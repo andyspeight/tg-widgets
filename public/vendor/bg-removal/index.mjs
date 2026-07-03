@@ -1,5440 +1,1834 @@
-var __create = Object.create;
-var __defProp = Object.defineProperty;
-var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getProtoOf = Object.getPrototypeOf;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __commonJS = (cb, mod) => function __require() {
-  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
-};
-var __copyProps = (to, from, except, desc) => {
-  if (from && typeof from === "object" || typeof from === "function") {
-    for (let key of __getOwnPropNames(from))
-      if (!__hasOwnProp.call(to, key) && key !== except)
-        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
-  }
-  return to;
-};
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
-  // If the importer is in node compatibility mode or this is not an ESM
-  // file that has been converted to a CommonJS file using a Babel-
-  // compatible transform (i.e. "__esModule" has not been set), then set
-  // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
-  mod
-));
+var SO=Object.create;var Zp=Object.defineProperty;var EO=Object.getOwnPropertyDescriptor;var AO=Object.getOwnPropertyNames;var IO=Object.getPrototypeOf,PO=Object.prototype.hasOwnProperty;var ou=(e,t)=>()=>{try{return t||e((t={exports:{}}).exports,t),t.exports}catch(n){throw t=0,n}};var $O=(e,t,n,o)=>{if(t&&typeof t=="object"||typeof t=="function")for(let f of AO(t))!PO.call(e,f)&&f!==n&&Zp(e,f,{get:()=>t[f],enumerable:!(o=EO(t,f))||o.enumerable});return e};var Io=(e,t,n)=>(n=e!=null?SO(IO(e)):{},$O(t||!e||!e.__esModule?Zp(n,"default",{value:e,enumerable:!0}):n,e));var Yp=ou((Po,_a)=>{(function(){var e,t="4.17.23",n=200,o="Unsupported core-js use. Try https://npms.io/search?q=ponyfill.",f="Expected a function",s="Invalid `variable` option passed into `_.template`",p="__lodash_hash_undefined__",i=500,c="__lodash_placeholder__",r=1,u=2,l=4,h=1,y=2,O=1,S=2,A=4,L=8,$=16,F=32,Z=64,ae=128,ot=256,Je=512,st=30,se="...",Me=800,yn=16,rn=1,bn=2,vt=3,Le=1/0,ve=9007199254740991,Kt=17976931348623157e292,At=NaN,Xe=4294967295,nn=Xe-1,St=Xe>>>1,Ct=[["ary",ae],["bind",O],["bindKey",S],["curry",L],["curryRight",$],["flip",Je],["partial",F],["partialRight",Z],["rearg",ot]],Mt="[object Arguments]",Nt="[object Array]",vn="[object AsyncFunction]",or="[object Boolean]",Lt="[object Date]",Gt="[object DOMException]",Ht="[object Error]",ut="[object Function]",at="[object GeneratorFunction]",dt="[object Map]",Jt="[object Number]",wn="[object Null]",It="[object Object]",Ir="[object Promise]",Un="[object Proxy]",ar="[object RegExp]",Bt="[object Set]",on="[object String]",sr="[object Symbol]",jn="[object Undefined]",ur="[object WeakMap]",zn="[object WeakSet]",Pr="[object ArrayBuffer]",lr="[object DataView]",_n="[object Float32Array]",xn="[object Float64Array]",an="[object Int8Array]",Vn="[object Int16Array]",Ge="[object Int32Array]",be="[object Uint8Array]",sn="[object Uint8ClampedArray]",Gn="[object Uint16Array]",Tn="[object Uint32Array]",to=/\b__p \+= '';/g,de=/\b(__p \+=) '' \+/g,On=/(__e\(.*?\)|\b__t\)) \+\n'';/g,hi=/&(?:amp|lt|gt|quot|#39);/g,$r=/[&<>"']/g,gi=RegExp(hi.source),T=RegExp($r.source),D=/<%-([\s\S]+?)%>/g,k=/<%([\s\S]+?)%>/g,V=/<%=([\s\S]+?)%>/g,ee=/\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/,le=/^\w*$/,$e=/[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|$))/g,pt=/[\\^$.*+?()[\]{}|]/g,Ut=RegExp(pt.source),wt=/^\s+/,Pt=/\s/,mi=/\{(?:\n\/\* \[wrapped with .+\] \*\/)?\n?/,yi=/\{\n\/\* \[wrapped with (.+)\] \*/,U=/,? & /,Be=/[^\x00-\x2f\x3a-\x40\x5b-\x60\x7b-\x7f]+/g,Qe=/[()=,{}\[\]\/\s]/,Dr=/\\(\\)?/g,bi=/\$\{([^\\}]*(?:\\.[^\\}]*)*)\}/g,Yo=/\w*$/,is=/^[-+]0x[0-9a-f]+$/i,os=/^0b[01]+$/i,Xo=/^\[object .+?Constructor\]$/,ro=/^0o[0-7]+$/i,Ko=/^(?:0|[1-9]\d*)$/,Hn=/[\xc0-\xd6\xd8-\xf6\xf8-\xff\u0100-\u017f]/g,vi=/($^)/,as=/['\n\r\u2028\u2029\\]/g,wi="\\ud800-\\udfff",ss="\\u0300-\\u036f",us="\\ufe20-\\ufe2f",Jo="\\u20d0-\\u20ff",no=ss+us+Jo,Qo="\\u2700-\\u27bf",io="a-z\\xdf-\\xf6\\xf8-\\xff",ls="\\xac\\xb1\\xd7\\xf7",cs="\\x00-\\x2f\\x3a-\\x40\\x5b-\\x60\\x7b-\\xbf",fs="\\u2000-\\u206f",ds=" \\t\\x0b\\f\\xa0\\ufeff\\n\\r\\u2028\\u2029\\u1680\\u180e\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200a\\u202f\\u205f\\u3000",ea="A-Z\\xc0-\\xd6\\xd8-\\xde",ps="\\ufe0e\\ufe0f",ta=ls+cs+fs+ds,oo="['\u2019]",hs="["+wi+"]",gs="["+ta+"]",ao="["+no+"]",ra="\\d+",Bu="["+Qo+"]",ms="["+io+"]",ce="[^"+wi+ta+ra+Qo+io+ea+"]",so="\\ud83c[\\udffb-\\udfff]",uo="(?:"+ao+"|"+so+")",na="[^"+wi+"]",lo="(?:\\ud83c[\\udde6-\\uddff]){2}",co="[\\ud800-\\udbff][\\udc00-\\udfff]",un="["+ea+"]",fo="\\u200d",ia="(?:"+ms+"|"+ce+")",ys="(?:"+un+"|"+ce+")",oa="(?:"+oo+"(?:d|ll|m|re|s|t|ve))?",po="(?:"+oo+"(?:D|LL|M|RE|S|T|VE))?",_i=uo+"?",ho="["+ps+"]?",Uu="(?:"+fo+"(?:"+[na,lo,co].join("|")+")"+ho+_i+")*",go="\\d*(?:1st|2nd|3rd|(?![123])\\dth)(?=\\b|[A-Z_])",bs="\\d*(?:1ST|2ND|3RD|(?![123])\\dTH)(?=\\b|[a-z_])",b=ho+_i+Uu,x="(?:"+[Bu,lo,co].join("|")+")"+b,I="(?:"+[na+ao+"?",ao,lo,co,hs].join("|")+")",M=RegExp(oo,"g"),Y=RegExp(ao,"g"),X=RegExp(so+"(?="+so+")|"+I+b,"g"),oe=RegExp([un+"?"+ms+"+"+oa+"(?="+[gs,un,"$"].join("|")+")",ys+"+"+po+"(?="+[gs,un+ia,"$"].join("|")+")",un+"?"+ia+"+"+oa,un+"+"+po,bs,go,ra,x].join("|"),"g"),lt=RegExp("["+fo+wi+no+ps+"]"),Cr=/[a-z][A-Z]|[A-Z]{2}[a-z]|[0-9][a-zA-Z]|[a-zA-Z][0-9]|[^a-zA-Z0-9 ]/,Et=["Array","Buffer","DataView","Date","Error","Float32Array","Float64Array","Function","Int8Array","Int16Array","Int32Array","Map","Math","Object","Promise","RegExp","Set","String","Symbol","TypeError","Uint8Array","Uint8ClampedArray","Uint16Array","Uint32Array","WeakMap","_","clearTimeout","isFinite","parseInt","setTimeout"],Wt=-1,Ke={};Ke[_n]=Ke[xn]=Ke[an]=Ke[Vn]=Ke[Ge]=Ke[be]=Ke[sn]=Ke[Gn]=Ke[Tn]=!0,Ke[Mt]=Ke[Nt]=Ke[Pr]=Ke[or]=Ke[lr]=Ke[Lt]=Ke[Ht]=Ke[ut]=Ke[dt]=Ke[Jt]=Ke[It]=Ke[ar]=Ke[Bt]=Ke[on]=Ke[ur]=!1;var Ze={};Ze[Mt]=Ze[Nt]=Ze[Pr]=Ze[lr]=Ze[or]=Ze[Lt]=Ze[_n]=Ze[xn]=Ze[an]=Ze[Vn]=Ze[Ge]=Ze[dt]=Ze[Jt]=Ze[It]=Ze[ar]=Ze[Bt]=Ze[on]=Ze[sr]=Ze[be]=Ze[sn]=Ze[Gn]=Ze[Tn]=!0,Ze[Ht]=Ze[ut]=Ze[ur]=!1;var z={\u00C0:"A",\u00C1:"A",\u00C2:"A",\u00C3:"A",\u00C4:"A",\u00C5:"A",\u00E0:"a",\u00E1:"a",\u00E2:"a",\u00E3:"a",\u00E4:"a",\u00E5:"a",\u00C7:"C",\u00E7:"c",\u00D0:"D",\u00F0:"d",\u00C8:"E",\u00C9:"E",\u00CA:"E",\u00CB:"E",\u00E8:"e",\u00E9:"e",\u00EA:"e",\u00EB:"e",\u00CC:"I",\u00CD:"I",\u00CE:"I",\u00CF:"I",\u00EC:"i",\u00ED:"i",\u00EE:"i",\u00EF:"i",\u00D1:"N",\u00F1:"n",\u00D2:"O",\u00D3:"O",\u00D4:"O",\u00D5:"O",\u00D6:"O",\u00D8:"O",\u00F2:"o",\u00F3:"o",\u00F4:"o",\u00F5:"o",\u00F6:"o",\u00F8:"o",\u00D9:"U",\u00DA:"U",\u00DB:"U",\u00DC:"U",\u00F9:"u",\u00FA:"u",\u00FB:"u",\u00FC:"u",\u00DD:"Y",\u00FD:"y",\u00FF:"y",\u00C6:"Ae",\u00E6:"ae",\u00DE:"Th",\u00FE:"th",\u00DF:"ss",\u0100:"A",\u0102:"A",\u0104:"A",\u0101:"a",\u0103:"a",\u0105:"a",\u0106:"C",\u0108:"C",\u010A:"C",\u010C:"C",\u0107:"c",\u0109:"c",\u010B:"c",\u010D:"c",\u010E:"D",\u0110:"D",\u010F:"d",\u0111:"d",\u0112:"E",\u0114:"E",\u0116:"E",\u0118:"E",\u011A:"E",\u0113:"e",\u0115:"e",\u0117:"e",\u0119:"e",\u011B:"e",\u011C:"G",\u011E:"G",\u0120:"G",\u0122:"G",\u011D:"g",\u011F:"g",\u0121:"g",\u0123:"g",\u0124:"H",\u0126:"H",\u0125:"h",\u0127:"h",\u0128:"I",\u012A:"I",\u012C:"I",\u012E:"I",\u0130:"I",\u0129:"i",\u012B:"i",\u012D:"i",\u012F:"i",\u0131:"i",\u0134:"J",\u0135:"j",\u0136:"K",\u0137:"k",\u0138:"k",\u0139:"L",\u013B:"L",\u013D:"L",\u013F:"L",\u0141:"L",\u013A:"l",\u013C:"l",\u013E:"l",\u0140:"l",\u0142:"l",\u0143:"N",\u0145:"N",\u0147:"N",\u014A:"N",\u0144:"n",\u0146:"n",\u0148:"n",\u014B:"n",\u014C:"O",\u014E:"O",\u0150:"O",\u014D:"o",\u014F:"o",\u0151:"o",\u0154:"R",\u0156:"R",\u0158:"R",\u0155:"r",\u0157:"r",\u0159:"r",\u015A:"S",\u015C:"S",\u015E:"S",\u0160:"S",\u015B:"s",\u015D:"s",\u015F:"s",\u0161:"s",\u0162:"T",\u0164:"T",\u0166:"T",\u0163:"t",\u0165:"t",\u0167:"t",\u0168:"U",\u016A:"U",\u016C:"U",\u016E:"U",\u0170:"U",\u0172:"U",\u0169:"u",\u016B:"u",\u016D:"u",\u016F:"u",\u0171:"u",\u0173:"u",\u0174:"W",\u0175:"w",\u0176:"Y",\u0177:"y",\u0178:"Y",\u0179:"Z",\u017B:"Z",\u017D:"Z",\u017A:"z",\u017C:"z",\u017E:"z",\u0132:"IJ",\u0133:"ij",\u0152:"Oe",\u0153:"oe",\u0149:"'n",\u017F:"s"},Ye={"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"},ct={"&amp;":"&","&lt;":"<","&gt;":">","&quot;":'"',"&#39;":"'"},Sn={"\\":"\\","'":"'","\n":"n","\r":"r","\u2028":"u2028","\u2029":"u2029"},vs=parseFloat,Wv=parseInt,jf=typeof global=="object"&&global&&global.Object===Object&&global,qv=typeof self=="object"&&self&&self.Object===Object&&self,kt=jf||qv||Function("return this")(),ju=typeof Po=="object"&&Po&&!Po.nodeType&&Po,xi=ju&&typeof _a=="object"&&_a&&!_a.nodeType&&_a,zf=xi&&xi.exports===ju,zu=zf&&jf.process,Nr=(function(){try{var C=xi&&xi.require&&xi.require("util").types;return C||zu&&zu.binding&&zu.binding("util")}catch{}})(),Vf=Nr&&Nr.isArrayBuffer,Gf=Nr&&Nr.isDate,Hf=Nr&&Nr.isMap,Wf=Nr&&Nr.isRegExp,qf=Nr&&Nr.isSet,Zf=Nr&&Nr.isTypedArray;function gr(C,j,B){switch(B.length){case 0:return C.call(j);case 1:return C.call(j,B[0]);case 2:return C.call(j,B[0],B[1]);case 3:return C.call(j,B[0],B[1],B[2])}return C.apply(j,B)}function Zv(C,j,B,ne){for(var we=-1,ze=C==null?0:C.length;++we<ze;){var $t=C[we];j(ne,$t,B($t),C)}return ne}function kr(C,j){for(var B=-1,ne=C==null?0:C.length;++B<ne&&j(C[B],B,C)!==!1;);return C}function Yv(C,j){for(var B=C==null?0:C.length;B--&&j(C[B],B,C)!==!1;);return C}function Yf(C,j){for(var B=-1,ne=C==null?0:C.length;++B<ne;)if(!j(C[B],B,C))return!1;return!0}function Wn(C,j){for(var B=-1,ne=C==null?0:C.length,we=0,ze=[];++B<ne;){var $t=C[B];j($t,B,C)&&(ze[we++]=$t)}return ze}function ws(C,j){var B=C==null?0:C.length;return!!B&&mo(C,j,0)>-1}function Vu(C,j,B){for(var ne=-1,we=C==null?0:C.length;++ne<we;)if(B(j,C[ne]))return!0;return!1}function ft(C,j){for(var B=-1,ne=C==null?0:C.length,we=Array(ne);++B<ne;)we[B]=j(C[B],B,C);return we}function qn(C,j){for(var B=-1,ne=j.length,we=C.length;++B<ne;)C[we+B]=j[B];return C}function Gu(C,j,B,ne){var we=-1,ze=C==null?0:C.length;for(ne&&ze&&(B=C[++we]);++we<ze;)B=j(B,C[we],we,C);return B}function Xv(C,j,B,ne){var we=C==null?0:C.length;for(ne&&we&&(B=C[--we]);we--;)B=j(B,C[we],we,C);return B}function Hu(C,j){for(var B=-1,ne=C==null?0:C.length;++B<ne;)if(j(C[B],B,C))return!0;return!1}var Kv=Wu("length");function Jv(C){return C.split("")}function Qv(C){return C.match(Be)||[]}function Xf(C,j,B){var ne;return B(C,function(we,ze,$t){if(j(we,ze,$t))return ne=ze,!1}),ne}function _s(C,j,B,ne){for(var we=C.length,ze=B+(ne?1:-1);ne?ze--:++ze<we;)if(j(C[ze],ze,C))return ze;return-1}function mo(C,j,B){return j===j?fw(C,j,B):_s(C,Kf,B)}function ew(C,j,B,ne){for(var we=B-1,ze=C.length;++we<ze;)if(ne(C[we],j))return we;return-1}function Kf(C){return C!==C}function Jf(C,j){var B=C==null?0:C.length;return B?Zu(C,j)/B:At}function Wu(C){return function(j){return j==null?e:j[C]}}function qu(C){return function(j){return C==null?e:C[j]}}function Qf(C,j,B,ne,we){return we(C,function(ze,$t,et){B=ne?(ne=!1,ze):j(B,ze,$t,et)}),B}function tw(C,j){var B=C.length;for(C.sort(j);B--;)C[B]=C[B].value;return C}function Zu(C,j){for(var B,ne=-1,we=C.length;++ne<we;){var ze=j(C[ne]);ze!==e&&(B=B===e?ze:B+ze)}return B}function Yu(C,j){for(var B=-1,ne=Array(C);++B<C;)ne[B]=j(B);return ne}function rw(C,j){return ft(j,function(B){return[B,C[B]]})}function ed(C){return C&&C.slice(0,id(C)+1).replace(wt,"")}function mr(C){return function(j){return C(j)}}function Xu(C,j){return ft(j,function(B){return C[B]})}function aa(C,j){return C.has(j)}function td(C,j){for(var B=-1,ne=C.length;++B<ne&&mo(j,C[B],0)>-1;);return B}function rd(C,j){for(var B=C.length;B--&&mo(j,C[B],0)>-1;);return B}function nw(C,j){for(var B=C.length,ne=0;B--;)C[B]===j&&++ne;return ne}var iw=qu(z),ow=qu(Ye);function aw(C){return"\\"+Sn[C]}function sw(C,j){return C==null?e:C[j]}function yo(C){return lt.test(C)}function uw(C){return Cr.test(C)}function lw(C){for(var j,B=[];!(j=C.next()).done;)B.push(j.value);return B}function Ku(C){var j=-1,B=Array(C.size);return C.forEach(function(ne,we){B[++j]=[we,ne]}),B}function nd(C,j){return function(B){return C(j(B))}}function Zn(C,j){for(var B=-1,ne=C.length,we=0,ze=[];++B<ne;){var $t=C[B];($t===j||$t===c)&&(C[B]=c,ze[we++]=B)}return ze}function xs(C){var j=-1,B=Array(C.size);return C.forEach(function(ne){B[++j]=ne}),B}function cw(C){var j=-1,B=Array(C.size);return C.forEach(function(ne){B[++j]=[ne,ne]}),B}function fw(C,j,B){for(var ne=B-1,we=C.length;++ne<we;)if(C[ne]===j)return ne;return-1}function dw(C,j,B){for(var ne=B+1;ne--;)if(C[ne]===j)return ne;return ne}function bo(C){return yo(C)?hw(C):Kv(C)}function qr(C){return yo(C)?gw(C):Jv(C)}function id(C){for(var j=C.length;j--&&Pt.test(C.charAt(j)););return j}var pw=qu(ct);function hw(C){for(var j=X.lastIndex=0;X.test(C);)++j;return j}function gw(C){return C.match(X)||[]}function mw(C){return C.match(oe)||[]}var yw=(function C(j){j=j==null?kt:Yn.defaults(kt.Object(),j,Yn.pick(kt,Et));var B=j.Array,ne=j.Date,we=j.Error,ze=j.Function,$t=j.Math,et=j.Object,Ju=j.RegExp,bw=j.String,Rr=j.TypeError,Ts=B.prototype,vw=ze.prototype,vo=et.prototype,Os=j["__core-js_shared__"],Ss=vw.toString,He=vo.hasOwnProperty,ww=0,od=(function(){var a=/[^.]+$/.exec(Os&&Os.keys&&Os.keys.IE_PROTO||"");return a?"Symbol(src)_1."+a:""})(),Es=vo.toString,_w=Ss.call(et),xw=kt._,Tw=Ju("^"+Ss.call(He).replace(pt,"\\$&").replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g,"$1.*?")+"$"),As=zf?j.Buffer:e,Xn=j.Symbol,Is=j.Uint8Array,ad=As?As.allocUnsafe:e,Ps=nd(et.getPrototypeOf,et),sd=et.create,ud=vo.propertyIsEnumerable,$s=Ts.splice,ld=Xn?Xn.isConcatSpreadable:e,sa=Xn?Xn.iterator:e,Ti=Xn?Xn.toStringTag:e,Ds=(function(){try{var a=Ii(et,"defineProperty");return a({},"",{}),a}catch{}})(),Ow=j.clearTimeout!==kt.clearTimeout&&j.clearTimeout,Sw=ne&&ne.now!==kt.Date.now&&ne.now,Ew=j.setTimeout!==kt.setTimeout&&j.setTimeout,Cs=$t.ceil,Ns=$t.floor,Qu=et.getOwnPropertySymbols,Aw=As?As.isBuffer:e,cd=j.isFinite,Iw=Ts.join,Pw=nd(et.keys,et),Dt=$t.max,qt=$t.min,$w=ne.now,Dw=j.parseInt,fd=$t.random,Cw=Ts.reverse,el=Ii(j,"DataView"),ua=Ii(j,"Map"),tl=Ii(j,"Promise"),wo=Ii(j,"Set"),la=Ii(j,"WeakMap"),ca=Ii(et,"create"),ks=la&&new la,_o={},Nw=Pi(el),kw=Pi(ua),Rw=Pi(tl),Fw=Pi(wo),Mw=Pi(la),Rs=Xn?Xn.prototype:e,fa=Rs?Rs.valueOf:e,dd=Rs?Rs.toString:e;function w(a){if(mt(a)&&!xe(a)&&!(a instanceof Ne)){if(a instanceof Fr)return a;if(He.call(a,"__wrapped__"))return pp(a)}return new Fr(a)}var xo=(function(){function a(){}return function(d){if(!ht(d))return{};if(sd)return sd(d);a.prototype=d;var g=new a;return a.prototype=e,g}})();function Fs(){}function Fr(a,d){this.__wrapped__=a,this.__actions__=[],this.__chain__=!!d,this.__index__=0,this.__values__=e}w.templateSettings={escape:D,evaluate:k,interpolate:V,variable:"",imports:{_:w}},w.prototype=Fs.prototype,w.prototype.constructor=w,Fr.prototype=xo(Fs.prototype),Fr.prototype.constructor=Fr;function Ne(a){this.__wrapped__=a,this.__actions__=[],this.__dir__=1,this.__filtered__=!1,this.__iteratees__=[],this.__takeCount__=Xe,this.__views__=[]}function Lw(){var a=new Ne(this.__wrapped__);return a.__actions__=cr(this.__actions__),a.__dir__=this.__dir__,a.__filtered__=this.__filtered__,a.__iteratees__=cr(this.__iteratees__),a.__takeCount__=this.__takeCount__,a.__views__=cr(this.__views__),a}function Bw(){if(this.__filtered__){var a=new Ne(this);a.__dir__=-1,a.__filtered__=!0}else a=this.clone(),a.__dir__*=-1;return a}function Uw(){var a=this.__wrapped__.value(),d=this.__dir__,g=xe(a),m=d<0,v=g?a.length:0,_=J1(0,v,this.__views__),E=_.start,P=_.end,N=P-E,H=m?P:E-1,W=this.__iteratees__,q=W.length,Q=0,ue=qt(N,this.__takeCount__);if(!g||!m&&v==N&&ue==N)return Fd(a,this.__actions__);var he=[];e:for(;N--&&Q<ue;){H+=d;for(var Ae=-1,ge=a[H];++Ae<q;){var De=W[Ae],ke=De.iteratee,vr=De.type,tr=ke(ge);if(vr==bn)ge=tr;else if(!tr){if(vr==rn)continue e;break e}}he[Q++]=ge}return he}Ne.prototype=xo(Fs.prototype),Ne.prototype.constructor=Ne;function Oi(a){var d=-1,g=a==null?0:a.length;for(this.clear();++d<g;){var m=a[d];this.set(m[0],m[1])}}function jw(){this.__data__=ca?ca(null):{},this.size=0}function zw(a){var d=this.has(a)&&delete this.__data__[a];return this.size-=d?1:0,d}function Vw(a){var d=this.__data__;if(ca){var g=d[a];return g===p?e:g}return He.call(d,a)?d[a]:e}function Gw(a){var d=this.__data__;return ca?d[a]!==e:He.call(d,a)}function Hw(a,d){var g=this.__data__;return this.size+=this.has(a)?0:1,g[a]=ca&&d===e?p:d,this}Oi.prototype.clear=jw,Oi.prototype.delete=zw,Oi.prototype.get=Vw,Oi.prototype.has=Gw,Oi.prototype.set=Hw;function En(a){var d=-1,g=a==null?0:a.length;for(this.clear();++d<g;){var m=a[d];this.set(m[0],m[1])}}function Ww(){this.__data__=[],this.size=0}function qw(a){var d=this.__data__,g=Ms(d,a);if(g<0)return!1;var m=d.length-1;return g==m?d.pop():$s.call(d,g,1),--this.size,!0}function Zw(a){var d=this.__data__,g=Ms(d,a);return g<0?e:d[g][1]}function Yw(a){return Ms(this.__data__,a)>-1}function Xw(a,d){var g=this.__data__,m=Ms(g,a);return m<0?(++this.size,g.push([a,d])):g[m][1]=d,this}En.prototype.clear=Ww,En.prototype.delete=qw,En.prototype.get=Zw,En.prototype.has=Yw,En.prototype.set=Xw;function An(a){var d=-1,g=a==null?0:a.length;for(this.clear();++d<g;){var m=a[d];this.set(m[0],m[1])}}function Kw(){this.size=0,this.__data__={hash:new Oi,map:new(ua||En),string:new Oi}}function Jw(a){var d=Ys(this,a).delete(a);return this.size-=d?1:0,d}function Qw(a){return Ys(this,a).get(a)}function e1(a){return Ys(this,a).has(a)}function t1(a,d){var g=Ys(this,a),m=g.size;return g.set(a,d),this.size+=g.size==m?0:1,this}An.prototype.clear=Kw,An.prototype.delete=Jw,An.prototype.get=Qw,An.prototype.has=e1,An.prototype.set=t1;function Si(a){var d=-1,g=a==null?0:a.length;for(this.__data__=new An;++d<g;)this.add(a[d])}function r1(a){return this.__data__.set(a,p),this}function n1(a){return this.__data__.has(a)}Si.prototype.add=Si.prototype.push=r1,Si.prototype.has=n1;function Zr(a){var d=this.__data__=new En(a);this.size=d.size}function i1(){this.__data__=new En,this.size=0}function o1(a){var d=this.__data__,g=d.delete(a);return this.size=d.size,g}function a1(a){return this.__data__.get(a)}function s1(a){return this.__data__.has(a)}function u1(a,d){var g=this.__data__;if(g instanceof En){var m=g.__data__;if(!ua||m.length<n-1)return m.push([a,d]),this.size=++g.size,this;g=this.__data__=new An(m)}return g.set(a,d),this.size=g.size,this}Zr.prototype.clear=i1,Zr.prototype.delete=o1,Zr.prototype.get=a1,Zr.prototype.has=s1,Zr.prototype.set=u1;function pd(a,d){var g=xe(a),m=!g&&$i(a),v=!g&&!m&&ti(a),_=!g&&!m&&!v&&Eo(a),E=g||m||v||_,P=E?Yu(a.length,bw):[],N=P.length;for(var H in a)(d||He.call(a,H))&&!(E&&(H=="length"||v&&(H=="offset"||H=="parent")||_&&(H=="buffer"||H=="byteLength"||H=="byteOffset")||Dn(H,N)))&&P.push(H);return P}function hd(a){var d=a.length;return d?a[dl(0,d-1)]:e}function l1(a,d){return Xs(cr(a),Ei(d,0,a.length))}function c1(a){return Xs(cr(a))}function rl(a,d,g){(g!==e&&!Yr(a[d],g)||g===e&&!(d in a))&&In(a,d,g)}function da(a,d,g){var m=a[d];(!(He.call(a,d)&&Yr(m,g))||g===e&&!(d in a))&&In(a,d,g)}function Ms(a,d){for(var g=a.length;g--;)if(Yr(a[g][0],d))return g;return-1}function f1(a,d,g,m){return Kn(a,function(v,_,E){d(m,v,g(v),E)}),m}function gd(a,d){return a&&cn(d,Rt(d),a)}function d1(a,d){return a&&cn(d,dr(d),a)}function In(a,d,g){d=="__proto__"&&Ds?Ds(a,d,{configurable:!0,enumerable:!0,value:g,writable:!0}):a[d]=g}function nl(a,d){for(var g=-1,m=d.length,v=B(m),_=a==null;++g<m;)v[g]=_?e:Ml(a,d[g]);return v}function Ei(a,d,g){return a===a&&(g!==e&&(a=a<=g?a:g),d!==e&&(a=a>=d?a:d)),a}function Mr(a,d,g,m,v,_){var E,P=d&r,N=d&u,H=d&l;if(g&&(E=v?g(a,m,v,_):g(a)),E!==e)return E;if(!ht(a))return a;var W=xe(a);if(W){if(E=e_(a),!P)return cr(a,E)}else{var q=Zt(a),Q=q==ut||q==at;if(ti(a))return Bd(a,P);if(q==It||q==Mt||Q&&!v){if(E=N||Q?{}:ip(a),!P)return N?V1(a,d1(E,a)):z1(a,gd(E,a))}else{if(!Ze[q])return v?a:{};E=t_(a,q,P)}}_||(_=new Zr);var ue=_.get(a);if(ue)return ue;_.set(a,E),Np(a)?a.forEach(function(ge){E.add(Mr(ge,d,g,ge,a,_))}):Dp(a)&&a.forEach(function(ge,De){E.set(De,Mr(ge,d,g,De,a,_))});var he=H?N?Tl:xl:N?dr:Rt,Ae=W?e:he(a);return kr(Ae||a,function(ge,De){Ae&&(De=ge,ge=a[De]),da(E,De,Mr(ge,d,g,De,a,_))}),E}function p1(a){var d=Rt(a);return function(g){return md(g,a,d)}}function md(a,d,g){var m=g.length;if(a==null)return!m;for(a=et(a);m--;){var v=g[m],_=d[v],E=a[v];if(E===e&&!(v in a)||!_(E))return!1}return!0}function yd(a,d,g){if(typeof a!="function")throw new Rr(f);return va(function(){a.apply(e,g)},d)}function pa(a,d,g,m){var v=-1,_=ws,E=!0,P=a.length,N=[],H=d.length;if(!P)return N;g&&(d=ft(d,mr(g))),m?(_=Vu,E=!1):d.length>=n&&(_=aa,E=!1,d=new Si(d));e:for(;++v<P;){var W=a[v],q=g==null?W:g(W);if(W=m||W!==0?W:0,E&&q===q){for(var Q=H;Q--;)if(d[Q]===q)continue e;N.push(W)}else _(d,q,m)||N.push(W)}return N}var Kn=Gd(ln),bd=Gd(ol,!0);function h1(a,d){var g=!0;return Kn(a,function(m,v,_){return g=!!d(m,v,_),g}),g}function Ls(a,d,g){for(var m=-1,v=a.length;++m<v;){var _=a[m],E=d(_);if(E!=null&&(P===e?E===E&&!br(E):g(E,P)))var P=E,N=_}return N}function g1(a,d,g,m){var v=a.length;for(g=Oe(g),g<0&&(g=-g>v?0:v+g),m=m===e||m>v?v:Oe(m),m<0&&(m+=v),m=g>m?0:Rp(m);g<m;)a[g++]=d;return a}function vd(a,d){var g=[];return Kn(a,function(m,v,_){d(m,v,_)&&g.push(m)}),g}function jt(a,d,g,m,v){var _=-1,E=a.length;for(g||(g=n_),v||(v=[]);++_<E;){var P=a[_];d>0&&g(P)?d>1?jt(P,d-1,g,m,v):qn(v,P):m||(v[v.length]=P)}return v}var il=Hd(),wd=Hd(!0);function ln(a,d){return a&&il(a,d,Rt)}function ol(a,d){return a&&wd(a,d,Rt)}function Bs(a,d){return Wn(d,function(g){return Cn(a[g])})}function Ai(a,d){d=Qn(d,a);for(var g=0,m=d.length;a!=null&&g<m;)a=a[fn(d[g++])];return g&&g==m?a:e}function _d(a,d,g){var m=d(a);return xe(a)?m:qn(m,g(a))}function Qt(a){return a==null?a===e?jn:wn:Ti&&Ti in et(a)?K1(a):c_(a)}function al(a,d){return a>d}function m1(a,d){return a!=null&&He.call(a,d)}function y1(a,d){return a!=null&&d in et(a)}function b1(a,d,g){return a>=qt(d,g)&&a<Dt(d,g)}function sl(a,d,g){for(var m=g?Vu:ws,v=a[0].length,_=a.length,E=_,P=B(_),N=1/0,H=[];E--;){var W=a[E];E&&d&&(W=ft(W,mr(d))),N=qt(W.length,N),P[E]=!g&&(d||v>=120&&W.length>=120)?new Si(E&&W):e}W=a[0];var q=-1,Q=P[0];e:for(;++q<v&&H.length<N;){var ue=W[q],he=d?d(ue):ue;if(ue=g||ue!==0?ue:0,!(Q?aa(Q,he):m(H,he,g))){for(E=_;--E;){var Ae=P[E];if(!(Ae?aa(Ae,he):m(a[E],he,g)))continue e}Q&&Q.push(he),H.push(ue)}}return H}function v1(a,d,g,m){return ln(a,function(v,_,E){d(m,g(v),_,E)}),m}function ha(a,d,g){d=Qn(d,a),a=up(a,d);var m=a==null?a:a[fn(Br(d))];return m==null?e:gr(m,a,g)}function xd(a){return mt(a)&&Qt(a)==Mt}function w1(a){return mt(a)&&Qt(a)==Pr}function _1(a){return mt(a)&&Qt(a)==Lt}function ga(a,d,g,m,v){return a===d?!0:a==null||d==null||!mt(a)&&!mt(d)?a!==a&&d!==d:x1(a,d,g,m,ga,v)}function x1(a,d,g,m,v,_){var E=xe(a),P=xe(d),N=E?Nt:Zt(a),H=P?Nt:Zt(d);N=N==Mt?It:N,H=H==Mt?It:H;var W=N==It,q=H==It,Q=N==H;if(Q&&ti(a)){if(!ti(d))return!1;E=!0,W=!1}if(Q&&!W)return _||(_=new Zr),E||Eo(a)?tp(a,d,g,m,v,_):Y1(a,d,N,g,m,v,_);if(!(g&h)){var ue=W&&He.call(a,"__wrapped__"),he=q&&He.call(d,"__wrapped__");if(ue||he){var Ae=ue?a.value():a,ge=he?d.value():d;return _||(_=new Zr),v(Ae,ge,g,m,_)}}return Q?(_||(_=new Zr),X1(a,d,g,m,v,_)):!1}function T1(a){return mt(a)&&Zt(a)==dt}function ul(a,d,g,m){var v=g.length,_=v,E=!m;if(a==null)return!_;for(a=et(a);v--;){var P=g[v];if(E&&P[2]?P[1]!==a[P[0]]:!(P[0]in a))return!1}for(;++v<_;){P=g[v];var N=P[0],H=a[N],W=P[1];if(E&&P[2]){if(H===e&&!(N in a))return!1}else{var q=new Zr;if(m)var Q=m(H,W,N,a,d,q);if(!(Q===e?ga(W,H,h|y,m,q):Q))return!1}}return!0}function Td(a){if(!ht(a)||o_(a))return!1;var d=Cn(a)?Tw:Xo;return d.test(Pi(a))}function O1(a){return mt(a)&&Qt(a)==ar}function S1(a){return mt(a)&&Zt(a)==Bt}function E1(a){return mt(a)&&ru(a.length)&&!!Ke[Qt(a)]}function Od(a){return typeof a=="function"?a:a==null?pr:typeof a=="object"?xe(a)?Ad(a[0],a[1]):Ed(a):Wp(a)}function ll(a){if(!ba(a))return Pw(a);var d=[];for(var g in et(a))He.call(a,g)&&g!="constructor"&&d.push(g);return d}function A1(a){if(!ht(a))return l_(a);var d=ba(a),g=[];for(var m in a)m=="constructor"&&(d||!He.call(a,m))||g.push(m);return g}function cl(a,d){return a<d}function Sd(a,d){var g=-1,m=fr(a)?B(a.length):[];return Kn(a,function(v,_,E){m[++g]=d(v,_,E)}),m}function Ed(a){var d=Sl(a);return d.length==1&&d[0][2]?ap(d[0][0],d[0][1]):function(g){return g===a||ul(g,a,d)}}function Ad(a,d){return Al(a)&&op(d)?ap(fn(a),d):function(g){var m=Ml(g,a);return m===e&&m===d?Ll(g,a):ga(d,m,h|y)}}function Us(a,d,g,m,v){a!==d&&il(d,function(_,E){if(v||(v=new Zr),ht(_))I1(a,d,E,g,Us,m,v);else{var P=m?m(Pl(a,E),_,E+"",a,d,v):e;P===e&&(P=_),rl(a,E,P)}},dr)}function I1(a,d,g,m,v,_,E){var P=Pl(a,g),N=Pl(d,g),H=E.get(N);if(H){rl(a,g,H);return}var W=_?_(P,N,g+"",a,d,E):e,q=W===e;if(q){var Q=xe(N),ue=!Q&&ti(N),he=!Q&&!ue&&Eo(N);W=N,Q||ue||he?xe(P)?W=P:_t(P)?W=cr(P):ue?(q=!1,W=Bd(N,!0)):he?(q=!1,W=Ud(N,!0)):W=[]:wa(N)||$i(N)?(W=P,$i(P)?W=Fp(P):(!ht(P)||Cn(P))&&(W=ip(N))):q=!1}q&&(E.set(N,W),v(W,N,m,_,E),E.delete(N)),rl(a,g,W)}function Id(a,d){var g=a.length;if(g)return d+=d<0?g:0,Dn(d,g)?a[d]:e}function Pd(a,d,g){d.length?d=ft(d,function(_){return xe(_)?function(E){return Ai(E,_.length===1?_[0]:_)}:_}):d=[pr];var m=-1;d=ft(d,mr(pe()));var v=Sd(a,function(_,E,P){var N=ft(d,function(H){return H(_)});return{criteria:N,index:++m,value:_}});return tw(v,function(_,E){return j1(_,E,g)})}function P1(a,d){return $d(a,d,function(g,m){return Ll(a,m)})}function $d(a,d,g){for(var m=-1,v=d.length,_={};++m<v;){var E=d[m],P=Ai(a,E);g(P,E)&&ma(_,Qn(E,a),P)}return _}function $1(a){return function(d){return Ai(d,a)}}function fl(a,d,g,m){var v=m?ew:mo,_=-1,E=d.length,P=a;for(a===d&&(d=cr(d)),g&&(P=ft(a,mr(g)));++_<E;)for(var N=0,H=d[_],W=g?g(H):H;(N=v(P,W,N,m))>-1;)P!==a&&$s.call(P,N,1),$s.call(a,N,1);return a}function Dd(a,d){for(var g=a?d.length:0,m=g-1;g--;){var v=d[g];if(g==m||v!==_){var _=v;Dn(v)?$s.call(a,v,1):gl(a,v)}}return a}function dl(a,d){return a+Ns(fd()*(d-a+1))}function D1(a,d,g,m){for(var v=-1,_=Dt(Cs((d-a)/(g||1)),0),E=B(_);_--;)E[m?_:++v]=a,a+=g;return E}function pl(a,d){var g="";if(!a||d<1||d>ve)return g;do d%2&&(g+=a),d=Ns(d/2),d&&(a+=a);while(d);return g}function Pe(a,d){return $l(sp(a,d,pr),a+"")}function C1(a){return hd(Ao(a))}function N1(a,d){var g=Ao(a);return Xs(g,Ei(d,0,g.length))}function ma(a,d,g,m){if(!ht(a))return a;d=Qn(d,a);for(var v=-1,_=d.length,E=_-1,P=a;P!=null&&++v<_;){var N=fn(d[v]),H=g;if(N==="__proto__"||N==="constructor"||N==="prototype")return a;if(v!=E){var W=P[N];H=m?m(W,N,P):e,H===e&&(H=ht(W)?W:Dn(d[v+1])?[]:{})}da(P,N,H),P=P[N]}return a}var Cd=ks?function(a,d){return ks.set(a,d),a}:pr,k1=Ds?function(a,d){return Ds(a,"toString",{configurable:!0,enumerable:!1,value:Ul(d),writable:!0})}:pr;function R1(a){return Xs(Ao(a))}function Lr(a,d,g){var m=-1,v=a.length;d<0&&(d=-d>v?0:v+d),g=g>v?v:g,g<0&&(g+=v),v=d>g?0:g-d>>>0,d>>>=0;for(var _=B(v);++m<v;)_[m]=a[m+d];return _}function F1(a,d){var g;return Kn(a,function(m,v,_){return g=d(m,v,_),!g}),!!g}function js(a,d,g){var m=0,v=a==null?m:a.length;if(typeof d=="number"&&d===d&&v<=St){for(;m<v;){var _=m+v>>>1,E=a[_];E!==null&&!br(E)&&(g?E<=d:E<d)?m=_+1:v=_}return v}return hl(a,d,pr,g)}function hl(a,d,g,m){var v=0,_=a==null?0:a.length;if(_===0)return 0;d=g(d);for(var E=d!==d,P=d===null,N=br(d),H=d===e;v<_;){var W=Ns((v+_)/2),q=g(a[W]),Q=q!==e,ue=q===null,he=q===q,Ae=br(q);if(E)var ge=m||he;else H?ge=he&&(m||Q):P?ge=he&&Q&&(m||!ue):N?ge=he&&Q&&!ue&&(m||!Ae):ue||Ae?ge=!1:ge=m?q<=d:q<d;ge?v=W+1:_=W}return qt(_,nn)}function Nd(a,d){for(var g=-1,m=a.length,v=0,_=[];++g<m;){var E=a[g],P=d?d(E):E;if(!g||!Yr(P,N)){var N=P;_[v++]=E===0?0:E}}return _}function kd(a){return typeof a=="number"?a:br(a)?At:+a}function yr(a){if(typeof a=="string")return a;if(xe(a))return ft(a,yr)+"";if(br(a))return dd?dd.call(a):"";var d=a+"";return d=="0"&&1/a==-Le?"-0":d}function Jn(a,d,g){var m=-1,v=ws,_=a.length,E=!0,P=[],N=P;if(g)E=!1,v=Vu;else if(_>=n){var H=d?null:q1(a);if(H)return xs(H);E=!1,v=aa,N=new Si}else N=d?[]:P;e:for(;++m<_;){var W=a[m],q=d?d(W):W;if(W=g||W!==0?W:0,E&&q===q){for(var Q=N.length;Q--;)if(N[Q]===q)continue e;d&&N.push(q),P.push(W)}else v(N,q,g)||(N!==P&&N.push(q),P.push(W))}return P}function gl(a,d){d=Qn(d,a);var g=-1,m=d.length;if(!m)return!0;for(var v=a==null||typeof a!="object"&&typeof a!="function";++g<m;){var _=d[g];if(typeof _=="string"){if(_==="__proto__"&&!He.call(a,"__proto__"))return!1;if(_==="constructor"&&g+1<m&&typeof d[g+1]=="string"&&d[g+1]==="prototype"){if(v&&g===0)continue;return!1}}}var E=up(a,d);return E==null||delete E[fn(Br(d))]}function Rd(a,d,g,m){return ma(a,d,g(Ai(a,d)),m)}function zs(a,d,g,m){for(var v=a.length,_=m?v:-1;(m?_--:++_<v)&&d(a[_],_,a););return g?Lr(a,m?0:_,m?_+1:v):Lr(a,m?_+1:0,m?v:_)}function Fd(a,d){var g=a;return g instanceof Ne&&(g=g.value()),Gu(d,function(m,v){return v.func.apply(v.thisArg,qn([m],v.args))},g)}function ml(a,d,g){var m=a.length;if(m<2)return m?Jn(a[0]):[];for(var v=-1,_=B(m);++v<m;)for(var E=a[v],P=-1;++P<m;)P!=v&&(_[v]=pa(_[v]||E,a[P],d,g));return Jn(jt(_,1),d,g)}function Md(a,d,g){for(var m=-1,v=a.length,_=d.length,E={};++m<v;){var P=m<_?d[m]:e;g(E,a[m],P)}return E}function yl(a){return _t(a)?a:[]}function bl(a){return typeof a=="function"?a:pr}function Qn(a,d){return xe(a)?a:Al(a,d)?[a]:dp(We(a))}var M1=Pe;function ei(a,d,g){var m=a.length;return g=g===e?m:g,!d&&g>=m?a:Lr(a,d,g)}var Ld=Ow||function(a){return kt.clearTimeout(a)};function Bd(a,d){if(d)return a.slice();var g=a.length,m=ad?ad(g):new a.constructor(g);return a.copy(m),m}function vl(a){var d=new a.constructor(a.byteLength);return new Is(d).set(new Is(a)),d}function L1(a,d){var g=d?vl(a.buffer):a.buffer;return new a.constructor(g,a.byteOffset,a.byteLength)}function B1(a){var d=new a.constructor(a.source,Yo.exec(a));return d.lastIndex=a.lastIndex,d}function U1(a){return fa?et(fa.call(a)):{}}function Ud(a,d){var g=d?vl(a.buffer):a.buffer;return new a.constructor(g,a.byteOffset,a.length)}function jd(a,d){if(a!==d){var g=a!==e,m=a===null,v=a===a,_=br(a),E=d!==e,P=d===null,N=d===d,H=br(d);if(!P&&!H&&!_&&a>d||_&&E&&N&&!P&&!H||m&&E&&N||!g&&N||!v)return 1;if(!m&&!_&&!H&&a<d||H&&g&&v&&!m&&!_||P&&g&&v||!E&&v||!N)return-1}return 0}function j1(a,d,g){for(var m=-1,v=a.criteria,_=d.criteria,E=v.length,P=g.length;++m<E;){var N=jd(v[m],_[m]);if(N){if(m>=P)return N;var H=g[m];return N*(H=="desc"?-1:1)}}return a.index-d.index}function zd(a,d,g,m){for(var v=-1,_=a.length,E=g.length,P=-1,N=d.length,H=Dt(_-E,0),W=B(N+H),q=!m;++P<N;)W[P]=d[P];for(;++v<E;)(q||v<_)&&(W[g[v]]=a[v]);for(;H--;)W[P++]=a[v++];return W}function Vd(a,d,g,m){for(var v=-1,_=a.length,E=-1,P=g.length,N=-1,H=d.length,W=Dt(_-P,0),q=B(W+H),Q=!m;++v<W;)q[v]=a[v];for(var ue=v;++N<H;)q[ue+N]=d[N];for(;++E<P;)(Q||v<_)&&(q[ue+g[E]]=a[v++]);return q}function cr(a,d){var g=-1,m=a.length;for(d||(d=B(m));++g<m;)d[g]=a[g];return d}function cn(a,d,g,m){var v=!g;g||(g={});for(var _=-1,E=d.length;++_<E;){var P=d[_],N=m?m(g[P],a[P],P,g,a):e;N===e&&(N=a[P]),v?In(g,P,N):da(g,P,N)}return g}function z1(a,d){return cn(a,El(a),d)}function V1(a,d){return cn(a,rp(a),d)}function Vs(a,d){return function(g,m){var v=xe(g)?Zv:f1,_=d?d():{};return v(g,a,pe(m,2),_)}}function To(a){return Pe(function(d,g){var m=-1,v=g.length,_=v>1?g[v-1]:e,E=v>2?g[2]:e;for(_=a.length>3&&typeof _=="function"?(v--,_):e,E&&er(g[0],g[1],E)&&(_=v<3?e:_,v=1),d=et(d);++m<v;){var P=g[m];P&&a(d,P,m,_)}return d})}function Gd(a,d){return function(g,m){if(g==null)return g;if(!fr(g))return a(g,m);for(var v=g.length,_=d?v:-1,E=et(g);(d?_--:++_<v)&&m(E[_],_,E)!==!1;);return g}}function Hd(a){return function(d,g,m){for(var v=-1,_=et(d),E=m(d),P=E.length;P--;){var N=E[a?P:++v];if(g(_[N],N,_)===!1)break}return d}}function G1(a,d,g){var m=d&O,v=ya(a);function _(){var E=this&&this!==kt&&this instanceof _?v:a;return E.apply(m?g:this,arguments)}return _}function Wd(a){return function(d){d=We(d);var g=yo(d)?qr(d):e,m=g?g[0]:d.charAt(0),v=g?ei(g,1).join(""):d.slice(1);return m[a]()+v}}function Oo(a){return function(d){return Gu(Gp(Vp(d).replace(M,"")),a,"")}}function ya(a){return function(){var d=arguments;switch(d.length){case 0:return new a;case 1:return new a(d[0]);case 2:return new a(d[0],d[1]);case 3:return new a(d[0],d[1],d[2]);case 4:return new a(d[0],d[1],d[2],d[3]);case 5:return new a(d[0],d[1],d[2],d[3],d[4]);case 6:return new a(d[0],d[1],d[2],d[3],d[4],d[5]);case 7:return new a(d[0],d[1],d[2],d[3],d[4],d[5],d[6])}var g=xo(a.prototype),m=a.apply(g,d);return ht(m)?m:g}}function H1(a,d,g){var m=ya(a);function v(){for(var _=arguments.length,E=B(_),P=_,N=So(v);P--;)E[P]=arguments[P];var H=_<3&&E[0]!==N&&E[_-1]!==N?[]:Zn(E,N);if(_-=H.length,_<g)return Kd(a,d,Gs,v.placeholder,e,E,H,e,e,g-_);var W=this&&this!==kt&&this instanceof v?m:a;return gr(W,this,E)}return v}function qd(a){return function(d,g,m){var v=et(d);if(!fr(d)){var _=pe(g,3);d=Rt(d),g=function(P){return _(v[P],P,v)}}var E=a(d,g,m);return E>-1?v[_?d[E]:E]:e}}function Zd(a){return $n(function(d){var g=d.length,m=g,v=Fr.prototype.thru;for(a&&d.reverse();m--;){var _=d[m];if(typeof _!="function")throw new Rr(f);if(v&&!E&&Zs(_)=="wrapper")var E=new Fr([],!0)}for(m=E?m:g;++m<g;){_=d[m];var P=Zs(_),N=P=="wrapper"?Ol(_):e;N&&Il(N[0])&&N[1]==(ae|L|F|ot)&&!N[4].length&&N[9]==1?E=E[Zs(N[0])].apply(E,N[3]):E=_.length==1&&Il(_)?E[P]():E.thru(_)}return function(){var H=arguments,W=H[0];if(E&&H.length==1&&xe(W))return E.plant(W).value();for(var q=0,Q=g?d[q].apply(this,H):W;++q<g;)Q=d[q].call(this,Q);return Q}})}function Gs(a,d,g,m,v,_,E,P,N,H){var W=d&ae,q=d&O,Q=d&S,ue=d&(L|$),he=d&Je,Ae=Q?e:ya(a);function ge(){for(var De=arguments.length,ke=B(De),vr=De;vr--;)ke[vr]=arguments[vr];if(ue)var tr=So(ge),wr=nw(ke,tr);if(m&&(ke=zd(ke,m,v,ue)),_&&(ke=Vd(ke,_,E,ue)),De-=wr,ue&&De<H){var xt=Zn(ke,tr);return Kd(a,d,Gs,ge.placeholder,g,ke,xt,P,N,H-De)}var Xr=q?g:this,kn=Q?Xr[a]:a;return De=ke.length,P?ke=f_(ke,P):he&&De>1&&ke.reverse(),W&&N<De&&(ke.length=N),this&&this!==kt&&this instanceof ge&&(kn=Ae||ya(kn)),kn.apply(Xr,ke)}return ge}function Yd(a,d){return function(g,m){return v1(g,a,d(m),{})}}function Hs(a,d){return function(g,m){var v;if(g===e&&m===e)return d;if(g!==e&&(v=g),m!==e){if(v===e)return m;typeof g=="string"||typeof m=="string"?(g=yr(g),m=yr(m)):(g=kd(g),m=kd(m)),v=a(g,m)}return v}}function wl(a){return $n(function(d){return d=ft(d,mr(pe())),Pe(function(g){var m=this;return a(d,function(v){return gr(v,m,g)})})})}function Ws(a,d){d=d===e?" ":yr(d);var g=d.length;if(g<2)return g?pl(d,a):d;var m=pl(d,Cs(a/bo(d)));return yo(d)?ei(qr(m),0,a).join(""):m.slice(0,a)}function W1(a,d,g,m){var v=d&O,_=ya(a);function E(){for(var P=-1,N=arguments.length,H=-1,W=m.length,q=B(W+N),Q=this&&this!==kt&&this instanceof E?_:a;++H<W;)q[H]=m[H];for(;N--;)q[H++]=arguments[++P];return gr(Q,v?g:this,q)}return E}function Xd(a){return function(d,g,m){return m&&typeof m!="number"&&er(d,g,m)&&(g=m=e),d=Nn(d),g===e?(g=d,d=0):g=Nn(g),m=m===e?d<g?1:-1:Nn(m),D1(d,g,m,a)}}function qs(a){return function(d,g){return typeof d=="string"&&typeof g=="string"||(d=Ur(d),g=Ur(g)),a(d,g)}}function Kd(a,d,g,m,v,_,E,P,N,H){var W=d&L,q=W?E:e,Q=W?e:E,ue=W?_:e,he=W?e:_;d|=W?F:Z,d&=~(W?Z:F),d&A||(d&=~(O|S));var Ae=[a,d,v,ue,q,he,Q,P,N,H],ge=g.apply(e,Ae);return Il(a)&&lp(ge,Ae),ge.placeholder=m,cp(ge,a,d)}function _l(a){var d=$t[a];return function(g,m){if(g=Ur(g),m=m==null?0:qt(Oe(m),292),m&&cd(g)){var v=(We(g)+"e").split("e"),_=d(v[0]+"e"+(+v[1]+m));return v=(We(_)+"e").split("e"),+(v[0]+"e"+(+v[1]-m))}return d(g)}}var q1=wo&&1/xs(new wo([,-0]))[1]==Le?function(a){return new wo(a)}:Vl;function Jd(a){return function(d){var g=Zt(d);return g==dt?Ku(d):g==Bt?cw(d):rw(d,a(d))}}function Pn(a,d,g,m,v,_,E,P){var N=d&S;if(!N&&typeof a!="function")throw new Rr(f);var H=m?m.length:0;if(H||(d&=~(F|Z),m=v=e),E=E===e?E:Dt(Oe(E),0),P=P===e?P:Oe(P),H-=v?v.length:0,d&Z){var W=m,q=v;m=v=e}var Q=N?e:Ol(a),ue=[a,d,g,m,v,W,q,_,E,P];if(Q&&u_(ue,Q),a=ue[0],d=ue[1],g=ue[2],m=ue[3],v=ue[4],P=ue[9]=ue[9]===e?N?0:a.length:Dt(ue[9]-H,0),!P&&d&(L|$)&&(d&=~(L|$)),!d||d==O)var he=G1(a,d,g);else d==L||d==$?he=H1(a,d,P):(d==F||d==(O|F))&&!v.length?he=W1(a,d,g,m):he=Gs.apply(e,ue);var Ae=Q?Cd:lp;return cp(Ae(he,ue),a,d)}function Qd(a,d,g,m){return a===e||Yr(a,vo[g])&&!He.call(m,g)?d:a}function ep(a,d,g,m,v,_){return ht(a)&&ht(d)&&(_.set(d,a),Us(a,d,e,ep,_),_.delete(d)),a}function Z1(a){return wa(a)?e:a}function tp(a,d,g,m,v,_){var E=g&h,P=a.length,N=d.length;if(P!=N&&!(E&&N>P))return!1;var H=_.get(a),W=_.get(d);if(H&&W)return H==d&&W==a;var q=-1,Q=!0,ue=g&y?new Si:e;for(_.set(a,d),_.set(d,a);++q<P;){var he=a[q],Ae=d[q];if(m)var ge=E?m(Ae,he,q,d,a,_):m(he,Ae,q,a,d,_);if(ge!==e){if(ge)continue;Q=!1;break}if(ue){if(!Hu(d,function(De,ke){if(!aa(ue,ke)&&(he===De||v(he,De,g,m,_)))return ue.push(ke)})){Q=!1;break}}else if(!(he===Ae||v(he,Ae,g,m,_))){Q=!1;break}}return _.delete(a),_.delete(d),Q}function Y1(a,d,g,m,v,_,E){switch(g){case lr:if(a.byteLength!=d.byteLength||a.byteOffset!=d.byteOffset)return!1;a=a.buffer,d=d.buffer;case Pr:return!(a.byteLength!=d.byteLength||!_(new Is(a),new Is(d)));case or:case Lt:case Jt:return Yr(+a,+d);case Ht:return a.name==d.name&&a.message==d.message;case ar:case on:return a==d+"";case dt:var P=Ku;case Bt:var N=m&h;if(P||(P=xs),a.size!=d.size&&!N)return!1;var H=E.get(a);if(H)return H==d;m|=y,E.set(a,d);var W=tp(P(a),P(d),m,v,_,E);return E.delete(a),W;case sr:if(fa)return fa.call(a)==fa.call(d)}return!1}function X1(a,d,g,m,v,_){var E=g&h,P=xl(a),N=P.length,H=xl(d),W=H.length;if(N!=W&&!E)return!1;for(var q=N;q--;){var Q=P[q];if(!(E?Q in d:He.call(d,Q)))return!1}var ue=_.get(a),he=_.get(d);if(ue&&he)return ue==d&&he==a;var Ae=!0;_.set(a,d),_.set(d,a);for(var ge=E;++q<N;){Q=P[q];var De=a[Q],ke=d[Q];if(m)var vr=E?m(ke,De,Q,d,a,_):m(De,ke,Q,a,d,_);if(!(vr===e?De===ke||v(De,ke,g,m,_):vr)){Ae=!1;break}ge||(ge=Q=="constructor")}if(Ae&&!ge){var tr=a.constructor,wr=d.constructor;tr!=wr&&"constructor"in a&&"constructor"in d&&!(typeof tr=="function"&&tr instanceof tr&&typeof wr=="function"&&wr instanceof wr)&&(Ae=!1)}return _.delete(a),_.delete(d),Ae}function $n(a){return $l(sp(a,e,mp),a+"")}function xl(a){return _d(a,Rt,El)}function Tl(a){return _d(a,dr,rp)}var Ol=ks?function(a){return ks.get(a)}:Vl;function Zs(a){for(var d=a.name+"",g=_o[d],m=He.call(_o,d)?g.length:0;m--;){var v=g[m],_=v.func;if(_==null||_==a)return v.name}return d}function So(a){var d=He.call(w,"placeholder")?w:a;return d.placeholder}function pe(){var a=w.iteratee||jl;return a=a===jl?Od:a,arguments.length?a(arguments[0],arguments[1]):a}function Ys(a,d){var g=a.__data__;return i_(d)?g[typeof d=="string"?"string":"hash"]:g.map}function Sl(a){for(var d=Rt(a),g=d.length;g--;){var m=d[g],v=a[m];d[g]=[m,v,op(v)]}return d}function Ii(a,d){var g=sw(a,d);return Td(g)?g:e}function K1(a){var d=He.call(a,Ti),g=a[Ti];try{a[Ti]=e;var m=!0}catch{}var v=Es.call(a);return m&&(d?a[Ti]=g:delete a[Ti]),v}var El=Qu?function(a){return a==null?[]:(a=et(a),Wn(Qu(a),function(d){return ud.call(a,d)}))}:Gl,rp=Qu?function(a){for(var d=[];a;)qn(d,El(a)),a=Ps(a);return d}:Gl,Zt=Qt;(el&&Zt(new el(new ArrayBuffer(1)))!=lr||ua&&Zt(new ua)!=dt||tl&&Zt(tl.resolve())!=Ir||wo&&Zt(new wo)!=Bt||la&&Zt(new la)!=ur)&&(Zt=function(a){var d=Qt(a),g=d==It?a.constructor:e,m=g?Pi(g):"";if(m)switch(m){case Nw:return lr;case kw:return dt;case Rw:return Ir;case Fw:return Bt;case Mw:return ur}return d});function J1(a,d,g){for(var m=-1,v=g.length;++m<v;){var _=g[m],E=_.size;switch(_.type){case"drop":a+=E;break;case"dropRight":d-=E;break;case"take":d=qt(d,a+E);break;case"takeRight":a=Dt(a,d-E);break}}return{start:a,end:d}}function Q1(a){var d=a.match(yi);return d?d[1].split(U):[]}function np(a,d,g){d=Qn(d,a);for(var m=-1,v=d.length,_=!1;++m<v;){var E=fn(d[m]);if(!(_=a!=null&&g(a,E)))break;a=a[E]}return _||++m!=v?_:(v=a==null?0:a.length,!!v&&ru(v)&&Dn(E,v)&&(xe(a)||$i(a)))}function e_(a){var d=a.length,g=new a.constructor(d);return d&&typeof a[0]=="string"&&He.call(a,"index")&&(g.index=a.index,g.input=a.input),g}function ip(a){return typeof a.constructor=="function"&&!ba(a)?xo(Ps(a)):{}}function t_(a,d,g){var m=a.constructor;switch(d){case Pr:return vl(a);case or:case Lt:return new m(+a);case lr:return L1(a,g);case _n:case xn:case an:case Vn:case Ge:case be:case sn:case Gn:case Tn:return Ud(a,g);case dt:return new m;case Jt:case on:return new m(a);case ar:return B1(a);case Bt:return new m;case sr:return U1(a)}}function r_(a,d){var g=d.length;if(!g)return a;var m=g-1;return d[m]=(g>1?"& ":"")+d[m],d=d.join(g>2?", ":" "),a.replace(mi,`{
+/* [wrapped with `+d+`] */
+`)}function n_(a){return xe(a)||$i(a)||!!(ld&&a&&a[ld])}function Dn(a,d){var g=typeof a;return d=d??ve,!!d&&(g=="number"||g!="symbol"&&Ko.test(a))&&a>-1&&a%1==0&&a<d}function er(a,d,g){if(!ht(g))return!1;var m=typeof d;return(m=="number"?fr(g)&&Dn(d,g.length):m=="string"&&d in g)?Yr(g[d],a):!1}function Al(a,d){if(xe(a))return!1;var g=typeof a;return g=="number"||g=="symbol"||g=="boolean"||a==null||br(a)?!0:le.test(a)||!ee.test(a)||d!=null&&a in et(d)}function i_(a){var d=typeof a;return d=="string"||d=="number"||d=="symbol"||d=="boolean"?a!=="__proto__":a===null}function Il(a){var d=Zs(a),g=w[d];if(typeof g!="function"||!(d in Ne.prototype))return!1;if(a===g)return!0;var m=Ol(g);return!!m&&a===m[0]}function o_(a){return!!od&&od in a}var a_=Os?Cn:Hl;function ba(a){var d=a&&a.constructor,g=typeof d=="function"&&d.prototype||vo;return a===g}function op(a){return a===a&&!ht(a)}function ap(a,d){return function(g){return g==null?!1:g[a]===d&&(d!==e||a in et(g))}}function s_(a){var d=eu(a,function(m){return g.size===i&&g.clear(),m}),g=d.cache;return d}function u_(a,d){var g=a[1],m=d[1],v=g|m,_=v<(O|S|ae),E=m==ae&&g==L||m==ae&&g==ot&&a[7].length<=d[8]||m==(ae|ot)&&d[7].length<=d[8]&&g==L;if(!(_||E))return a;m&O&&(a[2]=d[2],v|=g&O?0:A);var P=d[3];if(P){var N=a[3];a[3]=N?zd(N,P,d[4]):P,a[4]=N?Zn(a[3],c):d[4]}return P=d[5],P&&(N=a[5],a[5]=N?Vd(N,P,d[6]):P,a[6]=N?Zn(a[5],c):d[6]),P=d[7],P&&(a[7]=P),m&ae&&(a[8]=a[8]==null?d[8]:qt(a[8],d[8])),a[9]==null&&(a[9]=d[9]),a[0]=d[0],a[1]=v,a}function l_(a){var d=[];if(a!=null)for(var g in et(a))d.push(g);return d}function c_(a){return Es.call(a)}function sp(a,d,g){return d=Dt(d===e?a.length-1:d,0),function(){for(var m=arguments,v=-1,_=Dt(m.length-d,0),E=B(_);++v<_;)E[v]=m[d+v];v=-1;for(var P=B(d+1);++v<d;)P[v]=m[v];return P[d]=g(E),gr(a,this,P)}}function up(a,d){return d.length<2?a:Ai(a,Lr(d,0,-1))}function f_(a,d){for(var g=a.length,m=qt(d.length,g),v=cr(a);m--;){var _=d[m];a[m]=Dn(_,g)?v[_]:e}return a}function Pl(a,d){if(!(d==="constructor"&&typeof a[d]=="function")&&d!="__proto__")return a[d]}var lp=fp(Cd),va=Ew||function(a,d){return kt.setTimeout(a,d)},$l=fp(k1);function cp(a,d,g){var m=d+"";return $l(a,r_(m,d_(Q1(m),g)))}function fp(a){var d=0,g=0;return function(){var m=$w(),v=yn-(m-g);if(g=m,v>0){if(++d>=Me)return arguments[0]}else d=0;return a.apply(e,arguments)}}function Xs(a,d){var g=-1,m=a.length,v=m-1;for(d=d===e?m:d;++g<d;){var _=dl(g,v),E=a[_];a[_]=a[g],a[g]=E}return a.length=d,a}var dp=s_(function(a){var d=[];return a.charCodeAt(0)===46&&d.push(""),a.replace($e,function(g,m,v,_){d.push(v?_.replace(Dr,"$1"):m||g)}),d});function fn(a){if(typeof a=="string"||br(a))return a;var d=a+"";return d=="0"&&1/a==-Le?"-0":d}function Pi(a){if(a!=null){try{return Ss.call(a)}catch{}try{return a+""}catch{}}return""}function d_(a,d){return kr(Ct,function(g){var m="_."+g[0];d&g[1]&&!ws(a,m)&&a.push(m)}),a.sort()}function pp(a){if(a instanceof Ne)return a.clone();var d=new Fr(a.__wrapped__,a.__chain__);return d.__actions__=cr(a.__actions__),d.__index__=a.__index__,d.__values__=a.__values__,d}function p_(a,d,g){(g?er(a,d,g):d===e)?d=1:d=Dt(Oe(d),0);var m=a==null?0:a.length;if(!m||d<1)return[];for(var v=0,_=0,E=B(Cs(m/d));v<m;)E[_++]=Lr(a,v,v+=d);return E}function h_(a){for(var d=-1,g=a==null?0:a.length,m=0,v=[];++d<g;){var _=a[d];_&&(v[m++]=_)}return v}function g_(){var a=arguments.length;if(!a)return[];for(var d=B(a-1),g=arguments[0],m=a;m--;)d[m-1]=arguments[m];return qn(xe(g)?cr(g):[g],jt(d,1))}var m_=Pe(function(a,d){return _t(a)?pa(a,jt(d,1,_t,!0)):[]}),y_=Pe(function(a,d){var g=Br(d);return _t(g)&&(g=e),_t(a)?pa(a,jt(d,1,_t,!0),pe(g,2)):[]}),b_=Pe(function(a,d){var g=Br(d);return _t(g)&&(g=e),_t(a)?pa(a,jt(d,1,_t,!0),e,g):[]});function v_(a,d,g){var m=a==null?0:a.length;return m?(d=g||d===e?1:Oe(d),Lr(a,d<0?0:d,m)):[]}function w_(a,d,g){var m=a==null?0:a.length;return m?(d=g||d===e?1:Oe(d),d=m-d,Lr(a,0,d<0?0:d)):[]}function __(a,d){return a&&a.length?zs(a,pe(d,3),!0,!0):[]}function x_(a,d){return a&&a.length?zs(a,pe(d,3),!0):[]}function T_(a,d,g,m){var v=a==null?0:a.length;return v?(g&&typeof g!="number"&&er(a,d,g)&&(g=0,m=v),g1(a,d,g,m)):[]}function hp(a,d,g){var m=a==null?0:a.length;if(!m)return-1;var v=g==null?0:Oe(g);return v<0&&(v=Dt(m+v,0)),_s(a,pe(d,3),v)}function gp(a,d,g){var m=a==null?0:a.length;if(!m)return-1;var v=m-1;return g!==e&&(v=Oe(g),v=g<0?Dt(m+v,0):qt(v,m-1)),_s(a,pe(d,3),v,!0)}function mp(a){var d=a==null?0:a.length;return d?jt(a,1):[]}function O_(a){var d=a==null?0:a.length;return d?jt(a,Le):[]}function S_(a,d){var g=a==null?0:a.length;return g?(d=d===e?1:Oe(d),jt(a,d)):[]}function E_(a){for(var d=-1,g=a==null?0:a.length,m={};++d<g;){var v=a[d];m[v[0]]=v[1]}return m}function yp(a){return a&&a.length?a[0]:e}function A_(a,d,g){var m=a==null?0:a.length;if(!m)return-1;var v=g==null?0:Oe(g);return v<0&&(v=Dt(m+v,0)),mo(a,d,v)}function I_(a){var d=a==null?0:a.length;return d?Lr(a,0,-1):[]}var P_=Pe(function(a){var d=ft(a,yl);return d.length&&d[0]===a[0]?sl(d):[]}),$_=Pe(function(a){var d=Br(a),g=ft(a,yl);return d===Br(g)?d=e:g.pop(),g.length&&g[0]===a[0]?sl(g,pe(d,2)):[]}),D_=Pe(function(a){var d=Br(a),g=ft(a,yl);return d=typeof d=="function"?d:e,d&&g.pop(),g.length&&g[0]===a[0]?sl(g,e,d):[]});function C_(a,d){return a==null?"":Iw.call(a,d)}function Br(a){var d=a==null?0:a.length;return d?a[d-1]:e}function N_(a,d,g){var m=a==null?0:a.length;if(!m)return-1;var v=m;return g!==e&&(v=Oe(g),v=v<0?Dt(m+v,0):qt(v,m-1)),d===d?dw(a,d,v):_s(a,Kf,v,!0)}function k_(a,d){return a&&a.length?Id(a,Oe(d)):e}var R_=Pe(bp);function bp(a,d){return a&&a.length&&d&&d.length?fl(a,d):a}function F_(a,d,g){return a&&a.length&&d&&d.length?fl(a,d,pe(g,2)):a}function M_(a,d,g){return a&&a.length&&d&&d.length?fl(a,d,e,g):a}var L_=$n(function(a,d){var g=a==null?0:a.length,m=nl(a,d);return Dd(a,ft(d,function(v){return Dn(v,g)?+v:v}).sort(jd)),m});function B_(a,d){var g=[];if(!(a&&a.length))return g;var m=-1,v=[],_=a.length;for(d=pe(d,3);++m<_;){var E=a[m];d(E,m,a)&&(g.push(E),v.push(m))}return Dd(a,v),g}function Dl(a){return a==null?a:Cw.call(a)}function U_(a,d,g){var m=a==null?0:a.length;return m?(g&&typeof g!="number"&&er(a,d,g)?(d=0,g=m):(d=d==null?0:Oe(d),g=g===e?m:Oe(g)),Lr(a,d,g)):[]}function j_(a,d){return js(a,d)}function z_(a,d,g){return hl(a,d,pe(g,2))}function V_(a,d){var g=a==null?0:a.length;if(g){var m=js(a,d);if(m<g&&Yr(a[m],d))return m}return-1}function G_(a,d){return js(a,d,!0)}function H_(a,d,g){return hl(a,d,pe(g,2),!0)}function W_(a,d){var g=a==null?0:a.length;if(g){var m=js(a,d,!0)-1;if(Yr(a[m],d))return m}return-1}function q_(a){return a&&a.length?Nd(a):[]}function Z_(a,d){return a&&a.length?Nd(a,pe(d,2)):[]}function Y_(a){var d=a==null?0:a.length;return d?Lr(a,1,d):[]}function X_(a,d,g){return a&&a.length?(d=g||d===e?1:Oe(d),Lr(a,0,d<0?0:d)):[]}function K_(a,d,g){var m=a==null?0:a.length;return m?(d=g||d===e?1:Oe(d),d=m-d,Lr(a,d<0?0:d,m)):[]}function J_(a,d){return a&&a.length?zs(a,pe(d,3),!1,!0):[]}function Q_(a,d){return a&&a.length?zs(a,pe(d,3)):[]}var ex=Pe(function(a){return Jn(jt(a,1,_t,!0))}),tx=Pe(function(a){var d=Br(a);return _t(d)&&(d=e),Jn(jt(a,1,_t,!0),pe(d,2))}),rx=Pe(function(a){var d=Br(a);return d=typeof d=="function"?d:e,Jn(jt(a,1,_t,!0),e,d)});function nx(a){return a&&a.length?Jn(a):[]}function ix(a,d){return a&&a.length?Jn(a,pe(d,2)):[]}function ox(a,d){return d=typeof d=="function"?d:e,a&&a.length?Jn(a,e,d):[]}function Cl(a){if(!(a&&a.length))return[];var d=0;return a=Wn(a,function(g){if(_t(g))return d=Dt(g.length,d),!0}),Yu(d,function(g){return ft(a,Wu(g))})}function vp(a,d){if(!(a&&a.length))return[];var g=Cl(a);return d==null?g:ft(g,function(m){return gr(d,e,m)})}var ax=Pe(function(a,d){return _t(a)?pa(a,d):[]}),sx=Pe(function(a){return ml(Wn(a,_t))}),ux=Pe(function(a){var d=Br(a);return _t(d)&&(d=e),ml(Wn(a,_t),pe(d,2))}),lx=Pe(function(a){var d=Br(a);return d=typeof d=="function"?d:e,ml(Wn(a,_t),e,d)}),cx=Pe(Cl);function fx(a,d){return Md(a||[],d||[],da)}function dx(a,d){return Md(a||[],d||[],ma)}var px=Pe(function(a){var d=a.length,g=d>1?a[d-1]:e;return g=typeof g=="function"?(a.pop(),g):e,vp(a,g)});function wp(a){var d=w(a);return d.__chain__=!0,d}function hx(a,d){return d(a),a}function Ks(a,d){return d(a)}var gx=$n(function(a){var d=a.length,g=d?a[0]:0,m=this.__wrapped__,v=function(_){return nl(_,a)};return d>1||this.__actions__.length||!(m instanceof Ne)||!Dn(g)?this.thru(v):(m=m.slice(g,+g+(d?1:0)),m.__actions__.push({func:Ks,args:[v],thisArg:e}),new Fr(m,this.__chain__).thru(function(_){return d&&!_.length&&_.push(e),_}))});function mx(){return wp(this)}function yx(){return new Fr(this.value(),this.__chain__)}function bx(){this.__values__===e&&(this.__values__=kp(this.value()));var a=this.__index__>=this.__values__.length,d=a?e:this.__values__[this.__index__++];return{done:a,value:d}}function vx(){return this}function wx(a){for(var d,g=this;g instanceof Fs;){var m=pp(g);m.__index__=0,m.__values__=e,d?v.__wrapped__=m:d=m;var v=m;g=g.__wrapped__}return v.__wrapped__=a,d}function _x(){var a=this.__wrapped__;if(a instanceof Ne){var d=a;return this.__actions__.length&&(d=new Ne(this)),d=d.reverse(),d.__actions__.push({func:Ks,args:[Dl],thisArg:e}),new Fr(d,this.__chain__)}return this.thru(Dl)}function xx(){return Fd(this.__wrapped__,this.__actions__)}var Tx=Vs(function(a,d,g){He.call(a,g)?++a[g]:In(a,g,1)});function Ox(a,d,g){var m=xe(a)?Yf:h1;return g&&er(a,d,g)&&(d=e),m(a,pe(d,3))}function Sx(a,d){var g=xe(a)?Wn:vd;return g(a,pe(d,3))}var Ex=qd(hp),Ax=qd(gp);function Ix(a,d){return jt(Js(a,d),1)}function Px(a,d){return jt(Js(a,d),Le)}function $x(a,d,g){return g=g===e?1:Oe(g),jt(Js(a,d),g)}function _p(a,d){var g=xe(a)?kr:Kn;return g(a,pe(d,3))}function xp(a,d){var g=xe(a)?Yv:bd;return g(a,pe(d,3))}var Dx=Vs(function(a,d,g){He.call(a,g)?a[g].push(d):In(a,g,[d])});function Cx(a,d,g,m){a=fr(a)?a:Ao(a),g=g&&!m?Oe(g):0;var v=a.length;return g<0&&(g=Dt(v+g,0)),nu(a)?g<=v&&a.indexOf(d,g)>-1:!!v&&mo(a,d,g)>-1}var Nx=Pe(function(a,d,g){var m=-1,v=typeof d=="function",_=fr(a)?B(a.length):[];return Kn(a,function(E){_[++m]=v?gr(d,E,g):ha(E,d,g)}),_}),kx=Vs(function(a,d,g){In(a,g,d)});function Js(a,d){var g=xe(a)?ft:Sd;return g(a,pe(d,3))}function Rx(a,d,g,m){return a==null?[]:(xe(d)||(d=d==null?[]:[d]),g=m?e:g,xe(g)||(g=g==null?[]:[g]),Pd(a,d,g))}var Fx=Vs(function(a,d,g){a[g?0:1].push(d)},function(){return[[],[]]});function Mx(a,d,g){var m=xe(a)?Gu:Qf,v=arguments.length<3;return m(a,pe(d,4),g,v,Kn)}function Lx(a,d,g){var m=xe(a)?Xv:Qf,v=arguments.length<3;return m(a,pe(d,4),g,v,bd)}function Bx(a,d){var g=xe(a)?Wn:vd;return g(a,tu(pe(d,3)))}function Ux(a){var d=xe(a)?hd:C1;return d(a)}function jx(a,d,g){(g?er(a,d,g):d===e)?d=1:d=Oe(d);var m=xe(a)?l1:N1;return m(a,d)}function zx(a){var d=xe(a)?c1:R1;return d(a)}function Vx(a){if(a==null)return 0;if(fr(a))return nu(a)?bo(a):a.length;var d=Zt(a);return d==dt||d==Bt?a.size:ll(a).length}function Gx(a,d,g){var m=xe(a)?Hu:F1;return g&&er(a,d,g)&&(d=e),m(a,pe(d,3))}var Hx=Pe(function(a,d){if(a==null)return[];var g=d.length;return g>1&&er(a,d[0],d[1])?d=[]:g>2&&er(d[0],d[1],d[2])&&(d=[d[0]]),Pd(a,jt(d,1),[])}),Qs=Sw||function(){return kt.Date.now()};function Wx(a,d){if(typeof d!="function")throw new Rr(f);return a=Oe(a),function(){if(--a<1)return d.apply(this,arguments)}}function Tp(a,d,g){return d=g?e:d,d=a&&d==null?a.length:d,Pn(a,ae,e,e,e,e,d)}function Op(a,d){var g;if(typeof d!="function")throw new Rr(f);return a=Oe(a),function(){return--a>0&&(g=d.apply(this,arguments)),a<=1&&(d=e),g}}var Nl=Pe(function(a,d,g){var m=O;if(g.length){var v=Zn(g,So(Nl));m|=F}return Pn(a,m,d,g,v)}),Sp=Pe(function(a,d,g){var m=O|S;if(g.length){var v=Zn(g,So(Sp));m|=F}return Pn(d,m,a,g,v)});function Ep(a,d,g){d=g?e:d;var m=Pn(a,L,e,e,e,e,e,d);return m.placeholder=Ep.placeholder,m}function Ap(a,d,g){d=g?e:d;var m=Pn(a,$,e,e,e,e,e,d);return m.placeholder=Ap.placeholder,m}function Ip(a,d,g){var m,v,_,E,P,N,H=0,W=!1,q=!1,Q=!0;if(typeof a!="function")throw new Rr(f);d=Ur(d)||0,ht(g)&&(W=!!g.leading,q="maxWait"in g,_=q?Dt(Ur(g.maxWait)||0,d):_,Q="trailing"in g?!!g.trailing:Q);function ue(xt){var Xr=m,kn=v;return m=v=e,H=xt,E=a.apply(kn,Xr),E}function he(xt){return H=xt,P=va(De,d),W?ue(xt):E}function Ae(xt){var Xr=xt-N,kn=xt-H,qp=d-Xr;return q?qt(qp,_-kn):qp}function ge(xt){var Xr=xt-N,kn=xt-H;return N===e||Xr>=d||Xr<0||q&&kn>=_}function De(){var xt=Qs();if(ge(xt))return ke(xt);P=va(De,Ae(xt))}function ke(xt){return P=e,Q&&m?ue(xt):(m=v=e,E)}function vr(){P!==e&&Ld(P),H=0,m=N=v=P=e}function tr(){return P===e?E:ke(Qs())}function wr(){var xt=Qs(),Xr=ge(xt);if(m=arguments,v=this,N=xt,Xr){if(P===e)return he(N);if(q)return Ld(P),P=va(De,d),ue(N)}return P===e&&(P=va(De,d)),E}return wr.cancel=vr,wr.flush=tr,wr}var qx=Pe(function(a,d){return yd(a,1,d)}),Zx=Pe(function(a,d,g){return yd(a,Ur(d)||0,g)});function Yx(a){return Pn(a,Je)}function eu(a,d){if(typeof a!="function"||d!=null&&typeof d!="function")throw new Rr(f);var g=function(){var m=arguments,v=d?d.apply(this,m):m[0],_=g.cache;if(_.has(v))return _.get(v);var E=a.apply(this,m);return g.cache=_.set(v,E)||_,E};return g.cache=new(eu.Cache||An),g}eu.Cache=An;function tu(a){if(typeof a!="function")throw new Rr(f);return function(){var d=arguments;switch(d.length){case 0:return!a.call(this);case 1:return!a.call(this,d[0]);case 2:return!a.call(this,d[0],d[1]);case 3:return!a.call(this,d[0],d[1],d[2])}return!a.apply(this,d)}}function Xx(a){return Op(2,a)}var Kx=M1(function(a,d){d=d.length==1&&xe(d[0])?ft(d[0],mr(pe())):ft(jt(d,1),mr(pe()));var g=d.length;return Pe(function(m){for(var v=-1,_=qt(m.length,g);++v<_;)m[v]=d[v].call(this,m[v]);return gr(a,this,m)})}),kl=Pe(function(a,d){var g=Zn(d,So(kl));return Pn(a,F,e,d,g)}),Pp=Pe(function(a,d){var g=Zn(d,So(Pp));return Pn(a,Z,e,d,g)}),Jx=$n(function(a,d){return Pn(a,ot,e,e,e,d)});function Qx(a,d){if(typeof a!="function")throw new Rr(f);return d=d===e?d:Oe(d),Pe(a,d)}function e2(a,d){if(typeof a!="function")throw new Rr(f);return d=d==null?0:Dt(Oe(d),0),Pe(function(g){var m=g[d],v=ei(g,0,d);return m&&qn(v,m),gr(a,this,v)})}function t2(a,d,g){var m=!0,v=!0;if(typeof a!="function")throw new Rr(f);return ht(g)&&(m="leading"in g?!!g.leading:m,v="trailing"in g?!!g.trailing:v),Ip(a,d,{leading:m,maxWait:d,trailing:v})}function r2(a){return Tp(a,1)}function n2(a,d){return kl(bl(d),a)}function i2(){if(!arguments.length)return[];var a=arguments[0];return xe(a)?a:[a]}function o2(a){return Mr(a,l)}function a2(a,d){return d=typeof d=="function"?d:e,Mr(a,l,d)}function s2(a){return Mr(a,r|l)}function u2(a,d){return d=typeof d=="function"?d:e,Mr(a,r|l,d)}function l2(a,d){return d==null||md(a,d,Rt(d))}function Yr(a,d){return a===d||a!==a&&d!==d}var c2=qs(al),f2=qs(function(a,d){return a>=d}),$i=xd((function(){return arguments})())?xd:function(a){return mt(a)&&He.call(a,"callee")&&!ud.call(a,"callee")},xe=B.isArray,d2=Vf?mr(Vf):w1;function fr(a){return a!=null&&ru(a.length)&&!Cn(a)}function _t(a){return mt(a)&&fr(a)}function p2(a){return a===!0||a===!1||mt(a)&&Qt(a)==or}var ti=Aw||Hl,h2=Gf?mr(Gf):_1;function g2(a){return mt(a)&&a.nodeType===1&&!wa(a)}function m2(a){if(a==null)return!0;if(fr(a)&&(xe(a)||typeof a=="string"||typeof a.splice=="function"||ti(a)||Eo(a)||$i(a)))return!a.length;var d=Zt(a);if(d==dt||d==Bt)return!a.size;if(ba(a))return!ll(a).length;for(var g in a)if(He.call(a,g))return!1;return!0}function y2(a,d){return ga(a,d)}function b2(a,d,g){g=typeof g=="function"?g:e;var m=g?g(a,d):e;return m===e?ga(a,d,e,g):!!m}function Rl(a){if(!mt(a))return!1;var d=Qt(a);return d==Ht||d==Gt||typeof a.message=="string"&&typeof a.name=="string"&&!wa(a)}function v2(a){return typeof a=="number"&&cd(a)}function Cn(a){if(!ht(a))return!1;var d=Qt(a);return d==ut||d==at||d==vn||d==Un}function $p(a){return typeof a=="number"&&a==Oe(a)}function ru(a){return typeof a=="number"&&a>-1&&a%1==0&&a<=ve}function ht(a){var d=typeof a;return a!=null&&(d=="object"||d=="function")}function mt(a){return a!=null&&typeof a=="object"}var Dp=Hf?mr(Hf):T1;function w2(a,d){return a===d||ul(a,d,Sl(d))}function _2(a,d,g){return g=typeof g=="function"?g:e,ul(a,d,Sl(d),g)}function x2(a){return Cp(a)&&a!=+a}function T2(a){if(a_(a))throw new we(o);return Td(a)}function O2(a){return a===null}function S2(a){return a==null}function Cp(a){return typeof a=="number"||mt(a)&&Qt(a)==Jt}function wa(a){if(!mt(a)||Qt(a)!=It)return!1;var d=Ps(a);if(d===null)return!0;var g=He.call(d,"constructor")&&d.constructor;return typeof g=="function"&&g instanceof g&&Ss.call(g)==_w}var Fl=Wf?mr(Wf):O1;function E2(a){return $p(a)&&a>=-ve&&a<=ve}var Np=qf?mr(qf):S1;function nu(a){return typeof a=="string"||!xe(a)&&mt(a)&&Qt(a)==on}function br(a){return typeof a=="symbol"||mt(a)&&Qt(a)==sr}var Eo=Zf?mr(Zf):E1;function A2(a){return a===e}function I2(a){return mt(a)&&Zt(a)==ur}function P2(a){return mt(a)&&Qt(a)==zn}var $2=qs(cl),D2=qs(function(a,d){return a<=d});function kp(a){if(!a)return[];if(fr(a))return nu(a)?qr(a):cr(a);if(sa&&a[sa])return lw(a[sa]());var d=Zt(a),g=d==dt?Ku:d==Bt?xs:Ao;return g(a)}function Nn(a){if(!a)return a===0?a:0;if(a=Ur(a),a===Le||a===-Le){var d=a<0?-1:1;return d*Kt}return a===a?a:0}function Oe(a){var d=Nn(a),g=d%1;return d===d?g?d-g:d:0}function Rp(a){return a?Ei(Oe(a),0,Xe):0}function Ur(a){if(typeof a=="number")return a;if(br(a))return At;if(ht(a)){var d=typeof a.valueOf=="function"?a.valueOf():a;a=ht(d)?d+"":d}if(typeof a!="string")return a===0?a:+a;a=ed(a);var g=os.test(a);return g||ro.test(a)?Wv(a.slice(2),g?2:8):is.test(a)?At:+a}function Fp(a){return cn(a,dr(a))}function C2(a){return a?Ei(Oe(a),-ve,ve):a===0?a:0}function We(a){return a==null?"":yr(a)}var N2=To(function(a,d){if(ba(d)||fr(d)){cn(d,Rt(d),a);return}for(var g in d)He.call(d,g)&&da(a,g,d[g])}),Mp=To(function(a,d){cn(d,dr(d),a)}),iu=To(function(a,d,g,m){cn(d,dr(d),a,m)}),k2=To(function(a,d,g,m){cn(d,Rt(d),a,m)}),R2=$n(nl);function F2(a,d){var g=xo(a);return d==null?g:gd(g,d)}var M2=Pe(function(a,d){a=et(a);var g=-1,m=d.length,v=m>2?d[2]:e;for(v&&er(d[0],d[1],v)&&(m=1);++g<m;)for(var _=d[g],E=dr(_),P=-1,N=E.length;++P<N;){var H=E[P],W=a[H];(W===e||Yr(W,vo[H])&&!He.call(a,H))&&(a[H]=_[H])}return a}),L2=Pe(function(a){return a.push(e,ep),gr(Lp,e,a)});function B2(a,d){return Xf(a,pe(d,3),ln)}function U2(a,d){return Xf(a,pe(d,3),ol)}function j2(a,d){return a==null?a:il(a,pe(d,3),dr)}function z2(a,d){return a==null?a:wd(a,pe(d,3),dr)}function V2(a,d){return a&&ln(a,pe(d,3))}function G2(a,d){return a&&ol(a,pe(d,3))}function H2(a){return a==null?[]:Bs(a,Rt(a))}function W2(a){return a==null?[]:Bs(a,dr(a))}function Ml(a,d,g){var m=a==null?e:Ai(a,d);return m===e?g:m}function q2(a,d){return a!=null&&np(a,d,m1)}function Ll(a,d){return a!=null&&np(a,d,y1)}var Z2=Yd(function(a,d,g){d!=null&&typeof d.toString!="function"&&(d=Es.call(d)),a[d]=g},Ul(pr)),Y2=Yd(function(a,d,g){d!=null&&typeof d.toString!="function"&&(d=Es.call(d)),He.call(a,d)?a[d].push(g):a[d]=[g]},pe),X2=Pe(ha);function Rt(a){return fr(a)?pd(a):ll(a)}function dr(a){return fr(a)?pd(a,!0):A1(a)}function K2(a,d){var g={};return d=pe(d,3),ln(a,function(m,v,_){In(g,d(m,v,_),m)}),g}function J2(a,d){var g={};return d=pe(d,3),ln(a,function(m,v,_){In(g,v,d(m,v,_))}),g}var Q2=To(function(a,d,g){Us(a,d,g)}),Lp=To(function(a,d,g,m){Us(a,d,g,m)}),eT=$n(function(a,d){var g={};if(a==null)return g;var m=!1;d=ft(d,function(_){return _=Qn(_,a),m||(m=_.length>1),_}),cn(a,Tl(a),g),m&&(g=Mr(g,r|u|l,Z1));for(var v=d.length;v--;)gl(g,d[v]);return g});function tT(a,d){return Bp(a,tu(pe(d)))}var rT=$n(function(a,d){return a==null?{}:P1(a,d)});function Bp(a,d){if(a==null)return{};var g=ft(Tl(a),function(m){return[m]});return d=pe(d),$d(a,g,function(m,v){return d(m,v[0])})}function nT(a,d,g){d=Qn(d,a);var m=-1,v=d.length;for(v||(v=1,a=e);++m<v;){var _=a==null?e:a[fn(d[m])];_===e&&(m=v,_=g),a=Cn(_)?_.call(a):_}return a}function iT(a,d,g){return a==null?a:ma(a,d,g)}function oT(a,d,g,m){return m=typeof m=="function"?m:e,a==null?a:ma(a,d,g,m)}var Up=Jd(Rt),jp=Jd(dr);function aT(a,d,g){var m=xe(a),v=m||ti(a)||Eo(a);if(d=pe(d,4),g==null){var _=a&&a.constructor;v?g=m?new _:[]:ht(a)?g=Cn(_)?xo(Ps(a)):{}:g={}}return(v?kr:ln)(a,function(E,P,N){return d(g,E,P,N)}),g}function sT(a,d){return a==null?!0:gl(a,d)}function uT(a,d,g){return a==null?a:Rd(a,d,bl(g))}function lT(a,d,g,m){return m=typeof m=="function"?m:e,a==null?a:Rd(a,d,bl(g),m)}function Ao(a){return a==null?[]:Xu(a,Rt(a))}function cT(a){return a==null?[]:Xu(a,dr(a))}function fT(a,d,g){return g===e&&(g=d,d=e),g!==e&&(g=Ur(g),g=g===g?g:0),d!==e&&(d=Ur(d),d=d===d?d:0),Ei(Ur(a),d,g)}function dT(a,d,g){return d=Nn(d),g===e?(g=d,d=0):g=Nn(g),a=Ur(a),b1(a,d,g)}function pT(a,d,g){if(g&&typeof g!="boolean"&&er(a,d,g)&&(d=g=e),g===e&&(typeof d=="boolean"?(g=d,d=e):typeof a=="boolean"&&(g=a,a=e)),a===e&&d===e?(a=0,d=1):(a=Nn(a),d===e?(d=a,a=0):d=Nn(d)),a>d){var m=a;a=d,d=m}if(g||a%1||d%1){var v=fd();return qt(a+v*(d-a+vs("1e-"+((v+"").length-1))),d)}return dl(a,d)}var hT=Oo(function(a,d,g){return d=d.toLowerCase(),a+(g?zp(d):d)});function zp(a){return Bl(We(a).toLowerCase())}function Vp(a){return a=We(a),a&&a.replace(Hn,iw).replace(Y,"")}function gT(a,d,g){a=We(a),d=yr(d);var m=a.length;g=g===e?m:Ei(Oe(g),0,m);var v=g;return g-=d.length,g>=0&&a.slice(g,v)==d}function mT(a){return a=We(a),a&&T.test(a)?a.replace($r,ow):a}function yT(a){return a=We(a),a&&Ut.test(a)?a.replace(pt,"\\$&"):a}var bT=Oo(function(a,d,g){return a+(g?"-":"")+d.toLowerCase()}),vT=Oo(function(a,d,g){return a+(g?" ":"")+d.toLowerCase()}),wT=Wd("toLowerCase");function _T(a,d,g){a=We(a),d=Oe(d);var m=d?bo(a):0;if(!d||m>=d)return a;var v=(d-m)/2;return Ws(Ns(v),g)+a+Ws(Cs(v),g)}function xT(a,d,g){a=We(a),d=Oe(d);var m=d?bo(a):0;return d&&m<d?a+Ws(d-m,g):a}function TT(a,d,g){a=We(a),d=Oe(d);var m=d?bo(a):0;return d&&m<d?Ws(d-m,g)+a:a}function OT(a,d,g){return g||d==null?d=0:d&&(d=+d),Dw(We(a).replace(wt,""),d||0)}function ST(a,d,g){return(g?er(a,d,g):d===e)?d=1:d=Oe(d),pl(We(a),d)}function ET(){var a=arguments,d=We(a[0]);return a.length<3?d:d.replace(a[1],a[2])}var AT=Oo(function(a,d,g){return a+(g?"_":"")+d.toLowerCase()});function IT(a,d,g){return g&&typeof g!="number"&&er(a,d,g)&&(d=g=e),g=g===e?Xe:g>>>0,g?(a=We(a),a&&(typeof d=="string"||d!=null&&!Fl(d))&&(d=yr(d),!d&&yo(a))?ei(qr(a),0,g):a.split(d,g)):[]}var PT=Oo(function(a,d,g){return a+(g?" ":"")+Bl(d)});function $T(a,d,g){return a=We(a),g=g==null?0:Ei(Oe(g),0,a.length),d=yr(d),a.slice(g,g+d.length)==d}function DT(a,d,g){var m=w.templateSettings;g&&er(a,d,g)&&(d=e),a=We(a),d=iu({},d,m,Qd);var v=iu({},d.imports,m.imports,Qd),_=Rt(v),E=Xu(v,_),P,N,H=0,W=d.interpolate||vi,q="__p += '",Q=Ju((d.escape||vi).source+"|"+W.source+"|"+(W===V?bi:vi).source+"|"+(d.evaluate||vi).source+"|$","g"),ue="//# sourceURL="+(He.call(d,"sourceURL")?(d.sourceURL+"").replace(/\s/g," "):"lodash.templateSources["+ ++Wt+"]")+`
+`;a.replace(Q,function(ge,De,ke,vr,tr,wr){return ke||(ke=vr),q+=a.slice(H,wr).replace(as,aw),De&&(P=!0,q+=`' +
+__e(`+De+`) +
+'`),tr&&(N=!0,q+=`';
+`+tr+`;
+__p += '`),ke&&(q+=`' +
+((__t = (`+ke+`)) == null ? '' : __t) +
+'`),H=wr+ge.length,ge}),q+=`';
+`;var he=He.call(d,"variable")&&d.variable;if(!he)q=`with (obj) {
+`+q+`
+}
+`;else if(Qe.test(he))throw new we(s);q=(N?q.replace(to,""):q).replace(de,"$1").replace(On,"$1;"),q="function("+(he||"obj")+`) {
+`+(he?"":`obj || (obj = {});
+`)+"var __t, __p = ''"+(P?", __e = _.escape":"")+(N?`, __j = Array.prototype.join;
+function print() { __p += __j.call(arguments, '') }
+`:`;
+`)+q+`return __p
+}`;var Ae=Hp(function(){return ze(_,ue+"return "+q).apply(e,E)});if(Ae.source=q,Rl(Ae))throw Ae;return Ae}function CT(a){return We(a).toLowerCase()}function NT(a){return We(a).toUpperCase()}function kT(a,d,g){if(a=We(a),a&&(g||d===e))return ed(a);if(!a||!(d=yr(d)))return a;var m=qr(a),v=qr(d),_=td(m,v),E=rd(m,v)+1;return ei(m,_,E).join("")}function RT(a,d,g){if(a=We(a),a&&(g||d===e))return a.slice(0,id(a)+1);if(!a||!(d=yr(d)))return a;var m=qr(a),v=rd(m,qr(d))+1;return ei(m,0,v).join("")}function FT(a,d,g){if(a=We(a),a&&(g||d===e))return a.replace(wt,"");if(!a||!(d=yr(d)))return a;var m=qr(a),v=td(m,qr(d));return ei(m,v).join("")}function MT(a,d){var g=st,m=se;if(ht(d)){var v="separator"in d?d.separator:v;g="length"in d?Oe(d.length):g,m="omission"in d?yr(d.omission):m}a=We(a);var _=a.length;if(yo(a)){var E=qr(a);_=E.length}if(g>=_)return a;var P=g-bo(m);if(P<1)return m;var N=E?ei(E,0,P).join(""):a.slice(0,P);if(v===e)return N+m;if(E&&(P+=N.length-P),Fl(v)){if(a.slice(P).search(v)){var H,W=N;for(v.global||(v=Ju(v.source,We(Yo.exec(v))+"g")),v.lastIndex=0;H=v.exec(W);)var q=H.index;N=N.slice(0,q===e?P:q)}}else if(a.indexOf(yr(v),P)!=P){var Q=N.lastIndexOf(v);Q>-1&&(N=N.slice(0,Q))}return N+m}function LT(a){return a=We(a),a&&gi.test(a)?a.replace(hi,pw):a}var BT=Oo(function(a,d,g){return a+(g?" ":"")+d.toUpperCase()}),Bl=Wd("toUpperCase");function Gp(a,d,g){return a=We(a),d=g?e:d,d===e?uw(a)?mw(a):Qv(a):a.match(d)||[]}var Hp=Pe(function(a,d){try{return gr(a,e,d)}catch(g){return Rl(g)?g:new we(g)}}),UT=$n(function(a,d){return kr(d,function(g){g=fn(g),In(a,g,Nl(a[g],a))}),a});function jT(a){var d=a==null?0:a.length,g=pe();return a=d?ft(a,function(m){if(typeof m[1]!="function")throw new Rr(f);return[g(m[0]),m[1]]}):[],Pe(function(m){for(var v=-1;++v<d;){var _=a[v];if(gr(_[0],this,m))return gr(_[1],this,m)}})}function zT(a){return p1(Mr(a,r))}function Ul(a){return function(){return a}}function VT(a,d){return a==null||a!==a?d:a}var GT=Zd(),HT=Zd(!0);function pr(a){return a}function jl(a){return Od(typeof a=="function"?a:Mr(a,r))}function WT(a){return Ed(Mr(a,r))}function qT(a,d){return Ad(a,Mr(d,r))}var ZT=Pe(function(a,d){return function(g){return ha(g,a,d)}}),YT=Pe(function(a,d){return function(g){return ha(a,g,d)}});function zl(a,d,g){var m=Rt(d),v=Bs(d,m);g==null&&!(ht(d)&&(v.length||!m.length))&&(g=d,d=a,a=this,v=Bs(d,Rt(d)));var _=!(ht(g)&&"chain"in g)||!!g.chain,E=Cn(a);return kr(v,function(P){var N=d[P];a[P]=N,E&&(a.prototype[P]=function(){var H=this.__chain__;if(_||H){var W=a(this.__wrapped__),q=W.__actions__=cr(this.__actions__);return q.push({func:N,args:arguments,thisArg:a}),W.__chain__=H,W}return N.apply(a,qn([this.value()],arguments))})}),a}function XT(){return kt._===this&&(kt._=xw),this}function Vl(){}function KT(a){return a=Oe(a),Pe(function(d){return Id(d,a)})}var JT=wl(ft),QT=wl(Yf),eO=wl(Hu);function Wp(a){return Al(a)?Wu(fn(a)):$1(a)}function tO(a){return function(d){return a==null?e:Ai(a,d)}}var rO=Xd(),nO=Xd(!0);function Gl(){return[]}function Hl(){return!1}function iO(){return{}}function oO(){return""}function aO(){return!0}function sO(a,d){if(a=Oe(a),a<1||a>ve)return[];var g=Xe,m=qt(a,Xe);d=pe(d),a-=Xe;for(var v=Yu(m,d);++g<a;)d(g);return v}function uO(a){return xe(a)?ft(a,fn):br(a)?[a]:cr(dp(We(a)))}function lO(a){var d=++ww;return We(a)+d}var cO=Hs(function(a,d){return a+d},0),fO=_l("ceil"),dO=Hs(function(a,d){return a/d},1),pO=_l("floor");function hO(a){return a&&a.length?Ls(a,pr,al):e}function gO(a,d){return a&&a.length?Ls(a,pe(d,2),al):e}function mO(a){return Jf(a,pr)}function yO(a,d){return Jf(a,pe(d,2))}function bO(a){return a&&a.length?Ls(a,pr,cl):e}function vO(a,d){return a&&a.length?Ls(a,pe(d,2),cl):e}var wO=Hs(function(a,d){return a*d},1),_O=_l("round"),xO=Hs(function(a,d){return a-d},0);function TO(a){return a&&a.length?Zu(a,pr):0}function OO(a,d){return a&&a.length?Zu(a,pe(d,2)):0}return w.after=Wx,w.ary=Tp,w.assign=N2,w.assignIn=Mp,w.assignInWith=iu,w.assignWith=k2,w.at=R2,w.before=Op,w.bind=Nl,w.bindAll=UT,w.bindKey=Sp,w.castArray=i2,w.chain=wp,w.chunk=p_,w.compact=h_,w.concat=g_,w.cond=jT,w.conforms=zT,w.constant=Ul,w.countBy=Tx,w.create=F2,w.curry=Ep,w.curryRight=Ap,w.debounce=Ip,w.defaults=M2,w.defaultsDeep=L2,w.defer=qx,w.delay=Zx,w.difference=m_,w.differenceBy=y_,w.differenceWith=b_,w.drop=v_,w.dropRight=w_,w.dropRightWhile=__,w.dropWhile=x_,w.fill=T_,w.filter=Sx,w.flatMap=Ix,w.flatMapDeep=Px,w.flatMapDepth=$x,w.flatten=mp,w.flattenDeep=O_,w.flattenDepth=S_,w.flip=Yx,w.flow=GT,w.flowRight=HT,w.fromPairs=E_,w.functions=H2,w.functionsIn=W2,w.groupBy=Dx,w.initial=I_,w.intersection=P_,w.intersectionBy=$_,w.intersectionWith=D_,w.invert=Z2,w.invertBy=Y2,w.invokeMap=Nx,w.iteratee=jl,w.keyBy=kx,w.keys=Rt,w.keysIn=dr,w.map=Js,w.mapKeys=K2,w.mapValues=J2,w.matches=WT,w.matchesProperty=qT,w.memoize=eu,w.merge=Q2,w.mergeWith=Lp,w.method=ZT,w.methodOf=YT,w.mixin=zl,w.negate=tu,w.nthArg=KT,w.omit=eT,w.omitBy=tT,w.once=Xx,w.orderBy=Rx,w.over=JT,w.overArgs=Kx,w.overEvery=QT,w.overSome=eO,w.partial=kl,w.partialRight=Pp,w.partition=Fx,w.pick=rT,w.pickBy=Bp,w.property=Wp,w.propertyOf=tO,w.pull=R_,w.pullAll=bp,w.pullAllBy=F_,w.pullAllWith=M_,w.pullAt=L_,w.range=rO,w.rangeRight=nO,w.rearg=Jx,w.reject=Bx,w.remove=B_,w.rest=Qx,w.reverse=Dl,w.sampleSize=jx,w.set=iT,w.setWith=oT,w.shuffle=zx,w.slice=U_,w.sortBy=Hx,w.sortedUniq=q_,w.sortedUniqBy=Z_,w.split=IT,w.spread=e2,w.tail=Y_,w.take=X_,w.takeRight=K_,w.takeRightWhile=J_,w.takeWhile=Q_,w.tap=hx,w.throttle=t2,w.thru=Ks,w.toArray=kp,w.toPairs=Up,w.toPairsIn=jp,w.toPath=uO,w.toPlainObject=Fp,w.transform=aT,w.unary=r2,w.union=ex,w.unionBy=tx,w.unionWith=rx,w.uniq=nx,w.uniqBy=ix,w.uniqWith=ox,w.unset=sT,w.unzip=Cl,w.unzipWith=vp,w.update=uT,w.updateWith=lT,w.values=Ao,w.valuesIn=cT,w.without=ax,w.words=Gp,w.wrap=n2,w.xor=sx,w.xorBy=ux,w.xorWith=lx,w.zip=cx,w.zipObject=fx,w.zipObjectDeep=dx,w.zipWith=px,w.entries=Up,w.entriesIn=jp,w.extend=Mp,w.extendWith=iu,zl(w,w),w.add=cO,w.attempt=Hp,w.camelCase=hT,w.capitalize=zp,w.ceil=fO,w.clamp=fT,w.clone=o2,w.cloneDeep=s2,w.cloneDeepWith=u2,w.cloneWith=a2,w.conformsTo=l2,w.deburr=Vp,w.defaultTo=VT,w.divide=dO,w.endsWith=gT,w.eq=Yr,w.escape=mT,w.escapeRegExp=yT,w.every=Ox,w.find=Ex,w.findIndex=hp,w.findKey=B2,w.findLast=Ax,w.findLastIndex=gp,w.findLastKey=U2,w.floor=pO,w.forEach=_p,w.forEachRight=xp,w.forIn=j2,w.forInRight=z2,w.forOwn=V2,w.forOwnRight=G2,w.get=Ml,w.gt=c2,w.gte=f2,w.has=q2,w.hasIn=Ll,w.head=yp,w.identity=pr,w.includes=Cx,w.indexOf=A_,w.inRange=dT,w.invoke=X2,w.isArguments=$i,w.isArray=xe,w.isArrayBuffer=d2,w.isArrayLike=fr,w.isArrayLikeObject=_t,w.isBoolean=p2,w.isBuffer=ti,w.isDate=h2,w.isElement=g2,w.isEmpty=m2,w.isEqual=y2,w.isEqualWith=b2,w.isError=Rl,w.isFinite=v2,w.isFunction=Cn,w.isInteger=$p,w.isLength=ru,w.isMap=Dp,w.isMatch=w2,w.isMatchWith=_2,w.isNaN=x2,w.isNative=T2,w.isNil=S2,w.isNull=O2,w.isNumber=Cp,w.isObject=ht,w.isObjectLike=mt,w.isPlainObject=wa,w.isRegExp=Fl,w.isSafeInteger=E2,w.isSet=Np,w.isString=nu,w.isSymbol=br,w.isTypedArray=Eo,w.isUndefined=A2,w.isWeakMap=I2,w.isWeakSet=P2,w.join=C_,w.kebabCase=bT,w.last=Br,w.lastIndexOf=N_,w.lowerCase=vT,w.lowerFirst=wT,w.lt=$2,w.lte=D2,w.max=hO,w.maxBy=gO,w.mean=mO,w.meanBy=yO,w.min=bO,w.minBy=vO,w.stubArray=Gl,w.stubFalse=Hl,w.stubObject=iO,w.stubString=oO,w.stubTrue=aO,w.multiply=wO,w.nth=k_,w.noConflict=XT,w.noop=Vl,w.now=Qs,w.pad=_T,w.padEnd=xT,w.padStart=TT,w.parseInt=OT,w.random=pT,w.reduce=Mx,w.reduceRight=Lx,w.repeat=ST,w.replace=ET,w.result=nT,w.round=_O,w.runInContext=C,w.sample=Ux,w.size=Vx,w.snakeCase=AT,w.some=Gx,w.sortedIndex=j_,w.sortedIndexBy=z_,w.sortedIndexOf=V_,w.sortedLastIndex=G_,w.sortedLastIndexBy=H_,w.sortedLastIndexOf=W_,w.startCase=PT,w.startsWith=$T,w.subtract=xO,w.sum=TO,w.sumBy=OO,w.template=DT,w.times=sO,w.toFinite=Nn,w.toInteger=Oe,w.toLength=Rp,w.toLower=CT,w.toNumber=Ur,w.toSafeInteger=C2,w.toString=We,w.toUpper=NT,w.trim=kT,w.trimEnd=RT,w.trimStart=FT,w.truncate=MT,w.unescape=LT,w.uniqueId=lO,w.upperCase=BT,w.upperFirst=Bl,w.each=_p,w.eachRight=xp,w.first=yp,zl(w,(function(){var a={};return ln(w,function(d,g){He.call(w.prototype,g)||(a[g]=d)}),a})(),{chain:!1}),w.VERSION=t,kr(["bind","bindKey","curry","curryRight","partial","partialRight"],function(a){w[a].placeholder=w}),kr(["drop","take"],function(a,d){Ne.prototype[a]=function(g){g=g===e?1:Dt(Oe(g),0);var m=this.__filtered__&&!d?new Ne(this):this.clone();return m.__filtered__?m.__takeCount__=qt(g,m.__takeCount__):m.__views__.push({size:qt(g,Xe),type:a+(m.__dir__<0?"Right":"")}),m},Ne.prototype[a+"Right"]=function(g){return this.reverse()[a](g).reverse()}}),kr(["filter","map","takeWhile"],function(a,d){var g=d+1,m=g==rn||g==vt;Ne.prototype[a]=function(v){var _=this.clone();return _.__iteratees__.push({iteratee:pe(v,3),type:g}),_.__filtered__=_.__filtered__||m,_}}),kr(["head","last"],function(a,d){var g="take"+(d?"Right":"");Ne.prototype[a]=function(){return this[g](1).value()[0]}}),kr(["initial","tail"],function(a,d){var g="drop"+(d?"":"Right");Ne.prototype[a]=function(){return this.__filtered__?new Ne(this):this[g](1)}}),Ne.prototype.compact=function(){return this.filter(pr)},Ne.prototype.find=function(a){return this.filter(a).head()},Ne.prototype.findLast=function(a){return this.reverse().find(a)},Ne.prototype.invokeMap=Pe(function(a,d){return typeof a=="function"?new Ne(this):this.map(function(g){return ha(g,a,d)})}),Ne.prototype.reject=function(a){return this.filter(tu(pe(a)))},Ne.prototype.slice=function(a,d){a=Oe(a);var g=this;return g.__filtered__&&(a>0||d<0)?new Ne(g):(a<0?g=g.takeRight(-a):a&&(g=g.drop(a)),d!==e&&(d=Oe(d),g=d<0?g.dropRight(-d):g.take(d-a)),g)},Ne.prototype.takeRightWhile=function(a){return this.reverse().takeWhile(a).reverse()},Ne.prototype.toArray=function(){return this.take(Xe)},ln(Ne.prototype,function(a,d){var g=/^(?:filter|find|map|reject)|While$/.test(d),m=/^(?:head|last)$/.test(d),v=w[m?"take"+(d=="last"?"Right":""):d],_=m||/^find/.test(d);v&&(w.prototype[d]=function(){var E=this.__wrapped__,P=m?[1]:arguments,N=E instanceof Ne,H=P[0],W=N||xe(E),q=function(De){var ke=v.apply(w,qn([De],P));return m&&Q?ke[0]:ke};W&&g&&typeof H=="function"&&H.length!=1&&(N=W=!1);var Q=this.__chain__,ue=!!this.__actions__.length,he=_&&!Q,Ae=N&&!ue;if(!_&&W){E=Ae?E:new Ne(this);var ge=a.apply(E,P);return ge.__actions__.push({func:Ks,args:[q],thisArg:e}),new Fr(ge,Q)}return he&&Ae?a.apply(this,P):(ge=this.thru(q),he?m?ge.value()[0]:ge.value():ge)})}),kr(["pop","push","shift","sort","splice","unshift"],function(a){var d=Ts[a],g=/^(?:push|sort|unshift)$/.test(a)?"tap":"thru",m=/^(?:pop|shift)$/.test(a);w.prototype[a]=function(){var v=arguments;if(m&&!this.__chain__){var _=this.value();return d.apply(xe(_)?_:[],v)}return this[g](function(E){return d.apply(xe(E)?E:[],v)})}}),ln(Ne.prototype,function(a,d){var g=w[d];if(g){var m=g.name+"";He.call(_o,m)||(_o[m]=[]),_o[m].push({name:d,func:g})}}),_o[Gs(e,S).name]=[{name:"wrapper",func:e}],Ne.prototype.clone=Lw,Ne.prototype.reverse=Bw,Ne.prototype.value=Uw,w.prototype.at=gx,w.prototype.chain=mx,w.prototype.commit=yx,w.prototype.next=bx,w.prototype.plant=wx,w.prototype.reverse=_x,w.prototype.toJSON=w.prototype.valueOf=w.prototype.value=xx,w.prototype.first=w.prototype.head,sa&&(w.prototype[sa]=vx),w}),Yn=yw();typeof define=="function"&&typeof define.amd=="object"&&define.amd?(kt._=Yn,define(function(){return Yn})):xi?((xi.exports=Yn)._=Yn,ju._=Yn):kt._=Yn}).call(Po)});var Kp=ou((d3,Xp)=>{"use strict";function DO(e){for(var t=new Array(e),n=0;n<e;++n)t[n]=n;return t}Xp.exports=DO});var eh=ou((p3,Qp)=>{Qp.exports=function(e){return e!=null&&(Jp(e)||CO(e)||!!e._isBuffer)};function Jp(e){return!!e.constructor&&typeof e.constructor.isBuffer=="function"&&e.constructor.isBuffer(e)}function CO(e){return typeof e.readFloatLE=="function"&&typeof e.slice=="function"&&Jp(e.slice(0,0))}});var $o=ou((h3,th)=>{var NO=Kp(),kO=eh(),RO=typeof Float64Array<"u";function FO(e,t){return e[0]-t[0]}function MO(){var e=this.stride,t=new Array(e.length),n;for(n=0;n<t.length;++n)t[n]=[Math.abs(e[n]),n];t.sort(FO);var o=new Array(t.length);for(n=0;n<o.length;++n)o[n]=t[n][1];return o}function LO(e,t){var n=["View",t,"d",e].join("");t<0&&(n="View_Nil"+e);var o=e==="generic";if(t===-1){var f="function "+n+"(a){this.data=a;};var proto="+n+".prototype;proto.dtype='"+e+"';proto.index=function(){return -1};proto.size=0;proto.dimension=-1;proto.shape=proto.stride=proto.order=[];proto.lo=proto.hi=proto.transpose=proto.step=function(){return new "+n+"(this.data);};proto.get=proto.set=function(){};proto.pick=function(){return null};return function construct_"+n+"(a){return new "+n+"(a);}",S=new Function(f);return S()}else if(t===0){var f="function "+n+"(a,d) {this.data = a;this.offset = d};var proto="+n+".prototype;proto.dtype='"+e+"';proto.index=function(){return this.offset};proto.dimension=0;proto.size=1;proto.shape=proto.stride=proto.order=[];proto.lo=proto.hi=proto.transpose=proto.step=function "+n+"_copy() {return new "+n+"(this.data,this.offset)};proto.pick=function "+n+"_pick(){return TrivialArray(this.data);};proto.valueOf=proto.get=function "+n+"_get(){return "+(o?"this.data.get(this.offset)":"this.data[this.offset]")+"};proto.set=function "+n+"_set(v){return "+(o?"this.data.set(this.offset,v)":"this.data[this.offset]=v")+"};return function construct_"+n+"(a,b,c,d){return new "+n+"(a,d)}",S=new Function("TrivialArray",f);return S(au[e][0])}var f=["'use strict'"],s=NO(t),p=s.map(function(A){return"i"+A}),i="this.offset+"+s.map(function(A){return"this.stride["+A+"]*i"+A}).join("+"),c=s.map(function(A){return"b"+A}).join(","),r=s.map(function(A){return"c"+A}).join(",");f.push("function "+n+"(a,"+c+","+r+",d){this.data=a","this.shape=["+c+"]","this.stride=["+r+"]","this.offset=d|0}","var proto="+n+".prototype","proto.dtype='"+e+"'","proto.dimension="+t),f.push("Object.defineProperty(proto,'size',{get:function "+n+"_size(){return "+s.map(function(A){return"this.shape["+A+"]"}).join("*"),"}})"),t===1?f.push("proto.order=[0]"):(f.push("Object.defineProperty(proto,'order',{get:"),t<4?(f.push("function "+n+"_order(){"),t===2?f.push("return (Math.abs(this.stride[0])>Math.abs(this.stride[1]))?[1,0]:[0,1]}})"):t===3&&f.push("var s0=Math.abs(this.stride[0]),s1=Math.abs(this.stride[1]),s2=Math.abs(this.stride[2]);if(s0>s1){if(s1>s2){return [2,1,0];}else if(s0>s2){return [1,2,0];}else{return [1,0,2];}}else if(s0>s2){return [2,0,1];}else if(s2>s1){return [0,1,2];}else{return [0,2,1];}}})")):f.push("ORDER})")),f.push("proto.set=function "+n+"_set("+p.join(",")+",v){"),o?f.push("return this.data.set("+i+",v)}"):f.push("return this.data["+i+"]=v}"),f.push("proto.get=function "+n+"_get("+p.join(",")+"){"),o?f.push("return this.data.get("+i+")}"):f.push("return this.data["+i+"]}"),f.push("proto.index=function "+n+"_index(",p.join(),"){return "+i+"}"),f.push("proto.hi=function "+n+"_hi("+p.join(",")+"){return new "+n+"(this.data,"+s.map(function(A){return["(typeof i",A,"!=='number'||i",A,"<0)?this.shape[",A,"]:i",A,"|0"].join("")}).join(",")+","+s.map(function(A){return"this.stride["+A+"]"}).join(",")+",this.offset)}");var u=s.map(function(A){return"a"+A+"=this.shape["+A+"]"}),l=s.map(function(A){return"c"+A+"=this.stride["+A+"]"});f.push("proto.lo=function "+n+"_lo("+p.join(",")+"){var b=this.offset,d=0,"+u.join(",")+","+l.join(","));for(var h=0;h<t;++h)f.push("if(typeof i"+h+"==='number'&&i"+h+">=0){d=i"+h+"|0;b+=c"+h+"*d;a"+h+"-=d}");f.push("return new "+n+"(this.data,"+s.map(function(A){return"a"+A}).join(",")+","+s.map(function(A){return"c"+A}).join(",")+",b)}"),f.push("proto.step=function "+n+"_step("+p.join(",")+"){var "+s.map(function(A){return"a"+A+"=this.shape["+A+"]"}).join(",")+","+s.map(function(A){return"b"+A+"=this.stride["+A+"]"}).join(",")+",c=this.offset,d=0,ceil=Math.ceil");for(var h=0;h<t;++h)f.push("if(typeof i"+h+"==='number'){d=i"+h+"|0;if(d<0){c+=b"+h+"*(a"+h+"-1);a"+h+"=ceil(-a"+h+"/d)}else{a"+h+"=ceil(a"+h+"/d)}b"+h+"*=d}");f.push("return new "+n+"(this.data,"+s.map(function(A){return"a"+A}).join(",")+","+s.map(function(A){return"b"+A}).join(",")+",c)}");for(var y=new Array(t),O=new Array(t),h=0;h<t;++h)y[h]="a[i"+h+"]",O[h]="b[i"+h+"]";f.push("proto.transpose=function "+n+"_transpose("+p+"){"+p.map(function(A,L){return A+"=("+A+"===undefined?"+L+":"+A+"|0)"}).join(";"),"var a=this.shape,b=this.stride;return new "+n+"(this.data,"+y.join(",")+","+O.join(",")+",this.offset)}"),f.push("proto.pick=function "+n+"_pick("+p+"){var a=[],b=[],c=this.offset");for(var h=0;h<t;++h)f.push("if(typeof i"+h+"==='number'&&i"+h+">=0){c=(c+this.stride["+h+"]*i"+h+")|0}else{a.push(this.shape["+h+"]);b.push(this.stride["+h+"])}");f.push("var ctor=CTOR_LIST[a.length+1];return ctor(this.data,a,b,c)}"),f.push("return function construct_"+n+"(data,shape,stride,offset){return new "+n+"(data,"+s.map(function(A){return"shape["+A+"]"}).join(",")+","+s.map(function(A){return"stride["+A+"]"}).join(",")+",offset)}");var S=new Function("CTOR_LIST","ORDER",f.join(`
+`));return S(au[e],MO)}function BO(e){if(kO(e))return"buffer";if(RO)switch(Object.prototype.toString.call(e)){case"[object Float64Array]":return"float64";case"[object Float32Array]":return"float32";case"[object Int8Array]":return"int8";case"[object Int16Array]":return"int16";case"[object Int32Array]":return"int32";case"[object Uint8Array]":return"uint8";case"[object Uint16Array]":return"uint16";case"[object Uint32Array]":return"uint32";case"[object Uint8ClampedArray]":return"uint8_clamped";case"[object BigInt64Array]":return"bigint64";case"[object BigUint64Array]":return"biguint64"}return Array.isArray(e)?"array":"generic"}var au={float32:[],float64:[],int8:[],int16:[],int32:[],uint8:[],uint16:[],uint32:[],array:[],uint8_clamped:[],bigint64:[],biguint64:[],buffer:[],generic:[]};function UO(e,t,n,o){if(e===void 0){var r=au.array[0];return r([])}else typeof e=="number"&&(e=[e]);t===void 0&&(t=[e.length]);var f=t.length;if(n===void 0){n=new Array(f);for(var s=f-1,p=1;s>=0;--s)n[s]=p,p*=t[s]}if(o===void 0){o=0;for(var s=0;s<f;++s)n[s]<0&&(o-=(t[s]-1)*n[s])}for(var i=BO(e),c=au[i];c.length<=f+1;)c.push(LO(i,c.length-1));var r=c[f+1];return r(e,t,n,o)}th.exports=UO});var Uv=Io(Yp(),1),jv=Io($o(),1),Lu=Io($o(),1),Mu=Io($o(),1),Gv=Io($o(),1);var jO=Object.create,xu=Object.defineProperty,zO=Object.getOwnPropertyDescriptor,VO=Object.getOwnPropertyNames,GO=Object.getPrototypeOf,HO=Object.prototype.hasOwnProperty,G=(e,t)=>()=>(e&&(t=e(e=0)),t),it=(e,t)=>()=>(t||e((t={exports:{}}).exports,t),t.exports),Mo=(e,t)=>{for(var n in t)xu(e,n,{get:t[n],enumerable:!0})},Rm=(e,t,n,o)=>{if(t&&typeof t=="object"||typeof t=="function")for(let f of VO(t))!HO.call(e,f)&&f!==n&&xu(e,f,{get:()=>t[f],enumerable:!(o=zO(t,f))||o.enumerable});return e},No=(e,t,n)=>(n=e!=null?jO(GO(e)):{},Rm(t||!e||!e.__esModule?xu(n,"default",{value:e,enumerable:!0}):n,e)),Ui=e=>Rm(xu({},"__esModule",{value:!0}),e),xa,ri,Ha,rh,hf,gf=G(()=>{"use strict";xa=new Map,ri=[],Ha=(e,t,n)=>{if(t&&typeof t.init=="function"&&typeof t.createInferenceSessionHandler=="function"){let o=xa.get(e);if(o===void 0)xa.set(e,{backend:t,priority:n});else{if(o.priority>n)return;if(o.priority===n&&o.backend!==t)throw new Error(`cannot register backend "${e}" using priority ${n}`)}if(n>=0){let f=ri.indexOf(e);f!==-1&&ri.splice(f,1);for(let s=0;s<ri.length;s++)if(xa.get(ri[s]).priority<=n){ri.splice(s,0,e);return}ri.push(e)}return}throw new TypeError("not a valid backend")},rh=async e=>{let t=xa.get(e);if(!t)return"backend not found.";if(t.initialized)return t.backend;if(t.aborted)return t.error;{let n=!!t.initPromise;try{return n||(t.initPromise=t.backend.init(e)),await t.initPromise,t.initialized=!0,t.backend}catch(o){return n||(t.error=`${o}`,t.aborted=!0),t.error}finally{delete t.initPromise}}},hf=async e=>{let t=e.executionProviders||[],n=t.map(c=>typeof c=="string"?c:c.name),o=n.length===0?ri:n,f,s=[],p=new Set;for(let c of o){let r=await rh(c);typeof r=="string"?s.push({name:c,err:r}):(f||(f=r),f===r&&p.add(c))}if(!f)throw new Error(`no available backend found. ERR: ${s.map(c=>`[${c.name}] ${c.err}`).join(", ")}`);for(let{name:c,err:r}of s)n.includes(c)&&console.warn(`removing requested execution provider "${c}" from session options because it is not available: ${r}`);let i=t.filter(c=>p.has(typeof c=="string"?c:c.name));return[f,new Proxy(e,{get:(c,r)=>r==="executionProviders"?i:Reflect.get(c,r)})]}}),WO=G(()=>{"use strict";gf()}),Fm,qO=G(()=>{"use strict";Fm="1.17.3"}),Wl,zr,Mm=G(()=>{"use strict";qO(),Wl="warning",zr={wasm:{},webgl:{},webgpu:{},versions:{common:Fm},set logLevel(e){if(e!==void 0){if(typeof e!="string"||["verbose","info","warning","error","fatal"].indexOf(e)===-1)throw new Error(`Unsupported logging level: ${e}`);Wl=e}},get logLevel(){return Wl}},Object.defineProperty(zr,"logLevel",{enumerable:!0})}),me,ZO=G(()=>{"use strict";Mm(),me=zr}),Lm,Bm,YO=G(()=>{"use strict";Lm=(e,t)=>{let n=typeof document<"u"?document.createElement("canvas"):new OffscreenCanvas(1,1);n.width=e.dims[3],n.height=e.dims[2];let o=n.getContext("2d");if(o!=null){let f,s;t?.tensorLayout!==void 0&&t.tensorLayout==="NHWC"?(f=e.dims[2],s=e.dims[3]):(f=e.dims[3],s=e.dims[2]);let p=t?.format!==void 0?t.format:"RGB",i=t?.norm,c,r;i===void 0||i.mean===void 0?c=[255,255,255,255]:typeof i.mean=="number"?c=[i.mean,i.mean,i.mean,i.mean]:(c=[i.mean[0],i.mean[1],i.mean[2],0],i.mean[3]!==void 0&&(c[3]=i.mean[3])),i===void 0||i.bias===void 0?r=[0,0,0,0]:typeof i.bias=="number"?r=[i.bias,i.bias,i.bias,i.bias]:(r=[i.bias[0],i.bias[1],i.bias[2],0],i.bias[3]!==void 0&&(r[3]=i.bias[3]));let u=s*f,l=0,h=u,y=u*2,O=-1;p==="RGBA"?(l=0,h=u,y=u*2,O=u*3):p==="RGB"?(l=0,h=u,y=u*2):p==="RBG"&&(l=0,y=u,h=u*2);for(let S=0;S<s;S++)for(let A=0;A<f;A++){let L=(e.data[l++]-r[0])*c[0],$=(e.data[h++]-r[1])*c[1],F=(e.data[y++]-r[2])*c[2],Z=O===-1?255:(e.data[O++]-r[3])*c[3];o.fillStyle="rgba("+L+","+$+","+F+","+Z+")",o.fillRect(A,S,1,1)}if("toDataURL"in n)return n.toDataURL();throw new Error("toDataURL is not supported")}else throw new Error("Can not access image data")},Bm=(e,t)=>{let n=typeof document<"u"?document.createElement("canvas").getContext("2d"):new OffscreenCanvas(1,1).getContext("2d"),o;if(n!=null){let f,s,p;t?.tensorLayout!==void 0&&t.tensorLayout==="NHWC"?(f=e.dims[2],s=e.dims[1],p=e.dims[3]):(f=e.dims[3],s=e.dims[2],p=e.dims[1]);let i=t!==void 0&&t.format!==void 0?t.format:"RGB",c=t?.norm,r,u;c===void 0||c.mean===void 0?r=[255,255,255,255]:typeof c.mean=="number"?r=[c.mean,c.mean,c.mean,c.mean]:(r=[c.mean[0],c.mean[1],c.mean[2],255],c.mean[3]!==void 0&&(r[3]=c.mean[3])),c===void 0||c.bias===void 0?u=[0,0,0,0]:typeof c.bias=="number"?u=[c.bias,c.bias,c.bias,c.bias]:(u=[c.bias[0],c.bias[1],c.bias[2],0],c.bias[3]!==void 0&&(u[3]=c.bias[3]));let l=s*f;if(t!==void 0&&(t.format!==void 0&&p===4&&t.format!=="RGBA"||p===3&&t.format!=="RGB"&&t.format!=="BGR"))throw new Error("Tensor format doesn't match input tensor dims");let h=4,y=0,O=1,S=2,A=3,L=0,$=l,F=l*2,Z=-1;i==="RGBA"?(L=0,$=l,F=l*2,Z=l*3):i==="RGB"?(L=0,$=l,F=l*2):i==="RBG"&&(L=0,F=l,$=l*2),o=n.createImageData(f,s);for(let ae=0;ae<s*f;y+=h,O+=h,S+=h,A+=h,ae++)o.data[y]=(e.data[L++]-u[0])*r[0],o.data[O]=(e.data[$++]-u[1])*r[1],o.data[S]=(e.data[F++]-u[2])*r[2],o.data[A]=Z===-1?255:(e.data[Z++]-u[3])*r[3]}else throw new Error("Can not access image data");return o}}),su,Um,jm,zm,Vm,XO=G(()=>{"use strict";mf(),su=(e,t)=>{if(e===void 0)throw new Error("Image buffer must be defined");if(t.height===void 0||t.width===void 0)throw new Error("Image height and width must be defined");if(t.tensorLayout==="NHWC")throw new Error("NHWC Tensor layout is not supported yet");let{height:n,width:o}=t,f=t.norm??{mean:255,bias:0},s,p;typeof f.mean=="number"?s=[f.mean,f.mean,f.mean,f.mean]:s=[f.mean[0],f.mean[1],f.mean[2],f.mean[3]??255],typeof f.bias=="number"?p=[f.bias,f.bias,f.bias,f.bias]:p=[f.bias[0],f.bias[1],f.bias[2],f.bias[3]??0];let i=t.format!==void 0?t.format:"RGBA",c=t.tensorFormat!==void 0&&t.tensorFormat!==void 0?t.tensorFormat:"RGB",r=n*o,u=c==="RGBA"?new Float32Array(r*4):new Float32Array(r*3),l=4,h=0,y=1,O=2,S=3,A=0,L=r,$=r*2,F=-1;i==="RGB"&&(l=3,h=0,y=1,O=2,S=-1),c==="RGBA"?F=r*3:c==="RBG"?(A=0,$=r,L=r*2):c==="BGR"&&($=0,L=r,A=r*2);for(let Z=0;Z<r;Z++,h+=l,O+=l,y+=l,S+=l)u[A++]=(e[h]+p[0])/s[0],u[L++]=(e[y]+p[1])/s[1],u[$++]=(e[O]+p[2])/s[2],F!==-1&&S!==-1&&(u[F++]=(e[S]+p[3])/s[3]);return c==="RGBA"?new Jr("float32",u,[1,4,n,o]):new Jr("float32",u,[1,3,n,o])},Um=async(e,t)=>{let n=typeof HTMLImageElement<"u"&&e instanceof HTMLImageElement,o=typeof ImageData<"u"&&e instanceof ImageData,f=typeof ImageBitmap<"u"&&e instanceof ImageBitmap,s=typeof e=="string",p,i=t??{},c=()=>{if(typeof document<"u")return document.createElement("canvas");if(typeof OffscreenCanvas<"u")return new OffscreenCanvas(1,1);throw new Error("Canvas is not supported")},r=u=>u instanceof HTMLCanvasElement||u instanceof OffscreenCanvas?u.getContext("2d"):null;if(n){let u=c();u.width=e.width,u.height=e.height;let l=r(u);if(l!=null){let h=e.height,y=e.width;if(t!==void 0&&t.resizedHeight!==void 0&&t.resizedWidth!==void 0&&(h=t.resizedHeight,y=t.resizedWidth),t!==void 0){if(i=t,t.tensorFormat!==void 0)throw new Error("Image input config format must be RGBA for HTMLImageElement");i.tensorFormat="RGBA",i.height=h,i.width=y}else i.tensorFormat="RGBA",i.height=h,i.width=y;l.drawImage(e,0,0),p=l.getImageData(0,0,y,h).data}else throw new Error("Can not access image data")}else if(o){let u,l;if(t!==void 0&&t.resizedWidth!==void 0&&t.resizedHeight!==void 0?(u=t.resizedHeight,l=t.resizedWidth):(u=e.height,l=e.width),t!==void 0&&(i=t),i.format="RGBA",i.height=u,i.width=l,t!==void 0){let h=c();h.width=l,h.height=u;let y=r(h);if(y!=null)y.putImageData(e,0,0),p=y.getImageData(0,0,l,u).data;else throw new Error("Can not access image data")}else p=e.data}else if(f){if(t===void 0)throw new Error("Please provide image config with format for Imagebitmap");let u=c();u.width=e.width,u.height=e.height;let l=r(u);if(l!=null){let h=e.height,y=e.width;return l.drawImage(e,0,0,y,h),p=l.getImageData(0,0,y,h).data,i.height=h,i.width=y,su(p,i)}else throw new Error("Can not access image data")}else{if(s)return new Promise((u,l)=>{let h=c(),y=r(h);if(!e||!y)return l();let O=new Image;O.crossOrigin="Anonymous",O.src=e,O.onload=()=>{h.width=O.width,h.height=O.height,y.drawImage(O,0,0,h.width,h.height);let S=y.getImageData(0,0,h.width,h.height);i.height=h.height,i.width=h.width,u(su(S.data,i))}});throw new Error("Input data provided is not supported - aborted tensor creation")}if(p!==void 0)return su(p,i);throw new Error("Input data provided is not supported - aborted tensor creation")},jm=(e,t)=>{let{width:n,height:o,download:f,dispose:s}=t,p=[1,o,n,4];return new Jr({location:"texture",type:"float32",texture:e,dims:p,download:f,dispose:s})},zm=(e,t)=>{let{dataType:n,dims:o,download:f,dispose:s}=t;return new Jr({location:"gpu-buffer",type:n??"float32",gpuBuffer:e,dims:o,download:f,dispose:s})},Vm=(e,t,n)=>new Jr({location:"cpu-pinned",type:e,data:t,dims:n??[t.length]})}),Mi,ka,ql,Gm,KO=G(()=>{"use strict";Mi=new Map([["float32",Float32Array],["uint8",Uint8Array],["int8",Int8Array],["uint16",Uint16Array],["int16",Int16Array],["int32",Int32Array],["bool",Uint8Array],["float64",Float64Array],["uint32",Uint32Array]]),ka=new Map([[Float32Array,"float32"],[Uint8Array,"uint8"],[Int8Array,"int8"],[Uint16Array,"uint16"],[Int16Array,"int16"],[Int32Array,"int32"],[Float64Array,"float64"],[Uint32Array,"uint32"]]),ql=!1,Gm=()=>{if(!ql){ql=!0;let e=typeof BigInt64Array<"u"&&BigInt64Array.from,t=typeof BigUint64Array<"u"&&BigUint64Array.from,n=typeof Float16Array<"u"&&Float16Array.from;e&&(Mi.set("int64",BigInt64Array),ka.set(BigInt64Array,"int64")),t&&(Mi.set("uint64",BigUint64Array),ka.set(BigUint64Array,"uint64")),n?(Mi.set("float16",Float16Array),ka.set(Float16Array,"float16")):Mi.set("float16",Uint16Array)}}}),Hm,Wm,JO=G(()=>{"use strict";mf(),Hm=e=>{let t=1;for(let n=0;n<e.length;n++){let o=e[n];if(typeof o!="number"||!Number.isSafeInteger(o))throw new TypeError(`dims[${n}] must be an integer, got: ${o}`);if(o<0)throw new RangeError(`dims[${n}] must be a non-negative integer, got: ${o}`);t*=o}return t},Wm=(e,t)=>{switch(e.location){case"cpu":return new Jr(e.type,e.data,t);case"cpu-pinned":return new Jr({location:"cpu-pinned",data:e.data,type:e.type,dims:t});case"texture":return new Jr({location:"texture",texture:e.texture,type:e.type,dims:t});case"gpu-buffer":return new Jr({location:"gpu-buffer",gpuBuffer:e.gpuBuffer,type:e.type,dims:t});default:throw new Error(`tensorReshape: tensor location ${e.location} is not supported`)}}}),Jr,mf=G(()=>{"use strict";YO(),XO(),KO(),JO(),Jr=class{constructor(e,t,n){Gm();let o,f;if(typeof e=="object"&&"location"in e)switch(this.dataLocation=e.location,o=e.type,f=e.dims,e.location){case"cpu-pinned":{let p=Mi.get(o);if(!p)throw new TypeError(`unsupported type "${o}" to create tensor from pinned buffer`);if(!(e.data instanceof p))throw new TypeError(`buffer should be of type ${p.name}`);this.cpuData=e.data;break}case"texture":{if(o!=="float32")throw new TypeError(`unsupported type "${o}" to create tensor from texture`);this.gpuTextureData=e.texture,this.downloader=e.download,this.disposer=e.dispose;break}case"gpu-buffer":{if(o!=="float32"&&o!=="float16"&&o!=="int32"&&o!=="int64"&&o!=="uint32"&&o!=="uint8"&&o!=="bool")throw new TypeError(`unsupported type "${o}" to create tensor from gpu buffer`);this.gpuBufferData=e.gpuBuffer,this.downloader=e.download,this.disposer=e.dispose;break}default:throw new Error(`Tensor constructor: unsupported location '${this.dataLocation}'`)}else{let p,i;if(typeof e=="string")if(o=e,i=n,e==="string"){if(!Array.isArray(t))throw new TypeError("A string tensor's data must be a string array.");p=t}else{let c=Mi.get(e);if(c===void 0)throw new TypeError(`Unsupported tensor type: ${e}.`);if(Array.isArray(t)){if(e==="float16"&&c===Uint16Array)throw new TypeError("Creating a float16 tensor from number array is not supported. Please use Uint16Array as data.");e==="uint64"||e==="int64"?p=c.from(t,BigInt):p=c.from(t)}else if(t instanceof c)p=t;else throw new TypeError(`A ${o} tensor's data must be type of ${c}`)}else if(i=t,Array.isArray(e)){if(e.length===0)throw new TypeError("Tensor type cannot be inferred from an empty array.");let c=typeof e[0];if(c==="string")o="string",p=e;else if(c==="boolean")o="bool",p=Uint8Array.from(e);else throw new TypeError(`Invalid element type of data array: ${c}.`)}else{let c=ka.get(e.constructor);if(c===void 0)throw new TypeError(`Unsupported type for tensor data: ${e.constructor}.`);o=c,p=e}if(i===void 0)i=[p.length];else if(!Array.isArray(i))throw new TypeError("A tensor's dims must be a number array");f=i,this.cpuData=p,this.dataLocation="cpu"}let s=Hm(f);if(this.cpuData&&s!==this.cpuData.length)throw new Error(`Tensor's size(${s}) does not match data length(${this.cpuData.length}).`);this.type=o,this.dims=f,this.size=s}static async fromImage(e,t){return Um(e,t)}static fromTexture(e,t){return jm(e,t)}static fromGpuBuffer(e,t){return zm(e,t)}static fromPinnedBuffer(e,t,n){return Vm(e,t,n)}toDataURL(e){return Lm(this,e)}toImageData(e){return Bm(this,e)}get data(){if(this.ensureValid(),!this.cpuData)throw new Error("The data is not on CPU. Use `getData()` to download GPU data to CPU, or use `texture` or `gpuBuffer` property to access the GPU data directly.");return this.cpuData}get location(){return this.dataLocation}get texture(){if(this.ensureValid(),!this.gpuTextureData)throw new Error("The data is not stored as a WebGL texture.");return this.gpuTextureData}get gpuBuffer(){if(this.ensureValid(),!this.gpuBufferData)throw new Error("The data is not stored as a WebGPU buffer.");return this.gpuBufferData}async getData(e){switch(this.ensureValid(),this.dataLocation){case"cpu":case"cpu-pinned":return this.data;case"texture":case"gpu-buffer":{if(!this.downloader)throw new Error("The current tensor is not created with a specified data downloader.");if(this.isDownloading)throw new Error("The current tensor is being downloaded.");try{this.isDownloading=!0;let t=await this.downloader();return this.downloader=void 0,this.dataLocation="cpu",this.cpuData=t,e&&this.disposer&&(this.disposer(),this.disposer=void 0),t}finally{this.isDownloading=!1}}default:throw new Error(`cannot get data from location: ${this.dataLocation}`)}}dispose(){if(this.isDownloading)throw new Error("The current tensor is being downloaded.");this.disposer&&(this.disposer(),this.disposer=void 0),this.cpuData=void 0,this.gpuTextureData=void 0,this.gpuBufferData=void 0,this.downloader=void 0,this.isDownloading=void 0,this.dataLocation="none"}ensureValid(){if(this.dataLocation==="none")throw new Error("The tensor is disposed.")}reshape(e){if(this.ensureValid(),this.downloader||this.disposer)throw new Error("Cannot reshape a tensor that owns GPU resource.");return Wm(this,e)}}}),zt,yf=G(()=>{"use strict";mf(),zt=Jr}),$c,Zl,ko,Ro,qm=G(()=>{"use strict";Mm(),$c=(e,t)=>{(typeof zr.trace>"u"?!zr.wasm.trace:!zr.trace)||console.timeStamp(`${e}::ORT::${t}`)},Zl=(e,t)=>{let n=new Error().stack?.split(/\r\n|\r|\n/g)||[],o=!1;for(let f=0;f<n.length;f++){if(o&&!n[f].includes("TRACE_FUNC")){let s=`FUNC_${e}::${n[f].trim().split(" ")[1]}`;t&&(s+=`::${t}`),$c("CPU",s);return}n[f].includes("TRACE_FUNC")&&(o=!0)}},ko=e=>{(typeof zr.trace>"u"?!zr.wasm.trace:!zr.trace)||Zl("BEGIN",e)},Ro=e=>{(typeof zr.trace>"u"?!zr.wasm.trace:!zr.trace)||Zl("END",e)}}),Zm,QO=G(()=>{"use strict";gf(),yf(),qm(),Zm=class Ym{constructor(t){this.handler=t}async run(t,n,o){ko();let f={},s={};if(typeof t!="object"||t===null||t instanceof zt||Array.isArray(t))throw new TypeError("'feeds' must be an object that use input names as keys and OnnxValue as corresponding values.");let p=!0;if(typeof n=="object"){if(n===null)throw new TypeError("Unexpected argument[1]: cannot be null.");if(n instanceof zt)throw new TypeError("'fetches' cannot be a Tensor");if(Array.isArray(n)){if(n.length===0)throw new TypeError("'fetches' cannot be an empty array.");p=!1;for(let r of n){if(typeof r!="string")throw new TypeError("'fetches' must be a string array or an object.");if(this.outputNames.indexOf(r)===-1)throw new RangeError(`'fetches' contains invalid output name: ${r}.`);f[r]=null}if(typeof o=="object"&&o!==null)s=o;else if(typeof o<"u")throw new TypeError("'options' must be an object.")}else{let r=!1,u=Object.getOwnPropertyNames(n);for(let l of this.outputNames)if(u.indexOf(l)!==-1){let h=n[l];(h===null||h instanceof zt)&&(r=!0,p=!1,f[l]=h)}if(r){if(typeof o=="object"&&o!==null)s=o;else if(typeof o<"u")throw new TypeError("'options' must be an object.")}else s=n}}else if(typeof n<"u")throw new TypeError("Unexpected argument[1]: must be 'fetches' or 'options'.");for(let r of this.inputNames)if(typeof t[r]>"u")throw new Error(`input '${r}' is missing in 'feeds'.`);if(p)for(let r of this.outputNames)f[r]=null;let i=await this.handler.run(t,f,s),c={};for(let r in i)if(Object.hasOwnProperty.call(i,r)){let u=i[r];u instanceof zt?c[r]=u:c[r]=new zt(u.type,u.data,u.dims)}return Ro(),c}async release(){return this.handler.dispose()}static async create(t,n,o,f){ko();let s,p={};if(typeof t=="string"){if(s=t,typeof n=="object"&&n!==null)p=n;else if(typeof n<"u")throw new TypeError("'options' must be an object.")}else if(t instanceof Uint8Array){if(s=t,typeof n=="object"&&n!==null)p=n;else if(typeof n<"u")throw new TypeError("'options' must be an object.")}else if(t instanceof ArrayBuffer||typeof SharedArrayBuffer<"u"&&t instanceof SharedArrayBuffer){let u=t,l=0,h=t.byteLength;if(typeof n=="object"&&n!==null)p=n;else if(typeof n=="number"){if(l=n,!Number.isSafeInteger(l))throw new RangeError("'byteOffset' must be an integer.");if(l<0||l>=u.byteLength)throw new RangeError(`'byteOffset' is out of range [0, ${u.byteLength}).`);if(h=t.byteLength-l,typeof o=="number"){if(h=o,!Number.isSafeInteger(h))throw new RangeError("'byteLength' must be an integer.");if(h<=0||l+h>u.byteLength)throw new RangeError(`'byteLength' is out of range (0, ${u.byteLength-l}].`);if(typeof f=="object"&&f!==null)p=f;else if(typeof f<"u")throw new TypeError("'options' must be an object.")}else if(typeof o<"u")throw new TypeError("'byteLength' must be a number.")}else if(typeof n<"u")throw new TypeError("'options' must be an object.");s=new Uint8Array(u,l,h)}else throw new TypeError("Unexpected argument[0]: must be 'path' or 'buffer'.");let[i,c]=await hf(p),r=await i.createInferenceSessionHandler(s,c);return Ro(),new Ym(r)}startProfiling(){this.handler.startProfiling()}endProfiling(){this.handler.endProfiling()}get inputNames(){return this.handler.inputNames}get outputNames(){return this.handler.outputNames}}}),Tu,eS=G(()=>{"use strict";QO(),Tu=Zm}),tS=G(()=>{"use strict"}),rS=G(()=>{"use strict"}),nS=G(()=>{"use strict"}),iS=G(()=>{"use strict"}),nh,Xm,oS=G(()=>{"use strict";gf(),yf(),nh="Training backend could not be resolved. Make sure you're using the correct configuration & WebAssembly files.",Xm=class Km{constructor(t,n,o){this.handler=t,this.hasOptimizerModel=n,this.hasEvalModel=o}get trainingInputNames(){return this.handler.inputNames}get trainingOutputNames(){return this.handler.outputNames}get evalInputNames(){if(this.hasEvalModel)return this.handler.evalInputNames;throw new Error("This training session has no evalModel loaded.")}get evalOutputNames(){if(this.hasEvalModel)return this.handler.evalOutputNames;throw new Error("This training session has no evalModel loaded.")}static async create(t,n){let o=t.evalModel||"",f=t.optimizerModel||"",s=n||{},[p,i]=await hf(s);if(p.createTrainingSessionHandler){let c=await p.createTrainingSessionHandler(t.checkpointState,t.trainModel,o,f,i);return new Km(c,!!t.optimizerModel,!!t.evalModel)}else throw new Error(nh)}typeNarrowingForRunStep(t,n,o,f,s){let p={},i={};if(typeof o!="object"||o===null||o instanceof zt||Array.isArray(o))throw new TypeError("'feeds' must be an object that use input names as keys and OnnxValue as corresponding values.");let c=!0;if(typeof f=="object"){if(f===null)throw new TypeError("Unexpected argument[1]: cannot be null.");if(f instanceof zt)throw new TypeError("'fetches' cannot be a Tensor");if(Array.isArray(f)){if(f.length===0)throw new TypeError("'fetches' cannot be an empty array.");c=!1;for(let r of f){if(typeof r!="string")throw new TypeError("'fetches' must be a string array or an object.");if(n.indexOf(r)===-1)throw new RangeError(`'fetches' contains invalid output name: ${r}.`);p[r]=null}if(typeof s=="object"&&s!==null)i=s;else if(typeof s<"u")throw new TypeError("'options' must be an object.")}else{let r=!1,u=Object.getOwnPropertyNames(f);for(let l of n)if(u.indexOf(l)!==-1){let h=f[l];(h===null||h instanceof zt)&&(r=!0,c=!1,p[l]=h)}if(r){if(typeof s=="object"&&s!==null)i=s;else if(typeof s<"u")throw new TypeError("'options' must be an object.")}else i=f}}else if(typeof f<"u")throw new TypeError("Unexpected argument[1]: must be 'fetches' or 'options'.");for(let r of t)if(typeof o[r]>"u")throw new Error(`input '${r}' is missing in 'feeds'.`);if(c)for(let r of n)p[r]=null;return[p,i]}convertHandlerReturnTypeToMapOfTensors(t){let n={};for(let o in t)if(Object.hasOwnProperty.call(t,o)){let f=t[o];f instanceof zt?n[o]=f:n[o]=new zt(f.type,f.data,f.dims)}return n}async lazyResetGrad(){await this.handler.lazyResetGrad()}async runTrainStep(t,n,o){let[f,s]=this.typeNarrowingForRunStep(this.trainingInputNames,this.trainingOutputNames,t,n,o),p=await this.handler.runTrainStep(t,f,s);return this.convertHandlerReturnTypeToMapOfTensors(p)}async runOptimizerStep(t){if(this.hasOptimizerModel)await this.handler.runOptimizerStep(t||{});else throw new Error("This TrainingSession has no OptimizerModel loaded.")}async runEvalStep(t,n,o){if(this.hasEvalModel){let[f,s]=this.typeNarrowingForRunStep(this.evalInputNames,this.evalOutputNames,t,n,o),p=await this.handler.runEvalStep(t,f,s);return this.convertHandlerReturnTypeToMapOfTensors(p)}else throw new Error("This TrainingSession has no EvalModel loaded.")}async getParametersSize(t=!0){return this.handler.getParametersSize(t)}async loadParametersBuffer(t,n=!0){let o=await this.getParametersSize(n);if(t.length!==4*o)throw new Error("Size of the buffer passed into loadParametersBuffer must match the number of parameters in the model. Please use getParametersSize method to check.");return this.handler.loadParametersBuffer(t,n)}async getContiguousParameters(t=!0){return this.handler.getContiguousParameters(t)}async release(){return this.handler.dispose()}}}),Jm,aS=G(()=>{"use strict";oS(),Jm=Xm}),Qm={};Mo(Qm,{InferenceSession:()=>Tu,TRACE:()=>$c,TRACE_FUNC_BEGIN:()=>ko,TRACE_FUNC_END:()=>Ro,Tensor:()=>zt,TrainingSession:()=>Jm,env:()=>me,registerBackend:()=>Ha});var gn=G(()=>{"use strict";WO(),ZO(),eS(),yf(),tS(),rS(),qm(),nS(),iS(),aS()});function Li(e,t,n,o){if(t===void 0)return sS(e);if(n===void 0)uu(e,t,1);else if(typeof n=="number"&&o===void 0)uu(e,t,n);else if(typeof n=="string"&&o===void 0)uu(e,n,1,t);else if(typeof n=="string"&&typeof o=="number")uu(e,n,o,t);else throw new TypeError("input is valid")}function sS(e){return{verbose:Li.verbose.bind(null,e),info:Li.info.bind(null,e),warning:Li.warning.bind(null,e),error:Li.error.bind(null,e),fatal:Li.fatal.bind(null,e)}}function uu(e,t,n,o){let f=Co[o||""]||Co[""];Dc[e]<Dc[f.minimalSeverity]||(f.logDateTime&&(t=`${new Date().toISOString()}|${t}`),f.logSourceLocation,ey[f.provider].log(e,t,o))}var ih,oh,Dc,ey,Yl,Co,bt,Xl,Kl,ty,Ta,Qr=G(()=>{"use strict";ih=class{log(e,t,n){}},oh=class{log(e,t,n){console.log(`${this.color(e)} ${n?"\x1B[35m"+n+"\x1B[0m ":""}${t}`)}color(e){switch(e){case"verbose":return"\x1B[34;40mv\x1B[0m";case"info":return"\x1B[32mi\x1B[0m";case"warning":return"\x1B[30;43mw\x1B[0m";case"error":return"\x1B[31;40me\x1B[0m";case"fatal":return"\x1B[101mf\x1B[0m";default:throw new Error(`unsupported severity: ${e}`)}}},Dc={verbose:1e3,info:2e3,warning:4e3,error:5e3,fatal:6e3},ey={none:new ih,console:new oh},Yl={provider:"console",minimalSeverity:"warning",logDateTime:!0,logSourceLocation:!1},Co={"":Yl},(e=>{function t(r,u){e("verbose",r,u)}e.verbose=t;function n(r,u){e("info",r,u)}e.info=n;function o(r,u){e("warning",r,u)}e.warning=o;function f(r,u){e("error",r,u)}e.error=f;function s(r,u){e("fatal",r,u)}e.fatal=s;function p(r){Co={},i("",r||{})}e.reset=p;function i(r,u){if(r==="*")p(u);else{let l=Co[r]||Yl;Co[r]={provider:u.provider||l.provider,minimalSeverity:u.minimalSeverity||l.minimalSeverity,logDateTime:u.logDateTime===void 0?l.logDateTime:u.logDateTime,logSourceLocation:u.logSourceLocation===void 0?l.logSourceLocation:u.logSourceLocation}}}e.set=i;function c(r){let u={};r.logLevel&&(u.minimalSeverity=r.logLevel),i("",u)}e.setWithEnv=c})(Li||={}),bt=Li,Xl=class{constructor(e,t,n,o,f,s){this.category=e,this.name=t,this.startTime=n,this.endCallback=o,this.timer=f,this.ctx=s}async end(){return this.endCallback(this)}async checkTimer(){if(this.ctx===void 0||this.timer===void 0)throw new Error("No webgl timer found");return this.ctx.endTimer(),this.ctx.waitForQueryAndGetTime(this.timer)}},Kl=class{constructor(e,t,n,o){this.category=e,this.name=t,this.startTime=n,this.endTime=o}},ty=class{constructor(e,t,n){this._started=!1,this._flushPointer=0,this._started=!1,this._maxNumberEvents=e===void 0?1e4:e,this._flushBatchSize=t===void 0?10:t,this._flushIntervalInMilliseconds=n===void 0?5e3:n}static create(e){return e===void 0?new this:new this(e.maxNumberEvents,e.flushBatchSize,e.flushIntervalInMilliseconds)}start(){this._started=!0,this._timingEvents=[],this._flushTime=Ta(),this._flushPointer=0}stop(){for(this._started=!1;this._flushPointer<this._timingEvents.length;this._flushPointer++)this.logOneEvent(this._timingEvents[this._flushPointer])}event(e,t,n,o){let f=this._started?this.begin(e,t,o):void 0,s=!1,p=n();if(p&&typeof p.then=="function")return s=!0,new Promise((i,c)=>{p.then(async r=>{f&&await f.end(),i(r)},async r=>{f&&await f.end(),c(r)})});if(!s&&f){let i=f.end();if(i&&typeof i.then=="function")return new Promise((c,r)=>{i.then(()=>{c(p)},u=>{r(u)})})}return p}begin(e,t,n){if(!this._started)throw new Error("profiler is not started yet");if(n===void 0){let o=Ta();return this.flush(o),new Xl(e,t,o,f=>this.endSync(f))}else{let o=n.beginTimer();return new Xl(e,t,0,async f=>this.end(f),o,n)}}async end(e){let t=await e.checkTimer();this._timingEvents.length<this._maxNumberEvents&&(this._timingEvents.push(new Kl(e.category,e.name,e.startTime,t)),this.flush(t))}endSync(e){let t=Ta();this._timingEvents.length<this._maxNumberEvents&&(this._timingEvents.push(new Kl(e.category,e.name,e.startTime,t)),this.flush(t))}logOneEvent(e){bt.verbose(`Profiler.${e.category}`,`${(e.endTime-e.startTime).toFixed(2)}ms on event '${e.name}' at ${e.endTime.toFixed(2)}`)}flush(e){if(this._timingEvents.length-this._flushPointer>=this._flushBatchSize||e-this._flushTime>=this._flushIntervalInMilliseconds){for(let t=this._flushPointer;this._flushPointer<t+this._flushBatchSize&&this._flushPointer<this._timingEvents.length;this._flushPointer++)this.logOneEvent(this._timingEvents[this._flushPointer]);this._flushTime=Ta()}}get started(){return this._started}},Ta=typeof performance<"u"&&performance.now?()=>performance.now():Date.now});function uS(e,t,n){for(let o of n){let f=o[0],s=o[1],p=o[2],i=o[3],c=o[4];if(e.opType===f){for(let r of t)if((r.domain===s||r.domain==="ai.onnx"&&s==="")&&lS(r.version,p))return{opImpl:i,opInit:c}}}throw new TypeError(`cannot resolve operator '${e.opType}' with opsets: ${t.map(o=>`${o.domain||"ai.onnx"} v${o.version}`).join(", ")}`)}function lS(e,t){if(t.endsWith("+")){let n=Number.parseInt(t.substring(0,t.length-1),10);return!isNaN(n)&&n<=e}else if(t.split("-").length===2){let n=t.split("-"),o=Number.parseInt(n[0],10),f=Number.parseInt(n[1],10);return!isNaN(o)&&!isNaN(f)&&o<=e&&e<=f}else return Number.parseInt(t,10)===e}var cS=G(()=>{"use strict"}),fS=it(e=>{"use strict";e.__esModule=!0;var t=(function(){function n(o){if(!o)throw new TypeError("Invalid argument; `value` has no value.");this.value=n.EMPTY,o&&n.isGuid(o)&&(this.value=o)}return n.isGuid=function(o){var f=o.toString();return o&&(o instanceof n||n.validator.test(f))},n.create=function(){return new n([n.gen(2),n.gen(1),n.gen(1),n.gen(1),n.gen(3)].join("-"))},n.createEmpty=function(){return new n("emptyguid")},n.parse=function(o){return new n(o)},n.raw=function(){return[n.gen(2),n.gen(1),n.gen(1),n.gen(1),n.gen(3)].join("-")},n.gen=function(o){for(var f="",s=0;s<o;s++)f+=((1+Math.random())*65536|0).toString(16).substring(1);return f},n.prototype.equals=function(o){return n.isGuid(o)&&this.value===o.toString()},n.prototype.isEmpty=function(){return this.value===n.EMPTY},n.prototype.toString=function(){return this.value},n.prototype.toJSON=function(){return{value:this.value}},n.validator=new RegExp("^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$","i"),n.EMPTY="00000000-0000-0000-0000-000000000000",n})();e.Guid=t});function rt(e,t,n){this.low=e|0,this.high=t|0,this.unsigned=!!n}function Yt(e){return(e&&e.__isLong__)===!0}function ah(e){var t=Math.clz32(e&-e);return e?31-t:t}function Di(e,t){var n,o,f;return t?(e>>>=0,(f=0<=e&&e<256)&&(o=Nc[e],o)?o:(n=Ue(e,0,!0),f&&(Nc[e]=n),n)):(e|=0,(f=-128<=e&&e<128)&&(o=Cc[e],o)?o:(n=Ue(e,e<0?-1:0,!1),f&&(Cc[e]=n),n))}function Gr(e,t){if(isNaN(e))return t?dn:Vr;if(t){if(e<0)return dn;if(e>=kc)return Mc}else{if(e<=-Rc)return rr;if(e+1>=Rc)return Fc}return e<0?Gr(-e,t).neg():Ue(e%Bi|0,e/Bi|0,t)}function Ue(e,t,n){return new rt(e,t,n)}function bf(e,t,n){if(e.length===0)throw Error("empty string");if(typeof t=="number"?(n=t,t=!1):t=!!t,e==="NaN"||e==="Infinity"||e==="+Infinity"||e==="-Infinity")return t?dn:Vr;if(n=n||10,n<2||36<n)throw RangeError("radix");var o;if((o=e.indexOf("-"))>0)throw Error("interior hyphen");if(o===0)return bf(e.substring(1),t,n).neg();for(var f=Gr(ja(n,8)),s=Vr,p=0;p<e.length;p+=8){var i=Math.min(8,e.length-p),c=parseInt(e.substring(p,p+i),n);if(i<8){var r=Gr(ja(n,i));s=s.mul(r).add(Gr(c))}else s=s.mul(f),s=s.add(Gr(c))}return s.unsigned=t,s}function Kr(e,t){return typeof e=="number"?Gr(e,t):typeof e=="string"?bf(e,t):Ue(e.low,e.high,typeof t=="boolean"?t:e.unsigned)}var _r,Cc,Nc,ja,Jl,sh,Bi,kc,Rc,Ql,Vr,dn,Ci,ec,lu,Fc,Mc,rr,K,si,ry=G(()=>{_r=null;try{_r=new WebAssembly.Instance(new WebAssembly.Module(new Uint8Array([0,97,115,109,1,0,0,0,1,13,2,96,0,1,127,96,4,127,127,127,127,1,127,3,7,6,0,1,1,1,1,1,6,6,1,127,1,65,0,11,7,50,6,3,109,117,108,0,1,5,100,105,118,95,115,0,2,5,100,105,118,95,117,0,3,5,114,101,109,95,115,0,4,5,114,101,109,95,117,0,5,8,103,101,116,95,104,105,103,104,0,0,10,191,1,6,4,0,35,0,11,36,1,1,126,32,0,173,32,1,173,66,32,134,132,32,2,173,32,3,173,66,32,134,132,126,34,4,66,32,135,167,36,0,32,4,167,11,36,1,1,126,32,0,173,32,1,173,66,32,134,132,32,2,173,32,3,173,66,32,134,132,127,34,4,66,32,135,167,36,0,32,4,167,11,36,1,1,126,32,0,173,32,1,173,66,32,134,132,32,2,173,32,3,173,66,32,134,132,128,34,4,66,32,135,167,36,0,32,4,167,11,36,1,1,126,32,0,173,32,1,173,66,32,134,132,32,2,173,32,3,173,66,32,134,132,129,34,4,66,32,135,167,36,0,32,4,167,11,36,1,1,126,32,0,173,32,1,173,66,32,134,132,32,2,173,32,3,173,66,32,134,132,130,34,4,66,32,135,167,36,0,32,4,167,11])),{}).exports}catch{}rt.prototype.__isLong__,Object.defineProperty(rt.prototype,"__isLong__",{value:!0}),rt.isLong=Yt,Cc={},Nc={},rt.fromInt=Di,rt.fromNumber=Gr,rt.fromBits=Ue,ja=Math.pow,rt.fromString=bf,rt.fromValue=Kr,Jl=65536,sh=1<<24,Bi=Jl*Jl,kc=Bi*Bi,Rc=kc/2,Ql=Di(sh),Vr=Di(0),rt.ZERO=Vr,dn=Di(0,!0),rt.UZERO=dn,Ci=Di(1),rt.ONE=Ci,ec=Di(1,!0),rt.UONE=ec,lu=Di(-1),rt.NEG_ONE=lu,Fc=Ue(-1,2147483647,!1),rt.MAX_VALUE=Fc,Mc=Ue(-1,-1,!0),rt.MAX_UNSIGNED_VALUE=Mc,rr=Ue(0,-2147483648,!1),rt.MIN_VALUE=rr,K=rt.prototype,K.toInt=function(){return this.unsigned?this.low>>>0:this.low},K.toNumber=function(){return this.unsigned?(this.high>>>0)*Bi+(this.low>>>0):this.high*Bi+(this.low>>>0)},K.toString=function(e){if(e=e||10,e<2||36<e)throw RangeError("radix");if(this.isZero())return"0";if(this.isNegative())if(this.eq(rr)){var t=Gr(e),n=this.div(t),o=n.mul(t).sub(this);return n.toString(e)+o.toInt().toString(e)}else return"-"+this.neg().toString(e);for(var f=Gr(ja(e,6),this.unsigned),s=this,p="";;){var i=s.div(f),c=s.sub(i.mul(f)).toInt()>>>0,r=c.toString(e);if(s=i,s.isZero())return r+p;for(;r.length<6;)r="0"+r;p=""+r+p}},K.getHighBits=function(){return this.high},K.getHighBitsUnsigned=function(){return this.high>>>0},K.getLowBits=function(){return this.low},K.getLowBitsUnsigned=function(){return this.low>>>0},K.getNumBitsAbs=function(){if(this.isNegative())return this.eq(rr)?64:this.neg().getNumBitsAbs();for(var e=this.high!=0?this.high:this.low,t=31;t>0&&!(e&1<<t);t--);return this.high!=0?t+33:t+1},K.isZero=function(){return this.high===0&&this.low===0},K.eqz=K.isZero,K.isNegative=function(){return!this.unsigned&&this.high<0},K.isPositive=function(){return this.unsigned||this.high>=0},K.isOdd=function(){return(this.low&1)===1},K.isEven=function(){return(this.low&1)===0},K.equals=function(e){return Yt(e)||(e=Kr(e)),this.unsigned!==e.unsigned&&this.high>>>31===1&&e.high>>>31===1?!1:this.high===e.high&&this.low===e.low},K.eq=K.equals,K.notEquals=function(e){return!this.eq(e)},K.neq=K.notEquals,K.ne=K.notEquals,K.lessThan=function(e){return this.comp(e)<0},K.lt=K.lessThan,K.lessThanOrEqual=function(e){return this.comp(e)<=0},K.lte=K.lessThanOrEqual,K.le=K.lessThanOrEqual,K.greaterThan=function(e){return this.comp(e)>0},K.gt=K.greaterThan,K.greaterThanOrEqual=function(e){return this.comp(e)>=0},K.gte=K.greaterThanOrEqual,K.ge=K.greaterThanOrEqual,K.compare=function(e){if(Yt(e)||(e=Kr(e)),this.eq(e))return 0;var t=this.isNegative(),n=e.isNegative();return t&&!n?-1:!t&&n?1:this.unsigned?e.high>>>0>this.high>>>0||e.high===this.high&&e.low>>>0>this.low>>>0?-1:1:this.sub(e).isNegative()?-1:1},K.comp=K.compare,K.negate=function(){return!this.unsigned&&this.eq(rr)?rr:this.not().add(Ci)},K.neg=K.negate,K.add=function(e){Yt(e)||(e=Kr(e));var t=this.high>>>16,n=this.high&65535,o=this.low>>>16,f=this.low&65535,s=e.high>>>16,p=e.high&65535,i=e.low>>>16,c=e.low&65535,r=0,u=0,l=0,h=0;return h+=f+c,l+=h>>>16,h&=65535,l+=o+i,u+=l>>>16,l&=65535,u+=n+p,r+=u>>>16,u&=65535,r+=t+s,r&=65535,Ue(l<<16|h,r<<16|u,this.unsigned)},K.subtract=function(e){return Yt(e)||(e=Kr(e)),this.add(e.neg())},K.sub=K.subtract,K.multiply=function(e){if(this.isZero())return this;if(Yt(e)||(e=Kr(e)),_r){var t=_r.mul(this.low,this.high,e.low,e.high);return Ue(t,_r.get_high(),this.unsigned)}if(e.isZero())return this.unsigned?dn:Vr;if(this.eq(rr))return e.isOdd()?rr:Vr;if(e.eq(rr))return this.isOdd()?rr:Vr;if(this.isNegative())return e.isNegative()?this.neg().mul(e.neg()):this.neg().mul(e).neg();if(e.isNegative())return this.mul(e.neg()).neg();if(this.lt(Ql)&&e.lt(Ql))return Gr(this.toNumber()*e.toNumber(),this.unsigned);var n=this.high>>>16,o=this.high&65535,f=this.low>>>16,s=this.low&65535,p=e.high>>>16,i=e.high&65535,c=e.low>>>16,r=e.low&65535,u=0,l=0,h=0,y=0;return y+=s*r,h+=y>>>16,y&=65535,h+=f*r,l+=h>>>16,h&=65535,h+=s*c,l+=h>>>16,h&=65535,l+=o*r,u+=l>>>16,l&=65535,l+=f*c,u+=l>>>16,l&=65535,l+=s*i,u+=l>>>16,l&=65535,u+=n*r+o*c+f*i+s*p,u&=65535,Ue(h<<16|y,u<<16|l,this.unsigned)},K.mul=K.multiply,K.divide=function(e){if(Yt(e)||(e=Kr(e)),e.isZero())throw Error("division by zero");if(_r){if(!this.unsigned&&this.high===-2147483648&&e.low===-1&&e.high===-1)return this;var t=(this.unsigned?_r.div_u:_r.div_s)(this.low,this.high,e.low,e.high);return Ue(t,_r.get_high(),this.unsigned)}if(this.isZero())return this.unsigned?dn:Vr;var n,o,f;if(this.unsigned){if(e.unsigned||(e=e.toUnsigned()),e.gt(this))return dn;if(e.gt(this.shru(1)))return ec;f=dn}else{if(this.eq(rr)){if(e.eq(Ci)||e.eq(lu))return rr;if(e.eq(rr))return Ci;var s=this.shr(1);return n=s.div(e).shl(1),n.eq(Vr)?e.isNegative()?Ci:lu:(o=this.sub(e.mul(n)),f=n.add(o.div(e)),f)}else if(e.eq(rr))return this.unsigned?dn:Vr;if(this.isNegative())return e.isNegative()?this.neg().div(e.neg()):this.neg().div(e).neg();if(e.isNegative())return this.div(e.neg()).neg();f=Vr}for(o=this;o.gte(e);){n=Math.max(1,Math.floor(o.toNumber()/e.toNumber()));for(var p=Math.ceil(Math.log(n)/Math.LN2),i=p<=48?1:ja(2,p-48),c=Gr(n),r=c.mul(e);r.isNegative()||r.gt(o);)n-=i,c=Gr(n,this.unsigned),r=c.mul(e);c.isZero()&&(c=Ci),f=f.add(c),o=o.sub(r)}return f},K.div=K.divide,K.modulo=function(e){if(Yt(e)||(e=Kr(e)),_r){var t=(this.unsigned?_r.rem_u:_r.rem_s)(this.low,this.high,e.low,e.high);return Ue(t,_r.get_high(),this.unsigned)}return this.sub(this.div(e).mul(e))},K.mod=K.modulo,K.rem=K.modulo,K.not=function(){return Ue(~this.low,~this.high,this.unsigned)},K.countLeadingZeros=function(){return this.high?Math.clz32(this.high):Math.clz32(this.low)+32},K.clz=K.countLeadingZeros,K.countTrailingZeros=function(){return this.low?ah(this.low):ah(this.high)+32},K.ctz=K.countTrailingZeros,K.and=function(e){return Yt(e)||(e=Kr(e)),Ue(this.low&e.low,this.high&e.high,this.unsigned)},K.or=function(e){return Yt(e)||(e=Kr(e)),Ue(this.low|e.low,this.high|e.high,this.unsigned)},K.xor=function(e){return Yt(e)||(e=Kr(e)),Ue(this.low^e.low,this.high^e.high,this.unsigned)},K.shiftLeft=function(e){return Yt(e)&&(e=e.toInt()),(e&=63)===0?this:e<32?Ue(this.low<<e,this.high<<e|this.low>>>32-e,this.unsigned):Ue(0,this.low<<e-32,this.unsigned)},K.shl=K.shiftLeft,K.shiftRight=function(e){return Yt(e)&&(e=e.toInt()),(e&=63)===0?this:e<32?Ue(this.low>>>e|this.high<<32-e,this.high>>e,this.unsigned):Ue(this.high>>e-32,this.high>=0?0:-1,this.unsigned)},K.shr=K.shiftRight,K.shiftRightUnsigned=function(e){return Yt(e)&&(e=e.toInt()),(e&=63)===0?this:e<32?Ue(this.low>>>e|this.high<<32-e,this.high>>>e,this.unsigned):e===32?Ue(this.high,0,this.unsigned):Ue(this.high>>>e-32,0,this.unsigned)},K.shru=K.shiftRightUnsigned,K.shr_u=K.shiftRightUnsigned,K.rotateLeft=function(e){var t;return Yt(e)&&(e=e.toInt()),(e&=63)===0?this:e===32?Ue(this.high,this.low,this.unsigned):e<32?(t=32-e,Ue(this.low<<e|this.high>>>t,this.high<<e|this.low>>>t,this.unsigned)):(e-=32,t=32-e,Ue(this.high<<e|this.low>>>t,this.low<<e|this.high>>>t,this.unsigned))},K.rotl=K.rotateLeft,K.rotateRight=function(e){var t;return Yt(e)&&(e=e.toInt()),(e&=63)===0?this:e===32?Ue(this.high,this.low,this.unsigned):e<32?(t=32-e,Ue(this.high<<t|this.low>>>e,this.low<<t|this.high>>>e,this.unsigned)):(e-=32,t=32-e,Ue(this.low<<t|this.high>>>e,this.high<<t|this.low>>>e,this.unsigned))},K.rotr=K.rotateRight,K.toSigned=function(){return this.unsigned?Ue(this.low,this.high,!1):this},K.toUnsigned=function(){return this.unsigned?this:Ue(this.low,this.high,!0)},K.toBytes=function(e){return e?this.toBytesLE():this.toBytesBE()},K.toBytesLE=function(){var e=this.high,t=this.low;return[t&255,t>>>8&255,t>>>16&255,t>>>24,e&255,e>>>8&255,e>>>16&255,e>>>24]},K.toBytesBE=function(){var e=this.high,t=this.low;return[e>>>24,e>>>16&255,e>>>8&255,e&255,t>>>24,t>>>16&255,t>>>8&255,t&255]},rt.fromBytes=function(e,t,n){return n?rt.fromBytesLE(e,t):rt.fromBytesBE(e,t)},rt.fromBytesLE=function(e,t){return new rt(e[0]|e[1]<<8|e[2]<<16|e[3]<<24,e[4]|e[5]<<8|e[6]<<16|e[7]<<24,t)},rt.fromBytesBE=function(e,t){return new rt(e[4]<<24|e[5]<<16|e[6]<<8|e[7],e[0]<<24|e[1]<<16|e[2]<<8|e[3],t)},si=rt}),R,vf=G(()=>{R={},R.Offset,R.Table,R.SIZEOF_SHORT=2,R.SIZEOF_INT=4,R.FILE_IDENTIFIER_LENGTH=4,R.SIZE_PREFIX_LENGTH=4,R.Encoding={UTF8_BYTES:1,UTF16_STRING:2},R.int32=new Int32Array(2),R.float32=new Float32Array(R.int32.buffer),R.float64=new Float64Array(R.int32.buffer),R.isLittleEndian=new Uint16Array(new Uint8Array([1,0]).buffer)[0]===1,R.Long=function(e,t){this.low=e|0,this.high=t|0},R.Long.create=function(e,t){return e==0&&t==0?R.Long.ZERO:new R.Long(e,t)},R.Long.prototype.toFloat64=function(){return(this.low>>>0)+this.high*4294967296},R.Long.prototype.equals=function(e){return this.low==e.low&&this.high==e.high},R.Long.ZERO=new R.Long(0,0),R.Builder=function(e){if(e)var t=e;else var t=1024;this.bb=R.ByteBuffer.allocate(t),this.space=t,this.minalign=1,this.vtable=null,this.vtable_in_use=0,this.isNested=!1,this.object_start=0,this.vtables=[],this.vector_num_elems=0,this.force_defaults=!1},R.Builder.prototype.clear=function(){this.bb.clear(),this.space=this.bb.capacity(),this.minalign=1,this.vtable=null,this.vtable_in_use=0,this.isNested=!1,this.object_start=0,this.vtables=[],this.vector_num_elems=0,this.force_defaults=!1},R.Builder.prototype.forceDefaults=function(e){this.force_defaults=e},R.Builder.prototype.dataBuffer=function(){return this.bb},R.Builder.prototype.asUint8Array=function(){return this.bb.bytes().subarray(this.bb.position(),this.bb.position()+this.offset())},R.Builder.prototype.prep=function(e,t){e>this.minalign&&(this.minalign=e);for(var n=~(this.bb.capacity()-this.space+t)+1&e-1;this.space<n+e+t;){var o=this.bb.capacity();this.bb=R.Builder.growByteBuffer(this.bb),this.space+=this.bb.capacity()-o}this.pad(n)},R.Builder.prototype.pad=function(e){for(var t=0;t<e;t++)this.bb.writeInt8(--this.space,0)},R.Builder.prototype.writeInt8=function(e){this.bb.writeInt8(this.space-=1,e)},R.Builder.prototype.writeInt16=function(e){this.bb.writeInt16(this.space-=2,e)},R.Builder.prototype.writeInt32=function(e){this.bb.writeInt32(this.space-=4,e)},R.Builder.prototype.writeInt64=function(e){this.bb.writeInt64(this.space-=8,e)},R.Builder.prototype.writeFloat32=function(e){this.bb.writeFloat32(this.space-=4,e)},R.Builder.prototype.writeFloat64=function(e){this.bb.writeFloat64(this.space-=8,e)},R.Builder.prototype.addInt8=function(e){this.prep(1,0),this.writeInt8(e)},R.Builder.prototype.addInt16=function(e){this.prep(2,0),this.writeInt16(e)},R.Builder.prototype.addInt32=function(e){this.prep(4,0),this.writeInt32(e)},R.Builder.prototype.addInt64=function(e){this.prep(8,0),this.writeInt64(e)},R.Builder.prototype.addFloat32=function(e){this.prep(4,0),this.writeFloat32(e)},R.Builder.prototype.addFloat64=function(e){this.prep(8,0),this.writeFloat64(e)},R.Builder.prototype.addFieldInt8=function(e,t,n){(this.force_defaults||t!=n)&&(this.addInt8(t),this.slot(e))},R.Builder.prototype.addFieldInt16=function(e,t,n){(this.force_defaults||t!=n)&&(this.addInt16(t),this.slot(e))},R.Builder.prototype.addFieldInt32=function(e,t,n){(this.force_defaults||t!=n)&&(this.addInt32(t),this.slot(e))},R.Builder.prototype.addFieldInt64=function(e,t,n){(this.force_defaults||!t.equals(n))&&(this.addInt64(t),this.slot(e))},R.Builder.prototype.addFieldFloat32=function(e,t,n){(this.force_defaults||t!=n)&&(this.addFloat32(t),this.slot(e))},R.Builder.prototype.addFieldFloat64=function(e,t,n){(this.force_defaults||t!=n)&&(this.addFloat64(t),this.slot(e))},R.Builder.prototype.addFieldOffset=function(e,t,n){(this.force_defaults||t!=n)&&(this.addOffset(t),this.slot(e))},R.Builder.prototype.addFieldStruct=function(e,t,n){t!=n&&(this.nested(t),this.slot(e))},R.Builder.prototype.nested=function(e){if(e!=this.offset())throw new Error("FlatBuffers: struct must be serialized inline.")},R.Builder.prototype.notNested=function(){if(this.isNested)throw new Error("FlatBuffers: object serialization must not be nested.")},R.Builder.prototype.slot=function(e){this.vtable[e]=this.offset()},R.Builder.prototype.offset=function(){return this.bb.capacity()-this.space},R.Builder.growByteBuffer=function(e){var t=e.capacity();if(t&3221225472)throw new Error("FlatBuffers: cannot grow buffer beyond 2 gigabytes.");var n=t<<1,o=R.ByteBuffer.allocate(n);return o.setPosition(n-t),o.bytes().set(e.bytes(),n-t),o},R.Builder.prototype.addOffset=function(e){this.prep(R.SIZEOF_INT,0),this.writeInt32(this.offset()-e+R.SIZEOF_INT)},R.Builder.prototype.startObject=function(e){this.notNested(),this.vtable==null&&(this.vtable=[]),this.vtable_in_use=e;for(var t=0;t<e;t++)this.vtable[t]=0;this.isNested=!0,this.object_start=this.offset()},R.Builder.prototype.endObject=function(){if(this.vtable==null||!this.isNested)throw new Error("FlatBuffers: endObject called without startObject");this.addInt32(0);for(var e=this.offset(),t=this.vtable_in_use-1;t>=0&&this.vtable[t]==0;t--);for(var n=t+1;t>=0;t--)this.addInt16(this.vtable[t]!=0?e-this.vtable[t]:0);var o=2;this.addInt16(e-this.object_start);var f=(n+o)*R.SIZEOF_SHORT;this.addInt16(f);var s=0,p=this.space;e:for(t=0;t<this.vtables.length;t++){var i=this.bb.capacity()-this.vtables[t];if(f==this.bb.readInt16(i)){for(var c=R.SIZEOF_SHORT;c<f;c+=R.SIZEOF_SHORT)if(this.bb.readInt16(p+c)!=this.bb.readInt16(i+c))continue e;s=this.vtables[t];break}}return s?(this.space=this.bb.capacity()-e,this.bb.writeInt32(this.space,s-e)):(this.vtables.push(this.offset()),this.bb.writeInt32(this.bb.capacity()-e,this.offset()-e)),this.isNested=!1,e},R.Builder.prototype.finish=function(e,t,n){var o=n?R.SIZE_PREFIX_LENGTH:0;if(t){var f=t;if(this.prep(this.minalign,R.SIZEOF_INT+R.FILE_IDENTIFIER_LENGTH+o),f.length!=R.FILE_IDENTIFIER_LENGTH)throw new Error("FlatBuffers: file identifier must be length "+R.FILE_IDENTIFIER_LENGTH);for(var s=R.FILE_IDENTIFIER_LENGTH-1;s>=0;s--)this.writeInt8(f.charCodeAt(s))}this.prep(this.minalign,R.SIZEOF_INT+o),this.addOffset(e),o&&this.addInt32(this.bb.capacity()-this.space),this.bb.setPosition(this.space)},R.Builder.prototype.finishSizePrefixed=function(e,t){this.finish(e,t,!0)},R.Builder.prototype.requiredField=function(e,t){var n=this.bb.capacity()-e,o=n-this.bb.readInt32(n),f=this.bb.readInt16(o+t)!=0;if(!f)throw new Error("FlatBuffers: field "+t+" must be set")},R.Builder.prototype.startVector=function(e,t,n){this.notNested(),this.vector_num_elems=t,this.prep(R.SIZEOF_INT,e*t),this.prep(n,e*t)},R.Builder.prototype.endVector=function(){return this.writeInt32(this.vector_num_elems),this.offset()},R.Builder.prototype.createString=function(e){if(e instanceof Uint8Array)var t=e;else for(var t=[],n=0;n<e.length;){var o,f=e.charCodeAt(n++);if(f<55296||f>=56320)o=f;else{var s=e.charCodeAt(n++);o=(f<<10)+s+-56613888}o<128?t.push(o):(o<2048?t.push(o>>6&31|192):(o<65536?t.push(o>>12&15|224):t.push(o>>18&7|240,o>>12&63|128),t.push(o>>6&63|128)),t.push(o&63|128))}this.addInt8(0),this.startVector(1,t.length,1),this.bb.setPosition(this.space-=t.length);for(var n=0,p=this.space,i=this.bb.bytes();n<t.length;n++)i[p++]=t[n];return this.endVector()},R.Builder.prototype.createLong=function(e,t){return R.Long.create(e,t)},R.ByteBuffer=function(e){this.bytes_=e,this.position_=0},R.ByteBuffer.allocate=function(e){return new R.ByteBuffer(new Uint8Array(e))},R.ByteBuffer.prototype.clear=function(){this.position_=0},R.ByteBuffer.prototype.bytes=function(){return this.bytes_},R.ByteBuffer.prototype.position=function(){return this.position_},R.ByteBuffer.prototype.setPosition=function(e){this.position_=e},R.ByteBuffer.prototype.capacity=function(){return this.bytes_.length},R.ByteBuffer.prototype.readInt8=function(e){return this.readUint8(e)<<24>>24},R.ByteBuffer.prototype.readUint8=function(e){return this.bytes_[e]},R.ByteBuffer.prototype.readInt16=function(e){return this.readUint16(e)<<16>>16},R.ByteBuffer.prototype.readUint16=function(e){return this.bytes_[e]|this.bytes_[e+1]<<8},R.ByteBuffer.prototype.readInt32=function(e){return this.bytes_[e]|this.bytes_[e+1]<<8|this.bytes_[e+2]<<16|this.bytes_[e+3]<<24},R.ByteBuffer.prototype.readUint32=function(e){return this.readInt32(e)>>>0},R.ByteBuffer.prototype.readInt64=function(e){return new R.Long(this.readInt32(e),this.readInt32(e+4))},R.ByteBuffer.prototype.readUint64=function(e){return new R.Long(this.readUint32(e),this.readUint32(e+4))},R.ByteBuffer.prototype.readFloat32=function(e){return R.int32[0]=this.readInt32(e),R.float32[0]},R.ByteBuffer.prototype.readFloat64=function(e){return R.int32[R.isLittleEndian?0:1]=this.readInt32(e),R.int32[R.isLittleEndian?1:0]=this.readInt32(e+4),R.float64[0]},R.ByteBuffer.prototype.writeInt8=function(e,t){this.bytes_[e]=t},R.ByteBuffer.prototype.writeUint8=function(e,t){this.bytes_[e]=t},R.ByteBuffer.prototype.writeInt16=function(e,t){this.bytes_[e]=t,this.bytes_[e+1]=t>>8},R.ByteBuffer.prototype.writeUint16=function(e,t){this.bytes_[e]=t,this.bytes_[e+1]=t>>8},R.ByteBuffer.prototype.writeInt32=function(e,t){this.bytes_[e]=t,this.bytes_[e+1]=t>>8,this.bytes_[e+2]=t>>16,this.bytes_[e+3]=t>>24},R.ByteBuffer.prototype.writeUint32=function(e,t){this.bytes_[e]=t,this.bytes_[e+1]=t>>8,this.bytes_[e+2]=t>>16,this.bytes_[e+3]=t>>24},R.ByteBuffer.prototype.writeInt64=function(e,t){this.writeInt32(e,t.low),this.writeInt32(e+4,t.high)},R.ByteBuffer.prototype.writeUint64=function(e,t){this.writeUint32(e,t.low),this.writeUint32(e+4,t.high)},R.ByteBuffer.prototype.writeFloat32=function(e,t){R.float32[0]=t,this.writeInt32(e,R.int32[0])},R.ByteBuffer.prototype.writeFloat64=function(e,t){R.float64[0]=t,this.writeInt32(e,R.int32[R.isLittleEndian?0:1]),this.writeInt32(e+4,R.int32[R.isLittleEndian?1:0])},R.ByteBuffer.prototype.getBufferIdentifier=function(){if(this.bytes_.length<this.position_+R.SIZEOF_INT+R.FILE_IDENTIFIER_LENGTH)throw new Error("FlatBuffers: ByteBuffer is too short to contain an identifier.");for(var e="",t=0;t<R.FILE_IDENTIFIER_LENGTH;t++)e+=String.fromCharCode(this.readInt8(this.position_+R.SIZEOF_INT+t));return e},R.ByteBuffer.prototype.__offset=function(e,t){var n=e-this.readInt32(e);return t<this.readInt16(n)?this.readInt16(n+t):0},R.ByteBuffer.prototype.__union=function(e,t){return e.bb_pos=t+this.readInt32(t),e.bb=this,e},R.ByteBuffer.prototype.__string=function(e,t){e+=this.readInt32(e);var n=this.readInt32(e),o="",f=0;if(e+=R.SIZEOF_INT,t===R.Encoding.UTF8_BYTES)return this.bytes_.subarray(e,e+n);for(;f<n;){var s,p=this.readUint8(e+f++);if(p<192)s=p;else{var i=this.readUint8(e+f++);if(p<224)s=(p&31)<<6|i&63;else{var c=this.readUint8(e+f++);if(p<240)s=(p&15)<<12|(i&63)<<6|c&63;else{var r=this.readUint8(e+f++);s=(p&7)<<18|(i&63)<<12|(c&63)<<6|r&63}}}s<65536?o+=String.fromCharCode(s):(s-=65536,o+=String.fromCharCode((s>>10)+55296,(s&1023)+56320))}return o},R.ByteBuffer.prototype.__indirect=function(e){return e+this.readInt32(e)},R.ByteBuffer.prototype.__vector=function(e){return e+this.readInt32(e)+R.SIZEOF_INT},R.ByteBuffer.prototype.__vector_len=function(e){return this.readInt32(e+this.readInt32(e))},R.ByteBuffer.prototype.__has_identifier=function(e){if(e.length!=R.FILE_IDENTIFIER_LENGTH)throw new Error("FlatBuffers: file identifier must be length "+R.FILE_IDENTIFIER_LENGTH);for(var t=0;t<R.FILE_IDENTIFIER_LENGTH;t++)if(e.charCodeAt(t)!=this.readInt8(this.position_+R.SIZEOF_INT+t))return!1;return!0},R.ByteBuffer.prototype.createLong=function(e,t){return R.Long.create(e,t)}}),qe,Ou=G(()=>{"use strict";vf(),(e=>{let t;(n=>{let o;(f=>{let s;(p=>(p[p.UNDEFINED=0]="UNDEFINED",p[p.FLOAT=1]="FLOAT",p[p.INT=2]="INT",p[p.STRING=3]="STRING",p[p.TENSOR=4]="TENSOR",p[p.GRAPH=5]="GRAPH",p[p.FLOATS=6]="FLOATS",p[p.INTS=7]="INTS",p[p.STRINGS=8]="STRINGS",p[p.TENSORS=9]="TENSORS",p[p.GRAPHS=10]="GRAPHS",p[p.SPARSE_TENSOR=11]="SPARSE_TENSOR",p[p.SPARSE_TENSORS=12]="SPARSE_TENSORS"))(s=f.AttributeType||={})})(o=n.fbs||={})})(t=e.experimental||={})})(qe||={}),(e=>{let t;(n=>{let o;(f=>{let s;(p=>(p[p.UNKNOWN=0]="UNKNOWN",p[p.VALUE=1]="VALUE",p[p.PARAM=2]="PARAM"))(s=f.DimensionValueType||={})})(o=n.fbs||={})})(t=e.experimental||={})})(qe||={}),(e=>{let t;(n=>{let o;(f=>{let s;(p=>(p[p.UNDEFINED=0]="UNDEFINED",p[p.FLOAT=1]="FLOAT",p[p.UINT8=2]="UINT8",p[p.INT8=3]="INT8",p[p.UINT16=4]="UINT16",p[p.INT16=5]="INT16",p[p.INT32=6]="INT32",p[p.INT64=7]="INT64",p[p.STRING=8]="STRING",p[p.BOOL=9]="BOOL",p[p.FLOAT16=10]="FLOAT16",p[p.DOUBLE=11]="DOUBLE",p[p.UINT32=12]="UINT32",p[p.UINT64=13]="UINT64",p[p.COMPLEX64=14]="COMPLEX64",p[p.COMPLEX128=15]="COMPLEX128",p[p.BFLOAT16=16]="BFLOAT16",p[p.FLOAT8E4M3FN=17]="FLOAT8E4M3FN",p[p.FLOAT8E4M3FNUZ=18]="FLOAT8E4M3FNUZ",p[p.FLOAT8E5M2=19]="FLOAT8E5M2",p[p.FLOAT8E5M2FNUZ=20]="FLOAT8E5M2FNUZ"))(s=f.TensorDataType||={})})(o=n.fbs||={})})(t=e.experimental||={})})(qe||={}),(e=>{let t;(n=>{let o;(f=>{let s;(p=>(p[p.Primitive=0]="Primitive",p[p.Fused=1]="Fused"))(s=f.NodeType||={})})(o=n.fbs||={})})(t=e.experimental||={})})(qe||={}),(e=>{let t;(n=>{let o;(f=>{let s;(p=>(p[p.NONE=0]="NONE",p[p.tensor_type=1]="tensor_type",p[p.sequence_type=2]="sequence_type",p[p.map_type=3]="map_type"))(s=f.TypeInfoValue||={})})(o=n.fbs||={})})(t=e.experimental||={})})(qe||={}),(e=>{let t;(n=>{let o;(f=>{class s{constructor(){this.bb=null,this.bb_pos=0}__init(i,c){return this.bb_pos=i,this.bb=c,this}static getRootAsShape(i,c){return(c||new s).__init(i.readInt32(i.position())+i.position(),i)}static getSizePrefixedRootAsShape(i,c){return i.setPosition(i.position()+R.SIZE_PREFIX_LENGTH),(c||new s).__init(i.readInt32(i.position())+i.position(),i)}dim(i,c){let r=this.bb.__offset(this.bb_pos,4);return r?(c||new e.experimental.fbs.Dimension).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos+r)+i*4),this.bb):null}dimLength(){let i=this.bb.__offset(this.bb_pos,4);return i?this.bb.__vector_len(this.bb_pos+i):0}static startShape(i){i.startObject(1)}static addDim(i,c){i.addFieldOffset(0,c,0)}static createDimVector(i,c){i.startVector(4,c.length,4);for(let r=c.length-1;r>=0;r--)i.addOffset(c[r]);return i.endVector()}static startDimVector(i,c){i.startVector(4,c,4)}static endShape(i){return i.endObject()}static createShape(i,c){return s.startShape(i),s.addDim(i,c),s.endShape(i)}}f.Shape=s})(o=n.fbs||={})})(t=e.experimental||={})})(qe||={}),(e=>{let t;(n=>{let o;(f=>{class s{constructor(){this.bb=null,this.bb_pos=0}__init(i,c){return this.bb_pos=i,this.bb=c,this}static getRootAsDimension(i,c){return(c||new s).__init(i.readInt32(i.position())+i.position(),i)}static getSizePrefixedRootAsDimension(i,c){return i.setPosition(i.position()+R.SIZE_PREFIX_LENGTH),(c||new s).__init(i.readInt32(i.position())+i.position(),i)}value(i){let c=this.bb.__offset(this.bb_pos,4);return c?(i||new e.experimental.fbs.DimensionValue).__init(this.bb.__indirect(this.bb_pos+c),this.bb):null}denotation(i){let c=this.bb.__offset(this.bb_pos,6);return c?this.bb.__string(this.bb_pos+c,i):null}static startDimension(i){i.startObject(2)}static addValue(i,c){i.addFieldOffset(0,c,0)}static addDenotation(i,c){i.addFieldOffset(1,c,0)}static endDimension(i){return i.endObject()}static createDimension(i,c,r){return s.startDimension(i),s.addValue(i,c),s.addDenotation(i,r),s.endDimension(i)}}f.Dimension=s})(o=n.fbs||={})})(t=e.experimental||={})})(qe||={}),(e=>{let t;(n=>{let o;(f=>{class s{constructor(){this.bb=null,this.bb_pos=0}__init(i,c){return this.bb_pos=i,this.bb=c,this}static getRootAsDimensionValue(i,c){return(c||new s).__init(i.readInt32(i.position())+i.position(),i)}static getSizePrefixedRootAsDimensionValue(i,c){return i.setPosition(i.position()+R.SIZE_PREFIX_LENGTH),(c||new s).__init(i.readInt32(i.position())+i.position(),i)}dimType(){let i=this.bb.__offset(this.bb_pos,4);return i?this.bb.readInt8(this.bb_pos+i):0}dimValue(){let i=this.bb.__offset(this.bb_pos,6);return i?this.bb.readInt64(this.bb_pos+i):this.bb.createLong(0,0)}dimParam(i){let c=this.bb.__offset(this.bb_pos,8);return c?this.bb.__string(this.bb_pos+c,i):null}static startDimensionValue(i){i.startObject(3)}static addDimType(i,c){i.addFieldInt8(0,c,0)}static addDimValue(i,c){i.addFieldInt64(1,c,i.createLong(0,0))}static addDimParam(i,c){i.addFieldOffset(2,c,0)}static endDimensionValue(i){return i.endObject()}static createDimensionValue(i,c,r,u){return s.startDimensionValue(i),s.addDimType(i,c),s.addDimValue(i,r),s.addDimParam(i,u),s.endDimensionValue(i)}}f.DimensionValue=s})(o=n.fbs||={})})(t=e.experimental||={})})(qe||={}),(e=>{let t;(n=>{let o;(f=>{class s{constructor(){this.bb=null,this.bb_pos=0}__init(i,c){return this.bb_pos=i,this.bb=c,this}static getRootAsTensorTypeAndShape(i,c){return(c||new s).__init(i.readInt32(i.position())+i.position(),i)}static getSizePrefixedRootAsTensorTypeAndShape(i,c){return i.setPosition(i.position()+R.SIZE_PREFIX_LENGTH),(c||new s).__init(i.readInt32(i.position())+i.position(),i)}elemType(){let i=this.bb.__offset(this.bb_pos,4);return i?this.bb.readInt32(this.bb_pos+i):0}shape(i){let c=this.bb.__offset(this.bb_pos,6);return c?(i||new e.experimental.fbs.Shape).__init(this.bb.__indirect(this.bb_pos+c),this.bb):null}static startTensorTypeAndShape(i){i.startObject(2)}static addElemType(i,c){i.addFieldInt32(0,c,0)}static addShape(i,c){i.addFieldOffset(1,c,0)}static endTensorTypeAndShape(i){return i.endObject()}static createTensorTypeAndShape(i,c,r){return s.startTensorTypeAndShape(i),s.addElemType(i,c),s.addShape(i,r),s.endTensorTypeAndShape(i)}}f.TensorTypeAndShape=s})(o=n.fbs||={})})(t=e.experimental||={})})(qe||={}),(e=>{let t;(n=>{let o;(f=>{class s{constructor(){this.bb=null,this.bb_pos=0}__init(i,c){return this.bb_pos=i,this.bb=c,this}static getRootAsMapType(i,c){return(c||new s).__init(i.readInt32(i.position())+i.position(),i)}static getSizePrefixedRootAsMapType(i,c){return i.setPosition(i.position()+R.SIZE_PREFIX_LENGTH),(c||new s).__init(i.readInt32(i.position())+i.position(),i)}keyType(){let i=this.bb.__offset(this.bb_pos,4);return i?this.bb.readInt32(this.bb_pos+i):0}valueType(i){let c=this.bb.__offset(this.bb_pos,6);return c?(i||new e.experimental.fbs.TypeInfo).__init(this.bb.__indirect(this.bb_pos+c),this.bb):null}static startMapType(i){i.startObject(2)}static addKeyType(i,c){i.addFieldInt32(0,c,0)}static addValueType(i,c){i.addFieldOffset(1,c,0)}static endMapType(i){return i.endObject()}static createMapType(i,c,r){return s.startMapType(i),s.addKeyType(i,c),s.addValueType(i,r),s.endMapType(i)}}f.MapType=s})(o=n.fbs||={})})(t=e.experimental||={})})(qe||={}),(e=>{let t;(n=>{let o;(f=>{class s{constructor(){this.bb=null,this.bb_pos=0}__init(i,c){return this.bb_pos=i,this.bb=c,this}static getRootAsSequenceType(i,c){return(c||new s).__init(i.readInt32(i.position())+i.position(),i)}static getSizePrefixedRootAsSequenceType(i,c){return i.setPosition(i.position()+R.SIZE_PREFIX_LENGTH),(c||new s).__init(i.readInt32(i.position())+i.position(),i)}elemType(i){let c=this.bb.__offset(this.bb_pos,4);return c?(i||new e.experimental.fbs.TypeInfo).__init(this.bb.__indirect(this.bb_pos+c),this.bb):null}static startSequenceType(i){i.startObject(1)}static addElemType(i,c){i.addFieldOffset(0,c,0)}static endSequenceType(i){return i.endObject()}static createSequenceType(i,c){return s.startSequenceType(i),s.addElemType(i,c),s.endSequenceType(i)}}f.SequenceType=s})(o=n.fbs||={})})(t=e.experimental||={})})(qe||={}),(e=>{let t;(n=>{let o;(f=>{class s{constructor(){this.bb=null,this.bb_pos=0}__init(i,c){return this.bb_pos=i,this.bb=c,this}nodeIndex(){return this.bb.readUint32(this.bb_pos)}srcArgIndex(){return this.bb.readInt32(this.bb_pos+4)}dstArgIndex(){return this.bb.readInt32(this.bb_pos+8)}static createEdgeEnd(i,c,r,u){return i.prep(4,12),i.writeInt32(u),i.writeInt32(r),i.writeInt32(c),i.offset()}}f.EdgeEnd=s})(o=n.fbs||={})})(t=e.experimental||={})})(qe||={}),(e=>{let t;(n=>{let o;(f=>{class s{constructor(){this.bb=null,this.bb_pos=0}__init(i,c){return this.bb_pos=i,this.bb=c,this}static getRootAsNodeEdge(i,c){return(c||new s).__init(i.readInt32(i.position())+i.position(),i)}static getSizePrefixedRootAsNodeEdge(i,c){return i.setPosition(i.position()+R.SIZE_PREFIX_LENGTH),(c||new s).__init(i.readInt32(i.position())+i.position(),i)}nodeIndex(){let i=this.bb.__offset(this.bb_pos,4);return i?this.bb.readUint32(this.bb_pos+i):0}inputEdges(i,c){let r=this.bb.__offset(this.bb_pos,6);return r?(c||new e.experimental.fbs.EdgeEnd).__init(this.bb.__vector(this.bb_pos+r)+i*12,this.bb):null}inputEdgesLength(){let i=this.bb.__offset(this.bb_pos,6);return i?this.bb.__vector_len(this.bb_pos+i):0}outputEdges(i,c){let r=this.bb.__offset(this.bb_pos,8);return r?(c||new e.experimental.fbs.EdgeEnd).__init(this.bb.__vector(this.bb_pos+r)+i*12,this.bb):null}outputEdgesLength(){let i=this.bb.__offset(this.bb_pos,8);return i?this.bb.__vector_len(this.bb_pos+i):0}static startNodeEdge(i){i.startObject(3)}static addNodeIndex(i,c){i.addFieldInt32(0,c,0)}static addInputEdges(i,c){i.addFieldOffset(1,c,0)}static startInputEdgesVector(i,c){i.startVector(12,c,4)}static addOutputEdges(i,c){i.addFieldOffset(2,c,0)}static startOutputEdgesVector(i,c){i.startVector(12,c,4)}static endNodeEdge(i){return i.endObject()}static createNodeEdge(i,c,r,u){return s.startNodeEdge(i),s.addNodeIndex(i,c),s.addInputEdges(i,r),s.addOutputEdges(i,u),s.endNodeEdge(i)}}f.NodeEdge=s})(o=n.fbs||={})})(t=e.experimental||={})})(qe||={}),(e=>{let t;(n=>{let o;(f=>{class s{constructor(){this.bb=null,this.bb_pos=0}__init(i,c){return this.bb_pos=i,this.bb=c,this}static getRootAsNode(i,c){return(c||new s).__init(i.readInt32(i.position())+i.position(),i)}static getSizePrefixedRootAsNode(i,c){return i.setPosition(i.position()+R.SIZE_PREFIX_LENGTH),(c||new s).__init(i.readInt32(i.position())+i.position(),i)}name(i){let c=this.bb.__offset(this.bb_pos,4);return c?this.bb.__string(this.bb_pos+c,i):null}docString(i){let c=this.bb.__offset(this.bb_pos,6);return c?this.bb.__string(this.bb_pos+c,i):null}domain(i){let c=this.bb.__offset(this.bb_pos,8);return c?this.bb.__string(this.bb_pos+c,i):null}sinceVersion(){let i=this.bb.__offset(this.bb_pos,10);return i?this.bb.readInt32(this.bb_pos+i):0}index(){let i=this.bb.__offset(this.bb_pos,12);return i?this.bb.readUint32(this.bb_pos+i):0}opType(i){let c=this.bb.__offset(this.bb_pos,14);return c?this.bb.__string(this.bb_pos+c,i):null}type(){let i=this.bb.__offset(this.bb_pos,16);return i?this.bb.readInt32(this.bb_pos+i):0}executionProviderType(i){let c=this.bb.__offset(this.bb_pos,18);return c?this.bb.__string(this.bb_pos+c,i):null}inputs(i,c){let r=this.bb.__offset(this.bb_pos,20);return r?this.bb.__string(this.bb.__vector(this.bb_pos+r)+i*4,c):null}inputsLength(){let i=this.bb.__offset(this.bb_pos,20);return i?this.bb.__vector_len(this.bb_pos+i):0}outputs(i,c){let r=this.bb.__offset(this.bb_pos,22);return r?this.bb.__string(this.bb.__vector(this.bb_pos+r)+i*4,c):null}outputsLength(){let i=this.bb.__offset(this.bb_pos,22);return i?this.bb.__vector_len(this.bb_pos+i):0}attributes(i,c){let r=this.bb.__offset(this.bb_pos,24);return r?(c||new e.experimental.fbs.Attribute).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos+r)+i*4),this.bb):null}attributesLength(){let i=this.bb.__offset(this.bb_pos,24);return i?this.bb.__vector_len(this.bb_pos+i):0}inputArgCounts(i){let c=this.bb.__offset(this.bb_pos,26);return c?this.bb.readInt32(this.bb.__vector(this.bb_pos+c)+i*4):0}inputArgCountsLength(){let i=this.bb.__offset(this.bb_pos,26);return i?this.bb.__vector_len(this.bb_pos+i):0}inputArgCountsArray(){let i=this.bb.__offset(this.bb_pos,26);return i?new Int32Array(this.bb.bytes().buffer,this.bb.bytes().byteOffset+this.bb.__vector(this.bb_pos+i),this.bb.__vector_len(this.bb_pos+i)):null}implicitInputs(i,c){let r=this.bb.__offset(this.bb_pos,28);return r?this.bb.__string(this.bb.__vector(this.bb_pos+r)+i*4,c):null}implicitInputsLength(){let i=this.bb.__offset(this.bb_pos,28);return i?this.bb.__vector_len(this.bb_pos+i):0}static startNode(i){i.startObject(13)}static addName(i,c){i.addFieldOffset(0,c,0)}static addDocString(i,c){i.addFieldOffset(1,c,0)}static addDomain(i,c){i.addFieldOffset(2,c,0)}static addSinceVersion(i,c){i.addFieldInt32(3,c,0)}static addIndex(i,c){i.addFieldInt32(4,c,0)}static addOpType(i,c){i.addFieldOffset(5,c,0)}static addType(i,c){i.addFieldInt32(6,c,0)}static addExecutionProviderType(i,c){i.addFieldOffset(7,c,0)}static addInputs(i,c){i.addFieldOffset(8,c,0)}static createInputsVector(i,c){i.startVector(4,c.length,4);for(let r=c.length-1;r>=0;r--)i.addOffset(c[r]);return i.endVector()}static startInputsVector(i,c){i.startVector(4,c,4)}static addOutputs(i,c){i.addFieldOffset(9,c,0)}static createOutputsVector(i,c){i.startVector(4,c.length,4);for(let r=c.length-1;r>=0;r--)i.addOffset(c[r]);return i.endVector()}static startOutputsVector(i,c){i.startVector(4,c,4)}static addAttributes(i,c){i.addFieldOffset(10,c,0)}static createAttributesVector(i,c){i.startVector(4,c.length,4);for(let r=c.length-1;r>=0;r--)i.addOffset(c[r]);return i.endVector()}static startAttributesVector(i,c){i.startVector(4,c,4)}static addInputArgCounts(i,c){i.addFieldOffset(11,c,0)}static createInputArgCountsVector(i,c){i.startVector(4,c.length,4);for(let r=c.length-1;r>=0;r--)i.addInt32(c[r]);return i.endVector()}static startInputArgCountsVector(i,c){i.startVector(4,c,4)}static addImplicitInputs(i,c){i.addFieldOffset(12,c,0)}static createImplicitInputsVector(i,c){i.startVector(4,c.length,4);for(let r=c.length-1;r>=0;r--)i.addOffset(c[r]);return i.endVector()}static startImplicitInputsVector(i,c){i.startVector(4,c,4)}static endNode(i){return i.endObject()}static createNode(i,c,r,u,l,h,y,O,S,A,L,$,F,Z){return s.startNode(i),s.addName(i,c),s.addDocString(i,r),s.addDomain(i,u),s.addSinceVersion(i,l),s.addIndex(i,h),s.addOpType(i,y),s.addType(i,O),s.addExecutionProviderType(i,S),s.addInputs(i,A),s.addOutputs(i,L),s.addAttributes(i,$),s.addInputArgCounts(i,F),s.addImplicitInputs(i,Z),s.endNode(i)}}f.Node=s})(o=n.fbs||={})})(t=e.experimental||={})})(qe||={}),(e=>{let t;(n=>{let o;(f=>{class s{constructor(){this.bb=null,this.bb_pos=0}__init(i,c){return this.bb_pos=i,this.bb=c,this}static getRootAsValueInfo(i,c){return(c||new s).__init(i.readInt32(i.position())+i.position(),i)}static getSizePrefixedRootAsValueInfo(i,c){return i.setPosition(i.position()+R.SIZE_PREFIX_LENGTH),(c||new s).__init(i.readInt32(i.position())+i.position(),i)}name(i){let c=this.bb.__offset(this.bb_pos,4);return c?this.bb.__string(this.bb_pos+c,i):null}docString(i){let c=this.bb.__offset(this.bb_pos,6);return c?this.bb.__string(this.bb_pos+c,i):null}type(i){let c=this.bb.__offset(this.bb_pos,8);return c?(i||new e.experimental.fbs.TypeInfo).__init(this.bb.__indirect(this.bb_pos+c),this.bb):null}static startValueInfo(i){i.startObject(3)}static addName(i,c){i.addFieldOffset(0,c,0)}static addDocString(i,c){i.addFieldOffset(1,c,0)}static addType(i,c){i.addFieldOffset(2,c,0)}static endValueInfo(i){return i.endObject()}static createValueInfo(i,c,r,u){return s.startValueInfo(i),s.addName(i,c),s.addDocString(i,r),s.addType(i,u),s.endValueInfo(i)}}f.ValueInfo=s})(o=n.fbs||={})})(t=e.experimental||={})})(qe||={}),(e=>{let t;(n=>{let o;(f=>{class s{constructor(){this.bb=null,this.bb_pos=0}__init(i,c){return this.bb_pos=i,this.bb=c,this}static getRootAsTypeInfo(i,c){return(c||new s).__init(i.readInt32(i.position())+i.position(),i)}static getSizePrefixedRootAsTypeInfo(i,c){return i.setPosition(i.position()+R.SIZE_PREFIX_LENGTH),(c||new s).__init(i.readInt32(i.position())+i.position(),i)}denotation(i){let c=this.bb.__offset(this.bb_pos,4);return c?this.bb.__string(this.bb_pos+c,i):null}valueType(){let i=this.bb.__offset(this.bb_pos,6);return i?this.bb.readUint8(this.bb_pos+i):0}value(i){let c=this.bb.__offset(this.bb_pos,8);return c?this.bb.__union(i,this.bb_pos+c):null}static startTypeInfo(i){i.startObject(3)}static addDenotation(i,c){i.addFieldOffset(0,c,0)}static addValueType(i,c){i.addFieldInt8(1,c,0)}static addValue(i,c){i.addFieldOffset(2,c,0)}static endTypeInfo(i){return i.endObject()}static createTypeInfo(i,c,r,u){return s.startTypeInfo(i),s.addDenotation(i,c),s.addValueType(i,r),s.addValue(i,u),s.endTypeInfo(i)}}f.TypeInfo=s})(o=n.fbs||={})})(t=e.experimental||={})})(qe||={}),(e=>{let t;(n=>{let o;(f=>{class s{constructor(){this.bb=null,this.bb_pos=0}__init(i,c){return this.bb_pos=i,this.bb=c,this}static getRootAsOperatorSetId(i,c){return(c||new s).__init(i.readInt32(i.position())+i.position(),i)}static getSizePrefixedRootAsOperatorSetId(i,c){return i.setPosition(i.position()+R.SIZE_PREFIX_LENGTH),(c||new s).__init(i.readInt32(i.position())+i.position(),i)}domain(i){let c=this.bb.__offset(this.bb_pos,4);return c?this.bb.__string(this.bb_pos+c,i):null}version(){let i=this.bb.__offset(this.bb_pos,6);return i?this.bb.readInt64(this.bb_pos+i):this.bb.createLong(0,0)}static startOperatorSetId(i){i.startObject(2)}static addDomain(i,c){i.addFieldOffset(0,c,0)}static addVersion(i,c){i.addFieldInt64(1,c,i.createLong(0,0))}static endOperatorSetId(i){return i.endObject()}static createOperatorSetId(i,c,r){return s.startOperatorSetId(i),s.addDomain(i,c),s.addVersion(i,r),s.endOperatorSetId(i)}}f.OperatorSetId=s})(o=n.fbs||={})})(t=e.experimental||={})})(qe||={}),(e=>{let t;(n=>{let o;(f=>{class s{constructor(){this.bb=null,this.bb_pos=0}__init(i,c){return this.bb_pos=i,this.bb=c,this}static getRootAsTensor(i,c){return(c||new s).__init(i.readInt32(i.position())+i.position(),i)}static getSizePrefixedRootAsTensor(i,c){return i.setPosition(i.position()+R.SIZE_PREFIX_LENGTH),(c||new s).__init(i.readInt32(i.position())+i.position(),i)}name(i){let c=this.bb.__offset(this.bb_pos,4);return c?this.bb.__string(this.bb_pos+c,i):null}docString(i){let c=this.bb.__offset(this.bb_pos,6);return c?this.bb.__string(this.bb_pos+c,i):null}dims(i){let c=this.bb.__offset(this.bb_pos,8);return c?this.bb.readInt64(this.bb.__vector(this.bb_pos+c)+i*8):this.bb.createLong(0,0)}dimsLength(){let i=this.bb.__offset(this.bb_pos,8);return i?this.bb.__vector_len(this.bb_pos+i):0}dataType(){let i=this.bb.__offset(this.bb_pos,10);return i?this.bb.readInt32(this.bb_pos+i):0}rawData(i){let c=this.bb.__offset(this.bb_pos,12);return c?this.bb.readUint8(this.bb.__vector(this.bb_pos+c)+i):0}rawDataLength(){let i=this.bb.__offset(this.bb_pos,12);return i?this.bb.__vector_len(this.bb_pos+i):0}rawDataArray(){let i=this.bb.__offset(this.bb_pos,12);return i?new Uint8Array(this.bb.bytes().buffer,this.bb.bytes().byteOffset+this.bb.__vector(this.bb_pos+i),this.bb.__vector_len(this.bb_pos+i)):null}stringData(i,c){let r=this.bb.__offset(this.bb_pos,14);return r?this.bb.__string(this.bb.__vector(this.bb_pos+r)+i*4,c):null}stringDataLength(){let i=this.bb.__offset(this.bb_pos,14);return i?this.bb.__vector_len(this.bb_pos+i):0}static startTensor(i){i.startObject(6)}static addName(i,c){i.addFieldOffset(0,c,0)}static addDocString(i,c){i.addFieldOffset(1,c,0)}static addDims(i,c){i.addFieldOffset(2,c,0)}static createDimsVector(i,c){i.startVector(8,c.length,8);for(let r=c.length-1;r>=0;r--)i.addInt64(c[r]);return i.endVector()}static startDimsVector(i,c){i.startVector(8,c,8)}static addDataType(i,c){i.addFieldInt32(3,c,0)}static addRawData(i,c){i.addFieldOffset(4,c,0)}static createRawDataVector(i,c){i.startVector(1,c.length,1);for(let r=c.length-1;r>=0;r--)i.addInt8(c[r]);return i.endVector()}static startRawDataVector(i,c){i.startVector(1,c,1)}static addStringData(i,c){i.addFieldOffset(5,c,0)}static createStringDataVector(i,c){i.startVector(4,c.length,4);for(let r=c.length-1;r>=0;r--)i.addOffset(c[r]);return i.endVector()}static startStringDataVector(i,c){i.startVector(4,c,4)}static endTensor(i){return i.endObject()}static createTensor(i,c,r,u,l,h,y){return s.startTensor(i),s.addName(i,c),s.addDocString(i,r),s.addDims(i,u),s.addDataType(i,l),s.addRawData(i,h),s.addStringData(i,y),s.endTensor(i)}}f.Tensor=s})(o=n.fbs||={})})(t=e.experimental||={})})(qe||={}),(e=>{let t;(n=>{let o;(f=>{class s{constructor(){this.bb=null,this.bb_pos=0}__init(i,c){return this.bb_pos=i,this.bb=c,this}static getRootAsSparseTensor(i,c){return(c||new s).__init(i.readInt32(i.position())+i.position(),i)}static getSizePrefixedRootAsSparseTensor(i,c){return i.setPosition(i.position()+R.SIZE_PREFIX_LENGTH),(c||new s).__init(i.readInt32(i.position())+i.position(),i)}values(i){let c=this.bb.__offset(this.bb_pos,4);return c?(i||new e.experimental.fbs.Tensor).__init(this.bb.__indirect(this.bb_pos+c),this.bb):null}indices(i){let c=this.bb.__offset(this.bb_pos,6);return c?(i||new e.experimental.fbs.Tensor).__init(this.bb.__indirect(this.bb_pos+c),this.bb):null}dims(i){let c=this.bb.__offset(this.bb_pos,8);return c?this.bb.readInt64(this.bb.__vector(this.bb_pos+c)+i*8):this.bb.createLong(0,0)}dimsLength(){let i=this.bb.__offset(this.bb_pos,8);return i?this.bb.__vector_len(this.bb_pos+i):0}static startSparseTensor(i){i.startObject(3)}static addValues(i,c){i.addFieldOffset(0,c,0)}static addIndices(i,c){i.addFieldOffset(1,c,0)}static addDims(i,c){i.addFieldOffset(2,c,0)}static createDimsVector(i,c){i.startVector(8,c.length,8);for(let r=c.length-1;r>=0;r--)i.addInt64(c[r]);return i.endVector()}static startDimsVector(i,c){i.startVector(8,c,8)}static endSparseTensor(i){return i.endObject()}static createSparseTensor(i,c,r,u){return s.startSparseTensor(i),s.addValues(i,c),s.addIndices(i,r),s.addDims(i,u),s.endSparseTensor(i)}}f.SparseTensor=s})(o=n.fbs||={})})(t=e.experimental||={})})(qe||={}),(e=>{let t;(n=>{let o;(f=>{class s{constructor(){this.bb=null,this.bb_pos=0}__init(i,c){return this.bb_pos=i,this.bb=c,this}static getRootAsAttribute(i,c){return(c||new s).__init(i.readInt32(i.position())+i.position(),i)}static getSizePrefixedRootAsAttribute(i,c){return i.setPosition(i.position()+R.SIZE_PREFIX_LENGTH),(c||new s).__init(i.readInt32(i.position())+i.position(),i)}name(i){let c=this.bb.__offset(this.bb_pos,4);return c?this.bb.__string(this.bb_pos+c,i):null}docString(i){let c=this.bb.__offset(this.bb_pos,6);return c?this.bb.__string(this.bb_pos+c,i):null}type(){let i=this.bb.__offset(this.bb_pos,8);return i?this.bb.readInt32(this.bb_pos+i):0}f(){let i=this.bb.__offset(this.bb_pos,10);return i?this.bb.readFloat32(this.bb_pos+i):0}i(){let i=this.bb.__offset(this.bb_pos,12);return i?this.bb.readInt64(this.bb_pos+i):this.bb.createLong(0,0)}s(i){let c=this.bb.__offset(this.bb_pos,14);return c?this.bb.__string(this.bb_pos+c,i):null}t(i){let c=this.bb.__offset(this.bb_pos,16);return c?(i||new e.experimental.fbs.Tensor).__init(this.bb.__indirect(this.bb_pos+c),this.bb):null}g(i){let c=this.bb.__offset(this.bb_pos,18);return c?(i||new e.experimental.fbs.Graph).__init(this.bb.__indirect(this.bb_pos+c),this.bb):null}floats(i){let c=this.bb.__offset(this.bb_pos,20);return c?this.bb.readFloat32(this.bb.__vector(this.bb_pos+c)+i*4):0}floatsLength(){let i=this.bb.__offset(this.bb_pos,20);return i?this.bb.__vector_len(this.bb_pos+i):0}floatsArray(){let i=this.bb.__offset(this.bb_pos,20);return i?new Float32Array(this.bb.bytes().buffer,this.bb.bytes().byteOffset+this.bb.__vector(this.bb_pos+i),this.bb.__vector_len(this.bb_pos+i)):null}ints(i){let c=this.bb.__offset(this.bb_pos,22);return c?this.bb.readInt64(this.bb.__vector(this.bb_pos+c)+i*8):this.bb.createLong(0,0)}intsLength(){let i=this.bb.__offset(this.bb_pos,22);return i?this.bb.__vector_len(this.bb_pos+i):0}strings(i,c){let r=this.bb.__offset(this.bb_pos,24);return r?this.bb.__string(this.bb.__vector(this.bb_pos+r)+i*4,c):null}stringsLength(){let i=this.bb.__offset(this.bb_pos,24);return i?this.bb.__vector_len(this.bb_pos+i):0}tensors(i,c){let r=this.bb.__offset(this.bb_pos,26);return r?(c||new e.experimental.fbs.Tensor).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos+r)+i*4),this.bb):null}tensorsLength(){let i=this.bb.__offset(this.bb_pos,26);return i?this.bb.__vector_len(this.bb_pos+i):0}graphs(i,c){let r=this.bb.__offset(this.bb_pos,28);return r?(c||new e.experimental.fbs.Graph).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos+r)+i*4),this.bb):null}graphsLength(){let i=this.bb.__offset(this.bb_pos,28);return i?this.bb.__vector_len(this.bb_pos+i):0}static startAttribute(i){i.startObject(13)}static addName(i,c){i.addFieldOffset(0,c,0)}static addDocString(i,c){i.addFieldOffset(1,c,0)}static addType(i,c){i.addFieldInt32(2,c,0)}static addF(i,c){i.addFieldFloat32(3,c,0)}static addI(i,c){i.addFieldInt64(4,c,i.createLong(0,0))}static addS(i,c){i.addFieldOffset(5,c,0)}static addT(i,c){i.addFieldOffset(6,c,0)}static addG(i,c){i.addFieldOffset(7,c,0)}static addFloats(i,c){i.addFieldOffset(8,c,0)}static createFloatsVector(i,c){i.startVector(4,c.length,4);for(let r=c.length-1;r>=0;r--)i.addFloat32(c[r]);return i.endVector()}static startFloatsVector(i,c){i.startVector(4,c,4)}static addInts(i,c){i.addFieldOffset(9,c,0)}static createIntsVector(i,c){i.startVector(8,c.length,8);for(let r=c.length-1;r>=0;r--)i.addInt64(c[r]);return i.endVector()}static startIntsVector(i,c){i.startVector(8,c,8)}static addStrings(i,c){i.addFieldOffset(10,c,0)}static createStringsVector(i,c){i.startVector(4,c.length,4);for(let r=c.length-1;r>=0;r--)i.addOffset(c[r]);return i.endVector()}static startStringsVector(i,c){i.startVector(4,c,4)}static addTensors(i,c){i.addFieldOffset(11,c,0)}static createTensorsVector(i,c){i.startVector(4,c.length,4);for(let r=c.length-1;r>=0;r--)i.addOffset(c[r]);return i.endVector()}static startTensorsVector(i,c){i.startVector(4,c,4)}static addGraphs(i,c){i.addFieldOffset(12,c,0)}static createGraphsVector(i,c){i.startVector(4,c.length,4);for(let r=c.length-1;r>=0;r--)i.addOffset(c[r]);return i.endVector()}static startGraphsVector(i,c){i.startVector(4,c,4)}static endAttribute(i){return i.endObject()}static createAttribute(i,c,r,u,l,h,y,O,S,A,L,$,F,Z){return s.startAttribute(i),s.addName(i,c),s.addDocString(i,r),s.addType(i,u),s.addF(i,l),s.addI(i,h),s.addS(i,y),s.addT(i,O),s.addG(i,S),s.addFloats(i,A),s.addInts(i,L),s.addStrings(i,$),s.addTensors(i,F),s.addGraphs(i,Z),s.endAttribute(i)}}f.Attribute=s})(o=n.fbs||={})})(t=e.experimental||={})})(qe||={}),(e=>{let t;(n=>{let o;(f=>{class s{constructor(){this.bb=null,this.bb_pos=0}__init(i,c){return this.bb_pos=i,this.bb=c,this}static getRootAsGraph(i,c){return(c||new s).__init(i.readInt32(i.position())+i.position(),i)}static getSizePrefixedRootAsGraph(i,c){return i.setPosition(i.position()+R.SIZE_PREFIX_LENGTH),(c||new s).__init(i.readInt32(i.position())+i.position(),i)}initializers(i,c){let r=this.bb.__offset(this.bb_pos,4);return r?(c||new e.experimental.fbs.Tensor).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos+r)+i*4),this.bb):null}initializersLength(){let i=this.bb.__offset(this.bb_pos,4);return i?this.bb.__vector_len(this.bb_pos+i):0}nodeArgs(i,c){let r=this.bb.__offset(this.bb_pos,6);return r?(c||new e.experimental.fbs.ValueInfo).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos+r)+i*4),this.bb):null}nodeArgsLength(){let i=this.bb.__offset(this.bb_pos,6);return i?this.bb.__vector_len(this.bb_pos+i):0}nodes(i,c){let r=this.bb.__offset(this.bb_pos,8);return r?(c||new e.experimental.fbs.Node).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos+r)+i*4),this.bb):null}nodesLength(){let i=this.bb.__offset(this.bb_pos,8);return i?this.bb.__vector_len(this.bb_pos+i):0}maxNodeIndex(){let i=this.bb.__offset(this.bb_pos,10);return i?this.bb.readUint32(this.bb_pos+i):0}nodeEdges(i,c){let r=this.bb.__offset(this.bb_pos,12);return r?(c||new e.experimental.fbs.NodeEdge).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos+r)+i*4),this.bb):null}nodeEdgesLength(){let i=this.bb.__offset(this.bb_pos,12);return i?this.bb.__vector_len(this.bb_pos+i):0}inputs(i,c){let r=this.bb.__offset(this.bb_pos,14);return r?this.bb.__string(this.bb.__vector(this.bb_pos+r)+i*4,c):null}inputsLength(){let i=this.bb.__offset(this.bb_pos,14);return i?this.bb.__vector_len(this.bb_pos+i):0}outputs(i,c){let r=this.bb.__offset(this.bb_pos,16);return r?this.bb.__string(this.bb.__vector(this.bb_pos+r)+i*4,c):null}outputsLength(){let i=this.bb.__offset(this.bb_pos,16);return i?this.bb.__vector_len(this.bb_pos+i):0}sparseInitializers(i,c){let r=this.bb.__offset(this.bb_pos,18);return r?(c||new e.experimental.fbs.SparseTensor).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos+r)+i*4),this.bb):null}sparseInitializersLength(){let i=this.bb.__offset(this.bb_pos,18);return i?this.bb.__vector_len(this.bb_pos+i):0}static startGraph(i){i.startObject(8)}static addInitializers(i,c){i.addFieldOffset(0,c,0)}static createInitializersVector(i,c){i.startVector(4,c.length,4);for(let r=c.length-1;r>=0;r--)i.addOffset(c[r]);return i.endVector()}static startInitializersVector(i,c){i.startVector(4,c,4)}static addNodeArgs(i,c){i.addFieldOffset(1,c,0)}static createNodeArgsVector(i,c){i.startVector(4,c.length,4);for(let r=c.length-1;r>=0;r--)i.addOffset(c[r]);return i.endVector()}static startNodeArgsVector(i,c){i.startVector(4,c,4)}static addNodes(i,c){i.addFieldOffset(2,c,0)}static createNodesVector(i,c){i.startVector(4,c.length,4);for(let r=c.length-1;r>=0;r--)i.addOffset(c[r]);return i.endVector()}static startNodesVector(i,c){i.startVector(4,c,4)}static addMaxNodeIndex(i,c){i.addFieldInt32(3,c,0)}static addNodeEdges(i,c){i.addFieldOffset(4,c,0)}static createNodeEdgesVector(i,c){i.startVector(4,c.length,4);for(let r=c.length-1;r>=0;r--)i.addOffset(c[r]);return i.endVector()}static startNodeEdgesVector(i,c){i.startVector(4,c,4)}static addInputs(i,c){i.addFieldOffset(5,c,0)}static createInputsVector(i,c){i.startVector(4,c.length,4);for(let r=c.length-1;r>=0;r--)i.addOffset(c[r]);return i.endVector()}static startInputsVector(i,c){i.startVector(4,c,4)}static addOutputs(i,c){i.addFieldOffset(6,c,0)}static createOutputsVector(i,c){i.startVector(4,c.length,4);for(let r=c.length-1;r>=0;r--)i.addOffset(c[r]);return i.endVector()}static startOutputsVector(i,c){i.startVector(4,c,4)}static addSparseInitializers(i,c){i.addFieldOffset(7,c,0)}static createSparseInitializersVector(i,c){i.startVector(4,c.length,4);for(let r=c.length-1;r>=0;r--)i.addOffset(c[r]);return i.endVector()}static startSparseInitializersVector(i,c){i.startVector(4,c,4)}static endGraph(i){return i.endObject()}static createGraph(i,c,r,u,l,h,y,O,S){return s.startGraph(i),s.addInitializers(i,c),s.addNodeArgs(i,r),s.addNodes(i,u),s.addMaxNodeIndex(i,l),s.addNodeEdges(i,h),s.addInputs(i,y),s.addOutputs(i,O),s.addSparseInitializers(i,S),s.endGraph(i)}}f.Graph=s})(o=n.fbs||={})})(t=e.experimental||={})})(qe||={}),(e=>{let t;(n=>{let o;(f=>{class s{constructor(){this.bb=null,this.bb_pos=0}__init(i,c){return this.bb_pos=i,this.bb=c,this}static getRootAsModel(i,c){return(c||new s).__init(i.readInt32(i.position())+i.position(),i)}static getSizePrefixedRootAsModel(i,c){return i.setPosition(i.position()+R.SIZE_PREFIX_LENGTH),(c||new s).__init(i.readInt32(i.position())+i.position(),i)}irVersion(){let i=this.bb.__offset(this.bb_pos,4);return i?this.bb.readInt64(this.bb_pos+i):this.bb.createLong(0,0)}opsetImport(i,c){let r=this.bb.__offset(this.bb_pos,6);return r?(c||new e.experimental.fbs.OperatorSetId).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos+r)+i*4),this.bb):null}opsetImportLength(){let i=this.bb.__offset(this.bb_pos,6);return i?this.bb.__vector_len(this.bb_pos+i):0}producerName(i){let c=this.bb.__offset(this.bb_pos,8);return c?this.bb.__string(this.bb_pos+c,i):null}producerVersion(i){let c=this.bb.__offset(this.bb_pos,10);return c?this.bb.__string(this.bb_pos+c,i):null}domain(i){let c=this.bb.__offset(this.bb_pos,12);return c?this.bb.__string(this.bb_pos+c,i):null}modelVersion(){let i=this.bb.__offset(this.bb_pos,14);return i?this.bb.readInt64(this.bb_pos+i):this.bb.createLong(0,0)}docString(i){let c=this.bb.__offset(this.bb_pos,16);return c?this.bb.__string(this.bb_pos+c,i):null}graph(i){let c=this.bb.__offset(this.bb_pos,18);return c?(i||new e.experimental.fbs.Graph).__init(this.bb.__indirect(this.bb_pos+c),this.bb):null}graphDocString(i){let c=this.bb.__offset(this.bb_pos,20);return c?this.bb.__string(this.bb_pos+c,i):null}static startModel(i){i.startObject(9)}static addIrVersion(i,c){i.addFieldInt64(0,c,i.createLong(0,0))}static addOpsetImport(i,c){i.addFieldOffset(1,c,0)}static createOpsetImportVector(i,c){i.startVector(4,c.length,4);for(let r=c.length-1;r>=0;r--)i.addOffset(c[r]);return i.endVector()}static startOpsetImportVector(i,c){i.startVector(4,c,4)}static addProducerName(i,c){i.addFieldOffset(2,c,0)}static addProducerVersion(i,c){i.addFieldOffset(3,c,0)}static addDomain(i,c){i.addFieldOffset(4,c,0)}static addModelVersion(i,c){i.addFieldInt64(5,c,i.createLong(0,0))}static addDocString(i,c){i.addFieldOffset(6,c,0)}static addGraph(i,c){i.addFieldOffset(7,c,0)}static addGraphDocString(i,c){i.addFieldOffset(8,c,0)}static endModel(i){return i.endObject()}static createModel(i,c,r,u,l,h,y,O,S,A){return s.startModel(i),s.addIrVersion(i,c),s.addOpsetImport(i,r),s.addProducerName(i,u),s.addProducerVersion(i,l),s.addDomain(i,h),s.addModelVersion(i,y),s.addDocString(i,O),s.addGraph(i,S),s.addGraphDocString(i,A),s.endModel(i)}}f.Model=s})(o=n.fbs||={})})(t=e.experimental||={})})(qe||={}),(e=>{let t;(n=>{let o;(f=>{class s{constructor(){this.bb=null,this.bb_pos=0}__init(i,c){return this.bb_pos=i,this.bb=c,this}static getRootAsKernelCreateInfos(i,c){return(c||new s).__init(i.readInt32(i.position())+i.position(),i)}static getSizePrefixedRootAsKernelCreateInfos(i,c){return i.setPosition(i.position()+R.SIZE_PREFIX_LENGTH),(c||new s).__init(i.readInt32(i.position())+i.position(),i)}nodeIndices(i){let c=this.bb.__offset(this.bb_pos,4);return c?this.bb.readUint32(this.bb.__vector(this.bb_pos+c)+i*4):0}nodeIndicesLength(){let i=this.bb.__offset(this.bb_pos,4);return i?this.bb.__vector_len(this.bb_pos+i):0}nodeIndicesArray(){let i=this.bb.__offset(this.bb_pos,4);return i?new Uint32Array(this.bb.bytes().buffer,this.bb.bytes().byteOffset+this.bb.__vector(this.bb_pos+i),this.bb.__vector_len(this.bb_pos+i)):null}kernelDefHashes(i){let c=this.bb.__offset(this.bb_pos,6);return c?this.bb.readUint64(this.bb.__vector(this.bb_pos+c)+i*8):this.bb.createLong(0,0)}kernelDefHashesLength(){let i=this.bb.__offset(this.bb_pos,6);return i?this.bb.__vector_len(this.bb_pos+i):0}static startKernelCreateInfos(i){i.startObject(2)}static addNodeIndices(i,c){i.addFieldOffset(0,c,0)}static createNodeIndicesVector(i,c){i.startVector(4,c.length,4);for(let r=c.length-1;r>=0;r--)i.addInt32(c[r]);return i.endVector()}static startNodeIndicesVector(i,c){i.startVector(4,c,4)}static addKernelDefHashes(i,c){i.addFieldOffset(1,c,0)}static createKernelDefHashesVector(i,c){i.startVector(8,c.length,8);for(let r=c.length-1;r>=0;r--)i.addInt64(c[r]);return i.endVector()}static startKernelDefHashesVector(i,c){i.startVector(8,c,8)}static endKernelCreateInfos(i){return i.endObject()}static createKernelCreateInfos(i,c,r){return s.startKernelCreateInfos(i),s.addNodeIndices(i,c),s.addKernelDefHashes(i,r),s.endKernelCreateInfos(i)}}f.KernelCreateInfos=s})(o=n.fbs||={})})(t=e.experimental||={})})(qe||={}),(e=>{let t;(n=>{let o;(f=>{class s{constructor(){this.bb=null,this.bb_pos=0}__init(i,c){return this.bb_pos=i,this.bb=c,this}static getRootAsSubGraphSessionState(i,c){return(c||new s).__init(i.readInt32(i.position())+i.position(),i)}static getSizePrefixedRootAsSubGraphSessionState(i,c){return i.setPosition(i.position()+R.SIZE_PREFIX_LENGTH),(c||new s).__init(i.readInt32(i.position())+i.position(),i)}graphId(i){let c=this.bb.__offset(this.bb_pos,4);return c?this.bb.__string(this.bb_pos+c,i):null}sessionState(i){let c=this.bb.__offset(this.bb_pos,6);return c?(i||new e.experimental.fbs.SessionState).__init(this.bb.__indirect(this.bb_pos+c),this.bb):null}static startSubGraphSessionState(i){i.startObject(2)}static addGraphId(i,c){i.addFieldOffset(0,c,0)}static addSessionState(i,c){i.addFieldOffset(1,c,0)}static endSubGraphSessionState(i){let c=i.endObject();return i.requiredField(c,4),c}static createSubGraphSessionState(i,c,r){return s.startSubGraphSessionState(i),s.addGraphId(i,c),s.addSessionState(i,r),s.endSubGraphSessionState(i)}}f.SubGraphSessionState=s})(o=n.fbs||={})})(t=e.experimental||={})})(qe||={}),(e=>{let t;(n=>{let o;(f=>{class s{constructor(){this.bb=null,this.bb_pos=0}__init(i,c){return this.bb_pos=i,this.bb=c,this}static getRootAsSessionState(i,c){return(c||new s).__init(i.readInt32(i.position())+i.position(),i)}static getSizePrefixedRootAsSessionState(i,c){return i.setPosition(i.position()+R.SIZE_PREFIX_LENGTH),(c||new s).__init(i.readInt32(i.position())+i.position(),i)}kernels(i){let c=this.bb.__offset(this.bb_pos,4);return c?(i||new e.experimental.fbs.KernelCreateInfos).__init(this.bb.__indirect(this.bb_pos+c),this.bb):null}subGraphSessionStates(i,c){let r=this.bb.__offset(this.bb_pos,6);return r?(c||new e.experimental.fbs.SubGraphSessionState).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos+r)+i*4),this.bb):null}subGraphSessionStatesLength(){let i=this.bb.__offset(this.bb_pos,6);return i?this.bb.__vector_len(this.bb_pos+i):0}static startSessionState(i){i.startObject(2)}static addKernels(i,c){i.addFieldOffset(0,c,0)}static addSubGraphSessionStates(i,c){i.addFieldOffset(1,c,0)}static createSubGraphSessionStatesVector(i,c){i.startVector(4,c.length,4);for(let r=c.length-1;r>=0;r--)i.addOffset(c[r]);return i.endVector()}static startSubGraphSessionStatesVector(i,c){i.startVector(4,c,4)}static endSessionState(i){return i.endObject()}static createSessionState(i,c,r){return s.startSessionState(i),s.addKernels(i,c),s.addSubGraphSessionStates(i,r),s.endSessionState(i)}}f.SessionState=s})(o=n.fbs||={})})(t=e.experimental||={})})(qe||={}),(e=>{let t;(n=>{let o;(f=>{class s{constructor(){this.bb=null,this.bb_pos=0}__init(i,c){return this.bb_pos=i,this.bb=c,this}static getRootAsInferenceSession(i,c){return(c||new s).__init(i.readInt32(i.position())+i.position(),i)}static getSizePrefixedRootAsInferenceSession(i,c){return i.setPosition(i.position()+R.SIZE_PREFIX_LENGTH),(c||new s).__init(i.readInt32(i.position())+i.position(),i)}static bufferHasIdentifier(i){return i.__has_identifier("ORTM")}ortVersion(i){let c=this.bb.__offset(this.bb_pos,4);return c?this.bb.__string(this.bb_pos+c,i):null}model(i){let c=this.bb.__offset(this.bb_pos,6);return c?(i||new e.experimental.fbs.Model).__init(this.bb.__indirect(this.bb_pos+c),this.bb):null}sessionState(i){let c=this.bb.__offset(this.bb_pos,8);return c?(i||new e.experimental.fbs.SessionState).__init(this.bb.__indirect(this.bb_pos+c),this.bb):null}static startInferenceSession(i){i.startObject(3)}static addOrtVersion(i,c){i.addFieldOffset(0,c,0)}static addModel(i,c){i.addFieldOffset(1,c,0)}static addSessionState(i,c){i.addFieldOffset(2,c,0)}static endInferenceSession(i){return i.endObject()}static finishInferenceSessionBuffer(i,c){i.finish(c,"ORTM")}static finishSizePrefixedInferenceSessionBuffer(i,c){i.finish(c,"ORTM",!0)}static createInferenceSession(i,c,r,u){return s.startInferenceSession(i),s.addOrtVersion(i,c),s.addModel(i,r),s.addSessionState(i,u),s.endInferenceSession(i)}}f.InferenceSession=s})(o=n.fbs||={})})(t=e.experimental||={})})(qe||={})}),dS=it((e,t)=>{"use strict";t.exports=n;function n(o,f){for(var s=new Array(arguments.length-1),p=0,i=2,c=!0;i<arguments.length;)s[p++]=arguments[i++];return new Promise(function(r,u){s[p]=function(l){if(c)if(c=!1,l)u(l);else{for(var h=new Array(arguments.length-1),y=0;y<h.length;)h[y++]=arguments[y];r.apply(null,h)}};try{o.apply(f||null,s)}catch(l){c&&(c=!1,u(l))}})}}),pS=it(e=>{"use strict";var t=e;t.length=function(p){var i=p.length;if(!i)return 0;for(var c=0;--i%4>1&&p.charAt(i)==="=";)++c;return Math.ceil(p.length*3)/4-c};var n=new Array(64),o=new Array(123);for(f=0;f<64;)o[n[f]=f<26?f+65:f<52?f+71:f<62?f-4:f-59|43]=f++;var f;t.encode=function(p,i,c){for(var r=null,u=[],l=0,h=0,y;i<c;){var O=p[i++];switch(h){case 0:u[l++]=n[O>>2],y=(O&3)<<4,h=1;break;case 1:u[l++]=n[y|O>>4],y=(O&15)<<2,h=2;break;case 2:u[l++]=n[y|O>>6],u[l++]=n[O&63],h=0;break}l>8191&&((r||(r=[])).push(String.fromCharCode.apply(String,u)),l=0)}return h&&(u[l++]=n[y],u[l++]=61,h===1&&(u[l++]=61)),r?(l&&r.push(String.fromCharCode.apply(String,u.slice(0,l))),r.join("")):String.fromCharCode.apply(String,u.slice(0,l))};var s="invalid encoding";t.decode=function(p,i,c){for(var r=c,u=0,l,h=0;h<p.length;){var y=p.charCodeAt(h++);if(y===61&&u>1)break;if((y=o[y])===void 0)throw Error(s);switch(u){case 0:l=y,u=1;break;case 1:i[c++]=l<<2|(y&48)>>4,l=y,u=2;break;case 2:i[c++]=(l&15)<<4|(y&60)>>2,l=y,u=3;break;case 3:i[c++]=(l&3)<<6|y,u=0;break}}if(u===1)throw Error(s);return c-r},t.test=function(p){return/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(p)}}),hS=it((e,t)=>{"use strict";t.exports=n;function n(){this._listeners={}}n.prototype.on=function(o,f,s){return(this._listeners[o]||(this._listeners[o]=[])).push({fn:f,ctx:s||this}),this},n.prototype.off=function(o,f){if(o===void 0)this._listeners={};else if(f===void 0)this._listeners[o]=[];else for(var s=this._listeners[o],p=0;p<s.length;)s[p].fn===f?s.splice(p,1):++p;return this},n.prototype.emit=function(o){var f=this._listeners[o];if(f){for(var s=[],p=1;p<arguments.length;)s.push(arguments[p++]);for(p=0;p<f.length;)f[p].fn.apply(f[p++].ctx,s)}return this}}),gS=it((e,t)=>{"use strict";t.exports=n(n);function n(i){return typeof Float32Array<"u"?(function(){var c=new Float32Array([-0]),r=new Uint8Array(c.buffer),u=r[3]===128;function l(S,A,L){c[0]=S,A[L]=r[0],A[L+1]=r[1],A[L+2]=r[2],A[L+3]=r[3]}function h(S,A,L){c[0]=S,A[L]=r[3],A[L+1]=r[2],A[L+2]=r[1],A[L+3]=r[0]}i.writeFloatLE=u?l:h,i.writeFloatBE=u?h:l;function y(S,A){return r[0]=S[A],r[1]=S[A+1],r[2]=S[A+2],r[3]=S[A+3],c[0]}function O(S,A){return r[3]=S[A],r[2]=S[A+1],r[1]=S[A+2],r[0]=S[A+3],c[0]}i.readFloatLE=u?y:O,i.readFloatBE=u?O:y})():(function(){function c(u,l,h,y){var O=l<0?1:0;if(O&&(l=-l),l===0)u(1/l>0?0:2147483648,h,y);else if(isNaN(l))u(2143289344,h,y);else if(l>34028234663852886e22)u((O<<31|2139095040)>>>0,h,y);else if(l<11754943508222875e-54)u((O<<31|Math.round(l/1401298464324817e-60))>>>0,h,y);else{var S=Math.floor(Math.log(l)/Math.LN2),A=Math.round(l*Math.pow(2,-S)*8388608)&8388607;u((O<<31|S+127<<23|A)>>>0,h,y)}}i.writeFloatLE=c.bind(null,o),i.writeFloatBE=c.bind(null,f);function r(u,l,h){var y=u(l,h),O=(y>>31)*2+1,S=y>>>23&255,A=y&8388607;return S===255?A?NaN:O*(1/0):S===0?O*1401298464324817e-60*A:O*Math.pow(2,S-150)*(A+8388608)}i.readFloatLE=r.bind(null,s),i.readFloatBE=r.bind(null,p)})(),typeof Float64Array<"u"?(function(){var c=new Float64Array([-0]),r=new Uint8Array(c.buffer),u=r[7]===128;function l(S,A,L){c[0]=S,A[L]=r[0],A[L+1]=r[1],A[L+2]=r[2],A[L+3]=r[3],A[L+4]=r[4],A[L+5]=r[5],A[L+6]=r[6],A[L+7]=r[7]}function h(S,A,L){c[0]=S,A[L]=r[7],A[L+1]=r[6],A[L+2]=r[5],A[L+3]=r[4],A[L+4]=r[3],A[L+5]=r[2],A[L+6]=r[1],A[L+7]=r[0]}i.writeDoubleLE=u?l:h,i.writeDoubleBE=u?h:l;function y(S,A){return r[0]=S[A],r[1]=S[A+1],r[2]=S[A+2],r[3]=S[A+3],r[4]=S[A+4],r[5]=S[A+5],r[6]=S[A+6],r[7]=S[A+7],c[0]}function O(S,A){return r[7]=S[A],r[6]=S[A+1],r[5]=S[A+2],r[4]=S[A+3],r[3]=S[A+4],r[2]=S[A+5],r[1]=S[A+6],r[0]=S[A+7],c[0]}i.readDoubleLE=u?y:O,i.readDoubleBE=u?O:y})():(function(){function c(u,l,h,y,O,S){var A=y<0?1:0;if(A&&(y=-y),y===0)u(0,O,S+l),u(1/y>0?0:2147483648,O,S+h);else if(isNaN(y))u(0,O,S+l),u(2146959360,O,S+h);else if(y>17976931348623157e292)u(0,O,S+l),u((A<<31|2146435072)>>>0,O,S+h);else{var L;if(y<22250738585072014e-324)L=y/5e-324,u(L>>>0,O,S+l),u((A<<31|L/4294967296)>>>0,O,S+h);else{var $=Math.floor(Math.log(y)/Math.LN2);$===1024&&($=1023),L=y*Math.pow(2,-$),u(L*4503599627370496>>>0,O,S+l),u((A<<31|$+1023<<20|L*1048576&1048575)>>>0,O,S+h)}}}i.writeDoubleLE=c.bind(null,o,0,4),i.writeDoubleBE=c.bind(null,f,4,0);function r(u,l,h,y,O){var S=u(y,O+l),A=u(y,O+h),L=(A>>31)*2+1,$=A>>>20&2047,F=4294967296*(A&1048575)+S;return $===2047?F?NaN:L*(1/0):$===0?L*5e-324*F:L*Math.pow(2,$-1075)*(F+4503599627370496)}i.readDoubleLE=r.bind(null,s,0,4),i.readDoubleBE=r.bind(null,p,4,0)})(),i}function o(i,c,r){c[r]=i&255,c[r+1]=i>>>8&255,c[r+2]=i>>>16&255,c[r+3]=i>>>24}function f(i,c,r){c[r]=i>>>24,c[r+1]=i>>>16&255,c[r+2]=i>>>8&255,c[r+3]=i&255}function s(i,c){return(i[c]|i[c+1]<<8|i[c+2]<<16|i[c+3]<<24)>>>0}function p(i,c){return(i[c]<<24|i[c+1]<<16|i[c+2]<<8|i[c+3])>>>0}}),mS=it((exports,module)=>{"use strict";module.exports=inquire;function inquire(moduleName){try{var mod=eval("quire".replace(/^/,"re"))(moduleName);if(mod&&(mod.length||Object.keys(mod).length))return mod}catch(e){}return null}}),yS=it(e=>{"use strict";var t=e;t.length=function(n){for(var o=0,f=0,s=0;s<n.length;++s)f=n.charCodeAt(s),f<128?o+=1:f<2048?o+=2:(f&64512)===55296&&(n.charCodeAt(s+1)&64512)===56320?(++s,o+=4):o+=3;return o},t.read=function(n,o,f){var s=f-o;if(s<1)return"";for(var p=null,i=[],c=0,r;o<f;)r=n[o++],r<128?i[c++]=r:r>191&&r<224?i[c++]=(r&31)<<6|n[o++]&63:r>239&&r<365?(r=((r&7)<<18|(n[o++]&63)<<12|(n[o++]&63)<<6|n[o++]&63)-65536,i[c++]=55296+(r>>10),i[c++]=56320+(r&1023)):i[c++]=(r&15)<<12|(n[o++]&63)<<6|n[o++]&63,c>8191&&((p||(p=[])).push(String.fromCharCode.apply(String,i)),c=0);return p?(c&&p.push(String.fromCharCode.apply(String,i.slice(0,c))),p.join("")):String.fromCharCode.apply(String,i.slice(0,c))},t.write=function(n,o,f){for(var s=f,p,i,c=0;c<n.length;++c)p=n.charCodeAt(c),p<128?o[f++]=p:p<2048?(o[f++]=p>>6|192,o[f++]=p&63|128):(p&64512)===55296&&((i=n.charCodeAt(c+1))&64512)===56320?(p=65536+((p&1023)<<10)+(i&1023),++c,o[f++]=p>>18|240,o[f++]=p>>12&63|128,o[f++]=p>>6&63|128,o[f++]=p&63|128):(o[f++]=p>>12|224,o[f++]=p>>6&63|128,o[f++]=p&63|128);return f-s}}),bS=it((e,t)=>{"use strict";t.exports=n;function n(o,f,s){var p=s||8192,i=p>>>1,c=null,r=p;return function(u){if(u<1||u>i)return o(u);r+u>p&&(c=o(p),r=0);var l=f.call(c,r,r+=u);return r&7&&(r=(r|7)+1),l}}}),vS=it((e,t)=>{"use strict";t.exports=o;var n=ji();function o(i,c){this.lo=i>>>0,this.hi=c>>>0}var f=o.zero=new o(0,0);f.toNumber=function(){return 0},f.zzEncode=f.zzDecode=function(){return this},f.length=function(){return 1};var s=o.zeroHash="\0\0\0\0\0\0\0\0";o.fromNumber=function(i){if(i===0)return f;var c=i<0;c&&(i=-i);var r=i>>>0,u=(i-r)/4294967296>>>0;return c&&(u=~u>>>0,r=~r>>>0,++r>4294967295&&(r=0,++u>4294967295&&(u=0))),new o(r,u)},o.from=function(i){if(typeof i=="number")return o.fromNumber(i);if(n.isString(i))if(n.Long)i=n.Long.fromString(i);else return o.fromNumber(parseInt(i,10));return i.low||i.high?new o(i.low>>>0,i.high>>>0):f},o.prototype.toNumber=function(i){if(!i&&this.hi>>>31){var c=~this.lo+1>>>0,r=~this.hi>>>0;return c||(r=r+1>>>0),-(c+r*4294967296)}return this.lo+this.hi*4294967296},o.prototype.toLong=function(i){return n.Long?new n.Long(this.lo|0,this.hi|0,!!i):{low:this.lo|0,high:this.hi|0,unsigned:!!i}};var p=String.prototype.charCodeAt;o.fromHash=function(i){return i===s?f:new o((p.call(i,0)|p.call(i,1)<<8|p.call(i,2)<<16|p.call(i,3)<<24)>>>0,(p.call(i,4)|p.call(i,5)<<8|p.call(i,6)<<16|p.call(i,7)<<24)>>>0)},o.prototype.toHash=function(){return String.fromCharCode(this.lo&255,this.lo>>>8&255,this.lo>>>16&255,this.lo>>>24,this.hi&255,this.hi>>>8&255,this.hi>>>16&255,this.hi>>>24)},o.prototype.zzEncode=function(){var i=this.hi>>31;return this.hi=((this.hi<<1|this.lo>>>31)^i)>>>0,this.lo=(this.lo<<1^i)>>>0,this},o.prototype.zzDecode=function(){var i=-(this.lo&1);return this.lo=((this.lo>>>1|this.hi<<31)^i)>>>0,this.hi=(this.hi>>>1^i)>>>0,this},o.prototype.length=function(){var i=this.lo,c=(this.lo>>>28|this.hi<<4)>>>0,r=this.hi>>>24;return r===0?c===0?i<16384?i<128?1:2:i<2097152?3:4:c<16384?c<128?5:6:c<2097152?7:8:r<128?9:10}}),ji=it(e=>{"use strict";var t=e;t.asPromise=dS(),t.base64=pS(),t.EventEmitter=hS(),t.float=gS(),t.inquire=mS(),t.utf8=yS(),t.pool=bS(),t.LongBits=vS(),t.isNode=!!(typeof global<"u"&&global&&global.process&&global.process.versions&&global.process.versions.node),t.global=t.isNode&&global||typeof window<"u"&&window||typeof self<"u"&&self||e,t.emptyArray=Object.freeze?Object.freeze([]):[],t.emptyObject=Object.freeze?Object.freeze({}):{},t.isInteger=Number.isInteger||function(f){return typeof f=="number"&&isFinite(f)&&Math.floor(f)===f},t.isString=function(f){return typeof f=="string"||f instanceof String},t.isObject=function(f){return f&&typeof f=="object"},t.isset=t.isSet=function(f,s){var p=f[s];return p!=null&&f.hasOwnProperty(s)?typeof p!="object"||(Array.isArray(p)?p.length:Object.keys(p).length)>0:!1},t.Buffer=(function(){try{var f=t.inquire("buffer").Buffer;return f.prototype.utf8Write?f:null}catch{return null}})(),t._Buffer_from=null,t._Buffer_allocUnsafe=null,t.newBuffer=function(f){return typeof f=="number"?t.Buffer?t._Buffer_allocUnsafe(f):new t.Array(f):t.Buffer?t._Buffer_from(f):typeof Uint8Array>"u"?f:new Uint8Array(f)},t.Array=typeof Uint8Array<"u"?Uint8Array:Array,t.Long=t.global.dcodeIO&&t.global.dcodeIO.Long||t.global.Long||t.inquire("long"),t.key2Re=/^true|false|0|1$/,t.key32Re=/^-?(?:0|[1-9][0-9]*)$/,t.key64Re=/^(?:[\\x00-\\xff]{8}|-?(?:0|[1-9][0-9]*))$/,t.longToHash=function(f){return f?t.LongBits.from(f).toHash():t.LongBits.zeroHash},t.longFromHash=function(f,s){var p=t.LongBits.fromHash(f);return t.Long?t.Long.fromBits(p.lo,p.hi,s):p.toNumber(!!s)};function n(f,s,p){for(var i=Object.keys(s),c=0;c<i.length;++c)(f[i[c]]===void 0||!p)&&(f[i[c]]=s[i[c]]);return f}t.merge=n,t.lcFirst=function(f){return f.charAt(0).toLowerCase()+f.substring(1)};function o(f){function s(p,i){if(!(this instanceof s))return new s(p,i);Object.defineProperty(this,"message",{get:function(){return p}}),Error.captureStackTrace?Error.captureStackTrace(this,s):Object.defineProperty(this,"stack",{value:new Error().stack||""}),i&&n(this,i)}return s.prototype=Object.create(Error.prototype,{constructor:{value:s,writable:!0,enumerable:!1,configurable:!0},name:{get:function(){return f},set:void 0,enumerable:!1,configurable:!0},toString:{value:function(){return this.name+": "+this.message},writable:!0,enumerable:!1,configurable:!0}}),s}t.newError=o,t.ProtocolError=o("ProtocolError"),t.oneOfGetter=function(f){for(var s={},p=0;p<f.length;++p)s[f[p]]=1;return function(){for(var i=Object.keys(this),c=i.length-1;c>-1;--c)if(s[i[c]]===1&&this[i[c]]!==void 0&&this[i[c]]!==null)return i[c]}},t.oneOfSetter=function(f){return function(s){for(var p=0;p<f.length;++p)f[p]!==s&&delete this[f[p]]}},t.toJSONOptions={longs:String,enums:String,bytes:String,json:!0},t._configure=function(){var f=t.Buffer;if(!f){t._Buffer_from=t._Buffer_allocUnsafe=null;return}t._Buffer_from=f.from!==Uint8Array.from&&f.from||function(s,p){return new f(s,p)},t._Buffer_allocUnsafe=f.allocUnsafe||function(s){return new f(s)}}}),ny=it((e,t)=>{"use strict";t.exports=u;var n=ji(),o,f=n.LongBits,s=n.base64,p=n.utf8;function i($,F,Z){this.fn=$,this.len=F,this.next=void 0,this.val=Z}function c(){}function r($){this.head=$.head,this.tail=$.tail,this.len=$.len,this.next=$.states}function u(){this.len=0,this.head=new i(c,0,0),this.tail=this.head,this.states=null}var l=function(){return n.Buffer?function(){return(u.create=function(){return new o})()}:function(){return new u}};u.create=l(),u.alloc=function($){return new n.Array($)},n.Array!==Array&&(u.alloc=n.pool(u.alloc,n.Array.prototype.subarray)),u.prototype._push=function($,F,Z){return this.tail=this.tail.next=new i($,F,Z),this.len+=F,this};function h($,F,Z){F[Z]=$&255}function y($,F,Z){for(;$>127;)F[Z++]=$&127|128,$>>>=7;F[Z]=$}function O($,F){this.len=$,this.next=void 0,this.val=F}O.prototype=Object.create(i.prototype),O.prototype.fn=y,u.prototype.uint32=function($){return this.len+=(this.tail=this.tail.next=new O(($=$>>>0)<128?1:$<16384?2:$<2097152?3:$<268435456?4:5,$)).len,this},u.prototype.int32=function($){return $<0?this._push(S,10,f.fromNumber($)):this.uint32($)},u.prototype.sint32=function($){return this.uint32(($<<1^$>>31)>>>0)};function S($,F,Z){for(;$.hi;)F[Z++]=$.lo&127|128,$.lo=($.lo>>>7|$.hi<<25)>>>0,$.hi>>>=7;for(;$.lo>127;)F[Z++]=$.lo&127|128,$.lo=$.lo>>>7;F[Z++]=$.lo}u.prototype.uint64=function($){var F=f.from($);return this._push(S,F.length(),F)},u.prototype.int64=u.prototype.uint64,u.prototype.sint64=function($){var F=f.from($).zzEncode();return this._push(S,F.length(),F)},u.prototype.bool=function($){return this._push(h,1,$?1:0)};function A($,F,Z){F[Z]=$&255,F[Z+1]=$>>>8&255,F[Z+2]=$>>>16&255,F[Z+3]=$>>>24}u.prototype.fixed32=function($){return this._push(A,4,$>>>0)},u.prototype.sfixed32=u.prototype.fixed32,u.prototype.fixed64=function($){var F=f.from($);return this._push(A,4,F.lo)._push(A,4,F.hi)},u.prototype.sfixed64=u.prototype.fixed64,u.prototype.float=function($){return this._push(n.float.writeFloatLE,4,$)},u.prototype.double=function($){return this._push(n.float.writeDoubleLE,8,$)};var L=n.Array.prototype.set?function($,F,Z){F.set($,Z)}:function($,F,Z){for(var ae=0;ae<$.length;++ae)F[Z+ae]=$[ae]};u.prototype.bytes=function($){var F=$.length>>>0;if(!F)return this._push(h,1,0);if(n.isString($)){var Z=u.alloc(F=s.length($));s.decode($,Z,0),$=Z}return this.uint32(F)._push(L,F,$)},u.prototype.string=function($){var F=p.length($);return F?this.uint32(F)._push(p.write,F,$):this._push(h,1,0)},u.prototype.fork=function(){return this.states=new r(this),this.head=this.tail=new i(c,0,0),this.len=0,this},u.prototype.reset=function(){return this.states?(this.head=this.states.head,this.tail=this.states.tail,this.len=this.states.len,this.states=this.states.next):(this.head=this.tail=new i(c,0,0),this.len=0),this},u.prototype.ldelim=function(){var $=this.head,F=this.tail,Z=this.len;return this.reset().uint32(Z),Z&&(this.tail.next=$.next,this.tail=F,this.len+=Z),this},u.prototype.finish=function(){for(var $=this.head.next,F=this.constructor.alloc(this.len),Z=0;$;)$.fn($.val,F,Z),Z+=$.len,$=$.next;return F},u._configure=function($){o=$,u.create=l(),o._configure()}}),wS=it((e,t)=>{"use strict";t.exports=f;var n=ny();(f.prototype=Object.create(n.prototype)).constructor=f;var o=ji();function f(){n.call(this)}f._configure=function(){f.alloc=o._Buffer_allocUnsafe,f.writeBytesBuffer=o.Buffer&&o.Buffer.prototype instanceof Uint8Array&&o.Buffer.prototype.set.name==="set"?function(p,i,c){i.set(p,c)}:function(p,i,c){if(p.copy)p.copy(i,c,0,p.length);else for(var r=0;r<p.length;)i[c++]=p[r++]}},f.prototype.bytes=function(p){o.isString(p)&&(p=o._Buffer_from(p,"base64"));var i=p.length>>>0;return this.uint32(i),i&&this._push(f.writeBytesBuffer,i,p),this};function s(p,i,c){p.length<40?o.utf8.write(p,i,c):i.utf8Write?i.utf8Write(p,c):i.write(p,c)}f.prototype.string=function(p){var i=o.Buffer.byteLength(p);return this.uint32(i),i&&this._push(s,i,p),this},f._configure()}),iy=it((e,t)=>{"use strict";t.exports=i;var n=ji(),o,f=n.LongBits,s=n.utf8;function p(y,O){return RangeError("index out of range: "+y.pos+" + "+(O||1)+" > "+y.len)}function i(y){this.buf=y,this.pos=0,this.len=y.length}var c=typeof Uint8Array<"u"?function(y){if(y instanceof Uint8Array||Array.isArray(y))return new i(y);throw Error("illegal buffer")}:function(y){if(Array.isArray(y))return new i(y);throw Error("illegal buffer")},r=function(){return n.Buffer?function(y){return(i.create=function(O){return n.Buffer.isBuffer(O)?new o(O):c(O)})(y)}:c};i.create=r(),i.prototype._slice=n.Array.prototype.subarray||n.Array.prototype.slice,i.prototype.uint32=(function(){var y=4294967295;return function(){if(y=(this.buf[this.pos]&127)>>>0,this.buf[this.pos++]<128||(y=(y|(this.buf[this.pos]&127)<<7)>>>0,this.buf[this.pos++]<128)||(y=(y|(this.buf[this.pos]&127)<<14)>>>0,this.buf[this.pos++]<128)||(y=(y|(this.buf[this.pos]&127)<<21)>>>0,this.buf[this.pos++]<128)||(y=(y|(this.buf[this.pos]&15)<<28)>>>0,this.buf[this.pos++]<128))return y;if((this.pos+=5)>this.len)throw this.pos=this.len,p(this,10);return y}})(),i.prototype.int32=function(){return this.uint32()|0},i.prototype.sint32=function(){var y=this.uint32();return y>>>1^-(y&1)|0};function u(){var y=new f(0,0),O=0;if(this.len-this.pos>4){for(;O<4;++O)if(y.lo=(y.lo|(this.buf[this.pos]&127)<<O*7)>>>0,this.buf[this.pos++]<128)return y;if(y.lo=(y.lo|(this.buf[this.pos]&127)<<28)>>>0,y.hi=(y.hi|(this.buf[this.pos]&127)>>4)>>>0,this.buf[this.pos++]<128)return y;O=0}else{for(;O<3;++O){if(this.pos>=this.len)throw p(this);if(y.lo=(y.lo|(this.buf[this.pos]&127)<<O*7)>>>0,this.buf[this.pos++]<128)return y}return y.lo=(y.lo|(this.buf[this.pos++]&127)<<O*7)>>>0,y}if(this.len-this.pos>4){for(;O<5;++O)if(y.hi=(y.hi|(this.buf[this.pos]&127)<<O*7+3)>>>0,this.buf[this.pos++]<128)return y}else for(;O<5;++O){if(this.pos>=this.len)throw p(this);if(y.hi=(y.hi|(this.buf[this.pos]&127)<<O*7+3)>>>0,this.buf[this.pos++]<128)return y}throw Error("invalid varint encoding")}i.prototype.bool=function(){return this.uint32()!==0};function l(y,O){return(y[O-4]|y[O-3]<<8|y[O-2]<<16|y[O-1]<<24)>>>0}i.prototype.fixed32=function(){if(this.pos+4>this.len)throw p(this,4);return l(this.buf,this.pos+=4)},i.prototype.sfixed32=function(){if(this.pos+4>this.len)throw p(this,4);return l(this.buf,this.pos+=4)|0};function h(){if(this.pos+8>this.len)throw p(this,8);return new f(l(this.buf,this.pos+=4),l(this.buf,this.pos+=4))}i.prototype.float=function(){if(this.pos+4>this.len)throw p(this,4);var y=n.float.readFloatLE(this.buf,this.pos);return this.pos+=4,y},i.prototype.double=function(){if(this.pos+8>this.len)throw p(this,4);var y=n.float.readDoubleLE(this.buf,this.pos);return this.pos+=8,y},i.prototype.bytes=function(){var y=this.uint32(),O=this.pos,S=this.pos+y;if(S>this.len)throw p(this,y);return this.pos+=y,Array.isArray(this.buf)?this.buf.slice(O,S):O===S?new this.buf.constructor(0):this._slice.call(this.buf,O,S)},i.prototype.string=function(){var y=this.bytes();return s.read(y,0,y.length)},i.prototype.skip=function(y){if(typeof y=="number"){if(this.pos+y>this.len)throw p(this,y);this.pos+=y}else do if(this.pos>=this.len)throw p(this);while(this.buf[this.pos++]&128);return this},i.prototype.skipType=function(y){switch(y){case 0:this.skip();break;case 1:this.skip(8);break;case 2:this.skip(this.uint32());break;case 3:for(;(y=this.uint32()&7)!==4;)this.skipType(y);break;case 5:this.skip(4);break;default:throw Error("invalid wire type "+y+" at offset "+this.pos)}return this},i._configure=function(y){o=y,i.create=r(),o._configure();var O=n.Long?"toLong":"toNumber";n.merge(i.prototype,{int64:function(){return u.call(this)[O](!1)},uint64:function(){return u.call(this)[O](!0)},sint64:function(){return u.call(this).zzDecode()[O](!1)},fixed64:function(){return h.call(this)[O](!0)},sfixed64:function(){return h.call(this)[O](!1)}})}}),_S=it((e,t)=>{"use strict";t.exports=f;var n=iy();(f.prototype=Object.create(n.prototype)).constructor=f;var o=ji();function f(s){n.call(this,s)}f._configure=function(){o.Buffer&&(f.prototype._slice=o.Buffer.prototype.slice)},f.prototype.string=function(){var s=this.uint32();return this.buf.utf8Slice?this.buf.utf8Slice(this.pos,this.pos=Math.min(this.pos+s,this.len)):this.buf.toString("utf-8",this.pos,this.pos=Math.min(this.pos+s,this.len))},f._configure()}),xS=it((e,t)=>{"use strict";t.exports=o;var n=ji();(o.prototype=Object.create(n.EventEmitter.prototype)).constructor=o;function o(f,s,p){if(typeof f!="function")throw TypeError("rpcImpl must be a function");n.EventEmitter.call(this),this.rpcImpl=f,this.requestDelimited=!!s,this.responseDelimited=!!p}o.prototype.rpcCall=function f(s,p,i,c,r){if(!c)throw TypeError("request must be specified");var u=this;if(!r)return n.asPromise(f,u,s,p,i,c);if(!u.rpcImpl){setTimeout(function(){r(Error("already ended"))},0);return}try{return u.rpcImpl(s,p[u.requestDelimited?"encodeDelimited":"encode"](c).finish(),function(l,h){if(l)return u.emit("error",l,s),r(l);if(h===null){u.end(!0);return}if(!(h instanceof i))try{h=i[u.responseDelimited?"decodeDelimited":"decode"](h)}catch(y){return u.emit("error",y,s),r(y)}return u.emit("data",h,s),r(null,h)})}catch(l){u.emit("error",l,s),setTimeout(function(){r(l)},0);return}},o.prototype.end=function(f){return this.rpcImpl&&(f||this.rpcImpl(null,null,null),this.rpcImpl=null,this.emit("end").off()),this}}),TS=it(e=>{"use strict";var t=e;t.Service=xS()}),OS=it((e,t)=>{"use strict";t.exports={}}),SS=it(e=>{"use strict";var t=e;t.build="minimal",t.Writer=ny(),t.BufferWriter=wS(),t.Reader=iy(),t.BufferReader=_S(),t.util=ji(),t.rpc=TS(),t.roots=OS(),t.configure=n;function n(){t.util._configure(),t.Writer._configure(t.BufferWriter),t.Reader._configure(t.BufferReader)}n()}),ES=it((e,t)=>{"use strict";t.exports=SS()}),Ya=it((e,t)=>{"use strict";var n=ES(),o=n.Reader,f=n.Writer,s=n.util,p=n.roots.default||(n.roots.default={});p.onnx=(function(){var i={};return i.Version=(function(){var c={},r=Object.create(c);return r[c[0]="_START_VERSION"]=0,r[c[1]="IR_VERSION_2017_10_10"]=1,r[c[2]="IR_VERSION_2017_10_30"]=2,r[c[3]="IR_VERSION_2017_11_3"]=3,r[c[4]="IR_VERSION_2019_1_22"]=4,r[c[5]="IR_VERSION_2019_3_18"]=5,r[c[6]="IR_VERSION_2019_9_19"]=6,r[c[7]="IR_VERSION_2020_5_8"]=7,r[c[8]="IR_VERSION_2021_7_30"]=8,r[c[9]="IR_VERSION"]=9,r})(),i.AttributeProto=(function(){function c(r){if(this.floats=[],this.ints=[],this.strings=[],this.tensors=[],this.graphs=[],this.sparseTensors=[],this.typeProtos=[],r)for(var u=Object.keys(r),l=0;l<u.length;++l)r[u[l]]!=null&&(this[u[l]]=r[u[l]])}return c.prototype.name="",c.prototype.refAttrName="",c.prototype.docString="",c.prototype.type=0,c.prototype.f=0,c.prototype.i=s.Long?s.Long.fromBits(0,0,!1):0,c.prototype.s=s.newBuffer([]),c.prototype.t=null,c.prototype.g=null,c.prototype.sparseTensor=null,c.prototype.tp=null,c.prototype.floats=s.emptyArray,c.prototype.ints=s.emptyArray,c.prototype.strings=s.emptyArray,c.prototype.tensors=s.emptyArray,c.prototype.graphs=s.emptyArray,c.prototype.sparseTensors=s.emptyArray,c.prototype.typeProtos=s.emptyArray,c.create=function(r){return new c(r)},c.encode=function(r,u){if(u||(u=f.create()),r.name!=null&&Object.hasOwnProperty.call(r,"name")&&u.uint32(10).string(r.name),r.f!=null&&Object.hasOwnProperty.call(r,"f")&&u.uint32(21).float(r.f),r.i!=null&&Object.hasOwnProperty.call(r,"i")&&u.uint32(24).int64(r.i),r.s!=null&&Object.hasOwnProperty.call(r,"s")&&u.uint32(34).bytes(r.s),r.t!=null&&Object.hasOwnProperty.call(r,"t")&&p.onnx.TensorProto.encode(r.t,u.uint32(42).fork()).ldelim(),r.g!=null&&Object.hasOwnProperty.call(r,"g")&&p.onnx.GraphProto.encode(r.g,u.uint32(50).fork()).ldelim(),r.floats!=null&&r.floats.length){u.uint32(58).fork();for(var l=0;l<r.floats.length;++l)u.float(r.floats[l]);u.ldelim()}if(r.ints!=null&&r.ints.length){u.uint32(66).fork();for(var l=0;l<r.ints.length;++l)u.int64(r.ints[l]);u.ldelim()}if(r.strings!=null&&r.strings.length)for(var l=0;l<r.strings.length;++l)u.uint32(74).bytes(r.strings[l]);if(r.tensors!=null&&r.tensors.length)for(var l=0;l<r.tensors.length;++l)p.onnx.TensorProto.encode(r.tensors[l],u.uint32(82).fork()).ldelim();if(r.graphs!=null&&r.graphs.length)for(var l=0;l<r.graphs.length;++l)p.onnx.GraphProto.encode(r.graphs[l],u.uint32(90).fork()).ldelim();if(r.docString!=null&&Object.hasOwnProperty.call(r,"docString")&&u.uint32(106).string(r.docString),r.tp!=null&&Object.hasOwnProperty.call(r,"tp")&&p.onnx.TypeProto.encode(r.tp,u.uint32(114).fork()).ldelim(),r.typeProtos!=null&&r.typeProtos.length)for(var l=0;l<r.typeProtos.length;++l)p.onnx.TypeProto.encode(r.typeProtos[l],u.uint32(122).fork()).ldelim();if(r.type!=null&&Object.hasOwnProperty.call(r,"type")&&u.uint32(160).int32(r.type),r.refAttrName!=null&&Object.hasOwnProperty.call(r,"refAttrName")&&u.uint32(170).string(r.refAttrName),r.sparseTensor!=null&&Object.hasOwnProperty.call(r,"sparseTensor")&&p.onnx.SparseTensorProto.encode(r.sparseTensor,u.uint32(178).fork()).ldelim(),r.sparseTensors!=null&&r.sparseTensors.length)for(var l=0;l<r.sparseTensors.length;++l)p.onnx.SparseTensorProto.encode(r.sparseTensors[l],u.uint32(186).fork()).ldelim();return u},c.encodeDelimited=function(r,u){return this.encode(r,u).ldelim()},c.decode=function(r,u){r instanceof o||(r=o.create(r));for(var l=u===void 0?r.len:r.pos+u,h=new p.onnx.AttributeProto;r.pos<l;){var y=r.uint32();switch(y>>>3){case 1:{h.name=r.string();break}case 21:{h.refAttrName=r.string();break}case 13:{h.docString=r.string();break}case 20:{h.type=r.int32();break}case 2:{h.f=r.float();break}case 3:{h.i=r.int64();break}case 4:{h.s=r.bytes();break}case 5:{h.t=p.onnx.TensorProto.decode(r,r.uint32());break}case 6:{h.g=p.onnx.GraphProto.decode(r,r.uint32());break}case 22:{h.sparseTensor=p.onnx.SparseTensorProto.decode(r,r.uint32());break}case 14:{h.tp=p.onnx.TypeProto.decode(r,r.uint32());break}case 7:{if(h.floats&&h.floats.length||(h.floats=[]),(y&7)===2)for(var O=r.uint32()+r.pos;r.pos<O;)h.floats.push(r.float());else h.floats.push(r.float());break}case 8:{if(h.ints&&h.ints.length||(h.ints=[]),(y&7)===2)for(var O=r.uint32()+r.pos;r.pos<O;)h.ints.push(r.int64());else h.ints.push(r.int64());break}case 9:{h.strings&&h.strings.length||(h.strings=[]),h.strings.push(r.bytes());break}case 10:{h.tensors&&h.tensors.length||(h.tensors=[]),h.tensors.push(p.onnx.TensorProto.decode(r,r.uint32()));break}case 11:{h.graphs&&h.graphs.length||(h.graphs=[]),h.graphs.push(p.onnx.GraphProto.decode(r,r.uint32()));break}case 23:{h.sparseTensors&&h.sparseTensors.length||(h.sparseTensors=[]),h.sparseTensors.push(p.onnx.SparseTensorProto.decode(r,r.uint32()));break}case 15:{h.typeProtos&&h.typeProtos.length||(h.typeProtos=[]),h.typeProtos.push(p.onnx.TypeProto.decode(r,r.uint32()));break}default:r.skipType(y&7);break}}return h},c.decodeDelimited=function(r){return r instanceof o||(r=new o(r)),this.decode(r,r.uint32())},c.verify=function(r){if(typeof r!="object"||r===null)return"object expected";if(r.name!=null&&r.hasOwnProperty("name")&&!s.isString(r.name))return"name: string expected";if(r.refAttrName!=null&&r.hasOwnProperty("refAttrName")&&!s.isString(r.refAttrName))return"refAttrName: string expected";if(r.docString!=null&&r.hasOwnProperty("docString")&&!s.isString(r.docString))return"docString: string expected";if(r.type!=null&&r.hasOwnProperty("type"))switch(r.type){default:return"type: enum value expected";case 0:case 1:case 2:case 3:case 4:case 5:case 11:case 13:case 6:case 7:case 8:case 9:case 10:case 12:case 14:break}if(r.f!=null&&r.hasOwnProperty("f")&&typeof r.f!="number")return"f: number expected";if(r.i!=null&&r.hasOwnProperty("i")&&!s.isInteger(r.i)&&!(r.i&&s.isInteger(r.i.low)&&s.isInteger(r.i.high)))return"i: integer|Long expected";if(r.s!=null&&r.hasOwnProperty("s")&&!(r.s&&typeof r.s.length=="number"||s.isString(r.s)))return"s: buffer expected";if(r.t!=null&&r.hasOwnProperty("t")){var u=p.onnx.TensorProto.verify(r.t);if(u)return"t."+u}if(r.g!=null&&r.hasOwnProperty("g")){var u=p.onnx.GraphProto.verify(r.g);if(u)return"g."+u}if(r.sparseTensor!=null&&r.hasOwnProperty("sparseTensor")){var u=p.onnx.SparseTensorProto.verify(r.sparseTensor);if(u)return"sparseTensor."+u}if(r.tp!=null&&r.hasOwnProperty("tp")){var u=p.onnx.TypeProto.verify(r.tp);if(u)return"tp."+u}if(r.floats!=null&&r.hasOwnProperty("floats")){if(!Array.isArray(r.floats))return"floats: array expected";for(var l=0;l<r.floats.length;++l)if(typeof r.floats[l]!="number")return"floats: number[] expected"}if(r.ints!=null&&r.hasOwnProperty("ints")){if(!Array.isArray(r.ints))return"ints: array expected";for(var l=0;l<r.ints.length;++l)if(!s.isInteger(r.ints[l])&&!(r.ints[l]&&s.isInteger(r.ints[l].low)&&s.isInteger(r.ints[l].high)))return"ints: integer|Long[] expected"}if(r.strings!=null&&r.hasOwnProperty("strings")){if(!Array.isArray(r.strings))return"strings: array expected";for(var l=0;l<r.strings.length;++l)if(!(r.strings[l]&&typeof r.strings[l].length=="number"||s.isString(r.strings[l])))return"strings: buffer[] expected"}if(r.tensors!=null&&r.hasOwnProperty("tensors")){if(!Array.isArray(r.tensors))return"tensors: array expected";for(var l=0;l<r.tensors.length;++l){var u=p.onnx.TensorProto.verify(r.tensors[l]);if(u)return"tensors."+u}}if(r.graphs!=null&&r.hasOwnProperty("graphs")){if(!Array.isArray(r.graphs))return"graphs: array expected";for(var l=0;l<r.graphs.length;++l){var u=p.onnx.GraphProto.verify(r.graphs[l]);if(u)return"graphs."+u}}if(r.sparseTensors!=null&&r.hasOwnProperty("sparseTensors")){if(!Array.isArray(r.sparseTensors))return"sparseTensors: array expected";for(var l=0;l<r.sparseTensors.length;++l){var u=p.onnx.SparseTensorProto.verify(r.sparseTensors[l]);if(u)return"sparseTensors."+u}}if(r.typeProtos!=null&&r.hasOwnProperty("typeProtos")){if(!Array.isArray(r.typeProtos))return"typeProtos: array expected";for(var l=0;l<r.typeProtos.length;++l){var u=p.onnx.TypeProto.verify(r.typeProtos[l]);if(u)return"typeProtos."+u}}return null},c.fromObject=function(r){if(r instanceof p.onnx.AttributeProto)return r;var u=new p.onnx.AttributeProto;switch(r.name!=null&&(u.name=String(r.name)),r.refAttrName!=null&&(u.refAttrName=String(r.refAttrName)),r.docString!=null&&(u.docString=String(r.docString)),r.type){default:if(typeof r.type=="number"){u.type=r.type;break}break;case"UNDEFINED":case 0:u.type=0;break;case"FLOAT":case 1:u.type=1;break;case"INT":case 2:u.type=2;break;case"STRING":case 3:u.type=3;break;case"TENSOR":case 4:u.type=4;break;case"GRAPH":case 5:u.type=5;break;case"SPARSE_TENSOR":case 11:u.type=11;break;case"TYPE_PROTO":case 13:u.type=13;break;case"FLOATS":case 6:u.type=6;break;case"INTS":case 7:u.type=7;break;case"STRINGS":case 8:u.type=8;break;case"TENSORS":case 9:u.type=9;break;case"GRAPHS":case 10:u.type=10;break;case"SPARSE_TENSORS":case 12:u.type=12;break;case"TYPE_PROTOS":case 14:u.type=14;break}if(r.f!=null&&(u.f=Number(r.f)),r.i!=null&&(s.Long?(u.i=s.Long.fromValue(r.i)).unsigned=!1:typeof r.i=="string"?u.i=parseInt(r.i,10):typeof r.i=="number"?u.i=r.i:typeof r.i=="object"&&(u.i=new s.LongBits(r.i.low>>>0,r.i.high>>>0).toNumber())),r.s!=null&&(typeof r.s=="string"?s.base64.decode(r.s,u.s=s.newBuffer(s.base64.length(r.s)),0):r.s.length>=0&&(u.s=r.s)),r.t!=null){if(typeof r.t!="object")throw TypeError(".onnx.AttributeProto.t: object expected");u.t=p.onnx.TensorProto.fromObject(r.t)}if(r.g!=null){if(typeof r.g!="object")throw TypeError(".onnx.AttributeProto.g: object expected");u.g=p.onnx.GraphProto.fromObject(r.g)}if(r.sparseTensor!=null){if(typeof r.sparseTensor!="object")throw TypeError(".onnx.AttributeProto.sparseTensor: object expected");u.sparseTensor=p.onnx.SparseTensorProto.fromObject(r.sparseTensor)}if(r.tp!=null){if(typeof r.tp!="object")throw TypeError(".onnx.AttributeProto.tp: object expected");u.tp=p.onnx.TypeProto.fromObject(r.tp)}if(r.floats){if(!Array.isArray(r.floats))throw TypeError(".onnx.AttributeProto.floats: array expected");u.floats=[];for(var l=0;l<r.floats.length;++l)u.floats[l]=Number(r.floats[l])}if(r.ints){if(!Array.isArray(r.ints))throw TypeError(".onnx.AttributeProto.ints: array expected");u.ints=[];for(var l=0;l<r.ints.length;++l)s.Long?(u.ints[l]=s.Long.fromValue(r.ints[l])).unsigned=!1:typeof r.ints[l]=="string"?u.ints[l]=parseInt(r.ints[l],10):typeof r.ints[l]=="number"?u.ints[l]=r.ints[l]:typeof r.ints[l]=="object"&&(u.ints[l]=new s.LongBits(r.ints[l].low>>>0,r.ints[l].high>>>0).toNumber())}if(r.strings){if(!Array.isArray(r.strings))throw TypeError(".onnx.AttributeProto.strings: array expected");u.strings=[];for(var l=0;l<r.strings.length;++l)typeof r.strings[l]=="string"?s.base64.decode(r.strings[l],u.strings[l]=s.newBuffer(s.base64.length(r.strings[l])),0):r.strings[l].length>=0&&(u.strings[l]=r.strings[l])}if(r.tensors){if(!Array.isArray(r.tensors))throw TypeError(".onnx.AttributeProto.tensors: array expected");u.tensors=[];for(var l=0;l<r.tensors.length;++l){if(typeof r.tensors[l]!="object")throw TypeError(".onnx.AttributeProto.tensors: object expected");u.tensors[l]=p.onnx.TensorProto.fromObject(r.tensors[l])}}if(r.graphs){if(!Array.isArray(r.graphs))throw TypeError(".onnx.AttributeProto.graphs: array expected");u.graphs=[];for(var l=0;l<r.graphs.length;++l){if(typeof r.graphs[l]!="object")throw TypeError(".onnx.AttributeProto.graphs: object expected");u.graphs[l]=p.onnx.GraphProto.fromObject(r.graphs[l])}}if(r.sparseTensors){if(!Array.isArray(r.sparseTensors))throw TypeError(".onnx.AttributeProto.sparseTensors: array expected");u.sparseTensors=[];for(var l=0;l<r.sparseTensors.length;++l){if(typeof r.sparseTensors[l]!="object")throw TypeError(".onnx.AttributeProto.sparseTensors: object expected");u.sparseTensors[l]=p.onnx.SparseTensorProto.fromObject(r.sparseTensors[l])}}if(r.typeProtos){if(!Array.isArray(r.typeProtos))throw TypeError(".onnx.AttributeProto.typeProtos: array expected");u.typeProtos=[];for(var l=0;l<r.typeProtos.length;++l){if(typeof r.typeProtos[l]!="object")throw TypeError(".onnx.AttributeProto.typeProtos: object expected");u.typeProtos[l]=p.onnx.TypeProto.fromObject(r.typeProtos[l])}}return u},c.toObject=function(r,u){u||(u={});var l={};if((u.arrays||u.defaults)&&(l.floats=[],l.ints=[],l.strings=[],l.tensors=[],l.graphs=[],l.typeProtos=[],l.sparseTensors=[]),u.defaults){if(l.name="",l.f=0,s.Long){var h=new s.Long(0,0,!1);l.i=u.longs===String?h.toString():u.longs===Number?h.toNumber():h}else l.i=u.longs===String?"0":0;u.bytes===String?l.s="":(l.s=[],u.bytes!==Array&&(l.s=s.newBuffer(l.s))),l.t=null,l.g=null,l.docString="",l.tp=null,l.type=u.enums===String?"UNDEFINED":0,l.refAttrName="",l.sparseTensor=null}if(r.name!=null&&r.hasOwnProperty("name")&&(l.name=r.name),r.f!=null&&r.hasOwnProperty("f")&&(l.f=u.json&&!isFinite(r.f)?String(r.f):r.f),r.i!=null&&r.hasOwnProperty("i")&&(typeof r.i=="number"?l.i=u.longs===String?String(r.i):r.i:l.i=u.longs===String?s.Long.prototype.toString.call(r.i):u.longs===Number?new s.LongBits(r.i.low>>>0,r.i.high>>>0).toNumber():r.i),r.s!=null&&r.hasOwnProperty("s")&&(l.s=u.bytes===String?s.base64.encode(r.s,0,r.s.length):u.bytes===Array?Array.prototype.slice.call(r.s):r.s),r.t!=null&&r.hasOwnProperty("t")&&(l.t=p.onnx.TensorProto.toObject(r.t,u)),r.g!=null&&r.hasOwnProperty("g")&&(l.g=p.onnx.GraphProto.toObject(r.g,u)),r.floats&&r.floats.length){l.floats=[];for(var y=0;y<r.floats.length;++y)l.floats[y]=u.json&&!isFinite(r.floats[y])?String(r.floats[y]):r.floats[y]}if(r.ints&&r.ints.length){l.ints=[];for(var y=0;y<r.ints.length;++y)typeof r.ints[y]=="number"?l.ints[y]=u.longs===String?String(r.ints[y]):r.ints[y]:l.ints[y]=u.longs===String?s.Long.prototype.toString.call(r.ints[y]):u.longs===Number?new s.LongBits(r.ints[y].low>>>0,r.ints[y].high>>>0).toNumber():r.ints[y]}if(r.strings&&r.strings.length){l.strings=[];for(var y=0;y<r.strings.length;++y)l.strings[y]=u.bytes===String?s.base64.encode(r.strings[y],0,r.strings[y].length):u.bytes===Array?Array.prototype.slice.call(r.strings[y]):r.strings[y]}if(r.tensors&&r.tensors.length){l.tensors=[];for(var y=0;y<r.tensors.length;++y)l.tensors[y]=p.onnx.TensorProto.toObject(r.tensors[y],u)}if(r.graphs&&r.graphs.length){l.graphs=[];for(var y=0;y<r.graphs.length;++y)l.graphs[y]=p.onnx.GraphProto.toObject(r.graphs[y],u)}if(r.docString!=null&&r.hasOwnProperty("docString")&&(l.docString=r.docString),r.tp!=null&&r.hasOwnProperty("tp")&&(l.tp=p.onnx.TypeProto.toObject(r.tp,u)),r.typeProtos&&r.typeProtos.length){l.typeProtos=[];for(var y=0;y<r.typeProtos.length;++y)l.typeProtos[y]=p.onnx.TypeProto.toObject(r.typeProtos[y],u)}if(r.type!=null&&r.hasOwnProperty("type")&&(l.type=u.enums===String?p.onnx.AttributeProto.AttributeType[r.type]===void 0?r.type:p.onnx.AttributeProto.AttributeType[r.type]:r.type),r.refAttrName!=null&&r.hasOwnProperty("refAttrName")&&(l.refAttrName=r.refAttrName),r.sparseTensor!=null&&r.hasOwnProperty("sparseTensor")&&(l.sparseTensor=p.onnx.SparseTensorProto.toObject(r.sparseTensor,u)),r.sparseTensors&&r.sparseTensors.length){l.sparseTensors=[];for(var y=0;y<r.sparseTensors.length;++y)l.sparseTensors[y]=p.onnx.SparseTensorProto.toObject(r.sparseTensors[y],u)}return l},c.prototype.toJSON=function(){return this.constructor.toObject(this,n.util.toJSONOptions)},c.getTypeUrl=function(r){return r===void 0&&(r="type.googleapis.com"),r+"/onnx.AttributeProto"},c.AttributeType=(function(){var r={},u=Object.create(r);return u[r[0]="UNDEFINED"]=0,u[r[1]="FLOAT"]=1,u[r[2]="INT"]=2,u[r[3]="STRING"]=3,u[r[4]="TENSOR"]=4,u[r[5]="GRAPH"]=5,u[r[11]="SPARSE_TENSOR"]=11,u[r[13]="TYPE_PROTO"]=13,u[r[6]="FLOATS"]=6,u[r[7]="INTS"]=7,u[r[8]="STRINGS"]=8,u[r[9]="TENSORS"]=9,u[r[10]="GRAPHS"]=10,u[r[12]="SPARSE_TENSORS"]=12,u[r[14]="TYPE_PROTOS"]=14,u})(),c})(),i.ValueInfoProto=(function(){function c(r){if(r)for(var u=Object.keys(r),l=0;l<u.length;++l)r[u[l]]!=null&&(this[u[l]]=r[u[l]])}return c.prototype.name="",c.prototype.type=null,c.prototype.docString="",c.create=function(r){return new c(r)},c.encode=function(r,u){return u||(u=f.create()),r.name!=null&&Object.hasOwnProperty.call(r,"name")&&u.uint32(10).string(r.name),r.type!=null&&Object.hasOwnProperty.call(r,"type")&&p.onnx.TypeProto.encode(r.type,u.uint32(18).fork()).ldelim(),r.docString!=null&&Object.hasOwnProperty.call(r,"docString")&&u.uint32(26).string(r.docString),u},c.encodeDelimited=function(r,u){return this.encode(r,u).ldelim()},c.decode=function(r,u){r instanceof o||(r=o.create(r));for(var l=u===void 0?r.len:r.pos+u,h=new p.onnx.ValueInfoProto;r.pos<l;){var y=r.uint32();switch(y>>>3){case 1:{h.name=r.string();break}case 2:{h.type=p.onnx.TypeProto.decode(r,r.uint32());break}case 3:{h.docString=r.string();break}default:r.skipType(y&7);break}}return h},c.decodeDelimited=function(r){return r instanceof o||(r=new o(r)),this.decode(r,r.uint32())},c.verify=function(r){if(typeof r!="object"||r===null)return"object expected";if(r.name!=null&&r.hasOwnProperty("name")&&!s.isString(r.name))return"name: string expected";if(r.type!=null&&r.hasOwnProperty("type")){var u=p.onnx.TypeProto.verify(r.type);if(u)return"type."+u}return r.docString!=null&&r.hasOwnProperty("docString")&&!s.isString(r.docString)?"docString: string expected":null},c.fromObject=function(r){if(r instanceof p.onnx.ValueInfoProto)return r;var u=new p.onnx.ValueInfoProto;if(r.name!=null&&(u.name=String(r.name)),r.type!=null){if(typeof r.type!="object")throw TypeError(".onnx.ValueInfoProto.type: object expected");u.type=p.onnx.TypeProto.fromObject(r.type)}return r.docString!=null&&(u.docString=String(r.docString)),u},c.toObject=function(r,u){u||(u={});var l={};return u.defaults&&(l.name="",l.type=null,l.docString=""),r.name!=null&&r.hasOwnProperty("name")&&(l.name=r.name),r.type!=null&&r.hasOwnProperty("type")&&(l.type=p.onnx.TypeProto.toObject(r.type,u)),r.docString!=null&&r.hasOwnProperty("docString")&&(l.docString=r.docString),l},c.prototype.toJSON=function(){return this.constructor.toObject(this,n.util.toJSONOptions)},c.getTypeUrl=function(r){return r===void 0&&(r="type.googleapis.com"),r+"/onnx.ValueInfoProto"},c})(),i.NodeProto=(function(){function c(r){if(this.input=[],this.output=[],this.attribute=[],r)for(var u=Object.keys(r),l=0;l<u.length;++l)r[u[l]]!=null&&(this[u[l]]=r[u[l]])}return c.prototype.input=s.emptyArray,c.prototype.output=s.emptyArray,c.prototype.name="",c.prototype.opType="",c.prototype.domain="",c.prototype.attribute=s.emptyArray,c.prototype.docString="",c.create=function(r){return new c(r)},c.encode=function(r,u){if(u||(u=f.create()),r.input!=null&&r.input.length)for(var l=0;l<r.input.length;++l)u.uint32(10).string(r.input[l]);if(r.output!=null&&r.output.length)for(var l=0;l<r.output.length;++l)u.uint32(18).string(r.output[l]);if(r.name!=null&&Object.hasOwnProperty.call(r,"name")&&u.uint32(26).string(r.name),r.opType!=null&&Object.hasOwnProperty.call(r,"opType")&&u.uint32(34).string(r.opType),r.attribute!=null&&r.attribute.length)for(var l=0;l<r.attribute.length;++l)p.onnx.AttributeProto.encode(r.attribute[l],u.uint32(42).fork()).ldelim();return r.docString!=null&&Object.hasOwnProperty.call(r,"docString")&&u.uint32(50).string(r.docString),r.domain!=null&&Object.hasOwnProperty.call(r,"domain")&&u.uint32(58).string(r.domain),u},c.encodeDelimited=function(r,u){return this.encode(r,u).ldelim()},c.decode=function(r,u){r instanceof o||(r=o.create(r));for(var l=u===void 0?r.len:r.pos+u,h=new p.onnx.NodeProto;r.pos<l;){var y=r.uint32();switch(y>>>3){case 1:{h.input&&h.input.length||(h.input=[]),h.input.push(r.string());break}case 2:{h.output&&h.output.length||(h.output=[]),h.output.push(r.string());break}case 3:{h.name=r.string();break}case 4:{h.opType=r.string();break}case 7:{h.domain=r.string();break}case 5:{h.attribute&&h.attribute.length||(h.attribute=[]),h.attribute.push(p.onnx.AttributeProto.decode(r,r.uint32()));break}case 6:{h.docString=r.string();break}default:r.skipType(y&7);break}}return h},c.decodeDelimited=function(r){return r instanceof o||(r=new o(r)),this.decode(r,r.uint32())},c.verify=function(r){if(typeof r!="object"||r===null)return"object expected";if(r.input!=null&&r.hasOwnProperty("input")){if(!Array.isArray(r.input))return"input: array expected";for(var u=0;u<r.input.length;++u)if(!s.isString(r.input[u]))return"input: string[] expected"}if(r.output!=null&&r.hasOwnProperty("output")){if(!Array.isArray(r.output))return"output: array expected";for(var u=0;u<r.output.length;++u)if(!s.isString(r.output[u]))return"output: string[] expected"}if(r.name!=null&&r.hasOwnProperty("name")&&!s.isString(r.name))return"name: string expected";if(r.opType!=null&&r.hasOwnProperty("opType")&&!s.isString(r.opType))return"opType: string expected";if(r.domain!=null&&r.hasOwnProperty("domain")&&!s.isString(r.domain))return"domain: string expected";if(r.attribute!=null&&r.hasOwnProperty("attribute")){if(!Array.isArray(r.attribute))return"attribute: array expected";for(var u=0;u<r.attribute.length;++u){var l=p.onnx.AttributeProto.verify(r.attribute[u]);if(l)return"attribute."+l}}return r.docString!=null&&r.hasOwnProperty("docString")&&!s.isString(r.docString)?"docString: string expected":null},c.fromObject=function(r){if(r instanceof p.onnx.NodeProto)return r;var u=new p.onnx.NodeProto;if(r.input){if(!Array.isArray(r.input))throw TypeError(".onnx.NodeProto.input: array expected");u.input=[];for(var l=0;l<r.input.length;++l)u.input[l]=String(r.input[l])}if(r.output){if(!Array.isArray(r.output))throw TypeError(".onnx.NodeProto.output: array expected");u.output=[];for(var l=0;l<r.output.length;++l)u.output[l]=String(r.output[l])}if(r.name!=null&&(u.name=String(r.name)),r.opType!=null&&(u.opType=String(r.opType)),r.domain!=null&&(u.domain=String(r.domain)),r.attribute){if(!Array.isArray(r.attribute))throw TypeError(".onnx.NodeProto.attribute: array expected");u.attribute=[];for(var l=0;l<r.attribute.length;++l){if(typeof r.attribute[l]!="object")throw TypeError(".onnx.NodeProto.attribute: object expected");u.attribute[l]=p.onnx.AttributeProto.fromObject(r.attribute[l])}}return r.docString!=null&&(u.docString=String(r.docString)),u},c.toObject=function(r,u){u||(u={});var l={};if((u.arrays||u.defaults)&&(l.input=[],l.output=[],l.attribute=[]),u.defaults&&(l.name="",l.opType="",l.docString="",l.domain=""),r.input&&r.input.length){l.input=[];for(var h=0;h<r.input.length;++h)l.input[h]=r.input[h]}if(r.output&&r.output.length){l.output=[];for(var h=0;h<r.output.length;++h)l.output[h]=r.output[h]}if(r.name!=null&&r.hasOwnProperty("name")&&(l.name=r.name),r.opType!=null&&r.hasOwnProperty("opType")&&(l.opType=r.opType),r.attribute&&r.attribute.length){l.attribute=[];for(var h=0;h<r.attribute.length;++h)l.attribute[h]=p.onnx.AttributeProto.toObject(r.attribute[h],u)}return r.docString!=null&&r.hasOwnProperty("docString")&&(l.docString=r.docString),r.domain!=null&&r.hasOwnProperty("domain")&&(l.domain=r.domain),l},c.prototype.toJSON=function(){return this.constructor.toObject(this,n.util.toJSONOptions)},c.getTypeUrl=function(r){return r===void 0&&(r="type.googleapis.com"),r+"/onnx.NodeProto"},c})(),i.TrainingInfoProto=(function(){function c(r){if(this.initializationBinding=[],this.updateBinding=[],r)for(var u=Object.keys(r),l=0;l<u.length;++l)r[u[l]]!=null&&(this[u[l]]=r[u[l]])}return c.prototype.initialization=null,c.prototype.algorithm=null,c.prototype.initializationBinding=s.emptyArray,c.prototype.updateBinding=s.emptyArray,c.create=function(r){return new c(r)},c.encode=function(r,u){if(u||(u=f.create()),r.initialization!=null&&Object.hasOwnProperty.call(r,"initialization")&&p.onnx.GraphProto.encode(r.initialization,u.uint32(10).fork()).ldelim(),r.algorithm!=null&&Object.hasOwnProperty.call(r,"algorithm")&&p.onnx.GraphProto.encode(r.algorithm,u.uint32(18).fork()).ldelim(),r.initializationBinding!=null&&r.initializationBinding.length)for(var l=0;l<r.initializationBinding.length;++l)p.onnx.StringStringEntryProto.encode(r.initializationBinding[l],u.uint32(26).fork()).ldelim();if(r.updateBinding!=null&&r.updateBinding.length)for(var l=0;l<r.updateBinding.length;++l)p.onnx.StringStringEntryProto.encode(r.updateBinding[l],u.uint32(34).fork()).ldelim();return u},c.encodeDelimited=function(r,u){return this.encode(r,u).ldelim()},c.decode=function(r,u){r instanceof o||(r=o.create(r));for(var l=u===void 0?r.len:r.pos+u,h=new p.onnx.TrainingInfoProto;r.pos<l;){var y=r.uint32();switch(y>>>3){case 1:{h.initialization=p.onnx.GraphProto.decode(r,r.uint32());break}case 2:{h.algorithm=p.onnx.GraphProto.decode(r,r.uint32());break}case 3:{h.initializationBinding&&h.initializationBinding.length||(h.initializationBinding=[]),h.initializationBinding.push(p.onnx.StringStringEntryProto.decode(r,r.uint32()));break}case 4:{h.updateBinding&&h.updateBinding.length||(h.updateBinding=[]),h.updateBinding.push(p.onnx.StringStringEntryProto.decode(r,r.uint32()));break}default:r.skipType(y&7);break}}return h},c.decodeDelimited=function(r){return r instanceof o||(r=new o(r)),this.decode(r,r.uint32())},c.verify=function(r){if(typeof r!="object"||r===null)return"object expected";if(r.initialization!=null&&r.hasOwnProperty("initialization")){var u=p.onnx.GraphProto.verify(r.initialization);if(u)return"initialization."+u}if(r.algorithm!=null&&r.hasOwnProperty("algorithm")){var u=p.onnx.GraphProto.verify(r.algorithm);if(u)return"algorithm."+u}if(r.initializationBinding!=null&&r.hasOwnProperty("initializationBinding")){if(!Array.isArray(r.initializationBinding))return"initializationBinding: array expected";for(var l=0;l<r.initializationBinding.length;++l){var u=p.onnx.StringStringEntryProto.verify(r.initializationBinding[l]);if(u)return"initializationBinding."+u}}if(r.updateBinding!=null&&r.hasOwnProperty("updateBinding")){if(!Array.isArray(r.updateBinding))return"updateBinding: array expected";for(var l=0;l<r.updateBinding.length;++l){var u=p.onnx.StringStringEntryProto.verify(r.updateBinding[l]);if(u)return"updateBinding."+u}}return null},c.fromObject=function(r){if(r instanceof p.onnx.TrainingInfoProto)return r;var u=new p.onnx.TrainingInfoProto;if(r.initialization!=null){if(typeof r.initialization!="object")throw TypeError(".onnx.TrainingInfoProto.initialization: object expected");u.initialization=p.onnx.GraphProto.fromObject(r.initialization)}if(r.algorithm!=null){if(typeof r.algorithm!="object")throw TypeError(".onnx.TrainingInfoProto.algorithm: object expected");u.algorithm=p.onnx.GraphProto.fromObject(r.algorithm)}if(r.initializationBinding){if(!Array.isArray(r.initializationBinding))throw TypeError(".onnx.TrainingInfoProto.initializationBinding: array expected");u.initializationBinding=[];for(var l=0;l<r.initializationBinding.length;++l){if(typeof r.initializationBinding[l]!="object")throw TypeError(".onnx.TrainingInfoProto.initializationBinding: object expected");u.initializationBinding[l]=p.onnx.StringStringEntryProto.fromObject(r.initializationBinding[l])}}if(r.updateBinding){if(!Array.isArray(r.updateBinding))throw TypeError(".onnx.TrainingInfoProto.updateBinding: array expected");u.updateBinding=[];for(var l=0;l<r.updateBinding.length;++l){if(typeof r.updateBinding[l]!="object")throw TypeError(".onnx.TrainingInfoProto.updateBinding: object expected");u.updateBinding[l]=p.onnx.StringStringEntryProto.fromObject(r.updateBinding[l])}}return u},c.toObject=function(r,u){u||(u={});var l={};if((u.arrays||u.defaults)&&(l.initializationBinding=[],l.updateBinding=[]),u.defaults&&(l.initialization=null,l.algorithm=null),r.initialization!=null&&r.hasOwnProperty("initialization")&&(l.initialization=p.onnx.GraphProto.toObject(r.initialization,u)),r.algorithm!=null&&r.hasOwnProperty("algorithm")&&(l.algorithm=p.onnx.GraphProto.toObject(r.algorithm,u)),r.initializationBinding&&r.initializationBinding.length){l.initializationBinding=[];for(var h=0;h<r.initializationBinding.length;++h)l.initializationBinding[h]=p.onnx.StringStringEntryProto.toObject(r.initializationBinding[h],u)}if(r.updateBinding&&r.updateBinding.length){l.updateBinding=[];for(var h=0;h<r.updateBinding.length;++h)l.updateBinding[h]=p.onnx.StringStringEntryProto.toObject(r.updateBinding[h],u)}return l},c.prototype.toJSON=function(){return this.constructor.toObject(this,n.util.toJSONOptions)},c.getTypeUrl=function(r){return r===void 0&&(r="type.googleapis.com"),r+"/onnx.TrainingInfoProto"},c})(),i.ModelProto=(function(){function c(r){if(this.opsetImport=[],this.metadataProps=[],this.trainingInfo=[],this.functions=[],r)for(var u=Object.keys(r),l=0;l<u.length;++l)r[u[l]]!=null&&(this[u[l]]=r[u[l]])}return c.prototype.irVersion=s.Long?s.Long.fromBits(0,0,!1):0,c.prototype.opsetImport=s.emptyArray,c.prototype.producerName="",c.prototype.producerVersion="",c.prototype.domain="",c.prototype.modelVersion=s.Long?s.Long.fromBits(0,0,!1):0,c.prototype.docString="",c.prototype.graph=null,c.prototype.metadataProps=s.emptyArray,c.prototype.trainingInfo=s.emptyArray,c.prototype.functions=s.emptyArray,c.create=function(r){return new c(r)},c.encode=function(r,u){if(u||(u=f.create()),r.irVersion!=null&&Object.hasOwnProperty.call(r,"irVersion")&&u.uint32(8).int64(r.irVersion),r.producerName!=null&&Object.hasOwnProperty.call(r,"producerName")&&u.uint32(18).string(r.producerName),r.producerVersion!=null&&Object.hasOwnProperty.call(r,"producerVersion")&&u.uint32(26).string(r.producerVersion),r.domain!=null&&Object.hasOwnProperty.call(r,"domain")&&u.uint32(34).string(r.domain),r.modelVersion!=null&&Object.hasOwnProperty.call(r,"modelVersion")&&u.uint32(40).int64(r.modelVersion),r.docString!=null&&Object.hasOwnProperty.call(r,"docString")&&u.uint32(50).string(r.docString),r.graph!=null&&Object.hasOwnProperty.call(r,"graph")&&p.onnx.GraphProto.encode(r.graph,u.uint32(58).fork()).ldelim(),r.opsetImport!=null&&r.opsetImport.length)for(var l=0;l<r.opsetImport.length;++l)p.onnx.OperatorSetIdProto.encode(r.opsetImport[l],u.uint32(66).fork()).ldelim();if(r.metadataProps!=null&&r.metadataProps.length)for(var l=0;l<r.metadataProps.length;++l)p.onnx.StringStringEntryProto.encode(r.metadataProps[l],u.uint32(114).fork()).ldelim();if(r.trainingInfo!=null&&r.trainingInfo.length)for(var l=0;l<r.trainingInfo.length;++l)p.onnx.TrainingInfoProto.encode(r.trainingInfo[l],u.uint32(162).fork()).ldelim();if(r.functions!=null&&r.functions.length)for(var l=0;l<r.functions.length;++l)p.onnx.FunctionProto.encode(r.functions[l],u.uint32(202).fork()).ldelim();return u},c.encodeDelimited=function(r,u){return this.encode(r,u).ldelim()},c.decode=function(r,u){r instanceof o||(r=o.create(r));for(var l=u===void 0?r.len:r.pos+u,h=new p.onnx.ModelProto;r.pos<l;){var y=r.uint32();switch(y>>>3){case 1:{h.irVersion=r.int64();break}case 8:{h.opsetImport&&h.opsetImport.length||(h.opsetImport=[]),h.opsetImport.push(p.onnx.OperatorSetIdProto.decode(r,r.uint32()));break}case 2:{h.producerName=r.string();break}case 3:{h.producerVersion=r.string();break}case 4:{h.domain=r.string();break}case 5:{h.modelVersion=r.int64();break}case 6:{h.docString=r.string();break}case 7:{h.graph=p.onnx.GraphProto.decode(r,r.uint32());break}case 14:{h.metadataProps&&h.metadataProps.length||(h.metadataProps=[]),h.metadataProps.push(p.onnx.StringStringEntryProto.decode(r,r.uint32()));break}case 20:{h.trainingInfo&&h.trainingInfo.length||(h.trainingInfo=[]),h.trainingInfo.push(p.onnx.TrainingInfoProto.decode(r,r.uint32()));break}case 25:{h.functions&&h.functions.length||(h.functions=[]),h.functions.push(p.onnx.FunctionProto.decode(r,r.uint32()));break}default:r.skipType(y&7);break}}return h},c.decodeDelimited=function(r){return r instanceof o||(r=new o(r)),this.decode(r,r.uint32())},c.verify=function(r){if(typeof r!="object"||r===null)return"object expected";if(r.irVersion!=null&&r.hasOwnProperty("irVersion")&&!s.isInteger(r.irVersion)&&!(r.irVersion&&s.isInteger(r.irVersion.low)&&s.isInteger(r.irVersion.high)))return"irVersion: integer|Long expected";if(r.opsetImport!=null&&r.hasOwnProperty("opsetImport")){if(!Array.isArray(r.opsetImport))return"opsetImport: array expected";for(var u=0;u<r.opsetImport.length;++u){var l=p.onnx.OperatorSetIdProto.verify(r.opsetImport[u]);if(l)return"opsetImport."+l}}if(r.producerName!=null&&r.hasOwnProperty("producerName")&&!s.isString(r.producerName))return"producerName: string expected";if(r.producerVersion!=null&&r.hasOwnProperty("producerVersion")&&!s.isString(r.producerVersion))return"producerVersion: string expected";if(r.domain!=null&&r.hasOwnProperty("domain")&&!s.isString(r.domain))return"domain: string expected";if(r.modelVersion!=null&&r.hasOwnProperty("modelVersion")&&!s.isInteger(r.modelVersion)&&!(r.modelVersion&&s.isInteger(r.modelVersion.low)&&s.isInteger(r.modelVersion.high)))return"modelVersion: integer|Long expected";if(r.docString!=null&&r.hasOwnProperty("docString")&&!s.isString(r.docString))return"docString: string expected";if(r.graph!=null&&r.hasOwnProperty("graph")){var l=p.onnx.GraphProto.verify(r.graph);if(l)return"graph."+l}if(r.metadataProps!=null&&r.hasOwnProperty("metadataProps")){if(!Array.isArray(r.metadataProps))return"metadataProps: array expected";for(var u=0;u<r.metadataProps.length;++u){var l=p.onnx.StringStringEntryProto.verify(r.metadataProps[u]);if(l)return"metadataProps."+l}}if(r.trainingInfo!=null&&r.hasOwnProperty("trainingInfo")){if(!Array.isArray(r.trainingInfo))return"trainingInfo: array expected";for(var u=0;u<r.trainingInfo.length;++u){var l=p.onnx.TrainingInfoProto.verify(r.trainingInfo[u]);if(l)return"trainingInfo."+l}}if(r.functions!=null&&r.hasOwnProperty("functions")){if(!Array.isArray(r.functions))return"functions: array expected";for(var u=0;u<r.functions.length;++u){var l=p.onnx.FunctionProto.verify(r.functions[u]);if(l)return"functions."+l}}return null},c.fromObject=function(r){if(r instanceof p.onnx.ModelProto)return r;var u=new p.onnx.ModelProto;if(r.irVersion!=null&&(s.Long?(u.irVersion=s.Long.fromValue(r.irVersion)).unsigned=!1:typeof r.irVersion=="string"?u.irVersion=parseInt(r.irVersion,10):typeof r.irVersion=="number"?u.irVersion=r.irVersion:typeof r.irVersion=="object"&&(u.irVersion=new s.LongBits(r.irVersion.low>>>0,r.irVersion.high>>>0).toNumber())),r.opsetImport){if(!Array.isArray(r.opsetImport))throw TypeError(".onnx.ModelProto.opsetImport: array expected");u.opsetImport=[];for(var l=0;l<r.opsetImport.length;++l){if(typeof r.opsetImport[l]!="object")throw TypeError(".onnx.ModelProto.opsetImport: object expected");u.opsetImport[l]=p.onnx.OperatorSetIdProto.fromObject(r.opsetImport[l])}}if(r.producerName!=null&&(u.producerName=String(r.producerName)),r.producerVersion!=null&&(u.producerVersion=String(r.producerVersion)),r.domain!=null&&(u.domain=String(r.domain)),r.modelVersion!=null&&(s.Long?(u.modelVersion=s.Long.fromValue(r.modelVersion)).unsigned=!1:typeof r.modelVersion=="string"?u.modelVersion=parseInt(r.modelVersion,10):typeof r.modelVersion=="number"?u.modelVersion=r.modelVersion:typeof r.modelVersion=="object"&&(u.modelVersion=new s.LongBits(r.modelVersion.low>>>0,r.modelVersion.high>>>0).toNumber())),r.docString!=null&&(u.docString=String(r.docString)),r.graph!=null){if(typeof r.graph!="object")throw TypeError(".onnx.ModelProto.graph: object expected");u.graph=p.onnx.GraphProto.fromObject(r.graph)}if(r.metadataProps){if(!Array.isArray(r.metadataProps))throw TypeError(".onnx.ModelProto.metadataProps: array expected");u.metadataProps=[];for(var l=0;l<r.metadataProps.length;++l){if(typeof r.metadataProps[l]!="object")throw TypeError(".onnx.ModelProto.metadataProps: object expected");u.metadataProps[l]=p.onnx.StringStringEntryProto.fromObject(r.metadataProps[l])}}if(r.trainingInfo){if(!Array.isArray(r.trainingInfo))throw TypeError(".onnx.ModelProto.trainingInfo: array expected");u.trainingInfo=[];for(var l=0;l<r.trainingInfo.length;++l){if(typeof r.trainingInfo[l]!="object")throw TypeError(".onnx.ModelProto.trainingInfo: object expected");u.trainingInfo[l]=p.onnx.TrainingInfoProto.fromObject(r.trainingInfo[l])}}if(r.functions){if(!Array.isArray(r.functions))throw TypeError(".onnx.ModelProto.functions: array expected");u.functions=[];for(var l=0;l<r.functions.length;++l){if(typeof r.functions[l]!="object")throw TypeError(".onnx.ModelProto.functions: object expected");u.functions[l]=p.onnx.FunctionProto.fromObject(r.functions[l])}}return u},c.toObject=function(r,u){u||(u={});var l={};if((u.arrays||u.defaults)&&(l.opsetImport=[],l.metadataProps=[],l.trainingInfo=[],l.functions=[]),u.defaults){if(s.Long){var h=new s.Long(0,0,!1);l.irVersion=u.longs===String?h.toString():u.longs===Number?h.toNumber():h}else l.irVersion=u.longs===String?"0":0;if(l.producerName="",l.producerVersion="",l.domain="",s.Long){var h=new s.Long(0,0,!1);l.modelVersion=u.longs===String?h.toString():u.longs===Number?h.toNumber():h}else l.modelVersion=u.longs===String?"0":0;l.docString="",l.graph=null}if(r.irVersion!=null&&r.hasOwnProperty("irVersion")&&(typeof r.irVersion=="number"?l.irVersion=u.longs===String?String(r.irVersion):r.irVersion:l.irVersion=u.longs===String?s.Long.prototype.toString.call(r.irVersion):u.longs===Number?new s.LongBits(r.irVersion.low>>>0,r.irVersion.high>>>0).toNumber():r.irVersion),r.producerName!=null&&r.hasOwnProperty("producerName")&&(l.producerName=r.producerName),r.producerVersion!=null&&r.hasOwnProperty("producerVersion")&&(l.producerVersion=r.producerVersion),r.domain!=null&&r.hasOwnProperty("domain")&&(l.domain=r.domain),r.modelVersion!=null&&r.hasOwnProperty("modelVersion")&&(typeof r.modelVersion=="number"?l.modelVersion=u.longs===String?String(r.modelVersion):r.modelVersion:l.modelVersion=u.longs===String?s.Long.prototype.toString.call(r.modelVersion):u.longs===Number?new s.LongBits(r.modelVersion.low>>>0,r.modelVersion.high>>>0).toNumber():r.modelVersion),r.docString!=null&&r.hasOwnProperty("docString")&&(l.docString=r.docString),r.graph!=null&&r.hasOwnProperty("graph")&&(l.graph=p.onnx.GraphProto.toObject(r.graph,u)),r.opsetImport&&r.opsetImport.length){l.opsetImport=[];for(var y=0;y<r.opsetImport.length;++y)l.opsetImport[y]=p.onnx.OperatorSetIdProto.toObject(r.opsetImport[y],u)}if(r.metadataProps&&r.metadataProps.length){l.metadataProps=[];for(var y=0;y<r.metadataProps.length;++y)l.metadataProps[y]=p.onnx.StringStringEntryProto.toObject(r.metadataProps[y],u)}if(r.trainingInfo&&r.trainingInfo.length){l.trainingInfo=[];for(var y=0;y<r.trainingInfo.length;++y)l.trainingInfo[y]=p.onnx.TrainingInfoProto.toObject(r.trainingInfo[y],u)}if(r.functions&&r.functions.length){l.functions=[];for(var y=0;y<r.functions.length;++y)l.functions[y]=p.onnx.FunctionProto.toObject(r.functions[y],u)}return l},c.prototype.toJSON=function(){return this.constructor.toObject(this,n.util.toJSONOptions)},c.getTypeUrl=function(r){return r===void 0&&(r="type.googleapis.com"),r+"/onnx.ModelProto"},c})(),i.StringStringEntryProto=(function(){function c(r){if(r)for(var u=Object.keys(r),l=0;l<u.length;++l)r[u[l]]!=null&&(this[u[l]]=r[u[l]])}return c.prototype.key="",c.prototype.value="",c.create=function(r){return new c(r)},c.encode=function(r,u){return u||(u=f.create()),r.key!=null&&Object.hasOwnProperty.call(r,"key")&&u.uint32(10).string(r.key),r.value!=null&&Object.hasOwnProperty.call(r,"value")&&u.uint32(18).string(r.value),u},c.encodeDelimited=function(r,u){return this.encode(r,u).ldelim()},c.decode=function(r,u){r instanceof o||(r=o.create(r));for(var l=u===void 0?r.len:r.pos+u,h=new p.onnx.StringStringEntryProto;r.pos<l;){var y=r.uint32();switch(y>>>3){case 1:{h.key=r.string();break}case 2:{h.value=r.string();break}default:r.skipType(y&7);break}}return h},c.decodeDelimited=function(r){return r instanceof o||(r=new o(r)),this.decode(r,r.uint32())},c.verify=function(r){return typeof r!="object"||r===null?"object expected":r.key!=null&&r.hasOwnProperty("key")&&!s.isString(r.key)?"key: string expected":r.value!=null&&r.hasOwnProperty("value")&&!s.isString(r.value)?"value: string expected":null},c.fromObject=function(r){if(r instanceof p.onnx.StringStringEntryProto)return r;var u=new p.onnx.StringStringEntryProto;return r.key!=null&&(u.key=String(r.key)),r.value!=null&&(u.value=String(r.value)),u},c.toObject=function(r,u){u||(u={});var l={};return u.defaults&&(l.key="",l.value=""),r.key!=null&&r.hasOwnProperty("key")&&(l.key=r.key),r.value!=null&&r.hasOwnProperty("value")&&(l.value=r.value),l},c.prototype.toJSON=function(){return this.constructor.toObject(this,n.util.toJSONOptions)},c.getTypeUrl=function(r){return r===void 0&&(r="type.googleapis.com"),r+"/onnx.StringStringEntryProto"},c})(),i.TensorAnnotation=(function(){function c(r){if(this.quantParameterTensorNames=[],r)for(var u=Object.keys(r),l=0;l<u.length;++l)r[u[l]]!=null&&(this[u[l]]=r[u[l]])}return c.prototype.tensorName="",c.prototype.quantParameterTensorNames=s.emptyArray,c.create=function(r){return new c(r)},c.encode=function(r,u){if(u||(u=f.create()),r.tensorName!=null&&Object.hasOwnProperty.call(r,"tensorName")&&u.uint32(10).string(r.tensorName),r.quantParameterTensorNames!=null&&r.quantParameterTensorNames.length)for(var l=0;l<r.quantParameterTensorNames.length;++l)p.onnx.StringStringEntryProto.encode(r.quantParameterTensorNames[l],u.uint32(18).fork()).ldelim();return u},c.encodeDelimited=function(r,u){return this.encode(r,u).ldelim()},c.decode=function(r,u){r instanceof o||(r=o.create(r));for(var l=u===void 0?r.len:r.pos+u,h=new p.onnx.TensorAnnotation;r.pos<l;){var y=r.uint32();switch(y>>>3){case 1:{h.tensorName=r.string();break}case 2:{h.quantParameterTensorNames&&h.quantParameterTensorNames.length||(h.quantParameterTensorNames=[]),h.quantParameterTensorNames.push(p.onnx.StringStringEntryProto.decode(r,r.uint32()));break}default:r.skipType(y&7);break}}return h},c.decodeDelimited=function(r){return r instanceof o||(r=new o(r)),this.decode(r,r.uint32())},c.verify=function(r){if(typeof r!="object"||r===null)return"object expected";if(r.tensorName!=null&&r.hasOwnProperty("tensorName")&&!s.isString(r.tensorName))return"tensorName: string expected";if(r.quantParameterTensorNames!=null&&r.hasOwnProperty("quantParameterTensorNames")){if(!Array.isArray(r.quantParameterTensorNames))return"quantParameterTensorNames: array expected";for(var u=0;u<r.quantParameterTensorNames.length;++u){var l=p.onnx.StringStringEntryProto.verify(r.quantParameterTensorNames[u]);if(l)return"quantParameterTensorNames."+l}}return null},c.fromObject=function(r){if(r instanceof p.onnx.TensorAnnotation)return r;var u=new p.onnx.TensorAnnotation;if(r.tensorName!=null&&(u.tensorName=String(r.tensorName)),r.quantParameterTensorNames){if(!Array.isArray(r.quantParameterTensorNames))throw TypeError(".onnx.TensorAnnotation.quantParameterTensorNames: array expected");u.quantParameterTensorNames=[];for(var l=0;l<r.quantParameterTensorNames.length;++l){if(typeof r.quantParameterTensorNames[l]!="object")throw TypeError(".onnx.TensorAnnotation.quantParameterTensorNames: object expected");u.quantParameterTensorNames[l]=p.onnx.StringStringEntryProto.fromObject(r.quantParameterTensorNames[l])}}return u},c.toObject=function(r,u){u||(u={});var l={};if((u.arrays||u.defaults)&&(l.quantParameterTensorNames=[]),u.defaults&&(l.tensorName=""),r.tensorName!=null&&r.hasOwnProperty("tensorName")&&(l.tensorName=r.tensorName),r.quantParameterTensorNames&&r.quantParameterTensorNames.length){l.quantParameterTensorNames=[];for(var h=0;h<r.quantParameterTensorNames.length;++h)l.quantParameterTensorNames[h]=p.onnx.StringStringEntryProto.toObject(r.quantParameterTensorNames[h],u)}return l},c.prototype.toJSON=function(){return this.constructor.toObject(this,n.util.toJSONOptions)},c.getTypeUrl=function(r){return r===void 0&&(r="type.googleapis.com"),r+"/onnx.TensorAnnotation"},c})(),i.GraphProto=(function(){function c(r){if(this.node=[],this.initializer=[],this.sparseInitializer=[],this.input=[],this.output=[],this.valueInfo=[],this.quantizationAnnotation=[],r)for(var u=Object.keys(r),l=0;l<u.length;++l)r[u[l]]!=null&&(this[u[l]]=r[u[l]])}return c.prototype.node=s.emptyArray,c.prototype.name="",c.prototype.initializer=s.emptyArray,c.prototype.sparseInitializer=s.emptyArray,c.prototype.docString="",c.prototype.input=s.emptyArray,c.prototype.output=s.emptyArray,c.prototype.valueInfo=s.emptyArray,c.prototype.quantizationAnnotation=s.emptyArray,c.create=function(r){return new c(r)},c.encode=function(r,u){if(u||(u=f.create()),r.node!=null&&r.node.length)for(var l=0;l<r.node.length;++l)p.onnx.NodeProto.encode(r.node[l],u.uint32(10).fork()).ldelim();if(r.name!=null&&Object.hasOwnProperty.call(r,"name")&&u.uint32(18).string(r.name),r.initializer!=null&&r.initializer.length)for(var l=0;l<r.initializer.length;++l)p.onnx.TensorProto.encode(r.initializer[l],u.uint32(42).fork()).ldelim();if(r.docString!=null&&Object.hasOwnProperty.call(r,"docString")&&u.uint32(82).string(r.docString),r.input!=null&&r.input.length)for(var l=0;l<r.input.length;++l)p.onnx.ValueInfoProto.encode(r.input[l],u.uint32(90).fork()).ldelim();if(r.output!=null&&r.output.length)for(var l=0;l<r.output.length;++l)p.onnx.ValueInfoProto.encode(r.output[l],u.uint32(98).fork()).ldelim();if(r.valueInfo!=null&&r.valueInfo.length)for(var l=0;l<r.valueInfo.length;++l)p.onnx.ValueInfoProto.encode(r.valueInfo[l],u.uint32(106).fork()).ldelim();if(r.quantizationAnnotation!=null&&r.quantizationAnnotation.length)for(var l=0;l<r.quantizationAnnotation.length;++l)p.onnx.TensorAnnotation.encode(r.quantizationAnnotation[l],u.uint32(114).fork()).ldelim();if(r.sparseInitializer!=null&&r.sparseInitializer.length)for(var l=0;l<r.sparseInitializer.length;++l)p.onnx.SparseTensorProto.encode(r.sparseInitializer[l],u.uint32(122).fork()).ldelim();return u},c.encodeDelimited=function(r,u){return this.encode(r,u).ldelim()},c.decode=function(r,u){r instanceof o||(r=o.create(r));for(var l=u===void 0?r.len:r.pos+u,h=new p.onnx.GraphProto;r.pos<l;){var y=r.uint32();switch(y>>>3){case 1:{h.node&&h.node.length||(h.node=[]),h.node.push(p.onnx.NodeProto.decode(r,r.uint32()));break}case 2:{h.name=r.string();break}case 5:{h.initializer&&h.initializer.length||(h.initializer=[]),h.initializer.push(p.onnx.TensorProto.decode(r,r.uint32()));break}case 15:{h.sparseInitializer&&h.sparseInitializer.length||(h.sparseInitializer=[]),h.sparseInitializer.push(p.onnx.SparseTensorProto.decode(r,r.uint32()));break}case 10:{h.docString=r.string();break}case 11:{h.input&&h.input.length||(h.input=[]),h.input.push(p.onnx.ValueInfoProto.decode(r,r.uint32()));break}case 12:{h.output&&h.output.length||(h.output=[]),h.output.push(p.onnx.ValueInfoProto.decode(r,r.uint32()));break}case 13:{h.valueInfo&&h.valueInfo.length||(h.valueInfo=[]),h.valueInfo.push(p.onnx.ValueInfoProto.decode(r,r.uint32()));break}case 14:{h.quantizationAnnotation&&h.quantizationAnnotation.length||(h.quantizationAnnotation=[]),h.quantizationAnnotation.push(p.onnx.TensorAnnotation.decode(r,r.uint32()));break}default:r.skipType(y&7);break}}return h},c.decodeDelimited=function(r){return r instanceof o||(r=new o(r)),this.decode(r,r.uint32())},c.verify=function(r){if(typeof r!="object"||r===null)return"object expected";if(r.node!=null&&r.hasOwnProperty("node")){if(!Array.isArray(r.node))return"node: array expected";for(var u=0;u<r.node.length;++u){var l=p.onnx.NodeProto.verify(r.node[u]);if(l)return"node."+l}}if(r.name!=null&&r.hasOwnProperty("name")&&!s.isString(r.name))return"name: string expected";if(r.initializer!=null&&r.hasOwnProperty("initializer")){if(!Array.isArray(r.initializer))return"initializer: array expected";for(var u=0;u<r.initializer.length;++u){var l=p.onnx.TensorProto.verify(r.initializer[u]);if(l)return"initializer."+l}}if(r.sparseInitializer!=null&&r.hasOwnProperty("sparseInitializer")){if(!Array.isArray(r.sparseInitializer))return"sparseInitializer: array expected";for(var u=0;u<r.sparseInitializer.length;++u){var l=p.onnx.SparseTensorProto.verify(r.sparseInitializer[u]);if(l)return"sparseInitializer."+l}}if(r.docString!=null&&r.hasOwnProperty("docString")&&!s.isString(r.docString))return"docString: string expected";if(r.input!=null&&r.hasOwnProperty("input")){if(!Array.isArray(r.input))return"input: array expected";for(var u=0;u<r.input.length;++u){var l=p.onnx.ValueInfoProto.verify(r.input[u]);if(l)return"input."+l}}if(r.output!=null&&r.hasOwnProperty("output")){if(!Array.isArray(r.output))return"output: array expected";for(var u=0;u<r.output.length;++u){var l=p.onnx.ValueInfoProto.verify(r.output[u]);if(l)return"output."+l}}if(r.valueInfo!=null&&r.hasOwnProperty("valueInfo")){if(!Array.isArray(r.valueInfo))return"valueInfo: array expected";for(var u=0;u<r.valueInfo.length;++u){var l=p.onnx.ValueInfoProto.verify(r.valueInfo[u]);if(l)return"valueInfo."+l}}if(r.quantizationAnnotation!=null&&r.hasOwnProperty("quantizationAnnotation")){if(!Array.isArray(r.quantizationAnnotation))return"quantizationAnnotation: array expected";for(var u=0;u<r.quantizationAnnotation.length;++u){var l=p.onnx.TensorAnnotation.verify(r.quantizationAnnotation[u]);if(l)return"quantizationAnnotation."+l}}return null},c.fromObject=function(r){if(r instanceof p.onnx.GraphProto)return r;var u=new p.onnx.GraphProto;if(r.node){if(!Array.isArray(r.node))throw TypeError(".onnx.GraphProto.node: array expected");u.node=[];for(var l=0;l<r.node.length;++l){if(typeof r.node[l]!="object")throw TypeError(".onnx.GraphProto.node: object expected");u.node[l]=p.onnx.NodeProto.fromObject(r.node[l])}}if(r.name!=null&&(u.name=String(r.name)),r.initializer){if(!Array.isArray(r.initializer))throw TypeError(".onnx.GraphProto.initializer: array expected");u.initializer=[];for(var l=0;l<r.initializer.length;++l){if(typeof r.initializer[l]!="object")throw TypeError(".onnx.GraphProto.initializer: object expected");u.initializer[l]=p.onnx.TensorProto.fromObject(r.initializer[l])}}if(r.sparseInitializer){if(!Array.isArray(r.sparseInitializer))throw TypeError(".onnx.GraphProto.sparseInitializer: array expected");u.sparseInitializer=[];for(var l=0;l<r.sparseInitializer.length;++l){if(typeof r.sparseInitializer[l]!="object")throw TypeError(".onnx.GraphProto.sparseInitializer: object expected");u.sparseInitializer[l]=p.onnx.SparseTensorProto.fromObject(r.sparseInitializer[l])}}if(r.docString!=null&&(u.docString=String(r.docString)),r.input){if(!Array.isArray(r.input))throw TypeError(".onnx.GraphProto.input: array expected");u.input=[];for(var l=0;l<r.input.length;++l){if(typeof r.input[l]!="object")throw TypeError(".onnx.GraphProto.input: object expected");u.input[l]=p.onnx.ValueInfoProto.fromObject(r.input[l])}}if(r.output){if(!Array.isArray(r.output))throw TypeError(".onnx.GraphProto.output: array expected");u.output=[];for(var l=0;l<r.output.length;++l){if(typeof r.output[l]!="object")throw TypeError(".onnx.GraphProto.output: object expected");u.output[l]=p.onnx.ValueInfoProto.fromObject(r.output[l])}}if(r.valueInfo){if(!Array.isArray(r.valueInfo))throw TypeError(".onnx.GraphProto.valueInfo: array expected");u.valueInfo=[];for(var l=0;l<r.valueInfo.length;++l){if(typeof r.valueInfo[l]!="object")throw TypeError(".onnx.GraphProto.valueInfo: object expected");u.valueInfo[l]=p.onnx.ValueInfoProto.fromObject(r.valueInfo[l])}}if(r.quantizationAnnotation){if(!Array.isArray(r.quantizationAnnotation))throw TypeError(".onnx.GraphProto.quantizationAnnotation: array expected");u.quantizationAnnotation=[];for(var l=0;l<r.quantizationAnnotation.length;++l){if(typeof r.quantizationAnnotation[l]!="object")throw TypeError(".onnx.GraphProto.quantizationAnnotation: object expected");u.quantizationAnnotation[l]=p.onnx.TensorAnnotation.fromObject(r.quantizationAnnotation[l])}}return u},c.toObject=function(r,u){u||(u={});var l={};if((u.arrays||u.defaults)&&(l.node=[],l.initializer=[],l.input=[],l.output=[],l.valueInfo=[],l.quantizationAnnotation=[],l.sparseInitializer=[]),u.defaults&&(l.name="",l.docString=""),r.node&&r.node.length){l.node=[];for(var h=0;h<r.node.length;++h)l.node[h]=p.onnx.NodeProto.toObject(r.node[h],u)}if(r.name!=null&&r.hasOwnProperty("name")&&(l.name=r.name),r.initializer&&r.initializer.length){l.initializer=[];for(var h=0;h<r.initializer.length;++h)l.initializer[h]=p.onnx.TensorProto.toObject(r.initializer[h],u)}if(r.docString!=null&&r.hasOwnProperty("docString")&&(l.docString=r.docString),r.input&&r.input.length){l.input=[];for(var h=0;h<r.input.length;++h)l.input[h]=p.onnx.ValueInfoProto.toObject(r.input[h],u)}if(r.output&&r.output.length){l.output=[];for(var h=0;h<r.output.length;++h)l.output[h]=p.onnx.ValueInfoProto.toObject(r.output[h],u)}if(r.valueInfo&&r.valueInfo.length){l.valueInfo=[];for(var h=0;h<r.valueInfo.length;++h)l.valueInfo[h]=p.onnx.ValueInfoProto.toObject(r.valueInfo[h],u)}if(r.quantizationAnnotation&&r.quantizationAnnotation.length){l.quantizationAnnotation=[];for(var h=0;h<r.quantizationAnnotation.length;++h)l.quantizationAnnotation[h]=p.onnx.TensorAnnotation.toObject(r.quantizationAnnotation[h],u)}if(r.sparseInitializer&&r.sparseInitializer.length){l.sparseInitializer=[];for(var h=0;h<r.sparseInitializer.length;++h)l.sparseInitializer[h]=p.onnx.SparseTensorProto.toObject(r.sparseInitializer[h],u)}return l},c.prototype.toJSON=function(){return this.constructor.toObject(this,n.util.toJSONOptions)},c.getTypeUrl=function(r){return r===void 0&&(r="type.googleapis.com"),r+"/onnx.GraphProto"},c})(),i.TensorProto=(function(){function c(r){if(this.dims=[],this.floatData=[],this.int32Data=[],this.stringData=[],this.int64Data=[],this.externalData=[],this.doubleData=[],this.uint64Data=[],r)for(var u=Object.keys(r),l=0;l<u.length;++l)r[u[l]]!=null&&(this[u[l]]=r[u[l]])}return c.prototype.dims=s.emptyArray,c.prototype.dataType=0,c.prototype.segment=null,c.prototype.floatData=s.emptyArray,c.prototype.int32Data=s.emptyArray,c.prototype.stringData=s.emptyArray,c.prototype.int64Data=s.emptyArray,c.prototype.name="",c.prototype.docString="",c.prototype.rawData=s.newBuffer([]),c.prototype.externalData=s.emptyArray,c.prototype.dataLocation=0,c.prototype.doubleData=s.emptyArray,c.prototype.uint64Data=s.emptyArray,c.create=function(r){return new c(r)},c.encode=function(r,u){if(u||(u=f.create()),r.dims!=null&&r.dims.length){u.uint32(10).fork();for(var l=0;l<r.dims.length;++l)u.int64(r.dims[l]);u.ldelim()}if(r.dataType!=null&&Object.hasOwnProperty.call(r,"dataType")&&u.uint32(16).int32(r.dataType),r.segment!=null&&Object.hasOwnProperty.call(r,"segment")&&p.onnx.TensorProto.Segment.encode(r.segment,u.uint32(26).fork()).ldelim(),r.floatData!=null&&r.floatData.length){u.uint32(34).fork();for(var l=0;l<r.floatData.length;++l)u.float(r.floatData[l]);u.ldelim()}if(r.int32Data!=null&&r.int32Data.length){u.uint32(42).fork();for(var l=0;l<r.int32Data.length;++l)u.int32(r.int32Data[l]);u.ldelim()}if(r.stringData!=null&&r.stringData.length)for(var l=0;l<r.stringData.length;++l)u.uint32(50).bytes(r.stringData[l]);if(r.int64Data!=null&&r.int64Data.length){u.uint32(58).fork();for(var l=0;l<r.int64Data.length;++l)u.int64(r.int64Data[l]);u.ldelim()}if(r.name!=null&&Object.hasOwnProperty.call(r,"name")&&u.uint32(66).string(r.name),r.rawData!=null&&Object.hasOwnProperty.call(r,"rawData")&&u.uint32(74).bytes(r.rawData),r.doubleData!=null&&r.doubleData.length){u.uint32(82).fork();for(var l=0;l<r.doubleData.length;++l)u.double(r.doubleData[l]);u.ldelim()}if(r.uint64Data!=null&&r.uint64Data.length){u.uint32(90).fork();for(var l=0;l<r.uint64Data.length;++l)u.uint64(r.uint64Data[l]);u.ldelim()}if(r.docString!=null&&Object.hasOwnProperty.call(r,"docString")&&u.uint32(98).string(r.docString),r.externalData!=null&&r.externalData.length)for(var l=0;l<r.externalData.length;++l)p.onnx.StringStringEntryProto.encode(r.externalData[l],u.uint32(106).fork()).ldelim();return r.dataLocation!=null&&Object.hasOwnProperty.call(r,"dataLocation")&&u.uint32(112).int32(r.dataLocation),u},c.encodeDelimited=function(r,u){return this.encode(r,u).ldelim()},c.decode=function(r,u){r instanceof o||(r=o.create(r));for(var l=u===void 0?r.len:r.pos+u,h=new p.onnx.TensorProto;r.pos<l;){var y=r.uint32();switch(y>>>3){case 1:{if(h.dims&&h.dims.length||(h.dims=[]),(y&7)===2)for(var O=r.uint32()+r.pos;r.pos<O;)h.dims.push(r.int64());else h.dims.push(r.int64());break}case 2:{h.dataType=r.int32();break}case 3:{h.segment=p.onnx.TensorProto.Segment.decode(r,r.uint32());break}case 4:{if(h.floatData&&h.floatData.length||(h.floatData=[]),(y&7)===2)for(var O=r.uint32()+r.pos;r.pos<O;)h.floatData.push(r.float());else h.floatData.push(r.float());break}case 5:{if(h.int32Data&&h.int32Data.length||(h.int32Data=[]),(y&7)===2)for(var O=r.uint32()+r.pos;r.pos<O;)h.int32Data.push(r.int32());else h.int32Data.push(r.int32());break}case 6:{h.stringData&&h.stringData.length||(h.stringData=[]),h.stringData.push(r.bytes());break}case 7:{if(h.int64Data&&h.int64Data.length||(h.int64Data=[]),(y&7)===2)for(var O=r.uint32()+r.pos;r.pos<O;)h.int64Data.push(r.int64());else h.int64Data.push(r.int64());break}case 8:{h.name=r.string();break}case 12:{h.docString=r.string();break}case 9:{h.rawData=r.bytes();break}case 13:{h.externalData&&h.externalData.length||(h.externalData=[]),h.externalData.push(p.onnx.StringStringEntryProto.decode(r,r.uint32()));break}case 14:{h.dataLocation=r.int32();break}case 10:{if(h.doubleData&&h.doubleData.length||(h.doubleData=[]),(y&7)===2)for(var O=r.uint32()+r.pos;r.pos<O;)h.doubleData.push(r.double());else h.doubleData.push(r.double());break}case 11:{if(h.uint64Data&&h.uint64Data.length||(h.uint64Data=[]),(y&7)===2)for(var O=r.uint32()+r.pos;r.pos<O;)h.uint64Data.push(r.uint64());else h.uint64Data.push(r.uint64());break}default:r.skipType(y&7);break}}return h},c.decodeDelimited=function(r){return r instanceof o||(r=new o(r)),this.decode(r,r.uint32())},c.verify=function(r){if(typeof r!="object"||r===null)return"object expected";if(r.dims!=null&&r.hasOwnProperty("dims")){if(!Array.isArray(r.dims))return"dims: array expected";for(var u=0;u<r.dims.length;++u)if(!s.isInteger(r.dims[u])&&!(r.dims[u]&&s.isInteger(r.dims[u].low)&&s.isInteger(r.dims[u].high)))return"dims: integer|Long[] expected"}if(r.dataType!=null&&r.hasOwnProperty("dataType")&&!s.isInteger(r.dataType))return"dataType: integer expected";if(r.segment!=null&&r.hasOwnProperty("segment")){var l=p.onnx.TensorProto.Segment.verify(r.segment);if(l)return"segment."+l}if(r.floatData!=null&&r.hasOwnProperty("floatData")){if(!Array.isArray(r.floatData))return"floatData: array expected";for(var u=0;u<r.floatData.length;++u)if(typeof r.floatData[u]!="number")return"floatData: number[] expected"}if(r.int32Data!=null&&r.hasOwnProperty("int32Data")){if(!Array.isArray(r.int32Data))return"int32Data: array expected";for(var u=0;u<r.int32Data.length;++u)if(!s.isInteger(r.int32Data[u]))return"int32Data: integer[] expected"}if(r.stringData!=null&&r.hasOwnProperty("stringData")){if(!Array.isArray(r.stringData))return"stringData: array expected";for(var u=0;u<r.stringData.length;++u)if(!(r.stringData[u]&&typeof r.stringData[u].length=="number"||s.isString(r.stringData[u])))return"stringData: buffer[] expected"}if(r.int64Data!=null&&r.hasOwnProperty("int64Data")){if(!Array.isArray(r.int64Data))return"int64Data: array expected";for(var u=0;u<r.int64Data.length;++u)if(!s.isInteger(r.int64Data[u])&&!(r.int64Data[u]&&s.isInteger(r.int64Data[u].low)&&s.isInteger(r.int64Data[u].high)))return"int64Data: integer|Long[] expected"}if(r.name!=null&&r.hasOwnProperty("name")&&!s.isString(r.name))return"name: string expected";if(r.docString!=null&&r.hasOwnProperty("docString")&&!s.isString(r.docString))return"docString: string expected";if(r.rawData!=null&&r.hasOwnProperty("rawData")&&!(r.rawData&&typeof r.rawData.length=="number"||s.isString(r.rawData)))return"rawData: buffer expected";if(r.externalData!=null&&r.hasOwnProperty("externalData")){if(!Array.isArray(r.externalData))return"externalData: array expected";for(var u=0;u<r.externalData.length;++u){var l=p.onnx.StringStringEntryProto.verify(r.externalData[u]);if(l)return"externalData."+l}}if(r.dataLocation!=null&&r.hasOwnProperty("dataLocation"))switch(r.dataLocation){default:return"dataLocation: enum value expected";case 0:case 1:break}if(r.doubleData!=null&&r.hasOwnProperty("doubleData")){if(!Array.isArray(r.doubleData))return"doubleData: array expected";for(var u=0;u<r.doubleData.length;++u)if(typeof r.doubleData[u]!="number")return"doubleData: number[] expected"}if(r.uint64Data!=null&&r.hasOwnProperty("uint64Data")){if(!Array.isArray(r.uint64Data))return"uint64Data: array expected";for(var u=0;u<r.uint64Data.length;++u)if(!s.isInteger(r.uint64Data[u])&&!(r.uint64Data[u]&&s.isInteger(r.uint64Data[u].low)&&s.isInteger(r.uint64Data[u].high)))return"uint64Data: integer|Long[] expected"}return null},c.fromObject=function(r){if(r instanceof p.onnx.TensorProto)return r;var u=new p.onnx.TensorProto;if(r.dims){if(!Array.isArray(r.dims))throw TypeError(".onnx.TensorProto.dims: array expected");u.dims=[];for(var l=0;l<r.dims.length;++l)s.Long?(u.dims[l]=s.Long.fromValue(r.dims[l])).unsigned=!1:typeof r.dims[l]=="string"?u.dims[l]=parseInt(r.dims[l],10):typeof r.dims[l]=="number"?u.dims[l]=r.dims[l]:typeof r.dims[l]=="object"&&(u.dims[l]=new s.LongBits(r.dims[l].low>>>0,r.dims[l].high>>>0).toNumber())}if(r.dataType!=null&&(u.dataType=r.dataType|0),r.segment!=null){if(typeof r.segment!="object")throw TypeError(".onnx.TensorProto.segment: object expected");u.segment=p.onnx.TensorProto.Segment.fromObject(r.segment)}if(r.floatData){if(!Array.isArray(r.floatData))throw TypeError(".onnx.TensorProto.floatData: array expected");u.floatData=[];for(var l=0;l<r.floatData.length;++l)u.floatData[l]=Number(r.floatData[l])}if(r.int32Data){if(!Array.isArray(r.int32Data))throw TypeError(".onnx.TensorProto.int32Data: array expected");u.int32Data=[];for(var l=0;l<r.int32Data.length;++l)u.int32Data[l]=r.int32Data[l]|0}if(r.stringData){if(!Array.isArray(r.stringData))throw TypeError(".onnx.TensorProto.stringData: array expected");u.stringData=[];for(var l=0;l<r.stringData.length;++l)typeof r.stringData[l]=="string"?s.base64.decode(r.stringData[l],u.stringData[l]=s.newBuffer(s.base64.length(r.stringData[l])),0):r.stringData[l].length>=0&&(u.stringData[l]=r.stringData[l])}if(r.int64Data){if(!Array.isArray(r.int64Data))throw TypeError(".onnx.TensorProto.int64Data: array expected");u.int64Data=[];for(var l=0;l<r.int64Data.length;++l)s.Long?(u.int64Data[l]=s.Long.fromValue(r.int64Data[l])).unsigned=!1:typeof r.int64Data[l]=="string"?u.int64Data[l]=parseInt(r.int64Data[l],10):typeof r.int64Data[l]=="number"?u.int64Data[l]=r.int64Data[l]:typeof r.int64Data[l]=="object"&&(u.int64Data[l]=new s.LongBits(r.int64Data[l].low>>>0,r.int64Data[l].high>>>0).toNumber())}if(r.name!=null&&(u.name=String(r.name)),r.docString!=null&&(u.docString=String(r.docString)),r.rawData!=null&&(typeof r.rawData=="string"?s.base64.decode(r.rawData,u.rawData=s.newBuffer(s.base64.length(r.rawData)),0):r.rawData.length>=0&&(u.rawData=r.rawData)),r.externalData){if(!Array.isArray(r.externalData))throw TypeError(".onnx.TensorProto.externalData: array expected");u.externalData=[];for(var l=0;l<r.externalData.length;++l){if(typeof r.externalData[l]!="object")throw TypeError(".onnx.TensorProto.externalData: object expected");u.externalData[l]=p.onnx.StringStringEntryProto.fromObject(r.externalData[l])}}switch(r.dataLocation){default:if(typeof r.dataLocation=="number"){u.dataLocation=r.dataLocation;break}break;case"DEFAULT":case 0:u.dataLocation=0;break;case"EXTERNAL":case 1:u.dataLocation=1;break}if(r.doubleData){if(!Array.isArray(r.doubleData))throw TypeError(".onnx.TensorProto.doubleData: array expected");u.doubleData=[];for(var l=0;l<r.doubleData.length;++l)u.doubleData[l]=Number(r.doubleData[l])}if(r.uint64Data){if(!Array.isArray(r.uint64Data))throw TypeError(".onnx.TensorProto.uint64Data: array expected");u.uint64Data=[];for(var l=0;l<r.uint64Data.length;++l)s.Long?(u.uint64Data[l]=s.Long.fromValue(r.uint64Data[l])).unsigned=!0:typeof r.uint64Data[l]=="string"?u.uint64Data[l]=parseInt(r.uint64Data[l],10):typeof r.uint64Data[l]=="number"?u.uint64Data[l]=r.uint64Data[l]:typeof r.uint64Data[l]=="object"&&(u.uint64Data[l]=new s.LongBits(r.uint64Data[l].low>>>0,r.uint64Data[l].high>>>0).toNumber(!0))}return u},c.toObject=function(r,u){u||(u={});var l={};if((u.arrays||u.defaults)&&(l.dims=[],l.floatData=[],l.int32Data=[],l.stringData=[],l.int64Data=[],l.doubleData=[],l.uint64Data=[],l.externalData=[]),u.defaults&&(l.dataType=0,l.segment=null,l.name="",u.bytes===String?l.rawData="":(l.rawData=[],u.bytes!==Array&&(l.rawData=s.newBuffer(l.rawData))),l.docString="",l.dataLocation=u.enums===String?"DEFAULT":0),r.dims&&r.dims.length){l.dims=[];for(var h=0;h<r.dims.length;++h)typeof r.dims[h]=="number"?l.dims[h]=u.longs===String?String(r.dims[h]):r.dims[h]:l.dims[h]=u.longs===String?s.Long.prototype.toString.call(r.dims[h]):u.longs===Number?new s.LongBits(r.dims[h].low>>>0,r.dims[h].high>>>0).toNumber():r.dims[h]}if(r.dataType!=null&&r.hasOwnProperty("dataType")&&(l.dataType=r.dataType),r.segment!=null&&r.hasOwnProperty("segment")&&(l.segment=p.onnx.TensorProto.Segment.toObject(r.segment,u)),r.floatData&&r.floatData.length){l.floatData=[];for(var h=0;h<r.floatData.length;++h)l.floatData[h]=u.json&&!isFinite(r.floatData[h])?String(r.floatData[h]):r.floatData[h]}if(r.int32Data&&r.int32Data.length){l.int32Data=[];for(var h=0;h<r.int32Data.length;++h)l.int32Data[h]=r.int32Data[h]}if(r.stringData&&r.stringData.length){l.stringData=[];for(var h=0;h<r.stringData.length;++h)l.stringData[h]=u.bytes===String?s.base64.encode(r.stringData[h],0,r.stringData[h].length):u.bytes===Array?Array.prototype.slice.call(r.stringData[h]):r.stringData[h]}if(r.int64Data&&r.int64Data.length){l.int64Data=[];for(var h=0;h<r.int64Data.length;++h)typeof r.int64Data[h]=="number"?l.int64Data[h]=u.longs===String?String(r.int64Data[h]):r.int64Data[h]:l.int64Data[h]=u.longs===String?s.Long.prototype.toString.call(r.int64Data[h]):u.longs===Number?new s.LongBits(r.int64Data[h].low>>>0,r.int64Data[h].high>>>0).toNumber():r.int64Data[h]}if(r.name!=null&&r.hasOwnProperty("name")&&(l.name=r.name),r.rawData!=null&&r.hasOwnProperty("rawData")&&(l.rawData=u.bytes===String?s.base64.encode(r.rawData,0,r.rawData.length):u.bytes===Array?Array.prototype.slice.call(r.rawData):r.rawData),r.doubleData&&r.doubleData.length){l.doubleData=[];for(var h=0;h<r.doubleData.length;++h)l.doubleData[h]=u.json&&!isFinite(r.doubleData[h])?String(r.doubleData[h]):r.doubleData[h]}if(r.uint64Data&&r.uint64Data.length){l.uint64Data=[];for(var h=0;h<r.uint64Data.length;++h)typeof r.uint64Data[h]=="number"?l.uint64Data[h]=u.longs===String?String(r.uint64Data[h]):r.uint64Data[h]:l.uint64Data[h]=u.longs===String?s.Long.prototype.toString.call(r.uint64Data[h]):u.longs===Number?new s.LongBits(r.uint64Data[h].low>>>0,r.uint64Data[h].high>>>0).toNumber(!0):r.uint64Data[h]}if(r.docString!=null&&r.hasOwnProperty("docString")&&(l.docString=r.docString),r.externalData&&r.externalData.length){l.externalData=[];for(var h=0;h<r.externalData.length;++h)l.externalData[h]=p.onnx.StringStringEntryProto.toObject(r.externalData[h],u)}return r.dataLocation!=null&&r.hasOwnProperty("dataLocation")&&(l.dataLocation=u.enums===String?p.onnx.TensorProto.DataLocation[r.dataLocation]===void 0?r.dataLocation:p.onnx.TensorProto.DataLocation[r.dataLocation]:r.dataLocation),l},c.prototype.toJSON=function(){return this.constructor.toObject(this,n.util.toJSONOptions)},c.getTypeUrl=function(r){return r===void 0&&(r="type.googleapis.com"),r+"/onnx.TensorProto"},c.DataType=(function(){var r={},u=Object.create(r);return u[r[0]="UNDEFINED"]=0,u[r[1]="FLOAT"]=1,u[r[2]="UINT8"]=2,u[r[3]="INT8"]=3,u[r[4]="UINT16"]=4,u[r[5]="INT16"]=5,u[r[6]="INT32"]=6,u[r[7]="INT64"]=7,u[r[8]="STRING"]=8,u[r[9]="BOOL"]=9,u[r[10]="FLOAT16"]=10,u[r[11]="DOUBLE"]=11,u[r[12]="UINT32"]=12,u[r[13]="UINT64"]=13,u[r[14]="COMPLEX64"]=14,u[r[15]="COMPLEX128"]=15,u[r[16]="BFLOAT16"]=16,u[r[17]="FLOAT8E4M3FN"]=17,u[r[18]="FLOAT8E4M3FNUZ"]=18,u[r[19]="FLOAT8E5M2"]=19,u[r[20]="FLOAT8E5M2FNUZ"]=20,u})(),c.Segment=(function(){function r(u){if(u)for(var l=Object.keys(u),h=0;h<l.length;++h)u[l[h]]!=null&&(this[l[h]]=u[l[h]])}return r.prototype.begin=s.Long?s.Long.fromBits(0,0,!1):0,r.prototype.end=s.Long?s.Long.fromBits(0,0,!1):0,r.create=function(u){return new r(u)},r.encode=function(u,l){return l||(l=f.create()),u.begin!=null&&Object.hasOwnProperty.call(u,"begin")&&l.uint32(8).int64(u.begin),u.end!=null&&Object.hasOwnProperty.call(u,"end")&&l.uint32(16).int64(u.end),l},r.encodeDelimited=function(u,l){return this.encode(u,l).ldelim()},r.decode=function(u,l){u instanceof o||(u=o.create(u));for(var h=l===void 0?u.len:u.pos+l,y=new p.onnx.TensorProto.Segment;u.pos<h;){var O=u.uint32();switch(O>>>3){case 1:{y.begin=u.int64();break}case 2:{y.end=u.int64();break}default:u.skipType(O&7);break}}return y},r.decodeDelimited=function(u){return u instanceof o||(u=new o(u)),this.decode(u,u.uint32())},r.verify=function(u){return typeof u!="object"||u===null?"object expected":u.begin!=null&&u.hasOwnProperty("begin")&&!s.isInteger(u.begin)&&!(u.begin&&s.isInteger(u.begin.low)&&s.isInteger(u.begin.high))?"begin: integer|Long expected":u.end!=null&&u.hasOwnProperty("end")&&!s.isInteger(u.end)&&!(u.end&&s.isInteger(u.end.low)&&s.isInteger(u.end.high))?"end: integer|Long expected":null},r.fromObject=function(u){if(u instanceof p.onnx.TensorProto.Segment)return u;var l=new p.onnx.TensorProto.Segment;return u.begin!=null&&(s.Long?(l.begin=s.Long.fromValue(u.begin)).unsigned=!1:typeof u.begin=="string"?l.begin=parseInt(u.begin,10):typeof u.begin=="number"?l.begin=u.begin:typeof u.begin=="object"&&(l.begin=new s.LongBits(u.begin.low>>>0,u.begin.high>>>0).toNumber())),u.end!=null&&(s.Long?(l.end=s.Long.fromValue(u.end)).unsigned=!1:typeof u.end=="string"?l.end=parseInt(u.end,10):typeof u.end=="number"?l.end=u.end:typeof u.end=="object"&&(l.end=new s.LongBits(u.end.low>>>0,u.end.high>>>0).toNumber())),l},r.toObject=function(u,l){l||(l={});var h={};if(l.defaults){if(s.Long){var y=new s.Long(0,0,!1);h.begin=l.longs===String?y.toString():l.longs===Number?y.toNumber():y}else h.begin=l.longs===String?"0":0;if(s.Long){var y=new s.Long(0,0,!1);h.end=l.longs===String?y.toString():l.longs===Number?y.toNumber():y}else h.end=l.longs===String?"0":0}return u.begin!=null&&u.hasOwnProperty("begin")&&(typeof u.begin=="number"?h.begin=l.longs===String?String(u.begin):u.begin:h.begin=l.longs===String?s.Long.prototype.toString.call(u.begin):l.longs===Number?new s.LongBits(u.begin.low>>>0,u.begin.high>>>0).toNumber():u.begin),u.end!=null&&u.hasOwnProperty("end")&&(typeof u.end=="number"?h.end=l.longs===String?String(u.end):u.end:h.end=l.longs===String?s.Long.prototype.toString.call(u.end):l.longs===Number?new s.LongBits(u.end.low>>>0,u.end.high>>>0).toNumber():u.end),h},r.prototype.toJSON=function(){return this.constructor.toObject(this,n.util.toJSONOptions)},r.getTypeUrl=function(u){return u===void 0&&(u="type.googleapis.com"),u+"/onnx.TensorProto.Segment"},r})(),c.DataLocation=(function(){var r={},u=Object.create(r);return u[r[0]="DEFAULT"]=0,u[r[1]="EXTERNAL"]=1,u})(),c})(),i.SparseTensorProto=(function(){function c(r){if(this.dims=[],r)for(var u=Object.keys(r),l=0;l<u.length;++l)r[u[l]]!=null&&(this[u[l]]=r[u[l]])}return c.prototype.values=null,c.prototype.indices=null,c.prototype.dims=s.emptyArray,c.create=function(r){return new c(r)},c.encode=function(r,u){if(u||(u=f.create()),r.values!=null&&Object.hasOwnProperty.call(r,"values")&&p.onnx.TensorProto.encode(r.values,u.uint32(10).fork()).ldelim(),r.indices!=null&&Object.hasOwnProperty.call(r,"indices")&&p.onnx.TensorProto.encode(r.indices,u.uint32(18).fork()).ldelim(),r.dims!=null&&r.dims.length){u.uint32(26).fork();for(var l=0;l<r.dims.length;++l)u.int64(r.dims[l]);u.ldelim()}return u},c.encodeDelimited=function(r,u){return this.encode(r,u).ldelim()},c.decode=function(r,u){r instanceof o||(r=o.create(r));for(var l=u===void 0?r.len:r.pos+u,h=new p.onnx.SparseTensorProto;r.pos<l;){var y=r.uint32();switch(y>>>3){case 1:{h.values=p.onnx.TensorProto.decode(r,r.uint32());break}case 2:{h.indices=p.onnx.TensorProto.decode(r,r.uint32());break}case 3:{if(h.dims&&h.dims.length||(h.dims=[]),(y&7)===2)for(var O=r.uint32()+r.pos;r.pos<O;)h.dims.push(r.int64());else h.dims.push(r.int64());break}default:r.skipType(y&7);break}}return h},c.decodeDelimited=function(r){return r instanceof o||(r=new o(r)),this.decode(r,r.uint32())},c.verify=function(r){if(typeof r!="object"||r===null)return"object expected";if(r.values!=null&&r.hasOwnProperty("values")){var u=p.onnx.TensorProto.verify(r.values);if(u)return"values."+u}if(r.indices!=null&&r.hasOwnProperty("indices")){var u=p.onnx.TensorProto.verify(r.indices);if(u)return"indices."+u}if(r.dims!=null&&r.hasOwnProperty("dims")){if(!Array.isArray(r.dims))return"dims: array expected";for(var l=0;l<r.dims.length;++l)if(!s.isInteger(r.dims[l])&&!(r.dims[l]&&s.isInteger(r.dims[l].low)&&s.isInteger(r.dims[l].high)))return"dims: integer|Long[] expected"}return null},c.fromObject=function(r){if(r instanceof p.onnx.SparseTensorProto)return r;var u=new p.onnx.SparseTensorProto;if(r.values!=null){if(typeof r.values!="object")throw TypeError(".onnx.SparseTensorProto.values: object expected");u.values=p.onnx.TensorProto.fromObject(r.values)}if(r.indices!=null){if(typeof r.indices!="object")throw TypeError(".onnx.SparseTensorProto.indices: object expected");u.indices=p.onnx.TensorProto.fromObject(r.indices)}if(r.dims){if(!Array.isArray(r.dims))throw TypeError(".onnx.SparseTensorProto.dims: array expected");u.dims=[];for(var l=0;l<r.dims.length;++l)s.Long?(u.dims[l]=s.Long.fromValue(r.dims[l])).unsigned=!1:typeof r.dims[l]=="string"?u.dims[l]=parseInt(r.dims[l],10):typeof r.dims[l]=="number"?u.dims[l]=r.dims[l]:typeof r.dims[l]=="object"&&(u.dims[l]=new s.LongBits(r.dims[l].low>>>0,r.dims[l].high>>>0).toNumber())}return u},c.toObject=function(r,u){u||(u={});var l={};if((u.arrays||u.defaults)&&(l.dims=[]),u.defaults&&(l.values=null,l.indices=null),r.values!=null&&r.hasOwnProperty("values")&&(l.values=p.onnx.TensorProto.toObject(r.values,u)),r.indices!=null&&r.hasOwnProperty("indices")&&(l.indices=p.onnx.TensorProto.toObject(r.indices,u)),r.dims&&r.dims.length){l.dims=[];for(var h=0;h<r.dims.length;++h)typeof r.dims[h]=="number"?l.dims[h]=u.longs===String?String(r.dims[h]):r.dims[h]:l.dims[h]=u.longs===String?s.Long.prototype.toString.call(r.dims[h]):u.longs===Number?new s.LongBits(r.dims[h].low>>>0,r.dims[h].high>>>0).toNumber():r.dims[h]}return l},c.prototype.toJSON=function(){return this.constructor.toObject(this,n.util.toJSONOptions)},c.getTypeUrl=function(r){return r===void 0&&(r="type.googleapis.com"),r+"/onnx.SparseTensorProto"},c})(),i.TensorShapeProto=(function(){function c(r){if(this.dim=[],r)for(var u=Object.keys(r),l=0;l<u.length;++l)r[u[l]]!=null&&(this[u[l]]=r[u[l]])}return c.prototype.dim=s.emptyArray,c.create=function(r){return new c(r)},c.encode=function(r,u){if(u||(u=f.create()),r.dim!=null&&r.dim.length)for(var l=0;l<r.dim.length;++l)p.onnx.TensorShapeProto.Dimension.encode(r.dim[l],u.uint32(10).fork()).ldelim();return u},c.encodeDelimited=function(r,u){return this.encode(r,u).ldelim()},c.decode=function(r,u){r instanceof o||(r=o.create(r));for(var l=u===void 0?r.len:r.pos+u,h=new p.onnx.TensorShapeProto;r.pos<l;){var y=r.uint32();y>>>3===1?(h.dim&&h.dim.length||(h.dim=[]),h.dim.push(p.onnx.TensorShapeProto.Dimension.decode(r,r.uint32()))):r.skipType(y&7)}return h},c.decodeDelimited=function(r){return r instanceof o||(r=new o(r)),this.decode(r,r.uint32())},c.verify=function(r){if(typeof r!="object"||r===null)return"object expected";if(r.dim!=null&&r.hasOwnProperty("dim")){if(!Array.isArray(r.dim))return"dim: array expected";for(var u=0;u<r.dim.length;++u){var l=p.onnx.TensorShapeProto.Dimension.verify(r.dim[u]);if(l)return"dim."+l}}return null},c.fromObject=function(r){if(r instanceof p.onnx.TensorShapeProto)return r;var u=new p.onnx.TensorShapeProto;if(r.dim){if(!Array.isArray(r.dim))throw TypeError(".onnx.TensorShapeProto.dim: array expected");u.dim=[];for(var l=0;l<r.dim.length;++l){if(typeof r.dim[l]!="object")throw TypeError(".onnx.TensorShapeProto.dim: object expected");u.dim[l]=p.onnx.TensorShapeProto.Dimension.fromObject(r.dim[l])}}return u},c.toObject=function(r,u){u||(u={});var l={};if((u.arrays||u.defaults)&&(l.dim=[]),r.dim&&r.dim.length){l.dim=[];for(var h=0;h<r.dim.length;++h)l.dim[h]=p.onnx.TensorShapeProto.Dimension.toObject(r.dim[h],u)}return l},c.prototype.toJSON=function(){return this.constructor.toObject(this,n.util.toJSONOptions)},c.getTypeUrl=function(r){return r===void 0&&(r="type.googleapis.com"),r+"/onnx.TensorShapeProto"},c.Dimension=(function(){function r(l){if(l)for(var h=Object.keys(l),y=0;y<h.length;++y)l[h[y]]!=null&&(this[h[y]]=l[h[y]])}r.prototype.dimValue=null,r.prototype.dimParam=null,r.prototype.denotation="";var u;return Object.defineProperty(r.prototype,"value",{get:s.oneOfGetter(u=["dimValue","dimParam"]),set:s.oneOfSetter(u)}),r.create=function(l){return new r(l)},r.encode=function(l,h){return h||(h=f.create()),l.dimValue!=null&&Object.hasOwnProperty.call(l,"dimValue")&&h.uint32(8).int64(l.dimValue),l.dimParam!=null&&Object.hasOwnProperty.call(l,"dimParam")&&h.uint32(18).string(l.dimParam),l.denotation!=null&&Object.hasOwnProperty.call(l,"denotation")&&h.uint32(26).string(l.denotation),h},r.encodeDelimited=function(l,h){return this.encode(l,h).ldelim()},r.decode=function(l,h){l instanceof o||(l=o.create(l));for(var y=h===void 0?l.len:l.pos+h,O=new p.onnx.TensorShapeProto.Dimension;l.pos<y;){var S=l.uint32();switch(S>>>3){case 1:{O.dimValue=l.int64();break}case 2:{O.dimParam=l.string();break}case 3:{O.denotation=l.string();break}default:l.skipType(S&7);break}}return O},r.decodeDelimited=function(l){return l instanceof o||(l=new o(l)),this.decode(l,l.uint32())},r.verify=function(l){if(typeof l!="object"||l===null)return"object expected";var h={};if(l.dimValue!=null&&l.hasOwnProperty("dimValue")&&(h.value=1,!s.isInteger(l.dimValue)&&!(l.dimValue&&s.isInteger(l.dimValue.low)&&s.isInteger(l.dimValue.high))))return"dimValue: integer|Long expected";if(l.dimParam!=null&&l.hasOwnProperty("dimParam")){if(h.value===1)return"value: multiple values";if(h.value=1,!s.isString(l.dimParam))return"dimParam: string expected"}return l.denotation!=null&&l.hasOwnProperty("denotation")&&!s.isString(l.denotation)?"denotation: string expected":null},r.fromObject=function(l){if(l instanceof p.onnx.TensorShapeProto.Dimension)return l;var h=new p.onnx.TensorShapeProto.Dimension;return l.dimValue!=null&&(s.Long?(h.dimValue=s.Long.fromValue(l.dimValue)).unsigned=!1:typeof l.dimValue=="string"?h.dimValue=parseInt(l.dimValue,10):typeof l.dimValue=="number"?h.dimValue=l.dimValue:typeof l.dimValue=="object"&&(h.dimValue=new s.LongBits(l.dimValue.low>>>0,l.dimValue.high>>>0).toNumber())),l.dimParam!=null&&(h.dimParam=String(l.dimParam)),l.denotation!=null&&(h.denotation=String(l.denotation)),h},r.toObject=function(l,h){h||(h={});var y={};return h.defaults&&(y.denotation=""),l.dimValue!=null&&l.hasOwnProperty("dimValue")&&(typeof l.dimValue=="number"?y.dimValue=h.longs===String?String(l.dimValue):l.dimValue:y.dimValue=h.longs===String?s.Long.prototype.toString.call(l.dimValue):h.longs===Number?new s.LongBits(l.dimValue.low>>>0,l.dimValue.high>>>0).toNumber():l.dimValue,h.oneofs&&(y.value="dimValue")),l.dimParam!=null&&l.hasOwnProperty("dimParam")&&(y.dimParam=l.dimParam,h.oneofs&&(y.value="dimParam")),l.denotation!=null&&l.hasOwnProperty("denotation")&&(y.denotation=l.denotation),y},r.prototype.toJSON=function(){return this.constructor.toObject(this,n.util.toJSONOptions)},r.getTypeUrl=function(l){return l===void 0&&(l="type.googleapis.com"),l+"/onnx.TensorShapeProto.Dimension"},r})(),c})(),i.TypeProto=(function(){function c(u){if(u)for(var l=Object.keys(u),h=0;h<l.length;++h)u[l[h]]!=null&&(this[l[h]]=u[l[h]])}c.prototype.tensorType=null,c.prototype.sequenceType=null,c.prototype.mapType=null,c.prototype.optionalType=null,c.prototype.sparseTensorType=null,c.prototype.denotation="";var r;return Object.defineProperty(c.prototype,"value",{get:s.oneOfGetter(r=["tensorType","sequenceType","mapType","optionalType","sparseTensorType"]),set:s.oneOfSetter(r)}),c.create=function(u){return new c(u)},c.encode=function(u,l){return l||(l=f.create()),u.tensorType!=null&&Object.hasOwnProperty.call(u,"tensorType")&&p.onnx.TypeProto.Tensor.encode(u.tensorType,l.uint32(10).fork()).ldelim(),u.sequenceType!=null&&Object.hasOwnProperty.call(u,"sequenceType")&&p.onnx.TypeProto.Sequence.encode(u.sequenceType,l.uint32(34).fork()).ldelim(),u.mapType!=null&&Object.hasOwnProperty.call(u,"mapType")&&p.onnx.TypeProto.Map.encode(u.mapType,l.uint32(42).fork()).ldelim(),u.denotation!=null&&Object.hasOwnProperty.call(u,"denotation")&&l.uint32(50).string(u.denotation),u.sparseTensorType!=null&&Object.hasOwnProperty.call(u,"sparseTensorType")&&p.onnx.TypeProto.SparseTensor.encode(u.sparseTensorType,l.uint32(66).fork()).ldelim(),u.optionalType!=null&&Object.hasOwnProperty.call(u,"optionalType")&&p.onnx.TypeProto.Optional.encode(u.optionalType,l.uint32(74).fork()).ldelim(),l},c.encodeDelimited=function(u,l){return this.encode(u,l).ldelim()},c.decode=function(u,l){u instanceof o||(u=o.create(u));for(var h=l===void 0?u.len:u.pos+l,y=new p.onnx.TypeProto;u.pos<h;){var O=u.uint32();switch(O>>>3){case 1:{y.tensorType=p.onnx.TypeProto.Tensor.decode(u,u.uint32());break}case 4:{y.sequenceType=p.onnx.TypeProto.Sequence.decode(u,u.uint32());break}case 5:{y.mapType=p.onnx.TypeProto.Map.decode(u,u.uint32());break}case 9:{y.optionalType=p.onnx.TypeProto.Optional.decode(u,u.uint32());break}case 8:{y.sparseTensorType=p.onnx.TypeProto.SparseTensor.decode(u,u.uint32());break}case 6:{y.denotation=u.string();break}default:u.skipType(O&7);break}}return y},c.decodeDelimited=function(u){return u instanceof o||(u=new o(u)),this.decode(u,u.uint32())},c.verify=function(u){if(typeof u!="object"||u===null)return"object expected";var l={};if(u.tensorType!=null&&u.hasOwnProperty("tensorType")){l.value=1;{var h=p.onnx.TypeProto.Tensor.verify(u.tensorType);if(h)return"tensorType."+h}}if(u.sequenceType!=null&&u.hasOwnProperty("sequenceType")){if(l.value===1)return"value: multiple values";l.value=1;{var h=p.onnx.TypeProto.Sequence.verify(u.sequenceType);if(h)return"sequenceType."+h}}if(u.mapType!=null&&u.hasOwnProperty("mapType")){if(l.value===1)return"value: multiple values";l.value=1;{var h=p.onnx.TypeProto.Map.verify(u.mapType);if(h)return"mapType."+h}}if(u.optionalType!=null&&u.hasOwnProperty("optionalType")){if(l.value===1)return"value: multiple values";l.value=1;{var h=p.onnx.TypeProto.Optional.verify(u.optionalType);if(h)return"optionalType."+h}}if(u.sparseTensorType!=null&&u.hasOwnProperty("sparseTensorType")){if(l.value===1)return"value: multiple values";l.value=1;{var h=p.onnx.TypeProto.SparseTensor.verify(u.sparseTensorType);if(h)return"sparseTensorType."+h}}return u.denotation!=null&&u.hasOwnProperty("denotation")&&!s.isString(u.denotation)?"denotation: string expected":null},c.fromObject=function(u){if(u instanceof p.onnx.TypeProto)return u;var l=new p.onnx.TypeProto;if(u.tensorType!=null){if(typeof u.tensorType!="object")throw TypeError(".onnx.TypeProto.tensorType: object expected");l.tensorType=p.onnx.TypeProto.Tensor.fromObject(u.tensorType)}if(u.sequenceType!=null){if(typeof u.sequenceType!="object")throw TypeError(".onnx.TypeProto.sequenceType: object expected");l.sequenceType=p.onnx.TypeProto.Sequence.fromObject(u.sequenceType)}if(u.mapType!=null){if(typeof u.mapType!="object")throw TypeError(".onnx.TypeProto.mapType: object expected");l.mapType=p.onnx.TypeProto.Map.fromObject(u.mapType)}if(u.optionalType!=null){if(typeof u.optionalType!="object")throw TypeError(".onnx.TypeProto.optionalType: object expected");l.optionalType=p.onnx.TypeProto.Optional.fromObject(u.optionalType)}if(u.sparseTensorType!=null){if(typeof u.sparseTensorType!="object")throw TypeError(".onnx.TypeProto.sparseTensorType: object expected");l.sparseTensorType=p.onnx.TypeProto.SparseTensor.fromObject(u.sparseTensorType)}return u.denotation!=null&&(l.denotation=String(u.denotation)),l},c.toObject=function(u,l){l||(l={});var h={};return l.defaults&&(h.denotation=""),u.tensorType!=null&&u.hasOwnProperty("tensorType")&&(h.tensorType=p.onnx.TypeProto.Tensor.toObject(u.tensorType,l),l.oneofs&&(h.value="tensorType")),u.sequenceType!=null&&u.hasOwnProperty("sequenceType")&&(h.sequenceType=p.onnx.TypeProto.Sequence.toObject(u.sequenceType,l),l.oneofs&&(h.value="sequenceType")),u.mapType!=null&&u.hasOwnProperty("mapType")&&(h.mapType=p.onnx.TypeProto.Map.toObject(u.mapType,l),l.oneofs&&(h.value="mapType")),u.denotation!=null&&u.hasOwnProperty("denotation")&&(h.denotation=u.denotation),u.sparseTensorType!=null&&u.hasOwnProperty("sparseTensorType")&&(h.sparseTensorType=p.onnx.TypeProto.SparseTensor.toObject(u.sparseTensorType,l),l.oneofs&&(h.value="sparseTensorType")),u.optionalType!=null&&u.hasOwnProperty("optionalType")&&(h.optionalType=p.onnx.TypeProto.Optional.toObject(u.optionalType,l),l.oneofs&&(h.value="optionalType")),h},c.prototype.toJSON=function(){return this.constructor.toObject(this,n.util.toJSONOptions)},c.getTypeUrl=function(u){return u===void 0&&(u="type.googleapis.com"),u+"/onnx.TypeProto"},c.Tensor=(function(){function u(l){if(l)for(var h=Object.keys(l),y=0;y<h.length;++y)l[h[y]]!=null&&(this[h[y]]=l[h[y]])}return u.prototype.elemType=0,u.prototype.shape=null,u.create=function(l){return new u(l)},u.encode=function(l,h){return h||(h=f.create()),l.elemType!=null&&Object.hasOwnProperty.call(l,"elemType")&&h.uint32(8).int32(l.elemType),l.shape!=null&&Object.hasOwnProperty.call(l,"shape")&&p.onnx.TensorShapeProto.encode(l.shape,h.uint32(18).fork()).ldelim(),h},u.encodeDelimited=function(l,h){return this.encode(l,h).ldelim()},u.decode=function(l,h){l instanceof o||(l=o.create(l));for(var y=h===void 0?l.len:l.pos+h,O=new p.onnx.TypeProto.Tensor;l.pos<y;){var S=l.uint32();switch(S>>>3){case 1:{O.elemType=l.int32();break}case 2:{O.shape=p.onnx.TensorShapeProto.decode(l,l.uint32());break}default:l.skipType(S&7);break}}return O},u.decodeDelimited=function(l){return l instanceof o||(l=new o(l)),this.decode(l,l.uint32())},u.verify=function(l){if(typeof l!="object"||l===null)return"object expected";if(l.elemType!=null&&l.hasOwnProperty("elemType")&&!s.isInteger(l.elemType))return"elemType: integer expected";if(l.shape!=null&&l.hasOwnProperty("shape")){var h=p.onnx.TensorShapeProto.verify(l.shape);if(h)return"shape."+h}return null},u.fromObject=function(l){if(l instanceof p.onnx.TypeProto.Tensor)return l;var h=new p.onnx.TypeProto.Tensor;if(l.elemType!=null&&(h.elemType=l.elemType|0),l.shape!=null){if(typeof l.shape!="object")throw TypeError(".onnx.TypeProto.Tensor.shape: object expected");h.shape=p.onnx.TensorShapeProto.fromObject(l.shape)}return h},u.toObject=function(l,h){h||(h={});var y={};return h.defaults&&(y.elemType=0,y.shape=null),l.elemType!=null&&l.hasOwnProperty("elemType")&&(y.elemType=l.elemType),l.shape!=null&&l.hasOwnProperty("shape")&&(y.shape=p.onnx.TensorShapeProto.toObject(l.shape,h)),y},u.prototype.toJSON=function(){return this.constructor.toObject(this,n.util.toJSONOptions)},u.getTypeUrl=function(l){return l===void 0&&(l="type.googleapis.com"),l+"/onnx.TypeProto.Tensor"},u})(),c.Sequence=(function(){function u(l){if(l)for(var h=Object.keys(l),y=0;y<h.length;++y)l[h[y]]!=null&&(this[h[y]]=l[h[y]])}return u.prototype.elemType=null,u.create=function(l){return new u(l)},u.encode=function(l,h){return h||(h=f.create()),l.elemType!=null&&Object.hasOwnProperty.call(l,"elemType")&&p.onnx.TypeProto.encode(l.elemType,h.uint32(10).fork()).ldelim(),h},u.encodeDelimited=function(l,h){return this.encode(l,h).ldelim()},u.decode=function(l,h){l instanceof o||(l=o.create(l));for(var y=h===void 0?l.len:l.pos+h,O=new p.onnx.TypeProto.Sequence;l.pos<y;){var S=l.uint32();S>>>3===1?O.elemType=p.onnx.TypeProto.decode(l,l.uint32()):l.skipType(S&7)}return O},u.decodeDelimited=function(l){return l instanceof o||(l=new o(l)),this.decode(l,l.uint32())},u.verify=function(l){if(typeof l!="object"||l===null)return"object expected";if(l.elemType!=null&&l.hasOwnProperty("elemType")){var h=p.onnx.TypeProto.verify(l.elemType);if(h)return"elemType."+h}return null},u.fromObject=function(l){if(l instanceof p.onnx.TypeProto.Sequence)return l;var h=new p.onnx.TypeProto.Sequence;if(l.elemType!=null){if(typeof l.elemType!="object")throw TypeError(".onnx.TypeProto.Sequence.elemType: object expected");h.elemType=p.onnx.TypeProto.fromObject(l.elemType)}return h},u.toObject=function(l,h){h||(h={});var y={};return h.defaults&&(y.elemType=null),l.elemType!=null&&l.hasOwnProperty("elemType")&&(y.elemType=p.onnx.TypeProto.toObject(l.elemType,h)),y},u.prototype.toJSON=function(){return this.constructor.toObject(this,n.util.toJSONOptions)},u.getTypeUrl=function(l){return l===void 0&&(l="type.googleapis.com"),l+"/onnx.TypeProto.Sequence"},u})(),c.Map=(function(){function u(l){if(l)for(var h=Object.keys(l),y=0;y<h.length;++y)l[h[y]]!=null&&(this[h[y]]=l[h[y]])}return u.prototype.keyType=0,u.prototype.valueType=null,u.create=function(l){return new u(l)},u.encode=function(l,h){return h||(h=f.create()),l.keyType!=null&&Object.hasOwnProperty.call(l,"keyType")&&h.uint32(8).int32(l.keyType),l.valueType!=null&&Object.hasOwnProperty.call(l,"valueType")&&p.onnx.TypeProto.encode(l.valueType,h.uint32(18).fork()).ldelim(),h},u.encodeDelimited=function(l,h){return this.encode(l,h).ldelim()},u.decode=function(l,h){l instanceof o||(l=o.create(l));for(var y=h===void 0?l.len:l.pos+h,O=new p.onnx.TypeProto.Map;l.pos<y;){var S=l.uint32();switch(S>>>3){case 1:{O.keyType=l.int32();break}case 2:{O.valueType=p.onnx.TypeProto.decode(l,l.uint32());break}default:l.skipType(S&7);break}}return O},u.decodeDelimited=function(l){return l instanceof o||(l=new o(l)),this.decode(l,l.uint32())},u.verify=function(l){if(typeof l!="object"||l===null)return"object expected";if(l.keyType!=null&&l.hasOwnProperty("keyType")&&!s.isInteger(l.keyType))return"keyType: integer expected";if(l.valueType!=null&&l.hasOwnProperty("valueType")){var h=p.onnx.TypeProto.verify(l.valueType);if(h)return"valueType."+h}return null},u.fromObject=function(l){if(l instanceof p.onnx.TypeProto.Map)return l;var h=new p.onnx.TypeProto.Map;if(l.keyType!=null&&(h.keyType=l.keyType|0),l.valueType!=null){if(typeof l.valueType!="object")throw TypeError(".onnx.TypeProto.Map.valueType: object expected");h.valueType=p.onnx.TypeProto.fromObject(l.valueType)}return h},u.toObject=function(l,h){h||(h={});var y={};return h.defaults&&(y.keyType=0,y.valueType=null),l.keyType!=null&&l.hasOwnProperty("keyType")&&(y.keyType=l.keyType),l.valueType!=null&&l.hasOwnProperty("valueType")&&(y.valueType=p.onnx.TypeProto.toObject(l.valueType,h)),y},u.prototype.toJSON=function(){return this.constructor.toObject(this,n.util.toJSONOptions)},u.getTypeUrl=function(l){return l===void 0&&(l="type.googleapis.com"),l+"/onnx.TypeProto.Map"},u})(),c.Optional=(function(){function u(l){if(l)for(var h=Object.keys(l),y=0;y<h.length;++y)l[h[y]]!=null&&(this[h[y]]=l[h[y]])}return u.prototype.elemType=null,u.create=function(l){return new u(l)},u.encode=function(l,h){return h||(h=f.create()),l.elemType!=null&&Object.hasOwnProperty.call(l,"elemType")&&p.onnx.TypeProto.encode(l.elemType,h.uint32(10).fork()).ldelim(),h},u.encodeDelimited=function(l,h){return this.encode(l,h).ldelim()},u.decode=function(l,h){l instanceof o||(l=o.create(l));for(var y=h===void 0?l.len:l.pos+h,O=new p.onnx.TypeProto.Optional;l.pos<y;){var S=l.uint32();S>>>3===1?O.elemType=p.onnx.TypeProto.decode(l,l.uint32()):l.skipType(S&7)}return O},u.decodeDelimited=function(l){return l instanceof o||(l=new o(l)),this.decode(l,l.uint32())},u.verify=function(l){if(typeof l!="object"||l===null)return"object expected";if(l.elemType!=null&&l.hasOwnProperty("elemType")){var h=p.onnx.TypeProto.verify(l.elemType);if(h)return"elemType."+h}return null},u.fromObject=function(l){if(l instanceof p.onnx.TypeProto.Optional)return l;var h=new p.onnx.TypeProto.Optional;if(l.elemType!=null){if(typeof l.elemType!="object")throw TypeError(".onnx.TypeProto.Optional.elemType: object expected");h.elemType=p.onnx.TypeProto.fromObject(l.elemType)}return h},u.toObject=function(l,h){h||(h={});var y={};return h.defaults&&(y.elemType=null),l.elemType!=null&&l.hasOwnProperty("elemType")&&(y.elemType=p.onnx.TypeProto.toObject(l.elemType,h)),y},u.prototype.toJSON=function(){return this.constructor.toObject(this,n.util.toJSONOptions)},u.getTypeUrl=function(l){return l===void 0&&(l="type.googleapis.com"),l+"/onnx.TypeProto.Optional"},u})(),c.SparseTensor=(function(){function u(l){if(l)for(var h=Object.keys(l),y=0;y<h.length;++y)l[h[y]]!=null&&(this[h[y]]=l[h[y]])}return u.prototype.elemType=0,u.prototype.shape=null,u.create=function(l){return new u(l)},u.encode=function(l,h){return h||(h=f.create()),l.elemType!=null&&Object.hasOwnProperty.call(l,"elemType")&&h.uint32(8).int32(l.elemType),l.shape!=null&&Object.hasOwnProperty.call(l,"shape")&&p.onnx.TensorShapeProto.encode(l.shape,h.uint32(18).fork()).ldelim(),h},u.encodeDelimited=function(l,h){return this.encode(l,h).ldelim()},u.decode=function(l,h){l instanceof o||(l=o.create(l));for(var y=h===void 0?l.len:l.pos+h,O=new p.onnx.TypeProto.SparseTensor;l.pos<y;){var S=l.uint32();switch(S>>>3){case 1:{O.elemType=l.int32();break}case 2:{O.shape=p.onnx.TensorShapeProto.decode(l,l.uint32());break}default:l.skipType(S&7);break}}return O},u.decodeDelimited=function(l){return l instanceof o||(l=new o(l)),this.decode(l,l.uint32())},u.verify=function(l){if(typeof l!="object"||l===null)return"object expected";if(l.elemType!=null&&l.hasOwnProperty("elemType")&&!s.isInteger(l.elemType))return"elemType: integer expected";if(l.shape!=null&&l.hasOwnProperty("shape")){var h=p.onnx.TensorShapeProto.verify(l.shape);if(h)return"shape."+h}return null},u.fromObject=function(l){if(l instanceof p.onnx.TypeProto.SparseTensor)return l;var h=new p.onnx.TypeProto.SparseTensor;if(l.elemType!=null&&(h.elemType=l.elemType|0),l.shape!=null){if(typeof l.shape!="object")throw TypeError(".onnx.TypeProto.SparseTensor.shape: object expected");h.shape=p.onnx.TensorShapeProto.fromObject(l.shape)}return h},u.toObject=function(l,h){h||(h={});var y={};return h.defaults&&(y.elemType=0,y.shape=null),l.elemType!=null&&l.hasOwnProperty("elemType")&&(y.elemType=l.elemType),l.shape!=null&&l.hasOwnProperty("shape")&&(y.shape=p.onnx.TensorShapeProto.toObject(l.shape,h)),y},u.prototype.toJSON=function(){return this.constructor.toObject(this,n.util.toJSONOptions)},u.getTypeUrl=function(l){return l===void 0&&(l="type.googleapis.com"),l+"/onnx.TypeProto.SparseTensor"},u})(),c})(),i.OperatorSetIdProto=(function(){function c(r){if(r)for(var u=Object.keys(r),l=0;l<u.length;++l)r[u[l]]!=null&&(this[u[l]]=r[u[l]])}return c.prototype.domain="",c.prototype.version=s.Long?s.Long.fromBits(0,0,!1):0,c.create=function(r){return new c(r)},c.encode=function(r,u){return u||(u=f.create()),r.domain!=null&&Object.hasOwnProperty.call(r,"domain")&&u.uint32(10).string(r.domain),r.version!=null&&Object.hasOwnProperty.call(r,"version")&&u.uint32(16).int64(r.version),u},c.encodeDelimited=function(r,u){return this.encode(r,u).ldelim()},c.decode=function(r,u){r instanceof o||(r=o.create(r));for(var l=u===void 0?r.len:r.pos+u,h=new p.onnx.OperatorSetIdProto;r.pos<l;){var y=r.uint32();switch(y>>>3){case 1:{h.domain=r.string();break}case 2:{h.version=r.int64();break}default:r.skipType(y&7);break}}return h},c.decodeDelimited=function(r){return r instanceof o||(r=new o(r)),this.decode(r,r.uint32())},c.verify=function(r){return typeof r!="object"||r===null?"object expected":r.domain!=null&&r.hasOwnProperty("domain")&&!s.isString(r.domain)?"domain: string expected":r.version!=null&&r.hasOwnProperty("version")&&!s.isInteger(r.version)&&!(r.version&&s.isInteger(r.version.low)&&s.isInteger(r.version.high))?"version: integer|Long expected":null},c.fromObject=function(r){if(r instanceof p.onnx.OperatorSetIdProto)return r;var u=new p.onnx.OperatorSetIdProto;return r.domain!=null&&(u.domain=String(r.domain)),r.version!=null&&(s.Long?(u.version=s.Long.fromValue(r.version)).unsigned=!1:typeof r.version=="string"?u.version=parseInt(r.version,10):typeof r.version=="number"?u.version=r.version:typeof r.version=="object"&&(u.version=new s.LongBits(r.version.low>>>0,r.version.high>>>0).toNumber())),u},c.toObject=function(r,u){u||(u={});var l={};if(u.defaults)if(l.domain="",s.Long){var h=new s.Long(0,0,!1);l.version=u.longs===String?h.toString():u.longs===Number?h.toNumber():h}else l.version=u.longs===String?"0":0;return r.domain!=null&&r.hasOwnProperty("domain")&&(l.domain=r.domain),r.version!=null&&r.hasOwnProperty("version")&&(typeof r.version=="number"?l.version=u.longs===String?String(r.version):r.version:l.version=u.longs===String?s.Long.prototype.toString.call(r.version):u.longs===Number?new s.LongBits(r.version.low>>>0,r.version.high>>>0).toNumber():r.version),l},c.prototype.toJSON=function(){return this.constructor.toObject(this,n.util.toJSONOptions)},c.getTypeUrl=function(r){return r===void 0&&(r="type.googleapis.com"),r+"/onnx.OperatorSetIdProto"},c})(),i.OperatorStatus=(function(){var c={},r=Object.create(c);return r[c[0]="EXPERIMENTAL"]=0,r[c[1]="STABLE"]=1,r})(),i.FunctionProto=(function(){function c(r){if(this.input=[],this.output=[],this.attribute=[],this.attributeProto=[],this.node=[],this.opsetImport=[],r)for(var u=Object.keys(r),l=0;l<u.length;++l)r[u[l]]!=null&&(this[u[l]]=r[u[l]])}return c.prototype.name="",c.prototype.input=s.emptyArray,c.prototype.output=s.emptyArray,c.prototype.attribute=s.emptyArray,c.prototype.attributeProto=s.emptyArray,c.prototype.node=s.emptyArray,c.prototype.docString="",c.prototype.opsetImport=s.emptyArray,c.prototype.domain="",c.create=function(r){return new c(r)},c.encode=function(r,u){if(u||(u=f.create()),r.name!=null&&Object.hasOwnProperty.call(r,"name")&&u.uint32(10).string(r.name),r.input!=null&&r.input.length)for(var l=0;l<r.input.length;++l)u.uint32(34).string(r.input[l]);if(r.output!=null&&r.output.length)for(var l=0;l<r.output.length;++l)u.uint32(42).string(r.output[l]);if(r.attribute!=null&&r.attribute.length)for(var l=0;l<r.attribute.length;++l)u.uint32(50).string(r.attribute[l]);if(r.node!=null&&r.node.length)for(var l=0;l<r.node.length;++l)p.onnx.NodeProto.encode(r.node[l],u.uint32(58).fork()).ldelim();if(r.docString!=null&&Object.hasOwnProperty.call(r,"docString")&&u.uint32(66).string(r.docString),r.opsetImport!=null&&r.opsetImport.length)for(var l=0;l<r.opsetImport.length;++l)p.onnx.OperatorSetIdProto.encode(r.opsetImport[l],u.uint32(74).fork()).ldelim();if(r.domain!=null&&Object.hasOwnProperty.call(r,"domain")&&u.uint32(82).string(r.domain),r.attributeProto!=null&&r.attributeProto.length)for(var l=0;l<r.attributeProto.length;++l)p.onnx.AttributeProto.encode(r.attributeProto[l],u.uint32(90).fork()).ldelim();return u},c.encodeDelimited=function(r,u){return this.encode(r,u).ldelim()},c.decode=function(r,u){r instanceof o||(r=o.create(r));for(var l=u===void 0?r.len:r.pos+u,h=new p.onnx.FunctionProto;r.pos<l;){var y=r.uint32();switch(y>>>3){case 1:{h.name=r.string();break}case 4:{h.input&&h.input.length||(h.input=[]),h.input.push(r.string());break}case 5:{h.output&&h.output.length||(h.output=[]),h.output.push(r.string());break}case 6:{h.attribute&&h.attribute.length||(h.attribute=[]),h.attribute.push(r.string());break}case 11:{h.attributeProto&&h.attributeProto.length||(h.attributeProto=[]),h.attributeProto.push(p.onnx.AttributeProto.decode(r,r.uint32()));break}case 7:{h.node&&h.node.length||(h.node=[]),h.node.push(p.onnx.NodeProto.decode(r,r.uint32()));break}case 8:{h.docString=r.string();break}case 9:{h.opsetImport&&h.opsetImport.length||(h.opsetImport=[]),h.opsetImport.push(p.onnx.OperatorSetIdProto.decode(r,r.uint32()));break}case 10:{h.domain=r.string();break}default:r.skipType(y&7);break}}return h},c.decodeDelimited=function(r){return r instanceof o||(r=new o(r)),this.decode(r,r.uint32())},c.verify=function(r){if(typeof r!="object"||r===null)return"object expected";if(r.name!=null&&r.hasOwnProperty("name")&&!s.isString(r.name))return"name: string expected";if(r.input!=null&&r.hasOwnProperty("input")){if(!Array.isArray(r.input))return"input: array expected";for(var u=0;u<r.input.length;++u)if(!s.isString(r.input[u]))return"input: string[] expected"}if(r.output!=null&&r.hasOwnProperty("output")){if(!Array.isArray(r.output))return"output: array expected";for(var u=0;u<r.output.length;++u)if(!s.isString(r.output[u]))return"output: string[] expected"}if(r.attribute!=null&&r.hasOwnProperty("attribute")){if(!Array.isArray(r.attribute))return"attribute: array expected";for(var u=0;u<r.attribute.length;++u)if(!s.isString(r.attribute[u]))return"attribute: string[] expected"}if(r.attributeProto!=null&&r.hasOwnProperty("attributeProto")){if(!Array.isArray(r.attributeProto))return"attributeProto: array expected";for(var u=0;u<r.attributeProto.length;++u){var l=p.onnx.AttributeProto.verify(r.attributeProto[u]);if(l)return"attributeProto."+l}}if(r.node!=null&&r.hasOwnProperty("node")){if(!Array.isArray(r.node))return"node: array expected";for(var u=0;u<r.node.length;++u){var l=p.onnx.NodeProto.verify(r.node[u]);if(l)return"node."+l}}if(r.docString!=null&&r.hasOwnProperty("docString")&&!s.isString(r.docString))return"docString: string expected";if(r.opsetImport!=null&&r.hasOwnProperty("opsetImport")){if(!Array.isArray(r.opsetImport))return"opsetImport: array expected";for(var u=0;u<r.opsetImport.length;++u){var l=p.onnx.OperatorSetIdProto.verify(r.opsetImport[u]);if(l)return"opsetImport."+l}}return r.domain!=null&&r.hasOwnProperty("domain")&&!s.isString(r.domain)?"domain: string expected":null},c.fromObject=function(r){if(r instanceof p.onnx.FunctionProto)return r;var u=new p.onnx.FunctionProto;if(r.name!=null&&(u.name=String(r.name)),r.input){if(!Array.isArray(r.input))throw TypeError(".onnx.FunctionProto.input: array expected");u.input=[];for(var l=0;l<r.input.length;++l)u.input[l]=String(r.input[l])}if(r.output){if(!Array.isArray(r.output))throw TypeError(".onnx.FunctionProto.output: array expected");u.output=[];for(var l=0;l<r.output.length;++l)u.output[l]=String(r.output[l])}if(r.attribute){if(!Array.isArray(r.attribute))throw TypeError(".onnx.FunctionProto.attribute: array expected");u.attribute=[];for(var l=0;l<r.attribute.length;++l)u.attribute[l]=String(r.attribute[l])}if(r.attributeProto){if(!Array.isArray(r.attributeProto))throw TypeError(".onnx.FunctionProto.attributeProto: array expected");u.attributeProto=[];for(var l=0;l<r.attributeProto.length;++l){if(typeof r.attributeProto[l]!="object")throw TypeError(".onnx.FunctionProto.attributeProto: object expected");u.attributeProto[l]=p.onnx.AttributeProto.fromObject(r.attributeProto[l])}}if(r.node){if(!Array.isArray(r.node))throw TypeError(".onnx.FunctionProto.node: array expected");u.node=[];for(var l=0;l<r.node.length;++l){if(typeof r.node[l]!="object")throw TypeError(".onnx.FunctionProto.node: object expected");u.node[l]=p.onnx.NodeProto.fromObject(r.node[l])}}if(r.docString!=null&&(u.docString=String(r.docString)),r.opsetImport){if(!Array.isArray(r.opsetImport))throw TypeError(".onnx.FunctionProto.opsetImport: array expected");u.opsetImport=[];for(var l=0;l<r.opsetImport.length;++l){if(typeof r.opsetImport[l]!="object")throw TypeError(".onnx.FunctionProto.opsetImport: object expected");u.opsetImport[l]=p.onnx.OperatorSetIdProto.fromObject(r.opsetImport[l])}}return r.domain!=null&&(u.domain=String(r.domain)),u},c.toObject=function(r,u){u||(u={});var l={};if((u.arrays||u.defaults)&&(l.input=[],l.output=[],l.attribute=[],l.node=[],l.opsetImport=[],l.attributeProto=[]),u.defaults&&(l.name="",l.docString="",l.domain=""),r.name!=null&&r.hasOwnProperty("name")&&(l.name=r.name),r.input&&r.input.length){l.input=[];for(var h=0;h<r.input.length;++h)l.input[h]=r.input[h]}if(r.output&&r.output.length){l.output=[];for(var h=0;h<r.output.length;++h)l.output[h]=r.output[h]}if(r.attribute&&r.attribute.length){l.attribute=[];for(var h=0;h<r.attribute.length;++h)l.attribute[h]=r.attribute[h]}if(r.node&&r.node.length){l.node=[];for(var h=0;h<r.node.length;++h)l.node[h]=p.onnx.NodeProto.toObject(r.node[h],u)}if(r.docString!=null&&r.hasOwnProperty("docString")&&(l.docString=r.docString),r.opsetImport&&r.opsetImport.length){l.opsetImport=[];for(var h=0;h<r.opsetImport.length;++h)l.opsetImport[h]=p.onnx.OperatorSetIdProto.toObject(r.opsetImport[h],u)}if(r.domain!=null&&r.hasOwnProperty("domain")&&(l.domain=r.domain),r.attributeProto&&r.attributeProto.length){l.attributeProto=[];for(var h=0;h<r.attributeProto.length;++h)l.attributeProto[h]=p.onnx.AttributeProto.toObject(r.attributeProto[h],u)}return l},c.prototype.toJSON=function(){return this.constructor.toObject(this,n.util.toJSONOptions)},c.getTypeUrl=function(r){return r===void 0&&(r="type.googleapis.com"),r+"/onnx.FunctionProto"},c})(),i})(),t.exports=p});function mu(e,t){if(!e)throw new Error(typeof t=="string"?t:t())}function Lc(e){return new TextDecoder().decode(e)}var tt,Ra,uh,hn,oy,Or,pn,Te,Bc,yu,Wa,qa,Ve=G(()=>{"use strict";vf(),ry(),tt=No(Ya()),Lo(),Ra=class{static arraysEqual(e,t){if(e.length!==t.length)return!1;for(let n=0;n<e.length;n++)if(e[n]!==t[n])return!1;return!0}},uh=class{static preprocessInputShapes(e,t){let n=e.length===1?[1,e[0]]:e,o=t.length===1?[t[0],1]:t;return[n,o]}static postprocessOutputShape(e,t,n){t===1&&e.splice(e.length-2,1),n===1&&e.pop()}static calcMatMulShape(e,t){return e[1]!==t[0]?void 0:[e[0],t[1]]}},hn=class Fa{static calcShape(t,n,o=!1){let f=t.length,s=n.length;if(f===0)return n;if(s===0)return t;let p=Math.max(t.length,n.length),i=new Array(p);if(o){if(f<2||s<2)return;let c=uh.calcMatMulShape([t[f-2],t[f-1]],[n[s-2],n[s-1]]);if(c===void 0)return;[i[p-2],i[p-1]]=c}for(let c=o?3:1;c<=p;c++){let r=f-c<0?1:t[f-c],u=s-c<0?1:n[s-c];if(r!==u&&r>1&&u>1)return;i[p-c]=Math.max(r,u)}return i}static index(t,n){let o=new Array(n.length);return Fa.fillIndex(t,n,o),o}static fillIndex(t,n,o){let f=t.length-n.length;for(let s=0;s<n.length;s++)o[s]=t[f+s]%n[s]}static calc(t,n,o,f,s){let p=Fa.calcShape(t.dims,n.dims);if(p){if(f&&!Te.areEqual(p,t.dims))return;let i=Te.size(p),c=f?t:new Sr(p,s||t.type);if(p.length===0)c.set([],o(t.get([]),n.get([])));else{let r=new Array(p.length),u=new Array(t.dims.length),l=new Array(n.dims.length),h=0,y=0,O=!1,S=!1;t.dims.length===0&&(h=t.get([]),O=!0),n.dims.length===0&&(y=n.get([]),S=!0);let A;for(let L=0;L<i;L++){A=L;for(let $=p.length-1;$>=0;$--)r[$]=A%p[$],A=Math.floor(A/p[$]);O||(Fa.fillIndex(r,t.dims,u),h=t.get(u)),S||(Fa.fillIndex(r,n.dims,l),y=n.get(l)),c.set(r,o(h,y))}}return c}}static isValidBroadcast(t,n){let o=t.length,f=n.length;if(o>f)return!1;for(let s=1;s<=o;s++)if(t[o-s]!==1&&t[o-s]!==n[f-s])return!1;return!0}static getBroadcastDims(t,n){let o=t.length,f=[];for(let s=0;s<o;s++){let p=o-1-s,i=t[p]||1;(n[n.length-1-s]||1)>1&&i===1&&f.unshift(p)}return f}},oy=class{static getShapeOfGemmResult(e,t,n,o,f){if(e.length!==2||n.length!==2)throw new Error("shape need to be of size 2");let s,p,i;t?(s=e[1],p=e[0]):(s=e[0],p=e[1]);let c=-1;if(o?(i=n[0],c=1):(i=n[1],c=0),n[c]!==p)throw new Error("dimension mismatch");if(s<=0||i<=0||p<=0)throw new Error("invalid shape specified");if(f&&!hn.isValidBroadcast(f,[s,i]))throw new Error("gemm: invalid bias shape for broadcast");return[s,i,p]}},Or=class Uc{static tensorDataTypeFromProto(t){switch(t){case tt.onnx.TensorProto.DataType.INT8:return"int8";case tt.onnx.TensorProto.DataType.UINT8:return"uint8";case tt.onnx.TensorProto.DataType.BOOL:return"bool";case tt.onnx.TensorProto.DataType.INT16:return"int16";case tt.onnx.TensorProto.DataType.UINT16:return"uint16";case tt.onnx.TensorProto.DataType.INT32:return"int32";case tt.onnx.TensorProto.DataType.UINT32:return"uint32";case tt.onnx.TensorProto.DataType.FLOAT:return"float32";case tt.onnx.TensorProto.DataType.DOUBLE:return"float64";case tt.onnx.TensorProto.DataType.STRING:return"string";case tt.onnx.TensorProto.DataType.INT64:return"int32";case tt.onnx.TensorProto.DataType.UINT64:return"uint32";default:throw new Error(`unsupported data type: ${tt.onnx.TensorProto.DataType[t]}`)}}static tensorDataTypeStringToEnum(t){switch(t){case"int8":return tt.onnx.TensorProto.DataType.INT8;case"uint8":return tt.onnx.TensorProto.DataType.UINT8;case"bool":return tt.onnx.TensorProto.DataType.BOOL;case"int16":return tt.onnx.TensorProto.DataType.INT16;case"uint16":return tt.onnx.TensorProto.DataType.UINT16;case"int32":return tt.onnx.TensorProto.DataType.INT32;case"uint32":return tt.onnx.TensorProto.DataType.UINT32;case"float32":return tt.onnx.TensorProto.DataType.FLOAT;case"float64":return tt.onnx.TensorProto.DataType.DOUBLE;case"string":return tt.onnx.TensorProto.DataType.STRING;case"int64":return tt.onnx.TensorProto.DataType.INT64;case"uint64":return tt.onnx.TensorProto.DataType.UINT64;default:throw new Error(`unsupported data type: ${t}`)}}static tensorDimsFromProto(t){return t.map(n=>si.isLong(n)?n.toNumber():n)}static tensorValueTypeFromProto(t){return{tensorType:Uc.tensorDataTypeFromProto(t.elemType),shape:{dims:Uc.tensorDimsFromProto(t.shape.dim.map(n=>n.dimValue))}}}static tensorDimsFromORTFormat(t){let n=[];for(let o=0;o<t.dimsLength();o++)n.push(pn.longToNumber(t.dims(o)));return n}static tensorAttributesFromORTFormat(t){let n=[];for(let o=0;o<t.attributesLength();o++)n.push(t.attributes(o));return n}},pn=class{static longToNumber(e,t){return si.isLong(e)?e.toNumber():e instanceof R.Long?si.fromValue({low:e.low,high:e.high,unsigned:t??!1}).toNumber():e}static isLong(e){return si.isLong(e)||e instanceof R.Long}},Te=class oi{static size(t){return oi.getSizeFromDimensionRange(t,0,t.length)}static sizeFromDimension(t,n){if(n<0||n>t.length)throw new Error(`invalid dimension of ${n} for sizeFromDimension as Tensor has ${t.length} dimensions.`);return oi.getSizeFromDimensionRange(t,n,t.length)}static sizeToDimension(t,n){if(n<0||n>t.length)throw new Error(`invalid dimension of ${n} for sizeToDimension as Tensor has ${t.length} dimensions.`);return oi.getSizeFromDimensionRange(t,0,n)}static getSizeFromDimensionRange(t,n,o){let f=1;for(let s=n;s<o;s++){if(t[s]<=0)throw new Error("cannot get valid size from specified dimension range. Most likely the range contains 0 or negative values in them.");f*=t[s]}return f}static computeStrides(t){let n=t.length;if(n===0)return[];if(n===1)return[1];let o=new Array(n);o[n-1]=1,o[n-2]=t[n-1];for(let f=n-3;f>=0;--f)o[f]=o[f+1]*t[f+1];return o}static transpose(t){return t.slice().reverse()}static indicesToOffset(t,n,o){o===void 0&&(o=t.length);let f=0;for(let s=0;s<o;++s)f+=n[s]*t[s];return f}static offsetToIndices(t,n){let o=n.length;if(o===0)return[];if(o===1)return[t*n[0]];let f=new Array(n.length);for(let s=0;s<f.length-1;++s)f[s]=Math.floor(t/n[s]),t-=f[s]*n[s];return f[f.length-1]=t,f}static normalizeAxis(t,n){if(t<-n&&t>=n)throw new Error("unsupported axis for this operation.");return t<0?t+n:t}static normalizeAxes(t,n){return t.map(o=>this.normalizeAxis(o,n))}static incrementIndex(t,n,o){if(n.length===0||t.length===0)throw new Error("Index incrementing unsupported for scalar Tensor");if(o===void 0)o=n.length;else if(o<=0||o>n.length)throw new Error("Incorrect axis to increment on");for(let f=o-1;f>=0&&(t[f]++,!(t[f]<n[f]));--f)t[f]=0}static calculateReshapedDims(t,n){if(n.length===0){if(t.length===0||oi.size(t)===1)return[];throw new Error("cannot reshape to a scalar Tensor")}let o=n.length,f=new Array(o),s=-1,p=1;for(let c=0;c<o;c++){if(n[c]<-1)throw new Error("a dimension in shape hints cannot be less than -1");if(n[c]===-1){if(s!==-1)throw new Error("at most one dimension in shape hints can be -1");s=c}else{if(n[c]===0){if(c>=t.length)throw new Error("the dimension with value zero exceeds the dimension size of the input tensor");f[c]=t[c]}else f[c]=n[c];p*=f[c]}}let i=oi.size(t);if(s!==-1){if(i%p!==0)throw new Error(`the input tensor cannot be reshaped to the requested shape. Input shape: [${t}] Output shape: [${n}]`);f[s]=i/p}else if(p!==i)throw new Error("reshapedDims and originalDims don't have matching sizes");return f}static sortBasedOnPerm(t,n){return n?n.map(o=>t[o]):t.slice().reverse()}static padShape(t,n){let o=t.length;return t.map((f,s)=>f+n[s]+n[s+o])}static areEqual(t,n){return t.length!==n.length?!1:t.every((o,f)=>o===n[f])}static validateDimsAndCalcSize(t){if(t.length>6)throw new TypeError("Only rank 0 to 6 is supported for tensor shape.");let n=1;for(let o of t){if(!Number.isInteger(o))throw new TypeError(`Invalid shape: ${o} is not an integer`);if(o<0||o>2147483647)throw new TypeError(`Invalid shape: length ${o} is not allowed`);n*=o}return n}static flattenShape(t,n){n<0&&(n+=t.length);let o=t.reduce((s,p)=>s*p,1),f=t.slice(n).reduce((s,p)=>s*p,1);return[o/f,f]}static squeezeShape(t,n){let o=new Array;n=oi.normalizeAxes(n,t.length);for(let f=0;f<t.length;f++){let s=n.indexOf(f)>=0;if(s&&t[f]!==1)throw new Error("squeeze an axis of size different than 1");(n.length===0&&t[f]>1||n.length>0&&!s)&&o.push(t[f])}return o}static unsqueezeShape(t,n){let o=new Array(t.length+n.length);o.fill(0);for(let s=0;s<n.length;s++){let p=oi.normalizeAxis(n[s],o.length);if(p>=o.length)throw new Error("'axes' has an out of range axis");if(o[p]!==0)throw new Error("'axes' has a duplicate axis");o[p]=1}let f=0;for(let s=0;s<o.length;s++)o[s]===0&&(o[s]=t[f++]);if(f!==t.length)throw new Error("the unsqueezed dimension could not be established");return o}},Bc=class ay{static splitShape(t,n,o,f){if(o.length===0){if(!f)throw new Error("need to know number of outputs when the 'split' attribute is not specified");ay.determineSplit(t[n],f,o)}let s=[],p=[0];for(let i=0;i<o.length;++i){i!==0&&p.push(p[i-1]+o[i-1]);let c=t.slice();c[n]=o[i],s.push(c)}return[s,p]}static determineSplit(t,n,o){if(t%n!==0)throw new Error("cannot split tensor to equal sized parts");for(let f=0;f<n;++f)o.push(t/n)}},yu=class Ma{static adjustPoolAttributes(t,n,o,f,s,p){if(!t&&o.length!==n.length-2)throw new Error("length of specified kernel shapes should be 2 less than length of input dimensions");if(t)for(let i=0;i<n.length-2;i++)i>=o.length?o.push(n[i+2]):o[i]=n[i+2];for(let i=0;i<o.length;i++)if(i<f.length){if(f[i]<0)throw new Error("strides should be greater than or equal to 1")}else f.push(1);for(let i=0;i<o.length;i++)if(i<s.length){if(s[i]<0)throw new Error("dilations should be greater than or equal to 1")}else s.push(1);for(let i=0;i<o.length*2;i++)if(i<p.length){if(p[i]<0)throw new Error("pad should be greater than or equal to 1")}else p.push(0);for(let i=0;i<o.length;i++){if(o[i]<=0)throw new Error("kernel shapes need to be greater than 0");if(p[i]>=o[i]||p[i+o.length]>=o[i])throw new Error("pads should be smaller than kernel")}}static adjustPadsBasedOnAutoPad(t,n,o,f,s,p){if(p){if(s.length!==2*(t.length-2))throw new Error("length of pads should be twice the length of data dimensions");if(n.length!==t.length-2)throw new Error("length of strides should be the length of data dimensions");if(f.length!==t.length-2)throw new Error("length of kernel shapes should be the length of data dimensions");for(let i=0;i<t.length-2;i++)Ma.adjustPadAndReturnShape(t[i+2],n[i],o[i],f[i],s,i,i+t.length-2,p)}}static computePoolOutputShape(t,n,o,f,s,p,i){if(n.length<=0)throw new Error("input shape must be of size greater than 0");let c=[n[0],n[1]];return Ma.computeShapeHelper(t,n,c,o,f,s,p,i),c}static computeConvOutputShape(t,n,o,f,s,p,i){if(t.length<=0||n.length<=0)throw new Error("invalid input tensor dims or invalid filter tensor dims");let c=[t[0],n[0]];return Ma.computeShapeHelper(!1,t,c,o,f,s,p,i),c}static computeShapeHelper(t,n,o,f,s,p,i,c){if(t)for(let r=0;r<n.length-2;r++)o.push(1);else for(let r=0;r<n.length-2;r++)o.push(Ma.adjustPadAndReturnShape(n[r+2],f[r],s[r],p[r],i,r,r+n.length-2,c))}static adjustPadAndReturnShape(t,n,o,f,s,p,i,c){let r=o*(f-1)+1;if(c&&c!=="NOTSET")switch(c){case"VALID":return s[p]=0,s[i]=0,Math.floor((t-r)/n+1);case"SAME_LOWER":case"SAME_UPPER":if(o!==1)throw new Error("Dilation not supported for SAME_UPPER or SAME_LOWER");{let u=((t+n-1)/n-1)*n+f-t;return s[p]=Math.floor(c==="SAME_LOWER"?(u+1)/2:u/2),s[i]=u-s[p],Math.floor((t+u-f)/n+1)}default:throw new Error("Unsupported AutoPad type")}else return Math.floor((t+s[p]+s[i]-r)/n+1)}},Wa=-34028234663852886e22,qa=34028234663852886e22});function AS(e){switch(e){case"bool":case"int8":case"uint8":return 1;case"int16":case"uint16":return 2;case"int32":case"uint32":case"float32":return 4;case"float64":return 8;default:throw new Error(`cannot calculate sizeof() on type ${e}`)}}function lh(e){switch(e){case Ie.onnx.TensorProto.DataType.UINT8:case Ie.onnx.TensorProto.DataType.INT8:case Ie.onnx.TensorProto.DataType.BOOL:return 1;case Ie.onnx.TensorProto.DataType.UINT16:case Ie.onnx.TensorProto.DataType.INT16:return 2;case Ie.onnx.TensorProto.DataType.FLOAT:case Ie.onnx.TensorProto.DataType.INT32:case Ie.onnx.TensorProto.DataType.UINT32:return 4;case Ie.onnx.TensorProto.DataType.INT64:case Ie.onnx.TensorProto.DataType.DOUBLE:case Ie.onnx.TensorProto.DataType.UINT64:return 8;default:throw new Error(`cannot calculate sizeof() on type ${Ie.onnx.TensorProto.DataType[e]}`)}}function IS(e,t){return new(sy(t))(e)}function sy(e){switch(e){case"bool":case"uint8":return Uint8Array;case"int8":return Int8Array;case"int16":return Int16Array;case"uint16":return Uint16Array;case"int32":return Int32Array;case"uint32":return Uint32Array;case"int64":return BigInt64Array;case"float32":return Float32Array;case"float64":return Float64Array;default:throw new Error("unspecified error")}}function jc(e,t){if(t===Ie.onnx.TensorProto.DataType.INT64||t===hu.TensorDataType.INT64){if(e.greaterThanOrEqual(2147483648)||e.lessThan(-2147483648))throw new TypeError("int64 is not supported")}else if(t===Ie.onnx.TensorProto.DataType.UINT32||t===hu.TensorDataType.UINT32||t===Ie.onnx.TensorProto.DataType.UINT64||t===hu.TensorDataType.UINT64){if(e.greaterThanOrEqual(4294967296)||e.lessThan(0))throw new TypeError("uint64 is not supported")}else throw new TypeError(`not a LONG type: ${Ie.onnx.TensorProto.DataType[t]}`);return e.toNumber()}function ch(e,t,n){switch(t){case Ie.onnx.TensorProto.DataType.BOOL:case Ie.onnx.TensorProto.DataType.UINT8:return e.getUint8(n);case Ie.onnx.TensorProto.DataType.INT8:return e.getInt8(n);case Ie.onnx.TensorProto.DataType.UINT16:return e.getUint16(n,!0);case Ie.onnx.TensorProto.DataType.INT16:return e.getInt16(n,!0);case Ie.onnx.TensorProto.DataType.FLOAT:return e.getFloat32(n,!0);case Ie.onnx.TensorProto.DataType.INT32:return e.getInt32(n,!0);case Ie.onnx.TensorProto.DataType.UINT32:return e.getUint32(n,!0);case Ie.onnx.TensorProto.DataType.INT64:return jc(si.fromBits(e.getUint32(n,!0),e.getUint32(n+4,!0),!1),t);case Ie.onnx.TensorProto.DataType.DOUBLE:return e.getFloat64(n,!0);case Ie.onnx.TensorProto.DataType.UINT64:return jc(si.fromBits(e.getUint32(n,!0),e.getUint32(n+4,!0),!0),t);default:throw new Error(`cannot read from DataView for type ${Ie.onnx.TensorProto.DataType[t]}`)}}var fh,Ie,hu,Sr,Lo=G(()=>{"use strict";fh=No(fS()),ry(),Ou(),Ie=No(Ya()),Ve(),hu=qe.experimental.fbs,Sr=class gu{constructor(t,n,o,f,s,p=fh.Guid.create()){this.dims=t,this.type=n,this.dataProvider=o,this.asyncDataProvider=f,this.cache=s,this.dataId=p,this.size=Te.validateDimsAndCalcSize(t);let i=this.size,c=o===void 0&&f===void 0&&s===void 0;if(s!==void 0&&s.length!==i)throw new RangeError("Input dims doesn't match data length.");if(n==="string"){if(s!==void 0&&(!Array.isArray(s)||!s.every(r=>typeof r=="string")))throw new TypeError("cache should be a string array");c&&(this.cache=new Array(i))}else{if(s!==void 0){let r=sy(n);if(!(s instanceof r))throw new TypeError(`cache should be type ${r.name}`)}if(c){let r=new ArrayBuffer(i*AS(n));this.cache=IS(r,n)}}}get data(){if(this.cache===void 0){let t=this.dataProvider(this.dataId);if(t.length!==this.size)throw new Error("Length of data provided by the Data Provider is inconsistent with the dims of this Tensor.");this.cache=t}return this.cache}get stringData(){if(this.type!=="string")throw new TypeError("data type is not string");return this.data}get integerData(){switch(this.type){case"uint8":case"int8":case"uint16":case"int16":case"int32":case"uint32":case"bool":return this.data;default:throw new TypeError("data type is not integer (uint8, int8, uint16, int16, int32, uint32, bool)")}}get floatData(){switch(this.type){case"float32":case"float64":return this.data;default:throw new TypeError("data type is not float (float32, float64)")}}get numberData(){if(this.type!=="string")return this.data;throw new TypeError("type cannot be non-number (string)")}get(t){return this.data[Te.indicesToOffset(t,this.strides)]}set(t,n){this.data[Te.indicesToOffset(t,this.strides)]=n}async getData(){return this.cache===void 0&&(this.cache=await this.asyncDataProvider(this.dataId)),this.cache}get strides(){return this._strides||(this._strides=Te.computeStrides(this.dims)),this._strides}static fromProto(t){if(!t)throw new Error("cannot construct Value from an empty tensor");let n=Or.tensorDataTypeFromProto(t.dataType),o=Or.tensorDimsFromProto(t.dims),f=new gu(o,n);if(n==="string")t.stringData.forEach((s,p)=>{f.data[p]=Lc(s)});else if(t.rawData&&typeof t.rawData.byteLength=="number"&&t.rawData.byteLength>0){let s=f.data,p=new DataView(t.rawData.buffer,t.rawData.byteOffset,t.rawData.byteLength),i=lh(t.dataType),c=t.rawData.byteLength/i;if(t.rawData.byteLength%i!==0)throw new Error("invalid buffer length");if(s.length!==c)throw new Error("buffer length mismatch");for(let r=0;r<c;r++){let u=ch(p,t.dataType,r*i);s[r]=u}}else{let s;switch(t.dataType){case Ie.onnx.TensorProto.DataType.FLOAT:s=t.floatData;break;case Ie.onnx.TensorProto.DataType.INT32:case Ie.onnx.TensorProto.DataType.INT16:case Ie.onnx.TensorProto.DataType.UINT16:case Ie.onnx.TensorProto.DataType.INT8:case Ie.onnx.TensorProto.DataType.UINT8:case Ie.onnx.TensorProto.DataType.BOOL:s=t.int32Data;break;case Ie.onnx.TensorProto.DataType.INT64:s=t.int64Data;break;case Ie.onnx.TensorProto.DataType.DOUBLE:s=t.doubleData;break;case Ie.onnx.TensorProto.DataType.UINT32:case Ie.onnx.TensorProto.DataType.UINT64:s=t.uint64Data;break;default:throw new Error("unspecific error")}if(s==null)throw new Error("failed to populate data from a tensorproto value");let p=f.data;if(p.length!==s.length)throw new Error("array length mismatch");for(let i=0;i<s.length;i++){let c=s[i];si.isLong(c)?p[i]=jc(c,t.dataType):p[i]=c}}return f}static fromData(t,n,o){return new gu(n,o,void 0,void 0,t)}static fromOrtTensor(t){if(!t)throw new Error("cannot construct Value from an empty tensor");let n=Or.tensorDimsFromORTFormat(t),o=Or.tensorDataTypeFromProto(t.dataType()),f=new gu(n,o);if(o==="string")for(let s=0;s<t.stringDataLength();s++)f.data[s]=t.stringData(s);else if(t.rawDataArray()&&typeof t.rawDataLength()=="number"&&t.rawDataLength()>0){let s=f.data,p=new DataView(t.rawDataArray().buffer,t.rawDataArray().byteOffset,t.rawDataLength()),i=lh(t.dataType()),c=t.rawDataLength()/i;if(t.rawDataLength()%i!==0)throw new Error("invalid buffer length");if(s.length!==c)throw new Error("buffer length mismatch");for(let r=0;r<c;r++){let u=ch(p,t.dataType(),r*i);s[r]=u}}return f}}});function Re(e){return e===1?uy:ly}function PS(e){let t=Re(e);return`${t.version}
+      precision highp float;
+      ${t.attribute} vec3 position;
+      ${t.attribute} vec2 textureCoord;
 
-// ../../node_modules/.pnpm/iota-array@1.0.0/node_modules/iota-array/iota.js
-var require_iota = __commonJS({
-  "../../node_modules/.pnpm/iota-array@1.0.0/node_modules/iota-array/iota.js"(exports, module) {
-    "use strict";
-    function iota(n) {
-      var result = new Array(n);
-      for (var i = 0; i < n; ++i) {
-        result[i] = i;
-      }
-      return result;
-    }
-    module.exports = iota;
-  }
-});
+      ${t.varyingVertex} vec2 TexCoords;
 
-// ../../node_modules/.pnpm/is-buffer@1.1.6/node_modules/is-buffer/index.js
-var require_is_buffer = __commonJS({
-  "../../node_modules/.pnpm/is-buffer@1.1.6/node_modules/is-buffer/index.js"(exports, module) {
-    module.exports = function(obj) {
-      return obj != null && (isBuffer(obj) || isSlowBuffer(obj) || !!obj._isBuffer);
+      void main()
+      {
+          gl_Position = vec4(position, 1.0);
+          TexCoords = textureCoord;
+      }`}function $S(e){let t=Re(e);return`${t.version}
+    precision highp float;
+    precision highp int;
+    precision highp sampler2D;
+    ${t.varyingFrag} vec2 TexCoords;
+    ${t.outputDeclaration}
+    const vec2 halfCR = vec2(0.5, 0.5);
+
+    // Custom vector types to handle higher dimenalities.
+    struct ivec5
+    {
+      int x;
+      int y;
+      int z;
+      int w;
+      int u;
     };
-    function isBuffer(obj) {
-      return !!obj.constructor && typeof obj.constructor.isBuffer === "function" && obj.constructor.isBuffer(obj);
-    }
-    function isSlowBuffer(obj) {
-      return typeof obj.readFloatLE === "function" && typeof obj.slice === "function" && isBuffer(obj.slice(0, 0));
-    }
-  }
-});
 
-// ../../node_modules/.pnpm/ndarray@1.0.19/node_modules/ndarray/ndarray.js
-var require_ndarray = __commonJS({
-  "../../node_modules/.pnpm/ndarray@1.0.19/node_modules/ndarray/ndarray.js"(exports, module) {
-    var iota = require_iota();
-    var isBuffer = require_is_buffer();
-    var hasTypedArrays = typeof Float64Array !== "undefined";
-    function compare1st(a, b) {
-      return a[0] - b[0];
-    }
-    function order() {
-      var stride = this.stride;
-      var terms = new Array(stride.length);
-      var i;
-      for (i = 0; i < terms.length; ++i) {
-        terms[i] = [Math.abs(stride[i]), i];
-      }
-      terms.sort(compare1st);
-      var result = new Array(terms.length);
-      for (i = 0; i < result.length; ++i) {
-        result[i] = terms[i][1];
-      }
-      return result;
-    }
-    function compileConstructor(dtype, dimension) {
-      var className = ["View", dimension, "d", dtype].join("");
-      if (dimension < 0) {
-        className = "View_Nil" + dtype;
-      }
-      var useGetters = dtype === "generic";
-      if (dimension === -1) {
-        var code = "function " + className + "(a){this.data=a;};var proto=" + className + ".prototype;proto.dtype='" + dtype + "';proto.index=function(){return -1};proto.size=0;proto.dimension=-1;proto.shape=proto.stride=proto.order=[];proto.lo=proto.hi=proto.transpose=proto.step=function(){return new " + className + "(this.data);};proto.get=proto.set=function(){};proto.pick=function(){return null};return function construct_" + className + "(a){return new " + className + "(a);}";
-        var procedure = new Function(code);
-        return procedure();
-      } else if (dimension === 0) {
-        var code = "function " + className + "(a,d) {this.data = a;this.offset = d};var proto=" + className + ".prototype;proto.dtype='" + dtype + "';proto.index=function(){return this.offset};proto.dimension=0;proto.size=1;proto.shape=proto.stride=proto.order=[];proto.lo=proto.hi=proto.transpose=proto.step=function " + className + "_copy() {return new " + className + "(this.data,this.offset)};proto.pick=function " + className + "_pick(){return TrivialArray(this.data);};proto.valueOf=proto.get=function " + className + "_get(){return " + (useGetters ? "this.data.get(this.offset)" : "this.data[this.offset]") + "};proto.set=function " + className + "_set(v){return " + (useGetters ? "this.data.set(this.offset,v)" : "this.data[this.offset]=v") + "};return function construct_" + className + "(a,b,c,d){return new " + className + "(a,d)}";
-        var procedure = new Function("TrivialArray", code);
-        return procedure(CACHED_CONSTRUCTORS[dtype][0]);
-      }
-      var code = ["'use strict'"];
-      var indices = iota(dimension);
-      var args = indices.map(function(i2) {
-        return "i" + i2;
-      });
-      var index_str = "this.offset+" + indices.map(function(i2) {
-        return "this.stride[" + i2 + "]*i" + i2;
-      }).join("+");
-      var shapeArg = indices.map(function(i2) {
-        return "b" + i2;
-      }).join(",");
-      var strideArg = indices.map(function(i2) {
-        return "c" + i2;
-      }).join(",");
-      code.push(
-        "function " + className + "(a," + shapeArg + "," + strideArg + ",d){this.data=a",
-        "this.shape=[" + shapeArg + "]",
-        "this.stride=[" + strideArg + "]",
-        "this.offset=d|0}",
-        "var proto=" + className + ".prototype",
-        "proto.dtype='" + dtype + "'",
-        "proto.dimension=" + dimension
-      );
-      code.push(
-        "Object.defineProperty(proto,'size',{get:function " + className + "_size(){return " + indices.map(function(i2) {
-          return "this.shape[" + i2 + "]";
-        }).join("*"),
-        "}})"
-      );
-      if (dimension === 1) {
-        code.push("proto.order=[0]");
-      } else {
-        code.push("Object.defineProperty(proto,'order',{get:");
-        if (dimension < 4) {
-          code.push("function " + className + "_order(){");
-          if (dimension === 2) {
-            code.push("return (Math.abs(this.stride[0])>Math.abs(this.stride[1]))?[1,0]:[0,1]}})");
-          } else if (dimension === 3) {
-            code.push(
-              "var s0=Math.abs(this.stride[0]),s1=Math.abs(this.stride[1]),s2=Math.abs(this.stride[2]);if(s0>s1){if(s1>s2){return [2,1,0];}else if(s0>s2){return [1,2,0];}else{return [1,0,2];}}else if(s0>s2){return [2,0,1];}else if(s2>s1){return [0,1,2];}else{return [0,2,1];}}})"
-            );
-          }
-        } else {
-          code.push("ORDER})");
-        }
-      }
-      code.push(
-        "proto.set=function " + className + "_set(" + args.join(",") + ",v){"
-      );
-      if (useGetters) {
-        code.push("return this.data.set(" + index_str + ",v)}");
-      } else {
-        code.push("return this.data[" + index_str + "]=v}");
-      }
-      code.push("proto.get=function " + className + "_get(" + args.join(",") + "){");
-      if (useGetters) {
-        code.push("return this.data.get(" + index_str + ")}");
-      } else {
-        code.push("return this.data[" + index_str + "]}");
-      }
-      code.push(
-        "proto.index=function " + className + "_index(",
-        args.join(),
-        "){return " + index_str + "}"
-      );
-      code.push("proto.hi=function " + className + "_hi(" + args.join(",") + "){return new " + className + "(this.data," + indices.map(function(i2) {
-        return ["(typeof i", i2, "!=='number'||i", i2, "<0)?this.shape[", i2, "]:i", i2, "|0"].join("");
-      }).join(",") + "," + indices.map(function(i2) {
-        return "this.stride[" + i2 + "]";
-      }).join(",") + ",this.offset)}");
-      var a_vars = indices.map(function(i2) {
-        return "a" + i2 + "=this.shape[" + i2 + "]";
-      });
-      var c_vars = indices.map(function(i2) {
-        return "c" + i2 + "=this.stride[" + i2 + "]";
-      });
-      code.push("proto.lo=function " + className + "_lo(" + args.join(",") + "){var b=this.offset,d=0," + a_vars.join(",") + "," + c_vars.join(","));
-      for (var i = 0; i < dimension; ++i) {
-        code.push(
-          "if(typeof i" + i + "==='number'&&i" + i + ">=0){d=i" + i + "|0;b+=c" + i + "*d;a" + i + "-=d}"
-        );
-      }
-      code.push("return new " + className + "(this.data," + indices.map(function(i2) {
-        return "a" + i2;
-      }).join(",") + "," + indices.map(function(i2) {
-        return "c" + i2;
-      }).join(",") + ",b)}");
-      code.push("proto.step=function " + className + "_step(" + args.join(",") + "){var " + indices.map(function(i2) {
-        return "a" + i2 + "=this.shape[" + i2 + "]";
-      }).join(",") + "," + indices.map(function(i2) {
-        return "b" + i2 + "=this.stride[" + i2 + "]";
-      }).join(",") + ",c=this.offset,d=0,ceil=Math.ceil");
-      for (var i = 0; i < dimension; ++i) {
-        code.push(
-          "if(typeof i" + i + "==='number'){d=i" + i + "|0;if(d<0){c+=b" + i + "*(a" + i + "-1);a" + i + "=ceil(-a" + i + "/d)}else{a" + i + "=ceil(a" + i + "/d)}b" + i + "*=d}"
-        );
-      }
-      code.push("return new " + className + "(this.data," + indices.map(function(i2) {
-        return "a" + i2;
-      }).join(",") + "," + indices.map(function(i2) {
-        return "b" + i2;
-      }).join(",") + ",c)}");
-      var tShape = new Array(dimension);
-      var tStride = new Array(dimension);
-      for (var i = 0; i < dimension; ++i) {
-        tShape[i] = "a[i" + i + "]";
-        tStride[i] = "b[i" + i + "]";
-      }
-      code.push(
-        "proto.transpose=function " + className + "_transpose(" + args + "){" + args.map(function(n, idx) {
-          return n + "=(" + n + "===undefined?" + idx + ":" + n + "|0)";
-        }).join(";"),
-        "var a=this.shape,b=this.stride;return new " + className + "(this.data," + tShape.join(",") + "," + tStride.join(",") + ",this.offset)}"
-      );
-      code.push("proto.pick=function " + className + "_pick(" + args + "){var a=[],b=[],c=this.offset");
-      for (var i = 0; i < dimension; ++i) {
-        code.push("if(typeof i" + i + "==='number'&&i" + i + ">=0){c=(c+this.stride[" + i + "]*i" + i + ")|0}else{a.push(this.shape[" + i + "]);b.push(this.stride[" + i + "])}");
-      }
-      code.push("var ctor=CTOR_LIST[a.length+1];return ctor(this.data,a,b,c)}");
-      code.push("return function construct_" + className + "(data,shape,stride,offset){return new " + className + "(data," + indices.map(function(i2) {
-        return "shape[" + i2 + "]";
-      }).join(",") + "," + indices.map(function(i2) {
-        return "stride[" + i2 + "]";
-      }).join(",") + ",offset)}");
-      var procedure = new Function("CTOR_LIST", "ORDER", code.join("\n"));
-      return procedure(CACHED_CONSTRUCTORS[dtype], order);
-    }
-    function arrayDType(data) {
-      if (isBuffer(data)) {
-        return "buffer";
-      }
-      if (hasTypedArrays) {
-        switch (Object.prototype.toString.call(data)) {
-          case "[object Float64Array]":
-            return "float64";
-          case "[object Float32Array]":
-            return "float32";
-          case "[object Int8Array]":
-            return "int8";
-          case "[object Int16Array]":
-            return "int16";
-          case "[object Int32Array]":
-            return "int32";
-          case "[object Uint8Array]":
-            return "uint8";
-          case "[object Uint16Array]":
-            return "uint16";
-          case "[object Uint32Array]":
-            return "uint32";
-          case "[object Uint8ClampedArray]":
-            return "uint8_clamped";
-          case "[object BigInt64Array]":
-            return "bigint64";
-          case "[object BigUint64Array]":
-            return "biguint64";
-        }
-      }
-      if (Array.isArray(data)) {
-        return "array";
-      }
-      return "generic";
-    }
-    var CACHED_CONSTRUCTORS = {
-      "float32": [],
-      "float64": [],
-      "int8": [],
-      "int16": [],
-      "int32": [],
-      "uint8": [],
-      "uint16": [],
-      "uint32": [],
-      "array": [],
-      "uint8_clamped": [],
-      "bigint64": [],
-      "biguint64": [],
-      "buffer": [],
-      "generic": []
+    struct ivec6
+    {
+      int x;
+      int y;
+      int z;
+      int w;
+      int u;
+      int v;
     };
-    function wrappedNDArrayCtor(data, shape, stride, offset) {
-      if (data === void 0) {
-        var ctor = CACHED_CONSTRUCTORS.array[0];
-        return ctor([]);
-      } else if (typeof data === "number") {
-        data = [data];
-      }
-      if (shape === void 0) {
-        shape = [data.length];
-      }
-      var d = shape.length;
-      if (stride === void 0) {
-        stride = new Array(d);
-        for (var i = d - 1, sz = 1; i >= 0; --i) {
-          stride[i] = sz;
-          sz *= shape[i];
-        }
-      }
-      if (offset === void 0) {
-        offset = 0;
-        for (var i = 0; i < d; ++i) {
-          if (stride[i] < 0) {
-            offset -= (shape[i] - 1) * stride[i];
-          }
-        }
-      }
-      var dtype = arrayDType(data);
-      var ctor_list = CACHED_CONSTRUCTORS[dtype];
-      while (ctor_list.length <= d + 1) {
-        ctor_list.push(compileConstructor(dtype, ctor_list.length - 1));
-      }
-      var ctor = ctor_list[d + 1];
-      return ctor(data, shape, stride, offset);
+
+    int imod(int x, int y) {
+      return x - y * (x / y);
     }
-    module.exports = wrappedNDArrayCtor;
+
+    `}function DS(e,t){let n=Re(e);return`
+  void main() {
+    int indices[${t}];
+    toVec(TexCoords, indices);
+    vec4 result = vec4(process(indices));
+    ${n.output} = result;
   }
-});
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_freeGlobal.js
-var freeGlobal = typeof global == "object" && global && global.Object === Object && global;
-var freeGlobal_default = freeGlobal;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_root.js
-var freeSelf = typeof self == "object" && self && self.Object === Object && self;
-var root = freeGlobal_default || freeSelf || Function("return this")();
-var root_default = root;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_Symbol.js
-var Symbol2 = root_default.Symbol;
-var Symbol_default = Symbol2;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_getRawTag.js
-var objectProto = Object.prototype;
-var hasOwnProperty = objectProto.hasOwnProperty;
-var nativeObjectToString = objectProto.toString;
-var symToStringTag = Symbol_default ? Symbol_default.toStringTag : void 0;
-function getRawTag(value) {
-  var isOwn = hasOwnProperty.call(value, symToStringTag), tag = value[symToStringTag];
-  try {
-    value[symToStringTag] = void 0;
-    var unmasked = true;
-  } catch (e) {
-  }
-  var result = nativeObjectToString.call(value);
-  if (unmasked) {
-    if (isOwn) {
-      value[symToStringTag] = tag;
-    } else {
-      delete value[symToStringTag];
+  `}var uy,ly,gt=G(()=>{"use strict";uy={version:"",attribute:"attribute",varyingVertex:"varying",varyingFrag:"varying",texture2D:"texture2D",output:"gl_FragColor",outputDeclaration:""},ly={version:"#version 300 es",attribute:"in",varyingVertex:"out",varyingFrag:"in",texture2D:"texture",output:"outputColor",outputDeclaration:"out vec4 outputColor;"}}),Fe=G(()=>{"use strict"});async function dh(e,t=o=>0,n){return new Promise((o,f)=>{let s=0,p=()=>{if(e()){o();return}s++;let i=t(s);if(n!=null&&s>=n){f();return}setTimeout(p,i)};p()})}function tc(e){return mu(typeof e<"u"&&e.length!==0,()=>"empty string found for sampler name"),"get"+e.charAt(0).toUpperCase()+e.slice(1)}function CS(e){return mu(typeof e<"u"&&e.length!==0,()=>"empty string found for sampler name"),"get"+e.charAt(0).toUpperCase()+e.slice(1)+"AtOutCoords"}function Oa(e,t){let n=JSON.parse(JSON.stringify(e));return n=t,n}function Sa(e,t){return t.map(n=>e[n]).join(", ")}function ui(e){if(e<=1)return"int";if(e===2)return"ivec2";if(e===3)return"ivec3";if(e===4)return"ivec4";if(e===5)return"ivec5";if(e===6)return"ivec6";throw Error(`GPU for rank ${e} is not yet supported`)}function Fo(e=6){return["x","y","z","w","u","v"].slice(0,e)}var Fn=G(()=>{"use strict";Ve()});function NS(e,t){return Fo(t).map(n=>`${e}.${n}`)}function wf(e,t){return t===1?[e]:NS(e,t)}function Xa(){return`
+    float getChannel(vec4 frag, int dim) {
+      int modCoord = imod(dim, 2);
+      return modCoord == 0 ? frag.r : frag.g;
     }
-  }
-  return result;
-}
-var getRawTag_default = getRawTag;
 
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_objectToString.js
-var objectProto2 = Object.prototype;
-var nativeObjectToString2 = objectProto2.toString;
-function objectToString(value) {
-  return nativeObjectToString2.call(value);
-}
-var objectToString_default = objectToString;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_baseGetTag.js
-var nullTag = "[object Null]";
-var undefinedTag = "[object Undefined]";
-var symToStringTag2 = Symbol_default ? Symbol_default.toStringTag : void 0;
-function baseGetTag(value) {
-  if (value == null) {
-    return value === void 0 ? undefinedTag : nullTag;
-  }
-  return symToStringTag2 && symToStringTag2 in Object(value) ? getRawTag_default(value) : objectToString_default(value);
-}
-var baseGetTag_default = baseGetTag;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/isObject.js
-function isObject(value) {
-  var type = typeof value;
-  return value != null && (type == "object" || type == "function");
-}
-var isObject_default = isObject;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/isFunction.js
-var asyncTag = "[object AsyncFunction]";
-var funcTag = "[object Function]";
-var genTag = "[object GeneratorFunction]";
-var proxyTag = "[object Proxy]";
-function isFunction(value) {
-  if (!isObject_default(value)) {
-    return false;
-  }
-  var tag = baseGetTag_default(value);
-  return tag == funcTag || tag == genTag || tag == asyncTag || tag == proxyTag;
-}
-var isFunction_default = isFunction;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_coreJsData.js
-var coreJsData = root_default["__core-js_shared__"];
-var coreJsData_default = coreJsData;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_isMasked.js
-var maskSrcKey = function() {
-  var uid = /[^.]+$/.exec(coreJsData_default && coreJsData_default.keys && coreJsData_default.keys.IE_PROTO || "");
-  return uid ? "Symbol(src)_1." + uid : "";
-}();
-function isMasked(func) {
-  return !!maskSrcKey && maskSrcKey in func;
-}
-var isMasked_default = isMasked;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_toSource.js
-var funcProto = Function.prototype;
-var funcToString = funcProto.toString;
-function toSource(func) {
-  if (func != null) {
-    try {
-      return funcToString.call(func);
-    } catch (e) {
+    float getChannel(vec4 frag, vec2 innerDims) {
+      vec2 modCoord = mod(innerDims, 2.);
+      return modCoord.x == 0. ?
+        (modCoord.y == 0. ? frag.r : frag.g) :
+        (modCoord.y == 0. ? frag.b : frag.a);
     }
-    try {
-      return func + "";
-    } catch (e) {
-    }
-  }
-  return "";
-}
-var toSource_default = toSource;
+  `}var Bo=G(()=>{"use strict";Fn()});function kS(e,t,n){if(e===0)return"false";if(e===1)return`rc > ${t[0]}`;let o="";for(let f=e-2;f<e;f++)o+=`${n[f]} >= ${t[f-e+2]}`,f<e-1&&(o+="||");return o}function RS(e,t){let n=e.length;if(n===0)return"getA(), 0, 0, 0";if(n===1)return`getA(rc),
+            rc + 1 >= ${e[0]} ? 0. : getA(rc + 1),
+            0, 0`;let o="r, c",f="r, cp1",s="rp1, c",p="rp1, cp1",i="";if(n>2)for(let c=0;c<n-2;++c)i=i+`${t[c]},`;return`getA(${i}${o}),
+          rEdge ? 0. : getA(${i}${s}),
+          cEdge ? 0. : getA(${i}${f}),
+          rEdge || cEdge ? 0. : getA(${i}${p})`}function FS(e,t,n,o){return e===0||e===1?"":`
+    int r = ${t[e-2]};
+    int c = ${t[e-1]};
+    int rp1 = ${t[e-2]} + 1;
+    int cp1 = ${t[e-1]} + 1;
+    bool rEdge = rp1 >= ${o};
+    bool cEdge = cp1 >= ${n};
+    `}var rc,ph,cy,MS=G(()=>{"use strict";gt(),Fe(),Fn(),Bo(),rc={name:"pack",inputNames:["A"],inputTypes:[1]},ph=(e,t)=>{let n=Re(e.session.backend.glContext.version),o=t.dims,f=o.length,s=t.dims.length,p=ui(s),i=wf("rc",s),c=FS(s,i,o[o.length-2],o[o.length-1]),r;f===0?r=[1,1]:f===1?r=[o[0],1]:r=[o[s-1],o[s-2]];let u=kS(s,r,i),l=RS(o,i),h=`
+        void main() {
+          ${p} rc = getOutputCoords();
 
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_baseIsNative.js
-var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
-var reIsHostCtor = /^\[object .+?Constructor\]$/;
-var funcProto2 = Function.prototype;
-var objectProto3 = Object.prototype;
-var funcToString2 = funcProto2.toString;
-var hasOwnProperty2 = objectProto3.hasOwnProperty;
-var reIsNative = RegExp(
-  "^" + funcToString2.call(hasOwnProperty2).replace(reRegExpChar, "\\$&").replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, "$1.*?") + "$"
-);
-function baseIsNative(value) {
-  if (!isObject_default(value) || isMasked_default(value)) {
-    return false;
-  }
-  var pattern = isFunction_default(value) ? reIsNative : reIsHostCtor;
-  return pattern.test(toSource_default(value));
-}
-var baseIsNative_default = baseIsNative;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_getValue.js
-function getValue(object, key) {
-  return object == null ? void 0 : object[key];
-}
-var getValue_default = getValue;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_getNative.js
-function getNative(object, key) {
-  var value = getValue_default(object, key);
-  return baseIsNative_default(value) ? value : void 0;
-}
-var getNative_default = getNative;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_nativeCreate.js
-var nativeCreate = getNative_default(Object, "create");
-var nativeCreate_default = nativeCreate;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_hashClear.js
-function hashClear() {
-  this.__data__ = nativeCreate_default ? nativeCreate_default(null) : {};
-  this.size = 0;
-}
-var hashClear_default = hashClear;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_hashDelete.js
-function hashDelete(key) {
-  var result = this.has(key) && delete this.__data__[key];
-  this.size -= result ? 1 : 0;
-  return result;
-}
-var hashDelete_default = hashDelete;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_hashGet.js
-var HASH_UNDEFINED = "__lodash_hash_undefined__";
-var objectProto4 = Object.prototype;
-var hasOwnProperty3 = objectProto4.hasOwnProperty;
-function hashGet(key) {
-  var data = this.__data__;
-  if (nativeCreate_default) {
-    var result = data[key];
-    return result === HASH_UNDEFINED ? void 0 : result;
-  }
-  return hasOwnProperty3.call(data, key) ? data[key] : void 0;
-}
-var hashGet_default = hashGet;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_hashHas.js
-var objectProto5 = Object.prototype;
-var hasOwnProperty4 = objectProto5.hasOwnProperty;
-function hashHas(key) {
-  var data = this.__data__;
-  return nativeCreate_default ? data[key] !== void 0 : hasOwnProperty4.call(data, key);
-}
-var hashHas_default = hashHas;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_hashSet.js
-var HASH_UNDEFINED2 = "__lodash_hash_undefined__";
-function hashSet(key, value) {
-  var data = this.__data__;
-  this.size += this.has(key) ? 0 : 1;
-  data[key] = nativeCreate_default && value === void 0 ? HASH_UNDEFINED2 : value;
-  return this;
-}
-var hashSet_default = hashSet;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_Hash.js
-function Hash(entries) {
-  var index = -1, length = entries == null ? 0 : entries.length;
-  this.clear();
-  while (++index < length) {
-    var entry = entries[index];
-    this.set(entry[0], entry[1]);
-  }
-}
-Hash.prototype.clear = hashClear_default;
-Hash.prototype["delete"] = hashDelete_default;
-Hash.prototype.get = hashGet_default;
-Hash.prototype.has = hashHas_default;
-Hash.prototype.set = hashSet_default;
-var Hash_default = Hash;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_listCacheClear.js
-function listCacheClear() {
-  this.__data__ = [];
-  this.size = 0;
-}
-var listCacheClear_default = listCacheClear;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/eq.js
-function eq(value, other) {
-  return value === other || value !== value && other !== other;
-}
-var eq_default = eq;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_assocIndexOf.js
-function assocIndexOf(array, key) {
-  var length = array.length;
-  while (length--) {
-    if (eq_default(array[length][0], key)) {
-      return length;
-    }
-  }
-  return -1;
-}
-var assocIndexOf_default = assocIndexOf;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_listCacheDelete.js
-var arrayProto = Array.prototype;
-var splice = arrayProto.splice;
-function listCacheDelete(key) {
-  var data = this.__data__, index = assocIndexOf_default(data, key);
-  if (index < 0) {
-    return false;
-  }
-  var lastIndex = data.length - 1;
-  if (index == lastIndex) {
-    data.pop();
-  } else {
-    splice.call(data, index, 1);
-  }
-  --this.size;
-  return true;
-}
-var listCacheDelete_default = listCacheDelete;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_listCacheGet.js
-function listCacheGet(key) {
-  var data = this.__data__, index = assocIndexOf_default(data, key);
-  return index < 0 ? void 0 : data[index][1];
-}
-var listCacheGet_default = listCacheGet;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_listCacheHas.js
-function listCacheHas(key) {
-  return assocIndexOf_default(this.__data__, key) > -1;
-}
-var listCacheHas_default = listCacheHas;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_listCacheSet.js
-function listCacheSet(key, value) {
-  var data = this.__data__, index = assocIndexOf_default(data, key);
-  if (index < 0) {
-    ++this.size;
-    data.push([key, value]);
-  } else {
-    data[index][1] = value;
-  }
-  return this;
-}
-var listCacheSet_default = listCacheSet;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_ListCache.js
-function ListCache(entries) {
-  var index = -1, length = entries == null ? 0 : entries.length;
-  this.clear();
-  while (++index < length) {
-    var entry = entries[index];
-    this.set(entry[0], entry[1]);
-  }
-}
-ListCache.prototype.clear = listCacheClear_default;
-ListCache.prototype["delete"] = listCacheDelete_default;
-ListCache.prototype.get = listCacheGet_default;
-ListCache.prototype.has = listCacheHas_default;
-ListCache.prototype.set = listCacheSet_default;
-var ListCache_default = ListCache;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_Map.js
-var Map2 = getNative_default(root_default, "Map");
-var Map_default = Map2;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_mapCacheClear.js
-function mapCacheClear() {
-  this.size = 0;
-  this.__data__ = {
-    "hash": new Hash_default(),
-    "map": new (Map_default || ListCache_default)(),
-    "string": new Hash_default()
-  };
-}
-var mapCacheClear_default = mapCacheClear;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_isKeyable.js
-function isKeyable(value) {
-  var type = typeof value;
-  return type == "string" || type == "number" || type == "symbol" || type == "boolean" ? value !== "__proto__" : value === null;
-}
-var isKeyable_default = isKeyable;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_getMapData.js
-function getMapData(map, key) {
-  var data = map.__data__;
-  return isKeyable_default(key) ? data[typeof key == "string" ? "string" : "hash"] : data.map;
-}
-var getMapData_default = getMapData;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_mapCacheDelete.js
-function mapCacheDelete(key) {
-  var result = getMapData_default(this, key)["delete"](key);
-  this.size -= result ? 1 : 0;
-  return result;
-}
-var mapCacheDelete_default = mapCacheDelete;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_mapCacheGet.js
-function mapCacheGet(key) {
-  return getMapData_default(this, key).get(key);
-}
-var mapCacheGet_default = mapCacheGet;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_mapCacheHas.js
-function mapCacheHas(key) {
-  return getMapData_default(this, key).has(key);
-}
-var mapCacheHas_default = mapCacheHas;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_mapCacheSet.js
-function mapCacheSet(key, value) {
-  var data = getMapData_default(this, key), size = data.size;
-  data.set(key, value);
-  this.size += data.size == size ? 0 : 1;
-  return this;
-}
-var mapCacheSet_default = mapCacheSet;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/_MapCache.js
-function MapCache(entries) {
-  var index = -1, length = entries == null ? 0 : entries.length;
-  this.clear();
-  while (++index < length) {
-    var entry = entries[index];
-    this.set(entry[0], entry[1]);
-  }
-}
-MapCache.prototype.clear = mapCacheClear_default;
-MapCache.prototype["delete"] = mapCacheDelete_default;
-MapCache.prototype.get = mapCacheGet_default;
-MapCache.prototype.has = mapCacheHas_default;
-MapCache.prototype.set = mapCacheSet_default;
-var MapCache_default = MapCache;
-
-// ../../node_modules/.pnpm/lodash-es@4.17.21/node_modules/lodash-es/memoize.js
-var FUNC_ERROR_TEXT = "Expected a function";
-function memoize(func, resolver) {
-  if (typeof func != "function" || resolver != null && typeof resolver != "function") {
-    throw new TypeError(FUNC_ERROR_TEXT);
-  }
-  var memoized = function() {
-    var args = arguments, key = resolver ? resolver.apply(this, args) : args[0], cache = memoized.cache;
-    if (cache.has(key)) {
-      return cache.get(key);
-    }
-    var result = func.apply(this, args);
-    memoized.cache = cache.set(key, result) || cache;
-    return result;
-  };
-  memoized.cache = new (memoize.Cache || MapCache_default)();
-  return memoized;
-}
-memoize.Cache = MapCache_default;
-var memoize_default = memoize;
-
-// src/utils.ts
-var import_ndarray2 = __toESM(require_ndarray());
-
-// src/MimeType.ts
-var MimeType = class _MimeType {
-  constructor(type, params) {
-    this.type = "application/octet-stream";
-    this.params = {};
-    this.type = type;
-    this.params = params;
-  }
-  toString() {
-    const paramsStr = [];
-    for (const key in this.params) {
-      const value = this.params[key];
-      paramsStr.push(`${key}=${value}`);
-    }
-    return [this.type, ...paramsStr].join(";");
-  }
-  static create(type, params) {
-    return new _MimeType(type, params);
-  }
-  isIdentical(other) {
-    return this.type === other.type && this.params === other.params;
-  }
-  isEqual(other) {
-    return this.type === other.type;
-  }
-  static fromString(mimeType) {
-    const [type, ...paramsArr] = mimeType.split(";");
-    const params = {};
-    for (const param of paramsArr) {
-      const [key, value] = param.split("=");
-      params[key.trim()] = value.trim();
-    }
-    return new _MimeType(type, params);
-  }
-};
-
-// src/codecs.ts
-var import_ndarray = __toESM(require_ndarray());
-async function imageDecode(blob) {
-  const mime = MimeType.fromString(blob.type);
-  switch (mime.type) {
-    case "image/x-alpha8": {
-      const width = parseInt(mime.params["width"]);
-      const height = parseInt(mime.params["height"]);
-      return (0, import_ndarray.default)(new Uint8Array(await blob.arrayBuffer()), [
-        height,
-        width,
-        1
-      ]);
-    }
-    case "image/x-rgba8": {
-      const width = parseInt(mime.params["width"]);
-      const height = parseInt(mime.params["height"]);
-      return (0, import_ndarray.default)(new Uint8Array(await blob.arrayBuffer()), [
-        height,
-        width,
-        4
-      ]);
-    }
-    case "application/octet-stream":
-    case `image/png`:
-    case `image/jpeg`:
-    case `image/jpg`:
-    case `image/webp`: {
-      const imageBitmap = await createImageBitmap(blob);
-      const imageData = imageBitmapToImageData(imageBitmap);
-      return (0, import_ndarray.default)(new Uint8Array(imageData.data), [
-        imageData.height,
-        imageData.width,
-        4
-      ]);
-    }
-    default:
-      throw new Error(
-        `Invalid format: ${mime.type} with params: ${mime.params}`
-      );
-  }
-}
-async function imageEncode(imageTensor, quality = 0.8, format = "image/png") {
-  const [height, width, channels] = imageTensor.shape;
-  switch (format) {
-    case "image/x-alpha8":
-    case "image/x-rgba8": {
-      const mime = MimeType.create(format, {
-        width: width.toString(),
-        height: height.toString()
-      });
-      return new Blob([imageTensor.data], { type: mime.toString() });
-    }
-    case `image/png`:
-    case `image/jpeg`:
-    case `image/webp`: {
-      const imageData = new ImageData(
-        new Uint8ClampedArray(imageTensor.data),
-        width,
-        height
-      );
-      var canvas = createCanvas(imageData.width, imageData.height);
-      var ctx = canvas.getContext("2d");
-      ctx.putImageData(imageData, 0, 0);
-      return canvas.convertToBlob({ quality, type: format });
-    }
-    default:
-      throw new Error(`Invalid format: ${format}`);
-  }
-}
-
-// src/url.ts
-function isAbsoluteURI(url) {
-  const regExp = new RegExp("^(?:[a-z+]+:)?//", "i");
-  return regExp.test(url);
-}
-function ensureAbsoluteURI(url, baseUrl) {
-  if (isAbsoluteURI(url)) {
-    return url;
-  } else {
-    return new URL(url, baseUrl).href;
-  }
-}
-
-// src/utils.ts
-function imageBitmapToImageData(imageBitmap) {
-  var canvas = createCanvas(imageBitmap.width, imageBitmap.height);
-  var ctx = canvas.getContext("2d");
-  ctx.drawImage(imageBitmap, 0, 0);
-  return ctx.getImageData(0, 0, canvas.width, canvas.height);
-}
-function createTypeArray(length) {
-  if (typeof Uint8Array !== "undefined") {
-    return new Uint8Array(length);
-  } else if (typeof Uint8ClampedArray !== "undefined") {
-    return new Uint8ClampedArray(length);
-  } else if (typeof Uint16Array !== "undefined") {
-    return new Uint16Array(length);
-  } else if (typeof Uint32Array !== "undefined") {
-    return new Uint32Array(length);
-  } else if (typeof Float32Array !== "undefined") {
-    return new Float32Array(length);
-  } else if (typeof Float64Array !== "undefined") {
-    return new Float64Array(length);
-  } else {
-    throw new Error("TypedArray not supported");
-  }
-}
-function tensorResizeBilinear(imageTensor, newWidth, newHeight, proportional = false) {
-  const [srcHeight, srcWidth, srcChannels] = imageTensor.shape;
-  let scaleX = srcWidth / newWidth;
-  let scaleY = srcHeight / newHeight;
-  if (proportional) {
-    const downscaling = Math.max(scaleX, scaleY) > 1;
-    scaleX = scaleY = downscaling ? Math.max(scaleX, scaleY) : Math.min(scaleX, scaleY);
-  }
-  const resizedImageData = (0, import_ndarray2.default)(
-    createTypeArray(srcChannels * newWidth * newHeight),
-    [newHeight, newWidth, srcChannels]
-  );
-  for (let y = 0; y < newHeight; y++) {
-    for (let x = 0; x < newWidth; x++) {
-      const srcX = x * scaleX;
-      const srcY = y * scaleY;
-      const x1 = Math.max(Math.floor(srcX), 0);
-      const x2 = Math.min(Math.ceil(srcX), srcWidth - 1);
-      const y1 = Math.max(Math.floor(srcY), 0);
-      const y2 = Math.min(Math.ceil(srcY), srcHeight - 1);
-      const dx = srcX - x1;
-      const dy = srcY - y1;
-      for (let c = 0; c < srcChannels; c++) {
-        const p1 = imageTensor.get(y1, x1, c);
-        const p2 = imageTensor.get(y1, x2, c);
-        const p3 = imageTensor.get(y2, x1, c);
-        const p4 = imageTensor.get(y2, x2, c);
-        const interpolatedValue = (1 - dx) * (1 - dy) * p1 + dx * (1 - dy) * p2 + (1 - dx) * dy * p3 + dx * dy * p4;
-        resizedImageData.set(y, x, c, interpolatedValue);
-      }
-    }
-  }
-  return resizedImageData;
-}
-function tensorHWCtoBCHW(imageTensor, mean = [128, 128, 128], std = [256, 256, 256]) {
-  var imageBufferData = imageTensor.data;
-  const [srcHeight, srcWidth, srcChannels] = imageTensor.shape;
-  const stride = srcHeight * srcWidth;
-  const float32Data = new Float32Array(3 * stride);
-  for (let i = 0, j = 0; i < imageBufferData.length; i += 4, j += 1) {
-    float32Data[j] = (imageBufferData[i] - mean[0]) / std[0];
-    float32Data[j + stride] = (imageBufferData[i + 1] - mean[1]) / std[1];
-    float32Data[j + stride + stride] = (imageBufferData[i + 2] - mean[2]) / std[2];
-  }
-  return (0, import_ndarray2.default)(float32Data, [1, 3, srcHeight, srcWidth]);
-}
-async function imageSourceToImageData(image, config) {
-  if (typeof image === "string") {
-    image = ensureAbsoluteURI(image, config.publicPath);
-    image = new URL(image);
-  }
-  if (image instanceof URL) {
-    const response = await fetch(image, {});
-    image = await response.blob();
-  }
-  if (image instanceof ArrayBuffer || ArrayBuffer.isView(image)) {
-    image = new Blob([image]);
-  }
-  if (image instanceof Blob) {
-    image = await imageDecode(image);
-  }
-  return image;
-}
-function convertFloat32ToUint8(float32Array) {
-  const uint8Array = new Uint8Array(float32Array.data.length);
-  for (let i = 0; i < float32Array.data.length; i++) {
-    uint8Array[i] = float32Array.data[i] * 255;
-  }
-  return (0, import_ndarray2.default)(uint8Array, float32Array.shape);
-}
-function createCanvas(width, height) {
-  let canvas = void 0;
-  if (typeof OffscreenCanvas !== "undefined") {
-    canvas = new OffscreenCanvas(width, height);
-  } else {
-    canvas = document.createElement("canvas");
-  }
-  if (!canvas) {
-    throw new Error(
-      `Canvas nor OffscreenCanvas are available in the current context.`
-    );
-  }
-  return canvas;
-}
-
-// src/onnx.ts
-var import_ndarray3 = __toESM(require_ndarray());
-
-// src/capabilities.js
-var webgpu = async () => {
-  if (navigator.gpu === void 0)
-    return false;
-  const adapter = await navigator.gpu.requestAdapter();
-  return adapter !== null;
-};
-var maxNumThreads = () => navigator.hardwareConcurrency ?? 4;
-
-// src/resource.ts
-async function loadAsUrl(url, config) {
-  return URL.createObjectURL(await loadAsBlob(url, config));
-}
-async function loadAsBlob(key, config) {
-  const resourceUrl = new URL("resources.json", config.publicPath);
-  const resourceResponse = await fetch(resourceUrl);
-  if (!resourceResponse.ok) {
-    throw new Error(
-      `Resource metadata not found. Ensure that the config.publicPath is configured correctly.`
-    );
-  }
-  const resourceMap = await resourceResponse.json();
-  const entry = resourceMap[key];
-  if (!entry) {
-    throw new Error(
-      `Resource ${key} not found. Ensure that the config.publicPath is configured correctly.`
-    );
-  }
-  const chunks = entry.chunks;
-  let downloadedSize = 0;
-  const responses = chunks.map(async (chunk) => {
-    const chunkSize = chunk.offsets[1] - chunk.offsets[0];
-    const url = config.publicPath ? new URL(chunk.name, config.publicPath).toString() : chunk.name;
-    const response = await fetch(url, config.fetchArgs);
-    const blob = await response.blob();
-    if (chunkSize !== blob.size) {
-      throw new Error(
-        `Failed to fetch ${key} with size ${chunkSize} but got ${blob.size}`
-      );
-    }
-    if (config.progress) {
-      downloadedSize += chunkSize;
-      config.progress(`fetch:${key}`, downloadedSize, entry.size);
-    }
-    return blob;
-  });
-  const allChunkData = await Promise.all(responses);
-  const data = new Blob(allChunkData, { type: entry.mime });
-  if (data.size !== entry.size) {
-    throw new Error(
-      `Failed to fetch ${key} with size ${entry.size} but got ${data.size}`
-    );
-  }
-  return data;
-}
-
-// src/onnx.ts
-var ort = null;
-var getOrt = async (useWebGPU) => {
-  if (ort !== null) {
-    return ort;
-  }
-  if (useWebGPU) {
-    ort = (await import("onnxruntime-web/webgpu")).default;
-  } else {
-    ort = (await import("onnxruntime-web")).default;
-  }
-  return ort;
-};
-async function createOnnxSession(model, config) {
-  const useWebGPU = config.device === "gpu" && await webgpu();
-  const proxyToWorker = useWebGPU && config.proxyToWorker;
-  const executionProviders = [useWebGPU ? "webgpu" : "wasm"];
-  const ort2 = await getOrt(useWebGPU);
-  if (config.debug) {
-    console.debug("	Using WebGPU:", useWebGPU);
-    console.debug("	Proxy to Worker:", proxyToWorker);
-    ort2.env.debug = true;
-    ort2.env.logLevel = "verbose";
-  }
-  ort2.env.wasm.numThreads = maxNumThreads();
-  ort2.env.wasm.proxy = proxyToWorker;
-  const baseFilePath = useWebGPU ? "/onnxruntime-web/ort-wasm-simd-threaded.jsep" : "/onnxruntime-web/ort-wasm-simd-threaded";
-  const wasmPath = await loadAsUrl(`${baseFilePath}.wasm`, config);
-  const mjsPath = await loadAsUrl(`${baseFilePath}.mjs`, config);
-  ort2.env.wasm.wasmPaths = {
-    mjs: mjsPath,
-    wasm: wasmPath
-  };
-  if (config.debug) {
-    console.debug("ort.env.wasm:", ort2.env.wasm);
-  }
-  const ortConfig = {
-    executionProviders,
-    graphOptimizationLevel: "all",
-    executionMode: "parallel",
-    enableCpuMemArena: true
-  };
-  const session = await ort2.InferenceSession.create(model, ortConfig).catch(
-    (e) => {
-      throw new Error(
-        `Failed to create session: "${e}". Please check if the publicPath is set correctly.`
-      );
-    }
-  );
-  return session;
-}
-async function runOnnxSession(session, inputs, outputs, config) {
-  const useWebGPU = config.device === "gpu" && await webgpu();
-  const ort2 = await getOrt(useWebGPU);
-  const feeds = {};
-  for (const [key, tensor] of inputs) {
-    feeds[key] = new ort2.Tensor(
-      "float32",
-      new Float32Array(tensor.data),
-      tensor.shape
-    );
-  }
-  const outputData = await session.run(feeds, {});
-  const outputKVPairs = [];
-  for (const key of outputs) {
-    const output = outputData[key];
-    const shape = output.dims;
-    const data = output.data;
-    const tensor = (0, import_ndarray3.default)(data, shape);
-    outputKVPairs.push(tensor);
-  }
-  return outputKVPairs;
-}
-
-// ../../node_modules/.pnpm/zod@3.24.2/node_modules/zod/lib/index.mjs
-var util;
-(function(util2) {
-  util2.assertEqual = (val) => val;
-  function assertIs(_arg) {
-  }
-  util2.assertIs = assertIs;
-  function assertNever(_x) {
-    throw new Error();
-  }
-  util2.assertNever = assertNever;
-  util2.arrayToEnum = (items) => {
-    const obj = {};
-    for (const item of items) {
-      obj[item] = item;
-    }
-    return obj;
-  };
-  util2.getValidEnumValues = (obj) => {
-    const validKeys = util2.objectKeys(obj).filter((k) => typeof obj[obj[k]] !== "number");
-    const filtered = {};
-    for (const k of validKeys) {
-      filtered[k] = obj[k];
-    }
-    return util2.objectValues(filtered);
-  };
-  util2.objectValues = (obj) => {
-    return util2.objectKeys(obj).map(function(e) {
-      return obj[e];
-    });
-  };
-  util2.objectKeys = typeof Object.keys === "function" ? (obj) => Object.keys(obj) : (object) => {
-    const keys = [];
-    for (const key in object) {
-      if (Object.prototype.hasOwnProperty.call(object, key)) {
-        keys.push(key);
-      }
-    }
-    return keys;
-  };
-  util2.find = (arr, checker) => {
-    for (const item of arr) {
-      if (checker(item))
-        return item;
-    }
-    return void 0;
-  };
-  util2.isInteger = typeof Number.isInteger === "function" ? (val) => Number.isInteger(val) : (val) => typeof val === "number" && isFinite(val) && Math.floor(val) === val;
-  function joinValues(array, separator = " | ") {
-    return array.map((val) => typeof val === "string" ? `'${val}'` : val).join(separator);
-  }
-  util2.joinValues = joinValues;
-  util2.jsonStringifyReplacer = (_, value) => {
-    if (typeof value === "bigint") {
-      return value.toString();
-    }
-    return value;
-  };
-})(util || (util = {}));
-var objectUtil;
-(function(objectUtil2) {
-  objectUtil2.mergeShapes = (first, second) => {
-    return {
-      ...first,
-      ...second
-      // second overwrites first
-    };
-  };
-})(objectUtil || (objectUtil = {}));
-var ZodParsedType = util.arrayToEnum([
-  "string",
-  "nan",
-  "number",
-  "integer",
-  "float",
-  "boolean",
-  "date",
-  "bigint",
-  "symbol",
-  "function",
-  "undefined",
-  "null",
-  "array",
-  "object",
-  "unknown",
-  "promise",
-  "void",
-  "never",
-  "map",
-  "set"
-]);
-var getParsedType = (data) => {
-  const t = typeof data;
-  switch (t) {
-    case "undefined":
-      return ZodParsedType.undefined;
-    case "string":
-      return ZodParsedType.string;
-    case "number":
-      return isNaN(data) ? ZodParsedType.nan : ZodParsedType.number;
-    case "boolean":
-      return ZodParsedType.boolean;
-    case "function":
-      return ZodParsedType.function;
-    case "bigint":
-      return ZodParsedType.bigint;
-    case "symbol":
-      return ZodParsedType.symbol;
-    case "object":
-      if (Array.isArray(data)) {
-        return ZodParsedType.array;
-      }
-      if (data === null) {
-        return ZodParsedType.null;
-      }
-      if (data.then && typeof data.then === "function" && data.catch && typeof data.catch === "function") {
-        return ZodParsedType.promise;
-      }
-      if (typeof Map !== "undefined" && data instanceof Map) {
-        return ZodParsedType.map;
-      }
-      if (typeof Set !== "undefined" && data instanceof Set) {
-        return ZodParsedType.set;
-      }
-      if (typeof Date !== "undefined" && data instanceof Date) {
-        return ZodParsedType.date;
-      }
-      return ZodParsedType.object;
-    default:
-      return ZodParsedType.unknown;
-  }
-};
-var ZodIssueCode = util.arrayToEnum([
-  "invalid_type",
-  "invalid_literal",
-  "custom",
-  "invalid_union",
-  "invalid_union_discriminator",
-  "invalid_enum_value",
-  "unrecognized_keys",
-  "invalid_arguments",
-  "invalid_return_type",
-  "invalid_date",
-  "invalid_string",
-  "too_small",
-  "too_big",
-  "invalid_intersection_types",
-  "not_multiple_of",
-  "not_finite"
-]);
-var quotelessJson = (obj) => {
-  const json = JSON.stringify(obj, null, 2);
-  return json.replace(/"([^"]+)":/g, "$1:");
-};
-var ZodError = class _ZodError extends Error {
-  get errors() {
-    return this.issues;
-  }
-  constructor(issues) {
-    super();
-    this.issues = [];
-    this.addIssue = (sub) => {
-      this.issues = [...this.issues, sub];
-    };
-    this.addIssues = (subs = []) => {
-      this.issues = [...this.issues, ...subs];
-    };
-    const actualProto = new.target.prototype;
-    if (Object.setPrototypeOf) {
-      Object.setPrototypeOf(this, actualProto);
-    } else {
-      this.__proto__ = actualProto;
-    }
-    this.name = "ZodError";
-    this.issues = issues;
-  }
-  format(_mapper) {
-    const mapper = _mapper || function(issue) {
-      return issue.message;
-    };
-    const fieldErrors = { _errors: [] };
-    const processError = (error) => {
-      for (const issue of error.issues) {
-        if (issue.code === "invalid_union") {
-          issue.unionErrors.map(processError);
-        } else if (issue.code === "invalid_return_type") {
-          processError(issue.returnTypeError);
-        } else if (issue.code === "invalid_arguments") {
-          processError(issue.argumentsError);
-        } else if (issue.path.length === 0) {
-          fieldErrors._errors.push(mapper(issue));
-        } else {
-          let curr = fieldErrors;
-          let i = 0;
-          while (i < issue.path.length) {
-            const el = issue.path[i];
-            const terminal = i === issue.path.length - 1;
-            if (!terminal) {
-              curr[el] = curr[el] || { _errors: [] };
-            } else {
-              curr[el] = curr[el] || { _errors: [] };
-              curr[el]._errors.push(mapper(issue));
-            }
-            curr = curr[el];
-            i++;
-          }
-        }
-      }
-    };
-    processError(this);
-    return fieldErrors;
-  }
-  static assert(value) {
-    if (!(value instanceof _ZodError)) {
-      throw new Error(`Not a ZodError: ${value}`);
-    }
-  }
-  toString() {
-    return this.message;
-  }
-  get message() {
-    return JSON.stringify(this.issues, util.jsonStringifyReplacer, 2);
-  }
-  get isEmpty() {
-    return this.issues.length === 0;
-  }
-  flatten(mapper = (issue) => issue.message) {
-    const fieldErrors = {};
-    const formErrors = [];
-    for (const sub of this.issues) {
-      if (sub.path.length > 0) {
-        fieldErrors[sub.path[0]] = fieldErrors[sub.path[0]] || [];
-        fieldErrors[sub.path[0]].push(mapper(sub));
-      } else {
-        formErrors.push(mapper(sub));
-      }
-    }
-    return { formErrors, fieldErrors };
-  }
-  get formErrors() {
-    return this.flatten();
-  }
-};
-ZodError.create = (issues) => {
-  const error = new ZodError(issues);
-  return error;
-};
-var errorMap = (issue, _ctx) => {
-  let message;
-  switch (issue.code) {
-    case ZodIssueCode.invalid_type:
-      if (issue.received === ZodParsedType.undefined) {
-        message = "Required";
-      } else {
-        message = `Expected ${issue.expected}, received ${issue.received}`;
-      }
-      break;
-    case ZodIssueCode.invalid_literal:
-      message = `Invalid literal value, expected ${JSON.stringify(issue.expected, util.jsonStringifyReplacer)}`;
-      break;
-    case ZodIssueCode.unrecognized_keys:
-      message = `Unrecognized key(s) in object: ${util.joinValues(issue.keys, ", ")}`;
-      break;
-    case ZodIssueCode.invalid_union:
-      message = `Invalid input`;
-      break;
-    case ZodIssueCode.invalid_union_discriminator:
-      message = `Invalid discriminator value. Expected ${util.joinValues(issue.options)}`;
-      break;
-    case ZodIssueCode.invalid_enum_value:
-      message = `Invalid enum value. Expected ${util.joinValues(issue.options)}, received '${issue.received}'`;
-      break;
-    case ZodIssueCode.invalid_arguments:
-      message = `Invalid function arguments`;
-      break;
-    case ZodIssueCode.invalid_return_type:
-      message = `Invalid function return type`;
-      break;
-    case ZodIssueCode.invalid_date:
-      message = `Invalid date`;
-      break;
-    case ZodIssueCode.invalid_string:
-      if (typeof issue.validation === "object") {
-        if ("includes" in issue.validation) {
-          message = `Invalid input: must include "${issue.validation.includes}"`;
-          if (typeof issue.validation.position === "number") {
-            message = `${message} at one or more positions greater than or equal to ${issue.validation.position}`;
-          }
-        } else if ("startsWith" in issue.validation) {
-          message = `Invalid input: must start with "${issue.validation.startsWith}"`;
-        } else if ("endsWith" in issue.validation) {
-          message = `Invalid input: must end with "${issue.validation.endsWith}"`;
-        } else {
-          util.assertNever(issue.validation);
-        }
-      } else if (issue.validation !== "regex") {
-        message = `Invalid ${issue.validation}`;
-      } else {
-        message = "Invalid";
-      }
-      break;
-    case ZodIssueCode.too_small:
-      if (issue.type === "array")
-        message = `Array must contain ${issue.exact ? "exactly" : issue.inclusive ? `at least` : `more than`} ${issue.minimum} element(s)`;
-      else if (issue.type === "string")
-        message = `String must contain ${issue.exact ? "exactly" : issue.inclusive ? `at least` : `over`} ${issue.minimum} character(s)`;
-      else if (issue.type === "number")
-        message = `Number must be ${issue.exact ? `exactly equal to ` : issue.inclusive ? `greater than or equal to ` : `greater than `}${issue.minimum}`;
-      else if (issue.type === "date")
-        message = `Date must be ${issue.exact ? `exactly equal to ` : issue.inclusive ? `greater than or equal to ` : `greater than `}${new Date(Number(issue.minimum))}`;
-      else
-        message = "Invalid input";
-      break;
-    case ZodIssueCode.too_big:
-      if (issue.type === "array")
-        message = `Array must contain ${issue.exact ? `exactly` : issue.inclusive ? `at most` : `less than`} ${issue.maximum} element(s)`;
-      else if (issue.type === "string")
-        message = `String must contain ${issue.exact ? `exactly` : issue.inclusive ? `at most` : `under`} ${issue.maximum} character(s)`;
-      else if (issue.type === "number")
-        message = `Number must be ${issue.exact ? `exactly` : issue.inclusive ? `less than or equal to` : `less than`} ${issue.maximum}`;
-      else if (issue.type === "bigint")
-        message = `BigInt must be ${issue.exact ? `exactly` : issue.inclusive ? `less than or equal to` : `less than`} ${issue.maximum}`;
-      else if (issue.type === "date")
-        message = `Date must be ${issue.exact ? `exactly` : issue.inclusive ? `smaller than or equal to` : `smaller than`} ${new Date(Number(issue.maximum))}`;
-      else
-        message = "Invalid input";
-      break;
-    case ZodIssueCode.custom:
-      message = `Invalid input`;
-      break;
-    case ZodIssueCode.invalid_intersection_types:
-      message = `Intersection results could not be merged`;
-      break;
-    case ZodIssueCode.not_multiple_of:
-      message = `Number must be a multiple of ${issue.multipleOf}`;
-      break;
-    case ZodIssueCode.not_finite:
-      message = "Number must be finite";
-      break;
-    default:
-      message = _ctx.defaultError;
-      util.assertNever(issue);
-  }
-  return { message };
-};
-var overrideErrorMap = errorMap;
-function setErrorMap(map) {
-  overrideErrorMap = map;
-}
-function getErrorMap() {
-  return overrideErrorMap;
-}
-var makeIssue = (params) => {
-  const { data, path, errorMaps, issueData } = params;
-  const fullPath = [...path, ...issueData.path || []];
-  const fullIssue = {
-    ...issueData,
-    path: fullPath
-  };
-  if (issueData.message !== void 0) {
-    return {
-      ...issueData,
-      path: fullPath,
-      message: issueData.message
-    };
-  }
-  let errorMessage = "";
-  const maps = errorMaps.filter((m) => !!m).slice().reverse();
-  for (const map of maps) {
-    errorMessage = map(fullIssue, { data, defaultError: errorMessage }).message;
-  }
-  return {
-    ...issueData,
-    path: fullPath,
-    message: errorMessage
-  };
-};
-var EMPTY_PATH = [];
-function addIssueToContext(ctx, issueData) {
-  const overrideMap = getErrorMap();
-  const issue = makeIssue({
-    issueData,
-    data: ctx.data,
-    path: ctx.path,
-    errorMaps: [
-      ctx.common.contextualErrorMap,
-      // contextual error map is first priority
-      ctx.schemaErrorMap,
-      // then schema-bound map if available
-      overrideMap,
-      // then global override map
-      overrideMap === errorMap ? void 0 : errorMap
-      // then global default map
-    ].filter((x) => !!x)
-  });
-  ctx.common.issues.push(issue);
-}
-var ParseStatus = class _ParseStatus {
-  constructor() {
-    this.value = "valid";
-  }
-  dirty() {
-    if (this.value === "valid")
-      this.value = "dirty";
-  }
-  abort() {
-    if (this.value !== "aborted")
-      this.value = "aborted";
-  }
-  static mergeArray(status, results) {
-    const arrayValue = [];
-    for (const s of results) {
-      if (s.status === "aborted")
-        return INVALID;
-      if (s.status === "dirty")
-        status.dirty();
-      arrayValue.push(s.value);
-    }
-    return { status: status.value, value: arrayValue };
-  }
-  static async mergeObjectAsync(status, pairs) {
-    const syncPairs = [];
-    for (const pair of pairs) {
-      const key = await pair.key;
-      const value = await pair.value;
-      syncPairs.push({
-        key,
-        value
-      });
-    }
-    return _ParseStatus.mergeObjectSync(status, syncPairs);
-  }
-  static mergeObjectSync(status, pairs) {
-    const finalObject = {};
-    for (const pair of pairs) {
-      const { key, value } = pair;
-      if (key.status === "aborted")
-        return INVALID;
-      if (value.status === "aborted")
-        return INVALID;
-      if (key.status === "dirty")
-        status.dirty();
-      if (value.status === "dirty")
-        status.dirty();
-      if (key.value !== "__proto__" && (typeof value.value !== "undefined" || pair.alwaysSet)) {
-        finalObject[key.value] = value.value;
-      }
-    }
-    return { status: status.value, value: finalObject };
-  }
-};
-var INVALID = Object.freeze({
-  status: "aborted"
-});
-var DIRTY = (value) => ({ status: "dirty", value });
-var OK = (value) => ({ status: "valid", value });
-var isAborted = (x) => x.status === "aborted";
-var isDirty = (x) => x.status === "dirty";
-var isValid = (x) => x.status === "valid";
-var isAsync = (x) => typeof Promise !== "undefined" && x instanceof Promise;
-function __classPrivateFieldGet(receiver, state, kind, f) {
-  if (kind === "a" && !f)
-    throw new TypeError("Private accessor was defined without a getter");
-  if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-    throw new TypeError("Cannot read private member from an object whose class did not declare it");
-  return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
-}
-function __classPrivateFieldSet(receiver, state, value, kind, f) {
-  if (kind === "m")
-    throw new TypeError("Private method is not writable");
-  if (kind === "a" && !f)
-    throw new TypeError("Private accessor was defined without a setter");
-  if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-    throw new TypeError("Cannot write private member to an object whose class did not declare it");
-  return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
-}
-var errorUtil;
-(function(errorUtil2) {
-  errorUtil2.errToObj = (message) => typeof message === "string" ? { message } : message || {};
-  errorUtil2.toString = (message) => typeof message === "string" ? message : message === null || message === void 0 ? void 0 : message.message;
-})(errorUtil || (errorUtil = {}));
-var _ZodEnum_cache;
-var _ZodNativeEnum_cache;
-var ParseInputLazyPath = class {
-  constructor(parent, value, path, key) {
-    this._cachedPath = [];
-    this.parent = parent;
-    this.data = value;
-    this._path = path;
-    this._key = key;
-  }
-  get path() {
-    if (!this._cachedPath.length) {
-      if (this._key instanceof Array) {
-        this._cachedPath.push(...this._path, ...this._key);
-      } else {
-        this._cachedPath.push(...this._path, this._key);
-      }
-    }
-    return this._cachedPath;
-  }
-};
-var handleResult = (ctx, result) => {
-  if (isValid(result)) {
-    return { success: true, data: result.value };
-  } else {
-    if (!ctx.common.issues.length) {
-      throw new Error("Validation failed but no issues detected.");
-    }
-    return {
-      success: false,
-      get error() {
-        if (this._error)
-          return this._error;
-        const error = new ZodError(ctx.common.issues);
-        this._error = error;
-        return this._error;
-      }
-    };
-  }
-};
-function processCreateParams(params) {
-  if (!params)
-    return {};
-  const { errorMap: errorMap2, invalid_type_error, required_error, description } = params;
-  if (errorMap2 && (invalid_type_error || required_error)) {
-    throw new Error(`Can't use "invalid_type_error" or "required_error" in conjunction with custom error map.`);
-  }
-  if (errorMap2)
-    return { errorMap: errorMap2, description };
-  const customMap = (iss, ctx) => {
-    var _a, _b;
-    const { message } = params;
-    if (iss.code === "invalid_enum_value") {
-      return { message: message !== null && message !== void 0 ? message : ctx.defaultError };
-    }
-    if (typeof ctx.data === "undefined") {
-      return { message: (_a = message !== null && message !== void 0 ? message : required_error) !== null && _a !== void 0 ? _a : ctx.defaultError };
-    }
-    if (iss.code !== "invalid_type")
-      return { message: ctx.defaultError };
-    return { message: (_b = message !== null && message !== void 0 ? message : invalid_type_error) !== null && _b !== void 0 ? _b : ctx.defaultError };
-  };
-  return { errorMap: customMap, description };
-}
-var ZodType = class {
-  get description() {
-    return this._def.description;
-  }
-  _getType(input) {
-    return getParsedType(input.data);
-  }
-  _getOrReturnCtx(input, ctx) {
-    return ctx || {
-      common: input.parent.common,
-      data: input.data,
-      parsedType: getParsedType(input.data),
-      schemaErrorMap: this._def.errorMap,
-      path: input.path,
-      parent: input.parent
-    };
-  }
-  _processInputParams(input) {
-    return {
-      status: new ParseStatus(),
-      ctx: {
-        common: input.parent.common,
-        data: input.data,
-        parsedType: getParsedType(input.data),
-        schemaErrorMap: this._def.errorMap,
-        path: input.path,
-        parent: input.parent
-      }
-    };
-  }
-  _parseSync(input) {
-    const result = this._parse(input);
-    if (isAsync(result)) {
-      throw new Error("Synchronous parse encountered promise.");
-    }
-    return result;
-  }
-  _parseAsync(input) {
-    const result = this._parse(input);
-    return Promise.resolve(result);
-  }
-  parse(data, params) {
-    const result = this.safeParse(data, params);
-    if (result.success)
-      return result.data;
-    throw result.error;
-  }
-  safeParse(data, params) {
-    var _a;
-    const ctx = {
-      common: {
-        issues: [],
-        async: (_a = params === null || params === void 0 ? void 0 : params.async) !== null && _a !== void 0 ? _a : false,
-        contextualErrorMap: params === null || params === void 0 ? void 0 : params.errorMap
-      },
-      path: (params === null || params === void 0 ? void 0 : params.path) || [],
-      schemaErrorMap: this._def.errorMap,
-      parent: null,
-      data,
-      parsedType: getParsedType(data)
-    };
-    const result = this._parseSync({ data, path: ctx.path, parent: ctx });
-    return handleResult(ctx, result);
-  }
-  "~validate"(data) {
-    var _a, _b;
-    const ctx = {
-      common: {
-        issues: [],
-        async: !!this["~standard"].async
-      },
-      path: [],
-      schemaErrorMap: this._def.errorMap,
-      parent: null,
-      data,
-      parsedType: getParsedType(data)
-    };
-    if (!this["~standard"].async) {
-      try {
-        const result = this._parseSync({ data, path: [], parent: ctx });
-        return isValid(result) ? {
-          value: result.value
-        } : {
-          issues: ctx.common.issues
-        };
-      } catch (err) {
-        if ((_b = (_a = err === null || err === void 0 ? void 0 : err.message) === null || _a === void 0 ? void 0 : _a.toLowerCase()) === null || _b === void 0 ? void 0 : _b.includes("encountered")) {
-          this["~standard"].async = true;
-        }
-        ctx.common = {
-          issues: [],
-          async: true
-        };
-      }
-    }
-    return this._parseAsync({ data, path: [], parent: ctx }).then((result) => isValid(result) ? {
-      value: result.value
-    } : {
-      issues: ctx.common.issues
-    });
-  }
-  async parseAsync(data, params) {
-    const result = await this.safeParseAsync(data, params);
-    if (result.success)
-      return result.data;
-    throw result.error;
-  }
-  async safeParseAsync(data, params) {
-    const ctx = {
-      common: {
-        issues: [],
-        contextualErrorMap: params === null || params === void 0 ? void 0 : params.errorMap,
-        async: true
-      },
-      path: (params === null || params === void 0 ? void 0 : params.path) || [],
-      schemaErrorMap: this._def.errorMap,
-      parent: null,
-      data,
-      parsedType: getParsedType(data)
-    };
-    const maybeAsyncResult = this._parse({ data, path: ctx.path, parent: ctx });
-    const result = await (isAsync(maybeAsyncResult) ? maybeAsyncResult : Promise.resolve(maybeAsyncResult));
-    return handleResult(ctx, result);
-  }
-  refine(check, message) {
-    const getIssueProperties = (val) => {
-      if (typeof message === "string" || typeof message === "undefined") {
-        return { message };
-      } else if (typeof message === "function") {
-        return message(val);
-      } else {
-        return message;
-      }
-    };
-    return this._refinement((val, ctx) => {
-      const result = check(val);
-      const setError = () => ctx.addIssue({
-        code: ZodIssueCode.custom,
-        ...getIssueProperties(val)
-      });
-      if (typeof Promise !== "undefined" && result instanceof Promise) {
-        return result.then((data) => {
-          if (!data) {
-            setError();
-            return false;
+          if(${u}) {
+            ${n.output} = vec4(0);
           } else {
-            return true;
+            ${c}
+
+            ${n.output} = vec4(${l});
           }
-        });
-      }
-      if (!result) {
-        setError();
-        return false;
-      } else {
-        return true;
-      }
-    });
-  }
-  refinement(check, refinementData) {
-    return this._refinement((val, ctx) => {
-      if (!check(val)) {
-        ctx.addIssue(typeof refinementData === "function" ? refinementData(val, ctx) : refinementData);
-        return false;
-      } else {
-        return true;
-      }
-    });
-  }
-  _refinement(refinement) {
-    return new ZodEffects({
-      schema: this,
-      typeName: ZodFirstPartyTypeKind.ZodEffects,
-      effect: { type: "refinement", refinement }
-    });
-  }
-  superRefine(refinement) {
-    return this._refinement(refinement);
-  }
-  constructor(def) {
-    this.spa = this.safeParseAsync;
-    this._def = def;
-    this.parse = this.parse.bind(this);
-    this.safeParse = this.safeParse.bind(this);
-    this.parseAsync = this.parseAsync.bind(this);
-    this.safeParseAsync = this.safeParseAsync.bind(this);
-    this.spa = this.spa.bind(this);
-    this.refine = this.refine.bind(this);
-    this.refinement = this.refinement.bind(this);
-    this.superRefine = this.superRefine.bind(this);
-    this.optional = this.optional.bind(this);
-    this.nullable = this.nullable.bind(this);
-    this.nullish = this.nullish.bind(this);
-    this.array = this.array.bind(this);
-    this.promise = this.promise.bind(this);
-    this.or = this.or.bind(this);
-    this.and = this.and.bind(this);
-    this.transform = this.transform.bind(this);
-    this.brand = this.brand.bind(this);
-    this.default = this.default.bind(this);
-    this.catch = this.catch.bind(this);
-    this.describe = this.describe.bind(this);
-    this.pipe = this.pipe.bind(this);
-    this.readonly = this.readonly.bind(this);
-    this.isNullable = this.isNullable.bind(this);
-    this.isOptional = this.isOptional.bind(this);
-    this["~standard"] = {
-      version: 1,
-      vendor: "zod",
-      validate: (data) => this["~validate"](data)
-    };
-  }
-  optional() {
-    return ZodOptional.create(this, this._def);
-  }
-  nullable() {
-    return ZodNullable.create(this, this._def);
-  }
-  nullish() {
-    return this.nullable().optional();
-  }
-  array() {
-    return ZodArray.create(this);
-  }
-  promise() {
-    return ZodPromise.create(this, this._def);
-  }
-  or(option) {
-    return ZodUnion.create([this, option], this._def);
-  }
-  and(incoming) {
-    return ZodIntersection.create(this, incoming, this._def);
-  }
-  transform(transform) {
-    return new ZodEffects({
-      ...processCreateParams(this._def),
-      schema: this,
-      typeName: ZodFirstPartyTypeKind.ZodEffects,
-      effect: { type: "transform", transform }
-    });
-  }
-  default(def) {
-    const defaultValueFunc = typeof def === "function" ? def : () => def;
-    return new ZodDefault({
-      ...processCreateParams(this._def),
-      innerType: this,
-      defaultValue: defaultValueFunc,
-      typeName: ZodFirstPartyTypeKind.ZodDefault
-    });
-  }
-  brand() {
-    return new ZodBranded({
-      typeName: ZodFirstPartyTypeKind.ZodBranded,
-      type: this,
-      ...processCreateParams(this._def)
-    });
-  }
-  catch(def) {
-    const catchValueFunc = typeof def === "function" ? def : () => def;
-    return new ZodCatch({
-      ...processCreateParams(this._def),
-      innerType: this,
-      catchValue: catchValueFunc,
-      typeName: ZodFirstPartyTypeKind.ZodCatch
-    });
-  }
-  describe(description) {
-    const This = this.constructor;
-    return new This({
-      ...this._def,
-      description
-    });
-  }
-  pipe(target) {
-    return ZodPipeline.create(this, target);
-  }
-  readonly() {
-    return ZodReadonly.create(this);
-  }
-  isOptional() {
-    return this.safeParse(void 0).success;
-  }
-  isNullable() {
-    return this.safeParse(null).success;
-  }
-};
-var cuidRegex = /^c[^\s-]{8,}$/i;
-var cuid2Regex = /^[0-9a-z]+$/;
-var ulidRegex = /^[0-9A-HJKMNP-TV-Z]{26}$/i;
-var uuidRegex = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/i;
-var nanoidRegex = /^[a-z0-9_-]{21}$/i;
-var jwtRegex = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$/;
-var durationRegex = /^[-+]?P(?!$)(?:(?:[-+]?\d+Y)|(?:[-+]?\d+[.,]\d+Y$))?(?:(?:[-+]?\d+M)|(?:[-+]?\d+[.,]\d+M$))?(?:(?:[-+]?\d+W)|(?:[-+]?\d+[.,]\d+W$))?(?:(?:[-+]?\d+D)|(?:[-+]?\d+[.,]\d+D$))?(?:T(?=[\d+-])(?:(?:[-+]?\d+H)|(?:[-+]?\d+[.,]\d+H$))?(?:(?:[-+]?\d+M)|(?:[-+]?\d+[.,]\d+M$))?(?:[-+]?\d+(?:[.,]\d+)?S)?)??$/;
-var emailRegex = /^(?!\.)(?!.*\.\.)([A-Z0-9_'+\-\.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9\-]*\.)+[A-Z]{2,}$/i;
-var _emojiRegex = `^(\\p{Extended_Pictographic}|\\p{Emoji_Component})+$`;
-var emojiRegex;
-var ipv4Regex = /^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])$/;
-var ipv4CidrRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\/(3[0-2]|[12]?[0-9])$/;
-var ipv6Regex = /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$/;
-var ipv6CidrRegex = /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))\/(12[0-8]|1[01][0-9]|[1-9]?[0-9])$/;
-var base64Regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
-var base64urlRegex = /^([0-9a-zA-Z-_]{4})*(([0-9a-zA-Z-_]{2}(==)?)|([0-9a-zA-Z-_]{3}(=)?))?$/;
-var dateRegexSource = `((\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-((0[13578]|1[02])-(0[1-9]|[12]\\d|3[01])|(0[469]|11)-(0[1-9]|[12]\\d|30)|(02)-(0[1-9]|1\\d|2[0-8])))`;
-var dateRegex = new RegExp(`^${dateRegexSource}$`);
-function timeRegexSource(args) {
-  let regex = `([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d`;
-  if (args.precision) {
-    regex = `${regex}\\.\\d{${args.precision}}`;
-  } else if (args.precision == null) {
-    regex = `${regex}(\\.\\d+)?`;
-  }
-  return regex;
-}
-function timeRegex(args) {
-  return new RegExp(`^${timeRegexSource(args)}$`);
-}
-function datetimeRegex(args) {
-  let regex = `${dateRegexSource}T${timeRegexSource(args)}`;
-  const opts = [];
-  opts.push(args.local ? `Z?` : `Z`);
-  if (args.offset)
-    opts.push(`([+-]\\d{2}:?\\d{2})`);
-  regex = `${regex}(${opts.join("|")})`;
-  return new RegExp(`^${regex}$`);
-}
-function isValidIP(ip, version) {
-  if ((version === "v4" || !version) && ipv4Regex.test(ip)) {
-    return true;
-  }
-  if ((version === "v6" || !version) && ipv6Regex.test(ip)) {
-    return true;
-  }
-  return false;
-}
-function isValidJWT(jwt, alg) {
-  if (!jwtRegex.test(jwt))
-    return false;
-  try {
-    const [header] = jwt.split(".");
-    const base64 = header.replace(/-/g, "+").replace(/_/g, "/").padEnd(header.length + (4 - header.length % 4) % 4, "=");
-    const decoded = JSON.parse(atob(base64));
-    if (typeof decoded !== "object" || decoded === null)
-      return false;
-    if (!decoded.typ || !decoded.alg)
-      return false;
-    if (alg && decoded.alg !== alg)
-      return false;
-    return true;
-  } catch (_a) {
-    return false;
-  }
-}
-function isValidCidr(ip, version) {
-  if ((version === "v4" || !version) && ipv4CidrRegex.test(ip)) {
-    return true;
-  }
-  if ((version === "v6" || !version) && ipv6CidrRegex.test(ip)) {
-    return true;
-  }
-  return false;
-}
-var ZodString = class _ZodString extends ZodType {
-  _parse(input) {
-    if (this._def.coerce) {
-      input.data = String(input.data);
-    }
-    const parsedType = this._getType(input);
-    if (parsedType !== ZodParsedType.string) {
-      const ctx2 = this._getOrReturnCtx(input);
-      addIssueToContext(ctx2, {
-        code: ZodIssueCode.invalid_type,
-        expected: ZodParsedType.string,
-        received: ctx2.parsedType
-      });
-      return INVALID;
-    }
-    const status = new ParseStatus();
-    let ctx = void 0;
-    for (const check of this._def.checks) {
-      if (check.kind === "min") {
-        if (input.data.length < check.value) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            code: ZodIssueCode.too_small,
-            minimum: check.value,
-            type: "string",
-            inclusive: true,
-            exact: false,
-            message: check.message
-          });
-          status.dirty();
         }
-      } else if (check.kind === "max") {
-        if (input.data.length > check.value) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            code: ZodIssueCode.too_big,
-            maximum: check.value,
-            type: "string",
-            inclusive: true,
-            exact: false,
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else if (check.kind === "length") {
-        const tooBig = input.data.length > check.value;
-        const tooSmall = input.data.length < check.value;
-        if (tooBig || tooSmall) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          if (tooBig) {
-            addIssueToContext(ctx, {
-              code: ZodIssueCode.too_big,
-              maximum: check.value,
-              type: "string",
-              inclusive: true,
-              exact: true,
-              message: check.message
-            });
-          } else if (tooSmall) {
-            addIssueToContext(ctx, {
-              code: ZodIssueCode.too_small,
-              minimum: check.value,
-              type: "string",
-              inclusive: true,
-              exact: true,
-              message: check.message
-            });
+      `;return{...rc,hasMain:!0,output:{dims:t.dims,type:t.type,textureType:2},shaderSource:h}},cy=(e,t)=>({...rc,get:()=>ph(e,t)})});function hh(e){if(e.length===0)return[1,1,1];let t=1;for(let n=0;n<e.length-2;++n)t*=e[n];return[t,e.length>1?e[e.length-2]:1,e[e.length-1]]}function LS(e,t){let n=!1;return e.length===0||t.length===0?n=!0:e.length<2||t.length<2?n=e[e.length-1]===t[t.length-1]:n=e[e.length-1]===t[t.length-1]&&e[e.length-2]===t[t.length-2],n}function BS(e){let t=Te.computeStrides(e),n=["b","r","c"],o="index";return`
+    ivec3 inputCoordsFromReshapedOutCoords(int index) {
+      ${t.map((f,s)=>{let p=`int ${n[s]} = ${o} / ${f}`,i=s===t.length-1?`int ${n[s+1]} = ${o} - ${n[s]} * ${f}`:`index -= ${n[s]} * ${f}`;return`${p}; ${i};`}).join("")}
+      return ivec3(b, r, c);
+    }
+  `}function US(e){let t=Te.computeStrides(e);return`
+  int getFlattenedIndex(ivec3 coords) {
+    // reverse y, z order
+    return coords.x * ${t[0]} + coords.z * ${t[1]} + coords.y;
+  }
+`}var gh,mh,fy,jS=G(()=>{"use strict";Ve(),gt(),Fe(),Bo(),gh=e=>({name:"Reshape (packed)",inputTypes:[2],inputNames:["A"],cacheHint:`${e}`}),mh=(e,t,n,o)=>{let f=t.dims,s=o,p="";for(let r=0;r<4;r++){let u="";switch(r){case 0:u="outputCoords = rc;";break;case 1:u="outputCoords = ivec3(rc.x, rc.y+1, rc.z);";break;case 2:u="outputCoords = ivec3(rc.x, rc.y, rc.z+1);";break;case 3:u="outputCoords = ivec3(rc.x, rc.y+1, rc.z+1);";break;default:throw new Error}p+=`
+        ${u}
+        ${r>0?"if(outputCoords.y < rows && outputCoords.z < cols){":""}
+          int flattenedIndex = getFlattenedIndex(outputCoords);
+
+          ivec3 inputRC = inputCoordsFromReshapedOutCoords(flattenedIndex);
+          vec2 innerDims = vec2(float(inputRC.y),float(inputRC.z));
+
+          result[${r}] = getChannel(getA(inputRC.x, inputRC.y, inputRC.z), innerDims);
+
+        ${r>0?"}":""}
+      `}let i=Re(e.session.backend.glContext.version),c=`
+      ${BS(f)}
+      ${US(s)}
+      ${Xa()}
+
+      void main() {
+        ivec3 rc = getOutputCoords();
+
+        vec4 result = vec4(0.0);
+
+        ivec3 outputCoords;
+        int rows = ${s[2]};
+        int cols = ${s[1]};
+
+        ${p}
+        ${i.output} = result;
+      }
+    `;return{...n,output:{dims:s,type:t.type,textureType:2},shaderSource:c,hasMain:!0}},fy=(e,t,n)=>{let o=gh(n);return{...o,get:()=>mh(e,t,o,n)}}}),zc,zS=G(()=>{"use strict";gt(),Fe(),zc=(e,t)=>{let n=t.shape,o=Re(e.session.backend.glContext.version),f=`
+    const float FLOAT_MAX = 1.70141184e38;
+    const float FLOAT_MIN = 1.17549435e-38;
+
+    bool isNaN(float val) {
+      return (val < 1.0 || 0.0 < val || val == 0.0) ? false : true;
+    }
+
+    highp vec4 encodeAsUint8(highp float v) {
+      if (isNaN(v)) {
+        return vec4(255, 255, 255, 255);
+      }
+
+      highp float av = abs(v);
+
+      if(av < FLOAT_MIN) {
+        return vec4(0.0, 0.0, 0.0, 0.0);
+      } else if(v > FLOAT_MAX) {
+        return vec4(0.0, 0.0, 128.0, 127.0) / 255.0;
+      } else if(v < -FLOAT_MAX) {
+        return vec4(0.0, 0.0,  128.0, 255.0) / 255.0;
+      }
+
+      highp vec4 c = vec4(0,0,0,0);
+
+      highp float e = floor(log2(av));
+      highp float m = exp2(fract(log2(av))) - 1.0;
+
+      c[2] = floor(128.0 * m);
+      m -= c[2] / 128.0;
+      c[1] = floor(32768.0 * m);
+      m -= c[1] / 32768.0;
+      c[0] = floor(8388608.0 * m);
+
+      highp float ebias = e + 127.0;
+      c[3] = floor(ebias / 2.0);
+      ebias -= c[3] * 2.0;
+      c[2] += floor(ebias) * 128.0;
+
+      c[3] += 128.0 * step(0.0, -v);
+
+      return c / 255.0;
+    }
+
+    void main() {
+      float value = ${o.texture2D}(X,TexCoords).r;
+      ${o.output} = encodeAsUint8(value);
+    }`,s={name:"Uint8Encode",inputTypes:[0],inputNames:["X"],output:{dims:n,type:t.tensor.type,textureType:3},shaderSource:f,hasMain:!0};return e.executeProgram(s,[t.tensor])}});function VS(e,t){if(e===1)return"rc";let n="";for(let o=0;o<e;o++)n+=t[o],o<e-1&&(n+=",");return n}var nc,yh,dy,GS=G(()=>{"use strict";gt(),Fe(),Fn(),Bo(),nc={name:"unpack",inputNames:["A"],inputTypes:[2]},yh=(e,t)=>{let n=t.dims.length,o=wf("rc",n),f=o.slice(-2),s=ui(n),p=Xa(),i=t.dims.length===0?"":VS(n,o),c=n<=1?"rc":`vec2(${f.join(",")})`,r=Re(e.session.backend.glContext.version),u=`
+    ${p}
+    void main() {
+      ${s} rc = getOutputCoords();
+
+       // Sample the texture with the coords to get the rgba channel value.
+       vec4 packedInput = getA(${i});
+
+       ${r.output} = vec4(getChannel(packedInput, ${c}), 0, 0, 0);
+     }
+   `;return{...nc,hasMain:!0,output:{dims:t.dims,type:t.type,textureType:0},shaderSource:u}},dy=(e,t)=>({...nc,get:()=>yh(e,t)})}),py,Vc,hy,bu=G(()=>{"use strict";Qr(),py=class{constructor(e,t=1){if(t===1)this.internalFormat=e.R32F,this.format=e.RED,this.textureType=e.FLOAT,this.channelSize=t;else if(t===4)this.internalFormat=e.RGBA32F,this.format=e.RGBA,this.textureType=e.FLOAT,this.channelSize=t;else throw new Error(`Invalid number of channels: ${t}`)}encode(e,t){let n,o;return e.constructor!==Float32Array&&(bt.warning("Encoder","data was not of type Float32; creating new Float32Array"),o=new Float32Array(e)),t*this.channelSize>e.length?(bt.warning("Encoder","Source data too small. Allocating larger array"),o=e,n=this.allocate(t*this.channelSize),o.forEach((f,s)=>n[s]=f)):(o=e,n=o),n}allocate(e){return new Float32Array(e*4)}decode(e,t){return this.channelSize===1?e.filter((n,o)=>o%4===0).subarray(0,t):e.subarray(0,t)}},Vc=class{constructor(e,t=1,n){if(t!==1&&t!==4)throw new Error(`Invalid number of channels: ${t}`);this.internalFormat=e.RGBA,this.format=e.RGBA,this.channelSize=t,this.textureType=n||e.FLOAT}encode(e,t){let n=e;return this.channelSize===1&&(bt.verbose("Encoder","Exploding into a larger array"),n=this.allocate(t),e.forEach((o,f)=>n[f*4]=o)),n}allocate(e){return new Float32Array(e*4)}decode(e,t){return this.channelSize===1?e.filter((n,o)=>o%4===0).subarray(0,t):e.subarray(0,t)}},hy=class{constructor(e,t=1){if(this.channelSize=4,t===1)this.internalFormat=e.ALPHA,this.format=e.ALPHA,this.textureType=e.UNSIGNED_BYTE,this.channelSize=t;else if(t===4)this.internalFormat=e.RGBA,this.format=e.RGBA,this.textureType=e.UNSIGNED_BYTE,this.channelSize=t;else throw new Error(`Invalid number of channels: ${t}`)}encode(e,t){return new Uint8Array(e.buffer,e.byteOffset,e.byteLength)}allocate(e){return new Uint8Array(e*this.channelSize)}decode(e,t){if(e instanceof Uint8Array)return e.subarray(0,t);throw new Error(`Invalid array type: ${e.constructor}`)}}}),za,gy,Gc,HS=G(()=>{"use strict";Ve(),Fe(),za=(e,t,n)=>{let o=n===0||n===1?1:4,f=n===2,s=n===1||n===2,p=n===4?t.length-1:void 0,i=n===4?t.map((c,r)=>r===t.length-1?c*4:c):void 0;return Gc(e,t,o,i,{isPacked:f,reverseWH:s,breakAxis:p})},gy=(e,t,n)=>{let o=za(e,t,n);return[o.width,o.height]},Gc=(e,t,n=1,o,f)=>{let s=!!(f&&f.isPacked),[p,i]=e.computeTextureWH(s&&o||t,f),c=t.length,r=t.slice(0);if(c===0&&(r=[1]),n===1)o=t;else if(s){if(n!==4)throw new Error("a packed texture must be 4-channel");o=t,c>0&&(r[c-1]=Math.ceil(r[c-1]/2)),c>1&&(r[c-2]=Math.ceil(r[c-2]/2))}else if(!o)throw new Error("Unpacked shape is needed when using channels > 1");return{width:p,height:i,channels:n,isPacked:s,shape:r,strides:Te.computeStrides(r),unpackedShape:o,reversedWH:f&&f.reverseWH}}}),bh,my,WS=G(()=>{"use strict";Qr(),Lo(),Ve(),MS(),jS(),zS(),GS(),bu(),HS(),Fe(),bh=(e,t)=>{let n=t.map(f=>`${f.unpackedShape.join(",")};${f.width}x${f.height}`).join("_"),o=e.name;return e.cacheHint&&(o+="["+e.cacheHint+"]"),o+=":"+n,o},my=class{constructor(e){this.session=e,this.packedTextureDataCache=new Map,this.unpackedTextureDataCache=new Map}calculateTextureWidthAndHeight(e,t){return gy(this.session.layoutStrategy,e,t)}executeProgram(e,t){if(t.length<e.inputNames.length)throw new Error(`Input size mustn't be less than ${e.inputNames.length}.`);if(e.inputNames.length!==e.inputTypes.length)throw new Error("input names size does not match input types");let n=[];for(let c=0;c<e.inputNames.length;++c)n[c]=this.getOrCreateTextureData(t[c],e.inputTypes[c]);let o=bh(e,n),f=this.session.programManager.getArtifact(o),s=f?f.programInfo:typeof e.get=="function"?e.get():e,p=za(this.session.layoutStrategy,s.output.dims,s.output.textureType),i=this.createTextureData(p,s.output.type);return f||(f=this.session.programManager.build(s,n,i),this.session.programManager.setArtifact(o,f)),this.runProgram(f,n,i),i}run(e,t){return this.executeProgram(e,t).tensor}runProgram(e,t,n){for(let o=0;o<t.length;++o)if(!!t[o].isPacked!=(e.programInfo.inputTypes[o]===2))throw new Error(`input[${o}] property packed inconsistent`);if(!!n.isPacked!=(e.programInfo.output.textureType===2))throw new Error("output property packed inconsistent");this.session.programManager.run(e,t,n)}getOrCreateTextureData(e,t){let n=this.getTextureData(e.dataId,t===2);if(!n&&(n=this.getTextureData(e.dataId,t!==2),n))return t===2?this.pack(n):this.unpack(n);if(!n){let o=za(this.session.layoutStrategy,e.dims,t);if(t===4){let f=e.dims;if(f.length===4){let s=[f[0],Math.ceil(f[1]*f[2]*f[3]/4)],p=za(this.session.layoutStrategy,s,t),i=e.numberData;if(f[1]*f[2]*f[3]%4!==0){let c=f[0],r=f[1]*f[2]*f[3],u=Math.ceil(r*1/4)*4,l=c*u;i=new Float32Array(l);for(let h=0;h<c;++h){let y=h*r,O=h*u+h%1*r;i.set(e.numberData.subarray(y,y+r),O)}}return this.createTextureData(p,e.type,i,e,1)}}if(t===2){let f=Gc(this.session.layoutStrategy,e.dims,1,[],{reverseWH:!0}),s=this.createTextureData(f,e.type,e.numberData,e,1);n=this.pack(s)}else n=this.createTextureData(o,e.type,e.numberData,e,1)}return n}createTextureDataFromLayoutBindTensor(e,t,n,o){return this.createTextureData(e,t,n,o,1)}createTextureData(e,t,n,o,f){bt.verbose("InferenceHandler",`Creating TextureData: layout:[${JSON.stringify(e)}]`);let s=this.session.textureManager.createTextureFromLayout(t,e,n,f);return this.createTextureDataFromTexture(e,t,s,o)}reshapeUnpacked(e,t){let n=this.getOrCreateTextureData(e,0),o={channels:n.channels,height:n.height,width:n.width,shape:t.length!==0?t:[1],strides:Te.computeStrides(t),unpackedShape:t};return this.createTextureDataFromTexture(o,e.type,n.texture).tensor}reshapePacked(e,t){let n=this.getOrCreateTextureData(e,2);if(LS(e.dims,t)){let i={channels:n.channels,height:n.height,width:n.width,shape:t.length!==0?t:[1],strides:Te.computeStrides(t),unpackedShape:t,isPacked:!0};return this.createTextureDataFromTexture(i,e.type,n.texture).tensor}let o=hh(e.dims),f=hh(t),s=this.reshapePacked(e,o),p=this.run(fy(this,s,f),[s]);return this.reshapePacked(p,t)}cast(e,t){let n=this.getOrCreateTextureData(e,0);return this.createTextureDataFromTexture(n,t,n.texture).tensor}createTextureDataFromTexture(e,t,n,o,f){let s={...e,tensor:o||new Sr(e.unpackedShape,t,p=>this.readTexture(s),async p=>this.readTextureAsync(s),void 0,f),texture:n};return this.setTextureData(s.tensor.dataId,s,e.isPacked),s}getTextureData(e,t=!1){return this.session.isInitializer(e)?this.session.getTextureData(e,t):t?this.packedTextureDataCache.get(e):this.unpackedTextureDataCache.get(e)}setTextureData(e,t,n=!1){this.session.isInitializer(e)?this.session.setTextureData(e,t,n):(n?this.packedTextureDataCache:this.unpackedTextureDataCache).set(e,t)}isTextureLayoutCached(e,t=!1){return!!this.getTextureData(e.dataId,t)}dispose(){this.session.textureManager.clearActiveTextures(),this.packedTextureDataCache.forEach(e=>this.session.textureManager.releaseTexture(e)),this.packedTextureDataCache=new Map,this.unpackedTextureDataCache.forEach(e=>this.session.textureManager.releaseTexture(e)),this.unpackedTextureDataCache=new Map}readTexture(e){return e.isPacked?this.readTexture(this.unpack(e)):this.session.backend.glContext.isFloat32DownloadSupported?this.session.textureManager.readTexture(e,e.tensor.type,e.channels):this.session.textureManager.readUint8TextureAsFloat(zc(this,e))}async readTextureAsync(e){return e.isPacked?this.readTextureAsync(this.unpack(e)):this.session.backend.glContext.isFloat32DownloadSupported?this.session.textureManager.readTextureAsync(e,e.tensor.type,e.channels):this.session.textureManager.readUint8TextureAsFloat(zc(this,e))}pack(e){return this.executeProgram(cy(this,e.tensor),[e.tensor])}unpack(e){return this.executeProgram(dy(this,e.tensor),[e.tensor])}}}),vh,nt,Vt=G(()=>{"use strict";vh=class{constructor(e){Object.assign(this,e)}get cacheKey(){return this.key||(this.key=Object.getOwnPropertyNames(this).sort().map(e=>`${this[e]}`).join(";")),this.key}},nt=e=>new vh(e)}),ic,yy,by,wh,_h,qS=G(()=>{"use strict";Vt(),gt(),Fe(),ic={name:"BatchNormalization",inputNames:["A","Scale","B","Mean","Variance"],inputTypes:[0,0,0,0,0]},yy=(e,t,n)=>(_h(t),[e.run({...ic,cacheHint:n.cacheKey,get:()=>wh(e,t,n)},t)]),by=e=>{let t=e.attributes.getFloat("epsilon",1e-5),n=e.attributes.getFloat("momentum",.9),o=e.attributes.getInt("spatial",1);return nt({epsilon:t,momentum:n,spatial:o})},wh=(e,t,n)=>{let o=Re(e.session.backend.glContext.version),f=t[0].dims.length,[s,p]=e.calculateTextureWidthAndHeight(t[1].dims,0),i=`
+  float process(int[${f}] indices) {
+    vec2 position = offsetToCoords(indices[1], ${s}, ${p});
+    float scale = getColorAsFloat(${o.texture2D}(Scale, position));
+    float mean = getColorAsFloat(${o.texture2D}(Mean, position));
+    float variance = getColorAsFloat(${o.texture2D}(Variance, position));
+    float b = getColorAsFloat(${o.texture2D}(B, position));
+
+    return scale * ( (_A(indices) - mean) / sqrt(variance + float(${n.epsilon})) ) + b;
+  }`;return{...ic,output:{dims:t[0].dims,type:t[0].type,textureType:0},shaderSource:i}},_h=e=>{if(!e||e.length!==5)throw new Error("BatchNormalization requires 5 inputs.");let t=e[0],n=e[1],o=e[2],f=e[3],s=e[4];if(t.dims.length<3||n.dims.length!==1||o.dims.length!==1||f.dims.length!==1||s.dims.length!==1)throw new Error("invalid input shape.");if(n.dims[0]!==t.dims[1]||o.dims[0]!==t.dims[1]||f.dims[0]!==t.dims[1]||s.dims[0]!==t.dims[1])throw new Error("invalid input shape.");if(t.type!=="float32"&&t.type!=="float64"||n.type!=="float32"&&n.type!=="float64"||o.type!=="float32"&&o.type!=="float64"||f.type!=="float32"&&f.type!=="float64"||s.type!=="float32"&&s.type!=="float64")throw new Error("invalid input tensor types.")}}),vy,Uo,te,Hc,wy,li=G(()=>{"use strict";vy=class{constructor(e,t,n,o){this.glContext=e,this.programInfo=t,this.inputTextureLayouts=n,this.outputTextureLayout=o}},Uo=class{constructor(e){this.context=e}},te=class{constructor(e,t){this.routineBody=e,this.dependencies=t}},Hc=class{constructor(e,t,n){this.name=e,n?this.dependencies=n:this.dependencies=[],t&&(this.routineBody=t)}addDependency(e){e&&this.dependencies.push(e)}},wy=class{static returnOrderedNodes(e){if(!e||e.length===0)return[];if(e.length===1)return e;let t=new Set,n=new Set,o=new Array;return this.createOrderedNodes(e,t,n,o),o}static createOrderedNodes(e,t,n,o){for(let f=0;f<e.length;++f)this.dfsTraverse(e[f],t,n,o)}static dfsTraverse(e,t,n,o){if(!e||n.has(e.name))return;if(t.has(e.name))throw new Error("Cyclic dependency detected. Can't topologically sort routines needed for shader.");t.add(e.name);let f=e.dependencies;if(f&&f.length>0)for(let s=0;s<f.length;++s)this.dfsTraverse(f[s],t,n,o);o.push(e),n.add(e.name),t.delete(e.name)}}});function ZS(){let e="add_";return{body:`
+  float ${e}(float a, float b) {
+    return a + b;
+  }
+  vec4 ${e}(vec4 v1, vec4 v2) {
+    return v1 + v2;
+  }
+  `,name:e,type:0}}function YS(){let e="div_";return{body:`
+  float ${e}(float a, float b) {
+    return a / b;
+  }
+  vec4 ${e}(vec4 v1, vec4 v2) {
+    return v1 / v2;
+  }
+  `,name:e,type:0}}function XS(){let e="mul_";return{body:`
+  float ${e}(float a, float b) {
+    return a * b;
+  }
+  vec4 ${e}(vec4 v1, vec4 v2) {
+    return v1 * v2;
+  }
+  `,name:e,type:0}}function KS(){let e="sub_";return{body:`
+  float ${e}(float a, float b) {
+    return a - b;
+  }
+  vec4 ${e}(vec4 v1, vec4 v2) {
+    return v1 - v2;
+  }
+  `,name:e,type:0}}function JS(){let e="equal_";return{body:`
+  float ${e}(float a, float b) {
+    return float(a == b);
+  }
+  vec4 ${e}(vec4 v1, vec4 v2) {
+    return vec4(equal(v1, v2));
+  }
+  `,name:e,type:0}}function QS(){let e="greater_";return{body:`
+  float ${e}(float a, float b) {
+    return float(a > b);
+  }
+  vec4 ${e}(vec4 v1, vec4 v2) {
+    return vec4( v1.r > v2.r ,
+      v1.g > v2.g,
+      v1.b > v2.b,
+      v1.a > v2.a );
+  }
+  `,name:e,type:0}}function eE(){let e="less_";return{body:`
+  float ${e}(float a, float b) {
+    return float(a < b);
+  }
+  vec4 ${e}(vec4 v1, vec4 v2) {
+    return vec4( v1.r < v2.r ,
+                v1.g < v2.g,
+                v1.b < v2.b,
+                v1.a < v2.a );
+  }
+  `,name:e,type:0}}function tE(){let e="and_";return{body:`
+  float ${e}(float a, float b) {
+    return float( bool(a) && bool(b) );
+  }
+  vec4 ${e}(vec4 v1, vec4 v2) {
+    bvec4 b1 = bvec4(v1);
+    bvec4 b2 = bvec4(v2);
+    return vec4( b1.r && b2.r ,
+                b1.g && b2.g,
+                b1.b && b2.b,
+                b1.a && b2.a );
+  }
+  `,name:e,type:0}}function rE(){let e="or_";return{body:`
+  float ${e}(float a, float b) {
+    return float( bool(a) || bool(b) );
+  }
+  vec4 ${e}(vec4 v1, vec4 v2) {
+    bvec4 b1 = bvec4(v1);
+    bvec4 b2 = bvec4(v2);
+    return vec4( b1.r || b2.r ,
+                b1.g || b2.g,
+                b1.b || b2.b,
+                b1.a || b2.a );
+  }
+  `,name:e,type:0}}function nE(){let e="xor_";return{body:`
+  float ${e}(float a, float b) {
+    return float( bool(a) ^^ bool(b) );
+  }
+  vec4 ${e}(vec4 v1, vec4 v2) {
+    bvec4 b1 = bvec4(v1);
+    bvec4 b2 = bvec4(v2);
+    return vec4( b1.r ^^ b2.r ,
+                b1.g ^^ b2.g,
+                b1.b ^^ b2.b,
+                b1.a ^^ b2.a );
+  }
+  `,name:e,type:0}}function iE(){return aE("pow")}function oE(){let e="prelu_";return{body:`
+  float ${e}(float a, float b) {
+    return a < 0.0 ? a * b: a;
+  }
+  vec4 ${e}(vec4 v1, vec4 v2) {
+    return vec4(
+      v1.r < 0.0 ? v1.r * v2.r: v1.r,
+      v1.g < 0.0 ? v1.g * v2.g: v1.g,
+      v1.b < 0.0 ? v1.b * v2.b: v1.b,
+      v1.a < 0.0 ? v1.a * v2.a: v1.a
+      );
+  }
+  `,name:e,type:0}}function aE(e){let t=`${e}_`;return{body:`
+  float ${t}(float a, float b) {
+    return ${e}(a, b);
+  }
+  vec4 ${t}(vec4 v1, vec4 v2) {
+    return ${e}(v1, v2);
+  }
+  `,name:t,type:0}}var xr,xh,_y,xy,Ty,Oy,Sy,Ey,Ay,Iy,Py,$y,Dy,Cy,sE=G(()=>{"use strict";Ve(),li(),gt(),Fe(),xr=(e,t,n,o=t[0].type,f)=>{let s=e.session.pack?2:0;return{name:n.name,inputNames:["A","B"],inputTypes:[s,s],cacheHint:f,get:()=>xh(e,t,n,o)}},xh=(e,t,n,o=t[0].type)=>{let f=e.session.pack?2:0,s=!Te.areEqual(t[0].dims,t[1].dims),p=t[0].dims,i=e.session.pack;if(s){let u=hn.calcShape(t[0].dims,t[1].dims,!1);if(!u)throw new Error("Can't perform binary op on the given tensors");p=u;let l=p.length,h=t[0].dims.length!==0?t[0].dims.length:1,y=t[1].dims.length!==0?t[1].dims.length:1,O=t[0].dims.length!==0?"bcastIndices_A(indices, aindices);":"aindices[0] = 0;",S=t[1].dims.length!==0?"bcastIndices_B(indices, bindices);":"bindices[0] = 0;",A=Re(e.session.backend.glContext.version),L=i?`
+      ${n.body}
+      void main() {
+        vec4 a = getAAtOutCoords();
+        vec4 b = getBAtOutCoords();
+        vec4 result = ${n.name}(a, b);
+        ${A.output} = result;
+      }`:`
+      ${n.body}
+      float process(int indices[${l}]) {
+        int aindices[${h}];
+        int bindices[${y}];
+        ${O}
+        ${S}
+        return ${n.name}(_A(aindices), _B(bindices));
+      }`;return{name:n.name,inputNames:["A","B"],inputTypes:[f,f],output:{dims:p,type:o,textureType:f},shaderSource:L,hasMain:i}}let c=Re(e.session.backend.glContext.version),r=`
+    ${n.body}
+    void main() {
+      vec4 v1 = ${c.texture2D}(A, TexCoords);
+      vec4 v2 = ${c.texture2D}(B, TexCoords);
+      vec4 result = ${n.name}(v1, v2);
+      ${c.output} = result;
+    }
+    `;return{name:n.name,inputNames:["A","B"],inputTypes:[f,f],output:{dims:t[0].dims,type:o,textureType:f},shaderSource:r,hasMain:!0}},_y=(e,t)=>[e.run(xr(e,t,ZS()),t)],xy=(e,t)=>[e.run(xr(e,t,tE(),"bool"),t)],Ty=(e,t)=>[e.run(xr(e,t,YS()),t)],Oy=(e,t)=>[e.run(xr(e,t,JS(),"bool"),t)],Sy=(e,t)=>[e.run(xr(e,t,QS(),"bool"),t)],Ey=(e,t)=>[e.run(xr(e,t,eE(),"bool"),t)],Ay=(e,t)=>[e.run(xr(e,t,XS()),t)],Iy=(e,t)=>[e.run(xr(e,t,rE(),"bool"),t)],Py=(e,t)=>[e.run(xr(e,t,iE()),t)],$y=(e,t)=>[e.run(xr(e,t,oE()),t)],Dy=(e,t)=>[e.run(xr(e,t,KS()),t)],Cy=(e,t)=>[e.run(xr(e,t,nE(),"bool"),t)]}),Ny,ky,Th,uE=G(()=>{"use strict";Ve(),Ny=(e,t,n)=>(Th(t),[e.cast(t[0],n)]),ky=e=>Or.tensorDataTypeFromProto(e.attributes.getInt("to")),Th=e=>{if(!e||e.length!==1)throw new Error("Cast requires 1 input.");if(e[0].type==="string")throw new Error("Invalid input type.")}}),Oh,Sh,Ry,Ea,lE=G(()=>{"use strict";gt(),Fe(),Fn(),Bo(),Oh=(e,t)=>({name:"Concat (packed)",inputNames:Array.from({length:e},(n,o)=>`X${o}`),inputTypes:Array(e).fill(2),cacheHint:t}),Sh=(e,t,n,o)=>{let f=n[0].dims.slice();if(o>=f.length||o<-1*f.length)throw new Error("axis specified for concat doesn't match input dimensionality");o<0&&(o=f.length+o);let s=f.slice(0);for(let ae=1;ae<n.length;ae++){let ot=n[ae].dims.slice();for(let Je=0;Je<f.length;Je++)if(Je===o)s[o]+=ot[Je];else if(f[Je]!==ot[Je])throw new Error("non concat dimensions must match")}let p=s.length,i=wf("coords",p),c=ui(p),r=Xa(),u=n.map(ae=>ae.dims),l=Fo(p),h=new Array(u.length-1);h[0]=u[0][o];for(let ae=1;ae<h.length;ae++)h[ae]=h[ae-1]+u[ae][o];let y=l[o],O=l.slice(-2),S=l.join(),A=`if (${y} < ${h[0]}) {
+        return getChannel(
+            getX0(${S}), vec2(${O.join()}));
+        }`;for(let ae=1;ae<h.length;ae++){let ot=h[ae-1];A+=`
+            if (${y} < ${h[ae]}  && ${y} >= ${h[ae-1]}) {
+              return getChannel(
+                getX${ae}(${Ea(l,y,ot)}),
+                vec2(${Ea(O,y,ot)}));
+            }`}let L=h.length,$=h[h.length-1];A+=`
+            return getChannel(
+              getX${L}(${Ea(l,y,$)}),
+              vec2(${Ea(O,y,$)}));`;let F=Re(e.session.backend.glContext.version),Z=`
+          ${r}
+          float getValue(${l.map(ae=>"int "+ae)}) {
+            ${A}
           }
-          status.dirty();
+
+          void main() {
+            ${c} coords = getOutputCoords();
+            int lastDim = coords.${l[p-1]};
+            coords.${l[p-1]} = coords.${l[p-2]};
+            coords.${l[p-2]} = lastDim;
+
+            vec4 result = vec4(getValue(${i}), 0., 0., 0.);
+
+            ${i[p-1]} = ${i[p-1]} + 1;
+            if (${i[p-1]} < ${s[p-1]}) {
+              result.g = getValue(${i});
+            }
+
+            ${i[p-2]} = ${i[p-2]} + 1;
+            if (${i[p-2]} < ${s[p-2]}) {
+              result.a = getValue(${i});
+            }
+
+            ${i[p-1]} = ${i[p-1]} - 1;
+            if (${i[p-2]} < ${s[p-2]} &&
+                ${i[p-1]} < ${s[p-1]}) {
+              result.b = getValue(${i});
+            }
+            ${F.output} = result;
+          }
+        `;return{...t,output:{dims:s,type:n[0].type,textureType:2},shaderSource:Z,hasMain:!0}},Ry=(e,t,n)=>{let o=Oh(t.length,n.cacheKey);return{...o,get:()=>Sh(e,o,t,n.axis)}},Ea=(e,t,n)=>{let o=e.indexOf(t);return e.map((f,s)=>s===o?`${f} - ${n}`:f).join()}}),Fy,Eh,Ah,Ih,oc,Ph,$h,Dh,My,Ch,cE=G(()=>{"use strict";Vt(),Fe(),lE(),Fy=(e,t,n)=>(Ch(t),e.session.pack&&t[0].dims.length>1?[e.run(Ry(e,t,n),t)]:[e.run(Ih(e,t,n),t)]),Eh=(e,t)=>({name:"Concat",inputNames:Array.from({length:e},(n,o)=>`X${o}`),inputTypes:Array(e).fill(0),cacheHint:t}),Ah=(e,t,n,o)=>{let f=n[0].dims.slice();if(o>=f.length||o<-1*f.length)throw new Error("axis specified for concat doesn't match input dimensionality");o<0&&(o=f.length+o);let s=f.slice(0);for(let y=1;y<n.length;y++){let O=n[y].dims.slice();for(let S=0;S<f.length;S++)if(S===o)s[o]+=O[S];else if(f[S]!==O[S])throw new Error("non concat dimensions must match")}let p=s.length,i=new Array(n.length),c=0;for(let y=0;y<i.length;++y)c+=n[y].dims[o],i[y]=c;let r="";n.length<5?r=oc(i):r=Ph(i);let u=$h(n.length,p),l=Dh(i),h=`
+        ${u}
+        ${l}
+        ${r}
+        float process(int indices[${p}]) {
+          int textureIndex = getTextureWhereDataResides (indices[${o}]);
+
+          if(textureIndex != 0) {
+            indices[${o}] = indices[${o}] - int(getSizeInConcatAxisValueFromIndex(textureIndex-int(1)));
+          }
+
+          return fetchDataFromCorrectTexture(textureIndex, indices);
+        }`;return{...t,output:{dims:s,type:n[0].type,textureType:0},shaderSource:h}},Ih=(e,t,n)=>{let o=Eh(t.length,n.cacheKey);return{...o,get:()=>Ah(e,o,t,n.axis)}},oc=e=>`int getTextureWhereDataResides(int index) {
+      ${e.map((t,n)=>`if(index<${t}) {return ${n};}
+`).join("")}
+    }`,Ph=e=>oc(e),$h=(e,t)=>{let n=[`float fetchDataFromCorrectTexture(int textureIndex, int indices[${t}]) {`];for(let o=0;o<e;++o)o===0?n.push(`	if (textureIndex == ${o}) { return _X${o}(indices); }`):o===e-1?n.push(`	else { return _X${o}(indices); }`):n.push(`	else if (textureIndex == ${o}) { return _X${o}(indices); }`);return n.push("	}"),n.join(`
+`)},Dh=e=>{let t=["int getSizeInConcatAxisValueFromIndex(int index) {"];for(let n=0;n<e.length;++n)n===0?t.push(`	if (index == ${n}) { return ${e[n]}; }`):n===e.length-1?t.push(`	else { return ${e[n]}; }`):t.push(`	else if (index == ${n}) { return ${e[n]}; }`);return t.push("	}"),t.join(`
+`)},My=e=>nt({axis:e.attributes.getInt("axis")}),Ch=e=>{if(!e||e.length<1)throw new Error("too few inputs");let t=e[0].type,n=e[0].dims.length;if(t==="string")throw new Error("string tensor is not supported yet");for(let o of e){if(o.type!==t)throw new Error("input tensors should be one type");if(o.dims.length!==n)throw new Error("input tensors should have the same shape")}}});function fE(){return Hr("abs")}function dE(){return Hr("acos")}function pE(){return Hr("asin")}function hE(){return Hr("atan")}function gE(){return Hr("ceil")}function mE(){return Hr("cos")}function yE(e){let t="elu";return{body:`
+  const float alpha = float(${e});
+
+  float ${t}_(float a) {
+    return a >= 0.0 ? a: (exp(a) - 1.0) * alpha;
+  }
+  vec4 ${t}_(vec4 v) {
+    return vec4(${t}_(v.x), ${t}_(v.y), ${t}_(v.z), ${t}_(v.w));
+  }
+  `,name:t,type:0}}function bE(){return Hr("exp")}function vE(){return Hr("floor")}function Ly(e,t){let n="clip";return{body:`
+  const float min = float(${e});
+  const float max = float(${t});
+
+  float ${n}_(float a) {
+    return clamp(a, min, max);
+  }
+  vec4 ${n}_(vec4 v) {
+    return clamp(v, min, max);
+  }
+  `,name:n,type:0}}function wE(){let e="indentity";return{body:`
+  float ${e}_(float a) {
+    return a;
+  }
+  vec4 ${e}_(vec4 v) {
+    return v;
+  }
+  `,name:e,type:0}}function _E(e){let t="leakyRelu";return{body:`
+  const float alpha = float(${e});
+
+  float ${t}_(float a) {
+    return a < 0.0 ? a * alpha : a;
+  }
+  vec4 ${t}_(vec4 v) {
+    return vec4(${t}_(v.x), ${t}_(v.y), ${t}_(v.z), ${t}_(v.w));
+  }
+  `,name:t,type:0}}function xE(){return Hr("log")}function TE(){let e="neg";return{body:`
+  float ${e}_(float a) {
+    return -a;
+  }
+  vec4 ${e}_(vec4 v) {
+    return -v;
+  }
+  `,name:e,type:0}}function OE(){let e="not";return{body:`
+  float ${e}_(float a) {
+    return float( ! bool(a) );
+  }
+  bool ${e}_(bool a) {
+    return !a;
+  }
+  vec4 ${e}_(vec4 v) {
+    return vec4(!bool(v.x), !bool(v.y), !bool(v.z), !bool(v.w));
+  }
+  bvec4 ${e}_(bvec4 v) {
+    return bvec4(!v.x, !v.y, !v.z, !v.w);
+  }
+  `,name:e,type:0}}function SE(){return Hr("sin")}function By(){let e="relu";return{body:`
+  float ${e}_(float a) {
+    return max( a, 0.0 );
+  }
+  vec4 ${e}_(vec4 v) {
+    return max( v, 0.0 );
+  }
+  `,name:e,type:0}}function Uy(){let e="sigmoid";return{body:`
+  float ${e}_(float a) {
+    return 1.0 / (1.0 + exp(-a));
+  }
+  vec4 ${e}_(vec4 v) {
+    return 1.0 / (1.0 + exp(-v));
+  }
+  `,name:e,type:0}}function EE(){return Hr("sqrt")}function AE(){return Hr("tan")}function IE(){let e="tanh";return{body:`
+  float ${e}_(float a) {
+    a = clamp(a, -10., 10.);
+    a = exp(2.*a);
+    return (a - 1.) / (a + 1.);
+  }
+  vec4 ${e}_(vec4 v) {
+    v = clamp(v, -10., 10.);
+    v = exp(2.*v);
+    return (v - 1.) / (v + 1.);
+  }
+  `,name:e,type:0}}function Hr(e){return{body:`
+  float ${e}_(float a) {
+    return ${e}(a);
+  }
+  vec4 ${e}_(vec4 v) {
+    return ${e}(v);
+  }
+  `,name:e,type:0}}var Nh,yt,jy,zy,Vy,Gy,Wc,Hy,Wy,kh,qy,Zy,Yy,Xy,Ky,Jy,qc,Qy,e0,t0,r0,n0,i0,o0,a0,s0,u0,l0,c0=G(()=>{"use strict";Vt(),Ve(),li(),gt(),Fe(),Nh=(e,t,n,o)=>{let f=e.session.pack?2:0,s=Re(e.session.backend.glContext.version);return{...t,output:{dims:n.dims,type:n.type,textureType:f},shaderSource:`
+     ${o.body}
+     void main() {
+       vec4 v = ${s.texture2D}(A, TexCoords);
+       v = ${o.name}_(v);
+       ${s.output} = v;
+     }
+     `,hasMain:!0}},yt=(e,t,n,o)=>{let f=e.session.pack?2:0,s={name:n.name,inputTypes:[f],inputNames:["A"],cacheHint:o};return{...s,get:()=>Nh(e,s,t,n)}},jy=(e,t)=>[e.run(yt(e,t[0],fE()),t)],zy=(e,t)=>[e.run(yt(e,t[0],dE()),t)],Vy=(e,t)=>[e.run(yt(e,t[0],pE()),t)],Gy=(e,t)=>[e.run(yt(e,t[0],hE()),t)],Wc=(e,t,n)=>[e.run(yt(e,t[0],Ly(n.min,n.max),n.cacheKey),t)],Hy=e=>nt({min:e.attributes.getFloat("min",Wa),max:e.attributes.getFloat("max",qa)}),Wy=(e,t)=>{let n=kh(e,t);return Wc(e,[t[0]],n)},kh=(e,t)=>{if(t.length>=3&&(!e.session.isInitializer(t[1].dataId)||!e.session.isInitializer(t[2].dataId)))throw new Error("dynamic clip attributes are not allowed");let n=t.length>=3?t[1].numberData[0]:Wa,o=t.length>=3?t[2].numberData[0]:qa;return nt({min:n,max:o})},qy=(e,t)=>[e.run(yt(e,t[0],gE()),t)],Zy=(e,t)=>[e.run(yt(e,t[0],mE()),t)],Yy=(e,t,n)=>[e.run(yt(e,t[0],yE(n.alpha),n.cacheKey),t)],Xy=e=>nt({alpha:e.attributes.getFloat("alpha",1)}),Ky=(e,t)=>[e.run(yt(e,t[0],bE()),t)],Jy=(e,t)=>[e.run(yt(e,t[0],vE()),t)],qc=(e,t)=>[e.run(yt(e,t[0],wE()),t)],Qy=(e,t,n)=>[e.run(yt(e,t[0],_E(n.alpha),n.cacheKey),t)],e0=e=>nt({alpha:e.attributes.getFloat("alpha",.01)}),t0=(e,t)=>[e.run(yt(e,t[0],xE()),t)],r0=(e,t)=>[e.run(yt(e,t[0],TE()),t)],n0=(e,t)=>[e.run(yt(e,t[0],OE()),t)],i0=(e,t)=>[e.run(yt(e,t[0],By()),t)],o0=(e,t)=>[e.run(yt(e,t[0],Uy()),t)],a0=(e,t)=>[e.run(yt(e,t[0],SE()),t)],s0=(e,t)=>[e.run(yt(e,t[0],EE()),t)],u0=(e,t)=>[e.run(yt(e,t[0],AE()),t)],l0=(e,t)=>[e.run(yt(e,t[0],IE()),t)]});function Ka(e){let t;switch(e.activation){case"Relu":t=By();break;case"Sigmoid":t=Uy();break;case"Clip":t=Ly(e.clipMin,e.clipMax);break;default:return{activationFunction:"",applyActivation:""}}let n=t.name,o=t.body,f=`value = ${n}_(value);`;return{activationFunction:o,applyActivation:f}}var Su,jo=G(()=>{"use strict";Ve(),c0(),Su=e=>{let t=e.getString("activation","");if(t==="Clip"){let[n,o]=e.getFloats("activation_params",[Wa,qa]);return{activation:t,clipMax:o,clipMin:n,activationCacheKey:`${t}:${n},${o}`}}return{activation:t,activationCacheKey:t}}}),Rh,Fh,f0,PE=G(()=>{"use strict";Qr(),gt(),Fe(),Tf(),jo(),Rh=(e,t)=>({name:"GroupedConv",inputNames:e?["X","W","Bias"]:["X","W"],inputTypes:e?[0,0,0]:[0,0],cacheHint:t}),Fh=(e,t,n,o)=>{let f=t.length>2?"value += getBias(output_channel);":"",s=t[0].dims.slice(),p=t[1].dims.slice(),i=p[0]/o.group;bt.verbose("GroupedConv",`autpPad:${o.autoPad}, dilations:${o.dilations}, group:${o.group}, kernelShape:${o.kernelShape}, pads:${o.pads}, strides:${o.strides}`);let c=Va(s,p,o.dilations,o.pads,o.strides),r=Re(e.session.backend.glContext.version),{activationFunction:u,applyActivation:l}=Ka(o),h=`
+  const ivec2 strides = ivec2(${o.strides[0]}, ${o.strides[1]});
+  const ivec2 pads = ivec2(${o.pads[0]}, ${o.pads[1]});
+  ${u}
+  void main() {
+    ivec4 coords = getOutputCoords();
+    int batch = coords.x;
+    int output_channel = coords.y;
+    ivec2 xRCCorner = coords.zw * strides - pads;
+    int group_id = output_channel / ${i};
+
+    float value = 0.0;
+    for (int wInChannel = 0; wInChannel < ${p[1]}; wInChannel++) {
+      int input_channel = group_id * ${p[1]} + wInChannel;
+      for (int wHeight = 0; wHeight < ${p[2]}; wHeight++) {
+        int xHeight = xRCCorner.x + wHeight * ${o.dilations[0]};
+
+        if (xHeight < 0 || xHeight >= ${s[2]}) {
+          continue;
         }
-      } else if (check.kind === "email") {
-        if (!emailRegex.test(input.data)) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            validation: "email",
-            code: ZodIssueCode.invalid_string,
-            message: check.message
-          });
-          status.dirty();
+
+        for (int wWidth = 0; wWidth < ${p[3]}; wWidth++) {
+          int xWidth = xRCCorner.y + wWidth * ${o.dilations[1]};
+          if (xWidth < 0 || xWidth >= ${s[3]}) {
+            continue;
+          }
+
+          float xVal = getX(batch, input_channel, xWidth, xHeight);
+          float wVal = getW(output_channel, wInChannel, wWidth, wHeight);
+          value += xVal*wVal;
         }
-      } else if (check.kind === "emoji") {
-        if (!emojiRegex) {
-          emojiRegex = new RegExp(_emojiRegex, "u");
-        }
-        if (!emojiRegex.test(input.data)) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            validation: "emoji",
-            code: ZodIssueCode.invalid_string,
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else if (check.kind === "uuid") {
-        if (!uuidRegex.test(input.data)) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            validation: "uuid",
-            code: ZodIssueCode.invalid_string,
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else if (check.kind === "nanoid") {
-        if (!nanoidRegex.test(input.data)) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            validation: "nanoid",
-            code: ZodIssueCode.invalid_string,
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else if (check.kind === "cuid") {
-        if (!cuidRegex.test(input.data)) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            validation: "cuid",
-            code: ZodIssueCode.invalid_string,
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else if (check.kind === "cuid2") {
-        if (!cuid2Regex.test(input.data)) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            validation: "cuid2",
-            code: ZodIssueCode.invalid_string,
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else if (check.kind === "ulid") {
-        if (!ulidRegex.test(input.data)) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            validation: "ulid",
-            code: ZodIssueCode.invalid_string,
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else if (check.kind === "url") {
-        try {
-          new URL(input.data);
-        } catch (_a) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            validation: "url",
-            code: ZodIssueCode.invalid_string,
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else if (check.kind === "regex") {
-        check.regex.lastIndex = 0;
-        const testResult = check.regex.test(input.data);
-        if (!testResult) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            validation: "regex",
-            code: ZodIssueCode.invalid_string,
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else if (check.kind === "trim") {
-        input.data = input.data.trim();
-      } else if (check.kind === "includes") {
-        if (!input.data.includes(check.value, check.position)) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            code: ZodIssueCode.invalid_string,
-            validation: { includes: check.value, position: check.position },
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else if (check.kind === "toLowerCase") {
-        input.data = input.data.toLowerCase();
-      } else if (check.kind === "toUpperCase") {
-        input.data = input.data.toUpperCase();
-      } else if (check.kind === "startsWith") {
-        if (!input.data.startsWith(check.value)) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            code: ZodIssueCode.invalid_string,
-            validation: { startsWith: check.value },
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else if (check.kind === "endsWith") {
-        if (!input.data.endsWith(check.value)) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            code: ZodIssueCode.invalid_string,
-            validation: { endsWith: check.value },
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else if (check.kind === "datetime") {
-        const regex = datetimeRegex(check);
-        if (!regex.test(input.data)) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            code: ZodIssueCode.invalid_string,
-            validation: "datetime",
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else if (check.kind === "date") {
-        const regex = dateRegex;
-        if (!regex.test(input.data)) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            code: ZodIssueCode.invalid_string,
-            validation: "date",
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else if (check.kind === "time") {
-        const regex = timeRegex(check);
-        if (!regex.test(input.data)) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            code: ZodIssueCode.invalid_string,
-            validation: "time",
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else if (check.kind === "duration") {
-        if (!durationRegex.test(input.data)) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            validation: "duration",
-            code: ZodIssueCode.invalid_string,
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else if (check.kind === "ip") {
-        if (!isValidIP(input.data, check.version)) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            validation: "ip",
-            code: ZodIssueCode.invalid_string,
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else if (check.kind === "jwt") {
-        if (!isValidJWT(input.data, check.alg)) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            validation: "jwt",
-            code: ZodIssueCode.invalid_string,
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else if (check.kind === "cidr") {
-        if (!isValidCidr(input.data, check.version)) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            validation: "cidr",
-            code: ZodIssueCode.invalid_string,
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else if (check.kind === "base64") {
-        if (!base64Regex.test(input.data)) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            validation: "base64",
-            code: ZodIssueCode.invalid_string,
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else if (check.kind === "base64url") {
-        if (!base64urlRegex.test(input.data)) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            validation: "base64url",
-            code: ZodIssueCode.invalid_string,
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else {
-        util.assertNever(check);
       }
     }
-    return { status: status.value, value: input.data };
+    ${f}
+    ${l}
+    ${r.output} = vec4(value, .0, .0, .0);
   }
-  _regex(regex, validation, message) {
-    return this.refinement((data) => regex.test(data), {
-      validation,
-      code: ZodIssueCode.invalid_string,
-      ...errorUtil.errToObj(message)
-    });
-  }
-  _addCheck(check) {
-    return new _ZodString({
-      ...this._def,
-      checks: [...this._def.checks, check]
-    });
-  }
-  email(message) {
-    return this._addCheck({ kind: "email", ...errorUtil.errToObj(message) });
-  }
-  url(message) {
-    return this._addCheck({ kind: "url", ...errorUtil.errToObj(message) });
-  }
-  emoji(message) {
-    return this._addCheck({ kind: "emoji", ...errorUtil.errToObj(message) });
-  }
-  uuid(message) {
-    return this._addCheck({ kind: "uuid", ...errorUtil.errToObj(message) });
-  }
-  nanoid(message) {
-    return this._addCheck({ kind: "nanoid", ...errorUtil.errToObj(message) });
-  }
-  cuid(message) {
-    return this._addCheck({ kind: "cuid", ...errorUtil.errToObj(message) });
-  }
-  cuid2(message) {
-    return this._addCheck({ kind: "cuid2", ...errorUtil.errToObj(message) });
-  }
-  ulid(message) {
-    return this._addCheck({ kind: "ulid", ...errorUtil.errToObj(message) });
-  }
-  base64(message) {
-    return this._addCheck({ kind: "base64", ...errorUtil.errToObj(message) });
-  }
-  base64url(message) {
-    return this._addCheck({
-      kind: "base64url",
-      ...errorUtil.errToObj(message)
-    });
-  }
-  jwt(options) {
-    return this._addCheck({ kind: "jwt", ...errorUtil.errToObj(options) });
-  }
-  ip(options) {
-    return this._addCheck({ kind: "ip", ...errorUtil.errToObj(options) });
-  }
-  cidr(options) {
-    return this._addCheck({ kind: "cidr", ...errorUtil.errToObj(options) });
-  }
-  datetime(options) {
-    var _a, _b;
-    if (typeof options === "string") {
-      return this._addCheck({
-        kind: "datetime",
-        precision: null,
-        offset: false,
-        local: false,
-        message: options
-      });
-    }
-    return this._addCheck({
-      kind: "datetime",
-      precision: typeof (options === null || options === void 0 ? void 0 : options.precision) === "undefined" ? null : options === null || options === void 0 ? void 0 : options.precision,
-      offset: (_a = options === null || options === void 0 ? void 0 : options.offset) !== null && _a !== void 0 ? _a : false,
-      local: (_b = options === null || options === void 0 ? void 0 : options.local) !== null && _b !== void 0 ? _b : false,
-      ...errorUtil.errToObj(options === null || options === void 0 ? void 0 : options.message)
-    });
-  }
-  date(message) {
-    return this._addCheck({ kind: "date", message });
-  }
-  time(options) {
-    if (typeof options === "string") {
-      return this._addCheck({
-        kind: "time",
-        precision: null,
-        message: options
-      });
-    }
-    return this._addCheck({
-      kind: "time",
-      precision: typeof (options === null || options === void 0 ? void 0 : options.precision) === "undefined" ? null : options === null || options === void 0 ? void 0 : options.precision,
-      ...errorUtil.errToObj(options === null || options === void 0 ? void 0 : options.message)
-    });
-  }
-  duration(message) {
-    return this._addCheck({ kind: "duration", ...errorUtil.errToObj(message) });
-  }
-  regex(regex, message) {
-    return this._addCheck({
-      kind: "regex",
-      regex,
-      ...errorUtil.errToObj(message)
-    });
-  }
-  includes(value, options) {
-    return this._addCheck({
-      kind: "includes",
-      value,
-      position: options === null || options === void 0 ? void 0 : options.position,
-      ...errorUtil.errToObj(options === null || options === void 0 ? void 0 : options.message)
-    });
-  }
-  startsWith(value, message) {
-    return this._addCheck({
-      kind: "startsWith",
-      value,
-      ...errorUtil.errToObj(message)
-    });
-  }
-  endsWith(value, message) {
-    return this._addCheck({
-      kind: "endsWith",
-      value,
-      ...errorUtil.errToObj(message)
-    });
-  }
-  min(minLength, message) {
-    return this._addCheck({
-      kind: "min",
-      value: minLength,
-      ...errorUtil.errToObj(message)
-    });
-  }
-  max(maxLength, message) {
-    return this._addCheck({
-      kind: "max",
-      value: maxLength,
-      ...errorUtil.errToObj(message)
-    });
-  }
-  length(len, message) {
-    return this._addCheck({
-      kind: "length",
-      value: len,
-      ...errorUtil.errToObj(message)
-    });
-  }
-  /**
-   * Equivalent to `.min(1)`
-   */
-  nonempty(message) {
-    return this.min(1, errorUtil.errToObj(message));
-  }
-  trim() {
-    return new _ZodString({
-      ...this._def,
-      checks: [...this._def.checks, { kind: "trim" }]
-    });
-  }
-  toLowerCase() {
-    return new _ZodString({
-      ...this._def,
-      checks: [...this._def.checks, { kind: "toLowerCase" }]
-    });
-  }
-  toUpperCase() {
-    return new _ZodString({
-      ...this._def,
-      checks: [...this._def.checks, { kind: "toUpperCase" }]
-    });
-  }
-  get isDatetime() {
-    return !!this._def.checks.find((ch) => ch.kind === "datetime");
-  }
-  get isDate() {
-    return !!this._def.checks.find((ch) => ch.kind === "date");
-  }
-  get isTime() {
-    return !!this._def.checks.find((ch) => ch.kind === "time");
-  }
-  get isDuration() {
-    return !!this._def.checks.find((ch) => ch.kind === "duration");
-  }
-  get isEmail() {
-    return !!this._def.checks.find((ch) => ch.kind === "email");
-  }
-  get isURL() {
-    return !!this._def.checks.find((ch) => ch.kind === "url");
-  }
-  get isEmoji() {
-    return !!this._def.checks.find((ch) => ch.kind === "emoji");
-  }
-  get isUUID() {
-    return !!this._def.checks.find((ch) => ch.kind === "uuid");
-  }
-  get isNANOID() {
-    return !!this._def.checks.find((ch) => ch.kind === "nanoid");
-  }
-  get isCUID() {
-    return !!this._def.checks.find((ch) => ch.kind === "cuid");
-  }
-  get isCUID2() {
-    return !!this._def.checks.find((ch) => ch.kind === "cuid2");
-  }
-  get isULID() {
-    return !!this._def.checks.find((ch) => ch.kind === "ulid");
-  }
-  get isIP() {
-    return !!this._def.checks.find((ch) => ch.kind === "ip");
-  }
-  get isCIDR() {
-    return !!this._def.checks.find((ch) => ch.kind === "cidr");
-  }
-  get isBase64() {
-    return !!this._def.checks.find((ch) => ch.kind === "base64");
-  }
-  get isBase64url() {
-    return !!this._def.checks.find((ch) => ch.kind === "base64url");
-  }
-  get minLength() {
-    let min = null;
-    for (const ch of this._def.checks) {
-      if (ch.kind === "min") {
-        if (min === null || ch.value > min)
-          min = ch.value;
+`;return{...n,output:{dims:c,type:t[0].type,textureType:0},shaderSource:h,hasMain:!0}},f0=(e,t,n)=>{let o=Rh(t.length>2,n.cacheKey);return{...o,get:()=>Fh(e,t,o,n)}}}),Mh,Lh,d0,$E=G(()=>{"use strict";gt(),Fe(),Bo(),Mh=e=>({name:"Im2Col (packed)",inputNames:["A"],inputTypes:[2],cacheHint:e}),Lh=(e,t,n,o,f,s)=>{let p=n.dims,i=o.dims,c=2,r=3,u=f.length,l=[i[1]*i[2]*i[3],f[2]*f[3]],h=i[2]*i[3],y=Xa(),O=Re(e.session.backend.glContext.version),S="";for(let L=0;L<=1;L++)for(let $=0;$<=1;$++)S+=`
+            blockIndex = rc.x + ${$};
+            pos = rc.y + ${L};
+
+            if(blockIndex < ${l[1]} && pos < ${l[0]}) {
+              offsetY = int(blockIndex / (${f[u-1]})) * ${s.strides[0]} -
+                ${s.pads[0]};
+              d0 = offsetY + ${s.dilations[0]} * (imod(pos, ${h}) / ${i[2]});
+
+              if(d0 < ${p[c]} && d0 >= 0) {
+                offsetX = imod(blockIndex, ${f[u-1]}) * ${s.strides[1]} -
+                  ${s.pads[1]};
+                d1 = offsetX + ${s.dilations[1]} * imod(imod(pos, ${h}), ${i[2]});
+
+                if(d1 < ${p[r]} && d1 >= 0) {
+
+                  ch = int(float(pos)/ ${h}.);
+                    innerDims = vec2(d0, d1);
+                    result[${L*2+$}] = getChannel(
+                      getA(0, ch, int(innerDims.x),
+                      int(innerDims.y)), innerDims);
+                }
+              }
+            }
+
+          `;let A=`
+      ${y}
+
+      void main() {
+        ivec2 rc = getOutputCoords();
+          vec4 result = vec4(0.0);
+          int blockIndex, pos, offsetY, d0, offsetX, d1, ch;
+          vec2 innerDims;
+          ${S}
+          ${O.output} = result;
       }
-    }
-    return min;
-  }
-  get maxLength() {
-    let max = null;
-    for (const ch of this._def.checks) {
-      if (ch.kind === "max") {
-        if (max === null || ch.value < max)
-          max = ch.value;
-      }
-    }
-    return max;
-  }
-};
-ZodString.create = (params) => {
-  var _a;
-  return new ZodString({
-    checks: [],
-    typeName: ZodFirstPartyTypeKind.ZodString,
-    coerce: (_a = params === null || params === void 0 ? void 0 : params.coerce) !== null && _a !== void 0 ? _a : false,
-    ...processCreateParams(params)
-  });
-};
-function floatSafeRemainder(val, step) {
-  const valDecCount = (val.toString().split(".")[1] || "").length;
-  const stepDecCount = (step.toString().split(".")[1] || "").length;
-  const decCount = valDecCount > stepDecCount ? valDecCount : stepDecCount;
-  const valInt = parseInt(val.toFixed(decCount).replace(".", ""));
-  const stepInt = parseInt(step.toFixed(decCount).replace(".", ""));
-  return valInt % stepInt / Math.pow(10, decCount);
+            `;return{...t,output:{dims:l,type:n.type,textureType:2},shaderSource:A,hasMain:!0}},d0=(e,t,n,o,f)=>{let s=Mh(f.cacheKey);return{...s,get:()=>Lh(e,s,t,n,o,f)}}});function DE(e,t,n){let o=t[0].dims,f=t[1].dims,s=hn.calcShape(o,f,!0);if(!s)throw new Error("Can't use matmul on the given tensors");let p=ui(s.length),i=Fo(),{activationFunction:c,applyActivation:r}=Ka(n),u=t.length>2,l=u?"value += getBiasForMatmul();":"",h=u?`${h0(p,i,t[2].dims,s,!1)}`:"",y=s.length,O=o.length,S=f.length,A=o[o.length-1],L=`
+    ${c}
+    ${h}
+    float process(int indices[${y}]) {
+        int a[${O}];
+        int b[${S}];
+        bcastMatmulIndices_A(indices, a);
+        bcastMatmulIndices_B(indices, b);
+
+        float value;
+        for (int k=0; k<${A}; ++k) {
+            a[${O-1}] = k;
+            b[${S-2}] = k;
+            value += _A(a) * _B(b);
+        }
+        ${l}
+        ${r}
+        return value;
+    }`;return{...e,output:{dims:s,type:t[0].type,textureType:0},shaderSource:L}}function p0(e,t){let n=y0(e.length>2,t.activationCacheKey);return{...n,get:()=>DE(n,e,t)}}function h0(e,t,n,o,f){let s="",p=n.length,i=o.length,c=i-p;i<2&&p>0?s="coords":s=n.map((h,y)=>`coords.${t[y+c]}`).join(", ");let r=hn.getBroadcastDims(n,o).map(h=>`coords.${t[h+c]} = 0;`).join(`
+`),u=Te.size(n)===1,l="vec4(outputValue.xx, outputValue.yy)";return u&&(l="vec4(outputValue.x)"),f?`
+vec4 getBiasForMatmul() {
+  ${e} coords = getOutputCoords();
+  ${r}
+  vec4 outputValue = getBias(${s});
+  return ${l};
+}`:`
+float getBiasForMatmul() {
+  ${e} coords = getOutputCoords();
+  ${r}
+  return getBias(coords.x);
+}`}var g0,m0,y0,Bh,_f=G(()=>{"use strict";Ve(),Fe(),Fn(),jo(),b0(),g0=(e,t,n)=>(Bh(t),e.session.pack?[e.run(xf(e,t,n),t)]:[e.run(p0(t,n),t)]),m0=e=>Su(e.attributes),y0=(e,t)=>({name:"MatMul",inputNames:e?["A","B","Bias"]:["A","B"],inputTypes:e?[0,0,0]:[0,0],cacheHint:t}),Bh=e=>{if(!e||e.length!==2)throw new Error("MatMul requires 2 inputs.");if(e[0].dims[e[0].dims.length-1]!==e[1].dims[e[1].dims.length-2])throw new Error("shared dimension does not match.");if(e[0].type!=="float32"&&e[0].type!=="float64"||e[1].type!=="float32"&&e[1].type!=="float64")throw new Error("inputs should be float type");if(e[0].type!==e[1].type)throw new Error("inputs types should match")}});function CE(e,t,n,o){let f=[],s=[],p=n[0].dims,i=n[1].dims,c=p.length,r=i.length,u=o.length,l=u-c,h=u-r;f=p.map(($,F)=>`coords.${t[F+l]}`),f[c-1]="i*2",f.join(", "),s=i.map(($,F)=>`coords.${t[F+h]}`),s[r-2]="i*2",s.join(", ");let y=hn.getBroadcastDims(p,o),O=hn.getBroadcastDims(i,o),S=y.map($=>`coords.${t[$+l]} = 0;`).join(`
+`),A=O.map($=>`coords.${t[$+h]} = 0;`).join(`
+`),L=`int lastDim = coords.${t[u-1]};
+  coords.${t[u-1]} = coords.${t[u-2]};
+  coords.${t[u-2]} = lastDim;`;return`
+vec4 getAAtOutCoordsMatmul(int i) {
+  ${e} coords = getOutputCoords();
+  ${L}
+  ${S}
+  vec4 outputValue = getA(${f});
+  return outputValue;
 }
-var ZodNumber = class _ZodNumber extends ZodType {
-  constructor() {
-    super(...arguments);
-    this.min = this.gte;
-    this.max = this.lte;
-    this.step = this.multipleOf;
+
+vec4 getBAtOutCoordsMatmul(int i) {
+  ${e} coords = getOutputCoords();
+  ${L}
+  ${A}
+  vec4 outputValue = getB(${s});
+  return outputValue;
+}`}function NE(e,t){let n="";for(let o=0;o<t-2;o++)n+=`rc.${e[o]}, `;return n+=`rc.${e[t-2]}, i*2`,n}function kE(e,t){let n="";for(let o=0;o<t-2;o++)n+=`rc.${e[o]}, `;return n+=`i*2, rc.${e[t-1]}`,n}var Uh,jh,xf,b0=G(()=>{"use strict";Ve(),gt(),Fe(),Fn(),jo(),_f(),Uh=(e,t)=>({name:"MatMul (packed)",inputNames:e?["A","B","Bias"]:["A","B"],inputTypes:e?[2,2,2]:[2,2],cacheHint:t}),jh=(e,t,n,o)=>{let f=n.length>2,s=f?"value += getBiasForMatmul();":"",p=n[0].dims,i=n[1].dims,c=hn.calcShape(p,i,!0),r=!Te.areEqual(n[0].dims,n[1].dims);if(!c)throw new Error("Can't use matmul on the given tensors");let u=p[p.length-1],l=Math.ceil(u/2),h=p.length,y=i.length,O=Re(e.session.backend.glContext.version),S=ui(c.length),A=c.length,L=Fo(),{activationFunction:$,applyActivation:F}=Ka(o),Z=f?`${h0(S,L,n[2].dims,c,!0)}`:"",ae=r?`${CE(S,L,n,c)}`:"",ot=r?"getAAtOutCoordsMatmul(i)":`getA(${NE(L,h)})`,Je=r?"getBAtOutCoordsMatmul(i)":`getB(${kE(L,y)})`,st=r?"":`${S} rc =
+          getOutputCoords(); int lastDim = rc.${L[A-1]}; rc.${L[A-1]} =
+          rc.${L[A-2]}; rc.${L[A-2]} = lastDim;
+      `,se=`
+            ${ae}
+            ${Z}
+            ${$}
+            void main() {
+              ${st}
+
+              vec4 value = vec4(0);
+              for (int i = 0; i < ${l}; i++) {
+                vec4 a = ${ot};
+                vec4 b = ${Je};
+
+                value += (a.rrbb * b.rgrg);
+                value += (a.ggaa * b.baba);
+              }
+              ${s}
+              ${F}
+              ${O.output} = value;
+            }`;return{...t,output:{dims:c,type:n[0].type,textureType:2},shaderSource:se,hasMain:!0}},xf=(e,t,n)=>{let o=Uh(t.length>2,n.activationCacheKey);return{...o,get:()=>jh(e,o,t,n)}}}),v0,RE=G(()=>{"use strict";Tf(),$E(),b0(),v0=(e,t,n)=>{let o=t[0].dims,f=t[1].dims,s=Va(o,f,n.dilations,n.pads,n.strides),p=e.run(d0(e,t[0],t[1],s,n),[t[0]]),i=e.reshapePacked(t[1],[f[0],f[1]*f[2]*f[3]]),c=t.length===3?[i,p,t[2]]:[i,p],r=e.run(xf(e,c,n),c);return e.reshapePacked(r,s)}}),zh,Vh,w0,Zc,_0=G(()=>{"use strict";Fe(),zh=e=>({name:"Im2Col",inputNames:["X"],inputTypes:[0],cacheHint:e}),Vh=(e,t,n,o,f,s)=>{let p=n.dims,i=o.dims,c=f.length,r=Zc(p,i,f,4),u=`
+        const int XC = ${p[1]};
+        const int XH = ${p[2]};
+        const int XW = ${p[3]};
+        const int KH = ${s.kernelShape[0]};
+        const int KW = ${s.kernelShape[1]};
+        const int dilationH = ${s.dilations[0]};
+        const int dilationW = ${s.dilations[1]};
+        const int strideH = ${s.strides[0]};
+        const int strideW = ${s.strides[1]};
+        const int padH = ${s.pads[0]};
+        const int padW = ${s.pads[1]};
+        const int KHKW = KH*KW;
+        const int XCKHKW = XC * KHKW;
+        const int outputChannels = 4;
+        vec4 process(int indices[${c}]) {
+          int b  = indices[0]; // batch size
+          int oh = indices[1] * strideH - padH; //output height
+          int ow = indices[2] * strideW - padW; //output width
+          int p = indices[3] * outputChannels; //patch
+          vec4 value = vec4(0.0);
+          for(int i=0; i < outputChannels; ++i) {
+            if(p < XCKHKW) {
+              int patchC = p / KHKW;
+              int patchH = (p - patchC*KHKW) / KW;
+              int patchW = (p - patchC*KHKW) - patchH * KW;
+              int xh2 = oh + patchH * dilationH;
+              int xw2 = ow + patchW * dilationW;
+              int x[${p.length}];
+              x[0] = b;
+              x[1] = patchC;
+              x[2] = xh2;
+              x[3] = xw2;
+              if(xh2 >= 0 &&
+                  xh2 < XH &&
+                  xw2 >= 0 &&
+                  xw2 < XW) {
+                value[i] = _X(x);
+              }
+            }
+            ++p;
+          }
+          return value;
+        }
+        `;return{...t,output:{dims:r,type:n.type,textureType:4},shaderSource:u}},w0=(e,t,n,o,f)=>{let s=zh(f.cacheKey);return{...s,get:()=>Vh(e,s,t,n,o,f)}},Zc=(e,t,n,o=4)=>[n[0],n[2],n[3],Math.ceil(e[1]*t[2]*t[3]/o)]}),Gh,Hh,x0,FE=G(()=>{"use strict";Ve(),gt(),Fe(),jo(),_0(),Gh=(e,t)=>({name:"ConvDotProduct",inputNames:e?["Im2Col","K","B"]:["Im2Col","K"],inputTypes:e?[0,4,0]:[0,4],cacheKey:t.activationCacheKey}),Hh=(e,t,n,o,f)=>{let s=n[0].dims,p=n[1].dims,i=[p[0],Math.ceil(s[1]*p[2]*p[3]/4)],c=Zc(s,p,o),[r,u]=e.calculateTextureWidthAndHeight(i,4),l=Te.computeStrides(c),[h,y]=e.calculateTextureWidthAndHeight(c,4),O=o.length,S=n.length<3?"0.0":"_B(b)",A=Math.ceil(s[1]*p[2]*p[3]/4),{activationFunction:L,applyActivation:$}=Ka(f),F=Re(e.session.backend.glContext.version),Z=`
+${L}
+float process(int indices[${O}]) {
+  int b[1];
+  b[0] = indices[1];
+  int im2col[4];
+  im2col[0] = indices[0];
+  im2col[1] = indices[2];
+  im2col[2] = indices[3];
+  int im2colOffset = im2col[0] * ${l[0]} + im2col[1] * ${l[1]} + im2col[2] * ${l[2]};
+  int kernelOffset = indices[1] * ${i[1]};
+  float value = ${S};
+  for (int i = 0; i < ${A}; ++i) {
+    vec2 im2colCoords = offsetToCoords(im2colOffset, ${h}, ${y});
+    vec2 kernelCoords = offsetToCoords(kernelOffset, ${r}, ${u});
+    value += dot(${F.texture2D}(Im2Col, im2colCoords), ${F.texture2D}(K, kernelCoords));
+    ++im2colOffset;
+    ++kernelOffset;
   }
-  _parse(input) {
-    if (this._def.coerce) {
-      input.data = Number(input.data);
-    }
-    const parsedType = this._getType(input);
-    if (parsedType !== ZodParsedType.number) {
-      const ctx2 = this._getOrReturnCtx(input);
-      addIssueToContext(ctx2, {
-        code: ZodIssueCode.invalid_type,
-        expected: ZodParsedType.number,
-        received: ctx2.parsedType
-      });
-      return INVALID;
-    }
-    let ctx = void 0;
-    const status = new ParseStatus();
-    for (const check of this._def.checks) {
-      if (check.kind === "int") {
-        if (!util.isInteger(input.data)) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            code: ZodIssueCode.invalid_type,
-            expected: "integer",
-            received: "float",
-            message: check.message
-          });
-          status.dirty();
+  ${$}
+  return value;
+}`;return{...t,output:{dims:o,type:n[0].type,textureType:0},shaderSource:Z}},x0=(e,t,n,o)=>{let f=Gh(t.length>2,o);return{...f,get:()=>Hh(e,f,t,n,o)}}}),Va,Yc,Wh,qh,Zh,Yh,Xc,Xh,Tf=G(()=>{"use strict";Vt(),Ve(),PE(),RE(),FE(),jo(),_0(),_f(),Va=(e,t,n,o,f)=>{let s=e[0],p=e.slice(2),i=p.length,c=t[0],r=t.slice(2).map((l,h)=>l+(l-1)*(n[h]-1)),u=p.map((l,h)=>l+o[h]+o[h+i]).map((l,h)=>Math.floor((l-r[h]+f[h])/f[h]));return[s,c].concat(...u)},Yc=(e,t,n)=>(Xh(t,n),Wh(e,t,n)),Wh=(e,t,n)=>{let o=Yh(n,t),f=e.session.pack,s=o.kernelShape[0]===1&&o.kernelShape[1]===1;return o.group>1?[e.run(f0(e,t,o),t)]:s&&f?[qh(e,t,o)]:f&&t[0].dims.length===4&&t[0].dims[0]===1&&!s?[v0(e,t,o)]:[Zh(e,t,o)]},qh=(e,t,n)=>{let o=t[0].dims,f=t[1].dims,s=Va(o,f,n.dilations,n.pads,n.strides),p=e.reshapeUnpacked(t[0],[o[1],o[2]*o[3]]),i=e.reshapeUnpacked(t[1],[f[0],f[1]]),c=t.length>2?[i,p,t[2]]:[i,p],r=e.run(p0(c,n),c);return e.reshapeUnpacked(r,s)},Zh=(e,t,n)=>{let o=t[0].dims,f=t[1].dims,s=Va(o,f,n.dilations,n.pads,n.strides),p=e.run(w0(e,t[0],t[1],s,n),[t[0]]),i=t.length===3?[p,t[1],t[2]]:[p,t[1]];return e.run(x0(e,t,s,n),i)},Yh=(e,t)=>{let n=e.kernelShape.slice();if(e.kernelShape.length===0)for(let s=2;s<t[1].dims.length;++s)n.push(t[1].dims[s]);let o=e.pads.slice();yu.adjustPadsBasedOnAutoPad(t[0].dims,e.strides,e.dilations,n,o,e.autoPad);let f=Object.assign({},e);return Object.assign(f,{kernelShape:n,pads:o,cacheKey:e.cacheKey}),f},Xc=e=>{let t=e.attributes,n=Su(t),o=t.getString("auto_pad","NOTSET"),f=t.getInts("dilations",[1,1]),s=t.getInt("group",1),p=t.getInts("kernel_shape",[]),i=t.getInts("pads",[0,0,0,0]),c=t.getInts("strides",[1,1]);return nt({autoPad:o,dilations:f,group:s,kernelShape:p,pads:i,strides:c,...n})},Xh=(e,t)=>{if(!e||e.length!==2&&e.length!==3)throw new Error("Conv requires 2 or 3 inputs");if(e[0].dims.length!==4||e[1].dims.length!==4)throw new Error("currently only support 2-dimensional conv");let n=e[0].dims[1],o=e[1].dims[1]*t.group;if(n!==o)throw new Error("FILTER_IN_CHANNEL should be equal to DATA_CHANNEL");if(e.length===3&&(e[2].dims.length!==1||e[1].dims[0]!==e[2].dims[0]))throw new Error("invalid bias");let f=e[0].dims.length-2;if(t.dilations.length!==f)throw new Error(`dilations should be ${f}D`);if(t.strides.length!==f)throw new Error(`strides should be ${f}D`);if(t.pads.length!==f*2)throw new Error(`pads should be ${f*2}D`);if(t.kernelShape.length!==0&&t.kernelShape.length!==e[1].dims.length-2)throw new Error("invalid kernel shape");if(e[0].type!=="float32"||e[1].type!=="float32")throw new Error("Conv input(X,W) should be float tensor");if(e.length===3&&e[2].type!=="float32")throw new Error("Conv input(bias) should be float tensor")}}),Kh,Jh,Qh,T0,eg,tg,rg,ng,ig,og,O0,ag,ME=G(()=>{"use strict";Vt(),gt(),Fe(),jo(),Kh=(e,t,n,o,f,s)=>(e-1)*t+n+(o-1)*f+1-s,Jh=(e,t,n,o,f)=>{let s=Math.floor(e/2);t==="SAME_UPPER"?(n[o]=s,n[f]=e-s):t==="SAME_LOWER"&&(n[o]=e-s,n[f]=s)},Qh=(e,t,n,o,f,s,p,i)=>{let c=e.length-2,r=i.length===0;for(let u=0;u<c;++u){let l=r?e[u+2]*s[u]:i[u],h=Kh(e[u+2],s[u],f[u],t[u],n[u],l);Jh(h,o,f,u,u+c),r&&i.push(s[u]*(e[u+2]-1)+p[u]+(t[u]-1)*n[u]+1-f[u]-f[u+c])}},T0=(e,t,n)=>(ag(t,n),eg(e,t,n)),eg=(e,t,n)=>{let o=og(n,t);return[ig(e,t,o)]},tg=(e,t)=>({name:"ConvTranspose",inputNames:e?["X","W","B"]:["X","W"],inputTypes:e?[0,0,0]:[0,0],cacheHint:t}),rg=(e,t,n,o)=>{let f=t.length>2?"getB(output_channel)":"0.0",s=t[0].dims,p=t[1].dims,i=p[1],c=p[0]/o.group,r=[t[0].dims[0],t[1].dims[1]*o.group,...o.outputShape],u=Re(e.session.backend.glContext.version),{activationFunction:l,applyActivation:h}=Ka(o),y=`
+  const ivec2 strides = ivec2(${o.strides[0]}, ${o.strides[1]});
+  const ivec2 pads = ivec2(${o.pads[0]}, ${o.pads[1]});
+  ${l}
+  void main() {
+    ivec4 coords = getOutputCoords();
+    int batch = coords.x;
+    int output_channel = coords.y;
+
+    ivec2 loc = coords.zw + pads;
+
+    int group_id = output_channel / ${i};
+    int wOutChannel = output_channel - group_id * ${i};
+
+    float value = ${f};
+    for (int inChannelOffset = 0; inChannelOffset < ${c}; inChannelOffset++) {
+      int input_channel = group_id * ${c} + inChannelOffset;
+      for (int wWOff = 0; wWOff < ${p[2]}; wWOff++) {
+        for (int wHOff = 0; wHOff < ${p[3]}; wHOff++) {
+          ivec2 wOff = ivec2(wWOff * ${o.dilations[0]}, wHOff * ${o.dilations[1]});
+          ivec2 wLoc = loc - wOff;
+          ivec2 wLocIn = wLoc / strides;
+          if (
+            wLocIn * strides == wLoc &&
+            wLocIn.x >= 0 && wLocIn.x < ${s[2]} &&
+            wLocIn.y >= 0 && wLocIn.y < ${s[3]}
+          ) {
+            float xVal = getX(batch, input_channel, wLocIn.y, wLocIn.x);
+            float wVal = getW(input_channel, wOutChannel, wHOff, wWOff);
+            value += xVal * wVal;
+          }
         }
-      } else if (check.kind === "min") {
-        const tooSmall = check.inclusive ? input.data < check.value : input.data <= check.value;
-        if (tooSmall) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            code: ZodIssueCode.too_small,
-            minimum: check.value,
-            type: "number",
-            inclusive: check.inclusive,
-            exact: false,
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else if (check.kind === "max") {
-        const tooBig = check.inclusive ? input.data > check.value : input.data >= check.value;
-        if (tooBig) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            code: ZodIssueCode.too_big,
-            maximum: check.value,
-            type: "number",
-            inclusive: check.inclusive,
-            exact: false,
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else if (check.kind === "multipleOf") {
-        if (floatSafeRemainder(input.data, check.value) !== 0) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            code: ZodIssueCode.not_multiple_of,
-            multipleOf: check.value,
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else if (check.kind === "finite") {
-        if (!Number.isFinite(input.data)) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            code: ZodIssueCode.not_finite,
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else {
-        util.assertNever(check);
       }
     }
-    return { status: status.value, value: input.data };
+    ${h}
+    ${u.output} = vec4(value, .0, .0, .0);
   }
-  gte(value, message) {
-    return this.setLimit("min", value, true, errorUtil.toString(message));
-  }
-  gt(value, message) {
-    return this.setLimit("min", value, false, errorUtil.toString(message));
-  }
-  lte(value, message) {
-    return this.setLimit("max", value, true, errorUtil.toString(message));
-  }
-  lt(value, message) {
-    return this.setLimit("max", value, false, errorUtil.toString(message));
-  }
-  setLimit(kind, value, inclusive, message) {
-    return new _ZodNumber({
-      ...this._def,
-      checks: [
-        ...this._def.checks,
+`;return{...n,output:{dims:r,type:t[0].type,textureType:0},shaderSource:y,hasMain:!0}},ng=(e,t,n)=>{let o=tg(t.length>2,n.cacheKey);return{...o,get:()=>rg(e,t,o,n)}},ig=(e,t,n)=>e.run(ng(e,t,n),t),og=(e,t)=>{let n=e.kernelShape.slice();if(e.kernelShape.length===0)for(let i=2;i<t[1].dims.length;++i)n.push(t[1].dims[i]);let o=e.pads.slice(),f=e.outputShape.slice(),s=t[0].dims;Qh(s,n,e.dilations,e.autoPad,o,e.strides,e.outputPadding,f);let p=Object.assign({},e);return Object.assign(p,{kernelShape:n,pads:o,outputShape:f,cacheKey:e.cacheKey}),p},O0=e=>{let t=e.attributes,n=Su(t),o=t.getString("auto_pad","NOTSET"),f=t.getInts("dilations",[1,1]),s=t.getInt("group",1),p=t.getInts("kernel_shape",[]),i=t.getInts("output_padding",[0,0]),c=t.getInts("output_shape",[]),r=t.getInts("pads",[0,0,0,0]),u=t.getInts("strides",[1,1]);return nt({autoPad:o,dilations:f,group:s,kernelShape:p,outputPadding:i,outputShape:c,pads:r,strides:u,...n})},ag=(e,t)=>{if(!e||e.length!==2&&e.length!==3)throw new Error("Conv requires 2 or 3 inputs");if(e[0].dims.length!==4||e[1].dims.length!==4)throw new Error("currently only support 2-dimensional conv");let n=e[0].dims[1],o=e[1].dims[0];if(n!==o)throw new Error("FILTER_IN_CHANNEL should be equal to DATA_CHANNEL");let f=e[1].dims[1]*t.group;if(e.length===3&&(e[2].dims.length!==1||e[2].dims[0]!==f))throw new Error("invalid bias");let s=e[0].dims.length-2;if(t.dilations.length!==s)throw new Error(`dilations should be ${s}D`);if(t.strides.length!==s)throw new Error(`strides should be ${s}D`);if(t.pads.length!==s*2)throw new Error(`pads should be ${s*2}D`);if(t.outputPadding.length!==s)throw new Error(`output_padding should be ${s}D`);if(t.kernelShape.length!==0&&t.kernelShape.length!==e[1].dims.length-2)throw new Error("invalid kernel shape");if(t.outputShape.length!==0&&t.outputShape.length!==e[0].dims.length-2)throw new Error("invalid output shape");if(e[0].type!=="float32"||e[1].type!=="float32")throw new Error("ConvTranspose input(X,W) should be float tensor");if(e.length===3&&e[2].type!=="float32")throw new Error("ConvTranspose input(bias) should be float tensor")}}),ac,Za,S0,sg,sc,ug,lg,cg,Of=G(()=>{"use strict";Vt(),Ve(),Fe(),ac={name:"Transpose",inputNames:["A"],inputTypes:[0]},Za=(e,t,n)=>(cg(t),[e.run({...ac,cacheHint:n.cacheKey,get:()=>sg(e,t[0],n.perm)},t)]),S0=e=>nt({perm:e.attributes.getInts("perm",[])}),sg=(e,t,n)=>{let o=t.dims;n=sc(o,n);let f=ug(o,n),s=o.length,p=`
+      ${lg("perm",n,s)}
+      float process(int indices[${s}]) {
+        int a[${s}];
+        perm(a, indices);
+        return _A(a);
+      }`;return{...ac,output:{dims:f,type:t.type,textureType:0},shaderSource:p}},sc=(e,t)=>(t&&t.length!==e.length&&(t=[...e.keys()].reverse()),t),ug=(e,t)=>(t=sc(e,t),Te.sortBasedOnPerm(e,t)),lg=(e,t,n)=>{let o=[];o.push(`void ${e}(out int a[${n}], int src[${n}]) {`);for(let f=0;f<n;++f)o.push(`	a[${t[f]}]=src[${f}];`);return o.push("	}"),o.join(`
+`)},cg=e=>{if(!e||e.length!==1)throw new Error("Transpose requires 1 input.");if(e[0].type!=="float32"&&e[0].type!=="float64")throw new Error("input should be float tensor")}}),E0,A0,fg,LE=G(()=>{"use strict";Of(),E0=(e,t,n)=>{fg(t);let o=n.blocksize,f=o*o,s=n.mode==="DCR"?[0,3,4,1,5,2]:[0,1,4,2,5,3],p=n.mode==="DCR"?[t[0].dims[0],o,o,t[0].dims[1]/f,t[0].dims[2],t[0].dims[3]]:[t[0].dims[0],t[0].dims[1]/f,o,o,t[0].dims[2],t[0].dims[3]],i=e.reshapeUnpacked(t[0],p),c={perm:s,cacheKey:`${s}`},[r]=Za(e,[i],c),u=[t[0].dims[0],t[0].dims[1]/f,t[0].dims[2]*o,t[0].dims[3]*o];return[e.reshapeUnpacked(r,u)]},A0=e=>{let t=e.attributes.getInt("blocksize");if(t<1)throw new Error(`blocksize must be >= 1, but got : ${t} for DepthToSpace`);let n=e.attributes.getString("mode","DCR");if(n!=="DCR"&&n!=="CRD")throw new Error(`unrecognized mode: ${n} for DepthToSpace`);return{mode:n,blocksize:t}},fg=e=>{if(e.length!==1)throw new Error(`DepthToSpace expect 1 inputs, but got ${e.length}`);if(e[0].type==="string"||e[0].dims.length!==4)throw new TypeError("DepthToSpace input should be a 4-D numeric tensor")}}),I0,P0,dg,BE=G(()=>{"use strict";Ve(),I0=(e,t,n)=>{dg(t,n);let o=Te.flattenShape(t[0].dims,n);return[e.reshapeUnpacked(t[0],o)]},P0=e=>e.attributes.getInt("axis",1),dg=(e,t)=>{if(!e||e.length!==1)throw new Error("Flatten requires 1 input.");let n=e[0].dims.length;if(n===0)throw new Error("scalar tensor is not supported.");if(t<-n||t>n)throw new Error("Invalid axis");if(e[0].type==="string")throw new Error("string tensor is not supported.")}}),Ja,Eu=G(()=>{"use strict";Ja=["float32","float64","int32","int16","int8","uint16","uint32","uint8"]}),$0,D0,pg,hg,gg,mg,UE=G(()=>{"use strict";Vt(),Eu(),Ve(),Fe(),$0=(e,t,n)=>(mg(t,n.axis),[e.run(gg(e,t,n),t)]),D0=e=>nt({axis:e.attributes.getInt("axis",0)}),pg={name:"Gather",inputNames:["A","B"],inputTypes:[0,0]},hg=(e,t,n,o)=>{let f=n[0].dims.slice(),s=n[1].dims.slice(),p=new Array(f.length+s.length-1);o=Te.normalizeAxis(o,f.length);let i=[];for(let h=0;h<p.length;h++)h<o?(p[h]=f[h],i.push(`inputIdx[${h}] = outputIdx[${h}];`)):h<o+s.length?(p[h]=s[h-o],i.push(`indexDataIdx[${h-o}] = outputIdx[${h}];`)):(p[h]=f[h-s.length+1],i.push(`inputIdx[${h-s.length+1}] = outputIdx[${h}];`));let c=p.length||1,r=f.length,u=s.length||1,l=`
+      float process(int outputIdx[${c}]) {
+        int inputIdx[${r}];
+        int indexDataIdx[${u}];
+        indexDataIdx[0] = 0;
+        ${i.join(`
+        `)}
+        int idx = int(_B(indexDataIdx));
+        inputIdx[${o}] = idx < 0 ? idx + ${f[o]} : idx;
+        return _A(inputIdx);
+      }`;return{...t,output:{dims:p,type:n[0].type,textureType:0},shaderSource:l}},gg=(e,t,n)=>{let o={...pg,cacheHint:n.cacheKey};return{...o,get:()=>hg(e,o,t,n.axis)}},mg=(e,t)=>{if(!e||e.length!==2)throw new Error("Gather requires 2 inputs.");let n=e[0].dims.length;if(n<1)throw new Error("Invalid input shape.");if(t<-n||t>n-1)throw new Error("Invalid axis.");if(Ja.indexOf(e[0].type)===-1)throw new Error("Invaid input type.");if(e[1].type!=="int32"&&e[1].type!=="int16")throw new Error("Invaid input type.")}}),Kc,uc,C0,N0,yg,bg,vg,jE=G(()=>{"use strict";Vt(),Ve(),Fe(),Kc=(e,t,n)=>(vg(t,n),[e.run(yg(t,n),t)]),uc=(e,t)=>{let n=e.attributes.getInt("transA",0)!==0,o=e.attributes.getInt("transB",0)!==0,f=e.attributes.getFloat("alpha",1),s=e.attributes.getFloat("beta",1);return nt({transA:n,transB:o,alpha:f,beta:s,isOptionalC:t})},C0=e=>uc(e,!1),N0=e=>uc(e,!0),yg=(e,t)=>{let n={name:"Gemm",inputNames:e.length===3?["A","B","C"]:["A","B"],inputTypes:e.length===3?[0,0,0]:[0,0],key:t.cacheKey};return{...n,get:()=>bg(n,e,t)}},bg=(e,t,n)=>{let o=t[0].dims.slice(),f=t[1].dims.slice(),[s,p]=oy.getShapeOfGemmResult(o,n.transA,f,n.transB,t.length===3?t[2].dims:void 0),i=[s,p];if(!i)throw new Error("Can't use gemm on the given tensors");let c=o[o.length-1],r="";n.transA&&(c=o[0]),n.transA&&n.transB?r="value += _A_T(a) * _B_T(b);":n.transA&&!n.transB?r="value += _A_T(a) * _B(b);":!n.transA&&n.transB?r="value += _A(a) * _B_T(b);":!n.transA&&!n.transB&&(r="value += _A(a) * _B(b);");let u=i.length,l=t.length===3?`int c[${t[2].dims.length}];`:"",h=t.length===3?"bcastIndices_C(indices, c);":"",y=t.length===3?"value += beta * _C(c);":"",O=`
+      float process(int indices[${u}]) {
+          int a[${u}];
+          int b[${u}];
+          ${l}
+
+          copyVec(indices, a);
+          copyVec(indices, b);
+          ${h}
+
+          float value = 0.0;
+          for (int k=0; k<${c}; ++k) {
+              a[${u-1}] = k;
+              b[${u-2}] = k;
+              ${r}
+          }
+
+          value = value * alpha;
+          ${y}
+          return value;
+      }`;return{...e,output:{dims:i,type:t[0].type,textureType:0},variables:[{name:"alpha",type:"float",data:n.alpha},{name:"beta",type:"float",data:n.beta}],shaderSource:O}},vg=(e,t)=>{if(!e)throw new Error("Input is missing");if(t.isOptionalC&&(e.length<2||e.length>3))throw new Error("Invaid input shape.");if(!t.isOptionalC&&e.length!==3)throw new Error("Gemm requires 3 inputs");if(e.length===3&&e[2].dims.length!==1&&e[2].dims.length!==2)throw new Error("Invalid input shape of C");if(e[0].type!=="float32"&&e[0].type!=="float64"||e[1].type!=="float32"&&e[1].type!=="float64"||e.length===3&&e[2].type!=="float32"&&e[2].type!=="float64")throw new Error("Invalid input type.");if(e[0].type!==e[1].type||e.length===3&&e[0].type!==e[2].type)throw new Error("Input types are mismatched")}}),k0,R0,wg,_g,xg,Tg,Og,zE=G(()=>{"use strict";Vt(),Fe(),k0=(e,t,n)=>(Og(t),[e.run(xg(e,t,n),t)]),R0=e=>{let t=e.attributes.getFloat("scale"),n=e.attributes.getFloats("bias");return nt({scale:t,bias:n})},wg={name:"ImageScaler",inputNames:["X"],inputTypes:[0]},_g=(e,t,n,o)=>{let f=n[0].dims.slice(),s=f.length,p=`
+      ${Tg(o.bias.length)}
+      float process(int indices[${s}]) {
+        return _X(indices) * scale + getBias(bias, indices[1]);
+      }`;return{...t,output:{dims:f,type:n[0].type,textureType:0},variables:[{name:"bias",type:"float",arrayLength:o.bias.length,data:o.bias},{name:"scale",type:"float",data:o.scale}],shaderSource:p}},xg=(e,t,n)=>{let o={...wg,cacheHint:n.cacheKey};return{...o,get:()=>_g(e,o,t,n)}},Tg=e=>{let t=[`float getBias(float bias[${e}], int channel) {`];for(let n=0;n<e;++n)n===0?t.push(`	if (channel == ${n}) { return bias[${n}]; }`):n===e-1?t.push(`	else { return bias[${n}]; }`):t.push(`	else if (channel == ${n}) { return bias[${n}]; }`);return t.push("	}"),t.join(`
+`)},Og=e=>{if(!e||e.length!==1)throw new Error("ImageScaler requires 1 input.");if(e[0].dims.length!==4)throw new Error("Invalid input shape.");if(e[0].type!=="float32"&&e[0].type!=="float64")throw new Error("Invalid input type.")}}),F0,M0,lc,Sg,Eg,Ag,Ig,Pg,$g,VE=G(()=>{"use strict";gt(),Fe(),F0=(e,t,n)=>{$g(t);let o=e.run(Eg(t[0]),t);return[e.run(Pg(e,t[0],n,o.dims),[t[0],o,t[1],t[2]])]},M0=e=>e.attributes.getFloat("epsilon",1e-5),lc={name:"InstanceNormalization_MeanAndVariance",inputNames:["X"],inputTypes:[0]},Sg=(e,t)=>{let n=t.dims.slice(),o=n[1],f=n[2]*n[3],s=[n[0],o],p=`
+      vec4 process(int[2] indices) {
+        vec4 v = vec4(0.0);
+        int a[4];
+        a[0] = indices[0];
+        a[1] = indices[1];
+        float temp = 0.0;
+        for(int a2=0; a2<${n[2]}; a2++) {
+          a[2] = a2;
+          for(int a3=0; a3<${n[3]}; a3++) {
+            a[3] = a3;
+            float x = _X(a);
+            temp += x;
+          }
+        }
+        float mean = temp / float(${f});
+        temp = 0.0;
+        for(int a2=0; a2<${n[2]}; a2++) {
+          a[2] = a2;
+          for(int a3=0; a3<${n[3]}; a3++) {
+            a[3] = a3;
+            float x = _X(a);
+            temp += (x - mean) * (x - mean);
+          }
+        }
+        v.r = mean;
+        v.g = temp / float(${f});
+
+        return v;
+      }`;return{...e,output:{dims:s,type:t.type,textureType:4},shaderSource:p}},Eg=e=>({...lc,get:()=>Sg(lc,e)}),Ag={name:"InstanceNormalization_ComputeOutput",inputNames:["X","MeanAndVariance","Scale","B"],inputTypes:[0,4,0,0]},Ig=(e,t,n,o,f)=>{let s=Re(e.session.backend.glContext.version),[p,i]=e.calculateTextureWidthAndHeight(f,4),[c,r]=[p/4,i],u=`
+      vec4 get_MeanAndVariance(int[2] mv) {
+        int offset = indicesToOffset_MeanAndVariance(mv);
+        vec2 coords = offsetToCoords(offset, ${c}, ${r});
+        return ${s.texture2D}(MeanAndVariance, coords);
+      }
+
+      float process(int[4] indices) {
+        int mv[2];
+        mv[0] = indices[0];
+        mv[1] = indices[1];
+        vec4 mean_and_variance = get_MeanAndVariance(mv);
+        float mean = mean_and_variance.r;
+        float variance = mean_and_variance.g;
+
+        int sb[1];
+        sb[0] = indices[1];
+        float scale = _Scale(sb);
+        float b = _B(sb);
+
+        return scale * (_X(indices) - mean) / sqrt(variance + epsilon) + b;
+      }`;return{...t,output:{dims:n.dims,type:n.type,textureType:0},variables:[{name:"epsilon",type:"float",data:o}],shaderSource:u}},Pg=(e,t,n,o)=>{let f={...Ag,cacheHint:`${n}`};return{...f,get:()=>Ig(e,f,t,n,o)}},$g=e=>{if(!e||e.length!==3)throw new Error("InstanceNormalization requires 3 inputs.");let t=e[0],n=e[1],o=e[2];if(t.dims.length<3||n.dims.length!==1||o.dims.length!==1)throw new Error("Invalid input shape.");if(n.dims[0]!==t.dims[1]||o.dims[0]!==t.dims[1])throw new Error("Input shapes are mismatched.");if(t.type!=="float32"&&t.type!=="float64"||n.type!=="float32"&&n.type!=="float64"||o.type!=="float32"&&o.type!=="float64")throw new Error("Invalid input type.");if(e[0].dims.length!==4)throw new Error("Only support 4-D input shape.")}});function GE(e,t){let n=e[0].dims[1],o=e[0].dims.length,f=-Math.floor((t.size-1)/2),s=Math.ceil((t.size-1)/2),p=`float(${t.alpha}) / float(${t.size})`,i=`float(${t.bias})`,c=`float(${t.beta})`,r=`
+    float process(int indices[${o}]) {
+        int c = indices[1];
+        float x = _X(indices);
+        float square_sum = 0.0;
+
+        for (int i = ${f}; i <= ${s}; i++) {
+          int idx = c + i;
+          if (c >= 0 && c < ${n}) {
+            indices[1] = idx;
+            float j = _X(indices);
+            square_sum += j * j;
+          }
+        }
+        return x / pow(${i} + ${p} * square_sum, ${c});
+    }`;return{...Sf,cacheHint:t.cacheKey,output:{dims:e[0].dims,type:e[0].type,textureType:0},shaderSource:r}}function HE(e,t){return{...Sf,cacheHint:t.cacheKey,get:()=>GE(e,t)}}var L0,B0,Sf,Dg,WE=G(()=>{"use strict";Vt(),Fe(),L0=(e,t,n)=>(Dg(t),[e.run(HE(t,n),t)]),B0=e=>{let t=e.attributes.getFloat("alpha",1e-4),n=e.attributes.getFloat("beta",.75),o=e.attributes.getFloat("bias",1),f=e.attributes.getInt("size");return nt({alpha:t,beta:n,bias:o,size:f})},Sf={name:"LRN",inputNames:["X"],inputTypes:[0]},Dg=e=>{if(!e||e.length!==1)throw new Error("LRN requires 1 input.");if(e[0].dims.length!==4)throw new Error('currently only support LRN for input with "NCHW" format');if(e[0].type!=="float32")throw new Error("input should be float type")}}),Cg,Jc,U0,j0,z0,Ng,kg,Rg,Fg,Mg,Lg,Bg,Ug,qE=G(()=>{"use strict";Vt(),Ve(),gt(),Fe(),Cg={name:"Pad",inputNames:["A"],inputTypes:[0]},Jc=(e,t,n)=>(Rg(t),[e.run({...Cg,cacheHint:n.cacheKey,get:()=>kg(e,t[0],n)},t)]),U0=e=>{let t=e.attributes.getString("mode","constant"),n=e.attributes.getFloat("value",0),o=e.attributes.getInts("pads");return nt({mode:t,value:n,pads:o})},j0=(e,t,n)=>{Fg(t);let o=Ng(e,t,n);return Jc(e,[t[0]],o)},z0=e=>e.attributes.getString("mode","constant"),Ng=(e,t,n)=>{if(!e.session.isInitializer(t[1].dataId)||t.length>=3&&!e.session.isInitializer(t[2].dataId))throw new Error("dynamic pad attributes are not allowed");let o=Array.from(t[1].integerData),f=t.length>=3?t[2].floatData[0]:0;return nt({mode:n,pads:o,value:f})},kg=(e,t,n)=>{let o=Te.padShape(t.dims.slice(),n.pads),f=o.length,s=`
+      ${Mg(e,t,n)}
+      float process(int[${f}] indices) {
+          return padA(indices);
+      }`;return{name:"Pad",inputNames:["A"],inputTypes:[0],output:{dims:o,type:t.type,textureType:0},shaderSource:s}},Rg=e=>{if(!e||e.length!==1)throw new Error("Pad requires 1 input");if(e[0].type!=="float32"&&e[0].type!=="float64")throw new Error("Invalid input type.")},Fg=e=>{if(!e||e.length!==2&&e.length!==3)throw new Error("Pad requires 2 or 3 inputs");if(e[1].type!=="int32")throw new Error("Invalid input type.");if(e.length>=3&&e[2].type==="string")throw new Error("Invalid input type.")},Mg=(e,t,n)=>{let o=Re(e.session.backend.glContext.version),[f,s]=e.calculateTextureWidthAndHeight(t.dims,0),p=Te.computeStrides(t.dims);switch(n.mode){case"constant":return Lg(o,t.dims,p,f,s,n.pads,n.value);case"reflect":return Bg(o,t.dims,p,f,s,n.pads);case"edge":return Ug(o,t.dims,p,f,s,n.pads);default:throw new Error("Invalid mode")}},Lg=(e,t,n,o,f,s,p)=>{let i=t.length,c="";for(let r=i-1;r>=0;--r)c+=`
+        k = m[${r}] - ${s[r]};
+        if (k < 0)  return constant;
+        if (k >= ${t[r]}) return constant;
+        offset += k * ${n[r]};
+        `;return`
+      float padA(int m[${i}]) {
+        const float constant = float(${p});
+        int offset = 0;
+        int k = 0;
+        ${c}
+        vec2 coords = offsetToCoords(offset, ${o}, ${f});
+        float value = getColorAsFloat(${e.texture2D}(A, coords));
+        return value;
+      }
+      `},Bg=(e,t,n,o,f,s)=>{let p=t.length,i="";for(let c=p-1;c>=0;--c)i+=`
+        k = m[${c}] - ${s[c]};
+        if (k < 0) { k = -k; }
         {
-          kind,
-          value,
-          inclusive,
-          message: errorUtil.toString(message)
+          const int _2n_1 = ${2*(t[c]-1)};
+          k = int( mod( float(k), float(_2n_1) ) ) ;
+          if(k >= ${t[c]}) { k = _2n_1 - k; }
         }
-      ]
-    });
-  }
-  _addCheck(check) {
-    return new _ZodNumber({
-      ...this._def,
-      checks: [...this._def.checks, check]
-    });
-  }
-  int(message) {
-    return this._addCheck({
-      kind: "int",
-      message: errorUtil.toString(message)
-    });
-  }
-  positive(message) {
-    return this._addCheck({
-      kind: "min",
-      value: 0,
-      inclusive: false,
-      message: errorUtil.toString(message)
-    });
-  }
-  negative(message) {
-    return this._addCheck({
-      kind: "max",
-      value: 0,
-      inclusive: false,
-      message: errorUtil.toString(message)
-    });
-  }
-  nonpositive(message) {
-    return this._addCheck({
-      kind: "max",
-      value: 0,
-      inclusive: true,
-      message: errorUtil.toString(message)
-    });
-  }
-  nonnegative(message) {
-    return this._addCheck({
-      kind: "min",
-      value: 0,
-      inclusive: true,
-      message: errorUtil.toString(message)
-    });
-  }
-  multipleOf(value, message) {
-    return this._addCheck({
-      kind: "multipleOf",
-      value,
-      message: errorUtil.toString(message)
-    });
-  }
-  finite(message) {
-    return this._addCheck({
-      kind: "finite",
-      message: errorUtil.toString(message)
-    });
-  }
-  safe(message) {
-    return this._addCheck({
-      kind: "min",
-      inclusive: true,
-      value: Number.MIN_SAFE_INTEGER,
-      message: errorUtil.toString(message)
-    })._addCheck({
-      kind: "max",
-      inclusive: true,
-      value: Number.MAX_SAFE_INTEGER,
-      message: errorUtil.toString(message)
-    });
-  }
-  get minValue() {
-    let min = null;
-    for (const ch of this._def.checks) {
-      if (ch.kind === "min") {
-        if (min === null || ch.value > min)
-          min = ch.value;
+        offset += k * ${n[c]};
+        `;return`
+      float padA(int m[${p}]) {
+        int offset = 0;
+        int k = 0;
+        ${i}
+        vec2 coords = offsetToCoords(offset, ${o}, ${f});
+        float value = getColorAsFloat(${e.texture2D}(A, coords));
+        return value;
       }
-    }
-    return min;
-  }
-  get maxValue() {
-    let max = null;
-    for (const ch of this._def.checks) {
-      if (ch.kind === "max") {
-        if (max === null || ch.value < max)
-          max = ch.value;
+      `},Ug=(e,t,n,o,f,s)=>{let p=t.length,i="";for(let c=p-1;c>=0;--c)i+=`
+        k = m[${c}] - ${s[c]};
+        if (k < 0)  k = 0;
+        if (k >= ${t[c]}) k = ${t[c]-1};
+        offset += k * ${n[c]};
+      `;return`
+      float padA(int m[${p}]) {
+        int offset = 0;
+        int k = 0;
+        ${i}
+        vec2 coords = offsetToCoords(offset, ${o}, ${f});
+        float value = getColorAsFloat(${e.texture2D}(A, coords));
+        return value;
       }
-    }
-    return max;
-  }
-  get isInt() {
-    return !!this._def.checks.find((ch) => ch.kind === "int" || ch.kind === "multipleOf" && util.isInteger(ch.value));
-  }
-  get isFinite() {
-    let max = null, min = null;
-    for (const ch of this._def.checks) {
-      if (ch.kind === "finite" || ch.kind === "int" || ch.kind === "multipleOf") {
-        return true;
-      } else if (ch.kind === "min") {
-        if (min === null || ch.value > min)
-          min = ch.value;
-      } else if (ch.kind === "max") {
-        if (max === null || ch.value < max)
-          max = ch.value;
-      }
-    }
-    return Number.isFinite(min) && Number.isFinite(max);
-  }
-};
-ZodNumber.create = (params) => {
-  return new ZodNumber({
-    checks: [],
-    typeName: ZodFirstPartyTypeKind.ZodNumber,
-    coerce: (params === null || params === void 0 ? void 0 : params.coerce) || false,
-    ...processCreateParams(params)
-  });
-};
-var ZodBigInt = class _ZodBigInt extends ZodType {
-  constructor() {
-    super(...arguments);
-    this.min = this.gte;
-    this.max = this.lte;
-  }
-  _parse(input) {
-    if (this._def.coerce) {
-      try {
-        input.data = BigInt(input.data);
-      } catch (_a) {
-        return this._getInvalidInput(input);
-      }
-    }
-    const parsedType = this._getType(input);
-    if (parsedType !== ZodParsedType.bigint) {
-      return this._getInvalidInput(input);
-    }
-    let ctx = void 0;
-    const status = new ParseStatus();
-    for (const check of this._def.checks) {
-      if (check.kind === "min") {
-        const tooSmall = check.inclusive ? input.data < check.value : input.data <= check.value;
-        if (tooSmall) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            code: ZodIssueCode.too_small,
-            type: "bigint",
-            minimum: check.value,
-            inclusive: check.inclusive,
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else if (check.kind === "max") {
-        const tooBig = check.inclusive ? input.data > check.value : input.data >= check.value;
-        if (tooBig) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            code: ZodIssueCode.too_big,
-            type: "bigint",
-            maximum: check.value,
-            inclusive: check.inclusive,
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else if (check.kind === "multipleOf") {
-        if (input.data % check.value !== BigInt(0)) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            code: ZodIssueCode.not_multiple_of,
-            multipleOf: check.value,
-            message: check.message
-          });
-          status.dirty();
-        }
-      } else {
-        util.assertNever(check);
-      }
-    }
-    return { status: status.value, value: input.data };
-  }
-  _getInvalidInput(input) {
-    const ctx = this._getOrReturnCtx(input);
-    addIssueToContext(ctx, {
-      code: ZodIssueCode.invalid_type,
-      expected: ZodParsedType.bigint,
-      received: ctx.parsedType
-    });
-    return INVALID;
-  }
-  gte(value, message) {
-    return this.setLimit("min", value, true, errorUtil.toString(message));
-  }
-  gt(value, message) {
-    return this.setLimit("min", value, false, errorUtil.toString(message));
-  }
-  lte(value, message) {
-    return this.setLimit("max", value, true, errorUtil.toString(message));
-  }
-  lt(value, message) {
-    return this.setLimit("max", value, false, errorUtil.toString(message));
-  }
-  setLimit(kind, value, inclusive, message) {
-    return new _ZodBigInt({
-      ...this._def,
-      checks: [
-        ...this._def.checks,
-        {
-          kind,
-          value,
-          inclusive,
-          message: errorUtil.toString(message)
-        }
-      ]
-    });
-  }
-  _addCheck(check) {
-    return new _ZodBigInt({
-      ...this._def,
-      checks: [...this._def.checks, check]
-    });
-  }
-  positive(message) {
-    return this._addCheck({
-      kind: "min",
-      value: BigInt(0),
-      inclusive: false,
-      message: errorUtil.toString(message)
-    });
-  }
-  negative(message) {
-    return this._addCheck({
-      kind: "max",
-      value: BigInt(0),
-      inclusive: false,
-      message: errorUtil.toString(message)
-    });
-  }
-  nonpositive(message) {
-    return this._addCheck({
-      kind: "max",
-      value: BigInt(0),
-      inclusive: true,
-      message: errorUtil.toString(message)
-    });
-  }
-  nonnegative(message) {
-    return this._addCheck({
-      kind: "min",
-      value: BigInt(0),
-      inclusive: true,
-      message: errorUtil.toString(message)
-    });
-  }
-  multipleOf(value, message) {
-    return this._addCheck({
-      kind: "multipleOf",
-      value,
-      message: errorUtil.toString(message)
-    });
-  }
-  get minValue() {
-    let min = null;
-    for (const ch of this._def.checks) {
-      if (ch.kind === "min") {
-        if (min === null || ch.value > min)
-          min = ch.value;
-      }
-    }
-    return min;
-  }
-  get maxValue() {
-    let max = null;
-    for (const ch of this._def.checks) {
-      if (ch.kind === "max") {
-        if (max === null || ch.value < max)
-          max = ch.value;
-      }
-    }
-    return max;
-  }
-};
-ZodBigInt.create = (params) => {
-  var _a;
-  return new ZodBigInt({
-    checks: [],
-    typeName: ZodFirstPartyTypeKind.ZodBigInt,
-    coerce: (_a = params === null || params === void 0 ? void 0 : params.coerce) !== null && _a !== void 0 ? _a : false,
-    ...processCreateParams(params)
-  });
-};
-var ZodBoolean = class extends ZodType {
-  _parse(input) {
-    if (this._def.coerce) {
-      input.data = Boolean(input.data);
-    }
-    const parsedType = this._getType(input);
-    if (parsedType !== ZodParsedType.boolean) {
-      const ctx = this._getOrReturnCtx(input);
-      addIssueToContext(ctx, {
-        code: ZodIssueCode.invalid_type,
-        expected: ZodParsedType.boolean,
-        received: ctx.parsedType
-      });
-      return INVALID;
-    }
-    return OK(input.data);
-  }
-};
-ZodBoolean.create = (params) => {
-  return new ZodBoolean({
-    typeName: ZodFirstPartyTypeKind.ZodBoolean,
-    coerce: (params === null || params === void 0 ? void 0 : params.coerce) || false,
-    ...processCreateParams(params)
-  });
-};
-var ZodDate = class _ZodDate extends ZodType {
-  _parse(input) {
-    if (this._def.coerce) {
-      input.data = new Date(input.data);
-    }
-    const parsedType = this._getType(input);
-    if (parsedType !== ZodParsedType.date) {
-      const ctx2 = this._getOrReturnCtx(input);
-      addIssueToContext(ctx2, {
-        code: ZodIssueCode.invalid_type,
-        expected: ZodParsedType.date,
-        received: ctx2.parsedType
-      });
-      return INVALID;
-    }
-    if (isNaN(input.data.getTime())) {
-      const ctx2 = this._getOrReturnCtx(input);
-      addIssueToContext(ctx2, {
-        code: ZodIssueCode.invalid_date
-      });
-      return INVALID;
-    }
-    const status = new ParseStatus();
-    let ctx = void 0;
-    for (const check of this._def.checks) {
-      if (check.kind === "min") {
-        if (input.data.getTime() < check.value) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            code: ZodIssueCode.too_small,
-            message: check.message,
-            inclusive: true,
-            exact: false,
-            minimum: check.value,
-            type: "date"
-          });
-          status.dirty();
-        }
-      } else if (check.kind === "max") {
-        if (input.data.getTime() > check.value) {
-          ctx = this._getOrReturnCtx(input, ctx);
-          addIssueToContext(ctx, {
-            code: ZodIssueCode.too_big,
-            message: check.message,
-            inclusive: true,
-            exact: false,
-            maximum: check.value,
-            type: "date"
-          });
-          status.dirty();
-        }
-      } else {
-        util.assertNever(check);
-      }
-    }
-    return {
-      status: status.value,
-      value: new Date(input.data.getTime())
-    };
-  }
-  _addCheck(check) {
-    return new _ZodDate({
-      ...this._def,
-      checks: [...this._def.checks, check]
-    });
-  }
-  min(minDate, message) {
-    return this._addCheck({
-      kind: "min",
-      value: minDate.getTime(),
-      message: errorUtil.toString(message)
-    });
-  }
-  max(maxDate, message) {
-    return this._addCheck({
-      kind: "max",
-      value: maxDate.getTime(),
-      message: errorUtil.toString(message)
-    });
-  }
-  get minDate() {
-    let min = null;
-    for (const ch of this._def.checks) {
-      if (ch.kind === "min") {
-        if (min === null || ch.value > min)
-          min = ch.value;
-      }
-    }
-    return min != null ? new Date(min) : null;
-  }
-  get maxDate() {
-    let max = null;
-    for (const ch of this._def.checks) {
-      if (ch.kind === "max") {
-        if (max === null || ch.value < max)
-          max = ch.value;
-      }
-    }
-    return max != null ? new Date(max) : null;
-  }
-};
-ZodDate.create = (params) => {
-  return new ZodDate({
-    checks: [],
-    coerce: (params === null || params === void 0 ? void 0 : params.coerce) || false,
-    typeName: ZodFirstPartyTypeKind.ZodDate,
-    ...processCreateParams(params)
-  });
-};
-var ZodSymbol = class extends ZodType {
-  _parse(input) {
-    const parsedType = this._getType(input);
-    if (parsedType !== ZodParsedType.symbol) {
-      const ctx = this._getOrReturnCtx(input);
-      addIssueToContext(ctx, {
-        code: ZodIssueCode.invalid_type,
-        expected: ZodParsedType.symbol,
-        received: ctx.parsedType
-      });
-      return INVALID;
-    }
-    return OK(input.data);
-  }
-};
-ZodSymbol.create = (params) => {
-  return new ZodSymbol({
-    typeName: ZodFirstPartyTypeKind.ZodSymbol,
-    ...processCreateParams(params)
-  });
-};
-var ZodUndefined = class extends ZodType {
-  _parse(input) {
-    const parsedType = this._getType(input);
-    if (parsedType !== ZodParsedType.undefined) {
-      const ctx = this._getOrReturnCtx(input);
-      addIssueToContext(ctx, {
-        code: ZodIssueCode.invalid_type,
-        expected: ZodParsedType.undefined,
-        received: ctx.parsedType
-      });
-      return INVALID;
-    }
-    return OK(input.data);
-  }
-};
-ZodUndefined.create = (params) => {
-  return new ZodUndefined({
-    typeName: ZodFirstPartyTypeKind.ZodUndefined,
-    ...processCreateParams(params)
-  });
-};
-var ZodNull = class extends ZodType {
-  _parse(input) {
-    const parsedType = this._getType(input);
-    if (parsedType !== ZodParsedType.null) {
-      const ctx = this._getOrReturnCtx(input);
-      addIssueToContext(ctx, {
-        code: ZodIssueCode.invalid_type,
-        expected: ZodParsedType.null,
-        received: ctx.parsedType
-      });
-      return INVALID;
-    }
-    return OK(input.data);
-  }
-};
-ZodNull.create = (params) => {
-  return new ZodNull({
-    typeName: ZodFirstPartyTypeKind.ZodNull,
-    ...processCreateParams(params)
-  });
-};
-var ZodAny = class extends ZodType {
-  constructor() {
-    super(...arguments);
-    this._any = true;
-  }
-  _parse(input) {
-    return OK(input.data);
-  }
-};
-ZodAny.create = (params) => {
-  return new ZodAny({
-    typeName: ZodFirstPartyTypeKind.ZodAny,
-    ...processCreateParams(params)
-  });
-};
-var ZodUnknown = class extends ZodType {
-  constructor() {
-    super(...arguments);
-    this._unknown = true;
-  }
-  _parse(input) {
-    return OK(input.data);
-  }
-};
-ZodUnknown.create = (params) => {
-  return new ZodUnknown({
-    typeName: ZodFirstPartyTypeKind.ZodUnknown,
-    ...processCreateParams(params)
-  });
-};
-var ZodNever = class extends ZodType {
-  _parse(input) {
-    const ctx = this._getOrReturnCtx(input);
-    addIssueToContext(ctx, {
-      code: ZodIssueCode.invalid_type,
-      expected: ZodParsedType.never,
-      received: ctx.parsedType
-    });
-    return INVALID;
-  }
-};
-ZodNever.create = (params) => {
-  return new ZodNever({
-    typeName: ZodFirstPartyTypeKind.ZodNever,
-    ...processCreateParams(params)
-  });
-};
-var ZodVoid = class extends ZodType {
-  _parse(input) {
-    const parsedType = this._getType(input);
-    if (parsedType !== ZodParsedType.undefined) {
-      const ctx = this._getOrReturnCtx(input);
-      addIssueToContext(ctx, {
-        code: ZodIssueCode.invalid_type,
-        expected: ZodParsedType.void,
-        received: ctx.parsedType
-      });
-      return INVALID;
-    }
-    return OK(input.data);
-  }
-};
-ZodVoid.create = (params) => {
-  return new ZodVoid({
-    typeName: ZodFirstPartyTypeKind.ZodVoid,
-    ...processCreateParams(params)
-  });
-};
-var ZodArray = class _ZodArray extends ZodType {
-  _parse(input) {
-    const { ctx, status } = this._processInputParams(input);
-    const def = this._def;
-    if (ctx.parsedType !== ZodParsedType.array) {
-      addIssueToContext(ctx, {
-        code: ZodIssueCode.invalid_type,
-        expected: ZodParsedType.array,
-        received: ctx.parsedType
-      });
-      return INVALID;
-    }
-    if (def.exactLength !== null) {
-      const tooBig = ctx.data.length > def.exactLength.value;
-      const tooSmall = ctx.data.length < def.exactLength.value;
-      if (tooBig || tooSmall) {
-        addIssueToContext(ctx, {
-          code: tooBig ? ZodIssueCode.too_big : ZodIssueCode.too_small,
-          minimum: tooSmall ? def.exactLength.value : void 0,
-          maximum: tooBig ? def.exactLength.value : void 0,
-          type: "array",
-          inclusive: true,
-          exact: true,
-          message: def.exactLength.message
-        });
-        status.dirty();
-      }
-    }
-    if (def.minLength !== null) {
-      if (ctx.data.length < def.minLength.value) {
-        addIssueToContext(ctx, {
-          code: ZodIssueCode.too_small,
-          minimum: def.minLength.value,
-          type: "array",
-          inclusive: true,
-          exact: false,
-          message: def.minLength.message
-        });
-        status.dirty();
-      }
-    }
-    if (def.maxLength !== null) {
-      if (ctx.data.length > def.maxLength.value) {
-        addIssueToContext(ctx, {
-          code: ZodIssueCode.too_big,
-          maximum: def.maxLength.value,
-          type: "array",
-          inclusive: true,
-          exact: false,
-          message: def.maxLength.message
-        });
-        status.dirty();
-      }
-    }
-    if (ctx.common.async) {
-      return Promise.all([...ctx.data].map((item, i) => {
-        return def.type._parseAsync(new ParseInputLazyPath(ctx, item, ctx.path, i));
-      })).then((result2) => {
-        return ParseStatus.mergeArray(status, result2);
-      });
-    }
-    const result = [...ctx.data].map((item, i) => {
-      return def.type._parseSync(new ParseInputLazyPath(ctx, item, ctx.path, i));
-    });
-    return ParseStatus.mergeArray(status, result);
-  }
-  get element() {
-    return this._def.type;
-  }
-  min(minLength, message) {
-    return new _ZodArray({
-      ...this._def,
-      minLength: { value: minLength, message: errorUtil.toString(message) }
-    });
-  }
-  max(maxLength, message) {
-    return new _ZodArray({
-      ...this._def,
-      maxLength: { value: maxLength, message: errorUtil.toString(message) }
-    });
-  }
-  length(len, message) {
-    return new _ZodArray({
-      ...this._def,
-      exactLength: { value: len, message: errorUtil.toString(message) }
-    });
-  }
-  nonempty(message) {
-    return this.min(1, message);
-  }
-};
-ZodArray.create = (schema, params) => {
-  return new ZodArray({
-    type: schema,
-    minLength: null,
-    maxLength: null,
-    exactLength: null,
-    typeName: ZodFirstPartyTypeKind.ZodArray,
-    ...processCreateParams(params)
-  });
-};
-function deepPartialify(schema) {
-  if (schema instanceof ZodObject) {
-    const newShape = {};
-    for (const key in schema.shape) {
-      const fieldSchema = schema.shape[key];
-      newShape[key] = ZodOptional.create(deepPartialify(fieldSchema));
-    }
-    return new ZodObject({
-      ...schema._def,
-      shape: () => newShape
-    });
-  } else if (schema instanceof ZodArray) {
-    return new ZodArray({
-      ...schema._def,
-      type: deepPartialify(schema.element)
-    });
-  } else if (schema instanceof ZodOptional) {
-    return ZodOptional.create(deepPartialify(schema.unwrap()));
-  } else if (schema instanceof ZodNullable) {
-    return ZodNullable.create(deepPartialify(schema.unwrap()));
-  } else if (schema instanceof ZodTuple) {
-    return ZodTuple.create(schema.items.map((item) => deepPartialify(item)));
-  } else {
-    return schema;
-  }
-}
-var ZodObject = class _ZodObject extends ZodType {
-  constructor() {
-    super(...arguments);
-    this._cached = null;
-    this.nonstrict = this.passthrough;
-    this.augment = this.extend;
-  }
-  _getCached() {
-    if (this._cached !== null)
-      return this._cached;
-    const shape = this._def.shape();
-    const keys = util.objectKeys(shape);
-    return this._cached = { shape, keys };
-  }
-  _parse(input) {
-    const parsedType = this._getType(input);
-    if (parsedType !== ZodParsedType.object) {
-      const ctx2 = this._getOrReturnCtx(input);
-      addIssueToContext(ctx2, {
-        code: ZodIssueCode.invalid_type,
-        expected: ZodParsedType.object,
-        received: ctx2.parsedType
-      });
-      return INVALID;
-    }
-    const { status, ctx } = this._processInputParams(input);
-    const { shape, keys: shapeKeys } = this._getCached();
-    const extraKeys = [];
-    if (!(this._def.catchall instanceof ZodNever && this._def.unknownKeys === "strip")) {
-      for (const key in ctx.data) {
-        if (!shapeKeys.includes(key)) {
-          extraKeys.push(key);
-        }
-      }
-    }
-    const pairs = [];
-    for (const key of shapeKeys) {
-      const keyValidator = shape[key];
-      const value = ctx.data[key];
-      pairs.push({
-        key: { status: "valid", value: key },
-        value: keyValidator._parse(new ParseInputLazyPath(ctx, value, ctx.path, key)),
-        alwaysSet: key in ctx.data
-      });
-    }
-    if (this._def.catchall instanceof ZodNever) {
-      const unknownKeys = this._def.unknownKeys;
-      if (unknownKeys === "passthrough") {
-        for (const key of extraKeys) {
-          pairs.push({
-            key: { status: "valid", value: key },
-            value: { status: "valid", value: ctx.data[key] }
-          });
-        }
-      } else if (unknownKeys === "strict") {
-        if (extraKeys.length > 0) {
-          addIssueToContext(ctx, {
-            code: ZodIssueCode.unrecognized_keys,
-            keys: extraKeys
-          });
-          status.dirty();
-        }
-      } else if (unknownKeys === "strip")
-        ;
-      else {
-        throw new Error(`Internal ZodObject error: invalid unknownKeys value.`);
-      }
-    } else {
-      const catchall = this._def.catchall;
-      for (const key of extraKeys) {
-        const value = ctx.data[key];
-        pairs.push({
-          key: { status: "valid", value: key },
-          value: catchall._parse(
-            new ParseInputLazyPath(ctx, value, ctx.path, key)
-            //, ctx.child(key), value, getParsedType(value)
-          ),
-          alwaysSet: key in ctx.data
-        });
-      }
-    }
-    if (ctx.common.async) {
-      return Promise.resolve().then(async () => {
-        const syncPairs = [];
-        for (const pair of pairs) {
-          const key = await pair.key;
-          const value = await pair.value;
-          syncPairs.push({
-            key,
-            value,
-            alwaysSet: pair.alwaysSet
-          });
-        }
-        return syncPairs;
-      }).then((syncPairs) => {
-        return ParseStatus.mergeObjectSync(status, syncPairs);
-      });
-    } else {
-      return ParseStatus.mergeObjectSync(status, pairs);
-    }
-  }
-  get shape() {
-    return this._def.shape();
-  }
-  strict(message) {
-    errorUtil.errToObj;
-    return new _ZodObject({
-      ...this._def,
-      unknownKeys: "strict",
-      ...message !== void 0 ? {
-        errorMap: (issue, ctx) => {
-          var _a, _b, _c, _d;
-          const defaultError = (_c = (_b = (_a = this._def).errorMap) === null || _b === void 0 ? void 0 : _b.call(_a, issue, ctx).message) !== null && _c !== void 0 ? _c : ctx.defaultError;
-          if (issue.code === "unrecognized_keys")
-            return {
-              message: (_d = errorUtil.errToObj(message).message) !== null && _d !== void 0 ? _d : defaultError
-            };
-          return {
-            message: defaultError
-          };
-        }
-      } : {}
-    });
-  }
-  strip() {
-    return new _ZodObject({
-      ...this._def,
-      unknownKeys: "strip"
-    });
-  }
-  passthrough() {
-    return new _ZodObject({
-      ...this._def,
-      unknownKeys: "passthrough"
-    });
-  }
-  // const AugmentFactory =
-  //   <Def extends ZodObjectDef>(def: Def) =>
-  //   <Augmentation extends ZodRawShape>(
-  //     augmentation: Augmentation
-  //   ): ZodObject<
-  //     extendShape<ReturnType<Def["shape"]>, Augmentation>,
-  //     Def["unknownKeys"],
-  //     Def["catchall"]
-  //   > => {
-  //     return new ZodObject({
-  //       ...def,
-  //       shape: () => ({
-  //         ...def.shape(),
-  //         ...augmentation,
-  //       }),
-  //     }) as any;
-  //   };
-  extend(augmentation) {
-    return new _ZodObject({
-      ...this._def,
-      shape: () => ({
-        ...this._def.shape(),
-        ...augmentation
-      })
-    });
-  }
-  /**
-   * Prior to zod@1.0.12 there was a bug in the
-   * inferred type of merged objects. Please
-   * upgrade if you are experiencing issues.
-   */
-  merge(merging) {
-    const merged = new _ZodObject({
-      unknownKeys: merging._def.unknownKeys,
-      catchall: merging._def.catchall,
-      shape: () => ({
-        ...this._def.shape(),
-        ...merging._def.shape()
-      }),
-      typeName: ZodFirstPartyTypeKind.ZodObject
-    });
-    return merged;
-  }
-  // merge<
-  //   Incoming extends AnyZodObject,
-  //   Augmentation extends Incoming["shape"],
-  //   NewOutput extends {
-  //     [k in keyof Augmentation | keyof Output]: k extends keyof Augmentation
-  //       ? Augmentation[k]["_output"]
-  //       : k extends keyof Output
-  //       ? Output[k]
-  //       : never;
-  //   },
-  //   NewInput extends {
-  //     [k in keyof Augmentation | keyof Input]: k extends keyof Augmentation
-  //       ? Augmentation[k]["_input"]
-  //       : k extends keyof Input
-  //       ? Input[k]
-  //       : never;
-  //   }
-  // >(
-  //   merging: Incoming
-  // ): ZodObject<
-  //   extendShape<T, ReturnType<Incoming["_def"]["shape"]>>,
-  //   Incoming["_def"]["unknownKeys"],
-  //   Incoming["_def"]["catchall"],
-  //   NewOutput,
-  //   NewInput
-  // > {
-  //   const merged: any = new ZodObject({
-  //     unknownKeys: merging._def.unknownKeys,
-  //     catchall: merging._def.catchall,
-  //     shape: () =>
-  //       objectUtil.mergeShapes(this._def.shape(), merging._def.shape()),
-  //     typeName: ZodFirstPartyTypeKind.ZodObject,
-  //   }) as any;
-  //   return merged;
-  // }
-  setKey(key, schema) {
-    return this.augment({ [key]: schema });
-  }
-  // merge<Incoming extends AnyZodObject>(
-  //   merging: Incoming
-  // ): //ZodObject<T & Incoming["_shape"], UnknownKeys, Catchall> = (merging) => {
-  // ZodObject<
-  //   extendShape<T, ReturnType<Incoming["_def"]["shape"]>>,
-  //   Incoming["_def"]["unknownKeys"],
-  //   Incoming["_def"]["catchall"]
-  // > {
-  //   // const mergedShape = objectUtil.mergeShapes(
-  //   //   this._def.shape(),
-  //   //   merging._def.shape()
-  //   // );
-  //   const merged: any = new ZodObject({
-  //     unknownKeys: merging._def.unknownKeys,
-  //     catchall: merging._def.catchall,
-  //     shape: () =>
-  //       objectUtil.mergeShapes(this._def.shape(), merging._def.shape()),
-  //     typeName: ZodFirstPartyTypeKind.ZodObject,
-  //   }) as any;
-  //   return merged;
-  // }
-  catchall(index) {
-    return new _ZodObject({
-      ...this._def,
-      catchall: index
-    });
-  }
-  pick(mask) {
-    const shape = {};
-    util.objectKeys(mask).forEach((key) => {
-      if (mask[key] && this.shape[key]) {
-        shape[key] = this.shape[key];
-      }
-    });
-    return new _ZodObject({
-      ...this._def,
-      shape: () => shape
-    });
-  }
-  omit(mask) {
-    const shape = {};
-    util.objectKeys(this.shape).forEach((key) => {
-      if (!mask[key]) {
-        shape[key] = this.shape[key];
-      }
-    });
-    return new _ZodObject({
-      ...this._def,
-      shape: () => shape
-    });
-  }
-  /**
-   * @deprecated
-   */
-  deepPartial() {
-    return deepPartialify(this);
-  }
-  partial(mask) {
-    const newShape = {};
-    util.objectKeys(this.shape).forEach((key) => {
-      const fieldSchema = this.shape[key];
-      if (mask && !mask[key]) {
-        newShape[key] = fieldSchema;
-      } else {
-        newShape[key] = fieldSchema.optional();
-      }
-    });
-    return new _ZodObject({
-      ...this._def,
-      shape: () => newShape
-    });
-  }
-  required(mask) {
-    const newShape = {};
-    util.objectKeys(this.shape).forEach((key) => {
-      if (mask && !mask[key]) {
-        newShape[key] = this.shape[key];
-      } else {
-        const fieldSchema = this.shape[key];
-        let newField = fieldSchema;
-        while (newField instanceof ZodOptional) {
-          newField = newField._def.innerType;
-        }
-        newShape[key] = newField;
-      }
-    });
-    return new _ZodObject({
-      ...this._def,
-      shape: () => newShape
-    });
-  }
-  keyof() {
-    return createZodEnum(util.objectKeys(this.shape));
-  }
-};
-ZodObject.create = (shape, params) => {
-  return new ZodObject({
-    shape: () => shape,
-    unknownKeys: "strip",
-    catchall: ZodNever.create(),
-    typeName: ZodFirstPartyTypeKind.ZodObject,
-    ...processCreateParams(params)
-  });
-};
-ZodObject.strictCreate = (shape, params) => {
-  return new ZodObject({
-    shape: () => shape,
-    unknownKeys: "strict",
-    catchall: ZodNever.create(),
-    typeName: ZodFirstPartyTypeKind.ZodObject,
-    ...processCreateParams(params)
-  });
-};
-ZodObject.lazycreate = (shape, params) => {
-  return new ZodObject({
-    shape,
-    unknownKeys: "strip",
-    catchall: ZodNever.create(),
-    typeName: ZodFirstPartyTypeKind.ZodObject,
-    ...processCreateParams(params)
-  });
-};
-var ZodUnion = class extends ZodType {
-  _parse(input) {
-    const { ctx } = this._processInputParams(input);
-    const options = this._def.options;
-    function handleResults(results) {
-      for (const result of results) {
-        if (result.result.status === "valid") {
-          return result.result;
-        }
-      }
-      for (const result of results) {
-        if (result.result.status === "dirty") {
-          ctx.common.issues.push(...result.ctx.common.issues);
-          return result.result;
-        }
-      }
-      const unionErrors = results.map((result) => new ZodError(result.ctx.common.issues));
-      addIssueToContext(ctx, {
-        code: ZodIssueCode.invalid_union,
-        unionErrors
-      });
-      return INVALID;
-    }
-    if (ctx.common.async) {
-      return Promise.all(options.map(async (option) => {
-        const childCtx = {
-          ...ctx,
-          common: {
-            ...ctx.common,
-            issues: []
-          },
-          parent: null
-        };
-        return {
-          result: await option._parseAsync({
-            data: ctx.data,
-            path: ctx.path,
-            parent: childCtx
-          }),
-          ctx: childCtx
-        };
-      })).then(handleResults);
-    } else {
-      let dirty = void 0;
-      const issues = [];
-      for (const option of options) {
-        const childCtx = {
-          ...ctx,
-          common: {
-            ...ctx.common,
-            issues: []
-          },
-          parent: null
-        };
-        const result = option._parseSync({
-          data: ctx.data,
-          path: ctx.path,
-          parent: childCtx
-        });
-        if (result.status === "valid") {
-          return result;
-        } else if (result.status === "dirty" && !dirty) {
-          dirty = { result, ctx: childCtx };
-        }
-        if (childCtx.common.issues.length) {
-          issues.push(childCtx.common.issues);
-        }
-      }
-      if (dirty) {
-        ctx.common.issues.push(...dirty.ctx.common.issues);
-        return dirty.result;
-      }
-      const unionErrors = issues.map((issues2) => new ZodError(issues2));
-      addIssueToContext(ctx, {
-        code: ZodIssueCode.invalid_union,
-        unionErrors
-      });
-      return INVALID;
-    }
-  }
-  get options() {
-    return this._def.options;
-  }
-};
-ZodUnion.create = (types, params) => {
-  return new ZodUnion({
-    options: types,
-    typeName: ZodFirstPartyTypeKind.ZodUnion,
-    ...processCreateParams(params)
-  });
-};
-var getDiscriminator = (type) => {
-  if (type instanceof ZodLazy) {
-    return getDiscriminator(type.schema);
-  } else if (type instanceof ZodEffects) {
-    return getDiscriminator(type.innerType());
-  } else if (type instanceof ZodLiteral) {
-    return [type.value];
-  } else if (type instanceof ZodEnum) {
-    return type.options;
-  } else if (type instanceof ZodNativeEnum) {
-    return util.objectValues(type.enum);
-  } else if (type instanceof ZodDefault) {
-    return getDiscriminator(type._def.innerType);
-  } else if (type instanceof ZodUndefined) {
-    return [void 0];
-  } else if (type instanceof ZodNull) {
-    return [null];
-  } else if (type instanceof ZodOptional) {
-    return [void 0, ...getDiscriminator(type.unwrap())];
-  } else if (type instanceof ZodNullable) {
-    return [null, ...getDiscriminator(type.unwrap())];
-  } else if (type instanceof ZodBranded) {
-    return getDiscriminator(type.unwrap());
-  } else if (type instanceof ZodReadonly) {
-    return getDiscriminator(type.unwrap());
-  } else if (type instanceof ZodCatch) {
-    return getDiscriminator(type._def.innerType);
-  } else {
-    return [];
-  }
-};
-var ZodDiscriminatedUnion = class _ZodDiscriminatedUnion extends ZodType {
-  _parse(input) {
-    const { ctx } = this._processInputParams(input);
-    if (ctx.parsedType !== ZodParsedType.object) {
-      addIssueToContext(ctx, {
-        code: ZodIssueCode.invalid_type,
-        expected: ZodParsedType.object,
-        received: ctx.parsedType
-      });
-      return INVALID;
-    }
-    const discriminator = this.discriminator;
-    const discriminatorValue = ctx.data[discriminator];
-    const option = this.optionsMap.get(discriminatorValue);
-    if (!option) {
-      addIssueToContext(ctx, {
-        code: ZodIssueCode.invalid_union_discriminator,
-        options: Array.from(this.optionsMap.keys()),
-        path: [discriminator]
-      });
-      return INVALID;
-    }
-    if (ctx.common.async) {
-      return option._parseAsync({
-        data: ctx.data,
-        path: ctx.path,
-        parent: ctx
-      });
-    } else {
-      return option._parseSync({
-        data: ctx.data,
-        path: ctx.path,
-        parent: ctx
-      });
-    }
-  }
-  get discriminator() {
-    return this._def.discriminator;
-  }
-  get options() {
-    return this._def.options;
-  }
-  get optionsMap() {
-    return this._def.optionsMap;
-  }
-  /**
-   * The constructor of the discriminated union schema. Its behaviour is very similar to that of the normal z.union() constructor.
-   * However, it only allows a union of objects, all of which need to share a discriminator property. This property must
-   * have a different value for each object in the union.
-   * @param discriminator the name of the discriminator property
-   * @param types an array of object schemas
-   * @param params
-   */
-  static create(discriminator, options, params) {
-    const optionsMap = /* @__PURE__ */ new Map();
-    for (const type of options) {
-      const discriminatorValues = getDiscriminator(type.shape[discriminator]);
-      if (!discriminatorValues.length) {
-        throw new Error(`A discriminator value for key \`${discriminator}\` could not be extracted from all schema options`);
-      }
-      for (const value of discriminatorValues) {
-        if (optionsMap.has(value)) {
-          throw new Error(`Discriminator property ${String(discriminator)} has duplicate value ${String(value)}`);
-        }
-        optionsMap.set(value, type);
-      }
-    }
-    return new _ZodDiscriminatedUnion({
-      typeName: ZodFirstPartyTypeKind.ZodDiscriminatedUnion,
-      discriminator,
-      options,
-      optionsMap,
-      ...processCreateParams(params)
-    });
-  }
-};
-function mergeValues(a, b) {
-  const aType = getParsedType(a);
-  const bType = getParsedType(b);
-  if (a === b) {
-    return { valid: true, data: a };
-  } else if (aType === ZodParsedType.object && bType === ZodParsedType.object) {
-    const bKeys = util.objectKeys(b);
-    const sharedKeys = util.objectKeys(a).filter((key) => bKeys.indexOf(key) !== -1);
-    const newObj = { ...a, ...b };
-    for (const key of sharedKeys) {
-      const sharedValue = mergeValues(a[key], b[key]);
-      if (!sharedValue.valid) {
-        return { valid: false };
-      }
-      newObj[key] = sharedValue.data;
-    }
-    return { valid: true, data: newObj };
-  } else if (aType === ZodParsedType.array && bType === ZodParsedType.array) {
-    if (a.length !== b.length) {
-      return { valid: false };
-    }
-    const newArray = [];
-    for (let index = 0; index < a.length; index++) {
-      const itemA = a[index];
-      const itemB = b[index];
-      const sharedValue = mergeValues(itemA, itemB);
-      if (!sharedValue.valid) {
-        return { valid: false };
-      }
-      newArray.push(sharedValue.data);
-    }
-    return { valid: true, data: newArray };
-  } else if (aType === ZodParsedType.date && bType === ZodParsedType.date && +a === +b) {
-    return { valid: true, data: a };
-  } else {
-    return { valid: false };
-  }
-}
-var ZodIntersection = class extends ZodType {
-  _parse(input) {
-    const { status, ctx } = this._processInputParams(input);
-    const handleParsed = (parsedLeft, parsedRight) => {
-      if (isAborted(parsedLeft) || isAborted(parsedRight)) {
-        return INVALID;
-      }
-      const merged = mergeValues(parsedLeft.value, parsedRight.value);
-      if (!merged.valid) {
-        addIssueToContext(ctx, {
-          code: ZodIssueCode.invalid_intersection_types
-        });
-        return INVALID;
-      }
-      if (isDirty(parsedLeft) || isDirty(parsedRight)) {
-        status.dirty();
-      }
-      return { status: status.value, value: merged.data };
-    };
-    if (ctx.common.async) {
-      return Promise.all([
-        this._def.left._parseAsync({
-          data: ctx.data,
-          path: ctx.path,
-          parent: ctx
-        }),
-        this._def.right._parseAsync({
-          data: ctx.data,
-          path: ctx.path,
-          parent: ctx
-        })
-      ]).then(([left, right]) => handleParsed(left, right));
-    } else {
-      return handleParsed(this._def.left._parseSync({
-        data: ctx.data,
-        path: ctx.path,
-        parent: ctx
-      }), this._def.right._parseSync({
-        data: ctx.data,
-        path: ctx.path,
-        parent: ctx
-      }));
-    }
-  }
-};
-ZodIntersection.create = (left, right, params) => {
-  return new ZodIntersection({
-    left,
-    right,
-    typeName: ZodFirstPartyTypeKind.ZodIntersection,
-    ...processCreateParams(params)
-  });
-};
-var ZodTuple = class _ZodTuple extends ZodType {
-  _parse(input) {
-    const { status, ctx } = this._processInputParams(input);
-    if (ctx.parsedType !== ZodParsedType.array) {
-      addIssueToContext(ctx, {
-        code: ZodIssueCode.invalid_type,
-        expected: ZodParsedType.array,
-        received: ctx.parsedType
-      });
-      return INVALID;
-    }
-    if (ctx.data.length < this._def.items.length) {
-      addIssueToContext(ctx, {
-        code: ZodIssueCode.too_small,
-        minimum: this._def.items.length,
-        inclusive: true,
-        exact: false,
-        type: "array"
-      });
-      return INVALID;
-    }
-    const rest = this._def.rest;
-    if (!rest && ctx.data.length > this._def.items.length) {
-      addIssueToContext(ctx, {
-        code: ZodIssueCode.too_big,
-        maximum: this._def.items.length,
-        inclusive: true,
-        exact: false,
-        type: "array"
-      });
-      status.dirty();
-    }
-    const items = [...ctx.data].map((item, itemIndex) => {
-      const schema = this._def.items[itemIndex] || this._def.rest;
-      if (!schema)
-        return null;
-      return schema._parse(new ParseInputLazyPath(ctx, item, ctx.path, itemIndex));
-    }).filter((x) => !!x);
-    if (ctx.common.async) {
-      return Promise.all(items).then((results) => {
-        return ParseStatus.mergeArray(status, results);
-      });
-    } else {
-      return ParseStatus.mergeArray(status, items);
-    }
-  }
-  get items() {
-    return this._def.items;
-  }
-  rest(rest) {
-    return new _ZodTuple({
-      ...this._def,
-      rest
-    });
-  }
-};
-ZodTuple.create = (schemas, params) => {
-  if (!Array.isArray(schemas)) {
-    throw new Error("You must pass an array of schemas to z.tuple([ ... ])");
-  }
-  return new ZodTuple({
-    items: schemas,
-    typeName: ZodFirstPartyTypeKind.ZodTuple,
-    rest: null,
-    ...processCreateParams(params)
-  });
-};
-var ZodRecord = class _ZodRecord extends ZodType {
-  get keySchema() {
-    return this._def.keyType;
-  }
-  get valueSchema() {
-    return this._def.valueType;
-  }
-  _parse(input) {
-    const { status, ctx } = this._processInputParams(input);
-    if (ctx.parsedType !== ZodParsedType.object) {
-      addIssueToContext(ctx, {
-        code: ZodIssueCode.invalid_type,
-        expected: ZodParsedType.object,
-        received: ctx.parsedType
-      });
-      return INVALID;
-    }
-    const pairs = [];
-    const keyType = this._def.keyType;
-    const valueType = this._def.valueType;
-    for (const key in ctx.data) {
-      pairs.push({
-        key: keyType._parse(new ParseInputLazyPath(ctx, key, ctx.path, key)),
-        value: valueType._parse(new ParseInputLazyPath(ctx, ctx.data[key], ctx.path, key)),
-        alwaysSet: key in ctx.data
-      });
-    }
-    if (ctx.common.async) {
-      return ParseStatus.mergeObjectAsync(status, pairs);
-    } else {
-      return ParseStatus.mergeObjectSync(status, pairs);
-    }
-  }
-  get element() {
-    return this._def.valueType;
-  }
-  static create(first, second, third) {
-    if (second instanceof ZodType) {
-      return new _ZodRecord({
-        keyType: first,
-        valueType: second,
-        typeName: ZodFirstPartyTypeKind.ZodRecord,
-        ...processCreateParams(third)
-      });
-    }
-    return new _ZodRecord({
-      keyType: ZodString.create(),
-      valueType: first,
-      typeName: ZodFirstPartyTypeKind.ZodRecord,
-      ...processCreateParams(second)
-    });
-  }
-};
-var ZodMap = class extends ZodType {
-  get keySchema() {
-    return this._def.keyType;
-  }
-  get valueSchema() {
-    return this._def.valueType;
-  }
-  _parse(input) {
-    const { status, ctx } = this._processInputParams(input);
-    if (ctx.parsedType !== ZodParsedType.map) {
-      addIssueToContext(ctx, {
-        code: ZodIssueCode.invalid_type,
-        expected: ZodParsedType.map,
-        received: ctx.parsedType
-      });
-      return INVALID;
-    }
-    const keyType = this._def.keyType;
-    const valueType = this._def.valueType;
-    const pairs = [...ctx.data.entries()].map(([key, value], index) => {
-      return {
-        key: keyType._parse(new ParseInputLazyPath(ctx, key, ctx.path, [index, "key"])),
-        value: valueType._parse(new ParseInputLazyPath(ctx, value, ctx.path, [index, "value"]))
-      };
-    });
-    if (ctx.common.async) {
-      const finalMap = /* @__PURE__ */ new Map();
-      return Promise.resolve().then(async () => {
-        for (const pair of pairs) {
-          const key = await pair.key;
-          const value = await pair.value;
-          if (key.status === "aborted" || value.status === "aborted") {
-            return INVALID;
+      `}}),V0,G0,cc,H0,W0,q0,Z0,fc,dc,jg,pc,Y0,Aa,hc,Ia,zg,ZE=G(()=>{"use strict";Vt(),Ve(),Fe(),V0=(e,t,n)=>{Aa(t);let o={name:"AveragePool",inputNames:["X"],inputTypes:[0],cacheHint:n.cacheKey};return[e.run({...o,get:()=>cc(t,o,!1,n)},t)]},G0=e=>{let t=e.attributes.getString("auto_pad","NOTSET"),n=e.attributes.getInt("ceil_mode",0),o=e.attributes.getInt("count_include_pad",0)!==0,f=e.attributes.getInts("kernel_shape"),s=e.attributes.getInts("strides",[]),p=e.attributes.getInts("pads",[]);if(n!==0)throw new Error("using ceil() in shape computation is not yet supported for AveragePool");return nt({autoPad:t,ceilMode:n,countIncludePad:o,kernelShape:f,strides:s,pads:p})},cc=(e,t,n,o)=>{let[f,s]=dc(e,o,n),p=Te.size(f.kernelShape),i="value += _X(x);",c="";f.countIncludePad?c+=`value /= float(${p});`:c+=`value /= float(${p} - pad);`;let r=`
+        ${hc(e[0].dims,f,i,c,"0.0")}
+      `;return{...t,output:{dims:s,type:e[0].type,textureType:0},shaderSource:r}},H0=(e,t,n)=>{Aa(t);let o={name:"GlobalAveragePool",inputNames:["X"],inputTypes:[0],cacheHint:`${n.countIncludePad}`};return[e.run({...o,get:()=>cc(t,o,!0,n)},t)]},W0=e=>{let t=e.attributes.getInt("count_include_pad",0)!==0;return nt({autoPad:"",ceilMode:0,countIncludePad:t,kernelShape:[],strides:[],pads:[]})},q0=(e,t,n)=>{Aa(t);let o={name:"MaxPool",inputNames:["X"],inputTypes:[0],cacheHint:n.cacheKey};return[e.run({...o,get:()=>fc(t,o,!1,n)},t)]},Z0=e=>{let t=e.attributes.getString("auto_pad","NOTSET"),n=e.attributes.getInt("ceil_mode",0),o=e.attributes.getInts("kernel_shape"),f=e.attributes.getInts("strides",[]),s=e.attributes.getInts("pads",[]),p=e.attributes.getInt("storage_order",0),i=e.attributes.getInts("dilations",[]);if(p!==0)throw new Error("column major storage order is not yet supported for MaxPool");if(n!==0)throw new Error("using ceil() in shape computation is not yet supported for MaxPool");return nt({autoPad:t,ceilMode:n,countIncludePad:!1,kernelShape:o,strides:f,pads:s,storageOrder:p,dilations:i})},fc=(e,t,n,o)=>{let[f,s]=dc(e,o,n),p=`
+      value = max(_X(x), value);
+    `,i="",c=`
+      ${hc(e[0].dims,f,p,i,"-1e5")}
+    `;return{...t,output:{dims:s,type:e[0].type,textureType:0},shaderSource:c}},dc=(e,t,n)=>{let o=e[0].dims.slice(),f=Object.hasOwnProperty.call(t,"dilations"),s=t.kernelShape.slice(),p=t.strides.slice(),i=f?t.dilations.slice():[],c=t.pads.slice();yu.adjustPoolAttributes(n,o,s,p,i,c);let r=yu.computePoolOutputShape(n,o,p,i,s,c,t.autoPad),u=Object.assign({},t);return f?Object.assign(u,{kernelShape:s,strides:p,pads:c,dilations:i,cacheKey:t.cacheKey}):Object.assign(u,{kernelShape:s,strides:p,pads:c,cacheKey:t.cacheKey}),[u,r]},jg={autoPad:"",ceilMode:0,countIncludePad:!1,kernelShape:[],strides:[],pads:[],storageOrder:0,dilations:[],cacheKey:""},pc={name:"GlobalMaxPool",inputNames:["X"],inputTypes:[0]},Y0=(e,t)=>(Aa(t),[e.run({...pc,get:()=>fc(t,pc,!0,jg)},t)]),Aa=e=>{if(!e||e.length!==1)throw new Error("Pool ops requires 1 input.");if(e[0].type!=="float32"&&e[0].type!=="float64")throw new Error("Invalid input type.")},hc=(e,t,n,o,f)=>{let s=e.length;if(t.kernelShape.length<=2){let p=t.kernelShape[t.kernelShape.length-1],i=t.strides[t.strides.length-1],c=t.pads[t.pads.length/2-1],r=t.pads[t.pads.length-1],u=e[s-1],l="",h="",y="";if(c+r!==0?l=`
+          for (int i = 0; i < ${p}; i++) {
+            x[${s} - 1] = indices[${s} - 1] * ${i} - ${c} + i;
+            if (x[${s} - 1] < 0 || x[${s} - 1] >= ${u}) {
+              pad++;
+              continue;
+            }
+            ${n}
+          }`:l=`
+          for (int i = 0; i < ${p}; i++) {
+            x[${s} - 1] = indices[${s} - 1] * ${i} - ${c} + i;
+            ${n}
+          }`,t.kernelShape.length===2){let O=t.kernelShape[t.kernelShape.length-2],S=t.strides[t.strides.length-2],A=t.pads[t.pads.length/2-2],L=t.pads[t.pads.length-2],$=e[s-2];A+L!==0?h=`
+            for (int j = 0; j < ${O}; j++) {
+              x[${s} - 2] = indices[${s} - 2] * ${S} - ${A} + j;
+              if (x[${s} - 2] < 0 || x[${s} - 2] >= ${$}) {
+                pad+= ${p};
+                continue;
+              }
+          `:h=`
+            for (int j = 0; j < ${O}; j++) {
+              x[${s} - 2] = indices[${s} - 2] * ${S} - ${A} + j;
+            `,y=`
           }
-          if (key.status === "dirty" || value.status === "dirty") {
-            status.dirty();
+        `}return`
+        float process(int indices[${s}]) {
+          int x[${s}];
+          copyVec(indices, x);
+
+          float value = ${f};
+          int pad = 0;
+          ${h}
+          ${l}
+          ${y}
+          ${o}
+          return value;
+        }
+      `}else{let p=Te.size(t.kernelShape),i=Te.computeStrides(t.kernelShape),c=i.length,r=t.pads.length,u=zg(c),l=Ia(e,"inputDims"),h=Ia(t.pads,"pads"),y=Ia(i,"kernelStrides"),O=Ia(t.strides,"strides"),S=t.pads.reduce((L,$)=>L+$),A="";return S?A=`
+            if (x[j] >= inputDims[j] || x[j] < 0) {
+              pad++;
+              isPad = true;
+              break;
+            }
           }
-          finalMap.set(key.value, value.value);
-        }
-        return { status: status.value, value: finalMap };
-      });
-    } else {
-      const finalMap = /* @__PURE__ */ new Map();
-      for (const pair of pairs) {
-        const key = pair.key;
-        const value = pair.value;
-        if (key.status === "aborted" || value.status === "aborted") {
-          return INVALID;
-        }
-        if (key.status === "dirty" || value.status === "dirty") {
-          status.dirty();
-        }
-        finalMap.set(key.value, value.value);
-      }
-      return { status: status.value, value: finalMap };
-    }
-  }
-};
-ZodMap.create = (keyType, valueType, params) => {
-  return new ZodMap({
-    valueType,
-    keyType,
-    typeName: ZodFirstPartyTypeKind.ZodMap,
-    ...processCreateParams(params)
-  });
-};
-var ZodSet = class _ZodSet extends ZodType {
-  _parse(input) {
-    const { status, ctx } = this._processInputParams(input);
-    if (ctx.parsedType !== ZodParsedType.set) {
-      addIssueToContext(ctx, {
-        code: ZodIssueCode.invalid_type,
-        expected: ZodParsedType.set,
-        received: ctx.parsedType
-      });
-      return INVALID;
-    }
-    const def = this._def;
-    if (def.minSize !== null) {
-      if (ctx.data.size < def.minSize.value) {
-        addIssueToContext(ctx, {
-          code: ZodIssueCode.too_small,
-          minimum: def.minSize.value,
-          type: "set",
-          inclusive: true,
-          exact: false,
-          message: def.minSize.message
-        });
-        status.dirty();
-      }
-    }
-    if (def.maxSize !== null) {
-      if (ctx.data.size > def.maxSize.value) {
-        addIssueToContext(ctx, {
-          code: ZodIssueCode.too_big,
-          maximum: def.maxSize.value,
-          type: "set",
-          inclusive: true,
-          exact: false,
-          message: def.maxSize.message
-        });
-        status.dirty();
-      }
-    }
-    const valueType = this._def.valueType;
-    function finalizeSet(elements2) {
-      const parsedSet = /* @__PURE__ */ new Set();
-      for (const element of elements2) {
-        if (element.status === "aborted")
-          return INVALID;
-        if (element.status === "dirty")
-          status.dirty();
-        parsedSet.add(element.value);
-      }
-      return { status: status.value, value: parsedSet };
-    }
-    const elements = [...ctx.data.values()].map((item, i) => valueType._parse(new ParseInputLazyPath(ctx, item, ctx.path, i)));
-    if (ctx.common.async) {
-      return Promise.all(elements).then((elements2) => finalizeSet(elements2));
-    } else {
-      return finalizeSet(elements);
-    }
-  }
-  min(minSize, message) {
-    return new _ZodSet({
-      ...this._def,
-      minSize: { value: minSize, message: errorUtil.toString(message) }
-    });
-  }
-  max(maxSize, message) {
-    return new _ZodSet({
-      ...this._def,
-      maxSize: { value: maxSize, message: errorUtil.toString(message) }
-    });
-  }
-  size(size, message) {
-    return this.min(size, message).max(size, message);
-  }
-  nonempty(message) {
-    return this.min(1, message);
-  }
-};
-ZodSet.create = (valueType, params) => {
-  return new ZodSet({
-    valueType,
-    minSize: null,
-    maxSize: null,
-    typeName: ZodFirstPartyTypeKind.ZodSet,
-    ...processCreateParams(params)
-  });
-};
-var ZodFunction = class _ZodFunction extends ZodType {
-  constructor() {
-    super(...arguments);
-    this.validate = this.implement;
-  }
-  _parse(input) {
-    const { ctx } = this._processInputParams(input);
-    if (ctx.parsedType !== ZodParsedType.function) {
-      addIssueToContext(ctx, {
-        code: ZodIssueCode.invalid_type,
-        expected: ZodParsedType.function,
-        received: ctx.parsedType
-      });
-      return INVALID;
-    }
-    function makeArgsIssue(args, error) {
-      return makeIssue({
-        data: args,
-        path: ctx.path,
-        errorMaps: [
-          ctx.common.contextualErrorMap,
-          ctx.schemaErrorMap,
-          getErrorMap(),
-          errorMap
-        ].filter((x) => !!x),
-        issueData: {
-          code: ZodIssueCode.invalid_arguments,
-          argumentsError: error
-        }
-      });
-    }
-    function makeReturnsIssue(returns, error) {
-      return makeIssue({
-        data: returns,
-        path: ctx.path,
-        errorMaps: [
-          ctx.common.contextualErrorMap,
-          ctx.schemaErrorMap,
-          getErrorMap(),
-          errorMap
-        ].filter((x) => !!x),
-        issueData: {
-          code: ZodIssueCode.invalid_return_type,
-          returnTypeError: error
-        }
-      });
-    }
-    const params = { errorMap: ctx.common.contextualErrorMap };
-    const fn = ctx.data;
-    if (this._def.returns instanceof ZodPromise) {
-      const me = this;
-      return OK(async function(...args) {
-        const error = new ZodError([]);
-        const parsedArgs = await me._def.args.parseAsync(args, params).catch((e) => {
-          error.addIssue(makeArgsIssue(args, e));
-          throw error;
-        });
-        const result = await Reflect.apply(fn, this, parsedArgs);
-        const parsedReturns = await me._def.returns._def.type.parseAsync(result, params).catch((e) => {
-          error.addIssue(makeReturnsIssue(result, e));
-          throw error;
-        });
-        return parsedReturns;
-      });
-    } else {
-      const me = this;
-      return OK(function(...args) {
-        const parsedArgs = me._def.args.safeParse(args, params);
-        if (!parsedArgs.success) {
-          throw new ZodError([makeArgsIssue(args, parsedArgs.error)]);
-        }
-        const result = Reflect.apply(fn, this, parsedArgs.data);
-        const parsedReturns = me._def.returns.safeParse(result, params);
-        if (!parsedReturns.success) {
-          throw new ZodError([makeReturnsIssue(result, parsedReturns.error)]);
-        }
-        return parsedReturns.data;
-      });
-    }
-  }
-  parameters() {
-    return this._def.args;
-  }
-  returnType() {
-    return this._def.returns;
-  }
-  args(...items) {
-    return new _ZodFunction({
-      ...this._def,
-      args: ZodTuple.create(items).rest(ZodUnknown.create())
-    });
-  }
-  returns(returnType) {
-    return new _ZodFunction({
-      ...this._def,
-      returns: returnType
-    });
-  }
-  implement(func) {
-    const validatedFunc = this.parse(func);
-    return validatedFunc;
-  }
-  strictImplement(func) {
-    const validatedFunc = this.parse(func);
-    return validatedFunc;
-  }
-  static create(args, returns, params) {
-    return new _ZodFunction({
-      args: args ? args : ZodTuple.create([]).rest(ZodUnknown.create()),
-      returns: returns || ZodUnknown.create(),
-      typeName: ZodFirstPartyTypeKind.ZodFunction,
-      ...processCreateParams(params)
-    });
-  }
-};
-var ZodLazy = class extends ZodType {
-  get schema() {
-    return this._def.getter();
-  }
-  _parse(input) {
-    const { ctx } = this._processInputParams(input);
-    const lazySchema = this._def.getter();
-    return lazySchema._parse({ data: ctx.data, path: ctx.path, parent: ctx });
-  }
-};
-ZodLazy.create = (getter, params) => {
-  return new ZodLazy({
-    getter,
-    typeName: ZodFirstPartyTypeKind.ZodLazy,
-    ...processCreateParams(params)
-  });
-};
-var ZodLiteral = class extends ZodType {
-  _parse(input) {
-    if (input.data !== this._def.value) {
-      const ctx = this._getOrReturnCtx(input);
-      addIssueToContext(ctx, {
-        received: ctx.data,
-        code: ZodIssueCode.invalid_literal,
-        expected: this._def.value
-      });
-      return INVALID;
-    }
-    return { status: "valid", value: input.data };
-  }
-  get value() {
-    return this._def.value;
-  }
-};
-ZodLiteral.create = (value, params) => {
-  return new ZodLiteral({
-    value,
-    typeName: ZodFirstPartyTypeKind.ZodLiteral,
-    ...processCreateParams(params)
-  });
-};
-function createZodEnum(values, params) {
-  return new ZodEnum({
-    values,
-    typeName: ZodFirstPartyTypeKind.ZodEnum,
-    ...processCreateParams(params)
-  });
-}
-var ZodEnum = class _ZodEnum extends ZodType {
-  constructor() {
-    super(...arguments);
-    _ZodEnum_cache.set(this, void 0);
-  }
-  _parse(input) {
-    if (typeof input.data !== "string") {
-      const ctx = this._getOrReturnCtx(input);
-      const expectedValues = this._def.values;
-      addIssueToContext(ctx, {
-        expected: util.joinValues(expectedValues),
-        received: ctx.parsedType,
-        code: ZodIssueCode.invalid_type
-      });
-      return INVALID;
-    }
-    if (!__classPrivateFieldGet(this, _ZodEnum_cache, "f")) {
-      __classPrivateFieldSet(this, _ZodEnum_cache, new Set(this._def.values), "f");
-    }
-    if (!__classPrivateFieldGet(this, _ZodEnum_cache, "f").has(input.data)) {
-      const ctx = this._getOrReturnCtx(input);
-      const expectedValues = this._def.values;
-      addIssueToContext(ctx, {
-        received: ctx.data,
-        code: ZodIssueCode.invalid_enum_value,
-        options: expectedValues
-      });
-      return INVALID;
-    }
-    return OK(input.data);
-  }
-  get options() {
-    return this._def.values;
-  }
-  get enum() {
-    const enumValues = {};
-    for (const val of this._def.values) {
-      enumValues[val] = val;
-    }
-    return enumValues;
-  }
-  get Values() {
-    const enumValues = {};
-    for (const val of this._def.values) {
-      enumValues[val] = val;
-    }
-    return enumValues;
-  }
-  get Enum() {
-    const enumValues = {};
-    for (const val of this._def.values) {
-      enumValues[val] = val;
-    }
-    return enumValues;
-  }
-  extract(values, newDef = this._def) {
-    return _ZodEnum.create(values, {
-      ...this._def,
-      ...newDef
-    });
-  }
-  exclude(values, newDef = this._def) {
-    return _ZodEnum.create(this.options.filter((opt) => !values.includes(opt)), {
-      ...this._def,
-      ...newDef
-    });
-  }
-};
-_ZodEnum_cache = /* @__PURE__ */ new WeakMap();
-ZodEnum.create = createZodEnum;
-var ZodNativeEnum = class extends ZodType {
-  constructor() {
-    super(...arguments);
-    _ZodNativeEnum_cache.set(this, void 0);
-  }
-  _parse(input) {
-    const nativeEnumValues = util.getValidEnumValues(this._def.values);
-    const ctx = this._getOrReturnCtx(input);
-    if (ctx.parsedType !== ZodParsedType.string && ctx.parsedType !== ZodParsedType.number) {
-      const expectedValues = util.objectValues(nativeEnumValues);
-      addIssueToContext(ctx, {
-        expected: util.joinValues(expectedValues),
-        received: ctx.parsedType,
-        code: ZodIssueCode.invalid_type
-      });
-      return INVALID;
-    }
-    if (!__classPrivateFieldGet(this, _ZodNativeEnum_cache, "f")) {
-      __classPrivateFieldSet(this, _ZodNativeEnum_cache, new Set(util.getValidEnumValues(this._def.values)), "f");
-    }
-    if (!__classPrivateFieldGet(this, _ZodNativeEnum_cache, "f").has(input.data)) {
-      const expectedValues = util.objectValues(nativeEnumValues);
-      addIssueToContext(ctx, {
-        received: ctx.data,
-        code: ZodIssueCode.invalid_enum_value,
-        options: expectedValues
-      });
-      return INVALID;
-    }
-    return OK(input.data);
-  }
-  get enum() {
-    return this._def.values;
-  }
-};
-_ZodNativeEnum_cache = /* @__PURE__ */ new WeakMap();
-ZodNativeEnum.create = (values, params) => {
-  return new ZodNativeEnum({
-    values,
-    typeName: ZodFirstPartyTypeKind.ZodNativeEnum,
-    ...processCreateParams(params)
-  });
-};
-var ZodPromise = class extends ZodType {
-  unwrap() {
-    return this._def.type;
-  }
-  _parse(input) {
-    const { ctx } = this._processInputParams(input);
-    if (ctx.parsedType !== ZodParsedType.promise && ctx.common.async === false) {
-      addIssueToContext(ctx, {
-        code: ZodIssueCode.invalid_type,
-        expected: ZodParsedType.promise,
-        received: ctx.parsedType
-      });
-      return INVALID;
-    }
-    const promisified = ctx.parsedType === ZodParsedType.promise ? ctx.data : Promise.resolve(ctx.data);
-    return OK(promisified.then((data) => {
-      return this._def.type.parseAsync(data, {
-        path: ctx.path,
-        errorMap: ctx.common.contextualErrorMap
-      });
-    }));
-  }
-};
-ZodPromise.create = (schema, params) => {
-  return new ZodPromise({
-    type: schema,
-    typeName: ZodFirstPartyTypeKind.ZodPromise,
-    ...processCreateParams(params)
-  });
-};
-var ZodEffects = class extends ZodType {
-  innerType() {
-    return this._def.schema;
-  }
-  sourceType() {
-    return this._def.schema._def.typeName === ZodFirstPartyTypeKind.ZodEffects ? this._def.schema.sourceType() : this._def.schema;
-  }
-  _parse(input) {
-    const { status, ctx } = this._processInputParams(input);
-    const effect = this._def.effect || null;
-    const checkCtx = {
-      addIssue: (arg) => {
-        addIssueToContext(ctx, arg);
-        if (arg.fatal) {
-          status.abort();
-        } else {
-          status.dirty();
-        }
-      },
-      get path() {
-        return ctx.path;
-      }
-    };
-    checkCtx.addIssue = checkCtx.addIssue.bind(checkCtx);
-    if (effect.type === "preprocess") {
-      const processed = effect.transform(ctx.data, checkCtx);
-      if (ctx.common.async) {
-        return Promise.resolve(processed).then(async (processed2) => {
-          if (status.value === "aborted")
-            return INVALID;
-          const result = await this._def.schema._parseAsync({
-            data: processed2,
-            path: ctx.path,
-            parent: ctx
-          });
-          if (result.status === "aborted")
-            return INVALID;
-          if (result.status === "dirty")
-            return DIRTY(result.value);
-          if (status.value === "dirty")
-            return DIRTY(result.value);
-          return result;
-        });
-      } else {
-        if (status.value === "aborted")
-          return INVALID;
-        const result = this._def.schema._parseSync({
-          data: processed,
-          path: ctx.path,
-          parent: ctx
-        });
-        if (result.status === "aborted")
-          return INVALID;
-        if (result.status === "dirty")
-          return DIRTY(result.value);
-        if (status.value === "dirty")
-          return DIRTY(result.value);
-        return result;
-      }
-    }
-    if (effect.type === "refinement") {
-      const executeRefinement = (acc) => {
-        const result = effect.refinement(acc, checkCtx);
-        if (ctx.common.async) {
-          return Promise.resolve(result);
-        }
-        if (result instanceof Promise) {
-          throw new Error("Async refinement encountered during synchronous parse operation. Use .parseAsync instead.");
-        }
-        return acc;
-      };
-      if (ctx.common.async === false) {
-        const inner = this._def.schema._parseSync({
-          data: ctx.data,
-          path: ctx.path,
-          parent: ctx
-        });
-        if (inner.status === "aborted")
-          return INVALID;
-        if (inner.status === "dirty")
-          status.dirty();
-        executeRefinement(inner.value);
-        return { status: status.value, value: inner.value };
-      } else {
-        return this._def.schema._parseAsync({ data: ctx.data, path: ctx.path, parent: ctx }).then((inner) => {
-          if (inner.status === "aborted")
-            return INVALID;
-          if (inner.status === "dirty")
-            status.dirty();
-          return executeRefinement(inner.value).then(() => {
-            return { status: status.value, value: inner.value };
-          });
-        });
-      }
-    }
-    if (effect.type === "transform") {
-      if (ctx.common.async === false) {
-        const base = this._def.schema._parseSync({
-          data: ctx.data,
-          path: ctx.path,
-          parent: ctx
-        });
-        if (!isValid(base))
-          return base;
-        const result = effect.transform(base.value, checkCtx);
-        if (result instanceof Promise) {
-          throw new Error(`Asynchronous transform encountered during synchronous parse operation. Use .parseAsync instead.`);
-        }
-        return { status: status.value, value: result };
-      } else {
-        return this._def.schema._parseAsync({ data: ctx.data, path: ctx.path, parent: ctx }).then((base) => {
-          if (!isValid(base))
-            return base;
-          return Promise.resolve(effect.transform(base.value, checkCtx)).then((result) => ({ status: status.value, value: result }));
-        });
-      }
-    }
-    util.assertNever(effect);
-  }
-};
-ZodEffects.create = (schema, effect, params) => {
-  return new ZodEffects({
-    schema,
-    typeName: ZodFirstPartyTypeKind.ZodEffects,
-    effect,
-    ...processCreateParams(params)
-  });
-};
-ZodEffects.createWithPreprocess = (preprocess, schema, params) => {
-  return new ZodEffects({
-    schema,
-    effect: { type: "preprocess", transform: preprocess },
-    typeName: ZodFirstPartyTypeKind.ZodEffects,
-    ...processCreateParams(params)
-  });
-};
-var ZodOptional = class extends ZodType {
-  _parse(input) {
-    const parsedType = this._getType(input);
-    if (parsedType === ZodParsedType.undefined) {
-      return OK(void 0);
-    }
-    return this._def.innerType._parse(input);
-  }
-  unwrap() {
-    return this._def.innerType;
-  }
-};
-ZodOptional.create = (type, params) => {
-  return new ZodOptional({
-    innerType: type,
-    typeName: ZodFirstPartyTypeKind.ZodOptional,
-    ...processCreateParams(params)
-  });
-};
-var ZodNullable = class extends ZodType {
-  _parse(input) {
-    const parsedType = this._getType(input);
-    if (parsedType === ZodParsedType.null) {
-      return OK(null);
-    }
-    return this._def.innerType._parse(input);
-  }
-  unwrap() {
-    return this._def.innerType;
-  }
-};
-ZodNullable.create = (type, params) => {
-  return new ZodNullable({
-    innerType: type,
-    typeName: ZodFirstPartyTypeKind.ZodNullable,
-    ...processCreateParams(params)
-  });
-};
-var ZodDefault = class extends ZodType {
-  _parse(input) {
-    const { ctx } = this._processInputParams(input);
-    let data = ctx.data;
-    if (ctx.parsedType === ZodParsedType.undefined) {
-      data = this._def.defaultValue();
-    }
-    return this._def.innerType._parse({
-      data,
-      path: ctx.path,
-      parent: ctx
-    });
-  }
-  removeDefault() {
-    return this._def.innerType;
-  }
-};
-ZodDefault.create = (type, params) => {
-  return new ZodDefault({
-    innerType: type,
-    typeName: ZodFirstPartyTypeKind.ZodDefault,
-    defaultValue: typeof params.default === "function" ? params.default : () => params.default,
-    ...processCreateParams(params)
-  });
-};
-var ZodCatch = class extends ZodType {
-  _parse(input) {
-    const { ctx } = this._processInputParams(input);
-    const newCtx = {
-      ...ctx,
-      common: {
-        ...ctx.common,
-        issues: []
-      }
-    };
-    const result = this._def.innerType._parse({
-      data: newCtx.data,
-      path: newCtx.path,
-      parent: {
-        ...newCtx
-      }
-    });
-    if (isAsync(result)) {
-      return result.then((result2) => {
-        return {
-          status: "valid",
-          value: result2.status === "valid" ? result2.value : this._def.catchValue({
-            get error() {
-              return new ZodError(newCtx.common.issues);
-            },
-            input: newCtx.data
-          })
-        };
-      });
-    } else {
-      return {
-        status: "valid",
-        value: result.status === "valid" ? result.value : this._def.catchValue({
-          get error() {
-            return new ZodError(newCtx.common.issues);
-          },
-          input: newCtx.data
-        })
-      };
-    }
-  }
-  removeCatch() {
-    return this._def.innerType;
-  }
-};
-ZodCatch.create = (type, params) => {
-  return new ZodCatch({
-    innerType: type,
-    typeName: ZodFirstPartyTypeKind.ZodCatch,
-    catchValue: typeof params.catch === "function" ? params.catch : () => params.catch,
-    ...processCreateParams(params)
-  });
-};
-var ZodNaN = class extends ZodType {
-  _parse(input) {
-    const parsedType = this._getType(input);
-    if (parsedType !== ZodParsedType.nan) {
-      const ctx = this._getOrReturnCtx(input);
-      addIssueToContext(ctx, {
-        code: ZodIssueCode.invalid_type,
-        expected: ZodParsedType.nan,
-        received: ctx.parsedType
-      });
-      return INVALID;
-    }
-    return { status: "valid", value: input.data };
-  }
-};
-ZodNaN.create = (params) => {
-  return new ZodNaN({
-    typeName: ZodFirstPartyTypeKind.ZodNaN,
-    ...processCreateParams(params)
-  });
-};
-var BRAND = Symbol("zod_brand");
-var ZodBranded = class extends ZodType {
-  _parse(input) {
-    const { ctx } = this._processInputParams(input);
-    const data = ctx.data;
-    return this._def.type._parse({
-      data,
-      path: ctx.path,
-      parent: ctx
-    });
-  }
-  unwrap() {
-    return this._def.type;
-  }
-};
-var ZodPipeline = class _ZodPipeline extends ZodType {
-  _parse(input) {
-    const { status, ctx } = this._processInputParams(input);
-    if (ctx.common.async) {
-      const handleAsync = async () => {
-        const inResult = await this._def.in._parseAsync({
-          data: ctx.data,
-          path: ctx.path,
-          parent: ctx
-        });
-        if (inResult.status === "aborted")
-          return INVALID;
-        if (inResult.status === "dirty") {
-          status.dirty();
-          return DIRTY(inResult.value);
-        } else {
-          return this._def.out._parseAsync({
-            data: inResult.value,
-            path: ctx.path,
-            parent: ctx
-          });
-        }
-      };
-      return handleAsync();
-    } else {
-      const inResult = this._def.in._parseSync({
-        data: ctx.data,
-        path: ctx.path,
-        parent: ctx
-      });
-      if (inResult.status === "aborted")
-        return INVALID;
-      if (inResult.status === "dirty") {
-        status.dirty();
-        return {
-          status: "dirty",
-          value: inResult.value
-        };
-      } else {
-        return this._def.out._parseSync({
-          data: inResult.value,
-          path: ctx.path,
-          parent: ctx
-        });
-      }
-    }
-  }
-  static create(a, b) {
-    return new _ZodPipeline({
-      in: a,
-      out: b,
-      typeName: ZodFirstPartyTypeKind.ZodPipeline
-    });
-  }
-};
-var ZodReadonly = class extends ZodType {
-  _parse(input) {
-    const result = this._def.innerType._parse(input);
-    const freeze = (data) => {
-      if (isValid(data)) {
-        data.value = Object.freeze(data.value);
-      }
-      return data;
-    };
-    return isAsync(result) ? result.then((data) => freeze(data)) : freeze(result);
-  }
-  unwrap() {
-    return this._def.innerType;
-  }
-};
-ZodReadonly.create = (type, params) => {
-  return new ZodReadonly({
-    innerType: type,
-    typeName: ZodFirstPartyTypeKind.ZodReadonly,
-    ...processCreateParams(params)
-  });
-};
-function cleanParams(params, data) {
-  const p = typeof params === "function" ? params(data) : typeof params === "string" ? { message: params } : params;
-  const p2 = typeof p === "string" ? { message: p } : p;
-  return p2;
-}
-function custom(check, _params = {}, fatal) {
-  if (check)
-    return ZodAny.create().superRefine((data, ctx) => {
-      var _a, _b;
-      const r = check(data);
-      if (r instanceof Promise) {
-        return r.then((r2) => {
-          var _a2, _b2;
-          if (!r2) {
-            const params = cleanParams(_params, data);
-            const _fatal = (_b2 = (_a2 = params.fatal) !== null && _a2 !== void 0 ? _a2 : fatal) !== null && _b2 !== void 0 ? _b2 : true;
-            ctx.addIssue({ code: "custom", ...params, fatal: _fatal });
+          if (!isPad) {
+            ${n}
+          }`:A=`
           }
-        });
-      }
-      if (!r) {
-        const params = cleanParams(_params, data);
-        const _fatal = (_b = (_a = params.fatal) !== null && _a !== void 0 ? _a : fatal) !== null && _b !== void 0 ? _b : true;
-        ctx.addIssue({ code: "custom", ...params, fatal: _fatal });
-      }
+          ${n}
+        `,`
+        ${u}
+        float process(int indices[${s}]) {
+          int x[${s}];
+          copyVec(indices, x);
+          int offset[${c}];
+          int pads[${r}];
+          int inputDims[${s}];
+          int kernelStrides[${c}];
+          int strides[${c}];
+          ${h}
+          ${l}
+          ${O}
+          ${y}
+
+          float value = ${f};
+          int pad = 0;
+          bool isPad = false;
+          for (int i = 0; i < ${p}; i++) {
+            offsetToIndices(i, kernelStrides, offset);
+            isPad = false;
+            for (int j = ${s} - ${c}; j < ${s}; j++) {
+              x[j] = indices[j] * strides[j - ${s} + ${c}]
+                + offset[j - ${s} + ${c}] - pads[j - 2];
+              ${A}
+          }
+          ${o}
+
+          return value;
+        }
+      `}},Ia=(e,t)=>{let n="";for(let o=0;o<e.length;o++)n+=`
+      ${t}[${o}] = ${e[o]};
+    `;return n},zg=e=>`
+  void offsetToIndices(int offset, int[${e}] strides, out int[${e}] indices) {
+    if (${e} == 0) {
       return;
-    });
-  return ZodAny.create();
-}
-var late = {
-  object: ZodObject.lazycreate
-};
-var ZodFirstPartyTypeKind;
-(function(ZodFirstPartyTypeKind2) {
-  ZodFirstPartyTypeKind2["ZodString"] = "ZodString";
-  ZodFirstPartyTypeKind2["ZodNumber"] = "ZodNumber";
-  ZodFirstPartyTypeKind2["ZodNaN"] = "ZodNaN";
-  ZodFirstPartyTypeKind2["ZodBigInt"] = "ZodBigInt";
-  ZodFirstPartyTypeKind2["ZodBoolean"] = "ZodBoolean";
-  ZodFirstPartyTypeKind2["ZodDate"] = "ZodDate";
-  ZodFirstPartyTypeKind2["ZodSymbol"] = "ZodSymbol";
-  ZodFirstPartyTypeKind2["ZodUndefined"] = "ZodUndefined";
-  ZodFirstPartyTypeKind2["ZodNull"] = "ZodNull";
-  ZodFirstPartyTypeKind2["ZodAny"] = "ZodAny";
-  ZodFirstPartyTypeKind2["ZodUnknown"] = "ZodUnknown";
-  ZodFirstPartyTypeKind2["ZodNever"] = "ZodNever";
-  ZodFirstPartyTypeKind2["ZodVoid"] = "ZodVoid";
-  ZodFirstPartyTypeKind2["ZodArray"] = "ZodArray";
-  ZodFirstPartyTypeKind2["ZodObject"] = "ZodObject";
-  ZodFirstPartyTypeKind2["ZodUnion"] = "ZodUnion";
-  ZodFirstPartyTypeKind2["ZodDiscriminatedUnion"] = "ZodDiscriminatedUnion";
-  ZodFirstPartyTypeKind2["ZodIntersection"] = "ZodIntersection";
-  ZodFirstPartyTypeKind2["ZodTuple"] = "ZodTuple";
-  ZodFirstPartyTypeKind2["ZodRecord"] = "ZodRecord";
-  ZodFirstPartyTypeKind2["ZodMap"] = "ZodMap";
-  ZodFirstPartyTypeKind2["ZodSet"] = "ZodSet";
-  ZodFirstPartyTypeKind2["ZodFunction"] = "ZodFunction";
-  ZodFirstPartyTypeKind2["ZodLazy"] = "ZodLazy";
-  ZodFirstPartyTypeKind2["ZodLiteral"] = "ZodLiteral";
-  ZodFirstPartyTypeKind2["ZodEnum"] = "ZodEnum";
-  ZodFirstPartyTypeKind2["ZodEffects"] = "ZodEffects";
-  ZodFirstPartyTypeKind2["ZodNativeEnum"] = "ZodNativeEnum";
-  ZodFirstPartyTypeKind2["ZodOptional"] = "ZodOptional";
-  ZodFirstPartyTypeKind2["ZodNullable"] = "ZodNullable";
-  ZodFirstPartyTypeKind2["ZodDefault"] = "ZodDefault";
-  ZodFirstPartyTypeKind2["ZodCatch"] = "ZodCatch";
-  ZodFirstPartyTypeKind2["ZodPromise"] = "ZodPromise";
-  ZodFirstPartyTypeKind2["ZodBranded"] = "ZodBranded";
-  ZodFirstPartyTypeKind2["ZodPipeline"] = "ZodPipeline";
-  ZodFirstPartyTypeKind2["ZodReadonly"] = "ZodReadonly";
-})(ZodFirstPartyTypeKind || (ZodFirstPartyTypeKind = {}));
-var instanceOfType = (cls, params = {
-  message: `Input not instance of ${cls.name}`
-}) => custom((data) => data instanceof cls, params);
-var stringType = ZodString.create;
-var numberType = ZodNumber.create;
-var nanType = ZodNaN.create;
-var bigIntType = ZodBigInt.create;
-var booleanType = ZodBoolean.create;
-var dateType = ZodDate.create;
-var symbolType = ZodSymbol.create;
-var undefinedType = ZodUndefined.create;
-var nullType = ZodNull.create;
-var anyType = ZodAny.create;
-var unknownType = ZodUnknown.create;
-var neverType = ZodNever.create;
-var voidType = ZodVoid.create;
-var arrayType = ZodArray.create;
-var objectType = ZodObject.create;
-var strictObjectType = ZodObject.strictCreate;
-var unionType = ZodUnion.create;
-var discriminatedUnionType = ZodDiscriminatedUnion.create;
-var intersectionType = ZodIntersection.create;
-var tupleType = ZodTuple.create;
-var recordType = ZodRecord.create;
-var mapType = ZodMap.create;
-var setType = ZodSet.create;
-var functionType = ZodFunction.create;
-var lazyType = ZodLazy.create;
-var literalType = ZodLiteral.create;
-var enumType = ZodEnum.create;
-var nativeEnumType = ZodNativeEnum.create;
-var promiseType = ZodPromise.create;
-var effectsType = ZodEffects.create;
-var optionalType = ZodOptional.create;
-var nullableType = ZodNullable.create;
-var preprocessType = ZodEffects.createWithPreprocess;
-var pipelineType = ZodPipeline.create;
-var ostring = () => stringType().optional();
-var onumber = () => numberType().optional();
-var oboolean = () => booleanType().optional();
-var coerce = {
-  string: (arg) => ZodString.create({ ...arg, coerce: true }),
-  number: (arg) => ZodNumber.create({ ...arg, coerce: true }),
-  boolean: (arg) => ZodBoolean.create({
-    ...arg,
-    coerce: true
-  }),
-  bigint: (arg) => ZodBigInt.create({ ...arg, coerce: true }),
-  date: (arg) => ZodDate.create({ ...arg, coerce: true })
-};
-var NEVER = INVALID;
-var z = /* @__PURE__ */ Object.freeze({
-  __proto__: null,
-  defaultErrorMap: errorMap,
-  setErrorMap,
-  getErrorMap,
-  makeIssue,
-  EMPTY_PATH,
-  addIssueToContext,
-  ParseStatus,
-  INVALID,
-  DIRTY,
-  OK,
-  isAborted,
-  isDirty,
-  isValid,
-  isAsync,
-  get util() {
-    return util;
-  },
-  get objectUtil() {
-    return objectUtil;
-  },
-  ZodParsedType,
-  getParsedType,
-  ZodType,
-  datetimeRegex,
-  ZodString,
-  ZodNumber,
-  ZodBigInt,
-  ZodBoolean,
-  ZodDate,
-  ZodSymbol,
-  ZodUndefined,
-  ZodNull,
-  ZodAny,
-  ZodUnknown,
-  ZodNever,
-  ZodVoid,
-  ZodArray,
-  ZodObject,
-  ZodUnion,
-  ZodDiscriminatedUnion,
-  ZodIntersection,
-  ZodTuple,
-  ZodRecord,
-  ZodMap,
-  ZodSet,
-  ZodFunction,
-  ZodLazy,
-  ZodLiteral,
-  ZodEnum,
-  ZodNativeEnum,
-  ZodPromise,
-  ZodEffects,
-  ZodTransformer: ZodEffects,
-  ZodOptional,
-  ZodNullable,
-  ZodDefault,
-  ZodCatch,
-  ZodNaN,
-  BRAND,
-  ZodBranded,
-  ZodPipeline,
-  ZodReadonly,
-  custom,
-  Schema: ZodType,
-  ZodSchema: ZodType,
-  late,
-  get ZodFirstPartyTypeKind() {
-    return ZodFirstPartyTypeKind;
-  },
-  coerce,
-  any: anyType,
-  array: arrayType,
-  bigint: bigIntType,
-  boolean: booleanType,
-  date: dateType,
-  discriminatedUnion: discriminatedUnionType,
-  effect: effectsType,
-  "enum": enumType,
-  "function": functionType,
-  "instanceof": instanceOfType,
-  intersection: intersectionType,
-  lazy: lazyType,
-  literal: literalType,
-  map: mapType,
-  nan: nanType,
-  nativeEnum: nativeEnumType,
-  never: neverType,
-  "null": nullType,
-  nullable: nullableType,
-  number: numberType,
-  object: objectType,
-  oboolean,
-  onumber,
-  optional: optionalType,
-  ostring,
-  pipeline: pipelineType,
-  preprocess: preprocessType,
-  promise: promiseType,
-  record: recordType,
-  set: setType,
-  strictObject: strictObjectType,
-  string: stringType,
-  symbol: symbolType,
-  transformer: effectsType,
-  tuple: tupleType,
-  "undefined": undefinedType,
-  union: unionType,
-  unknown: unknownType,
-  "void": voidType,
-  NEVER,
-  ZodIssueCode,
-  quotelessJson,
-  ZodError
-});
-
-// package.json
-var package_default = {
-  name: "@imgly/background-removal",
-  version: "1.7.0",
-  description: "Background Removal in the Browser",
-  keywords: [
-    "background-removal",
-    "client-side",
-    "data-privacy",
-    "image-segmentation",
-    "image-matting",
-    "onnx"
-  ],
-  repository: {
-    type: "git",
-    url: "git+https://github.com/imgly/background-removal-js.git"
-  },
-  license: "SEE LICENSE IN LICENSE.md",
-  author: {
-    name: "IMG.LY GmbH",
-    email: "support@img.ly",
-    url: "https://img.ly"
-  },
-  bugs: {
-    email: "support@img.ly"
-  },
-  source: "./src/index.ts",
-  main: "./dist/index.cjs",
-  module: "./dist/index.mjs",
-  types: "./dist/src/index.d.ts",
-  exports: {
-    ".": {
-      require: "./dist/index.cjs",
-      import: "./dist/index.mjs",
-      types: "./dist/src/index.d.ts"
     }
-  },
-  homepage: "https://img.ly/showcases/cesdk/web/background-removal",
-  files: [
-    "LICENSE.md",
-    "README.md",
-    "CHANGELOG.md",
-    "ThirdPartyLicenses.json",
-    "dist/",
-    "bin/"
-  ],
-  scripts: {
-    start: "pnpm run watch",
-    clean: "npx rimraf dist",
-    test: "true",
-    resources: "node ../../scripts/package-resources.mjs",
-    "changelog:create": "node ../../scripts/changelog/changelog-create.mjs",
-    "changelog:generate": "node ../../scripts/changelog/changelog-generate.mjs",
-    build: "pnpm run clean && pnpm run types && pnpm run resources && pnpm run changelog:generate && node scripts/build.mjs",
-    types: " npx tsc --declaration --emitDeclarationOnly --declarationDir dist --declarationMap",
-    watch: "pnpm run clean && pnpm run resources && pnpm run changelog:generate && node scripts/watch.mjs",
-    "publish:latest": "pnpm publish --tag latest --access public",
-    "publish:next": "pnpm publish --tag next --access public",
-    "package:pack": "pnpm pack . --pack-destination ../../releases",
-    "check:all": "pnpm run check:pretty",
-    "check:pretty": "prettier --list-different './src/**/*.{ts,tsx}'",
-    pretty: "prettier --write './src/**/*.{ts,tsx}'"
-  },
-  dependencies: {
-    "lodash-es": "^4.17.21",
-    ndarray: "~1.0.0",
-    zod: "^3.23.8"
-  },
-  peerDependencies: {
-    "onnxruntime-web": "1.21.0"
-  },
-  devDependencies: {
-    "@types/lodash-es": "^4.17.12",
-    "@types/ndarray": "~1.0.14",
-    "@types/node": "~20.3.0",
-    assert: "~2.0.0",
-    esbuild: "~0.18.0",
-    glob: "~10.3.0",
-    "npm-dts": "~1.3.0",
-    process: "~0.11.0",
-    "ts-loader": "~9.4.0",
-    tslib: "~2.5.0",
-    typescript: "~5.1.0",
-    util: "~0.12.0",
-    webpack: "~5.85.0",
-    "webpack-cli": "~5.1.0"
-  }
-};
-
-// src/schema.ts
-var ConfigSchema = z.object({
-  publicPath: z.string().optional().describe("The public path to the wasm files and the onnx model.").default(
-    "https://staticimgly.com/@imgly/background-removal-data/${PACKAGE_VERSION}/dist/"
-  ).transform((val) => {
-    return val.replace("${PACKAGE_NAME}", package_default.name).replace("${PACKAGE_VERSION}", package_default.version);
-  }),
-  debug: z.boolean().default(false).describe("Whether to enable debug logging."),
-  rescale: z.boolean().default(true).describe("Whether to rescale the image."),
-  device: z.enum(["cpu", "gpu"]).default("cpu").describe("The device to run the model on."),
-  proxyToWorker: z.boolean().default(false).describe("Whether to proxy inference to a web worker."),
-  fetchArgs: z.any().default({}).describe("Arguments to pass to fetch when loading the model."),
-  progress: z.function().args(z.string(), z.number(), z.number()).returns(z.void()).describe("Progress callback.").optional(),
-  model: z.preprocess(
-    (val) => {
-      switch (val) {
-        case "large":
-          return "isnet";
-        case "small":
-          return "isnet_quint8";
-        case "medium":
-          return "isnet_fp16";
-        default:
-          return val;
+    for (int i = 0; i < ${e} - 1; ++i) {
+      indices[i] = offset / strides[i];
+      offset -= indices[i] * strides[i];
+    }
+    indices[${e} - 1] = offset;
+  }`}),ni,ai,Vg,Gg,X0,K0,J0,Q0,eb,tb,rb,YE=G(()=>{"use strict";Vt(),Eu(),Ve(),Fe(),ni=(e,t,n,o,f)=>{Gg(t);let s={name:o,inputNames:["A"],inputTypes:[0]};return[e.run({...s,cacheHint:n.cacheKey,get:()=>Vg(e,t,n,o,f,s)},t)]},ai=e=>{let t=e.attributes.getInts("axes",[]),n=e.attributes.getInt("keepdims",1)===1;return nt({axes:t,keepDims:n})},Vg=(e,t,n,o,f,s)=>{let p=[],i=t[0].dims.length||1,c=[],r=Te.normalizeAxes(n.axes,t[0].dims.length),u=f(t,r),l=u[1];for(let y=0;y<t[0].dims.length;y++)r.indexOf(y)>=0||r.length===0?(n.keepDims&&p.push(1),l=`
+          for(int j${y} = 0; j${y} < ${t[0].dims[y]}; j${y}++) {
+            inputIdx[${y}] = j${y};
+            ${l}
+          }`):(c.push(`inputIdx[${y}] = outputIdx[${p.length}];`),p.push(t[0].dims[y]));let h=`
+      float process(int outputIdx[${p.length||1}]) {
+        float value;                 // final result
+        int inputIdx[${i}];      // addressing input data
+        ${c.join(`
+`)}
+        ${u[0]}       // init ops for reduce max/min
+        ${l}
+        ${u[2]}       // final computation for reduce mean
+        return value;
+      }`;return{...s,output:{dims:p,type:t[0].type,textureType:0},shaderSource:h}},Gg=e=>{if(!e||e.length!==1)throw new Error("Reduce op requires 1 input.");if(Ja.indexOf(e[0].type)===-1)throw new Error("Invalid input type.")},X0=(e,t,n)=>ni(e,t,n,"ReduceSum",()=>["value = 0.0;","value += _A(inputIdx);",""]),K0=(e,t,n)=>ni(e,t,n,"ReduceMean",(o,f)=>{let s=1;for(let p=0;p<o[0].dims.length;p++)(f.indexOf(p)>=0||f.length===0)&&(s*=o[0].dims[p]);return["value = 0.0;","value += _A(inputIdx);",`value /= ${s}.;`]}),J0=(e,t,n)=>ni(e,t,n,"ReduceMax",(o,f)=>{let s=[];for(let p=0;p<o[0].dims.length;p++)(f.indexOf(p)>=0||f.length===0)&&s.push(`inputIdx[${p}] = 0;`);return[`${s.join(`
+`)}
+value = _A(inputIdx);`,"value = max(value, _A(inputIdx));",""]}),Q0=(e,t,n)=>ni(e,t,n,"ReduceMin",(o,f)=>{let s=[];for(let p=0;p<o[0].dims.length;p++)(f.indexOf(p)>=0||f.length===0)&&s.push(`inputIdx[${p}] = 0;`);return[`${s.join(`
+`)}
+value = _A(inputIdx);`,"value = min(value, _A(inputIdx));",""]}),eb=(e,t,n)=>ni(e,t,n,"ReduceProd",()=>["value = 1.0;","value *= _A(inputIdx);",""]),tb=(e,t,n)=>ni(e,t,n,"ReduceLogSum",()=>["value = 0.0;","value += _A(inputIdx);","value = log(value);"]),rb=(e,t,n)=>ni(e,t,n,"ReduceLogSumSquare",()=>["float t; value = 0.0;","t = _A(inputIdx); value += t * t;",""])}),nb,XE=G(()=>{"use strict";Ve(),nb=(e,t)=>{let n=Te.calculateReshapedDims(t[0].dims,t[1].integerData);return e.session.pack?[e.reshapePacked(t[0],n)]:[e.reshapeUnpacked(t[0],n)]}}),gc,Qc,ib,ob,Ga,Hg,ef,vu,ab=G(()=>{"use strict";Vt(),gt(),Fe(),gc={name:"Upsample",inputNames:["X"],inputTypes:[0]},Qc=(e,t,n)=>(ef(t,n),[e.run({...gc,cacheHint:n.cacheKey,get:()=>Hg(e,t,n)},t)]),ib=e=>Ga(e,7),ob=e=>Ga(e,9),Ga=(e,t)=>{let n=t>=10,o=e.attributes.getString("mode","nearest");if(o!=="nearest"&&o!=="linear"&&(t<11||o!=="cubic"))throw new Error(`unrecognized mode: ${o}`);let f=[];t<9&&(f=e.attributes.getFloats("scales"),vu(f,o,n));let s=e.attributes.getFloat("extrapolation_value",0),p=t>10?e.attributes.getString("coordinate_transformation_mode","half_pixel"):"asymmetric";if(["asymmetric","pytorch_half_pixel","tf_half_pixel_for_nn","align_corners","tf_crop_and_resize","half_pixel"].indexOf(p)===-1)throw new Error(`coordinate_transform_mode '${p}' is not supported`);let i=p==="tf_crop_and_resize",c=i,r=o==="nearest"&&t>=11?e.attributes.getString("nearest_mode","round_prefer_floor"):"";if(["round_prefer_floor","round_prefer_ceil","floor","ceil",""].indexOf(r)===-1)throw new Error(`nearest_mode '${r}' is not supported`);let u=e.attributes.getFloat("cubic_coeff_a",-.75),l=e.attributes.getInt("exclude_outside",0)!==0;if(l&&o!=="cubic")throw new Error("exclude_outside can be set to 1 only when mode is CUBIC.");let h=t<11?!0:o==="nearest"&&p==="asymmetric"&&r==="floor",y=0,O=0,S=0;return t>10?e.inputs.length>2?(y=1,O=2,S=3):(O=1,S=2):t===9&&(O=1),nt({opset:t,isResize:n,mode:o,scales:f,extrapolationValue:s,coordinateTransformMode:p,useExtrapolation:c,needRoiInput:i,nearestMode:r,cubicCoefficientA:u,excludeOutside:l,useNearest2xOptimization:h,roiInputIdx:y,scalesInputIdx:O,sizesInputIdx:S})},Hg=(e,t,n)=>{let o=Re(e.session.backend.glContext.version),[f,s]=e.calculateTextureWidthAndHeight(t[0].dims,0),p=t[0].dims.map((S,A)=>Math.floor(S*n.scales[A])),[i,c]=e.calculateTextureWidthAndHeight(p,0),r=p.length,u=new Array(r),l=new Array(r),h=`
+      int output_pitches[${r}];
+      int input_pitches[${r}];
+      `;for(let S=r-1;S>=0;S--)u[S]=S===r-1?1:u[S+1]*p[S+1],l[S]=S===r-1?1:l[S+1]*t[0].dims[S+1],h+=`
+        output_pitches[${S}] = ${u[S]};
+        input_pitches[${S}] = ${l[S]};
+        `;let y=`
+      float getInputFloat(int index) {
+        vec2 coords = offsetToCoords(index, ${f}, ${s});
+        float value = getColorAsFloat(${o.texture2D}(X, coords));
+        return value;
       }
-    },
-    z.enum(["isnet", "isnet_fp16", "isnet_quint8"])
-  ).default("medium"),
-  output: z.object({
-    format: z.enum([
-      "image/png",
-      "image/jpeg",
-      "image/webp",
-      "image/x-rgba8",
-      "image/x-alpha8"
-    ]).default("image/png"),
-    quality: z.number().default(0.8)
-  }).default({})
-}).default({}).transform((config) => {
-  if (config.debug)
-    console.log("Config:", config);
-  if (config.debug && !config.progress) {
-    config.progress = config.progress ?? ((key, current, total) => {
-      console.debug(`Downloading ${key}: ${current} of ${total}`);
-    });
-    if (!crossOriginIsolated) {
-      if (config.debug)
-        console.debug(
-          "Cross-Origin-Isolated is not enabled. Performance will be degraded. Please see  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer."
-        );
+      `,O=n.mode==="nearest"?`
+    ${y}
+    float process(int indices[${r}]) {
+      int input_index = 0;
+      int output_index = coordsToOffset(TexCoords, ${i}, ${c});
+
+      ${h}
+
+      int d, m;
+      for (int dim = 0; dim < ${r}; ++dim) {
+        d = output_index / output_pitches[dim];
+        m = output_index - d * output_pitches[dim];
+        output_index = m;
+
+        if (scales[dim] != 1 && d > 0) {
+          int d2 = d / scales[dim];
+          m = d - d2 * scales[dim];
+          d = d2;
+        }
+        input_index += input_pitches[dim] * d;
+      }
+
+      return getInputFloat(input_index);
+    }`:r===4?`
+    ${y}
+    float process(int indices[4]) {
+      int input_index = 0;
+      int output_index = coordsToOffset(TexCoords, ${i}, ${c});
+
+      ${h}
+
+      int m;
+      int index_of_dim0, index_of_dim1, index_of_dim2, index_of_dim3;
+      index_of_dim0 = output_index / output_pitches[0];
+      m = output_index - index_of_dim0 * output_pitches[0];
+      index_of_dim1 = m / output_pitches[1];
+      m = m - index_of_dim1 * output_pitches[1];
+      index_of_dim2 = m / output_pitches[2];
+      m = m - index_of_dim2 * output_pitches[2];
+      index_of_dim3 = m;
+
+      int index_of_input_dim2, index_of_input_dim3, x_offset, y_offset;
+      index_of_input_dim2 = index_of_dim2 / scales[2];
+      y_offset = index_of_dim2 - index_of_input_dim2 * scales[2];
+      index_of_input_dim3 = index_of_dim3 / scales[3];
+      x_offset = index_of_dim3 - index_of_input_dim3 * scales[3];
+
+      input_index = index_of_dim0 * input_pitches[0] +
+            index_of_dim1 * input_pitches[1] +
+            index_of_input_dim2 * input_pitches[2] +
+            index_of_input_dim3;
+
+      float x00 = getInputFloat(input_index);
+      float x10, x01, x11;
+
+      bool end_of_dim2 = false;
+      if (index_of_input_dim2 == (${t[0].dims[2]} - 1)) {
+        // It's the end in dimension 2
+        x01 = x00;
+        end_of_dim2 = true;
+      } else {
+        x01 = getInputFloat(input_index + input_pitches[2]);
+      }
+
+      if (index_of_input_dim3 == (input_pitches[2] - 1)) {
+        // It's the end in dimension 3
+        x10 = x00;
+        x11 = x01;
+      }
+      else {
+        x10 = getInputFloat(input_index + 1);
+        x11 = end_of_dim2 ? x10 : getInputFloat(input_index + input_pitches[2] + 1);
+      }
+
+      float y0 = x00 + float(y_offset) * (x01 - x00) / float(scales[2]);
+      float y1 = x10 + float(y_offset) * (x11 - x10) / float(scales[2]);
+      return y0 + float(x_offset) * (y1 - y0) / float(scales[3]);
+    }`:`
+    ${y}
+    float process(int indices[2]) {
+      int input_index = 0;
+      int output_index = coordsToOffset(TexCoords, ${i}, ${c});
+
+      ${h}
+
+      int m;
+      int index_of_dim0, index_of_dim1;
+      index_of_dim0 = output_index / output_pitches[0];
+      m = output_index - index_of_dim0 * output_pitches[0];
+      index_of_dim1 = m;
+
+      int index_of_input_dim0, index_of_input_dim1, x_offset, y_offset;
+      index_of_input_dim0 = index_of_dim0 / scales[0];
+      y_offset = index_of_dim0 - index_of_input_dim0 * scales[0];
+      index_of_input_dim1 = index_of_dim1 / scales[1];
+      x_offset = index_of_dim1 - index_of_input_dim1 * scales[1];
+
+      input_index = index_of_input_dim0 * input_pitches[0] + index_of_input_dim1;
+
+      float x00 = getInputFloat(input_index);
+      float x10, x01, x11;
+
+      bool end_of_dim0 = false;
+      if (index_of_input_dim0 == (${t[0].dims[0]} - 1)) {
+        // It's the end in dimension 0
+        x01 = x00;
+        end_of_dim0 = true;
+      } else {
+        x01 = getInputFloat(input_index + input_pitches[0]);
+      }
+
+      if (index_of_input_dim1 == (input_pitches[0] - 1)) {
+        // It's the end in dimension 1
+        x10 = x00;
+        x11 = x01;
+      }
+      else {
+        x10 = getInputFloat(input_index + 1);
+        x11 = end_of_dim0 ? x10 : getInputFloat(input_index + input_pitches[0] + 1);
+      }
+
+      float y0 = x00 + float(y_offset) * (x01 - x00) / float(scales[0]);
+      float y1 = x10 + float(y_offset) * (x11 - x10) / float(scales[0]);
+      return y0 + float(x_offset) * (y1 - y0) / float(scales[1]);
+    }`;return{...gc,output:{dims:p,type:t[0].type,textureType:0},shaderSource:O,variables:[{name:"scales",type:"int",arrayLength:n.scales.length,data:n.scales.map(S=>Math.ceil(S))}]}},ef=(e,t)=>{if(!e||t.opset<9&&e.length!==1||t.opset>=9&&t.opset<11&&e.length!==2||t.opset>=11&&e.length<2)throw new Error("invalid inputs.");if(t.scales.length>0&&e[0].dims.length!==t.scales.length)throw new Error("Invalid input shape.");if(e[0].type==="string")throw new Error("Invalid input tensor types.")},vu=(e,t,n)=>{if(n){for(let o of e)if(o<=0)throw new Error("Scale value should be greater than 0.")}else for(let o of e)if(o<1)throw new Error("Scale value should be greater than or equal to 1.");if((t==="linear"||t==="cubic")&&e.length!==2&&(e.length!==4||e[0]!==1||e[1]!==1))throw new Error(`'Linear' mode and 'Cubic' mode only support 2-D inputs ('Bilinear', 'Bicubic')         or 4-D inputs with the corresponding outermost 2 scale values being 1         in the ${n?"Resize":"Upsample"} opeartor.`)}}),cu,tf,sb,ub,Wg,qg,Zg,Yg,KE=G(()=>{"use strict";gt(),Fe(),Fn(),Bo(),ab(),cu={name:"Resize",inputNames:["A"],inputTypes:[2]},tf=(e,t,n)=>(ef(t,n),[e.run({...cu,cacheHint:n.cacheKey,get:()=>Wg(e,t,n)},t)]),sb=e=>Ga(e,10),ub=e=>Ga(e,11),Wg=(e,t,n)=>{let o=Re(e.session.backend.glContext.version),[f,s]=qg(t,n);if(f.every($=>$===1)&&n.coordinateTransformMode!=="tf_crop_and_resize")return{...cu,output:{dims:s,type:t[0].type,textureType:2},hasMain:!0,shaderSource:`void main() {
+                    vec4 v = ${o.texture2D}(X, TexCoords);
+                    ${o.output} = v;
+                }`};let p=s.length;if(p<2)throw new Error(`output dimension should be at least 2, but got ${p}`);let i=s[p-2],c=s[p-1],r=t[0].dims;if(p!==r.length)throw new Error(`output dimension should match input ${r.length}, but got ${p}`);let u=r[p-2],l=r[p-1],h=f[p-2],y=f[p-1],O="";if(n.mode!=="linear")throw new Error(`resize (packed) does not support mode: '${n.mode}'`);switch(n.coordinateTransformMode){case"asymmetric":O=`
+                    vec4 getSourceFracIndex(ivec4 coords) {
+                        return vec4(coords) / scaleWHWH;
+                    }
+                `;break;case"half_pixel":O=`
+                    vec4 getSourceFracIndex(ivec4 coords) {
+                        return (vec4(coords) + 0.5) / scaleWHWH - 0.5;
+                    }
+                `;break;case"pytorch_half_pixel":O=`
+                    vec4 getSourceFracIndex(ivec4 coords) {
+                        vec4 fcoords = vec4(coords);
+                        return vec4(
+                            ${c}.0 > 1.0 ? (fcoords.x + 0.5) / scaleWHWH.x - 0.5 : 0.0,
+                            ${i}.0 > 1.0 ? (fcoords.y + 0.5) / scaleWHWH.y - 0.5 : 0.0,
+                            ${c}.0 > 1.0 ? (fcoords.z + 0.5) / scaleWHWH.z - 0.5 : 0.0,
+                            ${i}.0 > 1.0 ? (fcoords.w + 0.5) / scaleWHWH.w - 0.5 : 0.0
+                          );
+                    }
+                `;break;case"align_corners":O=`
+                    vec4 getSourceFracIndex(ivec4 coords) {
+                        vec4 resized = vec4(${c}.0 - 1.0, ${i}.0 - 1.0, ${c}.0 - 1.0,
+                            ${i}.0 - 1.0);
+                        vec4 original = vec4(${l}.0 - 1.0, ${u}.0 - 1.0, ${l}.0 - 1.0,
+                            ${u}.0 - 1.0);
+                        vec4 new_scale = original / resized;
+                        return vec4(coords) * new_scale;
+                    }
+                `;break;default:throw new Error(`resize (packed) does not support coordinateTransformMode:                                 '${n.coordinateTransformMode}'`)}let S=ui(p),A=Xa(),L=`
+            const vec2 inputWH = vec2(${u}.0, ${l}.0);
+            const vec4 scaleWHWH = vec4(float(${h}), float(${y}), float(${h}), float(${y}));
+            ${A}
+            ${O}
+            float getAValue(int x10, int r, int c, int d) {
+                return getChannel(getA(x10, r, c, d), vec2(c, d));
+            }
+            void main() {
+                ${S} rc = getOutputCoords();
+
+                int batch = rc[0];
+                int depth = rc[1];
+
+                // retrieve the 4 coordinates that is used in the 4 packed output values.
+                ivec4 coords = ivec4(rc.wz, rc.w + 1, rc.z + 1);
+
+                // calculate the source index in fraction
+                vec4 sourceFrac = getSourceFracIndex(coords);
+
+                // get the lower and upper bound of the 4 values that will be packed into one texel.
+                ivec4 x00 = ivec4(max(sourceFrac.xy, vec2(0.0)), min(inputWH - 1.0, ceil(sourceFrac.xy)));
+                ivec4 x01 = ivec4(max(sourceFrac.xw, vec2(0.0)), min(inputWH - 1.0, ceil(sourceFrac.xw)));
+                ivec4 x10 = ivec4(max(sourceFrac.zy, vec2(0.0)), min(inputWH - 1.0, ceil(sourceFrac.zy)));
+                ivec4 x11 = ivec4(max(sourceFrac.zw, vec2(0.0)), min(inputWH - 1.0, ceil(sourceFrac.zw)));
+
+                bool hasNextRow = rc.w < ${i-1};
+                bool hasNextCol = rc.z < ${c-1};
+
+                // pack x00, x01, x10, x11's top-left corner into one vec4 structure
+                vec4 topLeft = vec4(
+                    getAValue(batch, depth, x00.x, x00.y),
+                    hasNextCol ? getAValue(batch, depth, x01.x, x01.y) : 0.0,
+                    hasNextRow ? getAValue(batch, depth, x10.x, x10.y) : 0.0,
+                    (hasNextRow && hasNextCol) ? getAValue(batch, depth, x11.x, x11.y) : 0.0);
+
+                // pack x00, x01, x10, x11's top-right corner into one vec4 structure
+                vec4 topRight = vec4(
+                    getAValue(batch, depth, x00.x, x00.w),
+                    hasNextCol ? getAValue(batch, depth, x01.x, x01.w) : 0.0,
+                    hasNextRow ? getAValue(batch, depth, x10.x, x10.w) : 0.0,
+                    (hasNextRow && hasNextCol) ? getAValue(batch, depth, x11.x, x11.w) : 0.0);
+
+                // pack x00, x01, x10, x11's bottom-left corner into one vec4 structure
+                vec4 bottomLeft = vec4(
+                    getAValue(batch, depth, x00.z, x00.y),
+                    hasNextCol ? getAValue(batch, depth, x01.z, x01.y) : 0.0,
+                    hasNextRow ? getAValue(batch, depth, x10.z, x10.y) : 0.0,
+                    (hasNextRow && hasNextCol) ? getAValue(batch, depth, x11.z, x11.y) : 0.0);
+
+                // pack x00, x01, x10, x11's bottom-right corner into one vec4 structure
+                vec4 bottomRight = vec4(
+                    getAValue(batch, depth, x00.z, x00.w),
+                    hasNextCol ? getAValue(batch, depth, x01.z, x01.w) : 0.0,
+                    hasNextRow ? getAValue(batch, depth, x10.z, x10.w) : 0.0,
+                    (hasNextRow && hasNextCol) ? getAValue(batch, depth, x11.z, x11.w) : 0.0);
+
+                // calculate the interpolation fraction on u and v direction
+                vec4 frac = vec4(sourceFrac) - floor(sourceFrac);
+                vec4 clampFrac = clamp(frac, vec4(0.0), vec4(1.0));
+
+                vec4 top = mix(topLeft, topRight, clampFrac.ywyw);
+                vec4 bottom = mix(bottomLeft, bottomRight, clampFrac.ywyw);
+                vec4 newValue = mix(top, bottom, clampFrac.xxzz);
+
+                ${o.output} = vec4(newValue);
+            }
+        `;return{...cu,output:{dims:s,type:t[0].type,textureType:2},hasMain:!0,shaderSource:L}},qg=(e,t)=>{let n=e[0].dims,o=t.scales,f;if(o.length===0){let p=e[t.scalesInputIdx];if(p&&p.size!==0){if(e[t.sizesInputIdx])throw new Error("Only one of scales or sizes must be provided as input.");o=Zg(p,t.mode,t.isResize)}else{let i=e[t.sizesInputIdx];if(!i||i.size===0)throw new Error("Either scales or sizes MUST be provided as input.");f=Array.from(i.integerData),o=Yg(f,n,t.mode,t.isResize)}}else if(e[t.sizesInputIdx])throw new Error("Only one of scales or sizes must be provided as input.");let s=f||n.map((p,i)=>Math.floor(p*o[i]));return[o,s]},Zg=(e,t,n)=>{let o=Array.from(e.floatData);return vu(o,t,n),o},Yg=(e,t,n,o)=>{let f=t.length,s=new Array(f);for(let p=0,i=f;p<i;p++)if(t[p]===0){if(e[p]!==0)throw new Error("Input dim is zero but required output dim is non-zero.");s[p]=1}else s[p]=e[p]/t[p];return vu(s,n,o),s}}),lb,Xg,JE=G(()=>{"use strict";Lo(),lb=(e,t)=>(Xg(t),[new Sr([t[0].dims.length],"int32",void 0,void 0,new Int32Array(t[0].dims))]),Xg=e=>{if(!e||e.length!==1)throw new Error("Shape requires 1 input.")}}),fu,cb,fb,mc,Kg,db,Jg,Qg,QE=G(()=>{"use strict";Vt(),Eu(),Ve(),Fe(),fu={name:"Slice",inputNames:["A"],inputTypes:[0]},cb=(e,t,n)=>(Kg(t),[e.run({...fu,cacheHint:n.cacheKey,get:()=>mc(e,t[0],n)},t)]),fb=e=>{let t=e.attributes.getInts("starts"),n=e.attributes.getInts("ends"),o=e.attributes.getInts("axes",[]);return nt({starts:t,ends:n,axes:o})},mc=(e,t,n)=>{let o=n.axes.length===0?t.dims.slice(0).map((u,l)=>l):n.axes,f=Te.normalizeAxes(o,t.dims.length),s=n.starts.map((u,l)=>u>t.dims[f[l]]-1?t.dims[f[l]]:Te.normalizeAxis(u,t.dims[f[l]])),p=n.ends.map((u,l)=>u>t.dims[f[l]]-1?t.dims[f[l]]:Te.normalizeAxis(u,t.dims[f[l]])),i=t.dims.slice(),c=[];for(let u=0;u<f.length;u++)i[f[u]]=p[u]-s[u],s[u]>0&&c.push(`outputIdx[${f[u]}] += ${s[u]};`);let r=`
+      float process(int outputIdx[${i.length}]) {
+        ${c.join(`
+      `)}
+        return _A(outputIdx);
+      }`;return{...fu,output:{dims:i,type:t.type,textureType:0},shaderSource:r}},Kg=e=>{if(!e||e.length!==1)throw new Error("Slice requires 1 input.");if(Ja.indexOf(e[0].type)===-1)throw new Error("Invalid input type.")},db=(e,t)=>{Qg(t);let n=Jg(e,t);return[e.run({...fu,cacheHint:n.cacheKey,get:()=>mc(e,t[0],n)},[t[0]])]},Jg=(e,t)=>{if(!e.session.isInitializer(t[1].dataId)||!e.session.isInitializer(t[2].dataId)||t.length>=4&&!e.session.isInitializer(t[3].dataId)||t.length>=5&&!e.session.isInitializer(t[4].dataId))throw new Error("dynamic slice attributes are not allowed");if(t.length>=5&&t[4].integerData.some(p=>p!==1))throw new Error("currently non-1 steps is not supported for Slice");let n=Array.from(t[1].integerData),o=Array.from(t[2].integerData),f=t.length>=4?Array.from(t[3].integerData):[],s=`${f};${n};${o}`;return{starts:n,ends:o,axes:f,cacheKey:s}},Qg=e=>{if(!e||e.length<3||e.length>5)throw new Error("Invalid input number.");if(e[1].type!=="int32"||e[1].dims.length!==1)throw new Error("Invalid input type.");if(e[2].type!=="int32"||e[2].dims.length!==1)throw new Error("Invalid input type.");if(e.length>=4&&(e[3].type!=="int32"||e[3].dims.length!==1))throw new Error("Invalid input type.");if(e.length>=5&&(e[4].type!=="int32"||e[4].dims.length!==1))throw new Error("Invalid input type.")}}),yc,bc,vc,pb,hb,gb,mb,wc,em,tm,rm,_c,eA=G(()=>{"use strict";Vt(),Ve(),gt(),Fe(),Of(),yc={name:"SoftmaxComputeMax",inputNames:["A"],inputTypes:[0]},bc={name:"SoftmaxComputeScale",inputNames:["A","Max"],inputTypes:[0,0]},vc={name:"SoftMax",inputNames:["A","Max","Norm"],inputTypes:[0,0,0]},pb=(e,t,n)=>{_c(t);let o=t[0].dims.slice(),f=Te.normalizeAxis(n.axis,o.length),s=Te.sizeToDimension(o,f),p=Te.sizeFromDimension(o,f);return wc(e,t,n,s,p)},hb=e=>nt({axis:e.attributes.getInt("axis",1)}),gb=e=>nt({axis:e.attributes.getInt("axis",-1)}),mb=(e,t,n)=>{_c(t);let o=t[0].dims.slice(),f=Te.normalizeAxis(n.axis,o.length),s=o.length,p=f!==s-1,i=[],c=[],r=[],u;p&&(c=Array.from({length:s}).map((O,S)=>S),c[f]=s-1,c[s-1]=f,c.map(O=>i.push(o[O])),u=nt({perm:c}),r=Za(e,t,u));let l=p?Te.sizeToDimension(i,s-1):Te.sizeToDimension(o,s-1),h=p?Te.sizeFromDimension(i,s-1):Te.sizeFromDimension(o,s-1),y=wc(e,p?r:t,n,l,h);return p?Za(e,y,u):y},wc=(e,t,n,o,f)=>{let s=em(e,t[0],o,f,[o]),p=e.run({...yc,cacheHint:n.cacheKey,get:()=>s},t),i=tm(e,t[0],o,f,s.output.dims,[o]),c=e.run({...bc,cacheHint:n.cacheKey,get:()=>i},[t[0],p]),r=rm(e,t[0],o,f,s.output.dims,i.output.dims);return[e.run({...vc,cacheHint:n.cacheKey,get:()=>r},[t[0],p,c])]},em=(e,t,n,o,f)=>{let[s,p]=e.calculateTextureWidthAndHeight(t.dims,0),i=f.length;if(n<1||o<1)throw new Error("Logical row count N and feature count D must be greater than or equal to 1");if(f.length!==1)throw new Error("Dimensionality of the output should be 1");if(f[0]!==n)throw new Error("Shape of the output should be equal to logical row count");let c=Re(e.session.backend.glContext.version),r=`
+      float process(int[${i}] indices) {
+        int logical_row_start_offset = indices[0] * ${o};
+
+        float max = getColorAsFloat(${c.texture2D}(A, offsetToCoords(logical_row_start_offset, ${s},
+        ${p} )));
+        for(int i=1; i<${o}; ++i)
+        {
+          float current = getColorAsFloat(${c.texture2D}(A, offsetToCoords(logical_row_start_offset + i,
+            ${s}, ${p})));
+          if(current > max)
+          max = current;
+        }
+
+        return max;
+      }`;return{...yc,output:{dims:f,type:t.type,textureType:0},shaderSource:r}},tm=(e,t,n,o,f,s)=>{let[p,i]=e.calculateTextureWidthAndHeight(t.dims,0),c=s.length;if(n<1||o<1)throw new Error("Logical row count N and feature count D must be greater than or equal to 1");if(s.length!==1)throw new Error("Dimensionality of the output should be 1");if(s[0]!==n)throw new Error("Shape of the output should be equal to logical row count");if(f.length!==1)throw new Error("Dimensionality of the intermediate results should be 1");if(f[0]!==n)throw new Error("Shape of the intermediate results should be equal to logical row count");let r=Re(e.session.backend.glContext.version),u=`
+      float process(int[${c}] indices) {
+        int logical_row_start_offset = indices[0] * ${o};
+
+        float norm_factor = 0.0;
+        float max = _Max(indices);
+        for(int i=0; i<${o}; ++i)
+        {
+          norm_factor += exp(getColorAsFloat(${r.texture2D}(A, offsetToCoords(logical_row_start_offset + i,
+            ${p}, ${i}))) - max);
+        }
+
+        return norm_factor;
+      }`;return{...bc,output:{dims:s,type:t.type,textureType:0},shaderSource:u}},rm=(e,t,n,o,f,s)=>{let[p,i]=e.calculateTextureWidthAndHeight(t.dims,0),c=t.dims.length;if(n<1||o<1)throw new Error("Logical row count N and feature count D must be greater than or equal to 1");if(f.length!==1||s.length!==1)throw new Error("Dimensionality of the intermediate results should be 1");if(f[0]!==n||s[0]!==n)throw new Error("Shape of the intermediate results should be equal to logical row count");let r=`
+      float process(int[${c}] indices) {
+
+      // get offset of current logical tensor index from the 2-D texture coordinates (TexCoords)
+      int offset = coordsToOffset(TexCoords, ${p}, ${i});
+
+      //determine the logical row for this index
+      int logical_row_index[1];
+      logical_row_index[0] = offset / ${o};
+
+      float norm_factor = _Norm(logical_row_index);
+
+      // avoid possible division by 0
+      // if norm_facor is 0, all elements are zero
+      // if so, return 0
+      if(norm_factor == 0.0)
+        return 0.0;
+
+      return exp(_A(indices) - _Max(logical_row_index)) / norm_factor;
+    }`;return{...vc,output:{dims:t.dims,type:t.type,textureType:0},shaderSource:r}},_c=e=>{if(!e||e.length!==1)throw new Error("Softmax requires 1 input.");if(e[0].type!=="float32"&&e[0].type!=="float64")throw new Error("Invalid input type")}}),xc,yb,bb,nm,im,om,tA=G(()=>{"use strict";Vt(),Ve(),Fe(),xc={name:"Split",inputNames:["A"],inputTypes:[0]},yb=(e,t,n)=>{om(t);let o=Te.normalizeAxis(n.axis,t[0].dims.length),f=nm(e,t,o,n),s=[];for(let p=0;p<f;++p)s.push(e.run({...xc,cacheHint:`${n.cacheKey};${p}`,get:()=>im(e,t[0],n,o,p)},t));return s},bb=e=>{let t=e.attributes.getInt("axis",0),n=e.attributes.getInts("split",[]),o=e.outputs.length;return nt({axis:t,split:n,numOutputs:o})},nm=(e,t,n,o)=>{let[,f]=Bc.splitShape(t[0].dims,n,o.split,o.numOutputs);return f.length},im=(e,t,n,o,f)=>{let[s,p]=Bc.splitShape(t.dims,o,n.split,n.numOutputs),i=p[f],c=s[f],r=`
+      float process(int indices[${c.length}]) {
+        indices[${o}] += ${i};
+        return _A(indices);
+      }
+    `;return{...xc,cacheHint:`${n.cacheKey}:${f}`,output:{dims:c,type:t.type,textureType:0},shaderSource:r}},om=e=>{if(!e||e.length!==1)throw new Error("Split requires one input.");if(e[0].type!=="int8"&&e[0].type!=="uint8"&&e[0].type!=="int16"&&e[0].type!=="uint16"&&e[0].type!=="int32"&&e[0].type!=="uint32"&&e[0].type!=="float32"&&e[0].type!=="float64"&&e[0].type!=="bool")throw new Error("Invalid input type.")}}),rf,vb,wb,am,sm,rA=G(()=>{"use strict";Ve(),rf=(e,t,n)=>{am(t);let o=Te.squeezeShape(t[0].dims,n);return[e.reshapeUnpacked(t[0],o)]},vb=(e,t)=>(sm(t),rf(e,[t[0]],Array.from(t[1].integerData))),wb=e=>e.attributes.getInts("axes"),am=e=>{if(!e||e.length!==1)throw new Error("Squeeze requires 1 input.");if(e[0].type==="string")throw new Error("invalid input tensor types.")},sm=e=>{if(!e||e.length!==2)throw new Error("Squeeze requires 2 inputs.");if(e[1].type!=="int32")throw new Error("Invalid input type.")}}),_b,um,lm,nA=G(()=>{"use strict";gt(),Fe(),_b=(e,t)=>{lm(t);let n={name:"Sum",inputNames:t.map((o,f)=>`X${f}`),inputTypes:new Array(t.length).fill(0)};return[e.run({...n,get:()=>um(e,t,n)},t)]},um=(e,t,n)=>{let o=Re(e.session.backend.glContext.version),f=t[0].dims.slice(),s=`
+      void main() {
+        vec4 result = ${t.map((p,i)=>`${o.texture2D}(X${i},TexCoords)`).join(" + ")};
+        ${o.output} = result;
+      }
+    `;return{...n,output:{dims:f,type:t[0].type,textureType:0},hasMain:!0,shaderSource:s}},lm=e=>{if(!e||e.length===0)throw new Error("Sum requires inputs.");let t=e[0].dims.length;for(let n=1;n<e.length;n++){if(t!==e[n].dims.length)throw new Error("Input shapes are mismatched.");for(let o=0;o<t;o++)if(e[0].dims[o]!==e[n].dims[o])throw new Error("Input shapes are not matched.")}if(e[0].type!=="float32"&&e[0].type!=="float64")throw new Error("Invalid input type.");for(let n=1;n<e.length;n++)if(e[0].type!==e[n].type)throw new Error("Input types are not matched.")}}),xb,cm,fm,iA=G(()=>{"use strict";Eu(),Fe(),xb=(e,t)=>{fm(t);let n={name:"Tile",inputNames:["A"],inputTypes:[0]};return[e.run({...n,get:()=>cm(e,t,n)},t)]},cm=(e,t,n)=>{let o=t[0].dims.slice(),f=new Array(o.length),s=[];for(let c=0;c<o.length;c++)f[c]=o[c]*t[1].numberData[c],s.push(`inputIdx[${c}] = int(mod(float(outputIdx[${c}]), ${o[c]}.));`);let p=f.length,i=`
+      float process(int outputIdx[${p}]) {
+        int inputIdx[${p}];
+        ${s.join(`
+`)}
+        return _A(inputIdx);
+      }
+    `;return{...n,output:{dims:f,type:t[0].type,textureType:0},shaderSource:i}},fm=e=>{if(!e||e.length!==2)throw new Error("Tile requires 2 input.");if(e[1].dims.length!==1)throw new Error("The second input shape must 1 dimension.");if(e[1].dims[0]!==e[0].dims.length)throw new Error("Invalid input shape.");if(Ja.indexOf(e[0].type)===-1)throw new Error("Invalid input type.");if(e[1].type!=="int32"&&e[1].type!=="int16")throw new Error("Invalid repeat type.")}}),nf,Tb,Ob,dm,pm,oA=G(()=>{"use strict";Ve(),nf=(e,t,n)=>{dm(t);let o=Te.unsqueezeShape(t[0].dims,n);return[e.reshapeUnpacked(t[0],o)]},Tb=(e,t)=>(pm(t),nf(e,[t[0]],Array.from(t[1].integerData))),Ob=e=>e.attributes.getInts("axes"),dm=e=>{if(!e||e.length!==1)throw new Error("Unsqueeze requires 1 input.");if(e[0].type==="string")throw new Error("invalid input tensor types.")},pm=e=>{if(!e||e.length!==2)throw new Error("Unsqueeze requires 2 inputs.");if(e[1].type!=="int32")throw new Error("Invalid input type.")}}),Sb,aA=G(()=>{"use strict";qS(),sE(),uE(),cE(),Tf(),ME(),LE(),BE(),UE(),jE(),zE(),VE(),WE(),_f(),qE(),ZE(),YE(),XE(),KE(),JE(),QE(),eA(),tA(),rA(),nA(),iA(),Of(),c0(),oA(),ab(),Sb=[["Abs","","6+",jy],["Acos","","7+",zy],["Add","","7+",_y],["And","","7+",xy],["Asin","","7+",Vy],["Atan","","7+",Gy],["AveragePool","","7+",V0,G0],["BatchNormalization","","7+",yy,by],["Cast","","6+",Ny,ky],["Ceil","","6+",qy],["Clip","","6-10",Wc,Hy],["Clip","","11+",Wy],["Concat","","4+",Fy,My],["Conv","","1+",Yc,Xc],["ConvTranspose","","1+",T0,O0],["Cos","","7+",Zy],["Div","","7+",Ty],["Dropout","","7+",qc],["DepthToSpace","","1+",E0,A0],["Equal","","7+",Oy],["Elu","","6+",Yy,Xy],["Exp","","6+",Ky],["Flatten","","1+",I0,P0],["Floor","","6+",Jy],["FusedConv","com.microsoft","1+",Yc,Xc],["Gather","","1+",$0,D0],["Gemm","","7-10",Kc,C0],["Gemm","","11+",Kc,N0],["GlobalAveragePool","","1+",H0,W0],["GlobalMaxPool","","1+",Y0],["Greater","","7+",Sy],["Identity","","1+",qc],["ImageScaler","","1+",k0,R0],["InstanceNormalization","","6+",F0,M0],["LeakyRelu","","6+",Qy,e0],["Less","","7+",Ey],["LRN","","1+",L0,B0],["Log","","6+",t0],["MatMul","","1+",g0,m0],["MaxPool","","1+",q0,Z0],["Mul","","7+",Ay],["Neg","","6+",r0],["Not","","1+",n0],["Or","","7+",Iy],["Pad","","2-10",Jc,U0],["Pad","","11+",j0,z0],["Pow","","7+",Py],["PRelu","","7+",$y],["ReduceLogSum","","1+",tb,ai],["ReduceMax","","1+",J0,ai],["ReduceMean","","1+",K0,ai],["ReduceMin","","1+",Q0,ai],["ReduceProd","","1+",eb,ai],["ReduceSum","","1-12",X0,ai],["ReduceSumSquare","","1+",rb,ai],["Relu","","6+",i0],["Reshape","","5+",nb],["Resize","","10",tf,sb],["Resize","","11+",tf,ub],["Shape","","1+",lb],["Sigmoid","","6+",o0],["Sin","","7+",a0],["Slice","","10+",db],["Slice","","1-9",cb,fb],["Softmax","","1-12",pb,hb],["Softmax","","13+",mb,gb],["Split","","2-12",yb,bb],["Sqrt","","6+",s0],["Squeeze","","1-12",rf,wb],["Squeeze","","13+",vb],["Sub","","7+",Dy],["Sum","","6+",_b],["Tan","","7+",u0],["Tanh","","6+",l0],["Tile","","6+",xb],["Transpose","","1+",Za,S0],["Upsample","","7-8",Qc,ib],["Upsample","","9",Qc,ob],["Unsqueeze","","1-12",nf,Ob],["Unsqueeze","","13+",Tb],["Xor","","7+",Cy]]});function sA(e){let t={},n;for(;(n=of.exec(e))!==null;){let o=n[3].split(",").map(f=>{let s=f.trim().split(" ");return s&&s.length===2?{type:s[0],name:s[1]}:null}).filter(f=>f!==null);t[n[2]]={params:o,body:n[4]}}for(let o in t){let f=Eb.replace("__FUNC__",o),s=new RegExp(f,"gm");for(;(n=s.exec(e))!==null;){let p=n[1],i=n[2],c=n[3].split(","),r=p?`${p} ${i};`:"",u=t[o].body,l="";t[o].params.forEach((y,O)=>{y&&(l+=`${y.type} ${y.name} = ${c[O]};
+`)}),u=`${l}
+ ${u}`,u=u.replace("return",`${i} = `);let h=`
+      ${r}
+      {
+        ${u}
+      }
+      `;e=e.replace(n[0],h)}}return e=e.replace(of,""),e}var of,Eb,uA=G(()=>{"use strict";of=/@inline[\s\n\r]+(\w+)[\s\n\r]+([0-9a-zA-Z_]+)\s*\(([^)]*)\)\s*{(([^}]|[\n\r])*)}/gm,Eb="(\\w+)?\\s+([_0-9a-zA-Z]+)\\s+=\\s+__FUNC__\\((.*)\\)\\s*;"});function La(e,t){let n=[],o=[],f=t!=null&&Array.isArray(t)&&t.length===0,s=t==null||f?null:lA(t,e).sort(),p=0;for(let i=0;i<e.length;++i){if(s!=null){if(s[p]===i&&e[i]!==1)throw new Error(`Can't squeeze axis ${i} since its dim '${e[i]}' is not 1`);(s[p]==null||s[p]>i)&&e[i]===1&&(n.push(e[i]),o.push(i)),s[p]<=i&&p++}e[i]!==1&&(n.push(e[i]),o.push(i))}return{newShape:n,keptDims:o}}function lA(e,t){let n=t.length;return e=e==null?t.map((o,f)=>f):[].concat(e),mu(e.every(o=>o>=-n&&o<n),()=>`All values in axis param must be in range [-${n}, ${n}) but got axis ${e}`),mu(e.every(cA),()=>`All values in axis param must be integers but got axis ${e}`),e.map(o=>o<0?n+o:o)}function cA(e){return e%1===0}function fA(e){if(e.length===0)return 1;let t=e[0];for(let n=1;n<e.length;n++)t*=e[n];return t}function hm(e){let t=Math.ceil(Math.sqrt(e));return[t,Math.ceil(e/t)]}var Ab,Ib=G(()=>{"use strict";Qr(),Ve(),Ab=class{constructor(e){this.maxTextureSize=e}computeTextureWH(e,t){let n=this.computeTexture(e,t);return t&&t.isPacked&&(n[0]/=2,n[1]/=2),t&&t.reverseWH?[n[1],n[0]]:n}computeTexture(e,t){let n=t&&t.isPacked;if(e.length===0)return n?[2,2]:[1,1];let o=this.maxTextureSize;if(t&&t.breakAxis!==void 0){let p=t.breakAxis>=e.length?1:e.slice(t.breakAxis).reduce((c,r)=>c*r),i=t.breakAxis<=0?1:e.slice(0,t.breakAxis).reduce((c,r)=>c*r);if(p>o||i>o)bt.verbose("TextureLayout",`Given width/height preferences were unattainable: shape:${e}, breakAxis:${t.breakAxis}`);else return[p,i]}let f=e.slice(0);n&&(o=o*2,f=f.map((p,i)=>i>=f.length-2?f[i]%2===0?f[i]:f[i]+1:f[i]),f.length===1&&(f=[2,f[0]])),f.length!==2&&(f=La(f).newShape);let s=fA(f);return f.length<=1&&s<=o?[1,s]:f.length===2&&f[0]<=o&&f[1]<=o?f:f.length===3&&f[0]*f[1]<=o&&f[2]<=o?[f[0]*f[1],f[2]]:f.length===3&&f[0]<=o&&f[1]*f[2]<=o?[f[0],f[1]*f[2]]:f.length===4&&f[0]*f[1]*f[2]<=o&&f[3]<=o?[f[0]*f[1]*f[2],f[3]]:f.length===4&&f[0]<=o&&f[1]*f[2]*f[3]<=o?[f[0],f[1]*f[2]*f[3]]:n?hm(s/4).map(p=>p*2):hm(s)}}}),Pb,dA=G(()=>{"use strict";Ve(),li(),gt(),Ib(),Fn(),Pb=class extends Uo{constructor(e){super(e)}getFunctions(){return{...this.offsetToCoords(),...this.coordsToOffset(),...this.toVec(),...this.valueFrom(),...this.getCommonUtilFuncs(),...this.getInputsSamplingSnippets(),...this.getOutputSamplingSnippet()}}getCustomTypes(){return{}}offsetToCoords(){let e="offsetToCoords";return{offsetToCoords:new te(`
+      vec2 ${e}(int offset, int width, int height) {
+        int t = offset / width;
+        int s = offset - t*width;
+        vec2 coords = (vec2(s,t) + vec2(0.5,0.5)) / vec2(width, height);
+        return coords;
+      }
+      `)}}coordsToOffset(){let e="coordsToOffset";return{coordsToOffset:new te(`
+      int ${e}(vec2 coords, int width, int height) {
+        float s = coords.s * float(width);
+        float t = coords.t * float(height);
+        int offset = int(t) * width + int(s);
+        return offset;
+      }
+      `)}}getOutputSamplingSnippet(){let e=this.context.outputTextureLayout;return e.isPacked?this.getPackedOutputSamplingSnippet(e):this.getUnpackedOutputSamplingSnippet(e)}getPackedOutputSamplingSnippet(e){let t=e.unpackedShape,n=[e.width,e.height],o={},f="getOutputCoords";switch(t.length){case 0:o[f]=this.getOutputScalarCoords();break;case 1:o[f]=this.getOutputPacked1DCoords(t,n);break;case 2:o[f]=this.getOutputPacked2DCoords(t,n);break;case 3:o[f]=this.getOutputPacked3DCoords(t,n);break;default:o[f]=this.getOutputPackedNDCoords(t,n)}let s=`
+      void setOutput(vec4 val) {
+        ${Re(this.context.glContext.version).output} = val;
+      }
+    `,p="floatTextureSetRGBA";return o[p]=new te(s),o}getUnpackedOutputSamplingSnippet(e){let t=e.unpackedShape,n=[e.width,e.height],o={},f="getOutputCoords";switch(t.length){case 0:o[f]=this.getOutputScalarCoords();break;case 1:o[f]=this.getOutputUnpacked1DCoords(t,n);break;case 2:o[f]=this.getOutputUnpacked2DCoords(t,n);break;case 3:o[f]=this.getOutputUnpacked3DCoords(t,n);break;case 4:o[f]=this.getOutputUnpacked4DCoords(t,n);break;case 5:o[f]=this.getOutputUnpacked5DCoords(t,n);break;case 6:o[f]=this.getOutputUnpacked6DCoords(t,n);break;default:throw new Error(`Unsupported output dimensionality: ${t.length}`)}let s=`
+        void setOutput(float val) {
+          ${Re(this.context.glContext.version).output} = vec4(val, 0, 0, 0);
+        }
+    `,p="floatTextureSetR";return o[p]=new te(s),o}getOutputScalarCoords(){return new te(`
+      int getOutputCoords() {
+        return 0;
+      }
+    `)}getOutputPacked1DCoords(e,t){let n=t,o="";return n[0]===1?(o=`
+          int getOutputCoords() {
+            return 2 * int(TexCoords.y * ${n[1]}.0);
+          }
+        `,new te(o)):n[1]===1?(o=`
+          int getOutputCoords() {
+            return 2 * int(TexCoords.x * ${n[0]}.0);
+          }
+        `,new te(o)):(o=`
+        int getOutputCoords() {
+          ivec2 resTexRC = ivec2(TexCoords.xy *
+                                 vec2(${n[0]}, ${n[1]}));
+          return 2 * (resTexRC.y * ${n[0]} + resTexRC.x);
+        }
+      `,new te(o))}getOutputPacked2DCoords(e,t){let n="";if(Ra.arraysEqual(e,t))return n=`
+        ivec2 getOutputCoords() {
+          return 2 * ivec2(TexCoords.xy * vec2(${t[0]}, ${t[1]}));
+        }
+      `,new te(n);let o=t,f=Math.ceil(e[1]/2);return n=`
+        ivec2 getOutputCoords() {
+          ivec2 resTexRC = ivec2(TexCoords.xy *
+                                vec2(${o[0]}, ${o[1]}));
+
+          int index = resTexRC.y * ${o[0]} + resTexRC.x;
+
+          // reverse r and c order for packed texture
+          int r = imod(index, ${f}) * 2;
+          int c = 2 * (index / ${f});
+
+          return ivec2(r, c);
+        }
+      `,new te(n)}getOutputPacked3DCoords(e,t){let n=[t[0],t[1]],o=Math.ceil(e[2]/2),f=o*Math.ceil(e[1]/2),s=`
+        ivec3 getOutputCoords() {
+          ivec2 resTexRC = ivec2(TexCoords.xy *
+                                vec2(${n[0]}, ${n[1]}));
+          int index = resTexRC.y * ${n[0]} + resTexRC.x;
+
+          int b = index / ${f};
+          index -= b * ${f};
+
+          // reverse r and c order for packed texture
+          int r = imod(index, ${o}) * 2;
+          int c = 2 * (index / ${o});
+
+          return ivec3(b, r, c);
+        }
+      `;return new te(s)}getOutputPackedNDCoords(e,t){let n=[t[0],t[1]],o=Math.ceil(e[e.length-1]/2),f=o*Math.ceil(e[e.length-2]/2),s=f,p="",i="b, r, c";for(let r=2;r<e.length-1;r++)s*=e[e.length-r-1],p=`
+      int b${r} = index / ${s};
+      index -= b${r} * ${s};
+    `+p,i=`b${r}, `+i;let c=`
+      ivec${e.length} getOutputCoords() {
+        ivec2 resTexRC = ivec2(TexCoords.xy *
+                              vec2(${n[0]}, ${n[1]}));
+        int index = resTexRC.y * ${n[0]} + resTexRC.x;
+
+        ${p}
+
+        int b = index / ${f};
+        index -= b * ${f};
+
+        // reverse r and c order for packed texture
+        int r = imod(index, ${o}) * 2;
+        int c = 2 * (index / ${o});
+
+        return ivec${e.length}(${i});
+      }
+    `;return new te(c)}getOutputUnpacked1DCoords(e,t){let n=`
+        int getOutputCoords() {
+          ivec2 resTexRC = ivec2(TexCoords.xy *
+                                vec2(${t[0]}, ${t[1]}));
+          return resTexRC.y * ${t[0]} + resTexRC.x;
+        }
+      `;return new te(n)}getOutputUnpacked2DCoords(e,t){let n=`
+        ivec2 getOutputCoords() {
+          ivec2 resTexRC = ivec2(TexCoords.xy *
+                                vec2(${t[0]}, ${t[1]}));
+          int index = resTexRC.y * ${t[0]} + resTexRC.x;
+          int r = index / ${e[1]};
+          int c = index - r * ${e[1]};
+          return ivec2(r, c);
+        }
+      `;return new te(n)}getOutputUnpacked3DCoords(e,t){let n="",o=e.length,f=null;o<2&&(f=[]),f=new Array(o-1),f[o-2]=e[o-1];for(let i=o-3;i>=0;--i)f[i]=f[i+1]*e[i+1];let s=["r","c","d"],p=f.map((i,c)=>{let r=`int ${s[c]} = index / ${i}`,u=c===f.length-1?`int ${s[c+1]} = index - ${s[c]} * ${i}`:`index -= ${s[c]} * ${i}`;return`${r}; ${u};`}).join("");return n=`
+        ivec3 getOutputCoords() {
+          ivec2 resTexRC = ivec2(TexCoords.xy *
+                                vec2(${t[0]}, ${t[1]}));
+          int index = resTexRC.y * ${t[0]} + resTexRC.x;
+          ${p}
+          return ivec3(r, c, d);
+        }
+      `,new te(n)}getOutputUnpacked4DCoords(e,t){let n="",o=e.length,f=null;o<2&&(f=[]),f=new Array(o-1),f[o-2]=e[o-1];for(let i=o-3;i>=0;--i)f[i]=f[i+1]*e[i+1];let s=["r","c","d","d2"],p=f.map((i,c)=>{let r=`int ${s[c]} = index / ${i}`,u=c===f.length-1?`int ${s[c+1]} = index - ${s[c]} * ${i}`:`index -= ${s[c]} * ${i}`;return`${r}; ${u};`}).join("");return n=`
+      ivec4 getOutputCoords() {
+          ivec2 resTexRC = ivec2(TexCoords.xy *
+                                vec2(${t[0]}, ${t[1]}));
+          int index = resTexRC.y * ${t[0]} + resTexRC.x;
+          ${p}
+          return ivec4(r, c, d, d2);
+        }
+      `,new te(n)}getOutputUnpacked5DCoords(e,t){let n="",o=e.length,f=null;o<2&&(f=[]),f=new Array(o-1),f[o-2]=e[o-1];for(let i=o-3;i>=0;--i)f[i]=f[i+1]*e[i+1];let s=["r","c","d","d2","d3"],p=f.map((i,c)=>{let r=`int ${s[c]} = index / ${i}`,u=c===f.length-1?`int ${s[c+1]} = index - ${s[c]} * ${i}`:`index -= ${s[c]} * ${i}`;return`${r}; ${u};`}).join("");return n=`
+      ivec5 getOutputCoords() {
+          ivec2 resTexRC = ivec2(TexCoords.xy *
+                                vec2(${t[0]}, ${t[1]}));
+          int index = resTexRC.y * ${t[0]} + resTexRC.x;
+          ${p}
+          return ivec5(r, c, d, d2, d3);
+        }
+      `,new te(n)}getOutputUnpacked6DCoords(e,t){let n="",o=e.length,f=null;o<2&&(f=[]),f=new Array(o-1),f[o-2]=e[o-1];for(let i=o-3;i>=0;--i)f[i]=f[i+1]*e[i+1];let s=["r","c","d","d2","d3","d4"],p=f.map((i,c)=>{let r=`int ${s[c]} = index / ${i}`,u=c===f.length-1?`int ${s[c+1]} = index - ${s[c]} * ${i}`:`index -= ${s[c]} * ${i}`;return`${r}; ${u};`}).join("");return n=`
+     ivec6 getOutputCoords() {
+         ivec2 resTexRC = ivec2(TexCoords.xy *
+                               vec2(${t[0]}, ${t[1]}));
+         int index = resTexRC.y * ${t[0]} + resTexRC.x;
+         ${p}
+         return ivec6(r, c, d, d2, d3, d4);
+       }
+     `,new te(n)}getCommonUtilFuncs(){let e={},t="uvFromFlat";e[t]=new te(`
+    vec2 uvFromFlat(int texNumR, int texNumC, int index) {
+      int texC = index / texNumR;
+      int texR = index - texC * texNumR;
+      // TODO: swap texR, texC order in following function so row is corresponding to u and column is corresponding to
+      //       v.
+      return (vec2(texR, texC) + halfCR) / vec2(texNumR, texNumC);
     }
-  }
-  return config;
-});
-function validateConfig(configuration) {
-  return ConfigSchema.parse(configuration ?? {});
-}
-
-// src/inference.ts
-var import_ndarray4 = __toESM(require_ndarray());
-async function initBase(config) {
-  if (config.debug)
-    console.debug("Loading model...", config.model);
-  const model = config.model;
-  const blob = await loadAsBlob(`/models/${model}`, config);
-  const arrayBuffer = await blob.arrayBuffer();
-  const session = await createOnnxSession(arrayBuffer, config);
-  return session;
-}
-async function initInference(config) {
-  config = validateConfig(config);
-  const base = await initBase(config);
-  return { config, session: { base } };
-}
-async function runInference(imageTensor, config, session) {
-  const resolution = 1024;
-  const [srcHeight, srcWidth, srcChannels] = imageTensor.shape;
-  const keepAspect = false;
-  let resizedImageTensor = tensorResizeBilinear(
-    imageTensor,
-    resolution,
-    resolution,
-    keepAspect
-  );
-  const inputTensor = tensorHWCtoBCHW(resizedImageTensor);
-  let predictionsDict = await runOnnxSession(
-    session.base,
-    [["input", inputTensor]],
-    ["output"],
-    config
-  );
-  let alphamask2 = (0, import_ndarray4.default)(predictionsDict[0].data, [resolution, resolution, 1]);
-  let alphamaskU8 = convertFloat32ToUint8(alphamask2);
-  if (config.rescale) {
-    alphamaskU8 = tensorResizeBilinear(
-      alphamaskU8,
-      srcWidth,
-      srcHeight,
-      keepAspect
-    );
-    return [alphamaskU8, imageTensor];
-  } else {
-    return [alphamaskU8, resizedImageTensor];
-  }
-}
-
-// src/api/v1.ts
-var init = memoize_default(initInference, (config) => JSON.stringify(config));
-async function preload(configuration) {
-  await init(configuration);
-  return;
-}
-async function removeBackground(image, configuration) {
-  const { config, session } = await init(configuration);
-  if (config.progress)
-    config.progress("compute:decode", 0, 4);
-  const inputImageTensor = await imageSourceToImageData(image, config);
-  config.progress?.("compute:inference", 1, 4);
-  const [alphamask2, imageTensor] = await runInference(
-    inputImageTensor,
-    config,
-    session
-  );
-  config.progress?.("compute:mask", 2, 4);
-  const outImageTensor = imageTensor;
-  const [width, height] = outImageTensor.shape;
-  const stride = width * height;
-  for (let i = 0; i < stride; i += 1) {
-    outImageTensor.data[4 * i + 3] = alphamask2.data[i];
-  }
-  config.progress?.("compute:encode", 3, 4);
-  const outImage = await imageEncode(
-    outImageTensor,
-    config.output.quality,
-    config.output.format
-  );
-  config.progress?.("compute:encode", 4, 4);
-  return outImage;
-}
-async function removeForeground(image, configuration) {
-  const { config, session } = await init(configuration);
-  const imageTensor = await imageSourceToImageData(image, config);
-  const [alphamask2, imageInput] = await runInference(
-    imageTensor,
-    config,
-    session
-  );
-  const outImageTensor = imageInput;
-  const [width, height, channels] = outImageTensor.shape;
-  const stride = width * height;
-  for (let i = 0; i < stride; i += 1) {
-    outImageTensor.data[4 * i + 3] = 255 - alphamask2.data[i];
-  }
-  const outImage = await imageEncode(
-    outImageTensor,
-    config.output.quality,
-    config.output.format
-  );
-  return outImage;
-}
-var alphamask = segmentForeground;
-async function segmentForeground(image, configuration) {
-  const { config, session } = await init(configuration);
-  const imageTensor = await imageSourceToImageData(image, config);
-  let [height, width, channels] = imageTensor.shape;
-  const [alphamask2, imageInput] = await runInference(
-    imageTensor,
-    config,
-    session
-  );
-  const stride = width * height;
-  const outImageTensor = imageTensor;
-  for (let i = 0; i < stride; i += 1) {
-    const index = 4 * i;
-    let alpha = alphamask2.data[i];
-    outImageTensor.data[index] = 255;
-    outImageTensor.data[index + 1] = 255;
-    outImageTensor.data[index + 2] = 255;
-    outImageTensor.data[index + 3] = alpha;
-  }
-  const outImage = await imageEncode(
-    outImageTensor,
-    config.output.quality,
-    config.output.format
-  );
-  return outImage;
-}
-async function applySegmentationMask(image, mask, config) {
-  config = validateConfig(config);
-  const imageTensor = await imageSourceToImageData(image, config);
-  const [imageHeight, imageWidth, imageChannels] = imageTensor.shape;
-  const maskTensor = await imageSourceToImageData(mask, config);
-  const [maskHeight, maskWidth, maskChannels] = maskTensor.shape;
-  const alphaMask = maskHeight !== imageHeight || maskWidth !== imageWidth ? tensorResizeBilinear(maskTensor, imageWidth, imageHeight) : maskTensor;
-  const stride = imageWidth * imageHeight;
-  for (let i = 0; i < stride; i += 1) {
-    const idxImage = imageChannels * i;
-    const idxMask = maskChannels * i;
-    imageTensor.data[idxImage + 3] = alphaMask.data[idxMask + 3];
-  }
-  const outImage = await imageEncode(
-    imageTensor,
-    config.output.quality,
-    config.output.format
-  );
-  return outImage;
-}
-export {
-  alphamask,
-  applySegmentationMask,
-  preload,
-  removeBackground,
-  removeForeground,
-  segmentForeground
-};
+    `),t="packedUVfrom1D",e[t]=new te(`
+      vec2 packedUVfrom1D(int texNumR, int texNumC, int index) {
+        int texelIndex = index / 2;
+        int texR = texelIndex / texNumC;
+        int texC = texelIndex - texR * texNumC;
+        return (vec2(texC, texR) + halfCR) / vec2(texNumC, texNumR);
+      }
+      `),t="packedUVfrom2D",e[t]=new te(`
+      vec2 packedUVfrom2D(int texNumR, int texNumC, int texelsInLogicalRow, int row, int col) {
+        int texelIndex = (row / 2) * texelsInLogicalRow + (col / 2);
+        int texR = texelIndex / texNumC;
+        int texC = texelIndex - texR * texNumC;
+        return (vec2(texC, texR) + halfCR) / vec2(texNumC, texNumR);
+      }
+      `),t="packedUVfrom3D",e[t]=new te(`
+      vec2 packedUVfrom3D(int texNumR, int texNumC,
+          int texelsInBatch, int texelsInLogicalRow, int b,
+          int row, int col) {
+        int index = b * texelsInBatch + (row / 2) * texelsInLogicalRow + (col / 2);
+        int texR = index / texNumC;
+        int texC = index - texR * texNumC;
+        return (vec2(texC, texR) + halfCR) / vec2(texNumC, texNumR);
+      }
+      `),t="sampleTexture";let n=Re(this.context.glContext.version);return e[t]=new te(`
+        float sampleTexture(sampler2D textureSampler, vec2 uv) {
+            return ${n.texture2D}(textureSampler, uv).r;
+        }`),e}getInputsSamplingSnippets(){let e={},t=this.context.outputTextureLayout;return this.context.programInfo.inputNames.forEach((n,o)=>{let f=this.context.inputTextureLayouts[o],s=tc(n);f.isPacked?e[s]=this.getPackedSamplerFromInput(s,n,f):e[s]=this.getUnpackedSamplerFromInput(s,n,f);let p=CS(n);f.unpackedShape.length<=t.unpackedShape.length&&(f.isPacked?e[p]=this.getPackedSamplerAtOutputCoords(p,f,t,n):e[p]=this.getUnpackedSamplerAtOutputCoords(p,f,t,n))}),e}getPackedSamplerAtOutputCoords(e,t,n,o){let f=t.unpackedShape,s=n.unpackedShape,p=tc(o),i=f.length,c=s.length,r=hn.getBroadcastDims(f,s),u=ui(c),l=c-i,h,y=Fo();i===0?h="":c<2&&r.length>=1?h="coords = 0;":h=r.map(Z=>`coords.${y[Z+l]} = 0;`).join(`
+`);let O="";c<2&&i>0?O="coords":O=f.map((Z,ae)=>`coords.${y[ae+l]}`).join(", ");let S="return outputValue;",A=Te.size(f)===1,L=Te.size(s)===1;if(i===1&&!A&&!L)S=`
+        return vec4(outputValue.xy, outputValue.xy);
+      `;else if(A&&!L)c===1?S=`
+          return vec4(outputValue.x, outputValue.x, 0., 0.);
+        `:S=`
+          return vec4(outputValue.x);
+        `;else if(r.length){let Z=i-2,ae=i-1;r.indexOf(Z)>-1&&r.indexOf(ae)>-1?S="return vec4(outputValue.x);":r.indexOf(Z)>-1?S="return vec4(outputValue.x, outputValue.y, outputValue.x, outputValue.y);":r.indexOf(ae)>-1&&(S="return vec4(outputValue.xx, outputValue.zz);")}let $=`
+        int lastDim = coords.${y[c-1]};
+        coords.${y[c-1]} = coords.${y[c-2]};
+        coords.${y[c-2]} = lastDim;
+      `,F=`
+      vec4 ${e}() {
+        ${u} coords = getOutputCoords();
+        ${$}
+        ${h}
+        vec4 outputValue = ${p}(${O});
+        ${S}
+      }
+    `;return new te(F,["coordinates.getOutputCoords"])}getUnpackedSamplerAtOutputCoords(e,t,n,o){let f=[n.width,n.height],s=[t.width,t.height],p=t.unpackedShape.length,i=n.unpackedShape.length,c=t.unpackedShape,r=n.unpackedShape,u=tc(o);if(p===i&&Ra.arraysEqual(s,f)){let $=`
+          float ${e}() {
+            return sampleTexture(${o}, TexCoords);
+          }
+        `;return new te($,["coordinates.sampleTexture"])}let l=ui(i),h=hn.getBroadcastDims(c,r),y=i-p,O,S=Fo();p===0?O="":i<2&&h.length>=1?O="coords = 0;":O=h.map($=>`coords.${S[$+y]} = 0;`).join(`
+`);let A="";i<2&&p>0?A="coords":A=t.unpackedShape.map(($,F)=>`coords.${S[F+y]}`).join(", ");let L=`
+        float ${e}() {
+          ${l} coords = getOutputCoords();
+          ${O}
+          return ${u}(${A});
+        }
+      `;return new te(L,["coordinates.getOutputCoords"])}getPackedSamplerFromInput(e,t,n){switch(n.unpackedShape.length){case 0:return this.getPackedSamplerScalar(e,t);case 1:return this.getPackedSampler1D(e,t,n);case 2:return this.getPackedSampler2D(e,t,n);case 3:return this.getPackedSampler3D(e,t,n);default:return this.getPackedSamplerND(e,t,n)}}getUnpackedSamplerFromInput(e,t,n){let o=n.unpackedShape;switch(o.length){case 0:return this.getUnpackedSamplerScalar(e,t,n);case 1:return this.getUnpackedSampler1D(e,t,n);case 2:return this.getUnpackedSampler2D(e,t,n);case 3:return this.getUnpackedSampler3D(e,t,n);case 4:return this.getUnpackedSampler4D(e,t,n);case 5:return this.getUnpackedSampler5D(e,t,n);case 6:return this.getUnpackedSampler6D(e,t,n);default:throw new Error(`Unsupported dimension ${o.length}-D`)}}getPackedSamplerScalar(e,t){let n=Re(this.context.glContext.version),o=`
+          vec4 ${e}() {
+            return ${n.texture2D}(${t}, halfCR);
+          }
+        `;return new te(o)}getPackedSampler1D(e,t,n){let o=[n.width,n.height],f=[o[1],o[0]],s=Re(this.context.glContext.version),p=`vec4 ${e}(int index) {
+      vec2 uv = packedUVfrom1D(
+      ${f[0]}, ${f[1]}, index);
+      return ${s.texture2D}(${t}, uv);
+    }`;return new te(p,["coordinates.packedUVfrom1D"])}getPackedSampler2D(e,t,n){let o=n.unpackedShape,f=[n.width,n.height],s=Re(this.context.glContext.version),p=f[0],i=f[1];if(f!=null&&Ra.arraysEqual(o,f)){let l=`vec4 ${e}(int row, int col) {
+        vec2 uv = (vec2(col, row) + halfCR) / vec2(${i}.0, ${p}.0);
+        return ${s.texture2D}(${t}, uv);
+      }`;return new te(l)}let c=f,r=Math.ceil(o[1]/2),u=`vec4 ${e}(int row, int col) {
+      vec2 uv = packedUVfrom2D(${c[1]}, ${c[0]}, ${r}, row, col);
+      return ${s.texture2D}(${t}, uv);
+    }`;return new te(u,["coordinates.packedUVfrom2D"])}getPackedSampler3D(e,t,n){let o=n.unpackedShape,f=[n.width,n.height],s=[f[0],f[1]],p=Re(this.context.glContext.version);if(o[0]===1){let h=o.slice(1),y=[1,2],O=Oa(o,h),S=["b","row","col"],A=JSON.parse(JSON.stringify(n));A.unpackedShape=O;let L=this.getPackedSamplerFromInput(e,t,A),$=`${L.routineBody}
+      vec4 ${e}(int b, int row, int col) {
+        return ${e}(${Sa(S,y)});
+      } `;return new te($,L.dependencies)}let i=s[0],c=s[1],r=Math.ceil(o[2]/2),u=r*Math.ceil(o[1]/2),l=`vec4 ${e}(int b, int row, int col) {
+      vec2 uv = packedUVfrom3D(
+        ${c}, ${i}, ${u}, ${r}, b, row, col);
+      return ${p.texture2D}(${t}, uv);}`;return new te(l,["coordinates.packedUVfrom3D"])}getPackedSamplerND(e,t,n){let o=n.unpackedShape,f=o.length,s=[n.width,n.height],p=Re(this.context.glContext.version),i=[s[0],s[1]],c=i[1],r=i[0],u=Math.ceil(o[f-1]/2),l=u*Math.ceil(o[f-2]/2),h="int b, int row, int col",y=`b * ${l} + (row / 2) * ${u} + (col / 2)`;for(let S=2;S<f-1;S++)h=`int b${S}, `+h,l*=o[f-S-1],y=`b${S} * ${l} + `+y;let O=`vec4 ${e}(${h}) {
+      int index = ${y};
+      int texR = index / ${r};
+      int texC = index - texR * ${r};
+      vec2 uv = (vec2(texC, texR) + halfCR) / vec2(${r}, ${c});
+      return ${p.texture2D}(${t}, uv);
+    }`;return new te(O)}getUnpackedSamplerScalar(e,t,n){let[o,f]=[n.width,n.height];if(o===1&&f===1){let p=`
+          float ${e}() {
+            return sampleTexture(${t}, halfCR);
+          }
+        `;return new te(p,["coordinates.sampleTexture"])}let s=`
+        float ${e}() {
+          int offset_${t} = coordsToOffset(TexCoords, ${o}, ${f});
+          vec2 uv = uvFromFlat(${o}, ${f}, offset_${t});
+          return sampleTexture(${t}, uv);
+        }
+      `;return new te(s,["coordinates.uvFromFlat","coordinates.sampleTexture","coordinates.coordsToOffset"])}getUnpackedSampler1D(e,t,n){let o=n.width,f=n.height;if(f===1&&o===1){let p=`
+        float ${e}(int index) {
+          return sampleTexture(${t}, halfCR);
+        }
+      `;return new te(p,["coordinates.sampleTexture"])}if(f===1){let p=`
+          float ${e}(int index) {
+            vec2 uv = vec2((float(index) + 0.5) / ${o}.0, 0.5);
+            return sampleTexture(${t}, uv);
+          }
+        `;return new te(p,["coordinates.sampleTexture"])}if(o===1){let p=`
+          float ${e}(int index) {
+            vec2 uv = vec2(0.5, (float(index) + 0.5) / ${f}.0);
+            return sampleTexture(${t}, uv);
+          }
+        `;return new te(p,["coordinates.sampleTexture"])}let s=`
+        float ${e}(int index) {
+          vec2 uv = uvFromFlat(${o}, ${f}, index);
+          return sampleTexture(${t}, uv);
+        }
+      `;return new te(s,["coordinates.uvFromFlat","coordinates.sampleTexture"])}getUnpackedSampler2D(e,t,n){let o=n.unpackedShape,f=[n.height,n.width];if(f!=null&&Ra.arraysEqual(o,f)){let l=f[1],h=f[0],y=`
+          float ${e}(int row, int col) {
+            vec2 uv = (vec2(row, col) + halfCR) / vec2(${l}.0, ${h}.0);
+            return sampleTexture(${t}, uv);
+          }
+        `;return new te(y,["coordinates.sampleTexture"])}let{newShape:s,keptDims:p}=La(o),i=s;if(i.length<o.length){let l=Oa(o,i),h=JSON.parse(JSON.stringify(n));h.unpackedShape=l;let y=["col","row"],O=`
+          ${this.getUnpackedSamplerFromInput(e,t,h).routineBody}
+          float ${e}(int row, int col) {
+            return ${e}(${Sa(y,p)});
+          }
+        `;return new te(O,["coordinates.sampleTexture"])}let c=f[1],r=f[0];if(r===1){let l=`
+          float ${e}(int row, int col) {
+            int offset_${t} = coordsToOffset(TexCoords, ${c}, ${r});
+            float index = dot(vec3(row, col, offset_${t}), vec3(${o[1]}, 1, 1));
+            vec2 uv = vec2(0.5, (index + 0.5) / ${c}.0);
+            return sampleTexture(${t}, uv);
+          }
+        `;return new te(l,["coordinates.sampleTexture","coordinates.coordsToOffset"])}if(c===1){let l=`
+          float ${e}(int row, int col) {
+            int offset_${t} = coordsToOffset(TexCoords, ${c}, ${r});
+            float index = dot(vec3(row, col, offset_${t}), vec3(${o[1]}, 1, 1));
+            vec2 uv = vec2((index + 0.5) / ${r}.0, 0.5);
+            return sampleTexture(${t}, uv);
+          }
+        `;return new te(l,["coordinates.sampleTexture","coordinates.coordsToOffset"])}let u=`
+        float ${e}(int row, int col) {
+          int index = col * ${o[1]} + row;
+          vec2 uv = uvFromFlat(${c}, ${r}, index);
+          return sampleTexture(${t}, uv);
+        }
+      `;return new te(u,["coordinates.uvFromFlat","coordinates.sampleTexture","coordinates.coordsToOffset"])}getUnpackedSampler3D(e,t,n){let o=n.unpackedShape,f=o[1]*o[2],s=o[2],{newShape:p,keptDims:i}=La(o),c=p;if(c.length<o.length){let h=Oa(o,c),y=["batch","col","row"],O=JSON.parse(JSON.stringify(n));O.unpackedShape=h;let S=this.getUnpackedSamplerFromInput(e,t,O),A=i.reverse(),L=`
+          ${S.routineBody}
+          float ${e}(int batch, int row, int col) {
+            return ${e}(${Sa(y,A)});
+          }
+        `;return new te(L,S.dependencies)}let r=n.width,u=n.height,l=`
+          float ${e}(int depth, int row, int col) {
+            // Explicitly use integer operations as dot() only works on floats.
+            int index = depth * ${f} + col * ${s} + row;
+            vec2 uv = uvFromFlat(${r}, ${u}, index);
+            return sampleTexture(${t}, uv);
+          }
+      `;return new te(l,["coordinates.uvFromFlat","coordinates.sampleTexture","coordinates.coordsToOffset"])}getUnpackedSampler4D(e,t,n){let o=n.unpackedShape,f=o[3],s=o[2]*f,p=o[1]*s,i=n.width,c=n.height,r=`
+        float ${e}(int row, int col, int depth, int depth2) {
+          int index = row * ${p} + col * ${s} +
+              depth2 * ${f} + depth;
+          vec2 uv = uvFromFlat(${i}, ${c}, index);
+          return sampleTexture(${t}, uv);
+        }
+      `;return new te(r,["coordinates.uvFromFlat","coordinates.sampleTexture"])}getUnpackedSampler5D(e,t,n){let o=n.unpackedShape,f=o[4],s=o[3]*f,p=o[2]*s,i=o[1]*p,{newShape:c,keptDims:r}=La(o);if(c.length<o.length){let y=Oa(o,c),O=["row","col","depth","depth2","depth3"],S=JSON.parse(JSON.stringify(n));S.unpackedShape=y;let A=`
+          ${this.getUnpackedSamplerFromInput(e,t,S).routineBody}
+          float ${e}(int row, int col, int depth, int depth2, int depth3) {
+            return ${e}(${Sa(O,r)});
+          }
+        `;return new te(A,["coordinates.sampleTexture","coordinates.uvFromFlat"])}let u=n.width,l=n.height,h=`
+        float ${e}(int row, int col, int depth, int depth2, int depth3) {
+          int index = row * ${i} + col * ${p} + depth * ${s} +
+          depth3 * ${f} + depth2;
+          vec2 uv = uvFromFlat(${u}, ${l}, index);
+          return sampleTexture(${t}, uv);
+        }
+      `;return new te(h,["coordinates.sampleTexture","coordinates.uvFromFlat"])}getUnpackedSampler6D(e,t,n){let o=n.unpackedShape,f=o[5],s=o[4]*f,p=o[3]*s,i=o[2]*p,c=o[1]*i,{newShape:r,keptDims:u}=La(o);if(r.length<o.length){let O=Oa(o,r),S=["row","col","depth","depth2","depth3","depth4"],A=JSON.parse(JSON.stringify(n));A.unpackedShape=O;let L=`
+            ${this.getUnpackedSamplerFromInput(e,t,A).routineBody}
+            float ${e}(int row, int col, int depth,
+              int depth2, int depth3, int depth4) {
+              return ${e}(${Sa(S,u)});
+            }
+          `;return new te(L,["coordinates.sampleTexture","coordinates.uvFromFlat"])}let l=n.width,h=n.height,y=`
+          float ${e}(int row, int col, int depth,
+            int depth2, int depth3, int depth4) {
+            int index = row * ${c} + col * ${i} + depth * ${p} +
+            depth2 * ${s} + depth3 * ${f} + depth4;
+            vec2 uv = uvFromFlat(${l}, ${h}, index);
+            return sampleTexture(${t}, uv);
+          }
+        `;return new te(y,["coordinates.uvFromFlat","coordinates.sampleTexture","coordinates.coordsToOffset"])}toVec(){let e=this.context.outputTextureLayout,t=e.shape.length,n=e.strides,o=e.width,f=e.height,s=[];for(let i=0;i<t-1;++i)s.push(`
+        c[${i}] = offset / ${n[i]};`),s.push(`
+        offset -= c[${i}] * ${n[i]};`);s.push(`
+        c[${t-1}] = offset;`);let p=`
+      void toVec(vec2 texCoords, out int c[${t}]) {
+        int offset = coordsToOffset(texCoords, ${o}, ${f});
+        ${s.join("")}
+      }
+      void toVec(int offset, out int c[${t}]) {
+        ${s.join("")}
+      }
+    `;return{toVec:new te(p,["coordinates.coordsToOffset"])}}valueFrom(){let e={};return this.context.programInfo.inputNames.forEach((t,n)=>{let o=this.context.inputTextureLayouts[n],f=(o.unpackedShape.length>0?o.unpackedShape:o.shape).length,s=`_${t}`;e[s]=new te(this.getValueFromSingle(t,f,o.width,o.height,!1),[`shapeUtils.indicesToOffset${s}`,"coordinates.offsetToCoords","fragcolor.getColorAsFloat"]),s=s+"_T",e[s]=new te(this.getValueFromSingle(t,f,o.width,o.height,!0),[`shapeUtils.indicesToOffset${s}`,"coordinates.offsetToCoords","fragcolor.getColorAsFloat"])}),e}getValueFromSingle(e,t,n,o,f){let s=`_${e}`;f&&(s=s+"_T");let p=Re(this.context.glContext.version);return`
+        float ${s}(int m[${t}]) {
+          int offset = indicesToOffset${s}(m);
+          vec2 coords = offsetToCoords(offset, ${n}, ${o});
+          float value = getColorAsFloat(${p.texture2D}(${e}, coords));
+          return value;
+        }
+        `}getPackedValueFrom(e,t,n,o,f){let s=`_${e}_Pack`;f&&(s=s+"_T");let p=Re(this.context.glContext.version);return`
+        vec4 ${s}(int m[${t}]) {
+          int offset = indicesToOffset_${e}(m);
+          vec2 coords = offsetToCoords(offset, ${n}, ${o});
+          return ${p.texture2D}(${e}, coords);
+        }
+        `}}}),$b,pA=G(()=>{"use strict";li(),$b=class af extends Uo{constructor(t){super(t)}getFunctions(){return{...this.encodeFloat32(),...this.decodeFloat32()}}getCustomTypes(){return{}}encodeFloat32(){return{encode:new te(`highp vec4 encode(highp float f) {
+        return vec4(f, 0.0, 0.0, 0.0);
+      }
+        `)}}decodeFloat32(){return{decode:new te(`highp float decode(highp vec4 rgba) {
+        return rgba.r;
+      }
+        `)}}encodeUint8(){let t=af.isLittleEndian()?"rgba.rgba=rgba.abgr;":"";return{encode:new te(`
+      highp vec4 encode(highp float f) {
+        highp float F = abs(f);
+        highp float Sign = step(0.0,-f);
+        highp float Exponent = floor(log2(F));
+        highp float Mantissa = (exp2(- Exponent) * F);
+        Exponent = floor(log2(F) + 127.0) + floor(log2(Mantissa));
+        highp vec4 rgba;
+        rgba[0] = 128.0 * Sign  + floor(Exponent*exp2(-1.0));
+        rgba[1] = 128.0 * mod(Exponent,2.0) + mod(floor(Mantissa*128.0),128.0);
+        rgba[2] = floor(mod(floor(Mantissa*exp2(23.0 -8.0)),exp2(8.0)));
+        rgba[3] = floor(exp2(23.0)*mod(Mantissa,exp2(-15.0)));
+        ${t}
+        rgba = rgba / 255.0; // values need to be normalized to [0,1]
+        return rgba;
+    }
+        `)}}decodeUint8(){let t=af.isLittleEndian()?"rgba.rgba=rgba.abgr;":"";return{decode:new te(`
+        highp float decode(highp vec4 rgba) {
+          rgba = rgba * 255.0; // values need to be de-normalized from [0,1] to [0,255]
+          ${t}
+          highp float Sign = 1.0 - step(128.0,rgba[0])*2.0;
+          highp float Exponent = 2.0 * mod(rgba[0],128.0) + step(128.0,rgba[1]) - 127.0;
+          highp float Mantissa = mod(rgba[1],128.0)*65536.0 + rgba[2]*256.0 +rgba[3] + float(0x800000);
+          highp float Result =  Sign * exp2(Exponent) * (Mantissa * exp2(-23.0 ));
+          return Result;
+      }
+        `)}}static isLittleEndian(){let t=new ArrayBuffer(4),n=new Uint32Array(t),o=new Uint8Array(t);if(n[0]=3735928559,o[0]===239)return!0;if(o[0]===222)return!1;throw new Error("unknown endianness")}}}),Db,hA=G(()=>{"use strict";li(),gt(),Db=class extends Uo{constructor(e){super(e)}getFunctions(){return{...this.setFragColor(),...this.getColorAsFloat()}}getCustomTypes(){return{}}setFragColor(){let e=Re(this.context.glContext.version);return{setFragColor:new te(`
+        void setFragColor(float value) {
+            ${e.output} = encode(value);
+        }
+        `,["encoding.encode"])}}getColorAsFloat(){return{getColorAsFloat:new te(`
+        float getColorAsFloat(vec4 color) {
+            return decode(color);
+        }
+        `,["encoding.decode"])}}}}),Cb,gA=G(()=>{"use strict";li(),Cb=class Ba extends Uo{constructor(t){super(t)}getFunctions(){return{...this.bcastIndex(),...this.bcastMatmulIndex(),...this.offsetToIndices(),...this.indicesToOffset(),...this.incrementIndices()}}getCustomTypes(){return{}}bcastIndex(){let t=this.context.outputTextureLayout.shape.length,n={};return this.context.programInfo.inputNames.forEach((o,f)=>{let s=this.context.inputTextureLayouts[f].unpackedShape;if(s.length<=t){let p=s.length,i=t-p,c=`bcastIndices_${o}`,r="";for(let l=0;l<p;++l)r+=`
+          realIndices[${l}] = int( mod(float(bcastedIndices[${i+l}]), ${s[l]}.0) );
+          `;let u=`
+        void ${c} (int bcastedIndices[${t}], out int realIndices[${p}]) {
+          ${r}
+        }
+        `;n[c]=new te(u)}}),n}bcastMatmulIndex(){let t=this.context.outputTextureLayout.shape.length,n={};return this.context.programInfo.inputNames.forEach((o,f)=>{let s=this.context.inputTextureLayouts[f].shape;if(!(s.length<2||s.length>t)){let p=s.length,i=t-p,c=`bcastMatmulIndices_${o}`,r="";for(let l=0;l<p-2;++l)r+=`
+          realIndices[${l}] = int( mod(float(bcastedIndices[${i+l}]), ${s[l]}.0) );
+          `;let u=`
+        void ${c}(int bcastedIndices[${t}], out int realIndices[${p}]) {
+          ${r}
+          realIndices[${p-1}] = bcastedIndices[${t-1}];
+          realIndices[${p-2}] = bcastedIndices[${t-2}];
+        }
+        `;n[c]=new te(u)}}),n}indicesToOffset(){let t={};return this.context.programInfo.inputNames.forEach((n,o)=>{let f=this.context.inputTextureLayouts[o].shape,s=this.context.inputTextureLayouts[o].strides,p=f.length,i=`indicesToOffset_${n}`;t[i]=new te(Ba.indexToOffsetSingle(i,p,s)),i=`indicesToOffset_${n}_T`,t[i]=new te(Ba.indexToOffsetSingle(i,p,s.slice().reverse()))}),t}static indexToOffsetSingle(t,n,o){let f="";for(let s=n-1;s>=0;--s)f+=`
+        offset += indices[${s}] * ${o[s]};
+        `;return`
+      int ${t}(int indices[${n}]) {
+        int offset = 0;
+        ${f}
+        return offset;
+      }
+      `}offsetToIndices(){let t={};return this.context.programInfo.inputNames.forEach((n,o)=>{let f=this.context.inputTextureLayouts[o].shape,s=this.context.inputTextureLayouts[o].strides,p=f.length,i=`offsetToIndices_${n}`;t[i]=new te(Ba.offsetToIndicesSingle(i,p,s)),i=`offsetToIndices_${n}_T`,t[i]=new te(Ba.offsetToIndicesSingle(i,p,s.slice().reverse()))}),t}static offsetToIndicesSingle(t,n,o){let f=[];for(let s=0;s<n-1;++s)f.push(`
+      indices[${s}] = offset / ${o[s]};`),f.push(`
+        offset -= indices[${s}] * ${o[s]};`);return f.push(`
+      indices[${n-1}] = offset;`),`
+      void ${t}(int offset, out int indices[${n}]) {
+        ${f.join("")}
+      }
+      `}incrementIndices(){let t={};return this.context.programInfo.inputNames.forEach((n,o)=>{let f=this.context.inputTextureLayouts[o].shape,s=f.length,p=`incrementIndices_${n}`,i="";for(let r=0;r<s;++r)i+=`
+        shape[${r}] = ${f[r]};`;let c=`
+        void ${p}(int axis, out int indices[${s}]) {
+          int shape[${s}];
+          ${i};
+          for(int i = ${s} -1 ; i >= 0; --i) {
+            if(i > axis) continue;
+            indices[i] += 1;
+            if(indices[i] < shape[i]) {
+              break;
+            }
+            indices[i] = 0;
+          }
+        }
+        `;t[p]=new te(c)}),t}}}),Nb,mA=G(()=>{"use strict";li(),Nb=class extends Uo{constructor(e){super(e)}getCustomTypes(){return{}}getFunctions(){return{...this.binaryVecFunctions(),...this.copyVec(),...this.setVecItem(),...this.getVecItem()}}binaryVecFunctions(){let e=this.context.outputTextureLayout.shape.length,t={add:"+=",sub:"-=",mul:"*=",div:"/="},n={};for(let o in t){let f=`${o}Vec`,s="";for(let i=0;i<e;++i)s+=`
+          dest[${i}] ${t[o]} src[${i}];
+          `;let p=`
+        void ${f}(int src[${e}], out int dest[${e}]) {
+          ${s}
+        }
+        `;n[f]=new te(p)}return n}copyVec(){let e=this.context.outputTextureLayout.shape.length,t="";for(let o=0;o<e;++o)t+=`
+        dest[${o}] = src[${o}];
+        `;let n=`
+      void copyVec(int src[${e}], out int dest[${e}]) {
+        ${t}
+      }
+      `;return{copyVec:new te(n)}}setVecItem(){let e=this.context.outputTextureLayout.shape.length,t=`
+        if(index < 0)
+            index =${e} + index;
+        if (index == 0)
+            m[0] = value;
+        `;for(let o=1;o<e-1;++o)t+=`
+        else if (index == ${o})
+            m[${o}] = value;
+            `;t+=`
+        else
+            m[${e-1}] = value;
+        `;let n=`
+      void setVecItem(out int m[${e}], int index, int value) {
+        ${t}
+      }
+        `;return{setVecItem:new te(n)}}getVecItem(){let e=this.context.outputTextureLayout.shape.length,t=`
+        if(index < 0)
+            index = ${e} + index;
+        if (index == 0)
+            return m[0];
+      `;for(let o=1;o<e-1;++o)t+=`
+        else if (index == ${o})
+            return m[${o}];
+      `;t+=`
+        else
+            return m[${e-1}];
+        `;let n=`
+      int getVecItem(int m[${e}], int index) {
+        ${t}
+      }
+    `;return{getVecItem:new te(n)}}}}),sf,yA=G(()=>{"use strict";dA(),pA(),hA(),gA(),mA(),sf={encoding:$b,fragcolor:Db,vec:Nb,shapeUtils:Cb,coordinates:Pb}}),kb,bA=G(()=>{"use strict";li(),uA(),yA(),gt(),kb=class{constructor(e,t,n,o){this.libs={},this.glslLibRoutineDependencyGraph={},this.context=new vy(e,t,n,o),Object.keys(sf).forEach(s=>{let p=new sf[s](this.context);this.libs[s]=p});let f=this.glslLibRoutineDependencyGraph;for(let s in this.libs){let p=this.libs[s].getFunctions();for(let i in p){let c=s+"."+i,r;f[c]?(r=f[c],r.routineBody=p[i].routineBody):(r=new Hc(c,p[i].routineBody),f[c]=r);let u=p[i].dependencies;if(u)for(let l=0;l<u.length;++l)if(f[u[l]])r.addDependency(f[u[l]]);else{let h=new Hc(u[l]);f[u[l]]=h,r.addDependency(h)}}}}preprocess(){let e=this.context.programInfo,t=e.shaderSource;return this.context.programInfo.hasMain||(t=`${t}
+      ${DS(this.context.glContext.version,this.context.outputTextureLayout.shape.length)}`),t=sA(t),`${$S(this.context.glContext.version)}
+    ${this.getUniforms(e.inputNames,e.variables)}
+    ${this.getImports(t)}
+    ${t}`}getImports(e){let t=this.selectGlslLibRoutinesToBeIncluded(e);if(t.length===0)return"";let n="";for(let o=0;o<t.length;++o)if(t[o].routineBody)n+=t[o].routineBody+`
+`;else throw new Error(`Missing body for the Glsl Library routine: ${t[o].name}`);return n}selectGlslLibRoutinesToBeIncluded(e){let t=[];return Object.keys(this.glslLibRoutineDependencyGraph).forEach(n=>{let o=n.split(".")[1];e.indexOf(o)!==-1&&t.push(this.glslLibRoutineDependencyGraph[n])}),wy.returnOrderedNodes(t)}getUniforms(e,t){let n=[];if(e)for(let o of e)n.push(`uniform sampler2D ${o};`);if(t)for(let o of t)n.push(`uniform ${o.type} ${o.name}${o.arrayLength?`[${o.arrayLength}]`:""};`);return n.join(`
+`)}}}),Rb,vA=G(()=>{"use strict";gn(),Qr(),bA(),gt(),Rb=class{constructor(e,t,n){this.profiler=e,this.glContext=t,this.textureLayoutStrategy=n,this.repo=new Map,this.attributesBound=!1}getArtifact(e){return this.repo.get(e)}setArtifact(e,t){this.repo.set(e,t)}run(e,t,n){this.profiler.event("op",`ProgramManager.run ${e.programInfo.name??"unknown kernel"}`,()=>{let o=this.glContext.gl,f=e.program;o.useProgram(f);try{this.bindOutput(n),this.attributesBound||this.bindAttributes(e.attribLocations),this.bindUniforms(e.uniformLocations,e.programInfo.variables??[],t)}catch(s){throw bt.error("ProgramManager",e.programInfo.shaderSource),s}this.profiler.event("backend","GlContext.draw()",()=>{this.glContext.draw()})},this.glContext)}dispose(){this.vertexShader&&this.glContext.deleteShader(this.vertexShader),this.repo.forEach(e=>this.glContext.deleteProgram(e.program))}build(e,t,n){return this.profiler.event("backend","ProgramManager.build",()=>{let o=new kb(this.glContext,e,t,n),f=o.preprocess(),s=this.compile(f);return{programInfo:e,program:s,uniformLocations:this.getUniformLocations(s,o.context.programInfo.inputNames,o.context.programInfo.variables),attribLocations:this.getAttribLocations(s)}})}compile(e){if(!this.vertexShader){bt.verbose("ProrgramManager","Compiling and caching Vertex shader for the first time");let o=PS(this.glContext.version);this.vertexShader=this.glContext.compileShader(o,this.glContext.gl.VERTEX_SHADER)}me.debug&&bt.verbose("ProrgramManager",`FragShader:
+${e}
+`);let t=this.glContext.compileShader(e,this.glContext.gl.FRAGMENT_SHADER),n=this.glContext.createProgram(this.vertexShader,t);return this.glContext.deleteShader(t),n}bindOutput(e){let t=e.width,n=e.height;bt.verbose("ProrgramManager",`Binding output texture to Framebuffer: w/h=${t}/${n}, shape=${e.shape}, type=${e.tensor.type}`),this.glContext.attachFramebuffer(e.texture,t,n)}bindAttributes(e){let t=e.position,n=e.textureCoord;this.glContext.setVertexAttributes(t,n),this.attributesBound=!0}bindUniforms(e,t,n){let o=this.glContext.gl,f=0;for(let{name:s,type:p,location:i,arrayLength:c}of e){let r=t.find(u=>u.name===s)?.data;if(p!=="sampler2D"&&!r)throw new Error(`variable '${s}' does not have data defined in program info`);switch(p){case"sampler2D":this.bindTexture(n[f],i,f),f++;break;case"float":c?o.uniform1fv(i,r):o.uniform1f(i,r);break;case"int":c?o.uniform1iv(i,r):o.uniform1i(i,r);break;default:throw new Error(`Uniform not implemented: ${p}`)}}}bindTexture(e,t,n){this.glContext.bindTextureToUniform(e.texture,n,t)}getAttribLocations(e){return{position:this.getAttribLocation(e,"position"),textureCoord:this.getAttribLocation(e,"textureCoord")}}getUniformLocations(e,t,n){let o=[];if(t)for(let f of t)o.push({name:f,type:"sampler2D",location:this.getUniformLocation(e,f)});if(n)for(let f of n)o.push({...f,location:this.getUniformLocation(e,f.name)});return o}getUniformLocation(e,t){let n=this.glContext.gl.getUniformLocation(e,t);if(n===null)throw new Error(`Uniform ${t} not found.`);return n}getAttribLocation(e,t){return this.glContext.gl.getAttribLocation(e,t)}}}),Fb,wA=G(()=>{"use strict";Qr(),bu(),Fb=class{constructor(e,t,n,o){this.glContext=e,this.layoutStrategy=t,this.profiler=n,this.config=o,this.pendingRead=new Map,o.reuseTextures&&(this.inUseTextures=new Map,this.idleTextures=new Map,this.textureLookup=new Map)}createTextureFromLayout(e,t,n,o){let f=this.toEncoderType(e),s=this.glContext.getEncoder(f,t.channels||1,o);if(t.isPacked&&o===1)throw new Error("not implemented");let p=t.width,i=t.height,c,r;if(this.config.reuseTextures){c=`${p}x${i}_${s.format}_${s.internalFormat}_${s.textureType}`,r=this.inUseTextures.get(c),r||(r=[],this.inUseTextures.set(c,r));let l=this.idleTextures.get(c);if(l&&l.length>0){let h=l.pop();return r.push(h),o===1&&this.glContext.updateTexture(h,p,i,s,this.toTextureData(e,n)),h}}bt.verbose("TextureManager",`Creating new texture of size ${t.width}x${t.height}`);let u=this.glContext.allocateTexture(p,i,s,this.toTextureData(e,n));return this.config.reuseTextures&&(r.push(u),this.textureLookup.set(u,c)),u}readTexture(e,t,n){return n||(n=1),this.profiler.event("backend","TextureManager.readTexture",()=>{let o=e.shape.reduce((s,p)=>s*p)*n,f=this.glContext.readTexture(e.texture,e.width,e.height,o,this.toEncoderType(t),n);return this.toTensorData(t,f)})}async readTextureAsync(e,t,n){let o=e.tensor.dataId;if(n||(n=1),this.pendingRead.has(o)){let f=this.pendingRead.get(o);return new Promise(s=>f?.push(s))}return this.profiler.event("backend","TextureManager.readTextureAsync",async()=>{this.pendingRead.set(o,[]);let f=e.shape.reduce((c,r)=>c*r)*n;await this.glContext.createAndWaitForFence();let s=this.glContext.readTexture(e.texture,e.width,e.height,f,this.toEncoderType(t),n),p=this.toTensorData(t,s),i=this.pendingRead.get(o);return this.pendingRead.delete(o),i?.forEach(c=>c(p)),p})}readUint8TextureAsFloat(e){return this.profiler.event("backend","TextureManager.readUint8TextureAsFloat",()=>{let t=e.shape.reduce((o,f)=>o*f),n=this.glContext.readTexture(e.texture,e.width,e.height,t*4,"byte",4);return new Float32Array(n.buffer,n.byteOffset,t)})}releaseTexture(e,t){let n;if(this.config.reuseTextures&&(n=this.textureLookup.get(e.texture),n)){t&&this.textureLookup.delete(n);let o=this.inUseTextures.get(n);if(o){let f=o.indexOf(e.texture);if(f!==-1){o.splice(f,1);let s=this.idleTextures.get(n);s||(s=[],this.idleTextures.set(n,s)),s.push(e.texture)}}}(!n||t)&&(bt.verbose("TextureManager",`Deleting texture of size ${e.width}x${e.height}`),this.glContext.deleteTexture(e.texture))}toTensorData(e,t){switch(e){case"int16":return t instanceof Int16Array?t:Int16Array.from(t);case"int32":return t instanceof Int32Array?t:Int32Array.from(t);case"int8":return t instanceof Int8Array?t:Int8Array.from(t);case"uint16":return t instanceof Uint16Array?t:Uint16Array.from(t);case"uint32":return t instanceof Uint32Array?t:Uint32Array.from(t);case"uint8":case"bool":return t instanceof Uint8Array?t:Uint8Array.from(t);case"float32":return t instanceof Float32Array?t:Float32Array.from(t);case"float64":return t instanceof Float64Array?t:Float64Array.from(t);default:throw new Error(`TensorData type ${e} is not supported`)}}toTextureData(e,t){if(t)return t instanceof Float32Array?t:new Float32Array(t)}toEncoderType(e){return"float"}clearActiveTextures(){this.glContext.clearActiveTextures()}}}),Mb,_A=G(()=>{"use strict";Qr(),cS(),WS(),aA(),vA(),Ib(),wA(),Mb=class{constructor(e,t){this.backend=e,this.context=t,this.layoutStrategy=new Ab(e.glContext.maxTextureSize),this.programManager=new Rb(this.context.profiler,e.glContext,this.layoutStrategy),this.textureManager=new Fb(e.glContext,this.layoutStrategy,this.context.profiler,{reuseTextures:e.textureCacheMode==="full"}),this.packedTextureDataCache=new Map,this.unpackedTextureDataCache=new Map,this.pack=e.pack,this.pack2unpackMap=new Map,this.unpack2packMap=new Map}createInferenceHandler(){return new my(this)}onGraphInitialized(e){let t=e.getValues().filter(n=>n.from===-1&&n.tensor).map(n=>n.tensor.dataId);this.initializers=new Set(t)}isInitializer(e){return this.initializers?this.initializers.has(e):!1}addInitializer(e){this.initializers.add(e)}getTextureData(e,t){return t?this.packedTextureDataCache.get(e):this.unpackedTextureDataCache.get(e)}setTextureData(e,t,n=!1){bt.verbose("WebGLSessionHandler","Storing Texture data in cache"),n?this.packedTextureDataCache.set(e,t):this.unpackedTextureDataCache.set(e,t)}dispose(){this.programManager.dispose(),this.textureManager.clearActiveTextures(),this.packedTextureDataCache.forEach(e=>this.textureManager.releaseTexture(e,!0)),this.packedTextureDataCache=new Map,this.unpackedTextureDataCache.forEach(e=>this.textureManager.releaseTexture(e,!0)),this.unpackedTextureDataCache=new Map}resolve(e,t,n){let o=uS(e,t,Sb);return{impl:o.opImpl,context:o.opInit?o.opInit(e,n):e}}}});function xA(e){let t=0;for(;t<e.length&&e[t]();++t);return t-1}var uf,TA=G(()=>{"use strict";gn(),bu(),bu(),Fn(),uf=class{constructor(e,t){this.frameBufferBound=!1,this.itemsToPoll=[],this.gl=e,this.version=t,this.getExtensions(),this.vertexbuffer=this.createVertexbuffer(),this.framebuffer=this.createFramebuffer(),this.queryVitalParameters()}allocateTexture(e,t,n,o){let f=this.gl,s=f.createTexture();f.bindTexture(f.TEXTURE_2D,s),f.texParameteri(f.TEXTURE_2D,f.TEXTURE_MIN_FILTER,f.NEAREST),f.texParameteri(f.TEXTURE_2D,f.TEXTURE_MAG_FILTER,f.NEAREST),f.texParameteri(f.TEXTURE_2D,f.TEXTURE_WRAP_S,f.CLAMP_TO_EDGE),f.texParameteri(f.TEXTURE_2D,f.TEXTURE_WRAP_T,f.CLAMP_TO_EDGE);let p=o?n.encode(o,e*t):null;return f.texImage2D(f.TEXTURE_2D,0,n.internalFormat,e,t,0,n.format,n.textureType,p),this.checkError(),s}updateTexture(e,t,n,o,f){let s=this.gl;s.bindTexture(s.TEXTURE_2D,e);let p=o.encode(f,t*n);s.texSubImage2D(s.TEXTURE_2D,0,0,0,t,n,o.format,o.textureType,p),this.checkError()}attachFramebuffer(e,t,n){let o=this.gl;o.bindTexture(o.TEXTURE_2D,e),o.bindFramebuffer(o.FRAMEBUFFER,this.framebuffer),o.framebufferTexture2D(o.FRAMEBUFFER,o.COLOR_ATTACHMENT0,o.TEXTURE_2D,e,0),this.checkError(),o.viewport(0,0,t,n),o.scissor(0,0,t,n)}readTexture(e,t,n,o,f,s){let p=this.gl;s||(s=1),this.frameBufferBound||this.attachFramebuffer(e,t,n);let i=this.getEncoder(f,s),c=i.allocate(t*n);return p.bindTexture(p.TEXTURE_2D,e),p.framebufferTexture2D(p.FRAMEBUFFER,p.COLOR_ATTACHMENT0,p.TEXTURE_2D,e,0),p.readPixels(0,0,t,n,p.RGBA,i.textureType,c),this.checkError(),i.decode(c,o)}isFramebufferReady(){return!0}getActiveTexture(){let e=this.gl;return`TEXTURE${e.getParameter(this.gl.ACTIVE_TEXTURE)-e.TEXTURE0}`}getTextureBinding(){return this.gl.getParameter(this.gl.TEXTURE_BINDING_2D)}getFramebufferBinding(){return this.gl.getParameter(this.gl.FRAMEBUFFER_BINDING)}setVertexAttributes(e,t){let n=this.gl;n.vertexAttribPointer(e,3,n.FLOAT,!1,20,0),n.enableVertexAttribArray(e),t!==-1&&(n.vertexAttribPointer(t,2,n.FLOAT,!1,20,12),n.enableVertexAttribArray(t)),this.checkError()}createProgram(e,t){let n=this.gl,o=n.createProgram();return n.attachShader(o,e),n.attachShader(o,t),n.linkProgram(o),o}compileShader(e,t){let n=this.gl,o=n.createShader(t);if(!o)throw new Error(`createShader() returned null with type ${t}`);if(n.shaderSource(o,e),n.compileShader(o),n.getShaderParameter(o,n.COMPILE_STATUS)===!1)throw new Error(`Failed to compile shader: ${n.getShaderInfoLog(o)}
+Shader source:
+${e}`);return o}deleteShader(e){this.gl.deleteShader(e)}bindTextureToUniform(e,t,n){let o=this.gl;o.activeTexture(o.TEXTURE0+t),this.checkError(),o.bindTexture(o.TEXTURE_2D,e),this.checkError(),o.uniform1i(n,t),this.checkError()}draw(){this.gl.drawArrays(this.gl.TRIANGLE_STRIP,0,4),this.checkError()}checkError(){if(me.debug){let e=this.gl,t=e.getError(),n="";switch(t){case e.NO_ERROR:return;case e.INVALID_ENUM:n="INVALID_ENUM";break;case e.INVALID_VALUE:n="INVALID_VALUE";break;case e.INVALID_OPERATION:n="INVALID_OPERATION";break;case e.INVALID_FRAMEBUFFER_OPERATION:n="INVALID_FRAMEBUFFER_OPERATION";break;case e.OUT_OF_MEMORY:n="OUT_OF_MEMORY";break;case e.CONTEXT_LOST_WEBGL:n="CONTEXT_LOST_WEBGL";break;default:n=`Unknown WebGL Error: ${t.toString(16)}`}throw new Error(n)}}deleteTexture(e){this.gl.deleteTexture(e)}deleteProgram(e){this.gl.deleteProgram(e)}getEncoder(e,t,n=0){if(this.version===2)return new py(this.gl,t);switch(e){case"float":return n===1||this.isRenderFloat32Supported?new Vc(this.gl,t):new Vc(this.gl,t,this.textureHalfFloatExtension.HALF_FLOAT_OES);case"int":throw new Error("not implemented");case"byte":return new hy(this.gl,t);default:throw new Error(`Invalid dataType: ${e}`)}}clearActiveTextures(){let e=this.gl;for(let t=0;t<this.maxTextureImageUnits;++t)e.activeTexture(e.TEXTURE0+t),e.bindTexture(e.TEXTURE_2D,null)}dispose(){if(this.disposed)return;let e=this.gl;e.bindFramebuffer(e.FRAMEBUFFER,null),e.deleteFramebuffer(this.framebuffer),e.bindBuffer(e.ARRAY_BUFFER,null),e.deleteBuffer(this.vertexbuffer),e.bindBuffer(e.ELEMENT_ARRAY_BUFFER,null),e.finish(),this.disposed=!0}createDefaultGeometry(){return new Float32Array([-1,1,0,0,1,-1,-1,0,0,0,1,1,0,1,1,1,-1,0,1,0])}createVertexbuffer(){let e=this.gl,t=e.createBuffer();if(!t)throw new Error("createBuffer() returned null");let n=this.createDefaultGeometry();return e.bindBuffer(e.ARRAY_BUFFER,t),e.bufferData(e.ARRAY_BUFFER,n,e.STATIC_DRAW),this.checkError(),t}createFramebuffer(){let e=this.gl.createFramebuffer();if(!e)throw new Error("createFramebuffer returned null");return e}queryVitalParameters(){let e=this.gl;if(this.isFloatTextureAttachableToFrameBuffer=this.checkFloatTextureAttachableToFrameBuffer(),this.isRenderFloat32Supported=this.checkRenderFloat32(),this.isFloat32DownloadSupported=this.checkFloat32Download(),this.version===1&&!this.textureHalfFloatExtension&&!this.isRenderFloat32Supported)throw new Error("both float32 and float16 TextureType are not supported");this.isBlendSupported=!this.isRenderFloat32Supported||this.checkFloat32Blend(),this.maxTextureSize=e.getParameter(e.MAX_TEXTURE_SIZE),this.maxTextureImageUnits=e.getParameter(e.MAX_TEXTURE_IMAGE_UNITS),this.version}getExtensions(){this.version===2?(this.colorBufferFloatExtension=this.gl.getExtension("EXT_color_buffer_float"),this.disjointTimerQueryWebgl2Extension=this.gl.getExtension("EXT_disjoint_timer_query_webgl2")):(this.textureFloatExtension=this.gl.getExtension("OES_texture_float"),this.textureHalfFloatExtension=this.gl.getExtension("OES_texture_half_float"))}checkFloatTextureAttachableToFrameBuffer(){let e=this.gl,t=e.createTexture();e.bindTexture(e.TEXTURE_2D,t);let n=this.version===2?e.RGBA32F:e.RGBA;e.texImage2D(e.TEXTURE_2D,0,n,1,1,0,e.RGBA,e.FLOAT,null);let o=e.createFramebuffer();e.bindFramebuffer(e.FRAMEBUFFER,o),e.framebufferTexture2D(e.FRAMEBUFFER,e.COLOR_ATTACHMENT0,e.TEXTURE_2D,t,0);let f=e.checkFramebufferStatus(e.FRAMEBUFFER)===e.FRAMEBUFFER_COMPLETE;return e.bindTexture(e.TEXTURE_2D,null),e.bindFramebuffer(e.FRAMEBUFFER,null),e.deleteTexture(t),e.deleteFramebuffer(o),f}checkRenderFloat32(){if(this.version===2){if(!this.colorBufferFloatExtension)return!1}else if(!this.textureFloatExtension)return!1;return this.isFloatTextureAttachableToFrameBuffer}checkFloat32Download(){if(this.version===2){if(!this.colorBufferFloatExtension)return!1}else if(!this.textureFloatExtension||!this.gl.getExtension("WEBGL_color_buffer_float"))return!1;return this.isFloatTextureAttachableToFrameBuffer}checkFloat32Blend(){let e=this.gl,t,n,o,f,s;try{t=e.createTexture(),n=e.createFramebuffer(),e.bindTexture(e.TEXTURE_2D,t);let p=this.version===2?e.RGBA32F:e.RGBA;return e.texImage2D(e.TEXTURE_2D,0,p,1,1,0,e.RGBA,e.FLOAT,null),e.bindFramebuffer(e.FRAMEBUFFER,n),e.framebufferTexture2D(e.FRAMEBUFFER,e.COLOR_ATTACHMENT0,e.TEXTURE_2D,t,0),e.enable(e.BLEND),o=e.createShader(e.VERTEX_SHADER),!o||(e.shaderSource(o,"void main(){}"),e.compileShader(o),f=e.createShader(e.FRAGMENT_SHADER),!f)||(e.shaderSource(f,"precision highp float;void main(){gl_FragColor=vec4(0.5);}"),e.compileShader(f),s=e.createProgram(),!s)?!1:(e.attachShader(s,o),e.attachShader(s,f),e.linkProgram(s),e.useProgram(s),e.drawArrays(e.POINTS,0,1),e.getError()===e.NO_ERROR)}finally{e.disable(e.BLEND),s&&e.deleteProgram(s),o&&e.deleteShader(o),f&&e.deleteShader(f),n&&(e.bindFramebuffer(e.FRAMEBUFFER,null),e.deleteFramebuffer(n)),t&&(e.bindTexture(e.TEXTURE_2D,null),e.deleteTexture(t))}}beginTimer(){if(this.version===2&&this.disjointTimerQueryWebgl2Extension){let e=this.gl,t=this.disjointTimerQueryWebgl2Extension,n=e.createQuery();return e.beginQuery(t.TIME_ELAPSED_EXT,n),n}else throw new Error("WebGL1 profiling currently not supported.")}endTimer(){if(this.version===2&&this.disjointTimerQueryWebgl2Extension){let e=this.gl,t=this.disjointTimerQueryWebgl2Extension;e.endQuery(t.TIME_ELAPSED_EXT);return}else throw new Error("WebGL1 profiling currently not supported")}isTimerResultAvailable(e){let t=!1,n=!1;if(this.version===2&&this.disjointTimerQueryWebgl2Extension){let o=this.gl,f=this.disjointTimerQueryWebgl2Extension;t=o.getQueryParameter(e,o.QUERY_RESULT_AVAILABLE),n=o.getParameter(f.GPU_DISJOINT_EXT)}else throw new Error("WebGL1 profiling currently not supported");return t&&!n}getTimerResult(e){let t=0;if(this.version===2){let n=this.gl;t=n.getQueryParameter(e,n.QUERY_RESULT),n.deleteQuery(e)}else throw new Error("WebGL1 profiling currently not supported");return t/1e6}async waitForQueryAndGetTime(e){return await dh(()=>this.isTimerResultAvailable(e)),this.getTimerResult(e)}async createAndWaitForFence(){let e=this.createFence(this.gl);return this.pollFence(e)}createFence(e){let t,n=e,o=n.fenceSync(n.SYNC_GPU_COMMANDS_COMPLETE,0);return e.flush(),o===null?t=()=>!0:t=()=>{let f=n.clientWaitSync(o,0,0);return f===n.ALREADY_SIGNALED||f===n.CONDITION_SATISFIED},{query:o,isFencePassed:t}}async pollFence(e){return new Promise(t=>{this.addItemToPoll(()=>e.isFencePassed(),()=>t())})}pollItems(){let e=xA(this.itemsToPoll.map(t=>t.isDoneFn));for(let t=0;t<=e;++t){let{resolveFn:n}=this.itemsToPoll[t];n()}this.itemsToPoll=this.itemsToPoll.slice(e+1)}async addItemToPoll(e,t){this.itemsToPoll.push({isDoneFn:e,resolveFn:t}),!(this.itemsToPoll.length>1)&&await dh(()=>(this.pollItems(),this.itemsToPoll.length===0))}}});function Lb(e){let t;if((!e||e==="webgl2")&&"webgl2"in Fi?t=Fi.webgl2:(!e||e==="webgl")&&"webgl"in Fi&&(t=Fi.webgl),!t)try{let o=SA();t=gm(o,e)}catch{let o=OA();t=gm(o,e)}e=e||t.version===1?"webgl":"webgl2";let n=t.gl;return Fi[e]=t,n.isContextLost()?(delete Fi[e],Lb(e)):(n.disable(n.DEPTH_TEST),n.disable(n.STENCIL_TEST),n.disable(n.BLEND),n.disable(n.DITHER),n.disable(n.POLYGON_OFFSET_FILL),n.disable(n.SAMPLE_COVERAGE),n.enable(n.SCISSOR_TEST),n.enable(n.CULL_FACE),n.cullFace(n.BACK),t)}function gm(e,t){let n={alpha:!1,depth:!1,antialias:!1,stencil:!1,preserveDrawingBuffer:!1,premultipliedAlpha:!1,failIfMajorPerformanceCaveat:!1},o,f=n;if((!t||t==="webgl2")&&(o=e.getContext("webgl2",f),o))try{return new uf(o,2)}catch(s){bt.warning("GlContextFactory",`failed to create WebGLContext using contextId 'webgl2'. Error: ${s}`)}if((!t||t==="webgl")&&(o=e.getContext("webgl",f)||e.getContext("experimental-webgl",f),o))try{return new uf(o,1)}catch(s){bt.warning("GlContextFactory",`failed to create WebGLContext using contextId 'webgl' or 'experimental-webgl'. Error: ${s}`)}throw new Error("WebGL is not supported")}function OA(){if(typeof document>"u")throw new TypeError("failed to create canvas: document is not supported");let e=document.createElement("canvas");return e.width=1,e.height=1,e}function SA(){if(typeof OffscreenCanvas>"u")throw new TypeError("failed to create offscreen canvas: OffscreenCanvas is not supported");return new OffscreenCanvas(1,1)}var Fi,EA=G(()=>{"use strict";Qr(),TA(),Fi={}}),Bb,AA=G(()=>{"use strict";gn(),Qr(),_A(),EA(),Bb=class{get contextId(){return me.webgl.contextId}set contextId(e){me.webgl.contextId=e}get matmulMaxBatchSize(){return me.webgl.matmulMaxBatchSize}set matmulMaxBatchSize(e){me.webgl.matmulMaxBatchSize=e}get textureCacheMode(){return me.webgl.textureCacheMode}set textureCacheMode(e){me.webgl.textureCacheMode=e}get pack(){return me.webgl.pack}set pack(e){me.webgl.pack=e}get async(){return me.webgl.async}set async(e){me.webgl.async=e}initialize(){try{return this.glContext=Lb(this.contextId),typeof this.matmulMaxBatchSize!="number"&&(this.matmulMaxBatchSize=16),typeof this.textureCacheMode!="string"&&(this.textureCacheMode="full"),typeof this.pack!="boolean"&&(this.pack=!1),typeof this.async!="boolean"&&(this.async=!1),bt.setWithEnv(me),me.webgl.context||Object.defineProperty(me.webgl,"context",{value:this.glContext.gl}),bt.verbose("WebGLBackend",`Created WebGLContext: ${typeof this.glContext} with matmulMaxBatchSize: ${this.matmulMaxBatchSize}; textureCacheMode: ${this.textureCacheMode}; pack: ${this.pack}; async: ${this.async}.`),!0}catch(e){return bt.warning("WebGLBackend",`Unable to initialize WebGLBackend. ${e}`),!1}}createSessionHandler(e){return new Mb(this,e)}dispose(){this.glContext.dispose()}}});async function Ub(e){if(e){let t=typeof e=="string"?[e]:e;for(let n of t){let o=Ef.get(n);if(o)return o;let f=await IA(n);if(f)return f}}else return Ub(["webgl"]);throw new Error("no available backend to use")}async function IA(e){let t=jb;if(typeof t[e]<"u"&&PA(t[e])){let n=t[e],o=n.initialize();if(typeof o=="object"&&"then"in o&&(o=await o),o)return Ef.set(e,n),n}}function PA(e){let t=e;return"initialize"in t&&typeof t.initialize=="function"&&"createSessionHandler"in t&&typeof t.createSessionHandler=="function"&&"dispose"in t&&typeof t.dispose=="function"}var Ef,jb,$A=G(()=>{"use strict";AA(),Ef=new Map,jb={webgl:new Bb}}),mm,zb,DA=G(()=>{"use strict";Qr(),mm=class{constructor(e,t){this.op=e,this.node=t}},zb=class{constructor(e,t,n){this.graph=e,this.profiler=n,this.initialize(t)}initialize(e){this.profiler.event("session","ExecutionPlan.initialize",()=>{let t=this.graph.getNodes();if(t.length!==e.length)throw new Error("The size of nodes and OPs do not match.");this._ops=e.map((n,o)=>new mm(n,t[o])),this.reset(),this._starter=[],this._ops.forEach((n,o)=>{let f=!0;for(let s of n.node.inputs)if(!this._values[s]&&this.graph.getInputIndices().indexOf(s)===-1){f=!1;break}f&&this._starter.push(o)})})}reset(){this._values=this.graph.getValues().map(e=>e.tensor)}async execute(e,t){return this.profiler.event("session","ExecutionPlan.execute",async()=>{this.reset();let n=e.createInferenceHandler(),o=this.graph.getInputIndices();if(t.length!==o.length)throw new Error(`number of input tensors don't match the number of inputs to the model: actual: ${t.length} expected: ${o.length}`);t.forEach((r,u)=>{let l=o[u];this._values[l]=r});let f=this._starter.slice(0),s=this.graph.getValues(),p=this.graph.getNodes(),i=0;for(;i<f.length;){let r=f[i++],u=this._ops[r],l=u.node.inputs.map(S=>this._values[S]);if(l.indexOf(void 0)!==-1)throw new Error(`unresolved input detected: op: ${u.node}`);let h=l;bt.verbose("ExecPlan",`Runing op:${u.node.name} (${h.map((S,A)=>`'${u.node.inputs[A]}': ${S.type}[${S.dims.join(",")}]`).join(", ")})`);let y=await this.profiler.event("node",u.node.name,async()=>u.op.impl(n,h,u.op.context));if(y.length!==u.node.outputs.length)throw new Error("the size of output does not match model definition.");y.forEach((S,A)=>{let L=u.node.outputs[A];if(this._values[L])throw new Error(`output [${L}] already has value: op:${u.node.name}`);this._values[L]=S});let O=new Set;y.forEach((S,A)=>{let L=u.node.outputs[A];for(let $ of s[L].to){let F=p[$],Z=!0;for(let ae of F.inputs)if(!this._values[ae]){Z=!1;break}Z&&O.add($)}}),f.push(...O)}let c=[];for(let r=0;r<this.graph.getOutputIndices().length;r++){let u=this.graph.getOutputIndices()[r],l=this._values[u];if(l===void 0)throw new Error(`required output [${u}] does not have value`);u===0?await l.getData():l.data,c.push(l)}return bt.verbose("ExecPlan","disposing of inferenceHandler"),n.dispose(),c})}}}),Ce,Tr,lf,CA=G(()=>{"use strict";Ou(),Ce=No(Ya()),Lo(),Ve(),Tr=qe.experimental.fbs,lf=class Ua{constructor(t){if(this._attributes=new Map,t!=null){for(let n of t)n instanceof Ce.onnx.AttributeProto?this._attributes.set(n.name,[Ua.getValue(n),Ua.getType(n)]):n instanceof Tr.Attribute&&this._attributes.set(n.name(),[Ua.getValue(n),Ua.getType(n)]);if(this._attributes.size<t.length)throw new Error("duplicated attribute names")}}set(t,n,o){this._attributes.set(t,[o,n])}delete(t){this._attributes.delete(t)}getFloat(t,n){return this.get(t,"float",n)}getInt(t,n){return this.get(t,"int",n)}getString(t,n){return this.get(t,"string",n)}getTensor(t,n){return this.get(t,"tensor",n)}getFloats(t,n){return this.get(t,"floats",n)}getInts(t,n){return this.get(t,"ints",n)}getStrings(t,n){return this.get(t,"strings",n)}getTensors(t,n){return this.get(t,"tensors",n)}get(t,n,o){let f=this._attributes.get(t);if(f===void 0){if(o!==void 0)return o;throw new Error(`required attribute not found: ${t}`)}if(f[1]!==n)throw new Error(`type mismatch: expected ${n} but got ${f[1]}`);return f[0]}static getType(t){let n=t instanceof Ce.onnx.AttributeProto?t.type:t.type();switch(n){case Ce.onnx.AttributeProto.AttributeType.FLOAT:return"float";case Ce.onnx.AttributeProto.AttributeType.INT:return"int";case Ce.onnx.AttributeProto.AttributeType.STRING:return"string";case Ce.onnx.AttributeProto.AttributeType.TENSOR:return"tensor";case Ce.onnx.AttributeProto.AttributeType.FLOATS:return"floats";case Ce.onnx.AttributeProto.AttributeType.INTS:return"ints";case Ce.onnx.AttributeProto.AttributeType.STRINGS:return"strings";case Ce.onnx.AttributeProto.AttributeType.TENSORS:return"tensors";default:throw new Error(`attribute type is not supported yet: ${Ce.onnx.AttributeProto.AttributeType[n]}`)}}static getValue(t){let n=t instanceof Ce.onnx.AttributeProto?t.type:t.type();if(n===Ce.onnx.AttributeProto.AttributeType.GRAPH||n===Ce.onnx.AttributeProto.AttributeType.GRAPHS)throw new Error("graph attribute is not supported yet");let o=this.getValueNoCheck(t);if(n===Ce.onnx.AttributeProto.AttributeType.INT&&pn.isLong(o))return pn.longToNumber(o);if(n===Ce.onnx.AttributeProto.AttributeType.INTS){let f=o,s=new Array(f.length);for(let p=0;p<f.length;p++){let i=f[p];s[p]=pn.longToNumber(i)}return s}if(n===Ce.onnx.AttributeProto.AttributeType.TENSOR)return t instanceof Ce.onnx.AttributeProto?Sr.fromProto(o):Sr.fromOrtTensor(o);if(n===Ce.onnx.AttributeProto.AttributeType.TENSORS){if(t instanceof Ce.onnx.AttributeProto)return o.map(f=>Sr.fromProto(f));if(t instanceof Tr.Attribute)return o.map(f=>Sr.fromOrtTensor(f))}return n===Ce.onnx.AttributeProto.AttributeType.STRING&&t instanceof Ce.onnx.AttributeProto?Lc(o):n===Ce.onnx.AttributeProto.AttributeType.STRINGS&&t instanceof Ce.onnx.AttributeProto?o.map(Lc):o}static getValueNoCheck(t){return t instanceof Ce.onnx.AttributeProto?this.getValueNoCheckFromOnnxFormat(t):this.getValueNoCheckFromOrtFormat(t)}static getValueNoCheckFromOnnxFormat(t){switch(t.type){case Ce.onnx.AttributeProto.AttributeType.FLOAT:return t.f;case Ce.onnx.AttributeProto.AttributeType.INT:return t.i;case Ce.onnx.AttributeProto.AttributeType.STRING:return t.s;case Ce.onnx.AttributeProto.AttributeType.TENSOR:return t.t;case Ce.onnx.AttributeProto.AttributeType.GRAPH:return t.g;case Ce.onnx.AttributeProto.AttributeType.FLOATS:return t.floats;case Ce.onnx.AttributeProto.AttributeType.INTS:return t.ints;case Ce.onnx.AttributeProto.AttributeType.STRINGS:return t.strings;case Ce.onnx.AttributeProto.AttributeType.TENSORS:return t.tensors;case Ce.onnx.AttributeProto.AttributeType.GRAPHS:return t.graphs;default:throw new Error(`unsupported attribute type: ${Ce.onnx.AttributeProto.AttributeType[t.type]}`)}}static getValueNoCheckFromOrtFormat(t){switch(t.type()){case Tr.AttributeType.FLOAT:return t.f();case Tr.AttributeType.INT:return t.i();case Tr.AttributeType.STRING:return t.s();case Tr.AttributeType.TENSOR:return t.t();case Tr.AttributeType.GRAPH:return t.g();case Tr.AttributeType.FLOATS:return t.floatsArray();case Tr.AttributeType.INTS:{let n=[];for(let o=0;o<t.intsLength();o++)n.push(t.ints(o));return n}case Tr.AttributeType.STRINGS:{let n=[];for(let o=0;o<t.stringsLength();o++)n.push(t.strings(o));return n}case Tr.AttributeType.TENSORS:{let n=[];for(let o=0;o<t.tensorsLength();o++)n.push(t.tensors(o));return n}default:throw new Error(`unsupported attribute type: ${Tr.AttributeType[t.type()]}`)}}}}),Tc,Pa,cf,Rn,Oc,ym,NA=G(()=>{"use strict";CA(),Ou(),Tc=No(Ya()),Lo(),Ve(),Pa=qe.experimental.fbs,cf={from:(e,t)=>new ym(e,t)},Rn=class{constructor(e){this._from=void 0,this._to=[],this.tensor=void 0,this.type=void 0,e&&(this.type=Or.tensorValueTypeFromProto(e.type.tensorType))}get from(){return this._from}get to(){return this._to}},Oc=class{constructor(e,t){e instanceof Tc.onnx.NodeProto?(this.name=e.name,this.opType=e.opType,this.attributes=new lf(e.attribute)):e instanceof Pa.Node&&(this.name=t??e.name(),this.opType=e.opType(),this.attributes=new lf(Or.tensorAttributesFromORTFormat(e))),this.inputs=[],this.outputs=[],this.executeNode=!0}},ym=class{constructor(e,t){if(!e)throw new TypeError("graph is empty");this.buildGraph(e),this.transformGraph(t),this.checkIsAcyclic()}getInputIndices(){return this._allInputIndices}getInputNames(){return this._allInputNames}getOutputIndices(){return this._allOutputIndices}getOutputNames(){return this._allOutputNames}getValues(){return this._allData}getNodes(){return this._nodes}buildGraph(e){if(e instanceof Tc.onnx.GraphProto)this.buildGraphFromOnnxFormat(e);else if(e instanceof Pa.Graph)this.buildGraphFromOrtFormat(e);else throw new TypeError("Graph type is not supported.")}buildGraphFromOnnxFormat(e){let t=new Map;this._allData=[],this._allInputIndices=[],this._allInputNames=[],this._allOutputIndices=[],this._allOutputNames=[],this._nodes=[];let n=new Map;if(!e.input)throw new Error("missing information in graph: input");let o=[];for(let f of e.input){if(t.has(f.name))throw new Error(`duplicated input name: ${f.name}`);let s=this._allData.push(new Rn(f))-1;t.set(f.name,s),o.push(f.name)}if(!e.initializer)throw new Error("missing information in graph: initializer");for(let f of e.initializer){let s=t.get(f.name);if(s===void 0){let p=new Rn;p.type={shape:{dims:Or.tensorDimsFromProto(f.dims)},tensorType:Or.tensorDataTypeFromProto(f.dataType)},s=this._allData.push(p)-1,t.set(f.name,s)}this._allData[s]._from=-1,this._allData[s].tensor=Sr.fromProto(f)}for(let f=0;f<this._allData.length;f++)this._allData[f].tensor||(this._allInputIndices.push(f),this._allInputNames.push(o[f]));if(!e.output)throw new Error("missing information in graph: output");for(let f of e.output){if(t.has(f.name))throw new Error(`duplicated output name: ${f.name}`);let s=this._allData.push(new Rn(f))-1;t.set(f.name,s),this._allOutputIndices.push(s),this._allOutputNames.push(f.name)}if(!e.node)throw new Error("missing information in graph: node");for(let f of e.node){if(!f.name)for(let p=0;;p++){let i=`unnamed_${f.opType}_${p}`;if(!n.has(i)){f.name=i;break}}if(n.has(f.name))throw new Error(`duplicated node name: ${f.name}`);let s=this._nodes.push(new Oc(f))-1;n.set(f.name,s)}for(let f=0;f<this._nodes.length;f++){let s=this._nodes[f],p=e.node[f];if(!p.output)throw new Error(`missing output for node: ${p.name}`);for(let i of p.output){let c=t.get(i);if(typeof c>"u"&&(c=this._allData.push(new Rn)-1,t.set(i,c)),s.outputs.push(c),this._allData[c]._from!==void 0)throw new Error(`multiple nodes output to one data value: ${c}`);if(this._allData[c]._from=f,p.opType==="Constant"){if(!p.attribute||p.attribute.length!==1||!p.attribute[0].t)throw new Error("missing attributes or missing tensor value in attributes for this Constant operator");if(!p.output||p.output.length!==1)throw new Error("missing output or incorrect number of outputs for this Constant operator");s.outputs.pop(),s.executeNode=!1,this._allData[c]._from=-1,this._allData[c].tensor=Sr.fromProto(p.attribute[0].t)}}}for(let f=0;f<this._nodes.length;f++){let s=this._nodes[f],p=e.node[f];if(!p.input)throw new Error(`missing input for node: ${p.name}`);for(let i of p.input){let c=t.get(i);if(typeof c>"u"){if(i===""&&(p.input.length===3||p.input.length===4)&&p.opType==="Resize")continue;throw new Error(`unrecognized input '${i}' for node: ${p.name}`)}s.inputs.push(c),this._allData[c]._to.push(f)}}return!0}buildGraphFromOrtFormat(e){let t=new Map;this._allData=[],this._allInputIndices=[],this._allInputNames=[],this._allOutputIndices=[],this._allOutputNames=[],this._nodes=[];let n=new Map,o=[];for(let f=0;f<e.inputsLength();f++){let s=e.inputs(f);if(t.has(s))throw new Error(`duplicated input name: ${s}`);for(let p=0;p<e.nodeArgsLength();p++)if(e.nodeArgs(p)?.name()===s){let i=new Rn;if(e.nodeArgs(p)?.type()?.valueType()!==Pa.TypeInfoValue.tensor_type)throw new Error("Unexpected value type for the nodeArg.");let c=e.nodeArgs(p).type().value(new Pa.TensorTypeAndShape),r=Or.tensorDataTypeFromProto(c.elemType()),u=c.shape(),l=[];for(let y=0;y<u.dimLength();y++)l.push(pn.longToNumber(u.dim(y).value().dimValue()));i.type={shape:{dims:l},tensorType:r};let h=this._allData.push(i)-1;t.set(s,h),o.push(s)}}for(let f=0;f<e.initializersLength();f++){let s=e.initializers(f),p=t.get(s.name());if(p===void 0){let i=new Rn,c=Or.tensorDimsFromORTFormat(s),r=Or.tensorDataTypeFromProto(s.dataType());i.type={shape:{dims:c},tensorType:r},p=this._allData.push(i)-1,t.set(s.name(),p)}this._allData[p]._from=-1,this._allData[p].tensor=Sr.fromOrtTensor(s)}for(let f=0;f<this._allData.length;f++)this._allData[f].tensor||(this._allInputIndices.push(f),this._allInputNames.push(o[f]));for(let f=0;f<e.outputsLength();f++){let s=e.outputs(f);if(t.has(s))throw new Error(`duplicated output name: ${s}`);let p=this._allData.push(new Rn)-1;t.set(s,p),this._allOutputIndices.push(p),this._allOutputNames.push(s)}if(!e.nodes)throw new Error("missing information in graph: node");for(let f=0;f<e.nodesLength();f++){let s=e.nodes(f),p=s.name();if(!p)for(let c=0;p=`unnamed_${s.opType()}_${c}`,!!n.has(p);c++);if(n.has(p))throw new Error(`duplicated node name: ${p}`);let i=this._nodes.push(new Oc(s,p))-1;n.set(p,i)}for(let f=0;f<this._nodes.length;f++){let s=this._nodes[f],p=e.nodes(f);if(p==null)throw new Error(`No node exists at index ${f}`);if(p?.outputsLength()===0)throw new Error(`missing output for node: ${p.name}`);for(let i=0;i<p?.outputsLength();i++){let c=p?.outputs(i),r=t.get(c);if(typeof r>"u"&&(r=this._allData.push(new Rn)-1,t.set(c,r)),s.outputs.push(r),this._allData[r]._from!==void 0)throw new Error(`multiple nodes output to one data value: ${r}`);if(this._allData[r]._from=f,p.opType()==="Constant"){if(p.attributesLength()!==1||!p.attributes(0).t())throw new Error("missing attributes or missing tensor value in attributes for this Constant operator");if(p.outputsLength()!==1)throw new Error("missing output or incorrect number of outputs for this Constant operator");s.outputs.pop(),s.executeNode=!1,this._allData[r]._from=-1,this._allData[r].tensor=Sr.fromOrtTensor(p.attributes(0).t())}}}for(let f=0;f<this._nodes.length;f++){let s=this._nodes[f],p=e.nodes(f);if(p.inputsLength()===0)throw new Error(`missing input for node: ${p.name}`);for(let i=0;i<p.inputsLength();i++){let c=p.inputs(i),r=t.get(c);if(typeof r>"u")throw new Error(`unrecognized input '${c}' for node: ${p.name()}`);s.inputs.push(r),this._allData[r]._to.push(f)}}}checkIsAcyclic(){let e=new Set;this._allInputIndices.forEach(o=>{this._allData[o]._to.forEach(f=>{e.add(f)})});let t=Array.from(e),n=new Array(this._nodes.length).fill("white");for(;t.length>0;){let o=t.pop();n[o]==="gray"?n[o]="black":(t.push(o),n[o]="gray",this._nodes[o].outputs.forEach(f=>{let s=this._allData[f];if(typeof s.tensor<"u")throw new Error("node outputs should not be initialized");if(s._from!==o)throw new Error("from property of the Value object doesn't match index of Node being processed");s._to.forEach(p=>{if(n[p]==="gray")throw new Error("model graph is cyclic");n[p]==="white"&&t.push(p)})}))}}transformGraph(e){this.removeAllIdentityNodes(),this.removeAllDropoutNodes(),this.fuseConvActivationNodes(),e&&e.transformGraph(this),this.finalizeGraph()}finalizeGraph(){let e=0,t=new Array(this._nodes.length,0),n=0;for(let o=0;o<this._nodes.length;o++)t[o]=n,this._nodes[o].executeNode?(n!==o&&(this._nodes[n]=this._nodes[o]),n++):this._nodes[o].outputs.forEach(f=>{this._allData[f]._from=-2});this._nodes.splice(n,this._nodes.length-n);for(let o=0;o<this._allData.length;o++){let f=this._allData[o];f._from!==void 0&&f._from!==-1&&f._from!==-2&&(f._from=t[f._from]);for(let s=0;s<f._to.length;s++)if(f._to[s]>=0)f._to[s]=t[f._to[s]];else throw new Error("Trying to update a removed node")}e=0;for(let o=0;o<this._allData.length;o++){if(this._allData[o].from===-2&&this._allOutputIndices.indexOf(o+e)===-1){e++,this._allData.splice(o,1),o--;continue}if(e>0){let f=-1;this._allData[o].from!==void 0&&this._allData[o].from!==-1?(f=this._nodes[this._allData[o].from].outputs.indexOf(o+e),f!==-1&&(this._nodes[this._allData[o].from].outputs[f]=o)):(f=this._allInputIndices.indexOf(o+e),f!==-1&&(this._allInputIndices[f]=o)),this._allData[o].to.forEach(s=>{f=this._nodes[s].inputs.indexOf(o+e),f!==-1&&(this._nodes[s].inputs[f]=o)}),this._allData[o].to.length===0&&(f=this._allOutputIndices.indexOf(o+e),f!==-1&&(this._allOutputIndices[f]=o))}}}deleteNode(e){let t=this._nodes[e];if(t.outputs.length>1){for(let p=1;p<t.outputs.length;p++)if(this._allData[t.outputs[p]].to.length>0)throw new Error("Node deletion with more than one output connected to other nodes is not supported. ")}t.executeNode=!1;let n=t.inputs[0],o=t.outputs[0],f=this._allData[o].to;for(let p=0;p<t.inputs.length;p++){let i=this._allData[t.inputs[p]].to.indexOf(e);if(i===-1)throw new Error("The Value object doesn't have the current Node in it's 'to' property ");this._allData[t.inputs[p]].to.splice(i,1)}this._allData[o]._to=[];let s=this._allOutputIndices.indexOf(o);if(s!==-1&&(this._allOutputIndices[s]=n),f&&f.length>0)for(let p of f){let i=this._nodes[p].inputs.indexOf(o);if(i===-1)throw new Error("The Node object doesn't have the output Value in it's 'inputs' property ");this._nodes[p].inputs[i]=n,this._allData[n].to.push(p)}}removeAllDropoutNodes(){let e=0;for(let t of this._nodes){if(t.opType==="Dropout"){if(t.inputs.length!==1)throw new Error("Dropout nodes should only contain one input. ");if(t.outputs.length!==1&&t.outputs.length!==2)throw new Error("Dropout nodes should contain either 1 or 2 output(s)");if(t.outputs.length===2&&this._allData[t.outputs[1]]._to.length!==0)throw new Error("Dropout nodes's second output should not be referenced by other nodes");this.deleteNode(e)}e++}}removeAllIdentityNodes(){let e=0;for(let t of this._nodes)t.opType==="Identity"&&this.deleteNode(e),e++}isActivation(e){switch(e.opType){case"Relu":case"Sigmoid":case"Clip":return!0;default:return!1}}fuseConvActivationNodes(){for(let e of this._nodes)if(e.opType==="Conv"){let t=this._allData[e.outputs[0]]._to;if(t.length===1&&this.isActivation(this._nodes[t[0]])){let n=this._nodes[t[0]];if(n.opType==="Clip")if(n.inputs.length===1)try{e.attributes.set("activation_params","floats",[n.attributes.getFloat("min"),n.attributes.getFloat("max")])}catch{e.attributes.set("activation_params","floats",[Wa,qa])}else if(n.inputs.length>=3&&this._allData[n.inputs[1]].tensor!==void 0&&this._allData[n.inputs[2]].tensor!==void 0)e.attributes.set("activation_params","floats",[this._allData[n.inputs[1]].tensor.floatData[0],this._allData[n.inputs[2]].tensor.floatData[0]]);else continue;e.attributes.set("activation","string",n.opType),this.deleteNode(t[0])}}}}}),bm,vm,Vb,kA=G(()=>{"use strict";vf(),NA(),Ou(),bm=No(Ya()),Ve(),vm=qe.experimental.fbs,Vb=class{constructor(){}load(e,t,n){if(!n)try{this.loadFromOnnxFormat(e,t);return}catch(o){if(n!==void 0)throw o}this.loadFromOrtFormat(e,t)}loadFromOnnxFormat(e,t){let n=bm.onnx.ModelProto.decode(e);if(pn.longToNumber(n.irVersion)<3)throw new Error("only support ONNX model with IR_VERSION>=3");this._opsets=n.opsetImport.map(o=>({domain:o.domain,version:pn.longToNumber(o.version)})),this._graph=cf.from(n.graph,t)}loadFromOrtFormat(e,t){let n=new R.ByteBuffer(e),o=vm.InferenceSession.getRootAsInferenceSession(n).model();if(pn.longToNumber(o.irVersion())<3)throw new Error("only support ONNX model with IR_VERSION>=3");this._opsets=[];for(let f=0;f<o.opsetImportLength();f++){let s=o.opsetImport(f);this._opsets.push({domain:s?.domain(),version:pn.longToNumber(s.version())})}this._graph=cf.from(o.graph(),t)}get graph(){return this._graph}get opsets(){return this._opsets}}}),Gb,RA=G(()=>{"use strict";$A(),DA(),Qr(),kA(),Gb=class{constructor(e={}){this._initialized=!1,this.backendHint=e.backendHint,this.profiler=ty.create(e.profiler),this.context={profiler:this.profiler,graphInputTypes:[],graphInputDims:[]}}get inputNames(){return this._model.graph.getInputNames()}get outputNames(){return this._model.graph.getOutputNames()}startProfiling(){this.profiler.start()}endProfiling(){this.profiler.stop()}async loadModel(e,t,n){await this.profiler.event("session","Session.loadModel",async()=>{let o=await Ub(this.backendHint);if(this.sessionHandler=o.createSessionHandler(this.context),this._model=new Vb,typeof e=="string"){let f=e.endsWith(".ort");if(typeof process<"u"&&process.versions&&process.versions.node){let s=await(void 0)(e);this.initialize(s,f)}else{let s=await(await fetch(e)).arrayBuffer();this.initialize(new Uint8Array(s),f)}}else if(ArrayBuffer.isView(e))this.initialize(e);else{let f=new Uint8Array(e,t||0,n||e.byteLength);this.initialize(f)}})}initialize(e,t){if(this._initialized)throw new Error("already initialized");this.profiler.event("session","Session.initialize",()=>{let n=this.sessionHandler.transformGraph?this.sessionHandler:void 0;this._model.load(e,n,t),this.sessionHandler.onGraphInitialized&&this.sessionHandler.onGraphInitialized(this._model.graph),this.initializeOps(this._model.graph),this._executionPlan=new zb(this._model.graph,this._ops,this.profiler)}),this._initialized=!0}async run(e){if(!this._initialized)throw new Error("session not initialized yet");return this.profiler.event("session","Session.run",async()=>{let t=this.normalizeAndValidateInputs(e),n=await this._executionPlan.execute(this.sessionHandler,t);return this.createOutput(n)})}normalizeAndValidateInputs(e){let t=this._model.graph.getInputNames();if(Array.isArray(e)){if(e.length!==t.length)throw new Error(`incorrect input array length: expected ${t.length} but got ${e.length}`)}else{if(e.size!==t.length)throw new Error(`incorrect input map size: expected ${t.length} but got ${e.size}`);let n=new Array(e.size),o=0;for(let f=0;f<t.length;++f){let s=e.get(t[f]);if(!s)throw new Error(`missing input tensor for: '${name}'`);n[o++]=s}e=n}if(!this.context.graphInputTypes||this.context.graphInputTypes.length===0||!this.context.graphInputDims||this.context.graphInputDims.length===0){let n=this._model.graph.getInputIndices(),o=this._model.graph.getValues(),f=new Array(n.length);for(let s=0;s<n.length;++s){let p=o[n[s]];f[s]=p.type.shape.dims,this.context.graphInputTypes.push(p.type.tensorType),this.context.graphInputDims.push(e[s].dims)}this.validateInputTensorDims(f,e,!0)}else this.validateInputTensorDims(this.context.graphInputDims,e,!1);return this.validateInputTensorTypes(this.context.graphInputTypes,e),e}validateInputTensorTypes(e,t){for(let n=0;n<t.length;n++){let o=e[n],f=t[n].type;if(o!==f)throw new Error(`input tensor[${n}] check failed: expected type '${o}' but got ${f}`)}}validateInputTensorDims(e,t,n){for(let o=0;o<t.length;o++){let f=e[o],s=t[o].dims;if(!this.compareTensorDims(f,s,n))throw new Error(`input tensor[${o}] check failed: expected shape '[${f.join(",")}]' but got [${s.join(",")}]`)}}compareTensorDims(e,t,n){if(e.length!==t.length)return!1;for(let o=0;o<e.length;++o)if(e[o]!==t[o]&&(!n||e[o]!==0))return!1;return!0}createOutput(e){let t=this._model.graph.getOutputNames();if(e.length!==t.length)throw new Error("expected number of outputs do not match number of generated outputs");let n=new Map;for(let o=0;o<t.length;++o)n.set(t[o],e[o]);return n}initializeOps(e){let t=e.getNodes();this._ops=new Array(t.length);for(let n=0;n<t.length;n++)this._ops[n]=this.sessionHandler.resolve(t[n],this._model.opsets,e)}}}),Hb,FA=G(()=>{"use strict";gn(),Lo(),Hb=class{constructor(e){this.session=e,this.inputNames=this.session.inputNames,this.outputNames=this.session.outputNames}async dispose(){}async run(e,t,n){let o=new Map;for(let p in e)if(Object.hasOwnProperty.call(e,p)){let i=e[p];o.set(p,new Sr(i.dims,i.type,void 0,void 0,i.data))}let f=await this.session.run(o),s={};return f.forEach((p,i)=>{s[i]=new zt(p.type,p.data,p.dims)}),s}startProfiling(){this.session.startProfiling()}endProfiling(){this.session.endProfiling()}}}),Wb={};Mo(Wb,{onnxjsBackend:()=>qb});var wm,qb,MA=G(()=>{"use strict";RA(),FA(),wm=class{async init(){}async createInferenceSessionHandler(e,t){let n=new Gb(t);return typeof e=="string"?await n.loadModel(e):await n.loadModel(e),new Hb(n)}},qb=new wm}),Af={};Mo(Af,{createReadStream:()=>Xb,readFile:()=>Zb,readFileSync:()=>Yb});var Zb,Yb,Xb,Kb=G(()=>{Zb=void 0,Yb=void 0,Xb=void 0}),If={};Mo(If,{join:()=>Jb});var Jb,Qb=G(()=>{Jb=void 0}),LA=it((e,t)=>{"use strict";var n=(()=>{var o=typeof document<"u"&&document.currentScript?document.currentScript.src:void 0;return typeof __filename<"u"&&(o=o||__filename),function(f={}){var s=f,p,i;s.ready=new Promise((T,D)=>{p=T,i=D});var c=Object.assign({},s),r="./this.program",u=typeof window=="object",l=typeof importScripts=="function",h=typeof process=="object"&&typeof process.versions=="object"&&typeof process.versions.node=="string",y="",O,S,A;if(h){var L=(Kb(),Ui(Af)),$=(Qb(),Ui(If));y=l?$.dirname(y)+"/":__dirname+"/",O=(T,D)=>(T=St(T)?new URL(T):$.normalize(T),L.readFileSync(T,D?void 0:"utf8")),A=T=>(T=O(T,!0),T.buffer||(T=new Uint8Array(T)),T),S=(T,D,k,V=!0)=>{T=St(T)?new URL(T):$.normalize(T),L.readFile(T,V?void 0:"utf8",(ee,le)=>{ee?k(ee):D(V?le.buffer:le)})},!s.thisProgram&&1<process.argv.length&&(r=process.argv[1].replace(/\\/g,"/")),process.argv.slice(2),s.inspect=()=>"[Emscripten Module object]"}else(u||l)&&(l?y=self.location.href:typeof document<"u"&&document.currentScript&&(y=document.currentScript.src),o&&(y=o),y.indexOf("blob:")!==0?y=y.substr(0,y.replace(/[?#].*/,"").lastIndexOf("/")+1):y="",O=T=>{var D=new XMLHttpRequest;return D.open("GET",T,!1),D.send(null),D.responseText},l&&(A=T=>{var D=new XMLHttpRequest;return D.open("GET",T,!1),D.responseType="arraybuffer",D.send(null),new Uint8Array(D.response)}),S=(T,D,k)=>{var V=new XMLHttpRequest;V.open("GET",T,!0),V.responseType="arraybuffer",V.onload=()=>{V.status==200||V.status==0&&V.response?D(V.response):k()},V.onerror=k,V.send(null)});var F=console.log.bind(console),Z=console.error.bind(console);Object.assign(s,c),c=null,typeof WebAssembly!="object"&&Xe("no native wasm support detected");var ae,ot=!1,Je,st,se,Me,yn;function rn(){var T=ae.buffer;s.HEAP8=Je=new Int8Array(T),s.HEAP16=new Int16Array(T),s.HEAPU8=st=new Uint8Array(T),s.HEAPU16=new Uint16Array(T),s.HEAP32=se=new Int32Array(T),s.HEAPU32=Me=new Uint32Array(T),s.HEAPF32=new Float32Array(T),s.HEAPF64=yn=new Float64Array(T)}var bn=[],vt=[],Le=[],ve=0,Kt=null,At=null;function Xe(T){throw T="Aborted("+T+")",Z(T),ot=!0,T=new WebAssembly.RuntimeError(T+". Build with -sASSERTIONS for more info."),i(T),T}var nn=T=>T.startsWith("data:application/octet-stream;base64,"),St=T=>T.startsWith("file://"),Ct;if(Ct="ort-wasm.wasm",!nn(Ct)){var Mt=Ct;Ct=s.locateFile?s.locateFile(Mt,y):y+Mt}function Nt(T){if(A)return A(T);throw"both async and sync fetching of the wasm failed"}function vn(T){if(u||l){if(typeof fetch=="function"&&!St(T))return fetch(T,{credentials:"same-origin"}).then(D=>{if(!D.ok)throw"failed to load wasm binary file at '"+T+"'";return D.arrayBuffer()}).catch(()=>Nt(T));if(S)return new Promise((D,k)=>{S(T,V=>D(new Uint8Array(V)),k)})}return Promise.resolve().then(()=>Nt(T))}function or(T,D,k){return vn(T).then(V=>WebAssembly.instantiate(V,D)).then(V=>V).then(k,V=>{Z(`failed to asynchronously prepare wasm: ${V}`),Xe(V)})}function Lt(T,D){var k=Ct;return typeof WebAssembly.instantiateStreaming!="function"||nn(k)||St(k)||h||typeof fetch!="function"?or(k,T,D):fetch(k,{credentials:"same-origin"}).then(V=>WebAssembly.instantiateStreaming(V,T).then(D,function(ee){return Z(`wasm streaming compile failed: ${ee}`),Z("falling back to ArrayBuffer instantiation"),or(k,T,D)}))}var Gt,Ht={920016:(T,D,k,V)=>{if(typeof s>"u"||!s.za)return 1;if(T=It(T>>>0),T.startsWith("./")&&(T=T.substring(2)),T=s.za.get(T),!T)return 2;if(D>>>=0,k>>>=0,D+k>T.byteLength)return 3;try{return st.set(T.subarray(D,D+k),V>>>0>>>0),0}catch{return 4}}};function ut(T){this.xa=T-24,this.Ha=function(D){Me[this.xa+4>>>2>>>0]=D},this.Ga=function(D){Me[this.xa+8>>>2>>>0]=D},this.Aa=function(D,k){this.Fa(),this.Ha(D),this.Ga(k)},this.Fa=function(){Me[this.xa+16>>>2>>>0]=0}}var at=0,dt=0,Jt=typeof TextDecoder<"u"?new TextDecoder("utf8"):void 0,wn=(T,D,k)=>{D>>>=0;var V=D+k;for(k=D;T[k]&&!(k>=V);)++k;if(16<k-D&&T.buffer&&Jt)return Jt.decode(T.subarray(D,k));for(V="";D<k;){var ee=T[D++];if(ee&128){var le=T[D++]&63;if((ee&224)==192)V+=String.fromCharCode((ee&31)<<6|le);else{var $e=T[D++]&63;ee=(ee&240)==224?(ee&15)<<12|le<<6|$e:(ee&7)<<18|le<<12|$e<<6|T[D++]&63,65536>ee?V+=String.fromCharCode(ee):(ee-=65536,V+=String.fromCharCode(55296|ee>>10,56320|ee&1023))}}else V+=String.fromCharCode(ee)}return V},It=(T,D)=>(T>>>=0)?wn(st,T,D):"",Ir=T=>{for(var D=0,k=0;k<T.length;++k){var V=T.charCodeAt(k);127>=V?D++:2047>=V?D+=2:55296<=V&&57343>=V?(D+=4,++k):D+=3}return D},Un=(T,D,k,V)=>{if(k>>>=0,!(0<V))return 0;var ee=k;V=k+V-1;for(var le=0;le<T.length;++le){var $e=T.charCodeAt(le);if(55296<=$e&&57343>=$e){var pt=T.charCodeAt(++le);$e=65536+(($e&1023)<<10)|pt&1023}if(127>=$e){if(k>=V)break;D[k++>>>0]=$e}else{if(2047>=$e){if(k+1>=V)break;D[k++>>>0]=192|$e>>6}else{if(65535>=$e){if(k+2>=V)break;D[k++>>>0]=224|$e>>12}else{if(k+3>=V)break;D[k++>>>0]=240|$e>>18,D[k++>>>0]=128|$e>>12&63}D[k++>>>0]=128|$e>>6&63}D[k++>>>0]=128|$e&63}}return D[k>>>0]=0,k-ee},ar=T=>T%4===0&&(T%100!==0||T%400===0),Bt=[0,31,60,91,121,152,182,213,244,274,305,335],on=[0,31,59,90,120,151,181,212,243,273,304,334],sr=T=>{var D=Ir(T)+1,k=Gn(D);return k&&Un(T,st,k,D),k},jn=[],ur={},zn=()=>{if(!Pr){var T={USER:"web_user",LOGNAME:"web_user",PATH:"/",PWD:"/",HOME:"/home/web_user",LANG:(typeof navigator=="object"&&navigator.languages&&navigator.languages[0]||"C").replace("-","_")+".UTF-8",_:r||"./this.program"},D;for(D in ur)ur[D]===void 0?delete T[D]:T[D]=ur[D];var k=[];for(D in T)k.push(`${D}=${T[D]}`);Pr=k}return Pr},Pr,lr=[null,[],[]],_n=[31,29,31,30,31,30,31,31,30,31,30,31],xn=[31,28,31,30,31,30,31,31,30,31,30,31];function an(T){var D=Array(Ir(T)+1);return Un(T,D,0,D.length),D}function Vn(T,D,k,V){function ee(U,Be,Qe){for(U=typeof U=="number"?U.toString():U||"";U.length<Be;)U=Qe[0]+U;return U}function le(U,Be){return ee(U,Be,"0")}function $e(U,Be){function Qe(bi){return 0>bi?-1:0<bi?1:0}var Dr;return(Dr=Qe(U.getFullYear()-Be.getFullYear()))===0&&(Dr=Qe(U.getMonth()-Be.getMonth()))===0&&(Dr=Qe(U.getDate()-Be.getDate())),Dr}function pt(U){switch(U.getDay()){case 0:return new Date(U.getFullYear()-1,11,29);case 1:return U;case 2:return new Date(U.getFullYear(),0,3);case 3:return new Date(U.getFullYear(),0,2);case 4:return new Date(U.getFullYear(),0,1);case 5:return new Date(U.getFullYear()-1,11,31);case 6:return new Date(U.getFullYear()-1,11,30)}}function Ut(U){var Be=U.ta;for(U=new Date(new Date(U.ua+1900,0,1).getTime());0<Be;){var Qe=U.getMonth(),Dr=(ar(U.getFullYear())?_n:xn)[Qe];if(Be>Dr-U.getDate())Be-=Dr-U.getDate()+1,U.setDate(1),11>Qe?U.setMonth(Qe+1):(U.setMonth(0),U.setFullYear(U.getFullYear()+1));else{U.setDate(U.getDate()+Be);break}}return Qe=new Date(U.getFullYear()+1,0,4),Be=pt(new Date(U.getFullYear(),0,4)),Qe=pt(Qe),0>=$e(Be,U)?0>=$e(Qe,U)?U.getFullYear()+1:U.getFullYear():U.getFullYear()-1}T>>>=0,D>>>=0,k>>>=0,V>>>=0;var wt=Me[V+40>>>2>>>0];V={Da:se[V>>>2>>>0],Ca:se[V+4>>>2>>>0],va:se[V+8>>>2>>>0],ya:se[V+12>>>2>>>0],wa:se[V+16>>>2>>>0],ua:se[V+20>>>2>>>0],oa:se[V+24>>>2>>>0],ta:se[V+28>>>2>>>0],Ia:se[V+32>>>2>>>0],Ba:se[V+36>>>2>>>0],Ea:wt?It(wt):""},k=It(k),wt={"%c":"%a %b %d %H:%M:%S %Y","%D":"%m/%d/%y","%F":"%Y-%m-%d","%h":"%b","%r":"%I:%M:%S %p","%R":"%H:%M","%T":"%H:%M:%S","%x":"%m/%d/%y","%X":"%H:%M:%S","%Ec":"%c","%EC":"%C","%Ex":"%m/%d/%y","%EX":"%H:%M:%S","%Ey":"%y","%EY":"%Y","%Od":"%d","%Oe":"%e","%OH":"%H","%OI":"%I","%Om":"%m","%OM":"%M","%OS":"%S","%Ou":"%u","%OU":"%U","%OV":"%V","%Ow":"%w","%OW":"%W","%Oy":"%y"};for(var Pt in wt)k=k.replace(new RegExp(Pt,"g"),wt[Pt]);var mi="Sunday Monday Tuesday Wednesday Thursday Friday Saturday".split(" "),yi="January February March April May June July August September October November December".split(" ");wt={"%a":U=>mi[U.oa].substring(0,3),"%A":U=>mi[U.oa],"%b":U=>yi[U.wa].substring(0,3),"%B":U=>yi[U.wa],"%C":U=>le((U.ua+1900)/100|0,2),"%d":U=>le(U.ya,2),"%e":U=>ee(U.ya,2," "),"%g":U=>Ut(U).toString().substring(2),"%G":U=>Ut(U),"%H":U=>le(U.va,2),"%I":U=>(U=U.va,U==0?U=12:12<U&&(U-=12),le(U,2)),"%j":U=>{for(var Be=0,Qe=0;Qe<=U.wa-1;Be+=(ar(U.ua+1900)?_n:xn)[Qe++]);return le(U.ya+Be,3)},"%m":U=>le(U.wa+1,2),"%M":U=>le(U.Ca,2),"%n":()=>`
+`,"%p":U=>0<=U.va&&12>U.va?"AM":"PM","%S":U=>le(U.Da,2),"%t":()=>"	","%u":U=>U.oa||7,"%U":U=>le(Math.floor((U.ta+7-U.oa)/7),2),"%V":U=>{var Be=Math.floor((U.ta+7-(U.oa+6)%7)/7);if(2>=(U.oa+371-U.ta-2)%7&&Be++,Be)Be==53&&(Qe=(U.oa+371-U.ta)%7,Qe==4||Qe==3&&ar(U.ua)||(Be=1));else{Be=52;var Qe=(U.oa+7-U.ta-1)%7;(Qe==4||Qe==5&&ar(U.ua%400-1))&&Be++}return le(Be,2)},"%w":U=>U.oa,"%W":U=>le(Math.floor((U.ta+7-(U.oa+6)%7)/7),2),"%y":U=>(U.ua+1900).toString().substring(2),"%Y":U=>U.ua+1900,"%z":U=>{U=U.Ba;var Be=0<=U;return U=Math.abs(U)/60,(Be?"+":"-")+("0000"+(U/60*100+U%60)).slice(-4)},"%Z":U=>U.Ea,"%%":()=>"%"},k=k.replace(/%%/g,"\0\0");for(Pt in wt)k.includes(Pt)&&(k=k.replace(new RegExp(Pt,"g"),wt[Pt](V)));return k=k.replace(/\0\0/g,"%"),Pt=an(k),Pt.length>D?0:(Je.set(Pt,T>>>0),Pt.length-1)}var Ge={a:function(T,D,k){throw T>>>=0,new ut(T).Aa(D>>>0,k>>>0),at=T,dt++,at},e:function(){return 0},H:function(){},x:function(){},z:function(){},J:function(){return 0},F:function(){},A:function(){},E:function(){},g:function(){},y:function(){},v:function(){},G:function(){},w:function(){},k:()=>1,n:function(T,D,k){T=D+2097152>>>0<4194305-!!T?(T>>>0)+4294967296*D:NaN,k>>>=0,T=new Date(1e3*T),se[k>>>2>>>0]=T.getUTCSeconds(),se[k+4>>>2>>>0]=T.getUTCMinutes(),se[k+8>>>2>>>0]=T.getUTCHours(),se[k+12>>>2>>>0]=T.getUTCDate(),se[k+16>>>2>>>0]=T.getUTCMonth(),se[k+20>>>2>>>0]=T.getUTCFullYear()-1900,se[k+24>>>2>>>0]=T.getUTCDay(),se[k+28>>>2>>>0]=(T.getTime()-Date.UTC(T.getUTCFullYear(),0,1,0,0,0,0))/864e5|0},o:function(T,D,k){T=D+2097152>>>0<4194305-!!T?(T>>>0)+4294967296*D:NaN,k>>>=0,T=new Date(1e3*T),se[k>>>2>>>0]=T.getSeconds(),se[k+4>>>2>>>0]=T.getMinutes(),se[k+8>>>2>>>0]=T.getHours(),se[k+12>>>2>>>0]=T.getDate(),se[k+16>>>2>>>0]=T.getMonth(),se[k+20>>>2>>>0]=T.getFullYear()-1900,se[k+24>>>2>>>0]=T.getDay(),se[k+28>>>2>>>0]=(ar(T.getFullYear())?Bt:on)[T.getMonth()]+T.getDate()-1|0,se[k+36>>>2>>>0]=-(60*T.getTimezoneOffset()),D=new Date(T.getFullYear(),6,1).getTimezoneOffset();var V=new Date(T.getFullYear(),0,1).getTimezoneOffset();se[k+32>>>2>>>0]=(D!=V&&T.getTimezoneOffset()==Math.min(V,D))|0},p:function(T){T>>>=0;var D=new Date(se[T+20>>>2>>>0]+1900,se[T+16>>>2>>>0],se[T+12>>>2>>>0],se[T+8>>>2>>>0],se[T+4>>>2>>>0],se[T>>>2>>>0],0),k=se[T+32>>>2>>>0],V=D.getTimezoneOffset(),ee=new Date(D.getFullYear(),6,1).getTimezoneOffset(),le=new Date(D.getFullYear(),0,1).getTimezoneOffset(),$e=Math.min(le,ee);return 0>k?se[T+32>>>2>>>0]=+(ee!=le&&$e==V):0<k!=($e==V)&&(ee=Math.max(le,ee),D.setTime(D.getTime()+6e4*((0<k?$e:ee)-V))),se[T+24>>>2>>>0]=D.getDay(),se[T+28>>>2>>>0]=(ar(D.getFullYear())?Bt:on)[D.getMonth()]+D.getDate()-1|0,se[T>>>2>>>0]=D.getSeconds(),se[T+4>>>2>>>0]=D.getMinutes(),se[T+8>>>2>>>0]=D.getHours(),se[T+12>>>2>>>0]=D.getDate(),se[T+16>>>2>>>0]=D.getMonth(),se[T+20>>>2>>>0]=D.getYear(),T=D.getTime(),isNaN(T)?(se[sn()>>>2>>>0]=61,T=-1):T/=1e3,Tn((Gt=T,1<=+Math.abs(Gt)?0<Gt?+Math.floor(Gt/4294967296)>>>0:~~+Math.ceil((Gt-+(~~Gt>>>0))/4294967296)>>>0:0)),T>>>0},l:function(){return-52},m:function(){},t:function(T,D,k){function V(Ut){return(Ut=Ut.toTimeString().match(/\(([A-Za-z ]+)\)$/))?Ut[1]:"GMT"}k>>>=0;var ee=new Date().getFullYear(),le=new Date(ee,0,1),$e=new Date(ee,6,1);ee=le.getTimezoneOffset();var pt=$e.getTimezoneOffset();Me[T>>>0>>>2>>>0]=60*Math.max(ee,pt),se[D>>>0>>>2>>>0]=+(ee!=pt),T=V(le),D=V($e),T=sr(T),D=sr(D),pt<ee?(Me[k>>>2>>>0]=T,Me[k+4>>>2>>>0]=D):(Me[k>>>2>>>0]=D,Me[k+4>>>2>>>0]=T)},d:()=>{Xe("")},B:function(T,D,k){T>>>=0,D>>>=0,k>>>=0,jn.length=0;for(var V;V=st[D++>>>0];){var ee=V!=105;ee&=V!=112,k+=ee&&k%8?4:0,jn.push(V==112?Me[k>>>2>>>0]:V==105?se[k>>>2>>>0]:yn[k>>>3>>>0]),k+=ee?8:4}return Ht[T].apply(null,jn)},h:()=>Date.now(),u:function(){return 4294901760},b:()=>performance.now(),I:function(T,D,k){return D>>>=0,st.copyWithin(T>>>0>>>0,D>>>0,D+(k>>>0)>>>0)},s:function(T){T>>>=0;var D=st.length;if(4294901760<T)return!1;for(var k=1;4>=k;k*=2){var V=D*(1+.2/k);V=Math.min(V,T+100663296);var ee=Math;V=Math.max(T,V);e:{ee=(ee.min.call(ee,4294901760,V+(65536-V%65536)%65536)-ae.buffer.byteLength+65535)/65536;try{ae.grow(ee),rn();var le=1;break e}catch{}le=void 0}if(le)return!0}return!1},C:function(T,D){T>>>=0,D>>>=0;var k=0;return zn().forEach((V,ee)=>{var le=D+k;for(ee=Me[T+4*ee>>>2>>>0]=le,le=0;le<V.length;++le)Je[ee++>>>0>>>0]=V.charCodeAt(le);Je[ee>>>0>>>0]=0,k+=V.length+1}),0},D:function(T,D){T>>>=0,D>>>=0;var k=zn();Me[T>>>2>>>0]=k.length;var V=0;return k.forEach(ee=>V+=ee.length+1),Me[D>>>2>>>0]=V,0},f:()=>52,j:function(){return 52},q:function(){return 70},i:function(T,D,k,V){D>>>=0,k>>>=0,V>>>=0;for(var ee=0,le=0;le<k;le++){var $e=Me[D>>>2>>>0],pt=Me[D+4>>>2>>>0];D+=8;for(var Ut=0;Ut<pt;Ut++){var wt=st[$e+Ut>>>0],Pt=lr[T];wt===0||wt===10?((T===1?F:Z)(wn(Pt,0)),Pt.length=0):Pt.push(wt)}ee+=pt}return Me[V>>>2>>>0]=ee,0},r:Vn,c:function(T,D,k,V){return Vn(T>>>0,D>>>0,k>>>0,V>>>0)}},be=(function(){function T(k){return be=k.exports,be=hi(),ae=be.K,rn(),vt.unshift(be.L),ve--,ve==0&&(Kt!==null&&(clearInterval(Kt),Kt=null),At&&(k=At,At=null,k())),be}var D={a:Ge};if(ve++,s.instantiateWasm)try{return s.instantiateWasm(D,T)}catch(k){Z(`Module.instantiateWasm callback failed with error: ${k}`),i(k)}return Lt(D,function(k){T(k.instance)}).catch(i),{}})();s._OrtInit=(T,D)=>(s._OrtInit=be.M)(T,D),s._OrtGetLastError=(T,D)=>(s._OrtGetLastError=be.N)(T,D),s._OrtCreateSessionOptions=(T,D,k,V,ee,le,$e,pt,Ut,wt)=>(s._OrtCreateSessionOptions=be.O)(T,D,k,V,ee,le,$e,pt,Ut,wt),s._OrtAppendExecutionProvider=(T,D)=>(s._OrtAppendExecutionProvider=be.P)(T,D),s._OrtAddFreeDimensionOverride=(T,D,k)=>(s._OrtAddFreeDimensionOverride=be.Q)(T,D,k),s._OrtAddSessionConfigEntry=(T,D,k)=>(s._OrtAddSessionConfigEntry=be.R)(T,D,k),s._OrtReleaseSessionOptions=T=>(s._OrtReleaseSessionOptions=be.S)(T),s._OrtCreateSession=(T,D,k)=>(s._OrtCreateSession=be.T)(T,D,k),s._OrtReleaseSession=T=>(s._OrtReleaseSession=be.U)(T),s._OrtGetInputOutputCount=(T,D,k)=>(s._OrtGetInputOutputCount=be.V)(T,D,k),s._OrtGetInputName=(T,D)=>(s._OrtGetInputName=be.W)(T,D),s._OrtGetOutputName=(T,D)=>(s._OrtGetOutputName=be.X)(T,D),s._OrtFree=T=>(s._OrtFree=be.Y)(T),s._OrtCreateTensor=(T,D,k,V,ee,le)=>(s._OrtCreateTensor=be.Z)(T,D,k,V,ee,le),s._OrtGetTensorData=(T,D,k,V,ee)=>(s._OrtGetTensorData=be._)(T,D,k,V,ee),s._OrtReleaseTensor=T=>(s._OrtReleaseTensor=be.$)(T),s._OrtCreateRunOptions=(T,D,k,V)=>(s._OrtCreateRunOptions=be.aa)(T,D,k,V),s._OrtAddRunConfigEntry=(T,D,k)=>(s._OrtAddRunConfigEntry=be.ba)(T,D,k),s._OrtReleaseRunOptions=T=>(s._OrtReleaseRunOptions=be.ca)(T),s._OrtCreateBinding=T=>(s._OrtCreateBinding=be.da)(T),s._OrtBindInput=(T,D,k)=>(s._OrtBindInput=be.ea)(T,D,k),s._OrtBindOutput=(T,D,k,V)=>(s._OrtBindOutput=be.fa)(T,D,k,V),s._OrtClearBoundOutputs=T=>(s._OrtClearBoundOutputs=be.ga)(T),s._OrtReleaseBinding=T=>(s._OrtReleaseBinding=be.ha)(T),s._OrtRunWithBinding=(T,D,k,V,ee)=>(s._OrtRunWithBinding=be.ia)(T,D,k,V,ee),s._OrtRun=(T,D,k,V,ee,le,$e,pt)=>(s._OrtRun=be.ja)(T,D,k,V,ee,le,$e,pt),s._OrtEndProfiling=T=>(s._OrtEndProfiling=be.ka)(T);var sn=()=>(sn=be.la)(),Gn=s._malloc=T=>(Gn=s._malloc=be.ma)(T);s._free=T=>(s._free=be.na)(T);var Tn=T=>(Tn=be.pa)(T),to=()=>(to=be.qa)(),de=T=>(de=be.ra)(T),On=T=>(On=be.sa)(T);function hi(){var T=be;T=Object.assign({},T);var D=V=>()=>V()>>>0,k=V=>ee=>V(ee)>>>0;return T.la=D(T.la),T.ma=k(T.ma),T.qa=D(T.qa),T.sa=k(T.sa),T}s.stackAlloc=On,s.stackSave=to,s.stackRestore=de,s.UTF8ToString=It,s.stringToUTF8=(T,D,k)=>Un(T,st,D,k),s.lengthBytesUTF8=Ir;var $r;At=function T(){$r||gi(),$r||(At=T)};function gi(){if(!(0<ve)){if(s.preRun)for(typeof s.preRun=="function"&&(s.preRun=[s.preRun]);s.preRun.length;){var T=s.preRun.shift();bn.unshift(T)}for(;0<bn.length;)bn.shift()(s);if(!(0<ve||$r||($r=!0,s.calledRun=!0,ot))){for(;0<vt.length;)vt.shift()(s);for(p(s);0<Le.length;)Le.shift()(s)}}}return gi(),f.ready}})();typeof e=="object"&&typeof t=="object"?t.exports=n:typeof define=="function"&&define.amd&&define([],()=>n)}),BA=it(()=>{}),UA=it(()=>{}),ev={};Mo(ev,{cpus:()=>tv});var tv,jA=G(()=>{tv=void 0}),zA=it((e,t)=>{"use strict";var n=(()=>{var o=typeof document<"u"&&document.currentScript?document.currentScript.src:void 0;return typeof __filename<"u"&&(o=o||__filename),function(f={}){function s(){return Le.buffer!=Xe.buffer&&Nt(),Xe}function p(){return Le.buffer!=Xe.buffer&&Nt(),nn}function i(){return Le.buffer!=Xe.buffer&&Nt(),St}function c(){return Le.buffer!=Xe.buffer&&Nt(),Ct}function r(){return Le.buffer!=Xe.buffer&&Nt(),Mt}var u=f,l,h;u.ready=new Promise((b,x)=>{l=b,h=x});var y=Object.assign({},u),O="./this.program",S=(b,x)=>{throw x},A=typeof window=="object",L=typeof importScripts=="function",$=typeof process=="object"&&typeof process.versions=="object"&&typeof process.versions.node=="string",F=u.ENVIRONMENT_IS_PTHREAD||!1,Z="";function ae(b){return u.locateFile?u.locateFile(b,Z):Z+b}var ot,Je,st;if($){var se=(Kb(),Ui(Af)),Me=(Qb(),Ui(If));Z=L?Me.dirname(Z)+"/":__dirname+"/",ot=(x,I)=>(x=It(x)?new URL(x):Me.normalize(x),se.readFileSync(x,I?void 0:"utf8")),st=x=>(x=ot(x,!0),x.buffer||(x=new Uint8Array(x)),x),Je=(x,I,M,Y=!0)=>{x=It(x)?new URL(x):Me.normalize(x),se.readFile(x,Y?void 0:"utf8",(X,oe)=>{X?M(X):I(Y?oe.buffer:oe)})},!u.thisProgram&&1<process.argv.length&&(O=process.argv[1].replace(/\\/g,"/")),process.argv.slice(2),S=(x,I)=>{throw process.exitCode=x,I},u.inspect=()=>"[Emscripten Module object]";let b;try{b=BA()}catch(x){throw console.error('The "worker_threads" module is not supported in this node.js build - perhaps a newer version is needed?'),x}global.Worker=b.Worker}else(A||L)&&(L?Z=self.location.href:typeof document<"u"&&document.currentScript&&(Z=document.currentScript.src),typeof o<"u"&&o&&(Z=o),Z.indexOf("blob:")!==0?Z=Z.substr(0,Z.replace(/[?#].*/,"").lastIndexOf("/")+1):Z="",$||(ot=b=>{var x=new XMLHttpRequest;return x.open("GET",b,!1),x.send(null),x.responseText},L&&(st=b=>{var x=new XMLHttpRequest;return x.open("GET",b,!1),x.responseType="arraybuffer",x.send(null),new Uint8Array(x.response)}),Je=(b,x,I)=>{var M=new XMLHttpRequest;M.open("GET",b,!0),M.responseType="arraybuffer",M.onload=()=>{M.status==200||M.status==0&&M.response?x(M.response):I()},M.onerror=I,M.send(null)}));$&&typeof performance>"u"&&(global.performance=UA().performance);var yn=console.log.bind(console),rn=console.error.bind(console);$&&(yn=(...b)=>se.writeSync(1,b.join(" ")+`
+`),rn=(...b)=>se.writeSync(2,b.join(" ")+`
+`));var bn=yn,vt=rn;Object.assign(u,y),y=null,typeof WebAssembly!="object"&&Jt("no native wasm support detected");var Le,ve,Kt=!1,At,Xe,nn,St,Ct,Mt;function Nt(){var b=Le.buffer;u.HEAP8=Xe=new Int8Array(b),u.HEAP16=new Int16Array(b),u.HEAPU8=nn=new Uint8Array(b),u.HEAPU16=new Uint16Array(b),u.HEAP32=St=new Int32Array(b),u.HEAPU32=Ct=new Uint32Array(b),u.HEAPF32=new Float32Array(b),u.HEAPF64=Mt=new Float64Array(b)}var vn=16777216;if(F)Le=u.wasmMemory;else if(u.wasmMemory)Le=u.wasmMemory;else if(Le=new WebAssembly.Memory({initial:vn/65536,maximum:65536,shared:!0}),!(Le.buffer instanceof SharedArrayBuffer))throw vt("requested a shared WebAssembly.Memory but the returned buffer is not a SharedArrayBuffer, indicating that while the browser has SharedArrayBuffer it does not have WebAssembly threads support - you may need to set a flag"),$&&vt("(on node you may need: --experimental-wasm-threads --experimental-wasm-bulk-memory and/or recent version)"),Error("bad memory");Nt(),vn=Le.buffer.byteLength;var or=[],Lt=[],Gt=[],Ht=0,ut=null,at=null;function dt(){if(Ht--,Ht==0&&(ut!==null&&(clearInterval(ut),ut=null),at)){var b=at;at=null,b()}}function Jt(b){throw b="Aborted("+b+")",vt(b),Kt=!0,At=1,b=new WebAssembly.RuntimeError(b+". Build with -sASSERTIONS for more info."),h(b),b}var wn=b=>b.startsWith("data:application/octet-stream;base64,"),It=b=>b.startsWith("file://"),Ir;Ir="ort-wasm-threaded.wasm",wn(Ir)||(Ir=ae(Ir));function Un(b){if(st)return st(b);throw"both async and sync fetching of the wasm failed"}function ar(b){if(A||L){if(typeof fetch=="function"&&!It(b))return fetch(b,{credentials:"same-origin"}).then(x=>{if(!x.ok)throw"failed to load wasm binary file at '"+b+"'";return x.arrayBuffer()}).catch(()=>Un(b));if(Je)return new Promise((x,I)=>{Je(b,M=>x(new Uint8Array(M)),I)})}return Promise.resolve().then(()=>Un(b))}function Bt(b,x,I){return ar(b).then(M=>WebAssembly.instantiate(M,x)).then(M=>M).then(I,M=>{vt(`failed to asynchronously prepare wasm: ${M}`),Jt(M)})}function on(b,x){var I=Ir;return typeof WebAssembly.instantiateStreaming!="function"||wn(I)||It(I)||$||typeof fetch!="function"?Bt(I,b,x):fetch(I,{credentials:"same-origin"}).then(M=>WebAssembly.instantiateStreaming(M,b).then(x,function(Y){return vt(`wasm streaming compile failed: ${Y}`),vt("falling back to ArrayBuffer instantiation"),Bt(I,b,x)}))}var sr,jn={921388:(b,x,I,M)=>{if(typeof u>"u"||!u.cb)return 1;if(b=an(b>>>0),b.startsWith("./")&&(b=b.substring(2)),b=u.cb.get(b),!b)return 2;if(x>>>=0,I>>>=0,M>>>=0,x+I>b.byteLength)return 3;try{return p().set(b.subarray(x,x+I),M>>>0),0}catch{return 4}}};function ur(b){this.name="ExitStatus",this.message=`Program terminated with exit(${b})`,this.status=b}var zn=b=>{b.terminate(),b.onmessage=()=>{}},Pr=b=>{de.Pa.length==0&&(Tn(),de.Ya(de.Pa[0]));var x=de.Pa.pop();if(!x)return 6;de.Qa.push(x),de.Ma[b.Oa]=x,x.Oa=b.Oa;var I={cmd:"run",start_routine:b.kb,arg:b.hb,pthread_ptr:b.Oa};return $&&x.unref(),x.postMessage(I,b.qb),0},lr=0,_n=typeof TextDecoder<"u"?new TextDecoder("utf8"):void 0,xn=(b,x,I)=>{x>>>=0;var M=x+I;for(I=x;b[I]&&!(I>=M);)++I;if(16<I-x&&b.buffer&&_n)return _n.decode(b.buffer instanceof SharedArrayBuffer?b.slice(x,I):b.subarray(x,I));for(M="";x<I;){var Y=b[x++];if(Y&128){var X=b[x++]&63;if((Y&224)==192)M+=String.fromCharCode((Y&31)<<6|X);else{var oe=b[x++]&63;Y=(Y&240)==224?(Y&15)<<12|X<<6|oe:(Y&7)<<18|X<<12|oe<<6|b[x++]&63,65536>Y?M+=String.fromCharCode(Y):(Y-=65536,M+=String.fromCharCode(55296|Y>>10,56320|Y&1023))}}else M+=String.fromCharCode(Y)}return M},an=(b,x)=>(b>>>=0)?xn(p(),b,x):"",Vn=b=>{var x=po();return b=b(),_i(x),b};function Ge(b,x){var I=arguments.length-2,M=arguments;return Vn(()=>{for(var Y=ho(8*I),X=Y>>>3,oe=0;oe<I;oe++){var lt=M[2+oe];r()[X+oe>>>0]=lt}return co(b,I,Y,x)})}function be(b){if(F)return Ge(0,1,b);At=b,0<lr||(de.lb(),u.onExit?.(b),Kt=!0),S(b,new ur(b))}var sn=b=>{if(At=b,F)throw hi(b),"unwind";be(b)};function Gn(){for(var b=u.numThreads;b--;)Tn();or.unshift(()=>{Ht++,to(()=>dt())})}function Tn(){var b=ae("ort-wasm-threaded.worker.js");b=new Worker(b),de.Pa.push(b)}function to(b){F?b():Promise.all(de.Pa.map(de.Ya)).then(b)}var de={Pa:[],Qa:[],bb:[],Ma:{},Wa(){F?(de.receiveObjectTransfer=de.jb,de.threadInitTLS=de.ab,de.setExitStatus=de.$a):Gn()},$a:b=>At=b,tb:["$terminateWorker"],lb:()=>{for(var b of de.Qa)zn(b);for(b of de.Pa)zn(b);de.Pa=[],de.Qa=[],de.Ma=[]},Za:b=>{var x=b.Oa;delete de.Ma[x],de.Pa.push(b),de.Qa.splice(de.Qa.indexOf(b),1),b.Oa=0,un(x)},jb(){},ab(){de.bb.forEach(b=>b())},Ya:b=>new Promise(x=>{b.onmessage=X=>{X=X.data;var oe=X.cmd;if(X.targetThread&&X.targetThread!=uo()){var lt=de.Ma[X.targetThread];lt?lt.postMessage(X,X.transferList):vt(`Internal error! Worker sent a message "${oe}" to target pthread ${X.targetThread}, but that thread no longer exists!`)}else oe==="checkMailbox"?ro():oe==="spawnThread"?Pr(X):oe==="cleanupThread"?de.Za(de.Ma[X.thread]):oe==="killThread"?(X=X.thread,oe=de.Ma[X],delete de.Ma[X],zn(oe),un(X),de.Qa.splice(de.Qa.indexOf(oe),1),oe.Oa=0):oe==="cancelThread"?de.Ma[X.thread].postMessage({cmd:"cancel"}):oe==="loaded"?(b.loaded=!0,$&&!b.Oa&&b.unref(),x(b)):oe==="alert"?alert(`Thread ${X.threadId}: ${X.text}`):X.target==="setimmediate"?b.postMessage(X):oe==="callHandler"?u[X.handler](...X.args):oe&&vt(`worker sent an unknown command ${oe}`)},b.onerror=X=>{throw vt(`worker sent an error! ${X.filename}:${X.lineno}: ${X.message}`),X},$&&(b.on("message",X=>b.onmessage({data:X})),b.on("error",X=>b.onerror(X)));var I=[],M=["onExit"],Y;for(Y of M)u.hasOwnProperty(Y)&&I.push(Y);b.postMessage({cmd:"load",handlers:I,urlOrBlob:u.mainScriptUrlOrBlob||o,wasmMemory:Le,wasmModule:ve})})};u.PThread=de;var On=b=>{for(;0<b.length;)b.shift()(u)};u.establishStackSpace=()=>{var b=uo(),x=c()[b+52>>>2>>>0];b=c()[b+56>>>2>>>0],oa(x,x-b),_i(x)};function hi(b){if(F)return Ge(1,0,b);sn(b)}var $r=[],gi;u.invokeEntryPoint=(b,x)=>{var I=$r[b];I||(b>=$r.length&&($r.length=b+1),$r[b]=I=gi.get(b)),b=I(x),0<lr?de.$a(b):fo(b)};function T(b){this.Va=b-24,this.gb=function(x){c()[this.Va+4>>>2>>>0]=x},this.fb=function(x){c()[this.Va+8>>>2>>>0]=x},this.Wa=function(x,I){this.eb(),this.gb(x),this.fb(I)},this.eb=function(){c()[this.Va+16>>>2>>>0]=0}}var D=0,k=0;function V(b,x,I,M){return F?Ge(2,1,b,x,I,M):ee(b,x,I,M)}function ee(b,x,I,M){if(b>>>=0,x>>>=0,I>>>=0,M>>>=0,typeof SharedArrayBuffer>"u")return vt("Current environment does not support SharedArrayBuffer, pthreads are not available!"),6;var Y=[];return F&&Y.length===0?V(b,x,I,M):(b={kb:I,Oa:b,hb:M,qb:Y},F?(b.sb="spawnThread",postMessage(b,Y),0):Pr(b))}function le(b,x,I){return F?Ge(3,1,b,x,I):0}function $e(b,x){if(F)return Ge(4,1,b,x)}var pt=b=>{for(var x=0,I=0;I<b.length;++I){var M=b.charCodeAt(I);127>=M?x++:2047>=M?x+=2:55296<=M&&57343>=M?(x+=4,++I):x+=3}return x},Ut=(b,x,I,M)=>{if(I>>>=0,!(0<M))return 0;var Y=I;M=I+M-1;for(var X=0;X<b.length;++X){var oe=b.charCodeAt(X);if(55296<=oe&&57343>=oe){var lt=b.charCodeAt(++X);oe=65536+((oe&1023)<<10)|lt&1023}if(127>=oe){if(I>=M)break;x[I++>>>0]=oe}else{if(2047>=oe){if(I+1>=M)break;x[I++>>>0]=192|oe>>6}else{if(65535>=oe){if(I+2>=M)break;x[I++>>>0]=224|oe>>12}else{if(I+3>=M)break;x[I++>>>0]=240|oe>>18,x[I++>>>0]=128|oe>>12&63}x[I++>>>0]=128|oe>>6&63}x[I++>>>0]=128|oe&63}}return x[I>>>0]=0,I-Y},wt=(b,x,I)=>Ut(b,p(),x,I);function Pt(b,x){if(F)return Ge(5,1,b,x)}function mi(b,x,I){if(F)return Ge(6,1,b,x,I)}function yi(b,x,I){return F?Ge(7,1,b,x,I):0}function U(b,x){if(F)return Ge(8,1,b,x)}function Be(b,x,I){if(F)return Ge(9,1,b,x,I)}function Qe(b,x,I,M){if(F)return Ge(10,1,b,x,I,M)}function Dr(b,x,I,M){if(F)return Ge(11,1,b,x,I,M)}function bi(b,x,I,M){if(F)return Ge(12,1,b,x,I,M)}function Yo(b){if(F)return Ge(13,1,b)}function is(b,x){if(F)return Ge(14,1,b,x)}function os(b,x,I){if(F)return Ge(15,1,b,x,I)}function Xo(b){b>>>=0,typeof Atomics.rb=="function"&&(Atomics.rb(i(),b>>>2,b).value.then(ro),b+=128,Atomics.store(i(),b>>>2,1))}u.__emscripten_thread_mailbox_await=Xo;var ro=()=>{var b=uo();if(b&&(Xo(b),b=ia,!Kt))try{if(b(),!(0<lr))try{F?fo(At):sn(At)}catch(x){x instanceof ur||x=="unwind"||S(1,x)}}catch(x){x instanceof ur||x=="unwind"||S(1,x)}};u.checkMailbox=ro;var Ko=[],Hn=b=>b%4===0&&(b%100!==0||b%400===0),vi=[0,31,60,91,121,152,182,213,244,274,305,335],as=[0,31,59,90,120,151,181,212,243,273,304,334];function wi(b,x,I,M,Y,X,oe,lt){return F?Ge(16,1,b,x,I,M,Y,X,oe,lt):-52}function ss(b,x,I,M,Y,X,oe){if(F)return Ge(17,1,b,x,I,M,Y,X,oe)}var us=b=>{var x=pt(b)+1,I=na(x);return I&&wt(b,I,x),I},Jo=[],no={},Qo=()=>{if(!io){var b={USER:"web_user",LOGNAME:"web_user",PATH:"/",PWD:"/",HOME:"/home/web_user",LANG:(typeof navigator=="object"&&navigator.languages&&navigator.languages[0]||"C").replace("-","_")+".UTF-8",_:O||"./this.program"},x;for(x in no)no[x]===void 0?delete b[x]:b[x]=no[x];var I=[];for(x in b)I.push(`${x}=${b[x]}`);io=I}return io},io;function ls(b,x){if(F)return Ge(18,1,b,x);b>>>=0,x>>>=0;var I=0;return Qo().forEach((M,Y)=>{var X=x+I;for(Y=c()[b+4*Y>>>2>>>0]=X,X=0;X<M.length;++X)s()[Y++>>>0>>>0]=M.charCodeAt(X);s()[Y>>>0>>>0]=0,I+=M.length+1}),0}function cs(b,x){if(F)return Ge(19,1,b,x);b>>>=0,x>>>=0;var I=Qo();c()[b>>>2>>>0]=I.length;var M=0;return I.forEach(Y=>M+=Y.length+1),c()[x>>>2>>>0]=M,0}function fs(b){return F?Ge(20,1,b):52}function ds(b,x,I,M){return F?Ge(21,1,b,x,I,M):52}function ea(b,x,I,M,Y){return F?Ge(22,1,b,x,I,M,Y):70}var ps=[null,[],[]];function ta(b,x,I,M){if(F)return Ge(23,1,b,x,I,M);x>>>=0,I>>>=0,M>>>=0;for(var Y=0,X=0;X<I;X++){var oe=c()[x>>>2>>>0],lt=c()[x+4>>>2>>>0];x+=8;for(var Cr=0;Cr<lt;Cr++){var Et=p()[oe+Cr>>>0],Wt=ps[b];Et===0||Et===10?((b===1?bn:vt)(xn(Wt,0)),Wt.length=0):Wt.push(Et)}Y+=lt}return c()[M>>>2>>>0]=Y,0}var oo=[31,29,31,30,31,30,31,31,30,31,30,31],hs=[31,28,31,30,31,30,31,31,30,31,30,31];function gs(b){var x=Array(pt(b)+1);return Ut(b,x,0,x.length),x}var ao=(b,x)=>{s().set(b,x>>>0)};function ra(b,x,I,M){function Y(z,Ye,ct){for(z=typeof z=="number"?z.toString():z||"";z.length<Ye;)z=ct[0]+z;return z}function X(z,Ye){return Y(z,Ye,"0")}function oe(z,Ye){function ct(vs){return 0>vs?-1:0<vs?1:0}var Sn;return(Sn=ct(z.getFullYear()-Ye.getFullYear()))===0&&(Sn=ct(z.getMonth()-Ye.getMonth()))===0&&(Sn=ct(z.getDate()-Ye.getDate())),Sn}function lt(z){switch(z.getDay()){case 0:return new Date(z.getFullYear()-1,11,29);case 1:return z;case 2:return new Date(z.getFullYear(),0,3);case 3:return new Date(z.getFullYear(),0,2);case 4:return new Date(z.getFullYear(),0,1);case 5:return new Date(z.getFullYear()-1,11,31);case 6:return new Date(z.getFullYear()-1,11,30)}}function Cr(z){var Ye=z.Ra;for(z=new Date(new Date(z.Sa+1900,0,1).getTime());0<Ye;){var ct=z.getMonth(),Sn=(Hn(z.getFullYear())?oo:hs)[ct];if(Ye>Sn-z.getDate())Ye-=Sn-z.getDate()+1,z.setDate(1),11>ct?z.setMonth(ct+1):(z.setMonth(0),z.setFullYear(z.getFullYear()+1));else{z.setDate(z.getDate()+Ye);break}}return ct=new Date(z.getFullYear()+1,0,4),Ye=lt(new Date(z.getFullYear(),0,4)),ct=lt(ct),0>=oe(Ye,z)?0>=oe(ct,z)?z.getFullYear()+1:z.getFullYear():z.getFullYear()-1}b>>>=0,x>>>=0,I>>>=0,M>>>=0;var Et=c()[M+40>>>2>>>0];M={ob:i()[M>>>2>>>0],nb:i()[M+4>>>2>>>0],Ta:i()[M+8>>>2>>>0],Xa:i()[M+12>>>2>>>0],Ua:i()[M+16>>>2>>>0],Sa:i()[M+20>>>2>>>0],Na:i()[M+24>>>2>>>0],Ra:i()[M+28>>>2>>>0],ub:i()[M+32>>>2>>>0],mb:i()[M+36>>>2>>>0],pb:Et?an(Et):""},I=an(I),Et={"%c":"%a %b %d %H:%M:%S %Y","%D":"%m/%d/%y","%F":"%Y-%m-%d","%h":"%b","%r":"%I:%M:%S %p","%R":"%H:%M","%T":"%H:%M:%S","%x":"%m/%d/%y","%X":"%H:%M:%S","%Ec":"%c","%EC":"%C","%Ex":"%m/%d/%y","%EX":"%H:%M:%S","%Ey":"%y","%EY":"%Y","%Od":"%d","%Oe":"%e","%OH":"%H","%OI":"%I","%Om":"%m","%OM":"%M","%OS":"%S","%Ou":"%u","%OU":"%U","%OV":"%V","%Ow":"%w","%OW":"%W","%Oy":"%y"};for(var Wt in Et)I=I.replace(new RegExp(Wt,"g"),Et[Wt]);var Ke="Sunday Monday Tuesday Wednesday Thursday Friday Saturday".split(" "),Ze="January February March April May June July August September October November December".split(" ");Et={"%a":z=>Ke[z.Na].substring(0,3),"%A":z=>Ke[z.Na],"%b":z=>Ze[z.Ua].substring(0,3),"%B":z=>Ze[z.Ua],"%C":z=>X((z.Sa+1900)/100|0,2),"%d":z=>X(z.Xa,2),"%e":z=>Y(z.Xa,2," "),"%g":z=>Cr(z).toString().substring(2),"%G":z=>Cr(z),"%H":z=>X(z.Ta,2),"%I":z=>(z=z.Ta,z==0?z=12:12<z&&(z-=12),X(z,2)),"%j":z=>{for(var Ye=0,ct=0;ct<=z.Ua-1;Ye+=(Hn(z.Sa+1900)?oo:hs)[ct++]);return X(z.Xa+Ye,3)},"%m":z=>X(z.Ua+1,2),"%M":z=>X(z.nb,2),"%n":()=>`
+`,"%p":z=>0<=z.Ta&&12>z.Ta?"AM":"PM","%S":z=>X(z.ob,2),"%t":()=>"	","%u":z=>z.Na||7,"%U":z=>X(Math.floor((z.Ra+7-z.Na)/7),2),"%V":z=>{var Ye=Math.floor((z.Ra+7-(z.Na+6)%7)/7);if(2>=(z.Na+371-z.Ra-2)%7&&Ye++,Ye)Ye==53&&(ct=(z.Na+371-z.Ra)%7,ct==4||ct==3&&Hn(z.Sa)||(Ye=1));else{Ye=52;var ct=(z.Na+7-z.Ra-1)%7;(ct==4||ct==5&&Hn(z.Sa%400-1))&&Ye++}return X(Ye,2)},"%w":z=>z.Na,"%W":z=>X(Math.floor((z.Ra+7-(z.Na+6)%7)/7),2),"%y":z=>(z.Sa+1900).toString().substring(2),"%Y":z=>z.Sa+1900,"%z":z=>{z=z.mb;var Ye=0<=z;return z=Math.abs(z)/60,(Ye?"+":"-")+("0000"+(z/60*100+z%60)).slice(-4)},"%Z":z=>z.pb,"%%":()=>"%"},I=I.replace(/%%/g,"\0\0");for(Wt in Et)I.includes(Wt)&&(I=I.replace(new RegExp(Wt,"g"),Et[Wt](M)));return I=I.replace(/\0\0/g,"%"),Wt=gs(I),Wt.length>x?0:(ao(Wt,b),Wt.length-1)}de.Wa();var Bu=[be,hi,V,le,$e,Pt,mi,yi,U,Be,Qe,Dr,bi,Yo,is,os,wi,ss,ls,cs,fs,ds,ea,ta],ms={b:function(b,x,I){throw b>>>=0,new T(b).Wa(x>>>0,I>>>0),D=b,k++,D},L:function(b){lo(b>>>0,!L,1,!A,131072,!1),de.ab()},j:function(b){b>>>=0,F?postMessage({cmd:"cleanupThread",thread:b}):de.Za(de.Ma[b])},H:ee,h:le,S:$e,D:Pt,F:mi,T:yi,Q:U,J:Be,P:Qe,n:Dr,E:bi,B:Yo,R:is,C:os,p:()=>1,z:function(b,x){b>>>=0,b==x>>>0?setTimeout(()=>ro()):F?postMessage({targetThread:b,cmd:"checkMailbox"}):(b=de.Ma[b])&&b.postMessage({cmd:"checkMailbox"})},I:function(b,x,I,M){x>>>=0,Ko.length=I,M=M>>>0>>>3;for(var Y=0;Y<I;Y++)Ko[Y]=r()[M+Y>>>0];return b=0>b?jn[-b-1]:Bu[b],de.ib=x,x=b.apply(null,Ko),de.ib=0,x},K:Xo,o:function(b){$&&de.Ma[b>>>0].ref()},s:function(b,x,I){b=x+2097152>>>0<4194305-!!b?(b>>>0)+4294967296*x:NaN,I>>>=0,b=new Date(1e3*b),i()[I>>>2>>>0]=b.getUTCSeconds(),i()[I+4>>>2>>>0]=b.getUTCMinutes(),i()[I+8>>>2>>>0]=b.getUTCHours(),i()[I+12>>>2>>>0]=b.getUTCDate(),i()[I+16>>>2>>>0]=b.getUTCMonth(),i()[I+20>>>2>>>0]=b.getUTCFullYear()-1900,i()[I+24>>>2>>>0]=b.getUTCDay(),b=(b.getTime()-Date.UTC(b.getUTCFullYear(),0,1,0,0,0,0))/864e5|0,i()[I+28>>>2>>>0]=b},t:function(b,x,I){b=x+2097152>>>0<4194305-!!b?(b>>>0)+4294967296*x:NaN,I>>>=0,b=new Date(1e3*b),i()[I>>>2>>>0]=b.getSeconds(),i()[I+4>>>2>>>0]=b.getMinutes(),i()[I+8>>>2>>>0]=b.getHours(),i()[I+12>>>2>>>0]=b.getDate(),i()[I+16>>>2>>>0]=b.getMonth(),i()[I+20>>>2>>>0]=b.getFullYear()-1900,i()[I+24>>>2>>>0]=b.getDay(),x=(Hn(b.getFullYear())?vi:as)[b.getMonth()]+b.getDate()-1|0,i()[I+28>>>2>>>0]=x,i()[I+36>>>2>>>0]=-(60*b.getTimezoneOffset()),x=new Date(b.getFullYear(),6,1).getTimezoneOffset();var M=new Date(b.getFullYear(),0,1).getTimezoneOffset();b=(x!=M&&b.getTimezoneOffset()==Math.min(M,x))|0,i()[I+32>>>2>>>0]=b},u:function(b){b>>>=0;var x=new Date(i()[b+20>>>2>>>0]+1900,i()[b+16>>>2>>>0],i()[b+12>>>2>>>0],i()[b+8>>>2>>>0],i()[b+4>>>2>>>0],i()[b>>>2>>>0],0),I=i()[b+32>>>2>>>0],M=x.getTimezoneOffset(),Y=new Date(x.getFullYear(),6,1).getTimezoneOffset(),X=new Date(x.getFullYear(),0,1).getTimezoneOffset(),oe=Math.min(X,Y);return 0>I?i()[b+32>>>2>>>0]=+(Y!=X&&oe==M):0<I!=(oe==M)&&(Y=Math.max(X,Y),x.setTime(x.getTime()+6e4*((0<I?oe:Y)-M))),i()[b+24>>>2>>>0]=x.getDay(),I=(Hn(x.getFullYear())?vi:as)[x.getMonth()]+x.getDate()-1|0,i()[b+28>>>2>>>0]=I,i()[b>>>2>>>0]=x.getSeconds(),i()[b+4>>>2>>>0]=x.getMinutes(),i()[b+8>>>2>>>0]=x.getHours(),i()[b+12>>>2>>>0]=x.getDate(),i()[b+16>>>2>>>0]=x.getMonth(),i()[b+20>>>2>>>0]=x.getYear(),b=x.getTime(),isNaN(b)?(i()[so()>>>2>>>0]=61,b=-1):b/=1e3,ys((sr=b,1<=+Math.abs(sr)?0<sr?+Math.floor(sr/4294967296)>>>0:~~+Math.ceil((sr-+(~~sr>>>0))/4294967296)>>>0:0)),b>>>0},q:wi,r:ss,y:function(b,x,I){function M(Et){return(Et=Et.toTimeString().match(/\(([A-Za-z ]+)\)$/))?Et[1]:"GMT"}b>>>=0,x>>>=0,I>>>=0;var Y=new Date().getFullYear(),X=new Date(Y,0,1),oe=new Date(Y,6,1);Y=X.getTimezoneOffset();var lt=oe.getTimezoneOffset(),Cr=Math.max(Y,lt);c()[b>>>2>>>0]=60*Cr,i()[x>>>2>>>0]=+(Y!=lt),b=M(X),x=M(oe),b=us(b),x=us(x),lt<Y?(c()[I>>>2>>>0]=b,c()[I+4>>>2>>>0]=x):(c()[I>>>2>>>0]=x,c()[I+4>>>2>>>0]=b)},c:()=>{Jt("")},O:function(b,x,I){b>>>=0,x>>>=0,I>>>=0,Jo.length=0;for(var M;M=p()[x++>>>0];){var Y=M!=105;Y&=M!=112,I+=Y&&I%8?4:0,Jo.push(M==112?c()[I>>>2>>>0]:M==105?i()[I>>>2>>>0]:r()[I>>>3>>>0]),I+=Y?8:4}return jn[b].apply(null,Jo)},k:()=>{},i:()=>Date.now(),U:()=>{throw lr+=1,"unwind"},A:function(){return 4294901760},e:()=>performance.timeOrigin+performance.now(),f:()=>$?(jA(),Ui(ev)).cpus().length:navigator.hardwareConcurrency,x:function(b){b>>>=0;var x=p().length;if(b<=x||4294901760<b)return!1;for(var I=1;4>=I;I*=2){var M=x*(1+.2/I);M=Math.min(M,b+100663296);var Y=Math;M=Math.max(b,M);e:{Y=(Y.min.call(Y,4294901760,M+(65536-M%65536)%65536)-Le.buffer.byteLength+65535)/65536;try{Le.grow(Y),Nt();var X=1;break e}catch{}X=void 0}if(X)return!0}return!1},M:ls,N:cs,G:sn,g:fs,m:ds,v:ea,l:ta,a:Le||u.wasmMemory,w:ra,d:function(b,x,I,M){return ra(b>>>0,x>>>0,I>>>0,M>>>0)}},ce=(function(){function b(I,M){return ce=I.exports,ce=Uu(),de.bb.push(ce.za),gi=ce.Aa,Lt.unshift(ce.V),ve=M,dt(),ce}var x={a:ms};if(Ht++,u.instantiateWasm)try{return u.instantiateWasm(x,b)}catch(I){vt(`Module.instantiateWasm callback failed with error: ${I}`),h(I)}return on(x,function(I){b(I.instance,I.module)}).catch(h),{}})();u._OrtInit=(b,x)=>(u._OrtInit=ce.W)(b,x),u._OrtGetLastError=(b,x)=>(u._OrtGetLastError=ce.X)(b,x),u._OrtCreateSessionOptions=(b,x,I,M,Y,X,oe,lt,Cr,Et)=>(u._OrtCreateSessionOptions=ce.Y)(b,x,I,M,Y,X,oe,lt,Cr,Et),u._OrtAppendExecutionProvider=(b,x)=>(u._OrtAppendExecutionProvider=ce.Z)(b,x),u._OrtAddFreeDimensionOverride=(b,x,I)=>(u._OrtAddFreeDimensionOverride=ce._)(b,x,I),u._OrtAddSessionConfigEntry=(b,x,I)=>(u._OrtAddSessionConfigEntry=ce.$)(b,x,I),u._OrtReleaseSessionOptions=b=>(u._OrtReleaseSessionOptions=ce.aa)(b),u._OrtCreateSession=(b,x,I)=>(u._OrtCreateSession=ce.ba)(b,x,I),u._OrtReleaseSession=b=>(u._OrtReleaseSession=ce.ca)(b),u._OrtGetInputOutputCount=(b,x,I)=>(u._OrtGetInputOutputCount=ce.da)(b,x,I),u._OrtGetInputName=(b,x)=>(u._OrtGetInputName=ce.ea)(b,x),u._OrtGetOutputName=(b,x)=>(u._OrtGetOutputName=ce.fa)(b,x),u._OrtFree=b=>(u._OrtFree=ce.ga)(b),u._OrtCreateTensor=(b,x,I,M,Y,X)=>(u._OrtCreateTensor=ce.ha)(b,x,I,M,Y,X),u._OrtGetTensorData=(b,x,I,M,Y)=>(u._OrtGetTensorData=ce.ia)(b,x,I,M,Y),u._OrtReleaseTensor=b=>(u._OrtReleaseTensor=ce.ja)(b),u._OrtCreateRunOptions=(b,x,I,M)=>(u._OrtCreateRunOptions=ce.ka)(b,x,I,M),u._OrtAddRunConfigEntry=(b,x,I)=>(u._OrtAddRunConfigEntry=ce.la)(b,x,I),u._OrtReleaseRunOptions=b=>(u._OrtReleaseRunOptions=ce.ma)(b),u._OrtCreateBinding=b=>(u._OrtCreateBinding=ce.na)(b),u._OrtBindInput=(b,x,I)=>(u._OrtBindInput=ce.oa)(b,x,I),u._OrtBindOutput=(b,x,I,M)=>(u._OrtBindOutput=ce.pa)(b,x,I,M),u._OrtClearBoundOutputs=b=>(u._OrtClearBoundOutputs=ce.qa)(b),u._OrtReleaseBinding=b=>(u._OrtReleaseBinding=ce.ra)(b),u._OrtRunWithBinding=(b,x,I,M,Y)=>(u._OrtRunWithBinding=ce.sa)(b,x,I,M,Y),u._OrtRun=(b,x,I,M,Y,X,oe,lt)=>(u._OrtRun=ce.ta)(b,x,I,M,Y,X,oe,lt),u._OrtEndProfiling=b=>(u._OrtEndProfiling=ce.ua)(b);var so=()=>(so=ce.va)(),uo=u._pthread_self=()=>(uo=u._pthread_self=ce.wa)(),na=u._malloc=b=>(na=u._malloc=ce.xa)(b);u._free=b=>(u._free=ce.ya)(b),u.__emscripten_tls_init=()=>(u.__emscripten_tls_init=ce.za)();var lo=u.__emscripten_thread_init=(b,x,I,M,Y,X)=>(lo=u.__emscripten_thread_init=ce.Ba)(b,x,I,M,Y,X);u.__emscripten_thread_crashed=()=>(u.__emscripten_thread_crashed=ce.Ca)();var co=(b,x,I,M)=>(co=ce.Da)(b,x,I,M),un=b=>(un=ce.Ea)(b),fo=u.__emscripten_thread_exit=b=>(fo=u.__emscripten_thread_exit=ce.Fa)(b),ia=()=>(ia=ce.Ga)(),ys=b=>(ys=ce.Ha)(b),oa=(b,x)=>(oa=ce.Ia)(b,x),po=()=>(po=ce.Ja)(),_i=b=>(_i=ce.Ka)(b),ho=b=>(ho=ce.La)(b);function Uu(){var b=ce;b=Object.assign({},b);var x=M=>()=>M()>>>0,I=M=>Y=>M(Y)>>>0;return b.va=x(b.va),b.wa=x(b.wa),b.xa=I(b.xa),b.emscripten_main_runtime_thread_id=x(b.emscripten_main_runtime_thread_id),b.Ja=x(b.Ja),b.La=I(b.La),b}u.wasmMemory=Le,u.stackAlloc=ho,u.stackSave=po,u.stackRestore=_i,u.keepRuntimeAlive=()=>0<lr,u.UTF8ToString=an,u.stringToUTF8=wt,u.lengthBytesUTF8=pt,u.ExitStatus=ur,u.PThread=de;var go;at=function b(){go||bs(),go||(at=b)};function bs(){if(!(0<Ht))if(F)l(u),F||On(Lt),startWorker(u);else{if(u.preRun)for(typeof u.preRun=="function"&&(u.preRun=[u.preRun]);u.preRun.length;)or.unshift(u.preRun.shift());On(or),0<Ht||go||(go=!0,u.calledRun=!0,Kt||(F||On(Lt),l(u),F||On(Gt)))}}return bs(),f.ready}})();typeof e=="object"&&typeof t=="object"?t.exports=n:typeof define=="function"&&define.amd&&define([],()=>n)}),VA=it((e,t)=>{t.exports='"use strict";var Module={},ENVIRONMENT_IS_NODE=typeof process=="object"&&typeof process.versions=="object"&&typeof process.versions.node=="string";if(ENVIRONMENT_IS_NODE){var nodeWorkerThreads=require("worker_threads"),parentPort=nodeWorkerThreads.parentPort;parentPort.on("message",e=>onmessage({data:e}));var fs=require("fs"),vm=require("vm");Object.assign(global,{self:global,require,Module,location:{href:__filename},Worker:nodeWorkerThreads.Worker,importScripts:e=>vm.runInThisContext(fs.readFileSync(e,"utf8"),{filename:e}),postMessage:e=>parentPort.postMessage(e),performance:global.performance||{now:Date.now}})}var initializedJS=!1;function threadPrintErr(){var e=Array.prototype.slice.call(arguments).join(" ");if(ENVIRONMENT_IS_NODE){fs.writeSync(2,e+`\n`);return}console.error(e)}function threadAlert(){var e=Array.prototype.slice.call(arguments).join(" ");postMessage({cmd:"alert",text:e,threadId:Module._pthread_self()})}var err=threadPrintErr;self.alert=threadAlert,Module.instantiateWasm=(e,t)=>{var a=Module.wasmModule;Module.wasmModule=null;var r=new WebAssembly.Instance(a,e);return t(r)},self.onunhandledrejection=e=>{throw e.reason||e};function handleMessage(e){try{if(e.data.cmd==="load"){let a=[];self.onmessage=r=>a.push(r),self.startWorker=r=>{Module=r,postMessage({cmd:"loaded"});for(let s of a)handleMessage(s);self.onmessage=handleMessage},Module.wasmModule=e.data.wasmModule;for(const r of e.data.handlers)Module[r]=(...s)=>{postMessage({cmd:"callHandler",handler:r,args:s})};if(Module.wasmMemory=e.data.wasmMemory,Module.buffer=Module.wasmMemory.buffer,Module.ENVIRONMENT_IS_PTHREAD=!0,typeof e.data.urlOrBlob=="string")importScripts(e.data.urlOrBlob);else{var t=URL.createObjectURL(e.data.urlOrBlob);importScripts(t),URL.revokeObjectURL(t)}ortWasmThreaded(Module)}else if(e.data.cmd==="run"){Module.__emscripten_thread_init(e.data.pthread_ptr,0,0,1),Module.__emscripten_thread_mailbox_await(e.data.pthread_ptr),Module.establishStackSpace(),Module.PThread.receiveObjectTransfer(e.data),Module.PThread.threadInitTLS(),initializedJS||(initializedJS=!0);try{Module.invokeEntryPoint(e.data.start_routine,e.data.arg)}catch(a){if(a!="unwind")throw a}}else e.data.cmd==="cancel"?Module._pthread_self()&&Module.__emscripten_thread_exit(-1):e.data.target==="setimmediate"||(e.data.cmd==="checkMailbox"?initializedJS&&Module.checkMailbox():e.data.cmd&&(err(`worker.js received unknown command ${e.data.cmd}`),err(e.data)))}catch(a){throw Module.__emscripten_thread_crashed?.(),a}}self.onmessage=handleMessage;\n'}),_m,xm,Sc,du,$a,Ec,Tm,Om,Sm,rv,Ft,Qa=G(()=>{"use strict";_m=LA(),xm=zA(),du=!1,$a=!1,Ec=!1,Tm=e=>{if(e===1)return!1;if(typeof SharedArrayBuffer>"u")return typeof self<"u"&&!self.crossOriginIsolated&&console.warn("env.wasm.numThreads is set to "+e+", but this will not work unless you enable crossOriginIsolated mode. See https://web.dev/cross-origin-isolation-guide/ for more info."),!1;typeof process<"u"&&process.versions&&process.versions.node&&console.warn("env.wasm.numThreads is set to "+e+", however, currently onnxruntime-web does not support multi-threads in Node.js. Please consider using onnxruntime-node for performance critical scenarios.");try{return typeof MessageChannel<"u"&&new MessageChannel().port1.postMessage(new SharedArrayBuffer(1)),WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,0,0,1,4,1,96,0,0,3,2,1,0,5,4,1,3,1,1,10,11,1,9,0,65,0,254,16,2,0,26,11]))}catch{return!1}},Om=()=>{try{return WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,0,0,1,4,1,96,0,0,3,2,1,0,10,30,1,28,0,65,0,253,15,253,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,253,186,1,26,11]))}catch{return!1}},Sm=(e,t)=>e?t?"ort-wasm-simd-threaded.wasm":"ort-wasm-simd.wasm":t?"ort-wasm-threaded.wasm":"ort-wasm.wasm",rv=async e=>{if(du)return Promise.resolve();if($a)throw new Error("multiple calls to 'initializeWebAssembly()' detected.");if(Ec)throw new Error("previous call to 'initializeWebAssembly()' failed.");$a=!0;let t=e.initTimeout,n=e.numThreads,o=e.simd,f=Tm(n),s=o&&Om(),p=e.wasmPaths,i=typeof p=="string"?p:void 0,c=Sm(s,f),r=typeof p=="object"?p[c]:void 0,u=!1,l=[];if(t>0&&l.push(new Promise(h=>{setTimeout(()=>{u=!0,h()},t)})),l.push(new Promise((h,y)=>{let O=f?xm:_m,S={locateFile:(A,L)=>f&&A.endsWith(".worker.js")&&typeof Blob<"u"?URL.createObjectURL(new Blob([VA()],{type:"text/javascript"})):A.endsWith(".wasm")?r||(i??L)+c:L+A};if(f)if(S.numThreads=n,typeof Blob>"u")S.mainScriptUrlOrBlob=(void 0)(__dirname,"ort-wasm-threaded.js");else{let A=`var ortWasmThreaded=${O.toString()};`;S.mainScriptUrlOrBlob=new Blob([A],{type:"text/javascript"})}O(S).then(A=>{$a=!1,du=!0,Sc=A,h()},A=>{$a=!1,Ec=!0,y(A)})})),await Promise.race(l),u)throw new Error(`WebAssembly backend initializing failed due to timeout: ${t}ms`)},Ft=()=>{if(du&&Sc)return Sc;throw new Error("WebAssembly is not initialized yet.")}}),Tt,wu,Ot,Pf=G(()=>{"use strict";Qa(),Tt=(e,t)=>{let n=Ft(),o=n.lengthBytesUTF8(e)+1,f=n._malloc(o);return n.stringToUTF8(e,f,o),t.push(f),f},wu=(e,t,n,o)=>{if(typeof e=="object"&&e!==null){if(n.has(e))throw new Error("Circular reference in options");n.add(e)}Object.entries(e).forEach(([f,s])=>{let p=t?t+f:f;if(typeof s=="object")wu(s,p+".",n,o);else if(typeof s=="string"||typeof s=="number")o(p,s.toString());else if(typeof s=="boolean")o(p,s?"1":"0");else throw new Error(`Can't handle extra config type: ${typeof s}`)})},Ot=e=>{let t=Ft(),n=t.stackSave();try{let o=t.stackAlloc(8);t._OrtGetLastError(o,o+4);let f=t.HEAP32[o/4],s=t.HEAPU32[o/4+1],p=s?t.UTF8ToString(s):"";throw new Error(`${e} ERROR_CODE: ${f}, ERROR_MESSAGE: ${p}`)}finally{t.stackRestore(n)}}}),nv,GA=G(()=>{"use strict";Qa(),Pf(),nv=e=>{let t=Ft(),n=0,o=[],f=e||{};try{if(e?.logSeverityLevel===void 0)f.logSeverityLevel=2;else if(typeof e.logSeverityLevel!="number"||!Number.isInteger(e.logSeverityLevel)||e.logSeverityLevel<0||e.logSeverityLevel>4)throw new Error(`log serverity level is not valid: ${e.logSeverityLevel}`);if(e?.logVerbosityLevel===void 0)f.logVerbosityLevel=0;else if(typeof e.logVerbosityLevel!="number"||!Number.isInteger(e.logVerbosityLevel))throw new Error(`log verbosity level is not valid: ${e.logVerbosityLevel}`);e?.terminate===void 0&&(f.terminate=!1);let s=0;return e?.tag!==void 0&&(s=Tt(e.tag,o)),n=t._OrtCreateRunOptions(f.logSeverityLevel,f.logVerbosityLevel,!!f.terminate,s),n===0&&Ot("Can't create run options."),e?.extra!==void 0&&wu(e.extra,"",new WeakSet,(p,i)=>{let c=Tt(p,o),r=Tt(i,o);t._OrtAddRunConfigEntry(n,c,r)!==0&&Ot(`Can't set a run config entry: ${p} - ${i}.`)}),[n,o]}catch(s){throw n!==0&&t._OrtReleaseRunOptions(n),o.forEach(p=>t._free(p)),s}}}),Em,Am,Im,Pm,iv,HA=G(()=>{"use strict";Qa(),Pf(),Em=e=>{switch(e){case"disabled":return 0;case"basic":return 1;case"extended":return 2;case"all":return 99;default:throw new Error(`unsupported graph optimization level: ${e}`)}},Am=e=>{switch(e){case"sequential":return 0;case"parallel":return 1;default:throw new Error(`unsupported execution mode: ${e}`)}},Im=e=>{e.extra||(e.extra={}),e.extra.session||(e.extra.session={});let t=e.extra.session;t.use_ort_model_bytes_directly||(t.use_ort_model_bytes_directly="1"),e.executionProviders&&e.executionProviders.some(n=>(typeof n=="string"?n:n.name)==="webgpu")&&(e.enableMemPattern=!1)},Pm=(e,t,n)=>{for(let o of t){let f=typeof o=="string"?o:o.name;switch(f){case"webnn":if(f="WEBNN",typeof o!="string"){let p=o;if(p?.deviceType){let i=Tt("deviceType",n),c=Tt(p.deviceType,n);Ft()._OrtAddSessionConfigEntry(e,i,c)!==0&&Ot(`Can't set a session config entry: 'deviceType' - ${p.deviceType}.`)}if(p?.numThreads){let i=p.numThreads;(typeof i!="number"||!Number.isInteger(i)||i<0)&&(i=0);let c=Tt("numThreads",n),r=Tt(i.toString(),n);Ft()._OrtAddSessionConfigEntry(e,c,r)!==0&&Ot(`Can't set a session config entry: 'numThreads' - ${p.numThreads}.`)}if(p?.powerPreference){let i=Tt("powerPreference",n),c=Tt(p.powerPreference,n);Ft()._OrtAddSessionConfigEntry(e,i,c)!==0&&Ot(`Can't set a session config entry: 'powerPreference' - ${p.powerPreference}.`)}}break;case"webgpu":if(f="JS",typeof o!="string"){let p=o;if(p?.preferredLayout){if(p.preferredLayout!=="NCHW"&&p.preferredLayout!=="NHWC")throw new Error(`preferredLayout must be either 'NCHW' or 'NHWC': ${p.preferredLayout}`);let i=Tt("preferredLayout",n),c=Tt(p.preferredLayout,n);Ft()._OrtAddSessionConfigEntry(e,i,c)!==0&&Ot(`Can't set a session config entry: 'preferredLayout' - ${p.preferredLayout}.`)}}break;case"wasm":case"cpu":continue;default:throw new Error(`not supported execution provider: ${f}`)}let s=Tt(f,n);Ft()._OrtAppendExecutionProvider(e,s)!==0&&Ot(`Can't append execution provider: ${f}.`)}},iv=e=>{let t=Ft(),n=0,o=[],f=e||{};Im(f);try{let s=Em(f.graphOptimizationLevel??"all"),p=Am(f.executionMode??"sequential"),i=typeof f.logId=="string"?Tt(f.logId,o):0,c=f.logSeverityLevel??2;if(!Number.isInteger(c)||c<0||c>4)throw new Error(`log serverity level is not valid: ${c}`);let r=f.logVerbosityLevel??0;if(!Number.isInteger(r)||r<0||r>4)throw new Error(`log verbosity level is not valid: ${r}`);let u=typeof f.optimizedModelFilePath=="string"?Tt(f.optimizedModelFilePath,o):0;if(n=t._OrtCreateSessionOptions(s,!!f.enableCpuMemArena,!!f.enableMemPattern,p,!!f.enableProfiling,0,i,c,r,u),n===0&&Ot("Can't create session options."),f.executionProviders&&Pm(n,f.executionProviders,o),f.enableGraphCapture!==void 0){if(typeof f.enableGraphCapture!="boolean")throw new Error(`enableGraphCapture must be a boolean value: ${f.enableGraphCapture}`);let l=Tt("enableGraphCapture",o),h=Tt(f.enableGraphCapture.toString(),o);t._OrtAddSessionConfigEntry(n,l,h)!==0&&Ot(`Can't set a session config entry: 'enableGraphCapture' - ${f.enableGraphCapture}.`)}if(f.freeDimensionOverrides)for(let[l,h]of Object.entries(f.freeDimensionOverrides)){if(typeof l!="string")throw new Error(`free dimension override name must be a string: ${l}`);if(typeof h!="number"||!Number.isInteger(h)||h<0)throw new Error(`free dimension override value must be a non-negative integer: ${h}`);let y=Tt(l,o);t._OrtAddFreeDimensionOverride(n,y,h)!==0&&Ot(`Can't set a free dimension override: ${l} - ${h}.`)}return f.extra!==void 0&&wu(f.extra,"",new WeakSet,(l,h)=>{let y=Tt(l,o),O=Tt(h,o);t._OrtAddSessionConfigEntry(n,y,O)!==0&&Ot(`Can't set a session config entry: ${l} - ${h}.`)}),[n,o]}catch(s){throw n!==0&&t._OrtReleaseSessionOptions(n),o.forEach(p=>t._free(p)),s}}}),ff,ov,df,av,sv,$f,uv,lv=G(()=>{"use strict";ff=e=>{switch(e){case"int8":return 3;case"uint8":return 2;case"bool":return 9;case"int16":return 5;case"uint16":return 4;case"int32":return 6;case"uint32":return 12;case"float16":return 10;case"float32":return 1;case"float64":return 11;case"string":return 8;case"int64":return 7;case"uint64":return 13;default:throw new Error(`unsupported data type: ${e}`)}},ov=e=>{switch(e){case 3:return"int8";case 2:return"uint8";case 9:return"bool";case 5:return"int16";case 4:return"uint16";case 6:return"int32";case 12:return"uint32";case 10:return"float16";case 1:return"float32";case 11:return"float64";case 8:return"string";case 7:return"int64";case 13:return"uint64";default:throw new Error(`unsupported data type: ${e}`)}},df=e=>[void 0,4,1,1,2,2,4,8,void 0,1,2,8,4,8,void 0,void 0,void 0][e],av=e=>{switch(e){case"float16":return typeof Float16Array<"u"&&Float16Array.from?Float16Array:Uint16Array;case"float32":return Float32Array;case"uint8":return Uint8Array;case"int8":return Int8Array;case"uint16":return Uint16Array;case"int16":return Int16Array;case"int32":return Int32Array;case"bool":return Uint8Array;case"float64":return Float64Array;case"uint32":return Uint32Array;case"int64":return BigInt64Array;case"uint64":return BigUint64Array;default:throw new Error(`unsupported type: ${e}`)}},sv=e=>{switch(e){case"verbose":return 0;case"info":return 1;case"warning":return 2;case"error":return 3;case"fatal":return 4;default:throw new Error(`unsupported logging level: ${e}`)}},$f=e=>e==="float32"||e==="float16"||e==="int32"||e==="int64"||e==="uint32"||e==="uint8"||e==="bool",uv=e=>{switch(e){case"none":return 0;case"cpu":return 1;case"cpu-pinned":return 2;case"texture":return 3;case"gpu-buffer":return 4;default:throw new Error(`unsupported data location: ${e}`)}}}),_u,cv=G(()=>{"use strict";_u=async e=>{if(typeof e=="string")if(typeof process<"u"&&process.versions&&process.versions.node)try{return new Uint8Array(await(void 0)(e))}catch(t){if(t.code==="ERR_FS_FILE_TOO_LARGE"){let n=(void 0)(e),o=[];for await(let f of n)o.push(f);return new Uint8Array(Buffer.concat(o))}throw t}else{let t=await fetch(e);if(!t.ok)throw new Error(`failed to load external data file: ${e}`);let n=t.headers.get("Content-Length"),o=n?parseInt(n,10):0;if(o<1073741824)return new Uint8Array(await t.arrayBuffer());{if(!t.body)throw new Error(`failed to load external data file: ${e}, no response body.`);let f=t.body.getReader(),s;try{s=new ArrayBuffer(o)}catch(i){if(i instanceof RangeError){let c=Math.ceil(o/65536);s=new WebAssembly.Memory({initial:c,maximum:c}).buffer}else throw i}let p=0;for(;;){let{done:i,value:c}=await f.read();if(i)break;let r=c.byteLength;new Uint8Array(s,p,r).set(c),p+=r}return new Uint8Array(s,0,o)}}else return e instanceof Blob?new Uint8Array(await e.arrayBuffer()):e instanceof Uint8Array?e:new Uint8Array(e)}}),$m,fv,dv,Ni,Dm,pf,pv,hv,Ac,gv,mv,yv,WA=G(()=>{"use strict";GA(),HA(),lv(),Qa(),Pf(),cv(),$m=(e,t)=>{Ft()._OrtInit(e,t)!==0&&Ot("Can't initialize onnxruntime.")},fv=async e=>{$m(e.wasm.numThreads,sv(e.logLevel))},dv=async(e,t)=>{},Ni=new Map,Dm=e=>{let t=Ft(),n=t.stackSave();try{let o=t.stackAlloc(8);return t._OrtGetInputOutputCount(e,o,o+4)!==0&&Ot("Can't get session input/output count."),[t.HEAP32[o/4],t.HEAP32[o/4+1]]}finally{t.stackRestore(n)}},pf=e=>{let t=Ft(),n=t._malloc(e.byteLength);if(n===0)throw new Error(`Can't create a session. failed to allocate a buffer of size ${e.byteLength}.`);return t.HEAPU8.set(e,n),[n,e.byteLength]},pv=async(e,t)=>{let n,o,f=Ft();Array.isArray(e)?[n,o]=e:e.buffer===f.HEAPU8.buffer?[n,o]=[e.byteOffset,e.byteLength]:[n,o]=pf(e);let s=0,p=0,i=0,c=[],r=[],u=[];try{if([p,c]=iv(t),t?.externalData&&f.mountExternalData){let $=[];for(let F of t.externalData){let Z=typeof F=="string"?F:F.path;$.push(_u(typeof F=="string"?F:F.data).then(ae=>{f.mountExternalData(Z,ae)}))}await Promise.all($)}s=await f._OrtCreateSession(n,o,p),s===0&&Ot("Can't create a session.");let[l,h]=Dm(s),y=!!t?.enableGraphCapture,O=[],S=[],A=[];for(let $=0;$<l;$++){let F=f._OrtGetInputName(s,$);F===0&&Ot("Can't get an input name."),r.push(F),O.push(f.UTF8ToString(F))}for(let $=0;$<h;$++){let F=f._OrtGetOutputName(s,$);F===0&&Ot("Can't get an output name."),u.push(F);let Z=f.UTF8ToString(F);S.push(Z)}return Ni.set(s,[s,r,u,null,y,!1]),[s,O,S]}catch(l){throw r.forEach(h=>f._OrtFree(h)),u.forEach(h=>f._OrtFree(h)),i!==0&&f._OrtReleaseBinding(i),s!==0&&f._OrtReleaseSession(s),l}finally{f._free(n),p!==0&&f._OrtReleaseSessionOptions(p),c.forEach(l=>f._free(l)),f.unmountExternalData?.()}},hv=e=>{let t=Ft(),n=Ni.get(e);if(!n)throw new Error(`cannot release session. invalid session id: ${e}`);let[o,f,s,p,i]=n;p&&(i&&t._OrtClearBoundOutputs(p.handle),t._OrtReleaseBinding(p.handle)),t.jsepOnReleaseSession?.(e),f.forEach(c=>t._OrtFree(c)),s.forEach(c=>t._OrtFree(c)),t._OrtReleaseSession(o),Ni.delete(e)},Ac=(e,t,n,o,f,s=!1)=>{if(!e){t.push(0);return}let p=Ft(),i=e[0],c=e[1],r=e[3],u,l;if(i==="string"&&r==="gpu-buffer")throw new Error("String tensor is not supported on GPU.");if(s&&r!=="gpu-buffer")throw new Error(`External buffer must be provided for input/output index ${f} when enableGraphCapture is true.`);if(r==="gpu-buffer"){let O=e[2].gpuBuffer,S=df(ff(i));l=c.reduce((L,$)=>L*$,1)*S;let A=p.jsepRegisterBuffer;if(!A)throw new Error('Tensor location "gpu-buffer" is not supported without using WebGPU.');u=A(o,f,O,l)}else{let O=e[2];if(Array.isArray(O)){l=4*O.length,u=p._malloc(l),n.push(u);let S=u/4;for(let A=0;A<O.length;A++){if(typeof O[A]!="string")throw new TypeError(`tensor data at index ${A} is not a string`);p.HEAPU32[S++]=Tt(O[A],n)}}else l=O.byteLength,u=p._malloc(l),n.push(u),p.HEAPU8.set(new Uint8Array(O.buffer,O.byteOffset,l),u)}let h=p.stackSave(),y=p.stackAlloc(4*c.length);try{let O=y/4;c.forEach(A=>p.HEAP32[O++]=A);let S=p._OrtCreateTensor(ff(i),u,l,y,c.length,uv(r));S===0&&Ot(`Can't create tensor for input/output. session=${o}, index=${f}.`),t.push(S)}finally{p.stackRestore(h)}},gv=async(e,t,n,o,f,s)=>{let p=Ft(),i=Ni.get(e);if(!i)throw new Error(`cannot run inference. invalid session id: ${e}`);let c=i[0],r=i[1],u=i[2],l=i[3],h=i[4],y=i[5],O=t.length,S=o.length,A=0,L=[],$=[],F=[],Z=[],ae=p.stackSave(),ot=p.stackAlloc(O*4),Je=p.stackAlloc(O*4),st=p.stackAlloc(S*4),se=p.stackAlloc(S*4);try{[A,L]=nv(s);for(let ve=0;ve<O;ve++)Ac(n[ve],$,Z,e,t[ve],h);for(let ve=0;ve<S;ve++)Ac(f[ve],F,Z,e,O+o[ve],h);let Me=ot/4,yn=Je/4,rn=st/4,bn=se/4;for(let ve=0;ve<O;ve++)p.HEAPU32[Me++]=$[ve],p.HEAPU32[yn++]=r[t[ve]];for(let ve=0;ve<S;ve++)p.HEAPU32[rn++]=F[ve],p.HEAPU32[bn++]=u[o[ve]];p.jsepOnRunStart?.(c);let vt;vt=await p._OrtRun(c,Je,ot,O,se,S,st,A),vt!==0&&Ot("failed to call OrtRun().");let Le=[];for(let ve=0;ve<S;ve++){let Kt=p.HEAPU32[st/4+ve];if(Kt===F[ve]){Le.push(f[ve]);continue}let At=p.stackSave(),Xe=p.stackAlloc(16),nn=!1,St,Ct=0;try{p._OrtGetTensorData(Kt,Xe,Xe+4,Xe+8,Xe+12)!==0&&Ot(`Can't access output tensor data on index ${ve}.`);let Mt=Xe/4,Nt=p.HEAPU32[Mt++];Ct=p.HEAPU32[Mt++];let vn=p.HEAPU32[Mt++],or=p.HEAPU32[Mt++],Lt=[];for(let ut=0;ut<or;ut++)Lt.push(p.HEAPU32[vn/4+ut]);p._OrtFree(vn);let Gt=Lt.reduce((ut,at)=>ut*at,1);St=ov(Nt);let Ht=l?.outputPreferredLocations[o[ve]];if(St==="string"){if(Ht==="gpu-buffer")throw new Error("String tensor is not supported on GPU.");let ut=[],at=Ct/4;for(let dt=0;dt<Gt;dt++){let Jt=p.HEAPU32[at++],wn=dt===Gt-1?void 0:p.HEAPU32[at]-Jt;ut.push(p.UTF8ToString(Jt,wn))}Le.push([St,Lt,ut,"cpu"])}else if(Ht==="gpu-buffer"&&Gt>0){let ut=p.jsepGetBuffer;if(!ut)throw new Error('preferredLocation "gpu-buffer" is not supported without using WebGPU.');let at=ut(Ct),dt=df(Nt);if(dt===void 0||!$f(St))throw new Error(`Unsupported data type: ${St}`);nn=!0,Le.push([St,Lt,{gpuBuffer:at,download:p.jsepCreateDownloader(at,Gt*dt,St),dispose:()=>{p._OrtReleaseTensor(Kt)}},"gpu-buffer"])}else{let ut=av(St),at=new ut(Gt);new Uint8Array(at.buffer,at.byteOffset,at.byteLength).set(p.HEAPU8.subarray(Ct,Ct+at.byteLength)),Le.push([St,Lt,at,"cpu"])}}finally{p.stackRestore(At),St==="string"&&Ct&&p._free(Ct),nn||p._OrtReleaseTensor(Kt)}}return l&&!h&&(p._OrtClearBoundOutputs(l.handle),Ni.set(e,[c,r,u,l,h,!1])),Le}finally{p.stackRestore(ae),$.forEach(Me=>p._OrtReleaseTensor(Me)),F.forEach(Me=>p._OrtReleaseTensor(Me)),Z.forEach(Me=>p._free(Me)),A!==0&&p._OrtReleaseRunOptions(A),L.forEach(Me=>p._free(Me))}},mv=e=>{let t=Ft(),n=Ni.get(e);if(!n)throw new Error("invalid session id");let o=n[0],f=t._OrtEndProfiling(o);f===0&&Ot("Can't get an profile file name."),t._OrtFree(f)},yv=e=>{let t=[];for(let n of e){let o=n[2];!Array.isArray(o)&&"buffer"in o&&t.push(o.buffer)}return t}}),qA=it((e,t)=>{t.exports='/*!\n * ONNX Runtime Web v1.17.3\n * Copyright (c) Microsoft Corporation. All rights reserved.\n * Licensed under the MIT License.\n */\n"use strict";(()=>{var Et=Object.defineProperty;var Jr=Object.getOwnPropertyDescriptor;var Xr=Object.getOwnPropertyNames;var Qr=Object.prototype.hasOwnProperty;var St=(u,c)=>()=>(u&&(c=u(u=0)),c);var tt=(u,c)=>()=>(c||u((c={exports:{}}).exports,c),c.exports),At=(u,c)=>{for(var a in c)Et(u,a,{get:c[a],enumerable:!0})},Zr=(u,c,a,h)=>{if(c&&typeof c=="object"||typeof c=="function")for(let f of Xr(c))!Qr.call(u,f)&&f!==a&&Et(u,f,{get:()=>c[f],enumerable:!(h=Jr(c,f))||h.enumerable});return u};var rt=u=>Zr(Et({},"__esModule",{value:!0}),u);var Tt={};At(Tt,{createReadStream:()=>dr,readFile:()=>Kr,readFileSync:()=>en});var Kr,en,dr,Mt=St(()=>{Kr=void 0,en=void 0,dr=void 0});var Ct={};At(Ct,{join:()=>tn});var tn,Dt=St(()=>{tn=void 0});var gr=tt((mr,Ft)=>{"use strict";var pr=(()=>{var u=typeof document<"u"&&document.currentScript?document.currentScript.src:void 0;return typeof __filename<"u"&&(u=u||__filename),function(c={}){var a=c,h,f;a.ready=new Promise((r,o)=>{h=r,f=o});var w=Object.assign({},a),g="./this.program",i=typeof window=="object",E=typeof importScripts=="function",P=typeof process=="object"&&typeof process.versions=="object"&&typeof process.versions.node=="string",U="",D,x,K;if(P){var R=(Mt(),rt(Tt)),I=(Dt(),rt(Ct));U=E?I.dirname(U)+"/":__dirname+"/",D=(r,o)=>(r=ve(r)?new URL(r):I.normalize(r),R.readFileSync(r,o?void 0:"utf8")),K=r=>(r=D(r,!0),r.buffer||(r=new Uint8Array(r)),r),x=(r,o,s,m=!0)=>{r=ve(r)?new URL(r):I.normalize(r),R.readFile(r,m?void 0:"utf8",(O,A)=>{O?s(O):o(m?A.buffer:A)})},!a.thisProgram&&1<process.argv.length&&(g=process.argv[1].replace(/\\\\/g,"/")),process.argv.slice(2),a.inspect=()=>"[Emscripten Module object]"}else(i||E)&&(E?U=self.location.href:typeof document<"u"&&document.currentScript&&(U=document.currentScript.src),u&&(U=u),U.indexOf("blob:")!==0?U=U.substr(0,U.replace(/[?#].*/,"").lastIndexOf("/")+1):U="",D=r=>{var o=new XMLHttpRequest;return o.open("GET",r,!1),o.send(null),o.responseText},E&&(K=r=>{var o=new XMLHttpRequest;return o.open("GET",r,!1),o.responseType="arraybuffer",o.send(null),new Uint8Array(o.response)}),x=(r,o,s)=>{var m=new XMLHttpRequest;m.open("GET",r,!0),m.responseType="arraybuffer",m.onload=()=>{m.status==200||m.status==0&&m.response?o(m.response):s()},m.onerror=s,m.send(null)});var v=console.log.bind(console),k=console.error.bind(console);Object.assign(a,w),w=null,typeof WebAssembly!="object"&&F("no native wasm support detected");var W,H=!1,se,ee,S,j,Ce;function Ue(){var r=W.buffer;a.HEAP8=se=new Int8Array(r),a.HEAP16=new Int16Array(r),a.HEAPU8=ee=new Uint8Array(r),a.HEAPU16=new Uint16Array(r),a.HEAP32=S=new Int32Array(r),a.HEAPU32=j=new Uint32Array(r),a.HEAPF32=new Float32Array(r),a.HEAPF64=Ce=new Float64Array(r)}var ce=[],ne=[],Q=[],Oe=0,he=null,ae=null;function F(r){throw r="Aborted("+r+")",k(r),H=!0,r=new WebAssembly.RuntimeError(r+". Build with -sASSERTIONS for more info."),f(r),r}var ye=r=>r.startsWith("data:application/octet-stream;base64,"),ve=r=>r.startsWith("file://"),fe;if(fe="ort-wasm.wasm",!ye(fe)){var _e=fe;fe=a.locateFile?a.locateFile(_e,U):U+_e}function Y(r){if(K)return K(r);throw"both async and sync fetching of the wasm failed"}function pe(r){if(i||E){if(typeof fetch=="function"&&!ve(r))return fetch(r,{credentials:"same-origin"}).then(o=>{if(!o.ok)throw"failed to load wasm binary file at \'"+r+"\'";return o.arrayBuffer()}).catch(()=>Y(r));if(x)return new Promise((o,s)=>{x(r,m=>o(new Uint8Array(m)),s)})}return Promise.resolve().then(()=>Y(r))}function Ie(r,o,s){return pe(r).then(m=>WebAssembly.instantiate(m,o)).then(m=>m).then(s,m=>{k(`failed to asynchronously prepare wasm: ${m}`),F(m)})}function Ee(r,o){var s=fe;return typeof WebAssembly.instantiateStreaming!="function"||ye(s)||ve(s)||P||typeof fetch!="function"?Ie(s,r,o):fetch(s,{credentials:"same-origin"}).then(m=>WebAssembly.instantiateStreaming(m,r).then(o,function(O){return k(`wasm streaming compile failed: ${O}`),k("falling back to ArrayBuffer instantiation"),Ie(s,r,o)}))}var be,we={920016:(r,o,s,m)=>{if(typeof a>"u"||!a.za)return 1;if(r=z(r>>>0),r.startsWith("./")&&(r=r.substring(2)),r=a.za.get(r),!r)return 2;if(o>>>=0,s>>>=0,o+s>r.byteLength)return 3;try{return ee.set(r.subarray(o,o+s),m>>>0>>>0),0}catch{return 4}}};function Le(r){this.xa=r-24,this.Ha=function(o){j[this.xa+4>>>2>>>0]=o},this.Ga=function(o){j[this.xa+8>>>2>>>0]=o},this.Aa=function(o,s){this.Fa(),this.Ha(o),this.Ga(s)},this.Fa=function(){j[this.xa+16>>>2>>>0]=0}}var me=0,Se=0,De=typeof TextDecoder<"u"?new TextDecoder("utf8"):void 0,te=(r,o,s)=>{o>>>=0;var m=o+s;for(s=o;r[s]&&!(s>=m);)++s;if(16<s-o&&r.buffer&&De)return De.decode(r.subarray(o,s));for(m="";o<s;){var O=r[o++];if(O&128){var A=r[o++]&63;if((O&224)==192)m+=String.fromCharCode((O&31)<<6|A);else{var L=r[o++]&63;O=(O&240)==224?(O&15)<<12|A<<6|L:(O&7)<<18|A<<12|L<<6|r[o++]&63,65536>O?m+=String.fromCharCode(O):(O-=65536,m+=String.fromCharCode(55296|O>>10,56320|O&1023))}}else m+=String.fromCharCode(O)}return m},z=(r,o)=>(r>>>=0)?te(ee,r,o):"",le=r=>{for(var o=0,s=0;s<r.length;++s){var m=r.charCodeAt(s);127>=m?o++:2047>=m?o+=2:55296<=m&&57343>=m?(o+=4,++s):o+=3}return o},Fe=(r,o,s,m)=>{if(s>>>=0,!(0<m))return 0;var O=s;m=s+m-1;for(var A=0;A<r.length;++A){var L=r.charCodeAt(A);if(55296<=L&&57343>=L){var re=r.charCodeAt(++A);L=65536+((L&1023)<<10)|re&1023}if(127>=L){if(s>=m)break;o[s++>>>0]=L}else{if(2047>=L){if(s+1>=m)break;o[s++>>>0]=192|L>>6}else{if(65535>=L){if(s+2>=m)break;o[s++>>>0]=224|L>>12}else{if(s+3>=m)break;o[s++>>>0]=240|L>>18,o[s++>>>0]=128|L>>12&63}o[s++>>>0]=128|L>>6&63}o[s++>>>0]=128|L&63}}return o[s>>>0]=0,s-O},Ae=r=>r%4===0&&(r%100!==0||r%400===0),qe=[0,31,60,91,121,152,182,213,244,274,305,335],at=[0,31,59,90,120,151,181,212,243,273,304,334],xe=r=>{var o=le(r)+1,s=st(o);return s&&Fe(r,ee,s,o),s},Ne=[],Re={},He=()=>{if(!Ge){var r={USER:"web_user",LOGNAME:"web_user",PATH:"/",PWD:"/",HOME:"/home/web_user",LANG:(typeof navigator=="object"&&navigator.languages&&navigator.languages[0]||"C").replace("-","_")+".UTF-8",_:g||"./this.program"},o;for(o in Re)Re[o]===void 0?delete r[o]:r[o]=Re[o];var s=[];for(o in r)s.push(`${o}=${r[o]}`);Ge=s}return Ge},Ge,Be=[null,[],[]],Ve=[31,29,31,30,31,30,31,31,30,31,30,31],Je=[31,28,31,30,31,30,31,31,30,31,30,31];function $e(r){var o=Array(le(r)+1);return Fe(r,o,0,o.length),o}function ot(r,o,s,m){function O(d,B,$){for(d=typeof d=="number"?d.toString():d||"";d.length<B;)d=$[0]+d;return d}function A(d,B){return O(d,B,"0")}function L(d,B){function $(et){return 0>et?-1:0<et?1:0}var Te;return(Te=$(d.getFullYear()-B.getFullYear()))===0&&(Te=$(d.getMonth()-B.getMonth()))===0&&(Te=$(d.getDate()-B.getDate())),Te}function re(d){switch(d.getDay()){case 0:return new Date(d.getFullYear()-1,11,29);case 1:return d;case 2:return new Date(d.getFullYear(),0,3);case 3:return new Date(d.getFullYear(),0,2);case 4:return new Date(d.getFullYear(),0,1);case 5:return new Date(d.getFullYear()-1,11,31);case 6:return new Date(d.getFullYear()-1,11,30)}}function de(d){var B=d.ta;for(d=new Date(new Date(d.ua+1900,0,1).getTime());0<B;){var $=d.getMonth(),Te=(Ae(d.getFullYear())?Ve:Je)[$];if(B>Te-d.getDate())B-=Te-d.getDate()+1,d.setDate(1),11>$?d.setMonth($+1):(d.setMonth(0),d.setFullYear(d.getFullYear()+1));else{d.setDate(d.getDate()+B);break}}return $=new Date(d.getFullYear()+1,0,4),B=re(new Date(d.getFullYear(),0,4)),$=re($),0>=L(B,d)?0>=L($,d)?d.getFullYear()+1:d.getFullYear():d.getFullYear()-1}r>>>=0,o>>>=0,s>>>=0,m>>>=0;var ie=j[m+40>>>2>>>0];m={Da:S[m>>>2>>>0],Ca:S[m+4>>>2>>>0],va:S[m+8>>>2>>>0],ya:S[m+12>>>2>>>0],wa:S[m+16>>>2>>>0],ua:S[m+20>>>2>>>0],oa:S[m+24>>>2>>>0],ta:S[m+28>>>2>>>0],Ia:S[m+32>>>2>>>0],Ba:S[m+36>>>2>>>0],Ea:ie?z(ie):""},s=z(s),ie={"%c":"%a %b %d %H:%M:%S %Y","%D":"%m/%d/%y","%F":"%Y-%m-%d","%h":"%b","%r":"%I:%M:%S %p","%R":"%H:%M","%T":"%H:%M:%S","%x":"%m/%d/%y","%X":"%H:%M:%S","%Ec":"%c","%EC":"%C","%Ex":"%m/%d/%y","%EX":"%H:%M:%S","%Ey":"%y","%EY":"%Y","%Od":"%d","%Oe":"%e","%OH":"%H","%OI":"%I","%Om":"%m","%OM":"%M","%OS":"%S","%Ou":"%u","%OU":"%U","%OV":"%V","%Ow":"%w","%OW":"%W","%Oy":"%y"};for(var ue in ie)s=s.replace(new RegExp(ue,"g"),ie[ue]);var Ze="Sunday Monday Tuesday Wednesday Thursday Friday Saturday".split(" "),Ke="January February March April May June July August September October November December".split(" ");ie={"%a":d=>Ze[d.oa].substring(0,3),"%A":d=>Ze[d.oa],"%b":d=>Ke[d.wa].substring(0,3),"%B":d=>Ke[d.wa],"%C":d=>A((d.ua+1900)/100|0,2),"%d":d=>A(d.ya,2),"%e":d=>O(d.ya,2," "),"%g":d=>de(d).toString().substring(2),"%G":d=>de(d),"%H":d=>A(d.va,2),"%I":d=>(d=d.va,d==0?d=12:12<d&&(d-=12),A(d,2)),"%j":d=>{for(var B=0,$=0;$<=d.wa-1;B+=(Ae(d.ua+1900)?Ve:Je)[$++]);return A(d.ya+B,3)},"%m":d=>A(d.wa+1,2),"%M":d=>A(d.Ca,2),"%n":()=>`\n`,"%p":d=>0<=d.va&&12>d.va?"AM":"PM","%S":d=>A(d.Da,2),"%t":()=>"	","%u":d=>d.oa||7,"%U":d=>A(Math.floor((d.ta+7-d.oa)/7),2),"%V":d=>{var B=Math.floor((d.ta+7-(d.oa+6)%7)/7);if(2>=(d.oa+371-d.ta-2)%7&&B++,B)B==53&&($=(d.oa+371-d.ta)%7,$==4||$==3&&Ae(d.ua)||(B=1));else{B=52;var $=(d.oa+7-d.ta-1)%7;($==4||$==5&&Ae(d.ua%400-1))&&B++}return A(B,2)},"%w":d=>d.oa,"%W":d=>A(Math.floor((d.ta+7-(d.oa+6)%7)/7),2),"%y":d=>(d.ua+1900).toString().substring(2),"%Y":d=>d.ua+1900,"%z":d=>{d=d.Ba;var B=0<=d;return d=Math.abs(d)/60,(B?"+":"-")+("0000"+(d/60*100+d%60)).slice(-4)},"%Z":d=>d.Ea,"%%":()=>"%"},s=s.replace(/%%/g,"\\0\\0");for(ue in ie)s.includes(ue)&&(s=s.replace(new RegExp(ue,"g"),ie[ue](m)));return s=s.replace(/\\0\\0/g,"%"),ue=$e(s),ue.length>o?0:(se.set(ue,r>>>0),ue.length-1)}var G={a:function(r,o,s){throw r>>>=0,new Le(r).Aa(o>>>0,s>>>0),me=r,Se++,me},e:function(){return 0},H:function(){},x:function(){},z:function(){},J:function(){return 0},F:function(){},A:function(){},E:function(){},g:function(){},y:function(){},v:function(){},G:function(){},w:function(){},k:()=>1,n:function(r,o,s){r=o+2097152>>>0<4194305-!!r?(r>>>0)+4294967296*o:NaN,s>>>=0,r=new Date(1e3*r),S[s>>>2>>>0]=r.getUTCSeconds(),S[s+4>>>2>>>0]=r.getUTCMinutes(),S[s+8>>>2>>>0]=r.getUTCHours(),S[s+12>>>2>>>0]=r.getUTCDate(),S[s+16>>>2>>>0]=r.getUTCMonth(),S[s+20>>>2>>>0]=r.getUTCFullYear()-1900,S[s+24>>>2>>>0]=r.getUTCDay(),S[s+28>>>2>>>0]=(r.getTime()-Date.UTC(r.getUTCFullYear(),0,1,0,0,0,0))/864e5|0},o:function(r,o,s){r=o+2097152>>>0<4194305-!!r?(r>>>0)+4294967296*o:NaN,s>>>=0,r=new Date(1e3*r),S[s>>>2>>>0]=r.getSeconds(),S[s+4>>>2>>>0]=r.getMinutes(),S[s+8>>>2>>>0]=r.getHours(),S[s+12>>>2>>>0]=r.getDate(),S[s+16>>>2>>>0]=r.getMonth(),S[s+20>>>2>>>0]=r.getFullYear()-1900,S[s+24>>>2>>>0]=r.getDay(),S[s+28>>>2>>>0]=(Ae(r.getFullYear())?qe:at)[r.getMonth()]+r.getDate()-1|0,S[s+36>>>2>>>0]=-(60*r.getTimezoneOffset()),o=new Date(r.getFullYear(),6,1).getTimezoneOffset();var m=new Date(r.getFullYear(),0,1).getTimezoneOffset();S[s+32>>>2>>>0]=(o!=m&&r.getTimezoneOffset()==Math.min(m,o))|0},p:function(r){r>>>=0;var o=new Date(S[r+20>>>2>>>0]+1900,S[r+16>>>2>>>0],S[r+12>>>2>>>0],S[r+8>>>2>>>0],S[r+4>>>2>>>0],S[r>>>2>>>0],0),s=S[r+32>>>2>>>0],m=o.getTimezoneOffset(),O=new Date(o.getFullYear(),6,1).getTimezoneOffset(),A=new Date(o.getFullYear(),0,1).getTimezoneOffset(),L=Math.min(A,O);return 0>s?S[r+32>>>2>>>0]=+(O!=A&&L==m):0<s!=(L==m)&&(O=Math.max(A,O),o.setTime(o.getTime()+6e4*((0<s?L:O)-m))),S[r+24>>>2>>>0]=o.getDay(),S[r+28>>>2>>>0]=(Ae(o.getFullYear())?qe:at)[o.getMonth()]+o.getDate()-1|0,S[r>>>2>>>0]=o.getSeconds(),S[r+4>>>2>>>0]=o.getMinutes(),S[r+8>>>2>>>0]=o.getHours(),S[r+12>>>2>>>0]=o.getDate(),S[r+16>>>2>>>0]=o.getMonth(),S[r+20>>>2>>>0]=o.getYear(),r=o.getTime(),isNaN(r)?(S[je()>>>2>>>0]=61,r=-1):r/=1e3,Xe((be=r,1<=+Math.abs(be)?0<be?+Math.floor(be/4294967296)>>>0:~~+Math.ceil((be-+(~~be>>>0))/4294967296)>>>0:0)),r>>>0},l:function(){return-52},m:function(){},t:function(r,o,s){function m(de){return(de=de.toTimeString().match(/\\(([A-Za-z ]+)\\)$/))?de[1]:"GMT"}s>>>=0;var O=new Date().getFullYear(),A=new Date(O,0,1),L=new Date(O,6,1);O=A.getTimezoneOffset();var re=L.getTimezoneOffset();j[r>>>0>>>2>>>0]=60*Math.max(O,re),S[o>>>0>>>2>>>0]=+(O!=re),r=m(A),o=m(L),r=xe(r),o=xe(o),re<O?(j[s>>>2>>>0]=r,j[s+4>>>2>>>0]=o):(j[s>>>2>>>0]=o,j[s+4>>>2>>>0]=r)},d:()=>{F("")},B:function(r,o,s){r>>>=0,o>>>=0,s>>>=0,Ne.length=0;for(var m;m=ee[o++>>>0];){var O=m!=105;O&=m!=112,s+=O&&s%8?4:0,Ne.push(m==112?j[s>>>2>>>0]:m==105?S[s>>>2>>>0]:Ce[s>>>3>>>0]),s+=O?8:4}return we[r].apply(null,Ne)},h:()=>Date.now(),u:function(){return 4294901760},b:()=>performance.now(),I:function(r,o,s){return o>>>=0,ee.copyWithin(r>>>0>>>0,o>>>0,o+(s>>>0)>>>0)},s:function(r){r>>>=0;var o=ee.length;if(4294901760<r)return!1;for(var s=1;4>=s;s*=2){var m=o*(1+.2/s);m=Math.min(m,r+100663296);var O=Math;m=Math.max(r,m);e:{O=(O.min.call(O,4294901760,m+(65536-m%65536)%65536)-W.buffer.byteLength+65535)/65536;try{W.grow(O),Ue();var A=1;break e}catch{}A=void 0}if(A)return!0}return!1},C:function(r,o){r>>>=0,o>>>=0;var s=0;return He().forEach((m,O)=>{var A=o+s;for(O=j[r+4*O>>>2>>>0]=A,A=0;A<m.length;++A)se[O++>>>0>>>0]=m.charCodeAt(A);se[O>>>0>>>0]=0,s+=m.length+1}),0},D:function(r,o){r>>>=0,o>>>=0;var s=He();j[r>>>2>>>0]=s.length;var m=0;return s.forEach(O=>m+=O.length+1),j[o>>>2>>>0]=m,0},f:()=>52,j:function(){return 52},q:function(){return 70},i:function(r,o,s,m){o>>>=0,s>>>=0,m>>>=0;for(var O=0,A=0;A<s;A++){var L=j[o>>>2>>>0],re=j[o+4>>>2>>>0];o+=8;for(var de=0;de<re;de++){var ie=ee[L+de>>>0],ue=Be[r];ie===0||ie===10?((r===1?v:k)(te(ue,0)),ue.length=0):ue.push(ie)}O+=re}return j[m>>>2>>>0]=O,0},r:ot,c:function(r,o,s,m){return ot(r>>>0,o>>>0,s>>>0,m>>>0)}},C=function(){function r(s){return C=s.exports,C=ut(),W=C.K,Ue(),ne.unshift(C.L),Oe--,Oe==0&&(he!==null&&(clearInterval(he),he=null),ae&&(s=ae,ae=null,s())),C}var o={a:G};if(Oe++,a.instantiateWasm)try{return a.instantiateWasm(o,r)}catch(s){k(`Module.instantiateWasm callback failed with error: ${s}`),f(s)}return Ee(o,function(s){r(s.instance)}).catch(f),{}}();a._OrtInit=(r,o)=>(a._OrtInit=C.M)(r,o),a._OrtGetLastError=(r,o)=>(a._OrtGetLastError=C.N)(r,o),a._OrtCreateSessionOptions=(r,o,s,m,O,A,L,re,de,ie)=>(a._OrtCreateSessionOptions=C.O)(r,o,s,m,O,A,L,re,de,ie),a._OrtAppendExecutionProvider=(r,o)=>(a._OrtAppendExecutionProvider=C.P)(r,o),a._OrtAddFreeDimensionOverride=(r,o,s)=>(a._OrtAddFreeDimensionOverride=C.Q)(r,o,s),a._OrtAddSessionConfigEntry=(r,o,s)=>(a._OrtAddSessionConfigEntry=C.R)(r,o,s),a._OrtReleaseSessionOptions=r=>(a._OrtReleaseSessionOptions=C.S)(r),a._OrtCreateSession=(r,o,s)=>(a._OrtCreateSession=C.T)(r,o,s),a._OrtReleaseSession=r=>(a._OrtReleaseSession=C.U)(r),a._OrtGetInputOutputCount=(r,o,s)=>(a._OrtGetInputOutputCount=C.V)(r,o,s),a._OrtGetInputName=(r,o)=>(a._OrtGetInputName=C.W)(r,o),a._OrtGetOutputName=(r,o)=>(a._OrtGetOutputName=C.X)(r,o),a._OrtFree=r=>(a._OrtFree=C.Y)(r),a._OrtCreateTensor=(r,o,s,m,O,A)=>(a._OrtCreateTensor=C.Z)(r,o,s,m,O,A),a._OrtGetTensorData=(r,o,s,m,O)=>(a._OrtGetTensorData=C._)(r,o,s,m,O),a._OrtReleaseTensor=r=>(a._OrtReleaseTensor=C.$)(r),a._OrtCreateRunOptions=(r,o,s,m)=>(a._OrtCreateRunOptions=C.aa)(r,o,s,m),a._OrtAddRunConfigEntry=(r,o,s)=>(a._OrtAddRunConfigEntry=C.ba)(r,o,s),a._OrtReleaseRunOptions=r=>(a._OrtReleaseRunOptions=C.ca)(r),a._OrtCreateBinding=r=>(a._OrtCreateBinding=C.da)(r),a._OrtBindInput=(r,o,s)=>(a._OrtBindInput=C.ea)(r,o,s),a._OrtBindOutput=(r,o,s,m)=>(a._OrtBindOutput=C.fa)(r,o,s,m),a._OrtClearBoundOutputs=r=>(a._OrtClearBoundOutputs=C.ga)(r),a._OrtReleaseBinding=r=>(a._OrtReleaseBinding=C.ha)(r),a._OrtRunWithBinding=(r,o,s,m,O)=>(a._OrtRunWithBinding=C.ia)(r,o,s,m,O),a._OrtRun=(r,o,s,m,O,A,L,re)=>(a._OrtRun=C.ja)(r,o,s,m,O,A,L,re),a._OrtEndProfiling=r=>(a._OrtEndProfiling=C.ka)(r);var je=()=>(je=C.la)(),st=a._malloc=r=>(st=a._malloc=C.ma)(r);a._free=r=>(a._free=C.na)(r);var Xe=r=>(Xe=C.pa)(r),it=()=>(it=C.qa)(),M=r=>(M=C.ra)(r),ke=r=>(ke=C.sa)(r);function ut(){var r=C;r=Object.assign({},r);var o=m=>()=>m()>>>0,s=m=>O=>m(O)>>>0;return r.la=o(r.la),r.ma=s(r.ma),r.qa=o(r.qa),r.sa=s(r.sa),r}a.stackAlloc=ke,a.stackSave=it,a.stackRestore=M,a.UTF8ToString=z,a.stringToUTF8=(r,o,s)=>Fe(r,ee,o,s),a.lengthBytesUTF8=le;var Pe;ae=function r(){Pe||Qe(),Pe||(ae=r)};function Qe(){if(!(0<Oe)){if(a.preRun)for(typeof a.preRun=="function"&&(a.preRun=[a.preRun]);a.preRun.length;){var r=a.preRun.shift();ce.unshift(r)}for(;0<ce.length;)ce.shift()(a);if(!(0<Oe||Pe||(Pe=!0,a.calledRun=!0,H))){for(;0<ne.length;)ne.shift()(a);for(h(a);0<Q.length;)Q.shift()(a)}}}return Qe(),c.ready}})();typeof mr=="object"&&typeof Ft=="object"?Ft.exports=pr:typeof define=="function"&&define.amd&&define([],()=>pr)});var hr=tt(()=>{});var yr=tt(()=>{});var br={};At(br,{cpus:()=>rn});var rn,wr=St(()=>{rn=void 0});var _r=tt((vr,xt)=>{"use strict";var Or=(()=>{var u=typeof document<"u"&&document.currentScript?document.currentScript.src:void 0;return typeof __filename<"u"&&(u=u||__filename),function(c={}){function a(){return Q.buffer!=F.buffer&&Y(),F}function h(){return Q.buffer!=F.buffer&&Y(),ye}function f(){return Q.buffer!=F.buffer&&Y(),ve}function w(){return Q.buffer!=F.buffer&&Y(),fe}function g(){return Q.buffer!=F.buffer&&Y(),_e}var i=c,E,P;i.ready=new Promise((e,t)=>{E=e,P=t});var U=Object.assign({},i),D="./this.program",x=(e,t)=>{throw t},K=typeof window=="object",R=typeof importScripts=="function",I=typeof process=="object"&&typeof process.versions=="object"&&typeof process.versions.node=="string",v=i.ENVIRONMENT_IS_PTHREAD||!1,k="";function W(e){return i.locateFile?i.locateFile(e,k):k+e}var H,se,ee;if(I){var S=(Mt(),rt(Tt)),j=(Dt(),rt(Ct));k=R?j.dirname(k)+"/":__dirname+"/",H=(t,n)=>(t=z(t)?new URL(t):j.normalize(t),S.readFileSync(t,n?void 0:"utf8")),ee=t=>(t=H(t,!0),t.buffer||(t=new Uint8Array(t)),t),se=(t,n,l,y=!0)=>{t=z(t)?new URL(t):j.normalize(t),S.readFile(t,y?void 0:"utf8",(b,_)=>{b?l(b):n(y?_.buffer:_)})},!i.thisProgram&&1<process.argv.length&&(D=process.argv[1].replace(/\\\\/g,"/")),process.argv.slice(2),x=(t,n)=>{throw process.exitCode=t,n},i.inspect=()=>"[Emscripten Module object]";let e;try{e=hr()}catch(t){throw console.error(\'The "worker_threads" module is not supported in this node.js build - perhaps a newer version is needed?\'),t}global.Worker=e.Worker}else(K||R)&&(R?k=self.location.href:typeof document<"u"&&document.currentScript&&(k=document.currentScript.src),typeof u<"u"&&u&&(k=u),k.indexOf("blob:")!==0?k=k.substr(0,k.replace(/[?#].*/,"").lastIndexOf("/")+1):k="",I||(H=e=>{var t=new XMLHttpRequest;return t.open("GET",e,!1),t.send(null),t.responseText},R&&(ee=e=>{var t=new XMLHttpRequest;return t.open("GET",e,!1),t.responseType="arraybuffer",t.send(null),new Uint8Array(t.response)}),se=(e,t,n)=>{var l=new XMLHttpRequest;l.open("GET",e,!0),l.responseType="arraybuffer",l.onload=()=>{l.status==200||l.status==0&&l.response?t(l.response):n()},l.onerror=n,l.send(null)}));I&&typeof performance>"u"&&(global.performance=yr().performance);var Ce=console.log.bind(console),Ue=console.error.bind(console);I&&(Ce=(...e)=>S.writeSync(1,e.join(" ")+`\n`),Ue=(...e)=>S.writeSync(2,e.join(" ")+`\n`));var ce=Ce,ne=Ue;Object.assign(i,U),U=null,typeof WebAssembly!="object"&&De("no native wasm support detected");var Q,Oe,he=!1,ae,F,ye,ve,fe,_e;function Y(){var e=Q.buffer;i.HEAP8=F=new Int8Array(e),i.HEAP16=new Int16Array(e),i.HEAPU8=ye=new Uint8Array(e),i.HEAPU16=new Uint16Array(e),i.HEAP32=ve=new Int32Array(e),i.HEAPU32=fe=new Uint32Array(e),i.HEAPF32=new Float32Array(e),i.HEAPF64=_e=new Float64Array(e)}var pe=16777216;if(v)Q=i.wasmMemory;else if(i.wasmMemory)Q=i.wasmMemory;else if(Q=new WebAssembly.Memory({initial:pe/65536,maximum:65536,shared:!0}),!(Q.buffer instanceof SharedArrayBuffer))throw ne("requested a shared WebAssembly.Memory but the returned buffer is not a SharedArrayBuffer, indicating that while the browser has SharedArrayBuffer it does not have WebAssembly threads support - you may need to set a flag"),I&&ne("(on node you may need: --experimental-wasm-threads --experimental-wasm-bulk-memory and/or recent version)"),Error("bad memory");Y(),pe=Q.buffer.byteLength;var Ie=[],Ee=[],be=[],we=0,Le=null,me=null;function Se(){if(we--,we==0&&(Le!==null&&(clearInterval(Le),Le=null),me)){var e=me;me=null,e()}}function De(e){throw e="Aborted("+e+")",ne(e),he=!0,ae=1,e=new WebAssembly.RuntimeError(e+". Build with -sASSERTIONS for more info."),P(e),e}var te=e=>e.startsWith("data:application/octet-stream;base64,"),z=e=>e.startsWith("file://"),le;le="ort-wasm-threaded.wasm",te(le)||(le=W(le));function Fe(e){if(ee)return ee(e);throw"both async and sync fetching of the wasm failed"}function Ae(e){if(K||R){if(typeof fetch=="function"&&!z(e))return fetch(e,{credentials:"same-origin"}).then(t=>{if(!t.ok)throw"failed to load wasm binary file at \'"+e+"\'";return t.arrayBuffer()}).catch(()=>Fe(e));if(se)return new Promise((t,n)=>{se(e,l=>t(new Uint8Array(l)),n)})}return Promise.resolve().then(()=>Fe(e))}function qe(e,t,n){return Ae(e).then(l=>WebAssembly.instantiate(l,t)).then(l=>l).then(n,l=>{ne(`failed to asynchronously prepare wasm: ${l}`),De(l)})}function at(e,t){var n=le;return typeof WebAssembly.instantiateStreaming!="function"||te(n)||z(n)||I||typeof fetch!="function"?qe(n,e,t):fetch(n,{credentials:"same-origin"}).then(l=>WebAssembly.instantiateStreaming(l,e).then(t,function(y){return ne(`wasm streaming compile failed: ${y}`),ne("falling back to ArrayBuffer instantiation"),qe(n,e,t)}))}var xe,Ne={921388:(e,t,n,l)=>{if(typeof i>"u"||!i.cb)return 1;if(e=$e(e>>>0),e.startsWith("./")&&(e=e.substring(2)),e=i.cb.get(e),!e)return 2;if(t>>>=0,n>>>=0,l>>>=0,t+n>e.byteLength)return 3;try{return h().set(e.subarray(t,t+n),l>>>0),0}catch{return 4}}};function Re(e){this.name="ExitStatus",this.message=`Program terminated with exit(${e})`,this.status=e}var He=e=>{e.terminate(),e.onmessage=()=>{}},Ge=e=>{M.Pa.length==0&&(Xe(),M.Ya(M.Pa[0]));var t=M.Pa.pop();if(!t)return 6;M.Qa.push(t),M.Ma[e.Oa]=t,t.Oa=e.Oa;var n={cmd:"run",start_routine:e.kb,arg:e.hb,pthread_ptr:e.Oa};return I&&t.unref(),t.postMessage(n,e.qb),0},Be=0,Ve=typeof TextDecoder<"u"?new TextDecoder("utf8"):void 0,Je=(e,t,n)=>{t>>>=0;var l=t+n;for(n=t;e[n]&&!(n>=l);)++n;if(16<n-t&&e.buffer&&Ve)return Ve.decode(e.buffer instanceof SharedArrayBuffer?e.slice(t,n):e.subarray(t,n));for(l="";t<n;){var y=e[t++];if(y&128){var b=e[t++]&63;if((y&224)==192)l+=String.fromCharCode((y&31)<<6|b);else{var _=e[t++]&63;y=(y&240)==224?(y&15)<<12|b<<6|_:(y&7)<<18|b<<12|_<<6|e[t++]&63,65536>y?l+=String.fromCharCode(y):(y-=65536,l+=String.fromCharCode(55296|y>>10,56320|y&1023))}}else l+=String.fromCharCode(y)}return l},$e=(e,t)=>(e>>>=0)?Je(h(),e,t):"",ot=e=>{var t=vt();return e=e(),ct(t),e};function G(e,t){var n=arguments.length-2,l=arguments;return ot(()=>{for(var y=_t(8*n),b=y>>>3,_=0;_<n;_++){var J=l[2+_];g()[b+_>>>0]=J}return ar(e,n,y,t)})}function C(e){if(v)return G(0,1,e);ae=e,0<Be||(M.lb(),i.onExit?.(e),he=!0),x(e,new Re(e))}var je=e=>{if(ae=e,v)throw ut(e),"unwind";C(e)};function st(){for(var e=i.numThreads;e--;)Xe();Ie.unshift(()=>{we++,it(()=>Se())})}function Xe(){var e=W("ort-wasm-threaded.worker.js");e=new Worker(e),M.Pa.push(e)}function it(e){v?e():Promise.all(M.Pa.map(M.Ya)).then(e)}var M={Pa:[],Qa:[],bb:[],Ma:{},Wa(){v?(M.receiveObjectTransfer=M.jb,M.threadInitTLS=M.ab,M.setExitStatus=M.$a):st()},$a:e=>ae=e,tb:["$terminateWorker"],lb:()=>{for(var e of M.Qa)He(e);for(e of M.Pa)He(e);M.Pa=[],M.Qa=[],M.Ma=[]},Za:e=>{var t=e.Oa;delete M.Ma[t],M.Pa.push(e),M.Qa.splice(M.Qa.indexOf(e),1),e.Oa=0,wt(t)},jb(){},ab(){M.bb.forEach(e=>e())},Ya:e=>new Promise(t=>{e.onmessage=b=>{b=b.data;var _=b.cmd;if(b.targetThread&&b.targetThread!=lt()){var J=M.Ma[b.targetThread];J?J.postMessage(b,b.transferList):ne(`Internal error! Worker sent a message "${_}" to target pthread ${b.targetThread}, but that thread no longer exists!`)}else _==="checkMailbox"?ft():_==="spawnThread"?Ge(b):_==="cleanupThread"?M.Za(M.Ma[b.thread]):_==="killThread"?(b=b.thread,_=M.Ma[b],delete M.Ma[b],He(_),wt(b),M.Qa.splice(M.Qa.indexOf(_),1),_.Oa=0):_==="cancelThread"?M.Ma[b.thread].postMessage({cmd:"cancel"}):_==="loaded"?(e.loaded=!0,I&&!e.Oa&&e.unref(),t(e)):_==="alert"?alert(`Thread ${b.threadId}: ${b.text}`):b.target==="setimmediate"?e.postMessage(b):_==="callHandler"?i[b.handler](...b.args):_&&ne(`worker sent an unknown command ${_}`)},e.onerror=b=>{throw ne(`worker sent an error! ${b.filename}:${b.lineno}: ${b.message}`),b},I&&(e.on("message",b=>e.onmessage({data:b})),e.on("error",b=>e.onerror(b)));var n=[],l=["onExit"],y;for(y of l)i.hasOwnProperty(y)&&n.push(y);e.postMessage({cmd:"load",handlers:n,urlOrBlob:i.mainScriptUrlOrBlob||u,wasmMemory:Q,wasmModule:Oe})})};i.PThread=M;var ke=e=>{for(;0<e.length;)e.shift()(i)};i.establishStackSpace=()=>{var e=lt(),t=w()[e+52>>>2>>>0];e=w()[e+56>>>2>>>0],ir(t,t-e),ct(t)};function ut(e){if(v)return G(1,0,e);je(e)}var Pe=[],Qe;i.invokeEntryPoint=(e,t)=>{var n=Pe[e];n||(e>=Pe.length&&(Pe.length=e+1),Pe[e]=n=Qe.get(e)),e=n(t),0<Be?M.$a(e):Ot(e)};function r(e){this.Va=e-24,this.gb=function(t){w()[this.Va+4>>>2>>>0]=t},this.fb=function(t){w()[this.Va+8>>>2>>>0]=t},this.Wa=function(t,n){this.eb(),this.gb(t),this.fb(n)},this.eb=function(){w()[this.Va+16>>>2>>>0]=0}}var o=0,s=0;function m(e,t,n,l){return v?G(2,1,e,t,n,l):O(e,t,n,l)}function O(e,t,n,l){if(e>>>=0,t>>>=0,n>>>=0,l>>>=0,typeof SharedArrayBuffer>"u")return ne("Current environment does not support SharedArrayBuffer, pthreads are not available!"),6;var y=[];return v&&y.length===0?m(e,t,n,l):(e={kb:n,Oa:e,hb:l,qb:y},v?(e.sb="spawnThread",postMessage(e,y),0):Ge(e))}function A(e,t,n){return v?G(3,1,e,t,n):0}function L(e,t){if(v)return G(4,1,e,t)}var re=e=>{for(var t=0,n=0;n<e.length;++n){var l=e.charCodeAt(n);127>=l?t++:2047>=l?t+=2:55296<=l&&57343>=l?(t+=4,++n):t+=3}return t},de=(e,t,n,l)=>{if(n>>>=0,!(0<l))return 0;var y=n;l=n+l-1;for(var b=0;b<e.length;++b){var _=e.charCodeAt(b);if(55296<=_&&57343>=_){var J=e.charCodeAt(++b);_=65536+((_&1023)<<10)|J&1023}if(127>=_){if(n>=l)break;t[n++>>>0]=_}else{if(2047>=_){if(n+1>=l)break;t[n++>>>0]=192|_>>6}else{if(65535>=_){if(n+2>=l)break;t[n++>>>0]=224|_>>12}else{if(n+3>=l)break;t[n++>>>0]=240|_>>18,t[n++>>>0]=128|_>>12&63}t[n++>>>0]=128|_>>6&63}t[n++>>>0]=128|_&63}}return t[n>>>0]=0,n-y},ie=(e,t,n)=>de(e,h(),t,n);function ue(e,t){if(v)return G(5,1,e,t)}function Ze(e,t,n){if(v)return G(6,1,e,t,n)}function Ke(e,t,n){return v?G(7,1,e,t,n):0}function d(e,t){if(v)return G(8,1,e,t)}function B(e,t,n){if(v)return G(9,1,e,t,n)}function $(e,t,n,l){if(v)return G(10,1,e,t,n,l)}function Te(e,t,n,l){if(v)return G(11,1,e,t,n,l)}function et(e,t,n,l){if(v)return G(12,1,e,t,n,l)}function Bt(e){if(v)return G(13,1,e)}function kt(e,t){if(v)return G(14,1,e,t)}function Wt(e,t,n){if(v)return G(15,1,e,t,n)}function mt(e){e>>>=0,typeof Atomics.rb=="function"&&(Atomics.rb(f(),e>>>2,e).value.then(ft),e+=128,Atomics.store(f(),e>>>2,1))}i.__emscripten_thread_mailbox_await=mt;var ft=()=>{var e=lt();if(e&&(mt(e),e=or,!he))try{if(e(),!(0<Be))try{v?Ot(ae):je(ae)}catch(t){t instanceof Re||t=="unwind"||x(1,t)}}catch(t){t instanceof Re||t=="unwind"||x(1,t)}};i.checkMailbox=ft;var gt=[],Ye=e=>e%4===0&&(e%100!==0||e%400===0),Nt=[0,31,60,91,121,152,182,213,244,274,305,335],Ht=[0,31,59,90,120,151,181,212,243,273,304,334];function Gt(e,t,n,l,y,b,_,J){return v?G(16,1,e,t,n,l,y,b,_,J):-52}function $t(e,t,n,l,y,b,_){if(v)return G(17,1,e,t,n,l,y,b,_)}var jt=e=>{var t=re(e)+1,n=rr(t);return n&&ie(e,n,t),n},ht=[],yt={},Yt=()=>{if(!bt){var e={USER:"web_user",LOGNAME:"web_user",PATH:"/",PWD:"/",HOME:"/home/web_user",LANG:(typeof navigator=="object"&&navigator.languages&&navigator.languages[0]||"C").replace("-","_")+".UTF-8",_:D||"./this.program"},t;for(t in yt)yt[t]===void 0?delete e[t]:e[t]=yt[t];var n=[];for(t in e)n.push(`${t}=${e[t]}`);bt=n}return bt},bt;function zt(e,t){if(v)return G(18,1,e,t);e>>>=0,t>>>=0;var n=0;return Yt().forEach((l,y)=>{var b=t+n;for(y=w()[e+4*y>>>2>>>0]=b,b=0;b<l.length;++b)a()[y++>>>0>>>0]=l.charCodeAt(b);a()[y>>>0>>>0]=0,n+=l.length+1}),0}function qt(e,t){if(v)return G(19,1,e,t);e>>>=0,t>>>=0;var n=Yt();w()[e>>>2>>>0]=n.length;var l=0;return n.forEach(y=>l+=y.length+1),w()[t>>>2>>>0]=l,0}function Vt(e){return v?G(20,1,e):52}function Jt(e,t,n,l){return v?G(21,1,e,t,n,l):52}function Xt(e,t,n,l,y){return v?G(22,1,e,t,n,l,y):70}var $r=[null,[],[]];function Qt(e,t,n,l){if(v)return G(23,1,e,t,n,l);t>>>=0,n>>>=0,l>>>=0;for(var y=0,b=0;b<n;b++){var _=w()[t>>>2>>>0],J=w()[t+4>>>2>>>0];t+=8;for(var Me=0;Me<J;Me++){var oe=h()[_+Me>>>0],ge=$r[e];oe===0||oe===10?((e===1?ce:ne)(Je(ge,0)),ge.length=0):ge.push(oe)}y+=J}return w()[l>>>2>>>0]=y,0}var Zt=[31,29,31,30,31,30,31,31,30,31,30,31],Kt=[31,28,31,30,31,30,31,31,30,31,30,31];function jr(e){var t=Array(re(e)+1);return de(e,t,0,t.length),t}var Yr=(e,t)=>{a().set(e,t>>>0)};function er(e,t,n,l){function y(p,N,X){for(p=typeof p=="number"?p.toString():p||"";p.length<N;)p=X[0]+p;return p}function b(p,N){return y(p,N,"0")}function _(p,N){function X(cr){return 0>cr?-1:0<cr?1:0}var We;return(We=X(p.getFullYear()-N.getFullYear()))===0&&(We=X(p.getMonth()-N.getMonth()))===0&&(We=X(p.getDate()-N.getDate())),We}function J(p){switch(p.getDay()){case 0:return new Date(p.getFullYear()-1,11,29);case 1:return p;case 2:return new Date(p.getFullYear(),0,3);case 3:return new Date(p.getFullYear(),0,2);case 4:return new Date(p.getFullYear(),0,1);case 5:return new Date(p.getFullYear()-1,11,31);case 6:return new Date(p.getFullYear()-1,11,30)}}function Me(p){var N=p.Ra;for(p=new Date(new Date(p.Sa+1900,0,1).getTime());0<N;){var X=p.getMonth(),We=(Ye(p.getFullYear())?Zt:Kt)[X];if(N>We-p.getDate())N-=We-p.getDate()+1,p.setDate(1),11>X?p.setMonth(X+1):(p.setMonth(0),p.setFullYear(p.getFullYear()+1));else{p.setDate(p.getDate()+N);break}}return X=new Date(p.getFullYear()+1,0,4),N=J(new Date(p.getFullYear(),0,4)),X=J(X),0>=_(N,p)?0>=_(X,p)?p.getFullYear()+1:p.getFullYear():p.getFullYear()-1}e>>>=0,t>>>=0,n>>>=0,l>>>=0;var oe=w()[l+40>>>2>>>0];l={ob:f()[l>>>2>>>0],nb:f()[l+4>>>2>>>0],Ta:f()[l+8>>>2>>>0],Xa:f()[l+12>>>2>>>0],Ua:f()[l+16>>>2>>>0],Sa:f()[l+20>>>2>>>0],Na:f()[l+24>>>2>>>0],Ra:f()[l+28>>>2>>>0],ub:f()[l+32>>>2>>>0],mb:f()[l+36>>>2>>>0],pb:oe?$e(oe):""},n=$e(n),oe={"%c":"%a %b %d %H:%M:%S %Y","%D":"%m/%d/%y","%F":"%Y-%m-%d","%h":"%b","%r":"%I:%M:%S %p","%R":"%H:%M","%T":"%H:%M:%S","%x":"%m/%d/%y","%X":"%H:%M:%S","%Ec":"%c","%EC":"%C","%Ex":"%m/%d/%y","%EX":"%H:%M:%S","%Ey":"%y","%EY":"%Y","%Od":"%d","%Oe":"%e","%OH":"%H","%OI":"%I","%Om":"%m","%OM":"%M","%OS":"%S","%Ou":"%u","%OU":"%U","%OV":"%V","%Ow":"%w","%OW":"%W","%Oy":"%y"};for(var ge in oe)n=n.replace(new RegExp(ge,"g"),oe[ge]);var fr="Sunday Monday Tuesday Wednesday Thursday Friday Saturday".split(" "),lr="January February March April May June July August September October November December".split(" ");oe={"%a":p=>fr[p.Na].substring(0,3),"%A":p=>fr[p.Na],"%b":p=>lr[p.Ua].substring(0,3),"%B":p=>lr[p.Ua],"%C":p=>b((p.Sa+1900)/100|0,2),"%d":p=>b(p.Xa,2),"%e":p=>y(p.Xa,2," "),"%g":p=>Me(p).toString().substring(2),"%G":p=>Me(p),"%H":p=>b(p.Ta,2),"%I":p=>(p=p.Ta,p==0?p=12:12<p&&(p-=12),b(p,2)),"%j":p=>{for(var N=0,X=0;X<=p.Ua-1;N+=(Ye(p.Sa+1900)?Zt:Kt)[X++]);return b(p.Xa+N,3)},"%m":p=>b(p.Ua+1,2),"%M":p=>b(p.nb,2),"%n":()=>`\n`,"%p":p=>0<=p.Ta&&12>p.Ta?"AM":"PM","%S":p=>b(p.ob,2),"%t":()=>"	","%u":p=>p.Na||7,"%U":p=>b(Math.floor((p.Ra+7-p.Na)/7),2),"%V":p=>{var N=Math.floor((p.Ra+7-(p.Na+6)%7)/7);if(2>=(p.Na+371-p.Ra-2)%7&&N++,N)N==53&&(X=(p.Na+371-p.Ra)%7,X==4||X==3&&Ye(p.Sa)||(N=1));else{N=52;var X=(p.Na+7-p.Ra-1)%7;(X==4||X==5&&Ye(p.Sa%400-1))&&N++}return b(N,2)},"%w":p=>p.Na,"%W":p=>b(Math.floor((p.Ra+7-(p.Na+6)%7)/7),2),"%y":p=>(p.Sa+1900).toString().substring(2),"%Y":p=>p.Sa+1900,"%z":p=>{p=p.mb;var N=0<=p;return p=Math.abs(p)/60,(N?"+":"-")+("0000"+(p/60*100+p%60)).slice(-4)},"%Z":p=>p.pb,"%%":()=>"%"},n=n.replace(/%%/g,"\\0\\0");for(ge in oe)n.includes(ge)&&(n=n.replace(new RegExp(ge,"g"),oe[ge](l)));return n=n.replace(/\\0\\0/g,"%"),ge=jr(n),ge.length>t?0:(Yr(ge,e),ge.length-1)}M.Wa();var zr=[C,ut,m,A,L,ue,Ze,Ke,d,B,$,Te,et,Bt,kt,Wt,Gt,$t,zt,qt,Vt,Jt,Xt,Qt],qr={b:function(e,t,n){throw e>>>=0,new r(e).Wa(t>>>0,n>>>0),o=e,s++,o},L:function(e){nr(e>>>0,!R,1,!K,131072,!1),M.ab()},j:function(e){e>>>=0,v?postMessage({cmd:"cleanupThread",thread:e}):M.Za(M.Ma[e])},H:O,h:A,S:L,D:ue,F:Ze,T:Ke,Q:d,J:B,P:$,n:Te,E:et,B:Bt,R:kt,C:Wt,p:()=>1,z:function(e,t){e>>>=0,e==t>>>0?setTimeout(()=>ft()):v?postMessage({targetThread:e,cmd:"checkMailbox"}):(e=M.Ma[e])&&e.postMessage({cmd:"checkMailbox"})},I:function(e,t,n,l){t>>>=0,gt.length=n,l=l>>>0>>>3;for(var y=0;y<n;y++)gt[y]=g()[l+y>>>0];return e=0>e?Ne[-e-1]:zr[e],M.ib=t,t=e.apply(null,gt),M.ib=0,t},K:mt,o:function(e){I&&M.Ma[e>>>0].ref()},s:function(e,t,n){e=t+2097152>>>0<4194305-!!e?(e>>>0)+4294967296*t:NaN,n>>>=0,e=new Date(1e3*e),f()[n>>>2>>>0]=e.getUTCSeconds(),f()[n+4>>>2>>>0]=e.getUTCMinutes(),f()[n+8>>>2>>>0]=e.getUTCHours(),f()[n+12>>>2>>>0]=e.getUTCDate(),f()[n+16>>>2>>>0]=e.getUTCMonth(),f()[n+20>>>2>>>0]=e.getUTCFullYear()-1900,f()[n+24>>>2>>>0]=e.getUTCDay(),e=(e.getTime()-Date.UTC(e.getUTCFullYear(),0,1,0,0,0,0))/864e5|0,f()[n+28>>>2>>>0]=e},t:function(e,t,n){e=t+2097152>>>0<4194305-!!e?(e>>>0)+4294967296*t:NaN,n>>>=0,e=new Date(1e3*e),f()[n>>>2>>>0]=e.getSeconds(),f()[n+4>>>2>>>0]=e.getMinutes(),f()[n+8>>>2>>>0]=e.getHours(),f()[n+12>>>2>>>0]=e.getDate(),f()[n+16>>>2>>>0]=e.getMonth(),f()[n+20>>>2>>>0]=e.getFullYear()-1900,f()[n+24>>>2>>>0]=e.getDay(),t=(Ye(e.getFullYear())?Nt:Ht)[e.getMonth()]+e.getDate()-1|0,f()[n+28>>>2>>>0]=t,f()[n+36>>>2>>>0]=-(60*e.getTimezoneOffset()),t=new Date(e.getFullYear(),6,1).getTimezoneOffset();var l=new Date(e.getFullYear(),0,1).getTimezoneOffset();e=(t!=l&&e.getTimezoneOffset()==Math.min(l,t))|0,f()[n+32>>>2>>>0]=e},u:function(e){e>>>=0;var t=new Date(f()[e+20>>>2>>>0]+1900,f()[e+16>>>2>>>0],f()[e+12>>>2>>>0],f()[e+8>>>2>>>0],f()[e+4>>>2>>>0],f()[e>>>2>>>0],0),n=f()[e+32>>>2>>>0],l=t.getTimezoneOffset(),y=new Date(t.getFullYear(),6,1).getTimezoneOffset(),b=new Date(t.getFullYear(),0,1).getTimezoneOffset(),_=Math.min(b,y);return 0>n?f()[e+32>>>2>>>0]=+(y!=b&&_==l):0<n!=(_==l)&&(y=Math.max(b,y),t.setTime(t.getTime()+6e4*((0<n?_:y)-l))),f()[e+24>>>2>>>0]=t.getDay(),n=(Ye(t.getFullYear())?Nt:Ht)[t.getMonth()]+t.getDate()-1|0,f()[e+28>>>2>>>0]=n,f()[e>>>2>>>0]=t.getSeconds(),f()[e+4>>>2>>>0]=t.getMinutes(),f()[e+8>>>2>>>0]=t.getHours(),f()[e+12>>>2>>>0]=t.getDate(),f()[e+16>>>2>>>0]=t.getMonth(),f()[e+20>>>2>>>0]=t.getYear(),e=t.getTime(),isNaN(e)?(f()[tr()>>>2>>>0]=61,e=-1):e/=1e3,sr((xe=e,1<=+Math.abs(xe)?0<xe?+Math.floor(xe/4294967296)>>>0:~~+Math.ceil((xe-+(~~xe>>>0))/4294967296)>>>0:0)),e>>>0},q:Gt,r:$t,y:function(e,t,n){function l(oe){return(oe=oe.toTimeString().match(/\\(([A-Za-z ]+)\\)$/))?oe[1]:"GMT"}e>>>=0,t>>>=0,n>>>=0;var y=new Date().getFullYear(),b=new Date(y,0,1),_=new Date(y,6,1);y=b.getTimezoneOffset();var J=_.getTimezoneOffset(),Me=Math.max(y,J);w()[e>>>2>>>0]=60*Me,f()[t>>>2>>>0]=+(y!=J),e=l(b),t=l(_),e=jt(e),t=jt(t),J<y?(w()[n>>>2>>>0]=e,w()[n+4>>>2>>>0]=t):(w()[n>>>2>>>0]=t,w()[n+4>>>2>>>0]=e)},c:()=>{De("")},O:function(e,t,n){e>>>=0,t>>>=0,n>>>=0,ht.length=0;for(var l;l=h()[t++>>>0];){var y=l!=105;y&=l!=112,n+=y&&n%8?4:0,ht.push(l==112?w()[n>>>2>>>0]:l==105?f()[n>>>2>>>0]:g()[n>>>3>>>0]),n+=y?8:4}return Ne[e].apply(null,ht)},k:()=>{},i:()=>Date.now(),U:()=>{throw Be+=1,"unwind"},A:function(){return 4294901760},e:()=>performance.timeOrigin+performance.now(),f:()=>I?(wr(),rt(br)).cpus().length:navigator.hardwareConcurrency,x:function(e){e>>>=0;var t=h().length;if(e<=t||4294901760<e)return!1;for(var n=1;4>=n;n*=2){var l=t*(1+.2/n);l=Math.min(l,e+100663296);var y=Math;l=Math.max(e,l);e:{y=(y.min.call(y,4294901760,l+(65536-l%65536)%65536)-Q.buffer.byteLength+65535)/65536;try{Q.grow(y),Y();var b=1;break e}catch{}b=void 0}if(b)return!0}return!1},M:zt,N:qt,G:je,g:Vt,m:Jt,v:Xt,l:Qt,a:Q||i.wasmMemory,w:er,d:function(e,t,n,l){return er(e>>>0,t>>>0,n>>>0,l>>>0)}},T=function(){function e(n,l){return T=n.exports,T=Vr(),M.bb.push(T.za),Qe=T.Aa,Ee.unshift(T.V),Oe=l,Se(),T}var t={a:qr};if(we++,i.instantiateWasm)try{return i.instantiateWasm(t,e)}catch(n){ne(`Module.instantiateWasm callback failed with error: ${n}`),P(n)}return at(t,function(n){e(n.instance,n.module)}).catch(P),{}}();i._OrtInit=(e,t)=>(i._OrtInit=T.W)(e,t),i._OrtGetLastError=(e,t)=>(i._OrtGetLastError=T.X)(e,t),i._OrtCreateSessionOptions=(e,t,n,l,y,b,_,J,Me,oe)=>(i._OrtCreateSessionOptions=T.Y)(e,t,n,l,y,b,_,J,Me,oe),i._OrtAppendExecutionProvider=(e,t)=>(i._OrtAppendExecutionProvider=T.Z)(e,t),i._OrtAddFreeDimensionOverride=(e,t,n)=>(i._OrtAddFreeDimensionOverride=T._)(e,t,n),i._OrtAddSessionConfigEntry=(e,t,n)=>(i._OrtAddSessionConfigEntry=T.$)(e,t,n),i._OrtReleaseSessionOptions=e=>(i._OrtReleaseSessionOptions=T.aa)(e),i._OrtCreateSession=(e,t,n)=>(i._OrtCreateSession=T.ba)(e,t,n),i._OrtReleaseSession=e=>(i._OrtReleaseSession=T.ca)(e),i._OrtGetInputOutputCount=(e,t,n)=>(i._OrtGetInputOutputCount=T.da)(e,t,n),i._OrtGetInputName=(e,t)=>(i._OrtGetInputName=T.ea)(e,t),i._OrtGetOutputName=(e,t)=>(i._OrtGetOutputName=T.fa)(e,t),i._OrtFree=e=>(i._OrtFree=T.ga)(e),i._OrtCreateTensor=(e,t,n,l,y,b)=>(i._OrtCreateTensor=T.ha)(e,t,n,l,y,b),i._OrtGetTensorData=(e,t,n,l,y)=>(i._OrtGetTensorData=T.ia)(e,t,n,l,y),i._OrtReleaseTensor=e=>(i._OrtReleaseTensor=T.ja)(e),i._OrtCreateRunOptions=(e,t,n,l)=>(i._OrtCreateRunOptions=T.ka)(e,t,n,l),i._OrtAddRunConfigEntry=(e,t,n)=>(i._OrtAddRunConfigEntry=T.la)(e,t,n),i._OrtReleaseRunOptions=e=>(i._OrtReleaseRunOptions=T.ma)(e),i._OrtCreateBinding=e=>(i._OrtCreateBinding=T.na)(e),i._OrtBindInput=(e,t,n)=>(i._OrtBindInput=T.oa)(e,t,n),i._OrtBindOutput=(e,t,n,l)=>(i._OrtBindOutput=T.pa)(e,t,n,l),i._OrtClearBoundOutputs=e=>(i._OrtClearBoundOutputs=T.qa)(e),i._OrtReleaseBinding=e=>(i._OrtReleaseBinding=T.ra)(e),i._OrtRunWithBinding=(e,t,n,l,y)=>(i._OrtRunWithBinding=T.sa)(e,t,n,l,y),i._OrtRun=(e,t,n,l,y,b,_,J)=>(i._OrtRun=T.ta)(e,t,n,l,y,b,_,J),i._OrtEndProfiling=e=>(i._OrtEndProfiling=T.ua)(e);var tr=()=>(tr=T.va)(),lt=i._pthread_self=()=>(lt=i._pthread_self=T.wa)(),rr=i._malloc=e=>(rr=i._malloc=T.xa)(e);i._free=e=>(i._free=T.ya)(e),i.__emscripten_tls_init=()=>(i.__emscripten_tls_init=T.za)();var nr=i.__emscripten_thread_init=(e,t,n,l,y,b)=>(nr=i.__emscripten_thread_init=T.Ba)(e,t,n,l,y,b);i.__emscripten_thread_crashed=()=>(i.__emscripten_thread_crashed=T.Ca)();var ar=(e,t,n,l)=>(ar=T.Da)(e,t,n,l),wt=e=>(wt=T.Ea)(e),Ot=i.__emscripten_thread_exit=e=>(Ot=i.__emscripten_thread_exit=T.Fa)(e),or=()=>(or=T.Ga)(),sr=e=>(sr=T.Ha)(e),ir=(e,t)=>(ir=T.Ia)(e,t),vt=()=>(vt=T.Ja)(),ct=e=>(ct=T.Ka)(e),_t=e=>(_t=T.La)(e);function Vr(){var e=T;e=Object.assign({},e);var t=l=>()=>l()>>>0,n=l=>y=>l(y)>>>0;return e.va=t(e.va),e.wa=t(e.wa),e.xa=n(e.xa),e.emscripten_main_runtime_thread_id=t(e.emscripten_main_runtime_thread_id),e.Ja=t(e.Ja),e.La=n(e.La),e}i.wasmMemory=Q,i.stackAlloc=_t,i.stackSave=vt,i.stackRestore=ct,i.keepRuntimeAlive=()=>0<Be,i.UTF8ToString=$e,i.stringToUTF8=ie,i.lengthBytesUTF8=re,i.ExitStatus=Re,i.PThread=M;var dt;me=function e(){dt||ur(),dt||(me=e)};function ur(){if(!(0<we))if(v)E(i),v||ke(Ee),startWorker(i);else{if(i.preRun)for(typeof i.preRun=="function"&&(i.preRun=[i.preRun]);i.preRun.length;)Ie.unshift(i.preRun.shift());ke(Ie),0<we||dt||(dt=!0,i.calledRun=!0,he||(v||ke(Ee),E(i),v||ke(be)))}}return ur(),c.ready}})();typeof vr=="object"&&typeof xt=="object"?xt.exports=Or:typeof define=="function"&&define.amd&&define([],()=>Or)});var Er=tt((On,nn)=>{nn.exports=\'"use strict";var Module={},ENVIRONMENT_IS_NODE=typeof process=="object"&&typeof process.versions=="object"&&typeof process.versions.node=="string";if(ENVIRONMENT_IS_NODE){var nodeWorkerThreads=require("worker_threads"),parentPort=nodeWorkerThreads.parentPort;parentPort.on("message",e=>onmessage({data:e}));var fs=require("fs"),vm=require("vm");Object.assign(global,{self:global,require,Module,location:{href:__filename},Worker:nodeWorkerThreads.Worker,importScripts:e=>vm.runInThisContext(fs.readFileSync(e,"utf8"),{filename:e}),postMessage:e=>parentPort.postMessage(e),performance:global.performance||{now:Date.now}})}var initializedJS=!1;function threadPrintErr(){var e=Array.prototype.slice.call(arguments).join(" ");if(ENVIRONMENT_IS_NODE){fs.writeSync(2,e+`\\n`);return}console.error(e)}function threadAlert(){var e=Array.prototype.slice.call(arguments).join(" ");postMessage({cmd:"alert",text:e,threadId:Module._pthread_self()})}var err=threadPrintErr;self.alert=threadAlert,Module.instantiateWasm=(e,t)=>{var a=Module.wasmModule;Module.wasmModule=null;var r=new WebAssembly.Instance(a,e);return t(r)},self.onunhandledrejection=e=>{throw e.reason||e};function handleMessage(e){try{if(e.data.cmd==="load"){let a=[];self.onmessage=r=>a.push(r),self.startWorker=r=>{Module=r,postMessage({cmd:"loaded"});for(let s of a)handleMessage(s);self.onmessage=handleMessage},Module.wasmModule=e.data.wasmModule;for(const r of e.data.handlers)Module[r]=(...s)=>{postMessage({cmd:"callHandler",handler:r,args:s})};if(Module.wasmMemory=e.data.wasmMemory,Module.buffer=Module.wasmMemory.buffer,Module.ENVIRONMENT_IS_PTHREAD=!0,typeof e.data.urlOrBlob=="string")importScripts(e.data.urlOrBlob);else{var t=URL.createObjectURL(e.data.urlOrBlob);importScripts(t),URL.revokeObjectURL(t)}ortWasmThreaded(Module)}else if(e.data.cmd==="run"){Module.__emscripten_thread_init(e.data.pthread_ptr,0,0,1),Module.__emscripten_thread_mailbox_await(e.data.pthread_ptr),Module.establishStackSpace(),Module.PThread.receiveObjectTransfer(e.data),Module.PThread.threadInitTLS(),initializedJS||(initializedJS=!0);try{Module.invokeEntryPoint(e.data.start_routine,e.data.arg)}catch(a){if(a!="unwind")throw a}}else e.data.cmd==="cancel"?Module._pthread_self()&&Module.__emscripten_thread_exit(-1):e.data.target==="setimmediate"||(e.data.cmd==="checkMailbox"?initializedJS&&Module.checkMailbox():e.data.cmd&&(err(`worker.js received unknown command ${e.data.cmd}`),err(e.data)))}catch(a){throw Module.__emscripten_thread_crashed?.(),a}}self.onmessage=handleMessage;\\n\'});var Ar;Ar=gr();var an=_r(),Pt,Ut=!1,pt=!1,Sr=!1,on=u=>{if(u===1)return!1;if(typeof SharedArrayBuffer>"u")return typeof self<"u"&&!self.crossOriginIsolated&&console.warn("env.wasm.numThreads is set to "+u+", but this will not work unless you enable crossOriginIsolated mode. See https://web.dev/cross-origin-isolation-guide/ for more info."),!1;typeof process<"u"&&process.versions&&process.versions.node&&console.warn("env.wasm.numThreads is set to "+u+", however, currently onnxruntime-web does not support multi-threads in Node.js. Please consider using onnxruntime-node for performance critical scenarios.");try{return typeof MessageChannel<"u"&&new MessageChannel().port1.postMessage(new SharedArrayBuffer(1)),WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,0,0,1,4,1,96,0,0,3,2,1,0,5,4,1,3,1,1,10,11,1,9,0,65,0,254,16,2,0,26,11]))}catch{return!1}},sn=()=>{try{return WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,0,0,1,4,1,96,0,0,3,2,1,0,10,30,1,28,0,65,0,253,15,253,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,253,186,1,26,11]))}catch{return!1}},un=(u,c)=>u?c?"ort-wasm-simd-threaded.wasm":"ort-wasm-simd.wasm":c?"ort-wasm-threaded.wasm":"ort-wasm.wasm",Tr=async u=>{if(Ut)return Promise.resolve();if(pt)throw new Error("multiple calls to \'initializeWebAssembly()\' detected.");if(Sr)throw new Error("previous call to \'initializeWebAssembly()\' failed.");pt=!0;let c=u.initTimeout,a=u.numThreads,h=u.simd,f=on(a),w=h&&sn(),g=u.wasmPaths,i=typeof g=="string"?g:void 0,E=un(w,f),P=typeof g=="object"?g[E]:void 0,U=!1,D=[];if(c>0&&D.push(new Promise(x=>{setTimeout(()=>{U=!0,x()},c)})),D.push(new Promise((x,K)=>{let R=f?an:Ar,I={locateFile:(v,k)=>f&&v.endsWith(".worker.js")&&typeof Blob<"u"?URL.createObjectURL(new Blob([Er()],{type:"text/javascript"})):v.endsWith(".wasm")?P||(i??k)+E:k+v};if(f)if(I.numThreads=a,typeof Blob>"u")I.mainScriptUrlOrBlob=(void 0)(__dirname,"ort-wasm-threaded.js");else{let v=`var ortWasmThreaded=${R.toString()};`;I.mainScriptUrlOrBlob=new Blob([v],{type:"text/javascript"})}R(I).then(v=>{pt=!1,Ut=!0,Pt=v,x()},v=>{pt=!1,Sr=!0,K(v)})})),await Promise.race(D),U)throw new Error(`WebAssembly backend initializing failed due to timeout: ${c}ms`)},Z=()=>{if(Ut&&Pt)return Pt;throw new Error("WebAssembly is not initialized yet.")};var q=(u,c)=>{let a=Z(),h=a.lengthBytesUTF8(u)+1,f=a._malloc(h);return a.stringToUTF8(u,f,h),c.push(f),f},nt=(u,c,a,h)=>{if(typeof u=="object"&&u!==null){if(a.has(u))throw new Error("Circular reference in options");a.add(u)}Object.entries(u).forEach(([f,w])=>{let g=c?c+f:f;if(typeof w=="object")nt(w,g+".",a,h);else if(typeof w=="string"||typeof w=="number")h(g,w.toString());else if(typeof w=="boolean")h(g,w?"1":"0");else throw new Error(`Can\'t handle extra config type: ${typeof w}`)})},V=u=>{let c=Z(),a=c.stackSave();try{let h=c.stackAlloc(8);c._OrtGetLastError(h,h+4);let f=c.HEAP32[h/4],w=c.HEAPU32[h/4+1],g=w?c.UTF8ToString(w):"";throw new Error(`${u} ERROR_CODE: ${f}, ERROR_MESSAGE: ${g}`)}finally{c.stackRestore(a)}};var Mr=u=>{let c=Z(),a=0,h=[],f=u||{};try{if(u?.logSeverityLevel===void 0)f.logSeverityLevel=2;else if(typeof u.logSeverityLevel!="number"||!Number.isInteger(u.logSeverityLevel)||u.logSeverityLevel<0||u.logSeverityLevel>4)throw new Error(`log serverity level is not valid: ${u.logSeverityLevel}`);if(u?.logVerbosityLevel===void 0)f.logVerbosityLevel=0;else if(typeof u.logVerbosityLevel!="number"||!Number.isInteger(u.logVerbosityLevel))throw new Error(`log verbosity level is not valid: ${u.logVerbosityLevel}`);u?.terminate===void 0&&(f.terminate=!1);let w=0;return u?.tag!==void 0&&(w=q(u.tag,h)),a=c._OrtCreateRunOptions(f.logSeverityLevel,f.logVerbosityLevel,!!f.terminate,w),a===0&&V("Can\'t create run options."),u?.extra!==void 0&&nt(u.extra,"",new WeakSet,(g,i)=>{let E=q(g,h),P=q(i,h);c._OrtAddRunConfigEntry(a,E,P)!==0&&V(`Can\'t set a run config entry: ${g} - ${i}.`)}),[a,h]}catch(w){throw a!==0&&c._OrtReleaseRunOptions(a),h.forEach(g=>c._free(g)),w}};var fn=u=>{switch(u){case"disabled":return 0;case"basic":return 1;case"extended":return 2;case"all":return 99;default:throw new Error(`unsupported graph optimization level: ${u}`)}},ln=u=>{switch(u){case"sequential":return 0;case"parallel":return 1;default:throw new Error(`unsupported execution mode: ${u}`)}},cn=u=>{u.extra||(u.extra={}),u.extra.session||(u.extra.session={});let c=u.extra.session;c.use_ort_model_bytes_directly||(c.use_ort_model_bytes_directly="1"),u.executionProviders&&u.executionProviders.some(a=>(typeof a=="string"?a:a.name)==="webgpu")&&(u.enableMemPattern=!1)},dn=(u,c,a)=>{for(let h of c){let f=typeof h=="string"?h:h.name;switch(f){case"webnn":if(f="WEBNN",typeof h!="string"){let g=h;if(g?.deviceType){let i=q("deviceType",a),E=q(g.deviceType,a);Z()._OrtAddSessionConfigEntry(u,i,E)!==0&&V(`Can\'t set a session config entry: \'deviceType\' - ${g.deviceType}.`)}if(g?.numThreads){let i=g.numThreads;(typeof i!="number"||!Number.isInteger(i)||i<0)&&(i=0);let E=q("numThreads",a),P=q(i.toString(),a);Z()._OrtAddSessionConfigEntry(u,E,P)!==0&&V(`Can\'t set a session config entry: \'numThreads\' - ${g.numThreads}.`)}if(g?.powerPreference){let i=q("powerPreference",a),E=q(g.powerPreference,a);Z()._OrtAddSessionConfigEntry(u,i,E)!==0&&V(`Can\'t set a session config entry: \'powerPreference\' - ${g.powerPreference}.`)}}break;case"webgpu":if(f="JS",typeof h!="string"){let g=h;if(g?.preferredLayout){if(g.preferredLayout!=="NCHW"&&g.preferredLayout!=="NHWC")throw new Error(`preferredLayout must be either \'NCHW\' or \'NHWC\': ${g.preferredLayout}`);let i=q("preferredLayout",a),E=q(g.preferredLayout,a);Z()._OrtAddSessionConfigEntry(u,i,E)!==0&&V(`Can\'t set a session config entry: \'preferredLayout\' - ${g.preferredLayout}.`)}}break;case"wasm":case"cpu":continue;default:throw new Error(`not supported execution provider: ${f}`)}let w=q(f,a);Z()._OrtAppendExecutionProvider(u,w)!==0&&V(`Can\'t append execution provider: ${f}.`)}},Cr=u=>{let c=Z(),a=0,h=[],f=u||{};cn(f);try{let w=fn(f.graphOptimizationLevel??"all"),g=ln(f.executionMode??"sequential"),i=typeof f.logId=="string"?q(f.logId,h):0,E=f.logSeverityLevel??2;if(!Number.isInteger(E)||E<0||E>4)throw new Error(`log serverity level is not valid: ${E}`);let P=f.logVerbosityLevel??0;if(!Number.isInteger(P)||P<0||P>4)throw new Error(`log verbosity level is not valid: ${P}`);let U=typeof f.optimizedModelFilePath=="string"?q(f.optimizedModelFilePath,h):0;if(a=c._OrtCreateSessionOptions(w,!!f.enableCpuMemArena,!!f.enableMemPattern,g,!!f.enableProfiling,0,i,E,P,U),a===0&&V("Can\'t create session options."),f.executionProviders&&dn(a,f.executionProviders,h),f.enableGraphCapture!==void 0){if(typeof f.enableGraphCapture!="boolean")throw new Error(`enableGraphCapture must be a boolean value: ${f.enableGraphCapture}`);let D=q("enableGraphCapture",h),x=q(f.enableGraphCapture.toString(),h);c._OrtAddSessionConfigEntry(a,D,x)!==0&&V(`Can\'t set a session config entry: \'enableGraphCapture\' - ${f.enableGraphCapture}.`)}if(f.freeDimensionOverrides)for(let[D,x]of Object.entries(f.freeDimensionOverrides)){if(typeof D!="string")throw new Error(`free dimension override name must be a string: ${D}`);if(typeof x!="number"||!Number.isInteger(x)||x<0)throw new Error(`free dimension override value must be a non-negative integer: ${x}`);let K=q(D,h);c._OrtAddFreeDimensionOverride(a,K,x)!==0&&V(`Can\'t set a free dimension override: ${D} - ${x}.`)}return f.extra!==void 0&&nt(f.extra,"",new WeakSet,(D,x)=>{let K=q(D,h),R=q(x,h);c._OrtAddSessionConfigEntry(a,K,R)!==0&&V(`Can\'t set a session config entry: ${D} - ${x}.`)}),[a,h]}catch(w){throw a!==0&&c._OrtReleaseSessionOptions(a),h.forEach(g=>c._free(g)),w}};var Rt=u=>{switch(u){case"int8":return 3;case"uint8":return 2;case"bool":return 9;case"int16":return 5;case"uint16":return 4;case"int32":return 6;case"uint32":return 12;case"float16":return 10;case"float32":return 1;case"float64":return 11;case"string":return 8;case"int64":return 7;case"uint64":return 13;default:throw new Error(`unsupported data type: ${u}`)}},Dr=u=>{switch(u){case 3:return"int8";case 2:return"uint8";case 9:return"bool";case 5:return"int16";case 4:return"uint16";case 6:return"int32";case 12:return"uint32";case 10:return"float16";case 1:return"float32";case 11:return"float64";case 8:return"string";case 7:return"int64";case 13:return"uint64";default:throw new Error(`unsupported data type: ${u}`)}},It=u=>[void 0,4,1,1,2,2,4,8,void 0,1,2,8,4,8,void 0,void 0,void 0][u],Fr=u=>{switch(u){case"float16":return typeof Float16Array<"u"&&Float16Array.from?Float16Array:Uint16Array;case"float32":return Float32Array;case"uint8":return Uint8Array;case"int8":return Int8Array;case"uint16":return Uint16Array;case"int16":return Int16Array;case"int32":return Int32Array;case"bool":return Uint8Array;case"float64":return Float64Array;case"uint32":return Uint32Array;case"int64":return BigInt64Array;case"uint64":return BigUint64Array;default:throw new Error(`unsupported type: ${u}`)}},xr=u=>{switch(u){case"verbose":return 0;case"info":return 1;case"warning":return 2;case"error":return 3;case"fatal":return 4;default:throw new Error(`unsupported logging level: ${u}`)}},Pr=u=>u==="float32"||u==="float16"||u==="int32"||u==="int64"||u==="uint32"||u==="uint8"||u==="bool",Ur=u=>{switch(u){case"none":return 0;case"cpu":return 1;case"cpu-pinned":return 2;case"texture":return 3;case"gpu-buffer":return 4;default:throw new Error(`unsupported data location: ${u}`)}};var Rr=async u=>{if(typeof u=="string")if(typeof process<"u"&&process.versions&&process.versions.node)try{return new Uint8Array(await(void 0)(u))}catch(c){if(c.code==="ERR_FS_FILE_TOO_LARGE"){let a=(void 0)(u),h=[];for await(let f of a)h.push(f);return new Uint8Array(Buffer.concat(h))}throw c}else{let c=await fetch(u);if(!c.ok)throw new Error(`failed to load external data file: ${u}`);let a=c.headers.get("Content-Length"),h=a?parseInt(a,10):0;if(h<1073741824)return new Uint8Array(await c.arrayBuffer());{if(!c.body)throw new Error(`failed to load external data file: ${u}, no response body.`);let f=c.body.getReader(),w;try{w=new ArrayBuffer(h)}catch(i){if(i instanceof RangeError){let E=Math.ceil(h/65536);w=new WebAssembly.Memory({initial:E,maximum:E}).buffer}else throw i}let g=0;for(;;){let{done:i,value:E}=await f.read();if(i)break;let P=E.byteLength;new Uint8Array(w,g,P).set(E),g+=P}return new Uint8Array(w,0,h)}}else return u instanceof Blob?new Uint8Array(await u.arrayBuffer()):u instanceof Uint8Array?u:new Uint8Array(u)};var pn=(u,c)=>{Z()._OrtInit(u,c)!==0&&V("Can\'t initialize onnxruntime.")},Lr=async u=>{pn(u.wasm.numThreads,xr(u.logLevel))},Br=async(u,c)=>{},ze=new Map,mn=u=>{let c=Z(),a=c.stackSave();try{let h=c.stackAlloc(8);return c._OrtGetInputOutputCount(u,h,h+4)!==0&&V("Can\'t get session input/output count."),[c.HEAP32[h/4],c.HEAP32[h/4+1]]}finally{c.stackRestore(a)}},Lt=u=>{let c=Z(),a=c._malloc(u.byteLength);if(a===0)throw new Error(`Can\'t create a session. failed to allocate a buffer of size ${u.byteLength}.`);return c.HEAPU8.set(u,a),[a,u.byteLength]},kr=async(u,c)=>{let a,h,f=Z();Array.isArray(u)?[a,h]=u:u.buffer===f.HEAPU8.buffer?[a,h]=[u.byteOffset,u.byteLength]:[a,h]=Lt(u);let w=0,g=0,i=0,E=[],P=[],U=[];try{if([g,E]=Cr(c),c?.externalData&&f.mountExternalData){let W=[];for(let H of c.externalData){let se=typeof H=="string"?H:H.path;W.push(Rr(typeof H=="string"?H:H.data).then(ee=>{f.mountExternalData(se,ee)}))}await Promise.all(W)}w=await f._OrtCreateSession(a,h,g),w===0&&V("Can\'t create a session.");let[D,x]=mn(w),K=!!c?.enableGraphCapture,R=[],I=[],v=[];for(let W=0;W<D;W++){let H=f._OrtGetInputName(w,W);H===0&&V("Can\'t get an input name."),P.push(H),R.push(f.UTF8ToString(H))}for(let W=0;W<x;W++){let H=f._OrtGetOutputName(w,W);H===0&&V("Can\'t get an output name."),U.push(H);let se=f.UTF8ToString(H);I.push(se)}let k=null;return ze.set(w,[w,P,U,k,K,!1]),[w,R,I]}catch(D){throw P.forEach(x=>f._OrtFree(x)),U.forEach(x=>f._OrtFree(x)),i!==0&&f._OrtReleaseBinding(i),w!==0&&f._OrtReleaseSession(w),D}finally{f._free(a),g!==0&&f._OrtReleaseSessionOptions(g),E.forEach(D=>f._free(D)),f.unmountExternalData?.()}},Wr=u=>{let c=Z(),a=ze.get(u);if(!a)throw new Error(`cannot release session. invalid session id: ${u}`);let[h,f,w,g,i]=a;g&&(i&&c._OrtClearBoundOutputs(g.handle),c._OrtReleaseBinding(g.handle)),c.jsepOnReleaseSession?.(u),f.forEach(E=>c._OrtFree(E)),w.forEach(E=>c._OrtFree(E)),c._OrtReleaseSession(h),ze.delete(u)},Ir=(u,c,a,h,f,w=!1)=>{if(!u){c.push(0);return}let g=Z(),i=u[0],E=u[1],P=u[3],U,D;if(i==="string"&&P==="gpu-buffer")throw new Error("String tensor is not supported on GPU.");if(w&&P!=="gpu-buffer")throw new Error(`External buffer must be provided for input/output index ${f} when enableGraphCapture is true.`);if(P==="gpu-buffer"){let R=u[2].gpuBuffer,I=It(Rt(i));D=E.reduce((k,W)=>k*W,1)*I;let v=g.jsepRegisterBuffer;if(!v)throw new Error(\'Tensor location "gpu-buffer" is not supported without using WebGPU.\');U=v(h,f,R,D)}else{let R=u[2];if(Array.isArray(R)){D=4*R.length,U=g._malloc(D),a.push(U);let I=U/4;for(let v=0;v<R.length;v++){if(typeof R[v]!="string")throw new TypeError(`tensor data at index ${v} is not a string`);g.HEAPU32[I++]=q(R[v],a)}}else D=R.byteLength,U=g._malloc(D),a.push(U),g.HEAPU8.set(new Uint8Array(R.buffer,R.byteOffset,D),U)}let x=g.stackSave(),K=g.stackAlloc(4*E.length);try{let R=K/4;E.forEach(v=>g.HEAP32[R++]=v);let I=g._OrtCreateTensor(Rt(i),U,D,K,E.length,Ur(P));I===0&&V(`Can\'t create tensor for input/output. session=${h}, index=${f}.`),c.push(I)}finally{g.stackRestore(x)}},Nr=async(u,c,a,h,f,w)=>{let g=Z(),i=ze.get(u);if(!i)throw new Error(`cannot run inference. invalid session id: ${u}`);let E=i[0],P=i[1],U=i[2],D=i[3],x=i[4],K=i[5],R=c.length,I=h.length,v=0,k=[],W=[],H=[],se=[],ee=g.stackSave(),S=g.stackAlloc(R*4),j=g.stackAlloc(R*4),Ce=g.stackAlloc(I*4),Ue=g.stackAlloc(I*4);try{[v,k]=Mr(w);for(let F=0;F<R;F++)Ir(a[F],W,se,u,c[F],x);for(let F=0;F<I;F++)Ir(f[F],H,se,u,R+h[F],x);let ce=S/4,ne=j/4,Q=Ce/4,Oe=Ue/4;for(let F=0;F<R;F++)g.HEAPU32[ce++]=W[F],g.HEAPU32[ne++]=P[c[F]];for(let F=0;F<I;F++)g.HEAPU32[Q++]=H[F],g.HEAPU32[Oe++]=U[h[F]];g.jsepOnRunStart?.(E);let he;he=await g._OrtRun(E,j,S,R,Ue,I,Ce,v),he!==0&&V("failed to call OrtRun().");let ae=[];for(let F=0;F<I;F++){let ye=g.HEAPU32[Ce/4+F];if(ye===H[F]){ae.push(f[F]);continue}let ve=g.stackSave(),fe=g.stackAlloc(4*4),_e=!1,Y,pe=0;try{g._OrtGetTensorData(ye,fe,fe+4,fe+8,fe+12)!==0&&V(`Can\'t access output tensor data on index ${F}.`);let Ee=fe/4,be=g.HEAPU32[Ee++];pe=g.HEAPU32[Ee++];let we=g.HEAPU32[Ee++],Le=g.HEAPU32[Ee++],me=[];for(let te=0;te<Le;te++)me.push(g.HEAPU32[we/4+te]);g._OrtFree(we);let Se=me.reduce((te,z)=>te*z,1);Y=Dr(be);let De=D?.outputPreferredLocations[h[F]];if(Y==="string"){if(De==="gpu-buffer")throw new Error("String tensor is not supported on GPU.");let te=[],z=pe/4;for(let le=0;le<Se;le++){let Fe=g.HEAPU32[z++],Ae=le===Se-1?void 0:g.HEAPU32[z]-Fe;te.push(g.UTF8ToString(Fe,Ae))}ae.push([Y,me,te,"cpu"])}else if(De==="gpu-buffer"&&Se>0){let te=g.jsepGetBuffer;if(!te)throw new Error(\'preferredLocation "gpu-buffer" is not supported without using WebGPU.\');let z=te(pe),le=It(be);if(le===void 0||!Pr(Y))throw new Error(`Unsupported data type: ${Y}`);_e=!0,ae.push([Y,me,{gpuBuffer:z,download:g.jsepCreateDownloader(z,Se*le,Y),dispose:()=>{g._OrtReleaseTensor(ye)}},"gpu-buffer"])}else{let te=Fr(Y),z=new te(Se);new Uint8Array(z.buffer,z.byteOffset,z.byteLength).set(g.HEAPU8.subarray(pe,pe+z.byteLength)),ae.push([Y,me,z,"cpu"])}}finally{g.stackRestore(ve),Y==="string"&&pe&&g._free(pe),_e||g._OrtReleaseTensor(ye)}}return D&&!x&&(g._OrtClearBoundOutputs(D.handle),ze.set(u,[E,P,U,D,x,!1])),ae}finally{g.stackRestore(ee),W.forEach(ce=>g._OrtReleaseTensor(ce)),H.forEach(ce=>g._OrtReleaseTensor(ce)),se.forEach(ce=>g._free(ce)),v!==0&&g._OrtReleaseRunOptions(v),k.forEach(ce=>g._free(ce))}},Hr=u=>{let c=Z(),a=ze.get(u);if(!a)throw new Error("invalid session id");let h=a[0],f=c._OrtEndProfiling(h);f===0&&V("Can\'t get an profile file name."),c._OrtFree(f)},Gr=u=>{let c=[];for(let a of u){let h=a[2];!Array.isArray(h)&&"buffer"in h&&c.push(h.buffer)}return c};self.onmessage=u=>{let{type:c,in:a}=u.data;try{switch(c){case"init-wasm":Tr(a.wasm).then(()=>{Lr(a).then(()=>{postMessage({type:c})},h=>{postMessage({type:c,err:h})})},h=>{postMessage({type:c,err:h})});break;case"init-ep":{let{epName:h,env:f}=a;Br(f,h).then(()=>{postMessage({type:c})},w=>{postMessage({type:c,err:w})});break}case"copy-from":{let{buffer:h}=a,f=Lt(h);postMessage({type:c,out:f});break}case"create":{let{model:h,options:f}=a;kr(h,f).then(w=>{postMessage({type:c,out:w})},w=>{postMessage({type:c,err:w})});break}case"release":Wr(a),postMessage({type:c});break;case"run":{let{sessionId:h,inputIndices:f,inputs:w,outputIndices:g,options:i}=a;Nr(h,f,w,g,new Array(g.length).fill(null),i).then(E=>{E.some(P=>P[3]!=="cpu")?postMessage({type:c,err:"Proxy does not support non-cpu tensor location."}):postMessage({type:c,out:E},Gr([...w,...E]))},E=>{postMessage({type:c,err:E})});break}case"end-profiling":Hr(a),postMessage({type:c});break;default:}}catch(h){postMessage({type:c,err:h})}};})();\n'}),ii,jr,Do,Da,Ca,Ic,pu,ki,Ri,Cm,Na,bv,vv,wv,_v,xv,Tv,Ov,Sv=G(()=>{"use strict";gn(),WA(),Qa(),ii=()=>!!me.wasm.proxy&&typeof document<"u",Do=!1,Da=!1,Ca=!1,pu=new Map,ki=(e,t)=>{let n=pu.get(e);n?n.push(t):pu.set(e,[t])},Ri=()=>{if(Do||!Da||Ca||!jr)throw new Error("worker not ready")},Cm=e=>{switch(e.data.type){case"init-wasm":Do=!1,e.data.err?(Ca=!0,Ic[1](e.data.err)):(Da=!0,Ic[0]());break;case"init-ep":case"copy-from":case"create":case"release":case"run":case"end-profiling":{let t=pu.get(e.data.type);e.data.err?t.shift()[1](e.data.err):t.shift()[0](e.data.out);break}default:}},Na=typeof document<"u"?document?.currentScript?.src:void 0,bv=async()=>{if(!Da){if(Do)throw new Error("multiple calls to 'initWasm()' detected.");if(Ca)throw new Error("previous call to 'initWasm()' failed.");if(Do=!0,ii())return me.wasm.wasmPaths===void 0&&Na&&Na.indexOf("blob:")!==0&&(me.wasm.wasmPaths=Na.substr(0,+Na.lastIndexOf("/")+1)),new Promise((e,t)=>{jr?.terminate();let n=URL.createObjectURL(new Blob([qA()],{type:"text/javascript"}));jr=new Worker(n,{name:"ort-wasm-proxy-worker"}),jr.onerror=f=>t(f),jr.onmessage=Cm,URL.revokeObjectURL(n),Ic=[e,t];let o={type:"init-wasm",in:me};jr.postMessage(o)});try{await rv(me.wasm),await fv(me),Da=!0}catch(e){throw Ca=!0,e}finally{Do=!1}}},vv=async e=>{if(ii())return Ri(),new Promise((t,n)=>{ki("init-ep",[t,n]);let o={type:"init-ep",in:{epName:e,env:me}};jr.postMessage(o)});await dv(me,e)},wv=async e=>ii()?(Ri(),new Promise((t,n)=>{ki("copy-from",[t,n]);let o={type:"copy-from",in:{buffer:e}};jr.postMessage(o,[e.buffer])})):pf(e),_v=async(e,t)=>{if(ii()){if(t?.preferredOutputLocation)throw new Error('session option "preferredOutputLocation" is not supported for proxy.');return Ri(),new Promise((n,o)=>{ki("create",[n,o]);let f={type:"create",in:{model:e,options:{...t}}},s=[];e instanceof Uint8Array&&s.push(e.buffer),jr.postMessage(f,s)})}else return pv(e,t)},xv=async e=>{if(ii())return Ri(),new Promise((t,n)=>{ki("release",[t,n]);let o={type:"release",in:e};jr.postMessage(o)});hv(e)},Tv=async(e,t,n,o,f,s)=>{if(ii()){if(n.some(p=>p[3]!=="cpu"))throw new Error("input tensor on GPU is not supported for proxy.");if(f.some(p=>p))throw new Error("pre-allocated output tensor is not supported for proxy.");return Ri(),new Promise((p,i)=>{ki("run",[p,i]);let c=n,r={type:"run",in:{sessionId:e,inputIndices:t,inputs:c,outputIndices:o,options:s}};jr.postMessage(r,yv(c))})}else return gv(e,t,n,o,f,s)},Ov=async e=>{if(ii())return Ri(),new Promise((t,n)=>{ki("end-profiling",[t,n]);let o={type:"end-profiling",in:e};jr.postMessage(o)});mv(e)}}),Pc,Nm,Ev,ZA=G(()=>{"use strict";gn(),Sv(),lv(),cv(),Pc=(e,t)=>{switch(e.location){case"cpu":return[e.type,e.dims,e.data,"cpu"];case"gpu-buffer":return[e.type,e.dims,{gpuBuffer:e.gpuBuffer},"gpu-buffer"];default:throw new Error(`invalid data location: ${e.location} for ${t()}`)}},Nm=e=>{switch(e[3]){case"cpu":return new zt(e[0],e[2],e[1]);case"gpu-buffer":{let t=e[0];if(!$f(t))throw new Error(`not supported data type: ${t} for deserializing GPU tensor`);let{gpuBuffer:n,download:o,dispose:f}=e[2];return zt.fromGpuBuffer(n,{dataType:t,dims:e[1],download:o,dispose:f})}default:throw new Error(`invalid data location: ${e[3]}`)}},Ev=class{async fetchModelAndCopyToWasmMemory(e){return wv(await _u(e))}async loadModel(e,t){ko();let n;typeof e=="string"?typeof process<"u"&&process.versions&&process.versions.node?n=await _u(e):n=await this.fetchModelAndCopyToWasmMemory(e):n=e,[this.sessionId,this.inputNames,this.outputNames]=await _v(n,t),Ro()}async dispose(){return xv(this.sessionId)}async run(e,t,n){ko();let o=[],f=[];Object.entries(e).forEach(l=>{let h=l[0],y=l[1],O=this.inputNames.indexOf(h);if(O===-1)throw new Error(`invalid input '${h}'`);o.push(y),f.push(O)});let s=[],p=[];Object.entries(t).forEach(l=>{let h=l[0],y=l[1],O=this.outputNames.indexOf(h);if(O===-1)throw new Error(`invalid output '${h}'`);s.push(y),p.push(O)});let i=o.map((l,h)=>Pc(l,()=>`input "${this.inputNames[f[h]]}"`)),c=s.map((l,h)=>l?Pc(l,()=>`output "${this.outputNames[p[h]]}"`):null),r=await Tv(this.sessionId,f,i,p,c,n),u={};for(let l=0;l<r.length;l++)u[this.outputNames[p[l]]]=s[l]??Nm(r[l]);return Ro(),u}startProfiling(){}endProfiling(){Ov(this.sessionId)}}}),km,Av,YA=G(()=>{"use strict";gn(),Sv(),ZA(),km=()=>{if((typeof me.wasm.initTimeout!="number"||me.wasm.initTimeout<0)&&(me.wasm.initTimeout=0),typeof me.wasm.simd!="boolean"&&(me.wasm.simd=!0),typeof me.wasm.proxy!="boolean"&&(me.wasm.proxy=!1),typeof me.wasm.trace!="boolean"&&(me.wasm.trace=!1),typeof me.wasm.numThreads!="number"||!Number.isInteger(me.wasm.numThreads)||me.wasm.numThreads<=0){(typeof self<"u"&&!self.crossOriginIsolated||typeof process<"u"&&process.versions&&process.versions.node)&&(me.wasm.numThreads=1);let e=typeof navigator>"u"?(void 0)().length:navigator.hardwareConcurrency;me.wasm.numThreads=Math.min(4,Math.ceil((e||1)/2))}},Av=class{async init(e){km(),await bv(),await vv(e)}async createInferenceSessionHandler(e,t){let n=new Ev;return await n.loadModel(e,t),Promise.resolve(n)}}}),Iv={};Mo(Iv,{wasmBackend:()=>Pv});var Pv,XA=G(()=>{"use strict";YA(),Pv=new Av});gn();gn();gn();var KA="1.17.3",g3=Qm;{let e=(MA(),Ui(Wb)).onnxjsBackend;Ha("webgl",e,-10)}{let e=(XA(),Ui(Iv)).wasmBackend;Ha("cpu",e,10),Ha("wasm",e,10)}Object.defineProperty(me.versions,"web",{value:KA,enumerable:!0});var je;(function(e){e.assertEqual=f=>f;function t(f){}e.assertIs=t;function n(f){throw new Error}e.assertNever=n,e.arrayToEnum=f=>{let s={};for(let p of f)s[p]=p;return s},e.getValidEnumValues=f=>{let s=e.objectKeys(f).filter(i=>typeof f[f[i]]!="number"),p={};for(let i of s)p[i]=f[i];return e.objectValues(p)},e.objectValues=f=>e.objectKeys(f).map(function(s){return f[s]}),e.objectKeys=typeof Object.keys=="function"?f=>Object.keys(f):f=>{let s=[];for(let p in f)Object.prototype.hasOwnProperty.call(f,p)&&s.push(p);return s},e.find=(f,s)=>{for(let p of f)if(s(p))return p},e.isInteger=typeof Number.isInteger=="function"?f=>Number.isInteger(f):f=>typeof f=="number"&&isFinite(f)&&Math.floor(f)===f;function o(f,s=" | "){return f.map(p=>typeof p=="string"?`'${p}'`:p).join(s)}e.joinValues=o,e.jsonStringifyReplacer=(f,s)=>typeof s=="bigint"?s.toString():s})(je||(je={}));var Df;(function(e){e.mergeShapes=(t,n)=>({...t,...n})})(Df||(Df={}));var re=je.arrayToEnum(["string","nan","number","integer","float","boolean","date","bigint","symbol","function","undefined","null","array","object","unknown","promise","void","never","map","set"]),ci=e=>{switch(typeof e){case"undefined":return re.undefined;case"string":return re.string;case"number":return isNaN(e)?re.nan:re.number;case"boolean":return re.boolean;case"function":return re.function;case"bigint":return re.bigint;case"symbol":return re.symbol;case"object":return Array.isArray(e)?re.array:e===null?re.null:e.then&&typeof e.then=="function"&&e.catch&&typeof e.catch=="function"?re.promise:typeof Map<"u"&&e instanceof Map?re.map:typeof Set<"u"&&e instanceof Set?re.set:typeof Date<"u"&&e instanceof Date?re.date:re.object;default:return re.unknown}},J=je.arrayToEnum(["invalid_type","invalid_literal","custom","invalid_union","invalid_union_discriminator","invalid_enum_value","unrecognized_keys","invalid_arguments","invalid_return_type","invalid_date","invalid_string","too_small","too_big","invalid_intersection_types","not_multiple_of","not_finite"]),QA=e=>JSON.stringify(e,null,2).replace(/"([^"]+)":/g,"$1:"),Er=class extends Error{constructor(t){super(),this.issues=[],this.addIssue=o=>{this.issues=[...this.issues,o]},this.addIssues=(o=[])=>{this.issues=[...this.issues,...o]};let n=new.target.prototype;Object.setPrototypeOf?Object.setPrototypeOf(this,n):this.__proto__=n,this.name="ZodError",this.issues=t}get errors(){return this.issues}format(t){let n=t||function(s){return s.message},o={_errors:[]},f=s=>{for(let p of s.issues)if(p.code==="invalid_union")p.unionErrors.map(f);else if(p.code==="invalid_return_type")f(p.returnTypeError);else if(p.code==="invalid_arguments")f(p.argumentsError);else if(p.path.length===0)o._errors.push(n(p));else{let i=o,c=0;for(;c<p.path.length;){let r=p.path[c];c===p.path.length-1?(i[r]=i[r]||{_errors:[]},i[r]._errors.push(n(p))):i[r]=i[r]||{_errors:[]},i=i[r],c++}}};return f(this),o}toString(){return this.message}get message(){return JSON.stringify(this.issues,je.jsonStringifyReplacer,2)}get isEmpty(){return this.issues.length===0}flatten(t=n=>n.message){let n={},o=[];for(let f of this.issues)f.path.length>0?(n[f.path[0]]=n[f.path[0]]||[],n[f.path[0]].push(t(f))):o.push(t(f));return{formErrors:o,fieldErrors:n}}get formErrors(){return this.flatten()}};Er.create=e=>new Er(e);var es=(e,t)=>{let n;switch(e.code){case J.invalid_type:e.received===re.undefined?n="Required":n=`Expected ${e.expected}, received ${e.received}`;break;case J.invalid_literal:n=`Invalid literal value, expected ${JSON.stringify(e.expected,je.jsonStringifyReplacer)}`;break;case J.unrecognized_keys:n=`Unrecognized key(s) in object: ${je.joinValues(e.keys,", ")}`;break;case J.invalid_union:n="Invalid input";break;case J.invalid_union_discriminator:n=`Invalid discriminator value. Expected ${je.joinValues(e.options)}`;break;case J.invalid_enum_value:n=`Invalid enum value. Expected ${je.joinValues(e.options)}, received '${e.received}'`;break;case J.invalid_arguments:n="Invalid function arguments";break;case J.invalid_return_type:n="Invalid function return type";break;case J.invalid_date:n="Invalid date";break;case J.invalid_string:typeof e.validation=="object"?"includes"in e.validation?(n=`Invalid input: must include "${e.validation.includes}"`,typeof e.validation.position=="number"&&(n=`${n} at one or more positions greater than or equal to ${e.validation.position}`)):"startsWith"in e.validation?n=`Invalid input: must start with "${e.validation.startsWith}"`:"endsWith"in e.validation?n=`Invalid input: must end with "${e.validation.endsWith}"`:je.assertNever(e.validation):e.validation!=="regex"?n=`Invalid ${e.validation}`:n="Invalid";break;case J.too_small:e.type==="array"?n=`Array must contain ${e.exact?"exactly":e.inclusive?"at least":"more than"} ${e.minimum} element(s)`:e.type==="string"?n=`String must contain ${e.exact?"exactly":e.inclusive?"at least":"over"} ${e.minimum} character(s)`:e.type==="number"?n=`Number must be ${e.exact?"exactly equal to ":e.inclusive?"greater than or equal to ":"greater than "}${e.minimum}`:e.type==="date"?n=`Date must be ${e.exact?"exactly equal to ":e.inclusive?"greater than or equal to ":"greater than "}${new Date(Number(e.minimum))}`:n="Invalid input";break;case J.too_big:e.type==="array"?n=`Array must contain ${e.exact?"exactly":e.inclusive?"at most":"less than"} ${e.maximum} element(s)`:e.type==="string"?n=`String must contain ${e.exact?"exactly":e.inclusive?"at most":"under"} ${e.maximum} character(s)`:e.type==="number"?n=`Number must be ${e.exact?"exactly":e.inclusive?"less than or equal to":"less than"} ${e.maximum}`:e.type==="bigint"?n=`BigInt must be ${e.exact?"exactly":e.inclusive?"less than or equal to":"less than"} ${e.maximum}`:e.type==="date"?n=`Date must be ${e.exact?"exactly":e.inclusive?"smaller than or equal to":"smaller than"} ${new Date(Number(e.maximum))}`:n="Invalid input";break;case J.custom:n="Invalid input";break;case J.invalid_intersection_types:n="Intersection results could not be merged";break;case J.not_multiple_of:n=`Number must be a multiple of ${e.multipleOf}`;break;case J.not_finite:n="Number must be finite";break;default:n=t.defaultError,je.assertNever(e)}return{message:n}},Cv=es;function eI(e){Cv=e}function Iu(){return Cv}var Pu=e=>{let{data:t,path:n,errorMaps:o,issueData:f}=e,s=[...n,...f.path||[]],p={...f,path:s},i="",c=o.filter(r=>!!r).slice().reverse();for(let r of c)i=r(p,{data:t,defaultError:i}).message;return{...f,path:s,message:f.message||i}},tI=[];function ie(e,t){let n=Pu({issueData:t,data:e.data,path:e.path,errorMaps:[e.common.contextualErrorMap,e.schemaErrorMap,Iu(),es].filter(o=>!!o)});e.common.issues.push(n)}var Xt=class e{constructor(){this.value="valid"}dirty(){this.value==="valid"&&(this.value="dirty")}abort(){this.value!=="aborted"&&(this.value="aborted")}static mergeArray(t,n){let o=[];for(let f of n){if(f.status==="aborted")return _e;f.status==="dirty"&&t.dirty(),o.push(f.value)}return{status:t.value,value:o}}static async mergeObjectAsync(t,n){let o=[];for(let f of n)o.push({key:await f.key,value:await f.value});return e.mergeObjectSync(t,o)}static mergeObjectSync(t,n){let o={};for(let f of n){let{key:s,value:p}=f;if(s.status==="aborted"||p.status==="aborted")return _e;s.status==="dirty"&&t.dirty(),p.status==="dirty"&&t.dirty(),(typeof p.value<"u"||f.alwaysSet)&&(o[s.value]=p.value)}return{status:t.value,value:o}}},_e=Object.freeze({status:"aborted"}),Nv=e=>({status:"dirty",value:e}),nr=e=>({status:"valid",value:e}),Cf=e=>e.status==="aborted",Nf=e=>e.status==="dirty",$u=e=>e.status==="valid",Du=e=>typeof Promise<"u"&&e instanceof Promise,fe;(function(e){e.errToObj=t=>typeof t=="string"?{message:t}:t||{},e.toString=t=>typeof t=="string"?t:t?.message})(fe||(fe={}));var Wr=class{constructor(t,n,o,f){this._cachedPath=[],this.parent=t,this.data=n,this._path=o,this._key=f}get path(){return this._cachedPath.length||(this._key instanceof Array?this._cachedPath.push(...this._path,...this._key):this._cachedPath.push(...this._path,this._key)),this._cachedPath}},$v=(e,t)=>{if($u(t))return{success:!0,data:t.value};if(!e.common.issues.length)throw new Error("Validation failed but no issues detected.");return{success:!1,get error(){if(this._error)return this._error;let n=new Er(e.common.issues);return this._error=n,this._error}}};function Se(e){if(!e)return{};let{errorMap:t,invalid_type_error:n,required_error:o,description:f}=e;if(t&&(n||o))throw new Error(`Can't use "invalid_type_error" or "required_error" in conjunction with custom error map.`);return t?{errorMap:t,description:f}:{errorMap:(p,i)=>p.code!=="invalid_type"?{message:i.defaultError}:typeof i.data>"u"?{message:o??i.defaultError}:{message:n??i.defaultError},description:f}}var Ee=class{constructor(t){this.spa=this.safeParseAsync,this._def=t,this.parse=this.parse.bind(this),this.safeParse=this.safeParse.bind(this),this.parseAsync=this.parseAsync.bind(this),this.safeParseAsync=this.safeParseAsync.bind(this),this.spa=this.spa.bind(this),this.refine=this.refine.bind(this),this.refinement=this.refinement.bind(this),this.superRefine=this.superRefine.bind(this),this.optional=this.optional.bind(this),this.nullable=this.nullable.bind(this),this.nullish=this.nullish.bind(this),this.array=this.array.bind(this),this.promise=this.promise.bind(this),this.or=this.or.bind(this),this.and=this.and.bind(this),this.transform=this.transform.bind(this),this.brand=this.brand.bind(this),this.default=this.default.bind(this),this.catch=this.catch.bind(this),this.describe=this.describe.bind(this),this.pipe=this.pipe.bind(this),this.isNullable=this.isNullable.bind(this),this.isOptional=this.isOptional.bind(this)}get description(){return this._def.description}_getType(t){return ci(t.data)}_getOrReturnCtx(t,n){return n||{common:t.parent.common,data:t.data,parsedType:ci(t.data),schemaErrorMap:this._def.errorMap,path:t.path,parent:t.parent}}_processInputParams(t){return{status:new Xt,ctx:{common:t.parent.common,data:t.data,parsedType:ci(t.data),schemaErrorMap:this._def.errorMap,path:t.path,parent:t.parent}}}_parseSync(t){let n=this._parse(t);if(Du(n))throw new Error("Synchronous parse encountered promise.");return n}_parseAsync(t){let n=this._parse(t);return Promise.resolve(n)}parse(t,n){let o=this.safeParse(t,n);if(o.success)return o.data;throw o.error}safeParse(t,n){var o;let f={common:{issues:[],async:(o=n?.async)!==null&&o!==void 0?o:!1,contextualErrorMap:n?.errorMap},path:n?.path||[],schemaErrorMap:this._def.errorMap,parent:null,data:t,parsedType:ci(t)},s=this._parseSync({data:t,path:f.path,parent:f});return $v(f,s)}async parseAsync(t,n){let o=await this.safeParseAsync(t,n);if(o.success)return o.data;throw o.error}async safeParseAsync(t,n){let o={common:{issues:[],contextualErrorMap:n?.errorMap,async:!0},path:n?.path||[],schemaErrorMap:this._def.errorMap,parent:null,data:t,parsedType:ci(t)},f=this._parse({data:t,path:o.path,parent:o}),s=await(Du(f)?f:Promise.resolve(f));return $v(o,s)}refine(t,n){let o=f=>typeof n=="string"||typeof n>"u"?{message:n}:typeof n=="function"?n(f):n;return this._refinement((f,s)=>{let p=t(f),i=()=>s.addIssue({code:J.custom,...o(f)});return typeof Promise<"u"&&p instanceof Promise?p.then(c=>c?!0:(i(),!1)):p?!0:(i(),!1)})}refinement(t,n){return this._refinement((o,f)=>t(o)?!0:(f.addIssue(typeof n=="function"?n(o,f):n),!1))}_refinement(t){return new Ar({schema:this,typeName:ye.ZodEffects,effect:{type:"refinement",refinement:t}})}superRefine(t){return this._refinement(t)}optional(){return en.create(this,this._def)}nullable(){return Bn.create(this,this._def)}nullish(){return this.nullable().optional()}array(){return Ln.create(this,this._def)}promise(){return pi.create(this,this._def)}or(t){return Zi.create([this,t],this._def)}and(t){return Yi.create(this,t,this._def)}transform(t){return new Ar({...Se(this._def),schema:this,typeName:ye.ZodEffects,effect:{type:"transform",transform:t}})}default(t){let n=typeof t=="function"?t:()=>t;return new eo({...Se(this._def),innerType:this,defaultValue:n,typeName:ye.ZodDefault})}brand(){return new Ru({typeName:ye.ZodBranded,type:this,...Se(this._def)})}catch(t){let n=typeof t=="function"?t:()=>t;return new qo({...Se(this._def),innerType:this,catchValue:n,typeName:ye.ZodCatch})}describe(t){let n=this.constructor;return new n({...this._def,description:t})}pipe(t){return ts.create(this,t)}isOptional(){return this.safeParse(void 0).success}isNullable(){return this.safeParse(null).success}},rI=/^c[^\s-]{8,}$/i,nI=/^[a-z][a-z0-9]*$/,iI=/[0-9A-HJKMNP-TV-Z]{26}/,oI=/^([a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[a-f0-9]{4}-[a-f0-9]{12}|00000000-0000-0000-0000-000000000000)$/i,aI=/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[(((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2}))\.){3}((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2}))\])|(\[IPv6:(([a-f0-9]{1,4}:){7}|::([a-f0-9]{1,4}:){0,6}|([a-f0-9]{1,4}:){1}:([a-f0-9]{1,4}:){0,5}|([a-f0-9]{1,4}:){2}:([a-f0-9]{1,4}:){0,4}|([a-f0-9]{1,4}:){3}:([a-f0-9]{1,4}:){0,3}|([a-f0-9]{1,4}:){4}:([a-f0-9]{1,4}:){0,2}|([a-f0-9]{1,4}:){5}:([a-f0-9]{1,4}:){0,1})([a-f0-9]{1,4}|(((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2}))\.){3}((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2})))\])|([A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])*(\.[A-Za-z]{2,})+))$/,sI=/^(\p{Extended_Pictographic}|\p{Emoji_Component})+$/u,uI=/^(((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2}))\.){3}((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2}))$/,lI=/^(([a-f0-9]{1,4}:){7}|::([a-f0-9]{1,4}:){0,6}|([a-f0-9]{1,4}:){1}:([a-f0-9]{1,4}:){0,5}|([a-f0-9]{1,4}:){2}:([a-f0-9]{1,4}:){0,4}|([a-f0-9]{1,4}:){3}:([a-f0-9]{1,4}:){0,3}|([a-f0-9]{1,4}:){4}:([a-f0-9]{1,4}:){0,2}|([a-f0-9]{1,4}:){5}:([a-f0-9]{1,4}:){0,1})([a-f0-9]{1,4}|(((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2}))\.){3}((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2})))$/,cI=e=>e.precision?e.offset?new RegExp(`^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{${e.precision}}(([+-]\\d{2}(:?\\d{2})?)|Z)$`):new RegExp(`^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{${e.precision}}Z$`):e.precision===0?e.offset?new RegExp("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(([+-]\\d{2}(:?\\d{2})?)|Z)$"):new RegExp("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"):e.offset?new RegExp("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(([+-]\\d{2}(:?\\d{2})?)|Z)$"):new RegExp("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$");function fI(e,t){return!!((t==="v4"||!t)&&uI.test(e)||(t==="v6"||!t)&&lI.test(e))}var fi=class e extends Ee{constructor(){super(...arguments),this._regex=(t,n,o)=>this.refinement(f=>t.test(f),{validation:n,code:J.invalid_string,...fe.errToObj(o)}),this.nonempty=t=>this.min(1,fe.errToObj(t)),this.trim=()=>new e({...this._def,checks:[...this._def.checks,{kind:"trim"}]}),this.toLowerCase=()=>new e({...this._def,checks:[...this._def.checks,{kind:"toLowerCase"}]}),this.toUpperCase=()=>new e({...this._def,checks:[...this._def.checks,{kind:"toUpperCase"}]})}_parse(t){if(this._def.coerce&&(t.data=String(t.data)),this._getType(t)!==re.string){let s=this._getOrReturnCtx(t);return ie(s,{code:J.invalid_type,expected:re.string,received:s.parsedType}),_e}let o=new Xt,f;for(let s of this._def.checks)if(s.kind==="min")t.data.length<s.value&&(f=this._getOrReturnCtx(t,f),ie(f,{code:J.too_small,minimum:s.value,type:"string",inclusive:!0,exact:!1,message:s.message}),o.dirty());else if(s.kind==="max")t.data.length>s.value&&(f=this._getOrReturnCtx(t,f),ie(f,{code:J.too_big,maximum:s.value,type:"string",inclusive:!0,exact:!1,message:s.message}),o.dirty());else if(s.kind==="length"){let p=t.data.length>s.value,i=t.data.length<s.value;(p||i)&&(f=this._getOrReturnCtx(t,f),p?ie(f,{code:J.too_big,maximum:s.value,type:"string",inclusive:!0,exact:!0,message:s.message}):i&&ie(f,{code:J.too_small,minimum:s.value,type:"string",inclusive:!0,exact:!0,message:s.message}),o.dirty())}else if(s.kind==="email")aI.test(t.data)||(f=this._getOrReturnCtx(t,f),ie(f,{validation:"email",code:J.invalid_string,message:s.message}),o.dirty());else if(s.kind==="emoji")sI.test(t.data)||(f=this._getOrReturnCtx(t,f),ie(f,{validation:"emoji",code:J.invalid_string,message:s.message}),o.dirty());else if(s.kind==="uuid")oI.test(t.data)||(f=this._getOrReturnCtx(t,f),ie(f,{validation:"uuid",code:J.invalid_string,message:s.message}),o.dirty());else if(s.kind==="cuid")rI.test(t.data)||(f=this._getOrReturnCtx(t,f),ie(f,{validation:"cuid",code:J.invalid_string,message:s.message}),o.dirty());else if(s.kind==="cuid2")nI.test(t.data)||(f=this._getOrReturnCtx(t,f),ie(f,{validation:"cuid2",code:J.invalid_string,message:s.message}),o.dirty());else if(s.kind==="ulid")iI.test(t.data)||(f=this._getOrReturnCtx(t,f),ie(f,{validation:"ulid",code:J.invalid_string,message:s.message}),o.dirty());else if(s.kind==="url")try{new URL(t.data)}catch{f=this._getOrReturnCtx(t,f),ie(f,{validation:"url",code:J.invalid_string,message:s.message}),o.dirty()}else s.kind==="regex"?(s.regex.lastIndex=0,s.regex.test(t.data)||(f=this._getOrReturnCtx(t,f),ie(f,{validation:"regex",code:J.invalid_string,message:s.message}),o.dirty())):s.kind==="trim"?t.data=t.data.trim():s.kind==="includes"?t.data.includes(s.value,s.position)||(f=this._getOrReturnCtx(t,f),ie(f,{code:J.invalid_string,validation:{includes:s.value,position:s.position},message:s.message}),o.dirty()):s.kind==="toLowerCase"?t.data=t.data.toLowerCase():s.kind==="toUpperCase"?t.data=t.data.toUpperCase():s.kind==="startsWith"?t.data.startsWith(s.value)||(f=this._getOrReturnCtx(t,f),ie(f,{code:J.invalid_string,validation:{startsWith:s.value},message:s.message}),o.dirty()):s.kind==="endsWith"?t.data.endsWith(s.value)||(f=this._getOrReturnCtx(t,f),ie(f,{code:J.invalid_string,validation:{endsWith:s.value},message:s.message}),o.dirty()):s.kind==="datetime"?cI(s).test(t.data)||(f=this._getOrReturnCtx(t,f),ie(f,{code:J.invalid_string,validation:"datetime",message:s.message}),o.dirty()):s.kind==="ip"?fI(t.data,s.version)||(f=this._getOrReturnCtx(t,f),ie(f,{validation:"ip",code:J.invalid_string,message:s.message}),o.dirty()):je.assertNever(s);return{status:o.value,value:t.data}}_addCheck(t){return new e({...this._def,checks:[...this._def.checks,t]})}email(t){return this._addCheck({kind:"email",...fe.errToObj(t)})}url(t){return this._addCheck({kind:"url",...fe.errToObj(t)})}emoji(t){return this._addCheck({kind:"emoji",...fe.errToObj(t)})}uuid(t){return this._addCheck({kind:"uuid",...fe.errToObj(t)})}cuid(t){return this._addCheck({kind:"cuid",...fe.errToObj(t)})}cuid2(t){return this._addCheck({kind:"cuid2",...fe.errToObj(t)})}ulid(t){return this._addCheck({kind:"ulid",...fe.errToObj(t)})}ip(t){return this._addCheck({kind:"ip",...fe.errToObj(t)})}datetime(t){var n;return typeof t=="string"?this._addCheck({kind:"datetime",precision:null,offset:!1,message:t}):this._addCheck({kind:"datetime",precision:typeof t?.precision>"u"?null:t?.precision,offset:(n=t?.offset)!==null&&n!==void 0?n:!1,...fe.errToObj(t?.message)})}regex(t,n){return this._addCheck({kind:"regex",regex:t,...fe.errToObj(n)})}includes(t,n){return this._addCheck({kind:"includes",value:t,position:n?.position,...fe.errToObj(n?.message)})}startsWith(t,n){return this._addCheck({kind:"startsWith",value:t,...fe.errToObj(n)})}endsWith(t,n){return this._addCheck({kind:"endsWith",value:t,...fe.errToObj(n)})}min(t,n){return this._addCheck({kind:"min",value:t,...fe.errToObj(n)})}max(t,n){return this._addCheck({kind:"max",value:t,...fe.errToObj(n)})}length(t,n){return this._addCheck({kind:"length",value:t,...fe.errToObj(n)})}get isDatetime(){return!!this._def.checks.find(t=>t.kind==="datetime")}get isEmail(){return!!this._def.checks.find(t=>t.kind==="email")}get isURL(){return!!this._def.checks.find(t=>t.kind==="url")}get isEmoji(){return!!this._def.checks.find(t=>t.kind==="emoji")}get isUUID(){return!!this._def.checks.find(t=>t.kind==="uuid")}get isCUID(){return!!this._def.checks.find(t=>t.kind==="cuid")}get isCUID2(){return!!this._def.checks.find(t=>t.kind==="cuid2")}get isULID(){return!!this._def.checks.find(t=>t.kind==="ulid")}get isIP(){return!!this._def.checks.find(t=>t.kind==="ip")}get minLength(){let t=null;for(let n of this._def.checks)n.kind==="min"&&(t===null||n.value>t)&&(t=n.value);return t}get maxLength(){let t=null;for(let n of this._def.checks)n.kind==="max"&&(t===null||n.value<t)&&(t=n.value);return t}};fi.create=e=>{var t;return new fi({checks:[],typeName:ye.ZodString,coerce:(t=e?.coerce)!==null&&t!==void 0?t:!1,...Se(e)})};function dI(e,t){let n=(e.toString().split(".")[1]||"").length,o=(t.toString().split(".")[1]||"").length,f=n>o?n:o,s=parseInt(e.toFixed(f).replace(".","")),p=parseInt(t.toFixed(f).replace(".",""));return s%p/Math.pow(10,f)}var zi=class e extends Ee{constructor(){super(...arguments),this.min=this.gte,this.max=this.lte,this.step=this.multipleOf}_parse(t){if(this._def.coerce&&(t.data=Number(t.data)),this._getType(t)!==re.number){let s=this._getOrReturnCtx(t);return ie(s,{code:J.invalid_type,expected:re.number,received:s.parsedType}),_e}let o,f=new Xt;for(let s of this._def.checks)s.kind==="int"?je.isInteger(t.data)||(o=this._getOrReturnCtx(t,o),ie(o,{code:J.invalid_type,expected:"integer",received:"float",message:s.message}),f.dirty()):s.kind==="min"?(s.inclusive?t.data<s.value:t.data<=s.value)&&(o=this._getOrReturnCtx(t,o),ie(o,{code:J.too_small,minimum:s.value,type:"number",inclusive:s.inclusive,exact:!1,message:s.message}),f.dirty()):s.kind==="max"?(s.inclusive?t.data>s.value:t.data>=s.value)&&(o=this._getOrReturnCtx(t,o),ie(o,{code:J.too_big,maximum:s.value,type:"number",inclusive:s.inclusive,exact:!1,message:s.message}),f.dirty()):s.kind==="multipleOf"?dI(t.data,s.value)!==0&&(o=this._getOrReturnCtx(t,o),ie(o,{code:J.not_multiple_of,multipleOf:s.value,message:s.message}),f.dirty()):s.kind==="finite"?Number.isFinite(t.data)||(o=this._getOrReturnCtx(t,o),ie(o,{code:J.not_finite,message:s.message}),f.dirty()):je.assertNever(s);return{status:f.value,value:t.data}}gte(t,n){return this.setLimit("min",t,!0,fe.toString(n))}gt(t,n){return this.setLimit("min",t,!1,fe.toString(n))}lte(t,n){return this.setLimit("max",t,!0,fe.toString(n))}lt(t,n){return this.setLimit("max",t,!1,fe.toString(n))}setLimit(t,n,o,f){return new e({...this._def,checks:[...this._def.checks,{kind:t,value:n,inclusive:o,message:fe.toString(f)}]})}_addCheck(t){return new e({...this._def,checks:[...this._def.checks,t]})}int(t){return this._addCheck({kind:"int",message:fe.toString(t)})}positive(t){return this._addCheck({kind:"min",value:0,inclusive:!1,message:fe.toString(t)})}negative(t){return this._addCheck({kind:"max",value:0,inclusive:!1,message:fe.toString(t)})}nonpositive(t){return this._addCheck({kind:"max",value:0,inclusive:!0,message:fe.toString(t)})}nonnegative(t){return this._addCheck({kind:"min",value:0,inclusive:!0,message:fe.toString(t)})}multipleOf(t,n){return this._addCheck({kind:"multipleOf",value:t,message:fe.toString(n)})}finite(t){return this._addCheck({kind:"finite",message:fe.toString(t)})}safe(t){return this._addCheck({kind:"min",inclusive:!0,value:Number.MIN_SAFE_INTEGER,message:fe.toString(t)})._addCheck({kind:"max",inclusive:!0,value:Number.MAX_SAFE_INTEGER,message:fe.toString(t)})}get minValue(){let t=null;for(let n of this._def.checks)n.kind==="min"&&(t===null||n.value>t)&&(t=n.value);return t}get maxValue(){let t=null;for(let n of this._def.checks)n.kind==="max"&&(t===null||n.value<t)&&(t=n.value);return t}get isInt(){return!!this._def.checks.find(t=>t.kind==="int"||t.kind==="multipleOf"&&je.isInteger(t.value))}get isFinite(){let t=null,n=null;for(let o of this._def.checks){if(o.kind==="finite"||o.kind==="int"||o.kind==="multipleOf")return!0;o.kind==="min"?(n===null||o.value>n)&&(n=o.value):o.kind==="max"&&(t===null||o.value<t)&&(t=o.value)}return Number.isFinite(n)&&Number.isFinite(t)}};zi.create=e=>new zi({checks:[],typeName:ye.ZodNumber,coerce:e?.coerce||!1,...Se(e)});var Vi=class e extends Ee{constructor(){super(...arguments),this.min=this.gte,this.max=this.lte}_parse(t){if(this._def.coerce&&(t.data=BigInt(t.data)),this._getType(t)!==re.bigint){let s=this._getOrReturnCtx(t);return ie(s,{code:J.invalid_type,expected:re.bigint,received:s.parsedType}),_e}let o,f=new Xt;for(let s of this._def.checks)s.kind==="min"?(s.inclusive?t.data<s.value:t.data<=s.value)&&(o=this._getOrReturnCtx(t,o),ie(o,{code:J.too_small,type:"bigint",minimum:s.value,inclusive:s.inclusive,message:s.message}),f.dirty()):s.kind==="max"?(s.inclusive?t.data>s.value:t.data>=s.value)&&(o=this._getOrReturnCtx(t,o),ie(o,{code:J.too_big,type:"bigint",maximum:s.value,inclusive:s.inclusive,message:s.message}),f.dirty()):s.kind==="multipleOf"?t.data%s.value!==BigInt(0)&&(o=this._getOrReturnCtx(t,o),ie(o,{code:J.not_multiple_of,multipleOf:s.value,message:s.message}),f.dirty()):je.assertNever(s);return{status:f.value,value:t.data}}gte(t,n){return this.setLimit("min",t,!0,fe.toString(n))}gt(t,n){return this.setLimit("min",t,!1,fe.toString(n))}lte(t,n){return this.setLimit("max",t,!0,fe.toString(n))}lt(t,n){return this.setLimit("max",t,!1,fe.toString(n))}setLimit(t,n,o,f){return new e({...this._def,checks:[...this._def.checks,{kind:t,value:n,inclusive:o,message:fe.toString(f)}]})}_addCheck(t){return new e({...this._def,checks:[...this._def.checks,t]})}positive(t){return this._addCheck({kind:"min",value:BigInt(0),inclusive:!1,message:fe.toString(t)})}negative(t){return this._addCheck({kind:"max",value:BigInt(0),inclusive:!1,message:fe.toString(t)})}nonpositive(t){return this._addCheck({kind:"max",value:BigInt(0),inclusive:!0,message:fe.toString(t)})}nonnegative(t){return this._addCheck({kind:"min",value:BigInt(0),inclusive:!0,message:fe.toString(t)})}multipleOf(t,n){return this._addCheck({kind:"multipleOf",value:t,message:fe.toString(n)})}get minValue(){let t=null;for(let n of this._def.checks)n.kind==="min"&&(t===null||n.value>t)&&(t=n.value);return t}get maxValue(){let t=null;for(let n of this._def.checks)n.kind==="max"&&(t===null||n.value<t)&&(t=n.value);return t}};Vi.create=e=>{var t;return new Vi({checks:[],typeName:ye.ZodBigInt,coerce:(t=e?.coerce)!==null&&t!==void 0?t:!1,...Se(e)})};var Gi=class extends Ee{_parse(t){if(this._def.coerce&&(t.data=!!t.data),this._getType(t)!==re.boolean){let o=this._getOrReturnCtx(t);return ie(o,{code:J.invalid_type,expected:re.boolean,received:o.parsedType}),_e}return nr(t.data)}};Gi.create=e=>new Gi({typeName:ye.ZodBoolean,coerce:e?.coerce||!1,...Se(e)});var Hi=class e extends Ee{_parse(t){if(this._def.coerce&&(t.data=new Date(t.data)),this._getType(t)!==re.date){let s=this._getOrReturnCtx(t);return ie(s,{code:J.invalid_type,expected:re.date,received:s.parsedType}),_e}if(isNaN(t.data.getTime())){let s=this._getOrReturnCtx(t);return ie(s,{code:J.invalid_date}),_e}let o=new Xt,f;for(let s of this._def.checks)s.kind==="min"?t.data.getTime()<s.value&&(f=this._getOrReturnCtx(t,f),ie(f,{code:J.too_small,message:s.message,inclusive:!0,exact:!1,minimum:s.value,type:"date"}),o.dirty()):s.kind==="max"?t.data.getTime()>s.value&&(f=this._getOrReturnCtx(t,f),ie(f,{code:J.too_big,message:s.message,inclusive:!0,exact:!1,maximum:s.value,type:"date"}),o.dirty()):je.assertNever(s);return{status:o.value,value:new Date(t.data.getTime())}}_addCheck(t){return new e({...this._def,checks:[...this._def.checks,t]})}min(t,n){return this._addCheck({kind:"min",value:t.getTime(),message:fe.toString(n)})}max(t,n){return this._addCheck({kind:"max",value:t.getTime(),message:fe.toString(n)})}get minDate(){let t=null;for(let n of this._def.checks)n.kind==="min"&&(t===null||n.value>t)&&(t=n.value);return t!=null?new Date(t):null}get maxDate(){let t=null;for(let n of this._def.checks)n.kind==="max"&&(t===null||n.value<t)&&(t=n.value);return t!=null?new Date(t):null}};Hi.create=e=>new Hi({checks:[],coerce:e?.coerce||!1,typeName:ye.ZodDate,...Se(e)});var Vo=class extends Ee{_parse(t){if(this._getType(t)!==re.symbol){let o=this._getOrReturnCtx(t);return ie(o,{code:J.invalid_type,expected:re.symbol,received:o.parsedType}),_e}return nr(t.data)}};Vo.create=e=>new Vo({typeName:ye.ZodSymbol,...Se(e)});var Wi=class extends Ee{_parse(t){if(this._getType(t)!==re.undefined){let o=this._getOrReturnCtx(t);return ie(o,{code:J.invalid_type,expected:re.undefined,received:o.parsedType}),_e}return nr(t.data)}};Wi.create=e=>new Wi({typeName:ye.ZodUndefined,...Se(e)});var qi=class extends Ee{_parse(t){if(this._getType(t)!==re.null){let o=this._getOrReturnCtx(t);return ie(o,{code:J.invalid_type,expected:re.null,received:o.parsedType}),_e}return nr(t.data)}};qi.create=e=>new qi({typeName:ye.ZodNull,...Se(e)});var di=class extends Ee{constructor(){super(...arguments),this._any=!0}_parse(t){return nr(t.data)}};di.create=e=>new di({typeName:ye.ZodAny,...Se(e)});var Mn=class extends Ee{constructor(){super(...arguments),this._unknown=!0}_parse(t){return nr(t.data)}};Mn.create=e=>new Mn({typeName:ye.ZodUnknown,...Se(e)});var tn=class extends Ee{_parse(t){let n=this._getOrReturnCtx(t);return ie(n,{code:J.invalid_type,expected:re.never,received:n.parsedType}),_e}};tn.create=e=>new tn({typeName:ye.ZodNever,...Se(e)});var Go=class extends Ee{_parse(t){if(this._getType(t)!==re.undefined){let o=this._getOrReturnCtx(t);return ie(o,{code:J.invalid_type,expected:re.void,received:o.parsedType}),_e}return nr(t.data)}};Go.create=e=>new Go({typeName:ye.ZodVoid,...Se(e)});var Ln=class e extends Ee{_parse(t){let{ctx:n,status:o}=this._processInputParams(t),f=this._def;if(n.parsedType!==re.array)return ie(n,{code:J.invalid_type,expected:re.array,received:n.parsedType}),_e;if(f.exactLength!==null){let p=n.data.length>f.exactLength.value,i=n.data.length<f.exactLength.value;(p||i)&&(ie(n,{code:p?J.too_big:J.too_small,minimum:i?f.exactLength.value:void 0,maximum:p?f.exactLength.value:void 0,type:"array",inclusive:!0,exact:!0,message:f.exactLength.message}),o.dirty())}if(f.minLength!==null&&n.data.length<f.minLength.value&&(ie(n,{code:J.too_small,minimum:f.minLength.value,type:"array",inclusive:!0,exact:!1,message:f.minLength.message}),o.dirty()),f.maxLength!==null&&n.data.length>f.maxLength.value&&(ie(n,{code:J.too_big,maximum:f.maxLength.value,type:"array",inclusive:!0,exact:!1,message:f.maxLength.message}),o.dirty()),n.common.async)return Promise.all([...n.data].map((p,i)=>f.type._parseAsync(new Wr(n,p,n.path,i)))).then(p=>Xt.mergeArray(o,p));let s=[...n.data].map((p,i)=>f.type._parseSync(new Wr(n,p,n.path,i)));return Xt.mergeArray(o,s)}get element(){return this._def.type}min(t,n){return new e({...this._def,minLength:{value:t,message:fe.toString(n)}})}max(t,n){return new e({...this._def,maxLength:{value:t,message:fe.toString(n)}})}length(t,n){return new e({...this._def,exactLength:{value:t,message:fe.toString(n)}})}nonempty(t){return this.min(1,t)}};Ln.create=(e,t)=>new Ln({type:e,minLength:null,maxLength:null,exactLength:null,typeName:ye.ZodArray,...Se(t)});function zo(e){if(e instanceof hr){let t={};for(let n in e.shape){let o=e.shape[n];t[n]=en.create(zo(o))}return new hr({...e._def,shape:()=>t})}else return e instanceof Ln?new Ln({...e._def,type:zo(e.element)}):e instanceof en?en.create(zo(e.unwrap())):e instanceof Bn?Bn.create(zo(e.unwrap())):e instanceof mn?mn.create(e.items.map(t=>zo(t))):e}var hr=class e extends Ee{constructor(){super(...arguments),this._cached=null,this.nonstrict=this.passthrough,this.augment=this.extend}_getCached(){if(this._cached!==null)return this._cached;let t=this._def.shape(),n=je.objectKeys(t);return this._cached={shape:t,keys:n}}_parse(t){if(this._getType(t)!==re.object){let r=this._getOrReturnCtx(t);return ie(r,{code:J.invalid_type,expected:re.object,received:r.parsedType}),_e}let{status:o,ctx:f}=this._processInputParams(t),{shape:s,keys:p}=this._getCached(),i=[];if(!(this._def.catchall instanceof tn&&this._def.unknownKeys==="strip"))for(let r in f.data)p.includes(r)||i.push(r);let c=[];for(let r of p){let u=s[r],l=f.data[r];c.push({key:{status:"valid",value:r},value:u._parse(new Wr(f,l,f.path,r)),alwaysSet:r in f.data})}if(this._def.catchall instanceof tn){let r=this._def.unknownKeys;if(r==="passthrough")for(let u of i)c.push({key:{status:"valid",value:u},value:{status:"valid",value:f.data[u]}});else if(r==="strict")i.length>0&&(ie(f,{code:J.unrecognized_keys,keys:i}),o.dirty());else if(r!=="strip")throw new Error("Internal ZodObject error: invalid unknownKeys value.")}else{let r=this._def.catchall;for(let u of i){let l=f.data[u];c.push({key:{status:"valid",value:u},value:r._parse(new Wr(f,l,f.path,u)),alwaysSet:u in f.data})}}return f.common.async?Promise.resolve().then(async()=>{let r=[];for(let u of c){let l=await u.key;r.push({key:l,value:await u.value,alwaysSet:u.alwaysSet})}return r}).then(r=>Xt.mergeObjectSync(o,r)):Xt.mergeObjectSync(o,c)}get shape(){return this._def.shape()}strict(t){return fe.errToObj,new e({...this._def,unknownKeys:"strict",...t!==void 0?{errorMap:(n,o)=>{var f,s,p,i;let c=(p=(s=(f=this._def).errorMap)===null||s===void 0?void 0:s.call(f,n,o).message)!==null&&p!==void 0?p:o.defaultError;return n.code==="unrecognized_keys"?{message:(i=fe.errToObj(t).message)!==null&&i!==void 0?i:c}:{message:c}}}:{}})}strip(){return new e({...this._def,unknownKeys:"strip"})}passthrough(){return new e({...this._def,unknownKeys:"passthrough"})}extend(t){return new e({...this._def,shape:()=>({...this._def.shape(),...t})})}merge(t){return new e({unknownKeys:t._def.unknownKeys,catchall:t._def.catchall,shape:()=>({...this._def.shape(),...t._def.shape()}),typeName:ye.ZodObject})}setKey(t,n){return this.augment({[t]:n})}catchall(t){return new e({...this._def,catchall:t})}pick(t){let n={};return je.objectKeys(t).forEach(o=>{t[o]&&this.shape[o]&&(n[o]=this.shape[o])}),new e({...this._def,shape:()=>n})}omit(t){let n={};return je.objectKeys(this.shape).forEach(o=>{t[o]||(n[o]=this.shape[o])}),new e({...this._def,shape:()=>n})}deepPartial(){return zo(this)}partial(t){let n={};return je.objectKeys(this.shape).forEach(o=>{let f=this.shape[o];t&&!t[o]?n[o]=f:n[o]=f.optional()}),new e({...this._def,shape:()=>n})}required(t){let n={};return je.objectKeys(this.shape).forEach(o=>{if(t&&!t[o])n[o]=this.shape[o];else{let s=this.shape[o];for(;s instanceof en;)s=s._def.innerType;n[o]=s}}),new e({...this._def,shape:()=>n})}keyof(){return kv(je.objectKeys(this.shape))}};hr.create=(e,t)=>new hr({shape:()=>e,unknownKeys:"strip",catchall:tn.create(),typeName:ye.ZodObject,...Se(t)});hr.strictCreate=(e,t)=>new hr({shape:()=>e,unknownKeys:"strict",catchall:tn.create(),typeName:ye.ZodObject,...Se(t)});hr.lazycreate=(e,t)=>new hr({shape:e,unknownKeys:"strip",catchall:tn.create(),typeName:ye.ZodObject,...Se(t)});var Zi=class extends Ee{_parse(t){let{ctx:n}=this._processInputParams(t),o=this._def.options;function f(s){for(let i of s)if(i.result.status==="valid")return i.result;for(let i of s)if(i.result.status==="dirty")return n.common.issues.push(...i.ctx.common.issues),i.result;let p=s.map(i=>new Er(i.ctx.common.issues));return ie(n,{code:J.invalid_union,unionErrors:p}),_e}if(n.common.async)return Promise.all(o.map(async s=>{let p={...n,common:{...n.common,issues:[]},parent:null};return{result:await s._parseAsync({data:n.data,path:n.path,parent:p}),ctx:p}})).then(f);{let s,p=[];for(let c of o){let r={...n,common:{...n.common,issues:[]},parent:null},u=c._parseSync({data:n.data,path:n.path,parent:r});if(u.status==="valid")return u;u.status==="dirty"&&!s&&(s={result:u,ctx:r}),r.common.issues.length&&p.push(r.common.issues)}if(s)return n.common.issues.push(...s.ctx.common.issues),s.result;let i=p.map(c=>new Er(c));return ie(n,{code:J.invalid_union,unionErrors:i}),_e}}get options(){return this._def.options}};Zi.create=(e,t)=>new Zi({options:e,typeName:ye.ZodUnion,...Se(t)});var Au=e=>e instanceof Xi?Au(e.schema):e instanceof Ar?Au(e.innerType()):e instanceof Ki?[e.value]:e instanceof Ji?e.options:e instanceof Qi?Object.keys(e.enum):e instanceof eo?Au(e._def.innerType):e instanceof Wi?[void 0]:e instanceof qi?[null]:null,Cu=class e extends Ee{_parse(t){let{ctx:n}=this._processInputParams(t);if(n.parsedType!==re.object)return ie(n,{code:J.invalid_type,expected:re.object,received:n.parsedType}),_e;let o=this.discriminator,f=n.data[o],s=this.optionsMap.get(f);return s?n.common.async?s._parseAsync({data:n.data,path:n.path,parent:n}):s._parseSync({data:n.data,path:n.path,parent:n}):(ie(n,{code:J.invalid_union_discriminator,options:Array.from(this.optionsMap.keys()),path:[o]}),_e)}get discriminator(){return this._def.discriminator}get options(){return this._def.options}get optionsMap(){return this._def.optionsMap}static create(t,n,o){let f=new Map;for(let s of n){let p=Au(s.shape[t]);if(!p)throw new Error(`A discriminator value for key \`${t}\` could not be extracted from all schema options`);for(let i of p){if(f.has(i))throw new Error(`Discriminator property ${String(t)} has duplicate value ${String(i)}`);f.set(i,s)}}return new e({typeName:ye.ZodDiscriminatedUnion,discriminator:t,options:n,optionsMap:f,...Se(o)})}};function kf(e,t){let n=ci(e),o=ci(t);if(e===t)return{valid:!0,data:e};if(n===re.object&&o===re.object){let f=je.objectKeys(t),s=je.objectKeys(e).filter(i=>f.indexOf(i)!==-1),p={...e,...t};for(let i of s){let c=kf(e[i],t[i]);if(!c.valid)return{valid:!1};p[i]=c.data}return{valid:!0,data:p}}else if(n===re.array&&o===re.array){if(e.length!==t.length)return{valid:!1};let f=[];for(let s=0;s<e.length;s++){let p=e[s],i=t[s],c=kf(p,i);if(!c.valid)return{valid:!1};f.push(c.data)}return{valid:!0,data:f}}else return n===re.date&&o===re.date&&+e==+t?{valid:!0,data:e}:{valid:!1}}var Yi=class extends Ee{_parse(t){let{status:n,ctx:o}=this._processInputParams(t),f=(s,p)=>{if(Cf(s)||Cf(p))return _e;let i=kf(s.value,p.value);return i.valid?((Nf(s)||Nf(p))&&n.dirty(),{status:n.value,value:i.data}):(ie(o,{code:J.invalid_intersection_types}),_e)};return o.common.async?Promise.all([this._def.left._parseAsync({data:o.data,path:o.path,parent:o}),this._def.right._parseAsync({data:o.data,path:o.path,parent:o})]).then(([s,p])=>f(s,p)):f(this._def.left._parseSync({data:o.data,path:o.path,parent:o}),this._def.right._parseSync({data:o.data,path:o.path,parent:o}))}};Yi.create=(e,t,n)=>new Yi({left:e,right:t,typeName:ye.ZodIntersection,...Se(n)});var mn=class e extends Ee{_parse(t){let{status:n,ctx:o}=this._processInputParams(t);if(o.parsedType!==re.array)return ie(o,{code:J.invalid_type,expected:re.array,received:o.parsedType}),_e;if(o.data.length<this._def.items.length)return ie(o,{code:J.too_small,minimum:this._def.items.length,inclusive:!0,exact:!1,type:"array"}),_e;!this._def.rest&&o.data.length>this._def.items.length&&(ie(o,{code:J.too_big,maximum:this._def.items.length,inclusive:!0,exact:!1,type:"array"}),n.dirty());let s=[...o.data].map((p,i)=>{let c=this._def.items[i]||this._def.rest;return c?c._parse(new Wr(o,p,o.path,i)):null}).filter(p=>!!p);return o.common.async?Promise.all(s).then(p=>Xt.mergeArray(n,p)):Xt.mergeArray(n,s)}get items(){return this._def.items}rest(t){return new e({...this._def,rest:t})}};mn.create=(e,t)=>{if(!Array.isArray(e))throw new Error("You must pass an array of schemas to z.tuple([ ... ])");return new mn({items:e,typeName:ye.ZodTuple,rest:null,...Se(t)})};var Nu=class e extends Ee{get keySchema(){return this._def.keyType}get valueSchema(){return this._def.valueType}_parse(t){let{status:n,ctx:o}=this._processInputParams(t);if(o.parsedType!==re.object)return ie(o,{code:J.invalid_type,expected:re.object,received:o.parsedType}),_e;let f=[],s=this._def.keyType,p=this._def.valueType;for(let i in o.data)f.push({key:s._parse(new Wr(o,i,o.path,i)),value:p._parse(new Wr(o,o.data[i],o.path,i))});return o.common.async?Xt.mergeObjectAsync(n,f):Xt.mergeObjectSync(n,f)}get element(){return this._def.valueType}static create(t,n,o){return n instanceof Ee?new e({keyType:t,valueType:n,typeName:ye.ZodRecord,...Se(o)}):new e({keyType:fi.create(),valueType:t,typeName:ye.ZodRecord,...Se(n)})}},Ho=class extends Ee{_parse(t){let{status:n,ctx:o}=this._processInputParams(t);if(o.parsedType!==re.map)return ie(o,{code:J.invalid_type,expected:re.map,received:o.parsedType}),_e;let f=this._def.keyType,s=this._def.valueType,p=[...o.data.entries()].map(([i,c],r)=>({key:f._parse(new Wr(o,i,o.path,[r,"key"])),value:s._parse(new Wr(o,c,o.path,[r,"value"]))}));if(o.common.async){let i=new Map;return Promise.resolve().then(async()=>{for(let c of p){let r=await c.key,u=await c.value;if(r.status==="aborted"||u.status==="aborted")return _e;(r.status==="dirty"||u.status==="dirty")&&n.dirty(),i.set(r.value,u.value)}return{status:n.value,value:i}})}else{let i=new Map;for(let c of p){let r=c.key,u=c.value;if(r.status==="aborted"||u.status==="aborted")return _e;(r.status==="dirty"||u.status==="dirty")&&n.dirty(),i.set(r.value,u.value)}return{status:n.value,value:i}}}};Ho.create=(e,t,n)=>new Ho({valueType:t,keyType:e,typeName:ye.ZodMap,...Se(n)});var Wo=class e extends Ee{_parse(t){let{status:n,ctx:o}=this._processInputParams(t);if(o.parsedType!==re.set)return ie(o,{code:J.invalid_type,expected:re.set,received:o.parsedType}),_e;let f=this._def;f.minSize!==null&&o.data.size<f.minSize.value&&(ie(o,{code:J.too_small,minimum:f.minSize.value,type:"set",inclusive:!0,exact:!1,message:f.minSize.message}),n.dirty()),f.maxSize!==null&&o.data.size>f.maxSize.value&&(ie(o,{code:J.too_big,maximum:f.maxSize.value,type:"set",inclusive:!0,exact:!1,message:f.maxSize.message}),n.dirty());let s=this._def.valueType;function p(c){let r=new Set;for(let u of c){if(u.status==="aborted")return _e;u.status==="dirty"&&n.dirty(),r.add(u.value)}return{status:n.value,value:r}}let i=[...o.data.values()].map((c,r)=>s._parse(new Wr(o,c,o.path,r)));return o.common.async?Promise.all(i).then(c=>p(c)):p(i)}min(t,n){return new e({...this._def,minSize:{value:t,message:fe.toString(n)}})}max(t,n){return new e({...this._def,maxSize:{value:t,message:fe.toString(n)}})}size(t,n){return this.min(t,n).max(t,n)}nonempty(t){return this.min(1,t)}};Wo.create=(e,t)=>new Wo({valueType:e,minSize:null,maxSize:null,typeName:ye.ZodSet,...Se(t)});var ku=class e extends Ee{constructor(){super(...arguments),this.validate=this.implement}_parse(t){let{ctx:n}=this._processInputParams(t);if(n.parsedType!==re.function)return ie(n,{code:J.invalid_type,expected:re.function,received:n.parsedType}),_e;function o(i,c){return Pu({data:i,path:n.path,errorMaps:[n.common.contextualErrorMap,n.schemaErrorMap,Iu(),es].filter(r=>!!r),issueData:{code:J.invalid_arguments,argumentsError:c}})}function f(i,c){return Pu({data:i,path:n.path,errorMaps:[n.common.contextualErrorMap,n.schemaErrorMap,Iu(),es].filter(r=>!!r),issueData:{code:J.invalid_return_type,returnTypeError:c}})}let s={errorMap:n.common.contextualErrorMap},p=n.data;return this._def.returns instanceof pi?nr(async(...i)=>{let c=new Er([]),r=await this._def.args.parseAsync(i,s).catch(h=>{throw c.addIssue(o(i,h)),c}),u=await p(...r);return await this._def.returns._def.type.parseAsync(u,s).catch(h=>{throw c.addIssue(f(u,h)),c})}):nr((...i)=>{let c=this._def.args.safeParse(i,s);if(!c.success)throw new Er([o(i,c.error)]);let r=p(...c.data),u=this._def.returns.safeParse(r,s);if(!u.success)throw new Er([f(r,u.error)]);return u.data})}parameters(){return this._def.args}returnType(){return this._def.returns}args(...t){return new e({...this._def,args:mn.create(t).rest(Mn.create())})}returns(t){return new e({...this._def,returns:t})}implement(t){return this.parse(t)}strictImplement(t){return this.parse(t)}static create(t,n,o){return new e({args:t||mn.create([]).rest(Mn.create()),returns:n||Mn.create(),typeName:ye.ZodFunction,...Se(o)})}},Xi=class extends Ee{get schema(){return this._def.getter()}_parse(t){let{ctx:n}=this._processInputParams(t);return this._def.getter()._parse({data:n.data,path:n.path,parent:n})}};Xi.create=(e,t)=>new Xi({getter:e,typeName:ye.ZodLazy,...Se(t)});var Ki=class extends Ee{_parse(t){if(t.data!==this._def.value){let n=this._getOrReturnCtx(t);return ie(n,{received:n.data,code:J.invalid_literal,expected:this._def.value}),_e}return{status:"valid",value:t.data}}get value(){return this._def.value}};Ki.create=(e,t)=>new Ki({value:e,typeName:ye.ZodLiteral,...Se(t)});function kv(e,t){return new Ji({values:e,typeName:ye.ZodEnum,...Se(t)})}var Ji=class e extends Ee{_parse(t){if(typeof t.data!="string"){let n=this._getOrReturnCtx(t),o=this._def.values;return ie(n,{expected:je.joinValues(o),received:n.parsedType,code:J.invalid_type}),_e}if(this._def.values.indexOf(t.data)===-1){let n=this._getOrReturnCtx(t),o=this._def.values;return ie(n,{received:n.data,code:J.invalid_enum_value,options:o}),_e}return nr(t.data)}get options(){return this._def.values}get enum(){let t={};for(let n of this._def.values)t[n]=n;return t}get Values(){let t={};for(let n of this._def.values)t[n]=n;return t}get Enum(){let t={};for(let n of this._def.values)t[n]=n;return t}extract(t){return e.create(t)}exclude(t){return e.create(this.options.filter(n=>!t.includes(n)))}};Ji.create=kv;var Qi=class extends Ee{_parse(t){let n=je.getValidEnumValues(this._def.values),o=this._getOrReturnCtx(t);if(o.parsedType!==re.string&&o.parsedType!==re.number){let f=je.objectValues(n);return ie(o,{expected:je.joinValues(f),received:o.parsedType,code:J.invalid_type}),_e}if(n.indexOf(t.data)===-1){let f=je.objectValues(n);return ie(o,{received:o.data,code:J.invalid_enum_value,options:f}),_e}return nr(t.data)}get enum(){return this._def.values}};Qi.create=(e,t)=>new Qi({values:e,typeName:ye.ZodNativeEnum,...Se(t)});var pi=class extends Ee{unwrap(){return this._def.type}_parse(t){let{ctx:n}=this._processInputParams(t);if(n.parsedType!==re.promise&&n.common.async===!1)return ie(n,{code:J.invalid_type,expected:re.promise,received:n.parsedType}),_e;let o=n.parsedType===re.promise?n.data:Promise.resolve(n.data);return nr(o.then(f=>this._def.type.parseAsync(f,{path:n.path,errorMap:n.common.contextualErrorMap})))}};pi.create=(e,t)=>new pi({type:e,typeName:ye.ZodPromise,...Se(t)});var Ar=class extends Ee{innerType(){return this._def.schema}sourceType(){return this._def.schema._def.typeName===ye.ZodEffects?this._def.schema.sourceType():this._def.schema}_parse(t){let{status:n,ctx:o}=this._processInputParams(t),f=this._def.effect||null;if(f.type==="preprocess"){let p=f.transform(o.data);return o.common.async?Promise.resolve(p).then(i=>this._def.schema._parseAsync({data:i,path:o.path,parent:o})):this._def.schema._parseSync({data:p,path:o.path,parent:o})}let s={addIssue:p=>{ie(o,p),p.fatal?n.abort():n.dirty()},get path(){return o.path}};if(s.addIssue=s.addIssue.bind(s),f.type==="refinement"){let p=i=>{let c=f.refinement(i,s);if(o.common.async)return Promise.resolve(c);if(c instanceof Promise)throw new Error("Async refinement encountered during synchronous parse operation. Use .parseAsync instead.");return i};if(o.common.async===!1){let i=this._def.schema._parseSync({data:o.data,path:o.path,parent:o});return i.status==="aborted"?_e:(i.status==="dirty"&&n.dirty(),p(i.value),{status:n.value,value:i.value})}else return this._def.schema._parseAsync({data:o.data,path:o.path,parent:o}).then(i=>i.status==="aborted"?_e:(i.status==="dirty"&&n.dirty(),p(i.value).then(()=>({status:n.value,value:i.value}))))}if(f.type==="transform")if(o.common.async===!1){let p=this._def.schema._parseSync({data:o.data,path:o.path,parent:o});if(!$u(p))return p;let i=f.transform(p.value,s);if(i instanceof Promise)throw new Error("Asynchronous transform encountered during synchronous parse operation. Use .parseAsync instead.");return{status:n.value,value:i}}else return this._def.schema._parseAsync({data:o.data,path:o.path,parent:o}).then(p=>$u(p)?Promise.resolve(f.transform(p.value,s)).then(i=>({status:n.value,value:i})):p);je.assertNever(f)}};Ar.create=(e,t,n)=>new Ar({schema:e,typeName:ye.ZodEffects,effect:t,...Se(n)});Ar.createWithPreprocess=(e,t,n)=>new Ar({schema:t,effect:{type:"preprocess",transform:e},typeName:ye.ZodEffects,...Se(n)});var en=class extends Ee{_parse(t){return this._getType(t)===re.undefined?nr(void 0):this._def.innerType._parse(t)}unwrap(){return this._def.innerType}};en.create=(e,t)=>new en({innerType:e,typeName:ye.ZodOptional,...Se(t)});var Bn=class extends Ee{_parse(t){return this._getType(t)===re.null?nr(null):this._def.innerType._parse(t)}unwrap(){return this._def.innerType}};Bn.create=(e,t)=>new Bn({innerType:e,typeName:ye.ZodNullable,...Se(t)});var eo=class extends Ee{_parse(t){let{ctx:n}=this._processInputParams(t),o=n.data;return n.parsedType===re.undefined&&(o=this._def.defaultValue()),this._def.innerType._parse({data:o,path:n.path,parent:n})}removeDefault(){return this._def.innerType}};eo.create=(e,t)=>new eo({innerType:e,typeName:ye.ZodDefault,defaultValue:typeof t.default=="function"?t.default:()=>t.default,...Se(t)});var qo=class extends Ee{_parse(t){let{ctx:n}=this._processInputParams(t),o={...n,common:{...n.common,issues:[]}},f=this._def.innerType._parse({data:o.data,path:o.path,parent:{...o}});return Du(f)?f.then(s=>({status:"valid",value:s.status==="valid"?s.value:this._def.catchValue({get error(){return new Er(o.common.issues)},input:o.data})})):{status:"valid",value:f.status==="valid"?f.value:this._def.catchValue({get error(){return new Er(o.common.issues)},input:o.data})}}removeCatch(){return this._def.innerType}};qo.create=(e,t)=>new qo({innerType:e,typeName:ye.ZodCatch,catchValue:typeof t.catch=="function"?t.catch:()=>t.catch,...Se(t)});var Zo=class extends Ee{_parse(t){if(this._getType(t)!==re.nan){let o=this._getOrReturnCtx(t);return ie(o,{code:J.invalid_type,expected:re.nan,received:o.parsedType}),_e}return{status:"valid",value:t.data}}};Zo.create=e=>new Zo({typeName:ye.ZodNaN,...Se(e)});var pI=Symbol("zod_brand"),Ru=class extends Ee{_parse(t){let{ctx:n}=this._processInputParams(t),o=n.data;return this._def.type._parse({data:o,path:n.path,parent:n})}unwrap(){return this._def.type}},ts=class e extends Ee{_parse(t){let{status:n,ctx:o}=this._processInputParams(t);if(o.common.async)return(async()=>{let s=await this._def.in._parseAsync({data:o.data,path:o.path,parent:o});return s.status==="aborted"?_e:s.status==="dirty"?(n.dirty(),Nv(s.value)):this._def.out._parseAsync({data:s.value,path:o.path,parent:o})})();{let f=this._def.in._parseSync({data:o.data,path:o.path,parent:o});return f.status==="aborted"?_e:f.status==="dirty"?(n.dirty(),{status:"dirty",value:f.value}):this._def.out._parseSync({data:f.value,path:o.path,parent:o})}}static create(t,n){return new e({in:t,out:n,typeName:ye.ZodPipeline})}},Rv=(e,t={},n)=>e?di.create().superRefine((o,f)=>{var s,p;if(!e(o)){let i=typeof t=="function"?t(o):typeof t=="string"?{message:t}:t,c=(p=(s=i.fatal)!==null&&s!==void 0?s:n)!==null&&p!==void 0?p:!0,r=typeof i=="string"?{message:i}:i;f.addIssue({code:"custom",...r,fatal:c})}}):di.create(),hI={object:hr.lazycreate},ye;(function(e){e.ZodString="ZodString",e.ZodNumber="ZodNumber",e.ZodNaN="ZodNaN",e.ZodBigInt="ZodBigInt",e.ZodBoolean="ZodBoolean",e.ZodDate="ZodDate",e.ZodSymbol="ZodSymbol",e.ZodUndefined="ZodUndefined",e.ZodNull="ZodNull",e.ZodAny="ZodAny",e.ZodUnknown="ZodUnknown",e.ZodNever="ZodNever",e.ZodVoid="ZodVoid",e.ZodArray="ZodArray",e.ZodObject="ZodObject",e.ZodUnion="ZodUnion",e.ZodDiscriminatedUnion="ZodDiscriminatedUnion",e.ZodIntersection="ZodIntersection",e.ZodTuple="ZodTuple",e.ZodRecord="ZodRecord",e.ZodMap="ZodMap",e.ZodSet="ZodSet",e.ZodFunction="ZodFunction",e.ZodLazy="ZodLazy",e.ZodLiteral="ZodLiteral",e.ZodEnum="ZodEnum",e.ZodEffects="ZodEffects",e.ZodNativeEnum="ZodNativeEnum",e.ZodOptional="ZodOptional",e.ZodNullable="ZodNullable",e.ZodDefault="ZodDefault",e.ZodCatch="ZodCatch",e.ZodPromise="ZodPromise",e.ZodBranded="ZodBranded",e.ZodPipeline="ZodPipeline"})(ye||(ye={}));var gI=(e,t={message:`Input not instance of ${e.name}`})=>Rv(n=>n instanceof e,t),Fv=fi.create,Mv=zi.create,mI=Zo.create,yI=Vi.create,Lv=Gi.create,bI=Hi.create,vI=Vo.create,wI=Wi.create,_I=qi.create,xI=di.create,TI=Mn.create,OI=tn.create,SI=Go.create,EI=Ln.create,AI=hr.create,II=hr.strictCreate,PI=Zi.create,$I=Cu.create,DI=Yi.create,CI=mn.create,NI=Nu.create,kI=Ho.create,RI=Wo.create,FI=ku.create,MI=Xi.create,LI=Ki.create,BI=Ji.create,UI=Qi.create,jI=pi.create,Dv=Ar.create,zI=en.create,VI=Bn.create,GI=Ar.createWithPreprocess,HI=ts.create,WI=()=>Fv().optional(),qI=()=>Mv().optional(),ZI=()=>Lv().optional(),YI={string:(e=>fi.create({...e,coerce:!0})),number:(e=>zi.create({...e,coerce:!0})),boolean:(e=>Gi.create({...e,coerce:!0})),bigint:(e=>Vi.create({...e,coerce:!0})),date:(e=>Hi.create({...e,coerce:!0}))},XI=_e,ir=Object.freeze({__proto__:null,defaultErrorMap:es,setErrorMap:eI,getErrorMap:Iu,makeIssue:Pu,EMPTY_PATH:tI,addIssueToContext:ie,ParseStatus:Xt,INVALID:_e,DIRTY:Nv,OK:nr,isAborted:Cf,isDirty:Nf,isValid:$u,isAsync:Du,get util(){return je},get objectUtil(){return Df},ZodParsedType:re,getParsedType:ci,ZodType:Ee,ZodString:fi,ZodNumber:zi,ZodBigInt:Vi,ZodBoolean:Gi,ZodDate:Hi,ZodSymbol:Vo,ZodUndefined:Wi,ZodNull:qi,ZodAny:di,ZodUnknown:Mn,ZodNever:tn,ZodVoid:Go,ZodArray:Ln,ZodObject:hr,ZodUnion:Zi,ZodDiscriminatedUnion:Cu,ZodIntersection:Yi,ZodTuple:mn,ZodRecord:Nu,ZodMap:Ho,ZodSet:Wo,ZodFunction:ku,ZodLazy:Xi,ZodLiteral:Ki,ZodEnum:Ji,ZodNativeEnum:Qi,ZodPromise:pi,ZodEffects:Ar,ZodTransformer:Ar,ZodOptional:en,ZodNullable:Bn,ZodDefault:eo,ZodCatch:qo,ZodNaN:Zo,BRAND:pI,ZodBranded:Ru,ZodPipeline:ts,custom:Rv,Schema:Ee,ZodSchema:Ee,late:hI,get ZodFirstPartyTypeKind(){return ye},coerce:YI,any:xI,array:EI,bigint:yI,boolean:Lv,date:bI,discriminatedUnion:$I,effect:Dv,enum:BI,function:FI,instanceof:gI,intersection:DI,lazy:MI,literal:LI,map:kI,nan:mI,nativeEnum:UI,never:OI,null:_I,nullable:VI,number:Mv,object:AI,oboolean:ZI,onumber:qI,optional:zI,ostring:WI,pipeline:HI,preprocess:GI,promise:jI,record:NI,set:RI,strictObject:II,string:Fv,symbol:vI,transformer:Dv,tuple:CI,undefined:wI,union:PI,unknown:TI,void:SI,NEVER:XI,ZodIssueCode:J,quotelessJson:QA,ZodError:Er});var Hv=Io($o(),1);async function KI(e){let t=zv.fromString(e.type);switch(t.type){case"image/x-alpha8":{let n=parseInt(t.params.width),o=parseInt(t.params.height);return(0,Mu.default)(new Uint8Array(await e.arrayBuffer()),[o,n,1])}case"image/x-rgba8":{let n=parseInt(t.params.width),o=parseInt(t.params.height);return(0,Mu.default)(new Uint8Array(await e.arrayBuffer()),[o,n,4])}case"application/octet-stream":case"image/png":case"image/jpeg":case"image/webp":{let n=await createImageBitmap(e),o=e3(n);return(0,Mu.default)(new Uint8Array(o.data),[o.height,o.width,4])}default:throw new Error(`Invalid format: ${t.type} with params: ${t.params}`)}}async function rs(e,t=.8,n="image/png"){let[o,f,s]=e.shape;switch(n){case"image/x-alpha8":case"image/x-rgba8":{let c=zv.create(n,{width:f.toString(),height:o.toString()});return new Blob([e.data],{type:c.toString()})}case"image/png":case"image/jpeg":case"image/webp":{let c=new ImageData(new Uint8ClampedArray(e.data),f,o);var p=Vv(c.width,c.height),i=p.getContext("2d");return i.putImageData(c,0,0),p.convertToBlob({quality:t,type:n})}default:throw new Error(`Invalid format: ${n}`)}}var zv=class Rf{type="application/octet-stream";params={};constructor(t,n){this.type=t,this.params=n}toString(){let t=[];for(let n in this.params){let o=this.params[n];t.push(`${n}=${o}`)}return[this.type,...t].join(";")}static create(t,n){return new Rf(t,n)}isIdentical(t){return this.type===t.type&&this.params===t.params}isEqual(t){return this.type===t.type}static fromString(t){let[n,...o]=t.split(";"),f={};for(let s of o){let[p,i]=s.split("=");f[p.trim()]=i.trim()}return new Rf(n,f)}};function JI(e){return new RegExp("^(?:[a-z+]+:)?//","i").test(e)}function QI(e,t){return JI(e)?e:new URL(e,t).href}function e3(e){var t=Vv(e.width,e.height),n=t.getContext("2d");return n.drawImage(e,0,0),n.getImageData(0,0,t.width,t.height)}function Ff(e,t,n){let[o,f,s]=e.shape,p=f/t,i=o/n,c=(0,Lu.default)(new Uint8Array(s*t*n),[n,t,s]);for(let r=0;r<n;r++)for(let u=0;u<t;u++){let l=u*p,h=r*i,y=Math.max(Math.floor(l),0),O=Math.min(Math.ceil(l),f-1),S=Math.max(Math.floor(h),0),A=Math.min(Math.ceil(h),o-1),L=l-y,$=h-S;for(let F=0;F<s;F++){let Z=e.get(S,y,F),ae=e.get(S,O,F),ot=e.get(A,y,F),Je=e.get(A,O,F),st=(1-L)*(1-$)*Z+L*(1-$)*ae+(1-L)*$*ot+L*$*Je;c.set(r,u,F,Math.round(st))}}return c}function t3(e,t=[128,128,128],n=[256,256,256]){var o=e.data;let[f,s,p]=e.shape,i=f*s,c=new Float32Array(3*i);for(let r=0,u=0;r<o.length;r+=4,u+=1)c[u]=(o[r]-t[0])/n[0],c[u+i]=(o[r+1]-t[1])/n[1],c[u+i+i]=(o[r+2]-t[2])/n[2];return(0,Lu.default)(c,[1,3,f,s])}async function ns(e,t){return typeof e=="string"&&(e=QI(e,t.publicPath),e=new URL(e)),e instanceof URL&&(e=await(await fetch(e,{})).blob()),(e instanceof ArrayBuffer||ArrayBuffer.isView(e))&&(e=new Blob([e])),e instanceof Blob&&(e=await KI(e)),e}function r3(e){let t=new Uint8Array(e.data.length);for(let n=0;n<e.data.length;n++)t[n]=e.data[n]*255;return(0,Lu.default)(t,e.shape)}function Vv(e,t){let n;if(typeof OffscreenCanvas<"u"?n=new OffscreenCanvas(e,t):n=document.createElement("canvas"),!n)throw new Error("Canvas nor OffscreenCanvas are available in the current context.");return n}async function n3(e){let t=new URL("resources.json",e.publicPath),n=await fetch(t);if(!n.ok)throw new Error(`Resource metadata not found. Ensure that the config.publicPath is configured correctl: ${e.publicPath}`);let o=await n.json(),f=Object.keys(o);await Promise.all(f.map(async s=>Mf(s,e)))}async function Fu(e,t){return URL.createObjectURL(await Mf(e,t))}async function Mf(e,t){let n=new URL("resources.json",t.publicPath),o=await fetch(n);if(!o.ok)throw new Error("Resource metadata not found. Ensure that the config.publicPath is configured correctly.");let s=(await o.json())[e];if(!s)throw new Error(`Resource ${e} not found. Ensure that the config.publicPath is configured correctly.`);let p=s.chunks,i=0,c=p.map(async l=>{let h=l.offsets[1]-l.offsets[0],y=t.publicPath?new URL(l.hash,t.publicPath).toString():l.hash,S=await(await fetch(y,t.fetchArgs)).blob();if(h!==S.size)throw new Error(`Failed to fetch ${e} with size ${h} but got ${S.size}`);return t.progress&&(i+=h,t.progress(`fetch:${e}`,i,s.size)),S}),r=await Promise.all(c),u=new Blob(r,{type:s.mime});if(u.size!==s.size)throw new Error(`Failed to fetch ${e} with size ${s.size} but got ${u.size}`);return u}var i3=async()=>WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,0,0,1,5,1,96,0,1,123,3,2,1,0,10,10,1,8,0,65,0,253,15,253,98,11])),o3=()=>(async e=>{try{return typeof MessageChannel<"u"&&new MessageChannel().port1.postMessage(new SharedArrayBuffer(1)),WebAssembly.validate(e)}catch{return!1}})(new Uint8Array([0,97,115,109,1,0,0,0,1,4,1,96,0,0,3,2,1,0,5,4,1,3,1,1,10,11,1,9,0,65,0,254,16,2,0,26,11]));async function a3(e,t){let n={simd:await i3(),threads:await o3(),numThreads:navigator.hardwareConcurrency??4,webgpu:navigator.gpu!==void 0};t.debug&&(console.debug("Capabilities:",n),me.debug=!0,me.logLevel="verbose"),me.wasm.numThreads=n.numThreads,me.wasm.simd=n.simd,me.wasm.proxy=t.proxyToWorker,me.wasm.wasmPaths={"ort-wasm-simd-threaded.wasm":n.simd&&n.threads?await Fu("/onnxruntime-web/ort-wasm-simd-threaded.wasm",t):void 0,"ort-wasm-simd.wasm":n.simd&&!n.threads?await Fu("/onnxruntime-web/ort-wasm-simd.wasm",t):void 0,"ort-wasm-threaded.wasm":!n.simd&&n.threads?await Fu("/onnxruntime-web/ort-wasm-threaded.wasm",t):void 0,"ort-wasm.wasm":!n.simd&&!n.threads?await Fu("/onnxruntime-web/ort-wasm.wasm",t):void 0},t.debug&&console.debug("ort.env.wasm:",me.wasm);let o={executionProviders:["wasm"],graphOptimizationLevel:"all",executionMode:"parallel",enableCpuMemArena:!0};return await Tu.create(e,o).catch(s=>{throw new Error(`Failed to create session: ${s}. Please check if the publicPath is set correctly.`)})}async function s3(e,t,n){let o={};for(let[p,i]of t)o[p]=new zt("float32",new Float32Array(i.data),i.shape);let f=await e.run(o,{}),s=[];for(let p of n){let i=f[p],c=i.dims,r=i.data,u=(0,Gv.default)(r,c);s.push(u)}return s}var Bv={name:"@imgly/background-removal",version:"1.4.5",description:"Background Removal in the Browser",keywords:["background-removal","client-side","data-privacy","image-segmentation","image-matting","onnx"],repository:{type:"git",url:"git+https://github.com/imgly/background-removal-js.git"},license:"SEE LICENSE IN LICENSE.md",author:{name:"IMG.LY GmbH",email:"support@img.ly",url:"https://img.ly"},bugs:{email:"support@img.ly"},source:"./src/index.ts",main:"./dist/index.cjs",module:"./dist/index.mjs",types:"./dist/src/index.d.ts",exports:{".":{require:"./dist/index.cjs",import:"./dist/index.mjs",types:"./dist/src/index.d.ts"}},homepage:"https://img.ly/showcases/cesdk/web/background-removal",files:["LICENSE.md","README.md","CHANGELOG.md","ThirdPartyLicenses.json","dist/","bin/"],scripts:{start:"npm run watch",clean:"npx rimraf dist",test:"true",resources:"node ../../scripts/package-resources.mjs","changelog:create":"node ../../scripts/changelog/changelog-create.mjs","changelog:generate":"node ../../scripts/changelog/changelog-generate.mjs",build:"npm run clean && npm run types && npm run resources && npm run changelog:generate && node scripts/build.mjs",types:" npx tsc --declaration --emitDeclarationOnly --declarationDir dist --declarationMap",watch:"npm run clean && npm run resources && npm run changelog:generate && node scripts/watch.mjs","publish:latest":"npm run build && npm publish --tag latest --access public","publish:next":"npm run build && npm publish --tag next --access public","package:pack":"npm run build && npm pack . --pack-destination ../../releases",lint:"npx prettier --write ."},bundledDependencies:[],dependencies:{"@types/lodash":"~4.14.0","@types/node":"~20.3.0","@types/ndarray":"~1.0.14",lodash:"~4.17.0",ndarray:"~1.0.0","onnxruntime-web":"~1.17.0",zod:"~3.21.0"},devDependencies:{assert:"~2.0.0",esbuild:"~0.18.0",glob:"~10.3.0","npm-dts":"~1.3.0",process:"~0.11.0","ts-loader":"~9.4.0",tslib:"~2.5.0",typescript:"~5.1.0",util:"~0.12.0",webpack:"~5.85.0","webpack-cli":"~5.1.0"}},u3=ir.object({publicPath:ir.string().optional().describe("The public path to the wasm files and the onnx model.").default("https://staticimgly.com/@imgly/background-removal-data/${PACKAGE_VERSION}/dist/").transform(e=>e.replace("${PACKAGE_NAME}",Bv.name).replace("${PACKAGE_VERSION}",Bv.version)),debug:ir.boolean().default(!1).describe("Whether to enable debug logging."),proxyToWorker:ir.boolean().default(!0).describe("Whether to proxy inference to a web worker."),fetchArgs:ir.any().default({}).describe("Arguments to pass to fetch when loading the model."),progress:ir.function().args(ir.string(),ir.number(),ir.number()).returns(ir.void()).describe("Progress callback.").optional(),model:ir.enum(["small","medium"]).default("medium"),output:ir.object({format:ir.enum(["image/png","image/jpeg","image/webp","image/x-rgba8","image/x-alpha8"]).default("image/png"),quality:ir.number().default(.8)}).default({})}).default({});function Lf(e){let t=u3.parse(e??{});return t.debug&&console.log("Config:",t),t.debug&&!t.progress&&(t.progress=t.progress??((n,o,f)=>{console.debug(`Downloading ${n}: ${o} of ${f}`)}),crossOriginIsolated||console.debug("Cross-Origin-Isolated is not enabled. Performance will be degraded. Please see  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer.")),t}async function l3(e){e=Lf(e),e.debug&&console.debug("Loading model...");let t=e.model,o=await(await Mf(`/models/${t}`,e)).arrayBuffer(),f=await a3(o,e);return{config:e,session:f}}async function Bf(e,t,n){t.progress&&t.progress("compute:inference",0,1);let o=1024,[f,s,p]=e.shape,i=Ff(e,o,o),c=t3(i),r=await s3(n,[["input",c]],["output"]),u=(0,Hv.default)(r[0].data,[o,o,1]),l=r3(u);return l=Ff(l,s,f),t.progress&&t.progress("compute:inference",1,1),l}var oP=c3,Uf=(0,Uv.memoize)(l3,e=>JSON.stringify(e));async function aP(e){let t=Lf(e);await n3(t)}async function c3(e,t){let{config:n,session:o}=await Uf(t),f=await ns(e,n),[s,p,i]=f.shape,c=await Bf(f,n,o),r=s*p,u=f;for(let h=0;h<r;h+=1)u.data[4*h+3]=c.data[h];return await rs(u,n.output.quality,n.output.format)}async function sP(e,t){let{config:n,session:o}=await Uf(t),f=await ns(e,n),[s,p,i]=f.shape,c=await Bf(f,n,o),r=s*p,u=f;for(let h=0;h<r;h+=1)u.data[4*h+3]=255-c.data[h];return await rs(u,n.output.quality,n.output.format)}async function uP(e,t){let{config:n,session:o}=await Uf(t),f=await ns(e,n),[s,p,i]=f.shape,c=await Bf(f,n,o);switch(n.output.format){case"image/x-alpha8":return await rs(c,n.output.quality,n.output.format);default:{let r=p*s,u=(0,jv.default)(new Uint8Array(i*r),[s,p,i]);for(let h=0;h<r;h+=1){let y=4*h+3;u.data[y]=c.data[h],u.data[y+1]=c.data[h],u.data[y+2]=c.data[h],u.data[y+3]=255}return await rs(u,n.output.quality,n.output.format)}}}async function lP(e,t,n){n=Lf(n);let o=await ns(e,n),[f,s,p]=o.shape,i=await ns(t,n),[c,r,u]=i.shape,l=c!==f||r!==s?Ff(i,s,f):i,h=s*f;for(let O=0;O<h;O+=1){let S=p*O,A=u*O;o.data[S+3]=l.data[A]}return await rs(o,n.output.quality,n.output.format)}export{lP as applySegmentationMask,oP as default,aP as preload,c3 as removeBackground,sP as removeForeground,uP as segmentForeground};
 /*! Bundled license information:
+
+lodash/lodash.js:
+  (**
+   * @license
+   * Lodash <https://lodash.com/>
+   * Copyright OpenJS Foundation and other contributors <https://openjsf.org/>
+   * Released under MIT license <https://lodash.com/license>
+   * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+   * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+   *)
 
 is-buffer/index.js:
   (*!
@@ -5443,5 +1837,36 @@ is-buffer/index.js:
    * @author   Feross Aboukhadijeh <https://feross.org>
    * @license  MIT
    *)
+
+onnxruntime-web/dist/esm/ort.min.js:
+  (*!
+   * ONNX Runtime Web v1.17.3
+   * Copyright (c) Microsoft Corporation. All rights reserved.
+   * Licensed under the MIT License.
+   *)
+
+onnxruntime-web/dist/esm/ort.min.js:
+  (*! Bundled license information:
+  
+  long/index.js:
+    (**
+     * @license
+     * Copyright 2009 The Closure Library Authors
+     * Copyright 2020 Daniel Wirtz / The long.js Authors.
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *     http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     *
+     * SPDX-License-Identifier: Apache-2.0
+     *)
+  *)
 */
-//# sourceMappingURL=index.mjs.map

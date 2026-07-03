@@ -16,10 +16,14 @@
  * shared library (visible to every client instantly — locked decision
  * 3 Jul 2026) and handed back through onSelect.
  *
- * The AI model data downloads on first use from imgly's versioned CDN
- * (staticimgly.com, pinned by the vendored bundle). If that is ever
- * unreachable the flat-background removal still works — the button simply
- * reports it could not load.
+ * The AI cutout is fully self-hosted: the vendored bundle
+ * (@imgly/background-removal 1.4.5) and its matching model + wasm data live
+ * under /vendor/bg-removal/, so no third-party CDN is involved. (The first
+ * attempt used the 1.7.0 bundle with imgly's CDN default, which pointed at
+ * a data version the CDN does not hold — the cutout failed for exactly that
+ * pairing reason. Version-matched and self-hosted kills the whole class.)
+ * If anything still fails, the flat-background removal works regardless and
+ * the error now names its cause.
  */
 (function () {
   'use strict';
@@ -459,10 +463,12 @@
 
   function smartCutout() {
     upErr('');
-    setBusy('Loading the cutout model — first use downloads it (~15MB)…');
+    setBusy('Loading the cutout model — first use downloads it (~50MB, then cached)…');
     var cfg = {
-      model: 'isnet_quint8',
-      output: { format: 'image/png' },
+      // Model + wasm are served from OUR origin (version-matched to the
+      // vendored 1.4.5 bundle). 1.4.5 names its models small/medium.
+      publicPath: new URL('/vendor/bg-removal/data/', window.location.origin).toString(),
+      model: 'small',
       progress: function (key, cur, total) {
         if (total > 0 && /fetch/.test(String(key))) {
           setBusy('Downloading cutout model… ' + Math.min(100, Math.round((cur / total) * 100)) + '%');
@@ -473,13 +479,10 @@
     };
     import(BG_REMOVAL_SRC)
       .then(function (mod) {
-        var removeBackground = mod.removeBackground || (mod.default && mod.default.removeBackground);
-        if (!removeBackground) throw new Error('removeBackground export missing');
+        var removeBackground = mod.removeBackground || (mod.default && mod.default.removeBackground) || mod.default;
+        if (typeof removeBackground !== 'function') throw new Error('removeBackground export missing');
         return canvasToBlob(st.work).then(function (blob) {
-          return removeBackground(blob, cfg).catch(function () {
-            // A GPU/webgpu failure retries on plain CPU before giving up.
-            return removeBackground(blob, Object.assign({}, cfg, { device: 'cpu' }));
-          });
+          return removeBackground(blob, cfg);
         });
       })
       .then(function (outBlob) {
@@ -499,9 +502,10 @@
         setBusy('');
       })
       .catch(function (e) {
-        console.warn('[logo-picker] smart cutout failed:', e && e.message);
+        console.warn('[logo-picker] smart cutout failed:', e);
         setBusy('');
-        upErr('Smart cutout could not run here — try "Remove background" instead.');
+        var why = e && e.message ? String(e.message).slice(0, 140) : 'unknown error';
+        upErr('Smart cutout failed (' + why + ') — "Remove background" works regardless.');
       });
   }
 
