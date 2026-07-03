@@ -17,6 +17,7 @@
 
 import { setJson, getJson, setString, getString, zadd, zrangebyscore, incr, decr, configured as redisConfigured } from '../../_redis.js';
 import { encrypt, decrypt } from '../../_crypto.js';
+import * as zoom from './zoom.js';
 import { getProvider } from './providers.js';
 
 export function storageReady() { return redisConfigured(); }
@@ -74,6 +75,52 @@ export async function getAccessToken(clientId) {
     const tok = await provider.refresh(refreshToken);
     if (!tok || !tok.access_token) return null;
     return { accessToken: tok.access_token, calendarId: conn.calendarId, email: conn.email, provider: conn.provider || 'google' };
+  } catch (e) { return null; }
+}
+
+// ── Zoom connection (separate from the calendar one) ───────
+// A client can hold BOTH: the calendar drives availability and invites, Zoom
+// drives per-booking video meetings. Key: apt:zoom:<clientRecordId>.
+const zoomKey = (clientId) => 'apt:zoom:' + clientId;
+
+export async function saveZoomConnection(clientId, conn) {
+  if (!clientId) return false;
+  return setJson(zoomKey(clientId), {
+    email: conn.email || '',
+    refreshTokenEnc: conn.refreshToken ? encrypt(conn.refreshToken) : (conn.refreshTokenEnc || ''),
+    connectedAt: conn.connectedAt || new Date().toISOString(),
+  });
+}
+
+export async function getZoomConnection(clientId) {
+  if (!clientId) return null;
+  const rec = await getJson(zoomKey(clientId));
+  if (!rec || rec.revoked || !rec.refreshTokenEnc) return null;
+  return rec;
+}
+
+export async function deleteZoomConnection(clientId) {
+  if (!clientId) return false;
+  return setJson(zoomKey(clientId), { revoked: true, revokedAt: new Date().toISOString() });
+}
+
+/**
+ * Resolve a usable Zoom access token. Zoom ROTATES the refresh token on
+ * every refresh, so the replacement is persisted immediately — losing it
+ * would kill the connection on the next use.
+ */
+export async function getZoomAccessToken(clientId) {
+  const conn = await getZoomConnection(clientId);
+  if (!conn) return null;
+  let refreshToken;
+  try { refreshToken = decrypt(conn.refreshTokenEnc); } catch (e) { return null; }
+  try {
+    const tok = await zoom.refresh(refreshToken);
+    if (!tok || !tok.access_token) return null;
+    if (tok.refresh_token && tok.refresh_token !== refreshToken) {
+      await saveZoomConnection(clientId, { email: conn.email, refreshToken: tok.refresh_token, connectedAt: conn.connectedAt });
+    }
+    return { accessToken: tok.access_token, email: conn.email };
   } catch (e) { return null; }
 }
 

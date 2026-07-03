@@ -451,7 +451,7 @@
         <input class="input" data-ev-f="description" value="${esc(ev.description||'')}" placeholder="Short description (optional)" maxlength="120" style="margin-top:7px">
         ${ev.mode === 'video' ? `
         <input class="input" data-ev-f="meetingUrl" value="${esc(ev.meetingUrl||'')}" placeholder="Video link, e.g. your Zoom room (optional)" maxlength="300" style="margin-top:7px">
-        <span class="field-hint">Paste your own Zoom/Meet/Teams link, or leave blank and a meeting link is created automatically when your calendar is connected. Either way it goes in the invite and the confirmation email.</span>` : ''}
+        <span class="field-hint">Paste your own meeting link, or leave blank: with Zoom connected (below) each booking gets its own Zoom meeting; otherwise a Google Meet is created via your calendar. Either way it goes in the invite and the confirmation email.</span>` : ''}
       </div>`).join('');
   }
   function renderQuestions() {
@@ -684,24 +684,35 @@
     if (!s) { el.innerHTML = note('Could not check calendar status. Try reloading the page.'); return; }
     if (!s.configured) { el.innerHTML = note('Calendar connecting is not switched on for this account yet. The scheduler still works without it.'); return; }
     if (!s.storage) { el.innerHTML = note('Booking storage is not configured yet, so connecting is unavailable.'); return; }
+    let html = '';
+    const connRow = (label, email, disconnectAct) =>
+      '<div style="display:flex;align-items:center;gap:11px;padding:11px 13px;border:1px solid var(--tgse-border);border-radius:11px;background:var(--tgse-panel);margin-bottom:8px">' +
+        '<span style="width:9px;height:9px;border-radius:999px;background:#10B981;flex:0 0 auto;box-shadow:0 0 0 3px rgba(16,185,129,.18)"></span>' +
+        '<div style="flex:1;min-width:0;line-height:1.35">' +
+          '<div style="font-size:13px;font-weight:600;color:var(--tgse-ink)">Connected to ' + esc(label) + '</div>' +
+          (email ? '<div style="font-size:12px;color:var(--tgse-ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + esc(email) + '">' + esc(email) + '</div>' : '') +
+        '</div>' +
+        '<button type="button" data-cal="' + disconnectAct + '" style="flex:0 0 auto;background:none;border:1px solid var(--tgse-border);border-radius:7px;color:var(--tgse-ink-2);font:inherit;font-size:12px;font-weight:600;padding:5px 11px;cursor:pointer">Disconnect</button>' +
+      '</div>';
     if (s.connected) {
-      const label = PROVIDER_LABELS[s.provider] || 'your calendar';
-      el.innerHTML =
-        '<div style="display:flex;align-items:center;gap:11px;padding:11px 13px;border:1px solid var(--tgse-border);border-radius:11px;background:var(--tgse-panel)">' +
-          '<span style="width:9px;height:9px;border-radius:999px;background:#10B981;flex:0 0 auto;box-shadow:0 0 0 3px rgba(16,185,129,.18)"></span>' +
-          '<div style="flex:1;min-width:0;line-height:1.35">' +
-            '<div style="font-size:13px;font-weight:600;color:var(--tgse-ink)">Connected to ' + esc(label) + '</div>' +
-            (s.email ? '<div style="font-size:12px;color:var(--tgse-ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + esc(s.email) + '">' + esc(s.email) + '</div>' : '') +
-          '</div>' +
-          '<button type="button" data-cal="disconnect" style="flex:0 0 auto;background:none;border:1px solid var(--tgse-border);border-radius:7px;color:var(--tgse-ink-2);font:inherit;font-size:12px;font-weight:600;padding:5px 11px;cursor:pointer">Disconnect</button>' +
-        '</div>';
+      html += connRow(PROVIDER_LABELS[s.provider] || 'your calendar', s.email, 'disconnect');
     } else {
       const provs = (s.providers && s.providers.length) ? s.providers : ['google'];
       const btns = provs.map(function (p) {
         return '<button type="button" class="tgse-btn tgse-btn--sm" data-cal="connect" data-provider="' + esc(p) + '" style="margin:0 8px 8px 0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Connect ' + esc(PROVIDER_LABELS[p] || p) + '</button>';
       }).join('');
-      el.innerHTML = '<div style="display:flex;flex-wrap:wrap;align-items:center">' + btns + '</div>';
+      html += '<div style="display:flex;flex-wrap:wrap;align-items:center">' + btns + '</div>';
     }
+    // Zoom is a SEPARATE connection: the calendar drives availability and
+    // invites; Zoom gives every video booking its own real Zoom meeting.
+    if (s.zoomConnected) {
+      html += connRow('Zoom', s.zoomEmail, 'zoom-disconnect');
+      html += '<div style="font-size:12px;color:var(--tgse-ink-3);margin:2px 2px 0">Video meetings without their own link get a unique Zoom meeting per booking.</div>';
+    } else if (s.zoomConfigured) {
+      html += '<div style="margin-top:2px"><button type="button" class="tgse-btn tgse-btn--sm" data-cal="connect" data-provider="zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3"/></svg> Connect Zoom</button>' +
+        '<div style="font-size:12px;color:var(--tgse-ink-3);margin:6px 2px 0">Connect Zoom and every video booking gets its own Zoom meeting, like Calendly. Without it, video bookings use your pasted link or a Google Meet.</div></div>';
+    }
+    el.innerHTML = html;
   }
   function refreshCalStatus() {
     fetch('/api/calendar/status').then(r => r.ok ? r.json() : null).then(renderCalStatus).catch(() => renderCalStatus(null));
@@ -714,13 +725,17 @@
       location.href = '/api/calendar/connect?provider=' + encodeURIComponent(provider) + '&ret=' + encodeURIComponent(location.pathname + location.search);
     }
     else if (act === 'disconnect') { fetch('/api/calendar/disconnect', { method: 'POST' }).then(() => { tgse.toast('Calendar disconnected', 'ok'); refreshCalStatus(); }); }
+    else if (act === 'zoom-disconnect') { fetch('/api/calendar/disconnect', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ service: 'zoom' }) }).then(() => { tgse.toast('Zoom disconnected', 'ok'); refreshCalStatus(); }); }
   });
   (function calReturnFlag() {
-    const cal = new URLSearchParams(location.search).get('calendar');
-    if (!cal) return;
+    const p = new URLSearchParams(location.search);
+    const cal = p.get('calendar'), zm = p.get('zoom');
+    if (!cal && !zm) return;
     const map = { connected: ['Calendar connected', 'ok'], error: ['Could not connect the calendar', 'err'], denied: ['Calendar connection cancelled', 'err'], norefresh: ['Please remove access in Google then reconnect', 'err'], nostore: ['Booking storage is not configured', 'err'] };
-    const m = map[cal]; if (m && window.tgse) tgse.toast(m[0], m[1]);
-    const u = new URL(location); u.searchParams.delete('calendar'); history.replaceState(null, '', u);
+    const zmap = { connected: ['Zoom connected — video bookings now create Zoom meetings', 'ok'], error: ['Could not connect Zoom', 'err'], denied: ['Zoom connection cancelled', 'err'], norefresh: ['Please remove the app in Zoom then reconnect', 'err'], nostore: ['Booking storage is not configured', 'err'] };
+    const m = cal ? map[cal] : zmap[zm];
+    if (m && window.tgse) tgse.toast(m[0], m[1]);
+    const u = new URL(location); u.searchParams.delete('calendar'); u.searchParams.delete('zoom'); history.replaceState(null, '', u);
   })();
 
   // "Send time options" — open the share pop-out for this saved scheduler.

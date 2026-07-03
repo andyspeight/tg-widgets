@@ -8,8 +8,9 @@
  */
 import { resolveWidget, pickEvent } from './state.js';
 import { isValidSlot, hostDateKey } from './slots.js';
-import { getAccessToken, saveBooking, placeHold, releaseHold, getDayCount, incDayCount, decDayCount } from './store.js';
+import { getAccessToken, getZoomAccessToken, saveBooking, placeHold, releaseHold, getDayCount, incDayCount, decDayCount } from './store.js';
 import { getProvider } from './providers.js';
+import * as zoom from './zoom.js';
 import { sendCancelled, sendRescheduled } from './mail.js';
 
 export async function cancelBooking(booking) {
@@ -20,6 +21,13 @@ export async function cancelBooking(booking) {
       if (tok) await getProvider(tok.provider).deleteEvent(tok.accessToken, tok.calendarId, booking.providerEventId);
     }
   } catch (e) { console.error('[actions.cancel]', e.message); }
+  // The per-booking Zoom meeting dies with the booking.
+  try {
+    if (booking.zoomMeetingId) {
+      const ztok = await getZoomAccessToken(booking.clientRecordId);
+      if (ztok) await zoom.deleteMeeting(ztok.accessToken, booking.zoomMeetingId);
+    }
+  } catch (e) { console.error('[actions.cancel.zoom]', e.message); }
   await releaseHold(booking.clientRecordId, booking.startISO);
   if (booking.dayCounted) await decDayCount(booking.clientRecordId, hostDateKey(booking.startISO, booking.hostTimezone));
   booking.status = 'cancelled';
@@ -68,6 +76,13 @@ export async function rescheduleBooking(booking, newStart, opts) {
       }
     }
   } catch (e) { console.error('[actions.reschedule]', e.message); }
+  // Move the per-booking Zoom meeting with it — the join link stays the same.
+  try {
+    if (booking.zoomMeetingId) {
+      const ztok = await getZoomAccessToken(booking.clientRecordId);
+      if (ztok) await zoom.updateMeeting(ztok.accessToken, booking.zoomMeetingId, { startISO: newStart, durationMins: ev.mins, timezone: booking.hostTimezone || 'UTC' });
+    }
+  } catch (e) { console.error('[actions.reschedule.zoom]', e.message); }
 
   await releaseHold(booking.clientRecordId, booking.startISO);
   booking.startISO = newStart;

@@ -13,8 +13,9 @@
  */
 import { resolveWidget, pickEvent, bookingRef, manageToken } from '../_lib/calendar/state.js';
 import { isValidSlot, hostDateKey } from '../_lib/calendar/slots.js';
-import { getAccessToken, saveBooking, placeHold, releaseHold, getDayCount, incDayCount } from '../_lib/calendar/store.js';
+import { getAccessToken, getZoomAccessToken, saveBooking, placeHold, releaseHold, getDayCount, incDayCount } from '../_lib/calendar/store.js';
 import { getProvider } from '../_lib/calendar/providers.js';
+import { createMeeting as zoomCreateMeeting } from '../_lib/calendar/zoom.js';
 import { sendNewBooking } from '../_lib/calendar/mail.js';
 import { checkRateLimit } from '../_lib/auth/ratelimit.js';
 import { getRequestIp } from '../_lib/auth/http.js';
@@ -106,12 +107,30 @@ export default async function handler(req, res) {
   const held = await placeHold(w.clientRecordId, startISO, ref);
   if (!held) return res.status(409).json({ error: 'Someone just took that time. Please pick another.' });
 
-  // The video-meeting link for this booking: the event type's own link
-  // (their Zoom room etc.) wins; otherwise a Meet/Teams link is minted by
-  // the connected calendar below for video meetings.
+  // The video-meeting link for this booking, in precedence order:
+  //   1. the event type's own link (their personal Zoom room etc.)
+  //   2. a REAL per-booking Zoom meeting when the client has Zoom connected
+  //   3. a Meet/Teams link minted by the connected calendar (below)
   const explicitUrl = /^https?:\/\/\S+$/i.test(String(ev.meetingUrl || '').trim())
     ? String(ev.meetingUrl).trim().slice(0, 300) : '';
   let meetingUrl = explicitUrl;
+  let zoomMeetingId = '';
+  if (!meetingUrl && ev.mode === 'video') {
+    try {
+      const ztok = await getZoomAccessToken(w.clientRecordId);
+      if (ztok) {
+        const zm = await zoomCreateMeeting(ztok.accessToken, {
+          topic: (ev.label || 'Appointment') + ' with ' + name,
+          startISO, durationMins: ev.mins, timezone: config.timezone || 'UTC',
+          agenda: 'Booked via the website scheduler. Reference ' + ref + '.',
+        });
+        if (zm && zm.join_url) { meetingUrl = zm.join_url; zoomMeetingId = String(zm.id || ''); }
+      }
+    } catch (e) {
+      console.error('[book] zoom create failed:', e.message);
+      // Fall through — the calendar can still mint a Meet/Teams link.
+    }
+  }
 
   // If connected, re-check free/busy then create the event.
   let providerEventId = '', calendarLink = '', connected = false, providerName = '';
@@ -132,18 +151,18 @@ export default async function handler(req, res) {
 
       const descLines = ['Booked via the website scheduler.', 'Visitor: ' + name + ' <' + email + '>' + (phone ? ', ' + phone : '')];
       Object.keys(answers).forEach(k => { descLines.push(k + ': ' + answers[k]); });
-      if (explicitUrl) descLines.unshift('Join the meeting: ' + explicitUrl);
+      if (meetingUrl) descLines.unshift('Join the meeting: ' + meetingUrl);
       const created = await provider.insertEvent(tok.accessToken, tok.calendarId, {
         summary: (ev.label || 'Appointment') + ' with ' + name,
         description: descLines.join('\n'),
         start: { dateTime: startISO, timeZone: config.timezone || 'UTC' },
         end: { dateTime: endISO, timeZone: config.timezone || 'UTC' },
-        location: explicitUrl || config.location || '',
+        location: meetingUrl || config.location || '',
         attendees: [{ email, displayName: name }],
         reminders: { useDefault: true },
-        // Video meetings without their own link get one minted by the
-        // calendar (Google Meet / Teams).
-        _conference: !explicitUrl && ev.mode === 'video',
+        // Video meetings still without a link (no event link, no Zoom) get
+        // one minted by the calendar (Google Meet / Teams).
+        _conference: !meetingUrl && ev.mode === 'video',
       });
       providerEventId = created.id || '';
       calendarLink = created.htmlLink || '';
@@ -162,7 +181,7 @@ export default async function handler(req, res) {
     hostTimezone: config.timezone || 'Europe/London',
     invitee: { name, email, phone, answers },
     provider: providerName, providerEventId, calendarLink,
-    meetingUrl,
+    meetingUrl, zoomMeetingId,
     // Branding travels WITH the booking so every lifecycle email (confirm,
     // reminder, reschedule, cancel) renders consistently without re-reading
     // the widget config.
