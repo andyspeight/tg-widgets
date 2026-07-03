@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Travelgenix Scheduler",
+  "version": "0.1.0",
+  "description": "Your appointment schedulers, one click away: copy booking links, share times that suit, and see what's coming up.",
+  "minimum_chrome_version": "114",
+  "action": {
+    "default_title": "Travelgenix Scheduler"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "side_panel": {
+    "default_path": "panel.html"
+  },
+  "permissions": ["sidePanel"],
+  "host_permissions": [
+    "https://widgets.travelify.io/*",
+    "https://id.travelify.io/*"
+  ]
+}

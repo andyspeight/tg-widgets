@@ -11,6 +11,8 @@
     * { box-sizing: border-box; }
     body { margin: 0; min-height: 100vh; background: #F1F5F9; font-family: 'Inter', system-ui, sans-serif; color: #0F172A; display: flex; align-items: flex-start; justify-content: center; padding: 40px 16px; -webkit-font-smoothing: antialiased; }
     .card { width: 100%; max-width: 460px; background: #fff; border: 1px solid #E2E8F0; border-radius: 18px; box-shadow: 0 1px 3px rgba(15,23,42,.06), 0 18px 42px rgba(15,23,42,.10); padding: 28px 26px; }
+    /* Standing mode (no preselected slot) hosts the full scheduler — give it room. */
+    .card.wide { max-width: 640px; }
     .badge { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--accent) 14%, transparent); margin-bottom: 14px; }
     .badge svg { width: 22px; height: 22px; fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
     h1 { margin: 0 0 4px; font-size: 21px; font-weight: 800; letter-spacing: -.02em; }
@@ -105,16 +107,45 @@
         '<div class="foot">Powered by Travelgenix</div>';
     }
 
+    // Mount the full scheduler widget into a host element. The widget script's
+    // own scan only runs at page load, so late-injected mounts (the slot-taken
+    // fallback, and standing mode below) must construct it directly.
+    function mountScheduler(host) {
+      var el = document.createElement('div');
+      el.setAttribute('data-tg-widget', 'appointment');
+      el.__tgInited = true; // constructed here — a later scan must not double-mount
+      host.appendChild(el);
+      try { new window.TGAppointmentWidget(el, cfg || {}); }
+      catch (e) { host.innerHTML = '<p class="sub">We could not load the scheduler. Please try again or contact us directly.</p>'; }
+    }
+
     function taken() {
       $('card').innerHTML =
         '<h1>That time was just taken</h1>' +
         '<p class="sub">Sorry, someone grabbed that slot first. Please pick another time below.</p>' +
-        '<div id="scheduler-mount"><div data-tg-widget="appointment" data-tg-id="' + esc(widgetId) + '"></div></div>';
+        '<div id="scheduler-mount"></div>';
+      mountScheduler($('scheduler-mount'));
+    }
+
+    // Standing mode: no preselected slot — this is the scheduler's shareable
+    // booking-page link (what "Copy booking link" copies). The visitor picks
+    // their own time in the full widget.
+    function renderStanding() {
+      document.title = (cfg.heading || 'Book an appointment') + ' · Travelgenix';
+      $('card').classList.add('wide');
+      $('card').innerHTML =
+        '<div class="badge"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>' +
+        '<h1>' + esc(cfg.heading || 'Book an appointment') + '</h1>' +
+        '<p class="sub">Pick a time that suits you and confirm in seconds.</p>' +
+        '<div id="scheduler-mount"></div>' +
+        '<div class="foot">Powered by Travelgenix</div>';
+      mountScheduler($('scheduler-mount'));
     }
 
     // Boot
     (function () {
-      if (!widgetId || !startISO || !Number.isFinite(Date.parse(startISO))) { fail('This booking link is missing or invalid. Please use the link from your email, or contact us directly.'); return; }
+      if (!widgetId) { fail('This booking link is missing or invalid. Please use the link from your email, or contact us directly.'); return; }
+      var standing = !startISO || !Number.isFinite(Date.parse(startISO));
       fetch('/api/widget-config?id=' + encodeURIComponent(widgetId))
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (data) {
@@ -122,7 +153,7 @@
           tz = cfg.timezone || 'Europe/London';
           ev = pickEvent();
           if (cfg.accent && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(cfg.accent)) document.documentElement.style.setProperty('--accent', cfg.accent);
-          render();
+          if (standing) renderStanding(); else render();
         })
         .catch(function () { fail('We could not load this scheduler. Please try again or contact us directly.'); });
     })();
