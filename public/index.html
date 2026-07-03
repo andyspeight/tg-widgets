@@ -969,6 +969,7 @@ function renderNav() {
     // Plan badge, Widgets nav, user chip.
     el.innerHTML = `<span style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;background:${planCol}15;color:${planCol}">${userData.plan || 'Free'}</span>
       <button class="nav-link" onclick="location.href='#catalogue'">Widgets</button>
+      <button class="nav-link" onclick="location.href='/bookings'">My meetings</button>
       <div class="nav-user"><div class="nav-user-av">${ini}</div>${display}</div>
       <button class="nav-logout" onclick="signOut()" title="Sign out"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="nav-logout-label">Logout</span></button>`;
   } else {

@@ -114,6 +114,15 @@ main.no-pad { padding: 0; }
 .hint-card b { color: var(--text); }
 .hint-card a { color: var(--accent); font-weight: 700; text-decoration: none; }
 
+/* Footer link through to the full bookings page (reschedule / cancel). */
+.manage-link {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 14px; padding: 11px 14px; border: 1px solid var(--border); border-radius: 10px;
+  background: var(--card); color: var(--accent); font-size: 13px; font-weight: 700; text-decoration: none;
+}
+.manage-link:hover { background: #F1F5F9; border-color: var(--accent); }
+.manage-link svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: 0 0 auto; }
+
 /* Signed-out */
 .signin-card {
   background: var(--card); border: 1px solid var(--border); border-radius: 14px;

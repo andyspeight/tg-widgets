@@ -204,6 +204,12 @@ function renderAgenda() {
     if (agenda.degraded) html += '<div class="hint-card">Your calendar could not be read just now — showing what we have. Try refresh.</div>';
   }
 
+  // Always offer a way through to the full bookings page, where a meeting can
+  // be rescheduled or cancelled (the drawer is view-only).
+  html += '<a class="manage-link" href="' + API + '/bookings" target="_blank" rel="noopener">' +
+    '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
+    'Manage my meetings — reschedule or cancel</a>';
+
   $('view').innerHTML = html;
 }
 
@@ -285,6 +291,7 @@ function render() { (tab === 'meetings' ? renderMeetings : renderAgenda)(); }
 $('refresh').addEventListener('click', load);
 $('back').addEventListener('click', render);
 $('open-dashboard').href = 'https://id.travelify.io/dashboard.html';
+$('open-bookings').href = API + '/bookings';
 document.querySelectorAll('nav .tab').forEach((el) => {
   el.addEventListener('click', () => {
     tab = el.getAttribute('data-tab');
