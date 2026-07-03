@@ -45,6 +45,9 @@
     },
     "api/cron/brain-verify.js": {
       "maxDuration": 300
+    },
+    "api/admin/logo-import.js": {
+      "maxDuration": 120
     }
   },
   "crons": [

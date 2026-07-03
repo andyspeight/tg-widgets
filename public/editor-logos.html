@@ -9,8 +9,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="/editor-shell.css" />
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<link rel="stylesheet" href="https://tg-logo-library.vercel.app/logo-picker.css" />
-<script src="https://tg-logo-library.vercel.app/logo-picker.js" defer></script>
+<!-- Logo library picker — now served from this app (the shared library moved
+     into tg-widgets on 3 Jul 2026; the old tg-logo-library app is retired). -->
+<link rel="stylesheet" href="/logo-picker.css" />
+<script src="/logo-picker.js" defer></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -698,6 +700,10 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
               Pick from library
             </button>
+            <button class="add-row-btn" id="upload-logo" style="margin-top:6px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload a logo
+            </button>
             <button class="add-row-btn" id="add-logo" style="margin-top:6px;background:transparent;color:var(--tg-text-2)">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               Add blank logo
@@ -1133,6 +1139,9 @@ function renderLogoList() {
             <button class="mini-btn" data-action="down" data-idx="${i}" title="Move down" aria-label="Move down" ${i === logos.length - 1 ? 'disabled' : ''}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
+            <button class="mini-btn" data-action="upload" data-idx="${i}" title="Upload image" aria-label="Upload image">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </button>
             <button class="mini-btn" data-action="toggle" data-idx="${i}" title="Edit" aria-label="Edit">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             </button>
@@ -1547,6 +1556,20 @@ function bindEvents() {
       state.openLogoIdx = state.openLogoIdx === idx ? -1 : idx;
       renderLogoList();
       return;
+    } else if (action === 'upload') {
+      // Upload (and optionally edit) an image for THIS logo row. The upload
+      // also publishes to the shared library; here it fills the row.
+      openPicker('upload', (brand) => {
+        const l = state.config.logos[idx];
+        if (!l) return;
+        l.image = brandImageUrl(brand);
+        if (!l.name || l.name === 'New logo' || l.name === 'Untitled logo') l.name = brand.name;
+        if (!l.url && brand.domain) l.url = `https://${brand.domain}`;
+        l.tgDomain = brand.domain || l.tgDomain || '';
+        pushHistory();
+        syncUIFromState();
+      });
+      return;
     }
     pushHistory();
     syncUIFromState();
@@ -1576,36 +1599,43 @@ function bindEvents() {
     syncUIFromState();
   });
 
-  // Pick from Travelgenix Logo Library
-  $('#pick-logo').addEventListener('click', () => {
+  // Best image URL for a library brand: prefer SVG, then transparent PNG.
+  function brandImageUrl(brand) {
+    const svg = (brand.assets || []).find(a => a.type === 'SVG');
+    const pngT = (brand.assets || []).find(a => a.type === 'PNG-Transparent');
+    return (svg && svg.url) || (pngT && pngT.url) || brand.preferredUrl || '';
+  }
+
+  // Append a library/uploaded brand as a new logo row.
+  function addBrandAsLogo(brand) {
+    state.config.logos.push({
+      name: brand.name,
+      image: brandImageUrl(brand),
+      url: brand.domain ? `https://${brand.domain}` : '',
+      group: brand.category || '',
+      featured: false,
+      // Stash the domain so the runtime can resolve to latest URL on render.
+      tgDomain: brand.domain || ''
+    });
+    state.openLogoIdx = state.config.logos.length - 1;
+    pushHistory();
+    syncUIFromState();
+  }
+
+  function openPicker(mode, onSelect) {
     if (typeof window.LogoPicker === 'undefined') {
       alert('Logo picker is still loading. Try again in a moment.');
       return;
     }
-    window.LogoPicker.open({
-      onSelect: (brand) => {
-        // Prefer SVG, fall back to PNG-Transparent, then anything
-        const svg = (brand.assets || []).find(a => a.type === 'SVG');
-        const pngT = (brand.assets || []).find(a => a.type === 'PNG-Transparent');
-        const imageUrl = (svg && svg.url) || (pngT && pngT.url) || brand.preferredUrl || '';
+    window.LogoPicker.open({ mode, onSelect });
+  }
 
-        const websiteUrl = brand.domain ? `https://${brand.domain}` : '';
+  // Pick from the Travelgenix Logo Library (which now also offers upload).
+  $('#pick-logo').addEventListener('click', () => openPicker('library', addBrandAsLogo));
 
-        state.config.logos.push({
-          name: brand.name,
-          image: imageUrl,
-          url: websiteUrl,
-          group: brand.category || '',
-          featured: false,
-          // Stash the domain so the runtime can resolve to latest URL on render.
-          tgDomain: brand.domain || ''
-        });
-        state.openLogoIdx = state.config.logos.length - 1;
-        pushHistory();
-        syncUIFromState();
-      }
-    });
-  });
+  // Upload straight into the editor: edit the image (background removal,
+  // trim, resize), publish it to the shared library, and use it here.
+  $('#upload-logo').addEventListener('click', () => openPicker('upload', addBrandAsLogo));
 
   // CSV
   $('#csv-template').addEventListener('click', downloadTemplate);
