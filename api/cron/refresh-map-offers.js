@@ -211,6 +211,17 @@ function normaliseOffer(offer, fallbackCC = null) {
     // Capped so a verbose operator can't bloat the stored offer.
     operatorMessage: (acc.operator && acc.operator.message)
       ? String(acc.operator.message).slice(0, 200) : null,
+    // Supplier ids for the per-client supplier filter (Travelify `sid`, added
+    // to the feed 3 Jul 2026). Scoped to the sub-product's prodType: on a
+    // package flight.sid === accommodation.sid === the Packages supplier id;
+    // on a flight-only offer only flight.sid; on a hotel-only offer only
+    // accommodation.sid. Null when the sub-product is absent (compactOffer
+    // then strips it, so a hotel-only offer costs no flightSid byte).
+    // accommodation.uniqueRef pins the exact property for the deeplink
+    // (&refn=), unrelated to supplier matching.
+    flightSid: num(flight.sid),
+    accommodationSid: num(acc.sid),
+    accommodationUniqueRef: acc.uniqueRef ? String(acc.uniqueRef).slice(0, 64) : null,
     image: (acc.image && acc.image.url) || (flight.image && flight.image.url) || null,
     url: offer.url || null, updated: offer.updated || null, fetchedAt: new Date().toISOString(),
   };

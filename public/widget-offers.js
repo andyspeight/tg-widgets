@@ -113,7 +113,7 @@
   // Our own FX proxy (ECB/Frankfurter). The cache is GBP; we convert at display
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
-  const VERSION = '1.9.0';
+  const VERSION = '1.10.0';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -640,7 +640,40 @@
       if (fl.cabinClass) p.set('cabin', fl.cabinClass);
       if (fl.carrier && fl.carrier.code) p.set('carrier', fl.carrier.code);
     }
+    // uniqueRef pins the exact property (e.g. TTI:83099724). URLSearchParams
+    // encodes the colon, per Travelify's "URL encode to be safe".
+    if (st !== 'Flights' && acc && acc.uniqueRef) p.set('refn', acc.uniqueRef);
     return 'https://dl.tvllnk.com/deeplink/' + encodeURIComponent(id) + '?' + p.toString();
+  }
+  // Per-client supplier visibility. supplierFilter (three integer lists of
+  // allowed Travelify supplier ids) is injected into the widget config by
+  // /api/widget-config only when the client has restricted their suppliers in
+  // Control. An offer is matched by its type against the matching list; a
+  // package offer's flight.sid === accommodation.sid === its Packages supplier
+  // id. Empty list for a type = show all of that type. Missing sid (offer
+  // cached before the feed carried sids) = keep, so the filter can never blank
+  // a widget mid-rollout.
+  function supplierAllows(o, sf) {
+    if (!sf || !o) return true;
+    const type = String(o.type || 'Packages');
+    const fl = o.flight, acc = o.accommodation;
+    const fSid = fl && Number.isFinite(fl.sid) ? fl.sid : null;
+    const aSid = acc && Number.isFinite(acc.sid) ? acc.sid : null;
+    if (type === 'Flights') {
+      if (!sf.flights || !sf.flights.length) return true;
+      return fSid == null ? true : sf.flights.indexOf(fSid) !== -1;
+    }
+    if (type === 'Accommodation') {
+      if (!sf.accommodation || !sf.accommodation.length) return true;
+      return aSid == null ? true : sf.accommodation.indexOf(aSid) !== -1;
+    }
+    if (!sf.packages || !sf.packages.length) return true;
+    const sid = fSid != null ? fSid : aSid;
+    return sid == null ? true : sf.packages.indexOf(sid) !== -1;
+  }
+  function gateSuppliers(list, sf) {
+    if (!sf || !Array.isArray(list)) return list || [];
+    return list.filter((o) => supplierAllows(o, sf));
   }
   function fmtCur(val, code) {
     const rounded = Math.round(val);
@@ -5398,6 +5431,9 @@
       return {
         appId: c.appId || '',
         apiKey: c.apiKey || '',
+        // Per-client supplier visibility (injected by /api/widget-config).
+        // null unless the client has restricted their suppliers in Control.
+        supplierFilter: (c.supplierFilter && typeof c.supplierFilter === 'object') ? c.supplierFilter : null,
 
         type: c.type || 'Accommodation',
         origins: Array.isArray(c.origins) ? c.origins : [],
@@ -5916,7 +5952,7 @@
       if (ttlMs > 0) {
         const cached = cacheGet(ck, ttlMs);
         if (cached) {
-          this.rawOffers = cached;
+          this.rawOffers = gateSuppliers(cached, this.cfg.supplierFilter);
           this._offersSource = 'session';
           this._renderOffers();
           this._fireDataLoaded();
@@ -5939,7 +5975,7 @@
           });
           const data = await res.json();
           if (data && data.success && Array.isArray(data.data) && data.data.length > 0) {
-            this.rawOffers = data.data;
+            this.rawOffers = gateSuppliers(data.data, this.cfg.supplierFilter);
             this._offersSource = 'cache';
             this._availableTotal = Number.isFinite(data.totalMatched) ? data.totalMatched : data.data.length;
             if (ttlMs > 0) cacheSet(ck, this.rawOffers);
@@ -5977,7 +6013,7 @@
           this._showError(data.error || 'Travelify returned an error.');
           return;
         }
-        this.rawOffers = data.data || [];
+        this.rawOffers = gateSuppliers(data.data || [], this.cfg.supplierFilter);
         this._offersSource = 'live';
         this._availableTotal = null;
         if (ttlMs > 0) cacheSet(ck, this.rawOffers);
@@ -8793,7 +8829,7 @@
         });
         if (!res.ok) throw new Error('API ' + res.status);
         const data = await res.json();
-        this.rawOffers = (data && data.data) ? data.data : [];
+        this.rawOffers = gateSuppliers((data && data.data) ? data.data : [], this.cfg.supplierFilter);
       } catch (err) {
         console.warn('[TGOffers/board]', err);
       }

@@ -132,6 +132,10 @@ function toRawShape(o) {
   };
   if (hasFlight) {
     raw.flight = {
+      // Supplier id (Travelify sid) — carried through for the per-client
+      // supplier filter the widget applies. Null on offers cached before the
+      // feed added sids.
+      sid: Number.isFinite(o.flightSid) ? o.flightSid : null,
       origin: o.origin ? { iataCode: o.origin, name: o.originName || null } : null,
       destination: {
         iataCode: o.airport || null,
@@ -163,6 +167,11 @@ function toRawShape(o) {
       checkinDate: o.checkinDate || null,
       propertyType: o.propertyType || null,
       chain: o.chain || null,
+      // Supplier id (Travelify sid) for the per-client supplier filter.
+      sid: Number.isFinite(o.accommodationSid) ? o.accommodationSid : null,
+      // uniqueRef pins the exact property for the offer deeplink (&refn=).
+      // Only present on accommodation and package-accommodation offers.
+      uniqueRef: o.accommodationUniqueRef || null,
       // Operator name + message drive the operator strip and the ATOL badge
       // (compliance-relevant), so they're stored and rebuilt.
       operator: (o.operatorName || o.operatorMessage)

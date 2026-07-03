@@ -7,6 +7,7 @@
  * All inputs sanitised before Airtable queries.
  */
 import { requireAuth, sanitiseForFormula, sanitiseConfig, setCors, applyRateLimit, RATE_LIMITS, lookupClientCredentialsByEmail } from './_auth.js';
+import { getJson } from './_redis.js';
 
 // Hydration fallback for cookie-issued JWTs that lack the legacy fields
 // (email, plan) the rest of this endpoint depends on. Once every active
@@ -131,6 +132,43 @@ async function hydrateLegacyUserFields(user) {
 
 const AIRTABLE_API = 'https://api.airtable.com/v0';
 const TABLE_NAME = 'Widgets';
+
+// ── Per-client supplier visibility ─────────────────────────────────────────
+// The offer + map widgets hide offers from suppliers a client hasn't switched
+// on in Control (/admin/suppliers.html → /api/admin/client-suppliers, stored
+// as Redis suppliers:client:{clientId}). We resolve the selection at config-GET
+// time and ship it inside the widget config so the widget can gate its own
+// offer list — including the live-Travelify fallback, which a server-side cache
+// filter would miss. Off by default per product decision: an EMPTY selection
+// means "show all", so we attach supplierFilter ONLY when the client has chosen
+// some suppliers. Stored keys are the master "prodType:id" (e.g. "Packages:61");
+// we split them into the three integer lists the widget matches against — a
+// package offer's flight.sid === accommodation.sid === its Packages supplier id.
+async function supplierFilterForClient(clientId) {
+  if (!clientId) return null;
+  try {
+    const rec = await getJson('suppliers:client:' + clientId);
+    const keys = rec && Array.isArray(rec.enabled) ? rec.enabled : [];
+    if (!keys.length) return null; // no selection → show all → nothing to ship
+    const f = { flights: [], accommodation: [], packages: [] };
+    for (const k of keys) {
+      const i = String(k).indexOf(':');
+      if (i < 1) continue;
+      const id = parseInt(k.slice(i + 1), 10);
+      if (!Number.isFinite(id)) continue;
+      const prod = k.slice(0, i);
+      if (prod === 'Flights') f.flights.push(id);
+      else if (prod === 'Accommodation') f.accommodation.push(id);
+      else if (prod === 'Packages') f.packages.push(id);
+    }
+    if (!f.flights.length && !f.accommodation.length && !f.packages.length) return null;
+    return f;
+  } catch (e) {
+    // Fail open — a Redis hiccup must never blank a live widget.
+    console.warn('[widget-config] supplier filter lookup failed:', e.message);
+    return null;
+  }
+}
 
 const REC_ID_RE = /^rec[A-Za-z0-9]{14}$/;
 // Staff bypass the entitlement gate (they create widgets for demos/setup).
@@ -568,6 +606,11 @@ export default async function handler(req, res) {
             if (creds) {
               config.appId = creds.appId;
               if (widgetType === 'Travel Offers') config.apiKey = creds.apiKey;
+              // Attach the client's supplier visibility so the widget can hide
+              // offers from suppliers they haven't switched on in Control. Only
+              // present when the client has actually restricted their suppliers.
+              const supplierFilter = await supplierFilterForClient(creds.recordId);
+              if (supplierFilter) config.supplierFilter = supplierFilter;
             } else {
               console.warn('[widget-config] no Travelify credentials on Clients record for', clientEmail, 'widgetId:', widgetId);
               // Leave config without creds — widget will show "Missing Travelify credentials"

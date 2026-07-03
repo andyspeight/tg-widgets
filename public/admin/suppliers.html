@@ -75,7 +75,7 @@
   <div class="container">
     <div class="page-header">
       <h1>Suppliers</h1>
-      <p>Choose which suppliers a client shows in their offer and map widgets. A supplier that is off will have none of its offers appear for that client. New suppliers are off until switched on.</p>
+      <p>Choose which suppliers a client shows in their offer and map widgets. Leave a product type with nothing switched on to show every supplier for it, or switch some on to limit it to just those.</p>
       <a class="back" href="/admin/">&larr; Back to Control</a>
     </div>
 
@@ -152,9 +152,9 @@
       const byType = {};
       master.forEach((s) => { (byType[s.prodType] = byType[s.prodType] || []).push(s); });
 
-      const banner = (!configured)
-        ? '<div class="banner warn">This client has no supplier selection yet, so with the filter live their widgets would show nothing. Switch on the suppliers they should show, or use “Enable all”.</div>'
-        : '<div class="banner info">Only the suppliers switched on below will have their offers shown in this client\'s map and offer widgets.</div>';
+      const banner = (enabled.size === 0)
+        ? '<div class="banner info">Nothing is switched on, so this client shows offers from every supplier. Switch some on to limit the widgets to just those.</div>'
+        : '<div class="banner info">This client shows offers only from the suppliers switched on below. Any product type with nothing switched on shows all of that type.</div>';
       $('banner').innerHTML = banner
         + '<div class="group-head" style="margin-top:8px"><div class="g-actions"><button data-all="on">Enable all</button><button data-all="off">Disable all</button></div></div>';
 

@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.9.0';
+  const VERSION = '3.10.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -347,7 +347,20 @@
       if (o.cabinClass) p.set('cabin', o.cabinClass);
       if (o.carrierCode) p.set('carrier', o.carrierCode);
     }
+    // uniqueRef pins the exact property (e.g. TTI:83099724). URLSearchParams
+    // encodes the colon, per Travelify's "URL encode to be safe".
+    if (st !== 'Flights' && o.accommodationUniqueRef) p.set('refn', o.accommodationUniqueRef);
     return TVLLNK_BASE + '/deeplink/' + encodeURIComponent(id) + '?' + p.toString();
+  }
+  // Per-client supplier visibility. The map's deal cards are package deals, so
+  // an offer is kept when its Packages supplier id (flightSid, which equals
+  // accommodationSid on a package) is in the client's allowed packages list.
+  // Empty/absent list = show all. Missing sid (pre-rollout cache) = keep.
+  function mapSupplierAllows(o, sf) {
+    if (!sf || !sf.packages || !sf.packages.length) return true;
+    const sid = Number.isFinite(o.flightSid) ? o.flightSid
+      : (Number.isFinite(o.accommodationSid) ? o.accommodationSid : null);
+    return sid == null ? true : sf.packages.indexOf(sid) !== -1;
   }
   // Accept ONLY #RGB or #RRGGBB. Anything else (named colours, rgb(), url(),
   // javascript:, garbage) returns '' so it can never reach a style attribute.
@@ -3181,7 +3194,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
         .then(r => r.ok ? r.json() : Promise.reject(new Error('deals HTTP ' + r.status)))
         .then(data => {
           if (token !== this._dealsToken) return; // superseded
-          const offers = (data && Array.isArray(data.offers)) ? data.offers : [];
+          const offers = ((data && Array.isArray(data.offers)) ? data.offers : [])
+            .filter(o => mapSupplierAllows(o, this.cfg.supplierFilter));
           if (!offers.length) { this._renderDealsEmpty(scroll, metaEl, name); return; }
           const total = data.total || offers.length;
           // Cache for resort filtering + zoom re-entry.
