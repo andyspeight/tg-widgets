@@ -110,7 +110,10 @@
   // decision 2 Jul 2026) and only fall back to the live proxy when the cache
   // has nothing matching the widget's filters.
   const CACHED_OFFERS_URL = API_BASE.replace('/widget-config', '/cached-offers');
-  const VERSION = '1.7.0';
+  // Our own FX proxy (ECB/Frankfurter). The cache is GBP; we convert at display
+  // time to the viewer's chosen currency. Edge-cached, so this is near-free.
+  const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
+  const VERSION = '1.8.0';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -562,6 +565,59 @@
     return (sym || '£') + rounded.toLocaleString('en-GB');
   }
 
+  // ── Currency conversion (display only — the offer cache stays GBP) ──────
+  // Cached prices are GBP. We convert at render time to the viewer's chosen
+  // currency using rates from our own /api/fx-rates (ECB), and fall back to a
+  // built-in table if that feed is ever unreachable so a price always shows.
+  // ACTIVE_CUR is set at the top of each render pass; rendering is synchronous
+  // so multiple widget instances on a page never interleave.
+  const FX_FALLBACK = { GBP: 1, EUR: 1.17, USD: 1.27, AUD: 1.92, CAD: 1.72, NZD: 2.08,
+    CHF: 1.13, JPY: 198, SEK: 13.4, NOK: 13.6, DKK: 8.72, PLN: 5.0, CZK: 29.3, HUF: 456,
+    RON: 5.8, BGN: 2.29, ISK: 175, ZAR: 23.2, SGD: 1.71, HKD: 9.9, THB: 46, INR: 106,
+    CNY: 9.1, TRY: 41, MXN: 23, BRL: 6.9, ILS: 4.7, IDR: 20500, KRW: 1730, MYR: 5.6, PHP: 72 };
+  let ACTIVE_CUR = { code: 'GBP', rates: { GBP: 1 } };
+  function setActiveCur(cur) { if (cur && cur.rates) ACTIVE_CUR = cur; }
+  // Mirrors the /api/fx-rates allowlist. GBP/EUR/USD first so the picker leads
+  // with the common travel currencies; the rest follow.
+  const CURRENCIES = { GBP: 'British Pound', EUR: 'Euro', USD: 'US Dollar',
+    AUD: 'Australian Dollar', CAD: 'Canadian Dollar', NZD: 'New Zealand Dollar',
+    CHF: 'Swiss Franc', JPY: 'Japanese Yen', SEK: 'Swedish Krona', NOK: 'Norwegian Krone',
+    DKK: 'Danish Krone', PLN: 'Polish Zloty', CZK: 'Czech Koruna', HUF: 'Hungarian Forint',
+    RON: 'Romanian Leu', BGN: 'Bulgarian Lev', ISK: 'Icelandic Krona', ZAR: 'South African Rand',
+    SGD: 'Singapore Dollar', HKD: 'Hong Kong Dollar', THB: 'Thai Baht', INR: 'Indian Rupee',
+    CNY: 'Chinese Yuan', TRY: 'Turkish Lira', MXN: 'Mexican Peso', BRL: 'Brazilian Real',
+    ILS: 'Israeli Shekel', IDR: 'Indonesian Rupiah', KRW: 'South Korean Won',
+    MYR: 'Malaysian Ringgit', PHP: 'Philippine Peso' };
+  const CURRENCY_ORDER = Object.keys(CURRENCIES);
+  function fmtCur(val, code) {
+    const rounded = Math.round(val);
+    try { return new Intl.NumberFormat('en-GB', { style: 'currency', currency: code, maximumFractionDigits: 0 }).format(rounded); }
+    catch (e) { return code + ' ' + rounded.toLocaleString('en-GB'); }
+  }
+  // Convert a GBP amount into the active currency and format it.
+  function money(gbpAmount) {
+    if (!isFinite(gbpAmount)) return '';
+    const code = ACTIVE_CUR.code || 'GBP';
+    if (code === 'GBP') return fmtCur(gbpAmount, 'GBP');
+    const rate = (ACTIVE_CUR.rates && ACTIVE_CUR.rates[code] > 0) ? ACTIVE_CUR.rates[code] : (FX_FALLBACK[code] || 1);
+    return fmtCur(gbpAmount * rate, code);
+  }
+  // Fetch GBP→codes rates from our FX proxy, filling any gaps from the fallback.
+  function loadFxRates(codes) {
+    const want = [...new Set(codes.filter((c) => c && c !== 'GBP'))];
+    const withFallback = () => { const r = { GBP: 1 }; want.forEach((c) => { r[c] = FX_FALLBACK[c] || 1; }); return r; };
+    if (!want.length) return Promise.resolve({ GBP: 1 });
+    return fetch(FX_RATES_URL + '?base=GBP&symbols=' + encodeURIComponent(want.join(',')))
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!d || !d.rates) return withFallback();
+        const r = { GBP: 1 };
+        want.forEach((c) => { r[c] = (typeof d.rates[c] === 'number' && d.rates[c] > 0) ? d.rates[c] : (FX_FALLBACK[c] || 1); });
+        return r;
+      })
+      .catch(withFallback);
+  }
+
   // Pax count — adults + children (infants don't count toward per-person pricing)
   function paxCount(o) {
     return Math.max(1, (o.adults || 0) + (o.children || 0));
@@ -581,11 +637,10 @@
     const sub = (k) => (t ? t(k) : ({ total: 'total', perPerson: 'per person', perNight: 'per night', perPersonPerNight: 'per person, per night' })[k] || k);
     const totalStr = o.formattedPrice || '';
     const ppStr = o.formattedPPPrice || '';
-    const sym = currencySymbol(totalStr || ppStr);
     const numeric = getNumericPrice(o);
     const pax = paxCount(o);
     const nights = nightsCount(o);
-    // Determine the currency-aware total in raw numbers.
+    // Work entirely in GBP numbers, then money() converts to the active currency.
     // formattedPPPrice is per person; multiply by pax to derive total.
     // formattedPrice is total; if ppStr missing, divide by pax for per-person.
     let total = null, perPerson = null;
@@ -609,30 +664,29 @@
 
     // Per-night requires nights > 0 — fall back gracefully when absent (e.g. flight-only)
     if ((m === 'pernight' || m === 'perpersonpernight') && !nights) {
-      // Fall through to perperson or total
-      if (m === 'perpersonpernight' && perPerson != null) return { primary: formatMoney(perPerson, sym), sub: sub('perPerson') };
-      if (total != null) return { primary: formatMoney(total, sym), sub: sub('total') };
+      if (m === 'perpersonpernight' && perPerson != null) return { primary: money(perPerson), sub: sub('perPerson') };
+      if (total != null) return { primary: money(total), sub: sub('total') };
     }
 
     if (m === 'total') {
-      return { primary: total != null ? formatMoney(total, sym) : (totalStr || ppStr), sub: sub('total') };
+      return { primary: total != null ? money(total) : '', sub: sub('total') };
     }
     if (m === 'perperson') {
-      return { primary: perPerson != null ? formatMoney(perPerson, sym) : (ppStr || totalStr), sub: sub('perPerson') };
+      return { primary: perPerson != null ? money(perPerson) : '', sub: sub('perPerson') };
     }
     if (m === 'pernight') {
       const v = total != null && nights ? total / nights : null;
-      return { primary: v != null ? formatMoney(v, sym) : (totalStr || ppStr), sub: sub('perNight') };
+      return { primary: v != null ? money(v) : '', sub: sub('perNight') };
     }
     if (m === 'perpersonpernight') {
       const v = perPerson != null && nights ? perPerson / nights : null;
-      return { primary: v != null ? formatMoney(v, sym) : (ppStr || totalStr), sub: sub('perPersonPerNight') };
+      return { primary: v != null ? money(v) : '', sub: sub('perPersonPerNight') };
     }
-    // auto
-    return {
-      primary: ppStr || totalStr,
-      sub: ppStr ? sub('perPerson') : (totalStr ? sub('total') : ''),
-    };
+    // auto — prefer the per-person price when the offer provides one, else total
+    if (ppStr && perPerson != null) return { primary: money(perPerson), sub: sub('perPerson') };
+    if (total != null) return { primary: money(total), sub: sub('total') };
+    if (perPerson != null) return { primary: money(perPerson), sub: sub('perPerson') };
+    return { primary: '', sub: '' };
   }
 
   function paxBasisLabel(o, t) {
@@ -5215,7 +5269,42 @@
       this.shadow = container.attachShadow({ mode: 'open' });
       this.root = null;
       this.rawOffers = [];
+      // Display currency. Prices are cached in GBP and converted at render time;
+      // rates load asynchronously (fallback table used until they arrive).
+      this.cur = { code: (this.cfg.displayCurrency || 'GBP'), rates: { GBP: 1 } };
+      setActiveCur(this.cur);
       this._render();
+      this._loadCurrency();
+    }
+
+    // Fetch the rates this widget can display. With the switcher on we fetch the
+    // whole set so a visitor's change is instant; otherwise just the default.
+    _loadCurrency() {
+      const need = this.cfg.showCurrencySwitcher ? CURRENCY_ORDER.slice() : [this.cur.code];
+      if (need.length === 1 && need[0] === 'GBP') return;   // nothing to convert
+      loadFxRates(need).then((rates) => {
+        this.cur.rates = rates;
+        setActiveCur(this.cur);
+        this._renderCurBar();
+        if (this.rawOffers && this.rawOffers.length) this._renderOffers();
+      });
+    }
+
+    // The currency switcher sits above the offers as its own element so a
+    // template re-render (which resets this.root.innerHTML) never wipes it.
+    _renderCurBar() {
+      if (!this.curBar) return;
+      if (!this.cfg.showCurrencySwitcher) { this.curBar.innerHTML = ''; this.curBar.style.display = 'none'; return; }
+      const opts = CURRENCY_ORDER.map((c) =>
+        '<option value="' + c + '"' + (c === this.cur.code ? ' selected' : '') + '>' + c + ' · ' + esc(CURRENCIES[c]) + '</option>'
+      ).join('');
+      this.curBar.style.display = '';
+      this.curBar.style.cssText = 'display:flex;justify-content:flex-end;align-items:center;margin:0 0 10px;font:inherit';
+      this.curBar.innerHTML =
+        '<label style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:#64748b">' +
+          '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>' +
+          '<select data-tgo-cur aria-label="Display currency" style="font:inherit;font-size:12.5px;padding:5px 8px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;color:#0f172a;cursor:pointer">' + opts + '</select>' +
+        '</label>';
     }
 
     // Build the language hint object for makeT. Returns the author's explicit
@@ -5285,6 +5374,15 @@
         fontFamily: c.fontFamily || '',
 
         priceDisplay: c.priceDisplay || 'auto',
+
+        // Currency: prices are cached in GBP and converted for display.
+        // displayCurrency is the agency default shown to every visitor; when
+        // showCurrencySwitcher is on the widget also lets a visitor switch to
+        // their own currency. Both are OPT-IN (default GBP, switcher off) so
+        // existing embeds are unchanged until the editor turns them on — with
+        // the default config the widget behaves exactly as before, no FX fetch.
+        displayCurrency: (c.displayCurrency || 'GBP').toUpperCase(),
+        showCurrencySwitcher: c.showCurrencySwitcher === true,
 
         // Template — picks the visual layout. 'cards' is the existing
         // grid/carousel render. 'departure-board' is the airport-style table.
@@ -5887,6 +5985,7 @@
     }
 
     _renderOffers() {
+      setActiveCur(this.cur);
       // Departure-board template doesn't dedupe (it's a fares list, not a
       // shop-around grid), so pass raw offers straight in.
       if (this.cfg.template === 'departure-board') {
@@ -6357,7 +6456,7 @@
         html += (amenHtml);
       }
 
-      const wasPrice = (pricing.priceChanged && pricing.priceBeforeChange) ? '£' + Math.round(pricing.priceBeforeChange) : null;
+      const wasPrice = (pricing.priceChanged && pricing.priceBeforeChange) ? money(pricing.priceBeforeChange) : null;
       html += this._renderPriceFooter(o, wasPrice);
       html += '</div>';
       return html;
@@ -6435,7 +6534,7 @@
           + '</div>');
       }
 
-      const wasPrice = priceChanged ? '£' + Math.round(pricing.priceBeforeChange) : null;
+      const wasPrice = priceChanged ? money(pricing.priceBeforeChange) : null;
       html += this._renderPriceFooter(o, wasPrice);
       html += '</div>';
       return html;
@@ -6469,7 +6568,7 @@
       const isDynamic = pkgType === 'DynamicPackages';
 
       const priceChanged = (flightPricing.priceChanged && flightPricing.priceBeforeChange);
-      const wasPrice = priceChanged ? '£' + Math.round(flightPricing.priceBeforeChange) : null;
+      const wasPrice = priceChanged ? money(flightPricing.priceBeforeChange) : null;
       const isLeadIn = (accPricing.isLeadIn === true) || (flightPricing.isLeadIn === true);
 
       const badgeText = isHoliday ? this.t('packageHoliday') : (isDynamic ? this.t('flightHotel') : this.t('package'));
@@ -6634,7 +6733,7 @@
       const img = safeImgUrl((acc.image && acc.image.url) || '');
       const amenities = Array.isArray(acc.amenities) ? acc.amenities : [];
       const isLeadIn = pricing.isLeadIn === true;
-      const wasPrice = (pricing.priceChanged && pricing.priceBeforeChange) ? '£' + Math.round(pricing.priceBeforeChange) : null;
+      const wasPrice = (pricing.priceChanged && pricing.priceBeforeChange) ? money(pricing.priceBeforeChange) : null;
 
       let html = '<article class="tgo-list-row">';
       html += '<div class="tgo-list-img" ' + cssBgUrl(img) + '>';
@@ -6697,7 +6796,7 @@
       const stopsLabel = isDirect ? this.t('direct') : this.t(stops === 1 ? 'stop' : 'stops', { n: stops });
       const tripType = f.returnDate ? this.t('returnLabel') : this.t('oneWay');
       const isLeadIn = pricing.isLeadIn === true;
-      const wasPrice = (pricing.priceChanged && pricing.priceBeforeChange) ? '£' + Math.round(pricing.priceBeforeChange) : null;
+      const wasPrice = (pricing.priceChanged && pricing.priceBeforeChange) ? money(pricing.priceBeforeChange) : null;
 
       let html = '<article class="tgo-list-row">';
       html += '<div class="tgo-list-img" ' + cssBgUrl(img) + '>';
@@ -6756,7 +6855,7 @@
       const isHoliday = pkgType === 'PackageHolidays';
       const isLeadIn = (accPricing.isLeadIn === true) || (flightPricing.isLeadIn === true);
       const wasPrice = (flightPricing.priceChanged && flightPricing.priceBeforeChange)
-        ? '£' + Math.round(flightPricing.priceBeforeChange) : null;
+        ? money(flightPricing.priceBeforeChange) : null;
 
       let html = '<article class="tgo-list-row">';
       html += '<div class="tgo-list-img" ' + cssBgUrl(img) + '>';
@@ -7027,9 +7126,9 @@
       const accPricing = acc.pricing || {};
       const flightPricing = f.pricing || {};
       const wasPrice = (accPricing.priceChanged && accPricing.priceBeforeChange)
-        ? '£' + Math.round(accPricing.priceBeforeChange)
+        ? money(accPricing.priceBeforeChange)
         : (flightPricing.priceChanged && flightPricing.priceBeforeChange)
-          ? '£' + Math.round(flightPricing.priceBeforeChange)
+          ? money(flightPricing.priceBeforeChange)
           : null;
 
       let html = '<article class="tgo-mag-hero" ' + cssBgUrl(img) + '>';
@@ -7445,10 +7544,10 @@
       const accP = acc.pricing || {};
       const flP = f.pricing || {};
       if (accP.priceChanged && accP.priceBeforeChange) {
-        return '£' + Math.round(accP.priceBeforeChange).toLocaleString('en-GB');
+        return money(accP.priceBeforeChange);
       }
       if (flP.priceChanged && flP.priceBeforeChange) {
-        return '£' + Math.round(flP.priceBeforeChange).toLocaleString('en-GB');
+        return money(flP.priceBeforeChange);
       }
       return null;
     }
@@ -8496,7 +8595,7 @@
       // Price
       const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto', this.t);
       const wasPrice = (pricing.priceChanged && pricing.priceBeforeChange)
-        ? '£' + Math.round(pricing.priceBeforeChange) : null;
+        ? money(pricing.priceBeforeChange) : null;
 
       // Barcode "number" — synthetic, derived from carrier + flight + date
       const barcodeNum = (carrier.code || 'XX') + (f.flightNumber || '0000') + '·' + (date || '').replace(/\s/g, '');
