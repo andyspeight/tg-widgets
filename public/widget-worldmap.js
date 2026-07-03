@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.8.0';
+  const VERSION = '3.9.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -308,17 +308,46 @@
     if (/^(https?|mailto|tel):/i.test(s)) return s;
     return '#';
   }
-  // Rebuild an offer's booking deeplink for THIS client. Cached offers carry a
-  // Travelify deeplink (https://dl.tvllnk.com/deeplink/{AppID}?st=...&params)
-  // built on the account the cache was populated from (our demo). The search
-  // params are already correct; only the AppID in the path needs to become the
-  // embedding client's, so the same search runs in their Travelify application.
-  // No AppID (inline embeds, missing creds) → leave the link untouched.
-  function clientDeeplink(rawUrl, appId) {
-    const s = String(rawUrl || '').trim();
+  // Board basis → Travelify deeplink brd code (per the deeplink spec).
+  const TVLLNK_BASE = 'https://dl.tvllnk.com';
+  function brdCode(b) {
+    const k = String(b || '').toLowerCase().replace(/[^a-z]/g, '');
+    return ({ roomonly: 'RoomOnly', selfcatering: 'SelfCatering', bedandbreakfast: 'BedAndBreakfast',
+      breakfast: 'BedAndBreakfast', halfboard: 'HalfBoard', fullboard: 'FullBoard', allinclusive: 'AllInclusive' })[k] || '';
+  }
+  // Build a Travelify booking deeplink for THIS client FROM the offer's details,
+  // per Travelify's deeplink spec: dl.tvllnk.com/deeplink/{AppID}?st=...&params.
+  // We build from the structured fields rather than reuse the cached results URL
+  // (that carries a demo search session and expires), so a click runs a fresh
+  // live search in the client's own Travelify application. No AppID (inline
+  // embed / missing creds) → '' so the caller can fall back to the raw link.
+  function buildDeeplink(o, appId) {
     const id = String(appId || '').trim();
-    if (!s || !id) return s;
-    return s.replace(/(\/deeplink\/)[^/?#]+/i, '$1' + encodeURIComponent(id));
+    if (!id || !o) return '';
+    const type = String(o.type || 'Packages');
+    const st = type === 'Flights' ? 'Flights' : type === 'Accommodation' ? 'Accommodation' : 'DynamicPackaging';
+    const p = new URLSearchParams();
+    p.set('st', st);
+    if (st !== 'Accommodation') { if (o.origin) p.set('org', o.origin); if (o.airport) p.set('dst', o.airport); }
+    if (st !== 'Flights') { if (o.resort) p.set('loc', o.resort); if (o.countryCode) p.set('ctry', o.countryCode); }
+    const start = String(o.outboundDate || o.checkinDate || '');
+    if (/^\d{4}-\d{2}-\d{2}/.test(start)) p.set('fr', start.slice(0, 10));
+    if (o.nights) p.set('dur', String(o.nights));
+    // Adults only: child ages are not stored and the spec requires an age per
+    // child, so a child search would be invalid — search adults (the cache is
+    // built on adult searches) rather than send a broken link.
+    p.set('adt', String(o.adults || 2));
+    if (st !== 'Flights') {
+      const brd = brdCode(o.boardBasis); if (brd) p.set('brd', brd);
+      if (o.rating) p.set('rat', String(o.rating));
+    }
+    if (o.currency) p.set('curr', o.currency);
+    if (st !== 'Accommodation') {
+      if (o.direct) p.set('dir', 'true');
+      if (o.cabinClass) p.set('cabin', o.cabinClass);
+      if (o.carrierCode) p.set('carrier', o.carrierCode);
+    }
+    return TVLLNK_BASE + '/deeplink/' + encodeURIComponent(id) + '?' + p.toString();
   }
   // Accept ONLY #RGB or #RRGGBB. Anything else (named colours, rgb(), url(),
   // javascript:, garbage) returns '' so it can never reach a style attribute.
@@ -3438,7 +3467,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
     /** Build one deal card. Whole card is an anchor to the Travelify deeplink. */
     _cardHtml(o) {
-      const href = safeUrl(clientDeeplink(o.url, this.cfg.appId));
+      const href = safeUrl(buildDeeplink(o, this.cfg.appId) || o.url);
       const img = safeUrl(o.image);
       const t = this.t;
       const pp = formatPrice(o.pricePP || o.price, o.currency);
