@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Suppliers · Travelgenix Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --tg-primary: #1B2B5B; --tg-primary-light: #2A3F7A;
+      --tg-accent: #00B4D8; --tg-accent-dark: #0096B7;
+      --tg-success: #10B981; --tg-warning: #F59E0B; --tg-error: #EF4444;
+      --tg-bg-primary: #FFFFFF; --tg-bg-secondary: #F8FAFC; --tg-bg-tertiary: #F1F5F9;
+      --tg-border: #E2E8F0;
+      --tg-text-primary: #0F172A; --tg-text-secondary: #475569; --tg-text-tertiary: #94A3B8;
+      --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 20px; --space-6: 24px;
+      --radius-md: 8px; --radius-lg: 12px;
+      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 15px; line-height: 1.6; color: var(--tg-text-primary);
+      background: var(--tg-bg-secondary); -webkit-font-smoothing: antialiased;
+    }
+    .container { max-width: 1000px; margin: 0 auto; padding: 0 var(--space-6) 120px; }
+    .page-header { padding-top: var(--space-6); margin-bottom: var(--space-5); }
+    .page-header h1 { font-size: 28px; font-weight: 700; margin: 0 0 4px; letter-spacing: -0.02em; }
+    .page-header p { margin: 0; color: var(--tg-text-secondary); font-size: 14px; max-width: 640px; }
+    .back { display: inline-block; margin: var(--space-4) 0 0; color: var(--tg-text-secondary); text-decoration: none; font-size: 13px; }
+    .back:hover { color: var(--tg-accent-dark); }
+
+    .card { background: var(--tg-bg-primary); border: 1px solid var(--tg-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); padding: var(--space-5); margin-bottom: var(--space-4); }
+    label.fl { display: block; font-size: 13px; font-weight: 600; color: var(--tg-text-secondary); margin-bottom: 6px; }
+    select, input[type="search"] {
+      width: 100%; font: inherit; font-size: 15px; padding: 10px 12px;
+      border: 1px solid var(--tg-border); border-radius: var(--radius-md); background: var(--tg-bg-primary); color: var(--tg-text-primary);
+    }
+    .hint { font-size: 13px; color: var(--tg-text-tertiary); margin-top: var(--space-3); }
+    .banner { border-radius: var(--radius-md); padding: 10px 14px; font-size: 13.5px; margin-bottom: var(--space-4); }
+    .banner.warn { background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
+    .banner.info { background: #E0F2FE; color: #075985; border: 1px solid #BAE6FD; }
+
+    .group { margin-top: var(--space-5); }
+    .group-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-2); }
+    .group-head h2 { font-size: 15px; font-weight: 700; margin: 0; }
+    .group-head .g-actions button { font: inherit; font-size: 12.5px; font-weight: 600; color: var(--tg-accent-dark); background: none; border: 0; cursor: pointer; padding: 4px 6px; }
+    .rows { border: 1px solid var(--tg-border); border-radius: var(--radius-md); overflow: hidden; }
+    .row { display: flex; align-items: center; gap: var(--space-3); padding: 11px 14px; border-top: 1px solid var(--tg-border); background: var(--tg-bg-primary); }
+    .row:first-child { border-top: 0; }
+    .row .nm { flex: 1; font-size: 14.5px; font-weight: 500; }
+    .row .prem { font-size: 11px; font-weight: 700; color: var(--tg-warning); background: #FEF3C7; padding: 1px 7px; border-radius: 10px; }
+    /* toggle */
+    .sw { position: relative; width: 42px; height: 24px; flex: 0 0 auto; }
+    .sw input { opacity: 0; width: 42px; height: 24px; margin: 0; cursor: pointer; }
+    .sw .track { position: absolute; inset: 0; background: #CBD5E1; border-radius: 999px; transition: background 150ms; pointer-events: none; }
+    .sw .knob { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; background: #fff; border-radius: 50%; transition: transform 150ms; pointer-events: none; box-shadow: 0 1px 2px rgba(0,0,0,.2); }
+    .sw input:checked ~ .track { background: var(--tg-success); }
+    .sw input:checked ~ .knob { transform: translateX(18px); }
+    .sw input:focus-visible ~ .track { box-shadow: 0 0 0 3px rgba(0,180,216,.25); }
+
+    .savebar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--tg-bg-primary); border-top: 1px solid var(--tg-border); box-shadow: 0 -4px 16px rgba(15,23,42,.06); padding: var(--space-4) var(--space-6); display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); }
+    .savebar .status { font-size: 13px; color: var(--tg-text-secondary); }
+    .btn { display: inline-flex; align-items: center; gap: var(--space-2); padding: 11px 20px; font: inherit; font-size: 14px; font-weight: 600; border-radius: var(--radius-md); border: 1px solid transparent; cursor: pointer; }
+    .btn-primary { background: var(--tg-primary); color: #fff; }
+    .btn-primary:hover { background: var(--tg-primary-light); }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+    .empty { text-align: center; color: var(--tg-text-tertiary); padding: var(--space-6); font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="page-header">
+      <h1>Suppliers</h1>
+      <p>Choose which suppliers a client shows in their offer and map widgets. A supplier that is off will have none of its offers appear for that client. New suppliers are off until switched on.</p>
+      <a class="back" href="/admin/">&larr; Back to Control</a>
+    </div>
+
+    <div class="card">
+      <label class="fl" for="client">Client</label>
+      <select id="client"><option value="">Loading clients…</option></select>
+      <div class="hint" id="masterHint"></div>
+    </div>
+
+    <div id="panel" hidden>
+      <div id="banner"></div>
+      <div id="groups"></div>
+    </div>
+
+    <div id="placeholder" class="card"><div class="empty">Pick a client to manage their suppliers.</div></div>
+  </div>
+
+  <div class="savebar" id="savebar" hidden>
+    <span class="status" id="status"></span>
+    <button class="btn btn-primary" id="save" disabled>Save changes</button>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const PROD_ORDER = ['Packages', 'Accommodation', 'Flights'];
+    const PROD_LABEL = { Packages: 'Packages (flight + hotel)', Accommodation: 'Hotels', Flights: 'Flights' };
+
+    let master = [];            // [{key,id,prodType,type,name,isPremium}]
+    let enabled = new Set();    // keys currently on for the selected client
+    let baseline = '';          // JSON of the saved set, for dirty tracking
+    let clientId = '';
+
+    function dirty() { return JSON.stringify([...enabled].sort()) !== baseline; }
+    function syncSave() {
+      $('save').disabled = !clientId || !dirty();
+      $('status').textContent = !clientId ? '' : (dirty() ? 'Unsaved changes' : 'All changes saved');
+    }
+
+    async function loadMaster() {
+      try {
+        const r = await fetch('/api/admin/suppliers', { credentials: 'include' });
+        if (r.status === 401 || r.status === 403) { document.body.innerHTML = '<div class="container"><div class="page-header"><h1>Suppliers</h1><p>Please sign in to Control as a Travelgenix admin.</p></div></div>'; return false; }
+        const d = await r.json();
+        master = Array.isArray(d.suppliers) ? d.suppliers : [];
+        $('masterHint').textContent = master.length + ' suppliers available' + (d.fetchedAt ? ' · list updated ' + new Date(d.fetchedAt).toLocaleDateString('en-GB') : '') + (d.stale ? ' (cached)' : '');
+        return true;
+      } catch (e) { $('masterHint').textContent = 'Could not load the supplier list.'; return false; }
+    }
+
+    async function loadClients() {
+      try {
+        const r = await fetch('/api/admin/clients/list?limit=500', { credentials: 'include' });
+        const d = await r.json();
+        const list = Array.isArray(d) ? d : (d.clients || d.data || []);
+        list.sort((a, b) => String(a.clientName || '').localeCompare(String(b.clientName || '')));
+        $('client').innerHTML = '<option value="">Select a client…</option>' +
+          list.map((c) => `<option value="${esc(c.id)}">${esc(c.clientName || c.tradingName || c.id)}</option>`).join('');
+      } catch (e) { $('client').innerHTML = '<option value="">Could not load clients</option>'; }
+    }
+
+    async function loadClientSuppliers(id) {
+      const r = await fetch('/api/admin/client-suppliers?clientId=' + encodeURIComponent(id), { credentials: 'include' });
+      const d = await r.json();
+      enabled = new Set(Array.isArray(d.enabled) ? d.enabled : []);
+      baseline = JSON.stringify([...enabled].sort());
+      return d;
+    }
+
+    function render(configured) {
+      $('placeholder').hidden = true;
+      $('panel').hidden = false;
+      $('savebar').hidden = false;
+      const byType = {};
+      master.forEach((s) => { (byType[s.prodType] = byType[s.prodType] || []).push(s); });
+
+      const banner = (!configured)
+        ? '<div class="banner warn">This client has no supplier selection yet, so with the filter live their widgets would show nothing. Switch on the suppliers they should show, or use “Enable all”.</div>'
+        : '<div class="banner info">Only the suppliers switched on below will have their offers shown in this client\'s map and offer widgets.</div>';
+      $('banner').innerHTML = banner
+        + '<div class="group-head" style="margin-top:8px"><div class="g-actions"><button data-all="on">Enable all</button><button data-all="off">Disable all</button></div></div>';
+
+      $('groups').innerHTML = PROD_ORDER.filter((t) => byType[t] && byType[t].length).map((t) => {
+        const rows = byType[t].map((s) => `
+          <div class="row">
+            <span class="nm">${esc(s.name)}</span>
+            ${s.isPremium ? '<span class="prem">Premium</span>' : ''}
+            <label class="sw"><input type="checkbox" data-key="${esc(s.key)}" ${enabled.has(s.key) ? 'checked' : ''}><span class="track"></span><span class="knob"></span></label>
+          </div>`).join('');
+        return `<div class="group">
+          <div class="group-head"><h2>${esc(PROD_LABEL[t] || t)}</h2>
+            <div class="g-actions"><button data-group="${t}" data-on="1">All on</button><button data-group="${t}" data-on="0">All off</button></div>
+          </div>
+          <div class="rows">${rows}</div>
+        </div>`;
+      }).join('') || '<div class="card"><div class="empty">No suppliers in the list yet. They load from Travelify; try again shortly.</div></div>';
+      syncSave();
+    }
+
+    // Delegated toggle + bulk actions
+    $('groups').addEventListener('change', (e) => {
+      const cb = e.target.closest('input[data-key]'); if (!cb) return;
+      if (cb.checked) enabled.add(cb.getAttribute('data-key')); else enabled.delete(cb.getAttribute('data-key'));
+      syncSave();
+    });
+    document.addEventListener('click', (e) => {
+      const g = e.target.closest('button[data-group]');
+      if (g) {
+        const t = g.getAttribute('data-group'), on = g.getAttribute('data-on') === '1';
+        master.filter((s) => s.prodType === t).forEach((s) => { on ? enabled.add(s.key) : enabled.delete(s.key); });
+        applyChecks(); syncSave(); return;
+      }
+      const a = e.target.closest('button[data-all]');
+      if (a) {
+        const on = a.getAttribute('data-all') === 'on';
+        enabled = on ? new Set(master.map((s) => s.key)) : new Set();
+        applyChecks(); syncSave(); return;
+      }
+    });
+    function applyChecks() {
+      document.querySelectorAll('#groups input[data-key]').forEach((cb) => { cb.checked = enabled.has(cb.getAttribute('data-key')); });
+    }
+
+    $('client').addEventListener('change', async (e) => {
+      clientId = e.target.value;
+      if (!clientId) { $('panel').hidden = true; $('savebar').hidden = true; $('placeholder').hidden = false; return; }
+      $('status').textContent = 'Loading…';
+      const d = await loadClientSuppliers(clientId);
+      render(!!d.configured);
+    });
+
+    $('save').addEventListener('click', async () => {
+      if (!clientId) return;
+      $('save').disabled = true; $('status').textContent = 'Saving…';
+      try {
+        const r = await fetch('/api/admin/client-suppliers', {
+          method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ clientId, enabled: [...enabled] }),
+        });
+        const d = await r.json();
+        if (d.ok) { baseline = JSON.stringify([...enabled].sort()); $('status').textContent = 'Saved'; }
+        else { $('status').textContent = d.error || 'Could not save'; }
+      } catch (e) { $('status').textContent = 'Network error'; }
+      // Sync only the button state; keep the save/error message we just set.
+      $('save').disabled = !clientId || !dirty();
+    });
+
+    (async () => { const ok = await loadMaster(); if (ok !== false) await loadClients(); })();
+  </script>
+</body>
+</html>
