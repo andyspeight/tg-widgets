@@ -182,13 +182,38 @@ export async function getBookingByToken(token) {
 }
 
 // ── Double-booking hold ────────────────────────────────────
-// Returns true if the hold was placed, false if the slot is already held.
+// A hold guards a slot between "start booking" and "booking saved", and (with
+// no connected calendar) is the only double-booking guard. Holds carry no TTL,
+// so the value is "<ref>|<placedAtMs>": a hold is only respected while it is
+// FRESH (a booking genuinely in flight) or still backed by a live booking. An
+// older hold with no live booking behind it is an orphan — a failed save or an
+// abandoned attempt — and is reclaimed, so a slot can never wedge permanently
+// as "taken" with no way to clear it.
+const HOLD_FRESH_MS = 5 * 60 * 1000;
+
+function parseHold(v) {
+  if (!v) return { ref: '', placedAt: 0 };
+  const i = String(v).indexOf('|');
+  if (i === -1) return { ref: v, placedAt: 0 };            // legacy hold (no timestamp) → treat as old
+  return { ref: v.slice(0, i), placedAt: Number(v.slice(i + 1)) || 0 };
+}
+
+// Returns true if the hold was placed, false if the slot is genuinely taken.
 export async function placeHold(clientId, startISO, ref) {
   if (!clientId || !startISO) return true;   // no client scope → nothing to guard
   const key = holdKey(clientId, startISO);
-  const existing = await getString(key);
-  if (existing && existing !== ref) return false;
-  await setString(key, ref);
+  const { ref: existRef, placedAt } = parseHold(await getString(key));
+  if (existRef && existRef !== ref) {
+    const fresh = (Date.now() - placedAt) < HOLD_FRESH_MS;
+    let liveBooking = false;
+    if (!fresh) {
+      // Only reclaim once we are sure no live booking stands behind the hold.
+      try { const b = await getBooking(existRef); liveBooking = !!(b && b.status !== 'cancelled'); }
+      catch (e) { liveBooking = true; }   // cannot verify → keep the slot guarded
+    }
+    if (fresh || liveBooking) return false;
+  }
+  await setString(key, ref + '|' + Date.now());
   return true;
 }
 
@@ -200,6 +225,6 @@ export async function releaseHold(clientId, startISO) {
 
 export async function isHeld(clientId, startISO, exceptRef) {
   if (!clientId || !startISO) return false;
-  const v = await getString(holdKey(clientId, startISO));
-  return !!(v && v !== exceptRef);
+  const { ref } = parseHold(await getString(holdKey(clientId, startISO)));
+  return !!(ref && ref !== exceptRef);
 }
