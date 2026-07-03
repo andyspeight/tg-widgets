@@ -9,6 +9,17 @@ the toolbar icon opens a side panel on any page with:
   snippet where every time is a one-click booking link).
 - **Coming up** — the next two weeks of booked appointments at a glance.
 
+## Gmail compose button (v0.2.0)
+
+Inside Gmail, a teal calendar button appears beside **Send** in every compose
+window. It opens a popover with your schedulers: **Link** drops the booking
+page in at your cursor as a tidy hyperlink; **Times** opens the slot picker
+right there and inserts the composed snippet at your cursor — no copy-paste.
+The caret position is preserved throughout (the button never steals focus).
+Only two Gmail landmarks are relied on (the message body and the Send
+button); if Google ever shifts them, the button quietly doesn't appear and
+Gmail is unaffected.
+
 ## How it works
 
 The extension is a deliberately thin shell (Manifest V3, Chrome 114+). The

@@ -86,6 +86,13 @@
     var esc = function (v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); };
     var P = new URLSearchParams(location.search);
     var ORIGIN = location.origin;
+    // Insert mode: when embedded by the browser extension inside an email
+    // compose window (?mode=insert&nonce=N), the primary button hands the
+    // composed snippet to the embedder via postMessage instead of the
+    // clipboard. The payload is public availability info; the embedder
+    // validates our origin and the nonce it minted before acting on it.
+    var MODE = P.get('mode') === 'insert' ? 'insert' : 'copy';
+    var NONCE = P.get('nonce') || '';
     var schedulers = [];
     (function () {
       var one = P.get('widget') || P.get('id');
@@ -186,6 +193,11 @@
 
     function copyBlock() {
       var html = buildHtml(), text = buildText();
+      if (MODE === 'insert' && window.parent !== window) {
+        window.parent.postMessage({ type: 'tgs-insert', nonce: NONCE, html: html, text: text }, '*');
+        toast('Inserted into your email');
+        return;
+      }
       function done() { toast('Copied — paste into your email'); }
       if (navigator.clipboard && window.ClipboardItem) {
         navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob([text], { type: 'text/plain' }) })]).then(done).catch(function () {
@@ -204,6 +216,7 @@
     $('sched').addEventListener('change', function (e) { current = e.target.value; selected = []; loadAvailability(); });
 
     // Boot
+    if (MODE === 'insert') $('copy').textContent = 'Insert into email';
     paintSchedulers();
     loadSchedulerNames();
     loadAvailability();

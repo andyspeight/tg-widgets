@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Travelgenix Scheduler",
-  "version": "0.1.0",
-  "description": "Your appointment schedulers, one click away: copy booking links, share times that suit, and see what's coming up.",
+  "version": "0.2.0",
+  "description": "Your appointment schedulers, one click away: copy booking links, share times that suit, and insert them into Gmail as you write.",
   "minimum_chrome_version": "114",
   "action": {
     "default_title": "Travelgenix Scheduler"
@@ -19,6 +19,13 @@
   "side_panel": {
     "default_path": "panel.html"
   },
+  "content_scripts": [
+    {
+      "matches": ["https://mail.google.com/*"],
+      "js": ["gmail.js"],
+      "run_at": "document_idle"
+    }
+  ],
   "permissions": ["sidePanel"],
   "host_permissions": [
     "https://widgets.travelify.io/*",
