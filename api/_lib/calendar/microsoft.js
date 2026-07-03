@@ -111,6 +111,30 @@ export async function freeBusy(accessToken, calendarId, timeMin, timeMax) {
     .filter(b => b.start && b.end);
 }
 
+/**
+ * The upcoming diary: events between timeMin and timeMax, soonest first,
+ * normalised to { id, title, startISO, endISO, allDay, link } — the same
+ * shape google.js returns, so the agenda endpoint stays provider-neutral.
+ */
+export async function listEvents(accessToken, calendarId, timeMin, timeMax) {
+  const url = GRAPH + '/me/calendarView?startDateTime=' + encodeURIComponent(timeMin) + '&endDateTime=' + encodeURIComponent(timeMax) +
+    '&$orderby=start/dateTime&$top=25&$select=id,subject,start,end,isAllDay,webLink,isCancelled';
+  const r = await fetch(url, { headers: { Authorization: 'Bearer ' + accessToken, Prefer: 'outlook.timezone="UTC"' } });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error('ms_calendarview_' + r.status);
+  return (Array.isArray(j.value) ? j.value : [])
+    .filter(e => e && !e.isCancelled)
+    .map(e => ({
+      id: e.id,
+      title: e.subject || '(no title)',
+      startISO: e.start && e.start.dateTime ? (/[zZ]$/.test(e.start.dateTime) ? e.start.dateTime : e.start.dateTime + 'Z') : '',
+      endISO: e.end && e.end.dateTime ? (/[zZ]$/.test(e.end.dateTime) ? e.end.dateTime : e.end.dateTime + 'Z') : '',
+      allDay: !!e.isAllDay,
+      link: e.webLink || '',
+    }))
+    .filter(e => e.startISO);
+}
+
 export async function insertEvent(accessToken, calendarId, event) {
   const r = await fetch(GRAPH + '/me/events', {
     method: 'POST',

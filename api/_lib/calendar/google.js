@@ -103,6 +103,36 @@ export async function freeBusy(accessToken, calendarId, timeMin, timeMax) {
   return (cal && Array.isArray(cal.busy)) ? cal.busy : [];
 }
 
+/**
+ * The upcoming diary: events between timeMin and timeMax, soonest first,
+ * normalised to { id, title, startISO, endISO, allDay, link }. Cancelled
+ * events and ones the user declined are dropped. Powers the extension's
+ * "Coming up" view — the calendar.events scope we already request covers it.
+ */
+export async function listEvents(accessToken, calendarId, timeMin, timeMax) {
+  const qs = new URLSearchParams({
+    timeMin, timeMax, singleEvents: 'true', orderBy: 'startTime', maxResults: '25',
+    fields: 'items(id,summary,start,end,status,htmlLink,attendees(self,responseStatus))',
+  });
+  const r = await fetch(CAL_BASE + '/calendars/' + encodeURIComponent(calendarId || 'primary') + '/events?' + qs.toString(), {
+    headers: { Authorization: 'Bearer ' + accessToken },
+  });
+  if (!r.ok) throw new Error('google_events_' + r.status);
+  const d = await r.json().catch(() => ({}));
+  return (d.items || [])
+    .filter(e => e && e.status !== 'cancelled'
+      && !(Array.isArray(e.attendees) && e.attendees.some(a => a && a.self && a.responseStatus === 'declined')))
+    .map(e => ({
+      id: e.id,
+      title: e.summary || '(no title)',
+      startISO: (e.start && (e.start.dateTime || (e.start.date ? e.start.date + 'T00:00:00Z' : ''))) || '',
+      endISO: (e.end && (e.end.dateTime || (e.end.date ? e.end.date + 'T00:00:00Z' : ''))) || '',
+      allDay: !!(e.start && e.start.date),
+      link: e.htmlLink || '',
+    }))
+    .filter(e => e.startISO);
+}
+
 export async function insertEvent(accessToken, calendarId, event) {
   const r = await fetch(CAL_BASE + '/calendars/' + encodeURIComponent(calendarId || 'primary') + '/events?sendUpdates=all&conferenceDataVersion=0', {
     method: 'POST',

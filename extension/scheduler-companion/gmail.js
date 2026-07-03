@@ -112,6 +112,7 @@
     .group { font-size: 11px; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: .05em; padding: 8px 6px 2px; }
     .row { display: flex; align-items: center; gap: 8px; padding: 8px 6px; border-bottom: 1px solid #F1F5F9; }
     .row:last-child { border-bottom: 0; }
+    .row .dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }
     .row .name { flex: 1; font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .row .mins { color: #64748B; font-weight: 500; font-size: 11.5px; margin-left: 6px; }
     .row button {
@@ -197,11 +198,14 @@
       return;
     }
 
+    const PALETTE = ['#7C3AED', '#F59E0B', '#0891B2', '#F97316', '#10B981', '#EC4899'];
+    let rowIdx = 0;
     paint('<div class="list">' + schedulers.map((s, i) => {
       const events = (s.events && s.events.length) ? s.events : [null];
-      const head = '<div class="group">' + esc(s.name) + '</div>';
+      const head = schedulers.length > 1 ? '<div class="group">' + esc(s.name) + '</div>' : '';
       return head + events.map((ev, j) =>
-        '<div class="row"><span class="name" title="' + esc(ev ? ev.label : s.name) + '">' + esc(ev ? ev.label : 'Booking page') +
+        '<div class="row"><span class="dot" style="background:' + PALETTE[rowIdx++ % PALETTE.length] + '"></span>' +
+        '<span class="name" title="' + esc(ev ? ev.label : s.name) + '">' + esc(ev ? ev.label : 'Booking page') +
         (ev && ev.mins ? '<span class="mins">' + esc(String(ev.mins)) + ' min</span>' : '') + '</span>' +
         '<button type="button" data-link="' + i + ':' + j + '" title="Insert this booking link at the cursor">Link</button>' +
         '<button type="button" class="primary" data-times="' + i + ':' + j + '" title="Pick specific times to offer">Times</button></div>'
