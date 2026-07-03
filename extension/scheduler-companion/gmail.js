@@ -227,7 +227,9 @@
         const label = hit.ev ? 'Book: ' + hit.ev.label : 'Book an appointment';
         const { targetBody: tb, savedRange: sr } = popover;
         closePopover();
-        insertHtml(tb, sr, '<a href="' + esc(url) + '">' + esc(label) + '</a>&nbsp;');
+        // Email-safe pill button — reads as a proper CTA at the other end,
+        // not a bare blue link.
+        insertHtml(tb, sr, '<a href="' + esc(url) + '" style="display:inline-block;padding:10px 18px;border-radius:999px;background:#0891B2;color:#ffffff;font-weight:bold;font-size:14px;text-decoration:none;font-family:Arial,Helvetica,sans-serif">' + esc(label) + '</a>&nbsp;');
       });
     });
     box.querySelectorAll('[data-times]').forEach((btn) => {

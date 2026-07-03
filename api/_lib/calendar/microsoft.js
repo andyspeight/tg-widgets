@@ -92,6 +92,11 @@ export function toGraphEvent(ev) {
   if (Array.isArray(ev.attendees) && ev.attendees.length) {
     out.attendees = ev.attendees.map(a => ({ emailAddress: { address: a.email, name: a.displayName || a.email }, type: 'required' }));
   }
+  // _conference (truthy) asks Graph to provision a Teams meeting for the event.
+  if (ev._conference) {
+    out.isOnlineMeeting = true;
+    out.onlineMeetingProvider = 'teamsForBusiness';
+  }
   return out;
 }
 
@@ -143,7 +148,11 @@ export async function insertEvent(accessToken, calendarId, event) {
   });
   const j = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error('ms_insert_' + r.status + ' ' + (j.error && j.error.message || ''));
-  return { id: j.id, htmlLink: j.webLink || '' };
+  return {
+    id: j.id,
+    htmlLink: j.webLink || '',
+    meetingUrl: (j.onlineMeeting && j.onlineMeeting.joinUrl) || '',
+  };
 }
 
 export async function patchEvent(accessToken, calendarId, eventId, patch) {

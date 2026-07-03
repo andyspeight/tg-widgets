@@ -106,6 +106,13 @@ export default async function handler(req, res) {
   const held = await placeHold(w.clientRecordId, startISO, ref);
   if (!held) return res.status(409).json({ error: 'Someone just took that time. Please pick another.' });
 
+  // The video-meeting link for this booking: the event type's own link
+  // (their Zoom room etc.) wins; otherwise a Meet/Teams link is minted by
+  // the connected calendar below for video meetings.
+  const explicitUrl = /^https?:\/\/\S+$/i.test(String(ev.meetingUrl || '').trim())
+    ? String(ev.meetingUrl).trim().slice(0, 300) : '';
+  let meetingUrl = explicitUrl;
+
   // If connected, re-check free/busy then create the event.
   let providerEventId = '', calendarLink = '', connected = false, providerName = '';
   try {
@@ -125,17 +132,22 @@ export default async function handler(req, res) {
 
       const descLines = ['Booked via the website scheduler.', 'Visitor: ' + name + ' <' + email + '>' + (phone ? ', ' + phone : '')];
       Object.keys(answers).forEach(k => { descLines.push(k + ': ' + answers[k]); });
+      if (explicitUrl) descLines.unshift('Join the meeting: ' + explicitUrl);
       const created = await provider.insertEvent(tok.accessToken, tok.calendarId, {
         summary: (ev.label || 'Appointment') + ' with ' + name,
         description: descLines.join('\n'),
         start: { dateTime: startISO, timeZone: config.timezone || 'UTC' },
         end: { dateTime: endISO, timeZone: config.timezone || 'UTC' },
-        location: config.location || '',
+        location: explicitUrl || config.location || '',
         attendees: [{ email, displayName: name }],
         reminders: { useDefault: true },
+        // Video meetings without their own link get one minted by the
+        // calendar (Google Meet / Teams).
+        _conference: !explicitUrl && ev.mode === 'video',
       });
       providerEventId = created.id || '';
       calendarLink = created.htmlLink || '';
+      if (!meetingUrl && created.meetingUrl) meetingUrl = created.meetingUrl;
     }
   } catch (e) {
     console.error('[book] calendar create failed:', e.message);
@@ -150,6 +162,12 @@ export default async function handler(req, res) {
     hostTimezone: config.timezone || 'Europe/London',
     invitee: { name, email, phone, answers },
     provider: providerName, providerEventId, calendarLink,
+    meetingUrl,
+    // Branding travels WITH the booking so every lifecycle email (confirm,
+    // reminder, reschedule, cancel) renders consistently without re-reading
+    // the widget config.
+    company: String(config.company || '').slice(0, 80),
+    accent: /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(config.accent || '')) ? config.accent : '',
     dayCounted: cap > 0,
     sourceUrl: clean(body.sourceUrl).slice(0, 300), createdAt: new Date().toISOString(),
   };
@@ -166,5 +184,5 @@ export default async function handler(req, res) {
   booking.location = config.location || '';
   await sendNewBooking(booking, { manageUrl });
 
-  return res.status(200).json({ ok: true, ref, manageUrl: manageUrl || undefined, calendarLink, connected });
+  return res.status(200).json({ ok: true, ref, manageUrl: manageUrl || undefined, calendarLink, connected, meetingUrl: meetingUrl || undefined });
 }

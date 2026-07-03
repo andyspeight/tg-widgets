@@ -23,7 +23,9 @@
     .card { background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; padding: 16px; margin: 12px 0; }
     .day { margin: 0 0 14px; }
     .day:last-child { margin-bottom: 0; }
-    .day-h { font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: .05em; margin: 0 0 8px; }
+    .day-h { font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: .05em; margin: 0 0 8px; display: flex; align-items: center; gap: 10px; }
+    .day-all { font: inherit; font-size: 11px; font-weight: 700; color: var(--accent); background: none; border: 0; cursor: pointer; padding: 0; text-transform: none; letter-spacing: 0; }
+    .day-all:hover { text-decoration: underline; }
     .chips { display: flex; flex-wrap: wrap; gap: 7px; }
     .chip { border: 1.5px solid #E2E8F0; background: #fff; color: #0F172A; font: inherit; font-size: 13px; font-weight: 600; padding: 7px 12px; border-radius: 9px; cursor: pointer; transition: border-color .12s, background .12s; }
     .chip:hover { background: #F8FAFC; }
@@ -104,6 +106,9 @@
     // ?event=ID scopes the whole flow (availability, links) to one meeting
     // type; otherwise the scheduler's default event applies.
     var tz = 'Europe/London', eventId = P.get('event') || '', selected = []; // selected = array of startISO
+    var accentHex = '#0891B2'; // widget accent — used for the email chips
+    var lastSlots = [];        // last rendered slot list (re-render for select-all)
+    var MAX_PICK = 20;
 
     function toast(msg) { var t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._t); t._t = setTimeout(function () { t.classList.remove('show'); }, 1900); }
 
@@ -111,14 +116,24 @@
     function dayLabel(iso) { try { return new Intl.DateTimeFormat('en-GB', { timeZone: tz, weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(iso)); } catch (e) { return iso; } }
     function timeLabel(iso) { try { return new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date(iso)).replace(/\s/g, ''); } catch (e) { return iso; } }
     function fullLabel(iso) { try { return new Intl.DateTimeFormat('en-GB', { timeZone: tz, weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date(iso)); } catch (e) { return iso; } }
-    function bookLink(iso) { return ORIGIN + '/book-appointment?widget=' + encodeURIComponent(current) + '&start=' + encodeURIComponent(iso) + (eventId ? '&event=' + encodeURIComponent(eventId) : ''); }
+    // Every emailed time link carries the WHOLE offered set (`offered`), so
+    // if that slot has gone by the time the customer clicks, the booking page
+    // offers only the OTHER suggested times — never the full calendar.
+    function bookLink(iso) {
+      return ORIGIN + '/book-appointment?widget=' + encodeURIComponent(current) + '&start=' + encodeURIComponent(iso) +
+        (eventId ? '&event=' + encodeURIComponent(eventId) : '') +
+        '&offered=' + encodeURIComponent(selected.slice().sort().join(','));
+    }
 
     function loadSchedulerNames() {
       schedulers.forEach(function (s) {
         fetch('/api/widget-config?id=' + encodeURIComponent(s.id)).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
           var cfg = d && (d.config || d) || {};
           s.name = (d && d.name) || cfg.heading || s.id;
-          if (cfg.accent && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(cfg.accent) && s.id === current) document.documentElement.style.setProperty('--accent', cfg.accent);
+          if (cfg.accent && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(cfg.accent) && s.id === current) {
+            document.documentElement.style.setProperty('--accent', cfg.accent);
+            accentHex = cfg.accent;
+          }
           paintSchedulers();
         }).catch(function () {});
       });
@@ -147,13 +162,17 @@
     }
 
     function renderSlots(slots) {
+      lastSlots = slots || [];
       if (!slots.length) { $('slots').innerHTML = '<div class="state">No available times in the next two weeks. Check the scheduler\'s availability and connected calendar.</div>'; $('bar').style.display = 'none'; $('composer').style.display = 'none'; return; }
       var byDay = {};
       slots.forEach(function (s) { var k = dayKey(s.startISO); (byDay[k] || (byDay[k] = [])).push(s.startISO); });
       var html = '<div class="card">';
       Object.keys(byDay).sort().forEach(function (k) {
-        html += '<div class="day"><div class="day-h">' + esc(dayLabel(byDay[k][0])) + '</div><div class="chips">';
-        byDay[k].forEach(function (iso) {
+        var dayIsos = byDay[k];
+        var allSel = dayIsos.every(function (iso) { return selected.indexOf(iso) !== -1; });
+        html += '<div class="day"><div class="day-h">' + esc(dayLabel(dayIsos[0])) +
+          ' <button type="button" class="day-all" data-day="' + esc(k) + '">' + (allSel ? 'Clear day' : 'Select all') + '</button></div><div class="chips">';
+        dayIsos.forEach(function (iso) {
           html += '<button type="button" class="chip' + (selected.indexOf(iso) !== -1 ? ' sel' : '') + '" data-iso="' + esc(iso) + '">' + esc(timeLabel(iso)) + '</button>';
         });
         html += '</div></div>';
@@ -165,19 +184,53 @@
           var iso = b.getAttribute('data-iso');
           var at = selected.indexOf(iso);
           if (at !== -1) { selected.splice(at, 1); b.classList.remove('sel'); }
-          else { if (selected.length >= 12) { toast('Up to 12 options'); return; } selected.push(iso); b.classList.add('sel'); }
+          else { if (selected.length >= MAX_PICK) { toast('Up to ' + MAX_PICK + ' options'); return; } selected.push(iso); b.classList.add('sel'); }
           update();
+        });
+      });
+      Array.prototype.forEach.call(document.querySelectorAll('.day-all'), function (b) {
+        b.addEventListener('click', function () {
+          var k = b.getAttribute('data-day');
+          var dayIsos = (byDay[k] || []);
+          var allSel = dayIsos.every(function (iso) { return selected.indexOf(iso) !== -1; });
+          if (allSel) {
+            selected = selected.filter(function (iso) { return dayIsos.indexOf(iso) === -1; });
+          } else {
+            var truncated = false;
+            dayIsos.forEach(function (iso) {
+              if (selected.indexOf(iso) !== -1) return;
+              if (selected.length >= MAX_PICK) { truncated = true; return; }
+              selected.push(iso);
+            });
+            if (truncated) toast('Up to ' + MAX_PICK + ' options — day partially selected');
+          }
+          renderSlots(lastSlots);
         });
       });
       $('bar').style.display = '';
       update();
     }
 
+    // Email-safe snippet: times as rounded pill buttons grouped under bold day
+    // headings, in the scheduler's accent colour. Inline styles only — this
+    // has to survive Gmail, Outlook and everything in between.
     function buildHtml() {
       var intro = esc($('intro').value.trim());
       var outro = esc($('outro').value.trim());
-      var items = selected.slice().sort().map(function (iso) { return '<li><a href="' + esc(bookLink(iso)) + '">' + esc(fullLabel(iso)) + '</a></li>'; }).join('');
-      return '<div>' + (intro ? '<p>' + intro + '</p>' : '') + '<ul>' + items + '</ul>' + (outro ? '<p>' + outro + '</p>' : '') + '</div>';
+      var FONT = "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
+      var byDay = {};
+      selected.slice().sort().forEach(function (iso) { var k = dayKey(iso); (byDay[k] || (byDay[k] = [])).push(iso); });
+      var days = Object.keys(byDay).sort().map(function (k) {
+        var chips = byDay[k].map(function (iso) {
+          return '<a href="' + esc(bookLink(iso)) + '" style="display:inline-block;padding:9px 16px;margin:0 8px 8px 0;border:2px solid ' + accentHex + ';border-radius:999px;color:' + accentHex + ';font-weight:bold;font-size:14px;text-decoration:none;' + FONT + '">' + esc(timeLabel(iso)) + '</a>';
+        }).join('');
+        return '<div style="margin:0 0 4px;font-weight:bold;font-size:14px;color:#334155;' + FONT + '">' + esc(dayLabel(byDay[k][0])) + '</div><div style="margin:0 0 10px">' + chips + '</div>';
+      }).join('');
+      return '<div style="' + FONT + ';color:#0F172A;font-size:14.5px;line-height:1.6">' +
+        (intro ? '<p style="margin:0 0 12px">' + intro + '</p>' : '') +
+        days +
+        (outro ? '<p style="margin:6px 0 0">' + outro + '</p>' : '') +
+        '</div>';
     }
     function buildText() {
       var intro = $('intro').value.trim(), outro = $('outro').value.trim();

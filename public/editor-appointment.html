@@ -449,6 +449,9 @@
             <select class="select" data-ev-f="mode">${[['callback','Callback'],['phone','Phone'],['video','Video'],['inperson','In person']].map(o=>`<option value="${o[0]}"${o[0]===ev.mode?' selected':''}>${o[1]}</option>`).join('')}</select></div>
         </div>
         <input class="input" data-ev-f="description" value="${esc(ev.description||'')}" placeholder="Short description (optional)" maxlength="120" style="margin-top:7px">
+        ${ev.mode === 'video' ? `
+        <input class="input" data-ev-f="meetingUrl" value="${esc(ev.meetingUrl||'')}" placeholder="Video link, e.g. your Zoom room (optional)" maxlength="300" style="margin-top:7px">
+        <span class="field-hint">Paste your own Zoom/Meet/Teams link, or leave blank and a meeting link is created automatically when your calendar is connected. Either way it goes in the invite and the confirmation email.</span>` : ''}
       </div>`).join('');
   }
   function renderQuestions() {

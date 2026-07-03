@@ -13,7 +13,7 @@ function view(b) {
     startISO: b.startISO, endISO: b.endISO, timezone: b.hostTimezone,
     widgetId: b.widgetId || '', eventId: b.eventId || '',
     name: v.name || '', email: v.email || '', phone: v.phone || '',
-    answers: v.answers || {}, calendarLink: b.calendarLink || '', createdAt: b.createdAt,
+    answers: v.answers || {}, calendarLink: b.calendarLink || '', meetingUrl: b.meetingUrl || '', createdAt: b.createdAt,
   };
 }
 

@@ -134,14 +134,32 @@ export async function listEvents(accessToken, calendarId, timeMin, timeMax) {
 }
 
 export async function insertEvent(accessToken, calendarId, event) {
-  const r = await fetch(CAL_BASE + '/calendars/' + encodeURIComponent(calendarId || 'primary') + '/events?sendUpdates=all&conferenceDataVersion=0', {
+  // event._conference (truthy) asks Google to mint a Meet link for the event.
+  // conferenceDataVersion=1 is required for the request to be honoured; it is
+  // harmless when no conferenceData is supplied.
+  const wantsConference = !!event._conference;
+  const body = Object.assign({}, event);
+  delete body._conference;
+  if (wantsConference) {
+    body.conferenceData = {
+      createRequest: {
+        requestId: 'tg-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
+        conferenceSolutionKey: { type: 'hangoutsMeet' },
+      },
+    };
+  }
+  const r = await fetch(CAL_BASE + '/calendars/' + encodeURIComponent(calendarId || 'primary') + '/events?sendUpdates=all&conferenceDataVersion=1', {
     method: 'POST',
     headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
-    body: JSON.stringify(event),
+    body: JSON.stringify(body),
   });
   const j = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error('google_insert_' + r.status + ' ' + (j.error && j.error.message || ''));
-  return { id: j.id, htmlLink: j.htmlLink };
+  // hangoutLink is the Meet URL; entryPoints carry it too on some responses.
+  const entry = j.conferenceData && Array.isArray(j.conferenceData.entryPoints)
+    ? j.conferenceData.entryPoints.find(p => p && p.entryPointType === 'video')
+    : null;
+  return { id: j.id, htmlLink: j.htmlLink, meetingUrl: j.hangoutLink || (entry && entry.uri) || '' };
 }
 
 export async function patchEvent(accessToken, calendarId, eventId, patch) {

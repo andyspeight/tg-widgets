@@ -31,6 +31,10 @@
     .foot { margin-top: 16px; font-size: 11px; color: #94A3B8; text-align: center; }
     .success svg { width: 26px; height: 26px; }
     .manage { display: inline-block; margin-top: 14px; color: var(--accent); font-weight: 600; font-size: 14px; }
+    .joinbtn { display: block; text-align: center; margin-top: 6px; border-radius: 11px; background: var(--accent); color: #fff; font-weight: 700; font-size: 15px; padding: 13px; text-decoration: none; box-shadow: 0 6px 16px rgba(15,23,42,.16); }
+    .join-url { margin-top: 8px; font-size: 11px; color: #94A3B8; word-break: break-all; text-align: center; }
+    .offer-chip { display: block; margin: 0 0 9px; padding: 12px 15px; border: 1.5px solid var(--accent); border-radius: 11px; color: var(--accent); font-weight: 700; font-size: 14px; text-decoration: none; text-align: center; transition: background .12s, color .12s; }
+    .offer-chip:hover { background: var(--accent); color: #fff; }
     #scheduler-mount { margin-top: 10px; }
   </style>
 </head>
@@ -47,6 +51,13 @@
     var widgetId = P.get('widget') || P.get('id') || '';
     var startISO = P.get('start') || '';
     var eventId = P.get('event') || '';
+    // The offered set: when this link came from a "share times" email it
+    // carries every suggested time. If the chosen slot has gone, the visitor
+    // is only ever shown the OTHER offered times — never the full calendar.
+    var OFFERED = (P.get('offered') || '').split(',')
+      .map(function (s) { return s.trim(); })
+      .filter(function (s) { return s && Number.isFinite(Date.parse(s)); })
+      .slice(0, 30);
     var cfg = null, tz = 'Europe/London', ev = null;
 
     function fmtWhen(iso, zone) {
@@ -103,6 +114,7 @@
         '<div class="badge success"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>' +
         '<h1>You\'re booked in</h1>' +
         '<p class="sub">Your ' + esc(ev.label || 'appointment') + ' is confirmed for <strong>' + esc(when) + '</strong>. A confirmation email and calendar invite are on the way.</p>' +
+        (d.meetingUrl ? '<a class="joinbtn" href="' + esc(d.meetingUrl) + '" target="_blank" rel="noopener">Join the video meeting</a><div class="join-url">' + esc(d.meetingUrl) + '</div>' : '') +
         (d.manageUrl ? '<a class="manage" href="' + esc(d.manageUrl) + '">Reschedule or cancel</a>' : '') +
         '<div class="foot">Powered by Travelgenix</div>';
     }
@@ -119,7 +131,40 @@
       catch (e) { host.innerHTML = '<p class="sub">We could not load the scheduler. Please try again or contact us directly.</p>'; }
     }
 
+    function offeredLink(iso) {
+      return location.pathname + '?widget=' + encodeURIComponent(widgetId) + '&start=' + encodeURIComponent(iso) +
+        (eventId ? '&event=' + encodeURIComponent(eventId) : '') + '&offered=' + encodeURIComponent(OFFERED.join(','));
+    }
+
+    // The chosen slot has gone. When this link carries an offered set, the
+    // visitor only ever sees the OTHER suggested times (checked against live
+    // availability) — the full calendar is reserved for standing links.
     function taken() {
+      if (OFFERED.length) {
+        var others = OFFERED.filter(function (iso) { return iso !== startISO && Date.parse(iso) > Date.now(); });
+        $('card').innerHTML = '<h1>That time was just taken</h1><p class="sub" id="tk-sub">Checking the other suggested times…</p><div id="tk-list"></div>';
+        var finish = function (live) {
+          var list = live.filter(function (iso) { return others.indexOf(iso) !== -1; });
+          if (!list.length) {
+            $('tk-sub').textContent = 'None of the suggested times are available any more. Please reply to the email and we\'ll find a time that works.';
+            return;
+          }
+          $('tk-sub').textContent = 'These suggested times are still open — pick one:';
+          $('tk-list').innerHTML = list.map(function (iso) {
+            return '<a class="offer-chip" href="' + esc(offeredLink(iso)) + '">' + esc(fmtWhen(iso, tz)) + '</a>';
+          }).join('');
+        };
+        var from = new Date().toISOString();
+        var to = new Date(Math.max.apply(null, others.map(function (i) { return Date.parse(i); })) + 3600000).toISOString();
+        fetch('/api/appointment/availability?widgetId=' + encodeURIComponent(widgetId) + (eventId ? '&eventId=' + encodeURIComponent(eventId) : '') + '&from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to))
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (d) {
+            if (d && Array.isArray(d.slots)) finish(d.slots.map(function (s) { return s.startISO; }));
+            else finish(others); // availability unreachable — offer them unverified
+          })
+          .catch(function () { finish(others); });
+        return;
+      }
       $('card').innerHTML =
         '<h1>That time was just taken</h1>' +
         '<p class="sub">Sorry, someone grabbed that slot first. Please pick another time below.</p>' +
