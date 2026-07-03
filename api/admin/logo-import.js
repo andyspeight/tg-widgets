@@ -5,10 +5,11 @@
  * in-repo logo library (/api/logo-library), re-uploading every image into
  * OUR Blob store so nothing keeps depending on the old app.
  *
- *   GET  ?probe=1  → discovery only: which index URL was found and how many
+ *   GET (no flag)  → discovery only: which index URL was found and how many
  *                    brands it holds, with a shape sample. Writes nothing.
- *   POST           → import. Skips brands whose name is already in our
- *                    index, so it is safe to run repeatedly until done.
+ *   GET ?run=1     → import, browser-clickable (POST also works). Skips
+ *                    brands whose name is already in our index, so it is
+ *                    safe to run repeatedly until done.
  *
  * The old app's exact API is unknown from this repo, so discovery tries the
  * likely JSON paths and, failing those, reads the old picker's JS and lifts
@@ -125,7 +126,14 @@ export default async function handler(req, res) {
   if (gate.error) return res.status(gate.status).json({ error: gate.error });
 
   const started = Date.now();
-  const probeOnly = req.method === 'GET';
+  if (req.method !== 'GET' && req.method !== 'POST') {
+    return res.status(405).json({ error: 'GET (?probe=1 or ?run=1) or POST only' });
+  }
+  // ?run=1 lets the admin trigger the import from the browser address bar —
+  // this is a staff-gated one-off migration tool, so a GET with an explicit
+  // run flag is a fair trade against making Andy craft a POST.
+  const q = req.query || {};
+  const doImport = req.method === 'POST' || q.run === '1' || q.run === 'true';
 
   try {
     const found = await discoverIndex();
@@ -138,7 +146,7 @@ export default async function handler(req, res) {
       });
     }
     const mapped = found.list.map(mapBrand).filter(Boolean);
-    if (probeOnly) {
+    if (!doImport) {
       return res.status(200).json({
         ok: true,
         probe: true,
@@ -146,10 +154,10 @@ export default async function handler(req, res) {
         totalFound: found.list.length,
         usable: mapped.length,
         sample: mapped.slice(0, 3),
+        next: 'Looks right? Add ?run=1 to this URL to import.',
       });
     }
 
-    if (req.method !== 'POST') return res.status(405).json({ error: 'GET (probe) or POST (import) only' });
     const token = process.env.TG_Blob_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
     if (!token) return res.status(500).json({ ok: false, error: 'Blob storage not configured' });
     const { put } = await import('@vercel/blob');
