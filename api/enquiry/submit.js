@@ -836,32 +836,24 @@ export default async function handler(req, res) {
     return errorResponse(res, 404, 'form_not_found', 'Form not found.');
   }
 
-  // 7. Origin check — open by default, opt-in restriction.
+  // 7. Origin check — informational only, NEVER blocking.
   //
-  // Travelgenix's model is open: travel agents embed each form on whatever
-  // sites they own, and we don't pre-register those sites. So an empty
-  // Allowed Origins field means "accept submissions from any origin." This
-  // matches the standard form-builder convention (Tally, Typeform, Formspark).
+  // Product principle: a widget must work on ANY site it is embedded on. Agents
+  // embed each form on whatever sites they own and we do not pre-register them,
+  // so we never reject on origin — doing so silently broke a live client embed.
+  // A mismatch against an agent's optional Allowed Origins list is recorded for
+  // telemetry, but the submission still goes through.
   //
-  // The actual abuse defences live elsewhere: the form ID is unguessable,
-  // the per-form rate limit (strict / standard / lenient) caps submissions
-  // per minute regardless of origin, the honeypot drops bots silently, and
-  // Turnstile blocks non-humans when the agent enables it. The origin check
-  // exists only as a belt-and-braces option for agents who actively want to
-  // restrict to specific sites — populating Allowed Origins switches the
-  // form into restricted mode.
+  // Abuse is handled without an origin gate: the form ID is unguessable, the
+  // per-form rate limit caps submissions per minute, the honeypot drops bots
+  // silently, and Turnstile blocks non-humans when the agent enables it.
   const formAllowList = parseAllowedOrigins(form.fields[FORM_FIELDS.allowedOrigins]);
-  const restrictedMode = formAllowList.length > 0;
   const origin = (req.headers.origin || '').toLowerCase();
 
-  if (restrictedMode) {
-    // Agent has opted in to origin restriction. Their list plus our demo
-    // origins (which are always permitted so the editor preview keeps working).
+  if (formAllowList.length && origin) {
     const allowedOrigins = [...formAllowList, ...DEMO_ORIGINS.map(s => s.toLowerCase())];
-    if (origin && !allowedOrigins.includes(origin)) {
-      console.warn('[submit] Origin rejected (restricted mode):', { formId: payload.formId, origin });
-      return errorResponse(res, 403, 'origin_not_allowed',
-        'This origin is not permitted to submit to this form.');
+    if (!allowedOrigins.includes(origin)) {
+      console.warn('[submit] Origin not in allowlist (allowed anyway):', { formId: payload.formId, origin });
     }
   }
 
