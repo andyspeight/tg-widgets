@@ -68,7 +68,7 @@
 
   const API_BASE = resolveApiOrigin();
 
-  const VERSION = '1.0.3';
+  const VERSION = '1.0.4';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (nav controls, badges, rating wording, the localised
@@ -1133,6 +1133,8 @@
         const total = this._filtered().length;
         if (total > 1) {
           this.state.featuredTimer = setInterval(() => {
+            // Stop if the host was removed without destroy() (SPA client sites).
+            if (this.host && !this.host.isConnected) { this.destroy(); return; }
             this.state.featuredIndex = (this.state.featuredIndex + 1) % total;
             this.render();
           }, 6500);
@@ -1155,7 +1157,11 @@
       // Carousel autoplay
       if (this.c.layout === 'carousel' && this.c.carousel.autoplay && !this._prefersReducedMotion()) {
         const interval = clamp(this.c.carousel.interval, 2000, 20000);
-        this.state.carouselTimer = setInterval(() => this._carouselStep('next'), interval);
+        this.state.carouselTimer = setInterval(() => {
+          // Stop if the host was removed without destroy() (SPA client sites).
+          if (this.host && !this.host.isConnected) { this.destroy(); return; }
+          this._carouselStep('next');
+        }, interval);
         if (track) {
           track.addEventListener('mouseenter', () => clearInterval(this.state.carouselTimer));
         }

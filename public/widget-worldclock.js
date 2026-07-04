@@ -19,7 +19,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.2';
+  const VERSION = '1.0.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the default heading and the "same time" offset label).
@@ -220,6 +220,10 @@
     }
 
     _tick() {
+      // Self-terminate if the host was removed from the page without destroy()
+      // being called (common on SPA client sites) — otherwise this interval
+      // keeps firing every second against a detached shadow tree.
+      if (this.el && !this.el.isConnected) { this.destroy(); return; }
       const c = this.cfg;
       const now = new Date();
       const viewerOff = -now.getTimezoneOffset();

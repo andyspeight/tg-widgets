@@ -36,7 +36,7 @@
     return '/api/widget-config';
   }
   var API_BASE = resolveConfigApi();
-  var VERSION = '1.0.2';
+  var VERSION = '1.0.3';
   var TAU = Math.PI * 2;
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -552,6 +552,10 @@
   };
 
   TGLoaderWidget.prototype._frame = function (now) {
+    // Self-terminate if the host was removed from the page without destroy()
+    // being called (common on SPA client sites) — otherwise this rAF loop runs
+    // forever against a detached shadow tree.
+    if (!this.el || !this.el.isConnected) { this.destroy(); return; }
     if (!this._start) this._start = now;
     var dur = this.cfg.durationMs / this.cfg.speed;
     var t = ((now - this._start) % dur) / dur;
