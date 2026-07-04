@@ -59,7 +59,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.2.2';
+  const VERSION = '1.2.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome, per language. English is the source + fallback. The author's
@@ -684,6 +684,11 @@
       merged.search = Object.assign({}, base.search, (c && c.search) || {});
       merged.cta = Object.assign({}, base.cta, (c && c.cta) || {});
       merged.seo = Object.assign({}, base.seo, (c && c.seo) || {});
+      // Config is untrusted — a non-array questions/categories (e.g. a string or
+      // object) would throw in _prepareQuestions/_localizedConfig and kill the
+      // whole widget. Coerce to arrays.
+      merged.questions = Array.isArray(merged.questions) ? merged.questions : [];
+      merged.categories = Array.isArray(merged.categories) ? merged.categories : [];
       return merged;
     }
 
