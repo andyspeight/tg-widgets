@@ -59,6 +59,11 @@ const DISPATCHERS = {
 
 const DISPATCH_TIMEOUT_MS = 15_000;
 
+// Shown to the visitor only when a lead could not be captured anywhere — not
+// in the master Submissions store and not by any destination. In that one case
+// we must not report success, or the lead is silently lost.
+const LEAD_NOT_CAPTURED_MESSAGE = 'Sorry, we could not save your details just now. Please try again in a moment.';
+
 // ── Public API ──────────────────────────────────────────────────────────
 
 /**
@@ -105,9 +110,12 @@ export async function dispatchLead(input, options = {}) {
   if (filteredJobs.length === 0) {
     // No destinations configured — that's fine, the Submissions record is
     // the lead's home. Many simple deployments will use only the Airtable
-    // inbox.
+    // inbox. But if that master write ALSO failed, the lead is captured
+    // nowhere, so don't report success — ask the visitor to try again.
     return {
-      ok: true,
+      ok: !!submissionRecordId,
+      error: submissionRecordId ? undefined : LEAD_NOT_CAPTURED_MESSAGE,
+      statusCode: submissionRecordId ? undefined : 503,
       leadId: lead.leadId,
       submissionRecordId,
       completed: [],
@@ -140,8 +148,16 @@ export async function dispatchLead(input, options = {}) {
     }
   }
 
+  // The lead is safe if it reached the master Submissions store OR at least one
+  // destination. Only when it landed NOWHERE (master write failed and every
+  // destination failed) do we surface an error, so the visitor can retry
+  // instead of being falsely told it worked. Partial destination failures with
+  // the lead safely in Submissions stay ok:true and are captured in failed[].
+  const captured = !!submissionRecordId || completed.length > 0;
   return {
-    ok: true,
+    ok: captured,
+    error: captured ? undefined : LEAD_NOT_CAPTURED_MESSAGE,
+    statusCode: captured ? undefined : 503,
     leadId: lead.leadId,
     submissionRecordId,
     completed,
