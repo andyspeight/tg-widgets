@@ -18,7 +18,7 @@
 //
 // =============================================================================
 
-import { applyRateLimit, isValidEmail } from './_auth.js';
+import { applyRateLimit, isValidEmail, sanitiseForFormula } from './_auth.js';
 import { dispatchLead } from './_lib/routing/router.js';
 
 const ENQUIRIES_BASE_ID = process.env.TG_ENQUIRIES_AIRTABLE_BASE_ID;
@@ -59,32 +59,41 @@ function splitName(full) {
   return { first: parts[0], last: parts.slice(1).join(' ') };
 }
 
-// Look up the popup widget record to resolve client identity.
-// Cached per cold start.
+// Resolve the popup widget record from its public WidgetID (tgw_...).
+// Returns { recordId (rec...), clientName, clientEmail } or null.
+// The widget posts its public WidgetID, but routing + the canonical lead are
+// keyed on the Airtable record ID, so we must resolve one to the other here.
+// This must be a filterByFormula lookup on {WidgetID}, NOT a direct record GET —
+// widgetId is the public tgw_... value, not the Airtable record ID. Mirrors the
+// working newsletter-submit resolver. Cached per cold start.
 const widgetCache = new Map();
 async function resolveWidget(widgetId) {
   if (!widgetId || !WIDGETS_BASE_ID || !WIDGETS_PAT) return null;
   if (widgetCache.has(widgetId)) return widgetCache.get(widgetId);
 
   try {
-    const url = `https://api.airtable.com/v0/${WIDGETS_BASE_ID}/${WIDGETS_TABLE_ID}/${widgetId}`;
+    const safeId = sanitiseForFormula(widgetId);
+    const formula = encodeURIComponent(`{WidgetID} = '${safeId}'`);
+    const url = `https://api.airtable.com/v0/${WIDGETS_BASE_ID}/${WIDGETS_TABLE_ID}?filterByFormula=${formula}&maxRecords=1`;
     const resp = await fetch(url, {
       headers: { 'Authorization': `Bearer ${WIDGETS_PAT}` },
     });
     if (!resp.ok) {
-      widgetCache.set(widgetId, null);
+      // Don't cache transient Airtable failures as "not found" — a 429/5xx here
+      // must not poison the cache for the rest of this instance's life.
       return null;
     }
     const data = await resp.json();
-    // Field IDs we care about — these match the existing widget schema.
-    // We don't have field IDs for client name/email here; we'll use whatever
-    // the editor stamped in. Best-effort lookup.
-    const fields = data.fields || {};
+    const record = data.records && data.records[0];
+    if (!record) {
+      widgetCache.set(widgetId, null);
+      return null;
+    }
+    const fields = record.fields || {};
     const widget = {
-      recordId: data.id,
-      // Try common field name patterns
-      clientName: fields['Client Name'] || fields['Client'] || '',
-      clientEmail: fields['Client Email'] || fields['Email'] || '',
+      recordId: record.id,
+      clientName: fields['ClientName'] || fields['Client Name'] || fields['Client'] || '',
+      clientEmail: fields['ClientEmail'] || fields['Client Email'] || fields['Email'] || '',
     };
     widgetCache.set(widgetId, widget);
     return widget;
@@ -152,7 +161,7 @@ export default async function handler(req, res) {
     res.status(400).json({ error: 'Invalid email' });
     return;
   }
-  if (!widgetId || !/^rec[A-Za-z0-9]{14}$/.test(widgetId)) {
+  if (!widgetId || !/^tgw_[A-Za-z0-9_]+$/.test(widgetId)) {
     res.status(400).json({ error: 'Invalid widget ID' });
     return;
   }
