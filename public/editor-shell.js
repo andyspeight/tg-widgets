@@ -609,6 +609,15 @@
 
   async function doSave() {
     if (!ensureAuth()) return;
+    // Optional editor veto. An editor can supply canSave() to block a save it
+    // knows would be destructive — chiefly when its config failed to load, so
+    // saving now would overwrite the real record with blank defaults. Returning
+    // false (the editor shows its own message) aborts before any state change.
+    if (typeof opts.canSave === 'function') {
+      let allowed = true;
+      try { allowed = opts.canSave() !== false; } catch (e) { console.error('[tgse] canSave threw', e); }
+      if (!allowed) return;
+    }
     if (typeof opts.getConfig !== 'function') {
       console.error('[tgse] getConfig() not provided in init()');
       return;

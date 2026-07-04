@@ -393,6 +393,9 @@ let C = {
   reviews: []
 };
 let wId = null, dark = false, tab = 'design', dm = false;
+// Set when a load fails for an existing ?id= — blocks a destructive save that
+// would overwrite the real record with template defaults.
+let loadError = false;
 let hist = [], histIdx = -1;
 let openSecs = {}, openRevs = {};
 let shell = null;
@@ -847,12 +850,17 @@ async function loadWidget(id) {
     const d = await r.json();
     Object.assign(C, d);
     document.getElementById('name-input').value = C.place?.name || '';
+    loadError = false;
     snap(); ren(); renP();
     tgse.toast('Loaded', 'ok');
   } catch (e) {
+    // Load failed — wId still points at the real record but C now holds only
+    // template defaults. Flag it so a save can't overwrite the good data.
+    loadError = true;
     C.reviews = JSON.parse(JSON.stringify(TPL[0].reviews));
     C.place = { ...TPL[0].place };
     snap(); ren(); renP();
+    tgse.toast('Could not load that widget. Saving is disabled to protect it — reload to try again.', 'err');
   }
 }
 
@@ -880,6 +888,13 @@ shell = tgse.init({
   scriptFile: 'widget-reviews.js',
 
   getConfig: () => C,
+  canSave: () => {
+    if (loadError) {
+      tgse.toast('Not saving — this widget could not be loaded, so saving now would overwrite it with a blank one. Reload the page to try again.', 'err');
+      return false;
+    }
+    return true;
+  },
   setConfig: (c) => { Object.assign(C, c); ren(); renP(); },
 
   fontPickerEl: '#fontPickerMount',

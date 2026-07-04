@@ -50,7 +50,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.2';
+  const VERSION = '1.0.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the "Unnamed" fallback, contact aria-labels and the
@@ -117,6 +117,24 @@
     // Bare domain (e.g. "linkedin.com/in/jane") — prepend https
     if (/^[a-z0-9.-]+\.[a-z]{2,}/i.test(s)) return 'https://' + s;
     return '';
+  }
+
+  /**
+   * Load the chosen Google Font on the host page so it is actually available on
+   * the client's site (a font defined at document level applies inside shadow
+   * roots). Once per family; the Inter default needs no load. On a CSP-restricted
+   * site the stylesheet is blocked and the widget falls back to system fonts,
+   * exactly as before — no worse.
+   */
+  function ensureFont(family) {
+    if (!family || family === 'Inter' || typeof document === 'undefined') return;
+    const id = 'tg-font-' + String(family).toLowerCase().replace(/\s+/g, '-');
+    if (document.getElementById(id)) return;
+    const l = document.createElement('link');
+    l.id = id;
+    l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(family).replace(/%20/g, '+') + ':ital,wght@0,400;0,500;0,600;1,400&display=swap';
+    document.head.appendChild(l);
   }
 
   /** Image URLs: allow data:image/* for inline placeholders, block scripts. */
@@ -783,6 +801,7 @@
       if (!container) throw new Error('[TGTeam] no container');
       this.el = container;
       this.cfg = this._mergeConfig(config);
+      ensureFont(this.cfg.fontFamily);
       this.t = makeT(this.cfg);   // resolve viewer language + UI strings
       this.activeDept = '__all__';
       this.activeIdx = 0;
@@ -1244,13 +1263,21 @@
       if (el.__tgInited) continue;
       el.__tgInited = true;
       let cfg = null;
+      let loadFailed = false;
       const inline = el.getAttribute('data-tg-config');
       if (inline) {
         try { cfg = JSON.parse(inline); } catch (e) { cfg = null; }
       } else {
         const id = el.getAttribute('data-tg-id');
-        if (id) cfg = await fetchConfig(id);
+        if (id) {
+          cfg = await fetchConfig(id);
+          if (!cfg) loadFailed = true; // a real embed whose config could not load
+        }
       }
+      // A live embed (data-tg-id) whose config failed to load — bad id, deleted
+      // widget, or an API outage — must NOT fall back to the built-in sample
+      // team on the client's site. Leave the container empty instead.
+      if (loadFailed) continue;
       try {
         new TGTeamWidget(el, cfg || {});
       } catch (e) {

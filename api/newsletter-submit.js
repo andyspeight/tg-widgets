@@ -57,7 +57,14 @@ function sanitiseString(s, max) {
 // Returns { recordId (rec...), clientName, clientEmail, widgetType } or null.
 // The widget posts its public WidgetID, but routing + the canonical lead are
 // keyed on the Airtable record ID, so we must resolve one to the other here.
-// Cached per cold start.
+//
+// Cache: per cold start, POSITIVE resolutions only. We must never cache a null,
+// because a transient Airtable failure (429 rate-limit or 5xx) would then be
+// pinned for the whole life of the warm instance — every subsequent newsletter
+// signup for that widget would 404 and the lead would be silently dropped until
+// Vercel recycled the instance. A genuinely-missing widget is cheap to re-look-up
+// and rate-limiting already guards against abuse, so we simply re-query on any
+// miss rather than remembering the miss.
 const widgetCache = new Map();
 async function resolveWidget(widgetId) {
   if (!widgetId || !WIDGETS_BASE_ID || !WIDGETS_PAT) return null;
@@ -73,13 +80,14 @@ async function resolveWidget(widgetId) {
       headers: { 'Authorization': `Bearer ${WIDGETS_PAT}` },
     });
     if (!resp.ok) {
-      widgetCache.set(widgetId, null);
+      // Transient upstream failure — do NOT cache. Retry on the next signup.
+      console.error('[newsletter-submit] Widget lookup upstream', resp.status, 'for', widgetId);
       return null;
     }
     const data = await resp.json();
     const record = data.records && data.records[0];
     if (!record) {
-      widgetCache.set(widgetId, null);
+      // Genuinely not found (or not yet visible) — do NOT cache the miss.
       return null;
     }
     const fields = record.fields || {};
