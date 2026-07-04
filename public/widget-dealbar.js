@@ -17,7 +17,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.1';
+  const VERSION = '1.0.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome and localized defaults. The CTA label is author content and
@@ -337,7 +337,11 @@
       this.clock.innerHTML = parts.join('');
     }
 
-    _tick() { this._renderClock(); }
+    _tick() {
+      // Stop the clock if the host was removed without destroy() (SPA sites).
+      if (this.el && !this.el.isConnected) { this.destroy(); return; }
+      this._renderClock();
+    }
 
     dismiss(silent) {
       if (this._dismissed) return;

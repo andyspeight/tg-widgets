@@ -18,7 +18,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.3.2';
+  const VERSION = '1.3.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (navigation controls and structural aria-labels).
@@ -759,7 +759,11 @@
       if (!this.queue || this.queue.length < 2) return;
       this._stop();
       const self = this;
-      this.timer = setInterval(function () { self._next(); }, this.cfg.interval * 1000);
+      this.timer = setInterval(function () {
+        // Stop autoplay if the host was removed without destroy() (SPA sites).
+        if (self.el && !self.el.isConnected) { self.destroy(); return; }
+        self._next();
+      }, this.cfg.interval * 1000);
     }
     _stop() { if (this.timer) { clearInterval(this.timer); this.timer = null; } }
     _restart() { this._stop(); this._start(); }
