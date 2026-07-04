@@ -6331,11 +6331,40 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
         }),
         toggleRow({
           label: 'Cloudflare Turnstile',
-          sub: 'Privacy-friendly CAPTCHA for when honeypot alone is not enough. Requires Turnstile site key in your account.',
+          sub: 'Privacy-friendly CAPTCHA for when honeypot alone is not enough. Needs a Turnstile site key (below).',
           checked: !!sec.turnstile,
-          onChange: (v) => { sec.turnstile = v; save(); }
+          // Re-render so the site-key field and the missing-key warning appear
+          // or disappear the moment the toggle changes.
+          onChange: (v) => { sec.turnstile = v; save(); renderInspector(); }
         })
       ]));
+
+      // Site-key field + go-live warning. The widget only runs Turnstile when a
+      // key is present, so Turnstile-on-without-a-key silently does nothing —
+      // the agent thinks the form is protected when only the honeypot is active.
+      // Surface it here rather than shipping a broken CAPTCHA to the live form.
+      if (sec.turnstile) {
+        body.appendChild(section('Turnstile site key', [
+          labelledInput({
+            label: 'Cloudflare Turnstile site key',
+            value: sec.turnstileSiteKey || '',
+            placeholder: '0x4AAAAAAA...',
+            maxlength: 80,
+            hint: 'From your Cloudflare Turnstile dashboard. Without it the security check will not run.',
+            onInput: (v) => { sec.turnstileSiteKey = v.trim(); save(); renderInspector(); }
+          })
+        ]));
+
+        if (!sec.turnstileSiteKey) {
+          const warn = document.createElement('div');
+          warn.className = 'insp-section';
+          const inner = document.createElement('div');
+          inner.style.cssText = 'padding:12px;background:var(--danger-soft);border-left:3px solid var(--warning);border-radius:7px;font-size:12px;line-height:1.6;color:var(--sub);';
+          inner.innerHTML = '<strong style="color:var(--ink)">Turnstile is on but has no site key.</strong> The security check will not run, so this form is protected by the honeypot only. Paste your Turnstile site key above, or turn Turnstile off.';
+          warn.appendChild(inner);
+          body.appendChild(warn);
+        }
+      }
 
       // Rate limiting
       body.appendChild(section('Rate limiting', [
