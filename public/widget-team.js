@@ -119,6 +119,24 @@
     return '';
   }
 
+  /**
+   * Load the chosen Google Font on the host page so it is actually available on
+   * the client's site (a font defined at document level applies inside shadow
+   * roots). Once per family; the Inter default needs no load. On a CSP-restricted
+   * site the stylesheet is blocked and the widget falls back to system fonts,
+   * exactly as before — no worse.
+   */
+  function ensureFont(family) {
+    if (!family || family === 'Inter' || typeof document === 'undefined') return;
+    const id = 'tg-font-' + String(family).toLowerCase().replace(/\s+/g, '-');
+    if (document.getElementById(id)) return;
+    const l = document.createElement('link');
+    l.id = id;
+    l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(family).replace(/%20/g, '+') + ':ital,wght@0,400;0,500;0,600;1,400&display=swap';
+    document.head.appendChild(l);
+  }
+
   /** Image URLs: allow data:image/* for inline placeholders, block scripts. */
   function safeImageUrl(u) {
     if (!u) return '';
@@ -783,6 +801,7 @@
       if (!container) throw new Error('[TGTeam] no container');
       this.el = container;
       this.cfg = this._mergeConfig(config);
+      ensureFont(this.cfg.fontFamily);
       this.t = makeT(this.cfg);   // resolve viewer language + UI strings
       this.activeDept = '__all__';
       this.activeIdx = 0;

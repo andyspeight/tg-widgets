@@ -68,7 +68,7 @@
 
   const API_BASE = resolveApiOrigin();
 
-  const VERSION = '1.0.1';
+  const VERSION = '1.0.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (nav controls, badges, rating wording, the localised
@@ -139,6 +139,29 @@
   function safeColor(c, fallback) {
     if (typeof c !== 'string') return fallback;
     return /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/.test(c.trim()) ? c.trim() : fallback;
+  }
+
+  /** Validate a CSS font-family value before interpolating into a <style> block.
+   *  Only letters, digits, spaces, commas, quotes and hyphens; capped length.
+   *  Anything else (braces, semicolons, url(), etc.) falls back safely. */
+  function safeFontStack(v, fb) {
+    const s = String(v == null ? '' : v).trim();
+    return (s && s.length <= 120 && /^[A-Za-z0-9 ,"'-]+$/.test(s)) ? s : fb;
+  }
+
+  /** Inject a Google Fonts stylesheet link so a client-chosen web font actually
+   *  loads on the client's own site (the link in document.head applies inside
+   *  shadow roots too). Once per family. Skips Inter and empty values. CSP-blocked
+   *  sites simply fall back to the system stack, no regression. */
+  function ensureFont(family) {
+    if (!family || family === 'Inter' || typeof document === 'undefined') return;
+    const id = 'tg-font-' + String(family).toLowerCase().replace(/\s+/g, '-');
+    if (document.getElementById(id)) return;
+    const l = document.createElement('link');
+    l.id = id;
+    l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(family).replace(/%20/g, '+') + ':ital,wght@0,400;0,500;0,600;1,400&display=swap';
+    document.head.appendChild(l);
   }
 
   /** Clamp a number between min and max. */
@@ -698,6 +721,7 @@
     constructor(host, config) {
       this.host = host;
       this.c = this._mergeConfig(config);
+      ensureFont(this.c.fontFamily); // load the chosen web font on the client site
       this.t = makeT(this.c);   // resolve viewer language + UI strings
       this.state = {
         activeFilter: 'all',    // trip-type chip filter
@@ -731,6 +755,8 @@
       const T = ['light', 'dark', 'auto'];
       if (!T.includes(merged.theme)) merged.theme = 'auto';
       merged.gridCols = clamp(merged.gridCols, 2, 3);
+      // Validate the font-family before it reaches the <style> block (XSS sink)
+      merged.fontFamily = safeFontStack(merged.fontFamily, '');
       // Normalise testimonials array
       merged.testimonials = Array.isArray(merged.testimonials)
         ? merged.testimonials.map((t, i) => this._normaliseTestimonial(t, i)).filter(Boolean)
