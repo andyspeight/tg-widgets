@@ -15,7 +15,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.1';
+  const VERSION = '1.0.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the localised default stat labels used when the
@@ -70,6 +70,15 @@
 
   const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const hexOk = (v) => /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(v || '').trim());
+  // A font-family value is interpolated into the shadow <style> block, so it must
+  // never carry CSS-breakout characters ( < > { } ; : ( ) etc). Allow only what a
+  // real font-family stack needs — names, spaces, commas and quotes — otherwise
+  // fall back. Prevents a saved fontFamily like `x}</style><img onerror=...>` from
+  // escaping the style element and executing on the client's page.
+  const safeFontStack = (v, fb) => {
+    const s = String(v == null ? '' : v).trim();
+    return (s && s.length <= 120 && /^[A-Za-z0-9 ,"'-]+$/.test(s)) ? s : fb;
+  };
   const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
 
   function fmtNumber(n, decimals) {
@@ -135,7 +144,7 @@
         align: c.align === 'left' ? 'left' : 'center',
         animate: c.animate !== false,
         theme: c.theme === 'dark' ? 'dark' : 'light',
-        fontFamily: typeof c.fontFamily === 'string' && c.fontFamily ? c.fontFamily : 'Inter, system-ui, sans-serif',
+        fontFamily: safeFontStack(c.fontFamily, 'Inter, system-ui, sans-serif'),
         previewMode: !!c.previewMode,
       };
     }
