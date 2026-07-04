@@ -56,7 +56,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.2.1';
+  const VERSION = '1.2.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the unit labels and the dismiss control). The expiry
@@ -893,7 +893,11 @@
       // Start ticking only if there's a live countdown
       if (!isExpired || repeating) {
         this._tick(true);
-        this._timerId = setInterval(() => this._tick(false), 1000);
+        this._timerId = setInterval(() => {
+          // Stop ticking if the host was removed without destroy() (SPA sites).
+          if (this.el && !this.el.isConnected) { this.destroy(); return; }
+          this._tick(false);
+        }, 1000);
       }
     }
 

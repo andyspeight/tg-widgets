@@ -32,7 +32,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.2.0';
+  var WIDGET_VERSION = '1.2.1';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (labels, placeholders, step names, buttons, validation,
@@ -1606,8 +1606,11 @@
     var self = this, S = this.S, c = this.config;
     var fields = this._buildFields();
 
-    // Preview / no formId — flash success without hitting the pipeline.
-    if (!c.formId || c.formId === 'preview') {
+    // Preview / no formId — flash success without hitting the pipeline. A LIVE
+    // embed (isLiveEmbed, set by initContainer) never takes this path even with
+    // a blank formId, so a misconfigured widget errors on the real submit
+    // instead of flashing fake success and dropping the lead.
+    if (!c.isLiveEmbed && (!c.formId || c.formId === 'preview')) {
       this._renderDone();
       return;
     }
@@ -1646,9 +1649,13 @@
   // ---- success ---------------------------------------------------------------
   TGEnquiryProWidget.prototype._renderDone = function (body) {
     var S = this.S, c = this.config;
-    // custom redirect
+    // custom redirect — http(s) only. redirectUrl is untrusted config; without
+    // this guard a `javascript:`/`data:` value would execute on the client page
+    // on every successful submit. A non-http(s) value falls through to the
+    // normal inline thank-you rather than navigating.
     if (c.thankYou && c.thankYou.mode === 'redirect' && c.thankYou.redirectUrl) {
-      try { location.href = c.thankYou.redirectUrl; return; } catch (e) {}
+      var ru = String(c.thankYou.redirectUrl).trim();
+      if (/^https?:\/\//i.test(ru)) { try { location.href = ru; return; } catch (e) {} }
     }
     while (this.card.firstChild) this.card.removeChild(this.card.firstChild);
     var done = document.createElement('div'); done.className = 'ep-done';
@@ -1713,7 +1720,7 @@
     var widgetId = container.getAttribute('data-tg-id');
     var inline = container.getAttribute('data-tg-config');
     if (inline) {
-      try { new TGEnquiryProWidget(container, JSON.parse(inline)); return; }
+      try { var icfg = JSON.parse(inline); icfg.isLiveEmbed = true; new TGEnquiryProWidget(container, icfg); return; }
       catch (e) { console.error('[TGEnquiryProWidget] Invalid data-tg-config JSON:', e); }
     }
     if (!widgetId) { console.error('[TGEnquiryProWidget] Container missing data-tg-id'); return; }
@@ -1732,7 +1739,7 @@
         if (!res.ok) { renderOops(shadow, (res.d && res.d.error) || t('oopsLoad'), t); tgReport('error', widgetId, 'config load failed', (res.d && res.d.error) || 'HTTP error'); return; }
         var w = Object.create(TGEnquiryProWidget.prototype);
         w.instance = ++INSTANCE_COUNTER; w.container = container; w.shadow = shadow; w.widgetId = widgetId;
-        w.t = makeT(res.d); w.config = w._normalise(res.d); w._resetState(); w._render();
+        w.t = makeT(res.d); w.config = w._normalise(res.d); w.config.isLiveEmbed = true; w._resetState(); w._render();
         container.__tgWidget = w;
         tgReport('load', widgetId, 'ok');
       })

@@ -43,7 +43,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.1';
+  const VERSION = '1.0.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (day names, status words, opening-time phrases). The
@@ -124,6 +124,18 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
+  }
+
+  // Config accent and font reach the root style attribute — validate at source
+  // so they can't add declarations or break out; the string is also esc()'d at
+  // injection as a second layer.
+  function safeColor(v, fb) {
+    const s = String(v == null ? '' : v).trim();
+    return /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/.test(s) ? s : fb;
+  }
+  function safeFontStack(v, fb) {
+    const s = String(v == null ? '' : v).trim();
+    return (s && s.length <= 120 && /^[A-Za-z0-9 ,"'-]+$/.test(s)) ? s : fb;
   }
 
   function cleanPhone(p) {
@@ -671,7 +683,7 @@
         fontFamily: typeof cfg.fontFamily === 'string' ? cfg.fontFamily : '',
         theme: {
           mode: cfg.theme && cfg.theme.mode === 'dark' ? 'dark' : 'light',
-          accent: (cfg.theme && cfg.theme.accent) || '#1B2B5B',
+          accent: safeColor(cfg.theme && cfg.theme.accent, '#1B2B5B'),
           radius: cfg.theme && Number.isFinite(Number(cfg.theme.radius)) ? Number(cfg.theme.radius) : 14,
         },
       };
@@ -683,9 +695,9 @@
       const parts = [];
       if (t.accent) parts.push(`--tgho-accent:${t.accent}`);
       if (Number.isFinite(t.radius)) parts.push(`--tgho-radius:${t.radius}px`);
-      if (this.c.fontFamily && typeof this.c.fontFamily === 'string') {
-        const safe = this.c.fontFamily.replace(/'/g, '');
-        parts.push(`font-family:'${safe}', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`);
+      const safe = safeFontStack(this.c.fontFamily, '');
+      if (safe) {
+        parts.push(`font-family:'${safe.replace(/'/g, '')}', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`);
       }
       return parts.join(';');
     }
@@ -700,7 +712,7 @@
     _render() {
       const cfg = this.c;
       const status = cfg.showStatus ? evalStatus(cfg.hours, cfg.holidays, new Date(), cfg.timeFormat, this.t) : null;
-      const themeStyle = this._themeStyle();
+      const themeStyle = esc(this._themeStyle());
 
       let inner = '';
       if (cfg.layout === 'list') inner = this._renderList(status);
@@ -977,6 +989,9 @@
       const now = new Date();
       const msUntilNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
       this._tickTimer = setTimeout(() => {
+        // Stop the minute loop (and the document listeners destroy() removes) if
+        // the host was removed without destroy() (SPA client sites).
+        if (this.el && !this.el.isConnected) { this.destroy(); return; }
         this._render();
         this._scheduleTick();
       }, Math.max(1000, msUntilNextMinute));

@@ -63,7 +63,7 @@
     } catch (e) { /* fall through */ }
     return '/api/whatsapp-track';
   })();
-  const VERSION = '1.0.1';
+  const VERSION = '1.0.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (weekday names, online/away status, chat controls and
@@ -215,6 +215,18 @@
     if (/^javascript:/i.test(s) || /^vbscript:/i.test(s)) return '';
     if (/^data:/i.test(s) && !/^data:image\//i.test(s)) return '';
     return s;
+  }
+
+  // Config colours and font reach the root style attribute — validate at source
+  // so they can't add declarations or break out of the attribute (the string is
+  // also esc()'d at injection as a second layer).
+  function safeColor(v, fb) {
+    const s = String(v == null ? '' : v).trim();
+    return /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/.test(s) ? s : fb;
+  }
+  function safeFontStack(v, fb) {
+    const s = String(v == null ? '' : v).trim();
+    return (s && s.length <= 120 && /^[A-Za-z0-9 ,"'-]+$/.test(s)) ? s : fb;
   }
 
   // Strip everything that isn't a digit. WhatsApp expects E.164 without the +.
@@ -977,7 +989,7 @@
       // to it. Author-entered values always win over the localised default.
       const t = makeT(cfg);
       const agentsRaw = Array.isArray(cfg.agents) ? cfg.agents : [];
-      const agents = agentsRaw.map(a => ({
+      const agents = agentsRaw.filter(a => a && typeof a === 'object').map(a => ({
         name: typeof a.name === 'string' ? a.name : '',
         role: typeof a.role === 'string' ? a.role : '',
         phone: typeof a.phone === 'string' ? a.phone : '',
@@ -1074,8 +1086,8 @@
         fontFamily: typeof cfg.fontFamily === 'string' ? cfg.fontFamily : '',
         theme: {
           mode: cfg.theme && cfg.theme.mode === 'dark' ? 'dark' : 'light',
-          brand: (cfg.theme && cfg.theme.brand) || '#25D366',
-          brandDark: (cfg.theme && cfg.theme.brandDark) || '#128C7E',
+          brand: safeColor(cfg.theme && cfg.theme.brand, '#25D366'),
+          brandDark: safeColor(cfg.theme && cfg.theme.brandDark, '#128C7E'),
           radius: cfg.theme && Number.isFinite(Number(cfg.theme.radius)) ? Number(cfg.theme.radius) : 16,
         },
       };
@@ -1087,9 +1099,9 @@
       if (t.brand) parts.push(`--tgwa-brand:${t.brand}`);
       if (t.brandDark) parts.push(`--tgwa-brand-dark:${t.brandDark}`);
       if (Number.isFinite(t.radius)) parts.push(`--tgwa-radius:${t.radius}px`);
-      if (this.c.fontFamily && typeof this.c.fontFamily === 'string') {
-        const safe = this.c.fontFamily.replace(/'/g, '');
-        parts.push(`font-family:'${safe}', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`);
+      const safe = safeFontStack(this.c.fontFamily, '');
+      if (safe) {
+        parts.push(`font-family:'${safe.replace(/'/g, '')}', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`);
       }
       return parts.join(';');
     }
@@ -1145,7 +1157,9 @@
     _render() {
       const cfg = this.c;
       const status = this._hoursStatus();
-      const themeStyle = this._themeStyle();
+      // esc() the assembled style string as a second layer over the source
+      // validation, so it can never break out of the style="..." attribute.
+      const themeStyle = esc(this._themeStyle());
 
       // Hide floating/vertical widget entirely when closed and hideWhenClosed is on
       const isFloatingType = cfg.layout === 'floating' || cfg.layout === 'vertical';

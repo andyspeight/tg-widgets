@@ -45,7 +45,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.2';
 
   // ---------- Helpers ----------
   function esc(s) {
@@ -67,12 +67,18 @@
   function safeColor(c, fallback) {
     if (!c) return fallback;
     const s = String(c).trim();
-    // Allow hex, rgb/rgba, hsl/hsla, named colours
+    // Fully anchored — the rgb/hsl bodies may only contain numeric tokens, so a
+    // value like 'rgb(0,0,0);position:fixed;...' can't inject CSS declarations.
     if (/^#[0-9a-f]{3,8}$/i.test(s)) return s;
-    if (/^rgba?\(/i.test(s) && !/[<>"'`]/.test(s)) return s;
-    if (/^hsla?\(/i.test(s) && !/[<>"'`]/.test(s)) return s;
+    if (/^rgba?\([0-9.,\s%]+\)$/i.test(s)) return s;
+    if (/^hsla?\([0-9.,\s%deg]+\)$/i.test(s)) return s;
     if (/^[a-z]+$/i.test(s)) return s;
     return fallback;
+  }
+
+  function safeFontStack(v, fb) {
+    const s = String(v == null ? '' : v).trim();
+    return (s && s.length <= 120 && /^[A-Za-z0-9 ,"'-]+$/.test(s)) ? s : fb;
   }
 
   function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
@@ -596,7 +602,7 @@
         `--tgx-tracking: ${Number(c.letterSpacing).toFixed(3)}em`,
         `--tgx-leading: ${clamp(c.lineHeight, 0.8, 2.5)}`,
         `--tgx-align: ${['left','center','right'].includes(c.align) ? c.align : 'center'}`,
-        `--tgx-font: ${c.fontFamily ? `'${esc(c.fontFamily)}', Inter, sans-serif` : 'Inter, sans-serif'}`
+        `--tgx-font: ${(function () { const f = safeFontStack(c.fontFamily, ''); return f ? `'${f.replace(/'/g, '')}', Inter, sans-serif` : 'Inter, sans-serif'; })()}`
       ].join('; ');
 
       const themeAttr = c.theme === 'dark' ? 'dark' : 'light';
@@ -604,7 +610,7 @@
 
       this.shadow.innerHTML = `
         <style>${STYLES}</style>
-        <div class="tgx-root" data-theme="${themeAttr}" data-respect-reduced-motion="${reducedAttr}" style="${rootStyle}">
+        <div class="tgx-root" data-theme="${themeAttr}" data-respect-reduced-motion="${reducedAttr}" style="${esc(rootStyle)}">
           <div class="tgx-stage" data-mode="${esc(c.mode)}"></div>
         </div>
       `;
@@ -643,7 +649,14 @@
     }
 
     _setTimer(fn, delay) {
-      const t = setTimeout(fn, delay);
+      const self = this;
+      // Guard every scheduled callback: if the host was removed without
+      // destroy() (SPA client sites), tear down instead of running the loop
+      // forever against a detached shadow tree.
+      const t = setTimeout(function () {
+        if (self.el && !self.el.isConnected) { self.destroy(); return; }
+        fn();
+      }, delay);
       this._timers.push(t);
       return t;
     }

@@ -38,7 +38,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.1.0';
+  var WIDGET_VERSION = '1.1.1';
   var VISITOR_ID_KEY = 'tg_visitor_id_v1';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -1182,9 +1182,22 @@
   //  Styles — scoped to shadow DOM (same CSS as v0.3.0)
   // ============================================================================
 
+  // Colours and font are interpolated into the shadow <style> block. It's set
+  // via textContent so there's no </style> HTML breakout, but an unvalidated
+  // value could still inject CSS declarations/rules ( ; { } ) or break the
+  // quoted font name ( " ). Validate to hex / a plain font name.
+  function safeHexColour(v, fb) {
+    var s = String(v == null ? '' : v).trim();
+    return /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/.test(s) ? s : fb;
+  }
+  function safeFontName(v, fb) {
+    var s = String(v == null ? '' : v).trim();
+    return (s && s.length <= 60 && /^[A-Za-z0-9 ,-]+$/.test(s)) ? s : fb;
+  }
+
   function buildStyles(brand) {
-    var accent = (brand && brand.accentColour) || '#00B4D8';
-    var primary = (brand && brand.buttonColour) || '#1B2B5B';
+    var accent = safeHexColour(brand && brand.accentColour, '#00B4D8');
+    var primary = safeHexColour(brand && brand.buttonColour, '#1B2B5B');
     var isDark = (brand && brand.theme) === 'dark';
 
     // Base theme colour map — used as fallback when the user hasn't overridden
@@ -1205,24 +1218,28 @@
     // colour in the editor, it wins over the theme default. Leaving a value
     // blank falls back to the sensible theme-based default above.
     var c = {
-      bg:             (brand && brand.bgColour)     || base.bg,
+      bg:             safeHexColour(brand && brand.bgColour, base.bg),
       bgAlt:          base.bgAlt,
       bgTile:         base.bgTile,
-      border:         (brand && brand.borderColour) || base.border,
+      border:         safeHexColour(brand && brand.borderColour, base.border),
       borderLight:    base.borderLight,
-      text:           (brand && brand.textColour)   || base.text,
+      text:           safeHexColour(brand && brand.textColour, base.text),
       textSecondary:  base.textSecondary,
       textTertiary:   base.textTertiary
     };
-    var errorC = (brand && brand.errorColour) || '#DC2626';
+    var errorC = safeHexColour(brand && brand.errorColour, '#DC2626');
 
     // Corner radius — translates the editor's segmented value to actual px.
     // Applied to card, inputs, pills, chips, buttons. Keeps proportions sensible
     // (e.g. pills stay rounded even when "None" is picked so they still read
     // as pills, not rectangles).
     var radiusMap = { none: 0, small: 4, medium: 8, large: 14 };
-    var radiusCard = radiusMap[(brand && brand.cornerRadius) || 'medium'] * 2; // cards are rounder
-    var radiusInput = radiusMap[(brand && brand.cornerRadius) || 'medium'];
+    // Allow-list the enum: an unknown/typo value (config is untrusted) must fall
+    // back to the default, not yield undefined -> NaNpx.
+    var radiusVal = radiusMap[brand && brand.cornerRadius];
+    if (radiusVal == null) radiusVal = radiusMap.medium;
+    var radiusCard = radiusVal * 2; // cards are rounder
+    var radiusInput = radiusVal;
     var radiusBtn = radiusInput;
 
     // Field size — compact/comfortable/spacious affects input height, pill
@@ -1233,7 +1250,9 @@
       comfortable: { inputH: 44, pillH: 40, sectionY: 24, sectionX: 32 },
       spacious:    { inputH: 52, pillH: 46, sectionY: 32, sectionX: 36 }
     };
-    var sz = sizeMap[(brand && brand.fieldSize) || 'comfortable'];
+    // Allow-list the enum: an unknown fieldSize would leave sz undefined and
+    // throw on sz.sectionY below, so the whole form never renders (no lead).
+    var sz = sizeMap[brand && brand.fieldSize] || sizeMap.comfortable;
 
     // Field style — outlined (default), filled (light grey background, no
     // border), underlined (no side borders, only bottom underline).
@@ -1257,7 +1276,7 @@
     // at the top of the stylesheet. "system" means don't load anything,
     // just use the system font stack. Loading happens inside the shadow DOM
     // so it doesn't conflict with the host page.
-    var ff = (brand && brand.fontFamily) || 'Inter';
+    var ff = safeFontName(brand && brand.fontFamily, 'Inter');
     var fontStack, fontImport = '';
     if (ff === 'system') {
       fontStack = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
@@ -2900,10 +2919,17 @@
       ctx.fields.forEach(function (f) {
         if (f.__step !== stepId) return;
         if (!f.validate) return;
+        // validate() returns an error message string (or null) — NOT an object.
+        // The old `result.error` check was always undefined, so every step
+        // validated as passing and required fields never blocked Next, letting
+        // the visitor reach submit with invalid fields hidden on earlier steps.
         var result = f.validate();
-        if (result && result.error) {
+        if (result) {
           errorCount++;
+          if (f.showError) f.showError(result);
           if (!firstInvalid) firstInvalid = f;
+        } else if (f.clearError) {
+          f.clearError();
         }
       });
       if (errorCount > 0) {
@@ -3030,8 +3056,10 @@
 
     // Preview mode — if the widget is running inside the editor (no formId),
     // don't actually submit. Just flash a success state so the agent knows
-    // validation passed.
-    if (!config.formId || config.formId === 'preview') {
+    // validation passed. A LIVE embed (isLiveEmbed) never takes this path even
+    // if its formId is blank, so a misconfigured widget errors visibly on the
+    // real submit instead of flashing fake success and dropping the lead.
+    if (!config.isLiveEmbed && (!config.formId || config.formId === 'preview')) {
       submitBtn.disabled = true;
       var origHtml = submitBtn.innerHTML;
       submitBtn.innerHTML = '';
@@ -3238,6 +3266,11 @@
       widget.container = container;
       widget.shadow = shadow;
       widget.config = widget._normalise(data);
+      // Mark this as a real client embed (not the editor preview). A live embed
+      // whose saved config is missing a formId must NOT flash fake success and
+      // silently drop the lead — it should attempt the real submit and surface
+      // any server error. The editor preview leaves this unset.
+      widget.config.isLiveEmbed = true;
       widget._render();
 
       // Stash for potential programmatic access

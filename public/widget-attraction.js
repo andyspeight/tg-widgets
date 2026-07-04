@@ -35,7 +35,7 @@
   }
   const CONFIG_API  = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || resolveBase('/api/widget-config');
   const CONTENT_API = (typeof window !== 'undefined' && window.__TG_ATTRACTION_API__) || resolveBase('/api/attraction-content');
-  const VERSION = '1.1.1';
+  const VERSION = '1.1.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (fact/section labels, badges, CTA button, empty/error
@@ -462,7 +462,11 @@
     }
 
     _renderHero(d) {
-      const heroImg = safeUrl(this.c.heroImageUrl);
+      let heroImg = safeUrl(this.c.heroImageUrl);
+      // The URL goes into a background url() inside a style attribute — reject
+      // any URL with characters that could close url()/the attribute or add CSS
+      // declarations (e.g. 'https://a.png);position:fixed;inset:0;...').
+      if (heroImg && !/^https?:\/\/[^\s"'()<>;\\]+$/i.test(heroImg)) heroImg = '';
       const eyebrow = [d.location, d.country, d.type].filter(Boolean).map(esc).join(' &middot; ');
       const badges = [];
       if (d.operator) badges.push('<span class="tgx-badge">' + esc(d.operator) + '</span>');

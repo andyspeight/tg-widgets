@@ -73,7 +73,7 @@
     } catch (e) { /* fall through */ }
     return '/api/events-content';
   })();
-  const VERSION = '1.0.1';
+  const VERSION = '1.0.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (month + weekday names, view-switcher and filter
@@ -197,6 +197,23 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
+  }
+
+  // The root style attribute carries author colours and font as CSS custom
+  // properties. Validate each so a saved value can't add declarations ( ; ) or
+  // break out ( " ) of the style attribute; the attribute is also esc()'d at
+  // injection as a second layer.
+  function safeColorE(v, fb) {
+    const s = String(v == null ? '' : v).trim();
+    if (/^#[0-9a-f]{3,8}$/i.test(s)) return s;
+    if (/^rgba?\([0-9.,\s%]+\)$/i.test(s)) return s;
+    if (/^hsla?\([0-9.,\s%deg]+\)$/i.test(s)) return s;
+    if (/^[a-z]{3,20}$/i.test(s)) return s;
+    return fb;
+  }
+  function safeFontStackE(v, fb) {
+    const s = String(v == null ? '' : v).trim();
+    return (s && s.length <= 120 && /^[A-Za-z0-9 ,"'-]+$/.test(s)) ? s : fb;
   }
 
   function safeUrl(url) {
@@ -1261,21 +1278,22 @@
       const brandRgb  = hexToRgb(cfg.brand) || '249, 115, 22';
       const accentHex = cfg.accent || '#0891B2';
 
+      const ff = safeFontStackE(cfg.fontFamily, '');
       const inlineVars =
-        '--tge-brand:' + (cfg.brand || '#F97316') + ';' +
+        '--tge-brand:' + safeColorE(cfg.brand, '#F97316') + ';' +
         '--tge-brand-rgb:' + brandRgb + ';' +
-        '--tge-accent:' + accentHex + ';' +
-        (cfg.bg     ? '--tge-bg:' + cfg.bg + ';' : '') +
-        (cfg.text   ? '--tge-text:' + cfg.text + ';' : '') +
-        (cfg.sub    ? '--tge-sub:' + cfg.sub + ';' : '') +
-        (cfg.border ? '--tge-border:' + cfg.border + ';' : '') +
+        '--tge-accent:' + safeColorE(accentHex, '#0891B2') + ';' +
+        (cfg.bg     ? '--tge-bg:' + safeColorE(cfg.bg, '#FFFFFF') + ';' : '') +
+        (cfg.text   ? '--tge-text:' + safeColorE(cfg.text, '#0F172A') + ';' : '') +
+        (cfg.sub    ? '--tge-sub:' + safeColorE(cfg.sub, '#64748B') + ';' : '') +
+        (cfg.border ? '--tge-border:' + safeColorE(cfg.border, '#E2E8F0') + ';' : '') +
         (cfg.radius ? '--tge-radius:' + Math.max(0, Math.min(40, cfg.radius)) + 'px;' : '') +
-        (cfg.fontFamily ? "--tge-font:'" + cfg.fontFamily.replace(/'/g, "") + "', 'Inter', sans-serif;" : '');
+        (ff ? "--tge-font:'" + ff.replace(/'/g, '') + "', 'Inter', sans-serif;" : '');
 
       const theme = cfg.theme === 'dark' ? 'dark' : 'light';
 
       this.shadow.innerHTML = '<style>' + fontImport + STYLES + '</style>'
-        + '<div class="tge-root" data-theme="' + theme + '" style="' + inlineVars + '">'
+        + '<div class="tge-root" data-theme="' + theme + '" style="' + esc(inlineVars) + '">'
         + '<div class="tge-shell">'
         + this._renderHeader()
         + '<div class="tge-filters-mount"></div>'

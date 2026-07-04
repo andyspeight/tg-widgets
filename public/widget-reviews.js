@@ -44,7 +44,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.1';
+  const VERSION = '1.0.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (rating summary, section labels, controls). Platform
@@ -643,6 +643,8 @@
         if (this._spotTimer) clearInterval(this._spotTimer);
         const fives = this.c.reviews.filter(r => r.rating === 5);
         this._spotTimer = setInterval(() => {
+          // Stop rotating if the host was removed without destroy() (SPA sites).
+          if (this.el && !this.el.isConnected) { this.destroy(); return; }
           this.spotlightIdx = (this.spotlightIdx + 1) % fives.length;
           this._render();
         }, 6000);

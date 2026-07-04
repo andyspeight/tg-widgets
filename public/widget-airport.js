@@ -84,7 +84,7 @@
     } catch (e) { /* fall through */ }
     return '/api/airport-content';
   })();
-  const VERSION = '1.1.1';
+  const VERSION = '1.1.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (section/fact labels, tab labels, CTA buttons, map
@@ -1045,7 +1045,11 @@
 
     _renderHero(d, role) {
       const iata = safeIata(d.iata);
-      const heroImg = safeUrl(d.heroImageUrl || this.c.heroImageUrl);
+      let heroImg = safeUrl(d.heroImageUrl || this.c.heroImageUrl);
+      // The URL goes into a background url() inside a style attribute — reject
+      // any URL with characters that could close url()/the attribute or add CSS
+      // declarations (e.g. 'https://a.png);position:fixed;inset:0;...').
+      if (heroImg && !/^https?:\/\/[^\s"'()<>;\\]+$/i.test(heroImg)) heroImg = '';
       const eyebrow = [d.cityServed, d.country, d.type].filter(Boolean).map(esc).join(' &middot; ');
       const tagline = esc((d.tagline || '').slice(0, 240));
       const style = heroImg ? ' style="--tga-hero-img:url(' + esc(heroImg) + ')"' : '';
@@ -1119,7 +1123,11 @@
       if (d.checkInSummary) tiles.push(this._fact('luggage', this.t('checkIn'), d.checkInSummary, d.checkInDetail));
       if (d.terminalsCount) {
         const n = Number(d.terminalsCount);
-        tiles.push(this._fact('building', this.t('terminals'), n + ' ' + this.t(n > 1 ? 'terminalPlural' : 'terminalSingular'), d.terminalsNote));
+        // terminalsCount is free-text in Airtable — a non-numeric value would
+        // render "NaN terminals". Fall back to the raw string when it isn't a
+        // finite number.
+        const label = Number.isFinite(n) ? (n + ' ' + this.t(n > 1 ? 'terminalPlural' : 'terminalSingular')) : String(d.terminalsCount);
+        tiles.push(this._fact('building', this.t('terminals'), label, d.terminalsNote));
       }
       if (d.keyAirlines) {
         tiles.push(this._fact('plane', this.t(role === 'destination' ? 'ukAirlines' : 'keyAirlines'),

@@ -92,7 +92,7 @@
     } catch (e) { /* fall through */ }
     return '/api/destination-content';
   })();
-  const VERSION = '1.2.1';
+  const VERSION = '1.2.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (section default headings, fact/planning labels,
@@ -1449,23 +1449,29 @@
       // subsequent re-renders preserve it.
       if (!this._tempUnit) this._tempUnit = this.c.temperatureUnit === 'F' ? 'F' : 'C';
       const unit = this._tempUnit;
-      const conv = (c) => unit === 'F' ? Math.round(c * 9 / 5 + 32) : c;
+      // Coerce every temp to a finite number. temps is remote content (only
+      // <script> is stripped upstream) and in Celsius mode the value is
+      // concatenated straight into innerHTML below — a string entry like
+      // '<img onerror=...>' would otherwise execute. Non-numbers become null.
+      const conv = (c) => { const n = Number(c); return Number.isFinite(n) ? (unit === 'F' ? Math.round(n * 9 / 5 + 32) : n) : null; };
 
       const displayTemps = temps.map(conv);
-      const maxDisplay = Math.max.apply(null, displayTemps.filter(n => typeof n === 'number'));
+      const finiteTemps = displayTemps.filter(n => Number.isFinite(n));
+      const maxDisplay = finiteTemps.length ? Math.max.apply(null, finiteTemps) : (unit === 'F' ? 86 : 30);
       const minTempForScaling = unit === 'F' ? 32 : 0; // scale bars from a sensible baseline
       const range = Math.max(maxDisplay - minTempForScaling, 1);
 
       const maxRain = Array.isArray(rain) ? Math.max.apply(null, rain.filter(n => typeof n === 'number')) || 1 : 1;
 
       const bars = displayTemps.map((t, i) => {
-        const h = Math.max(6, Math.round(((t - minTempForScaling) / range) * 100));
+        const valid = Number.isFinite(t);
+        const h = valid ? Math.max(6, Math.round(((t - minTempForScaling) / range) * 100)) : 6;
         const s = season[i] || 'off';
         const isCurrent = i === currentMonth;
         const currentAttr = isCurrent ? ' data-current="true"' : '';
         return (
           '<div class="tgs-climate-col"' + currentAttr + '>' +
-            '<span class="tgs-climate-temp">' + t + '°</span>' +
+            '<span class="tgs-climate-temp">' + (valid ? t : '–') + '°</span>' +
             '<div class="tgs-climate-bar" data-season="' + esc(s) + '" style="height:' + h + '%;" aria-hidden="true"></div>' +
           '</div>'
         );

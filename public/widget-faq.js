@@ -59,7 +59,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.2.1';
+  const VERSION = '1.2.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome, per language. English is the source + fallback. The author's
@@ -514,6 +514,18 @@
     return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
   }
 
+  // Colours are interpolated into the shadow <style> block. esc() blocks HTML
+  // breakout but NOT `;` `{` `}`, so a value like '#000;}.x{...}' would inject
+  // CSS rules. Validate to hex so only a colour can appear.
+  function safeColor(v, fb) {
+    const s = String(v == null ? '' : v).trim();
+    return /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/.test(s) ? s : fb;
+  }
+  function safeFontStack(v, fb) {
+    const s = String(v == null ? '' : v).trim();
+    return (s && s.length <= 120 && /^[A-Za-z0-9 ,"'-]+$/.test(s)) ? s : fb;
+  }
+
   function isSafeUrl(url) {
     if (!url) return false;
     return /^(https?:\/\/|mailto:|tel:|#|\/)/i.test(url);
@@ -672,6 +684,11 @@
       merged.search = Object.assign({}, base.search, (c && c.search) || {});
       merged.cta = Object.assign({}, base.cta, (c && c.cta) || {});
       merged.seo = Object.assign({}, base.seo, (c && c.seo) || {});
+      // Config is untrusted — a non-array questions/categories (e.g. a string or
+      // object) would throw in _prepareQuestions/_localizedConfig and kill the
+      // whole widget. Coerce to arrays.
+      merged.questions = Array.isArray(merged.questions) ? merged.questions : [];
+      merged.categories = Array.isArray(merged.categories) ? merged.categories : [];
       return merged;
     }
 
@@ -734,17 +751,18 @@
       // Optional font override — when fontFamily is set, override the host's
       // hardcoded Inter stack. .tgf-root cascades to descendants and beats
       // :host because root is more specific.
-      const fontRule = (this.c.fontFamily && typeof this.c.fontFamily === 'string')
-        ? `font-family: '${esc(this.c.fontFamily.replace(/'/g, ''))}', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;`
+      const ff = safeFontStack(this.c.fontFamily, '');
+      const fontRule = ff
+        ? `font-family: '${ff.replace(/'/g, '')}', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;`
         : '';
       return `.tgf-root {
-        --tgf-brand: ${esc(c.brand || '#0891B2')};
-        --tgf-accent: ${esc(c.accent || '#6366F1')};
-        --tgf-bg: ${esc(c.bg || '#F8FAFC')};
-        --tgf-card: ${esc(c.card || '#FFFFFF')};
-        --tgf-text: ${esc(c.text || '#0F172A')};
-        --tgf-sub: ${esc(c.sub || '#64748B')};
-        --tgf-border: ${esc(c.border || '#E2E8F0')};
+        --tgf-brand: ${safeColor(c.brand, '#0891B2')};
+        --tgf-accent: ${safeColor(c.accent, '#6366F1')};
+        --tgf-bg: ${safeColor(c.bg, '#F8FAFC')};
+        --tgf-card: ${safeColor(c.card, '#FFFFFF')};
+        --tgf-text: ${safeColor(c.text, '#0F172A')};
+        --tgf-sub: ${safeColor(c.sub, '#64748B')};
+        --tgf-border: ${safeColor(c.border, '#E2E8F0')};
         --tgf-brand-soft: ${brandSoft};
         --tgf-accent-soft: ${accentSoft};
         --tgf-radius: ${radius + 4}px;

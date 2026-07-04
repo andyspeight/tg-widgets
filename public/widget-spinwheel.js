@@ -16,7 +16,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.2.1';
+  const VERSION = '1.2.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the spin button, result flow, lead-capture labels and
@@ -106,6 +106,14 @@
 
   const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const hexOk = (v) => /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(v || '').trim());
+  // fontFamily is interpolated raw into the shadow <style> block, so it must not
+  // carry CSS/HTML-breakout characters (< > { } ; : etc). Allow only what a real
+  // font-family stack needs, else fall back. Stops a saved fontFamily like
+  // `x}</style><img onerror=...>` escaping the style element on the client page.
+  const safeFontStack = (v, fb) => {
+    const s = String(v == null ? '' : v).trim();
+    return (s && s.length <= 120 && /^[A-Za-z0-9 ,"'-]+$/.test(s)) ? s : fb;
+  };
   const reducedMotion = () => { try { return typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
 
   // Only allow safe href schemes for the CTA.
@@ -217,7 +225,7 @@
         peek: !!c.peek,
         layout: c.layout === 'inline' ? 'inline' : 'card',
         theme: c.theme === 'dark' ? 'dark' : 'light',
-        fontFamily: typeof c.fontFamily === 'string' && c.fontFamily ? c.fontFamily : 'Inter, system-ui, sans-serif',
+        fontFamily: safeFontStack(c.fontFamily, 'Inter, system-ui, sans-serif'),
         previewMode: !!c.previewMode,
         widgetId: c.widgetId || '',
       };
