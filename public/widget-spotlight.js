@@ -1420,7 +1420,7 @@
         '<section class="tgs-section tgs-section-hero" aria-labelledby="tgs-hero-title">' +
           '<div class="tgs-hero">' +
             (imgUrl
-              ? '<img class="tgs-hero-img" src="' + esc(imgUrl) + '" alt="' + esc(altText) + '" loading="eager" />'
+              ? '<img class="tgs-hero-img" src="' + esc(imgUrl) + '" alt="' + esc(altText) + '" data-fb-hero="1" loading="eager" />'
               : '<div class="tgs-hero-img" style="background:linear-gradient(135deg,var(--tgs-brand),var(--tgs-accent));"></div>') +
             '<div class="tgs-hero-scrim" aria-hidden="true"></div>' +
             '<div class="tgs-hero-content">' +
@@ -1816,6 +1816,18 @@
     _bind() {
       const r = this.root;
       if (!r) return;
+      // Swap a hero image that fails to load for the brand gradient stand-in, so
+      // a broken or hotlink-blocked URL never leaves the browser's broken-image
+      // glyph. CSP-safe: attached here, not via inline onerror.
+      const heroImg = r.querySelector('img[data-fb-hero]');
+      if (heroImg) {
+        heroImg.addEventListener('error', () => {
+          const div = document.createElement('div');
+          div.className = 'tgs-hero-img';
+          div.style.background = 'linear-gradient(135deg,var(--tgs-brand),var(--tgs-accent))';
+          if (heroImg.parentNode) heroImg.parentNode.replaceChild(div, heroImg);
+        }, { once: true });
+      }
       // Temperature unit toggle in the climate chart header
       const unitBtns = r.querySelectorAll('.tgs-climate-unit');
       unitBtns.forEach(btn => {

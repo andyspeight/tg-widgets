@@ -636,6 +636,16 @@
       this.cardEl.classList.add('is-open');
       const close = this.cardEl.querySelector('.tgm-card-close');
       if (close) close.addEventListener('click', () => this._hideCard());
+      // Hide the card image if it fails to load so a broken or hotlink-blocked
+      // URL never shows the browser's broken-image glyph. CSP-safe: attached
+      // here, not via inline onerror.
+      const cardImg = this.cardEl.querySelector('.tgm-card-img');
+      if (cardImg) {
+        cardImg.addEventListener('error', () => {
+          cardImg.remove();
+          this.cardEl.classList.remove('has-img');
+        }, { once: true });
+      }
     }
 
     _hideCard() {

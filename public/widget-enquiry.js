@@ -2656,12 +2656,17 @@
     var card = el('div', { class: 'tg-card' });
     var heroChildren = [];
     if (config.branding && config.branding.logoUrl) {
-      heroChildren.push(el('img', {
+      var logoImg = el('img', {
         class: 'tg-hero-logo',
         src: config.branding.logoUrl,
         alt: '',
         loading: 'lazy'
-      }));
+      });
+      // Hide the logo if it fails to load so a broken or hotlink-blocked URL
+      // never shows the browser's broken-image glyph above the form. CSP-safe:
+      // attached here, not via inline onerror.
+      logoImg.addEventListener('error', function () { logoImg.style.display = 'none'; }, { once: true });
+      heroChildren.push(logoImg);
     }
     heroChildren.push(el('h2', { text: config.header.title || t('headerTitle') }));
     heroChildren.push(el('p', { text: config.header.subtitle || t('headerSubtitle') }));
