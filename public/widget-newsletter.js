@@ -79,7 +79,7 @@
     } catch (e) { /* fall through */ }
     return '/api/newsletter-submit';
   })();
-  const VERSION = '1.0.1';
+  const VERSION = '1.0.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only: validation / error / status messages, plus the
@@ -886,9 +886,13 @@
 
       this._render();
 
-      // Footer slides up after a short delay so it doesn't fight the page render
+      // Footer slides up after a short delay so it doesn't fight the page render.
+      // Latch _footerShown so later re-renders (validation error, submit state)
+      // keep the bar on-screen instead of rebuilding it hidden — otherwise a
+      // mistyped email slides the whole widget, error and all, out of view.
       if (this.c.layout === 'footer' && !this._dismissed) {
         setTimeout(() => {
+          this._footerShown = true;
           const bar = this.shadow.querySelector('.tgnl-footer');
           if (bar) bar.setAttribute('data-show', 'true');
         }, this.c.footerDelay * 1000);
@@ -1158,7 +1162,7 @@
         `;
       }
       return `
-        <div class="tgnl-footer" data-show="false" role="region" aria-label="${esc(cfg.title || this.t('title'))}">
+        <div class="tgnl-footer" data-show="${(this._footerShown || this._errorMsg) ? 'true' : 'false'}" role="region" aria-label="${esc(cfg.title || this.t('title'))}">
           <div class="tgnl-footer-text">
             <p class="tgnl-footer-title">${esc(cfg.title || this.t('title'))}</p>
             <p class="tgnl-footer-sub">${esc(cfg.subtitle || this.t('subtitle'))}</p>
