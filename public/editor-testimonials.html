@@ -1706,9 +1706,17 @@
         const k = el.dataset.slider;
         const val = el.parentElement.querySelector('.slider-val');
         el.addEventListener('input', () => {
-          mutateLight(cfg => { cfg[k] = parseInt(el.value, 10); });
-          if (val) val.textContent = el.value + 'px';
-          const hint = el.closest('.field').querySelector('.field-hint'); if (hint) hint.textContent = el.value + 'px';
+          const raw = parseInt(el.value, 10);
+          // Write to the nested path (e.g. carousel.interval), not a literal
+          // "carousel.interval" top-level key — otherwise the widget, which reads
+          // cfg.carousel.interval, never sees the change and junk keys pile up.
+          mutateLight(cfg => setAtPath(cfg, k, raw));
+          // Format the readout to match how each slider renders: the carousel
+          // interval is a time (seconds), the marquee speed is px/s.
+          const isTime = k === 'carousel.interval';
+          if (val) val.textContent = isTime ? (raw / 1000).toFixed(1) + 's' : String(raw);
+          const hint = el.closest('.field').querySelector('.field-hint');
+          if (hint) hint.textContent = isTime ? (raw / 1000).toFixed(1) + 's' : raw + 'px/s';
         });
         el.addEventListener('change', () => pushHistory());
       });
