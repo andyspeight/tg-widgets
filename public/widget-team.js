@@ -50,7 +50,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.2';
+  const VERSION = '1.0.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the "Unnamed" fallback, contact aria-labels and the
@@ -1244,13 +1244,21 @@
       if (el.__tgInited) continue;
       el.__tgInited = true;
       let cfg = null;
+      let loadFailed = false;
       const inline = el.getAttribute('data-tg-config');
       if (inline) {
         try { cfg = JSON.parse(inline); } catch (e) { cfg = null; }
       } else {
         const id = el.getAttribute('data-tg-id');
-        if (id) cfg = await fetchConfig(id);
+        if (id) {
+          cfg = await fetchConfig(id);
+          if (!cfg) loadFailed = true; // a real embed whose config could not load
+        }
       }
+      // A live embed (data-tg-id) whose config failed to load — bad id, deleted
+      // widget, or an API outage — must NOT fall back to the built-in sample
+      // team on the client's site. Leave the container empty instead.
+      if (loadFailed) continue;
       try {
         new TGTeamWidget(el, cfg || {});
       } catch (e) {
