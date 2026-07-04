@@ -959,15 +959,16 @@
       const iconName = (q.icon && IC[q.icon]) ? q.icon :
                        (this._categoryIcon(q.category) || 'help');
       const ansId = 'ans-' + esc(q.id);
+      const qId = 'q-' + esc(q.id);
       const showIcon = this.c.showIcons !== false;
 
       return `<article class="tgf-item" data-id="${esc(q.id)}" data-open="${isOpen}">
-        <button class="tgf-question" type="button" aria-expanded="${isOpen}" aria-controls="${ansId}">
+        <button class="tgf-question" id="${qId}" type="button" aria-expanded="${isOpen}" aria-controls="${ansId}">
           ${showIcon ? `<span class="tgf-q-icon">${icon(iconName, 18)}</span>` : ''}
           <span class="tgf-q-text">${qHtml}${this._renderBadges(q)}</span>
           <span class="tgf-chevron">${icon('chevron', 20)}</span>
         </button>
-        <div class="tgf-answer" id="${ansId}" role="region">
+        <div class="tgf-answer" id="${ansId}" role="region" aria-labelledby="${qId}">
           <div class="tgf-answer-outer">
             <div class="tgf-answer-body">
               ${answerHtml}
