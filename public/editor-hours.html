@@ -569,6 +569,29 @@
               <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
             <div class="tgse-section-body">
+              <div class="field" style="margin-bottom:10px">
+                <span class="field-label">Business timezone</span>
+                <select class="input" id="tzSelect">
+                  <option value="">Visitor's own timezone (default)</option>
+                  <option value="Europe/London">United Kingdom (Europe/London)</option>
+                  <option value="Europe/Dublin">Ireland (Europe/Dublin)</option>
+                  <option value="Europe/Paris">France (Europe/Paris)</option>
+                  <option value="Europe/Berlin">Germany (Europe/Berlin)</option>
+                  <option value="Europe/Madrid">Spain (Europe/Madrid)</option>
+                  <option value="Europe/Rome">Italy (Europe/Rome)</option>
+                  <option value="Europe/Amsterdam">Netherlands (Europe/Amsterdam)</option>
+                  <option value="Europe/Bucharest">Romania (Europe/Bucharest)</option>
+                  <option value="Europe/Athens">Greece (Europe/Athens)</option>
+                  <option value="Atlantic/Canary">Canary Islands (Atlantic/Canary)</option>
+                  <option value="America/New_York">US Eastern (America/New_York)</option>
+                  <option value="America/Chicago">US Central (America/Chicago)</option>
+                  <option value="America/Denver">US Mountain (America/Denver)</option>
+                  <option value="America/Los_Angeles">US Pacific (America/Los_Angeles)</option>
+                  <option value="Asia/Dubai">UAE (Asia/Dubai)</option>
+                  <option value="Australia/Sydney">Sydney (Australia/Sydney)</option>
+                </select>
+                <div class="toggle-help" style="margin-top:6px">Off by default. When set, "Open now" is worked out in the business's timezone, so it reads correctly for a visitor in another country.</div>
+              </div>
               <div class="toggle-row">
                 <div>
                   <div class="toggle-label">Show timezone label</div>
@@ -650,6 +673,7 @@
       startWeekOn: 'mon',
       showTimezoneNote: false,
       timezoneLabel: 'Times shown in UK time',
+      timezone: '', // '' = compute open-now in the visitor's own timezone (off)
       hours: {
         mon: [['09:00', '17:30']],
         tue: [['09:00', '17:30']],
@@ -813,6 +837,12 @@
   bindInput('phoneInput', 'phone');
   bindInput('phoneLabelInput', 'phoneLabel');
   bindInput('tzLabelInput', 'timezoneLabel');
+
+  // Business timezone select (drives open-now computation; '' = visitor local)
+  document.getElementById('tzSelect').addEventListener('change', (e) => {
+    C.timezone = e.target.value || '';
+    dirty(); render();
+  });
 
   document.getElementById('name-input').addEventListener('input', () => shell.markDirty());
 
@@ -1002,6 +1032,16 @@
     document.getElementById('phoneInput').value = C.phone || '';
     document.getElementById('phoneLabelInput').value = C.phoneLabel || '';
     document.getElementById('tzLabelInput').value = C.timezoneLabel || '';
+    const tzSel = document.getElementById('tzSelect');
+    tzSel.value = C.timezone || '';
+    // A saved timezone that isn't one of the presets: add it so it shows and
+    // round-trips rather than silently reverting to the visitor default.
+    if ((C.timezone || '') && tzSel.value !== C.timezone) {
+      const opt = document.createElement('option');
+      opt.value = C.timezone; opt.textContent = C.timezone;
+      tzSel.appendChild(opt);
+      tzSel.value = C.timezone;
+    }
 
     document.getElementById('previewStage').setAttribute('data-theme', C.theme.mode || 'light');
     renderHours();

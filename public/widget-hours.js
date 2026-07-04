@@ -43,7 +43,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.3';
+  const VERSION = '1.0.4';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (day names, status words, opening-time phrases). The
@@ -197,6 +197,32 @@
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     return `${y}-${m}-${day}`;
+  }
+
+  // Return a Date whose LOCAL wall-clock components (year, month, day, hours,
+  // minutes) equal the current time in the given IANA timezone. The whole
+  // schedule engine reads getFullYear/getMonth/getDate/getDay/getHours/
+  // getMinutes, so feeding it this makes "open now" evaluate in the business's
+  // timezone rather than the visitor's. An empty or invalid timezone falls back
+  // to the visitor's own local time — the default, feature off.
+  function nowInZone(timeZone) {
+    if (!timeZone || typeof timeZone !== 'string') return new Date();
+    try {
+      const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: timeZone,
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+      }).formatToParts(new Date());
+      const get = (type) => {
+        const p = parts.find(x => x.type === type);
+        return p ? parseInt(p.value, 10) : 0;
+      };
+      let hour = get('hour');
+      if (hour === 24) hour = 0; // some engines emit "24" for midnight
+      return new Date(get('year'), get('month') - 1, get('day'), hour, get('minute'), get('second'));
+    } catch (e) {
+      return new Date(); // unknown timezone name — fall back to visitor local
+    }
   }
 
   // Look up the schedule for a given date — returns either {closed: true, label}, or {slots: [...], label}
@@ -662,6 +688,11 @@
         timeFormat: cfg.timeFormat === '24' ? '24' : '12', // 12 | 24
         showTimezoneNote: cfg.showTimezoneNote === true,
         timezoneLabel: cfg.timezoneLabel || 'Times shown in UK time',
+        // IANA timezone the schedule is defined in (e.g. 'Europe/London'). Empty
+        // = off: "open now" is computed in the visitor's own local time (the
+        // long-standing behaviour). Set it so the business's hours read correctly
+        // for a visitor in another timezone. Validated at use via Intl try/catch.
+        timezone: typeof cfg.timezone === 'string' ? cfg.timezone.trim() : '',
         dayLabels: cfg.dayLabels === 'short' ? 'short' : 'full', // full | short
         startWeekOn: cfg.startWeekOn === 'sun' ? 'sun' : 'mon',  // mon | sun
 
@@ -711,7 +742,7 @@
 
     _render() {
       const cfg = this.c;
-      const status = cfg.showStatus ? evalStatus(cfg.hours, cfg.holidays, new Date(), cfg.timeFormat, this.t) : null;
+      const status = cfg.showStatus ? evalStatus(cfg.hours, cfg.holidays, nowInZone(cfg.timezone), cfg.timeFormat, this.t) : null;
       const themeStyle = esc(this._themeStyle());
 
       let inner = '';
@@ -822,7 +853,9 @@
 
     _renderRows() {
       const cfg = this.c;
-      const today = new Date();
+      // Use the business timezone (if set) so the highlighted "today" row agrees
+      // with the open-now status across a midnight boundary.
+      const today = nowInZone(cfg.timezone);
       const todayKey = DAY_KEYS[today.getDay()];
       const todayDateStr = ymd(today);
       const useShort = cfg.dayLabels === 'short';
