@@ -38,7 +38,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.1.0';
+  var WIDGET_VERSION = '1.1.1';
   var VISITOR_ID_KEY = 'tg_visitor_id_v1';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -1221,8 +1221,12 @@
     // (e.g. pills stay rounded even when "None" is picked so they still read
     // as pills, not rectangles).
     var radiusMap = { none: 0, small: 4, medium: 8, large: 14 };
-    var radiusCard = radiusMap[(brand && brand.cornerRadius) || 'medium'] * 2; // cards are rounder
-    var radiusInput = radiusMap[(brand && brand.cornerRadius) || 'medium'];
+    // Allow-list the enum: an unknown/typo value (config is untrusted) must fall
+    // back to the default, not yield undefined -> NaNpx.
+    var radiusVal = radiusMap[brand && brand.cornerRadius];
+    if (radiusVal == null) radiusVal = radiusMap.medium;
+    var radiusCard = radiusVal * 2; // cards are rounder
+    var radiusInput = radiusVal;
     var radiusBtn = radiusInput;
 
     // Field size — compact/comfortable/spacious affects input height, pill
@@ -1233,7 +1237,9 @@
       comfortable: { inputH: 44, pillH: 40, sectionY: 24, sectionX: 32 },
       spacious:    { inputH: 52, pillH: 46, sectionY: 32, sectionX: 36 }
     };
-    var sz = sizeMap[(brand && brand.fieldSize) || 'comfortable'];
+    // Allow-list the enum: an unknown fieldSize would leave sz undefined and
+    // throw on sz.sectionY below, so the whole form never renders (no lead).
+    var sz = sizeMap[brand && brand.fieldSize] || sizeMap.comfortable;
 
     // Field style — outlined (default), filled (light grey background, no
     // border), underlined (no side borders, only bottom underline).
@@ -2900,10 +2906,17 @@
       ctx.fields.forEach(function (f) {
         if (f.__step !== stepId) return;
         if (!f.validate) return;
+        // validate() returns an error message string (or null) — NOT an object.
+        // The old `result.error` check was always undefined, so every step
+        // validated as passing and required fields never blocked Next, letting
+        // the visitor reach submit with invalid fields hidden on earlier steps.
         var result = f.validate();
-        if (result && result.error) {
+        if (result) {
           errorCount++;
+          if (f.showError) f.showError(result);
           if (!firstInvalid) firstInvalid = f;
+        } else if (f.clearError) {
+          f.clearError();
         }
       });
       if (errorCount > 0) {
@@ -3030,8 +3043,10 @@
 
     // Preview mode — if the widget is running inside the editor (no formId),
     // don't actually submit. Just flash a success state so the agent knows
-    // validation passed.
-    if (!config.formId || config.formId === 'preview') {
+    // validation passed. A LIVE embed (isLiveEmbed) never takes this path even
+    // if its formId is blank, so a misconfigured widget errors visibly on the
+    // real submit instead of flashing fake success and dropping the lead.
+    if (!config.isLiveEmbed && (!config.formId || config.formId === 'preview')) {
       submitBtn.disabled = true;
       var origHtml = submitBtn.innerHTML;
       submitBtn.innerHTML = '';
@@ -3238,6 +3253,11 @@
       widget.container = container;
       widget.shadow = shadow;
       widget.config = widget._normalise(data);
+      // Mark this as a real client embed (not the editor preview). A live embed
+      // whose saved config is missing a formId must NOT flash fake success and
+      // silently drop the lead — it should attempt the real submit and surface
+      // any server error. The editor preview leaves this unset.
+      widget.config.isLiveEmbed = true;
       widget._render();
 
       // Stash for potential programmatic access
