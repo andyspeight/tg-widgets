@@ -17,7 +17,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.1.1';
+  const VERSION = '1.1.2';
 
   function resolveBase(path, override) {
     if (typeof window === 'undefined') return path;
@@ -25,6 +25,16 @@
     try {
       const me = document.currentScript;
       if (me && me.src) return new URL(me.src).origin + path;
+      // currentScript is null for async/defer/module or tag-manager injected
+      // loads — scan for this widget's own script tag so the fetch still targets
+      // the widget host rather than falling back to the relative path (which
+      // resolves to the client's own origin and 404s, dropping the client's
+      // saved colour, label and position).
+      const scripts = document.getElementsByTagName('script');
+      for (let i = scripts.length - 1; i >= 0; i--) {
+        const s = scripts[i].src || '';
+        if (/\/widget-backtotop\.js(\?|$|#)/.test(s)) return new URL(s).origin + path;
+      }
     } catch (e) { /* noop */ }
     return path;
   }
