@@ -18,7 +18,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.3.1';
+  const VERSION = '1.3.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (navigation controls and structural aria-labels).
@@ -62,6 +62,15 @@
     try {
       const me = document.currentScript;
       if (me && me.src) return new URL(me.src).origin + path;
+      // currentScript is null for async/defer/module or tag-manager injected
+      // loads — scan for this widget's own script tag so the fetch still targets
+      // the widget host rather than falling back to the relative path (which
+      // resolves to the client's own origin and 404s).
+      const scripts = document.getElementsByTagName('script');
+      for (let i = scripts.length - 1; i >= 0; i--) {
+        const s = scripts[i].src || '';
+        if (/\/widget-carousel\.js(\?|$|#)/.test(s)) return new URL(s).origin + path;
+      }
     } catch (e) { /* noop */ }
     return path;
   }
