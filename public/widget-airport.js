@@ -84,7 +84,7 @@
     } catch (e) { /* fall through */ }
     return '/api/airport-content';
   })();
-  const VERSION = '1.1.3';
+  const VERSION = '1.1.4';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (section/fact labels, tab labels, CTA buttons, map
@@ -361,6 +361,18 @@
     if (str == null) return '';
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;')
       .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  // Colours are applied via element.style.setProperty (a safe CSSOM sink that
+  // can't break out), but a value like 'url(https://evil/x)' could still beacon,
+  // so validate to hex before use.
+  function hexOk(v) { return typeof v === 'string' && /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v.trim()); }
+  function hexToRgba(hex, alpha) {
+    let h = String(hex || '').trim().replace('#', '');
+    if (h.length === 3) h = h.split('').map(c => c + c).join('');
+    if (!/^[0-9a-fA-F]{6}$/.test(h)) return '';
+    const r = parseInt(h.slice(0, 2), 16), g = parseInt(h.slice(2, 4), 16), b = parseInt(h.slice(4, 6), 16);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
   }
 
   function safeUrl(url, allowMailtoTel) {
@@ -1003,6 +1015,21 @@
       const root = document.createElement('div');
       root.className = 'tga-root';
       root.setAttribute('data-theme', this.c.theme === 'dark' ? 'dark' : 'light');
+      // Apply the saved editor branding (colours, radius, font) so a live embed
+      // matches what the client picked, not just the hardcoded defaults.
+      if (hexOk(this.c.brandColor)) {
+        root.style.setProperty('--tga-brand', this.c.brandColor);
+        root.style.setProperty('--tga-brand-soft', hexToRgba(this.c.brandColor, 0.08));
+      }
+      if (hexOk(this.c.accentColor)) {
+        root.style.setProperty('--tga-accent', this.c.accentColor);
+        root.style.setProperty('--tga-accent-soft', hexToRgba(this.c.accentColor, 0.12));
+      }
+      if (this.c.radius != null) {
+        const n = Math.max(0, Math.min(24, parseInt(this.c.radius, 10) || 16));
+        root.style.setProperty('--tga-radius', n + 'px');
+        root.style.setProperty('--tga-radius-sm', Math.max(4, n - 6) + 'px');
+      }
       if (this.c.fontFamily) {
         root.style.fontFamily = "'" + String(this.c.fontFamily).replace(/'/g, '') + "', sans-serif";
       }
@@ -1467,11 +1494,36 @@
       // would otherwise render "Airport not found" and lock the mount before
       // the editor has a chance to provide the picked airport's data.
       if (el.hasAttribute('data-tg-no-autoinit')) return;
+      // Mark immediately so the MutationObserver re-running init() during the
+      // async config fetch below can't process the same element twice.
+      el.setAttribute('data-tg-initialised', 'true');
       let cfg = {};
       const inline = el.getAttribute('data-tg-config');
       if (inline) { try { cfg = JSON.parse(inline); } catch (e) { /* */ } }
       const wid = el.getAttribute('data-tg-id');
-      if (wid) cfg.widgetId = wid;
+      if (inline) {
+        // Inline config already carries its display settings.
+        if (wid) cfg.widgetId = wid;
+        new TGAirportWidget(el, cfg);
+        return;
+      }
+      if (wid) {
+        // Two-step embed (matching attraction and the other widgets): fetch the
+        // saved display config (colours, sections, CTA, hero image) from
+        // /api/widget-config first, then the widget fetches its airport content.
+        // Previously airport ignored the saved config entirely on data-tg-id
+        // embeds, so the client's branding never showed on their site.
+        fetch(API_BASE + '?id=' + encodeURIComponent(wid), { credentials: 'omit' })
+          .then(r => (r.ok ? r.json() : null))
+          .then(data => {
+            const c = (data && (data.config || data)) || {};
+            c.widgetId = wid;
+            new TGAirportWidget(el, c);
+          })
+          .catch(() => { new TGAirportWidget(el, { widgetId: wid }); });
+        return;
+      }
+      // No id and no inline config — nothing to render.
       new TGAirportWidget(el, cfg);
     });
   }
