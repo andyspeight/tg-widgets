@@ -634,6 +634,10 @@
       transition: transform 320ms cubic-bezier(.2,.8,.2,1);
     }
     .tgnl-footer[data-show="true"] { transform: translateY(0); }
+    /* Consent checkbox sits in the footer text column — inherit the bar's light
+       text so it stays readable on the brand background. */
+    .tgnl-footer .tgnl-checkbox { color: var(--tgnl-brand-text); font-size: 11.5px; margin: 6px 0 0; opacity: .95; }
+    .tgnl-footer .tgnl-checkbox a { color: var(--tgnl-brand-text); }
     .tgnl-footer-text { flex: 1; min-width: 0; }
     .tgnl-footer-title {
       font-size: 14px;
@@ -1016,9 +1020,12 @@
       const link = cfg.privacyUrl
         ? ` <a href="${esc(cfg.privacyUrl)}" target="_blank" rel="noopener noreferrer">${esc(this.t('privacyPolicy'))}</a>`
         : '';
+      // Never pre-tick: a pre-ticked marketing opt-in is not valid consent under
+      // UK GDPR/PECR. The visitor ticks it themselves; when consent is required,
+      // submit is blocked until they do.
       return `
         <label class="tgnl-checkbox">
-          <input type="checkbox" id="consent" ${cfg.consentRequired ? '' : 'checked'} />
+          <input type="checkbox" id="consent" />
           <span>${esc(cfg.consentLabel || this.t('consentLabel'))}${link}</span>
         </label>
       `;
@@ -1060,6 +1067,7 @@
             <span class="tgnl-btn-label">${esc(cfg.buttonLabel || this.t('buttonLabel'))}</span>
           </button>
         </form>
+        ${this._renderConsentBlock()}
         ${this._renderErrorBlock()}
         ${this._renderConsentBlurb()}
       `;
@@ -1166,6 +1174,7 @@
           <div class="tgnl-footer-text">
             <p class="tgnl-footer-title">${esc(cfg.title || this.t('title'))}</p>
             <p class="tgnl-footer-sub">${esc(cfg.subtitle || this.t('subtitle'))}</p>
+            ${this._renderConsentBlock()}
           </div>
           <form class="tgnl-footer-form" id="form" novalidate>
             <input class="tgnl-footer-input" type="email" id="email" placeholder="${esc(cfg.emailPlaceholder || this.t('emailPlaceholder'))}" autocomplete="email" required aria-label="${esc(this.t('ariaEmail'))}" />
