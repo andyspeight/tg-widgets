@@ -1149,7 +1149,7 @@
       const sz = size || 38;
       if (agent.photo) {
         const url = safeImageUrl(agent.photo);
-        return `<div class="tgwa-agent-photo" data-online="${!!showOnlineDot && agent.online}" style="width:${sz}px;height:${sz}px"><img src="${esc(url)}" alt="${esc(agent.name || '')}" loading="lazy" decoding="async" /></div>`;
+        return `<div class="tgwa-agent-photo" data-online="${!!showOnlineDot && agent.online}" style="width:${sz}px;height:${sz}px"><img src="${esc(url)}" alt="${esc(agent.name || '')}" data-fb-init="${esc(this._initials(agent.name))}" data-fb-size="${Math.round(sz * 0.36)}" loading="lazy" decoding="async" /></div>`;
       }
       return `<div class="tgwa-agent-photo" data-online="${!!showOnlineDot && agent.online}" style="width:${sz}px;height:${sz}px;font-size:${Math.round(sz * 0.36)}px">${esc(this._initials(agent.name))}</div>`;
     }
@@ -1353,6 +1353,19 @@
     _bind() {
       const root = this.shadow.querySelector('.tgwa-root');
       if (!root) return;
+
+      // Swap any agent photo that fails to load for the initials avatar, so a
+      // broken URL, a 404 or a hotlink-blocked image never shows the browser's
+      // broken-image glyph. CSP-safe: attached here, not via inline onerror.
+      this.shadow.querySelectorAll('img[data-fb-init]').forEach(img => {
+        img.addEventListener('error', () => {
+          const c = img.parentElement;
+          if (!c) return;
+          c.textContent = img.getAttribute('data-fb-init') || '';
+          const fs = parseInt(img.getAttribute('data-fb-size'), 10);
+          if (fs) c.style.fontSize = fs + 'px';
+        }, { once: true });
+      });
 
       // Floating: FAB + close + greeting close + click-through
       const fab = this.shadow.querySelector('#fab');

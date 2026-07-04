@@ -290,6 +290,17 @@
       .replace(/'/g, '&#39;');
   }
 
+  function ensureFont(family) {
+    if (!family || family === 'Inter' || typeof document === 'undefined') return;
+    const id = 'tg-font-' + String(family).toLowerCase().replace(/\s+/g, '-');
+    if (document.getElementById(id)) return;
+    const l = document.createElement('link');
+    l.id = id;
+    l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(family).replace(/%20/g, '+') + ':ital,wght@0,400;0,500;0,600;1,400&display=swap';
+    document.head.appendChild(l);
+  }
+
   function safeUrl(url, allowMailtoTel) {
     if (typeof url !== 'string') return '';
     const trimmed = url.trim();
@@ -917,6 +928,7 @@
       if (!container) throw new Error('TGWeatherWidget: container required');
       this.el = container;
       this.c = this._defaults(config);
+      ensureFont(this.c.fontFamily);   // load the client-chosen web font on the host site (house rule 2)
       this.t = makeT(this.c);   // resolve viewer language + UI strings
       this.shadow = container.attachShadow ? container.attachShadow({ mode: 'open' }) : container;
       this._renderShell();
@@ -1308,6 +1320,7 @@
 
     update(newConfig) {
       this.c = this._defaults(Object.assign({}, this.c, newConfig));
+      ensureFont(this.c.fontFamily);   // load the client-chosen web font on the host site (house rule 2)
       this.t = makeT(this.c);
       // Reset unit state so editor config changes to temperatureUnit take effect
       if (newConfig && 'temperatureUnit' in newConfig) this._tempUnit = null;

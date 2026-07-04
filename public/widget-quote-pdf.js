@@ -388,7 +388,7 @@
       '<style>' + STYLES + '</style>' +
       '<div class="tgqp-root" data-theme="' + esc(this.theme) + '"' + (styleVars ? ' style="' + styleVars + '"' : '') + '>' +
         btns +
-        '<span class="tgqp-msg" data-msg hidden></span>' +
+        '<span class="tgqp-msg" data-msg role="status" aria-live="polite" hidden></span>' +
       '</div>';
     this._bind();
   };
@@ -405,6 +405,8 @@
     var m = this.shadow.querySelector('[data-msg]');
     if (!text) { m.hidden = true; m.textContent = ''; return; }
     m.hidden = false;
+    // Announce errors assertively (they interrupt), successes politely.
+    m.setAttribute('aria-live', kind === 'err' ? 'assertive' : 'polite');
     m.className = 'tgqp-msg ' + (kind === 'err' ? 'tgqp-msg--err' : 'tgqp-msg--ok');
     m.innerHTML = (kind === 'err' ? IC.alert : IC.check) + '<span>' + esc(text) + '</span>';
   };

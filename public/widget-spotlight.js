@@ -383,6 +383,17 @@
       .replace(/'/g, '&#39;');
   }
 
+  function ensureFont(family) {
+    if (!family || family === 'Inter' || typeof document === 'undefined') return;
+    const id = 'tg-font-' + String(family).toLowerCase().replace(/\s+/g, '-');
+    if (document.getElementById(id)) return;
+    const l = document.createElement('link');
+    l.id = id;
+    l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(family).replace(/%20/g, '+') + ':ital,wght@0,400;0,500;0,600;1,400&display=swap';
+    document.head.appendChild(l);
+  }
+
   // URL protocol allowlist. Rejects javascript:, data:, vbscript:, relative.
   function safeUrl(url, allowMailtoTel) {
     if (typeof url !== 'string') return '';
@@ -1216,6 +1227,7 @@
       if (!container) throw new Error('TGSpotlightWidget: container required');
       this.el = container;
       this.c = this._defaults(config);
+      ensureFont(this.c.fontFamily);   // load the client-chosen web font on the host site (house rule 2)
       this.t = makeT(this.c);   // resolve viewer language + UI strings
       this.shadow = container.attachShadow ? container.attachShadow({ mode: 'open' }) : container;
       this._renderShell();
@@ -1420,7 +1432,7 @@
         '<section class="tgs-section tgs-section-hero" aria-labelledby="tgs-hero-title">' +
           '<div class="tgs-hero">' +
             (imgUrl
-              ? '<img class="tgs-hero-img" src="' + esc(imgUrl) + '" alt="' + esc(altText) + '" loading="eager" />'
+              ? '<img class="tgs-hero-img" src="' + esc(imgUrl) + '" alt="' + esc(altText) + '" data-fb-hero="1" loading="eager" />'
               : '<div class="tgs-hero-img" style="background:linear-gradient(135deg,var(--tgs-brand),var(--tgs-accent));"></div>') +
             '<div class="tgs-hero-scrim" aria-hidden="true"></div>' +
             '<div class="tgs-hero-content">' +
@@ -1816,6 +1828,18 @@
     _bind() {
       const r = this.root;
       if (!r) return;
+      // Swap a hero image that fails to load for the brand gradient stand-in, so
+      // a broken or hotlink-blocked URL never leaves the browser's broken-image
+      // glyph. CSP-safe: attached here, not via inline onerror.
+      const heroImg = r.querySelector('img[data-fb-hero]');
+      if (heroImg) {
+        heroImg.addEventListener('error', () => {
+          const div = document.createElement('div');
+          div.className = 'tgs-hero-img';
+          div.style.background = 'linear-gradient(135deg,var(--tgs-brand),var(--tgs-accent))';
+          if (heroImg.parentNode) heroImg.parentNode.replaceChild(div, heroImg);
+        }, { once: true });
+      }
       // Temperature unit toggle in the climate chart header
       const unitBtns = r.querySelectorAll('.tgs-climate-unit');
       unitBtns.forEach(btn => {
@@ -1832,6 +1856,7 @@
     // Public API
     update(newConfig) {
       this.c = this._defaults(Object.assign({}, this.c, newConfig));
+      ensureFont(this.c.fontFamily);   // load the client-chosen web font on the host site (house rule 2)
       this.t = makeT(this.c);
       this._renderShell();
       if (this.c.destinationData) {

@@ -526,6 +526,17 @@
     return (s && s.length <= 120 && /^[A-Za-z0-9 ,"'-]+$/.test(s)) ? s : fb;
   }
 
+  function ensureFont(family) {
+    if (!family || family === 'Inter' || typeof document === 'undefined') return;
+    const id = 'tg-font-' + String(family).toLowerCase().replace(/\s+/g, '-');
+    if (document.getElementById(id)) return;
+    const l = document.createElement('link');
+    l.id = id;
+    l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(family).replace(/%20/g, '+') + ':ital,wght@0,400;0,500;0,600;1,400&display=swap';
+    document.head.appendChild(l);
+  }
+
   function isSafeUrl(url) {
     if (!url) return false;
     return /^(https?:\/\/|mailto:|tel:|#|\/)/i.test(url);
@@ -614,6 +625,7 @@
     constructor(container, config) {
       this.el = container;
       this.c = this._defaults(config);
+      ensureFont(safeFontStack(this.c.fontFamily, '')); // load the client-chosen web font on the host site (house rule 2)
       this.widgetId = container.getAttribute('data-tg-id') ||
         ('faq_' + Math.random().toString(36).slice(2, 10));
       this.shadow = container.attachShadow({ mode: 'open' });
@@ -959,15 +971,16 @@
       const iconName = (q.icon && IC[q.icon]) ? q.icon :
                        (this._categoryIcon(q.category) || 'help');
       const ansId = 'ans-' + esc(q.id);
+      const qId = 'q-' + esc(q.id);
       const showIcon = this.c.showIcons !== false;
 
       return `<article class="tgf-item" data-id="${esc(q.id)}" data-open="${isOpen}">
-        <button class="tgf-question" type="button" aria-expanded="${isOpen}" aria-controls="${ansId}">
+        <button class="tgf-question" id="${qId}" type="button" aria-expanded="${isOpen}" aria-controls="${ansId}">
           ${showIcon ? `<span class="tgf-q-icon">${icon(iconName, 18)}</span>` : ''}
           <span class="tgf-q-text">${qHtml}${this._renderBadges(q)}</span>
           <span class="tgf-chevron">${icon('chevron', 20)}</span>
         </button>
-        <div class="tgf-answer" id="${ansId}" role="region">
+        <div class="tgf-answer" id="${ansId}" role="region" aria-labelledby="${qId}">
           <div class="tgf-answer-outer">
             <div class="tgf-answer-body">
               ${answerHtml}
@@ -1211,6 +1224,7 @@
 
     update(newConfig) {
       this.c = this._defaults(newConfig);
+      ensureFont(safeFontStack(this.c.fontFamily, '')); // load the client-chosen web font on the host site (house rule 2)
       this._prepareQuestions();
       this.state.openItems.clear();
       this.state.query = '';

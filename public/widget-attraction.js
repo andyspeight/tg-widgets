@@ -295,12 +295,24 @@
       .slice(0, max || 8).map(p => '<p>' + esc(p).replace(/\n/g, '<br>') + '</p>').join('');
   }
 
+  function ensureFont(family) {
+    if (!family || family === 'Inter' || typeof document === 'undefined') return;
+    const id = 'tg-font-' + String(family).toLowerCase().replace(/\s+/g, '-');
+    if (document.getElementById(id)) return;
+    const l = document.createElement('link');
+    l.id = id;
+    l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(family).replace(/%20/g, '+') + ':ital,wght@0,400;0,500;0,600;1,400&display=swap';
+    document.head.appendChild(l);
+  }
+
   /* ===== Widget class ===== */
   class TGAttractionWidget {
     constructor(container, config) {
       if (!container) throw new Error('TGAttractionWidget: container required');
       this.el = container;
       this.c = this._defaults(config);
+      ensureFont(this.c.fontFamily);   // load the client-chosen web font on the host site (house rule 2)
       this.t = makeT(this.c);   // resolve viewer language + UI strings
       if (container.shadowRoot) {
         this.shadow = container.shadowRoot;
@@ -604,6 +616,7 @@
 
     update(newConfig) {
       this.c = this._defaults(Object.assign({}, this.c, newConfig || {}));
+      ensureFont(this.c.fontFamily);   // load the client-chosen web font on the host site (house rule 2)
       this.t = makeT(this.c);
       this._renderShell();
       if (this.c.attractionData) { this._data = this.c.attractionData; this._renderContent(); }

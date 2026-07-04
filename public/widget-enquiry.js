@@ -1479,13 +1479,19 @@
     ]);
     var labelChildren = [labelText];
     if (labelExtras) labelChildren = labelChildren.concat(labelExtras);
+    // Give the visible label a stable id so grouped fields (stars, board,
+    // duration...) can point their role="group" at it via aria-labelledby.
+    // Otherwise a client's custom field label is invisible to screen readers,
+    // which only hear the generic group name.
+    var labelId = labelText ? 'tg-' + instance + '-lbl-' + INSTANCE_COUNTER : '';
     var fieldNode = el('div', { class: 'tg-field' }, [
-      labelText ? el('label', { class: 'tg-label' }, labelChildren) : null
+      labelText ? el('label', { class: 'tg-label', id: labelId }, labelChildren) : null
     ]);
     return {
       fieldNode: fieldNode,
       errorNode: errorNode,
       errorId: errorId,
+      labelId: labelId,
       show: function (msg) {
         fieldNode.classList.add('has-error');
         errorNode.classList.add('is-shown');
@@ -2114,7 +2120,7 @@
       var btn = el('button', { class: 'tg-pill' + (n === 7 ? ' is-active' : ''), type: 'button', 'data-n': String(n), 'aria-pressed': (n === 7 ? 'true' : 'false'), text: t('duration_nights', { n: n }), onclick: function () { setActive(n); } });
       buttons.push(btn);
     });
-    shell.fieldNode.appendChild(el('div', { class: 'tg-chips', role: 'group', 'aria-label': t('duration_options') }, buttons));
+    shell.fieldNode.appendChild(el('div', { class: 'tg-chips', role: 'group', 'aria-labelledby': shell.labelId, 'aria-label': t('duration_options') }, buttons));
     shell.fieldNode.appendChild(shell.errorNode);
     return {
       type: 'duration',
@@ -2269,7 +2275,7 @@
       }, [icons, el('h4', { text: presetLabel }), el('p', { text: presetDesc })]);
       cards.push(card);
     });
-    shell.fieldNode.appendChild(el('div', { class: 'tg-star-grid', role: 'group', 'aria-label': t('stars_options') }, cards));
+    shell.fieldNode.appendChild(el('div', { class: 'tg-star-grid', role: 'group', 'aria-labelledby': shell.labelId, 'aria-label': t('stars_options') }, cards));
     shell.fieldNode.appendChild(shell.errorNode);
     return {
       type: 'stars',
@@ -2308,7 +2314,7 @@
       });
       buttons.push(btn);
     });
-    shell.fieldNode.appendChild(el('div', { class: 'tg-seg', role: 'group', 'aria-label': t('board_options') }, buttons));
+    shell.fieldNode.appendChild(el('div', { class: 'tg-seg', role: 'group', 'aria-labelledby': shell.labelId, 'aria-label': t('board_options') }, buttons));
     shell.fieldNode.appendChild(shell.errorNode);
     return {
       type: 'board',
@@ -2341,7 +2347,7 @@
       }, [svg(ICONS[opt.icon] || ICONS.pin, { size: 14 }), interestLabel]);
       buttons.push(btn);
     });
-    shell.fieldNode.appendChild(el('div', { class: 'tg-chips', role: 'group', 'aria-label': t('interests_options') }, buttons));
+    shell.fieldNode.appendChild(el('div', { class: 'tg-chips', role: 'group', 'aria-labelledby': shell.labelId, 'aria-label': t('interests_options') }, buttons));
     shell.fieldNode.appendChild(shell.errorNode);
     return {
       type: 'interests',
@@ -2656,12 +2662,17 @@
     var card = el('div', { class: 'tg-card' });
     var heroChildren = [];
     if (config.branding && config.branding.logoUrl) {
-      heroChildren.push(el('img', {
+      var logoImg = el('img', {
         class: 'tg-hero-logo',
         src: config.branding.logoUrl,
         alt: '',
         loading: 'lazy'
-      }));
+      });
+      // Hide the logo if it fails to load so a broken or hotlink-blocked URL
+      // never shows the browser's broken-image glyph above the form. CSP-safe:
+      // attached here, not via inline onerror.
+      logoImg.addEventListener('error', function () { logoImg.style.display = 'none'; }, { once: true });
+      heroChildren.push(logoImg);
     }
     heroChildren.push(el('h2', { text: config.header.title || t('headerTitle') }));
     heroChildren.push(el('p', { text: config.header.subtitle || t('headerSubtitle') }));

@@ -309,7 +309,20 @@
       this.shadow = container.attachShadow ? container.attachShadow({ mode: 'open' }) : container;
       this.videos = [];
       this.channel = { title: this.cfg.channelTitle || '', url: safeUrl(this.cfg.channelUrl) || '' };
-      this._onKey = (e) => { if (e.key === 'Escape') this._closeLightbox(); };
+      this._onKey = (e) => {
+        if (e.key === 'Escape') { this._closeLightbox(); return; }
+        // Trap Tab within the open dialog so keyboard focus can't escape to the
+        // host page behind the modal. The dialog's focusable stops are the close
+        // button and the video iframe.
+        if (e.key === 'Tab' && this._lb) {
+          const stops = [this._lb.querySelector('.tgy-lb-close'), this._lb.querySelector('iframe')].filter(Boolean);
+          if (!stops.length) return;
+          const first = stops[0], last = stops[stops.length - 1];
+          const active = this.shadow.activeElement;
+          if (e.shiftKey && active === first) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && active === last) { e.preventDefault(); first.focus(); }
+        }
+      };
       this._ro = null;
       this._buildShell();
       this._load();
@@ -513,17 +526,30 @@
       const root = this.shadow.querySelector('.tgy-root') || this.shadow;
       root.appendChild(lb);
       this._lb = lb;
+      // Remember what had focus so it can be restored when the dialog closes,
+      // then move focus into the dialog (the close button) for keyboard users.
+      this._lbReturn = this.shadow.activeElement || null;
       const close = () => this._closeLightbox();
       lb.addEventListener('click', (e) => { if (e.target === lb) close(); });
       lb.querySelector('.tgy-lb-close').addEventListener('click', close);
       document.addEventListener('keydown', this._onKey);
-      requestAnimationFrame(() => lb.classList.add('is-open'));
+      requestAnimationFrame(() => {
+        lb.classList.add('is-open');
+        const btn = lb.querySelector('.tgy-lb-close');
+        if (btn) btn.focus();
+      });
     }
 
     _closeLightbox() {
       document.removeEventListener('keydown', this._onKey);
       if (this._lb && this._lb.parentNode) this._lb.parentNode.removeChild(this._lb);
       this._lb = null;
+      // Return focus to whatever opened the lightbox so keyboard users aren't
+      // dropped back at the top of the page.
+      if (this._lbReturn && typeof this._lbReturn.focus === 'function' && this._lbReturn.isConnected) {
+        try { this._lbReturn.focus(); } catch (e) {}
+      }
+      this._lbReturn = null;
     }
 
     update(newConfig) {

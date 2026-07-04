@@ -120,6 +120,17 @@
     return (s && s.length <= 120 && /^[A-Za-z0-9 ,"'-]+$/.test(s)) ? s : fb;
   }
 
+  function ensureFont(family) {
+    if (!family || family === 'Inter' || typeof document === 'undefined') return;
+    const id = 'tg-font-' + String(family).toLowerCase().replace(/\s+/g, '-');
+    if (document.getElementById(id)) return;
+    const l = document.createElement('link');
+    l.id = id;
+    l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(family).replace(/%20/g, '+') + ':ital,wght@0,400;0,500;0,600;1,400&display=swap';
+    document.head.appendChild(l);
+  }
+
   // URL allowlist: http(s), tel, mailto, sms, anchors, relative paths.
   // Returns '' for anything dangerous (javascript:, data: etc.) so href gets empty.
   function safeUrl(u) {
@@ -631,6 +642,7 @@
       if (!container) throw new Error('TGContactWidget: container required');
       this.el = container;
       this.cfg = this._mergeConfig(config);
+      ensureFont(safeFontStack(this.cfg.fontFamily, ''));   // load the client-chosen web font on the host site (house rule 2)
       this.t = makeT(this.cfg);   // resolve viewer language + UI strings
       this.shadow = container.attachShadow ? container.attachShadow({ mode: 'open' }) : null;
       if (!this.shadow) {
@@ -653,6 +665,7 @@
 
     update(newConfig) {
       this.cfg = this._mergeConfig(Object.assign({}, this.cfg, newConfig));
+      ensureFont(safeFontStack(this.cfg.fontFamily, ''));   // load the client-chosen web font on the host site (house rule 2)
       this.t = makeT(this.cfg);
       this._render();
     }

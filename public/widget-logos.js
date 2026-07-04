@@ -285,6 +285,15 @@
       letter-spacing: 0.01em;
       line-height: 1.3;
     }
+    /* Text stand-in shown when a logo image fails to load (rule 3). */
+    .tgl-fallback-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--tgl-text, var(--tgl-sub));
+      text-align: center;
+      line-height: 1.25;
+      padding: 4px 8px;
+    }
 
     /* ----- Layout: Grid ----- */
     .tgl-grid {
@@ -609,7 +618,7 @@
       return `
         <${tag} class="tgl-cell${linkClass}" ${linkAttrs} aria-label="${esc(name || this.t('logo'))}">
           <div class="tgl-img-wrap">
-            <img class="tgl-img" src="${esc(safeImageUrl(logo.image))}" alt="${esc(altText)}" loading="lazy" decoding="async" />
+            <img class="tgl-img" src="${esc(safeImageUrl(logo.image))}" alt="${esc(altText)}" data-fb-name="${esc(name)}" loading="lazy" decoding="async" />
           </div>
           ${caption}
         </${tag}>
@@ -646,7 +655,7 @@
           <div class="tgl-spotlight-featured">
             <span class="tgl-spotlight-badge">${esc(this.t('featuredPartner'))}</span>
             <div class="tgl-spotlight-img-wrap">
-              <img class="tgl-spotlight-img" src="${esc(safeImageUrl(featured.image))}" alt="${esc(featured.alt || featured.name || this.t('featuredLogo'))}" loading="lazy" decoding="async" />
+              <img class="tgl-spotlight-img" src="${esc(safeImageUrl(featured.image))}" alt="${esc(featured.alt || featured.name || this.t('featuredLogo'))}" data-fb-name="${esc(featured.name || '')}" loading="lazy" decoding="async" />
             </div>
             ${featured.name ? `<h3 class="tgl-spotlight-name">${esc(featured.name)}</h3>` : ''}
             ${this.c.spotlightTagline ? `<p class="tgl-spotlight-tagline">${esc(this.c.spotlightTagline)}</p>` : ''}
@@ -666,6 +675,27 @@
           this._activeGroup = t.getAttribute('data-group') || 'all';
           this._render();
         });
+      });
+      this._bindImageFallbacks();
+    }
+
+    // Swap any logo image that fails to load for its name as plain text, or hide
+    // it if unnamed, so a broken URL, 404 or hotlink block never leaves the
+    // browser's broken-image glyph on the client's page. CSP-safe: attached
+    // here, not via inline onerror.
+    _bindImageFallbacks() {
+      this.shadow.querySelectorAll('img[data-fb-name]').forEach(img => {
+        img.addEventListener('error', () => {
+          const name = img.getAttribute('data-fb-name') || '';
+          if (name) {
+            const span = document.createElement('span');
+            span.className = 'tgl-fallback-name';
+            span.textContent = name;
+            if (img.parentNode) img.parentNode.replaceChild(span, img);
+          } else if (img.parentElement) {
+            img.parentElement.style.display = 'none';
+          }
+        }, { once: true });
       });
     }
 
