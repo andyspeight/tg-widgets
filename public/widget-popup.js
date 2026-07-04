@@ -80,7 +80,7 @@
     } catch (e) { /* fall through */ }
     return '/api/popup-lead';
   })();
-  const VERSION = '1.0.1';
+  const VERSION = '1.0.2';
   const STORAGE_PREFIX = 'tgp_';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -182,6 +182,24 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
+  }
+
+  // Config-derived values flow into the shadow root's style/class attributes, so
+  // they must be validated at the source — the config API accepts arbitrary
+  // configs and only strips <script> tags. Colours are hex-only, the font is a
+  // safe stack, and class/attribute slugs are [a-z0-9-] only. Anything else
+  // falls back to a default, so a hostile value cannot break out of the
+  // attribute and run script on the client's page.
+  function safeColor(v, fb) {
+    return (typeof v === 'string' && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v.trim())) ? v.trim() : fb;
+  }
+  function safeFontStack(v, fb) {
+    const s = String(v == null ? '' : v).trim();
+    return (s && s.length <= 120 && /^[A-Za-z0-9 ,"'-]+$/.test(s)) ? s : fb;
+  }
+  function safeSlug(v, fb) {
+    const s = String(v == null ? '' : v).toLowerCase().replace(/[^a-z0-9-]/g, '');
+    return s || fb;
   }
 
   function safeUrl(url) {
@@ -1135,41 +1153,49 @@
 
     _cssVars() {
       const c = this.cfg;
-      const brandRgb = hexToRgb(c.brand) || '27, 43, 91';
-      const accentRgb = hexToRgb(c.accent) || '0, 180, 216';
+      const brand = safeColor(c.brand, '#1B2B5B');
+      const accent = safeColor(c.accent, '#00B4D8');
+      const brandRgb = hexToRgb(brand) || '27, 43, 91';
+      const accentRgb = hexToRgb(accent) || '0, 180, 216';
       const opacity = Math.max(0, Math.min(100, c.overlayOpacity || 60)) / 100;
       let theme = c.theme || 'light';
       if (theme === 'auto') {
         theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       }
       const isDark = theme === 'dark';
-      const bg = c.bg || (isDark ? '#1E293B' : '#FFFFFF');
-      const text = c.text || (isDark ? '#F8FAFC' : '#0F172A');
+      const bg = safeColor(c.bg, isDark ? '#1E293B' : '#FFFFFF');
+      const text = safeColor(c.text, isDark ? '#F8FAFC' : '#0F172A');
+      const textOnBrand = safeColor(c.textOnBrand, '#FFFFFF');
+      let radius = parseInt(c.radius, 10);
+      if (!Number.isFinite(radius)) radius = 16;
+      radius = Math.max(0, Math.min(64, radius));
+      const font = safeFontStack(c.fontFamily, '');
       return {
-        theme,
+        // Only ever 'light' or 'dark' — never an arbitrary c.theme string.
+        theme: isDark ? 'dark' : 'light',
         styles: [
-          '--tgp-brand:' + (c.brand || '#1B2B5B'),
+          '--tgp-brand:' + brand,
           '--tgp-brand-rgb:' + brandRgb,
-          '--tgp-accent:' + (c.accent || '#00B4D8'),
+          '--tgp-accent:' + accent,
           '--tgp-accent-rgb:' + accentRgb,
           '--tgp-bg:' + bg,
           '--tgp-text:' + text,
-          '--tgp-text-on-brand:' + (c.textOnBrand || '#FFFFFF'),
-          '--tgp-radius:' + (c.radius != null ? c.radius : 16) + 'px',
+          '--tgp-text-on-brand:' + textOnBrand,
+          '--tgp-radius:' + radius + 'px',
           '--tgp-overlay:rgba(15, 23, 42,' + opacity + ')',
-          c.fontFamily ? '--tgp-font:' + c.fontFamily + ', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' : ''
+          font ? '--tgp-font:' + font + ', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' : ''
         ].filter(Boolean).join(';')
       };
     }
 
     _layoutClass() {
       const c = this.cfg;
-      const layout = c.layout || 'centered';
+      const layout = safeSlug(c.layout, 'centered');
       let pos = '';
       if (layout === 'slide-in' || layout === 'floating-card') {
-        pos = ' tgp-pos-' + (c.position || 'bottom-right');
+        pos = ' tgp-pos-' + safeSlug(c.position, 'bottom-right');
       } else if (layout === 'side-drawer') {
-        pos = ' tgp-pos-' + (c.sideDrawerSide || 'right');
+        pos = ' tgp-pos-' + safeSlug(c.sideDrawerSide, 'right');
       }
       return 'tgp-layout-' + layout + pos;
     }
@@ -1187,7 +1213,7 @@
       const showBackdrop = this._showBackdrop();
 
       let html = '<style>' + STYLES + '</style>';
-      html += '<div class="tgp-root ' + layoutClass + '" data-theme="' + css.theme + '" style="' + css.styles + '">';
+      html += '<div class="tgp-root ' + layoutClass + '" data-theme="' + css.theme + '" style="' + esc(css.styles) + '">';
       if (showBackdrop) html += '<div class="tgp-backdrop" data-tgp-backdrop></div>';
       html += '<div class="tgp-container" role="dialog" aria-modal="' + (showBackdrop ? 'true' : 'false') + '" aria-label="' + esc(this.cfg.title || this.t('notification')) + '">';
       html += '<div class="tgp-card" data-tgp-card>';
