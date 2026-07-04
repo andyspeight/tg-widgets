@@ -17,8 +17,26 @@
 (function () {
   'use strict';
 
-  var API_BASE = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || '/api/widget-config';
-  var VERSION = '1.0.1';
+  // Resolve the widget-config API from THIS script's own origin, so the fetch
+  // targets the widget host (widgets.travelify.io) and not the client's own
+  // site. An explicit window.__TG_WIDGET_API__ still wins; the relative path is
+  // only a last resort for same-origin contexts (the editor / demo pages).
+  function resolveConfigApi() {
+    if (typeof window === 'undefined') return '/api/widget-config';
+    if (window.__TG_WIDGET_API__) return window.__TG_WIDGET_API__;
+    try {
+      var me = document.currentScript;
+      if (me && me.src) return new URL(me.src).origin + '/api/widget-config';
+      var scripts = document.getElementsByTagName('script');
+      for (var i = scripts.length - 1; i >= 0; i--) {
+        var s = scripts[i].src || '';
+        if (/\/widget-loader\.js(\?|$|#)/.test(s)) return new URL(s).origin + '/api/widget-config';
+      }
+    } catch (e) { /* fall through */ }
+    return '/api/widget-config';
+  }
+  var API_BASE = resolveConfigApi();
+  var VERSION = '1.0.2';
   var TAU = Math.PI * 2;
 
   // ─── i18n ───────────────────────────────────────────────────
