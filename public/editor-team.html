@@ -676,7 +676,7 @@
     showDepartmentFilter: true,
     showContactIcons: true,
     carouselAutoplay: false,
-    carouselInterval: 5,
+    carouselInterval: 5000,
     members: [
       makeMember({ name: 'Sarah Mitchell', role: 'Senior Travel Consultant', department: 'Tailor-made', bio: 'Twenty years arranging unforgettable trips across Europe and Asia.', specialisms: 'Honeymoons, Family, Italy', years: 20, languages: 'English, Italian', email: 'sarah@example.com', featured: true }),
       makeMember({ name: 'James Thornton', role: 'Cruise Specialist', department: 'Cruise', bio: 'Personally sailed every major cruise line.', specialisms: 'River Cruise, Caribbean', years: 12, languages: 'English' }),
@@ -778,7 +778,9 @@
     toggleSwitch('show-filter', !!C.showDepartmentFilter);
     toggleSwitch('show-contacts', !!C.showContactIcons);
     toggleSwitch('autoplay', !!C.carouselAutoplay);
-    document.getElementById('interval').value = parseInt(C.carouselInterval, 10) || 5;
+    // carouselInterval is stored in ms; heal legacy seconds-values, show seconds.
+    const rawIvl = parseInt(C.carouselInterval, 10) || 5000;
+    document.getElementById('interval').value = Math.round((rawIvl < 100 ? rawIvl * 1000 : rawIvl) / 1000);
 
     // Members
     renderMemberList();

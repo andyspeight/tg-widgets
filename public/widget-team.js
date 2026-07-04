@@ -50,7 +50,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.1';
+  const VERSION = '1.0.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the "Unnamed" fallback, contact aria-labels and the
@@ -1189,7 +1189,13 @@
     }
 
     _startAutoplay() {
-      const interval = Math.max(2000, parseInt(this.cfg.carouselInterval, 10) || 5000);
+      // carouselInterval is stored in milliseconds. Older saved configs stored
+      // it in seconds (e.g. 5), so heal any suspiciously small value up to ms
+      // before clamping — otherwise a 5 becomes a 2s (clamped) flashing carousel
+      // instead of the intended 5s.
+      let rawInterval = parseInt(this.cfg.carouselInterval, 10) || 5000;
+      if (rawInterval > 0 && rawInterval < 100) rawInterval *= 1000;
+      const interval = Math.max(2000, rawInterval);
       const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (reduceMotion) return;
       const root = this.shadow.querySelector('.tgt-root');
