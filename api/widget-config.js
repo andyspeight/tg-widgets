@@ -217,16 +217,31 @@ function canModifyWidget(record, { sessionClientId, userEmail }) {
     ? fields.ClientRecordId.trim()
     : '';
 
+  // Does the authenticated user's own email match the widget's owning email?
+  // This is the legacy ownership signal and the safe fallback below.
+  const widgetEmail = (fields.ClientEmail || '').toLowerCase().trim();
+  const email = (userEmail || '').toLowerCase().trim();
+  const emailMatches = !!(widgetEmail && email && widgetEmail === email);
+
   // Authoritative path: widget has a known owning client.
   if (widgetClientId) {
-    if (sessionClientId && sessionClientId === widgetClientId) return true;
-    return 'client-mismatch';
+    // The session carries a trustworthy owning client — the strong check.
+    // A different client id is a genuine cross-client attempt: deny.
+    if (sessionClientId) {
+      return sessionClientId === widgetClientId ? true : 'client-mismatch';
+    }
+    // The session has NO owning client id at all (e.g. a legacy or stale token
+    // issued before the clientId claim existed, or a sign-in path that omits
+    // it). Do NOT hard-deny the real owner over a missing claim — fall back to
+    // the same ClientEmail match the legacy path uses. Cross-client protection
+    // is unaffected: an attacker's session would carry a *different* clientId
+    // and be denied above; this branch only relaxes the id-absent case and
+    // still requires the owning email to match. Fails closed otherwise.
+    return emailMatches ? true : 'client-missing-email-mismatch';
   }
 
   // Legacy path: no owning client recorded — fall back to creator email.
-  const widgetEmail = (fields.ClientEmail || '').toLowerCase().trim();
-  const email = (userEmail || '').toLowerCase().trim();
-  if (widgetEmail && email && widgetEmail === email) return true;
+  if (emailMatches) return true;
   return 'email-mismatch';
 }
 
