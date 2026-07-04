@@ -716,6 +716,11 @@
                 <label class="field-label">Pairs well with</label>
                 <input class="input" id="hPaired" maxlength="40" placeholder="Pairs well with" />
               </div>
+              <div class="field">
+                <label class="field-label">Paired-destination link base</label>
+                <input class="input" id="pairedLinkBase" placeholder="Auto (matches your page URLs)" maxlength="200" />
+                <div class="field-help" style="margin-top:6px">Leave blank and paired links follow your own destination-page URLs automatically. Set a path like <code>/holidays/</code> or a full <code>https://</code> address only if your destination pages live somewhere else.</div>
+              </div>
             </div>
           </div>
         </div>
@@ -889,6 +894,7 @@
         factsHeading: 'At a glance',
         planningHeading: 'Good to know',
         pairedHeading: 'Pairs well with',
+        pairedLinkBase: '',
         cta: {
           title: 'Speak to our destination specialist',
           subtitle: '',
@@ -1428,6 +1434,7 @@
       document.getElementById('hTags').value = c.tagsHeading || '';
       document.getElementById('hEvents').value = c.eventsHeading || '';
       document.getElementById('hPaired').value = c.pairedHeading || '';
+      document.getElementById('pairedLinkBase').value = c.pairedLinkBase || '';
       // Auto-detect
       const ad = c.autoDetect || {};
       const adEnabled = !!ad.enabled;
@@ -1536,6 +1543,7 @@
     document.getElementById('hTags').addEventListener('input', e => { state.config.tagsHeading = e.target.value; onConfigChange(); });
     document.getElementById('hEvents').addEventListener('input', e => { state.config.eventsHeading = e.target.value; onConfigChange(); });
     document.getElementById('hPaired').addEventListener('input', e => { state.config.pairedHeading = e.target.value; onConfigChange(); });
+    document.getElementById('pairedLinkBase').addEventListener('input', e => { state.config.pairedLinkBase = e.target.value.trim(); onConfigChange(); });
 
     // Auto-detect
     document.getElementById('togAutoDetect').addEventListener('click', e => {

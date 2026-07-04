@@ -92,7 +92,7 @@
     } catch (e) { /* fall through */ }
     return '/api/destination-content';
   })();
-  const VERSION = '1.2.2';
+  const VERSION = '1.2.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (section default headings, fact/planning labels,
@@ -1271,6 +1271,12 @@
         factsHeading: '',
         planningHeading: '',
         pairedHeading: '',
+        // Where the client hosts their destination pages, so paired-destination
+        // links resolve to the right place on their site. Empty = auto: mirror
+        // the URL structure the widget already uses to auto-detect the current
+        // destination (autoDetect). Set a '/prefix/' or an https:// base to
+        // override. See _pairedHref.
+        pairedLinkBase: '',
         cta: {
           title: '',
           subtitle: '',
@@ -1731,19 +1737,66 @@
     // "Pairs well with" — sibling destinations from the Best Paired With links,
     // resolved by the API into { name, slug, url }. Each is a link to the matching
     // destination page when a slug is present, otherwise a plain pill.
+    // Build the href for a paired destination. The API hands us its own
+    // canonical path (e.g. /destinations/cities/paris), which rarely matches
+    // where the CLIENT hosts their destination pages — so a root-relative link
+    // breaks on their site (wrong structure, and wrong directory when the page
+    // is served from a subpath). Resolve it the way the widget already detects
+    // the current destination (autoDetect), or via an explicit pairedLinkBase.
+    // Always same-origin (or an explicit https base) and slug-validated, so a
+    // bad value can never become a protocol-relative, off-site or javascript link.
+    _pairedHref(p) {
+      const lastSeg = (u) => {
+        if (typeof u !== 'string') return '';
+        const clean = u.split('#')[0].split('?')[0];
+        const parts = clean.split('/').filter(Boolean);
+        return parts.length ? parts[parts.length - 1] : '';
+      };
+      const slug = normaliseSlugClient((p && p.slug) || lastSeg(p && p.url) || '');
+      if (!slug) return '';
+
+      // 1. Explicit base wins: a root-relative '/prefix/' or an http(s) base.
+      const baseRaw = typeof this.c.pairedLinkBase === 'string' ? this.c.pairedLinkBase.trim() : '';
+      if (baseRaw) {
+        if (/^\/(?!\/)/.test(baseRaw)) return baseRaw.replace(/\/+$/, '') + '/' + slug;
+        if (/^https?:\/\//i.test(baseRaw)) {
+          try { return new URL(slug, baseRaw.replace(/\/*$/, '/')).href; } catch (e) { return ''; }
+        }
+        return '';
+      }
+
+      // 2. Mirror the client's own URL structure via autoDetect.
+      const ad = this.c.autoDetect || {};
+      const loc = (typeof window !== 'undefined' && window.location) ? window.location : null;
+      if (ad.enabled && loc) {
+        const source = ad.slugSource || 'last-path-segment';
+        if (source === 'last-path-segment') {
+          const parts = (loc.pathname || '/').split('/');
+          let i = parts.length - 1;
+          while (i > 0 && parts[i] === '') i--; // skip a trailing slash
+          if (i <= 0) return '';
+          parts[i] = slug;
+          return parts.join('/');
+        }
+        if (source === 'query-param') {
+          const param = String(ad.slugExtra || '').trim();
+          if (param) return (loc.pathname || '') + '?' + encodeURIComponent(param) + '=' + slug;
+        }
+        // custom-selector has no URL structure to build from — fall through.
+      }
+
+      // 3. Fall back to the API's root-relative path (unchanged legacy behaviour).
+      return /^\/(?!\/)[A-Za-z0-9/_%.\-]*$/.test(p && p.url) ? p.url : '';
+    }
+
     _renderPaired(d) {
       const list = Array.isArray(d.pairedWith) ? d.pairedWith : [];
       const items = list.filter(p => p && p.name).slice(0, 6);
       if (items.length === 0) return '';
 
-      // The API hands us root-relative destination paths (/destinations/cities/...).
-      // Accept those but reject anything protocol-relative (//host) or with a scheme
-      // so a bad value can never become an off-site or javascript: link.
-      const isSafeRel = (u) => typeof u === 'string' && /^\/(?!\/)[A-Za-z0-9/_%.\-]*$/.test(u);
-
       const pills = items.map(p => {
         const inner = icon('compass', 14) + '<span>' + esc(p.name) + '</span>';
-        const url = isSafeRel(p.url) ? p.url : '';
+        const url = this._pairedHref(p);
         return url
           ? '<a class="tgs-pair" href="' + esc(url) + '">' + inner + '<span class="tgs-pair-arrow">' + icon('arrow', 13) + '</span></a>'
           : '<span class="tgs-pair">' + inner + '</span>';
