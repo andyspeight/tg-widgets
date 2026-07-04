@@ -43,7 +43,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.2';
+  const VERSION = '1.0.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (day names, status words, opening-time phrases). The
@@ -989,6 +989,9 @@
       const now = new Date();
       const msUntilNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
       this._tickTimer = setTimeout(() => {
+        // Stop the minute loop (and the document listeners destroy() removes) if
+        // the host was removed without destroy() (SPA client sites).
+        if (this.el && !this.el.isConnected) { this.destroy(); return; }
         this._render();
         this._scheduleTick();
       }, Math.max(1000, msUntilNextMinute));

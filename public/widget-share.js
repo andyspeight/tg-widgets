@@ -63,7 +63,7 @@
     } catch (e) { /* fall through */ }
     return '/api/share-track';
   })();
-  const VERSION = '1.0.2';
+  const VERSION = '1.0.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only. Platform names (WhatsApp, Facebook, X…) are brand
@@ -664,12 +664,18 @@
         });
         // Close on outside click
         if (typeof document !== 'undefined') {
-          document.addEventListener('click', () => {
+          // Store + remove the previous handler so a re-render (update()) doesn't
+          // stack duplicate document listeners, and tear down if the host was
+          // removed without destroy() (SPA client sites).
+          if (this._docClickHandler) document.removeEventListener('click', this._docClickHandler);
+          this._docClickHandler = () => {
+            if (this.el && !this.el.isConnected) { this.destroy(); return; }
             if (pop.getAttribute('data-open') === 'true') {
               pop.setAttribute('data-open', 'false');
               trig.setAttribute('aria-expanded', 'false');
             }
-          });
+          };
+          document.addEventListener('click', this._docClickHandler);
         }
       }
 
@@ -702,6 +708,7 @@
 
       // Apply initial scroll-threshold visibility
       const applyVisibility = () => {
+        if (this.el && !this.el.isConnected) { this.destroy(); return; }
         const y = window.scrollY || 0;
         const aboveThreshold = y >= (cfg.showAfterScroll || 0);
         if (!aboveThreshold) {
@@ -807,6 +814,10 @@
     }
 
     destroy() {
+      if (this._docClickHandler) {
+        document.removeEventListener('click', this._docClickHandler);
+        this._docClickHandler = null;
+      }
       if (this._scrollHandler) {
         window.removeEventListener('scroll', this._scrollHandler);
         this._scrollHandler = null;

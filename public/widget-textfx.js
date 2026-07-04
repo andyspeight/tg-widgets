@@ -45,7 +45,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.1';
+  const VERSION = '1.0.2';
 
   // ---------- Helpers ----------
   function esc(s) {
@@ -649,7 +649,14 @@
     }
 
     _setTimer(fn, delay) {
-      const t = setTimeout(fn, delay);
+      const self = this;
+      // Guard every scheduled callback: if the host was removed without
+      // destroy() (SPA client sites), tear down instead of running the loop
+      // forever against a detached shadow tree.
+      const t = setTimeout(function () {
+        if (self.el && !self.el.isConnected) { self.destroy(); return; }
+        fn();
+      }, delay);
       this._timers.push(t);
       return t;
     }
