@@ -50,7 +50,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.3';
+  const VERSION = '1.0.4';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the "Unnamed" fallback, contact aria-labels and the
@@ -190,6 +190,14 @@
     const s = String(name || '');
     for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
     return palette[Math.abs(h) % palette.length];
+  }
+
+  /** Data attributes carrying the initials-avatar fallback for a member photo,
+   *  so a broken or unreachable image (bad URL, 404, relative path that doesn't
+   *  resolve, hotlink-blocked) can be swapped for the same avatar we'd show if
+   *  no photo were set. Read by _bindImageFallbacks after render. */
+  function fbAttrs(m) {
+    return `data-fb-bg="${esc(avatarColor(m && m.name))}" data-fb-init="${esc(initials(m && m.name))}"`;
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -976,7 +984,7 @@
     _renderSpotlightPhoto(m) {
       const photo = safeImageUrl(m && m.photo);
       if (photo) {
-        return `<div class="tgt-spotlight-photo"><img src="${esc(photo)}" alt="${esc(m.name || '')}" loading="lazy"></div>`;
+        return `<div class="tgt-spotlight-photo"><img src="${esc(photo)}" alt="${esc(m.name || '')}" loading="lazy" ${fbAttrs(m)}></div>`;
       }
       const init = initials(m && m.name);
       const bg = avatarColor(m && m.name);
@@ -987,7 +995,7 @@
       if (!m) return '';
       const photo = safeImageUrl(m.photo);
       const photoHtml = photo
-        ? `<div class="tgt-spotlight-item-photo"><img src="${esc(photo)}" alt="" loading="lazy"></div>`
+        ? `<div class="tgt-spotlight-item-photo"><img src="${esc(photo)}" alt="" loading="lazy" ${fbAttrs(m)}></div>`
         : `<div class="tgt-spotlight-item-photo tgt-spotlight-item-photo--fallback" style="background:${esc(avatarColor(m.name))}">${esc(initials(m.name))}</div>`;
       return `
         <button type="button" class="tgt-spotlight-item ${isOn ? 'is-on' : ''}" data-spotlight-idx="${i}" role="listitem">
@@ -1004,7 +1012,7 @@
       if (!m) return '';
       const photo = safeImageUrl(m.photo);
       const photoHtml = photo
-        ? `<div class="tgt-photo"><img src="${esc(photo)}" alt="${esc(m.name || '')}" loading="lazy"></div>`
+        ? `<div class="tgt-photo"><img src="${esc(photo)}" alt="${esc(m.name || '')}" loading="lazy" ${fbAttrs(m)}></div>`
         : `<div class="tgt-photo tgt-photo--fallback" style="background:${esc(avatarColor(m.name))}">${esc(initials(m.name))}</div>`;
       const name = `<h3 class="tgt-name">${esc(m.name || this.t('unnamed'))}</h3>`;
       const role = m.role ? `<p class="tgt-role">${esc(m.role)}</p>` : '';
@@ -1027,7 +1035,7 @@
       if (!m) return '';
       const photo = safeImageUrl(m.photo);
       const photoHtml = photo
-        ? `<div class="tgt-compact-photo"><img src="${esc(photo)}" alt="${esc(m.name || '')}" loading="lazy"></div>`
+        ? `<div class="tgt-compact-photo"><img src="${esc(photo)}" alt="${esc(m.name || '')}" loading="lazy" ${fbAttrs(m)}></div>`
         : `<div class="tgt-compact-photo tgt-compact-photo--fallback" style="background:${esc(avatarColor(m.name))}">${esc(initials(m.name))}</div>`;
       return `
         <div class="tgt-compact-card" role="listitem">
@@ -1111,7 +1119,28 @@
     }
 
     // ─── Event binding ───
+    // Swap any member photo that fails to load for the initials avatar, so a
+    // broken URL, a 404, a relative path that doesn't resolve on the client's
+    // site, or a hotlink-blocked image never shows the browser's broken-image
+    // glyph. CSP-safe: the handler is attached here, not via an inline onerror.
+    _bindImageFallbacks(scope) {
+      const root = scope || this.shadow;
+      if (!root) return;
+      root.querySelectorAll('img[data-fb-init]').forEach(img => {
+        img.addEventListener('error', () => {
+          const c = img.parentElement;
+          if (!c) return;
+          const base = c.classList[0];
+          if (base) c.classList.add(base + '--fallback');
+          const bg = img.getAttribute('data-fb-bg');
+          if (bg) c.style.background = bg;
+          c.textContent = img.getAttribute('data-fb-init') || '';
+        }, { once: true });
+      });
+    }
+
     _bind() {
+      this._bindImageFallbacks();
       const root = this.shadow.querySelector('.tgt-root');
       if (!root) return;
 
@@ -1194,7 +1223,10 @@
       const featureEl = this.shadow.querySelector('[data-spotlight-feature]');
       const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const swap = () => {
-        if (featureEl) featureEl.innerHTML = this._renderSpotlightFeature(members[idx]);
+        if (featureEl) {
+          featureEl.innerHTML = this._renderSpotlightFeature(members[idx]);
+          this._bindImageFallbacks(featureEl);
+        }
       };
       if (featureEl && !reduceMotion) {
         featureEl.style.opacity = '0';
