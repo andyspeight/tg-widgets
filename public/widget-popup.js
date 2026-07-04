@@ -1226,6 +1226,9 @@
     open() {
       if (this.state.isOpen) return;
       this.state.isOpen = true;
+      // Remember what had focus so we can return it when a modal popup closes.
+      this._prevFocus = (this._showBackdrop() && document.activeElement && document.activeElement !== document.body)
+        ? document.activeElement : null;
       this._render();
       recordShown(this.cfg);
 
@@ -1278,6 +1281,11 @@
         this.shadow.innerHTML = '';
         this.cleanupFns.forEach(fn => { try { fn(); } catch {} });
         this.cleanupFns = [];
+        // Return focus to whatever triggered the popup (modal a11y).
+        if (this._prevFocus && typeof this._prevFocus.focus === 'function') {
+          try { this._prevFocus.focus(); } catch {}
+        }
+        this._prevFocus = null;
       }, 320);
     }
 
@@ -1302,6 +1310,26 @@
         const onEsc = (e) => { if (e.key === 'Escape') self.close('dismissed'); };
         document.addEventListener('keydown', onEsc);
         this.cleanupFns.push(() => document.removeEventListener('keydown', onEsc));
+      }
+
+      // Focus trap for modal layouts — a modal (aria-modal="true") must keep Tab
+      // within itself so keyboard focus can't wander onto the page behind it.
+      // Non-modal notifications (slide-in, floating card, bar) are left alone.
+      if (this._showBackdrop()) {
+        const container = root.querySelector('.tgp-container') || root;
+        const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+        const onTrap = (e) => {
+          if (e.key !== 'Tab') return;
+          const items = container.querySelectorAll(FOCUSABLE);
+          if (!items.length) return;
+          const first = items[0];
+          const last = items[items.length - 1];
+          const active = self.shadow.activeElement;
+          if (e.shiftKey && active === first) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && active === last) { e.preventDefault(); first.focus(); }
+        };
+        document.addEventListener('keydown', onTrap, true);
+        this.cleanupFns.push(() => document.removeEventListener('keydown', onTrap, true));
       }
 
       // CTA click → counts as conversion for non-form content
