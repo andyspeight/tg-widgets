@@ -68,7 +68,7 @@
 
   const API_BASE = resolveApiOrigin();
 
-  const VERSION = '1.0.2';
+  const VERSION = '1.0.4';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (nav controls, badges, rating wording, the localised
@@ -309,6 +309,19 @@
   function buildStyles(c) {
     const brand = safeColor(c.brandColor, '#EC4899');
     const accent = safeColor(c.accentColor, '#8B5CF6');
+    // Surface palette from the editor's colour pickers. Each falls back to the
+    // widget's original light default, so a widget that never set them looks
+    // exactly as before. Background is special: only paint it when the author
+    // actually chose a colour, otherwise the widget stays transparent and sits
+    // on the page as it always has. When a background IS set the root becomes a
+    // padded, rounded panel so the colour reads as a deliberate surface.
+    const card = safeColor(c.cardColor, '#FFFFFF');
+    const text = safeColor(c.textColor, '#0F172A');
+    const sub = safeColor(c.subColor, '#475569');
+    const border = safeColor(c.borderColor, '#E2E8F0');
+    const bg = safeColor(c.bgColor, '');
+    const hasBg = !!bg;
+    const rootPad = hasBg ? '40px' : '0';
     const radius = clamp(c.radius, 0, 32);
     const fontStack = c.fontFamily
       ? `${c.fontFamily}, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`
@@ -322,12 +335,12 @@
         --tgt-star: #F59E0B;
         --tgt-verified: #10B981;
 
-        --tgt-bg: transparent;
-        --tgt-card: #FFFFFF;
-        --tgt-text: #0F172A;
-        --tgt-sub: #475569;
+        --tgt-bg: ${hasBg ? bg : 'transparent'};
+        --tgt-card: ${card};
+        --tgt-text: ${text};
+        --tgt-sub: ${sub};
         --tgt-muted: #94A3B8;
-        --tgt-border: #E2E8F0;
+        --tgt-border: ${border};
         --tgt-hover: #F8FAFC;
         --tgt-chip: #F1F5F9;
 
@@ -352,6 +365,7 @@
       }
 
       :host([data-theme="dark"]) {
+        --tgt-bg: ${hasBg ? '#0F172A' : 'transparent'};
         --tgt-card: #1E293B;
         --tgt-text: #F1F5F9;
         --tgt-sub: #CBD5E1;
@@ -362,6 +376,7 @@
       }
       @media (prefers-color-scheme: dark) {
         :host([data-theme="auto"]) {
+          --tgt-bg: ${hasBg ? '#0F172A' : 'transparent'};
           --tgt-card: #1E293B;
           --tgt-text: #F1F5F9;
           --tgt-sub: #CBD5E1;
@@ -374,7 +389,12 @@
 
       *, *::before, *::after { box-sizing: border-box; }
 
-      .tgt-root { width: 100%; max-width: 100%; }
+      .tgt-root {
+        width: 100%; max-width: 100%;
+        background: var(--tgt-bg);
+        padding: ${rootPad};
+        border-radius: ${hasBg ? radius + 'px' : '0'};
+      }
 
       /* ── Header ───────────────────────────────── */
       .tgt-header { text-align: center; margin: 0 0 32px; }
@@ -735,12 +755,17 @@
     // ── Config merge ─────────────────────────────
     _mergeConfig(user) {
       const u = user || {};
-      // Back-compat: accept FAQ-editor-style colors.brand / colors.accent as aliases
-      // for brandColor / accentColor at the top level. Editor uses colors.* shape
-      // for rich palette management; widget internally uses *Color.
+      // Accept the editor's colors.* palette as aliases for the widget's own
+      // *Color fields. The editor manages a full palette (brand, accent,
+      // background, card surface, text, secondary text, border); the widget
+      // reads them as brandColor/accentColor/bgColor/cardColor/textColor/
+      // subColor/borderColor and feeds them to the CSS custom properties in
+      // buildStyles. Only map when the widget field isn't already set.
       if (u.colors && typeof u.colors === 'object') {
-        if (u.colors.brand && !u.brandColor) u.brandColor = u.colors.brand;
-        if (u.colors.accent && !u.accentColor) u.accentColor = u.colors.accent;
+        const alias = { brand: 'brandColor', accent: 'accentColor', bg: 'bgColor', card: 'cardColor', text: 'textColor', sub: 'subColor', border: 'borderColor' };
+        for (const k in alias) {
+          if (u.colors[k] && !u[alias[k]]) u[alias[k]] = u.colors[k];
+        }
       }
       const merged = {
         ...DEFAULT_CONFIG,
@@ -1108,6 +1133,8 @@
         const total = this._filtered().length;
         if (total > 1) {
           this.state.featuredTimer = setInterval(() => {
+            // Stop if the host was removed without destroy() (SPA client sites).
+            if (this.host && !this.host.isConnected) { this.destroy(); return; }
             this.state.featuredIndex = (this.state.featuredIndex + 1) % total;
             this.render();
           }, 6500);
@@ -1130,7 +1157,11 @@
       // Carousel autoplay
       if (this.c.layout === 'carousel' && this.c.carousel.autoplay && !this._prefersReducedMotion()) {
         const interval = clamp(this.c.carousel.interval, 2000, 20000);
-        this.state.carouselTimer = setInterval(() => this._carouselStep('next'), interval);
+        this.state.carouselTimer = setInterval(() => {
+          // Stop if the host was removed without destroy() (SPA client sites).
+          if (this.host && !this.host.isConnected) { this.destroy(); return; }
+          this._carouselStep('next');
+        }, interval);
         if (track) {
           track.addEventListener('mouseenter', () => clearInterval(this.state.carouselTimer));
         }

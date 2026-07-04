@@ -17,7 +17,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.1.2';
+  const VERSION = '1.1.3';
 
   function resolveBase(path, override) {
     if (typeof window === 'undefined') return path;
@@ -167,14 +167,29 @@
       this._onScroll = this._onScroll.bind(this);
       this._onClick = this._onClick.bind(this);
       this._ticking = false;
+      // The element the page actually scrolls in. null means the window/document
+      // scrolls (the normal case); an element means the page scrolls inside an
+      // inner container (app-shell layouts where body itself doesn't scroll).
+      this._scroller = null;
       this._build();
       if (this.cfg.previewMode) {
         this._setVisible(true);
       } else {
-        window.addEventListener('scroll', this._onScroll, { passive: true });
-        window.addEventListener('resize', this._onScroll, { passive: true });
+        this._bindScroll();
         this._evaluate();
       }
+    }
+
+    // Listen in the capture phase on document so we catch scroll from any
+    // element — scroll events don't bubble, but capture still reaches them, so
+    // this sees an inner scroll container as well as the window/document.
+    _bindScroll() {
+      document.addEventListener('scroll', this._onScroll, { capture: true, passive: true });
+      window.addEventListener('resize', this._onScroll, { passive: true });
+    }
+    _unbindScroll() {
+      document.removeEventListener('scroll', this._onScroll, { capture: true });
+      window.removeEventListener('resize', this._onScroll);
     }
 
     _build() {
@@ -223,6 +238,12 @@
     }
 
     _scrolledPercent() {
+      const s = this._scroller;
+      if (s) {
+        const max = s.scrollHeight - s.clientHeight;
+        if (max <= 0) return 0;
+        return ((s.scrollTop || 0) / max) * 100;
+      }
       const d = document.documentElement;
       const st = window.scrollY || window.pageYOffset || d.scrollTop || 0;
       const max = (d.scrollHeight || 0) - (d.clientHeight || window.innerHeight || 0);
@@ -230,7 +251,18 @@
       return (st / max) * 100;
     }
 
-    _onScroll() {
+    _onScroll(e) {
+      // Remember which element scrolled. The window/document scrolling reports
+      // document (or documentElement/body) as the target; an inner container
+      // reports itself. Only latch a real, scrollable element as the scroller.
+      const tgt = e && e.target;
+      if (tgt) {
+        if (tgt === document || tgt === document.documentElement || tgt === document.body || tgt === window) {
+          this._scroller = null;
+        } else if (tgt.nodeType === 1 && (tgt.scrollHeight - tgt.clientHeight) > 1) {
+          this._scroller = tgt;
+        }
+      }
       if (this._ticking) return;
       this._ticking = true;
       window.requestAnimationFrame(() => { this._evaluate(); this._ticking = false; });
@@ -252,8 +284,10 @@
       e.preventDefault();
       if (this.cfg.previewMode) return;
       const smooth = this.cfg.smoothScroll !== false && !prefersReducedMotion();
-      try { window.scrollTo({ top: 0, behavior: smooth ? 'smooth' : 'auto' }); }
-      catch (err) { window.scrollTo(0, 0); }
+      const s = this._scroller;
+      const target = s || window;
+      try { target.scrollTo({ top: 0, behavior: smooth ? 'smooth' : 'auto' }); }
+      catch (err) { if (s) s.scrollTop = 0; else window.scrollTo(0, 0); }
     }
 
     update(newConfig) {
@@ -263,15 +297,13 @@
       if (this.cfg.previewMode) {
         this._setVisible(true);
       } else {
-        window.addEventListener('scroll', this._onScroll, { passive: true });
-        window.addEventListener('resize', this._onScroll, { passive: true });
+        this._bindScroll();
         this._evaluate();
       }
     }
 
     destroy(keepShadow) {
-      window.removeEventListener('scroll', this._onScroll);
-      window.removeEventListener('resize', this._onScroll);
+      this._unbindScroll();
       if (this.btn) { try { this.btn.removeEventListener('click', this._onClick); } catch (e) {} }
       if (!keepShadow && this.shadow) this.shadow.innerHTML = '';
     }
