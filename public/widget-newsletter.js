@@ -79,7 +79,7 @@
     } catch (e) { /* fall through */ }
     return '/api/newsletter-submit';
   })();
-  const VERSION = '1.0.2';
+  const VERSION = '1.0.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only: validation / error / status messages, plus the
@@ -104,7 +104,7 @@
       firstNamePlaceholder: 'First name',
       buttonLabel: 'Subscribe',
       successTitle: "You're in!",
-      successMessage: 'Check your inbox for a welcome email.',
+      successMessage: 'Look out for our next email.',
       consentLabel: 'I agree to receive travel inspiration emails.',
       triggerLabel: 'Subscribe to our newsletter',
       tabLabel: 'Newsletter',
@@ -125,7 +125,7 @@
       firstNamePlaceholder: 'Prénom',
       buttonLabel: "S'abonner",
       successTitle: "C'est fait !",
-      successMessage: 'Consultez votre boîte mail pour un e-mail de bienvenue.',
+      successMessage: 'Surveillez notre prochain e-mail.',
       consentLabel: "J'accepte de recevoir des e-mails d'inspiration voyage.",
       triggerLabel: 'Abonnez-vous à notre newsletter',
       tabLabel: 'Newsletter',
@@ -146,7 +146,7 @@
       firstNamePlaceholder: 'Vorname',
       buttonLabel: 'Abonnieren',
       successTitle: 'Geschafft!',
-      successMessage: 'Schauen Sie in Ihr Postfach für eine Willkommens-E-Mail.',
+      successMessage: 'Halten Sie Ausschau nach unserer nächsten E-Mail.',
       consentLabel: 'Ich bin damit einverstanden, Reiseinspirations-E-Mails zu erhalten.',
       triggerLabel: 'Abonnieren Sie unseren Newsletter',
       tabLabel: 'Newsletter',
@@ -167,7 +167,7 @@
       firstNamePlaceholder: 'Nombre',
       buttonLabel: 'Suscribirse',
       successTitle: '¡Listo!',
-      successMessage: 'Revisa tu bandeja de entrada para ver el correo de bienvenida.',
+      successMessage: 'Atento a nuestro próximo correo.',
       consentLabel: 'Acepto recibir correos de inspiración de viajes.',
       triggerLabel: 'Suscríbete a nuestra newsletter',
       tabLabel: 'Newsletter',
@@ -188,7 +188,7 @@
       firstNamePlaceholder: 'Nome',
       buttonLabel: 'Iscriviti',
       successTitle: 'Fatto!',
-      successMessage: 'Controlla la tua casella di posta per l\'email di benvenuto.',
+      successMessage: 'Tieni d\'occhio la nostra prossima email.',
       consentLabel: 'Acconsento a ricevere email di ispirazione di viaggio.',
       triggerLabel: 'Iscriviti alla nostra newsletter',
       tabLabel: 'Newsletter',
@@ -209,7 +209,7 @@
       firstNamePlaceholder: 'Prenume',
       buttonLabel: 'Abonează-te',
       successTitle: 'Gata!',
-      successMessage: 'Verificați căsuța de e-mail pentru un mesaj de bun venit.',
+      successMessage: 'Fiți atent la următorul nostru e-mail.',
       consentLabel: 'Sunt de acord să primesc e-mailuri cu inspirație de călătorie.',
       triggerLabel: 'Abonați-vă la newsletterul nostru',
       tabLabel: 'Newsletter',
@@ -876,6 +876,11 @@
       this._succeeded = false;
       this._dismissed = false;
       this._errorMsg = null;
+      // Preserve what the visitor typed across a re-render. Without this a
+      // validation error (bad email, unticked consent) or a network failure
+      // would wipe the email they just entered, because _render() rebuilds the
+      // whole shadow tree. Captured from the live form before every re-render.
+      this._form = { email: '', firstName: '', consent: false };
       this._docKeyHandler = null;
       this._dismissKey = `tgnl_dismissed_${this.c.widgetId || 'anon'}`;
 
@@ -1025,7 +1030,7 @@
       // submit is blocked until they do.
       return `
         <label class="tgnl-checkbox">
-          <input type="checkbox" id="consent" />
+          <input type="checkbox" id="consent" ${this._form.consent ? 'checked' : ''} />
           <span>${esc(cfg.consentLabel || this.t('consentLabel'))}${link}</span>
         </label>
       `;
@@ -1062,7 +1067,7 @@
       }
       return `
         <form class="tgnl-inline-form" id="form" novalidate>
-          <input class="tgnl-input" type="email" id="email" placeholder="${esc(cfg.emailPlaceholder || this.t('emailPlaceholder'))}" autocomplete="email" required aria-label="${esc(this.t('ariaEmail'))}" />
+          <input class="tgnl-input" type="email" id="email" value="${esc(this._form.email)}" placeholder="${esc(cfg.emailPlaceholder || this.t('emailPlaceholder'))}" autocomplete="email" required aria-label="${esc(this.t('ariaEmail'))}" />
           <button class="tgnl-btn" type="submit" id="submitBtn">
             <span class="tgnl-btn-label">${esc(cfg.buttonLabel || this.t('buttonLabel'))}</span>
           </button>
@@ -1088,7 +1093,7 @@
       }
       const icon = cfg.showIcon ? `<div class="tgnl-card-icon">${svgIcon('mail', 22)}</div>` : '';
       const firstName = cfg.showFirstName
-        ? `<input class="tgnl-input" type="text" id="firstName" placeholder="${esc(cfg.firstNamePlaceholder || this.t('firstNamePlaceholder'))}" autocomplete="given-name" aria-label="${esc(this.t('ariaFirstName'))}" />`
+        ? `<input class="tgnl-input" type="text" id="firstName" value="${esc(this._form.firstName)}" placeholder="${esc(cfg.firstNamePlaceholder || this.t('firstNamePlaceholder'))}" autocomplete="given-name" aria-label="${esc(this.t('ariaFirstName'))}" />`
         : '';
       return `
         <div class="tgnl-card">
@@ -1097,7 +1102,7 @@
           <p class="tgnl-card-sub">${esc(cfg.subtitle || this.t('subtitle'))}</p>
           <form class="tgnl-card-form" id="form" novalidate>
             ${firstName}
-            <input class="tgnl-input" type="email" id="email" placeholder="${esc(cfg.emailPlaceholder || this.t('emailPlaceholder'))}" autocomplete="email" required aria-label="${esc(this.t('ariaEmail'))}" />
+            <input class="tgnl-input" type="email" id="email" value="${esc(this._form.email)}" placeholder="${esc(cfg.emailPlaceholder || this.t('emailPlaceholder'))}" autocomplete="email" required aria-label="${esc(this.t('ariaEmail'))}" />
             ${this._renderConsentBlock()}
             ${this._renderErrorBlock()}
             <button class="tgnl-btn" type="submit" id="submitBtn">
@@ -1138,7 +1143,7 @@
         `;
       }
       const firstName = cfg.showFirstName
-        ? `<input class="tgnl-input" type="text" id="firstName" placeholder="${esc(cfg.firstNamePlaceholder || this.t('firstNamePlaceholder'))}" autocomplete="given-name" aria-label="${esc(this.t('ariaFirstName'))}" />`
+        ? `<input class="tgnl-input" type="text" id="firstName" value="${esc(this._form.firstName)}" placeholder="${esc(cfg.firstNamePlaceholder || this.t('firstNamePlaceholder'))}" autocomplete="given-name" aria-label="${esc(this.t('ariaFirstName'))}" />`
         : '';
       return `
         <h3 class="tgnl-card-title">${esc(cfg.title || this.t('title'))}</h3>
@@ -1177,7 +1182,7 @@
             ${this._renderConsentBlock()}
           </div>
           <form class="tgnl-footer-form" id="form" novalidate>
-            <input class="tgnl-footer-input" type="email" id="email" placeholder="${esc(cfg.emailPlaceholder || this.t('emailPlaceholder'))}" autocomplete="email" required aria-label="${esc(this.t('ariaEmail'))}" />
+            <input class="tgnl-footer-input" type="email" id="email" value="${esc(this._form.email)}" placeholder="${esc(cfg.emailPlaceholder || this.t('emailPlaceholder'))}" autocomplete="email" required aria-label="${esc(this.t('ariaEmail'))}" />
             <button class="tgnl-footer-btn" type="submit" id="submitBtn">${esc(cfg.buttonLabel || this.t('buttonLabel'))}</button>
           </form>
           ${this._errorMsg ? `<div class="tgnl-error-msg" role="alert" style="position:absolute;bottom:100%;right:24px;margin-bottom:8px;background:#FEE2E2;color:#991B1B;border-color:#FCA5A5">${svgIcon('alert', 14)}<span>${esc(this._errorMsg)}</span></div>` : ''}
@@ -1293,6 +1298,14 @@
       const firstName = (firstNameEl && firstNameEl.value || '').trim();
       const consent = consentEl ? !!consentEl.checked : true; // implicit consent if no checkbox shown
 
+      // Remember exactly what they typed so any error re-render below restores
+      // it instead of handing them an empty form to fill in all over again.
+      this._form = {
+        email: emailEl ? emailEl.value : '',
+        firstName: firstNameEl ? firstNameEl.value : '',
+        consent,
+      };
+
       // Validation
       if (!isEmail(email)) {
         if (emailEl) emailEl.setAttribute('aria-invalid', 'true');
@@ -1344,6 +1357,7 @@
 
         this._succeeded = true;
         this._submitting = false;
+        this._form = { email: '', firstName: '', consent: false };
         this._render();
       } catch (err) {
         this._submitting = false;
@@ -1430,6 +1444,7 @@
       this._open = false;
       this._succeeded = false;
       this._errorMsg = null;
+      this._form = { email: '', firstName: '', consent: false };
       this._render();
     }
 
