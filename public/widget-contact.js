@@ -50,7 +50,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.1';
+  const VERSION = '1.0.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the action labels and their aria-labels). Business
@@ -109,6 +109,15 @@
     if (/^hsla?\([0-9.,\s%deg]+\)$/i.test(s)) return s;
     if (/^[a-z]{3,20}$/i.test(s)) return s;
     return fallback;
+  }
+
+  // fontFamily is interpolated into a CSS custom property. Allow only what a real
+  // font-family stack needs so it can't add declarations ( ; { } ) or break out
+  // of the style element ( < > ); the style attribute is additionally esc()'d at
+  // injection to neutralise quotes.
+  function safeFontStack(v, fb) {
+    const s = String(v == null ? '' : v).trim();
+    return (s && s.length <= 120 && /^[A-Za-z0-9 ,"'-]+$/.test(s)) ? s : fb;
   }
 
   // URL allowlist: http(s), tel, mailto, sms, anchors, relative paths.
@@ -660,8 +669,9 @@
       const brand = safeColor(c.brandColor, '#1B2B5B');
       const accent = safeColor(c.accentColor, '#00B4D8');
       const radius = Math.max(0, Math.min(40, Number(c.radius) || 16));
-      const fontFamily = c.fontFamily
-        ? `'${String(c.fontFamily).replace(/'/g, '')}', 'Inter', -apple-system, sans-serif`
+      const ff = safeFontStack(c.fontFamily, '');
+      const fontFamily = ff
+        ? `'${ff.replace(/'/g, '')}', 'Inter', -apple-system, sans-serif`
         : `'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`;
       const theme = c.theme === 'dark' ? 'dark' : 'light';
       const layout = ['panel', 'card', 'strip'].indexOf(c.layout) >= 0 ? c.layout : 'panel';
@@ -680,7 +690,7 @@
 
       this.shadow.innerHTML = `
         <style>${STYLES}</style>
-        <div class="tgc-root" data-theme="${theme}" style="${rootStyle}">
+        <div class="tgc-root" data-theme="${theme}" style="${esc(rootStyle)}">
           ${body}
         </div>
       `;

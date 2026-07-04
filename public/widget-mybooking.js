@@ -182,7 +182,7 @@
   const API_PAY = (typeof window !== 'undefined' && window.__TG_PAY_API__) || (API_BASE + '/api/pay-balance');
   const API_AMEND = (typeof window !== 'undefined' && window.__TG_AMEND_API__) || (API_BASE + '/api/amend-order');
   const AMEND_MAX = 1000; // matches the server cap in /api/amend-order
-  const VERSION = '1.10.2';
+  const VERSION = '1.10.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only. Booking data, PII, prices, dates, the agency name and
@@ -1777,6 +1777,21 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
+  }
+  // The theme overrides are assembled into the root style attribute, so author
+  // colours and font must be validated (can't add declarations or break out) and
+  // the attribute is esc()'d at injection.
+  function safeColorM(v, fb) {
+    const s = String(v == null ? '' : v).trim();
+    if (/^#[0-9a-f]{3,8}$/i.test(s)) return s;
+    if (/^rgba?\([0-9.,\s%]+\)$/i.test(s)) return s;
+    if (/^hsla?\([0-9.,\s%deg]+\)$/i.test(s)) return s;
+    if (/^[a-z]{3,20}$/i.test(s)) return s;
+    return fb;
+  }
+  function safeFontStackM(v, fb) {
+    const s = String(v == null ? '' : v).trim();
+    return (s && s.length <= 120 && /^[A-Za-z0-9 ,"'-]+$/.test(s)) ? s : fb;
   }
   function fmtMoney(amount, currency) {
     if (typeof amount !== 'number' || !Number.isFinite(amount)) return '';
@@ -4301,8 +4316,8 @@
     _buildOverrides() {
       const c = this.c.colors || {};
       const lighten = (hex, amt) => this._shiftHex(hex, amt);
-      const primary = c.primary || '#1B2B5B';
-      const accent = c.accent || '#00B4D8';
+      const primary = safeColorM(c.primary, '#1B2B5B');
+      const accent = safeColorM(c.accent, '#00B4D8');
       const parsed = parseInt(this.c.radius, 10);
       const radius = Math.max(0, Math.min(28, Number.isFinite(parsed) ? parsed : 12));
       const overrides = {
@@ -4312,9 +4327,9 @@
         '--tgm-accent': accent,
         '--tgm-accent-light': lighten(accent, 16),
         '--tgm-accent-dark': lighten(accent, -16),
-        '--tgm-success': c.success || '#10B981',
-        '--tgm-warning': c.warning || '#F59E0B',
-        '--tgm-text': c.text || '#0F172A',
+        '--tgm-success': safeColorM(c.success, '#10B981'),
+        '--tgm-warning': safeColorM(c.warning, '#F59E0B'),
+        '--tgm-text': safeColorM(c.text, '#0F172A'),
         '--tgm-radius-sm': Math.round(radius * 0.5) + 'px',
         '--tgm-radius-md': Math.round(radius * 0.66) + 'px',
         '--tgm-radius-lg': radius + 'px',
@@ -4325,8 +4340,9 @@
       // .tgm-root inherits from the shadow host; setting font-family on the root
       // (with !important to defeat the :host rule) propagates everywhere via
       // the font-family: inherit on inputs/buttons/etc.
-      if (this.c.fontFamily && typeof this.c.fontFamily === 'string') {
-        overrides['font-family'] = "'" + this.c.fontFamily.replace(/'/g, "") + "', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+      const ff = safeFontStackM(this.c.fontFamily, '');
+      if (ff) {
+        overrides['font-family'] = "'" + ff.replace(/'/g, '') + "', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
       }
       return Object.entries(overrides)
         .map(([k, v]) => k + ':' + v + ';')
@@ -4376,7 +4392,7 @@
       }
 
       const narrowAttr = this._narrow ? ' tgm-narrow' : '';
-      this.shadow.innerHTML = '<style>' + STYLES + '</style><div class="tgm-root' + narrowAttr + '"' + themeAttr + ' style="' + overrides + '">' + inner + '</div>';
+      this.shadow.innerHTML = '<style>' + STYLES + '</style><div class="tgm-root' + narrowAttr + '"' + themeAttr + ' style="' + esc(overrides) + '">' + inner + '</div>';
       this._bind();
     }
 
