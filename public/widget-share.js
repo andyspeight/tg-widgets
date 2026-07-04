@@ -63,7 +63,7 @@
     } catch (e) { /* fall through */ }
     return '/api/share-track';
   })();
-  const VERSION = '1.0.1';
+  const VERSION = '1.0.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only. Platform names (WhatsApp, Facebook, X…) are brand
@@ -106,6 +106,18 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
+  }
+
+  // Config colours and font reach the root style attribute — validate at source
+  // so they can't add declarations or break out; the string is also esc()'d at
+  // injection as a second layer.
+  function safeColor(v, fb) {
+    const s = String(v == null ? '' : v).trim();
+    return /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/.test(s) ? s : fb;
+  }
+  function safeFontStack(v, fb) {
+    const s = String(v == null ? '' : v).trim();
+    return (s && s.length <= 120 && /^[A-Za-z0-9 ,"'-]+$/.test(s)) ? s : fb;
   }
 
   function safeUrl(u) {
@@ -516,9 +528,9 @@
         fontFamily: typeof cfg.fontFamily === 'string' ? cfg.fontFamily : '',
         theme: {
           mode: cfg.theme && cfg.theme.mode === 'dark' ? 'dark' : 'light',
-          brand: (cfg.theme && cfg.theme.brand) || '#0891B2',
-          card: (cfg.theme && cfg.theme.card) || '',
-          text: (cfg.theme && cfg.theme.text) || '',
+          brand: safeColor(cfg.theme && cfg.theme.brand, '#0891B2'),
+          card: safeColor(cfg.theme && cfg.theme.card, ''),
+          text: safeColor(cfg.theme && cfg.theme.text, ''),
           radius: cfg.theme && Number.isFinite(Number(cfg.theme.radius)) ? Number(cfg.theme.radius) : 14,
         },
       };
@@ -532,9 +544,9 @@
       if (t.text) parts.push(`--tgsh-text:${t.text}`);
       if (Number.isFinite(t.radius)) parts.push(`--tgsh-radius:${t.radius}px`);
       if (Number.isFinite(this.c.iconSize)) parts.push(`--tgsh-icon-size:${this.c.iconSize}px`);
-      if (this.c.fontFamily && typeof this.c.fontFamily === 'string') {
-        const safe = this.c.fontFamily.replace(/'/g, '');
-        parts.push(`font-family:'${safe}', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`);
+      const safe = safeFontStack(this.c.fontFamily, '');
+      if (safe) {
+        parts.push(`font-family:'${safe.replace(/'/g, '')}', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`);
       }
       return parts.join(';');
     }
@@ -594,7 +606,7 @@
 
     _render() {
       const cfg = this.c;
-      const themeStyle = this._themeStyle();
+      const themeStyle = esc(this._themeStyle());
       let inner = '';
 
       switch (cfg.layout) {

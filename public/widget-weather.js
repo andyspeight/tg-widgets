@@ -86,7 +86,7 @@
     } catch (e) { /* fall through */ }
     return '/api/destination-content';
   })();
-  const VERSION = '1.0.1';
+  const VERSION = '1.0.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only: month names, climate-band reason labels, the
@@ -1158,10 +1158,16 @@
 
       const currentMonth = new Date().getMonth();
       const unit = this._tempUnit;
-      const conv = (c) => unit === 'F' ? Math.round(c * 9 / 5 + 32) : c;
+      // Coerce every temp to a finite number. The temps array is remote data
+      // (only <script> is stripped upstream), and in Celsius mode the value was
+      // previously concatenated straight into innerHTML — a string entry like
+      // '<img onerror=...>' would have executed. Non-numbers become null and
+      // render as a dash with no markup.
+      const conv = (c) => { const n = Number(c); return Number.isFinite(n) ? (unit === 'F' ? Math.round(n * 9 / 5 + 32) : n) : null; };
 
       const displayTemps = temps.map(conv);
-      const maxDisplay = Math.max.apply(null, displayTemps.filter(n => typeof n === 'number'));
+      const finiteTemps = displayTemps.filter(n => Number.isFinite(n));
+      const maxDisplay = finiteTemps.length ? Math.max.apply(null, finiteTemps) : (unit === 'F' ? 86 : 30);
       const minTempForScaling = unit === 'F' ? 32 : 0;
       const range = Math.max(maxDisplay - minTempForScaling, 1);
 
@@ -1169,13 +1175,14 @@
       const maxRain = hasRain ? (Math.max.apply(null, rain.filter(n => typeof n === 'number')) || 1) : 1;
 
       const bars = displayTemps.map((t, i) => {
-        const h = Math.max(6, Math.round(((t - minTempForScaling) / range) * 100));
+        const valid = Number.isFinite(t);
+        const h = valid ? Math.max(6, Math.round(((t - minTempForScaling) / range) * 100)) : 6;
         const s = season[i] || 'off';
         const isCurrent = i === currentMonth;
         const currentAttr = isCurrent ? ' data-current="true"' : '';
         return (
           '<div class="tgw-climate-col"' + currentAttr + '>' +
-            '<span class="tgw-climate-temp">' + t + '°</span>' +
+            '<span class="tgw-climate-temp">' + (valid ? t : '–') + '°</span>' +
             '<div class="tgw-climate-bar" data-season="' + esc(s) + '" style="height:' + h + '%;" aria-hidden="true"></div>' +
           '</div>'
         );

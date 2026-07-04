@@ -43,7 +43,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.1';
+  const VERSION = '1.0.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (default heading, the "Visit website" link, and the
@@ -91,11 +91,26 @@
       .replace(/'/g, '&#039;');
   }
 
+  // Allowlist, not denylist: only http(s)/mailto/tel/anchor/site-relative survive.
+  // A denylist misses obfuscations like `java\tscript:` (browsers strip the tab
+  // before dispatch), so allowlist and reject everything else.
   function safeUrl(u) {
     if (!u) return '';
     const s = String(u).trim();
-    if (/^javascript:/i.test(s) || /^data:/i.test(s) || /^vbscript:/i.test(s)) return '';
-    return s;
+    if (s.startsWith('#') || s.startsWith('/')) return s;
+    return /^(https?:|mailto:|tel:)/i.test(s) ? s : '';
+  }
+
+  // Config colours and font reach the root style attribute — validate at source
+  // so they can't add declarations or break out; the string is also esc()'d at
+  // injection as a second layer.
+  function safeColor(v, fb) {
+    const s = String(v == null ? '' : v).trim();
+    return /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/.test(s) ? s : fb;
+  }
+  function safeFontStack(v, fb) {
+    const s = String(v == null ? '' : v).trim();
+    return (s && s.length <= 120 && /^[A-Za-z0-9 ,"'-]+$/.test(s)) ? s : fb;
   }
 
   // Image URLs are allowed to be data: URIs (for inline SVG/PNG placeholders),
@@ -472,11 +487,11 @@
         lang: cfg.lang || cfg.language || cfg.locale || '',
         theme: {
           mode: cfg.theme && cfg.theme.mode === 'dark' ? 'dark' : 'light',
-          brand: (cfg.theme && cfg.theme.brand) || '#0891B2',
-          accent: (cfg.theme && cfg.theme.accent) || '#6366F1',
-          bg: (cfg.theme && cfg.theme.bg) || '',
-          card: (cfg.theme && cfg.theme.card) || '',
-          text: (cfg.theme && cfg.theme.text) || '',
+          brand: safeColor(cfg.theme && cfg.theme.brand, '#0891B2'),
+          accent: safeColor(cfg.theme && cfg.theme.accent, '#6366F1'),
+          bg: safeColor(cfg.theme && cfg.theme.bg, ''),
+          card: safeColor(cfg.theme && cfg.theme.card, ''),
+          text: safeColor(cfg.theme && cfg.theme.text, ''),
           radius: cfg.theme && Number.isFinite(Number(cfg.theme.radius)) ? Number(cfg.theme.radius) : 16,
         },
       };
@@ -484,7 +499,7 @@
 
     _render() {
       const cfg = this.c;
-      const themeStyle = this._themeStyle();
+      const themeStyle = esc(this._themeStyle());
       const heading = cfg.showHeading ? this._renderHeading() : '';
       const tabs = (cfg.showFilters && this._groups().length > 1) ? this._renderTabs() : '';
       const body = this._renderBody();
@@ -519,9 +534,9 @@
       // Font override — when fontFamily is set, override the host's hardcoded
       // Inter stack. Setting font-family on .tgl-root cascades to descendants
       // and beats :host because the root is more specific.
-      if (this.c.fontFamily && typeof this.c.fontFamily === 'string') {
-        const safe = this.c.fontFamily.replace(/'/g, '');
-        parts.push(`font-family:'${safe}', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`);
+      const safe = safeFontStack(this.c.fontFamily, '');
+      if (safe) {
+        parts.push(`font-family:'${safe.replace(/'/g, '')}', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`);
       }
       return parts.join(';');
     }
