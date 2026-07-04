@@ -81,6 +81,17 @@
     return (s && s.length <= 120 && /^[A-Za-z0-9 ,"'-]+$/.test(s)) ? s : fb;
   }
 
+  function ensureFont(family) {
+    if (!family || family === 'Inter' || typeof document === 'undefined') return;
+    const id = 'tg-font-' + String(family).toLowerCase().replace(/\s+/g, '-');
+    if (document.getElementById(id)) return;
+    const l = document.createElement('link');
+    l.id = id;
+    l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(family).replace(/%20/g, '+') + ':ital,wght@0,400;0,500;0,600;1,400&display=swap';
+    document.head.appendChild(l);
+  }
+
   function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
   function easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
 
@@ -446,6 +457,7 @@
     constructor(container, config) {
       this.el = container;
       this.c = this._defaults(config);
+      ensureFont(safeFontStack(this.c.fontFamily, ''));   // load the client-chosen web font on the host site (house rule 2)
       this.shadow = container.attachShadow({ mode: 'open' });
       this._timers = [];
       this._raf = null;
@@ -499,6 +511,7 @@
           duration: 2000,
           decimals: 0,
           thousandsSeparator: ',',
+          decimalSeparator: '.',      // so European authors can pair '.' thousands with ',' decimals
           easing: 'cubic',            // cubic | quart | linear
           startOnView: true
         },
@@ -801,15 +814,17 @@
       const to = Number(cfg.to) || 0;
       const decimals = clamp(cfg.decimals, 0, 6);
       const sep = typeof cfg.thousandsSeparator === 'string' ? cfg.thousandsSeparator.slice(0, 2) : ',';
+      // Decimal separator is author-set too, so European formats (1.234,5) work
+      // without colliding with a '.' thousands separator. Defaults to '.'.
+      const dsep = typeof cfg.decimalSeparator === 'string' && cfg.decimalSeparator ? cfg.decimalSeparator.slice(0, 2) : '.';
       const duration = clamp(cfg.duration, 200, 10000);
       const easing = cfg.easing === 'quart' ? easeOutQuart : (cfg.easing === 'linear' ? (t => t) : easeOutCubic);
 
       const format = (val) => {
         const fixed = val.toFixed(decimals);
-        if (!sep) return fixed;
         const [whole, frac] = fixed.split('.');
-        const withSep = whole.replace(/\B(?=(\d{3})+(?!\d))/g, sep);
-        return frac ? `${withSep}.${frac}` : withSep;
+        const withSep = sep ? whole.replace(/\B(?=(\d{3})+(?!\d))/g, sep) : whole;
+        return frac ? `${withSep}${dsep}${frac}` : withSep;
       };
 
       this.stage.innerHTML = `
@@ -1232,6 +1247,7 @@
 
     update(newConfig) {
       this.c = this._defaults(Object.assign({}, this.c, newConfig));
+      ensureFont(safeFontStack(this.c.fontFamily, ''));   // load the client-chosen web font on the host site (house rule 2)
       this._render();
     }
 

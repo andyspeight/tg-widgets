@@ -197,6 +197,16 @@
     const s = String(v == null ? '' : v).trim();
     return (s && s.length <= 120 && /^[A-Za-z0-9 ,"'-]+$/.test(s)) ? s : fb;
   }
+  function ensureFont(family) {
+    if (!family || family === 'Inter' || typeof document === 'undefined') return;
+    const id = 'tg-font-' + String(family).toLowerCase().replace(/\s+/g, '-');
+    if (document.getElementById(id)) return;
+    const l = document.createElement('link');
+    l.id = id;
+    l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(family).replace(/%20/g, '+') + ':ital,wght@0,400;0,500;0,600;1,400&display=swap';
+    document.head.appendChild(l);
+  }
   function safeSlug(v, fb) {
     const s = String(v == null ? '' : v).toLowerCase().replace(/[^a-z0-9-]/g, '');
     return s || fb;
@@ -1133,6 +1143,7 @@
     constructor(container, config) {
       this.el = container;
       this.cfg = Object.assign({}, DEFAULTS, config || {});
+      ensureFont(safeFontStack(this.cfg.fontFamily, '')); // load the client-chosen web font on the host site (house rule 2)
       this.t = makeT(this.cfg);   // resolve viewer language + UI strings
       this.state = { submitted: false, twoStepAccepted: false, isOpen: false };
       this.shadow = container.attachShadow({ mode: 'open' });
@@ -1462,6 +1473,7 @@
 
     update(newConfig) {
       this.cfg = Object.assign({}, DEFAULTS, newConfig || {});
+      ensureFont(safeFontStack(this.cfg.fontFamily, '')); // load the client-chosen web font on the host site (house rule 2)
       this.t = makeT(this.cfg);
       if (this.state.isOpen) this._render(), this._bind();
     }

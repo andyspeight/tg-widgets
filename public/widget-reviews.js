@@ -353,6 +353,16 @@
 
   /* ━━━ HELPERS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
   function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+  function ensureFont(family) {
+    if (!family || family === 'Inter' || typeof document === 'undefined') return;
+    const id = 'tg-font-' + String(family).toLowerCase().replace(/\s+/g, '-');
+    if (document.getElementById(id)) return;
+    const l = document.createElement('link');
+    l.id = id;
+    l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(family).replace(/%20/g, '+') + ':ital,wght@0,400;0,500;0,600;1,400&display=swap';
+    document.head.appendChild(l);
+  }
   const COLORS = ['#3B82F6','#10B981','#8B5CF6','#F59E0B','#EC4899','#0891B2','#6366F1','#14B8A6'];
   function avatarColor(name) { return COLORS[(name || '').charCodeAt(0) % COLORS.length]; }
   function initials(name) { return (name || 'U').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(); }
@@ -365,6 +375,7 @@
     constructor(container, config) {
       this.el = container;
       this.c = this._defaults(config);
+      ensureFont(this.c.fontFamily);   // load the client-chosen web font on the host site (house rule 2)
       this.t = makeT(this.c);   // resolve viewer language + UI strings
       this.shadow = container.attachShadow({ mode: 'open' });
       this.activeTag = null;
@@ -687,7 +698,7 @@
       });
     }
 
-    update(newConfig) { this.c = this._defaults(newConfig); this.t = makeT(this.c); this.activeTag = null; this.spotlightIdx = 0; this._render(); }
+    update(newConfig) { this.c = this._defaults(newConfig); ensureFont(this.c.fontFamily); this.t = makeT(this.c); this.activeTag = null; this.spotlightIdx = 0; this._render(); }
     destroy() { if (this._spotTimer) clearInterval(this._spotTimer); this.shadow.innerHTML = ''; }
   }
 

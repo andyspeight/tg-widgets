@@ -930,12 +930,24 @@
 }
 `;
 
+  function ensureFont(family) {
+    if (!family || family === 'Inter' || typeof document === 'undefined') return;
+    const id = 'tg-font-' + String(family).toLowerCase().replace(/\s+/g, '-');
+    if (document.getElementById(id)) return;
+    const l = document.createElement('link');
+    l.id = id;
+    l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(family).replace(/%20/g, '+') + ':ital,wght@0,400;0,500;0,600;1,400&display=swap';
+    document.head.appendChild(l);
+  }
+
   /* ===== Widget class =============================================== */
   class TGAirportWidget {
     constructor(container, config) {
       if (!container) throw new Error('TGAirportWidget: container required');
       this.el = container;
       this.c = this._defaults(config);
+      ensureFont(this.c.fontFamily);   // load the client-chosen web font on the host site (house rule 2)
       this.t = makeT(this.c);   // resolve viewer language + UI strings
       // Reuse an existing shadow root if one is already attached — this happens
       // when the editor re-instantiates the widget after the user picks an
@@ -1468,6 +1480,7 @@
 
     update(newConfig) {
       this.c = this._defaults(Object.assign({}, this.c, newConfig || {}));
+      ensureFont(this.c.fontFamily);   // load the client-chosen web font on the host site (house rule 2)
       this.t = makeT(this.c);
       this._renderShell();
       if (this.c.airportData) { this._airport = this.c.airportData; this._renderContent(); }

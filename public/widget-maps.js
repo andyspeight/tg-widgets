@@ -224,6 +224,16 @@
     if (!f) return '';
     return String(f).replace(/[^a-z0-9 ,'"\-]/gi, '').slice(0, 120);
   }
+  function ensureFont(family) {
+    if (!family || family === 'Inter' || typeof document === 'undefined') return;
+    const id = 'tg-font-' + String(family).toLowerCase().replace(/\s+/g, '-');
+    if (document.getElementById(id)) return;
+    const l = document.createElement('link');
+    l.id = id;
+    l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(family).replace(/%20/g, '+') + ':ital,wght@0,400;0,500;0,600;1,400&display=swap';
+    document.head.appendChild(l);
+  }
   function safeColor(c, fallback) {
     if (typeof c === 'string' && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(c.trim())) return c.trim();
     return fallback;
@@ -417,6 +427,7 @@
     constructor(container, config) {
       this.el = container;
       this.cfg = Object.assign({}, DEFAULTS, config || {});
+      ensureFont(this.cfg.fontFamily); // load the client-chosen web font on the host site (house rule 2)
       this.t = makeT(this.cfg);   // resolve viewer language + UI strings
       this.shadow = container.shadowRoot || container.attachShadow({ mode: 'open' });
       this.map = null;
@@ -668,6 +679,7 @@
 
     update(newConfig) {
       this.cfg = Object.assign({}, this.cfg, newConfig || {});
+      ensureFont(this.cfg.fontFamily); // load the client-chosen web font on the host site (house rule 2)
       this.t = makeT(this.cfg);
       this.destroy(true);
       this._render();

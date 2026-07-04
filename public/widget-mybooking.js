@@ -1793,6 +1793,16 @@
     const s = String(v == null ? '' : v).trim();
     return (s && s.length <= 120 && /^[A-Za-z0-9 ,"'-]+$/.test(s)) ? s : fb;
   }
+  function ensureFont(family) {
+    if (!family || family === 'Inter' || typeof document === 'undefined') return;
+    const id = 'tg-font-' + String(family).toLowerCase().replace(/\s+/g, '-');
+    if (document.getElementById(id)) return;
+    const l = document.createElement('link');
+    l.id = id;
+    l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(family).replace(/%20/g, '+') + ':ital,wght@0,400;0,500;0,600;1,400&display=swap';
+    document.head.appendChild(l);
+  }
   function fmtMoney(amount, currency) {
     if (typeof amount !== 'number' || !Number.isFinite(amount)) return '';
     const cur = currency || 'GBP';
@@ -4225,6 +4235,7 @@
     constructor(container, config) {
       this.el = container;
       this.c = this._defaults(config);
+      ensureFont(safeFontStackM(this.c.fontFamily, '')); // load the client-chosen web font on the host site (house rule 2)
       this.t = makeT(this.c);   // resolve viewer language + UI strings
       this.c.t = this.t;        // carry the translator into the module-level render fns (they receive c, not this)
       this.shadow = container.attachShadow({ mode: 'open' });
@@ -5802,6 +5813,7 @@
 
     update(newConfig) {
       this.c = this._defaults(Object.assign({}, this.c, newConfig));
+      ensureFont(safeFontStackM(this.c.fontFamily, '')); // load the client-chosen web font on the host site (house rule 2)
       this.t = makeT(this.c);
       this.c.t = this.t;
       this._render();
