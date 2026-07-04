@@ -1182,9 +1182,22 @@
   //  Styles — scoped to shadow DOM (same CSS as v0.3.0)
   // ============================================================================
 
+  // Colours and font are interpolated into the shadow <style> block. It's set
+  // via textContent so there's no </style> HTML breakout, but an unvalidated
+  // value could still inject CSS declarations/rules ( ; { } ) or break the
+  // quoted font name ( " ). Validate to hex / a plain font name.
+  function safeHexColour(v, fb) {
+    var s = String(v == null ? '' : v).trim();
+    return /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/.test(s) ? s : fb;
+  }
+  function safeFontName(v, fb) {
+    var s = String(v == null ? '' : v).trim();
+    return (s && s.length <= 60 && /^[A-Za-z0-9 ,-]+$/.test(s)) ? s : fb;
+  }
+
   function buildStyles(brand) {
-    var accent = (brand && brand.accentColour) || '#00B4D8';
-    var primary = (brand && brand.buttonColour) || '#1B2B5B';
+    var accent = safeHexColour(brand && brand.accentColour, '#00B4D8');
+    var primary = safeHexColour(brand && brand.buttonColour, '#1B2B5B');
     var isDark = (brand && brand.theme) === 'dark';
 
     // Base theme colour map — used as fallback when the user hasn't overridden
@@ -1205,16 +1218,16 @@
     // colour in the editor, it wins over the theme default. Leaving a value
     // blank falls back to the sensible theme-based default above.
     var c = {
-      bg:             (brand && brand.bgColour)     || base.bg,
+      bg:             safeHexColour(brand && brand.bgColour, base.bg),
       bgAlt:          base.bgAlt,
       bgTile:         base.bgTile,
-      border:         (brand && brand.borderColour) || base.border,
+      border:         safeHexColour(brand && brand.borderColour, base.border),
       borderLight:    base.borderLight,
-      text:           (brand && brand.textColour)   || base.text,
+      text:           safeHexColour(brand && brand.textColour, base.text),
       textSecondary:  base.textSecondary,
       textTertiary:   base.textTertiary
     };
-    var errorC = (brand && brand.errorColour) || '#DC2626';
+    var errorC = safeHexColour(brand && brand.errorColour, '#DC2626');
 
     // Corner radius — translates the editor's segmented value to actual px.
     // Applied to card, inputs, pills, chips, buttons. Keeps proportions sensible
@@ -1263,7 +1276,7 @@
     // at the top of the stylesheet. "system" means don't load anything,
     // just use the system font stack. Loading happens inside the shadow DOM
     // so it doesn't conflict with the host page.
-    var ff = (brand && brand.fontFamily) || 'Inter';
+    var ff = safeFontName(brand && brand.fontFamily, 'Inter');
     var fontStack, fontImport = '';
     if (ff === 'system') {
       fontStack = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
