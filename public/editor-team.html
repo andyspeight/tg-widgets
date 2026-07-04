@@ -686,6 +686,9 @@
 
   let widgetInst = null;
   let openMemberIdx = -1;
+  // Set when a load fails for an existing ?id= — blocks a destructive save that
+  // would overwrite the real record with blank defaults.
+  let loadError = false;
 
   // ─── Shell init ───
   const shell = tgse.init({
@@ -694,6 +697,13 @@
     scriptFile: 'widget-team.js',
 
     getConfig: () => C,
+    canSave: () => {
+      if (loadError) {
+        tgse.toast('Not saving — this widget could not be loaded, so saving now would overwrite it with a blank one. Reload the page to try again.', 'err');
+        return false;
+      }
+      return true;
+    },
     setConfig: (c) => { C = Object.assign({}, C, c); render(); },
 
     fontPickerEl: '#fontPickerMount',
@@ -736,13 +746,23 @@
     fetch('/api/widget-config?id=' + encodeURIComponent(wId))
       .then(r => r.ok ? r.json() : null)
       .then(d => {
-        if (!d) return;
+        if (!d) {
+          // Load failed — the widget id is real but we have only blank defaults.
+          // Flag it so a save can't overwrite the real record with a blank one.
+          loadError = true;
+          tgse.toast('Could not load that widget. Saving is disabled to protect it — reload to try again.', 'err');
+          return;
+        }
+        loadError = false;
         if (d.config) C = Object.assign({}, C, d.config);
         if (d.name) document.getElementById('name-input').value = d.name;
         syncUIFromState();
         render();
       })
-      .catch(() => tgse.toast('Failed to load widget', 'err'));
+      .catch(() => {
+        loadError = true;
+        tgse.toast('Could not load that widget. Saving is disabled to protect it — reload to try again.', 'err');
+      });
   }
 
   // ─── Sync UI ───

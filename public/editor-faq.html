@@ -2576,7 +2576,10 @@
         pushHistory();
       } catch (err) {
         console.warn('Load failed', err);
-        showToast('Could not load that widget — showing a blank one', 'error');
+        // Mark the load as failed so save() refuses to overwrite the real
+        // record with blank defaults (state.widgetId still points at it).
+        state.loadError = true;
+        showToast('Could not load that widget. Saving is disabled to protect it — reload to try again.', 'error');
       }
     }
 
@@ -2665,6 +2668,15 @@
 
       // Shell asks us for the current config when it needs to save.
       getConfig: () => state.config,
+      // Block a save that would overwrite a real widget with blank defaults
+      // after its config failed to load (state.widgetId still points at it).
+      canSave: () => {
+        if (state.loadError) {
+          showToast('Not saving — this widget could not be loaded, so saving now would overwrite it with a blank one. Reload the page to try again.', 'error');
+          return false;
+        }
+        return true;
+      },
       setConfig: (c) => {
         if (c && typeof c === 'object') Object.assign(state.config, c);
         renderAll(); updatePreview();
