@@ -15,7 +15,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.2';
+  const VERSION = '1.0.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the localised default stat labels used when the
@@ -81,8 +81,21 @@
   };
   const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
 
-  function fmtNumber(n, decimals) {
+  // Cache one Intl.NumberFormat per locale+decimals combo — _render calls this
+  // every animation frame, so rebuilding the formatter each time would be waste.
+  const _nfCache = {};
+  function fmtNumber(n, decimals, locale) {
     const d = Math.max(0, Math.min(2, decimals | 0));
+    // Format in the viewer's language so grouping and decimal separators match
+    // their locale (e.g. 1 234,5 in French, 1.234,5 in German), consistent with
+    // the rest of the widget's i18n. Falls back to comma-grouped en formatting.
+    try {
+      if (typeof Intl !== 'undefined' && Intl.NumberFormat) {
+        const key = (locale || 'en') + '|' + d;
+        const nf = _nfCache[key] || (_nfCache[key] = new Intl.NumberFormat(locale || undefined, { minimumFractionDigits: d, maximumFractionDigits: d }));
+        return nf.format(n);
+      }
+    } catch (e) { /* fall through to manual grouping */ }
     const fixed = d > 0 ? n.toFixed(d) : String(Math.round(n));
     const parts = fixed.split('.');
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -146,6 +159,10 @@
         theme: c.theme === 'dark' ? 'dark' : 'light',
         fontFamily: safeFontStack(c.fontFamily, 'Inter, system-ui, sans-serif'),
         previewMode: !!c.previewMode,
+        // Carry the language override through so makeT (and the locale-aware
+        // number formatter) honour a config-set language. Empty = auto-detect
+        // from the viewer's browser, unchanged from before.
+        lang: typeof c.lang === 'string' ? c.lang : '',
       };
     }
 
@@ -196,7 +213,7 @@
     _render(progress) {
       const e = easeOutCubic(Math.max(0, Math.min(1, progress)));
       this.cfg.stats.forEach((s, i) => {
-        if (this.nums[i]) this.nums[i].textContent = fmtNumber(s.value * e, s.decimals);
+        if (this.nums[i]) this.nums[i].textContent = fmtNumber(s.value * e, s.decimals, this.t.lang);
       });
     }
 
