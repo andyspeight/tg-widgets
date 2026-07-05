@@ -134,6 +134,7 @@ export default async function handler(req, res) {
     await logWidgetEvent(req, {
       event: 'popup-lead',
       widgetId: logWidgetId,
+      widgetType: 'Popup',
       accountName: logAccount,
       status,
       latencyMs: Date.now() - startedAt,

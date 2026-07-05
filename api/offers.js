@@ -57,6 +57,7 @@ export default async function handler(req, res) {
     await logWidgetEvent(req, {
       event: 'offers',
       widgetId,
+      widgetType: 'Travel Offers',
       accountName,
       clientId,
       status,

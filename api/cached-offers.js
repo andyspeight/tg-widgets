@@ -213,6 +213,7 @@ export default async function handler(req, res) {
     await logWidgetEvent(req, {
       event: 'cached-offers',
       widgetId,
+      widgetType: 'Travel Offers',
       status,
       cacheHit: status === 200 ? (Number(jsonBody?.totalMatched) > 0) : null,
       latencyMs: Date.now() - startedAt,

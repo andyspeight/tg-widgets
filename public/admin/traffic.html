@@ -335,7 +335,7 @@
       drawChart(d.timeseries || [], d.bucket);
       flagBurst(d.timeseries || []);
 
-      rankTable('t-widgets', d.topWidgets || [], 'Widget');
+      rankTable('t-widgets', d.topWidgets || [], 'Widget', true);
       rankTable('t-domains', d.topDomains || [], 'Domain');
       rankTable('t-accounts', d.topAccounts || [], 'Account');
       blockedTable(d.blocked || []);
@@ -348,14 +348,18 @@
       }).join('');
     }
 
-    function rankTable(id, rows, label) {
+    function rankTable(id, rows, label, typeCol) {
       var el = document.getElementById(id);
       if (!rows.length) { el.innerHTML = '<tr><td class="muted">No data</td></tr>'; return; }
-      var head = '<tr><th>' + esc(label) + '</th><th class="num">Reqs</th><th class="num">%miss</th><th class="num">429</th></tr>';
+      var head = '<tr><th>' + esc(label) + '</th>' +
+        (typeCol ? '<th>Type</th>' : '') +
+        '<th class="num">Reqs</th><th class="num">%miss</th><th class="num">429</th></tr>';
       var body = rows.map(function (r) {
         var miss = pct(r.misses, r.total);
         var blocked = Number(r.blocked) || 0;
-        return '<tr><td title="' + esc(r.key) + '">' + esc(String(r.key).slice(0, 42)) + '</td>' +
+        var keyMax = typeCol ? 24 : 42;
+        return '<tr><td title="' + esc(r.key) + '">' + esc(String(r.key).slice(0, keyMax)) + '</td>' +
+          (typeCol ? '<td>' + (r.wtype ? esc(String(r.wtype).slice(0, 24)) : '<span class="muted">—</span>') + '</td>' : '') +
           '<td class="num">' + nfmt(r.total) + '</td>' +
           '<td class="num"><span class="pill ' + ((Number(r.misses) || 0) > 0 ? 'miss' : 'ok') + '">' + miss + '</span></td>' +
           '<td class="num">' + (blocked ? '<span class="pill block">' + nfmt(blocked) + '</span>' : '<span class="muted">0</span>') + '</td></tr>';
@@ -384,7 +388,7 @@
         var t = new Date(r.ts);
         return '<tr><td class="muted">' + (isNaN(t.getTime()) ? '' : t.toLocaleTimeString()) + '</td>' +
           '<td>' + esc(r.event) + '</td>' +
-          '<td title="' + esc(r.widget_id) + '">' + esc(String(r.widget_id || r.account_name || '—').slice(0, 22)) + '</td>' +
+          '<td title="' + esc(r.widget_id || '') + '">' + esc(String(r.widget_type || r.widget_id || r.account_name || '—').slice(0, 22)) + '</td>' +
           '<td>' + esc(String(r.referer_domain || '—').slice(0, 26)) + '</td>' +
           '<td><code>' + esc(r.ip_text || '—') + '</code></td>' +
           '<td class="num ' + cls + '">' + esc(st || '—') + '</td>' +

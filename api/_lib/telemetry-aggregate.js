@@ -82,14 +82,15 @@ export function aggregateBuffer(entries, opts) {
     for (const e of rows) {
       const key = e[dimField] || '(unknown)';
       let g = m.get(key);
-      if (!g) { g = { key, total: 0, misses: 0, blocked: 0, _ips: new Set() }; m.set(key, g); }
+      if (!g) { g = { key, wtype: null, total: 0, misses: 0, blocked: 0, _ips: new Set() }; m.set(key, g); }
       g.total++;
+      if (!g.wtype && e.widget_type) g.wtype = e.widget_type;
       if (e.cache_hit === false) g.misses++;
       if (Number(e.status) === 429) g.blocked++;
       if (e.ip_hash) g._ips.add(e.ip_hash);
     }
     return Array.from(m.values())
-      .map((g) => ({ key: g.key, total: g.total, misses: g.misses, blocked: g.blocked, uniq_ip: g._ips.size }))
+      .map((g) => ({ key: g.key, wtype: g.wtype, total: g.total, misses: g.misses, blocked: g.blocked, uniq_ip: g._ips.size }))
       .sort((a, b) => b.total - a.total)
       .slice(0, limit);
   }
@@ -118,6 +119,7 @@ export function aggregateBuffer(entries, opts) {
       ts: e.ts,
       event: e.event,
       widget_id: e.widget_id,
+      widget_type: e.widget_type,
       account_name: e.account_name,
       referer_domain: e.referer_domain,
       ip_text: e.ip || null,

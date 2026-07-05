@@ -571,11 +571,13 @@ export default async function handler(req, res) {
       // config GETs are cheap cache HITs, but we still log so a scan across
       // widget IDs (lots of 404s from one IP) is visible on the dashboard.
       let accountName = null;
+      let widgetTypeVal = null;
       async function done(status, jsonBody) {
         res.status(status).json(jsonBody);
         await logWidgetEvent(req, {
           event: 'config',
           widgetId,
+          widgetType: widgetTypeVal,
           accountName,
           status,
           latencyMs: Date.now() - startedAt,
@@ -610,6 +612,7 @@ export default async function handler(req, res) {
       const configStr = widgetRecord.fields.Config || '{}';
       const name = widgetRecord.fields.Name || '';
       const widgetType = widgetRecord.fields.WidgetType || '';
+      widgetTypeVal = String(widgetType).trim() || null;
       const clientEmail = (widgetRecord.fields.ClientEmail || '').toLowerCase().trim();
       accountName = (widgetRecord.fields.ClientName || widgetRecord.fields['Client Name'] || clientEmail || '').toString().trim() || null;
 

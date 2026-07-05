@@ -111,6 +111,7 @@ export function buildEvent(req, fields = {}) {
   return {
     event: str(fields.event, 32),
     widget_id: str(fields.widgetId, 120),
+    widget_type: str(fields.widgetType, 60),
     client_id: str(fields.clientId, 120),
     account_name: str(fields.accountName, 200),
     referer_domain: refererDomain(where),
