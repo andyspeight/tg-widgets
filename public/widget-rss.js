@@ -27,7 +27,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.1';
+  const VERSION = '1.0.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (default heading, empty/error states, the live-feed
@@ -99,6 +99,19 @@
   }
   function safeColor(c, fb) { return (typeof c === 'string' && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(c.trim())) ? c.trim() : fb; }
   function safeFont(f) { return (typeof f === 'string' && /^[\w \-]{1,40}$/.test(f.trim())) ? f.trim() : 'Inter'; }
+  // Load a client-chosen web font on the host page (house rule 2). Naming a font
+  // in CSS does nothing if it is not on the page, so the choice silently fell
+  // back to the system stack. Inject the Google Fonts stylesheet once, skipping
+  // Inter/empty. safeFont already limits the value to a plain family name.
+  function ensureFont(family) {
+    if (!family || family === 'Inter' || typeof document === 'undefined') return;
+    const id = 'tg-font-' + String(family).toLowerCase().replace(/\s+/g, '-');
+    if (document.getElementById(id)) return;
+    const l = document.createElement('link');
+    l.id = id; l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(family).replace(/%20/g, '+') + ':ital,wght@0,400;0,500;0,600;1,400&display=swap';
+    document.head.appendChild(l);
+  }
 
   function fmtDate(iso, t) {
     t = t || ((k) => MESSAGES.en[k] || k);
@@ -261,6 +274,7 @@
       const radius = Math.max(0, Math.min(28, parseInt(cfg.radius, 10) || 16));
       const cols = Math.max(2, Math.min(4, parseInt(cfg.columns, 10) || 3));
       const font = safeFont(cfg.fontFamily || cfg.font);
+      ensureFont(font); // load the client-chosen web font on the host site (house rule 2)
       const rootStyle = [
         `--tgr-accent:${accent}`, `--tgr-radius:${radius}px`, `--tgr-cols:${cols}`,
         `font-family:'${font}', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`,
@@ -349,7 +363,12 @@
       const title = it.title || this.t('untitled');
       const target = cfg.openNewTab ? ' target="_blank" rel="noopener noreferrer"' : '';
       const showThumb = cfg.showImages && layout !== 'compact' && it.image;
-      const thumb = showThumb ? `<span class="tgr-thumb" style="background-image:url('${esc(it.image)}')" role="img" aria-label=""></span>` : '';
+      // Carry the image URL on a data attribute and set background-image via
+      // CSSOM after render (see _renderItems). Interpolating it into an inline
+      // style="...url('…')" is unsafe: esc() turns ' into &#039;, which the
+      // browser HTML-decodes back to ' before the CSS parser runs, letting a
+      // malicious feed image URL break out of url('…') and inject CSS.
+      const thumb = showThumb ? `<span class="tgr-thumb" data-bg="${esc(it.image)}" role="img" aria-label=""></span>` : '';
       const meta = [];
       if (cfg.showSource && it.source) meta.push(`<span class="tgr-src">${esc(it.source)}</span>`);
       if (cfg.showDate && it.published) meta.push(esc(fmtDate(it.published, this.t)));
@@ -372,10 +391,15 @@
     _renderItems() {
       const layout = this._layout();
       this.contentEl.innerHTML = `<div class="tgr-${layout}">${this.items.map(i => this._cardHtml(i)).join('')}</div>`;
-      // Hide any thumbnail that fails to load (no inline handlers)
-      this.contentEl.querySelectorAll('.tgr-thumb[style]').forEach(span => {
-        const url = (span.getAttribute('style').match(/url\('([^']+)'\)/) || [])[1];
+      // Set the thumbnail background via CSSOM (injection-safe) and hide any that
+      // fails to load. Setting .style.backgroundImage through the DOM can't break
+      // out of the style rule the way an inline style string can.
+      this.contentEl.querySelectorAll('.tgr-thumb[data-bg]').forEach(span => {
+        const url = span.getAttribute('data-bg');
         if (!url) return;
+        // Strip the two characters that could terminate the url("…") wrapper;
+        // everything else is inert once assigned through CSSOM.
+        span.style.backgroundImage = 'url("' + url.replace(/["\\]/g, '') + '")';
         const probe = new Image();
         probe.onerror = () => { span.style.display = 'none'; };
         probe.src = url;

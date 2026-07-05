@@ -23,7 +23,7 @@
   window.TravelgenixWidgets = window.TravelgenixWidgets || {};
   window.TravelgenixWidgets.travelResultsAi = true;
 
-  var VERSION = '1.10.1';
+  var VERSION = '1.10.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (header, controls, fact/board labels, fallback states).
@@ -406,6 +406,22 @@
   }
   function isHex(c) { return typeof c === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(c); }
   function str(v, max) { return typeof v === 'string' ? v.slice(0, max || 80) : undefined; }
+  // Load a client-chosen web font on the host page (house rule 2). Naming a
+  // font in CSS does nothing if it is not on the page — the editor's preview
+  // loads it but the live widget did not, so the client's choice silently fell
+  // back to the system stack. Inject the Google Fonts stylesheet once, skipping
+  // Inter/empty. encodeURIComponent keeps the request safe; a plain-family guard
+  // avoids firing a junk request for an odd value.
+  function ensureFont(family) {
+    if (!family || family === 'Inter' || typeof document === 'undefined') return;
+    if (!/^[A-Za-z0-9 ,"'-]+$/.test(family)) return;
+    var id = 'tg-font-' + String(family).toLowerCase().replace(/\s+/g, '-');
+    if (document.getElementById(id)) return;
+    var l = document.createElement('link');
+    l.id = id; l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(family).replace(/%20/g, '+') + ':ital,wght@0,400;0,500;0,600;1,400&display=swap';
+    document.head.appendChild(l);
+  }
   function sanitiseCfg(c) {
     c = c || {}; var o = {}, v;
     if (typeof c.enabled === 'boolean') o.enabled = c.enabled;
@@ -703,6 +719,7 @@
     persistUI();
   }
   function applyConfig() {
+    ensureFont(CFG.font); // load the client-chosen web font (house rule 2)
     if (!host || !els.panel) return;
     layout();
     var p = els.panel.style;
