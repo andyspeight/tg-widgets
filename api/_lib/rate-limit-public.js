@@ -83,6 +83,10 @@ function safeFrag(s, max = 80) {
  * counts aligned to `entries`, or null on ANY failure (→ caller fails open).
  * @param {{key:string, ttl:number}[]} entries
  */
+// This runs BEFORE the response is sent, so it must be bounded: a slow or hung
+// Upstash can never delay a widget. On timeout we abort and fail open.
+const PIPELINE_TIMEOUT_MS = 800;
+
 async function pipelineIncr(entries) {
   if (!REDIS_URL || !REDIS_TOKEN || entries.length === 0) return null;
   const commands = [];
@@ -90,7 +94,11 @@ async function pipelineIncr(entries) {
     commands.push(['INCR', e.key]);
     commands.push(['EXPIRE', e.key, e.ttl, 'NX']); // set TTL only on first write
   }
+  let ctrl;
+  let timer;
   try {
+    ctrl = new AbortController();
+    timer = setTimeout(() => ctrl.abort(), PIPELINE_TIMEOUT_MS);
     const res = await fetch(`${REDIS_URL}/pipeline`, {
       method: 'POST',
       headers: {
@@ -98,6 +106,7 @@ async function pipelineIncr(entries) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(commands),
+      signal: ctrl.signal,
     });
     if (!res.ok) return null;
     const data = await res.json();
@@ -109,8 +118,11 @@ async function pipelineIncr(entries) {
       return Number(v);
     });
   } catch (e) {
+    // Includes AbortError on timeout — fail open.
     console.warn('[ratelimit] pipeline error', e && e.message);
     return null;
+  } finally {
+    if (timer) clearTimeout(timer);
   }
 }
 
