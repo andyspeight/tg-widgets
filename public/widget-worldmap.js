@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.10.0';
+  const VERSION = '3.10.1';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -1683,7 +1683,14 @@ svg.leaflet-image-layer.leaflet-interactive path {
        The overlay body is a flex row; the cards column is a fixed-ish width and
        the map column flexes to fill. On narrow widths (container query) they
        stack — map on top, cards scroll beneath. */
-    .tgwm-overlay-body { container-type: inline-size; container-name: tgwmbody; }
+    /* The container is the OVERLAY, one level above the body: a container
+       query can never match rules on the container element itself, and the
+       stacking rule below styles .tgwm-overlay-body directly. With the
+       container ON the body (as originally written) that rule silently never
+       applied — phones kept the row layout, the map column crushed to zero
+       width and the deals panel floated at 55% height over blank space (the
+       reported mobile bug). */
+    .tgwm-overlay { container-type: inline-size; container-name: tgwmbody; }
 
     .tgwm-ov-cards {
       flex: 0 0 40%;
@@ -1988,6 +1995,19 @@ svg.leaflet-image-layer.leaflet-interactive path {
         max-height: 55%;
       }
       .tgwm-ov-mapcol { order: 1; flex: 1 1 auto; min-height: 200px; }
+      /* Collapsed state, stacked axis. The base collapse rule zeroes WIDTH
+         (right for the desktop side-by-side layout), but stacked the main
+         axis is vertical — inheriting it here left a zero-width panel still
+         flex-growing to half the screen, so the map sat squashed above a
+         blank bottom half (the reported mobile bug). Collapse the HEIGHT
+         instead and give the width back: the map fills the phone screen
+         until a destination is tapped, then the deals take up to 55%. */
+      .tgwm-overlay-body[data-cards-hidden] .tgwm-ov-cards {
+        flex-grow: 0;
+        max-width: none;
+        max-height: 0;
+        border-top: 0;
+      }
     }
 
     /* Prevent the host page scrolling behind the overlay while it's open.
