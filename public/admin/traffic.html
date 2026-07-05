@@ -162,6 +162,7 @@
     </div>
 
     <div id="content" hidden>
+      <div id="mode-note" hidden style="margin-bottom:var(--sp-4);padding:10px 14px;border-radius:var(--radius-sm);background:rgba(245,158,11,.12);color:var(--tg-warning);font-size:13px;font-weight:500;"></div>
       <div class="tiles" id="tiles"></div>
 
       <div class="card">
@@ -285,6 +286,14 @@
       document.getElementById('empty').hidden = true;
       document.getElementById('content').hidden = false;
       document.getElementById('range-label').textContent = d.from ? (new Date(d.from).toLocaleString() + ' → now') : '';
+
+      var note = document.getElementById('mode-note');
+      if (d.mode === 'redis') {
+        note.hidden = false;
+        note.textContent = 'Fallback mode — reading the last ' + (d.bufferSize != null ? d.bufferSize : '~800') + ' events from Redis. Add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in Vercel for full history and longer ranges.';
+      } else {
+        note.hidden = true;
+      }
 
       var s = d.summary || {};
       var total = Number(s.total) || 0;

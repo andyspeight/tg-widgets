@@ -26,11 +26,18 @@
 
 import { createHash } from 'crypto';
 import { getRequestIp, getUserAgent } from './auth/http.js';
+import { lpush, ltrim, configured as redisConfigured } from '../_redis.js';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 const IP_SALT = process.env.TELEMETRY_IP_SALT || 'tg-widgets-telemetry-v1';
 const INSERT_TIMEOUT_MS = 1500;
+
+// Fallback sink: until Supabase env vars are set, we keep a capped rolling
+// buffer of recent events in the Upstash Redis that's ALREADY provisioned, so
+// the traffic dashboard has something to show tonight. Bounded, best-effort.
+export const REDIS_BUFFER_KEY = 'widget:events:recent:v1';
+const REDIS_BUFFER_CAP = 800;
 
 export function telemetryConfigured() {
   return !!(SUPABASE_URL && SERVICE_KEY) && process.env.TELEMETRY_DISABLED !== '1';
@@ -120,15 +127,26 @@ export function buildEvent(req, fields = {}) {
 }
 
 /**
- * Insert one telemetry row. Fire-and-forget semantics: never throws, bounded
- * by a short timeout. Call it AFTER sending the HTTP response.
+ * Log one telemetry row. Fire-and-forget semantics: never throws, bounded by a
+ * short timeout. Call it AFTER sending the HTTP response.
+ *
+ * Primary sink is Supabase. When Supabase isn't configured yet, we fall back to
+ * a capped Redis rolling buffer so the dashboard still has recent data — this
+ * is the stopgap that lets traffic be watched before the Supabase env vars land.
  */
 export async function logWidgetEvent(req, fields = {}) {
-  if (!telemetryConfigured()) return;
+  const row = buildEvent(req, fields);
+  if (telemetryConfigured()) {
+    await insertSupabase(row);
+    return;
+  }
+  await pushRedisBuffer(row);
+}
+
+async function insertSupabase(row) {
   let ctrl;
   let timer;
   try {
-    const row = buildEvent(req, fields);
     ctrl = new AbortController();
     timer = setTimeout(() => ctrl.abort(), INSERT_TIMEOUT_MS);
     const res = await fetch(`${SUPABASE_URL}/rest/v1/widget_events`, {
@@ -151,5 +169,17 @@ export async function logWidgetEvent(req, fields = {}) {
     console.warn('[telemetry] insert failed', e && e.message);
   } finally {
     if (timer) clearTimeout(timer);
+  }
+}
+
+async function pushRedisBuffer(row) {
+  if (!redisConfigured()) return;
+  try {
+    // Store ts as an ISO string so the dashboard can filter by window.
+    const entry = { ...row, ts: new Date().toISOString() };
+    await lpush(REDIS_BUFFER_KEY, JSON.stringify(entry));
+    await ltrim(REDIS_BUFFER_KEY, 0, REDIS_BUFFER_CAP - 1);
+  } catch (e) {
+    console.warn('[telemetry] redis buffer push failed', e && e.message);
   }
 }

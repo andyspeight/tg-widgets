@@ -19,6 +19,9 @@
  *   - Reads through SECURITY-restricted RPCs; service key never leaves here.
  */
 import { requireAdmin, setAdminCors } from './_guard.js';
+import { lrange, configured as redisConfigured } from '../_redis.js';
+import { REDIS_BUFFER_KEY } from '../_lib/telemetry.js';
+import { aggregateBuffer } from '../_lib/telemetry-aggregate.js';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -74,7 +77,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'GET only' });
   }
 
-  if (!telemetryConfigured()) {
+  // Neither store available → nothing to show.
+  if (!telemetryConfigured() && !redisConfigured()) {
     return res.status(503).json({
       error: 'Telemetry store not configured',
       detail: 'Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in Vercel to enable the dashboard.',
@@ -106,6 +110,38 @@ export default async function handler(req, res) {
     p_domain: filt(q.domain, 253),
   };
   const limit = Math.max(1, Math.min(200, parseInt(q.limit, 10) || 20));
+
+  // ── Fallback mode ──────────────────────────────────────────────────
+  // Supabase not wired up yet, but Redis is: read the capped rolling buffer
+  // and aggregate in-process. Same response shape, plus mode:'redis' so the
+  // dashboard can show a "limited history" note.
+  if (!telemetryConfigured() && redisConfigured()) {
+    try {
+      const raw = await lrange(REDIS_BUFFER_KEY, 0, -1);
+      const entries = [];
+      for (const s of raw) {
+        try { entries.push(JSON.parse(s)); } catch { /* skip malformed */ }
+      }
+      const filters = { event: eventFilter, widget: f.p_widget, account: f.p_account, domain: f.p_domain };
+      const agg = aggregateBuffer(entries, { from, to, bucket, limit, filters });
+      if (action === 'recent') {
+        return res.status(200).json({ configured: false, mode: 'redis', from, to, recent: agg.recent });
+      }
+      return res.status(200).json({
+        configured: false,
+        mode: 'redis',
+        bufferSize: entries.length,
+        range: rangeKey,
+        bucket,
+        from,
+        to,
+        ...agg,
+      });
+    } catch (err) {
+      console.error('[widget-traffic] redis fallback failed:', err.message);
+      return res.status(502).json({ error: 'Telemetry buffer read failed', detail: err.message.slice(0, 200) });
+    }
+  }
 
   try {
     if (action === 'recent') {
