@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cookie Consent · Travelgenix Widget Suite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!--
+    The consent widget belongs in the site <head>, ABOVE any analytics tags.
+    The demo builds the tag from the control-panel settings in the URL so you
+    can try every layout and theme. A real embed is just:
+
+    <script src="https://widgets.travelify.io/widget-consent.js"
+            data-layout="card" data-position="bottom-left" data-theme="auto"
+            data-accent="#00b4d8" data-privacy-url="/privacy-policy"></script>
+  -->
+  <script>
+    (function () {
+      var q = new URLSearchParams(location.search);
+      var attrs = {
+        'data-layout': q.get('layout') || 'card',
+        'data-position': q.get('position') || 'bottom-left',
+        'data-theme': q.get('theme') || 'auto',
+        'data-accent': q.get('accent') || '#00b4d8',
+        'data-geo': q.get('geo') || 'gdpr',
+        'data-privacy-url': '/privacy-policy',
+        'data-policy-version': '1',
+        'data-log': 'false',
+        'data-tg-config': JSON.stringify({
+          cookies: [
+            { name: 'tg_consent', provider: 'This site', purpose: 'Remembers your cookie choice', duration: '180 days', category: 'necessary' },
+            { name: '_ga / _ga_*', provider: 'Google Analytics', purpose: 'Counts visits and traffic sources', duration: '2 years', category: 'analytics' },
+            { name: '_gcl_au', provider: 'Google Ads', purpose: 'Measures ad campaign conversions', duration: '90 days', category: 'marketing' },
+            { name: '_fbp', provider: 'Meta', purpose: 'Shows relevant offers on Facebook and Instagram', duration: '90 days', category: 'marketing' }
+          ]
+        })
+      };
+      var s = document.createElement('script');
+      s.src = '/widget-consent.js';
+      for (var k in attrs) s.setAttribute(k, attrs[k]);
+      document.head.appendChild(s);
+    })();
+  </script>
+
+  <style>
+    :root {
+      --tg-bg: #F8FAFC;
+      --tg-card: #FFFFFF;
+      --tg-text: #0F172A;
+      --tg-sub: #475569;
+      --tg-muted: #94A3B8;
+      --tg-border: #E2E8F0;
+      --tg-brand: #1B2B5B;
+      --tg-accent: #00B4D8;
+      --tg-green: #10B981;
+      --tg-red: #EF4444;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: var(--tg-text);
+      background: var(--tg-bg);
+      line-height: 1.5;
+    }
+    a { color: var(--tg-accent); }
+
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: saturate(180%) blur(10px);
+      border-bottom: 1px solid var(--tg-border);
+    }
+    .topbar-inner {
+      max-width: 1100px; margin: 0 auto;
+      padding: 14px 20px;
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    .brand { font-weight: 700; font-size: 15px; }
+    .brand span { color: var(--tg-accent); }
+
+    main { max-width: 1100px; margin: 0 auto; padding: 32px 20px 120px; }
+    h1 { font-size: 26px; font-weight: 800; letter-spacing: -.02em; margin: 0 0 6px; }
+    .lede { color: var(--tg-sub); max-width: 640px; margin: 0 0 28px; }
+
+    .grid { display: grid; grid-template-columns: 320px 1fr; gap: 20px; align-items: start; }
+    @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+
+    .panel {
+      background: var(--tg-card); border: 1px solid var(--tg-border);
+      border-radius: 14px; padding: 20px;
+    }
+    .panel h2 { font-size: 14px; font-weight: 700; margin: 0 0 14px; }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 12px; font-weight: 600; color: var(--tg-sub); margin-bottom: 5px; }
+    .field select, .field input[type="color"] {
+      width: 100%; padding: 8px 10px; font: inherit; font-size: 13px;
+      border: 1px solid var(--tg-border); border-radius: 8px; background: #fff;
+    }
+    .field input[type="color"] { height: 38px; padding: 3px; cursor: pointer; }
+    button.apply, button.reset {
+      font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;
+      border-radius: 9px; padding: 10px 16px; border: 1.5px solid transparent;
+      width: 100%; margin-top: 4px;
+    }
+    button.apply { background: var(--tg-accent); color: #fff; }
+    button.reset { background: transparent; border-color: var(--tg-border); color: var(--tg-text); margin-top: 8px; }
+
+    .status-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 7px;
+      border: 1px solid var(--tg-border); border-radius: 99px;
+      background: #fff; padding: 6px 13px; font-size: 12.5px; font-weight: 600;
+    }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--tg-muted); }
+    .chip.on .dot { background: var(--tg-green); }
+    .chip.off .dot { background: var(--tg-red); }
+
+    .log {
+      background: #0B1220; color: #C9D6F2; border-radius: 10px;
+      font: 12px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
+      padding: 14px 16px; max-height: 230px; overflow-y: auto; white-space: pre-wrap;
+    }
+    .hint { font-size: 12.5px; color: var(--tg-muted); margin-top: 10px; }
+    code { background: #EEF2F7; border-radius: 5px; padding: 1px 6px; font-size: 12.5px; }
+
+    .gated-box {
+      border: 1.5px dashed var(--tg-border); border-radius: 12px;
+      padding: 16px; margin-top: 16px; font-size: 13.5px; color: var(--tg-sub);
+    }
+    .gated-box b { color: var(--tg-text); }
+    footer { margin-top: 40px; font-size: 13px; color: var(--tg-muted); }
+  </style>
+</head>
+<body>
+  <div class="topbar"><div class="topbar-inner">
+    <div class="brand">Travelgenix <span>Widget Suite</span> · Cookie Consent</div>
+  </div></div>
+
+  <main>
+    <h1>Cookie Consent</h1>
+    <p class="lede">
+      A beautiful, low-impact consent manager built for Duda sites. Google Consent
+      Mode v2 signals default to denied before any analytics loads, gated scripts
+      stay dormant until their category is granted, and every Travelgenix widget
+      can read the visitor's choice through <code>window.tgConsent</code>.
+    </p>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>Try the options</h2>
+        <div class="field"><label for="c-layout">Layout</label>
+          <select id="c-layout">
+            <option value="card">Floating card</option>
+            <option value="bar">Bottom bar</option>
+            <option value="modal">Centred modal</option>
+          </select></div>
+        <div class="field"><label for="c-position">Position (card)</label>
+          <select id="c-position">
+            <option value="bottom-left">Bottom left</option>
+            <option value="bottom-right">Bottom right</option>
+            <option value="top-left">Top left</option>
+            <option value="top-right">Top right</option>
+          </select></div>
+        <div class="field"><label for="c-theme">Theme</label>
+          <select id="c-theme">
+            <option value="auto">Auto (follows the visitor)</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select></div>
+        <div class="field"><label for="c-accent">Accent colour</label>
+          <input type="color" id="c-accent" value="#00b4d8"></div>
+        <div class="field"><label for="c-geo">Region behaviour</label>
+          <select id="c-geo">
+            <option value="gdpr">GDPR opt-in (UK and EU flow)</option>
+            <option value="notice">Implied consent notice (rest of world)</option>
+          </select></div>
+        <button class="apply" id="apply">Apply and reload</button>
+        <button class="reset" id="reset">Reset my choice and reload</button>
+        <p class="hint">Applying reloads the page, exactly as a returning visitor would see it.</p>
+      </div>
+
+      <div>
+        <div class="panel">
+          <h2>Live consent state</h2>
+          <div class="status-row">
+            <span class="chip" id="ch-necessary"><span class="dot"></span>Necessary</span>
+            <span class="chip" id="ch-functional"><span class="dot"></span>Functional</span>
+            <span class="chip" id="ch-analytics"><span class="dot"></span>Analytics</span>
+            <span class="chip" id="ch-marketing"><span class="dot"></span>Marketing</span>
+            <span class="chip" id="ch-gated"><span class="dot"></span>Gated script</span>
+          </div>
+          <div class="log" id="log">— consent events will appear here —</div>
+          <p class="hint">
+            The log mirrors what GA4 and GTM see: the Consent Mode default set at
+            parse time, then every <code>tg_consent_update</code>.
+          </p>
+        </div>
+
+        <div class="gated-box">
+          <b>Gated third-party script demo.</b> The block below is
+          <code>&lt;script type="text/plain" data-tg-consent="analytics"&gt;</code>.
+          It stays inert until you grant analytics, then runs and flips the
+          "Gated script" chip green. This is how a client would wrap any
+          non-Google tracker on their Duda site.
+        </div>
+
+        <!-- Stays dormant until the analytics category is granted -->
+        <script type="text/plain" data-tg-consent="analytics">
+          window.__DEMO_GATED_RAN__ = true;
+          document.dispatchEvent(new CustomEvent('demo-gated-ran'));
+        </script>
+      </div>
+    </div>
+
+    <footer>
+      Change your mind any time: the floating badge, or this footer link —
+      <a href="#tg-consent">Cookie settings</a>.
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      var q = new URLSearchParams(location.search);
+      var ids = { layout: 'c-layout', position: 'c-position', theme: 'c-theme', geo: 'c-geo' };
+      for (var k in ids) {
+        var el = document.getElementById(ids[k]);
+        if (q.get(k)) el.value = q.get(k);
+      }
+      if (q.get('accent')) document.getElementById('c-accent').value = q.get('accent');
+
+      document.getElementById('apply').addEventListener('click', function () {
+        var p = new URLSearchParams();
+        for (var k in ids) p.set(k, document.getElementById(ids[k]).value);
+        p.set('accent', document.getElementById('c-accent').value);
+        location.search = p.toString();
+      });
+      document.getElementById('reset').addEventListener('click', function () {
+        document.cookie = 'tg_consent=; Max-Age=0; Path=/';
+        try { localStorage.removeItem('tgc_state'); sessionStorage.removeItem('tgc_geo'); } catch (e) {}
+        location.reload();
+      });
+
+      var logEl = document.getElementById('log');
+      function log(line) {
+        if (logEl.textContent.indexOf('appear here') !== -1) logEl.textContent = '';
+        logEl.textContent += line + '\n';
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+      function chip(id, on) {
+        var el = document.getElementById(id);
+        el.classList.toggle('on', !!on);
+        el.classList.toggle('off', !on);
+      }
+      function paint(cats) {
+        chip('ch-necessary', true);
+        chip('ch-functional', cats.functional);
+        chip('ch-analytics', cats.analytics);
+        chip('ch-marketing', cats.marketing);
+      }
+
+      // Mirror the dataLayer, the same feed GTM consumes.
+      window.dataLayer = window.dataLayer || [];
+      function logItem(item) {
+        try {
+          if (item && item[0] === 'consent') {
+            log('[consent ' + item[1] + '] ' + JSON.stringify(item[2]));
+          } else if (item && item.event === 'tg_consent_update') {
+            log('[tg_consent_update] source=' + item.tg_consent_source +
+              ' functional=' + item.tg_consent_functional +
+              ' analytics=' + item.tg_consent_analytics +
+              ' marketing=' + item.tg_consent_marketing);
+          }
+        } catch (e) {}
+      }
+      var push = window.dataLayer.push.bind(window.dataLayer);
+      window.dataLayer.push = function (item) {
+        logItem(item);
+        return push(item);
+      };
+      // Log anything pushed before this mirror was installed (the widget sets
+      // its Consent Mode default the moment its script tag executes).
+      for (var i = 0; i < window.dataLayer.length; i++) logItem(window.dataLayer[i]);
+
+      document.addEventListener('tg-consent-change', function (ev) {
+        paint(ev.detail.categories);
+      });
+      document.addEventListener('demo-gated-ran', function () {
+        chip('ch-gated', true);
+        log('[gated script] analytics-gated script has run');
+      });
+
+      var tries = 0;
+      (function waitApi() {
+        if (window.tgConsent) {
+          paint(window.tgConsent.get());
+          chip('ch-gated', !!window.__DEMO_GATED_RAN__);
+        } else if (tries++ < 100) {
+          setTimeout(waitApi, 50);
+        }
+      })();
+    })();
+  </script>
+</body>
+</html>

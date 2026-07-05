@@ -6,7 +6,8 @@
   "description": "Playwright smoke harness for the TG Slicer capture and emit engine. Test tooling only, kept out of the Vercel deploy.",
   "scripts": {
     "smoke": "node run-smoke.mjs tg-slicer f",
-    "smoke:moving": "node run-smoke.mjs tg-slicer i"
+    "smoke:moving": "node run-smoke.mjs tg-slicer i",
+    "smoke:consent": "node consent-smoke.mjs"
   },
   "devDependencies": {
     "playwright": "^1.60.0"
