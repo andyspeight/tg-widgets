@@ -942,6 +942,21 @@ const WIDGETS = [
     scriptFile: 'widget-travel-results-ai.js',
     access: { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
   },
+  {
+    id: 'consent',
+    name: 'Cookie Consent',
+    airtableType: 'Cookie Consent',  // matches Airtable WidgetType singleSelect option
+    description: 'A beautiful, low-impact cookie consent banner built for Duda sites. Google Consent Mode v2 holds GA4 and Google Ads back until the visitor chooses, gated scripts stay dormant without consent, and UK/EU visitors get the full opt-in flow while the rest of the world sees a light notice. Anonymous consent receipts included — no more third-party CMP subscription.',
+    category: 'Compliance',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<path d="M21 12a9 9 0 1 1-9.75-8.97 3.5 3.5 0 0 0 4.22 4.22A9 9 0 0 1 21 12z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="10" r="1"/><circle cx="14" cy="14" r="1"/><circle cx="9.5" cy="15.5" r="1"/>'},
+    color: '#00B4D8',
+    editorUrl: '/editor-consent',
+    demoUrl: '/demo-consent',
+    widgetTag: 'consent',
+    scriptFile: 'widget-consent.js',
+    access: { Spark: 1, Boost: 1, Ignite: -1, Bespoke: -1 },
+  },
 ];
 
 const CATEGORIES = ['All', ...new Set(WIDGETS.map(w => w.category))];
