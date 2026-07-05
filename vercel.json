@@ -269,6 +269,10 @@
       "destination": "/demo-hours.html"
     },
     {
+      "source": "/demo-smartsection",
+      "destination": "/demo-smartsection.html"
+    },
+    {
       "source": "/demo-newsletter",
       "destination": "/demo-newsletter.html"
     },
@@ -447,6 +451,10 @@
     {
       "source": "/editor-hours",
       "destination": "/editor-hours.html"
+    },
+    {
+      "source": "/editor-smartsection",
+      "destination": "/editor-smartsection.html"
     },
     {
       "source": "/editor-newsletter",
@@ -1128,6 +1136,40 @@
     },
     {
       "source": "/widget-hours.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/tgse-rules.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-smartsection.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",

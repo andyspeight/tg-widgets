@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Section Editor — Travelgenix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<style>
+  /* Per-editor styles only — shell tokens come from editor-shell.css. */
+
+  .field { margin-bottom: 14px; }
+  .field-label { display: block; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--tgse-muted); margin-bottom: 6px; }
+  .field-help { font-size: 12px; color: var(--tgse-muted); margin-top: 5px; line-height: 1.45; }
+  .input, .select {
+    width: 100%; padding: 8px 10px; font: 500 13px/1.3 Inter, sans-serif;
+    color: var(--tgse-ink); background: var(--tgse-panel-2); border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-sm); outline: none; box-sizing: border-box;
+  }
+  .input:focus, .select:focus { border-color: var(--tgse-brand); }
+
+  .seg { display: flex; gap: 4px; background: var(--tgse-panel-2); border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-sm); padding: 3px; }
+  .seg button {
+    flex: 1; padding: 6px 8px; border: 0; border-radius: 6px; background: transparent;
+    font: 600 12px Inter, sans-serif; color: var(--tgse-muted); cursor: pointer;
+  }
+  .seg button.is-active { background: var(--tgse-brand); color: #fff; }
+
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  .toggle-label { font: 600 13px Inter, sans-serif; color: var(--tgse-ink); }
+  .toggle-help { font-size: 12px; color: var(--tgse-muted); margin-top: 2px; line-height: 1.4; }
+  .toggle {
+    position: relative; flex: none; width: 40px; height: 22px; border: 0; border-radius: 999px;
+    background: var(--tgse-border-strong); cursor: pointer; transition: background 150ms ease;
+  }
+  .toggle::after {
+    content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px;
+    border-radius: 50%; background: #fff; transition: left 150ms ease;
+  }
+  .toggle.is-on { background: var(--tgse-brand); }
+  .toggle.is-on::after { left: 21px; }
+
+  /* Rule builder */
+  .rule-card {
+    border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md);
+    background: var(--tgse-panel-2); padding: 12px; margin-bottom: 10px;
+  }
+  .rule-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .rule-head .select { flex: 1; }
+  .rule-remove {
+    flex: none; width: 26px; height: 26px; border: 1px solid var(--tgse-border); border-radius: 6px;
+    background: transparent; color: var(--tgse-muted); font-size: 15px; line-height: 1; cursor: pointer;
+  }
+  .rule-remove:hover { color: var(--tgse-danger); border-color: var(--tgse-danger); }
+  .rule-params .field:last-child { margin-bottom: 0; }
+  .rule-row2 { display: flex; gap: 8px; }
+  .rule-row2 > * { flex: 1; min-width: 0; }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    padding: 5px 10px; border: 1px solid var(--tgse-border); border-radius: 999px;
+    background: transparent; font: 600 12px Inter, sans-serif; color: var(--tgse-muted); cursor: pointer;
+  }
+  .chip.is-active { background: var(--tgse-brand); border-color: var(--tgse-brand); color: #fff; }
+  .add-rule {
+    width: 100%; padding: 9px; border: 1px dashed var(--tgse-border-strong); border-radius: var(--tgse-radius-md);
+    background: transparent; font: 600 13px Inter, sans-serif; color: var(--tgse-brand); cursor: pointer;
+  }
+  .add-rule:hover { border-color: var(--tgse-brand); }
+  .empty-rules {
+    padding: 14px; border-radius: var(--tgse-radius-md); background: var(--tgse-panel-2);
+    font-size: 12.5px; color: var(--tgse-muted); line-height: 1.5; margin-bottom: 10px;
+  }
+  .note-box {
+    padding: 12px 14px; border-radius: var(--tgse-radius-md); background: var(--tgse-brand-tint);
+    font-size: 12.5px; color: var(--tgse-ink-2); line-height: 1.55;
+  }
+  .note-box code { font: 500 11.5px "JetBrains Mono", monospace; background: var(--tgse-panel-2); padding: 1px 5px; border-radius: 4px; }
+
+  /* Preview mock page */
+  .preview-page { min-height: 100%; background: #F8FAFC; font-family: Inter, sans-serif; }
+  .preview-page[data-theme="dark"] { background: #0F172A; }
+  .mock-nav { display: flex; align-items: center; gap: 14px; padding: 14px 26px; background: #fff; border-bottom: 1px solid #E2E8F0; }
+  .preview-page[data-theme="dark"] .mock-nav { background: #1E293B; border-color: #334155; }
+  .mock-logo { width: 26px; height: 26px; border-radius: 7px; background: linear-gradient(135deg, #1B2B5B, #00B4D8); }
+  .mock-links { display: flex; gap: 10px; margin-left: auto; }
+  .mock-links span { width: 52px; height: 8px; border-radius: 4px; background: #E2E8F0; }
+  .preview-page[data-theme="dark"] .mock-links span { background: #334155; }
+  .mock-block { margin: 22px 26px; }
+  .mock-line { height: 10px; border-radius: 5px; background: #E2E8F0; margin-bottom: 8px; }
+  .preview-page[data-theme="dark"] .mock-line { background: #334155; }
+  .smart-demo {
+    margin: 22px 26px; padding: 30px 28px; border-radius: 14px; color: #fff;
+    background: linear-gradient(120deg, #1B2B5B 0%, #4338CA 55%, #00B4D8 100%);
+  }
+  .smart-demo h3 { margin: 0 0 6px; font-size: 20px; font-weight: 700; }
+  .smart-demo p { margin: 0 0 16px; font-size: 13.5px; opacity: .88; max-width: 420px; line-height: 1.5; }
+  .smart-demo .cta { display: inline-block; padding: 9px 18px; border-radius: 999px; background: #fff; color: #1B2B5B; font-weight: 700; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div class="tgse-app">
+
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4.5v9L12 20l-8-4.5v-9z"/><path d="M12 11l8-4.5M12 11v9M12 11L4 6.5"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Smart Section</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates
+        <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        AI builder
+        <span class="tgse-kbd">A</span>
+      </button>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled smart section" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="design" role="tab" aria-selected="true">Rules</button>
+      <button data-tab="content" role="tab" aria-selected="false">Behaviour</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+
+      <!-- ===== RULES TAB ===== -->
+      <div class="tgse-panel is-active" data-tab="design">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            <span class="tgse-section-label">Who sees this section</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <span class="field-label">Show the section when</span>
+              <div class="seg" id="matchSeg">
+                <button data-match="all" class="is-active" type="button">All rules match</button>
+                <button data-match="any" type="button">Any rule matches</button>
+              </div>
+            </div>
+            <div id="rulesList"></div>
+            <button class="add-rule" id="btnAddRule" type="button">+ Add a rule</button>
+            <div class="field-help">No rules means everyone sees the section. Rules are checked in the visitor's browser, in their local time.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== BEHAVIOUR TAB ===== -->
+      <div class="tgse-panel" data-tab="content">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            <span class="tgse-section-label">Dismissal</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">Visitors can dismiss it</div>
+                <div class="toggle-help">Adds a small close button to the corner of the section.</div>
+              </div>
+              <button class="toggle" id="tglDismiss" type="button" aria-pressed="false" aria-label="Visitors can dismiss it"></button>
+            </div>
+            <div class="field" id="dismissDaysField" hidden>
+              <span class="field-label">Stay hidden for (days)</span>
+              <input class="input" id="inDismissDays" type="number" min="0" max="365" step="1">
+              <div class="field-help">After a visitor dismisses the section, it stays hidden for this many days on their device.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span class="tgse-section-label">Frequency</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <span class="field-label">Show at most (times per visitor)</span>
+              <input class="input" id="inMaxShows" type="number" min="0" max="1000" step="1">
+              <div class="field-help">0 means no limit. Counted anonymously on the visitor's device — no personal data is stored.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>
+            <span class="tgse-section-label">Reveal</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <span class="field-label">When the section appears</span>
+              <div class="seg" id="revealSeg">
+                <button data-reveal="fade" class="is-active" type="button">Fade in</button>
+                <button data-reveal="none" type="button">Instant</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== SETTINGS TAB ===== -->
+      <div class="tgse-panel" data-tab="settings">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            <span class="tgse-section-label">How to use it</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="note-box">
+              Smart Section is a wrapper. Get the embed code, then put the content you want to show or hide <strong>inside</strong> the <code>&lt;div&gt;</code> — a banner, an offer, a whole section, even other Travelgenix widgets. Everything inside follows your rules. The preview here uses sample content; on your site it wraps whatever you put in it.
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+            <span class="tgse-section-label">Debugging</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">Debug badge on the live site</div>
+                <div class="toggle-help">Shows the section to everyone with a badge explaining what real visitors would see. Turn this off before going live.</div>
+              </div>
+              <button class="toggle" id="tglDebug" type="button" aria-pressed="false" aria-label="Debug badge on the live site"></button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </aside>
+
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop" aria-label="Desktop view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+        </button>
+        <button data-vp="tablet" title="Tablet" aria-label="Tablet view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+        <button data-vp="mobile" title="Mobile" aria-label="Mobile view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+      </div>
+
+      <div class="tgse-divider"></div>
+
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle page theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        Theme
+      </button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Get embed code
+      </button>
+    </div>
+
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame">
+        <div class="preview-page" id="previewPage" data-theme="light">
+          <div class="mock-nav">
+            <div class="mock-logo"></div>
+            <div class="mock-links"><span></span><span></span><span></span></div>
+          </div>
+          <div class="mock-block">
+            <div class="mock-line" style="width: 46%;"></div>
+            <div class="mock-line" style="width: 72%;"></div>
+            <div class="mock-line" style="width: 63%;"></div>
+          </div>
+          <div data-tg-widget="smartsection" id="widgetMount">
+            <div class="smart-demo">
+              <h3>Sample content: this is what your rules control</h3>
+              <p>On your site, anything you place inside the Smart Section follows these rules: an offer, a banner, a whole section, even other widgets.</p>
+              <span class="cta">Book now</span>
+            </div>
+          </div>
+          <div class="mock-block">
+            <div class="mock-line" style="width: 68%;"></div>
+            <div class="mock-line" style="width: 54%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Shell behaviour (must come before the editor's own script) -->
+<script src="/editor-shell.js"></script>
+
+<!-- Live preview: the real rule engine + widget, in preview mode -->
+<script>window.__TG_PREVIEW__ = true;</script>
+<script src="/tgse-rules.js"></script>
+<script src="/widget-smartsection.js"></script>
+
+<script src="/editor-tour.js"></script>
+
+<script>
+  'use strict';
+
+  /* ------------------------------------------------------------------ *
+   * Config state
+   * ------------------------------------------------------------------ */
+
+  let C = {
+    match: 'all',
+    rules: [],
+    dismissible: false,
+    dismissDays: 30,
+    maxShows: 0,
+    reveal: 'fade',
+    debug: false,
+  };
+
+  const RULE_TYPES = [
+    { type: 'visitorType', label: 'Visitor type' },
+    { type: 'timeOfDay', label: 'Time of day' },
+    { type: 'dayOfWeek', label: 'Day of week' },
+    { type: 'device', label: 'Device' },
+    { type: 'utm', label: 'Campaign / traffic source' },
+    { type: 'exitIntent', label: 'Exit intent' },
+  ];
+
+  const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const DEVICE_LABELS = { mobile: 'Mobile', tablet: 'Tablet', desktop: 'Desktop' };
+
+  function defaultRule(type) {
+    switch (type) {
+      case 'visitorType': return { type, value: 'new' };
+      case 'timeOfDay': return { type, from: '09:00', to: '17:00' };
+      case 'dayOfWeek': return { type, days: [1, 2, 3, 4, 5] };
+      case 'device': return { type, devices: ['mobile'] };
+      case 'utm': return { type, param: 'source', match: 'is', value: '' };
+      case 'exitIntent': return { type };
+      default: return { type };
+    }
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Shell init
+   * ------------------------------------------------------------------ */
+
+  const shell = tgse.init({
+    widgetType: 'Smart Section',
+    widgetTag: 'smartsection',
+    scriptFile: 'widget-smartsection.js',
+    getConfig: () => C,
+    setConfig: (c) => { C = Object.assign({}, C, c); renderAll(); },
+    onThemeToggle: (isDark) => {
+      document.getElementById('previewPage').setAttribute('data-theme', isDark ? 'dark' : 'light');
+    },
+    onAIBuild: () => tgse.toast('The AI rule builder is coming in a later release', 'ok'),
+    onTemplates: () => tgse.toast('Templates are coming in a later release', 'ok'),
+    onLoginSuccess: () => loadFromUrl(),
+  });
+
+  /* ------------------------------------------------------------------ *
+   * Rule builder (sidebar)
+   * All user-entered values are written to inputs via element properties,
+   * never interpolated into HTML.
+   * ------------------------------------------------------------------ */
+
+  function dirty() { shell.markDirty(); }
+
+  function renderRules() {
+    const list = document.getElementById('rulesList');
+    list.textContent = '';
+
+    if (!C.rules.length) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-rules';
+      empty.textContent = 'No rules yet, so everyone sees this section. Add a rule to start targeting.';
+      list.appendChild(empty);
+      return;
+    }
+
+    C.rules.forEach((rule, idx) => {
+      const card = document.createElement('div');
+      card.className = 'rule-card';
+
+      const head = document.createElement('div');
+      head.className = 'rule-head';
+      const typeSel = document.createElement('select');
+      typeSel.className = 'select';
+      typeSel.setAttribute('aria-label', 'Rule type');
+      RULE_TYPES.forEach((rt) => {
+        const opt = document.createElement('option');
+        opt.value = rt.type;
+        opt.textContent = rt.label;
+        typeSel.appendChild(opt);
+      });
+      typeSel.value = rule.type;
+      typeSel.addEventListener('change', () => {
+        C.rules[idx] = defaultRule(typeSel.value);
+        dirty(); renderRules(); renderPreview();
+      });
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'rule-remove';
+      remove.setAttribute('aria-label', 'Remove rule');
+      remove.textContent = '×';
+      remove.addEventListener('click', () => {
+        C.rules.splice(idx, 1);
+        dirty(); renderRules(); renderPreview();
+      });
+      head.appendChild(typeSel);
+      head.appendChild(remove);
+      card.appendChild(head);
+
+      const params = document.createElement('div');
+      params.className = 'rule-params';
+      buildParams(params, rule);
+      card.appendChild(params);
+
+      list.appendChild(card);
+    });
+  }
+
+  function field(labelText, control, help) {
+    const wrap = document.createElement('div');
+    wrap.className = 'field';
+    const label = document.createElement('span');
+    label.className = 'field-label';
+    label.textContent = labelText;
+    wrap.appendChild(label);
+    wrap.appendChild(control);
+    if (help) {
+      const h = document.createElement('div');
+      h.className = 'field-help';
+      h.textContent = help;
+      wrap.appendChild(h);
+    }
+    return wrap;
+  }
+
+  function select(options, value, onChange) {
+    const sel = document.createElement('select');
+    sel.className = 'select';
+    options.forEach(([val, text]) => {
+      const opt = document.createElement('option');
+      opt.value = val;
+      opt.textContent = text;
+      sel.appendChild(opt);
+    });
+    sel.value = value;
+    sel.addEventListener('change', () => { onChange(sel.value); dirty(); renderPreview(); });
+    return sel;
+  }
+
+  function chipRow(items, isActive, onToggle) {
+    const row = document.createElement('div');
+    row.className = 'chip-row';
+    items.forEach(([val, text]) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'chip' + (isActive(val) ? ' is-active' : '');
+      chip.textContent = text;
+      chip.addEventListener('click', () => {
+        onToggle(val);
+        chip.classList.toggle('is-active');
+        dirty(); renderPreview();
+      });
+      row.appendChild(chip);
+    });
+    return row;
+  }
+
+  function buildParams(host, rule) {
+    if (rule.type === 'visitorType') {
+      host.appendChild(field('Show to', select(
+        [['new', 'New visitors (first visit)'], ['returning', 'Returning visitors']],
+        rule.value, (v) => { rule.value = v; }
+      )));
+    }
+
+    if (rule.type === 'timeOfDay') {
+      const row = document.createElement('div');
+      row.className = 'rule-row2';
+      const from = document.createElement('input');
+      from.type = 'time'; from.className = 'input'; from.value = rule.from || '09:00';
+      from.setAttribute('aria-label', 'From time');
+      from.addEventListener('change', () => { rule.from = from.value; dirty(); renderPreview(); });
+      const to = document.createElement('input');
+      to.type = 'time'; to.className = 'input'; to.value = rule.to || '17:00';
+      to.setAttribute('aria-label', 'To time');
+      to.addEventListener('change', () => { rule.to = to.value; dirty(); renderPreview(); });
+      row.appendChild(from); row.appendChild(to);
+      host.appendChild(field('Between (visitor’s local time)', row, 'A window that ends past midnight works too, like 22:00 to 06:00.'));
+    }
+
+    if (rule.type === 'dayOfWeek') {
+      rule.days = Array.isArray(rule.days) ? rule.days : [];
+      host.appendChild(field('On these days', chipRow(
+        DAY_LABELS.map((label, day) => [day, label]),
+        (day) => rule.days.indexOf(day) !== -1,
+        (day) => {
+          const at = rule.days.indexOf(day);
+          if (at === -1) rule.days.push(day); else rule.days.splice(at, 1);
+        }
+      )));
+    }
+
+    if (rule.type === 'device') {
+      rule.devices = Array.isArray(rule.devices) ? rule.devices : [];
+      host.appendChild(field('On these devices', chipRow(
+        Object.keys(DEVICE_LABELS).map((d) => [d, DEVICE_LABELS[d]]),
+        (d) => rule.devices.indexOf(d) !== -1,
+        (d) => {
+          const at = rule.devices.indexOf(d);
+          if (at === -1) rule.devices.push(d); else rule.devices.splice(at, 1);
+        }
+      )));
+    }
+
+    if (rule.type === 'utm') {
+      const row = document.createElement('div');
+      row.className = 'rule-row2';
+      row.appendChild(select(
+        [['source', 'utm_source'], ['medium', 'utm_medium'], ['campaign', 'utm_campaign'], ['referrer', 'Referrer URL']],
+        rule.param || 'source', (v) => { rule.param = v; }
+      ));
+      row.appendChild(select(
+        [['is', 'is exactly'], ['contains', 'contains']],
+        rule.match || 'is', (v) => { rule.match = v; }
+      ));
+      const value = document.createElement('input');
+      value.className = 'input'; value.maxLength = 200;
+      value.placeholder = 'e.g. newsletter';
+      value.value = rule.value || '';
+      value.setAttribute('aria-label', 'Value to match');
+      value.addEventListener('input', () => { rule.value = value.value; dirty(); });
+      value.addEventListener('change', () => renderPreview());
+      host.appendChild(field('Traffic matches', row));
+      host.appendChild(value);
+    }
+
+    if (rule.type === 'exitIntent') {
+      const help = document.createElement('div');
+      help.className = 'field-help';
+      help.textContent = 'The section stays hidden until the visitor moves to leave the page (mouse towards the top on desktop, a fast scroll up on mobile).';
+      host.appendChild(help);
+    }
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Behaviour + settings controls
+   * ------------------------------------------------------------------ */
+
+  function wireSeg(id, attr, get, set) {
+    const seg = document.getElementById(id);
+    seg.querySelectorAll('button').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        set(btn.getAttribute(attr));
+        seg.querySelectorAll('button').forEach((b) => b.classList.toggle('is-active', b === btn));
+        dirty(); renderPreview();
+      });
+    });
+  }
+
+  function syncSeg(id, attr, value) {
+    document.querySelectorAll('#' + id + ' button').forEach((b) => {
+      b.classList.toggle('is-active', b.getAttribute(attr) === value);
+    });
+  }
+
+  function wireToggle(id, get, set) {
+    const el = document.getElementById(id);
+    el.addEventListener('click', () => {
+      set(!get());
+      el.classList.toggle('is-on', get());
+      el.setAttribute('aria-pressed', String(get()));
+      dirty(); syncBehaviourVisibility(); renderPreview();
+    });
+  }
+
+  function syncToggle(id, on) {
+    const el = document.getElementById(id);
+    el.classList.toggle('is-on', on);
+    el.setAttribute('aria-pressed', String(on));
+  }
+
+  function wireNumber(id, min, max, get, set) {
+    const el = document.getElementById(id);
+    el.addEventListener('change', () => {
+      let n = parseInt(el.value, 10);
+      if (isNaN(n)) n = get();
+      n = Math.min(max, Math.max(min, n));
+      el.value = n;
+      set(n);
+      dirty(); renderPreview();
+    });
+  }
+
+  function syncBehaviourVisibility() {
+    document.getElementById('dismissDaysField').hidden = !C.dismissible;
+  }
+
+  wireSeg('matchSeg', 'data-match', () => C.match, (v) => { C.match = v; });
+  wireSeg('revealSeg', 'data-reveal', () => C.reveal, (v) => { C.reveal = v; });
+  wireToggle('tglDismiss', () => C.dismissible, (v) => { C.dismissible = v; });
+  wireToggle('tglDebug', () => C.debug, (v) => { C.debug = v; });
+  wireNumber('inDismissDays', 0, 365, () => C.dismissDays, (v) => { C.dismissDays = v; });
+  wireNumber('inMaxShows', 0, 1000, () => C.maxShows, (v) => { C.maxShows = v; });
+
+  document.getElementById('btnAddRule').addEventListener('click', () => {
+    C.rules.push(defaultRule('visitorType'));
+    dirty(); renderRules(); renderPreview();
+  });
+
+  /* ------------------------------------------------------------------ *
+   * Preview — the real widget in preview mode: content always visible,
+   * badge reporting what live visitors would get.
+   * ------------------------------------------------------------------ */
+
+  let inst = null;
+  function renderPreview() {
+    const mount = document.getElementById('widgetMount');
+    if (inst) { try { inst.destroy(); } catch (e) { /* noop */ } }
+    inst = new window.TGSmartSectionWidget(mount, JSON.parse(JSON.stringify(C)));
+  }
+
+  function syncControls() {
+    syncSeg('matchSeg', 'data-match', C.match);
+    syncSeg('revealSeg', 'data-reveal', C.reveal);
+    syncToggle('tglDismiss', C.dismissible);
+    syncToggle('tglDebug', C.debug);
+    document.getElementById('inDismissDays').value = C.dismissDays;
+    document.getElementById('inMaxShows').value = C.maxShows;
+    syncBehaviourVisibility();
+  }
+
+  function renderAll() {
+    syncControls();
+    renderRules();
+    renderPreview();
+  }
+
+  function loadFromUrl() {
+    const params = new URLSearchParams(location.search);
+    const wId = params.get('id');
+    if (!wId) { renderAll(); return; }
+    fetch('/api/widget-config?id=' + encodeURIComponent(wId))
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!d) { renderAll(); return; }
+        if (d.config) C = Object.assign({}, C, d.config);
+        if (d.name) document.getElementById('name-input').value = d.name;
+        renderAll();
+      })
+      .catch(() => { tgse.toast('Failed to load widget', 'err'); renderAll(); });
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Boot — canonical tgse.onReady gate (never call isLoggedIn() sync).
+   * ------------------------------------------------------------------ */
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const boot = () => {
+      if (tgse.isLoggedIn()) {
+        loadFromUrl();
+        if (typeof window.initSmartSectionTour === 'function') window.initSmartSectionTour();
+      } else {
+        renderAll(); // shell shows its login overlay; keep the default state behind it
+      }
+    };
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(boot);
+    } else {
+      boot();
+    }
+  });
+
+  document.getElementById('name-input').addEventListener('input', () => shell.markDirty());
+</script>
+
+</body>
+</html>
