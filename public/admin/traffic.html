@@ -101,6 +101,33 @@
     .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-5); }
     .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-5); }
     @media (max-width: 900px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+
+    /* ── Phones ──────────────────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      body { font-size: 13.5px; }
+      .topbar { height: auto; min-height: 56px; padding: 9px var(--sp-4); flex-wrap: wrap; gap: var(--sp-2); }
+      .brand { font-size: 15px; }
+      .brand .sub { display: none; }              /* the date range label — save space */
+      .top-actions { gap: var(--sp-2); flex-wrap: wrap; }
+      .btn { height: 38px; padding: 0 12px; }      /* bigger touch targets */
+      .wrap { padding: var(--sp-4); }
+      /* Controls stack: range full-width, event full-width, filters 2-up, apply full-width */
+      .controls { gap: var(--sp-2); }
+      .segmented { width: 100%; }
+      .segmented button { flex: 1; padding: 10px 0; }
+      #f-event { flex: 1 1 100%; height: 40px; }
+      input.filter { flex: 1 1 calc(50% - var(--sp-2)); width: auto; min-width: 0; height: 40px; }
+      #apply-btn { flex: 1 1 100%; height: 42px; justify-content: center; }
+      #status { flex: 1 1 100%; }
+      .tiles { grid-template-columns: repeat(2, 1fr); gap: var(--sp-3); }
+      .tile { padding: var(--sp-3); }
+      .tile .v { font-size: 22px; }
+      .card { padding: var(--sp-4); }
+      th, td { padding: 9px 8px; }
+      .table-scroll { -webkit-overflow-scrolling: touch; }
+      /* Trim the least-important column from the live feed so it fits better */
+      #t-recent th:nth-child(7), #t-recent td:nth-child(7) { display: none; } /* ms */
+    }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
     th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--tg-border); white-space: nowrap; }
     th { color: var(--tg-text-tertiary); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .3px; }
@@ -367,10 +394,16 @@
     }
 
     // ── Time-series chart (inline SVG, no libraries) ────────────────────────
+    var lastSeries = null, lastBucket = 'hour';
     function drawChart(series, bucket) {
+      lastSeries = series; lastBucket = bucket;
       var host = document.getElementById('chart');
       if (!series.length) { host.innerHTML = '<p class="muted">No requests in this window.</p>'; return; }
-      var W = 1180, H = 220, padL = 44, padR = 12, padT = 12, padB = 26;
+      // On phones use a less extreme aspect ratio so the chart stays tall
+      // enough to read once it scales down to screen width.
+      var mobile = window.matchMedia('(max-width: 640px)').matches;
+      var W = mobile ? 560 : 1180, H = mobile ? 300 : 220;
+      var padL = mobile ? 38 : 44, padR = 12, padT = 12, padB = 26;
       var iw = W - padL - padR, ih = H - padT - padB;
       var maxV = 1;
       series.forEach(function (p) { maxV = Math.max(maxV, Number(p.total) || 0); });
@@ -397,9 +430,9 @@
         grid += '<text x="' + (padL - 8) + '" y="' + (gy + 4) + '" text-anchor="end" font-size="11" fill="currentColor" opacity="0.5">' + nfmt(val) + '</text>';
       });
 
-      // x labels — a handful spread across
+      // x labels — a handful spread across (fewer on a narrow screen)
       var labels = '';
-      var step = Math.max(1, Math.ceil(n / 7));
+      var step = Math.max(1, Math.ceil(n / (mobile ? 4 : 7)));
       for (var i = 0; i < n; i += step) {
         labels += '<text x="' + x(i).toFixed(1) + '" y="' + (H - 6) + '" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.5">' + esc(shortTime(series[i].bucket, bucket)) + '</text>';
       }
@@ -446,6 +479,15 @@
     document.getElementById('auto-refresh').addEventListener('change', function () {
       if (this.checked) { autoTimer = setInterval(load, 15000); }
       else { clearInterval(autoTimer); autoTimer = null; }
+    });
+
+    // Redraw the chart on rotate/resize so it re-picks the mobile aspect ratio.
+    var resizeTimer = null;
+    window.addEventListener('resize', function () {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () {
+        if (lastSeries) drawChart(lastSeries, lastBucket);
+      }, 200);
     });
 
     load();
