@@ -8,6 +8,8 @@
  */
 import { requireAuth, sanitiseForFormula, sanitiseConfig, setCors, applyRateLimit, RATE_LIMITS, lookupClientCredentialsByEmail } from './_auth.js';
 import { getJson } from './_redis.js';
+import { evaluatePublicRateLimit } from './_lib/rate-limit-public.js';
+import { logWidgetEvent } from './_lib/telemetry.js';
 
 // Hydration fallback for cookie-issued JWTs that lack the legacy fields
 // (email, plan) the rest of this endpoint depends on. Once every active
@@ -562,13 +564,37 @@ export default async function handler(req, res) {
   try {
     // ── GET: Public — fetch config by widget ID ─────────────
     if (req.method === 'GET') {
-      const widgetId = req.query.id;
-      if (!widgetId || typeof widgetId !== 'string' || widgetId.length > 100) {
-        return res.status(400).json({ error: 'Invalid widget ID' });
+      const startedAt = Date.now();
+      const widgetId = typeof req.query.id === 'string' ? req.query.id.slice(0, 120) : '';
+
+      // Telemetry: send response, then log after the bytes are flushed. Most
+      // config GETs are cheap cache HITs, but we still log so a scan across
+      // widget IDs (lots of 404s from one IP) is visible on the dashboard.
+      let accountName = null;
+      async function done(status, jsonBody) {
+        res.status(status).json(jsonBody);
+        await logWidgetEvent(req, {
+          event: 'config',
+          widgetId,
+          accountName,
+          status,
+          latencyMs: Date.now() - startedAt,
+        });
+      }
+
+      // Rate limit (cross-instance, fail-open). Generous — real embeds refresh
+      // and the CDN absorbs most reads — but bounded so config can't be scraped.
+      const rl = await evaluatePublicRateLimit(req, res, { event: 'config', widgetId });
+      if (!rl.allowed) {
+        return done(429, { error: `Too many requests. Retry in ${rl.retryAfter}s.` });
+      }
+
+      if (!req.query.id || typeof req.query.id !== 'string' || req.query.id.length > 100) {
+        return done(400, { error: 'Invalid widget ID' });
       }
 
       // Sanitise before using in formula
-      const safeId = sanitiseForFormula(widgetId);
+      const safeId = sanitiseForFormula(req.query.id);
       const formula = encodeURIComponent(`{WidgetID} = '${safeId}'`);
       const url = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}?filterByFormula=${formula}&maxRecords=1`;
 
@@ -577,7 +603,7 @@ export default async function handler(req, res) {
 
       const data = await resp.json();
       if (!data.records || data.records.length === 0) {
-        return res.status(404).json({ error: 'Widget not found' });
+        return done(404, { error: 'Widget not found' });
       }
 
       const widgetRecord = data.records[0];
@@ -585,6 +611,7 @@ export default async function handler(req, res) {
       const name = widgetRecord.fields.Name || '';
       const widgetType = widgetRecord.fields.WidgetType || '';
       const clientEmail = (widgetRecord.fields.ClientEmail || '').toLowerCase().trim();
+      accountName = (widgetRecord.fields.ClientName || widgetRecord.fields['Client Name'] || clientEmail || '').toString().trim() || null;
 
       try {
         const config = JSON.parse(configStr);
@@ -675,9 +702,9 @@ export default async function handler(req, res) {
         } else {
           res.setHeader('Cache-Control', 's-maxage=300, max-age=60, stale-while-revalidate=600');
         }
-        return res.status(200).json(payload);
+        return done(200, payload);
       } catch {
-        return res.status(500).json({ error: 'Widget data corrupted' });
+        return done(500, { error: 'Widget data corrupted' });
       }
     }
 

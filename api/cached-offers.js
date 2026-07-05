@@ -32,6 +32,8 @@
 
 import { setCors } from './_auth.js';
 import { getJson, keys, configured } from './_redis.js';
+import { evaluatePublicRateLimit } from './_lib/rate-limit-public.js';
+import { logWidgetEvent } from './_lib/telemetry.js';
 
 const COUNTRY_PREFIX = 'offers:packages:';
 const SUMMARY_KEY = 'map:offers:v1';
@@ -198,13 +200,40 @@ export default async function handler(req, res) {
     return res.status(405).json({ success: false, error: 'GET only' });
   }
 
+  const startedAt = Date.now();
+  const q = req.query || {};
+  const widgetId = q.widgetId ? String(q.widgetId).slice(0, 120) : '';
+
+  // Send the response then log telemetry (after the bytes are flushed, so no
+  // client-visible latency). cacheHit reflects whether the cache actually
+  // served offers — a 0-match result is effectively a miss that makes the
+  // widget fall back to the live proxy. Never throws.
+  async function done(status, jsonBody) {
+    res.status(status).json(jsonBody);
+    await logWidgetEvent(req, {
+      event: 'cached-offers',
+      widgetId,
+      status,
+      cacheHit: status === 200 ? (Number(jsonBody?.totalMatched) > 0) : null,
+      latencyMs: Date.now() - startedAt,
+    });
+  }
+
+  // Rate limit (cross-instance, fail-open). Cheap Redis reads, but still
+  // throttled so the cache can't be hammered as a scraping surface.
+  const rl = await evaluatePublicRateLimit(req, res, { event: 'cached-offers', widgetId });
+  if (!rl.allowed) {
+    return done(429, {
+      success: false,
+      error: `Too many requests. Please retry in ${rl.retryAfter} second${rl.retryAfter === 1 ? '' : 's'}.`,
+    });
+  }
+
   if (!configured()) {
     // No Redis in this deploy — tell the widget honestly so it falls back to live.
     res.setHeader('Cache-Control', 'no-store');
-    return res.status(200).json({ success: true, source: 'cache', totalMatched: 0, data: [] });
+    return done(200, { success: true, source: 'cache', totalMatched: 0, data: [] });
   }
-
-  const q = req.query || {};
 
   try {
     const dest = csv(q.destinations, /^[A-Z]{2,3}$/);
@@ -218,7 +247,7 @@ export default async function handler(req, res) {
     // then falls back to live Travelify, which resolves free-text names).
     if (dest.invalid || orig.invalid || boardsCsv.invalid) {
       res.setHeader('Cache-Control', 'no-store');
-      return res.status(200).json({ success: true, source: 'cache', totalMatched: 0, data: [], unresolvedFilters: true });
+      return done(200, { success: true, source: 'cache', totalMatched: 0, data: [], unresolvedFilters: true });
     }
     const destTokens = dest.tokens;
     const ccs = new Set(destTokens.filter((s) => s.length === 2));
@@ -230,7 +259,7 @@ export default async function handler(req, res) {
     const cabinsCsv = csv(q.cabinClasses, /^[A-Z]/i, 8);
     if (cabinsCsv.invalid) {
       res.setHeader('Cache-Control', 'no-store');
-      return res.status(200).json({ success: true, source: 'cache', totalMatched: 0, data: [], unresolvedFilters: true });
+      return done(200, { success: true, source: 'cache', totalMatched: 0, data: [], unresolvedFilters: true });
     }
     const cabins = new Set(cabinsCsv.tokens.map(normBoard)); // same loose normaliser
 
@@ -348,7 +377,7 @@ export default async function handler(req, res) {
     res.setHeader('Cache-Control', unique.length
       ? 'public, s-maxage=120, stale-while-revalidate=300'
       : 'no-store'); // never edge-cache a miss — the cache may be mid-fill
-    return res.status(200).json({
+    return done(200, {
       success: true,
       source: 'cache',
       totalMatched: unique.length,
@@ -360,6 +389,6 @@ export default async function handler(req, res) {
     // Fail soft with an empty result — the widget treats this as a miss and
     // falls back to the live proxy, so visitors always see offers.
     res.setHeader('Cache-Control', 'no-store');
-    return res.status(200).json({ success: true, source: 'cache', totalMatched: 0, data: [], degraded: true });
+    return done(200, { success: true, source: 'cache', totalMatched: 0, data: [], degraded: true });
   }
 }

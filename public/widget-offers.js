@@ -6006,6 +6006,10 @@
           body: JSON.stringify({
             ...payload,
             appId: this.cfg.appId || '',
+            // Sent purely so the proxy can attribute traffic to this widget /
+            // account for abuse triage. The proxy strips it before forwarding
+            // to Travelify; older widgets that omit it still work.
+            _widgetId: this.cfg._widgetId || '',
           }),
         });
         const data = await res.json();
@@ -6064,6 +6068,8 @@
       if (payload.DatesMax != null) q.set('DatesMax', payload.DatesMax);
       if (payload.sort) q.set('sort', payload.sort);
       if (payload.maxOffers) q.set('maxOffers', payload.maxOffers);
+      // Attribution only — lets the cache endpoint tie traffic to this widget.
+      if (this.cfg._widgetId) q.set('widgetId', this.cfg._widgetId);
       return q.toString();
     }
 
@@ -8825,6 +8831,10 @@
           body: JSON.stringify({
             ...payload,
             appId: this.cfg.appId || '',
+            // Sent purely so the proxy can attribute traffic to this widget /
+            // account for abuse triage. The proxy strips it before forwarding
+            // to Travelify; older widgets that omit it still work.
+            _widgetId: this.cfg._widgetId || '',
           }),
         });
         if (!res.ok) throw new Error('API ' + res.status);

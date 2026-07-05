@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Widget Traffic — Travelgenix Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --tg-primary: #1B2B5B; --tg-primary-light: #2A3F7A; --tg-accent: #00B4D8;
+      --tg-accent-light: #48CAE4; --tg-success: #10B981; --tg-warning: #F59E0B;
+      --tg-error: #EF4444; --tg-info: #3B82F6;
+      --tg-bg-primary: #FFFFFF; --tg-bg-secondary: #F8FAFC; --tg-bg-tertiary: #F1F5F9;
+      --tg-border: #E2E8F0; --tg-text-primary: #0F172A; --tg-text-secondary: #475569;
+      --tg-text-tertiary: #94A3B8;
+      --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 20px; --sp-6: 24px;
+      --radius: 10px; --radius-sm: 6px;
+      --shadow-sm: 0 1px 2px rgba(15,23,42,.05);
+      --shadow-md: 0 4px 14px rgba(15,23,42,.07);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --tg-bg-primary: #0F172A; --tg-bg-secondary: #0B1120; --tg-bg-tertiary: #1E293B;
+        --tg-border: #334155; --tg-text-primary: #F8FAFC; --tg-text-secondary: #CBD5E1;
+        --tg-text-tertiary: #64748B; --tg-primary: #48CAE4;
+      }
+    }
+    :root[data-theme="dark"] {
+      --tg-bg-primary: #0F172A; --tg-bg-secondary: #0B1120; --tg-bg-tertiary: #1E293B;
+      --tg-border: #334155; --tg-text-primary: #F8FAFC; --tg-text-secondary: #CBD5E1;
+      --tg-text-tertiary: #64748B; --tg-primary: #48CAE4;
+    }
+    * , *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px; line-height: 1.55; color: var(--tg-text-primary);
+      background: var(--tg-bg-secondary); -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+    .topbar {
+      background: var(--tg-bg-primary); border-bottom: 1px solid var(--tg-border);
+      padding: 0 var(--sp-6); height: 60px; display: flex; align-items: center;
+      justify-content: space-between; position: sticky; top: 0; z-index: 20;
+    }
+    .brand { display: flex; align-items: center; gap: var(--sp-3); font-weight: 700; }
+    .brand .mark {
+      width: 28px; height: 28px; border-radius: var(--radius-sm); color: #fff;
+      background: linear-gradient(135deg, #1B2B5B, #00B4D8);
+      display: flex; align-items: center; justify-content: center; font-size: 13px;
+    }
+    .brand .sub { font-weight: 500; color: var(--tg-text-tertiary); font-size: 13px; }
+    .top-actions { display: flex; align-items: center; gap: var(--sp-3); }
+    .btn {
+      height: 34px; padding: 0 var(--sp-4); border-radius: var(--radius-sm);
+      border: 1px solid var(--tg-border); background: var(--tg-bg-primary);
+      color: var(--tg-text-secondary); cursor: pointer; font: inherit; font-size: 13px;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn:hover { background: var(--tg-bg-tertiary); color: var(--tg-text-primary); }
+    .btn.primary { background: var(--tg-primary); color: #fff; border-color: transparent; }
+    .wrap { max-width: 1240px; margin: 0 auto; padding: var(--sp-6); }
+    .controls {
+      display: flex; flex-wrap: wrap; gap: var(--sp-3); align-items: center;
+      margin-bottom: var(--sp-5);
+    }
+    .segmented { display: inline-flex; border: 1px solid var(--tg-border); border-radius: var(--radius-sm); overflow: hidden; }
+    .segmented button {
+      border: 0; background: var(--tg-bg-primary); color: var(--tg-text-secondary);
+      padding: 7px 14px; cursor: pointer; font: inherit; font-size: 13px;
+    }
+    .segmented button.active { background: var(--tg-primary); color: #fff; }
+    select, input.filter {
+      height: 34px; border: 1px solid var(--tg-border); border-radius: var(--radius-sm);
+      background: var(--tg-bg-primary); color: var(--tg-text-primary); font: inherit;
+      font-size: 13px; padding: 0 10px;
+    }
+    input.filter { width: 160px; }
+    label.ck { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--tg-text-secondary); }
+
+    .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--sp-4); margin-bottom: var(--sp-5); }
+    .tile {
+      background: var(--tg-bg-primary); border: 1px solid var(--tg-border);
+      border-radius: var(--radius); padding: var(--sp-4); box-shadow: var(--shadow-sm);
+    }
+    .tile .k { font-size: 12px; color: var(--tg-text-tertiary); text-transform: uppercase; letter-spacing: .4px; font-weight: 600; }
+    .tile .v { font-size: 26px; font-weight: 700; margin-top: 4px; letter-spacing: -.5px; }
+    .tile .v.warn { color: var(--tg-error); }
+    .card {
+      background: var(--tg-bg-primary); border: 1px solid var(--tg-border);
+      border-radius: var(--radius); padding: var(--sp-5); box-shadow: var(--shadow-sm);
+      margin-bottom: var(--sp-5);
+    }
+    .card h2 { font-size: 15px; margin: 0 0 var(--sp-4); display: flex; align-items: center; gap: 8px; }
+    .flag {
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
+      padding: 3px 9px; border-radius: 20px; background: rgba(239,68,68,.12); color: var(--tg-error);
+    }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-5); }
+    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-5); }
+    @media (max-width: 900px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--tg-border); white-space: nowrap; }
+    th { color: var(--tg-text-tertiary); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .3px; }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .table-scroll { overflow-x: auto; }
+    .muted { color: var(--tg-text-tertiary); }
+    .pill { display: inline-block; padding: 1px 8px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .pill.ok { background: rgba(16,185,129,.12); color: var(--tg-success); }
+    .pill.miss { background: rgba(245,158,11,.14); color: var(--tg-warning); }
+    .pill.block { background: rgba(239,68,68,.12); color: var(--tg-error); }
+    .status-2 { color: var(--tg-success); font-weight: 600; }
+    .status-4, .status-5 { color: var(--tg-error); font-weight: 600; }
+    .chart-wrap { position: relative; }
+    svg { display: block; width: 100%; height: auto; }
+    .legend { display: flex; gap: var(--sp-4); font-size: 12px; color: var(--tg-text-secondary); margin-top: 8px; }
+    .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: middle; }
+    .state { text-align: center; padding: 60px 20px; color: var(--tg-text-secondary); }
+    .state h3 { margin: 0 0 8px; }
+    .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--tg-border); border-top-color: var(--tg-primary); border-radius: 50%; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <span class="mark">TG</span>
+      <span>Widget Traffic</span>
+      <span class="sub" id="range-label"></span>
+    </div>
+    <div class="top-actions">
+      <a class="btn" href="/admin/">← Control</a>
+      <button class="btn" id="refresh-btn">Refresh</button>
+      <label class="ck"><input type="checkbox" id="auto-refresh" /> Auto</label>
+      <button class="btn" id="theme-btn" title="Toggle theme">◐</button>
+    </div>
+  </div>
+
+  <div class="wrap" id="root">
+    <div class="controls">
+      <div class="segmented" id="range-seg">
+        <button data-range="1h">1h</button>
+        <button data-range="24h" class="active">24h</button>
+        <button data-range="7d">7d</button>
+        <button data-range="30d">30d</button>
+      </div>
+      <select id="f-event">
+        <option value="">All events</option>
+        <option value="offers">offers</option>
+        <option value="cached-offers">cached-offers</option>
+        <option value="config">config</option>
+        <option value="popup-lead">popup-lead</option>
+      </select>
+      <input class="filter" id="f-widget" placeholder="widget id" />
+      <input class="filter" id="f-account" placeholder="account" />
+      <input class="filter" id="f-domain" placeholder="domain" />
+      <button class="btn primary" id="apply-btn">Apply</button>
+      <span id="status" class="muted"></span>
+    </div>
+
+    <div id="content" hidden>
+      <div class="tiles" id="tiles"></div>
+
+      <div class="card">
+        <h2>Requests over time <span id="burst-flag" class="flag" hidden>burst detected</span></h2>
+        <div class="chart-wrap" id="chart"></div>
+        <div class="legend">
+          <span><i style="background:var(--tg-accent)"></i>Total</span>
+          <span><i style="background:var(--tg-warning)"></i>Cache miss</span>
+          <span><i style="background:var(--tg-error)"></i>429 blocked</span>
+        </div>
+      </div>
+
+      <div class="grid3">
+        <div class="card"><h2>Top widgets</h2><div class="table-scroll"><table id="t-widgets"></table></div></div>
+        <div class="card"><h2>Top domains</h2><div class="table-scroll"><table id="t-domains"></table></div></div>
+        <div class="card"><h2>Top accounts</h2><div class="table-scroll"><table id="t-accounts"></table></div></div>
+      </div>
+
+      <div class="grid2">
+        <div class="card"><h2>Rate-limit panel — top blocked sources</h2><div class="table-scroll"><table id="t-blocked"></table></div></div>
+        <div class="card"><h2>Live feed</h2><div class="table-scroll"><table id="t-recent"></table></div></div>
+      </div>
+    </div>
+
+    <div id="loading" class="state"><span class="spinner"></span><p class="muted">Loading telemetry…</p></div>
+    <div id="empty" class="state" hidden></div>
+  </div>
+
+  <script>
+    // ── Theme ───────────────────────────────────────────────────────────────
+    (function () {
+      var saved = null; try { saved = localStorage.getItem('tg-admin-theme'); } catch (e) {}
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+    })();
+    document.getElementById('theme-btn').addEventListener('click', function () {
+      var el = document.documentElement;
+      var cur = el.getAttribute('data-theme');
+      var next = cur === 'dark' ? 'light' : 'dark';
+      el.setAttribute('data-theme', next);
+      try { localStorage.setItem('tg-admin-theme', next); } catch (e) {}
+    });
+
+    // ── State + helpers ─────────────────────────────────────────────────────
+    var state = { range: '24h', event: '', widget: '', account: '', domain: '' };
+    var autoTimer = null;
+
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+      });
+    }
+    function nfmt(n) {
+      n = Number(n) || 0;
+      if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+      if (n >= 1e3) return (n / 1e3).toFixed(1) + 'k';
+      return String(n);
+    }
+    function pct(part, total) {
+      total = Number(total) || 0; part = Number(part) || 0;
+      if (!total) return '0%';
+      return Math.round((part / total) * 100) + '%';
+    }
+    function shortTime(iso, bucket) {
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return esc(iso);
+      if (bucket === 'day') return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      if (bucket === 'minute') return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+      return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function qs() {
+      var p = new URLSearchParams();
+      p.set('action', 'overview');
+      p.set('range', state.range);
+      if (state.event) p.set('event', state.event);
+      if (state.widget) p.set('widget', state.widget);
+      if (state.account) p.set('account', state.account);
+      if (state.domain) p.set('domain', state.domain);
+      return p.toString();
+    }
+
+    // ── Load ────────────────────────────────────────────────────────────────
+    async function load() {
+      var statusEl = document.getElementById('status');
+      statusEl.textContent = 'Loading…';
+      var resp;
+      try {
+        resp = await fetch('/api/admin/widget-traffic?' + qs(), { credentials: 'include' });
+      } catch (e) {
+        return showEmpty('Network error', 'Could not reach the telemetry API.');
+      }
+      if (resp.status === 401) {
+        location.href = '/signin.html?redirect=' + encodeURIComponent('/admin/traffic');
+        return;
+      }
+      if (resp.status === 403) return showEmpty('Admin access required', 'Your account is not on the admin allow-list.');
+      if (resp.status === 503) {
+        var body = await resp.json().catch(function () { return {}; });
+        return showEmpty('Telemetry not configured yet', (body && body.detail) || 'Add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in Vercel.');
+      }
+      if (!resp.ok) {
+        var e2 = await resp.json().catch(function () { return {}; });
+        return showEmpty('Telemetry query failed', (e2 && e2.detail) || ('HTTP ' + resp.status));
+      }
+      var data = await resp.json();
+      render(data);
+      statusEl.textContent = 'Updated ' + new Date().toLocaleTimeString();
+    }
+
+    function showEmpty(title, msg) {
+      document.getElementById('loading').hidden = true;
+      document.getElementById('content').hidden = true;
+      var el = document.getElementById('empty');
+      el.hidden = false;
+      el.innerHTML = '<h3>' + esc(title) + '</h3><p class="muted">' + esc(msg) + '</p>';
+      document.getElementById('status').textContent = '';
+    }
+
+    function render(d) {
+      document.getElementById('loading').hidden = true;
+      document.getElementById('empty').hidden = true;
+      document.getElementById('content').hidden = false;
+      document.getElementById('range-label').textContent = d.from ? (new Date(d.from).toLocaleString() + ' → now') : '';
+
+      var s = d.summary || {};
+      var total = Number(s.total) || 0;
+      tiles([
+        ['Total requests', nfmt(total), false],
+        ['Cache miss', pct(s.misses, total), false],
+        ['429 blocked', nfmt(s.blocked), (Number(s.blocked) || 0) > 0],
+        ['Unique IPs', nfmt(s.uniq_ip), false],
+        ['Unique widgets', nfmt(s.uniq_widget), false]
+      ]);
+
+      drawChart(d.timeseries || [], d.bucket);
+      flagBurst(d.timeseries || []);
+
+      rankTable('t-widgets', d.topWidgets || [], 'Widget');
+      rankTable('t-domains', d.topDomains || [], 'Domain');
+      rankTable('t-accounts', d.topAccounts || [], 'Account');
+      blockedTable(d.blocked || []);
+      recentTable(d.recent || []);
+    }
+
+    function tiles(rows) {
+      document.getElementById('tiles').innerHTML = rows.map(function (r) {
+        return '<div class="tile"><div class="k">' + esc(r[0]) + '</div><div class="v' + (r[2] ? ' warn' : '') + '">' + esc(r[1]) + '</div></div>';
+      }).join('');
+    }
+
+    function rankTable(id, rows, label) {
+      var el = document.getElementById(id);
+      if (!rows.length) { el.innerHTML = '<tr><td class="muted">No data</td></tr>'; return; }
+      var head = '<tr><th>' + esc(label) + '</th><th class="num">Reqs</th><th class="num">%miss</th><th class="num">429</th></tr>';
+      var body = rows.map(function (r) {
+        var miss = pct(r.misses, r.total);
+        var blocked = Number(r.blocked) || 0;
+        return '<tr><td title="' + esc(r.key) + '">' + esc(String(r.key).slice(0, 42)) + '</td>' +
+          '<td class="num">' + nfmt(r.total) + '</td>' +
+          '<td class="num"><span class="pill ' + ((Number(r.misses) || 0) > 0 ? 'miss' : 'ok') + '">' + miss + '</span></td>' +
+          '<td class="num">' + (blocked ? '<span class="pill block">' + nfmt(blocked) + '</span>' : '<span class="muted">0</span>') + '</td></tr>';
+      }).join('');
+      el.innerHTML = head + body;
+    }
+
+    function blockedTable(rows) {
+      var el = document.getElementById('t-blocked');
+      if (!rows.length) { el.innerHTML = '<tr><td class="muted">No 429s in this window — nothing blocked.</td></tr>'; return; }
+      el.innerHTML = '<tr><th>IP (hashed)</th><th class="num">Blocked</th><th class="num">Uniq IP</th></tr>' +
+        rows.map(function (r) {
+          return '<tr><td><code>' + esc(String(r.key).slice(0, 16)) + '…</code></td>' +
+            '<td class="num"><span class="pill block">' + nfmt(r.blocked) + '</span></td>' +
+            '<td class="num">' + nfmt(r.uniq_ip) + '</td></tr>';
+        }).join('');
+    }
+
+    function recentTable(rows) {
+      var el = document.getElementById('t-recent');
+      if (!rows.length) { el.innerHTML = '<tr><td class="muted">No recent events</td></tr>'; return; }
+      var head = '<tr><th>Time</th><th>Event</th><th>Widget</th><th>Domain</th><th>IP</th><th class="num">Status</th><th class="num">ms</th></tr>';
+      var body = rows.map(function (r) {
+        var st = Number(r.status) || 0;
+        var cls = st >= 500 ? 'status-5' : st >= 400 ? 'status-4' : 'status-2';
+        var t = new Date(r.ts);
+        return '<tr><td class="muted">' + (isNaN(t.getTime()) ? '' : t.toLocaleTimeString()) + '</td>' +
+          '<td>' + esc(r.event) + '</td>' +
+          '<td title="' + esc(r.widget_id) + '">' + esc(String(r.widget_id || r.account_name || '—').slice(0, 22)) + '</td>' +
+          '<td>' + esc(String(r.referer_domain || '—').slice(0, 26)) + '</td>' +
+          '<td><code>' + esc(r.ip_text || '—') + '</code></td>' +
+          '<td class="num ' + cls + '">' + esc(st || '—') + '</td>' +
+          '<td class="num muted">' + esc(r.latency_ms == null ? '' : r.latency_ms) + '</td></tr>';
+      }).join('');
+      el.innerHTML = head + body;
+    }
+
+    // ── Time-series chart (inline SVG, no libraries) ────────────────────────
+    function drawChart(series, bucket) {
+      var host = document.getElementById('chart');
+      if (!series.length) { host.innerHTML = '<p class="muted">No requests in this window.</p>'; return; }
+      var W = 1180, H = 220, padL = 44, padR = 12, padT = 12, padB = 26;
+      var iw = W - padL - padR, ih = H - padT - padB;
+      var maxV = 1;
+      series.forEach(function (p) { maxV = Math.max(maxV, Number(p.total) || 0); });
+      var n = series.length;
+      var x = function (i) { return padL + (n === 1 ? iw / 2 : (i / (n - 1)) * iw); };
+      var y = function (v) { return padT + ih - (Math.min(v, maxV) / maxV) * ih; };
+
+      function path(key, close) {
+        var d = '';
+        for (var i = 0; i < n; i++) {
+          var vy = y(Number(series[i][key]) || 0);
+          d += (i === 0 ? 'M' : 'L') + x(i).toFixed(1) + ',' + vy.toFixed(1) + ' ';
+        }
+        if (close) d += 'L' + x(n - 1).toFixed(1) + ',' + y(0).toFixed(1) + ' L' + x(0).toFixed(1) + ',' + y(0).toFixed(1) + ' Z';
+        return d;
+      }
+
+      // y grid + labels (0, mid, max)
+      var grid = '';
+      [0, 0.5, 1].forEach(function (f) {
+        var val = Math.round(maxV * f);
+        var gy = y(val);
+        grid += '<line x1="' + padL + '" y1="' + gy + '" x2="' + (W - padR) + '" y2="' + gy + '" stroke="currentColor" stroke-opacity="0.12"/>';
+        grid += '<text x="' + (padL - 8) + '" y="' + (gy + 4) + '" text-anchor="end" font-size="11" fill="currentColor" opacity="0.5">' + nfmt(val) + '</text>';
+      });
+
+      // x labels — a handful spread across
+      var labels = '';
+      var step = Math.max(1, Math.ceil(n / 7));
+      for (var i = 0; i < n; i += step) {
+        labels += '<text x="' + x(i).toFixed(1) + '" y="' + (H - 6) + '" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.5">' + esc(shortTime(series[i].bucket, bucket)) + '</text>';
+      }
+
+      var svg =
+        '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Requests over time" style="color:var(--tg-text-tertiary)">' +
+        grid +
+        '<path d="' + path('total', true) + '" fill="var(--tg-accent)" fill-opacity="0.12" stroke="none"/>' +
+        '<path d="' + path('total', false) + '" fill="none" stroke="var(--tg-accent)" stroke-width="2"/>' +
+        '<path d="' + path('misses', false) + '" fill="none" stroke="var(--tg-warning)" stroke-width="1.5" stroke-dasharray="4 3"/>' +
+        '<path d="' + path('blocked', false) + '" fill="none" stroke="var(--tg-error)" stroke-width="1.5"/>' +
+        labels +
+        '</svg>';
+      host.innerHTML = svg;
+    }
+
+    // Burst flag: latest bucket markedly above the median of the rest.
+    function flagBurst(series) {
+      var el = document.getElementById('burst-flag');
+      el.hidden = true;
+      if (series.length < 4) return;
+      var vals = series.map(function (p) { return Number(p.total) || 0; });
+      var last = vals[vals.length - 1];
+      var prior = vals.slice(0, -1).sort(function (a, b) { return a - b; });
+      var med = prior[Math.floor(prior.length / 2)] || 0;
+      if (last >= 20 && last > med * 4 && med >= 0) el.hidden = false;
+    }
+
+    // ── Wiring ──────────────────────────────────────────────────────────────
+    document.getElementById('range-seg').addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      state.range = b.getAttribute('data-range');
+      Array.prototype.forEach.call(this.children, function (c) { c.classList.toggle('active', c === b); });
+      load();
+    });
+    document.getElementById('apply-btn').addEventListener('click', function () {
+      state.event = document.getElementById('f-event').value;
+      state.widget = document.getElementById('f-widget').value.trim();
+      state.account = document.getElementById('f-account').value.trim();
+      state.domain = document.getElementById('f-domain').value.trim();
+      load();
+    });
+    document.getElementById('refresh-btn').addEventListener('click', load);
+    document.getElementById('auto-refresh').addEventListener('change', function () {
+      if (this.checked) { autoTimer = setInterval(load, 15000); }
+      else { clearInterval(autoTimer); autoTimer = null; }
+    });
+
+    load();
+  </script>
+</body>
+</html>

@@ -74,6 +74,10 @@
       "destination": "/admin.html"
     },
     {
+      "source": "/admin/traffic",
+      "destination": "/admin/traffic.html"
+    },
+    {
       "source": "/brain",
       "destination": "/brain.html"
     },
