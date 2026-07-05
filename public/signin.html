@@ -341,7 +341,11 @@
           ? 'Too many attempts. Please wait a moment and try again.'
           : code === 'suspended'
           ? 'Your account is suspended. Please contact support.'
-          : 'Email or password is incorrect.';
+          // Travelify-first accounts have no password until they add one, so
+          // the generic refusal points at both working routes. Kept generic
+          // (shown for every failed attempt) so it never leaks whether an
+          // email exists or how a given account signs in.
+          : 'Email or password is incorrect. If you normally open the widgets from Travelify, your account will not have a password yet: use "Forgot password?" below to add one, or carry on using the link in Travelify.';
         showMsg(friendly, 'error');
         submitBtn.disabled = false;
         submitBtn.textContent = 'Sign in';
