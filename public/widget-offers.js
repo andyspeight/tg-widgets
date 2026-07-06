@@ -114,7 +114,7 @@
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
   const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
-  const VERSION = '1.10.2';
+  const VERSION = '1.10.3';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // Telemetry: report a one-time load heartbeat and any failure to
@@ -633,19 +633,20 @@
     const st = type === 'Flights' ? 'Flights' : type === 'Accommodation' ? 'Accommodation' : 'DynamicPackaging';
     const p = new URLSearchParams();
     p.set('st', st);
-    let hasDst = false;
     if (st !== 'Accommodation' && fl) {
       if (fl.origin && fl.origin.iataCode) p.set('org', fl.origin.iataCode);
-      if (fl.destination && fl.destination.iataCode) { p.set('dst', fl.destination.iataCode); hasDst = true; }
+      if (fl.destination && fl.destination.iataCode) p.set('dst', fl.destination.iataCode);
     }
     if (st !== 'Flights' && acc) {
-      // loc is the resort name, and Travelify hard-matches it as a City: an
-      // unrecognised name (e.g. "Hadaba", "South Male Atoll") fails the WHOLE
-      // deeplink with "Unable to match location City". Only send it when there
-      // is no airport dst to anchor on. The airport IATA is a reliable anchor,
-      // the resort name is not, so packages/flights rely on dst + ctry and the
-      // exact property comes from refn below.
-      if (!hasDst && acc.destination && acc.destination.name) p.set('loc', acc.destination.name);
+      // loc is REQUIRED by Travelify's DynamicPackagingSearchCriteria — dropping
+      // it fails the whole deeplink with "You must specify a location (loc)".
+      // acc.destination.name is Travelify's own resort/town name, which is the
+      // matchable city for the vast majority (Estepona, Puerto de la Cruz, and
+      // so on), sent alongside the airport dst + ctry. A few sub-districts
+      // (Hadaba, South Male Atoll) are not in Travelify's deeplink gazetteer and
+      // still fail to match as a City — that is a Travelify taxonomy gap, not a
+      // reason to strip the location from every package. refn pins the property.
+      if (acc.destination && acc.destination.name) p.set('loc', acc.destination.name);
       const ctry = (acc.destination && acc.destination.countryCode) || (fl && fl.destination && fl.destination.countryCode);
       if (ctry) p.set('ctry', ctry);
     }
