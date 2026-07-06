@@ -113,8 +113,25 @@
   // Our own FX proxy (ECB/Frankfurter). The cache is GBP; we convert at display
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
-  const VERSION = '1.10.1';
+  const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
+  const VERSION = '1.10.2';
   const CACHE_PREFIX = 'tgo_cache_';
+
+  // Telemetry: report a one-time load heartbeat and any failure to
+  // /api/widget-log so we hear about a broken embed before the client does.
+  // Posts to our own API origin (connect-src), so a client site's script-src
+  // CSP can't block it, and it never throws. Mirrors the world map reporter.
+  function tgReport(event, widgetId, message, detail) {
+    try {
+      var b = JSON.stringify({
+        event: event, widget: 'offers', widgetId: String(widgetId || ''),
+        message: String(message || '').slice(0, 300), detail: String(detail || '').slice(0, 500),
+        url: (function () { try { return location.href; } catch (e) { return ''; } })(),
+      });
+      if (navigator && typeof navigator.sendBeacon === 'function' && navigator.sendBeacon(WIDGET_LOG_URL, new Blob([b], { type: 'text/plain' }))) return;
+      fetch(WIDGET_LOG_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: b, keepalive: true, credentials: 'omit' }).catch(function () {});
+    } catch (e) { /* telemetry must never throw */ }
+  }
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only — CTAs, price context, fact labels, filter/board
@@ -5859,6 +5876,7 @@
       this.root.innerHTML = '<div class="tgo-error">'
         + '<strong>' + esc(this.t('couldNotLoad')) + '</strong> ' + esc(msg)
         + '</div>';
+      tgReport('error', this.cfg && this.cfg._widgetId, msg, this.cfg && this.cfg.template);
     }
 
     _showEmpty() {
@@ -9367,6 +9385,7 @@
       throw new Error('No config returned');
     } catch (err) {
       console.error('[TGOffers] Config load error:', err);
+      tgReport('error', widgetId, 'config load failed', err && err.message);
       return null;
     }
   }
@@ -9394,7 +9413,13 @@
         continue;
       }
 
-      new TGOffersWidget(el, config);
+      try {
+        new TGOffersWidget(el, config);
+        tgReport('load', (config && config._widgetId) || widgetId || '', (config && config.template) || '');
+      } catch (err) {
+        console.error('[TGOffers] init failed:', err);
+        tgReport('error', (config && config._widgetId) || widgetId || '', 'init failed', err && err.message);
+      }
     }
   }
 

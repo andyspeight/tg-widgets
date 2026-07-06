@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Widget Health — Travelgenix Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --tg-primary: #1B2B5B; --tg-primary-light: #2A3F7A; --tg-accent: #00B4D8;
+      --tg-accent-light: #48CAE4; --tg-success: #10B981; --tg-warning: #F59E0B;
+      --tg-error: #EF4444; --tg-info: #3B82F6;
+      --tg-bg-primary: #FFFFFF; --tg-bg-secondary: #F8FAFC; --tg-bg-tertiary: #F1F5F9;
+      --tg-border: #E2E8F0; --tg-text-primary: #0F172A; --tg-text-secondary: #475569;
+      --tg-text-tertiary: #94A3B8;
+      --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 20px; --sp-6: 24px;
+      --radius: 10px; --radius-sm: 6px;
+      --shadow-sm: 0 1px 2px rgba(15,23,42,.05);
+      --shadow-md: 0 4px 14px rgba(15,23,42,.07);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --tg-bg-primary: #0F172A; --tg-bg-secondary: #0B1120; --tg-bg-tertiary: #1E293B;
+        --tg-border: #334155; --tg-text-primary: #F8FAFC; --tg-text-secondary: #CBD5E1;
+        --tg-text-tertiary: #64748B; --tg-primary: #48CAE4;
+      }
+    }
+    :root[data-theme="dark"] {
+      --tg-bg-primary: #0F172A; --tg-bg-secondary: #0B1120; --tg-bg-tertiary: #1E293B;
+      --tg-border: #334155; --tg-text-primary: #F8FAFC; --tg-text-secondary: #CBD5E1;
+      --tg-text-tertiary: #64748B; --tg-primary: #48CAE4;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px; line-height: 1.55; color: var(--tg-text-primary);
+      background: var(--tg-bg-secondary); -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+    .topbar {
+      background: var(--tg-bg-primary); border-bottom: 1px solid var(--tg-border);
+      padding: 0 var(--sp-6); height: 60px; display: flex; align-items: center;
+      justify-content: space-between; position: sticky; top: 0; z-index: 20;
+    }
+    .brand { display: flex; align-items: center; gap: var(--sp-3); font-weight: 700; }
+    .brand .mark {
+      width: 28px; height: 28px; border-radius: var(--radius-sm); color: #fff;
+      background: linear-gradient(135deg, #1B2B5B, #00B4D8);
+      display: flex; align-items: center; justify-content: center; font-size: 13px;
+    }
+    .brand .sub { font-weight: 500; color: var(--tg-text-tertiary); font-size: 13px; }
+    .top-actions { display: flex; align-items: center; gap: var(--sp-3); }
+    .btn {
+      height: 34px; padding: 0 var(--sp-4); border-radius: var(--radius-sm);
+      border: 1px solid var(--tg-border); background: var(--tg-bg-primary);
+      color: var(--tg-text-secondary); cursor: pointer; font: inherit; font-size: 13px;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn:hover { background: var(--tg-bg-tertiary); color: var(--tg-text-primary); }
+    .btn.primary { background: var(--tg-primary); color: #fff; border-color: transparent; }
+    .wrap { max-width: 1240px; margin: 0 auto; padding: var(--sp-6); }
+    .controls { display: flex; flex-wrap: wrap; gap: var(--sp-3); align-items: center; margin-bottom: var(--sp-5); }
+    .segmented { display: inline-flex; border: 1px solid var(--tg-border); border-radius: var(--radius-sm); overflow: hidden; }
+    .segmented button {
+      height: 34px; padding: 0 var(--sp-4); border: 0; background: var(--tg-bg-primary);
+      color: var(--tg-text-secondary); cursor: pointer; font: inherit; font-size: 13px;
+      border-right: 1px solid var(--tg-border);
+    }
+    .segmented button:last-child { border-right: 0; }
+    .segmented button.active { background: var(--tg-primary); color: #fff; }
+    select.ctl {
+      height: 34px; padding: 0 var(--sp-3); border-radius: var(--radius-sm);
+      border: 1px solid var(--tg-border); background: var(--tg-bg-primary);
+      color: var(--tg-text-primary); font: inherit; font-size: 13px;
+    }
+    .spacer { flex: 1; }
+    .status { color: var(--tg-text-tertiary); font-size: 12px; }
+    .tiles { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--sp-4); margin-bottom: var(--sp-6); }
+    .tile {
+      background: var(--tg-bg-primary); border: 1px solid var(--tg-border);
+      border-radius: var(--radius); padding: var(--sp-4) var(--sp-5); box-shadow: var(--shadow-sm);
+    }
+    .tile .k { color: var(--tg-text-tertiary); font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: .04em; }
+    .tile .v { font-size: 26px; font-weight: 700; margin-top: 4px; }
+    .tile .v.warn { color: var(--tg-error); }
+    .tile .v.ok { color: var(--tg-success); }
+    .grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-6); }
+    .card {
+      background: var(--tg-bg-primary); border: 1px solid var(--tg-border);
+      border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden;
+    }
+    .card h3 { margin: 0; padding: var(--sp-4) var(--sp-5); font-size: 14px; border-bottom: 1px solid var(--tg-border); }
+    .tbl-scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 9px var(--sp-5); border-bottom: 1px solid var(--tg-border); white-space: nowrap; }
+    th { color: var(--tg-text-tertiary); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+    td.wrap-cell { white-space: normal; max-width: 460px; }
+    tr:last-child td { border-bottom: 0; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .muted { color: var(--tg-text-tertiary); }
+    .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+    .pill.err { background: rgba(239,68,68,.12); color: var(--tg-error); }
+    .pill.load { background: rgba(16,185,129,.12); color: var(--tg-success); }
+    .pill.count-err { background: rgba(239,68,68,.12); color: var(--tg-error); }
+    .empty { text-align: center; padding: 60px var(--sp-6); color: var(--tg-text-secondary); }
+    .empty h3 { margin: 0 0 6px; color: var(--tg-text-primary); }
+    .loading { text-align: center; padding: 60px; color: var(--tg-text-tertiary); }
+    @media (max-width: 860px) {
+      .tiles { grid-template-columns: repeat(2, 1fr); }
+      .wrap { padding: var(--sp-4); }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="mark">TG</span>
+      <span>Widget Health<span class="sub">&nbsp;· Control</span></span>
+    </div>
+    <div class="top-actions">
+      <a class="btn" href="/admin/traffic">Traffic</a>
+      <a class="btn" href="/admin/">Control</a>
+      <button class="btn" id="theme-btn" title="Toggle theme">Theme</button>
+      <button class="btn primary" id="refresh-btn">Refresh</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="controls">
+      <div class="segmented" id="seg-event" role="tablist" aria-label="Event filter">
+        <button data-event="all" class="active">All</button>
+        <button data-event="error">Failures</button>
+        <button data-event="load">Loads</button>
+      </div>
+      <select class="ctl" id="widget-filter" aria-label="Widget filter"><option value="">All widgets</option></select>
+      <label class="status" style="display:flex;align-items:center;gap:6px;cursor:pointer">
+        <input type="checkbox" id="auto" /> Auto-refresh 30s
+      </label>
+      <span class="spacer"></span>
+      <span class="status" id="status"></span>
+    </div>
+
+    <div id="loading" class="loading">Loading…</div>
+    <div id="empty" class="empty" hidden></div>
+
+    <div id="content" hidden>
+      <div class="tiles" id="tiles"></div>
+      <div class="grid">
+        <div class="card">
+          <h3>By widget</h3>
+          <div class="tbl-scroll"><table id="t-widgets"></table></div>
+        </div>
+        <div class="card">
+          <h3>Recent events</h3>
+          <div class="tbl-scroll"><table id="t-recent"></table></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    var state = { event: 'all', widget: '', auto: false };
+    var timer = null;
+
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+      });
+    }
+    function nfmt(n) { n = Number(n) || 0; return n.toLocaleString(); }
+    function when(iso) {
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return esc(iso || '—');
+      var now = Date.now(), diff = Math.round((now - d.getTime()) / 1000);
+      if (diff < 60) return diff + 's ago';
+      if (diff < 3600) return Math.round(diff / 60) + 'm ago';
+      if (diff < 86400) return Math.round(diff / 3600) + 'h ago';
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    }
+    function host(u) { try { return new URL(u).host; } catch (e) { return u || '—'; } }
+
+    // Theme toggle — same key the other Control pages use.
+    (function () {
+      var saved = null; try { saved = localStorage.getItem('tg-admin-theme'); } catch (e) {}
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+      document.getElementById('theme-btn').addEventListener('click', function () {
+        var cur = document.documentElement.getAttribute('data-theme');
+        var next = cur === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        try { localStorage.setItem('tg-admin-theme', next); } catch (e) {}
+      });
+    })();
+
+    document.getElementById('seg-event').addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      state.event = b.getAttribute('data-event');
+      [].forEach.call(this.querySelectorAll('button'), function (x) { x.classList.toggle('active', x === b); });
+      load();
+    });
+    document.getElementById('widget-filter').addEventListener('change', function () { state.widget = this.value; load(); });
+    document.getElementById('refresh-btn').addEventListener('click', load);
+    document.getElementById('auto').addEventListener('change', function () {
+      state.auto = this.checked;
+      if (timer) { clearInterval(timer); timer = null; }
+      if (state.auto) timer = setInterval(load, 30000);
+    });
+
+    function showEmpty(title, msg) {
+      document.getElementById('loading').hidden = true;
+      document.getElementById('content').hidden = true;
+      var el = document.getElementById('empty');
+      el.hidden = false;
+      el.innerHTML = '<h3>' + esc(title) + '</h3><p class="muted">' + esc(msg) + '</p>';
+      document.getElementById('status').textContent = '';
+    }
+
+    async function load() {
+      document.getElementById('status').textContent = 'Loading…';
+      var p = new URLSearchParams();
+      if (state.event !== 'all') p.set('event', state.event);
+      if (state.widget) p.set('widget', state.widget);
+      p.set('limit', '250');
+      var resp;
+      try {
+        resp = await fetch('/api/admin/widget-logs?' + p.toString(), { credentials: 'include' });
+      } catch (e) { return showEmpty('Network error', 'Could not reach the widget-log API.'); }
+      if (resp.status === 401) { location.href = '/signin.html?redirect=' + encodeURIComponent('/admin/widget-health'); return; }
+      if (resp.status === 403) return showEmpty('Admin access required', 'Your account is not on the admin allow-list.');
+      if (resp.status === 503) {
+        var b = await resp.json().catch(function () { return {}; });
+        return showEmpty('Telemetry store not configured', (b && b.detail) || 'Add the Upstash Redis env vars in Vercel.');
+      }
+      if (!resp.ok) {
+        var e2 = await resp.json().catch(function () { return {}; });
+        return showEmpty('Could not load the widget log', (e2 && (e2.detail || e2.error)) || ('HTTP ' + resp.status));
+      }
+      render(await resp.json());
+      document.getElementById('status').textContent = 'Updated ' + new Date().toLocaleTimeString();
+    }
+
+    function render(d) {
+      document.getElementById('loading').hidden = true;
+      document.getElementById('empty').hidden = true;
+      document.getElementById('content').hidden = false;
+
+      var s = d.summary || {};
+      document.getElementById('tiles').innerHTML = [
+        ['Failures 24h', nfmt(s.errors24h), (Number(s.errors24h) || 0) > 0 ? 'warn' : 'ok'],
+        ['Failures total', nfmt(s.errors), (Number(s.errors) || 0) > 0 ? 'warn' : ''],
+        ['Load heartbeats', nfmt(s.loads), ''],
+        ['Widgets seen', nfmt(s.widgets), ''],
+        ['Client sites', nfmt(s.sites), '']
+      ].map(function (r) {
+        return '<div class="tile"><div class="k">' + esc(r[0]) + '</div><div class="v ' + (r[2] || '') + '">' + esc(r[1]) + '</div></div>';
+      }).join('');
+
+      // Widget filter options (preserve current selection).
+      var sel = document.getElementById('widget-filter');
+      if (sel.options.length <= 1 && d.byWidget && d.byWidget.length) {
+        var cur = sel.value;
+        sel.innerHTML = '<option value="">All widgets</option>' + d.byWidget.map(function (w) {
+          return '<option value="' + esc(w.widget) + '">' + esc(w.widget) + '</option>';
+        }).join('');
+        sel.value = cur;
+      }
+
+      var tw = document.getElementById('t-widgets');
+      var bw = d.byWidget || [];
+      if (!bw.length) { tw.innerHTML = '<tr><td class="muted">No widgets reporting yet</td></tr>'; }
+      else {
+        tw.innerHTML = '<tr><th>Widget</th><th class="num">Failures</th><th class="num">Loads</th><th class="num">Sites</th><th>Last failure</th></tr>' +
+          bw.map(function (w) {
+            var lastErr = w.lastError ? (esc(String(w.lastError).slice(0, 60)) + ' · ' + esc(when(w.lastErrorAt))) : '<span class="muted">none</span>';
+            return '<tr><td><b>' + esc(w.widget) + '</b></td>' +
+              '<td class="num">' + (Number(w.errors) ? '<span class="pill count-err">' + nfmt(w.errors) + '</span>' : '<span class="muted">0</span>') + '</td>' +
+              '<td class="num">' + nfmt(w.loads) + '</td>' +
+              '<td class="num">' + nfmt(w.sites) + '</td>' +
+              '<td>' + lastErr + '</td></tr>';
+          }).join('');
+      }
+
+      var tr = document.getElementById('t-recent');
+      var ev = d.entries || [];
+      if (!ev.length) { tr.innerHTML = '<tr><td class="muted">No events for this filter</td></tr>'; }
+      else {
+        tr.innerHTML = '<tr><th>When</th><th>Event</th><th>Widget</th><th>Site</th><th>Message</th></tr>' +
+          ev.map(function (e) {
+            var badge = e.event === 'error' ? '<span class="pill err">fail</span>' : '<span class="pill load">load</span>';
+            var site = e.origin || e.pageUrl || '';
+            return '<tr><td title="' + esc(e.at) + '">' + esc(when(e.at)) + '</td>' +
+              '<td>' + badge + '</td>' +
+              '<td><b>' + esc(e.widget) + '</b>' + (e.widgetId ? '<br><span class="muted" style="font-size:11px">' + esc(String(e.widgetId).slice(0, 24)) + '</span>' : '') + '</td>' +
+              '<td title="' + esc(site) + '">' + esc(host(site)) + '</td>' +
+              '<td class="wrap-cell">' + (e.event === 'error' ? esc(e.message || '—') : '<span class="muted">—</span>') +
+              (e.detail ? '<br><span class="muted" style="font-size:11px">' + esc(String(e.detail).slice(0, 160)) + '</span>' : '') + '</td></tr>';
+          }).join('');
+      }
+    }
+
+    load();
+  </script>
+</body>
+</html>

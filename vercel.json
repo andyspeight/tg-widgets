@@ -78,6 +78,10 @@
       "destination": "/admin/traffic.html"
     },
     {
+      "source": "/admin/widget-health",
+      "destination": "/admin/widget-health.html"
+    },
+    {
       "source": "/brain",
       "destination": "/brain.html"
     },
