@@ -78,6 +78,8 @@ export default async function handler(req, res) {
         category: b.category || '',
         assets: b.assets || [],
         preferredUrl: b.preferredUrl || '',
+        colourPrimary: b.colourPrimary || '',
+        colourSecondary: b.colourSecondary || '',
         canDelete: staff || (b.addedBy && b.addedBy === who) || false,
       })),
     });

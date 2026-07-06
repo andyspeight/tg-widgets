@@ -89,6 +89,14 @@
       "destination": "/admin/logo-find.html"
     },
     {
+      "source": "/admin/logo-library",
+      "destination": "/admin/logo-library.html"
+    },
+    {
+      "source": "/admin/logos",
+      "destination": "/admin/logo-library.html"
+    },
+    {
       "source": "/brain",
       "destination": "/brain.html"
     },
