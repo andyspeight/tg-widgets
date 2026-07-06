@@ -48,6 +48,9 @@
     },
     "api/admin/logo-import.js": {
       "maxDuration": 120
+    },
+    "api/admin/logo-find.js": {
+      "maxDuration": 60
     }
   },
   "crons": [
@@ -80,6 +83,10 @@
     {
       "source": "/admin/widget-health",
       "destination": "/admin/widget-health.html"
+    },
+    {
+      "source": "/admin/logo-find",
+      "destination": "/admin/logo-find.html"
     },
     {
       "source": "/brain",
