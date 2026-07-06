@@ -298,6 +298,7 @@ const ALLOWED_WIDGET_TYPES = [
   'World Map',
   'Travel Results AI',
   'Special Offers',
+  'Prism',
 ];
 
 // Per-plan widget count limits, keyed by widgetType.
@@ -346,6 +347,7 @@ const PLAN_WIDGET_LIMITS = {
   'World Map':             { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Travel Results AI':     { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
   'Special Offers':        { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'Prism':                 { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
 };
 
 // Canonical plan names recognised by PLAN_WIDGET_LIMITS lookups.

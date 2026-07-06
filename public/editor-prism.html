@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prism — Travelgenix Widget Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<style>
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label { display:block; font-size:12px; font-weight:600; color:var(--tgse-ink-2); margin-bottom:6px; letter-spacing:.02em; }
+  .field-hint { display:block; font-size:11px; color:var(--tgse-ink-3); margin-top:4px; line-height:1.45; }
+  .input, .select, textarea.input {
+    width:100%; padding:8px 10px; font:inherit; font-size:13px;
+    border:1px solid var(--tgse-border); border-radius:var(--tgse-radius-sm);
+    background:var(--tgse-panel); color:var(--tgse-ink);
+    transition:border-color 160ms ease, box-shadow 160ms ease;
+  }
+  textarea.input { resize:vertical; min-height:52px; line-height:1.5; }
+  .input:focus, .select:focus { outline:none; border-color:var(--tgse-brand); box-shadow:0 0 0 3px var(--tgse-brand-tint); }
+  .select { appearance:none; background-image:linear-gradient(45deg,transparent 50%,var(--tgse-ink-3) 50%),linear-gradient(135deg,var(--tgse-ink-3) 50%,transparent 50%);
+    background-position:calc(100% - 15px) 55%,calc(100% - 10px) 55%; background-size:5px 5px,5px 5px; background-repeat:no-repeat; padding-right:28px; }
+
+  /* two-up grid for compact controls */
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:8px 10px; }
+
+  /* range rows */
+  .range-row { display:flex; align-items:center; gap:10px; }
+  .range-row input[type=range] { flex:1; -webkit-appearance:none; appearance:none; height:20px; background:transparent; cursor:pointer; }
+  input[type=range]::-webkit-slider-runnable-track { height:4px; border-radius:2px; background:var(--tgse-border); }
+  input[type=range]::-moz-range-track { height:4px; border-radius:2px; background:var(--tgse-border); }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; margin-top:-6px; width:16px; height:16px; border-radius:50%; background:var(--tgse-brand); border:2px solid #fff; box-shadow:0 1px 2px rgba(0,0,0,.25); }
+  input[type=range]::-moz-range-thumb { width:14px; height:14px; border:2px solid #fff; border-radius:50%; background:var(--tgse-brand); }
+  .range-val { font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--tgse-ink-2); min-width:40px; text-align:right; }
+
+  /* colour rows */
+  .colour-row { display:flex; align-items:center; gap:8px; }
+  .colour-swatch-wrap { position:relative; width:34px; height:34px; border-radius:var(--tgse-radius-sm); border:1px solid var(--tgse-border); overflow:hidden; flex-shrink:0; }
+  .colour-swatch-wrap input[type="color"] { position:absolute; inset:-2px; width:calc(100% + 4px); height:calc(100% + 4px); border:0; padding:0; background:transparent; cursor:pointer; }
+  .colour-hex { flex:1; font-family:'JetBrains Mono', monospace; text-transform:uppercase; }
+
+  /* switch */
+  .switch-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:2px 0; }
+  .switch-row-label { font-size:13px; color:var(--tgse-ink); font-weight:500; }
+  .switch { appearance:none; width:36px; height:20px; border-radius:999px; background:var(--tgse-border); border:0; padding:0; cursor:pointer; position:relative; transition:background 160ms ease; flex-shrink:0; }
+  .switch::after { content:""; position:absolute; width:16px; height:16px; border-radius:999px; background:#fff; top:2px; left:2px; box-shadow:0 1px 2px rgba(0,0,0,.15); transition:transform 160ms ease; }
+  .switch.is-on { background:var(--tgse-brand); }
+  .switch.is-on::after { transform:translateX(16px); }
+
+  /* destinations list */
+  .dest-list { display:flex; flex-direction:column; gap:6px; margin-bottom:10px; }
+  .dest-item { display:flex; align-items:center; gap:10px; padding:6px; border:1px solid var(--tgse-border); border-radius:var(--tgse-radius-sm);
+    background:var(--tgse-panel); cursor:pointer; transition:border-color 160ms ease, background 160ms ease; }
+  .dest-item:hover { background:var(--tgse-hover); }
+  .dest-item.is-sel { border-color:var(--tgse-brand); background:var(--tgse-brand-tint); }
+  .dest-thumb { width:44px; height:32px; border-radius:5px; overflow:hidden; flex-shrink:0; background:#0d1622; }
+  .dest-thumb img { width:100%; height:100%; object-fit:cover; }
+  .dest-name { flex:1; font-size:13px; font-weight:600; color:var(--tgse-ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .dest-drag { color:var(--tgse-ink-3); font-size:11px; }
+  .dest-del { border:0; background:transparent; color:var(--tgse-ink-3); cursor:pointer; padding:4px; border-radius:5px; line-height:0; }
+  .dest-del:hover { color:#B23A3A; background:rgba(178,58,58,.1); }
+  .dest-del svg { width:15px; height:15px; }
+  .btn-add { width:100%; padding:9px; border:1px dashed var(--tgse-border); background:transparent; color:var(--tgse-ink-2); border-radius:var(--tgse-radius-sm);
+    font:inherit; font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; }
+  .btn-add:hover { border-color:var(--tgse-brand); color:var(--tgse-brand-dark); }
+  .btn-add svg { width:15px; height:15px; }
+
+  .dest-detail { margin-top:12px; padding-top:14px; border-top:1px dashed var(--tgse-border); }
+  .dest-detail.is-empty { display:none; }
+  .dest-detail-head { font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--tgse-ink-3); font-weight:700; margin-bottom:10px; }
+
+  /* focal picker */
+  .focal { position:relative; width:100%; aspect-ratio:16/10; border-radius:8px; overflow:hidden; border:1px solid var(--tgse-border);
+    background:#0d1622; cursor:crosshair; touch-action:none; }
+  .focal img { width:100%; height:100%; object-fit:cover; opacity:.97; pointer-events:none; }
+  .focal-grid { position:absolute; inset:0; pointer-events:none;
+    background-image:linear-gradient(rgba(255,255,255,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.16) 1px,transparent 1px); background-size:33.33% 33.33%; }
+  .reticle { position:absolute; width:30px; height:30px; transform:translate(-50%,-50%); pointer-events:none; border:2px solid #fff; border-radius:50%;
+    box-shadow:0 0 0 2px rgba(0,0,0,.35), inset 0 0 0 1px rgba(0,0,0,.25); }
+  .reticle::before,.reticle::after { content:""; position:absolute; background:#fff; }
+  .reticle::before { left:50%; top:-8px; width:2px; height:8px; transform:translateX(-50%); }
+  .reticle::after { left:-8px; top:50%; height:2px; width:8px; transform:translateY(-50%); }
+  .focal-note { position:absolute; left:7px; bottom:6px; font-size:10px; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.7); pointer-events:none; }
+
+  .is-hidden { display:none !important; }
+</style>
+</head>
+<body>
+<div class="tgse-app">
+
+  <aside class="tgse-sidebar">
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M9 3v18M15 3l-3 18"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Prism</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        AI builder <span class="tgse-kbd">A</span>
+      </button>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled prism hero" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="content" role="tab" aria-selected="true">Content</button>
+      <button data-tab="design" role="tab" aria-selected="false">Design</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+
+      <!-- ===== CONTENT ===== -->
+      <div class="tgse-panel is-active" data-tab="content">
+
+        <!-- Headline copy -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Headline copy</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field"><label class="field-label">Heading</label><input type="text" class="input" id="t-title" maxlength="60" placeholder="DESTINATIONS"></div>
+            <div class="field"><label class="field-label">Script line</label><input type="text" class="input" id="t-script" maxlength="80" placeholder="Extraordinary Journeys"></div>
+            <div class="field"><label class="field-label">Lead</label><textarea class="input" id="t-lead" maxlength="140" placeholder="Extraordinary stays.&#10;Unforgettable memories."></textarea><span class="field-hint">Line breaks are kept.</span></div>
+            <div class="field"><label class="field-label">Body</label><textarea class="input" id="t-body" maxlength="300" placeholder="Handpicked luxuries in the world's most iconic destinations."></textarea></div>
+          </div>
+        </div>
+
+        <!-- Destinations -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+            <span class="tgse-section-label">Destinations</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="dest-list" id="dest-list"></div>
+            <button class="btn-add" id="dest-add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add a destination</button>
+
+            <div class="dest-detail is-empty" id="dest-detail">
+              <div class="dest-detail-head" id="dest-detail-head">Photo</div>
+              <div class="field">
+                <label class="field-label">Choose the part to show — drag the point</label>
+                <div class="focal" id="focal" role="slider" aria-label="Focal point" tabindex="0">
+                  <img id="focal-img" alt=""><div class="focal-grid"></div><div class="reticle" id="reticle"></div><span class="focal-note">drag to reframe</span>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label">Zoom</label>
+                <div class="range-row"><input type="range" id="d-zoom" min="1" max="2.2" step="0.01"><span class="range-val" id="d-zoom-v">1.00×</span></div>
+              </div>
+              <div class="field"><label class="field-label">Label</label><input type="text" class="input" id="d-label" maxlength="40" placeholder="MAURITIUS"></div>
+              <div class="field">
+                <label class="field-label">Photo URL</label>
+                <input type="text" class="input" id="d-image" maxlength="600" placeholder="https://…/photo.jpg">
+                <span class="field-hint" id="d-image-note">Leave blank to keep the built-in sample scene.</span>
+              </div>
+              <div class="field">
+                <label class="field-label">Links to (URL)</label>
+                <input type="text" class="input" id="d-href" maxlength="400" placeholder="/destinations/mauritius">
+                <span class="field-hint" id="d-href-note">Opens when a visitor clicks this photo. Leave blank for no link.</span>
+              </div>
+              <div class="field"><div class="switch-row"><span class="switch-row-label">Open link in a new tab</span><button type="button" class="switch" id="d-newtab" aria-pressed="false"></button></div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== DESIGN ===== -->
+      <div class="tgse-panel" data-tab="design">
+
+        <!-- Section -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+            <span class="tgse-section-label">Section</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field"><label class="field-label">Panel background</label>
+              <div class="colour-row"><div class="colour-swatch-wrap"><input type="color" id="c-panel"></div><input class="input colour-hex" id="h-panel" maxlength="7"></div></div>
+            <div class="field"><label class="field-label">Seam colour</label>
+              <div class="colour-row"><div class="colour-swatch-wrap"><input type="color" id="c-seam"></div><input class="input colour-hex" id="h-seam" maxlength="7"></div></div>
+            <div class="field"><label class="field-label">Diagonal angle</label>
+              <div class="range-row"><input type="range" id="d-slant" min="0" max="7" step="0.1"><span class="range-val" id="d-slant-v">2.7</span></div>
+              <span class="field-hint">Set to 0 for straight vertical slices.</span></div>
+            <div class="field"><label class="field-label">Corner radius</label>
+              <div class="range-row"><input type="range" id="d-radius" min="0" max="24" step="1"><span class="range-val" id="d-radius-v">6</span></div></div>
+          </div>
+        </div>
+
+        <!-- Typography sections are generated below into this container -->
+        <div id="typo-mount"></div>
+
+      </div>
+
+    </div>
+  </aside>
+
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop" aria-label="Desktop view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
+        <button data-vp="tablet" title="Tablet" aria-label="Tablet view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+        <button data-vp="mobile" title="Mobile" aria-label="Mobile view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+      </div>
+      <div class="tgse-divider"></div>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle preview backdrop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> Theme</button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> Get embed code</button>
+    </div>
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame"></div>
+    </div>
+  </section>
+
+</div>
+
+<script src="/editor-shell.js"></script>
+<script src="/widget-prism.js"></script>
+<style>
+  .pv-faux { width:100%; background:#fff; border-radius:12px; box-shadow:0 1px 3px rgba(15,23,42,.08), 0 8px 32px rgba(15,23,42,.05); overflow:hidden; }
+  .pv-faux[data-bg="dark"] { background:#0B1220; }
+  .pvf-head { display:flex; align-items:center; justify-content:space-between; padding:13px 22px; font-size:13px; color:#334155; border-bottom:1px solid #EEF2F6; }
+  .pv-faux[data-bg="dark"] .pvf-head { color:#CBD5E1; border-bottom-color:#1E293B; }
+  .pvf-head .logo { font-weight:700; color:#0F172A; }
+  .pv-faux[data-bg="dark"] .pvf-head .logo { color:#F1F5F9; }
+  .pvf-head .nav { display:flex; gap:16px; opacity:.75; font-size:12px; }
+  .pvf-hero { padding:22px; }
+  .pvf-below { padding:0 22px 26px; }
+  .pvf-row { height:12px; border-radius:4px; background:#EEF2F6; margin:10px 0; }
+  .pv-faux[data-bg="dark"] .pvf-row { background:#1E293B; }
+  .pvf-row.w1 { width:40%; height:18px; } .pvf-row.w2 { width:92%; } .pvf-row.w3 { width:80%; }
+</style>
+<script>
+"use strict";
+(function () {
+  var deepClone = function (o) { return JSON.parse(JSON.stringify(o)); };
+  var DEF = (window.TGPrismWidget && window.TGPrismWidget.DEFAULTS) ? window.TGPrismWidget.DEFAULTS : {};
+  var C = deepClone(DEF);
+  C.previewMode = true;
+
+  // Font catalogue for the selects (grouped), from the widget's allow-list.
+  var FONT_GROUPS = [
+    ['Serif display', ['Playfair Display', 'Cormorant Garamond', 'EB Garamond']],
+    ['Roman caps', ['Cinzel', 'Marcellus']],
+    ['Script', ['Great Vibes', 'Pinyon Script']],
+    ['Sans', ['Montserrat', 'DM Sans']]
+  ];
+  function fontOptions(current) {
+    var h = '';
+    FONT_GROUPS.forEach(function (g) {
+      h += '<optgroup label="' + g[0] + '">';
+      g[1].forEach(function (n) { h += '<option value="' + n + '"' + (n === current ? ' selected' : '') + '>' + n + '</option>'; });
+      h += '</optgroup>';
+    });
+    return h;
+  }
+
+  function hexOk(v) { return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(v || '').trim()); }
+  function safeUrlState(v) {
+    v = String(v == null ? '' : v).trim();
+    if (!v) return { url: '', state: 'empty' };
+    if (/^\s*(javascript|vbscript):/i.test(v)) return { url: '', state: 'blocked' };
+    if (/^(https?:\/\/|mailto:|tel:|\/|#)/i.test(v)) return { url: v, state: 'ok' };
+    if (/^[\w.-]+\.[a-z]{2,}(\/|$)/i.test(v)) return { url: 'https://' + v, state: 'ok' };
+    return { url: '', state: 'invalid' };
+  }
+  var SCENE_URLS = (DEF.items || []).map(function (it) { return it.image; });
+
+  var selected = 0;
+  var previewDark = false;
+  var widgetInst = null;
+
+  var shell = tgse.init({
+    widgetType: 'Prism',
+    widgetTag: 'prism',
+    scriptFile: 'widget-prism.js',
+    getConfig: function () { var out = deepClone(C); delete out.previewMode; return out; },
+    setConfig: function (c) { C = Object.assign({}, C, c); C.previewMode = true; syncUIFromState(); render(); },
+    onAIBuild: function () { tgse.toast('AI builder coming soon for Prism', 'ok'); },
+    onTemplates: function () { tgse.toast('Templates coming soon for Prism', 'ok'); },
+    onThemeToggle: function (isDark) { previewDark = isDark; render(); },
+    onDesignMode: function () {},
+    onLoginSuccess: function () { loadFromUrl(); }
+  });
+
+  // ── Typography sections (Design tab) ──
+  var TYPO = [
+    { key: 'title',  label: 'Heading',   min: 2.2, max: 4.6, weight: true, tracking: true },
+    { key: 'script', label: 'Script line', min: 2.2, max: 4.8, weight: false, tracking: false },
+    { key: 'lead',   label: 'Lead',      min: 1.4, max: 2.9, weight: true, tracking: false },
+    { key: 'body',   label: 'Body',      min: 1.1, max: 2.1, weight: true, tracking: false },
+    { key: 'labels', label: 'Destination labels', min: 1.0, max: 2.1, weight: false, tracking: true }
+  ];
+  function buildTypo() {
+    var ico = '<svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>';
+    var chev = '<svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+    var html = '';
+    TYPO.forEach(function (r) {
+      var k = r.key;
+      html += '<div class="tgse-section"><div class="tgse-section-head">' + ico +
+        '<span class="tgse-section-label">' + r.label + '</span>' + chev + '</div><div class="tgse-section-body">';
+      html += '<div class="field"><label class="field-label">Font</label><select class="select" id="ff-' + k + '"></select></div>';
+      html += '<div class="field"><label class="field-label">Size</label><div class="range-row"><input type="range" id="fs-' + k + '" min="' + r.min + '" max="' + r.max + '" step="0.05"><span class="range-val" id="fs-' + k + '-v"></span></div></div>';
+      if (r.weight) html += '<div class="field"><label class="field-label">Weight</label><select class="select" id="fw-' + k + '"><option value="400">Regular</option><option value="500">Medium</option><option value="600">Semibold</option><option value="700">Bold</option></select></div>';
+      if (r.tracking) html += '<div class="field"><label class="field-label">Letter-spacing</label><div class="range-row"><input type="range" id="ft-' + k + '" min="-4" max="26" step="1"><span class="range-val" id="ft-' + k + '-v"></span></div></div>';
+      html += '<div class="field"><label class="field-label">Colour</label><div class="colour-row"><div class="colour-swatch-wrap"><input type="color" id="fc-' + k + '"></div><input class="input colour-hex" id="fh-' + k + '" maxlength="7"></div></div>';
+      html += '</div></div>';
+    });
+    document.getElementById('typo-mount').innerHTML = html;
+
+    TYPO.forEach(function (r) {
+      var k = r.key;
+      document.getElementById('ff-' + k).innerHTML = fontOptions(C[k].font);
+      document.getElementById('ff-' + k).addEventListener('change', function (e) { C[k].font = e.target.value; touch(); });
+      wireRange('fs-' + k, function (v) { C[k].size = v; }, function (v) { return v.toFixed(2); });
+      if (r.weight) document.getElementById('fw-' + k).addEventListener('change', function (e) { C[k].weight = parseInt(e.target.value, 10); touch(); });
+      if (r.tracking) wireRange('ft-' + k, function (v) { C[k].tracking = v; }, function (v) { return String(Math.round(v)); });
+      wireColour('fc-' + k, 'fh-' + k, function (v) { C[k].color = v; });
+    });
+  }
+
+  // ── generic wiring helpers ──
+  function touch() { shell.markDirty(); render(); }
+  function wireRange(id, set, fmt) {
+    var el = document.getElementById(id), out = document.getElementById(id + '-v');
+    el.addEventListener('input', function () { var v = parseFloat(el.value); set(v); if (out) out.textContent = (fmt ? fmt(v) : v); touch(); });
+  }
+  function wireColour(colId, hexId, set) {
+    var col = document.getElementById(colId), hex = document.getElementById(hexId);
+    col.addEventListener('input', function () { var v = col.value.toUpperCase(); hex.value = v; set(v); touch(); });
+    hex.addEventListener('input', function () { var v = (hex.value || '').trim().toUpperCase(); if (hexOk(v)) { col.value = v; set(v); touch(); } });
+  }
+  function toggleSwitch(id, on) { var el = document.getElementById(id); if (!el) return; el.classList.toggle('is-on', !!on); el.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+
+  // ── Destinations list ──
+  function buildDestList() {
+    var wrap = document.getElementById('dest-list');
+    wrap.innerHTML = C.items.map(function (it, i) {
+      var img = SCENE_or(it);
+      return '<div class="dest-item' + (i === selected ? ' is-sel' : '') + '" data-i="' + i + '">' +
+        '<span class="dest-thumb"><img src="' + escAttr(img) + '" alt=""></span>' +
+        '<span class="dest-name">' + escHtml(it.label || 'Untitled') + '</span>' +
+        '<button class="dest-del" data-del="' + i + '" title="Remove" aria-label="Remove">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' +
+        '</button></div>';
+    }).join('');
+  }
+  function SCENE_or(it) { return (it.image && String(it.image).trim()) ? it.image : ''; }
+  function escHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function escAttr(s) { return escHtml(s).replace(/"/g, '&quot;'); }
+
+  function selectDest(i) {
+    selected = Math.max(0, Math.min(C.items.length - 1, i));
+    document.querySelectorAll('#dest-list .dest-item').forEach(function (el) { el.classList.toggle('is-sel', parseInt(el.dataset.i, 10) === selected); });
+    var it = C.items[selected];
+    var detail = document.getElementById('dest-detail');
+    if (!it) { detail.classList.add('is-empty'); return; }
+    detail.classList.remove('is-empty');
+    document.getElementById('dest-detail-head').textContent = (it.label || 'Photo') + ' — ' + (selected + 1) + ' of ' + C.items.length;
+    document.getElementById('d-label').value = it.label || '';
+    document.getElementById('d-image').value = (it.image && !isSceneUrl(it.image)) ? it.image : '';
+    document.getElementById('d-href').value = it.href || '';
+    var z = document.getElementById('d-zoom'); z.value = it.zoom || 1; document.getElementById('d-zoom-v').textContent = (it.zoom || 1).toFixed(2) + '×';
+    toggleSwitch('d-newtab', it.newTab);
+    syncFocal(); updateHrefNote(); updateImageNote();
+  }
+  function isSceneUrl(u) { return SCENE_URLS.indexOf(u) !== -1; }
+  function syncFocal() {
+    var it = C.items[selected]; if (!it) return;
+    document.getElementById('focal-img').src = SCENE_or(it) || placeholderFor(selected);
+    var r = document.getElementById('reticle');
+    r.style.left = (it.fx == null ? 50 : it.fx) + '%'; r.style.top = (it.fy == null ? 50 : it.fy) + '%';
+  }
+  function placeholderFor(i) {
+    // transparent 1px; the focal box shows its dark background if no image
+    return 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="10"/>');
+  }
+  function updateHrefNote() {
+    var it = C.items[selected]; var res = safeUrlState(it.href); var n = document.getElementById('d-href-note');
+    if (res.state === 'empty') { n.textContent = 'Opens when a visitor clicks this photo. Leave blank for no link.'; n.style.color = ''; }
+    else if (res.state === 'ok') { n.textContent = '✓ Links to ' + res.url; n.style.color = '#3F7A4B'; }
+    else if (res.state === 'blocked') { n.textContent = '✗ Blocked for safety (script URLs are not allowed).'; n.style.color = '#B23A3A'; }
+    else { n.textContent = "✗ That doesn't look like a valid address."; n.style.color = '#B23A3A'; }
+  }
+  function updateImageNote() {
+    var it = C.items[selected]; var v = document.getElementById('d-image').value.trim(); var n = document.getElementById('d-image-note');
+    if (!v) { n.textContent = 'Leave blank to keep the built-in sample scene.'; n.style.color = ''; }
+    else if (/^\s*(javascript|vbscript):/i.test(v)) { n.textContent = '✗ Blocked for safety.'; n.style.color = '#B23A3A'; }
+    else { n.textContent = 'Client photo — the framing above still applies.'; n.style.color = ''; }
+  }
+
+  function wireFocal() {
+    var box = document.getElementById('focal'), r = document.getElementById('reticle'); var drag = false;
+    function set(cx, cy) {
+      var b = box.getBoundingClientRect();
+      var x = Math.max(0, Math.min(100, (cx - b.left) / b.width * 100));
+      var y = Math.max(0, Math.min(100, (cy - b.top) / b.height * 100));
+      var it = C.items[selected]; if (!it) return;
+      it.fx = Math.round(x); it.fy = Math.round(y);
+      r.style.left = it.fx + '%'; r.style.top = it.fy + '%'; touch();
+    }
+    box.addEventListener('pointerdown', function (e) { drag = true; box.setPointerCapture(e.pointerId); set(e.clientX, e.clientY); });
+    box.addEventListener('pointermove', function (e) { if (drag) set(e.clientX, e.clientY); });
+    box.addEventListener('pointerup', function () { drag = false; });
+    box.addEventListener('keydown', function (e) {
+      var it = C.items[selected]; if (!it) return; var step = e.shiftKey ? 10 : 2, moved = true;
+      if (e.key === 'ArrowLeft') it.fx = Math.max(0, (it.fx || 50) - step);
+      else if (e.key === 'ArrowRight') it.fx = Math.min(100, (it.fx || 50) + step);
+      else if (e.key === 'ArrowUp') it.fy = Math.max(0, (it.fy || 50) - step);
+      else if (e.key === 'ArrowDown') it.fy = Math.min(100, (it.fy || 50) + step);
+      else moved = false;
+      if (moved) { e.preventDefault(); r.style.left = it.fx + '%'; r.style.top = it.fy + '%'; touch(); }
+    });
+  }
+
+  // ── preview ──
+  function buildFauxPage() {
+    var dark = !!previewDark;
+    return '<div class="pv-faux" data-bg="' + (dark ? 'dark' : 'light') + '">' +
+      '<div class="pvf-head"><span class="logo">Sunshine Holidays</span><span class="nav"><span>Destinations</span><span>Offers</span><span>About</span></span></div>' +
+      '<div class="pvf-hero"><div data-tg-widget="prism" id="widget-mount"></div></div>' +
+      '<div class="pvf-below"><div class="pvf-row w1"></div><div class="pvf-row w2"></div><div class="pvf-row w3"></div></div>' +
+      '</div>';
+  }
+  function render() {
+    var frame = document.getElementById('pv-frame'); if (!frame) return;
+    if (widgetInst) { try { widgetInst.destroy(); } catch (e) {} widgetInst = null; }
+    frame.innerHTML = buildFauxPage();
+    var host = document.getElementById('widget-mount'); if (!host) return;
+    requestAnimationFrame(function () {
+      if (window.TGPrismWidget) { try { widgetInst = new window.TGPrismWidget(host, C); } catch (e) { console.error(e); } }
+    });
+  }
+
+  // ── sync all controls from C ──
+  function syncUIFromState() {
+    document.getElementById('t-title').value = C.title.text || '';
+    document.getElementById('t-script').value = C.script.text || '';
+    document.getElementById('t-lead').value = C.lead.text || '';
+    document.getElementById('t-body').value = C.body.text || '';
+    setColour('c-panel', 'h-panel', C.panelBg, '#F4F0E7');
+    setColour('c-seam', 'h-seam', C.seam, '#FFFFFF');
+    setRange('d-slant', C.slant, function (v) { return v.toFixed(1); });
+    setRange('d-radius', C.radius, function (v) { return String(Math.round(v)); });
+    TYPO.forEach(function (r) {
+      var k = r.key, g = C[k];
+      var ff = document.getElementById('ff-' + k); if (ff) ff.value = g.font;
+      setRange('fs-' + k, g.size, function (v) { return v.toFixed(2); });
+      if (r.weight) { var fw = document.getElementById('fw-' + k); if (fw) fw.value = String(g.weight || 400); }
+      if (r.tracking) setRange('ft-' + k, g.tracking, function (v) { return String(Math.round(v)); });
+      setColour('fc-' + k, 'fh-' + k, g.color, '#000000');
+    });
+    buildDestList();
+    selectDest(Math.min(selected, C.items.length - 1));
+  }
+  function setColour(colId, hexId, val, fb) {
+    var v = hexOk(val) ? val : fb; document.getElementById(colId).value = v; document.getElementById(hexId).value = (val || fb).toUpperCase();
+  }
+  function setRange(id, val, fmt) { var el = document.getElementById(id), out = document.getElementById(id + '-v'); if (el) el.value = val; if (out) out.textContent = fmt ? fmt(parseFloat(val)) : val; }
+
+  // ── static control wiring ──
+  function wireText(id, set) { document.getElementById(id).addEventListener('input', function (e) { set(e.target.value); touch(); }); }
+
+  buildTypo();
+
+  wireText('t-title', function (v) { C.title.text = v; });
+  wireText('t-script', function (v) { C.script.text = v; });
+  wireText('t-lead', function (v) { C.lead.text = v; });
+  wireText('t-body', function (v) { C.body.text = v; });
+  wireColour('c-panel', 'h-panel', function (v) { C.panelBg = v; });
+  wireColour('c-seam', 'h-seam', function (v) { C.seam = v; });
+  wireRange('d-slant', function (v) { C.slant = v; }, function (v) { return v.toFixed(1); });
+  wireRange('d-radius', function (v) { C.radius = v; }, function (v) { return String(Math.round(v)); });
+
+  // destinations
+  document.getElementById('dest-list').addEventListener('click', function (e) {
+    var del = e.target.closest('[data-del]');
+    if (del) { e.stopPropagation(); removeDest(parseInt(del.dataset.del, 10)); return; }
+    var item = e.target.closest('.dest-item'); if (item) selectDest(parseInt(item.dataset.i, 10));
+  });
+  document.getElementById('dest-add').addEventListener('click', function () {
+    if (C.items.length >= 12) { tgse.toast('Up to 12 destinations', 'ok'); return; }
+    C.items.push({ label: 'NEW', image: '', href: '', newTab: false, fx: 50, fy: 50, zoom: 1 });
+    selected = C.items.length - 1; buildDestList(); selectDest(selected); touch();
+  });
+  function removeDest(i) {
+    if (C.items.length <= 1) { tgse.toast('Keep at least one destination', 'ok'); return; }
+    C.items.splice(i, 1);
+    if (selected >= C.items.length) selected = C.items.length - 1;
+    buildDestList(); selectDest(selected); touch();
+  }
+  wireText('d-label', function (v) { if (C.items[selected]) { C.items[selected].label = v; document.getElementById('dest-detail-head').textContent = (v || 'Photo') + ' — ' + (selected + 1) + ' of ' + C.items.length; var t = document.querySelector('#dest-list .dest-item[data-i="' + selected + '"] .dest-name'); if (t) t.textContent = v || 'Untitled'; } });
+  document.getElementById('d-image').addEventListener('input', function (e) {
+    if (!C.items[selected]) return;
+    var v = e.target.value.trim();
+    C.items[selected].image = v || SCENE_URLS[selected % SCENE_URLS.length] || '';
+    updateImageNote(); syncFocal();
+    var th = document.querySelector('#dest-list .dest-item[data-i="' + selected + '"] .dest-thumb img'); if (th) th.src = C.items[selected].image || '';
+    touch();
+  });
+  document.getElementById('d-href').addEventListener('input', function (e) { if (C.items[selected]) { C.items[selected].href = e.target.value; updateHrefNote(); touch(); } });
+  document.getElementById('d-newtab').addEventListener('click', function () { if (!C.items[selected]) return; C.items[selected].newTab = !C.items[selected].newTab; toggleSwitch('d-newtab', C.items[selected].newTab); touch(); });
+  wireRange('d-zoom', function (v) { if (C.items[selected]) C.items[selected].zoom = v; }, function (v) { return v.toFixed(2) + '×'; });
+  wireFocal();
+
+  document.getElementById('name-input').addEventListener('input', function () { shell.markDirty(); });
+
+  // ── load ──
+  function loadFromUrl() {
+    var id = new URLSearchParams(location.search).get('id');
+    if (!id) { syncUIFromState(); render(); return; }
+    fetch('/api/widget-config?id=' + encodeURIComponent(id))
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (d && d.config) { C = Object.assign({}, deepClone(DEF), d.config); C.previewMode = true; if (!Array.isArray(C.items) || !C.items.length) C.items = deepClone(DEF.items); }
+        if (d && d.name) document.getElementById('name-input').value = d.name;
+        selected = 0; syncUIFromState(); render();
+      })
+      .catch(function () { tgse.toast('Failed to load widget', 'err'); syncUIFromState(); render(); });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(function () { if (tgse.isLoggedIn()) loadFromUrl(); else { syncUIFromState(); render(); } });
+    } else { if (tgse.isLoggedIn()) loadFromUrl(); else { syncUIFromState(); render(); } }
+  });
+})();
+</script>
+</body>
+</html>
