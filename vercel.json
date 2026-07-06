@@ -154,6 +154,10 @@
       "destination": "/demo-backtotop.html"
     },
     {
+      "source": "/demo-consent",
+      "destination": "/demo-consent.html"
+    },
+    {
       "source": "/demo-carousel",
       "destination": "/demo-carousel.html"
     },
@@ -328,6 +332,10 @@
     {
       "source": "/editor-backtotop",
       "destination": "/editor-backtotop.html"
+    },
+    {
+      "source": "/editor-consent",
+      "destination": "/editor-consent.html"
     },
     {
       "source": "/demo-dealbar",
@@ -783,6 +791,23 @@
     },
     {
       "source": "/widget-backtotop.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-consent.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
