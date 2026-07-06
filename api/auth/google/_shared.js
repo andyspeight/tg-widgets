@@ -28,9 +28,17 @@ const SAFE_NEXT_PREFIXES = ['/home.html', '/admin', '/dashboard.html'];
 const ALLOWED_HOSTS = ['id.travelify.io', 'widgets.travelify.io', 'tg-widgets.vercel.app'];
 const PRIMARY_HOST = 'id.travelify.io';
 
+// Sign-in uses its OWN OAuth client, deliberately separate from the calendar
+// integration's GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET (api/_lib/calendar/
+// google.js). Reasons: (1) the calendar client requests sensitive Calendar
+// scopes and carries the calendar callback's redirect URIs — reusing it would
+// entangle sign-in with the calendar consent screen's verification state and
+// require our redirect URIs on that client; (2) least privilege — the sign-in
+// client can only ever see name + email, never anyone's calendar. So keep the
+// two clients fully independent; no fallback to the calendar vars.
 export function googleConfig() {
-  const clientId = process.env.GOOGLE_CLIENT_ID || '';
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET || '';
+  const clientId = process.env.GOOGLE_SIGNIN_CLIENT_ID || '';
+  const clientSecret = process.env.GOOGLE_SIGNIN_CLIENT_SECRET || '';
   return { clientId, clientSecret, configured: !!(clientId && clientSecret) };
 }
 
