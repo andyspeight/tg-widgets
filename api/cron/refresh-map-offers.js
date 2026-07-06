@@ -251,7 +251,14 @@ function normaliseOffers(rawArray, sweepTypeId = 'Packages', drops = null, fallb
     // Stamp the swept type authoritatively — the read side filters on it.
     n.type = sweepTypeId;
     if (passesDurationRule(n)) out.push(n);
-    else if (drops) drops.duration++;
+    else if (drops) {
+      // Split the nights-rule drop so the audit can tell "missing a nights
+      // value" (a hotel-only offer we might choose to keep) from "genuinely
+      // outside the 2–28 night holiday range".
+      drops.duration++;
+      if (!Number.isFinite(n.nights)) drops.durNoNights = (drops.durNoNights || 0) + 1;
+      else drops.durOutOfRange = (drops.durOutOfRange || 0) + 1;
+    }
   }
   return out;
 }
@@ -514,8 +521,16 @@ const MARKETS = [
   // destination, held today or not.
   {
     id: 'GB', nationality: 'GB',
-    flightOrigins: ['LGW', 'LHR', 'LCY', 'LTN', 'STN', 'SEN', 'MAN', 'BHX', 'EMA', 'BRS',
-                    'NCL', 'LBA', 'LPL', 'MME', 'ABZ', 'EDI', 'GLA', 'INV', 'NQY', 'LDY'],
+    // Flight-only sweeps fire ONE request per origin per destination, so this
+    // list multiplies the request budget hard (20 origins was ~1,100 flight
+    // requests per full sweep). Travelify returns very little flight-only
+    // inventory — a whole sweep yields ~15 offers with nothing dropped by our
+    // filters — so those requests were mostly empty and were starving the time
+    // budget the Packages and Accommodation sweeps need. Trimmed to the busiest
+    // UK hubs (6 Jul 2026). Dropped the smaller regionals: LCY, SEN, EMA, LBA,
+    // LPL, MME, ABZ, INV, NQY, LDY — add any back here if a client needs that
+    // departure point.
+    flightOrigins: ['LHR', 'LGW', 'LTN', 'STN', 'MAN', 'BHX', 'EDI', 'GLA', 'BRS', 'NCL'],
   },
   { id: 'IE', nationality: 'IE', flightOrigins: ['DUB', 'ORK', 'SNN'] }, // Irish departures for the Irish clients
 ];
@@ -644,7 +659,7 @@ async function sweepCountry(row) {
     const raw = await callOffersProxy(buildPayload(row, code, market, sweepType, flightOrigin));
     if (!raw.ok) return { code, market: market.id, type: sweepType.id, origin: flightOrigin || undefined, ok: false, error: raw.error || `HTTP ${raw.status}`, count: 0, fetched: 0, dropped: null, offers: [] };
     const arr = raw.data && Array.isArray(raw.data.data) ? raw.data.data : [];
-    const dropped = { noPrice: 0, noDest: 0, duration: 0, nonGBP: 0 };
+    const dropped = { noPrice: 0, noDest: 0, duration: 0, durNoNights: 0, durOutOfRange: 0, nonGBP: 0 };
     // The country fallback applies to the non-map types only: the world map's
     // Packages product keeps its exact geo requirements, while hotel-only and
     // flight-only offers inherit the swept country when the supplier omits it.
@@ -711,7 +726,7 @@ function aggregateSweepStats(perCountry) {
   const perType = {};
   const bucket = (type) => perType[type] || (perType[type] = {
     requests: 0, failed: 0, fetched: 0, kept: 0, unique: 0,
-    dropped: { noPrice: 0, noDest: 0, duration: 0, nonGBP: 0 },
+    dropped: { noPrice: 0, noDest: 0, duration: 0, durNoNights: 0, durOutOfRange: 0, nonGBP: 0 },
   });
   for (const p of perCountry || []) {
     for (const r of (p.codeResults || [])) {
@@ -725,6 +740,8 @@ function aggregateSweepStats(perCountry) {
       t.dropped.noPrice += d.noPrice || 0;
       t.dropped.noDest += d.noDest || 0;
       t.dropped.duration += d.duration || 0;
+      t.dropped.durNoNights += d.durNoNights || 0;
+      t.dropped.durOutOfRange += d.durOutOfRange || 0;
       t.dropped.nonGBP += d.nonGBP || 0;
     }
     // Per-country unique tallies (offers are country-scoped, so summing
@@ -1036,7 +1053,9 @@ export default async function handler(req, res) {
       });
       for (const [t, s] of Object.entries(sweepStats)) {
         console.log(`[map-cron] sweep ${t}: ${s.fetched} fetched → ${s.kept} kept` +
-          ` (noPrice ${s.dropped.noPrice}, noDest ${s.dropped.noDest}, duration ${s.dropped.duration}, nonGBP ${s.dropped.nonGBP}` +
+          ` (noPrice ${s.dropped.noPrice}, noDest ${s.dropped.noDest}, duration ${s.dropped.duration}` +
+          (s.dropped.duration ? ` [noNights ${s.dropped.durNoNights || 0}, outOfRange ${s.dropped.durOutOfRange || 0}]` : '') +
+          `, nonGBP ${s.dropped.nonGBP}` +
           (s.failed ? `, ${s.failed}/${s.requests} requests failed)` : `)`));
       }
     }
