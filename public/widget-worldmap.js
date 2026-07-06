@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.10.2';
+  const VERSION = '3.10.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -328,8 +328,19 @@
     const st = type === 'Flights' ? 'Flights' : type === 'Accommodation' ? 'Accommodation' : 'DynamicPackaging';
     const p = new URLSearchParams();
     p.set('st', st);
-    if (st !== 'Accommodation') { if (o.origin) p.set('org', o.origin); if (o.airport) p.set('dst', o.airport); }
-    if (st !== 'Flights') { if (o.resort) p.set('loc', o.resort); if (o.countryCode) p.set('ctry', o.countryCode); }
+    let hasDst = false;
+    if (st !== 'Accommodation') { if (o.origin) p.set('org', o.origin); if (o.airport) { p.set('dst', o.airport); hasDst = true; } }
+    if (st !== 'Flights') {
+      // loc is the resort name, and Travelify hard-matches it as a City: an
+      // unrecognised name (e.g. "Hadaba", "South Male Atoll") fails the WHOLE
+      // deeplink with "Unable to match location City". Only send it when there
+      // is no airport dst to anchor on. The airport IATA is a reliable anchor,
+      // the resort name is not, so packages/flights rely on dst + ctry and the
+      // exact property comes from refn below. Accommodation-only offers have no
+      // airport, so loc stays as their one geo hint.
+      if (!hasDst && o.resort) p.set('loc', o.resort);
+      if (o.countryCode) p.set('ctry', o.countryCode);
+    }
     const start = String(o.outboundDate || o.checkinDate || '');
     if (/^\d{4}-\d{2}-\d{2}/.test(start)) p.set('fr', start.slice(0, 10));
     if (o.nights) p.set('dur', String(o.nights));

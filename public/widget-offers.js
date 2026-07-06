@@ -113,7 +113,7 @@
   // Our own FX proxy (ECB/Frankfurter). The cache is GBP; we convert at display
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
-  const VERSION = '1.10.0';
+  const VERSION = '1.10.1';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -616,12 +616,19 @@
     const st = type === 'Flights' ? 'Flights' : type === 'Accommodation' ? 'Accommodation' : 'DynamicPackaging';
     const p = new URLSearchParams();
     p.set('st', st);
+    let hasDst = false;
     if (st !== 'Accommodation' && fl) {
       if (fl.origin && fl.origin.iataCode) p.set('org', fl.origin.iataCode);
-      if (fl.destination && fl.destination.iataCode) p.set('dst', fl.destination.iataCode);
+      if (fl.destination && fl.destination.iataCode) { p.set('dst', fl.destination.iataCode); hasDst = true; }
     }
     if (st !== 'Flights' && acc) {
-      if (acc.destination && acc.destination.name) p.set('loc', acc.destination.name);
+      // loc is the resort name, and Travelify hard-matches it as a City: an
+      // unrecognised name (e.g. "Hadaba", "South Male Atoll") fails the WHOLE
+      // deeplink with "Unable to match location City". Only send it when there
+      // is no airport dst to anchor on. The airport IATA is a reliable anchor,
+      // the resort name is not, so packages/flights rely on dst + ctry and the
+      // exact property comes from refn below.
+      if (!hasDst && acc.destination && acc.destination.name) p.set('loc', acc.destination.name);
       const ctry = (acc.destination && acc.destination.countryCode) || (fl && fl.destination && fl.destination.countryCode);
       if (ctry) p.set('ctry', ctry);
     }
