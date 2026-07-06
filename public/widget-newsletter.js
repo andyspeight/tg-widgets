@@ -1,5 +1,5 @@
 /**
- * Travelgenix Newsletter Signup Widget v1.0.0
+ * Travelgenix Newsletter Signup Widget v1.1.0
  * Self-contained, embeddable widget with 5 layouts:
  *   - inline    (horizontal email + button)
  *   - card      (vertical card with optional name field, consent, success state)
@@ -79,7 +79,7 @@
     } catch (e) { /* fall through */ }
     return '/api/newsletter-submit';
   })();
-  const VERSION = '1.0.3';
+  const VERSION = '1.1.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only: validation / error / status messages, plus the
@@ -254,12 +254,62 @@
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) && v.length <= 254;
   }
 
-  function safeFontFamily(name) {
-    // Whitelist of safe font tokens; everything else falls back to system
-    const ALLOWED = ['Inter', 'system-ui', 'Arial', 'Helvetica', 'Georgia', 'Roboto', 'Open Sans', 'Lato', 'Poppins', 'Nunito', 'Montserrat', 'Source Sans Pro', 'Source Sans 3', 'Work Sans', 'Plus Jakarta Sans', 'DM Sans'];
-    if (typeof name !== 'string') return 'Inter, system-ui, sans-serif';
-    if (ALLOWED.includes(name)) return `'${name}', system-ui, sans-serif`;
+  // The fonts the editor's picker offers (mirrors editor-shell.js FONTS). The
+  // widget loads any of these from Google Fonts so a picked font actually
+  // renders on the live site, not only in the editor preview.
+  const GOOGLE_FONTS = [
+    'DM Sans', 'Inter', 'Poppins', 'Raleway', 'Open Sans', 'Lato',
+    'Montserrat', 'Nunito', 'Source Sans 3', 'Work Sans', 'Outfit',
+    'Plus Jakarta Sans', 'Rubik', 'Manrope', 'Sora', 'Space Grotesk',
+    'Figtree', 'Onest', 'Albert Sans', 'Urbanist', 'Karla', 'Cabin',
+    'Mulish', 'Josefin Sans', 'Quicksand', 'Barlow', 'Archivo',
+    'Red Hat Display', 'Overpass'
+  ];
+  // System / web-safe families we let through without loading anything.
+  const SYSTEM_FONTS = ['system-ui', 'Arial', 'Helvetica', 'Georgia', 'Times New Roman', 'Verdana', 'Tahoma', 'Trebuchet MS', 'Roboto', 'Source Sans Pro'];
+
+  // Sanitise a free-text (website) font-family so it cannot break out of the
+  // style attribute it lands in — --tgnl-font sits inside a double-quoted
+  // style="". We keep a comma list of bare or single-quoted family names;
+  // double quotes, semicolons, braces and angle brackets are stripped.
+  function sanitizeCustomFont(v) {
+    if (typeof v !== 'string') return '';
+    return v.replace(/[^A-Za-z0-9 ,'_-]/g, '').replace(/\s+/g, ' ').trim().slice(0, 120);
+  }
+
+  // Resolve the CSS font-family value from config. A website font (free-text
+  // toggle) wins when set; otherwise the picked Google/system font; otherwise
+  // Inter. The returned string is safe to drop into a style attribute.
+  function resolveFontFamily(c) {
+    if (c && c.customFontEnabled) {
+      const custom = sanitizeCustomFont(c.customFontFamily);
+      if (custom) return /,/.test(custom) ? custom : `'${custom}', system-ui, sans-serif`;
+    }
+    const name = (c && typeof c.fontFamily === 'string') ? c.fontFamily : '';
+    if (GOOGLE_FONTS.indexOf(name) !== -1 || SYSTEM_FONTS.indexOf(name) !== -1) {
+      return `'${name}', system-ui, sans-serif`;
+    }
     return 'Inter, system-ui, sans-serif';
+  }
+
+  // Load a picked Google Font once per page so it renders on the live site.
+  // Only known families are requested (no arbitrary URLs); the injected node is
+  // a stylesheet link (CSP-safe, no script) and degrades to system-ui if the
+  // client's CSP blocks fonts.googleapis.com. Website fonts (free-text) are
+  // never loaded — they are expected to already exist on the host page.
+  const _loadedFonts = {};
+  function loadWidgetFont(name) {
+    if (typeof document === 'undefined') return;
+    if (!name || GOOGLE_FONTS.indexOf(name) === -1 || _loadedFonts[name]) return;
+    _loadedFonts[name] = true;
+    const id = 'tgnl-font-' + name.replace(/[^A-Za-z0-9]+/g, '-').toLowerCase();
+    if (document.getElementById(id)) return;
+    const fam = encodeURIComponent(name).replace(/%20/g, '+');
+    const link = document.createElement('link');
+    link.id = id;
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=' + fam + ':wght@400;500;600;700&display=swap';
+    (document.head || document.documentElement).appendChild(link);
   }
 
   function lighten(hex, pct) {
@@ -958,6 +1008,8 @@
 
         // Theming
         fontFamily: c.fontFamily || 'Inter',
+        customFontEnabled: !!c.customFontEnabled,
+        customFontFamily: (typeof c.customFontFamily === 'string') ? c.customFontFamily.slice(0, 120) : '',
         theme: {
           mode: (c.theme && c.theme.mode === 'dark') ? 'dark' : 'light',
           brand: (c.theme && /^#[0-9a-f]{3,8}$/i.test(c.theme.brand)) ? c.theme.brand : '#1B2B5B',
@@ -985,7 +1037,7 @@
         `--tgnl-accent: ${accent}`,
         `--tgnl-radius: ${radius}px`,
         `--tgnl-radius-input: ${Math.max(4, radius - 4)}px`,
-        `--tgnl-font: ${safeFontFamily(this.c.fontFamily)}`,
+        `--tgnl-font: ${resolveFontFamily(this.c)}`,
       ].join('; ');
     }
 
@@ -1002,6 +1054,9 @@
     // ─── Render ──────────────────────────────────────────────────────────
     _render() {
       const cfg = this.c;
+      // Pull the picked Google font onto the page so it renders on the live
+      // site (website fonts via the free-text toggle are left to the host).
+      if (!cfg.customFontEnabled) loadWidgetFont(cfg.fontFamily);
       const themeStyle = this._themeStyle();
       let inner = '';
       if (cfg.layout === 'inline')   inner = this._renderInline();
