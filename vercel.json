@@ -495,6 +495,14 @@
     {
       "source": "/demo-loader",
       "destination": "/demo-loader.html"
+    },
+    {
+      "source": "/editor-prism",
+      "destination": "/editor-prism.html"
+    },
+    {
+      "source": "/demo-prism",
+      "destination": "/demo-prism.html"
     }
   ],
   "headers": [
@@ -823,6 +831,23 @@
     },
     {
       "source": "/widget-dealbar.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-prism.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",

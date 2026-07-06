@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Prism — Travelgenix Widget Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F4F1EA; color: #0F172A; min-height: 100vh; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  body[data-bg="dark"] { background: #0B1220; color: #E2E8F0; }
+
+  .demo-bar { background: rgba(255,255,255,0.85); border-bottom: 1px solid #E6E0D2; padding: 14px 24px; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(8px); }
+  body[data-bg="dark"] .demo-bar { background: rgba(15,23,42,0.85); border-bottom-color: #1E293B; }
+  .demo-bar-inner { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .demo-brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; color: inherit; }
+  .demo-brand-mark { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, #1E2E49 0%, #A6792F 100%); }
+  .demo-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .demo-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: #94A3B8; margin-right: 2px; }
+  .demo-pill { appearance: none; border: 1px solid #E6E0D2; background: #fff; color: #475569; font: inherit; font-size: 13px; font-weight: 500; padding: 7px 14px; border-radius: 999px; cursor: pointer; transition: all 0.18s ease; }
+  body[data-bg="dark"] .demo-pill { background: #1E293B; color: #94A3B8; border-color: #334155; }
+  .demo-pill:hover { background: #F1F5F9; color: #0F172A; }
+  body[data-bg="dark"] .demo-pill:hover { background: #334155; color: #F1F5F9; }
+  .demo-pill[aria-pressed="true"] { background: #1E2E49; color: #fff; border-color: #1E2E49; }
+  .demo-divider { width: 1px; height: 20px; background: #E6E0D2; margin: 0 4px; }
+  body[data-bg="dark"] .demo-divider { background: #334155; }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 40px 24px 8px; }
+  .stage { margin: 8px 0 44px; }
+  article { max-width: 760px; margin: 0 auto; padding: 8px 24px 120px; }
+  article h2 { font-size: 24px; font-weight: 700; margin: 40px 0 12px; letter-spacing: -0.01em; }
+  article p { color: #475569; margin: 0 0 18px; }
+  body[data-bg="dark"] article p { color: #94A3B8; }
+  .demo-foot { max-width: 760px; margin: 0 auto; padding: 0 24px 80px; font-size: 12px; color: #94A3B8; }
+</style>
+</head>
+<body>
+  <div class="demo-bar">
+    <div class="demo-bar-inner">
+      <div class="demo-brand"><span class="demo-brand-mark"></span> Sunshine Holidays</div>
+      <div class="demo-controls">
+        <span class="demo-label">Slices</span>
+        <button class="demo-pill" id="angleToggle" aria-pressed="true">Diagonal</button>
+        <button class="demo-pill" id="linkToggle" aria-pressed="false">Links on</button>
+        <span class="demo-divider"></span>
+        <button class="demo-pill" id="darkToggle" aria-pressed="false">Dark</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="stage"><div data-tg-widget="prism" id="mount"></div></div>
+  </div>
+
+  <article id="article"></article>
+  <div class="demo-foot">Demo page · widget-prism.js v1.0.0 · pure client-side, no API key. Editorial hero band with a font-controllable panel and angled photo slices, each with a focal point and a link.</div>
+
+  <script src="/widget-prism.js"></script>
+  <script>
+    (function () {
+      var paras = [
+        "Prism turns a row of your best destinations into an editorial hero. The panel on the left carries your voice, with full control over the display face, the script line and the body copy.",
+        "Each slice is a photograph in its own right. Pick exactly which part of the image shows, then point it wherever you like, a destination page, an offer, an enquiry form.",
+        "It is one self-contained script. No dependencies, no API key, and it loads its own web fonts so it looks the same on any site.",
+      ];
+      var headings = ['A hero with a point of view', 'Every photo, framed your way', 'Drop it in anywhere'];
+      var art = document.getElementById('article'), html = '';
+      for (var i = 0; i < headings.length; i++) html += '<h2>' + headings[i] + '</h2><p>' + paras[i] + '</p>';
+      art.innerHTML = html;
+    })();
+
+    var mount = document.getElementById('mount');
+    var state = { diagonal: true, links: false };
+    var inst = null;
+
+    function rebuild() {
+      if (inst) { try { inst.destroy(); } catch (e) {} }
+      var items = (window.TGPrismWidget.DEFAULTS.items).map(function (it) {
+        return Object.assign({}, it, { href: state.links ? '#' + (it.label || '').toLowerCase() : '', newTab: false });
+      });
+      inst = new window.TGPrismWidget(mount, {
+        slant: state.diagonal ? 2.7 : 0,
+        items: items
+      });
+    }
+    function wireToggle(id, key, on, off) {
+      document.getElementById(id).addEventListener('click', function (e) {
+        state[key] = !state[key];
+        e.currentTarget.setAttribute('aria-pressed', String(state[key]));
+        e.currentTarget.textContent = state[key] ? on : off;
+        rebuild();
+      });
+    }
+    wireToggle('angleToggle', 'diagonal', 'Diagonal', 'Straight');
+    wireToggle('linkToggle', 'links', 'Links on', 'Links off');
+    document.getElementById('darkToggle').addEventListener('click', function (e) {
+      var on = document.body.getAttribute('data-bg') !== 'dark';
+      document.body.setAttribute('data-bg', on ? 'dark' : 'light');
+      e.currentTarget.setAttribute('aria-pressed', String(on));
+    });
+
+    if (window.TGPrismWidget) rebuild(); else window.addEventListener('load', rebuild);
+  </script>
+</body>
+</html>
