@@ -57,6 +57,11 @@
     .lcard-body { padding: 10px 12px 12px; border-top: 1px solid var(--tg-border); }
     .lcard-name { font-weight: 600; font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .lcard-domain { color: var(--tg-text-tertiary); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .lcard-domain-input { display: block; width: 100%; box-sizing: border-box; margin: 1px 0 0; padding: 2px 5px; font: inherit; font-size: 12px; color: var(--tg-text-tertiary); background: transparent; border: 1px solid transparent; border-radius: 5px; }
+    .lcard-domain-input::placeholder { color: var(--tg-text-tertiary); opacity: .7; }
+    .lcard-domain-input:hover { border-color: var(--tg-border); }
+    .lcard-domain-input:focus { outline: none; border-color: var(--tg-primary); background: var(--tg-bg-primary); color: var(--tg-text-primary); }
+    .lcard-domain-input.saving { opacity: .6; }
     .lcard-meta { display: flex; align-items: center; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
     .chip { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 600; background: var(--tg-bg-tertiary); color: var(--tg-text-secondary); }
     .sw { display: inline-flex; gap: 4px; margin-left: auto; }
@@ -131,7 +136,7 @@
       <div class="controls">
         <input type="search" id="q" placeholder="Search by brand name or domain…" />
         <select class="fld" id="cat"><option value="">All brands</option></select>
-        <select class="fld" id="sort"><option value="new">Newest first</option><option value="name">Name A–Z</option></select>
+        <select class="fld" id="sort"><option value="name">Name A–Z</option><option value="new">Newest first</option></select>
         <button class="btn" id="refresh-all" title="Look up a fresh logo for every brand shown">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M21 12a9 9 0 1 1-2.6-6.3"/><polyline points="21 4 21 9 16 9"/></svg>
           Refresh all
@@ -274,7 +279,7 @@
           + '<div class="lcard-preview">' + (b.preferredUrl ? '<img src="'+esc(b.preferredUrl)+'" alt="'+esc(b.name)+'" loading="lazy">' : '') + '</div>'
           + '<div class="lcard-body">'
           +   '<div class="lcard-name" title="'+esc(b.name)+'">'+esc(b.name)+'</div>'
-          +   '<div class="lcard-domain">'+esc(b.domain||'&nbsp;')+'</div>'
+          +   '<input class="lcard-domain-input" type="text" value="'+esc(b.domain||'')+'" data-domain-id="'+esc(b.id)+'" placeholder="add a website domain" spellcheck="false" autocapitalize="off" autocomplete="off" title="Fix the website domain, then Refresh to fetch its logo">'
           +   '<div class="lcard-meta">'
           +     '<span class="chip">'+nAssets+(nAssets===1?' asset':' assets')+'</span>'
           +     (b.category ? '<span class="chip">'+esc(b.category)+'</span>' : '')
@@ -299,17 +304,44 @@
         renderGrid();
       } catch(e){ alert('Could not remove that logo — network error.'); }
     });
+    // Save a corrected website domain on blur / Enter (so a later "Refresh all"
+    // uses it too). The per-card Refresh also sends the field value directly.
+    document.getElementById('grid').addEventListener('change', async function(e){
+      var inp = e.target.closest('.lcard-domain-input');
+      if (!inp) return;
+      var id = inp.getAttribute('data-domain-id');
+      var val = inp.value.trim();
+      var b = brands.find(function(x){ return x.id===id; });
+      if (b && (b.domain||'') === val) return; // unchanged
+      inp.classList.add('saving'); inp.disabled = true;
+      try {
+        var r = await fetch('/api/logo-library?id='+encodeURIComponent(id), { method:'PATCH', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ domain: val }) });
+        if (r.status===401){ location.href='/signin.html?redirect='+encodeURIComponent('/admin/logo-library'); return; }
+        var d = {}; try { d = await r.json(); } catch(e){}
+        if (!r.ok){ alert((d && (d.message||d.error)) || 'Could not save the domain.'); if (b){ inp.value = b.domain||''; } return; }
+        if (b){ b.domain = (d && typeof d.domain==='string') ? d.domain : val; inp.value = b.domain; }
+      } catch(e){ alert('Could not save the domain — network error.'); }
+      finally { inp.classList.remove('saving'); inp.disabled = false; }
+    });
     async function refreshLogo(btn){
       var id = btn.getAttribute('data-refresh');
+      // Use the current (possibly just-edited) domain from the card's field, so a
+      // corrected domain is applied and re-looked-up in one click.
+      var card = btn.closest('.lcard');
+      var dinput = card && card.querySelector('.lcard-domain-input');
       btn.disabled = true; btn.classList.add('busy');
       try {
-        var r = await fetch('/api/admin/logo-find', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'refresh', id: id }) });
+        var payload = { action:'refresh', id: id };
+        if (dinput) payload.domain = dinput.value.trim();
+        var r = await fetch('/api/admin/logo-find', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
         if (r.status===401){ location.href='/signin.html?redirect='+encodeURIComponent('/admin/logo-library'); return; }
         if (r.status===403){ alert('Refreshing logos needs a Travelgenix admin account.'); return; }
         var d = {}; try { d = await r.json(); } catch(e){}
         if (!r.ok){ alert(d.error || ('Refresh failed (HTTP '+r.status+')')); return; }
-        if (!d.ok){ alert(d.message || 'No fresh logo found.'); return; }
         var i = brands.findIndex(function(x){ return x.id===id; });
+        // Persist the domain the server saved (returned even on a no-logo result).
+        if (i!==-1 && typeof d.domain==='string'){ brands[i] = Object.assign({}, brands[i], { domain: d.domain }); }
+        if (!d.ok){ alert(d.message || 'No fresh logo found.'); renderGrid(); return; }
         if (i!==-1 && d.brand){ brands[i] = Object.assign({}, brands[i], d.brand); }
         renderGrid();
       } catch(e){ alert('Refresh failed — network error.'); }

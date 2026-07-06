@@ -166,6 +166,37 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true, brand: { ...pub, canDelete: true } });
   }
 
+  // ── PATCH: correct a brand's website domain (staff or uploader) ──────────
+  // A wrong or blank domain is why many migration placeholders never resolved;
+  // let an operator fix it in place so Logo.dev can serve the logo on the next
+  // refresh (without spending the small Brandfetch name-search quota).
+  if (req.method === 'PATCH') {
+    if (!applyRateLimit(res, `logolib:${who}`, RATE_LIMITS.widgetWrite)) return;
+    const id = cleanText((req.query || {}).id, 60);
+    if (!id) return jsonError(res, 400, 'id_required', 'id required');
+    let body;
+    try { body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {}); }
+    catch { return jsonError(res, 400, 'invalid_json', 'Body must be JSON'); }
+    const idx = await readIndex();
+    const brand = idx.brands.find((b) => b.id === id);
+    if (!brand) return jsonError(res, 404, 'not_found', 'That logo is not in the library');
+    if (!staff && brand.addedBy !== who) {
+      return jsonError(res, 403, 'not_yours', 'Only Travelgenix staff or the uploader can edit this logo');
+    }
+    if (!Object.prototype.hasOwnProperty.call(body, 'domain')) {
+      return jsonError(res, 400, 'nothing_to_update', 'Nothing to update');
+    }
+    const raw = String(body.domain == null ? '' : body.domain).trim();
+    const nd = cleanDomain(body.domain);
+    if (raw && !nd) return jsonError(res, 400, 'invalid_domain', 'That does not look like a valid website domain');
+    brand.domain = nd; // a valid bare hostname, or '' to clear
+    idx.updatedAt = new Date().toISOString();
+    if (!(await setJson(INDEX_KEY, idx))) {
+      return jsonError(res, 500, 'index_failed', 'Could not update the library index — please try again');
+    }
+    return res.status(200).json({ ok: true, id: brand.id, domain: brand.domain });
+  }
+
   // ── DELETE: remove an entry (staff or uploader) ──────────────────────────
   if (req.method === 'DELETE') {
     if (!applyRateLimit(res, `logolib:${who}`, RATE_LIMITS.widgetWrite)) return;
@@ -198,6 +229,6 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true });
   }
 
-  res.setHeader('Allow', 'GET, POST, DELETE');
-  return jsonError(res, 405, 'method_not_allowed', 'GET, POST or DELETE only');
+  res.setHeader('Allow', 'GET, POST, PATCH, DELETE');
+  return jsonError(res, 405, 'method_not_allowed', 'GET, POST, PATCH or DELETE only');
 }
