@@ -16,10 +16,9 @@
       --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 20px; --sp-6: 24px; --radius: 12px; --radius-sm: 6px;
       --shadow-sm: 0 1px 2px rgba(15,23,42,.05); --shadow-md: 0 4px 14px rgba(15,23,42,.07);
     }
-    @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-      --tg-bg-primary: #0F172A; --tg-bg-secondary: #0B1120; --tg-bg-tertiary: #1E293B;
-      --tg-border: #334155; --tg-text-primary: #F8FAFC; --tg-text-secondary: #CBD5E1; --tg-text-tertiary: #64748B; --tg-primary: #48CAE4;
-    } }
+    /* Default theme is light. Dark only applies when the operator toggles it
+       (the toggle stamps data-theme="dark"); we deliberately do NOT auto-dark
+       from the system preference. */
     :root[data-theme="dark"] {
       --tg-bg-primary: #0F172A; --tg-bg-secondary: #0B1120; --tg-bg-tertiary: #1E293B;
       --tg-border: #334155; --tg-text-primary: #F8FAFC; --tg-text-secondary: #CBD5E1; --tg-text-tertiary: #64748B; --tg-primary: #48CAE4;
@@ -65,6 +64,12 @@
     .lcard-del { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; border-radius: 6px; border: 0; background: rgba(15,23,42,.55); color: #fff; cursor: pointer; display: none; align-items: center; justify-content: center; }
     .lcard-del svg { width: 13px; height: 13px; }
     .lcard:hover .lcard-del { display: flex; }
+    .lcard-refresh { position: absolute; top: 6px; left: 6px; height: 24px; padding: 0 8px; border-radius: 6px; border: 0; background: rgba(15,23,42,.55); color: #fff; cursor: pointer; display: none; align-items: center; gap: 5px; font: inherit; font-size: 11px; font-weight: 600; }
+    .lcard-refresh svg { width: 12px; height: 12px; }
+    .lcard:hover .lcard-refresh { display: inline-flex; }
+    .lcard-refresh:disabled { opacity: .7; cursor: default; }
+    .lcard-refresh.busy svg { animation: tgspin .8s linear infinite; }
+    @keyframes tgspin { to { transform: rotate(360deg); } }
 
     .panel { background: var(--tg-bg-primary); border: 1px solid var(--tg-border); border-radius: var(--radius); box-shadow: var(--shadow-sm); padding: var(--sp-6); }
     .panel h2 { margin: 0 0 6px; font-size: 16px; }
@@ -260,6 +265,7 @@
         var nAssets = (b.assets && b.assets.length) || 0;
         return '<div class="lcard">'
           + (b.canDelete ? '<button class="lcard-del" data-del="'+esc(b.id)+'" title="Remove from library" aria-label="Remove '+esc(b.name)+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' : '')
+          + (b.domain ? '<button class="lcard-refresh" data-refresh="'+esc(b.id)+'" title="Fetch a fresh logo for '+esc(b.domain)+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.3"/><polyline points="21 4 21 9 16 9"/></svg>Refresh</button>' : '')
           + '<div class="lcard-preview">' + (b.preferredUrl ? '<img src="'+esc(b.preferredUrl)+'" alt="'+esc(b.name)+'" loading="lazy">' : '') + '</div>'
           + '<div class="lcard-body">'
           +   '<div class="lcard-name" title="'+esc(b.name)+'">'+esc(b.name)+'</div>'
@@ -274,6 +280,8 @@
     }
     ['q','cat','sort'].forEach(function(id){ document.getElementById(id).addEventListener('input', renderGrid); document.getElementById(id).addEventListener('change', renderGrid); });
     document.getElementById('grid').addEventListener('click', async function(e){
+      var ref = e.target.closest('[data-refresh]');
+      if (ref){ await refreshLogo(ref); return; }
       var del = e.target.closest('[data-del]'); if (!del) return;
       var id = del.getAttribute('data-del');
       var b = brands.find(function(x){ return x.id===id; });
@@ -286,6 +294,22 @@
         renderGrid();
       } catch(e){ alert('Could not remove that logo — network error.'); }
     });
+    async function refreshLogo(btn){
+      var id = btn.getAttribute('data-refresh');
+      btn.disabled = true; btn.classList.add('busy');
+      try {
+        var r = await fetch('/api/admin/logo-find', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'refresh', id: id }) });
+        if (r.status===401){ location.href='/signin.html?redirect='+encodeURIComponent('/admin/logo-library'); return; }
+        if (r.status===403){ alert('Refreshing logos needs a Travelgenix admin account.'); return; }
+        var d = {}; try { d = await r.json(); } catch(e){}
+        if (!r.ok){ alert(d.error || ('Refresh failed (HTTP '+r.status+')')); return; }
+        if (!d.ok){ alert(d.message || 'No fresh logo found.'); return; }
+        var i = brands.findIndex(function(x){ return x.id===id; });
+        if (i!==-1 && d.brand){ brands[i] = Object.assign({}, brands[i], d.brand); }
+        renderGrid();
+      } catch(e){ alert('Refresh failed — network error.'); }
+      finally { btn.disabled=false; btn.classList.remove('busy'); }
+    }
 
     // ── Add new (reuse the shared LogoPicker upload/cutout modal) ──
     document.getElementById('open-uploader').addEventListener('click', function(){
