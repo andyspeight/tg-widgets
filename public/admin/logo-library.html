@@ -337,7 +337,7 @@
       var prog = document.getElementById('refresh-prog');
       btn.disabled = true; prog.hidden = false;
       var ids = targets.map(function(b){ return b.id; });
-      var done = 0, changed = 0, failed = 0;
+      var done = 0, changed = 0, failed = 0, rl = 0;
       prog.textContent = 'Refreshing… 0 / '+ids.length;
       try {
         for (var start=0; start<ids.length; start+=REFRESH_BATCH){
@@ -363,10 +363,13 @@
             // Whole batch failed (timeout/5xx) — count it and carry on, don't stop the run.
             done += slice.length; failed += slice.length;
           }
+          rl += (d && d.rateLimited) || 0;
           prog.textContent = 'Refreshing… '+done+' / '+ids.length+' ('+changed+' updated)';
           renderGrid();
         }
-        prog.textContent = 'Done. '+changed+' updated, '+(ids.length-changed)+' left unchanged of '+ids.length+'.';
+        var msg = 'Done. '+changed+' updated, '+(ids.length-changed)+' left unchanged of '+ids.length+'.';
+        if (rl > 0){ msg += ' '+rl+' needed a Brandfetch name lookup but its monthly quota is used up — those will refresh once it resets (or add a correct website domain so Logo.dev can serve them).'; }
+        prog.textContent = msg;
       } finally { btn.disabled = false; }
     }
     document.getElementById('refresh-all').addEventListener('click', refreshAll);
