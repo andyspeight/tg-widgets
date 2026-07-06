@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.10.1';
+  const VERSION = '3.10.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -1986,15 +1986,22 @@ svg.leaflet-image-layer.leaflet-interactive path {
     @container tgwmbody (max-width: 720px) {
       .tgwm-overlay-body { flex-direction: column; }
       .tgwm-ov-cards {
-        flex: 1 1 auto;
+        /* Deals take a fixed ~70% of the height once a destination is tapped;
+           the map fills the remaining ~30%. Rigid basis (no grow/shrink) so
+           it's a true 70%, not just a cap. The collapsed rule below overrides
+           this to zero height before a destination is picked. */
+        flex: 0 0 70%;
         max-width: none;
         width: 100%;
         border-right: 0;
         border-top: 1px solid var(--tgwm-border);
         order: 2;            /* map on top, cards below */
-        max-height: 55%;
+        max-height: 70%;
       }
-      .tgwm-ov-mapcol { order: 1; flex: 1 1 auto; min-height: 200px; }
+      /* Map fills whatever the deals don't: 100% before a tap (deals
+         collapsed), ~30% after (deals at 70%). Must stay flex:1 1 auto so it
+         grows back to full-screen when the deals panel is hidden. */
+      .tgwm-ov-mapcol { order: 1; flex: 1 1 auto; min-height: 160px; }
       /* Collapsed state, stacked axis. The base collapse rule zeroes WIDTH
          (right for the desktop side-by-side layout), but stacked the main
          axis is vertical — inheriting it here left a zero-width panel still
