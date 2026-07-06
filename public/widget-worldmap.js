@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.11.1';
+  const VERSION = '3.11.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -268,6 +268,16 @@
   // Loading from the same origin as the widget itself is always permitted.
   const LEAFLET_JS_URL = API_BASE + '/vendor/leaflet-1.9.4.js';
 
+  // Our own <script>'s nonce, if the client uses a nonce-based Content-Security-
+  // Policy. A strict CSP (script-src 'nonce-…' without 'strict-dynamic') lets the
+  // nonced widget script run but BLOCKS the Leaflet <script> we inject below,
+  // which surfaced as "Leaflet failed to load" (map init failed) on a client site.
+  // Copying the nonce onto the injected script lets it through. Read here at load
+  // time: the .nonce IDL property is only reliably readable while the script runs.
+  const SCRIPT_NONCE = (function () {
+    try { var s = document.currentScript; return (s && s.nonce) || ''; } catch (e) { return ''; }
+  })();
+
   // MapTiler Streets — the chosen provider. The key is a single shared
   // Travelgenix key, domain-restricted in the MapTiler dashboard to
   // *.tg-widgets.vercel.app and client domains. It is necessarily visible
@@ -287,6 +297,9 @@
       const s = document.createElement('script');
       s.src = LEAFLET_JS_URL;
       s.async = true;
+      // Carry our nonce so a nonce-based CSP on the client site permits this
+      // injected script (both the IDL property and the attribute, for breadth).
+      if (SCRIPT_NONCE) { try { s.nonce = SCRIPT_NONCE; } catch (e) {} s.setAttribute('nonce', SCRIPT_NONCE); }
       s.onload = () => resolve(window.L);
       s.onerror = () => reject(new Error('Leaflet failed to load'));
       document.head.appendChild(s);
