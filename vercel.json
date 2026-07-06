@@ -50,7 +50,7 @@
       "maxDuration": 120
     },
     "api/admin/logo-find.js": {
-      "maxDuration": 60
+      "maxDuration": 120
     }
   },
   "crons": [

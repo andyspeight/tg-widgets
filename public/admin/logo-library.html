@@ -132,8 +132,13 @@
         <input type="search" id="q" placeholder="Search by brand name or domain…" />
         <select class="fld" id="cat"><option value="">All brands</option></select>
         <select class="fld" id="sort"><option value="new">Newest first</option><option value="name">Name A–Z</option></select>
+        <button class="btn" id="refresh-all" title="Look up a fresh logo for every brand shown">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M21 12a9 9 0 1 1-2.6-6.3"/><polyline points="21 4 21 9 16 9"/></svg>
+          Refresh all
+        </button>
       </div>
       <p class="count" id="count"></p>
+      <p class="count" id="refresh-prog" hidden></p>
       <div id="browse-loading" class="loading">Loading the library…</div>
       <div id="browse-empty" class="empty" hidden></div>
       <div class="grid" id="grid" hidden></div>
@@ -265,7 +270,7 @@
         var nAssets = (b.assets && b.assets.length) || 0;
         return '<div class="lcard">'
           + (b.canDelete ? '<button class="lcard-del" data-del="'+esc(b.id)+'" title="Remove from library" aria-label="Remove '+esc(b.name)+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' : '')
-          + (b.domain ? '<button class="lcard-refresh" data-refresh="'+esc(b.id)+'" title="Fetch a fresh logo for '+esc(b.domain)+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.3"/><polyline points="21 4 21 9 16 9"/></svg>Refresh</button>' : '')
+          + '<button class="lcard-refresh" data-refresh="'+esc(b.id)+'" title="Fetch a fresh logo for '+esc(b.domain||b.name)+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.3"/><polyline points="21 4 21 9 16 9"/></svg>Refresh</button>'
           + '<div class="lcard-preview">' + (b.preferredUrl ? '<img src="'+esc(b.preferredUrl)+'" alt="'+esc(b.name)+'" loading="lazy">' : '') + '</div>'
           + '<div class="lcard-body">'
           +   '<div class="lcard-name" title="'+esc(b.name)+'">'+esc(b.name)+'</div>'
@@ -310,6 +315,61 @@
       } catch(e){ alert('Refresh failed — network error.'); }
       finally { btn.disabled=false; btn.classList.remove('busy'); }
     }
+
+    // Global "Refresh all": look up a fresh logo for every brand in the current
+    // view (a category/search filter scopes it; no filter = the whole library).
+    // Driven in small client-side batches so each request stays under the
+    // function's time budget and progress is visible. Only brands where a real
+    // logo is found get replaced; the rest are left exactly as they were.
+    var REFRESH_BATCH = 10;
+    async function refreshAll(){
+      var q = document.getElementById('q').value.trim().toLowerCase();
+      var cat = document.getElementById('cat').value;
+      var targets = brands.filter(function(b){
+        if (cat && (b.category||'')!==cat) return false;
+        if (q && String(b.name||'').toLowerCase().indexOf(q)===-1 && String(b.domain||'').toLowerCase().indexOf(q)===-1) return false;
+        return true;
+      });
+      if (!targets.length){ alert('There are no brands to refresh.'); return; }
+      if (!confirm('Refresh logos for '+targets.length+' brand'+(targets.length===1?'':'s')+'?\n\nEach one is looked up again by name and domain, and only replaced when a real logo is found. This can take a few minutes.')) return;
+
+      var btn = document.getElementById('refresh-all');
+      var prog = document.getElementById('refresh-prog');
+      btn.disabled = true; prog.hidden = false;
+      var ids = targets.map(function(b){ return b.id; });
+      var done = 0, changed = 0, failed = 0;
+      prog.textContent = 'Refreshing… 0 / '+ids.length;
+      try {
+        for (var start=0; start<ids.length; start+=REFRESH_BATCH){
+          var slice = ids.slice(start, start+REFRESH_BATCH);
+          var d = null;
+          try {
+            var r = await fetch('/api/admin/logo-find', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'refresh-batch', ids: slice }) });
+            if (r.status===401){ location.href='/signin.html?redirect='+encodeURIComponent('/admin/logo-library'); return; }
+            if (r.status===403){ alert('Refreshing logos needs a Travelgenix admin account.'); break; }
+            try { d = await r.json(); } catch(e){}
+            if (!r.ok){ d = null; }
+          } catch(e){ d = null; }
+          if (d && Array.isArray(d.results)){
+            d.results.forEach(function(res){
+              done++;
+              if (res && res.ok && res.preferredUrl){
+                changed++;
+                var i = brands.findIndex(function(x){ return x.id===res.id; });
+                if (i!==-1){ brands[i] = Object.assign({}, brands[i], { preferredUrl: res.preferredUrl, assets: [{ type:'', url: res.preferredUrl }] }); }
+              } else { failed++; }
+            });
+          } else {
+            // Whole batch failed (timeout/5xx) — count it and carry on, don't stop the run.
+            done += slice.length; failed += slice.length;
+          }
+          prog.textContent = 'Refreshing… '+done+' / '+ids.length+' ('+changed+' updated)';
+          renderGrid();
+        }
+        prog.textContent = 'Done. '+changed+' updated, '+(ids.length-changed)+' left unchanged of '+ids.length+'.';
+      } finally { btn.disabled = false; }
+    }
+    document.getElementById('refresh-all').addEventListener('click', refreshAll);
 
     // ── Add new (reuse the shared LogoPicker upload/cutout modal) ──
     document.getElementById('open-uploader').addEventListener('click', function(){
