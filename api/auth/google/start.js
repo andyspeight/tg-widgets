@@ -8,6 +8,7 @@
  */
 
 import { generateSecureToken } from '../../_lib/auth/crypto.js';
+import { configured as redisConfigured } from '../../_redis.js';
 import {
   GOOGLE_AUTH_URL, googleConfig, redirectUri, redirectToSignin, safeNext, saveState,
 } from './_shared.js';
@@ -18,6 +19,26 @@ export default async function handler(req, res) {
     return res.end('GET only');
   }
   const { clientId, configured } = googleConfig();
+
+  // Booleans-only health probe (no secret values, safe to expose). Tells us
+  // which of the two "bounce back to sign-in" causes is in play — a missing
+  // Google client, or a failing one-shot state store — since the redirect
+  // hides that from the outside.
+  if (req.query && req.query.probe === '1') {
+    let stateStoreOk = false, stateErr = null;
+    try {
+      stateStoreOk = !!(await saveState(generateSecureToken(), '/dashboard.html'));
+    } catch (e) { stateErr = String(e && e.message || e).slice(0, 120); }
+    res.setHeader('Cache-Control', 'no-store');
+    return res.status(200).json({
+      googleConfigured: configured,
+      redisConfigured: redisConfigured(),
+      stateStoreOk,
+      ...(stateErr ? { stateErr } : {}),
+      redirectUri: redirectUri(req),
+    });
+  }
+
   if (!configured) {
     return redirectToSignin(res, 'google_not_configured');
   }
