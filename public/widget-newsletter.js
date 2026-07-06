@@ -1,5 +1,5 @@
 /**
- * Travelgenix Newsletter Signup Widget v1.1.0
+ * Travelgenix Newsletter Signup Widget v1.1.1
  * Self-contained, embeddable widget with 5 layouts:
  *   - inline    (horizontal email + button)
  *   - card      (vertical card with optional name field, consent, success state)
@@ -79,7 +79,7 @@
     } catch (e) { /* fall through */ }
     return '/api/newsletter-submit';
   })();
-  const VERSION = '1.1.0';
+  const VERSION = '1.1.1';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only: validation / error / status messages, plus the
@@ -351,6 +351,12 @@
     *, *::before, *::after { box-sizing: border-box; }
 
     .tgnl-root {
+      /* Consume the font here, not only on :host. --tgnl-font is set as an
+         inline style on THIS element, and CSS custom properties cascade to
+         descendants, not up to :host — so the :host font-family: var(--tgnl-font)
+         only ever saw its Inter fallback. Applying it on .tgnl-root (where the
+         variable is actually defined) is what makes the chosen font take. */
+      font-family: var(--tgnl-font, 'Inter', system-ui, sans-serif);
       --tgnl-brand: #1B2B5B;
       --tgnl-brand-text: #FFFFFF;
       --tgnl-brand-hover: #2A3F7A;
