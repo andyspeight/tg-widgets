@@ -10,6 +10,7 @@
 // Travelgenix demo credentials so the public marketing demo on tg-widgets.vercel.app
 // keeps working without configuration.
 
+import { timingSafeEqual } from 'crypto';
 import { setCors, lookupClientCredentialsByAppId } from './_auth.js';
 import { evaluatePublicRateLimit } from './_lib/rate-limit-public.js';
 import { logWidgetEvent } from './_lib/telemetry.js';
@@ -19,6 +20,21 @@ const TRAVELIFY_ENDPOINT = 'https://api.travelify.io/widgetsvc/traveloffers';
 // Travelgenix demo credentials (App 250) — published in Travelify docs.
 const DEMO_APP_ID = '250';
 const DEMO_PUBLIC_KEY = 'A41D180E-CBFE-4E30-A47D-FAAB424A650D';
+
+// The world-map cache-refresh cron (api/cron/refresh-map-offers.js) calls this
+// proxy server-side, once per country, at high volume from our own Vercel
+// egress IP. It carries a shared-secret header so we can recognise it and skip
+// the per-IP rate limit — otherwise we would throttle our own cache fill. The
+// secret is server-only (never shipped to a browser), so this cannot be used by
+// an attacker to bypass the limiter.
+function isInternalCron(req) {
+  const secret = process.env.CRON_SECRET || '';
+  const got = req.headers['x-tgs-internal'] || '';
+  if (!secret || !got) return false;
+  const a = Buffer.from(String(got));
+  const b = Buffer.from(secret);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
 
 export default async function handler(req, res) {
   setCors(res);
@@ -45,6 +61,11 @@ export default async function handler(req, res) {
   const requestedAppId = rawAppId == null ? '' : String(rawAppId).trim();
   const widgetId = rawWidgetId == null ? '' : String(rawWidgetId).trim().slice(0, 120);
 
+  // Is this our own internal cache-refresh cron? If so it is exempt from the
+  // per-IP rate limit and kept out of the abuse telemetry (it is known infra,
+  // not a widget or a visitor to monitor).
+  const internal = isInternalCron(req);
+
   // Attribution resolved as we go, denormalised onto the telemetry row.
   let accountName = null;
   let clientId = null;
@@ -54,6 +75,7 @@ export default async function handler(req, res) {
   // instance alive long enough for the insert to complete. Never throws.
   async function done(status, jsonBody) {
     res.status(status).json(jsonBody);
+    if (internal) return; // our own cache refresh — not abuse telemetry
     await logWidgetEvent(req, {
       event: 'offers',
       widgetId,
@@ -70,12 +92,15 @@ export default async function handler(req, res) {
   // This is the open hole: a single unauthenticated POST returns full live
   // inventory. Throttle per IP (and per IP+widget) before we do any upstream
   // work or credential lookup. Fail-open — a Redis blip never blanks a widget.
-  const rl = await evaluatePublicRateLimit(req, res, { event: 'offers', widgetId });
-  if (!rl.allowed) {
-    return done(429, {
-      success: false,
-      error: `Too many requests. Please slow down and retry in ${rl.retryAfter} second${rl.retryAfter === 1 ? '' : 's'}.`,
-    });
+  // Skipped for the internal cron so we never throttle our own cache fill.
+  if (!internal) {
+    const rl = await evaluatePublicRateLimit(req, res, { event: 'offers', widgetId });
+    if (!rl.allowed) {
+      return done(429, {
+        success: false,
+        error: `Too many requests. Please slow down and retry in ${rl.retryAfter} second${rl.retryAfter === 1 ? '' : 's'}.`,
+      });
+    }
   }
 
   let appId;

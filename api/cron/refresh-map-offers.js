@@ -570,6 +570,11 @@ async function callOffersProxy(payload, timeoutMs = PER_REQUEST_TIMEOUT_MS, retr
           'Content-Type': 'application/json',
           'Referer': SELF_ORIGIN + '/',
           'Origin': SELF_ORIGIN,
+          // Identify this as our own internal cache-refresh traffic so the
+          // proxy exempts it from the per-IP rate limit (we call it once per
+          // country at high volume from a single Vercel egress IP). The secret
+          // is server-only; browsers never see it.
+          ...(process.env.CRON_SECRET ? { 'x-tgs-internal': process.env.CRON_SECRET } : {}),
         },
         body: JSON.stringify(payload),
         signal: controller.signal,
