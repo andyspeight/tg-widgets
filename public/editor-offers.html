@@ -1604,6 +1604,17 @@
                 </select>
                 <div class="field-help">Per-night options need accommodation nights — they fall back gracefully on flight-only offers.</div>
               </div>
+              <div class="field">
+                <label class="field-label" for="cfgDisplayCurrency">Display currency</label>
+                <select id="cfgDisplayCurrency"></select>
+                <div class="field-help">Prices are converted from GBP to this currency at live exchange rates.</div>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Let visitors switch currency
+                  <div class="toggle-help">Adds a currency picker above the offers so a visitor can choose their own.</div>
+                </span>
+                <button type="button" class="switch" id="cfgShowCurrencySwitcher" aria-pressed="false"></button>
+              </div>
             </div>
           </div>
 
@@ -1890,6 +1901,8 @@
         brandColor: '#1B2B5B', accentColor: '#00B4D8',
         radius: 14, fontFamily: '',
         priceDisplay: 'auto',
+        displayCurrency: 'GBP',
+        showCurrencySwitcher: false,
         layout: 'grid',
         carouselAutoplay: false,
         carouselInterval: 6,
@@ -2082,6 +2095,23 @@
     /* ============================================================
        Hydrate UI from state.config
        ============================================================ */
+    // Currencies offered in the display-currency picker (mirrors the widget +
+    // /api/fx-rates allowlist). The widget converts cached GBP prices to this.
+    const CURRENCY_LIST = [['GBP', 'British Pound'], ['EUR', 'Euro'], ['USD', 'US Dollar'],
+      ['AUD', 'Australian Dollar'], ['CAD', 'Canadian Dollar'], ['NZD', 'New Zealand Dollar'],
+      ['CHF', 'Swiss Franc'], ['JPY', 'Japanese Yen'], ['SEK', 'Swedish Krona'], ['NOK', 'Norwegian Krone'],
+      ['DKK', 'Danish Krone'], ['PLN', 'Polish Zloty'], ['CZK', 'Czech Koruna'], ['HUF', 'Hungarian Forint'],
+      ['RON', 'Romanian Leu'], ['BGN', 'Bulgarian Lev'], ['ISK', 'Icelandic Krona'], ['ZAR', 'South African Rand'],
+      ['SGD', 'Singapore Dollar'], ['HKD', 'Hong Kong Dollar'], ['THB', 'Thai Baht'], ['INR', 'Indian Rupee'],
+      ['CNY', 'Chinese Yuan'], ['TRY', 'Turkish Lira'], ['MXN', 'Mexican Peso'], ['BRL', 'Brazilian Real'],
+      ['ILS', 'Israeli Shekel'], ['IDR', 'Indonesian Rupiah'], ['KRW', 'South Korean Won'],
+      ['MYR', 'Malaysian Ringgit'], ['PHP', 'Philippine Peso']];
+    function ensureCurrencyOptions() {
+      const sel = document.getElementById('cfgDisplayCurrency');
+      if (!sel || sel.options.length) return;
+      sel.innerHTML = CURRENCY_LIST.map(([code, name]) => '<option value="' + code + '">' + code + ' · ' + name + '</option>').join('');
+    }
+
     function hydrateUI() {
       const c = state.config;
       $('name-input').value = state.name || '';
@@ -2245,6 +2275,9 @@
       });
 
       $('cfgPriceDisplay').value = c.priceDisplay || 'auto';
+      ensureCurrencyOptions();
+      $('cfgDisplayCurrency').value = c.displayCurrency || 'GBP';
+      $('cfgShowCurrencySwitcher').setAttribute('aria-pressed', c.showCurrencySwitcher === true ? 'true' : 'false');
 
       $('cfgDedupe').value = c.dedupeStrategy || 'hotel';
       $('cfgCache').value = c.cacheMinutes != null ? c.cacheMinutes : 15;
@@ -2672,6 +2705,7 @@
         cfgEmptyHeading: 'emptyHeading', cfgEmptyBody: 'emptyBody',
         cfgEmptyCtaText: 'emptyCtaText', cfgEmptyCtaUrl: 'emptyCtaUrl',
         cfgPriceDisplay: 'priceDisplay',
+        cfgDisplayCurrency: 'displayCurrency',
       };
       Object.entries(fieldMap).forEach(([id, key]) => {
         const el = $(id);
@@ -2801,6 +2835,13 @@
         const next = btn.getAttribute('aria-pressed') !== 'true';
         btn.setAttribute('aria-pressed', next ? 'true' : 'false');
         state.config.boardAllowSwitcher = next;
+        markDirtyAndPreview();
+      });
+      $('cfgShowCurrencySwitcher').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.showCurrencySwitcher = next;
         markDirtyAndPreview();
       });
       document.querySelectorAll('#cfgBoardDateRangeSeg button').forEach(b => {
