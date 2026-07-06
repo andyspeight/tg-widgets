@@ -114,7 +114,7 @@
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
   const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
-  const VERSION = '1.10.3';
+  const VERSION = '1.10.4';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // Telemetry: report a one-time load heartbeat and any failure to
@@ -5377,7 +5377,11 @@
       // 'en' (used for the data request) must NOT pin the UI to English, so we
       // only pass a language hint when the author actually supplied one.
       this.t = makeT(this._uiLangHint(config));
-      this.shadow = container.attachShadow({ mode: 'open' });
+      // Reuse an existing shadow root if this host was already mounted (e.g. a
+      // page that both marks the element with data-tg-widget AND constructs
+      // manually). A second attachShadow throws NotSupportedError; the render
+      // below resets the shadow via innerHTML, so reusing it is safe.
+      this.shadow = container.shadowRoot || container.attachShadow({ mode: 'open' });
       this.root = null;
       this.rawOffers = [];
       // Display currency. Prices are cached in GBP and converted at render time;

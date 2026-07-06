@@ -714,9 +714,11 @@
     updateVisibility();
     mount.innerHTML = '';
     const div = document.createElement('div');
-    div.setAttribute('data-tg-widget', 'offers');
-    div.setAttribute('data-tg-config', JSON.stringify(buildConfig()));
     mount.appendChild(div);
+    // Construct directly — the demo rebuilds on every control change. Do NOT set
+    // data-tg-widget on this div: the script's auto-initialiser (which runs on
+    // DOMContentLoaded) would then grab it and call attachShadow a second time,
+    // which throws NotSupportedError ("The operation is not supported").
     new window.TGOffersWidget(div, buildConfig());
   }
 
