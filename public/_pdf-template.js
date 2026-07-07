@@ -1415,7 +1415,11 @@ export function renderPdfHtml(order, opts = {}) {
         + (carRentalItems.length > 0 ? 1 : 0)
         + (ticketsItems.length > 0 ? 1 : 0)
         + (packagesItems.length > 0 ? 1 : 0)
-        + ((accomItem && !isPackage) ? 1 : 0);
+        // Gate on `accom` (a real accommodation object), not `accomItem`, which
+        // falls back to items[0] for a booking with no hotel — that fallback
+        // made a ticket/flight/transfer-only order sprout a spurious
+        // "— Accommodation" line here.
+        + ((accom && !isPackage) ? 1 : 0);
       return `
     <div class="pdf-section">
       <div class="pdf-section-title">Payment Schedule</div>
@@ -1425,7 +1429,7 @@ export function renderPdfHtml(order, opts = {}) {
             <span class="label">${escapeHtml(resolveTotalLabel(order.items))}</span>
             <span class="value num">${escapeHtml(formatMoney(totalCost, currency))}</span>
           </div>
-          ${(multiProduct > 1 && accomItem && !isPackage && typeof accomItem.price === 'number') ? `
+          ${(multiProduct > 1 && accom && !isPackage && typeof accomItem.price === 'number') ? `
           <div class="pdf-pay-row" style="font-size:11px; padding:4px 0;">
             <span class="label" style="color:#94A3B8; padding-left:12px;">— Accommodation</span>
             <span class="value num" style="color:#475569;">${escapeHtml(formatMoney(accomItem.price, currency))}</span>
