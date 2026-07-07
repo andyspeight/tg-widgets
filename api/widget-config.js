@@ -299,6 +299,7 @@ const ALLOWED_WIDGET_TYPES = [
   'Travel Results AI',
   'Special Offers',
   'Prism',
+  'Cookie Consent',
 ];
 
 // Per-plan widget count limits, keyed by widgetType.
@@ -348,6 +349,8 @@ const PLAN_WIDGET_LIMITS = {
   'Travel Results AI':     { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
   'Special Offers':        { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
   'Prism':                 { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  // Compliance widget — one per site is the norm, so every plan gets it.
+  'Cookie Consent':        { Spark: 1, Boost: 1, Ignite: -1, Bespoke: -1 },
 };
 
 // Canonical plan names recognised by PLAN_WIDGET_LIMITS lookups.
@@ -489,6 +492,11 @@ const WIDGET_TYPE_ALIASES = {
   'special offers':        'Special Offers',
   'special-offer-builder': 'Special Offers',
   'special offer builder': 'Special Offers',
+  'consent':           'Cookie Consent',
+  'cookie-consent':    'Cookie Consent',
+  'cookie consent':    'Cookie Consent',
+  'cookies':           'Cookie Consent',
+  'cmp':               'Cookie Consent',
   'offers-grid':           'Special Offers',
   'offer-builder':         'Special Offers',
 };

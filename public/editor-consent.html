@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cookie Consent Editor — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<style>
+  /* Per-editor styles only — shell tokens live in editor-shell.css. */
+  .input, .select, .textarea {
+    width:100%; padding:8px 10px; font:inherit; font-size:13px;
+    border:1px solid var(--tgse-border); border-radius:var(--tgse-radius-sm);
+    background:var(--tgse-panel); color:var(--tgse-ink);
+    transition:border-color 160ms ease, box-shadow 160ms ease;
+  }
+  .textarea { resize:vertical; min-height:74px; line-height:1.5; }
+  .input:focus, .select:focus, .textarea:focus { outline:none; border-color:var(--tgse-brand); box-shadow:0 0 0 3px var(--tgse-brand-tint); }
+
+  /* Option picker (layout / position) */
+  .pick-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+  .pick-grid.cols-2 { grid-template-columns:1fr 1fr; }
+  .pick-btn { appearance:none; border:1.5px solid var(--tgse-border); background:var(--tgse-panel);
+    padding:10px 6px; border-radius:var(--tgse-radius-sm); cursor:pointer; text-align:center;
+    transition:border-color 160ms ease, background 160ms ease; display:flex; flex-direction:column; gap:7px; align-items:center; }
+  .pick-btn:hover { background:var(--tgse-hover); }
+  .pick-btn.is-on { border-color:var(--tgse-brand); background:var(--tgse-brand-tint); }
+  .pick-label { font-size:11px; font-weight:600; color:var(--tgse-ink); }
+  .pick-btn.is-on .pick-label { color:var(--tgse-brand-dark); }
+
+  /* Layout swatch — mini frame showing where the banner sits */
+  .lay-sw { width:40px; height:28px; border:1px solid var(--tgse-border); border-radius:5px; position:relative; background:var(--tgse-hover); overflow:hidden; }
+  .lay-sw::after { content:''; position:absolute; background:var(--tgse-brand); border-radius:2px; }
+  .lay-sw.card::after { width:16px; height:10px; left:3px; bottom:3px; }
+  .lay-sw.bar::after { left:2px; right:2px; height:7px; bottom:2px; }
+  .lay-sw.modal::after { width:20px; height:12px; left:50%; top:50%; transform:translate(-50%,-50%); }
+
+  /* Position swatch — dot in the chosen corner */
+  .pos-sw { width:40px; height:28px; border:1px solid var(--tgse-border); border-radius:5px; position:relative; background:var(--tgse-hover); }
+  .pos-sw::after { content:''; position:absolute; width:8px; height:8px; border-radius:999px; background:var(--tgse-brand); }
+  .pos-sw.bl::after { left:4px; bottom:4px; }
+  .pos-sw.br::after { right:4px; bottom:4px; }
+  .pos-sw.tl::after { left:4px; top:4px; }
+  .pos-sw.tr::after { right:4px; top:4px; }
+
+  /* Colour row */
+  .colour-row { display:flex; align-items:center; gap:8px; }
+  .colour-swatch-wrap { position:relative; width:36px; height:36px; border-radius:var(--tgse-radius-sm); border:1px solid var(--tgse-border); overflow:hidden; flex-shrink:0; }
+  .colour-swatch-wrap input[type="color"] { position:absolute; inset:-2px; width:calc(100% + 4px); height:calc(100% + 4px); border:0; padding:0; background:transparent; cursor:pointer; }
+  .colour-hex { flex:1; font-family:'JetBrains Mono', monospace; text-transform:uppercase; }
+
+  /* Switch */
+  .switch-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; }
+  .switch-row-label { font-size:13px; color:var(--tgse-ink); font-weight:500; }
+  .switch { appearance:none; width:36px; height:20px; border-radius:999px; background:var(--tgse-border); border:0; padding:0; cursor:pointer; position:relative; transition:background 160ms ease; flex-shrink:0; }
+  .switch::after { content:""; position:absolute; width:16px; height:16px; border-radius:999px; background:#fff; top:2px; left:2px; box-shadow:0 1px 2px rgba(0,0,0,.15); transition:transform 160ms ease; }
+  .switch.is-on { background:var(--tgse-brand); }
+  .switch.is-on::after { transform:translateX(16px); }
+
+  /* Slider */
+  .slider-row { display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; }
+  .slider-row input[type="range"] { width:100%; accent-color:var(--tgse-brand); }
+  .slider-val { font-size:12px; font-weight:600; color:var(--tgse-ink-2); font-family:'JetBrains Mono', monospace; min-width:42px; text-align:right; }
+
+  .hint { font-size:11.5px; color:var(--tgse-ink-3); margin-top:6px; line-height:1.5; }
+  .hint code { font-family:'JetBrains Mono', monospace; font-size:10.5px; background:var(--tgse-hover); border-radius:4px; padding:1px 4px; }
+
+  /* Cookie table editor */
+  .ck-card { border:1px solid var(--tgse-border); border-radius:var(--tgse-radius-sm); padding:10px; margin-bottom:10px; background:var(--tgse-panel); }
+  .ck-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; }
+  .ck-row:last-child { margin-bottom:0; }
+  .ck-row .full { grid-column:1 / -1; }
+  .ck-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .ck-title { font-size:12px; font-weight:600; color:var(--tgse-ink-2); font-family:'JetBrains Mono', monospace; }
+  .ck-del { appearance:none; border:0; background:transparent; color:var(--tgse-ink-3); cursor:pointer; padding:4px; border-radius:6px; display:flex; }
+  .ck-del:hover { color:#DC2626; background:var(--tgse-hover); }
+  .ck-del svg { width:15px; height:15px; }
+  .ck-add { width:100%; }
+
+  /* Preview iframe */
+  #pv-iframe { display:block; width:100%; height:100%; min-height:520px; border:0; background:#fff; }
+  .tgse-frame { overflow:hidden; }
+
+  /* Template cards in the templates modal */
+  .tpl-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .tpl-card { border:1.5px solid var(--tgse-border); border-radius:var(--tgse-radius-md); padding:14px; cursor:pointer; background:var(--tgse-panel); text-align:left; transition:border-color 160ms ease, background 160ms ease; }
+  .tpl-card:hover { border-color:var(--tgse-brand); background:var(--tgse-brand-tint); }
+  .tpl-swatch { height:44px; border-radius:8px; margin-bottom:10px; border:1px solid var(--tgse-border); position:relative; overflow:hidden; }
+  .tpl-swatch::after { content:''; position:absolute; background:var(--sw, #00B4D8); border-radius:3px; }
+  .tpl-swatch.card { background:#F1F5F9; } .tpl-swatch.card::after { width:34%; height:18px; left:6px; bottom:6px; }
+  .tpl-swatch.bar { background:#F1F5F9; } .tpl-swatch.bar::after { left:4px; right:4px; height:12px; bottom:4px; }
+  .tpl-swatch.bar.dark { background:#334155; }
+  .tpl-swatch.modal { background:#CBD5E1; } .tpl-swatch.modal::after { width:44%; height:22px; left:50%; top:50%; transform:translate(-50%,-50%); }
+  .tpl-name { font-size:13px; font-weight:600; color:var(--tgse-ink); margin-bottom:3px; }
+  .tpl-desc { font-size:11.5px; color:var(--tgse-ink-3); line-height:1.45; }
+
+  .is-hidden { display:none !important; }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+
+<div class="tgse-app">
+
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9.75-8.97 3.5 3.5 0 0 0 4.22 4.22A9 9 0 0 1 21 12z"/><circle cx="9" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="14" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="9.5" cy="15.5" r="1" fill="currentColor" stroke="none"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Cookie Consent</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        AI builder <span class="tgse-kbd">A</span>
+      </button>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled cookie consent" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="design" role="tab" aria-selected="true">Design</button>
+      <button data-tab="content" role="tab" aria-selected="false">Content</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+
+      <!-- ===== DESIGN TAB ===== -->
+      <div class="tgse-panel is-active" data-tab="design">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 15h18"/></svg>
+            <span class="tgse-section-label">Layout</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label">Banner style</label>
+              <div class="pick-grid" id="pick-layout">
+                <button type="button" class="pick-btn" data-v="card"><span class="lay-sw card"></span><span class="pick-label">Card</span></button>
+                <button type="button" class="pick-btn" data-v="bar"><span class="lay-sw bar"></span><span class="pick-label">Bar</span></button>
+                <button type="button" class="pick-btn" data-v="modal"><span class="lay-sw modal"></span><span class="pick-label">Modal</span></button>
+              </div>
+            </div>
+            <div class="tgse-field" id="field-position">
+              <label class="tgse-field-label">Corner (card and badge)</label>
+              <div class="pick-grid cols-2" id="pick-position">
+                <button type="button" class="pick-btn" data-v="bottom-left"><span class="pos-sw bl"></span><span class="pick-label">Bottom left</span></button>
+                <button type="button" class="pick-btn" data-v="bottom-right"><span class="pos-sw br"></span><span class="pick-label">Bottom right</span></button>
+                <button type="button" class="pick-btn" data-v="top-left"><span class="pos-sw tl"></span><span class="pick-label">Top left</span></button>
+                <button type="button" class="pick-btn" data-v="top-right"><span class="pos-sw tr"></span><span class="pick-label">Top right</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+            <span class="tgse-section-label">Colours</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label">Accent colour</label>
+              <div class="colour-row">
+                <span class="colour-swatch-wrap"><input type="color" id="in-accent" value="#00B4D8"></span>
+                <input type="text" class="input colour-hex" id="in-accent-hex" value="#00B4D8" maxlength="7" spellcheck="false">
+              </div>
+              <p class="hint">Buttons and toggles. Text on the accent flips between light and dark automatically for contrast.</p>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label">Theme</label>
+              <select class="select" id="in-theme">
+                <option value="auto">Auto — follows the visitor's device</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Typography</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label">Font family</label>
+              <div id="fontPickerMount"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="6"/></svg>
+            <span class="tgse-section-label">Shape</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label">Corner radius</label>
+              <div class="slider-row">
+                <input type="range" id="in-radius" min="0" max="32" step="1" value="14">
+                <span class="slider-val" id="val-radius">14px</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== CONTENT TAB ===== -->
+      <div class="tgse-panel" data-tab="content">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+            <span class="tgse-section-label">Banner copy</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label">Title</label>
+              <input type="text" class="input" id="in-title" maxlength="120" placeholder="We value your privacy">
+              <p class="hint">Leave blank for the built-in copy, which auto-translates into six languages.</p>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label">Message</label>
+              <textarea class="textarea" id="in-body" maxlength="600" placeholder="We use cookies to make this site work, understand how it is used and show you relevant travel offers. You can accept, reject or fine-tune them any time."></textarea>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label">Logo URL (optional)</label>
+              <input type="text" class="input" id="in-logo" maxlength="300" placeholder="https://yoursite.com/logo.svg">
+              <p class="hint">Shown in the banner head instead of the cookie icon.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            <span class="tgse-section-label">Privacy policy link</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label">Privacy policy URL</label>
+              <input type="text" class="input" id="in-privacy-url" maxlength="300" placeholder="/privacy-policy">
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label">Link label</label>
+              <input type="text" class="input" id="in-privacy-label" maxlength="60" placeholder="Privacy policy">
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg>
+            <span class="tgse-section-label">Cookie table</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <p class="hint" style="margin:0 0 10px">Listed under each category in the preference centre so visitors can see exactly what each cookie does.</p>
+            <div id="ck-list"></div>
+            <button type="button" class="tgse-btn ck-add" id="ck-add">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add cookie
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== SETTINGS TAB ===== -->
+      <div class="tgse-panel" data-tab="settings">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <span class="tgse-section-label">Region behaviour</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <select class="select" id="in-geo">
+                <option value="auto">Auto — opt-in for UK/EU visitors, light notice elsewhere</option>
+                <option value="gdpr">Always ask — full opt-in banner for everyone</option>
+                <option value="notice">Notice only — implied consent with an easy opt-out</option>
+              </select>
+              <p class="hint">Auto looks up the visitor's country at our edge (no IP is stored) and picks the right consent model. If the lookup fails it plays safe and asks.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6l7-3z"/></svg>
+            <span class="tgse-section-label">Consent lifecycle</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label">Policy version</label>
+              <input type="text" class="input" id="in-policy-version" maxlength="20" placeholder="1">
+              <p class="hint">Bump this (1 → 2) after a material change to your cookie use and every visitor is asked again.</p>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label">Ask again after</label>
+              <div class="slider-row">
+                <input type="range" id="in-reconsent" min="30" max="395" step="5" value="180">
+                <span class="slider-val" id="val-reconsent">180 days</span>
+              </div>
+            </div>
+            <div class="switch-row">
+              <span class="switch-row-label">Floating re-entry badge</span>
+              <button type="button" class="switch is-on" id="sw-badge" role="switch" aria-checked="true" aria-label="Floating re-entry badge"></button>
+            </div>
+            <p class="hint" style="margin-top:0">The little cookie button that lets visitors change their mind. If you turn it off, add a footer link to <code>#tg-consent</code> instead — withdrawing consent must stay easy.</p>
+            <div class="switch-row">
+              <span class="switch-row-label">Reload page on withdrawal</span>
+              <button type="button" class="switch is-on" id="sw-reload" role="switch" aria-checked="true" aria-label="Reload page on withdrawal"></button>
+            </div>
+            <p class="hint" style="margin-top:0">A tracker that already ran cannot be un-run. Reloading after a downgrade makes sure it really stops.</p>
+            <div class="switch-row">
+              <span class="switch-row-label">Anonymous consent receipts</span>
+              <button type="button" class="switch is-on" id="sw-log" role="switch" aria-checked="true" aria-label="Anonymous consent receipts"></button>
+            </div>
+            <p class="hint" style="margin-top:0">Keeps a privacy-safe record of each choice (random id, no IP) so you can evidence consent under GDPR.</p>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            <span class="tgse-section-label">Installing on Duda</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <p class="hint" style="margin-top:0">
+              1. Save, then use <b>Get embed code</b> above.<br>
+              2. In Duda: <b>Site Settings → Site Header HTML</b> — paste the tag <b>above</b> any analytics code so tracking waits for consent.<br>
+              3. Turn off Duda's built-in cookie notification (Site Settings → Privacy) so visitors see one banner, not two.<br>
+              4. Wrap any non-Google tracker as <code>&lt;script type="text/plain" data-tg-consent="analytics"&gt;</code> and it stays dormant until consent.
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </aside>
+
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop" aria-label="Desktop view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+        </button>
+        <button data-vp="tablet" title="Tablet" aria-label="Tablet view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+        <button data-vp="mobile" title="Mobile" aria-label="Mobile view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+      </div>
+
+      <div class="tgse-divider"></div>
+
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle preview page darkness">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        Page theme
+      </button>
+      <button class="tgse-btn tgse-btn--sm" id="btn-replay" title="Show the banner again as a first-time visitor">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        Replay banner
+      </button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed-consent" title="Get embed code">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Get embed code
+      </button>
+    </div>
+
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame">
+        <iframe id="pv-iframe" title="Cookie consent preview" sandbox="allow-scripts allow-same-origin"></iframe>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script src="/editor-shell.js"></script>
+<script src="/editor-tour.js"></script>
+<script src="/tour-consent.js"></script>
+
+<script>
+  // The widget config — edited through the sidebar, rendered live into the
+  // preview iframe, saved via the shell to /api/widget-config.
+  let C = {
+    layout: 'card',
+    position: 'bottom-left',
+    theme: 'auto',
+    accent: '#00B4D8',
+    font: '',
+    radius: 14,
+    logo: '',
+    title: '',
+    body: '',
+    privacyUrl: '',
+    privacyLabel: '',
+    geo: 'auto',
+    policyVersion: '1',
+    reconsentDays: 180,
+    badge: true,
+    reloadOnWithdraw: true,
+    log: true,
+    cookies: [
+      { name: 'tg_consent', provider: 'This site', purpose: 'Remembers your cookie choice', duration: '180 days', category: 'necessary' },
+      { name: '_ga / _ga_*', provider: 'Google Analytics', purpose: 'Counts visits and traffic sources', duration: '2 years', category: 'analytics' },
+      { name: '_gcl_au', provider: 'Google Ads', purpose: 'Measures ad campaign conversions', duration: '90 days', category: 'marketing' },
+    ],
+  };
+
+  let pageDark = false; // preview page darkness (for checking theme:auto)
+
+  const shell = tgse.init({
+    widgetType: 'Cookie Consent',
+    widgetTag: 'consent',
+    scriptFile: 'widget-consent.js',
+
+    getConfig: () => C,
+    setConfig: (c) => { C = Object.assign({}, C, c); syncControls(); render(); },
+
+    fontPickerEl: '#fontPickerMount',
+    onFontChange: (f) => { C.font = (f && f !== 'Inter') ? f : ''; dirty(); },
+
+    onAIBuild: () => tgse.toast('The AI builder is not available for this widget yet', 'ok'),
+    onTemplates: openTemplates,
+    onThemeToggle: () => { pageDark = !pageDark; render(); },
+    onLoginSuccess: () => { loadFromUrl(); if (typeof window.initConsentTour === 'function') window.initConsentTour(); },
+  });
+
+  function dirty() { shell.markDirty(); render(); }
+
+  // ── Preview ─────────────────────────────────────────────────────
+  // The banner is position:fixed, so it previews inside a sandboxed iframe
+  // running the REAL widget against a mock travel page. Telemetry and
+  // consent receipts are stubbed out, and the stored choice is cleared on
+  // every render so the banner always replays as a first-time visitor.
+  function previewSrcdoc() {
+    const cfg = Object.assign({}, C, {
+      // Preview always shows a decisive flow: auto behaves as the UK/EU
+      // opt-in a client will care most about. No receipts from previews.
+      geo: C.geo === 'notice' ? 'notice' : 'gdpr',
+      log: false,
+    });
+    const cfgAttr = JSON.stringify(cfg).replace(/&/g, '&amp;').replace(/'/g, '&#39;');
+    const pageBg = pageDark ? '#0B1220' : '#F1F5F9';
+    const cardBg = pageDark ? '#16213A' : '#FFFFFF';
+    const ink = pageDark ? '#E2E8F0' : '#0F172A';
+    const sub = pageDark ? '#7C8CAD' : '#64748B';
+    return '<!doctype html><html><head><meta charset="utf-8">' +
+      '<script>' +
+      // Fresh visitor on every render + no editor-origin telemetry.
+      "document.cookie='tg_consent=; Max-Age=0; Path=/';" +
+      "try{localStorage.removeItem('tgc_state');sessionStorage.removeItem('tgc_geo');}catch(e){}" +
+      "window.fetch=function(){return Promise.resolve({ok:true,json:function(){return Promise.resolve({})}})};" +
+      "navigator.sendBeacon=function(){return true};" +
+      '<\/script>' +
+      "<script src='/widget-consent.js' data-tg-config='" + cfgAttr + "'><\/script>" +
+      '<style>body{margin:0;font-family:Inter,-apple-system,sans-serif;background:' + pageBg + ';color:' + ink + '}' +
+      '.hero{height:240px;background:linear-gradient(120deg,#1B2B5B,#00B4D8);display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;font-weight:800;letter-spacing:-.02em}' +
+      '.wrap{max-width:860px;margin:0 auto;padding:28px 20px}' +
+      '.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}' +
+      '.card{background:' + cardBg + ';border-radius:12px;padding:16px;box-shadow:0 4px 16px rgba(15,23,42,.08)}' +
+      '.ph{height:76px;border-radius:8px;background:linear-gradient(120deg,#CBD5E1,#94A3B8);margin-bottom:10px}' +
+      '.card b{font-size:14px}.card p{font-size:12px;color:' + sub + ';margin:4px 0 0}' +
+      'footer{padding:18px 20px;text-align:center;font-size:12px;color:' + sub + '}footer a{color:#00B4D8}' +
+      '</style></head><body>' +
+      '<div class="hero">Your travel website</div>' +
+      '<div class="wrap"><div class="cards">' +
+      '<div class="card"><div class="ph"></div><b>Maldives escapes</b><p>7 nights from £1,299pp</p></div>' +
+      '<div class="card"><div class="ph"></div><b>Orlando family deals</b><p>Flights + park tickets</p></div>' +
+      '<div class="card"><div class="ph"></div><b>Med cruises</b><p>Balcony upgrades inside</p></div>' +
+      '</div></div>' +
+      '<footer>© Your Agency · <a href="#tg-consent">Cookie settings</a></footer>' +
+      '</body></html>';
+  }
+
+  function render() {
+    document.getElementById('pv-iframe').srcdoc = previewSrcdoc();
+  }
+
+  // ── Sidebar wiring ──────────────────────────────────────────────
+  function bindPick(id, key) {
+    const grid = document.getElementById(id);
+    grid.addEventListener('click', (e) => {
+      const btn = e.target.closest('.pick-btn');
+      if (!btn) return;
+      C[key] = btn.dataset.v;
+      grid.querySelectorAll('.pick-btn').forEach(b => b.classList.toggle('is-on', b === btn));
+      if (key === 'layout') updatePositionVisibility();
+      dirty();
+    });
+  }
+  function setPick(id, val) {
+    document.querySelectorAll('#' + id + ' .pick-btn').forEach(b => b.classList.toggle('is-on', b.dataset.v === val));
+  }
+  function updatePositionVisibility() {
+    document.getElementById('field-position').classList.toggle('is-hidden', C.layout === 'bar');
+  }
+  function bindText(id, key) {
+    document.getElementById(id).addEventListener('input', (e) => { C[key] = e.target.value; dirty(); });
+  }
+  function bindSwitch(id, key) {
+    const el = document.getElementById(id);
+    el.addEventListener('click', () => {
+      C[key] = !C[key];
+      el.classList.toggle('is-on', C[key]);
+      el.setAttribute('aria-checked', String(C[key]));
+      dirty();
+    });
+  }
+
+  bindPick('pick-layout', 'layout');
+  bindPick('pick-position', 'position');
+  bindText('in-title', 'title');
+  bindText('in-body', 'body');
+  bindText('in-logo', 'logo');
+  bindText('in-privacy-url', 'privacyUrl');
+  bindText('in-privacy-label', 'privacyLabel');
+  bindText('in-policy-version', 'policyVersion');
+  bindSwitch('sw-badge', 'badge');
+  bindSwitch('sw-reload', 'reloadOnWithdraw');
+  bindSwitch('sw-log', 'log');
+
+  document.getElementById('in-theme').addEventListener('change', (e) => { C.theme = e.target.value; dirty(); });
+  document.getElementById('in-geo').addEventListener('change', (e) => { C.geo = e.target.value; dirty(); });
+
+  // Accent: swatch and hex stay in step; only valid hex reaches the config.
+  const accentPicker = document.getElementById('in-accent');
+  const accentHex = document.getElementById('in-accent-hex');
+  accentPicker.addEventListener('input', () => {
+    C.accent = accentPicker.value; accentHex.value = accentPicker.value.toUpperCase(); dirty();
+  });
+  accentHex.addEventListener('input', () => {
+    const v = accentHex.value.trim();
+    if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v)) { C.accent = v; accentPicker.value = v.length === 4 ? '#' + [...v.slice(1)].map(c => c + c).join('') : v; dirty(); }
+  });
+
+  const radiusEl = document.getElementById('in-radius');
+  radiusEl.addEventListener('input', () => {
+    C.radius = parseInt(radiusEl.value, 10);
+    document.getElementById('val-radius').textContent = C.radius + 'px';
+    dirty();
+  });
+  const reconsentEl = document.getElementById('in-reconsent');
+  reconsentEl.addEventListener('input', () => {
+    C.reconsentDays = parseInt(reconsentEl.value, 10);
+    document.getElementById('val-reconsent').textContent = C.reconsentDays + ' days';
+    dirty();
+  });
+
+  // ── Cookie table editor ─────────────────────────────────────────
+  const CK_FIELDS = [
+    ['name', 'Cookie name', 'e.g. _ga'],
+    ['provider', 'Provider', 'e.g. Google Analytics'],
+    ['duration', 'Duration', 'e.g. 2 years'],
+    ['category', '', ''],
+  ];
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function renderCookieList() {
+    const list = document.getElementById('ck-list');
+    list.innerHTML = C.cookies.map((c, i) =>
+      '<div class="ck-card" data-i="' + i + '">' +
+      '<div class="ck-head"><span class="ck-title">' + esc(c.name || 'new cookie') + '</span>' +
+      '<button type="button" class="ck-del" data-del="' + i + '" title="Remove" aria-label="Remove cookie">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' +
+      '</button></div>' +
+      '<div class="ck-row">' +
+      '<input type="text" class="input" data-k="name" placeholder="Cookie name" maxlength="60" value="' + esc(c.name) + '">' +
+      '<input type="text" class="input" data-k="provider" placeholder="Provider" maxlength="80" value="' + esc(c.provider) + '">' +
+      '</div>' +
+      '<div class="ck-row">' +
+      '<input type="text" class="input" data-k="duration" placeholder="Duration" maxlength="40" value="' + esc(c.duration) + '">' +
+      '<select class="select" data-k="category">' +
+      ['necessary', 'functional', 'analytics', 'marketing'].map(cat =>
+        '<option value="' + cat + '"' + (c.category === cat ? ' selected' : '') + '>' + cat.charAt(0).toUpperCase() + cat.slice(1) + '</option>').join('') +
+      '</select>' +
+      '</div>' +
+      '<div class="ck-row"><input type="text" class="input full" data-k="purpose" placeholder="What it does, in plain English" maxlength="200" value="' + esc(c.purpose) + '"></div>' +
+      '</div>'
+    ).join('');
+  }
+  document.getElementById('ck-list').addEventListener('input', (e) => {
+    const card = e.target.closest('.ck-card');
+    const key = e.target.dataset.k;
+    if (!card || !key) return;
+    const i = parseInt(card.dataset.i, 10);
+    if (!C.cookies[i]) return;
+    C.cookies[i][key] = e.target.value;
+    if (key === 'name') card.querySelector('.ck-title').textContent = e.target.value || 'new cookie';
+    dirty();
+  });
+  document.getElementById('ck-list').addEventListener('change', (e) => {
+    if (e.target.dataset.k === 'category') {
+      const card = e.target.closest('.ck-card');
+      const i = parseInt(card.dataset.i, 10);
+      if (C.cookies[i]) { C.cookies[i].category = e.target.value; dirty(); }
+    }
+  });
+  document.getElementById('ck-list').addEventListener('click', (e) => {
+    const del = e.target.closest('[data-del]');
+    if (!del) return;
+    C.cookies.splice(parseInt(del.dataset.del, 10), 1);
+    renderCookieList();
+    dirty();
+  });
+  document.getElementById('ck-add').addEventListener('click', () => {
+    if (C.cookies.length >= 60) { tgse.toast('Cookie table is full (60 rows)', 'err'); return; }
+    C.cookies.push({ name: '', provider: '', purpose: '', duration: '', category: 'analytics' });
+    renderCookieList();
+    dirty();
+  });
+
+  // ── Replay ──────────────────────────────────────────────────────
+  document.getElementById('btn-replay').addEventListener('click', render);
+
+  // ── Embed code (custom modal — this widget embeds as a single head
+  //    script, not the shell's default div + script pattern) ────────
+  function openEmbedModal() {
+    const wId = new URLSearchParams(location.search).get('id');
+    if (!wId) { tgse.toast('Save the widget first to get an embed code', 'err'); return; }
+    const embed = '<script src="' + location.origin + '/widget-consent.js" data-tg-id="' + wId + '"></' + 'script>';
+    let modal = document.getElementById('consent-embed-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'consent-embed-modal';
+      modal.className = 'tgse-modal';
+      modal.innerHTML =
+        '<div class="tgse-modal-card" role="dialog" aria-labelledby="consent-embed-title">' +
+        '<div class="tgse-modal-head"><h2 id="consent-embed-title">Embed code</h2></div>' +
+        '<div class="tgse-modal-body">' +
+        '<pre style="background:var(--tgse-panel-3);border:1px solid var(--tgse-border);border-radius:var(--tgse-radius-md);padding:14px;font:500 12px \'JetBrains Mono\',monospace;color:var(--tgse-ink);overflow-x:auto;margin:0 0 12px;white-space:pre-wrap;word-break:break-all" id="consent-embed-code"></pre>' +
+        '<p style="font-size:12.5px;color:var(--tgse-ink-3);line-height:1.6;margin:0">Paste into <b>Duda → Site Settings → Site Header HTML</b>, above any analytics tags, so tracking waits for consent. Then switch off Duda\'s built-in cookie notification so visitors see one banner, not two.</p>' +
+        '</div>' +
+        '<div class="tgse-modal-foot">' +
+        '<button type="button" class="tgse-btn" id="consent-embed-close">Close</button>' +
+        '<button type="button" class="tgse-btn tgse-btn--primary" id="consent-embed-copy">Copy code</button>' +
+        '</div></div>';
+      document.body.appendChild(modal);
+      modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('is-open'); });
+      modal.querySelector('#consent-embed-close').addEventListener('click', () => modal.classList.remove('is-open'));
+      modal.querySelector('#consent-embed-copy').addEventListener('click', () => {
+        navigator.clipboard.writeText(modal.querySelector('#consent-embed-code').textContent)
+          .then(() => tgse.toast('Copied', 'ok'))
+          .catch(() => tgse.toast('Copy failed — select the code and copy manually', 'err'));
+      });
+    }
+    modal.querySelector('#consent-embed-code').textContent = embed;
+    modal.classList.add('is-open');
+  }
+  document.getElementById('btn-embed-consent').addEventListener('click', openEmbedModal);
+
+  // ── Templates ───────────────────────────────────────────────────
+  const TEMPLATES = [
+    { name: 'Travelgenix classic', desc: 'Floating card, bottom left, aqua accent. The house default.', sw: 'card', swColor: '#00B4D8',
+      cfg: { layout: 'card', position: 'bottom-left', theme: 'auto', accent: '#00B4D8', radius: 14 } },
+    { name: 'Quiet bar', desc: 'A slim light bar along the bottom. Least intrusive.', sw: 'bar', swColor: '#1B2B5B',
+      cfg: { layout: 'bar', theme: 'light', accent: '#1B2B5B', radius: 10 } },
+    { name: 'Midnight bar', desc: 'Dark bottom bar for dark-look sites.', sw: 'bar dark', swColor: '#00B4D8',
+      cfg: { layout: 'bar', theme: 'dark', accent: '#00B4D8', radius: 10 } },
+    { name: 'Front and centre', desc: 'A centred modal with a blurred backdrop. Maximum attention.', sw: 'modal', swColor: '#1B2B5B',
+      cfg: { layout: 'modal', theme: 'light', accent: '#1B2B5B', radius: 18 } },
+  ];
+  function openTemplates() {
+    let modal = document.getElementById('consent-tpl-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'consent-tpl-modal';
+      modal.className = 'tgse-modal';
+      modal.innerHTML =
+        '<div class="tgse-modal-card" role="dialog" aria-labelledby="consent-tpl-title">' +
+        '<div class="tgse-modal-head"><h2 id="consent-tpl-title">Templates</h2></div>' +
+        '<div class="tgse-modal-body"><div class="tpl-grid">' +
+        TEMPLATES.map((t, i) =>
+          '<button type="button" class="tpl-card" data-tpl="' + i + '">' +
+          '<div class="tpl-swatch ' + t.sw + '" style="--sw:' + t.swColor + '"></div>' +
+          '<div class="tpl-name">' + t.name + '</div>' +
+          '<div class="tpl-desc">' + t.desc + '</div>' +
+          '</button>').join('') +
+        '</div></div>' +
+        '<div class="tgse-modal-foot"><button type="button" class="tgse-btn" id="consent-tpl-close">Close</button></div>' +
+        '</div>';
+      document.body.appendChild(modal);
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) { modal.classList.remove('is-open'); return; }
+        const card = e.target.closest('[data-tpl]');
+        if (!card) return;
+        Object.assign(C, TEMPLATES[parseInt(card.dataset.tpl, 10)].cfg);
+        syncControls();
+        modal.classList.remove('is-open');
+        dirty();
+      });
+      modal.querySelector('#consent-tpl-close').addEventListener('click', () => modal.classList.remove('is-open'));
+    }
+    modal.classList.add('is-open');
+  }
+
+  // ── Sync sidebar controls from C (load, templates, setConfig) ──
+  function syncControls() {
+    setPick('pick-layout', C.layout);
+    setPick('pick-position', C.position);
+    updatePositionVisibility();
+    document.getElementById('in-theme').value = C.theme;
+    document.getElementById('in-geo').value = C.geo;
+    accentPicker.value = /^#[0-9a-f]{6}$/i.test(C.accent) ? C.accent : '#00B4D8';
+    accentHex.value = C.accent.toUpperCase();
+    radiusEl.value = C.radius;
+    document.getElementById('val-radius').textContent = C.radius + 'px';
+    reconsentEl.value = C.reconsentDays;
+    document.getElementById('val-reconsent').textContent = C.reconsentDays + ' days';
+    document.getElementById('in-title').value = C.title || '';
+    document.getElementById('in-body').value = C.body || '';
+    document.getElementById('in-logo').value = C.logo || '';
+    document.getElementById('in-privacy-url').value = C.privacyUrl || '';
+    document.getElementById('in-privacy-label').value = C.privacyLabel || '';
+    document.getElementById('in-policy-version').value = C.policyVersion || '1';
+    [['sw-badge', C.badge], ['sw-reload', C.reloadOnWithdraw], ['sw-log', C.log]].forEach(([id, on]) => {
+      const el = document.getElementById(id);
+      el.classList.toggle('is-on', !!on);
+      el.setAttribute('aria-checked', String(!!on));
+    });
+    renderCookieList();
+  }
+
+  function loadFromUrl() {
+    const wId = new URLSearchParams(location.search).get('id');
+    if (!wId) { syncControls(); render(); return; }
+    fetch('/api/widget-config?id=' + encodeURIComponent(wId))
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d && d.config) C = Object.assign({}, C, d.config);
+        if (d && d.name) document.getElementById('name-input').value = d.name;
+        syncControls();
+        render();
+      })
+      .catch(() => { tgse.toast('Failed to load widget', 'err'); syncControls(); render(); });
+  }
+
+  // Boot — wait for shell auth to resolve before loading (see shell docs:
+  // calling tgse.isLoggedIn() synchronously races the async cookie check).
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(() => { if (tgse.isLoggedIn()) { loadFromUrl(); if (typeof window.initConsentTour === 'function') window.initConsentTour(); } });
+    } else if (tgse.isLoggedIn()) {
+      loadFromUrl();
+      if (typeof window.initConsentTour === 'function') window.initConsentTour();
+    }
+    syncControls();
+    render();
+  });
+
+  document.getElementById('name-input')?.addEventListener('input', () => shell.markDirty());
+</script>
+
+</body>
+</html>
