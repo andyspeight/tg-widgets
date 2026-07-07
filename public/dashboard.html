@@ -113,6 +113,188 @@
       font-size: 15px;
     }
 
+    /* ─── Launchpad hero + stats (moved from the retired /home page) ─────── */
+    .hero {
+      background: var(--tg-bg-primary);
+      border: 1px solid var(--tg-border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-8);
+      margin-bottom: var(--space-6);
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -40%; right: -10%;
+      width: 480px; height: 480px;
+      background: radial-gradient(circle, rgba(0, 180, 216, 0.06) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .hero-eyebrow {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--tg-text-tertiary);
+      margin-bottom: var(--space-2);
+    }
+    .hero-title {
+      font-size: 32px; font-weight: 700; letter-spacing: -0.025em;
+      color: var(--tg-text-primary);
+      margin: 0 0 var(--space-2); line-height: 1.15;
+      position: relative;
+    }
+    .hero-meta {
+      display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2);
+      margin-bottom: var(--space-4);
+      position: relative;
+    }
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px; font-weight: 500;
+    }
+    .pill-status-active { background: rgba(16, 185, 129, 0.10); color: var(--tg-success); }
+    .pill-status-suspended { background: rgba(148, 163, 184, 0.18); color: var(--tg-text-tertiary); }
+    .pill-status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .pill-pkg {
+      background: rgba(0, 180, 216, 0.10);
+      color: var(--tg-accent-dark);
+      font-weight: 600;
+    }
+    [data-theme="dark"] .pill-pkg { color: var(--tg-accent-light); }
+    .hero-greeting {
+      font-size: 15px; color: var(--tg-text-secondary);
+      position: relative;
+      max-width: 640px;
+      margin: 0;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: var(--space-4);
+      margin-bottom: var(--space-8);
+    }
+    .stat {
+      background: var(--tg-bg-primary);
+      border: 1px solid var(--tg-border);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    .stat-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--tg-text-tertiary);
+      margin-bottom: 6px;
+    }
+    .stat-value {
+      font-size: 18px; font-weight: 600;
+      color: var(--tg-text-primary);
+      letter-spacing: -0.01em;
+    }
+    .stat-sub {
+      font-size: 12px; color: var(--tg-text-tertiary);
+      margin-top: 2px;
+    }
+
+    /* ─── Company switcher (multi-company users) — moved from /home ──────── */
+    .switcher { position: relative; }
+    .switcher[hidden] { display: none; }
+    .switcher-trigger {
+      display: inline-flex; align-items: center; gap: 8px;
+      height: 36px; padding: 0 12px;
+      background: var(--tg-bg-tertiary);
+      border: 1px solid var(--tg-border);
+      border-radius: var(--radius-md);
+      color: var(--tg-text-primary);
+      font-family: inherit; font-size: 13px; font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      max-width: 220px;
+    }
+    .switcher-trigger:hover { background: var(--tg-bg-primary); border-color: var(--tg-accent); }
+    .switcher-trigger:focus-visible { outline: 2px solid var(--tg-accent); outline-offset: 2px; }
+    .switcher-icon {
+      width: 16px; height: 16px;
+      color: var(--tg-text-secondary);
+      flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .switcher-icon svg { width: 16px; height: 16px; }
+    .switcher-label {
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      max-width: 140px;
+      flex: 1; text-align: left;
+    }
+    .switcher-caret {
+      width: 14px; height: 14px;
+      color: var(--tg-text-tertiary);
+      flex-shrink: 0;
+      transition: transform 0.15s;
+    }
+    .switcher-caret svg { width: 14px; height: 14px; }
+    .switcher-trigger[aria-expanded="true"] .switcher-caret { transform: rotate(180deg); }
+    .switcher-menu {
+      position: absolute;
+      top: calc(100% + 6px); right: 0;
+      min-width: 280px;
+      background: var(--tg-bg-primary);
+      border: 1px solid var(--tg-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: 6px;
+      z-index: 50;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    .switcher-menu[hidden] { display: none; }
+    .switcher-menu-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--tg-text-tertiary);
+      padding: 8px 12px 4px;
+    }
+    .switcher-option {
+      display: flex; align-items: center; gap: 12px;
+      width: 100%; padding: 10px 12px;
+      background: transparent; border: 0;
+      text-align: left; cursor: pointer;
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      color: var(--tg-text-primary);
+      transition: background 0.1s;
+    }
+    .switcher-option:hover:not(:disabled) { background: var(--tg-bg-tertiary); }
+    .switcher-option:focus-visible { outline: 2px solid var(--tg-accent); outline-offset: -2px; }
+    .switcher-option:disabled { cursor: default; }
+    .switcher-option-info { flex: 1; min-width: 0; }
+    .switcher-option-name {
+      font-size: 14px; font-weight: 500;
+      color: var(--tg-text-primary);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .switcher-option-sub {
+      font-size: 12px; color: var(--tg-text-tertiary);
+      margin-top: 2px;
+    }
+    .switcher-option-check {
+      width: 18px; height: 18px;
+      color: var(--tg-accent);
+      flex-shrink: 0;
+      display: none;
+    }
+    .switcher-option[aria-selected="true"] .switcher-option-check { display: inline-flex; }
+    .switcher-option-check svg { width: 18px; height: 18px; }
+    .switcher-option-suspended .switcher-option-name { color: var(--tg-text-tertiary); }
+
+    @media (max-width: 640px) {
+      .switcher-label { display: none; }
+      .switcher-trigger { padding: 0 8px; max-width: 56px; }
+      .switcher-menu { min-width: 240px; right: -48px; }
+      .user-chip { display: none; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+    }
+
     .product-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -340,6 +522,18 @@
       <span>Travelgenix</span>
     </div>
     <div class="topbar-right">
+      <div class="switcher" id="switcher" hidden>
+        <button class="switcher-trigger" id="switcher-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+          <span class="switcher-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><rect x="9" y="9" width="2" height="2"/><rect x="13" y="9" width="2" height="2"/><rect x="9" y="13" width="2" height="2"/><rect x="13" y="13" width="2" height="2"/></svg>
+          </span>
+          <span class="switcher-label" id="switcher-current-name">Loading…</span>
+          <span class="switcher-caret">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </button>
+        <div class="switcher-menu" id="switcher-menu" role="listbox" hidden></div>
+      </div>
       <div class="user-chip" id="user-chip" hidden>
         <span id="user-email"></span>
       </div>
@@ -403,6 +597,32 @@
       return 'there';
     }
 
+    function fmtDate(iso) {
+      if (!iso) return '—';
+      try {
+        const d = new Date(iso);
+        if (isNaN(d.getTime())) return '—';
+        return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+      } catch { return '—'; }
+    }
+
+    function fmtRelative(iso) {
+      if (!iso) return 'Never';
+      try {
+        const d = new Date(iso);
+        const diffMs = Date.now() - d.getTime();
+        if (isNaN(diffMs)) return 'Never';
+        const mins = Math.round(diffMs / 60000);
+        if (mins < 1) return 'Just now';
+        if (mins < 60) return `${mins} minute${mins === 1 ? '' : 's'} ago`;
+        const hours = Math.round(mins / 60);
+        if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+        const days = Math.round(hours / 24);
+        if (days < 30) return `${days} day${days === 1 ? '' : 's'} ago`;
+        return fmtDate(iso);
+      } catch { return 'Never'; }
+    }
+
     async function load() {
       try {
         const r = await fetch('/api/dashboard/me-products', { credentials: 'include' });
@@ -413,6 +633,7 @@
         if (!r.ok) throw new Error('me-products failed: ' + r.status);
         const data = await r.json();
         render(data);
+        loadCompanies();
       } catch (err) {
         console.error('[dashboard] load failed', err);
         document.getElementById('content').innerHTML = `
@@ -425,18 +646,53 @@
 
     function render(data) {
       const u = data.user || {};
+      const c = data.client || {};
+      const products = Array.isArray(data.products) ? data.products : [];
       document.getElementById('user-email').textContent = u.email || '';
       document.getElementById('user-chip').hidden = !u.email;
 
-      const greetingHtml = `
-        <div class="greeting">
-          <h1>${escapeHtml(getGreeting())}, ${escapeHtml(firstName(u.fullName, u.email))}</h1>
-          <p>${u.clientName ? escapeHtml(u.clientName) + ' · ' : ''}${data.products.length} app${data.products.length === 1 ? '' : 's'} available</p>
-        </div>
+      const statusKey = (c.status || '').toLowerCase();
+      const statusClass = statusKey === 'suspended' ? 'pill-status-suspended' : 'pill-status-active';
+      const statusLabel = c.status
+        ? c.status.charAt(0).toUpperCase() + c.status.slice(1).toLowerCase()
+        : 'Active';
+      const clientName = c.clientName || u.clientName || '';
+
+      const headerHtml = `
+        <section class="hero">
+          <div class="hero-eyebrow">${escapeHtml(getGreeting())}, ${escapeHtml(firstName(u.fullName, u.email))}</div>
+          <h1 class="hero-title">${escapeHtml(clientName || 'Your workspace')}</h1>
+          <div class="hero-meta">
+            <span class="pill ${statusClass}"><span class="pill-status-dot"></span>${escapeHtml(statusLabel)}</span>
+            ${c.packageName ? `<span class="pill pill-pkg">${escapeHtml(c.packageName)} plan</span>` : ''}
+          </div>
+          <p class="hero-greeting">Welcome back. Launch any of your tools below. Your session is shared across them, so you won't need to sign in again.</p>
+        </section>
+        <section class="stats">
+          <div class="stat">
+            <div class="stat-label">Signed in as</div>
+            <div class="stat-value">${escapeHtml(u.fullName || u.email || '—')}</div>
+            ${u.fullName ? `<div class="stat-sub">${escapeHtml(u.email || '')}</div>` : ''}
+          </div>
+          <div class="stat">
+            <div class="stat-label">Last login</div>
+            <div class="stat-value">${escapeHtml(fmtRelative(u.lastLogin))}</div>
+            ${u.lastLogin ? `<div class="stat-sub">${escapeHtml(fmtDate(u.lastLogin))}</div>` : ''}
+          </div>
+          <div class="stat">
+            <div class="stat-label">Member since</div>
+            <div class="stat-value">${escapeHtml(fmtDate(c.createdAt))}</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Products</div>
+            <div class="stat-value">${products.length}</div>
+            <div class="stat-sub">${products.length === 1 ? 'tool available' : 'tools available'}</div>
+          </div>
+        </section>
       `;
 
-      if (!data.products || data.products.length === 0) {
-        document.getElementById('content').innerHTML = greetingHtml + `
+      if (products.length === 0) {
+        document.getElementById('content').innerHTML = headerHtml + `
           <div class="empty-state">
             <h2>No apps yet</h2>
             <p>You don't have access to any Travelgenix apps. If this looks wrong, contact your account owner or Travelgenix support.</p>
@@ -445,7 +701,7 @@
         return;
       }
 
-      const tilesHtml = data.products.map(p => {
+      const tilesHtml = products.map(p => {
         const staffPill = p.staff
           ? `<span class="staff-pill" title="Travelgenix staff only">${STAFF_PILL_ICON}Staff</span>`
           : '';
@@ -487,7 +743,7 @@
         `;
       }).join('');
 
-      document.getElementById('content').innerHTML = greetingHtml + `
+      document.getElementById('content').innerHTML = headerHtml + `
         <div class="product-grid">${tilesHtml}</div>
       `;
     }
@@ -527,7 +783,160 @@
     });
     applyThemeButton();
 
+    // ─── Company switcher (multi-company users) — moved from the old /home ──
+    // Only shows when the signed-in person is linked to more than one client
+    // company. Picking one POSTs /api/auth/switch-client and reloads.
+    let companyList = [];
+    let currentClientId = null;
+    let menuOpen = false;
+    let switching = false;
+
+    function loadCompanies() {
+      fetch('/api/auth/companies', {
+        credentials: 'include',
+        headers: { 'Accept': 'application/json' },
+      })
+        .then((r) => r.ok ? r.json() : null)
+        .then((data) => {
+          if (!data || data.ok === false) return;
+          companyList = data.companies || [];
+          currentClientId = data.currentClientId || null;
+          renderSwitcher();
+        })
+        .catch((err) => {
+          console.warn('[dashboard] companies load failed:', err.message);
+        });
+    }
+
+    function renderSwitcher() {
+      const wrap = document.getElementById('switcher');
+      const currentLabel = document.getElementById('switcher-current-name');
+      const menu = document.getElementById('switcher-menu');
+      if (!wrap || !currentLabel || !menu) return;
+
+      // Only show the switcher if the user has more than one linked company.
+      if (!Array.isArray(companyList) || companyList.length < 2) {
+        wrap.hidden = true;
+        return;
+      }
+      wrap.hidden = false;
+
+      const current = companyList.find((c) => c.current) || companyList[0];
+      currentLabel.textContent = current.name || 'Workspace';
+      currentLabel.title = current.name || '';
+
+      menu.innerHTML = `
+        <div class="switcher-menu-label">Your companies</div>
+        ${companyList.map((c) => {
+          const isCurrent = c.id === currentClientId;
+          const isSuspended = (c.status || '').toLowerCase() === 'suspended';
+          const sub = [c.packageName ? `${c.packageName} plan` : '', isSuspended ? 'Suspended' : '']
+            .filter(Boolean).join(' · ');
+          return `
+            <button
+              class="switcher-option ${isSuspended ? 'switcher-option-suspended' : ''}"
+              role="option"
+              aria-selected="${isCurrent}"
+              data-client-id="${escapeHtml(c.id)}"
+              ${isCurrent || isSuspended ? 'disabled' : ''}
+              type="button"
+            >
+              <span class="switcher-option-info">
+                <div class="switcher-option-name">${escapeHtml(c.name || '(unnamed)')}</div>
+                ${sub ? `<div class="switcher-option-sub">${escapeHtml(sub)}</div>` : ''}
+              </span>
+              <span class="switcher-option-check">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+            </button>`;
+        }).join('')}
+      `;
+    }
+
+    function setMenuOpen(open) {
+      menuOpen = open;
+      const trigger = document.getElementById('switcher-trigger');
+      const menu = document.getElementById('switcher-menu');
+      if (!trigger || !menu) return;
+      trigger.setAttribute('aria-expanded', String(open));
+      menu.hidden = !open;
+    }
+
+    document.addEventListener('click', (e) => {
+      const trigger = e.target.closest('#switcher-trigger');
+      const option = e.target.closest('.switcher-option');
+      const insideSwitcher = e.target.closest('#switcher');
+
+      if (trigger) {
+        e.preventDefault();
+        setMenuOpen(!menuOpen);
+        return;
+      }
+
+      if (option && !option.disabled && !switching) {
+        e.preventDefault();
+        const targetId = option.dataset.clientId;
+        if (targetId && targetId !== currentClientId) {
+          switchToCompany(targetId);
+        }
+        return;
+      }
+
+      if (menuOpen && !insideSwitcher) {
+        setMenuOpen(false);
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && menuOpen) {
+        setMenuOpen(false);
+        const trigger = document.getElementById('switcher-trigger');
+        if (trigger) trigger.focus();
+      }
+    });
+
+    function switchToCompany(clientId) {
+      switching = true;
+      const trigger = document.getElementById('switcher-trigger');
+      const currentLabel = document.getElementById('switcher-current-name');
+      const previousLabel = currentLabel.textContent;
+      currentLabel.textContent = 'Switching…';
+      if (trigger) trigger.disabled = true;
+
+      fetch('/api/auth/switch-client', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ clientId }),
+      })
+        .then((r) => r.json().then((d) => ({ status: r.status, body: d })))
+        .then(({ status, body }) => {
+          if (status >= 200 && status < 300 && body.ok !== false) {
+            // New session cookie set server-side. Reload with the new context.
+            location.reload();
+          } else {
+            const msg = (body && body.error) || `Could not switch (${status})`;
+            alert(msg);
+            currentLabel.textContent = previousLabel;
+            if (trigger) trigger.disabled = false;
+            switching = false;
+          }
+        })
+        .catch((err) => {
+          console.error('[dashboard] switch failed:', err);
+          alert('Network error. Please try again.');
+          currentLabel.textContent = previousLabel;
+          if (trigger) trigger.disabled = false;
+          switching = false;
+        });
+    }
+
     load();
   </script>
+  <!-- Travelgenix staff act-as pill + acting-as banner. Self-gating: renders
+       nothing for non-staff. Lets staff act as any client from the launchpad;
+       the session is shared across .travelify.io so a switch reflects on every
+       product. Moved here from the old /home page during consolidation. -->
+  <script defer src="/staff-switcher.js"></script>
 </body>
 </html>

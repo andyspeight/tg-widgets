@@ -5,8 +5,10 @@
  * Used by:
  *   - Product front-ends on load to confirm the session and gate UI
  *   - Identity Console to refresh after a permission change
- *   - Client home page (/home.html) to render company header + product tiles
  *   - Widget Suite dashboard to show-and-tag widgets by entitlement
+ *
+ * Note: the launchpad (/dashboard.html) reads /api/dashboard/me-products,
+ * not this endpoint. The retired /home.html used to render its tiles here.
  *
  * Accepts auth via either Authorization: Bearer header OR the
  * tg_session cookie (set on .travelify.io for cross-subdomain SSO).

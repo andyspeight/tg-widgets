@@ -48,6 +48,7 @@ import {
   PERMISSIONS,
   CLIENTS,
   USERS,
+  PACKAGES,
   CATALOGUE,
   CLIENT_ENTITLEMENTS,
 } from '../_lib/auth/schema.js';
@@ -235,20 +236,42 @@ export default async function handler(req, res) {
         return a.name.localeCompare(b.name);
       });
 
-    // Client name for the page header.
+    // Client + account meta for the launchpad hero and stats strip (moved here
+    // from the retired /home.html so the dashboard is the single launchpad).
+    // clientName is kept on `user` for backward compatibility; the richer
+    // account fields live under `client`.
     let clientName = '';
+    let clientStatus = '';
+    let packageName = '';
+    let clientCreatedAt = null;
     if (ctx.clientRecordId) {
       try {
         const c = await getRecord(CLIENTS.tableId, ctx.clientRecordId);
         clientName = c.fields[CLIENTS.fields.clientName] || '';
+        clientStatus = c.fields[CLIENTS.fields.status] || '';
+        clientCreatedAt = c.fields[CLIENTS.fields.createdAt] || null;
+        const pkgLinks = c.fields[CLIENTS.fields.package] || [];
+        if (pkgLinks.length > 0) {
+          const pkgRec = await getRecord(PACKAGES.tableId, pkgLinks[0]).catch(() => null);
+          if (pkgRec) packageName = pkgRec.fields[PACKAGES.fields.packageName] || '';
+        }
       } catch {}
     }
+
+    const lastLogin = userRec?.fields?.[USERS.fields.lastLogin] || null;
 
     return res.status(200).json({
       user: {
         email,
         fullName: ctx.fullName || '',
         clientName,
+        lastLogin,
+      },
+      client: {
+        clientName,
+        status: clientStatus,
+        packageName,
+        createdAt: clientCreatedAt,
       },
       products,
       _resolvedFrom: resolvedFrom,

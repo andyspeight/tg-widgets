@@ -62,10 +62,14 @@ import { revokeAllUserSessions } from '../_lib/auth/sessions.js';
 
 // ─── Config ─────────────────────────────────────────────────────────
 const SIGNIN_PATH = '/signin.html';
-const DEFAULT_REDIRECT = '/home.html';
+// The dashboard is now the single launchpad every client lands on, no matter
+// how they sign in. /home.html is retired and 308-redirects here (see
+// vercel.json), so a stale ?next=/home.html still ends up on the dashboard.
+const DEFAULT_REDIRECT = '/dashboard.html';
 
 // Allowlist of safe redirect paths for the ?next= param. Anything outside
 // these prefixes is ignored and the default is used. Prevents open-redirect.
+// /home.html stays allowed so old links resolve, then Vercel redirects them.
 const SAFE_NEXT_PREFIXES = ['/home.html', '/admin', '/dashboard.html'];
 
 // SSO failure codes. These end up in the URL as ?error=<code>, and
