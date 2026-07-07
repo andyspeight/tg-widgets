@@ -245,6 +245,8 @@
 
 <script src="/editor-shell.js"></script>
 <script src="/widget-prism.js"></script>
+<script src="/editor-tour.js"></script>
+<script src="/tour-prism.js"></script>
 <style>
   .pv-faux { width:100%; background:#fff; border-radius:12px; box-shadow:0 1px 3px rgba(15,23,42,.08), 0 8px 32px rgba(15,23,42,.05); overflow:hidden; }
   .pv-faux[data-bg="dark"] { background:#0B1220; }
@@ -309,7 +311,7 @@
     onTemplates: function () { tgse.toast('Templates coming soon for Prism', 'ok'); },
     onThemeToggle: function (isDark) { previewDark = isDark; render(); },
     onDesignMode: function () {},
-    onLoginSuccess: function () { loadFromUrl(); }
+    onLoginSuccess: function () { loadFromUrl(); if (typeof window.initPrismTour === 'function') window.initPrismTour(); }
   });
 
   // ── Typography sections (Design tab) ──
@@ -550,8 +552,8 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     if (window.tgse && typeof window.tgse.onReady === 'function') {
-      window.tgse.onReady(function () { if (tgse.isLoggedIn()) loadFromUrl(); else { syncUIFromState(); render(); } });
-    } else { if (tgse.isLoggedIn()) loadFromUrl(); else { syncUIFromState(); render(); } }
+      window.tgse.onReady(function () { if (tgse.isLoggedIn()) { loadFromUrl(); if (typeof window.initPrismTour === 'function') window.initPrismTour(); } else { syncUIFromState(); render(); } });
+    } else { if (tgse.isLoggedIn()) { loadFromUrl(); if (typeof window.initPrismTour === 'function') window.initPrismTour(); } else { syncUIFromState(); render(); } }
   });
 })();
 </script>
