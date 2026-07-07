@@ -212,6 +212,9 @@
               <span class="field-hint">Set to 0 for straight vertical slices.</span></div>
             <div class="field"><label class="field-label">Corner radius</label>
               <div class="range-row"><input type="range" id="d-radius" min="0" max="24" step="1"><span class="range-val" id="d-radius-v">6</span></div></div>
+            <div class="field"><label class="field-label">Drop shadow</label>
+              <select class="select" id="d-shadow"><option value="none">None</option><option value="soft">Soft</option><option value="strong">Strong</option></select>
+              <span class="field-hint">Off by default. A shadow can look like an artefact in a full-width section.</span></div>
           </div>
         </div>
 
@@ -473,6 +476,7 @@
     setColour('c-seam', 'h-seam', C.seam, '#FFFFFF');
     setRange('d-slant', C.slant, function (v) { return v.toFixed(1); });
     setRange('d-radius', C.radius, function (v) { return String(Math.round(v)); });
+    var shSel = document.getElementById('d-shadow'); if (shSel) shSel.value = C.shadow || 'none';
     TYPO.forEach(function (r) {
       var k = r.key, g = C[k];
       var ff = document.getElementById('ff-' + k); if (ff) ff.value = g.font;
@@ -502,6 +506,7 @@
   wireColour('c-seam', 'h-seam', function (v) { C.seam = v; });
   wireRange('d-slant', function (v) { C.slant = v; }, function (v) { return v.toFixed(1); });
   wireRange('d-radius', function (v) { C.radius = v; }, function (v) { return String(Math.round(v)); });
+  document.getElementById('d-shadow').addEventListener('change', function (e) { C.shadow = e.target.value; touch(); });
 
   // destinations
   document.getElementById('dest-list').addEventListener('click', function (e) {
