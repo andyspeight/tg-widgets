@@ -19,6 +19,16 @@
  *   - BothPackages:   send packageType:'Any' (omitting returns DynamicPackages only)
  *
  * Changelog:
+ *   v1.10.6 (Jul 2026) — Deeplink location fix:
+ *     • Anchor the accommodation search on the destination airport
+ *       (loc=<dst IATA> + loct=Airport) instead of the resort/atoll name.
+ *       Resort names like "South Male Atoll" or "Raa Atoll" are not in
+ *       Travelify's City gazetteer, so the default City lookup failed the
+ *       whole deeplink ("Unable to match location City"). The airport code
+ *       always resolves and goes up to the gateway/country level per the
+ *       Travelify Deep Linking Instructions
+ *     • Drop the undocumented refn param (not in the deeplink spec, ignored
+ *       by Travelify, so it never pinned the property)
  *   v1.7.0 (Jul 2026) — Served from the Travelgenix offer cache:
  *     • Stay-type widgets fetch GET /api/cached-offers first (the pool the
  *       cron builds from Travelify at 250/request) and only fall back to the
@@ -114,7 +124,7 @@
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
   const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
-  const VERSION = '1.10.5';
+  const VERSION = '1.10.6';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // Telemetry: report a one-time load heartbeat and any failure to
@@ -633,20 +643,30 @@
     const st = type === 'Flights' ? 'Flights' : type === 'Accommodation' ? 'Accommodation' : 'DynamicPackaging';
     const p = new URLSearchParams();
     p.set('st', st);
+    const destIata = (fl && fl.destination && fl.destination.iataCode) || null;
     if (st !== 'Accommodation' && fl) {
       if (fl.origin && fl.origin.iataCode) p.set('org', fl.origin.iataCode);
-      if (fl.destination && fl.destination.iataCode) p.set('dst', fl.destination.iataCode);
+      if (destIata) p.set('dst', destIata);
     }
     if (st !== 'Flights' && acc) {
-      // loc is REQUIRED by Travelify's DynamicPackagingSearchCriteria — dropping
-      // it fails the whole deeplink with "You must specify a location (loc)".
-      // acc.destination.name is Travelify's own resort/town name, which is the
-      // matchable city for the vast majority (Estepona, Puerto de la Cruz, and
-      // so on), sent alongside the airport dst + ctry. A few sub-districts
-      // (Hadaba, South Male Atoll) are not in Travelify's deeplink gazetteer and
-      // still fail to match as a City — that is a Travelify taxonomy gap, not a
-      // reason to strip the location from every package. refn pins the property.
-      if (acc.destination && acc.destination.name) p.set('loc', acc.destination.name);
+      // Travelify resolves `loc` through `loct` (location type lookup, default
+      // City — see the Travelify Deep Linking Instructions). acc.destination.name
+      // is frequently a region, not a City: resort/atoll names such as
+      // "South Male Atoll" or "Raa Atoll" are absent from Travelify's City
+      // gazetteer, so the default City lookup fails the WHOLE deeplink
+      // ("Unable to match location City: ..."). The destination airport is
+      // Travelify's own IATA code and always resolves, so anchor the
+      // accommodation on it with loct=Airport. That goes up from the unmatched
+      // resort to the gateway level — country-wide for a single-gateway country
+      // such as the Maldives — and stays consistent with the flight leg. Fall
+      // back to the resort name only when there is no airport to anchor on
+      // (accommodation-only offers).
+      if (destIata) {
+        p.set('loc', destIata);
+        p.set('loct', 'Airport');
+      } else if (acc.destination && acc.destination.name) {
+        p.set('loc', acc.destination.name);
+      }
       const ctry = (acc.destination && acc.destination.countryCode) || (fl && fl.destination && fl.destination.countryCode);
       if (ctry) p.set('ctry', ctry);
     }
@@ -665,9 +685,9 @@
       if (fl.cabinClass) p.set('cabin', fl.cabinClass);
       if (fl.carrier && fl.carrier.code) p.set('carrier', fl.carrier.code);
     }
-    // uniqueRef pins the exact property (e.g. TTI:83099724). URLSearchParams
-    // encodes the colon, per Travelify's "URL encode to be safe".
-    if (st !== 'Flights' && acc && acc.uniqueRef) p.set('refn', acc.uniqueRef);
+    // Note: no `refn` param — it is not in the Travelify deeplink spec, so
+    // Travelify ignores it (it never pinned the property). Precise
+    // property pinning would use loct=Property, kept out until verified live.
     return 'https://dl.tvllnk.com/deeplink/' + encodeURIComponent(id) + '?' + p.toString();
   }
   // Per-client supplier visibility. supplierFilter (three integer lists of
