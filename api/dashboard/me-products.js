@@ -136,8 +136,15 @@ export default async function handler(req, res) {
     }
 
     // catalogueItemId → productSlug (the Control → launchpad bridge).
+    // Skip INACTIVE catalogue items. The Catalogue tab's Active toggle is the
+    // single gate for what a client can be shown: a client can carry a stale
+    // enabled entitlement for a product that was later switched off in the
+    // catalogue (package-seeded at onboarding, then deactivated — e.g. Luna
+    // Chat). Those must never surface as a launchpad tile. This mirrors
+    // /api/auth/me and the Entitlements tab, which already honour the flag.
     const slugByCatalogueId = new Map();
     for (const c of catalogue) {
+      if (!c.fields[CATALOGUE.fields.active]) continue;
       const ps = c.fields[CATALOGUE.fields.productSlug];
       // singleSelect comes back as { name } when expanded, or a string.
       const slug = typeof ps === 'string' ? ps : (ps && ps.name) || '';
