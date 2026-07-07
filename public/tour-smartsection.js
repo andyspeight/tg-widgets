@@ -19,6 +19,12 @@
   function buildSteps() {
     return [
       {
+        target: '#btn-templates',
+        title: 'Start from a template',
+        body: 'In a hurry? Click Templates for ready-made recipes: an exit-intent offer, an office-hours message, a mobile-only promo and more. Or build your own below.',
+        placement: 'right'
+      },
+      {
         tab: 'design',
         target: '#matchSeg',
         title: 'Decide who sees it',
