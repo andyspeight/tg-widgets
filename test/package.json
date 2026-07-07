@@ -7,7 +7,8 @@
   "scripts": {
     "smoke": "node run-smoke.mjs tg-slicer f",
     "smoke:moving": "node run-smoke.mjs tg-slicer i",
-    "smoke:consent": "node consent-smoke.mjs"
+    "smoke:consent": "node consent-smoke.mjs",
+    "smoke:consent-fixes": "node consent-fixes-smoke.mjs"
   },
   "devDependencies": {
     "playwright": "^1.60.0"
