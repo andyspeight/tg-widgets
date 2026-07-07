@@ -174,6 +174,52 @@
           </div>
         </div>
 
+        <div class="tgse-section is-open" id="simPanel">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span class="tgse-section-label">Preview as this visitor</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field-help" style="margin-top:0;margin-bottom:12px;">Pretend to be a visitor so you can see a rule working. This only changes the preview on the right, never your saved rules.</div>
+            <div class="field">
+              <span class="field-label">Visitor</span>
+              <div class="seg" id="simVisitor">
+                <button data-v="new" class="is-active" type="button">New</button>
+                <button data-v="returning" type="button">Returning</button>
+              </div>
+            </div>
+            <div class="field">
+              <span class="field-label">Device</span>
+              <div class="seg" id="simDevice">
+                <button data-d="mobile" type="button">Mobile</button>
+                <button data-d="tablet" type="button">Tablet</button>
+                <button data-d="desktop" class="is-active" type="button">Desktop</button>
+              </div>
+            </div>
+            <div class="field">
+              <span class="field-label">Day and time</span>
+              <div class="rule-row2">
+                <select class="select" id="simDay" aria-label="Simulated day of week">
+                  <option value="1">Monday</option>
+                  <option value="2">Tuesday</option>
+                  <option value="3">Wednesday</option>
+                  <option value="4">Thursday</option>
+                  <option value="5">Friday</option>
+                  <option value="6">Saturday</option>
+                  <option value="0">Sunday</option>
+                </select>
+                <input type="time" class="input" id="simTime" aria-label="Simulated time of day">
+              </div>
+            </div>
+            <div class="field">
+              <span class="field-label">Campaign source (utm_source)</span>
+              <input class="input" id="simUtm" maxlength="120" placeholder="e.g. newsletter" aria-label="Simulated utm_source">
+              <div class="field-help">Simulates the utm_source of the visit. Leave blank for direct traffic.</div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- ===== BEHAVIOUR TAB ===== -->
@@ -338,9 +384,10 @@
 <!-- Live preview: the real rule engine + widget, in preview mode -->
 <script>window.__TG_PREVIEW__ = true;</script>
 <script src="/tgse-rules.js"></script>
-<script src="/widget-smartsection.js"></script>
+<script src="/widget-smartsection.js?v=1.1.0"></script>
 
 <script src="/editor-tour.js"></script>
+<script src="/tour-smartsection.js"></script>
 
 <script>
   'use strict';
@@ -398,7 +445,10 @@
     },
     onAIBuild: () => tgse.toast('The AI rule builder is coming in a later release', 'ok'),
     onTemplates: () => tgse.toast('Templates are coming in a later release', 'ok'),
-    onLoginSuccess: () => loadFromUrl(),
+    onLoginSuccess: () => {
+      loadFromUrl();
+      if (typeof window.initSmartSectionTour === 'function') window.initSmartSectionTour();
+    },
   });
 
   /* ------------------------------------------------------------------ *
@@ -655,14 +705,77 @@
   });
 
   /* ------------------------------------------------------------------ *
+   * Preview simulation — "Preview as this visitor". Held separately from
+   * the saved config C, so it never touches getConfig or marks dirty. The
+   * widget reads window.__TG_PREVIEW_CTX__ in preview mode and passes it to
+   * the engine, which fills any omitted dimension from the real visitor.
+   * ------------------------------------------------------------------ */
+
+  const SIM = { visitor: 'new', device: 'desktop', day: null, time: null, utm: '' };
+
+  function buildSimContext() {
+    const base = new Date();
+    const targetDay = SIM.day == null ? base.getDay() : SIM.day;
+    let hh = base.getHours(), mm = base.getMinutes();
+    if (SIM.time && /^\d{1,2}:\d{2}$/.test(SIM.time)) {
+      const parts = SIM.time.split(':');
+      hh = parseInt(parts[0], 10);
+      mm = parseInt(parts[1], 10);
+    }
+    // A date carrying the chosen weekday and time — the engine only reads
+    // getDay()/getHours()/getMinutes(), so the absolute date does not matter.
+    const d = new Date(base.getFullYear(), base.getMonth(), base.getDate(), hh, mm, 0, 0);
+    d.setDate(d.getDate() + (((targetDay - d.getDay()) + 7) % 7));
+    const utm = (SIM.utm || '').trim().toLowerCase();
+    return {
+      now: d,
+      device: SIM.device,
+      returning: SIM.visitor === 'returning',
+      entrySource: { referrer: '', source: utm, medium: '', campaign: '' },
+    };
+  }
+
+  function wireSimControls() {
+    const now = new Date();
+    const daySel = document.getElementById('simDay');
+    const timeIn = document.getElementById('simTime');
+    daySel.value = String(now.getDay());
+    SIM.day = now.getDay();
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    timeIn.value = hh + ':' + mm;
+    SIM.time = hh + ':' + mm;
+
+    function seg(id, attr, set) {
+      const el = document.getElementById(id);
+      el.querySelectorAll('button').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          set(btn.getAttribute(attr));
+          el.querySelectorAll('button').forEach((b) => b.classList.toggle('is-active', b === btn));
+          renderPreview();
+        });
+      });
+    }
+    seg('simVisitor', 'data-v', (v) => { SIM.visitor = v; });
+    seg('simDevice', 'data-d', (v) => { SIM.device = v; });
+    daySel.addEventListener('change', () => { SIM.day = parseInt(daySel.value, 10); renderPreview(); });
+    timeIn.addEventListener('change', () => { SIM.time = timeIn.value; renderPreview(); });
+    const utmIn = document.getElementById('simUtm');
+    utmIn.addEventListener('input', () => { SIM.utm = utmIn.value; });
+    utmIn.addEventListener('change', () => renderPreview());
+  }
+  wireSimControls();
+
+  /* ------------------------------------------------------------------ *
    * Preview — the real widget in preview mode: content always visible,
-   * badge reporting what live visitors would get.
+   * badge reporting what the simulated visitor would get.
    * ------------------------------------------------------------------ */
 
   let inst = null;
   function renderPreview() {
     const mount = document.getElementById('widgetMount');
     if (inst) { try { inst.destroy(); } catch (e) { /* noop */ } }
+    window.__TG_PREVIEW_CTX__ = buildSimContext();
     inst = new window.TGSmartSectionWidget(mount, JSON.parse(JSON.stringify(C)));
   }
 

@@ -105,7 +105,16 @@ single AND/OR group are the locked v1 scope — no variant/controller modes.
 - `public/tgse-rules.js` — rule engine (shell level, reusable)
 - `public/widget-smartsection.js` — the widget
 - `public/editor-smartsection.html` — editor (shell contract; live in-page
-  preview using the real engine + widget with `__TG_PREVIEW__` set)
+  preview using the real engine + widget with `__TG_PREVIEW__` set). Includes
+  a "Preview as this visitor" simulator: the sidebar sets
+  `window.__TG_PREVIEW_CTX__` (visitor, device, day + time, utm_source) and the
+  widget passes it to the engine so the badge shows what that visitor would get.
+  Simulator state is held outside the saved config, so it never marks dirty.
+- `public/tour-smartsection.js` — guided setup tour (house contract:
+  `tgse.tour` / `tgse.tourLauncher` / `window.initSmartSectionTour`), 8 steps
+  across the rule builder, the simulator, dismissal/frequency, preview, save
+  and embed. Loaded after `editor-tour.js`; no vercel header block needed
+  (tour files are served by the generic static rule).
 - `public/demo-smartsection.html` — demo page (five wrapped bands: dismissible,
   office hours, mobile only, returning visitors, real exit intent)
 - `api/widget-config.js` — `'Smart Section'` in `ALLOWED_WIDGET_TYPES`,
@@ -118,8 +127,9 @@ single AND/OR group are the locked v1 scope — no variant/controller modes.
   `loadMiniPreview` (static preview, so no engine script tag at the bottom of
   the dashboard)
 - `tests/test-rules.cjs` — 27 unit tests (plain Node + node:vm)
-- `tests/test-integration.cjs` — 10 jsdom integration tests (jsdom is a
-  devDependency; `runScripts: 'outside-only'`)
+- `tests/test-integration.cjs` — 12 jsdom integration tests (jsdom is a
+  devDependency; `runScripts: 'outside-only'`), the last two covering the
+  preview-context simulation
 
 Run tests: `npm run test:smartsection`
 

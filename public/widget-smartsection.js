@@ -1,5 +1,5 @@
 /**
- * Travelgenix Smart Section Widget v1.0.0
+ * Travelgenix Smart Section Widget v1.1.0
  * Show different content to different visitors without a developer.
  * Self-contained, embeddable wrapper widget — zero dependencies beyond the
  * shared rule engine (tgse-rules.js), which it loads itself if missing.
@@ -23,7 +23,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '1.0.0';
+  var VERSION = '1.1.0';
 
   /* ------------------------------------------------------------------ *
    * API base resolution (shared suite convention)
@@ -206,8 +206,12 @@
 
     if (isPreview() || c.debug) {
       // Editors always see their content; the badge reports what real
-      // visitors would get. Nothing is persisted in preview.
-      var verdict = engine.evaluate({ match: c.match, rules: c.rules });
+      // visitors would get. Nothing is persisted in preview. The editor can
+      // set window.__TG_PREVIEW_CTX__ to simulate a specific visitor (device,
+      // new/returning, day + time, traffic source) — any keys it omits fall
+      // back to the real visitor via the engine's context merge.
+      var simCtx = (typeof window !== 'undefined' && window.__TG_PREVIEW_CTX__) || null;
+      var verdict = engine.evaluate({ match: c.match, rules: c.rules }, simCtx);
       this._reveal(null, true);
       this._badge(verdict);
       if (c.dismissible) this._dismissButton(true);
