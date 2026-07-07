@@ -134,6 +134,31 @@
   .tpl-ico svg { width: 30px; height: 30px; }
   .tpl-name { font-size: 13px; font-weight: 700; color: var(--tgse-ink); margin-bottom: 2px; }
   .tpl-desc { font-size: 12px; color: var(--tgse-muted); line-height: 1.45; }
+
+  /* Modal footer + buttons (AI builder) */
+  .modal-foot {
+    display: flex; gap: 8px; justify-content: flex-end;
+    padding: 12px 20px; border-top: 1px solid var(--tgse-border);
+  }
+  .btn-primary {
+    padding: 8px 16px; border: 0; border-radius: 8px; cursor: pointer;
+    background: var(--tgse-brand); color: #fff; font: 600 13px Inter, sans-serif;
+  }
+  .btn-primary:hover { filter: brightness(1.08); }
+  .btn-primary:disabled { opacity: .55; cursor: not-allowed; }
+  .btn-secondary {
+    padding: 8px 16px; border: 1px solid var(--tgse-border); border-radius: 8px; cursor: pointer;
+    background: var(--tgse-panel); color: var(--tgse-ink); font: 500 13px Inter, sans-serif;
+  }
+  .btn-secondary:hover { border-color: var(--tgse-brand); color: var(--tgse-brand); }
+  .ai-prompt {
+    width: 100%; min-height: 96px; resize: vertical; box-sizing: border-box;
+    padding: 10px 12px; font: 500 13px/1.5 Inter, sans-serif; color: var(--tgse-ink);
+    background: var(--tgse-panel-2); border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-sm); outline: none;
+  }
+  .ai-prompt:focus { border-color: var(--tgse-brand); }
+  .ai-examples { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .ai-hint { font-size: 12px; color: var(--tgse-muted); line-height: 1.5; margin-top: 12px; }
 </style>
 </head>
 <body>
@@ -429,6 +454,26 @@
   </div>
 </div>
 
+<!-- AI rule builder -->
+<div class="modal-bg" id="aiModal" hidden>
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">Build rules with AI</span>
+      <button class="modal-close" data-close="aiModal" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-intro">Describe who should see this section in plain English. The AI turns it into rules that you can then tweak.</div>
+      <textarea class="ai-prompt" id="aiPrompt" maxlength="1000" placeholder="e.g. Returning visitors on mobile, on weekday evenings"></textarea>
+      <div class="ai-examples" id="aiExamples"></div>
+      <div class="ai-hint">The AI only sets targeting rules, never your content. It cannot target by country, page URL or logged-in state.</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" data-close="aiModal" type="button">Cancel</button>
+      <button class="btn-primary" id="aiGenerateBtn" type="button">Generate rules</button>
+    </div>
+  </div>
+</div>
+
 <!-- Shell behaviour (must come before the editor's own script) -->
 <script src="/editor-shell.js"></script>
 
@@ -494,7 +539,7 @@
     onThemeToggle: (isDark) => {
       document.getElementById('previewPage').setAttribute('data-theme', isDark ? 'dark' : 'light');
     },
-    onAIBuild: () => tgse.toast('The AI rule builder is coming in a later release', 'ok'),
+    onAIBuild: () => openModal('aiModal'),
     onTemplates: () => openModal('tplModal'),
     onLoginSuccess: () => {
       loadFromUrl();
@@ -873,14 +918,20 @@
     },
   ];
 
-  function applyTemplate(t) {
+  // Shared by templates and the AI builder: reset to a clean base config,
+  // apply the recipe, keep the saved widget id, and re-render.
+  function applyRecipe(cfg, suggestName) {
     const keepId = C.widgetId;
-    C = Object.assign({}, TPL_BASE, JSON.parse(JSON.stringify(t.cfg)));
+    C = Object.assign({}, TPL_BASE, cfg);
     if (keepId) C.widgetId = keepId;
     const nameInput = document.getElementById('name-input');
-    if (t.suggest && !nameInput.value.trim()) nameInput.value = t.suggest;
+    if (suggestName && !nameInput.value.trim()) nameInput.value = suggestName;
     dirty();
     renderAll();
+  }
+
+  function applyTemplate(t) {
+    applyRecipe(JSON.parse(JSON.stringify(t.cfg)), t.suggest);
     closeModal('tplModal');
     tgse.toast('Template applied', 'ok');
   }
@@ -922,9 +973,77 @@
     if (e.target === document.getElementById('tplModal')) closeModal('tplModal');
   });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeModal('tplModal');
+    if (e.key === 'Escape') { closeModal('tplModal'); closeModal('aiModal'); }
   });
   buildTemplates();
+
+  /* ------------------------------------------------------------------ *
+   * AI rule builder — plain-English audience to rules via /api/widget-ai.
+   * The server sanitises the model's output before it reaches us, and we
+   * apply it through the same applyRecipe path as a template.
+   * ------------------------------------------------------------------ */
+
+  const AI_EXAMPLES = [
+    'New visitors from our email newsletter',
+    'Mobile visitors at the weekend',
+    'Returning visitors, weekday office hours',
+    'Anyone about to leave the page',
+  ];
+
+  function buildAiExamples() {
+    const wrap = document.getElementById('aiExamples');
+    wrap.textContent = '';
+    AI_EXAMPLES.forEach((ex) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'chip';
+      chip.textContent = ex;
+      chip.addEventListener('click', () => { document.getElementById('aiPrompt').value = ex; });
+      wrap.appendChild(chip);
+    });
+  }
+  buildAiExamples();
+
+  function aiHeaders() {
+    if (window.tgse && typeof tgse.authHeaders === 'function') return tgse.authHeaders();
+    return { 'Content-Type': 'application/json' };
+  }
+
+  async function aiGenerate() {
+    const prompt = document.getElementById('aiPrompt').value.trim();
+    if (prompt.length < 5) { tgse.toast('Describe your audience first', 'err'); return; }
+    const btn = document.getElementById('aiGenerateBtn');
+    const label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Generating…';
+    try {
+      const res = await fetch('/api/widget-ai', {
+        method: 'POST',
+        headers: aiHeaders(),
+        body: JSON.stringify({ widgetType: 'Smart Section', prompt: prompt }),
+      });
+      if (res.status === 401) { tgse.showLogin('Please sign in again'); return; }
+      let data = null;
+      try { data = await res.json(); } catch (e) { /* non-JSON error body */ }
+      if (!res.ok) {
+        tgse.toast((data && data.error) ? data.error : ('AI request failed (' + res.status + ')'), 'err');
+        return;
+      }
+      if (!data || !Array.isArray(data.rules)) {
+        tgse.toast('AI returned an unexpected response', 'err');
+        return;
+      }
+      applyRecipe(data);
+      closeModal('aiModal');
+      tgse.toast(data.rules.length ? 'Rules applied, review them on the left' : 'No targeting matched, so everyone will see it', 'ok');
+    } catch (e) {
+      tgse.toast('AI request failed', 'err');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = label;
+    }
+  }
+  document.getElementById('aiGenerateBtn').addEventListener('click', aiGenerate);
 
   /* ------------------------------------------------------------------ *
    * Preview — the real widget in preview mode: content always visible,
