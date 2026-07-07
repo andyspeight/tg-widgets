@@ -712,19 +712,37 @@ export function renderPdfHtml(order, opts = {}) {
   const checkinFmt = startDate ? formatDate(startDate, { includeWeekday: true }) : '—';
   const checkoutFmt = checkout ? formatDate(checkout, { includeWeekday: true }) : '—';
 
-  // Real check-in/out times, parsed from the hotel's ImportantInfo (mirrors the
-  // widget's parser). The template used to hardcode "from 15:00 / by 12:00" on
-  // every PDF regardless of the booking; when no time is present we now hide it
-  // rather than print a made-up default.
+  // Real check-in/out times from the accommodation descriptions. Travelify
+  // carries these two ways and we read both — the template used to hardcode
+  // "from 15:00 / by 12:00" on every PDF regardless of the booking:
+  //   1. "Additional Information" fields — the label is in the TITLE and the
+  //      time is the whole (short) TEXT, e.g. { title: "Check-Out Time",
+  //      text: "10:00" }. This is how booking-specific times are usually set.
+  //   2. Hotel ImportantInfo prose — the time sits next to the label inside the
+  //      text, e.g. "Check-out time: 10:00".
+  // When neither is present we hide the time rather than print a made-up one.
+  const TIME_RE = /\d{1,2}:\d{2}(?:\s*-\s*\d{1,2}:\d{2})?/;
   let checkinTime = '';
   let checkoutTime = '';
   for (const info of (accom?.descriptions || [])) {
-    if (info?.type !== 'ImportantInfo') continue;
-    const txt = info.text || '';
-    const ci = txt.match(/Check[\s-]?in\s+(?:hour|time)?\s*[:\-]?\s*(\d{1,2}:\d{2}(?:\s*-\s*\d{1,2}:\d{2})?)/i);
-    const co = txt.match(/Check[\s-]?out\s+(?:hour|time)?\s*[:\-]?\s*(\d{1,2}:\d{2}(?:\s*-\s*\d{1,2}:\d{2})?)/i);
-    if (ci && !checkinTime) checkinTime = ci[1];
-    if (co && !checkoutTime) checkoutTime = co[1];
+    const title = info?.title || '';
+    const txt = info?.text || '';
+    // 1) Label/value: title identifies the field, text is just the time.
+    if (!checkinTime && /check[\s-]?in/i.test(title) && txt.trim().length <= 20) {
+      const m = txt.match(TIME_RE); if (m) checkinTime = m[0];
+    }
+    if (!checkoutTime && /check[\s-]?out/i.test(title) && txt.trim().length <= 20) {
+      const m = txt.match(TIME_RE); if (m) checkoutTime = m[0];
+    }
+    // 2) Prose: the time is embedded in the text beside the label.
+    if (!checkinTime) {
+      const m = txt.match(/Check[\s-]?in\s+(?:hour|time)?\s*[:\-]?\s*(\d{1,2}:\d{2}(?:\s*-\s*\d{1,2}:\d{2})?)/i);
+      if (m) checkinTime = m[1];
+    }
+    if (!checkoutTime) {
+      const m = txt.match(/Check[\s-]?out\s+(?:hour|time)?\s*[:\-]?\s*(\d{1,2}:\d{2}(?:\s*-\s*\d{1,2}:\d{2})?)/i);
+      if (m) checkoutTime = m[1];
+    }
   }
 
   // Policies cards are hotel concepts: the cancellation summary reads the
@@ -1415,7 +1433,11 @@ export function renderPdfHtml(order, opts = {}) {
         + (carRentalItems.length > 0 ? 1 : 0)
         + (ticketsItems.length > 0 ? 1 : 0)
         + (packagesItems.length > 0 ? 1 : 0)
-        + ((accomItem && !isPackage) ? 1 : 0);
+        // Gate on `accom` (a real accommodation object), not `accomItem`, which
+        // falls back to items[0] for a booking with no hotel — that fallback
+        // made a ticket/flight/transfer-only order sprout a spurious
+        // "— Accommodation" line here.
+        + ((accom && !isPackage) ? 1 : 0);
       return `
     <div class="pdf-section">
       <div class="pdf-section-title">Payment Schedule</div>
@@ -1425,7 +1447,7 @@ export function renderPdfHtml(order, opts = {}) {
             <span class="label">${escapeHtml(resolveTotalLabel(order.items))}</span>
             <span class="value num">${escapeHtml(formatMoney(totalCost, currency))}</span>
           </div>
-          ${(multiProduct > 1 && accomItem && !isPackage && typeof accomItem.price === 'number') ? `
+          ${(multiProduct > 1 && accom && !isPackage && typeof accomItem.price === 'number') ? `
           <div class="pdf-pay-row" style="font-size:11px; padding:4px 0;">
             <span class="label" style="color:#94A3B8; padding-left:12px;">— Accommodation</span>
             <span class="value num" style="color:#475569;">${escapeHtml(formatMoney(accomItem.price, currency))}</span>
