@@ -18,7 +18,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '1.0.0';
+  var VERSION = '1.1.0';
 
   function resolveBase(path, override) {
     if (typeof window === 'undefined') return path;
@@ -179,6 +179,13 @@
     'linear-gradient(160deg,#5c7a97,#20415e)', 'linear-gradient(160deg,#e0954f,#7c3f28)',
     'linear-gradient(160deg,#2f7f9a,#0c3a4c)', 'linear-gradient(160deg,#37c0bf,#12707f)'
   ];
+  // Optional drop shadow presets. Default is off — the widget usually sits in a
+  // full-bleed section where a shadow reads as an artefact.
+  var SHADOWS = {
+    none: 'none',
+    soft: '0 2px 6px rgba(20,25,40,.10),0 16px 38px rgba(20,25,40,.14)',
+    strong: '0 3px 8px rgba(20,25,40,.14),0 28px 64px rgba(20,25,40,.24)'
+  };
 
   var DEFAULTS = {
     title:  { text: 'DESTINATIONS', font: 'Playfair Display', size: 3.35, color: '#1E2E49', tracking: 6, weight: 700 },
@@ -186,7 +193,7 @@
     lead:   { text: 'Extraordinary stays.\nUnforgettable memories.', font: 'EB Garamond', size: 2.1, color: '#22344F', weight: 600 },
     body:   { text: "Handpicked luxuries in the world's most iconic destinations. Where every stay is designed for pure indulgence.", font: 'EB Garamond', size: 1.5, color: '#46566C', weight: 500 },
     labels: { font: 'Cinzel', size: 1.4, color: '#FFFFFF', tracking: 6 },
-    panelBg: '#F4F0E7', seam: '#FFFFFF', slant: 2.7, radius: 6,
+    panelBg: '#F4F0E7', seam: '#FFFFFF', slant: 2.7, radius: 6, shadow: 'none',
     items: [
       { label: 'MAURITIUS', image: SCENES.mauritius, href: '', newTab: false, fx: 50, fy: 52, zoom: 1.0 },
       { label: 'MALDIVES',  image: SCENES.maldives,  href: '', newTab: false, fx: 50, fy: 55, zoom: 1.0 },
@@ -202,9 +209,10 @@
     return '' +
       ':host{all:initial;display:block}' +
       '*,*::before,*::after{box-sizing:border-box}' +
-      '.prism{position:relative;container-type:inline-size;width:100%;aspect-ratio:1010/352;' +
+      '.prism-shell{container-type:inline-size;width:100%;display:block}' +
+      '.prism{position:relative;width:100%;aspect-ratio:1010/352;' +
         'background:var(--seam,#fff);border-radius:var(--radius,6px);overflow:hidden;isolation:isolate;' +
-        'box-shadow:0 2px 6px rgba(20,25,40,.12),0 26px 60px rgba(20,25,40,.22)}' +
+        'box-shadow:var(--shadow,none)}' +
       '.panel{position:absolute;inset:0 auto 0 0;width:34cqw;z-index:2;' +
         'background-color:var(--panelBg,#F4F0E7);' +
         'background-image:radial-gradient(130% 100% at 16% 8%,color-mix(in srgb,#fff 60%,var(--panelBg)),var(--panelBg) 62%);' +
@@ -237,7 +245,23 @@
         'transform:translateX(calc(-0.42 * var(--slant)))}' +
       '.slice:last-child .label{transform:none}' +
       'a.slice:focus-visible{outline:3px solid #fff;outline-offset:-3px}' +
-      '@container (max-width:560px){.prism{aspect-ratio:5/4}.body{max-width:26cqw}}' +
+      // On narrow screens the side-by-side band makes the panel text shrink to
+      // nothing, so stack: full-width editorial panel on top (readable clamped
+      // type), photo strip below at a controlled height.
+      '@container (max-width:780px){' +
+        '.prism{aspect-ratio:auto;display:flex;flex-direction:column}' +
+        '.panel{position:static;inset:auto;width:100%;clip-path:none;background-image:none;' +
+          'padding:clamp(20px,5cqw,32px) clamp(18px,5cqw,28px)}' +
+        '.title{font-size:clamp(24px,7cqw,40px)}' +
+        '.script{font-size:clamp(24px,7.4cqw,42px);margin:.14em 0 0 .1em}' +
+        '.copy{margin-top:16px;align-items:flex-start;text-align:left;gap:12px}' +
+        '.rule{width:96px}' +
+        '.lead{font-size:clamp(17px,4.6cqw,24px)}' +
+        '.body{font-size:clamp(13.5px,3.6cqw,17px);max-width:62ch}' +
+        '.strip{position:static;inset:auto;left:auto;right:auto;top:auto;bottom:auto;' +
+          'width:100%;height:clamp(150px,44cqw,230px)}' +
+        '.label{font-size:clamp(9px,2.4cqw,13px);bottom:10px}' +
+      '}' +
       '@media (prefers-reduced-motion:reduce){.ph{transition:none}}';
   }
 
@@ -261,6 +285,7 @@
       seam: c.seam != null ? c.seam : DEFAULTS.seam,
       slant: c.slant != null ? c.slant : DEFAULTS.slant,
       radius: c.radius != null ? c.radius : DEFAULTS.radius,
+      shadow: c.shadow != null ? c.shadow : DEFAULTS.shadow,
       items: items.slice(0, 12),
       previewMode: !!c.previewMode
     };
@@ -274,6 +299,7 @@
       '--seam:' + safeColor(c.seam, '#FFFFFF'),
       '--slant:' + clampNum(c.slant, 0, 8, 2.7) + 'cqw',
       '--radius:' + clampNum(c.radius, 0, 40, 6) + 'px',
+      '--shadow:' + (SHADOWS[String(c.shadow)] || SHADOWS.none),
       '--gold:' + safeColor(s.color, '#A6792F'),
       '--titleF:' + fontStack(safeFontName(t.font, 'Playfair Display')),
       '--titleS:' + clampNum(t.size, 1.5, 6, 3.35) + 'cqw',
@@ -319,7 +345,10 @@
     [c.title.font, c.script.font, c.lead.font, c.body.font, c.labels.font].forEach(function (f) { ensureFont(safeFontName(f, '')); });
 
     var slices = c.items.map(this._slice, this).join('');
+    // Outer .prism-shell is the query container; .prism is a descendant so a
+    // container query can restyle .prism itself (stacked mobile layout).
     this.shadow.innerHTML = '<style>' + styles() + '</style>' +
+      '<div class="prism-shell">' +
       '<div class="prism" part="prism" style="' + this._vars() + '">' +
         '<div class="panel">' +
           '<h2 class="title">' + esc(c.title.text) + '</h2>' +
@@ -331,6 +360,7 @@
           '</div>' +
         '</div>' +
         '<div class="strip">' + slices + '</div>' +
+      '</div>' +
       '</div>';
 
     this.root = this.shadow.querySelector('.prism');
