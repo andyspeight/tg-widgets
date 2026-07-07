@@ -9,7 +9,8 @@
   "scripts": {
     "test:brain": "node test/brain-smoke.mjs",
     "test:authme": "node test/auth-me-entitlements-smoke.mjs",
-    "test:smartsection": "node tests/test-rules.cjs && node tests/test-integration.cjs && node tests/test-ai-rules.cjs && node tests/test-triggers.cjs"
+    "test:smartsection": "node tests/test-rules.cjs && node tests/test-integration.cjs && node tests/test-ai-rules.cjs && node tests/test-triggers.cjs",
+    "test:deeplink": "node tests/test-deeplink.cjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",

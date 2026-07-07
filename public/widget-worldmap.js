@@ -17,11 +17,18 @@
  * (Escape / backdrop / close button to dismiss, focus-trapped, scroll-locked).
  * A configured fullscreenUrl still wins (opens in a new tab) for back-compat.
  * The interactive map + deal cards + filters mount into the overlay body next.
+ *
+ * v3.11.3: deeplink location fix. Anchor the accommodation search on the
+ * gateway airport (loc=<IATA> + loct=Airport) instead of the resort/atoll
+ * name, which is often absent from Travelify's City gazetteer and failed the
+ * whole deeplink ("Unable to match location City"). Drop the undocumented
+ * refn param (ignored by Travelify). See the Travelify Deep Linking
+ * Instructions.
  */
 (function () {
   'use strict';
 
-  const VERSION = '3.11.2';
+  const VERSION = '3.11.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -344,15 +351,18 @@
     p.set('st', st);
     if (st !== 'Accommodation') { if (o.origin) p.set('org', o.origin); if (o.airport) p.set('dst', o.airport); }
     if (st !== 'Flights') {
-      // loc is REQUIRED by Travelify's DynamicPackagingSearchCriteria — dropping
-      // it fails the whole deeplink with "You must specify a location (loc)".
-      // o.resort is Travelify's own resort/town name, which is the matchable city
-      // for the vast majority (Estepona, Puerto de la Cruz, and so on), sent
-      // alongside the airport dst + ctry. A few sub-districts (Hadaba, South Male
-      // Atoll) are not in Travelify's deeplink gazetteer and still fail to match
-      // as a City — that is a Travelify taxonomy gap, not a reason to strip the
-      // location from every package. refn pins the exact property.
-      if (o.resort) p.set('loc', o.resort);
+      // Travelify resolves `loc` through `loct` (location type lookup, default
+      // City — see the Travelify Deep Linking Instructions). o.resort is
+      // frequently a region, not a City: atoll names such as "South Male Atoll"
+      // or "Raa Atoll" are absent from Travelify's City gazetteer, so the
+      // default City lookup fails the WHOLE deeplink ("Unable to match location
+      // City: ..."). The gateway airport is Travelify's own IATA code and always
+      // resolves, so anchor the accommodation on it with loct=Airport. That goes
+      // up from the unmatched resort to the gateway level — country-wide for a
+      // single-gateway country such as the Maldives. Fall back to the resort
+      // name only when there is no airport to anchor on.
+      if (o.airport) { p.set('loc', o.airport); p.set('loct', 'Airport'); }
+      else if (o.resort) { p.set('loc', o.resort); }
       if (o.countryCode) p.set('ctry', o.countryCode);
     }
     const start = String(o.outboundDate || o.checkinDate || '');
@@ -372,9 +382,9 @@
       if (o.cabinClass) p.set('cabin', o.cabinClass);
       if (o.carrierCode) p.set('carrier', o.carrierCode);
     }
-    // uniqueRef pins the exact property (e.g. TTI:83099724). URLSearchParams
-    // encodes the colon, per Travelify's "URL encode to be safe".
-    if (st !== 'Flights' && o.accommodationUniqueRef) p.set('refn', o.accommodationUniqueRef);
+    // Note: no `refn` param — it is not in the Travelify deeplink spec, so
+    // Travelify ignores it (it never pinned the property). Precise property
+    // pinning would use loct=Property, kept out until verified live.
     return TVLLNK_BASE + '/deeplink/' + encodeURIComponent(id) + '?' + p.toString();
   }
   // Per-client supplier visibility. The map's deal cards are package deals, so
