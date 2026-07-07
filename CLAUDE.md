@@ -13,7 +13,9 @@ Owner: Andy Speight, CEO, Travelgenix.
 - `public/` — 40+ embeddable widgets (`widget-*.js`), their editors
   (`editor-*.html`), demo pages (`demo-*.html`), the client dashboard
   (`index.html`), the shared editor shell (`editor-shell.js/.css`,
-  `editor-shell-template.html`) and the shared rule engine (`tgse-rules.js`).
+  `editor-shell-template.html`) and the shared rule + trigger engine
+  (`tgse-rules.js`: `evaluate` for visitor rules, `armTrigger` for event
+  triggers — Smart Section uses it; Popup delegates to it when present).
 - `api/` — Vercel serverless functions (widget config CRUD, auth, leads,
   email, the optional TG Slicer AI-emit endpoint).
 - `tg-slicer/` — the TG Slicer Chrome extension (see its handover below).
@@ -121,7 +123,7 @@ block per public script file (copy the `/widget-hours.js` block).
 
 - Widget suites: `tests/*.cjs` (plain Node; jsdom is a devDependency for DOM
   integration tests). Smart Section: `npm run test:smartsection` (27 unit +
-  12 integration + 10 AI-validator).
+  12 integration + 10 AI-validator + 12 trigger).
 - TG Slicer: `node test/run-smoke.mjs tg-slicer <fixture-prefix>` (Playwright;
   see the slicer handover for setup).
 - When you add a capability, add a test that exercises it and re-run the
