@@ -97,6 +97,43 @@
   .smart-demo h3 { margin: 0 0 6px; font-size: 20px; font-weight: 700; }
   .smart-demo p { margin: 0 0 16px; font-size: 13.5px; opacity: .88; max-width: 420px; line-height: 1.5; }
   .smart-demo .cta { display: inline-block; padding: 9px 18px; border-radius: 999px; background: #fff; color: #1B2B5B; font-weight: 700; font-size: 13px; }
+
+  /* Templates modal */
+  .modal-bg {
+    position: fixed; inset: 0; z-index: 200; padding: 24px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(15,23,42,.55); backdrop-filter: blur(4px);
+  }
+  .modal-bg[hidden] { display: none; }
+  .modal {
+    width: 100%; max-width: 520px; max-height: calc(100vh - 48px);
+    display: flex; flex-direction: column; overflow: hidden;
+    background: var(--tgse-panel); border-radius: 16px; box-shadow: var(--tgse-shadow-lg);
+  }
+  .modal-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; border-bottom: 1px solid var(--tgse-border);
+  }
+  .modal-title { font-size: 15px; font-weight: 700; color: var(--tgse-ink); }
+  .modal-close {
+    width: 28px; height: 28px; border: 0; border-radius: 6px; cursor: pointer;
+    background: transparent; color: var(--tgse-muted); font-size: 20px; line-height: 1;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .modal-close:hover { background: var(--tgse-hover); color: var(--tgse-ink); }
+  .modal-body { padding: 20px; overflow-y: auto; }
+  .modal-intro { font-size: 12.5px; color: var(--tgse-muted); line-height: 1.5; margin-bottom: 14px; }
+  .tpl-list { display: grid; gap: 8px; }
+  .tpl-card {
+    border: 1px solid var(--tgse-border); border-radius: 10px; padding: 12px 14px;
+    background: var(--tgse-panel-2); text-align: left; cursor: pointer; font-family: inherit;
+    display: flex; align-items: flex-start; gap: 12px; transition: border-color .15s ease, transform .15s ease;
+  }
+  .tpl-card:hover { border-color: var(--tgse-brand); transform: translateY(-1px); }
+  .tpl-ico { flex: none; width: 30px; height: 30px; color: var(--tgse-brand); }
+  .tpl-ico svg { width: 30px; height: 30px; }
+  .tpl-name { font-size: 13px; font-weight: 700; color: var(--tgse-ink); margin-bottom: 2px; }
+  .tpl-desc { font-size: 12px; color: var(--tgse-muted); line-height: 1.45; }
 </style>
 </head>
 <body>
@@ -378,6 +415,20 @@
 
 </div>
 
+<!-- Templates picker -->
+<div class="modal-bg" id="tplModal" hidden>
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">Start from a template</span>
+      <button class="modal-close" data-close="tplModal" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-intro">Pick a recipe to fill in the rules and settings. It is a starting point, so tweak anything after.</div>
+      <div class="tpl-list" id="tplList"></div>
+    </div>
+  </div>
+</div>
+
 <!-- Shell behaviour (must come before the editor's own script) -->
 <script src="/editor-shell.js"></script>
 
@@ -444,7 +495,7 @@
       document.getElementById('previewPage').setAttribute('data-theme', isDark ? 'dark' : 'light');
     },
     onAIBuild: () => tgse.toast('The AI rule builder is coming in a later release', 'ok'),
-    onTemplates: () => tgse.toast('Templates are coming in a later release', 'ok'),
+    onTemplates: () => openModal('tplModal'),
     onLoginSuccess: () => {
       loadFromUrl();
       if (typeof window.initSmartSectionTour === 'function') window.initSmartSectionTour();
@@ -765,6 +816,115 @@
     utmIn.addEventListener('change', () => renderPreview());
   }
   wireSimControls();
+
+  /* ------------------------------------------------------------------ *
+   * Templates — starter recipes. Applying one resets to a clean config
+   * and fills in the recipe's rules and settings; the saved widget id is
+   * preserved so an existing widget is not orphaned.
+   * ------------------------------------------------------------------ */
+
+  const TPL_BASE = { match: 'all', rules: [], dismissible: false, dismissDays: 30, maxShows: 0, reveal: 'fade', debug: false };
+
+  const TPL_ICONS = {
+    exit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>',
+    clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+    phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg>',
+    back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>',
+    star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+    weekend: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+    tag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>',
+  };
+
+  const TEMPLATES = [
+    {
+      name: 'Exit-intent offer', icon: TPL_ICONS.exit, suggest: 'Exit-intent offer',
+      desc: 'Show a last-chance offer only as the visitor moves to leave the page.',
+      cfg: { match: 'all', rules: [{ type: 'exitIntent' }], dismissible: true, dismissDays: 14, reveal: 'fade' },
+    },
+    {
+      name: 'Office hours only', icon: TPL_ICONS.clock, suggest: 'Office hours message',
+      desc: 'Show a "we are online now" message on weekdays between 9am and 5pm, visitor local time.',
+      cfg: { match: 'all', rules: [{ type: 'dayOfWeek', days: [1, 2, 3, 4, 5] }, { type: 'timeOfDay', from: '09:00', to: '17:00' }] },
+    },
+    {
+      name: 'Mobile-only promo', icon: TPL_ICONS.phone, suggest: 'Mobile promo',
+      desc: 'Show app or mobile-specific content to phone visitors only.',
+      cfg: { match: 'all', rules: [{ type: 'device', devices: ['mobile'] }] },
+    },
+    {
+      name: 'Welcome back', icon: TPL_ICONS.back, suggest: 'Returning visitor welcome',
+      desc: 'Greet returning visitors with a message new visitors will not see.',
+      cfg: { match: 'all', rules: [{ type: 'visitorType', value: 'returning' }] },
+    },
+    {
+      name: 'First-time greeting', icon: TPL_ICONS.star, suggest: 'New visitor greeting',
+      desc: 'Show an intro to first-time visitors only, with a dismiss button.',
+      cfg: { match: 'all', rules: [{ type: 'visitorType', value: 'new' }], dismissible: true, dismissDays: 30 },
+    },
+    {
+      name: 'Weekend special', icon: TPL_ICONS.weekend, suggest: 'Weekend special',
+      desc: 'Show a weekend-only offer on Saturdays and Sundays.',
+      cfg: { match: 'all', rules: [{ type: 'dayOfWeek', days: [0, 6] }] },
+    },
+    {
+      name: 'Campaign traffic', icon: TPL_ICONS.tag, suggest: 'Campaign message',
+      desc: 'Match visitors arriving from one campaign. Set the utm_source after applying.',
+      cfg: { match: 'all', rules: [{ type: 'utm', param: 'source', match: 'is', value: 'newsletter' }] },
+    },
+  ];
+
+  function applyTemplate(t) {
+    const keepId = C.widgetId;
+    C = Object.assign({}, TPL_BASE, JSON.parse(JSON.stringify(t.cfg)));
+    if (keepId) C.widgetId = keepId;
+    const nameInput = document.getElementById('name-input');
+    if (t.suggest && !nameInput.value.trim()) nameInput.value = t.suggest;
+    dirty();
+    renderAll();
+    closeModal('tplModal');
+    tgse.toast('Template applied', 'ok');
+  }
+
+  function buildTemplates() {
+    const list = document.getElementById('tplList');
+    list.textContent = '';
+    TEMPLATES.forEach((t) => {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'tpl-card';
+      const ico = document.createElement('span');
+      ico.className = 'tpl-ico';
+      ico.setAttribute('aria-hidden', 'true');
+      ico.innerHTML = t.icon; // hardcoded SVG constant, never user or config data
+      const body = document.createElement('div');
+      const name = document.createElement('div');
+      name.className = 'tpl-name';
+      name.textContent = t.name;
+      const desc = document.createElement('div');
+      desc.className = 'tpl-desc';
+      desc.textContent = t.desc;
+      body.appendChild(name);
+      body.appendChild(desc);
+      card.appendChild(ico);
+      card.appendChild(body);
+      card.addEventListener('click', () => applyTemplate(t));
+      list.appendChild(card);
+    });
+  }
+
+  function openModal(id) { document.getElementById(id).removeAttribute('hidden'); }
+  function closeModal(id) { document.getElementById(id).setAttribute('hidden', ''); }
+
+  document.querySelectorAll('[data-close]').forEach((btn) => {
+    btn.addEventListener('click', () => closeModal(btn.getAttribute('data-close')));
+  });
+  document.getElementById('tplModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('tplModal')) closeModal('tplModal');
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal('tplModal');
+  });
+  buildTemplates();
 
   /* ------------------------------------------------------------------ *
    * Preview — the real widget in preview mode: content always visible,

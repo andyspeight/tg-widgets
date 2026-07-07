@@ -111,10 +111,15 @@ single AND/OR group are the locked v1 scope — no variant/controller modes.
   widget passes it to the engine so the badge shows what that visitor would get.
   Simulator state is held outside the saved config, so it never marks dirty.
 - `public/tour-smartsection.js` — guided setup tour (house contract:
-  `tgse.tour` / `tgse.tourLauncher` / `window.initSmartSectionTour`), 8 steps
-  across the rule builder, the simulator, dismissal/frequency, preview, save
-  and embed. Loaded after `editor-tour.js`; no vercel header block needed
-  (tour files are served by the generic static rule).
+  `tgse.tour` / `tgse.tourLauncher` / `window.initSmartSectionTour`), 9 steps
+  across templates, the rule builder, the simulator, dismissal/frequency,
+  preview, save and embed. Loaded after `editor-tour.js`; no vercel header
+  block needed (tour files are served by the generic static rule).
+- Templates: the editor's Templates button opens a picker of 7 starter recipes
+  (exit-intent offer, office hours, mobile-only, welcome back, first-time
+  greeting, weekend special, campaign traffic). Applying one resets to a clean
+  config, fills in the recipe's rules and settings, and preserves the saved
+  widget id. Follows the house modal pattern (`#tplModal`, `.tpl-card`).
 - `public/demo-smartsection.html` — demo page (five wrapped bands: dismissible,
   office hours, mobile only, returning visitors, real exit intent)
 - `api/widget-config.js` — `'Smart Section'` in `ALLOWED_WIDGET_TYPES`,
