@@ -173,6 +173,35 @@ function eq(actual, expected, msg) {
     eq(el.getAttribute('data-tgss-state'), null, 'state attribute cleared');
   });
 
+  await test('11. preview simulation: a returning-visitor context makes a returning-only rule read visible', async () => {
+    const win = setup('<section id="s">Welcome back</section>', { preview: true });
+    const el = win.document.getElementById('s');
+    win.__TG_PREVIEW_CTX__ = { returning: true };
+    new win.TGSmartSectionWidget(el, { rules: [{ type: 'visitorType', value: 'returning' }] });
+    await tick();
+    eq(el.getAttribute('data-tgss-state'), 'shown', 'content still shown in preview');
+    const badge = el.querySelector('[data-tgss-ui="badge"]');
+    eq(badge.textContent.indexOf('visible to this visitor') !== -1, true, 'badge reads visible for a simulated returning visitor');
+  });
+
+  await test('12. preview simulation: device context flips a mobile-only rule between hidden and visible', async () => {
+    const desk = setup('<section id="s">Mobile only</section>', { preview: true });
+    const deskEl = desk.document.getElementById('s');
+    desk.__TG_PREVIEW_CTX__ = { device: 'desktop' };
+    new desk.TGSmartSectionWidget(deskEl, { rules: [{ type: 'device', devices: ['mobile'] }] });
+    await tick();
+    const deskBadge = deskEl.querySelector('[data-tgss-ui="badge"]');
+    eq(deskBadge.textContent.indexOf('hidden for this visitor') !== -1, true, 'desktop sim reads hidden under a mobile-only rule');
+
+    const mob = setup('<section id="s2">Mobile only</section>', { preview: true });
+    const mobEl = mob.document.getElementById('s2');
+    mob.__TG_PREVIEW_CTX__ = { device: 'mobile' };
+    new mob.TGSmartSectionWidget(mobEl, { rules: [{ type: 'device', devices: ['mobile'] }] });
+    await tick();
+    const mobBadge = mobEl.querySelector('[data-tgss-ui="badge"]');
+    eq(mobBadge.textContent.indexOf('visible to this visitor') !== -1, true, 'mobile sim flips the same rule to visible');
+  });
+
   console.log('');
   console.log(passed + ' passed, ' + failed + ' failed');
   process.exit(failed ? 1 : 0);
