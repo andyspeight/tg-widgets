@@ -422,6 +422,8 @@
 </div>
 
 <script src="/editor-shell.js"></script>
+<script src="/editor-tour.js"></script>
+<script src="/tour-consent.js"></script>
 
 <script>
   // The widget config — edited through the sidebar, rendered live into the
@@ -467,7 +469,7 @@
     onAIBuild: () => tgse.toast('The AI builder is not available for this widget yet', 'ok'),
     onTemplates: openTemplates,
     onThemeToggle: () => { pageDark = !pageDark; render(); },
-    onLoginSuccess: () => loadFromUrl(),
+    onLoginSuccess: () => { loadFromUrl(); if (typeof window.initConsentTour === 'function') window.initConsentTour(); },
   });
 
   function dirty() { shell.markDirty(); render(); }
@@ -784,9 +786,10 @@
   // calling tgse.isLoggedIn() synchronously races the async cookie check).
   document.addEventListener('DOMContentLoaded', () => {
     if (window.tgse && typeof window.tgse.onReady === 'function') {
-      window.tgse.onReady(() => { if (tgse.isLoggedIn()) loadFromUrl(); });
+      window.tgse.onReady(() => { if (tgse.isLoggedIn()) { loadFromUrl(); if (typeof window.initConsentTour === 'function') window.initConsentTour(); } });
     } else if (tgse.isLoggedIn()) {
       loadFromUrl();
+      if (typeof window.initConsentTour === 'function') window.initConsentTour();
     }
     syncControls();
     render();
