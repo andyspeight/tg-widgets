@@ -122,6 +122,14 @@ single AND/OR group are the locked v1 scope — no variant/controller modes.
   widget id. Follows the house modal pattern (`#tplModal`, `.tpl-card`).
 - `public/demo-smartsection.html` — demo page (five wrapped bands: dismissible,
   office hours, mobile only, returning visitors, real exit intent)
+- `api/widget-ai.js` — `'SMART SECTION'` added to the shared AI endpoint:
+  `ALLOWED_WIDGET_TYPES`, a `buildSmartSectionPrompt` (rules only, no copy), and
+  `sanitiseSmartSectionConfig` wired into both dispatches. Reuses the existing
+  Anthropic call and per-plan daily caps (Ignite 40, Bespoke 100). The editor's
+  AI button turns a plain-English audience description into rules.
+- `api/_lib/smartsection-rules.js` — the trust boundary: `sanitiseSmartSectionConfig`
+  whitelists rule types and fields and clamps numbers, so nothing the model
+  returns reaches a client unchecked. Dependency-free and unit-tested.
 - `api/widget-config.js` — `'Smart Section'` in `ALLOWED_WIDGET_TYPES`,
   `PLAN_WIDGET_LIMITS` (`{ Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 }`) and
   slug aliases
@@ -135,6 +143,9 @@ single AND/OR group are the locked v1 scope — no variant/controller modes.
 - `tests/test-integration.cjs` — 12 jsdom integration tests (jsdom is a
   devDependency; `runScripts: 'outside-only'`), the last two covering the
   preview-context simulation
+- `tests/test-ai-rules.cjs` — 10 tests for `sanitiseSmartSectionConfig` (the AI
+  trust boundary): clean pass-through, dropped unknown types, malformed fields,
+  clamps, injection and prototype-pollution guards
 
 Run tests: `npm run test:smartsection`
 

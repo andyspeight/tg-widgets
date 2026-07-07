@@ -53,6 +53,7 @@
  */
 
 import { requireAuth, setCors } from './_auth.js';
+import { sanitiseSmartSectionConfig } from './_lib/smartsection-rules.js';
 
 // ═══════════════════════════════════════════════════════════════════
 // CONSTANTS
@@ -65,7 +66,7 @@ const FETCH_TIMEOUT_MS = 30_000;
 const PROMPT_MIN_LEN = 5;
 const PROMPT_MAX_LEN = 1000;
 
-const ALLOWED_WIDGET_TYPES = ['FAQ', 'PRICING', 'REVIEWS', 'SPOTLIGHT', 'WEATHER', 'COUNTDOWN TIMER'];
+const ALLOWED_WIDGET_TYPES = ['FAQ', 'PRICING', 'REVIEWS', 'SPOTLIGHT', 'WEATHER', 'COUNTDOWN TIMER', 'SMART SECTION'];
 const ALLOWED_TONES        = ['warm', 'professional', 'casual'];
 
 // Per-plan daily caps. Adjust here without touching logic.
@@ -227,7 +228,7 @@ function parseBody(body) {
   // widgetType — strict enum
   const widgetType = String(body.widgetType || '').toUpperCase();
   if (!ALLOWED_WIDGET_TYPES.includes(widgetType)) {
-    return { error: 'Invalid widgetType. Must be FAQ, PRICING, REVIEWS, SPOTLIGHT, WEATHER or COUNTDOWN TIMER.' };
+    return { error: 'Invalid widgetType. Must be FAQ, PRICING, REVIEWS, SPOTLIGHT, WEATHER, COUNTDOWN TIMER or SMART SECTION.' };
   }
 
   // prompt — trimmed, length-bounded string
@@ -373,6 +374,7 @@ function buildPrompt(widgetType, userPrompt, options) {
   if (widgetType === 'SPOTLIGHT') return buildSpotlightPrompt(userPrompt);
   if (widgetType === 'WEATHER')   return buildWeatherPrompt(userPrompt);
   if (widgetType === 'COUNTDOWN TIMER') return buildCountdownPrompt(userPrompt);
+  if (widgetType === 'SMART SECTION')   return buildSmartSectionPrompt(userPrompt);
   throw new Error('Unreachable'); // caught by input validation above
 }
 
@@ -546,6 +548,56 @@ Rules:
   return { system: SYSTEM_SAFETY, userMsg };
 }
 
+function buildSmartSectionPrompt(userPrompt) {
+  // Smart Section: the AI writes NO copy. It only translates a plain-English
+  // audience description into targeting rules. Whatever it returns is run
+  // through sanitiseSmartSectionConfig() before it reaches the client, so the
+  // schema here is advisory — the sanitiser is the real guard.
+  const userMsg = `Widget type: SMART SECTION
+
+The Smart Section widget shows or hides a section of a travel website depending on WHO the visitor is and WHEN they arrive. Your only task is to translate the plain-English audience description below into a targeting rule configuration. You do NOT write any copy or content.
+
+Use ONLY these rule types and field values:
+- { "type": "visitorType", "value": "new" | "returning" }  — first-time versus returning visitors
+- { "type": "timeOfDay", "from": "HH:MM", "to": "HH:MM" }  — 24-hour visitor-local time; a window may cross midnight, e.g. "22:00" to "06:00"
+- { "type": "dayOfWeek", "days": [0-6] }  — 0 = Sunday, 1 = Monday, ... 6 = Saturday
+- { "type": "device", "devices": ["mobile" | "tablet" | "desktop"] }
+- { "type": "utm", "param": "source" | "medium" | "campaign" | "referrer", "match": "is" | "contains", "value": "text" }  — matches the visit's UTM tags or referring URL
+- { "type": "exitIntent" }  — fires as the visitor moves to leave the page
+
+Combine the rules with "match": "all" (every rule must pass) or "any" (at least one passes). Default to "all".
+
+Optional behaviour fields:
+- "dismissible": true or false — adds a close button. Default false. Use true for offers or promos a visitor might want to dismiss.
+- "dismissDays": integer 0-365 — how long a dismissal is remembered. Default 30. Only meaningful when dismissible is true.
+- "maxShows": integer 0-1000 — cap per visitor, 0 means unlimited. Default 0.
+- "reveal": "fade" or "none". Default "fade".
+
+<audience_description>
+${userPrompt}
+</audience_description>
+
+Return a single JSON object with exactly this shape, including only the rules the description calls for:
+{
+  "match": "all",
+  "rules": [ { "type": "device", "devices": ["mobile"] } ],
+  "dismissible": false,
+  "dismissDays": 30,
+  "maxShows": 0,
+  "reveal": "fade"
+}
+
+Rules:
+- Use ONLY the rule types and field values listed above. Never invent a rule type or field.
+- Include only rules the description actually implies. If it implies no targeting at all, return an empty "rules" array.
+- For utm: prefer "source" unless the description clearly means medium, campaign or referrer. Use "contains" for partial or brand matches (e.g. "visitors from Facebook" becomes referrer contains "facebook"); use "is" for an exact campaign or source name.
+- "days" must be integers 0-6. Times must be "HH:MM" 24-hour strings.
+- Return ONLY the JSON object, no explanation and no markdown fences.
+- If the description asks for targeting Smart Section cannot express (for example a specific country, a logged-in state, or a particular page URL), do not guess. Instead return { "error": "one short sentence naming what is not supported" }.`;
+
+  return { system: SYSTEM_SAFETY, userMsg };
+}
+
 function buildWeatherPrompt(userPrompt) {
   // Weather content (name, climate, season) always comes from the Destination
   // Content database. The AI picks presentation: palette, layout, temperature
@@ -656,6 +708,7 @@ function parseAndValidate(widgetType, rawText, options) {
   if (widgetType === 'SPOTLIGHT') return validateSpotlightLoose(obj);
   if (widgetType === 'WEATHER')   return validateWeatherLoose(obj);
   if (widgetType === 'COUNTDOWN TIMER') return validateCountdownLoose(obj);
+  if (widgetType === 'SMART SECTION')   return sanitiseSmartSectionConfig(obj);
   throw new Error('Unknown widgetType in validator');
 }
 

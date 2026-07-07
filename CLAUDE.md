@@ -121,7 +121,7 @@ block per public script file (copy the `/widget-hours.js` block).
 
 - Widget suites: `tests/*.cjs` (plain Node; jsdom is a devDependency for DOM
   integration tests). Smart Section: `npm run test:smartsection` (27 unit +
-  12 integration).
+  12 integration + 10 AI-validator).
 - TG Slicer: `node test/run-smoke.mjs tg-slicer <fixture-prefix>` (Playwright;
   see the slicer handover for setup).
 - When you add a capability, add a test that exercises it and re-run the
