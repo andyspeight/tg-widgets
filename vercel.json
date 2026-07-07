@@ -71,6 +71,18 @@
       "schedule": "0 4 * * 1"
     }
   ],
+  "redirects": [
+    {
+      "source": "/home.html",
+      "destination": "/dashboard.html",
+      "permanent": true
+    },
+    {
+      "source": "/home",
+      "destination": "/dashboard.html",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/admin",

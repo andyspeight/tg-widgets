@@ -2,7 +2,8 @@
  * GET /api/auth/companies
  *
  * Returns the list of companies (clients) the current authenticated user
- * is linked to. Powers the company-switcher dropdown on /home.html.
+ * is linked to. Powers the company-switcher dropdown on the dashboard
+ * launchpad (/dashboard.html).
  *
  * Response shape:
  *   {
