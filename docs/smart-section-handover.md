@@ -161,6 +161,24 @@ Run tests: `npm run test:smartsection`
    `?id=`, check the embed code; open `/demo-smartsection` and try the exit
    intent band and the dismiss + reset flow.
 
+## Shared trigger engine (Phase 2, shipped)
+
+`tgse-rules.js` now also owns the suite's event triggers via
+`tgseRules.armTrigger(spec, onFire)` — load, time, scroll, exit-intent, click,
+inactivity and pageviews — the canonical version of the logic Popup used to
+inline. It reuses the existing exit-intent armer and takes an injectable
+storage adapter so a caller can persist the pageviews count under its own key.
+
+`widget-popup.js` (v1.0.3) delegates to `tgseRules.armTrigger` when the engine
+is already on the page (any Smart Section page, and more over time), passing its
+own `readKey`/`writeKey` and `pv_<widgetId>` session key so behaviour is
+identical. Pages without the engine keep Popup's inline `attachTrigger`
+unchanged — no extra request, no timing change, existing popups unaffected.
+`tests/test-triggers.cjs` (12 jsdom tests) pins every trigger's fire condition
+and confirms Popup both delegates with a correctly-mapped spec and falls back
+cleanly when the engine is absent. Live smoke (real popups firing through the
+engine) still needs a signed-in check — not drivable headlessly here.
+
 ## Phase 2 (in priority order, Andy to confirm)
 
 1. Migrate Popup's triggers onto `tgseRules` — proves the platform story.

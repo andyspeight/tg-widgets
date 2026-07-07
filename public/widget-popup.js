@@ -80,7 +80,7 @@
     } catch (e) { /* fall through */ }
     return '/api/popup-lead';
   })();
-  const VERSION = '1.0.2';
+  const VERSION = '1.0.3';
   const STORAGE_PREFIX = 'tgp_';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -460,6 +460,24 @@
   // ---------- Trigger registry ----------
   // Each trigger returns a Promise that resolves when the trigger fires.
   // It also receives an "abort" callback so we can cancel pending triggers.
+  // Translate a popup config into the shared engine's armTrigger spec. The
+  // pageviews count is persisted through Popup's own storage helpers (tgp_
+  // prefix, session) under the exact key the inline path uses, so a page with
+  // the engine counts pageviews identically to one without it.
+  function triggerSpec(cfg) {
+    return {
+      type: cfg.trigger || 'load',
+      delay: cfg.triggerDelay,
+      scrollPercent: cfg.triggerScrollPercent,
+      selector: cfg.triggerSelector,
+      inactivitySeconds: cfg.triggerInactivitySeconds,
+      pageviews: cfg.triggerPageviews,
+      widgetId: cfg.widgetId,
+      storage: { read: readKey, write: writeKey },
+      storageKey: 'pv_' + (cfg.widgetId || 'default'),
+    };
+  }
+
   function attachTrigger(cfg, onFire) {
     const trigger = cfg.trigger || 'load';
     let aborted = false;
@@ -1158,7 +1176,17 @@
         return;
       }
 
-      const cleanup = attachTrigger(this.cfg, () => this.open());
+      // Prefer the shared rule engine's trigger system when it is already on
+      // the page (Smart Section and other TG widgets load it). The engine path
+      // is the same logic as attachTrigger below, and the pageviews count is
+      // persisted under Popup's own key, so behaviour is identical. Pages
+      // without the engine keep using the inline implementation unchanged —
+      // existing popups are never affected and no extra request is added.
+      const fire = () => this.open();
+      const engine = window.tgseRules;
+      const cleanup = (engine && typeof engine.armTrigger === 'function')
+        ? engine.armTrigger(triggerSpec(this.cfg), fire)
+        : attachTrigger(this.cfg, fire);
       this.cleanupFns.push(cleanup);
     }
 

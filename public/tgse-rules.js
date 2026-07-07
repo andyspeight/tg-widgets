@@ -1,5 +1,5 @@
 /**
- * Travelgenix Rule Engine (tgse-rules) v1.0.0
+ * Travelgenix Rule Engine (tgse-rules) v1.1.0
  * Shell-level, reusable visitor-rule engine for the TG widget suite.
  * Zero dependencies. Loaded once per page. No eval, no Function constructor:
  * rules are pure data, evaluated by a hardcoded dispatch table of named
@@ -39,7 +39,7 @@
   var root = typeof globalThis !== 'undefined' ? globalThis : window;
   if (root.tgseRules) return; // load once per page
 
-  var VERSION = '1.0.0';
+  var VERSION = '1.1.0';
   var STORAGE_PREFIX = 'tgsr_';
 
   /* ------------------------------------------------------------------ *
@@ -313,6 +313,118 @@
     exitIntent: armExitIntent,
   };
 
+  /* ------------------------------------------------------------------ *
+   * armTrigger(spec, onFire) — the shared "when to fire" primitive for the
+   * suite. Fires onFire exactly once when the trigger condition is met, and
+   * returns a cleanup function. This is the canonical implementation of the
+   * event triggers widgets have historically inlined (Popup's load / time /
+   * scroll / exit-intent / click / inactivity / pageviews); centralised here
+   * so the whole suite shares one tested version.
+   *
+   * spec = {
+   *   type: 'load'|'time'|'scroll'|'exitIntent'|'click'|'inactivity'|'pageviews',
+   *   delay,               // ms — load (default 0) and time (default 5000)
+   *   scrollPercent,       // scroll (default 50)
+   *   selector,            // click (required; no selector = never fires)
+   *   inactivitySeconds,   // inactivity (default 30, min 5)
+   *   pageviews,           // pageviews (default 2, min 1)
+   *   widgetId,            // used to build the default pageviews storage key
+   *   storage, storageKey, // optional: a { read, write } adapter + key so a
+   *                        // caller can persist the pageviews count under its
+   *                        // own prefix (behaviour parity with a migrating widget)
+   * }
+   *
+   * Unlike armDeferred, arming failure does NOT fire — a trigger firing on
+   * error could surface a popup at the wrong moment. The caller keeps its own
+   * fallback.
+   */
+  function armTrigger(spec, onFire) {
+    spec = (spec && typeof spec === 'object') ? spec : {};
+    var type = spec.type || 'load';
+    var aborted = false;
+    var cleanup = function () { aborted = true; };
+
+    function fire() {
+      if (aborted) return;
+      aborted = true;
+      try { onFire(); } catch (e) { /* consumer error — not ours */ }
+    }
+
+    var doc = root.document;
+
+    try {
+      if (type === 'load') {
+        var tl = setTimeout(fire, Math.max(0, spec.delay || 0));
+        cleanup = function () { aborted = true; clearTimeout(tl); };
+
+      } else if (type === 'time') {
+        var tt = setTimeout(fire, Math.max(0, spec.delay || 5000));
+        cleanup = function () { aborted = true; clearTimeout(tt); };
+
+      } else if (type === 'scroll') {
+        var pct = Math.max(1, Math.min(100, spec.scrollPercent || 50));
+        var onScroll = function () {
+          if (aborted) return;
+          var docH = Math.max(doc.body.scrollHeight, doc.documentElement.scrollHeight) - root.innerHeight;
+          if (docH <= 0) return;
+          var scrolled = (root.scrollY || root.pageYOffset) / docH * 100;
+          if (scrolled >= pct) fire();
+        };
+        root.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+        cleanup = function () { aborted = true; root.removeEventListener('scroll', onScroll); };
+
+      } else if (type === 'exitIntent' || type === 'exit-intent') {
+        var disarm = armExitIntent(fire);
+        cleanup = function () { aborted = true; disarm(); };
+
+      } else if (type === 'click') {
+        var sel = String(spec.selector || '').trim();
+        if (!sel) return cleanup;
+        var onClick = function (e) {
+          if (aborted) return;
+          try {
+            if (e.target && e.target.closest && e.target.closest(sel)) {
+              e.preventDefault();
+              fire();
+            }
+          } catch (err) { /* bad selector — ignore */ }
+        };
+        doc.addEventListener('click', onClick, true);
+        cleanup = function () { aborted = true; doc.removeEventListener('click', onClick, true); };
+
+      } else if (type === 'inactivity') {
+        var secs = Math.max(5, spec.inactivitySeconds || 30);
+        var timeout;
+        var reset = function () {
+          if (aborted) return;
+          clearTimeout(timeout);
+          timeout = setTimeout(fire, secs * 1000);
+        };
+        var IDLE_EVENTS = ['mousemove', 'keydown', 'scroll', 'touchstart'];
+        IDLE_EVENTS.forEach(function (ev) { doc.addEventListener(ev, reset, { passive: true }); });
+        reset();
+        cleanup = function () {
+          aborted = true;
+          clearTimeout(timeout);
+          IDLE_EVENTS.forEach(function (ev) { doc.removeEventListener(ev, reset); });
+        };
+
+      } else if (type === 'pageviews') {
+        var required = Math.max(1, spec.pageviews || 2);
+        var store = (spec.storage && typeof spec.storage.read === 'function') ? spec.storage : { read: readKey, write: writeKey };
+        var key = spec.storageKey || ('trig_pv_' + (spec.widgetId || 'default'));
+        var current = (store.read(key, 'session') || 0) + 1;
+        store.write(key, current, 'session');
+        if (current >= required) fire();
+      }
+    } catch (e) {
+      try { console.warn('[tgse-rules] armTrigger failed to arm', e); } catch (e2) { /* noop */ }
+    }
+
+    return cleanup;
+  }
+
   function armDeferred(group, cb) {
     var cleanup = [];
     var fired = false;
@@ -350,6 +462,8 @@
     deferrableTypes: Object.keys(DEFERRABLE),
     evaluate: evaluate,
     armDeferred: armDeferred,
+    armTrigger: armTrigger,
+    triggerTypes: ['load', 'time', 'scroll', 'exitIntent', 'click', 'inactivity', 'pageviews'],
     getDevice: getDevice,
     isReturningVisitor: isReturningVisitor,
     getEntrySource: getEntrySource,
