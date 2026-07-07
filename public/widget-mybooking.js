@@ -2100,6 +2100,9 @@
     @keyframes tgm-fadeup { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
     .tgm-hero { position: relative; height: 380px; border-radius: var(--tgm-radius-2xl); overflow: hidden; box-shadow: 0 20px 25px rgba(0,0,0,.08), 0 10px 10px rgba(0,0,0,.04); margin-bottom: 16px; }
     .tgm-hero-img { position: absolute; inset: 0; background-size: cover; background-position: center; transform: scale(1.04); animation: tgm-zoom 24s ease-in-out infinite alternate; }
+    /* Full-image mode (display.showFullImage): show the whole image, filling the
+       frame even if it stretches. Drop the crop-zoom so nothing is cut off. */
+    .tgm-hero-img.tgm-hero-img--full { background-size: 100% 100%; transform: none; animation: none; }
     @keyframes tgm-zoom { to { transform: scale(1.1); } }
     .tgm-hero-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(15,23,42,.10) 0%, rgba(15,23,42,.20) 40%, rgba(15,23,42,.85) 100%); }
     .tgm-hero-content { position: absolute; inset: 0; padding: 32px; display: flex; flex-direction: column; justify-content: space-between; color: #fff; }
@@ -3724,7 +3727,7 @@
       <div class="tgm-found">
         ${heroUrl ? `
         <div class="tgm-hero">
-          <div class="tgm-hero-img" data-tgm-hero-img style="background-image:url('${esc(heroUrl)}')"></div>
+          <div class="tgm-hero-img${c.display?.showFullImage ? ' tgm-hero-img--full' : ''}" data-tgm-hero-img style="background-image:url('${esc(heroUrl)}')"></div>
           <div class="tgm-hero-overlay"></div>
           <div class="tgm-hero-content">
             <div class="tgm-hero-top">
