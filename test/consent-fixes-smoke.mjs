@@ -120,9 +120,18 @@ const fixtureUrl = (cfg) => BASE + '/fixture?cfg=' + encodeURIComponent(JSON.str
     contentType: 'application/json',
     body: JSON.stringify({ ok: true, user: { email: 'demo@travelgenix.io', fullName: 'Demo', role: 'admin' }, client: { clientName: 'Demo', recordId: 'rec1', packageName: 'Ignite' }, permissions: [] }),
   }));
+  const cfgGets = [];
+  page.on('request', (req) => {
+    const u = req.url();
+    if (req.method() === 'GET' && u.includes('/api/widget-config')) cfgGets.push(u);
+  });
   await page.goto(BASE + '/editor-consent.html?id=tgw_demo');
   await page.waitForFunction(() => window.__consentReady || document.getElementById('in-privacy-url'));
   await page.waitForTimeout(900); // let load + sync settle
+
+  // Reopen must bypass the CDN edge cache, or a just-saved setting reads back
+  // stale. The editor's config GET must carry a unique cache-buster param.
+  ok(cfgGets.some((u) => /[?&]_=\d+/.test(u)), 'editor config load busts the edge cache (unique param)');
 
   // #4: the font picker reflects the saved Poppins, not the DM Sans default.
   const fp = await page.evaluate(() => window.tgse && tgse._fontPicker ? tgse._fontPicker.value : null);
