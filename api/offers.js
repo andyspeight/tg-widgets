@@ -10,13 +10,31 @@
 // Travelgenix demo credentials so the public marketing demo on tg-widgets.vercel.app
 // keeps working without configuration.
 
+import { timingSafeEqual } from 'crypto';
 import { setCors, lookupClientCredentialsByAppId } from './_auth.js';
+import { evaluatePublicRateLimit } from './_lib/rate-limit-public.js';
+import { logWidgetEvent } from './_lib/telemetry.js';
 
 const TRAVELIFY_ENDPOINT = 'https://api.travelify.io/widgetsvc/traveloffers';
 
 // Travelgenix demo credentials (App 250) — published in Travelify docs.
 const DEMO_APP_ID = '250';
 const DEMO_PUBLIC_KEY = 'A41D180E-CBFE-4E30-A47D-FAAB424A650D';
+
+// The world-map cache-refresh cron (api/cron/refresh-map-offers.js) calls this
+// proxy server-side, once per country, at high volume from our own Vercel
+// egress IP. It carries a shared-secret header so we can recognise it and skip
+// the per-IP rate limit — otherwise we would throttle our own cache fill. The
+// secret is server-only (never shipped to a browser), so this cannot be used by
+// an attacker to bypass the limiter.
+function isInternalCron(req) {
+  const secret = process.env.CRON_SECRET || '';
+  const got = req.headers['x-tgs-internal'] || '';
+  if (!secret || !got) return false;
+  const a = Buffer.from(String(got));
+  const b = Buffer.from(secret);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
 
 export default async function handler(req, res) {
   setCors(res);
@@ -26,6 +44,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ success: false, error: 'Method not allowed' });
   }
 
+  const startedAt = Date.now();
+
   // Capture the real visitor's user-agent — Travelify logs this for analytics
   // and recommends sending it via customerUserAgent in the body
   const customerUserAgent = req.headers['user-agent'] || 'Travelgenix-Widget/1.0';
@@ -33,10 +53,55 @@ export default async function handler(req, res) {
   const body = req.body || {};
 
   // ── Resolve credentials ───────────────────────────────────────────
-  // Strip appId out of the body so it never goes through to Travelify (it
-  // doesn't belong on the request payload — it belongs in the auth header).
-  const { appId: rawAppId, apiKey: _ignoredApiKey, ...travelifyBody } = body;
+  // Strip appId AND _widgetId out of the body so neither goes through to
+  // Travelify. appId belongs in the auth header; _widgetId is ours, added by
+  // the widget purely so we can attribute traffic to a widget/account. Both
+  // are optional — an older widget that sends neither still works.
+  const { appId: rawAppId, apiKey: _ignoredApiKey, _widgetId: rawWidgetId, ...travelifyBody } = body;
   const requestedAppId = rawAppId == null ? '' : String(rawAppId).trim();
+  const widgetId = rawWidgetId == null ? '' : String(rawWidgetId).trim().slice(0, 120);
+
+  // Is this our own internal cache-refresh cron? If so it is exempt from the
+  // per-IP rate limit and kept out of the abuse telemetry (it is known infra,
+  // not a widget or a visitor to monitor).
+  const internal = isInternalCron(req);
+
+  // Attribution resolved as we go, denormalised onto the telemetry row.
+  let accountName = null;
+  let clientId = null;
+
+  // Send the response, then log telemetry. Logging runs after the bytes are
+  // flushed so the client sees zero extra latency; awaiting keeps the Vercel
+  // instance alive long enough for the insert to complete. Never throws.
+  async function done(status, jsonBody) {
+    res.status(status).json(jsonBody);
+    if (internal) return; // our own cache refresh — not abuse telemetry
+    await logWidgetEvent(req, {
+      event: 'offers',
+      widgetId,
+      widgetType: 'Travel Offers',
+      accountName,
+      clientId,
+      status,
+      cacheHit: false, // /api/offers is always a live upstream lookup
+      latencyMs: Date.now() - startedAt,
+    });
+  }
+
+  // ── Rate limit (cross-instance, fail-open) ─────────────────────────
+  // This is the open hole: a single unauthenticated POST returns full live
+  // inventory. Throttle per IP (and per IP+widget) before we do any upstream
+  // work or credential lookup. Fail-open — a Redis blip never blanks a widget.
+  // Skipped for the internal cron so we never throttle our own cache fill.
+  if (!internal) {
+    const rl = await evaluatePublicRateLimit(req, res, { event: 'offers', widgetId });
+    if (!rl.allowed) {
+      return done(429, {
+        success: false,
+        error: `Too many requests. Please slow down and retry in ${rl.retryAfter} second${rl.retryAfter === 1 ? '' : 's'}.`,
+      });
+    }
+  }
 
   let appId;
   let apiKey;
@@ -45,12 +110,13 @@ export default async function handler(req, res) {
   if (!requestedAppId || requestedAppId === DEMO_APP_ID) {
     appId = DEMO_APP_ID;
     apiKey = DEMO_PUBLIC_KEY;
+    accountName = 'Travelgenix Demo';
   } else {
     // Real client: look up by App ID against the Clients table.
     try {
       const creds = await lookupClientCredentialsByAppId(requestedAppId);
       if (!creds) {
-        return res.status(404).json({
+        return done(404, {
           success: false,
           error: 'Unknown client',
           detail: `No Travelgenix client with Travelify App ID ${requestedAppId}`,
@@ -58,9 +124,11 @@ export default async function handler(req, res) {
       }
       appId = creds.appId;
       apiKey = creds.apiKey;
+      accountName = creds.clientName || null;
+      clientId = creds.recordId || null;
     } catch (err) {
       console.error('[offers] credential lookup failed for appId', requestedAppId, '—', err.message);
-      return res.status(500).json({
+      return done(500, {
         success: false,
         error: 'Credential lookup failed',
       });
@@ -131,7 +199,7 @@ export default async function handler(req, res) {
     try {
       data = JSON.parse(responseText);
     } catch {
-      return res.status(502).json({
+      return done(502, {
         success: false,
         error: 'Upstream returned non-JSON response',
         upstreamStatus: upstream.status,
@@ -140,7 +208,7 @@ export default async function handler(req, res) {
     }
 
     if (!upstream.ok) {
-      return res.status(upstream.status).json({
+      return done(upstream.status, {
         success: false,
         error: data?.error || `Upstream returned ${upstream.status}`,
         upstreamStatus: upstream.status,
@@ -148,9 +216,9 @@ export default async function handler(req, res) {
       });
     }
 
-    return res.status(200).json(data);
+    return done(200, data);
   } catch (err) {
-    return res.status(500).json({
+    return done(500, {
       success: false,
       error: err.message || 'Proxy request failed',
     });

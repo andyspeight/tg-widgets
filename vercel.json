@@ -48,6 +48,9 @@
     },
     "api/admin/logo-import.js": {
       "maxDuration": 120
+    },
+    "api/admin/logo-find.js": {
+      "maxDuration": 120
     }
   },
   "crons": [
@@ -72,6 +75,26 @@
     {
       "source": "/admin",
       "destination": "/admin.html"
+    },
+    {
+      "source": "/admin/traffic",
+      "destination": "/admin/traffic.html"
+    },
+    {
+      "source": "/admin/widget-health",
+      "destination": "/admin/widget-health.html"
+    },
+    {
+      "source": "/admin/logo-find",
+      "destination": "/admin/logo-find.html"
+    },
+    {
+      "source": "/admin/logo-library",
+      "destination": "/admin/logo-library.html"
+    },
+    {
+      "source": "/admin/logos",
+      "destination": "/admin/logo-library.html"
     },
     {
       "source": "/brain",
@@ -480,6 +503,14 @@
     {
       "source": "/demo-loader",
       "destination": "/demo-loader.html"
+    },
+    {
+      "source": "/editor-prism",
+      "destination": "/editor-prism.html"
+    },
+    {
+      "source": "/demo-prism",
+      "destination": "/demo-prism.html"
     }
   ],
   "headers": [
@@ -825,6 +856,23 @@
     },
     {
       "source": "/widget-dealbar.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-prism.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",

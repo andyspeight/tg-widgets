@@ -137,8 +137,17 @@ export async function lrange(key, start, stop) {
 export async function setNxEx(key, value, ttlSeconds) {
   if (!configured()) return false;
   try {
-    const url = `${REDIS_URL}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}?NX=true&EX=${Math.max(1, Math.floor(ttlSeconds))}`;
-    const res = await fetch(url, { method: 'POST', headers: { Authorization: `Bearer ${REDIS_TOKEN}` } });
+    // Use the JSON-array command form (value travels in the BODY, not the
+    // URL path). The old path form `/set/{key}/{value}?NX&EX` put the value
+    // in the URL, and a value containing an encoded slash — e.g. a
+    // "/dashboard.html" redirect stored by the Google sign-in flow — tripped
+    // the edge router so the write silently failed (result !== 'OK'). The
+    // body form is safe for any value. (SET returns "OK", or null if NX lost.)
+    const res = await fetch(REDIS_URL, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${REDIS_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(['SET', key, value, 'NX', 'EX', Math.max(1, Math.floor(ttlSeconds))]),
+    });
     if (!res.ok) return false;
     const j = await res.json();
     return j && j.result === 'OK';

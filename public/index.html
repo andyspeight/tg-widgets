@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Travelgenix Widget Suite</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:wght@700&family=Great+Vibes&family=Cinzel:wght@600&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#F7F8FA;--sf:#FFF;--bd:#E5E7EB;--tx:#111827;--sb:#6B7280;--mt:#9CA3AF;--br:#0891B2;--bl:#ECFEFF;--bk:#0E7490;--ac:#7C3AED;--ok:#10B981;--dn:#EF4444;--warn:#F59E0B;--ft:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;--mono:'JetBrains Mono',monospace}
 *{box-sizing:border-box;margin:0;padding:0}body{font-family:var(--ft);background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased}
@@ -625,6 +625,21 @@ const WIDGETS = [
     demoUrl: '/demo-dealbar',
     widgetTag: 'dealbar',
     scriptFile: 'widget-dealbar.js',
+    access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  },
+  {
+    id: 'prism',
+    name: 'Prism',
+    airtableType: 'Prism',  // matches Airtable WidgetType singleSelect option
+    description: 'An editorial hero band. A cream panel with full font control sits beside a row of angled photo slices, each one framed how you like and linked wherever you want. Made for showing off your best destinations.',
+    category: 'Content',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M10 3 8.5 21M16 3l-1.5 18"/>'},
+    color: '#A6792F',
+    editorUrl: '/editor-prism',
+    demoUrl: '/demo-prism',
+    widgetTag: 'prism',
+    scriptFile: 'widget-prism.js',
     access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
   {
@@ -3755,6 +3770,25 @@ function loadMiniPreview(w) {
           </div>
         </div>
       </div>`;
+    return;
+  }
+
+  // Prism is an editorial hero band — awkward to live-mount in a card, so use a
+  // faithful static mockup (same approach as the Deal Bar).
+  if (w.id === 'prism') {
+    const PSL = [['#37bfc4','#0d7a8f','MALDIVES'],['#5c7a97','#20415e','CANADA'],['#e0954f','#7c3f28','KENYA'],['#2f7f9a','#0c3a4c','DUBAI'],['#37c0bf','#12707f','CARIBBEAN']];
+    const pslices = PSL.map((s,i)=>{ const last=i===PSL.length-1; return '<span style="position:relative;flex:1;overflow:hidden;margin-left:'+(i===0?0:-13)+'px;background:linear-gradient(160deg,'+s[0]+','+s[1]+');clip-path:polygon('+(last?'15px 0,100% 0,100% 100%,0 100%':'15px 0,100% 0,calc(100% - 15px) 100%,0 100%')+');"><span style="position:absolute;inset:0;background:linear-gradient(to top,rgba(6,12,22,.6),transparent 46%);"></span><span style="position:absolute;left:0;right:0;bottom:9px;text-align:center;font-family:\'Cinzel\',Georgia,serif;font-weight:600;font-size:8.5px;letter-spacing:.03em;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.5);">'+s[2]+'</span></span>'; }).join('');
+    container.innerHTML =
+      '<div style="width:100%;height:100%;min-height:150px;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.06);">' +
+        '<div style="position:relative;height:172px;background:#fff;overflow:hidden;">' +
+          '<div style="position:absolute;inset:0 0 0 34%;display:flex;background:#fff;z-index:1;">' + pslices + '</div>' +
+          '<div style="position:absolute;inset:0 auto 0 0;width:39%;z-index:2;background:#F4F0E7;clip-path:polygon(0 0,100% 0,90% 100%,0 100%);display:flex;flex-direction:column;justify-content:center;padding:0 16px 0 18px;">' +
+            '<div style="font-family:\'Playfair Display\',Georgia,serif;font-weight:700;font-size:17px;letter-spacing:.05em;color:#1E2E49;line-height:1;">DESTINATIONS</div>' +
+            '<div style="font-family:\'Great Vibes\',cursive;font-size:18px;color:#A6792F;line-height:1.15;margin-top:2px;">Extraordinary Journeys</div>' +
+            '<div style="display:flex;align-items:center;gap:5px;margin-top:8px;"><span style="height:1px;width:26px;background:#A6792F;opacity:.75;"></span><span style="width:5px;height:5px;background:#A6792F;transform:rotate(45deg);"></span><span style="height:1px;width:26px;background:#A6792F;opacity:.75;"></span></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
     return;
   }
 }

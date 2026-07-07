@@ -752,6 +752,18 @@
           </div>
         </div>
         <div class="field-group" id="font-picker-mount"></div>
+        <div class="toggle-row" style="margin-top:14px">
+          <div>
+            <div class="toggle-row-label">Use a font from your website</div>
+            <div class="toggle-row-sub">Type a font your site already loads. If it exists there, the widget uses it instead of the picker above.</div>
+          </div>
+          <label class="switch" id="sw-custom-font"><input type="checkbox"></label>
+        </div>
+        <div class="field-group" id="custom-font-group" style="display:none">
+          <label class="field-label" for="custom-font-family">Website font family</label>
+          <input class="text-input" id="custom-font-family" type="text" maxlength="120" placeholder="e.g. Georgia, 'Helvetica Neue', sans-serif">
+          <div class="field-help">The CSS font-family name as used on your site. Falls back to the system font if the site does not have it.</div>
+        </div>
       </div>
 
       <!-- ====== CONTENT TAB ====== -->
@@ -1047,7 +1059,7 @@
   </div>
 </div>
 
-<script src="/widget-newsletter.js"></script>
+<script src="/widget-newsletter.js?v=1.1.1"></script>
 <script src="/editor-shell.js"></script>
 
 <!-- Guided setup tour (reusable engine + step list) -->
@@ -1093,6 +1105,8 @@
       tabLabel: 'Newsletter',
       verticalSide: 'right',
       fontFamily: 'Inter',
+      customFontEnabled: false,
+      customFontFamily: '',
       theme: { mode: 'light', brand: '#1B2B5B', accent: '#00B4D8', radius: 14 },
       tags: [],
     };
@@ -1395,6 +1409,24 @@
     // Radius
     document.getElementById('radius-slider').value = state.config.theme.radius;
     document.getElementById('radius-value').textContent = state.config.theme.radius;
+    // Font — keep the shell's mounted picker in step with the loaded config
+    syncFontPicker();
+    // Website (free-text) font toggle + field
+    setSwitch('#sw-custom-font', state.config.customFontEnabled);
+    setVal('#custom-font-family', state.config.customFontFamily);
+    const cfGrp = document.getElementById('custom-font-group');
+    if (cfGrp) cfGrp.style.display = state.config.customFontEnabled ? '' : 'none';
+  }
+
+  // Push the current fontFamily back into the shell's font picker. The picker
+  // is mounted once at init with the default font, so when a saved widget
+  // loads (or setConfig replaces the config) the picker must be re-synced or it
+  // keeps showing the default — which is why the saved font looked lost.
+  function syncFontPicker() {
+    try {
+      const p = window.tgse && window.tgse._fontPicker;
+      if (p) p.value = state.config.fontFamily || 'Inter';
+    } catch (e) { /* picker not mounted yet — renderAll runs again after load */ }
   }
 
   function renderContentTab() {
@@ -1899,6 +1931,14 @@
       markDirty();
       updatePreview();
     });
+
+    // Website (free-text) font
+    bindSwitch('#sw-custom-font', (on) => {
+      state.config.customFontEnabled = on;
+      const grp = document.getElementById('custom-font-group');
+      if (grp) grp.style.display = on ? '' : 'none';
+    });
+    bindText('#custom-font-family', v => state.config.customFontFamily = v);
 
     // Content tab — text inputs
     bindText('#title-input', v => state.config.title = v);

@@ -18,8 +18,10 @@
 //
 // =============================================================================
 
-import { applyRateLimit, isValidEmail, sanitiseForFormula } from './_auth.js';
+import { isValidEmail, sanitiseForFormula } from './_auth.js';
 import { dispatchLead } from './_lib/routing/router.js';
+import { evaluatePublicRateLimit } from './_lib/rate-limit-public.js';
+import { logWidgetEvent } from './_lib/telemetry.js';
 
 const ENQUIRIES_BASE_ID = process.env.TG_ENQUIRIES_AIRTABLE_BASE_ID;
 const ENQUIRIES_PAT = process.env.TG_ENQUIRIES_AIRTABLE_PAT;
@@ -118,10 +120,32 @@ export default async function handler(req, res) {
     return;
   }
 
-  // Rate limit by IP
+  const startedAt = Date.now();
   const ip = getClientIp(req);
-  if (!applyRateLimit(res, `popup-lead:${ip}`, { max: 20, windowMs: 15 * 60 * 1000 })) {
-    return;
+
+  // Attribution is resolved further down (widget lookup); captured here so the
+  // telemetry closure can read the final values.
+  let logWidgetId = '';
+  let logAccount = null;
+
+  // Send the response, then log telemetry after the bytes are flushed.
+  async function done(status, jsonBody) {
+    res.status(status).json(jsonBody);
+    await logWidgetEvent(req, {
+      event: 'popup-lead',
+      widgetId: logWidgetId,
+      widgetType: 'Popup',
+      accountName: logAccount,
+      status,
+      latencyMs: Date.now() - startedAt,
+    });
+  }
+
+  // Rate limit — cross-instance (Redis), fail-open. widgetId isn't parsed yet,
+  // so this first pass is per-IP; that's the abuse vector for a lead endpoint.
+  const rl = await evaluatePublicRateLimit(req, res, { event: 'popup-lead' });
+  if (!rl.allowed) {
+    return done(429, { error: `Too many requests. Retry in ${rl.retryAfter}s.` });
   }
 
   // Parse payload
@@ -148,6 +172,7 @@ export default async function handler(req, res) {
   }
 
   const widgetId = sanitiseString(body.widgetId || '', 50);
+  logWidgetId = widgetId;
   const email = sanitiseString(body.email || '', 254);
   const rawName = sanitiseString(body.name || '', MAX_NAME_LENGTH);
   const phone = sanitiseString(body.phone || '', 30);
@@ -158,12 +183,10 @@ export default async function handler(req, res) {
     : [];
 
   if (!isValidEmail(email)) {
-    res.status(400).json({ error: 'Invalid email' });
-    return;
+    return done(400, { error: 'Invalid email' });
   }
   if (!widgetId || !/^tgw_[A-Za-z0-9_]+$/.test(widgetId)) {
-    res.status(400).json({ error: 'Invalid widget ID' });
-    return;
+    return done(400, { error: 'Invalid widget ID' });
   }
 
   // Resolve the widget for client identity
@@ -173,6 +196,7 @@ export default async function handler(req, res) {
   // Fall back to a placeholder so the lead still lands in Submissions.
   const clientEmail = widget?.clientEmail || 'unknown@travelgenix.io';
   const clientName = widget?.clientName || '';
+  logAccount = clientName || clientEmail || null;
 
   // Build the popup → canonical lead
   const { first, last } = splitName(rawName);
@@ -210,11 +234,10 @@ export default async function handler(req, res) {
   try {
     const result = await dispatchLead(partialLead);
     if (!result.ok) {
-      res.status(result.statusCode || 400).json({ error: result.error });
-      return;
+      return done(result.statusCode || 400, { error: result.error });
     }
     // Success — return minimal info
-    res.status(200).json({
+    return done(200, {
       ok: true,
       leadId: result.leadId,
       delivered: result.completed.length,
@@ -222,6 +245,6 @@ export default async function handler(req, res) {
     });
   } catch (err) {
     console.error('[popup-lead] dispatchLead crashed:', err);
-    res.status(500).json({ error: 'Submission failed. Please try again.' });
+    return done(500, { error: 'Submission failed. Please try again.' });
   }
 }

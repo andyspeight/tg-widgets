@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.10.1';
+  const VERSION = '3.11.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -240,6 +240,7 @@
   const DEALS_URL = API_BASE + '/api/destination-map-deals';
   const RESORTS_URL = API_BASE + '/api/destination-map-resorts';
   const CONFIG_URL = API_BASE + '/api/widget-config';
+  const FX_RATES_URL = API_BASE + '/api/fx-rates';
 
   // Telemetry: report a load heartbeat and any failure to /api/widget-log so we
   // hear about a broken embed before the client does. Posts to our own API
@@ -267,6 +268,16 @@
   // Loading from the same origin as the widget itself is always permitted.
   const LEAFLET_JS_URL = API_BASE + '/vendor/leaflet-1.9.4.js';
 
+  // Our own <script>'s nonce, if the client uses a nonce-based Content-Security-
+  // Policy. A strict CSP (script-src 'nonce-…' without 'strict-dynamic') lets the
+  // nonced widget script run but BLOCKS the Leaflet <script> we inject below,
+  // which surfaced as "Leaflet failed to load" (map init failed) on a client site.
+  // Copying the nonce onto the injected script lets it through. Read here at load
+  // time: the .nonce IDL property is only reliably readable while the script runs.
+  const SCRIPT_NONCE = (function () {
+    try { var s = document.currentScript; return (s && s.nonce) || ''; } catch (e) { return ''; }
+  })();
+
   // MapTiler Streets — the chosen provider. The key is a single shared
   // Travelgenix key, domain-restricted in the MapTiler dashboard to
   // *.tg-widgets.vercel.app and client domains. It is necessarily visible
@@ -286,6 +297,9 @@
       const s = document.createElement('script');
       s.src = LEAFLET_JS_URL;
       s.async = true;
+      // Carry our nonce so a nonce-based CSP on the client site permits this
+      // injected script (both the IDL property and the attribute, for breadth).
+      if (SCRIPT_NONCE) { try { s.nonce = SCRIPT_NONCE; } catch (e) {} s.setAttribute('nonce', SCRIPT_NONCE); }
       s.onload = () => resolve(window.L);
       s.onerror = () => reject(new Error('Leaflet failed to load'));
       document.head.appendChild(s);
@@ -329,7 +343,18 @@
     const p = new URLSearchParams();
     p.set('st', st);
     if (st !== 'Accommodation') { if (o.origin) p.set('org', o.origin); if (o.airport) p.set('dst', o.airport); }
-    if (st !== 'Flights') { if (o.resort) p.set('loc', o.resort); if (o.countryCode) p.set('ctry', o.countryCode); }
+    if (st !== 'Flights') {
+      // loc is REQUIRED by Travelify's DynamicPackagingSearchCriteria — dropping
+      // it fails the whole deeplink with "You must specify a location (loc)".
+      // o.resort is Travelify's own resort/town name, which is the matchable city
+      // for the vast majority (Estepona, Puerto de la Cruz, and so on), sent
+      // alongside the airport dst + ctry. A few sub-districts (Hadaba, South Male
+      // Atoll) are not in Travelify's deeplink gazetteer and still fail to match
+      // as a City — that is a Travelify taxonomy gap, not a reason to strip the
+      // location from every package. refn pins the exact property.
+      if (o.resort) p.set('loc', o.resort);
+      if (o.countryCode) p.set('ctry', o.countryCode);
+    }
     const start = String(o.outboundDate || o.checkinDate || '');
     if (/^\d{4}-\d{2}-\d{2}/.test(start)) p.set('fr', start.slice(0, 10));
     if (o.nights) p.set('dur', String(o.nights));
@@ -382,10 +407,60 @@
     if (p) s += '--tgwm-pin-anchor:' + p + ';--tgwm-cta-bg:' + p + ';';
     return s;
   }
-  function formatPrice(p, currency) {
+  // ── Currency conversion (display only — the offer cache stays GBP) ──────
+  // Cached map prices are GBP. We convert at render time to the viewer's chosen
+  // currency using rates from our own /api/fx-rates (ECB), falling back to a
+  // built-in table if that feed is unreachable so a price always shows. This
+  // mirrors the Travel Offers widget so the two read identically. ACTIVE_CUR is
+  // set from the instance's this.cur before each price-rendering pass.
+  const FX_FALLBACK = { GBP: 1, EUR: 1.17, USD: 1.27, AUD: 1.92, CAD: 1.72, NZD: 2.08,
+    CHF: 1.13, JPY: 198, SEK: 13.4, NOK: 13.6, DKK: 8.72, PLN: 5.0, CZK: 29.3, HUF: 456,
+    RON: 5.8, BGN: 2.29, ISK: 175, ZAR: 23.2, SGD: 1.71, HKD: 9.9, THB: 46, INR: 106,
+    CNY: 9.1, TRY: 41, MXN: 23, BRL: 6.9, ILS: 4.7, IDR: 20500, KRW: 1730, MYR: 5.6, PHP: 72 };
+  const CURRENCIES = { GBP: 'British Pound', EUR: 'Euro', USD: 'US Dollar',
+    AUD: 'Australian Dollar', CAD: 'Canadian Dollar', NZD: 'New Zealand Dollar',
+    CHF: 'Swiss Franc', JPY: 'Japanese Yen', SEK: 'Swedish Krona', NOK: 'Norwegian Krone',
+    DKK: 'Danish Krone', PLN: 'Polish Zloty', CZK: 'Czech Koruna', HUF: 'Hungarian Forint',
+    RON: 'Romanian Leu', BGN: 'Bulgarian Lev', ISK: 'Icelandic Krona', ZAR: 'South African Rand',
+    SGD: 'Singapore Dollar', HKD: 'Hong Kong Dollar', THB: 'Thai Baht', INR: 'Indian Rupee',
+    CNY: 'Chinese Yuan', TRY: 'Turkish Lira', MXN: 'Mexican Peso', BRL: 'Brazilian Real',
+    ILS: 'Israeli Shekel', IDR: 'Indonesian Rupiah', KRW: 'South Korean Won',
+    MYR: 'Malaysian Ringgit', PHP: 'Philippine Peso' };
+  const CURRENCY_ORDER = Object.keys(CURRENCIES);
+  let ACTIVE_CUR = { code: 'GBP', rates: { GBP: 1 } };
+  function setActiveCur(cur) { if (cur && cur.rates) ACTIVE_CUR = cur; }
+  function fmtCur(amount, code) {
+    const rounded = Math.round(amount);
+    try { return new Intl.NumberFormat('en-GB', { style: 'currency', currency: code, maximumFractionDigits: 0 }).format(rounded); }
+    catch (e) { return code + ' ' + rounded.toLocaleString('en-GB'); }
+  }
+  // Fetch GBP→codes rates from our FX proxy, filling any gaps from the fallback.
+  // Never rejects (resolves to the fallback table) so it is safe in Promise.all.
+  function loadFxRates(codes) {
+    const want = [...new Set((codes || []).filter((c) => c && c !== 'GBP'))];
+    const withFallback = () => { const r = { GBP: 1 }; want.forEach((c) => { r[c] = FX_FALLBACK[c] || 1; }); return r; };
+    if (!want.length) return Promise.resolve({ GBP: 1 });
+    return fetch(FX_RATES_URL + '?base=GBP&symbols=' + encodeURIComponent(want.join(',')))
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!d || !d.rates) return withFallback();
+        const r = { GBP: 1 };
+        want.forEach((c) => { r[c] = (typeof d.rates[c] === 'number' && d.rates[c] > 0) ? d.rates[c] : (FX_FALLBACK[c] || 1); });
+        return r;
+      })
+      .catch(withFallback);
+  }
+  // Format a cached price (in srcCurrency, normally GBP) in the active display
+  // currency. The per-person display rule is applied by the caller.
+  function formatPrice(p, srcCurrency) {
     if (!Number.isFinite(p) || p <= 0) return '';
-    const sym = currency === 'GBP' ? '£' : currency === 'EUR' ? '€' : currency === 'USD' ? '$' : '';
-    return sym + Math.round(p).toLocaleString('en-GB');
+    const from = (srcCurrency && CURRENCIES[srcCurrency]) ? srcCurrency : 'GBP';
+    // Normalise to GBP (rates are units-per-1-GBP), then to the active currency.
+    const fromRate = (ACTIVE_CUR.rates[from] > 0) ? ACTIVE_CUR.rates[from] : (FX_FALLBACK[from] || 1);
+    const gbp = (from === 'GBP') ? p : p / fromRate;
+    const code = ACTIVE_CUR.code || 'GBP';
+    const rate = (ACTIVE_CUR.rates[code] > 0) ? ACTIVE_CUR.rates[code] : (FX_FALLBACK[code] || 1);
+    return fmtCur(gbp * rate, code);
   }
 
   // Travelify boardBasis comes camelCase ("AllInclusivePlus"); humanise + localise
@@ -1478,6 +1553,15 @@ svg.leaflet-image-layer.leaflet-interactive path {
     }
     .tgwm-overlay-close svg { width: 20px; height: 20px; }
     @media (prefers-reduced-motion: reduce) { .tgwm-overlay-close { transition: none; } }
+    .tgwm-ov-cur {
+      flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px;
+      margin-right: 10px; opacity: .85;
+    }
+    .tgwm-ov-cur select {
+      font: inherit; font-size: 13px; padding: 6px 8px;
+      border: 1px solid rgba(128,128,128,.35); border-radius: 8px;
+      background: rgba(255,255,255,.92); color: #0f172a; cursor: pointer; max-width: 96px;
+    }
 
     /* Content area — pieces 2-4 (map + deal cards + filters) mount in here.
        For piece 1 it just holds the empty/placeholder state. */
@@ -1986,15 +2070,22 @@ svg.leaflet-image-layer.leaflet-interactive path {
     @container tgwmbody (max-width: 720px) {
       .tgwm-overlay-body { flex-direction: column; }
       .tgwm-ov-cards {
-        flex: 1 1 auto;
+        /* Deals take a fixed ~70% of the height once a destination is tapped;
+           the map fills the remaining ~30%. Rigid basis (no grow/shrink) so
+           it's a true 70%, not just a cap. The collapsed rule below overrides
+           this to zero height before a destination is picked. */
+        flex: 0 0 70%;
         max-width: none;
         width: 100%;
         border-right: 0;
         border-top: 1px solid var(--tgwm-border);
         order: 2;            /* map on top, cards below */
-        max-height: 55%;
+        max-height: 70%;
       }
-      .tgwm-ov-mapcol { order: 1; flex: 1 1 auto; min-height: 200px; }
+      /* Map fills whatever the deals don't: 100% before a tap (deals
+         collapsed), ~30% after (deals at 70%). Must stay flex:1 1 auto so it
+         grows back to full-screen when the deals panel is hidden. */
+      .tgwm-ov-mapcol { order: 1; flex: 1 1 auto; min-height: 160px; }
       /* Collapsed state, stacked axis. The base collapse rule zeroes WIDTH
          (right for the desktop side-by-side layout), but stacked the main
          axis is vertical — inheriting it here left a zero-width panel still
@@ -2042,6 +2133,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
     maxPins: 10,
     // Optional per-widget MapTiler key override. Leave empty to use the shared key.
     mapKey: '',
+    // Display currency. Prices are cached in GBP and converted at render time to
+    // this currency. showCurrencySwitcher adds a picker in the fullscreen overlay
+    // so a visitor can change it themselves (mirrors the Travel Offers widget).
+    displayCurrency: 'GBP',
+    showCurrencySwitcher: false,
   };
 
   // ── Widget class
@@ -2052,6 +2148,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
       this.host = container;
       this.widgetId = (config && config.widgetId) || (container.getAttribute && container.getAttribute('data-tg-id')) || '';
       this.cfg = Object.assign({}, DEFAULTS, config || {});
+      // Display currency state. Prices are cached GBP, converted at render time;
+      // rates load in _init (fallback table used until they arrive).
+      this.cur = { code: (this.cfg.displayCurrency || 'GBP'), rates: { GBP: 1 } };
+      setActiveCur(this.cur);
       this.t = makeT(this.cfg);   // resolve viewer language + UI strings
       this.shadow = container.attachShadow({ mode: 'open' });
       this.data = null;
@@ -2091,10 +2191,17 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
     async _init() {
       try {
-        const [L, offers] = await Promise.all([
+        // With the switcher on we fetch the whole set so a visitor's change is
+        // instant; otherwise just the configured display currency. loadFxRates
+        // never rejects, so it can't fail the map init.
+        const need = this.cfg.showCurrencySwitcher ? CURRENCY_ORDER.slice() : [this.cur.code];
+        const [L, offers, rates] = await Promise.all([
           loadLeaflet(),
           this._loadOffers(),
+          loadFxRates(need),
         ]);
+        this.cur.rates = rates || { GBP: 1 };
+        setActiveCur(this.cur);
         this.data = this._applyCountryAllowList(offers);
         this._renderMap(L);
         this._hideLoading();
@@ -2325,6 +2432,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
             <h2 class="tgwm-overlay-title">${esc(c.title || t('title'))}</h2>
             <p class="tgwm-overlay-sub">${esc(c.subtitle || t('subtitle'))}</p>
           </div>
+          ${c.showCurrencySwitcher ? `<label class="tgwm-ov-cur" aria-label="Display currency">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <select data-ov-cur>${CURRENCY_ORDER.map((cc) => `<option value="${cc}"${cc === (this.cur.code || 'GBP') ? ' selected' : ''}>${cc}</option>`).join('')}</select>
+          </label>` : ''}
           <button class="tgwm-overlay-close" data-ov-close type="button" aria-label="${esc(t('closeFullscreen'))}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <line x1="18" y1="6" x2="6" y2="18"/>
@@ -2381,6 +2492,20 @@ svg.leaflet-image-layer.leaflet-interactive path {
       // Close affordances: button, backdrop click.
       wrap.querySelector('[data-ov-close]').addEventListener('click', () => this._closeOverlay());
       wrap.querySelector('[data-ov-backdrop]').addEventListener('click', () => this._closeOverlay());
+
+      // Currency switcher (fullscreen overlay only, opt-in via showCurrencySwitcher).
+      // Repaint the open country's cards + resort pins in the new currency. Off by
+      // default, so it never affects a client who has not enabled it.
+      const curSel = wrap.querySelector('[data-ov-cur]');
+      if (curSel) curSel.addEventListener('change', () => {
+        try {
+          const code = curSel.value;
+          if (!CURRENCIES[code]) return;
+          this.cur.code = code;
+          setActiveCur(this.cur);
+          if (this._dealsCache) this._onFilterChange();
+        } catch (e) { /* a currency change must never break the overlay */ }
+      });
 
       this.shadow.querySelector('.tgwm-root').appendChild(wrap);
       this.overlayEl = wrap;
@@ -2563,6 +2688,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
      *  (lat/lng + fromPricePP) from the resorts endpoint, so it works whichever
      *  source fed it. Switches the map into resort mode and drops the markers. */
     _buildResortPins(items, fitToResorts) {
+      setActiveCur(this.cur);
       if (!this.ovMap || !Array.isArray(items)) return;
 
       // Distinct resorts → cheapest. Tolerate both shapes:
@@ -3347,6 +3473,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     /** Render cards from a set of offers (cheapest first, capped). Used for the
      *  full country list, resort-filtered subsets, and filter-narrowed sets. */
     _renderCards(offers, total, countryName, resortName) {
+      setActiveCur(this.cur);
       const scroll = this.overlayEl.querySelector('[data-ov-cards-scroll]');
       const titleEl = this.overlayEl.querySelector('[data-ov-cards-title]');
       const metaEl = this.overlayEl.querySelector('[data-ov-cards-meta]');
@@ -3634,6 +3761,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     }
 
     _renderMap(L) {
+      setActiveCur(this.cur);
       const mapEl = this.shadow.querySelector('[data-map]');
       if (!mapEl) return;
       if (!this.data || !Array.isArray(this.data.countries)) return;

@@ -273,6 +273,19 @@
               </label>
             </div>
             <div class="tgwm-field-hint">Lets visitors open the immersive fullscreen map to browse and filter every deal.</div>
+            <div class="tgwm-field" style="margin-top:16px">
+              <label class="tgwm-field-label" for="f-currency">Display currency</label>
+              <select class="tgwm-input" id="f-currency"></select>
+            </div>
+            <div class="tgwm-field-hint">Prices are stored in GBP and converted to this currency at live exchange rates.</div>
+            <div class="tgwm-field tgwm-toggle-row" style="margin-top:12px">
+              <label class="tgwm-field-label" for="f-currency-switcher">Let visitors switch currency</label>
+              <label class="tgwm-switch">
+                <input type="checkbox" id="f-currency-switcher">
+                <span></span>
+              </label>
+            </div>
+            <div class="tgwm-field-hint">Adds a currency picker to the fullscreen map so a visitor can choose their own.</div>
           </div>
         </div>
 
@@ -341,8 +354,27 @@
     primary: '',         // '' = widget's built-in navy
     countries: [],       // [] = show all available
     showFullscreenButton: true,
+    displayCurrency: 'GBP',
+    showCurrencySwitcher: false,
     fontFamily: 'Inter',
   };
+
+  // Currencies offered in the display-currency picker (mirrors the widget +
+  // /api/fx-rates allowlist). The widget converts cached GBP prices to this.
+  const CURRENCY_LIST = [['GBP', 'British Pound'], ['EUR', 'Euro'], ['USD', 'US Dollar'],
+    ['AUD', 'Australian Dollar'], ['CAD', 'Canadian Dollar'], ['NZD', 'New Zealand Dollar'],
+    ['CHF', 'Swiss Franc'], ['JPY', 'Japanese Yen'], ['SEK', 'Swedish Krona'], ['NOK', 'Norwegian Krone'],
+    ['DKK', 'Danish Krone'], ['PLN', 'Polish Zloty'], ['CZK', 'Czech Koruna'], ['HUF', 'Hungarian Forint'],
+    ['RON', 'Romanian Leu'], ['BGN', 'Bulgarian Lev'], ['ISK', 'Icelandic Krona'], ['ZAR', 'South African Rand'],
+    ['SGD', 'Singapore Dollar'], ['HKD', 'Hong Kong Dollar'], ['THB', 'Thai Baht'], ['INR', 'Indian Rupee'],
+    ['CNY', 'Chinese Yuan'], ['TRY', 'Turkish Lira'], ['MXN', 'Mexican Peso'], ['BRL', 'Brazilian Real'],
+    ['ILS', 'Israeli Shekel'], ['IDR', 'Indonesian Rupiah'], ['KRW', 'South Korean Won'],
+    ['MYR', 'Malaysian Ringgit'], ['PHP', 'Philippine Peso']];
+  function ensureCurrencyOptions() {
+    const sel = document.getElementById('f-currency');
+    if (!sel || sel.options.length) return;
+    sel.innerHTML = CURRENCY_LIST.map(([code, name]) => '<option value="' + code + '">' + code + ' · ' + name + '</option>').join('');
+  }
 
   let widgetInst = null;
   let availableCountries = [];   // [{ cc, name, region }]
@@ -429,6 +461,9 @@
     document.getElementById('f-title').value = C.title || '';
     document.getElementById('f-subtitle').value = C.subtitle || '';
     document.getElementById('f-fullscreen').checked = C.showFullscreenButton !== false;
+    ensureCurrencyOptions();
+    document.getElementById('f-currency').value = C.displayCurrency || 'GBP';
+    document.getElementById('f-currency-switcher').checked = C.showCurrencySwitcher === true;
 
     const acc = isHex(C.accent) ? C.accent : '#00B4D8';
     const pri = isHex(C.primary) ? C.primary : '#1B2B5B';
@@ -537,6 +572,8 @@
     document.getElementById('f-title').addEventListener('input', (e) => { C.title = e.target.value; shell.markDirty(); render(); });
     document.getElementById('f-subtitle').addEventListener('input', (e) => { C.subtitle = e.target.value; shell.markDirty(); render(); });
     document.getElementById('f-fullscreen').addEventListener('change', (e) => { C.showFullscreenButton = e.target.checked; shell.markDirty(); render(); });
+    document.getElementById('f-currency').addEventListener('change', (e) => { C.displayCurrency = e.target.value; shell.markDirty(); render(); });
+    document.getElementById('f-currency-switcher').addEventListener('change', (e) => { C.showCurrencySwitcher = e.target.checked; shell.markDirty(); render(); });
 
     // Colours — picker ↔ hex sync
     function bindColour(pickerId, hexId, key) {

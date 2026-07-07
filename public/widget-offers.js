@@ -113,8 +113,25 @@
   // Our own FX proxy (ECB/Frankfurter). The cache is GBP; we convert at display
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
-  const VERSION = '1.10.0';
+  const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
+  const VERSION = '1.10.4';
   const CACHE_PREFIX = 'tgo_cache_';
+
+  // Telemetry: report a one-time load heartbeat and any failure to
+  // /api/widget-log so we hear about a broken embed before the client does.
+  // Posts to our own API origin (connect-src), so a client site's script-src
+  // CSP can't block it, and it never throws. Mirrors the world map reporter.
+  function tgReport(event, widgetId, message, detail) {
+    try {
+      var b = JSON.stringify({
+        event: event, widget: 'offers', widgetId: String(widgetId || ''),
+        message: String(message || '').slice(0, 300), detail: String(detail || '').slice(0, 500),
+        url: (function () { try { return location.href; } catch (e) { return ''; } })(),
+      });
+      if (navigator && typeof navigator.sendBeacon === 'function' && navigator.sendBeacon(WIDGET_LOG_URL, new Blob([b], { type: 'text/plain' }))) return;
+      fetch(WIDGET_LOG_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: b, keepalive: true, credentials: 'omit' }).catch(function () {});
+    } catch (e) { /* telemetry must never throw */ }
+  }
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only — CTAs, price context, fact labels, filter/board
@@ -621,6 +638,14 @@
       if (fl.destination && fl.destination.iataCode) p.set('dst', fl.destination.iataCode);
     }
     if (st !== 'Flights' && acc) {
+      // loc is REQUIRED by Travelify's DynamicPackagingSearchCriteria — dropping
+      // it fails the whole deeplink with "You must specify a location (loc)".
+      // acc.destination.name is Travelify's own resort/town name, which is the
+      // matchable city for the vast majority (Estepona, Puerto de la Cruz, and
+      // so on), sent alongside the airport dst + ctry. A few sub-districts
+      // (Hadaba, South Male Atoll) are not in Travelify's deeplink gazetteer and
+      // still fail to match as a City — that is a Travelify taxonomy gap, not a
+      // reason to strip the location from every package. refn pins the property.
       if (acc.destination && acc.destination.name) p.set('loc', acc.destination.name);
       const ctry = (acc.destination && acc.destination.countryCode) || (fl && fl.destination && fl.destination.countryCode);
       if (ctry) p.set('ctry', ctry);
@@ -5352,7 +5377,11 @@
       // 'en' (used for the data request) must NOT pin the UI to English, so we
       // only pass a language hint when the author actually supplied one.
       this.t = makeT(this._uiLangHint(config));
-      this.shadow = container.attachShadow({ mode: 'open' });
+      // Reuse an existing shadow root if this host was already mounted (e.g. a
+      // page that both marks the element with data-tg-widget AND constructs
+      // manually). A second attachShadow throws NotSupportedError; the render
+      // below resets the shadow via innerHTML, so reusing it is safe.
+      this.shadow = container.shadowRoot || container.attachShadow({ mode: 'open' });
       this.root = null;
       this.rawOffers = [];
       // Display currency. Prices are cached in GBP and converted at render time;
@@ -5852,6 +5881,7 @@
       this.root.innerHTML = '<div class="tgo-error">'
         + '<strong>' + esc(this.t('couldNotLoad')) + '</strong> ' + esc(msg)
         + '</div>';
+      tgReport('error', this.cfg && this.cfg._widgetId, msg, this.cfg && this.cfg.template);
     }
 
     _showEmpty() {
@@ -6006,6 +6036,10 @@
           body: JSON.stringify({
             ...payload,
             appId: this.cfg.appId || '',
+            // Sent purely so the proxy can attribute traffic to this widget /
+            // account for abuse triage. The proxy strips it before forwarding
+            // to Travelify; older widgets that omit it still work.
+            _widgetId: this.cfg._widgetId || '',
           }),
         });
         const data = await res.json();
@@ -6064,6 +6098,8 @@
       if (payload.DatesMax != null) q.set('DatesMax', payload.DatesMax);
       if (payload.sort) q.set('sort', payload.sort);
       if (payload.maxOffers) q.set('maxOffers', payload.maxOffers);
+      // Attribution only — lets the cache endpoint tie traffic to this widget.
+      if (this.cfg._widgetId) q.set('widgetId', this.cfg._widgetId);
       return q.toString();
     }
 
@@ -8825,6 +8861,10 @@
           body: JSON.stringify({
             ...payload,
             appId: this.cfg.appId || '',
+            // Sent purely so the proxy can attribute traffic to this widget /
+            // account for abuse triage. The proxy strips it before forwarding
+            // to Travelify; older widgets that omit it still work.
+            _widgetId: this.cfg._widgetId || '',
           }),
         });
         if (!res.ok) throw new Error('API ' + res.status);
@@ -9350,6 +9390,7 @@
       throw new Error('No config returned');
     } catch (err) {
       console.error('[TGOffers] Config load error:', err);
+      tgReport('error', widgetId, 'config load failed', err && err.message);
       return null;
     }
   }
@@ -9377,7 +9418,13 @@
         continue;
       }
 
-      new TGOffersWidget(el, config);
+      try {
+        new TGOffersWidget(el, config);
+        tgReport('load', (config && config._widgetId) || widgetId || '', (config && config.template) || '');
+      } catch (err) {
+        console.error('[TGOffers] init failed:', err);
+        tgReport('error', (config && config._widgetId) || widgetId || '', 'init failed', err && err.message);
+      }
     }
   }
 
