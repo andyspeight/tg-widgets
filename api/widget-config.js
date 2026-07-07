@@ -300,6 +300,7 @@ const ALLOWED_WIDGET_TYPES = [
   'Special Offers',
   'Prism',
   'Cookie Consent',
+  'Smart Section',
 ];
 
 // Per-plan widget count limits, keyed by widgetType.
@@ -351,6 +352,8 @@ const PLAN_WIDGET_LIMITS = {
   'Prism':                 { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   // Compliance widget — one per site is the norm, so every plan gets it.
   'Cookie Consent':        { Spark: 1, Boost: 1, Ignite: -1, Bespoke: -1 },
+  // Premium-only positioning (locked 24 Jun 2026): no teaser tier on Boost.
+  'Smart Section':         { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
 };
 
 // Canonical plan names recognised by PLAN_WIDGET_LIMITS lookups.
@@ -499,6 +502,9 @@ const WIDGET_TYPE_ALIASES = {
   'cmp':               'Cookie Consent',
   'offers-grid':           'Special Offers',
   'offer-builder':         'Special Offers',
+  'smartsection':          'Smart Section',
+  'smart-section':         'Smart Section',
+  'smart section':         'Smart Section',
 };
 
 function canonicaliseWidgetType(raw) {

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Section Widget — Demo — Travelgenix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #F8FAFC; color: #0F172A; font-family: Inter, -apple-system, sans-serif; }
+
+  .demo-bar {
+    position: sticky; top: 0; z-index: 50; display: flex; align-items: center; gap: 14px;
+    padding: 12px 22px; background: #fff; border-bottom: 1px solid #E2E8F0;
+  }
+  .demo-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 14px; }
+  .demo-brand-mark { width: 26px; height: 26px; border-radius: 7px; background: linear-gradient(135deg, #1B2B5B, #00B4D8); }
+  .demo-brand span { color: #64748B; font-weight: 500; }
+  .demo-controls { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+  .demo-controls button {
+    padding: 7px 14px; border: 1px solid #CBD5E1; border-radius: 8px; background: #fff;
+    font: 600 12.5px Inter, sans-serif; color: #334155; cursor: pointer;
+  }
+  .demo-controls button:hover { border-color: #94A3B8; }
+
+  .page { max-width: 1040px; margin: 0 auto; padding: 34px 22px 60px; }
+  .hero { text-align: center; margin: 18px 0 38px; }
+  .hero h1 { margin: 0 0 10px; font-size: 32px; font-weight: 800; letter-spacing: -0.02em; }
+  .hero p { margin: 0 auto; max-width: 640px; color: #475569; font-size: 15.5px; line-height: 1.6; }
+
+  .demo-block { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; margin-bottom: 26px; }
+  .demo-block > h2 { margin: 0 0 4px; font-size: 17px; font-weight: 700; }
+  .demo-block > p { margin: 0 0 18px; color: #64748B; font-size: 13.5px; line-height: 1.55; }
+
+  .band { padding: 30px 28px; border-radius: 14px; color: #fff; }
+  .band h3 { margin: 0 0 6px; font-size: 20px; font-weight: 700; }
+  .band p { margin: 0 0 16px; font-size: 13.5px; opacity: .9; max-width: 460px; line-height: 1.55; }
+  .band .cta { display: inline-block; padding: 9px 18px; border-radius: 999px; background: #fff; font-weight: 700; font-size: 13px; text-decoration: none; }
+  .band--navy { background: linear-gradient(120deg, #1B2B5B, #4338CA); }
+  .band--navy .cta { color: #1B2B5B; }
+  .band--teal { background: linear-gradient(120deg, #0F766E, #00B4D8); }
+  .band--teal .cta { color: #0F766E; }
+  .band--sunset { background: linear-gradient(120deg, #9A3412, #F59E0B); }
+  .band--sunset .cta { color: #9A3412; }
+  .band--plum { background: linear-gradient(120deg, #6B21A8, #DB2777); }
+  .band--plum .cta { color: #6B21A8; }
+  .band--sky { background: linear-gradient(120deg, #075985, #38BDF8); }
+  .band--sky .cta { color: #075985; }
+
+  .footer-mock { background: #1B2B5B; color: #CBD5E1; margin-top: 40px; }
+  .footer-mock .inner { max-width: 1040px; margin: 0 auto; padding: 36px 22px; display: flex; gap: 40px; flex-wrap: wrap; font-size: 13px; line-height: 1.7; }
+  .footer-mock h4 { margin: 0 0 8px; color: #fff; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div class="demo-bar">
+  <div class="demo-brand">
+    <div class="demo-brand-mark"></div>
+    Atlas Travel Co. <span>— demo client site</span>
+  </div>
+  <div class="demo-controls">
+    <button id="btnReset" type="button" title="Clear dismissals, show counters and the visitor marker stored by this demo">Reset demo state</button>
+  </div>
+</div>
+
+<div class="page">
+  <div class="hero">
+    <h1>Smart Section</h1>
+    <p>Show different content to different visitors without a developer. Each block below is wrapped in a Smart Section with different rules. The examples marked with a badge use debug mode, so you can see what a real visitor would get.</p>
+  </div>
+
+  <div class="demo-block">
+    <h2>1. Everyone sees it, and can dismiss it</h2>
+    <p>No rules, with the dismiss button switched on. Dismiss it and it stays gone. Press "Reset demo state" to bring it back.</p>
+    <div data-tg-widget="smartsection" data-tg-config='{"rules":[],"dismissible":true,"dismissDays":30,"widgetId":"demo_dismiss"}'>
+      <div class="band band--navy">
+        <h3>Summer sale: up to 30% off Greek island escapes</h3>
+        <p>Seven nights half board, flights included. Ends Sunday.</p>
+        <span class="cta">See the deals</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-block">
+    <h2>2. Office hours only</h2>
+    <p>Rules: Monday to Friday AND 09:00 to 17:00 in the visitor's local time. Debug mode is on, so the badge tells you whether it would show right now.</p>
+    <div data-tg-widget="smartsection" data-tg-config='{"match":"all","rules":[{"type":"dayOfWeek","days":[1,2,3,4,5]},{"type":"timeOfDay","from":"09:00","to":"17:00"}],"debug":true,"widgetId":"demo_hours"}'>
+      <div class="band band--teal">
+        <h3>Our travel experts are online now</h3>
+        <p>Call us for a tailor-made quote while the team is at their desks.</p>
+        <span class="cta">Call 01202 555 0199</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-block">
+    <h2>3. Mobile visitors only</h2>
+    <p>Rule: device is mobile. On a desktop the badge shows it would be hidden. Open this page on your phone to flip it.</p>
+    <div data-tg-widget="smartsection" data-tg-config='{"rules":[{"type":"device","devices":["mobile"]}],"debug":true,"widgetId":"demo_mobile"}'>
+      <div class="band band--sunset">
+        <h3>Get our app-only mobile deals</h3>
+        <p>Book on your phone and save an extra 5% on late escapes.</p>
+        <span class="cta">Browse mobile deals</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-block">
+    <h2>4. Returning visitors only</h2>
+    <p>Rule: visitor type is returning. Your first view of this page counts as new. Reload and the badge flips to visible.</p>
+    <div data-tg-widget="smartsection" data-tg-config='{"rules":[{"type":"visitorType","value":"returning"}],"debug":true,"widgetId":"demo_returning"}'>
+      <div class="band band--plum">
+        <h3>Welcome back, your shortlist is waiting</h3>
+        <p>Pick up where you left off, or ask us to price up the trips you saved.</p>
+        <span class="cta">Continue planning</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-block">
+    <h2>5. Exit intent</h2>
+    <p>Rule: exit intent. This one is real, not debug. The section below is genuinely hidden until you move the mouse up towards the browser bar as if leaving (on mobile, a fast scroll up).</p>
+    <div data-tg-widget="smartsection" data-tg-config='{"rules":[{"type":"exitIntent"}],"widgetId":"demo_exit"}'>
+      <div class="band band--sky">
+        <h3>Before you go, grab 10% off your first booking</h3>
+        <p>Use code WANDER10 at checkout. Valid for the next 48 hours.</p>
+        <span class="cta">Claim the code</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer-mock">
+  <div class="inner">
+    <div>
+      <h4>Atlas Travel Co.</h4>
+      Independent travel experts since 1998.<br>ATOL protected. ABTA member.
+    </div>
+    <div>
+      <h4>Visit us</h4>
+      12 Harbourside Way<br>Bournemouth BH1 2AB
+    </div>
+  </div>
+</div>
+
+<script src="/tgse-rules.js"></script>
+<script src="/widget-smartsection.js"></script>
+<script>
+  'use strict';
+  document.getElementById('btnReset').addEventListener('click', function () {
+    var doomed = [];
+    for (var i = 0; i < localStorage.length; i++) {
+      var key = localStorage.key(i);
+      if (key && key.indexOf('tgsr_') === 0) doomed.push(key);
+    }
+    doomed.forEach(function (key) { localStorage.removeItem(key); });
+    try { sessionStorage.removeItem('tgsr_entry_src'); } catch (e) { /* noop */ }
+    location.reload();
+  });
+</script>
+
+</body>
+</html>
