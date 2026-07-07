@@ -344,7 +344,25 @@
               <span class="switch-row-label">Floating re-entry badge</span>
               <button type="button" class="switch is-on" id="sw-badge" role="switch" aria-checked="true" aria-label="Floating re-entry badge"></button>
             </div>
-            <p class="hint" style="margin-top:0">The little cookie button that lets visitors change their mind. If you turn it off, add a footer link to <code>#tg-consent</code> instead — withdrawing consent must stay easy.</p>
+            <p class="hint" style="margin-top:0">The little cookie button that lets visitors change their mind. If you turn it off, add a footer link to <code>#tg-consent</code> instead, withdrawing consent must stay easy.</p>
+            <div class="tgse-field" style="margin-top:12px">
+              <label class="tgse-field-label">Badge alignment</label>
+              <div class="pick-grid" id="pick-badge-align" style="grid-template-columns:1fr 1fr 1fr 1fr">
+                <button type="button" class="pick-btn" data-v="auto"><span class="pick-label">Auto</span></button>
+                <button type="button" class="pick-btn" data-v="left"><span class="pick-label">Left</span></button>
+                <button type="button" class="pick-btn" data-v="center"><span class="pick-label">Middle</span></button>
+                <button type="button" class="pick-btn" data-v="right"><span class="pick-label">Right</span></button>
+              </div>
+              <p class="hint">Auto follows the banner corner. Set it left, middle or right to place the badge where it will not clash with your other floating buttons.</p>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label">Badge height off the bottom</label>
+              <div class="slider-row">
+                <input type="range" id="in-badge-offset" min="0" max="200" step="2" value="16">
+                <span class="slider-val" id="val-badge-offset">16px</span>
+              </div>
+              <p class="hint">Lift the badge up to sit above a chat bubble or back-to-top button.</p>
+            </div>
             <div class="switch-row">
               <span class="switch-row-label">Reload page on withdrawal</span>
               <button type="button" class="switch is-on" id="sw-reload" role="switch" aria-checked="true" aria-label="Reload page on withdrawal"></button>
@@ -433,7 +451,7 @@
     position: 'bottom-left',
     theme: 'auto',
     accent: '#00B4D8',
-    font: '',
+    fontFamily: 'Inter',
     radius: 14,
     logo: '',
     title: '',
@@ -444,6 +462,8 @@
     policyVersion: '1',
     reconsentDays: 180,
     badge: true,
+    badgeAlign: '',
+    badgeOffset: 16,
     reloadOnWithdraw: true,
     log: true,
     cookies: [
@@ -464,7 +484,7 @@
     setConfig: (c) => { C = Object.assign({}, C, c); syncControls(); render(); },
 
     fontPickerEl: '#fontPickerMount',
-    onFontChange: (f) => { C.font = (f && f !== 'Inter') ? f : ''; dirty(); },
+    onFontChange: (f) => { C.fontFamily = f || 'Inter'; dirty(); },
 
     onAIBuild: () => tgse.toast('The AI builder is not available for this widget yet', 'ok'),
     onTemplates: openTemplates,
@@ -472,6 +492,16 @@
     onLoginSuccess: () => { loadFromUrl(); if (typeof window.initConsentTour === 'function') window.initConsentTour(); },
   });
 
+  // Reloading the preview iframe on every keystroke stole focus from the
+  // sidebar inputs (the banner inside auto-focuses its Accept button). Debounce
+  // the preview so continuous typing is smooth, and the preview itself runs the
+  // widget with focusOnOpen:false so a reload never yanks focus away.
+  let _renderTimer = null;
+  function render() {
+    clearTimeout(_renderTimer);
+    _renderTimer = setTimeout(paintPreview, 260);
+  }
+  function renderNow() { clearTimeout(_renderTimer); paintPreview(); }
   function dirty() { shell.markDirty(); render(); }
 
   // ── Preview ─────────────────────────────────────────────────────
@@ -482,9 +512,11 @@
   function previewSrcdoc() {
     const cfg = Object.assign({}, C, {
       // Preview always shows a decisive flow: auto behaves as the UK/EU
-      // opt-in a client will care most about. No receipts from previews.
+      // opt-in a client will care most about. No receipts from previews, and
+      // no autofocus so a preview reload never pulls focus off a sidebar input.
       geo: C.geo === 'notice' ? 'notice' : 'gdpr',
       log: false,
+      focusOnOpen: false,
     });
     const cfgAttr = JSON.stringify(cfg).replace(/&/g, '&amp;').replace(/'/g, '&#39;');
     const pageBg = pageDark ? '#0B1220' : '#F1F5F9';
@@ -519,7 +551,7 @@
       '</body></html>';
   }
 
-  function render() {
+  function paintPreview() {
     document.getElementById('pv-iframe').srcdoc = previewSrcdoc();
   }
 
@@ -565,6 +597,21 @@
   bindSwitch('sw-badge', 'badge');
   bindSwitch('sw-reload', 'reloadOnWithdraw');
   bindSwitch('sw-log', 'log');
+
+  // Badge alignment: 'auto' maps to an empty string (follow the banner corner).
+  document.getElementById('pick-badge-align').addEventListener('click', (e) => {
+    const btn = e.target.closest('.pick-btn');
+    if (!btn) return;
+    C.badgeAlign = btn.dataset.v === 'auto' ? '' : btn.dataset.v;
+    setPick('pick-badge-align', btn.dataset.v);
+    dirty();
+  });
+  const badgeOffsetEl = document.getElementById('in-badge-offset');
+  badgeOffsetEl.addEventListener('input', () => {
+    C.badgeOffset = parseInt(badgeOffsetEl.value, 10);
+    document.getElementById('val-badge-offset').textContent = C.badgeOffset + 'px';
+    dirty();
+  });
 
   document.getElementById('in-theme').addEventListener('change', (e) => { C.theme = e.target.value; dirty(); });
   document.getElementById('in-geo').addEventListener('change', (e) => { C.geo = e.target.value; dirty(); });
@@ -760,26 +807,32 @@
     document.getElementById('in-privacy-url').value = C.privacyUrl || '';
     document.getElementById('in-privacy-label').value = C.privacyLabel || '';
     document.getElementById('in-policy-version').value = C.policyVersion || '1';
+    setPick('pick-badge-align', C.badgeAlign || 'auto');
+    badgeOffsetEl.value = C.badgeOffset;
+    document.getElementById('val-badge-offset').textContent = C.badgeOffset + 'px';
     [['sw-badge', C.badge], ['sw-reload', C.reloadOnWithdraw], ['sw-log', C.log]].forEach(([id, on]) => {
       const el = document.getElementById(id);
       el.classList.toggle('is-on', !!on);
       el.setAttribute('aria-checked', String(!!on));
     });
+    // Keep the shared font picker in step with the saved value (it mounts once
+    // at init with the default, before the config loads).
+    if (window.tgse && tgse._fontPicker) tgse._fontPicker.value = C.fontFamily || 'Inter';
     renderCookieList();
   }
 
   function loadFromUrl() {
     const wId = new URLSearchParams(location.search).get('id');
-    if (!wId) { syncControls(); render(); return; }
+    if (!wId) { syncControls(); renderNow(); return; }
     fetch('/api/widget-config?id=' + encodeURIComponent(wId))
       .then(r => r.ok ? r.json() : null)
       .then(d => {
         if (d && d.config) C = Object.assign({}, C, d.config);
         if (d && d.name) document.getElementById('name-input').value = d.name;
         syncControls();
-        render();
+        renderNow();
       })
-      .catch(() => { tgse.toast('Failed to load widget', 'err'); syncControls(); render(); });
+      .catch(() => { tgse.toast('Failed to load widget', 'err'); syncControls(); renderNow(); });
   }
 
   // Boot — wait for shell auth to resolve before loading (see shell docs:
@@ -792,7 +845,7 @@
       if (typeof window.initConsentTour === 'function') window.initConsentTour();
     }
     syncControls();
-    render();
+    renderNow();
   });
 
   document.getElementById('name-input')?.addEventListener('input', () => shell.markDirty());

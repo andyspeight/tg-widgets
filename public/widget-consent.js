@@ -375,7 +375,7 @@
     position: 'bottom-left',   // for card: bottom-left | bottom-right | top-left | top-right
     theme: 'auto',             // light | dark | auto
     accent: '#00b4d8',
-    font: '',                  // Google Font family, loaded on demand
+    fontFamily: '',            // Google Font family, loaded on demand (empty = Inter)
     radius: 14,                // px, 0–32
     logo: '',                  // optional logo URL shown in the banner
     title: '',                 // localised default when empty
@@ -386,8 +386,11 @@
     policyVersion: '1',        // bump to re-prompt every visitor
     reconsentDays: 180,        // choice lifetime before re-prompting
     badge: true,               // floating re-entry badge after a choice is made
+    badgeAlign: '',            // left | center | right (empty = follow the banner corner)
+    badgeOffset: 16,           // px the badge sits off the bottom edge (dodge other floating buttons)
     reloadOnWithdraw: true,    // reload after a downgrade so stopped trackers really stop
     log: true,                 // anonymous consent receipts to /api/consent-log
+    focusOnOpen: true,         // move focus into the banner on open (off in the editor preview)
     // First-party cookie names purged when their category is withdrawn.
     // Prefixes with a trailing * match (e.g. _ga_* → _ga_ABC123).
     purgeCookies: {
@@ -408,9 +411,9 @@
     var attr = function (name) { return el.getAttribute('data-' + name); };
     var map = {
       layout: 'layout', position: 'position', theme: 'theme', accent: 'accent',
-      font: 'font', logo: 'logo', title: 'title', body: 'body',
+      font: 'fontFamily', logo: 'logo', title: 'title', body: 'body',
       'privacy-url': 'privacyUrl', 'privacy-label': 'privacyLabel',
-      geo: 'geo', 'policy-version': 'policyVersion', lang: 'lang'
+      geo: 'geo', 'policy-version': 'policyVersion', 'badge-align': 'badgeAlign', lang: 'lang'
     };
     for (var name in map) {
       var v = attr(name);
@@ -418,6 +421,8 @@
     }
     var radius = attr('radius');
     if (radius !== null) cfg.radius = radius;
+    var boff = attr('badge-offset');
+    if (boff !== null) cfg.badgeOffset = boff;
     var flags = { badge: 'badge', log: 'log', 'reload-on-withdraw': 'reloadOnWithdraw' };
     for (var f in flags) {
       var fv = attr(f);
@@ -438,7 +443,11 @@
     cfg.theme = pickEnum(cfg.theme, ['light', 'dark', 'auto'], DEFAULTS.theme);
     cfg.geo = pickEnum(cfg.geo, ['auto', 'gdpr', 'notice'], DEFAULTS.geo);
     cfg.accent = safeColor(cfg.accent, DEFAULTS.accent);
-    cfg.font = safeFontStack(cfg.font, '');
+    // Font: standardise on fontFamily (the editor shell's key); accept a
+    // legacy 'font' value too. 'Inter' and empty both mean the system default.
+    var famRaw = (cfg.fontFamily != null && cfg.fontFamily !== '') ? cfg.fontFamily : cfg.font;
+    cfg.fontFamily = safeFontStack(famRaw, '');
+    delete cfg.font;
     cfg.radius = clampInt(cfg.radius, 0, 32, DEFAULTS.radius);
     cfg.logo = safeUrl(cfg.logo);
     cfg.privacyUrl = safeUrl(cfg.privacyUrl);
@@ -449,8 +458,11 @@
     cfg.reconsentDays = clampInt(cfg.reconsentDays, 1, 395, DEFAULTS.reconsentDays);
     cfg.widgetId = String(cfg.widgetId || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 60);
     cfg.badge = cfg.badge !== false;
+    cfg.badgeAlign = pickEnum(cfg.badgeAlign, ['left', 'center', 'right'], '');
+    cfg.badgeOffset = clampInt(cfg.badgeOffset, 0, 240, DEFAULTS.badgeOffset);
     cfg.log = cfg.log !== false;
     cfg.reloadOnWithdraw = cfg.reloadOnWithdraw !== false;
+    cfg.focusOnOpen = cfg.focusOnOpen !== false;
     if (!cfg.purgeCookies || typeof cfg.purgeCookies !== 'object') cfg.purgeCookies = DEFAULTS.purgeCookies;
     var cookies = [];
     if (Array.isArray(cfg.cookies)) {
@@ -665,8 +677,8 @@
   function buildCss(cfg) {
     var accent = cfg.accent;
     var accentText = contrastText(accent);
-    var font = cfg.font ? "'" + cfg.font + "', " : '';
-    var stack = font + "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    var fam = (cfg.fontFamily && cfg.fontFamily !== 'Inter') ? "'" + cfg.fontFamily + "', " : '';
+    var stack = fam + "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
     var r = cfg.radius;
     var light = '--bg:#ffffff;--text:#0f172a;--sub:#475569;--border:#e2e8f0;--soft:#f1f5f9;--shadow:0 18px 50px rgba(15,23,42,.18)';
     var dark = '--bg:#101828;--text:#f1f5f9;--sub:#94a3b8;--border:#26334d;--soft:#1a2438;--shadow:0 18px 50px rgba(0,0,0,.5)';
@@ -731,11 +743,11 @@
       '.badge{position:fixed;z-index:2147483646;width:44px;height:44px;border-radius:50%;background:var(--bg);border:1px solid var(--border);box-shadow:0 6px 20px rgba(15,23,42,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--accent);transition:transform .15s ease}\n' +
       '.badge:hover{transform:scale(1.08)}\n' +
       '.badge .ic{width:22px;height:22px}\n' +
-      '.badge.bottom-left{left:16px;bottom:16px}.badge.bottom-right{right:16px;bottom:16px}\n' +
-      '.badge.top-left{left:16px;top:16px}.badge.top-right{right:16px;top:16px}\n' +
+      '.badge.b-left{left:16px}.badge.b-right{right:16px}.badge.b-center{left:50%;transform:translateX(-50%)}\n' +
+      '.badge.b-center:hover{transform:translateX(-50%) scale(1.08)}\n' +
       '.toast{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;background:var(--text);color:var(--bg);font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:99px;opacity:0;transition:opacity .25s ease;pointer-events:none;white-space:nowrap}\n' +
       '.toast.show{opacity:1}\n' +
-      '@media (max-width:560px){.bar .inner{flex-direction:column;align-items:stretch}.bar .btns{width:100%}.bar .btns button{flex:1}}\n' +
+      '@media (max-width:560px){.bar .inner{flex-direction:column;align-items:stretch;gap:12px}.bar .copy{flex:0 0 auto;min-width:0}.bar .btns{width:100%}.bar .btns button{flex:1}}\n' +
       '@keyframes tgc-in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}\n' +
       '@keyframes tgc-in-down{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:translateY(0)}}\n' +
       '.anim-up{animation:tgc-in .35s cubic-bezier(.21,.9,.35,1) both}\n' +
@@ -776,7 +788,7 @@
     var root = document.createElement('div');
     shadow.appendChild(root);
     document.body.appendChild(host);
-    if (cfg.font) ensureFont(cfg.font);
+    if (cfg.fontFamily) ensureFont(cfg.fontFamily);
 
     var ui = { host: host, root: root, open: null };
     var animClass = (cfg.layout === 'card' && /top/.test(cfg.position)) ? 'anim-down' : 'anim-up';
@@ -805,7 +817,7 @@
         '<button class="b-ghost" data-act="prefs">' + esc(t('preferences')) + '</button>' +
         '</div></div></div></div>';
       var first = root.querySelector('.b-accept');
-      if (first) { try { first.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }
+      if (first && cfg.focusOnOpen) { try { first.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }
     };
 
     /** Light implied-consent notice (opt-out regions). */
@@ -850,15 +862,19 @@
         if (slot) slot.innerHTML = cookieTable(t, cfg.cookies, CATEGORIES[i]);
       }
       var back = root.querySelector('[data-act="back"]');
-      if (back) { try { back.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }
+      if (back && cfg.focusOnOpen) { try { back.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }
     };
 
     /** Floating re-entry badge shown once a choice exists. */
     ui.showBadge = function () {
       ui.open = 'badge';
       if (!cfg.badge) { root.innerHTML = ''; return; }
+      // The badge sits at the bottom on its own alignment (left / centre /
+      // right), independent of the banner corner, with a configurable offset so
+      // it can clear the site's other floating buttons.
+      var align = cfg.badgeAlign || (/right/.test(cfg.position) ? 'right' : 'left');
       root.innerHTML =
-        '<button class="badge ' + cfg.position + '" data-act="prefs" aria-label="' + esc(t('cookieSettings')) + '" title="' + esc(t('cookieSettings')) + '">' +
+        '<button class="badge b-' + align + '" style="bottom:' + cfg.badgeOffset + 'px" data-act="prefs" aria-label="' + esc(t('cookieSettings')) + '" title="' + esc(t('cookieSettings')) + '">' +
         svg(IC.cookie, 'ic') + '</button>';
     };
 
