@@ -21,6 +21,7 @@ import {
   USERS, CLIENTS, PACKAGES, PRODUCTS, CATALOGUE, CLIENT_ENTITLEMENTS, PACKAGE_CATALOGUE,
 } from '../_lib/auth/schema.js';
 import { isStaffEmail } from '../_lib/auth/staff.js';
+import { resolveEntitlements } from '../_lib/auth/entitlements.js';
 
 export default async function handler(req, res) {
   if (setCors(req, res)) return;
@@ -84,7 +85,9 @@ export default async function handler(req, res) {
         }
       }
 
-      // Compute accessibleProducts = permissions ∩ client entitlements
+      // Pull the Control tables that drive entitlements and the launchpad, then
+      // resolve them in one pure pass (see _lib/auth/entitlements.js). Keeping
+      // the computation pure lets us smoke test it against real record shapes.
       const [catalogue, products, entitlements, packageCatalogue] = await Promise.all([
         listAllRecords(CATALOGUE.tableId),
         listAllRecords(PRODUCTS.tableId),
@@ -92,127 +95,33 @@ export default async function handler(req, res) {
         listAllRecords(PACKAGE_CATALOGUE.tableId),
       ]);
 
-      // Product slug → { slug, name }, and the set of ACTIVE product slugs.
-      const productInfoBySlug = new Map();
-      const activeSlugs = new Set();
-      for (const p of products) {
-        const slug = p.fields[PRODUCTS.fields.productId];
-        if (!slug) continue;
-        const name = p.fields[PRODUCTS.fields.displayName] || slug;
-        productInfoBySlug.set(slug, { slug, name });
-        if (p.fields[PRODUCTS.fields.status] === 'active') activeSlugs.add(slug);
-      }
-      allActiveSlugs = Array.from(activeSlugs);
-
-      // Map catalogueId → product slug (the Control → launchpad bridge).
-      // Skip INACTIVE catalogue items. A client can carry a stale enabled
-      // entitlement row for a product that was later switched off in the
-      // catalogue (package-seeded at onboarding, then deactivated). Those must
-      // not surface as launchpad tiles. The Catalogue tab's Active flag is the
-      // single gate, and the Entitlements tab already honours it (get.js).
-      // We also capture productCode here for the widget dashboard show-and-tag,
-      // and the full set of ACTIVE codes.
-      const slugByCatalogueId = new Map();
-      const codeByCatalogueId = new Map();
-      const activeCodeSet = new Set();
-      for (const c of catalogue) {
-        if (!c.fields[CATALOGUE.fields.active]) continue;
-        const ps = c.fields[CATALOGUE.fields.productSlug];
-        const slug = typeof ps === 'string' ? ps : (ps && ps.name) || '';
-        if (slug) slugByCatalogueId.set(c.id, slug);
-        const code = c.fields[CATALOGUE.fields.productCode];
-        if (code) {
-          codeByCatalogueId.set(c.id, code);
-          activeCodeSet.add(code);
-        }
-      }
-
-      // Slugs the client is currently entitled to. Control is the source of truth.
-      // We accumulate entitled productCodes in the same pass.
-      const entitledSlugs = new Set();
-      const entitledCodeSet = new Set();
-      for (const ent of entitlements) {
-        const linked = ent.fields[CLIENT_ENTITLEMENTS.fields.client] || [];
-        if (!linked.includes(client.recordId)) continue;
-        if (!ent.fields[CLIENT_ENTITLEMENTS.fields.enabled]) continue;
-        const cats = ent.fields[CLIENT_ENTITLEMENTS.fields.catalogueItem] || [];
-        for (const cId of cats) {
-          const slug = slugByCatalogueId.get(cId);
-          if (slug) entitledSlugs.add(slug);
-          const code = codeByCatalogueId.get(cId);
-          if (code) entitledCodeSet.add(code);
-        }
-      }
-
-      // Widget create-access follows the client's PLAN via the Package
-      // Catalogue (the catalogue toggles), so Control is the single source of
-      // truth and staff can change it live. A widget is available when the
-      // client's package includes it (includedByDefault) and the catalogue
-      // item is active. Staff get every active widget — full access, including
-      // while acting as a client. On any error we fall back to the client's own
-      // entitlement rows so a hiccup never strips access.
-      activeWidgetCodes = Array.from(activeCodeSet);
-      if (isStaffEmail(ctx.email || '')) {
-        entitledWidgetCodes = Array.from(activeCodeSet);
-      } else {
-        try {
-          const clientPkgId = (clientRec.fields[CLIENTS.fields.package] || [])[0] || null;
-          if (clientPkgId) {
-            const planCodes = new Set();
-            for (const row of packageCatalogue) {
-              if (!row.fields[PACKAGE_CATALOGUE.fields.includedByDefault]) continue;
-              const pkgs = row.fields[PACKAGE_CATALOGUE.fields.package] || [];
-              if (!pkgs.includes(clientPkgId)) continue;
-              for (const cId of (row.fields[PACKAGE_CATALOGUE.fields.catalogueItem] || [])) {
-                const code = codeByCatalogueId.get(cId); // active items only
-                if (code) planCodes.add(code);
-              }
-            }
-            entitledWidgetCodes = Array.from(planCodes);
-          } else {
-            entitledWidgetCodes = Array.from(entitledCodeSet);
-          }
-        } catch (e) {
-          console.error('[auth/me] plan widget codes failed, using entitlements:', e.message);
-          entitledWidgetCodes = Array.from(entitledCodeSet);
-        }
-      }
-
-      // Travelgenix staff in their OWN account see every active product. Staff
-      // ACTING AS a client (the active client is not one of their linked
-      // clients) and ordinary client users both see the client's entitled
-      // products, so the launchpad mirrors Control exactly. This replaces the
-      // old permission ∩ entitlement intersection, which gated the launchpad
-      // on the signed-in user's own permissions and so never matched Control.
+      // Staff in their OWN account see everything; staff acting AS a client (the
+      // active client is not one of their linked clients) see the client's own
+      // entitlements, so the launchpad mirrors Control exactly.
       const linkedClientIds = (userRec?.fields?.[USERS.fields.client] || [])
         .map((x) => (typeof x === 'string' ? x : x && x.id))
         .filter(Boolean);
       const staff = isStaffEmail(ctx.email || '');
       const impersonating = !linkedClientIds.includes(client.recordId);
+      const clientPackageId = (clientRec.fields[CLIENTS.fields.package] || [])[0] || null;
 
-      let launchSlugs;
-      if (staff && !impersonating) {
-        launchSlugs = Array.from(activeSlugs);
-      } else if (entitledSlugs.size > 0) {
-        launchSlugs = Array.from(entitledSlugs).filter((s) => productInfoBySlug.has(s));
-      } else {
-        // Safety net: this client has no entitlements seeded yet. Fall back to
-        // the user's permission products so the launchpad is not blank while
-        // the client is being set up in Control.
-        launchSlugs = (ctx.permissions || []).map((p) => p.product);
-      }
+      const resolved = resolveEntitlements({
+        catalogue,
+        products,
+        entitlements,
+        packageCatalogue,
+        clientRecordId: client.recordId,
+        clientPackageId,
+        isStaff: staff,
+        isImpersonating: impersonating,
+        permissions: ctx.permissions || [],
+        role: ctx.role,
+      });
 
-      const seen = new Set();
-      for (const slug of launchSlugs) {
-        if (!slug || seen.has(slug)) continue;
-        seen.add(slug);
-        const info = productInfoBySlug.get(slug);
-        accessibleProducts.push({
-          slug,
-          name: info ? info.name : slug,
-          role: ctx.role || 'member',
-        });
-      }
+      entitledWidgetCodes = resolved.entitledWidgetCodes;
+      activeWidgetCodes = resolved.activeWidgetCodes;
+      allActiveSlugs = resolved.allActiveSlugs;
+      accessibleProducts = resolved.accessibleProducts;
     } catch (err) {
       console.error('[auth/me] accessibleProducts compute failed:', err.message);
     }
