@@ -114,7 +114,7 @@
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
   const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
-  const VERSION = '1.10.4';
+  const VERSION = '1.10.5';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // Telemetry: report a one-time load heartbeat and any failure to
@@ -9380,19 +9380,33 @@
   // ── Auto-init ─────────────────────────────────────────────────────
 
   async function loadConfigFromApi(widgetId) {
-    try {
-      const res = await fetch(API_BASE + '?id=' + encodeURIComponent(widgetId));
-      if (!res.ok) throw new Error('Config load failed: ' + res.status);
-      const data = await res.json();
-      if (data && data.config) {
-        return Object.assign({}, data.config, { _widgetId: widgetId });
+    const url = API_BASE + '?id=' + encodeURIComponent(widgetId);
+    let lastErr = null;
+    // Retry a transient network failure a couple of times before giving up. A
+    // one-off fetch blip — or a fetch the visitor aborted by navigating away
+    // (Safari reports both as a "Load failed" TypeError) — should not fail the
+    // embed or fire a false alert. An HTTP error (4xx/5xx) will not self-heal,
+    // so stop and report that one straight away.
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (attempt) await new Promise((r) => setTimeout(r, 400 * attempt));
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Config load failed: ' + res.status);
+        const data = await res.json();
+        if (data && data.config) return Object.assign({}, data.config, { _widgetId: widgetId });
+        throw new Error('No config returned');
+      } catch (err) {
+        lastErr = err;
+        if (err && typeof err.message === 'string' && /^Config load failed: \d/.test(err.message)) break;
       }
-      throw new Error('No config returned');
-    } catch (err) {
-      console.error('[TGOffers] Config load error:', err);
-      tgReport('error', widgetId, 'config load failed', err && err.message);
-      return null;
     }
+    console.error('[TGOffers] Config load error:', lastErr);
+    // Don't alert when the tab is hidden/unloading — the fetch was almost
+    // certainly aborted by the visitor leaving, which is benign noise.
+    let hidden = false;
+    try { hidden = (document.visibilityState === 'hidden'); } catch (e) {}
+    if (!hidden) tgReport('error', widgetId, 'config load failed', lastErr && lastErr.message);
+    return null;
   }
 
   async function init() {
