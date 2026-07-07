@@ -446,7 +446,7 @@ const renderPdfCarRentalItem = (item) => {
 };
 
 // PDF: Tickets / Attractions card
-const renderPdfTicketsItem = (item) => {
+const renderPdfTicketsItem = (item, showCancellation = true) => {
   const t = item?.ticketsAttractions;
   if (!t) return '';
   const opt = t.selectedOption;
@@ -460,6 +460,12 @@ const renderPdfTicketsItem = (item) => {
   const descByTitle = (title) => (t.descriptions || []).find(d => (d.title || '').toLowerCase() === title.toLowerCase());
   const overview = descByTitle('Description')?.text || descByTitle('About')?.text || '';
   const meetingPoint = (t.descriptions || []).find(d => /meeting\s*point/i.test(d.title || ''))?.text || '';
+  // The ticket's own cancellation terms (verbatim from Travelify). The
+  // accom-only Refundable/Non-refundable summary card doesn't apply to a
+  // ticket, so surface the real policy here. Gated by the Cancellation toggle.
+  const cancelDesc = showCancellation
+    ? (t.descriptions || []).find(d => /cancel/i.test(d.title || '') || /cancel/i.test(d.type || ''))
+    : null;
 
   return `
     <div class="pdf-extra-card" style="margin-bottom:16px; padding:14px 16px; background:#F8FAFC; border-radius:10px;">
@@ -475,6 +481,10 @@ const renderPdfTicketsItem = (item) => {
         <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #E2E8F0; font-size:11px; color:#475569; line-height:1.55;">
           ${overview ? `<p style="margin:0 0 6px;">${escapeHtml(overview.slice(0, 400))}${overview.length > 400 ? '…' : ''}</p>` : ''}
           ${meetingPoint ? `<div><strong style="color:#0F172A;">Meeting point:</strong> ${escapeHtml(meetingPoint.slice(0, 300))}</div>` : ''}
+        </div>` : ''}
+      ${cancelDesc?.text ? `
+        <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #E2E8F0; font-size:11px; color:#475569; line-height:1.55;">
+          <strong style="color:#0F172A;">Cancellation policy:</strong> ${escapeHtml(cancelDesc.text.slice(0, 500))}${cancelDesc.text.length > 500 ? '…' : ''}
         </div>` : ''}
     </div>`;
 };
@@ -535,6 +545,10 @@ export function renderPdfHtml(order, opts = {}) {
   // convention so configs saved before the toggles existed are unaffected.
   const showCancellation = opts.display?.showCancellation !== false
     && opts.display?.showCancel !== false;
+
+  // "Show full image" (opt-in): fit the whole hero image into the frame even if
+  // it stretches, instead of cropping to fill. Default off = crop-to-fill.
+  const showFullImage = opts.display?.showFullImage === true;
 
   // Colour overrides — defaults match the Travelgenix design language but
   // are fully overridable per widget.
@@ -697,6 +711,29 @@ export function renderPdfHtml(order, opts = {}) {
   const refBarBookedDate = formatDateShort(order.created);
   const checkinFmt = startDate ? formatDate(startDate, { includeWeekday: true }) : '—';
   const checkoutFmt = checkout ? formatDate(checkout, { includeWeekday: true }) : '—';
+
+  // Real check-in/out times, parsed from the hotel's ImportantInfo (mirrors the
+  // widget's parser). The template used to hardcode "from 15:00 / by 12:00" on
+  // every PDF regardless of the booking; when no time is present we now hide it
+  // rather than print a made-up default.
+  let checkinTime = '';
+  let checkoutTime = '';
+  for (const info of (accom?.descriptions || [])) {
+    if (info?.type !== 'ImportantInfo') continue;
+    const txt = info.text || '';
+    const ci = txt.match(/Check[\s-]?in\s+(?:hour|time)?\s*[:\-]?\s*(\d{1,2}:\d{2}(?:\s*-\s*\d{1,2}:\d{2})?)/i);
+    const co = txt.match(/Check[\s-]?out\s+(?:hour|time)?\s*[:\-]?\s*(\d{1,2}:\d{2}(?:\s*-\s*\d{1,2}:\d{2})?)/i);
+    if (ci && !checkinTime) checkinTime = ci[1];
+    if (co && !checkoutTime) checkoutTime = co[1];
+  }
+
+  // Policies cards are hotel concepts: the cancellation summary reads the
+  // hotel's refundability and the check-in/out card shows hotel hours. They
+  // only render when the booking has accommodation. A ticket booking surfaces
+  // its own cancellation terms on the ticket card instead, so it never shows a
+  // wrong "Non-refundable" or a hotel check-in/out block.
+  const showCheckinOutCard = !!accom;
+  const showCancelCard = showCancellation && !!accom;
   const propertyTypeLine = [accom?.propertyType, starsCount ? `${starsCount}-star` : null].filter(Boolean).join(' · ');
   const addressLine = [
     accom?.location?.address1,
@@ -877,7 +914,7 @@ export function renderPdfHtml(order, opts = {}) {
     position: relative;
     height: 240px;
     ${heroImg
-      ? `background-image: url('${escapeHtml(heroImg)}'); background-size: cover; background-position: center;`
+      ? `background-image: url('${escapeHtml(heroImg)}'); background-size: ${showFullImage ? '100% 100%' : 'cover'}; background-position: center;`
       : `background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);`
     }
   }
@@ -1319,15 +1356,17 @@ export function renderPdfHtml(order, opts = {}) {
       <div class="pdf-section-title">Your Trip</div>
       <dl class="pdf-kv">
         ${locationLine ? `<dt>Destination</dt><dd>${escapeHtml(locationLine)}</dd>` : ''}
+        ${accom ? `
         <dt>Accommodation</dt>
         <dd>${escapeHtml(propertyName)}${propertyTypeLine ? ` · ${escapeHtml(propertyTypeLine)}` : ''}</dd>
         ${addressLine ? `<dt>Address</dt><dd>${escapeHtml(addressLine)}</dd>` : ''}
         <dt>Check-in</dt>
-        <dd class="num">${escapeHtml(checkinFmt)} &nbsp;·&nbsp; from 15:00</dd>
+        <dd class="num">${escapeHtml(checkinFmt)}${checkinTime ? ` &nbsp;·&nbsp; from ${escapeHtml(checkinTime)}` : ''}</dd>
         <dt>Check-out</dt>
-        <dd class="num">${escapeHtml(checkoutFmt)} &nbsp;·&nbsp; by 12:00</dd>
+        <dd class="num">${escapeHtml(checkoutFmt)}${checkoutTime ? ` &nbsp;·&nbsp; by ${escapeHtml(checkoutTime)}` : ''}</dd>
         ${nights ? `<dt>Duration</dt><dd class="num">${nights} night${nights === 1 ? '' : 's'}</dd>` : ''}
         ${unit ? `<dt>Room type</dt><dd>${escapeHtml([(unit.roomType && unit.roomType !== 'Unknown') ? unit.roomType : unit.name, rate?.board].filter(Boolean).join(' · '))}</dd>` : ''}
+        ` : ''}
         ${leadGuestName ? `<dt>Lead guest</dt><dd>${escapeHtml(leadGuestName)}</dd>` : ''}
         ${specialRequests ? `<dt>Special requests</dt><dd style="font-style:italic; color:var(--text-2);">${escapeHtml(specialRequests)}</dd>` : ''}
       </dl>
@@ -1359,7 +1398,7 @@ export function renderPdfHtml(order, opts = {}) {
     ${ticketsItems.length > 0 ? `
     <div class="pdf-section">
       <div class="pdf-section-title">${ticketsItems.length === 1 ? 'Ticket' : 'Tickets & Attractions'}</div>
-      ${ticketsItems.map(renderPdfTicketsItem).join('')}
+      ${ticketsItems.map((it) => renderPdfTicketsItem(it, showCancellation)).join('')}
     </div>` : ''}
 
     ${totalCost != null ? (() => {
@@ -1528,10 +1567,11 @@ export function renderPdfHtml(order, opts = {}) {
       </div>
     </div>` : ''}
 
+    ${(showCancelCard || showCheckinOutCard) ? `
     <div class="pdf-section">
       <div class="pdf-section-title">Policies</div>
-      <div class="pdf-policies"${showCancellation ? '' : ' style="grid-template-columns:1fr;"'}>
-        ${showCancellation ? `
+      <div class="pdf-policies"${(showCancelCard && showCheckinOutCard) ? '' : ' style="grid-template-columns:1fr;"'}>
+        ${showCancelCard ? `
         <div class="pdf-policy">
           <div class="pdf-policy-label">Cancellation</div>
           <div class="pdf-policy-title">${isRefundable ? 'Refundable' : 'Non-refundable'}</div>
@@ -1541,15 +1581,18 @@ export function renderPdfHtml(order, opts = {}) {
               : `This rate is non-refundable. Please contact us if your plans change.`}
           </div>
         </div>` : ''}
+        ${showCheckinOutCard ? `
         <div class="pdf-policy">
           <div class="pdf-policy-label">Check-in / out</div>
-          <div class="pdf-policy-title">Standard hours</div>
+          <div class="pdf-policy-title">${(checkinTime || checkoutTime) ? 'Standard hours' : 'On arrival'}</div>
           <div class="pdf-policy-body">
-            Check-in from <strong class="num">15:00</strong>, check-out by <strong class="num">12:00</strong>. Photo ID required on arrival.
+            ${(checkinTime || checkoutTime)
+              ? `Check-in${checkinTime ? ` from <strong class="num">${escapeHtml(checkinTime)}</strong>` : ''}${checkoutTime ? `, check-out by <strong class="num">${escapeHtml(checkoutTime)}</strong>` : ''}. `
+              : ''}Photo ID required on arrival.
           </div>
-        </div>
+        </div>` : ''}
       </div>
-    </div>
+    </div>` : ''}
 
   </div>
 
