@@ -469,6 +469,7 @@
           </div>
           <div class="section-body"><div class="section-body-inner">
             <div class="toggle-row"><span>PDF download button</span><button class="switch on" data-display="showActions" type="button"></button></div>
+            <div class="toggle-row"><span>Full image on PDF<small>Show the whole hero image on the PDF instead of cropping it to fill. May stretch the image.</small></span><button class="switch" data-display="showFullImage" type="button"></button></div>
             <div class="toggle-row"><span>Documents section</span><button class="switch on" data-display="showDocuments" type="button"></button></div>
             <div class="toggle-row"><span>Hotel facilities</span><button class="switch on" data-display="showFacilities" type="button"></button></div>
             <div class="toggle-row"><span>Hotel description</span><button class="switch on" data-display="showHotelDescription" type="button"></button></div>
@@ -618,7 +619,7 @@ import { renderEmailHtml } from '/_email-template.js';
       colors: Object.assign({}, DEFAULT_COLOURS),
       radius: 12,
       support: { email: '', phone: '' },
-      display: { showActions: true, showDocuments: true, showFacilities: true, showHotelDescription: true, showCancellation: true, showCancel: true, cancelEmail: true, showAmend: true, showPayBalance: true, showLocalFees: true },
+      display: { showActions: true, showFullImage: false, showDocuments: true, showFacilities: true, showHotelDescription: true, showCancellation: true, showCancel: true, cancelEmail: true, showAmend: true, showPayBalance: true, showLocalFees: true },
       lunaIntegration: { connected: false, clientName: '' },
     },
     previewTheme: 'light',
@@ -1163,10 +1164,14 @@ import { renderEmailHtml } from '/_email-template.js';
       document.querySelectorAll('.radius-tile').forEach(t => {
         t.classList.toggle('active', parseInt(t.dataset.radius, 10) === state.config.radius);
       });
-      // Display switches
+      // Display switches. Most default ON (absent key = on). showFullImage is
+      // opt-in, so it must default OFF (absent key = off) — otherwise older
+      // configs without the key would wrongly show it enabled.
+      const displayDefaultOff = new Set(['showFullImage']);
       document.querySelectorAll('[data-display]').forEach(sw => {
         const k = sw.dataset.display;
-        sw.classList.toggle('on', state.config.display?.[k] !== false);
+        const v = state.config.display?.[k];
+        sw.classList.toggle('on', displayDefaultOff.has(k) ? (v === true) : (v !== false));
       });
       // Luna integration
       if (!state.config.lunaIntegration) state.config.lunaIntegration = { connected: false, clientName: '' };
