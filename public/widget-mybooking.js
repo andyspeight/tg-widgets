@@ -3528,9 +3528,13 @@
     const total = (typeof summary.totalPrice === 'number' && summary.totalPrice > 0)
       ? summary.totalPrice
       : (pricing?.memberPrice ?? pricing?.price ?? accItem?.price ?? 0);
+    // Order-level voucher/promo discount (signed, negative). It's not in the
+    // item prices, so net it off the total the balance is measured against.
+    const voucher = (order.voucher && typeof order.voucher.value === 'number') ? order.voucher.value : 0;
+    const netTotal = Math.round((total + voucher) * 100) / 100;
     const paid = typeof order.paidToDate === 'number' ? order.paidToDate : 0;
-    const outstanding = Math.max(0, Math.round((total - paid) * 100) / 100);
-    return { total, paid, outstanding };
+    const outstanding = Math.max(0, Math.round((netTotal - paid) * 100) / 100);
+    return { total, voucher, netTotal, paid, outstanding };
   }
 
   // The "Pay balance / Pay next payment" CTA inside the Payment section.
@@ -3958,6 +3962,12 @@
               const { paid, outstanding } = computeOutstanding(order);
               if (!(paid > 0) && !(outstanding > 0)) return '';
               let rows = '';
+              // Voucher/promo discount, shown as a deduction between the total
+              // and the paid/balance rows so the figures read as a running sum.
+              if (order.voucher && typeof order.voucher.value === 'number' && order.voucher.value < 0) {
+                const vLabel = order.voucher.name || order.voucher.code || 'Voucher';
+                rows += `<div class="tgm-pay-row"><span class="tgm-pay-label">${esc(vLabel)}</span><span class="v paid">${esc(fmtMoney(order.voucher.value, currency))}</span></div>`;
+              }
               if (paid > 0) {
                 rows += `<div class="tgm-pay-row"><span class="tgm-pay-label">${esc(c.labels?.paidSoFar || c.t('paidSoFar'))}</span><span class="v paid">${esc(fmtMoney(paid, currency))}</span></div>`;
               }

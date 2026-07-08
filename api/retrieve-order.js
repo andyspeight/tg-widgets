@@ -933,6 +933,19 @@ function trimOrder(raw) {
   // having to re-walk the items array on the front end.
   const summary = computeSummary(items);
 
+  // Order-level voucher / promo. Travelify carries the discount at the TOP
+  // level (NOT in item prices) as a signed voucherValue — negative means money
+  // off. Surface it so the widget/PDF/email can show it as a deduction line and
+  // net it off the balance. Only surfaced when it actually reduces the total.
+  const voucherValue = (typeof raw.voucherValue === 'number' && raw.voucherValue < 0)
+    ? Math.round(raw.voucherValue * 100) / 100
+    : 0;
+  const voucher = voucherValue ? {
+    code: safeStr(raw.voucherCode, 60),
+    name: safeStr(raw.voucherName, 120),
+    value: voucherValue,
+  } : null;
+
   return {
     id: safeNum(raw.id),
     status: safeStr(raw.status, 30),
@@ -945,6 +958,7 @@ function trimOrder(raw) {
     created: safeStr(raw.created, 30),
     items,
     summary,
+    voucher,
     // Order-level payment state (where balance/instalments actually live).
     paidToDate: computePaidToDate(raw),
     depositOption: trimDepositOption(raw.depositOption),
@@ -1274,45 +1288,6 @@ export default async function handler(req, res) {
     if (raw && (raw.code === '404' || raw.code === 404)) {
       return notFound(res);
     }
-
-    // ─── TEMP DIAGNOSTIC — remove after capture ──────────────────────────
-    // We can't reach the Travelify API from the dev environment (egress
-    // policy), so dump the raw pricing skeleton for ONE order under
-    // investigation (promo not coming off the balance). Pricing metadata only,
-    // no PII, and scoped to a single orderRef so nothing else is logged.
-    if (orderRef === 'YTG78341') {
-      try {
-        const MONEY = /total|discount|promo|voucher|net|gross|due|balance|amount|price|deposit|paid|sub|fee|saving|charge/i;
-        const pickMoney = (o) => Object.fromEntries(
-          Object.entries(o || {}).filter(([k, v]) => MONEY.test(k) && (v == null || typeof v !== 'object')));
-        const payments = Array.isArray(raw.payments) ? raw.payments : [];
-        const dep = raw.depositOption || null;
-        const depBd = dep && Array.isArray(dep.breakdown) ? dep.breakdown : [];
-        console.log('[BALANCE DEBUG YTG78341]', JSON.stringify({
-          topLevelKeys: Object.keys(raw),
-          orderMoneyFields: pickMoney(raw),
-          currency: raw.currency,
-          items: (raw.items || []).map((it) => ({
-            product: it.product, id: it.id, price: it.price,
-            itemMoneyFields: pickMoney(it),
-            pricingKeys: it.dataObject && it.dataObject.pricing ? Object.keys(it.dataObject.pricing) : null,
-            pricingMoney: pickMoney(it.dataObject && it.dataObject.pricing),
-          })),
-          itemsPriceSum: Math.round((raw.items || []).reduce((s, it) => s + (Number(it.price) || 0), 0) * 100) / 100,
-          depositOption: dep ? {
-            keys: Object.keys(dep), initialAmount: dep.initialAmount, currency: dep.currency,
-            breakdownCount: depBd.length,
-            breakdownSum: Math.round(depBd.reduce((s, b) => s + (Number(b.amount) || 0), 0) * 100) / 100,
-            breakdown: depBd.map((b) => ({ num: b.num, amount: b.amount, dueDate: b.dueDate, keys: Object.keys(b) })),
-          } : null,
-          payments: payments.map((p) => ({ status: p.status, amount: p.amount })),
-          paidToDateSuccess: Math.round(payments.filter((p) => String(p.status || '').toLowerCase() === 'success').reduce((s, p) => s + (Number(p.amount) || 0), 0) * 100) / 100,
-        }));
-      } catch (e) {
-        console.log('[BALANCE DEBUG YTG78341] dump failed:', e.message);
-      }
-    }
-    // ─── END TEMP DIAGNOSTIC ─────────────────────────────────────────────
 
     // 5. Trim + sanitise
     const order = trimOrder(raw);

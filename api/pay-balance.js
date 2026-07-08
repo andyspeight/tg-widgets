@@ -157,7 +157,13 @@ function computePaidToDate(raw) {
 function computeOrderTotal(raw) {
   const items = Array.isArray(raw?.items) ? raw.items : [];
   const sum = items.reduce((s, it) => s + (typeof it.price === 'number' ? it.price : 0), 0);
-  return Math.round(sum * 100) / 100;
+  // Order-level voucher/promo discount. Travelify stores it as a signed
+  // top-level voucherValue (negative = money off) that is NOT reflected in
+  // item.price, so the payable total must add it (it only ever reduces). Without
+  // this we over-charge by the discount; with it the total matches Travelify's
+  // own remaining schedule.
+  const voucher = (typeof raw?.voucherValue === 'number' && raw.voucherValue < 0) ? raw.voucherValue : 0;
+  return Math.round((sum + voucher) * 100) / 100;
 }
 
 // Single source of truth for "what (if anything) do we collect now". The
