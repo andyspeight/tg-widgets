@@ -1322,13 +1322,16 @@ export default async function handler(req, res) {
         const KNOWN = new Set(['id', 'status', 'customerTitle', 'customerFirstname', 'customerSurname', 'customerEmail', 'customerPhone', 'customerMobile', 'specialRequests', 'currency', 'created', 'items', 'payments', 'documents', 'depositOption', 'voucherValue', 'voucherCode', 'voucherName', 'key', 'orderKey']);
         const unknown = {};
         for (const k of Object.keys(raw)) { if (!KNOWN.has(k)) unknown[k] = describe(raw[k], 0); }
+        // The extras arrived as an item with product 'Extras' the mapper does
+        // not handle. Describe that item's dataObject in full (PII-safe) so we
+        // can write the trim/render against the real field names.
+        const extrasItem = (raw.items || []).find((it) => it && it.product === 'Extras');
         console.log('[EXTRAS DEBUG ET90582]', JSON.stringify({
           topLevelKeys: Object.keys(raw),
           rawItemsCount: Array.isArray(raw.items) ? raw.items.length : 0,
           itemsProducts: (raw.items || []).map((it) => it && it.product),
-          unknownTopLevel: unknown,
-          firstItemKeys: raw.items && raw.items[0] ? Object.keys(raw.items[0]) : null,
-          firstItemDataObjectKeys: raw.items && raw.items[0] && raw.items[0].dataObject ? Object.keys(raw.items[0].dataObject) : null,
+          extrasItemEnvelope: extrasItem ? describe({ ...extrasItem, dataObject: undefined }, 0) : null,
+          extrasItemDataObject: extrasItem ? describe(extrasItem.dataObject, 0) : null,
         }));
       } catch (e) {
         console.log('[EXTRAS DEBUG ET90582] dump failed:', e.message);
