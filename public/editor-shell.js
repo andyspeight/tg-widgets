@@ -239,6 +239,35 @@
   })();
 
   // ============================================================
+  // STAFF "ACTING AS" SAFETY NET
+  // ============================================================
+  //
+  // Every editor loads the shell, so injecting the staff switcher here puts the
+  // loud "ACTING AS <client>" banner (and the exit-to-your-account button) on
+  // ALL 42 editors automatically — including the appointment scheduler editor,
+  // where a silent act-as session previously showed another client's calendar
+  // with no warning. The switcher self-gates: /api/auth/staff-clients returns
+  // the client list only to staff (403 otherwise), so it renders nothing for a
+  // normal client. It also has its own double-init guard (window.__tgStaffSwitcher).
+  //
+  // Gated to our own origins so it can never fire on a customer site (editors
+  // only ever run on travelify.io, but this is belt-and-braces).
+  (function injectStaffSwitcher() {
+    try {
+      var h = (location.hostname || '').toLowerCase();
+      var ours = h === 'travelify.io' || h.slice(-13) === '.travelify.io' ||
+        h === 'localhost' || h === '127.0.0.1';
+      if (!ours) return;
+      if (document.querySelector('script[data-tg-staff-switcher]')) return;
+      var s = document.createElement('script');
+      s.src = '/staff-switcher.js';
+      s.defer = true;
+      s.setAttribute('data-tg-staff-switcher', '');
+      (document.head || document.documentElement).appendChild(s);
+    } catch (e) { /* non-fatal: the banner is a safety net, not core */ }
+  })();
+
+  // ============================================================
   // SESSION MANAGEMENT
   // Soft cutover: read both localStorage + sessionStorage,
   // write only to localStorage going forward.

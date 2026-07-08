@@ -24,6 +24,12 @@
     </a>
   </header>
 
+  <!-- Staff safety net: shown only while acting as a client (see panel.js
+       loadActingAs). Warns that the diary + meetings below belong to that
+       client, not the signed-in staff member, and routes to the dashboard to
+       switch back. Persists across view re-renders because it lives outside #view. -->
+  <div id="actas" class="actas" hidden></div>
+
   <div id="account" class="account" hidden>
     <span class="avatar" id="avatar">A</span>
     <span class="acct-text">

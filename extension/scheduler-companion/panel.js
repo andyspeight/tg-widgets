@@ -14,6 +14,7 @@
 'use strict';
 
 const API = 'https://widgets.travelify.io';
+const DASH = 'https://id.travelify.io/dashboard.html';
 const PALETTE = ['#7C3AED', '#F59E0B', '#0891B2', '#F97316', '#10B981', '#EC4899'];
 
 const $ = (id) => document.getElementById(id);
@@ -232,6 +233,47 @@ async function loadIdentity() {
   } catch (e) { /* header stays plain */ }
 }
 
+/**
+ * Staff safety net. When a Travelgenix staff member is "acting as" a client,
+ * the shared .travelify.io session flips every tool to that client — including
+ * the diary and meetings shown here. Without a warning, staff saw another
+ * client's calendar and thought their own had vanished. This surfaces a loud
+ * amber strip naming the client. /api/auth/staff-clients is staff-gated (403
+ * for clients, 401 signed out), so the strip never shows for a normal user.
+ *
+ * The strip routes to the dashboard to switch back rather than calling
+ * /api/auth/switch-client here: that endpoint rejects non-travelify.io origins
+ * (CSRF defence), and an extension page's origin isn't allowed.
+ */
+async function loadActingAs() {
+  try {
+    const r = await fetch(API + '/api/auth/staff-clients', { credentials: 'include' });
+    if (!r.ok) { hideActingAs(); return; }
+    const d = await r.json();
+    if (!d || !d.impersonating || !d.currentClientId) { hideActingAs(); return; }
+    const cur = (d.clients || []).filter((c) => c.id === d.currentClientId)[0];
+    renderActingAs(cur ? cur.name : 'another client');
+  } catch (e) { hideActingAs(); }
+}
+
+function hideActingAs() {
+  const el = $('actas');
+  if (el) { el.hidden = true; el.innerHTML = ''; }
+}
+
+function renderActingAs(name) {
+  const el = $('actas');
+  if (!el) return;
+  el.innerHTML =
+    '<span class="a-badge">ACTING AS</span>' +
+    '<span class="a-text">' +
+      '<span class="a-name">' + esc(name) + '</span>' +
+      '<span class="a-sub">This diary and these meetings are theirs, not yours.</span>' +
+    '</span>' +
+    '<a class="a-exit" href="' + DASH + '" target="_blank" rel="noopener">Switch back</a>';
+  el.hidden = false;
+}
+
 async function load() {
   showLoading(tab === 'meetings' ? 'Loading your meetings…' : 'Loading your diary…');
 
@@ -246,7 +288,8 @@ async function load() {
     return;
   }
 
-  loadIdentity(); // non-blocking
+  loadIdentity();  // non-blocking
+  loadActingAs();  // non-blocking staff safety net
 
   const schedulers = (Array.isArray(widgets) ? widgets : [])
     .filter((w) => w && w.type === 'Appointment' && w.widgetId);
