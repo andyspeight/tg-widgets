@@ -1147,12 +1147,16 @@
         : s.id == null ? 'Unknown supplier (no id)'
         : ('Supplier #' + s.id);
       let g = groups.get(name);
-      if (!g) { g = { name, isPremium: false, unresolved: false, byType: { Packages: 0, Accommodation: 0, Flights: 0 }, total: 0, fromPP: null }; groups.set(name, g); }
+      if (!g) { g = { name, isPremium: false, unresolved: false, noId: false, byType: { Packages: 0, Accommodation: 0, Flights: 0 }, total: 0, fromPP: null, hint: null, _topKeyCount: 0 }; groups.set(name, g); }
       g.byType[s.prodType] = (g.byType[s.prodType] || 0) + (s.count || 0);
       g.total += (s.count || 0);
       if (meta && meta.isPremium) g.isPremium = true;
       if (!meta && s.id != null) g.unresolved = true;
+      if (s.id == null) g.noId = true;
       if (s.fromPP != null && (g.fromPP == null || s.fromPP < g.fromPP)) g.fromPP = s.fromPP;
+      // Carry the operator/carrier hint from the group's dominant sub-key, so
+      // an unnamed supplier still shows who is behind its offers.
+      if ((s.count || 0) > g._topKeyCount) { g._topKeyCount = s.count || 0; g.hint = s.topOperator || s.topCarrier || g.hint; }
     }
 
     const q = filter.trim().toLowerCase();
@@ -1173,9 +1177,14 @@
     const cell = (n) => n ? `<b>${n.toLocaleString('en-GB')}</b>` : '<span class="count-na">—</span>';
     const body = rows.map(g => {
       const tags = (g.isPremium ? ' <span class="region-tag" style="background:#EEF2FF;color:#4338CA">premium</span>' : '')
-        + (g.unresolved ? ' <span class="region-tag" style="background:#FFFBEB;color:#B45309" title="No match in the master supplier list — showing the raw Travelify id">unmatched</span>' : '');
+        + (g.unresolved ? ' <span class="region-tag" style="background:#FFFBEB;color:#B45309" title="No match in Travelify\'s active supplier list — likely deactivated since these offers were cached. Showing the raw id and the operator/airline behind the offers.">unmatched</span>' : '');
+      // For a supplier we cannot name, show the operator/airline behind its
+      // offers — the practical way to identify a deactivated or unknown id.
+      const hintLine = ((g.unresolved || g.noId) && g.hint)
+        ? `<div class="cc-code" title="Most common tour operator (packages / hotels) or airline (flights) across this supplier's offers — the best clue to who it is when the id is not in the active supplier list">likely: ${esc(g.hint)}</div>`
+        : '';
       return `<tr>
-        <td><div class="cc-name">${esc(g.name)}${tags}</div></td>
+        <td><div class="cc-name">${esc(g.name)}${tags}</div>${hintLine}</td>
         <td class="num" title="Flight + hotel packages">${cell(g.byType.Packages)}</td>
         <td class="num" title="Hotel-only offers">${cell(g.byType.Accommodation)}</td>
         <td class="num" title="Flight-only offers">${cell(g.byType.Flights)}</td>

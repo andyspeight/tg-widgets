@@ -128,12 +128,24 @@ function tallySuppliers(offers, cc, agg) {
     const id = supplierIdFor(o, prodType);
     const key = `${prodType}:${id == null ? '?' : id}`;
     let e = agg.get(key);
-    if (!e) { e = { key, id, prodType, count: 0, fromPP: null, ccs: new Set() }; agg.set(key, e); }
+    if (!e) { e = { key, id, prodType, count: 0, fromPP: null, ccs: new Set(), ops: new Map(), carriers: new Map() }; agg.set(key, e); }
     e.count += 1;
     e.ccs.add(cc);
     const pp = Number.isFinite(o.pricePP) ? o.pricePP : (Number.isFinite(o.price) ? o.price : null);
     if (pp != null && (e.fromPP == null || pp < e.fromPP)) e.fromPP = pp;
+    // Identifying hints for suppliers we cannot name from the active feed (a
+    // deactivated id keeps serving cached offers for up to 70h): the tour
+    // operator behind packages/hotels and the airline behind flights.
+    if (o.operatorName) e.ops.set(o.operatorName, (e.ops.get(o.operatorName) || 0) + 1);
+    if (o.carrier) e.carriers.set(o.carrier, (e.carriers.get(o.carrier) || 0) + 1);
   }
+}
+
+/** Most frequent key in a count Map (ties broken by insertion order). */
+function topOf(m) {
+  let best = null, n = -1;
+  for (const [k, v] of m) if (v > n) { n = v; best = k; }
+  return best;
 }
 
 /** Sort offers cheapest-first by per-person price, total price as fallback,
@@ -295,10 +307,16 @@ export default async function handler(req, res) {
 
     countries.sort((a, b) => b.offerCount - a.offerCount);
 
-    // Flatten the supplier tally: drop the working Set for a plain country
-    // count, biggest suppliers first. Drives the Suppliers tab.
+    // Flatten the supplier tally: drop the working Set/Maps for plain values
+    // (country count + the dominant operator/carrier hint), biggest suppliers
+    // first. Drives the Suppliers tab.
     const suppliers = Array.from(supplierAgg.values())
-      .map(({ ccs, ...rest }) => ({ ...rest, countryCount: ccs.size }))
+      .map(({ ccs, ops, carriers, ...rest }) => ({
+        ...rest,
+        countryCount: ccs.size,
+        topOperator: topOf(ops),
+        topCarrier: topOf(carriers),
+      }))
       .sort((a, b) => b.count - a.count);
 
     return res.status(200).json({
