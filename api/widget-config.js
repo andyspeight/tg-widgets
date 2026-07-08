@@ -301,6 +301,7 @@ const ALLOWED_WIDGET_TYPES = [
   'Prism',
   'Cookie Consent',
   'Smart Section',
+  'Email Signature',
 ];
 
 // Per-plan widget count limits, keyed by widgetType.
@@ -354,6 +355,9 @@ const PLAN_WIDGET_LIMITS = {
   'Cookie Consent':        { Spark: 1, Boost: 1, Ignite: -1, Bespoke: -1 },
   // Premium-only positioning (locked 24 Jun 2026): no teaser tier on Boost.
   'Smart Section':         { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  // Self-serve signature builder. Available from Spark so starters can try it;
+  // higher tiers get more signatures (one per staff member adds up).
+  'Email Signature':       { Spark: 1, Boost: 5, Ignite: -1, Bespoke: -1 },
 };
 
 // Canonical plan names recognised by PLAN_WIDGET_LIMITS lookups.
@@ -505,6 +509,11 @@ const WIDGET_TYPE_ALIASES = {
   'smartsection':          'Smart Section',
   'smart-section':         'Smart Section',
   'smart section':         'Smart Section',
+  'emailsig':              'Email Signature',
+  'email-signature':       'Email Signature',
+  'email signature':       'Email Signature',
+  'signature':             'Email Signature',
+  'email-sig':             'Email Signature',
 };
 
 function canonicaliseWidgetType(raw) {

@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Email Signature Editor — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<style>
+  /* Per-editor control styles. Shell tokens (--tgse-*) with plain fallbacks. */
+  .field { margin-bottom: 14px; }
+  .field-label { display:block; font-size:12px; font-weight:600; color: var(--tgse-text, #1b2b5b); margin-bottom:6px; }
+  .field-help { font-size:11px; color: var(--tgse-muted, #8a8f98); margin-top:6px; line-height:1.4; }
+  .input, .textarea, .select {
+    width:100%; font:inherit; font-size:13px; color:#1b2b5b;
+    background:#fff; border:1px solid var(--tgse-border, #d5d8dd); border-radius:8px;
+    padding:9px 11px; outline:none;
+  }
+  .input:focus, .textarea:focus, .select:focus { border-color:#1B2B5B; box-shadow:0 0 0 3px rgba(27,43,91,.10); }
+  .textarea { min-height:80px; resize:vertical; }
+  .row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .colour-row { display:flex; align-items:center; gap:8px; }
+  .colour-row input[type=color] { width:40px; height:38px; padding:0; border:1px solid var(--tgse-border,#d5d8dd); border-radius:8px; background:#fff; cursor:pointer; }
+  .colour-row .input { flex:1; }
+  .toggle-row { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:10px 0; }
+  .toggle-label { font-size:13px; font-weight:600; color:#1b2b5b; }
+  .toggle-help { font-size:11px; color:var(--tgse-muted,#8a8f98); margin-top:2px; line-height:1.4; }
+  .toggle { flex:0 0 auto; width:40px; height:23px; border-radius:999px; border:none; background:#cfd4dc; position:relative; cursor:pointer; transition:background .15s; }
+  .toggle::after { content:""; position:absolute; top:2px; left:2px; width:19px; height:19px; border-radius:50%; background:#fff; transition:left .15s; box-shadow:0 1px 2px rgba(0,0,0,.2); }
+  .toggle.is-on { background:#1B2B5B; }
+  .toggle.is-on::after { left:19px; }
+  .layout-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+  .layout-card { text-align:center; padding:12px 6px; border:1.5px solid var(--tgse-border,#d5d8dd); border-radius:9px; background:#fff; cursor:pointer; }
+  .layout-card.is-active { border-color:#1B2B5B; background:#f5f7fb; }
+  .layout-thumb { height:34px; display:flex; align-items:center; justify-content:center; margin-bottom:6px; }
+  .layout-thumb span { display:block; background:#c3c9d4; border-radius:2px; }
+  .layout-name { font-size:12px; font-weight:600; color:#1b2b5b; }
+  .slider-wrap { display:flex; align-items:center; gap:10px; }
+  .slider { flex:1; }
+  .slider-val { font-size:12px; color:var(--tgse-muted,#8a8f98); min-width:42px; text-align:right; }
+  .social-row { display:grid; grid-template-columns:120px 1fr 34px; gap:8px; margin-bottom:8px; align-items:center; }
+  .btn-x { border:1px solid var(--tgse-border,#d5d8dd); background:#fff; color:#98455a; border-radius:8px; height:38px; cursor:pointer; font-size:16px; line-height:1; }
+  .btn-x:hover { background:#fbf2f4; }
+  .btn-add { width:100%; border:1px dashed var(--tgse-border,#c3c9d4); background:#fff; color:#1B2B5B; border-radius:8px; padding:9px; font-size:13px; font-weight:600; cursor:pointer; }
+  .btn-add:hover { background:#f5f7fb; }
+  #widgetMount { width:100%; }
+</style>
+</head>
+<body>
+
+<div class="tgse-app">
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Email Signature</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates
+        <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/></svg>
+        AI builder
+        <span class="tgse-kbd">A</span>
+      </button>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled signature" maxlength="80" />
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button class="tab is-active" data-tab="design" role="tab" aria-selected="true">Design</button>
+      <button class="tab" data-tab="content" role="tab" aria-selected="false">Content</button>
+      <button class="tab" data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+      <div class="sb-body">
+
+        <!-- ===== DESIGN TAB ===== -->
+        <div class="tgse-panel is-active" data-tab="design">
+
+          <div class="tgse-section is-open">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
+              <span class="tgse-section-label">Template</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="layout-grid" id="templateGrid">
+                <button class="layout-card is-active" data-template="classic" type="button">
+                  <div class="layout-thumb"><span style="width:20px;height:20px;border-radius:50%"></span><span style="width:20px;height:3px;margin-left:6px"></span></div>
+                  <div class="layout-name">Classic</div>
+                </button>
+                <button class="layout-card" data-template="modern" type="button">
+                  <div class="layout-thumb"><span style="width:3px;height:24px"></span><span style="width:22px;height:3px;margin-left:6px"></span></div>
+                  <div class="layout-name">Modern</div>
+                </button>
+                <button class="layout-card" data-template="compact" type="button">
+                  <div class="layout-thumb"><span style="width:28px;height:4px"></span></div>
+                  <div class="layout-name">Compact</div>
+                </button>
+              </div>
+              <div class="field-help">Classic puts your photo or logo beside your details. Modern uses an accent bar. Compact is a single tidy column.</div>
+            </div>
+          </div>
+
+          <div class="tgse-section is-open">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+              <span class="tgse-section-label">Colours</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="field">
+                <span class="field-label">Brand accent (name, links, button)</span>
+                <div class="colour-row"><input type="color" id="colAccent" value="#1B2B5B" /><input type="text" class="input" id="colAccentHex" maxlength="7" value="#1B2B5B" /></div>
+              </div>
+              <div class="row2">
+                <div class="field">
+                  <span class="field-label">Main text</span>
+                  <div class="colour-row"><input type="color" id="colText" value="#333333" /><input type="text" class="input" id="colTextHex" maxlength="7" value="#333333" /></div>
+                </div>
+                <div class="field">
+                  <span class="field-label">Muted text</span>
+                  <div class="colour-row"><input type="color" id="colMuted" value="#8a8f98" /><input type="text" class="input" id="colMutedHex" maxlength="7" value="#8a8f98" /></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tgse-section">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+              <span class="tgse-section-label">Typography</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="field">
+                <span class="field-label">Font (email-safe)</span>
+                <select class="select" id="fontSelect"></select>
+                <div class="field-help">Only fonts that render reliably in every email client are offered.</div>
+              </div>
+              <div class="field">
+                <span class="field-label">Base text size</span>
+                <div class="slider-wrap"><input type="range" min="11" max="18" step="1" id="fontSize" class="slider" value="14" /><span class="slider-val" id="fontSizeVal">14px</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== CONTENT TAB ===== -->
+        <div class="tgse-panel" data-tab="content">
+
+          <div class="tgse-section is-open">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span class="tgse-section-label">You</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="field"><span class="field-label">Full name</span><input class="input" id="fName" maxlength="120" placeholder="Jane Doe" /></div>
+              <div class="field"><span class="field-label">Job title</span><input class="input" id="fTitle" maxlength="120" placeholder="Travel Consultant" /></div>
+              <div class="field"><span class="field-label">Company</span><input class="input" id="fCompany" maxlength="120" placeholder="Sunshine Travel" /></div>
+              <div class="field"><span class="field-label">Headshot URL (optional)</span><input class="input" id="fPhoto" maxlength="300" placeholder="https://…/photo.jpg" /><div class="field-help">A square image works best. Classic template shows it as a round photo.</div></div>
+              <div class="field"><span class="field-label">Company logo URL (optional)</span><input class="input" id="fLogo" maxlength="300" placeholder="https://…/logo.png" /></div>
+            </div>
+          </div>
+
+          <div class="tgse-section is-open">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.94.36 1.86.7 2.74a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.34-1.27a2 2 0 0 1 2.11-.45c.88.34 1.8.57 2.74.7A2 2 0 0 1 22 16.92z"/></svg>
+              <span class="tgse-section-label">Contact</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="row2">
+                <div class="field"><span class="field-label">Phone</span><input class="input" id="cPhone" maxlength="40" placeholder="+44 20 1234 5678" /></div>
+                <div class="field"><span class="field-label">Mobile</span><input class="input" id="cMobile" maxlength="40" placeholder="+44 7700 900000" /></div>
+              </div>
+              <div class="field"><span class="field-label">Email</span><input class="input" id="cEmail" maxlength="200" placeholder="jane@sunshinetravel.co.uk" /></div>
+              <div class="field"><span class="field-label">Website</span><input class="input" id="cWebsite" maxlength="200" placeholder="sunshinetravel.co.uk" /></div>
+              <div class="field"><span class="field-label">Address (optional)</span><input class="input" id="cAddress" maxlength="200" placeholder="12 High Street, London" /></div>
+            </div>
+          </div>
+
+          <div class="tgse-section">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M8 12h8"/></svg>
+              <span class="tgse-section-label">Call to action</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="toggle-row">
+                <div><div class="toggle-label">Show button</div><div class="toggle-help">A coloured button under your details.</div></div>
+                <button class="toggle is-on" id="ctaToggle" type="button" aria-pressed="true"></button>
+              </div>
+              <div class="field"><span class="field-label">Button text</span><input class="input" id="ctaLabel" maxlength="60" placeholder="Book your next trip" /></div>
+              <div class="field"><span class="field-label">Button link</span><input class="input" id="ctaUrl" maxlength="300" placeholder="https://sunshinetravel.co.uk/book" /></div>
+            </div>
+          </div>
+
+          <div class="tgse-section">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20"/></svg>
+              <span class="tgse-section-label">Social links</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div id="socialList"></div>
+              <button class="btn-add" id="socialAdd" type="button">+ Add social link</button>
+              <div class="field-help">Shown as tidy text links (icon images are blocked by many email clients).</div>
+            </div>
+          </div>
+
+          <div class="tgse-section">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.5 8 11 4.6-2.5 8-6 8-11V5z"/></svg>
+              <span class="tgse-section-label">Travel credentials</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="toggle-row">
+                <div><div class="toggle-label">Show credentials</div><div class="toggle-help">ABTA / ATOL numbers and a Trustpilot rating as a trust line.</div></div>
+                <button class="toggle" id="badgeToggle" type="button" aria-pressed="false"></button>
+              </div>
+              <div class="row2">
+                <div class="field"><span class="field-label">ABTA number</span><input class="input" id="tAbta" maxlength="24" placeholder="Y1234" /></div>
+                <div class="field"><span class="field-label">ATOL number</span><input class="input" id="tAtol" maxlength="24" placeholder="5678" /></div>
+              </div>
+              <div class="row2">
+                <div class="field"><span class="field-label">Trustpilot rating</span><input class="input" id="tTpRating" maxlength="8" placeholder="4.8" /></div>
+                <div class="field"><span class="field-label">Trustpilot link</span><input class="input" id="tTpUrl" maxlength="200" placeholder="https://…" /></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== SETTINGS TAB ===== -->
+        <div class="tgse-panel" data-tab="settings">
+
+          <div class="tgse-section is-open">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 15 5-5 4 4 3-3 6 6"/></svg>
+              <span class="tgse-section-label">Promo banner</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="toggle-row">
+                <div><div class="toggle-label">Show a banner</div><div class="toggle-help">A clickable image under your signature — great for offers.</div></div>
+                <button class="toggle" id="bannerToggle" type="button" aria-pressed="false"></button>
+              </div>
+              <div class="field"><span class="field-label">Banner image URL</span><input class="input" id="bImage" maxlength="300" placeholder="https://…/summer-sale.png" /></div>
+              <div class="field"><span class="field-label">Banner links to</span><input class="input" id="bLink" maxlength="300" placeholder="https://sunshinetravel.co.uk/offers" /></div>
+              <div class="field">
+                <span class="field-label">Banner width</span>
+                <div class="slider-wrap"><input type="range" min="120" max="600" step="20" id="bWidth" class="slider" value="480" /><span class="slider-val" id="bWidthVal">480px</span></div>
+              </div>
+              <div class="toggle-row">
+                <div><div class="toggle-label">Keep it updatable</div><div class="toggle-help">Serve the banner through Travelgenix so you can swap the image later without re-pasting. Needs the widget saved.</div></div>
+                <button class="toggle is-on" id="bUpdatable" type="button" aria-pressed="true"></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="tgse-section">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+              <span class="tgse-section-label">Open tracking</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="toggle-row">
+                <div><div class="toggle-label">Add an open pixel</div><div class="toggle-help">A tiny invisible image that logs when an email is opened. Needs the widget saved.</div></div>
+                <button class="toggle" id="pixelToggle" type="button" aria-pressed="false"></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="tgse-section">
+            <div class="tgse-section-head">
+              <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+              <span class="tgse-section-label">Legal disclaimer</span>
+              <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="tgse-section-body">
+              <div class="field"><span class="field-label">Footer text (optional)</span><textarea class="textarea" id="disclaimer" maxlength="600" placeholder="This email and any attachments are confidential…"></textarea></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </aside>
+
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop" aria-label="Desktop view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
+        <button data-vp="mobile" title="Mobile" aria-label="Mobile view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+      </div>
+      <div class="tgse-divider"></div>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Get embed code
+      </button>
+    </div>
+
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame">
+        <div id="widgetMount"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="/editor-shell.js"></script>
+<script src="/widget-emailsig.js"></script>
+
+<script>
+  // Email-safe font stacks (label → CSS stack). No web fonts — email strips them.
+  const EMAIL_FONTS = [
+    ['Arial',            "Arial, 'Helvetica Neue', Helvetica, sans-serif"],
+    ['Helvetica',        "'Helvetica Neue', Helvetica, Arial, sans-serif"],
+    ['Verdana',          "Verdana, Geneva, sans-serif"],
+    ['Tahoma',           "Tahoma, Geneva, sans-serif"],
+    ['Trebuchet MS',     "'Trebuchet MS', Helvetica, sans-serif"],
+    ['Georgia',          "Georgia, 'Times New Roman', serif"],
+    ['Times New Roman',  "'Times New Roman', Times, serif"],
+    ['Courier New',      "'Courier New', Courier, monospace"],
+  ];
+
+  function defaultsCfg() {
+    return {
+      template: 'classic',
+      theme: { accent: '#1B2B5B', text: '#333333', muted: '#8a8f98', font: EMAIL_FONTS[0][1], fontSize: 14 },
+      person: { name: '', title: '', company: '', photoUrl: '', logoUrl: '' },
+      contact: { phone: '', mobile: '', email: '', website: '', address: '' },
+      cta: { enabled: true, label: 'Book your next trip', url: '' },
+      socials: [],
+      banner: { enabled: false, imageUrl: '', linkUrl: '', width: 480, updatable: true },
+      travel: { showBadges: false, abta: '', atol: '', trustpilotRating: '', trustpilotUrl: '' },
+      tracking: { openPixel: false },
+      disclaimer: '',
+      widgetId: '',
+    };
+  }
+
+  let C = defaultsCfg();
+  let inst = null;
+
+  const shell = tgse.init({
+    widgetType: 'Email Signature',
+    widgetTag: 'emailsig',
+    scriptFile: 'widget-emailsig.js',
+    getConfig: () => C,
+    setConfig: (c) => { C = Object.assign({}, C, c); syncControls(); render(); },
+    onAIBuild: () => { tgse.toast('AI builder coming soon', 'ok'); },
+    onTemplates: () => { tgse.toast('Templates coming soon', 'ok'); },
+    onAfterSave: (d) => { if (d && d.widgetId) { C.widgetId = d.widgetId; render(); } },
+    onLoginSuccess: () => { loadFromUrl(); },
+  });
+
+  const $ = (id) => document.getElementById(id);
+  function dirty() { shell.markDirty(); }
+
+  function tearDown() {
+    if (inst && typeof inst.destroy === 'function') { try { inst.destroy(); } catch (e) {} }
+    inst = null;
+    const old = $('widgetMount');
+    if (old) { const fresh = document.createElement('div'); fresh.id = 'widgetMount'; old.replaceWith(fresh); }
+  }
+
+  function render() {
+    if (!window.TGEmailSigWidget) return;
+    tearDown();
+    const host = $('widgetMount');
+    if (!host) return;
+    const el = document.createElement('div');
+    el.setAttribute('data-tg-widget', 'emailsig');
+    host.appendChild(el);
+    inst = new window.TGEmailSigWidget(el, C);
+  }
+
+  // ── Social rows (repeatable) ──
+  function socialOptions(sel) {
+    const nets = ['facebook', 'instagram', 'x', 'linkedin', 'youtube', 'tiktok', 'pinterest', 'whatsapp', 'website'];
+    const label = { facebook: 'Facebook', instagram: 'Instagram', x: 'X', linkedin: 'LinkedIn', youtube: 'YouTube', tiktok: 'TikTok', pinterest: 'Pinterest', whatsapp: 'WhatsApp', website: 'Website' };
+    return nets.map((n) => '<option value="' + n + '"' + (n === sel ? ' selected' : '') + '>' + label[n] + '</option>').join('');
+  }
+  function renderSocials() {
+    const list = $('socialList');
+    list.innerHTML = C.socials.map((s, i) =>
+      '<div class="social-row" data-i="' + i + '">'
+      + '<select class="select js-snet">' + socialOptions(s.network) + '</select>'
+      + '<input class="input js-surl" maxlength="300" placeholder="https://…" value="' + escAttr(s.url) + '" />'
+      + '<button class="btn-x js-sdel" type="button" title="Remove">×</button>'
+      + '</div>'
+    ).join('');
+  }
+  $('socialAdd').addEventListener('click', () => { C.socials.push({ network: 'facebook', url: '' }); renderSocials(); dirty(); render(); });
+  $('socialList').addEventListener('input', (e) => {
+    const row = e.target.closest('[data-i]'); if (!row) return;
+    const i = +row.getAttribute('data-i');
+    if (e.target.classList.contains('js-snet')) C.socials[i].network = e.target.value;
+    if (e.target.classList.contains('js-surl')) C.socials[i].url = e.target.value;
+    dirty(); render();
+  });
+  $('socialList').addEventListener('click', (e) => {
+    if (!e.target.classList.contains('js-sdel')) return;
+    const row = e.target.closest('[data-i]'); if (!row) return;
+    C.socials.splice(+row.getAttribute('data-i'), 1); renderSocials(); dirty(); render();
+  });
+
+  function escAttr(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+
+  // ── Bind a text input to a nested config path ──
+  function bindInput(id, get, set) {
+    const el = $(id); if (!el) return;
+    el.addEventListener('input', () => { set(el.value); dirty(); render(); });
+  }
+  function bindColour(colId, hexId, set) {
+    const col = $(colId), hex = $(hexId);
+    const apply = (v) => { set(v); dirty(); render(); };
+    col.addEventListener('input', () => { hex.value = col.value; apply(col.value); });
+    hex.addEventListener('input', () => { if (/^#[0-9a-fA-F]{6}$/.test(hex.value)) { col.value = hex.value; apply(hex.value); } else { apply(hex.value); } });
+  }
+  function bindToggle(id, get, set) {
+    const el = $(id); if (!el) return;
+    el.addEventListener('click', () => {
+      const on = !get();
+      el.classList.toggle('is-on', on); el.setAttribute('aria-pressed', on ? 'true' : 'false');
+      set(on); dirty(); render();
+    });
+  }
+
+  bindInput('fName', () => C.person.name, (v) => C.person.name = v);
+  bindInput('fTitle', () => C.person.title, (v) => C.person.title = v);
+  bindInput('fCompany', () => C.person.company, (v) => C.person.company = v);
+  bindInput('fPhoto', () => C.person.photoUrl, (v) => C.person.photoUrl = v);
+  bindInput('fLogo', () => C.person.logoUrl, (v) => C.person.logoUrl = v);
+  bindInput('cPhone', () => C.contact.phone, (v) => C.contact.phone = v);
+  bindInput('cMobile', () => C.contact.mobile, (v) => C.contact.mobile = v);
+  bindInput('cEmail', () => C.contact.email, (v) => C.contact.email = v);
+  bindInput('cWebsite', () => C.contact.website, (v) => C.contact.website = v);
+  bindInput('cAddress', () => C.contact.address, (v) => C.contact.address = v);
+  bindInput('ctaLabel', () => C.cta.label, (v) => C.cta.label = v);
+  bindInput('ctaUrl', () => C.cta.url, (v) => C.cta.url = v);
+  bindInput('tAbta', () => C.travel.abta, (v) => C.travel.abta = v);
+  bindInput('tAtol', () => C.travel.atol, (v) => C.travel.atol = v);
+  bindInput('tTpRating', () => C.travel.trustpilotRating, (v) => C.travel.trustpilotRating = v);
+  bindInput('tTpUrl', () => C.travel.trustpilotUrl, (v) => C.travel.trustpilotUrl = v);
+  bindInput('bImage', () => C.banner.imageUrl, (v) => C.banner.imageUrl = v);
+  bindInput('bLink', () => C.banner.linkUrl, (v) => C.banner.linkUrl = v);
+  bindInput('disclaimer', () => C.disclaimer, (v) => C.disclaimer = v);
+
+  bindColour('colAccent', 'colAccentHex', (v) => C.theme.accent = v);
+  bindColour('colText', 'colTextHex', (v) => C.theme.text = v);
+  bindColour('colMuted', 'colMutedHex', (v) => C.theme.muted = v);
+
+  bindToggle('ctaToggle', () => C.cta.enabled, (v) => C.cta.enabled = v);
+  bindToggle('badgeToggle', () => C.travel.showBadges, (v) => C.travel.showBadges = v);
+  bindToggle('bannerToggle', () => C.banner.enabled, (v) => C.banner.enabled = v);
+  bindToggle('bUpdatable', () => C.banner.updatable, (v) => C.banner.updatable = v);
+  bindToggle('pixelToggle', () => C.tracking.openPixel, (v) => C.tracking.openPixel = v);
+
+  // Template cards
+  $('templateGrid').addEventListener('click', (e) => {
+    const card = e.target.closest('[data-template]'); if (!card) return;
+    document.querySelectorAll('#templateGrid .layout-card').forEach((c) => c.classList.toggle('is-active', c === card));
+    C.template = card.getAttribute('data-template'); dirty(); render();
+  });
+
+  // Font select + size
+  (function initFont() {
+    const sel = $('fontSelect');
+    sel.innerHTML = EMAIL_FONTS.map(([label, stack]) => '<option value="' + escAttr(stack) + '">' + label + '</option>').join('');
+    sel.addEventListener('change', () => { C.theme.font = sel.value; dirty(); render(); });
+  })();
+  $('fontSize').addEventListener('input', () => { C.theme.fontSize = +$('fontSize').value; $('fontSizeVal').textContent = $('fontSize').value + 'px'; dirty(); render(); });
+  $('bWidth').addEventListener('input', () => { C.banner.width = +$('bWidth').value; $('bWidthVal').textContent = $('bWidth').value + 'px'; dirty(); render(); });
+
+  // Push current C into every control (after load / setConfig).
+  function syncControls() {
+    $('fName').value = C.person.name || '';
+    $('fTitle').value = C.person.title || '';
+    $('fCompany').value = C.person.company || '';
+    $('fPhoto').value = C.person.photoUrl || '';
+    $('fLogo').value = C.person.logoUrl || '';
+    $('cPhone').value = C.contact.phone || '';
+    $('cMobile').value = C.contact.mobile || '';
+    $('cEmail').value = C.contact.email || '';
+    $('cWebsite').value = C.contact.website || '';
+    $('cAddress').value = C.contact.address || '';
+    $('ctaLabel').value = C.cta.label || '';
+    $('ctaUrl').value = C.cta.url || '';
+    $('tAbta').value = C.travel.abta || '';
+    $('tAtol').value = C.travel.atol || '';
+    $('tTpRating').value = C.travel.trustpilotRating || '';
+    $('tTpUrl').value = C.travel.trustpilotUrl || '';
+    $('bImage').value = C.banner.imageUrl || '';
+    $('bLink').value = C.banner.linkUrl || '';
+    $('disclaimer').value = C.disclaimer || '';
+
+    const setCol = (colId, hexId, v) => { $(colId).value = v; $(hexId).value = v; };
+    setCol('colAccent', 'colAccentHex', C.theme.accent);
+    setCol('colText', 'colTextHex', C.theme.text);
+    setCol('colMuted', 'colMutedHex', C.theme.muted);
+
+    $('fontSelect').value = C.theme.font;
+    $('fontSize').value = C.theme.fontSize; $('fontSizeVal').textContent = C.theme.fontSize + 'px';
+    $('bWidth').value = C.banner.width; $('bWidthVal').textContent = C.banner.width + 'px';
+
+    const setTgl = (id, on) => { const el = $(id); el.classList.toggle('is-on', !!on); el.setAttribute('aria-pressed', on ? 'true' : 'false'); };
+    setTgl('ctaToggle', C.cta.enabled);
+    setTgl('badgeToggle', C.travel.showBadges);
+    setTgl('bannerToggle', C.banner.enabled);
+    setTgl('bUpdatable', C.banner.updatable);
+    setTgl('pixelToggle', C.tracking.openPixel);
+
+    document.querySelectorAll('#templateGrid .layout-card').forEach((c) => c.classList.toggle('is-active', c.getAttribute('data-template') === C.template));
+    renderSocials();
+  }
+
+  // Deep-merge loaded config onto defaults so missing nested keys keep defaults.
+  function mergeConfig(loaded) {
+    const base = defaultsCfg();
+    if (!loaded || typeof loaded !== 'object') return base;
+    for (const k of Object.keys(base)) {
+      if (loaded[k] === undefined || loaded[k] === null) continue;
+      if (Array.isArray(base[k])) base[k] = Array.isArray(loaded[k]) ? loaded[k] : base[k];
+      else if (typeof base[k] === 'object') base[k] = Object.assign({}, base[k], loaded[k]);
+      else base[k] = loaded[k];
+    }
+    return base;
+  }
+
+  function loadFromUrl() {
+    const params = new URLSearchParams(location.search);
+    const wId = params.get('id');
+    if (!wId) { syncControls(); render(); return; }
+    fetch('/api/widget-config?id=' + encodeURIComponent(wId))
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d && d.config) C = mergeConfig(d.config);
+        C.widgetId = wId;
+        if (d && d.name) $('name-input').value = d.name;
+        syncControls(); render();
+      })
+      .catch(() => { syncControls(); render(); tgse.toast('Failed to load signature', 'err'); });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(() => { if (tgse.isLoggedIn()) loadFromUrl(); else { syncControls(); render(); } });
+    } else {
+      syncControls(); render();
+      if (tgse.isLoggedIn()) loadFromUrl();
+    }
+  });
+
+  $('name-input')?.addEventListener('input', () => shell.markDirty());
+</script>
+
+</body>
+</html>

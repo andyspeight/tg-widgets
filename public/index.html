@@ -928,6 +928,21 @@ const WIDGETS = [
     access: { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'emailsig',
+    name: 'Email Signature',
+    airtableType: 'Email Signature',  // matches Airtable WidgetType singleSelect option
+    description: 'Build a branded email signature and drop it into Gmail, Outlook or Apple Mail in minutes. Photo or logo, click-to-call and email links, social links, a book-now button, an optional ABTA / ATOL and Trustpilot trust line, plus an updatable promo banner and open tracking served from Travelgenix. Copy the signature or the raw HTML, with step-by-step install guides for every major email client.',
+    category: 'Engagement',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<rect x="2" y="4" width="20" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="m22 7-10 5L2 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'},
+    color: '#1B2B5B',
+    editorUrl: '/editor-emailsig',
+    demoUrl: '/demo-emailsig',
+    widgetTag: 'emailsig',
+    scriptFile: 'widget-emailsig.js',
+    access: { Spark: 1, Boost: 5, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'contact',
     name: 'Contact Card',
     airtableType: 'Contact Card',
@@ -1807,6 +1822,37 @@ function loadMiniPreview(w) {
       cta:{enabled:false},
       seo:{enableSchema:false}
     });
+  }
+
+  if (w.id === 'emailsig') {
+    container.innerHTML = `
+      <div style="width:700px;height:340px;background:#f4f6f9;border-radius:16px;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:20px;box-sizing:border-box;display:flex;flex-direction:column;">
+        <div style="font-size:12px;color:#8a8f98;margin-bottom:8px;">New message &nbsp;&middot;&nbsp; to client@example.com</div>
+        <div style="background:#fff;border-radius:12px;flex:1;padding:20px 22px;box-shadow:0 1px 3px rgba(16,24,40,.06);display:flex;flex-direction:column;overflow:hidden;">
+          <div style="color:#334155;font-size:14px;">Kind regards,</div>
+          <div style="height:12px"></div>
+          <table style="border-collapse:collapse;font-family:Arial,sans-serif;">
+            <tr>
+              <td style="vertical-align:top;padding-right:16px;">
+                <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#1B2B5B,#3f5aa6);"></div>
+              </td>
+              <td style="width:2px;background:#1B2B5B;">&nbsp;</td>
+              <td style="width:16px"></td>
+              <td style="vertical-align:top;">
+                <div style="font-size:16px;font-weight:bold;color:#1B2B5B;">Jane Doe</div>
+                <div style="font-size:12px;color:#8a8f98;margin-top:2px;">Travel Consultant &nbsp;&bull;&nbsp; Sunshine Travel</div>
+                <div style="font-size:12px;color:#334155;margin-top:8px;line-height:1.7;">
+                  <span style="color:#8a8f98">Tel</span> &nbsp;<span style="color:#1B2B5B">+44 20 1234 5678</span><br>
+                  <span style="color:#8a8f98">Email</span> &nbsp;<span style="color:#1B2B5B">jane@sunshinetravel.co.uk</span>
+                </div>
+                <div style="margin-top:10px;"><span style="display:inline-block;background:#1B2B5B;color:#fff;font-size:12px;font-weight:bold;padding:7px 14px;border-radius:4px;">Book your next trip</span></div>
+              </td>
+            </tr>
+          </table>
+          <div style="margin-top:14px;height:46px;border-radius:6px;background:linear-gradient(90deg,#00B4D8,#1B2B5B);display:flex;align-items:center;padding:0 16px;color:#fff;font-size:13px;font-weight:600;">Summer sale &nbsp;&middot;&nbsp; up to 40% off selected holidays</div>
+        </div>
+      </div>`;
+    return;
   }
 
   if (w.id === 'testimonials') {
