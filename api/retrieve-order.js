@@ -1290,40 +1290,48 @@ export default async function handler(req, res) {
     }
 
     // ─── TEMP DIAGNOSTIC — remove after capture ──────────────────────────
-    // We can't reach the Travelify API from the dev environment (egress
-    // policy), so dump the raw pricing skeleton for ONE order under
-    // investigation (promo not coming off the balance). Pricing metadata only,
-    // no PII, and scoped to a single orderRef so nothing else is logged.
-    if (orderRef === 'YTG78341') {
+    // The My Booking widget isn't surfacing post-booking Extras (order
+    // ET90582: a "TRANSFERS / Private Return Taxi" extra added AFTER the
+    // original booking). The mapper only reads raw.items[]; we suspect
+    // order-level extras live in a field it never looks at. We can't reach
+    // Travelify from the dev environment (egress policy), so dump the raw
+    // order's STRUCTURE for that one order to find where the extras live.
+    // Structure + non-PII product fields only: participant names / DOBs are
+    // redacted, and it is scoped to a single orderRef so nothing else logs.
+    if (orderRef === 'ET90582') {
       try {
-        const MONEY = /total|discount|promo|voucher|net|gross|due|balance|amount|price|deposit|paid|sub|fee|saving|charge/i;
-        const pickMoney = (o) => Object.fromEntries(
-          Object.entries(o || {}).filter(([k, v]) => MONEY.test(k) && (v == null || typeof v !== 'object')));
-        const payments = Array.isArray(raw.payments) ? raw.payments : [];
-        const dep = raw.depositOption || null;
-        const depBd = dep && Array.isArray(dep.breakdown) ? dep.breakdown : [];
-        console.log('[BALANCE DEBUG YTG78341]', JSON.stringify({
+        const PII = /firstname|surname|forename|fullname|lastname|middlename|dob|dateofbirth|birth|email|phone|mobile|passport|nationalid|address/i;
+        const describe = (v, depth) => {
+          if (v === null || v === undefined) return null;
+          if (Array.isArray(v)) return { __len: v.length, __sample: (v.length && depth < 5) ? describe(v[0], depth + 1) : undefined };
+          if (typeof v === 'object') {
+            const o = {};
+            for (const k of Object.keys(v).slice(0, 40)) {
+              if (PII.test(k)) { o[k] = '<redacted>'; continue; }
+              const val = v[k];
+              if (val && typeof val === 'object') o[k] = depth < 5 ? describe(val, depth + 1) : '[obj]';
+              else if (typeof val === 'string') o[k] = val.length > 80 ? val.slice(0, 80) + '…' : val;
+              else o[k] = val;
+            }
+            return o;
+          }
+          return typeof v;
+        };
+        // Keys the mapper already handles — anything else is a candidate home
+        // for the missing extras.
+        const KNOWN = new Set(['id', 'status', 'customerTitle', 'customerFirstname', 'customerSurname', 'customerEmail', 'customerPhone', 'customerMobile', 'specialRequests', 'currency', 'created', 'items', 'payments', 'documents', 'depositOption', 'voucherValue', 'voucherCode', 'voucherName', 'key', 'orderKey']);
+        const unknown = {};
+        for (const k of Object.keys(raw)) { if (!KNOWN.has(k)) unknown[k] = describe(raw[k], 0); }
+        console.log('[EXTRAS DEBUG ET90582]', JSON.stringify({
           topLevelKeys: Object.keys(raw),
-          orderMoneyFields: pickMoney(raw),
-          currency: raw.currency,
-          items: (raw.items || []).map((it) => ({
-            product: it.product, id: it.id, price: it.price,
-            itemMoneyFields: pickMoney(it),
-            pricingKeys: it.dataObject && it.dataObject.pricing ? Object.keys(it.dataObject.pricing) : null,
-            pricingMoney: pickMoney(it.dataObject && it.dataObject.pricing),
-          })),
-          itemsPriceSum: Math.round((raw.items || []).reduce((s, it) => s + (Number(it.price) || 0), 0) * 100) / 100,
-          depositOption: dep ? {
-            keys: Object.keys(dep), initialAmount: dep.initialAmount, currency: dep.currency,
-            breakdownCount: depBd.length,
-            breakdownSum: Math.round(depBd.reduce((s, b) => s + (Number(b.amount) || 0), 0) * 100) / 100,
-            breakdown: depBd.map((b) => ({ num: b.num, amount: b.amount, dueDate: b.dueDate, keys: Object.keys(b) })),
-          } : null,
-          payments: payments.map((p) => ({ status: p.status, amount: p.amount })),
-          paidToDateSuccess: Math.round(payments.filter((p) => String(p.status || '').toLowerCase() === 'success').reduce((s, p) => s + (Number(p.amount) || 0), 0) * 100) / 100,
+          rawItemsCount: Array.isArray(raw.items) ? raw.items.length : 0,
+          itemsProducts: (raw.items || []).map((it) => it && it.product),
+          unknownTopLevel: unknown,
+          firstItemKeys: raw.items && raw.items[0] ? Object.keys(raw.items[0]) : null,
+          firstItemDataObjectKeys: raw.items && raw.items[0] && raw.items[0].dataObject ? Object.keys(raw.items[0].dataObject) : null,
         }));
       } catch (e) {
-        console.log('[BALANCE DEBUG YTG78341] dump failed:', e.message);
+        console.log('[EXTRAS DEBUG ET90582] dump failed:', e.message);
       }
     }
     // ─── END TEMP DIAGNOSTIC ─────────────────────────────────────────────
