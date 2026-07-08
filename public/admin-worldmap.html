@@ -398,6 +398,9 @@
       <button class="tab" data-tab="cache" role="tab" aria-selected="false">
         Cache <span class="tab-count" id="tc-cache">—</span>
       </button>
+      <button class="tab" data-tab="suppliers" role="tab" aria-selected="false">
+        Suppliers <span class="tab-count" id="tc-suppliers">—</span>
+      </button>
     </div>
     <div class="panel-head">
       <h2 id="panel-title">Destinations</h2>
@@ -508,14 +511,17 @@
   const API_REBUILD = '/api/admin/map-rebuild';
   const API_CONFIG = '/api/admin/map-config';
   const API_CACHE = '/api/admin/map-cache';
+  const API_SUPPLIERS = '/api/admin/suppliers';
 
   const ALLOWED_INTERVALS = [15, 30, 45, 60, 120, 240, 1440];
 
   let DEST = [];        // current destinations
   let lastRunAt = null;
   let filter = '';
-  let activeTab = 'all'; // 'all' | 'live' | 'empty' | 'cache'
+  let activeTab = 'all'; // 'all' | 'live' | 'empty' | 'cache' | 'suppliers'
   let configLoaded = false;
+  let SUPPLIERS_MASTER = null;       // Map: `prodType:id` → { name, isPremium }
+  let suppliersMasterLoading = false;
   let CACHE = null;               // cache overview: { countries, summary, lastRunAt }
   const CACHE_OFFERS = new Map(); // cc → fetched offers payload for the expanded view
   const cacheOriginFilter = new Set(); // selected departure airports (multi)
@@ -611,6 +617,7 @@
 
   function renderTable() {
     if (activeTab === 'cache') { renderCacheTable(); return; }
+    if (activeTab === 'suppliers') { renderSuppliersTable(); return; }
     const q = filter.trim().toLowerCase();
     let rows = DEST.filter(d => {
       // Tab filter first
@@ -741,6 +748,7 @@
       CACHE = await r.json();
       CACHE_OFFERS.clear();
       $('tc-cache').textContent = (CACHE.countries || []).length;
+      $('tc-suppliers').textContent = (CACHE.suppliers || []).length;
       renderTable();
     } catch (e) {
       renderError(e.message);
@@ -1081,6 +1089,114 @@
     }
   }
 
+  // ── suppliers tab ────────────────────────────────────────────
+  // Summarises the WHOLE offer cache by supplier: total offers from each
+  // Travelify supplier, split into Packages / Hotels / Flights. The counts come
+  // from the map-cache overview (CACHE.suppliers, keyed prodType:id); the names
+  // come from the master supplier list. The same company's id repeats across
+  // product types, so rows are grouped by resolved name to give one line per
+  // supplier with its type breakdown.
+  async function loadSuppliersMaster() {
+    if (SUPPLIERS_MASTER || suppliersMasterLoading) return;
+    suppliersMasterLoading = true;
+    try {
+      const r = await fetch(API_SUPPLIERS, { credentials: 'include' });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const d = await r.json();
+      const m = new Map();
+      for (const s of (d.suppliers || [])) m.set(s.key, { name: s.name, isPremium: !!s.isPremium });
+      SUPPLIERS_MASTER = m;
+    } catch (e) {
+      // Names are a nicety — fall back to raw ids rather than blocking the view.
+      SUPPLIERS_MASTER = new Map();
+    } finally {
+      suppliersMasterLoading = false;
+      if (activeTab === 'suppliers') renderTable();
+    }
+  }
+
+  function suppliersMetaLine(grandTotal, supplierCount) {
+    const gen = CACHE.summary && CACHE.summary.generatedAt ? timeAgo(CACHE.summary.generatedAt) : '—';
+    const namesNote = suppliersMasterLoading ? ' · <span style="color:var(--muted)">resolving supplier names…</span>'
+      : (SUPPLIERS_MASTER && SUPPLIERS_MASTER.size === 0) ? ' · <span style="color:var(--warn)">supplier names unavailable — showing ids</span>'
+      : '';
+    const redisNote = CACHE.redisConfigured === false
+      ? ` · <span style="color:var(--err); font-weight:700">Redis not configured — the map is running on the bundled seed file</span>`
+      : '';
+    return `<div style="padding:10px 18px; font-size:12px; color:var(--muted); border-bottom:1px solid var(--border); background:#FBFCFE">
+      <b style="color:var(--text)">${grandTotal.toLocaleString('en-GB')}</b> offers stored from
+      <b style="color:var(--text)">${supplierCount.toLocaleString('en-GB')}</b> supplier${supplierCount === 1 ? '' : 's'} ·
+      map summary rebuilt <b style="color:var(--text)">${esc(gen)}</b>${namesNote}${redisNote}
+    </div>`;
+  }
+
+  function renderSuppliersTable() {
+    if (!CACHE) { loadCache(); return; }
+    if (!SUPPLIERS_MASTER && !suppliersMasterLoading) loadSuppliersMaster();
+    const master = SUPPLIERS_MASTER || new Map();
+    const raw = CACHE.suppliers || [];
+    const grandTotal = raw.reduce((s, x) => s + (x.count || 0), 0);
+
+    // Group the per-type supplier keys by resolved name so one company reads as
+    // a single row. Unresolved ids show as "Supplier #id"; offers with no id
+    // (fetched before the sid feed) collect under one "unknown" row.
+    const groups = new Map(); // name → { name, isPremium, unresolved, byType, total, fromPP }
+    for (const s of raw) {
+      const meta = master.get(s.key);
+      const name = meta ? meta.name
+        : s.id == null ? 'Unknown supplier (no id)'
+        : ('Supplier #' + s.id);
+      let g = groups.get(name);
+      if (!g) { g = { name, isPremium: false, unresolved: false, byType: { Packages: 0, Accommodation: 0, Flights: 0 }, total: 0, fromPP: null }; groups.set(name, g); }
+      g.byType[s.prodType] = (g.byType[s.prodType] || 0) + (s.count || 0);
+      g.total += (s.count || 0);
+      if (meta && meta.isPremium) g.isPremium = true;
+      if (!meta && s.id != null) g.unresolved = true;
+      if (s.fromPP != null && (g.fromPP == null || s.fromPP < g.fromPP)) g.fromPP = s.fromPP;
+    }
+
+    const q = filter.trim().toLowerCase();
+    const rows = Array.from(groups.values())
+      .filter(g => !q || g.name.toLowerCase().includes(q))
+      .sort((a, b) => b.total - a.total);
+
+    $('tc-suppliers').textContent = groups.size;
+
+    if (!rows.length) {
+      const msg = q ? 'No suppliers match your search.'
+        : CACHE.redisConfigured === false ? 'Redis is not configured — there are no cached offers to summarise.'
+        : 'The cache is empty. Run a rebuild to fill it.';
+      $('table-host').innerHTML = suppliersMetaLine(grandTotal, groups.size) + `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div>${esc(msg)}</div></div>`;
+      return;
+    }
+
+    const cell = (n) => n ? `<b>${n.toLocaleString('en-GB')}</b>` : '<span class="count-na">—</span>';
+    const body = rows.map(g => {
+      const tags = (g.isPremium ? ' <span class="region-tag" style="background:#EEF2FF;color:#4338CA">premium</span>' : '')
+        + (g.unresolved ? ' <span class="region-tag" style="background:#FFFBEB;color:#B45309" title="No match in the master supplier list — showing the raw Travelify id">unmatched</span>' : '');
+      return `<tr>
+        <td><div class="cc-name">${esc(g.name)}${tags}</div></td>
+        <td class="num" title="Flight + hotel packages">${cell(g.byType.Packages)}</td>
+        <td class="num" title="Hotel-only offers">${cell(g.byType.Accommodation)}</td>
+        <td class="num" title="Flight-only offers">${cell(g.byType.Flights)}</td>
+        <td class="num"><span class="count-pill"><b>${g.total.toLocaleString('en-GB')}</b></span></td>
+        <td class="num hide-sm">${g.fromPP != null ? esc(money(g.fromPP, 'GBP')) : '<span class="count-na">—</span>'}</td>
+      </tr>`;
+    }).join('');
+
+    $('table-host').innerHTML = suppliersMetaLine(grandTotal, groups.size) + `<table>
+      <thead><tr>
+        <th>Supplier</th>
+        <th class="num">Packages</th>
+        <th class="num">Hotels</th>
+        <th class="num">Flights</th>
+        <th class="num">Total offers</th>
+        <th class="num hide-sm">From (pp)</th>
+      </tr></thead>
+      <tbody>${body}</tbody>
+    </table>`;
+  }
+
   // ── modal ────────────────────────────────────────────────────
   function openModal(dest) {
     $('modal-title').textContent = dest ? 'Edit destination' : 'Add destination';
@@ -1168,7 +1284,7 @@
       else if (cron.partial) toast(`Swept ${cron.processedCountries} of ${cron.totalCountries} countries before the time limit — click again to continue from where it stopped`, 'ok');
       else toast('Rebuild complete', 'ok');
       // Give the cron a moment, then reload counts on whichever tab is open.
-      setTimeout(() => (activeTab === 'cache' ? loadCache() : load()), body.scope === 'all' ? 3000 : 1500);
+      setTimeout(() => ((activeTab === 'cache' || activeTab === 'suppliers') ? loadCache() : load()), body.scope === 'all' ? 3000 : 1500);
     } catch (e) {
       toast(e.message, 'err');
     } finally {
@@ -1191,7 +1307,9 @@
       tab === 'live' ? 'Destinations returning offers' :
       tab === 'empty' ? 'Destinations polling nothing' :
       tab === 'cache' ? 'Offer cache — what is stored right now' :
+      tab === 'suppliers' ? 'Offer cache — by supplier' :
       'Destinations';
+    $('search').placeholder = tab === 'suppliers' ? 'Search supplier…' : 'Search country or code…';
     renderTable();
   }
 
@@ -1274,7 +1392,7 @@
 
   // ── events ───────────────────────────────────────────────────
   $('btn-refresh').addEventListener('click', () => {
-    if (activeTab === 'cache') loadCache();
+    if (activeTab === 'cache' || activeTab === 'suppliers') loadCache();
     else load();
   });
   $('btn-add').addEventListener('click', () => openModal(null));

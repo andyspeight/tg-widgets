@@ -106,6 +106,36 @@ function buildTypeStats(offers, nowMs) {
   return { typeStats, staleCount };
 }
 
+/** The Travelify supplier id an offer belongs to, scoped to its type: hotels
+ *  carry accommodationSid, flight-only offers flightSid, packages flightSid
+ *  (which equals accommodationSid). Null when the offer predates the sid feed
+ *  (added 3 Jul 2026) — those land in an "unknown supplier" bucket so totals
+ *  still reconcile. */
+function supplierIdFor(o, prodType) {
+  const id = prodType === 'Accommodation' ? o.accommodationSid
+    : prodType === 'Flights' ? o.flightSid
+    : (o.flightSid != null ? o.flightSid : o.accommodationSid); // Packages
+  return Number.isFinite(id) ? id : null;
+}
+
+/** Fold one country's offers into a running supplier tally (keyed prodType:id
+ *  to match the master supplier list). Accumulation is synchronous, so it is
+ *  safe to share the Map across the pooled workers. */
+function tallySuppliers(offers, cc, agg) {
+  for (const o of offers) {
+    if (!o) continue;
+    const prodType = OFFER_TYPES.includes(o.type) ? o.type : 'Packages';
+    const id = supplierIdFor(o, prodType);
+    const key = `${prodType}:${id == null ? '?' : id}`;
+    let e = agg.get(key);
+    if (!e) { e = { key, id, prodType, count: 0, fromPP: null, ccs: new Set() }; agg.set(key, e); }
+    e.count += 1;
+    e.ccs.add(cc);
+    const pp = Number.isFinite(o.pricePP) ? o.pricePP : (Number.isFinite(o.price) ? o.price : null);
+    if (pp != null && (e.fromPP == null || pp < e.fromPP)) e.fromPP = pp;
+  }
+}
+
 /** Sort offers cheapest-first by per-person price, total price as fallback,
  *  unpriced last. Stable enough for an inspector view. */
 function byCheapest(a, b) {
@@ -229,9 +259,14 @@ export default async function handler(req, res) {
     }
 
     const nowMs = Date.now();
+    // Running supplier tally, folded in per country as the pool sweeps. Keyed
+    // prodType:id to line up with /api/admin/suppliers; the Suppliers tab
+    // resolves those ids to names.
+    const supplierAgg = new Map();
     const countries = await pooled(ccs, async (cc) => {
       const stored = await loadCountryOffers(cc);
       const offers = stored.offers;
+      tallySuppliers(offers, cc, supplierAgg);
       const resorts = await getJson(resortsKey(cc));
       const s = summaryByCC.get(cc);
       // Oldest fetchedAt still stored — surfaces countries drifting toward the
@@ -260,6 +295,12 @@ export default async function handler(req, res) {
 
     countries.sort((a, b) => b.offerCount - a.offerCount);
 
+    // Flatten the supplier tally: drop the working Set for a plain country
+    // count, biggest suppliers first. Drives the Suppliers tab.
+    const suppliers = Array.from(supplierAgg.values())
+      .map(({ ccs, ...rest }) => ({ ...rest, countryCount: ccs.size }))
+      .sort((a, b) => b.count - a.count);
+
     return res.status(200).json({
       ok: true,
       redisConfigured: true,
@@ -267,6 +308,7 @@ export default async function handler(req, res) {
       lastSweep: lastSweep || null,
       summary: summary ? { generatedAt: summary.generatedAt || null, stats: summary.stats || null } : null,
       countries,
+      suppliers,
     });
   } catch (err) {
     console.error('[admin/map-cache] error:', err.message);
