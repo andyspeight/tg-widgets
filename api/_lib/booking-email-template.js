@@ -196,8 +196,14 @@ function buildPaymentInfo(order) {
 
   if (!total) return null;
 
+  // Order-level voucher/promo discount (signed, negative; not in item prices).
+  // Net it off so the balance matches Travelify's own schedule.
+  const voucherVal = (order.voucher && typeof order.voucher.value === 'number') ? order.voucher.value : 0;
+  const netTotal = Math.round((total + voucherVal) * 100) / 100;
+
   const result = {
     total,
+    voucher: order.voucher || null,
     currency,
     depositPaid: null,   // rendered as "Paid so far"
     balanceDue: null,    // rendered as "Balance remaining"
@@ -211,7 +217,7 @@ function buildPaymentInfo(order) {
   const paid = typeof order.paidToDate === 'number' ? order.paidToDate : null;
   if (paid != null) {
     if (paid > 0) result.depositPaid = Math.round(paid * 100) / 100;
-    const outstanding = Math.max(0, Math.round((total - paid) * 100) / 100);
+    const outstanding = Math.max(0, Math.round((netTotal - paid) * 100) / 100);
     if (outstanding > 0) {
       result.balanceDue = outstanding;
       if (dep && Array.isArray(dep.breakdown) && dep.breakdown.length) {
@@ -248,8 +254,8 @@ function buildPaymentInfo(order) {
   result.paidInFull = result.depositPaid != null
     && result.depositPaid > 0
     && (result.balanceDue == null || result.balanceDue <= 0)
-    && typeof total === 'number' && total > 0
-    && Math.round((total - result.depositPaid) * 100) / 100 <= 0;
+    && typeof netTotal === 'number' && netTotal > 0
+    && Math.round((netTotal - result.depositPaid) * 100) / 100 <= 0;
 
   return result;
 }
@@ -511,6 +517,20 @@ export function renderBookingEmail(opts) {
         </td>
       </tr>
     `);
+
+    if (payment.voucher && typeof payment.voucher.value === 'number' && payment.voucher.value < 0) {
+      const vLabel = payment.voucher.name || payment.voucher.code || 'Voucher';
+      rows.push(`
+        <tr>
+          <td style="padding:12px 0;border-bottom:1px solid #e2e8f0;font:400 15px/1.6 ${FONT};color:#64748b;">
+            ${escapeHtml(vLabel)}
+          </td>
+          <td style="padding:12px 0;border-bottom:1px solid #e2e8f0;text-align:right;font:600 15px/1.6 ${FONT};color:#10b981;">
+            – ${escapeHtml(formatMoney(Math.abs(payment.voucher.value), payment.currency))}
+          </td>
+        </tr>
+      `);
+    }
 
     if (payment.depositPaid != null) {
       const isLast = (payment.balanceDue == null || payment.balanceDue <= 0) && !payment.paidInFull;
@@ -780,6 +800,9 @@ export function renderBookingEmail(opts) {
   if (payment) {
     textParts.push('', '─── Payment ───', '');
     textParts.push(`${resolveTotalLabel(order?.items)}: ${formatMoney(payment.total, payment.currency)}`);
+    if (payment.voucher && typeof payment.voucher.value === 'number' && payment.voucher.value < 0) {
+      textParts.push(`${payment.voucher.name || payment.voucher.code || 'Voucher'}: - ${formatMoney(Math.abs(payment.voucher.value), payment.currency)}`);
+    }
     if (payment.depositPaid != null) {
       textParts.push(`Paid so far: ${formatMoney(payment.depositPaid, payment.currency)}`);
     }

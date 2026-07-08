@@ -635,6 +635,12 @@ export function renderPdfHtml(order, opts = {}) {
     : (accom?.pricing?.price ?? accomItem?.price ?? null);
   const currency = accom?.pricing?.currency || accomItem?.currency || flightItems[0]?.currency || extraItems[0]?.currency || order.currency || 'GBP';
 
+  // Order-level voucher/promo discount (signed, negative; not in item prices).
+  // Net it off so the balance and the instalment reconciliation match
+  // Travelify's own schedule.
+  const voucherVal = (order.voucher && typeof order.voucher.value === 'number') ? order.voucher.value : 0;
+  const netTotalCost = (totalCost != null) ? Math.round((totalCost + voucherVal) * 100) / 100 : null;
+
   // Payment state — the authoritative balance is total − payments taken, NOT
   // the depositOption.breakdown sum (Travelify leaves the schedule in place
   // after a payment). The breakdown is used only for due dates / instalment
@@ -645,8 +651,8 @@ export function renderPdfHtml(order, opts = {}) {
 
   if (typeof order.paidToDate === 'number') {
     if (order.paidToDate > 0) depositPaid = Math.round(order.paidToDate * 100) / 100;
-    const outstanding = (totalCost != null)
-      ? Math.max(0, Math.round((totalCost - order.paidToDate) * 100) / 100)
+    const outstanding = (netTotalCost != null)
+      ? Math.max(0, Math.round((netTotalCost - order.paidToDate) * 100) / 100)
       : null;
     if (outstanding && outstanding > 0) {
       balance = outstanding;
@@ -678,7 +684,7 @@ export function renderPdfHtml(order, opts = {}) {
       (accom?.pricing?.depositOptions || [])[0] ||
       null;
     depositPaid = depositOption?.amount ?? null;
-    balance = totalCost != null && depositPaid != null ? totalCost - depositPaid : null;
+    balance = netTotalCost != null && depositPaid != null ? Math.round((netTotalCost - depositPaid) * 100) / 100 : null;
     balanceDueDate = depositOption?.dueDate || null;
     instalments = depositOption?.breakdown || [];
   }
@@ -1481,6 +1487,11 @@ export function renderPdfHtml(order, opts = {}) {
           <div class="pdf-pay-row" style="font-size:11px; padding:4px 0;">
             <span class="label" style="color:#94A3B8; padding-left:12px;">— Tickets</span>
             <span class="value num" style="color:#475569;">${escapeHtml(formatMoney(ticketsItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0), currency))}</span>
+          </div>` : ''}
+          ${voucherVal ? `
+          <div class="pdf-pay-row">
+            <span class="label">${escapeHtml(order.voucher?.name || order.voucher?.code || 'Voucher')}</span>
+            <span class="value paid num">– ${escapeHtml(formatMoney(Math.abs(voucherVal), currency))}</span>
           </div>` : ''}
           ${depositPaid != null ? `
           <div class="pdf-pay-row">
