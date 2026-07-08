@@ -148,7 +148,12 @@ export async function insertEvent(accessToken, calendarId, event) {
       },
     };
   }
-  const r = await fetch(CAL_BASE + '/calendars/' + encodeURIComponent(calendarId || 'primary') + '/events?sendUpdates=all&conferenceDataVersion=1', {
+  // sendUpdates=none: the appointment flow sends its OWN branded confirmation /
+  // reschedule / cancel emails (api/_lib/calendar/mail.js). If we also let Google
+  // notify the attendee, the visitor gets our email AND Google's own calendar
+  // invite — the duplicate "alerts" clients reported. They still get the .ics on
+  // our email to add the meeting to their own calendar.
+  const r = await fetch(CAL_BASE + '/calendars/' + encodeURIComponent(calendarId || 'primary') + '/events?sendUpdates=none&conferenceDataVersion=1', {
     method: 'POST',
     headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -163,7 +168,7 @@ export async function insertEvent(accessToken, calendarId, event) {
 }
 
 export async function patchEvent(accessToken, calendarId, eventId, patch) {
-  const r = await fetch(CAL_BASE + '/calendars/' + encodeURIComponent(calendarId || 'primary') + '/events/' + encodeURIComponent(eventId) + '?sendUpdates=all', {
+  const r = await fetch(CAL_BASE + '/calendars/' + encodeURIComponent(calendarId || 'primary') + '/events/' + encodeURIComponent(eventId) + '?sendUpdates=none', {
     method: 'PATCH',
     headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
     body: JSON.stringify(patch),
@@ -174,7 +179,7 @@ export async function patchEvent(accessToken, calendarId, eventId, patch) {
 }
 
 export async function deleteEvent(accessToken, calendarId, eventId) {
-  const r = await fetch(CAL_BASE + '/calendars/' + encodeURIComponent(calendarId || 'primary') + '/events/' + encodeURIComponent(eventId) + '?sendUpdates=all', {
+  const r = await fetch(CAL_BASE + '/calendars/' + encodeURIComponent(calendarId || 'primary') + '/events/' + encodeURIComponent(eventId) + '?sendUpdates=none', {
     method: 'DELETE',
     headers: { Authorization: 'Bearer ' + accessToken },
   });

@@ -6,8 +6,10 @@
  * message carries an .ics attachment and, when the meeting has a video link
  * (the event type's own Zoom/Meet/Teams room, or one minted by the connected
  * calendar), a prominent Join button. A short notification goes to the agency.
- * When the host has a connected calendar Google/Microsoft also send their own
- * invite, so these are additive, never the only signal.
+ * This branded email is the SINGLE customer-facing signal: we tell the Google
+ * calendar write not to email the attendee (sendUpdates=none) so the visitor
+ * does not also get Google's own invite on top of this one. They add the
+ * meeting to their calendar from the .ics attached here.
  *
  * Design: email-client-safe HTML (tables + inline styles, system fonts, no
  * external assets). Branding comes from the booking itself (accent + company
@@ -16,7 +18,11 @@
  * All sends are best-effort: a mail failure never fails the booking.
  */
 
-const FROM_EMAIL = process.env.CONTACT_FROM || 'info@travelgenix.io';
+// Customer-facing emails go out under the agency's NAME (companyOf) with the
+// agency as reply-to; the envelope sender is the platform's verified sender so
+// they deliver, but it is a neutral address (not a travelgenix.io one) so the
+// customer never sees the platform brand. Same sender My Booking uses.
+const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'noreply@travelify.io';
 const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const icsEsc = (v) => String(v == null ? '' : v).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
 
@@ -109,7 +115,7 @@ function shell(booking, title, innerHtml, preheader) {
     innerHtml +
     '</td></tr>' +
     '</table>' +
-    '<div style="' + FONT + ';font-size:12px;color:#94A3B8;padding:14px 0 0">' + esc(companyOf(booking)) + ' · Powered by Travelgenix</div>' +
+    (booking.company ? '<div style="' + FONT + ';font-size:12px;color:#94A3B8;padding:14px 0 0">' + esc(booking.company) + '</div>' : '') +
     '</td></tr></table>';
 }
 
