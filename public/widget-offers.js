@@ -19,6 +19,12 @@
  *   - BothPackages:   send packageType:'Any' (omitting returns DynamicPackages only)
  *
  * Changelog:
+ *   v1.10.9 (Jul 2026) — Fix the invisible "View deal" button in the pax popover:
+ *     • The travellers popover is appended to the shadow root as a sibling of
+ *       .tgo-root, where the --tgo-* design tokens live, so it never inherited
+ *       --tgo-accent. The primary button (background: var(--tgo-accent)) then
+ *       rendered as a white block that still clicked (it ran the search on the
+ *       blank space). Carry the resolved accent onto the popover layer.
  *   v1.10.8 (Jul 2026) — Return flights deeplink to a return search:
  *     • A return flight offer showed "Return" on the card but the deeplink
  *       omitted the return leg, so Travelify ran a one-way search. Now emits
@@ -137,7 +143,7 @@
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
   const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
-  const VERSION = '1.10.8';
+  const VERSION = '1.10.9';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // Telemetry: report a one-time load heartbeat and any failure to
@@ -5762,6 +5768,21 @@
         + '</div>';
 
       this.shadow.appendChild(layer);
+
+      // The popover layer is appended to the shadow root as a SIBLING of
+      // .tgo-root, so it does not inherit the --tgo-* design tokens defined on
+      // .tgo-root. Without this the primary button (background: var(--tgo-accent))
+      // resolves to no colour and renders as an invisible white block that still
+      // clicks. Carry the resolved accent across — the client's custom colour if
+      // set, else the default — so the "View deal" button is visible.
+      try {
+        const cs = getComputedStyle(this.root);
+        const accent = (cs.getPropertyValue('--tgo-accent') || '').trim() || '#00B4D8';
+        const accentHover = (cs.getPropertyValue('--tgo-accent-hover') || '').trim() || '#0096B7';
+        layer.style.setProperty('--tgo-accent', accent);
+        layer.style.setProperty('--tgo-accent-hover', accentHover);
+      } catch (e) { /* getComputedStyle never throws here, but never break the popover */ }
+
       const popover = layer.querySelector('.tgo-popover');
 
       // Find the parent card to clamp within
