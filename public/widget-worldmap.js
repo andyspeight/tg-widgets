@@ -3920,6 +3920,34 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
   // ── Auto-init
 
+  // Fetch this widget's config with a short retry. A transient network blip
+  // (offline flicker, backgrounded tab, flaky wifi) should not surface as a
+  // failure, so we retry a couple of times with backoff before giving up. A real
+  // HTTP error (404 deleted config, 500) is not retried. If it ultimately fails
+  // on a visible page we report it so we hear about a genuinely broken embed;
+  // when the tab is hidden we stay quiet (backgrounded fetches often abort).
+  async function loadConfigWithRetry(widgetId) {
+    const url = CONFIG_URL + '?id=' + encodeURIComponent(widgetId);
+    let lastErr = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (attempt) await new Promise((r) => setTimeout(r, 400 * attempt));
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Config load failed: ' + res.status);
+        const r = await res.json();
+        return (r && (r.config || r)) || {};
+      } catch (err) {
+        lastErr = err;
+        if (err && typeof err.message === 'string' && /^Config load failed: \d/.test(err.message)) break;
+      }
+    }
+    console.warn('[tgwm v3] config fetch failed', lastErr && lastErr.message);
+    let hidden = false;
+    try { hidden = (document.visibilityState === 'hidden'); } catch (e) {}
+    if (!hidden) tgReport('error', widgetId, 'config load failed', lastErr && lastErr.message);
+    return null;
+  }
+
   async function init() {
     const containers = document.querySelectorAll('[data-tg-widget="worldmap"]');
     for (const el of containers) {
@@ -3934,13 +3962,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
       }
       const widgetId = el.getAttribute('data-tg-id');
       if (widgetId && !inlineCfg) {
-        try {
-          const res = await fetch(CONFIG_URL + '?id=' + encodeURIComponent(widgetId));
-          if (res.ok) {
-            const r = await res.json();
-            cfg = r.config || r;
-          }
-        } catch (e) { console.warn('[tgwm v3] config fetch failed', e.message); }
+        const loaded = await loadConfigWithRetry(widgetId);
+        if (loaded) cfg = loaded;
       }
       new TGWorldMapWidget(el, cfg);
     }

@@ -1,5 +1,5 @@
 /**
- * Travelgenix Newsletter Signup Widget v1.1.1
+ * Travelgenix Newsletter Signup Widget v1.2.0
  * Self-contained, embeddable widget with 5 layouts:
  *   - inline    (horizontal email + button)
  *   - card      (vertical card with optional name field, consent, success state)
@@ -79,7 +79,25 @@
     } catch (e) { /* fall through */ }
     return '/api/newsletter-submit';
   })();
-  const VERSION = '1.1.1';
+  const VERSION = '1.2.0';
+
+  // Telemetry: report a load heartbeat and any config failure to /api/widget-log
+  // so we hear about a broken embed before the client does. Posts to our own API
+  // origin (connect-src), so a client site's script-src CSP can't block it, and it
+  // never throws. LOG_URL is derived from API_BASE (…/api/widget-config →
+  // …/api/widget-log) so it always targets our origin, never the customer's.
+  const LOG_URL = API_BASE.replace(/\/widget-config$/, '/widget-log');
+  function tgReport(event, widgetId, message, detail) {
+    try {
+      var b = JSON.stringify({
+        event: event, widget: 'newsletter', widgetId: String(widgetId || ''),
+        message: String(message || '').slice(0, 300), detail: String(detail || '').slice(0, 500),
+        url: (function () { try { return location.href; } catch (e) { return ''; } })(),
+      });
+      if (navigator && typeof navigator.sendBeacon === 'function' && navigator.sendBeacon(LOG_URL, new Blob([b], { type: 'text/plain' }))) return;
+      fetch(LOG_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: b, keepalive: true, credentials: 'omit' }).catch(function () {});
+    } catch (e) { /* telemetry must never throw */ }
+  }
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only: validation / error / status messages, plus the
@@ -1515,6 +1533,34 @@
     }
   }
 
+  // Fetch this widget's config with a short retry. A transient network blip
+  // (offline flicker, backgrounded tab, flaky wifi) should not surface as a
+  // failure, so we retry a couple of times with backoff before giving up. A real
+  // HTTP error (404 deleted config, 500) is not retried. If it ultimately fails
+  // on a visible page we report it so we hear about a genuinely broken embed;
+  // when the tab is hidden we stay quiet (backgrounded fetches often abort).
+  async function loadConfigWithRetry(widgetId) {
+    const url = `${API_BASE}?id=${encodeURIComponent(widgetId)}&type=newsletter`;
+    let lastErr = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (attempt) await new Promise((r) => setTimeout(r, 400 * attempt));
+      try {
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error('Config load failed: ' + resp.status);
+        const data = await resp.json();
+        return (data && (data.config || data)) || {};
+      } catch (err) {
+        lastErr = err;
+        if (err && typeof err.message === 'string' && /^Config load failed: \d/.test(err.message)) break;
+      }
+    }
+    console.warn(`[TG Newsletter] config fetch failed for ${widgetId}`, lastErr && lastErr.message);
+    let hidden = false;
+    try { hidden = (document.visibilityState === 'hidden'); } catch (e) {}
+    if (!hidden) tgReport('error', widgetId, 'config load failed', lastErr && lastErr.message);
+    return null;
+  }
+
   // ---------- Auto-initializer ----------
   async function init() {
     if (typeof document === 'undefined') return;
@@ -1539,19 +1585,11 @@
         continue;
       }
 
-      try {
-        const resp = await fetch(`${API_BASE}?id=${encodeURIComponent(widgetId)}&type=newsletter`);
-        if (!resp.ok) {
-          console.warn(`[TG Newsletter] config fetch ${resp.status} for ${widgetId}`);
-          continue;
-        }
-        const data = await resp.json();
-        const cfg = (data && (data.config || data)) || {};
-        cfg.widgetId = widgetId;
-        new TGNewsletterWidget(el, cfg);
-      } catch (e) {
-        console.warn(`[TG Newsletter] config fetch failed for ${widgetId}`, e);
-      }
+      const cfg = await loadConfigWithRetry(widgetId);
+      if (!cfg) continue;
+      cfg.widgetId = widgetId;
+      new TGNewsletterWidget(el, cfg);
+      tgReport('load', widgetId, 'ok');
     }
   }
 
