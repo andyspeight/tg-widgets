@@ -30,11 +30,17 @@
  * operator id, so the operator whitelist could never name it and was wiping it
  * out — leaving clients who restrict packages seeing almost nothing, since most
  * inventory is dynamic. The whitelist now gates only operator packages.
+ *
+ * v3.11.5: flight deeplinks send the return date. A return flight offer showed
+ * "Return" on the card but the deeplink omitted the return leg, so Travelify
+ * ran a one-way search. Now emits to=<returnDate> for st=Flights per the
+ * Travelify Deep Linking Instructions (fr=depart, to=return). Packages already
+ * express the return via dur/nights, so this is Flights-only.
  */
 (function () {
   'use strict';
 
-  const VERSION = '3.11.4';
+  const VERSION = '3.11.5';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -374,6 +380,14 @@
     const start = String(o.outboundDate || o.checkinDate || '');
     if (/^\d{4}-\d{2}-\d{2}/.test(start)) p.set('fr', start.slice(0, 10));
     if (o.nights) p.set('dur', String(o.nights));
+    // A return flight needs its return date (to=yyyy-mm-dd) or Travelify runs a
+    // one-way search. Flights-only: packages express the return through dur
+    // (nights) above, per the Travelify Deep Linking Instructions (fr=depart,
+    // to=return).
+    if (st === 'Flights') {
+      const ret = String(o.returnDate || '');
+      if (/^\d{4}-\d{2}-\d{2}/.test(ret)) p.set('to', ret.slice(0, 10));
+    }
     // Adults only: child ages are not stored and the spec requires an age per
     // child, so a child search would be invalid — search adults (the cache is
     // built on adult searches) rather than send a broken link.

@@ -19,6 +19,12 @@
  *   - BothPackages:   send packageType:'Any' (omitting returns DynamicPackages only)
  *
  * Changelog:
+ *   v1.10.8 (Jul 2026) — Return flights deeplink to a return search:
+ *     • A return flight offer showed "Return" on the card but the deeplink
+ *       omitted the return leg, so Travelify ran a one-way search. Now emits
+ *       to=<returnDate> for st=Flights per the Travelify Deep Linking
+ *       Instructions (fr=depart, to=return). Packages already carry dur
+ *       (nights), so this is Flights-only.
  *   v1.10.7 (Jul 2026) — Supplier filter no longer hides dynamic packages:
  *     • A dynamic package (flight + hotel from two different suppliers) has no
  *       single tour operator, so the per-client operator whitelist could never
@@ -131,7 +137,7 @@
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
   const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
-  const VERSION = '1.10.7';
+  const VERSION = '1.10.8';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // Telemetry: report a one-time load heartbeat and any failure to
@@ -680,6 +686,14 @@
     const start = String((fl && fl.outboundDate) || (acc && acc.checkinDate) || '');
     if (/^\d{4}-\d{2}-\d{2}/.test(start)) p.set('fr', start.slice(0, 10));
     if (acc && acc.nights) p.set('dur', String(acc.nights));
+    // A return flight needs its return date (to=yyyy-mm-dd) or Travelify runs a
+    // one-way search. Flights-only: packages express the return through dur
+    // (nights) above, per the Travelify Deep Linking Instructions (fr=depart,
+    // to=return).
+    if (st === 'Flights') {
+      const ret = String((fl && fl.returnDate) || '');
+      if (/^\d{4}-\d{2}-\d{2}/.test(ret)) p.set('to', ret.slice(0, 10));
+    }
     p.set('adt', String(o.adults || 2));
     if (st !== 'Flights' && acc) {
       const brd = brdCode(acc.boardBasis); if (brd) p.set('brd', brd);

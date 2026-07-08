@@ -130,6 +130,16 @@ const qp = (url) => new URL(url).searchParams;
   eq(q.get('loc'), null, 'offers/flt no loc');
   eq(q.get('loct'), null, 'offers/flt no loct');
   eq(q.get('ctry'), null, 'offers/flt no ctry');
+  eq(q.get('to'), null, 'offers/flt one-way → no return date');
+}
+
+// ── Offers: RETURN flight sends to=<returnDate> (spec: fr=depart, to=return) ──
+{
+  const o = { type: 'Flights', adults: 2, flight: { origin: { iataCode: 'LON' }, destination: { iataCode: 'AGP', countryCode: 'ES' }, outboundDate: '2026-08-01T21:30:00Z', returnDate: '2026-08-08T14:10:00Z' } };
+  const q = qp(offersDeeplink(o));
+  eq(q.get('st'), 'Flights', 'offers/ret st');
+  eq(q.get('fr'), '2026-08-01', 'offers/ret depart date');
+  eq(q.get('to'), '2026-08-08', 'offers/ret return date (to)');
 }
 
 // ── Offers: no AppID → empty string (caller falls back to raw link) ───────
@@ -168,6 +178,22 @@ eq(offersDeeplinkNoApp({ type: 'Packages', flight: { destination: { iataCode: 'M
   eq(q.get('loc'), 'Barcelona', 'map/acc-noapt loc falls back to resort name');
   eq(q.get('loct'), null, 'map/acc-noapt no loct');
 }
+
+// ── World Map: RETURN flight sends to=<returnDate> ────────────────────────
+{
+  const o = { type: 'Flights', adults: 2, origin: 'LON', airport: 'AGP', countryCode: 'ES', outboundDate: '2026-08-01T21:30:00Z', returnDate: '2026-08-08T14:10:00Z' };
+  const q = qp(buildDeeplink(o, '370'));
+  eq(q.get('st'), 'Flights', 'map/ret st');
+  eq(q.get('fr'), '2026-08-01', 'map/ret depart date');
+  eq(q.get('to'), '2026-08-08', 'map/ret return date (to)');
+}
+// ── World Map: one-way flight (no returnDate) → no `to` ───────────────────
+{
+  const o = { type: 'Flights', adults: 2, origin: 'LON', airport: 'AGP', countryCode: 'ES', outboundDate: '2026-08-01' };
+  eq(qp(buildDeeplink(o, '370')).get('to'), null, 'map/flt one-way → no return date');
+}
+// ── World Map: package still uses dur, never `to` ─────────────────────────
+eq(qp(buildDeeplink({ type: 'Packages', airport: 'AGP', countryCode: 'ES', outboundDate: '2026-08-01', nights: 7, returnDate: '2026-08-08' }, '370')).get('to'), null, 'map/pkg return via dur, not to');
 
 // ── World Map: no AppID → empty string ────────────────────────────────────
 eq(buildDeeplink({ type: 'Packages', airport: 'MLE' }, ''), '', 'map: empty when no AppID');
