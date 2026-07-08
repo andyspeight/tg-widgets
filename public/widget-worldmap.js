@@ -24,11 +24,17 @@
  * whole deeplink ("Unable to match location City"). Drop the undocumented
  * refn param (ignored by Travelify). See the Travelify Deep Linking
  * Instructions.
+ *
+ * v3.11.4: per-client supplier filter no longer hides dynamic packages. A
+ * dynamic package (flight + hotel from two different suppliers) has no single
+ * operator id, so the operator whitelist could never name it and was wiping it
+ * out — leaving clients who restrict packages seeing almost nothing, since most
+ * inventory is dynamic. The whitelist now gates only operator packages.
  */
 (function () {
   'use strict';
 
-  const VERSION = '3.11.3';
+  const VERSION = '3.11.4';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -387,14 +393,24 @@
     // pinning would use loct=Property, kept out until verified live.
     return TVLLNK_BASE + '/deeplink/' + encodeURIComponent(id) + '?' + p.toString();
   }
-  // Per-client supplier visibility. The map's deal cards are package deals, so
-  // an offer is kept when its Packages supplier id (flightSid, which equals
-  // accommodationSid on a package) is in the client's allowed packages list.
-  // Empty/absent list = show all. Missing sid (pre-rollout cache) = keep.
+  // Per-client supplier visibility. The map's deal cards are package deals.
+  // Empty/absent packages list = show all. Missing sid (pre-rollout cache) = keep.
+  //
+  // A DYNAMIC package (flight + hotel assembled from two different suppliers)
+  // has no single tour operator, so the operator whitelist cannot name it and
+  // must never hide it — its visibility is governed by the widget's package-type
+  // selection, not this filter. Only an OPERATOR package (PackageHolidays, where
+  // flight.sid === accommodation.sid === the operator id) is gated on that id.
+  // Detected by packageType, falling back to sid inequality for offers cached
+  // before packageType was carried.
   function mapSupplierAllows(o, sf) {
     if (!sf || !sf.packages || !sf.packages.length) return true;
-    const sid = Number.isFinite(o.flightSid) ? o.flightSid
-      : (Number.isFinite(o.accommodationSid) ? o.accommodationSid : null);
+    const fSid = Number.isFinite(o.flightSid) ? o.flightSid : null;
+    const aSid = Number.isFinite(o.accommodationSid) ? o.accommodationSid : null;
+    const isDynamic = o.packageType === 'DynamicPackages'
+      || (o.packageType == null && fSid != null && aSid != null && fSid !== aSid);
+    if (isDynamic) return true;
+    const sid = fSid != null ? fSid : aSid;
     return sid == null ? true : sf.packages.indexOf(sid) !== -1;
   }
   // Accept ONLY #RGB or #RRGGBB. Anything else (named colours, rgb(), url(),

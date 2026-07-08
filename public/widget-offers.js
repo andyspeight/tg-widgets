@@ -19,6 +19,13 @@
  *   - BothPackages:   send packageType:'Any' (omitting returns DynamicPackages only)
  *
  * Changelog:
+ *   v1.10.7 (Jul 2026) — Supplier filter no longer hides dynamic packages:
+ *     • A dynamic package (flight + hotel from two different suppliers) has no
+ *       single tour operator, so the per-client operator whitelist could never
+ *       name it and was hiding it. Clients who restricted packages then saw
+ *       almost nothing, since most inventory is dynamic. The whitelist now
+ *       gates only operator packages (PackageHolidays); dynamic packages are
+ *       governed by the widget's package-type selection alone.
  *   v1.10.6 (Jul 2026) — Deeplink location fix:
  *     • Anchor the accommodation search on the destination airport
  *       (loc=<dst IATA> + loct=Airport) instead of the resort/atoll name.
@@ -124,7 +131,7 @@
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
   const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
-  const VERSION = '1.10.6';
+  const VERSION = '1.10.7';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // Telemetry: report a one-time load heartbeat and any failure to
@@ -693,11 +700,18 @@
   // Per-client supplier visibility. supplierFilter (three integer lists of
   // allowed Travelify supplier ids) is injected into the widget config by
   // /api/widget-config only when the client has restricted their suppliers in
-  // Control. An offer is matched by its type against the matching list; a
-  // package offer's flight.sid === accommodation.sid === its Packages supplier
-  // id. Empty list for a type = show all of that type. Missing sid (offer
-  // cached before the feed carried sids) = keep, so the filter can never blank
-  // a widget mid-rollout.
+  // Control. An offer is matched by its type against the matching list. Empty
+  // list for a type = show all of that type. Missing sid (offer cached before
+  // the feed carried sids) = keep, so the filter can never blank a widget
+  // mid-rollout.
+  //
+  // Packages split two ways. An OPERATOR package (PackageHolidays) has one tour
+  // operator — flight.sid === accommodation.sid === that operator id — and is
+  // gated on the operator list. A DYNAMIC package (DynamicPackages) is a flight
+  // and hotel assembled from two DIFFERENT suppliers, so it has no single
+  // operator the whitelist could name; the operator whitelist must never hide
+  // it (its visibility is the widget's package-type selection, applied on
+  // fetch). Detected by packageType, with sid inequality as the fallback.
   function supplierAllows(o, sf) {
     if (!sf || !o) return true;
     const type = String(o.type || 'Packages');
@@ -713,6 +727,9 @@
       return aSid == null ? true : sf.accommodation.indexOf(aSid) !== -1;
     }
     if (!sf.packages || !sf.packages.length) return true;
+    const isDynamic = o.packageType === 'DynamicPackages'
+      || (o.packageType == null && fSid != null && aSid != null && fSid !== aSid);
+    if (isDynamic) return true;
     const sid = fSid != null ? fSid : aSid;
     return sid == null ? true : sf.packages.indexOf(sid) !== -1;
   }
