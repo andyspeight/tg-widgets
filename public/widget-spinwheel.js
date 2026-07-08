@@ -16,7 +16,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.2.2';
+  const VERSION = '1.3.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the spin button, result flow, lead-capture labels and
@@ -114,6 +114,53 @@
     const s = String(v == null ? '' : v).trim();
     return (s && s.length <= 120 && /^[A-Za-z0-9 ,"'-]+$/.test(s)) ? s : fb;
   };
+
+  // Fonts the editor's picker offers. The widget loads any of these from Google
+  // Fonts so a chosen font actually RENDERS on the live site, not just in the
+  // editor preview (previously the family was set but never loaded, so it fell
+  // back to Inter). Mirrors the newsletter widget.
+  const GOOGLE_FONTS = [
+    'DM Sans', 'Inter', 'Poppins', 'Raleway', 'Open Sans', 'Lato',
+    'Montserrat', 'Nunito', 'Source Sans 3', 'Work Sans', 'Outfit',
+    'Plus Jakarta Sans', 'Rubik', 'Manrope', 'Sora', 'Space Grotesk',
+    'Figtree', 'Onest', 'Albert Sans', 'Urbanist', 'Karla', 'Cabin',
+    'Mulish', 'Josefin Sans', 'Quicksand', 'Barlow', 'Archivo',
+    'Red Hat Display', 'Overpass'
+  ];
+  const SYSTEM_FONTS = ['system-ui', 'Arial', 'Helvetica', 'Georgia', 'Times New Roman', 'Verdana', 'Tahoma', 'Trebuchet MS', 'Roboto', 'Source Sans Pro'];
+  // Resolve a saved font NAME into a safe, quoted CSS font-family stack. Unknown
+  // values fall back to Inter so a broken/hostile value can never reach the DOM.
+  function fontStack(name) {
+    const n = String(name || '').trim();
+    if ((GOOGLE_FONTS.indexOf(n) !== -1 || SYSTEM_FONTS.indexOf(n) !== -1) && /^[A-Za-z0-9 ]+$/.test(n)) {
+      return `'${n}', system-ui, sans-serif`;
+    }
+    return 'Inter, system-ui, sans-serif';
+  }
+  // Load a chosen Google Font once per page. Only known families are requested;
+  // the injected node is a stylesheet link (CSP-safe, no script) and degrades to
+  // system-ui if the client's CSP blocks fonts.googleapis.com.
+  const _loadedFonts = {};
+  function loadWidgetFont(name) {
+    if (typeof document === 'undefined') return;
+    const n = String(name || '').trim();
+    if (!n || GOOGLE_FONTS.indexOf(n) === -1 || _loadedFonts[n]) return;
+    _loadedFonts[n] = true;
+    const id = 'tgsw-font-' + n.replace(/[^A-Za-z0-9]+/g, '-').toLowerCase();
+    if (document.getElementById(id)) return;
+    const fam = encodeURIComponent(n).replace(/%20/g, '+');
+    const link = document.createElement('link');
+    link.id = id;
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=' + fam + ':wght@400;500;600;700&display=swap';
+    (document.head || document.documentElement).appendChild(link);
+  }
+  // Shrink a font-size (viewBox units) so an n-character label fits availLen.
+  // Lets a long place name run the full length of the spoke instead of spilling.
+  function fitFont(text, baseFs, availLen) {
+    const est = String(text || '').length * baseFs * 0.56; // rough per-char width
+    return est > availLen ? Math.max(2.6, baseFs * availLen / est) : baseFs;
+  }
   const reducedMotion = () => { try { return typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
 
   // Only allow safe href schemes for the CTA.
@@ -225,7 +272,12 @@
         peek: !!c.peek,
         layout: c.layout === 'inline' ? 'inline' : 'card',
         theme: c.theme === 'dark' ? 'dark' : 'light',
-        fontFamily: safeFontStack(c.fontFamily, 'Inter, system-ui, sans-serif'),
+        // Store the picked font NAME (validated); fontStack() wraps it for CSS
+        // and loadWidgetFont() actually loads it at render time.
+        fontFamily: (GOOGLE_FONTS.indexOf(c.fontFamily) !== -1 || SYSTEM_FONTS.indexOf(c.fontFamily) !== -1) ? c.fontFamily : 'Inter',
+        // Wheel-label orientation. 'radial' runs names along the spoke (fits long
+        // place names); 'curved' is the older around-the-wheel look.
+        labelStyle: c.labelStyle === 'curved' ? 'curved' : 'radial',
         previewMode: !!c.previewMode,
         widgetId: c.widgetId || '',
       };
@@ -258,20 +310,44 @@
         const tcol = textColorOn(fill);
         const tstroke = tcol === '#ffffff' ? 'rgba(0,0,0,.28)' : 'rgba(255,255,255,.4)';
         const mid = a0 + seg / 2;
-        let rot = mid; if (mid > 90 && mid < 270) rot = mid + 180;
+        const radial = c.labelStyle !== 'curved';
         const hasSub = !!segs[i].description;
-        // Push labels outward into the wide part of each slice so long words
-        // (e.g. "Cape Town", "Welcome drinks") clear the centre hub and stop merging.
-        const mainR = hasSub ? (flat ? 0.69 : 0.66) : (flat ? 0.64 : 0.6);
+        const rawLabel = segs[i].label;
+        // Rotation. 'radial' runs the text ALONG the spoke, kept upright by
+        // reading outward on the right half and inward on the left, so a long
+        // name uses the whole spoke instead of overflowing the slice. 'curved'
+        // keeps the older around-the-wheel orientation.
+        let rot;
+        if (radial) { rot = (mid <= 180) ? (mid - 90) : (mid + 90); }
+        else { rot = mid; if (mid > 90 && mid < 270) rot = mid + 180; }
+
+        let mainR, mainFs, subR;
+        const subFs = flat ? 2.7 : 2.4;
+        if (radial) {
+          // Centre the label on the usable spoke (clear of the hub, inside the
+          // rim); a long name is shrunk to fit that length rather than spilling.
+          const innerR = 0.30, outerR = flat ? 0.83 : 0.80;
+          if (hasSub) { mainR = innerR + (outerR - innerR) * 0.64; subR = innerR + (outerR - innerR) * 0.24; }
+          else { mainR = (innerR + outerR) / 2; }
+          const span = (outerR - innerR) * 50 * (hasSub ? 0.6 : 1);
+          mainFs = fitFont(rawLabel, flat ? 5.4 : 4.6, span);
+        } else {
+          // Older look: push labels outward into the wide part of each slice.
+          mainR = hasSub ? (flat ? 0.69 : 0.66) : (flat ? 0.64 : 0.6);
+          mainFs = flat ? 5.4 : 4.6;
+          subR = flat ? 0.54 : 0.49;
+        }
         const [mx, my] = pt(mid, mainR);
-        const mainFs = flat ? 5.4 : 4.6;
-        const label = segs[i].label.length > 16 ? segs[i].label.slice(0, 15) + '…' : segs[i].label;
-        labels += `<text x="${mx.toFixed(2)}" y="${my.toFixed(2)}" transform="rotate(${rot.toFixed(1)} ${mx.toFixed(2)} ${my.toFixed(2)})" text-anchor="middle" dominant-baseline="middle" font-size="${mainFs}" font-weight="800" letter-spacing="${flat ? '-0.02' : '0.03'}" fill="${tcol}" style="paint-order:stroke;stroke:${tstroke};stroke-width:.55px">${esc(label)}</text>`;
+        const label = rawLabel.length > 24 ? rawLabel.slice(0, 23) + '…' : rawLabel;
+        const lsp = radial ? '0' : (flat ? '-0.02' : '0.03');
+        labels += `<text x="${mx.toFixed(2)}" y="${my.toFixed(2)}" transform="rotate(${rot.toFixed(1)} ${mx.toFixed(2)} ${my.toFixed(2)})" text-anchor="middle" dominant-baseline="middle" font-size="${mainFs.toFixed(2)}" font-weight="800" letter-spacing="${lsp}" fill="${tcol}" style="paint-order:stroke;stroke:${tstroke};stroke-width:.55px">${esc(label)}</text>`;
         if (hasSub) {
-          const [sx, sy] = pt(mid, flat ? 0.54 : 0.49);
-          const subFs = flat ? 2.7 : 2.4;
-          const sub = segs[i].description.length > 26 ? segs[i].description.slice(0, 25) + '…' : segs[i].description;
-          labels += `<text x="${sx.toFixed(2)}" y="${sy.toFixed(2)}" transform="rotate(${rot.toFixed(1)} ${sx.toFixed(2)} ${sy.toFixed(2)})" text-anchor="middle" dominant-baseline="middle" font-size="${subFs}" font-weight="600" fill="${tcol}" opacity="0.78">${esc(sub)}</text>`;
+          const [sx, sy] = pt(mid, subR);
+          const subMax = radial ? 22 : 26;
+          const subTxt = segs[i].description.length > subMax ? segs[i].description.slice(0, subMax - 1) + '…' : segs[i].description;
+          const subSpan = ((flat ? 0.83 : 0.80) - 0.30) * 50 * 0.5;
+          const subFsFit = radial ? fitFont(subTxt, subFs, subSpan) : subFs;
+          labels += `<text x="${sx.toFixed(2)}" y="${sy.toFixed(2)}" transform="rotate(${rot.toFixed(1)} ${sx.toFixed(2)} ${sy.toFixed(2)})" text-anchor="middle" dominant-baseline="middle" font-size="${subFsFit.toFixed(2)}" font-weight="600" fill="${tcol}" opacity="0.78">${esc(subTxt)}</text>`;
         }
       }
 
@@ -313,6 +389,7 @@
 
     _build() {
       const c = this.cfg;
+      loadWidgetFont(c.fontFamily); // ensure the chosen web font is actually loaded
       // Localised defaults for unconfigured author copy.
       const heading = c.heading || this.t('heading');
       const buttonText = c.buttonText || this.t('spin');
@@ -346,7 +423,7 @@
         <style>
           :host { all: initial; }
           * { box-sizing: border-box; }
-          .sw { font-family: ${c.fontFamily}; color: ${ink}; ${cardCss} max-width: ${c.size + 80}px; text-align:center; }
+          .sw { font-family: ${fontStack(c.fontFamily)}; color: ${ink}; ${cardCss} max-width: ${c.size + 80}px; text-align:center; }
           .sw-head { font-size: 19px; font-weight: 800; color: ${headInk}; margin: 0 0 ${c.subheading ? '4px' : '18px'}; letter-spacing: -.015em; }
           .sw-logo { display:block; max-height:44px; max-width:72%; margin:0 auto 14px; object-fit:contain; }
           .sw-sub { font-size: 14px; color: ${ink2}; margin: 0 0 16px; line-height: 1.45; }

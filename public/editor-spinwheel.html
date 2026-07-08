@@ -283,6 +283,14 @@
               <label class="field-label">Font</label>
               <div id="fontPickerMount"></div>
             </div>
+            <div class="field">
+              <label class="field-label">Label direction</label>
+              <div class="pick-grid" id="labeldir-picker">
+                <button type="button" class="pick-btn" data-labeldir="radial"><span class="pick-label">Along the spoke</span></button>
+                <button type="button" class="pick-btn" data-labeldir="curved"><span class="pick-label">Around the wheel</span></button>
+              </div>
+              <span class="field-hint">Along the spoke fits long place names best (they run out from the centre, so nothing breaks). Around the wheel is the older curved look, good for short words.</span>
+            </div>
           </div>
         </div>
       </div>
@@ -338,7 +346,7 @@
 </div>
 
 <script src="/editor-shell.js"></script>
-<script src="/widget-spinwheel.js?v=1.2.0"></script>
+<script src="/widget-spinwheel.js?v=1.3.0"></script>
 <style>
   .pv-faux { width:100%; max-width:620px; background:#fff; border-radius:12px; box-shadow:0 1px 3px rgba(15,23,42,.08), 0 8px 32px rgba(15,23,42,.05); padding:40px; display:flex; justify-content:center; }
   .pv-faux[data-bg="dark"] { background:#0B1220; }
@@ -364,7 +372,7 @@
     oncePerVisitor: false, spinDuration: 4500, size: 360,
     style: 'premium', accent: '#0891B2', segment2: '', pointerColor: '', peek: false,
     spinColor: '', spinTextColor: '', headingColor: '', cardBg: '', cardTransparent: false,
-    layout: 'card', theme: 'light', fontFamily: 'Inter',
+    layout: 'card', theme: 'light', fontFamily: 'Inter', labelStyle: 'radial',
   };
 
   let widgetInst = null;
@@ -454,6 +462,7 @@
     document.querySelectorAll('#layout-picker [data-layout]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-layout') === C.layout));
     document.querySelectorAll('#style-picker [data-style]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-style') === (C.style || 'premium')));
     document.querySelectorAll('#btnpos-picker [data-btnpos]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-btnpos') === (C.buttonPlacement || 'hub')));
+    document.querySelectorAll('#labeldir-picker [data-labeldir]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-labeldir') === (C.labelStyle || 'radial')));
     document.getElementById('dur-input').value = C.spinDuration;
     document.getElementById('dur-val').textContent = (C.spinDuration / 1000).toFixed(1) + 's';
     toggleSwitch('sw-once', C.oncePerVisitor);
@@ -507,6 +516,12 @@
     const b = e.target.closest('[data-btnpos]'); if (!b) return;
     C.buttonPlacement = b.getAttribute('data-btnpos');
     document.querySelectorAll('#btnpos-picker [data-btnpos]').forEach(x => x.classList.toggle('is-on', x === b));
+    shell.markDirty(); render();
+  });
+  document.getElementById('labeldir-picker').addEventListener('click', e => {
+    const b = e.target.closest('[data-labeldir]'); if (!b) return;
+    C.labelStyle = b.getAttribute('data-labeldir');
+    document.querySelectorAll('#labeldir-picker [data-labeldir]').forEach(x => x.classList.toggle('is-on', x === b));
     shell.markDirty(); render();
   });
 
