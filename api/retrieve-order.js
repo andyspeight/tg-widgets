@@ -843,6 +843,54 @@ function trimPackages(d) {
   };
 }
 
+// Extras — a distinct Travelify product ("Add Extra Group / Add Extra" in the
+// agent system, frequently added to a booking AFTER it was originally made).
+// Unlike every other product its dataObject is an ARRAY of extra groups; each
+// group holds one or more bookable extras, and each extra carries its own
+// price and participants. We also flatten a unique traveller list so the
+// order-level traveller aggregation can pick these people up the same way it
+// does for every other product.
+function trimExtras(dataObject) {
+  const rawGroups = Array.isArray(dataObject) ? dataObject : [];
+  const seen = new Set();
+  const travellers = [];
+  const groups = rawGroups.slice(0, 20).map((g) => ({
+    type: safeStr(g.type, 60),
+    name: safeStr(g.name, 120),
+    description: safeStr(g.description, 500),
+    extras: Array.isArray(g.extras)
+      ? g.extras.slice(0, 20).map((e) => {
+          const participants = Array.isArray(e.participants)
+            ? e.participants.slice(0, 20).map((p) => ({
+                type: safeStr(p.type, 30),
+                title: safeStr(p.title, 30),
+                firstname: safeStr(p.firstname, 80),
+                surname: safeStr(p.surname, 80),
+              }))
+            : [];
+          for (const p of participants) {
+            const key = `${(p.title || '').toLowerCase()}|${(p.firstname || '').toLowerCase()}|${(p.surname || '').toLowerCase()}`;
+            if (!seen.has(key) && (p.firstname || p.surname)) { seen.add(key); travellers.push(p); }
+          }
+          return {
+            type: safeStr(e.type, 60),
+            name: safeStr(e.name, 200),
+            description: safeStr(e.description, 1000),
+            qty: safeNum(e.qtySelected),
+            payAtPickup: !!e.isPayAtPickup,
+            pricing: e.pricing ? {
+              currency: safeStr(e.pricing.currency, 10),
+              price: safeNum(e.pricing.price),
+              refundability: safeStr(e.pricing.refundability, 30),
+            } : null,
+            participants,
+          };
+        })
+      : [],
+  }));
+  return { groups, travellers };
+}
+
 function trimItem(item) {
   if (!item || typeof item !== 'object') return null;
   const out = {
@@ -883,6 +931,8 @@ function trimItem(item) {
       atolProtected: pkg.atolProtected,
       inclusions: pkg.inclusions,
     };
+  } else if (item.product === 'Extras' && item.dataObject) {
+    out.extras = trimExtras(item.dataObject);
   }
   // Other product types (Insurance, etc) fall through with the
   // common envelope only. Widget renders a generic "Booked" card for those
@@ -987,6 +1037,7 @@ function computeSummary(items) {
     hasCarRental: false,
     hasTicketsAttractions: false,
     hasPackages: false,
+    hasExtras: false,
     accommodationItems: 0,
     flightItems: 0,
     airportExtrasItems: 0,
@@ -994,6 +1045,7 @@ function computeSummary(items) {
     carRentalItems: 0,
     ticketsAttractionsItems: 0,
     packagesItems: 0,
+    extrasItems: 0,
     earliestStart: null,
     latestEnd: null,
     travellers: [],
@@ -1021,6 +1073,9 @@ function computeSummary(items) {
     } else if (item.product === 'TicketsAttractions') {
       summary.hasTicketsAttractions = true;
       summary.ticketsAttractionsItems++;
+    } else if (item.product === 'Extras') {
+      summary.hasExtras = true;
+      summary.extrasItems++;
     } else if (item.product === 'Packages') {
       // Packages bundle hotel + flights. Track them as Packages for the
       // badge/total-label logic, but also mark hasAccommodation/hasFlights
@@ -1063,6 +1118,7 @@ function computeSummary(items) {
       item.transfers?.travellers ||
       item.carRental?.travellers ||
       item.ticketsAttractions?.guests ||
+      item.extras?.travellers ||
       [];
     for (const t of list) {
       const key = `${(t.title || '').toLowerCase()}|${(t.firstname || '').toLowerCase()}|${(t.surname || '').toLowerCase()}`;
@@ -1288,56 +1344,6 @@ export default async function handler(req, res) {
     if (raw && (raw.code === '404' || raw.code === 404)) {
       return notFound(res);
     }
-
-    // ─── TEMP DIAGNOSTIC — remove after capture ──────────────────────────
-    // The My Booking widget isn't surfacing post-booking Extras (order
-    // ET90582: a "TRANSFERS / Private Return Taxi" extra added AFTER the
-    // original booking). The mapper only reads raw.items[]; we suspect
-    // order-level extras live in a field it never looks at. We can't reach
-    // Travelify from the dev environment (egress policy), so dump the raw
-    // order's STRUCTURE for that one order to find where the extras live.
-    // Structure + non-PII product fields only: participant names / DOBs are
-    // redacted, and it is scoped to a single orderRef so nothing else logs.
-    if (orderRef === 'ET90582') {
-      try {
-        const PII = /firstname|surname|forename|fullname|lastname|middlename|dob|dateofbirth|birth|email|phone|mobile|passport|nationalid|address/i;
-        const describe = (v, depth) => {
-          if (v === null || v === undefined) return null;
-          if (Array.isArray(v)) return { __len: v.length, __sample: (v.length && depth < 5) ? describe(v[0], depth + 1) : undefined };
-          if (typeof v === 'object') {
-            const o = {};
-            for (const k of Object.keys(v).slice(0, 40)) {
-              if (PII.test(k)) { o[k] = '<redacted>'; continue; }
-              const val = v[k];
-              if (val && typeof val === 'object') o[k] = depth < 5 ? describe(val, depth + 1) : '[obj]';
-              else if (typeof val === 'string') o[k] = val.length > 80 ? val.slice(0, 80) + '…' : val;
-              else o[k] = val;
-            }
-            return o;
-          }
-          return typeof v;
-        };
-        // Keys the mapper already handles — anything else is a candidate home
-        // for the missing extras.
-        const KNOWN = new Set(['id', 'status', 'customerTitle', 'customerFirstname', 'customerSurname', 'customerEmail', 'customerPhone', 'customerMobile', 'specialRequests', 'currency', 'created', 'items', 'payments', 'documents', 'depositOption', 'voucherValue', 'voucherCode', 'voucherName', 'key', 'orderKey']);
-        const unknown = {};
-        for (const k of Object.keys(raw)) { if (!KNOWN.has(k)) unknown[k] = describe(raw[k], 0); }
-        // The extras arrived as an item with product 'Extras' the mapper does
-        // not handle. Describe that item's dataObject in full (PII-safe) so we
-        // can write the trim/render against the real field names.
-        const extrasItem = (raw.items || []).find((it) => it && it.product === 'Extras');
-        console.log('[EXTRAS DEBUG ET90582]', JSON.stringify({
-          topLevelKeys: Object.keys(raw),
-          rawItemsCount: Array.isArray(raw.items) ? raw.items.length : 0,
-          itemsProducts: (raw.items || []).map((it) => it && it.product),
-          extrasItemEnvelope: extrasItem ? describe({ ...extrasItem, dataObject: undefined }, 0) : null,
-          extrasItemDataObject: extrasItem ? describe(extrasItem.dataObject, 0) : null,
-        }));
-      } catch (e) {
-        console.log('[EXTRAS DEBUG ET90582] dump failed:', e.message);
-      }
-    }
-    // ─── END TEMP DIAGNOSTIC ─────────────────────────────────────────────
 
     // 5. Trim + sanitise
     const order = trimOrder(raw);

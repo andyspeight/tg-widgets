@@ -135,6 +135,7 @@ const resolveTotalLabel = (items) => {
       CarHire:             'Total car hire cost',
       Transfers:           'Total transfer cost',
       Transfer:            'Total transfer cost',
+      Extras:              'Total cost',
       Insurance:           'Total insurance cost',
     };
     return map[only] || 'Total cost';
@@ -397,6 +398,31 @@ const renderPdfTransferItem = (item, showCancellation = true) => {
     </div>`;
 };
 
+// PDF: Extras card (post-booking "Add Extra Group / Add Extra"). One card per
+// bookable extra, with its group as context and the participants it covers.
+const renderPdfExtrasItem = (item) => {
+  const ex = item?.extras;
+  if (!ex || !Array.isArray(ex.groups)) return '';
+  const cards = [];
+  for (const g of ex.groups) {
+    for (const e of (g.extras || [])) {
+      const kind = [g.type, g.name].filter(Boolean).join(' · ') || 'Extra';
+      const names = (e.participants || [])
+        .map(p => [p.title, p.firstname, p.surname].filter(Boolean).join(' ').trim())
+        .filter(Boolean);
+      const qtyBit = (typeof e.qty === 'number' && e.qty > 1) ? ` <span style="color:#475569; font-weight:500;">×${escapeHtml(String(e.qty))}</span>` : '';
+      cards.push(`
+        <div class="pdf-extra-card" style="margin-bottom:16px; padding:14px 16px; background:#F8FAFC; border-radius:10px;">
+          <div style="font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#94A3B8; margin-bottom:4px;">${escapeHtml(kind)}</div>
+          <div style="font-size:14px; font-weight:600; color:#0F172A; margin-bottom:4px;">${escapeHtml(e.name || g.name || 'Extra')}${qtyBit}</div>
+          ${e.description ? `<div style="font-size:11px; color:#475569;${names.length ? ' margin-bottom:8px;' : ''}">${escapeHtml(e.description)}</div>` : ''}
+          ${names.length ? `<div style="font-size:11px; color:#475569; padding-top:8px; border-top:1px solid #E2E8F0;"><strong style="color:#0F172A;">For:</strong> ${escapeHtml(names.join(', '))}</div>` : ''}
+        </div>`);
+    }
+  }
+  return cards.join('');
+};
+
 // PDF: Car Rental card
 const renderPdfCarRentalItem = (item) => {
   const cr = item?.carRental;
@@ -581,6 +607,7 @@ export function renderPdfHtml(order, opts = {}) {
   const transferItems = (order.items || []).filter((it) => it?.product === 'Transfers');
   const carRentalItems = (order.items || []).filter((it) => it?.product === 'CarRental');
   const ticketsItems = (order.items || []).filter((it) => it?.product === 'TicketsAttractions');
+  const extrasProdItems = (order.items || []).filter((it) => it?.product === 'Extras');
   // Package metadata for the ATOL badge / operator disclosure on the PDF.
   // Null when this isn't a package booking.
   const packageItem = (order.items || []).find((it) => it?.product === 'Packages') || null;
@@ -1425,6 +1452,12 @@ export function renderPdfHtml(order, opts = {}) {
       ${ticketsItems.map((it) => renderPdfTicketsItem(it, showCancellation)).join('')}
     </div>` : ''}
 
+    ${extrasProdItems.length > 0 ? `
+    <div class="pdf-section">
+      <div class="pdf-section-title">Extras</div>
+      ${extrasProdItems.map(renderPdfExtrasItem).join('')}
+    </div>` : ''}
+
     ${totalCost != null ? (() => {
       // Breakdown lines. Packages must be treated as a single "Holiday
       // package" line because the customer paid one bundled price — listing
@@ -1438,6 +1471,7 @@ export function renderPdfHtml(order, opts = {}) {
         + (transferItems.length > 0 ? 1 : 0)
         + (carRentalItems.length > 0 ? 1 : 0)
         + (ticketsItems.length > 0 ? 1 : 0)
+        + (extrasProdItems.length > 0 ? 1 : 0)
         + (packagesItems.length > 0 ? 1 : 0)
         // Gate on `accom` (a real accommodation object), not `accomItem`, which
         // falls back to items[0] for a booking with no hotel — that fallback
@@ -1487,6 +1521,11 @@ export function renderPdfHtml(order, opts = {}) {
           <div class="pdf-pay-row" style="font-size:11px; padding:4px 0;">
             <span class="label" style="color:#94A3B8; padding-left:12px;">— Tickets</span>
             <span class="value num" style="color:#475569;">${escapeHtml(formatMoney(ticketsItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0), currency))}</span>
+          </div>` : ''}
+          ${(multiProduct > 1 && extrasProdItems.length > 0) ? `
+          <div class="pdf-pay-row" style="font-size:11px; padding:4px 0;">
+            <span class="label" style="color:#94A3B8; padding-left:12px;">— Extras</span>
+            <span class="value num" style="color:#475569;">${escapeHtml(formatMoney(extrasProdItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0), currency))}</span>
           </div>` : ''}
           ${voucherVal ? `
           <div class="pdf-pay-row">

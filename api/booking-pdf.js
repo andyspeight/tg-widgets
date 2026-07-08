@@ -448,6 +448,35 @@ function trimPackages(d) {
   };
 }
 
+// Extras — a distinct Travelify product ("Add Extra Group / Add Extra", often
+// added to a booking after it was made). Its dataObject is an ARRAY of groups,
+// each holding one or more bookable extras with their own price + participants.
+function trimExtras(dataObject) {
+  const rawGroups = Array.isArray(dataObject) ? dataObject : [];
+  const seen = new Set();
+  const travellers = [];
+  const groups = rawGroups.slice(0, 20).map((g) => ({
+    type: safeStr(g.type, 60), name: safeStr(g.name, 120), description: safeStr(g.description, 500),
+    extras: Array.isArray(g.extras) ? g.extras.slice(0, 20).map((e) => {
+      const participants = Array.isArray(e.participants) ? e.participants.slice(0, 20).map((p) => ({
+        type: safeStr(p.type, 30), title: safeStr(p.title, 30),
+        firstname: safeStr(p.firstname, 80), surname: safeStr(p.surname, 80),
+      })) : [];
+      for (const p of participants) {
+        const key = `${(p.title || '').toLowerCase()}|${(p.firstname || '').toLowerCase()}|${(p.surname || '').toLowerCase()}`;
+        if (!seen.has(key) && (p.firstname || p.surname)) { seen.add(key); travellers.push(p); }
+      }
+      return {
+        type: safeStr(e.type, 60), name: safeStr(e.name, 200), description: safeStr(e.description, 1000),
+        qty: safeNum(e.qtySelected), payAtPickup: !!e.isPayAtPickup,
+        pricing: e.pricing ? { currency: safeStr(e.pricing.currency, 10), price: safeNum(e.pricing.price), refundability: safeStr(e.pricing.refundability, 30) } : null,
+        participants,
+      };
+    }) : [],
+  }));
+  return { groups, travellers };
+}
+
 function trimItem(item) {
   if (!item || typeof item !== 'object') return null;
   const out = {
@@ -480,6 +509,8 @@ function trimItem(item) {
       atolProtected: pkg.atolProtected,
       inclusions: pkg.inclusions,
     };
+  } else if (item.product === 'Extras' && item.dataObject) {
+    out.extras = trimExtras(item.dataObject);
   }
   return out;
 }
@@ -489,6 +520,7 @@ function computeSummary(items) {
     totalPrice: 0,
     hasAccommodation: false, hasFlights: false, hasAirportExtras: false,
     hasTransfers: false, hasCarRental: false, hasTicketsAttractions: false, hasPackages: false,
+    hasExtras: false,
     earliestStart: null, travellers: [],
   };
   for (const item of items) {
@@ -499,6 +531,7 @@ function computeSummary(items) {
     else if (item.product === 'Transfers') summary.hasTransfers = true;
     else if (item.product === 'CarRental') summary.hasCarRental = true;
     else if (item.product === 'TicketsAttractions') summary.hasTicketsAttractions = true;
+    else if (item.product === 'Extras') summary.hasExtras = true;
     else if (item.product === 'Packages') {
       // Packages bundle hotel + flights — set both flags so downstream
       // consumers treat the booking as a holiday with flights.
@@ -525,6 +558,7 @@ function computeSummary(items) {
       || item.transfers?.travellers
       || item.carRental?.travellers
       || item.ticketsAttractions?.guests
+      || item.extras?.travellers
       || [];
     for (const t of list) {
       const key = `${(t.title || '').toLowerCase()}|${(t.firstname || '').toLowerCase()}|${(t.surname || '').toLowerCase()}`;

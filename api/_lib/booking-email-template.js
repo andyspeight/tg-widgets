@@ -119,6 +119,7 @@ function resolveTotalLabel(items) {
       CarHire:             'Total car hire cost',
       Transfers:           'Total transfer cost',
       Transfer:            'Total transfer cost',
+      Extras:              'Total cost',
       Insurance:           'Total insurance cost',
     };
     return map[only] || 'Total cost';
@@ -483,6 +484,22 @@ export function renderBookingEmail(opts) {
       label: tk.ticketType || 'Tickets',
       value: `${name}${bits ? ` · ${bits}` : ''}${city ? ` · ${city}` : ''}`,
     });
+  }
+
+  // Extras — post-booking "Add Extra Group / Add Extra". One row per bookable
+  // extra: "Private Return Taxi · Airport to Atmosphere Bar Return".
+  const allExtrasItems = (order?.items || []).filter(i => i.product === 'Extras');
+  for (const xItem of allExtrasItems) {
+    for (const g of (xItem.extras?.groups || [])) {
+      for (const e of (g.extras || [])) {
+        const namePart = e.name || g.name || 'Extra';
+        const value = [namePart, e.description].filter(Boolean).join(' · ');
+        summaryRows.push({
+          label: g.name || g.type || 'Extra',
+          value: (typeof e.qty === 'number' && e.qty > 1) ? `${value} · ×${e.qty}` : value,
+        });
+      }
+    }
   }
 
   // Summary row HTML — every row uses the same body + caption sizes. No mono.

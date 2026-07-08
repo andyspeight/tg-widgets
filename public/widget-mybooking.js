@@ -3368,6 +3368,44 @@
   }
 
   // Display label + icon for a product type, used by the cancel section.
+  // -------- Extras (post-booking add-ons) --------
+  // Renders the Travelify "Extras" product ("Add Extra Group / Add Extra" in
+  // the agent system, typically added to a booking after it was made). Its
+  // data is a list of groups, each holding one or more bookable extras with
+  // their own participants, so we render one card per extra with the group as
+  // context. Price is intentionally omitted here (it shows in the payment
+  // breakdown) to match the transfer / airport-extra cards.
+  function renderExtrasItemCard(item) {
+    const ex = item?.extras;
+    if (!ex || !Array.isArray(ex.groups)) return '';
+    const cards = [];
+    for (const g of ex.groups) {
+      for (const e of (g.extras || [])) {
+        const kind = [g.type, g.name].filter(Boolean).join(' · ');
+        const icon = /transport|transfer|taxi|car|van|shuttle/i.test(`${g.type || ''} ${e.type || ''}`) ? IC.van : IC.bag;
+        const names = (e.participants || [])
+          .map(p => [p.title, p.firstname, p.surname].filter(Boolean).join(' ').trim())
+          .filter(Boolean);
+        const metaBits = [];
+        if (names.length) metaBits.push(`<span class="tgm-extra-meta-item">${svg(IC.user, 2, 14)}<span>${esc(names.join(', '))}</span></span>`);
+        if (typeof e.qty === 'number' && e.qty > 1) metaBits.push(`<span class="tgm-extra-meta-item">${svg(IC.check, 2, 14)}<span>${esc('×' + e.qty)}</span></span>`);
+        cards.push(`
+          <div class="tgm-extra-card">
+            <div class="tgm-extra-head">
+              <div class="tgm-extra-icon">${svg(icon, 2, 22)}</div>
+              <div class="tgm-extra-info">
+                ${kind ? `<div class="tgm-extra-kind">${esc(kind)}</div>` : ''}
+                <div class="tgm-extra-name">${esc(e.name || g.name || 'Extra')}</div>
+                ${e.description ? `<div class="tgm-extra-sub">${esc(e.description)}</div>` : ''}
+              </div>
+            </div>
+            ${metaBits.length ? `<div class="tgm-extra-meta">${metaBits.join('')}</div>` : ''}
+          </div>`);
+      }
+    }
+    return cards.join('');
+  }
+
   function productMeta(item) {
     switch (item?.product) {
       case 'Accommodation':      return { icon: IC.bed,    label: 'Accommodation' };
@@ -3377,6 +3415,7 @@
       case 'CarRental':          return { icon: IC.car,    label: 'Car hire' };
       case 'TicketsAttractions': return { icon: IC.ticket, label: 'Tickets & attractions' };
       case 'AirportExtras':      return { icon: IC.bag,    label: 'Airport extras' };
+      case 'Extras':             return { icon: IC.bag,    label: 'Extras' };
       default:                   return { icon: IC.booking, label: item?.product || 'Booked item' };
     }
   }
@@ -3598,6 +3637,7 @@
     const transferItems = items.filter(i => i.product === 'Transfers');
     const carRentalItems = items.filter(i => i.product === 'CarRental');
     const ticketsItems = items.filter(i => i.product === 'TicketsAttractions');
+    const extrasProdItems = items.filter(i => i.product === 'Extras');
     // Package metadata (ATOL flag, operator name) for the badge render.
     // Null when this isn't a package booking.
     const packageItem = items.find(i => i.product === 'Packages') || null;
@@ -3894,6 +3934,7 @@
         ${transferItems.map(tItem => renderTransferCard(tItem, c)).join('')}
         ${carRentalItems.map(crItem => renderCarRentalCard(crItem, c)).join('')}
         ${ticketsItems.map(tkItem => renderTicketsCard(tkItem, c)).join('')}
+        ${extrasProdItems.map(xItem => renderExtrasItemCard(xItem)).join('')}
 
         <div class="tgm-two">
           <div class="tgm-section">
@@ -3920,7 +3961,8 @@
                 + (summary.hasAirportExtras ? 1 : 0)
                 + (summary.hasTransfers ? 1 : 0)
                 + (summary.hasCarRental ? 1 : 0)
-                + (summary.hasTicketsAttractions ? 1 : 0);
+                + (summary.hasTicketsAttractions ? 1 : 0)
+                + (summary.hasExtras ? 1 : 0);
               if (productCount < 2) return '';
               const lines = [];
               // Hotel line — only when accommodation is a separate product,
@@ -3943,6 +3985,8 @@
               if (carRentalTotal > 0) lines.push({ label: c.labels?.carHireLine || c.t('carHireLine'), val: carRentalTotal });
               const ticketsTotal = ticketsItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0);
               if (ticketsTotal > 0) lines.push({ label: c.labels?.ticketsLine || c.t('ticketsLine'), val: ticketsTotal });
+              const extrasProdTotal = extrasProdItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0);
+              if (extrasProdTotal > 0) lines.push({ label: c.labels?.extrasProductLine || 'Extras', val: extrasProdTotal });
               if (lines.length < 2) return '';
               return `
                 <div class="tgm-pay-breakdown">
