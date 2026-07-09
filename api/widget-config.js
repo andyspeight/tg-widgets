@@ -353,8 +353,8 @@ const PLAN_WIDGET_LIMITS = {
   'Prism':                 { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   // Compliance widget — one per site is the norm, so every plan gets it.
   'Cookie Consent':        { Spark: 1, Boost: 1, Ignite: -1, Bespoke: -1 },
-  // Premium-only positioning (locked 24 Jun 2026): no teaser tier on Boost.
-  'Smart Section':         { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  // Opened to Boost 9 Jul 2026 to widen the creator base (was Ignite/Bespoke only).
+  'Smart Section':         { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
   // Self-serve signature builder. Premium-only positioning (locked 8 Jul 2026),
   // same tiering as Smart Section: no teaser on Spark or Boost.
   'Email Signature':       { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },

@@ -6,161 +6,472 @@
 <title>Smart Section Widget — Demo — Travelgenix</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; }
-  body { margin: 0; background: #F8FAFC; color: #0F172A; font-family: Inter, -apple-system, sans-serif; }
-
-  .demo-bar {
-    position: sticky; top: 0; z-index: 50; display: flex; align-items: center; gap: 14px;
-    padding: 12px 22px; background: #fff; border-bottom: 1px solid #E2E8F0;
+  :root {
+    --navy: #1B2B5B; --indigo: #4338CA; --cyan: #00B4D8;
+    --ink: #0F172A; --sub: #475569; --muted: #64748B;
+    --line: #E2E8F0; --bg: #F1F5F9; --card: #FFFFFF;
   }
-  .demo-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 14px; }
-  .demo-brand-mark { width: 26px; height: 26px; border-radius: 7px; background: linear-gradient(135deg, #1B2B5B, #00B4D8); }
-  .demo-brand span { color: #64748B; font-weight: 500; }
-  .demo-controls { margin-left: auto; display: flex; gap: 10px; align-items: center; }
-  .demo-controls button {
-    padding: 7px 14px; border: 1px solid #CBD5E1; border-radius: 8px; background: #fff;
-    font: 600 12.5px Inter, sans-serif; color: #334155; cursor: pointer;
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  h1, h2, h3 { letter-spacing: -0.02em; }
+
+  /* Intro band */
+  .intro { background: linear-gradient(135deg, #0B1533 0%, #1B2B5B 45%, #4338CA 100%); color: #fff; }
+  .intro .wrap { max-width: 1080px; margin: 0 auto; padding: 44px 22px 28px; }
+  .intro .kicker { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #A5B4FC; margin-bottom: 12px; }
+  .intro h1 { margin: 0 0 12px; font-size: 38px; font-weight: 900; line-height: 1.08; max-width: 720px; }
+  .intro p { margin: 0; max-width: 620px; font-size: 16px; line-height: 1.6; color: #CBD5E1; }
+
+  /* Persona control */
+  .persona { position: sticky; top: 0; z-index: 60; background: rgba(11,21,51,.92); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(255,255,255,.12); }
+  .persona .wrap { max-width: 1080px; margin: 0 auto; padding: 12px 22px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .persona .lead { font-size: 13px; font-weight: 700; color: #fff; white-space: nowrap; }
+  .pgroup { display: flex; flex-direction: column; gap: 4px; }
+  .pgroup .plabel { font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: #94A3B8; }
+  .seg { display: inline-flex; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); border-radius: 9px; padding: 2px; }
+  .seg button { border: 0; background: transparent; color: #CBD5E1; font: 600 12px Inter, sans-serif; padding: 5px 10px; border-radius: 7px; cursor: pointer; white-space: nowrap; }
+  .seg button.on { background: #fff; color: var(--navy); }
+  .persona .spacer { flex: 1; }
+  .htoggle { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; color: #CBD5E1; cursor: pointer; user-select: none; }
+  .htoggle input { accent-color: var(--cyan); width: 15px; height: 15px; }
+
+  /* Live summary */
+  .summary { max-width: 1080px; margin: 0 auto; padding: 14px 22px 0; }
+  .summary-inner { background: #EEF2FF; border: 1px solid #C7D2FE; border-radius: 12px; padding: 12px 16px; font-size: 13.5px; color: #3730A3; line-height: 1.5; }
+  .summary-inner b { color: var(--indigo); }
+
+  /* Mock site */
+  .site { max-width: 1080px; margin: 0 auto; padding: 18px 22px 40px; }
+  .browser { background: var(--card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 40px rgba(15,23,42,.08); }
+  .chrome { display: flex; align-items: center; gap: 8px; padding: 11px 16px; background: #F8FAFC; border-bottom: 1px solid var(--line); }
+  .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .dot.r { background: #FB7185; } .dot.y { background: #FBBF24; } .dot.g { background: #34D399; }
+  .addr { margin-left: 10px; flex: 1; background: #fff; border: 1px solid var(--line); border-radius: 7px; padding: 5px 12px; font-size: 12px; color: var(--muted); }
+
+  .nav { display: flex; align-items: center; gap: 16px; padding: 16px 26px; border-bottom: 1px solid var(--line); }
+  .logo { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 15px; color: var(--navy); }
+  .logo-mark { width: 26px; height: 26px; border-radius: 8px; background: linear-gradient(135deg, var(--navy), var(--cyan)); }
+  .nav .links { margin-left: auto; display: flex; gap: 16px; }
+  .nav .links span { font-size: 13px; color: var(--sub); font-weight: 500; }
+
+  .content { padding: 0 0 8px; }
+  .hero-base { position: relative; padding: 46px 30px; color: #fff; background: linear-gradient(120deg, rgba(15,23,42,.78), rgba(67,56,202,.62)), linear-gradient(120deg, #1B2B5B, #4338CA 60%, #00B4D8); }
+  .hero-base h2 { margin: 0 0 8px; font-size: 30px; font-weight: 900; max-width: 560px; }
+  .hero-base p { margin: 0; font-size: 15px; color: #E2E8F0; max-width: 480px; }
+  .search-mock { margin-top: 22px; display: flex; gap: 8px; flex-wrap: wrap; max-width: 560px; }
+  .search-mock .field { flex: 1; min-width: 120px; background: rgba(255,255,255,.92); border-radius: 9px; padding: 11px 14px; font-size: 12.5px; color: var(--muted); font-weight: 600; }
+  .search-mock .go { background: var(--cyan); color: var(--navy); border-radius: 9px; padding: 11px 20px; font-size: 13px; font-weight: 800; }
+
+  .row { padding: 22px 30px; }
+  .row-title { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .tile { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .tile .pic { height: 84px; background-size: cover; background-position: center; }
+  .tile .body { padding: 10px 12px; }
+  .tile .name { font-size: 13px; font-weight: 700; color: var(--ink); }
+  .tile .meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .tile .price { margin-top: 8px; font-size: 15px; font-weight: 800; color: var(--ink); }
+  .tile .price span { font-size: 10px; font-weight: 600; color: var(--muted); }
+
+  /* Smart Section managed blocks */
+  .ss { position: relative; transition: opacity .25s ease; }
+  .ss-tag { display: none; position: absolute; top: -9px; left: 16px; z-index: 5; background: var(--indigo); color: #fff; font-size: 9.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; padding: 2px 9px; border-radius: 999px; box-shadow: 0 2px 8px rgba(67,56,202,.4); }
+  body.show-tags .ss { outline: 2px dashed rgba(67,56,202,.55); outline-offset: 3px; border-radius: 12px; }
+  body.show-tags .ss-tag { display: inline-block; }
+
+  .band { margin: 0 30px 18px; padding: 22px 24px; border-radius: 14px; color: #fff; }
+  .band h3 { margin: 0 0 5px; font-size: 19px; font-weight: 800; }
+  .band p { margin: 0 0 14px; font-size: 13.5px; opacity: .92; max-width: 460px; line-height: 1.5; }
+  .band .btn { display: inline-block; padding: 9px 17px; border-radius: 999px; background: #fff; font-weight: 800; font-size: 12.5px; }
+  .b-plum { background: linear-gradient(120deg, #6D28D9, #DB2777); } .b-plum .btn { color: #6D28D9; }
+  .b-emerald { background: linear-gradient(120deg, #047857, #10B981); } .b-emerald .btn { color: #047857; }
+  .b-amber { background: linear-gradient(120deg, #B45309, #F59E0B); } .b-amber .btn { color: #B45309; }
+  .b-sky { background: linear-gradient(120deg, #0369A1, #38BDF8); } .b-sky .btn { color: #0369A1; }
+  .b-rose { background: linear-gradient(120deg, #9F1239, #FB7185); } .b-rose .btn { color: #9F1239; }
+  .b-slate { background: linear-gradient(120deg, #334155, #64748B); } .b-slate .btn { color: #334155; }
+  .band.mini { display: flex; align-items: center; gap: 14px; padding: 14px 20px; }
+  .band.mini h3 { font-size: 15px; margin: 0; }
+  .band.mini p { display: none; }
+  .band.mini .btn { margin-left: auto; }
+
+  /* Ways-to-use cards */
+  .ways { max-width: 1080px; margin: 0 auto; padding: 20px 22px 10px; }
+  .ways h2 { font-size: 24px; font-weight: 800; margin: 0 0 4px; }
+  .ways .sub { color: var(--sub); font-size: 14.5px; margin: 0 0 20px; }
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .uc { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+  .uc .ico { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #fff; }
+  .uc .ico svg { width: 20px; height: 20px; }
+  .uc h3 { font-size: 15px; font-weight: 800; margin: 0 0 5px; }
+  .uc p { font-size: 13px; color: var(--sub); line-height: 1.5; margin: 0 0 10px; }
+  .uc .rule { font-size: 11.5px; font-weight: 600; color: var(--indigo); background: #EEF2FF; border-radius: 7px; padding: 5px 9px; display: inline-block; }
+
+  /* Real exit-intent */
+  .live { max-width: 1080px; margin: 0 auto; padding: 26px 22px 10px; }
+  .live-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 22px 24px; }
+  .live-card .lbl { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: #059669; background: #ECFDF5; border-radius: 999px; padding: 3px 10px; margin-bottom: 12px; }
+  .live-card h2 { font-size: 20px; font-weight: 800; margin: 0 0 6px; }
+  .live-card > p { font-size: 14px; color: var(--sub); line-height: 1.55; margin: 0 0 16px; max-width: 640px; }
+  .live-band { padding: 24px; border-radius: 12px; color: #fff; background: linear-gradient(120deg, #0369A1, #38BDF8); }
+  .live-band h3 { margin: 0 0 5px; font-size: 19px; font-weight: 800; }
+  .live-band p { margin: 0 0 14px; font-size: 13.5px; opacity: .92; }
+  .live-band .btn { display: inline-block; padding: 9px 17px; border-radius: 999px; background: #fff; color: #0369A1; font-weight: 800; font-size: 12.5px; }
+
+  /* CTA + footer */
+  .cta { max-width: 1080px; margin: 26px auto 0; padding: 0 22px; }
+  .cta-inner { background: linear-gradient(120deg, var(--navy), var(--indigo)); border-radius: 16px; padding: 30px 28px; color: #fff; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+  .cta-inner h2 { margin: 0; font-size: 22px; font-weight: 800; flex: 1; min-width: 240px; }
+  .cta-inner a { background: #fff; color: var(--navy); font-weight: 800; font-size: 14px; padding: 12px 22px; border-radius: 999px; text-decoration: none; white-space: nowrap; }
+  .foot { text-align: center; color: var(--muted); font-size: 12.5px; padding: 34px 22px 44px; }
+
+  @media (max-width: 720px) {
+    .intro h1 { font-size: 28px; }
+    .tiles, .cards { grid-template-columns: 1fr; }
+    .persona .wrap { gap: 12px; }
+    .persona .spacer { display: none; }
+    .hero-base { padding: 32px 20px; }
+    .band, .row { margin-left: 14px; margin-right: 14px; padding-left: 18px; padding-right: 18px; }
   }
-  .demo-controls button:hover { border-color: #94A3B8; }
-
-  .page { max-width: 1040px; margin: 0 auto; padding: 34px 22px 60px; }
-  .hero { text-align: center; margin: 18px 0 38px; }
-  .hero h1 { margin: 0 0 10px; font-size: 32px; font-weight: 800; letter-spacing: -0.02em; }
-  .hero p { margin: 0 auto; max-width: 640px; color: #475569; font-size: 15.5px; line-height: 1.6; }
-
-  .demo-block { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; margin-bottom: 26px; }
-  .demo-block > h2 { margin: 0 0 4px; font-size: 17px; font-weight: 700; }
-  .demo-block > p { margin: 0 0 18px; color: #64748B; font-size: 13.5px; line-height: 1.55; }
-
-  .band { padding: 30px 28px; border-radius: 14px; color: #fff; }
-  .band h3 { margin: 0 0 6px; font-size: 20px; font-weight: 700; }
-  .band p { margin: 0 0 16px; font-size: 13.5px; opacity: .9; max-width: 460px; line-height: 1.55; }
-  .band .cta { display: inline-block; padding: 9px 18px; border-radius: 999px; background: #fff; font-weight: 700; font-size: 13px; text-decoration: none; }
-  .band--navy { background: linear-gradient(120deg, #1B2B5B, #4338CA); }
-  .band--navy .cta { color: #1B2B5B; }
-  .band--teal { background: linear-gradient(120deg, #0F766E, #00B4D8); }
-  .band--teal .cta { color: #0F766E; }
-  .band--sunset { background: linear-gradient(120deg, #9A3412, #F59E0B); }
-  .band--sunset .cta { color: #9A3412; }
-  .band--plum { background: linear-gradient(120deg, #6B21A8, #DB2777); }
-  .band--plum .cta { color: #6B21A8; }
-  .band--sky { background: linear-gradient(120deg, #075985, #38BDF8); }
-  .band--sky .cta { color: #075985; }
-
-  .footer-mock { background: #1B2B5B; color: #CBD5E1; margin-top: 40px; }
-  .footer-mock .inner { max-width: 1040px; margin: 0 auto; padding: 36px 22px; display: flex; gap: 40px; flex-wrap: wrap; font-size: 13px; line-height: 1.7; }
-  .footer-mock h4 { margin: 0 0 8px; color: #fff; font-size: 13px; }
 </style>
 </head>
 <body>
 
-<div class="demo-bar">
-  <div class="demo-brand">
-    <div class="demo-brand-mark"></div>
-    Atlas Travel Co. <span>— demo client site</span>
-  </div>
-  <div class="demo-controls">
-    <button id="btnReset" type="button" title="Clear dismissals, show counters and the visitor marker stored by this demo">Reset demo state</button>
+<!-- Intro -->
+<div class="intro">
+  <div class="wrap">
+    <span class="kicker">Smart Section · live demo</span>
+    <h1>One website. The right message for every visitor.</h1>
+    <p>Below is a travel agency homepage. Change the visitor along the top and watch the page rearrange itself, new offers appear, others step aside, no separate pages and no developer. That is Smart Section.</p>
   </div>
 </div>
 
-<div class="page">
-  <div class="hero">
-    <h1>Smart Section</h1>
-    <p>Show different content to different visitors without a developer. Each block below is wrapped in a Smart Section with different rules. The examples marked with a badge use debug mode, so you can see what a real visitor would get.</p>
-  </div>
-
-  <div class="demo-block">
-    <h2>1. Everyone sees it, and can dismiss it</h2>
-    <p>No rules, with the dismiss button switched on. Dismiss it and it stays gone. Press "Reset demo state" to bring it back.</p>
-    <div data-tg-widget="smartsection" data-tg-config='{"rules":[],"dismissible":true,"dismissDays":30,"widgetId":"demo_dismiss"}'>
-      <div class="band band--navy">
-        <h3>Summer sale: up to 30% off Greek island escapes</h3>
-        <p>Seven nights half board, flights included. Ends Sunday.</p>
-        <span class="cta">See the deals</span>
+<!-- Persona control -->
+<div class="persona">
+  <div class="wrap">
+    <span class="lead">View the page as:</span>
+    <div class="pgroup">
+      <span class="plabel">Visitor</span>
+      <div class="seg" data-persona="visitor">
+        <button data-val="new" class="on" type="button">New</button>
+        <button data-val="returning" type="button">Returning</button>
       </div>
     </div>
-  </div>
-
-  <div class="demo-block">
-    <h2>2. Office hours only</h2>
-    <p>Rules: Monday to Friday AND 09:00 to 17:00 in the visitor's local time. Debug mode is on, so the badge tells you whether it would show right now.</p>
-    <div data-tg-widget="smartsection" data-tg-config='{"match":"all","rules":[{"type":"dayOfWeek","days":[1,2,3,4,5]},{"type":"timeOfDay","from":"09:00","to":"17:00"}],"debug":true,"widgetId":"demo_hours"}'>
-      <div class="band band--teal">
-        <h3>Our travel experts are online now</h3>
-        <p>Call us for a tailor-made quote while the team is at their desks.</p>
-        <span class="cta">Call 01202 555 0199</span>
+    <div class="pgroup">
+      <span class="plabel">Device</span>
+      <div class="seg" data-persona="device">
+        <button data-val="desktop" class="on" type="button">Desktop</button>
+        <button data-val="mobile" type="button">Mobile</button>
       </div>
     </div>
-  </div>
-
-  <div class="demo-block">
-    <h2>3. Mobile visitors only</h2>
-    <p>Rule: device is mobile. On a desktop the badge shows it would be hidden. Open this page on your phone to flip it.</p>
-    <div data-tg-widget="smartsection" data-tg-config='{"rules":[{"type":"device","devices":["mobile"]}],"debug":true,"widgetId":"demo_mobile"}'>
-      <div class="band band--sunset">
-        <h3>Get our app-only mobile deals</h3>
-        <p>Book on your phone and save an extra 5% on late escapes.</p>
-        <span class="cta">Browse mobile deals</span>
+    <div class="pgroup">
+      <span class="plabel">When</span>
+      <div class="seg" data-persona="when">
+        <button data-val="daytime" class="on" type="button">Weekday daytime</button>
+        <button data-val="evening" type="button">Weekday evening</button>
+        <button data-val="weekend" type="button">Weekend</button>
       </div>
     </div>
-  </div>
-
-  <div class="demo-block">
-    <h2>4. Returning visitors only</h2>
-    <p>Rule: visitor type is returning. Your first view of this page counts as new. Reload and the badge flips to visible.</p>
-    <div data-tg-widget="smartsection" data-tg-config='{"rules":[{"type":"visitorType","value":"returning"}],"debug":true,"widgetId":"demo_returning"}'>
-      <div class="band band--plum">
-        <h3>Welcome back, your shortlist is waiting</h3>
-        <p>Pick up where you left off, or ask us to price up the trips you saved.</p>
-        <span class="cta">Continue planning</span>
+    <div class="pgroup">
+      <span class="plabel">Arrived via</span>
+      <div class="seg" data-persona="source">
+        <button data-val="direct" class="on" type="button">Direct</button>
+        <button data-val="newsletter" type="button">Newsletter</button>
+        <button data-val="facebook" type="button">Facebook</button>
       </div>
     </div>
+    <span class="spacer"></span>
+    <label class="htoggle"><input type="checkbox" id="hlToggle" checked> Highlight smart sections</label>
   </div>
+</div>
 
-  <div class="demo-block">
-    <h2>5. Exit intent</h2>
-    <p>Rule: exit intent. This one is real, not debug. The section below is genuinely hidden until you move the mouse up towards the browser bar as if leaving (on mobile, a fast scroll up).</p>
-    <div data-tg-widget="smartsection" data-tg-config='{"rules":[{"type":"exitIntent"}],"widgetId":"demo_exit"}'>
-      <div class="band band--sky">
-        <h3>Before you go, grab 10% off your first booking</h3>
+<!-- Live summary -->
+<div class="summary">
+  <div class="summary-inner" id="summary">This visitor sees the standard page.</div>
+</div>
+
+<!-- Mock travel site -->
+<div class="site">
+  <div class="browser">
+    <div class="chrome">
+      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <span class="addr">https://www.atlastravelco.co.uk</span>
+    </div>
+
+    <div class="nav">
+      <div class="logo"><span class="logo-mark"></span> Atlas Travel Co.</div>
+      <div class="links"><span>Holidays</span><span>Cruises</span><span>Offers</span><span>About</span></div>
+    </div>
+
+    <div class="content">
+
+      <!-- HERO with two swappable Smart Sections -->
+      <div class="hero-base">
+        <h2>Handpicked holidays, sorted by real people.</h2>
+        <p>Tailor-made trips from a team that has been there. Tell us where you dream of going.</p>
+        <div class="search-mock">
+          <div class="field">Where to?</div>
+          <div class="field">When?</div>
+          <div class="go">Search</div>
+        </div>
+      </div>
+
+      <!-- New visitor greeting -->
+      <div class="ss" data-ss-label="First-time offer" data-ss='{"match":"all","rules":[{"type":"visitorType","value":"new"}]}'>
+        <span class="ss-tag">Smart Section</span>
+        <div class="band b-emerald">
+          <h3>First time with Atlas? Here is 5% off your first booking.</h3>
+          <p>New here, so here is a little welcome. Use code HELLO5 at checkout on any holiday.</p>
+          <span class="btn">Claim 5% off</span>
+        </div>
+      </div>
+
+      <!-- Returning visitor greeting -->
+      <div class="ss" data-ss-label="Welcome back" data-ss='{"match":"all","rules":[{"type":"visitorType","value":"returning"}]}'>
+        <span class="ss-tag">Smart Section</span>
+        <div class="band b-plum">
+          <h3>Welcome back. Your Santorini shortlist is ready.</h3>
+          <p>Pick up where you left off, or let us price up the trips you saved last time.</p>
+          <span class="btn">Continue planning</span>
+        </div>
+      </div>
+
+      <!-- Newsletter thank-you -->
+      <div class="ss" data-ss-label="Newsletter rate" data-ss='{"match":"all","rules":[{"type":"utm","param":"source","match":"is","value":"newsletter"}]}'>
+        <span class="ss-tag">Smart Section</span>
+        <div class="band b-amber">
+          <h3>Thanks for opening our email. Your subscriber rate is locked in.</h3>
+          <p>Members save an extra 8% this week. It is already applied to the offers below.</p>
+          <span class="btn">See member offers</span>
+        </div>
+      </div>
+
+      <!-- Facebook social -->
+      <div class="ss" data-ss-label="Social deal" data-ss='{"match":"all","rules":[{"type":"utm","param":"referrer","match":"contains","value":"facebook"}]}'>
+        <span class="ss-tag">Smart Section</span>
+        <div class="band b-rose">
+          <h3>Saw us on Facebook? Here is your social-exclusive deal.</h3>
+          <p>A little thank you for the follow. Free lounge passes on selected long-haul trips.</p>
+          <span class="btn">Grab the deal</span>
+        </div>
+      </div>
+
+      <!-- Experts online (office hours) -->
+      <div class="ss" data-ss-label="Experts online" data-ss='{"match":"all","rules":[{"type":"dayOfWeek","days":[1,2,3,4,5]},{"type":"timeOfDay","from":"09:00","to":"17:00"}]}'>
+        <span class="ss-tag">Smart Section</span>
+        <div class="band mini b-sky">
+          <h3>Our travel experts are online now. Call for a tailor-made quote.</h3>
+          <span class="btn">Call 01202 555 0199</span>
+        </div>
+      </div>
+
+      <!-- After hours (evenings + weekends) -->
+      <div class="ss" data-ss-label="Leave a message" data-ss='{"match":"any","rules":[{"type":"timeOfDay","from":"17:00","to":"09:00"},{"type":"dayOfWeek","days":[0,6]}]}'>
+        <span class="ss-tag">Smart Section</span>
+        <div class="band mini b-slate">
+          <h3>The team is away. Leave your number and we will call you back.</h3>
+          <span class="btn">Request a callback</span>
+        </div>
+      </div>
+
+      <!-- Weekend escapes -->
+      <div class="ss" data-ss-label="Weekend escapes" data-ss='{"match":"all","rules":[{"type":"dayOfWeek","days":[0,6]}]}'>
+        <span class="ss-tag">Smart Section</span>
+        <div class="band b-amber">
+          <h3>Weekend escapes, departing soon. Book by Sunday night.</h3>
+          <p>Short breaks and last-minute sun, only while the weekend lasts.</p>
+          <span class="btn">Browse weekend deals</span>
+        </div>
+      </div>
+
+      <!-- Mobile app strip -->
+      <div class="ss" data-ss-label="Mobile app deal" data-ss='{"match":"all","rules":[{"type":"device","devices":["mobile"]}]}'>
+        <span class="ss-tag">Smart Section</span>
+        <div class="band mini b-plum">
+          <h3>On your phone? Get the Atlas app for mobile-only late deals.</h3>
+          <span class="btn">Get the app</span>
+        </div>
+      </div>
+
+      <!-- Standard content (always visible) -->
+      <div class="row">
+        <p class="row-title">This week's holidays</p>
+        <div class="tiles">
+          <div class="tile">
+            <div class="pic" style="background:linear-gradient(135deg,#0EA5E9,#6366F1)"></div>
+            <div class="body"><div class="name">Santorini, Greece</div><div class="meta">7 nights · B&amp;B · 4★</div><div class="price">£729<span> pp</span></div></div>
+          </div>
+          <div class="tile">
+            <div class="pic" style="background:linear-gradient(135deg,#F59E0B,#EF4444)"></div>
+            <div class="body"><div class="name">Marrakech, Morocco</div><div class="meta">5 nights · Half board</div><div class="price">£549<span> pp</span></div></div>
+          </div>
+          <div class="tile">
+            <div class="pic" style="background:linear-gradient(135deg,#10B981,#0EA5E9)"></div>
+            <div class="body"><div class="name">Amalfi Coast, Italy</div><div class="meta">7 nights · Room only</div><div class="price">£899<span> pp</span></div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Ways to use it -->
+<div class="ways">
+  <h2>Ways travel brands use Smart Section</h2>
+  <p class="sub">Every block above is one Smart Section. Here is why each one earns its place.</p>
+  <div class="cards">
+    <div class="uc">
+      <div class="ico" style="background:#6D28D9"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg></div>
+      <h3>Welcome your regulars</h3>
+      <p>Returning visitors get a personal nudge and their saved trips. First-timers never see it.</p>
+      <span class="rule">Returning visitors</span>
+    </div>
+    <div class="uc">
+      <div class="ico" style="background:#B45309"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg></div>
+      <h3>Reward email opens</h3>
+      <p>Show a subscriber-only rate to anyone who clicked through from your newsletter.</p>
+      <span class="rule">Traffic from your newsletter</span>
+    </div>
+    <div class="uc">
+      <div class="ico" style="background:#0369A1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+      <h3>Catch the leavers</h3>
+      <p>A last-chance offer that appears only as someone moves to close the tab.</p>
+      <span class="rule">Exit intent</span>
+    </div>
+    <div class="uc">
+      <div class="ico" style="background:#DB2777"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg></div>
+      <h3>Push the app on mobile</h3>
+      <p>App-only late deals for phone visitors, invisible on desktop where it would not fit.</p>
+      <span class="rule">Mobile visitors</span>
+    </div>
+    <div class="uc">
+      <div class="ico" style="background:#0891B2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+      <h3>Staff the phones</h3>
+      <p>"Call us now" during office hours, "leave a message" the rest of the time.</p>
+      <span class="rule">Weekdays 9 to 5</span>
+    </div>
+    <div class="uc">
+      <div class="ico" style="background:#B45309"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+      <h3>Ride the weekend</h3>
+      <p>Weekend-only escapes that show on Saturday and Sunday, then quietly step aside.</p>
+      <span class="rule">Saturday and Sunday</span>
+    </div>
+  </div>
+</div>
+
+<!-- Real, live exit intent -->
+<div class="live">
+  <div class="live-card">
+    <span class="lbl">This one is real</span>
+    <h2>Exit intent, running live on this page</h2>
+    <p>The persona switch above simulates visitors so you can see the idea. This block is the genuine widget: it is hidden right now and only appears when you move your mouse up towards the browser bar as if you are about to leave. On a phone, a quick scroll up near the top does it.</p>
+    <div data-tg-widget="smartsection" data-tg-config='{"rules":[{"type":"exitIntent"}],"dismissible":true,"widgetId":"demo_exit"}'>
+      <div class="live-band">
+        <h3>Before you go, grab 10% off your first booking.</h3>
         <p>Use code WANDER10 at checkout. Valid for the next 48 hours.</p>
-        <span class="cta">Claim the code</span>
+        <span class="btn">Claim the code</span>
       </div>
     </div>
   </div>
-
 </div>
 
-<div class="footer-mock">
-  <div class="inner">
-    <div>
-      <h4>Atlas Travel Co.</h4>
-      Independent travel experts since 1998.<br>ATOL protected. ABTA member.
-    </div>
-    <div>
-      <h4>Visit us</h4>
-      12 Harbourside Way<br>Bournemouth BH1 2AB
-    </div>
+<!-- CTA -->
+<div class="cta">
+  <div class="cta-inner">
+    <h2>Build your first Smart Section in a couple of minutes.</h2>
+    <a href="/editor-smartsection">Open the editor</a>
   </div>
+</div>
+
+<div class="foot">
+  Atlas Travel Co. is a fictional demo site. Smart Section is a Travelgenix widget.
+  <br>Change the visitor at the top, or <a href="#" id="btnReset">reset the live examples</a>.
 </div>
 
 <script src="/tgse-rules.js"></script>
 <script src="/widget-smartsection.js"></script>
 <script>
   'use strict';
-  document.getElementById('btnReset').addEventListener('click', function () {
-    var doomed = [];
-    for (var i = 0; i < localStorage.length; i++) {
-      var key = localStorage.key(i);
-      if (key && key.indexOf('tgsr_') === 0) doomed.push(key);
-    }
-    doomed.forEach(function (key) { localStorage.removeItem(key); });
-    try { sessionStorage.removeItem('tgsr_entry_src'); } catch (e) { /* noop */ }
+
+  const persona = { visitor: 'new', device: 'desktop', when: 'daytime', source: 'direct' };
+
+  // Build a visitor context for the engine from the chosen persona.
+  function buildCtx() {
+    const base = new Date();
+    let day = 2, hh = 14, mm = 0; // weekday daytime = Tuesday 14:00
+    if (persona.when === 'evening') { day = 2; hh = 20; }
+    else if (persona.when === 'weekend') { day = 6; hh = 14; }
+    const d = new Date(base.getFullYear(), base.getMonth(), base.getDate(), hh, mm, 0, 0);
+    d.setDate(d.getDate() + (((day - d.getDay()) + 7) % 7));
+    const entry = { referrer: '', source: '', medium: '', campaign: '' };
+    if (persona.source === 'newsletter') entry.source = 'newsletter';
+    else if (persona.source === 'facebook') entry.referrer = 'https://m.facebook.com/';
+    return { now: d, device: persona.device, returning: persona.visitor === 'returning', entrySource: entry };
+  }
+
+  function transform() {
+    const ctx = buildCtx();
+    const shown = [];
+    document.querySelectorAll('[data-ss]').forEach((el) => {
+      let show = true;
+      try {
+        if (window.tgseRules) show = window.tgseRules.evaluate(JSON.parse(el.getAttribute('data-ss')), ctx).show;
+      } catch (e) { show = true; } // fail open, never hide by mistake
+      el.style.display = show ? '' : 'none';
+      el.style.opacity = show ? '1' : '';
+      if (show) { const l = el.getAttribute('data-ss-label'); if (l) shown.push(l); }
+    });
+    updateSummary(shown);
+  }
+
+  function updateSummary(shown) {
+    const box = document.getElementById('summary');
+    box.textContent = '';
+    if (!shown.length) { box.textContent = 'This visitor sees the standard page, with no extra sections.'; return; }
+    const pre = document.createTextNode('This visitor also sees: ');
+    box.appendChild(pre);
+    shown.forEach((label, i) => {
+      const b = document.createElement('b');
+      b.textContent = label;
+      box.appendChild(b);
+      if (i < shown.length - 1) box.appendChild(document.createTextNode(', '));
+    });
+    box.appendChild(document.createTextNode('.'));
+  }
+
+  // Wire the persona segmented controls.
+  document.querySelectorAll('.seg[data-persona]').forEach((seg) => {
+    const key = seg.getAttribute('data-persona');
+    seg.querySelectorAll('button').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        persona[key] = btn.getAttribute('data-val');
+        seg.querySelectorAll('button').forEach((b) => b.classList.toggle('on', b === btn));
+        transform();
+      });
+    });
+  });
+
+  // Highlight toggle.
+  const hl = document.getElementById('hlToggle');
+  function syncHl() { document.body.classList.toggle('show-tags', hl.checked); }
+  hl.addEventListener('change', syncHl);
+  syncHl();
+
+  // Reset the live examples (returning marker + exit dismissal).
+  document.getElementById('btnReset').addEventListener('click', (e) => {
+    e.preventDefault();
+    try {
+      const doomed = [];
+      for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.indexOf('tgsr_') === 0) doomed.push(k); }
+      doomed.forEach((k) => localStorage.removeItem(k));
+      sessionStorage.removeItem('tgsr_entry_src');
+    } catch (err) { /* ignore */ }
     location.reload();
   });
+
+  transform();
 </script>
 
 </body>
