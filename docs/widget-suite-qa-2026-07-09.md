@@ -2,6 +2,10 @@
 
 _Full-suite quality sweep of all 47 embeddable widgets plus the shared editor shell, the config/auth API surface and the client dashboard. Run by a fleet of 98 agents (one reviewer per area, each finding then re-checked by an adversarial verifier against the actual source). Reported findings are the ones that survived verification._
 
+## Remediation status
+
+**All 13 high-severity findings are fixed** on branch `claude/widget-suite-qa-h4vkpo` (9 July 2026). Covered: the reviews / worldmap / offers-grid XSS sinks, the offer-* relative-`/api` embed blanks, the offer-builder save-failure form wipe, the countdown false "offer ended", the carousel runaway interval, the offers inactivity re-open loop, the popup Vimeo autoplay URL, the events "+N more" dead end and the prism dead-link mismatch. Each widget's `VERSION` was bumped and a regression suite added (`npm run test:qa-highs`); the existing widget, deeplink and Smart Section suites stay green. The 73 medium and 117 low findings below are not yet actioned.
+
 ## How this was done
 
 - **Coverage:** 47 `public/widget-*.js` widgets + 3 shared areas (`editor-shell.js`/`tgse-rules.js`, the `api/widget-config.js` + auth surface, and the `index.html` dashboard). For each widget the reviewer also read its `editor-*.html` and `demo-*.html`.
