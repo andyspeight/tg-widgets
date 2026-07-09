@@ -12,8 +12,10 @@ the editor and copies it into Gmail, Outlook or Apple Mail. Output is
 email-safe inline-table HTML (no JavaScript, no `<style>` blocks) so it renders
 across every major client, with step-by-step install guides per provider. It
 works for travel brands (photo or logo, book-now CTA, ABTA/ATOL and Trustpilot
-trust line, social links) and generic professionals alike, across three
-templates: classic, modern, compact.
+trust line, social links) and generic professionals alike, across a gallery of
+ten templates (classic, modern, horizontal, stacked, compact, minimal,
+monogram, header band, card, corporate). Setup extras: one-click colour presets
+and headshot/logo upload (browser-rasterised PNG to /api/upload-logo).
 
 Two hosted, updatable extras survive inside email (where scripts and most CSS
 are stripped): a promo banner served through Travelgenix so the offer can be
@@ -66,7 +68,10 @@ interpolate a raw config string. `tests/test-emailsig.cjs` covers this heavily.
   the image (never a 4xx that would break in the inbox).
 - `api/_lib/emailsig.js` — shared helpers (`TRANSPARENT_GIF`, `safeWidgetId`,
   `safeHttpUrl`, `fetchWidgetConfig`, `selfOrigin`, `clientIp`).
-- `tests/test-emailsig.cjs` — 30 tests, plain Node via `vm` (no jsdom needed).
+- `public/emailsig-icons/*.png` — hosted brand social icons (email blocks SVG,
+  so these are PNGs, generated via headless Chromium). Referenced by `socials()`
+  as `<origin>/emailsig-icons/<file>.png`.
+- `tests/test-emailsig.cjs` — 34 tests, plain Node via `vm` (no jsdom needed).
 
 ## Config schema (stored in the Widgets record's Config JSON)
 
@@ -120,8 +125,10 @@ bounded by email image-proxy caching (short cache headers, ~5 min).
   server-side management platform (the Exclaimer/Xink/Opensense/Symprex model).
 - Audience: both travel-branded and generic professional.
 - Tiers: premium only, same as Smart Section.
-- Social links and ABTA/ATOL/Trustpilot render as text — email clients block SVG
-  icons and we ship no PNGs.
+- Social links use real brand icons as hosted PNGs (email blocks SVG, so PNG,
+  not the earlier monogram chips). ABTA/ATOL/Trustpilot render as a text trust
+  line. Corporate auto-deploy (server-side stamping, directory sync, M365) is
+  out of scope — we compete as the best self-serve generator.
 
 ## Next steps
 

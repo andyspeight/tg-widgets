@@ -176,15 +176,17 @@ test('keeps only whitelisted networks with valid URLs', () => {
   hasNot(out, 'javascript:');
 });
 
-test('social links render as brand-coloured icon chips', () => {
+test('social links render as hosted brand icons', () => {
   const out = build({ person: PERSON, socials: [
     { network: 'facebook', url: 'https://facebook.com/x' },
     { network: 'linkedin', url: 'https://linkedin.com/x' },
-  ] });
-  has(out, 'bgcolor="#1877F2"', 'Facebook brand colour missing');
-  has(out, 'bgcolor="#0A66C2"', 'LinkedIn brand colour missing');
-  has(out, 'title="Facebook"', 'accessible label missing');
-  has(out, '>in<', 'LinkedIn monogram missing');
+    { network: 'twitter', url: 'https://twitter.com/x' },
+  ] }, { origin: ORIGIN });
+  has(out, ORIGIN + '/emailsig-icons/facebook.png', 'facebook icon src missing');
+  has(out, ORIGIN + '/emailsig-icons/linkedin.png', 'linkedin icon src missing');
+  has(out, '/emailsig-icons/x.png', 'twitter should reuse the x icon');
+  has(out, 'alt="Facebook"', 'accessible alt missing');
+  has(out, 'title="LinkedIn"', 'accessible title missing');
 });
 
 // ── CTA button ──────────────────────────────────────────────────────────────
