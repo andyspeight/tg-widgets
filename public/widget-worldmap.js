@@ -36,11 +36,16 @@
  * ran a one-way search. Now emits to=<returnDate> for st=Flights per the
  * Travelify Deep Linking Instructions (fr=depart, to=return). Packages already
  * express the return via dur/nights, so this is Flights-only.
+ *
+ * v3.11.6: pass the client's enabled package-operator ids to the deals endpoint
+ * (?pkgSuppliers=…) so it filters BEFORE its cheapest-N cut. Previously an
+ * enabled operator's packages could be squeezed out of the fetched slice by
+ * cheaper non-enabled ones. The client-side filter still runs as a backstop.
  */
 (function () {
   'use strict';
 
-  const VERSION = '3.11.5';
+  const VERSION = '3.11.6';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -3376,7 +3381,16 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
       if (!cc) { this._renderDealsError(scroll, metaEl); return; }
 
-      fetch(DEALS_URL + '?country=' + encodeURIComponent(cc), { credentials: 'omit' })
+      // Pass the client's enabled package-operator ids so the endpoint filters
+      // BEFORE its cheapest-N cut — otherwise an enabled operator's offers can
+      // be squeezed out of the fetched slice by non-enabled ones. mapSupplierAllows
+      // below still runs (defensive, and covers a stale/unfiltered response).
+      const sf = this.cfg.supplierFilter;
+      const sfParam = (sf && Array.isArray(sf.packages) && sf.packages.length)
+        ? '&pkgSuppliers=' + encodeURIComponent(sf.packages.join(','))
+        : '';
+
+      fetch(DEALS_URL + '?country=' + encodeURIComponent(cc) + sfParam, { credentials: 'omit' })
         .then(r => r.ok ? r.json() : Promise.reject(new Error('deals HTTP ' + r.status)))
         .then(data => {
           if (token !== this._dealsToken) return; // superseded

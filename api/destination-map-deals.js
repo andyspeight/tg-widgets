@@ -53,6 +53,15 @@ function normaliseBoard(s) {
   return String(s || '').toLowerCase().replace(/[^a-z]/g, '');
 }
 
+// Dynamic package (flight + hotel from two different suppliers) vs operator
+// package (one tour operator). packageType is authoritative; sid inequality is
+// the fallback. Mirrors the widget/admin classifier.
+function isDynamicPackage(o) {
+  if (o.packageType === 'DynamicPackages') return true;
+  if (o.packageType === 'PackageHolidays') return false;
+  return Number.isFinite(o.flightSid) && Number.isFinite(o.accommodationSid) && o.flightSid !== o.accommodationSid;
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -95,6 +104,24 @@ export default async function handler(req, res) {
 
     // Scope to the airport if one was given.
     if (airport) offers = offers.filter(o => o.airport === airport);
+
+    // Per-client operator whitelist, applied BEFORE the cheapest-N cut so an
+    // enabled operator's packages surface instead of being squeezed out of the
+    // fetched slice by non-enabled ones. The widget passes its enabled Packages
+    // operator ids as ?pkgSuppliers=110,61,123. Dynamic packages have no single
+    // operator and always show (mirrors the widget filter); empty/absent list =
+    // show all. The widget still re-applies its own filter, so this is a safe
+    // pre-filter that only ever tightens the cheapest-N to what the client sees.
+    const pkgSuppliers = String(q.pkgSuppliers || '')
+      .split(',').map(s => parseInt(s, 10)).filter(Number.isFinite).slice(0, 200);
+    if (pkgSuppliers.length) {
+      offers = offers.filter(o => {
+        if (isDynamicPackage(o)) return true;
+        const sid = Number.isFinite(o.flightSid) ? o.flightSid
+          : (Number.isFinite(o.accommodationSid) ? o.accommodationSid : null);
+        return sid == null ? true : pkgSuppliers.includes(sid);
+      });
+    }
 
     const total = offers.length;
 
