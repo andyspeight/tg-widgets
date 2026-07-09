@@ -54,7 +54,9 @@ export function setCors(req, res) {
   }
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  // X-TG-Act-As carries the scoped act-as grant (docs/act-as-scoping-spec.md).
+  // Allowed here so a cross-subdomain acting request passes CORS preflight.
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-TG-Act-As');
   res.setHeader('Access-Control-Max-Age', '600');
 
   if (req.method === 'OPTIONS') {
