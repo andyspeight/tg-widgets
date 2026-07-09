@@ -254,7 +254,7 @@
     var wrap = document.createElement("div");
     var sp = document.createElement("div"); sp.className = "spinner";
     var t = document.createElement("div"); t.className = "big"; t.textContent = "Capturing the page";
-    var s = document.createElement("div"); s.textContent = "Loading it in a real browser and lifting the section faithfully.";
+    var s = document.createElement("div"); s.id = "loadsub"; s.textContent = "Loading it in a real browser and lifting the section faithfully.";
     wrap.appendChild(sp); wrap.appendChild(t); wrap.appendChild(s);
     showEmpty(wrap);
   }
@@ -291,21 +291,29 @@
     var btn = $("capture");
     btn.disabled = true; btn.textContent = "Capturing…";
     loadingState();
+    var ctrl = new AbortController();
+    var t8 = setTimeout(function(){ var e = $("loadsub"); if (e) e.textContent = "Real sites take longer than a demo page. Still working…"; }, 8000);
+    var t25 = setTimeout(function(){ var e = $("loadsub"); if (e) e.textContent = "Still going. A big page can take up to a minute the first time."; }, 25000);
+    var abortT = setTimeout(function(){ ctrl.abort(); }, 75000);
     fetch("/api/studio/capture", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
+      signal: ctrl.signal,
       body: JSON.stringify({ url: url, selector: sel })
     }).then(function(r){
       if (r.status === 401) { errorState("Please sign in to use TG Studio."); toast("Sign in required."); return null; }
-      return r.json().then(function(j){ return { ok: r.ok, j: j }; });
+      return r.json().then(function(j){ return { ok: r.ok, j: j }; })
+        .catch(function(){ return { ok: false, j: { error: "The capture service timed out. Try a smaller section or a simpler page." } }; });
     }).then(function(res){
       if (!res) return;
       if (!res.ok || !res.j || res.j.error) { errorState((res.j && res.j.error) || "The capture failed. Try again."); return; }
       render(res.j);
-    }).catch(function(){
-      errorState("Could not reach the capture service. Please try again.");
+    }).catch(function(err){
+      if (err && err.name === "AbortError") { errorState("That took too long. Try the selector box to grab a smaller part, or a simpler page."); }
+      else { errorState("Could not reach the capture service. Please try again."); }
     }).finally(function(){
+      clearTimeout(t8); clearTimeout(t25); clearTimeout(abortT);
       btn.disabled = false; btn.textContent = "Capture this page";
     });
   }

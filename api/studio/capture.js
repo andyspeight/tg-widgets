@@ -42,8 +42,10 @@ import { safeUrl } from '../_lib/webfetch.js';
 import { requireStudioAccess } from './_gate.js';
 
 // ─── Constants ──────────────────────────────────────────────────────
-const NAV_TIMEOUT_MS = 20_000;   // per-navigation cap, sits under vercel maxDuration:60
-const SETTLE_MS = 600;           // let late fonts / lazy images paint after networkidle
+const NAV_TIMEOUT_MS = 22_000;   // page-load cap, sits under vercel maxDuration:60
+const IDLE_TIMEOUT_MS = 5_000;   // brief, bounded wait for late fonts/lazy images
+const SETTLE_MS = 400;           // final paint settle
+const CAPTURE_EVAL_TIMEOUT_MS = 25_000; // guard the in-page walk on pathological pages
 const MAX_SLICE_BYTES = 1_500_000; // raw capture can be bigger than the 400KB AI-emit cap
 const VIEWPORT = { width: 1440, height: 900 };
 // A normal desktop UA. Best effort at not tripping trivial bot walls; not a disguise.
@@ -132,20 +134,24 @@ export default async function handler(req, res) {
       return r.continue();
     });
 
+    // Load to DOM ready (fast and reliable), then give late fonts/lazy images a
+    // brief, BOUNDED chance to settle. Chatty sites (trackers, long-poll, sockets)
+    // never reach full network idle, so we do not wait for it — we cap the wait.
     try {
-      await page.goto(url, { waitUntil: 'networkidle2', timeout: NAV_TIMEOUT_MS });
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
     } catch {
-      // networkidle2 can time out on chatty sites; a load-state page is still capturable.
-      try { await page.goto(url, { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS }); }
-      catch { await browser.close(); return res.status(502).json({ error: 'That page could not be loaded. Check the link and try again.' }); }
+      await browser.close();
+      return res.status(502).json({ error: 'That page took too long to load. Try a simpler page, or narrow to one section with the selector box.' });
     }
+    try { await page.waitForNetworkIdle({ idleTime: 500, timeout: IDLE_TIMEOUT_MS }); } catch { /* proceed anyway */ }
     await sleep(SETTLE_MS);
 
     const { captureJs, emitJs } = engine();
     await page.addScriptTag({ content: captureJs });
     await page.addScriptTag({ content: emitJs });
 
-    const out = await page.evaluate(async (sel) => {
+    const out = await Promise.race([
+      page.evaluate(async (sel) => {
       const pick = () => {
         if (sel) { const el = document.querySelector(sel); if (el) return el; }
         // No selector: grab the first "section-sized" block near the top
@@ -175,7 +181,9 @@ export default async function handler(req, res) {
       } catch (e) {
         return { error: 'capture-threw:' + (e && e.message ? e.message : 'unknown') };
       }
-    }, selector || null);
+      }, selector || null),
+      new Promise((resolve) => setTimeout(() => resolve({ error: 'capture-timeout' }), CAPTURE_EVAL_TIMEOUT_MS)),
+    ]);
 
     await browser.close();
     browser = null;
