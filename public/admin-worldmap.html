@@ -403,6 +403,9 @@
       <button class="tab" data-tab="suppliers" role="tab" aria-selected="false">
         Suppliers <span class="tab-count" id="tc-suppliers">—</span>
       </button>
+      <button class="tab" data-tab="preview" role="tab" aria-selected="false">
+        Client preview
+      </button>
     </div>
     <div class="panel-head">
       <h2 id="panel-title">Destinations</h2>
@@ -514,6 +517,7 @@
   const API_CONFIG = '/api/admin/map-config';
   const API_CACHE = '/api/admin/map-cache';
   const API_SUPPLIERS = '/api/admin/suppliers';
+  const API_CLIENTS = '/api/admin/clients/list';
 
   const ALLOWED_INTERVALS = [15, 30, 45, 60, 120, 240, 1440];
 
@@ -524,6 +528,11 @@
   let configLoaded = false;
   let SUPPLIERS_MASTER = null;       // Map: `prodType:id` → { name, isPremium }
   let suppliersMasterLoading = false;
+  let CLIENTS = null;                // client list for the preview picker
+  let clientsLoading = false;
+  let PREVIEW = null;                // last preview result
+  let previewClientId = '';
+  let previewLoading = false;
   let CACHE = null;               // cache overview: { countries, summary, lastRunAt }
   const CACHE_OFFERS = new Map(); // cc → fetched offers payload for the expanded view
   const cacheOriginFilter = new Set(); // selected departure airports (multi)
@@ -620,6 +629,7 @@
   function renderTable() {
     if (activeTab === 'cache') { renderCacheTable(); return; }
     if (activeTab === 'suppliers') { renderSuppliersTable(); return; }
+    if (activeTab === 'preview') { renderPreviewTab(); return; }
     const q = filter.trim().toLowerCase();
     let rows = DEST.filter(d => {
       // Tab filter first
@@ -1241,6 +1251,145 @@
     </table>`;
   }
 
+  // ── client preview tab ───────────────────────────────────────
+  // "What would client X actually see?" — loads a client's supplier selection
+  // and, via the server preview mode (which applies the EXACT widget filter),
+  // shows how many stored offers survive per kind and per country, with a loud
+  // warning when a restriction hides most inventory. Turns the Rashid class of
+  // support issue into a pre-flight check.
+  async function loadClients() {
+    if (CLIENTS || clientsLoading) return;
+    clientsLoading = true;
+    try {
+      const r = await fetch(API_CLIENTS, { credentials: 'include' });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const d = await r.json();
+      CLIENTS = (d.clients || []).map(c => ({ id: c.id, name: c.clientName || c.primaryEmail || c.id }));
+    } catch (e) {
+      CLIENTS = [];
+    } finally {
+      clientsLoading = false;
+      if (activeTab === 'preview') renderTable();
+    }
+  }
+
+  async function loadPreview(clientId) {
+    previewClientId = clientId;
+    PREVIEW = null;
+    if (!clientId) { renderTable(); return; }
+    previewLoading = true;
+    renderTable();
+    try {
+      const r = await fetch(`${API_CACHE}?preview=${encodeURIComponent(clientId)}`, { credentials: 'include' });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      PREVIEW = await r.json();
+    } catch (e) {
+      PREVIEW = { error: e.message };
+    } finally {
+      previewLoading = false;
+      renderTable();
+    }
+  }
+
+  const PREVIEW_KIND_LABEL = { PackageHolidays: 'Package holidays', DynamicPackages: 'Dynamic packages', Accommodation: 'Hotels', Flights: 'Flights' };
+
+  // Resolve a filter's id list to readable supplier names via the master list.
+  function filterNames(f, prodType, master) {
+    const key = prodType === 'Packages' ? 'packages' : prodType === 'Accommodation' ? 'accommodation' : 'flights';
+    const ids = (f && f[key]) || [];
+    if (!ids.length) return null;
+    return ids.map(id => { const m = master.get(prodType + ':' + id); return m ? m.name : ('#' + id); });
+  }
+
+  function previewKindTable(p) {
+    const rows = ['PackageHolidays', 'DynamicPackages', 'Accommodation', 'Flights'].map(k => {
+      const s = (p.byKind || {})[k] || { stored: 0, visible: 0 };
+      if (!s.stored) return '';
+      const pct = s.stored ? Math.round((s.visible / s.stored) * 100) : 0;
+      const hidden = s.stored - s.visible;
+      const note = k === 'DynamicPackages' ? '<span class="cc-code" title="Dynamic packages are not tied to one operator, so a supplier selection never hides them">always shown</span>'
+        : (hidden ? `<span class="count-zero">${hidden.toLocaleString('en-GB')} hidden</span>` : '<span class="cc-code">all shown</span>');
+      return `<tr>
+        <td>${esc(PREVIEW_KIND_LABEL[k] || k)}</td>
+        <td class="num"><b>${s.visible.toLocaleString('en-GB')}</b></td>
+        <td class="num">${s.stored.toLocaleString('en-GB')}</td>
+        <td class="num">${pct}%</td>
+        <td>${note}</td>
+      </tr>`;
+    }).join('');
+    return `<table><thead><tr><th>Offer kind</th><th class="num">Visible</th><th class="num">Stored</th><th class="num">Shown</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+
+  function previewWorstCountries(p) {
+    const hit = (p.countries || []).filter(c => c.hidden > 0).slice(0, 12);
+    if (!hit.length) return '';
+    const rows = hit.map(c => `<tr>
+      <td><span class="cc-flag">${flag(c.countryCode)}</span> ${esc(ccName(c.countryCode))} <span class="cc-code">${esc(c.countryCode)}</span></td>
+      <td class="num"><b>${c.visible.toLocaleString('en-GB')}</b></td>
+      <td class="num">${c.stored.toLocaleString('en-GB')}</td>
+      <td class="num"><span class="count-zero">${c.hidden.toLocaleString('en-GB')}</span></td>
+    </tr>`).join('');
+    return `<div style="padding:14px 18px 4px; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.05em">Where they lose the most</div>
+      <table><thead><tr><th>Country</th><th class="num">Visible</th><th class="num">Stored</th><th class="num">Hidden</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+
+  function renderPreviewBody(p, master) {
+    if (p.error) return `<div class="empty-state">Couldn't build the preview.<br><small>${esc(p.error)}</small></div>`;
+    const stored = p.totalStored || 0, visible = p.totalVisible || 0;
+    const pct = stored ? Math.round((visible / stored) * 100) : 0;
+    const hiddenPct = 100 - pct;
+
+    if (!p.restricted) {
+      return `<div class="note-strip" style="margin:16px 18px; background:#ECFDF5; border-color:#A7F3D0; color:#065F46">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span>No supplier restriction set${p.configured ? '' : ' (nothing configured)'} — this client sees <b>all ${stored.toLocaleString('en-GB')}</b> stored offers.</span>
+      </div>` + previewKindTable(p);
+    }
+
+    const warn = hiddenPct >= 40;
+    const headline = `<div style="padding:18px 18px 14px; display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; border-bottom:1px solid var(--border)">
+      <div style="font-size:30px; font-weight:800; letter-spacing:-.02em">${visible.toLocaleString('en-GB')}<span style="font-size:15px; font-weight:600; color:var(--muted)"> of ${stored.toLocaleString('en-GB')} offers visible</span></div>
+      <div style="font-size:13px; font-weight:700; padding:4px 10px; border-radius:999px; background:${warn ? 'var(--err-bg)' : 'var(--ok-bg)'}; color:${warn ? 'var(--err)' : 'var(--ok)'}">${hiddenPct}% hidden by their supplier selection</div>
+    </div>`;
+
+    const warnBanner = warn ? `<div class="note-strip" style="margin:14px 18px; background:var(--err-bg); border-color:#FECACA; color:#991B1B">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span>This selection hides most of the catalogue. Check the operator packages they've switched on actually match the stored inventory — and remember dynamic packages always show.</span>
+    </div>` : '';
+
+    const fp = filterNames(p.filter, 'Packages', master);
+    const fa = filterNames(p.filter, 'Accommodation', master);
+    const ff = filterNames(p.filter, 'Flights', master);
+    const parts = [];
+    if (fp) parts.push(`<b>Package operators:</b> ${esc(fp.join(', '))}`);
+    if (fa) parts.push(`<b>Hotel suppliers:</b> ${esc(fa.join(', '))}`);
+    if (ff) parts.push(`<b>Flight suppliers:</b> ${esc(ff.join(', '))}`);
+    const filterLine = parts.length ? `<div style="padding:10px 18px; font-size:12px; color:var(--muted); border-bottom:1px solid var(--border)">Restricted to — ${parts.join(' · ')}. Any type with nothing switched on shows every supplier.</div>` : '';
+
+    return headline + warnBanner + filterLine + previewKindTable(p) + previewWorstCountries(p);
+  }
+
+  function renderPreviewTab() {
+    if (!CLIENTS && !clientsLoading) loadClients();
+    if (!SUPPLIERS_MASTER && !suppliersMasterLoading) loadSuppliersMaster();
+    const master = SUPPLIERS_MASTER || new Map();
+    const opts = (CLIENTS || []).map(c => `<option value="${esc(c.id)}"${c.id === previewClientId ? ' selected' : ''}>${esc(c.name)}</option>`).join('');
+    const picker = `<div style="padding:14px 18px; border-bottom:1px solid var(--border); background:#FBFCFE; display:flex; align-items:center; gap:10px; flex-wrap:wrap">
+      <span style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.05em">Preview client</span>
+      <select data-act="preview-client" style="font:inherit; font-size:13px; padding:8px 11px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--card); color:var(--text); min-width:220px">
+        <option value="">${clientsLoading ? 'Loading clients…' : 'Choose a client…'}</option>
+        ${opts}
+      </select>
+      <span style="font-size:12px; color:var(--muted)">Shows exactly what this client's widgets serve, given the suppliers switched on in Control.</span>
+    </div>`;
+    let body;
+    if (previewLoading) body = `<div class="empty-state">Working out what they see…</div>`;
+    else if (!previewClientId) body = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><div>Pick a client to see what their widgets show.</div></div>`;
+    else if (PREVIEW) body = renderPreviewBody(PREVIEW, master);
+    else body = '';
+    $('table-host').innerHTML = picker + body;
+  }
+
   // ── modal ────────────────────────────────────────────────────
   function openModal(dest) {
     $('modal-title').textContent = dest ? 'Edit destination' : 'Add destination';
@@ -1352,8 +1501,13 @@
       tab === 'empty' ? 'Destinations polling nothing' :
       tab === 'cache' ? 'Offer cache — what is stored right now' :
       tab === 'suppliers' ? 'Offer cache — by supplier' :
+      tab === 'preview' ? 'Client preview — what a client actually sees' :
       'Destinations';
-    $('search').placeholder = tab === 'suppliers' ? 'Search supplier…' : 'Search country or code…';
+    // The search box only applies to the country/supplier lists.
+    const search = $('search');
+    search.placeholder = tab === 'suppliers' ? 'Search supplier…' : 'Search country or code…';
+    const searchWrap = search.closest('.search');
+    if (searchWrap) searchWrap.style.display = tab === 'preview' ? 'none' : '';
     renderTable();
   }
 
@@ -1436,8 +1590,14 @@
 
   // ── events ───────────────────────────────────────────────────
   $('btn-refresh').addEventListener('click', () => {
+    if (activeTab === 'preview') { CLIENTS = null; if (previewClientId) loadPreview(previewClientId); else renderTable(); return; }
     if (activeTab === 'cache' || activeTab === 'suppliers') loadCache();
     else load();
+  });
+  // Client picker on the preview tab (delegated — table-host is re-rendered).
+  $('table-host').addEventListener('change', (e) => {
+    const sel = e.target.closest('[data-act="preview-client"]');
+    if (sel) loadPreview(sel.value);
   });
   $('btn-add').addEventListener('click', () => openModal(null));
   $('btn-rebuild-all').addEventListener('click', (e) => {

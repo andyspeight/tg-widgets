@@ -59,6 +59,8 @@ async function loadCountryOffers(cc) {
 }
 
 const CC_RE = /^[A-Z]{2}$/;
+const REC_RE = /^rec[A-Za-z0-9]{14}$/;
+const CLIENT_SUPPLIERS_PREFIX = 'suppliers:client:';
 const DEFAULT_LIMIT = 200;
 const MAX_LIMIT = 500;
 const OFFER_TYPES = ['Packages', 'Accommodation', 'Flights'];
@@ -92,6 +94,28 @@ function packageKind(o) {
   const f = o.flightSid, a = o.accommodationSid;
   if (Number.isFinite(f) && Number.isFinite(a) && f !== a) return PKG_DYNAMIC;
   return PKG_HOLIDAY;
+}
+
+/** Would this offer survive a client's supplier selection? Mirrors EXACTLY the
+ *  widget filter (widget-offers supplierAllows / widget-worldmap mapSupplierAllows):
+ *  empty list for a type = show all; missing sid = keep; dynamic packages bypass
+ *  the operator whitelist; only operator packages are gated on the operator id.
+ *  f is { flights:[ids], accommodation:[ids], packages:[ids] }. */
+function offerVisible(o, f) {
+  const type = OFFER_TYPES.includes(o.type) ? o.type : 'Packages';
+  if (type === 'Flights') {
+    if (!f.flights.length) return true;
+    return Number.isFinite(o.flightSid) ? f.flights.includes(o.flightSid) : true;
+  }
+  if (type === 'Accommodation') {
+    if (!f.accommodation.length) return true;
+    return Number.isFinite(o.accommodationSid) ? f.accommodation.includes(o.accommodationSid) : true;
+  }
+  if (!f.packages.length) return true;
+  if (packageKind(o) === PKG_DYNAMIC) return true; // dynamic packages always show
+  const sid = Number.isFinite(o.flightSid) ? o.flightSid
+    : (Number.isFinite(o.accommodationSid) ? o.accommodationSid : null);
+  return sid == null ? true : f.packages.includes(sid);
 }
 
 /** Accumulate one offer into a stats bucket (count, cheapest pp, oldest/newest
@@ -241,6 +265,69 @@ export default async function handler(req, res) {
     }
 
     const q = req.query || {};
+
+    // ── GET ?preview=<clientId>: what a client's supplier selection shows ──
+    // Reads the client's selection from Redis, resolves it to the three id
+    // lists (same split as widget-config's supplierFilterForClient), then walks
+    // every stored offer applying the EXACT widget filter and tallies
+    // visible-vs-stored per package kind / type and per country. Turns "why is
+    // my client seeing nothing" into a glance.
+    if (q.preview) {
+      const clientId = String(q.preview).trim();
+      if (!REC_RE.test(clientId)) {
+        return res.status(400).json({ ok: false, error: 'preview must be a client record id (rec…)' });
+      }
+      const rec = await getJson(CLIENT_SUPPLIERS_PREFIX + clientId);
+      const enabled = rec && Array.isArray(rec.enabled) ? rec.enabled : [];
+      const f = { flights: [], accommodation: [], packages: [] };
+      for (const k of enabled) {
+        const i = String(k).indexOf(':');
+        if (i < 1) continue;
+        const id = parseInt(String(k).slice(i + 1), 10);
+        if (!Number.isFinite(id)) continue;
+        const prod = String(k).slice(0, i);
+        if (prod === 'Flights') f.flights.push(id);
+        else if (prod === 'Accommodation') f.accommodation.push(id);
+        else if (prod === 'Packages') f.packages.push(id);
+      }
+      const allKeys = await keys(`${COUNTRY_PREFIX}*`);
+      const ccs = allKeys
+        .map((k) => String(k).slice(COUNTRY_PREFIX.length).toUpperCase())
+        .filter((cc) => CC_RE.test(cc));
+      const KINDS = ['PackageHolidays', 'DynamicPackages', 'Accommodation', 'Flights'];
+      const byKind = {};
+      for (const k of KINDS) byKind[k] = { stored: 0, visible: 0 };
+      const countryRows = [];
+      let totalStored = 0, totalVisible = 0;
+      await pooled(ccs, async (cc) => {
+        const stored = await loadCountryOffers(cc);
+        let cStored = 0, cVisible = 0;
+        for (const o of stored.offers) {
+          if (!o) continue;
+          const type = OFFER_TYPES.includes(o.type) ? o.type : 'Packages';
+          const kind = type === 'Packages' ? packageKind(o) : type;
+          const vis = offerVisible(o, f);
+          (byKind[kind] || (byKind[kind] = { stored: 0, visible: 0 })).stored += 1;
+          if (vis) byKind[kind].visible += 1;
+          cStored += 1; if (vis) cVisible += 1;
+        }
+        totalStored += cStored; totalVisible += cVisible;
+        if (cStored) countryRows.push({ countryCode: cc, stored: cStored, visible: cVisible, hidden: cStored - cVisible });
+      });
+      countryRows.sort((a, b) => b.hidden - a.hidden || b.stored - a.stored);
+      return res.status(200).json({
+        ok: true,
+        mode: 'preview',
+        clientId,
+        configured: !!rec,
+        restricted: !!(f.flights.length || f.accommodation.length || f.packages.length),
+        filter: f,
+        totalStored,
+        totalVisible,
+        byKind,
+        countries: countryRows,
+      });
+    }
 
     // ── GET ?country=XX: one country's stored offers ──────────────────────
     // Optional ?type=Packages|Accommodation|Flights and ?origins=LGW,DUB
