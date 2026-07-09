@@ -269,14 +269,47 @@ export function describeUnclassifiedItem(item) {
 }
 
 /**
- * PII-safe structural fingerprint of the whole order (key names only, no
- * values) — logged once when an order has items we could not extract detail
+ * PII-safe recursive shape of a value: emits KEY NAMES and TYPES only, never
+ * values, so guest names / emails / references never reach the log. Arrays are
+ * reported as their length plus the shape of their first element. Depth and
+ * breadth are capped so a pathological payload can't blow the log up.
+ */
+export function describeStructure(value, maxDepth = 6, _depth = 0) {
+  if (value === null) return 'null';
+  if (value === undefined) return 'undefined';
+  if (Array.isArray(value)) {
+    if (value.length === 0) return 'array(0)';
+    return { __array: value.length, __of: _depth < maxDepth ? describeStructure(value[0], maxDepth, _depth + 1) : '…' };
+  }
+  const t = typeof value;
+  if (t !== 'object') return t; // 'string' | 'number' | 'boolean' — type, not value
+  if (_depth >= maxDepth) return '{…}';
+  const out = {};
+  const keys = Object.keys(value);
+  let n = 0;
+  for (const k of keys) {
+    if (n++ >= 40) { out.__more = keys.length - 40; break; }
+    out[k] = describeStructure(value[k], maxDepth, _depth + 1);
+  }
+  return out;
+}
+
+/**
+ * PII-safe structural fingerprint of the whole order (key names + types only,
+ * no values) — logged once when an order has items we could not extract detail
  * for, so we can see whether the hotel/flight detail lives at the order level
- * (e.g. a separate products/hotels array) rather than on the item.
+ * (e.g. under `data` or `sources`) rather than on the item.
  */
 export function describeOrderShape(raw) {
   const orderKeys = (raw && typeof raw === 'object' && !Array.isArray(raw)) ? Object.keys(raw).slice(0, 60) : [];
   const items = raw && Array.isArray(raw.items) ? raw.items : [];
   const firstItemKeys = items[0] && typeof items[0] === 'object' ? Object.keys(items[0]).slice(0, 60) : [];
-  return { orderKeys, itemCount: items.length, firstItemKeys };
+  return {
+    orderKeys,
+    itemCount: items.length,
+    firstItemKeys,
+    // Deep shape of the two containers that might hold the real detail.
+    dataShape: describeStructure(raw && raw.data, 7),
+    sourcesShape: describeStructure(raw && raw.sources, 7),
+  };
 }

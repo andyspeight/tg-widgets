@@ -1017,7 +1017,7 @@ function trimOrder(raw) {
   // names (no values) once so we can see where Travelify actually put it.
   if (items.some(it => it && it.product && !it.accommodation && !it.flights
     && !it.airportExtras && !it.transfers && !it.carRental && !it.ticketsAttractions && !it.extras)) {
-    console.warn('[retrieve-order] order/item shape (detail missing)', describeOrderShape(raw));
+    console.warn('[retrieve-order] order/item shape (detail missing)', JSON.stringify(describeOrderShape(raw)).slice(0, 8000));
   }
 
   // Compute a summary derived from the items. The widget uses these to

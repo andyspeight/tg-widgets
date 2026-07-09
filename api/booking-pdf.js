@@ -575,7 +575,7 @@ function trimOrder(raw) {
   for (const it of items) delete it.__sniffed;
   if (items.some(it => it && it.product && !it.accommodation && !it.flights
     && !it.airportExtras && !it.transfers && !it.carRental && !it.ticketsAttractions && !it.extras)) {
-    console.warn('[booking-pdf] order/item shape (detail missing)', describeOrderShape(raw));
+    console.warn('[booking-pdf] order/item shape (detail missing)', JSON.stringify(describeOrderShape(raw)).slice(0, 8000));
   }
   const paidToDate = (() => {
     const ps = Array.isArray(raw.payments) ? raw.payments : [];
