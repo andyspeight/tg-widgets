@@ -106,6 +106,25 @@ check('sniff: tickets shape → TicketsAttractions',
   sniffProductFromShape({ name: 'Desert Safari', ticketType: 'Tours', options: [] }) === 'TicketsAttractions');
 check('sniff: unknown shape → null', sniffProductFromShape({ policyNumber: 'X', cover: 'Gold' }) === null);
 
+// Packages ambiguity resolved by SHAPE, not label alone: a generic "Holiday"
+// label over a hotel-only payload must NOT invent phantom flights.
+check('ambiguous "Holiday" + hotel-only payload → Accommodation (not Packages)',
+  resolveProductType('Holiday', hotelData) === 'Accommodation');
+check('ambiguous "Holiday" + flight-only payload → Flights (not Packages)',
+  resolveProductType('Holiday', flightData) === 'Flights');
+check('"Holiday" + genuine hotel+flight payload → Packages',
+  resolveProductType('Holiday', { ...hotelData, routes: flightData.routes }) === 'Packages');
+check('"Holiday" with no payload → Packages (label-only, unchanged)',
+  resolveProductType('Holiday', null) === 'Packages');
+// A single-product label over a genuinely bundled payload keeps the bundle.
+check('label "Hotel" but payload bundles flights → Packages (no dropped flights)',
+  resolveProductType('Hotel', { ...hotelData, routes: flightData.routes }) === 'Packages');
+
+// classifyItem reports HOW it resolved, for the genuine-before-sniffed ordering.
+check('classifyItem: exact label → resolvedBy exact', classifyItem({ product: 'Accommodation', dataObject: hotelData }).resolvedBy === 'exact');
+check('classifyItem: alias label → resolvedBy alias', classifyItem({ product: 'Hotel', dataObject: hotelData }).resolvedBy === 'alias');
+check('classifyItem: unknown label recovered by shape → resolvedBy sniff', classifyItem({ product: 'GroupBooking', dataObject: hotelData }).resolvedBy === 'sniff');
+
 // ===== 3. coerceDataObject: strings, alternate keys, junk =====
 check('coerce: object passed through', coerceDataObject({ dataObject: hotelData }) === hotelData);
 check('coerce: JSON string parsed',
@@ -152,6 +171,21 @@ check('CANONICAL_PRODUCTS has all eight types', CANONICAL_PRODUCTS.length === 8)
     { product: 'Flights', flights: { travellers: [{ title: 'Miss', firstname: 'Alexandra', surname: 'Stephenson' }] } },
   ];
   check('aggregate: overlapping person de-duped', aggregateTravellers(items).length === 1);
+}
+{
+  // Regression guard for the Packages case flagged in review: the hotel record
+  // carries the person WITHOUT a title, the flight record carries the SAME
+  // person WITH a title. Must list them ONCE, keeping the hotel record's
+  // type/position but borrowing the flight's title — not twice.
+  const pkgItem = {
+    product: 'Packages',
+    accommodation: { guests: [{ type: 'Lead', firstname: 'Jane', surname: 'Doe' }] },
+    flights: { travellers: [{ type: 'Adult', title: 'Miss', firstname: 'Jane', surname: 'Doe' }] },
+  };
+  const t = aggregateTravellers([pkgItem]);
+  check('aggregate: title-divergent same person listed once (no duplicate)', t.length === 1);
+  check('aggregate: borrowed the title from the flight record', t[0].title === 'Miss');
+  check('aggregate: kept the hotel record type/position (Lead)', t[0].type === 'Lead');
 }
 
 // ===== 6. End-to-end: an ET90803-shaped booking renders its trip + titles =====

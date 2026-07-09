@@ -119,31 +119,57 @@ export function sniffProductFromShape(d) {
 }
 
 /**
- * Resolve a raw Travelify product label onto our canonical set.
- *   1. exact canonical match (fast path — behaviour unchanged),
- *   2. a known label variant,
- *   3. a structural sniff of the payload (catches never-seen labels).
- * Returns null when it cannot be classified any of those ways.
+ * Resolve a raw label + payload onto a canonical product, recording HOW it was
+ * resolved so callers can prefer confident matches over shape guesses.
+ *   1. 'exact'  — the label is already canonical (fast path, authoritative),
+ *   2. 'alias'  — a known label variant,
+ *   3. 'sniff'  — a structural read of the payload (catches never-seen labels).
+ *
+ * The Packages ambiguity is resolved by SHAPE, not the label alone: a generic
+ * word like 'Holiday' must not invent a bundled hotel+flight when the payload
+ * is only one of them (which would set a phantom hasFlights/hasAccommodation
+ * downstream), and a single-product label must not drop a genuinely bundled
+ * component. Other label/shape disagreements keep the (more intentional) label.
  */
-export function resolveProductType(rawProduct, dataObject) {
+function resolveInternal(rawProduct, dataObject) {
   const raw = String(rawProduct == null ? '' : rawProduct).trim();
-  if (CANONICAL_SET.has(raw)) return raw;
-  const key = normLabel(raw);
-  if (PRODUCT_ALIASES[key]) return PRODUCT_ALIASES[key];
-  return sniffProductFromShape(dataObject);
+  if (CANONICAL_SET.has(raw)) return { type: raw, by: 'exact' };
+
+  const alias = PRODUCT_ALIASES[normLabel(raw)] || null;
+  const sniff = sniffProductFromShape(dataObject);
+
+  if (alias) {
+    if (alias === 'Packages' && sniff && sniff !== 'Packages') return { type: sniff, by: 'sniff' };
+    if (alias !== 'Packages' && sniff === 'Packages') return { type: 'Packages', by: 'sniff' };
+    return { type: alias, by: 'alias' };
+  }
+  if (sniff) return { type: sniff, by: 'sniff' };
+  return { type: null, by: null };
 }
 
 /**
- * Coerce + classify in one call. Returns { productType, dataObject, rawProduct }.
- * productType is null when the item can't be classified at all.
+ * Resolve a raw Travelify product label onto our canonical set (or null).
+ */
+export function resolveProductType(rawProduct, dataObject) {
+  return resolveInternal(rawProduct, dataObject).type;
+}
+
+/**
+ * Coerce + classify in one call.
+ * Returns { productType, dataObject, rawProduct, resolvedBy }.
+ *   - productType is null when the item can't be classified at all.
+ *   - resolvedBy is 'exact' | 'alias' | 'sniff' | null — callers use it to keep
+ *     genuine (exact/alias) matches ahead of shape-sniffed ones so a mystery
+ *     item can't displace a real hotel/flight of the same type.
  */
 export function classifyItem(item) {
   const dataObject = coerceDataObject(item);
-  const productType = resolveProductType(item && item.product, dataObject);
+  const { type, by } = resolveInternal(item && item.product, dataObject);
   return {
-    productType,
+    productType: type,
     dataObject,
     rawProduct: item && item.product != null ? String(item.product) : null,
+    resolvedBy: by,
   };
 }
 
@@ -160,8 +186,15 @@ export function classifyItem(item) {
  * customerTitle ("Mr" for a party of Miss/Ms). De-dupes on title + name.
  */
 export function aggregateTravellers(items) {
-  const seen = new Set();
-  const out = [];
+  // De-dupe on the PERSON (first + surname), NOT title + name. The same
+  // passenger routinely appears on both the hotel record (often title-less)
+  // and the flight record (airline-required title), so keying on the title
+  // too would list them twice — once without a title, once with. Keep the
+  // first sighting (so the hotel's 'Lead' type/position wins) but fill in a
+  // title from a later record if the first one lacked one.
+  const byPerson = new Map();
+  const order = [];
+  const titled = (t) => !!(t && t.title && String(t.title).trim());
   for (const item of (Array.isArray(items) ? items : [])) {
     if (!item || typeof item !== 'object') continue;
     const lists = [
@@ -176,15 +209,23 @@ export function aggregateTravellers(items) {
     for (const list of lists) {
       for (const t of list) {
         if (!t || typeof t !== 'object') continue;
-        const key = `${(t.title || '').toLowerCase()}|${(t.firstname || '').toLowerCase()}|${(t.surname || '').toLowerCase()}`;
-        if (!seen.has(key) && (t.firstname || t.surname)) {
-          seen.add(key);
-          out.push(t);
+        const fn = (t.firstname || '').trim().toLowerCase();
+        const sn = (t.surname || '').trim().toLowerCase();
+        if (!fn && !sn) continue;
+        const key = `${fn}|${sn}`;
+        const existing = byPerson.get(key);
+        if (!existing) {
+          byPerson.set(key, t);
+          order.push(key);
+        } else if (!titled(existing) && titled(t)) {
+          // Upgrade in place: keep the first record's type/position, borrow
+          // the missing title from this later, titled sighting.
+          byPerson.set(key, { ...existing, title: t.title });
         }
       }
     }
   }
-  return out;
+  return order.map((k) => byPerson.get(k));
 }
 
 /**

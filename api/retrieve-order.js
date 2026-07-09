@@ -903,7 +903,7 @@ function trimItem(item) {
   // lost ALL its detail while its price still counted toward the total
   // (Exclusively Travel ET90803: a hotel + flights showed as a £4,203
   // balance with no trip). See api/_lib/travelify-items.js.
-  const { productType, dataObject } = classifyItem(item);
+  const { productType, dataObject, resolvedBy } = classifyItem(item);
 
   const out = {
     id: safeNum(item.id),
@@ -958,6 +958,12 @@ function trimItem(item) {
     console.warn('[retrieve-order] unclassified order item', describeUnclassifiedItem(item));
   }
 
+  // Mark items recovered purely by shape sniff (unfamiliar label) so trimOrder
+  // can keep genuine (exact/alias) matches ahead of them — a mystery
+  // hotel-shaped add-on must not displace the real hotel in items.find().
+  // Stripped before the order is returned.
+  if (resolvedBy === 'sniff') out.__sniffed = true;
+
   return out;
 }
 
@@ -997,6 +1003,14 @@ function trimOrder(raw) {
   const items = Array.isArray(raw.items)
     ? raw.items.slice(0, 8).map(trimItem).filter(Boolean)
     : [];
+
+  // Genuine product matches (exact label or known alias) take precedence over
+  // shape-sniffed ones, so a mystery hotel/flight-shaped item can't displace
+  // the real hotel/flight in consumers that pick "the" item via items.find().
+  // Stable sort keeps original order within each group; sniffed items were
+  // previously dropped entirely, so ordering them last is strictly additive.
+  items.sort((a, b) => (a.__sniffed ? 1 : 0) - (b.__sniffed ? 1 : 0));
+  for (const it of items) delete it.__sniffed;
 
   // Compute a summary derived from the items. The widget uses these to
   // render the trip header, the countdown, and the totals row without

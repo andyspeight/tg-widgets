@@ -485,7 +485,7 @@ function trimItem(item) {
   // variants, and sniffs the shape as a last resort. Mirrors
   // /api/retrieve-order so the PDF matches the widget. See
   // api/_lib/travelify-items.js.
-  const { productType, dataObject } = classifyItem(item);
+  const { productType, dataObject, resolvedBy } = classifyItem(item);
   const out = {
     id: safeNum(item.id), status: safeStr(item.status, 30),
     product: productType || safeStr(item.product, 30),
@@ -522,6 +522,9 @@ function trimItem(item) {
   } else {
     console.warn('[booking-pdf] unclassified order item', describeUnclassifiedItem(item));
   }
+  // Mark shape-sniffed items so trimOrder can keep genuine matches ahead of
+  // them (stripped before rendering). Mirrors /api/retrieve-order.
+  if (resolvedBy === 'sniff') out.__sniffed = true;
   return out;
 }
 
@@ -565,6 +568,11 @@ function computeSummary(items) {
 function trimOrder(raw) {
   if (!raw || typeof raw !== 'object') return null;
   const items = Array.isArray(raw.items) ? raw.items.slice(0, 8).map(trimItem).filter(Boolean) : [];
+  // Keep genuine (exact/alias) product matches ahead of shape-sniffed ones so
+  // a mystery item can't displace the real hotel/flight in items.find().
+  // Stable; sniffed items were previously dropped so this is strictly additive.
+  items.sort((a, b) => (a.__sniffed ? 1 : 0) - (b.__sniffed ? 1 : 0));
+  for (const it of items) delete it.__sniffed;
   const paidToDate = (() => {
     const ps = Array.isArray(raw.payments) ? raw.payments : [];
     const sum = ps.filter(p => p && String(p.status || '').toLowerCase() === 'success')
