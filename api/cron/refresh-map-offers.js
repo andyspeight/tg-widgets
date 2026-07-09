@@ -830,7 +830,20 @@ async function rebuildSummary(rows) {
     if (!last || !last.at || (nowT - Date.parse(last.at)) >= HISTORY_MIN_GAP_MS) {
       let holidays = 0, dynamic = 0;
       for (const o of all) { if (packageKindOf(o) === 'DynamicPackages') dynamic++; else holidays++; }
-      arr.push({ at: payload.generatedAt, packages: all.length, holidays, dynamic, countries: countries.length });
+      // Count the hotels/flights pool too — but read those keys ONLY here (past
+      // the gate), so the common per-sweep summary rebuild pays nothing extra.
+      let hotels = 0, flights = 0;
+      for (const cc of allCountryCodes) {
+        const x = await getJson(extraKey(cc));
+        if (x && Array.isArray(x.offers)) {
+          for (const o of x.offers) {
+            if (!o) continue;
+            if (o.type === 'Flights') flights++;
+            else if (o.type === 'Accommodation') hotels++;
+          }
+        }
+      }
+      arr.push({ at: payload.generatedAt, packages: all.length, holidays, dynamic, hotels, flights, countries: countries.length });
       while (arr.length > HISTORY_MAX) arr.shift();
       await setJson(HISTORY_KEY, arr);
     }
