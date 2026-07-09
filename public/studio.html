@@ -133,9 +133,10 @@
     <div class="banner">
       <span aria-hidden="true">✨</span>
       <div>
-        <b>Turn a website you love into something you own.</b> Paste a link and TG Studio captures the section
-        faithfully, then you make it yours and drop it into your site. Use it on your own sites, a client or
-        prospect site with permission, or a well known reference site as a live demo.
+        <b>Turn a website you love into something you own.</b> Paste a link, TG Studio captures the section
+        faithfully, you make it yours, then paste it into your site as one block (a Duda HTML widget, or
+        anywhere). Use it on your own sites, a client or prospect site with permission, or a well known
+        reference site as a live demo.
       </div>
     </div>
 
@@ -180,10 +181,10 @@
             <button id="tab-code" aria-pressed="false">Code</button>
           </div>
           <div class="spacer"></div>
-          <button class="btn secondary" id="copy" disabled>Copy code</button>
-          <button class="btn secondary" id="download" disabled>Download HTML</button>
+          <button class="btn secondary" id="copy" disabled title="One block to paste into a Duda HTML widget or any site">Copy embed</button>
+          <button class="btn secondary" id="download" disabled title="A self-contained .html file">Download .html</button>
           <button class="btn secondary" id="refine" disabled title="Refine with AI">Refine with AI</button>
-          <button class="btn secondary" id="toduda" disabled title="Build a Duda widget sheet">Send to Duda</button>
+          <button class="btn secondary" id="toduda" disabled title="For hand-building a native widget in Duda's Widget Builder">Duda widget sheet</button>
         </div>
         <div class="stage" id="stage">
           <div class="empty" id="empty">
@@ -243,6 +244,12 @@
       "<style>*{box-sizing:border-box}html,body{margin:0;background:#fff}" + css + "</style>" +
       "</head><body>" + html + "</body></html>";
   }
+  // The paste-ready embed: one self-contained block for a Duda HTML widget or any site.
+  function embedCode(){
+    if (!state.slice) return "";
+    return "<!-- Captured with TG Studio. Paste this whole block into a Duda HTML widget, or any site's HTML block. -->\n" +
+      "<style>\n" + (state.slice.css || "") + "\n</style>\n" + (state.slice.html || "");
+  }
 
   function showEmpty(node){
     $("empty").innerHTML = "";
@@ -271,7 +278,7 @@
     if (!state.slice) return;
     $("empty").hidden = true;
     $("frame").srcdoc = previewDoc(state.slice);
-    $("code").textContent = "<style>\n" + (state.slice.css || "") + "\n</style>\n\n" + (state.slice.html || "");
+    $("code").textContent = embedCode();
     $("copy").disabled = false; $("download").disabled = false; $("refine").disabled = false;
     $("toduda").disabled = false;
     $("refineInput").disabled = false; $("applyRefine").disabled = false;
@@ -325,10 +332,10 @@
   // ── Copy + Download (client side, no backend) ──
   $("copy").addEventListener("click", function(){
     if (!state.slice) return;
-    var text = "<style>\n" + (state.slice.css || "") + "\n</style>\n\n" + (state.slice.html || "");
+    var text = embedCode();
     (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(text) : Promise.reject())
-      .then(function(){ toast("Code copied."); })
-      .catch(function(){ toast("Copy failed. Select the code and copy it."); });
+      .then(function(){ toast("Embed copied. Paste it into a Duda HTML widget, or any site's HTML block."); })
+      .catch(function(){ toast("Copy failed. Open the Code tab, select all and copy."); });
   });
   $("download").addEventListener("click", function(){
     if (!state.slice) return;
@@ -339,7 +346,7 @@
     a.download = "tg-studio-capture.html";
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
-    toast("Downloaded.");
+    toast("Downloaded a self-contained .html file.");
   });
 
   // ── Refine loop (make it yours) ──
@@ -393,7 +400,7 @@
     a.download = name + "-duda-buildsheet.json";
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
-    toast("Duda build sheet ready. Downloaded.");
+    toast("Duda widget sheet downloaded. Use it to hand-build a native widget in Duda's Widget Builder.");
   });
 })();
 </script>
