@@ -121,7 +121,28 @@
       }
     }
 
+    // Cache-bust GET /api/widget-config so an editor reload always shows the
+    // freshest config. A live widget's PUBLIC config is CDN-cached
+    // (s-maxage=300), and Vercel's edge can serve that cached copy to an
+    // AUTHENTICATED editor request too — a Cookie does not bypass the edge
+    // cache. So after a successful save, the reopened editor was handed the OLD
+    // config and the change "didn't stick". A unique URL forces a fresh fetch.
+    // Scope is deliberately tiny: only GET /api/widget-config, only same-origin,
+    // and only on editor pages (they load this shell). Public embeds on
+    // customer sites never run this shell, so their config stays CDN-cached.
+    function tgseBustConfigGet(input, init) {
+      try {
+        var method = String((init && init.method) || (input && input.method) || 'GET').toUpperCase();
+        if (method !== 'GET' || typeof input !== 'string') return input;
+        var url = new URL(input, window.location.href);
+        if (url.origin !== window.location.origin || url.pathname !== '/api/widget-config') return input;
+        if (!url.searchParams.has('_ts')) url.searchParams.set('_ts', String(Date.now()));
+        return url.toString();
+      } catch (e) { return input; }
+    }
+
     const wrapped = function tgseFetch(input, init) {
+      input = tgseBustConfigGet(input, init);
       if (shouldAttachCredentials(input)) {
         // Respect a caller-specified credentials value (including 'omit'
         // if someone deliberately opts out).
