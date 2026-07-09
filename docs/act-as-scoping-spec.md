@@ -203,9 +203,12 @@ repo answer above.
 
 - Phase 0 (done, 8 July 2026): loud interim banner on every staff surface so
   act-as can never again be silent while we build the real fix.
-- Phase 1: add the header overlay to `requireAuth` (additive, nothing removed),
-  point the banner at the new signal. Nothing breaks because no tool sends the
-  header yet.
+- Phase 1 (done, 8 July 2026): the header overlay is in `requireAuth`, plus the
+  grant module (`api/_lib/auth/actas.js`) and the staff-only mint endpoint
+  (`POST /api/auth/act-as/start`). Additive and dormant: no tool sends the
+  header yet, so nothing changed in practice. Covered by `npm run test:actas`
+  (24 checks). The banner is deliberately NOT repointed yet, so it keeps working
+  off the current global-switch signal until phase 2.
 - Phase 2: switch `staff-switcher.js` and the shell to the per-tab grant. Keep
   the global switch for genuine members only.
 - Phase 3: roll the header attach and banner into each other tool that shares
