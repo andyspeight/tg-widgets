@@ -28,6 +28,11 @@
     "api/slice-emit.js": {
       "maxDuration": 300
     },
+    "api/studio/capture.js": {
+      "memory": 1024,
+      "maxDuration": 60,
+      "includeFiles": "{node_modules/@sparticuz/chromium/**,tg-slicer/capture.js,tg-slicer/emit-local.js}"
+    },
     "api/brain/run-gate.js": {
       "maxDuration": 300
     },
@@ -499,6 +504,10 @@
     {
       "source": "/screenshot-to-code",
       "destination": "/screenshot-to-code.html"
+    },
+    {
+      "source": "/studio",
+      "destination": "/studio.html"
     },
     {
       "source": "/editor-test",
@@ -1325,7 +1334,7 @@
       ]
     },
     {
-      "source": "/(editor|editor-[a-z0-9-]+|inbox-enquiry|admin-worldmap|screenshot-to-code)(\\.html)?",
+      "source": "/(editor|editor-[a-z0-9-]+|inbox-enquiry|admin-worldmap|screenshot-to-code|studio)(\\.html)?",
       "headers": [
         {
           "key": "X-Frame-Options",
