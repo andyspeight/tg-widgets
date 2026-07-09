@@ -53,6 +53,24 @@ function normaliseBoard(s) {
   return String(s || '').toLowerCase().replace(/[^a-z]/g, '');
 }
 
+// Serve-time stale guard — the same expiry rules the cron purges on (past
+// travel date, or fetched more than 70 hours ago; keep in step with the cron's
+// MAX_AGE_HOURS and the offer-box read guard in cached-offers.js). The cron
+// deletes stale offers on its own cadence, but between runs an offer can cross
+// the 70-hour/past-date line while still stored, so the read side enforces the
+// rules independently — nothing stale ever reaches the map, matching the offer
+// boxes and the admin's "never served to widgets" promise.
+const STALE_AGE_MS = 70 * 60 * 60 * 1000;
+function isServable(o, nowMs) {
+  const td = Date.parse(o.outboundDate || o.checkinDate || '');
+  if (Number.isFinite(td) && td < nowMs) return false;
+  if (o.fetchedAt) {
+    const f = Date.parse(o.fetchedAt);
+    if (Number.isFinite(f) && (nowMs - f) > STALE_AGE_MS) return false;
+  }
+  return true;
+}
+
 // Dynamic package (flight + hotel from two different suppliers) vs operator
 // package (one tour operator). packageType is authoritative; sid inequality is
 // the fallback. Mirrors the widget/admin classifier.
@@ -96,6 +114,13 @@ export default async function handler(req, res) {
 
     const stored = await getJson(countryKey(country));
     let offers = stored && Array.isArray(stored.offers) ? stored.offers.slice() : [];
+
+    // Never serve a stale offer, even in the window between cron purges. Same
+    // rules the cron and the offer-box read guard use (past travel date or
+    // fetched > 70h ago). Applied before facets/count so nothing stale can
+    // pollute the filter UI or the totals either.
+    const nowMs = Date.now();
+    offers = offers.filter(o => isServable(o, nowMs));
 
     // The map's deal cards are package deals. The country keys now also hold
     // Accommodation and Flights offers (swept for the offer-box widgets), so
