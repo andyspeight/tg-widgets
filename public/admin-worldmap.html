@@ -825,11 +825,82 @@
     const staleNote = staleTotal
       ? ` · <span class="stale-tag" title="Offers past their travel date or fetched more than 70 hours ago, still stored. The next cron run deletes them; they are never served to widgets.">${staleTotal.toLocaleString('en-GB')} stale</span>`
       : '';
-    return `<div style="padding:10px 18px; font-size:12px; color:var(--muted); border-bottom:1px solid var(--border); background:#FBFCFE">
-      <b style="color:var(--text)">${total.toLocaleString('en-GB')}</b> offers stored across
+    return `<div style="padding:10px 18px; font-size:12px; color:var(--muted); border-bottom:1px solid var(--border); background:#FBFCFE; display:flex; align-items:center; gap:8px; flex-wrap:wrap">
+      <span><b style="color:var(--text)">${total.toLocaleString('en-GB')}</b> offers stored across
       <b style="color:var(--text)">${countries.length}</b> countries ·
-      map summary rebuilt <b style="color:var(--text)">${esc(gen)}</b>${staleNote}${redisNote}
-    </div>` + lastSweepLine() + typeTabsRow(countries) + originChipsRow();
+      map summary rebuilt <b style="color:var(--text)">${esc(gen)}</b>${staleNote}${redisNote}</span>
+      <button class="btn btn--sm btn--ghost" data-act="export-cache-csv" style="margin-left:auto" title="Download this country summary as CSV">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        CSV
+      </button>
+    </div>` + cacheHealthLine() + lastSweepLine() + typeTabsRow(countries) + originChipsRow();
+  }
+
+  // Coverage/health at a glance for the active type view: how many cached
+  // countries carry this type, how many are drifting toward the 70h expiry
+  // cliff. Uses data already in the overview — surfaces the problems.
+  function cacheHealthLine() {
+    const cs = (CACHE && CACHE.countries) || [];
+    if (!cs.length) return '';
+    const type = cacheTypeTab;
+    const now = Date.now();
+    let withType = 0, empties = 0, cliff = 0;
+    for (const c of cs) {
+      const st = cacheStatsFor(c, type);
+      if (st.count > 0) withType += 1; else { empties += 1; continue; }
+      const oldest = st.oldest || c.oldestFetchedAt;
+      if (oldest) { const age = (now - Date.parse(oldest)) / 3600000; if (age > 60) cliff += 1; }
+    }
+    const label = type === 'All' ? 'offers' : ((CACHE_TYPE_LABELS[type] || type).toLowerCase());
+    const emptyNote = (type !== 'All' && empties)
+      ? ` · <span style="color:var(--warn)">${empties} cached ${empties === 1 ? 'country has' : 'countries have'} no ${esc(label)}</span>` : '';
+    const cliffNote = cliff
+      ? ` · <span style="color:var(--warn)" title="Oldest ${esc(label)} offer is over 60h old — offers expire 70h after they are fetched, so these thin out soon unless re-polled">${cliff} drifting past 60h</span>` : '';
+    if (!emptyNote && !cliffNote) return '';
+    return `<div style="padding:8px 18px; font-size:12px; color:var(--muted); border-bottom:1px solid var(--border); background:#FBFCFE">
+      Coverage — <b style="color:var(--text)">${withType}</b> of ${cs.length} cached countries have ${esc(label)}${emptyNote}${cliffNote}
+    </div>`;
+  }
+
+  // ── CSV export ───────────────────────────────────────────────
+  function downloadCsv(filename, rows) {
+    const q = (v) => { const s = String(v == null ? '' : v); return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    const csv = rows.map(r => r.map(q).join(',')).join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 100);
+  }
+  function cacheCsv() {
+    const cs = (CACHE && CACHE.countries) || [];
+    const rows = [['Country', 'Code', 'Total', 'Holidays', 'Dynamic', 'Hotels', 'Flights', 'Resorts', 'Cheapest pp', 'Currency', 'Refreshed', 'Oldest offer']];
+    for (const c of cs) {
+      const ps = c.packageStats || {}, ts = c.typeStats || {};
+      rows.push([
+        ccName(c.countryCode), c.countryCode, c.offerCount || 0,
+        (ps.PackageHolidays && ps.PackageHolidays.count) || 0,
+        (ps.DynamicPackages && ps.DynamicPackages.count) || 0,
+        (ts.Accommodation && ts.Accommodation.count) || 0,
+        (ts.Flights && ts.Flights.count) || 0,
+        c.resortCount || 0,
+        c.cheapestPP != null ? c.cheapestPP : '', c.currency || 'GBP',
+        c.refreshedAt || '', c.oldestFetchedAt || '',
+      ]);
+    }
+    return rows;
+  }
+  function suppliersCsv() {
+    const master = SUPPLIERS_MASTER || new Map();
+    const rows = [['Supplier', 'Type', 'Offers', 'Cheapest pp', 'Countries', 'Client-selectable', 'Top operator/carrier']];
+    for (const s of ((CACHE && CACHE.suppliers) || [])) {
+      const isDyn = s.key === 'Dynamic' || s.prodType === 'Dynamic';
+      const meta = master.get(s.key);
+      const name = isDyn ? 'Dynamic packages' : meta ? meta.name : s.id == null ? 'Unknown' : ('Supplier #' + s.id);
+      rows.push([name, s.prodType, s.count || 0, s.fromPP != null ? s.fromPP : '', s.countryCount || 0, isDyn ? 'no' : (meta ? 'yes' : 'no'), s.topOperator || s.topCarrier || '']);
+    }
+    return rows;
   }
 
   // What the LAST cron sweep pulled per type: fetched from Travelify versus
@@ -1037,8 +1108,14 @@
       const ft = Date.parse(o.fetchedAt || '');
       return Number.isFinite(ft) && (nowMs - ft) > 70 * 3600 * 1000;
     };
+    // The stored offer keeps its Travelify click URL — link the name to it so
+    // an admin can open the real offer and test the booking path in one click.
+    const hotelLabel = (o) => esc(o.hotel || (o.type === 'Flights' ? (o.carrier || 'Flight') : '—'));
+    const nameCell = (o) => (o.url && /^https:\/\//i.test(o.url))
+      ? `<a href="${esc(o.url)}" target="_blank" rel="noopener noreferrer" title="Open this offer on Travelify — test the booking path" style="color:var(--text); text-decoration:none; border-bottom:1px dotted var(--muted-2)"><b>${hotelLabel(o)}</b> <span style="color:var(--muted-2)">↗</span></a>`
+      : `<b>${hotelLabel(o)}</b>`;
     const trs = d.offers.map(o => `<tr>
-      <td><b>${esc(o.hotel || (o.type === 'Flights' ? (o.carrier || 'Flight') : '—'))}</b>${o.rating ? ` <span class="ap-name">${esc(String(o.rating))}★</span>` : ''}</td>
+      <td>${nameCell(o)}${o.rating ? ` <span class="ap-name">${esc(String(o.rating))}★</span>` : ''}</td>
       <td class="ap-name">${esc(typeLabel(o))}</td>
       <td class="ap-name">${esc(o.resort || '—')}</td>
       <td><span class="ap-iata">${esc(o.airport || '—')}</span></td>
@@ -1152,10 +1229,14 @@
     const redisNote = CACHE.redisConfigured === false
       ? ` · <span style="color:var(--err); font-weight:700">Redis not configured — the map is running on the bundled seed file</span>`
       : '';
-    return `<div style="padding:10px 18px; font-size:12px; color:var(--muted); border-bottom:1px solid var(--border); background:#FBFCFE">
-      <b style="color:var(--text)">${grandTotal.toLocaleString('en-GB')}</b> offers stored ·
+    return `<div style="padding:10px 18px; font-size:12px; color:var(--muted); border-bottom:1px solid var(--border); background:#FBFCFE; display:flex; align-items:center; gap:8px; flex-wrap:wrap">
+      <span><b style="color:var(--text)">${grandTotal.toLocaleString('en-GB')}</b> offers stored ·
       <b style="color:var(--text)">${supplierCount.toLocaleString('en-GB')}</b> named supplier${supplierCount === 1 ? '' : 's'} the operator packages, hotels and flights come from ·
-      map summary rebuilt <b style="color:var(--text)">${esc(gen)}</b>${namesNote}${redisNote}
+      map summary rebuilt <b style="color:var(--text)">${esc(gen)}</b>${namesNote}${redisNote}</span>
+      <button class="btn btn--sm btn--ghost" data-act="export-suppliers-csv" style="margin-left:auto" title="Download the supplier summary as CSV">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        CSV
+      </button>
     </div>`;
   }
 
@@ -1627,6 +1708,9 @@
     const btn = e.target.closest('button[data-act]');
     if (!btn) return;
     const act = btn.getAttribute('data-act');
+
+    if (act === 'export-cache-csv') { downloadCsv('offer-cache.csv', cacheCsv()); return; }
+    if (act === 'export-suppliers-csv') { downloadCsv('offer-cache-suppliers.csv', suppliersCsv()); return; }
 
     if (act === 'cache-type') {
       const t = btn.getAttribute('data-type') || 'All';
