@@ -227,6 +227,8 @@
   .type-tab .tt-count { font-size: 11px; color: var(--muted); font-weight: 500; }
   .type-tab.is-on { background: var(--teal); border-color: var(--teal); color: #fff; }
   .type-tab.is-on .tt-count { color: rgba(255,255,255,.8); }
+  .type-tab--sub { font-weight: 600; border-style: dashed; }
+  .type-tab--sub.is-on { border-style: solid; }
   .stale-tag {
     display: inline-block; font-size: 10.5px; font-weight: 700; border-radius: 999px;
     padding: 1px 8px; background: #FEF2F2; color: #B91C1C; margin-left: 6px;
@@ -526,7 +528,7 @@
   const CACHE_OFFERS = new Map(); // cc → fetched offers payload for the expanded view
   const cacheOriginFilter = new Set(); // selected departure airports (multi)
   let cacheTypeTab = 'All'; // Cache tab offer-type view: All | Packages | Accommodation | Flights
-  const CACHE_TYPE_LABELS = { Packages: 'Packages', Accommodation: 'Hotels', Flights: 'Flights' };
+  const CACHE_TYPE_LABELS = { Packages: 'Packages', Accommodation: 'Hotels', Flights: 'Flights', PackageHolidays: 'Holidays', DynamicPackages: 'Dynamic' };
 
   // ── helpers ──────────────────────────────────────────────────
   const $ = (id) => document.getElementById(id);
@@ -757,15 +759,20 @@
 
   // ── Per-type helpers (the API's typeStats breakdown drives everything) ──
 
+  // The two package-kind views read the packageStats split; every other view
+  // (All / Packages / Hotels / Flights) reads the per-type stats.
+  const PKG_KINDS = ['PackageHolidays', 'DynamicPackages'];
+  const statSourceFor = (c, type) => PKG_KINDS.includes(type) ? (c.packageStats || {}) : (c.typeStats || {});
+
   // Stats for one country under the active type view. 'All' aggregates.
   function cacheStatsFor(c, type) {
-    const ts = c.typeStats || {};
     if (type !== 'All') {
-      const t = ts[type];
+      const t = statSourceFor(c, type)[type];
       return t
         ? { count: t.count || 0, fromPP: t.fromPP, oldest: t.oldestFetchedAt || null, stale: t.stale || 0 }
         : { count: 0, fromPP: null, oldest: null, stale: 0 };
     }
+    const ts = c.typeStats || {};
     let count = 0, fromPP = null, oldest = null, stale = 0;
     for (const k of Object.keys(ts)) {
       const t = ts[k];
@@ -779,8 +786,11 @@
 
   // Departure-airport tally for one country under the active type view.
   function cacheOriginsFor(c, type) {
+    if (type !== 'All') {
+      const t = statSourceFor(c, type)[type];
+      return (t && t.origins) || {};
+    }
     const ts = c.typeStats || {};
-    if (type !== 'All') return (ts[type] && ts[type].origins) || {};
     const merged = {};
     for (const k of Object.keys(ts)) {
       const org = ts[k].origins || {};
@@ -848,8 +858,9 @@
   }
 
   // Offer-type sub-tabs: All plus one per stored type, with global counts.
+  // Packages splits into Holidays (one operator) and Dynamic (assembled).
   function typeTabsRow(countries) {
-    const totals = { All: 0, Packages: 0, Accommodation: 0, Flights: 0 };
+    const totals = { All: 0, Packages: 0, Accommodation: 0, Flights: 0, PackageHolidays: 0, DynamicPackages: 0 };
     for (const c of countries) {
       const ts = c.typeStats || {};
       for (const k of Object.keys(ts)) {
@@ -857,12 +868,16 @@
         totals[k] = (totals[k] || 0) + n;
         totals.All += n;
       }
+      const ps = c.packageStats || {};
+      for (const k of Object.keys(ps)) totals[k] = (totals[k] || 0) + (ps[k].count || 0);
     }
-    const tab = (key, label, tip) =>
-      `<button class="type-tab${cacheTypeTab === key ? ' is-on' : ''}" data-act="cache-type" data-type="${key}" title="${esc(tip)}">${label} <span class="tt-count">${(totals[key] || 0).toLocaleString('en-GB')}</span></button>`;
+    const tab = (key, label, tip, sub) =>
+      `<button class="type-tab${sub ? ' type-tab--sub' : ''}${cacheTypeTab === key ? ' is-on' : ''}" data-act="cache-type" data-type="${key}" title="${esc(tip)}">${sub ? '<span style="opacity:.5">↳ </span>' : ''}${label} <span class="tt-count">${(totals[key] || 0).toLocaleString('en-GB')}</span></button>`;
     return `<div class="type-tabs"><span class="chips-label">Offer type</span>
       ${tab('All', 'All', 'Every stored offer, with a per-type breakdown per country')}
-      ${tab('Packages', 'Packages', 'Flight + hotel package offers — the pool the world map also reads')}
+      ${tab('Packages', 'Packages', 'All package offers (holidays + dynamic) — the pool the world map also reads')}
+      ${tab('PackageHolidays', 'Holidays', 'Package holidays — flight + hotel from ONE tour operator (Jet2, TUI…). These are what a per-client supplier selection can restrict.', true)}
+      ${tab('DynamicPackages', 'Dynamic', 'Dynamic packages — flight + hotel assembled from two different suppliers. The bulk of stock; not tied to one operator, so a client selection cannot restrict them.', true)}
       ${tab('Accommodation', 'Hotels', 'Hotel-only offers')}
       ${tab('Flights', 'Flights', 'Flight-only offers')}
     </div>`;
@@ -930,8 +945,9 @@
       return;
     }
 
-    // All view carries three extra per-type columns; type views are compact.
-    const colCount = isAll ? 10 : 7;
+    // All view carries four extra per-type columns (Holidays/Dynamic/Hotels/
+    // Flights); type views are compact.
+    const colCount = isAll ? 11 : 7;
 
     const body = rows.map(({ c, stats, f }) => {
       const name = ccName(c.countryCode);
@@ -945,12 +961,12 @@
       // Granular per-type cells for the All view: count, from-price, and a
       // tooltip with freshness detail for that type.
       const typeCell = (t) => {
-        const s = (c.typeStats || {})[t];
+        const s = (PKG_KINDS.includes(t) ? (c.packageStats || {}) : (c.typeStats || {}))[t];
         if (!s || !s.count) return `<td class="num hide-sm"><span class="count-na">—</span></td>`;
         const tip = `${CACHE_TYPE_LABELS[t]}: ${s.count.toLocaleString('en-GB')} offers · from ${money(s.fromPP, c.currency) || '—'} pp · oldest ${timeAgo(s.oldestFetchedAt)} · newest ${timeAgo(s.newestFetchedAt)}${s.stale ? ` · ${s.stale} stale` : ''}`;
         return `<td class="num hide-sm" title="${esc(tip)}"><b>${s.count.toLocaleString('en-GB')}</b><div style="font-size:11px; color:var(--muted)">${esc(money(s.fromPP, c.currency) || '')}</div></td>`;
       };
-      const typeCells = isAll ? typeCell('Packages') + typeCell('Accommodation') + typeCell('Flights') : '';
+      const typeCells = isAll ? typeCell('PackageHolidays') + typeCell('DynamicPackages') + typeCell('Accommodation') + typeCell('Flights') : '';
       return `<tr data-cc="${esc(c.countryCode)}">
         <td><div class="cc-cell">
           <button class="expand-btn" data-act="cache-toggle" data-cc="${esc(c.countryCode)}" aria-label="Browse cached offers" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg></button>
@@ -976,7 +992,7 @@
     }).join('');
 
     const typeHead = isAll
-      ? `<th class="num hide-sm" title="Flight + hotel packages">Packages</th><th class="num hide-sm" title="Hotel-only offers">Hotels</th><th class="num hide-sm" title="Flight-only offers">Flights</th>`
+      ? `<th class="num hide-sm" title="Package holidays — flight + hotel from one tour operator">Holidays</th><th class="num hide-sm" title="Dynamic packages — flight + hotel assembled from two different suppliers">Dynamic</th><th class="num hide-sm" title="Hotel-only offers">Hotels</th><th class="num hide-sm" title="Flight-only offers">Flights</th>`
       : '';
     $('table-host').innerHTML = cacheMetaLine() + `<table>
       <thead><tr>
@@ -998,7 +1014,10 @@
       const t = Date.parse(iso); if (isNaN(t)) return '—';
       return new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' });
     };
-    const typeLabel = (t) => t === 'Accommodation' ? 'Hotel' : t === 'Flights' ? 'Flight' : 'Package';
+    const pkgKind = (o) => o.packageType === 'DynamicPackages' ? 'Dynamic'
+      : o.packageType === 'PackageHolidays' ? 'Holiday'
+      : (Number.isFinite(o.flightSid) && Number.isFinite(o.accommodationSid) && o.flightSid !== o.accommodationSid) ? 'Dynamic' : 'Holiday';
+    const typeLabel = (o) => o.type === 'Accommodation' ? 'Hotel' : o.type === 'Flights' ? 'Flight' : pkgKind(o);
     // Mirror the expiry rules (past travel date or fetched >70h ago) so any
     // offer that slipped past deletion is visibly flagged in the browse view.
     const nowMs = Date.now();
@@ -1010,7 +1029,7 @@
     };
     const trs = d.offers.map(o => `<tr>
       <td><b>${esc(o.hotel || (o.type === 'Flights' ? (o.carrier || 'Flight') : '—'))}</b>${o.rating ? ` <span class="ap-name">${esc(String(o.rating))}★</span>` : ''}</td>
-      <td class="ap-name">${esc(typeLabel(o.type || 'Packages'))}</td>
+      <td class="ap-name">${esc(typeLabel(o))}</td>
       <td class="ap-name">${esc(o.resort || '—')}</td>
       <td><span class="ap-iata">${esc(o.airport || '—')}</span></td>
       <td><span class="ap-iata">${esc(o.origin || '—')}</span></td>
