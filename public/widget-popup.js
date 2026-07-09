@@ -80,7 +80,7 @@
     } catch (e) { /* fall through */ }
     return '/api/popup-lead';
   })();
-  const VERSION = '1.0.3';
+  const VERSION = '1.0.4';
   const STORAGE_PREFIX = 'tgp_';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -1123,7 +1123,10 @@
     let html = '<div class="tgp-body" style="padding:0">';
     html += renderCloseBtn(cfg, t);
     if (embed) {
-      const auto = cfg.videoAutoplay ? '&autoplay=1' : '';
+      // Choose the query separator from the embed URL itself: the YouTube embed
+      // already carries '?rel=0&…' but the Vimeo embed has no query string, so a
+      // hard-coded '&' would push autoplay into the path and break the video.
+      const auto = cfg.videoAutoplay ? (embed.indexOf('?') === -1 ? '?' : '&') + 'autoplay=1' : '';
       html += '<div class="tgp-video-wrap">';
       html += '<iframe src="' + esc(embed + auto) + '" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
       html += '</div>';
