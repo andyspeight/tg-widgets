@@ -78,7 +78,10 @@
   <article id="article"></article>
   <div class="demo-foot">Demo page · widget-dealbar.js v1.0.0 · pure client-side, no API key. Sticky announcement bar with optional countdown and call to action.</div>
 
-  <div data-tg-widget="dealbar" id="mount"></div>
+  <!-- No data-tg-widget here: this demo constructs the widget manually in rebuild(),
+       so the auto-init must not also claim this mount (that double-init flashed a
+       default bar before the demo config rendered). -->
+  <div id="mount"></div>
 
   <script src="/widget-dealbar.js"></script>
   <script>

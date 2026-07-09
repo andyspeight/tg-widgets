@@ -58,6 +58,8 @@
   .qp-status svg { width:14px; height:14px; flex-shrink:0; }
   .qp-status.ok { background:rgba(16,185,129,.08); color:#065F46; border:1px solid rgba(16,185,129,.25); }
   .qp-status.missing { background:rgba(245,158,11,.08); color:#78350F; border:1px solid rgba(245,158,11,.25); }
+  [data-tgse-theme="dark"] .qp-status.ok { color:#34D399; }
+  [data-tgse-theme="dark"] .qp-status.missing { color:#FBBF24; }
   .qp-status.loading { background:var(--tgse-panel-2); color:var(--tgse-ink-3); border:1px solid var(--tgse-border); }
   .qp-status .qp-meta { font-family:'JetBrains Mono',monospace; font-size:11px; }
 
@@ -169,12 +171,12 @@
             <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="tgse-section-body">
-            <div class="qp-color-row"><label>Top bar (logo area)</label><span class="qp-hex" id="hex-topBar">#111D3E</span><input type="color" id="c-topBar" data-key="topBar" value="#111D3E"></div>
-            <div class="qp-color-row"><label>Hero section</label><span class="qp-hex" id="hex-hero">#1B2B5B</span><input type="color" id="c-hero" data-key="hero" value="#1B2B5B"></div>
-            <div class="qp-color-row"><label>Accents &amp; lines</label><span class="qp-hex" id="hex-accent">#00B4D8</span><input type="color" id="c-accent" data-key="accent" value="#00B4D8"></div>
-            <div class="qp-color-row"><label>Labels</label><span class="qp-hex" id="hex-labels">#0096B7</span><input type="color" id="c-labels" data-key="labels" value="#0096B7"></div>
-            <div class="qp-color-row"><label>Titles &amp; prices</label><span class="qp-hex" id="hex-titles">#1B2B5B</span><input type="color" id="c-titles" data-key="titles" value="#1B2B5B"></div>
-            <div class="qp-color-row"><label>Text</label><span class="qp-hex" id="hex-text">#0F172A</span><input type="color" id="c-text" data-key="text" value="#0F172A"></div>
+            <div class="qp-color-row"><label>Top bar (logo area)</label><span class="qp-hex" id="hex-topBar">#111D3E</span><input type="color" id="c-topBar" data-key="topBar" value="#111D3E" aria-label="Top bar colour"></div>
+            <div class="qp-color-row"><label>Hero section</label><span class="qp-hex" id="hex-hero">#1B2B5B</span><input type="color" id="c-hero" data-key="hero" value="#1B2B5B" aria-label="Hero section colour"></div>
+            <div class="qp-color-row"><label>Accents &amp; lines</label><span class="qp-hex" id="hex-accent">#00B4D8</span><input type="color" id="c-accent" data-key="accent" value="#00B4D8" aria-label="Accents and lines colour"></div>
+            <div class="qp-color-row"><label>Labels</label><span class="qp-hex" id="hex-labels">#0096B7</span><input type="color" id="c-labels" data-key="labels" value="#0096B7" aria-label="Labels colour"></div>
+            <div class="qp-color-row"><label>Titles &amp; prices</label><span class="qp-hex" id="hex-titles">#1B2B5B</span><input type="color" id="c-titles" data-key="titles" value="#1B2B5B" aria-label="Titles and prices colour"></div>
+            <div class="qp-color-row"><label>Text</label><span class="qp-hex" id="hex-text">#0F172A</span><input type="color" id="c-text" data-key="text" value="#0F172A" aria-label="Text colour"></div>
             <div class="qp-help">These six colours re-theme the whole quote.</div>
           </div>
         </div>
@@ -187,8 +189,8 @@
             <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="tgse-section-body">
-            <div class="qp-color-row"><label>Button colour</label><span class="qp-hex" id="hex-btnBg">#00B4D8</span><input type="color" id="c-btnBg" data-bkey="bg" value="#00B4D8"></div>
-            <div class="qp-color-row"><label>Button text</label><span class="qp-hex" id="hex-btnText">#FFFFFF</span><input type="color" id="c-btnText" data-bkey="text" value="#FFFFFF"></div>
+            <div class="qp-color-row"><label>Button colour</label><span class="qp-hex" id="hex-btnBg">#00B4D8</span><input type="color" id="c-btnBg" data-bkey="bg" value="#00B4D8" aria-label="Button background colour"></div>
+            <div class="qp-color-row"><label>Button text</label><span class="qp-hex" id="hex-btnText">#FFFFFF</span><input type="color" id="c-btnText" data-bkey="text" value="#FFFFFF" aria-label="Button text colour"></div>
             <div class="qp-align-row">
               <label>Alignment</label>
               <div class="qp-seg" id="align-seg">

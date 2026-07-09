@@ -1068,6 +1068,7 @@ async function renderMyWidgets(opts = {}) {
   el.classList.add('show');
 
   // Fetch from Airtable, scoped to this user via auth token
+  let fetchOk = false;
   try {
     // credentials:'include' ships the tg_session cookie so the new
     // unified Travelgenix SSO flow can authenticate this request.
@@ -1084,7 +1085,7 @@ async function renderMyWidgets(opts = {}) {
       fetchOpts.cache = 'no-store';
     }
     const r = await fetch('/api/widget-list', fetchOpts);
-    if (r.ok) { myWidgetData = await r.json(); }
+    if (r.ok) { myWidgetData = await r.json(); fetchOk = true; }
   } catch(e) {
     // Root cause of the "copy/delete does nothing" bug: a transient refresh
     // failure (a backgrounded tab aborting the fetch, a network blip) used to
@@ -1096,6 +1097,16 @@ async function renderMyWidgets(opts = {}) {
   }
 
   const grid = document.getElementById('myGrid');
+  // Distinguish a failed load from a genuinely empty list. If the fetch was
+  // not ok (or threw) and we have nothing cached to fall back on, show an
+  // explicit error card with a retry path — never a false "No widgets yet"
+  // that makes a returning client think their widgets were wiped.
+  if (!fetchOk && !myWidgetData.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--mt);font-size:13px">Could not load your widgets.<br><button type="button" id="myWidgetsRetry" style="margin-top:12px;padding:8px 16px;border:1px solid var(--br);border-radius:8px;background:transparent;color:var(--br);font-size:13px;font-family:inherit;cursor:pointer">Retry</button></div>`;
+    const retry = document.getElementById('myWidgetsRetry');
+    if (retry) retry.addEventListener('click', () => renderMyWidgets({ bypassCache: true }));
+    return;
+  }
   if (!myWidgetData.length) {
     grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--mt);font-size:13px">No widgets yet. Create your first one from the catalogue below.</div>`;
     return;
@@ -1316,8 +1327,12 @@ async function performDeleteWidget() {
     } else {
       closeTypeModal();
     }
-    // Always re-render the grid so counts update / empty state appears
-    renderMyWidgets();
+    // Always re-render the grid so counts update / empty state appears.
+    // bypassCache:true is essential — /api/widget-list has a 10s browser
+    // cache, so a plain refresh would repopulate myWidgetData with the
+    // just-deleted record and the widget would reappear. Await it so the
+    // list is never transiently repopulated with the deleted record.
+    await renderMyWidgets({ bypassCache: true });
   } catch (err) {
     console.error('[delete] failed:', err);
     errEl.textContent = 'Connection error. Please try again.';

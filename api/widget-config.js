@@ -809,6 +809,7 @@ export default async function handler(req, res) {
         const formula = encodeURIComponent(`{WidgetID} = '${safeWid}'`);
         const searchUrl = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}?filterByFormula=${formula}&maxRecords=1`;
         const searchResp = await fetch(searchUrl, { headers });
+        if (!searchResp.ok) await throwAirtableError('Update lookup failed', searchResp);
         const searchData = await searchResp.json();
 
         if (searchData.records && searchData.records.length > 0) {

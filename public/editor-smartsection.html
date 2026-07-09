@@ -275,9 +275,17 @@
               </div>
             </div>
             <div class="field">
-              <span class="field-label">Campaign source (utm_source)</span>
-              <input class="input" id="simUtm" maxlength="120" placeholder="e.g. newsletter" aria-label="Simulated utm_source">
-              <div class="field-help">Simulates the utm_source of the visit. Leave blank for direct traffic.</div>
+              <span class="field-label">Traffic source</span>
+              <div class="rule-row2">
+                <select class="select" id="simUtmParam" aria-label="Simulated traffic parameter">
+                  <option value="source">utm_source</option>
+                  <option value="medium">utm_medium</option>
+                  <option value="campaign">utm_campaign</option>
+                  <option value="referrer">Referrer URL</option>
+                </select>
+                <input class="input" id="simUtm" maxlength="200" placeholder="e.g. newsletter" aria-label="Simulated traffic value">
+              </div>
+              <div class="field-help">Pick which traffic parameter to simulate then type its value. Leave the value blank for direct traffic.</div>
             </div>
           </div>
         </div>
@@ -807,7 +815,7 @@
    * the engine, which fills any omitted dimension from the real visitor.
    * ------------------------------------------------------------------ */
 
-  const SIM = { visitor: 'new', device: 'desktop', day: null, time: null, utm: '' };
+  const SIM = { visitor: 'new', device: 'desktop', day: null, time: null, utm: '', utmParam: 'source' };
 
   function buildSimContext() {
     const base = new Date();
@@ -822,12 +830,15 @@
     // getDay()/getHours()/getMinutes(), so the absolute date does not matter.
     const d = new Date(base.getFullYear(), base.getMonth(), base.getDate(), hh, mm, 0, 0);
     d.setDate(d.getDate() + (((targetDay - d.getDay()) + 7) % 7));
-    const utm = (SIM.utm || '').trim().toLowerCase();
+    const val = (SIM.utm || '').trim().toLowerCase();
+    const entrySource = { referrer: '', source: '', medium: '', campaign: '' };
+    const param = SIM.utmParam || 'source';
+    if (Object.prototype.hasOwnProperty.call(entrySource, param)) entrySource[param] = val;
     return {
       now: d,
       device: SIM.device,
       returning: SIM.visitor === 'returning',
-      entrySource: { referrer: '', source: utm, medium: '', campaign: '' },
+      entrySource: entrySource,
     };
   }
 
@@ -859,6 +870,8 @@
     const utmIn = document.getElementById('simUtm');
     utmIn.addEventListener('input', () => { SIM.utm = utmIn.value; });
     utmIn.addEventListener('change', () => renderPreview());
+    const utmParamSel = document.getElementById('simUtmParam');
+    utmParamSel.addEventListener('change', () => { SIM.utmParam = utmParamSel.value; renderPreview(); });
   }
   wireSimControls();
 

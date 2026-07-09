@@ -246,6 +246,12 @@
     font-style: italic;
     padding: 4px 0 2px;
   }
+  .hours-slot-note {
+    font-size: 11px;
+    color: var(--tgse-text-3, #94A3B8);
+    padding: 0 0 5px;
+  }
+  .hours-slot-note.is-error { color: #EF4444; }
 
   /* Holidays list */
   .holidays-list { display: flex; flex-direction: column; gap: 6px; }
@@ -867,14 +873,26 @@
       if (isClosed) {
         slotsHtml = '<div class="hours-day-closed-msg">Closed all day</div>';
       } else {
-        slotsHtml = slots.map((slot, idx) => `
+        slotsHtml = slots.map((slot, idx) => {
+          const s0 = String(slot[0] || '');
+          const s1 = String(slot[1] || '');
+          let note = '';
+          if (/^\d{2}:\d{2}$/.test(s0) && /^\d{2}:\d{2}$/.test(s1)) {
+            if (s1 === s0) {
+              note = '<div class="hours-slot-note is-error">Close time must be different from the open time</div>';
+            } else if (s1 < s0) {
+              note = '<div class="hours-slot-note">Overnight slot, closes the next day</div>';
+            }
+          }
+          return `
           <div class="hours-slot">
             <input class="input" data-day="${key}" data-idx="${idx}" data-pos="0" type="time" value="${escAttr(slot[0])}" />
             <span class="hours-slot-sep">–</span>
             <input class="input" data-day="${key}" data-idx="${idx}" data-pos="1" type="time" value="${escAttr(slot[1])}" />
             <button class="slot-remove" data-day="${key}" data-idx="${idx}" type="button" title="Remove slot" aria-label="Remove slot">×</button>
-          </div>
-        `).join('');
+          </div>${note}
+        `;
+        }).join('');
       }
 
       dayEl.innerHTML = `

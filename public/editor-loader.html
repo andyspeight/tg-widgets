@@ -90,10 +90,15 @@
     padding: 12px 14px; background: var(--tgse-panel-2); border: 1px solid var(--tgse-border);
     border-radius: var(--tgse-radius-md); cursor: pointer; text-align: left; font: inherit;
   }
-  .exp-item:hover { border-color: var(--tgse-brand); }
+  .exp-item:not(:disabled):hover { border-color: var(--tgse-brand); }
+  .exp-item:disabled { opacity: .55; cursor: not-allowed; }
   .exp-item .exp-fmt { font-size: 14px; font-weight: 600; color: var(--tgse-ink); }
   .exp-item .exp-desc { font-size: 12px; color: var(--tgse-ink-3); margin-top: 2px; }
-  .exp-item .exp-go { font-size: 12px; font-weight: 600; color: var(--tgse-brand); flex: none; }
+  .exp-item .exp-go {
+    font-size: 11px; font-weight: 600; color: var(--tgse-ink-3); flex: none;
+    padding: 3px 8px; border: 1px solid var(--tgse-border); border-radius: 999px;
+    text-transform: uppercase; letter-spacing: .04em;
+  }
   .exp-note {
     margin-top: 14px; padding: 12px 14px; font-size: 12px; line-height: 1.5; color: var(--tgse-ink-2);
     background: var(--tgse-brand-tint); border-radius: var(--tgse-radius-md);
@@ -264,8 +269,8 @@
             <div class="sec-body">
               <div class="field">
                 <label class="field-label" for="rng-fps">Frame rate <span class="val" id="rng-fps-out"></span></label>
-                <input class="range" type="range" id="rng-fps" min="10" max="60" step="1">
-                <p class="field-hint">Higher is smoother but larger. 24 to 30 suits most loaders.</p>
+                <input class="range" type="range" id="rng-fps" min="10" max="60" step="1" disabled>
+                <p class="field-hint">Higher is smoother but larger. 24 to 30 suits most loaders. Available once encoders land.</p>
               </div>
             </div>
           </div>
@@ -273,11 +278,11 @@
             <button class="tgse-section-head sec-head" type="button"><span class="sec-title">Download</span><svg class="sec-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
             <div class="sec-body">
               <div class="exp-grid">
-                <button class="exp-item" data-export="gif" type="button"><span><span class="exp-fmt">GIF</span><span class="exp-desc">Universal. Hard-cut transparency</span></span><span class="exp-go">Export</span></button>
-                <button class="exp-item" data-export="webm" type="button"><span><span class="exp-fmt">WebM</span><span class="exp-desc">Smooth alpha transparency</span></span><span class="exp-go">Export</span></button>
-                <button class="exp-item" data-export="apng" type="button"><span><span class="exp-fmt">APNG</span><span class="exp-desc">Smooth alpha, wide support</span></span><span class="exp-go">Export</span></button>
-                <button class="exp-item" data-export="mp4" type="button"><span><span class="exp-fmt">MP4</span><span class="exp-desc">Solid background only</span></span><span class="exp-go">Export</span></button>
-                <button class="exp-item" data-export="png-sequence" type="button"><span><span class="exp-fmt">PNG sequence</span><span class="exp-desc">For video editors</span></span><span class="exp-go">Export</span></button>
+                <button class="exp-item" data-export="gif" type="button" disabled><span><span class="exp-fmt">GIF</span><span class="exp-desc">Universal. Hard-cut transparency</span></span><span class="exp-go">Coming soon</span></button>
+                <button class="exp-item" data-export="webm" type="button" disabled><span><span class="exp-fmt">WebM</span><span class="exp-desc">Smooth alpha transparency</span></span><span class="exp-go">Coming soon</span></button>
+                <button class="exp-item" data-export="apng" type="button" disabled><span><span class="exp-fmt">APNG</span><span class="exp-desc">Smooth alpha, wide support</span></span><span class="exp-go">Coming soon</span></button>
+                <button class="exp-item" data-export="mp4" type="button" disabled><span><span class="exp-fmt">MP4</span><span class="exp-desc">Solid background only</span></span><span class="exp-go">Coming soon</span></button>
+                <button class="exp-item" data-export="png-sequence" type="button" disabled><span><span class="exp-fmt">PNG sequence</span><span class="exp-desc">For video editors</span></span><span class="exp-go">Coming soon</span></button>
               </div>
               <p class="exp-note">Encoders are wired in the next build step. The download uses the current template, colours and the transparent or matte choice from the Design tab.</p>
             </div>
@@ -630,16 +635,10 @@
   }
 
   /* ---------- Export (encoders wired in the next build step) ---------- */
-  function wireExport() {
-    var btns = document.querySelectorAll('[data-export]');
-    for (var i = 0; i < btns.length; i++) {
-      (function (b) {
-        b.addEventListener('click', function () {
-          tgse.toast(b.getAttribute('data-export').toUpperCase() + ' export is wired in the next build step', 'ok');
-        });
-      })(btns[i]);
-    }
-  }
+  /* Export buttons and the FPS control stay disabled until the encoders land,
+     so no click handler is wired here — a disabled control cannot mislead the
+     user with a success toast for a feature that has not shipped. */
+  function wireExport() {}
 
   /* ---------- Load existing config ---------- */
   function reflectAll() {
