@@ -215,28 +215,48 @@ export default async function handler(req, res) {
     const originalName = (sourceFields.Name || '').trim();
     const derivedName = customName || `${originalName} (Copy)`.slice(0, 200);
 
+    // Stamp ClientRecordId — the AUTHORITATIVE owner. widget-list scopes a
+    // client workspace by {ClientRecordId}='<activeClientId>' and, for a staff
+    // member whose login email is shared across accounts, drops the ClientEmail
+    // fallback entirely. So a copy created WITHOUT ClientRecordId (as this
+    // endpoint did) never appears in the list even though it was created — the
+    // "copied widget doesn't show" bug. A copy belongs to the same client as
+    // its source, so carry the source's ClientRecordId; fall back to the
+    // session's client if the source predates the field.
+    const REC = /^rec[A-Za-z0-9]{14}$/;
+    const srcOwner = typeof sourceFields.ClientRecordId === 'string' ? sourceFields.ClientRecordId : '';
+    const copyClientRecordId = REC.test(srcOwner)
+      ? srcOwner
+      : (typeof user.clientId === 'string' && REC.test(user.clientId) ? user.clientId : '');
+
+    const copyFields = {
+      WidgetID: newWidgetId,
+      Name: derivedName,
+      // Carry the full config blob verbatim. Includes theme, layout,
+      // colours, copy content, integrations — everything the user
+      // configured on the original. The user opted-in to copying
+      // credentials when they chose this action.
+      Config: sourceFields.Config || '{}',
+      Status: 'Active', // Generic widgets have no Draft concept; Active is the only value used.
+      WidgetType: sourceType,
+      ClientName: user.clientName || sourceFields.ClientName || '',
+      ClientEmail: user.email,
+      CreatedAt: new Date().toISOString(),
+      UpdatedAt: new Date().toISOString(),
+    };
+    if (copyClientRecordId) {
+      copyFields.ClientRecordId = copyClientRecordId;
+    } else {
+      console.warn(`[widget-copy] copy ${newWidgetId} created WITHOUT ClientRecordId ` +
+        `(source ${widgetId} had none, session clientId unusable) — it may not appear in the scoped list.`);
+    }
+
     const createUrl = `${AIRTABLE_API}/${baseId}/${TABLE_NAME}`;
     const createResp = await fetch(createUrl, {
       method: 'POST',
       headers,
       body: JSON.stringify({
-        records: [{
-          fields: {
-            WidgetID: newWidgetId,
-            Name: derivedName,
-            // Carry the full config blob verbatim. Includes theme, layout,
-            // colours, copy content, integrations — everything the user
-            // configured on the original. The user opted-in to copying
-            // credentials when they chose this action.
-            Config: sourceFields.Config || '{}',
-            Status: 'Active', // Generic widgets have no Draft concept; Active is the only value used.
-            WidgetType: sourceType,
-            ClientName: user.clientName || sourceFields.ClientName || '',
-            ClientEmail: user.email,
-            CreatedAt: new Date().toISOString(),
-            UpdatedAt: new Date().toISOString(),
-          },
-        }],
+        records: [{ fields: copyFields }],
       }),
     });
     if (!createResp.ok) await throwAirtableError('Create failed', createResp);
