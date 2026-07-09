@@ -98,8 +98,12 @@ sells.
   and one plain-language instruction to Claude, returns scrubbed `{ html, css }`
   to re-preview. Keeps images (owned rebuild). Distinct from slice-emit, which
   is the Duda export target.
+- `api/studio/to-duda.js` — POST `/api/studio/to-duda` `{ html, css, source? }`.
+  Auth + gate + rate limit, forwards to the deployed slice-emit endpoint with the
+  shared secret and returns the Duda build sheet. Reuses slice-emit as-is.
 - `public/studio.html` — capture, faithful preview, code view, copy, download,
-  and the refine loop ("Make it yours": type a change, apply, re-preview, repeat).
+  the refine loop ("Make it yours": type a change, apply, re-preview, repeat),
+  and Send to Duda (downloads the build sheet for the Duda Widget Builder).
 - `vercel.json` — `/studio` rewrite, capture function config (memory 1024,
   maxDuration 60, `includeFiles` bundling chromium and the two engine files),
   refine function config (maxDuration 60), and `studio` in the security-header
@@ -137,10 +141,13 @@ scrubbed html/css. The page wires a "Make it yours" box that applies changes and
 re-previews, and the loop runs on the latest section each time. Still to polish:
 a visible change history / undo, and a spinner in the preview during a refine.
 
-P3 next — export targets. Send to Duda (feed the current section into
-slice-emit for a build sheet, plus the Partner API path from the Slicer
+P3 in progress — export targets. Send to Duda is DONE: `api/studio/to-duda.js`
+forwards the current section to the existing slice-emit endpoint (attaching the
+shared secret server-side, so it reuses the one Duda prompt rather than copying
+it) and the page downloads the build sheet for the Duda Widget Builder. Still to
+do: the Duda Partner API path for programmatic widget creation (see the Slicer
 handover), and "save as a tg-widget" so a capture becomes a first-class widget
-in the suite.
+in the suite (the five-places registration in CLAUDE.md).
 
 P4 — travel wiring (the moat). Offer to drop our booking, availability, offers
 and enquiry widgets into a captured section, so the output is not just pretty,

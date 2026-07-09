@@ -36,6 +36,9 @@
     "api/studio/refine.js": {
       "maxDuration": 60
     },
+    "api/studio/to-duda.js": {
+      "maxDuration": 300
+    },
     "api/brain/run-gate.js": {
       "maxDuration": 300
     },

@@ -182,7 +182,7 @@
           <button class="btn secondary" id="copy" disabled>Copy code</button>
           <button class="btn secondary" id="download" disabled>Download HTML</button>
           <button class="btn secondary" id="refine" disabled title="Refine with AI">Refine with AI</button>
-          <button class="btn secondary" id="toduda" disabled title="Coming next">Send to Duda</button>
+          <button class="btn secondary" id="toduda" disabled title="Build a Duda widget sheet">Send to Duda</button>
         </div>
         <div class="stage" id="stage">
           <div class="empty" id="empty">
@@ -272,6 +272,7 @@
     $("frame").srcdoc = previewDoc(state.slice);
     $("code").textContent = "<style>\n" + (state.slice.css || "") + "\n</style>\n\n" + (state.slice.html || "");
     $("copy").disabled = false; $("download").disabled = false; $("refine").disabled = false;
+    $("toduda").disabled = false;
     $("refineInput").disabled = false; $("applyRefine").disabled = false;
     $("refineBox").setAttribute("aria-disabled", "false");
     view("preview");
@@ -363,6 +364,38 @@
   $("applyRefine").addEventListener("click", applyRefine);
   $("refineInput").addEventListener("keydown", function(e){ if (e.key === "Enter") applyRefine(); });
   $("refine").addEventListener("click", function(){ if (state.slice) $("refineInput").focus(); });
+
+  // ── Send to Duda (build sheet for the Duda Widget Builder) ──
+  $("toduda").addEventListener("click", function(){
+    if (!state.slice) { toast("Capture something first."); return; }
+    var btn = $("toduda");
+    btn.disabled = true; btn.textContent = "Building…";
+    fetch("/api/studio/to-duda", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ html: state.slice.html, css: state.slice.css, source: state.source })
+    }).then(function(r){
+      if (r.status === 401) { toast("Sign in required."); return null; }
+      return r.json().then(function(j){ return { ok: r.ok, j: j }; });
+    }).then(function(res){
+      if (!res) return;
+      if (!res.ok || !res.j || res.j.error || !res.j.buildSheet) { toast((res.j && res.j.error) || "Duda build failed. Try again."); return; }
+      var sheet = res.j.buildSheet;
+      var name = (sheet.widgetName || "tg-studio-widget").replace(/[^a-z0-9]+/gi, "-").toLowerCase();
+      var blob = new Blob([JSON.stringify(sheet, null, 2)], { type: "application/json" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = name + "-duda-buildsheet.json";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+      toast("Duda build sheet ready. Downloaded.");
+    }).catch(function(){
+      toast("Could not reach the Duda build step.");
+    }).finally(function(){
+      btn.disabled = !state.slice; btn.textContent = "Send to Duda";
+    });
+  });
 })();
 </script>
 </body>
