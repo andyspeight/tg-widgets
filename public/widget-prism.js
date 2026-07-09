@@ -18,7 +18,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '1.1.0';
+  var VERSION = '1.1.1';
 
   function resolveBase(path, override) {
     if (typeof window === 'undefined') return path;
@@ -239,7 +239,10 @@
       '.ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .18s ease,object-position .18s ease}' +
       '.scrim{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;' +
         'background:linear-gradient(to top,rgba(6,12,22,.62) 0%,rgba(6,12,22,.16) 26%,transparent 46%)}' +
-      '.label{position:absolute;left:0;right:0;bottom:2.3cqw;z-index:2;text-align:center;white-space:nowrap;' +
+      // Labels wrap within the visible parallelogram (inset by ~half the slant
+      // each side) instead of being clipped when the text is long.
+      '.label{position:absolute;left:calc(var(--slant) * .5);right:calc(var(--slant) * .5);bottom:2.3cqw;z-index:2;' +
+        'text-align:center;line-height:1.14;overflow-wrap:break-word;padding:0 .3cqw;' +
         'font-family:var(--labelF);font-weight:600;font-size:var(--labelS);letter-spacing:var(--labelL);color:var(--labelC);' +
         'text-transform:uppercase;text-shadow:0 1px 10px rgba(0,0,0,.55),0 1px 2px rgba(0,0,0,.5);' +
         'transform:translateX(calc(-0.42 * var(--slant)))}' +
@@ -260,7 +263,7 @@
         '.body{font-size:clamp(13.5px,3.6cqw,17px);max-width:62ch}' +
         '.strip{position:static;inset:auto;left:auto;right:auto;top:auto;bottom:auto;' +
           'width:100%;height:clamp(150px,44cqw,230px)}' +
-        '.label{font-size:clamp(9px,2.4cqw,13px);bottom:10px}' +
+        '.label{font-size:clamp(9px,2.2cqw,12px);bottom:10px}' +
       '}' +
       '@media (prefers-reduced-motion:reduce){.ph{transition:none}}';
   }
@@ -400,12 +403,7 @@
     var avail = this.panel.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
     this._fit(this.shadow.querySelector('.title'), avail);
     this._fit(this.shadow.querySelector('.script'), avail);
-    var slantPx = this.root.clientWidth * (clampNum(this.cfg.slant, 0, 8, 2.7) / 100);
-    var labels = this.shadow.querySelectorAll('.slice');
-    for (var i = 0; i < labels.length; i++) {
-      var lab = labels[i].querySelector('.label');
-      this._fit(lab, labels[i].clientWidth - slantPx - 8);
-    }
+    // Labels are not auto-shrunk any more — they wrap (see .label CSS).
   };
 
   TGPrismWidget.prototype.update = function (newConfig) {
