@@ -143,7 +143,7 @@
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
   const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
-  const VERSION = '1.10.9';
+  const VERSION = '1.10.10';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // Telemetry: report a one-time load heartbeat and any failure to
@@ -1314,19 +1314,30 @@
       cleanup = () => { aborted = true; document.removeEventListener('click', onClick); };
     } else if (trigger === 'inactivity') {
       const secs = Math.max(5, cfg.popupTriggerInactivitySeconds || 30);
+      const events = ['mousemove', 'keydown', 'scroll', 'touchstart'];
       let timer = null;
+      function teardown() {
+        if (timer) { clearTimeout(timer); timer = null; }
+        events.forEach(e => document.removeEventListener(e, reset));
+      }
+      // One-shot, like scroll / exit-intent / time: the moment the popup fires we
+      // stop listening, so the trigger cannot re-arm on the next mouse move and
+      // re-open the popup every 30s after the visitor has already dismissed it.
+      function fireOnce() {
+        if (aborted) return;
+        teardown();
+        fire();
+      }
       function reset() {
         if (aborted) return;
         if (timer) clearTimeout(timer);
-        timer = setTimeout(fire, secs * 1000);
+        timer = setTimeout(fireOnce, secs * 1000);
       }
-      const events = ['mousemove', 'keydown', 'scroll', 'touchstart'];
       events.forEach(e => document.addEventListener(e, reset, { passive: true }));
       reset();
       cleanup = () => {
         aborted = true;
-        if (timer) clearTimeout(timer);
-        events.forEach(e => document.removeEventListener(e, reset));
+        teardown();
       };
     } else if (trigger === 'pageviews') {
       const required = Math.max(1, cfg.popupTriggerPageviews || 2);
