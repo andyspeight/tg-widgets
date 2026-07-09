@@ -147,22 +147,45 @@ the real staff user, which is the safe default.
   visible cue.
 - Audit helpers to tag writes with `realUserId` + target.
 
-### 4.2 Possibly in other repos (the open question)
+### 4.2 Other tools that share the login
 
-Any tool on `*.travelify.io` that reads the shared `tg_session` cookie flips
-today and will need two small changes under the new model: attach the
+Confirmed by Andy on 8 July 2026: every tool shares the same `travelify.io`
+login. So the contact engine, Luna Marketing (`marketing.travelify.io`), TG
+Control, Contracting and the widget suite all read the same `tg_session`
+cookie, and today they all flip together on a global switch.
+
+Under the new model each of them needs two small changes: attach the
 `X-TG-Act-As` header from its own fetch layer when acting, and show the banner.
-Until it does, it safely defaults to the real staff member.
+Crucially this is safe by default (see 4.3): until a tool is updated it simply
+shows the real staff member, never a client, so nothing breaks and nothing
+flips while we work through them one at a time.
 
-Candidates that share the login and may be separate apps or repos:
+Still to confirm, so we can size the work rather than change the design: which
+of these live in this repo and which are separate apps or repos. The widget
+suite and the shared auth endpoints are here in tg-widgets. If the contact
+engine and Luna are separate deployments they each need their own small update,
+and (see the caveat below) they do not yet carry even the interim banner.
 
-- the contact engine (Andy named this in the incident),
-- Luna Marketing (`marketing.travelify.io`),
-- TG Control, Contracting, and any other suite tool.
+### 4.3 Safe by default (why the rollout has no unsafe window)
 
-To finish the spec I need to know, for each: is it in this repo or another, and
-does it use the shared `tg_session` login. That tells us how wide the real fix
-reaches and what to schedule.
+Because the base cookie is always the real staff user and impersonation is
+opt-in per tool, any tool that has not been updated to send the header resolves
+to the staff member's own account. The failure mode of an un-updated tool is
+"shows you as yourself", never "silently shows you a client". So the calendar
+bleed stops the moment this repo ships the server overlay and switches its own
+switcher (phases 1 and 2), and every other tool can be migrated later with no
+window where it could flip unseen.
+
+### 4.4 Interim banner coverage caveat (today, before the real fix)
+
+The interim banner shipped on 8 July 2026 lives in this repo, so it covers the
+widget editors, the admin pages, the dashboard, the widget index and the
+scheduler side panel. It does NOT cover the contact engine or Luna if those are
+separate apps, because this session can only deploy tg-widgets. Until the real
+fix lands, those tools still flip on a global switch with no banner. Two ways
+to close that gap: add the same `staff-switcher.js` banner to those repos now,
+or accept the exposure there until the scoped fix ships. This needs the
+repo answer above.
 
 ## 5. Security requirements
 
@@ -192,10 +215,12 @@ reaches and what to schedule.
 
 ## 7. Open questions for Andy
 
-1. The contact engine, Luna Marketing, TG Control, Contracting: which of these
-   share the `travelify.io` login, and which live in this repo versus another?
-   This is the one blocker for finishing section 4.2.
+1. Answered 8 July 2026: all tools share the `travelify.io` login. Remaining
+   detail, for sizing not design: which of the contact engine and Luna are
+   separate repos or deployments, so we know how many places phase 3 (and the
+   interim banner, section 4.4) has to reach.
 2. Idle timeout for an act-as grant: 30 minutes of inactivity, then it drops
    back to yourself. Happy with that, or do you want a different figure.
 3. Should exiting act-as in one tab also end it in any other tab where you had
    started it, or leave each tab independent.
+4. Sign-off: happy with the Option A shape in section 3 before any build.
