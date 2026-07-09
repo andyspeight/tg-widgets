@@ -1,7 +1,7 @@
 # Scoped "act as client" — design spec for sign-off
 
 Status: DRAFT for Andy to approve before any build.
-Date: 8 July 2026.
+Date: 9 July 2026.
 Owner: Andy Speight. Author: Claude Code session.
 
 This is a design document, not shipped code. It describes how to move "act as
@@ -10,7 +10,7 @@ acting as a client in one tool can never silently change another tool (the
 calendar incident, July 2026). It also lists every place that has to change,
 including tools that may live in other repos.
 
-The loud interim safety banner described at the end is already live (shipped 8
+The loud interim safety banner described at the end is already live (shipped 9
 July 2026). This spec is about the real fix that comes after it.
 
 ---
@@ -149,7 +149,7 @@ the real staff user, which is the safe default.
 
 ### 4.2 Other tools that share the login
 
-Confirmed by Andy on 8 July 2026: every tool shares the same `travelify.io`
+Confirmed by Andy on 9 July 2026: every tool shares the same `travelify.io`
 login. So the contact engine, Luna Marketing (`marketing.travelify.io`), TG
 Control, Contracting and the widget suite all read the same `tg_session`
 cookie, and today they all flip together on a global switch.
@@ -178,7 +178,7 @@ window where it could flip unseen.
 
 ### 4.4 Interim banner coverage caveat (today, before the real fix)
 
-The interim banner shipped on 8 July 2026 lives in this repo, so it covers the
+The interim banner shipped on 9 July 2026 lives in this repo, so it covers the
 widget editors, the admin pages, the dashboard, the widget index and the
 scheduler side panel. It does NOT cover the contact engine or Luna if those are
 separate apps, because this session can only deploy tg-widgets. Until the real
@@ -201,9 +201,9 @@ repo answer above.
 
 ## 6. Rollout
 
-- Phase 0 (done, 8 July 2026): loud interim banner on every staff surface so
+- Phase 0 (done, 9 July 2026): loud interim banner on every staff surface so
   act-as can never again be silent while we build the real fix.
-- Phase 1 (done, 8 July 2026): the header overlay is in `requireAuth`, plus the
+- Phase 1 (done, 9 July 2026): the header overlay is in `requireAuth`, plus the
   grant module (`api/_lib/auth/actas.js`) and the staff-only mint endpoint
   (`POST /api/auth/act-as/start`). Additive and dormant: no tool sends the
   header yet, so nothing changed in practice. Covered by `npm run test:actas`
@@ -218,7 +218,7 @@ repo answer above.
 
 ## 7. Open questions for Andy
 
-1. Answered 8 July 2026: all tools share the `travelify.io` login. Remaining
+1. Answered 9 July 2026: all tools share the `travelify.io` login. Remaining
    detail, for sizing not design: which of the contact engine and Luna are
    separate repos or deployments, so we know how many places phase 3 (and the
    interim banner, section 4.4) has to reach.
