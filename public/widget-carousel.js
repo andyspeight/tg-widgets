@@ -18,7 +18,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.3.3';
+  const VERSION = '1.3.4';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (navigation controls and structural aria-labels).
@@ -744,12 +744,24 @@
 
     _advanceBy(steps) {
       const self = this;
+      // Clear any stepper still draining from a previous multi-step jump. Without
+      // this, a second far-dot click starts a new interval over this._t2 and
+      // orphans the first, which then advances the carousel every 180ms forever —
+      // _stop(), pause-on-hover and destroy() would never reach it.
+      if (this._t2) { clearInterval(this._t2); this._t2 = null; }
       this._next();
       let remaining = steps - 1;
       if (remaining > 0) {
-        this._t2 = setInterval(function () {
-          if (!self.animating) { self._next(); remaining--; if (remaining <= 0) clearInterval(self._t2); }
+        // Capture our own id in a local so the termination branch can only ever
+        // clear THIS interval, never whatever this._t2 currently points at.
+        const id = setInterval(function () {
+          if (!self.animating) {
+            self._next();
+            remaining--;
+            if (remaining <= 0) { clearInterval(id); if (self._t2 === id) self._t2 = null; }
+          }
         }, 180);
+        this._t2 = id;
       }
       this._restart();
     }
