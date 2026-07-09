@@ -37,7 +37,7 @@
 
 import crypto from 'node:crypto';
 import { lookupClientCredentialsByRecordId } from '../_auth.js';
-import { classifyItem, describeUnclassifiedItem, aggregateTravellers } from '../_lib/travelify-items.js';
+import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape } from '../_lib/travelify-items.js';
 
 const AIRTABLE_BASE = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
 const CLIENTS_TABLE = 'tblikekpaTKraMktZ';
@@ -802,6 +802,10 @@ function trimOrder(raw) {
   // items.find(). Stable; sniffed items were previously dropped so additive.
   items.sort((a, b) => (a.__sniffed ? 1 : 0) - (b.__sniffed ? 1 : 0));
   for (const it of items) delete it.__sniffed;
+  if (items.some(it => it && it.product && !it.accommodation && !it.flights
+    && !it.airportExtras && !it.transfers && !it.carRental && !it.ticketsAttractions && !it.extras)) {
+    console.warn('[retrieve-order-by-client] order/item shape (detail missing)', describeOrderShape(raw));
+  }
 
   // Compute a summary derived from the items. The widget uses these to
   // render the trip header, the countdown, and the totals row without

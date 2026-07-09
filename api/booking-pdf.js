@@ -28,7 +28,7 @@
 
 import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail, lookupClientCredentialsByRecordId } from './_auth.js';
 import { renderPdfHtml } from '../public/_pdf-template.js';
-import { classifyItem, describeUnclassifiedItem, aggregateTravellers } from './_lib/travelify-items.js';
+import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape } from './_lib/travelify-items.js';
 
 // ----- Constants (matched 1:1 with retrieve-order.js) -----
 
@@ -573,6 +573,10 @@ function trimOrder(raw) {
   // Stable; sniffed items were previously dropped so this is strictly additive.
   items.sort((a, b) => (a.__sniffed ? 1 : 0) - (b.__sniffed ? 1 : 0));
   for (const it of items) delete it.__sniffed;
+  if (items.some(it => it && it.product && !it.accommodation && !it.flights
+    && !it.airportExtras && !it.transfers && !it.carRental && !it.ticketsAttractions && !it.extras)) {
+    console.warn('[booking-pdf] order/item shape (detail missing)', describeOrderShape(raw));
+  }
   const paidToDate = (() => {
     const ps = Array.isArray(raw.payments) ? raw.payments : [];
     const sum = ps.filter(p => p && String(p.status || '').toLowerCase() === 'success')

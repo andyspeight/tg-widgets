@@ -30,7 +30,7 @@
  */
 
 import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail, lookupClientCredentialsByRecordId } from './_auth.js';
-import { classifyItem, describeUnclassifiedItem, aggregateTravellers } from './_lib/travelify-items.js';
+import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape } from './_lib/travelify-items.js';
 
 const AIRTABLE_BASE = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
 const WIDGETS_TABLE = 'tblVAThVqAjqtria2';
@@ -1011,6 +1011,14 @@ function trimOrder(raw) {
   // previously dropped entirely, so ordering them last is strictly additive.
   items.sort((a, b) => (a.__sniffed ? 1 : 0) - (b.__sniffed ? 1 : 0));
   for (const it of items) delete it.__sniffed;
+
+  // Diagnostic: if any item has a product but NO detail sub-object, the detail
+  // wasn't under dataObject (nor the alternate keys). Log the order + item key
+  // names (no values) once so we can see where Travelify actually put it.
+  if (items.some(it => it && it.product && !it.accommodation && !it.flights
+    && !it.airportExtras && !it.transfers && !it.carRental && !it.ticketsAttractions && !it.extras)) {
+    console.warn('[retrieve-order] order/item shape (detail missing)', describeOrderShape(raw));
+  }
 
   // Compute a summary derived from the items. The widget uses these to
   // render the trip header, the countdown, and the totals row without

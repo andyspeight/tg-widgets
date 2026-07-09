@@ -258,8 +258,25 @@ export function describeUnclassifiedItem(item) {
   }
   return {
     rawProduct: item && item.product != null ? String(item.product).slice(0, 40) : null,
+    // The item's own top-level keys (names only, no values) — reveals whether
+    // the detail sits under a key other than dataObject/data/detail/details/
+    // object, or isn't on the item at all.
+    itemKeys: (item && typeof item === 'object' && !Array.isArray(item)) ? Object.keys(item).slice(0, 50) : [],
     dataObjectType: Array.isArray(d) ? 'array' : (d ? 'object' : typeof (item && item.dataObject)),
     dataObjectKeys: keys,
     hasPrice: typeof (item && item.price) === 'number',
   };
+}
+
+/**
+ * PII-safe structural fingerprint of the whole order (key names only, no
+ * values) — logged once when an order has items we could not extract detail
+ * for, so we can see whether the hotel/flight detail lives at the order level
+ * (e.g. a separate products/hotels array) rather than on the item.
+ */
+export function describeOrderShape(raw) {
+  const orderKeys = (raw && typeof raw === 'object' && !Array.isArray(raw)) ? Object.keys(raw).slice(0, 60) : [];
+  const items = raw && Array.isArray(raw.items) ? raw.items : [];
+  const firstItemKeys = items[0] && typeof items[0] === 'object' ? Object.keys(items[0]).slice(0, 60) : [];
+  return { orderKeys, itemCount: items.length, firstItemKeys };
 }
