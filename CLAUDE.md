@@ -30,6 +30,8 @@ Owner: Andy Speight, CEO, Travelgenix.
   CLAUDE.md; Airtable record `recnbueCv8al70eCb`).
 - **Smart Section**: `docs/smart-section-handover.md` (Airtable record
   `recCKQZ4ucnuef2Ii`).
+- **Email Signature**: `docs/email-signature-handover.md` (Airtable record
+  `recYKgvuON4dFQWfa`).
 
 Living project state lives in Airtable: base `appj9tksreHOwkhYg`, table
 `tblpyhPNhiQg3XkkT` (Projects). Read the record at the start of a session that

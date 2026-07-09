@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Email Signature — Travelgenix Widget Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #F8FAFC; color: #0F172A; min-height: 100vh; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .demo-bar { background: rgba(255,255,255,.85); backdrop-filter: blur(8px); border-bottom: 1px solid #E2E8F0; padding: 14px 24px; position: sticky; top: 0; z-index: 100; }
+  .demo-bar-inner { max-width: 1080px; margin: 0 auto; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .demo-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; }
+  .demo-brand-mark { width: 32px; height: 32px; border-radius: 9px; background: linear-gradient(135deg, #1B2B5B, #00B4D8); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px; }
+  .demo-cta { margin-left: auto; }
+  .demo-cta a { display: inline-block; background: #1B2B5B; color: #fff; text-decoration: none; font-weight: 600; font-size: 13px; padding: 9px 16px; border-radius: 8px; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 48px 24px 80px; }
+  .hero { text-align: center; max-width: 680px; margin: 0 auto 40px; }
+  .hero .eyebrow { text-transform: uppercase; letter-spacing: .08em; font-size: 12px; font-weight: 700; color: #00B4D8; }
+  .hero h1 { font-size: 38px; line-height: 1.15; letter-spacing: -0.02em; margin: 10px 0 14px; }
+  .hero p { font-size: 17px; color: #475569; }
+  .stage { background: #fff; border: 1px solid #E2E8F0; border-radius: 18px; padding: 28px; box-shadow: 0 8px 30px rgba(15,23,42,.06); }
+  .cols { display: grid; grid-template-columns: 1fr; gap: 28px; }
+  .points { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 40px; }
+  .points li { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px; }
+  .points h3 { font-size: 15px; margin-bottom: 6px; }
+  .points p { font-size: 14px; color: #64748B; }
+</style>
+</head>
+<body>
+
+<div class="demo-bar">
+  <div class="demo-bar-inner">
+    <div class="demo-brand"><span class="demo-brand-mark">T</span> Travelgenix Widgets</div>
+    <div class="demo-cta"><a href="/editor-emailsig">Build your own</a></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="eyebrow">Email Signature</div>
+    <h1>A branded signature for every inbox</h1>
+    <p>Design it once, then copy it straight into Gmail, Outlook or Apple Mail. Add your logo, a book-now button, your ABTA and ATOL numbers, and a promo banner you can update any time without touching the signature again.</p>
+  </div>
+
+  <div class="stage">
+    <div class="cols">
+      <!-- Live widget: inline config so the demo needs no saved id -->
+      <div data-tg-widget="emailsig" data-tg-config='{"template":"classic","theme":{"accent":"#1B2B5B","text":"#333333","muted":"#8a8f98","font":"Arial, Helvetica, sans-serif","fontSize":14},"person":{"name":"Jane Doe","title":"Travel Consultant","company":"Sunshine Travel"},"contact":{"phone":"+44 20 1234 5678","mobile":"+44 7700 900000","email":"jane@sunshinetravel.co.uk","website":"sunshinetravel.co.uk","address":"12 High Street, London"},"cta":{"enabled":true,"label":"Book your next trip","url":"https://sunshinetravel.co.uk/book"},"socials":[{"network":"facebook","url":"https://facebook.com/sunshinetravel"},{"network":"instagram","url":"https://instagram.com/sunshinetravel"},{"network":"linkedin","url":"https://linkedin.com/company/sunshinetravel"}],"travel":{"showBadges":true,"abta":"Y1234","atol":"5678","trustpilotRating":"4.8","trustpilotUrl":"https://uk.trustpilot.com/review/sunshinetravel.co.uk"},"banner":{"enabled":false},"tracking":{"openPixel":false},"disclaimer":"This email and any attachments are confidential and intended solely for the addressee. If you are not the intended recipient please delete it."}'></div>
+    </div>
+  </div>
+
+  <ul class="points">
+    <li><h3>Works everywhere</h3><p>Email-safe HTML with inline styles and no scripts, so it renders in Gmail, Outlook, Apple Mail and on your phone.</p></li>
+    <li><h3>Copy and paste</h3><p>Grab the ready-to-paste signature or the raw HTML, with step-by-step install guides for every major client.</p></li>
+    <li><h3>Updatable banner</h3><p>Your promo banner is served by Travelgenix, so you can swap the offer later without re-pasting the signature.</p></li>
+    <li><h3>Travel ready</h3><p>Show ABTA and ATOL numbers and a Trustpilot rating to build trust on every email you send.</p></li>
+  </ul>
+</div>
+
+<script src="/widget-emailsig.js"></script>
+</body>
+</html>
