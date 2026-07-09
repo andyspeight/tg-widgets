@@ -1124,9 +1124,24 @@
       ? ` · <span style="color:var(--err); font-weight:700">Redis not configured — the map is running on the bundled seed file</span>`
       : '';
     return `<div style="padding:10px 18px; font-size:12px; color:var(--muted); border-bottom:1px solid var(--border); background:#FBFCFE">
-      <b style="color:var(--text)">${grandTotal.toLocaleString('en-GB')}</b> offers stored from
-      <b style="color:var(--text)">${supplierCount.toLocaleString('en-GB')}</b> supplier${supplierCount === 1 ? '' : 's'} ·
+      <b style="color:var(--text)">${grandTotal.toLocaleString('en-GB')}</b> offers stored ·
+      <b style="color:var(--text)">${supplierCount.toLocaleString('en-GB')}</b> named supplier${supplierCount === 1 ? '' : 's'} the operator packages, hotels and flights come from ·
       map summary rebuilt <b style="color:var(--text)">${esc(gen)}</b>${namesNote}${redisNote}
+    </div>`;
+  }
+
+  // Prominent banner for the dynamic-package pool: the bulk of inventory that is
+  // NOT tied to any one supplier and can never be switched on/off per client.
+  // Making this explicit is what turns "why does my client see nothing" from a
+  // support ticket into a glance.
+  function dynamicPackagesCallout(dyn, grandTotal) {
+    if (!dyn || !dyn.count) return '';
+    const pct = grandTotal ? Math.round((dyn.count / grandTotal) * 100) : 0;
+    const from = dyn.fromPP != null ? money(dyn.fromPP, 'GBP') : '';
+    const op = dyn.topOperator ? ` · mostly ${esc(dyn.topOperator)}` : '';
+    return `<div style="display:flex; gap:10px; align-items:flex-start; padding:11px 18px; background:#EEF4FF; border-bottom:1px solid #C7D7FE; font-size:12.5px; line-height:1.5; color:#3730A3">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto;margin-top:1px"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+      <span><b>Dynamic packages — ${dyn.count.toLocaleString('en-GB')} offers (${pct}% of the cache)</b> across ${dyn.countryCount || 0} countr${dyn.countryCount === 1 ? 'y' : 'ies'}${from ? `, from ${esc(from)} pp` : ''}${op}. Flight + hotel assembled from two different suppliers, so they belong to no single operator and <b>can't be restricted per client</b> — they always show. The suppliers below are the ones a client's selection can actually gate.</span>
     </div>`;
   }
 
@@ -1136,26 +1151,27 @@
     const master = SUPPLIERS_MASTER || new Map();
     const raw = CACHE.suppliers || [];
     const grandTotal = raw.reduce((s, x) => s + (x.count || 0), 0);
+    const dyn = raw.find(s => s.key === 'Dynamic' || s.prodType === 'Dynamic') || null;
 
-    // Group the per-type supplier keys by resolved name so one company reads as
-    // a single row. Unresolved ids show as "Supplier #id"; offers with no id
-    // (fetched before the sid feed) collect under one "unknown" row.
-    const groups = new Map(); // name → { name, isPremium, unresolved, byType, total, fromPP }
+    // Group the attributable supplier keys by resolved name so one company reads
+    // as a single row (the same id repeats across product types). The dynamic
+    // pool is handled separately in the callout above. Unresolved ids show as
+    // "Supplier #id" and are flagged not-selectable.
+    const groups = new Map(); // name → { name, isPremium, selectable, byType, total, fromPP, hint }
     for (const s of raw) {
+      if (s.key === 'Dynamic' || s.prodType === 'Dynamic') continue;
       const meta = master.get(s.key);
       const name = meta ? meta.name
         : s.id == null ? 'Unknown supplier (no id)'
         : ('Supplier #' + s.id);
       let g = groups.get(name);
-      if (!g) { g = { name, isPremium: false, unresolved: false, noId: false, byType: { Packages: 0, Accommodation: 0, Flights: 0 }, total: 0, fromPP: null, hint: null, _topKeyCount: 0 }; groups.set(name, g); }
+      if (!g) { g = { name, isPremium: false, selectable: false, unnamed: false, byType: { Packages: 0, Accommodation: 0, Flights: 0 }, total: 0, fromPP: null, hint: null, _topKeyCount: 0 }; groups.set(name, g); }
       g.byType[s.prodType] = (g.byType[s.prodType] || 0) + (s.count || 0);
       g.total += (s.count || 0);
-      if (meta && meta.isPremium) g.isPremium = true;
-      if (!meta && s.id != null) g.unresolved = true;
-      if (s.id == null) g.noId = true;
+      if (meta) { g.isPremium = g.isPremium || !!meta.isPremium; g.selectable = true; }
+      else g.unnamed = true;
       if (s.fromPP != null && (g.fromPP == null || s.fromPP < g.fromPP)) g.fromPP = s.fromPP;
-      // Carry the operator/carrier hint from the group's dominant sub-key, so
-      // an unnamed supplier still shows who is behind its offers.
+      // Carry the operator/carrier hint from the group's dominant sub-key.
       if ((s.count || 0) > g._topKeyCount) { g._topKeyCount = s.count || 0; g.hint = s.topOperator || s.topCarrier || g.hint; }
     }
 
@@ -1166,26 +1182,26 @@
 
     $('tc-suppliers').textContent = groups.size;
 
+    const callout = dynamicPackagesCallout(dyn, grandTotal);
+
     if (!rows.length) {
       const msg = q ? 'No suppliers match your search.'
         : CACHE.redisConfigured === false ? 'Redis is not configured — there are no cached offers to summarise.'
-        : 'The cache is empty. Run a rebuild to fill it.';
-      $('table-host').innerHTML = suppliersMetaLine(grandTotal, groups.size) + `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div>${esc(msg)}</div></div>`;
+        : 'The cache holds only dynamic packages — no named suppliers to restrict.';
+      $('table-host').innerHTML = suppliersMetaLine(grandTotal, groups.size) + callout + `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div>${esc(msg)}</div></div>`;
       return;
     }
 
     const cell = (n) => n ? `<b>${n.toLocaleString('en-GB')}</b>` : '<span class="count-na">—</span>';
     const body = rows.map(g => {
       const tags = (g.isPremium ? ' <span class="region-tag" style="background:#EEF2FF;color:#4338CA">premium</span>' : '')
-        + (g.unresolved ? ' <span class="region-tag" style="background:#FFFBEB;color:#B45309" title="No match in Travelify\'s active supplier list — likely deactivated since these offers were cached. Showing the raw id and the operator/airline behind the offers.">unmatched</span>' : '');
-      // For a supplier we cannot name, show the operator/airline behind its
-      // offers — the practical way to identify a deactivated or unknown id.
-      const hintLine = ((g.unresolved || g.noId) && g.hint)
+        + (!g.selectable ? ' <span class="region-tag" style="background:#FFFBEB;color:#B45309" title="Not in Travelify\'s active supplier list — a client cannot switch this on or off in Control (likely deactivated since these offers were cached). Showing the raw id and the operator/airline behind the offers.">not selectable</span>' : '');
+      const hintLine = (!g.selectable && g.hint)
         ? `<div class="cc-code" title="Most common tour operator (packages / hotels) or airline (flights) across this supplier's offers — the best clue to who it is when the id is not in the active supplier list">likely: ${esc(g.hint)}</div>`
         : '';
       return `<tr>
         <td><div class="cc-name">${esc(g.name)}${tags}</div>${hintLine}</td>
-        <td class="num" title="Flight + hotel packages">${cell(g.byType.Packages)}</td>
+        <td class="num" title="Package holidays — flight + hotel from a single tour operator">${cell(g.byType.Packages)}</td>
         <td class="num" title="Hotel-only offers">${cell(g.byType.Accommodation)}</td>
         <td class="num" title="Flight-only offers">${cell(g.byType.Flights)}</td>
         <td class="num"><span class="count-pill"><b>${g.total.toLocaleString('en-GB')}</b></span></td>
@@ -1193,10 +1209,10 @@
       </tr>`;
     }).join('');
 
-    $('table-host').innerHTML = suppliersMetaLine(grandTotal, groups.size) + `<table>
+    $('table-host').innerHTML = suppliersMetaLine(grandTotal, groups.size) + callout + `<table>
       <thead><tr>
         <th>Supplier</th>
-        <th class="num">Packages</th>
+        <th class="num" title="Package holidays — one tour operator supplies both flight and hotel">Holidays</th>
         <th class="num">Hotels</th>
         <th class="num">Flights</th>
         <th class="num">Total offers</th>

@@ -76,66 +76,99 @@ function isStale(o, nowMs) {
   return false;
 }
 
-/** Per-type breakdown of one country's stored offers: count, cheapest pp,
- *  oldest/newest fetch, stale count and per-departure-airport tallies. The
- *  Cache tab's type tabs, chips and granular columns all read this. */
+// A "package" in the cache is really two products. An OPERATOR package
+// (PackageHolidays) is one tour operator — flight.sid === accommodation.sid ===
+// that operator's Packages id. A DYNAMIC package (DynamicPackages) is a flight
+// and a hotel assembled from two DIFFERENT suppliers, so it has no single
+// operator id; its flight.sid is just the flight consolidator. Roughly 70% of
+// inventory is dynamic. packageType is authoritative; the sid-inequality
+// fallback covers offers cached before packageType was carried. Mirrors the
+// widget filter so the admin view matches what clients actually see.
+const PKG_HOLIDAY = 'PackageHolidays';
+const PKG_DYNAMIC = 'DynamicPackages';
+function packageKind(o) {
+  if (o.packageType === PKG_DYNAMIC) return PKG_DYNAMIC;
+  if (o.packageType === PKG_HOLIDAY) return PKG_HOLIDAY;
+  const f = o.flightSid, a = o.accommodationSid;
+  if (Number.isFinite(f) && Number.isFinite(a) && f !== a) return PKG_DYNAMIC;
+  return PKG_HOLIDAY;
+}
+
+/** Accumulate one offer into a stats bucket (count, cheapest pp, oldest/newest
+ *  fetch, stale, per-departure-airport origins). Shared by the per-type and the
+ *  per-package-kind breakdowns. */
+function accStat(map, key, o, pp, stale) {
+  const ts = map[key] || (map[key] = {
+    count: 0, fromPP: null, oldestFetchedAt: null, newestFetchedAt: null, stale: 0, origins: {},
+  });
+  ts.count += 1;
+  if (pp != null && (ts.fromPP == null || pp < ts.fromPP)) ts.fromPP = pp;
+  if (o.fetchedAt) {
+    if (!ts.oldestFetchedAt || o.fetchedAt < ts.oldestFetchedAt) ts.oldestFetchedAt = o.fetchedAt;
+    if (!ts.newestFetchedAt || o.fetchedAt > ts.newestFetchedAt) ts.newestFetchedAt = o.fetchedAt;
+  }
+  if (stale) ts.stale += 1;
+  const k = String(o.origin || '').toUpperCase();
+  if (/^[A-Z]{3}$/.test(k)) {
+    const e = ts.origins[k] || (ts.origins[k] = { count: 0, fromPP: null });
+    e.count += 1;
+    if (pp != null && (e.fromPP == null || pp < e.fromPP)) e.fromPP = pp;
+  }
+}
+
+/** Per-type breakdown of one country's stored offers, plus a package-kind split
+ *  (Package holidays vs Dynamic). The Cache tab's type tabs, chips, columns and
+ *  the dynamic/operator split all read this. */
 function buildTypeStats(offers, nowMs) {
   const typeStats = {};
+  const packageStats = {}; // PackageHolidays / DynamicPackages — packages only
   let staleCount = 0;
   for (const o of offers) {
     if (!o) continue;
     const t = OFFER_TYPES.includes(o.type) ? o.type : 'Packages';
-    const ts = typeStats[t] || (typeStats[t] = {
-      count: 0, fromPP: null, oldestFetchedAt: null, newestFetchedAt: null, stale: 0, origins: {},
-    });
-    ts.count += 1;
     const pp = Number.isFinite(o.pricePP) ? o.pricePP : (Number.isFinite(o.price) ? o.price : null);
-    if (pp != null && (ts.fromPP == null || pp < ts.fromPP)) ts.fromPP = pp;
-    if (o.fetchedAt) {
-      if (!ts.oldestFetchedAt || o.fetchedAt < ts.oldestFetchedAt) ts.oldestFetchedAt = o.fetchedAt;
-      if (!ts.newestFetchedAt || o.fetchedAt > ts.newestFetchedAt) ts.newestFetchedAt = o.fetchedAt;
-    }
-    if (isStale(o, nowMs)) { ts.stale += 1; staleCount += 1; }
-    const k = String(o.origin || '').toUpperCase();
-    if (/^[A-Z]{3}$/.test(k)) {
-      const e = ts.origins[k] || (ts.origins[k] = { count: 0, fromPP: null });
-      e.count += 1;
-      if (pp != null && (e.fromPP == null || pp < e.fromPP)) e.fromPP = pp;
-    }
+    const stale = isStale(o, nowMs);
+    if (stale) staleCount += 1;
+    accStat(typeStats, t, o, pp, stale);
+    if (t === 'Packages') accStat(packageStats, packageKind(o), o, pp, stale);
   }
-  return { typeStats, staleCount };
+  return { typeStats, packageStats, staleCount };
 }
 
-/** The Travelify supplier id an offer belongs to, scoped to its type: hotels
- *  carry accommodationSid, flight-only offers flightSid, packages flightSid
- *  (which equals accommodationSid). Null when the offer predates the sid feed
- *  (added 3 Jul 2026) — those land in an "unknown supplier" bucket so totals
- *  still reconcile. */
-function supplierIdFor(o, prodType) {
-  const id = prodType === 'Accommodation' ? o.accommodationSid
-    : prodType === 'Flights' ? o.flightSid
-    : (o.flightSid != null ? o.flightSid : o.accommodationSid); // Packages
-  return Number.isFinite(id) ? id : null;
-}
-
-/** Fold one country's offers into a running supplier tally (keyed prodType:id
- *  to match the master supplier list). Accumulation is synchronous, so it is
+/** Fold one country's offers into a running supplier tally. Operator packages,
+ *  hotels and flights are keyed prodType:id to match the master supplier list
+ *  (so the Suppliers tab can name and flag them as client-selectable). DYNAMIC
+ *  packages collapse into ONE 'Dynamic' bucket rather than a fake per-consolidator
+ *  row, since no single supplier owns them. Accumulation is synchronous, so it is
  *  safe to share the Map across the pooled workers. */
 function tallySuppliers(offers, cc, agg) {
   for (const o of offers) {
     if (!o) continue;
     const prodType = OFFER_TYPES.includes(o.type) ? o.type : 'Packages';
-    const id = supplierIdFor(o, prodType);
-    const key = `${prodType}:${id == null ? '?' : id}`;
+    let key, id, group;
+    if (prodType === 'Packages') {
+      if (packageKind(o) === PKG_DYNAMIC) {
+        key = 'Dynamic'; id = null; group = 'Dynamic';
+      } else {
+        id = Number.isFinite(o.flightSid) ? o.flightSid
+          : (Number.isFinite(o.accommodationSid) ? o.accommodationSid : null); // operator id
+        key = `Packages:${id == null ? '?' : id}`; group = 'Packages';
+      }
+    } else if (prodType === 'Accommodation') {
+      id = Number.isFinite(o.accommodationSid) ? o.accommodationSid : null;
+      key = `Accommodation:${id == null ? '?' : id}`; group = 'Accommodation';
+    } else {
+      id = Number.isFinite(o.flightSid) ? o.flightSid : null;
+      key = `Flights:${id == null ? '?' : id}`; group = 'Flights';
+    }
     let e = agg.get(key);
-    if (!e) { e = { key, id, prodType, count: 0, fromPP: null, ccs: new Set(), ops: new Map(), carriers: new Map() }; agg.set(key, e); }
+    if (!e) { e = { key, id, prodType: group, count: 0, fromPP: null, ccs: new Set(), ops: new Map(), carriers: new Map() }; agg.set(key, e); }
     e.count += 1;
     e.ccs.add(cc);
     const pp = Number.isFinite(o.pricePP) ? o.pricePP : (Number.isFinite(o.price) ? o.price : null);
     if (pp != null && (e.fromPP == null || pp < e.fromPP)) e.fromPP = pp;
-    // Identifying hints for suppliers we cannot name from the active feed (a
-    // deactivated id keeps serving cached offers for up to 70h): the tour
-    // operator behind packages/hotels and the airline behind flights.
+    // Identifying hints: the tour operator behind packages/hotels and the airline
+    // behind flights. Names the dynamic bucket and any deactivated-id supplier.
     if (o.operatorName) e.ops.set(o.operatorName, (e.ops.get(o.operatorName) || 0) + 1);
     if (o.carrier) e.carriers.set(o.carrier, (e.carriers.get(o.carrier) || 0) + 1);
   }
@@ -220,7 +253,12 @@ export default async function handler(req, res) {
       if (!stored.exists || !stored.offers.length) {
         return res.status(200).json({ ok: true, country: cc, exists: false, count: 0, offers: [] });
       }
-      const typeParam = OFFER_TYPES.includes(String(q.type || '').trim()) ? String(q.type).trim() : null;
+      // ?type accepts a stored type (Packages|Accommodation|Flights) OR a
+      // package kind (PackageHolidays|DynamicPackages) — the latter scopes to
+      // Packages offers of that kind so the browse view can drill into the split.
+      const rawType = String(q.type || '').trim();
+      const typeParam = OFFER_TYPES.includes(rawType) ? rawType : null;
+      const kindParam = (rawType === PKG_HOLIDAY || rawType === PKG_DYNAMIC) ? rawType : null;
       const origins = String(q.origins || '')
         .split(',')
         .map((s) => s.trim().toUpperCase())
@@ -229,9 +267,9 @@ export default async function handler(req, res) {
       const originSet = origins.length ? new Set(origins) : null;
       const offset = Math.max(0, parseInt(q.offset, 10) || 0);
       const limit = Math.min(MAX_LIMIT, Math.max(1, parseInt(q.limit, 10) || DEFAULT_LIMIT));
-      let pool = typeParam
-        ? stored.offers.filter((o) => o && (o.type || 'Packages') === typeParam)
-        : stored.offers;
+      let pool = stored.offers;
+      if (typeParam) pool = pool.filter((o) => o && (o.type || 'Packages') === typeParam);
+      else if (kindParam) pool = pool.filter((o) => o && (o.type || 'Packages') === 'Packages' && packageKind(o) === kindParam);
       if (originSet) pool = pool.filter((o) => o && originSet.has(String(o.origin || '').toUpperCase()));
       const sorted = pool.slice().sort(byCheapest);
       return res.status(200).json({
@@ -240,7 +278,7 @@ export default async function handler(req, res) {
         exists: true,
         refreshedAt: stored.refreshedAt || null,
         totalStored: stored.offers.length,
-        appliedType: typeParam,
+        appliedType: typeParam || kindParam,
         appliedOrigins: origins,
         count: sorted.length,
         offset,
@@ -290,11 +328,12 @@ export default async function handler(req, res) {
       // Per-type breakdown (counts, cheapest, freshness, stale, origins) —
       // the granular detail behind the Cache tab's All/Packages/Hotels/
       // Flights views.
-      const { typeStats, staleCount } = buildTypeStats(offers, nowMs);
+      const { typeStats, packageStats, staleCount } = buildTypeStats(offers, nowMs);
       return {
         countryCode: cc,
         offerCount: offers.length,
         typeStats,
+        packageStats,
         staleCount,
         refreshedAt: stored.refreshedAt,
         oldestFetchedAt,
