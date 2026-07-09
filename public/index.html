@@ -1085,7 +1085,15 @@ async function renderMyWidgets(opts = {}) {
     }
     const r = await fetch('/api/widget-list', fetchOpts);
     if (r.ok) { myWidgetData = await r.json(); }
-  } catch(e) { myWidgetData = []; }
+  } catch(e) {
+    // Root cause of the "copy/delete does nothing" bug: a transient refresh
+    // failure (a backgrounded tab aborting the fetch, a network blip) used to
+    // wipe myWidgetData to []. If a type modal was open, its buttons then
+    // looked their widget up by id, found nothing, and silently bailed. Keep
+    // the last-known list on a transient failure; the next good refresh
+    // replaces it. On first load it is already [] so nothing is lost.
+    console.warn('[renderMyWidgets] widget-list refresh failed, keeping last list:', e && e.message);
+  }
 
   const grid = document.getElementById('myGrid');
   if (!myWidgetData.length) {
@@ -1155,7 +1163,7 @@ function openTypeModal(airtableType) {
         Edit
       </a>
       <button class="type-modal-item-btn type-modal-item-btn-copy" title="Duplicate this widget" aria-label="Copy widget"
-              onclick="copyWidget('${esc(w.widgetId)}', this)">
+              onclick="copyWidget('${esc(w.widgetId)}', this, '${esc(w.type || '')}')">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;vertical-align:middle"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
         Copy
       </button>
@@ -1214,7 +1222,11 @@ document.addEventListener('keydown', (e) => {
 function confirmDeleteWidget(widgetId) {
   const w = myWidgetData.find(x => x.widgetId === widgetId);
   if (!w) {
+    // Fail loud, not silent (the copy/delete "nothing happens" class). Delete
+    // needs the name for the confirm copy, so unlike copy it can't proceed
+    // blind — but it must tell the user why instead of doing nothing.
     console.warn('[confirmDelete] widget not found in local state:', widgetId);
+    showToast('Could not open that widget just now. Please refresh and try again', 'err');
     return;
   }
   const widgetName = w.name || 'Untitled';
@@ -1328,17 +1340,24 @@ async function performDeleteWidget() {
  *      show a success toast naming the new widget
  *   4. On failure: re-enable the button, restore label, show error toast
  */
-async function copyWidget(widgetId, btn) {
-  const w = myWidgetData.find(x => x.widgetId === widgetId);
-  if (!w) {
-    console.warn('[copyWidget] widget not found in local state:', widgetId);
-    return;
-  }
+async function copyWidget(widgetId, btn, widgetType) {
+  if (!widgetId) { showToast('Could not copy widget (missing id)', 'err'); return; }
+
+  // Resolve the widget type from the button itself, NOT from a fresh
+  // myWidgetData lookup. A background widget-list refresh that failed (e.g. a
+  // backgrounded tab aborting the fetch) empties myWidgetData while the modal
+  // stays open, and the old code then hit `if (!w) return` and did nothing at
+  // all — no request, no toast. That was the suite-wide "copy does nothing"
+  // bug. The type now travels with the click, so copy no longer depends on
+  // local state being fresh. Fall back to a lookup only for any legacy caller,
+  // then to the generic endpoint, and never bail silently.
+  let type = widgetType || '';
+  if (!type) { const w = myWidgetData.find(x => x.widgetId === widgetId); type = (w && w.type) || ''; }
 
   // Enquiry Forms go to their dedicated endpoint (richer storage shape).
-  const isEnquiry = w.type === 'Enquiry Form';
+  const isEnquiry = type === 'Enquiry Form';
   const endpoint = isEnquiry ? '/api/enquiry-form-copy' : '/api/widget-copy';
-  const airtableType = w.type;
+  const airtableType = type;
 
   // Disable + visual feedback. Stash original markup so we can restore it.
   const originalHTML = btn.innerHTML;
@@ -1383,7 +1402,7 @@ async function copyWidget(widgetId, btn) {
     // If the modal was open before this action it'll have stayed open
     // (renderMyWidgets only touches #myGrid, not the modal), so we
     // just repaint its contents.
-    if (document.getElementById('typeModal').classList.contains('open')) {
+    if (airtableType && document.getElementById('typeModal').classList.contains('open')) {
       openTypeModal(airtableType);
     }
   } catch (err) {
