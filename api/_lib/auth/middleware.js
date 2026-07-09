@@ -23,6 +23,7 @@ import { jsonError } from './http.js';
 import { readSessionCookie } from './cookie.js';
 import { resolveUserPermissions } from './permissions.js';
 import { isStaffEmail } from './staff.js';
+import { resolveActAs } from './actas.js';
 
 /**
  * Extract a session token from either the Authorization header (Bearer)
@@ -139,6 +140,25 @@ export async function requireAuth(req, res) {
     clientRecordId = userClientIds[0] || null;
   }
 
+  // Scoped "act as client" overlay (staff only). A per-request signed grant in
+  // the X-TG-Act-As header lets a staff member act as one client for THIS
+  // request only, without the shared tg_session cookie changing identity — so
+  // acting as a client in one tool no longer flips every other tool (the
+  // July 2026 calendar incident). See docs/act-as-scoping-spec.md.
+  //
+  // Additive and dormant until the switcher starts sending the header: with no
+  // header, resolution is exactly as above. Fail closed: any invalid, expired,
+  // or mismatched grant is ignored and the request runs as the real staff user,
+  // never as the target. The grant is honoured only for staff and only when its
+  // staffUserId matches the caller, so a leaked grant cannot be replayed by
+  // someone else.
+  let actingAs = null;
+  const act = resolveActAs({ isStaff, req, userRecordId: userRec.id });
+  if (act) {
+    clientRecordId = act.targetClientId;
+    actingAs = { realUserId: userRec.id, clientRecordId: act.targetClientId };
+  }
+
   // Touch the session asynchronously; don't await
   touchSession(session.recordId).catch(() => {});
 
@@ -156,7 +176,12 @@ export async function requireAuth(req, res) {
     fullName: f[USERS.fields.fullName] || '',
     sessionRecordId: session.recordId,
     sessionId: session.sessionId,
-    permissions
+    permissions,
+    // null normally; { realUserId, clientRecordId } when this request is a
+    // staff act-as. userRecordId always stays the real staff user, so audit
+    // and "who did this" reads true; clientRecordId is the target being acted
+    // as. Consumers that must know use ctx.actingAs (e.g. to tag writes).
+    actingAs,
   };
 }
 
