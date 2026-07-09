@@ -22,7 +22,7 @@
   .intro .wrap { max-width: 1080px; margin: 0 auto; padding: 44px 22px 28px; }
   .intro .kicker { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #A5B4FC; margin-bottom: 12px; }
   .intro h1 { margin: 0 0 12px; font-size: 38px; font-weight: 900; line-height: 1.08; max-width: 720px; }
-  .intro p { margin: 0; max-width: 620px; font-size: 16px; line-height: 1.6; color: #CBD5E1; }
+  .intro p { margin: 0; max-width: 640px; font-size: 16px; line-height: 1.6; color: #CBD5E1; }
 
   /* Persona control */
   .persona { position: sticky; top: 0; z-index: 60; background: rgba(11,21,51,.92); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(255,255,255,.12); }
@@ -41,6 +41,9 @@
   .summary { max-width: 1080px; margin: 0 auto; padding: 14px 22px 0; }
   .summary-inner { background: #EEF2FF; border: 1px solid #C7D2FE; border-radius: 12px; padding: 12px 16px; font-size: 13.5px; color: #3730A3; line-height: 1.5; }
   .summary-inner b { color: var(--indigo); }
+  .embed-note { max-width: 1080px; margin: 10px auto 0; padding: 0 22px; }
+  .embed-note-inner { display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--sub); background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 9px 14px; }
+  .embed-note-inner svg { width: 16px; height: 16px; color: var(--indigo); flex: none; }
 
   /* Mock site */
   .site { max-width: 1080px; margin: 0 auto; padding: 18px 22px 40px; }
@@ -57,15 +60,92 @@
   .nav .links span { font-size: 13px; color: var(--sub); font-weight: 500; }
 
   .content { padding: 0 0 8px; }
-  .hero-base { position: relative; padding: 46px 30px; color: #fff; background: linear-gradient(120deg, rgba(15,23,42,.78), rgba(67,56,202,.62)), linear-gradient(120deg, #1B2B5B, #4338CA 60%, #00B4D8); }
+  .hero-base { position: relative; padding: 46px 30px; color: #fff; background-color: #1B2B5B; background-image: linear-gradient(120deg, rgba(15,23,42,.72), rgba(67,56,202,.55)), url('https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=1200&q=70'); background-size: cover; background-position: center; }
   .hero-base h2 { margin: 0 0 8px; font-size: 30px; font-weight: 900; max-width: 560px; }
   .hero-base p { margin: 0; font-size: 15px; color: #E2E8F0; max-width: 480px; }
   .search-mock { margin-top: 22px; display: flex; gap: 8px; flex-wrap: wrap; max-width: 560px; }
-  .search-mock .field { flex: 1; min-width: 120px; background: rgba(255,255,255,.92); border-radius: 9px; padding: 11px 14px; font-size: 12.5px; color: var(--muted); font-weight: 600; }
+  .search-mock .field { flex: 1; min-width: 120px; background: rgba(255,255,255,.94); border-radius: 9px; padding: 11px 14px; font-size: 12.5px; color: var(--muted); font-weight: 600; }
   .search-mock .go { background: var(--cyan); color: var(--navy); border-radius: 9px; padding: 11px 20px; font-size: 13px; font-weight: 800; }
 
   .row { padding: 22px 30px; }
   .row-title { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+
+  /* Smart Section managed blocks */
+  .ss { position: relative; margin: 0 30px 18px; transition: opacity .25s ease; }
+  .ss-tag { display: none; position: absolute; top: -9px; left: 16px; z-index: 5; background: var(--indigo); color: #fff; font-size: 9.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; padding: 2px 9px; border-radius: 999px; box-shadow: 0 2px 8px rgba(67,56,202,.4); }
+  body.show-tags .ss { outline: 2px dashed rgba(67,56,202,.55); outline-offset: 4px; border-radius: 14px; }
+  body.show-tags .ss-tag { display: inline-block; }
+
+  /* Section shell */
+  .sec { border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: #fff; }
+  .sec-head { padding: 16px 20px 4px; }
+  .sec-head.on-dark { color: #fff; }
+  .sec-eyebrow { font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; opacity: .8; margin: 0 0 4px; }
+  .sec-title { font-size: 19px; font-weight: 800; margin: 0; }
+  .sec-sub { font-size: 13px; margin: 4px 0 0; opacity: .85; }
+
+  /* Offer cards */
+  .ocards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; padding: 14px 20px 20px; }
+  .ocards.three { grid-template-columns: repeat(3, 1fr); }
+  .ocard { border: 1px solid var(--line); border-radius: 13px; overflow: hidden; background: #fff; display: flex; flex-direction: column; }
+  .ocard .ph { height: 118px; background-size: cover; background-position: center; position: relative; }
+  .ocard .bd { padding: 11px 13px; display: flex; flex-direction: column; flex: 1; }
+  .ocard .nm { font-size: 13.5px; font-weight: 800; color: var(--ink); }
+  .ocard .mt { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .ocard .stars { color: #FBBF24; font-size: 11px; letter-spacing: 1px; margin-top: 4px; }
+  .ocard .foot { display: flex; align-items: flex-end; justify-content: space-between; margin-top: auto; padding-top: 8px; }
+  .ocard .price .was { font-size: 11px; color: var(--muted); text-decoration: line-through; }
+  .ocard .price .now { font-size: 17px; font-weight: 900; color: var(--ink); }
+  .ocard .price .now span { font-size: 10px; font-weight: 600; color: var(--muted); }
+  .ocard .view { font-size: 11px; font-weight: 800; color: var(--indigo); }
+  .pbadge { position: absolute; top: 9px; left: 9px; font-size: 9.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; padding: 3px 8px; border-radius: 7px; color: #fff; }
+  .pbadge.heart { background: #DB2777; } .pbadge.save { background: #059669; } .pbadge.member { background: #B45309; } .pbadge.social { background: #4F46E5; }
+
+  /* Welcome hero card (new visitor) */
+  .whero { position: relative; color: #fff; padding: 26px 24px; background-color: #047857; background-image: linear-gradient(115deg, rgba(4,120,87,.86), rgba(6,95,70,.55)), url('https://images.unsplash.com/photo-1510097467424-192d713fd8b2?auto=format&fit=crop&w=1000&q=70'); background-size: cover; background-position: center; }
+  .whero .eyebrow { font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #A7F3D0; }
+  .whero h3 { margin: 6px 0 6px; font-size: 23px; font-weight: 900; max-width: 460px; }
+  .whero p { margin: 0 0 14px; font-size: 13.5px; opacity: .92; max-width: 440px; }
+  .whero .cta-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .whero .code { border: 1.5px dashed rgba(255,255,255,.7); border-radius: 8px; padding: 7px 12px; font-weight: 800; font-size: 13px; letter-spacing: .06em; }
+  .whero .btn { background: #fff; color: #047857; font-weight: 800; font-size: 12.5px; padding: 9px 17px; border-radius: 999px; }
+
+  /* Experts card */
+  .experts { display: flex; align-items: center; gap: 18px; padding: 18px 20px; background: linear-gradient(120deg, #0C4A6E, #0369A1); color: #fff; flex-wrap: wrap; }
+  .avatars { display: flex; }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #0369A1; margin-left: -10px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: #fff; }
+  .avatar:first-child { margin-left: 0; }
+  .experts .txt { flex: 1; min-width: 180px; }
+  .experts .txt h3 { margin: 0 0 3px; font-size: 17px; font-weight: 800; }
+  .experts .txt p { margin: 0; font-size: 12px; opacity: .85; }
+  .experts .online { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; }
+  .experts .online .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #34D399; box-shadow: 0 0 0 3px rgba(52,211,153,.3); }
+  .experts .btn { background: #fff; color: #0369A1; font-weight: 800; font-size: 13px; padding: 10px 18px; border-radius: 999px; white-space: nowrap; }
+
+  /* Callback (after hours) */
+  .callback { padding: 18px 20px; background: #F8FAFC; border: 1px solid var(--line); border-radius: 16px; }
+  .callback h3 { margin: 0 0 3px; font-size: 16px; font-weight: 800; color: var(--ink); }
+  .callback p { margin: 0 0 12px; font-size: 12.5px; color: var(--muted); }
+  .cbform { display: flex; gap: 8px; flex-wrap: wrap; }
+  .cbform .f { flex: 1; min-width: 130px; background: #fff; border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px; font-size: 12.5px; color: var(--muted); }
+  .cbform .btn { background: var(--navy); color: #fff; font-weight: 800; font-size: 12.5px; padding: 10px 18px; border-radius: 9px; white-space: nowrap; }
+
+  /* Weekend countdown wrap */
+  .cd-wrap { padding: 4px 20px 18px; }
+
+  /* App card (mobile) */
+  .appcard { display: flex; align-items: center; gap: 20px; padding: 18px 22px; background: linear-gradient(120deg, #4C1D95, #7C3AED); color: #fff; flex-wrap: wrap; }
+  .phone { width: 66px; height: 128px; border-radius: 14px; background: #1E1B4B; border: 3px solid rgba(255,255,255,.85); position: relative; flex: none; box-shadow: 0 8px 22px rgba(0,0,0,.28); }
+  .phone::before { content: ""; position: absolute; top: 7px; left: 50%; transform: translateX(-50%); width: 22px; height: 4px; border-radius: 3px; background: rgba(255,255,255,.5); }
+  .phone .scr { position: absolute; inset: 13px 7px 9px; border-radius: 7px; background: linear-gradient(160deg, #A78BFA, #22D3EE); }
+  .appcard .txt { flex: 1; min-width: 180px; }
+  .appcard .txt h3 { margin: 0 0 4px; font-size: 18px; font-weight: 800; }
+  .appcard .txt p { margin: 0 0 12px; font-size: 12.5px; opacity: .9; }
+  .stores { display: flex; gap: 8px; flex-wrap: wrap; }
+  .store { display: inline-flex; align-items: center; gap: 7px; background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.25); border-radius: 9px; padding: 7px 12px; font-size: 11px; font-weight: 700; }
+  .store svg { width: 15px; height: 15px; }
+
+  /* Standard tiles */
   .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
   .tile { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
   .tile .pic { height: 84px; background-size: cover; background-position: center; }
@@ -74,27 +154,6 @@
   .tile .meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
   .tile .price { margin-top: 8px; font-size: 15px; font-weight: 800; color: var(--ink); }
   .tile .price span { font-size: 10px; font-weight: 600; color: var(--muted); }
-
-  /* Smart Section managed blocks */
-  .ss { position: relative; transition: opacity .25s ease; }
-  .ss-tag { display: none; position: absolute; top: -9px; left: 16px; z-index: 5; background: var(--indigo); color: #fff; font-size: 9.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; padding: 2px 9px; border-radius: 999px; box-shadow: 0 2px 8px rgba(67,56,202,.4); }
-  body.show-tags .ss { outline: 2px dashed rgba(67,56,202,.55); outline-offset: 3px; border-radius: 12px; }
-  body.show-tags .ss-tag { display: inline-block; }
-
-  .band { margin: 0 30px 18px; padding: 22px 24px; border-radius: 14px; color: #fff; }
-  .band h3 { margin: 0 0 5px; font-size: 19px; font-weight: 800; }
-  .band p { margin: 0 0 14px; font-size: 13.5px; opacity: .92; max-width: 460px; line-height: 1.5; }
-  .band .btn { display: inline-block; padding: 9px 17px; border-radius: 999px; background: #fff; font-weight: 800; font-size: 12.5px; }
-  .b-plum { background: linear-gradient(120deg, #6D28D9, #DB2777); } .b-plum .btn { color: #6D28D9; }
-  .b-emerald { background: linear-gradient(120deg, #047857, #10B981); } .b-emerald .btn { color: #047857; }
-  .b-amber { background: linear-gradient(120deg, #B45309, #F59E0B); } .b-amber .btn { color: #B45309; }
-  .b-sky { background: linear-gradient(120deg, #0369A1, #38BDF8); } .b-sky .btn { color: #0369A1; }
-  .b-rose { background: linear-gradient(120deg, #9F1239, #FB7185); } .b-rose .btn { color: #9F1239; }
-  .b-slate { background: linear-gradient(120deg, #334155, #64748B); } .b-slate .btn { color: #334155; }
-  .band.mini { display: flex; align-items: center; gap: 14px; padding: 14px 20px; }
-  .band.mini h3 { font-size: 15px; margin: 0; }
-  .band.mini p { display: none; }
-  .band.mini .btn { margin-left: auto; }
 
   /* Ways-to-use cards */
   .ways { max-width: 1080px; margin: 0 auto; padding: 20px 22px 10px; }
@@ -125,14 +184,15 @@
   .cta-inner h2 { margin: 0; font-size: 22px; font-weight: 800; flex: 1; min-width: 240px; }
   .cta-inner a { background: #fff; color: var(--navy); font-weight: 800; font-size: 14px; padding: 12px 22px; border-radius: 999px; text-decoration: none; white-space: nowrap; }
   .foot { text-align: center; color: var(--muted); font-size: 12.5px; padding: 34px 22px 44px; }
+  .foot a { color: var(--indigo); }
 
   @media (max-width: 720px) {
     .intro h1 { font-size: 28px; }
-    .tiles, .cards { grid-template-columns: 1fr; }
+    .tiles, .cards, .ocards, .ocards.three { grid-template-columns: 1fr; }
     .persona .wrap { gap: 12px; }
     .persona .spacer { display: none; }
     .hero-base { padding: 32px 20px; }
-    .band, .row { margin-left: 14px; margin-right: 14px; padding-left: 18px; padding-right: 18px; }
+    .ss, .row { margin-left: 14px; margin-right: 14px; }
   }
 </style>
 </head>
@@ -143,7 +203,7 @@
   <div class="wrap">
     <span class="kicker">Smart Section · live demo</span>
     <h1>One website. The right message for every visitor.</h1>
-    <p>Below is a travel agency homepage. Change the visitor along the top and watch the page rearrange itself, new offers appear, others step aside, no separate pages and no developer. That is Smart Section.</p>
+    <p>Below is a travel agency homepage. Change the visitor along the top and watch the page rearrange itself, new offers appear, others step aside, no separate pages and no developer. Every managed block holds real content: photos, offer cards, forms, even other Travelgenix widgets.</p>
   </div>
 </div>
 
@@ -190,6 +250,12 @@
 <div class="summary">
   <div class="summary-inner" id="summary">This visitor sees the standard page.</div>
 </div>
+<div class="embed-note">
+  <div class="embed-note-inner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+    A Smart Section holds anything you can put on a page. The weekend section below has a real, live Travelgenix Countdown widget running inside it. Switch to Weekend to see it.
+  </div>
+</div>
 
 <!-- Mock travel site -->
 <div class="site">
@@ -206,7 +272,7 @@
 
     <div class="content">
 
-      <!-- HERO with two swappable Smart Sections -->
+      <!-- HERO -->
       <div class="hero-base">
         <h2>Handpicked holidays, sorted by real people.</h2>
         <p>Tailor-made trips from a team that has been there. Tell us where you dream of going.</p>
@@ -217,80 +283,140 @@
         </div>
       </div>
 
-      <!-- New visitor greeting -->
+      <!-- New visitor: welcome hero -->
       <div class="ss" data-ss-label="First-time offer" data-ss='{"match":"all","rules":[{"type":"visitorType","value":"new"}]}'>
         <span class="ss-tag">Smart Section</span>
-        <div class="band b-emerald">
-          <h3>First time with Atlas? Here is 5% off your first booking.</h3>
-          <p>New here, so here is a little welcome. Use code HELLO5 at checkout on any holiday.</p>
-          <span class="btn">Claim 5% off</span>
+        <div class="sec">
+          <div class="whero">
+            <span class="eyebrow">New here</span>
+            <h3>Your first Atlas trip is 5% off.</h3>
+            <p>Welcome. A little thank you for stopping by, on any holiday you book with us.</p>
+            <div class="cta-row">
+              <span class="code">HELLO5</span>
+              <span class="btn">Start planning</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Returning visitor greeting -->
+      <!-- Returning visitor: welcome back + saved trips -->
       <div class="ss" data-ss-label="Welcome back" data-ss='{"match":"all","rules":[{"type":"visitorType","value":"returning"}]}'>
         <span class="ss-tag">Smart Section</span>
-        <div class="band b-plum">
-          <h3>Welcome back. Your Santorini shortlist is ready.</h3>
-          <p>Pick up where you left off, or let us price up the trips you saved last time.</p>
-          <span class="btn">Continue planning</span>
+        <div class="sec">
+          <div class="sec-head"><p class="sec-eyebrow" style="color:#6D28D9">Welcome back</p><h3 class="sec-title">Your shortlist is ready when you are.</h3><p class="sec-sub" style="color:var(--sub)">Pick up where you left off, or let us price up the trips you saved.</p></div>
+          <div class="ocards">
+            <div class="ocard">
+              <div class="ph" style="background-color:#0EA5E9;background-image:url('https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=600&q=70')"><span class="pbadge heart">♥ Saved</span></div>
+              <div class="bd"><div class="nm">Santorini, Greece</div><div class="mt">7 nights · B&amp;B · 4★</div><div class="stars">★★★★★</div><div class="foot"><span class="price"><span class="now">£729<span> pp</span></span></span><span class="view">View trip →</span></div></div>
+            </div>
+            <div class="ocard">
+              <div class="ph" style="background-color:#F59E0B;background-image:url('https://images.unsplash.com/photo-1573843981267-be1999ff37cd?auto=format&fit=crop&w=600&q=70')"><span class="pbadge heart">♥ Saved</span></div>
+              <div class="bd"><div class="nm">Tenerife, Canaries</div><div class="mt">5 nights · Half board</div><div class="stars">★★★★☆</div><div class="foot"><span class="price"><span class="now">£549<span> pp</span></span></span><span class="view">View trip →</span></div></div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Newsletter thank-you -->
+      <!-- Newsletter: member offers -->
       <div class="ss" data-ss-label="Newsletter rate" data-ss='{"match":"all","rules":[{"type":"utm","param":"source","match":"is","value":"newsletter"}]}'>
         <span class="ss-tag">Smart Section</span>
-        <div class="band b-amber">
-          <h3>Thanks for opening our email. Your subscriber rate is locked in.</h3>
-          <p>Members save an extra 8% this week. It is already applied to the offers below.</p>
-          <span class="btn">See member offers</span>
+        <div class="sec">
+          <div class="sec-head"><p class="sec-eyebrow" style="color:#B45309">Subscriber exclusive</p><h3 class="sec-title">Thanks for opening our email. Your member rate is live.</h3><p class="sec-sub" style="color:var(--sub)">An extra 8% is already applied to these, just for subscribers.</p></div>
+          <div class="ocards">
+            <div class="ocard">
+              <div class="ph" style="background-color:#0284C7;background-image:url('https://images.unsplash.com/photo-1510097467424-192d713fd8b2?auto=format&fit=crop&w=600&q=70')"><span class="pbadge member">Member price</span></div>
+              <div class="bd"><div class="nm">Cancun, Mexico</div><div class="mt">7 nights · All inclusive</div><div class="foot"><span class="price"><span class="was">£999</span><br><span class="now">£899<span> pp</span></span></span><span class="view">Book →</span></div></div>
+            </div>
+            <div class="ocard">
+              <div class="ph" style="background-color:#7C3AED;background-image:url('https://images.unsplash.com/photo-1418985991508-e47386d96a71?auto=format&fit=crop&w=600&q=70')"><span class="pbadge member">Member price</span></div>
+              <div class="bd"><div class="nm">Lapland, Finland</div><div class="mt">3 nights · Santa break</div><div class="foot"><span class="price"><span class="was">£869</span><br><span class="now">£799<span> pp</span></span></span><span class="view">Book →</span></div></div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Facebook social -->
+      <!-- Facebook: social deal -->
       <div class="ss" data-ss-label="Social deal" data-ss='{"match":"all","rules":[{"type":"utm","param":"referrer","match":"contains","value":"facebook"}]}'>
         <span class="ss-tag">Smart Section</span>
-        <div class="band b-rose">
-          <h3>Saw us on Facebook? Here is your social-exclusive deal.</h3>
-          <p>A little thank you for the follow. Free lounge passes on selected long-haul trips.</p>
-          <span class="btn">Grab the deal</span>
+        <div class="sec">
+          <div class="ocards three" style="grid-template-columns: 1.4fr 1fr;">
+            <div class="ph" style="min-height:150px;border-radius:12px;background-color:#4F46E5;background-image:linear-gradient(120deg,rgba(79,70,229,.5),rgba(0,0,0,.15)),url('https://images.unsplash.com/photo-1418985991508-e47386d96a71?auto=format&fit=crop&w=700&q=70');background-size:cover;background-position:center;position:relative"><span class="pbadge social" style="top:12px;left:12px">Facebook exclusive</span></div>
+            <div style="display:flex;flex-direction:column;justify-content:center;padding:6px 4px">
+              <h3 style="margin:0 0 6px;font-size:18px;font-weight:800;color:var(--ink)">Saw us on Facebook?</h3>
+              <p style="margin:0 0 12px;font-size:12.5px;color:var(--sub);line-height:1.5">Free lounge passes on selected long-haul trips, our thank you for the follow.</p>
+              <span style="align-self:flex-start;background:#4F46E5;color:#fff;font-weight:800;font-size:12.5px;padding:9px 16px;border-radius:999px">Grab the deal</span>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- Experts online (office hours) -->
       <div class="ss" data-ss-label="Experts online" data-ss='{"match":"all","rules":[{"type":"dayOfWeek","days":[1,2,3,4,5]},{"type":"timeOfDay","from":"09:00","to":"17:00"}]}'>
         <span class="ss-tag">Smart Section</span>
-        <div class="band mini b-sky">
-          <h3>Our travel experts are online now. Call for a tailor-made quote.</h3>
-          <span class="btn">Call 01202 555 0199</span>
+        <div class="sec">
+          <div class="experts">
+            <div class="avatars">
+              <span class="avatar" style="background:linear-gradient(135deg,#F472B6,#DB2777)">JS</span>
+              <span class="avatar" style="background:linear-gradient(135deg,#38BDF8,#0284C7)">MR</span>
+              <span class="avatar" style="background:linear-gradient(135deg,#34D399,#059669)">AK</span>
+            </div>
+            <div class="txt">
+              <h3>Our travel experts are online now.</h3>
+              <p><span class="online"><span class="live-dot"></span> 3 advisers available</span> · ABTA and ATOL protected</p>
+            </div>
+            <span class="btn">Call 01202 555 0199</span>
+          </div>
         </div>
       </div>
 
       <!-- After hours (evenings + weekends) -->
       <div class="ss" data-ss-label="Leave a message" data-ss='{"match":"any","rules":[{"type":"timeOfDay","from":"17:00","to":"09:00"},{"type":"dayOfWeek","days":[0,6]}]}'>
         <span class="ss-tag">Smart Section</span>
-        <div class="band mini b-slate">
-          <h3>The team is away. Leave your number and we will call you back.</h3>
-          <span class="btn">Request a callback</span>
+        <div class="callback">
+          <h3>The team is away right now. Leave your number and we will call you back.</h3>
+          <p>We are open again weekdays from 9am. Pop your details in and we will be in touch first thing.</p>
+          <div class="cbform">
+            <span class="f">Your name</span>
+            <span class="f">Phone number</span>
+            <span class="btn">Request a callback</span>
+          </div>
         </div>
       </div>
 
-      <!-- Weekend escapes -->
+      <!-- Weekend escapes + LIVE COUNTDOWN WIDGET -->
       <div class="ss" data-ss-label="Weekend escapes" data-ss='{"match":"all","rules":[{"type":"dayOfWeek","days":[0,6]}]}'>
         <span class="ss-tag">Smart Section</span>
-        <div class="band b-amber">
-          <h3>Weekend escapes, departing soon. Book by Sunday night.</h3>
-          <p>Short breaks and last-minute sun, only while the weekend lasts.</p>
-          <span class="btn">Browse weekend deals</span>
+        <div class="sec">
+          <div class="sec-head"><p class="sec-eyebrow" style="color:#B45309">Weekend only</p><h3 class="sec-title">Weekend escapes, departing soon.</h3><p class="sec-sub" style="color:var(--sub)">Short breaks and last-minute sun. This is a real Countdown widget, dropped straight into the section.</p></div>
+          <div class="cd-wrap"><div id="wkCountdown"></div></div>
+          <div class="ocards">
+            <div class="ocard">
+              <div class="ph" style="background-color:#0284C7;background-image:url('https://images.unsplash.com/photo-1510097467424-192d713fd8b2?auto=format&fit=crop&w=600&q=70')"><span class="pbadge save">Save £180</span></div>
+              <div class="bd"><div class="nm">Costa del Sol, Spain</div><div class="mt">4 nights · departs Fri</div><div class="foot"><span class="price"><span class="now">£329<span> pp</span></span></span><span class="view">Book →</span></div></div>
+            </div>
+            <div class="ocard">
+              <div class="ph" style="background-color:#F59E0B;background-image:url('https://images.unsplash.com/photo-1573843981267-be1999ff37cd?auto=format&fit=crop&w=600&q=70')"><span class="pbadge save">Save £140</span></div>
+              <div class="bd"><div class="nm">Lisbon, Portugal</div><div class="mt">3 nights · city break</div><div class="foot"><span class="price"><span class="now">£269<span> pp</span></span></span><span class="view">Book →</span></div></div>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- Mobile app strip -->
       <div class="ss" data-ss-label="Mobile app deal" data-ss='{"match":"all","rules":[{"type":"device","devices":["mobile"]}]}'>
         <span class="ss-tag">Smart Section</span>
-        <div class="band mini b-plum">
-          <h3>On your phone? Get the Atlas app for mobile-only late deals.</h3>
-          <span class="btn">Get the app</span>
+        <div class="sec">
+          <div class="appcard">
+            <div class="phone"><span class="scr"></span></div>
+            <div class="txt">
+              <h3>On your phone? Get the Atlas app.</h3>
+              <p>Mobile-only late deals, price alerts and your trips in your pocket.</p>
+              <div class="stores">
+                <span class="store"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 1c.1 1.2-.4 2.4-1.1 3.2-.8.9-2 1.6-3.2 1.5-.1-1.2.5-2.4 1.2-3.1.8-.9 2.1-1.5 3.1-1.6zM20 17.5c-.6 1.4-.9 2-1.7 3.2-1.1 1.7-2.6 3.8-4.5 3.8-1.7 0-2.1-1.1-4.4-1.1-2.3 0-2.8 1.1-4.4 1.1-1.9 0-3.3-1.9-4.4-3.6C-.8 16.5-.4 10.9 2.9 9.2c1.2-.6 2.4-.8 3.4-.8 1.4 0 2.3 1.1 4 1.1 1.6 0 2.6-1.1 4.3-1.1.9 0 3.5.1 5.1 2.6-4.5 2.5-3.8 8.9.3 6.5z"/></svg> App Store</span>
+                <span class="store"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.6 2.3 13 11.7l-2.6 2.6L3 6.9c-.2-.2-.3-.5-.3-.8V3c0-.3.1-.5.3-.7.2-.1.4-.1.6 0zM15 13.7l3.9 2.2c.8.5.8 1.6 0 2.1L15 20.3l-2.9-2.9L15 13.7zM3 21.1V17l.9-.9 2.6 2.6-2.3 2.3c-.2.2-.4.2-.6.1-.4-.1-.6-.5-.6-1zM4.5 2.1 13 6.9l-2.4 2.4-6.7-6.7c.2-.3.4-.4.6-.5z"/></svg> Google Play</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -299,16 +425,16 @@
         <p class="row-title">This week's holidays</p>
         <div class="tiles">
           <div class="tile">
-            <div class="pic" style="background:linear-gradient(135deg,#0EA5E9,#6366F1)"></div>
+            <div class="pic" style="background-color:#0EA5E9;background-image:url('https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=600&q=70')"></div>
             <div class="body"><div class="name">Santorini, Greece</div><div class="meta">7 nights · B&amp;B · 4★</div><div class="price">£729<span> pp</span></div></div>
           </div>
           <div class="tile">
-            <div class="pic" style="background:linear-gradient(135deg,#F59E0B,#EF4444)"></div>
-            <div class="body"><div class="name">Marrakech, Morocco</div><div class="meta">5 nights · Half board</div><div class="price">£549<span> pp</span></div></div>
+            <div class="pic" style="background-color:#F59E0B;background-image:url('https://images.unsplash.com/photo-1573843981267-be1999ff37cd?auto=format&fit=crop&w=600&q=70')"></div>
+            <div class="body"><div class="name">Tenerife, Canaries</div><div class="meta">5 nights · Half board</div><div class="price">£549<span> pp</span></div></div>
           </div>
           <div class="tile">
-            <div class="pic" style="background:linear-gradient(135deg,#10B981,#0EA5E9)"></div>
-            <div class="body"><div class="name">Amalfi Coast, Italy</div><div class="meta">7 nights · Room only</div><div class="price">£899<span> pp</span></div></div>
+            <div class="pic" style="background-color:#10B981;background-image:url('https://images.unsplash.com/photo-1510097467424-192d713fd8b2?auto=format&fit=crop&w=600&q=70')"></div>
+            <div class="body"><div class="name">Cancun, Mexico</div><div class="meta">7 nights · All inclusive</div><div class="price">£899<span> pp</span></div></div>
           </div>
         </div>
       </div>
@@ -320,18 +446,18 @@
 <!-- Ways to use it -->
 <div class="ways">
   <h2>Ways travel brands use Smart Section</h2>
-  <p class="sub">Every block above is one Smart Section. Here is why each one earns its place.</p>
+  <p class="sub">Every managed block above is one Smart Section, holding real content, right down to a live widget.</p>
   <div class="cards">
     <div class="uc">
       <div class="ico" style="background:#6D28D9"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg></div>
       <h3>Welcome your regulars</h3>
-      <p>Returning visitors get a personal nudge and their saved trips. First-timers never see it.</p>
+      <p>Returning visitors get their saved trips back. First-timers get a welcome offer instead.</p>
       <span class="rule">Returning visitors</span>
     </div>
     <div class="uc">
       <div class="ico" style="background:#B45309"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg></div>
       <h3>Reward email opens</h3>
-      <p>Show a subscriber-only rate to anyone who clicked through from your newsletter.</p>
+      <p>Show a subscriber-only price to anyone who clicked through from your newsletter.</p>
       <span class="rule">Traffic from your newsletter</span>
     </div>
     <div class="uc">
@@ -341,7 +467,7 @@
       <span class="rule">Exit intent</span>
     </div>
     <div class="uc">
-      <div class="ico" style="background:#DB2777"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg></div>
+      <div class="ico" style="background:#7C3AED"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg></div>
       <h3>Push the app on mobile</h3>
       <p>App-only late deals for phone visitors, invisible on desktop where it would not fit.</p>
       <span class="rule">Mobile visitors</span>
@@ -349,13 +475,13 @@
     <div class="uc">
       <div class="ico" style="background:#0891B2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
       <h3>Staff the phones</h3>
-      <p>"Call us now" during office hours, "leave a message" the rest of the time.</p>
+      <p>"Call us now" during office hours, a callback form the rest of the time.</p>
       <span class="rule">Weekdays 9 to 5</span>
     </div>
     <div class="uc">
-      <div class="ico" style="background:#B45309"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-      <h3>Ride the weekend</h3>
-      <p>Weekend-only escapes that show on Saturday and Sunday, then quietly step aside.</p>
+      <div class="ico" style="background:#B45309"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+      <h3>Drop in another widget</h3>
+      <p>Wrap anything, even other Travelgenix widgets. The weekend section runs a live Countdown inside it.</p>
       <span class="rule">Saturday and Sunday</span>
     </div>
   </div>
@@ -392,6 +518,7 @@
 
 <script src="/tgse-rules.js"></script>
 <script src="/widget-smartsection.js"></script>
+<script src="/widget-countdown.js"></script>
 <script>
   'use strict';
 
@@ -420,7 +547,6 @@
         if (window.tgseRules) show = window.tgseRules.evaluate(JSON.parse(el.getAttribute('data-ss')), ctx).show;
       } catch (e) { show = true; } // fail open, never hide by mistake
       el.style.display = show ? '' : 'none';
-      el.style.opacity = show ? '1' : '';
       if (show) { const l = el.getAttribute('data-ss-label'); if (l) shown.push(l); }
     });
     updateSummary(shown);
@@ -430,8 +556,7 @@
     const box = document.getElementById('summary');
     box.textContent = '';
     if (!shown.length) { box.textContent = 'This visitor sees the standard page, with no extra sections.'; return; }
-    const pre = document.createTextNode('This visitor also sees: ');
-    box.appendChild(pre);
+    box.appendChild(document.createTextNode('This visitor also sees: '));
     shown.forEach((label, i) => {
       const b = document.createElement('b');
       b.textContent = label;
@@ -470,6 +595,30 @@
     } catch (err) { /* ignore */ }
     location.reload();
   });
+
+  // Drop a real, live Countdown widget inside the weekend Smart Section,
+  // targeting the upcoming Sunday night so it never expires.
+  function nextSundayISO() {
+    const d = new Date();
+    d.setDate(d.getDate() + ((7 - d.getDay()) % 7));
+    d.setHours(23, 59, 0, 0);
+    if (d.getTime() <= Date.now()) d.setDate(d.getDate() + 7);
+    return d.toISOString();
+  }
+  (function mountCountdown() {
+    const el = document.getElementById('wkCountdown');
+    if (!el || typeof window.TGCountdownWidget !== 'function') return;
+    try {
+      new window.TGCountdownWidget(el, {
+        layout: 'banner',
+        heading: 'Weekend sale ends in',
+        cta: { text: '', url: '' },
+        targetDate: nextSundayISO(),
+        display: { showDays: false, showHours: true, showMinutes: true, showSeconds: true },
+        colours: { brand: '#B45309', accent: '#F59E0B' },
+      });
+    } catch (err) { /* countdown is a bonus; never break the demo */ }
+  })();
 
   transform();
 </script>
