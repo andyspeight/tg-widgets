@@ -16,7 +16,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.3.0';
+  const VERSION = '1.4.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the spin button, result flow, lead-capture labels and
@@ -278,6 +278,12 @@
         // Wheel-label orientation. 'radial' runs names along the spoke (fits long
         // place names); 'curved' is the older around-the-wheel look.
         labelStyle: c.labelStyle === 'curved' ? 'curved' : 'radial',
+        // Thin contrast outline behind each slice label. On by default (keeps
+        // existing widgets unchanged); set false for clean, flat text.
+        labelOutline: c.labelOutline !== false,
+        // Font weight for the slice labels. Clamped to 100..900 (nearest 100),
+        // default 800. The sub-line stays lighter.
+        labelWeight: Math.max(100, Math.min(900, Math.round((Number(c.labelWeight) || 800) / 100) * 100)),
         previewMode: !!c.previewMode,
         widgetId: c.widgetId || '',
       };
@@ -340,7 +346,8 @@
         const [mx, my] = pt(mid, mainR);
         const label = rawLabel.length > 24 ? rawLabel.slice(0, 23) + '…' : rawLabel;
         const lsp = radial ? '0' : (flat ? '-0.02' : '0.03');
-        labels += `<text x="${mx.toFixed(2)}" y="${my.toFixed(2)}" transform="rotate(${rot.toFixed(1)} ${mx.toFixed(2)} ${my.toFixed(2)})" text-anchor="middle" dominant-baseline="middle" font-size="${mainFs.toFixed(2)}" font-weight="800" letter-spacing="${lsp}" fill="${tcol}" style="paint-order:stroke;stroke:${tstroke};stroke-width:.55px">${esc(label)}</text>`;
+        const outline = c.labelOutline ? ` style="paint-order:stroke;stroke:${tstroke};stroke-width:.55px"` : '';
+        labels += `<text x="${mx.toFixed(2)}" y="${my.toFixed(2)}" transform="rotate(${rot.toFixed(1)} ${mx.toFixed(2)} ${my.toFixed(2)})" text-anchor="middle" dominant-baseline="middle" font-size="${mainFs.toFixed(2)}" font-weight="${c.labelWeight}" letter-spacing="${lsp}" fill="${tcol}"${outline}>${esc(label)}</text>`;
         if (hasSub) {
           const [sx, sy] = pt(mid, subR);
           const subMax = radial ? 22 : 26;
@@ -433,7 +440,11 @@
           .sw-topbtn:disabled { opacity:.55; cursor:default; }
           .sw-hubcap { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:54px; height:54px; border-radius:50%; background:#fff; box-shadow:0 0 0 3px #E9B949, 0 4px 10px rgba(11,18,32,.3); z-index:2; }
           .sw-stage { position: relative; width: ${c.size}px; max-width: 100%; aspect-ratio: 1 / 1; margin: 0 auto; }
-          .sw-wheel { width: 100%; height: 100%; display: block; }
+          /* overflow:visible so the wheel's own drop shadow is not clipped at
+             the edges (the rim fills the 0..100 viewBox and the shadow spills
+             past it, worst at the bottom). The stage and card do not clip; peek
+             mode re-clips via .sw-stage overflow:hidden below. */
+          .sw-wheel { width: 100%; height: 100%; display: block; overflow: visible; }
           .sw-rot { transform-box: fill-box; transform-origin: 50% 50%; }
           .sw.is-peek .sw-stage { aspect-ratio: auto; height: 0; padding-bottom: 60%; overflow: hidden; }
           .sw.is-peek .sw-wheel { position: absolute; top: 0; left: 0; width: 100%; height: auto; }

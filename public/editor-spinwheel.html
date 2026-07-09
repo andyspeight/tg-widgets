@@ -291,6 +291,18 @@
               </div>
               <span class="field-hint">Along the spoke fits long place names best (they run out from the centre, so nothing breaks). Around the wheel is the older curved look, good for short words.</span>
             </div>
+            <div class="field">
+              <label class="field-label">Label weight</label>
+              <div class="slider-row">
+                <input type="range" id="weight-input" min="100" max="900" step="100" value="800">
+                <span class="slider-val" id="weight-val">Extra bold</span>
+              </div>
+              <span class="field-hint">How heavy the slice names look. Lighter weights read cleaner, heavier ones stand out more.</span>
+            </div>
+            <div class="field">
+              <div class="switch-row"><span class="switch-row-label">Text outline</span><button type="button" class="switch" id="sw-outline" aria-pressed="true"></button></div>
+              <span class="field-hint">A thin outline behind each name for contrast on busy slices. Turn off for clean, flat text.</span>
+            </div>
           </div>
         </div>
       </div>
@@ -346,7 +358,7 @@
 </div>
 
 <script src="/editor-shell.js"></script>
-<script src="/widget-spinwheel.js?v=1.3.0"></script>
+<script src="/widget-spinwheel.js?v=1.4.0"></script>
 <style>
   .pv-faux { width:100%; max-width:620px; background:#fff; border-radius:12px; box-shadow:0 1px 3px rgba(15,23,42,.08), 0 8px 32px rgba(15,23,42,.05); padding:40px; display:flex; justify-content:center; }
   .pv-faux[data-bg="dark"] { background:#0B1220; }
@@ -373,7 +385,11 @@
     style: 'premium', accent: '#0891B2', segment2: '', pointerColor: '', peek: false,
     spinColor: '', spinTextColor: '', headingColor: '', cardBg: '', cardTransparent: false,
     layout: 'card', theme: 'light', fontFamily: 'Inter', labelStyle: 'radial',
+    labelOutline: true, labelWeight: 800,
   };
+
+  const WEIGHT_NAMES = { 100: 'Thin', 200: 'Extra light', 300: 'Light', 400: 'Regular', 500: 'Medium', 600: 'Semibold', 700: 'Bold', 800: 'Extra bold', 900: 'Black' };
+  const weightName = (w) => WEIGHT_NAMES[w] || String(w);
 
   let widgetInst = null;
 
@@ -396,6 +412,8 @@
     if (!Array.isArray(C.segments)) C.segments = [];
     C.segments = C.segments.filter(s => s).slice(0, MAX);
     while (C.segments.length < 2) C.segments.push({ label: 'Prize ' + (C.segments.length + 1), weight: 1 });
+    C.labelWeight = Math.max(100, Math.min(900, Math.round((Number(C.labelWeight) || 800) / 100) * 100));
+    C.labelOutline = C.labelOutline !== false;
   }
 
   function render() {
@@ -467,6 +485,9 @@
     document.getElementById('dur-val').textContent = (C.spinDuration / 1000).toFixed(1) + 's';
     toggleSwitch('sw-once', C.oncePerVisitor);
     toggleSwitch('sw-peek', C.peek);
+    document.getElementById('weight-input').value = C.labelWeight;
+    document.getElementById('weight-val').textContent = weightName(C.labelWeight);
+    toggleSwitch('sw-outline', C.labelOutline);
   }
 
   // ── Segment rows ──
@@ -548,6 +569,8 @@
   document.getElementById('dur-input').addEventListener('input', e => { C.spinDuration = parseInt(e.target.value, 10) || 4500; document.getElementById('dur-val').textContent = (C.spinDuration / 1000).toFixed(1) + 's'; shell.markDirty(); });
   document.getElementById('sw-once').addEventListener('click', () => { C.oncePerVisitor = !C.oncePerVisitor; toggleSwitch('sw-once', C.oncePerVisitor); shell.markDirty(); });
   document.getElementById('sw-peek').addEventListener('click', () => { C.peek = !C.peek; toggleSwitch('sw-peek', C.peek); shell.markDirty(); remount(); });
+  document.getElementById('weight-input').addEventListener('input', e => { C.labelWeight = parseInt(e.target.value, 10) || 800; document.getElementById('weight-val').textContent = weightName(C.labelWeight); shell.markDirty(); render(); });
+  document.getElementById('sw-outline').addEventListener('click', () => { C.labelOutline = !C.labelOutline; toggleSwitch('sw-outline', C.labelOutline); shell.markDirty(); render(); });
 
   document.getElementById('name-input').addEventListener('input', () => shell.markDirty());
 
