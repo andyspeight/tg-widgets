@@ -18,7 +18,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '1.1.1';
+  var VERSION = '1.1.2';
 
   function resolveBase(path, override) {
     if (typeof window === 'undefined') return path;
@@ -247,6 +247,7 @@
         'text-transform:uppercase;text-shadow:0 1px 10px rgba(0,0,0,.55),0 1px 2px rgba(0,0,0,.5);' +
         'transform:translateX(calc(-0.42 * var(--slant)))}' +
       '.slice:last-child .label{transform:none}' +
+      '.label--fit{white-space:nowrap;overflow-wrap:normal}' +
       'a.slice:focus-visible{outline:3px solid #fff;outline-offset:-3px}' +
       // On narrow screens the side-by-side band makes the panel text shrink to
       // nothing, so stack: full-width editorial panel on top (readable clamped
@@ -333,8 +334,10 @@
     var fx = clampNum(item.fx, 0, 100, 50), fy = clampNum(item.fy, 0, 100, 50), z = clampNum(item.zoom, 1, 3, 1);
     var st = 'object-position:' + fx + '% ' + fy + '%;transform:scale(' + z + ');transform-origin:' + fx + '% ' + fy + '%';
     var label = esc(item.label || '');
+    // Single word (no spaces) scales down to fit; multi-word wraps onto lines.
+    var single = label && !/\s/.test(String(item.label).trim());
     var inner = '<img class="ph" alt=""' + (img ? ' src="' + esc(img) + '"' : '') + ' style="' + st + '">' +
-      '<span class="scrim" aria-hidden="true"></span><span class="label">' + label + '</span>';
+      '<span class="scrim" aria-hidden="true"></span><span class="label' + (single ? ' label--fit' : '') + '">' + label + '</span>';
     var cls = 'slice fb' + (i % 6);
     if (href) {
       var tgt = item.newTab ? ' target="_blank" rel="noopener"' : '';
@@ -403,7 +406,17 @@
     var avail = this.panel.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
     this._fit(this.shadow.querySelector('.title'), avail);
     this._fit(this.shadow.querySelector('.script'), avail);
-    // Labels are not auto-shrunk any more — they wrap (see .label CSS).
+    // Single-word labels scale down to fit their slice; multi-word labels wrap.
+    var fits = this.shadow.querySelectorAll('.label--fit');
+    for (var i = 0; i < fits.length; i++) {
+      var el = fits[i];
+      el.style.fontSize = '';
+      var sw = el.scrollWidth, cw = el.clientWidth;
+      if (cw > 0 && sw > cw + 1) {
+        var px = parseFloat(getComputedStyle(el).fontSize);
+        el.style.fontSize = Math.max(7, px * (cw / sw) * 0.97) + 'px';
+      }
+    }
   };
 
   TGPrismWidget.prototype.update = function (newConfig) {
