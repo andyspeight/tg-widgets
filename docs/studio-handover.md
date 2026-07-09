@@ -1,8 +1,12 @@
 # TG Studio — project handover for Claude Code
 
-Working name: **TG Studio** (rename pending, see Open decisions). Started
-2026-07-09. This is the single source of truth for the standalone "capture a
-website and make it yours" product. Read it fully before doing anything.
+Name: **TG Studio** (locked 2026-07-09). Started 2026-07-09. This is the single
+source of truth for the standalone "capture a website and make it yours"
+product. Read it fully before doing anything.
+
+Decisions locked with Andy 2026-07-09: name is TG Studio; access is Ignite and
+Bespoke only (Travelgenix staff bypass for demos); the AI refine loop is the
+first feature after capture, and it is now in.
 
 ## What TG Studio is
 
@@ -86,13 +90,25 @@ sells.
   as the smoke harness does, returns `{ slice:{html,css,meta}, buildSheet }`.
   SSRF-guarded by `safeUrl` plus request interception on every http(s) request.
   Tight per-user rate limit.
-- `vercel.json` — a `/studio` rewrite, the function config for the capture
-  endpoint (memory 1024, maxDuration 60, `includeFiles` bundling chromium and
-  the two engine files), and `studio` added to the security-header group.
+- `api/studio/_gate.js` — shared access gate. Ignite/Bespoke only, staff
+  (Travelgenix domains) bypass. Plan resolved from the JWT or the Clients table,
+  same as widget-config. Enforced server-side on every Studio endpoint.
+- `api/studio/refine.js` — POST `/api/studio/refine` `{ html, css, instruction }`.
+  The "make it mine" loop. Auth + gate + rate limit, sends the current section
+  and one plain-language instruction to Claude, returns scrubbed `{ html, css }`
+  to re-preview. Keeps images (owned rebuild). Distinct from slice-emit, which
+  is the Duda export target.
+- `public/studio.html` — capture, faithful preview, code view, copy, download,
+  and the refine loop ("Make it yours": type a change, apply, re-preview, repeat).
+- `vercel.json` — `/studio` rewrite, capture function config (memory 1024,
+  maxDuration 60, `includeFiles` bundling chromium and the two engine files),
+  refine function config (maxDuration 60), and `studio` in the security-header
+  group.
 
-This is a genuine v0: sign in, paste a public link, get a faithful editable
-capture with a live preview. The AI refine loop and the export targets are the
-next builds, not this one.
+This is a genuine v0: sign in (Ignite/Bespoke or staff), paste a public link,
+get a faithful editable capture with a live preview, then refine it in plain
+language as many times as you like. The export targets (Duda, save as widget)
+and the travel wiring are the next builds.
 
 ## Architecture
 
@@ -111,17 +127,20 @@ Two ways in, one pipeline, several ways out.
 
 ## Roadmap (ordered)
 
-P1 done — this scaffold. URL capture to faithful preview, standalone page,
+P1 done — the scaffold. URL capture to faithful preview, standalone page,
 endpoint, routing.
 
-P2 — the AI refine loop (the Anima "Playground" moment). A thin authenticated
-proxy `api/studio/refine.js` that holds `TGS_SHARED_SECRET` server-side and
-forwards the slice to the slice-emit logic, so the browser never sees the
-secret. Wire "Refine with AI" and a chat-style "make it more like X" box.
+P2 done — the AI refine loop (the Anima "Playground" moment). `api/studio/refine.js`
+is a first-class authenticated endpoint (session cookie, no shared secret in the
+browser). It sends the current section plus one instruction to Claude and returns
+scrubbed html/css. The page wires a "Make it yours" box that applies changes and
+re-previews, and the loop runs on the latest section each time. Still to polish:
+a visible change history / undo, and a spinner in the preview during a refine.
 
-P3 — export targets. Send to Duda (build sheet + the Partner API path from the
-Slicer handover), and "save as a tg-widget" so a capture becomes a first-class
-widget in the suite.
+P3 next — export targets. Send to Duda (feed the current section into
+slice-emit for a build sheet, plus the Partner API path from the Slicer
+handover), and "save as a tg-widget" so a capture becomes a first-class widget
+in the suite.
 
 P4 — travel wiring (the moat). Offer to drop our booking, availability, offers
 and enquiry widgets into a captured section, so the output is not just pretty,
@@ -131,15 +150,12 @@ P5 — productise. Optional: a Studio API and MCP server (the Anima "powers othe
 tools" play) if we want to be infrastructure for other builders. Later, and a
 different business.
 
-## Open decisions (need Andy)
+## Open decisions
 
-1. **Name.** "TG Studio" is a placeholder. Options to weigh: TG Studio, Lift,
-   Remix, Canvas, Replica, Mirror. Whatever we pick, the slug `studio` and the
-   files are easy to rename.
-2. **Who gets it.** "Available to our users" is the brief. Today the gate is any
-   signed-in user. Decide the plan tiers (Spark/Boost/Ignite/Bespoke) and any
-   monthly capture limit, mirroring `PLAN_WIDGET_LIMITS`. Gating is enforced
-   server-side at capture time, never trusted to the client.
+1. **Name.** DECIDED 2026-07-09 — TG Studio.
+2. **Who gets it.** DECIDED 2026-07-09 — Ignite and Bespoke only, staff bypass.
+   Enforced in `_gate.js`. Still to decide: a monthly capture / refine cap per
+   plan (today the only limit is the short-window rate limit), if we want one.
 3. **Capture emphasis.** Lead with paste-a-URL (headless), the extension, or
    both equally. Both already exist. This is a marketing and onboarding call.
 4. **Publish and hosting.** Do captures stay as embed snippets and Duda widgets,

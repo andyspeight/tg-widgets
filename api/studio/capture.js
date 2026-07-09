@@ -39,6 +39,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { requireAuth, setCors, applyRateLimit } from '../_auth.js';
 import { safeUrl } from '../_lib/webfetch.js';
+import { requireStudioAccess } from './_gate.js';
 
 // ─── Constants ──────────────────────────────────────────────────────
 const NAV_TIMEOUT_MS = 20_000;   // per-navigation cap, sits under vercel maxDuration:60
@@ -101,8 +102,12 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Session error' });
   }
 
-  // 2. Rate limit (in-memory, always on)
+  // 2. Rate limit (in-memory, always on) — protects the plan lookup below too
   if (!applyRateLimit(res, `studio:cap:${identity}`, CAPTURE_RATE_LIMIT)) return; // 429 already sent
+
+  // 2b. Plan gate — TG Studio is Ignite/Bespoke (staff bypass). Server-side only.
+  const gate = await requireStudioAccess(auth.user);
+  if (!gate.ok) return res.status(gate.status).json({ error: gate.error });
 
   // 3. Validate input
   const parsed = parseBody(req.body);

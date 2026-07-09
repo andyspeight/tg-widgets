@@ -76,6 +76,8 @@
   }
   input:focus-visible{outline:none;border-color:var(--tg-accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--tg-accent) 18%,transparent);}
   .hint{font-size:12px;color:var(--tg-text-tertiary);margin-top:6px;}
+  input:disabled{opacity:.55;cursor:not-allowed;}
+  .refine{margin-top:6px;padding-top:16px;border-top:1px dashed var(--tg-border);}
   details.adv{margin-top:14px;}
   details.adv summary{font-size:12px;font-weight:600;color:var(--tg-text-secondary);cursor:pointer;}
   details.adv[open] summary{margin-bottom:10px;}
@@ -154,6 +156,13 @@
 
           <button class="btn" id="capture">Capture this page</button>
 
+          <div class="refine" id="refineBox" aria-disabled="true">
+            <label class="fld" for="refineInput">Make it yours</label>
+            <input type="text" id="refineInput" placeholder="make it responsive, warm palette, bigger heading" autocomplete="off" spellcheck="false" disabled />
+            <div class="hint">Plain language. Capture something first, then refine it as many times as you like.</div>
+            <button class="btn" id="applyRefine" disabled>Apply change</button>
+          </div>
+
           <div class="divider">or</div>
           <div class="ext">
             Need a precise element, or a page behind a login? Grab it with the
@@ -172,7 +181,7 @@
           <div class="spacer"></div>
           <button class="btn secondary" id="copy" disabled>Copy code</button>
           <button class="btn secondary" id="download" disabled>Download HTML</button>
-          <button class="btn secondary" id="refine" disabled title="Coming next">Refine with AI</button>
+          <button class="btn secondary" id="refine" disabled title="Refine with AI">Refine with AI</button>
           <button class="btn secondary" id="toduda" disabled title="Coming next">Send to Duda</button>
         </div>
         <div class="stage" id="stage">
@@ -257,15 +266,19 @@
     showEmpty(wrap);
   }
 
+  function paint(){
+    if (!state.slice) return;
+    $("empty").hidden = true;
+    $("frame").srcdoc = previewDoc(state.slice);
+    $("code").textContent = "<style>\n" + (state.slice.css || "") + "\n</style>\n\n" + (state.slice.html || "");
+    $("copy").disabled = false; $("download").disabled = false; $("refine").disabled = false;
+    $("refineInput").disabled = false; $("applyRefine").disabled = false;
+    $("refineBox").setAttribute("aria-disabled", "false");
+    view("preview");
+  }
   function render(data){
     state.slice = data.slice; state.buildSheet = data.buildSheet; state.source = data.source || "";
-    $("empty").hidden = true;
-    // Preview
-    $("frame").srcdoc = previewDoc(data.slice);
-    // Code (the faithful HTML + CSS you can embed today)
-    $("code").textContent = "<style>\n" + (data.slice.css || "") + "\n</style>\n\n" + (data.slice.html || "");
-    $("copy").disabled = false; $("download").disabled = false;
-    view("preview");
+    paint();
     toast("Captured. Preview ready.");
   }
 
@@ -317,6 +330,39 @@
     setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
     toast("Downloaded.");
   });
+
+  // ── Refine loop (make it yours) ──
+  function applyRefine(){
+    if (!state.slice) { toast("Capture something first."); return; }
+    var instruction = ($("refineInput").value || "").trim();
+    if (!instruction) { toast("Say what to change."); $("refineInput").focus(); return; }
+    var btn = $("applyRefine");
+    btn.disabled = true; btn.textContent = "Applying…"; $("refine").disabled = true;
+    fetch("/api/studio/refine", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ html: state.slice.html, css: state.slice.css, instruction: instruction, source: state.source })
+    }).then(function(r){
+      if (r.status === 401) { toast("Sign in required."); return null; }
+      return r.json().then(function(j){ return { ok: r.ok, j: j }; });
+    }).then(function(res){
+      if (!res) return;
+      if (!res.ok || !res.j || res.j.error || !res.j.html) { toast((res.j && res.j.error) || "Refine failed. Try rephrasing."); return; }
+      state.slice = { html: res.j.html, css: res.j.css, meta: state.slice.meta };
+      state.buildSheet = null; // stale after an edit; re-emitted at export time
+      paint();
+      $("refineInput").value = "";
+      toast("Updated.");
+    }).catch(function(){
+      toast("Could not reach the refine step.");
+    }).finally(function(){
+      btn.disabled = false; btn.textContent = "Apply change"; $("refine").disabled = !state.slice;
+    });
+  }
+  $("applyRefine").addEventListener("click", applyRefine);
+  $("refineInput").addEventListener("keydown", function(e){ if (e.key === "Enter") applyRefine(); });
+  $("refine").addEventListener("click", function(){ if (state.slice) $("refineInput").focus(); });
 })();
 </script>
 </body>

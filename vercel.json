@@ -33,6 +33,9 @@
       "maxDuration": 60,
       "includeFiles": "{node_modules/@sparticuz/chromium/**,tg-slicer/capture.js,tg-slicer/emit-local.js}"
     },
+    "api/studio/refine.js": {
+      "maxDuration": 60
+    },
     "api/brain/run-gate.js": {
       "maxDuration": 300
     },
