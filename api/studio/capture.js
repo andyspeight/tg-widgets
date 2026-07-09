@@ -94,6 +94,7 @@ export default async function handler(req, res) {
   setCors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  const startedAt = Date.now();
 
   // 1. Auth — any signed-in Travelgenix user
   const auth = requireAuth(req);
@@ -173,13 +174,15 @@ export default async function handler(req, res) {
       };
       const root = pick();
       if (!root) return { error: 'Nothing to capture on that page.' };
+      const rr = root.getBoundingClientRect ? root.getBoundingClientRect() : { width: 0, height: 0 };
+      const picked = { tag: (root.tagName || '?').toLowerCase(), cls: (root.className ? String(root.className).slice(0, 60) : ''), w: Math.round(rr.width), h: Math.round(rr.height), kids: root.childElementCount || 0 };
       try {
         const slice = await window.TGSCapture.capture(root);
         let buildSheet = null;
         try { buildSheet = window.TGSEmit.buildSheet(slice); } catch (e) { /* preview still works without it */ }
-        return { slice, buildSheet };
+        return { slice, buildSheet, picked };
       } catch (e) {
-        return { error: 'capture-threw:' + (e && e.message ? e.message : 'unknown') };
+        return { error: 'capture-threw:' + (e && e.message ? e.message : 'unknown'), picked };
       }
       }, selector || null),
       new Promise((resolve) => setTimeout(() => resolve({ error: 'capture-timeout' }), CAPTURE_EVAL_TIMEOUT_MS)),
@@ -198,6 +201,7 @@ export default async function handler(req, res) {
     if (!html.trim()) return res.status(502).json({ error: 'The capture came back empty. Try a different page or element.' });
 
     const bytes = Buffer.byteLength(html, 'utf8') + Buffer.byteLength(css, 'utf8');
+    console.log('[studio-capture] ok', JSON.stringify({ source: url, picked: out.picked || null, kb: Math.round(bytes / 1024), hasSheet: !!out.buildSheet, ms: Date.now() - startedAt }));
     if (bytes > MAX_SLICE_BYTES) {
       return res.status(413).json({ error: 'That section is very large. Point at one part with the selector box (try header, .hero or main), or use the Slicer extension to pick a single element.' });
     }
