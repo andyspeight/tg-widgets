@@ -96,7 +96,9 @@ const greece = {
 
 function render(data) {
   const container = makeEl('div');
-  const w = new TGSpotlightWidget(container, { destinationData: data, theme: 'light' });
+  // Give the CTA a real URL: since the dead-end fix, the CTA section is only
+  // emitted when it has a usable destination (an empty URL renders nothing).
+  const w = new TGSpotlightWidget(container, { destinationData: data, theme: 'light', cta: { url: 'https://example.com/enquire' } });
   return w.root.innerHTML;
 }
 
@@ -151,6 +153,11 @@ const iPaired = html.indexOf('tgs-paired-heading');
 const iCta = html.indexOf('tgs-cta-heading');
 assert(iEvents > -1 && iPaired > iEvents, 'paired comes after events');
 assert(iCta > -1 && iPaired < iCta, 'paired comes before the CTA');
+
+// CTA is a dead end with no destination → omit it entirely (not a disabled button)
+const noCtaUrl = makeEl('div');
+const wNoCta = new TGSpotlightWidget(noCtaUrl, { destinationData: greece, theme: 'light' });
+assert(!wNoCta.root.innerHTML.includes('tgs-cta-heading'), 'CTA section omitted when it has no URL');
 
 // empty + safety
 console.log('Case 5: paired empty and unsafe url');

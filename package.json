@@ -13,7 +13,8 @@
     "test:smartsection": "node tests/test-rules.cjs && node tests/test-integration.cjs && node tests/test-ai-rules.cjs && node tests/test-triggers.cjs",
     "test:deeplink": "node tests/test-deeplink.cjs",
     "test:mybooking": "node test/mybooking-extras-smoke.mjs",
-    "test:qa-highs": "node test/qa-highs-smoke.mjs"
+    "test:qa-highs": "node test/qa-highs-smoke.mjs",
+    "test:boot": "node test/boot-smoke.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",
