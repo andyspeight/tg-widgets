@@ -60,6 +60,8 @@ interpolate a raw config string. `tests/test-emailsig.cjs` covers this heavily.
   `<select>` feeding `theme.font`.
 - `public/demo-emailsig.html` — standalone demo, embeds via inline
   `data-tg-config` so it needs no saved id.
+- `public/tour-emailsig.js` — guided setup tour (defines `window.initEmailSigTour`,
+  loaded by the editor alongside `editor-tour.js`, same pattern as `tour-hours.js`).
 - `api/emailsig-banner.js` — `GET ?id=` → 302 to the current banner image
   (updatable), else a transparent 1x1.
 - `api/emailsig-click.js` — `GET ?id=` → logs the click, 302 to the banner

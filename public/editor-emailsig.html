@@ -364,6 +364,8 @@
 
 <script src="/editor-shell.js"></script>
 <script src="/widget-emailsig.js"></script>
+<script src="/editor-tour.js"></script>
+<script src="/tour-emailsig.js"></script>
 
 <script>
   // Email-safe font stacks (label → CSS stack). No web fonts — email strips them.
@@ -406,7 +408,7 @@
     onAIBuild: () => { tgse.toast('AI builder coming soon', 'ok'); },
     onTemplates: () => openTemplateModal(),
     onAfterSave: (d) => { if (d && d.widgetId) { C.widgetId = d.widgetId; render(); } },
-    onLoginSuccess: () => { loadFromUrl(); },
+    onLoginSuccess: () => { loadFromUrl(); if (typeof window.initEmailSigTour === 'function') window.initEmailSigTour(); },
   });
 
   const $ = (id) => document.getElementById(id);
@@ -703,7 +705,10 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     if (window.tgse && typeof window.tgse.onReady === 'function') {
-      window.tgse.onReady(() => { if (tgse.isLoggedIn()) loadFromUrl(); else { syncControls(); render(); } });
+      window.tgse.onReady(() => {
+        if (tgse.isLoggedIn()) { loadFromUrl(); if (typeof window.initEmailSigTour === 'function') window.initEmailSigTour(); }
+        else { syncControls(); render(); }
+      });
     } else {
       syncControls(); render();
       if (tgse.isLoggedIn()) loadFromUrl();
