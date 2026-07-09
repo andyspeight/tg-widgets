@@ -4,7 +4,12 @@ _Full-suite quality sweep of all 47 embeddable widgets plus the shared editor sh
 
 ## Remediation status
 
-**All 13 high-severity findings are fixed** on branch `claude/widget-suite-qa-h4vkpo` (9 July 2026). Covered: the reviews / worldmap / offers-grid XSS sinks, the offer-* relative-`/api` embed blanks, the offer-builder save-failure form wipe, the countdown false "offer ended", the carousel runaway interval, the offers inactivity re-open loop, the popup Vimeo autoplay URL, the events "+N more" dead end and the prism dead-link mismatch. Each widget's `VERSION` was bumped and a regression suite added (`npm run test:qa-highs`); the existing widget, deeplink and Smart Section suites stay green. The 73 medium and 117 low findings below are not yet actioned.
+**All 13 high-severity and all 73 medium-severity findings are fixed** on branch `claude/widget-suite-qa-h4vkpo` (9 July 2026).
+
+- **Highs (13/13):** the reviews / worldmap / offers-grid XSS sinks, the offer-* relative-`/api` embed blanks, the offer-builder save-failure form wipe, the countdown false "offer ended", the carousel runaway interval, the offers inactivity re-open loop, the popup Vimeo autoplay URL, the events "+N more" dead end and the prism dead-link mismatch.
+- **Mediums (73/73):** the CSS-`url()` overlay vectors (offer-card, testimonials) and the mybooking link-scheme gap; the un-closable / dead-end control family (whatsapp, offer-card, reviews, consent, spotlight, appointment, weather); the robustness set (hours overnight logic, offers-grid API origin, youtube observer leak, dealbar double-init, consent fetch timeouts, the API update-vs-create lookup check, the dashboard delete cache); and a broad accessibility pass (focus management after re-render, aria on icon-only controls, visible focus). Two demo-page residuals were closed too.
+
+Widget `VERSION` constants were bumped throughout. Test coverage was extended (`npm run test:qa-highs` for the highs, `npm run test:boot` mounts every touched widget) and the existing widget, deeplink and Smart Section suites stay green. The 117 low findings below are not yet actioned.
 
 ## How this was done
 
