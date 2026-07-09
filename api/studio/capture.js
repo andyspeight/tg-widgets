@@ -153,29 +153,41 @@ export default async function handler(req, res) {
 
     const out = await Promise.race([
       page.evaluate(async (sel) => {
+      const vh = window.innerHeight || 900;
+      const visible = (el) => {
+        const s = getComputedStyle(el);
+        return s.display !== 'none' && s.visibility !== 'hidden' && parseFloat(s.opacity || '1') > 0.01;
+      };
+      // Content weight: real sections have text, children and media. Empty
+      // overlays / backdrops / spacers score ~0 and are skipped.
+      const score = (el) => {
+        const txt = (el.textContent || '').trim().length;
+        const media = el.querySelectorAll('img,svg,picture,video').length;
+        return txt + (el.childElementCount || 0) * 40 + media * 120;
+      };
       const pick = () => {
         if (sel) { const el = document.querySelector(sel); if (el) return el; }
-        // No selector: grab the first "section-sized" block near the top
-        // (usually the hero), not the whole page. A whole-page computed-style
-        // capture is huge, messy, and not the point of Studio (capture a
-        // section you love). The selector field and the Slicer extension are
-        // the precise paths when this heuristic picks the wrong thing.
+        // No selector: the first VISIBLE, CONTENT-BEARING, section-sized block
+        // near the top (usually the hero). Skips empty overlays, sticky navs,
+        // cookie bars and the giant whole-page wrapper.
         const root = document.querySelector('main') || document.body;
-        const vh = window.innerHeight || 900;
-        const blocks = root.querySelectorAll('section, header, article, div');
-        for (const c of blocks) {
+        const cands = root.querySelectorAll('section, header, article, div');
+        for (const c of cands) {
           const r = c.getBoundingClientRect();
-          // tall enough to matter, but not basically the whole page, and it
-          // starts within the first screen (skips the giant page wrapper,
-          // sticky navs and cookie bars).
-          if (r.top >= 0 && r.top < vh && r.height >= 240 && r.height <= vh * 2.2 && r.width >= 320) return c;
+          if (!(r.top >= 0 && r.top < vh && r.height >= 200 && r.height <= vh * 2.4 && r.width >= 320)) continue;
+          if (!visible(c)) continue;
+          if (score(c) >= 60) return c;
         }
-        return root.querySelector('section, header, article') || root;
+        const secs = root.querySelectorAll('section, header, article');
+        for (const s of secs) { if (visible(s) && score(s) >= 60) return s; }
+        return root;
       };
       const root = pick();
       if (!root) return { error: 'Nothing to capture on that page.' };
       const rr = root.getBoundingClientRect ? root.getBoundingClientRect() : { width: 0, height: 0 };
-      const picked = { tag: (root.tagName || '?').toLowerCase(), cls: (root.className ? String(root.className).slice(0, 60) : ''), w: Math.round(rr.width), h: Math.round(rr.height), kids: root.childElementCount || 0 };
+      const textLen = (root.textContent || '').trim().length;
+      const imgCount = root.querySelectorAll('img,svg,picture,video').length;
+      const picked = { tag: (root.tagName || '?').toLowerCase(), cls: (root.className ? String(root.className).slice(0, 60) : ''), w: Math.round(rr.width), h: Math.round(rr.height), kids: root.childElementCount || 0, textLen, imgCount };
       try {
         const slice = await window.TGSCapture.capture(root);
         let buildSheet = null;
@@ -194,6 +206,14 @@ export default async function handler(req, res) {
     if (!out || out.error) {
       console.error('[studio-capture] in-page error:', out && out.error);
       return res.status(502).json({ error: 'That section could not be captured. Try a different page, or grab a precise element with the Slicer extension.' });
+    }
+
+    // Guard: if the auto-pick found only an empty/near-empty block, say so
+    // rather than returning a blank preview.
+    const pk = out.picked || {};
+    if (!selector && (pk.textLen || 0) < 15 && (pk.imgCount || 0) === 0) {
+      console.log('[studio-capture] empty-pick', JSON.stringify({ source: url, picked: pk }));
+      return res.status(422).json({ error: 'We could not find a clear section on that page automatically. Try the selector box (for example header, .hero or main), or grab the exact element with the Slicer extension.' });
     }
 
     const html = (out.slice && out.slice.html) || '';
