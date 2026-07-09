@@ -56,7 +56,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.2.2';
+  const VERSION = '1.2.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the unit labels and the dismiss control). The expiry
@@ -874,8 +874,21 @@
 
       // Decide what to render
       const remaining = targetMs ? computeRemaining(targetMs) : null;
-      const isExpired = !targetMs || (remaining && remaining.expired);
       const repeating = !!(c.repeating && c.repeating.enabled);
+
+      // No resolvable target date → the widget was never given one, or its remote
+      // config failed to load (fetchConfig returns null on any network/HTTP/JSON
+      // error, and we fall back to defaults where targetDate is null). Render a
+      // hidden shell rather than the misleading "This offer has now ended." — a
+      // transient API blip must not read as a genuinely expired offer. A real
+      // past date parses to a timestamp, so true expiries are unaffected.
+      if (!targetMs) {
+        this.shadow.appendChild(root);
+        this._root = root;
+        return;
+      }
+
+      const isExpired = !!(remaining && remaining.expired);
 
       // ── Redirect on expiry — fire once, never in repeating mode, never
       //    if scheduledStart hasn't passed (already returned above) ──
