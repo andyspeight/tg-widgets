@@ -203,7 +203,7 @@
 (function(){
   "use strict";
   var $ = function(id){ return document.getElementById(id); };
-  var state = { slice:null, buildSheet:null, source:"" };
+  var state = { slice:null, buildSheet:null, source:"", baseCss:"", overrides:"" };
 
   // ── Theme (matches the rest of the suite) ──
   try {
@@ -280,6 +280,7 @@
   }
   function render(data){
     state.slice = data.slice; state.buildSheet = data.buildSheet; state.source = data.source || "";
+    state.baseCss = (data.slice && data.slice.css) || ""; state.overrides = "";
     paint();
     toast("Captured. Preview ready.");
   }
@@ -358,9 +359,12 @@
       return r.json().then(function(j){ return { ok: r.ok, j: j }; });
     }).then(function(res){
       if (!res) return;
-      if (!res.ok || !res.j || res.j.error || !res.j.html) { toast((res.j && res.j.error) || "Refine failed. Try rephrasing."); return; }
-      state.slice = { html: res.j.html, css: res.j.css, meta: state.slice.meta };
-      state.buildSheet = null; // stale after an edit; re-emitted at export time
+      if (!res.ok || !res.j || res.j.error || !res.j.css) { toast((res.j && res.j.error) || "Refine failed. Try rephrasing."); return; }
+      // The refine returns a small CSS override. Accumulate it, layer it on the
+      // base capture, and re-preview. The deterministic build sheet is kept and
+      // the overrides are appended to it at export time.
+      state.overrides = (state.overrides || "") + "\n" + res.j.css;
+      state.slice = { html: state.slice.html, css: (state.baseCss || "") + state.overrides, meta: state.slice.meta };
       paint();
       $("refineInput").value = "";
       toast("Updated.");
@@ -376,34 +380,20 @@
 
   // ── Send to Duda (build sheet for the Duda Widget Builder) ──
   $("toduda").addEventListener("click", function(){
-    if (!state.slice) { toast("Capture something first."); return; }
-    var btn = $("toduda");
-    btn.disabled = true; btn.textContent = "Building…";
-    fetch("/api/studio/to-duda", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ html: state.slice.html, css: state.slice.css, source: state.source })
-    }).then(function(r){
-      if (r.status === 401) { toast("Sign in required."); return null; }
-      return r.json().then(function(j){ return { ok: r.ok, j: j }; });
-    }).then(function(res){
-      if (!res) return;
-      if (!res.ok || !res.j || res.j.error || !res.j.buildSheet) { toast((res.j && res.j.error) || "Duda build failed. Try again."); return; }
-      var sheet = res.j.buildSheet;
-      var name = (sheet.widgetName || "tg-studio-widget").replace(/[^a-z0-9]+/gi, "-").toLowerCase();
-      var blob = new Blob([JSON.stringify(sheet, null, 2)], { type: "application/json" });
-      var a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = name + "-duda-buildsheet.json";
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
-      toast("Duda build sheet ready. Downloaded.");
-    }).catch(function(){
-      toast("Could not reach the Duda build step.");
-    }).finally(function(){
-      btn.disabled = !state.slice; btn.textContent = "Send to Duda";
-    });
+    // Use the deterministic build sheet from capture (no AI, no size limit), with
+    // any refinements appended. This is the project's default emit path.
+    if (!state.buildSheet) { toast("Duda export is not ready for this capture."); return; }
+    var sheet;
+    try { sheet = JSON.parse(JSON.stringify(state.buildSheet)); } catch (e) { toast("Could not prepare the Duda sheet."); return; }
+    if (state.overrides) sheet.cssDesktop = (sheet.cssDesktop || "") + "\n/* TG Studio refinements */\n" + state.overrides;
+    var name = (sheet.widgetName || "tg-studio-widget").replace(/[^a-z0-9]+/gi, "-").toLowerCase();
+    var blob = new Blob([JSON.stringify(sheet, null, 2)], { type: "application/json" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name + "-duda-buildsheet.json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+    toast("Duda build sheet ready. Downloaded.");
   });
 })();
 </script>

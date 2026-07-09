@@ -94,13 +94,17 @@ sells.
   (Travelgenix domains) bypass. Plan resolved from the JWT or the Clients table,
   same as widget-config. Enforced server-side on every Studio endpoint.
 - `api/studio/refine.js` — POST `/api/studio/refine` `{ html, css, instruction }`.
-  The "make it mine" loop. Auth + gate + rate limit, sends the current section
-  and one plain-language instruction to Claude, returns scrubbed `{ html, css }`
-  to re-preview. Keeps images (owned rebuild). Distinct from slice-emit, which
-  is the Duda export target.
-- `api/studio/to-duda.js` — POST `/api/studio/to-duda` `{ html, css, source? }`.
-  Auth + gate + rate limit, forwards to the deployed slice-emit endpoint with the
-  shared secret and returns the Duda build sheet. Reuses slice-emit as-is.
+  The "make it mine" loop. Returns a SMALL CSS override (not the whole section),
+  which the page appends and re-previews. This is deliberate: a faithful capture
+  is large (the engine snapshots every node's computed style, so a hero can be
+  hundreds of KB) and no model can re-emit that in one response. An override is
+  tiny, fast, works at any section size and stacks as the user keeps refining.
+  Input cap 700KB (fits the model context); auth + gate + rate limit + scrub.
+- Duda export is DETERMINISTIC and client-side. The capture already returns a
+  build sheet from `emit-local.js` (no AI, no size limit). "Send to Duda" clones
+  it, appends the accumulated refine overrides to `cssDesktop`, and downloads it.
+  This is the project's default emit path. `api/studio/to-duda.js` (forwards to
+  the AI slice-emit) stays as the optional "AI smarten up" path, not the default.
 - `public/studio.html` — capture, faithful preview, code view, copy, download,
   the refine loop ("Make it yours": type a change, apply, re-preview, repeat),
   and Send to Duda (downloads the build sheet for the Duda Widget Builder).
