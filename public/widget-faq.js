@@ -59,7 +59,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.2.3';
+  const VERSION = '1.2.4';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome, per language. English is the source + fallback. The author's
@@ -1003,14 +1003,17 @@
       if (!cta || !cta.enabled) return '';
       const styleClass = cta.style === 'strip' ? ' tgf-cta--strip' :
                          cta.style === 'gradient' ? ' tgf-cta--gradient' : '';
-      const btnUrl = isSafeUrl(cta.buttonUrl) ? esc(cta.buttonUrl) : '#';
-      const external = /^https?:/i.test(cta.buttonUrl || '') ? ' target="_blank" rel="noopener noreferrer"' : '';
+      const rawUrl = (cta.buttonUrl || '').trim();
+      // Treat '' or '#' as no destination: a scroll-to-top anchor is a dead-end control.
+      const hasUrl = rawUrl !== '' && rawUrl !== '#' && isSafeUrl(rawUrl);
+      const btnUrl = hasUrl ? esc(rawUrl) : '';
+      const external = /^https?:/i.test(rawUrl) ? ' target="_blank" rel="noopener noreferrer"' : '';
       return `<div class="tgf-cta${styleClass}">
         <div class="tgf-cta-copy">
           ${cta.heading ? `<p class="tgf-cta-title">${esc(cta.heading)}</p>` : ''}
           ${cta.description ? `<p class="tgf-cta-desc">${esc(cta.description)}</p>` : ''}
         </div>
-        ${cta.buttonText ? `<a class="tgf-cta-btn" href="${btnUrl}"${external}>${esc(cta.buttonText)} ${icon('arrow-right', 16)}</a>` : ''}
+        ${cta.buttonText && hasUrl ? `<a class="tgf-cta-btn" href="${btnUrl}"${external}>${esc(cta.buttonText)} ${icon('arrow-right', 16)}</a>` : ''}
       </div>`;
     }
 

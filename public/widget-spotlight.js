@@ -92,7 +92,7 @@
     } catch (e) { /* fall through */ }
     return '/api/destination-content';
   })();
-  const VERSION = '1.2.3';
+  const VERSION = '1.2.4';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (section default headings, fact/planning labels,
@@ -1828,12 +1828,12 @@
       const subtitle    = renderTemplate(cta.subtitle || '',    tplVars);
       const buttonLabel = renderTemplate(cta.buttonLabel || this.t('ctaButton') || this.t('ctaButtonFallback'), tplVars) || this.t('ctaButtonFallback');
 
-      // Even without a URL, we still render the CTA panel — but as a no-op
-      // visually-complete block. An editor preview with no URL yet is still
-      // useful.
-      const buttonHtml = url
-        ? '<a class="tgs-cta-btn" href="' + esc(url) + '" rel="noopener">' + esc(buttonLabel) + icon('arrow', 16) + '</a>'
-        : '<button class="tgs-cta-btn" type="button" disabled aria-disabled="true" style="opacity:0.8;cursor:not-allowed;">' + esc(buttonLabel) + icon('arrow', 16) + '</button>';
+      // A CTA with no valid destination is a dead end: a greyed-out enquire
+      // button a visitor can't use and can't get past. Omit the whole section
+      // instead — _renderContent's html.filter(Boolean) drops the empty string.
+      if (!url) return '';
+
+      const buttonHtml = '<a class="tgs-cta-btn" href="' + esc(url) + '" rel="noopener">' + esc(buttonLabel) + icon('arrow', 16) + '</a>';
 
       return (
         '<section class="tgs-section" aria-labelledby="tgs-cta-heading">' +
@@ -1894,16 +1894,44 @@
         }, { once: true });
       }
       // Temperature unit toggle in the climate chart header
-      const unitBtns = r.querySelectorAll('.tgs-climate-unit');
+      this._bindClimateUnits(r);
+    }
+
+    // Wire the °C/°F pills found within `scope`. Flipping the unit swaps only
+    // the climate section in place (see _refreshClimateUnit) rather than
+    // rebuilding this.root, so keyboard focus and any open <details> planning
+    // accordion elsewhere on the page survive the change.
+    _bindClimateUnits(scope) {
+      if (!scope) return;
+      const unitBtns = scope.querySelectorAll('.tgs-climate-unit');
       unitBtns.forEach(btn => {
         btn.addEventListener('click', () => {
           const unit = btn.getAttribute('data-unit');
           if (!unit || unit === this._tempUnit) return;
           this._tempUnit = unit;
-          // Only re-render content (not shell) so fonts/theme stay stable
-          this._renderContent();
+          this._refreshClimateUnit(unit);
         });
       });
+    }
+
+    // Re-render only the climate <section> after a unit flip, then move focus
+    // to the active pill. Preserves focus and open accordion state that a full
+    // _renderContent would discard. Falls back to a full re-render if the
+    // section can't be located.
+    _refreshClimateUnit(unit) {
+      const r = this.root;
+      if (!r || !this._destination) { if (r) this._renderContent(); return; }
+      const heading = r.querySelector('#tgs-climate-heading');
+      const section = heading ? heading.closest('.tgs-section') : null;
+      if (!section || !section.parentNode) { this._renderContent(); return; }
+      const wrap = document.createElement('div');
+      wrap.innerHTML = this._renderClimate(this._destination);
+      const fresh = wrap.firstElementChild;
+      if (!fresh) { this._renderContent(); return; }
+      section.parentNode.replaceChild(fresh, section);
+      this._bindClimateUnits(fresh);
+      const active = fresh.querySelector('.tgs-climate-unit[data-unit="' + unit + '"]');
+      if (active) active.focus();
     }
 
     // Public API

@@ -86,7 +86,7 @@
     } catch (e) { /* fall through */ }
     return '/api/destination-content';
   })();
-  const VERSION = '1.0.2';
+  const VERSION = '1.0.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only: month names, climate-band reason labels, the
@@ -1031,9 +1031,14 @@
     }
 
     async _loadDestination() {
+      // Guard the fetch with a timeout so a stalled request (weak mobile link,
+      // hung proxy, captive portal) aborts and falls through to the error
+      // notice rather than leaving the loading skeleton shimmering forever.
+      const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      const timer = ctrl ? setTimeout(() => ctrl.abort(), 9000) : null;
       try {
         const url = CONTENT_API + '?id=' + encodeURIComponent(this.c.widgetId);
-        const res = await fetch(url, { credentials: 'omit' });
+        const res = await fetch(url, ctrl ? { credentials: 'omit', signal: ctrl.signal } : { credentials: 'omit' });
         if (!res.ok) {
           if (res.status === 404) return this._renderNotFound();
           throw new Error('Content fetch failed (' + res.status + ')');
@@ -1043,6 +1048,8 @@
       } catch (err) {
         console.error('[TG Weather] Failed to load destination:', err);
         this._renderError();
+      } finally {
+        if (timer) clearTimeout(timer);
       }
     }
 
@@ -1271,6 +1278,12 @@
       const cta = this.c.cta || {};
       if (!cta.title && !cta.buttonLabel && !cta.url) return '';
       const url = safeUrl(cta.url, true);
+      // A CTA with no valid destination is a dead-end control for a live
+      // visitor, so omit the whole section. The disabled button is kept only
+      // as an editor-preview affordance (the editor iframe sets __TG_PREVIEW__)
+      // so the agent can see the CTA before filling in the URL.
+      const isPreview = typeof window !== 'undefined' && window.__TG_PREVIEW__;
+      if (!url && !isPreview) return '';
       const buttonHtml = url
         ? '<a class="tgw-cta-btn" href="' + esc(url) + '" rel="noopener">' + esc(cta.buttonLabel || this.t('enquire')) + icon('arrow', 13) + '</a>'
         : '<button class="tgw-cta-btn" type="button" disabled aria-disabled="true" style="opacity:0.8;cursor:not-allowed;">' + esc(cta.buttonLabel || this.t('enquire')) + icon('arrow', 13) + '</button>';
@@ -1362,9 +1375,13 @@
 
         const id = el.getAttribute('data-tg-id');
         if (id) {
-          const res = await fetch(API_BASE + '?id=' + encodeURIComponent(id), {
-            credentials: 'omit'
-          });
+          // Timeout-guard the config fetch — a stalled request aborts and
+          // falls through to the catch fallback instead of hanging silently.
+          const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+          const timer = ctrl ? setTimeout(() => ctrl.abort(), 9000) : null;
+          const res = await fetch(API_BASE + '?id=' + encodeURIComponent(id),
+            ctrl ? { credentials: 'omit', signal: ctrl.signal } : { credentials: 'omit' });
+          if (timer) clearTimeout(timer);
           if (!res.ok) throw new Error('Widget config fetch failed (' + res.status + ')');
           const data = await res.json();
           const cfg = data && (data.config || data);

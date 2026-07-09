@@ -19,7 +19,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.1.2';
+  const VERSION = '0.1.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the empty-state line and the default card CTA). The
@@ -57,10 +57,33 @@
   }
 
   // Base URL this script was served from, to load the card widget + build links.
+  // The widget runs on customer sites, so document.currentScript can be null when
+  // the tag is injected async — fall back to scanning for our own script tag, then
+  // this page's origin, so we never leave a bare '/' that would resolve to the
+  // customer's own origin (and 404 the offers feed).
   const SCRIPT_BASE = (function () {
     try { const s = document.currentScript && document.currentScript.src; if (s) return s.replace(/[^/]+$/, ''); } catch (e) {}
+    try {
+      const scripts = document.getElementsByTagName('script');
+      for (let i = scripts.length - 1; i >= 0; i--) {
+        const s = scripts[i].src || '';
+        if (/\/widget-offers-grid\.js(\?|#|$)/.test(s)) return s.replace(/[^/]+$/, '');
+      }
+    } catch (e) {}
+    try { if (typeof window !== 'undefined' && window.location && window.location.origin) return window.location.origin + '/'; } catch (e) {}
     return '/';
   })();
+
+  // API base for the offers feed. Honours an explicit opt-in override first, then
+  // the script's own origin — never a relative '/api', which on a customer site
+  // targets the customer origin and 404s.
+  function resolveApiBase() {
+    // __TG_WIDGET_API__ is the full config URL (…/api/widget-config); this base
+    // is joined with 'api/saved-offers', so take its ORIGIN, not the raw value,
+    // or the path would double-nest (…/api/widget-config/api/saved-offers).
+    try { if (typeof window !== 'undefined' && window.__TG_WIDGET_API__) return new URL(window.__TG_WIDGET_API__).origin + '/'; } catch (e) {}
+    return SCRIPT_BASE;
+  }
 
   let _cardPromise = null;
   function ensureCard() {
@@ -220,7 +243,7 @@
     _load() {
       const cfg = this.cfg;
       if (!cfg.client) { this._render('empty'); return; }
-      const url = SCRIPT_BASE + 'api/saved-offers?client=' + encodeURIComponent(cfg.client);
+      const url = resolveApiBase() + 'api/saved-offers?client=' + encodeURIComponent(cfg.client);
       fetch(url)
         .then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
         .then((d) => this._fill((d && d.offers) || []))

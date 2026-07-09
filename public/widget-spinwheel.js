@@ -16,7 +16,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.4.0';
+  const VERSION = '1.4.1';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the spin button, result flow, lead-capture labels and
@@ -482,9 +482,9 @@
             <svg class="sw-wheel" viewBox="0 0 100 100" role="img" aria-label="${esc(this.t('wheelLabel'))}">${this._wheelSvg()}</svg>
             ${topPlacement ? ((c.style !== 'flat' && !c.peek) ? '<div class="sw-hubcap" aria-hidden="true"></div>' : '') : `<button class="sw-hub" id="spin" type="button">${esc(buttonText)}</button>`}
           </div>
-          <div class="sw-result" id="result" hidden>
+          <div class="sw-result" id="result" role="status" aria-live="polite" hidden>
             <div class="sw-res-badge" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M8.5 13.6 7 22l5-3 5 3-1.5-8.4"/></svg></div>
-            <div class="sw-res-title" id="res-title"></div>
+            <div class="sw-res-title" id="res-title" tabindex="-1"></div>
             <div class="sw-res-text" id="res-text"></div>
             <a class="sw-cta" id="cta" rel="noopener" hidden></a>
           </div>
@@ -578,6 +578,12 @@
         cta.hidden = false;
       } else { cta.hidden = true; }
       result.hidden = false;
+      // Move focus to a sensible anchor so a screen-reader visitor lands on the
+      // result rather than on the spin button that is about to be disabled.
+      // Skip on a restored reveal (page load) where stealing focus is unwanted.
+      if (!restored) {
+        try { (!cta.hidden ? cta : title).focus(); } catch (e) { /* ignore */ }
+      }
     }
 
     update(config) {

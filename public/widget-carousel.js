@@ -18,7 +18,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.3.4';
+  const VERSION = '1.3.5';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (navigation controls and structural aria-labels).
@@ -678,6 +678,14 @@
 
     _setPos(card, cls, instant) {
       ['pos0', 'pos1', 'pos2', 'posQ', 'posX'].forEach(function (p) { card.classList.remove(p); });
+      // Off-screen queued (posQ) and leaving (posX) cards sit at opacity 0 with the
+      // focus ring clipped by overflow:hidden. Keep them — and the CTA link inside —
+      // out of the tab order and the a11y tree so keyboard users don't tab through
+      // dead invisible stops before reaching the real controls. inert covers both.
+      const hidden = (cls === 'posQ' || cls === 'posX');
+      card.inert = hidden;
+      if (hidden) card.setAttribute('aria-hidden', 'true');
+      else card.removeAttribute('aria-hidden');
       if (instant) {
         card.classList.add('no-anim');
         card.classList.add(cls);

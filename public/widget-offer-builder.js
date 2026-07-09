@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.1.1';
+  const VERSION = '0.1.2';
 
   // Resolve the API base off THIS script's origin so a remote-config embed on a
   // customer domain does not fetch the customer's own '/api/...' (404 → blank).
@@ -422,7 +422,7 @@
         // and shows a shareable /offer page link. Off by default (fires the
         // tg-offer-created event only).
         save: bool(c.save, false),
-        saveEndpoint: c.saveEndpoint || '/api/saved-offers',
+        saveEndpoint: c.saveEndpoint || API_BASE.replace('/widget-config', '/saved-offers'),
         offerId: c.offerId || '',                 // set when editing an existing saved offer
         offerBaseUrl: c.offerBaseUrl || '',        // optional absolute base for the shareable link
 
@@ -448,7 +448,7 @@
         // Audience languages / translate. On by default; the host can hide it
         // (e.g. the unauthenticated demo, where translate would 401).
         showLanguages: bool(c.showLanguages, true),
-        translateEndpoint: c.translateEndpoint || '/api/offer-translate',
+        translateEndpoint: c.translateEndpoint || API_BASE.replace('/widget-config', '/offer-translate'),
 
         // Required fields
         requireTitle: bool(c.requireTitle, true),

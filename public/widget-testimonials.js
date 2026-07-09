@@ -68,7 +68,7 @@
 
   const API_BASE = resolveApiOrigin();
 
-  const VERSION = '1.0.4';
+  const VERSION = '1.0.5';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (nav controls, badges, rating wording, the localised
@@ -139,6 +139,17 @@
   function safeColor(c, fallback) {
     if (typeof c !== 'string') return fallback;
     return /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/.test(c.trim()) ? c.trim() : fallback;
+  }
+
+  /** Percent-encode the characters that could break out of a CSS url('...')
+   *  context. esc() is the WRONG sanitiser here: the browser HTML-decodes the
+   *  style attribute before parsing the CSS, so an escaped quote decodes back
+   *  and lets the value close the url() and inject further declarations. The URL
+   *  is already scheme-checked by isSafeUrl(); this guards the CSS sink. */
+  function cssUrl(u) {
+    return String(u == null ? '' : u).replace(/[()'"\\\s<>]/g, function (ch) {
+      return '%' + ch.charCodeAt(0).toString(16).padStart(2, '0').toUpperCase();
+    });
   }
 
   /** Validate a CSS font-family value before interpolating into a <style> block.
@@ -955,7 +966,7 @@
     _avatarHTML(t, size) {
       const s = size || 44;
       if (t.avatar) {
-        return `<div class="tgt-avatar" style="background-image:url('${esc(t.avatar)}');width:${s}px;height:${s}px"></div>`;
+        return `<div class="tgt-avatar" style="background-image:url('${cssUrl(t.avatar)}');width:${s}px;height:${s}px"></div>`;
       }
       return `<div class="tgt-avatar" style="background:${avatarColor(t.author)};width:${s}px;height:${s}px">${esc(initials(t.author))}</div>`;
     }
@@ -1019,7 +1030,7 @@
         ? `<span class="tgt-source">${sourceLogo(t.source, 14)} ${esc(this._sourceLabel(t.source))}</span>`
         : '';
 
-      return `<section class="tgt-featured" aria-roledescription="testimonial">
+      return `<section class="tgt-featured" aria-roledescription="testimonial" aria-live="polite">
         <span class="tgt-featured-mark" aria-hidden="true">${icon('quote', 70)}</span>
         ${ratingEl}
         <blockquote class="tgt-featured-quote">${esc(t.quote)}</blockquote>
@@ -1128,16 +1139,41 @@
         });
       });
 
-      // Featured auto-rotate (respect reduced motion)
+      // Featured auto-rotate (respect reduced motion). Pause on hover/focus so a
+      // keyboard or screen-reader user is not interrupted, and restore focus to
+      // the current dot after the re-render so their place is not lost.
       if (this.c.layout === 'featured' && this.c.testimonials.length > 1 && !this._prefersReducedMotion()) {
         const total = this._filtered().length;
         if (total > 1) {
-          this.state.featuredTimer = setInterval(() => {
+          const advanceFeatured = () => {
             // Stop if the host was removed without destroy() (SPA client sites).
             if (this.host && !this.host.isConnected) { this.destroy(); return; }
+            const active = this.root.activeElement;
+            const keepDotFocus = !!(active && active.classList && active.classList.contains('tgt-featured-dot'));
             this.state.featuredIndex = (this.state.featuredIndex + 1) % total;
             this.render();
-          }, 6500);
+            if (keepDotFocus) {
+              const dot = this.root.querySelector('.tgt-featured-dot[aria-current="true"]');
+              if (dot) dot.focus();
+            }
+          };
+          const armFeatured = () => {
+            if (this.state.featuredTimer) return;
+            if (this.host && !this.host.isConnected) return;
+            if (this._prefersReducedMotion()) return;
+            this.state.featuredTimer = setInterval(advanceFeatured, 6500);
+          };
+          const pauseFeatured = () => {
+            if (this.state.featuredTimer) { clearInterval(this.state.featuredTimer); this.state.featuredTimer = null; }
+          };
+          armFeatured();
+          const featured = this.root.querySelector('.tgt-featured');
+          if (featured) {
+            featured.addEventListener('pointerenter', pauseFeatured);
+            featured.addEventListener('pointerleave', armFeatured);
+            featured.addEventListener('focusin', pauseFeatured);
+            featured.addEventListener('focusout', armFeatured);
+          }
         }
       }
 
@@ -1154,16 +1190,31 @@
       if (track) {
         track.addEventListener('scroll', () => this._carouselUpdateDots(), { passive: true });
       }
-      // Carousel autoplay
+      // Carousel autoplay. Loops back to the first card at the end (rather than
+      // freezing on the last) and re-arms after a hover/focus pause so it does
+      // not silently die for the rest of the visit.
       if (this.c.layout === 'carousel' && this.c.carousel.autoplay && !this._prefersReducedMotion()) {
         const interval = clamp(this.c.carousel.interval, 2000, 20000);
-        this.state.carouselTimer = setInterval(() => {
+        const tickCarousel = () => {
           // Stop if the host was removed without destroy() (SPA client sites).
           if (this.host && !this.host.isConnected) { this.destroy(); return; }
-          this._carouselStep('next');
-        }, interval);
+          this._carouselAdvance();
+        };
+        const armCarousel = () => {
+          if (this.state.carouselTimer) return;
+          if (this.host && !this.host.isConnected) return;
+          if (this._prefersReducedMotion()) return;
+          this.state.carouselTimer = setInterval(tickCarousel, interval);
+        };
+        const pauseCarousel = () => {
+          if (this.state.carouselTimer) { clearInterval(this.state.carouselTimer); this.state.carouselTimer = null; }
+        };
+        armCarousel();
         if (track) {
-          track.addEventListener('mouseenter', () => clearInterval(this.state.carouselTimer));
+          track.addEventListener('mouseenter', pauseCarousel);
+          track.addEventListener('mouseleave', armCarousel);
+          track.addEventListener('focusin', pauseCarousel);
+          track.addEventListener('focusout', armCarousel);
         }
       }
 
@@ -1194,6 +1245,21 @@
       if (!card) return;
       const step = card.getBoundingClientRect().width + 20;
       track.scrollBy({ left: dir === 'next' ? step : -step, behavior: 'smooth' });
+    }
+
+    // Autoplay advance: step forward, but loop back to the start once the track
+    // is at (or within one card of) the end so autoplay keeps rotating.
+    _carouselAdvance() {
+      const track = this.root.querySelector('.tgt-carousel-track');
+      if (!track) return;
+      const card = track.querySelector('.tgt-card');
+      const step = card ? card.getBoundingClientRect().width + 20 : track.clientWidth;
+      const maxLeft = track.scrollWidth - track.clientWidth;
+      if (track.scrollLeft > 0 && track.scrollLeft >= maxLeft - step) {
+        track.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        track.scrollBy({ left: step, behavior: 'smooth' });
+      }
     }
 
     _carouselGoTo(n) {

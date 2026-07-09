@@ -63,7 +63,7 @@
     } catch (e) { /* fall through */ }
     return '/api/whatsapp-track';
   })();
-  const VERSION = '1.0.2';
+  const VERSION = '1.0.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (weekday names, online/away status, chat controls and
@@ -791,6 +791,13 @@
       outline-offset: 2px;
     }
     .tgwa-inline svg { width: 22px; height: 22px; fill: #FFFFFF; flex-shrink: 0; }
+    .tgwa-inline[data-disabled="true"] {
+      background: var(--tgwa-muted);
+      cursor: not-allowed;
+      pointer-events: none;
+      opacity: 0.7;
+      box-shadow: none;
+    }
     .tgwa-inline-meta { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.2; }
     .tgwa-inline-meta-sub { font-size: 11px; opacity: 0.85; font-weight: 500; }
 
@@ -844,6 +851,12 @@
     }
     .tgwa-inline-card-cta:hover { background: var(--tgwa-brand-dark); }
     .tgwa-inline-card-cta svg { width: 14px; height: 14px; fill: #FFFFFF; }
+    .tgwa-inline-card-cta[data-disabled="true"] {
+      background: var(--tgwa-muted);
+      cursor: not-allowed;
+      pointer-events: none;
+      opacity: 0.7;
+    }
 
     /* ========== VERTICAL TAB LAYOUT ========== */
     /* A slim tall pill stuck to the side of the viewport, vertically centred.
@@ -1297,13 +1310,16 @@
       if (isMulti) return '';
       const cfg = this.c;
       const phone = (cfg.agents[0] && cfg.agents[0].phone) || cfg.phone;
-      const isOffline = cfg.hoursEnabled && !status.open;
-      const link = isOffline ? '#' : this._waLink(phone);
+      // Keep the wa.me link live out-of-hours so a visitor can leave a message as
+      // the away copy invites. Only disable when there is no phone to reach at all,
+      // so an empty href can never open a duplicate tab of the current page.
+      const link = this._waLink(phone);
+      const disabled = !link;
       return `
         <div class="tgwa-panel-foot">
-          <a class="tgwa-cta" href="${esc(link)}" target="_blank" rel="noopener noreferrer" data-platform="whatsapp" data-disabled="${isOffline}">
+          <a class="tgwa-cta" href="${esc(link || '#')}" target="_blank" rel="noopener noreferrer" data-platform="whatsapp" data-disabled="${disabled}"${disabled ? ' aria-disabled="true"' : ''}>
             ${svg('whatsapp', 18)}
-            <span>${esc(isOffline ? this.t('currentlyOffline') : cfg.ctaLabel)}</span>
+            <span>${esc(cfg.ctaLabel)}</span>
           </a>
           <div class="tgwa-fineprint">${esc(this.t('fineprint'))}</div>
         </div>
@@ -1314,12 +1330,15 @@
       const cfg = this.c;
       const phone = (cfg.agents[0] && cfg.agents[0].phone) || cfg.phone;
       const isOffline = cfg.hoursEnabled && !status.open;
-      const link = isOffline ? '#' : this._waLink(phone);
+      // Keep the link live out-of-hours; only disable when there is no phone to
+      // reach, so an empty href can never open a duplicate tab of the current page.
+      const link = this._waLink(phone);
+      const disabled = !link;
       const subLabel = isOffline
         ? (status.nextOpen ? this.t('backOnline', { when: status.nextOpen }) : this.t('currentlyOffline'))
         : cfg.inlineSubLabel;
       return `
-        <a class="tgwa-inline" href="${esc(link)}" target="_blank" rel="noopener noreferrer" data-platform="whatsapp" data-disabled="${isOffline}">
+        <a class="tgwa-inline" href="${esc(link || '#')}" target="_blank" rel="noopener noreferrer" data-platform="whatsapp" data-disabled="${disabled}"${disabled ? ' aria-disabled="true"' : ''}>
           ${svg('whatsapp', 22)}
           <span class="tgwa-inline-meta">
             <span>${esc(cfg.inlineLabel)}</span>
@@ -1333,7 +1352,10 @@
       const cfg = this.c;
       const agent = cfg.agents[0] || { name: cfg.name, role: cfg.role, phone: cfg.phone, photo: cfg.photo, online: cfg.online };
       const isOffline = cfg.hoursEnabled && !status.open;
-      const link = isOffline ? '#' : this._waLink(agent.phone);
+      // Keep the link live out-of-hours; only disable when there is no phone to
+      // reach, so an empty href can never open a duplicate tab of the current page.
+      const link = this._waLink(agent.phone);
+      const disabled = !link;
       return `
         <div class="tgwa-inline-card">
           ${this._renderAgentPhoto(agent, 48, !isOffline && agent.online)}
@@ -1342,9 +1364,9 @@
             <div class="tgwa-inline-card-meta-role">${esc(agent.role || '')}</div>
             <div class="tgwa-inline-card-meta-status" data-state="${isOffline ? 'offline' : 'online'}">${esc(isOffline ? this.t('replyBack') : this.t('replyMinutes'))}</div>
           </div>
-          <a class="tgwa-inline-card-cta" href="${esc(link)}" target="_blank" rel="noopener noreferrer" data-platform="whatsapp" data-disabled="${isOffline}">
+          <a class="tgwa-inline-card-cta" href="${esc(link || '#')}" target="_blank" rel="noopener noreferrer" data-platform="whatsapp" data-disabled="${disabled}"${disabled ? ' aria-disabled="true"' : ''}>
             ${svg('whatsapp', 14)}
-            <span>${esc(isOffline ? this.t('closed') : this.t('chat'))}</span>
+            <span>${esc(this.t('chat'))}</span>
           </a>
         </div>
       `;

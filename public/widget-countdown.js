@@ -56,7 +56,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.2.3';
+  const VERSION = '1.2.4';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the unit labels and the dismiss control). The expiry
@@ -783,7 +783,39 @@
 
     destroy() {
       this._stop();
+      this._clearStickyOffset();   // release any host-body padding we reserved
       try { this.shadow.innerHTML = ''; } catch {}
+    }
+
+    // Sticky top/bottom banners are position:fixed and would overlay the host
+    // page's own header/footer. Reserve space by padding the host <body> so the
+    // bar never covers the site's nav or content. Undone on dismiss/destroy and
+    // re-measured on every render (see _clearStickyOffset).
+    _applyStickyOffset(root) {
+      const c = this.c;
+      if (c.layout !== 'banner') return;
+      const pos = (c.banner && c.banner.position) || 'static';
+      if (pos !== 'sticky-top' && pos !== 'sticky-bottom') return;
+      if (typeof document === 'undefined' || !document.body) return;
+      const bar = root.querySelector('.tgcd-banner');
+      if (!bar) return;
+      try {
+        // getBoundingClientRect forces layout, so the height is accurate even
+        // though we measure synchronously right after mounting.
+        const h = Math.round(bar.getBoundingClientRect().height);
+        if (!h) return;
+        const side = pos === 'sticky-top' ? 'paddingTop' : 'paddingBottom';
+        this._stickySide = side;
+        this._stickyPrev = document.body.style[side];   // restore this on cleanup
+        document.body.style[side] = h + 'px';
+        this._stickyApplied = true;
+      } catch (e) { /* host body not writable — bar still shows, just no offset */ }
+    }
+
+    _clearStickyOffset() {
+      if (!this._stickyApplied) return;
+      try { document.body.style[this._stickySide] = this._stickyPrev || ''; } catch (e) { /* noop */ }
+      this._stickyApplied = false;
     }
 
     _stop() {
@@ -816,6 +848,11 @@
       style.textContent = STYLES;
       this.shadow.innerHTML = '';
       this.shadow.appendChild(style);
+
+      // Drop any host-body padding from a previous render. Re-applied at the end
+      // only if this render is still a sticky banner; the early returns below
+      // (scheduled-start, dismissed, no target, redirect) leave it cleared.
+      this._clearStickyOffset();
 
       // ── Scheduled start: render nothing until the start date arrives ──
       // Useful for "set up the Black Friday banner in October, leave it on the
@@ -915,6 +952,9 @@
 
       this.shadow.appendChild(root);
       this._root = root;
+
+      // Reserve host-page space for a sticky bar so it never overlays the nav
+      this._applyStickyOffset(root);
 
       // Start ticking only if there's a live countdown
       if (!isExpired || repeating) {
@@ -1021,6 +1061,7 @@
         btn.addEventListener('click', () => {
           this._dismissed = true;
           this._stop();
+          this._clearStickyOffset();   // give the reserved space back to the host
           this.shadow.innerHTML = '';
           // Persist across reloads using a per-widget key. Falls back silently
           // if storage isn't available (private browsing, etc.).

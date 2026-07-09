@@ -84,7 +84,7 @@
     } catch (e) { /* fall through */ }
     return '/api/airport-content';
   })();
-  const VERSION = '1.1.4';
+  const VERSION = '1.1.5';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (section/fact labels, tab labels, CTA buttons, map
@@ -1347,6 +1347,8 @@
         this.t(isDest ? 'browseResorts' : 'searchFlights');
       const url   = safeUrl(isDest ? cta.destinationButtonUrl : cta.originButtonUrl);
       const official = safeUrl(d.officialWebsite);
+      // Never render a CTA band with no actionable button (dead-end).
+      if (!url && !official) return '';
       if (!title && !sub && !label && !official) return '';
       return '<div class="tga-cta">' +
         '<div class="tga-cta-text">' +

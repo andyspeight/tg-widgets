@@ -45,7 +45,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.11.7';
+  const VERSION = '3.11.8';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -2296,7 +2296,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
               <div class="tgwm-spinner" aria-hidden="true"></div>
               <span data-loading-text>${esc(t('loadingMap'))}</span>
             </div>
-            <button class="tgwm-fs-btn" data-fs-btn aria-label="${esc(t('viewMapFullscreen'))}">
+            ${c.showFullscreenButton !== false ? `<button class="tgwm-fs-btn" data-fs-btn aria-label="${esc(t('viewMapFullscreen'))}">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="15 3 21 3 21 9"/>
                 <polyline points="9 21 3 21 3 15"/>
@@ -2304,7 +2304,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
                 <line x1="3" y1="21" x2="10" y2="14"/>
               </svg>
               <span>${esc(c.ctaLabel || t('viewFullscreen'))}</span>
-            </button>
+            </button>` : ''}
           </div>
         </div>
       `;

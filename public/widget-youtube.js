@@ -27,7 +27,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.1';
+  const VERSION = '1.0.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (relative-time labels, the header/CTA defaults, the
@@ -553,11 +553,28 @@
     }
 
     update(newConfig) {
+      const prev = this.cfg;
       this.cfg = Object.assign({}, this.cfg, newConfig || {});
       this.t = makeT(this.cfg);
       this.channel = { title: this.cfg.channelTitle || '', url: safeUrl(this.cfg.channelUrl) || '' };
+      // Only the channel or how many videos we ask for changes the underlying
+      // feed. Everything else (title, subtitle, CTA, colours, radius, columns,
+      // layout, toggles) is presentation only, so re-render from the videos we
+      // already loaded — no refetch, no skeleton flash on each keystroke.
+      const feedChanged = String(prev.channelId || '') !== String(this.cfg.channelId || '')
+        || (parseInt(prev.maxVideos, 10) || 6) !== (parseInt(this.cfg.maxVideos, 10) || 6);
+      // Tear down the observers/listeners the previous shell owned before we
+      // rebuild — _buildShell creates a fresh ResizeObserver, so without this the
+      // old one leaks (and a stale lightbox keydown listener would linger).
+      try { if (this._ro) { this._ro.disconnect(); this._ro = null; } } catch (e) { /* noop */ }
+      try { this._closeLightbox(); } catch (e) { /* noop */ }
       this._buildShell();
-      this._load();
+      if (!feedChanged && Array.isArray(this.videos) && this.videos.length) {
+        this._refreshHead();
+        this._renderVideos();
+      } else {
+        this._load();
+      }
     }
 
     destroy(keepShadow) {

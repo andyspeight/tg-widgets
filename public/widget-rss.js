@@ -27,7 +27,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.2';
+  const VERSION = '1.0.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (default heading, empty/error states, the live-feed
@@ -411,13 +411,21 @@
     }
 
     update(newConfig) {
+      // Only these fields change which articles load. Everything else
+      // (colours, radius, layout, header text, per-card toggles) is
+      // appearance-only, so rebuild the shell but reuse the cached items
+      // instead of refetching the feeds on every editor keystroke.
+      const dataKeys = ['feeds', 'maxItems', 'dedupe', 'items'];
+      const before = JSON.stringify(dataKeys.map(k => this.cfg[k]));
       this.cfg = Object.assign({}, this.cfg, newConfig || {});
       this.t = makeT(this.cfg);
       if (newConfig && newConfig.headerTitle == null && (!this.cfg.headerTitle || this.cfg.headerTitle === MESSAGES.en.latestNews)) {
         this.cfg.headerTitle = this.t('latestNews');
       }
+      const after = JSON.stringify(dataKeys.map(k => this.cfg[k]));
       this._buildShell();
-      this._load();
+      if (before !== after || !this.items.length) this._load();
+      else this._renderItems();
     }
     destroy(keepShadow) { if (!keepShadow && this.shadow) this.shadow.innerHTML = ''; }
   }

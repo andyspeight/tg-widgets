@@ -43,7 +43,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.4';
+  const VERSION = '1.0.5';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (day names, status words, opening-time phrases). The
@@ -253,11 +253,36 @@
     const today = scheduleForDate(d, hours, holidays);
     const minutesNow = d.getHours() * 60 + d.getMinutes();
 
+    // A slot that opened yesterday and spans midnight (close <= open) keeps us
+    // open now while minutesNow is still before its close time.
+    const yesterday = scheduleForDate(new Date(d.getTime() - 86400000), hours, holidays);
+    if (!yesterday.closed) {
+      for (const slot of yesterday.slots) {
+        const a = parseHHMM(slot[0]);
+        const b = parseHHMM(slot[1]);
+        if (a !== null && b !== null && b <= a && minutesNow < b) {
+          return {
+            open: true,
+            nextOpen: false,
+            closingAt: b,
+            label: t('openUntil', { time: formatTime(b, tf) }),
+          };
+        }
+      }
+    }
+
     if (!today.closed) {
       for (const slot of today.slots) {
         const a = parseHHMM(slot[0]);
         const b = parseHHMM(slot[1]);
-        if (a !== null && b !== null && minutesNow >= a && minutesNow < b) {
+        if (a === null || b === null) continue;
+        // b <= a marks a midnight-spanning slot. Today's slot only makes us open
+        // once we are past its open time (the evening). The small-hours portion
+        // belongs to YESTERDAY's slot and is handled by the yesterday-tail check
+        // above — counting it here too would falsely report open in the small
+        // hours even when the previous day was closed.
+        const openNow = (b <= a) ? (minutesNow >= a) : (minutesNow >= a && minutesNow < b);
+        if (openNow) {
           return {
             open: true,
             nextOpen: false,

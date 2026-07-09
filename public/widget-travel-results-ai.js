@@ -21,9 +21,13 @@
   // Stage 1 of the contract: announce presence as early as possible so the
   // Travel Results widget knows to emit the results-ready event.
   window.TravelgenixWidgets = window.TravelgenixWidgets || {};
+  // Cross-instance double-init guard: if the script is included twice (header
+  // pasted twice, or header plus a stray container embed) the presence flag is
+  // already set, so the second copy no-ops rather than mounting a second panel.
+  if (window.TravelgenixWidgets.travelResultsAi) return;
   window.TravelgenixWidgets.travelResultsAi = true;
 
-  var VERSION = '1.10.2';
+  var VERSION = '1.10.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (header, controls, fact/board labels, fallback states).
@@ -662,12 +666,23 @@
       shortlist: cands.map(compact)
     };
     if (message) { payload.message = message; payload.history = history.slice(-8); }
+    // Fail-safe timeout: a stalled connection (slow proxy, cold-start where the
+    // socket opens but the body never arrives) would otherwise leave fetch
+    // neither resolving nor rejecting, freezing the panel on 'Reading…' /
+    // 'Thinking…' forever. AbortController.abort() rejects the promise, routing
+    // into the existing .catch fallback so the visitor always lands on picks.
+    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 18000);
     return fetch(API_BASE, {
       method: 'POST', mode: 'cors', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload), signal: ctrl ? ctrl.signal : undefined
     }).then(function (r) {
+      clearTimeout(timer);
       if (!r.ok) throw new Error('HTTP ' + r.status);
       return r.json();
+    }, function (e) {
+      clearTimeout(timer);
+      throw e;
     });
   }
 

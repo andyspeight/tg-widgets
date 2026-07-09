@@ -73,7 +73,7 @@
     } catch (e) { /* fall through */ }
     return '/api/events-content';
   })();
-  const VERSION = '1.0.3';
+  const VERSION = '1.0.4';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (month + weekday names, view-switcher and filter
@@ -1680,6 +1680,9 @@
     }
 
     _openModal(e) {
+      // Prefer an already-recorded opener (e.g. the "+N more" button behind a day
+      // list) so closing the detail modal returns focus to the real origin.
+      const trigger = this._modalTrigger || this.shadow.activeElement;
       this._closeModal();
       const meta = categoryMeta(e.category);
       const catColor = e.catColor || meta.color;
@@ -1689,7 +1692,7 @@
       const root = this.shadow.querySelector('.tge-root');
       const modalHtml = ''
         + '<div class="tge-modal-bg" data-tge-modal></div>'
-        + '<div class="tge-modal" role="dialog" aria-modal="true">'
+        + '<div class="tge-modal" role="dialog" aria-modal="true" aria-labelledby="tge-modal-title">'
           + '<div class="tge-modal-card" style="position:relative;--tge-cat:' + catColor + ';--tge-cat-rgb:' + catRgb + '">'
             + '<button class="tge-modal-close" type="button" aria-label="' + esc(this.t('close')) + '">' + svgPath(IC.close, '') + '</button>'
             + (e.image && this.cfg.showImages !== false
@@ -1697,7 +1700,7 @@
                 : '')
             + '<div class="tge-modal-body">'
               + '<span class="tge-modal-cat"><span class="tge-cat-tag-dot"></span>' + esc(e.category) + '</span>'
-              + '<h3 class="tge-modal-name">' + esc(e.name) + '</h3>'
+              + '<h3 class="tge-modal-name" id="tge-modal-title">' + esc(e.name) + '</h3>'
               + '<div class="tge-modal-meta">'
                 + '<div class="tge-modal-meta-row">' + svgPath(IC.cal, '') + '<span>' + esc(dateRange) + '</span></div>'
                 + (e.location ? '<div class="tge-modal-meta-row">' + svgPath(IC.pin, '') + '<span>' + esc(e.location) + '</span></div>' : '')
@@ -1730,8 +1733,26 @@
       bg && bg.addEventListener('click', close);
       const closeBtn = root.querySelector('.tge-modal-close');
       closeBtn && closeBtn.addEventListener('click', close);
-      this._kbdHandler = (ev) => { if (ev.key === 'Escape') close(); };
+      this._modalTrigger = trigger;
+      this._kbdHandler = (ev) => {
+        if (ev.key === 'Escape') { close(); return; }
+        this._trapTab(ev, card);
+      };
       document.addEventListener('keydown', this._kbdHandler);
+      // Move focus into the dialog so keyboard users land on a control inside it.
+      requestAnimationFrame(() => { closeBtn && closeBtn.focus(); });
+    }
+
+    // Keep Tab focus inside the open modal card (elements live in the shadow root).
+    _trapTab(ev, card) {
+      if (ev.key !== 'Tab' || !card) return;
+      const focusable = card.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])');
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = this.shadow.activeElement;
+      if (ev.shiftKey && active === first) { ev.preventDefault(); last.focus(); }
+      else if (!ev.shiftKey && active === last) { ev.preventDefault(); first.focus(); }
     }
 
     _openModalList(dayStr, events) {
@@ -1742,6 +1763,7 @@
       // Multiple events → a real day list, each row opening its own detail modal.
       // Previously this opened events[0] (already visible as pill #1), so the 4th,
       // 5th … events the "+N more" button counted were unreachable.
+      const trigger = this.shadow.activeElement;
       this._closeModal();
       const heading = fmtRange(dayStr, dayStr, this.t) || esc(this.t('close'));
       let rows = '';
@@ -1788,8 +1810,13 @@
       bg && bg.addEventListener('click', close);
       const closeBtn = root.querySelector('.tge-modal-close');
       closeBtn && closeBtn.addEventListener('click', close);
-      this._kbdHandler = (ev) => { if (ev.key === 'Escape') close(); };
+      this._modalTrigger = trigger;
+      this._kbdHandler = (ev) => {
+        if (ev.key === 'Escape') { close(); return; }
+        this._trapTab(ev, card);
+      };
       document.addEventListener('keydown', this._kbdHandler);
+      requestAnimationFrame(() => { closeBtn && closeBtn.focus(); });
 
       root.querySelectorAll('.tge-daylist-row').forEach((btn) => {
         btn.addEventListener('click', () => {
@@ -1811,6 +1838,12 @@
       if (this._kbdHandler) {
         document.removeEventListener('keydown', this._kbdHandler);
         this._kbdHandler = null;
+      }
+      // Return focus to whatever opened the modal so keyboard users are not stranded.
+      if (this._modalTrigger) {
+        const t = this._modalTrigger;
+        this._modalTrigger = null;
+        try { if (t.isConnected && typeof t.focus === 'function') t.focus(); } catch {}
       }
     }
 

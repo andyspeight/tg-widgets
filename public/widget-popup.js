@@ -80,7 +80,7 @@
     } catch (e) { /* fall through */ }
     return '/api/popup-lead';
   })();
-  const VERSION = '1.0.4';
+  const VERSION = '1.0.5';
   const STORAGE_PREFIX = 'tgp_';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -1249,7 +1249,22 @@
       return c.overlay && overlayLayouts.includes(layout);
     }
 
+    // Circle-of-doom guard: a visitor must always keep at least one way to
+    // dismiss the popup. Backdrop-click only helps when a backdrop is actually
+    // shown, so for backdrop-less layouts (bars, slide-ins, floating cards) the
+    // only escapes are the X and Escape. If an author has turned both off and no
+    // dismissible backdrop remains, force the close button on so the popup can
+    // never become unescapable for the whole session.
+    _ensureDismissable() {
+      const c = this.cfg;
+      const backdropDismiss = this._showBackdrop() && c.closeOnBackdropClick;
+      if (!backdropDismiss && !c.showCloseButton && !c.closeOnEscape) {
+        c.showCloseButton = true;
+      }
+    }
+
     _render() {
+      this._ensureDismissable();
       const css = this._cssVars();
       const layoutClass = this._layoutClass();
       const showBackdrop = this._showBackdrop();

@@ -1,5 +1,5 @@
 /**
- * Travelgenix Smart Section Widget v1.1.0
+ * Travelgenix Smart Section Widget v1.1.1
  * Show different content to different visitors without a developer.
  * Self-contained, embeddable wrapper widget — zero dependencies beyond the
  * shared rule engine (tgse-rules.js), which it loads itself if missing.
@@ -23,7 +23,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '1.1.0';
+  var VERSION = '1.1.1';
 
   /* ------------------------------------------------------------------ *
    * API base resolution (shared suite convention)
@@ -129,6 +129,17 @@
 
   function stateKey(id, suffix) {
     return 'ss_' + (id || 'default') + '_' + suffix;
+  }
+
+  // Stable short id derived from a string (djb2). Used to give inline-config
+  // sections without an explicit id their own state bucket, so two different
+  // dismissible sections on one page do not share dismiss/show-cap storage.
+  function hashId(str) {
+    var h = 5381;
+    for (var i = 0; i < str.length; i++) {
+      h = ((h << 5) + h + str.charCodeAt(i)) >>> 0;
+    }
+    return h.toString(36);
   }
 
   function isDismissed(engine, id) {
@@ -399,6 +410,13 @@
         var inline = el.getAttribute('data-tg-config');
         if (inline) {
           config = JSON.parse(inline);
+          // Give inline sections a stable per-section id so dismiss/show-cap
+          // state never collides across sections: prefer an explicit
+          // data-tg-id, else derive one from the inline config itself.
+          if (config && typeof config === 'object' && !config.widgetId) {
+            var inlineId = el.getAttribute('data-tg-id');
+            config.widgetId = inlineId || ('inline_' + hashId(inline));
+          }
         } else {
           var id = el.getAttribute('data-tg-id');
           if (id) {
