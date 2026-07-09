@@ -30,6 +30,7 @@
  */
 
 import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail, lookupClientCredentialsByRecordId } from './_auth.js';
+import { classifyItem, describeUnclassifiedItem, aggregateTravellers } from './_lib/travelify-items.js';
 
 const AIRTABLE_BASE = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
 const WIDGETS_TABLE = 'tblVAThVqAjqtria2';
@@ -893,10 +894,25 @@ function trimExtras(dataObject) {
 
 function trimItem(item) {
   if (!item || typeof item !== 'object') return null;
+
+  // Robustly resolve the product type and normalise the detail payload.
+  // classifyItem unwraps a JSON-string dataObject, looks under alternate
+  // keys, maps label variants onto our canonical set, and — as a last
+  // resort — sniffs the payload's shape. Without this, an item whose
+  // dataObject was a string, or whose product used an unfamiliar label,
+  // lost ALL its detail while its price still counted toward the total
+  // (Exclusively Travel ET90803: a hotel + flights showed as a £4,203
+  // balance with no trip). See api/_lib/travelify-items.js.
+  const { productType, dataObject } = classifyItem(item);
+
   const out = {
     id: safeNum(item.id),
     status: safeStr(item.status, 30),
-    product: safeStr(item.product, 30),
+    // Normalise to the canonical product so every downstream consumer
+    // (widget, email, PDF) — all of which filter on
+    // item.product === 'Accommodation' etc — picks the item up. Fall back
+    // to the raw label when we genuinely can't classify it.
+    product: productType || safeStr(item.product, 30),
     bookingReference: safeStr(item.bookingReference, 100),
     price: safeNum(item.price),
     currency: safeStr(item.originalCurrency, 10),
@@ -905,25 +921,26 @@ function trimItem(item) {
   };
 
   // Per-product extraction. Each branch is isolated so a malformed item
-  // of one product doesn't break the others.
-  if (item.product === 'Accommodation' && item.dataObject) {
-    out.accommodation = trimAccommodation(item.dataObject);
-  } else if (item.product === 'Flights' && item.dataObject) {
-    out.flights = trimFlights(item.dataObject);
-  } else if (item.product === 'AirportExtras' && item.dataObject) {
-    out.airportExtras = trimAirportExtras(item.dataObject);
-  } else if (item.product === 'Transfers' && item.dataObject) {
-    out.transfers = trimTransfers(item.dataObject);
-  } else if (item.product === 'CarRental' && item.dataObject) {
-    out.carRental = trimCarRental(item.dataObject);
-  } else if (item.product === 'TicketsAttractions' && item.dataObject) {
-    out.ticketsAttractions = trimTicketsAttractions(item.dataObject);
-  } else if (item.product === 'Packages' && item.dataObject) {
+  // of one product doesn't break the others. Keyed on the RESOLVED product
+  // type and the COERCED dataObject.
+  if (productType === 'Accommodation' && dataObject) {
+    out.accommodation = trimAccommodation(dataObject);
+  } else if (productType === 'Flights' && dataObject) {
+    out.flights = trimFlights(dataObject);
+  } else if (productType === 'AirportExtras' && dataObject) {
+    out.airportExtras = trimAirportExtras(dataObject);
+  } else if (productType === 'Transfers' && dataObject) {
+    out.transfers = trimTransfers(dataObject);
+  } else if (productType === 'CarRental' && dataObject) {
+    out.carRental = trimCarRental(dataObject);
+  } else if (productType === 'TicketsAttractions' && dataObject) {
+    out.ticketsAttractions = trimTicketsAttractions(dataObject);
+  } else if (productType === 'Packages' && dataObject) {
     // Packages are composite: expose accommodation + flights directly on
     // the item so all existing consumers (widget, email, PDF) Just Work
     // without needing to know about the Packages product type. Operator
     // info and ATOL flag travel alongside on item.package for the badge.
-    const pkg = trimPackages(item.dataObject);
+    const pkg = trimPackages(dataObject);
     out.accommodation = pkg.accommodation;
     out.flights = pkg.flights;
     out.package = {
@@ -931,12 +948,15 @@ function trimItem(item) {
       atolProtected: pkg.atolProtected,
       inclusions: pkg.inclusions,
     };
-  } else if (item.product === 'Extras' && item.dataObject) {
-    out.extras = trimExtras(item.dataObject);
+  } else if (productType === 'Extras' && dataObject) {
+    out.extras = trimExtras(dataObject);
+  } else {
+    // Genuinely unrecognised: neither a known/aliased product label nor a
+    // payload shape we can read. The price still counts toward the total,
+    // but log a PII-safe structural fingerprint so we can add explicit
+    // support for the next never-seen product without shipping a probe.
+    console.warn('[retrieve-order] unclassified order item', describeUnclassifiedItem(item));
   }
-  // Other product types (Insurance, etc) fall through with the
-  // common envelope only. Widget renders a generic "Booked" card for those
-  // so the price isn't orphaned.
 
   return out;
 }
@@ -1108,26 +1128,10 @@ function computeSummary(items) {
   // Aggregate unique travellers across all items. People appear in the
   // accommodation 'guests' array, flights/extras 'travellers', tickets
   // 'guests', transfers 'travellers', and car rental's normalised
-  // driver-as-traveller. Usually overlapping but not always.
-  const seen = new Set();
-  for (const item of items) {
-    const list =
-      item.accommodation?.guests ||
-      item.flights?.travellers ||
-      item.airportExtras?.travellers ||
-      item.transfers?.travellers ||
-      item.carRental?.travellers ||
-      item.ticketsAttractions?.guests ||
-      item.extras?.travellers ||
-      [];
-    for (const t of list) {
-      const key = `${(t.title || '').toLowerCase()}|${(t.firstname || '').toLowerCase()}|${(t.surname || '').toLowerCase()}`;
-      if (!seen.has(key) && (t.firstname || t.surname)) {
-        seen.add(key);
-        summary.travellers.push(t);
-      }
-    }
-  }
+  // driver-as-traveller. Usually overlapping but not always. Reads every
+  // sub-object per item (see aggregateTravellers) so a booking whose
+  // passengers sit on the flights rather than the hotel still lists them.
+  summary.travellers = aggregateTravellers(items);
 
   return summary;
 }
