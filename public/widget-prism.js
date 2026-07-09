@@ -18,7 +18,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '1.1.2';
+  var VERSION = '1.1.3';
 
   function resolveBase(path, override) {
     if (typeof window === 'undefined') return path;
@@ -239,15 +239,14 @@
       '.ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .18s ease,object-position .18s ease}' +
       '.scrim{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;' +
         'background:linear-gradient(to top,rgba(6,12,22,.62) 0%,rgba(6,12,22,.16) 26%,transparent 46%)}' +
-      // Labels wrap within the visible parallelogram (inset by ~half the slant
-      // each side) instead of being clipped when the text is long.
+      // Labels wrap only at spaces (never mid-word) within the visible
+      // parallelogram; if a single word is too wide it is scaled down in _refit.
       '.label{position:absolute;left:calc(var(--slant) * .5);right:calc(var(--slant) * .5);bottom:2.3cqw;z-index:2;' +
-        'text-align:center;line-height:1.14;overflow-wrap:break-word;padding:0 .3cqw;' +
+        'text-align:center;line-height:1.14;overflow-wrap:normal;word-break:keep-all;padding:0 .3cqw;' +
         'font-family:var(--labelF);font-weight:600;font-size:var(--labelS);letter-spacing:var(--labelL);color:var(--labelC);' +
         'text-transform:uppercase;text-shadow:0 1px 10px rgba(0,0,0,.55),0 1px 2px rgba(0,0,0,.5);' +
         'transform:translateX(calc(-0.42 * var(--slant)))}' +
       '.slice:last-child .label{transform:none}' +
-      '.label--fit{white-space:nowrap;overflow-wrap:normal}' +
       'a.slice:focus-visible{outline:3px solid #fff;outline-offset:-3px}' +
       // On narrow screens the side-by-side band makes the panel text shrink to
       // nothing, so stack: full-width editorial panel on top (readable clamped
@@ -334,10 +333,8 @@
     var fx = clampNum(item.fx, 0, 100, 50), fy = clampNum(item.fy, 0, 100, 50), z = clampNum(item.zoom, 1, 3, 1);
     var st = 'object-position:' + fx + '% ' + fy + '%;transform:scale(' + z + ');transform-origin:' + fx + '% ' + fy + '%';
     var label = esc(item.label || '');
-    // Single word (no spaces) scales down to fit; multi-word wraps onto lines.
-    var single = label && !/\s/.test(String(item.label).trim());
     var inner = '<img class="ph" alt=""' + (img ? ' src="' + esc(img) + '"' : '') + ' style="' + st + '">' +
-      '<span class="scrim" aria-hidden="true"></span><span class="label' + (single ? ' label--fit' : '') + '">' + label + '</span>';
+      '<span class="scrim" aria-hidden="true"></span><span class="label">' + label + '</span>';
     var cls = 'slice fb' + (i % 6);
     if (href) {
       var tgt = item.newTab ? ' target="_blank" rel="noopener"' : '';
@@ -406,10 +403,11 @@
     var avail = this.panel.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
     this._fit(this.shadow.querySelector('.title'), avail);
     this._fit(this.shadow.querySelector('.script'), avail);
-    // Single-word labels scale down to fit their slice; multi-word labels wrap.
-    var fits = this.shadow.querySelectorAll('.label--fit');
-    for (var i = 0; i < fits.length; i++) {
-      var el = fits[i];
+    // Labels wrap at spaces; if any single word is still wider than its slice,
+    // scale the whole label down so it fits on one line (no mid-word break).
+    var labels = this.shadow.querySelectorAll('.label');
+    for (var i = 0; i < labels.length; i++) {
+      var el = labels[i];
       el.style.fontSize = '';
       var sw = el.scrollWidth, cw = el.clientWidth;
       if (cw > 0 && sw > cw + 1) {
