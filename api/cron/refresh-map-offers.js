@@ -71,6 +71,12 @@ const MIN_NIGHTS = 2;
 const MAX_NIGHTS = 28;
 
 const SUMMARY_KEY = 'map:offers:v1';
+// Sampled composition history for the admin trend line (spot supplier drop-offs
+// / inventory drift). Appended on summary rebuild, gated to ~30m so manual
+// re-polls don't spam it, capped to the last HISTORY_MAX points.
+const HISTORY_KEY = 'map:offers:history';
+const HISTORY_MIN_GAP_MS = 30 * 60 * 1000;
+const HISTORY_MAX = 240;
 const LASTRUN_KEY = 'map:offers:lastRunAt';
 const CURSOR_KEY = 'map:offers:cursor';
 // Per-type fetch/keep/drop tallies from the most recent sweep — the Cache
@@ -138,6 +144,16 @@ function isFresh(stored, intervalMins, now = Date.now()) {
   const t = Date.parse(stored.refreshedAt);
   if (!Number.isFinite(t)) return false;
   return (now - t) < intervalMins * 60 * 1000;
+}
+
+// Operator package (one tour operator) vs dynamic package (flight + hotel from
+// two different suppliers). packageType is authoritative; sid inequality is the
+// fallback. Mirrors the admin/widget classifier.
+function packageKindOf(o) {
+  if (o.packageType === 'DynamicPackages') return 'DynamicPackages';
+  if (o.packageType === 'PackageHolidays') return 'PackageHolidays';
+  return (Number.isFinite(o.flightSid) && Number.isFinite(o.accommodationSid) && o.flightSid !== o.accommodationSid)
+    ? 'DynamicPackages' : 'PackageHolidays';
 }
 
 // ── Tested offer parser (unit-verified 22 May 2026) ─────────────────────────
@@ -800,6 +816,27 @@ async function rebuildSummary(rows) {
   };
   const ok = await setJson(SUMMARY_KEY, payload);
   if (ok) await setString(LASTRUN_KEY, payload.generatedAt);
+
+  // Sample a composition point for the admin trend line. Best-effort — a
+  // history hiccup must never fail the summary write. Gated to ~30m so frequent
+  // manual re-polls don't spam the series; `all` is the package pool, split
+  // into holidays vs dynamic (the map's own product, and where supplier drift
+  // shows first).
+  try {
+    const raw = await getJson(HISTORY_KEY);
+    const arr = Array.isArray(raw) ? raw.slice() : [];
+    const last = arr[arr.length - 1];
+    const nowT = Date.parse(payload.generatedAt);
+    if (!last || !last.at || (nowT - Date.parse(last.at)) >= HISTORY_MIN_GAP_MS) {
+      let holidays = 0, dynamic = 0;
+      for (const o of all) { if (packageKindOf(o) === 'DynamicPackages') dynamic++; else holidays++; }
+      arr.push({ at: payload.generatedAt, packages: all.length, holidays, dynamic, countries: countries.length });
+      while (arr.length > HISTORY_MAX) arr.shift();
+      await setJson(HISTORY_KEY, arr);
+    }
+  } catch (e) {
+    console.warn('[map-cron] history sample skipped:', e.message);
+  }
   return { written: ok, ...payload.stats };
 }
 
