@@ -19,7 +19,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.1.1';
+  const VERSION = '0.1.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the empty-state line and the default card CTA). The
@@ -151,7 +151,10 @@
       return {
         client: c.client || '',
         layout: layouts.indexOf(c.layout) !== -1 ? c.layout : 'vertical',
-        columns: String(c.columns || 'auto'),
+        // Whitelist to the CSS's known column tokens — this value is concatenated
+        // into a class attribute (cols-<n>), so an unvalidated string is an
+        // innerHTML injection vector.
+        columns: ['2', '3', '4'].indexOf(String(c.columns)) !== -1 ? String(c.columns) : 'auto',
         template: c.template || 'classic',
         theme: c.theme === 'dark' ? 'dark' : 'light',
         accentColor: c.accentColor || c.accent || '',

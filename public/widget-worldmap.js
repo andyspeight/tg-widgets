@@ -45,7 +45,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.11.6';
+  const VERSION = '3.11.7';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -3699,11 +3699,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
       const carrier = o.carrier ? esc(o.carrier) : '';
       const directBadge = o.direct ? `<span class="tgwm-card-badge">${esc(t('direct'))}</span>` : '';
       const imgHtml = img !== '#'
-        ? `<img src="${img}" alt="${hotel}" loading="lazy" onerror="this.style.display='none'">`
+        ? `<img src="${esc(img)}" alt="${hotel}" loading="lazy" onerror="this.style.display='none'">`
         : '';
 
       return `
-        <a class="tgwm-card" href="${href}" target="_blank" rel="noopener noreferrer">
+        <a class="tgwm-card" href="${esc(href)}" target="_blank" rel="noopener noreferrer">
           <div class="tgwm-card-img">
             ${imgHtml}
             ${directBadge}

@@ -44,7 +44,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.2';
+  const VERSION = '1.0.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (rating summary, section labels, controls). Platform
@@ -168,10 +168,11 @@
   function srcTag(k) { var m = srcMeta(k); return '<span class="tgr-src">' + m.mark + esc(m.name) + '</span>'; }
 
   function stars(count, size, color) {
+    const col = safeColor(color, '#F59E0B');
     let h = '';
     for (let i = 1; i <= 5; i++) {
-      const fill = i <= count ? color : 'none';
-      const stroke = i <= count ? color : '#D1D5DB';
+      const fill = i <= count ? col : 'none';
+      const stroke = i <= count ? col : '#D1D5DB';
       h += `<svg style="width:${size}px;height:${size}px" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/></svg>`;
     }
     return `<span class="tgr-stars">${h}</span>`;
@@ -353,6 +354,30 @@
 
   /* ━━━ HELPERS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
   function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+  // Scheme allowlist for any config/data URL that lands in an href or src.
+  // esc() only entity-encodes; it does NOT stop a javascript:/data: scheme, so
+  // every URL sink must pass through here first (and still be esc()'d for the
+  // attribute quote). Rejected values collapse to a harmless '#'.
+  function safeUrl(u) {
+    const s = String(u == null ? '' : u).trim();
+    if (!s) return '#';
+    if (/^(https?:|mailto:|tel:)/i.test(s)) return s;
+    if (s.charAt(0) === '#') return s;
+    if (s.charAt(0) === '/' && s.charAt(1) !== '/') return s; // same-origin path, not protocol-relative
+    return '#';
+  }
+  // Colour whitelist for any config value interpolated into a style attribute or
+  // CSS custom property. Blocks attribute breakout (a quote in the value) and
+  // url()/expression payloads by only passing hex, rgb/hsl and bare named colours.
+  function safeColor(c, fallback) {
+    const s = String(c == null ? '' : c).trim();
+    fallback = fallback || 'transparent';
+    if (/^#[0-9a-f]{3,8}$/i.test(s)) return s;
+    if (/^rgba?\([\d.,\s%]+\)$/i.test(s)) return s;
+    if (/^hsla?\([\d.,\s%]+\)$/i.test(s)) return s;
+    if (/^[a-z]{3,20}$/i.test(s)) return s;
+    return fallback;
+  }
   function ensureFont(family) {
     if (!family || family === 'Inter' || typeof document === 'undefined') return;
     const id = 'tg-font-' + String(family).toLowerCase().replace(/\s+/g, '-');
@@ -410,7 +435,18 @@
       const c = this.c;
       const reviews = this._filtered();
       let html = `<style>${STYLES}</style>`;
-      html += `<div class="tgr-root" data-theme="${c.theme}" style="--tgr-brand:${c.brandColor};--tgr-accent:${c.accentColor};--tgr-bg:${c.theme==='dark'?'#0F172A':c.pageBg};--tgr-card:${c.theme==='dark'?'#1E293B':c.cardBg};--tgr-text:${c.theme==='dark'?'#F1F5F9':c.textColor};--tgr-sub:${c.theme==='dark'?'#94A3B8':c.subtextColor};--tgr-border:${c.theme==='dark'?'#334155':'#E2E8F0'};--tgr-radius:${c.borderRadius}px;--tgr-radius-sm:${Math.max(c.borderRadius-4,8)}px">`;
+      // Whitelist every colour before it reaches the style attribute, and clamp
+      // the radius to a number, so a crafted config value cannot break out of the
+      // attribute (attribute-breakout XSS) or inject url()/expression payloads.
+      const brand = safeColor(c.brandColor, '#0891B2');
+      const accent = safeColor(c.accentColor, '#6366F1');
+      const bg = c.theme === 'dark' ? '#0F172A' : safeColor(c.pageBg, '#F8FAFC');
+      const card = c.theme === 'dark' ? '#1E293B' : safeColor(c.cardBg, '#FFFFFF');
+      const textC = c.theme === 'dark' ? '#F1F5F9' : safeColor(c.textColor, '#0F172A');
+      const subC = c.theme === 'dark' ? '#94A3B8' : safeColor(c.subtextColor, '#64748B');
+      const border = c.theme === 'dark' ? '#334155' : '#E2E8F0';
+      const radius = Math.max(0, Math.min(48, Number(c.borderRadius) || 0));
+      html += `<div class="tgr-root" data-theme="${esc(c.theme)}" style="--tgr-brand:${brand};--tgr-accent:${accent};--tgr-bg:${bg};--tgr-card:${card};--tgr-text:${textC};--tgr-sub:${subC};--tgr-border:${border};--tgr-radius:${radius}px;--tgr-radius-sm:${Math.max(radius-4,8)}px">`;
 
       if (c.showHeader) html += this._header();
       if (c.showAI && c.layout !== 'badge' && c.layout !== 'ticker') html += this._ai();
@@ -468,7 +504,7 @@
         // ctaText is author content; when left at the English default, show the
         // localised chrome string instead so a French viewer sees French.
         const ctaText = (c.ctaText === 'Write a Review') ? this.t('writeReview') : c.ctaText;
-        h += `<a href="${esc(c.ctaUrl)}" class="tgr-cta" target="_blank" rel="noopener">${icon('msgSq')}${esc(ctaText)}${icon('extLink')}</a>`;
+        h += `<a href="${esc(safeUrl(c.ctaUrl))}" class="tgr-cta" target="_blank" rel="noopener">${icon('msgSq')}${esc(ctaText)}${icon('extLink')}</a>`;
       }
       return h + `</div>`;
     }
@@ -485,7 +521,7 @@
       hl.forEach(a => {
         const labelKey = LABEL_KEYS[a.label];
         const label = labelKey ? this.t(labelKey) : a.label;
-        h += `<div class="tgr-ai-card"><div class="tgr-ai-card-icon" style="background:${a.color}15">${icon(a.icon||'heart')}</div><div class="tgr-ai-card-label">${esc(label)}</div><div class="tgr-ai-card-value">${esc(a.value)}</div></div>`;
+        h += `<div class="tgr-ai-card"><div class="tgr-ai-card-icon" style="background:${safeColor(a.color, '#EC4899')}15">${icon(a.icon||'heart')}</div><div class="tgr-ai-card-label">${esc(label)}</div><div class="tgr-ai-card-value">${esc(a.value)}</div></div>`;
       });
       return h + `</div></div>`;
     }
@@ -508,7 +544,7 @@
 
       // Photo hero variant
       if (variant === 'photohero' && r.hasPhoto && r.photoUrl) {
-        h += `<div class="tgr-photo-overlay"><div class="tgr-photo tgr-photo-hero"><img src="${esc(r.photoUrl)}" alt="" loading="lazy"></div>`;
+        h += `<div class="tgr-photo-overlay"><div class="tgr-photo tgr-photo-hero"><img src="${esc(safeUrl(r.photoUrl))}" alt="" loading="lazy"></div>`;
         h += `<div class="tgr-photo-overlay-inner">${avatar(r.author,'tgr-avatar-sm')}<div><p class="tgr-author-name">${esc(r.author)}</p>${stars(r.rating,10,'#FBBF24')}</div></div></div>`;
         h += `<div style="padding:4px 0 0"><p class="tgr-text">${esc(r.text).slice(0,150)}${r.text.length>150?'...':''}</p>`;
         h += `<div class="tgr-card-foot"><span class="tgr-date">${esc(r.date)}</span>${srcTag(r.source || c.source)}</div></div>`;
@@ -535,7 +571,7 @@
       h += `<div class="tgr-card-head"><div class="tgr-card-author">${avatar(r.author)}<div><p class="tgr-author-name">${esc(r.author)}</p><div class="tgr-author-meta">${stars(r.rating,12,'#F59E0B')}<span class="tgr-date">${esc(r.date)}</span></div></div></div>${srcTag(r.source || c.source)}</div>`;
 
       if (c.showPhotos && r.hasPhoto && r.photoUrl) {
-        h += `<div class="tgr-photo"><img src="${esc(r.photoUrl)}" alt="" loading="lazy"></div>`;
+        h += `<div class="tgr-photo"><img src="${esc(safeUrl(r.photoUrl))}" alt="" loading="lazy"></div>`;
       }
 
       const limit = variant === 'carousel' ? 120 : 200;
