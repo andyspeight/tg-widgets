@@ -87,6 +87,12 @@ a{text-decoration:none;color:inherit}
 .cat-filter:hover{border-color:var(--br);color:var(--br)}
 .cat-filter.active{background:var(--bl);border-color:var(--br);color:var(--br)}
 .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
+.cat-search{position:relative;margin-bottom:16px;max-width:440px}
+.cat-search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--mt);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.cat-search input{width:100%;padding:11px 14px 11px 40px;border-radius:10px;border:1px solid var(--bd);background:var(--sf);font-size:14px;font-family:var(--ft);color:var(--tx);transition:all .15s}
+.cat-search input::placeholder{color:var(--mt)}
+.cat-search input:focus{outline:none;border-color:var(--br);box-shadow:0 0 0 3px var(--bl)}
+.cat-empty{grid-column:1/-1;text-align:center;padding:48px 20px;color:var(--mt);font-size:14px}
 
 /* Widget Card */
 .w-card{background:var(--sf);border:1px solid var(--bd);border-radius:16px;overflow:hidden;transition:all .3s}
@@ -303,6 +309,10 @@ body.modal-open{overflow:hidden}
 <div class="catalogue">
   <div class="section-head">
     <h2 class="section-title" id="catTitle">Widget Catalogue</h2>
+  </div>
+  <div class="cat-search">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="search" id="catSearch" placeholder="Search widgets by name…" autocomplete="off" oninput="onSearchInput(this.value)">
   </div>
   <div class="cat-filters" id="catFilters"></div>
   <div class="cat-grid" id="catGrid"></div>
@@ -1008,6 +1018,7 @@ const CATEGORIES = ['All', ...new Set(WIDGETS.map(w => w.category))];
 let signedIn = false;
 let userEmail = '';
 let activeFilter = 'All';
+let searchQuery = '';
 let myWidgetData = [];
 
 /* ═══ RENDER ═══ */
@@ -1417,11 +1428,15 @@ function renderFilters() {
 }
 
 function renderCatalogue() {
-  const filtered = activeFilter === 'All' ? WIDGETS : WIDGETS.filter(w => w.category === activeFilter);
+  const q = searchQuery.trim().toLowerCase();
+  let filtered = activeFilter === 'All' ? WIDGETS : WIDGETS.filter(w => w.category === activeFilter);
+  if (q) filtered = filtered.filter(w => (w.name || '').toLowerCase().includes(q));
+  // Alphabetical by name — easy to scan now the catalogue is large.
+  filtered = filtered.slice().sort((a, b) => a.name.localeCompare(b.name));
   const grid = document.getElementById('catGrid');
   const plan = getUserPlan();
 
-  grid.innerHTML = filtered.map((w, i) => {
+  const cardsHtml = filtered.map((w, i) => {
     // Two layers of "status":
     //  1. registry w.status — 'coming-soon' means the widget isn't built yet
     //     (no editor/demo). Hard gate, applies to everyone. Old behaviour.
@@ -1541,12 +1556,19 @@ function renderCatalogue() {
       </div>
     </div>`;
   }).join('');
+  grid.innerHTML = cardsHtml || `<div class="cat-empty">No widgets match your search. Try a different name.</div>`;
 
   // Load live mini-previews — for every built widget (live or preview-soon),
   // since preview-soon keeps its working preview.
   setTimeout(() => {
     filtered.filter(w => w.status === 'live').forEach(w => loadMiniPreview(w));
   }, 200);
+}
+
+function onSearchInput(v) {
+  searchQuery = v || '';
+  clearTimeout(onSearchInput._t);
+  onSearchInput._t = setTimeout(renderCatalogue, 120);
 }
 
 function setFilter(cat) {
