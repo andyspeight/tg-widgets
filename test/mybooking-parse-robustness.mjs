@@ -187,6 +187,30 @@ check('CANONICAL_PRODUCTS has all eight types', CANONICAL_PRODUCTS.length === 8)
   check('aggregate: borrowed the title from the flight record', t[0].title === 'Miss');
   check('aggregate: kept the hotel record type/position (Lead)', t[0].type === 'Lead');
 }
+{
+  // Two genuinely DIFFERENT people who share a first + surname but carry
+  // distinct titles must NOT be collapsed (e.g. a father/son both "John Smith").
+  const items = [{ product: 'Accommodation', accommodation: { guests: [
+    { type: 'Lead', title: 'Mr', firstname: 'John', surname: 'Smith' },
+    { type: 'Adult', title: 'Master', firstname: 'John', surname: 'Smith' },
+  ] } }];
+  const t = aggregateTravellers(items);
+  check('aggregate: distinct same-name people with different titles kept separate', t.length === 2);
+  check('aggregate: both distinct titles preserved',
+    t.some(p => p.title === 'Mr') && t.some(p => p.title === 'Master'));
+}
+{
+  // Guard the object-corruption path the review probed: upgrading a title-less
+  // record must not mutate the original guest object in item.accommodation.guests.
+  const hotelGuest = { type: 'Lead', firstname: 'Ada', surname: 'Byte' };
+  const items = [
+    { product: 'Accommodation', accommodation: { guests: [hotelGuest] } },
+    { product: 'Flights', flights: { travellers: [{ type: 'Adult', title: 'Ms', firstname: 'Ada', surname: 'Byte' }] } },
+  ];
+  const t = aggregateTravellers(items);
+  check('aggregate: single merged record with borrowed title', t.length === 1 && t[0].title === 'Ms');
+  check('aggregate: original hotel guest object not mutated', hotelGuest.title === undefined);
+}
 
 // ===== 6. End-to-end: an ET90803-shaped booking renders its trip + titles =====
 {

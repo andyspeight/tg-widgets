@@ -186,14 +186,17 @@ export function classifyItem(item) {
  * customerTitle ("Mr" for a party of Miss/Ms). De-dupes on title + name.
  */
 export function aggregateTravellers(items) {
-  // De-dupe on the PERSON (first + surname), NOT title + name. The same
-  // passenger routinely appears on both the hotel record (often title-less)
-  // and the flight record (airline-required title), so keying on the title
-  // too would list them twice — once without a title, once with. Keep the
-  // first sighting (so the hotel's 'Lead' type/position wins) but fill in a
-  // title from a later record if the first one lacked one.
-  const byPerson = new Map();
+  // De-dupe on the PERSON, tolerating the common title divergence between the
+  // hotel record (often title-less) and the flight record (airline-required
+  // title) for the SAME passenger — which must collapse to one — WITHOUT
+  // collapsing two genuinely different people who share a first + surname but
+  // carry distinct titles (e.g. a "John Smith" father and son), which must
+  // stay two. Two records merge only when their titles match or either side is
+  // title-less; the first sighting keeps its type/position (so the hotel's
+  // 'Lead' wins) and borrows a title from a later sighting when it lacked one.
+  const buckets = new Map(); // 'first|surname' -> kept traveller objects
   const order = [];
+  const norm = (s) => (s || '').trim().toLowerCase();
   const titled = (t) => !!(t && t.title && String(t.title).trim());
   for (const item of (Array.isArray(items) ? items : [])) {
     if (!item || typeof item !== 'object') continue;
@@ -209,23 +212,34 @@ export function aggregateTravellers(items) {
     for (const list of lists) {
       for (const t of list) {
         if (!t || typeof t !== 'object') continue;
-        const fn = (t.firstname || '').trim().toLowerCase();
-        const sn = (t.surname || '').trim().toLowerCase();
+        const fn = norm(t.firstname);
+        const sn = norm(t.surname);
         if (!fn && !sn) continue;
         const key = `${fn}|${sn}`;
-        const existing = byPerson.get(key);
-        if (!existing) {
-          byPerson.set(key, t);
-          order.push(key);
-        } else if (!titled(existing) && titled(t)) {
-          // Upgrade in place: keep the first record's type/position, borrow
-          // the missing title from this later, titled sighting.
-          byPerson.set(key, { ...existing, title: t.title });
+        let bucket = buckets.get(key);
+        if (!bucket) { bucket = []; buckets.set(key, bucket); }
+        // Find an existing record for the same person: same title, or either
+        // side untitled. A different non-empty title means a distinct person.
+        let slot = -1;
+        for (let i = 0; i < bucket.length; i++) {
+          const e = bucket[i];
+          if (norm(e.title) === norm(t.title) || !titled(e) || !titled(t)) { slot = i; break; }
+        }
+        if (slot === -1) {
+          bucket.push(t);
+          order.push(t);
+        } else if (!titled(bucket[slot]) && titled(t)) {
+          // Same person, first sighting had no title — borrow this one's,
+          // keeping the original type/position.
+          const upgraded = { ...bucket[slot], title: t.title };
+          const oi = order.indexOf(bucket[slot]);
+          bucket[slot] = upgraded;
+          if (oi !== -1) order[oi] = upgraded;
         }
       }
     }
   }
-  return order.map((k) => byPerson.get(k));
+  return order;
 }
 
 /**
