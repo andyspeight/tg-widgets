@@ -44,6 +44,31 @@
   .btn-add { width:100%; border:1px dashed var(--tgse-border,#c3c9d4); background:#fff; color:#1B2B5B; border-radius:8px; padding:9px; font-size:13px; font-weight:600; cursor:pointer; }
   .btn-add:hover { background:#f5f7fb; }
   #widgetMount { width:100%; }
+  /* template gallery + presets + uploads */
+  .tpl-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+  .tpl-card { text-align:left; padding:9px 11px; border:1.5px solid var(--tgse-border,#d5d8dd); border-radius:9px; background:#fff; cursor:pointer; font-size:12.5px; font-weight:600; color:#1b2b5b; }
+  .tpl-card.is-active { border-color:#1B2B5B; background:#f5f7fb; }
+  .tpl-card small { display:block; font-weight:500; color:var(--tgse-muted,#8a8f98); font-size:11px; margin-top:1px; }
+  .preset-row { display:flex; flex-wrap:wrap; gap:8px; }
+  .preset { width:26px; height:26px; border-radius:7px; border:2px solid #fff; box-shadow:0 0 0 1px var(--tgse-border,#d5d8dd); cursor:pointer; padding:0; }
+  .preset.is-active { box-shadow:0 0 0 2px #1B2B5B; }
+  .upload-row { display:flex; align-items:center; gap:10px; margin-top:6px; }
+  .btn-upload { border:1px solid var(--tgse-border,#d5d8dd); background:#fff; color:#1B2B5B; border-radius:8px; padding:7px 12px; font-size:12.5px; font-weight:600; cursor:pointer; white-space:nowrap; }
+  .btn-upload:hover { background:#f5f7fb; }
+  .tpl-modal { position:fixed; inset:0; background:rgba(16,24,40,.55); display:none; align-items:flex-start; justify-content:center; z-index:9999; padding:40px 20px; overflow:auto; }
+  .tpl-modal.is-open { display:flex; }
+  .tpl-modal-inner { background:#fff; border-radius:16px; max-width:920px; width:100%; padding:24px; box-shadow:0 20px 60px rgba(16,24,40,.35); }
+  .tpl-modal-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .tpl-modal-head h2 { margin:0; font-size:18px; color:#1b2b5b; }
+  .tpl-close { border:none; background:#f1f3f7; border-radius:8px; width:32px; height:32px; font-size:20px; line-height:1; cursor:pointer; color:#5a6473; }
+  .tpl-gallery { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:16px; }
+  .tpl-thumb { border:1.5px solid #e4e8f0; border-radius:12px; padding:14px; cursor:pointer; background:#fff; }
+  .tpl-thumb:hover { border-color:#1B2B5B; }
+  .tpl-thumb.is-active { border-color:#1B2B5B; box-shadow:0 0 0 2px rgba(27,43,91,.15); }
+  .tpl-thumb-name { font-size:13px; font-weight:700; color:#1b2b5b; margin-bottom:8px; display:flex; justify-content:space-between; }
+  .tpl-thumb-name span { font-weight:500; color:#8a8f98; font-size:11px; }
+  .tpl-preview { height:150px; overflow:hidden; border-radius:8px; background:#fff; }
+  .tpl-preview > div { transform:scale(.72); transform-origin:top left; width:139%; }
 </style>
 </head>
 <body>
@@ -108,21 +133,9 @@
               <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
             <div class="tgse-section-body">
-              <div class="layout-grid" id="templateGrid">
-                <button class="layout-card is-active" data-template="classic" type="button">
-                  <div class="layout-thumb"><span style="width:20px;height:20px;border-radius:50%"></span><span style="width:20px;height:3px;margin-left:6px"></span></div>
-                  <div class="layout-name">Classic</div>
-                </button>
-                <button class="layout-card" data-template="modern" type="button">
-                  <div class="layout-thumb"><span style="width:3px;height:24px"></span><span style="width:22px;height:3px;margin-left:6px"></span></div>
-                  <div class="layout-name">Modern</div>
-                </button>
-                <button class="layout-card" data-template="compact" type="button">
-                  <div class="layout-thumb"><span style="width:28px;height:4px"></span></div>
-                  <div class="layout-name">Compact</div>
-                </button>
-              </div>
-              <div class="field-help">Classic puts your photo or logo beside your details. Modern uses an accent bar. Compact is a single tidy column.</div>
+              <div class="tpl-grid" id="templateGrid"></div>
+              <button class="btn-add" id="tplBrowse" type="button" style="margin-top:10px">Browse the gallery</button>
+              <div class="field-help">Ten layouts. Tap one to switch instantly, or browse the gallery to preview them all with your details.</div>
             </div>
           </div>
 
@@ -133,6 +146,10 @@
               <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
             <div class="tgse-section-body">
+              <div class="field">
+                <span class="field-label">Quick colour</span>
+                <div class="preset-row" id="presetRow"></div>
+              </div>
               <div class="field">
                 <span class="field-label">Brand accent (name, links, button)</span>
                 <div class="colour-row"><input type="color" id="colAccent" value="#1B2B5B" /><input type="text" class="input" id="colAccentHex" maxlength="7" value="#1B2B5B" /></div>
@@ -183,8 +200,16 @@
               <div class="field"><span class="field-label">Full name</span><input class="input" id="fName" maxlength="120" placeholder="Jane Doe" /></div>
               <div class="field"><span class="field-label">Job title</span><input class="input" id="fTitle" maxlength="120" placeholder="Travel Consultant" /></div>
               <div class="field"><span class="field-label">Company</span><input class="input" id="fCompany" maxlength="120" placeholder="Sunshine Travel" /></div>
-              <div class="field"><span class="field-label">Headshot URL (optional)</span><input class="input" id="fPhoto" maxlength="300" placeholder="https://…/photo.jpg" /><div class="field-help">A square image works best. Classic template shows it as a round photo.</div></div>
-              <div class="field"><span class="field-label">Company logo URL (optional)</span><input class="input" id="fLogo" maxlength="300" placeholder="https://…/logo.png" /></div>
+              <div class="field"><span class="field-label">Headshot</span>
+                <input class="input" id="fPhoto" maxlength="300" placeholder="https://…/photo.jpg or upload below" />
+                <div class="upload-row"><button class="btn-upload" id="photoUpload" type="button">Upload image</button><span class="field-help" id="photoStatus">Square works best. Shown as a round photo.</span></div>
+                <input type="file" id="photoFile" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" style="display:none" />
+              </div>
+              <div class="field"><span class="field-label">Company logo</span>
+                <input class="input" id="fLogo" maxlength="300" placeholder="https://…/logo.png or upload below" />
+                <div class="upload-row"><button class="btn-upload" id="logoUpload" type="button">Upload image</button><span class="field-help" id="logoStatus"></span></div>
+                <input type="file" id="logoFile" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" style="display:none" />
+              </div>
             </div>
           </div>
 
@@ -379,7 +404,7 @@
     getConfig: () => C,
     setConfig: (c) => { C = Object.assign({}, C, c); syncControls(); render(); },
     onAIBuild: () => { tgse.toast('AI builder coming soon', 'ok'); },
-    onTemplates: () => { tgse.toast('Templates coming soon', 'ok'); },
+    onTemplates: () => openTemplateModal(),
     onAfterSave: (d) => { if (d && d.widgetId) { C.widgetId = d.widgetId; render(); } },
     onLoginSuccess: () => { loadFromUrl(); },
   });
@@ -487,12 +512,114 @@
   bindToggle('bUpdatable', () => C.banner.updatable, (v) => C.banner.updatable = v);
   bindToggle('pixelToggle', () => C.tracking.openPixel, (v) => C.tracking.openPixel = v);
 
-  // Template cards
+  // ── Template gallery ──
+  const TPL = (window.TGEmailSigWidget && window.TGEmailSigWidget.TEMPLATES) || [{ id: 'classic', label: 'Classic', group: '' }];
+  const PRESETS = (window.TGEmailSigWidget && window.TGEmailSigWidget.COLOUR_PRESETS) || [];
+
+  function buildTemplateGrid() {
+    $('templateGrid').innerHTML = TPL.map((t) =>
+      '<button class="tpl-card" type="button" data-template="' + t.id + '">' + escAttr(t.label) + '<small>' + escAttr(t.group || '') + '</small></button>'
+    ).join('');
+    markActiveTemplate();
+  }
+  function markActiveTemplate() {
+    document.querySelectorAll('#templateGrid .tpl-card').forEach((c) => c.classList.toggle('is-active', c.getAttribute('data-template') === C.template));
+    document.querySelectorAll('#tplGallery .tpl-thumb').forEach((c) => c.classList.toggle('is-active', c.getAttribute('data-template') === C.template));
+  }
+  function applyTemplate(id) { C.template = id; markActiveTemplate(); dirty(); render(); }
   $('templateGrid').addEventListener('click', (e) => {
-    const card = e.target.closest('[data-template]'); if (!card) return;
-    document.querySelectorAll('#templateGrid .layout-card').forEach((c) => c.classList.toggle('is-active', c === card));
-    C.template = card.getAttribute('data-template'); dirty(); render();
+    const card = e.target.closest('[data-template]'); if (card) applyTemplate(card.getAttribute('data-template'));
   });
+
+  // ── Colour presets ──
+  function buildPresets() {
+    $('presetRow').innerHTML = PRESETS.map((p) =>
+      '<button class="preset" type="button" title="' + escAttr(p.label) + '" data-accent="' + escAttr(p.accent) + '" style="background:' + escAttr(p.accent) + '"></button>'
+    ).join('');
+    markActivePreset();
+  }
+  function markActivePreset() {
+    document.querySelectorAll('#presetRow .preset').forEach((b) =>
+      b.classList.toggle('is-active', (b.getAttribute('data-accent') || '').toLowerCase() === (C.theme.accent || '').toLowerCase()));
+  }
+  $('presetRow').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-accent]'); if (!b) return;
+    C.theme.accent = b.getAttribute('data-accent');
+    $('colAccent').value = C.theme.accent; $('colAccentHex').value = C.theme.accent;
+    markActivePreset(); dirty(); render();
+  });
+
+  // ── Gallery modal with live thumbnails ──
+  const THUMB = { theme: { text: '#333333', muted: '#8a8f98', font: 'Arial, Helvetica, sans-serif', fontSize: 14 },
+    person: { name: 'Jane Doe', title: 'Travel Consultant', company: 'Sunshine Travel' },
+    contact: { phone: '+44 20 1234 5678', email: 'jane@sunshinetravel.co.uk', website: 'sunshinetravel.co.uk' },
+    cta: { enabled: true, label: 'Book now', url: 'https://example.co/book' },
+    socials: [{ network: 'facebook', url: 'https://facebook.com/x' }, { network: 'instagram', url: 'https://instagram.com/x' }],
+    travel: { showBadges: true, abta: 'Y1234', atol: '5678' } };
+  let modalEl = null;
+  function buildModal() {
+    modalEl = document.createElement('div');
+    modalEl.className = 'tpl-modal';
+    modalEl.innerHTML = '<div class="tpl-modal-inner"><div class="tpl-modal-head"><h2>Template gallery</h2><button class="tpl-close" type="button" aria-label="Close">&times;</button></div><div class="tpl-gallery" id="tplGallery"></div></div>';
+    document.body.appendChild(modalEl);
+    const B = window.TGEmailSigWidget;
+    $('tplGallery').innerHTML = TPL.map((t) => {
+      const cfg = Object.assign({}, THUMB, { template: t.id, theme: Object.assign({}, THUMB.theme, { accent: C.theme.accent }) });
+      const sig = B ? B.buildSignatureHtml(cfg, { origin: '' }) : '';
+      return '<div class="tpl-thumb" data-template="' + t.id + '"><div class="tpl-thumb-name">' + escAttr(t.label) + '<span>' + escAttr(t.group || '') + '</span></div><div class="tpl-preview"><div>' + sig + '</div></div></div>';
+    }).join('');
+    modalEl.addEventListener('click', (e) => {
+      if (e.target === modalEl || e.target.closest('.tpl-close')) { closeTemplateModal(); return; }
+      const th = e.target.closest('[data-template]');
+      if (th) { applyTemplate(th.getAttribute('data-template')); closeTemplateModal(); }
+    });
+  }
+  function openTemplateModal() { if (!modalEl) buildModal(); markActiveTemplate(); modalEl.classList.add('is-open'); }
+  function closeTemplateModal() { if (modalEl) modalEl.classList.remove('is-open'); }
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeTemplateModal(); });
+  $('tplBrowse').addEventListener('click', openTemplateModal);
+
+  // ── Image uploads (both route through /api/upload-logo: dataUrl -> {url}) ──
+  function convertToPng(file) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const MAX = 480; let w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+          if (!w || !h) { w = 240; h = 240; }
+          if (w > MAX || h > MAX) { const s = Math.min(MAX / w, MAX / h); w = Math.round(w * s); h = Math.round(h * s); }
+          const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+          const ctx = cv.getContext('2d'); ctx.clearRect(0, 0, w, h); ctx.drawImage(img, 0, 0, w, h);
+          URL.revokeObjectURL(url); resolve(cv.toDataURL('image/png'));
+        } catch (err) { URL.revokeObjectURL(url); reject(err); }
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Could not read that image')); };
+      img.src = url;
+    });
+  }
+  function wireUpload(btnId, fileId, statusId, apply) {
+    $(btnId).addEventListener('click', () => $(fileId).click());
+    $(fileId).addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0]; if (!file) return;
+      if (!/^image\//.test(file.type)) { tgse.toast('Please choose an image file', 'err'); e.target.value = ''; return; }
+      if (file.size > 8 * 1024 * 1024) { tgse.toast('That image is over 8MB — choose a smaller one', 'err'); e.target.value = ''; return; }
+      const st = $(statusId); const prev = st.textContent; st.textContent = 'Uploading…';
+      try {
+        const dataUrl = await convertToPng(file);
+        const r = await fetch('/api/upload-logo', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dataUrl }) });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok || !data.url) throw new Error(data.error || 'Upload failed — please try again');
+        apply(data.url); st.textContent = 'Uploaded ✓'; dirty(); render();
+      } catch (err) { st.textContent = prev; tgse.toast((err && err.message) || 'Could not upload that image', 'err'); }
+      finally { e.target.value = ''; }
+    });
+  }
+  wireUpload('photoUpload', 'photoFile', 'photoStatus', (url) => { C.person.photoUrl = url; $('fPhoto').value = url; });
+  wireUpload('logoUpload', 'logoFile', 'logoStatus', (url) => { C.person.logoUrl = url; $('fLogo').value = url; });
+
+  buildTemplateGrid();
+  buildPresets();
 
   // Font select + size
   (function initFont() {
@@ -541,7 +668,8 @@
     setTgl('bUpdatable', C.banner.updatable);
     setTgl('pixelToggle', C.tracking.openPixel);
 
-    document.querySelectorAll('#templateGrid .layout-card').forEach((c) => c.classList.toggle('is-active', c.getAttribute('data-template') === C.template));
+    markActiveTemplate();
+    markActivePreset();
     renderSocials();
   }
 

@@ -125,15 +125,36 @@ test('clamps an out-of-range font size', () => {
 });
 
 // ── Templates ───────────────────────────────────────────────────────────────
-test('every template returns a presentation table', () => {
-  for (const t of ['classic', 'modern', 'compact']) {
-    has(build({ template: t, person: PERSON }), '<table role="presentation"', t + ' missing table');
+test('the whole gallery renders a presentation table', () => {
+  const ids = Widget.TEMPLATES.map((t) => t.id);
+  ok(ids.length >= 10, 'expected a gallery of 10+ templates, got ' + ids.length);
+  const full = { person: PERSON, contact: { phone: '+44 20 1234 5678', email: 'a@b.co', website: 'x.com' },
+    socials: [{ network: 'facebook', url: 'https://f.co/x' }], cta: { enabled: true, label: 'Go', url: 'https://x.co' },
+    travel: { showBadges: true, abta: 'Y1' }, disclaimer: 'Confidential.' };
+  for (const id of ids) {
+    has(build(Object.assign({ template: id }, full)), '<table role="presentation"', id + ' missing table');
   }
+});
+
+test('exported gallery metadata is well-formed', () => {
+  ok(Array.isArray(Widget.TEMPLATES) && Widget.TEMPLATES.every((t) => t.id && t.label), 'TEMPLATES metadata malformed');
+  ok(Array.isArray(Widget.COLOUR_PRESETS) && Widget.COLOUR_PRESETS.length >= 5, 'COLOUR_PRESETS missing');
 });
 
 test('modern template shows the accent bar, compact does not', () => {
   has(build({ template: 'modern', person: PERSON }), 'width:4px', 'modern accent bar missing');
   hasNot(build({ template: 'compact', person: PERSON }), 'width:4px', 'compact should have no accent bar');
+});
+
+test('monogram template shows initials from the name', () => {
+  const out = build({ template: 'monogram', person: { name: 'Jane Doe' } });
+  has(out, '>JD<', 'expected JD monogram');
+});
+
+test('header band template paints an accent band', () => {
+  const out = build({ template: 'headerband', person: PERSON, theme: { accent: '#123456' } });
+  has(out, 'background-color:#123456', 'accent band missing');
+  has(out, 'color:#ffffff', 'band text should be white');
 });
 
 test('unknown template falls back to classic (still renders)', () => {
@@ -153,6 +174,17 @@ test('keeps only whitelisted networks with valid URLs', () => {
   has(out, 'Instagram');
   hasNot(out, 'evilnet');
   hasNot(out, 'javascript:');
+});
+
+test('social links render as brand-coloured icon chips', () => {
+  const out = build({ person: PERSON, socials: [
+    { network: 'facebook', url: 'https://facebook.com/x' },
+    { network: 'linkedin', url: 'https://linkedin.com/x' },
+  ] });
+  has(out, 'bgcolor="#1877F2"', 'Facebook brand colour missing');
+  has(out, 'bgcolor="#0A66C2"', 'LinkedIn brand colour missing');
+  has(out, 'title="Facebook"', 'accessible label missing');
+  has(out, '>in<', 'LinkedIn monogram missing');
 });
 
 // ── CTA button ──────────────────────────────────────────────────────────────
