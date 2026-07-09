@@ -44,7 +44,7 @@ import { requireStudioAccess } from './_gate.js';
 // ─── Constants ──────────────────────────────────────────────────────
 const NAV_TIMEOUT_MS = 20_000;   // per-navigation cap, sits under vercel maxDuration:60
 const SETTLE_MS = 600;           // let late fonts / lazy images paint after networkidle
-const MAX_SLICE_BYTES = 1_200_000; // raw capture can be bigger than the 400KB AI-emit cap
+const MAX_SLICE_BYTES = 1_500_000; // raw capture can be bigger than the 400KB AI-emit cap
 const VIEWPORT = { width: 1440, height: 900 };
 // A normal desktop UA. Best effort at not tripping trivial bot walls; not a disguise.
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
@@ -148,7 +148,22 @@ export default async function handler(req, res) {
     const out = await page.evaluate(async (sel) => {
       const pick = () => {
         if (sel) { const el = document.querySelector(sel); if (el) return el; }
-        return document.querySelector('main') || document.body; // whole-page default
+        // No selector: grab the first "section-sized" block near the top
+        // (usually the hero), not the whole page. A whole-page computed-style
+        // capture is huge, messy, and not the point of Studio (capture a
+        // section you love). The selector field and the Slicer extension are
+        // the precise paths when this heuristic picks the wrong thing.
+        const root = document.querySelector('main') || document.body;
+        const vh = window.innerHeight || 900;
+        const blocks = root.querySelectorAll('section, header, article, div');
+        for (const c of blocks) {
+          const r = c.getBoundingClientRect();
+          // tall enough to matter, but not basically the whole page, and it
+          // starts within the first screen (skips the giant page wrapper,
+          // sticky navs and cookie bars).
+          if (r.top >= 0 && r.top < vh && r.height >= 240 && r.height <= vh * 2.2 && r.width >= 320) return c;
+        }
+        return root.querySelector('section, header, article') || root;
       };
       const root = pick();
       if (!root) return { error: 'Nothing to capture on that page.' };
@@ -176,7 +191,7 @@ export default async function handler(req, res) {
 
     const bytes = Buffer.byteLength(html, 'utf8') + Buffer.byteLength(css, 'utf8');
     if (bytes > MAX_SLICE_BYTES) {
-      return res.status(413).json({ error: 'That page is very large. Point at a single section with the selector field, or use the Slicer extension to pick one element.' });
+      return res.status(413).json({ error: 'That section is very large. Point at one part with the selector box (try header, .hero or main), or use the Slicer extension to pick a single element.' });
     }
 
     return res.status(200).json({
