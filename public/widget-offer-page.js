@@ -29,8 +29,26 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.1.1';
-  const API_BASE = '/api/widget-config';
+  const VERSION = '0.1.2';
+
+  // Resolve the API base off THIS script's origin. The widget is hosted on
+  // widgets.travelify.io and embedded on customer sites, so a relative
+  // '/api/...' resolves to the customer origin and 404s (blank render).
+  function resolveApiBase() {
+    if (typeof window === 'undefined') return '/api/widget-config';
+    if (window.__TG_WIDGET_API__) return window.__TG_WIDGET_API__;
+    try {
+      const me = document.currentScript;
+      if (me && me.src) return new URL(me.src).origin + '/api/widget-config';
+      const scripts = document.getElementsByTagName('script');
+      for (let i = scripts.length - 1; i >= 0; i--) {
+        const s = scripts[i].src || '';
+        if (/\/widget-offer-page\.js(\?|$|#)/.test(s)) return new URL(s).origin + '/api/widget-config';
+      }
+    } catch (e) { /* fall through */ }
+    return '/api/widget-config';
+  }
+  const API_BASE = resolveApiBase();
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (section headings, fact/detail labels, CTA copy,

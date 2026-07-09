@@ -21,8 +21,25 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.1.0';
-  const API_BASE = '/api/widget-config';
+  const VERSION = '0.1.1';
+
+  // Resolve the API base off THIS script's origin so a remote-config embed on a
+  // customer domain does not fetch the customer's own '/api/...' (404 → blank).
+  function resolveApiBase() {
+    if (typeof window === 'undefined') return '/api/widget-config';
+    if (window.__TG_WIDGET_API__) return window.__TG_WIDGET_API__;
+    try {
+      const me = document.currentScript;
+      if (me && me.src) return new URL(me.src).origin + '/api/widget-config';
+      const scripts = document.getElementsByTagName('script');
+      for (let i = scripts.length - 1; i >= 0; i--) {
+        const s = scripts[i].src || '';
+        if (/\/widget-offer-builder\.js(\?|$|#)/.test(s)) return new URL(s).origin + '/api/widget-config';
+      }
+    } catch (e) { /* fall through */ }
+    return '/api/widget-config';
+  }
+  const API_BASE = resolveApiBase();
 
   // ── Small helpers ─────────────────────────────────────────────────────────
   function esc(s) {
@@ -252,6 +269,9 @@
     .ob-field.invalid input, .ob-field.invalid select { border-color: var(--tgo-error); }
     .ob-err { font-size: 11px; color: var(--tgo-error); font-weight: 600; display: none; }
     .ob-field.invalid .ob-err { display: block; }
+    .ob-save-error { display: none; margin-top: 12px; padding: 11px 14px; border-radius: var(--tgo-radius);
+      font-size: 13px; font-weight: 600; line-height: 1.45; color: var(--tgo-error);
+      border: 1px solid var(--tgo-error); background: rgba(220, 38, 38, 0.08); }
     .ob-prefix { position: relative; }
     .ob-prefix .sym { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--tgo-muted); pointer-events: none; }
     .ob-prefix input { padding-left: 24px; }
@@ -1086,6 +1106,8 @@
     _saveOffer(offer) {
       const btn = this.root.querySelector('.ob-submit');
       if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+      const prevErr = this.root.querySelector('.ob-save-error');
+      if (prevErr) prevErr.style.display = 'none';
       fetch(this.cfg.saveEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1099,7 +1121,29 @@
           this.el.dispatchEvent(new CustomEvent('tg-offer-saved', { bubbles: true, composed: true, detail: { id: res.j.id, url: res.j.url, offer: offer } }));
           this._success(offer, res.j);
         })
-        .catch((err) => { this._success(offer, null, String(err && err.message || err)); });
+        .catch((err) => { this._saveError(String(err && err.message || err)); });
+    }
+
+    // Save failed: keep the filled-in form intact, re-enable the submit button
+    // and surface the error inline so the user can re-authenticate and retry
+    // without losing any input. (Previously this tore down to the success panel,
+    // discarding every entry on a transient 401/network blip.)
+    _saveError(msg) {
+      const btn = this.root.querySelector('.ob-submit');
+      if (btn) { btn.disabled = false; btn.textContent = this.cfg.submitLabel; }
+      const actions = this.root.querySelector('.ob-actions');
+      if (!actions) return;
+      let box = this.root.querySelector('.ob-save-error');
+      if (!box) {
+        box = document.createElement('div');
+        box.className = 'ob-save-error';
+        box.setAttribute('role', 'alert');
+        actions.parentNode.insertBefore(box, actions);
+      }
+      box.textContent = 'Could not save the offer (' + msg + '). Your entries are safe. '
+        + 'Check you are still signed in, then press ' + this.cfg.submitLabel + ' again.';
+      box.style.display = 'block';
+      try { box.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e) { /* noop */ }
     }
 
     _success(offer, saved, err) {
