@@ -534,7 +534,17 @@
     var th = document.querySelector('#dest-list .dest-item[data-i="' + selected + '"] .dest-thumb img'); if (th) th.src = C.items[selected].image || '';
     touch();
   });
-  document.getElementById('d-href').addEventListener('input', function (e) { if (C.items[selected]) { C.items[selected].href = e.target.value; updateHrefNote(); touch(); } });
+  document.getElementById('d-href').addEventListener('input', function (e) {
+    if (!C.items[selected]) return;
+    var res = safeUrlState(e.target.value);
+    // Persist the NORMALISED url the note promises (bare 'example.com' becomes
+    // 'https://example.com'), so the widget's stricter safeUrl accepts it and the
+    // published slice is actually clickable. Keep the raw text for partial/blocked
+    // input so in-progress typing and the warning are preserved; clear on empty.
+    C.items[selected].href = (res.state === 'ok') ? res.url : (res.state === 'empty' ? '' : e.target.value);
+    updateHrefNote();
+    touch();
+  });
   document.getElementById('d-newtab').addEventListener('click', function () { if (!C.items[selected]) return; C.items[selected].newTab = !C.items[selected].newTab; toggleSwitch('d-newtab', C.items[selected].newTab); touch(); });
   wireRange('d-zoom', function (v) { if (C.items[selected]) C.items[selected].zoom = v; }, function (v) { return v.toFixed(2) + '×'; });
   wireFocal();
