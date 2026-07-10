@@ -12,7 +12,8 @@
     "test:actas": "node test/act-as-grant-smoke.mjs",
     "test:smartsection": "node tests/test-rules.cjs && node tests/test-integration.cjs && node tests/test-ai-rules.cjs && node tests/test-triggers.cjs",
     "test:deeplink": "node tests/test-deeplink.cjs",
-    "test:mybooking": "node test/mybooking-extras-smoke.mjs && node test/mybooking-parse-robustness.mjs"
+    "test:mybooking": "node test/mybooking-extras-smoke.mjs && node test/mybooking-parse-robustness.mjs",
+    "test:autocomplete": "node tests/autocomplete-translate.test.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",

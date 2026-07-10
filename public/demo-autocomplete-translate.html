@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Autocomplete translation — test rig</title>
+  <style>
+    :root { --ink:#1d2733; --muted:#5b6672; --line:#e3e8ee; --brand:#0b6; --bg:#f6f8fb; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--ink);
+      font: 16px/1.5 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex; justify-content: center; padding: 40px 16px;
+    }
+    .wrap { width: 100%; max-width: 560px; }
+    h1 { font-size: 20px; margin: 0 0 4px; }
+    .lead { color: var(--muted); margin: 0 0 24px; font-size: 14px; }
+    .panel { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
+    label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 6px; }
+    .row { display: flex; gap: 10px; }
+    .row .grow { flex: 1; }
+    input, select {
+      width: 100%; padding: 11px 12px; font-size: 16px; color: var(--ink);
+      border: 1px solid var(--line); border-radius: 9px; background: #fff; outline: none;
+    }
+    input:focus, select:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(0,187,102,.15); }
+    select { max-width: 130px; }
+    .results { margin-top: 14px; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; display: none; }
+    .results.show { display: block; }
+    .item { padding: 10px 12px; border-top: 1px solid var(--line); display: flex; gap: 8px; align-items: baseline; }
+    .item:first-child { border-top: 0; }
+    .item .name { font-weight: 600; }
+    .item .type { font-size: 12px; color: var(--muted); }
+    .item .code { margin-left: auto; font-size: 12px; color: var(--muted); font-variant: tabular-nums; }
+    .empty { padding: 12px; color: var(--muted); font-size: 14px; }
+    .status {
+      margin-top: 16px; font-size: 13px; color: var(--muted);
+      background: var(--bg); border-radius: 9px; padding: 10px 12px; min-height: 20px;
+    }
+    .status b { color: var(--ink); font-weight: 600; }
+    .status .arrow { color: var(--brand); padding: 0 4px; }
+    .tag { display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 20px; background: #eaf6ef; color: var(--brand); margin-left: 6px; }
+    .hint { margin-top: 18px; font-size: 13px; color: var(--muted); }
+    .hint code { background: #eef2f6; padding: 1px 5px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Autocomplete translation — test rig</h1>
+    <p class="lead">
+      Type a place name in the chosen language. The box talks to our translator,
+      which swaps the word for the English one Travelify knows, searches, and
+      shows the answers back in your language.
+    </p>
+
+    <div class="panel">
+      <div class="row">
+        <div class="grow">
+          <label for="q">Search</label>
+          <input id="q" type="text" autocomplete="off" spellcheck="false" placeholder="Try: Londra, Roma, Veneția, Franța">
+        </div>
+        <div>
+          <label for="lang">Language</label>
+          <select id="lang">
+            <option value="ro" selected>RO</option>
+            <option value="en">EN</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="results" class="results"></div>
+      <div id="status" class="status">Start typing to see a match.</div>
+    </div>
+
+    <p class="hint">
+      Behind the scenes this calls <code>/api/autocomplete</code>. The status line
+      shows what you typed, the English word we searched, and how it matched.
+    </p>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+      var input = document.getElementById('q');
+      var langSel = document.getElementById('lang');
+      var resultsEl = document.getElementById('results');
+      var statusEl = document.getElementById('status');
+      var timer = null;
+      var seq = 0;
+
+      function el(tag, cls, text) {
+        var n = document.createElement(tag);
+        if (cls) n.className = cls;
+        if (text != null) n.textContent = text;
+        return n;
+      }
+
+      function setStatus(nodes) {
+        statusEl.textContent = '';
+        nodes.forEach(function (n) {
+          statusEl.appendChild(typeof n === 'string' ? document.createTextNode(n) : n);
+        });
+      }
+
+      function render(list) {
+        resultsEl.textContent = '';
+        if (!list.length) {
+          resultsEl.appendChild(el('div', 'empty', 'No matches.'));
+          resultsEl.classList.add('show');
+          return;
+        }
+        list.forEach(function (loc) {
+          var item = el('div', 'item');
+          item.appendChild(el('span', 'name', loc && loc.name ? String(loc.name) : ''));
+          if (loc && loc.type) item.appendChild(el('span', 'type', String(loc.type)));
+          var code = (loc && (loc.iataCode || loc.countryCode)) || '';
+          if (code) item.appendChild(el('span', 'code', String(code)));
+          resultsEl.appendChild(item);
+        });
+        resultsEl.classList.add('show');
+      }
+
+      function search() {
+        var q = input.value.trim();
+        var lang = langSel.value;
+        if (q.length < 2) {
+          resultsEl.classList.remove('show');
+          setStatus(['Start typing to see a match.']);
+          return;
+        }
+        var mine = ++seq;
+        setStatus(['Searching...']);
+        var url = '/api/autocomplete?Query=' + encodeURIComponent(q) +
+                  '&Language=' + encodeURIComponent(lang) + '&MaxItems=8';
+        fetch(url, { headers: { Accept: 'application/json' } })
+          .then(function (res) {
+            var resolved = res.headers.get('X-TG-Query-Resolved');
+            var match = res.headers.get('X-TG-Match') || 'passthrough';
+            return res.json().then(function (body) {
+              return { body: body, resolved: resolved ? decodeURIComponent(resolved) : q, match: match };
+            });
+          })
+          .then(function (out) {
+            if (mine !== seq) return; // a newer keystroke already fired
+            var list = Array.isArray(out.body) ? out.body : [];
+            render(list);
+            var nodes = [el('b', null, q)];
+            if (out.resolved && out.resolved.toLowerCase() !== q.toLowerCase()) {
+              nodes.push(el('span', 'arrow', '→'));
+              nodes.push(el('b', null, out.resolved));
+              nodes.push(el('span', 'tag', out.match));
+            } else {
+              nodes.push(' searched as typed');
+            }
+            setStatus(nodes);
+          })
+          .catch(function () {
+            if (mine !== seq) return;
+            resultsEl.classList.remove('show');
+            setStatus(['Something went wrong reaching the search.']);
+          });
+      }
+
+      function schedule() {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(search, 180);
+      }
+
+      input.addEventListener('input', schedule);
+      langSel.addEventListener('change', search);
+    })();
+  </script>
+</body>
+</html>
