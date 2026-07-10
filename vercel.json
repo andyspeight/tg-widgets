@@ -539,6 +539,14 @@
     {
       "source": "/demo-prism",
       "destination": "/demo-prism.html"
+    },
+    {
+      "source": "/demo-autocomplete-translate",
+      "destination": "/demo-autocomplete-translate.html"
+    },
+    {
+      "source": "/autocomplete",
+      "destination": "/api/autocomplete"
     }
   ],
   "headers": [
