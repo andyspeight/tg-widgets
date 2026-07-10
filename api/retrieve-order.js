@@ -30,7 +30,7 @@
  */
 
 import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail, lookupClientCredentialsByRecordId } from './_auth.js';
-import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape } from './_lib/travelify-items.js';
+import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape, describeStructure } from './_lib/travelify-items.js';
 
 const AIRTABLE_BASE = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
 const WIDGETS_TABLE = 'tblVAThVqAjqtria2';
@@ -1369,6 +1369,28 @@ export default async function handler(req, res) {
     // Travelify's documented 404 shape is { code: '404', message: ... }
     if (raw && (raw.code === '404' || raw.code === 404)) {
       return notFound(res);
+    }
+
+    // TEMP PROBE — remove after the ET90434-vs-ET90803 comparison. Dumps a
+    // PII-safe structural fingerprint (key names + types only, never values)
+    // of the two bookings under investigation, so we can see why one surfaces
+    // its hotel/flight/guest detail and the other does not. Scoped to the two
+    // refs so it never touches any other customer's lookup.
+    if (orderRef === 'ET90434' || orderRef === 'ET90803') {
+      try {
+        console.warn(`[retrieve-order] PROBE ${orderRef} order`, JSON.stringify(describeOrderShape(raw)).slice(0, 8000));
+        const rawItems = Array.isArray(raw.items) ? raw.items.slice(0, 8) : [];
+        for (const it of rawItems) {
+          console.warn(`[retrieve-order] PROBE ${orderRef} item`, JSON.stringify({
+            product: it && it.product,
+            hasDataObject: !!(it && it.dataObject),
+            itemKeys: (it && typeof it === 'object') ? Object.keys(it) : [],
+            dataObjectShape: describeStructure(it && it.dataObject, 6),
+          }).slice(0, 6000));
+        }
+      } catch (e) {
+        console.warn('[retrieve-order] PROBE error', e && e.message);
+      }
     }
 
     // 5. Trim + sanitise
