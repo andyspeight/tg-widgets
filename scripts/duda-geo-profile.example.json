@@ -1,0 +1,31 @@
+{
+  "business": {
+    "name": "Traveldemo Holidays",
+    "url": "https://www.traveldemo.site/",
+    "logo": "https://www.traveldemo.site/logo.png",
+    "image": "https://www.traveldemo.site/og.jpg",
+    "description": "Luxury travel to Dubai and the Maldives, with trade prices, ATOL protection and member savings.",
+    "telephone": "+44 20 1234 5678",
+    "email": "hello@traveldemo.site",
+    "orgType": "TravelAgency",
+    "inLanguage": "en-GB",
+    "address": {
+      "streetAddress": "1 High Street",
+      "addressLocality": "London",
+      "addressRegion": "",
+      "postalCode": "W1 1AA",
+      "addressCountry": "GB"
+    },
+    "sameAs": [
+      "https://www.facebook.com/traveldemo",
+      "https://www.instagram.com/traveldemo"
+    ],
+    "searchUrlTemplate": "https://www.traveldemo.site/search?q={search_term_string}"
+  },
+  "pages": [
+    { "url": "https://www.traveldemo.site/", "title": "Destinations", "description": "Featured destinations and offers" },
+    { "url": "https://www.traveldemo.site/dubai", "title": "Dubai", "description": "Dubai holidays" },
+    { "url": "https://www.traveldemo.site/maldives", "title": "Maldives", "description": "Maldives holidays" },
+    { "url": "https://www.traveldemo.site/tours", "title": "Tours", "description": "Guided tours and itineraries" }
+  ]
+}
