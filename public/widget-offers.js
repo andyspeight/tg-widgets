@@ -143,7 +143,7 @@
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
   const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
-  const VERSION = '1.10.11';
+  const VERSION = '1.10.12';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // Telemetry: report a one-time load heartbeat and any failure to
@@ -659,7 +659,21 @@
     if (!id || !o) return '';
     const fl = o.flight || null, acc = o.accommodation || null;
     const type = String(o.type || (fl && acc ? 'Packages' : acc ? 'Accommodation' : fl ? 'Flights' : 'Packages'));
-    const st = type === 'Flights' ? 'Flights' : type === 'Accommodation' ? 'Accommodation' : 'DynamicPackaging';
+    // Packages split two ways in Travelify's deep links, with IDENTICAL params:
+    // a dynamically-assembled flight+hotel is st=DynamicPackaging, a tour-operator
+    // package holiday is st=Packages. packageType is authoritative; when it is
+    // absent (older data) two DIFFERENT supplier ids mean a dynamic package,
+    // mirroring the dynamic/operator split in supplierAllows().
+    let st;
+    if (type === 'Flights') st = 'Flights';
+    else if (type === 'Accommodation') st = 'Accommodation';
+    else {
+      const fSid = fl && Number.isFinite(fl.sid) ? fl.sid : null;
+      const aSid = acc && Number.isFinite(acc.sid) ? acc.sid : null;
+      const isDynamic = o.packageType === 'DynamicPackages'
+        || (o.packageType == null && fSid != null && aSid != null && fSid !== aSid);
+      st = isDynamic ? 'DynamicPackaging' : 'Packages';
+    }
     const p = new URLSearchParams();
     p.set('st', st);
     const destIata = (fl && fl.destination && fl.destination.iataCode) || null;

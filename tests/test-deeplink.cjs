@@ -10,6 +10,10 @@
  * destination airport (loc=<IATA> + loct=Airport) rather than the resort/atoll
  * name (which fails Travelify's City gazetteer for e.g. Maldives atolls), and
  * drop the undocumented `refn` param.
+ *
+ * Also covers the package-type split: a dynamically-assembled flight+hotel uses
+ * st=DynamicPackaging, a tour-operator package holiday uses st=Packages with the
+ * SAME params (packageType authoritative; sid inequality the fallback).
  */
 'use strict';
 const fs = require('fs');
@@ -75,16 +79,16 @@ const buildDeeplink = buildMapDeeplink(mapSrc);
 
 const qp = (url) => new URL(url).searchParams;
 
-// ── Offers: Maldives package (the reported failing case) ──────────────────
+// ── Offers: Maldives DYNAMIC package (the reported failing case) ───────────
 {
   const o = {
-    type: 'Packages', adults: 2,
-    flight: { origin: { iataCode: 'BHX' }, destination: { iataCode: 'MLE', countryCode: 'MV' }, outboundDate: '2026-10-01T21:30:00Z', cabinClass: 'Economy', carrier: { code: 'AI' } },
-    accommodation: { destination: { name: 'South Male Atoll', countryCode: 'MV' }, nights: 7, boardBasis: 'BedAndBreakfast', rating: 3, uniqueRef: 'TTI:55364582' },
+    type: 'Packages', packageType: 'DynamicPackages', adults: 2,
+    flight: { origin: { iataCode: 'BHX' }, sid: 27, destination: { iataCode: 'MLE', countryCode: 'MV' }, outboundDate: '2026-10-01T21:30:00Z', cabinClass: 'Economy', carrier: { code: 'AI' } },
+    accommodation: { sid: 45, destination: { name: 'South Male Atoll', countryCode: 'MV' }, nights: 7, boardBasis: 'BedAndBreakfast', rating: 3, uniqueRef: 'TTI:55364582' },
   };
   const url = offersDeeplink(o);
   const q = qp(url);
-  eq(q.get('st'), 'DynamicPackaging', 'offers/MV st');
+  eq(q.get('st'), 'DynamicPackaging', 'offers/MV st (dynamic package)');
   eq(q.get('loc'), 'MLE', 'offers/MV loc is the airport, not the atoll');
   eq(q.get('loct'), 'Airport', 'offers/MV loct=Airport');
   eq(q.get('ctry'), 'MV', 'offers/MV ctry');
@@ -95,6 +99,33 @@ const qp = (url) => new URL(url).searchParams;
   eq(q.get('carrier'), 'AI', 'offers/MV carrier');
   assert(!/[?&]refn=/.test(url), 'offers/MV: no refn param');
   assert(!/South\+?Male/i.test(url), 'offers/MV: atoll name never appears in the URL');
+}
+
+// ── Offers: tour-operator PACKAGE HOLIDAY → st=Packages, SAME params as DP ──
+{
+  const o = {
+    type: 'Packages', packageType: 'PackageHolidays', adults: 2,
+    flight: { origin: { iataCode: 'BHX' }, sid: 72, destination: { iataCode: 'MLE', countryCode: 'MV' }, outboundDate: '2026-10-01T21:30:00Z', cabinClass: 'Economy', carrier: { code: 'AI' } },
+    accommodation: { sid: 72, destination: { name: 'South Male Atoll', countryCode: 'MV' }, nights: 7, boardBasis: 'BedAndBreakfast', rating: 3, uniqueRef: 'TTI:55364582' },
+  };
+  const q = qp(offersDeeplink(o));
+  eq(q.get('st'), 'Packages', 'offers/PH st (package holiday → st=Packages)');
+  // Every other parameter must be identical to the dynamic-package link.
+  eq(q.get('loc'), 'MLE', 'offers/PH loc identical to DP');
+  eq(q.get('loct'), 'Airport', 'offers/PH loct identical to DP');
+  eq(q.get('ctry'), 'MV', 'offers/PH ctry identical to DP');
+  eq(q.get('dst'), 'MLE', 'offers/PH dst identical to DP');
+  eq(q.get('org'), 'BHX', 'offers/PH org identical to DP');
+  eq(q.get('brd'), 'BedAndBreakfast', 'offers/PH brd identical to DP');
+  eq(q.get('carrier'), 'AI', 'offers/PH carrier identical to DP');
+}
+
+// ── Offers: package with NO packageType falls back on supplier ids ─────────
+{
+  const dyn = { type: 'Packages', adults: 2, flight: { origin: { iataCode: 'LGW' }, sid: 3, destination: { iataCode: 'AGP', countryCode: 'ES' }, outboundDate: '2026-08-01' }, accommodation: { sid: 9, destination: { name: 'Estepona', countryCode: 'ES' }, nights: 7 } };
+  eq(qp(offersDeeplink(dyn)).get('st'), 'DynamicPackaging', 'offers/fallback: two different sids → DynamicPackaging');
+  const op = { type: 'Packages', adults: 2, flight: { origin: { iataCode: 'LGW' }, sid: 66, destination: { iataCode: 'AGP', countryCode: 'ES' }, outboundDate: '2026-08-01' }, accommodation: { sid: 66, destination: { name: 'Estepona', countryCode: 'ES' }, nights: 7 } };
+  eq(qp(offersDeeplink(op)).get('st'), 'Packages', 'offers/fallback: one operator sid → Packages');
 }
 
 // ── Offers: Spain package (regression — airport anchor, no town name) ─────
@@ -145,12 +176,12 @@ const qp = (url) => new URL(url).searchParams;
 // ── Offers: no AppID → empty string (caller falls back to raw link) ───────
 eq(offersDeeplinkNoApp({ type: 'Packages', flight: { destination: { iataCode: 'MLE' } } }), '', 'offers: empty when no AppID');
 
-// ── World Map: Maldives package ───────────────────────────────────────────
+// ── World Map: Maldives DYNAMIC package ───────────────────────────────────
 {
-  const o = { type: 'Packages', adults: 2, origin: 'BHX', airport: 'MLE', countryCode: 'MV', resort: 'South Male Atoll', outboundDate: '2026-10-01T21:30:00Z', nights: 7, boardBasis: 'BedAndBreakfast', rating: 3, currency: 'GBP', cabinClass: 'Economy', carrierCode: 'AI', accommodationUniqueRef: 'TTI:55364582' };
+  const o = { type: 'Packages', packageType: 'DynamicPackages', flightSid: 27, accommodationSid: 45, adults: 2, origin: 'BHX', airport: 'MLE', countryCode: 'MV', resort: 'South Male Atoll', outboundDate: '2026-10-01T21:30:00Z', nights: 7, boardBasis: 'BedAndBreakfast', rating: 3, currency: 'GBP', cabinClass: 'Economy', carrierCode: 'AI', accommodationUniqueRef: 'TTI:55364582' };
   const url = buildDeeplink(o, '370');
   const q = qp(url);
-  eq(q.get('st'), 'DynamicPackaging', 'map/MV st');
+  eq(q.get('st'), 'DynamicPackaging', 'map/MV st (dynamic package)');
   eq(q.get('loc'), 'MLE', 'map/MV loc is the airport, not the atoll');
   eq(q.get('loct'), 'Airport', 'map/MV loct=Airport');
   eq(q.get('ctry'), 'MV', 'map/MV ctry');
@@ -158,6 +189,27 @@ eq(offersDeeplinkNoApp({ type: 'Packages', flight: { destination: { iataCode: 'M
   eq(q.get('org'), 'BHX', 'map/MV org');
   assert(!/[?&]refn=/.test(url), 'map/MV: no refn param');
   assert(!/South\+?Male/i.test(url), 'map/MV: atoll name never appears in the URL');
+}
+
+// ── World Map: tour-operator PACKAGE HOLIDAY → st=Packages, SAME params ────
+{
+  const o = { type: 'Packages', packageType: 'PackageHolidays', flightSid: 72, accommodationSid: 72, adults: 2, origin: 'BHX', airport: 'MLE', countryCode: 'MV', resort: 'South Male Atoll', outboundDate: '2026-10-01T21:30:00Z', nights: 7, boardBasis: 'BedAndBreakfast', rating: 3, currency: 'GBP', cabinClass: 'Economy', carrierCode: 'AI' };
+  const q = qp(buildDeeplink(o, '370'));
+  eq(q.get('st'), 'Packages', 'map/PH st (package holiday → st=Packages)');
+  eq(q.get('loc'), 'MLE', 'map/PH loc identical to DP');
+  eq(q.get('loct'), 'Airport', 'map/PH loct identical to DP');
+  eq(q.get('ctry'), 'MV', 'map/PH ctry identical to DP');
+  eq(q.get('dst'), 'MLE', 'map/PH dst identical to DP');
+  eq(q.get('org'), 'BHX', 'map/PH org identical to DP');
+  eq(q.get('brd'), 'BedAndBreakfast', 'map/PH brd identical to DP');
+}
+
+// ── World Map: package with NO packageType falls back on supplier ids ──────
+{
+  const dyn = { type: 'Packages', flightSid: 3, accommodationSid: 9, adults: 2, airport: 'AGP', countryCode: 'ES', outboundDate: '2026-08-01', nights: 7 };
+  eq(qp(buildDeeplink(dyn, '370')).get('st'), 'DynamicPackaging', 'map/fallback: two different sids → DynamicPackaging');
+  const op = { type: 'Packages', flightSid: 66, accommodationSid: 66, adults: 2, airport: 'AGP', countryCode: 'ES', outboundDate: '2026-08-01', nights: 7 };
+  eq(qp(buildDeeplink(op, '370')).get('st'), 'Packages', 'map/fallback: one operator sid → Packages');
 }
 
 // ── World Map: accommodation-only WITH a gateway airport (robust anchor) ───
