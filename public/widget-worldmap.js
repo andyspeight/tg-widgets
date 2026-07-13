@@ -45,7 +45,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.11.8';
+  const VERSION = '3.11.9';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -363,7 +363,19 @@
     const id = String(appId || '').trim();
     if (!id || !o) return '';
     const type = String(o.type || 'Packages');
-    const st = type === 'Flights' ? 'Flights' : type === 'Accommodation' ? 'Accommodation' : 'DynamicPackaging';
+    // Packages split two ways in Travelify's deep links, with IDENTICAL params:
+    // a dynamically-assembled flight+hotel is st=DynamicPackaging, a tour-operator
+    // package holiday is st=Packages. packageType is authoritative; when it is
+    // absent (older cache rows) two DIFFERENT supplier ids mean a dynamic package,
+    // mirroring the dynamic/operator split used for supplier gating.
+    let st;
+    if (type === 'Flights') st = 'Flights';
+    else if (type === 'Accommodation') st = 'Accommodation';
+    else {
+      const isDynamic = o.packageType === 'DynamicPackages'
+        || (o.packageType == null && Number.isFinite(o.flightSid) && Number.isFinite(o.accommodationSid) && o.flightSid !== o.accommodationSid);
+      st = isDynamic ? 'DynamicPackaging' : 'Packages';
+    }
     const p = new URLSearchParams();
     p.set('st', st);
     if (st !== 'Accommodation') { if (o.origin) p.set('org', o.origin); if (o.airport) p.set('dst', o.airport); }
