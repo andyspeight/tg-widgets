@@ -45,7 +45,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.11.9';
+  const VERSION = '3.11.10';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -423,6 +423,55 @@
     // Travelify ignores it (it never pinned the property). Precise property
     // pinning would use loct=Property, kept out until verified live.
     return TVLLNK_BASE + '/deeplink/' + encodeURIComponent(id) + '?' + p.toString();
+  }
+
+  // ── Deeplink token transport (x-access-token via POST body) ───────────────
+  // When the visitor carries an `x-access-token` cookie, the Travelify booking
+  // deeplink is handed over as an auto-submitting POST form with the token in the
+  // body, keeping it out of the URL, browser history, the Referer header and the
+  // destination's access logs. No cookie -> the normal GET is left untouched.
+  // How the deeplink is built is unchanged; only the final navigation differs.
+  function getCookie(name) {
+    try {
+      if (typeof document === 'undefined' || !document.cookie) return null;
+      const escaped = name.replace(/([.$?*|{}()\[\]\\\/+^])/g, '\\$1');
+      const m = document.cookie.match(new RegExp('(?:^|; )' + escaped + '=([^;]*)'));
+      return m ? decodeURIComponent(m[1]) : null;
+    } catch (e) { return null; }
+  }
+  function postDeeplinkWithToken(url, newTab) {
+    const token = getCookie('x-access-token');
+    if (!token || !url) return false;
+    try {
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = url;               // deeplink verbatim — query string preserved
+      if (newTab) { form.target = '_blank'; form.rel = 'noopener'; }
+      form.style.display = 'none';
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'x-access-token';
+      input.value = token;             // browser encodes the POST body; no manual encoding
+      form.appendChild(input);
+      (document.body || document.documentElement).appendChild(form);
+      form.submit();
+      setTimeout(function () { try { if (form.parentNode) form.parentNode.removeChild(form); } catch (e) { /* noop */ } }, 0);
+      return true;
+    } catch (e) { return false; }
+  }
+  // One capture-phase interceptor per shadow root: swap the GET for a token POST
+  // on Travelify deeplink anchors only. Any other link is left completely alone.
+  function wireDeeplinkPost(shadowRoot) {
+    if (!shadowRoot || shadowRoot.__tgDlPostWired) return;
+    shadowRoot.__tgDlPostWired = true;
+    shadowRoot.addEventListener('click', function (ev) {
+      const a = ev.target && ev.target.closest ? ev.target.closest('a[href]') : null;
+      if (!a || !/^https?:\/\/dl\.tvllnk\.com\/deeplink\//i.test(a.href || '')) return;
+      if (postDeeplinkWithToken(a.href, a.target === '_blank')) {
+        ev.preventDefault();
+        ev.stopPropagation();
+      }
+    }, true);
   }
   // Per-client supplier visibility. The map's deal cards are package deals.
   // Empty/absent packages list = show all. Missing sid (pre-rollout cache) = keep.
@@ -2211,6 +2260,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       setActiveCur(this.cur);
       this.t = makeT(this.cfg);   // resolve viewer language + UI strings
       this.shadow = container.attachShadow({ mode: 'open' });
+      wireDeeplinkPost(this.shadow); // intercept deeplink clicks → token POST when present
       this.data = null;
       this.map = null;
       this.markers = [];
