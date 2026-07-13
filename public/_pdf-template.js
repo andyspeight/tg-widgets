@@ -720,7 +720,6 @@ export function renderPdfHtml(order, opts = {}) {
   const refundability = accom?.pricing?.refundability || null;
 
   const customerName = titleCaseName([order.customerTitle, order.customerFirstname, order.customerSurname]);
-  const customerSurnameOnly = order.customerSurname || '';
 
   const guests = (Array.isArray(summary.travellers) && summary.travellers.length > 0)
     ? summary.travellers
@@ -731,6 +730,14 @@ export function renderPdfHtml(order, opts = {}) {
     surname: order.customerSurname,
   };
   const leadGuestName = titleCaseName([leadGuest?.title, leadGuest?.firstname, leadGuest?.surname]);
+  // Greeting salutation — the lead guest's REAL title + surname (e.g. "Mrs
+  // Stephenson"), never a hardcoded "Mr". Falls back to the lead guest's full
+  // name, then the customer's name, then a neutral word, so it always reflects
+  // real data rather than assuming a gender.
+  const greetingName =
+    (leadGuest?.title && leadGuest?.surname)
+      ? `${String(leadGuest.title).trim()} ${String(leadGuest.surname).trim()}`.trim()
+      : (leadGuestName || customerName || 'Customer');
 
   const specialRequests = order.specialRequests || null;
 
@@ -1385,7 +1392,7 @@ export function renderPdfHtml(order, opts = {}) {
   <div class="pdf-body">
 
     <p class="pdf-greeting">
-      Dear <strong>${escapeHtml(customerSurnameOnly ? `Mr ${customerSurnameOnly}` : (customerName || 'Customer'))}</strong>, thank you for booking with us. This document contains everything you need for your upcoming stay. Please keep it safe and bring it with you, or save it to your phone.
+      Dear <strong>${escapeHtml(greetingName)}</strong>, thank you for booking with us. This document contains everything you need for your upcoming stay. Please keep it safe and bring it with you, or save it to your phone.
     </p>
 
     <div class="pdf-ref-bar">

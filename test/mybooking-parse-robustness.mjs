@@ -262,6 +262,9 @@ check('CANONICAL_PRODUCTS has all eight types', CANONICAL_PRODUCTS.length === 8)
   check('PDF: hotel name now renders', pdf.includes('Lindos Blu Hotel'));
   check('PDF: flight route renders', pdf.includes('Rhodes') || pdf.includes('RHO'));
   check('PDF: lead guest shows correct title (Miss, not Mr)', /Miss\s+Alexandra\s+Stephenson/.test(pdfText));
+  // The greeting must use the lead guest's real title, not a hardcoded "Mr".
+  check('PDF: greeting uses the lead guest title (Miss Stephenson)', /Dear\s*<strong>\s*Miss Stephenson\s*<\/strong>/.test(pdf));
+  check('PDF: greeting is not the hardcoded "Mr Stephenson"', !pdf.includes('Mr Stephenson'));
 
   const email = renderBookingEmail({ order, orderRef: 'ET90803', brand: { name: 'Exclusively Travel' } });
   const emailText = email.html.replace(/<[^>]*>/g, ' ');
