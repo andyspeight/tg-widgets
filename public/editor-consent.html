@@ -824,7 +824,12 @@
   function loadFromUrl() {
     const wId = new URLSearchParams(location.search).get('id');
     if (!wId) { syncControls(); renderNow(); return; }
-    fetch('/api/widget-config?id=' + encodeURIComponent(wId))
+    // Bust the CDN edge cache. The public embed fetches this same URL
+    // anonymously and its response is edge-cached (s-maxage=300); without a
+    // unique param the editor would be served that stale copy for minutes after
+    // a save, so a just-changed setting looks like it never saved. A cache-
+    // buster forces a fresh authed read (which the API returns as no-store).
+    fetch('/api/widget-config?id=' + encodeURIComponent(wId) + '&_=' + Date.now(), { cache: 'no-store' })
       .then(r => r.ok ? r.json() : null)
       .then(d => {
         if (d && d.config) C = Object.assign({}, C, d.config);

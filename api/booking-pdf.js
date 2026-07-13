@@ -28,6 +28,7 @@
 
 import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail, lookupClientCredentialsByRecordId } from './_auth.js';
 import { renderPdfHtml } from '../public/_pdf-template.js';
+import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape } from './_lib/travelify-items.js';
 
 // ----- Constants (matched 1:1 with retrieve-order.js) -----
 
@@ -479,29 +480,36 @@ function trimExtras(dataObject) {
 
 function trimItem(item) {
   if (!item || typeof item !== 'object') return null;
+  // Resolve the product type and normalise the detail payload robustly —
+  // unwraps a JSON-string dataObject, tries alternate keys, maps label
+  // variants, and sniffs the shape as a last resort. Mirrors
+  // /api/retrieve-order so the PDF matches the widget. See
+  // api/_lib/travelify-items.js.
+  const { productType, dataObject, resolvedBy } = classifyItem(item);
   const out = {
-    id: safeNum(item.id), status: safeStr(item.status, 30), product: safeStr(item.product, 30),
+    id: safeNum(item.id), status: safeStr(item.status, 30),
+    product: productType || safeStr(item.product, 30),
     bookingReference: safeStr(item.bookingReference, 100), price: safeNum(item.price),
     currency: safeStr(item.originalCurrency, 10), startDate: safeStr(item.startDate, 30),
     duration: safeNum(item.duration),
   };
-  if (item.product === 'Accommodation' && item.dataObject) {
-    out.accommodation = trimAccommodation(item.dataObject);
-  } else if (item.product === 'Flights' && item.dataObject) {
-    out.flights = trimFlights(item.dataObject);
-  } else if (item.product === 'AirportExtras' && item.dataObject) {
-    out.airportExtras = trimAirportExtras(item.dataObject);
-  } else if (item.product === 'Transfers' && item.dataObject) {
-    out.transfers = trimTransfers(item.dataObject);
-  } else if (item.product === 'CarRental' && item.dataObject) {
-    out.carRental = trimCarRental(item.dataObject);
-  } else if (item.product === 'TicketsAttractions' && item.dataObject) {
-    out.ticketsAttractions = trimTicketsAttractions(item.dataObject);
-  } else if (item.product === 'Packages' && item.dataObject) {
+  if (productType === 'Accommodation' && dataObject) {
+    out.accommodation = trimAccommodation(dataObject);
+  } else if (productType === 'Flights' && dataObject) {
+    out.flights = trimFlights(dataObject);
+  } else if (productType === 'AirportExtras' && dataObject) {
+    out.airportExtras = trimAirportExtras(dataObject);
+  } else if (productType === 'Transfers' && dataObject) {
+    out.transfers = trimTransfers(dataObject);
+  } else if (productType === 'CarRental' && dataObject) {
+    out.carRental = trimCarRental(dataObject);
+  } else if (productType === 'TicketsAttractions' && dataObject) {
+    out.ticketsAttractions = trimTicketsAttractions(dataObject);
+  } else if (productType === 'Packages' && dataObject) {
     // Packages are composite: expose accommodation + flights directly on
     // the item so all existing rendering Just Works. Operator info and
     // ATOL flag travel alongside on item.package for the hero badge.
-    const pkg = trimPackages(item.dataObject);
+    const pkg = trimPackages(dataObject);
     out.accommodation = pkg.accommodation;
     out.flights = pkg.flights;
     out.package = {
@@ -509,9 +517,14 @@ function trimItem(item) {
       atolProtected: pkg.atolProtected,
       inclusions: pkg.inclusions,
     };
-  } else if (item.product === 'Extras' && item.dataObject) {
-    out.extras = trimExtras(item.dataObject);
+  } else if (productType === 'Extras' && dataObject) {
+    out.extras = trimExtras(dataObject);
+  } else {
+    console.warn('[booking-pdf] unclassified order item', describeUnclassifiedItem(item));
   }
+  // Mark shape-sniffed items so trimOrder can keep genuine matches ahead of
+  // them (stripped before rendering). Mirrors /api/retrieve-order.
+  if (resolvedBy === 'sniff') out.__sniffed = true;
   return out;
 }
 
@@ -548,31 +561,22 @@ function computeSummary(items) {
   }
   summary.totalPrice = Math.round(summary.totalPrice * 100) / 100;
   if (summary.totalPrice === 0) summary.totalPrice = null;
-  const seen = new Set();
-  for (const item of items) {
-    // Pull travellers from all product types. Order matters: prefer the
-    // explicit travellers/guests array on the most-specific sub-object.
-    const list = item.accommodation?.guests
-      || item.flights?.travellers
-      || item.airportExtras?.travellers
-      || item.transfers?.travellers
-      || item.carRental?.travellers
-      || item.ticketsAttractions?.guests
-      || item.extras?.travellers
-      || [];
-    for (const t of list) {
-      const key = `${(t.title || '').toLowerCase()}|${(t.firstname || '').toLowerCase()}|${(t.surname || '').toLowerCase()}`;
-      if (!seen.has(key) && (t.firstname || t.surname)) {
-        seen.add(key); summary.travellers.push(t);
-      }
-    }
-  }
+  summary.travellers = aggregateTravellers(items);
   return summary;
 }
 
 function trimOrder(raw) {
   if (!raw || typeof raw !== 'object') return null;
   const items = Array.isArray(raw.items) ? raw.items.slice(0, 8).map(trimItem).filter(Boolean) : [];
+  // Keep genuine (exact/alias) product matches ahead of shape-sniffed ones so
+  // a mystery item can't displace the real hotel/flight in items.find().
+  // Stable; sniffed items were previously dropped so this is strictly additive.
+  items.sort((a, b) => (a.__sniffed ? 1 : 0) - (b.__sniffed ? 1 : 0));
+  for (const it of items) delete it.__sniffed;
+  if (items.some(it => it && it.product && !it.accommodation && !it.flights
+    && !it.airportExtras && !it.transfers && !it.carRental && !it.ticketsAttractions && !it.extras)) {
+    console.warn('[booking-pdf] order/item shape (detail missing)', JSON.stringify(describeOrderShape(raw)).slice(0, 8000));
+  }
   const paidToDate = (() => {
     const ps = Array.isArray(raw.payments) ? raw.payments : [];
     const sum = ps.filter(p => p && String(p.status || '').toLowerCase() === 'success')

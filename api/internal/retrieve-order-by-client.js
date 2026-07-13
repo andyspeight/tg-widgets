@@ -28,13 +28,16 @@
  * All failures return a generic status with no field-level detail.
  *
  * NOTE ON DUPLICATION: the trim* / safe* / computeSummary / trimOrder block
- * below is copied VERBATIM from api/retrieve-order.js (v1.4.1) so the order
- * shape is byte-identical and the Booking type keeps mirroring one contract.
- * Post-show TODO: extract a shared api/_order-trim.js and import in both.
+ * below mirrors api/retrieve-order.js so the order shape stays identical and
+ * the Booking type keeps mirroring one contract. The product-classification
+ * and traveller-aggregation logic is now shared via api/_lib/travelify-items.js
+ * (imported by all three order endpoints); the per-product trim* functions
+ * remain duplicated. Post-show TODO: extract the trim* block too.
  */
 
 import crypto from 'node:crypto';
 import { lookupClientCredentialsByRecordId } from '../_auth.js';
+import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape } from '../_lib/travelify-items.js';
 
 const AIRTABLE_BASE = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
 const CLIENTS_TABLE = 'tblikekpaTKraMktZ';
@@ -724,10 +727,20 @@ function trimExtras(dataObject) {
 
 function trimItem(item) {
   if (!item || typeof item !== 'object') return null;
+
+  // Robustly resolve product + normalise the detail payload (parse a
+  // JSON-string dataObject, alternate keys, label variants, shape sniff).
+  // Mirrors /api/retrieve-order so the Luna traveller app gets the same shape.
+  // See api/_lib/travelify-items.js.
+  const { productType, dataObject, resolvedBy } = classifyItem(item);
+
   const out = {
     id: safeNum(item.id),
     status: safeStr(item.status, 30),
-    product: safeStr(item.product, 30),
+    // Normalise to the canonical product so downstream consumers that filter
+    // on item.product === 'Accommodation' etc pick the item up. Fall back to
+    // the raw label when it genuinely can't be classified.
+    product: productType || safeStr(item.product, 30),
     bookingReference: safeStr(item.bookingReference, 100),
     price: safeNum(item.price),
     currency: safeStr(item.originalCurrency, 10),
@@ -736,25 +749,26 @@ function trimItem(item) {
   };
 
   // Per-product extraction. Each branch is isolated so a malformed item
-  // of one product doesn't break the others.
-  if (item.product === 'Accommodation' && item.dataObject) {
-    out.accommodation = trimAccommodation(item.dataObject);
-  } else if (item.product === 'Flights' && item.dataObject) {
-    out.flights = trimFlights(item.dataObject);
-  } else if (item.product === 'AirportExtras' && item.dataObject) {
-    out.airportExtras = trimAirportExtras(item.dataObject);
-  } else if (item.product === 'Transfers' && item.dataObject) {
-    out.transfers = trimTransfers(item.dataObject);
-  } else if (item.product === 'CarRental' && item.dataObject) {
-    out.carRental = trimCarRental(item.dataObject);
-  } else if (item.product === 'TicketsAttractions' && item.dataObject) {
-    out.ticketsAttractions = trimTicketsAttractions(item.dataObject);
-  } else if (item.product === 'Packages' && item.dataObject) {
+  // of one product doesn't break the others. Keyed on the RESOLVED product
+  // type and the COERCED dataObject.
+  if (productType === 'Accommodation' && dataObject) {
+    out.accommodation = trimAccommodation(dataObject);
+  } else if (productType === 'Flights' && dataObject) {
+    out.flights = trimFlights(dataObject);
+  } else if (productType === 'AirportExtras' && dataObject) {
+    out.airportExtras = trimAirportExtras(dataObject);
+  } else if (productType === 'Transfers' && dataObject) {
+    out.transfers = trimTransfers(dataObject);
+  } else if (productType === 'CarRental' && dataObject) {
+    out.carRental = trimCarRental(dataObject);
+  } else if (productType === 'TicketsAttractions' && dataObject) {
+    out.ticketsAttractions = trimTicketsAttractions(dataObject);
+  } else if (productType === 'Packages' && dataObject) {
     // Packages are composite: expose accommodation + flights directly on
     // the item so all existing consumers (widget, email, PDF) Just Work
     // without needing to know about the Packages product type. Operator
     // info and ATOL flag travel alongside on item.package for the badge.
-    const pkg = trimPackages(item.dataObject);
+    const pkg = trimPackages(dataObject);
     out.accommodation = pkg.accommodation;
     out.flights = pkg.flights;
     out.package = {
@@ -762,12 +776,15 @@ function trimItem(item) {
       atolProtected: pkg.atolProtected,
       inclusions: pkg.inclusions,
     };
-  } else if (item.product === 'Extras' && item.dataObject) {
-    out.extras = trimExtras(item.dataObject);
+  } else if (productType === 'Extras' && dataObject) {
+    out.extras = trimExtras(dataObject);
+  } else {
+    console.warn('[retrieve-order-by-client] unclassified order item', describeUnclassifiedItem(item));
   }
-  // Other product types (Insurance, etc) fall through with the
-  // common envelope only. Widget renders a generic "Booked" card for those
-  // so the price isn't orphaned.
+
+  // Mark shape-sniffed items so trimOrder can keep genuine matches ahead of
+  // them (stripped before returning). Mirrors /api/retrieve-order.
+  if (resolvedBy === 'sniff') out.__sniffed = true;
 
   return out;
 }
@@ -779,6 +796,16 @@ function trimOrder(raw) {
   const items = Array.isArray(raw.items)
     ? raw.items.slice(0, 8).map(trimItem).filter(Boolean)
     : [];
+
+  // Genuine (exact/alias) product matches take precedence over shape-sniffed
+  // ones so a mystery item can't displace the real hotel/flight in
+  // items.find(). Stable; sniffed items were previously dropped so additive.
+  items.sort((a, b) => (a.__sniffed ? 1 : 0) - (b.__sniffed ? 1 : 0));
+  for (const it of items) delete it.__sniffed;
+  if (items.some(it => it && it.product && !it.accommodation && !it.flights
+    && !it.airportExtras && !it.transfers && !it.carRental && !it.ticketsAttractions && !it.extras)) {
+    console.warn('[retrieve-order-by-client] order/item shape (detail missing)', JSON.stringify(describeOrderShape(raw)).slice(0, 8000));
+  }
 
   // Compute a summary derived from the items. The widget uses these to
   // render the trip header, the countdown, and the totals row without
@@ -890,29 +917,10 @@ function computeSummary(items) {
   summary.totalPrice = Math.round(summary.totalPrice * 100) / 100;
   if (summary.totalPrice === 0) summary.totalPrice = null;
 
-  // Aggregate unique travellers across all items. People appear in the
-  // accommodation 'guests' array, flights/extras 'travellers', tickets
-  // 'guests', transfers 'travellers', and car rental's normalised
-  // driver-as-traveller. Usually overlapping but not always.
-  const seen = new Set();
-  for (const item of items) {
-    const list =
-      item.accommodation?.guests ||
-      item.flights?.travellers ||
-      item.airportExtras?.travellers ||
-      item.transfers?.travellers ||
-      item.carRental?.travellers ||
-      item.ticketsAttractions?.guests ||
-      item.extras?.travellers ||
-      [];
-    for (const t of list) {
-      const key = `${(t.title || '').toLowerCase()}|${(t.firstname || '').toLowerCase()}|${(t.surname || '').toLowerCase()}`;
-      if (!seen.has(key) && (t.firstname || t.surname)) {
-        seen.add(key);
-        summary.travellers.push(t);
-      }
-    }
-  }
+  // Aggregate unique travellers across all items — reads every sub-object per
+  // item and de-dupes on the person (see aggregateTravellers), so a booking
+  // whose passengers sit on the flights rather than the hotel still lists them.
+  summary.travellers = aggregateTravellers(items);
 
   return summary;
 }
