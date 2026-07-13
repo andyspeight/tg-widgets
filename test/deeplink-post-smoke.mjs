@@ -1,5 +1,5 @@
 /**
- * Deeplink token-transport test: when an `x-access-token` cookie is present, a
+ * Deeplink token-transport test: when a `travelify-accesstoken` cookie is present, a
  * click on a Travelify deeplink anchor is handed over as an auto-POST form with
  * the token in the body instead of a GET; otherwise the GET is left untouched.
  *
@@ -77,8 +77,13 @@ function harness(file) {
   ok(r.form === null, 'offers/no-cookie: no POST form created');
   ok(r.ev.defaultPrevented === false, 'offers/no-cookie: GET navigation left intact');
 
-  // Cookie with reserved chars (+ / =) → POST with the decoded token in the body.
-  h.window.document.cookie = 'x-access-token=abc%2Bdef%2Fghi%3D';
+  // The OLD cookie name (x-access-token) must be ignored — we read travelify-accesstoken.
+  h.window.document.cookie = 'x-access-token=OLD-should-be-ignored';
+  r = h.click('dl');
+  ok(r.form === null, 'offers/old-cookie-name: x-access-token cookie is NOT used');
+
+  // Correct cookie (reserved chars + / =) → POST with the decoded token in the body.
+  h.window.document.cookie = 'travelify-accesstoken=abc%2Bdef%2Fghi%3D';
   r = h.click('dl');
   ok(!!r.form, 'offers/cookie: POST form submitted');
   ok(r.form && r.form.method.toLowerCase() === 'post', 'offers/cookie: method=POST');
@@ -101,7 +106,7 @@ function harness(file) {
   const h = harness('widget-worldmap.js');
   let r = h.click('dl');
   ok(r.form === null, 'map/no-cookie: no POST form');
-  h.window.document.cookie = 'x-access-token=Zm9v%2BYmFy';
+  h.window.document.cookie = 'travelify-accesstoken=Zm9v%2BYmFy';
   r = h.click('dl');
   ok(!!r.form && r.form.method.toLowerCase() === 'post', 'map/cookie: POST form submitted');
   const input = r.form && r.form.querySelector('input[name="x-access-token"]');
