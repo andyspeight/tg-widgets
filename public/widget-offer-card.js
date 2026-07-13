@@ -27,8 +27,27 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.1.1';
-  const API_BASE = '/api/widget-config';
+  const VERSION = '0.1.3';
+
+  // Resolve the API base off THIS script's origin. The widget is hosted on
+  // widgets.travelify.io and embedded on customer sites, so a relative
+  // '/api/...' resolves to the customer origin and 404s. Order: explicit
+  // opt-in, then document.currentScript, then a scan for our own script tag.
+  function resolveApiBase() {
+    if (typeof window === 'undefined') return '/api/widget-config';
+    if (window.__TG_WIDGET_API__) return window.__TG_WIDGET_API__;
+    try {
+      const me = document.currentScript;
+      if (me && me.src) return new URL(me.src).origin + '/api/widget-config';
+      const scripts = document.getElementsByTagName('script');
+      for (let i = scripts.length - 1; i >= 0; i--) {
+        const s = scripts[i].src || '';
+        if (/\/widget-offer-card\.js(\?|$|#)/.test(s)) return new URL(s).origin + '/api/widget-config';
+      }
+    } catch (e) { /* fall through */ }
+    return '/api/widget-config';
+  }
+  const API_BASE = resolveApiBase();
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the CTA label, the Save badge word, the nights label,
@@ -134,6 +153,14 @@
     if (/^(https?:)?\/\//i.test(s) || s.startsWith('/') || s.startsWith('#')) return s;
     return '';
   }
+  // A URL safe to drop inside a CSS url('...') value. esc() cannot neutralise
+  // the characters that break out of url() — ( ) ' " ; whitespace \ — so reject
+  // any value that carries one. Runs the safeUrl allowlist first.
+  function safeCssUrl(u) {
+    const s = safeUrl(u);
+    if (!s || /[()'"\\;\s]/.test(s)) return '';
+    return s;
+  }
 
   const PIN = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
 
@@ -220,6 +247,8 @@
       display: inline-flex; align-items: center; justify-content: center; font-family: inherit;
     }
     .tgoc-cta:hover { background: var(--tgo-accent-hover); }
+    .tgoc-cta--disabled { background: var(--tgo-muted); cursor: default; opacity: 0.65; pointer-events: none; }
+    .tgoc-cta--disabled:hover { background: var(--tgo-muted); }
 
     /* ── Vertical layout ── */
     .tgoc-card--vertical { flex-direction: column; max-width: 380px; }
@@ -483,8 +512,9 @@
     }
 
     _imageBlock(d) {
-      const bg = d.image ? ' style="background-image:url(' + esc(d.image) + ')"' : '';
-      const ph = d.image ? '' : '<div class="tgoc-img-ph">' + esc(d.loc || d.title) + '</div>';
+      const cssUrl = safeCssUrl(d.image);
+      const bg = cssUrl ? ' style="background-image:url(\'' + cssUrl + '\')"' : '';
+      const ph = cssUrl ? '' : '<div class="tgoc-img-ph">' + esc(d.loc || d.title) + '</div>';
       return '<div class="tgoc-img"' + bg + '>' + ph + this._chips(d) + '</div>';
     }
 
@@ -518,16 +548,22 @@
     }
 
     _cta() {
-      const href = this._linkHref || '#';
-      const tgt = this.cfg.ctaTarget ? ' target="_blank" rel="noopener"' : '';
       const label = this.cfg.ctaText || this.t('viewDeal');
-      return '<a class="tgoc-cta" href="' + esc(href) + '"' + tgt + '>' + esc(label) + '</a>';
+      // The whole card is the <a> when a destination exists (see _render), so the
+      // CTA renders as a visual-only span — never an anchor nested in an anchor.
+      if (this._linkHref) {
+        return '<span class="tgoc-cta">' + esc(label) + '</span>';
+      }
+      // No destination at all: show the CTA as a visibly disabled control rather
+      // than a dead '#' link that just jumps the page to the top.
+      return '<span class="tgoc-cta tgoc-cta--disabled" role="button" aria-disabled="true">' + esc(label) + '</span>';
     }
 
     // Banner: full-bleed image with the offer overlaid. Punchy and promotional.
     _bannerCard(d) {
-      const bg = d.image ? ' style="background-image:url(' + esc(d.image) + ')"' : '';
-      const phCls = d.image ? '' : ' ph';
+      const cssUrl = safeCssUrl(d.image);
+      const bg = cssUrl ? ' style="background-image:url(\'' + cssUrl + '\')"' : '';
+      const phCls = cssUrl ? '' : ' ph';
       const eyebrow = d.eyebrow ? '<span class="tgoc-b-eyebrow">' + esc(d.eyebrow) + '</span>' : '';
       const loc = d.loc ? '<span class="tgoc-loc">' + PIN + esc(d.loc) + '</span>' : '';
       const stars = d.stars ? '<span class="tgoc-b-stars">' + '★'.repeat(d.stars) + '</span>' : '';

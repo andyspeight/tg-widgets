@@ -32,7 +32,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.2.1';
+  var WIDGET_VERSION = '1.2.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (labels, placeholders, step names, buttons, validation,
@@ -125,6 +125,7 @@
       startAnother: 'Start another enquiry',
       // chrome
       planYourTrip: 'Plan your trip', travelEnquiry: 'Travel enquiry', securityCheck: 'Security check',
+      tsFailed: 'The security check did not load. Please reload it.', tsReload: 'Reload check',
       loadingForm: 'Loading form...',
       formUnavailable: 'Form unavailable',
       oopsLoad: 'Unable to load this form.',
@@ -204,6 +205,7 @@
       sumFlexibleDates: 'Dates flexibles',
       startAnother: 'Commencer une nouvelle demande',
       planYourTrip: 'Planifiez votre voyage', travelEnquiry: 'Demande de voyage', securityCheck: 'Contrôle de sécurité',
+      tsFailed: 'Le contrôle de sécurité ne s’est pas chargé. Veuillez le recharger.', tsReload: 'Recharger',
       loadingForm: 'Chargement du formulaire...',
       formUnavailable: 'Formulaire indisponible',
       oopsLoad: 'Impossible de charger ce formulaire.',
@@ -283,6 +285,7 @@
       sumFlexibleDates: 'Flexible Termine',
       startAnother: 'Weitere Anfrage starten',
       planYourTrip: 'Planen Sie Ihre Reise', travelEnquiry: 'Reiseanfrage', securityCheck: 'Sicherheitsprüfung',
+      tsFailed: 'Die Sicherheitsprüfung wurde nicht geladen. Bitte laden Sie sie neu.', tsReload: 'Neu laden',
       loadingForm: 'Formular wird geladen...',
       formUnavailable: 'Formular nicht verfügbar',
       oopsLoad: 'Dieses Formular kann nicht geladen werden.',
@@ -362,6 +365,7 @@
       sumFlexibleDates: 'Fechas flexibles',
       startAnother: 'Iniciar otra consulta',
       planYourTrip: 'Planifica tu viaje', travelEnquiry: 'Consulta de viaje', securityCheck: 'Verificación de seguridad',
+      tsFailed: 'La verificación de seguridad no se cargó. Vuelve a cargarla.', tsReload: 'Recargar',
       loadingForm: 'Cargando formulario...',
       formUnavailable: 'Formulario no disponible',
       oopsLoad: 'No se puede cargar este formulario.',
@@ -441,6 +445,7 @@
       sumFlexibleDates: 'Date flessibili',
       startAnother: 'Inizia un’altra richiesta',
       planYourTrip: 'Pianifica il tuo viaggio', travelEnquiry: 'Richiesta di viaggio', securityCheck: 'Controllo di sicurezza',
+      tsFailed: 'Il controllo di sicurezza non è stato caricato. Ricaricalo.', tsReload: 'Ricarica',
       loadingForm: 'Caricamento del modulo...',
       formUnavailable: 'Modulo non disponibile',
       oopsLoad: 'Impossibile caricare questo modulo.',
@@ -520,6 +525,7 @@
       sumFlexibleDates: 'Date flexibile',
       startAnother: 'Începe o nouă solicitare',
       planYourTrip: 'Planifică-ți călătoria', travelEnquiry: 'Solicitare de călătorie', securityCheck: 'Verificare de securitate',
+      tsFailed: 'Verificarea de securitate nu s-a încărcat. Reîncărcați-o.', tsReload: 'Reîncarcă',
       loadingForm: 'Se încarcă formularul...',
       formUnavailable: 'Formular indisponibil',
       oopsLoad: 'Acest formular nu poate fi încărcat.',
@@ -793,6 +799,8 @@
 
       ".ep-body{padding:20px 24px 8px;min-height:200px}",
       ".ep-q{font-family:var(--ff-display);font-weight:600;font-size:clamp(22px,5.4vw,27px);line-height:1.15;letter-spacing:-.01em;margin-bottom:6px}",
+      ".ep-q:focus{outline:none}",
+      ".ep-q:focus-visible{outline:2px solid var(--brand);outline-offset:4px;border-radius:6px}",
       ".ep-sub{color:var(--ink-3);font-size:14px;margin-bottom:20px}",
       ".ep-step{animation:ep-rise .45s var(--ease) both}",
       "@keyframes ep-rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}",
@@ -908,7 +916,11 @@
       ".ep-brand{text-align:center;font-size:11px;color:var(--muted);padding:0 0 16px;letter-spacing:.02em}",
       ".ep-brand b{color:var(--ink-3);font-weight:600}",
       ".ep-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}",
-      ".ep-turnstile{margin:4px 0 16px;min-height:65px;display:flex;align-items:center;justify-content:center}",
+      ".ep-turnstile{margin:4px 0 16px;min-height:65px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}",
+      ".ep-ts-retry{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}",
+      ".ep-ts-retry-msg{font-size:12.5px;color:var(--ink-3);max-width:280px}",
+      ".ep-ts-retry-btn{background:var(--brand);color:#fff;border:none;font:inherit;font-size:13px;font-weight:700;padding:8px 16px;border-radius:var(--radius-pill);cursor:pointer}",
+      ".ep-ts-retry-btn:hover{background:var(--brand-dark)}",
       ".ep-oops{padding:48px 32px;text-align:center}",
       ".ep-oops h3{font-family:var(--ff-display);font-size:18px;margin:0 0 8px}",
       ".ep-oops p{color:var(--ink-2);font-size:14px}",
@@ -1055,6 +1067,11 @@
 
   TGEnquiryProWidget.prototype._renderStep = function () {
     var self = this, S = this.S, c = this.config;
+    // First mount must not steal focus from the host page; every later step change
+    // (Continue / Back / restart) moves focus to the new step heading so keyboard
+    // and screen-reader users are carried to the new question instead of dropping
+    // to document.body.
+    var firstRender = !this._stepMounted; this._stepMounted = true;
     while (this.card.firstChild) this.card.removeChild(this.card.firstChild);
 
     // head
@@ -1104,6 +1121,15 @@
     brand.appendChild(document.createTextNode(this.t('poweredBy') + ' '));
     var b = document.createElement('b'); b.textContent = 'Travelgenix'; brand.appendChild(b);
     this.card.appendChild(brand);
+
+    // Move focus to the new step's heading so the change is announced and Tab
+    // resumes inside the form. Programmatic focus on the first mount is skipped
+    // so the widget does not yank the host page on load.
+    if (!firstRender) {
+      var heading = step.querySelector('.ep-q') || step;
+      heading.setAttribute('tabindex', '-1');
+      try { heading.focus(); } catch (e) {}
+    }
   };
 
   // ---- helpers for building controls ----------------------------------------
@@ -1467,9 +1493,37 @@
     var sec = this.config.security || {};
     if (sec.turnstile && sec.turnstileSiteKey) {
       var tsWrap = document.createElement('div'); tsWrap.className = 'ep-turnstile';
-      var theme = this.root && this.root.classList.contains('is-dark') ? 'dark' : 'light';
-      this._turnstile = createTurnstileFrame(sec.turnstileSiteKey, theme, function () { clrErr(self._consErr); }, this.t('securityCheck'));
-      tsWrap.appendChild(this._turnstile.iframe);
+      var tsTheme = this.root && this.root.classList.contains('is-dark') ? 'dark' : 'light';
+      // A blocked or errored challenge iframe used to leave the visitor stuck: Send
+      // kept reporting 'complete the security check' with nothing to act on. Give the
+      // challenge a 15s load timeout and surface a visible reload affordance on
+      // timeout / error / expiry so the lead is never trapped by a broken widget.
+      var tsTimer = null;
+      var clearTsTimer = function () { if (tsTimer) { clearTimeout(tsTimer); tsTimer = null; } };
+      var showTsRetry = function () {
+        if (!tsWrap.isConnected || tsWrap.querySelector('.ep-ts-retry')) return;
+        var box = document.createElement('div'); box.className = 'ep-ts-retry'; box.setAttribute('role', 'alert');
+        var msg = document.createElement('span'); msg.className = 'ep-ts-retry-msg'; msg.textContent = self.t('tsFailed');
+        var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'ep-ts-retry-btn';
+        btn.textContent = self.t('tsReload');
+        btn.addEventListener('click', function () { armTsFrame(); });
+        box.appendChild(msg); box.appendChild(btn); tsWrap.appendChild(box);
+      };
+      var armTsFrame = function () {
+        clearTsTimer();
+        if (self._turnstile) { try { self._turnstile.destroy(); } catch (e) {} self._turnstile = null; }
+        while (tsWrap.firstChild) tsWrap.removeChild(tsWrap.firstChild);
+        self._turnstile = createTurnstileFrame(sec.turnstileSiteKey, tsTheme, function (tok) {
+          if (tok) {
+            clearTsTimer();
+            var r = tsWrap.querySelector('.ep-ts-retry'); if (r) tsWrap.removeChild(r);
+            clrErr(self._consErr);
+          } else { showTsRetry(); }   // expired / timeout / error from the iframe
+        }, self.t('securityCheck'));
+        tsWrap.appendChild(self._turnstile.iframe);
+        tsTimer = setTimeout(function () { if (!(self._turnstile && self._turnstile.getToken())) showTsRetry(); }, 15000);
+      };
+      armTsFrame();
       root.appendChild(tsWrap);
     }
   };
@@ -1739,7 +1793,7 @@
         if (!res.ok) { renderOops(shadow, (res.d && res.d.error) || t('oopsLoad'), t); tgReport('error', widgetId, 'config load failed', (res.d && res.d.error) || 'HTTP error'); return; }
         var w = Object.create(TGEnquiryProWidget.prototype);
         w.instance = ++INSTANCE_COUNTER; w.container = container; w.shadow = shadow; w.widgetId = widgetId;
-        w.t = makeT(res.d); w.config = w._normalise(res.d); w.config.isLiveEmbed = true; w._resetState(); w._render();
+        w.t = makeT(res.d); w.config = w._normalise(res.d); w.config.isLiveEmbed = true; w._applyI18n(); w._resetState(); w._render();
         container.__tgWidget = w;
         tgReport('load', widgetId, 'ok');
       })

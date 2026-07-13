@@ -29,8 +29,26 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.1.1';
-  const API_BASE = '/api/widget-config';
+  const VERSION = '0.1.3';
+
+  // Resolve the API base off THIS script's origin. The widget is hosted on
+  // widgets.travelify.io and embedded on customer sites, so a relative
+  // '/api/...' resolves to the customer origin and 404s (blank render).
+  function resolveApiBase() {
+    if (typeof window === 'undefined') return '/api/widget-config';
+    if (window.__TG_WIDGET_API__) return window.__TG_WIDGET_API__;
+    try {
+      const me = document.currentScript;
+      if (me && me.src) return new URL(me.src).origin + '/api/widget-config';
+      const scripts = document.getElementsByTagName('script');
+      for (let i = scripts.length - 1; i >= 0; i--) {
+        const s = scripts[i].src || '';
+        if (/\/widget-offer-page\.js(\?|$|#)/.test(s)) return new URL(s).origin + '/api/widget-config';
+      }
+    } catch (e) { /* fall through */ }
+    return '/api/widget-config';
+  }
+  const API_BASE = resolveApiBase();
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (section headings, fact/detail labels, CTA copy,
@@ -71,7 +89,10 @@
       endsIn: 'Offer ends in {days}d {hours}h {mins}m',
       enquirySent: 'Enquiry sent',
       thanksName: 'Thanks {name}. A travel expert will be in touch within one working hour.',
-      openPhoto: 'Open photo {n}', video: 'Video'
+      openPhoto: 'Open photo {n}', video: 'Video',
+      closePhoto: 'Close photo viewer', prevPhoto: 'Previous photo', nextPhoto: 'Next photo',
+      photoAlt: '{title}, photo {n} of {total}',
+      loading: 'Loading offer…', loadError: 'We could not load this offer.', retry: 'Try again'
     },
     fr: {
       defaultTitle: 'Votre prochaine escapade',
@@ -104,7 +125,10 @@
       endsIn: 'L’offre se termine dans {days}j {hours}h {mins}min',
       enquirySent: 'Demande envoyée',
       thanksName: 'Merci {name}. Un expert voyages vous contactera sous une heure ouvrée.',
-      openPhoto: 'Ouvrir la photo {n}', video: 'Vidéo'
+      openPhoto: 'Ouvrir la photo {n}', video: 'Vidéo',
+      closePhoto: 'Fermer la visionneuse', prevPhoto: 'Photo précédente', nextPhoto: 'Photo suivante',
+      photoAlt: '{title}, photo {n} sur {total}',
+      loading: 'Chargement de l’offre…', loadError: 'Impossible de charger cette offre.', retry: 'Réessayer'
     },
     de: {
       defaultTitle: 'Ihre nächste Auszeit',
@@ -137,7 +161,10 @@
       endsIn: 'Das Angebot endet in {days}T {hours}Std {mins}Min',
       enquirySent: 'Anfrage gesendet',
       thanksName: 'Danke {name}. Ein Reiseexperte meldet sich innerhalb einer Arbeitsstunde.',
-      openPhoto: 'Foto {n} öffnen', video: 'Video'
+      openPhoto: 'Foto {n} öffnen', video: 'Video',
+      closePhoto: 'Fotoansicht schließen', prevPhoto: 'Vorheriges Foto', nextPhoto: 'Nächstes Foto',
+      photoAlt: '{title}, Foto {n} von {total}',
+      loading: 'Angebot wird geladen…', loadError: 'Dieses Angebot konnte nicht geladen werden.', retry: 'Erneut versuchen'
     },
     es: {
       defaultTitle: 'Tu próxima escapada',
@@ -170,7 +197,10 @@
       endsIn: 'La oferta termina en {days}d {hours}h {mins}min',
       enquirySent: 'Consulta enviada',
       thanksName: 'Gracias {name}. Un experto en viajes te contactará en una hora laborable.',
-      openPhoto: 'Abrir foto {n}', video: 'Vídeo'
+      openPhoto: 'Abrir foto {n}', video: 'Vídeo',
+      closePhoto: 'Cerrar el visor de fotos', prevPhoto: 'Foto anterior', nextPhoto: 'Foto siguiente',
+      photoAlt: '{title}, foto {n} de {total}',
+      loading: 'Cargando la oferta…', loadError: 'No pudimos cargar esta oferta.', retry: 'Reintentar'
     },
     it: {
       defaultTitle: 'La tua prossima fuga',
@@ -203,7 +233,10 @@
       endsIn: 'L’offerta termina tra {days}g {hours}h {mins}min',
       enquirySent: 'Richiesta inviata',
       thanksName: 'Grazie {name}. Un esperto di viaggi ti contatterà entro un’ora lavorativa.',
-      openPhoto: 'Apri foto {n}', video: 'Video'
+      openPhoto: 'Apri foto {n}', video: 'Video',
+      closePhoto: 'Chiudi il visualizzatore', prevPhoto: 'Foto precedente', nextPhoto: 'Foto successiva',
+      photoAlt: '{title}, foto {n} di {total}',
+      loading: 'Caricamento dell’offerta…', loadError: 'Impossibile caricare questa offerta.', retry: 'Riprova'
     },
     ro: {
       defaultTitle: 'Următoarea ta evadare',
@@ -236,7 +269,10 @@
       endsIn: 'Oferta se încheie în {days}z {hours}h {mins}min',
       enquirySent: 'Solicitare trimisă',
       thanksName: 'Mulțumim {name}. Un expert în călătorii te va contacta în maximum o oră lucrătoare.',
-      openPhoto: 'Deschide fotografia {n}', video: 'Video'
+      openPhoto: 'Deschide fotografia {n}', video: 'Video',
+      closePhoto: 'Închide vizualizatorul', prevPhoto: 'Fotografia anterioară', nextPhoto: 'Fotografia următoare',
+      photoAlt: '{title}, fotografia {n} din {total}',
+      loading: 'Se încarcă oferta…', loadError: 'Nu am putut încărca această ofertă.', retry: 'Încearcă din nou'
     }
   };
   // Uses the shared TGi18n core when present; otherwise an identical inline
@@ -1026,10 +1062,11 @@
         + '<span class="tgop-bar-spacer"></span><span>' + esc(t('poweredBy')) + '</span>'
       + '</div></div>';
 
-      const fLightbox = '<div class="tgop-lb" data-lb><button type="button" class="tgop-lb-btn close" data-lb-close>' + I.x + '</button>'
-        + '<button type="button" class="tgop-lb-btn prev" data-lb-prev>' + I.chevDown + '</button>'
+      const fLightbox = '<div class="tgop-lb" data-lb role="dialog" aria-modal="true" aria-label="' + esc(t('photos')) + '">'
+        + '<button type="button" class="tgop-lb-btn close" data-lb-close aria-label="' + esc(t('closePhoto')) + '">' + I.x + '</button>'
+        + '<button type="button" class="tgop-lb-btn prev" data-lb-prev aria-label="' + esc(t('prevPhoto')) + '">' + I.chevDown + '</button>'
         + '<img class="tgop-lb-img" data-lb-img alt="">'
-        + '<button type="button" class="tgop-lb-btn next" data-lb-next>' + I.chevDown + '</button></div>';
+        + '<button type="button" class="tgop-lb-btn next" data-lb-next aria-label="' + esc(t('nextPhoto')) + '">' + I.chevDown + '</button></div>';
 
       // Main column content order (shared by classic + immersive)
       const mainCol = fAbout + fIncludes + fVideo + fGallery + fMap + fDetail;
@@ -1180,31 +1217,62 @@
 
     _initLightbox(d) {
       const root = this.root;
+      const shadow = this.shadow;
+      const t = this.t;
+      const title = d.title || d.property || '';
       const lb = root.querySelector('[data-lb]');
       const img = root.querySelector('[data-lb-img]');
       const gallery = root.querySelector('[data-gallery]');
       if (!lb || !gallery) return;
+      const closeBtn = root.querySelector('[data-lb-close]');
+      const prevBtn = root.querySelector('[data-lb-prev]');
+      const nextBtn = root.querySelector('[data-lb-next]');
       const imgs = d.images;
       let idx = 0;
-      const show = function (i) { idx = (i + imgs.length) % imgs.length; img.src = imgs[idx]; };
-      const open = function (i) { show(i); lb.classList.add('open'); };
-      const close = function () { lb.classList.remove('open'); img.src = ''; };
-      gallery.querySelectorAll('.g').forEach((g) => g.addEventListener('click', function () { open(parseInt(g.dataset.idx, 10) || 0); }));
-      root.querySelector('[data-lb-close]').addEventListener('click', close);
-      root.querySelector('[data-lb-prev]').addEventListener('click', function () { show(idx - 1); });
-      root.querySelector('[data-lb-next]').addEventListener('click', function () { show(idx + 1); });
+      let lastFocus = null;
+      const show = function (i) {
+        idx = (i + imgs.length) % imgs.length;
+        img.src = imgs[idx];
+        img.alt = t('photoAlt', { title: title, n: idx + 1, total: imgs.length });
+      };
+      // Move focus into the dialog on open and restore it to the trigger on close,
+      // so a keyboard user is never left focused on the hidden gallery behind the overlay.
+      const open = function (i, trigger) {
+        lastFocus = trigger || null;
+        show(i);
+        lb.classList.add('open');
+        closeBtn.focus();
+      };
+      const close = function () {
+        lb.classList.remove('open');
+        img.src = '';
+        if (lastFocus) { try { lastFocus.focus(); } catch (e) { /* noop */ } lastFocus = null; }
+      };
+      gallery.querySelectorAll('.g').forEach((g) => g.addEventListener('click', function () { open(parseInt(g.dataset.idx, 10) || 0, g); }));
+      closeBtn.addEventListener('click', close);
+      prevBtn.addEventListener('click', function () { show(idx - 1); });
+      nextBtn.addEventListener('click', function () { show(idx + 1); });
       lb.addEventListener('click', function (e) { if (e.target === lb) close(); });
       const onKey = function (e) {
         if (!lb.classList.contains('open')) return;
-        if (e.key === 'Escape') close();
-        else if (e.key === 'ArrowLeft') show(idx - 1);
-        else if (e.key === 'ArrowRight') show(idx + 1);
+        if (e.key === 'Escape') { close(); }
+        else if (e.key === 'ArrowLeft') { show(idx - 1); }
+        else if (e.key === 'ArrowRight') { show(idx + 1); }
+        else if (e.key === 'Tab') {
+          // Trap Tab within the lightbox controls rather than the page behind it.
+          const order = [closeBtn, prevBtn, nextBtn];
+          let pos = order.indexOf(shadow.activeElement);
+          if (pos === -1) pos = 0;
+          const to = e.shiftKey ? (pos + order.length - 1) % order.length : (pos + 1) % order.length;
+          e.preventDefault();
+          order[to].focus();
+        }
       };
       window.addEventListener('keydown', onKey);
       this._onKey = onKey;
       // rotate the prev arrow to point left, next stays as down-rotated-right
-      root.querySelector('[data-lb-prev]').style.transform = 'translateY(-50%) rotate(90deg)';
-      root.querySelector('[data-lb-next]').style.transform = 'translateY(-50%) rotate(-90deg)';
+      prevBtn.style.transform = 'translateY(-50%) rotate(90deg)';
+      nextBtn.style.transform = 'translateY(-50%) rotate(-90deg)';
     }
 
     _submitEnquiry(form, d) {
@@ -1275,13 +1343,58 @@
 
   // ── Auto-init ───────────────────────────────────────────────────────────────
   async function loadConfigFromApi(widgetId) {
+    // Fail-safe timeout so a hung connection resolves to the error fallback
+    // instead of leaving the loading placeholder up forever.
+    const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 10000) : null;
     try {
-      const res = await fetch(API_BASE + '?id=' + encodeURIComponent(widgetId));
+      const res = await fetch(API_BASE + '?id=' + encodeURIComponent(widgetId), ctrl ? { signal: ctrl.signal } : undefined);
       if (!res.ok) throw new Error('Config load failed: ' + res.status);
       const data = await res.json();
       if (data && data.config) return Object.assign({}, data.config, { _widgetId: widgetId });
       throw new Error('No config returned');
     } catch (err) { console.error('[TGOfferPage] Config load error:', err); return null; }
+    finally { if (timer) clearTimeout(timer); }
+  }
+
+  // Light-DOM placeholder shown before/while the remote config loads, and as a
+  // fail-safe error state (with a retry) when it does not. Inline styles keep it
+  // CSP-clean; it is naturally hidden once the widget attaches its shadow root.
+  function renderPlaceholder(el, message, onRetry) {
+    const tt = makeT();
+    const box = document.createElement('div');
+    box.setAttribute('role', 'status');
+    box.setAttribute('aria-live', 'polite');
+    box.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:220px;padding:32px 20px;box-sizing:border-box;font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#475569;text-align:center;';
+    const p = document.createElement('p');
+    p.style.cssText = 'margin:0;';
+    p.textContent = message;
+    box.appendChild(p);
+    if (typeof onRetry === 'function') {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = tt('retry');
+      btn.style.cssText = 'appearance:none;border:1px solid #cbd5e1;background:#fff;color:#0f172a;border-radius:10px;padding:9px 18px;font:inherit;font-weight:600;cursor:pointer;';
+      btn.addEventListener('click', function () { btn.disabled = true; onRetry(); });
+      box.appendChild(btn);
+    }
+    el.innerHTML = '';
+    el.appendChild(box);
+  }
+
+  async function mountRemote(el, widgetId, offerAttr) {
+    const tt = makeT();
+    renderPlaceholder(el, tt('loading'));
+    const config = await loadConfigFromApi(widgetId);
+    if (!config) {
+      renderPlaceholder(el, tt('loadError'), function () { mountRemote(el, widgetId, offerAttr); });
+      return;
+    }
+    if (offerAttr && !config.offer) {
+      try { config.offer = JSON.parse(offerAttr); } catch (e) { console.error('[TGOfferPage] Invalid data-tg-offer:', e); }
+    }
+    el.innerHTML = '';
+    new TGOfferPageWidget(el, config);
   }
 
   async function init() {
@@ -1289,16 +1402,14 @@
     for (const el of containers) {
       if (el._tgInitialised || el.shadowRoot) continue;
       el._tgInitialised = true;
-      let config = null;
       const inline = el.getAttribute('data-tg-config');
       const offerAttr = el.getAttribute('data-tg-offer');
       const widgetId = el.getAttribute('data-tg-id');
+      if (widgetId && !inline) { mountRemote(el, widgetId, offerAttr); continue; }
+      let config = {};
       if (inline) {
         try { config = JSON.parse(inline); } catch (e) { console.error('[TGOfferPage] Invalid inline config:', e); continue; }
-      } else if (widgetId) {
-        config = await loadConfigFromApi(widgetId);
-        if (!config) continue;
-      } else { config = {}; }
+      }
       if (offerAttr && !config.offer) {
         try { config.offer = JSON.parse(offerAttr); } catch (e) { console.error('[TGOfferPage] Invalid data-tg-offer:', e); }
       }

@@ -1,5 +1,5 @@
 /* ============================================================
-   Travelgenix Widget Editor — Unified Shell JS v1.2.0
+   Travelgenix Widget Editor — Unified Shell JS v1.2.1
    Source of truth: /editor-shell-spec.md
 
    Loaded by every editor via:
@@ -48,6 +48,13 @@
    narrow by design — see the comment block at the top of the IIFE for
    the rules. Future cleanup: when every fetch site is updated with
    explicit credentials, this interceptor can be removed safely.
+
+   ── v1.2.1 (Jul 2026) ──
+   Fix: doSave() now aborts a stalled request after 20s (AbortController)
+   so a flaky connection can no longer lock the Save button in 'Saving…'
+   forever, and guards against stacking parallel saves while one is in
+   flight. showLogin() only redirects once (no boot-time redirect loop)
+   and warns before discarding unsaved edits when a session expires.
    ============================================================ */
 
 (function () {
@@ -71,7 +78,9 @@
   // ── Internal state ────────────────────────────────────────
   let opts = null;       // editor's init options
   let saveDirty = false;
+  let saveInFlight = false;
   let saveTimer = null;
+  let loginRedirected = false;
   let activeTab = 'design';
 
   // ============================================================
@@ -504,9 +513,26 @@
   }
 
   function showLogin(message) {
-    // Redirect to the canonical sign-in page (the legacy inline modal is
-    // wired to /api/widget-auth which is now disconnected from the new
-    // bcrypt-based Users table).
+    // Redirect to the canonical sign-in page. (The legacy inline overlay
+    // built by buildLoginOverlay() is wired to /api/widget-auth, which is
+    // now disconnected from the bcrypt-based Users table, so it is not used.)
+
+    // Redirect only once — a boot-time auth gate can fire this repeatedly,
+    // and without a guard a failing check on return would loop the browser
+    // between the editor and /signin.html.
+    if (loginRedirected) return;
+
+    // If the session expired mid-edit, don't silently discard unsaved work —
+    // let the user cancel the redirect so they can retry or copy their edits.
+    if (saveDirty && typeof window.confirm === 'function') {
+      const go = window.confirm(
+        'You have unsaved changes that will be lost when you sign in again. ' +
+        'Sign in now anyway?'
+      );
+      if (!go) return;
+    }
+
+    loginRedirected = true;
     const here = location.pathname + location.search + location.hash;
     location.href = '/signin.html?next=' + encodeURIComponent(here);
   }
@@ -659,6 +685,10 @@
 
   async function doSave() {
     if (!ensureAuth()) return;
+    // Guard against a second save while one is already in flight — Cmd/Ctrl+S
+    // bypasses the button's pointer-events:none, so without this a stalled
+    // request could stack up parallel POSTs.
+    if (saveInFlight) return;
     // Optional editor veto. An editor can supply canSave() to block a save it
     // knows would be destructive — chiefly when its config failed to load, so
     // saving now would overwrite the real record with blank defaults. Returning
@@ -676,6 +706,7 @@
     const nameEl = document.getElementById('name-input');
     const name = (nameEl?.value || '').trim() || 'Untitled';
 
+    saveInFlight = true;
     setSaveState('saving');
 
     const body = {
@@ -688,6 +719,12 @@
     const wId = params.get('id');
     if (wId) body.widgetId = wId;
 
+    // Abort a stalled request after ~20s so a flaky connection can never
+    // lock the Save button in 'Saving…' forever — the abort lands in the
+    // catch block below, which restores the dirty (clickable) state.
+    const ctrl = new AbortController();
+    const timeoutId = setTimeout(() => ctrl.abort(), 20000);
+
     try {
       const r = await fetch('/api/widget-config', {
         method: 'POST',
@@ -697,6 +734,7 @@
         // Without it, cookie-only users get 401 → "session expired".
         credentials: 'include',
         body: JSON.stringify(body),
+        signal: ctrl.signal,
       });
 
       if (r.status === 401) {
@@ -739,6 +777,9 @@
       console.error('[tgse] Save failed in catch block:', e);
       toast('Save failed — network error', 'err');
       setSaveState('dirty');
+    } finally {
+      clearTimeout(timeoutId);
+      saveInFlight = false;
     }
   }
 

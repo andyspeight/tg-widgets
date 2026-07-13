@@ -320,14 +320,13 @@
     const wId = new URLSearchParams(location.search).get('id');
     if (!wId) { render(); return; }
     fetch('/api/widget-config?id=' + encodeURIComponent(wId))
-      .then(r => r.ok ? r.json() : null)
+      .then(r => r.ok ? r.json() : Promise.reject(new Error('config ' + r.status)))
       .then(d => {
-        if (!d) return;
-        if (d.config) C = Object.assign({}, C, d.config);
-        if (d.name) document.getElementById('name-input').value = d.name;
+        if (d && d.config) C = Object.assign({}, C, d.config);
+        if (d && d.name) document.getElementById('name-input').value = d.name;
         syncUIFromState(); render();
       })
-      .catch(() => tgse.toast('Failed to load widget', 'err'));
+      .catch(() => { render(); tgse.toast('Failed to load widget', 'err'); });
   }
 
   document.addEventListener('DOMContentLoaded', () => {

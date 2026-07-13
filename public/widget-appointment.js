@@ -24,7 +24,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '2.0.2';
+  const VERSION = '2.0.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (step labels, field labels, buttons, validation and
@@ -41,6 +41,7 @@
       fmt12: '12h', fmt24: '24h',
       minUnit: '{n} min',
       noTimesLeft: 'No times left on this day.',
+      noneAvailable: 'No times available right now.',
       back: 'Back', name: 'Name', email: 'Email', phone: 'Phone', message: 'Message',
       namePlaceholder: 'Your name', emailPlaceholder: 'you@example.com', phonePlaceholder: 'Your number',
       pleaseChoose: 'Please choose…',
@@ -68,6 +69,7 @@
       fmt12: '12h', fmt24: '24h',
       minUnit: '{n} min',
       noTimesLeft: 'Aucun horaire disponible ce jour-là.',
+      noneAvailable: 'Aucun horaire disponible pour le moment.',
       back: 'Retour', name: 'Nom', email: 'E-mail', phone: 'Téléphone', message: 'Message',
       namePlaceholder: 'Votre nom', emailPlaceholder: 'vous@exemple.com', phonePlaceholder: 'Votre numéro',
       pleaseChoose: 'Veuillez choisir…',
@@ -95,6 +97,7 @@
       fmt12: '12 h', fmt24: '24 h',
       minUnit: '{n} Min.',
       noTimesLeft: 'An diesem Tag sind keine Zeiten mehr verfügbar.',
+      noneAvailable: 'Derzeit sind keine Zeiten verfügbar.',
       back: 'Zurück', name: 'Name', email: 'E-Mail', phone: 'Telefon', message: 'Nachricht',
       namePlaceholder: 'Ihr Name', emailPlaceholder: 'sie@beispiel.de', phonePlaceholder: 'Ihre Nummer',
       pleaseChoose: 'Bitte wählen…',
@@ -122,6 +125,7 @@
       fmt12: '12 h', fmt24: '24 h',
       minUnit: '{n} min',
       noTimesLeft: 'No quedan horarios para este día.',
+      noneAvailable: 'No hay horarios disponibles ahora mismo.',
       back: 'Atrás', name: 'Nombre', email: 'Correo electrónico', phone: 'Teléfono', message: 'Mensaje',
       namePlaceholder: 'Tu nombre', emailPlaceholder: 'tu@ejemplo.com', phonePlaceholder: 'Tu número',
       pleaseChoose: 'Elige una opción…',
@@ -149,6 +153,7 @@
       fmt12: '12h', fmt24: '24h',
       minUnit: '{n} min',
       noTimesLeft: 'Nessun orario disponibile in questo giorno.',
+      noneAvailable: 'Nessun orario disponibile al momento.',
       back: 'Indietro', name: 'Nome', email: 'Email', phone: 'Telefono', message: 'Messaggio',
       namePlaceholder: 'Il tuo nome', emailPlaceholder: 'tu@esempio.com', phonePlaceholder: 'Il tuo numero',
       pleaseChoose: 'Scegli…',
@@ -176,6 +181,7 @@
       fmt12: '12h', fmt24: '24h',
       minUnit: '{n} min',
       noTimesLeft: 'Niciun interval disponibil în această zi.',
+      noneAvailable: 'Niciun interval disponibil momentan.',
       back: 'Înapoi', name: 'Nume', email: 'E-mail', phone: 'Telefon', message: 'Mesaj',
       namePlaceholder: 'Numele dvs.', emailPlaceholder: 'tu@exemplu.com', phonePlaceholder: 'Numărul dvs.',
       pleaseChoose: 'Alegeți…',
@@ -723,21 +729,30 @@
       this.root.innerHTML = `<div class="tga-grid">
         ${this._asideHtml(false)}
         <div class="tga-main">
-          <h3 class="tga-step-h">${esc(this.t('chooseMeeting'))}</h3>
+          <h3 class="tga-step-h" tabindex="-1">${esc(this.t('chooseMeeting'))}</h3>
           <div class="tga-events">${items}</div>
         </div>
       </div>`;
       this.root.querySelector('.tga-events').addEventListener('click', (e) => {
         const b = e.target.closest('[data-ev]'); if (!b) return;
+        this._interacted = true;
         this.eventIdx = parseInt(b.getAttribute('data-ev'), 10);
         this.selectedKey = null; this.selectedSlot = null; this.viewMonth = null;
         this._computeSlots(); this._renderScheduler();
       });
+      if (this._interacted) this._moveFocus('.tga-step-h');
     }
 
     // ── Step 1+2: calendar + times ──
     _renderScheduler() {
       const c = this.cfg;
+      // No bookable days at all (blackouts, a short range, or the server reports
+      // fully booked): show an explicit empty state rather than a dead calendar.
+      if (!this.availableKeys || !this.availableKeys.length) {
+        this._renderNoAvailability();
+        if (this.backend && !this._serverLoaded) this._refineFromServer();
+        return;
+      }
       if (!this.viewMonth) {
         const first = this.availableKeys[0];
         if (first) { const [y, m] = first.split('-'); this.viewMonth = { y: +y, m0: +m - 1 }; }
@@ -750,7 +765,7 @@
           ${multi ? `<button type="button" class="tga-back" id="tga-back-ev"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> ${esc(this.t('meetings'))}</button>` : ''}
           <div class="tga-sched">
             <div class="tga-cal-wrap">
-              <h3 class="tga-step-h">${esc(this.t('selectDateTime'))}</h3>
+              <h3 class="tga-step-h" tabindex="-1">${esc(this.t('selectDateTime'))}</h3>
               <div class="tga-cal-head">
                 <button type="button" class="tga-navbtn" id="tga-prev" aria-label="${esc(this.t('prevMonth'))}"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
                 <span class="tga-cal-month" id="tga-month"></span>
@@ -763,9 +778,9 @@
                 <select id="tga-tz" aria-label="${esc(this.t('timezone'))}"></select>
               </div>
             </div>
-            <div class="tga-times-wrap tga-hidden" id="tga-times-wrap">
+            <div class="tga-times-wrap tga-hidden" id="tga-times-wrap" aria-live="polite">
               <div class="tga-times-head">
-                <span class="tga-times-date" id="tga-times-date"></span>
+                <span class="tga-times-date" id="tga-times-date" tabindex="-1"></span>
                 <span class="tga-fmt" role="group" aria-label="${esc(this.t('timeFormat'))}">
                   <button type="button" data-fmt="12">${esc(this.t('fmt12'))}</button>
                   <button type="button" data-fmt="24">${esc(this.t('fmt24'))}</button>
@@ -787,22 +802,55 @@
       this._renderMonth();
       this._wireScheduler();
       if (this.selectedKey) this._renderTimes();
+      // Only pull focus on a real user-driven step change, never on first mount.
+      if (this._interacted) this._moveFocus('.tga-step-h');
 
       // Backend mode: refine the calendar with real free/busy from the server.
-      if (this.backend && !this._serverLoaded) {
-        this._fetchServerSlots().then(ok => {
-          this._serverLoaded = ok;
-          if (!ok) return;
-          // Keep the current month if it still has availability, else jump to the first open one.
-          if (!this.availableKeys.length) { this.viewMonth = null; }
-          else {
-            const cur = this.viewMonth ? (this.viewMonth.y * 100 + this.viewMonth.m0) : -1;
-            const hasInView = this.availableKeys.some(k => { const [y, m] = k.split('-'); return (+y * 100 + (+m - 1)) === cur; });
-            if (!hasInView) { const [y, m] = this.availableKeys[0].split('-'); this.viewMonth = { y: +y, m0: +m - 1 }; }
-          }
-          if (this.shadow.getElementById('tga-cal')) { this._renderMonth(); if (this.selectedKey && this.slotsByDate[this.selectedKey]) this._renderTimes(); }
-        });
-      }
+      if (this.backend && !this._serverLoaded) this._refineFromServer();
+    }
+
+    // Pull real free/busy from the server and re-paint. Shared by the calendar
+    // and the empty state so a fully-booked baseline still gets refined, and a
+    // zero-slot server response lands on the empty state instead of crashing.
+    _refineFromServer() {
+      this._fetchServerSlots().then(ok => {
+        this._serverLoaded = ok;
+        if (!ok) return;
+        if (!this.availableKeys.length) { this._renderNoAvailability(); return; }
+        // Keep the current month if it still has availability, else jump to the first open one.
+        const cur = this.viewMonth ? (this.viewMonth.y * 100 + this.viewMonth.m0) : -1;
+        const hasInView = this.availableKeys.some(k => { const [y, m] = k.split('-'); return (+y * 100 + (+m - 1)) === cur; });
+        if (!this.viewMonth || !hasInView) { const [y, m] = this.availableKeys[0].split('-'); this.viewMonth = { y: +y, m0: +m - 1 }; }
+        // Was showing the empty state (no calendar mounted): build it now.
+        if (!this.shadow.getElementById('tga-cal')) { this._renderScheduler(); return; }
+        this._renderMonth();
+        if (this.selectedKey && this.slotsByDate[this.selectedKey]) this._renderTimes();
+      });
+    }
+
+    // Dead-end guard: no bookable days. Explain it and keep an escape (back to
+    // the meetings list) reachable even for a single event type.
+    _renderNoAvailability() {
+      this.root.innerHTML = `<div class="tga-grid">
+        ${this._asideHtml(true)}
+        <div class="tga-main">
+          <button type="button" class="tga-back" id="tga-back-ev"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> ${esc(this.t('meetings'))}</button>
+          <h3 class="tga-step-h" tabindex="-1">${esc(this.t('selectDateTime'))}</h3>
+          <div class="tga-empty" role="status" aria-live="polite">${esc(this.t('noneAvailable'))}</div>
+        </div>
+      </div>`;
+      const back = this.shadow.getElementById('tga-back-ev');
+      if (back) back.addEventListener('click', () => { this._interacted = true; this.eventIdx = -1; this.viewMonth = null; this.selectedKey = null; this.selectedSlot = null; this._renderEventPicker(); });
+      if (this._interacted) this._moveFocus('.tga-step-h');
+    }
+
+    // Move keyboard focus to a sensible anchor after a re-render, without
+    // scrolling the host page. Safe no-op if the target is missing.
+    _moveFocus(sel) {
+      try {
+        const el = this.shadow.getElementById(sel) || this.shadow.querySelector(sel);
+        if (el && typeof el.focus === 'function') el.focus({ preventScroll: true });
+      } catch (e) { /* noop */ }
     }
 
     _fillTz() {
@@ -815,13 +863,16 @@
     _wireScheduler() {
       const sh = this.shadow;
       const back = sh.getElementById('tga-back-ev');
-      if (back) back.addEventListener('click', () => { this.eventIdx = -1; this.viewMonth = null; this.selectedKey = null; this.selectedSlot = null; this._renderEventPicker(); });
+      if (back) back.addEventListener('click', () => { this._interacted = true; this.eventIdx = -1; this.viewMonth = null; this.selectedKey = null; this.selectedSlot = null; this._renderEventPicker(); });
       sh.getElementById('tga-prev').addEventListener('click', () => this._shiftMonth(-1));
       sh.getElementById('tga-next').addEventListener('click', () => this._shiftMonth(1));
       sh.getElementById('tga-cal').addEventListener('click', (e) => {
         const b = e.target.closest('[data-key]'); if (!b || b.classList.contains('muted')) return;
         this.selectedKey = b.getAttribute('data-key'); this.selectedSlot = null;
         this._renderMonth(); this._renderTimes();
+        // Move focus onto the now-revealed times panel so keyboard users are not
+        // dropped back to the top of the calendar on every day selection.
+        this._moveFocus('tga-times-date');
       });
       sh.getElementById('tga-tz').addEventListener('change', (e) => { this.viewTz = e.target.value; if (this.selectedKey) this._renderTimes(); });
       sh.querySelector('.tga-fmt').addEventListener('click', (e) => {
@@ -852,6 +903,7 @@
     }
 
     _renderMonth() {
+      if (!this.viewMonth) { const t = todayYmdInTz(this._hostTz()); this.viewMonth = { y: t.y, m0: t.m - 1 }; }
       const sh = this.shadow, { y, m0 } = this.viewMonth;
       sh.getElementById('tga-month').textContent = this.names.monthsLong[m0] + ' ' + y;
       const { min, max } = this._monthBounds();
@@ -937,8 +989,10 @@
           <button type="button" class="tga-submit" id="tga-submit">${esc(this.t('confirmNewTime'))}</button>
         </div>
       </div>`;
-      this.shadow.getElementById('tga-back-cal').addEventListener('click', () => this._renderScheduler());
+      this.shadow.getElementById('tga-back-cal').addEventListener('click', () => { this._interacted = true; this._renderScheduler(); });
       this.shadow.getElementById('tga-submit').addEventListener('click', () => this._submitReschedule());
+      // Anchor focus on the Back control so the step change is announced.
+      this._moveFocus('tga-back-cal');
     }
 
     _submitReschedule() {
@@ -1005,8 +1059,10 @@
         </div>
       </div>`;
       void ev;
-      this.shadow.getElementById('tga-back-cal').addEventListener('click', () => { this._renderScheduler(); });
+      this.shadow.getElementById('tga-back-cal').addEventListener('click', () => { this._interacted = true; this._renderScheduler(); });
       this.shadow.getElementById('tga-submit').addEventListener('click', () => this._submit());
+      // New step: land focus on the first field so the form is announced.
+      this._moveFocus('tga-name');
     }
 
     _fieldErr(id, on) {
@@ -1155,7 +1211,7 @@
         ${foot}
       </div>`;
       const again = this.shadow.getElementById('tga-again');
-      if (again) again.addEventListener('click', () => { this.selectedSlot = null; this._computeSlots(); this._renderScheduler(); });
+      if (again) again.addEventListener('click', () => { this._interacted = true; this.selectedSlot = null; this._computeSlots(); this._renderScheduler(); });
     }
 
     update(newConfig) {
@@ -1171,6 +1227,7 @@
       this.backend = !!this.widgetId && !this.cfg.previewMode;
       this.eventIdx = this._initialEventIdx();
       this._serverLoaded = false;
+      this._interacted = false;
       this.viewMonth = null; this.selectedKey = null; this.selectedSlot = null;
       this._build();
     }

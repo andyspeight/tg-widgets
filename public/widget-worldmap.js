@@ -45,7 +45,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.11.6';
+  const VERSION = '3.11.8';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -2296,7 +2296,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
               <div class="tgwm-spinner" aria-hidden="true"></div>
               <span data-loading-text>${esc(t('loadingMap'))}</span>
             </div>
-            <button class="tgwm-fs-btn" data-fs-btn aria-label="${esc(t('viewMapFullscreen'))}">
+            ${c.showFullscreenButton !== false ? `<button class="tgwm-fs-btn" data-fs-btn aria-label="${esc(t('viewMapFullscreen'))}">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="15 3 21 3 21 9"/>
                 <polyline points="9 21 3 21 3 15"/>
@@ -2304,7 +2304,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
                 <line x1="3" y1="21" x2="10" y2="14"/>
               </svg>
               <span>${esc(c.ctaLabel || t('viewFullscreen'))}</span>
-            </button>
+            </button>` : ''}
           </div>
         </div>
       `;
@@ -3699,11 +3699,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
       const carrier = o.carrier ? esc(o.carrier) : '';
       const directBadge = o.direct ? `<span class="tgwm-card-badge">${esc(t('direct'))}</span>` : '';
       const imgHtml = img !== '#'
-        ? `<img src="${img}" alt="${hotel}" loading="lazy" onerror="this.style.display='none'">`
+        ? `<img src="${esc(img)}" alt="${hotel}" loading="lazy" onerror="this.style.display='none'">`
         : '';
 
       return `
-        <a class="tgwm-card" href="${href}" target="_blank" rel="noopener noreferrer">
+        <a class="tgwm-card" href="${esc(href)}" target="_blank" rel="noopener noreferrer">
           <div class="tgwm-card-img">
             ${imgHtml}
             ${directBadge}

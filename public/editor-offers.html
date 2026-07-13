@@ -3030,14 +3030,34 @@
           }, 250);
         });
       }
-      function bindPopupSwitch(id, key) {
+      function bindPopupSwitch(id, key, after) {
         $(id).addEventListener('click', (ev) => {
           const btn = ev.currentTarget;
           const next = btn.getAttribute('aria-pressed') !== 'true';
           btn.setAttribute('aria-pressed', next ? 'true' : 'false');
           state.config[key] = next;
+          if (after) after();
           markDirtyAndPreview();
         });
+      }
+
+      // Warn when the client has just switched off the last way a visitor could
+      // dismiss the popup. Backdrop-click only counts as an escape when the
+      // current layout actually paints a backdrop (centered / fullscreen /
+      // side-drawer with the overlay on). The widget enforces a hard floor too
+      // (it force-shows the close button), but flag it here so the client knows.
+      function warnIfNoPopupDismissPath() {
+        const c = state.config;
+        const layout = c.popupLayout || 'slide-in';
+        const hasBackdrop = ['centered', 'fullscreen', 'side-drawer'].indexOf(layout) !== -1 && c.popupOverlay !== false;
+        const backdropCloses = hasBackdrop && c.popupCloseOnBackdropClick !== false;
+        const hasClose = c.popupShowCloseButton !== false;
+        const hasEscape = c.popupCloseOnEscape !== false;
+        if (!hasClose && !hasEscape && !backdropCloses) {
+          if (window.tgse && window.tgse.toast) {
+            window.tgse.toast('Visitors need a way to close the popup. The close button will stay on until you enable Escape or backdrop click.', 'error');
+          }
+        }
       }
       function bindPopupList(id, key) {
         $(id).addEventListener('input', () => {
@@ -3063,6 +3083,8 @@
       bindPopupSelect('cfgPopupLayout', 'popupLayout', () => {
         updatePopupLayoutVisibility();
         updatePopupRenderModeVisibility();
+        // Switching to a backdrop-less layout can remove the only escape path.
+        warnIfNoPopupDismissPath();
       });
       // Position picker — 3x3 visual grid for slide-in / floating-card layouts
       document.querySelectorAll('#popupPositionPicker .pos-btn').forEach(b => {
@@ -3135,10 +3157,10 @@
       bindPopupText('cfgPopupFooterText', 'popupFooterText', '');
       bindPopupText('cfgPopupFooterCtaText', 'popupFooterCtaText', '');
       bindPopupText('cfgPopupFooterCtaUrl', 'popupFooterCtaUrl', '');
-      bindPopupSwitch('cfgPopupShowCloseButton', 'popupShowCloseButton');
-      bindPopupSwitch('cfgPopupCloseOnEscape', 'popupCloseOnEscape');
-      bindPopupSwitch('cfgPopupCloseOnBackdropClick', 'popupCloseOnBackdropClick');
-      bindPopupSwitch('cfgPopupOverlay', 'popupOverlay');
+      bindPopupSwitch('cfgPopupShowCloseButton', 'popupShowCloseButton', warnIfNoPopupDismissPath);
+      bindPopupSwitch('cfgPopupCloseOnEscape', 'popupCloseOnEscape', warnIfNoPopupDismissPath);
+      bindPopupSwitch('cfgPopupCloseOnBackdropClick', 'popupCloseOnBackdropClick', warnIfNoPopupDismissPath);
+      bindPopupSwitch('cfgPopupOverlay', 'popupOverlay', warnIfNoPopupDismissPath);
       bindPopupNumber('cfgPopupOverlayOpacity', 'popupOverlayOpacity', 60);
 
       const toggleMap = {

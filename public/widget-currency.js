@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.2';
+  const VERSION = '1.0.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (field labels, the swap control, the rates status and
@@ -30,12 +30,12 @@
   // note are content, translated separately, but fall back to a localised
   // default when the author leaves them blank. English is the source + fallback.
   const MESSAGES = {
-    en: { heading: 'Currency converter', amount: 'Amount', from: 'From', to: 'To', fromCurrency: 'From currency', toCurrency: 'To currency', swap: 'Swap currencies', liveRates: 'Live rates', indicativeRates: 'Indicative rates', ratesPrefix: 'ECB', note: 'Rates are indicative and for guidance only.', loadError: 'Unable to load Currency widget' },
-    fr: { heading: 'Convertisseur de devises', amount: 'Montant', from: 'De', to: 'À', fromCurrency: 'Devise de départ', toCurrency: 'Devise d’arrivée', swap: 'Inverser les devises', liveRates: 'Taux en direct', indicativeRates: 'Taux indicatifs', ratesPrefix: 'BCE', note: 'Les taux sont indicatifs et fournis à titre informatif uniquement.', loadError: 'Impossible de charger le convertisseur de devises' },
-    de: { heading: 'Währungsrechner', amount: 'Betrag', from: 'Von', to: 'Nach', fromCurrency: 'Ausgangswährung', toCurrency: 'Zielwährung', swap: 'Währungen tauschen', liveRates: 'Live-Kurse', indicativeRates: 'Indikative Kurse', ratesPrefix: 'EZB', note: 'Die Kurse sind indikativ und dienen nur zur Orientierung.', loadError: 'Währungsrechner konnte nicht geladen werden' },
-    es: { heading: 'Conversor de divisas', amount: 'Cantidad', from: 'De', to: 'A', fromCurrency: 'Divisa de origen', toCurrency: 'Divisa de destino', swap: 'Intercambiar monedas', liveRates: 'Tipos en directo', indicativeRates: 'Tipos indicativos', ratesPrefix: 'BCE', note: 'Los tipos son indicativos y solo a título orientativo.', loadError: 'No se pudo cargar el conversor de divisas' },
-    it: { heading: 'Convertitore di valuta', amount: 'Importo', from: 'Da', to: 'A', fromCurrency: 'Valuta di partenza', toCurrency: 'Valuta di arrivo', swap: 'Inverti valute', liveRates: 'Tassi in tempo reale', indicativeRates: 'Tassi indicativi', ratesPrefix: 'BCE', note: 'I tassi sono indicativi e forniti solo a scopo informativo.', loadError: 'Impossibile caricare il convertitore di valuta' },
-    ro: { heading: 'Convertor valutar', amount: 'Sumă', from: 'Din', to: 'În', fromCurrency: 'Valuta de plecare', toCurrency: 'Valuta de destinație', swap: 'Inversează valutele', liveRates: 'Cursuri în direct', indicativeRates: 'Cursuri indicative', ratesPrefix: 'BCE', note: 'Cursurile sunt indicative și au doar scop informativ.', loadError: 'Convertorul valutar nu a putut fi încărcat' },
+    en: { heading: 'Currency converter', amount: 'Amount', from: 'From', to: 'To', fromCurrency: 'From currency', toCurrency: 'To currency', swap: 'Swap currencies', liveRates: 'Live rates', indicativeRates: 'Indicative rates', ratesPrefix: 'ECB', note: 'Rates are indicative and for guidance only.', rateUnavailable: 'Rate unavailable offline', loadError: 'Unable to load Currency widget' },
+    fr: { heading: 'Convertisseur de devises', amount: 'Montant', from: 'De', to: 'À', fromCurrency: 'Devise de départ', toCurrency: 'Devise d’arrivée', swap: 'Inverser les devises', liveRates: 'Taux en direct', indicativeRates: 'Taux indicatifs', ratesPrefix: 'BCE', note: 'Les taux sont indicatifs et fournis à titre informatif uniquement.', rateUnavailable: 'Taux indisponible hors ligne', loadError: 'Impossible de charger le convertisseur de devises' },
+    de: { heading: 'Währungsrechner', amount: 'Betrag', from: 'Von', to: 'Nach', fromCurrency: 'Ausgangswährung', toCurrency: 'Zielwährung', swap: 'Währungen tauschen', liveRates: 'Live-Kurse', indicativeRates: 'Indikative Kurse', ratesPrefix: 'EZB', note: 'Die Kurse sind indikativ und dienen nur zur Orientierung.', rateUnavailable: 'Kurs offline nicht verfügbar', loadError: 'Währungsrechner konnte nicht geladen werden' },
+    es: { heading: 'Conversor de divisas', amount: 'Cantidad', from: 'De', to: 'A', fromCurrency: 'Divisa de origen', toCurrency: 'Divisa de destino', swap: 'Intercambiar monedas', liveRates: 'Tipos en directo', indicativeRates: 'Tipos indicativos', ratesPrefix: 'BCE', note: 'Los tipos son indicativos y solo a título orientativo.', rateUnavailable: 'Tipo no disponible sin conexión', loadError: 'No se pudo cargar el conversor de divisas' },
+    it: { heading: 'Convertitore di valuta', amount: 'Importo', from: 'Da', to: 'A', fromCurrency: 'Valuta di partenza', toCurrency: 'Valuta di arrivo', swap: 'Inverti valute', liveRates: 'Tassi in tempo reale', indicativeRates: 'Tassi indicativi', ratesPrefix: 'BCE', note: 'I tassi sono indicativi e forniti solo a scopo informativo.', rateUnavailable: 'Tasso non disponibile offline', loadError: 'Impossibile caricare il convertitore di valuta' },
+    ro: { heading: 'Convertor valutar', amount: 'Sumă', from: 'Din', to: 'În', fromCurrency: 'Valuta de plecare', toCurrency: 'Valuta de destinație', swap: 'Inversează valutele', liveRates: 'Cursuri în direct', indicativeRates: 'Cursuri indicative', ratesPrefix: 'BCE', note: 'Cursurile sunt indicative și au doar scop informativ.', rateUnavailable: 'Curs indisponibil offline', loadError: 'Convertorul valutar nu a putut fi încărcat' },
   };
   // Uses the shared TGi18n core when present; otherwise an identical inline
   // resolver keeps the widget self-contained.
@@ -263,18 +263,28 @@
       // Build a rate table in the configured base from the GBP fallback.
       const base = this.cfg.baseCurrency;
       const g = FALLBACK_GBP;
-      const baseInGbp = g[base] || 1;
+      const baseInGbp = g[base];
       const rates = {};
-      this.cfg.currencies.forEach(code => { if (g[code]) rates[code] = g[code] / baseInGbp; });
-      rates[base] = 1;
-      this.rates = { base, rates, date: '' };
+      // Without a built-in rate for the base we cannot anchor the table, so
+      // leave it empty and flag it so _rate/_compute surface the unavailable
+      // message rather than treating the base as if it were worth one GBP.
+      if (baseInGbp) {
+        this.cfg.currencies.forEach(code => { if (g[code]) rates[code] = g[code] / baseInGbp; });
+        rates[base] = 1;
+      }
+      this.rates = { base, rates, date: '', baseKnown: !!baseInGbp };
       this.live = false;
     }
 
     _rate(code) {
       if (!this.rates || !this.rates.rates) return null;
       const v = this.rates.rates[code];
-      return (Number.isFinite(v) && v > 0) ? v : (code === this.rates.base ? 1 : null);
+      if (Number.isFinite(v) && v > 0) return v;
+      // The base is 1:1 with itself only when the table is actually anchored on
+      // it — always true for live rates, but for the offline fallback only when
+      // the base has a built-in rate (baseKnown).
+      if (code === this.rates.base && this.rates.baseKnown !== false) return 1;
+      return null;
     }
 
     _fmt(value, code) {
@@ -293,7 +303,17 @@
       const updEl = sh.getElementById('updated');
       const rf = this._rate(this.from), rt = this._rate(this.to);
       if (!resultEl) return;
-      if (rf == null || rt == null) { resultEl.textContent = '—'; if (rateEl) rateEl.textContent = ''; return; }
+      if (rf == null || rt == null) {
+        // Rates are loaded but the offline fallback has no rate for one of the
+        // selected currencies (or an unanchored base) — say so instead of
+        // stranding the visitor on a bare dash. Before rates load (no table
+        // yet) keep the neutral placeholder.
+        const offline = this.rates && !this.live;
+        resultEl.textContent = offline ? this.t('rateUnavailable') : '—';
+        if (rateEl) rateEl.textContent = '';
+        if (liveEl && offline) liveEl.innerHTML = '<span class="tgc-dot is-stale"></span>' + esc(this.t('indicativeRates'));
+        return;
+      }
       const factor = rt / rf;
       resultEl.textContent = this._fmt(this.amount * factor, this.to);
       if (rateEl) rateEl.textContent = '1 ' + this.from + ' = ' + this._fmt(factor, this.to);

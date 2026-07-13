@@ -15,7 +15,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.3';
+  const VERSION = '1.0.4';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the localised default stat labels used when the
@@ -114,6 +114,7 @@
       this.t = makeT(this.cfg);   // resolve viewer language + UI strings
       this._raf = null;
       this._io = null;
+      this._fallback = null;
       this._done = false;
       this.shadow = el.attachShadow ? el.attachShadow({ mode: 'open' }) : el;
       el.setAttribute('data-tg-initialised', '1');
@@ -220,16 +221,39 @@
     _arm() {
       const c = this.cfg;
       if (!c.animate || reducedMotion()) { this._render(1); this._done = true; return; }
+      // Single entry point for starting the count-up, safe to call more than
+      // once. Tears down the observer and fail-safe timer so nothing lingers.
+      const kick = () => {
+        if (this._done) return;
+        this._done = true;
+        if (this._io) { try { this._io.disconnect(); } catch (e) {} this._io = null; }
+        if (this._fallback) { clearTimeout(this._fallback); this._fallback = null; }
+        this._play();
+      };
       // Animate when scrolled into view; if IO is unavailable, animate now.
       if (typeof IntersectionObserver === 'function') {
+        // threshold 0 fires on ANY intersection. A stats block taller than a
+        // short viewport can never reach a higher ratio, so a stricter
+        // threshold would strand every figure at 0 for the whole session.
         this._io = new IntersectionObserver((entries) => {
           for (const en of entries) {
-            if (en.isIntersecting && !this._done) { this._done = true; this._play(); this._io.disconnect(); }
+            if (en.isIntersecting) { kick(); return; }
           }
-        }, { threshold: 0.3 });
+        }, { threshold: 0 });
         this._io.observe(this.el);
+        // If the element is already partly on screen at arm time, start now —
+        // the observer may not report an initial intersection on some engines.
+        try {
+          const r = this.el.getBoundingClientRect();
+          const vh = window.innerHeight || document.documentElement.clientHeight || 0;
+          const vw = window.innerWidth || document.documentElement.clientWidth || 0;
+          if (r.bottom > 0 && r.top < vh && r.right > 0 && r.left < vw) kick();
+        } catch (e) { /* noop */ }
+        // Fail-safe: never leave the figures stuck at 0. If no intersection is
+        // ever reported, animate anyway after a short delay.
+        this._fallback = setTimeout(kick, 2500);
       } else {
-        this._done = true; this._play();
+        kick();
       }
     }
 
@@ -248,6 +272,7 @@
     update(config) {
       if (this._raf) { cancelAnimationFrame(this._raf); this._raf = null; }
       if (this._io) { try { this._io.disconnect(); } catch (e) {} this._io = null; }
+      if (this._fallback) { clearTimeout(this._fallback); this._fallback = null; }
       this.cfg = this._defaults(config || {});
       this.t = makeT(this.cfg);
       this._done = true;        // editor updates show finals, no re-animation
@@ -258,6 +283,7 @@
     destroy() {
       if (this._raf) { cancelAnimationFrame(this._raf); this._raf = null; }
       if (this._io) { try { this._io.disconnect(); } catch (e) {} this._io = null; }
+      if (this._fallback) { clearTimeout(this._fallback); this._fallback = null; }
       try { this.shadow.innerHTML = ''; } catch (e) {}
       try { this.el.removeAttribute('data-tg-initialised'); } catch (e) {}
     }

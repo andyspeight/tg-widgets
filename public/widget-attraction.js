@@ -35,7 +35,7 @@
   }
   const CONFIG_API  = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || resolveBase('/api/widget-config');
   const CONTENT_API = (typeof window !== 'undefined' && window.__TG_ATTRACTION_API__) || resolveBase('/api/attraction-content');
-  const VERSION = '1.1.2';
+  const VERSION = '1.1.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (fact/section labels, badges, CTA button, empty/error
@@ -769,6 +769,10 @@
           // Two-step embed (matches the other widgets): fetch the saved display
           // config (colours, sections, CTA, hero image) from /api/widget-config,
           // then the widget fetches its content from /api/attraction-content?id=.
+          // Mark synchronously before the async fetch so a re-entrant init()
+          // (fired by the MutationObserver mid-fetch) skips this element instead
+          // of building a second widget on it. The constructor re-sets it.
+          el.setAttribute('data-tg-initialised', 'true');
           fetch(CONFIG_API + '?id=' + encodeURIComponent(id), { credentials: 'omit' })
             .then(r => (r.ok ? r.json() : null))
             .then(data => {

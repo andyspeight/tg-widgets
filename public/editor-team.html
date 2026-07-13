@@ -829,7 +829,7 @@
         : `<div class="member-avatar" style="background:${escAttr(avatarColor(m.name))}">${escAttr(initials(m.name))}</div>`;
       return `
         <div class="member-item ${isOpen ? 'is-open' : ''}" data-idx="${i}">
-          <div class="member-head" data-action="toggle">
+          <div class="member-head" data-action="toggle" tabindex="0" role="button" aria-expanded="${isOpen ? 'true' : 'false'}" aria-label="Toggle member details">
             ${avatar}
             <div class="member-summary">
               <div class="member-summary-name">${escAttr(m.name || 'Unnamed')}${m.featured ? ' <span class="badge-dot" title="Featured"></span>' : ''}</div>
@@ -1068,6 +1068,26 @@
       renderMemberList();
       render();
     }
+  });
+
+  // Keyboard toggle for the member head (Enter/Space) — the head is a
+  // role="button" with tabindex=0, so mirror the toggle click above.
+  memberListEl.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    const head = e.target.closest('.member-head');
+    if (!head || e.target !== head) return;
+    // Don't toggle when focus is on an action button or inside the body
+    if (e.target.closest('.member-actions') || e.target.closest('.member-body')) return;
+    const item = head.closest('[data-idx]');
+    if (!item) return;
+    e.preventDefault();
+    const idx = parseInt(item.getAttribute('data-idx'), 10);
+    openMemberIdx = (openMemberIdx === idx) ? -1 : idx;
+    renderMemberList();
+    // Keep focus on the same member head after the re-render so the
+    // keyboard user does not lose their place.
+    const refocus = memberListEl.querySelector('[data-idx="' + idx + '"] .member-head');
+    if (refocus) refocus.focus();
   });
 
   // Toggle switch inside member body (featured flag) — needs separate listener

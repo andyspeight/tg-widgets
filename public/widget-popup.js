@@ -80,7 +80,7 @@
     } catch (e) { /* fall through */ }
     return '/api/popup-lead';
   })();
-  const VERSION = '1.0.3';
+  const VERSION = '1.0.5';
   const STORAGE_PREFIX = 'tgp_';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -1123,7 +1123,10 @@
     let html = '<div class="tgp-body" style="padding:0">';
     html += renderCloseBtn(cfg, t);
     if (embed) {
-      const auto = cfg.videoAutoplay ? '&autoplay=1' : '';
+      // Choose the query separator from the embed URL itself: the YouTube embed
+      // already carries '?rel=0&…' but the Vimeo embed has no query string, so a
+      // hard-coded '&' would push autoplay into the path and break the video.
+      const auto = cfg.videoAutoplay ? (embed.indexOf('?') === -1 ? '?' : '&') + 'autoplay=1' : '';
       html += '<div class="tgp-video-wrap">';
       html += '<iframe src="' + esc(embed + auto) + '" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
       html += '</div>';
@@ -1246,7 +1249,22 @@
       return c.overlay && overlayLayouts.includes(layout);
     }
 
+    // Circle-of-doom guard: a visitor must always keep at least one way to
+    // dismiss the popup. Backdrop-click only helps when a backdrop is actually
+    // shown, so for backdrop-less layouts (bars, slide-ins, floating cards) the
+    // only escapes are the X and Escape. If an author has turned both off and no
+    // dismissible backdrop remains, force the close button on so the popup can
+    // never become unescapable for the whole session.
+    _ensureDismissable() {
+      const c = this.cfg;
+      const backdropDismiss = this._showBackdrop() && c.closeOnBackdropClick;
+      if (!backdropDismiss && !c.showCloseButton && !c.closeOnEscape) {
+        c.showCloseButton = true;
+      }
+    }
+
     _render() {
+      this._ensureDismissable();
       const css = this._cssVars();
       const layoutClass = this._layoutClass();
       const showBackdrop = this._showBackdrop();

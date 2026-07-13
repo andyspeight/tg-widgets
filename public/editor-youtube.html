@@ -406,11 +406,24 @@
   function render() {
     const host = document.getElementById('widget-mount');
     if (!host) return;
+    // Once an instance exists, update it in place. update() only re-fetches the
+    // feed when the channel or video count actually changes, so presentation
+    // edits (title, colours, layout, etc.) no longer flash the skeleton or fire
+    // a request per keystroke. Fall back to a full re-instantiate on first
+    // render or if update() ever throws.
+    if (widgetInst && typeof widgetInst.update === 'function') {
+      try { widgetInst.update(C); return; } catch (e) {}
+    }
     if (widgetInst) { try { widgetInst.destroy(); } catch (e) {} }
     const fresh = host.cloneNode(false);
     host.parentNode.replaceChild(fresh, host);
     if (window.TGYouTubeWidget) widgetInst = new window.TGYouTubeWidget(fresh, C);
   }
+
+  // Debounced render for continuous inputs (sliders, colour drag, typing) so a
+  // burst of 'input' events collapses into one preview update.
+  let renderTimer = null;
+  function renderSoon() { clearTimeout(renderTimer); renderTimer = setTimeout(render, 200); }
 
   function loadFromUrl() {
     const wId = new URLSearchParams(location.search).get('id');
@@ -508,18 +521,18 @@
     document.getElementById('cols-field').classList.toggle('is-hidden', C.layout !== 'grid');
     shell.markDirty(); render();
   });
-  document.getElementById('cols-input').addEventListener('input', (e) => { C.columns = parseInt(e.target.value, 10) || 3; document.getElementById('cols-val').textContent = C.columns; shell.markDirty(); render(); });
-  document.getElementById('max-input').addEventListener('input', (e) => { C.maxVideos = parseInt(e.target.value, 10) || 6; document.getElementById('max-val').textContent = C.maxVideos; shell.markDirty(); render(); });
-  document.getElementById('radius-input').addEventListener('input', (e) => { C.radius = parseInt(e.target.value, 10) || 0; document.getElementById('radius-val').textContent = C.radius + 'px'; shell.markDirty(); render(); });
+  document.getElementById('cols-input').addEventListener('input', (e) => { C.columns = parseInt(e.target.value, 10) || 3; document.getElementById('cols-val').textContent = C.columns; shell.markDirty(); renderSoon(); });
+  document.getElementById('max-input').addEventListener('input', (e) => { C.maxVideos = parseInt(e.target.value, 10) || 6; document.getElementById('max-val').textContent = C.maxVideos; shell.markDirty(); renderSoon(); });
+  document.getElementById('radius-input').addEventListener('input', (e) => { C.radius = parseInt(e.target.value, 10) || 0; document.getElementById('radius-val').textContent = C.radius + 'px'; shell.markDirty(); renderSoon(); });
 
   (function wireColour() {
     const col = document.getElementById('accent-col'), hex = document.getElementById('accent-hex');
-    col.addEventListener('input', () => { const v = col.value.toUpperCase(); hex.value = v; C.accent = v; shell.markDirty(); render(); });
-    hex.addEventListener('input', () => { const v = (hex.value || '').trim().toUpperCase(); if (hexOk(v)) { col.value = v; C.accent = v; shell.markDirty(); render(); } });
+    col.addEventListener('input', () => { const v = col.value.toUpperCase(); hex.value = v; C.accent = v; shell.markDirty(); renderSoon(); });
+    hex.addEventListener('input', () => { const v = (hex.value || '').trim().toUpperCase(); if (hexOk(v)) { col.value = v; C.accent = v; shell.markDirty(); renderSoon(); } });
   })();
 
   // ─── Content controls ───
-  function wireText(id, key) { const el = document.getElementById(id); el.addEventListener('input', () => { C[key] = el.value; shell.markDirty(); render(); }); }
+  function wireText(id, key) { const el = document.getElementById(id); el.addEventListener('input', () => { C[key] = el.value; shell.markDirty(); renderSoon(); }); }
   wireText('head-title', 'headerTitle');
   wireText('head-sub', 'headerSubtitle');
   wireText('cta-label', 'channelCtaLabel');

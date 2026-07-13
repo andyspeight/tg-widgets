@@ -182,7 +182,7 @@
   const API_PAY = (typeof window !== 'undefined' && window.__TG_PAY_API__) || (API_BASE + '/api/pay-balance');
   const API_AMEND = (typeof window !== 'undefined' && window.__TG_AMEND_API__) || (API_BASE + '/api/amend-order');
   const AMEND_MAX = 1000; // matches the server cap in /api/amend-order
-  const VERSION = '1.10.3';
+  const VERSION = '1.10.4';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only. Booking data, PII, prices, dates, the agency name and
@@ -1777,6 +1777,21 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
+  }
+  // Supplier document/media URLs come from upstream records that can be
+  // malicious or tampered, so gate any URL heading into an href through a
+  // scheme allowlist. javascript:/data:/vbscript: are dropped (returns '').
+  function safeUrl(u) {
+    const s = String(u == null ? '' : u).trim();
+    if (/^https?:\/\//i.test(s) || /^mailto:/i.test(s) || /^tel:/i.test(s)) return s;
+    return '';
+  }
+  // Extra guard for a CSS url('...') context: esc() alone does not stop a
+  // quote/paren/whitespace breaking out of the declaration, so require a
+  // scheme-clean URL with none of those characters, else drop it.
+  function safeCssUrl(u) {
+    const s = safeUrl(u);
+    return /['"()\s]/.test(s) ? '' : s;
   }
   // The theme overrides are assembled into the root style attribute, so author
   // colours and font must be validated (can't add declarations or break out) and
@@ -3652,12 +3667,14 @@
     const tripStart = summary.earliestStart || checkin;
     const days = daysUntil(tripStart);
 
-    const heroUrl = acc?.media?.[0]?.url
+    const heroUrl = safeCssUrl(
+      acc?.media?.[0]?.url
       || extraItems[0]?.airportExtras?.media?.[0]?.url
       || ticketsItems[0]?.ticketsAttractions?.media?.find(m => m.type === 'GenericImage')?.url
       || transferItems[0]?.transfers?.media?.find(m => m.type === 'GenericImage')?.url
       || carRentalItems[0]?.carRental?.media?.find(m => m.type === 'GenericImage')?.url
-      || '';
+      || ''
+    );
     const thumbs = (acc?.media || []).slice(0, 4);
 
     // Booking reference policy: display verbatim from Travelify, falling back to
@@ -3795,7 +3812,7 @@
               ${acc?.location?.city ? `<p class="tgm-hero-loc">${svg(IC.pin)}${esc(acc.location.city)}${acc.location.country ? ', ' + esc(acc.location.country) : ''}</p>` : ''}
             </div>
           </div>
-          ${thumbs.length > 1 ? `<div class="tgm-hero-thumbs">${thumbs.map((m, i) => `<button class="${i === 0 ? 'active' : ''}" data-tgm-thumb data-img="${esc(m.url)}" style="background-image:url('${esc(m.url)}')" aria-label="${esc(c.t('ariaViewImage', { n: i + 1 }))}"></button>`).join('')}</div>` : ''}
+          ${thumbs.length > 1 ? `<div class="tgm-hero-thumbs">${thumbs.map((m, i) => { const tu = safeCssUrl(m.url); return `<button class="${i === 0 ? 'active' : ''}" data-tgm-thumb data-img="${esc(tu)}" style="background-image:url('${esc(tu)}')" aria-label="${esc(c.t('ariaViewImage', { n: i + 1 }))}"></button>`; }).join('')}</div>` : ''}
         </div>
         ` : ''}
 
@@ -4153,16 +4170,20 @@
         <div class="tgm-section">
           <h3>${svg(IC.file)}${esc(c.labels?.documents || c.t('documents'))}</h3>
           <div class="tgm-docs">
-            ${docs.map(d => `
-              <a class="tgm-doc" href="${esc(d.url)}" target="_blank" rel="noopener">
+            ${docs.map(d => {
+              const durl = safeUrl(d.url);
+              const inner = `
                 <div class="tgm-doc-icon">${fileIconForExt(d.ext)}</div>
                 <div class="tgm-doc-info">
                   <div class="tgm-doc-name">${esc(d.name)}</div>
                   <div class="tgm-doc-meta">${esc((d.ext || 'FILE').toUpperCase())}${d.size ? ' · ' + esc(fmtFileSize(d.size)) : ''}</div>
-                </div>
-                ${svg(IC.dl)}
-              </a>
-            `).join('')}
+                </div>`;
+              // No safe destination: render the document as plain text rather
+              // than a clickable link pointing at a javascript:/data: payload.
+              return durl
+                ? `<a class="tgm-doc" href="${esc(durl)}" target="_blank" rel="noopener">${inner}${svg(IC.dl)}</a>`
+                : `<div class="tgm-doc">${inner}</div>`;
+            }).join('')}
           </div>
         </div>
         ` : ''}

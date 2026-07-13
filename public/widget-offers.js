@@ -143,7 +143,7 @@
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
   const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
-  const VERSION = '1.10.9';
+  const VERSION = '1.10.11';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // Telemetry: report a one-time load heartbeat and any failure to
@@ -1314,19 +1314,30 @@
       cleanup = () => { aborted = true; document.removeEventListener('click', onClick); };
     } else if (trigger === 'inactivity') {
       const secs = Math.max(5, cfg.popupTriggerInactivitySeconds || 30);
+      const events = ['mousemove', 'keydown', 'scroll', 'touchstart'];
       let timer = null;
+      function teardown() {
+        if (timer) { clearTimeout(timer); timer = null; }
+        events.forEach(e => document.removeEventListener(e, reset));
+      }
+      // One-shot, like scroll / exit-intent / time: the moment the popup fires we
+      // stop listening, so the trigger cannot re-arm on the next mouse move and
+      // re-open the popup every 30s after the visitor has already dismissed it.
+      function fireOnce() {
+        if (aborted) return;
+        teardown();
+        fire();
+      }
       function reset() {
         if (aborted) return;
         if (timer) clearTimeout(timer);
-        timer = setTimeout(fire, secs * 1000);
+        timer = setTimeout(fireOnce, secs * 1000);
       }
-      const events = ['mousemove', 'keydown', 'scroll', 'touchstart'];
       events.forEach(e => document.addEventListener(e, reset, { passive: true }));
       reset();
       cleanup = () => {
         aborted = true;
-        if (timer) clearTimeout(timer);
-        events.forEach(e => document.removeEventListener(e, reset));
+        teardown();
       };
     } else if (trigger === 'pageviews') {
       const required = Math.max(1, cfg.popupTriggerPageviews || 2);
@@ -5710,7 +5721,10 @@
       this._applyHostStyles();
       this.shadow.appendChild(this.root);
       this._wireShadowEvents();
-      this._showLoading();
+      // Popup template renders nothing inline — it overlays on trigger. Painting
+      // a loading skeleton would leave grey cards sitting on the host page until
+      // (and if) the popup ever opens, so skip it and keep the container empty.
+      if (this.cfg.template !== 'popup') this._showLoading();
       this._fetchAndRender();
     }
 
@@ -7818,9 +7832,28 @@
       };
     }
 
+    // True when a backdrop is present AND clicking it dismisses the popup.
+    // Backdrop only exists for centered/fullscreen/side-drawer with overlay on
+    // (mirrors the showBackdrop logic in _popupBuildHtml).
+    _popupHasBackdropDismiss() {
+      const cfg = this.cfg;
+      const layout = cfg.popupLayout || 'slide-in';
+      const hasBackdrop = ['centered', 'fullscreen', 'side-drawer'].includes(layout) && cfg.popupOverlay !== false;
+      return hasBackdrop && !!cfg.popupCloseOnBackdropClick;
+    }
+
+    // Escape floor: never render a popup the visitor cannot dismiss. If the
+    // close button, Escape key and backdrop click are all off there is no way
+    // out short of reloading, so force the close button back on.
+    _popupEffectiveShowClose() {
+      const cfg = this.cfg;
+      if (cfg.popupShowCloseButton) return true;
+      return !cfg.popupCloseOnEscape && !this._popupHasBackdropDismiss();
+    }
+
     // Close button shared across all three render modes
     _popupCloseBtn() {
-      if (!this.cfg.popupShowCloseButton) return '';
+      if (!this._popupEffectiveShowClose()) return '';
       return '<button class="tgop-close" data-tgop-close aria-label="' + esc(this.t('close')) + '">'
         + '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">'
         + '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'
@@ -8063,7 +8096,7 @@
         if (discount && discount > 0) {
           html += '<span class="tgop-single-discount">-' + discount + '%</span>';
         }
-        if (cfg.popupShowCloseButton) {
+        if (this._popupEffectiveShowClose()) {
           html += '<div class="tgop-single-close-wrap">' + this._popupCloseBtn() + '</div>';
         }
         html += '</div>';
@@ -8397,7 +8430,7 @@
         html += '<a class="tgop-mini-cta" href="' + esc(safeUrl(cfg.popupFooterCtaUrl)) + '" target="_blank" rel="noopener" data-tgop-conv>'
           + esc(cfg.popupFooterCtaText) + '</a>';
       }
-      if (cfg.popupShowCloseButton) {
+      if (this._popupEffectiveShowClose()) {
         html += '<button type="button" class="tgop-mini-close" data-tgop-close aria-label="' + esc(this.t('close')) + '">'
           + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
           + '</button>';
@@ -8733,6 +8766,11 @@
         this._popupOpen();
         return;
       }
+
+      // Not preview: the inline container must occupy no space on the host page
+      // whether or not the popup ever opens (excluded page, suppressed visitor,
+      // no offers, trigger never fires). Keep it empty until _popupOpen overlays.
+      this.root.innerHTML = '';
 
       // Eligibility check first
       const eligibility = popupShouldShow(this.cfg);
@@ -9433,7 +9471,8 @@
       this._applyHostStyles();
       this.shadow.appendChild(this.root);
       this._wireShadowEvents();
-      this._showLoading();
+      // Popup template renders nothing inline (see _render) — no loading skeleton.
+      if (this.cfg.template !== 'popup') this._showLoading();
       this._fetchAndRender();
     }
 

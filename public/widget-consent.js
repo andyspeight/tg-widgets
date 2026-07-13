@@ -1,5 +1,5 @@
 /**
- * Travelgenix Cookie Consent Widget v1.0.0
+ * Travelgenix Cookie Consent Widget v1.0.1
  * Self-contained, embeddable cookie consent manager (CMP-lite)
  * Zero dependencies — works on any website via a single script tag
  *
@@ -43,12 +43,16 @@
   if (window.__TG_CONSENT_LOADED__) return;
   window.__TG_CONSENT_LOADED__ = true;
 
-  var VERSION = '1.0.0';
+  var VERSION = '1.0.1';
   var COOKIE_NAME = 'tg_consent';
   var STORAGE_KEY = 'tgc_state';
   var ANON_ID_KEY = 'tgc_id';
   var GEO_CACHE_KEY = 'tgc_geo';
   var CATEGORIES = ['necessary', 'functional', 'analytics', 'marketing'];
+  // A stalled geo / config endpoint must never strand the banner on the
+  // critical render path — every network read on that path races this budget
+  // and falls back to the GDPR opt-in flow if the socket hangs.
+  var FETCH_TIMEOUT_MS = 1500;
 
   /**
    * Resolve the API base origin. Same lesson as widget-popup: this script is
@@ -620,6 +624,10 @@
    */
   function applyChoice(cats, action) {
     var cfg = state.cfg;
+    // A site button may call window.tgConsent.acceptAll() before the async
+    // geo / config boot has run. No config yet means no policyVersion to
+    // stamp — no-op instead of dereferencing null and throwing.
+    if (!cfg) return;
     var oldCats = currentCats();
     var hadStored = !!state.stored;
     state.stored = {
@@ -653,7 +661,7 @@
     try { cached = JSON.parse(window.sessionStorage.getItem(GEO_CACHE_KEY) || 'null'); } catch (e) { /* ignore */ }
     if (cached && (cached.mode === 'gdpr' || cached.mode === 'optout')) return Promise.resolve(cached);
     if (!API_ORIGIN) return Promise.resolve({ mode: 'gdpr', country: '' });
-    return fetch(GEO_API, { credentials: 'omit' })
+    var live = fetch(GEO_API, { credentials: 'omit' })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) {
         var mode = (j && j.mode === 'optout') ? 'optout' : 'gdpr';   // unknown fails safe to opt-in
@@ -662,6 +670,13 @@
         return out;
       })
       .catch(function () { return { mode: 'gdpr', country: '' }; });
+    // A hung endpoint (socket accepted, no response) would leave `live`
+    // pending forever and makeUi would never run — race a timeout so the
+    // banner always appears and fails safe to GDPR opt-in.
+    var timeout = new Promise(function (resolve) {
+      setTimeout(function () { resolve({ mode: 'gdpr', country: '' }); }, FETCH_TIMEOUT_MS);
+    });
+    return Promise.race([live, timeout]);
   }
 
   // ─── UI ──────────────────────────────────────────────────────────
@@ -700,6 +715,10 @@
       '.card .panel{border-radius:var(--radius)}\n' +
       '.modal .panel{border-radius:var(--radius);max-width:560px;width:calc(100vw - 32px);max-height:calc(100vh - 48px);display:flex;flex-direction:column}\n' +
       '.inner{padding:20px}\n' +
+      // Modal panel is a capped-height flex column; let its single content
+      // region scroll so long author copy can never clip the action buttons
+      // below the fold on short (landscape phone) viewports.
+      '.modal .inner{overflow-y:auto;min-height:0}\n' +
       '.bar .inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:16px 20px}\n' +
       '.bar .copy{flex:1 1 320px;min-width:260px}\n' +
       '.head{display:flex;align-items:center;gap:10px;margin-bottom:8px}\n' +
@@ -878,6 +897,14 @@
         svg(IC.cookie, 'ic') + '</button>';
     };
 
+    // Move focus onto the badge after a modal dialog is torn down, so a
+    // keyboard visitor is not left with focus on a removed node (or stranded
+    // on the blurred page behind where the overlay used to be).
+    ui.focusBadge = function () {
+      var b = root.querySelector('.badge');
+      if (b && cfg.focusOnOpen) { try { b.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }
+    };
+
     ui.close = function () { ui.open = null; root.innerHTML = ''; };
 
     ui.readToggles = function () {
@@ -897,6 +924,7 @@
   function afterChoice() {
     if (!state.ui) return;
     state.ui.showBadge();
+    state.ui.focusBadge();
   }
 
   function openPreferences() {
@@ -937,8 +965,31 @@
       }
     });
 
-    // Escape backs out of the preference layer (never skips the consent choice).
     ui.root.addEventListener('keydown', function (ev) {
+      // aria-modal views (the modal-layout first banner and every preference
+      // layer) must keep Tab focus inside the dialog, or a keyboard visitor
+      // lands on controls in the blurred page behind the overlay.
+      var isModalView = (ui.open === 'prefs') || (ui.open === 'banner' && cfg.layout === 'modal');
+      if (ev.key === 'Tab' && isModalView) {
+        var dialog = ui.root.querySelector('[role="dialog"]');
+        if (!dialog) return;
+        var nodes = dialog.querySelectorAll('button, a[href], input, [tabindex]:not([tabindex="-1"])');
+        var list = [];
+        for (var i = 0; i < nodes.length; i++) {
+          if (!nodes[i].disabled && nodes[i].offsetParent !== null) list.push(nodes[i]);
+        }
+        if (!list.length) return;
+        var rootNode = ui.root.getRootNode ? ui.root.getRootNode() : null;
+        var current = rootNode ? rootNode.activeElement : null;
+        var idx = list.indexOf(current);
+        if (ev.shiftKey) {
+          if (idx <= 0) { ev.preventDefault(); list[list.length - 1].focus(); }
+        } else if (idx === -1 || idx === list.length - 1) {
+          ev.preventDefault(); list[0].focus();
+        }
+        return;
+      }
+      // Escape backs out of the preference layer (never skips the consent choice).
       if (ev.key !== 'Escape' || ui.open !== 'prefs') return;
       if (state.stored) afterChoice();
       else if (state.geoMode === 'optout') ui.showNotice();
@@ -1034,22 +1085,27 @@
     if (cfg.widgetId) {
       // Remote config (from the editor) overlays defaults; inline attributes
       // win so a support tweak in the embed always sticks.
-      fetch(CONFIG_API + '?id=' + encodeURIComponent(cfg.widgetId), { credentials: 'omit' })
+      var live = fetch(CONFIG_API + '?id=' + encodeURIComponent(cfg.widgetId), { credentials: 'omit' })
         .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (remote) {
-          var remoteCfg = remote && (remote.config || remote);
-          if (remoteCfg && typeof remoteCfg === 'object') {
-            var merged = {};
-            var k;
-            for (k in remoteCfg) merged[k] = remoteCfg[k];
-            var inline = readInlineConfig();
-            for (k in inline) merged[k] = inline[k];
-            boot(sanitiseConfig(merged));
-          } else {
-            boot(cfg);
-          }
-        })
-        .catch(function () { boot(cfg); });
+        .catch(function () { return null; });
+      // A hung config endpoint must not block the banner — race a timeout and
+      // boot with the inline defaults if the remote overlay never arrives.
+      var timeout = new Promise(function (resolve) {
+        setTimeout(function () { resolve(null); }, FETCH_TIMEOUT_MS);
+      });
+      Promise.race([live, timeout]).then(function (remote) {
+        var remoteCfg = remote && (remote.config || remote);
+        if (remoteCfg && typeof remoteCfg === 'object') {
+          var merged = {};
+          var k;
+          for (k in remoteCfg) merged[k] = remoteCfg[k];
+          var inline = readInlineConfig();
+          for (k in inline) merged[k] = inline[k];
+          boot(sanitiseConfig(merged));
+        } else {
+          boot(cfg);
+        }
+      });
     } else {
       boot(cfg);
     }

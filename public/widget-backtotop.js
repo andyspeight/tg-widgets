@@ -17,7 +17,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.1.3';
+  const VERSION = '1.1.4';
 
   function resolveBase(path, override) {
     if (typeof window === 'undefined') return path;
@@ -237,6 +237,14 @@
       this.btn.addEventListener('click', this._onClick);
     }
 
+    // True when the window/document itself has a scroll range. When it does we
+    // always drive from the page and never latch to an inner box.
+    _docScrollable() {
+      const d = document.documentElement;
+      const max = (d.scrollHeight || 0) - (d.clientHeight || window.innerHeight || 0);
+      return max > 1;
+    }
+
     _scrolledPercent() {
       const s = this._scroller;
       if (s) {
@@ -254,10 +262,14 @@
     _onScroll(e) {
       // Remember which element scrolled. The window/document scrolling reports
       // document (or documentElement/body) as the target; an inner container
-      // reports itself. Only latch a real, scrollable element as the scroller.
+      // reports itself. Only fall back to an inner scroll container when the
+      // page itself cannot scroll (genuine app-shell layouts). Whenever the main
+      // page is scrollable we always drive from window/document, so scrolling an
+      // inner overflow box (itinerary panel, testimonials slider) never latches
+      // the button to the wrong element and makes it look broken.
       const tgt = e && e.target;
       if (tgt) {
-        if (tgt === document || tgt === document.documentElement || tgt === document.body || tgt === window) {
+        if (this._docScrollable() || tgt === document || tgt === document.documentElement || tgt === document.body || tgt === window) {
           this._scroller = null;
         } else if (tgt.nodeType === 1 && (tgt.scrollHeight - tgt.clientHeight) > 1) {
           this._scroller = tgt;
@@ -288,6 +300,28 @@
       const target = s || window;
       try { target.scrollTo({ top: 0, behavior: smooth ? 'smooth' : 'auto' }); }
       catch (err) { if (s) s.scrollTop = 0; else window.scrollTo(0, 0); }
+      // Deliberately place focus at the top of the page. The button auto-hides
+      // once the page reaches the top, so a keyboard or screen reader user would
+      // otherwise lose their place when the focus ring vanishes. Move focus off
+      // the button before it becomes aria-hidden.
+      this._focusTop();
+    }
+
+    // Send focus to a sensible top-of-page anchor: the main landmark, the first
+    // heading, or the body as a last resort. tabindex we add temporarily is
+    // removed on blur so the page isn't left with stray focusable elements.
+    _focusTop() {
+      try {
+        const el = document.querySelector('main, [role="main"], h1') || document.body;
+        if (!el) return;
+        const hadTabindex = el.hasAttribute('tabindex');
+        if (!hadTabindex) el.setAttribute('tabindex', '-1');
+        el.focus({ preventScroll: true });
+        if (!hadTabindex) {
+          const clear = () => { try { el.removeAttribute('tabindex'); } catch (e) {} el.removeEventListener('blur', clear); };
+          el.addEventListener('blur', clear);
+        }
+      } catch (e) { /* noop */ }
     }
 
     update(newConfig) {

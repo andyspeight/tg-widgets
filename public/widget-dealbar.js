@@ -17,7 +17,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.2';
+  const VERSION = '1.0.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome and localized defaults. The CTA label is author content and
@@ -196,6 +196,13 @@
   class TGDealBarWidget {
     constructor(container, config) {
       this.el = container;
+      // Guard a second init on the same mount (e.g. auto-init plus a manual
+      // `new` on a demo page): tear the previous instance down first so its
+      // resize listener and page-push margin are released before we re-push.
+      if (container && container.__tgDealBarInstance && container.__tgDealBarInstance !== this) {
+        try { container.__tgDealBarInstance.destroy(); } catch (e) { /* noop */ }
+      }
+      if (container) container.__tgDealBarInstance = this;
       this.cfg = Object.assign({}, DEFAULTS, config || {});
       this.t = makeT(this.cfg);   // resolve viewer language + UI strings
       this.shadow = container.shadowRoot || (container.attachShadow ? container.attachShadow({ mode: 'open' }) : container);
@@ -370,7 +377,10 @@
       if (this._timer) { clearInterval(this._timer); this._timer = null; }
       window.removeEventListener('resize', this._onResize);
       if (this._pushedProp) { try { document.body.style[this._pushedProp] = this._prevMargin; } catch (e) {} this._pushedProp = null; }
-      if (!keepShadow && this.shadow) this.shadow.innerHTML = '';
+      if (!keepShadow) {
+        if (this.shadow) this.shadow.innerHTML = '';
+        if (this.el && this.el.__tgDealBarInstance === this) this.el.__tgDealBarInstance = null;
+      }
     }
   }
 

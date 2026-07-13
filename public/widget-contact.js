@@ -50,7 +50,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.2';
+  const VERSION = '1.0.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the action labels and their aria-labels). Business
@@ -133,12 +133,18 @@
 
   // URL allowlist: http(s), tel, mailto, sms, anchors, relative paths.
   // Returns '' for anything dangerous (javascript:, data: etc.) so href gets empty.
+  // A scheme-less bare domain (e.g. sunwardtravel.co.uk, facebook.com/page) is
+  // treated as https:// so an author's Website / social link actually renders
+  // instead of vanishing. A leading scheme is required to be one of the allowed
+  // ones, so javascript:/data: still fail the domain test (the ':' before any
+  // '/' means they never match) and return ''.
   function safeUrl(u) {
     if (!u) return '';
     const s = String(u).trim();
     if (!s) return '';
     if (s.startsWith('#') || s.startsWith('/')) return s;
     if (/^(https?:|mailto:|tel:|sms:)/i.test(s)) return s;
+    if (/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+([\/?#].*)?$/i.test(s)) return 'https://' + s;
     return '';
   }
 
@@ -181,11 +187,13 @@
     if (cfg.phone) lines.push('TEL;TYPE=WORK,VOICE:' + vEscape(cfg.phone));
     if (cfg.whatsapp) lines.push('TEL;TYPE=CELL:' + vEscape(cfg.whatsapp));
     if (cfg.email) lines.push('EMAIL;TYPE=WORK:' + vEscape(cfg.email));
-    if (cfg.website) lines.push('URL:' + vEscape(cfg.website));
+    const webUrl = safeUrl(cfg.website);
+    if (webUrl) lines.push('URL:' + vEscape(webUrl));
     if (cfg.address) lines.push('ADR;TYPE=WORK:;;' + vEscape(cfg.address) + ';;;;');
     if (Array.isArray(cfg.socials)) {
       cfg.socials.forEach(s => {
-        if (s && s.url) lines.push('URL:' + vEscape(s.url));
+        const su = s && safeUrl(s.url);
+        if (su) lines.push('URL:' + vEscape(su));
       });
     }
     lines.push('END:VCARD');
@@ -681,7 +689,8 @@
       const c = this.cfg;
       const brand = safeColor(c.brandColor, '#1B2B5B');
       const accent = safeColor(c.accentColor, '#00B4D8');
-      const radius = Math.max(0, Math.min(40, Number(c.radius) || 16));
+      const rn = Number(c.radius);
+      const radius = Math.max(0, Math.min(40, Number.isFinite(rn) ? rn : 16));
       const ff = safeFontStack(c.fontFamily, '');
       const fontFamily = ff
         ? `'${ff.replace(/'/g, '')}', 'Inter', -apple-system, sans-serif`

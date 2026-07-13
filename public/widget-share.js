@@ -63,7 +63,7 @@
     } catch (e) { /* fall through */ }
     return '/api/share-track';
   })();
-  const VERSION = '1.0.3';
+  const VERSION = '1.0.4';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only. Platform names (WhatsApp, Facebook, X…) are brand
@@ -475,7 +475,41 @@
 
     /* ----- Responsive ----- */
     @media (max-width: 600px) {
-      .tgsh-rail { display: none; }
+      /* The vertical edge-pinned rail overlaps content and reads badly on
+         phones, so on small screens it falls back to a horizontal bottom
+         dock. Previously it was display:none, which left mobile visitors
+         (the majority on travel sites) with no share control at all. */
+      .tgsh-rail {
+        top: auto;
+        bottom: 12px;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        flex-direction: row;
+        border-radius: 999px;
+        padding: 8px 10px;
+        gap: 6px;
+        max-width: calc(100vw - 32px);
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+      .tgsh-rail[data-side="left"],
+      .tgsh-rail[data-side="right"] { left: 50%; right: auto; }
+      .tgsh-rail::-webkit-scrollbar { display: none; }
+      .tgsh-rail.is-hidden,
+      .tgsh-rail[data-side="left"].is-hidden {
+        transform: translateX(-50%) translateY(20px);
+      }
+      /* Rail tooltips normally sit to the side; above the buttons suits the
+         bottom dock fallback better. */
+      .tgsh-rail .tgsh-btn[data-tooltip]::before,
+      .tgsh-rail[data-side="left"] .tgsh-btn[data-tooltip]::before {
+        bottom: calc(100% + 8px);
+        top: auto;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+      }
       .tgsh-dock {
         bottom: 12px;
         padding: 8px 10px;

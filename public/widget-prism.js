@@ -18,7 +18,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '1.1.3';
+  var VERSION = '1.1.4';
 
   function resolveBase(path, override) {
     if (typeof window === 'undefined') return path;
@@ -46,6 +46,10 @@
     if (/^data:image\/(png|jpe?g|gif|webp|avif|svg\+xml)[;,]/i.test(s)) return s;
     if (/^\s*(javascript|vbscript|data):/i.test(s)) return '';
     if (/^(https?:|mailto:|tel:|\/|#|\.)/i.test(s)) return s;
+    // Bare domain (example.com, www.example.com/guide) — repair to https:// so a
+    // link the editor certified with a green tick is not silently dead here. Uses
+    // the same shape as the editor's safeUrlState so the two validators agree.
+    if (/^[\w.-]+\.[a-z]{2,}(\/|$)/i.test(s)) return 'https://' + s;
     return '';
   }
 

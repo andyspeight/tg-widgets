@@ -44,7 +44,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.2';
+  const VERSION = '1.0.4';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (rating summary, section labels, controls). Platform
@@ -58,6 +58,8 @@
       mostPraised: 'Most praised', topStrength: 'Top strength', trendingUp: 'Trending up',
       helpful: 'Helpful', ownerReplied: 'Owner replied', replied: 'replied',
       seeAll: 'See all reviews', all: 'All', noSpotlight: 'No 5-star reviews to spotlight.',
+      noReviews: 'No reviews to show yet.',
+      prevReviews: 'Previous reviews', nextReviews: 'Next reviews', closeReviews: 'Close', goToReview: 'Go to review {n}',
     },
     fr: {
       writeReview: 'Rédiger un avis', poweredBy: 'Avis vérifiés par',
@@ -66,6 +68,8 @@
       mostPraised: 'Le plus apprécié', topStrength: 'Point fort', trendingUp: 'En hausse',
       helpful: 'Utile', ownerReplied: 'Réponse du propriétaire', replied: 'a répondu',
       seeAll: 'Voir tous les avis', all: 'Tous', noSpotlight: 'Aucun avis 5 étoiles à mettre en avant.',
+      noReviews: "Aucun avis à afficher pour le moment.",
+      prevReviews: 'Avis précédents', nextReviews: 'Avis suivants', closeReviews: 'Fermer', goToReview: "Aller à l'avis {n}",
     },
     de: {
       writeReview: 'Bewertung schreiben', poweredBy: 'Verifizierte Bewertungen von',
@@ -74,6 +78,8 @@
       mostPraised: 'Am meisten gelobt', topStrength: 'Top-Stärke', trendingUp: 'Im Aufwärtstrend',
       helpful: 'Hilfreich', ownerReplied: 'Inhaber hat geantwortet', replied: 'hat geantwortet',
       seeAll: 'Alle Bewertungen ansehen', all: 'Alle', noSpotlight: 'Keine 5-Sterne-Bewertungen zum Hervorheben.',
+      noReviews: 'Noch keine Bewertungen vorhanden.',
+      prevReviews: 'Vorherige Bewertungen', nextReviews: 'Nächste Bewertungen', closeReviews: 'Schließen', goToReview: 'Zur Bewertung {n}',
     },
     es: {
       writeReview: 'Escribir una reseña', poweredBy: 'Reseñas verificadas por',
@@ -82,6 +88,8 @@
       mostPraised: 'Lo más elogiado', topStrength: 'Punto fuerte', trendingUp: 'En aumento',
       helpful: 'Útil', ownerReplied: 'El propietario respondió', replied: 'respondió',
       seeAll: 'Ver todas las reseñas', all: 'Todas', noSpotlight: 'No hay reseñas de 5 estrellas para destacar.',
+      noReviews: 'Aún no hay reseñas para mostrar.',
+      prevReviews: 'Reseñas anteriores', nextReviews: 'Reseñas siguientes', closeReviews: 'Cerrar', goToReview: 'Ir a la reseña {n}',
     },
     it: {
       writeReview: 'Scrivi una recensione', poweredBy: 'Recensioni verificate da',
@@ -90,6 +98,8 @@
       mostPraised: 'Più apprezzato', topStrength: 'Punto di forza', trendingUp: 'In crescita',
       helpful: 'Utile', ownerReplied: 'Il titolare ha risposto', replied: 'ha risposto',
       seeAll: 'Vedi tutte le recensioni', all: 'Tutte', noSpotlight: 'Nessuna recensione a 5 stelle da mettere in evidenza.',
+      noReviews: 'Nessuna recensione da mostrare al momento.',
+      prevReviews: 'Recensioni precedenti', nextReviews: 'Recensioni successive', closeReviews: 'Chiudi', goToReview: 'Vai alla recensione {n}',
     },
     ro: {
       writeReview: 'Scrie o recenzie', poweredBy: 'Recenzii verificate de',
@@ -98,6 +108,8 @@
       mostPraised: 'Cel mai apreciat', topStrength: 'Punct forte', trendingUp: 'În creștere',
       helpful: 'Util', ownerReplied: 'Proprietarul a răspuns', replied: 'a răspuns',
       seeAll: 'Vezi toate recenziile', all: 'Toate', noSpotlight: 'Nicio recenzie de 5 stele de evidențiat.',
+      noReviews: 'Nicio recenzie de afișat momentan.',
+      prevReviews: 'Recenzii anterioare', nextReviews: 'Recenzii următoare', closeReviews: 'Închide', goToReview: 'Mergi la recenzia {n}',
     },
   };
   // Uses the shared TGi18n core when present; otherwise an identical inline
@@ -168,13 +180,16 @@
   function srcTag(k) { var m = srcMeta(k); return '<span class="tgr-src">' + m.mark + esc(m.name) + '</span>'; }
 
   function stars(count, size, color) {
+    const col = safeColor(color, '#F59E0B');
     let h = '';
     for (let i = 1; i <= 5; i++) {
-      const fill = i <= count ? color : 'none';
-      const stroke = i <= count ? color : '#D1D5DB';
+      const fill = i <= count ? col : 'none';
+      const stroke = i <= count ? col : '#D1D5DB';
       h += `<svg style="width:${size}px;height:${size}px" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/></svg>`;
     }
-    return `<span class="tgr-stars">${h}</span>`;
+    // Give the icon-only rating an accessible name so screen readers can perceive it.
+    const n = Math.max(0, Math.min(5, Math.round(Number(count) || 0)));
+    return `<span class="tgr-stars" role="img" aria-label="${n} out of 5 stars">${h}</span>`;
   }
 
   /* ━━━ CSS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
@@ -295,11 +310,19 @@
     .tgr-carousel::-webkit-scrollbar { display:none; }
     .tgr-carousel > * { flex-shrink:0; width:320px; scroll-snap-align:start; }
     .tgr-carousel-btn { position:absolute; top:50%; transform:translateY(-50%); width:40px; height:40px; border-radius:20px; background:var(--tgr-card); border:1px solid var(--tgr-border); box-shadow:0 2px 8px rgba(0,0,0,.08); display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; transition:all .2s; z-index:5; color:var(--tgr-brand); }
-    .tgr-carousel-wrap:hover .tgr-carousel-btn { opacity:1; }
+    .tgr-carousel-wrap:hover .tgr-carousel-btn,
+    .tgr-carousel-wrap:focus-within .tgr-carousel-btn,
+    .tgr-carousel-btn:focus { opacity:1; }
+    .tgr-carousel-btn:focus-visible { outline:2px solid var(--tgr-brand); outline-offset:2px; }
     .tgr-carousel-btn:hover { box-shadow:0 4px 12px rgba(0,0,0,.12); transform:translateY(-50%) scale(1.08); }
     .tgr-carousel-btn svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
     .tgr-carousel-prev { left:-16px; }
     .tgr-carousel-next { right:-16px; }
+
+    /* Empty state */
+    .tgr-empty { text-align:center; color:var(--tgr-sub); padding:40px 24px; }
+    .tgr-empty svg { width:32px; height:32px; stroke:var(--tgr-muted); fill:none; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; opacity:.5; margin:0 auto 12px; display:block; }
+    .tgr-empty p { font-size:14px; font-weight:500; }
 
     /* Spotlight */
     .tgr-spotlight { text-align:center; max-width:640px; margin:0 auto; padding:24px 0; }
@@ -353,6 +376,30 @@
 
   /* ━━━ HELPERS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
   function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+  // Scheme allowlist for any config/data URL that lands in an href or src.
+  // esc() only entity-encodes; it does NOT stop a javascript:/data: scheme, so
+  // every URL sink must pass through here first (and still be esc()'d for the
+  // attribute quote). Rejected values collapse to a harmless '#'.
+  function safeUrl(u) {
+    const s = String(u == null ? '' : u).trim();
+    if (!s) return '#';
+    if (/^(https?:|mailto:|tel:)/i.test(s)) return s;
+    if (s.charAt(0) === '#') return s;
+    if (s.charAt(0) === '/' && s.charAt(1) !== '/') return s; // same-origin path, not protocol-relative
+    return '#';
+  }
+  // Colour whitelist for any config value interpolated into a style attribute or
+  // CSS custom property. Blocks attribute breakout (a quote in the value) and
+  // url()/expression payloads by only passing hex, rgb/hsl and bare named colours.
+  function safeColor(c, fallback) {
+    const s = String(c == null ? '' : c).trim();
+    fallback = fallback || 'transparent';
+    if (/^#[0-9a-f]{3,8}$/i.test(s)) return s;
+    if (/^rgba?\([\d.,\s%]+\)$/i.test(s)) return s;
+    if (/^hsla?\([\d.,\s%]+\)$/i.test(s)) return s;
+    if (/^[a-z]{3,20}$/i.test(s)) return s;
+    return fallback;
+  }
   function ensureFont(family) {
     if (!family || family === 'Inter' || typeof document === 'undefined') return;
     const id = 'tg-font-' + String(family).toLowerCase().replace(/\s+/g, '-');
@@ -410,7 +457,18 @@
       const c = this.c;
       const reviews = this._filtered();
       let html = `<style>${STYLES}</style>`;
-      html += `<div class="tgr-root" data-theme="${c.theme}" style="--tgr-brand:${c.brandColor};--tgr-accent:${c.accentColor};--tgr-bg:${c.theme==='dark'?'#0F172A':c.pageBg};--tgr-card:${c.theme==='dark'?'#1E293B':c.cardBg};--tgr-text:${c.theme==='dark'?'#F1F5F9':c.textColor};--tgr-sub:${c.theme==='dark'?'#94A3B8':c.subtextColor};--tgr-border:${c.theme==='dark'?'#334155':'#E2E8F0'};--tgr-radius:${c.borderRadius}px;--tgr-radius-sm:${Math.max(c.borderRadius-4,8)}px">`;
+      // Whitelist every colour before it reaches the style attribute, and clamp
+      // the radius to a number, so a crafted config value cannot break out of the
+      // attribute (attribute-breakout XSS) or inject url()/expression payloads.
+      const brand = safeColor(c.brandColor, '#0891B2');
+      const accent = safeColor(c.accentColor, '#6366F1');
+      const bg = c.theme === 'dark' ? '#0F172A' : safeColor(c.pageBg, '#F8FAFC');
+      const card = c.theme === 'dark' ? '#1E293B' : safeColor(c.cardBg, '#FFFFFF');
+      const textC = c.theme === 'dark' ? '#F1F5F9' : safeColor(c.textColor, '#0F172A');
+      const subC = c.theme === 'dark' ? '#94A3B8' : safeColor(c.subtextColor, '#64748B');
+      const border = c.theme === 'dark' ? '#334155' : '#E2E8F0';
+      const radius = Math.max(0, Math.min(48, Number(c.borderRadius) || 0));
+      html += `<div class="tgr-root" data-theme="${esc(c.theme)}" style="--tgr-brand:${brand};--tgr-accent:${accent};--tgr-bg:${bg};--tgr-card:${card};--tgr-text:${textC};--tgr-sub:${subC};--tgr-border:${border};--tgr-radius:${radius}px;--tgr-radius-sm:${Math.max(radius-4,8)}px">`;
 
       if (c.showHeader) html += this._header();
       if (c.showAI && c.layout !== 'badge' && c.layout !== 'ticker') html += this._ai();
@@ -468,7 +526,7 @@
         // ctaText is author content; when left at the English default, show the
         // localised chrome string instead so a French viewer sees French.
         const ctaText = (c.ctaText === 'Write a Review') ? this.t('writeReview') : c.ctaText;
-        h += `<a href="${esc(c.ctaUrl)}" class="tgr-cta" target="_blank" rel="noopener">${icon('msgSq')}${esc(ctaText)}${icon('extLink')}</a>`;
+        h += `<a href="${esc(safeUrl(c.ctaUrl))}" class="tgr-cta" target="_blank" rel="noopener">${icon('msgSq')}${esc(ctaText)}${icon('extLink')}</a>`;
       }
       return h + `</div>`;
     }
@@ -485,7 +543,7 @@
       hl.forEach(a => {
         const labelKey = LABEL_KEYS[a.label];
         const label = labelKey ? this.t(labelKey) : a.label;
-        h += `<div class="tgr-ai-card"><div class="tgr-ai-card-icon" style="background:${a.color}15">${icon(a.icon||'heart')}</div><div class="tgr-ai-card-label">${esc(label)}</div><div class="tgr-ai-card-value">${esc(a.value)}</div></div>`;
+        h += `<div class="tgr-ai-card"><div class="tgr-ai-card-icon" style="background:${safeColor(a.color, '#EC4899')}15">${icon(a.icon||'heart')}</div><div class="tgr-ai-card-label">${esc(label)}</div><div class="tgr-ai-card-value">${esc(a.value)}</div></div>`;
       });
       return h + `</div></div>`;
     }
@@ -508,7 +566,7 @@
 
       // Photo hero variant
       if (variant === 'photohero' && r.hasPhoto && r.photoUrl) {
-        h += `<div class="tgr-photo-overlay"><div class="tgr-photo tgr-photo-hero"><img src="${esc(r.photoUrl)}" alt="" loading="lazy"></div>`;
+        h += `<div class="tgr-photo-overlay"><div class="tgr-photo tgr-photo-hero"><img src="${esc(safeUrl(r.photoUrl))}" alt="" loading="lazy"></div>`;
         h += `<div class="tgr-photo-overlay-inner">${avatar(r.author,'tgr-avatar-sm')}<div><p class="tgr-author-name">${esc(r.author)}</p>${stars(r.rating,10,'#FBBF24')}</div></div></div>`;
         h += `<div style="padding:4px 0 0"><p class="tgr-text">${esc(r.text).slice(0,150)}${r.text.length>150?'...':''}</p>`;
         h += `<div class="tgr-card-foot"><span class="tgr-date">${esc(r.date)}</span>${srcTag(r.source || c.source)}</div></div>`;
@@ -535,7 +593,7 @@
       h += `<div class="tgr-card-head"><div class="tgr-card-author">${avatar(r.author)}<div><p class="tgr-author-name">${esc(r.author)}</p><div class="tgr-author-meta">${stars(r.rating,12,'#F59E0B')}<span class="tgr-date">${esc(r.date)}</span></div></div></div>${srcTag(r.source || c.source)}</div>`;
 
       if (c.showPhotos && r.hasPhoto && r.photoUrl) {
-        h += `<div class="tgr-photo"><img src="${esc(r.photoUrl)}" alt="" loading="lazy"></div>`;
+        h += `<div class="tgr-photo"><img src="${esc(safeUrl(r.photoUrl))}" alt="" loading="lazy"></div>`;
       }
 
       const limit = variant === 'carousel' ? 120 : 200;
@@ -557,14 +615,23 @@
       return h + `</div>`;
     }
 
+    /* ── Empty state ── */
+    // Shared fallback so a widget with no reviews (or a tag filter that matches
+    // nothing) reads as intentional rather than broken.
+    _empty() {
+      return `<div class="tgr-empty">${icon('msgSq')}<p>${esc(this.t('noReviews'))}</p></div>`;
+    }
+
     /* ── Grid layout ── */
     _grid(reviews) {
+      if (!reviews.length) return this._empty();
       const cols = Math.min(reviews.length, 3);
       return `<div class="tgr-grid" data-cols="${cols}">${reviews.map(r => this._card(r)).join('')}</div>`;
     }
 
     /* ── Masonry layout ── */
     _masonry(reviews) {
+      if (!reviews.length) return this._empty();
       const getVariant = (r, i) => {
         if (i === 0 && r.hasPhoto) return 'photohero';
         if (i === 1 || i === 5) return 'quote';
@@ -577,9 +644,10 @@
 
     /* ── Carousel layout ── */
     _carousel(reviews) {
-      let h = `<div class="tgr-carousel-wrap"><button class="tgr-carousel-btn tgr-carousel-prev">${icon('chevL')}</button>`;
+      if (!reviews.length) return this._empty();
+      let h = `<div class="tgr-carousel-wrap"><button class="tgr-carousel-btn tgr-carousel-prev" aria-label="${esc(this.t('prevReviews'))}">${icon('chevL')}</button>`;
       h += `<div class="tgr-carousel">${reviews.map(r => this._card(r, 'carousel')).join('')}</div>`;
-      h += `<button class="tgr-carousel-btn tgr-carousel-next">${icon('chevR')}</button></div>`;
+      h += `<button class="tgr-carousel-btn tgr-carousel-next" aria-label="${esc(this.t('nextReviews'))}">${icon('chevR')}</button></div>`;
       return h;
     }
 
@@ -591,7 +659,7 @@
       let h = `<div class="tgr-spotlight"><div class="tgr-quote-icon">${icon('quote')}</div>`;
       h += `<p class="tgr-text">"${esc(r.text)}"</p>`;
       h += `<div class="tgr-spotlight-author">${avatar(r.author)}<div style="text-align:left"><p class="tgr-author-name">${esc(r.author)}</p><div class="tgr-author-meta">${stars(r.rating,13,'#F59E0B')}<span class="tgr-date">${esc(r.date)}</span></div></div></div>`;
-      h += `<div class="tgr-spotlight-dots">${fives.map((_,i)=>`<button class="tgr-dot${i===this.spotlightIdx%fives.length?' active':''}" data-dot="${i}"></button>`).join('')}</div>`;
+      h += `<div class="tgr-spotlight-dots">${fives.map((_,i)=>`<button class="tgr-dot${i===this.spotlightIdx%fives.length?' active':''}" data-dot="${i}" aria-label="${esc(this.t('goToReview',{n:i+1}))}"></button>`).join('')}</div>`;
       return h + `</div>`;
     }
 
@@ -601,7 +669,7 @@
       let h = `<div class="tgr-badge-wrap"><div style="position:relative">`;
       h += `<button class="tgr-badge tgr-badge-toggle"><div class="tgr-badge-star">${icon('star')}</div><span class="tgr-badge-num">${p.rating}</span>${stars(5,11,'#F59E0B')}<span class="tgr-badge-count">${p.total} ${esc(this.t('reviewsNoun'))}</span><span class="tgr-src">${srcMeta(c.source || 'google').mark}</span></button>`;
       h += `<div class="tgr-badge-popup${this.badgeOpen?' open':''}">`;
-      h += `<div class="tgr-badge-popup-head"><div><p class="tgr-author-name">${esc(p.name)}</p><div style="display:flex;align-items:center;gap:8px;margin-top:4px"><span class="tgr-rating-num" style="font-size:24px">${p.rating}</span><div>${stars(5,13,c.brandColor)}<p style="font-size:11px;color:var(--tgr-muted);margin-top:2px">${p.total} ${esc(this.t('reviewsNoun'))}</p></div></div></div><button class="tgr-badge-popup-close tgr-badge-close">${icon('x')}</button></div>`;
+      h += `<div class="tgr-badge-popup-head"><div><p class="tgr-author-name">${esc(p.name)}</p><div style="display:flex;align-items:center;gap:8px;margin-top:4px"><span class="tgr-rating-num" style="font-size:24px">${p.rating}</span><div>${stars(5,13,c.brandColor)}<p style="font-size:11px;color:var(--tgr-muted);margin-top:2px">${p.total} ${esc(this.t('reviewsNoun'))}</p></div></div></div><button class="tgr-badge-popup-close tgr-badge-close" aria-label="${esc(this.t('closeReviews'))}">${icon('x')}</button></div>`;
       h += `<div class="tgr-badge-reviews">${reviews.map(r=>`<div class="tgr-badge-review">${avatar(r.author,'tgr-avatar-xs')}<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px"><p class="tgr-author-name" style="font-size:11px">${esc(r.author)}</p>${stars(r.rating,9,'#F59E0B')}</div><p class="tgr-badge-review-text">${esc(r.text).slice(0,80)}...</p></div></div>`).join('')}</div>`;
       h += `<button class="tgr-badge-allbtn">${esc(this.t('seeAll'))} ${icon('arrowUp')}</button>`;
       return h + `</div></div></div>`;
@@ -609,6 +677,7 @@
 
     /* ── Ticker layout ── */
     _ticker(reviews) {
+      if (!reviews.length) return this._empty();
       const items = [...reviews, ...reviews];
       let h = `<div class="tgr-ticker-wrap"><div class="tgr-ticker">`;
       items.forEach(r => {
@@ -666,6 +735,12 @@
       const badgeClose = this.shadow.querySelector('.tgr-badge-close');
       if (badgeBtn) badgeBtn.addEventListener('click', () => { this.badgeOpen = !this.badgeOpen; this._render(); });
       if (badgeClose) badgeClose.addEventListener('click', (e) => { e.stopPropagation(); this.badgeOpen = false; this._render(); });
+
+      // "See all reviews" — the popup's headline action. Expand from the badge
+      // into a full reviews layout in place so the button always has a concrete,
+      // valid destination (no dead end).
+      const badgeAll = this.shadow.querySelector('.tgr-badge-allbtn');
+      if (badgeAll) badgeAll.addEventListener('click', (e) => { e.stopPropagation(); this.badgeOpen = false; this.c.layout = 'cards'; this._render(); });
 
       // Reply toggles
       this.shadow.querySelectorAll('.tgr-reply-btn').forEach(btn => {

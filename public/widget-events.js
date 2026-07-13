@@ -73,7 +73,7 @@
     } catch (e) { /* fall through */ }
     return '/api/events-content';
   })();
-  const VERSION = '1.0.2';
+  const VERSION = '1.0.4';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (month + weekday names, view-switcher and filter
@@ -1098,6 +1098,22 @@
     .tge-modal-cta:active { transform: scale(0.97); }
     .tge-modal-cta svg { width: 14px; height: 14px; }
 
+    /* ---------- Day list ("+N more") ---------- */
+    .tge-daylist { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+    .tge-daylist-row {
+      all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px; border-radius: 12px; background: var(--tge-bg-alt);
+      border: 1px solid var(--tge-border); transition: background 160ms ease, transform 120ms ease;
+    }
+    .tge-daylist-row:hover { background: var(--tge-bg); border-color: var(--tge-border-strong); }
+    .tge-daylist-row:focus-visible { outline: 2px solid var(--tge-brand); outline-offset: 2px; }
+    .tge-daylist-row:active { transform: scale(0.99); }
+    .tge-daylist-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--tge-cat, var(--tge-brand)); flex: none; }
+    .tge-daylist-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+    .tge-daylist-name { font-size: 14px; font-weight: 600; color: var(--tge-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tge-daylist-meta { font-size: 12px; color: var(--tge-sub); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tge-daylist-arr { width: 16px; height: 16px; color: var(--tge-sub); flex: none; }
+
     /* ---------- Responsive ---------- */
     @media (max-width: 640px) {
       .tge-header { padding: 16px; flex-direction: column; align-items: stretch; }
@@ -1664,6 +1680,9 @@
     }
 
     _openModal(e) {
+      // Prefer an already-recorded opener (e.g. the "+N more" button behind a day
+      // list) so closing the detail modal returns focus to the real origin.
+      const trigger = this._modalTrigger || this.shadow.activeElement;
       this._closeModal();
       const meta = categoryMeta(e.category);
       const catColor = e.catColor || meta.color;
@@ -1673,7 +1692,7 @@
       const root = this.shadow.querySelector('.tge-root');
       const modalHtml = ''
         + '<div class="tge-modal-bg" data-tge-modal></div>'
-        + '<div class="tge-modal" role="dialog" aria-modal="true">'
+        + '<div class="tge-modal" role="dialog" aria-modal="true" aria-labelledby="tge-modal-title">'
           + '<div class="tge-modal-card" style="position:relative;--tge-cat:' + catColor + ';--tge-cat-rgb:' + catRgb + '">'
             + '<button class="tge-modal-close" type="button" aria-label="' + esc(this.t('close')) + '">' + svgPath(IC.close, '') + '</button>'
             + (e.image && this.cfg.showImages !== false
@@ -1681,7 +1700,7 @@
                 : '')
             + '<div class="tge-modal-body">'
               + '<span class="tge-modal-cat"><span class="tge-cat-tag-dot"></span>' + esc(e.category) + '</span>'
-              + '<h3 class="tge-modal-name">' + esc(e.name) + '</h3>'
+              + '<h3 class="tge-modal-name" id="tge-modal-title">' + esc(e.name) + '</h3>'
               + '<div class="tge-modal-meta">'
                 + '<div class="tge-modal-meta-row">' + svgPath(IC.cal, '') + '<span>' + esc(dateRange) + '</span></div>'
                 + (e.location ? '<div class="tge-modal-meta-row">' + svgPath(IC.pin, '') + '<span>' + esc(e.location) + '</span></div>' : '')
@@ -1714,13 +1733,98 @@
       bg && bg.addEventListener('click', close);
       const closeBtn = root.querySelector('.tge-modal-close');
       closeBtn && closeBtn.addEventListener('click', close);
-      this._kbdHandler = (ev) => { if (ev.key === 'Escape') close(); };
+      this._modalTrigger = trigger;
+      this._kbdHandler = (ev) => {
+        if (ev.key === 'Escape') { close(); return; }
+        this._trapTab(ev, card);
+      };
       document.addEventListener('keydown', this._kbdHandler);
+      // Move focus into the dialog so keyboard users land on a control inside it.
+      requestAnimationFrame(() => { closeBtn && closeBtn.focus(); });
+    }
+
+    // Keep Tab focus inside the open modal card (elements live in the shadow root).
+    _trapTab(ev, card) {
+      if (ev.key !== 'Tab' || !card) return;
+      const focusable = card.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])');
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = this.shadow.activeElement;
+      if (ev.shiftKey && active === first) { ev.preventDefault(); last.focus(); }
+      else if (!ev.shiftKey && active === last) { ev.preventDefault(); first.focus(); }
     }
 
     _openModalList(dayStr, events) {
-      // For "+N more" — show first event for now. Could later show a day-list popover.
-      if (events.length) this._openModal(events[0]);
+      if (!events || !events.length) return;
+      // Single hidden event → straight to its detail modal.
+      if (events.length === 1) { this._openModal(events[0]); return; }
+
+      // Multiple events → a real day list, each row opening its own detail modal.
+      // Previously this opened events[0] (already visible as pill #1), so the 4th,
+      // 5th … events the "+N more" button counted were unreachable.
+      const trigger = this.shadow.activeElement;
+      this._closeModal();
+      const heading = fmtRange(dayStr, dayStr, this.t) || esc(this.t('close'));
+      let rows = '';
+      events.forEach((e, i) => {
+        const meta = categoryMeta(e.category);
+        const catColor = e.catColor || meta.color;
+        rows += '<button type="button" class="tge-daylist-row" data-tge-idx="' + i + '" style="--tge-cat:' + catColor + '">'
+          + '<span class="tge-daylist-dot"></span>'
+          + '<span class="tge-daylist-info">'
+            + '<span class="tge-daylist-name">' + esc(e.name) + '</span>'
+            + '<span class="tge-daylist-meta">' + esc(e.category || '')
+              + (e.location ? ' · ' + esc(e.location) : '') + '</span>'
+          + '</span>'
+          + svgPath(IC.chevR, 'tge-daylist-arr')
+          + '</button>';
+      });
+
+      const root = this.shadow.querySelector('.tge-root');
+      const modalHtml = ''
+        + '<div class="tge-modal-bg" data-tge-modal></div>'
+        + '<div class="tge-modal" role="dialog" aria-modal="true" aria-label="' + esc(heading) + '">'
+          + '<div class="tge-modal-card" style="position:relative">'
+            + '<button class="tge-modal-close" type="button" aria-label="' + esc(this.t('close')) + '">' + svgPath(IC.close, '') + '</button>'
+            + '<div class="tge-modal-body">'
+              + '<h3 class="tge-modal-name">' + esc(heading) + '</h3>'
+              + '<div class="tge-daylist">' + rows + '</div>'
+            + '</div>'
+          + '</div>'
+        + '</div>';
+
+      const wrap = document.createElement('div');
+      wrap.innerHTML = modalHtml;
+      while (wrap.firstChild) root.appendChild(wrap.firstChild);
+
+      this._modalEl = root.querySelector('.tge-modal');
+      const bg = root.querySelector('.tge-modal-bg');
+      const card = root.querySelector('.tge-modal-card');
+      requestAnimationFrame(() => {
+        bg && bg.classList.add('tge-open');
+        card && card.classList.add('tge-open');
+      });
+
+      const close = () => this._closeModal();
+      bg && bg.addEventListener('click', close);
+      const closeBtn = root.querySelector('.tge-modal-close');
+      closeBtn && closeBtn.addEventListener('click', close);
+      this._modalTrigger = trigger;
+      this._kbdHandler = (ev) => {
+        if (ev.key === 'Escape') { close(); return; }
+        this._trapTab(ev, card);
+      };
+      document.addEventListener('keydown', this._kbdHandler);
+      requestAnimationFrame(() => { closeBtn && closeBtn.focus(); });
+
+      root.querySelectorAll('.tge-daylist-row').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.getAttribute('data-tge-idx'), 10);
+          const ev = events[idx];
+          if (ev) this._openModal(ev); // _openModal calls _closeModal first, replacing the list
+        });
+      });
     }
 
     _closeModal() {
@@ -1734,6 +1838,12 @@
       if (this._kbdHandler) {
         document.removeEventListener('keydown', this._kbdHandler);
         this._kbdHandler = null;
+      }
+      // Return focus to whatever opened the modal so keyboard users are not stranded.
+      if (this._modalTrigger) {
+        const t = this._modalTrigger;
+        this._modalTrigger = null;
+        try { if (t.isConnected && typeof t.focus === 'function') t.focus(); } catch {}
       }
     }
 

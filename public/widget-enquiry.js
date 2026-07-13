@@ -38,7 +38,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.1.1';
+  var WIDGET_VERSION = '1.1.2';
   var VISITOR_ID_KEY = 'tg_visitor_id_v1';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -2777,12 +2777,22 @@
     var turnstileToken = null;
     var turnstileFrame = null;
     if (config.security && config.security.turnstile) {
-      turnstileContainer = el('div', { class: 'tg-turnstile' });
-      if (isMultiStep) {
-        // Hide initially; shown when user navigates to final step
-        turnstileContainer.style.display = 'none';
+      if (config.security.turnstileSiteKey) {
+        turnstileContainer = el('div', { class: 'tg-turnstile' });
+        if (isMultiStep) {
+          // Hide initially; shown when user navigates to final step
+          turnstileContainer.style.display = 'none';
+        }
+        card.appendChild(turnstileContainer);
+      } else {
+        // Turnstile is enabled on the form but the sitekey didn't arrive —
+        // most likely TURNSTILE_SITE_KEY isn't set in the server environment.
+        // Fail safe for the visitor: render no challenge rather than an
+        // unsolvable one that would strand them at submit. Bot protection is
+        // still enforced server-side at /api/enquiry/submit, and the missing
+        // sitekey is logged so the site owner gets a signal.
+        console.error('[TGEnquiryWidget] security.turnstile is true but turnstileSiteKey is missing — skipping client challenge, relying on server-side verification');
       }
-      card.appendChild(turnstileContainer);
     }
 
     // ── Navigation row ──────────────────────────────────────────────────
@@ -2857,10 +2867,11 @@
     }
 
     // Mount the Turnstile iframe. The iframe runs /turnstile-frame.html on
-    // our domain, solves the challenge, and postMessages the token back.
-    // If the sitekey is missing (Turnstile enabled but env var not set
-    // server-side), the submit handler will fail closed with a helpful error.
-    if (turnstileContainer && config.security.turnstileSiteKey) {
+    // our domain, solves the challenge, and postMessages the token back. The
+    // container is only present when a sitekey arrived (see above), so the
+    // missing-sitekey case never renders a challenge — it falls through to
+    // server-side verification instead of stranding the visitor.
+    if (turnstileContainer) {
       turnstileFrame = createTurnstileFrame(
         config.security.turnstileSiteKey,
         config.branding.theme,
@@ -2869,16 +2880,6 @@
       );
       turnstileContainer.appendChild(turnstileFrame.iframe);
       this._turnstileFrame = turnstileFrame;
-    } else if (turnstileContainer) {
-      // Turnstile is enabled on the form but the sitekey didn't arrive —
-      // most likely TURNSTILE_SITE_KEY isn't set in the server environment.
-      // Show a visible placeholder so the agent notices something is wrong
-      // rather than silently letting bots through.
-      turnstileContainer.appendChild(el('div', {
-        style: { padding: '12px', fontSize: '12px', color: '#DC2626', textAlign: 'center' },
-        text: t('securityMisconfigured')
-      }));
-      console.error('[TGEnquiryWidget] security.turnstile is true but turnstileSiteKey is missing');
     }
 
     // ── Multi-step navigation state machine ──────────────────────────────
@@ -3058,8 +3059,13 @@
 
     summaryError.classList.remove('is-shown');
 
+    // Only block on a missing token when the challenge was actually rendered
+    // (a sitekey is present). If Turnstile is enabled but the sitekey never
+    // arrived, no challenge was shown, so we fail safe and let the submit
+    // proceed — server-side verification at /api/enquiry/submit is the real
+    // gate. Blocking here would permanently strand the visitor.
     var turnstileToken = getToken();
-    if (config.security && config.security.turnstile && !turnstileToken) {
+    if (config.security && config.security.turnstile && config.security.turnstileSiteKey && !turnstileToken) {
       summaryError.classList.add('is-shown');
       summaryError.querySelector('.tg-summary-error-text').textContent = t('securityIncomplete');
       return;

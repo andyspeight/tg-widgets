@@ -394,10 +394,23 @@
   function render() {
     const host = document.getElementById('widget-mount');
     if (!host) return;
+    // Reuse the live instance for appearance/heading/feed edits — update()
+    // rebuilds the shell and only refetches when the feed list or maxItems
+    // actually change, so we don't flicker the skeleton or hammer the feed
+    // proxy on every slider tick or keystroke.
+    if (widgetInst && typeof widgetInst.update === 'function') { try { widgetInst.update(C); return; } catch (e) {} }
     if (widgetInst) { try { widgetInst.destroy(); } catch (e) {} }
     const fresh = host.cloneNode(false);
     host.parentNode.replaceChild(fresh, host);
     if (window.TGRssWidget) widgetInst = new window.TGRssWidget(fresh, C);
+  }
+
+  // Debounced render for high-frequency inputs (slider drags, typing) so we
+  // coalesce a burst of changes into one preview update.
+  let _renderTimer = null;
+  function renderDebounced() {
+    if (_renderTimer) clearTimeout(_renderTimer);
+    _renderTimer = setTimeout(() => { _renderTimer = null; render(); }, 280);
   }
 
   function loadFromUrl() {
@@ -467,7 +480,7 @@
   document.getElementById('feed-list').addEventListener('input', (e) => {
     const inp = e.target.closest('.feed-url'); if (!inp) return;
     const i = parseInt(inp.getAttribute('data-i'), 10);
-    C.feeds[i] = inp.value.trim(); shell.markDirty(); render();
+    C.feeds[i] = inp.value.trim(); shell.markDirty(); renderDebounced();
   });
   document.getElementById('feed-list').addEventListener('click', (e) => {
     const rm = e.target.closest('.feed-rm'); if (!rm) return;
@@ -500,18 +513,18 @@
     document.getElementById('cols-field').classList.toggle('is-hidden', C.layout !== 'grid');
     shell.markDirty(); render();
   });
-  document.getElementById('cols-input').addEventListener('input', (e) => { C.columns = parseInt(e.target.value, 10) || 3; document.getElementById('cols-val').textContent = C.columns; shell.markDirty(); render(); });
-  document.getElementById('max-input').addEventListener('input', (e) => { C.maxItems = parseInt(e.target.value, 10) || 9; document.getElementById('max-val').textContent = C.maxItems; shell.markDirty(); render(); });
-  document.getElementById('radius-input').addEventListener('input', (e) => { C.radius = parseInt(e.target.value, 10) || 0; document.getElementById('radius-val').textContent = C.radius + 'px'; shell.markDirty(); render(); });
+  document.getElementById('cols-input').addEventListener('input', (e) => { C.columns = parseInt(e.target.value, 10) || 3; document.getElementById('cols-val').textContent = C.columns; shell.markDirty(); renderDebounced(); });
+  document.getElementById('max-input').addEventListener('input', (e) => { C.maxItems = parseInt(e.target.value, 10) || 9; document.getElementById('max-val').textContent = C.maxItems; shell.markDirty(); renderDebounced(); });
+  document.getElementById('radius-input').addEventListener('input', (e) => { C.radius = parseInt(e.target.value, 10) || 0; document.getElementById('radius-val').textContent = C.radius + 'px'; shell.markDirty(); renderDebounced(); });
 
   (function wireColour() {
     const col = document.getElementById('accent-col'), hex = document.getElementById('accent-hex');
-    col.addEventListener('input', () => { const v = col.value.toUpperCase(); hex.value = v; C.accent = v; shell.markDirty(); render(); });
-    hex.addEventListener('input', () => { const v = (hex.value || '').trim().toUpperCase(); if (hexOk(v)) { col.value = v; C.accent = v; shell.markDirty(); render(); } });
+    col.addEventListener('input', () => { const v = col.value.toUpperCase(); hex.value = v; C.accent = v; shell.markDirty(); renderDebounced(); });
+    hex.addEventListener('input', () => { const v = (hex.value || '').trim().toUpperCase(); if (hexOk(v)) { col.value = v; C.accent = v; shell.markDirty(); renderDebounced(); } });
   })();
 
   // ─── Content controls ───
-  function wireText(id, key) { const el = document.getElementById(id); el.addEventListener('input', () => { C[key] = el.value; shell.markDirty(); render(); }); }
+  function wireText(id, key) { const el = document.getElementById(id); el.addEventListener('input', () => { C[key] = el.value; shell.markDirty(); renderDebounced(); }); }
   wireText('head-title', 'headerTitle');
   wireText('head-sub', 'headerSubtitle');
 
@@ -522,7 +535,7 @@
   wireSwitch('show-date', 'showDate');
   wireSwitch('show-excerpt', 'showExcerpt', () => document.getElementById('excerpt-len-field').classList.toggle('is-hidden', !C.showExcerpt));
   wireSwitch('open-newtab', 'openNewTab');
-  document.getElementById('excerpt-input').addEventListener('input', (e) => { C.excerptLength = parseInt(e.target.value, 10) || 140; document.getElementById('excerpt-val').textContent = C.excerptLength; shell.markDirty(); render(); });
+  document.getElementById('excerpt-input').addEventListener('input', (e) => { C.excerptLength = parseInt(e.target.value, 10) || 140; document.getElementById('excerpt-val').textContent = C.excerptLength; shell.markDirty(); renderDebounced(); });
 
   document.getElementById('name-input').addEventListener('input', () => shell.markDirty());
 

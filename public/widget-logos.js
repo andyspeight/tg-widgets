@@ -43,7 +43,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.2';
+  const VERSION = '1.0.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (default heading, the "Visit website" link, and the
@@ -674,6 +674,12 @@
         t.addEventListener('click', () => {
           this._activeGroup = t.getAttribute('data-group') || 'all';
           this._render();
+          // _render() replaced the whole shadow root, destroying the button the
+          // visitor just activated. Restore focus to the matching tab so keyboard
+          // and screen-reader users stay inside the tablist.
+          const sel = window.CSS && CSS.escape ? CSS.escape(this._activeGroup) : this._activeGroup;
+          const active = this.shadow.querySelector('.tgl-tab[data-group="' + sel + '"]');
+          if (active) active.focus();
         });
       });
       this._bindImageFallbacks();
