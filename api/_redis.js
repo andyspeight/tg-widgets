@@ -10,8 +10,20 @@
  * It is only ever overwritten by a successful cron run.
  */
 
+import { gzipSync, gunzipSync } from 'node:zlib';
+
 const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL || '';
 const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || '';
+
+// Large values (chiefly the per-country offer keys, which can reach ~900KB of
+// JSON) are gzip+base64 compressed on write and transparently inflated on read,
+// so they stay well under Upstash's ~1MB per-request write limit. JSON with
+// repeated field names compresses ~5-8x, giving big countries plenty of head
+// room instead of tripping the halve-and-retry that drops offers. The GZ_PREFIX
+// marks a compressed value; getJson auto-detects it, so this is invisible to
+// every caller and backward-compatible with existing uncompressed keys.
+const GZ_PREFIX = 'gz:v1:';
+const COMPRESS_THRESHOLD = 64 * 1024; // below this, plain JSON is cheaper to store
 
 export function configured() {
   return !!(REDIS_URL && REDIS_TOKEN);
@@ -39,7 +51,13 @@ async function callRedis(command, ...args) {
 export async function setJson(key, valueObject) {
   if (!configured()) return false;
   try {
-    const body = JSON.stringify(valueObject);
+    let body = JSON.stringify(valueObject);
+    if (body.length > COMPRESS_THRESHOLD) {
+      try {
+        const packed = GZ_PREFIX + gzipSync(Buffer.from(body, 'utf8')).toString('base64');
+        if (packed.length < body.length) body = packed; // only if it actually helps
+      } catch (e) { /* compression failed — fall back to plain JSON */ }
+    }
     const res = await fetch(`${REDIS_URL}/set/${encodeURIComponent(key)}`, {
       method: 'POST',
       headers: {
@@ -63,7 +81,12 @@ export async function setJson(key, valueObject) {
 export async function getJson(key) {
   const raw = await callRedis('get', key);
   if (!raw) return null;
-  try { return JSON.parse(raw); } catch { return null; }
+  try {
+    const text = (typeof raw === 'string' && raw.startsWith(GZ_PREFIX))
+      ? gunzipSync(Buffer.from(raw.slice(GZ_PREFIX.length), 'base64')).toString('utf8')
+      : raw;
+    return JSON.parse(text);
+  } catch { return null; }
 }
 
 /** Set a plain string (used for lastRunAt timestamps). */

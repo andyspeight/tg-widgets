@@ -20,15 +20,19 @@
  *
  * CADENCE
  *   - ?full=1  → sweep every enabled country (the nightly run).
- *   - default  → sweep a rotating ~15% slice (the hourly run).
- *   The cron schedule in vercel.json fires hourly-ish; trigger the nightly full
+ *   - default  → sweep a rotating ~5% slice, once every 10 minutes, so the
+ *     rotation still covers ~30% of countries per hour (same as the old
+ *     every-45-min 15% slice) but with a third of the per-run /api/offers
+ *     fan-out, spread evenly so no single 5-minute window carries a whole
+ *     slice's burst.
+ *   The cron schedule in vercel.json fires every 10 min; trigger the nightly full
  *   sweep with ?full=1 (e.g. a second cron entry, or the scheduler calling it).
  *
  * STORAGE KEYS
  *   offers:packages:{CC}   per-country raw normalised offers + refreshedAt
  *   map:offers:v1          derived summary the widget reads (country + airport pins)
  *   map:offers:lastRunAt   ISO timestamp of the last successful summary write
- *   map:offers:cursor      rotation cursor for the hourly 15% slice
+ *   map:offers:cursor      rotation cursor for the rotating 5% slice
  *
  * AUTH
  *   Caller must send Authorization: Bearer ${CRON_SECRET}.
@@ -60,7 +64,12 @@ const PER_REQUEST_TIMEOUT_MS = 10000;
 const REQUEST_CONCURRENCY = 6;     // parallel proxy calls within a country
                                    // (raised from 4 when types × markets grew
                                    // the per-country request count)
-const HOURLY_FRACTION = 0.15;      // ~15% of countries per hourly run
+// ~5% of countries per run. The rotation is cursor-based, so coverage per hour
+// is frequency × fraction: this pairs with the */10 cron (6 runs/hour) to sweep
+// the same ~30%/hour as the old */45 × 15% did, but in thirds — a third of the
+// /api/offers fan-out per run, evenly spaced 10 min apart, so no single 5-minute
+// window carries a whole slice's burst. Same coverage and freshness, flatter peak.
+const HOURLY_FRACTION = 0.05;
 const MAX_AGE_HOURS = 70;          // purge offers older than this (was 4 days / 96h)
 // Trip-duration bounds. Travelify returns offers of varying real durations and
 // sort:price:asc surfaces the cheapest — which can be a 1-night stay. We keep
