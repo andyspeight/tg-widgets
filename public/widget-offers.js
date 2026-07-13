@@ -143,7 +143,7 @@
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
   const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
-  const VERSION = '1.10.12';
+  const VERSION = '1.10.13';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // Telemetry: report a one-time load heartbeat and any failure to
@@ -730,6 +730,59 @@
     // Travelify ignores it (it never pinned the property). Precise
     // property pinning would use loct=Property, kept out until verified live.
     return 'https://dl.tvllnk.com/deeplink/' + encodeURIComponent(id) + '?' + p.toString();
+  }
+
+  // ── Deeplink token transport (x-access-token via POST body) ───────────────
+  // When the visitor carries an `x-access-token` cookie, the Travelify booking
+  // deeplink is handed over as an auto-submitting POST form with the token in the
+  // body, keeping it out of the URL, browser history, the Referer header and the
+  // destination's access logs. No cookie -> the normal GET is left untouched.
+  // How the deeplink and its query string are built is unchanged; only the final
+  // navigation step differs.
+  function getCookie(name) {
+    try {
+      if (typeof document === 'undefined' || !document.cookie) return null;
+      const escaped = name.replace(/([.$?*|{}()\[\]\\\/+^])/g, '\\$1');
+      const m = document.cookie.match(new RegExp('(?:^|; )' + escaped + '=([^;]*)'));
+      return m ? decodeURIComponent(m[1]) : null;
+    } catch (e) { return null; }
+  }
+  // Returns true when it POSTed (the caller then suppresses its GET); false when
+  // there is no token, so the caller falls through to its normal GET. newTab
+  // preserves the card's open-in-new-tab behaviour.
+  function postDeeplinkWithToken(url, newTab) {
+    const token = getCookie('x-access-token');
+    if (!token || !url) return false;
+    try {
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = url;               // deeplink verbatim — query string preserved
+      if (newTab) { form.target = '_blank'; form.rel = 'noopener'; }
+      form.style.display = 'none';
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'x-access-token';
+      input.value = token;             // browser encodes the POST body; no manual encoding
+      form.appendChild(input);
+      (document.body || document.documentElement).appendChild(form);
+      form.submit();
+      setTimeout(function () { try { if (form.parentNode) form.parentNode.removeChild(form); } catch (e) { /* noop */ } }, 0);
+      return true;
+    } catch (e) { return false; }
+  }
+  // One capture-phase interceptor per shadow root: swap the GET for a token POST
+  // on Travelify deeplink anchors only. Any other link is left completely alone.
+  function wireDeeplinkPost(shadowRoot) {
+    if (!shadowRoot || shadowRoot.__tgDlPostWired) return;
+    shadowRoot.__tgDlPostWired = true;
+    shadowRoot.addEventListener('click', function (ev) {
+      const a = ev.target && ev.target.closest ? ev.target.closest('a[href]') : null;
+      if (!a || !/^https?:\/\/dl\.tvllnk\.com\/deeplink\//i.test(a.href || '')) return;
+      if (postDeeplinkWithToken(a.href, a.target === '_blank')) {
+        ev.preventDefault();
+        ev.stopPropagation();
+      }
+    }, true);
   }
   // Per-client supplier visibility. supplierFilter (three integer lists of
   // allowed Travelify supplier ids) is injected into the widget config by
@@ -5464,6 +5517,7 @@
       // manually). A second attachShadow throws NotSupportedError; the render
       // below resets the shadow via innerHTML, so reusing it is safe.
       this.shadow = container.shadowRoot || container.attachShadow({ mode: 'open' });
+      wireDeeplinkPost(this.shadow); // intercept deeplink clicks → token POST when present
       this.root = null;
       this.rawOffers = [];
       // Display currency. Prices are cached in GBP and converted at render time;
@@ -5931,7 +5985,10 @@
             const sep = url.indexOf('?') >= 0 ? '&' : '?';
             newUrl = url + sep + 'adt=' + state.adults + '&chd=' + state.children + '&inf=' + state.infants;
           }
-          window.open(safeUrl(newUrl), '_blank', 'noopener,noreferrer');
+          const dest = safeUrl(newUrl);
+          if (!postDeeplinkWithToken(dest, true)) {
+            window.open(dest, '_blank', 'noopener,noreferrer');
+          }
           close();
           return;
         }
