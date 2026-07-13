@@ -45,7 +45,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.11.10';
+  const VERSION = '3.11.11';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -426,7 +426,7 @@
   }
 
   // ── Deeplink token transport (x-access-token via POST body) ───────────────
-  // When the visitor carries an `x-access-token` cookie, the Travelify booking
+  // When the visitor carries a `travelify-accesstoken` cookie, the Travelify booking
   // deeplink is handed over as an auto-submitting POST form with the token in the
   // body, keeping it out of the URL, browser history, the Referer header and the
   // destination's access logs. No cookie -> the normal GET is left untouched.
@@ -440,7 +440,9 @@
     } catch (e) { return null; }
   }
   function postDeeplinkWithToken(url, newTab) {
-    const token = getCookie('x-access-token');
+    // Cookie name and POST field name differ on purpose: read the cookie
+    // `travelify-accesstoken`, submit it as the `x-access-token` form field.
+    const token = getCookie('travelify-accesstoken');
     if (!token || !url) return false;
     try {
       const form = document.createElement('form');
