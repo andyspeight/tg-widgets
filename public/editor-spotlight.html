@@ -614,6 +614,11 @@
               <div class="field-help" style="margin-bottom:12px;">
                 The wording comes from Travelgenix Luna. Rewrite any of it in your own voice below. Facts, climate and images always stay live, and anything you leave untouched keeps updating automatically. You can revert to Luna at any time.
               </div>
+              <div class="field">
+                <label class="field-label">Your brand voice (optional)</label>
+                <textarea class="textarea" id="contentVoice" maxlength="600" rows="2" placeholder="e.g. warm and informal, we are a family-run agency in Leeds who know Greece inside out"></textarea>
+                <div class="field-help" style="margin-top:6px">Guides the <strong>Rewrite with AI</strong> buttons below. Leave blank for a warm, plain default.</div>
+              </div>
               <div id="contentEditRoot"></div>
             </div>
           </div>
@@ -915,6 +920,7 @@
         },
         destination: null,
         contentOverrides: {},
+        contentVoice: '',
         autoDetect: {
           enabled: false,
           slugSource: 'last-path-segment',
@@ -1537,6 +1543,7 @@
         +   '<label class="field-label" style="margin:0;">' + escHtml(opts.label) + '</label>'
         +   '<div style="display:flex;align-items:center;gap:10px;">'
         +     '<span class="ce-edited" style="font-size:11px;font-weight:700;color:var(--accent);"' + (edited ? '' : ' hidden') + '>Edited</span>'
+        +     '<button type="button" class="ce-ai" data-ai="' + escHtml(opts.path) + '" data-ai-label="' + escHtml(opts.label) + '" style="font-size:11px;font-weight:600;color:var(--accent);background:none;border:none;cursor:pointer;padding:0;">✨ Rewrite with AI</button>'
         +     '<button type="button" class="ce-revert" data-revert="' + escHtml(opts.path) + '" style="font-size:11px;font-weight:600;color:var(--sub);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;"' + (edited ? '' : ' hidden') + '>Revert to Luna</button>'
         +   '</div>'
         + '</div>'
@@ -1654,8 +1661,50 @@
       root.querySelectorAll('.ce-revert, .ce-useluna').forEach(btn => {
         btn.addEventListener('click', () => revertOne(btn.getAttribute('data-revert')));
       });
+      root.querySelectorAll('.ce-ai').forEach(btn => {
+        btn.addEventListener('click', () => aiRewrite(btn.getAttribute('data-ai'), btn.getAttribute('data-ai-label'), btn, key));
+      });
       const all = document.getElementById('ceRevertAll');
       if (all) all.addEventListener('click', () => ceRevertAll(key));
+    }
+
+    // "Rewrite with AI" — rewrite one field in the client's brand voice via the
+    // hardened /api/widget-ai rewrite action. The Luna original is captured as
+    // the override's `o`, so revert and drift detection keep working.
+    async function aiRewrite(path, label, btn, key) {
+      const control = document.querySelector('#contentEditRoot [data-ovpath="' + path + '"]');
+      if (!control) return;
+      const original = ceOriginalFor(key, path);
+      const text = (control.value || original || '').trim();
+      if (!text) { toast('Nothing to rewrite yet', 'error'); return; }
+      const voice = (state.config.contentVoice || '').trim();
+      const prev = btn.textContent;
+      btn.disabled = true; btn.textContent = 'Rewriting…';
+      try {
+        const res = await fetch(API_AI, {
+          method: 'POST',
+          headers: authH(),
+          body: JSON.stringify({ action: 'rewrite', field: label, text: text, voice: voice }),
+        });
+        if (res.status === 401) { toast('Your session expired. Please sign in.', 'error'); showLogin(); return; }
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 403) { toast(data.error || 'AI rewrite needs a Boost plan or higher.', 'error'); return; }
+        if (res.status === 429) { toast(data.error || 'Daily AI limit reached. Try again tomorrow.', 'error'); return; }
+        if (!res.ok || !data.text) throw new Error(data.error || 'Rewrite failed');
+        control.value = data.text;
+        setOverride(path.split('.'), data.text, original);
+        const row = control.closest('[data-row]');
+        if (row) {
+          const ed = row.querySelector('.ce-edited'); if (ed) ed.hidden = false;
+          const rv = row.querySelector('.ce-revert'); if (rv) rv.hidden = false;
+        }
+        updateCeFlag(key);
+        toast('Rewritten in your voice', 'success');
+      } catch (err) {
+        toast((err && err.message) || 'Rewrite failed', 'error');
+      } finally {
+        btn.disabled = false; btn.textContent = prev;
+      }
     }
 
     /* ============================================================
@@ -1699,6 +1748,7 @@
       document.getElementById('hEvents').value = c.eventsHeading || '';
       document.getElementById('hPaired').value = c.pairedHeading || '';
       document.getElementById('pairedLinkBase').value = c.pairedLinkBase || '';
+      document.getElementById('contentVoice').value = c.contentVoice || '';
       // Auto-detect
       const ad = c.autoDetect || {};
       const adEnabled = !!ad.enabled;
@@ -1810,6 +1860,7 @@
     document.getElementById('hEvents').addEventListener('input', e => { state.config.eventsHeading = e.target.value; onConfigChange(); });
     document.getElementById('hPaired').addEventListener('input', e => { state.config.pairedHeading = e.target.value; onConfigChange(); });
     document.getElementById('pairedLinkBase').addEventListener('input', e => { state.config.pairedLinkBase = e.target.value.trim(); onConfigChange(); });
+    document.getElementById('contentVoice').addEventListener('input', e => { state.config.contentVoice = e.target.value; onConfigChange(); });
 
     // Auto-detect
     document.getElementById('togAutoDetect').addEventListener('click', e => {

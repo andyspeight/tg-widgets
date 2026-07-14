@@ -148,6 +148,11 @@
           </div>
           <div class="tgse-section-body">
             <div class="at-help" style="margin-bottom:12px;">The wording comes from Travelgenix Luna. Rewrite any of it in your own voice below. Facts, badges, the map and the verified date always stay live, and anything you leave untouched keeps updating automatically. You can revert to Luna at any time.</div>
+            <div class="tgse-field">
+              <label class="tgse-field-label">Your brand voice (optional)</label>
+              <textarea class="input" id="content-voice" maxlength="600" rows="2" placeholder="e.g. warm and informal, we are a family-run agency who love a good theme park"></textarea>
+              <div class="field-hint">Guides the <strong>Rewrite with AI</strong> buttons below. Leave blank for a warm, plain default.</div>
+            </div>
             <div id="at-content-edit"></div>
           </div>
         </div>
@@ -348,6 +353,7 @@
       },
       contentOverrides: contentOverrides,
       contentEdited: hasAnyOverride(contentOverrides),
+      contentVoice: (document.getElementById('content-voice') || {}).value || '',
     };
   }
 
@@ -355,6 +361,7 @@
   function setConfig(cfg) {
     if (!cfg) return;
     contentOverrides = (cfg.contentOverrides && typeof cfg.contentOverrides === 'object') ? cfg.contentOverrides : {};
+    { const cv = document.getElementById('content-voice'); if (cv) cv.value = cfg.contentVoice || ''; }
     if (cfg.brandColor)  document.getElementById('brand-color').value = cfg.brandColor;
     if (cfg.accentColor) document.getElementById('accent-color').value = cfg.accentColor;
     document.getElementById('hero-url').value = cfg.heroImageUrl || '';
@@ -575,6 +582,7 @@
       +   '<label class="tgse-field-label" style="margin:0;">' + esc(spec.label) + '</label>'
       +   '<div style="display:flex;align-items:center;gap:10px;">'
       +     '<span class="at-ce-edited" style="font-size:11px;font-weight:700;color:var(--tgse-accent,#00B4D8);"' + (edited ? '' : ' hidden') + '>Edited</span>'
+      +     '<button type="button" class="at-ce-ai" data-ai="' + esc(spec.path) + '" data-ai-label="' + esc(spec.label) + '" style="font-size:11px;font-weight:600;color:var(--tgse-accent,#00B4D8);background:none;border:none;cursor:pointer;padding:0;">✨ Rewrite with AI</button>'
       +     '<button type="button" class="at-ce-revert" data-revert="' + esc(spec.path) + '" style="font-size:11px;font-weight:600;color:var(--tgse-muted,#64748B);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;"' + (edited ? '' : ' hidden') + '>Revert to Luna</button>'
       +   '</div>'
       + '</div>'
@@ -649,8 +657,54 @@
         renderPreview();
       });
     });
+    root.querySelectorAll('.at-ce-ai').forEach(btn => {
+      btn.addEventListener('click', () => aiRewrite(btn.getAttribute('data-ai'), btn.getAttribute('data-ai-label'), btn));
+    });
     const all = document.getElementById('at-ce-revertall');
     if (all) all.addEventListener('click', ceRevertAll);
+  }
+
+  // "Rewrite with AI" — rewrite one field in the client's brand voice via the
+  // hardened /api/widget-ai rewrite action. The Luna original is captured as
+  // the override's `o`, so revert and drift detection keep working.
+  async function aiRewrite(path, label, btn) {
+    if (!ceKey()) return;
+    const control = document.querySelector('#at-content-edit [data-ovpath="' + path + '"]');
+    if (!control) return;
+    const original = ceOriginal(path);
+    const text = (control.value || original || '').trim();
+    const tg = window.tgse || {};
+    const say = (m, k) => { if (typeof tg.toast === 'function') tg.toast(m, k); };
+    if (!text) { say('Nothing to rewrite yet', 'error'); return; }
+    const voiceEl = document.getElementById('content-voice');
+    const voice = (voiceEl ? voiceEl.value : '').trim();
+    const headers = Object.assign({ 'Content-Type': 'application/json' }, (typeof tg.authHeaders === 'function' ? tg.authHeaders() : {}));
+    const prev = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Rewriting…';
+    try {
+      const res = await fetch('/api/widget-ai', {
+        method: 'POST', headers: headers,
+        body: JSON.stringify({ action: 'rewrite', field: label, text: text, voice: voice }),
+      });
+      if (res.status === 401) { say('Your session expired. Please sign in.', 'error'); if (typeof tg.showLogin === 'function') tg.showLogin(); return; }
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 403) { say(data.error || 'AI rewrite needs a Boost plan or higher.', 'error'); return; }
+      if (res.status === 429) { say(data.error || 'Daily AI limit reached. Try again tomorrow.', 'error'); return; }
+      if (!res.ok || !data.text) throw new Error(data.error || 'Rewrite failed');
+      control.value = data.text;
+      setOverride(path, data.text, original);
+      const row = control.closest('[data-row]');
+      if (row) {
+        const ed = row.querySelector('.at-ce-edited'); if (ed) ed.hidden = false;
+        row.querySelectorAll('.at-ce-revert').forEach(b => { b.hidden = false; });
+      }
+      updateCeFlag();
+      say('Rewritten in your voice', 'success');
+    } catch (err) {
+      say((err && err.message) || 'Rewrite failed', 'error');
+    } finally {
+      btn.disabled = false; btn.textContent = prev;
+    }
   }
 
   // ---- Initialise shell ----

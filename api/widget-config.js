@@ -839,6 +839,12 @@ export default async function handler(req, res) {
           delete cleanConfig.contentEdited;
         }
       }
+      // Brand-voice note (drives the "Rewrite with AI" prompts) — clamp length.
+      if (typeof cleanConfig.contentVoice === 'string') {
+        const voice = cleanConfig.contentVoice.trim().slice(0, 1000);
+        if (voice) cleanConfig.contentVoice = voice;
+        else delete cleanConfig.contentVoice;
+      }
 
       const configStr = JSON.stringify(cleanConfig);
 
