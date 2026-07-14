@@ -95,7 +95,7 @@
     } catch (e) { /* fall through */ }
     return '/api/destination-content';
   })();
-  const VERSION = '1.3.0';
+  const VERSION = '1.4.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (section default headings, fact/planning labels,
@@ -1445,7 +1445,9 @@
           if (!slugData || slugData.found === false) {
             return this._renderHidden();
           }
-          this._destination = slugData;
+          // Auto-detect: apply the client's overrides for the RESOLVED
+          // destination, keyed by the payload's own level:recordId.
+          this._destination = this._withOverrides(slugData);
           this._renderContent();
           return;
         }
@@ -1466,17 +1468,21 @@
     }
 
     // Merge the client's content overrides for the CURRENT destination over a
-    // freshly-fetched Luna payload. Phase 1: overrides apply to fixed-destination
-    // widgets only. In auto-detect mode the resolved destination varies per page
-    // and the content API does not return a stable record id to key on, so
-    // per-destination overrides are deferred (the editor hides content editing
-    // when auto-detect is on, so no overrides are stored for these widgets).
+    // freshly-fetched Luna payload. Overrides are keyed by `level:recordId` and
+    // apply in BOTH fixed and auto-detect mode: the key is taken from the
+    // payload's own identity (the API echoes recordId), so an auto-detect embed
+    // that resolves a slug to Santorini picks up the Santorini overrides. Older
+    // payloads that predate the recordId echo fall back to the configured fixed
+    // destination.
     _withOverrides(data) {
-      if (this.c.autoDetect && this.c.autoDetect.enabled) return data;
-      const dest = this.c.destination;
       const all = this.c.contentOverrides;
-      if (!dest || !dest.recordId || !all || typeof all !== 'object') return data;
-      const ov = all[(dest.level || '') + ':' + dest.recordId];
+      if (!data || !all || typeof all !== 'object') return data;
+      let key = (data.level && data.recordId) ? (data.level + ':' + data.recordId) : '';
+      if (!key) {
+        const dest = this.c.destination;
+        if (dest && dest.recordId) key = (dest.level || '') + ':' + dest.recordId;
+      }
+      const ov = key ? all[key] : null;
       return ov ? applyContentOverrides(data, ov) : data;
     }
 

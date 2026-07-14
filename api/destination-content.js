@@ -521,7 +521,9 @@ async function resolvePaired(level, fields, pat) {
 }
 
 // Build the public response payload from raw Airtable fields.
-function shapePayload(level, fields, inherited, paired) {
+// `recordId` is echoed back so clients can key per-destination content
+// overrides by `level:recordId` — the same key in fixed and auto-detect mode.
+function shapePayload(level, fields, inherited, paired, recordId) {
   const map = LEVEL_MAP[level];
   const f = fields || {};
 
@@ -548,6 +550,7 @@ function shapePayload(level, fields, inherited, paired) {
 
   return {
     level,
+    recordId: typeof recordId === 'string' ? recordId : '',
     name: txt(f[map.fields.name], 120),
     tagline: txt(f[map.fields.tagline], 200),
     heroIntro: txt(f[map.fields.heroIntro], 600),
@@ -720,7 +723,7 @@ export default async function handler(req, res) {
       } catch (err) {
         console.error('[destination-content] paired error:', err?.message || err);
       }
-      const payload = { found: true, ...shapePayload(resolved.level, resolved.fields, inherited, paired) };
+      const payload = { found: true, ...shapePayload(resolved.level, resolved.fields, inherited, paired, resolved.recordId) };
       memSet(slugCacheKey, payload);
       res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600');
       res.setHeader('X-Cache', 'MISS');
@@ -772,7 +775,7 @@ export default async function handler(req, res) {
       console.error('[destination-content] paired error:', err?.message || err);
     }
 
-    const payload = shapePayload(level, fields, inherited, paired);
+    const payload = shapePayload(level, fields, inherited, paired, recordId);
     memSet(cacheKey, payload);
 
     res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600');

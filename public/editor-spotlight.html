@@ -1560,12 +1560,10 @@
       if (!root) return;
       const ad = state.config.autoDetect || {};
       const dest = state.config.destination;
-      if (ad.enabled) {
-        root.innerHTML = ceHint('Content editing applies to fixed-destination widgets. Turn off auto-detect above to rewrite this widget’s wording.');
-        return;
-      }
       if (!dest || !dest.recordId) {
-        root.innerHTML = ceHint('Pick a fixed destination above, then rewrite its wording here in your own voice.');
+        root.innerHTML = ceHint(ad.enabled
+          ? 'Pick a destination above to rewrite its content. In auto-detect mode you can rewrite as many destinations as you like, one at a time; every other destination stays on Luna’s wording.'
+          : 'Pick a fixed destination above, then rewrite its wording here in your own voice.');
         return;
       }
       const key = dest.level + ':' + dest.recordId;
@@ -1579,6 +1577,9 @@
       const bucket = (state.config.contentOverrides || {})[key];
       const count = bucket ? countLeaves(bucket) : 0;
       const parts = [];
+      if (ad.enabled) {
+        parts.push('<div class="field-help" style="margin-bottom:12px;padding:10px 12px;background:var(--brand-soft,rgba(27,43,91,.1));border-radius:8px;border-left:3px solid var(--accent);">Auto-detect is on. You’re rewriting <strong>' + escHtml(dest.name || 'this destination') + '</strong>. These edits apply wherever the widget resolves to it. Pick another destination above to rewrite that one too — every destination you don’t touch stays on Luna’s wording.</div>');
+      }
       parts.push('<div id="ceFlag" style="' + ceFlagStyle(count) + '">' + ceFlagInner(count) + '</div>');
 
       parts.push(ceSectionLabel('Hero'));

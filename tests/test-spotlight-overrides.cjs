@@ -206,6 +206,33 @@ function livePayload() {
   eq(hasContentOverrides({ 'k': { highlights: { s: { title: { v: 'x', o: '' } } } } }), true, 'nested leaf → has overrides');
 }
 
+// ── 9. _withOverrides key selection (fixed + auto-detect) ──────────────────
+{
+  const withOverrides = new Function(
+    extractFn(widgetSrc, 'function normaliseSlugClient(s)') + '\n' +
+    extractFn(widgetSrc, 'function pickV(ov, fallback)') + '\n' +
+    extractFn(widgetSrc, 'function applyContentOverrides(data, ov)') + '\n' +
+    'const proto = { ' + extractFn(widgetSrc, '_withOverrides(data)') + ' };\n' +
+    'return (c, data) => proto._withOverrides.call({ c }, data);'
+  )();
+
+  const overrides = { 'city:recABC': { tagline: ov('Keyed by payload') } };
+  const payload = () => ({ name: 'Santorini', level: 'city', recordId: 'recABC', tagline: 'Live' });
+
+  // Payload carries its own identity → applies whether auto-detect is on or off.
+  eq(withOverrides({ contentOverrides: overrides, autoDetect: { enabled: false } }, payload()).tagline, 'Keyed by payload', 'fixed: keyed by payload identity');
+  eq(withOverrides({ contentOverrides: overrides, autoDetect: { enabled: true } }, payload()).tagline, 'Keyed by payload', 'auto-detect: keyed by payload identity');
+
+  // Older payload without recordId → fall back to the configured destination.
+  const legacy = () => ({ name: 'Santorini', level: 'city', tagline: 'Live' });
+  eq(withOverrides({ contentOverrides: overrides, destination: { level: 'city', recordId: 'recABC' } }, legacy()).tagline, 'Keyed by payload', 'legacy payload falls back to config.destination key');
+  // No payload identity and no config destination → live unchanged.
+  eq(withOverrides({ contentOverrides: overrides }, legacy()).tagline, 'Live', 'no key resolvable → live');
+
+  // Non-matching identity → live payload unchanged.
+  eq(withOverrides({ contentOverrides: overrides }, { name: 'S', level: 'country', recordId: 'recZZZ', tagline: 'Live' }).tagline, 'Live', 'non-matching identity → live');
+}
+
 // ── report ─────────────────────────────────────────────────────────────────
 if (failures.length) {
   console.error(`\nspotlight-overrides: ${passed} passed, ${failures.length} FAILED`);
