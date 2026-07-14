@@ -84,7 +84,7 @@
     } catch (e) { /* fall through */ }
     return '/api/airport-content';
   })();
-  const VERSION = '1.1.5';
+  const VERSION = '1.2.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (section/fact labels, tab labels, CTA buttons, map
@@ -361,6 +361,43 @@
     if (str == null) return '';
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;')
       .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  /* ------------------------------------------------------------------
+   * Client content overrides.
+   *
+   * Content is fetched live from Luna Brain and never snapshotted into
+   * config. Clients may rewrite the editorial prose in their own voice;
+   * those rewrites live in config.contentOverrides (keyed by the airport's
+   * IATA code) and are merged over the live payload here, at render time.
+   * Only the whitelisted prose fields are overridable — the IATA code, city
+   * served, country, distance and flight time always stay live, so a stale
+   * rewrite can never publish a wrong fact. Each override is { v, o } where v
+   * is the client's text and o is the Luna original at edit time (o is used
+   * by the editor for drift detection; the widget ignores it).
+   * ------------------------------------------------------------------ */
+  var OVERRIDABLE_FIELDS = [
+    'tagline', 'overview', 'overviewHeading', 'terminalsNote',
+    'terminalsAndAirlines', 'keyAirlines', 'keyAirlinesNote', 'flightTimeNote',
+    'checkInSummary', 'checkInDetail', 'recommendedArrival',
+    'gettingThereByTrain', 'gettingThereByCar', 'gettingThereByCoach',
+    'taxiAndRideshare', 'parking', 'dropOffInfo', 'transferInfo', 'carHireInfo',
+    'taxiInfo', 'coachInfo', 'loungesInfo', 'eatShopInfo', 'familyInfo',
+    'assistInfo', 'hotelsInfo', 'tips', 'usefulTips',
+  ];
+  function applyContentOverrides(data, ov) {
+    if (!data || !ov || typeof ov !== 'object') return data;
+    // Return a shallow copy — never mutate the caller's object. The editor
+    // renders its live preview in-page and hands us a reference to its cached
+    // Luna payload; mutating it would corrupt the editor's "revert to Luna"
+    // and drift detection. Only top-level scalar prose fields are replaced.
+    var out = {};
+    for (var key in data) { if (Object.prototype.hasOwnProperty.call(data, key)) out[key] = data[key]; }
+    OVERRIDABLE_FIELDS.forEach(function (k) {
+      var o = ov[k];
+      if (o && typeof o.v === 'string') out[k] = o.v;
+    });
+    return out;
   }
 
   // Colours are applied via element.style.setProperty (a safe CSSOM sink that
@@ -965,7 +1002,7 @@
       this._renderShell();
 
       if (this.c.airportData && typeof this.c.airportData === 'object') {
-        this._airport = this.c.airportData;
+        this._airport = this._withOverrides(this.c.airportData);
         this._renderContent();
       } else if (this.c.widgetId) {
         this._loadAirport();
@@ -994,12 +1031,25 @@
           destinationButtonLabel: '', destinationButtonUrl: '',
         },
         airport: null, airportData: null,
+        contentOverrides: {},   // client rewrites, keyed by airport IATA code
       };
       if (!c || typeof c !== 'object') return base;
       const m = Object.assign({}, base, c);
       m.sections = Object.assign({}, base.sections, c.sections || {});
       m.cta = Object.assign({}, base.cta, c.cta || {});
       return m;
+    }
+
+    // Merge the client's content overrides for THIS airport over a freshly-
+    // fetched Luna payload. Keyed by the payload's IATA code (always present in
+    // both production and editor preview); whitelisted prose only.
+    _withOverrides(data) {
+      if (!data) return data;
+      const all = this.c.contentOverrides;
+      const key = data.iata ? String(data.iata).toUpperCase() : '';
+      if (!key || !all || typeof all !== 'object') return data;
+      const ov = all[key];
+      return ov ? applyContentOverrides(data, ov) : data;
     }
 
     _loadAirport() {
@@ -1013,7 +1063,7 @@
         .then(d => {
           if (!d) return;
           if (d.found === false) { this._renderHidden(); return; }
-          this._airport = d.airport || null;
+          this._airport = this._withOverrides(d.airport || null);
           this._renderContent();
         })
         .catch(() => this._renderError());
@@ -1485,7 +1535,7 @@
       ensureFont(this.c.fontFamily);   // load the client-chosen web font on the host site (house rule 2)
       this.t = makeT(this.c);
       this._renderShell();
-      if (this.c.airportData) { this._airport = this.c.airportData; this._renderContent(); }
+      if (this.c.airportData) { this._airport = this._withOverrides(this.c.airportData); this._renderContent(); }
       else if (this._airport) { this._renderContent(); }
       else if (this.c.widgetId) { this._loadAirport(); }
       else { this._renderNotFound(); }

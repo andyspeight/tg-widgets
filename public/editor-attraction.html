@@ -139,6 +139,19 @@
           </div>
         </div>
 
+        <!-- Rewrite content -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            <span class="tgse-section-label">Rewrite content</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="at-help" style="margin-bottom:12px;">The wording comes from Travelgenix Luna. Rewrite any of it in your own voice below. Facts, badges, the map and the verified date always stay live, and anything you leave untouched keeps updating automatically. You can revert to Luna at any time.</div>
+            <div id="at-content-edit"></div>
+          </div>
+        </div>
+
         <!-- CTA -->
         <div class="tgse-section is-open">
           <div class="tgse-section-head">
@@ -302,6 +315,7 @@
 
   let selectedAttraction = null;  // { recordId, name, type, operator, location, country }
   let attractionContent = null;   // full payload from /api/attraction-content for preview
+  let contentOverrides = {};      // client rewrites, keyed by attraction recordId
   const searchInput  = document.getElementById('at-search');
   const resultsEl    = document.getElementById('at-results');
   const selectedWrap = document.getElementById('at-selected');
@@ -332,12 +346,15 @@
         buttonLabel: document.getElementById('cta-label').value,
         buttonUrl:   document.getElementById('cta-url').value,
       },
+      contentOverrides: contentOverrides,
+      contentEdited: hasAnyOverride(contentOverrides),
     };
   }
 
   // ---- Restore config ----
   function setConfig(cfg) {
     if (!cfg) return;
+    contentOverrides = (cfg.contentOverrides && typeof cfg.contentOverrides === 'object') ? cfg.contentOverrides : {};
     if (cfg.brandColor)  document.getElementById('brand-color').value = cfg.brandColor;
     if (cfg.accentColor) document.getElementById('accent-color').value = cfg.accentColor;
     document.getElementById('hero-url').value = cfg.heroImageUrl || '';
@@ -354,6 +371,7 @@
     if (cfg.attraction && cfg.attraction.recordId) {
       hydrateSelected(cfg.attraction.recordId).then(() => renderPreview());
     } else {
+      renderContentEditor();
       renderPreview();
     }
   }
@@ -373,6 +391,7 @@
       };
       attractionContent = a;
       paintSelected();
+      renderContentEditor();
     } catch (e) { /* noop */ }
   }
 
@@ -464,6 +483,7 @@
     selectedAttraction = null;
     attractionContent = null;
     paintSelected();
+    renderContentEditor();
     renderPreview();
   });
 
@@ -473,6 +493,165 @@
     el.addEventListener('input', debouncedPreview);
     el.addEventListener('change', debouncedPreview);
   });
+
+  /* ============================================================
+     Content editor — rewrite Luna's editorial prose in your own
+     voice. Stores a per-attraction diff in contentOverrides as
+     { v, o } (v = your text, o = the Luna original at edit time),
+     keyed by attraction recordId. The widget merges it over the
+     live Luna payload at render time, so untouched fields keep
+     auto-updating. Prose only — facts, badges, map and verified
+     date always stay live.
+     ============================================================ */
+  const CE_FIELDS = [
+    { group: 'Hero',              path: 'tagline',         label: 'Tagline' },
+    { group: 'Overview',          path: 'overview',        label: 'Overview', multiline: true },
+    { group: 'Overview',          path: 'bestTime',        label: 'Best time to visit', multiline: true },
+    { group: 'Star attractions',  path: 'starAttractions', label: 'Star attractions', multiline: true },
+    { group: 'Good to know',      path: 'familyGuide',     label: 'For families', multiline: true },
+    { group: 'Good to know',      path: 'thrillGuide',     label: 'For thrill-seekers', multiline: true },
+    { group: 'Good to know',      path: 'heightRestrict',  label: 'Height restrictions', multiline: true },
+    { group: 'Good to know',      path: 'accessibility',   label: 'Accessibility', multiline: true },
+    { group: 'Tickets',           path: 'tickets',         label: 'Tickets and prices', multiline: true },
+    { group: 'Tickets',           path: 'fastTrack',       label: 'Fast-track', multiline: true },
+    { group: 'Getting there',     path: 'nearestAirport',  label: 'Nearest airports', multiline: true },
+    { group: 'Getting there',     path: 'gettingThere',    label: 'Getting there', multiline: true },
+    { group: 'Getting there',     path: 'nearestTown',     label: 'Nearest town', multiline: true },
+    { group: 'Where to stay',     path: 'onSiteHotels',    label: 'On-site hotels', multiline: true },
+    { group: 'Where to stay',     path: 'nearbyHotels',    label: 'Nearby hotels', multiline: true },
+    { group: 'Food and drink',    path: 'foodDrink',       label: 'Food and drink', multiline: true },
+    { group: 'Insider tips',      path: 'quirks',          label: 'Insider tips', multiline: true },
+    { group: 'Combine your trip', path: 'combineWith',     label: 'Combine your trip', multiline: true },
+  ];
+  function ceKey() { return (selectedAttraction && selectedAttraction.recordId) ? selectedAttraction.recordId : null; }
+  function ceOriginal(path) { return (attractionContent && attractionContent[path]) ? String(attractionContent[path]) : ''; }
+  function ceOverrideAt(path) {
+    const key = ceKey();
+    const b = key && contentOverrides[key];
+    const leaf = b && b[path];
+    return (leaf && typeof leaf === 'object' && typeof leaf.v === 'string') ? leaf : null;
+  }
+  function setOverride(path, value, original) {
+    const key = ceKey();
+    if (!key) return;
+    const bucket = contentOverrides[key] = contentOverrides[key] || {};
+    const orig = String(original == null ? '' : original);
+    const trimmed = String(value == null ? '' : value).trim();
+    if (trimmed === '' || trimmed === orig.trim()) delete bucket[path];
+    else bucket[path] = { v: String(value), o: orig };
+    if (Object.keys(bucket).length === 0) delete contentOverrides[key];
+    if (window.tgse && typeof window.tgse.markDirty === 'function') window.tgse.markDirty();
+    debouncedPreview();
+  }
+  function countLeaves(bucket) {
+    return Object.keys(bucket || {}).filter(k => bucket[k] && typeof bucket[k].v === 'string').length;
+  }
+  function hasAnyOverride(all) {
+    return !!all && Object.keys(all).some(k => countLeaves(all[k]) > 0);
+  }
+  function ceFlagStyle(count) {
+    return 'margin-bottom:12px;padding:10px 12px;border-radius:8px;'
+      + (count ? 'background:var(--tgse-brand-tint,rgba(0,180,216,.12));border-left:3px solid var(--tgse-accent,#00B4D8);'
+               : 'background:var(--tgse-bg-input,#F1F5F9);border-left:3px solid var(--tgse-border,#E2E8F0);');
+  }
+  function ceFlagInner(count) {
+    const title = count ? ('Content customised — ' + count + ' field' + (count === 1 ? '' : 's') + ' rewritten') : 'Using Luna’s wording';
+    const help = count ? 'These fields no longer auto-update from Luna. Everything you leave untouched still does.' : 'Rewrite any wording below to make it your own.';
+    return '<div style="font-size:12px;color:var(--tgse-ink,#0F172A);font-weight:600;">' + esc(title) + '</div>'
+      + '<div class="at-help" style="margin-top:2px;">' + esc(help) + '</div>'
+      + (count ? '<button type="button" id="at-ce-revertall" style="margin-top:8px;font-size:11px;font-weight:600;color:var(--tgse-error,#EF4444);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;">Revert everything to Luna</button>' : '');
+  }
+  function ceField(spec) {
+    const ov = ceOverrideAt(spec.path);
+    const edited = !!ov;
+    const live = ceOriginal(spec.path);
+    const eff = edited ? ov.v : live;
+    const drift = edited && String(ov.o).trim() !== String(live).trim();
+    const control = spec.multiline
+      ? '<textarea class="input" rows="3" data-ovpath="' + esc(spec.path) + '" style="width:100%;resize:vertical;">' + esc(eff) + '</textarea>'
+      : '<input class="input" data-ovpath="' + esc(spec.path) + '" value="' + esc(eff) + '" style="width:100%;" />';
+    return '<div class="tgse-field" data-row="' + esc(spec.path) + '">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">'
+      +   '<label class="tgse-field-label" style="margin:0;">' + esc(spec.label) + '</label>'
+      +   '<div style="display:flex;align-items:center;gap:10px;">'
+      +     '<span class="at-ce-edited" style="font-size:11px;font-weight:700;color:var(--tgse-accent,#00B4D8);"' + (edited ? '' : ' hidden') + '>Edited</span>'
+      +     '<button type="button" class="at-ce-revert" data-revert="' + esc(spec.path) + '" style="font-size:11px;font-weight:600;color:var(--tgse-muted,#64748B);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;"' + (edited ? '' : ' hidden') + '>Revert to Luna</button>'
+      +   '</div>'
+      + '</div>'
+      + control
+      + '<div style="margin-top:6px;font-size:11px;padding:8px 10px;background:rgba(245,158,11,.12);border-radius:6px;border-left:3px solid #F59E0B;"' + (drift ? '' : ' hidden') + '>'
+      +   'Luna’s version of this changed after you edited it. '
+      +   '<button type="button" class="at-ce-useluna" data-revert="' + esc(spec.path) + '" style="font-weight:600;color:var(--tgse-ink,#0F172A);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;">Use Luna’s new wording</button>'
+      + '</div>'
+      + '</div>';
+  }
+  function renderContentEditor() {
+    const root = document.getElementById('at-content-edit');
+    if (!root) return;
+    if (!selectedAttraction) {
+      root.innerHTML = '<div class="at-help">Pick an attraction above, then rewrite its wording here in your own voice.</div>';
+      return;
+    }
+    if (!attractionContent) {
+      root.innerHTML = '<div class="at-help">Loading content…</div>';
+      return;
+    }
+    const key = ceKey();
+    const count = countLeaves(contentOverrides[key]);
+    const parts = ['<div id="at-ce-flag" style="' + ceFlagStyle(count) + '">' + ceFlagInner(count) + '</div>'];
+    let lastGroup = '';
+    CE_FIELDS.forEach(spec => {
+      const live = ceOriginal(spec.path);
+      if (!live && !ceOverrideAt(spec.path)) return; // only offer fields Luna actually has (or already edited)
+      if (spec.group !== lastGroup) {
+        parts.push('<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--tgse-muted,#94A3B8);margin:16px 0 8px;">' + esc(spec.group) + '</div>');
+        lastGroup = spec.group;
+      }
+      parts.push(ceField(spec));
+    });
+    root.innerHTML = parts.join('');
+    bindContentEditor(root, key);
+  }
+  function updateCeFlag() {
+    const flag = document.getElementById('at-ce-flag');
+    if (!flag) return;
+    const count = countLeaves(contentOverrides[ceKey()]);
+    flag.setAttribute('style', ceFlagStyle(count));
+    flag.innerHTML = ceFlagInner(count);
+    const btn = flag.querySelector('#at-ce-revertall');
+    if (btn) btn.addEventListener('click', ceRevertAll);
+  }
+  function ceRevertAll() {
+    const key = ceKey();
+    if (key) delete contentOverrides[key];
+    if (window.tgse && typeof window.tgse.markDirty === 'function') window.tgse.markDirty();
+    renderContentEditor();
+    renderPreview();
+  }
+  function bindContentEditor(root, key) {
+    root.querySelectorAll('[data-ovpath]').forEach(el => {
+      el.addEventListener('input', () => {
+        const p = el.getAttribute('data-ovpath');
+        setOverride(p, el.value, ceOriginal(p));
+        const row = el.closest('[data-row]');
+        if (row) {
+          const has = !!ceOverrideAt(p);
+          const ed = row.querySelector('.at-ce-edited'); if (ed) ed.hidden = !has;
+          row.querySelectorAll('.at-ce-revert').forEach(b => { b.hidden = !has; });
+        }
+        updateCeFlag();
+      });
+    });
+    root.querySelectorAll('.at-ce-revert, .at-ce-useluna').forEach(btn => {
+      btn.addEventListener('click', () => {
+        setOverride(btn.getAttribute('data-revert'), '', ceOriginal(btn.getAttribute('data-revert')));
+        renderContentEditor();
+        renderPreview();
+      });
+    });
+    const all = document.getElementById('at-ce-revertall');
+    if (all) all.addEventListener('click', ceRevertAll);
+  }
 
   // ---- Initialise shell ----
   if (window.tgse && typeof window.tgse.init === 'function') {
