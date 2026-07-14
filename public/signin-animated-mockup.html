@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in · Travelgenix (animated mockup)</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<style>
+  /* ── Travelgenix brand tokens (from editor-shell.css) ────────── */
+  :root {
+    --brand: #0891B2;
+    --brand-dark: #0E7490;
+    --accent: #6366F1;
+    --accent-dark: #4F46E5;
+    --ink: #0F172A;
+    --ink-2: #475569;
+    --ink-3: #64748B;
+    --muted: #94A3B8;
+    --border: #E2E8F0;
+    --panel: #FFFFFF;
+    --panel-2: #F8FAFC;
+    --page: #F1F5F9;
+    --radius: 16px;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    background:
+      radial-gradient(900px 500px at 15% 10%, rgba(8,145,178,.10), transparent 60%),
+      radial-gradient(900px 500px at 85% 90%, rgba(99,102,241,.12), transparent 60%),
+      var(--page);
+    color: var(--ink);
+    font-family: var(--font);
+    padding: 24px;
+  }
+
+  .stage { width: 100%; max-width: 860px; }
+
+  .stage-brand {
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+    margin: 0 0 20px;
+    font-weight: 700; font-size: 13px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink-3);
+  }
+  .stage-brand .dot {
+    width: 22px; height: 22px; border-radius: 7px;
+    background: linear-gradient(135deg, var(--brand), var(--accent));
+    box-shadow: 0 4px 12px rgba(8,145,178,.35);
+  }
+
+  /* ── The sliding card ──────────────────────────────────────── */
+  .container {
+    position: relative;
+    width: 100%;
+    min-height: 540px;
+    background: var(--panel);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 24px 60px rgba(15,23,42,.14);
+    overflow: hidden;
+  }
+
+  /* Both form halves sit stacked on the left, we slide between them */
+  .form-panel {
+    position: absolute;
+    top: 0; height: 100%; width: 50%;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 46px 52px;
+    transition: transform .7s cubic-bezier(.65,.05,.36,1),
+                opacity .7s ease;
+  }
+
+  .sign-in  { left: 0; z-index: 2; }
+  .sign-up  { left: 0; z-index: 1; opacity: 0; }
+
+  /* When "create account" is active, both panels slide right */
+  .container.active .sign-in  { transform: translateX(100%); opacity: 0; }
+  .container.active .sign-up  { transform: translateX(100%); opacity: 1; z-index: 5; }
+
+  h1 {
+    margin: 0 0 6px; font-size: 24px; font-weight: 700;
+    letter-spacing: -.02em;
+  }
+  .lede { margin: 0 0 22px; font-size: 14px; color: var(--ink-3); line-height: 1.5; }
+
+  /* ── OAuth ──────────────────────────────────────────────────── */
+  .oauth { display: grid; gap: 8px; margin-bottom: 18px; }
+  .oauth button {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; padding: 11px 16px;
+    background: var(--panel); color: var(--ink);
+    border: 1px solid var(--border); border-radius: 10px;
+    font: inherit; font-size: 14px; font-weight: 500; cursor: pointer;
+    transition: background .14s ease, border-color .14s ease, transform .06s ease;
+  }
+  .oauth button:hover { background: var(--panel-2); border-color: #CBD5E1; }
+  .oauth button:active { transform: translateY(1px); }
+  .oauth svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+  .divider {
+    display: flex; align-items: center; gap: 12px; margin: 8px 0 18px;
+    color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .1em;
+  }
+  .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── Fields ─────────────────────────────────────────────────── */
+  form { display: grid; gap: 13px; }
+  .field { display: grid; gap: 6px; }
+  .field label { font-size: 13px; font-weight: 500; color: var(--ink-2); }
+  .field input {
+    width: 100%; padding: 11px 14px;
+    border: 1px solid var(--border); border-radius: 10px;
+    font: inherit; font-size: 14px; background: var(--panel); color: var(--ink);
+    transition: border-color .14s ease, box-shadow .14s ease;
+  }
+  .field input:focus {
+    outline: none; border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(99,102,241,.16);
+  }
+  .row-between { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .link-btn {
+    background: none; border: 0; padding: 0; font: inherit; font-size: 13px;
+    color: var(--accent); cursor: pointer;
+  }
+  .link-btn:hover { text-decoration: underline; }
+
+  .submit {
+    width: 100%; padding: 12px 16px; margin-top: 4px;
+    background: linear-gradient(135deg, var(--brand), var(--accent));
+    color: #fff; border: 0; border-radius: 10px;
+    font: inherit; font-size: 15px; font-weight: 600; cursor: pointer;
+    box-shadow: 0 8px 18px rgba(8,145,178,.30);
+    transition: filter .14s ease, transform .06s ease, box-shadow .14s ease;
+  }
+  .submit:hover { filter: brightness(1.05); box-shadow: 0 10px 22px rgba(8,145,178,.38); }
+  .submit:active { transform: translateY(1px); }
+
+  /* Small inline toggle shown on mobile only */
+  .swap-line { display: none; text-align: center; margin-top: 16px; font-size: 13px; color: var(--ink-3); }
+  .swap-line .link-btn { font-size: 13px; font-weight: 600; }
+
+  /* ── The gradient overlay that slides across ───────────────── */
+  .overlay-wrap {
+    position: absolute; top: 0; left: 50%;
+    width: 50%; height: 100%; overflow: hidden; z-index: 100;
+    transition: transform .7s cubic-bezier(.65,.05,.36,1);
+    border-radius: 0 var(--radius) var(--radius) 0;
+  }
+  .container.active .overlay-wrap {
+    transform: translateX(-100%);
+    border-radius: var(--radius) 0 0 var(--radius);
+  }
+
+  .overlay {
+    position: relative; left: -100%;
+    width: 200%; height: 100%;
+    color: #fff;
+    background: linear-gradient(135deg, var(--brand) 0%, var(--accent) 100%);
+    transform: translateX(0);
+    transition: transform .7s cubic-bezier(.65,.05,.36,1);
+  }
+  .container.active .overlay { transform: translateX(50%); }
+
+  /* Soft moving light shapes for the "animated" feel */
+  .overlay::before, .overlay::after {
+    content: ""; position: absolute; border-radius: 50%;
+    background: rgba(255,255,255,.14); filter: blur(2px);
+    animation: float 9s ease-in-out infinite;
+  }
+  .overlay::before { width: 260px; height: 260px; top: -60px; right: 8%; }
+  .overlay::after  { width: 180px; height: 180px; bottom: -40px; left: 12%; animation-delay: -4.5s; }
+
+  @keyframes float {
+    0%,100% { transform: translateY(0) scale(1); opacity: .8; }
+    50%     { transform: translateY(26px) scale(1.08); opacity: 1; }
+  }
+
+  .overlay-panel {
+    position: absolute; top: 0; height: 100%; width: 50%;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center; padding: 46px 44px;
+    transition: transform .7s cubic-bezier(.65,.05,.36,1);
+  }
+  .overlay-left  { transform: translateX(-18%); }
+  .overlay-right { right: 0; transform: translateX(0); }
+  .container.active .overlay-left  { transform: translateX(0); }
+  .container.active .overlay-right { transform: translateX(18%); }
+
+  .overlay-panel h2 { margin: 0 0 10px; font-size: 26px; font-weight: 700; letter-spacing: -.02em; }
+  .overlay-panel p  { margin: 0 0 26px; font-size: 14px; line-height: 1.6; color: rgba(255,255,255,.9); max-width: 300px; }
+
+  .ghost-btn {
+    background: rgba(255,255,255,.14); color: #fff;
+    border: 1.5px solid rgba(255,255,255,.7);
+    border-radius: 10px; padding: 11px 34px;
+    font: inherit; font-size: 14px; font-weight: 600; letter-spacing: .02em;
+    cursor: pointer; backdrop-filter: blur(2px);
+    transition: background .14s ease, transform .06s ease;
+  }
+  .ghost-btn:hover { background: rgba(255,255,255,.24); }
+  .ghost-btn:active { transform: translateY(1px); }
+
+  .foot { text-align: center; margin-top: 18px; font-size: 12px; color: var(--muted); }
+
+  /* ── Mobile: no room to slide, so stack and use the text toggle ── */
+  @media (max-width: 720px) {
+    .container { min-height: 0; }
+    .overlay-wrap { display: none; }
+    .form-panel {
+      position: relative; width: 100%; padding: 34px 26px;
+      transition: none;
+    }
+    .sign-up { display: none; }
+    .container.active .sign-in { display: none; transform: none; opacity: 1; }
+    .container.active .sign-up { display: flex; opacity: 1; transform: none; }
+    .swap-line { display: block; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .form-panel, .overlay-wrap, .overlay, .overlay-panel { transition: none !important; }
+    .overlay::before, .overlay::after { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+<main class="stage" role="main">
+  <div class="stage-brand"><span class="dot"></span> Travelgenix ID</div>
+
+  <div class="container" id="container">
+
+    <!-- ── Sign in ─────────────────────────────────────────── -->
+    <section class="form-panel sign-in" aria-label="Sign in">
+      <h1>Welcome back</h1>
+      <p class="lede">Sign in to reach your Travelgenix apps.</p>
+
+      <div class="oauth">
+        <button type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.75h3.57c2.08-1.92 3.28-4.74 3.28-8.07z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.75c-.99.66-2.25 1.06-3.71 1.06-2.86 0-5.28-1.93-6.14-4.53H2.17v2.84A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.86 14.12a6.6 6.6 0 0 1 0-4.24V7.04H2.17a11 11 0 0 0 0 9.92l3.69-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1A11 11 0 0 0 2.17 7.04l3.69 2.84C6.72 7.31 9.14 5.38 12 5.38z"/></svg>
+          Continue with Google
+        </button>
+      </div>
+
+      <div class="divider">or with email</div>
+
+      <form onsubmit="return false">
+        <div class="field">
+          <label for="si-email">Email</label>
+          <input type="email" id="si-email" autocomplete="username" placeholder="you@agency.com">
+        </div>
+        <div class="field">
+          <div class="row-between">
+            <label for="si-pw">Password</label>
+            <button type="button" class="link-btn">Forgot password?</button>
+          </div>
+          <input type="password" id="si-pw" autocomplete="current-password" placeholder="••••••••••">
+        </div>
+        <button type="submit" class="submit">Sign in</button>
+      </form>
+
+      <p class="swap-line">New to Travelgenix?
+        <button type="button" class="link-btn" data-toggle>Create an account</button>
+      </p>
+    </section>
+
+    <!-- ── Create account ──────────────────────────────────── -->
+    <section class="form-panel sign-up" aria-label="Create account">
+      <h1>Create your account</h1>
+      <p class="lede">Set up your Travelgenix ID in a moment.</p>
+
+      <div class="oauth">
+        <button type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.75h3.57c2.08-1.92 3.28-4.74 3.28-8.07z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.75c-.99.66-2.25 1.06-3.71 1.06-2.86 0-5.28-1.93-6.14-4.53H2.17v2.84A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.86 14.12a6.6 6.6 0 0 1 0-4.24V7.04H2.17a11 11 0 0 0 0 9.92l3.69-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1A11 11 0 0 0 2.17 7.04l3.69 2.84C6.72 7.31 9.14 5.38 12 5.38z"/></svg>
+          Sign up with Google
+        </button>
+      </div>
+
+      <div class="divider">or with email</div>
+
+      <form onsubmit="return false">
+        <div class="field">
+          <label for="su-name">Full name</label>
+          <input type="text" id="su-name" autocomplete="name" placeholder="Jane Traveller">
+        </div>
+        <div class="field">
+          <label for="su-email">Email</label>
+          <input type="email" id="su-email" autocomplete="email" placeholder="you@agency.com">
+        </div>
+        <div class="field">
+          <label for="su-pw">Password</label>
+          <input type="password" id="su-pw" autocomplete="new-password" placeholder="At least 10 characters">
+        </div>
+        <button type="submit" class="submit">Create account</button>
+      </form>
+
+      <p class="swap-line">Already have a login?
+        <button type="button" class="link-btn" data-toggle>Sign in</button>
+      </p>
+    </section>
+
+    <!-- ── Sliding gradient overlay ────────────────────────── -->
+    <div class="overlay-wrap" aria-hidden="true">
+      <div class="overlay">
+        <div class="overlay-panel overlay-left">
+          <h2>Already with us?</h2>
+          <p>Sign in with your existing Travelgenix ID and pick up right where you left off.</p>
+          <button type="button" class="ghost-btn" id="toSignIn">Sign in</button>
+        </div>
+        <div class="overlay-panel overlay-right">
+          <h2>New here?</h2>
+          <p>Create a Travelgenix ID to unlock every widget, editor and dashboard in one place.</p>
+          <button type="button" class="ghost-btn" id="toSignUp">Create account</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <p class="foot">Travelgenix · Bournemouth, UK · part of Agendas Group</p>
+</main>
+
+<script>
+  (function () {
+    'use strict';
+    var container = document.getElementById('container');
+
+    function showSignUp() { container.classList.add('active'); }
+    function showSignIn() { container.classList.remove('active'); }
+
+    document.getElementById('toSignUp').addEventListener('click', showSignUp);
+    document.getElementById('toSignIn').addEventListener('click', showSignIn);
+
+    // Mobile inline toggles (both directions)
+    document.querySelectorAll('[data-toggle]').forEach(function (btn) {
+      btn.addEventListener('click', function () { container.classList.toggle('active'); });
+    });
+  })();
+</script>
+</body>
+</html>
