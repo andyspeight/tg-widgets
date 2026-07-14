@@ -606,6 +606,23 @@
             </div>
           </div>
 
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Rewrite content
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field-help" style="margin-bottom:12px;">
+                The wording comes from Travelgenix Luna. Rewrite any of it in your own voice below. Facts, climate and images always stay live, and anything you leave untouched keeps updating automatically. You can revert to Luna at any time.
+              </div>
+              <div class="field">
+                <label class="field-label">Your brand voice (optional)</label>
+                <textarea class="textarea" id="contentVoice" maxlength="600" rows="2" placeholder="e.g. warm and informal, we are a family-run agency in Leeds who know Greece inside out"></textarea>
+                <div class="field-help" style="margin-top:6px">Guides the <strong>Rewrite with AI</strong> buttons below. Leave blank for a warm, plain default.</div>
+              </div>
+              <div id="contentEditRoot"></div>
+            </div>
+          </div>
+
           <div class="section" data-open="false">
             <button class="section-head" data-section>Auto-detect
               <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
@@ -902,6 +919,8 @@
           url: '',
         },
         destination: null,
+        contentOverrides: {},
+        contentVoice: '',
         autoDetect: {
           enabled: false,
           slugSource: 'last-path-segment',
@@ -1240,8 +1259,9 @@
       // Reset the breakdown state so we render a loading shell while we fetch
       selectedCompleteness = { state: 'loading' };
       renderSelectedDestination();
+      renderContentEditor();
       onConfigChange();
-      fetchDestinationData(r.level, r.recordId); // preload for preview
+      fetchDestinationData(r.level, r.recordId); // preload for preview + content editor
       fetchSelectedCompleteness(r.level, r.recordId);
     }
 
@@ -1300,6 +1320,7 @@
         }
         destCache[key] = await res.json();
         schedulePreview();
+        renderContentEditor();
       } catch (err) {
         if (err.name === 'AbortError') return;
         console.error('[editor] destination fetch failed', err);
@@ -1384,6 +1405,7 @@
         destCache = {};
         selectedCompleteness = null;
         renderSelectedDestination();
+        renderContentEditor();
         onConfigChange();
       });
     }
@@ -1392,6 +1414,298 @@
       return String(s == null ? '' : s)
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    /* ============================================================
+       Content editor — rewrite Luna's editorial prose in your own
+       voice. Stores a thin per-field diff in config.contentOverrides
+       as { v, o } (v = your text, o = the Luna original at edit time).
+       The widget merges it over the live Luna payload at render time,
+       so untouched fields keep auto-updating. Prose only — facts,
+       climate, images and tags always stay live. Phase 1 covers
+       fixed-destination widgets (auto-detect is deferred).
+       ============================================================ */
+    // Mirror the widget's normaliseSlugClient exactly so array-item keys match.
+    function ceSlug(s) {
+      return String(s == null ? '' : s).toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 100);
+    }
+    function contentKey() {
+      const d = state.config.destination;
+      return (d && d.recordId) ? ((d.level || '') + ':' + d.recordId) : null;
+    }
+    function overrideAt(pathArr) {
+      const key = contentKey();
+      const all = state.config.contentOverrides;
+      if (!key || !all || !all[key]) return null;
+      let node = all[key];
+      for (let i = 0; i < pathArr.length; i++) {
+        if (!node || typeof node !== 'object') return null;
+        node = node[pathArr[i]];
+      }
+      return (node && typeof node === 'object' && typeof node.v === 'string') ? node : null;
+    }
+    // The live Luna original for a dotted path, read from the cached payload.
+    function ceOriginalFor(key, path) {
+      const live = destCache[key];
+      if (!live) return '';
+      const segs = path.split('.');
+      if (segs[0] === 'tagline')   return live.tagline || '';
+      if (segs[0] === 'heroIntro') return live.heroIntro || '';
+      if (segs[0] === 'planning')  return (live.planning && live.planning[segs[1]]) || '';
+      if (segs[0] === 'highlights') {
+        const h = (live.highlights || []).find(x => x && x.title && ceSlug(x.title) === segs[1]);
+        return h ? (h[segs[2]] || '') : '';
+      }
+      if (segs[0] === 'events') {
+        const e = (live.events || []).find(x => x && x.name && ceSlug(x.name) === segs[1]);
+        return e ? (e[segs[2]] || '') : '';
+      }
+      return '';
+    }
+    function cePrune(obj) {
+      Object.keys(obj).forEach(k => {
+        const v = obj[k];
+        if (v && typeof v === 'object' && typeof v.v !== 'string') {
+          cePrune(v);
+          if (Object.keys(v).length === 0) delete obj[k];
+        }
+      });
+    }
+    // Write (or clear) one override. Empty text, or text equal to Luna's original,
+    // clears the override so the field falls back to live Luna — that IS the revert.
+    function setOverride(pathArr, value, original) {
+      const key = contentKey();
+      if (!key) return;
+      const all = state.config.contentOverrides = state.config.contentOverrides || {};
+      const orig = String(original == null ? '' : original);
+      const trimmed = String(value == null ? '' : value).trim();
+      const isRevert = trimmed === '' || trimmed === orig.trim();
+      let node = all[key] = all[key] || {};
+      for (let i = 0; i < pathArr.length - 1; i++) {
+        node = node[pathArr[i]] = node[pathArr[i]] || {};
+      }
+      const leaf = pathArr[pathArr.length - 1];
+      if (isRevert) delete node[leaf];
+      else node[leaf] = { v: String(value), o: orig };
+      cePrune(all[key]);
+      if (Object.keys(all[key]).length === 0) delete all[key];
+      onConfigChange();
+    }
+    function countLeaves(obj) {
+      let n = 0;
+      (function walk(o) {
+        Object.keys(o).forEach(k => {
+          const v = o[k];
+          if (v && typeof v === 'object') { if (typeof v.v === 'string') n++; else walk(v); }
+        });
+      })(obj);
+      return n;
+    }
+    function hasAnyOverride(all) {
+      if (!all || typeof all !== 'object') return false;
+      return Object.keys(all).some(k => all[k] && countLeaves(all[k]) > 0);
+    }
+
+    function ceHint(msg) {
+      return '<div class="field-help" style="padding:10px 12px;background:var(--hover);border-radius:8px;">' + escHtml(msg) + '</div>';
+    }
+    function ceSectionLabel(t) {
+      return '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:16px 0 8px;">' + escHtml(t) + '</div>';
+    }
+    function ceFlagStyle(count) {
+      return 'margin-bottom:12px;padding:10px 12px;border-radius:8px;'
+        + (count ? 'background:var(--accent-soft);border-left:3px solid var(--accent);'
+                 : 'background:var(--hover);border-left:3px solid var(--border-strong);');
+    }
+    function ceFlagInner(count) {
+      const title = count
+        ? ('Content customised — ' + count + ' field' + (count === 1 ? '' : 's') + ' rewritten')
+        : 'Using Luna’s wording';
+      const help = count
+        ? 'These fields no longer auto-update from Luna. Everything you leave untouched still does.'
+        : 'Rewrite any wording below to make it your own.';
+      return '<div style="font-size:12px;color:var(--ink);font-weight:600;">' + escHtml(title) + '</div>'
+        + '<div class="field-help" style="margin-top:2px;">' + escHtml(help) + '</div>'
+        + (count ? '<button type="button" id="ceRevertAll" style="margin-top:8px;font-size:11px;font-weight:600;color:var(--danger);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;">Revert everything to Luna</button>' : '');
+    }
+    function ceField(opts) {
+      const segs = opts.path.split('.');
+      const ov = overrideAt(segs);
+      const edited = !!ov;
+      const eff = edited ? ov.v : (opts.live || '');
+      const drift = edited && String(ov.o).trim() !== String(opts.live || '').trim();
+      const control = opts.multiline
+        ? '<textarea class="textarea" rows="3" data-ovpath="' + escHtml(opts.path) + '" placeholder="' + escHtml(opts.placeholder || '') + '">' + escHtml(eff) + '</textarea>'
+        : '<input class="input" data-ovpath="' + escHtml(opts.path) + '" value="' + escHtml(eff) + '" placeholder="' + escHtml(opts.placeholder || '') + '" />';
+      return '<div class="field" data-row="' + escHtml(opts.path) + '">'
+        + '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">'
+        +   '<label class="field-label" style="margin:0;">' + escHtml(opts.label) + '</label>'
+        +   '<div style="display:flex;align-items:center;gap:10px;">'
+        +     '<span class="ce-edited" style="font-size:11px;font-weight:700;color:var(--accent);"' + (edited ? '' : ' hidden') + '>Edited</span>'
+        +     '<button type="button" class="ce-ai" data-ai="' + escHtml(opts.path) + '" data-ai-label="' + escHtml(opts.label) + '" style="font-size:11px;font-weight:600;color:var(--accent);background:none;border:none;cursor:pointer;padding:0;">✨ Rewrite with AI</button>'
+        +     '<button type="button" class="ce-revert" data-revert="' + escHtml(opts.path) + '" style="font-size:11px;font-weight:600;color:var(--sub);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;"' + (edited ? '' : ' hidden') + '>Revert to Luna</button>'
+        +   '</div>'
+        + '</div>'
+        + control
+        + '<div class="ce-drift" style="margin-top:6px;font-size:11px;padding:8px 10px;background:rgba(245,158,11,.12);border-radius:6px;border-left:3px solid var(--warning);"' + (drift ? '' : ' hidden') + '>'
+        +   'Luna’s version of this changed after you edited it. '
+        +   '<button type="button" class="ce-useluna" data-revert="' + escHtml(opts.path) + '" style="font-weight:600;color:var(--ink);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;">Use Luna’s new wording</button>'
+        + '</div>'
+        + '</div>';
+    }
+
+    function renderContentEditor() {
+      const root = document.getElementById('contentEditRoot');
+      if (!root) return;
+      const ad = state.config.autoDetect || {};
+      const dest = state.config.destination;
+      if (!dest || !dest.recordId) {
+        root.innerHTML = ceHint(ad.enabled
+          ? 'Pick a destination above to rewrite its content. In auto-detect mode you can rewrite as many destinations as you like, one at a time; every other destination stays on Luna’s wording.'
+          : 'Pick a fixed destination above, then rewrite its wording here in your own voice.');
+        return;
+      }
+      const key = dest.level + ':' + dest.recordId;
+      const live = destCache[key];
+      if (!live) {
+        root.innerHTML = ceHint('Loading content…');
+        fetchDestinationData(dest.level, dest.recordId);
+        return;
+      }
+
+      const bucket = (state.config.contentOverrides || {})[key];
+      const count = bucket ? countLeaves(bucket) : 0;
+      const parts = [];
+      if (ad.enabled) {
+        parts.push('<div class="field-help" style="margin-bottom:12px;padding:10px 12px;background:var(--brand-soft,rgba(27,43,91,.1));border-radius:8px;border-left:3px solid var(--accent);">Auto-detect is on. You’re rewriting <strong>' + escHtml(dest.name || 'this destination') + '</strong>. These edits apply wherever the widget resolves to it. Pick another destination above to rewrite that one too — every destination you don’t touch stays on Luna’s wording.</div>');
+      }
+      parts.push('<div id="ceFlag" style="' + ceFlagStyle(count) + '">' + ceFlagInner(count) + '</div>');
+
+      parts.push(ceSectionLabel('Hero'));
+      parts.push(ceField({ path: 'tagline',   label: 'Tagline', live: live.tagline, placeholder: 'A short, punchy line' }));
+      parts.push(ceField({ path: 'heroIntro', label: 'Intro',   live: live.heroIntro, multiline: true, placeholder: 'A sentence or two of scene-setting' }));
+
+      const highlights = Array.isArray(live.highlights) ? live.highlights.slice(0, 6) : [];
+      const hlWithTitle = highlights.filter(h => h && h.title);
+      if (hlWithTitle.length) {
+        parts.push(ceSectionLabel('Highlights'));
+        hlWithTitle.forEach(h => {
+          const k = ceSlug(h.title);
+          parts.push('<div style="padding:10px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;">');
+          parts.push(ceField({ path: 'highlights.' + k + '.title',       label: 'Title',       live: h.title }));
+          parts.push(ceField({ path: 'highlights.' + k + '.description', label: 'Description', live: h.description, multiline: true }));
+          parts.push('</div>');
+        });
+      }
+
+      const events = Array.isArray(live.events) ? live.events.slice(0, 6) : [];
+      const evWithName = events.filter(e => e && e.name);
+      if (evWithName.length) {
+        parts.push(ceSectionLabel('What’s on'));
+        evWithName.forEach(e => {
+          const k = ceSlug(e.name);
+          const monthTag = e.month ? '  · ' + e.month : '';
+          parts.push('<div style="padding:10px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;">');
+          parts.push(ceField({ path: 'events.' + k + '.name',        label: 'Name' + monthTag, live: e.name }));
+          parts.push(ceField({ path: 'events.' + k + '.description', label: 'Description',      live: e.description, multiline: true }));
+          parts.push('</div>');
+        });
+      }
+
+      const p = live.planning || {};
+      const hasVisa   = p.visaAdvisory && String(p.visaAdvisory).trim();
+      const hasHealth = p.healthNotes  && String(p.healthNotes).trim();
+      if (hasVisa || hasHealth) {
+        parts.push(ceSectionLabel('Good to know'));
+        if (hasVisa)   parts.push(ceField({ path: 'planning.visaAdvisory', label: 'Visa guidance', live: p.visaAdvisory, multiline: true }));
+        if (hasHealth) parts.push(ceField({ path: 'planning.healthNotes',  label: 'Health notes',  live: p.healthNotes,  multiline: true }));
+      }
+
+      root.innerHTML = parts.join('');
+      bindContentEditor(root, key);
+    }
+
+    function updateCeFlag(key) {
+      const flag = document.getElementById('ceFlag');
+      if (!flag) return;
+      const bucket = (state.config.contentOverrides || {})[key];
+      const count = bucket ? countLeaves(bucket) : 0;
+      flag.setAttribute('style', ceFlagStyle(count));
+      flag.innerHTML = ceFlagInner(count);
+      const btn = flag.querySelector('#ceRevertAll');
+      if (btn) btn.addEventListener('click', () => ceRevertAll(key));
+    }
+    function ceRevertAll(key) {
+      if (state.config.contentOverrides) delete state.config.contentOverrides[key];
+      onConfigChange();
+      renderContentEditor();
+    }
+    function bindContentEditor(root, key) {
+      root.querySelectorAll('[data-ovpath]').forEach(el => {
+        el.addEventListener('input', () => {
+          const p = el.getAttribute('data-ovpath');
+          setOverride(p.split('.'), el.value, ceOriginalFor(key, p));
+          const row = el.closest('[data-row]');
+          if (row) {
+            const has = !!overrideAt(p.split('.'));
+            const ed = row.querySelector('.ce-edited'); if (ed) ed.hidden = !has;
+            const rv = row.querySelector('.ce-revert'); if (rv) rv.hidden = !has;
+          }
+          updateCeFlag(key);
+        });
+      });
+      const revertOne = (p) => {
+        setOverride(p.split('.'), '', ceOriginalFor(key, p));
+        renderContentEditor();
+      };
+      root.querySelectorAll('.ce-revert, .ce-useluna').forEach(btn => {
+        btn.addEventListener('click', () => revertOne(btn.getAttribute('data-revert')));
+      });
+      root.querySelectorAll('.ce-ai').forEach(btn => {
+        btn.addEventListener('click', () => aiRewrite(btn.getAttribute('data-ai'), btn.getAttribute('data-ai-label'), btn, key));
+      });
+      const all = document.getElementById('ceRevertAll');
+      if (all) all.addEventListener('click', () => ceRevertAll(key));
+    }
+
+    // "Rewrite with AI" — rewrite one field in the client's brand voice via the
+    // hardened /api/widget-ai rewrite action. The Luna original is captured as
+    // the override's `o`, so revert and drift detection keep working.
+    async function aiRewrite(path, label, btn, key) {
+      const control = document.querySelector('#contentEditRoot [data-ovpath="' + path + '"]');
+      if (!control) return;
+      const original = ceOriginalFor(key, path);
+      const text = (control.value || original || '').trim();
+      if (!text) { toast('Nothing to rewrite yet', 'error'); return; }
+      const voice = (state.config.contentVoice || '').trim();
+      const prev = btn.textContent;
+      btn.disabled = true; btn.textContent = 'Rewriting…';
+      try {
+        const res = await fetch(API_AI, {
+          method: 'POST',
+          headers: authH(),
+          body: JSON.stringify({ action: 'rewrite', field: label, text: text, voice: voice }),
+        });
+        if (res.status === 401) { toast('Your session expired. Please sign in.', 'error'); showLogin(); return; }
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 403) { toast(data.error || 'AI rewrite needs a Boost plan or higher.', 'error'); return; }
+        if (res.status === 429) { toast(data.error || 'Daily AI limit reached. Try again tomorrow.', 'error'); return; }
+        if (!res.ok || !data.text) throw new Error(data.error || 'Rewrite failed');
+        control.value = data.text;
+        setOverride(path.split('.'), data.text, original);
+        const row = control.closest('[data-row]');
+        if (row) {
+          const ed = row.querySelector('.ce-edited'); if (ed) ed.hidden = false;
+          const rv = row.querySelector('.ce-revert'); if (rv) rv.hidden = false;
+        }
+        updateCeFlag(key);
+        toast('Rewritten in your voice', 'success');
+      } catch (err) {
+        toast((err && err.message) || 'Rewrite failed', 'error');
+      } finally {
+        btn.disabled = false; btn.textContent = prev;
+      }
     }
 
     /* ============================================================
@@ -1435,6 +1749,7 @@
       document.getElementById('hEvents').value = c.eventsHeading || '';
       document.getElementById('hPaired').value = c.pairedHeading || '';
       document.getElementById('pairedLinkBase').value = c.pairedLinkBase || '';
+      document.getElementById('contentVoice').value = c.contentVoice || '';
       // Auto-detect
       const ad = c.autoDetect || {};
       const adEnabled = !!ad.enabled;
@@ -1453,6 +1768,8 @@
       document.getElementById('togBestTime').setAttribute('aria-checked', c.showBestTimeCallout ? 'true' : 'false');
       // Destination
       renderSelectedDestination();
+      // Content editor (rewrite-in-your-voice panel)
+      renderContentEditor();
       // Embed
       renderEmbed();
     }
@@ -1544,12 +1861,14 @@
     document.getElementById('hEvents').addEventListener('input', e => { state.config.eventsHeading = e.target.value; onConfigChange(); });
     document.getElementById('hPaired').addEventListener('input', e => { state.config.pairedHeading = e.target.value; onConfigChange(); });
     document.getElementById('pairedLinkBase').addEventListener('input', e => { state.config.pairedLinkBase = e.target.value.trim(); onConfigChange(); });
+    document.getElementById('contentVoice').addEventListener('input', e => { state.config.contentVoice = e.target.value; onConfigChange(); });
 
     // Auto-detect
     document.getElementById('togAutoDetect').addEventListener('click', e => {
       state.config.autoDetect.enabled = !state.config.autoDetect.enabled;
       e.currentTarget.setAttribute('aria-checked', state.config.autoDetect.enabled ? 'true' : 'false');
       document.getElementById('autoDetectFields').hidden = !state.config.autoDetect.enabled;
+      renderContentEditor();
       onConfigChange();
     });
     document.getElementById('slugSource').addEventListener('change', e => {
@@ -1945,7 +2264,13 @@ ${font ? `<link href="https://fonts.googleapis.com/css2?family=${font}:wght@400;
       // Shell asks us for the current config when it needs to save.
       // Shell's body shape is { widgetId, name, widgetType, config } — same
       // as Spotlight's old save() — so the API call is identical.
-      getConfig: () => state.config,
+      getConfig: () => {
+        // Flag on save: mark the widget as content-customised whenever any
+        // override is present, so the divergence from Luna is tracked (the
+        // dashboard and API can surface it). The server re-derives this too.
+        state.config.contentEdited = hasAnyOverride(state.config.contentOverrides);
+        return state.config;
+      },
       setConfig: (c) => {
         if (c && typeof c === 'object') Object.assign(state.config, c);
         hydrateUI();

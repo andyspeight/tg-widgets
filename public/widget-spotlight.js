@@ -4,7 +4,10 @@
  * Zero dependencies. Shadow DOM isolation. Works on any website via a single script tag.
  *
  * Data is fetched live at render-time from the Travelgenix Destination Content
- * database via /api/destination-content — never snapshotted into config.
+ * database via /api/destination-content — never snapshotted into config. Clients
+ * may rewrite the editorial prose in their own voice; those rewrites live in
+ * config.contentOverrides and are merged over the live payload at render time
+ * (prose only — facts, climate, images and tags always stay live).
  *
  * Features
  *  - Full-bleed editorial hero with destination name + tagline
@@ -92,7 +95,7 @@
     } catch (e) { /* fall through */ }
     return '/api/destination-content';
   })();
-  const VERSION = '1.2.4';
+  const VERSION = '1.4.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (section default headings, fact/planning labels,
@@ -422,6 +425,70 @@
     }).replace(/\s{2,}/g, ' ').trim();
     // The double-space collapse handles cases like "Visit {{region}} today"
     // when region is blank — would otherwise leave an awkward "Visit  today".
+  }
+
+  /* ------------------------------------------------------------------
+   * Client content overrides.
+   *
+   * Content is fetched live from Luna Brain and never snapshotted into
+   * config. But clients may rewrite the editorial prose in their own voice.
+   * Those rewrites live in config.contentOverrides as a thin diff layer that
+   * is merged over the live payload here, at render time. Only prose fields
+   * are overridable — facts, climate, images, tags and paired links always
+   * stay live, so a stale rewrite can never publish a wrong fact.
+   *
+   * Shape (per destination, keyed `level:recordId`):
+   *   {
+   *     tagline:   { v, o },              // v = client text, o = Luna original
+   *     heroIntro: { v, o },
+   *     planning:  { visaAdvisory:{v,o}, healthNotes:{v,o} },
+   *     highlights:{ '<slug-of-original-title>': { title:{v,o}, description:{v,o} } },
+   *     events:    { '<slug-of-original-name>':  { name:{v,o},  description:{v,o} } }
+   *   }
+   *
+   * `o` (the Luna original at edit time) is only used by the editor to flag
+   * drift ("Luna changed this since you edited it"); the widget ignores it.
+   * Array items are matched by the normalised original title/name, so if Luna
+   * renames or removes an item the override simply falls away and the live
+   * Luna value shows through — no silent mis-application onto the wrong card.
+   * ------------------------------------------------------------------ */
+  function pickV(ov, fallback) {
+    return (ov && typeof ov.v === 'string') ? ov.v : fallback;
+  }
+  function applyContentOverrides(data, ov) {
+    if (!data || !ov || typeof ov !== 'object') return data;
+    const out = data; // the fetched payload is ours to mutate
+    if (ov.tagline)   out.tagline   = pickV(ov.tagline,   out.tagline);
+    if (ov.heroIntro) out.heroIntro = pickV(ov.heroIntro, out.heroIntro);
+    if (ov.planning && out.planning && typeof out.planning === 'object') {
+      if (ov.planning.visaAdvisory) out.planning.visaAdvisory = pickV(ov.planning.visaAdvisory, out.planning.visaAdvisory);
+      if (ov.planning.healthNotes)  out.planning.healthNotes  = pickV(ov.planning.healthNotes,  out.planning.healthNotes);
+    }
+    if (ov.highlights && Array.isArray(out.highlights)) {
+      out.highlights = out.highlights.map((h) => {
+        if (!h || !h.title) return h;
+        const o = ov.highlights[normaliseSlugClient(h.title)];
+        if (!o) return h;
+        const merged = {};
+        for (const k in h) if (Object.prototype.hasOwnProperty.call(h, k)) merged[k] = h[k];
+        if (o.title)       merged.title       = pickV(o.title, h.title);
+        if (o.description) merged.description = pickV(o.description, h.description);
+        return merged;
+      });
+    }
+    if (ov.events && Array.isArray(out.events)) {
+      out.events = out.events.map((e) => {
+        if (!e || !e.name) return e;
+        const o = ov.events[normaliseSlugClient(e.name)];
+        if (!o) return e;
+        const merged = {};
+        for (const k in e) if (Object.prototype.hasOwnProperty.call(e, k)) merged[k] = e[k];
+        if (o.name)        merged.name        = pickV(o.name, e.name);
+        if (o.description) merged.description = pickV(o.description, e.description);
+        return merged;
+      });
+    }
+    return out;
   }
 
   // Month labels used throughout
@@ -1235,7 +1302,7 @@
       // If inline destinationData was supplied, use it immediately.
       // Otherwise, fetch live from the content API.
       if (this.c.destinationData && typeof this.c.destinationData === 'object') {
-        this._destination = this.c.destinationData;
+        this._destination = this._withOverrides(this.c.destinationData);
         this._renderContent();
       } else if (this.c.widgetId) {
         this._loadDestination();
@@ -1285,6 +1352,7 @@
         },
         destination: null,       // {level, recordId}
         destinationData: null,   // optional inline preview payload
+        contentOverrides: {},    // client rewrites, keyed by `level:recordId`
         autoDetect: {
           enabled: false,
           slugSource: 'last-path-segment', // 'last-path-segment' | 'query-param' | 'custom-selector'
@@ -1377,7 +1445,9 @@
           if (!slugData || slugData.found === false) {
             return this._renderHidden();
           }
-          this._destination = slugData;
+          // Auto-detect: apply the client's overrides for the RESOLVED
+          // destination, keyed by the payload's own level:recordId.
+          this._destination = this._withOverrides(slugData);
           this._renderContent();
           return;
         }
@@ -1389,12 +1459,31 @@
           if (res.status === 404) return this._renderNotFound();
           throw new Error('Content fetch failed (' + res.status + ')');
         }
-        this._destination = await res.json();
+        this._destination = this._withOverrides(await res.json());
         this._renderContent();
       } catch (err) {
         console.error('[TG Spotlight] Failed to load destination:', err);
         this._renderError();
       }
+    }
+
+    // Merge the client's content overrides for the CURRENT destination over a
+    // freshly-fetched Luna payload. Overrides are keyed by `level:recordId` and
+    // apply in BOTH fixed and auto-detect mode: the key is taken from the
+    // payload's own identity (the API echoes recordId), so an auto-detect embed
+    // that resolves a slug to Santorini picks up the Santorini overrides. Older
+    // payloads that predate the recordId echo fall back to the configured fixed
+    // destination.
+    _withOverrides(data) {
+      const all = this.c.contentOverrides;
+      if (!data || !all || typeof all !== 'object') return data;
+      let key = (data.level && data.recordId) ? (data.level + ':' + data.recordId) : '';
+      if (!key) {
+        const dest = this.c.destination;
+        if (dest && dest.recordId) key = (dest.level || '') + ':' + dest.recordId;
+      }
+      const ov = key ? all[key] : null;
+      return ov ? applyContentOverrides(data, ov) : data;
     }
 
     _renderContent() {

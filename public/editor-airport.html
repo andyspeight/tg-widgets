@@ -352,6 +352,24 @@
           </div>
         </div>
 
+        <!-- Rewrite content -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            <span class="tgse-section-label">Rewrite content</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="ap-cta-help" style="margin-bottom:12px;">The wording comes from Travelgenix Luna. Rewrite any of it in your own voice below. The IATA code, city, country, distance and flight time always stay live, and anything you leave untouched keeps updating automatically. You can revert to Luna at any time.</div>
+            <div class="tgse-field">
+              <label class="tgse-field-label">Your brand voice (optional)</label>
+              <textarea class="input" id="content-voice" maxlength="600" rows="2" placeholder="e.g. warm and reassuring, we help nervous flyers feel at ease"></textarea>
+              <div class="field-hint">Guides the <strong>Rewrite with AI</strong> buttons below. Leave blank for a warm, plain default.</div>
+            </div>
+            <div id="ap-content-edit"></div>
+          </div>
+        </div>
+
         <!-- CTAs -->
         <div class="tgse-section is-open">
           <div class="tgse-section-head">
@@ -572,6 +590,7 @@
   // ---- Local state ----
   let selectedAirport = null;   // { recordId, iata, name, role, status, cityServed, country, ... fullAirportData? }
   let airportContent = null;    // full airport payload from /api/airport-content for preview
+  let contentOverrides = {};    // client rewrites, keyed by airport IATA code
   const searchInput = document.getElementById('ap-search');
   const resultsEl   = document.getElementById('ap-results');
   const selectedWrap = document.getElementById('ap-selected');
@@ -605,12 +624,17 @@
         destinationButtonLabel: document.getElementById('cta-dest-label').value,
         destinationButtonUrl:  document.getElementById('cta-dest-url').value,
       },
+      contentOverrides: contentOverrides,
+      contentEdited: hasAnyOverride(contentOverrides),
+      contentVoice: (document.getElementById('content-voice') || {}).value || '',
     };
   }
 
   // ---- Restore config from saved record ----
   function setConfig(cfg) {
     if (!cfg) return;
+    contentOverrides = (cfg.contentOverrides && typeof cfg.contentOverrides === 'object') ? cfg.contentOverrides : {};
+    { const cv = document.getElementById('content-voice'); if (cv) cv.value = cfg.contentVoice || ''; }
     if (cfg.brandColor)   document.getElementById('brand-color').value = cfg.brandColor;
     if (cfg.accentColor)  document.getElementById('accent-color').value = cfg.accentColor;
     document.getElementById('hero-url').value = cfg.heroImageUrl || '';
@@ -635,6 +659,7 @@
       // Re-fetch the airport summary so we can show the chip
       hydrateSelected(cfg.airport).then(() => renderPreview());
     } else {
+      renderContentEditor();
       renderPreview();
     }
   }
@@ -660,6 +685,7 @@
       };
       airportContent = d.airport;
       paintSelected();
+      renderContentEditor();
     } catch (e) { /* noop */ }
   }
 
@@ -773,6 +799,7 @@
     selectedAirport = null;
     airportContent = null;
     paintSelected();
+    renderContentEditor();
     renderPreview();
   });
 
@@ -786,6 +813,222 @@
     el.addEventListener('input', debouncedPreview);
     el.addEventListener('change', debouncedPreview);
   });
+
+  /* ============================================================
+     Content editor — rewrite Luna's editorial prose in your own
+     voice. Stores a per-airport diff in contentOverrides as
+     { v, o } (v = your text, o = the Luna original at edit time),
+     keyed by the airport's IATA code. The widget merges it over
+     the live Luna payload at render time, so untouched fields keep
+     auto-updating. Prose only — the IATA code, city, country,
+     distance and flight time always stay live.
+     ============================================================ */
+  const CE_FIELDS = [
+    { group: 'Hero',                 path: 'tagline',              label: 'Tagline' },
+    { group: 'Overview',             path: 'overviewHeading',      label: 'Overview heading' },
+    { group: 'Overview',             path: 'overview',             label: 'Overview', multiline: true },
+    { group: 'Terminals and airlines', path: 'terminalsNote',      label: 'Terminals note', multiline: true },
+    { group: 'Terminals and airlines', path: 'terminalsAndAirlines', label: 'Terminals and airlines', multiline: true },
+    { group: 'Terminals and airlines', path: 'keyAirlines',        label: 'Key airlines', multiline: true },
+    { group: 'Terminals and airlines', path: 'keyAirlinesNote',    label: 'Key airlines note', multiline: true },
+    { group: 'Flights and check-in', path: 'flightTimeNote',       label: 'Flight time note', multiline: true },
+    { group: 'Flights and check-in', path: 'checkInSummary',       label: 'Check-in summary', multiline: true },
+    { group: 'Flights and check-in', path: 'checkInDetail',        label: 'Check-in detail', multiline: true },
+    { group: 'Flights and check-in', path: 'recommendedArrival',   label: 'Recommended arrival', multiline: true },
+    { group: 'Getting there',        path: 'gettingThereByTrain',  label: 'By train', multiline: true },
+    { group: 'Getting there',        path: 'gettingThereByCar',    label: 'By car', multiline: true },
+    { group: 'Getting there',        path: 'gettingThereByCoach',  label: 'By coach', multiline: true },
+    { group: 'Getting there',        path: 'taxiAndRideshare',     label: 'Taxi and rideshare', multiline: true },
+    { group: 'Getting there',        path: 'parking',              label: 'Parking', multiline: true },
+    { group: 'Getting there',        path: 'dropOffInfo',          label: 'Drop-off', multiline: true },
+    { group: 'Transfers and hire',   path: 'transferInfo',         label: 'Transfers', multiline: true },
+    { group: 'Transfers and hire',   path: 'carHireInfo',          label: 'Car hire', multiline: true },
+    { group: 'Transfers and hire',   path: 'taxiInfo',             label: 'Taxis', multiline: true },
+    { group: 'Transfers and hire',   path: 'coachInfo',            label: 'Coaches', multiline: true },
+    { group: 'At the airport',       path: 'loungesInfo',          label: 'Lounges', multiline: true },
+    { group: 'At the airport',       path: 'eatShopInfo',          label: 'Eat and shop', multiline: true },
+    { group: 'At the airport',       path: 'familyInfo',           label: 'Families', multiline: true },
+    { group: 'At the airport',       path: 'assistInfo',           label: 'Assistance', multiline: true },
+    { group: 'At the airport',       path: 'hotelsInfo',           label: 'Airport hotels', multiline: true },
+    { group: 'Tips',                 path: 'tips',                 label: 'Insider tips', multiline: true },
+    { group: 'Tips',                 path: 'usefulTips',           label: 'Useful tips', multiline: true },
+  ];
+  function ceKey() { return (selectedAirport && selectedAirport.iata) ? String(selectedAirport.iata).toUpperCase() : null; }
+  function ceOriginal(path) { return (airportContent && airportContent[path]) ? String(airportContent[path]) : ''; }
+  function ceOverrideAt(path) {
+    const key = ceKey();
+    const b = key && contentOverrides[key];
+    const leaf = b && b[path];
+    return (leaf && typeof leaf === 'object' && typeof leaf.v === 'string') ? leaf : null;
+  }
+  function setOverride(path, value, original) {
+    const key = ceKey();
+    if (!key) return;
+    const bucket = contentOverrides[key] = contentOverrides[key] || {};
+    const orig = String(original == null ? '' : original);
+    const trimmed = String(value == null ? '' : value).trim();
+    if (trimmed === '' || trimmed === orig.trim()) delete bucket[path];
+    else bucket[path] = { v: String(value), o: orig };
+    if (Object.keys(bucket).length === 0) delete contentOverrides[key];
+    if (window.tgse && typeof window.tgse.markDirty === 'function') window.tgse.markDirty();
+    debouncedPreview();
+  }
+  function countLeaves(bucket) {
+    return Object.keys(bucket || {}).filter(k => bucket[k] && typeof bucket[k].v === 'string').length;
+  }
+  function hasAnyOverride(all) {
+    return !!all && Object.keys(all).some(k => countLeaves(all[k]) > 0);
+  }
+  function ceFlagStyle(count) {
+    return 'margin-bottom:12px;padding:10px 12px;border-radius:8px;'
+      + (count ? 'background:var(--tgse-brand-tint,rgba(0,180,216,.12));border-left:3px solid var(--tgse-accent,#00B4D8);'
+               : 'background:var(--tgse-bg-input,#F1F5F9);border-left:3px solid var(--tgse-border,#E2E8F0);');
+  }
+  function ceFlagInner(count) {
+    const title = count ? ('Content customised — ' + count + ' field' + (count === 1 ? '' : 's') + ' rewritten') : 'Using Luna’s wording';
+    const help = count ? 'These fields no longer auto-update from Luna. Everything you leave untouched still does.' : 'Rewrite any wording below to make it your own.';
+    return '<div style="font-size:12px;color:var(--tgse-ink,#0F172A);font-weight:600;">' + esc(title) + '</div>'
+      + '<div class="ap-cta-help" style="margin-top:2px;">' + esc(help) + '</div>'
+      + (count ? '<button type="button" id="ap-ce-revertall" style="margin-top:8px;font-size:11px;font-weight:600;color:var(--tgse-error,#EF4444);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;">Revert everything to Luna</button>' : '');
+  }
+  function ceField(spec) {
+    const ov = ceOverrideAt(spec.path);
+    const edited = !!ov;
+    const live = ceOriginal(spec.path);
+    const eff = edited ? ov.v : live;
+    const drift = edited && String(ov.o).trim() !== String(live).trim();
+    const control = spec.multiline
+      ? '<textarea class="input" rows="3" data-ovpath="' + esc(spec.path) + '" style="width:100%;resize:vertical;">' + esc(eff) + '</textarea>'
+      : '<input class="input" data-ovpath="' + esc(spec.path) + '" value="' + esc(eff) + '" style="width:100%;" />';
+    return '<div class="tgse-field" data-row="' + esc(spec.path) + '">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">'
+      +   '<label class="tgse-field-label" style="margin:0;">' + esc(spec.label) + '</label>'
+      +   '<div style="display:flex;align-items:center;gap:10px;">'
+      +     '<span class="ap-ce-edited" style="font-size:11px;font-weight:700;color:var(--tgse-accent,#00B4D8);"' + (edited ? '' : ' hidden') + '>Edited</span>'
+      +     '<button type="button" class="ap-ce-ai" data-ai="' + esc(spec.path) + '" data-ai-label="' + esc(spec.label) + '" style="font-size:11px;font-weight:600;color:var(--tgse-accent,#00B4D8);background:none;border:none;cursor:pointer;padding:0;">✨ Rewrite with AI</button>'
+      +     '<button type="button" class="ap-ce-revert" data-revert="' + esc(spec.path) + '" style="font-size:11px;font-weight:600;color:var(--tgse-muted,#64748B);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;"' + (edited ? '' : ' hidden') + '>Revert to Luna</button>'
+      +   '</div>'
+      + '</div>'
+      + control
+      + '<div style="margin-top:6px;font-size:11px;padding:8px 10px;background:rgba(245,158,11,.12);border-radius:6px;border-left:3px solid #F59E0B;"' + (drift ? '' : ' hidden') + '>'
+      +   'Luna’s version of this changed after you edited it. '
+      +   '<button type="button" class="ap-ce-useluna" data-revert="' + esc(spec.path) + '" style="font-weight:600;color:var(--tgse-ink,#0F172A);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;">Use Luna’s new wording</button>'
+      + '</div>'
+      + '</div>';
+  }
+  function renderContentEditor() {
+    const root = document.getElementById('ap-content-edit');
+    if (!root) return;
+    if (!selectedAirport) {
+      root.innerHTML = '<div class="ap-cta-help">Pick an airport above, then rewrite its wording here in your own voice.</div>';
+      return;
+    }
+    if (!airportContent) {
+      root.innerHTML = '<div class="ap-cta-help">Loading content…</div>';
+      return;
+    }
+    const key = ceKey();
+    const count = countLeaves(contentOverrides[key]);
+    const parts = ['<div id="ap-ce-flag" style="' + ceFlagStyle(count) + '">' + ceFlagInner(count) + '</div>'];
+    let lastGroup = '';
+    CE_FIELDS.forEach(spec => {
+      const live = ceOriginal(spec.path);
+      if (!live && !ceOverrideAt(spec.path)) return;
+      if (spec.group !== lastGroup) {
+        parts.push('<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--tgse-muted,#94A3B8);margin:16px 0 8px;">' + esc(spec.group) + '</div>');
+        lastGroup = spec.group;
+      }
+      parts.push(ceField(spec));
+    });
+    root.innerHTML = parts.join('');
+    bindContentEditor(root);
+  }
+  function updateCeFlag() {
+    const flag = document.getElementById('ap-ce-flag');
+    if (!flag) return;
+    const count = countLeaves(contentOverrides[ceKey()]);
+    flag.setAttribute('style', ceFlagStyle(count));
+    flag.innerHTML = ceFlagInner(count);
+    const btn = flag.querySelector('#ap-ce-revertall');
+    if (btn) btn.addEventListener('click', ceRevertAll);
+  }
+  function ceRevertAll() {
+    const key = ceKey();
+    if (key) delete contentOverrides[key];
+    if (window.tgse && typeof window.tgse.markDirty === 'function') window.tgse.markDirty();
+    renderContentEditor();
+    renderPreview();
+  }
+  function bindContentEditor(root) {
+    root.querySelectorAll('[data-ovpath]').forEach(el => {
+      el.addEventListener('input', () => {
+        const p = el.getAttribute('data-ovpath');
+        setOverride(p, el.value, ceOriginal(p));
+        const row = el.closest('[data-row]');
+        if (row) {
+          const has = !!ceOverrideAt(p);
+          const ed = row.querySelector('.ap-ce-edited'); if (ed) ed.hidden = !has;
+          row.querySelectorAll('.ap-ce-revert').forEach(b => { b.hidden = !has; });
+        }
+        updateCeFlag();
+      });
+    });
+    root.querySelectorAll('.ap-ce-revert, .ap-ce-useluna').forEach(btn => {
+      btn.addEventListener('click', () => {
+        setOverride(btn.getAttribute('data-revert'), '', ceOriginal(btn.getAttribute('data-revert')));
+        renderContentEditor();
+        renderPreview();
+      });
+    });
+    root.querySelectorAll('.ap-ce-ai').forEach(btn => {
+      btn.addEventListener('click', () => aiRewrite(btn.getAttribute('data-ai'), btn.getAttribute('data-ai-label'), btn));
+    });
+    const all = document.getElementById('ap-ce-revertall');
+    if (all) all.addEventListener('click', ceRevertAll);
+  }
+
+  // "Rewrite with AI" — rewrite one field in the client's brand voice via the
+  // hardened /api/widget-ai rewrite action. The Luna original is captured as
+  // the override's `o`, so revert and drift detection keep working.
+  async function aiRewrite(path, label, btn) {
+    if (!ceKey()) return;
+    const control = document.querySelector('#ap-content-edit [data-ovpath="' + path + '"]');
+    if (!control) return;
+    const original = ceOriginal(path);
+    const text = (control.value || original || '').trim();
+    const tg = window.tgse || {};
+    const say = (m, k) => { if (typeof tg.toast === 'function') tg.toast(m, k); };
+    if (!text) { say('Nothing to rewrite yet', 'error'); return; }
+    const voiceEl = document.getElementById('content-voice');
+    const voice = (voiceEl ? voiceEl.value : '').trim();
+    const headers = Object.assign({ 'Content-Type': 'application/json' }, (typeof tg.authHeaders === 'function' ? tg.authHeaders() : {}));
+    const prev = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Rewriting…';
+    try {
+      const res = await fetch('/api/widget-ai', {
+        method: 'POST', headers: headers,
+        body: JSON.stringify({ action: 'rewrite', field: label, text: text, voice: voice }),
+      });
+      if (res.status === 401) { say('Your session expired. Please sign in.', 'error'); if (typeof tg.showLogin === 'function') tg.showLogin(); return; }
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 403) { say(data.error || 'AI rewrite needs a Boost plan or higher.', 'error'); return; }
+      if (res.status === 429) { say(data.error || 'Daily AI limit reached. Try again tomorrow.', 'error'); return; }
+      if (!res.ok || !data.text) throw new Error(data.error || 'Rewrite failed');
+      control.value = data.text;
+      setOverride(path, data.text, original);
+      const row = control.closest('[data-row]');
+      if (row) {
+        const ed = row.querySelector('.ap-ce-edited'); if (ed) ed.hidden = false;
+        row.querySelectorAll('.ap-ce-revert').forEach(b => { b.hidden = false; });
+      }
+      updateCeFlag();
+      say('Rewritten in your voice', 'success');
+    } catch (err) {
+      say((err && err.message) || 'Rewrite failed', 'error');
+    } finally {
+      btn.disabled = false; btn.textContent = prev;
+    }
+  }
 
   // ---- Initialise shell ----
   // The shell's tgse object handles save/auth/templates/AI/embed/font picker.

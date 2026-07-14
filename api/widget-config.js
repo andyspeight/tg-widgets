@@ -20,6 +20,64 @@ import { USERS, CLIENTS, CATALOGUE, CLIENT_ENTITLEMENTS, PACKAGE_CATALOGUE } fro
 import { normalisePlanValue } from './_lib/auth/plan.js';
 
 /**
+ * Bounded sanitiser for the client "rewrite in your own voice" content
+ * overrides on the Spotlight family (Destination / Attraction / Airport).
+ *
+ * Overrides are a thin per-destination diff, keyed `level:recordId`, whose
+ * leaves are { v, o } string pairs (v = client text, o = the Luna original
+ * captured at edit time). This keeps only that shape, clamps every string,
+ * and caps the counts so a config can neither be bloated past Airtable's
+ * limit nor abused. XSS is already covered downstream: sanitiseConfig strips
+ * <script> from every string and the widgets esc() every value at render.
+ */
+const OV_MAX_KEYS = 250;   // destinations overridden per widget
+const OV_MAX_LEAVES = 60;  // edited fields per destination
+const OV_MAX_STR = 6000;   // characters per field
+function sanitiseContentOverrides(input) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) return {};
+  const out = {};
+  let keyCount = 0;
+  for (const key of Object.keys(input)) {
+    if (keyCount >= OV_MAX_KEYS) break;
+    if (typeof key !== 'string' || !key || key.length > 120) continue;
+    const bucket = input[key];
+    if (!bucket || typeof bucket !== 'object' || Array.isArray(bucket)) continue;
+    const state = { leaves: 0 };
+    const cleanBucket = {};
+    const walk = (src, dst) => {
+      for (const k of Object.keys(src)) {
+        if (state.leaves >= OV_MAX_LEAVES) break;
+        if (typeof k !== 'string' || !k || k.length > 120) continue;
+        const val = src[k];
+        if (!val || typeof val !== 'object' || Array.isArray(val)) continue;
+        if (typeof val.v === 'string') {
+          const v = val.v.slice(0, OV_MAX_STR);
+          if (!v.trim()) continue; // empty text is not an override
+          dst[k] = { v, o: typeof val.o === 'string' ? val.o.slice(0, OV_MAX_STR) : '' };
+          state.leaves++;
+        } else {
+          const child = {};
+          walk(val, child);
+          if (Object.keys(child).length) dst[k] = child;
+        }
+      }
+    };
+    walk(bucket, cleanBucket);
+    if (Object.keys(cleanBucket).length) { out[key] = cleanBucket; keyCount++; }
+  }
+  return out;
+}
+function hasContentOverrides(ov) {
+  if (!ov || typeof ov !== 'object') return false;
+  const anyLeaf = (o) => Object.keys(o).some(k => {
+    const v = o[k];
+    if (!v || typeof v !== 'object') return false;
+    return typeof v.v === 'string' ? true : anyLeaf(v);
+  });
+  return Object.keys(ov).some(k => ov[k] && typeof ov[k] === 'object' && anyLeaf(ov[k]));
+}
+
+/**
  * If the JWT carries userId but not email/plan/clientId (true for cookies
  * issued before the auth migration that started embedding those fields),
  * look the missing fields up by record ID and patch them onto the user
@@ -766,6 +824,28 @@ export default async function handler(req, res) {
 
       // Sanitise the config object
       const cleanConfig = sanitiseConfig(config);
+
+      // Bound the Spotlight-family content overrides and re-derive the
+      // "content customised" flag server-side, so it is authoritative and
+      // cannot be spoofed by the client. Only touch configs that carry the
+      // field (the Spotlight editors) — leave every other widget untouched.
+      if (cleanConfig.contentOverrides !== undefined) {
+        const overrides = sanitiseContentOverrides(cleanConfig.contentOverrides);
+        if (Object.keys(overrides).length) {
+          cleanConfig.contentOverrides = overrides;
+          cleanConfig.contentEdited = true;
+        } else {
+          delete cleanConfig.contentOverrides;
+          delete cleanConfig.contentEdited;
+        }
+      }
+      // Brand-voice note (drives the "Rewrite with AI" prompts) — clamp length.
+      if (typeof cleanConfig.contentVoice === 'string') {
+        const voice = cleanConfig.contentVoice.trim().slice(0, 1000);
+        if (voice) cleanConfig.contentVoice = voice;
+        else delete cleanConfig.contentVoice;
+      }
+
       const configStr = JSON.stringify(cleanConfig);
 
       // Cap config size. Airtable's Config column is long text, hard-capped at

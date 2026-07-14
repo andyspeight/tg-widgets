@@ -35,7 +35,7 @@
   }
   const CONFIG_API  = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || resolveBase('/api/widget-config');
   const CONTENT_API = (typeof window !== 'undefined' && window.__TG_ATTRACTION_API__) || resolveBase('/api/attraction-content');
-  const VERSION = '1.1.3';
+  const VERSION = '1.2.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (fact/section labels, badges, CTA button, empty/error
@@ -295,6 +295,40 @@
       .slice(0, max || 8).map(p => '<p>' + esc(p).replace(/\n/g, '<br>') + '</p>').join('');
   }
 
+  /* ------------------------------------------------------------------
+   * Client content overrides.
+   *
+   * Content is fetched live from Luna Brain and never snapshotted into
+   * config. Clients may rewrite the editorial prose in their own voice;
+   * those rewrites live in config.contentOverrides (keyed by attraction
+   * recordId) and are merged over the live payload here, at render time.
+   * Only the whitelisted prose fields are overridable — facts, badges,
+   * location, map coordinates and the verified date always stay live, so a
+   * stale rewrite can never publish a wrong fact. Each override is { v, o }
+   * where v is the client's text and o is the Luna original at edit time
+   * (o is used by the editor for drift detection; the widget ignores it).
+   * ------------------------------------------------------------------ */
+  var OVERRIDABLE_FIELDS = [
+    'tagline', 'overview', 'bestTime', 'starAttractions', 'familyGuide',
+    'thrillGuide', 'heightRestrict', 'accessibility', 'tickets', 'fastTrack',
+    'nearestAirport', 'gettingThere', 'nearestTown', 'onSiteHotels',
+    'nearbyHotels', 'foodDrink', 'quirks', 'combineWith',
+  ];
+  function applyContentOverrides(data, ov) {
+    if (!data || !ov || typeof ov !== 'object') return data;
+    // Return a shallow copy — never mutate the caller's object. The editor
+    // renders its live preview in-page and hands us a reference to its cached
+    // Luna payload; mutating it would corrupt the editor's "revert to Luna"
+    // and drift detection. Only top-level scalar prose fields are replaced.
+    var out = {};
+    for (var key in data) { if (Object.prototype.hasOwnProperty.call(data, key)) out[key] = data[key]; }
+    OVERRIDABLE_FIELDS.forEach(function (k) {
+      var o = ov[k];
+      if (o && typeof o.v === 'string') out[k] = o.v;
+    });
+    return out;
+  }
+
   function ensureFont(family) {
     if (!family || family === 'Inter' || typeof document === 'undefined') return;
     const id = 'tg-font-' + String(family).toLowerCase().replace(/\s+/g, '-');
@@ -325,7 +359,7 @@
       this._mapInst = null;
       this._renderShell();
       if (this.c.attractionData && typeof this.c.attractionData === 'object') {
-        this._data = this.c.attractionData;
+        this._data = this._withOverrides(this.c.attractionData);
         this._renderContent();
       } else if (this.c.widgetId || this.c.recordId) {
         this._load();
@@ -358,6 +392,7 @@
           buttonUrl: '',
         },
         attractionData: null,
+        contentOverrides: {},   // client rewrites, keyed by attraction recordId
       };
       if (!c || typeof c !== 'object') return base;
       const m = Object.assign({}, base, c);
@@ -398,12 +433,24 @@
         if (!res.ok) { if (res.status === 404) return this._renderNotFound(); throw new Error('fetch ' + res.status); }
         const data = await res.json();
         if (!data || data.found === false || !data.attraction) return this._renderNotFound();
-        this._data = data.attraction;
+        this._data = this._withOverrides(data.attraction);
         this._renderContent();
       } catch (err) {
         console.error('[TG Attraction] load failed:', err);
         this._renderError();
       }
+    }
+
+    // Merge the client's content overrides for THIS attraction over a
+    // freshly-fetched Luna payload. Keyed by recordId; whitelisted prose only.
+    _withOverrides(data) {
+      // The editor saves the selection as config.attraction.recordId; a legacy
+      // top-level recordId is honoured as a fallback.
+      const id = (this.c.attraction && this.c.attraction.recordId) || this.c.recordId || '';
+      const all = this.c.contentOverrides;
+      if (!id || !all || typeof all !== 'object') return data;
+      const ov = all[id];
+      return ov ? applyContentOverrides(data, ov) : data;
     }
 
     _renderContent() {
@@ -619,7 +666,7 @@
       ensureFont(this.c.fontFamily);   // load the client-chosen web font on the host site (house rule 2)
       this.t = makeT(this.c);
       this._renderShell();
-      if (this.c.attractionData) { this._data = this.c.attractionData; this._renderContent(); }
+      if (this.c.attractionData) { this._data = this._withOverrides(this.c.attractionData); this._renderContent(); }
       else if (this.c.widgetId || this.c.recordId) { this._load(); }
       else if (this._data) { this._renderContent(); }
       else { this._renderNotFound(); }
