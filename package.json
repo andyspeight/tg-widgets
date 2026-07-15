@@ -15,7 +15,8 @@
     "test:deeplink-post": "node test/deeplink-post-smoke.mjs",
     "test:mybooking": "node test/mybooking-extras-smoke.mjs && node test/mybooking-parse-robustness.mjs",
     "test:qa-highs": "node test/qa-highs-smoke.mjs",
-    "test:boot": "node test/boot-smoke.mjs"
+    "test:boot": "node test/boot-smoke.mjs",
+    "test:widget-log": "node test/widget-log-alert-smoke.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",
