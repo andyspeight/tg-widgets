@@ -3043,6 +3043,7 @@
       config: defaultConfig(),
       dirty: false,
       saving: false,
+      loadNotFound: false,    // true only when load() got a genuine 404 (form gone)
       lastSaved: null,
       activePaletteTab: 'fields',
       previewMode: false,
@@ -3163,7 +3164,10 @@
         const res = await fetch(url, { credentials: 'include', headers: authHeaders() });
         if (res.status === 401) throw new Error('AUTH');
         if (res.status === 404) {
-          showToast('Form not found — starting a new one', 'warning');
+          // Genuine 404 — the id points at nothing (deleted or never existed).
+          // init() clears the stale id and treats this as a fresh form, so the
+          // first save is a clean CREATE rather than a PATCH of a ghost record.
+          state.loadNotFound = true;
           return false;
         }
         if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -3188,11 +3192,16 @@
           i18n: (data.i18n && typeof data.i18n === 'object' && !Array.isArray(data.i18n)) ? data.i18n : {},
           i18nMeta: (data.i18nMeta && typeof data.i18nMeta === 'object' && !Array.isArray(data.i18nMeta)) ? data.i18nMeta : {}
         });
+        state.loadNotFound = false;
         return true;
       } catch (err) {
         if (err.message === 'AUTH') throw err;
+        // A real load failure (network / 5xx / permission). This is NOT a 404 —
+        // the form may well exist, so we must not fall through to a blank editor:
+        // saving that blank would overwrite the real record or spawn an orphan.
+        // init() shows a hard error and blocks editing instead.
         console.error('[load]', err);
-        showToast('Could not load that form — showing a blank one', 'error');
+        state.loadNotFound = false;
         return false;
       }
     }
@@ -7812,12 +7821,39 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
       const params = new URLSearchParams(window.location.search);
       const loadId = params.get('id');
       if (loadId) {
+        // Bind the save target to the URL id BEFORE loading. A save must always
+        // update the form the editor was opened for — never mint a new record.
+        // Previously, any load hiccup left state.widgetId null and the first save
+        // took the CREATE path, spawning an orphan copy while the original form
+        // (still linked from the dashboard) kept its pre-edit content. That was
+        // the "it saved with no error, but my changes are gone when I reopen it"
+        // bug: the edits were quietly written to a brand-new record.
+        state.widgetId = loadId;
+        let loaded = false;
         try {
-          await load(loadId);
+          loaded = await load(loadId);
         } catch (err) {
           if (err.message === 'AUTH') {
             clearSession();
             showLogin();
+            return;
+          }
+          loaded = false;
+        }
+        if (!loaded) {
+          if (state.loadNotFound) {
+            // Form genuinely gone — start a clean new form. Drop the stale id so
+            // the first save CREATEs rather than trying to PATCH a ghost record.
+            state.widgetId = null;
+            const u = new URL(window.location.href);
+            u.searchParams.delete('id');
+            window.history.replaceState(null, '', u);
+            showToast('That form could not be found — starting a new one', 'warning');
+          } else {
+            // Load failed for another reason (network / 5xx / permission). The
+            // form probably exists, so do NOT let the user edit a blank that a
+            // save would overwrite or orphan. Show a hard error and stop here.
+            showLoadError();
             return;
           }
         }
@@ -7896,6 +7932,38 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
 
       // Mount initial preview invisibly so first ⌘P is instant
       // (actually wait — only mount when preview is activated to save cycles)
+    }
+
+    // Hard stop for a failed load of an EXISTING form. Renders an error into the
+    // boot overlay (still on screen) and keeps the editor hidden, so the user can
+    // never edit — and therefore never overwrite or orphan — a form we could not
+    // load. Reload just re-runs the whole boot (the usual cure for a transient
+    // network blip). Built with createElement (no innerHTML of any dynamic data).
+    function showLoadError() {
+      const boot = $('#boot-loading');
+      const editor = $('#editor');
+      if (editor) editor.hidden = true;
+      if (!boot) return;
+      boot.hidden = false;
+      const inner = boot.querySelector('.boot-loading-inner') || boot;
+      inner.innerHTML = '';
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'max-width:420px;text-align:center;padding:0 24px';
+      const h = document.createElement('div');
+      h.style.cssText = 'font-size:18px;font-weight:600;margin:0 0 8px;color:#0f172a';
+      h.textContent = 'We could not open this form';
+      const p = document.createElement('div');
+      p.style.cssText = 'font-size:14px;color:#64748b;line-height:1.5;margin:0 0 18px';
+      p.textContent = 'Something went wrong loading it. Your saved form is safe — nothing has been changed. Please check your connection and try again.';
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = 'Reload';
+      btn.style.cssText = 'appearance:none;border:0;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600;color:#fff;background:#1B2B5B;cursor:pointer';
+      btn.addEventListener('click', () => location.reload());
+      wrap.appendChild(h);
+      wrap.appendChild(p);
+      wrap.appendChild(btn);
+      inner.appendChild(wrap);
     }
 
     /* ============================== LOGIN ============================== */
