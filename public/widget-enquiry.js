@@ -38,7 +38,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.1.3';
+  var WIDGET_VERSION = '1.1.4';
   var VISITOR_ID_KEY = 'tg_visitor_id_v1';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -2327,15 +2327,39 @@
     };
   }
 
+  // Normalise a custom options array from the form config: [{ value, label, icon? }].
+  // Returns a clean array, or null so the caller falls back to the built-in
+  // defaults. Caps the count and lengths, whitelists the icon against ICONS, and
+  // never lets an option be empty. Used by the choice fields (interests today).
+  function sanitiseChoices(raw) {
+    if (!Array.isArray(raw) || !raw.length) return null;
+    var out = [];
+    for (var i = 0; i < raw.length && out.length < 24; i++) {
+      var c = raw[i];
+      if (!c || typeof c !== 'object') continue;
+      var value = String(c.value == null ? '' : c.value).trim().slice(0, 64);
+      var label = String(c.label == null ? '' : c.label).trim().slice(0, 80);
+      if (!value && !label) continue;
+      if (!value) value = label;
+      if (!label) label = value;
+      var icon = (typeof c.icon === 'string' && ICONS[c.icon]) ? c.icon : 'pin';
+      out.push({ value: value, label: label, icon: icon });
+    }
+    return out.length ? out : null;
+  }
+
   function renderInterests(instance, fieldSpec, t) {
     t = t || makeT(null);
     var shell = createFieldShell(instance, fieldSpec.label || t('label_interests'), [' ', el('span', { class: 'tg-opt', text: t('interests_pickMany') })]);
     var selected = [];
     var buttons = [];
-    INTEREST_OPTIONS.forEach(function (opt) {
-      // Preset label is fixed chrome — translate via per-value key, falling
-      // back to the English seed. The submitted value (opt.value) is unchanged.
-      var interestLabel = t('int_' + opt.value) || opt.label;
+    // Options come from the form config when the agent has customised them
+    // (fieldSpec.choices), otherwise the built-in travel set. Only the defaults
+    // carry `int_<value>` translation keys, so custom options show their own
+    // author label. The submitted value (opt.value) is what lands in the inbox.
+    var customChoices = sanitiseChoices(fieldSpec.choices);
+    (customChoices || INTEREST_OPTIONS).forEach(function (opt) {
+      var interestLabel = customChoices ? opt.label : (t('int_' + opt.value) || opt.label);
       var btn = el('button', {
         class: 'tg-pill', type: 'button', 'data-value': opt.value,
         'aria-pressed': 'false', 'aria-label': interestLabel,

@@ -2828,6 +2828,32 @@
     const NOTES_MAX = 3;
     function fieldTypeLimit(typeId) { return typeId === 'notes' ? NOTES_MAX : 1; }
 
+    // Default options for the Interests ("what type of trip") field. The agent
+    // can edit/add/remove these per form; when they do, the list is stored on
+    // field.choices and the widget renders it instead of its built-in set. Values
+    // mirror the widget's INTEREST_OPTIONS so an untouched form is unchanged.
+    const DEFAULT_INTEREST_CHOICES = [
+      { value: 'beach', label: 'Beach' },
+      { value: 'city', label: 'City' },
+      { value: 'culture', label: 'Culture' },
+      { value: 'food', label: 'Food & wine' },
+      { value: 'adventure', label: 'Adventure' },
+      { value: 'family', label: 'Family' },
+      { value: 'wellness', label: 'Wellness' },
+      { value: 'honeymoon', label: 'Honeymoon' }
+    ];
+    const CHOICE_MAX = 24;
+    // The effective options for a choice field: the agent's custom list if set,
+    // else the built-in defaults (interests only, for now).
+    function choicesFor(field) {
+      if (field && Array.isArray(field.choices) && field.choices.length) {
+        return field.choices
+          .map(c => ({ value: String((c && c.value) || ''), label: String((c && c.label) || '').trim() }))
+          .filter(c => c.label);
+      }
+      return DEFAULT_INTEREST_CHOICES.map(c => ({ value: c.value, label: c.label }));
+    }
+
     // Build an SVG element from an icon path string
     function iconSvg(pathHtml, size = 16) {
       const ns = 'http://www.w3.org/2000/svg';
@@ -4430,18 +4456,9 @@
         case 'interests': {
           const wrap = document.createElement('div');
           wrap.className = 'fp-chips';
-          [
-            { label: 'Beach', active: true },
-            { label: 'City' },
-            { label: 'Culture', active: true },
-            { label: 'Food & wine' },
-            { label: 'Adventure' },
-            { label: 'Family' },
-            { label: 'Wellness' },
-            { label: 'Honeymoon' }
-          ].forEach(o => {
+          choicesFor(field).forEach((o, i) => {
             const c = document.createElement('span');
-            c.className = 'fp-chip' + (o.active ? ' is-active' : '');
+            c.className = 'fp-chip' + (i === 0 || i === 2 ? ' is-active' : '');
             const dot = document.createElement('span');
             dot.className = 'fp-chip-dot';
             c.appendChild(dot);
@@ -7582,6 +7599,88 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
             onInput: (v) => { field.options.marketingLabel = v; saveField(); }
           })
         ]);
+      }
+
+      if (field.type === 'interests') {
+        // Editable "trip type" options. Rows are label-only; the submitted value
+        // IS the label (interests are display-only downstream — see
+        // api/enquiry/submit.js — so the inbox shows exactly what's typed here).
+        // Persisting writes a de-duplicated list to field.choices; the widget
+        // reads it and falls back to its built-in set when absent (untouched
+        // forms are therefore unchanged). "Reset to defaults" clears field.choices.
+        const rows = choicesFor(field).map(c => ({ label: c.label }));
+
+        const persist = () => {
+          const seen = Object.create(null);
+          field.choices = rows
+            .map(r => String(r.label || '').trim().slice(0, 64))
+            .filter(label => { const k = label.toLowerCase(); if (!label || seen[k]) return false; seen[k] = 1; return true; })
+            .map(label => ({ value: label, label: label }));
+          saveField();
+        };
+
+        const list = document.createElement('div');
+        list.style.cssText = 'display:flex;flex-direction:column;gap:6px';
+        const renderRows = () => {
+          list.textContent = '';
+          rows.forEach((r, idx) => {
+            const row = document.createElement('div');
+            row.style.cssText = 'display:flex;gap:6px;align-items:center';
+            const input = document.createElement('input');
+            input.className = 'input';
+            input.type = 'text';
+            input.value = r.label;
+            input.maxLength = 64;
+            input.placeholder = 'Option label';
+            input.style.flex = '1';
+            input.addEventListener('input', () => { rows[idx].label = input.value; persist(); });
+            const del = document.createElement('button');
+            del.type = 'button';
+            del.title = 'Remove option';
+            del.setAttribute('aria-label', 'Remove option');
+            del.textContent = '✕';
+            del.style.cssText = 'flex:0 0 auto;width:32px;height:32px;border:1px solid var(--border,#E2E8F0);border-radius:var(--radius,6px);background:var(--hover,#F8FAFC);color:var(--muted,#64748b);cursor:pointer';
+            del.addEventListener('click', () => {
+              if (rows.length <= 1) { showToast('Keep at least one option', 'warning', 2000); return; }
+              rows.splice(idx, 1); persist(); renderRows();
+            });
+            row.appendChild(input); row.appendChild(del);
+            list.appendChild(row);
+          });
+        };
+        renderRows();
+
+        const addBtn = document.createElement('button');
+        addBtn.type = 'button';
+        addBtn.textContent = '+ Add option';
+        addBtn.style.cssText = 'padding:7px 12px;border:1px dashed var(--border,#CBD5E1);border-radius:var(--radius,6px);background:transparent;color:var(--muted,#334155);cursor:pointer;font-size:13px';
+        addBtn.addEventListener('click', () => {
+          if (rows.length >= CHOICE_MAX) { showToast('Up to ' + CHOICE_MAX + ' options', 'warning', 2000); return; }
+          rows.push({ label: '' }); renderRows();
+          const inputs = list.querySelectorAll('input'); if (inputs.length) inputs[inputs.length - 1].focus();
+        });
+
+        const resetBtn = document.createElement('button');
+        resetBtn.type = 'button';
+        resetBtn.textContent = 'Reset to defaults';
+        resetBtn.style.cssText = 'padding:7px 12px;border:1px solid var(--border,#E2E8F0);border-radius:var(--radius,6px);background:transparent;color:var(--muted,#64748b);cursor:pointer;font-size:13px';
+        resetBtn.addEventListener('click', () => {
+          rows.length = 0;
+          DEFAULT_INTEREST_CHOICES.forEach(c => rows.push({ label: c.label }));
+          delete field.choices;   // absence → widget uses its built-in defaults
+          saveField();
+          renderRows();
+        });
+
+        const controls = document.createElement('div');
+        controls.style.cssText = 'display:flex;gap:8px;margin-top:8px';
+        controls.appendChild(addBtn); controls.appendChild(resetBtn);
+
+        const hint = document.createElement('p');
+        hint.style.cssText = 'font-size:12px;color:var(--muted,#64748b);margin:8px 0 0;line-height:1.5';
+        hint.textContent = 'The "trip type" options visitors choose from. Add your own, rename or remove — up to ' + CHOICE_MAX + '. They arrive in the inbox exactly as you label them here.';
+
+        return section('Options', [list, controls, hint]);
       }
 
       // All other field types have no extras — the common sections cover them
