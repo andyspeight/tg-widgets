@@ -128,11 +128,22 @@ export default async function handler(req, res) {
       // in-build product with nowhere to go yet.
       const controlUrl = (p.fields[PRODUCTS.fields.launchUrl] || '').trim();
       const defaultUrl = comingSoon ? (PRODUCT_URLS[slug] || '') : (PRODUCT_URLS[slug] || '/');
+      let url = controlUrl || defaultUrl;
+      // TEMPORARY (2026-07): Support Desk's Control Launch URL is
+      // help.travelgenix.io, which has no SSL certificate provisioned yet, so a
+      // Support-Desk-only user opening it hits ERR_CERT_COMMON_NAME_INVALID.
+      // While it is still "coming soon", route to the working preview build
+      // instead. This switches itself off the moment Support Desk is flipped to
+      // "active" in Control (i.e. genuinely live behind a valid cert). Remove
+      // this block once help.travelgenix.io serves a valid certificate.
+      if (comingSoon && slug === PRODUCTS.slugs.SUPPORT_DESK && PRODUCT_URLS[slug]) {
+        url = PRODUCT_URLS[slug];
+      }
       productBySlug.set(slug, {
         slug,
         name: p.fields[PRODUCTS.fields.displayName] || slug,
         description: p.fields[PRODUCTS.fields.description] || '',
-        url: controlUrl || defaultUrl,
+        url,
         staff: STAFF_SLUGS.has(slug),
         comingSoon,
       });
