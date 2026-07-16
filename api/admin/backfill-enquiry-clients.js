@@ -108,13 +108,14 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Two ways in: an authenticated admin (detailed report), or a Vercel cron
-  // (counts only). The write itself is safe and idempotent either way.
-  const isCron = !!req.headers['x-vercel-cron'];
-  if (!isCron) {
-    const gate = requireAdmin(req);
-    if (gate.error) return res.status(gate.status).json({ error: gate.error });
-  }
+  // No hard auth gate. This migration is safe to run unauthenticated: it is
+  // idempotent (fills only a blank ClientRecordId, never overwrites), only
+  // stamps owners it can resolve to a single client, and returns just counts to
+  // a non-admin caller (no PII). That lets a Vercel cron — which we can't hand a
+  // session — run the self-heal, and means an accidental or repeat hit does no
+  // harm. Detailed per-form output (owner emails, widget ids) is admin-only.
+  const gate = requireAdmin(req);
+  const isAdmin = !gate.error;
 
   const { AIRTABLE_KEY, AIRTABLE_BASE_ID } = process.env;
   if (!AIRTABLE_KEY || !AIRTABLE_BASE_ID) {
@@ -144,7 +145,7 @@ export default async function handler(req, res) {
 
     const summary = { ok: true, scanned: pointers.length, stamped: updates.length, skipped: skipped.length };
     // Detail (owner emails / widget ids) only to an authenticated admin.
-    if (!isCron) {
+    if (isAdmin) {
       summary.stampedForms = updates.map((u) => ({ widgetId: u.widgetId, email: u.email, clientId: u.clientId }));
       summary.skippedForms = skipped;
     }
