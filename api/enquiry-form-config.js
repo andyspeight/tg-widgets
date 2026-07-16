@@ -29,39 +29,57 @@ import { getRecord } from './_lib/auth/airtable.js';
 import { USERS } from './_lib/auth/schema.js';
 import { isStaffEmail } from './_lib/auth/staff.js';
 
+const REC_ID_RE = /^rec[A-Za-z0-9]{14}$/;
+
 /**
- * Hydrate the user's email from the Users table when the JWT didn't carry it.
+ * Hydrate the user's email AND linked client from the Users table when the JWT
+ * didn't carry them.
  *
- * BACKGROUND: SSO-issued JWTs (Travelify cookie auth) sometimes lack
- * `email` even though they carry `recordId`. The legacy `signin.html`
- * flow puts email in the JWT; the cookie SSO flow doesn't always.
+ * BACKGROUND: SSO-issued JWTs (Travelify cookie auth) sometimes lack `email`
+ * and `clientId` even though they carry `recordId`. The legacy `signin.html`
+ * flow puts them in the JWT; the cookie SSO flow doesn't always.
  *
- * Without this, the create path writes `undefined` to `OwnerEmail` on
- * the Enquiry Form record, and the update path compares `undefined ===
- * undefined` — but since the check rejects when `!ownerEmail`, the user
- * is locked out of their own form with a 403.
+ * Email is needed for the ownership check — without it the create path writes
+ * `undefined` to OwnerEmail and the update path locks the user out with a 403.
+ * clientId is needed to stamp ClientRecordId on the Widgets pointer — without
+ * it the saved form is invisible in /api/widget-list (which scopes by
+ * ClientRecordId) and the owner can never reopen it.
  *
  * Mirrors the hydrateLegacyUserFields helper in api/widget-config.js.
- * Email-only here because the only auth check in this file is by email
- * (ownership). If this file ever needs clientId or plan, copy the
- * larger helper across — or, better, lift both into a shared module
- * once a third endpoint needs the same trick.
  *
  * @param {object} user — auth.user from requireAuth(). Mutated in place.
  */
-async function hydrateUserEmail(user) {
-  if (!user || user.email || !user.recordId) return;
+async function hydrateUserFacts(user) {
+  // Cookie-issued JWTs carry neither the email (needed for the ownership check)
+  // nor the linked client. We need the client too now: the Widgets pointer we
+  // write MUST carry ClientRecordId, because /api/widget-list scopes the
+  // dashboard strictly by it (its ClientEmail fallback is dropped for staff
+  // whose login email spans several accounts). Without the stamp the saved form
+  // is invisible in the dashboard and the owner can't reopen it. One Users read
+  // gives us both facts.
+  if (!user || !user.recordId) return;
+  const needEmail = !user.email;
+  const needClient = !(typeof user.clientId === 'string' && REC_ID_RE.test(user.clientId));
+  if (!needEmail && !needClient) return;
   try {
     const u = await getRecord(USERS.tableId, user.recordId);
-    const email = u?.fields?.[USERS.fields.email];
-    if (typeof email === 'string' && email.trim()) {
-      user.email = email.trim();
-      console.log('[enquiry-form-config] hydrated email from record:', user.recordId);
-    } else {
-      console.warn('[enquiry-form-config] hydrate failed: no email on user record', user.recordId);
+    if (needEmail) {
+      const email = u?.fields?.[USERS.fields.email];
+      if (typeof email === 'string' && email.trim()) {
+        user.email = email.trim();
+        console.log('[enquiry-form-config] hydrated email from record:', user.recordId);
+      } else {
+        console.warn('[enquiry-form-config] hydrate failed: no email on user record', user.recordId);
+      }
+    }
+    if (needClient) {
+      const links = u?.fields?.[USERS.fields.client];
+      const first = Array.isArray(links) ? links[0] : null;
+      const id = typeof first === 'string' ? first : (first && first.id);
+      if (typeof id === 'string' && REC_ID_RE.test(id)) user.clientId = id;
     }
   } catch (err) {
-    console.warn('[enquiry-form-config] hydrate user email failed:', err.message);
+    console.warn('[enquiry-form-config] hydrate user facts failed:', err.message);
   }
 }
 
@@ -544,7 +562,7 @@ export default async function handler(req, res) {
         const auth = requireAuth(req);
         if (auth.error) return res.status(auth.status).json({ error: auth.error });
         // Hydrate email from user record if JWT didn't carry it (SSO cookie sessions).
-        await hydrateUserEmail(auth.user);
+        await hydrateUserFacts(auth.user);
 
         const record = await fetchEnquiryFormByWidgetId(widgetId, headers, AIRTABLE_BASE_ID);
         if (!record) return res.status(404).json({ error: 'Form not found' });
@@ -640,7 +658,12 @@ export default async function handler(req, res) {
       // MUST happen before rate-limit-by-email below — otherwise the rate
       // limit key collapses to 'enquiry-save:undefined' and one user can
       // exhaust the bucket for everyone.
-      await hydrateUserEmail(user);
+      await hydrateUserFacts(user);
+
+      // The session's owning client, used to stamp ClientRecordId on the Widgets
+      // pointer. This is what /api/widget-list scopes the dashboard by, so a
+      // pointer without it is invisible in the list. Only trust a well-formed id.
+      const sessionClientId = (typeof user.clientId === 'string' && REC_ID_RE.test(user.clientId)) ? user.clientId : null;
 
       if (!applyRateLimit(res, `enquiry-save:${user.email}`, RATE_LIMITS.widgetWrite)) return;
 
@@ -728,17 +751,24 @@ export default async function handler(req, res) {
             status: payload.status || 'Draft',
             submissionCount: efRec.fields[EF.submissionCount] || 0,
           });
+          const pointerFields = {
+            Name: safeStr(payload.name || pointerRec.fields.Name || 'Enquiry Form', 200),
+            Config: pointerConfig,
+            UpdatedAt: new Date().toISOString(),
+          };
+          // Backfill ClientRecordId on legacy pointers that never had it stamped
+          // (every enquiry pointer created before this fix), so the form finally
+          // shows up in the dashboard list. Only when the OWNER is the one saving
+          // — a staff member editing someone else's form must not stamp their own
+          // client onto it. Never overwrite an existing stamp.
+          if (sessionClientId && !pointerRec.fields.ClientRecordId && userEmail && ownerEmail && userEmail === ownerEmail) {
+            pointerFields.ClientRecordId = sessionClientId;
+          }
           const pointerPatchUrl = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${WIDGETS_TABLE}/${pointerRec.id}`;
           await fetch(pointerPatchUrl, {
             method: 'PATCH',
             headers,
-            body: JSON.stringify({
-              fields: {
-                Name: safeStr(payload.name || pointerRec.fields.Name || 'Enquiry Form', 200),
-                Config: pointerConfig,
-                UpdatedAt: new Date().toISOString(),
-              },
-            }),
+            body: JSON.stringify({ fields: pointerFields }),
           });
         }
 
@@ -797,25 +827,32 @@ export default async function handler(req, res) {
         submissionCount: 0,
       });
 
+      const pointerCreateFields = {
+        WidgetID: newWidgetId,
+        Name: safeStr(payload.name, 200),
+        Config: pointerConfig,
+        Status: 'Active',
+        WidgetType: WIDGET_TYPE,
+        ClientName: user.clientName || '',
+        ClientEmail: user.email,
+        CreatedAt: new Date().toISOString(),
+        UpdatedAt: new Date().toISOString(),
+      };
+      // Stamp the authoritative owner so the form shows in the dashboard list
+      // (/api/widget-list scopes by ClientRecordId). Omit when the session gave
+      // us no trustworthy client, exactly as api/widget-config.js does — never
+      // write a guessed owner. The ClientEmail fallback still covers those.
+      if (sessionClientId) {
+        pointerCreateFields.ClientRecordId = sessionClientId;
+      } else {
+        console.warn('[enquiry-form-config] Creating pointer', newWidgetId, 'WITHOUT ClientRecordId — no session client id');
+      }
+
       const pointerCreateUrl = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${WIDGETS_TABLE}`;
       const pointerCreateResp = await fetch(pointerCreateUrl, {
         method: 'POST',
         headers,
-        body: JSON.stringify({
-          records: [{
-            fields: {
-              WidgetID: newWidgetId,
-              Name: safeStr(payload.name, 200),
-              Config: pointerConfig,
-              Status: 'Active',
-              WidgetType: WIDGET_TYPE,
-              ClientName: user.clientName || '',
-              ClientEmail: user.email,
-              CreatedAt: new Date().toISOString(),
-              UpdatedAt: new Date().toISOString(),
-            },
-          }],
-        }),
+        body: JSON.stringify({ records: [{ fields: pointerCreateFields }] }),
       });
 
       // If pointer create fails, rollback the Enquiry Forms record so we don't orphan it
@@ -847,7 +884,7 @@ export default async function handler(req, res) {
       const user = auth.user;
       // Hydrate email from user record if JWT didn't carry it (SSO cookie sessions).
       // Must happen before rate-limit-by-email below — see POST path for why.
-      await hydrateUserEmail(user);
+      await hydrateUserFacts(user);
 
       if (!applyRateLimit(res, `enquiry-delete:${user.email}`, RATE_LIMITS.widgetWrite)) return;
 
