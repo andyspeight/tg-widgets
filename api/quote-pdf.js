@@ -202,9 +202,22 @@ function buildRenderOpts(config) {
       supportEmail: c.supportEmail,
       supportPhone: c.supportPhone,
       colors: {
+        // New 6-colour model the editor saves (topBar, hero, accent, labels,
+        // titles, text). These must be forwarded verbatim: the editor preview
+        // themes from them, and resolveBrand() in the renderer reads these exact
+        // keys. Forwarding only the legacy keys below silently dropped five of
+        // the six, so the PDF/email fell back to the default navy while the
+        // editor preview showed the client's colours.
+        topBar: colors.topBar,
+        hero: colors.hero,
+        accent: colors.accent,
+        labels: colors.labels,
+        titles: colors.titles,
+        text: colors.text,
+        // Legacy keys kept so pre-6-colour saved configs still map through
+        // resolveBrand()'s back-compat fallback.
         primary: colors.primary,
         primaryDark: colors.primaryDark,
-        accent: colors.accent,
         accentDark: colors.accentDark,
       },
     },
