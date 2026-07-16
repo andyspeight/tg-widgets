@@ -206,7 +206,8 @@ export const PRODUCTS = {
     ONBOARDING:     'onboarding',
     CRM:            'crm',
     SUPPORT_DESK:   'support_desk',
-    BACK_OFFICE:    'back_office'
+    BACK_OFFICE:    'back_office',
+    LUNA_DESK:      'luna_desk'
   },
   statuses: {
     ACTIVE:      'active',

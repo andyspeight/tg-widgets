@@ -73,6 +73,9 @@ const PRODUCT_URLS = {
   [PRODUCTS.slugs.ONBOARDING]:     'https://tg-onboarding-gamma.vercel.app/',
   [PRODUCTS.slugs.CRM]:            'https://travelgenix-crm.vercel.app/',
   [PRODUCTS.slugs.SUPPORT_DESK]:   'https://tg-support-desk-git-preview-agendasgroup.vercel.app/dashboard',
+  // Luna Desk — Travelgenix's own internal B2B CRM (prospects + customer care).
+  // Staff-only; opens its current deployment until it moves behind Control SSO.
+  [PRODUCTS.slugs.LUNA_DESK]:      'https://tg-crm-b2b.vercel.app/',
 };
 
 // Products that are Travelgenix staff only. The launchpad renders a small
