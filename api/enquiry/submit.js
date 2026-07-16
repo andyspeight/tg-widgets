@@ -239,7 +239,9 @@ function validatePayload(raw) {
   if (f.phone !== undefined && (typeof f.phone !== 'string' || f.phone.length > 32)) {
     fail('fields.phone', 'Invalid phone.');
   }
-  if (f.notes !== undefined && (typeof f.notes !== 'string' || f.notes.length > 2000)) {
+  // Up to 8000: a form can carry several notes fields (each capped at 2000 in
+  // the widget), which the widget merges into this one labelled value.
+  if (f.notes !== undefined && (typeof f.notes !== 'string' || f.notes.length > 8000)) {
     fail('fields.notes', 'Notes too long.');
   }
   if (f.marketing_consent !== undefined && typeof f.marketing_consent !== 'boolean') {
@@ -556,7 +558,7 @@ async function writeMasterRecord({ form, payload, meta, sequential, reference })
       [SUB_FIELDS.infants]:          travellers.infants ?? 0,
       [SUB_FIELDS.stars]:            p.stars ?? null,
       [SUB_FIELDS.interestsJSON]:    JSON.stringify(p.interests || []),
-      [SUB_FIELDS.notes]:            cleanString(p.notes, 2000),
+      [SUB_FIELDS.notes]:            cleanString(p.notes, 8000),
       [SUB_FIELDS.contactConsent]:   !!p.contact_consent,
       [SUB_FIELDS.marketingConsent]: !!p.marketing_consent,
       // Flights Included — only the Enquiry Pro widget sends this. Legacy

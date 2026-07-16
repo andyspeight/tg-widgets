@@ -38,7 +38,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.1.2';
+  var WIDGET_VERSION = '1.1.3';
   var VISITOR_ID_KEY = 'tg_visitor_id_v1';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -2415,10 +2415,31 @@
     };
   }
 
+  // Collapse the list of free-text notes fields into the single `notes` value
+  // the server stores. renderNotes pushes each non-empty field as { label, value }
+  // onto fieldValues.__notes__; here we merge that list: one field → its value
+  // verbatim (unchanged from the single-notes era); two or three → each labelled
+  // so the agent can tell them apart in the inbox and emails. Mutates in place.
+  function mergeNotesFields(fieldValues) {
+    if (!fieldValues || !fieldValues.__notes__) return;
+    var arr = fieldValues.__notes__;
+    delete fieldValues.__notes__;
+    if (arr.length === 1) {
+      fieldValues.notes = arr[0].value;
+    } else if (arr.length > 1) {
+      fieldValues.notes = arr.map(function (n) {
+        var label = String(n.label || 'Notes').replace(/\s*:\s*$/, '');
+        return label + ':\n' + n.value;
+      }).join('\n\n');
+    }
+  }
+
   function renderNotes(instance, fieldSpec, t) {
     t = t || makeT(null);
     var shell = createFieldShell(instance, fieldSpec.label || t('label_notes'), [' ', el('span', { class: 'tg-opt', text: t('optional') })]);
-    var textareaId = 'tg-' + instance + '-notes';
+    // Per-field DOM id so a form can carry more than one notes field without
+    // duplicate ids (the id falls back to 'notes' for the default field).
+    var textareaId = 'tg-' + instance + '-' + (fieldSpec.id || 'notes');
     var textarea = el('textarea', { id: textareaId, class: 'tg-textarea', 'aria-label': t('notesAria'), placeholder: fieldSpec.placeholder || t('notes_ph'), maxlength: '2000' });
     var labelEl = shell.fieldNode.querySelector('.tg-label');
     if (labelEl) labelEl.setAttribute('for', textareaId);
@@ -2427,7 +2448,15 @@
     return {
       type: 'notes',
       node: shell.fieldNode,
-      writeTo: function (fields) { var v = textarea.value.trim(); if (v) fields.notes = v; },
+      // Collect into a list rather than writing `notes` directly, so several
+      // notes fields don't overwrite each other. The submit flow merges the
+      // list into the single `notes` value (see _collectFields below).
+      writeTo: function (fields) {
+        var v = textarea.value.trim();
+        if (!v) return;
+        if (!fields.__notes__) fields.__notes__ = [];
+        fields.__notes__.push({ label: fieldSpec.label || t('label_notes'), value: v });
+      },
       validate: function () { return null; },
       showError: function (msg) { shell.show(msg); },
       clearError: function () { shell.clear(); },
@@ -3091,6 +3120,9 @@
 
     var fieldValues = {};
     fields.forEach(function (f) { f.writeTo(fieldValues); });
+
+    mergeNotesFields(fieldValues);
+
     var firstNameForTy = fieldValues.first_name || '';
 
     var payload = {

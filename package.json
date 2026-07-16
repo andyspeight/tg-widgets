@@ -17,7 +17,8 @@
     "test:qa-highs": "node test/qa-highs-smoke.mjs",
     "test:boot": "node test/boot-smoke.mjs",
     "test:widget-log": "node test/widget-log-alert-smoke.mjs",
-    "test:enquiry-load": "node test/enquiry-load-smoke.mjs"
+    "test:enquiry-load": "node test/enquiry-load-smoke.mjs",
+    "test:enquiry-notes": "node test/enquiry-notes-smoke.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",

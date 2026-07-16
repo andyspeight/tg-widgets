@@ -2820,6 +2820,14 @@
     // Quick lookup by type id
     const FIELD_TYPE_MAP = FIELD_TYPES.reduce((m, t) => { m[t.id] = t; return m; }, {});
 
+    // Notes is the one field type an agent may add more than once — clients
+    // often want a couple of separate free-text prompts (e.g. "dietary needs"
+    // and "special occasions"). Capped so the form stays tidy; every other type
+    // stays one-per-form. The widget merges the notes fields into one labelled
+    // value on submit, so the inbox and emails still get a single notes block.
+    const NOTES_MAX = 3;
+    function fieldTypeLimit(typeId) { return typeId === 'notes' ? NOTES_MAX : 1; }
+
     // Build an SVG element from an icon path string
     function iconSvg(pathHtml, size = 16) {
       const ns = 'http://www.w3.org/2000/svg';
@@ -3398,7 +3406,8 @@
     // are dimmed and drag-disabled (one of each type allowed per form).
     function renderFieldPalette(body) {
       const currentFields = parseFields(state.config.fieldsJSON);
-      const usedTypes = new Set(currentFields.map(f => f.type));
+      const typeCounts = {};
+      currentFields.forEach(f => { typeCounts[f.type] = (typeCounts[f.type] || 0) + 1; });
 
       FIELD_CATEGORIES.forEach(cat => {
         const typesInCat = FIELD_TYPES.filter(t => t.category === cat);
@@ -3410,14 +3419,14 @@
         body.appendChild(title);
 
         typesInCat.forEach(type => {
-          const already = usedTypes.has(type.id);
+          const already = (typeCounts[type.id] || 0) >= fieldTypeLimit(type.id);
           const card = document.createElement('div');
           card.className = 'palette-card';
           card.setAttribute('draggable', already ? 'false' : 'true');
           card.setAttribute('data-field-type', type.id);
           if (already) card.setAttribute('data-disabled', 'true');
           card.setAttribute('title', already
-            ? type.name + ' is already on your form'
+            ? (type.id === 'notes' ? 'You can add up to ' + NOTES_MAX + ' notes fields' : type.name + ' is already on your form')
             : 'Drag onto the canvas to add ' + type.name);
 
           const icon = document.createElement('span');
@@ -4890,9 +4899,12 @@
 
     function addFieldToCanvas(typeId, insertIndex, explicitStepId) {
       const fields = parseFields(state.config.fieldsJSON);
-      // Guard: one of each type per form
-      if (fields.find(f => f.type === typeId)) {
-        showToast(FIELD_TYPE_MAP[typeId].name + ' is already on your form', 'warning', 2500);
+      // Guard: one of each type per form (notes may repeat, up to NOTES_MAX).
+      const countOfType = fields.filter(f => f.type === typeId).length;
+      if (countOfType >= fieldTypeLimit(typeId)) {
+        showToast(typeId === 'notes'
+          ? 'You can add up to ' + NOTES_MAX + ' notes fields'
+          : FIELD_TYPE_MAP[typeId].name + ' is already on your form', 'warning', 2500);
         return;
       }
       const newField = makeField(typeId);
