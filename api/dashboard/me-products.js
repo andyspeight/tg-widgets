@@ -72,7 +72,11 @@ const PRODUCT_URLS = {
   // non-clickable "Coming soon" tile until a URL is added.
   [PRODUCTS.slugs.ONBOARDING]:     'https://tg-onboarding-gamma.vercel.app/',
   [PRODUCTS.slugs.CRM]:            'https://travelgenix-crm.vercel.app/',
-  [PRODUCTS.slugs.SUPPORT_DESK]:   'https://tg-support-desk-git-preview-agendasgroup.vercel.app/dashboard',
+  // Support Desk shipped (July 2026) — its live home is help.travelgenix.io.
+  // Control's Launch URL still wins over this; kept as a safe default so a
+  // cleared Control URL falls back to the real address, never the team-only
+  // preview build (which sits behind Vercel SSO and locks out external staff).
+  [PRODUCTS.slugs.SUPPORT_DESK]:   'https://help.travelgenix.io/dashboard',
   // Luna Desk — Travelgenix's own internal B2B CRM (prospects + customer care).
   // Staff-only; opens its current deployment until it moves behind Control SSO.
   [PRODUCTS.slugs.LUNA_DESK]:      'https://tg-crm-b2b.vercel.app/',
@@ -128,17 +132,7 @@ export default async function handler(req, res) {
       // in-build product with nowhere to go yet.
       const controlUrl = (p.fields[PRODUCTS.fields.launchUrl] || '').trim();
       const defaultUrl = comingSoon ? (PRODUCT_URLS[slug] || '') : (PRODUCT_URLS[slug] || '/');
-      let url = controlUrl || defaultUrl;
-      // TEMPORARY (2026-07): Support Desk's Control Launch URL is
-      // help.travelgenix.io, which has no SSL certificate provisioned yet, so a
-      // Support-Desk-only user opening it hits ERR_CERT_COMMON_NAME_INVALID.
-      // While it is still "coming soon", route to the working preview build
-      // instead. This switches itself off the moment Support Desk is flipped to
-      // "active" in Control (i.e. genuinely live behind a valid cert). Remove
-      // this block once help.travelgenix.io serves a valid certificate.
-      if (comingSoon && slug === PRODUCTS.slugs.SUPPORT_DESK && PRODUCT_URLS[slug]) {
-        url = PRODUCT_URLS[slug];
-      }
+      const url = controlUrl || defaultUrl;
       productBySlug.set(slug, {
         slug,
         name: p.fields[PRODUCTS.fields.displayName] || slug,
