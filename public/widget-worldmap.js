@@ -41,11 +41,19 @@
  * (?pkgSuppliers=…) so it filters BEFORE its cheapest-N cut. Previously an
  * enabled operator's packages could be squeezed out of the fetched slice by
  * cheaper non-enabled ones. The client-side filter still runs as a backstop.
+ *
+ * v3.11.12: harden the offers load. The single offers fetch had no timeout and
+ * no retry, so a transient network blip on a visitor's connection (or the
+ * visitor navigating away mid-load, which aborts the in-flight request) made it
+ * reject as "Failed to fetch", broke the whole map init and raised a false
+ * "map init failed" alert. The fetch now bounds each attempt and retries once,
+ * mirroring loadFxRates' resilient-by-default stance, and a network/abort error
+ * on an already-hidden page no longer raises an operational alert.
  */
 (function () {
   'use strict';
 
-  const VERSION = '3.11.11';
+  const VERSION = '3.11.12';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -558,6 +566,50 @@
       })
       .catch(withFallback);
   }
+
+  // Fetch with a bounded per-attempt timeout and a single retry. The offers
+  // payload is the map's lifeblood and we cannot invent a fallback for it on the
+  // client (the SERVER already falls back Redis → seed → skeleton), so instead
+  // of swallowing a failure like loadFxRates we retry once. A transient network
+  // blip on a visitor's connection, or a brief upstream hiccup, then self-heals
+  // rather than breaking the whole map and raising a false alert. Rejects only
+  // after BOTH attempts fail, so a genuine outage still surfaces. AbortController
+  // is used directly (not AbortSignal.timeout) for the widest client-browser
+  // support, and the timer is always cleared so a slow-but-ok response is kept.
+  function fetchWithRetry(url, opts, attempts, timeoutMs) {
+    attempts = attempts || 2;
+    timeoutMs = timeoutMs || 10000;
+    var tryOnce = function (n) {
+      var ctl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+      var timer = ctl ? setTimeout(function () { try { ctl.abort(); } catch (e) {} }, timeoutMs) : null;
+      var o = Object.assign({}, opts || {});
+      if (ctl) o.signal = ctl.signal;
+      return fetch(url, o)
+        .then(function (res) { if (timer) clearTimeout(timer); return res; })
+        .catch(function (err) {
+          if (timer) clearTimeout(timer);
+          // Only a network-level failure (fetch reject / timeout abort) is worth
+          // retrying; give it one more go after a brief backoff.
+          if (n + 1 < attempts) {
+            return new Promise(function (r) { setTimeout(r, 400); }).then(function () { return tryOnce(n + 1); });
+          }
+          throw err;
+        });
+    };
+    return tryOnce(0);
+  }
+
+  // Decide whether a failed init warrants an operational alert. A network or
+  // abort error on a page that is already hidden is the signature of a visitor
+  // navigating away mid-load: the in-flight offers fetch aborts and rejects as
+  // "Failed to fetch", which is not an actionable widget problem. Suppress the
+  // alert in exactly that case; every other failure (and any failure on a
+  // visible page) still reports. Pure + exported-ish for the smoke test.
+  function isNavAwayAbort(message, hidden) {
+    if (!hidden) return false;
+    return /failed to fetch|load failed|networkerror|the user aborted|aborted|signal is aborted/i.test(String(message || ''));
+  }
+
   // Format a cached price (in srcCurrency, normally GBP) in the active display
   // currency. The per-person display rule is applied by the caller.
   function formatPrice(p, srcCurrency) {
@@ -2316,9 +2368,17 @@ svg.leaflet-image-layer.leaflet-interactive path {
         this._hideLoading();
         tgReport('load', this.widgetId, 'ok');
       } catch (e) {
-        console.warn('[tgwm v3] init failed:', e.message);
+        const msg = (e && e.message) || '';
+        console.warn('[tgwm v3] init failed:', msg);
         this._showError(this.t('mapUnavailable'));
-        tgReport('error', this.widgetId, 'map init failed', e && e.message);
+        // Don't raise an operational alert for a visitor who navigated away
+        // mid-load (aborted fetch on an already-hidden page). Still show the
+        // fallback UI and log locally; just don't email an alert for it.
+        let hidden = false;
+        try { hidden = (typeof document !== 'undefined' && document.visibilityState === 'hidden'); } catch (e2) {}
+        if (!isNavAwayAbort(msg, hidden)) {
+          tgReport('error', this.widgetId, 'map init failed', msg);
+        }
       }
     }
 
@@ -2338,7 +2398,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
     }
 
     async _loadOffers() {
-      const res = await fetch(OFFERS_URL, { credentials: 'omit' });
+      // Bounded + one retry: a transient blip shouldn't break the whole map.
+      const res = await fetchWithRetry(OFFERS_URL, { credentials: 'omit' });
       if (!res.ok) throw new Error('offers HTTP ' + res.status);
       return await res.json();
     }
