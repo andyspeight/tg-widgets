@@ -62,7 +62,9 @@
 
     function fmtWhen(iso, zone) {
       try {
-        return new Intl.DateTimeFormat('en-GB', { timeZone: zone, weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date(iso));
+        // hourCycle:'h12' not hour12:true — 'en-GB'+hour12 hits the h11 cycle on
+        // some ICU builds and shows noon as "0:00pm". h12 pins the 1–12 clock.
+        return new Intl.DateTimeFormat('en-GB', { timeZone: zone, weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit', hourCycle: 'h12' }).format(new Date(iso));
       } catch (e) { return iso; }
     }
     function fail(msg) { $('card').innerHTML = '<h1>Sorry</h1><p class="sub">' + esc(msg) + '</p>'; }
