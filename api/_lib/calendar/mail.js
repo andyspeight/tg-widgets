@@ -32,11 +32,16 @@ function icsStamp(ms) {
   return d.getUTCFullYear() + pad2(d.getUTCMonth() + 1) + pad2(d.getUTCDate()) + 'T' + pad2(d.getUTCHours()) + pad2(d.getUTCMinutes()) + '00Z';
 }
 
+// Time is formatted with an explicit hourCycle:'h12', NOT hour12:true. With
+// hour12:true the 'en-GB' locale resolves to the h11 hour cycle on some ICU
+// builds (notably Vercel's Lambda runtime), which renders noon as "0:00pm" and
+// midnight as "0:00am" — a real client saw "0:00pm" in a confirmation email.
+// h12 pins the 1–12 clock so noon/midnight read as "12:00pm"/"12:00am".
 export function whenString(iso, tz) {
   try {
     const d = new Date(iso);
     const ds = new Intl.DateTimeFormat('en-GB', { timeZone: tz, weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(d);
-    const ts = new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: 'numeric', minute: '2-digit', hour12: true }).format(d).replace(/[  \s]/g, '').toLowerCase();
+    const ts = new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: 'numeric', minute: '2-digit', hourCycle: 'h12' }).format(d).replace(/[  \s]/g, '').toLowerCase();
     return ds + ' at ' + ts;
   } catch (e) { return iso; }
 }
@@ -47,7 +52,7 @@ function dateLine(iso, tz) {
 }
 function timeLine(booking, tz) {
   try {
-    const f = (iso) => new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date(iso)).replace(/[  \s]/g, '').toLowerCase();
+    const f = (iso) => new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: 'numeric', minute: '2-digit', hourCycle: 'h12' }).format(new Date(iso)).replace(/[  \s]/g, '').toLowerCase();
     const start = f(booking.startISO);
     const end = booking.endISO ? f(booking.endISO) : '';
     return start + (end ? ' – ' + end : '') + ' (' + (booking.durationMins || 30) + ' min)';

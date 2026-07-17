@@ -24,7 +24,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '2.0.3';
+  const VERSION = '2.0.4';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (step labels, field labels, buttons, validation and
@@ -331,7 +331,10 @@
   // Format an instant as a time string in `tz`.
   function fmtTimeTz(inst, tz, hour12) {
     try {
-      return new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: 'numeric', minute: '2-digit', hour12: !!hour12 }).format(inst)
+      // hourCycle (not hour12): 'en-GB' + hour12:true resolves to the h11 cycle
+      // on some ICU builds, showing noon/midnight as "0:00pm"/"0:00am". h12 pins
+      // the 1–12 clock; h23 is the 24-hour view (00:00–23:00).
+      return new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: 'numeric', minute: '2-digit', hourCycle: hour12 ? 'h12' : 'h23' }).format(inst)
         .replace(/[  \s]/g, '').toLowerCase();
     } catch (e) { return ''; }
   }

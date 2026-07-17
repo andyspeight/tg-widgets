@@ -53,7 +53,7 @@
       try{
         var d=new Date(b.startISO);
         var ds=new Intl.DateTimeFormat('en-GB',{timeZone:b.timezone,weekday:'long',day:'numeric',month:'long'}).format(d);
-        var ts=new Intl.DateTimeFormat('en-GB',{timeZone:b.timezone,hour:'numeric',minute:'2-digit',hour12:true}).format(d).replace(/[ \s]/g,'').toLowerCase();
+        var ts=new Intl.DateTimeFormat('en-GB',{timeZone:b.timezone,hour:'numeric',minute:'2-digit',hourCycle:'h12'}).format(d).replace(/[ \s]/g,'').toLowerCase();
         return ds+' at '+ts;
       }catch(e){return b.startISO;}
     }

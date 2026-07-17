@@ -70,7 +70,7 @@
       window.open('/appointment-share?' + q, 'tgshare', 'width=600,height=780,noopener');
     });
     function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];});}
-    function whenText(b){try{var d=new Date(b.startISO);var ds=new Intl.DateTimeFormat('en-GB',{timeZone:b.timezone,weekday:'short',day:'numeric',month:'short'}).format(d);var ts=new Intl.DateTimeFormat('en-GB',{timeZone:b.timezone,hour:'numeric',minute:'2-digit',hour12:true}).format(d).replace(/[ \s]/g,'').toLowerCase();return ds+' · '+ts;}catch(e){return b.startISO;}}
+    function whenText(b){try{var d=new Date(b.startISO);var ds=new Intl.DateTimeFormat('en-GB',{timeZone:b.timezone,weekday:'short',day:'numeric',month:'short'}).format(d);var ts=new Intl.DateTimeFormat('en-GB',{timeZone:b.timezone,hour:'numeric',minute:'2-digit',hourCycle:'h12'}).format(d).replace(/[ \s]/g,'').toLowerCase();return ds+' · '+ts;}catch(e){return b.startISO;}}
 
     function render(bookings){
       var seen={}; shareWidgets=[]; bookings.forEach(function(b){ if(b.widgetId && !seen[b.widgetId]){ seen[b.widgetId]=1; shareWidgets.push(b.widgetId); } });
