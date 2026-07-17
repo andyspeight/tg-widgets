@@ -110,5 +110,32 @@ ok(!/\.brand-meta strong\{color:#fff;?\}/.test(renderer), 'old hard-coded white 
 ok(/--brand-ink:\$\{topBarText\.ink\}/.test(renderer), 'top bar ink var injected from readableSet');
 ok(/--hero-ink:\$\{heroText\.ink\}/.test(renderer), 'hero ink var injected from readableSet');
 
+// ── Email sender name: the client's company, not the platform ────────────────
+// The customer email must go FROM the client's company (configured brandName),
+// falling back to the env sender name, then the generic default, only when a
+// widget has no brand name (e.g. the demo).
+// eslint-disable-next-line no-eval
+const quoteFromName = eval('(' + ex(api, 'function quoteFromName(opts)') + ')');
+const savedEnv = { q: process.env.QUOTE_PDF_FROM_NAME, s: process.env.SENDGRID_FROM_NAME_FALLBACK };
+const setEnv = (q, s) => {
+  if (q === undefined) delete process.env.QUOTE_PDF_FROM_NAME; else process.env.QUOTE_PDF_FROM_NAME = q;
+  if (s === undefined) delete process.env.SENDGRID_FROM_NAME_FALLBACK; else process.env.SENDGRID_FROM_NAME_FALLBACK = s;
+};
+
+setEnv(undefined, undefined);
+ok(quoteFromName({ brand: { name: 'Exclusively Travel' } }) === 'Exclusively Travel', 'configured brand name is the sender (the reported bug)');
+ok(quoteFromName(undefined) === 'Travelgenix', 'no brand, no env → Travelgenix default');
+ok(quoteFromName({ brand: { name: '   ' } }) === 'Travelgenix', 'blank brand name → default');
+ok(quoteFromName({ brand: {} }) === 'Travelgenix', 'missing brand name → default');
+
+setEnv('QP Sender', 'SG Fallback');
+ok(quoteFromName({ brand: { name: 'Exclusively Travel' } }) === 'Exclusively Travel', 'brand name WINS over env override');
+ok(quoteFromName(undefined) === 'QP Sender', 'no brand → QUOTE_PDF_FROM_NAME');
+
+setEnv(undefined, 'SG Fallback');
+ok(quoteFromName(undefined) === 'SG Fallback', 'no brand, no QP name → SENDGRID fallback');
+
+setEnv(savedEnv.q, savedEnv.s); // restore
+
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
