@@ -19,7 +19,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.3';
+  const VERSION = '1.0.4';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the default heading and the "same time" offset label).
@@ -232,7 +232,11 @@
         try {
           r.time.textContent = new Intl.DateTimeFormat([], {
             timeZone: tz, hour: '2-digit', minute: '2-digit',
-            ...(c.showSeconds ? { second: '2-digit' } : {}), hour12: !c.use24h,
+            // hourCycle, not hour12: hour12:true resolves to the h11 cycle on
+            // some locale/ICU combinations, which numbers a 12-hour clock 0-11
+            // and shows noon as "00:00 PM" and midnight as "00:00 AM". h12 pins
+            // the 1-12 clock; h23 is the 24-hour view (00:00-23:00).
+            ...(c.showSeconds ? { second: '2-digit' } : {}), hourCycle: c.use24h ? 'h23' : 'h12',
           }).format(now);
           if (r.date) r.date.textContent = new Intl.DateTimeFormat([], { timeZone: tz, weekday: 'short', day: 'numeric', month: 'short' }).format(now);
           if (r.dn) {

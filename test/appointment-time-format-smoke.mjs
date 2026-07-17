@@ -80,5 +80,11 @@ for (const [f, count] of Object.entries(FILES)) {
 const widget = readFileSync(url('public/widget-appointment.js'), 'utf8');
 ok(/hourCycle:\s*hour12\s*\?\s*'h12'\s*:\s*'h23'/.test(widget), 'picker switches h12 (12-hour) vs h23 (24-hour)');
 
+// Sibling widget: the World Clock carried the identical hour12 pattern (same
+// h11 "00:00 PM" bug class). Guard it too — its live time must use hourCycle.
+const clock = readFileSync(url('public/widget-worldclock.js'), 'utf8');
+ok(/hourCycle:\s*c\.use24h\s*\?\s*'h23'\s*:\s*'h12'/.test(clock), 'world clock live time uses hourCycle (h23/h12)');
+ok(!/hour12:\s*!c\.use24h/.test(clock), 'world clock no longer uses hour12:!c.use24h');
+
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
