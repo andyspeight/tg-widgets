@@ -25,6 +25,16 @@ const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || '';
 const GZ_PREFIX = 'gz:v1:';
 const COMPRESS_THRESHOLD = 64 * 1024; // below this, plain JSON is cheaper to store
 
+// Cap how long a single Upstash REST call may hang. Reads (callRedis) fall back
+// to null on any failure, so a hung read must fail FAST rather than stall the
+// whole serverless function to its maxDuration — a timeout there returns a
+// platform 504 WITHOUT the CORS headers the handler would have set, which the
+// browser reports to the widget as a bare "Failed to fetch". Bounding the read
+// lets an endpoint like /api/destination-map-offers fall through to its seed
+// tier and still answer 200 + CORS within budget. AbortSignal.timeout is stable
+// in Node 20 (the repo's runtime).
+const REDIS_READ_TIMEOUT_MS = 2500;
+
 export function configured() {
   return !!(REDIS_URL && REDIS_TOKEN);
 }
@@ -34,6 +44,7 @@ async function callRedis(command, ...args) {
   try {
     const res = await fetch(`${REDIS_URL}/${command}/${args.map(encodeURIComponent).join('/')}`, {
       headers: { Authorization: `Bearer ${REDIS_TOKEN}` },
+      signal: AbortSignal.timeout(REDIS_READ_TIMEOUT_MS),
     });
     if (!res.ok) {
       console.error('[redis] HTTP', res.status, command);
