@@ -329,7 +329,18 @@ function escapeHtml(s) {
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-async function emailQuotePdf(doc, pdfBuffer, extraAttachments) {
+// The customer-facing quote email goes out under the CLIENT's company name (the
+// widget's configured brandName), so the recipient sees their own travel agent
+// rather than the Travelgenix platform — the same stance the appointment emails
+// take with companyOf(). The verified sender ADDRESS never changes (SendGrid
+// requires it); only the display name does. Fall back to the env sender name,
+// then the generic default, when a widget carries no brand name (e.g. the demo).
+function quoteFromName(opts) {
+  const brandName = opts && opts.brand && opts.brand.name && String(opts.brand.name).trim();
+  return brandName || process.env.QUOTE_PDF_FROM_NAME || process.env.SENDGRID_FROM_NAME_FALLBACK || 'Travelgenix';
+}
+
+async function emailQuotePdf(doc, pdfBuffer, extraAttachments, opts) {
   // Recipient + names: official shape carries customerEmail/customerFirstname at
   // the data root; legacy flat shape carries them under setup. Support both.
   const d = (doc && doc.data && doc.data.items) ? doc.data : doc;
@@ -341,7 +352,7 @@ async function emailQuotePdf(doc, pdfBuffer, extraAttachments) {
   //   SENDGRID_API_KEY, SENDGRID_FROM_EMAIL, SENDGRID_FROM_NAME_FALLBACK.
   // QUOTE_PDF_* names are accepted too as an override if ever set.
   const fromEmail = process.env.QUOTE_PDF_FROM_EMAIL || process.env.SENDGRID_FROM_EMAIL;
-  const fromName = process.env.QUOTE_PDF_FROM_NAME || process.env.SENDGRID_FROM_NAME_FALLBACK || 'Travelgenix';
+  const fromName = quoteFromName(opts);
   const apiKey = process.env.SENDGRID_API_KEY;
 
   if (!apiKey || !fromEmail) {
@@ -447,7 +458,7 @@ export default async function handler(req, res) {
       // The merged PDF already contains the attachments; also send each one as a
       // SEPARATE attachment so the customer gets standalone copies too.
       const extraAttachments = await fetchAttachmentBuffers(ctx.opts && ctx.opts.attachments);
-      const result = await emailQuotePdf(doc, pdf, extraAttachments);
+      const result = await emailQuotePdf(doc, pdf, extraAttachments, ctx.opts);
       return res.status(200).json({ ok: true, emailed: result });
     }
 
@@ -464,4 +475,4 @@ export default async function handler(req, res) {
 }
 
 // Exposed for tests.
-export { validate, fetchQuoteDocument };
+export { validate, fetchQuoteDocument, quoteFromName };
