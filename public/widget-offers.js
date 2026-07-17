@@ -19,6 +19,14 @@
  *   - BothPackages:   send packageType:'Any' (omitting returns DynamicPackages only)
  *
  * Changelog:
+ *   v1.10.15 (Jul 2026) — Harden the offer-data load against transient failures:
+ *     • The live-proxy offer fetch had no timeout and no retry, so a transient
+ *       network blip (or a visitor navigating away mid-load, which aborts the
+ *       request) blanked the widget and fired a false "Failed to fetch" alert.
+ *       It now bounds each attempt and retries once, matching loadConfigFromApi.
+ *     • _showError no longer raises an alert for a network/abort error on an
+ *       already-hidden page (navigate-away); real errors, and any error on a
+ *       visible page, still alert.
  *   v1.10.9 (Jul 2026) — Fix the invisible "View deal" button in the pax popover:
  *     • The travellers popover is appended to the shadow root as a sibling of
  *       .tgo-root, where the --tgo-* design tokens live, so it never inherited
@@ -143,7 +151,7 @@
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
   const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
-  const VERSION = '1.10.14';
+  const VERSION = '1.10.15';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // Telemetry: report a one-time load heartbeat and any failure to
@@ -160,6 +168,45 @@
       if (navigator && typeof navigator.sendBeacon === 'function' && navigator.sendBeacon(WIDGET_LOG_URL, new Blob([b], { type: 'text/plain' }))) return;
       fetch(WIDGET_LOG_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: b, keepalive: true, credentials: 'omit' }).catch(function () {});
     } catch (e) { /* telemetry must never throw */ }
+  }
+
+  // Fetch with a bounded per-attempt timeout and one retry, so a transient blip
+  // on a visitor's connection (or a brief upstream hiccup) doesn't blank the
+  // widget and fire a false alert. Same stance as loadConfigFromApi below, but
+  // for the offer-data fetch. Retries only a network-level failure (fetch reject
+  // / timeout abort); a resolved response — including an HTTP error or a
+  // {success:false} body — is handed straight back so the caller can decide,
+  // because those won't self-heal. Rejects only after both attempts fail, so a
+  // genuine outage still surfaces. AbortController (not AbortSignal.timeout) for
+  // the widest client-browser support; the timer is always cleared.
+  function fetchWithRetry(url, opts, attempts, timeoutMs) {
+    attempts = attempts || 2;
+    timeoutMs = timeoutMs || 10000;
+    var tryOnce = function (n) {
+      var ctl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+      var timer = ctl ? setTimeout(function () { try { ctl.abort(); } catch (e) {} }, timeoutMs) : null;
+      var o = Object.assign({}, opts || {});
+      if (ctl) o.signal = ctl.signal;
+      return fetch(url, o)
+        .then(function (res) { if (timer) clearTimeout(timer); return res; })
+        .catch(function (err) {
+          if (timer) clearTimeout(timer);
+          if (n + 1 < attempts) {
+            return new Promise(function (r) { setTimeout(r, 400); }).then(function () { return tryOnce(n + 1); });
+          }
+          throw err;
+        });
+    };
+    return tryOnce(0);
+  }
+
+  // Is this the signature of a transient network failure / a fetch the visitor
+  // aborted by navigating away? Safari says "Load failed", others "Failed to
+  // fetch"; an aborted request throws an AbortError. We use this to suppress the
+  // operational alert for a benign navigate-away on an already-hidden page,
+  // while a real server error (e.g. "Travelify returned an error") still alerts.
+  function isNavAwayError(message) {
+    return /failed to fetch|load failed|networkerror|the user aborted|aborted|signal is aborted/i.test(String(message || ''));
   }
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -6040,7 +6087,16 @@
       this.root.innerHTML = '<div class="tgo-error">'
         + '<strong>' + esc(this.t('couldNotLoad')) + '</strong> ' + esc(msg)
         + '</div>';
-      tgReport('error', this.cfg && this.cfg._widgetId, msg, this.cfg && this.cfg.template);
+      // Suppress the alert only for a transient network/abort error on a page the
+      // visitor has already left (navigate-away mid-load) — the offer fetch above
+      // already retried, so a lingering network error here on a hidden page is
+      // almost certainly the visitor leaving. Real errors, and any error on a
+      // visible page, still alert.
+      let hidden = false;
+      try { hidden = (typeof document !== 'undefined' && document.visibilityState === 'hidden'); } catch (e) {}
+      if (!(hidden && isNavAwayError(msg))) {
+        tgReport('error', this.cfg && this.cfg._widgetId, msg, this.cfg && this.cfg.template);
+      }
     }
 
     _showEmpty() {
@@ -6187,7 +6243,7 @@
         // config server-side by widget-config.js (see lookupTravelifyCredentials
         // there). For Travelgenix's own demo widgets the field will be empty
         // or '250' and the proxy falls through to demo credentials.
-        const res = await fetch(OFFERS_PROXY, {
+        const res = await fetchWithRetry(OFFERS_PROXY, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
