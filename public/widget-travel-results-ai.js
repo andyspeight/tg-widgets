@@ -27,7 +27,7 @@
   if (window.TravelgenixWidgets.travelResultsAi) return;
   window.TravelgenixWidgets.travelResultsAi = true;
 
-  var VERSION = '1.10.3';
+  var VERSION = '1.10.4';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (header, controls, fact/board labels, fallback states).
@@ -407,6 +407,44 @@
   function configApi() {
     try { if (SELF && SELF.src) return new URL(SELF.src).origin + '/api/widget-config'; } catch (e) {}
     return 'https://tg-widgets.vercel.app/api/widget-config';
+  }
+
+  // ---- failure telemetry --------------------------------------------------
+  // Widget-log beacon — mirrors the World Map / Offers reporters. Posts to OUR
+  // origin (so a client site's connect-src can't block it) and never throws.
+  // Without this a failed AI endpoint degrades silently to local picks and no
+  // one is told; this surfaces a genuine outage as a widget-log alert.
+  var WIDGET_LOG_URL = (function () {
+    try { return new URL(API_BASE).origin + '/api/widget-log'; } catch (e) {}
+    try { if (SELF && SELF.src) return new URL(SELF.src).origin + '/api/widget-log'; } catch (e) {}
+    return 'https://tg-widgets.vercel.app/api/widget-log';
+  })();
+  function report(event, message, detail) {
+    try {
+      var b = JSON.stringify({
+        event: event, widget: 'travel-results-ai', widgetId: String((CFG && CFG._widgetId) || ''),
+        message: String(message || '').slice(0, 300), detail: String(detail || '').slice(0, 500),
+        url: (function () { try { return location.href; } catch (e) { return ''; } })()
+      });
+      if (navigator && typeof navigator.sendBeacon === 'function' && navigator.sendBeacon(WIDGET_LOG_URL, new Blob([b], { type: 'text/plain' }))) return;
+      fetch(WIDGET_LOG_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: b, keepalive: true, credentials: 'omit' }).catch(function () {});
+    } catch (e) { /* telemetry must never throw */ }
+  }
+  // callEndpoint throws Error('HTTP <status>') ONLY when the server responded
+  // with a non-2xx — a genuine endpoint failure (auth, config, quota, server)
+  // worth alerting on. A network reject ("Failed to fetch") or an aborted
+  // request (18s timeout / navigate-away) is transient/benign — the local
+  // fallback covers the visitor and it never matches here, so no visibility
+  // guard is needed (a completed HTTP-error response is never a navigate-away).
+  // The widget-log server de-dupes per widget+site for 30 minutes, so a real
+  // outage is one alert, not one per visitor.
+  function isEndpointFailure(message) {
+    return /^HTTP \d/.test(String(message || ''));
+  }
+  function reportEndpointFailure(e) {
+    if (isEndpointFailure(e && e.message)) {
+      report('error', 'recommendations endpoint failed', (e && e.message) || 'unknown');
+    }
   }
   function isHex(c) { return typeof c === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(c); }
   function str(v, max) { return typeof v === 'string' ? v.slice(0, max || 80) : undefined; }
@@ -1033,6 +1071,7 @@
     }).catch(function (e) {
       if (payload.searchSession !== activeSession) return;
       console.warn('[trai] endpoint failed, using fallback', e);
+      reportEndpointFailure(e);
       var recs = fallbackRecs(cands, CFG.maxRecs); currentRecs = recs;
       setSub(T('suggested', { count: recs.length, plural: recs.length === 1 ? '' : 's' }));
       renderRecs(introLine(), recs);
@@ -1066,6 +1105,7 @@
     }).catch(function (e) {
       if (els.body.contains(thinking)) els.body.removeChild(thinking);
       console.warn('[trai] refine failed, using fallback', e);
+      reportEndpointFailure(e);
       var recs = fallbackRecs(cands, CFG.maxRecs); currentRecs = recs;
       renderRecs(T('closestMatches'), recs, true);
     });
