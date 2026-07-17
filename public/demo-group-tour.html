@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Group Trips · Tour Page · Travelgenix Widget Suite</title>
+<style>
+  :root {
+    --tg-bg: #F7F9FB; --tg-surface: #FFFFFF; --tg-border: #E2E8F0;
+    --tg-text: #0F172A; --tg-sub: #475569; --tg-muted: #94A3B8;
+    --tg-brand: #1B2B5B; --tg-accent: #0891B2; --tg-accent-soft: #E0F4FA;
+  }
+  [data-theme="dark"] { --tg-bg: #0B1220; --tg-surface: #111B2E; --tg-border: #1E293B; --tg-text: #F1F5F9; --tg-sub: #94A3B8; --tg-muted: #64748B; --tg-accent: #38BDF8; --tg-accent-soft: rgba(56,189,248,0.12); }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--tg-bg); color: var(--tg-text); }
+  .demobar { position: sticky; top: 0; z-index: 100; background: var(--tg-surface); border-bottom: 1px solid var(--tg-border); padding: 10px 20px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 9px; text-decoration: none; color: var(--tg-text); font-weight: 700; font-size: 15px; }
+  .brand-mark { width: 24px; height: 24px; background: linear-gradient(135deg, var(--tg-brand), var(--tg-accent)); border-radius: 7px; }
+  .pill { padding: 3px 9px; background: var(--tg-accent-soft); color: var(--tg-accent); border-radius: 999px; font-size: 11px; font-weight: 600; }
+  .spacer { flex: 1; }
+  .demobar label { font-size: 11px; color: var(--tg-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+  .demobar select, .demobar input[type=color] { padding: 6px 8px; border: 1px solid var(--tg-border); border-radius: 7px; font-size: 13px; background: var(--tg-surface); color: var(--tg-text); font-family: inherit; }
+  .demobar input[type=color] { padding: 3px; width: 38px; height: 32px; cursor: pointer; }
+  .ctl { display: flex; align-items: center; gap: 7px; }
+  .tlink { color: var(--tg-sub); text-decoration: none; font-size: 13px; }
+  .tlink:hover { color: var(--tg-text); }
+  .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(140%); z-index: 200; background: #0F172A; color: #fff; padding: 14px 20px; border-radius: 12px; box-shadow: 0 16px 40px rgba(0,0,0,0.3); font-size: 14px; max-width: 90vw; transition: transform 0.4s cubic-bezier(.2,.8,.2,1); }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast b { color: #7DD3FC; }
+</style>
+</head>
+<body>
+  <div class="demobar">
+    <a class="brand" href="/"><span class="brand-mark"></span>Travelgenix</a>
+    <span class="pill">Group Trips · Tour Page</span>
+    <span class="spacer"></span>
+    <div class="ctl"><label for="ctrlTrip">Trip</label>
+      <select id="ctrlTrip">
+        <option value="vietnam" selected>Vietnam · small group</option>
+        <option value="morocco">Morocco · Atlas & Sahara</option>
+        <option value="amalfi">Amalfi · walking week</option>
+        <option value="sparse">Minimal · few details</option>
+      </select>
+    </div>
+    <div class="ctl"><label for="ctrlMode">Module</label>
+      <select id="ctrlMode">
+        <option value="booking" selected>Booking</option>
+        <option value="enquiry">Enquiry</option>
+      </select>
+    </div>
+    <div class="ctl"><label for="ctrlTemplate">Template</label>
+      <select id="ctrlTemplate">
+        <option value="classic" selected>Classic</option>
+        <option value="editorial">Editorial</option>
+        <option value="immersive">Immersive</option>
+      </select>
+    </div>
+    <div class="ctl"><label for="ctrlAccent">Accent</label><input id="ctrlAccent" type="color" value="#0891B2" /></div>
+    <a class="tlink" href="#" id="themeLink">Dark</a>
+  </div>
+
+  <div id="pageMount"></div>
+  <div class="toast" id="toast"></div>
+
+  <script src="/widget-maps.js"></script>
+  <script src="/widget-group-trips.js"></script>
+  <script>
+    function $(id) { return document.getElementById(id); }
+    const mount = $('pageMount');
+
+    const TRIPS = {
+      vietnam: {
+        currency: 'GBP',
+        title: 'Highlights of Vietnam, small group tour',
+        destination: 'Hanoi to Ho Chi Minh City, Vietnam',
+        summary: 'Twelve days travelling north to south with a small group of no more than sixteen, led by a local guide who knows the back streets as well as the big sights.\nCruise the karst islands of Ha Long Bay, ride the night train to Hue, cycle the rice paddies around Hoi An and finish with the buzz of Ho Chi Minh City. Comfortable hotels, most meals and every transfer are taken care of so all you carry is a day pack.',
+        heroImage: 'https://images.unsplash.com/photo-1528127269322-539801943592?w=1600&q=80',
+        gallery: [
+          'https://images.unsplash.com/photo-1555921015-5532091f6026?w=800&q=75',
+          'https://images.unsplash.com/photo-1509978778156-518eea30166b?w=800&q=75',
+          'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=800&q=75',
+          'https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=800&q=75'
+        ],
+        mapQuery: 'Ha Long Bay, Vietnam',
+        mapLat: '20.9101', mapLng: '107.1839', mapStyle: 'satellite',
+        videoUrl: 'https://www.youtube.com/watch?v=Scxs7L0vhZ4',
+        highlights: ['Overnight cruise on Ha Long Bay', 'Local guide throughout', 'Small group, max 16', 'Cooking class in Hoi An', 'Cyclo ride through the Old Quarter'],
+        included: ['11 nights in hand-picked hotels', 'Overnight boat on Ha Long Bay', 'All breakfasts and 6 dinners', 'Private air-conditioned transport', 'English speaking local guide', 'Internal flight Da Nang to Ho Chi Minh', 'All entrance fees on the itinerary', 'Airport transfers on arrival and departure'],
+        notIncluded: ['International flights to Vietnam', 'Vietnam visa', 'Travel insurance', 'Lunches and drinks', 'Tips for your guide and driver'],
+        departures: [
+          { date: '2026-10-12', label: '12 October 2026' },
+          { date: '2026-11-09', label: '9 November 2026' },
+          { date: '2027-02-15', label: '15 February 2027' },
+          { date: '2027-03-15', label: '15 March 2027' }
+        ],
+        pricePerPerson: 1899, deposit: 250, currency: 'GBP',
+        balanceDueDate: '1 August 2026', minPax: 6, maxPax: 16, spotsTaken: 11
+      },
+      morocco: {
+        currency: 'GBP',
+        title: 'Morocco: Atlas Mountains and the Sahara',
+        destination: 'Marrakech, Atlas & the Sahara, Morocco',
+        summary: 'A week over the High Atlas passes and down to the dunes of Erg Chigaga, sleeping under canvas in a proper desert camp far from the day trippers.\nWe travel as a group of no more than twelve with a Berber guide, sharing mint tea in mountain villages and watching the sun come up over the sand.',
+        heroImage: 'https://images.unsplash.com/photo-1489749798305-4fea3ae63d43?w=1600&q=80',
+        gallery: [
+          'https://images.unsplash.com/photo-1518065665898-4c6dc2f3a3b4?w=800&q=75',
+          'https://images.unsplash.com/photo-1539020140153-e479b8c22e70?w=800&q=75',
+          'https://images.unsplash.com/photo-1548783300-70b41bc84f56?w=800&q=75'
+        ],
+        mapQuery: 'Erg Chigaga, Morocco',
+        mapLat: '29.9057', mapLng: '-6.0500', mapStyle: 'satellite',
+        highlights: ['Two nights in a Sahara desert camp', 'Berber guide throughout', 'Small group, max 12', 'Camel trek at sunset', 'Cook your own tagine'],
+        included: ['7 nights including a desert camp', 'All breakfasts and 4 dinners', 'Private 4x4 transport', 'Camel trek into the dunes', 'Local Berber guide', 'Airport transfers'],
+        notIncluded: ['International flights to Marrakech', 'Travel insurance', 'Lunches and drinks', 'Tips'],
+        departures: [
+          { date: '2026-09-20', label: '20 September 2026' },
+          { date: '2026-10-18', label: '18 October 2026' },
+          { date: '2027-03-21', label: '21 March 2027' }
+        ],
+        pricePerPerson: 1150, deposit: 175, currency: 'GBP',
+        balanceDueDate: '15 July 2026', minPax: 4, maxPax: 12, spotsTaken: 5
+      },
+      amalfi: {
+        currency: 'GBP',
+        title: 'Amalfi Coast walking week',
+        destination: 'Sorrento & the Amalfi Coast, Italy',
+        summary: 'Seven days walking the old mule paths above the Amalfi Coast, from the Path of the Gods to the lemon groves of Ravello, with a relaxed group and a village base in Sorrento.',
+        heroImage: 'https://images.unsplash.com/photo-1533165924636-d0b5b6c5b8a8?w=1600&q=80',
+        gallery: [
+          'https://images.unsplash.com/photo-1534445867742-43195f401b6c?w=800&q=75',
+          'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=800&q=75'
+        ],
+        mapQuery: 'Amalfi, Italy',
+        mapLat: '40.6340', mapLng: '14.6027', mapStyle: 'streets',
+        highlights: ['Walk the Path of the Gods', 'Small group, max 14', 'Local walking guide', 'Boat trip to Capri'],
+        included: ['7 nights in a family-run hotel', 'All breakfasts and 3 dinners', 'Guided walks on 5 days', 'Boat trip to Capri', 'Local guide throughout'],
+        notIncluded: ['Flights to Naples', 'Travel insurance', 'Lunches', 'Tips'],
+        departures: [
+          { date: '2026-05-17', label: '17 May 2026' },
+          { date: '2026-09-13', label: '13 September 2026' }
+        ],
+        pricePerPerson: 1395, deposit: 200, currency: 'GBP',
+        balanceDueDate: '1 April 2026', minPax: 6, maxPax: 14, spotsTaken: 9
+      },
+      sparse: {
+        currency: 'GBP',
+        title: 'Lapland aurora group break',
+        destination: 'Rovaniemi, Finland',
+        summary: 'A short group trip inside the Arctic Circle to chase the northern lights.',
+        heroImage: 'https://images.unsplash.com/photo-1483347756197-71ef80e95f73?w=1600&q=80',
+        included: ['3 nights in a glass cabin', 'Aurora hunt by minibus', 'Local guide'],
+        departures: [{ date: '2026-12-05', label: '5 December 2026' }],
+        pricePerPerson: 999, deposit: 150, currency: 'GBP',
+        minPax: 2, maxPax: 10, spotsTaken: 3
+      }
+    };
+
+    let theme = 'light';
+    $('themeLink').addEventListener('click', (e) => { e.preventDefault(); theme = theme === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', theme); $('themeLink').textContent = theme === 'dark' ? 'Light' : 'Dark'; render(); });
+
+    let widget = null;
+    function render() {
+      if (widget && widget.destroy) widget.destroy();
+      mount.innerHTML = '';
+      const div = document.createElement('div');
+      div.setAttribute('data-tg-widget', 'group-trips');
+      mount.appendChild(div);
+      widget = new window.TGGroupTripsWidget(div, {
+        theme: theme,
+        template: $('ctrlTemplate').value,
+        accentColor: $('ctrlAccent').value,
+        agencyName: 'Your Travel Co.',
+        booking: { mode: $('ctrlMode').value, showSpotsLeft: true },
+        tour: TRIPS[$('ctrlTrip').value]
+      });
+      window.scrollTo(0, 0);
+    }
+
+    mount.addEventListener('tg-group-register', (e) => {
+      const r = e.detail.registration || {};
+      const t = $('toast');
+      t.innerHTML = 'Registration captured for <b>' + (r.name || 'traveller') + '</b> · ' + (r.partySize || 1) + ' place(s) on ' + (r.departure || 'this trip');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 4500);
+    });
+    mount.addEventListener('tg-group-enquiry', (e) => {
+      const t = $('toast');
+      t.innerHTML = 'Enquiry captured for <b>' + ((e.detail.enquiry && e.detail.enquiry.name) || 'visitor') + '</b>';
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 4500);
+    });
+
+    document.querySelectorAll('.demobar select, .demobar input').forEach(el => el.addEventListener('change', render));
+    render();
+  </script>
+</body>
+</html>
