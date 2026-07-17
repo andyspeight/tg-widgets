@@ -8,3 +8,7 @@ playwright-report/
 
 # OS noise
 .DS_Store
+
+# Staging area for one-off deliverables handed to the user directly (e.g. the
+# C# reference port), not part of the widget platform source.
+scratchpad-deliverables/
