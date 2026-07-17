@@ -861,9 +861,34 @@ function resolveBrand(opts) {
   };
 }
 
+// Header text needs to stay readable whatever brand background sits behind it.
+// The top bar (--topbar) and hero (--hero) can be any colour the client picks,
+// including light ones, but the template historically hard-coded white/pale text
+// — which vanishes on a light bar (a real client had a white top bar with an
+// invisible phone + email). Pick a light or dark text set from the background's
+// WCAG relative luminance. The ~0.179 crossover is where white and black text
+// have equal contrast, so dark brand colours keep the original white-on-navy
+// look and only genuinely light backgrounds flip to dark text.
+function readableSet(bgHex) {
+  const m = /^#([0-9a-fA-F]{6})$/.exec(String(bgHex || '').trim());
+  // Unknown / non-hex → assume a dark background (the historical default) so an
+  // unconfigured or malformed colour never regresses the familiar look.
+  if (!m) return { ink: '#FFFFFF', muted: '#C7D2E8', ref: '#9DB0D4' };
+  const h = m[1];
+  const lin = (v) => { const c = parseInt(v, 16) / 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
+  const L = 0.2126 * lin(h.slice(0, 2)) + 0.7152 * lin(h.slice(2, 4)) + 0.0722 * lin(h.slice(4, 6));
+  return L > 0.179
+    ? { ink: '#1F2937', muted: '#475569', ref: '#64748B' }  // dark text on a light bar
+    : { ink: '#FFFFFF', muted: '#C7D2E8', ref: '#9DB0D4' }; // light text on a dark bar
+}
+
 function renderQuoteHTML(input, opts) {
   const q = normaliseQuote(input);
   const brand = resolveBrand(opts);
+  // Contrast-safe header text: the top bar reads off --topbar, the hero off
+  // --hero (its dominant, left-hand colour where the text actually sits).
+  const topBarText = readableSet(brand.colors.topBar);
+  const heroText = readableSet(brand.colors.hero);
   const currency = q.currency || 'GBP';
   const items = Array.isArray(q.items) ? q.items : [];
 
@@ -904,6 +929,10 @@ function renderQuoteHTML(input, opts) {
     --ink:${brand.colors.text}; --slate:#475569; --mute:#94A3B8;
     --bg:#FFFFFF; --bg2:#F8FAFC; --bg3:#F1F5F9; --line:#E2E8F0;
     --ok:#10B981; --no:#94A3B8;
+    /* Contrast-safe header text, chosen from the top bar / hero luminance so a
+       light brand colour doesn't leave the name, phone and email invisible. */
+    --brand-ink:${topBarText.ink}; --brand-muted:${topBarText.muted};
+    --hero-ink:${heroText.ink}; --hero-muted:${heroText.muted}; --hero-ref:${heroText.ref};
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -926,20 +955,20 @@ function renderQuoteHTML(input, opts) {
     background:var(--navy-dark);
   }
   .brand-id{display:flex;flex-direction:column;gap:2px;}
-  .brand-name{font-size:18px;font-weight:700;color:#fff;letter-spacing:-0.01em;}
+  .brand-name{font-size:18px;font-weight:700;color:var(--brand-ink);letter-spacing:-0.01em;}
   .brand-logo{max-height:44px;max-width:220px;width:auto;height:auto;display:block;}
-  .brand-tag{font-size:12px;color:#C7D2E8;}
-  .brand-meta{text-align:right;font-size:12px;color:#C7D2E8;line-height:1.5;}
-  .brand-meta strong{color:#fff;}
+  .brand-tag{font-size:12px;color:var(--brand-muted);}
+  .brand-meta{text-align:right;font-size:12px;color:var(--brand-muted);line-height:1.5;}
+  .brand-meta strong{color:var(--brand-ink);}
 
   /* Hero */
   .hero{
     background:linear-gradient(135deg,var(--hero) 0%,var(--topbar) 100%);
-    color:#fff;padding:34px 32px;
+    color:var(--hero-ink);padding:34px 32px;
   }
   .hero h1{margin:0 0 6px;font-size:26px;font-weight:700;letter-spacing:-0.02em;}
-  .hero p{margin:0;font-size:14px;color:#C7D2E8;}
-  .hero-ref{margin-top:14px;font-size:11px;color:#9DB0D4;letter-spacing:0.04em;text-transform:uppercase;}
+  .hero p{margin:0;font-size:14px;color:var(--hero-muted);}
+  .hero-ref{margin-top:14px;font-size:11px;color:var(--hero-ref);letter-spacing:0.04em;text-transform:uppercase;}
 
   /* Summary chips */
   .chips{display:flex;gap:12px;padding:20px 32px;background:var(--bg2);border-bottom:1px solid var(--line);}

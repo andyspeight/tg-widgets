@@ -90,5 +90,25 @@ const full = resolveBrand(buildRenderOpts({ brandName: 'Exclusively Travel', sup
 ok(full.name === 'Exclusively Travel', 'brandName flows through');
 ok(full.supportPhone === '0203 012 9623', 'supportPhone flows through');
 
+// ── Header text contrast: light top bar must get dark text, not white ────────
+// A client set a white/light top bar; the phone + email were hard-coded white
+// and vanished. readableSet() chooses the text set from the background luminance.
+// eslint-disable-next-line no-eval
+const readableSet = eval('(' + ex(renderer, 'function readableSet(bgHex)') + ')');
+ok(readableSet('#FFFFFF').ink === '#1F2937', 'white top bar → dark ink (the reported bug)');
+ok(readableSet('#F5F7FA').ink === '#1F2937', 'near-white bar → dark ink');
+ok(readableSet('#111D3E').ink === '#FFFFFF', 'default dark navy → white ink (unchanged)');
+ok(readableSet('#1B2B5B').ink === '#FFFFFF', 'default hero navy → white ink (unchanged)');
+ok(readableSet('nope').ink === '#FFFFFF', 'malformed → assume dark bg (no regression)');
+ok(readableSet(undefined).ink === '#FFFFFF', 'missing → assume dark bg');
+ok(readableSet('#FFFFFF').muted === '#475569' && readableSet('#FFFFFF').ref === '#64748B', 'light bar → dark muted + ref');
+ok(readableSet('#111D3E').muted === '#C7D2E8' && readableSet('#111D3E').ref === '#9DB0D4', 'dark bar → pale muted + ref');
+
+// ── Wiring guard: the template uses the contrast vars, not hard-coded white ───
+ok(/\.brand-meta strong\{color:var\(--brand-ink\);\}/.test(renderer), 'brand-meta strong uses --brand-ink');
+ok(!/\.brand-meta strong\{color:#fff;?\}/.test(renderer), 'old hard-coded white brand-meta strong is gone');
+ok(/--brand-ink:\$\{topBarText\.ink\}/.test(renderer), 'top bar ink var injected from readableSet');
+ok(/--hero-ink:\$\{heroText\.ink\}/.test(renderer), 'hero ink var injected from readableSet');
+
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
