@@ -584,7 +584,14 @@ export default async function handler(req, res) {
       const record = await fetchEnquiryFormByWidgetId(widgetId, headers, AIRTABLE_BASE_ID);
       if (!record) return res.status(404).json({ error: 'Form not found' });
       if (record.fields[EF.status] !== 'Live') {
-        return res.status(404).json({ error: 'Form not found' });
+        // The form EXISTS but isn't published. Return a distinct message rather
+        // than the identical "Form not found" used for a genuinely missing form:
+        // a Draft form showing "Form not found" reads like the form was lost,
+        // when the fix is simply to set its status to Live in the builder. Kept
+        // short and factual because the widget renders this text on a failed
+        // load — an agent testing an unpublished embed learns the real reason,
+        // and it stays presentable if a Draft form is ever embedded publicly.
+        return res.status(404).json({ error: 'This form is not published yet.' });
       }
 
       const pub = readEnquiryFormRecord(record);
