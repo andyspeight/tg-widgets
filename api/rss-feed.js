@@ -12,8 +12,10 @@
  *     inward and most DNS-rebind setups)
  *   - redirects followed MANUALLY, each hop re-validated through the same guard
  *   - response size + time capped
- *   - locked CORS (shared TG_ALLOWED_ORIGINS env + Duda previews), per-IP rate
- *     limit, 15-min edge cache, uniform error shape
+ *   - open CORS ('*'): a public, read-only, no-credentials feed that embeds on
+ *     arbitrary client sites must be readable from any origin; abuse is bounded
+ *     by the SSRF guard + per-IP rate limit, not by an origin list
+ *   - per-IP rate limit, 15-min edge cache, uniform error shape
  *
  * Returns the newest items, parsed from RSS 2.0 or Atom into one clean shape:
  *   { ok:true, feed:{ title, link, url }, count, items:[
@@ -28,36 +30,18 @@
 
 import { promises as dns } from 'node:dns';
 
-// ─── CORS (shared posture with the other data endpoints) ─────────────────────
-const ALLOWED_ORIGINS = [
-  'https://tg-widgets.vercel.app',
-  'https://widgets.travelify.io',
-  'https://www.travelgenix.io',
-  'https://travelgenix.io',
-  'https://www.traveldemo.site',
-  'https://traveldemo.site',
-];
-const ALLOW_DUDA_PREVIEWS = true;
-const EXTRA_ORIGINS = (process.env.TG_ALLOWED_ORIGINS || '')
-  .split(',').map(s => s.trim()).filter(Boolean);
-
-function isAllowedOrigin(origin) {
-  if (!origin) return false;
-  if (ALLOWED_ORIGINS.includes(origin) || EXTRA_ORIGINS.includes(origin)) return true;
-  if (ALLOW_DUDA_PREVIEWS) {
-    try {
-      const h = new URL(origin).hostname;
-      if (h === 'duda.co' || h.endsWith('.duda.co') || h.endsWith('.dudamobile.com') || h.endsWith('.multiscreensite.com')) return true;
-    } catch (e) { /* ignore */ }
-  }
-  return false;
-}
+// ─── CORS ────────────────────────────────────────────────────────────────────
+// The RSS widget embeds on ARBITRARY client websites, so the feed must be
+// readable cross-origin from any domain. The response is public, read-only (GET)
+// feed data with no credentials, so Access-Control-Allow-Origin: '*' is the
+// correct policy — the same stance as the other public widget feeds
+// (destination-map-offers, destination-map-deals). A locked origin allow-list
+// only broke the widget on client sites (their own domain was never listed, so
+// no Allow-Origin header was sent and the browser blocked the read) without
+// adding real protection: abuse is bounded server-side by the SSRF guard and
+// the per-IP rate limiter below, neither of which CORS affects.
 function applyCors(req, res) {
-  const origin = req.headers.origin;
-  if (origin && isAllowedOrigin(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Vary', 'Origin');
-  }
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 }
