@@ -30,6 +30,7 @@
 import { requireAuth, setCors, applyRateLimit, RATE_LIMITS } from './_auth.js';
 import { getRecord } from './_lib/auth/airtable.js';
 import { USERS } from './_lib/auth/schema.js';
+import { nextFormSequential } from './enquiry-form-config.js';
 
 const AIRTABLE_API = 'https://api.airtable.com/v0';
 const WIDGETS_TABLE = 'Widgets';
@@ -90,10 +91,12 @@ const EF = {
 
 // Fields that should NOT be copied as-is. Each handled specially below.
 //   widgetId         — new value minted
-//   formId           — formula, regenerates itself
+//   formId           — formula off Sequential, recomputes from the new stamp
 //   submissionCount  — reset to 0 (submissions belong to the source)
 //   status           — forced to Draft on copy regardless of source
-//   sequential       — Airtable autonumber, regenerates
+//   sequential       — plain number field, NOT an autonumber: it must be
+//                      stamped explicitly (nextFormSequential below) or the
+//                      Form ID formula collapses to the shared "EF-000"
 //   formName         — modified to add " (Copy)"
 const FIELDS_TO_RESET = new Set([
   EF.widgetId, EF.formId, EF.submissionCount, EF.status, EF.sequential, EF.formName,
@@ -210,6 +213,8 @@ export default async function handler(req, res) {
     newEfFields[EF.status] = 'Draft';
     newEfFields[EF.submissionCount] = 0;
     newEfFields[EF.ownerEmail] = user.email;
+    const nextSeq = await nextFormSequential(headers, baseId);
+    if (nextSeq !== null) newEfFields[EF.sequential] = nextSeq;
 
     const originalFormName = (sourceEf.fields[EF.formName] || '').trim();
     const derivedName = customName || `${originalFormName} (Copy)`.slice(0, 200);

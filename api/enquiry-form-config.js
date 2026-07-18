@@ -521,10 +521,50 @@ async function fetchEnquiryFormByWidgetId(widgetId, headers, baseId) {
   // since filterByFormula requires field names. "Widget ID" is the display name.
   const formula = encodeURIComponent(`{Widget ID} = '${safe}'`);
   const url = `${AIRTABLE_API}/${baseId}/${ENQUIRY_FORMS_TABLE}?filterByFormula=${formula}&maxRecords=1&returnFieldsByFieldId=true`;
-  const resp = await fetch(url, { headers });
-  if (!resp.ok) throw new Error('Enquiry Forms lookup failed');
-  const data = await resp.json();
-  return data.records && data.records[0] ? data.records[0] : null;
+  // One short retry on 429/5xx/network — the whole platform shares one
+  // Airtable base's 5 req/s budget, so transient blips are a matter of when.
+  // A failure after the retry still THROWS (handled as a 500 upstream), it is
+  // never conflated with "no record": only a genuine empty result returns null.
+  const attempt = async () => {
+    const resp = await fetch(url, { headers });
+    if (!resp.ok) {
+      const err = new Error('Enquiry Forms lookup failed');
+      err.retryable = resp.status === 429 || resp.status >= 500;
+      throw err;
+    }
+    const data = await resp.json();
+    return data.records && data.records[0] ? data.records[0] : null;
+  };
+  try {
+    return await attempt();
+  } catch (err) {
+    if (err.retryable === false) throw err;
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    return attempt();
+  }
+}
+
+// Next value for the Sequential number field, which feeds the Form ID formula
+// (EF-####). Every form created before 2026-07-18 skipped this stamp, so all
+// their Form IDs collapsed to the shared "EF-000" — which broke submissions
+// while the submit endpoint still looked forms up by Form ID. Submissions now
+// key on widgetId, so uniqueness here is only cosmetic (the dashboard badge) —
+// a same-instant race or a failed read is harmless. Sorts by field ID, which
+// the Airtable list API accepts alongside field names.
+async function nextFormSequential(headers, baseId) {
+  try {
+    const url = `${AIRTABLE_API}/${baseId}/${ENQUIRY_FORMS_TABLE}?maxRecords=1&returnFieldsByFieldId=true` +
+      `&sort%5B0%5D%5Bfield%5D=${EF.sequential}&sort%5B0%5D%5Bdirection%5D=desc`;
+    const resp = await fetch(url, { headers });
+    if (!resp.ok) throw new Error(`sequential read HTTP ${resp.status}`);
+    const data = await resp.json();
+    const top = data.records && data.records[0];
+    const max = top && typeof top.fields[EF.sequential] === 'number' ? top.fields[EF.sequential] : 0;
+    return max + 1;
+  } catch (err) {
+    console.warn('[enquiry-form-config] nextFormSequential failed (form gets no badge number):', err.message);
+    return null;
+  }
 }
 
 // ────────────────────────────────────────────────────────────────
@@ -581,8 +621,13 @@ export default async function handler(req, res) {
       }
 
       // Public widget-render path. Only returns live forms; Draft/Archived return 404.
+      // Error responses are explicitly uncacheable — a transient 404 must never
+      // get pinned anywhere while the form itself is fine.
       const record = await fetchEnquiryFormByWidgetId(widgetId, headers, AIRTABLE_BASE_ID);
-      if (!record) return res.status(404).json({ error: 'Form not found' });
+      if (!record) {
+        res.setHeader('Cache-Control', 'no-store');
+        return res.status(404).json({ error: 'Form not found' });
+      }
       if (record.fields[EF.status] !== 'Live') {
         // The form EXISTS but isn't published. Return a distinct message rather
         // than the identical "Form not found" used for a genuinely missing form:
@@ -591,6 +636,7 @@ export default async function handler(req, res) {
         // short and factual because the widget renders this text on a failed
         // load — an agent testing an unpublished embed learns the real reason,
         // and it stays presentable if a Draft form is ever embedded publicly.
+        res.setHeader('Cache-Control', 'no-store');
         return res.status(404).json({ error: 'This form is not published yet.' });
       }
 
@@ -808,6 +854,10 @@ export default async function handler(req, res) {
       efFields[EF.widgetId] = newWidgetId;
       // Default submission count to 0 on create
       efFields[EF.submissionCount] = 0;
+      // Stamp Sequential so the Form ID formula renders a real EF-#### badge
+      // (null on a failed read — omit rather than write junk).
+      const nextSeq = await nextFormSequential(headers, AIRTABLE_BASE_ID);
+      if (nextSeq !== null) efFields[EF.sequential] = nextSeq;
       // Default status to Draft on create unless the caller explicitly set Live
       if (!efFields[EF.status]) efFields[EF.status] = 'Draft';
 
@@ -948,3 +998,6 @@ export default async function handler(req, res) {
 
 // Test surface — pure validation logic, no network.
 export const _test = { cleanTranslations, clampStr };
+
+// Shared with enquiry-form-copy.js so copies get a real EF-#### badge too.
+export { nextFormSequential };
