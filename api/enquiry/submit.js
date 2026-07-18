@@ -71,6 +71,7 @@ const MAX_PAYLOAD_BYTES = 64 * 1024; // 64KB
 // Enquiry Forms field IDs (config source)
 const FORM_FIELDS = {
   formName:          'fldC0MLSyJqg6U1zT',
+  formId:            'fldZTiyzyhXjCIapn', // formula (EF-####) — read only
   sequential:        'fldatpd9Ms5J5JGPy',
   clientName:        'fldrw1eTFYCFIo0pp',
   status:            'fldTR9W1dhMRoT0MK',
@@ -177,6 +178,7 @@ const FORM_RATE_LIMITS = {
 const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const EMAIL_REGEX    = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FORM_ID_REGEX  = /^EF-\d{1,6}$/;
+const WIDGET_ID_REGEX = /^tgw_[A-Za-z0-9_]{1,80}$/;
 
 // Validation returns { ok, errors? } where errors is a {path: message} object.
 // Keeps submit.js surface area small — we don't need zod's full feature set.
@@ -189,8 +191,21 @@ function validatePayload(raw) {
     return { ok: false, errors: { '': 'Body must be a JSON object.' } };
   }
 
-  // Top-level required fields
-  if (typeof raw.formId !== 'string' || !FORM_ID_REGEX.test(raw.formId)) {
+  // Form identity. widgetId (tgw_..., minted server-side at create, unique by
+  // construction) is the preferred lookup key; formId (EF-####) is the legacy
+  // key that older cached widget code still sends. formId is a formula off
+  // Sequential and was NOT unique for forms created before 2026-07-18 (every
+  // one rendered "EF-000"), so it can never again be the primary key. At
+  // least one well-formed key must be present.
+  const hasWidgetId = typeof raw.widgetId === 'string' && WIDGET_ID_REGEX.test(raw.widgetId);
+  const hasFormId   = typeof raw.formId === 'string' && FORM_ID_REGEX.test(raw.formId);
+  if (raw.widgetId !== undefined && !hasWidgetId) {
+    fail('widgetId', 'Invalid widgetId.');
+  }
+  if (raw.formId !== undefined && !hasFormId) {
+    fail('formId', 'Invalid formId.');
+  }
+  if (!hasWidgetId && !hasFormId) {
     fail('formId', 'Invalid formId.');
   }
   if (typeof raw.visitorId !== 'string' || raw.visitorId.length < 1 || raw.visitorId.length > 128) {
@@ -460,22 +475,51 @@ function buildReference(prefix, sequential) {
 
 // ---------- Form config fetch ------------------------------------------------
 
-async function fetchForm(formId) {
-  const formula = `{Form ID} = "${escapeForFormula(formId)}"`;
+// Resolve the form record. Looks up by Widget ID when the payload carries one
+// (unique by construction), falling back to the legacy Form ID for cached
+// widget code that predates the widgetId key.
+//
+// An Airtable failure (429 rate limit — the whole platform shares one base's
+// 5 req/s budget — or a 5xx blip) is NOT "no such form". It used to be
+// returned as null here, which the handler answered with 404 "Form not
+// found." — visitors on perfectly healthy Live forms saw their finished
+// enquiry rejected as if the form had been deleted. Now: one short retry for
+// retryable failures, then THROW so the handler can answer an honest,
+// retryable 503 instead. Only a genuine empty result returns null.
+const LOOKUP_RETRY_DELAY_MS = 400;
+
+async function fetchForm({ widgetId, formId }) {
+  const formula = widgetId
+    ? `{Widget ID} = "${escapeForFormula(widgetId)}"`
+    : `{Form ID} = "${escapeForFormula(formId)}"`;
   const url = new URL(`https://api.airtable.com/v0/${WIDGET_SUITE_BASE_ID}/${ENQUIRY_FORMS_TABLE_ID}`);
   url.searchParams.set('filterByFormula', formula);
   url.searchParams.set('maxRecords', '1');
   url.searchParams.set('returnFieldsByFieldId', 'true');
 
-  const response = await fetch(url.toString(), {
-    headers: { Authorization: `Bearer ${WIDGET_SUITE_PAT}` },
-  });
-  if (!response.ok) {
-    console.error('[submit] fetchForm failed:', response.status);
-    return null;
+  const attempt = async () => {
+    const response = await fetch(url.toString(), {
+      headers: { Authorization: `Bearer ${WIDGET_SUITE_PAT}` },
+    });
+    if (!response.ok) {
+      const err = new Error(`form lookup HTTP ${response.status}`);
+      // 429/5xx are transient; other 4xx (bad PAT, bad request) are not.
+      err.retryable = response.status === 429 || response.status >= 500;
+      throw err;
+    }
+    const data = await response.json();
+    return data.records?.[0] || null;
+  };
+
+  try {
+    return await attempt();
+  } catch (err) {
+    // Network rejects carry no .retryable — treat them as transient too.
+    if (err.retryable === false) throw err;
+    console.warn('[submit] form lookup retrying after:', err.message);
+    await new Promise((resolve) => setTimeout(resolve, LOOKUP_RETRY_DELAY_MS));
+    return attempt();
   }
-  const data = await response.json();
-  return data.records?.[0] || null;
 }
 
 // ---------- Turnstile verification -------------------------------------------
@@ -527,7 +571,9 @@ async function writeMasterRecord({ form, payload, meta, sequential, reference })
       [SUB_FIELDS.sequential]:       sequential,
       [SUB_FIELDS.referencePrefix]:  cleanString(f[FORM_FIELDS.referencePrefix] || 'TG-', 32),
       [SUB_FIELDS.formRecordId]:     form.id,
-      [SUB_FIELDS.formId]:           cleanString(payload.formId, 16),
+      // Stamp the RESOLVED record's Form ID, not the payload's — cached widget
+      // code can send a stale (historically colliding) formId.
+      [SUB_FIELDS.formId]:           cleanString(f[FORM_FIELDS.formId] || payload.formId, 16),
       [SUB_FIELDS.formName]:         cleanString(f[FORM_FIELDS.formName], 200),
       [SUB_FIELDS.clientName]:       cleanString(f[FORM_FIELDS.clientName], 200),
       [SUB_FIELDS.visitorId]:        cleanString(payload.visitorId, 128),
@@ -823,19 +869,27 @@ export default async function handler(req, res) {
     return errorResponse(res, 400, 'invalid_json', 'Request body must be valid JSON.');
   }
 
-  // 6. Fetch form definition
+  // 6. Fetch form definition — by widgetId when present, legacy formId otherwise
   let form;
   try {
-    form = await fetchForm(payload.formId);
+    form = await fetchForm({ widgetId: payload.widgetId, formId: payload.formId });
   } catch (err) {
-    console.error('[submit] Form fetch error:', err);
-    return errorResponse(res, 500, 'server_error', 'Something went wrong. Please try again.');
+    // The LOOKUP failed — the form may well exist. Nothing has been written
+    // yet, so this is safe to retry: the widget re-sends once on a retryable
+    // 503 before showing anything to the visitor.
+    console.error('[submit] Form lookup failed (not a 404):', err.message || err);
+    res.setHeader('Retry-After', '2');
+    return errorResponse(res, 503, 'service_busy',
+      'We could not send your enquiry just now. Please try again.', { retryable: true });
   }
   if (!form) {
     return errorResponse(res, 404, 'form_not_found', 'Form not found.');
   }
   if (form.fields[FORM_FIELDS.status] !== 'Live') {
-    return errorResponse(res, 404, 'form_not_found', 'Form not found.');
+    // The form exists but is not Live. Saying "Form not found." here made
+    // agents think a live form had vanished; name the real state instead.
+    return errorResponse(res, 404, 'form_not_live',
+      'This form is not accepting enquiries right now.');
   }
 
   // 7. Origin check — informational only, NEVER blocking.
@@ -882,8 +936,10 @@ export default async function handler(req, res) {
   const ip = getIp(req);
   const tier = form.fields[FORM_FIELDS.antiSpamRateLimit] || 'standard';
   const limit = FORM_RATE_LIMITS[tier] || FORM_RATE_LIMITS.standard;
-  // applyRateLimit writes 429 to res and returns false if blocked
-  if (!applyRateLimit(res, `submit:${payload.formId}:${ip}`, limit)) return;
+  // applyRateLimit writes 429 to res and returns false if blocked. Key on
+  // widgetId when present — formId collided across every pre-2026-07-18 form,
+  // which silently pooled all forms into ONE per-IP bucket.
+  if (!applyRateLimit(res, `submit:${payload.widgetId || payload.formId}:${ip}`, limit)) return;
 
   // 10. Turnstile verification (if form has it enabled)
   if (form.fields[FORM_FIELDS.antiSpamTurnstile]) {

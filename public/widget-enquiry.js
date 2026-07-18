@@ -1,5 +1,5 @@
 /**
- * Travelgenix Enquiry Form Widget v1.0.0
+ * Travelgenix Enquiry Form Widget v1.1.5
  * Self-contained, embeddable form widget — part of the Travelgenix Widget Suite
  * Zero dependencies — works on any website via a single script tag
  *
@@ -38,7 +38,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.1.4';
+  var WIDGET_VERSION = '1.1.5';
   var VISITOR_ID_KEY = 'tg_visitor_id_v1';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -873,6 +873,28 @@
   // Unique ID prefix per widget instance — multiple widgets on the same page
   // must not collide on generated element IDs (aria-describedby etc.)
   var INSTANCE_COUNTER = 0;
+
+  // ── Widget-log alerting ────────────────────────────────────────────────────
+  // Beacon genuine failures (config load HTTP errors, final submit failures)
+  // to /api/widget-log so an outage or a broken embed alerts us instead of
+  // waiting for a client to report it. The server de-dupes per widget+site for
+  // 30 minutes; the once-per-page guard here keeps a single visitor from
+  // firing more than one alert. Telemetry must never throw or block the form.
+  var WIDGET_LOG_URL = API_BASE + '/api/widget-log';
+  var reportedThisPage = false;
+  function report(message, detail, widgetId) {
+    if (reportedThisPage) return;
+    reportedThisPage = true;
+    try {
+      var b = JSON.stringify({
+        event: 'error', widget: 'enquiry', widgetId: String(widgetId || ''),
+        message: String(message || '').slice(0, 300), detail: String(detail || '').slice(0, 500),
+        url: (function () { try { return location.href; } catch (e) { return ''; } })()
+      });
+      if (navigator && typeof navigator.sendBeacon === 'function' && navigator.sendBeacon(WIDGET_LOG_URL, new Blob([b], { type: 'text/plain' }))) return;
+      fetch(WIDGET_LOG_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: b, keepalive: true, credentials: 'omit' }).catch(function () {});
+    } catch (e) { /* telemetry must never throw */ }
+  }
 
   // ============================================================================
   //  Utilities
@@ -3150,6 +3172,9 @@
     var firstNameForTy = fieldValues.first_name || '';
 
     var payload = {
+      // widgetId is the server's preferred lookup key (unique per form).
+      // formId stays for back-compat while cached configs roll over.
+      widgetId: config.widgetId || undefined,
       formId: config.formId,
       visitorId: getVisitorId(),
       sourceUrl: window.location.href,
@@ -3165,21 +3190,40 @@
     submitBtn.appendChild(svg(ICONS.spinner, { size: 16, class: 'tg-spin' }));
     submitBtn.appendChild(document.createTextNode(' ' + t('sending')));
 
-    fetch(API_BASE + '/api/enquiry/submit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    }).then(function (r) {
-      return r.json().then(function (body) { return { ok: r.ok, body: body }; });
-    }).then(function (result) {
-      if (result.ok && result.body.ok) {
-        self._renderThankYou(result.body, firstNameForTy);
-      } else {
+    // One silent retry on a retryable 503: the server answers that ONLY when
+    // the form lookup failed before anything was written, so re-sending can
+    // never duplicate a submission. The button stays in its "Sending" state
+    // through the retry; the visitor only ever sees an error if that fails too.
+    var attemptSend = function (attemptNo) {
+      fetch(API_BASE + '/api/enquiry/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).then(function (r) {
+        return r.json().then(function (body) { return { ok: r.ok, status: r.status, body: body }; });
+      }).then(function (result) {
+        if (result.ok && result.body.ok) {
+          self._renderThankYou(result.body, firstNameForTy);
+          return;
+        }
+        if (attemptNo === 1 && result.status === 503 && result.body && result.body.retryable) {
+          setTimeout(function () { attemptSend(2); }, 2000);
+          return;
+        }
         self._showSubmitError(submitBtn, summaryError, result.body);
-      }
-    }).catch(function () {
-      self._showSubmitError(submitBtn, summaryError, { message: t('genericError') });
-    });
+        try { console.warn('[TGEnquiryWidget] submit failed for', config.widgetId || config.formId, 'HTTP', result.status, '-', result.body && (result.body.error || result.body.message)); } catch (e) {}
+        // Alert on server-side failures and on not-found/not-live for a real
+        // embed (a live page pointing at a missing or unpublished form is a
+        // broken embed WE want to hear about). Validation errors are the
+        // visitor's to fix — no alert.
+        if (config.isLiveEmbed && (result.status >= 500 || result.status === 404)) {
+          report('submit failed', 'HTTP ' + result.status + ' ' + ((result.body && result.body.error) || ''), config.widgetId);
+        }
+      }).catch(function () {
+        self._showSubmitError(submitBtn, summaryError, { message: t('genericError') });
+      });
+    };
+    attemptSend(1);
   };
 
   TGEnquiryWidget.prototype._showSubmitError = function (submitBtn, summaryError, body) {
@@ -3316,9 +3360,18 @@
     shadow.appendChild(loading);
 
     try {
-      var response = await fetch(API_BASE + '/api/enquiry-form-config?id=' + encodeURIComponent(widgetId), {
-        credentials: 'omit'
-      });
+      var configUrl = API_BASE + '/api/enquiry-form-config?id=' + encodeURIComponent(widgetId);
+      // One silent retry on a network reject or a 429/5xx — the GET is
+      // idempotent and transient blips otherwise cost the whole form. A
+      // resolved 404 is a real answer and is never retried.
+      var response;
+      try {
+        response = await fetch(configUrl, { credentials: 'omit' });
+        if (response.status === 429 || response.status >= 500) throw new Error('HTTP ' + response.status);
+      } catch (firstErr) {
+        await new Promise(function (resolve) { setTimeout(resolve, 600); });
+        response = await fetch(configUrl, { credentials: 'omit' });
+      }
       var data = await response.json();
 
       // Clear loading — we're going to let the widget take over the shadow
@@ -3326,6 +3379,8 @@
 
       if (!response.ok) {
         renderError(shadow, (data && data.error) || t('unableToLoad'), t);
+        try { console.warn('[TGEnquiryWidget] config load failed for', widgetId, 'HTTP', response.status, '-', data && data.error, '(' + configUrl + ')'); } catch (e) {}
+        report('config load failed', 'HTTP ' + response.status + ' ' + ((data && data.error) || ''), widgetId);
         return;
       }
 
@@ -3349,7 +3404,7 @@
       // Stash for potential programmatic access
       container.__tgWidget = widget;
     } catch (err) {
-      console.error('[TGEnquiryWidget] Failed to load config:', err);
+      console.error('[TGEnquiryWidget] Failed to load config for', widgetId, ':', err);
       renderError(shadow, t('unableToReach'), t);
     }
   }
