@@ -21,7 +21,7 @@
 // =============================================================================
 
 import { renderDefaultAgentEmail } from './_templates/agent-email.js';
-import { sendViaSendGrid, buildFromField } from './sendgrid.js';
+import { sendViaSendGrid, resolveFromIdentity } from './sendgrid.js';
 
 const BOARD_BASIS_LABEL = {
   RO: 'Room only', BB: 'B&B', HB: 'Half board', FB: 'Full board', AI: 'All inclusive',
@@ -147,12 +147,14 @@ export default async function sendAgentEmail(ctx) {
 
   const subject = `New enquiry ${reference} — ${tokens.fullName} · ${tokens.destinations}`;
 
-  // From display name is the client's own brand (falls back to the platform
-  // name inside buildFromField only when the form has no Client Name).
+  // From identity is the client's own brand: their business name always, and
+  // their own ADDRESS (the form owner's email) when their domain is
+  // authenticated in SendGrid — platform sender otherwise.
   const agentBrandName = form.fields.fldrw1eTFYCFIo0pp || ''; // Client Name
+  const ownerEmail = form.fields.fldLzWF0XnEXeZYH1 || ''; // Owner Email
 
   return await sendViaSendGrid({
-    from: buildFromField(agentBrandName),
+    from: await resolveFromIdentity(agentBrandName, ownerEmail),
     to: recipients,
     subject,
     html,
