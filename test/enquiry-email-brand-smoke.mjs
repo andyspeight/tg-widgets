@@ -29,16 +29,26 @@ const { default: sendAutoReply } = await import('../api/enquiry/_lib/routing/aut
 
 const CLIENT_NAME_FIELD = 'fldrw1eTFYCFIo0pp';
 const ROUTING_TO_FIELD = 'fldlu1HcErBfp2wh2';
+const OWNER_EMAIL_FIELD = 'fldLzWF0XnEXeZYH1';
 
 let captured = [];
+// SendGrid's authenticated-domain list, as the mock API serves it.
+// null → the API errors (e.g. key without the read scope).
+let authDomains = null;
 global.fetch = async (url, opts) => {
-  captured.push({ url: String(url), body: JSON.parse(opts.body) });
+  const u = String(url);
+  if (u.includes('/v3/whitelabel/domains')) {
+    if (!authDomains) return { ok: false, status: 403, json: async () => ({}) };
+    return { ok: true, status: 200, json: async () => authDomains.map(d => ({ domain: d, valid: true })) };
+  }
+  captured.push({ url: u, body: JSON.parse(opts.body) });
   return { ok: true, status: 202, headers: { get: () => 'msg-id-1' }, text: async () => '' };
 };
 
-function ctx(clientName) {
+function ctx(clientName, ownerEmail) {
   const fields = { [ROUTING_TO_FIELD]: 'george@freefromtravel.com' };
   if (clientName !== undefined) fields[CLIENT_NAME_FIELD] = clientName;
+  if (ownerEmail !== undefined) fields[OWNER_EMAIL_FIELD] = ownerEmail;
   return {
     form: { id: 'rec5oGBRzbuDV9vuv', fields },
     payload: {
@@ -77,10 +87,39 @@ ok(body && body.from && body.from.name === 'Free From Travel', `auto-reply From 
 ok(body && body.personalizations[0].to[0].email === 'jo@example.com', 'auto-reply goes to the visitor');
 ok(body && body.reply_to && body.reply_to.email === 'george@freefromtravel.com', 'auto-reply Reply-To is the agent');
 
+// ── Client-domain sending: authenticated domain → client's own address ───────
+authDomains = ['freefromtravel.com'];
+captured = [];
+result = await sendAgentEmail(ctx('Free From Travel', 'george@freefromtravel.com'));
+body = captured[0] && captured[0].body;
+ok(body && body.from.email === 'george@freefromtravel.com', `authenticated domain → From is the client's own address (got "${body && body.from.email}")`);
+ok(body && body.from.name === 'Free From Travel', 'client display name kept alongside their address');
+
+// ── Unauthenticated domain → platform sender (deliverability guard) ──────────
+captured = [];
+result = await sendAgentEmail(ctx('Sunny Breaks', 'owner@gmail.com'));
+body = captured[0] && captured[0].body;
+ok(body && body.from.email === 'noreply@travelify.io', `unauthenticated domain falls back to the platform sender (got "${body && body.from.email}")`);
+
+// ── Env allowlist wins even when the domain list lacks the domain ────────────
+process.env.TG_AUTHENTICATED_SENDER_DOMAINS = 'dreamhols.example';
+captured = [];
+result = await sendAgentEmail(ctx('Dream Hols', 'sales@dreamhols.example'));
+body = captured[0] && captured[0].body;
+ok(body && body.from.email === 'sales@dreamhols.example', 'TG_AUTHENTICATED_SENDER_DOMAINS allowlist honoured');
+delete process.env.TG_AUTHENTICATED_SENDER_DOMAINS;
+
+// ── Auto-reply gets the same treatment ───────────────────────────────────────
+captured = [];
+result = await sendAutoReply(ctx('Free From Travel', 'george@freefromtravel.com'));
+body = captured[0] && captured[0].body;
+ok(body && body.from.email === 'george@freefromtravel.com' && body.from.name === 'Free From Travel',
+  'auto-reply sends from the client\'s own authenticated address');
+
 // ── Source guards: no hardcoded platform From name, no powered-by footers ────
 const emailSrc = readFileSync(new URL('../api/enquiry/_lib/routing/email.js', import.meta.url), 'utf8');
 ok(!/Travelgenix Enquiries/.test(emailSrc), 'agent email no longer hardcodes "Travelgenix Enquiries"');
-ok(/buildFromField\(agentBrandName\)/.test(emailSrc), 'agent email From is built from the client name');
+ok(/resolveFromIdentity\(agentBrandName, ownerEmail\)/.test(emailSrc), 'agent email From is built from the client identity');
 
 const enquirySrc = readFileSync(new URL('../public/widget-enquiry.js', import.meta.url), 'utf8');
 ok(!/tg-brand/.test(enquirySrc), 'Enquiry widget: powered-by footer fully removed');

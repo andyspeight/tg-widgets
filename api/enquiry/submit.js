@@ -1015,4 +1015,7 @@ export default async function handler(req, res) {
 //  Optional:
 //  TURNSTILE_SECRET_KEY           — required ONLY if any form has Turnstile enabled
 //  LUNA_CHAT_JWT_SECRET           — required ONLY if any form has Luna Chat routing
+//  TG_AUTHENTICATED_SENDER_DOMAINS — comma-separated client domains allowed as
+//                                    From addresses without querying SendGrid's
+//                                    authenticated-domain list (see routing/sendgrid.js)
 // =============================================================================

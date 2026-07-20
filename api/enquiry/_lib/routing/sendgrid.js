@@ -36,6 +36,77 @@ export function buildFromField(displayName) {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Client-domain sending (Andy's call, 20 Jul 2026): where a client's own
+// domain is authenticated in this SendGrid account, form emails send FROM
+// that domain (e.g. george@freefromtravel.com) instead of the platform
+// identity. Domain authentication is per-domain DNS (DKIM + return-path);
+// sending from a domain WITHOUT it fails the client's own DMARC and lands in
+// spam — so the domain is verified before use and anything unverified falls
+// back to the platform sender silently.
+//
+// Sources, in order:
+//   1. TG_AUTHENTICATED_SENDER_DOMAINS — comma-separated env allowlist,
+//      checked first so this works even when the API key lacks the Sender
+//      Authentication read scope.
+//   2. GET /v3/whitelabel/domains — SendGrid's own list of authenticated
+//      domains (valid entries only), cached in-module for 10 minutes.
+// ---------------------------------------------------------------------------
+
+const DOMAIN_CACHE_TTL_MS = 10 * 60 * 1000;
+let domainCache = { at: 0, domains: null };
+
+function envSenderDomains() {
+  return String(process.env.TG_AUTHENTICATED_SENDER_DOMAINS || '')
+    .split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+}
+
+async function fetchAuthenticatedDomains() {
+  const now = Date.now();
+  if (domainCache.domains && now - domainCache.at < DOMAIN_CACHE_TTL_MS) return domainCache.domains;
+  if (!SENDGRID_API_KEY) return [];
+  try {
+    const r = await fetch('https://api.sendgrid.com/v3/whitelabel/domains?limit=100', {
+      headers: { Authorization: `Bearer ${SENDGRID_API_KEY}` },
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const list = await r.json();
+    const domains = (Array.isArray(list) ? list : [])
+      .filter(d => d && d.valid)
+      .map(d => String(d.domain || '').toLowerCase())
+      .filter(Boolean);
+    domainCache = { at: now, domains };
+    return domains;
+  } catch (err) {
+    // Key without the read scope, network blip, etc. Cache the empty answer
+    // too, so a broken key warns once per instance per TTL, not once per send.
+    console.warn('[sendgrid] authenticated-domain lookup failed (platform sender used):', err.message);
+    domainCache = { at: now, domains: [] };
+    return [];
+  }
+}
+
+function domainOf(email) {
+  const m = /^[^@\s]+@([^@\s]+\.[^@\s]+)$/.exec(String(email || '').trim().toLowerCase());
+  return m ? m[1] : null;
+}
+
+/**
+ * Resolve the full From identity for a client-branded email. Uses
+ * `preferredEmail` as the From ADDRESS when its domain is authenticated in
+ * SendGrid (env allowlist or live domain list); otherwise the platform
+ * sender. Display name behaves exactly like buildFromField.
+ */
+export async function resolveFromIdentity(displayName, preferredEmail) {
+  const base = buildFromField(displayName);
+  const domain = domainOf(preferredEmail);
+  if (!domain) return base;
+  const matches = (list) => list.some(d => domain === d || domain.endsWith('.' + d));
+  const ok = matches(envSenderDomains()) || matches(await fetchAuthenticatedDomains());
+  if (!ok) return base;
+  return { ...base, email: String(preferredEmail).trim() };
+}
+
 /**
  * Send one email via SendGrid. Returns a unified result shape matching
  * what the routing modules expect: {status, error?, id?}.

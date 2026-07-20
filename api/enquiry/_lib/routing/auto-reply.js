@@ -23,7 +23,7 @@
 // =============================================================================
 
 import { renderDefaultAutoReplyEmail } from './_templates/auto-reply-email.js';
-import { sendViaSendGrid, buildFromField } from './sendgrid.js';
+import { sendViaSendGrid, resolveFromIdentity } from './sendgrid.js';
 
 const BOARD_BASIS_LABEL = {
   RO: 'Room only', BB: 'B&B', HB: 'Half board', FB: 'Full board', AI: 'All inclusive',
@@ -33,6 +33,7 @@ const BOARD_BASIS_LABEL = {
 const F = {
   formName:          'fldC0MLSyJqg6U1zT',
   clientName:        'fldrw1eTFYCFIo0pp',
+  ownerEmail:        'fldLzWF0XnEXeZYH1',
   buttonColour:      'fldxyawmdBzNiOb7g',
   accentColour:      'fldD113UMPvDR4zOL',
   routingEmailTo:    'fldlu1HcErBfp2wh2',
@@ -161,18 +162,19 @@ export default async function sendAutoReply(ctx) {
 
   const subject = `Your enquiry ${reference} — we've got it`;
 
-  // Build the from display name. Use the travel agent's business name
-  // (their Client Name in the form config) so the customer's inbox shows
-  // "From: Travelaire" rather than "From: Travelgenix". Falls back to the
-  // Travelgenix default inside buildFromField() if Client Name is blank.
+  // Build the from identity. The travel agent's business name (their Client
+  // Name in the form config) so the customer's inbox shows "From: Travelaire"
+  // rather than "From: Travelgenix" — and their own ADDRESS too when their
+  // domain is authenticated in SendGrid (platform sender otherwise).
   const agentBrandName = form.fields[F.clientName] || '';
+  const ownerEmail = form.fields[F.ownerEmail] || '';
 
   // Reply-To goes to the agent's first notification address so the
   // customer's reply lands with them, not at our no-reply address.
   const replyTo = getAgentReplyTo(form.fields[F.routingEmailTo]);
 
   return await sendViaSendGrid({
-    from: buildFromField(agentBrandName),
+    from: await resolveFromIdentity(agentBrandName, ownerEmail),
     to: [to],
     subject,
     html,
