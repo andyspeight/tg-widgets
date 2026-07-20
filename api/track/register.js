@@ -51,6 +51,7 @@ export default async function handler(req, res) {
 
   const subject = typeof body.subject === 'string' ? body.subject.slice(0, 300) : '';
   const recipient = typeof body.recipient === 'string' ? body.recipient.slice(0, 200) : '';
+  const templateId = (typeof body.templateId === 'string' && /^rec[A-Za-z0-9]{14}$/.test(body.templateId)) ? body.templateId : '';
   const rawLinks = Array.isArray(body.links) ? body.links.slice(0, MAX_LINKS) : [];
 
   const token = newToken();
@@ -74,6 +75,7 @@ export default async function handler(req, res) {
     Subject: subject,
     Recipient: recipient,
     Links: JSON.stringify(links.map((l) => ({ label: l.label, url: l.url }))),
+    ...(templateId ? { TemplateId: templateId } : {}),
   });
 
   // Copy-paste snippet: tracked links (if any) then the hidden pixel. Labels are

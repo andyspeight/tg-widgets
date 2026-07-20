@@ -142,6 +142,19 @@
   .hidden { display: none !important; }
   .skel { background: linear-gradient(90deg, var(--border-soft) 25%, var(--border) 50%, var(--border-soft) 75%); background-size: 200% 100%; animation: sh 1.3s infinite; border-radius: 6px; }
   @keyframes sh { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  /* Templates */
+  .tpl-list { padding: 6px 8px; }
+  .tpl-row { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-bottom: 1px solid var(--border-soft); }
+  .tpl-row:last-child { border-bottom: none; }
+  .tpl-main { flex: 1; min-width: 0; }
+  .tpl-nm { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tpl-sj { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tpl-stats { display: flex; gap: 12px; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .tpl-acts { display: flex; gap: 6px; flex: 0 0 auto; }
+  .tpl-formwrap { padding: 16px 18px; border-top: 1px solid var(--border); }
+  .tpl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 640px) { .tpl-stats { display: none; } .tpl-grid { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -271,6 +284,29 @@
       <div class="empty hidden" id="empty">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg>
         <div>No tracked emails yet. Create your first tracker above.</div>
+      </div>
+    </section>
+
+    <!-- Templates -->
+    <section class="card" id="templates" aria-labelledby="tpl-h" style="margin-top:18px">
+      <div class="card-head"><h2 id="tpl-h">Templates</h2><span class="grow"></span><span class="hint" style="margin:0">insert in Gmail from the extension</span></div>
+      <div id="tpl-list" class="tpl-list"><div class="empty" style="padding:22px">Loading…</div></div>
+      <div class="tpl-formwrap">
+        <form id="tpl-form" novalidate>
+          <div class="tpl-grid">
+            <div class="field"><label class="fld" for="tpl-name">Name</label><input type="text" id="tpl-name" maxlength="120" placeholder="Intro email" autocomplete="off"></div>
+            <div class="field"><label class="fld" for="tpl-subject">Subject</label><input type="text" id="tpl-subject" maxlength="300" placeholder="Great to connect" autocomplete="off"></div>
+          </div>
+          <div class="field" style="margin-top:12px">
+            <label class="fld" for="tpl-body">Body</label>
+            <textarea id="tpl-body" style="min-height:120px" placeholder="Hi there,&#10;&#10;..."></textarea>
+            <p class="hint">Plain text or HTML. Inserted at your cursor in Gmail.</p>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <button class="btn btn--primary" id="tpl-save" type="submit"><span id="tpl-save-label">Add template</span></button>
+            <button class="btn hidden" id="tpl-cancel" type="button">Cancel</button>
+          </div>
+        </form>
       </div>
     </section>
   </div>
@@ -475,9 +511,73 @@
     });
   }
 
+  // ── Templates ──────────────────────────────────────────────────────────────
+  var editingId = null;
+  function loadTemplates() {
+    fetch('/api/track/templates?stats=1', { credentials: 'include' }).then(function (r) {
+      if (r.status === 401 || r.status === 403) { showGate(r.status); throw new Error('auth'); }
+      if (!r.ok) throw new Error('t');
+      return r.json();
+    }).then(function (d) { renderTemplates(d.templates || []); }).catch(function () {});
+  }
+  function renderTemplates(tpls) {
+    var host = $('tpl-list');
+    if (!tpls.length) { host.innerHTML = '<div class="empty" style="padding:22px">No templates yet. Create one below, then insert it in Gmail from the extension.</div>'; return; }
+    host.innerHTML = tpls.map(function (t) {
+      var s = t.stats || { uses: 0, opens: 0, humanOpens: 0, clicks: 0 };
+      return '<div class="tpl-row" data-id="' + esc(t.id) + '">' +
+        '<div class="tpl-main"><div class="tpl-nm">' + esc(t.name || 'Untitled') + '</div>' + (t.subject ? '<div class="tpl-sj">' + esc(t.subject) + '</div>' : '') + '</div>' +
+        '<div class="tpl-stats"><span title="Times used">' + s.uses + ' used</span><span title="Real opens">' + s.humanOpens + ' opens</span><span title="Clicks">' + s.clicks + ' clicks</span></div>' +
+        '<div class="tpl-acts"><button class="btn btn--sm" data-edit type="button" aria-label="Edit template">Edit</button><button class="btn btn--sm" data-del type="button" aria-label="Delete template">Delete</button></div>' +
+        '</div>';
+    }).join('');
+    host.querySelectorAll('.tpl-row').forEach(function (row) {
+      var t = tpls.filter(function (x) { return x.id === row.getAttribute('data-id'); })[0];
+      if (!t) return;
+      row.querySelector('[data-edit]').addEventListener('click', function () { startEdit(t); });
+      row.querySelector('[data-del]').addEventListener('click', function () { delTemplate(t); });
+    });
+  }
+  function startEdit(t) {
+    editingId = t.id;
+    $('tpl-name').value = t.name || ''; $('tpl-subject').value = t.subject || ''; $('tpl-body').value = t.body || '';
+    $('tpl-save-label').textContent = 'Save changes';
+    $('tpl-cancel').classList.remove('hidden');
+    $('templates').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    $('tpl-name').focus();
+  }
+  function resetForm() {
+    editingId = null;
+    $('tpl-name').value = ''; $('tpl-subject').value = ''; $('tpl-body').value = '';
+    $('tpl-save-label').textContent = 'Add template';
+    $('tpl-cancel').classList.add('hidden');
+  }
+  function delTemplate(t) {
+    if (!window.confirm('Delete template "' + (t.name || 'Untitled') + '"?')) return;
+    fetch('/api/track/templates', { method: 'DELETE', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: t.id }) })
+      .then(function (r) { if (!r.ok) throw new Error('d'); toast('Template deleted'); if (editingId === t.id) resetForm(); loadTemplates(); })
+      .catch(function () { toast('Could not delete', 'err'); });
+  }
+  $('tpl-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = $('tpl-name').value.trim();
+    if (!name) { toast('Give the template a name', 'err'); $('tpl-name').focus(); return; }
+    var payload = { name: name, subject: $('tpl-subject').value, body: $('tpl-body').value };
+    var method = editingId ? 'PATCH' : 'POST';
+    if (editingId) payload.id = editingId;
+    var btn = $('tpl-save'); btn.disabled = true;
+    fetch('/api/track/templates', { method: method, credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+      .then(function (r) { if (r.status === 401 || r.status === 403) { showGate(r.status); throw new Error('auth'); } if (!r.ok) throw new Error('s'); return r.json(); })
+      .then(function () { toast(editingId ? 'Template saved' : 'Template added'); resetForm(); loadTemplates(); })
+      .catch(function (err) { if (err && err.message !== 'auth') toast('Could not save template', 'err'); })
+      .then(function () { btn.disabled = false; });
+  });
+  $('tpl-cancel').addEventListener('click', resetForm);
+
   load();
+  loadTemplates();
   setInterval(load, 8000);
-  document.addEventListener('visibilitychange', function () { if (!document.hidden) load(); });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) { load(); loadTemplates(); } });
 })();
 </script>
 </body>
