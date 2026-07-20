@@ -153,7 +153,9 @@ const widgetSrc = readFileSync(new URL('../public/widget-enquiry.js', import.met
 ok(/widgetId:\s*config\.widgetId/.test(widgetSrc), 'widget submit payload carries widgetId');
 ok(/result\.status === 503 && result\.body && result\.body\.retryable/.test(widgetSrc), 'widget auto-retries a retryable 503 once');
 ok(/\/api\/widget-log/.test(widgetSrc), 'widget beacons /api/widget-log on failures');
-ok(/WIDGET_VERSION = '1\.1\.5'/.test(widgetSrc), 'widget version bumped to 1.1.5');
+const vMatch = widgetSrc.match(/WIDGET_VERSION = '(\d+)\.(\d+)\.(\d+)'/);
+const vNum = vMatch ? (+vMatch[1]) * 1e6 + (+vMatch[2]) * 1e3 + (+vMatch[3]) : 0;
+ok(vNum >= 1001005, `widget version at or beyond the 1.1.5 fix (got ${vMatch && vMatch[0]})`);
 
 const configSrc = readFileSync(new URL('../api/enquiry-form-config.js', import.meta.url), 'utf8');
 ok(/nextFormSequential/.test(configSrc) && /efFields\[EF\.sequential\] = nextSeq/.test(configSrc),

@@ -11,10 +11,12 @@
 //  Uses the form's custom HTML template if set, otherwise the built-in
 //  default below. {token} placeholders in the HTML are replaced at send time.
 //
-//  The agent email is branded as "Travelgenix Enquiries" — agents receive
-//  these as system notifications from their widget platform, not as customer
-//  replies. Reply-To is set to the visitor's email so hitting Reply in the
-//  mail client goes straight to the customer.
+//  The agent email is branded with the CLIENT's business name (the form's
+//  Client Name field, stamped from the account) — Andy's call 20 Jul 2026:
+//  every form email carries the client's brand, never "Travelgenix". The
+//  verified sender ADDRESS stays on our authenticated domain; only the
+//  display name changes. Reply-To is set to the visitor's email so hitting
+//  Reply in the mail client goes straight to the customer.
 //
 // =============================================================================
 
@@ -25,9 +27,6 @@ const BOARD_BASIS_LABEL = {
   RO: 'Room only', BB: 'B&B', HB: 'Half board', FB: 'Full board', AI: 'All inclusive',
 };
 
-// The display name for agent-facing emails. Always Travelgenix — this is an
-// internal system notification, not a customer-facing message.
-const AGENT_EMAIL_FROM_NAME = 'Travelgenix Enquiries';
 
 /**
  * Build the replaceable token map used inside HTML templates.
@@ -148,8 +147,12 @@ export default async function sendAgentEmail(ctx) {
 
   const subject = `New enquiry ${reference} — ${tokens.fullName} · ${tokens.destinations}`;
 
+  // From display name is the client's own brand (falls back to the platform
+  // name inside buildFromField only when the form has no Client Name).
+  const agentBrandName = form.fields.fldrw1eTFYCFIo0pp || ''; // Client Name
+
   return await sendViaSendGrid({
-    from: buildFromField(AGENT_EMAIL_FROM_NAME),
+    from: buildFromField(agentBrandName),
     to: recipients,
     subject,
     html,
