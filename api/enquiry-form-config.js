@@ -26,7 +26,7 @@ import {
   RATE_LIMITS,
 } from './_auth.js';
 import { getRecord } from './_lib/auth/airtable.js';
-import { USERS } from './_lib/auth/schema.js';
+import { USERS, CLIENTS } from './_lib/auth/schema.js';
 import { isStaffEmail } from './_lib/auth/staff.js';
 
 const REC_ID_RE = /^rec[A-Za-z0-9]{14}$/;
@@ -60,9 +60,10 @@ async function hydrateUserFacts(user) {
   if (!user || !user.recordId) return;
   const needEmail = !user.email;
   const needClient = !(typeof user.clientId === 'string' && REC_ID_RE.test(user.clientId));
-  if (!needEmail && !needClient) return;
+  const needClientName = !user.clientName;
+  if (!needEmail && !needClient && !needClientName) return;
   try {
-    const u = await getRecord(USERS.tableId, user.recordId);
+    const u = (needEmail || needClient) ? await getRecord(USERS.tableId, user.recordId) : null;
     if (needEmail) {
       const email = u?.fields?.[USERS.fields.email];
       if (typeof email === 'string' && email.trim()) {
@@ -77,6 +78,14 @@ async function hydrateUserFacts(user) {
       const first = Array.isArray(links) ? links[0] : null;
       const id = typeof first === 'string' ? first : (first && first.id);
       if (typeof id === 'string' && REC_ID_RE.test(id)) user.clientId = id;
+    }
+    // Client (business) name — the account fact every form email is branded
+    // with. SSO JWTs rarely carry it, so resolve it from the linked client
+    // record. One extra read, saves only, gated on it being missing.
+    if (!user.clientName && typeof user.clientId === 'string' && REC_ID_RE.test(user.clientId)) {
+      const cli = await getRecord(CLIENTS.tableId, user.clientId).catch(() => null);
+      const cn = cli?.fields?.[CLIENTS.fields.clientName];
+      if (typeof cn === 'string' && cn.trim()) user.clientName = cn.trim();
     }
   } catch (err) {
     console.warn('[enquiry-form-config] hydrate user facts failed:', err.message);
@@ -784,6 +793,16 @@ export default async function handler(req, res) {
           return res.status(400).json({ error: err.message });
         }
 
+        // Auto-heal: forms created before the account name was stamped have a
+        // blank Client Name, which branded their emails "Travelgenix". When
+        // the OWNER saves and neither the record nor the payload carries a
+        // name, stamp the account's business name. Never from a staff session
+        // — that would brand the form with the staff member's own account.
+        if (efFields[EF.clientName] === undefined && !efRec.fields[EF.clientName]
+            && user.clientName && userEmail && ownerEmail && userEmail === ownerEmail) {
+          efFields[EF.clientName] = safeStr(user.clientName, 200);
+        }
+
         // Patch the Enquiry Forms record
         const efPatchUrl = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${ENQUIRY_FORMS_TABLE}/${efRec.id}`;
         const efPatchResp = await fetch(efPatchUrl, {
@@ -854,6 +873,12 @@ export default async function handler(req, res) {
       efFields[EF.widgetId] = newWidgetId;
       // Default submission count to 0 on create
       efFields[EF.submissionCount] = 0;
+      // Brand fact: default the Client Name to the account's business name
+      // when the editor didn't supply one — form emails are sent from this
+      // name, so it must never silently stay blank.
+      if (!efFields[EF.clientName] && user.clientName) {
+        efFields[EF.clientName] = safeStr(user.clientName, 200);
+      }
       // Stamp Sequential so the Form ID formula renders a real EF-#### badge
       // (null on a failed read — omit rather than write junk).
       const nextSeq = await nextFormSequential(headers, AIRTABLE_BASE_ID);

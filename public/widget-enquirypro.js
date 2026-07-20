@@ -1,5 +1,5 @@
 /**
- * Travelgenix Enquiry Pro Widget v1.0.0
+ * Travelgenix Enquiry Pro Widget v1.2.3
  * A best-in-class, multi-step travel enquiry form — part of the Travelgenix Widget Suite.
  * Zero dependencies. Works on any website via a single script tag.
  *
@@ -32,7 +32,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.2.2';
+  var WIDGET_VERSION = '1.2.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (labels, placeholders, step names, buttons, validation,
@@ -913,8 +913,6 @@
       ".ep-summary{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:26px}",
       ".ep-sumchip{font-size:12.5px;font-weight:600;color:var(--ink-2);background:var(--hover);border:1px solid var(--border);padding:6px 12px;border-radius:var(--radius-pill)}",
       ".ep-restart{background:none;border:none;color:var(--brand);font:inherit;font-size:14px;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px}",
-      ".ep-brand{text-align:center;font-size:11px;color:var(--muted);padding:0 0 16px;letter-spacing:.02em}",
-      ".ep-brand b{color:var(--ink-3);font-weight:600}",
       ".ep-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}",
       ".ep-turnstile{margin:4px 0 16px;min-height:65px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}",
       ".ep-ts-retry{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}",
@@ -1116,11 +1114,6 @@
     next.addEventListener('click', function () { self._onNext(); });
     foot.appendChild(next);
     this.card.appendChild(foot);
-
-    var brand = document.createElement('div'); brand.className = 'ep-brand';
-    brand.appendChild(document.createTextNode(this.t('poweredBy') + ' '));
-    var b = document.createElement('b'); b.textContent = 'Travelgenix'; brand.appendChild(b);
-    this.card.appendChild(brand);
 
     // Move focus to the new step's heading so the change is announced and Tab
     // resumes inside the form. Programmatic focus on the first mount is skipped
@@ -1748,10 +1741,6 @@
     restart.addEventListener('click', function () { self._resetState(); self._renderStep(); });
     done.appendChild(restart);
     this.card.appendChild(done);
-
-    var brand = document.createElement('div'); brand.className = 'ep-brand';
-    brand.appendChild(document.createTextNode(this.t('poweredBy') + ' ')); var bb = document.createElement('b'); bb.textContent = 'Travelgenix'; brand.appendChild(bb);
-    this.card.appendChild(brand);
   };
 
   // ===========================================================================

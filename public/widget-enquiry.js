@@ -1,5 +1,5 @@
 /**
- * Travelgenix Enquiry Form Widget v1.1.5
+ * Travelgenix Enquiry Form Widget v1.1.6
  * Self-contained, embeddable form widget — part of the Travelgenix Widget Suite
  * Zero dependencies — works on any website via a single script tag
  *
@@ -38,7 +38,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.1.5';
+  var WIDGET_VERSION = '1.1.6';
   var VISITOR_ID_KEY = 'tg_visitor_id_v1';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -1474,10 +1474,6 @@
       '.tg-ty h2{font-size:26px;font-weight:600;margin:0 0 6px;color:' + c.text + '}',
       '.tg-ty-ref{display:inline-block;padding:4px 12px;margin-top:12px;background:' + c.bgTile + ';border-radius:999px;font-size:12px;font-weight:500;color:' + c.textSecondary + ';font-variant-numeric:tabular-nums;letter-spacing:.04em}',
       '.tg-ty > p{font-size:15px;color:' + c.textSecondary + ';max-width:420px;margin:12px auto 0}',
-      '.tg-brand{text-align:center;padding:16px 0 0;font-size:11px;color:' + c.textTertiary + '}',
-      '.tg-brand strong{color:' + c.textSecondary + ';font-weight:500}',
-      '.tg-brand a{color:' + c.textTertiary + ';text-decoration:none}',
-      '.tg-brand a:hover{color:' + c.textSecondary + '}',
       '.tg-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}',
       '@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}'
     ].join('\n');
@@ -2914,10 +2910,6 @@
     card.appendChild(el('div', { class: 'tg-footer' }, navChildren));
 
     shadow.appendChild(card);
-    shadow.appendChild(el('div', { class: 'tg-brand' }, [
-      t('poweredBy'),
-      el('strong', {}, [el('a', { href: 'https://travelgenix.io', target: '_blank', rel: 'noopener', text: 'Travelgenix' })])
-    ]));
 
     // ── Submit wiring ────────────────────────────────────────────────────
     // Submit button is wired identically in both modes — it always submits
@@ -3270,10 +3262,6 @@
       ])
     ]);
     shadow.appendChild(card);
-    shadow.appendChild(el('div', { class: 'tg-brand' }, [
-      t('poweredBy'),
-      el('strong', {}, [el('a', { href: 'https://travelgenix.io', target: '_blank', rel: 'noopener', text: 'Travelgenix' })])
-    ]));
 
     setTimeout(function () {
       var h2 = card.querySelector('h2');
