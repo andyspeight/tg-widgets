@@ -117,6 +117,10 @@
       "destination": "/brain.html"
     },
     {
+      "source": "/yesaware",
+      "destination": "/yesaware.html"
+    },
+    {
       "source": "/demo",
       "destination": "/demo.html"
     },

@@ -586,11 +586,31 @@ Security posture (reviewed against travelgenix-security, no ship-blockers):
 Not yet verified live: the endpoints need a deploy plus a signed-in session to
 exercise end to end. Unit tests and the import graph are green.
 
+### Phase 1, slice 2 — mint page and dashboard (20 Jul 2026)
+
+Shipped the UI. `public/yesaware.html` (served at `/yesaware`) is an admin-only
+page with:
+- A "track a new email" form that calls register and shows the pixel URL, each
+  tracked link and a full HTML snippet, each with a copy button. It tells you to
+  drop the pixel into Gmail via Insert photo then Web address (URL).
+- A live dashboard: totals (tracked, opens, real opens, clicks), a table of
+  tracked emails with per-email counts, and a newest-first activity feed.
+- `api/track/list.js` — admin-gated read API that joins Messages and Events on
+  Token and aggregates in memory. "Real opens" excludes Apple and proxy
+  prefetches (Source is not `direct`).
+- On-brand (Travelgenix tokens), light default with full dark mode, keyboard and
+  screen-reader friendly, no inline handlers (CSP-clean).
+- `vercel.json`: a `/yesaware` rewrite.
+
+Liveness is by polling every 8 seconds, not Ably yet — there was no Ably wiring in
+the repo to reuse, and polling is secure and dependency-free. Ably push is the
+next enhancement, not a blocker.
+
 ### Next slice
-- A small admin page that calls register and shows the paste snippet, so minting
-  a tracker is a form and not a manual API call.
-- An opens/clicks dashboard reading the two tables, live via Ably.
-- Then Phase 2, the Gmail extension.
+- Swap polling for Ably push (a capability-token endpoint plus a client
+  subscription) so opens land instantly.
+- Then Phase 2, the Gmail extension (button-triggered tracking, modelled on
+  `scheduler-companion`).
 
 ## Sources
 
