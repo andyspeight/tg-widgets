@@ -606,6 +606,24 @@ Liveness is by polling every 8 seconds, not Ably yet — there was no Ably wirin
 the repo to reuse, and polling is secure and dependency-free. Ably push is the
 next enhancement, not a blocker.
 
+### Deployed to production (20 Jul 2026)
+
+Merged to `main` (commit f045d1e); Vercel deployment `dpl_2Syr...` is READY on
+production. Verified live server-side through the Vercel deployment URL (the
+build container's egress cannot reach widgets.travelify.io, so the Vercel MCP
+fetched the endpoints):
+- `GET /api/track/list` returns 401, fails closed (the admin gate works).
+- `GET /api/track/click` with a bad signature returns 204 with no Location
+  header (the open-redirect guard holds).
+- `GET /api/track/open` returns 200 image/gif, 42 bytes, Cache-Control no-store
+  with no `s-maxage` and `x-vercel-cache: MISS` (every open reaches the function,
+  the CDN does not swallow it).
+- `GET /yesaware` returns 200, the page serves.
+
+Still to confirm by hand (needs a signed-in session, which the assistant cannot
+hold): create a tracker, insert the pixel in a real email, open it and click a
+link, and watch the rows land on the dashboard.
+
 ### Next slice
 - Swap polling for Ably push (a capability-token endpoint plus a client
   subscription) so opens land instantly.
