@@ -155,6 +155,24 @@
   .tpl-formwrap { padding: 16px 18px; border-top: 1px solid var(--border); }
   .tpl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   @media (max-width: 640px) { .tpl-stats { display: none; } .tpl-grid { grid-template-columns: 1fr; } }
+
+  /* Reminders + sequences */
+  .rem-row, .seq-row, .due-row { display: flex; align-items: flex-start; gap: 12px; padding: 11px 12px; border-bottom: 1px solid var(--border-soft); }
+  .rem-row:last-child, .seq-row:last-child, .due-row:last-child { border-bottom: none; }
+  .rem-main, .seq-main, .due-main { flex: 1; min-width: 0; }
+  .rem-note, .seq-nm, .due-nm { font-weight: 600; }
+  .rem-due { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .rem-due.over { color: var(--err); font-weight: 700; }
+  .rem-due.soon { color: var(--warn); font-weight: 700; }
+  .seq-meta, .due-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .due-acts { display: flex; gap: 6px; flex: 0 0 auto; }
+  .inline-form { padding: 14px 18px; border-top: 1px solid var(--border); display: grid; gap: 10px; }
+  .inline-form .r2 { display: grid; grid-template-columns: 1fr 210px auto; gap: 10px; align-items: end; }
+  @media (max-width: 640px) { .inline-form .r2 { grid-template-columns: 1fr; } }
+  .step-card { border: 1px solid var(--border); border-radius: 9px; padding: 12px; display: grid; gap: 8px; margin-bottom: 8px; background: var(--well); }
+  .step-card .sc-head { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--muted); }
+  input[type=datetime-local], input[type=number] { font: inherit; font-size: 14px; padding: 9px 11px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--well); color: var(--text); }
+  input[type=datetime-local]:focus, input[type=number]:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px var(--accent-soft); }
 </style>
 </head>
 <body>
@@ -308,6 +326,38 @@
           </div>
         </form>
       </div>
+    </section>
+
+    <!-- Reminders -->
+    <section class="card" id="reminders" aria-labelledby="rem-h" style="margin-top:18px">
+      <div class="card-head"><h2 id="rem-h">Reminders</h2><span class="grow"></span><span class="hint" style="margin:0">a nudge lands in your inbox when due</span></div>
+      <div id="rem-list" class="tpl-list"><div class="empty" style="padding:22px">Loading…</div></div>
+      <form id="rem-form" class="inline-form" novalidate>
+        <div class="r2">
+          <div class="field" style="margin:0"><label class="fld" for="rem-note">Remind me to…</label><input type="text" id="rem-note" maxlength="200" placeholder="Chase Jane if no reply" autocomplete="off"></div>
+          <div class="field" style="margin:0"><label class="fld" for="rem-due">When</label><input type="datetime-local" id="rem-due"></div>
+          <button class="btn btn--primary" id="rem-add" type="submit">Add</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Sequences -->
+    <section class="card" id="sequences" aria-labelledby="seq-h" style="margin-top:18px">
+      <div class="card-head"><h2 id="seq-h">Sequences</h2><span class="grow"></span><span class="hint" style="margin:0">plan multi-step outreach; send in Gmail</span></div>
+      <div style="padding:14px 18px;border-bottom:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:8px">Ready to send now</div>
+        <div id="due-list"><div class="hint" style="margin:0">Nothing due.</div></div>
+      </div>
+      <div id="seq-list" class="tpl-list"><div class="empty" style="padding:18px">Loading…</div></div>
+      <form id="seq-form" class="inline-form" novalidate>
+        <div class="field" style="margin:0"><label class="fld" for="seq-name">New sequence name</label><input type="text" id="seq-name" maxlength="120" placeholder="Cold outreach" autocomplete="off"></div>
+        <div id="seq-steps"></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn" id="seq-addstep" type="button">Add step</button>
+          <span style="flex:1"></span>
+          <button class="btn btn--primary" id="seq-save" type="submit">Create sequence</button>
+        </div>
+      </form>
     </section>
   </div>
 </div>
@@ -574,10 +624,140 @@
   });
   $('tpl-cancel').addEventListener('click', resetForm);
 
+  // ── Reminders ──────────────────────────────────────────────────────────────
+  var notified = {};
+  function loadReminders() {
+    fetch('/api/track/reminders', { credentials: 'include' }).then(function (r) {
+      if (r.status === 401 || r.status === 403) { showGate(r.status); throw new Error('auth'); }
+      if (!r.ok) throw new Error('r'); return r.json();
+    }).then(function (d) { renderReminders(d.reminders || []); }).catch(function () {});
+  }
+  function renderReminders(rem) {
+    var pending = rem.filter(function (x) { return x.status === 'pending'; });
+    var host = $('rem-list');
+    if (!pending.length) { host.innerHTML = '<div class="empty" style="padding:22px">No reminders. Add one below.</div>'; return; }
+    var now = Date.now();
+    host.innerHTML = pending.map(function (r) {
+      var due = Date.parse(r.dueAt) || 0;
+      var cls = due <= now ? 'over' : (due - now < 86400000 ? 'soon' : '');
+      var when = due ? new Date(due).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+      return '<div class="rem-row" data-id="' + esc(r.id) + '"><div class="rem-main"><div class="rem-note">' + esc(r.note) + '</div><div class="rem-due ' + cls + '">' + (cls === 'over' ? 'Overdue &middot; ' : '') + esc(when) + '</div></div>' +
+        '<div class="tpl-acts"><button class="btn btn--sm" data-done type="button" aria-label="Mark done">Done</button><button class="btn btn--sm" data-del type="button" aria-label="Delete reminder">Delete</button></div></div>';
+    }).join('');
+    host.querySelectorAll('.rem-row').forEach(function (row) {
+      var r = pending.filter(function (x) { return x.id === row.getAttribute('data-id'); })[0]; if (!r) return;
+      row.querySelector('[data-done]').addEventListener('click', function () { remAction('PATCH', { id: r.id, status: 'done' }, 'Done'); });
+      row.querySelector('[data-del]').addEventListener('click', function () { remAction('DELETE', { id: r.id }, 'Deleted'); });
+    });
+    pending.forEach(function (r) {
+      var due = Date.parse(r.dueAt) || 0;
+      if (due <= now && !notified[r.id]) { notified[r.id] = 1; if ('Notification' in window && Notification.permission === 'granted') { try { new Notification('YesAware reminder', { body: r.note }); } catch (e) {} } }
+    });
+  }
+  function remAction(method, body, okMsg) {
+    fetch('/api/track/reminders', { method: method, credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { if (!r.ok) throw new Error('x'); toast(okMsg); loadReminders(); }).catch(function () { toast('Could not update reminder', 'err'); });
+  }
+  $('rem-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if ('Notification' in window && Notification.permission === 'default') { try { Notification.requestPermission(); } catch (er) {} }
+    var note = $('rem-note').value.trim(); var due = $('rem-due').value;
+    if (!note) { toast('What should I remind you about?', 'err'); return; }
+    if (!due) { toast('Pick a date and time', 'err'); return; }
+    var btn = $('rem-add'); btn.disabled = true;
+    fetch('/api/track/reminders', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ note: note, dueAt: new Date(due).toISOString() }) })
+      .then(function (r) { if (r.status === 401 || r.status === 403) { showGate(r.status); throw new Error('auth'); } if (!r.ok) throw new Error('s'); return r.json(); })
+      .then(function () { toast('Reminder added'); $('rem-note').value = ''; $('rem-due').value = ''; loadReminders(); })
+      .catch(function (err) { if (err && err.message !== 'auth') toast('Could not add reminder', 'err'); })
+      .then(function () { btn.disabled = false; });
+  });
+
+  // ── Sequences ──────────────────────────────────────────────────────────────
+  function addStepRow(step) {
+    var wrap = document.createElement('div'); wrap.className = 'step-card';
+    var idx = $('seq-steps').children.length + 1;
+    wrap.innerHTML = '<div class="sc-head"><span>Step ' + idx + '</span><span style="flex:1"></span><button type="button" class="btn btn--sm" data-rm>Remove</button></div>' +
+      '<div style="display:flex;gap:10px;align-items:center"><label class="fld" style="margin:0">Delay (days)</label><input type="number" min="0" max="365" value="' + (step && step.delayDays != null ? step.delayDays : (idx === 1 ? 0 : 2)) + '" data-delay style="width:90px"></div>' +
+      '<input type="text" maxlength="300" placeholder="Subject" data-subject value="' + (step ? esc(step.subject || '') : '') + '">' +
+      '<textarea placeholder="Body — use {{name}} for the recipient\'s name" data-body style="min-height:80px">' + (step ? esc(step.body || '') : '') + '</textarea>';
+    wrap.querySelector('[data-rm]').addEventListener('click', function () { wrap.remove(); renumberSteps(); });
+    $('seq-steps').appendChild(wrap);
+  }
+  function renumberSteps() { Array.prototype.forEach.call($('seq-steps').children, function (c, i) { var s = c.querySelector('.sc-head span'); if (s) s.textContent = 'Step ' + (i + 1); }); }
+  function collectSteps() { return Array.prototype.map.call($('seq-steps').children, function (c) { return { delayDays: Number(c.querySelector('[data-delay]').value) || 0, subject: c.querySelector('[data-subject]').value, body: c.querySelector('[data-body]').value }; }); }
+  $('seq-addstep').addEventListener('click', function () { addStepRow(); });
+  function seqPost(body) {
+    return fetch('/api/track/sequences', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { if (r.status === 401 || r.status === 403) { showGate(r.status); return false; } if (!r.ok) throw new Error('x'); return true; })
+      .catch(function () { toast('Something went wrong', 'err'); return false; });
+  }
+  $('seq-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = $('seq-name').value.trim(); if (!name) { toast('Name the sequence', 'err'); return; }
+    var steps = collectSteps().filter(function (s) { return s.subject || s.body; });
+    if (!steps.length) { toast('Add at least one step', 'err'); return; }
+    var btn = $('seq-save'); btn.disabled = true;
+    seqPost({ action: 'create-sequence', name: name, steps: steps }).then(function (ok) {
+      if (ok) { toast('Sequence created'); $('seq-name').value = ''; $('seq-steps').innerHTML = ''; addStepRow(); loadSequences(); }
+    }).then(function () { btn.disabled = false; });
+  });
+  function loadSequences() {
+    fetch('/api/track/sequences', { credentials: 'include' }).then(function (r) {
+      if (r.status === 401 || r.status === 403) { showGate(r.status); throw new Error('auth'); } if (!r.ok) throw new Error('s'); return r.json();
+    }).then(function (d) { renderSequences(d.sequences || []); }).catch(function () {});
+    fetch('/api/track/sequences?due=1', { credentials: 'include' }).then(function (r) { return r.ok ? r.json() : { due: [] }; }).then(function (d) { renderDue(d.due || []); }).catch(function () {});
+  }
+  function parseRecipients(raw) {
+    return String(raw || '').split(/[\n,;]+/).map(function (x) { return x.trim(); }).filter(Boolean).map(function (tok) {
+      var sp = tok.split(/\s+/); return { email: sp[0], name: sp.slice(1).join(' ') };
+    }).filter(function (x) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x.email); });
+  }
+  function renderSequences(seqs) {
+    var host = $('seq-list');
+    if (!seqs.length) { host.innerHTML = '<div class="empty" style="padding:18px">No sequences yet. Create one below.</div>'; return; }
+    host.innerHTML = seqs.map(function (s) {
+      return '<div class="seq-row" data-id="' + esc(s.id) + '"><div class="seq-main"><div class="seq-nm">' + esc(s.name) + (s.status === 'paused' ? ' <span class="tag tag--bot">paused</span>' : '') + '</div><div class="seq-meta">' + s.steps.length + ' steps &middot; ' + s.activeRecipients + ' active</div>' +
+        '<div style="margin-top:8px"><input type="text" data-enroll placeholder="Enrol: email Name (comma or newline separated)" style="width:100%"></div></div>' +
+        '<div class="tpl-acts"><button class="btn btn--sm" data-enrolbtn type="button">Enrol</button><button class="btn btn--sm" data-toggle type="button">' + (s.status === 'paused' ? 'Resume' : 'Pause') + '</button><button class="btn btn--sm" data-del type="button">Delete</button></div></div>';
+    }).join('');
+    host.querySelectorAll('.seq-row').forEach(function (row) {
+      var s = seqs.filter(function (x) { return x.id === row.getAttribute('data-id'); })[0]; if (!s) return;
+      row.querySelector('[data-enrolbtn]').addEventListener('click', function () {
+        var recips = parseRecipients(row.querySelector('[data-enroll]').value);
+        if (!recips.length) { toast('Enter a valid email', 'err'); return; }
+        seqPost({ action: 'enroll', sequenceId: s.id, recipients: recips }).then(function (ok) { if (ok) { toast('Enrolled ' + recips.length); loadSequences(); } });
+      });
+      row.querySelector('[data-toggle]').addEventListener('click', function () { seqPost({ action: s.status === 'paused' ? 'resume-sequence' : 'pause-sequence', id: s.id }).then(function (ok) { if (ok) { toast('Updated'); loadSequences(); } }); });
+      row.querySelector('[data-del]').addEventListener('click', function () {
+        if (!window.confirm('Delete sequence "' + (s.name || '') + '"?')) return;
+        fetch('/api/track/sequences', { method: 'DELETE', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: s.id }) })
+          .then(function (r) { if (!r.ok) throw new Error('x'); toast('Deleted'); loadSequences(); }).catch(function () { toast('Could not delete', 'err'); });
+      });
+    });
+  }
+  function renderDue(due) {
+    var host = $('due-list');
+    if (!due.length) { host.innerHTML = '<div class="hint" style="margin:0">Nothing due right now.</div>'; return; }
+    host.innerHTML = due.map(function (d, i) {
+      return '<div class="due-row" data-i="' + i + '"><div class="due-main"><div class="due-nm">' + esc(d.sequenceName) + ' &middot; step ' + (d.step + 1) + '/' + d.totalSteps + '</div><div class="due-sub">to ' + esc(d.email) + (d.subject ? ' &middot; ' + esc(d.subject) : '') + '</div></div>' +
+        '<div class="due-acts"><button class="btn btn--sm" data-copy type="button">Copy body</button><button class="btn btn--sm btn--primary" data-sent type="button">Mark sent</button></div></div>';
+    }).join('');
+    host.querySelectorAll('.due-row').forEach(function (row) {
+      var d = due[Number(row.getAttribute('data-i'))]; if (!d) return;
+      row.querySelector('[data-copy]').addEventListener('click', function () { copyText(d.body || ''); });
+      row.querySelector('[data-sent]').addEventListener('click', function () { seqPost({ action: 'advance', recipientId: d.recipientId }).then(function (ok) { if (ok) { toast('Marked sent'); loadSequences(); } }); });
+    });
+  }
+
+  // ── Boot ─────────────────────────────────────────────────────────────────────
   load();
   loadTemplates();
+  loadReminders();
+  loadSequences();
+  addStepRow();
   setInterval(load, 8000);
-  document.addEventListener('visibilitychange', function () { if (!document.hidden) { load(); loadTemplates(); } });
+  setInterval(function () { loadReminders(); loadSequences(); }, 30000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) { load(); loadTemplates(); loadReminders(); loadSequences(); } });
 })();
 </script>
 </body>

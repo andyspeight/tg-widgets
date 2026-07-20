@@ -63,6 +63,10 @@
       "schedule": "0 * * * *"
     },
     {
+      "path": "/api/cron/yesaware-reminders",
+      "schedule": "*/15 * * * *"
+    },
+    {
       "path": "/api/cron/brain-verify",
       "schedule": "0 3 * * *"
     },
