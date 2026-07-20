@@ -16,8 +16,10 @@ script fetches go through the service worker so the session cookie travels.
 
 - `manifest.json` — MV3 manifest.
 - `tracking.js` — pure transforms (extract links, rewrite hrefs, insert pixel).
-- `gmail.js` — content script: the Track button and compose glue (Phase 2).
-- `send-hook.js` — MAIN-world send interceptor for auto-tracking (Phase 4).
+- `gmail.js` — content script: the Track button, the Templates picker, and
+  auto-track on send (Phases 2 to 4). Auto-track intercepts the Send button and
+  Ctrl/Cmd+Enter, registers the tracker, rewrites the body, then sends — failing
+  open so your email always goes even if tracking hiccups.
 - `background.js` — service-worker fetch bridge (whitelisted paths only).
 - `popup.html` / `popup.js` — settings: auto-track toggle, dashboard + templates links.
 

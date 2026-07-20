@@ -19,6 +19,13 @@
   var DONE = 'data-ya-done';
   var T = self.YesAwareTracking;
 
+  // Auto-track preference (Phase 4). When on, sending an email tracks it first.
+  var autoTrack = false;
+  try {
+    chrome.storage.local.get('autoTrack', function (o) { autoTrack = !!(o && o.autoTrack); });
+    chrome.storage.onChanged.addListener(function (ch) { if (ch && ch.autoTrack) autoTrack = !!ch.autoTrack.newValue; });
+  } catch (e) { /* no storage */ }
+
   function bg(path, method, body) {
     return new Promise(function (resolve) {
       try {
@@ -174,6 +181,52 @@
     });
   }
 
+  // ── Auto-track on send (Phase 4) ─────────────────────────────────────────────
+  // Register + rewrite the body in place. Resolves whether or not it succeeded,
+  // so the caller can always proceed to send — we never trap the user's email.
+  function doTrack(root, body) {
+    return new Promise(function (resolve) {
+      var html = body.innerHTML;
+      var links = (T ? T.extractLinks(html) : []).map(function (u) { return { url: u }; });
+      var payload = { subject: subjectOf(root), recipient: recipientsOf(root), links: links };
+      var tpl = root.getAttribute('data-ya-tpl'); if (tpl) payload.templateId = tpl;
+      bg('/api/track/register', 'POST', payload).then(function (res) {
+        if (res && res.ok && res.body) {
+          var data = res.body;
+          var map = T ? T.urlMapFromLinks(data.links) : {};
+          body.innerHTML = T ? T.applyTracking(html, map, data.pixelHtml || '') : html;
+          body.dispatchEvent(new Event('input', { bubbles: true }));
+          root.setAttribute('data-ya-token', data.token || '1');
+        }
+        resolve();
+      });
+    });
+  }
+
+  function autoTrackThenSend(root, body, send) {
+    if (busy) return;
+    busy = true;
+    doTrack(root, body).then(function () {
+      busy = false;
+      send.setAttribute('data-ya-go', '1'); // let our guard pass this programmatic send
+      try { send.click(); } catch (e) { /* Gmail will still send on the user's next try */ }
+    });
+  }
+
+  // Intercept the Send button so an auto-tracked email is stamped before it goes.
+  function guardSend(root, body, send) {
+    if (send.getAttribute('data-ya-guard') === '1') return;
+    send.setAttribute('data-ya-guard', '1');
+    send.addEventListener('click', function (e) {
+      if (!autoTrack) return;                                 // off → send as normal
+      if (root.getAttribute('data-ya-token')) return;         // already tracked → send
+      if (send.getAttribute('data-ya-go') === '1') { send.removeAttribute('data-ya-go'); return; } // our re-trigger
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      autoTrackThenSend(root, body, send);
+    }, true);
+  }
+
   // ── Inject ──────────────────────────────────────────────────────────────────
   function injectFor(body) {
     var root = composeRootOf(body);
@@ -181,6 +234,7 @@
     var send = findSendButton(root);
     if (!send || !send.parentElement) return;
     root.setAttribute(DONE, '1');
+    guardSend(root, body, send);
 
     var host = document.createElement('span');
     host.setAttribute(BTN, '1');
@@ -198,6 +252,22 @@
 
     send.parentElement.insertBefore(host, send.nextSibling);
   }
+
+  // Keyboard send (Ctrl/Cmd+Enter) — same auto-track path as the Send button.
+  document.addEventListener('keydown', function (e) {
+    if (!autoTrack) return;
+    if (e.key !== 'Enter' || !(e.ctrlKey || e.metaKey)) return;
+    var el = document.activeElement;
+    var body = el && el.closest ? el.closest('div[contenteditable="true"][role="textbox"]') : null;
+    if (!body) return;
+    var root = composeRootOf(body);
+    if (!root || root.getAttribute('data-ya-token')) return;
+    var send = findSendButton(root);
+    if (!send) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    autoTrackThenSend(root, body, send);
+  }, true);
 
   var queued = false;
   function scan() { queued = false; findComposeBodies().forEach(function (b) { try { injectFor(b); } catch (e) { /* never break Gmail */ } }); }

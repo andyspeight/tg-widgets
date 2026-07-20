@@ -13,12 +13,6 @@
       "run_at": "document_idle"
     }
   ],
-  "web_accessible_resources": [
-    {
-      "resources": ["send-hook.js"],
-      "matches": ["https://mail.google.com/*"]
-    }
-  ],
   "permissions": ["storage"],
   "host_permissions": [
     "https://widgets.travelify.io/*",
