@@ -624,11 +624,55 @@ Still to confirm by hand (needs a signed-in session, which the assistant cannot
 hold): create a tracker, insert the pixel in a real email, open it and click a
 link, and watch the rows land on the dashboard.
 
-### Next slice
-- Swap polling for Ably push (a capability-token endpoint plus a client
-  subscription) so opens land instantly.
-- Then Phase 2, the Gmail extension (button-triggered tracking, modelled on
-  `scheduler-companion`).
+### Phases 2 to 5 (20 Jul 2026)
+
+All built, committed and deployed. Verified at the level each piece allows:
+backends live-tested through the deployment, extension logic unit-tested,
+extension DOM behaviour needs a load in Chrome.
+
+**Phase 2 — Gmail extension** (`extension/yesaware/`). A Track button beside Send:
+reads the compose subject, recipients and body, registers a tracker, rewrites the
+links and inserts the pixel. `tracking.js` is pure with 17 unit tests
+(`tests/test-yesaware-ext.cjs`). Modelled on `scheduler-companion`; fails quiet if
+Gmail's DOM moves. The service worker bridges fetches so the session cookie
+travels.
+
+**Phase 3 — Templates.** `YesAware Templates` table (`tblCSTQhwT4rL4nub`) +
+`api/track/templates.js` (admin CRUD, `GET?stats=1` for per-template opens and
+clicks) + a Templates section on the dashboard + a Templates picker in the
+extension that inserts at the caret and prefills the subject. `register.js` stamps
+the `templateId` (`Messages.TemplateId`).
+
+**Phase 4 — Auto-track on send.** The extension intercepts the Send button and
+Ctrl/Cmd+Enter and runs the same rewrite before sending, gated by the popup's
+auto-track toggle. Chosen over MAIN-world XHR surgery on Gmail's send payload
+because it reuses tested logic and fails open (the email always sends). No
+InboxSDK dependency.
+
+**Phase 5 — Reminders, send-later, sequences.**
+- Reminders: `YesAware Reminders` + `api/track/reminders.js` + a dashboard
+  section + `api/cron/yesaware-reminders.js` (every 15 min) that emails Andy a
+  digest of due items via SendGrid. Browser notification when due with the page
+  open.
+- Send-later: a reminder to send, plus Gmail's native Schedule send for delivery.
+- Sequences (mail merge): `YesAware Sequences` + `Sequence Recipients` tables +
+  `api/track/sequences.js` (create, enrol, `?due=1` queue with `{{name}}`,
+  advance, pause) + a dashboard section (step builder, enrol, the due queue with
+  copy-body and mark-sent). Honest boundary: **YesAware never sends server-side**
+  (no Gmail OAuth) — the queue tells you what to send, you send it in Gmail and
+  mark it sent, which schedules the next step.
+
+New env (all optional): `YESAWARE_OWNER_EMAIL` (digest recipient, default
+andy.speight@agendas.group). The existing `CRON_SECRET` gates the cron and
+SendGrid is already configured.
+
+### The frontier (what would come next)
+- Load the extension in Chrome and walk the real Gmail flows (Track, Templates,
+  auto-track on send). This is the only unverified surface.
+- Swap the 8-second dashboard polling for Ably push.
+- If sequences ever need true auto-send, that is the point to revisit the Gmail
+  API and OAuth (or an extension send-runner), with the deliverability and consent
+  guards from section 7.
 
 ## Sources
 
