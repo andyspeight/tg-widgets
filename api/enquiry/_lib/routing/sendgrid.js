@@ -68,6 +68,7 @@ async function fetchAuthenticatedDomains() {
   try {
     const r = await fetch('https://api.sendgrid.com/v3/whitelabel/domains?limit=100', {
       headers: { Authorization: `Bearer ${SENDGRID_API_KEY}` },
+      signal: AbortSignal.timeout(5000),
     });
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const list = await r.json();
@@ -207,6 +208,7 @@ export async function sendViaSendGrid({ from, to, subject, html, replyTo, header
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
+      signal: AbortSignal.timeout(8000),
     });
 
     // SendGrid returns 202 Accepted on success with no body. Any 4xx/5xx is a fail.

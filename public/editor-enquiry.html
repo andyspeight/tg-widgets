@@ -3077,6 +3077,7 @@
       config: defaultConfig(),
       dirty: false,
       saving: false,
+      statusTouched: false,   // true once the user changes Draft/Live/Archived this session
       loadNotFound: false,    // true only when load() got a genuine 404 (form gone)
       lastSaved: null,
       activePaletteTab: 'fields',
@@ -3110,9 +3111,15 @@
       btnText.textContent = 'Saving…';
 
       try {
+        // Send status ONLY when the user changed it in this session. Every
+        // save used to carry the loaded status, so a stale tab autosaving
+        // could silently flip a form another tab had published back to Draft
+        // — its live embed then answered "This form is not published yet."
+        const cfgToSend = Object.assign({}, state.config);
+        if (!state.statusTouched) delete cfgToSend.status;
         const body = {
           widgetId: state.widgetId,
-          config: state.config
+          config: cfgToSend
         };
         const res = await fetch(API_CONFIG, {
           method: 'POST',
@@ -5861,7 +5868,7 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
             { value: 'Live', label: 'Live' },
             { value: 'Archived', label: 'Archived' }
           ],
-          onChange: (v) => { cfg.status = v; save(); renderStatusBadge(); renderInspector(); }
+          onChange: (v) => { cfg.status = v; state.statusTouched = true; save(); renderStatusBadge(); renderInspector(); }
         })
       ]));
 

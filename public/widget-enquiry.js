@@ -1,5 +1,5 @@
 /**
- * Travelgenix Enquiry Form Widget v1.1.6
+ * Travelgenix Enquiry Form Widget v1.1.7
  * Self-contained, embeddable form widget — part of the Travelgenix Widget Suite
  * Zero dependencies — works on any website via a single script tag
  *
@@ -38,7 +38,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.1.6';
+  var WIDGET_VERSION = '1.1.7';
   var VISITOR_ID_KEY = 'tg_visitor_id_v1';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -119,6 +119,7 @@
       flexAria: 'Flexible by a week either side',
       flexLabel: "I'm flexible by a week either side",
       date_required: 'Please choose a departure date.',
+      interests_required: 'Please pick at least one option.',
       date_returnAfter: 'Return date must be after departure.',
       // Duration field
       label_duration: 'Duration',
@@ -256,6 +257,7 @@
       flexAria: 'Flexible d’une semaine de part et d’autre',
       flexLabel: 'Je suis flexible d’une semaine de part et d’autre',
       date_required: 'Veuillez choisir une date de départ.',
+      interests_required: 'Veuillez choisir au moins une option.',
       date_returnAfter: 'La date de retour doit être après le départ.',
       label_duration: 'Durée',
       duration_options: 'Options de durée',
@@ -383,6 +385,7 @@
       flexAria: 'Flexibel um eine Woche in beide Richtungen',
       flexLabel: 'Ich bin um eine Woche in beide Richtungen flexibel',
       date_required: 'Bitte wählen Sie ein Abflugdatum.',
+      interests_required: 'Bitte wählen Sie mindestens eine Option.',
       date_returnAfter: 'Das Rückflugdatum muss nach dem Hinflug liegen.',
       label_duration: 'Dauer',
       duration_options: 'Dauer-Optionen',
@@ -510,6 +513,7 @@
       flexAria: 'Flexible una semana arriba o abajo',
       flexLabel: 'Soy flexible una semana arriba o abajo',
       date_required: 'Elige una fecha de salida.',
+      interests_required: 'Elige al menos una opción.',
       date_returnAfter: 'La fecha de regreso debe ser posterior a la de salida.',
       label_duration: 'Duración',
       duration_options: 'Opciones de duración',
@@ -637,6 +641,7 @@
       flexAria: 'Flessibile di una settimana in entrambe le direzioni',
       flexLabel: 'Sono flessibile di una settimana in entrambe le direzioni',
       date_required: 'Scegli una data di partenza.',
+      interests_required: 'Scegli almeno un\'opzione.',
       date_returnAfter: 'La data di ritorno deve essere successiva alla partenza.',
       label_duration: 'Durata',
       duration_options: 'Opzioni di durata',
@@ -764,6 +769,7 @@
       flexAria: 'Flexibil cu o săptămână în plus sau în minus',
       flexLabel: 'Sunt flexibil cu o săptămână în plus sau în minus',
       date_required: 'Alegeți o dată de plecare.',
+      interests_required: 'Alegeți cel puțin o opțiune.',
       date_returnAfter: 'Data întoarcerii trebuie să fie după plecare.',
       label_duration: 'Durată',
       duration_options: 'Opțiuni de durată',
@@ -881,19 +887,27 @@
   // 30 minutes; the once-per-page guard here keeps a single visitor from
   // firing more than one alert. Telemetry must never throw or block the form.
   var WIDGET_LOG_URL = API_BASE + '/api/widget-log';
-  var reportedThisPage = false;
-  function report(message, detail, widgetId) {
-    if (reportedThisPage) return;
-    reportedThisPage = true;
+  function beacon(event, message, detail, widgetId) {
     try {
       var b = JSON.stringify({
-        event: 'error', widget: 'enquiry', widgetId: String(widgetId || ''),
+        event: event, widget: 'enquiry', widgetId: String(widgetId || ''),
         message: String(message || '').slice(0, 300), detail: String(detail || '').slice(0, 500),
         url: (function () { try { return location.href; } catch (e) { return ''; } })()
       });
       if (navigator && typeof navigator.sendBeacon === 'function' && navigator.sendBeacon(WIDGET_LOG_URL, new Blob([b], { type: 'text/plain' }))) return;
       fetch(WIDGET_LOG_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: b, keepalive: true, credentials: 'omit' }).catch(function () {});
     } catch (e) { /* telemetry must never throw */ }
+  }
+  var reportedThisPage = false;
+  function report(message, detail, widgetId) {
+    if (reportedThisPage) return;
+    reportedThisPage = true;
+    beacon('error', message, detail, widgetId);
+  }
+  // One 'load' heartbeat per successful mount, so an empty log distinguishes
+  // "widget never ran on that page" from "widget healthy, nobody failing".
+  function heartbeat(widgetId) {
+    beacon('load', 'mounted', 'v' + WIDGET_VERSION, widgetId);
   }
 
   // ============================================================================
@@ -1537,7 +1551,7 @@
     var destinations = [];
     var shell = createFieldShell(instance, fieldSpec.label || t('label_destination'));
     var input = el('input', {
-      class: 'tg-dest-input', type: 'text',
+      class: 'tg-dest-input', type: 'text', maxlength: '128',
       placeholder: t('dest_placeholder'),
       autocomplete: 'off',
       'aria-label': t('dest_searchAria'),
@@ -2106,7 +2120,12 @@
       type: 'daterange',
       node: shell.fieldNode,
       writeTo: function (fields) {
-        fields.travel_dates = { depart: depart.value || null, 'return': ret.value || null, flexible: !!flexInput.checked };
+        // Only include dates that are actually set — a null used to be sent
+        // for a blank return date and the server 400'd the whole submission.
+        var td = { flexible: !!flexInput.checked };
+        if (depart.value) td.depart = depart.value;
+        if (ret.value) td['return'] = ret.value;
+        fields.travel_dates = td;
       },
       validate: function () {
         if (fieldSpec.required === false) return null;
@@ -2352,7 +2371,7 @@
   function sanitiseChoices(raw) {
     if (!Array.isArray(raw) || !raw.length) return null;
     var out = [];
-    for (var i = 0; i < raw.length && out.length < 24; i++) {
+    for (var i = 0; i < raw.length && out.length < 20; i++) { // server caps selected interests at 20
       var c = raw[i];
       if (!c || typeof c !== 'object') continue;
       var value = String(c.value == null ? '' : c.value).trim().slice(0, 64);
@@ -2395,7 +2414,11 @@
       type: 'interests',
       node: shell.fieldNode,
       writeTo: function (fields) { fields.interests = selected.slice(); },
-      validate: function () { return null; },
+      validate: function () {
+        if (fieldSpec.required === false) return null;
+        if (selected.length === 0) return t('interests_required');
+        return null;
+      },
       showError: function (msg) { shell.show(msg); },
       clearError: function () { shell.clear(); },
       focus: function () { buttons[0].focus(); }
@@ -2406,8 +2429,8 @@
     t = t || makeT(null);
     var shell = createFieldShell(instance, null);
     var firstId = 'tg-' + instance + '-first'; var lastId = 'tg-' + instance + '-last';
-    var first = el('input', { id: firstId, class: 'tg-input', type: 'text', placeholder: t('firstName_ph'), 'aria-label': t('firstName'), autocomplete: 'given-name', 'aria-describedby': shell.errorId, oninput: function () { shell.clear(); first.removeAttribute('aria-invalid'); last.removeAttribute('aria-invalid'); } });
-    var last = el('input', { id: lastId, class: 'tg-input', type: 'text', placeholder: t('lastName_ph'), 'aria-label': t('lastName'), autocomplete: 'family-name', 'aria-describedby': shell.errorId, oninput: function () { shell.clear(); first.removeAttribute('aria-invalid'); last.removeAttribute('aria-invalid'); } });
+    var first = el('input', { id: firstId, class: 'tg-input', type: 'text', maxlength: '64', placeholder: t('firstName_ph'), 'aria-label': t('firstName'), autocomplete: 'given-name', 'aria-describedby': shell.errorId, oninput: function () { shell.clear(); first.removeAttribute('aria-invalid'); last.removeAttribute('aria-invalid'); } });
+    var last = el('input', { id: lastId, class: 'tg-input', type: 'text', maxlength: '64', placeholder: t('lastName_ph'), 'aria-label': t('lastName'), autocomplete: 'family-name', 'aria-describedby': shell.errorId, oninput: function () { shell.clear(); first.removeAttribute('aria-invalid'); last.removeAttribute('aria-invalid'); } });
     shell.fieldNode.appendChild(el('div', { class: 'tg-row' }, [
       el('div', {}, [el('label', { class: 'tg-label', for: firstId, text: t('firstName') }), first]),
       el('div', {}, [el('label', { class: 'tg-label', for: lastId, text: t('lastName') }), last])
@@ -2434,7 +2457,7 @@
     var shell = createFieldShell(instance, null);
     var emailId = 'tg-' + instance + '-email'; var phoneId = 'tg-' + instance + '-phone';
     var email = el('input', { id: emailId, class: 'tg-input', type: 'email', placeholder: t('email_ph'), 'aria-label': t('emailAddress'), autocomplete: 'email', required: true, 'aria-describedby': shell.errorId, oninput: function () { shell.clear(); email.removeAttribute('aria-invalid'); } });
-    var phone = el('input', { id: phoneId, class: 'tg-input', type: 'tel', placeholder: t('phone_ph'), 'aria-label': t('phoneAria'), autocomplete: 'tel' });
+    var phone = el('input', { id: phoneId, class: 'tg-input', type: 'tel', maxlength: '32', placeholder: t('phone_ph'), 'aria-label': t('phoneAria'), autocomplete: 'tel' });
     shell.fieldNode.appendChild(el('div', { class: 'tg-row' }, [
       el('div', {}, [el('label', { class: 'tg-label', for: emailId, text: t('emailAddress') }), email]),
       el('div', {}, [el('label', { class: 'tg-label', for: phoneId }, [t('phone') + ' ', el('span', { class: 'tg-opt', text: t('optional') })]), phone])
@@ -2482,7 +2505,7 @@
     // Per-field DOM id so a form can carry more than one notes field without
     // duplicate ids (the id falls back to 'notes' for the default field).
     var textareaId = 'tg-' + instance + '-' + (fieldSpec.id || 'notes');
-    var textarea = el('textarea', { id: textareaId, class: 'tg-textarea', 'aria-label': t('notesAria'), placeholder: fieldSpec.placeholder || t('notes_ph'), maxlength: '2000' });
+    var textarea = el('textarea', { id: textareaId, class: 'tg-textarea', 'aria-label': t('notesAria'), placeholder: (fieldSpec.options && fieldSpec.options.placeholder) || fieldSpec.placeholder || t('notes_ph'), maxlength: '2000' });
     var labelEl = shell.fieldNode.querySelector('.tg-label');
     if (labelEl) labelEl.setAttribute('for', textareaId);
     shell.fieldNode.appendChild(textarea);
@@ -2826,7 +2849,7 @@
     // Honeypot — always present, visually hidden. Lives outside of step
     // sections so it's part of every submit regardless of which step is active.
     var honeypot = el('input', {
-      class: 'tg-honeypot', type: 'text', name: 'website_url',
+      class: 'tg-honeypot', type: 'text', name: 'tg_hp_check',
       tabindex: '-1', autocomplete: 'off', 'aria-hidden': 'true'
     });
     card.appendChild(honeypot);
@@ -3203,16 +3226,23 @@
           return;
         }
         self._showSubmitError(submitBtn, summaryError, result.body);
+        // Server-side validation carries a {fields:{path:message}} map — walk
+        // it back to the exact renderers so the visitor sees WHICH answer to
+        // fix, not just "One or more fields are invalid."
+        if (result.status === 400 && result.body && result.body.fields) {
+          try { self._showServerFieldErrors(fields, result.body.fields, summaryError); } catch (e) {}
+        }
         try { console.warn('[TGEnquiryWidget] submit failed for', config.widgetId || config.formId, 'HTTP', result.status, '-', result.body && (result.body.error || result.body.message)); } catch (e) {}
-        // Alert on server-side failures and on not-found/not-live for a real
-        // embed (a live page pointing at a missing or unpublished form is a
-        // broken embed WE want to hear about). Validation errors are the
-        // visitor's to fix — no alert.
-        if (config.isLiveEmbed && (result.status >= 500 || result.status === 404)) {
-          report('submit failed', 'HTTP ' + result.status + ' ' + ((result.body && result.body.error) || ''), config.widgetId);
+        // Alert on any submit failure from a real embed except rate limiting:
+        // 5xx is an outage, 404 is a broken embed, and a 400 here means the
+        // widget produced a payload its own server rejects — every one of
+        // those is OURS to hear about, not the visitor's to report.
+        if (config.isLiveEmbed && result.status >= 400 && result.status !== 429) {
+          report('submit failed', 'HTTP ' + result.status + ' ' + ((result.body && result.body.error) || '') + ' ' + Object.keys((result.body && result.body.fields) || {}).slice(0, 5).join(','), config.widgetId);
         }
       }).catch(function () {
         self._showSubmitError(submitBtn, summaryError, { message: t('genericError') });
+        if (config.isLiveEmbed) report('submit network failure', 'fetch rejected or non-JSON response', config.widgetId);
       });
     };
     attemptSend(1);
@@ -3225,7 +3255,7 @@
     submitBtn.appendChild(el('span', { text: this.config.submitText || t('submitText') }));
     submitBtn.appendChild(svg(ICONS.arrow, { size: 16 }));
     summaryError.classList.add('is-shown');
-    summaryError.querySelector('.tg-summary-error-text').textContent = (body && body.message) || t('genericError');
+    summaryError.querySelector('.tg-summary-error-text').textContent = (body && (body.message || body.error)) || t('genericError');
     // Reset the Turnstile challenge so the user can generate a fresh token —
     // the one they just used was consumed by the failed submit attempt.
     if (this.config.security && this.config.security.turnstile && this._turnstileFrame) {
@@ -3233,9 +3263,47 @@
     }
   };
 
+  // Walk server-side validation paths ("fields.first_name") back to the
+  // renderer whose writeTo produces that payload key, highlight each one, and
+  // surface the actual messages in the summary banner. Fields on hidden steps
+  // still get their inline error, so stepping back reveals it.
+  TGEnquiryWidget.prototype._showServerFieldErrors = function (fields, errorMap, summaryError) {
+    var keyToField = {};
+    fields.forEach(function (f) {
+      var probe = {};
+      try { f.writeTo(probe); } catch (e) { return; }
+      Object.keys(probe).forEach(function (k) { keyToField[k] = f; });
+    });
+    var firstHit = null;
+    var messages = [];
+    Object.keys(errorMap).forEach(function (path) {
+      var msg = String(errorMap[path] || '').slice(0, 200);
+      if (msg) messages.push(msg);
+      var key = String(path).split('.')[1];
+      var f = key && keyToField[key];
+      if (!f || !f.showError) return;
+      f.showError(msg || 'Please check this answer.');
+      if (!firstHit) firstHit = f;
+    });
+    if (messages.length && summaryError) {
+      var textNode = summaryError.querySelector('.tg-summary-error-text');
+      if (textNode) textNode.textContent = messages.slice(0, 3).join(' ');
+    }
+    if (firstHit && firstHit.focus) { try { firstHit.focus(); } catch (e) {} }
+  };
+
   TGEnquiryWidget.prototype._renderThankYou = function (response, firstName) {
     var t = this.t;
     var shadow = this.shadow;
+    // 'redirect' mode: the author configured a conversion/tracking page. The
+    // widget used to ignore it entirely. Navigate the top page there; the
+    // inline card below still renders as a fallback for blocked navigation
+    // (sandboxed iframes and similar).
+    var ty = (response && response.thankYou) || this.config.thankYou || {};
+    if (ty.mode === 'redirect' && typeof ty.redirectUrl === 'string' && /^https?:\/\//i.test(ty.redirectUrl)) {
+      try { window.top.location.assign(ty.redirectUrl); }
+      catch (e) { try { window.location.assign(ty.redirectUrl); } catch (e2) { /* keep inline card */ } }
+    }
     // Preserve the style element so we don't lose theming
     var styleEl = shadow.querySelector('style');
     while (shadow.firstChild) shadow.removeChild(shadow.firstChild);
@@ -3387,13 +3455,22 @@
       // silently drop the lead — it should attempt the real submit and surface
       // any server error. The editor preview leaves this unset.
       widget.config.isLiveEmbed = true;
+      // Overlay the author's translations for the viewer language — the same
+      // step update() performs. Live embeds used to skip it, leaving every
+      // translated form English-only on client sites.
+      try { widget._applyI18n(); } catch (e) { /* never block render */ }
       widget._render();
 
       // Stash for potential programmatic access
       container.__tgWidget = widget;
+      heartbeat(widgetId);
     } catch (err) {
       console.error('[TGEnquiryWidget] Failed to load config for', widgetId, ':', err);
       renderError(shadow, t('unableToReach'), t);
+      // Attempt the beacon even though the network just failed — a CSP block
+      // on the config fetch often still allows sendBeacon, and this is the
+      // only trace the outage leaves.
+      report('config load threw', String((err && err.message) || err).slice(0, 200), widgetId);
     }
   }
 
@@ -3402,9 +3479,27 @@
     for (var i = 0; i < containers.length; i++) initContainer(containers[i]);
   }
 
+  // Site builders, tag managers and consent gates often inject the container
+  // AFTER this script has run — a one-shot scan left a permanently blank
+  // space with zero telemetry. Watch for late arrivals for a bounded window.
+  function watchForLateContainers() {
+    try {
+      if (typeof MutationObserver !== 'function' || !document.body) return;
+      var observer = new MutationObserver(function () {
+        var containers = document.querySelectorAll('[data-tg-widget="enquiry"]');
+        for (var i = 0; i < containers.length; i++) {
+          if (!containers[i].__tgMounted) initContainer(containers[i]);
+        }
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+      setTimeout(function () { observer.disconnect(); }, 30000);
+    } catch (e) { /* never break the host page */ }
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', autoInit);
+    document.addEventListener('DOMContentLoaded', function () { autoInit(); watchForLateContainers(); });
   } else {
     autoInit();
+    watchForLateContainers();
   }
 })();

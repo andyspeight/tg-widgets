@@ -27,7 +27,9 @@
     "test:trai-alert": "node test/trai-endpoint-alert-smoke.mjs",
     "test:rss-cors": "node test/rss-feed-cors-smoke.mjs",
     "test:enquiry-submit": "node test/enquiry-submit-lookup-smoke.mjs",
-    "test:enquiry-email": "node test/enquiry-email-brand-smoke.mjs"
+    "test:enquiry-email": "node test/enquiry-email-brand-smoke.mjs",
+    "test:enquiry-hardening": "node test/enquiry-hardening-smoke.mjs",
+    "test:enquiry-e2e": "node test/enquiry-e2e-smoke.cjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",

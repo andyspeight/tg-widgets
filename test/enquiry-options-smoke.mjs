@@ -64,7 +64,9 @@ ok(sanitiseChoices([{ value: 'a', label: 'A' }])[0].icon === 'pin', 'no icon →
 
 // ── caps count ───────────────────────────────────────────────────────────────
 const many = Array.from({ length: 40 }, (_, i) => ({ value: 'v' + i, label: 'L' + i }));
-ok(sanitiseChoices(many).length === 24, 'caps at 24 options');
+// Cap matches the server's selected-interests limit (20) — offering more
+// options than a visitor may select turned full selections into 400s.
+ok(sanitiseChoices(many).length === 20, 'caps at 20 options (server parity)');
 
 // ── choicesFor (editor seed) ─────────────────────────────────────────────────
 ok(choicesFor({}).length === 8, 'no field.choices → 8 built-in defaults');

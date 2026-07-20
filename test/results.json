@@ -1,0 +1,76 @@
+{
+  "results": [
+    {
+      "scenario": "a. happy path (5 steps, real handler, master record)",
+      "pass": true,
+      "detail": "thank-you \"Thanks Jo — we're on it\" + \"Reference TG-2026-119037\"; handler looked up {Widget ID}=\"tgw_1784179041137_anycbh\"; master record firstName=Jo, email routing attempted (no SendGrid key -> logged failed, submission still 200). visitorId sent: v_4fe2e5b0cb32939f08aead5381614c1a"
+    },
+    {
+      "scenario": "b. validation wall: advance step 1 with nothing selected",
+      "pass": true,
+      "detail": "blocked on step 1 with error \"Please fix the highlighted field above before continuing.\""
+    },
+    {
+      "scenario": "c. submit-time 503 -> silent auto-retry lands on thank-you",
+      "pass": true,
+      "detail": "POST#1: Airtable 429 x2 -> handler 503 {retryable:true, Retry-After:2}; widget silently retried after 2s; POST#2 -> 200; thank-you \"Thanks Jo — we're on it\". Airtable lookup called 3x total."
+    },
+    {
+      "scenario": "d. genuine 404 (empty lookup result)",
+      "pass": true,
+      "detail": "handler answered 404 form_not_found once (no retry); visitor sees exactly: \"Form not found.\" in the summary banner; widget beaconed /api/widget-log (2 beacon)."
+    },
+    {
+      "scenario": "e. hostile localStorage (Safari private mode)",
+      "pass": true,
+      "detail": "widget still inits + renders; getVisitorId() fell back to ephemeral id \"v_c0aa693d2526e19f7f4c2396\" (26 chars, non-persistent so returning visitors get a new id each submit); real handler accepted it (200, master record written)."
+    },
+    {
+      "scenario": "f. config GET network failure then recovery",
+      "pass": true,
+      "detail": "first GET rejected (network), widget silently retried after 600ms, second GET 200 -> full 5-step form rendered."
+    }
+  ],
+  "masterCreateSample": {
+    "fields": {
+      "fldNXTIZnLr7EwSf1": "TG-2026-119039",
+      "fldNO4d15W4xaXYLd": 119039,
+      "fld4335lLxU55RKzS": "TG-",
+      "fldk4fGMTm1BFY7MD": "recFORMMAIN0000001",
+      "fldMDhl75atiALwj4": "EF-0025",
+      "fldR4ipGZ4tp6fPrZ": "MAIN",
+      "fldJK3dXI664gGO9v": "Free From Travel",
+      "fldOcQW20Q0L19P9G": "v_c0aa693d2526e19f7f4c2396",
+      "fldTS4E0HWXc1IbZs": "203.0.113.15",
+      "fldaHLfF6bfNVQCbE": "e2e-jsdom-harness",
+      "fld6Ko6chs2aerwPg": "https://www.freefromtravel.com/enquire",
+      "fldO9laEEYmzTMl6V": "en-US",
+      "fldHIsFu8aTma2Udh": "Jo",
+      "fldokNLczzqR1dJkF": "Bloggs",
+      "fldNhL2013qhCCU87": "jo@example.com",
+      "fldeSiHPPRo983s8f": "",
+      "fldanxHheVASVcVHj": "[{\"id\":\"recDestGreece01\",\"name\":\"Greece\",\"type\":\"country\"}]",
+      "fldA0JrLek6nvuZfC": "",
+      "fldWTNvplA98gEfNt": false,
+      "fldsc0GlhRfT7KExm": 3,
+      "fldBcyotWmETyjSOB": 0,
+      "fldg8LtnXntJsVkdn": "[]",
+      "fldF8uRIwmb6aDtsY": 0,
+      "fldysKVijEzqo1wWH": 4,
+      "fldl6rVXUjLmSOb7v": "[\"beach\"]",
+      "fldEQAYJmYQlatoWq": "",
+      "fld4kh6AfKWuamN0i": true,
+      "fldiHCjnbG8EaWj6Z": false,
+      "fldokKF0PY9g2TI03": null,
+      "fld1LrJ05E51ieQaF": "{\"widgetId\":\"tgw_1784179041137_anycbh\",\"formId\":\"EF-0025\",\"visitorId\":\"v_c0aa693d2526e19f7f4c2396\",\"sourceUrl\":\"https://www.freefromtravel.com/enquire\",\"locale\":\"en-US\",\"honeypot\":\"\",\"turnstileToken\":null,\"submittedAt\":\"2026-07-20T11:32:04.119Z\",\"fields\":{\"interests\":[\"beach\"],\"destinations\":[{\"id\":\"recDestGreece01\",\"name\":\"Greece\",\"type\":\"country\"}],\"duration\":{\"nights\":10},\"travel_dates\":{\"flexible\":false,\"depart\":\"2026-09-10\",\"return\":\"2026-09-17\"},\"travellers\":{\"adults\":3,\"children\":0,\"infants\":0,\"childAges\":[]},\"budget_pp\":3800,\"stars\":4,\"board\":\"RO\",\"first_name\":\"Jo\",\"last_name\":\"Bloggs\",\"email\":\"jo@example.com\",\"phone\":\"\",\"contact_consent\":true,\"marketing_consent\":false}}",
+      "fld4C1iU7lC3BVmtU": "New",
+      "fldPP6tud7N2wwcUG": "george@freefromtravel.com",
+      "fldsuLhoevjubPcBF": "2026-09-10",
+      "fldgUVAATk4ptvuEQ": "2026-09-17",
+      "fldukKv5npF3yu7xy": 10,
+      "fldIbsjCV7EThsowD": 3800,
+      "fld8FymwGJmeb0PPe": "Room only"
+    },
+    "typecast": true
+  }
+}

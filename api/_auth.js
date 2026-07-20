@@ -89,9 +89,9 @@ export function applyRateLimit(res, key, limit = RATE_LIMITS.widgetRead) {
   res.setHeader('X-RateLimit-Remaining', Math.max(0, result.remaining));
   if (!result.allowed) {
     res.setHeader('Retry-After', result.retryAfter);
-    res.status(429).json({
-      error: `Too many requests. Please try again in ${result.retryAfter} second${result.retryAfter === 1 ? '' : 's'}.`,
-    });
+    const friendly = `Too many requests. Please try again in ${result.retryAfter} second${result.retryAfter === 1 ? '' : 's'}.`;
+    // Both keys: widgets render body.message; older callers read body.error.
+    res.status(429).json({ error: friendly, message: friendly });
     return false;
   }
   return true;

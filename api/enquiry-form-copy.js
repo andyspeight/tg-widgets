@@ -53,6 +53,8 @@ const EF = {
   submitButtonText:    'fldjrfgcfK7580bft',
   thankYouMode:        'fldTy6oSMKUwYEYjQ',
   thankYouMessage:     'fldiB3PkfcsHRKEWd',
+  // Layer-2 translations — copied so a duplicated form keeps its languages.
+  i18nJSON:            'fld0phLw3nKqM7UG6',
   redirectUrl:         'fldYkShCNfibHChpg',
   referencePrefix:     'fldXJxPXCLBnQeb7f',
   buttonColour:        'fldxyawmdBzNiOb7g',
@@ -119,7 +121,9 @@ async function hydrateUserEmail(user) {
 
 async function fetchEnquiryFormByWidgetId(widgetId, headers, baseId) {
   const safe = widgetId.replace(/'/g, "\\'");
-  const formula = encodeURIComponent(`{${EF.widgetId}}='${safe}'`);
+  // Field DISPLAY NAME, not field ID — IDs inside {braces} silently match
+  // nothing and every Duplicate answered 500 on a healthy form.
+  const formula = encodeURIComponent(`{Widget ID}='${safe}'`);
   const url = `${AIRTABLE_API}/${baseId}/${ENQUIRY_FORMS_TABLE}?filterByFormula=${formula}&maxRecords=1&returnFieldsByFieldId=true`;
   const resp = await fetch(url, { headers });
   if (!resp.ok) throw new Error(`EF lookup failed — ${resp.status}`);

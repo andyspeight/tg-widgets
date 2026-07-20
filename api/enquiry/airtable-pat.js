@@ -218,9 +218,13 @@ async function handleDelete(req, res, agentEmail) {
  * Returns { id, fields } or null if not found / not owned.
  */
 async function findFormByWidgetId(widgetId, agentEmail) {
+  // filterByFormula requires field DISPLAY NAMES — field IDs inside {braces}
+  // silently match nothing, which made this endpoint answer 404 "Form not
+  // found" for perfectly healthy forms. "Widget ID" / "Owner Email" are the
+  // Enquiry Forms display names (same convention as enquiry-form-config.js).
   const formula = `AND(` +
-    `{${F.widgetId}} = '${sanitiseForFormula(widgetId)}',` +
-    `LOWER({${F.ownerEmail}}) = '${sanitiseForFormula(agentEmail)}'` +
+    `{Widget ID} = '${sanitiseForFormula(widgetId)}',` +
+    `LOWER({Owner Email}) = '${sanitiseForFormula(agentEmail)}'` +
   `)`;
 
   const params = new URLSearchParams({
