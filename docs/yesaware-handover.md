@@ -8,9 +8,9 @@ conventions in `CLAUDE.md`.
 - **Owner / only user:** Andy Speight. This is a personal tool, not a client
   product and not a widget in the suite. It reuses the widget-suite backend and
   extension patterns but it is for one inbox only.
-- **Airtable project record:** not created yet. Create one in base
-  `appj9tksreHOwkhYg`, table `tblpyhPNhiQg3XkkT` when the build starts, then keep
-  it current per the project-handover rule.
+- **Airtable project record:** base `appj9tksreHOwkhYg`, table
+  `tblpyhPNhiQg3XkkT`, record `rec4Akjuxd3Sl344h`. Keep it current per the
+  project-handover rule.
 
 ## The one-line answer
 
@@ -128,6 +128,36 @@ be ruthless about scope (section 9).
 
 ---
 
+## What we are building, and where each feature is done best
+
+Scope is locked to the full set (Phases 1 to 5). Here is every feature YesAware
+will have and the tool whose version we should model on. "Model on" means copy the
+behaviour and feel, not the code, we build it on our own stack.
+
+| Feature | What it does | Model it on | Why that one |
+|---|---|---|---|
+| Open tracking + live "opened" ping | pixel fires, you get a real-time alert | **Mailtrack** for the one-glance simplicity, **Yesware** for the notification feed | Mailtrack owns simple, Yesware owns the sales-alert feel |
+| Click tracking | wrapped links, the real intent signal | **Yesware** | the strongest, most trusted click reporting in the field |
+| Attachment / document tracking | know when a sent PDF or deck is opened, and for how long | **Yesware** | this is Yesware's signature feature, nobody does it better |
+| Templates + per-template stats | save, insert in one click, see which wins | **HubSpot** (clean templates + performance), **Yesware** | HubSpot's free template experience is the benchmark |
+| Send later | write now, deliver at the right hour | **Boomerang** | the category definer for scheduling |
+| Reminders / follow-ups | "nudge me if no reply by Friday", auto-bump | **Boomerang** (the original), **Right Inbox** | Boomerang invented this pattern |
+| Meeting scheduler | share bookable times + a booking link in the email | **your own appointment scheduler** (already built), **Mixmax** as the external benchmark | you already ship this in Gmail, Mixmax is the best paid version to borrow from |
+| Sequences / mail merge | one personalised email to many, auto-chase non-repliers | **GMass** for Gmail-native merge that sends through your own Gmail, **Yesware Campaigns** / **Mixmax** for the drip logic | GMass is best-in-class for sending from your own address at Gmail scale |
+| Dashboard / analytics | opens, clicks, per-email and per-template history | **Yesware** reporting, plus the **pixel-tracker-vercel** open-source dashboard as a build reference | one is the feature bar, one is the code shortcut |
+| Bot filtering (quiet but essential) | discount Apple and Gmail proxy opens and your own self-opens | **samrathreddy/mail-tracker** open-source | it already implements exactly the filters we need |
+
+The short version: no single tool is the model, we cherry-pick. **Yesware is the
+reference for tracking depth, Mailtrack for tracking simplicity, Boomerang for
+scheduling and reminders, GMass for mail merge, HubSpot for templates, and your
+own widgets already cover the meeting scheduler.** For the plumbing we copy the
+approach from three open-source builds: **pixel-tracker-vercel** (pixel, click and
+dashboard on your exact Vercel and Upstash stack), **samrathreddy/mail-tracker**
+(the Gmail extension, per-recipient tracker and bot filtering) and **InboxSDK**
+(the clean Send hook for Phase 4).
+
+---
+
 ## 3. The uncomfortable truth about open tracking in 2026
 
 This shapes the whole design, so it goes near the top.
@@ -240,10 +270,11 @@ Gmail compose (Chrome extension, built on scheduler-companion)
    ├─ GET  /api/track/open?t=…   returns the 1x1 GIF, logs the open (async)
    └─ GET  /api/track/click?t=…&u=…  logs the click, 302s to the original URL
                      │
-   Store
-   ├─ Supabase: a `mail_events` table (opens + clicks) reusing the telemetry
-   │            pattern, and a `mail_messages` table (one row per sent email)
-   └─ Airtable: a Templates table (nice to edit by hand, low volume)
+   Store (Airtable)
+   ├─ Templates table   (edit by hand)
+   ├─ Messages table    (one row per sent email + its tokens)
+   └─ Events table      (opens + clicks, written off the hot path, Redis-buffered
+                         if volume ever grows)
                      │
    Ably: each open/click publishes to your private channel
                      │
@@ -303,12 +334,15 @@ rather than rebuilding.
 
 ### Where to store events
 
-Use **Supabase for events** (`mail_events`, `mail_messages`) because
-`telemetry.js` already talks to Supabase, it handles event volume far better than
-Airtable and the admin dashboard already reads Supabase via restricted RPCs. Use
-**Airtable for templates** because there are few of them and editing by hand is
-pleasant. The Supabase MCP is connected, so the tables can be created directly
-when we build.
+Decision (section 11): **Airtable for everything** — a Templates table, a Messages
+table (one row per sent email and its tokens) and an Events table (opens and
+clicks). Andy prefers keeping it in the one place he knows. At personal volume this
+is fine. Two rules make it safe: never put Airtable in the image's response path
+(log after the pixel is served, exactly as `telemetry.js` already does), and if
+volume ever climbs, buffer events through the Upstash Redis that `telemetry.js`
+already falls back to, then flush to Airtable in batches (Airtable allows about 5
+requests a second). Supabase stays as the escape hatch if the Events table ever
+outgrows Airtable, but we are not using it now.
 
 ---
 
@@ -390,7 +424,7 @@ not optional if the numbers are to mean anything.**
 Scope is the main risk, so the phases are deliberately small and each one is
 useful on its own.
 
-**Phase 0 — decisions (before any code).** Lock the open decisions in section 11.
+**Phase 0 — decisions.** Locked, see section 11. The next code step is Phase 1.
 
 **Phase 1 — tracking backend and dashboard (no extension yet).**
 Generalise the emailsig endpoints into `/api/track/open`, `/api/track/click` and
@@ -413,13 +447,14 @@ dashboard can show per-template open and click rates.
 Adopt InboxSDK's `presending` so every tracked email is injected automatically at
 send, links rewritten reliably, no forgotten-to-click gap.
 
-**Phase 5 — the nice-to-haves, only if wanted.**
+**Phase 5 — send later, reminders and sequences (in scope, built last).**
 Send later, follow-up reminders ("nudge me if no reply by Friday") and simple
-sequences or mail merge. These are the enterprise tail and much larger. Send
-later and reminders are the most useful of them for a solo user. Mail merge would
-pull in the Gmail API and its sending limits (500 a day on consumer Gmail, 2,000
-on Workspace, 1,500 for merges) and is the point where the "just for me" scope
-should be re-examined.
+sequences or mail merge. Andy has chosen to include these. They are the enterprise
+tail and much larger, so they come last and are effectively their own project.
+Send later and reminders are the most useful for a solo user and the cheapest of
+the five. Mail merge pulls in the Gmail API and its sending limits (500 a day on
+consumer Gmail, 2,000 on Workspace, 1,500 for merges) and needs the send-hook from
+Phase 4, so it is genuinely the last thing we build.
 
 **Phase 6 — unify.**
 Fold YesAware into the existing scheduler extension so one Travelgenix button in
@@ -449,25 +484,53 @@ Risks, honestly:
 | Vercel caches the pixel | CDN would swallow opens | No-store and no `s-maxage`, verify with a real send |
 | Legal (PECR) | Pixels need consent, B2B included | Off-switch, disclosure, prefer clicks, short retention |
 | Deliverability | Rewritten links can look like phishing | Branded tracking subdomain with SPF, DKIM and DMARC, single 302 hop, do not wrap links in cold outreach |
-| Scope creep | Sequences and mail merge are a different size of project | Hard stop at Phase 4 unless there is a clear reason |
+| Scope creep | Sequences and mail merge are a different size of project | In scope but built last as their own mini-project, ship Phases 1 to 4 first |
 
 ---
 
-## 11. Open decisions (what I need from you)
+## 11. Decisions locked (20 July 2026)
 
-1. **Scope.** Is this "open tracking, click tracking and templates" (Phases 1 to
-   4), or do you also want send later, reminders and sequences (Phase 5)? My
-   recommendation is Phases 1 to 4 first.
-2. **Event store.** Supabase for events (my recommendation, matches
-   `telemetry.js`) or Airtable for everything to keep it in one place you know
-   well?
-3. **Send injection.** Start with the button-triggered MVP (recommended) or go
-   straight to the InboxSDK send-hook?
-4. **One extension or two.** Build YesAware as its own extension first, or add it
-   into the existing `scheduler-companion` from the start?
-5. **Tracking subdomain.** Are we happy serving pixels and redirects off
-   `widgets.travelify.io`, or do you want a dedicated branded subdomain like
-   `trk.travelify.io` for deliverability?
+1. **Scope: all phases, 1 to 5.** Tracking, templates and dashboard, then send
+   later, reminders and sequences/mail merge. Phase 5 is still built last but it
+   is in.
+2. **Event store: Airtable.** Keep it in the one place Andy knows well. At personal
+   volume (tens of emails a day) Airtable is fine. The only watch-out is Airtable's
+   roughly 5 requests a second limit, so events are written off the hot path and,
+   if volume ever grows, buffered through the Upstash Redis that `telemetry.js`
+   already uses. Templates and the message registry live in Airtable too.
+3. **Send injection: start button-triggered, graduate to the InboxSDK send-hook.**
+   Explained just below. The MVP (Phase 2) uses the button so we prove the backend
+   fast, then Phase 4 switches to the automatic send-hook, which sequences
+   (Phase 5) need anyway.
+4. **Extension: separate.** Build YesAware as its own extension first, keep it
+   apart from the scheduler. Phase 6 can still fold them into one button later.
+5. **Tracking domain: reuse `widgets.travelify.io` (the simpler option).** The
+   pixel and redirect endpoints already serve from there, so there is zero DNS or
+   auth setup. If deliverability ever needs it (really only once mail merge is in
+   use), we add a branded `trk.travelify.io` then.
+
+### Button-triggered vs the send-hook (decision 3, explained)
+
+The difference is *when and how* the pixel and tracked links get into the email.
+
+- **Button-triggered (the MVP).** You write the email, then click a "Track this
+  email" button. At that moment the extension drops the pixel in and rewrites the
+  links that are there, then you press Gmail's normal Send. Simple, reuses the
+  scheduler extension's existing insert-at-cursor code almost as-is, no third-party
+  library. Weakness: it is manual (you have to remember to click) and it is a
+  snapshot, so a link you add *after* clicking is not tracked, and giving each
+  recipient their own pixel is awkward.
+- **Send-hook (the proper version, via InboxSDK).** The extension intercepts the
+  Send action itself. The instant you hit Send it injects a fresh pixel and
+  rewrites every link automatically, then lets the message go. A simple on/off
+  toggle is all you touch. This is how Mailtrack, Yesware and Streak actually work,
+  it never misses anything and it handles per-recipient pixels cleanly. Cost: it
+  leans on InboxSDK (a solid open-source library from Streak) and hooking Send is
+  more to test across Gmail's compose, reply and pop-out states.
+
+We start with the button because it proves the whole pipeline for almost no
+effort, then move to the send-hook before sequences, because automatic per-send
+injection is exactly what mail merge relies on.
 
 ---
 
