@@ -137,6 +137,7 @@ function getAgentReplyTo(raw) {
   const list = raw
     .split(/[\n,;]/)
     .map(s => s.trim())
+    .map(s => { const m = /<([^<>@\s]+@[^<>@\s]+\.[^<>@\s]+)>/.exec(s); return m ? m[1] : s; })
     .filter(s => s.length > 0 && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s));
   return list[0] || null;
 }

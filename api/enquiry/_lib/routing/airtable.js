@@ -225,6 +225,7 @@ async function writePatHealth(form, success, errorMessage) {
   try {
     const url = `${AIRTABLE_API}/${WIDGET_SUITE_BASE_ID}/${ENQUIRY_FORMS_TABLE_ID}/${form.id}`;
     await fetch(url, {
+      signal: AbortSignal.timeout(8000),
       method: 'PATCH',
       headers: {
         Authorization: `Bearer ${WIDGET_SUITE_PAT}`,
@@ -309,6 +310,7 @@ export default async function sendToAgentAirtable(ctx) {
 
   try {
     const response = await fetch(url, {
+      signal: AbortSignal.timeout(8000),
       method: 'POST',
       headers: {
         Authorization: `Bearer ${pat}`,

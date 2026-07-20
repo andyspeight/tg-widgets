@@ -558,12 +558,13 @@ async function fetchEnquiryFormByWidgetId(widgetId, headers, baseId) {
 // their Form IDs collapsed to the shared "EF-000" — which broke submissions
 // while the submit endpoint still looked forms up by Form ID. Submissions now
 // key on widgetId, so uniqueness here is only cosmetic (the dashboard badge) —
-// a same-instant race or a failed read is harmless. Sorts by field ID, which
-// the Airtable list API accepts alongside field names.
+// a same-instant race or a failed read is harmless. Sorts by the field's
+// DISPLAY NAME ("Sequential"): the list API's sort param, like
+// filterByFormula, does not resolve field IDs.
 async function nextFormSequential(headers, baseId) {
   try {
     const url = `${AIRTABLE_API}/${baseId}/${ENQUIRY_FORMS_TABLE}?maxRecords=1&returnFieldsByFieldId=true` +
-      `&sort%5B0%5D%5Bfield%5D=${EF.sequential}&sort%5B0%5D%5Bdirection%5D=desc`;
+      `&sort%5B0%5D%5Bfield%5D=Sequential&sort%5B0%5D%5Bdirection%5D=desc`;
     const resp = await fetch(url, { headers });
     if (!resp.ok) throw new Error(`sequential read HTTP ${resp.status}`);
     const data = await resp.json();

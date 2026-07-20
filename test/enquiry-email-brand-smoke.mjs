@@ -123,7 +123,9 @@ ok(/resolveFromIdentity\(agentBrandName, ownerEmail\)/.test(emailSrc), 'agent em
 
 const enquirySrc = readFileSync(new URL('../public/widget-enquiry.js', import.meta.url), 'utf8');
 ok(!/tg-brand/.test(enquirySrc), 'Enquiry widget: powered-by footer fully removed');
-ok(/WIDGET_VERSION = '1\.1\.6'/.test(enquirySrc), 'Enquiry widget version bumped to 1.1.6');
+const evm = enquirySrc.match(/WIDGET_VERSION = '(\d+)\.(\d+)\.(\d+)'/);
+const evn = evm ? (+evm[1]) * 1e6 + (+evm[2]) * 1e3 + (+evm[3]) : 0;
+ok(evn >= 1001006, `Enquiry widget version at or beyond 1.1.6 (got ${evm && evm[0]})`);
 
 const proSrc = readFileSync(new URL('../public/widget-enquirypro.js', import.meta.url), 'utf8');
 ok(!/ep-brand/.test(proSrc), 'Enquiry Pro widget: powered-by footer fully removed');

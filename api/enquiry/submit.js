@@ -211,11 +211,15 @@ function validatePayload(raw) {
   if (typeof raw.visitorId !== 'string' || raw.visitorId.length < 1 || raw.visitorId.length > 128) {
     fail('visitorId', 'Invalid visitorId.');
   }
+  // sourceUrl is OUR telemetry (the widget sends location.href verbatim) — a
+  // long or odd page URL is never the visitor's fault, so it is clamped or
+  // dropped, never a reason to reject the enquiry.
   if (raw.sourceUrl !== undefined) {
-    if (typeof raw.sourceUrl !== 'string' || raw.sourceUrl.length > 2048) {
-      fail('sourceUrl', 'Invalid sourceUrl.');
+    if (typeof raw.sourceUrl !== 'string') {
+      delete raw.sourceUrl;
     } else {
-      try { new URL(raw.sourceUrl); } catch (e) { fail('sourceUrl', 'Invalid URL.'); }
+      raw.sourceUrl = raw.sourceUrl.slice(0, 2048);
+      try { new URL(raw.sourceUrl); } catch (e) { delete raw.sourceUrl; }
     }
   }
   if (raw.locale !== undefined && (typeof raw.locale !== 'string' || raw.locale.length > 16)) {
@@ -328,8 +332,14 @@ function validatePayload(raw) {
     if (!f.travel_dates || typeof f.travel_dates !== 'object') {
       fail('fields.travel_dates', 'Invalid travel_dates.');
     } else {
-      if (f.travel_dates.depart !== undefined && !ISO_DATE_REGEX.test(f.travel_dates.depart)) fail('fields.travel_dates.depart', 'Invalid date.');
-      if (f.travel_dates.return !== undefined && !ISO_DATE_REGEX.test(f.travel_dates.return)) fail('fields.travel_dates.return', 'Invalid date.');
+      // null/'' mean "not filled" — widgets up to v1.1.6 serialised blank
+      // dates as null, and rejecting that 400'd EVERY visitor who left the
+      // return date empty (an optional input in the UI). Absent is fine;
+      // only a PRESENT malformed value is an error.
+      if (f.travel_dates.depart != null && f.travel_dates.depart !== '' && !ISO_DATE_REGEX.test(f.travel_dates.depart)) fail('fields.travel_dates.depart', 'Invalid date.');
+      if (f.travel_dates.return != null && f.travel_dates.return !== '' && !ISO_DATE_REGEX.test(f.travel_dates.return)) fail('fields.travel_dates.return', 'Invalid date.');
+      if (f.travel_dates.depart === null) delete f.travel_dates.depart;
+      if (f.travel_dates.return === null) delete f.travel_dates.return;
       if (f.travel_dates.flexible !== undefined && typeof f.travel_dates.flexible !== 'boolean') fail('fields.travel_dates.flexible', 'Invalid flag.');
     }
   }
@@ -500,6 +510,7 @@ async function fetchForm({ widgetId, formId }) {
   const attempt = async () => {
     const response = await fetch(url.toString(), {
       headers: { Authorization: `Bearer ${WIDGET_SUITE_PAT}` },
+      signal: AbortSignal.timeout(5000),
     });
     if (!response.ok) {
       const err = new Error(`form lookup HTTP ${response.status}`);
@@ -541,6 +552,7 @@ async function verifyTurnstile(token, ip) {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: body.toString(),
+      signal: AbortSignal.timeout(6000),
     });
     const json = await r.json();
     if (!json.success) {
@@ -634,11 +646,18 @@ async function writeMasterRecord({ form, payload, meta, sequential, reference })
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ ...body, typecast: true }),
+    signal: AbortSignal.timeout(8000),
   });
   if (!response.ok) {
     const errBody = await response.text();
     console.error('[submit] writeMasterRecord failed:', response.status, errBody.slice(0, 500));
-    throw new Error(`Airtable write failed: ${response.status}`);
+    const err = new Error(`Airtable write failed: ${response.status}`);
+    // 429 is the ONLY status marked safe to auto-retry: rate-limited requests
+    // are never committed, so a retry cannot duplicate the enquiry. A 5xx or
+    // network failure MAY have committed — those stay a manual "please try
+    // again" so the visitor decides.
+    err.retryable = response.status === 429;
+    throw err;
   }
   const data = await response.json();
   return data.id;
@@ -667,6 +686,7 @@ async function logRouting({ submissionId, destination, attempt, status, statusCo
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ ...body, typecast: true }),
+      signal: AbortSignal.timeout(4000),
     });
   } catch (err) {
     // Routing log failure is non-fatal — we log it server-side only
@@ -875,9 +895,14 @@ export default async function handler(req, res) {
     form = await fetchForm({ widgetId: payload.widgetId, formId: payload.formId });
   } catch (err) {
     // The LOOKUP failed — the form may well exist. Nothing has been written
-    // yet, so this is safe to retry: the widget re-sends once on a retryable
-    // 503 before showing anything to the visitor.
+    // yet, so a transient failure is safe to retry: the widget re-sends once
+    // on a retryable 503 before showing anything to the visitor. A
+    // DETERMINISTIC failure (revoked key, renamed field → 401/403/422) must
+    // not promise "try again" — surface an honest server error instead.
     console.error('[submit] Form lookup failed (not a 404):', err.message || err);
+    if (err.retryable === false) {
+      return errorResponse(res, 500, 'server_error', 'Something went wrong. Please try again later.');
+    }
     res.setHeader('Retry-After', '2');
     return errorResponse(res, 503, 'service_busy',
       'We could not send your enquiry just now. Please try again.', { retryable: true });
@@ -921,9 +946,13 @@ export default async function handler(req, res) {
     res.setHeader('Vary', 'Origin');
   }
 
-  // 8. Honeypot — silent fake-success for bots
-  if (payload.honeypot && payload.honeypot.length > 0) {
-    console.warn('[submit] Honeypot triggered:', { formId: payload.formId, ip: getIp(req) });
+  // 8. Honeypot — silent fake-success for bots. Only honoured when the form
+  // has honeypot protection on (default on): browser/password-manager
+  // autofill can write into the hidden input, and a real visitor's enquiry
+  // must never be swallowed by a protection the form owner turned off.
+  const honeypotEnabled = form.fields[FORM_FIELDS.antiSpamHoneypot] !== false;
+  if (honeypotEnabled && payload.honeypot && payload.honeypot.length > 0) {
+    console.warn('[submit] Honeypot triggered:', { widgetId: payload.widgetId, formId: payload.formId, ip: getIp(req) });
     return res.status(200).json({
       ok: true,
       reference: 'TG-' + new Date().getUTCFullYear() + '-00000',
@@ -968,6 +997,13 @@ export default async function handler(req, res) {
     submissionId = await writeMasterRecord({ form, payload, meta, sequential, reference });
   } catch (err) {
     console.error('[submit] Master record write failed:', err);
+    if (err.retryable) {
+      // Nothing was committed (Airtable 429) — the widget's silent auto-retry
+      // can safely re-send the whole submission.
+      res.setHeader('Retry-After', '2');
+      return errorResponse(res, 503, 'service_busy',
+        'We could not send your enquiry just now. Please try again.', { retryable: true });
+    }
     return errorResponse(res, 500, 'server_error',
       'We could not save your enquiry. Please try again.');
   }

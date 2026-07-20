@@ -123,6 +123,9 @@ function parseRecipients(raw) {
   return raw
     .split(/[\n,;]/)
     .map(s => s.trim())
+    // Accept "Name <email>" entries — agents paste these from mail clients,
+    // and silently dropping them used to kill their notifications entirely.
+    .map(s => { const m = /<([^<>@\s]+@[^<>@\s]+\.[^<>@\s]+)>/.exec(s); return m ? m[1] : s; })
     .filter(s => s.length > 0 && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s))
     .slice(0, 10); // cap at 10 recipients
 }

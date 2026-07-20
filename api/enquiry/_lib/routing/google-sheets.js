@@ -124,6 +124,7 @@ async function getAccessToken() {
   body.set('assertion', jwt);
 
   const response = await fetch(OAUTH_TOKEN_URL, {
+    signal: AbortSignal.timeout(8000),
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: body.toString(),
@@ -163,7 +164,9 @@ function buildRow({ form, payload, reference, submissionId }) {
     f.email || '',                                  // F
     f.phone || '',                                  // G
     destinations,                                   // H
-    f.departure_airport || '',                      // I
+    (Array.isArray(f.departure_airport)
+      ? f.departure_airport.join(', ')
+      : (f.departure_airport || '')),               // I — widget sends an array since multi-airport
     dates.depart || '',                             // J
     dates.return || '',                             // K
     dates.flexible ? 'Yes' : 'No',                  // L
@@ -239,6 +242,7 @@ export default async function sendToGoogleSheets(ctx) {
 
   try {
     const response = await fetch(url, {
+      signal: AbortSignal.timeout(8000),
       method: 'POST',
       headers: {
         Authorization: `Bearer ${accessToken}`,
