@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "YesAware — email tracking",
+  "version": "0.1.0",
+  "description": "Track opens and clicks on the emails you send from Gmail, with your own private YesAware dashboard.",
+  "minimum_chrome_version": "114",
+  "action": { "default_popup": "popup.html", "default_title": "YesAware" },
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": ["https://mail.google.com/*"],
+      "js": ["tracking.js", "gmail.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["send-hook.js"],
+      "matches": ["https://mail.google.com/*"]
+    }
+  ],
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://widgets.travelify.io/*",
+    "https://id.travelify.io/*"
+  ]
+}
