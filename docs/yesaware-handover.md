@@ -534,6 +534,64 @@ injection is exactly what mail merge relies on.
 
 ---
 
+## Build log
+
+### Phase 1, slice 1 — tracking backend (20 Jul 2026)
+
+Shipped the signed tracking core. No Gmail extension yet (that is slice 2 and on),
+so for now a tracker is minted by calling the register endpoint and the pixel and
+links are pasted into an email by hand, exactly the manual proof Phase 1 calls for.
+
+Files:
+- `api/_lib/yesaware.js` — tokens, HMAC signing, open classification, tracked
+  pixel/link builders, fail-open Airtable insert, in-memory dedupe, kill switch.
+- `api/track/open.js` — GET pixel. Always returns the 1x1 GIF (fail-open),
+  no-store, logs the open only when the HMAC verifies.
+- `api/track/click.js` — GET redirect. 302s only to a URL we signed (no
+  open-redirect surface), logs the click.
+- `api/track/register.js` — POST, admin only. Mints a token, stores a Messages
+  row, returns the pixel URL, signed tracked-link URLs and a paste-ready snippet.
+- `tests/test-yesaware.cjs` — 32 unit tests (token, sign/verify, classify,
+  pixel/link building, dedupe). All green.
+
+Airtable tables (base `appAYzWZxvK6qlwXK`, reusing the existing AIRTABLE_KEY):
+- `YesAware Messages` (`tblIwZKC7D8FV3SQW`) — Token, Subject, Recipient, Links.
+- `YesAware Events` (`tbllQDYcGdJxVqCPd`) — Token, Type (open/click), Source, URL,
+  IP, UA. Join to Messages on Token. Read each row's `createdTime` for when.
+
+Env (all reused except the optional ones):
+- `AIRTABLE_KEY`, `AIRTABLE_BASE_ID` — existing, already set on Vercel.
+- `TG_SESSION_SECRET` — existing, reused (domain-separated) as the HMAC key.
+- Optional `YESAWARE_SECRET` — a dedicated signing key to override the above.
+- Optional `YESAWARE_PUBLIC_ORIGIN` — defaults to `https://widgets.travelify.io`.
+- Optional `YESAWARE_DISABLED='1'` — global kill switch (stops all logging and
+  blocks new trackers, without a redeploy).
+
+Security posture (reviewed against travelgenix-security, no ship-blockers):
+- Opens and clicks only log when an HMAC signature we minted verifies, so events
+  cannot be forged and tokens cannot be enumerated.
+- The redirect only follows a URL whose signature matches, so there is no
+  open-redirect hole. `safeHttpUrl` restricts to http(s).
+- register is admin-gated (`requireAdmin`, fails closed) and rate limited.
+- Pixel and redirect are no-store with no `s-maxage`, so Vercel's CDN cannot
+  swallow opens.
+- Off-switch: nothing is tracked unless a tracker is explicitly minted, plus the
+  global `YESAWARE_DISABLED` kill switch. IP and UA are stored for classification
+  only, at personal volume.
+- Accepted and documented: the public pixel and redirect are not hard
+  rate-limited (image proxies batch legitimate opens); they are protected by
+  signature verification (forged hits do no database work) and a 10-second
+  in-memory dedupe. This matches the existing emailsig pixel.
+
+Not yet verified live: the endpoints need a deploy plus a signed-in session to
+exercise end to end. Unit tests and the import graph are green.
+
+### Next slice
+- A small admin page that calls register and shows the paste snippet, so minting
+  a tracker is a form and not a manual API call.
+- An opens/clicks dashboard reading the two tables, live via Ably.
+- Then Phase 2, the Gmail extension.
+
 ## Sources
 
 Market and pricing figures are indicative for mid-2026 and should be re-checked
