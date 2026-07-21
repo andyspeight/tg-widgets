@@ -1,6 +1,12 @@
 {
   "version": 2,
   "functions": {
+    "api/v1/payment-reminders.js": {
+      "maxDuration": 30
+    },
+    "api/cron/payment-reminders.js": {
+      "maxDuration": 60
+    },
     "api/enquiry/sheets-provision.js": {
       "maxDuration": 60
     },
@@ -63,6 +69,10 @@
     }
   },
   "crons": [
+    {
+      "path": "/api/cron/payment-reminders",
+      "schedule": "*/5 * * * *"
+    },
     {
       "path": "/api/cron/refresh-map-offers",
       "schedule": "*/10 * * * *"
