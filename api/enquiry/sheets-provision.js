@@ -168,32 +168,37 @@ export default async function handler(req, res) {
       sheetId = (await createRes.json()).id;
 
       // A Drive-created spreadsheet arrives with a default "Sheet1" tab —
-      // rename it to the routing tab and freeze the header row.
-      const metaRes = await fetch(
-        `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?fields=sheets.properties.sheetId`,
-        { headers: gHeaders, signal: AbortSignal.timeout(10000) }
-      );
-      if (!metaRes.ok) throw await googleError(metaRes, 'create');
-      const meta = await metaRes.json();
-      const firstTabId = meta.sheets && meta.sheets[0] && meta.sheets[0].properties
-        ? meta.sheets[0].properties.sheetId : 0;
-      const renameRes = await fetch(
-        `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}:batchUpdate`,
-        {
-          method: 'POST',
-          headers: gHeaders,
-          body: JSON.stringify({
-            requests: [{
-              updateSheetProperties: {
-                properties: { sheetId: firstTabId, title: TAB_NAME, gridProperties: { frozenRowCount: 1 } },
-                fields: 'title,gridProperties.frozenRowCount',
-              },
-            }],
-          }),
-          signal: AbortSignal.timeout(10000),
-        }
-      );
-      if (!renameRes.ok) throw await googleError(renameRes, 'create');
+      // rename it to the routing tab and freeze the header row. Brand-new
+      // files can stall their first call, hence googleStep's retry.
+      const firstTabId = await googleStep('read-tabs', async () => {
+        const metaRes = await fetch(
+          `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?fields=sheets.properties.sheetId`,
+          { headers: gHeaders, signal: AbortSignal.timeout(15000) }
+        );
+        if (!metaRes.ok) throw await googleError(metaRes, 'read-tabs');
+        const meta = await metaRes.json();
+        return meta.sheets && meta.sheets[0] && meta.sheets[0].properties
+          ? meta.sheets[0].properties.sheetId : 0;
+      });
+      await googleStep('rename-tab', async () => {
+        const renameRes = await fetch(
+          `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}:batchUpdate`,
+          {
+            method: 'POST',
+            headers: gHeaders,
+            body: JSON.stringify({
+              requests: [{
+                updateSheetProperties: {
+                  properties: { sheetId: firstTabId, title: TAB_NAME, gridProperties: { frozenRowCount: 1 } },
+                  fields: 'title,gridProperties.frozenRowCount',
+                },
+              }],
+            }),
+            signal: AbortSignal.timeout(15000),
+          }
+        );
+        if (!renameRes.ok) throw await googleError(renameRes, 'rename-tab');
+      });
     } else {
       const createRes = await fetch('https://sheets.googleapis.com/v4/spreadsheets', {
         method: 'POST',
@@ -211,23 +216,27 @@ export default async function handler(req, res) {
 
     // ── 2. Header row ──────────────────────────────────────────────────────
     const range = encodeURIComponent(`'${TAB_NAME}'!A1`);
-    const headerRes = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=RAW`,
-      { method: 'PUT', headers: gHeaders, body: JSON.stringify({ values: [HEADERS] }), signal: AbortSignal.timeout(10000) }
-    );
-    if (!headerRes.ok) throw await googleError(headerRes, 'headers');
+    await googleStep('headers', async () => {
+      const headerRes = await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=RAW`,
+        { method: 'PUT', headers: gHeaders, body: JSON.stringify({ values: [HEADERS] }), signal: AbortSignal.timeout(15000) }
+      );
+      if (!headerRes.ok) throw await googleError(headerRes, 'headers');
+    });
 
     // ── 3. Share with the form owner (Drive API, sends the standard email) ─
-    const shareRes = await fetch(
-      `https://www.googleapis.com/drive/v3/files/${sheetId}/permissions?sendNotificationEmail=true&supportsAllDrives=true`,
-      {
-        method: 'POST',
-        headers: gHeaders,
-        body: JSON.stringify({ type: 'user', role: 'writer', emailAddress: ownerEmail }),
-        signal: AbortSignal.timeout(10000),
-      }
-    );
-    if (!shareRes.ok) throw await googleError(shareRes, 'share');
+    await googleStep('share', async () => {
+      const shareRes = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${sheetId}/permissions?sendNotificationEmail=true&supportsAllDrives=true`,
+        {
+          method: 'POST',
+          headers: gHeaders,
+          body: JSON.stringify({ type: 'user', role: 'writer', emailAddress: ownerEmail }),
+          signal: AbortSignal.timeout(15000),
+        }
+      );
+      if (!shareRes.ok) throw await googleError(shareRes, 'share');
+    });
 
     console.log('[sheets-provision] created', sheetId, 'for', widgetId, 'shared with', ownerEmail);
     return res.status(200).json({
@@ -266,6 +275,25 @@ export default async function handler(req, res) {
       stage: err.stage || 'unknown',
       detail,
     });
+  }
+}
+
+// Run an idempotent Google step with a stage label and ONE retry — a
+// just-created spreadsheet can stall its first follow-up call, and every
+// step here (metadata read, tab rename, header write, permission grant) is
+// safe to repeat. Aborts and network rejects carry no stage of their own,
+// so the label is stamped on whatever escapes.
+async function googleStep(stage, fn) {
+  try {
+    return await fn();
+  } catch (first) {
+    console.warn(`[sheets-provision] ${stage} retrying after:`, first.message || first);
+    try {
+      return await fn();
+    } catch (err) {
+      if (!err.stage) err.stage = stage;
+      throw err;
+    }
   }
 }
 

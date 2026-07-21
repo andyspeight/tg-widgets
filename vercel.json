@@ -1,6 +1,12 @@
 {
   "version": 2,
   "functions": {
+    "api/enquiry/sheets-provision.js": {
+      "maxDuration": 60
+    },
+    "api/enquiry/submit.js": {
+      "maxDuration": 30
+    },
     "api/booking-pdf.js": {
       "memory": 1024,
       "maxDuration": 30,
