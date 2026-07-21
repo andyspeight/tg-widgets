@@ -1,0 +1,202 @@
+/**
+ * One-click Google Sheets provisioning for enquiry form routing.
+ *
+ *   POST /api/enquiry/sheets-provision
+ *     Body: { widgetId: 'tgw_...' }
+ *     Creates a ready-made spreadsheet via the platform service account,
+ *     writes the header row, shares it with the FORM OWNER's email (Editor,
+ *     with the standard Google notification email so they get the link), and
+ *     returns the wiring for the editor to save onto the form:
+ *     { created: true, sheetId, url, tab, sharedWith }
+ *
+ * WHY: the manual flow (client creates a sheet, shares it with our service
+ * account, pastes the ID) proved too much to ask of every client — Andy's
+ * call, 20 Jul 2026. Reversing the direction means the client does nothing:
+ * the sheet arrives in their inbox already wired up.
+ *
+ * Security:
+ *  - Requires a valid session. The caller must OWN the form, or be
+ *    Travelgenix staff acting for a client — either way the sheet is shared
+ *    with the form's Owner Email, never the caller's.
+ *  - The service account owns the file; its only other access is sheets
+ *    explicitly shared with it. No project-level Google permissions.
+ *  - Rate limited per caller.
+ *
+ * Requires (beyond the routing module's env): the Google Drive API enabled
+ * on the service account's Google Cloud project — sharing is a Drive call.
+ */
+import {
+  requireAuth,
+  setCors,
+  applyRateLimit,
+  sanitiseForFormula,
+} from '../_auth.js';
+import { getRecord } from '../_lib/auth/airtable.js';
+import { USERS } from '../_lib/auth/schema.js';
+import { isStaffEmail } from '../_lib/auth/staff.js';
+import { getAccessToken, credentialsConfigured, SERVICE_ACCOUNT_EMAIL } from './_lib/routing/google-sheets.js';
+
+const BASE_ID = process.env.AIRTABLE_BASE_ID;
+const PAT = process.env.AIRTABLE_KEY;
+const TABLE_FORMS = 'tblpw4TCmQfJHZIlF';
+
+// Field IDs on the Enquiry Forms table
+const F = {
+  widgetId:   'fld4LTXFnaJahj0uX',
+  ownerEmail: 'fldLzWF0XnEXeZYH1',
+  formName:   'fldC0MLSyJqg6U1zT',
+  clientName: 'fldrw1eTFYCFIo0pp',
+};
+
+const PROVISION_RATE_LIMIT = { max: 10, windowMs: 15 * 60 * 1000 };
+const TAB_NAME = 'Enquiries';
+
+// Provisioning both creates the file (Sheets API) and shares it (Drive API).
+const PROVISION_SCOPE = 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive';
+
+// Column headers — MUST stay in the routing module's column order (A..Z).
+const HEADERS = [
+  'Reference', 'Submitted At (UTC)', 'Form Name', 'First Name', 'Last Name',
+  'Email', 'Phone', 'Destinations', 'Departure Airport', 'Depart Date',
+  'Return Date', 'Flexible Dates', 'Duration', 'Adults', 'Children',
+  'Child Ages', 'Infants', 'Budget PP (GBP)', 'Stars', 'Board Basis',
+  'Interests', 'Notes', 'Marketing Consent', 'Source URL', 'IP Address',
+  'Submission ID',
+];
+
+export default async function handler(req, res) {
+  setCors(res);
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  if (!PAT || !BASE_ID) {
+    return res.status(500).json({ error: 'Server misconfigured: missing AIRTABLE_KEY or AIRTABLE_BASE_ID' });
+  }
+  if (!credentialsConfigured()) {
+    return res.status(503).json({ error: 'Google Sheets is not configured on the platform yet (service account missing)' });
+  }
+
+  const authResult = requireAuth(req);
+  if (authResult.error) {
+    return res.status(authResult.status).json({ error: authResult.error });
+  }
+  const user = authResult.user;
+  // Cookie-SSO sessions can lack the email — resolve it from the Users record
+  // like the config endpoint does, instead of bouncing the caller.
+  if (!user.email && user.recordId) {
+    try {
+      const u = await getRecord(USERS.tableId, user.recordId);
+      const email = u?.fields?.[USERS.fields.email];
+      if (typeof email === 'string' && email.trim()) user.email = email.trim();
+    } catch (err) {
+      console.warn('[sheets-provision] email hydrate failed:', err.message);
+    }
+  }
+  const agentEmail = String(user.email || '').toLowerCase().trim();
+  if (!agentEmail) return res.status(401).json({ error: 'Session missing email' });
+
+  if (!applyRateLimit(res, `sheets-provision:${agentEmail}`, PROVISION_RATE_LIMIT)) return;
+
+  let body = req.body;
+  if (typeof body === 'string') {
+    try { body = JSON.parse(body); }
+    catch (e) { return res.status(400).json({ error: 'Invalid JSON body' }); }
+  }
+  const widgetId = body && body.widgetId;
+  if (typeof widgetId !== 'string' || !/^tgw_[A-Za-z0-9_-]+$/.test(widgetId)) {
+    return res.status(400).json({ error: 'Invalid widgetId' });
+  }
+
+  try {
+    // ── Resolve the form + access check ────────────────────────────────────
+    const formula = `{Widget ID} = '${sanitiseForFormula(widgetId)}'`;
+    const lookupUrl = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_FORMS}` +
+      `?filterByFormula=${encodeURIComponent(formula)}&maxRecords=1&returnFieldsByFieldId=true`;
+    const lookupRes = await fetch(lookupUrl, {
+      headers: { Authorization: `Bearer ${PAT}` },
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!lookupRes.ok) throw new Error(`form lookup HTTP ${lookupRes.status}`);
+    const lookupData = await lookupRes.json();
+    const form = (lookupData.records || [])[0];
+    if (!form) return res.status(404).json({ error: 'Form not found' });
+
+    const ownerEmail = String(form.fields[F.ownerEmail] || '').toLowerCase().trim();
+    if (!isStaffEmail(agentEmail) && (!ownerEmail || ownerEmail !== agentEmail)) {
+      return res.status(403).json({ error: 'You do not have permission to manage this form' });
+    }
+    if (!ownerEmail) {
+      return res.status(400).json({ error: 'This form has no owner email to share the spreadsheet with' });
+    }
+
+    const token = await getAccessToken(PROVISION_SCOPE);
+    const gHeaders = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+    // ── 1. Create the spreadsheet ──────────────────────────────────────────
+    const title = `${form.fields[F.clientName] || form.fields[F.formName] || 'Enquiry form'} enquiries`.slice(0, 120);
+    const createRes = await fetch('https://sheets.googleapis.com/v4/spreadsheets', {
+      method: 'POST',
+      headers: gHeaders,
+      body: JSON.stringify({
+        properties: { title },
+        sheets: [{ properties: { title: TAB_NAME, gridProperties: { frozenRowCount: 1 } } }],
+      }),
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!createRes.ok) throw await googleError(createRes, 'create');
+    const created = await createRes.json();
+    const sheetId = created.spreadsheetId;
+    const url = created.spreadsheetUrl || `https://docs.google.com/spreadsheets/d/${sheetId}/edit`;
+
+    // ── 2. Header row ──────────────────────────────────────────────────────
+    const range = encodeURIComponent(`'${TAB_NAME}'!A1`);
+    const headerRes = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=RAW`,
+      { method: 'PUT', headers: gHeaders, body: JSON.stringify({ values: [HEADERS] }), signal: AbortSignal.timeout(10000) }
+    );
+    if (!headerRes.ok) throw await googleError(headerRes, 'headers');
+
+    // ── 3. Share with the form owner (Drive API, sends the standard email) ─
+    const shareRes = await fetch(
+      `https://www.googleapis.com/drive/v3/files/${sheetId}/permissions?sendNotificationEmail=true`,
+      {
+        method: 'POST',
+        headers: gHeaders,
+        body: JSON.stringify({ type: 'user', role: 'writer', emailAddress: ownerEmail }),
+        signal: AbortSignal.timeout(10000),
+      }
+    );
+    if (!shareRes.ok) throw await googleError(shareRes, 'share');
+
+    console.log('[sheets-provision] created', sheetId, 'for', widgetId, 'shared with', ownerEmail);
+    return res.status(200).json({
+      created: true,
+      sheetId,
+      url,
+      tab: TAB_NAME,
+      sharedWith: ownerEmail,
+      serviceAccount: SERVICE_ACCOUNT_EMAIL,
+    });
+  } catch (err) {
+    console.error('[sheets-provision] failed:', err.message || err);
+    if (err.driveDisabled) {
+      return res.status(503).json({
+        error: 'The Google Drive API is not enabled on the platform project yet — enable it in Google Cloud Console (project travelgenix-widgets) and try again.',
+      });
+    }
+    return res.status(502).json({ error: 'Could not create the spreadsheet. Please try again, or set it up manually below.' });
+  }
+}
+
+// Read a Google error response and produce a typed Error. The one case the
+// editor must distinguish is "Drive API not enabled on the project" — a
+// one-off platform setup step, not something to retry.
+async function googleError(response, stage) {
+  let detail = '';
+  try { detail = (await response.text()).slice(0, 400); } catch (e) { /* ignore */ }
+  const err = new Error(`google ${stage} HTTP ${response.status}: ${detail}`);
+  if (response.status === 403 && /accessNotConfigured|has not been used in project|is disabled/i.test(detail)) {
+    err.driveDisabled = true;
+  }
+  return err;
+}

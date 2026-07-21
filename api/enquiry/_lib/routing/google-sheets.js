@@ -12,7 +12,11 @@
 //
 //  Setup for the agent is a one-off:
 //    1. Create a Google Sheet
-//    2. Share it with: enquiries@tg-widgets.iam.gserviceaccount.com (Editor)
+//    2. Share it with the service account email (GOOGLE_SERVICE_ACCOUNT_EMAIL,
+//       currently tg-widget-enquiries@travelgenix-widgets.iam.gserviceaccount.com)
+//       with Editor access — OR use the builder's "Create my spreadsheet"
+//       button (api/enquiry/sheets-provision.js), which creates and shares a
+//       ready-made sheet automatically so the agent does nothing by hand.
 //    3. Paste the sheet ID into the form routing config
 //
 //  COLUMN ORDER (stable, written in this order every time):
@@ -73,13 +77,22 @@ const F = {
 // access tokens. We cache the token for ~55 minutes (they last 60) to avoid
 // re-signing on every request.
 
-let cachedToken = null;
-let cachedTokenExpiresAt = 0;
+const DEFAULT_SCOPE = 'https://www.googleapis.com/auth/spreadsheets';
 
-async function getAccessToken() {
+// Exported for sheets-provision.js (it shares files, so needs the drive scope
+// alongside spreadsheets). Cached per scope; tokens last an hour.
+export const SERVICE_ACCOUNT_EMAIL = GOOGLE_SA_EMAIL || '';
+export function credentialsConfigured() {
+  return !!(GOOGLE_SA_EMAIL && GOOGLE_SA_PRIVATE_KEY);
+}
+
+const tokenCache = {}; // scope -> { token, expiresAt }
+
+export async function getAccessToken(scope = DEFAULT_SCOPE) {
   const now = Math.floor(Date.now() / 1000);
-  if (cachedToken && cachedTokenExpiresAt > now + 60) {
-    return cachedToken;
+  const cached = tokenCache[scope];
+  if (cached && cached.expiresAt > now + 60) {
+    return cached.token;
   }
 
   if (!GOOGLE_SA_EMAIL || !GOOGLE_SA_PRIVATE_KEY) {
@@ -90,7 +103,7 @@ async function getAccessToken() {
   const header = { alg: 'RS256', typ: 'JWT' };
   const claims = {
     iss: GOOGLE_SA_EMAIL,
-    scope: 'https://www.googleapis.com/auth/spreadsheets',
+    scope: scope,
     aud: OAUTH_TOKEN_URL,
     iat: now,
     exp: now + 3600,
@@ -136,9 +149,8 @@ async function getAccessToken() {
   }
 
   const data = await response.json();
-  cachedToken = data.access_token;
-  cachedTokenExpiresAt = now + (data.expires_in || 3600);
-  return cachedToken;
+  tokenCache[scope] = { token: data.access_token, expiresAt: now + (data.expires_in || 3600) };
+  return tokenCache[scope].token;
 }
 
 // ---------- Build the row ---------------------------------------------------

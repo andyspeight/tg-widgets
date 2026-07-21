@@ -5378,6 +5378,11 @@
     }
 
     // ── Google Sheets inspector ──
+    // Primary path is the one-click provision: the platform creates the
+    // spreadsheet, writes the headers, shares it with the form owner's email
+    // and wires the ID in — the client does nothing by hand (Andy's call,
+    // 20 Jul 2026: the old share-a-sheet-with-us flow was too much to ask,
+    // and its setup note even showed a service account that never existed).
     function renderGoogleSheetsInspector(body, cfg, save) {
       if (!cfg.enabled) {
         body.appendChild(sectionNote(
@@ -5386,13 +5391,66 @@
         return;
       }
 
-      body.appendChild(section('Sheet details', [
+      if (!cfg.sheetId) {
+        const setup = document.createElement('div');
+        setup.className = 'insp-section';
+        setup.innerHTML = `
+          <h4 class="insp-section-title">Set up in one click</h4>
+          <div style="padding: 12px; background: var(--hover); border-radius: var(--radius); font-size: 12px; line-height: 1.5; color: var(--sub);">
+            We create a ready-made enquiries spreadsheet, share it with the form
+            owner's email and connect it to this form. Nothing to configure.
+          </div>
+        `;
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-primary';
+        btn.style.cssText = 'margin-top: 10px; width: 100%;';
+        btn.textContent = 'Create my spreadsheet';
+        btn.addEventListener('click', async () => {
+          if (!state.widgetId) { showToast('Save the form first, then try again', 'error'); return; }
+          btn.disabled = true;
+          btn.textContent = 'Creating…';
+          try {
+            const r = await fetch('/api/enquiry/sheets-provision', {
+              method: 'POST',
+              credentials: 'include',
+              headers: authHeaders({ 'Content-Type': 'application/json' }),
+              body: JSON.stringify({ widgetId: state.widgetId })
+            });
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok || !data.created) throw new Error(data.error || ('HTTP ' + r.status));
+            cfg.sheetId = data.sheetId;
+            cfg.tab = data.tab || 'Enquiries';
+            save();
+            showToast('Spreadsheet created and shared with ' + data.sharedWith, 'success', 5000);
+            renderInspector();
+          } catch (err) {
+            btn.disabled = false;
+            btn.textContent = 'Create my spreadsheet';
+            showToast(err.message || 'Could not create the spreadsheet', 'error', 6000);
+          }
+        });
+        setup.appendChild(btn);
+        body.appendChild(setup);
+      } else {
+        const linked = document.createElement('div');
+        linked.className = 'insp-section';
+        linked.innerHTML = `
+          <h4 class="insp-section-title">Connected spreadsheet</h4>
+          <div style="padding: 12px; background: var(--hover); border-radius: var(--radius); font-size: 12px; line-height: 1.5; color: var(--sub);">
+            Every enquiry appends a new row.
+            <a href="https://docs.google.com/spreadsheets/d/${encodeURIComponent(cfg.sheetId)}/edit" target="_blank" rel="noopener" style="color: var(--brand); font-weight: 600;">Open the spreadsheet</a>
+          </div>
+        `;
+        body.appendChild(linked);
+      }
+
+      body.appendChild(section('Sheet details (advanced)', [
         labelledInput({
           label: 'Spreadsheet ID',
           value: cfg.sheetId || '',
           placeholder: '1a2b3c4d5e6f7g8h...',
           maxlength: 100,
-          hintHtml: "The ID in your sheet's URL: <code>docs.google.com/spreadsheets/d/<strong>THIS_PART</strong>/edit</code>",
+          hintHtml: "Filled automatically by the button above — or paste the ID from your own sheet's URL: <code>docs.google.com/spreadsheets/d/<strong>THIS_PART</strong>/edit</code>",
           onInput: (v) => { cfg.sheetId = v; save(); }
         }),
         labelledInput({
@@ -5405,16 +5463,16 @@
         })
       ]));
 
-      // One-time setup note
+      // Manual fallback for agents connecting a spreadsheet they already have
       const setup = document.createElement('div');
       setup.className = 'insp-section';
       setup.innerHTML = `
-        <h4 class="insp-section-title">One-time setup</h4>
+        <h4 class="insp-section-title">Using your own spreadsheet instead?</h4>
         <div style="padding: 12px; background: var(--hover); border-radius: var(--radius); font-size: 12px; line-height: 1.5; color: var(--sub);">
-          Share your spreadsheet with our service account so Travelgenix can write to it:
-          <div class="readonly-box" style="margin-top: 8px;">travelgenix-forms@travelgenix-io.iam.gserviceaccount.com</div>
+          Share it with our service account so Travelgenix can write to it:
+          <div class="readonly-box" style="margin-top: 8px;">tg-widget-enquiries@travelgenix-widgets.iam.gserviceaccount.com</div>
           <div style="margin-top: 8px; font-size: 11px; color: var(--muted);">
-            Give it <strong>Editor</strong> access. Submissions will append as new rows starting from the next empty row.
+            Give it <strong>Editor</strong> access, then paste the spreadsheet ID above. Submissions append as new rows.
           </div>
         </div>
       `;

@@ -29,7 +29,8 @@
     "test:enquiry-submit": "node test/enquiry-submit-lookup-smoke.mjs",
     "test:enquiry-email": "node test/enquiry-email-brand-smoke.mjs",
     "test:enquiry-hardening": "node test/enquiry-hardening-smoke.mjs",
-    "test:enquiry-e2e": "node test/enquiry-e2e-smoke.cjs"
+    "test:enquiry-e2e": "node test/enquiry-e2e-smoke.cjs",
+    "test:enquiry-sheets": "node test/enquiry-sheets-provision-smoke.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",
