@@ -5417,7 +5417,7 @@
               body: JSON.stringify({ widgetId: state.widgetId })
             });
             const data = await r.json().catch(() => ({}));
-            if (!r.ok || !data.created) throw new Error(data.error || ('HTTP ' + r.status));
+            if (!r.ok || !data.created) throw new Error((data.error || ('HTTP ' + r.status)) + (data.detail ? ' — ' + data.detail : ''));
             cfg.sheetId = data.sheetId;
             cfg.tab = data.tab || 'Enquiries';
             save();
@@ -5426,7 +5426,7 @@
           } catch (err) {
             btn.disabled = false;
             btn.textContent = 'Create my spreadsheet';
-            showToast(err.message || 'Could not create the spreadsheet', 'error', 6000);
+            showToast(err.message || 'Could not create the spreadsheet', 'error', 10000);
           }
         });
         setup.appendChild(btn);
