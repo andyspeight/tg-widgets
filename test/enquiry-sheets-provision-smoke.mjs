@@ -120,7 +120,53 @@ await handler(request('george@freefromtravel.com', 'tgw_1784179041137_anycbd'), 
 ok(res.statusCode === 503 && /Drive API/.test((res.body && res.body.error) || ''), 'Drive API disabled → names the real fix');
 driveResponds = () => ({ ok: true, status: 200, json: async () => ({ id: 'perm1' }), text: async () => '' });
 
-// ── 5. Source guards: editor button + no ghost service accounts anywhere ─────
+// ── 5. Shared Drive mode: create in the drive, rename tab, share across drives ─
+process.env.TG_SHEETS_SHARED_DRIVE_ID = '0ASharedDrive123';
+installFetch('george@freefromtravel.com');
+global.fetch = (function (base) {
+  return async (url, opts) => {
+    const u = String(url);
+    if (u.startsWith('https://www.googleapis.com/drive/v3/files?')) {
+      calls.push({ url: u, method: opts.method, body: String(opts.body) });
+      return { ok: true, status: 200, json: async () => ({ id: 'SHEET456' }), text: async () => '' };
+    }
+    if (u.includes('?fields=sheets.properties.sheetId')) {
+      calls.push({ url: u, method: 'GET', body: '' });
+      return { ok: true, status: 200, json: async () => ({ sheets: [{ properties: { sheetId: 77 } }] }), text: async () => '' };
+    }
+    if (u.includes(':batchUpdate')) {
+      calls.push({ url: u, method: opts.method, body: String(opts.body) });
+      return { ok: true, status: 200, json: async () => ({}), text: async () => '' };
+    }
+    return base(url, opts);
+  };
+})(global.fetch);
+res = mockRes();
+await handler(request('george@freefromtravel.com', 'tgw_1784179041137_anycbe'), res);
+ok(res.statusCode === 200 && res.body && res.body.sheetId === 'SHEET456', `shared-drive provision → 200 with drive-created sheet (got ${res.statusCode} ${res.body && (res.body.error || '')} ${res.body && res.body.detail || ''})`);
+const driveCreate = calls.find(c => c.url.startsWith('https://www.googleapis.com/drive/v3/files?'));
+ok(driveCreate && /"parents":\["0ASharedDrive123"\]/.test(driveCreate.body) && driveCreate.url.includes('supportsAllDrives=true'), 'file created inside the Shared Drive');
+const rename = calls.find(c => c.url.includes(':batchUpdate'));
+ok(rename && /"sheetId":77/.test(rename.body) && /"title":"Enquiries"/.test(rename.body), 'default tab renamed to Enquiries with frozen header');
+const sdShare = calls.filter(c => c.url.includes('/drive/v3/files/SHEET456/permissions')).pop();
+ok(sdShare && sdShare.url.includes('supportsAllDrives=true'), 'share call supports shared drives');
+delete process.env.TG_SHEETS_SHARED_DRIVE_ID;
+
+// ── 6. No Shared Drive configured + Google refuses ownership → named setup fix ─
+installFetch('george@freefromtravel.com');
+global.fetch = (function (base) {
+  return async (url, opts) => {
+    if (String(url) === 'https://sheets.googleapis.com/v4/spreadsheets') {
+      return { ok: false, status: 403, json: async () => ({}), text: async () => JSON.stringify({ error: { code: 403, message: 'The caller does not have permission', status: 'PERMISSION_DENIED' } }) };
+    }
+    return base(url, opts);
+  };
+})(global.fetch);
+res = mockRes();
+await handler(request('george@freefromtravel.com', 'tgw_1784179041137_anycbf'), res);
+ok(res.statusCode === 503 && /Shared Drive/.test((res.body && res.body.error) || ''), 'ownership refusal names the Shared Drive fix');
+
+// ── 7. Source guards: editor button + no ghost service accounts anywhere ─────
 const ed = readFileSync(new URL('../public/editor-enquiry.html', import.meta.url), 'utf8');
 ok(/Create my spreadsheet/.test(ed) && /\/api\/enquiry\/sheets-provision/.test(ed), 'builder has the one-click provision button');
 ok(/tg-widget-enquiries@travelgenix-widgets\.iam\.gserviceaccount\.com/.test(ed), 'manual fallback shows the REAL service account');

@@ -143,20 +143,71 @@ export default async function handler(req, res) {
     const gHeaders = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
 
     // ── 1. Create the spreadsheet ──────────────────────────────────────────
+    // Google no longer lets service accounts OWN files (My Drive storage for
+    // service accounts is closed off — a direct create returns
+    // PERMISSION_DENIED). Files are therefore created inside the platform's
+    // Shared Drive, where the DRIVE owns them: TG_SHEETS_SHARED_DRIVE_ID is
+    // the Shared Drive (or a folder inside it) the service account belongs
+    // to as Content manager. Without it we attempt the direct create and
+    // translate the refusal into the setup instruction.
+    const sharedDriveId = String(process.env.TG_SHEETS_SHARED_DRIVE_ID || '').trim();
     const title = `${form.fields[F.clientName] || form.fields[F.formName] || 'Enquiry form'} enquiries`.slice(0, 120);
-    const createRes = await fetch('https://sheets.googleapis.com/v4/spreadsheets', {
-      method: 'POST',
-      headers: gHeaders,
-      body: JSON.stringify({
-        properties: { title },
-        sheets: [{ properties: { title: TAB_NAME, gridProperties: { frozenRowCount: 1 } } }],
-      }),
-      signal: AbortSignal.timeout(10000),
-    });
-    if (!createRes.ok) throw await googleError(createRes, 'create');
-    const created = await createRes.json();
-    const sheetId = created.spreadsheetId;
-    const url = created.spreadsheetUrl || `https://docs.google.com/spreadsheets/d/${sheetId}/edit`;
+    let sheetId;
+    if (sharedDriveId) {
+      const createRes = await fetch('https://www.googleapis.com/drive/v3/files?supportsAllDrives=true', {
+        method: 'POST',
+        headers: gHeaders,
+        body: JSON.stringify({
+          name: title,
+          mimeType: 'application/vnd.google-apps.spreadsheet',
+          parents: [sharedDriveId],
+        }),
+        signal: AbortSignal.timeout(10000),
+      });
+      if (!createRes.ok) throw await googleError(createRes, 'create');
+      sheetId = (await createRes.json()).id;
+
+      // A Drive-created spreadsheet arrives with a default "Sheet1" tab —
+      // rename it to the routing tab and freeze the header row.
+      const metaRes = await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?fields=sheets.properties.sheetId`,
+        { headers: gHeaders, signal: AbortSignal.timeout(10000) }
+      );
+      if (!metaRes.ok) throw await googleError(metaRes, 'create');
+      const meta = await metaRes.json();
+      const firstTabId = meta.sheets && meta.sheets[0] && meta.sheets[0].properties
+        ? meta.sheets[0].properties.sheetId : 0;
+      const renameRes = await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}:batchUpdate`,
+        {
+          method: 'POST',
+          headers: gHeaders,
+          body: JSON.stringify({
+            requests: [{
+              updateSheetProperties: {
+                properties: { sheetId: firstTabId, title: TAB_NAME, gridProperties: { frozenRowCount: 1 } },
+                fields: 'title,gridProperties.frozenRowCount',
+              },
+            }],
+          }),
+          signal: AbortSignal.timeout(10000),
+        }
+      );
+      if (!renameRes.ok) throw await googleError(renameRes, 'create');
+    } else {
+      const createRes = await fetch('https://sheets.googleapis.com/v4/spreadsheets', {
+        method: 'POST',
+        headers: gHeaders,
+        body: JSON.stringify({
+          properties: { title },
+          sheets: [{ properties: { title: TAB_NAME, gridProperties: { frozenRowCount: 1 } } }],
+        }),
+        signal: AbortSignal.timeout(10000),
+      });
+      if (!createRes.ok) throw await googleError(createRes, 'create');
+      sheetId = (await createRes.json()).spreadsheetId;
+    }
+    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/edit`;
 
     // ── 2. Header row ──────────────────────────────────────────────────────
     const range = encodeURIComponent(`'${TAB_NAME}'!A1`);
@@ -168,7 +219,7 @@ export default async function handler(req, res) {
 
     // ── 3. Share with the form owner (Drive API, sends the standard email) ─
     const shareRes = await fetch(
-      `https://www.googleapis.com/drive/v3/files/${sheetId}/permissions?sendNotificationEmail=true`,
+      `https://www.googleapis.com/drive/v3/files/${sheetId}/permissions?sendNotificationEmail=true&supportsAllDrives=true`,
       {
         method: 'POST',
         headers: gHeaders,
@@ -198,6 +249,12 @@ export default async function handler(req, res) {
     // Google policy: service accounts can be refused storage for files they
     // would own themselves. The fix is provisioning into a Shared Drive —
     // name it clearly so it is recognised instantly rather than guessed at.
+    if (!sharedDriveIdConfigured() && err.stage === 'create' && /PERMISSION_DENIED|caller does not have permission/i.test(detail)) {
+      return res.status(503).json({
+        error: 'Google no longer lets service accounts own new files. One-off fix: create a Shared Drive, add the service account as Content manager, then set TG_SHEETS_SHARED_DRIVE_ID in Vercel and redeploy.',
+        stage: 'create', detail,
+      });
+    }
     if (/storage.?quota|storageQuotaExceeded/i.test(detail)) {
       return res.status(503).json({
         error: 'Google refused to store a new file for the service account (storage quota policy). Provisioning needs to move to a Shared Drive.',
@@ -210,6 +267,10 @@ export default async function handler(req, res) {
       detail,
     });
   }
+}
+
+function sharedDriveIdConfigured() {
+  return !!String(process.env.TG_SHEETS_SHARED_DRIVE_ID || '').trim();
 }
 
 // Read a Google error response and produce a typed Error. The one case the
