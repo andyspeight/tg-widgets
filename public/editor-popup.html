@@ -238,6 +238,296 @@
     color: var(--tgse-ink-3);
     font-size: 12px; line-height: 1.5;
   }
+
+
+  /* ============ Routing tab ============ */
+  .routing-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .routing-card {
+    border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-sm, 6px);
+    padding: 12px;
+    background: var(--tgse-panel);
+  }
+  .routing-card-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .routing-card-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--tgse-panel-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--tgse-ink);
+  }
+  .routing-card-icon svg { width: 18px; height: 18px; }
+  .routing-card-name {
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--tgse-ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .routing-card-sub {
+    font-size: 11.5px;
+    color: var(--tgse-ink-3);
+    margin-top: 2px;
+  }
+  .routing-card-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .btn-small {
+    appearance: none;
+    border: 1px solid var(--tgse-border);
+    background: var(--tgse-panel);
+    color: var(--tgse-ink);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-family: inherit;
+    font-size: 11.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 120ms ease;
+  }
+  .btn-small:hover { background: var(--tgse-panel-2); }
+  .btn-small.is-danger { color: var(--tgse-error, #DC2626); border-color: color-mix(in srgb, var(--tgse-error, #DC2626) 30%, var(--tgse-border)); }
+  .btn-small.is-danger:hover { background: color-mix(in srgb, var(--tgse-error, #DC2626) 10%, transparent); }
+
+  .add-destination-btn {
+    width: 100%;
+    padding: 12px;
+    border: 1.5px dashed var(--tgse-border);
+    background: transparent;
+    color: var(--tgse-ink-2);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: var(--tgse-radius-sm, 6px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: border-color 120ms ease, color 120ms ease;
+  }
+  .add-destination-btn:hover {
+    border-color: var(--tgse-accent);
+    color: var(--tgse-accent);
+  }
+
+  .badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .badge-status.is-on  { background: color-mix(in srgb, var(--tgse-success, #10B981) 12%, transparent); color: var(--tgse-success, #047857); }
+  .badge-status.is-off { background: color-mix(in srgb, var(--tgse-ink-3) 12%, transparent); color: var(--tgse-ink-3); }
+  .badge-status.is-error { background: color-mix(in srgb, var(--tgse-error, #DC2626) 12%, transparent); color: var(--tgse-error, #DC2626); }
+
+  /* Modal for adding/editing destinations */
+  .tg-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    background: rgba(15, 23, 42, 0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .tg-modal-overlay.is-open { display: flex; animation: fade-in 180ms ease; }
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+  .tg-modal {
+    background: var(--tgse-panel);
+    border: 1px solid var(--tgse-border);
+    border-radius: 14px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 60px -12px rgba(15, 23, 42, 0.4);
+    overflow: hidden;
+  }
+  .tg-modal-head {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--tgse-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .tg-modal-title { font-size: 15px; font-weight: 700; color: var(--tgse-ink); margin: 0; }
+  .tg-modal-close {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--tgse-ink-3);
+    width: 30px; height: 30px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 120ms ease;
+  }
+  .tg-modal-close:hover { background: var(--tgse-panel-2); color: var(--tgse-ink); }
+  .tg-modal-body { padding: 22px; overflow-y: auto; flex: 1; }
+  .tg-modal-foot {
+    padding: 14px 22px;
+    border-top: 1px solid var(--tgse-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    background: var(--tgse-panel-2);
+  }
+  .btn-prim {
+    appearance: none;
+    border: 0;
+    background: var(--tgse-accent);
+    color: white;
+    padding: 9px 18px;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 150ms ease, transform 100ms ease;
+  }
+  .btn-prim:hover { background: color-mix(in srgb, var(--tgse-accent) 85%, black); }
+  .btn-prim:active { transform: scale(0.98); }
+  .btn-prim[disabled] { opacity: 0.6; cursor: not-allowed; }
+  .btn-secondary {
+    appearance: none;
+    background: var(--tgse-panel);
+    color: var(--tgse-ink);
+    border: 1px solid var(--tgse-border);
+    padding: 9px 16px;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .btn-secondary:hover { background: var(--tgse-panel-2); }
+
+  /* Destination picker grid */
+  .dest-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .dest-card {
+    padding: 16px;
+    border: 1.5px solid var(--tgse-border);
+    border-radius: 10px;
+    background: var(--tgse-panel);
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 120ms ease, transform 100ms ease;
+  }
+  .dest-card:hover { border-color: var(--tgse-accent); }
+  .dest-card-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    color: var(--tgse-ink);
+  }
+  .dest-card-icon svg { width: 20px; height: 20px; }
+  .dest-card-name { font-size: 13px; font-weight: 700; color: var(--tgse-ink); margin-bottom: 4px; }
+  .dest-card-desc { font-size: 12px; color: var(--tgse-ink-3); line-height: 1.4; }
+
+  .test-result {
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    margin-top: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .test-result.is-ok { background: color-mix(in srgb, var(--tgse-success, #10B981) 10%, transparent); color: var(--tgse-success, #047857); }
+  .test-result.is-error { background: color-mix(in srgb, var(--tgse-error, #DC2626) 10%, transparent); color: var(--tgse-error, #B91C1C); }
+  .test-result svg { flex-shrink: 0; margin-top: 2px; }
+
+
+  /* Base form classes required by the routing modal (from editor-newsletter) */
+  /* Newsletter editor-specific styles. Use --tgse-* tokens from the shell. */
+
+  .field-group { margin-bottom: 18px; }
+  .text-input,
+  .textarea {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-sm, 6px);
+    background: var(--tgse-panel);
+    color: var(--tgse-ink);
+    font-family: inherit;
+    font-size: 13px;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+    box-sizing: border-box;
+  }
+  .text-input:focus, .textarea:focus {
+    outline: none;
+    border-color: var(--tgse-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--tgse-accent) 22%, transparent);
+  }
+  /* Toggle (checkbox-styled) row */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    gap: 12px;
+  }
+  .toggle-row + .toggle-row { border-top: 1px solid var(--tgse-border-light, var(--tgse-border)); }
+  .toggle-row-label {
+    flex: 1;
+    font-size: 13px;
+    color: var(--tgse-ink);
+    line-height: 1.4;
+  }
+  .toggle-row-sub {
+    font-size: 11.5px;
+    color: var(--tgse-ink-3);
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+  .test-result {
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    margin-top: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .test-result.is-ok { background: color-mix(in srgb, var(--tgse-success, #10B981) 10%, transparent); color: var(--tgse-success, #047857); }
+  .test-result.is-error { background: color-mix(in srgb, var(--tgse-error, #DC2626) 10%, transparent); color: var(--tgse-error, #B91C1C); }
+  .test-result svg { flex-shrink: 0; margin-top: 2px; }
 </style>
 </head>
 <body>
@@ -296,6 +586,7 @@
       <button class="tab is-active" data-tab="design" role="tab" aria-selected="true">Design</button>
       <button class="tab" data-tab="content" role="tab" aria-selected="false">Content</button>
       <button class="tab" data-tab="settings" role="tab" aria-selected="false">Settings</button>
+      <button class="tab" data-tab="routing" role="tab" aria-selected="false">Routing</button>
     </nav>
 
     <!-- Row 6: Scrollable body -->
@@ -453,6 +744,27 @@
 
         </div>
 
+        <!-- ===== ROUTING TAB ===== -->
+        <div class="tab-panel" data-panel="routing">
+          <p style="font-size:13px;color:var(--tgse-ink-2);margin:0 0 16px;line-height:1.5">
+            When your popup captures a lead, send it to one or more places. Mix and match —
+            for example, push to Mailchimp and also drop a row in Google Sheets.
+          </p>
+          <div class="routing-list" id="routing-list">
+            <!-- routing cards rendered here -->
+          </div>
+          <button class="add-destination-btn" id="btn-add-destination" type="button">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add destination
+          </button>
+  
+          <div style="margin-top:18px;padding:12px;background:var(--tgse-panel-2);border-radius:6px;font-size:12px;color:var(--tgse-ink-2);line-height:1.5">
+            <strong style="color:var(--tgse-ink)">Tip:</strong> Save the popup first if you haven't yet. Routing destinations are linked to the saved widget record.
+          </div>
+        </div>
+  
+        </div>
+
       </div>
     </div>
   </aside>
@@ -499,6 +811,43 @@
 </div>
 
 <!-- Shell behaviour first -->
+<div class="tg-modal-overlay" id="dest-picker-overlay">
+  <div class="tg-modal" id="dest-picker">
+    <div class="tg-modal-head">
+      <h3 class="tg-modal-title">Choose a destination</h3>
+      <button class="tg-modal-close" data-close="dest-picker">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="tg-modal-body">
+      <div class="dest-grid" id="dest-grid">
+        <!-- destination cards rendered here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tg-modal-overlay" id="dest-config-overlay">
+  <div class="tg-modal" id="dest-config">
+    <div class="tg-modal-head">
+      <h3 class="tg-modal-title" id="dest-config-title">Configure destination</h3>
+      <button class="tg-modal-close" data-close="dest-config">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="tg-modal-body" id="dest-config-body">
+      <!-- form fields rendered per destination here -->
+    </div>
+    <div class="tg-modal-foot">
+      <button class="btn-secondary" id="dest-test-btn" type="button">Test connection</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn-secondary" data-close="dest-config" type="button">Cancel</button>
+        <button class="btn-prim" id="dest-save-btn" type="button">Save destination</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="/editor-shell.js"></script>
 
 <!-- The popup widget — used to render the live preview -->
@@ -650,7 +999,12 @@
       });
     },
     onAfterSave: (d) => {
-      // shell handles the URL sync; nothing extra needed here
+      // Capture the Airtable record id — routing destinations are keyed on
+      // it, and this unlocks the Routing tab right after the first save.
+      if (d && d.recordId) {
+        routingState.recordId = d.recordId;
+        loadRoutingConfigs();
+      }
     },
     onLoginSuccess: () => { loadFromUrl(); if (typeof window.initPopupTour === 'function') window.initPopupTour(); },
   });
@@ -1080,6 +1434,10 @@
         }
         if (d.config) C = Object.assign({}, DEFAULTS, d.config);
         if (d.name) $('#name-input').value = d.name;
+        if (d.recordId) {
+          routingState.recordId = d.recordId;
+          loadRoutingConfigs();
+        }
         renderAll();
       })
       .catch(() => {
@@ -1537,6 +1895,861 @@
       if (tgse.isLoggedIn()) loadFromUrl();
     }
   });
+
+  // ============================================================
+  // ROUTING PANEL (ported from editor-newsletter.html, 21 Jul 2026)
+  // Destination management for popup leads: the same RoutingConfig records,
+  // /api/routing-configs CRUD, connection tests and one-click Google Sheets
+  // provisioning. Keyed on the widget's Airtable record id, captured from
+  // the authenticated load and from onAfterSave.
+  // ============================================================
+  const routingState = { recordId: null, routingConfigs: [], pendingDest: null };
+  function escAttr(s) { return escHtml(s).replace(/'/g, '&#039;'); }
+
+  // ============================================================
+  // DESTINATION CATALOG
+  // ============================================================
+  // SVG icon strings — sized to fit a 32x32 container. We use semantic glyphs
+  // for each ESP rather than brand logos to avoid trademark issues. The parent
+  // card uses the brand colour as a tint so users still see brand association.
+  const ICON_MAILCHIMP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M4 8l8 5 8-5"/></svg>';
+  const ICON_BREVO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2c4.5 0 8 3 9 7"/><path d="M9 12l2 2 4-4"/></svg>';
+  const ICON_MAILERLITE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>';
+  const ICON_KLAVIYO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>';
+  const ICON_CONSTANT_CONTACT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+  const ICON_WEBHOOK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
+  const ICON_SHEETS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/><line x1="12" y1="11" x2="12" y2="19"/></svg>';
+  const ICON_EMAIL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>';
+  const ICON_FALLBACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+  const ICON_WELCOME = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>';
+
+  const DESTINATIONS = {
+    'mailchimp': {
+      name: 'Mailchimp',
+      icon: ICON_MAILCHIMP,
+      colour: '#FFE01B',
+      description: 'Add to a Mailchimp audience',
+      fields: [
+        { type: 'creds', key: 'apiKey', label: 'API key', placeholder: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-us21', help: 'Find this in Mailchimp → Account → Extras → API keys. Must include the data center suffix (e.g. -us21).' },
+        { type: 'config', key: 'audienceId', label: 'Audience ID', placeholder: 'a1b2c3d4e5', help: 'Find this in Audience → Settings → Audience name and defaults' },
+        { type: 'config', key: 'tags', label: 'Subscriber tags (optional)', placeholder: 'newsletter, atlas-travel', help: 'Comma-separated. Applied to every new subscriber.' },
+        { type: 'config-bool', key: 'doubleOptIn', label: 'Double opt-in', help: "Sends a confirmation email before subscribing. Off by default." },
+      ],
+    },
+    'brevo': {
+      name: 'Brevo',
+      icon: ICON_BREVO,
+      colour: '#0F8C50',
+      description: 'Add to a Brevo (Sendinblue) list',
+      fields: [
+        { type: 'creds', key: 'apiKey', label: 'API key', placeholder: 'xkeysib-...', help: 'Find this in Brevo → SMTP & API → API keys' },
+        { type: 'config', key: 'listIds', label: 'List ID(s)', placeholder: '4, 7', help: 'Comma-separated integers. Find list IDs in Contacts → Lists.' },
+      ],
+    },
+    'mailerlite': {
+      name: 'MailerLite',
+      icon: ICON_MAILERLITE,
+      colour: '#19D690',
+      description: 'Add to a MailerLite group',
+      fields: [
+        { type: 'creds', key: 'apiKey', label: 'API key', placeholder: 'eyJ0eXAiOiJK...', help: 'Find this in MailerLite → Integrations → API → Use' },
+        { type: 'config', key: 'groups', label: 'Group ID(s)', placeholder: '123456789012345678', help: 'Comma-separated. Group IDs are listed in MailerLite → Subscribers → Groups.' },
+      ],
+    },
+    'klaviyo': {
+      name: 'Klaviyo',
+      icon: ICON_KLAVIYO,
+      colour: '#FFD800',
+      description: 'Subscribe to a Klaviyo list with marketing consent',
+      fields: [
+        { type: 'creds', key: 'apiKey', label: 'Private API key', placeholder: 'pk_...', help: 'Generate in Klaviyo → Settings → API Keys. Needs lists:write and profiles:write scopes.' },
+        { type: 'config', key: 'listId', label: 'List ID', placeholder: 'Y6nRLr', help: 'Find this in Klaviyo → Lists & Segments → click your list → URL contains the ID' },
+      ],
+    },
+    'constant-contact': {
+      name: 'Constant Contact',
+      icon: ICON_CONSTANT_CONTACT,
+      colour: '#1856ED',
+      description: 'Add to one or more Constant Contact lists',
+      fields: [
+        { type: 'creds', key: 'accessToken', label: 'Access token', placeholder: 'eyJraWQ...', help: 'Constant Contact uses OAuth2. Paste the current access token here.' },
+        { type: 'creds', key: 'refreshToken', label: 'Refresh token', placeholder: 'rkid_...', help: 'Required for auto-refresh when the access token expires (every 24h).' },
+        { type: 'creds', key: 'clientId', label: 'OAuth client ID', placeholder: 'abc-123-def', help: 'Your Constant Contact app client ID' },
+        { type: 'creds', key: 'clientSecret', label: 'OAuth client secret', placeholder: '...', help: 'Your Constant Contact app client secret' },
+        { type: 'config', key: 'listIds', label: 'List ID(s)', placeholder: 'd13d60d0-f256-11e8-...', help: 'Comma-separated UUIDs. Find list IDs in the Constant Contact dashboard.' },
+      ],
+    },
+    'webhook': {
+      name: 'Webhook',
+      icon: ICON_WEBHOOK,
+      colour: '#475569',
+      description: 'POST a JSON payload to your endpoint',
+      fields: [
+        { type: 'config', key: 'url', label: 'Endpoint URL', placeholder: 'https://example.com/webhooks/newsletter', help: 'Your endpoint receives a POST with the lead JSON' },
+        { type: 'creds', key: 'secret', label: 'Shared secret (optional)', placeholder: '...', help: "If set, sent in the X-Travelgenix-Signature header for HMAC verification" },
+      ],
+    },
+    'google-sheets': {
+      name: 'Google Sheets',
+      icon: ICON_SHEETS,
+      colour: '#0F9D58',
+      description: 'Append a row to a Google Sheet',
+      setupNote: 'Click "Create my spreadsheet" below and we set everything up and share it with your email — nothing to configure. Or connect a sheet you already have: share it with the service account as Editor ("Test connection" shows the exact address) and paste its ID.',
+      fields: [
+        { type: 'config', key: 'spreadsheetId', label: 'Spreadsheet ID', placeholder: '1A2B3C...', help: 'From the sheet URL — the long string between /d/ and /edit. Example: docs.google.com/spreadsheets/d/[THIS PART]/edit' },
+        { type: 'config', key: 'sheetName', label: 'Tab name', placeholder: 'Sheet1', help: 'The tab inside the spreadsheet to append rows to. Defaults to "Sheet1". Header row is added automatically on first signup if the tab is empty.' },
+      ],
+    },
+    'email': {
+      name: 'Email notification',
+      icon: ICON_EMAIL,
+      colour: '#94A3B8',
+      description: 'Send a notification email to your team',
+      fields: [
+        { type: 'config', key: 'to', label: 'Recipient', placeholder: 'team@yourcompany.com', help: 'Sent from notifications@travelgenix.io' },
+        { type: 'config', key: 'subject', label: 'Subject (optional)', placeholder: 'New newsletter signup', help: 'Defaults to "New newsletter signup from {firstName}"' },
+      ],
+    },
+    'auto-reply': {
+      name: 'Welcome email',
+      icon: ICON_WELCOME,
+      colour: '#00B4D8',
+      description: 'Send a welcome email to the person who signs up',
+      fields: [
+        { type: 'config', key: 'fromName', label: 'From name (optional)', placeholder: 'Travelgenix', help: 'The name the welcome email comes from. Defaults to Travelgenix.' },
+        { type: 'config', key: 'subject', label: 'Subject (optional)', placeholder: 'You are in. Welcome to Travelgenix.', help: 'You can use {firstName} and {fromName}.' },
+        { type: 'config', key: 'headline', label: 'Headline (optional)', placeholder: 'You are on the list', help: 'The big heading inside the email.' },
+        { type: 'config', key: 'body', label: 'Message (optional)', placeholder: 'Leave blank to use the friendly default.', help: 'One line per paragraph. You can use {firstName} and {fromName}. Leave blank for the default welcome.', multiline: true },
+        { type: 'config', key: 'ctaLabel', label: 'Button text (optional)', placeholder: 'Browse destinations', help: 'Add a button. Leave blank for no button.' },
+        { type: 'config', key: 'ctaUrl', label: 'Button link (optional)', placeholder: 'https://yourwebsite.com', help: 'Where the button goes. Must start with https://' },
+      ],
+    },
+  };
+
+
+  // ============================================================
+  // INIT
+  // ============================================================
+  console.log('[boot] editor-newsletter.html running | shell:', !!window.tgse);
+
+  window.tgse.init({
+    widgetType: 'Newsletter Signup',
+    widgetTag: 'newsletter',
+    scriptFile: 'widget-newsletter.js',
+
+    getConfig: () => state.config,
+    setConfig: (c) => {
+      if (c && typeof c === 'object') {
+        // Deep-ish merge so we don't lose nested theme values when partially loaded
+        state.config = Object.assign(makeDefaultConfig(), c, {
+          theme: Object.assign({}, makeDefaultConfig().theme, (c && c.theme) || {}),
+        });
+      }
+      renderAll();
+      updatePreview();
+    },
+
+    onTabChange: (tab) => setTab(tab),
+    onLoginSuccess: () => init(),
+    onAfterSave: (d) => {
+      state.dirty = false;
+      if (d && d.widgetId) {
+        state.widgetId = d.widgetId;
+      }
+      // The save response returns the Airtable record ID. Routing is keyed on
+      // it, so capture it here — this is what unlocks the routing panel right
+      // after the very first save.
+      if (d && d.recordId) {
+        routingState.recordId = d.recordId;
+        loadRoutingConfigs();
+      }
+    },
+    onThemeToggle: (isDark) => {
+      state.config.theme.mode = isDark ? 'dark' : 'light';
+      markDirty();
+      renderTheme();
+      updatePreview();
+    },
+
+    onDesignMode: (isOn) => {
+      const stage = document.getElementById('preview-stage');
+      const btn = document.getElementById('btn-design-mode');
+      if (!stage) return;
+      stage.classList.toggle('is-dm-active', isOn);
+      if (btn) btn.classList.toggle('is-on', isOn);
+      if (isOn) {
+        wireDesignModeHotspots();
+        if (window.tgse && typeof window.tgse.toast === 'function') {
+          window.tgse.toast('Design mode on — click the widget to jump to its controls', 'ok');
+        }
+      } else {
+        unwireDesignModeHotspots();
+      }
+    },
+
+    // Shell mounts the font picker into this element and calls onFontChange
+    // when the user picks a font. The shell handles the dropdown UI itself.
+    fontPickerEl: '#font-picker-mount',
+    onFontChange: (font) => {
+      state.config.fontFamily = font;
+      updatePreview();
+    },
+  });
+
+  // ============================================================
+  // INITIAL DATA LOAD
+  // ============================================================
+  function init() {
+    // Read widgetId from query string. IDs are the public WidgetID format
+    // (tgw_<timestamp>_<rand>), NOT Airtable rec... IDs. Accept that format.
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    if (id && /^tgw_[A-Za-z0-9_]+$/.test(id)) {
+      state.widgetId = id;
+      // Load the saved widget back (name + config + recordId). This also
+      // triggers routing load once we know the record ID.
+      loadWidgetConfig(id);
+    }
+    renderAll();
+    updatePreview();
+
+    // Guided setup tour. Auto-opens on first login; a persistent "Show me how"
+    // pill reopens it any time. init() runs on onReady (gated on login) and on
+    // onLoginSuccess; the _booted guard inside keeps it idempotent.
+    if (typeof window.initNewsletterTour === 'function') window.initNewsletterTour();
+  }
+
+  // Load the saved widget config back into the editor on reopen.
+  //
+  // This restores the widget Name and all config, and captures the Airtable
+  // record ID (rec...) that routing is keyed on. Sends auth headers so the
+  // API returns recordId (it only does so for authenticated requests).
+  async function loadWidgetConfig(id) {
+    try {
+      const headers = (window.tgse && window.tgse.authHeaders) ? window.tgse.authHeaders() : {};
+      const resp = await fetch('/api/widget-config?id=' + encodeURIComponent(id), {
+        headers,
+        credentials: 'include',
+      });
+      if (!resp.ok) {
+        console.warn('[newsletter] config load failed', resp.status);
+        return;
+      }
+      const d = await resp.json();
+
+      // Restore config via the same merge the shell's setConfig uses, so we
+      // don't lose nested theme defaults on a partial load.
+      if (d && d.config && typeof d.config === 'object') {
+        state.config = Object.assign(makeDefaultConfig(), d.config, {
+          theme: Object.assign({}, makeDefaultConfig().theme, (d.config && d.config.theme) || {}),
+        });
+      }
+
+      // Restore the widget name into the shell's name input.
+      const nameEl = document.getElementById('name-input');
+      if (nameEl && d && typeof d.name === 'string') nameEl.value = d.name;
+
+      // Capture the record ID — this unlocks routing.
+      if (d && d.recordId) {
+        routingState.recordId = d.recordId;
+        loadRoutingConfigs();
+      }
+
+      renderAll();
+      updatePreview();
+    } catch (err) {
+      console.warn('[newsletter] config load error', err);
+    }
+  }
+
+  // ============================================================
+  // RENDER ALL TABS
+  // ============================================================
+  function renderAll() {
+    renderLayoutPicker();
+    renderTheme();
+    renderContentTab();
+    renderSettingsTab();
+    renderLayoutSpecificFields();
+    renderRoutingList();
+  }
+
+  function renderLayoutPicker() {
+    const cards = document.querySelectorAll('#layout-picker .layout-card');
+    cards.forEach(c => {
+      const layout = c.dataset.layout;
+      const input = c.querySelector('input');
+      const isSelected = state.config.layout === layout;
+      c.classList.toggle('is-selected', isSelected);
+      input.checked = isSelected;
+    });
+  }
+
+  function renderTheme() {
+    // Mode pills
+    document.querySelectorAll('#pill-mode button').forEach(b => {
+      b.classList.toggle('is-active', b.dataset.mode === state.config.theme.mode);
+    });
+    // Colour inputs
+    const $brand = document.getElementById('brand-colour');
+    const $brandPicker = document.getElementById('brand-colour-picker');
+    if ($brand) $brand.value = state.config.theme.brand;
+    if ($brandPicker) $brandPicker.value = state.config.theme.brand;
+    const $accent = document.getElementById('accent-colour');
+    const $accentPicker = document.getElementById('accent-colour-picker');
+    if ($accent) $accent.value = state.config.theme.accent;
+    if ($accentPicker) $accentPicker.value = state.config.theme.accent;
+    // Radius
+    document.getElementById('radius-slider').value = state.config.theme.radius;
+    document.getElementById('radius-value').textContent = state.config.theme.radius;
+    // Font — keep the shell's mounted picker in step with the loaded config
+    syncFontPicker();
+    // Website (free-text) font toggle + field
+    setSwitch('#sw-custom-font', state.config.customFontEnabled);
+    setVal('#custom-font-family', state.config.customFontFamily);
+    const cfGrp = document.getElementById('custom-font-group');
+    if (cfGrp) cfGrp.style.display = state.config.customFontEnabled ? '' : 'none';
+  }
+
+  // Push the current fontFamily back into the shell's font picker. The picker
+  // is mounted once at init with the default font, so when a saved widget
+  // loads (or setConfig replaces the config) the picker must be re-synced or it
+  // keeps showing the default — which is why the saved font looked lost.
+  function syncFontPicker() {
+    try {
+      const p = window.tgse && window.tgse._fontPicker;
+      if (p) p.value = state.config.fontFamily || 'Inter';
+    } catch (e) { /* picker not mounted yet — renderAll runs again after load */ }
+  }
+
+  function renderContentTab() {
+    setVal('#title-input', state.config.title);
+    setVal('#subtitle-input', state.config.subtitle);
+    setVal('#email-placeholder', state.config.emailPlaceholder);
+    setVal('#firstname-placeholder', state.config.firstNamePlaceholder);
+    setVal('#button-label', state.config.buttonLabel);
+    setVal('#success-title', state.config.successTitle);
+    setVal('#success-message', state.config.successMessage);
+    setVal('#trigger-label', state.config.triggerLabel);
+    setVal('#tab-label', state.config.tabLabel);
+    updateTabLabelHelp();
+  }
+
+  function renderSettingsTab() {
+    setSwitch('#sw-firstname', state.config.showFirstName);
+    setSwitch('#sw-icon', state.config.showIcon);
+    setSwitch('#sw-consent', state.config.showConsent);
+    setSwitch('#sw-consent-required', state.config.consentRequired);
+    setVal('#consent-label', state.config.consentLabel);
+    setVal('#privacy-url', state.config.privacyUrl);
+    document.querySelectorAll('#pill-trigger-style button').forEach(b => {
+      b.classList.toggle('is-active', b.dataset.style === state.config.triggerStyle);
+    });
+    document.getElementById('footer-delay').value = state.config.footerDelay;
+    document.getElementById('footer-delay-value').textContent = state.config.footerDelay;
+    setSwitch('#sw-footer-remember', state.config.footerRememberDismiss);
+    document.querySelectorAll('#pill-vertical-side button').forEach(b => {
+      b.classList.toggle('is-active', b.dataset.side === state.config.verticalSide);
+    });
+    setVal('#tags-input', (state.config.tags || []).join(', '));
+  }
+
+  function renderLayoutSpecificFields() {
+    const layout = state.config.layout;
+    document.querySelectorAll('.when-layout').forEach(el => {
+      const showOn = (el.dataset.showOn || '').split(',').map(s => s.trim());
+      el.style.display = showOn.includes(layout) ? '' : 'none';
+    });
+  }
+
+  function updateTabLabelHelp() {
+    const help = document.getElementById('tab-label-help');
+    if (!help) return;
+    const len = (state.config.tabLabel || '').length;
+    if (len > 14) {
+      help.textContent = `${len} characters — looks best at 14 or fewer (text is rotated)`;
+      help.classList.add('is-warning');
+    } else {
+      help.textContent = 'Default: Newsletter';
+      help.classList.remove('is-warning');
+    }
+  }
+
+  // ============================================================
+  // ROUTING TAB
+  // ============================================================
+  function renderRoutingList() {
+    const $list = document.getElementById('routing-list');
+    if (!$list) return;
+    if (!routingState.recordId) {
+      $list.innerHTML = `<div style="padding:14px;background:var(--tgse-panel-2);border-radius:6px;font-size:12.5px;color:var(--tgse-ink-2);text-align:center">Save the widget first to add destinations.</div>`;
+      document.getElementById('btn-add-destination').disabled = true;
+      return;
+    }
+    document.getElementById('btn-add-destination').disabled = false;
+    if (routingState.routingConfigs.length === 0) {
+      $list.innerHTML = `<div style="padding:18px;background:var(--tgse-panel-2);border-radius:6px;font-size:12.5px;color:var(--tgse-ink-3);text-align:center;line-height:1.5">No destinations yet.<br>Add one below to start collecting signups.</div>`;
+      return;
+    }
+    $list.innerHTML = routingState.routingConfigs.map(rc => {
+      const dest = DESTINATIONS[rc.destination] || { name: rc.destination, icon: ICON_FALLBACK, colour: '#94A3B8' };
+      const status = rc.enabled ? `<span class="badge-status is-on">On</span>` : `<span class="badge-status is-off">Off</span>`;
+      const verifyBadge = rc.lastVerifiedStatus === 'success' ? `<span class="badge-status is-on" style="margin-left:6px">Verified</span>`
+                       : rc.lastVerifiedStatus === 'failed' ? `<span class="badge-status is-error" style="margin-left:6px">Verify failed</span>`
+                       : '';
+      return `
+        <div class="routing-card" data-id="${escAttr(rc.id)}">
+          <div class="routing-card-head">
+            <div class="routing-card-icon" style="background:${escAttr(dest.colour)}1a">${dest.icon}</div>
+            <div style="flex:1;min-width:0">
+              <div class="routing-card-name">${escHtml(rc.name || dest.name)}</div>
+              <div class="routing-card-sub">${escHtml(dest.name)} ${status} ${verifyBadge}</div>
+            </div>
+          </div>
+          <div class="routing-card-actions">
+            <button class="btn-small" data-act="edit">Edit</button>
+            <button class="btn-small" data-act="toggle">${rc.enabled ? 'Disable' : 'Enable'}</button>
+            <button class="btn-small is-danger" data-act="delete">Delete</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Wire up actions
+    $list.querySelectorAll('.routing-card').forEach(card => {
+      const id = card.dataset.id;
+      const rc = routingState.routingConfigs.find(r => r.id === id);
+      if (!rc) return;
+      card.querySelector('[data-act="edit"]').addEventListener('click', () => openConfigModal(rc));
+      card.querySelector('[data-act="toggle"]').addEventListener('click', () => toggleRoutingConfig(rc));
+      card.querySelector('[data-act="delete"]').addEventListener('click', () => deleteRoutingConfig(rc));
+    });
+  }
+
+  async function loadRoutingConfigs() {
+    if (!routingState.recordId) return;
+    try {
+      const headers = (window.tgse && window.tgse.authHeaders) ? window.tgse.authHeaders() : {};
+      const resp = await fetch(`/api/routing-configs?widgetId=${encodeURIComponent(routingState.recordId)}`, { headers });
+      if (!resp.ok) {
+        console.warn('[routing] load failed', resp.status);
+        return;
+      }
+      const data = await resp.json();
+      routingState.routingConfigs = data.configs || [];
+      renderRoutingList();
+    } catch (err) {
+      console.warn('[routing] load error', err);
+    }
+  }
+
+  async function toggleRoutingConfig(rc) {
+    try {
+      const headers = Object.assign({ 'Content-Type': 'application/json' }, (window.tgse && window.tgse.authHeaders) ? window.tgse.authHeaders() : {});
+      const resp = await fetch('/api/routing-configs', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ op: 'update', id: rc.id, enabled: !rc.enabled }),
+      });
+      if (!resp.ok) {
+        if (window.tgse && window.tgse.toast) window.tgse.toast('Failed to update destination', 'error');
+        return;
+      }
+      const data = await resp.json();
+      const idx = routingState.routingConfigs.findIndex(r => r.id === rc.id);
+      if (idx !== -1 && data.config) routingState.routingConfigs[idx] = data.config;
+      renderRoutingList();
+    } catch (err) {
+      console.warn('[routing] toggle error', err);
+    }
+  }
+
+  async function deleteRoutingConfig(rc) {
+    if (!confirm(`Delete routing to ${(DESTINATIONS[rc.destination] || {}).name || rc.destination}? This can't be undone.`)) return;
+    try {
+      const headers = Object.assign({ 'Content-Type': 'application/json' }, (window.tgse && window.tgse.authHeaders) ? window.tgse.authHeaders() : {});
+      const resp = await fetch('/api/routing-configs', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ op: 'delete', id: rc.id }),
+      });
+      if (!resp.ok) {
+        if (window.tgse && window.tgse.toast) window.tgse.toast('Failed to delete', 'error');
+        return;
+      }
+      routingState.routingConfigs = routingState.routingConfigs.filter(r => r.id !== rc.id);
+      renderRoutingList();
+      if (window.tgse && window.tgse.toast) window.tgse.toast('Destination removed');
+    } catch (err) {
+      console.warn('[routing] delete error', err);
+    }
+  }
+
+  // ============================================================
+  // DESTINATION PICKER MODAL
+  // ============================================================
+  function openDestPicker() {
+    if (!routingState.recordId) {
+      alert('Save the widget first before adding destinations.');
+      return;
+    }
+    const $grid = document.getElementById('dest-grid');
+    $grid.innerHTML = Object.entries(DESTINATIONS).map(([key, dest]) => `
+      <button class="dest-card" type="button" data-dest="${key}">
+        <div class="dest-card-icon" style="background:${escAttr(dest.colour)}1a">${dest.icon}</div>
+        <div class="dest-card-name">${escHtml(dest.name)}</div>
+        <div class="dest-card-desc">${escHtml(dest.description)}</div>
+      </button>
+    `).join('');
+    $grid.querySelectorAll('[data-dest]').forEach(b => {
+      b.addEventListener('click', () => {
+        document.getElementById('dest-picker-overlay').classList.remove('is-open');
+        openConfigModal({ destination: b.dataset.dest, config: {}, enabled: true });
+      });
+    });
+    document.getElementById('dest-picker-overlay').classList.add('is-open');
+  }
+
+  // ============================================================
+  // DESTINATION CONFIG MODAL
+  // ============================================================
+  function openConfigModal(rc) {
+    routingState.pendingDest = JSON.parse(JSON.stringify(rc));
+    const dest = DESTINATIONS[rc.destination];
+    if (!dest) return;
+    document.getElementById('dest-config-title').textContent = `Configure ${dest.name}`;
+    const $body = document.getElementById('dest-config-body');
+    $body.innerHTML = renderConfigFields(rc, dest);
+    bindConfigFields(rc, dest);
+    document.getElementById('dest-config-overlay').classList.add('is-open');
+    document.getElementById('dest-test-btn').disabled = false;
+    document.getElementById('dest-save-btn').disabled = false;
+  }
+
+  function renderConfigFields(rc, dest) {
+    const config = rc.config || {};
+    const parts = [];
+
+    parts.push(`
+      <div class="field-group">
+        <label class="field-label" for="dc-name">Name (for your reference)</label>
+        <input class="text-input" id="dc-name" type="text" value="${escAttr(rc.name || dest.name)}" maxlength="200">
+      </div>
+    `);
+
+    if (dest.setupNote) {
+      parts.push(`
+        <div style="padding:12px 14px;background:color-mix(in srgb,var(--tgse-accent) 8%,transparent);border:1px solid color-mix(in srgb,var(--tgse-accent) 25%,transparent);border-radius:6px;font-size:12px;color:var(--tgse-ink-2);margin-bottom:14px;line-height:1.55">
+          <strong style="color:var(--tgse-ink)">Setup note.</strong> ${escHtml(dest.setupNote)}
+        </div>
+      `);
+    }
+
+    if (rc.destination === 'google-sheets' && !config.spreadsheetId) {
+      parts.push(`
+        <div class="field-group">
+          <button type="button" class="btn-prim" id="dc-provision-btn" style="width:100%">Create my spreadsheet</button>
+          <div class="field-help">We create a ready-made spreadsheet, share it with your email and fill the fields below automatically.</div>
+        </div>
+      `);
+    }
+
+    if (rc.id && rc.hasCredentials) {
+      parts.push(`
+        <div style="padding:10px 12px;background:color-mix(in srgb,var(--tgse-success,#10B981) 8%,transparent);border-radius:6px;font-size:12px;color:var(--tgse-success,#047857);margin-bottom:14px;line-height:1.5">
+          <strong>Credentials saved.</strong> Leave the credential fields below blank to keep them. Fill them in to replace.
+        </div>
+      `);
+    }
+
+    for (const f of dest.fields) {
+      const isCreds = f.type === 'creds';
+      const isBool = f.type === 'config-bool';
+      let v = '';
+      if (isBool) {
+        v = !!config[f.key];
+      } else if (isCreds) {
+        v = ''; // never pre-fill creds
+      } else {
+        v = config[f.key];
+        if (Array.isArray(v)) v = v.join(', ');
+        v = v == null ? '' : String(v);
+      }
+
+      if (isBool) {
+        parts.push(`
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-row-label">${escHtml(f.label)}</div>
+              <div class="toggle-row-sub">${escHtml(f.help || '')}</div>
+            </div>
+            <label class="switch ${v ? 'is-on' : ''}" data-bool-key="${escAttr(f.key)}"><input type="checkbox" ${v ? 'checked' : ''}></label>
+          </div>
+        `);
+      } else {
+        const inputType = isCreds ? 'password' : 'text';
+        if (f.multiline) {
+          parts.push(`
+            <div class="field-group">
+              <label class="field-label" for="dc-${escAttr(f.key)}">${escHtml(f.label)}</label>
+              <textarea class="textarea" id="dc-${escAttr(f.key)}" rows="6" placeholder="${escAttr(f.placeholder || '')}" data-config-key="${escAttr(f.key)}">${escHtml(v)}</textarea>
+              ${f.help ? `<div class="field-help">${escHtml(f.help)}</div>` : ''}
+            </div>
+          `);
+        } else {
+          parts.push(`
+            <div class="field-group">
+              <label class="field-label" for="dc-${escAttr(f.key)}">${escHtml(f.label)}</label>
+              <input class="text-input" id="dc-${escAttr(f.key)}" type="${inputType}" value="${escAttr(v)}" placeholder="${escAttr(f.placeholder || '')}" data-${isCreds ? 'creds' : 'config'}-key="${escAttr(f.key)}">
+              ${f.help ? `<div class="field-help">${escHtml(f.help)}</div>` : ''}
+            </div>
+          `);
+        }
+      }
+    }
+
+    parts.push(`
+      <div class="toggle-row" style="margin-top:14px">
+        <div>
+          <div class="toggle-row-label">Enabled</div>
+          <div class="toggle-row-sub">When off, leads aren't sent to this destination</div>
+        </div>
+        <label class="switch ${rc.enabled !== false ? 'is-on' : ''}" id="dc-enabled-switch"><input type="checkbox" ${rc.enabled !== false ? 'checked' : ''}></label>
+      </div>
+      <div id="dc-test-result"></div>
+    `);
+
+    return parts.join('');
+  }
+
+  function bindConfigFields(rc, dest) {
+    document.querySelectorAll('#dest-config-body [data-bool-key]').forEach(sw => {
+      sw.addEventListener('click', () => {
+        const key = sw.dataset.boolKey;
+        sw.classList.toggle('is-on');
+        const on = sw.classList.contains('is-on');
+        sw.querySelector('input').checked = on;
+        if (!routingState.pendingDest.config) routingState.pendingDest.config = {};
+        routingState.pendingDest.config[key] = on;
+      });
+    });
+    const enabledSw = document.getElementById('dc-enabled-switch');
+    enabledSw.addEventListener('click', () => {
+      enabledSw.classList.toggle('is-on');
+      enabledSw.querySelector('input').checked = enabledSw.classList.contains('is-on');
+    });
+
+    // One-click spreadsheet provisioning — the platform creates and shares
+    // the sheet, then fills the config fields so Save wires it up.
+    const provisionBtn = document.getElementById('dc-provision-btn');
+    if (provisionBtn) {
+      provisionBtn.addEventListener('click', async () => {
+        if (!routingState.recordId) { showTestResult(false, 'Save the widget first, then try again'); return; }
+        provisionBtn.disabled = true;
+        provisionBtn.textContent = 'Creating…';
+        try {
+          const headers = Object.assign({ 'Content-Type': 'application/json' }, (window.tgse && window.tgse.authHeaders) ? window.tgse.authHeaders() : {});
+          const resp = await fetch('/api/sheets-provision', {
+            method: 'POST',
+            credentials: 'include',
+            headers,
+            body: JSON.stringify({ widgetRecordId: routingState.recordId }),
+          });
+          const result = await resp.json().catch(() => ({}));
+          if (!resp.ok || !result.created) {
+            throw new Error((result.error || ('HTTP ' + resp.status)) + (result.detail ? ' — ' + result.detail : ''));
+          }
+          const idInput = document.getElementById('dc-spreadsheetId');
+          const tabInput = document.getElementById('dc-sheetName');
+          if (idInput) idInput.value = result.sheetId;
+          if (tabInput) tabInput.value = result.tab || 'Sheet1';
+          if (!routingState.pendingDest.config) routingState.pendingDest.config = {};
+          routingState.pendingDest.config.spreadsheetId = result.sheetId;
+          routingState.pendingDest.config.sheetName = result.tab || 'Sheet1';
+          provisionBtn.textContent = 'Spreadsheet created';
+          showTestResult(true, `Created and shared with ${result.sharedWith} — click Save to finish`);
+        } catch (err) {
+          provisionBtn.disabled = false;
+          provisionBtn.textContent = 'Create my spreadsheet';
+          showTestResult(false, err.message || 'Could not create the spreadsheet');
+        }
+      });
+    }
+  }
+
+  function collectConfigModal() {
+    const out = JSON.parse(JSON.stringify(routingState.pendingDest));
+    out.name = document.getElementById('dc-name').value.trim();
+    out.enabled = document.getElementById('dc-enabled-switch').classList.contains('is-on');
+    const dest = DESTINATIONS[out.destination];
+    if (!dest) return out;
+
+    out.config = out.config || {};
+    out.credentials = {};
+
+    for (const f of dest.fields) {
+      if (f.type === 'config-bool') continue; // already in routingState.pendingDest.config from binds
+      const sel = `[data-${f.type === 'creds' ? 'creds' : 'config'}-key="${f.key}"]`;
+      const el = document.querySelector(`#dest-config-body ${sel}`);
+      if (!el) continue;
+      const v = el.value.trim();
+      if (f.type === 'creds') {
+        if (v) out.credentials[f.key] = v;
+        // empty = leave existing creds alone (handled server-side)
+      } else {
+        // Lists: split comma → array
+        if (f.key === 'listIds' || f.key === 'groups' || f.key === 'tags') {
+          out.config[f.key] = v ? v.split(',').map(s => s.trim()).filter(Boolean) : [];
+          // For Brevo, listIds must be integers
+          if (out.destination === 'brevo' && f.key === 'listIds') {
+            out.config[f.key] = out.config[f.key].map(n => Number(n)).filter(Number.isInteger);
+          }
+        } else {
+          out.config[f.key] = v;
+        }
+      }
+    }
+
+    if (Object.keys(out.credentials).length === 0) delete out.credentials;
+    return out;
+  }
+
+  async function testDestination() {
+    const data = collectConfigModal();
+    const NO_CREDS_DESTINATIONS = ['google-sheets', 'email', 'auto-reply'];
+    const needsCreds = !NO_CREDS_DESTINATIONS.includes(data.destination);
+
+    if (needsCreds && !data.credentials && !data.id) {
+      // First-time creation needs creds (except for destinations that use
+      // a shared server-side service account)
+      showTestResult(false, 'Fill in the credentials first');
+      return;
+    }
+    const $btn = document.getElementById('dest-test-btn');
+    const orig = $btn.textContent;
+    $btn.textContent = 'Testing…';
+    $btn.disabled = true;
+    try {
+      const headers = Object.assign({ 'Content-Type': 'application/json' }, (window.tgse && window.tgse.authHeaders) ? window.tgse.authHeaders() : {});
+      const resp = await fetch('/api/routing-test', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          destination: data.destination,
+          credentials: data.credentials || {},
+          config: data.config || {},
+        }),
+      });
+      const result = await resp.json();
+      if (result.ok) {
+        const detail = [result.list, result.audience, result.group].find(Boolean) || '';
+        let msg = detail ? `Connected — found "${detail}"` : 'Connection successful';
+        // Google Sheets: also show the available tabs so the user knows what to type
+        if (data.destination === 'google-sheets' && Array.isArray(result.availableTabs) && result.availableTabs.length) {
+          msg += ` · Tabs: ${result.availableTabs.join(', ')}`;
+        }
+        showTestResult(true, msg);
+      } else {
+        showTestResult(false, result.error || 'Connection test failed');
+      }
+    } catch (err) {
+      showTestResult(false, err.message || 'Connection test failed');
+    } finally {
+      $btn.textContent = orig;
+      $btn.disabled = false;
+    }
+  }
+
+  function showTestResult(ok, msg) {
+    const $r = document.getElementById('dc-test-result');
+    if (!$r) return;
+    const icon = ok
+      ? `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
+      : `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+    $r.innerHTML = `<div class="test-result is-${ok ? 'ok' : 'error'}">${icon}<span>${escHtml(msg)}</span></div>`;
+  }
+
+  async function saveDestination() {
+    const data = collectConfigModal();
+
+    // Some destinations (e.g. google-sheets, email) don't need per-client
+    // credentials — they use server-side shared infrastructure. For
+    // everything else, require credentials when creating a new config.
+    const NO_CREDS_DESTINATIONS = ['google-sheets', 'email', 'auto-reply'];
+    const needsCreds = !NO_CREDS_DESTINATIONS.includes(data.destination);
+
+    if (!data.id && needsCreds && !data.credentials) {
+      showTestResult(false, 'Credentials required to create a new destination');
+      return;
+    }
+
+    const $btn = document.getElementById('dest-save-btn');
+    const orig = $btn.textContent;
+    $btn.textContent = 'Saving…';
+    $btn.disabled = true;
+
+    try {
+      const headers = Object.assign({ 'Content-Type': 'application/json' }, (window.tgse && window.tgse.authHeaders) ? window.tgse.authHeaders() : {});
+      const body = data.id
+        ? { op: 'update', id: data.id, name: data.name, enabled: data.enabled, config: data.config, credentials: data.credentials }
+        : {
+            op: 'create',
+            widgetType: 'popup',
+            widgetRecordId: routingState.recordId,
+            name: data.name,
+            destination: data.destination,
+            enabled: data.enabled,
+            config: data.config,
+            credentials: data.credentials,
+          };
+      const resp = await fetch('/api/routing-configs', { method: 'POST', headers, body: JSON.stringify(body) });
+      const result = await resp.json();
+      if (!resp.ok) {
+        showTestResult(false, result.error || 'Save failed');
+        return;
+      }
+      // Insert or update in local list
+      if (data.id) {
+        const idx = routingState.routingConfigs.findIndex(r => r.id === data.id);
+        if (idx !== -1) routingState.routingConfigs[idx] = result.config;
+      } else {
+        routingState.routingConfigs.push(result.config);
+      }
+      renderRoutingList();
+      document.getElementById('dest-config-overlay').classList.remove('is-open');
+      if (window.tgse && window.tgse.toast) window.tgse.toast('Destination saved');
+    } catch (err) {
+      showTestResult(false, err.message || 'Save failed');
+    } finally {
+      $btn.textContent = orig;
+      $btn.disabled = false;
+    }
+  }
+
+
+  (function wireRouting() {
+    const addBtn = document.getElementById('btn-add-destination');
+    if (!addBtn) return;
+    addBtn.addEventListener('click', openDestPicker);
+    ['dest-config-overlay', 'dest-picker-overlay'].forEach((id) => {
+      const ov = document.getElementById(id);
+      if (!ov) return;
+      ov.querySelectorAll('[data-close]').forEach(btn => {
+        btn.addEventListener('click', () => ov.classList.remove('is-open'));
+      });
+      ov.addEventListener('click', (e) => {
+        if (e.target === ov) ov.classList.remove('is-open');
+      });
+    });
+    const overlay = document.getElementById('dest-config-overlay');
+    document.getElementById('dest-test-btn').addEventListener('click', testDestination);
+    document.getElementById('dest-save-btn').addEventListener('click', saveDestination);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.tg-modal-overlay.is-open').forEach(o => o.classList.remove('is-open'));
+      }
+    });
+  })();
 </script>
 
 </body>
