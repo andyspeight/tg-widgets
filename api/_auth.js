@@ -367,6 +367,22 @@ const TG_CLIENT_FIELDS = {
   apiKey:           'fld9X1nvAgy0sHQ4B',
 };
 
+// Display names for filterByFormula ONLY. Airtable formulas silently match
+// NOTHING when a field ID is used inside {braces} — display names are
+// required there (returnFieldsByFieldId reads are unaffected). This exact
+// mistake previously broke the enquiry "Form not found" lookup and form-copy;
+// the formulas below used field IDs too, so lookupClientCredentialsByAppId
+// always returned null (offers.js saw every real client as "Unknown client")
+// and the email-based fallbacks never matched. Keep these in sync with the
+// Airtable schema if a field is ever renamed.
+const TG_CLIENT_FIELD_NAMES = {
+  email:          'Email',
+  travelifyAppId: 'Travelify App ID',
+};
+const TG_USER_FIELD_NAMES = {
+  email: 'Email',
+};
+
 function buildAirtableHeaders() {
   const key = process.env.AIRTABLE_KEY;
   if (!key) throw new Error('AIRTABLE_KEY not configured');
@@ -438,7 +454,7 @@ export async function lookupClientCredentialsByEmail(clientEmail) {
   if (!clientEmail || typeof clientEmail !== 'string') return null;
   const safe = sanitiseForFormula(clientEmail.toLowerCase());
   // LOWER() so email match is case-insensitive against whatever was stored.
-  const formula = `LOWER({${TG_CLIENT_FIELDS.email}})='${safe}'`;
+  const formula = `LOWER({${TG_CLIENT_FIELD_NAMES.email}})='${safe}'`;
   const rec = await fetchOneClientByFormula(formula);
   const direct = packCredentials(rec);
   if (direct) return direct;
@@ -456,7 +472,7 @@ async function lookupCredentialsViaUser(email) {
   const safe = sanitiseForFormula(String(email).toLowerCase());
   const headers = buildAirtableHeaders();
   const userUrl = `${TG_AIRTABLE_API}/${TG_AIRTABLE_BASE}/${TG_USERS_TABLE}`
-    + `?filterByFormula=${encodeURIComponent(`LOWER({${TG_USER_FIELDS.email}})='${safe}'`)}`
+    + `?filterByFormula=${encodeURIComponent(`LOWER({${TG_USER_FIELD_NAMES.email}})='${safe}'`)}`
     + `&maxRecords=1`
     + `&returnFieldsByFieldId=true`;
   let userRec;
@@ -487,9 +503,10 @@ export async function lookupClientCredentialsByAppId(appId) {
   if (appId == null) return null;
   const safe = sanitiseForFormula(String(appId).trim());
   if (!safe || !/^\d{1,10}$/.test(safe)) return null;
-  // Travelify App ID is stored as a number — Airtable filter compares it as
-  // a string when used inside a formula, but quoting works either way.
-  const formula = `{${TG_CLIENT_FIELDS.travelifyAppId}}='${safe}'`;
+  // Travelify App ID is a NUMBER field, so compare against a numeric literal
+  // (the digits-only guard above makes the interpolation safe). Field NAME in
+  // the braces — a field ID here silently matches nothing.
+  const formula = `{${TG_CLIENT_FIELD_NAMES.travelifyAppId}}=${safe}`;
   const rec = await fetchOneClientByFormula(formula);
   return packCredentials(rec);
 }

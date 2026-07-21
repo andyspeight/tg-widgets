@@ -164,6 +164,33 @@ export async function lrange(key, start, stop) {
 }
 
 /**
+ * SET-NX-EX with a tri-state result: 'set' (we claimed the key), 'exists'
+ * (someone else already holds it) or 'error' (Redis unconfigured/unreachable —
+ * the caller decides how to degrade). setNxEx below collapses 'exists' and
+ * 'error' into false, which is fine for alert throttles but NOT for
+ * idempotency gates, where "duplicate" and "can't tell" need different
+ * handling (409 vs a fallback storage check).
+ */
+export async function claimNxEx(key, value, ttlSeconds) {
+  if (!configured()) return 'error';
+  try {
+    const res = await fetch(REDIS_URL, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${REDIS_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(['SET', key, value, 'NX', 'EX', Math.max(1, Math.floor(ttlSeconds))]),
+      signal: AbortSignal.timeout(REDIS_READ_TIMEOUT_MS),
+    });
+    if (!res.ok) return 'error';
+    const j = await res.json();
+    if (!j || !Object.prototype.hasOwnProperty.call(j, 'result')) return 'error';
+    return j.result === 'OK' ? 'set' : 'exists';
+  } catch (e) {
+    console.error('[redis] claimNxEx error', e.message);
+    return 'error';
+  }
+}
+
+/**
  * SET key value only if absent, with a TTL (seconds). Returns true if it was
  * set (the key did not exist), false otherwise. Used as a dedupe/throttle gate
  * so one broken widget can't send a flood of alert emails.

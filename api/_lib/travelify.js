@@ -44,8 +44,8 @@ export const TRAVELIFY_ORIGIN = 'https://www.travelgenix.io';
 // use the published Travelgenix demo Travelify credentials (App 250). Demo
 // credentials are published in Travelify's own docs so it is safe to ship them.
 export const DEMO_WIDGET_SENTINEL = 'DEMO_WIDGET_ID';
-const DEMO_APP_ID = '250';
-const DEMO_PUBLIC_KEY = 'A41D180E-CBFE-4E30-A47D-FAAB424A650D';
+export const DEMO_APP_ID = '250';
+export const DEMO_PUBLIC_KEY = 'A41D180E-CBFE-4E30-A47D-FAAB424A650D';
 
 // ----- Rate limiting (in-memory, same pattern as _auth.js) -----
 
