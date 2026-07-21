@@ -1201,7 +1201,7 @@
       icon: ICON_SHEETS,
       colour: '#0F9D58',
       description: 'Append a row to a Google Sheet',
-      setupNote: 'Before saving, share your sheet with the Travelgenix service account email as Editor. Click "Test connection" and it will tell you the exact email address to share with.',
+      setupNote: 'Click "Create my spreadsheet" below and we set everything up and share it with your email — nothing to configure. Or connect a sheet you already have: share it with the service account as Editor ("Test connection" shows the exact address) and paste its ID.',
       fields: [
         { type: 'config', key: 'spreadsheetId', label: 'Spreadsheet ID', placeholder: '1A2B3C...', help: 'From the sheet URL — the long string between /d/ and /edit. Example: docs.google.com/spreadsheets/d/[THIS PART]/edit' },
         { type: 'config', key: 'sheetName', label: 'Tab name', placeholder: 'Sheet1', help: 'The tab inside the spreadsheet to append rows to. Defaults to "Sheet1". Header row is added automatically on first signup if the tab is empty.' },
@@ -1652,6 +1652,15 @@
       `);
     }
 
+    if (rc.destination === 'google-sheets' && !config.spreadsheetId) {
+      parts.push(`
+        <div class="field-group">
+          <button type="button" class="btn-prim" id="dc-provision-btn" style="width:100%">Create my spreadsheet</button>
+          <div class="field-help">We create a ready-made spreadsheet, share it with your email and fill the fields below automatically.</div>
+        </div>
+      `);
+    }
+
     if (rc.id && rc.hasCredentials) {
       parts.push(`
         <div style="padding:10px 12px;background:color-mix(in srgb,var(--tgse-success,#10B981) 8%,transparent);border-radius:6px;font-size:12px;color:var(--tgse-success,#047857);margin-bottom:14px;line-height:1.5">
@@ -1736,6 +1745,43 @@
       enabledSw.classList.toggle('is-on');
       enabledSw.querySelector('input').checked = enabledSw.classList.contains('is-on');
     });
+
+    // One-click spreadsheet provisioning — the platform creates and shares
+    // the sheet, then fills the config fields so Save wires it up.
+    const provisionBtn = document.getElementById('dc-provision-btn');
+    if (provisionBtn) {
+      provisionBtn.addEventListener('click', async () => {
+        if (!state.recordId) { showTestResult(false, 'Save the widget first, then try again'); return; }
+        provisionBtn.disabled = true;
+        provisionBtn.textContent = 'Creating…';
+        try {
+          const headers = Object.assign({ 'Content-Type': 'application/json' }, (window.tgse && window.tgse.authHeaders) ? window.tgse.authHeaders() : {});
+          const resp = await fetch('/api/sheets-provision', {
+            method: 'POST',
+            credentials: 'include',
+            headers,
+            body: JSON.stringify({ widgetRecordId: state.recordId }),
+          });
+          const result = await resp.json().catch(() => ({}));
+          if (!resp.ok || !result.created) {
+            throw new Error((result.error || ('HTTP ' + resp.status)) + (result.detail ? ' — ' + result.detail : ''));
+          }
+          const idInput = document.getElementById('dc-spreadsheetId');
+          const tabInput = document.getElementById('dc-sheetName');
+          if (idInput) idInput.value = result.sheetId;
+          if (tabInput) tabInput.value = result.tab || 'Sheet1';
+          if (!state.pendingDest.config) state.pendingDest.config = {};
+          state.pendingDest.config.spreadsheetId = result.sheetId;
+          state.pendingDest.config.sheetName = result.tab || 'Sheet1';
+          provisionBtn.textContent = 'Spreadsheet created';
+          showTestResult(true, `Created and shared with ${result.sharedWith} — click Save to finish`);
+        } catch (err) {
+          provisionBtn.disabled = false;
+          provisionBtn.textContent = 'Create my spreadsheet';
+          showTestResult(false, err.message || 'Could not create the spreadsheet');
+        }
+      });
+    }
   }
 
   function collectConfigModal() {

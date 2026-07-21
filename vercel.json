@@ -4,6 +4,9 @@
     "api/enquiry/sheets-provision.js": {
       "maxDuration": 60
     },
+    "api/sheets-provision.js": {
+      "maxDuration": 60
+    },
     "api/enquiry/submit.js": {
       "maxDuration": 30
     },
