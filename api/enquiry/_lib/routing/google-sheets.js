@@ -232,12 +232,21 @@ export default async function sendToGoogleSheets(ctx) {
   const url = `${SHEETS_API_BASE}/${sheetId}/values/${encodedRange}:append` +
               `?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
 
+  // Fail fast with a truthful reason when the PLATFORM credentials are not
+  // configured — every failure used to collapse into "Google auth failed",
+  // which read like the agent's sheet setup was wrong when in fact the
+  // service account env vars were never set on Vercel.
+  if (!GOOGLE_SA_EMAIL || !GOOGLE_SA_PRIVATE_KEY) {
+    console.error('[routing/google-sheets] GOOGLE_SERVICE_ACCOUNT_EMAIL / GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY not set — Sheets routing is not configured on the platform');
+    return { status: 'failed', error: 'Google Sheets not configured on the platform (service account missing)' };
+  }
+
   let accessToken;
   try {
     accessToken = await getAccessToken();
   } catch (err) {
     console.error('[routing/google-sheets] Token fetch failed:', err);
-    return { status: 'failed', error: 'Google auth failed' };
+    return { status: 'failed', error: `Google auth failed: ${String(err.message || err).slice(0, 150)}` };
   }
 
   try {

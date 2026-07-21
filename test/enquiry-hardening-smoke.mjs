@@ -146,6 +146,13 @@ ok(/options && fieldSpec\.options\.placeholder/.test(w), 'author notes placehold
 ok(/config load threw/.test(w) && /submit network failure/.test(w), 'network-level failures beacon too');
 ok(/body\.message \|\| body\.error/.test(w), 'error text falls back to body.error (429 shape)');
 
+// ── 8b. Sheets misconfiguration is named truthfully; editor scrolls on mobile ─
+ok(/not configured on the platform \(service account missing\)/.test(sheetsSrc) || /not configured on the platform/.test(readFileSync(new URL('../api/enquiry/_lib/routing/google-sheets.js', import.meta.url), 'utf8')),
+  'missing platform credentials get a truthful error, not "Google auth failed"');
+const edCss = readFileSync(new URL('../public/editor-enquiry.html', import.meta.url), 'utf8');
+ok(/@media \(max-width: 900px\)/.test(edCss) && /Stack the panels full width/.test(edCss),
+  'editor stacks panels and page-scrolls on small screens');
+
 // ── 9. Editor: stale tab can no longer flip Live → Draft ─────────────────────
 const ed = readFileSync(new URL('../public/editor-enquiry.html', import.meta.url), 'utf8');
 ok(/statusTouched: false/.test(ed) && /state\.statusTouched = true/.test(ed) && /if \(!state\.statusTouched\) delete cfgToSend\.status;/.test(ed),
