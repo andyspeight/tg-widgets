@@ -152,6 +152,8 @@ ok(/not configured on the platform \(service account missing\)/.test(sheetsSrc) 
 const edCss = readFileSync(new URL('../public/editor-enquiry.html', import.meta.url), 'utf8');
 ok(/@media \(max-width: 900px\)/.test(edCss) && /Stack the panels full width/.test(edCss),
   'editor stacks panels and page-scrolls on small screens');
+ok((edCss.match(/min-height: 0;/g) || []).length >= 6 && /height: 100dvh;/.test(edCss),
+  'panels can shrink below content height so their bodies scroll on short screens');
 
 // ── 9. Editor: stale tab can no longer flip Live → Draft ─────────────────────
 const ed = readFileSync(new URL('../public/editor-enquiry.html', import.meta.url), 'utf8');

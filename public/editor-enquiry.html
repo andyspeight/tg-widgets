@@ -75,6 +75,7 @@
       display: grid;
       grid-template-rows: 56px 1fr;
       height: 100vh;
+      height: 100dvh;
     }
 
     /* ============================= TOPBAR ================================== */
@@ -234,6 +235,8 @@
       display: flex;
       flex-direction: column;
       min-width: 0;
+      min-height: 0;
+      overflow: hidden;
     }
     .palette-tabs {
       display: grid; grid-template-columns: 1fr 1fr 1fr;
@@ -258,6 +261,7 @@
     }
     .palette-body {
       flex: 1;
+      min-height: 0;
       overflow-y: auto;
       overflow-x: hidden;
       padding: 16px 12px;
@@ -290,6 +294,7 @@
       display: flex;
       flex-direction: column;
       min-width: 0;
+      min-height: 0;
       overflow: hidden;
     }
     .canvas-toolbar {
@@ -307,6 +312,7 @@
     }
     .canvas-body {
       flex: 1;
+      min-height: 0;
       overflow-y: auto;
       overflow-x: hidden;
       padding: 32px 24px 64px;
@@ -370,6 +376,7 @@
       display: flex;
       flex-direction: column;
       min-width: 0;
+      min-height: 0;
       overflow: hidden;
     }
     .inspector-head {
@@ -397,6 +404,7 @@
     }
     .inspector-body {
       flex: 1;
+      min-height: 0;
       overflow-y: auto;
       overflow-x: hidden;
       padding: 16px;
