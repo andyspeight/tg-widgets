@@ -194,6 +194,32 @@
     @media (max-width: 1080px) {
       .body { grid-template-columns: 240px 1fr 320px; }
     }
+    /* Small screens: the three-column desktop grid cannot fit, and the locked
+       100vh + overflow:hidden page leaves the lower half of every panel
+       unreachable — settings could not be scrolled on phones and small
+       tablets. Stack the panels full width and let the whole page scroll. */
+    @media (max-width: 900px) {
+      html, body { overflow: auto; height: auto; }
+      .editor { display: block; height: auto; min-height: 100dvh; }
+      .body {
+        display: block;
+        overflow: visible;
+        height: auto;
+      }
+      .palette, .canvas, .inspector {
+        border-right: 0;
+        border-left: 0;
+        border-bottom: 1px solid var(--border);
+        overflow: visible;
+        height: auto;
+      }
+      .palette-body, .canvas-body, .inspector-body {
+        overflow-y: visible;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+      }
+      .body.is-preview { display: block; }
+    }
 
     /* In preview mode, hide inspector and expand canvas */
     .body.is-preview {
