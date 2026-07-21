@@ -31,7 +31,8 @@
     "test:enquiry-hardening": "node test/enquiry-hardening-smoke.mjs",
     "test:enquiry-e2e": "node test/enquiry-e2e-smoke.cjs",
     "test:enquiry-sheets": "node test/enquiry-sheets-provision-smoke.mjs",
-    "test:sheets-generic": "node test/sheets-provision-generic-smoke.mjs"
+    "test:sheets-generic": "node test/sheets-provision-generic-smoke.mjs",
+    "test:popup-routing": "node test/popup-routing-smoke.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",

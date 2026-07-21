@@ -227,9 +227,13 @@ const FULL_HEADERS = [
   'Marketing Consent', 'Custom Fields (JSON)', 'Referrer',
 ];
 
+// Lead-capture widgets (email + name, no travel brief) get the compact
+// layout — a popup lead in the 26-column travel grid is a row of blanks.
+const COMPACT_WIDGETS = new Set(['newsletter', 'popup']);
+
 function rowSpecForLead(lead) {
   const widget = lead?.source?.widget || '';
-  if (widget === 'newsletter') {
+  if (COMPACT_WIDGETS.has(widget)) {
     return { headers: NEWSLETTER_HEADERS, row: buildNewsletterRow(lead), cols: 'I' };
   }
   // Default — enquiry form & anything else uses the full 26-column layout
@@ -319,7 +323,7 @@ export async function dispatchGoogleSheets(lead, job) {
 
   return {
     statusCode: resp.status,
-    requestPayload: { spreadsheetId, sheetName, columnsWritten: row.length, rowShape: lead?.source?.widget === 'newsletter' ? 'newsletter' : 'full' },
+    requestPayload: { spreadsheetId, sheetName, columnsWritten: row.length, rowShape: COMPACT_WIDGETS.has(lead?.source?.widget) ? 'compact' : 'full' },
     responseBody: respText.slice(0, 2000),
   };
 }
