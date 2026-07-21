@@ -116,7 +116,11 @@ export default async function handler(req, res) {
       headers: { Authorization: `Bearer ${PAT}` },
       signal: AbortSignal.timeout(5000),
     });
-    if (!lookupRes.ok) throw new Error(`form lookup HTTP ${lookupRes.status}`);
+    if (!lookupRes.ok) {
+      const err = new Error(`form lookup HTTP ${lookupRes.status}`);
+      err.stage = 'lookup';
+      throw err;
+    }
     const lookupData = await lookupRes.json();
     const form = (lookupData.records || [])[0];
     if (!form) return res.status(404).json({ error: 'Form not found' });
@@ -129,7 +133,13 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'This form has no owner email to share the spreadsheet with' });
     }
 
-    const token = await getAccessToken(PROVISION_SCOPE);
+    let token;
+    try {
+      token = await getAccessToken(PROVISION_SCOPE);
+    } catch (err) {
+      err.stage = 'auth';
+      throw err;
+    }
     const gHeaders = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
 
     // ── 1. Create the spreadsheet ──────────────────────────────────────────
@@ -179,12 +189,26 @@ export default async function handler(req, res) {
     });
   } catch (err) {
     console.error('[sheets-provision] failed:', err.message || err);
+    const detail = String(err.message || err).slice(0, 200);
     if (err.driveDisabled) {
       return res.status(503).json({
         error: 'The Google Drive API is not enabled on the platform project yet — enable it in Google Cloud Console (project travelgenix-widgets) and try again.',
       });
     }
-    return res.status(502).json({ error: 'Could not create the spreadsheet. Please try again, or set it up manually below.' });
+    // Google policy: service accounts can be refused storage for files they
+    // would own themselves. The fix is provisioning into a Shared Drive —
+    // name it clearly so it is recognised instantly rather than guessed at.
+    if (/storage.?quota|storageQuotaExceeded/i.test(detail)) {
+      return res.status(503).json({
+        error: 'Google refused to store a new file for the service account (storage quota policy). Provisioning needs to move to a Shared Drive.',
+        stage: err.stage || 'create', detail,
+      });
+    }
+    return res.status(502).json({
+      error: `Could not create the spreadsheet (failed at: ${err.stage || 'unknown'}).`,
+      stage: err.stage || 'unknown',
+      detail,
+    });
   }
 }
 
@@ -195,6 +219,7 @@ async function googleError(response, stage) {
   let detail = '';
   try { detail = (await response.text()).slice(0, 400); } catch (e) { /* ignore */ }
   const err = new Error(`google ${stage} HTTP ${response.status}: ${detail}`);
+  err.stage = stage;
   if (response.status === 403 && /accessNotConfigured|has not been used in project|is disabled/i.test(detail)) {
     err.driveDisabled = true;
   }
