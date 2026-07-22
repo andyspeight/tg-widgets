@@ -182,7 +182,22 @@
   const API_PAY = (typeof window !== 'undefined' && window.__TG_PAY_API__) || (API_BASE + '/api/pay-balance');
   const API_AMEND = (typeof window !== 'undefined' && window.__TG_AMEND_API__) || (API_BASE + '/api/amend-order');
   const AMEND_MAX = 1000; // matches the server cap in /api/amend-order
-  const VERSION = '1.10.4';
+  const VERSION = '1.11.0';
+
+  // ── Payment deep link ──
+  // The balance reminder email links to the client's booking page with
+  // #tg-pay or #tg-pay=BOOKINGREF. When present we prefill the booking
+  // reference, scroll the widget into view and, once the customer retrieves
+  // their booking, open the payment card for them. Read once at load; the
+  // ref shape mirrors the server's validateOrderRef.
+  function readPayDeepLink() {
+    try {
+      const m = /#tg-pay(?:=([^&\s]*))?/.exec(String(window.location.hash || ''));
+      if (!m) return null;
+      const raw = decodeURIComponent(m[1] || '').trim().toUpperCase();
+      return { ref: /^[A-Z0-9_\-]{3,40}$/.test(raw) ? raw : '' };
+    } catch (e) { return null; }
+  }
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only. Booking data, PII, prices, dates, the agency name and
@@ -4329,8 +4344,20 @@
       this._emailEscHandler = null;  // document-level Esc listener for modal
       this._narrow = false;          // container-width-driven narrow layout flag
       this._resizeObserver = null;
+      // #tg-pay deep link from the balance reminder email: prefill the
+      // reference, bring the widget on screen, auto-open payment after
+      // retrieval (one-shot — cleared once the payment card has opened).
+      this._deepPay = readPayDeepLink();
+      if (this._deepPay && this._deepPay.ref) {
+        this._lastAttempt = { ref: this._deepPay.ref };
+      }
       this._initNarrowObserver();    // sets _narrow before first render so no flash
       this._render();
+      if (this._deepPay) {
+        setTimeout(() => {
+          try { this.el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { /* older browsers */ }
+        }, 150);
+      }
     }
 
     _initNarrowObserver() {
@@ -4483,6 +4510,23 @@
       const narrowAttr = this._narrow ? ' tgm-narrow' : '';
       this.shadow.innerHTML = '<style>' + STYLES + '</style><div class="tgm-root' + narrowAttr + '"' + themeAttr + ' style="' + esc(overrides) + '">' + inner + '</div>';
       this._bind();
+
+      // Deep-linked payment: the customer arrived from a balance reminder
+      // email, so once their booking is on screen open the payment card and
+      // bring it into view. After _bind so the open handler is live.
+      if (this._deepPay && this.state.stage === 'found') {
+        const deep = this._deepPay;
+        this._deepPay = null; // one-shot
+        setTimeout(() => {
+          try {
+            const openBtn = this.shadow.querySelector('[data-tgm-pay-open]');
+            if (!openBtn) return; // nothing left to pay — the summary tells the story
+            openBtn.click();
+            openBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          } catch (e) { /* auto-open is best-effort; the card is still there */ }
+          void deep;
+        }, 100);
+      }
     }
 
     _bind() {

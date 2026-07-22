@@ -422,6 +422,11 @@
               <input type="tel" id="support-phone" placeholder="+44 1234 567890">
             </div>
             <div class="field-help">Shown on the help card and the not-found state. Leave blank to hide.</div>
+            <div class="field">
+              <label>Booking page URL</label>
+              <input type="url" id="page-url" placeholder="https://yoursite.com/my-booking">
+            </div>
+            <div class="field-help">The page on your website where this widget lives. Balance reminder emails link customers here to pay securely. Must start with https://.</div>
           </div></div>
         </div>
 
@@ -619,6 +624,7 @@ import { renderEmailHtml } from '/_email-template.js';
       colors: Object.assign({}, DEFAULT_COLOURS),
       radius: 12,
       support: { email: '', phone: '' },
+      pageUrl: '',
       display: { showActions: true, showFullImage: false, showDocuments: true, showFacilities: true, showHotelDescription: true, showCancellation: true, showCancel: true, cancelEmail: true, showAmend: true, showPayBalance: true, showLocalFees: true },
       lunaIntegration: { connected: false, clientName: '' },
     },
@@ -825,7 +831,7 @@ import { renderEmailHtml } from '/_email-template.js';
   });
 
   // ===== Copy fields =====
-  ['copy-title', 'copy-subtitle', 'copy-subtitle-short', 'copy-eyebrow', 'support-email', 'support-phone', 'copy-cancel-email-msg'].forEach(id => {
+  ['copy-title', 'copy-subtitle', 'copy-subtitle-short', 'copy-eyebrow', 'support-email', 'support-phone', 'page-url', 'copy-cancel-email-msg'].forEach(id => {
     const el = document.getElementById(id);
     el.addEventListener('input', () => {
       if (id === 'copy-title') state.config.title = el.value;
@@ -834,6 +840,7 @@ import { renderEmailHtml } from '/_email-template.js';
       else if (id === 'copy-eyebrow') state.config.eyebrow = el.value;
       else if (id === 'support-email') state.config.support.email = el.value;
       else if (id === 'support-phone') state.config.support.phone = el.value;
+      else if (id === 'page-url') state.config.pageUrl = el.value.trim();
       else if (id === 'copy-cancel-email-msg') state.config.cancelEmailMessage = el.value;
       schedulePreview();
     });
@@ -1145,6 +1152,7 @@ import { renderEmailHtml } from '/_email-template.js';
       document.getElementById('copy-eyebrow').value = state.config.eyebrow || '';
       document.getElementById('support-email').value = state.config.support?.email || '';
       document.getElementById('support-phone').value = state.config.support?.phone || '';
+      document.getElementById('page-url').value = state.config.pageUrl || '';
       document.getElementById('copy-cancel-email-msg').value = state.config.cancelEmailMessage || '';
       document.getElementById('brand-name').value = state.config.brand?.name || '';
       // Layout tile
