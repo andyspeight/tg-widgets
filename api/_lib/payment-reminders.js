@@ -290,9 +290,15 @@ export async function findReminderByIdempotencyKey(idemKey) {
   return data.records?.[0] || null;
 }
 
-/** Oldest-first batch of queued rows for the worker. */
-export async function listAcceptedReminders(limit = 25) {
-  const url = `${tableUrl()}?filterByFormula=${encodeURIComponent(`{Status}='Accepted'`)}`
+/**
+ * Oldest-first batch of queued rows for the worker. Accepted = not yet
+ * fetched; Fetched = order fetched but the email not yet sent (either
+ * sending is disabled, or a send failed and awaits its backoff retry).
+ * Sent / Skipped / Failed are terminal and never picked up again.
+ */
+export async function listPendingReminders(limit = 25) {
+  const formula = `OR({Status}='Accepted',{Status}='Fetched')`;
+  const url = `${tableUrl()}?filterByFormula=${encodeURIComponent(formula)}`
     + `&maxRecords=${limit}`
     + `&sort%5B0%5D%5Bfield%5D=ReceivedAtUtc&sort%5B0%5D%5Bdirection%5D=asc`;
   const data = await airtableRequest(url, { headers: airtableHeaders() }, 'queue-list');
@@ -302,7 +308,10 @@ export async function listAcceptedReminders(limit = 25) {
 export async function updateReminderRecord(recordId, fields) {
   await airtableRequest(
     `${tableUrl()}/${recordId}`,
-    { method: 'PATCH', headers: airtableHeaders(), body: JSON.stringify({ fields }) },
+    // typecast lets controlled new select options (Skipped) materialise on
+    // first use — every value written here is produced by this pipeline,
+    // never by a caller, so typecast cannot smuggle anything in.
+    { method: 'PATCH', headers: airtableHeaders(), body: JSON.stringify({ fields, typecast: true }) },
     'record-update',
   );
 }
@@ -343,6 +352,137 @@ export async function fetchOrderByIdKey({ appId, apiKey }, orderId, orderKey) {
   if (!raw || typeof raw !== 'object' || raw.id == null) return { ok: false, error: 'order fetch returned no order' };
   if (String(raw.id) !== String(orderId)) return { ok: false, error: `order mismatch: asked ${orderId}, got ${raw.id}` };
   return { ok: true, order: raw };
+}
+
+// ── Phase 2: email sending support ───────────────────────────────────────────
+
+/**
+ * Master switch for the reminder email. OFF by default so Travelify's
+ * integration tests (and any half-configured client) can never email a real
+ * customer by accident; while off, the worker stops at Fetched exactly as
+ * phase 1 shipped. Andy flips PAYMENT_REMINDER_SEND_ENABLED=true in Vercel
+ * when the mock is approved and the contract is confirmed.
+ */
+export function sendingEnabled() {
+  return String(process.env.PAYMENT_REMINDER_SEND_ENABLED || '').toLowerCase() === 'true';
+}
+
+/**
+ * Notifications older than this are Skipped, never emailed. Guards the
+ * moment sending is first enabled: stale Fetched rows from testing must not
+ * turn into surprise emails to real customers weeks later.
+ */
+export const MAX_EMAIL_AGE_MS = 48 * 60 * 60 * 1000;
+
+/**
+ * One-shot send guard: claimed immediately before handing the email to
+ * SendGrid, so a crash between the send and the Sent stamp cannot resend on
+ * the next sweep. 'exists' means a send was already recorded for this
+ * reference; 'error' (Redis down) proceeds — the Status machine still
+ * prevents re-sends in every non-crash path.
+ */
+export async function claimSendGuard(reference) {
+  return await claimNxEx(`payrem:sent:${reference}`, '1', 7 * 24 * 60 * 60);
+}
+
+/** The customer-facing booking reference, when the raw order carries one. */
+export function readOrderRef(raw) {
+  const candidates = [raw?.reference, raw?.orderRef, raw?.bookingRef, raw?.ref];
+  for (const c of candidates) {
+    if (typeof c === 'string' && /^[A-Za-z0-9_\-]{3,40}$/.test(c.trim())) return c.trim().toUpperCase();
+  }
+  return null;
+}
+
+/** Compose the booking-page deep link the email button points at. */
+export function buildPayUrl(pageUrl, orderRef) {
+  if (typeof pageUrl !== 'string') return null;
+  const base = pageUrl.trim().replace(/#.*$/, '');
+  if (!/^https:\/\/[^\s]+$/i.test(base) || base.length > 300) return null;
+  return orderRef ? `${base}#tg-pay=${encodeURIComponent(orderRef)}` : `${base}#tg-pay`;
+}
+
+const WIDGETS_TABLE = 'tblVAThVqAjqtria2';
+
+// Clients-table branding field IDs (returnFieldsByFieldId reads only —
+// formulas never use these). Mirrors api/internal/retrieve-order-by-client.js.
+const CLIENT_BRAND_FIELDS = {
+  appName:     'fld0H6vOJOYqiODF5',
+  clientName:  'fldx9CiWtSm5lX7MF',
+  tradingName: 'fldDbFv039Bip6W8u',
+  email:       'fldVRiIAlrTjxnNHP',
+  logoUrl:     'fldGAJdxjdzz2X0sp',
+  phone:       'fldFES7Aa057MB3VT',
+};
+
+const httpsOnly = (v) => (typeof v === 'string' && /^https:\/\//i.test(v.trim()) ? v.trim() : '');
+
+/**
+ * Resolve how the reminder email presents itself: the agency's name, logo,
+ * reply-to, support contacts, legal footer and booking-page URL.
+ *
+ * Primary source: the client's My Booking widget record (same branding the
+ * booking confirmation emails use — FromName / FromEmail / LogoUrl /
+ * EmailFooter fields plus support contacts and pageUrl from its Config).
+ * Fallback when the client has no My Booking widget: the Clients record's
+ * own branding fields — the email then has no booking-page button and leans
+ * on the contact details instead.
+ */
+export async function resolveReminderBranding(application) {
+  const brand = {
+    name: (application && application.clientName) || 'Your travel team',
+    logoUrl: '', footerLine: '', replyTo: '',
+    supportEmail: '', supportPhone: '', pageUrl: '',
+  };
+
+  const recordId = application && application.recordId;
+  if (!recordId || !/^rec[A-Za-z0-9]{14}$/.test(recordId)) return brand;
+
+  // 1. The client's My Booking widget (field NAMES in the formula — ids
+  //    inside braces match nothing).
+  try {
+    const formula = `AND({WidgetType}='My Booking',{ClientRecordId}='${sanitiseForFormula(recordId)}')`;
+    const url = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${WIDGETS_TABLE}`
+      + `?filterByFormula=${encodeURIComponent(formula)}&maxRecords=5`;
+    const data = await airtableRequest(url, { headers: airtableHeaders() }, 'branding-widget');
+    const records = data.records || [];
+    const widget = records.find(r => r.fields?.Status === 'Active') || records[0];
+    if (widget) {
+      const f = widget.fields || {};
+      let cfg = {};
+      const rawCfg = f.Config || f.Settings;
+      if (rawCfg) {
+        if (typeof rawCfg === 'object') cfg = rawCfg;
+        else { try { cfg = JSON.parse(rawCfg); } catch { cfg = {}; } }
+      }
+      brand.name = String(f.FromName || cfg?.brand?.name || f.ClientName || brand.name).trim() || brand.name;
+      brand.logoUrl = httpsOnly(f.LogoUrl);
+      brand.footerLine = String(f.EmailFooter || '').trim();
+      brand.replyTo = String(f.FromEmail || f.ClientEmail || '').trim().toLowerCase();
+      brand.supportEmail = String(cfg?.support?.email || '').trim() || brand.replyTo;
+      brand.supportPhone = String(cfg?.support?.phone || '').trim();
+      brand.pageUrl = httpsOnly(cfg?.pageUrl);
+      return brand;
+    }
+  } catch (err) {
+    console.warn('[payment-reminders] widget branding lookup failed:', err.message);
+  }
+
+  // 2. Clients record fallback — contact-first email, no booking-page button.
+  try {
+    const url = `https://api.airtable.com/v0/${AIRTABLE_BASE}/tblikekpaTKraMktZ/${recordId}?returnFieldsByFieldId=true`;
+    const rec = await airtableRequest(url, { headers: airtableHeaders() }, 'branding-client');
+    const f = rec.fields || {};
+    const str = (id) => String(f[id] == null ? '' : f[id]).trim();
+    brand.name = str(CLIENT_BRAND_FIELDS.tradingName) || str(CLIENT_BRAND_FIELDS.appName) || str(CLIENT_BRAND_FIELDS.clientName) || brand.name;
+    brand.logoUrl = httpsOnly(str(CLIENT_BRAND_FIELDS.logoUrl));
+    brand.replyTo = str(CLIENT_BRAND_FIELDS.email).toLowerCase();
+    brand.supportEmail = brand.replyTo;
+    brand.supportPhone = str(CLIENT_BRAND_FIELDS.phone);
+  } catch (err) {
+    console.warn('[payment-reminders] client branding fallback failed:', err.message);
+  }
+  return brand;
 }
 
 // ── Logging helpers ──────────────────────────────────────────────────────────

@@ -23,6 +23,9 @@ process.env.UPSTASH_REDIS_REST_URL = REDIS_URL;
 process.env.UPSTASH_REDIS_REST_TOKEN = 'redis-token-test';
 process.env.TG_SESSION_SECRET = 'test-session-secret-0123456789abcdef0123456789';
 process.env.TG_SELF_ORIGIN = 'https://self.test.local';
+process.env.SENDGRID_API_KEY = 'SG.test-key';
+process.env.SENDGRID_FROM_EMAIL = 'noreply@travelify.io';
+delete process.env.PAYMENT_REMINDER_SEND_ENABLED; // phase-1 behaviour by default
 
 const CLIENTS_TABLE = 'tblikekpaTKraMktZ';
 const REMINDERS_TABLE = 'tblHwa7PI2BSGjXZV';
@@ -41,6 +44,10 @@ const state = {
   travelify: null,      // (url) => ({ status, body })
   kicks: [],
   calls: [],
+  brandingWidget: null, // My Booking widget record served to the branding lookup
+  clientRecord: null,   // Clients record served to the branding fallback
+  sends: [],            // captured SendGrid payloads
+  sendFail: false,
 };
 
 global.fetch = async (url, opts = {}) => {
@@ -75,9 +82,30 @@ global.fetch = async (url, opts = {}) => {
     const m = decoded.match(/\{Travelify App ID\}=(\d+)/);
     const client = m ? state.clients[Number(m[1])] : null;
     const records = client
-      ? [{ id: 'recCLIENT0000001', fields: { [F.appId]: Number(m[1]), [F.apiKey]: client.apiKey, [F.clientName]: client.name } }]
+      ? [{ id: 'recCLIENT00000001', fields: { [F.appId]: Number(m[1]), [F.apiKey]: client.apiKey, [F.clientName]: client.name } }]
       : [];
     return json(200, { records });
+  }
+  // Airtable: Clients record read (branding fallback)
+  if (u.includes(`/${CLIENTS_TABLE}/rec`)) {
+    if (!state.clientRecord) return json(404, {});
+    return json(200, state.clientRecord);
+  }
+  // Airtable: My Booking widget branding lookup
+  if (u.includes('/tblVAThVqAjqtria2?')) {
+    const decoded = decodeURIComponent(u);
+    if (decoded.includes(`{WidgetType}='My Booking'`)) {
+      return json(200, { records: state.brandingWidget ? [state.brandingWidget] : [] });
+    }
+    return json(200, { records: [] });
+  }
+
+  // SendGrid (a 400 for failures — 5xx would exercise the lib's real retry
+  // sleeps and slow the suite for nothing)
+  if (u.startsWith('https://api.sendgrid.com/')) {
+    if (state.sendFail) return json(400, { errors: [{ message: 'boom' }] });
+    state.sends.push(JSON.parse(body));
+    return { ok: true, status: 202, json: async () => ({}), text: async () => '', headers: { get: () => 'sg-msg-1' } };
   }
 
   // Airtable: Payment Reminders table
@@ -376,7 +404,138 @@ res = mockRes();
 await worker(cronReq(), res);
 ok(state.patches[0] && /no client found/.test(state.patches[0].fields.LastError || ''), 'unknown applicationId at processing time is stamped, not thrown');
 
-// ── D. Source guards ─────────────────────────────────────────────────────────
+// ── D. Phase 2: the balance reminder email ───────────────────────────────────
+const { renderReminderEmail } = await import('../api/_lib/payment-reminder-email.js');
+
+// Renderer unit checks
+const sampleAgency = { name: 'Sunshine Travel', logoUrl: '', footerLine: 'Sunshine Travel Ltd · ATOL 11234', supportEmail: 'bookings@sunshine.example', supportPhone: '01202 123 456' };
+const sampleCharge = { amount: 749.5, currency: 'GBP', total: 1490, paid: 740.5, outstanding: 749.5, isInstalment: false, remainingAmount: 0 };
+let mail = renderReminderEmail({ agency: sampleAgency, customerFirstName: 'Sarah', orderRef: 'ST-24189', charge: sampleCharge, dueDateIso: '2026-08-15', payUrl: 'https://sunshine.example/my-booking#tg-pay=ST-24189' });
+ok(mail.subject === 'Your balance of £749.50 is due', 'subject leads with the amount');
+ok(/Hello Sarah, your balance is due\./.test(mail.html) && /£749\.50/.test(mail.html) && /£740\.50/.test(mail.html), 'headline, balance and paid-so-far render');
+ok(/Saturday 15 August 2026/.test(mail.html), 'due date in plain long form');
+ok(/v:roundrect/.test(mail.html) && /#tg-pay=ST-24189/.test(mail.html) && /Pay my balance/.test(mail.html), 'bulletproof CTA points at the booking-page deep link');
+ok(/width="600"/.test(mail.html) && !/—/.test(mail.html), '600px wrapper, no em dashes anywhere');
+mail = renderReminderEmail({ agency: { ...sampleAgency, name: 'Evil <script>alert(1)</script>' }, customerFirstName: '', orderRef: null, charge: sampleCharge, dueDateIso: '', payUrl: null });
+ok(!/<script>alert/.test(mail.html) && /&lt;script&gt;/.test(mail.html), 'agency-sourced strings are escaped');
+ok(!/v:roundrect/.test(mail.html) && !/Pay my balance/.test(mail.html) && /take your payment over the phone/.test(mail.html), 'no booking page configured → contact-first email, no dead button');
+mail = renderReminderEmail({ agency: sampleAgency, customerFirstName: 'Sam', orderRef: 'ST-1', charge: { ...sampleCharge, amount: 200, isInstalment: true, remainingAmount: 549.5 }, dueDateIso: '2026-08-15', payUrl: 'https://sunshine.example/mb#tg-pay=ST-1' });
+ok(/Due now/.test(mail.html) && /remaining £549\.50 in later instalments/.test(mail.html), 'instalment plan explained');
+
+// Worker email flow. A realistic raw order that decideCharge can price.
+const payableOrder = (over = {}) => ({
+  id: 100482113,
+  reference: 'ST-24189',
+  status: 'Confirmed',
+  currency: 'GBP',
+  customerEmail: 'sarah@example.com',
+  customerFirstname: 'Sarah',
+  items: [{ price: 1490 }],
+  payments: [{ status: 'Success', amount: 740.5 }],
+  depositOption: { currency: 'GBP', breakdown: [{ amount: 749.5, dueDate: '2026-08-15' }] },
+  ...over,
+});
+const recentIso = () => new Date(Date.now() - 60000).toISOString();
+state.brandingWidget = {
+  id: 'recWIDGETMB00001',
+  fields: {
+    WidgetType: 'My Booking', Status: 'Active', ClientRecordId: 'recCLIENT00000001',
+    FromName: 'Sunshine Travel', FromEmail: 'bookings@sunshine.example', ClientEmail: 'owner@sunshine.example',
+    LogoUrl: 'https://sunshine.example/logo.png', EmailFooter: 'Sunshine Travel Ltd · ATOL 11234',
+    Config: JSON.stringify({ support: { email: 'help@sunshine.example', phone: '01202 123 456' }, pageUrl: 'https://sunshine.example/my-booking' }),
+  },
+};
+
+process.env.PAYMENT_REMINDER_SEND_ENABLED = 'true';
+state.redis.clear();
+state.accepted = [queued({ Reference: 'ref-mail-1', ReceivedAtUtc: recentIso() })];
+state.patches = []; state.sends = [];
+state.travelify = () => ({ status: 200, body: payableOrder() });
+res = mockRes();
+await worker(cronReq(), res);
+ok(res.body.sent === 1 && state.sends.length === 1, 'sending enabled + balance due → one email sent');
+const sg = state.sends[0];
+ok(sg && sg.personalizations?.[0]?.to?.[0]?.email === 'sarah@example.com', 'email goes to the order customer');
+ok(sg && sg.from?.name === 'Sunshine Travel' && sg.reply_to?.email === 'bookings@sunshine.example', 'sends AS the agency with their reply-to');
+ok(sg && /£749\.50/.test(sg.subject) && /sunshine\.example\/my-booking#tg-pay=ST-24189/.test(sg.content?.[1]?.value || ''), 'subject carries the amount; body links the booking-page deep link');
+ok(state.patches.at(-1)?.fields.Status === 'Sent' && state.patches.at(-1)?.fields.LastError === '', 'record advanced to Sent');
+
+state.redis.clear();
+state.accepted = [queued({ Reference: 'ref-mail-2', ReceivedAtUtc: recentIso() })];
+state.patches = []; state.sends = [];
+state.travelify = () => ({ status: 200, body: payableOrder({ payments: [{ status: 'Success', amount: 1490 }] }) });
+res = mockRes();
+await worker(cronReq(), res);
+ok(res.body.suppressed === 1 && state.sends.length === 0, 'already paid in full → no email');
+ok(state.patches.at(-1)?.fields.Status === 'Skipped' && /no outstanding balance/.test(state.patches.at(-1)?.fields.LastError), 'settled booking marked Skipped with the reason');
+
+state.redis.clear();
+state.accepted = [queued({ Reference: 'ref-mail-3', ApplicationId: 250, ReceivedAtUtc: recentIso() })];
+state.patches = []; state.sends = [];
+state.travelify = () => ({ status: 200, body: payableOrder() });
+res = mockRes();
+await worker(cronReq(), res);
+ok(state.sends.length === 0 && /demo application/.test(state.patches.at(-1)?.fields.LastError || ''), 'demo app 250 never emails a real customer');
+
+state.redis.clear();
+state.accepted = [queued({ Reference: 'ref-mail-4', ReceivedAtUtc: new Date(Date.now() - 3 * 24 * 3600000).toISOString() })];
+state.patches = []; state.sends = [];
+res = mockRes();
+await worker(cronReq(), res);
+ok(state.sends.length === 0 && /older than 48h/.test(state.patches.at(-1)?.fields.LastError || ''), 'stale notifications are Skipped, never surprise-emailed');
+
+state.redis.clear();
+state.accepted = [queued({ Reference: 'ref-mail-5', ReceivedAtUtc: recentIso() })];
+state.patches = []; state.sends = [];
+state.travelify = () => ({ status: 200, body: payableOrder({ customerEmail: '' }) });
+res = mockRes();
+await worker(cronReq(), res);
+ok(state.sends.length === 0 && /no valid customer email/.test(state.patches.at(-1)?.fields.LastError || ''), 'order without a customer email is Skipped');
+
+state.redis.clear();
+state.accepted = [queued({ Reference: 'ref-mail-6', ReceivedAtUtc: recentIso() })];
+state.patches = []; state.sends = [];
+state.sendFail = true;
+state.travelify = () => ({ status: 200, body: payableOrder() });
+res = mockRes();
+await worker(cronReq(), res);
+state.sendFail = false;
+const failPatch = state.patches.at(-1);
+ok(failPatch?.fields.Status === 'Fetched' && failPatch?.fields.Attempts === 1 && /email send failed/.test(failPatch?.fields.LastError), 'send failure keeps the row queued as Fetched for a backoff retry');
+
+state.redis.clear();
+state.redis.set('payrem:sent:ref-mail-7', '1'); // a previous run sent but crashed before stamping
+state.accepted = [queued({ Reference: 'ref-mail-7', ReceivedAtUtc: recentIso() })];
+state.patches = []; state.sends = [];
+res = mockRes();
+await worker(cronReq(), res);
+ok(state.sends.length === 0 && state.patches.at(-1)?.fields.Status === 'Sent', 'send guard prevents a double email after a crash');
+
+state.redis.clear();
+state.brandingWidget = null; // client has no My Booking widget
+state.clientRecord = { id: 'recCLIENT00000001', fields: { fldDbFv039Bip6W8u: 'Sunshine Trading', fldVRiIAlrTjxnNHP: 'accounts@sunshine.example', fldFES7Aa057MB3VT: '01202 999 999' } };
+state.accepted = [queued({ Reference: 'ref-mail-8', ReceivedAtUtc: recentIso() })];
+state.patches = []; state.sends = [];
+res = mockRes();
+await worker(cronReq(), res);
+const sg8 = state.sends[0];
+ok(sg8 && sg8.from?.name === 'Sunshine Trading' && !/Pay my balance/.test(sg8.content?.[1]?.value || ''), 'no widget → Clients-record branding, contact-first email without a dead button');
+state.brandingWidget = null; state.clientRecord = null;
+delete process.env.PAYMENT_REMINDER_SEND_ENABLED;
+
+// ── E. Source guards ─────────────────────────────────────────────────────────
+const widgetSrc = readFileSync(new URL('../public/widget-mybooking.js', import.meta.url), 'utf8');
+ok(/#tg-pay/.test(widgetSrc) && /readPayDeepLink/.test(widgetSrc) && /data-tgm-pay-open/.test(widgetSrc), 'My Booking widget reads the #tg-pay deep link');
+{
+  const vm = widgetSrc.match(/VERSION = '(\d+)\.(\d+)\.(\d+)'/);
+  ok(vm && (+vm[1] > 1 || (+vm[1] === 1 && +vm[2] >= 11)), 'widget version at or beyond 1.11 (deep-link support)');
+}
+const mbEditor = readFileSync(new URL('../public/editor-mybooking.html', import.meta.url), 'utf8');
+ok(/id="page-url"/.test(mbEditor) && /config\.pageUrl/.test(mbEditor), 'editor exposes the Booking page URL setting');
+const workerSrc = readFileSync(new URL('../api/cron/payment-reminders.js', import.meta.url), 'utf8');
+ok(/decideCharge/.test(workerSrc) && /PAYMENT_REMINDER_SEND_ENABLED/.test(readFileSync(new URL('../api/_lib/payment-reminders.js', import.meta.url), 'utf8')), 'amounts come from decideCharge; sending is gated behind the env flag');
+
+// ── F. Source guards (phase 1) ───────────────────────────────────────────────
 const auth = readFileSync(new URL('../api/_auth.js', import.meta.url), 'utf8');
 ok(/\{\$\{TG_CLIENT_FIELD_NAMES\.travelifyAppId\}\}=/.test(auth), 'appId lookup filters on the DISPLAY NAME (field ids in formulas match nothing)');
 ok(/LOWER\(\{\$\{TG_CLIENT_FIELD_NAMES\.email\}\}\)/.test(auth) && /LOWER\(\{\$\{TG_USER_FIELD_NAMES\.email\}\}\)/.test(auth), 'email lookups filter on display names too');

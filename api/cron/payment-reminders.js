@@ -1,25 +1,34 @@
 /**
- * Payment Reminder background worker (phase 1).
+ * Payment Reminder background worker (phases 1 + 2).
  *
  * Consumes the durable queue: Payment Reminders rows with Status=Accepted
- * (written by /api/v1/payment-reminders). For each row it resolves the
- * client's Travelify credentials from the applicationId, fetches the full
- * order (id + key), logs a PII-light summary and marks the row Fetched.
- * Phase 2 appends the email render/send + payment link here — the intake
- * endpoint and the queue contract don't change.
+ * or Fetched (written by /api/v1/payment-reminders). For each row it
+ * resolves the client's Travelify credentials from the applicationId,
+ * fetches the full order (id + key), then:
  *
- * Triggered two ways, both hitting this same handler:
- *   - Vercel cron every 5 minutes (the durability guarantee — survives
- *     restarts, retries failures on the next sweep)
- *   - a best-effort kick from the intake endpoint right after a 202 (the
- *     latency optimisation)
- * Overlap between the two is defused by a per-record Redis lock; the lock is
- * best-effort because phase-1 processing is read-only against Travelify.
+ *   - sending DISABLED (default): marks the row Fetched and stops — exactly
+ *     the phase 1 contract. Nothing emails anyone until Andy flips
+ *     PAYMENT_REMINDER_SEND_ENABLED=true in Vercel.
+ *   - sending ENABLED: computes the real outstanding balance with
+ *     decideCharge (the same engine the My Booking widget and
+ *     /api/pay-balance use), renders the agency-branded reminder email and
+ *     sends it to the order's customer, marking the row Sent.
+ *
+ * A row is SKIPPED (never emailed, terminal) when: the order has no
+ * outstanding balance (already paid — never chase a settled booking), the
+ * notification came from the Travelify demo app 250, the notification is
+ * older than 48 hours (stale test rows must not become surprise emails when
+ * the flag first flips), or the order carries no customer email. The reason
+ * lands in LastError prefixed "skipped:".
+ *
+ * Triggered by the 5-minute Vercel cron plus a best-effort kick from the
+ * intake endpoint. Overlap is defused by a per-record Redis lock, and the
+ * send itself is additionally protected by a one-shot Redis send guard so a
+ * crash between SendGrid accepting and the Sent stamp cannot double-email.
  *
  * Failure model: each failure stamps LastError and bumps Attempts; the row
- * stays Accepted and retries on a BACKOFF schedule (see below) until
- * MAX_ATTEMPTS flips it to Failed (visible in Airtable; alerting is a
- * phase-2 concern).
+ * stays queued (Accepted, or Fetched once the order fetch has succeeded)
+ * and retries on a backoff schedule until MAX_ATTEMPTS flips it to Failed.
  *
  * AUTH: Authorization: Bearer ${CRON_SECRET} (same convention as the other
  * crons; Vercel cron sends it automatically when the env var is set).
@@ -27,22 +36,32 @@
 
 import {
   MAX_ATTEMPTS,
+  MAX_EMAIL_AGE_MS,
   resolveApplication,
-  listAcceptedReminders,
+  listPendingReminders,
   updateReminderRecord,
   acquireProcessingLock,
   fetchOrderByIdKey,
   summariseOrder,
   timingSafeMatch,
+  sendingEnabled,
+  claimSendGuard,
+  readOrderRef,
+  buildPayUrl,
+  resolveReminderBranding,
+  maskEmail,
 } from '../_lib/payment-reminders.js';
+import { renderReminderEmail } from '../_lib/payment-reminder-email.js';
+import { decideCharge } from '../pay-balance.js';
+import { sendViaSendGrid, buildFromField, isValidEmail } from '../_lib/sendgrid.js';
+import { DEMO_APP_ID } from '../_lib/travelify.js';
 
 const BATCH_SIZE = 25;
 
 // Minutes to wait before retry N+1, indexed by attempts already made. The
 // 5-minute cron alone would exhaust MAX_ATTEMPTS in ~25 minutes — shorter
-// than a routine Travelify outage, and fatal-by-default while the order
-// fetch route awaits live confirmation. Spaced like this the cap covers
-// roughly 17 hours (0m, 15m, 1h, 4h, 12h) before a row goes Failed.
+// than a routine outage. Spaced like this the cap covers roughly 17 hours
+// (0m, 15m, 1h, 4h, 12h) before a row goes Failed.
 const RETRY_BACKOFF_MINUTES = [0, 15, 60, 240, 720];
 
 function isBackingOff(fields) {
@@ -63,23 +82,38 @@ async function processRecord(record) {
 
   const lock = await acquireProcessingLock(reference);
   if (lock === 'exists') return { outcome: 'skipped' };
-  // 'error' (Redis down) proceeds — phase 1 is read-only, overlap is harmless.
+  // 'error' (Redis down) proceeds — the send guard and Status machine still
+  // protect the email step; the fetch step is read-only.
 
-  const finishFailure = async (message) => {
+  const stamp = async (fields, outcome, error) => {
+    try {
+      await updateReminderRecord(record.id, { ...fields, ProcessedAtUtc: new Date().toISOString() });
+    } catch (err) {
+      console.error('[payment-reminders:worker] stamp failed for', reference, '—', err.message);
+      if (outcome === 'sent' || outcome === 'suppressed') {
+        // The action happened but the stamp didn't. The send guard prevents
+        // a re-send; surface loudly so the row isn't silently re-picked.
+        console.error('[payment-reminders:worker] STATUS STAMP LOST for', reference, '— intended', fields.Status);
+      }
+    }
+    return { outcome, error };
+  };
+
+  const finishFailure = (message, extraFields = {}) => {
     const nextAttempts = attempts + 1;
     const fields = {
+      ...extraFields,
       Attempts: nextAttempts,
       LastError: String(message || 'unknown error').slice(0, 1000),
-      ProcessedAtUtc: new Date().toISOString(),
     };
     if (nextAttempts >= MAX_ATTEMPTS) fields.Status = 'Failed';
-    try {
-      await updateReminderRecord(record.id, fields);
-    } catch (err) {
-      console.error('[payment-reminders:worker] failure-stamp failed for', reference, '—', err.message);
-    }
-    return { outcome: fields.Status === 'Failed' ? 'failed' : 'retry', error: message };
+    return stamp(fields, fields.Status === 'Failed' ? 'failed' : 'retry', message);
   };
+
+  const suppress = (reason) => stamp(
+    { Status: 'Skipped', Attempts: attempts + 1, LastError: `skipped: ${reason}` },
+    'suppressed',
+  );
 
   // 1. applicationId → the client's Travelify credentials.
   let application;
@@ -92,29 +126,70 @@ async function processRecord(record) {
     return finishFailure(`no client found for applicationId ${f.ApplicationId}`);
   }
 
-  // 2. Fetch the full order from Travelify by id + key.
+  // 2. Fetch the full order from Travelify by id + key. Always fresh — the
+  //    amounts must reflect any payment taken since the notification.
   const result = await fetchOrderByIdKey(application, f.OrderId, String(f.OrderKey || ''));
   if (!result.ok) {
     return finishFailure(result.error);
   }
+  const order = result.order;
+  console.log('[payment-reminders:worker] fetched order for', reference, JSON.stringify(summariseOrder(order)));
 
-  // 3. Phase 1 stops here: log the order and mark the row Fetched.
-  console.log('[payment-reminders:worker] fetched order for', reference,
-    JSON.stringify(summariseOrder(result.order)));
-  try {
-    await updateReminderRecord(record.id, {
-      Status: 'Fetched',
-      Attempts: attempts + 1,
-      LastError: '',
-      ProcessedAtUtc: new Date().toISOString(),
-    });
-  } catch (err) {
-    // The fetch worked but the stamp didn't — leave it Accepted; the next
-    // sweep redoes a cheap read rather than losing the item.
-    console.error('[payment-reminders:worker] fetched-stamp failed for', reference, '—', err.message);
-    return { outcome: 'retry', error: err.message };
+  // 3. Phase 1 resting state: sending disabled → stop at Fetched.
+  if (!sendingEnabled()) {
+    return stamp({ Status: 'Fetched', Attempts: attempts + 1, LastError: '' }, 'fetched');
   }
-  return { outcome: 'fetched' };
+
+  // 4. Email eligibility gates (each terminal, each auditable in Airtable).
+  if (String(f.ApplicationId) === DEMO_APP_ID) {
+    return suppress('demo application — email suppressed');
+  }
+  const receivedAt = Date.parse(f.ReceivedAtUtc || '');
+  if (Number.isFinite(receivedAt) && Date.now() - receivedAt > MAX_EMAIL_AGE_MS) {
+    return suppress('notification older than 48h — not emailing a stale reminder');
+  }
+  const charge = decideCharge(order, null);
+  if (charge.invalid || charge.noBalance || !(charge.amount > 0)) {
+    return suppress('no outstanding balance on the order');
+  }
+  const customerEmail = String(order.customerEmail || '').trim().toLowerCase();
+  if (!isValidEmail(customerEmail)) {
+    return suppress('order has no valid customer email');
+  }
+
+  // 5. Render with the agency's branding and send AS the agency.
+  const branding = await resolveReminderBranding(application);
+  const orderRef = readOrderRef(order);
+  const { subject, html } = renderReminderEmail({
+    agency: branding,
+    customerFirstName: typeof order.customerFirstname === 'string' ? order.customerFirstname : '',
+    orderRef,
+    charge,
+    dueDateIso: f.DueDate || charge.dueDate || '',
+    payUrl: buildPayUrl(branding.pageUrl, orderRef),
+  });
+
+  const guard = await claimSendGuard(reference);
+  if (guard === 'exists') {
+    // A previous run sent but crashed before stamping. Record the truth.
+    return stamp({ Status: 'Sent', Attempts: attempts + 1, LastError: 'send previously recorded (guard hit)' }, 'sent');
+  }
+
+  const sendResult = await sendViaSendGrid({
+    from: buildFromField(branding.name),
+    to: customerEmail,
+    replyTo: isValidEmail(branding.replyTo) ? branding.replyTo : undefined,
+    subject,
+    html,
+    categoryTag: 'payment-reminder',
+    headers: { 'X-TG-Reminder-Ref': reference },
+  });
+  if (sendResult.status !== 'sent') {
+    return finishFailure(`email send failed: ${sendResult.error || 'unknown'}`, { Status: 'Fetched' });
+  }
+
+  console.log('[payment-reminders:worker] reminder emailed for', reference, 'to', maskEmail(customerEmail));
+  return stamp({ Status: 'Sent', Attempts: attempts + 1, LastError: '' }, 'sent');
 }
 
 export default async function handler(req, res) {
@@ -126,13 +201,13 @@ export default async function handler(req, res) {
 
   let records;
   try {
-    records = await listAcceptedReminders(BATCH_SIZE);
+    records = await listPendingReminders(BATCH_SIZE);
   } catch (err) {
     console.error('[payment-reminders:worker] queue list failed:', err.message);
     return res.status(500).json({ ok: false, error: 'queue_list_failed' });
   }
 
-  const summary = { picked: records.length, fetched: 0, retry: 0, failed: 0, skipped: 0, waiting: 0 };
+  const summary = { picked: records.length, fetched: 0, sent: 0, suppressed: 0, retry: 0, failed: 0, skipped: 0, waiting: 0 };
   for (const record of records) {
     try {
       const { outcome } = await processRecord(record);
