@@ -151,7 +151,7 @@
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
   const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
-  const VERSION = '1.10.15';
+  const VERSION = '1.11.0';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // Telemetry: report a one-time load heartbeat and any failure to
@@ -692,6 +692,34 @@
   // so multiple widget instances never interleave).
   let ACTIVE_APPID = '';
   function setActiveAppId(id) { ACTIVE_APPID = String(id || '').trim(); }
+
+  // Property pinning (per-widget opt-in, cfg.propertyDeeplinks). Set at the
+  // top of each render pass alongside ACTIVE_APPID — same single-flight
+  // assumption, same pattern.
+  let PROPERTY_PIN = false;
+  function setPropertyPin(on) { PROPERTY_PIN = on === true; }
+
+  // Anchor the search on the exact property, the way Travelify's own deeplink
+  // generator does (verified against a live link, 22 Jul 2026):
+  //   loc="<hotel>, <city>" + loct=Property + lat/lng + rad=1 + refn=TTI:<code>
+  // Returns true only when it anchored. The property CODE (refn) is required —
+  // a name alone risks Travelify's gazetteer rejecting the whole link, which
+  // is the historical failure that moved these links onto airport anchors.
+  // The feed supplies uniqueRef already 'TTI:'-prefixed; bare codes get the
+  // prefix added. Coordinates are included when the offer carries them.
+  function setPropertyAnchor(p, hotel, city, lat, lng, refn) {
+    const name = (hotel || '').trim();
+    const ref = (refn == null ? '' : String(refn)).trim();
+    if (!name || !ref) return false;
+    p.set('loc', city ? name + ', ' + city : name);
+    p.set('loct', 'Property');
+    const la = Number(lat), ln = Number(lng);
+    if (Number.isFinite(la) && Number.isFinite(ln)) {
+      p.set('lat', String(la)); p.set('lng', String(ln)); p.set('rad', '1');
+    }
+    p.set('refn', /^[A-Za-z]+:/.test(ref) ? ref : 'TTI:' + ref);
+    return true;
+  }
   function brdCode(b) {
     const k = String(b || '').toLowerCase().replace(/[^a-z]/g, '');
     return ({ roomonly: 'RoomOnly', selfcatering: 'SelfCatering', bedandbreakfast: 'BedAndBreakfast',
@@ -729,26 +757,40 @@
       if (destIata) p.set('dst', destIata);
     }
     if (st !== 'Flights' && acc) {
-      // Travelify resolves `loc` through `loct` (location type lookup, default
-      // City — see the Travelify Deep Linking Instructions). acc.destination.name
-      // is frequently a region, not a City: resort/atoll names such as
-      // "South Male Atoll" or "Raa Atoll" are absent from Travelify's City
-      // gazetteer, so the default City lookup fails the WHOLE deeplink
-      // ("Unable to match location City: ..."). The destination airport is
-      // Travelify's own IATA code and always resolves, so anchor the
-      // accommodation on it with loct=Airport. That goes up from the unmatched
-      // resort to the gateway level — country-wide for a single-gateway country
-      // such as the Maldives — and stays consistent with the flight leg. Fall
-      // back to the resort name only when there is no airport to anchor on
-      // (accommodation-only offers).
-      if (destIata) {
-        p.set('loc', destIata);
-        p.set('loct', 'Airport');
-      } else if (acc.destination && acc.destination.name) {
-        p.set('loc', acc.destination.name);
+      // Property pinning first, when the widget opted in AND the offer carries
+      // the property code. A pinned link mirrors Travelify's own generator
+      // (loct=Property, no ctry). Anything less falls through to the proven
+      // airport anchor below, so a link can never dead-end on missing data.
+      const pinned = PROPERTY_PIN && setPropertyAnchor(
+        p,
+        acc.name,
+        acc.destination && acc.destination.name,
+        acc.destination && acc.destination.latitude,
+        acc.destination && acc.destination.longitude,
+        acc.uniqueRef
+      );
+      if (!pinned) {
+        // Travelify resolves `loc` through `loct` (location type lookup, default
+        // City — see the Travelify Deep Linking Instructions). acc.destination.name
+        // is frequently a region, not a City: resort/atoll names such as
+        // "South Male Atoll" or "Raa Atoll" are absent from Travelify's City
+        // gazetteer, so the default City lookup fails the WHOLE deeplink
+        // ("Unable to match location City: ..."). The destination airport is
+        // Travelify's own IATA code and always resolves, so anchor the
+        // accommodation on it with loct=Airport. That goes up from the unmatched
+        // resort to the gateway level — country-wide for a single-gateway country
+        // such as the Maldives — and stays consistent with the flight leg. Fall
+        // back to the resort name only when there is no airport to anchor on
+        // (accommodation-only offers).
+        if (destIata) {
+          p.set('loc', destIata);
+          p.set('loct', 'Airport');
+        } else if (acc.destination && acc.destination.name) {
+          p.set('loc', acc.destination.name);
+        }
+        const ctry = (acc.destination && acc.destination.countryCode) || (fl && fl.destination && fl.destination.countryCode);
+        if (ctry) p.set('ctry', ctry);
       }
-      const ctry = (acc.destination && acc.destination.countryCode) || (fl && fl.destination && fl.destination.countryCode);
-      if (ctry) p.set('ctry', ctry);
     }
     const start = String((fl && fl.outboundDate) || (acc && acc.checkinDate) || '');
     if (/^\d{4}-\d{2}-\d{2}/.test(start)) p.set('fr', start.slice(0, 10));
@@ -6339,6 +6381,7 @@
     _renderOffers() {
       setActiveCur(this.cur);
       setActiveAppId(this.cfg.appId);
+      setPropertyPin(this.cfg.propertyDeeplinks === true);
       // Departure-board template doesn't dedupe (it's a fares list, not a
       // shop-around grid), so pass raw offers straight in.
       if (this.cfg.template === 'departure-board') {
@@ -8620,6 +8663,7 @@
       const cfg = this.cfg;
       setActiveCur(this.cur);
       setActiveAppId(cfg.appId);
+      setPropertyPin(cfg.propertyDeeplinks === true);
       const layout = cfg.popupLayout || 'slide-in';
       const showBackdrop = ['centered', 'fullscreen', 'side-drawer'].includes(layout) && cfg.popupOverlay !== false;
       const opacity = Math.max(0, Math.min(100, cfg.popupOverlayOpacity || 60)) / 100;

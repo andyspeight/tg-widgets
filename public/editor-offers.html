@@ -987,6 +987,20 @@
           </div>
 
           <div class="section" data-open="false">
+            <button class="section-head" data-section>Deal links
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="toggle-row">
+                <span class="toggle-label">Link each deal to its exact property
+                  <div class="toggle-help">When on, clicking a deal searches that specific hotel on your booking site. When off, it searches the deal's destination with matching dates, board and rating (the current behaviour). Deals without a property reference always fall back to the destination search.</div>
+                </span>
+                <button type="button" class="switch" id="cfgPropertyLinks" aria-pressed="false"></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false">
             <button class="section-head" data-section>Date window &amp; sorting
               <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
@@ -2126,6 +2140,7 @@
       $('cfgBoardDefaultAirport').value = c.boardDefaultAirport || 'LHR';
       $('cfgBoardAutoDetect').setAttribute('aria-pressed', c.boardAutoDetect !== false ? 'true' : 'false');
       $('cfgBoardAllowSwitcher').setAttribute('aria-pressed', c.boardAllowSwitcher !== false ? 'true' : 'false');
+      $('cfgPropertyLinks').setAttribute('aria-pressed', c.propertyDeeplinks === true ? 'true' : 'false');
       document.querySelectorAll('#cfgBoardDateRangeSeg button').forEach(b => {
         b.setAttribute('aria-pressed', String(c.boardDateRange || 30) === b.dataset.range ? 'true' : 'false');
       });
@@ -2828,6 +2843,13 @@
         const next = btn.getAttribute('aria-pressed') !== 'true';
         btn.setAttribute('aria-pressed', next ? 'true' : 'false');
         state.config.boardAutoDetect = next;
+        markDirtyAndPreview();
+      });
+      $('cfgPropertyLinks').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.propertyDeeplinks = next;
         markDirtyAndPreview();
       });
       $('cfgBoardAllowSwitcher').addEventListener('click', (ev) => {

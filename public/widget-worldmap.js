@@ -53,7 +53,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.12.0';
+  const VERSION = '3.13.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -367,7 +367,29 @@
   // (that carries a demo search session and expires), so a click runs a fresh
   // live search in the client's own Travelify application. No AppID (inline
   // embed / missing creds) → '' so the caller can fall back to the raw link.
-  function buildDeeplink(o, appId) {
+  // Anchor the search on the exact property, the way Travelify's own deeplink
+  // generator does (verified against a live link, 22 Jul 2026):
+  //   loc="<hotel>, <city>" + loct=Property + lat/lng + rad=1 + refn=TTI:<code>
+  // Returns true only when it anchored. The property CODE (refn) is required —
+  // a name alone risks Travelify's gazetteer rejecting the whole link, which
+  // is the historical failure that moved these links onto airport anchors.
+  // The cache supplies accommodationUniqueRef already 'TTI:'-prefixed; bare
+  // codes get the prefix added. Coordinates are included when cached.
+  function setPropertyAnchor(p, hotel, city, lat, lng, refn) {
+    const name = (hotel || '').trim();
+    const ref = (refn == null ? '' : String(refn)).trim();
+    if (!name || !ref) return false;
+    p.set('loc', city ? name + ', ' + city : name);
+    p.set('loct', 'Property');
+    const la = Number(lat), ln = Number(lng);
+    if (Number.isFinite(la) && Number.isFinite(ln)) {
+      p.set('lat', String(la)); p.set('lng', String(ln)); p.set('rad', '1');
+    }
+    p.set('refn', /^[A-Za-z]+:/.test(ref) ? ref : 'TTI:' + ref);
+    return true;
+  }
+
+  function buildDeeplink(o, appId, opts) {
     const id = String(appId || '').trim();
     if (!id || !o) return '';
     const type = String(o.type || 'Packages');
@@ -388,19 +410,28 @@
     p.set('st', st);
     if (st !== 'Accommodation') { if (o.origin) p.set('org', o.origin); if (o.airport) p.set('dst', o.airport); }
     if (st !== 'Flights') {
-      // Travelify resolves `loc` through `loct` (location type lookup, default
-      // City — see the Travelify Deep Linking Instructions). o.resort is
-      // frequently a region, not a City: atoll names such as "South Male Atoll"
-      // or "Raa Atoll" are absent from Travelify's City gazetteer, so the
-      // default City lookup fails the WHOLE deeplink ("Unable to match location
-      // City: ..."). The gateway airport is Travelify's own IATA code and always
-      // resolves, so anchor the accommodation on it with loct=Airport. That goes
-      // up from the unmatched resort to the gateway level — country-wide for a
-      // single-gateway country such as the Maldives. Fall back to the resort
-      // name only when there is no airport to anchor on.
-      if (o.airport) { p.set('loc', o.airport); p.set('loct', 'Airport'); }
-      else if (o.resort) { p.set('loc', o.resort); }
-      if (o.countryCode) p.set('ctry', o.countryCode);
+      // Property pinning first, when the widget opted in AND the cached offer
+      // carries the property code. A pinned link mirrors Travelify's own
+      // generator (loct=Property, no ctry). Anything less falls through to
+      // the proven airport anchor, so a link can never dead-end on missing data.
+      const pinned = !!(opts && opts.propertyPin) && setPropertyAnchor(
+        p, o.hotel, o.resort, o.resortLat, o.resortLng, o.accommodationUniqueRef
+      );
+      if (!pinned) {
+        // Travelify resolves `loc` through `loct` (location type lookup, default
+        // City — see the Travelify Deep Linking Instructions). o.resort is
+        // frequently a region, not a City: atoll names such as "South Male Atoll"
+        // or "Raa Atoll" are absent from Travelify's City gazetteer, so the
+        // default City lookup fails the WHOLE deeplink ("Unable to match location
+        // City: ..."). The gateway airport is Travelify's own IATA code and always
+        // resolves, so anchor the accommodation on it with loct=Airport. That goes
+        // up from the unmatched resort to the gateway level — country-wide for a
+        // single-gateway country such as the Maldives. Fall back to the resort
+        // name only when there is no airport to anchor on.
+        if (o.airport) { p.set('loc', o.airport); p.set('loct', 'Airport'); }
+        else if (o.resort) { p.set('loc', o.resort); }
+        if (o.countryCode) p.set('ctry', o.countryCode);
+      }
     }
     const start = String(o.outboundDate || o.checkinDate || '');
     if (/^\d{4}-\d{2}-\d{2}/.test(start)) p.set('fr', start.slice(0, 10));
@@ -2317,6 +2348,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
     // an alias for GB. Offers whose departure airport is unknown to the
     // widget are hidden while a filter is set (predictable beats permissive).
     departureCountries: '',
+    // Deal links: when true, deals whose data carries the property code are
+    // deep-linked to that EXACT property (loct=Property + refn); offers
+    // without the code, and widgets with this off, keep the airport-anchored
+    // destination search.
+    propertyDeeplinks: false,
     // How many top destinations to show in envelope mode. World view gets crowded fast.
     maxPins: 10,
     // Optional per-widget MapTiler key override. Leave empty to use the shared key.
@@ -3846,7 +3882,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
     /** Build one deal card. Whole card is an anchor to the Travelify deeplink. */
     _cardHtml(o) {
-      const href = safeUrl(buildDeeplink(o, this.cfg.appId) || o.url);
+      const href = safeUrl(buildDeeplink(o, this.cfg.appId, { propertyPin: this.cfg.propertyDeeplinks === true }) || o.url);
       const img = safeUrl(o.image);
       const t = this.t;
       const pp = formatPrice(o.pricePP || o.price, o.currency);
