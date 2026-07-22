@@ -233,11 +233,11 @@ ok(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(accepte
 ok(!Number.isNaN(Date.parse(accepted.receivedAtUtc || '')), 'receivedAtUtc is a parseable timestamp');
 
 const created = state.creates[0];
-const today = new Date().toISOString().slice(0, 10);
+// (idempotency now keys on the balance's due date, not the receipt day)
 ok(created && created.Reference === accepted.reference && created.Status === 'Accepted', 'record created with the returned reference, queued as Accepted');
 ok(created.ApplicationId === 777 && created.OrderId === 100482113 && created.OrderKey === GUID, 'identity fields stored (orderKey normalised to lower case)');
 ok(created.AmountDue === 749.5 && created.Currency === 'GBP' && created.DueDate === '2026-08-15', 'amount, currency (upper-cased) and due date stored');
-ok(created.IdempotencyKey === `777|${GUID}|DepositBalance|${today}`, 'natural idempotency key: app|orderKey|type|receipt-day');
+ok(created.IdempotencyKey === `777|${GUID}|DepositBalance|2026-08-15`, 'natural idempotency key: app|orderKey|type|dueDate (one record per BALANCE, not per day)');
 ok(created.Attempts === 0 && created.ClientName === 'Free From Travel', 'attempts start at 0; client name resolved from the registry');
 ok(state.redis.get(`payrem:idem:${created.IdempotencyKey}`) === accepted.reference, 'Redis claim holds the original reference');
 ok(state.kicks.length === 1 && /Bearer cron-secret-test/.test(state.kicks[0].headers.Authorization || ''), 'worker kicked once with the cron secret');
@@ -250,12 +250,16 @@ ok(state.creates.length === 1, 'duplicate creates no second record');
 ok(state.kicks.length === 1, 'a duplicate does not kick the worker again');
 
 res = mockRes();
+await intake(request(valid({ dueDate: undefined })), res);
+ok(res.statusCode === 202 && state.creates.at(-1)?.IdempotencyKey === `777|${GUID}|DepositBalance|none`, 'no dueDate → key falls back to |none (a distinct balance from the dated one)');
+
+res = mockRes();
 await intake(request(valid({ applicationId: 250, orderKey: '11111111-2222-4333-8444-555555555555' })), res);
-ok(res.statusCode === 202 && state.creates[1]?.ClientName === 'Travelgenix demo', 'Travelify demo app 250 accepted without a Clients record');
+ok(res.statusCode === 202 && state.creates.at(-1)?.ClientName === 'Travelgenix demo', 'Travelify demo app 250 accepted without a Clients record');
 
 res = mockRes();
 await intake(request(valid({ orderKey: '99999999-8888-4777-8666-555555555555' }), { idem: 'core-batch-42' }), res);
-ok(res.statusCode === 202 && state.creates[2]?.IdempotencyKey === 'hdr:core-batch-42', 'caller Idempotency-Key header preferred over the natural key');
+ok(res.statusCode === 202 && state.creates.at(-1)?.IdempotencyKey === 'hdr:core-batch-42', 'caller Idempotency-Key header preferred over the natural key');
 res = mockRes();
 await intake(request(valid({ orderKey: '99999999-8888-4777-8666-000000000000' }), { idem: 'core-batch-42' }), res);
 ok(res.statusCode === 409, 'same Idempotency-Key header dedupes even across different orders');
@@ -458,7 +462,14 @@ const sg = state.sends[0];
 ok(sg && sg.personalizations?.[0]?.to?.[0]?.email === 'sarah@example.com', 'email goes to the order customer');
 ok(sg && sg.from?.name === 'Sunshine Travel' && sg.reply_to?.email === 'bookings@sunshine.example', 'sends AS the agency with their reply-to');
 ok(sg && /£749\.50/.test(sg.subject) && /sunshine\.example\/my-booking#tg-pay=ST-24189/.test(sg.content?.[1]?.value || ''), 'subject carries the amount; body links the booking-page deep link');
-ok(state.patches.at(-1)?.fields.Status === 'Sent' && state.patches.at(-1)?.fields.LastError === '', 'record advanced to Sent');
+const firstSend = state.patches.at(-1)?.fields;
+ok(firstSend?.Status === 'Sent' && firstSend?.LastError === '', 'record advanced to Sent');
+ok(firstSend?.EmailsSent === 1 && firstSend?.EmailsPlanned === 3 && firstSend?.GapDays === 7, 'default schedule snapshotted: email 1 of 3, 7 days apart');
+{
+  const next = Date.parse(firstSend?.NextEmailAtUtc || '');
+  const expected = Date.now() + 7 * 24 * 3600000;
+  ok(Number.isFinite(next) && Math.abs(next - expected) < 60000 && firstSend?.Attempts === 0, 'next reminder scheduled 7 days out, failure budget reset');
+}
 
 state.redis.clear();
 state.accepted = [queued({ Reference: 'ref-mail-2', ReceivedAtUtc: recentIso() })];
@@ -504,7 +515,7 @@ const failPatch = state.patches.at(-1);
 ok(failPatch?.fields.Status === 'Fetched' && failPatch?.fields.Attempts === 1 && /email send failed/.test(failPatch?.fields.LastError), 'send failure keeps the row queued as Fetched for a backoff retry');
 
 state.redis.clear();
-state.redis.set('payrem:sent:ref-mail-7', '1'); // a previous run sent but crashed before stamping
+state.redis.set('payrem:sent:ref-mail-7:1', '1'); // a previous run sent cycle 1 but crashed before stamping
 state.accepted = [queued({ Reference: 'ref-mail-7', ReceivedAtUtc: recentIso() })];
 state.patches = []; state.sends = [];
 res = mockRes();
@@ -521,9 +532,95 @@ await worker(cronReq(), res);
 const sg8 = state.sends[0];
 ok(sg8 && sg8.from?.name === 'Sunshine Trading' && !/Pay my balance/.test(sg8.content?.[1]?.value || ''), 'no widget → Clients-record branding, contact-first email without a dead button');
 state.brandingWidget = null; state.clientRecord = null;
-delete process.env.PAYMENT_REMINDER_SEND_ENABLED;
 
-// ── E. Source guards ─────────────────────────────────────────────────────────
+// ── E. Follow-up reminder schedule ───────────────────────────────────────────
+state.brandingWidget = {
+  id: 'recWIDGETMB00001',
+  fields: {
+    WidgetType: 'My Booking', Status: 'Active', ClientRecordId: 'recCLIENT00000001',
+    FromName: 'Sunshine Travel', FromEmail: 'bookings@sunshine.example',
+    Config: JSON.stringify({ support: { email: 'help@sunshine.example', phone: '01202 123 456' }, pageUrl: 'https://sunshine.example/my-booking', reminders: { count: 3, gapDays: 5 } }),
+  },
+};
+const pastDue = () => new Date(Date.now() - 3600000).toISOString();
+const followUp = (over = {}) => queued({
+  Status: 'Sent', EmailsSent: 1, EmailsPlanned: 3, GapDays: 5,
+  NextEmailAtUtc: pastDue(),
+  ReceivedAtUtc: new Date(Date.now() - 6 * 24 * 3600000).toISOString(), // a week old — follow-ups are stale by design
+  ...over,
+});
+
+// A due follow-up sends email 2 of 3 and schedules email 3
+state.redis.clear();
+state.accepted = [followUp({ Reference: 'ref-fup-1' })];
+state.patches = []; state.sends = [];
+state.travelify = () => ({ status: 200, body: payableOrder() });
+res = mockRes();
+await worker(cronReq(), res);
+ok(res.body.sent === 1 && /^Reminder: your balance of £749\.50 is still due$/.test(state.sends[0]?.subject || ''), 'follow-up sends with the softer "Reminder:" subject');
+const fup1 = state.patches.at(-1)?.fields;
+ok(fup1?.EmailsSent === 2 && Number.isFinite(Date.parse(fup1?.NextEmailAtUtc || '')), 'email 2 of 3 recorded, email 3 scheduled');
+ok(Math.abs(Date.parse(fup1.NextEmailAtUtc) - (Date.now() + 5 * 24 * 3600000)) < 60000, 'follow-up gap uses the record snapshot (5 days)');
+ok(!/older than 48h/.test(fup1?.LastError || ''), 'stale guard does not apply to scheduled follow-ups');
+
+// The last planned email is a final reminder and ends the schedule
+state.redis.clear();
+state.accepted = [followUp({ Reference: 'ref-fup-2', EmailsSent: 2 })];
+state.patches = []; state.sends = [];
+res = mockRes();
+await worker(cronReq(), res);
+ok(/^Final reminder: £749\.50 is still due$/.test(state.sends[0]?.subject || '') && /final reminder/i.test(state.sends[0]?.content?.[1]?.value || ''), 'last email in the plan reads as a final reminder');
+const fup2 = state.patches.at(-1)?.fields;
+ok(fup2?.EmailsSent === 3 && fup2?.NextEmailAtUtc === null, 'cycle complete — no further reminders scheduled');
+
+// Balance settled between reminders → chase closes, customer never chased again
+state.redis.clear();
+state.accepted = [followUp({ Reference: 'ref-fup-3', EmailsSent: 2 })];
+state.patches = []; state.sends = [];
+state.travelify = () => ({ status: 200, body: payableOrder({ payments: [{ status: 'Success', amount: 1490 }] }) });
+res = mockRes();
+await worker(cronReq(), res);
+ok(res.body.settled === 1 && state.sends.length === 0, 'settled balance between reminders → no email');
+const fup3 = state.patches.at(-1)?.fields;
+ok(fup3?.NextEmailAtUtc === null && /balance settled after 2 reminder emails/.test(fup3?.LastError || '') && fup3?.Status === undefined, 'schedule closed with the settled note; Sent status untouched');
+
+// Client config with a single email → nothing further scheduled
+state.redis.clear();
+state.brandingWidget.fields.Config = JSON.stringify({ pageUrl: 'https://sunshine.example/my-booking', reminders: { count: 1, gapDays: 7 } });
+state.accepted = [queued({ Reference: 'ref-fup-4', ReceivedAtUtc: recentIso() })];
+state.patches = []; state.sends = [];
+state.travelify = () => ({ status: 200, body: payableOrder() });
+res = mockRes();
+await worker(cronReq(), res);
+ok(state.patches.at(-1)?.fields.EmailsPlanned === 1 && state.patches.at(-1)?.fields.NextEmailAtUtc === null, 'client set to a single email → no follow-up scheduled');
+
+// A cycle-specific send guard cannot block a DIFFERENT cycle
+state.redis.clear();
+state.redis.set('payrem:sent:ref-fup-5:1', '1'); // cycle 1 guard exists from the first email
+state.accepted = [followUp({ Reference: 'ref-fup-5' })];
+state.patches = []; state.sends = [];
+res = mockRes();
+await worker(cronReq(), res);
+ok(state.sends.length === 1, 'cycle-1 guard does not block the cycle-2 follow-up');
+
+// Disabling sending mid-chase pauses follow-ups without rewriting state
+delete process.env.PAYMENT_REMINDER_SEND_ENABLED;
+state.redis.clear();
+state.accepted = [followUp({ Reference: 'ref-fup-6' })];
+state.patches = []; state.sends = [];
+res = mockRes();
+await worker(cronReq(), res);
+ok(res.body.waiting === 1 && state.patches.length === 0 && state.sends.length === 0, 'sending disabled mid-chase → Sent rows left untouched');
+state.brandingWidget = null;
+
+// ── F. Source guards (schedule) ──────────────────────────────────────────────
+const libSrc = readFileSync(new URL('../api/_lib/payment-reminders.js', import.meta.url), 'utf8');
+ok(/AND\(\{Status\}='Sent',\{NextEmailAtUtc\},\{NextEmailAtUtc\}<=NOW\(\)\)/.test(libSrc), 'queue formula picks up due follow-ups');
+ok(/normaliseReminderSchedule/.test(libSrc) && /value\.dueDate \|\| 'none'/.test(libSrc), 'schedule normaliser present; idempotency keyed on the balance not the day');
+const mbEditor2 = readFileSync(new URL('../public/editor-mybooking.html', import.meta.url), 'utf8');
+ok(/id="reminder-count"/.test(mbEditor2) && /id="reminder-gap"/.test(mbEditor2) && /config\.reminders/.test(mbEditor2), 'editor exposes the reminder schedule settings');
+
+// ── G. Source guards ─────────────────────────────────────────────────────────
 const widgetSrc = readFileSync(new URL('../public/widget-mybooking.js', import.meta.url), 'utf8');
 ok(/#tg-pay/.test(widgetSrc) && /readPayDeepLink/.test(widgetSrc) && /data-tgm-pay-open/.test(widgetSrc), 'My Booking widget reads the #tg-pay deep link');
 {

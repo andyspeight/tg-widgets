@@ -121,9 +121,10 @@ function step(num, title, body) {
  * @param {{amount: number, currency: string, total?: number, paid?: number, outstanding: number, isInstalment?: boolean, remainingAmount?: number}} p.charge
  * @param {string} [p.dueDateIso]         YYYY-MM-DD
  * @param {string|null} p.payUrl          Booking page URL with the #tg-pay deep link, or null
+ * @param {{n: number, of: number}} [p.sequence]  Which email in the chase this is (1-based) and how many are planned
  * @returns {{subject: string, preheader: string, html: string}}
  */
-export function renderReminderEmail({ agency, customerFirstName, orderRef, charge, dueDateIso, payUrl }) {
+export function renderReminderEmail({ agency, customerFirstName, orderRef, charge, dueDateIso, payUrl, sequence }) {
   const name = (agency && agency.name) || 'Your travel team';
   const money = formatMoney(charge.amount, charge.currency);
   const dueLong = formatLongDate(dueDateIso);
@@ -131,14 +132,29 @@ export function renderReminderEmail({ agency, customerFirstName, orderRef, charg
   const first = typeof customerFirstName === 'string' && customerFirstName.trim()
     ? customerFirstName.trim() : '';
 
-  const subject = `Your balance of ${money} is due`;
+  const seqN = sequence && Number.isFinite(sequence.n) ? sequence.n : 1;
+  const seqOf = sequence && Number.isFinite(sequence.of) ? sequence.of : 1;
+  const isFollowUp = seqN > 1;
+  const isFinal = isFollowUp && seqN >= seqOf;
+
+  const subject = isFinal ? `Final reminder: ${money} is still due`
+    : isFollowUp ? `Reminder: your balance of ${money} is still due`
+    : `Your balance of ${money} is due`;
   const preheader = `A reminder from ${name}: ${money} is due${dueBy}${orderRef ? ` on booking ${orderRef}` : ''}. Paying online is secure and takes a couple of minutes.`;
 
-  const headline = first ? `Hello ${escHtml(first)}, your balance is due.` : 'Your balance is due.';
+  const headline = isFinal
+    ? (first ? `${escHtml(first)}, a final reminder about your balance.` : 'A final reminder about your balance.')
+    : first ? `Hello ${escHtml(first)}, your balance is due.` : 'Your balance is due.';
   const introRef = orderRef ? ` on your booking <strong style="color:${C.textPrimary};">${escHtml(orderRef)}</strong>` : ' on your booking';
-  const intro = payUrl
-    ? `This is a friendly reminder from ${escHtml(name)} that a payment${introRef} is due${escHtml(dueBy)}. Paying online is secure and takes a couple of minutes.`
-    : `This is a friendly reminder from ${escHtml(name)} that a payment${introRef} is due${escHtml(dueBy)}. Get in touch using the details below and we will help you settle it.`;
+  const contactTail = payUrl
+    ? 'Paying online is secure and takes a couple of minutes.'
+    : 'Get in touch using the details below and we will help you settle it.';
+  const intro = isFinal
+    ? `This is our final reminder from ${escHtml(name)}: the payment${introRef} is still outstanding${escHtml(dueBy)}. ${contactTail} If you have already paid in the last day or two, thank you, and please ignore this email.`
+    : isFollowUp
+      ? `Just a gentle nudge from ${escHtml(name)}: the payment${introRef} is still outstanding${escHtml(dueBy)}. ${contactTail} If you have already paid in the last day or two, please ignore this email.`
+      : `This is a friendly reminder from ${escHtml(name)} that a payment${introRef} is due${escHtml(dueBy)}. ${contactTail}`;
+  const eyebrowText = isFinal ? 'Final payment reminder' : 'Payment reminder';
 
   // Cost card rows — only rows we genuinely know.
   let rows = '';
@@ -220,7 +236,7 @@ export function renderReminderEmail({ agency, customerFirstName, orderRef, charg
           <table border="0" cellspacing="0" cellpadding="0"><tr>
             <td width="48" height="48" align="center" bgcolor="${C.amberBg}" style="border-radius:12px;font-size:22px;line-height:48px;" aria-hidden="true">&#9200;</td>
           </tr></table>
-          <div style="font-family:${FONT};font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:${C.amberText};padding:20px 0 8px;">Payment reminder</div>
+          <div style="font-family:${FONT};font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:${C.amberText};padding:20px 0 8px;">${eyebrowText}</div>
           <div style="font-family:${FONT};font-size:26px;font-weight:700;line-height:1.2;letter-spacing:-0.025em;color:${C.textPrimary};">${headline}</div>
           <div style="font-family:${FONT};font-size:15px;line-height:1.6;color:${C.textSecondary};padding-top:12px;">${intro}</div>
         </td></tr>

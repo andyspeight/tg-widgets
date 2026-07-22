@@ -12,7 +12,14 @@
  *   - sending ENABLED: computes the real outstanding balance with
  *     decideCharge (the same engine the My Booking widget and
  *     /api/pay-balance use), renders the agency-branded reminder email and
- *     sends it to the order's customer, marking the row Sent.
+ *     sends it to the order's customer, marking the row Sent — then keeps
+ *     chasing on the client's schedule (config.reminders in their My
+ *     Booking editor: how many emails, how many days apart; default 3
+ *     emails 7 days apart). Each follow-up re-fetches the order first, so
+ *     the moment the customer pays the chase closes itself ("balance
+ *     settled after N reminder emails") and nobody is chased for money
+ *     they no longer owe. The last email in the plan is written and
+ *     subject-lined as a final reminder.
  *
  * A row is SKIPPED (never emailed, terminal) when: the order has no
  * outstanding balance (already paid — never chase a settled booking), the
@@ -135,8 +142,14 @@ async function processRecord(record) {
   const order = result.order;
   console.log('[payment-reminders:worker] fetched order for', reference, JSON.stringify(summariseOrder(order)));
 
-  // 3. Phase 1 resting state: sending disabled → stop at Fetched.
+  const emailsSent = Number.isFinite(f.EmailsSent) ? f.EmailsSent : 0;
+  const isFollowUp = emailsSent > 0;
+
+  // 3. Sending disabled → phase 1 resting state. An already-Sent row mid
+  //    chase is left completely untouched (disabling the flag PAUSES
+  //    follow-ups, it never rewrites their state).
   if (!sendingEnabled()) {
+    if (f.Status === 'Sent') return { outcome: 'waiting' };
     return stamp({ Status: 'Fetched', Attempts: attempts + 1, LastError: '' }, 'fetched');
   }
 
@@ -144,12 +157,24 @@ async function processRecord(record) {
   if (String(f.ApplicationId) === DEMO_APP_ID) {
     return suppress('demo application — email suppressed');
   }
-  const receivedAt = Date.parse(f.ReceivedAtUtc || '');
-  if (Number.isFinite(receivedAt) && Date.now() - receivedAt > MAX_EMAIL_AGE_MS) {
-    return suppress('notification older than 48h — not emailing a stale reminder');
+  if (!isFollowUp) {
+    // First email only: never turn a stale notification into a surprise.
+    // Follow-ups are older than 48h by design — their trigger is the
+    // schedule, and the fresh balance check below is their safety.
+    const receivedAt = Date.parse(f.ReceivedAtUtc || '');
+    if (Number.isFinite(receivedAt) && Date.now() - receivedAt > MAX_EMAIL_AGE_MS) {
+      return suppress('notification older than 48h — not emailing a stale reminder');
+    }
   }
   const charge = decideCharge(order, null);
   if (charge.invalid || charge.noBalance || !(charge.amount > 0)) {
+    if (isFollowUp) {
+      // The customer paid — the chase worked. Close the schedule quietly.
+      return stamp({
+        NextEmailAtUtc: null,
+        LastError: `balance settled after ${emailsSent} reminder email${emailsSent === 1 ? '' : 's'}`,
+      }, 'settled');
+    }
     return suppress('no outstanding balance on the order');
   }
   const customerEmail = String(order.customerEmail || '').trim().toLowerCase();
@@ -157,8 +182,15 @@ async function processRecord(record) {
     return suppress('order has no valid customer email');
   }
 
-  // 5. Render with the agency's branding and send AS the agency.
+  // 5. Render with the agency's branding and send AS the agency. The
+  //    schedule snapshot taken at first send governs follow-ups; the
+  //    client's current editor settings seed each new balance's cycle.
   const branding = await resolveReminderBranding(application);
+  const planned = (isFollowUp && Number.isFinite(f.EmailsPlanned) && f.EmailsPlanned > 0)
+    ? f.EmailsPlanned : branding.schedule.count;
+  const gapDays = (isFollowUp && Number.isFinite(f.GapDays) && f.GapDays > 0)
+    ? f.GapDays : branding.schedule.gapDays;
+  const cycle = emailsSent + 1;
   const orderRef = readOrderRef(order);
   const { subject, html } = renderReminderEmail({
     agency: branding,
@@ -167,12 +199,26 @@ async function processRecord(record) {
     charge,
     dueDateIso: f.DueDate || charge.dueDate || '',
     payUrl: buildPayUrl(branding.pageUrl, orderRef),
+    sequence: { n: cycle, of: Math.max(planned, cycle) },
   });
 
-  const guard = await claimSendGuard(reference);
+  // Everything a successful (or guard-recovered) send stamps: the count,
+  // the schedule snapshot, the next due date (or nothing when the cycle is
+  // complete) and a fresh failure budget for the next cycle.
+  const sentFields = {
+    Status: 'Sent',
+    EmailsSent: cycle,
+    EmailsPlanned: planned,
+    GapDays: gapDays,
+    NextEmailAtUtc: cycle < planned ? new Date(Date.now() + gapDays * 24 * 60 * 60 * 1000).toISOString() : null,
+    Attempts: 0,
+    LastError: '',
+  };
+
+  const guard = await claimSendGuard(reference, cycle);
   if (guard === 'exists') {
-    // A previous run sent but crashed before stamping. Record the truth.
-    return stamp({ Status: 'Sent', Attempts: attempts + 1, LastError: 'send previously recorded (guard hit)' }, 'sent');
+    // A previous run sent this cycle but crashed before stamping.
+    return stamp({ ...sentFields, LastError: 'send previously recorded (guard hit)' }, 'sent');
   }
 
   const sendResult = await sendViaSendGrid({
@@ -182,14 +228,17 @@ async function processRecord(record) {
     subject,
     html,
     categoryTag: 'payment-reminder',
-    headers: { 'X-TG-Reminder-Ref': reference },
+    headers: { 'X-TG-Reminder-Ref': `${reference}:${cycle}` },
   });
   if (sendResult.status !== 'sent') {
-    return finishFailure(`email send failed: ${sendResult.error || 'unknown'}`, { Status: 'Fetched' });
+    // First-email failures park the row as Fetched; follow-up failures keep
+    // Status Sent (the past-due NextEmailAtUtc keeps it in the sweep) —
+    // both retry on the backoff schedule until the attempt cap.
+    return finishFailure(`email send failed: ${sendResult.error || 'unknown'}`, isFollowUp ? {} : { Status: 'Fetched' });
   }
 
-  console.log('[payment-reminders:worker] reminder emailed for', reference, 'to', maskEmail(customerEmail));
-  return stamp({ Status: 'Sent', Attempts: attempts + 1, LastError: '' }, 'sent');
+  console.log('[payment-reminders:worker] reminder', `${cycle}/${planned}`, 'emailed for', reference, 'to', maskEmail(customerEmail));
+  return stamp(sentFields, 'sent');
 }
 
 export default async function handler(req, res) {
@@ -207,7 +256,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ ok: false, error: 'queue_list_failed' });
   }
 
-  const summary = { picked: records.length, fetched: 0, sent: 0, suppressed: 0, retry: 0, failed: 0, skipped: 0, waiting: 0 };
+  const summary = { picked: records.length, fetched: 0, sent: 0, settled: 0, suppressed: 0, retry: 0, failed: 0, skipped: 0, waiting: 0 };
   for (const record of records) {
     try {
       const { outcome } = await processRecord(record);
