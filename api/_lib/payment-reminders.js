@@ -20,14 +20,15 @@
  *    is the latency optimisation. Swapping in a push queue later (QStash
  *    etc.) only means changing the kick — the contract stays.
  *  - IDEMPOTENCY = an atomic Redis SET NX EX claim on the natural key
- *    applicationId|orderKey|reminderType|UTC-receipt-date, holding the
- *    original reference as its value so a duplicate can return it. Keying
- *    on the RECEIPT DAY means: same-day retries after a network blip are
- *    deduplicated; tomorrow's daily run is a fresh notification. (Open
- *    question flagged to the core team: whether they'd rather key on
- *    dueDate — one reminder per balance, ever — which changes what a
- *    legitimate repeat looks like.) A caller-supplied Idempotency-Key
- *    header is honoured in preference when present. Storage backs Redis up:
+ *    applicationId|orderKey|reminderType|dueDate, holding the original
+ *    reference as its value so a duplicate can return it. Keying on the
+ *    BALANCE (not the receipt day) means one record owns the whole chase:
+ *    the client-configured follow-up schedule runs off that record, and
+ *    however often the core re-pushes the same balance it gets 409 + the
+ *    original reference. This settles the spec's open question: cadence is
+ *    OURS, the core's push schedule is just the trigger. A caller-supplied
+ *    Idempotency-Key header is honoured in preference when present.
+ *    Storage backs Redis up:
  *    the endpoint checks Airtable for the key before every create — not
  *    only when Redis is down — because a record accepted DURING an outage
  *    has no claim, so after recovery a same-day retry looks new to Redis.
@@ -61,7 +62,7 @@ export const REMINDER_TYPES = ['DepositBalance', 'FinalBalance'];
 
 export const MAX_ATTEMPTS = 5;
 
-const IDEM_TTL_SECONDS = 48 * 60 * 60; // covers same-day retries; the key embeds the date so days never collide
+const IDEM_TTL_SECONDS = 60 * 24 * 60 * 60; // the claim spans the whole chase window for a balance; storage backs it beyond that
 const IDEM_PREFIX = 'payrem:idem:';
 const LOCK_PREFIX = 'payrem:lock:';
 
@@ -185,14 +186,17 @@ export async function resolveApplication(applicationId) {
 // ── Idempotency ──────────────────────────────────────────────────────────────
 
 /**
- * Natural key: application + order + reminder type + the UTC calendar day we
- * received it. Same-day retries collapse; tomorrow's daily run is new.
- * A caller-supplied Idempotency-Key header takes precedence when present.
+ * Natural key: application + order + reminder type + due date. One record
+ * per BALANCE being chased, not per day: the whole reminder schedule (first
+ * email plus client-configured follow-ups) lives on that one record, so the
+ * core's daily re-push for the same balance is a duplicate (409 + original
+ * reference) rather than the start of a second chase. A new balance cycle
+ * (a different due date, or FinalBalance after DepositBalance) is a fresh
+ * record. A caller-supplied Idempotency-Key header takes precedence.
  */
-export function buildIdempotencyKey(value, receivedAt, callerKey) {
+export function buildIdempotencyKey(value, _receivedAt, callerKey) {
   if (callerKey) return `hdr:${callerKey}`;
-  const day = receivedAt.toISOString().slice(0, 10);
-  return `${value.applicationId}|${value.orderKey}|${value.reminderType}|${day}`;
+  return `${value.applicationId}|${value.orderKey}|${value.reminderType}|${value.dueDate || 'none'}`;
 }
 
 /**
@@ -293,11 +297,12 @@ export async function findReminderByIdempotencyKey(idemKey) {
 /**
  * Oldest-first batch of queued rows for the worker. Accepted = not yet
  * fetched; Fetched = order fetched but the email not yet sent (either
- * sending is disabled, or a send failed and awaits its backoff retry).
- * Sent / Skipped / Failed are terminal and never picked up again.
+ * sending is disabled, or a send failed and awaits its backoff retry);
+ * Sent with a NextEmailAtUtc that has passed = a follow-up reminder is due.
+ * Sent with no NextEmailAtUtc, Skipped and Failed are terminal.
  */
 export async function listPendingReminders(limit = 25) {
-  const formula = `OR({Status}='Accepted',{Status}='Fetched')`;
+  const formula = `OR({Status}='Accepted',{Status}='Fetched',AND({Status}='Sent',{NextEmailAtUtc},{NextEmailAtUtc}<=NOW()))`;
   const url = `${tableUrl()}?filterByFormula=${encodeURIComponent(formula)}`
     + `&maxRecords=${limit}`
     + `&sort%5B0%5D%5Bfield%5D=ReceivedAtUtc&sort%5B0%5D%5Bdirection%5D=asc`;
@@ -375,14 +380,27 @@ export function sendingEnabled() {
 export const MAX_EMAIL_AGE_MS = 48 * 60 * 60 * 1000;
 
 /**
- * One-shot send guard: claimed immediately before handing the email to
- * SendGrid, so a crash between the send and the Sent stamp cannot resend on
- * the next sweep. 'exists' means a send was already recorded for this
- * reference; 'error' (Redis down) proceeds — the Status machine still
- * prevents re-sends in every non-crash path.
+ * One-shot send guard PER EMAIL IN THE CYCLE: claimed immediately before
+ * handing an email to SendGrid, so a crash between the send and the stamp
+ * cannot resend on the next sweep. cycle 1 = the first reminder, 2+ =
+ * follow-ups. 'exists' means this cycle's send was already recorded;
+ * 'error' (Redis down) proceeds — the schedule fields still prevent
+ * re-sends in every non-crash path.
  */
-export async function claimSendGuard(reference) {
-  return await claimNxEx(`payrem:sent:${reference}`, '1', 7 * 24 * 60 * 60);
+export async function claimSendGuard(reference, cycle = 1) {
+  return await claimNxEx(`payrem:sent:${reference}:${cycle}`, '1', 30 * 24 * 60 * 60);
+}
+
+/**
+ * Clamp the client's reminder-schedule settings into safe bounds. Defaults
+ * (3 emails, 7 days apart) reflect how agencies actually chase a balance;
+ * a client wanting a single email sets count 1 in their editor.
+ */
+export function normaliseReminderSchedule(cfg) {
+  const raw = (cfg && typeof cfg === 'object') ? cfg : {};
+  const count = Math.min(5, Math.max(1, Math.round(Number(raw.count)) || 3));
+  const gapDays = Math.min(30, Math.max(1, Math.round(Number(raw.gapDays)) || 7));
+  return { count, gapDays };
 }
 
 /** The customer-facing booking reference, when the raw order carries one. */
@@ -433,6 +451,7 @@ export async function resolveReminderBranding(application) {
     name: (application && application.clientName) || 'Your travel team',
     logoUrl: '', footerLine: '', replyTo: '',
     supportEmail: '', supportPhone: '', pageUrl: '',
+    schedule: normaliseReminderSchedule(null),
   };
 
   const recordId = application && application.recordId;
@@ -462,6 +481,7 @@ export async function resolveReminderBranding(application) {
       brand.supportEmail = String(cfg?.support?.email || '').trim() || brand.replyTo;
       brand.supportPhone = String(cfg?.support?.phone || '').trim();
       brand.pageUrl = httpsOnly(cfg?.pageUrl);
+      brand.schedule = normaliseReminderSchedule(cfg?.reminders);
       return brand;
     }
   } catch (err) {
