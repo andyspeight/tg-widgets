@@ -203,6 +203,20 @@
           </div>
         </div>
 
+        <!-- Departure points -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+            <span class="tgse-section-label">Departure points</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <label class="tgwm-field-label" for="f-departures">Departure countries</label>
+            <input type="text" class="tgwm-input" id="f-departures" maxlength="60" placeholder="e.g. GB or GB, IE">
+            <div class="tgwm-field-hint">Country codes of the departure airports to include, comma separated (GB = United Kingdom, IE = Ireland). Leave blank to show offers from all departure points.</div>
+          </div>
+        </div>
+
       </div>
 
       <!-- ===== DESIGN TAB ===== -->
@@ -460,6 +474,7 @@
   function syncControls() {
     document.getElementById('f-title').value = C.title || '';
     document.getElementById('f-subtitle').value = C.subtitle || '';
+    document.getElementById('f-departures').value = C.departureCountries || '';
     document.getElementById('f-fullscreen').checked = C.showFullscreenButton !== false;
     ensureCurrencyOptions();
     document.getElementById('f-currency').value = C.displayCurrency || 'GBP';
@@ -571,6 +586,7 @@
     // Title / intro
     document.getElementById('f-title').addEventListener('input', (e) => { C.title = e.target.value; shell.markDirty(); render(); });
     document.getElementById('f-subtitle').addEventListener('input', (e) => { C.subtitle = e.target.value; shell.markDirty(); render(); });
+    document.getElementById('f-departures').addEventListener('input', (e) => { C.departureCountries = e.target.value; shell.markDirty(); render(); });
     document.getElementById('f-fullscreen').addEventListener('change', (e) => { C.showFullscreenButton = e.target.checked; shell.markDirty(); render(); });
     document.getElementById('f-currency').addEventListener('change', (e) => { C.displayCurrency = e.target.value; shell.markDirty(); render(); });
     document.getElementById('f-currency-switcher').addEventListener('change', (e) => { C.showCurrencySwitcher = e.target.checked; shell.markDirty(); render(); });
