@@ -53,7 +53,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.11.12';
+  const VERSION = '3.12.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -709,6 +709,27 @@
     NOC: { lat: 53.9103, lng: -8.8185, label: 'Ireland West Knock' },
     KIR: { lat: 52.1809, lng: -9.5238, label: 'Kerry' },
   };
+
+  // Which country each known departure airport belongs to. Everything in
+  // UK_AIRPORTS is GB except the Irish set below. Used by the editor-driven
+  // departure-point filter (cfg.departureCountries).
+  const IRISH_AIRPORTS = new Set(['DUB', 'ORK', 'SNN', 'NOC', 'KIR']);
+  function originCountry(iata) {
+    const code = String(iata || '').toUpperCase();
+    if (!UK_AIRPORTS[code]) return null; // unknown departure airport
+    return IRISH_AIRPORTS.has(code) ? 'IE' : 'GB';
+  }
+
+  // 'gb, ie' / 'UK' / 'GB,IE' → Set(['GB','IE']); blank/invalid → null (= no
+  // filter). UK is a courtesy alias for GB — clients will type it.
+  function parseDepartureCountries(raw) {
+    if (typeof raw !== 'string' || !raw.trim()) return null;
+    const codes = raw.split(',')
+      .map(s => s.trim().toUpperCase())
+      .map(s => (s === 'UK' ? 'GB' : s))
+      .filter(s => /^[A-Z]{2}$/.test(s));
+    return codes.length ? new Set(codes) : null;
+  }
 
   // ── Leaflet CSS (inlined — needs to live inside Shadow DOM since <link> tags don't penetrate)
 
@@ -2289,6 +2310,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
     fullscreenUrl: '',
     // Origin airport code shown in pin context, also used for fullscreen link.
     origin: 'LGW',
+    // Departure-point filter: comma-delimited ISO country codes (e.g. 'GB' or
+    // 'GB,IE'). The offers cache sweeps multiple departure markets, so this
+    // lets a client show only offers departing from their market's airports.
+    // Blank = all departure points (current behaviour). 'UK' is accepted as
+    // an alias for GB. Offers whose departure airport is unknown to the
+    // widget are hidden while a filter is set (predictable beats permissive).
+    departureCountries: '',
     // How many top destinations to show in envelope mode. World view gets crowded fast.
     maxPins: 10,
     // Optional per-widget MapTiler key override. Leave empty to use the shared key.
@@ -2331,6 +2359,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
       this._ovMapHeightRetried = false;
       this._ovHasView = false;
       this._dealsToken = 0;
+      // Departure-point filter, parsed once. null = show all departures.
+      this._depAllow = parseDepartureCountries(this.cfg.departureCountries);
       // Resort drill-down state
       this._pinMode = 'country';
       this._resortMarkers = [];
@@ -3519,8 +3549,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
         .then(r => r.ok ? r.json() : Promise.reject(new Error('deals HTTP ' + r.status)))
         .then(data => {
           if (token !== this._dealsToken) return; // superseded
+          // Filter ONCE at arrival — cache, cards, resort pins, routes and the
+          // price/rating controls all see the same policy-filtered list.
           const offers = ((data && Array.isArray(data.offers)) ? data.offers : [])
-            .filter(o => mapSupplierAllows(o, this.cfg.supplierFilter));
+            .filter(o => mapSupplierAllows(o, this.cfg.supplierFilter))
+            .filter(o => !this._depAllow || this._depAllow.has(originCountry(o.origin)));
           if (!offers.length) { this._renderDealsEmpty(scroll, metaEl, name); return; }
           const total = data.total || offers.length;
           // Cache for resort filtering + zoom re-entry.
@@ -3751,7 +3784,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
         .then(data => {
           if (token !== this._resortDealsToken) return;   // superseded by another click
           if (this._activeResort !== resort) return;        // user moved on
-          const offers = (data && Array.isArray(data.offers)) ? data.offers : [];
+          // Same policy filters as the country-level load: this path fetches
+          // fresh from the airport endpoint, so the supplier and departure
+          // filters must be re-applied here or excluded offers reappear in
+          // the resort drill-down.
+          const offers = ((data && Array.isArray(data.offers)) ? data.offers : [])
+            .filter(o => mapSupplierAllows(o, this.cfg.supplierFilter))
+            .filter(o => !this._depAllow || this._depAllow.has(originCountry(o.origin)));
           // The airport may serve several resorts — narrow to this one, then
           // honour any active in-country filters.
           let mine = offers.filter(o => o.resort === resort);
