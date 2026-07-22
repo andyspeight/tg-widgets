@@ -58,17 +58,19 @@ function extractFn(src, signature) {
 
 // Build a callable deeplink function from a widget file, injecting the needed
 // closure values via a wrapper.
-function buildOffersDeeplink(src, appId) {
+function buildOffersDeeplink(src, appId, propertyPin) {
   const brd = extractFn(src, 'function brdCode(b)');
+  const anchor = extractFn(src, 'function setPropertyAnchor(p, hotel, city, lat, lng, refn)');
   const fn = extractFn(src, 'function offersDeeplink(o)');
   // eslint-disable-next-line no-new-func
-  return new Function('APPID', `const ACTIVE_APPID = APPID; ${brd}\n${fn}\nreturn offersDeeplink;`)(appId);
+  return new Function('APPID', 'PIN', `const ACTIVE_APPID = APPID; const PROPERTY_PIN = PIN === true; ${anchor}\n${brd}\n${fn}\nreturn offersDeeplink;`)(appId, propertyPin);
 }
 function buildMapDeeplink(src) {
   const brd = extractFn(src, 'function brdCode(b)');
-  const fn = extractFn(src, 'function buildDeeplink(o, appId)');
+  const anchor = extractFn(src, 'function setPropertyAnchor(p, hotel, city, lat, lng, refn)');
+  const fn = extractFn(src, 'function buildDeeplink(o, appId, opts)');
   // eslint-disable-next-line no-new-func
-  return new Function(`const TVLLNK_BASE = 'https://dl.tvllnk.com'; ${brd}\n${fn}\nreturn buildDeeplink;`)();
+  return new Function(`const TVLLNK_BASE = 'https://dl.tvllnk.com'; ${anchor}\n${brd}\n${fn}\nreturn buildDeeplink;`)();
 }
 
 const offersSrc = fs.readFileSync(OFFERS, 'utf8');
@@ -249,6 +251,135 @@ eq(qp(buildDeeplink({ type: 'Packages', airport: 'AGP', countryCode: 'ES', outbo
 
 // ── World Map: no AppID → empty string ────────────────────────────────────
 eq(buildDeeplink({ type: 'Packages', airport: 'MLE' }, ''), '', 'map: empty when no AppID');
+
+// ═══ Property pinning (per-widget opt-in, 22 Jul 2026) ═════════════════════
+// Recipe verified against Travelify's own generator: loc="<hotel>, <city>"
+// + loct=Property + lat/lng + rad=1 + refn=TTI:<code>. Off by default.
+const offersDeeplinkPinned = buildOffersDeeplink(offersSrc, '370', true);
+
+const pinnable = () => ({
+  type: 'Accommodation', adults: 2,
+  accommodation: {
+    sid: 45, name: 'Hilton Bournemouth', nights: 4, boardBasis: 'BedAndBreakfast', rating: 4,
+    uniqueRef: 'TTI:58612582', checkinDate: '2026-07-26',
+    destination: { name: 'Bournemouth', countryCode: 'GB', latitude: 50.71894237, longitude: -1.8807818 },
+    pricing: { currency: 'GBP' },
+  },
+});
+
+// Offers: pin ON + full data → the exact recipe from the verified live link
+{
+  const q = qp(offersDeeplinkPinned(pinnable()));
+  eq(q.get('st'), 'Accommodation', 'offers/pin st');
+  eq(q.get('loc'), 'Hilton Bournemouth, Bournemouth', 'offers/pin loc = "hotel, city"');
+  eq(q.get('loct'), 'Property', 'offers/pin loct=Property');
+  eq(q.get('refn'), 'TTI:58612582', 'offers/pin refn passes the TTI code through');
+  eq(q.get('lat'), '50.71894237', 'offers/pin lat');
+  eq(q.get('lng'), '-1.8807818', 'offers/pin lng');
+  eq(q.get('rad'), '1', 'offers/pin rad=1');
+  eq(q.get('ctry'), null, 'offers/pin: no ctry (mirrors the verified link)');
+  eq(q.get('fr'), '2026-07-26', 'offers/pin dates untouched');
+  eq(q.get('dur'), '4', 'offers/pin nights untouched');
+  eq(q.get('rat'), '4', 'offers/pin rating untouched');
+}
+
+// Offers: pin ON on a PACKAGE keeps the flight leg params alongside the anchor
+{
+  const o = pinnable();
+  o.type = 'Packages'; o.packageType = 'PackageHolidays';
+  o.flight = { origin: { iataCode: 'LGW' }, sid: 45, destination: { iataCode: 'BOH', countryCode: 'GB' }, outboundDate: '2026-07-26' };
+  const q = qp(offersDeeplinkPinned(o));
+  eq(q.get('st'), 'Packages', 'offers/pin-pkg st');
+  eq(q.get('org'), 'LGW', 'offers/pin-pkg org kept');
+  eq(q.get('dst'), 'BOH', 'offers/pin-pkg dst kept');
+  eq(q.get('loct'), 'Property', 'offers/pin-pkg property anchor');
+  eq(q.get('refn'), 'TTI:58612582', 'offers/pin-pkg refn');
+}
+
+// Offers: bare-number uniqueRef gets the TTI: prefix
+{
+  const o = pinnable();
+  o.accommodation.uniqueRef = '58612582';
+  eq(qp(offersDeeplinkPinned(o)).get('refn'), 'TTI:58612582', 'offers/pin: bare code gets TTI: prefix');
+}
+
+// Offers: pin ON but NO property code → falls back to the airport/dest anchor
+{
+  const o = pinnable();
+  delete o.accommodation.uniqueRef;
+  const q = qp(offersDeeplinkPinned(o));
+  eq(q.get('loct'), null, 'offers/pin-fallback: no loct=Property without a code');
+  eq(q.get('refn'), null, 'offers/pin-fallback: no refn');
+  eq(q.get('loc'), 'Bournemouth', 'offers/pin-fallback: destination anchor as today');
+  eq(q.get('ctry'), 'GB', 'offers/pin-fallback: ctry restored');
+}
+
+// Offers: pin ON but no hotel name → fallback too
+{
+  const o = pinnable();
+  delete o.accommodation.name;
+  eq(qp(offersDeeplinkPinned(o)).get('loct'), null, 'offers/pin-fallback: no anchor without the hotel name');
+}
+
+// Offers: coordinates missing → still pins, just without lat/lng/rad
+{
+  const o = pinnable();
+  delete o.accommodation.destination.latitude;
+  delete o.accommodation.destination.longitude;
+  const q = qp(offersDeeplinkPinned(o));
+  eq(q.get('loct'), 'Property', 'offers/pin-nocoords still pins');
+  eq(q.get('refn'), 'TTI:58612582', 'offers/pin-nocoords refn kept');
+  eq(q.get('lat'), null, 'offers/pin-nocoords no lat');
+  eq(q.get('rad'), null, 'offers/pin-nocoords no rad');
+}
+
+// Offers: pin OFF (the default) with full property data → EXACTLY today's link
+{
+  const q = qp(offersDeeplink(pinnable()));
+  eq(q.get('loct'), null, 'offers/off: no property anchor when the setting is off');
+  eq(q.get('refn'), null, 'offers/off: no refn when the setting is off');
+  eq(q.get('loc'), 'Bournemouth', 'offers/off: destination anchor unchanged');
+}
+
+// World Map: pin via opts + cache-shape offer
+{
+  const o = {
+    type: 'Accommodation', adults: 2, nights: 4, checkinDate: '2026-07-26',
+    airport: 'BOH', countryCode: 'GB', resort: 'Bournemouth',
+    hotel: 'Hilton Bournemouth', rating: 4, boardBasis: 'BedAndBreakfast',
+    resortLat: 50.71894237, resortLng: -1.8807818,
+    accommodationUniqueRef: 'TTI:58612582', currency: 'GBP',
+  };
+  const q = qp(buildDeeplink(o, '370', { propertyPin: true }));
+  eq(q.get('loc'), 'Hilton Bournemouth, Bournemouth', 'map/pin loc = "hotel, city"');
+  eq(q.get('loct'), 'Property', 'map/pin loct=Property');
+  eq(q.get('refn'), 'TTI:58612582', 'map/pin refn from accommodationUniqueRef');
+  eq(q.get('lat'), '50.71894237', 'map/pin lat from resort coords');
+  eq(q.get('rad'), '1', 'map/pin rad=1');
+  eq(q.get('ctry'), null, 'map/pin no ctry');
+
+  // Same offer without the code → airport anchor exactly as today
+  const q2 = qp(buildDeeplink({ ...o, accommodationUniqueRef: null }, '370', { propertyPin: true }));
+  eq(q2.get('loct'), 'Airport', 'map/pin-fallback: airport anchor');
+  eq(q2.get('loc'), 'BOH', 'map/pin-fallback: loc is the airport');
+  eq(q2.get('refn'), null, 'map/pin-fallback: no refn');
+
+  // Pin not requested → unchanged current behaviour even with full data
+  const q3 = qp(buildDeeplink(o, '370'));
+  eq(q3.get('loct'), 'Airport', 'map/off: airport anchor when opts absent');
+  eq(q3.get('refn'), null, 'map/off: no refn');
+}
+
+// Editors + defaults: the setting exists, wired, and defaults OFF
+{
+  const offersEd = fs.readFileSync(path.join(__dirname, '..', 'public', 'editor-offers.html'), 'utf8');
+  const mapEd = fs.readFileSync(path.join(__dirname, '..', 'public', 'editor-worldmap.html'), 'utf8');
+  assert(/cfgPropertyLinks/.test(offersEd) && /propertyDeeplinks = next/.test(offersEd), 'offers editor toggle wired');
+  assert(/f-property-links/.test(mapEd) && /C\.propertyDeeplinks = e\.target\.checked/.test(mapEd), 'map editor toggle wired');
+  assert(/propertyDeeplinks: false/.test(mapSrc), 'map widget defaults the setting OFF');
+  assert(/setPropertyPin\(this\.cfg\.propertyDeeplinks === true\)/.test(offersSrc) && /setPropertyPin\(cfg\.propertyDeeplinks === true\)/.test(offersSrc),
+    'offers widget sets the pin flag on BOTH render paths (grid + popup)');
+}
 
 // ── Report ────────────────────────────────────────────────────────────────
 if (failures.length) {

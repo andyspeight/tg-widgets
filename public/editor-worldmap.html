@@ -217,6 +217,25 @@
           </div>
         </div>
 
+        <!-- Deal links -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            <span class="tgse-section-label">Deal links</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgwm-field tgwm-toggle-row">
+              <label class="tgwm-field-label" for="f-property-links">Link each deal to its exact property</label>
+              <label class="tgwm-switch">
+                <input type="checkbox" id="f-property-links">
+                <span></span>
+              </label>
+            </div>
+            <div class="tgwm-field-hint">When on, clicking a deal searches that specific hotel on your booking site. When off, it searches the deal's destination with matching dates, board and rating (the current behaviour). Deals without a property reference always fall back to the destination search.</div>
+          </div>
+        </div>
+
       </div>
 
       <!-- ===== DESIGN TAB ===== -->
@@ -475,6 +494,7 @@
     document.getElementById('f-title').value = C.title || '';
     document.getElementById('f-subtitle').value = C.subtitle || '';
     document.getElementById('f-departures').value = C.departureCountries || '';
+    document.getElementById('f-property-links').checked = C.propertyDeeplinks === true;
     document.getElementById('f-fullscreen').checked = C.showFullscreenButton !== false;
     ensureCurrencyOptions();
     document.getElementById('f-currency').value = C.displayCurrency || 'GBP';
@@ -587,6 +607,7 @@
     document.getElementById('f-title').addEventListener('input', (e) => { C.title = e.target.value; shell.markDirty(); render(); });
     document.getElementById('f-subtitle').addEventListener('input', (e) => { C.subtitle = e.target.value; shell.markDirty(); render(); });
     document.getElementById('f-departures').addEventListener('input', (e) => { C.departureCountries = e.target.value; shell.markDirty(); render(); });
+    document.getElementById('f-property-links').addEventListener('change', (e) => { C.propertyDeeplinks = e.target.checked; shell.markDirty(); render(); });
     document.getElementById('f-fullscreen').addEventListener('change', (e) => { C.showFullscreenButton = e.target.checked; shell.markDirty(); render(); });
     document.getElementById('f-currency').addEventListener('change', (e) => { C.displayCurrency = e.target.value; shell.markDirty(); render(); });
     document.getElementById('f-currency-switcher').addEventListener('change', (e) => { C.showCurrencySwitcher = e.target.checked; shell.markDirty(); render(); });
