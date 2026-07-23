@@ -145,7 +145,7 @@ export function renderDefaultAgentEmail(t) {
                 </tr>
               </table>
               <div style="margin-top:12px;color:#94A3B8;font-size:12px;">
-                Or <a href="${esc(t.submissionUrl)}" style="color:#0096B7;text-decoration:none;">view this enquiry in Airtable</a>
+                Or <a href="${esc(t.submissionUrl)}" style="color:#0096B7;text-decoration:none;">view this enquiry in your inbox</a>
               </div>
             </td>
           </tr>

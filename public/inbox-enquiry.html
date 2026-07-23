@@ -2621,7 +2621,16 @@ function bindRefresh() {
   bindSearch();
   bindRefresh();
   bindDrawerDismiss();
-  fetchSubmissions(false);
+  fetchSubmissions(false).then(() => {
+    // Deep-link from the agent notification email (/inbox-enquiry?id=...): open
+    // that enquiry once the list is loaded. openSubmission fetches it
+    // owner-scoped, so a client can only ever open one of their own — an id for
+    // another client's submission simply returns nothing.
+    try {
+      const id = new URLSearchParams(location.search).get('id');
+      if (id) openSubmission(id);
+    } catch (e) { /* malformed URL — ignore */ }
+  });
 })();
 </script>
 
