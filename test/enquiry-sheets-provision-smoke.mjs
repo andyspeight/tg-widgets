@@ -99,6 +99,16 @@ ok(shareCall && /"emailAddress":"george@freefromtravel.com"/.test(shareCall.body
 ok(shareCall && shareCall.url.includes('sendNotificationEmail=true'), 'owner gets the Google notification email');
 const tokenCall = calls.find(c => c.url.includes('oauth2.googleapis.com'));
 ok(tokenCall && /assertion=/.test(tokenCall.body), 'real JWT signing path exercised');
+// Server-side save-back: the freshly-created sheet must be wired onto the form
+// here, so routing works even if the editor never completes its own save. The
+// 23 Jul 2026 report — Sheets routing left ON with a blank sheet id — failed
+// every submission with "No Google Sheet ID configured".
+const saveBack = calls.find(c => c.method === 'PATCH' && /\/recFORM0000000001$/.test(c.url));
+ok(saveBack, 'the form is PATCHed to wire the sheet server-side');
+ok(saveBack && /"fldtfW0lFELg7yiv2":"SHEET123"/.test(saveBack.body), 'save-back writes the new sheet id onto the form');
+ok(saveBack && /"fldGg7Yew1GCkmW08":true/.test(saveBack.body), 'save-back enables Google Sheets routing on the form');
+ok(saveBack && /"fldJ9KIeaiVsU4jP4":"Enquiries"/.test(saveBack.body), 'save-back sets the sheet tab to Enquiries');
+ok(res.body && res.body.savedToForm === true, 'response confirms the form was saved (savedToForm:true)');
 
 // ── 2. Staff can provision for a client; sheet still shared with the owner ───
 installFetch('george@freefromtravel.com');
