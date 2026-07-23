@@ -19,6 +19,8 @@
  * Run: node test/widget-ai-smoke.mjs
  */
 
+import jwt from 'jsonwebtoken';
+
 let passed = 0, failed = 0;
 const ok = (c, label) => { if (c) { passed++; } else { failed++; console.error('  FAIL:', label); } };
 
@@ -53,7 +55,12 @@ global.fetch = async (url, opts = {}) => {
     const decoded = decodeURIComponent(u);
     const m = decoded.match(/filterByFormula=([^&]*)/);
     state.lookupFormulas.push(m ? m[1] : '');
-    const matches = /\{Email\}/.test(decoded) && /george@freefromtravel\.com/.test(decoded) && /\{Status\}='Active'/.test(decoded);
+    const active = /\{Status\}='Active'/.test(decoded);
+    // Legacy bearer path resolves by email; the SSO cookie path resolves the
+    // SAME client by RECORD_ID(). Both are Active-gated.
+    const emailMatch = /\{Email\}/.test(decoded) && /george@freefromtravel\.com/.test(decoded);
+    const idMatch = /RECORD_ID\(\)='recCLIENT00000001'/.test(decoded);
+    const matches = active && (emailMatch || idMatch);
     return json(200, { records: matches ? [{ id: 'recCLIENT00000001', fields: {
       [F.plan]: state.account.plan,
       [F.clientName]: state.account.clientName,
@@ -112,6 +119,19 @@ const request = (body, email = 'george@freefromtravel.com') => ({
   body,
   socket: { remoteAddress: '10.0.0.1' },
 });
+// The CURRENT sign-in flow: an id.travelify.io SSO cookie. Its JWT carries the
+// Clients record id as clientId but NO email (see api/auth/* signSessionToken).
+// This is the shape that produced "Session error" until widget-ai learned to
+// resolve the account by clientId. `claims` lets a test omit clientId.
+const cookieRequest = (body, claims = { userId: 'recUSER00000001A', clientId: 'recCLIENT00000001', role: 'owner', sessionId: 'sess-1' }) => {
+  const token = jwt.sign(claims, process.env.TG_SESSION_SECRET, { algorithm: 'HS256', issuer: 'tg-widget-suite', expiresIn: '24h' });
+  return {
+    method: 'POST',
+    headers: { cookie: `tg_session=${token}`, origin: 'https://widgets.travelify.io' },
+    body,
+    socket: { remoteAddress: '10.0.0.2' },
+  };
+};
 // A genuinely substantive description — what a good prompt looks like.
 const GOOD_DESC = 'We are Free From Travel, an ABTA agency in Bristol arranging allergy-friendly family holidays to Spain, Greece and Portugal, plus escorted tours.';
 const faqReq = (over = {}) => ({
@@ -162,6 +182,37 @@ ok(!process.env.AIRTABLE_USERS_TABLE, 'no bespoke env var needed — the 500 "AI
   ok(JSON.stringify(r2.body) === JSON.stringify(r1.body), 'cached retry returns the same result');
   ok(state.anthropicBodies.length === callsAfterFirst, 'identical retry makes NO model call (£0)');
   ok(state.patches.length === patchesAfterFirst, 'identical retry does NOT spend a daily credit');
+}
+
+// ── Current SSO cookie flow: no email, resolve by clientId ───────────────────
+// The 23 Jul 2026 report: the FAQ AI showed "Session error" for every user
+// signed in via the id.travelify.io cookie, whose JWT carries the Clients record
+// id (clientId) but no email — and widget-ai hard-required an email.
+{
+  let r = mockRes();
+  await handler(cookieRequest(faqReq({ prompt: uniqueDesc('COOKIE') })), r);
+  ok(r.statusCode === 200 && r.body?.questions?.length === 2,
+    'SSO cookie (no email) resolves the account by clientId and generates — no more "Session error"');
+  const f = decodeURIComponent(state.lookupFormulas.at(-1) || '');
+  ok(/RECORD_ID\(\)='recCLIENT00000001'/.test(f) && /\{Status\}='Active'/.test(f),
+    'cookie path resolves the Clients record by RECORD_ID(), still Active-gated');
+}
+
+// An SSO cookie for an unknown/suspended client → 403, never a 500 Session error.
+{
+  let r = mockRes();
+  await handler(cookieRequest(faqReq({ prompt: uniqueDesc('COOKIE404') }),
+    { userId: 'recUSER00000001A', clientId: 'recCLIENTUNKNOWNX', role: 'owner', sessionId: 's2' }), r);
+  ok(r.statusCode === 403 && !/Session error/.test(r.body?.error || ''),
+    'unknown client via cookie → 403 "Account not found", not a mystery 500');
+}
+
+// A validated session carrying NEITHER email nor clientId → 403, not the old 500.
+{
+  let r = mockRes();
+  await handler(cookieRequest(faqReq(), { userId: 'recUSER00000001A', role: 'owner', sessionId: 's3' }), r);
+  ok(r.statusCode === 403 && !/Session error/.test(r.body?.error || ''),
+    'token with neither email nor clientId → 403, not a bare 500 "Session error"');
 }
 
 // ── Per-type floors ──────────────────────────────────────────────────────────
