@@ -78,6 +78,12 @@ global.fetch = async (url, opts = {}) => {
   if (u.startsWith('https://api.anthropic.com/')) {
     const sent = JSON.parse(body);
     state.anthropicBodies.push(sent);
+    // Test-scripted responses (for the empty/retry/refusal/prose cases):
+    // consume one { text, stopReason } per call, in order.
+    if (Array.isArray(state.aiScript) && state.aiScript.length) {
+      const nxt = state.aiScript.shift();
+      return json(200, { content: [{ type: 'text', text: nxt.text || '' }], stop_reason: nxt.stopReason || 'end_turn' });
+    }
     const sys = sent.system || '';
     const userMsg = sent.messages?.[0]?.content || '';
     let obj;
@@ -104,7 +110,7 @@ global.fetch = async (url, opts = {}) => {
         categories: [],
       };
     }
-    return json(200, { content: [{ type: 'text', text: JSON.stringify(obj) }] });
+    return json(200, { content: [{ type: 'text', text: JSON.stringify(obj) }], stop_reason: 'end_turn' });
   }
   throw new Error('unmocked fetch: ' + u);
 };
@@ -248,6 +254,44 @@ ok(!process.env.AIRTABLE_USERS_TABLE, 'no bespoke env var needed — the 500 "AI
 
 // A prompt the AI cannot turn into any valid setting → surfaced, not a silent no-op.
 // (Model returns an all-junk config → validator finds nothing usable → 502.)
+
+// ── Generation resilience: the 23 Jul 2026 FAQ "AI returned an invalid
+//    response" was an EMPTY model completion with no retry and no clear reason.
+{
+  // An empty first completion is retried once, then succeeds.
+  state.aiScript = [{ text: '', stopReason: 'end_turn' }]; // 2nd call falls through to the valid FAQ default
+  let r = mockRes();
+  const before = state.anthropicBodies.length;
+  await handler(request(faqReq({ prompt: uniqueDesc('RETRY') })), r);
+  ok(r.statusCode === 200 && r.body?.questions?.length === 2, 'an empty first completion is retried and then succeeds (no opaque 502)');
+  ok(state.anthropicBodies.length === before + 2, 'exactly one retry — two model calls — on an empty response');
+  state.aiScript = null;
+}
+{
+  // JSON wrapped in prose is salvaged rather than rejected.
+  state.aiScript = [{ text: 'Sure! Here are your FAQs:\n{"questions":[{"question":"When to visit?","answer":"Spring and autumn are ideal for comfortable temperatures."}],"categories":[]}\nHope that helps.', stopReason: 'end_turn' }];
+  let r = mockRes();
+  await handler(request(faqReq({ prompt: uniqueDesc('PROSE') })), r);
+  ok(r.statusCode === 200 && r.body?.questions?.length === 1, 'JSON wrapped in stray prose is salvaged, not rejected');
+  state.aiScript = null;
+}
+{
+  // A persistent refusal (empty + stop_reason 'refusal' both tries) → a clear,
+  // actionable 422, not the opaque 502.
+  state.aiScript = [{ text: '', stopReason: 'refusal' }, { text: '', stopReason: 'refusal' }];
+  let r = mockRes();
+  await handler(request(faqReq({ prompt: uniqueDesc('REFUSE') })), r);
+  ok(r.statusCode === 422 && r.body?.code === 'ai_declined', 'a persistent refusal returns a clear 422, not a mystery 502');
+  ok(/simplify/i.test(r.body?.error || ''), 'the decline message steers the client to simplify the request');
+  state.aiScript = null;
+}
+{
+  // FAQ scales its token budget with the requested count, so a big multi-topic
+  // ask cannot truncate mid-JSON (the real cause of the reported failure).
+  let r = mockRes();
+  await handler(request(faqReq({ prompt: uniqueDesc('TOKENS'), options: { count: 12, tone: 'professional', existingCategories: [] } })), r);
+  ok(state.anthropicBodies.at(-1)?.max_tokens === 2500 + 12 * 450, 'FAQ token budget scales with the requested count (12 → 7900)');
+}
 
 // ── Per-type floors ──────────────────────────────────────────────────────────
 // Weather's AI generates palette + CTA copy FROM a business description, so it
