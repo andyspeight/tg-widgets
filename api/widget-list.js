@@ -23,6 +23,14 @@
  *   client's email is shared with another account the user belongs to, the email
  *   fallback is dropped and we scope by ClientRecordId alone.
  *
+ *   Staff-email guard (23 Jul 2026, Worldchoice incident): a client account
+ *   whose login email IS a staff address gets no email fallback either — a
+ *   staff email never identifies one client, and the staff member's ownerless
+ *   personal/test widgets would otherwise surface in that client's dashboard.
+ *   The shared-email guard alone cannot catch this: it only compares against
+ *   other accounts the LOGGED-IN user belongs to, and a client's own users
+ *   belong to just their one account.
+ *
  *   No own-email rule: previous versions also OR-ed in the logged-in user's own
  *   email so staff saw their personal widgets. That smeared a staff member's
  *   widgets across every client they work in, so it has been removed. A genuine
@@ -39,6 +47,7 @@
 import { requireAuth, sanitiseForFormula, setCors, applyRateLimit, RATE_LIMITS } from './_auth.js';
 import { getRecord } from './_lib/auth/airtable.js';
 import { USERS, CLIENTS } from './_lib/auth/schema.js';
+import { isStaffEmail } from './_lib/auth/staff.js';
 
 const REC_ID_RE = /^rec[A-Za-z0-9]{14}$/;
 
@@ -168,8 +177,21 @@ export default async function handler(req, res) {
 
   // Resolve the async inputs, then build the formula with the pure helper below.
   const activeClientEmail = activeClientId ? await resolveActiveClientEmail(activeClientId) : '';
+  // The email fallback is dropped whenever the active client's email cannot
+  // identify exactly one client. Two ways that happens:
+  //   1. STAFF EMAIL: the client account was set up under a Travelgenix staff
+  //      address (staff configure accounts for clients, so this occurs in the
+  //      wild — Worldchoice Sports, 23 Jul 2026). A staff member's ownerless
+  //      personal/test widgets share that same ClientEmail, and without this
+  //      guard every one of them surfaced in the CLIENT's dashboard. The
+  //      shared-email check below cannot catch it because it only compares
+  //      against OTHER accounts the logged-in user belongs to, and the
+  //      client's users belong to one account.
+  //   2. SHARED EMAIL: the same login email owns several accounts the user
+  //      belongs to (the existing guard).
   const emailShared = activeClientId
-    ? await activeEmailIsShared(activeClientId, activeClientEmail, linkedClientIds)
+    ? (isStaffEmail(activeClientEmail)
+        || await activeEmailIsShared(activeClientId, activeClientEmail, linkedClientIds))
     : false;
 
   const formula = buildScopeFormula({ activeClientId, activeClientEmail, emailShared, userEmailLower });
