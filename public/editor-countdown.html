@@ -1677,6 +1677,12 @@
 
       // AI generate
       document.getElementById('aiGenerateBtn').addEventListener('click', aiGenerate);
+      if (window.tgse && tgse.wireAiPrompt) {
+        tgse.wireAiPrompt({
+          textarea: '#aiPrompt', button: '#aiGenerateBtn', minChars: 15, minWords: 3,
+          checklist: ['what you are promoting', 'when it ends', 'where the button links'],
+        });
+      }
 
       // Templates
       buildTemplates();

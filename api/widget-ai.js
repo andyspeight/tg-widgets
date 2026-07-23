@@ -78,6 +78,56 @@ const FETCH_TIMEOUT_MS = 30_000;
 const PROMPT_MIN_LEN = 5;
 const PROMPT_MAX_LEN = 1000;
 
+// Prompt-quality floor per widgetType. Business-description flows need a
+// substantive prompt or the AI produces generic filler and the client burns
+// credits retrying ("sidney faq" → rubbish → reflects badly on us). Enforced
+// in parseBody, BEFORE the daily counter is touched and BEFORE any model
+// call, so a thin prompt costs nothing. Place-name (Weather) and occasion
+// (Countdown) flows legitimately take short input, so they keep a low floor.
+const PROMPT_QUALITY = {
+  // Business-description flows: the AI builds content/branding FROM a
+  // description of the business, so a thin prompt = generic filler.
+  FAQ:               { chars: 30, words: 5, kind: 'business' },
+  PRICING:           { chars: 30, words: 5, kind: 'business' },
+  REVIEWS:           { chars: 30, words: 5, kind: 'business' },
+  SPOTLIGHT:         { chars: 30, words: 5, kind: 'business' },
+  WEATHER:           { chars: 30, words: 5, kind: 'business' }, // generates palette + CTA copy from the business
+  // Shorter, structured descriptions — still need substance, less of it.
+  'COUNTDOWN TIMER': { chars: 15, words: 3, kind: 'campaign' },  // what is on offer + when it ends
+  'SMART SECTION':   { chars: 15, words: 3, kind: 'targeting' }, // the audience to target
+};
+const PROMPT_TOO_THIN_MSG = 'Please describe your business in a bit more detail so the AI has something to work with. Include who you are, what you sell and who your customers are — a sentence or two is plenty. For example: "We are Sunshine Travel, an ABTA agency in Bournemouth arranging family beach holidays to Spain, Greece and Turkey, plus river cruises."';
+
+// Identical-retry dedupe. A client who clicks Generate twice (impatience,
+// "that's not quite right, try again") would otherwise pay for each call.
+// We serve the first result back for a short window with NO model call and
+// NO counter increment, so repeated identical asks are free. Best-effort,
+// per-instance (the daily cap remains the hard cost ceiling behind it);
+// most waste is rapid double-clicks, which land on the same warm instance.
+const AI_CACHE = new Map();               // key -> { at, payload }
+const AI_CACHE_TTL_MS = 10 * 60 * 1000;
+const AI_CACHE_MAX = 500;
+function aiCacheKey(recordId, widgetType, prompt, options) {
+  return `${recordId}|${widgetType}|${prompt}|${JSON.stringify(options)}`;
+}
+function aiCacheGet(key) {
+  const e = AI_CACHE.get(key);
+  if (!e) return null;
+  if (Date.now() - e.at > AI_CACHE_TTL_MS) { AI_CACHE.delete(key); return null; }
+  return e.payload;
+}
+function aiCacheSet(key, payload) {
+  if (AI_CACHE.size >= AI_CACHE_MAX) {
+    const cutoff = Date.now() - AI_CACHE_TTL_MS;
+    for (const [k, v] of AI_CACHE) { if (v.at < cutoff) AI_CACHE.delete(k); }
+    if (AI_CACHE.size >= AI_CACHE_MAX) {
+      const oldest = AI_CACHE.keys().next().value;
+      if (oldest) AI_CACHE.delete(oldest);
+    }
+  }
+  AI_CACHE.set(key, { at: Date.now(), payload });
+}
+
 // Rewrite action ("rewrite this field in our voice") input caps.
 const REWRITE_TEXT_MIN  = 1;
 const REWRITE_TEXT_MAX  = 6000;   // matches the content-override field cap
@@ -222,8 +272,18 @@ export default async function handler(req, res) {
 
   // ── 5b. Input validation (config-generation flow) ───────────────
   const parsed = parseBody(req.body);
-  if (parsed.error) return res.status(400).json({ error: parsed.error });
+  if (parsed.error) return res.status(400).json({ error: parsed.error, code: parsed.code });
   const { widgetType, prompt, options } = parsed;
+
+  // ── 5c. Identical-retry dedupe (before any cost) ────────────────
+  // A cache hit costs nothing: no counter increment, no model call.
+  const cacheKey = aiCacheKey(userRecord.recordId, widgetType, prompt, options);
+  const cachedPayload = aiCacheGet(cacheKey);
+  if (cachedPayload) {
+    res.setHeader('X-RateLimit-Limit', planLimit);
+    res.setHeader('X-TG-AI-Cache', 'hit');
+    return res.status(200).json(cachedPayload);
+  }
 
   // ── 6. Rate limit check (Airtable-backed, fail closed) ──────────
   let limitState;
@@ -245,7 +305,11 @@ export default async function handler(req, res) {
   res.setHeader('X-RateLimit-Remaining', Math.max(0, planLimit - limitState.newCount));
 
   // ── 7. Build prompt + call Anthropic ────────────────────────────
-  const { system, userMsg } = buildPrompt(widgetType, prompt, options);
+  let { system, userMsg } = buildPrompt(widgetType, prompt, options);
+  // Ground the generation in the client's real business so even a thin
+  // description yields on-brand output instead of generic filler.
+  const accountContext = buildAccountContext(userRecord);
+  if (accountContext) userMsg = `${accountContext}\n\n${userMsg}`;
 
   let aiResponse;
   try {
@@ -268,7 +332,9 @@ export default async function handler(req, res) {
     return res.status(502).json({ error: 'AI returned an invalid response. Please rephrase and try again.' });
   }
 
-  // ── 9. Return ───────────────────────────────────────────────────
+  // ── 9. Cache for identical retries, then return ─────────────────
+  aiCacheSet(cacheKey, cleaned);
+  res.setHeader('X-TG-AI-Cache', 'miss');
   return res.status(200).json(cleaned);
 }
 
@@ -300,11 +366,18 @@ function parseBody(body) {
     return { error: 'Invalid widgetType. Must be FAQ, PRICING, REVIEWS, SPOTLIGHT, WEATHER, COUNTDOWN TIMER or SMART SECTION.' };
   }
 
-  // prompt — trimmed, length-bounded string
+  // prompt — trimmed, length-bounded string, quality-gated per widgetType.
   if (typeof body.prompt !== 'string') return { error: 'Missing prompt' };
   const prompt = body.prompt.trim().slice(0, PROMPT_MAX_LEN);
-  if (prompt.length < PROMPT_MIN_LEN) {
-    return { error: 'Prompt too short — describe what you need (at least 5 characters)' };
+  const q = PROMPT_QUALITY[widgetType] || { chars: PROMPT_MIN_LEN, words: 1, kind: 'business' };
+  const wordCount = prompt.split(/\s+/).filter(Boolean).length;
+  if (prompt.length < q.chars || wordCount < q.words) {
+    return {
+      error: q.kind === 'business'
+        ? PROMPT_TOO_THIN_MSG
+        : `Please add a little more detail (at least ${q.chars} characters).`,
+      code: 'prompt_too_thin',
+    };
   }
 
   // options — only FAQ uses these today
@@ -333,10 +406,13 @@ function clampInt(v, min, max, dflt) {
 // Field IDs on the Users table. These are the three fields we read during
 // the AI endpoint flow. If any field is renamed in Airtable, the IDs stay
 // stable so this keeps working.
-// Read-path field id only (returnFieldsByFieldId). Email/Status constants
+// Read-path field ids only (returnFieldsByFieldId). Email/Status constants
 // were removed with the formula fix — formulas take display names, and
 // keeping unused id constants around is how they end up back in one.
-const FIELD_PLAN   = 'fldBgDeQdtwMqTIS4';
+const FIELD_PLAN          = 'fldBgDeQdtwMqTIS4';
+const FIELD_CLIENT_NAME   = 'fldx9CiWtSm5lX7MF';
+const FIELD_TRADING_NAME  = 'fldDbFv039Bip6W8u';
+const FIELD_WEBSITE       = 'fld9zVc9PHgu18RVW';
 
 async function lookupUserByEmail(email) {
   const AT_BASE  = process.env.AIRTABLE_BASE_ID;
@@ -371,8 +447,31 @@ async function lookupUserByEmail(email) {
   const planRaw = fields[FIELD_PLAN];
   // singleSelect returns as string in filterByFormula GET responses
   const plan = typeof planRaw === 'string' ? planRaw : (planRaw?.name || '');
+  const str = (v) => (typeof v === 'string' ? v.trim() : '');
 
-  return { recordId: rec.id, plan };
+  // Brand context, so the AI can ground generated content in the client's
+  // real business even when their typed description is thin.
+  return {
+    recordId:    rec.id,
+    plan,
+    clientName:  str(fields[FIELD_CLIENT_NAME]),
+    tradingName: str(fields[FIELD_TRADING_NAME]),
+    website:     str(fields[FIELD_WEBSITE]),
+  };
+}
+
+// Compose the account-grounding block prepended to every generate prompt.
+// Empty when we know nothing useful (never fabricate an identity). The
+// business name that shows in front of customers is the trading name where
+// present, otherwise the client name.
+function buildAccountContext(account) {
+  if (!account) return '';
+  const name = account.tradingName || account.clientName || '';
+  const bits = [];
+  if (name) bits.push(`Business name: ${name}`);
+  if (account.website) bits.push(`Website: ${account.website}`);
+  if (!bits.length) return '';
+  return `<account_context>\nThis content is for a real UK travel business we already work with. Ground everything you produce in this business, use its real name, and never invent a different company. If the description below is thin, lean on this context and sensible travel-industry defaults rather than generic filler.\n${bits.join('\n')}\n</account_context>`;
 }
 
 // ═══════════════════════════════════════════════════════════════════

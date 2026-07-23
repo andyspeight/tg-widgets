@@ -1496,6 +1496,9 @@ ${font ? `<link href="https://fonts.googleapis.com/css2?family=${font}:wght@400;
     });
     // AI / Templates buttons are wired by the shell via tgse.init({ onAIBuild, onTemplates }).
 
+    if (window.tgse && tgse.wireAiPrompt) {
+      tgse.wireAiPrompt({ textarea: '#aiPrompt', button: '#aiGenerate', minChars: 30, minWords: 5 });
+    }
     document.getElementById('aiGenerate').addEventListener('click', async () => {
       const prompt = document.getElementById('aiPrompt').value.trim();
       if (prompt.length < 10) { toast('Please describe your business in a bit more detail', 'error'); return; }
