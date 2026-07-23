@@ -421,23 +421,6 @@
   .modal-btn.is-primary:hover { background: #000; }
   .modal-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  .ai-mode-row {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px;
-  }
-  .ai-mode-card {
-    appearance: none; border: 1px solid var(--tg-border); background: var(--tg-bg-2);
-    padding: 12px; border-radius: var(--tg-radius-sm); cursor: pointer;
-    text-align: left; transition: all 0.15s ease;
-    font: inherit;
-  }
-  .ai-mode-card:hover { border-color: var(--tg-text-3); }
-  .ai-mode-card[aria-pressed="true"] {
-    border-color: var(--tg-accent);
-    background: color-mix(in srgb, var(--tg-accent) 6%, transparent);
-  }
-  .ai-mode-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; color: var(--tg-text); }
-  .ai-mode-desc { font-size: 11px; color: var(--tg-text-2); line-height: 1.4; }
-
   .template-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .template-card {
     appearance: none; border: 1px solid var(--tg-border); background: var(--tg-bg);
@@ -822,21 +805,12 @@
       </button>
     </div>
     <div class="modal-body">
-      <div class="ai-mode-row">
-        <button class="ai-mode-card" data-ai-mode="suggest" aria-pressed="true">
-          <div class="ai-mode-title">Suggest names</div>
-          <div class="ai-mode-desc">AI suggests partner names and groups. You upload the logo images.</div>
-        </button>
-        <button class="ai-mode-card" data-ai-mode="find" aria-pressed="false">
-          <div class="ai-mode-title">Find logos for me</div>
-          <div class="ai-mode-desc">AI suggests names and tries to find official logo URLs. Always double-check before publishing.</div>
-        </button>
-      </div>
+      <div class="field-help" style="margin-bottom:12px">AI suggests partner and supplier names grouped for you. You then upload the real logo images and add the links, so what you publish is always genuine and on-brand.</div>
       <div class="field">
         <label>Tell us about your business</label>
-        <textarea class="field-textarea" id="ai-prompt" placeholder="e.g. We're a Bournemouth travel agent specialising in package holidays to Spain and Greece. ABTA-bonded, ATOL protected, sell mainly TUI and Jet2." style="min-height:90px"></textarea>
+        <textarea class="field-textarea" id="ai-prompt" placeholder="e.g. We're a Bournemouth travel agent specialising in package holidays to Spain and Greece. We sell mainly TUI and Jet2." style="min-height:90px"></textarea>
       </div>
-      <div class="field-help">The more specific you are about what you sell and your accreditations, the better the suggestions.</div>
+      <div class="field-help">The more specific you are about who you sell and work with, the better the suggestions. Only add accreditation logos you genuinely hold.</div>
     </div>
     <div class="modal-foot">
       <button class="modal-btn" data-close-modal="ai-modal">Cancel</button>
@@ -984,7 +958,6 @@ let state = {
   history: [],
   historyIdx: -1,
   isDirty: false,
-  aiMode: 'suggest',
   openLogoIdx: -1,
 };
 
@@ -1326,9 +1299,10 @@ async function generateAI() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Generating...';
   try {
-    const fullPrompt = state.aiMode === 'find'
-      ? `You are helping a UK travel agent populate a "logos" widget for their website. Based on this description, suggest 6-10 partner/supplier/accreditation logos. For each, return: name, group ("Suppliers", "Accreditations", or "Reviews"), and a likely official logo image URL (use Wikipedia commons or the company's known logo CDN where possible). If unsure of the URL, leave it empty. Description: ${prompt}`
-      : `You are helping a UK travel agent populate a "logos" widget for their website. Based on this description, suggest 6-10 partner/supplier/accreditation names. For each, return: name (the brand name), group ("Suppliers", "Accreditations", or "Reviews"). Do not provide image URLs. Description: ${prompt}`;
+    // Names only. The AI never invents logo image URLs (they hallucinate and
+    // break) and never asserts an accreditation the client may not hold — the
+    // client uploads the real logo image and confirms each name themselves.
+    const fullPrompt = `You are helping a UK travel agent populate a "logos" widget for their website. Based on this description, suggest 6-10 partner or supplier brand names the agent is likely to work with, plus any well-known accreditation bodies as candidates the agent can confirm. For each, return: name (the brand name) and group ("Suppliers", "Accreditations", or "Reviews"). Do not provide image URLs. Only suggest names the agent can verify they genuinely have. Description: ${prompt}`;
 
     const res = await fetch('/api/widget-ai', {
       method: 'POST',
@@ -1338,7 +1312,7 @@ async function generateAI() {
         prompt: fullPrompt,
         responseFormat: 'json',
         schema: {
-          logos: 'array of { name: string, group: string, image: string }'
+          logos: 'array of { name: string, group: string }'
         }
       })
     });
@@ -1662,14 +1636,6 @@ function bindEvents() {
     b.addEventListener('click', () => closeModal(b.getAttribute('data-close-modal')));
   });
 
-  // AI mode
-  $$('[data-ai-mode]').forEach(b => {
-    b.addEventListener('click', () => {
-      $$('[data-ai-mode]').forEach(x => x.setAttribute('aria-pressed', 'false'));
-      b.setAttribute('aria-pressed', 'true');
-      state.aiMode = b.getAttribute('data-ai-mode');
-    });
-  });
   $('#ai-generate').addEventListener('click', generateAI);
 
   // Login form removed — shell handles it.

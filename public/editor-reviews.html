@@ -216,11 +216,6 @@
         Templates
         <span class="tgse-kbd">T</span>
       </button>
-      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
-        AI builder
-        <span class="tgse-kbd">A</span>
-      </button>
     </div>
 
     <div class="tgse-name">
@@ -289,38 +284,11 @@
 <div class="pop" id="popover"></div>
 
 <!-- ============================================================
-     MODALS — AI builder & Templates (shell-styled)
+     MODALS — Templates (shell-styled)
+     Note: AI review generation was removed on purpose — publishing
+     AI-generated reviews as genuine is unlawful (UK DMCC Act 2024).
+     Reviews are entered manually or from a real reviews source.
      ============================================================ -->
-<div class="tgse-modal" id="aiModal">
-  <div class="tgse-modal-card">
-    <div class="tgse-modal-head">
-      <span class="tgse-id-tile">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
-      </span>
-      <div>
-        <h2>AI review generator</h2>
-        <p class="tgse-modal-sub">Generate realistic demo reviews for your widget.</p>
-      </div>
-    </div>
-    <div class="tgse-modal-body">
-      <textarea id="aiPrompt" rows="3" placeholder="e.g. Generate 8 reviews for a travel agency in Bournemouth, mix of family and couples holidays" style="width:100%;padding:10px 12px;font-size:13px;border:1px solid var(--tgse-border);border-radius:var(--tgse-radius-md);background:var(--tgse-panel-2);color:var(--tgse-ink);font-family:inherit;outline:none;resize:vertical;min-height:72px;margin-bottom:12px"></textarea>
-      <div class="chips">
-        <button class="chip" type="button">8 reviews for a UK travel agency</button>
-        <button class="chip" type="button">6 reviews for a luxury tour operator</button>
-        <button class="chip" type="button">10 reviews for a holiday company, mostly 5-star</button>
-      </div>
-      <div id="aiErr" class="erm" style="display:none"></div>
-    </div>
-    <div class="tgse-modal-foot">
-      <button class="tgse-btn" type="button" data-close-modal="aiModal">Cancel</button>
-      <button class="tgse-btn tgse-btn--ai" type="button" id="aiGenerate">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/></svg>
-        Generate
-      </button>
-    </div>
-  </div>
-</div>
-
 <div class="tgse-modal" id="tplModal">
   <div class="tgse-modal-card">
     <div class="tgse-modal-head">
@@ -473,7 +441,6 @@ function cTab() {
   let h = `<div class="reviews-header">
     <span class="ttl">Reviews (${C.reviews.length})</span>
     <div class="acts">
-      <button class="ab" type="button" onclick="document.getElementById('btn-ai').click()"><svg viewBox="0 0 24 24"><path d="M12 2l1 4 4 1-4 1-1 4-1-4-4-1 4-1 1-4z"/></svg>AI</button>
       <button class="ab" type="button" onclick="addRev()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add review</button>
     </div>
   </div>
@@ -749,49 +716,14 @@ function dlTpl() {
   XLSX.writeFile(wb, 'reviews-template.xlsx');
 }
 
-/* ── AI builder ──────────────────────────────────────────────── */
-async function generateAI() {
-  const prompt = document.getElementById('aiPrompt').value.trim();
-  if (!prompt) return;
-  const btn = document.getElementById('aiGenerate');
-  const err = document.getElementById('aiErr');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="ai-spin"></span> Generating…';
-  err.style.display = 'none';
-  try {
-    const r = await fetch('/api/widget-ai', {
-      method: 'POST',
-      headers: tgse.authHeaders(),
-      body: JSON.stringify({
-        prompt: `Generate Google Reviews widget data. Return ONLY JSON, no markdown. ${prompt}. Return: {"place":{"name":"Business Name","rating":4.8,"total":NUMBER},"reviews":[{"id":"unique","author":"Full Name","rating":5,"date":"relative date","text":"review text 50-150 words","tags":["Tag1","Tag2"],"helpful":NUMBER,"hasPhoto":false,"photoUrl":"","reply":{"author":"Business Name","text":"reply"} or null}],"aiHighlights":[{"label":"label","value":"value","color":"#hex","icon":"heart|users|trending|award"}]}`
-      })
-    });
-    if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.error || 'Failed'); }
-    const d = await r.json();
-    snap();
-    if (d.reviews) C.reviews = d.reviews;
-    if (d.place) C.place = d.place;
-    if (d.aiHighlights) C.aiHighlights = d.aiHighlights;
-    closeModal('aiModal');
-    ren(); renP();
-    tgse.toast('AI generated reviews', 'ok');
-  } catch (e) {
-    err.textContent = e.message || 'Generation failed';
-    err.style.display = 'block';
-  }
-  btn.disabled = false;
-  btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/></svg>Generate';
-}
+/* AI review generation removed on purpose: publishing AI-invented reviews
+   as genuine is unlawful in the UK (DMCC Act 2024). Reviews are entered
+   manually, imported, or fed from a real reviews source. */
 
 /* ── Templates ───────────────────────────────────────────────── */
 function showTplModal() {
   const list = document.getElementById('tplList');
-  list.innerHTML = `<div class="tpc" onclick="closeModal('tplModal');setTimeout(()=>document.getElementById('btn-ai').click(),100)" style="border-style:dashed;border-color:var(--tgse-accent);background:var(--tgse-brand-tint)">
-    <div class="tpi" style="background:linear-gradient(135deg,var(--tgse-brand),var(--tgse-accent))">
-      <svg viewBox="0 0 24 24" style="stroke:#fff"><path d="M12 2l1 4 4 1-4 1-1 4-1-4-4-1 4-1 1-4z"/></svg>
-    </div>
-    <div class="tpn"><strong>Build with AI</strong><small>Generate realistic reviews</small></div>
-  </div>` + TPL.map((t, i) => `<div class="tpc" onclick="applyTemplate(${i})">
+  list.innerHTML = TPL.map((t, i) => `<div class="tpc" onclick="applyTemplate(${i})">
     <div class="tpi"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
     <div class="tpn"><strong>${t.n}</strong><small>${t.d}</small></div>
   </div>`).join('');
@@ -815,11 +747,6 @@ document.querySelectorAll('[data-close-modal]').forEach(btn => {
 document.querySelectorAll('.tgse-modal').forEach(m => {
   m.addEventListener('click', e => { if (e.target === m) closeModal(m.id); });
 });
-// Chips inside the AI modal — fill prompt
-document.querySelectorAll('#aiModal .chip').forEach(chip => {
-  chip.addEventListener('click', () => { document.getElementById('aiPrompt').value = chip.textContent; });
-});
-document.getElementById('aiGenerate').addEventListener('click', generateAI);
 
 /* ── Theme toggle button ─────────────────────────────────────── */
 function updateThemeButtonLabel() {
@@ -900,7 +827,6 @@ shell = tgse.init({
   fontPickerEl: '#fontPickerMount',
   onFontChange: (f) => { snap(); C.fontFamily = f; renP(); },
 
-  onAIBuild: () => openModal('aiModal'),
   onTemplates: () => showTplModal(),
 
   onThemeToggle: () => {
