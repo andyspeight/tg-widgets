@@ -5,9 +5,10 @@
  * ─── Request body ───────────────────────────────────────────────────
  *   {
  *     widgetType: 'FAQ' | 'PRICING' | 'SPOTLIGHT' | 'WEATHER' | 'COUNTDOWN TIMER'
- *               | 'SMART SECTION' | 'LOGO SHOWCASE' | 'TEXT FX',  // required
+ *               | 'SMART SECTION' | 'TRAVEL OFFERS' | 'LOGO SHOWCASE' | 'TEXT FX',  // required
  *     prompt: string,                              // 5-1000 chars (4000 for passthrough types)
  *     schema?: object,                             // passthrough types only — the JSON shape to return
+ *     currentConfig?: object,                      // TRAVEL OFFERS only — the widget's current config
  *     action?: 'rewrite',                          // see rewrite mode below
  *     // legacy: any other action value is ignored
  *     options?: {                                  // FAQ only for now
@@ -152,8 +153,19 @@ const REWRITE_FIELD_MAX = 60;
 // Kept separate so the business-description quality floor and FAQ options
 // parsing do not apply to them.
 const PASSTHROUGH_WIDGET_TYPES = ['LOGO SHOWCASE', 'TEXT FX'];
-const ALLOWED_WIDGET_TYPES = ['FAQ', 'PRICING', 'SPOTLIGHT', 'WEATHER', 'COUNTDOWN TIMER', 'SMART SECTION', ...PASSTHROUGH_WIDGET_TYPES];
+const ALLOWED_WIDGET_TYPES = ['FAQ', 'PRICING', 'SPOTLIGHT', 'WEATHER', 'COUNTDOWN TIMER', 'SMART SECTION', 'TRAVEL OFFERS', ...PASSTHROUGH_WIDGET_TYPES];
 const ALLOWED_TONES        = ['warm', 'professional', 'casual'];
+
+// Travel Offers "AI suggestions" turn a plain-English intent ("luxury 5-star
+// hotels in Greece") into widget SEARCH config. The output is strictly
+// whitelisted to these enums/ranges — it drives what a live widget shows, so a
+// hallucinated field or value is dropped rather than trusted. Values mirror the
+// editor's own dropdowns (public/editor-offers.html).
+const OFFERS_TYPES     = ['Accommodation', 'Flights', 'DynamicPackages', 'PackageHolidays'];
+const OFFERS_TEMPLATES = ['cards', 'magazine', 'ticker', 'popup', 'departure-board', 'boarding-pass'];
+const OFFERS_BOARDS    = ['RoomOnly', 'BedAndBreakfast', 'HalfBoard', 'FullBoard', 'AllInclusive', 'AllInclusivePlus'];
+const OFFERS_CABINS    = ['Economy', 'PremiumEconomy', 'Business', 'First'];
+const OFFERS_SORTS     = ['price:asc', 'price:desc'];
 
 // Passthrough prompts carry the editor's full instruction template, so they
 // get a roomier length cap; the schema they declare is bounded too.
@@ -303,7 +315,7 @@ export default async function handler(req, res) {
   // ── 5b. Input validation (config-generation flow) ───────────────
   const parsed = parseBody(req.body);
   if (parsed.error) return res.status(400).json({ error: parsed.error, code: parsed.code });
-  const { widgetType, prompt, options, schema } = parsed;
+  const { widgetType, prompt, options, schema, currentConfig } = parsed;
 
   // ── 5c. Identical-retry dedupe (before any cost) ────────────────
   // A cache hit costs nothing: no counter increment, no model call.
@@ -335,7 +347,7 @@ export default async function handler(req, res) {
   res.setHeader('X-RateLimit-Remaining', Math.max(0, planLimit - limitState.newCount));
 
   // ── 7. Build prompt + call Anthropic ────────────────────────────
-  let { system, userMsg } = buildPrompt(widgetType, prompt, options, schema);
+  let { system, userMsg } = buildPrompt(widgetType, prompt, options, schema, currentConfig);
   // Ground the generation in the client's real business so even a thin
   // description yields on-brand output instead of generic filler.
   const accountContext = buildAccountContext(userRecord);
@@ -396,13 +408,26 @@ function parseBody(body) {
   // widgetType — strict enum
   const widgetType = String(body.widgetType || '').toUpperCase();
   if (!ALLOWED_WIDGET_TYPES.includes(widgetType)) {
-    return { error: 'Invalid widgetType. Must be FAQ, PRICING, SPOTLIGHT, WEATHER, COUNTDOWN TIMER, SMART SECTION, LOGO SHOWCASE or TEXT FX.' };
+    return { error: 'Invalid widgetType. Must be FAQ, PRICING, SPOTLIGHT, WEATHER, COUNTDOWN TIMER, SMART SECTION, TRAVEL OFFERS, LOGO SHOWCASE or TEXT FX.' };
   }
   const passthrough = PASSTHROUGH_WIDGET_TYPES.includes(widgetType);
 
   // prompt — trimmed, length-bounded string.
   if (typeof body.prompt !== 'string') return { error: 'Missing prompt' };
   const prompt = body.prompt.trim().slice(0, passthrough ? PASSTHROUGH_PROMPT_MAX_LEN : PROMPT_MAX_LEN);
+
+  // Travel Offers: a short search intent (no business-description floor). Carry
+  // through a trimmed snapshot of the current config (template + type only) so
+  // the AI preserves the layout unless the request implies a change.
+  if (widgetType === 'TRAVEL OFFERS') {
+    if (prompt.length < PROMPT_MIN_LEN) return { error: 'Missing prompt' };
+    const cc = (body.currentConfig && typeof body.currentConfig === 'object') ? body.currentConfig : {};
+    const currentConfig = {
+      template: typeof cc.template === 'string' ? cc.template.slice(0, 40) : '',
+      type:     typeof cc.type === 'string' ? cc.type.slice(0, 40) : '',
+    };
+    return { widgetType, prompt, options: {}, currentConfig };
+  }
 
   if (passthrough) {
     // Relay mode: the editor's instruction template carries the structure, so
@@ -633,8 +658,9 @@ function msUntilMidnightUTC() {
 // PROMPT BUILDERS — one per widgetType
 // ═══════════════════════════════════════════════════════════════════
 
-function buildPrompt(widgetType, userPrompt, options, schema) {
+function buildPrompt(widgetType, userPrompt, options, schema, currentConfig) {
   if (PASSTHROUGH_WIDGET_TYPES.includes(widgetType)) return buildPassthroughPrompt(userPrompt, schema);
+  if (widgetType === 'TRAVEL OFFERS') return buildTravelOffersPrompt(userPrompt, currentConfig);
   if (widgetType === 'FAQ')       return buildFAQPrompt(userPrompt, options);
   if (widgetType === 'PRICING')   return buildPricingPrompt(userPrompt);
   if (widgetType === 'SPOTLIGHT') return buildSpotlightPrompt(userPrompt);
@@ -657,6 +683,47 @@ ${schemaLine}
 
 Return ONLY the JSON object, with no prose and no markdown fences.`;
   return { system: SYSTEM_PASSTHROUGH, userMsg };
+}
+
+// Travel Offers "AI suggestions": translate a plain-English intent into widget
+// SEARCH config. Returns only the fields the request implies; the editor merges
+// them over the current config. Output is strictly whitelisted in
+// validateTravelOffers — this prompt just steers the model toward the right
+// fields and codes.
+function buildTravelOffersPrompt(userPrompt, currentConfig) {
+  const cc = currentConfig || {};
+  const ctx = [];
+  if (cc.template) ctx.push(`current layout template: ${cc.template}`);
+  if (cc.type) ctx.push(`current offer type: ${cc.type}`);
+  const ctxLine = ctx.length
+    ? `The widget's current settings are — ${ctx.join(', ')}. Keep these unless the request clearly implies a change.\n\n`
+    : '';
+
+  const userMsg = `Widget type: TRAVEL OFFERS
+
+The Travel Offers widget shows live holiday, flight and hotel deals. Translate the request below into a widget configuration. Return ONLY the fields the request implies and leave everything else out, so the widget keeps its other settings.
+
+${ctxLine}<request>
+${userPrompt}
+</request>
+
+Use ONLY these fields and values:
+- "type": one of "Accommodation", "Flights", "DynamicPackages", "PackageHolidays". Hotels → Accommodation; flights → Flights; "holidays"/"packages"/"all-inclusive" → "PackageHolidays" (operator packages) or "DynamicPackages" (flight plus hotel).
+- "template": one of "cards", "magazine", "ticker", "popup", "departure-board", "boarding-pass". Only set this if the request clearly asks for a specific layout (e.g. a flight "departure board"); otherwise omit it.
+- "destinations": array of 2-3 letter UPPERCASE codes — ISO country codes, or IATA airport codes only when a specific airport is named. Greece → ["GR"], Spain → ["ES"], Faro → ["FAO"].
+- "origins": array of departure codes. "from London" → ["LON"], "from Manchester" → ["MAN"]. "from the UK" → omit (leave open).
+- "boardBases": array from "RoomOnly","BedAndBreakfast","HalfBoard","FullBoard","AllInclusive","AllInclusivePlus". "all-inclusive" → ["AllInclusive"].
+- "cabinClasses": array from "Economy","PremiumEconomy","Business","First".
+- "ratingMin": number 0 to 5. "5-star" → 5; "4-star and up" → 4; "high reviews"/"top rated" → 4.
+- "budgetMin", "budgetMax": whole numbers in GBP. "under £600" → budgetMax 600.
+- "durationMin", "durationMax": nights, 0 to 28. "a week" → 7; "long weekend" → 3.
+- "DatesMin", "DatesMax": how many days ahead to search, 1 to 700. "last-minute" → DatesMax 21.
+- "maxOffers": whole number, 1 to 200.
+- "sort": "price:asc" (cheapest first) or "price:desc". "budget"/"cheap"/"deals" → "price:asc".
+
+Return a single JSON object with only the relevant fields, no markdown fences and no prose. If the request is not about travel offers, return {"error":"Please describe the offers you want to show."}.`;
+
+  return { system: SYSTEM_SAFETY, userMsg };
 }
 
 // Shared system-role safety clause. Keep user input in the USER role, never here.
@@ -1061,6 +1128,7 @@ function parseAndValidate(widgetType, rawText, options) {
     return { ...obj, result: obj };
   }
 
+  if (widgetType === 'TRAVEL OFFERS') return validateTravelOffers(obj);
   if (widgetType === 'FAQ')       return validateFAQ(obj, options);
   if (widgetType === 'PRICING')   return validatePricingLoose(obj);
   if (widgetType === 'SPOTLIGHT') return validateSpotlightLoose(obj);
@@ -1122,6 +1190,72 @@ function validateFAQ(obj, options) {
 function validatePricingLoose(obj) {
   if (obj && typeof obj === 'object') return obj;
   throw new Error('Invalid pricing response');
+}
+
+// Strict whitelist for Travel Offers search config. Every field is validated
+// against the editor's own enums/ranges; anything unknown or out of range is
+// dropped rather than trusted (this config drives what a live widget shows).
+// Returns { config } — the exact shape editor-offers.html reads (data.config).
+function validateTravelOffers(obj) {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) throw new Error('Invalid offers response');
+
+  const out = {};
+  const num = (v) => {
+    if (typeof v === 'number' && Number.isFinite(v)) return v;
+    const n = parseFloat(v);
+    return Number.isFinite(n) ? n : null;
+  };
+  const clampInt = (v, lo, hi) => { const n = num(v); return n == null ? null : Math.max(lo, Math.min(hi, Math.round(n))); };
+  const codes = (arr, cap) => {
+    if (!Array.isArray(arr)) return null;
+    const seen = [];
+    for (const v of arr) {
+      const c = String(v == null ? '' : v).trim().toUpperCase();
+      if (/^[A-Z]{2,4}$/.test(c) && !seen.includes(c)) seen.push(c);
+      if (seen.length >= cap) break;
+    }
+    return seen.length ? seen : null;
+  };
+  const pick = (arr, allowed, cap) => {
+    if (!Array.isArray(arr)) return null;
+    const out2 = [];
+    for (const v of arr) { if (allowed.includes(v) && !out2.includes(v)) out2.push(v); if (out2.length >= cap) break; }
+    return out2.length ? out2 : null;
+  };
+
+  if (OFFERS_TYPES.includes(obj.type))         out.type = obj.type;
+  if (OFFERS_TEMPLATES.includes(obj.template)) out.template = obj.template;
+  if (OFFERS_SORTS.includes(obj.sort))         out.sort = obj.sort;
+
+  const dest = codes(obj.destinations, 12); if (dest) out.destinations = dest;
+  const orig = codes(obj.origins, 12);      if (orig) out.origins = orig;
+  const boards = pick(obj.boardBases, OFFERS_BOARDS, 6);  if (boards) out.boardBases = boards;
+  const cabins = pick(obj.cabinClasses, OFFERS_CABINS, 4); if (cabins) out.cabinClasses = cabins;
+
+  const rating = num(obj.ratingMin);
+  if (rating != null) out.ratingMin = Math.max(0, Math.min(5, Math.round(rating * 2) / 2));
+
+  const bMin = clampInt(obj.budgetMin, 0, 100000);
+  const bMax = clampInt(obj.budgetMax, 0, 100000);
+  if (bMax != null) out.budgetMax = bMax;
+  // Only keep a floor that is consistent with the ceiling.
+  if (bMin != null && (bMax == null || bMin <= bMax)) out.budgetMin = bMin;
+
+  const dMin = clampInt(obj.durationMin, 0, 28);
+  const dMax = clampInt(obj.durationMax, 0, 28);
+  if (dMax != null) out.durationMax = dMax;
+  if (dMin != null && (dMax == null || dMin <= dMax)) out.durationMin = dMin;
+
+  const daMin = clampInt(obj.DatesMin, 1, 700);
+  const daMax = clampInt(obj.DatesMax, 1, 700);
+  if (daMax != null) out.DatesMax = daMax;
+  if (daMin != null && (daMax == null || daMin <= daMax)) out.DatesMin = daMin;
+
+  const mo = clampInt(obj.maxOffers, 1, 200);
+  if (mo != null) out.maxOffers = mo;
+
+  if (Object.keys(out).length === 0) throw new Error('No usable offer settings in AI response');
+  return { config: out };
 }
 function validateSpotlightLoose(obj) {
   // Strict schema enforcement — Spotlight AI output is small, predictable,

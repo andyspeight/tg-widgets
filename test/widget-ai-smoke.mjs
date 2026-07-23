@@ -86,6 +86,15 @@ global.fetch = async (url, opts = {}) => {
       obj = /"logos"/.test(userMsg)
         ? { logos: [{ name: 'TUI', group: 'Suppliers', image: '' }, { name: 'Jet2holidays', group: 'Suppliers', image: '' }] }
         : { phrases: ['Find your perfect beach escape', 'Find your perfect city break'] };
+    } else if (/Widget type: TRAVEL OFFERS/.test(userMsg)) {
+      // Deliberately mix valid fields with junk (bad template, non-code dests,
+      // out-of-range maxOffers, an unknown key) to prove the whitelist drops it.
+      obj = {
+        type: 'Accommodation', template: 'nope',
+        destinations: ['GR', 'greece', 'toolong'], origins: ['LON'],
+        ratingMin: 5, budgetMax: 600, maxOffers: 9999, sort: 'price:asc',
+        evilField: 'DROP ME',
+      };
     } else {
       obj = {
         questions: [
@@ -214,6 +223,31 @@ ok(!process.env.AIRTABLE_USERS_TABLE, 'no bespoke env var needed — the 500 "AI
   ok(r.statusCode === 403 && !/Session error/.test(r.body?.error || ''),
     'token with neither email nor clientId → 403, not a bare 500 "Session error"');
 }
+
+// ── Travel Offers "AI suggestions": intent → whitelisted search config ───────
+// The offers editor posts { widgetType:'Travel Offers', prompt, currentConfig }
+// and reads data.config. Until now the endpoint rejected the type, so it showed
+// "AI did not return a config". It now returns a validated { config }.
+{
+  let r = mockRes();
+  await handler(request({ widgetType: 'Travel Offers', prompt: 'Show luxury 5-star hotels in Greece', currentConfig: { template: 'cards', type: 'Accommodation' } }), r);
+  ok(r.statusCode === 200 && r.body?.config && typeof r.body.config === 'object' && !Array.isArray(r.body.config),
+    'Travel Offers returns { config } — the shape editor-offers.html reads');
+  const c = r.body?.config || {};
+  ok(c.type === 'Accommodation' && Array.isArray(c.destinations) && c.destinations.length === 1 && c.destinations[0] === 'GR',
+    'valid search fields survive; non-code destinations ("greece","toolong") are dropped');
+  ok(c.ratingMin === 5 && c.budgetMax === 600 && c.sort === 'price:asc' && c.origins?.[0] === 'LON',
+    'rating, budget ceiling, sort and origin come through');
+  ok(c.maxOffers === 200, 'out-of-range maxOffers (9999) is clamped to the ceiling (200)');
+  ok(!('template' in c) && !('evilField' in c),
+    'an invalid template and any non-whitelisted key are dropped, not trusted');
+  const sysSent = state.anthropicBodies.at(-1)?.messages?.[0]?.content || '';
+  ok(/current layout template: cards/.test(sysSent),
+    'the current template is passed as context so the AI preserves the layout');
+}
+
+// A prompt the AI cannot turn into any valid setting → surfaced, not a silent no-op.
+// (Model returns an all-junk config → validator finds nothing usable → 502.)
 
 // ── Per-type floors ──────────────────────────────────────────────────────────
 // Weather's AI generates palette + CTA copy FROM a business description, so it
