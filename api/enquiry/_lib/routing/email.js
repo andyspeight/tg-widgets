@@ -93,7 +93,12 @@ function buildTokens({ form, payload, reference, submissionId, meta }) {
     notes: f.notes || '—',
     submittedAt: new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' }),
     sourceUrl: payload.sourceUrl || '',
-    submissionUrl: `https://airtable.com/${process.env.TG_ENQUIRIES_AIRTABLE_BASE_ID}/tblxtRPhALFjeMVA6/${submissionId}`,
+    // The agent's OWN enquiry inbox (behind their client login), never the raw
+    // internal Airtable base. Linking to Airtable meant every notified client
+    // hit an access wall and could "request access" to our shared enquiries
+    // base — which holds EVERY client's enquiries (the 23 Jul 2026 report). The
+    // inbox reads submissions owner-scoped, so a client only ever sees theirs.
+    submissionUrl: `https://id.travelify.io/inbox-enquiry?id=${encodeURIComponent(submissionId)}`,
   };
 }
 

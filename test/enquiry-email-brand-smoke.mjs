@@ -120,6 +120,14 @@ ok(body && body.from.email === 'george@freefromtravel.com' && body.from.name ===
 const emailSrc = readFileSync(new URL('../api/enquiry/_lib/routing/email.js', import.meta.url), 'utf8');
 ok(!/Travelgenix Enquiries/.test(emailSrc), 'agent email no longer hardcodes "Travelgenix Enquiries"');
 ok(/resolveFromIdentity\(agentBrandName, ownerEmail\)/.test(emailSrc), 'agent email From is built from the client identity');
+// The 23 Jul 2026 report: the notification's "view this enquiry" link pointed
+// at our shared internal Airtable base, so notified clients hit an access wall
+// and could request access to EVERY client's enquiries. It must link to the
+// agent's own owner-scoped inbox, never airtable.com.
+ok(/inbox-enquiry\?id=/.test(emailSrc), 'agent email links to the client-scoped enquiry inbox');
+ok(!/airtable\.com\/\$\{[^}]*TG_ENQUIRIES/.test(emailSrc), 'agent email no longer links to the raw internal Airtable base');
+const agentTplSrc = readFileSync(new URL('../api/enquiry/_lib/routing/_templates/agent-email.js', import.meta.url), 'utf8');
+ok(!/view this enquiry in Airtable/.test(agentTplSrc) && /view this enquiry in your inbox/.test(agentTplSrc), 'the link text no longer says "in Airtable"');
 
 const enquirySrc = readFileSync(new URL('../public/widget-enquiry.js', import.meta.url), 'utf8');
 ok(!/tg-brand/.test(enquirySrc), 'Enquiry widget: powered-by footer fully removed');
