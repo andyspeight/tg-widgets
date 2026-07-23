@@ -1,6 +1,12 @@
 {
   "version": 2,
   "functions": {
+    "api/offers.js": {
+      "maxDuration": 30
+    },
+    "api/cached-offers.js": {
+      "maxDuration": 30
+    },
     "api/v1/payment-reminders.js": {
       "maxDuration": 30
     },

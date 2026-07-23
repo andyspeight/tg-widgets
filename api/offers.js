@@ -17,6 +17,15 @@ import { logWidgetEvent } from './_lib/telemetry.js';
 
 const TRAVELIFY_ENDPOINT = 'https://api.travelify.io/widgetsvc/traveloffers';
 
+// Bound the upstream call so a slow Travelify query (flight searches especially)
+// can never run the whole function to its Vercel maxDuration. When that happened
+// the platform killed the function and returned an EMPTY-bodied gateway response,
+// which the widget's JSON parse reported to visitors as "Unexpected end of JSON
+// input" (and a no-CORS 504 reads as "Failed to fetch"). With this timeout the
+// proxy always returns its own clean JSON well inside the function budget. Kept
+// comfortably below the 30s maxDuration set for this route in vercel.json.
+const UPSTREAM_TIMEOUT_MS = 20000;
+
 // Travelgenix demo credentials (App 250) — published in Travelify docs.
 const DEMO_APP_ID = '250';
 const DEMO_PUBLIC_KEY = 'A41D180E-CBFE-4E30-A47D-FAAB424A650D';
@@ -191,6 +200,7 @@ export default async function handler(req, res) {
       method: 'POST',
       headers: upstreamHeaders,
       body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
     });
 
     // Try to parse JSON — but capture text first so we can debug non-JSON responses
@@ -218,9 +228,12 @@ export default async function handler(req, res) {
 
     return done(200, data);
   } catch (err) {
-    return done(500, {
+    // A bounded-timeout abort surfaces as a clean 504 (not a platform-killed
+    // empty body): the widget can show a calm "offers unavailable" and retry.
+    const timedOut = err && (err.name === 'TimeoutError' || err.name === 'AbortError');
+    return done(timedOut ? 504 : 502, {
       success: false,
-      error: err.message || 'Proxy request failed',
+      error: timedOut ? 'Offers service timed out. Please try again.' : (err.message || 'Proxy request failed'),
     });
   }
 }

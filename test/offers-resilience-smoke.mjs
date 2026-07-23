@@ -43,6 +43,8 @@ const widget = readFileSync(new URL('../public/widget-offers.js', import.meta.ur
 const fetchWithRetry = eval('(' + ex(widget, 'function fetchWithRetry(url, opts, attempts, timeoutMs)') + ')');
 // eslint-disable-next-line no-eval
 const isNavAwayError = eval('(' + ex(widget, 'function isNavAwayError(message)') + ')');
+// eslint-disable-next-line no-eval
+const parseJsonResponse = eval('(' + ex(widget, 'async function parseJsonResponse(res, label)') + ')');
 
 const realFetch = global.fetch;
 
@@ -53,6 +55,11 @@ ok(isNavAwayError('The user aborted a request.') === true, 'abort message → na
 ok(isNavAwayError('Travelify returned an error.') === false, 'real Travelify error → NOT nav-away (still alerts)');
 ok(isNavAwayError('API 500') === false, 'HTTP status error → NOT nav-away');
 ok(isNavAwayError('') === false, 'empty → NOT nav-away');
+
+// ── Source guards: the defensive parser replaced the bare res.json() sites ────
+ok(/async function parseJsonResponse\(res, label\)/.test(widget), 'shared defensive JSON parser is defined');
+ok((widget.match(/parseJsonResponse\(res, '/g) || []).length >= 3, 'defensive parser wired at the live, cache and board offer sites');
+ok(/const VERSION = '1\.12\.0'/.test(widget), 'VERSION bumped to 1.12.0');
 
 async function run() {
   let calls;
@@ -104,6 +111,35 @@ async function run() {
   global.fetch = async (url, opts) => { calls++; sawMethod = opts && opts.method; sawBody = opts && opts.body; return { ok: true }; };
   await fetchWithRetry('u', { method: 'POST', body: '{"a":1}' }, 2, 200);
   ok(sawMethod === 'POST' && sawBody === '{"a":1}', 'caller opts (method + body) preserved with the injected signal');
+
+  // ── parseJsonResponse: the fix for the 23 Jul 2026 "Unexpected end of JSON
+  //    input" alert. An empty/non-JSON gateway body must yield a clean,
+  //    status-bearing message, never the raw parser error. ──────────────────────
+  const mkRes = (rok, status, text) => ({ ok: rok, status, text: async () => text });
+  const grab = async (r, label) => {
+    try { return { ok: true, data: await parseJsonResponse(r, label) }; }
+    catch (e) { return { ok: false, msg: e.message }; }
+  };
+  let p;
+
+  p = await grab(mkRes(true, 200, JSON.stringify({ success: true, data: [1, 2] })), 'Offers service');
+  ok(p.ok && p.data && p.data.success === true, 'valid 200 JSON → parsed object returned');
+
+  p = await grab(mkRes(true, 200, ''), 'Offers service');
+  ok(!p.ok && /unavailable \(HTTP 200\)/.test(p.msg), 'empty 200 body → clean "unavailable (HTTP 200)"');
+  ok(!p.ok && !/Unexpected end of JSON input/.test(p.msg), 'empty body NEVER surfaces the raw "Unexpected end of JSON input"');
+
+  p = await grab(mkRes(false, 504, ''), 'Offers service');
+  ok(!p.ok && p.msg === 'Offers service unavailable (HTTP 504)', 'empty 504 (the incident body) → exact classified message');
+
+  p = await grab(mkRes(false, 429, JSON.stringify({ success: false, error: 'Too many requests. Please slow down and retry in 60 seconds.' })), 'Offers service');
+  ok(!p.ok && /Too many requests/.test(p.msg), 'non-2xx JSON body → proxy .error surfaced (error contract preserved)');
+
+  p = await grab(mkRes(false, 502, ''), 'Offers service');
+  ok(!p.ok && /unavailable \(HTTP 502\)/.test(p.msg), 'empty 502 → classified with its status');
+
+  p = await grab(mkRes(true, 200, '<html>gateway error</html>'), 'Offers service');
+  ok(!p.ok && /invalid response \(HTTP 200\)/.test(p.msg) && !/Unexpected end of JSON input/.test(p.msg), 'non-JSON 200 body → "invalid response", not the raw parser error');
 }
 
 run()
