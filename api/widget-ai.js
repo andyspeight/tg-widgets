@@ -65,8 +65,14 @@ import { sanitiseSmartSectionConfig } from './_lib/smartsection-rules.js';
 // CONSTANTS
 // ═══════════════════════════════════════════════════════════════════
 
-const MODEL        = 'claude-sonnet-4-20250514';
-const MAX_TOKENS   = 1500;
+// Current-generation model, overridable per environment like every other AI
+// endpoint in this repo (offer-draft, the translate family). The previous
+// hardcoded claude-sonnet-4-20250514 (May 2025) had no override, so a model
+// retirement would have bricked widget AI with no recourse but a deploy.
+const MODEL        = process.env.WIDGET_AI_MODEL || 'claude-sonnet-5';
+// Headroom for the largest ask (12 FAQs with full answers) — 1500 could
+// truncate mid-JSON, which surfaced to users as "invalid response" 502s.
+const MAX_TOKENS   = 2500;
 const FETCH_TIMEOUT_MS = 30_000;
 
 const PROMPT_MIN_LEN = 5;
@@ -102,10 +108,20 @@ const FAQ_ALLOWED_ICONS = [
   'phone', 'mail', 'message', 'book', 'check',
 ];
 
-// Airtable field IDs on the Users table. Using IDs (not names) so that
-// renaming the fields in the Airtable UI doesn't break this endpoint.
+// Airtable field IDs on the Clients table (named "Users" before May 2026).
+// IDs are used for READS (returnFieldsByFieldId) and WRITES only — never in
+// filterByFormula, where Airtable silently matches NOTHING for an ID in
+// braces. Formulas use the display names below.
 const FIELD_AI_DAILY_COUNT = 'fldlyipF5vQLUUxoh';
 const FIELD_AI_DAILY_DATE  = 'fldlJ8nMB41hqdRnS';
+const FIELD_NAME_EMAIL  = 'Email';
+const FIELD_NAME_STATUS = 'Status';
+
+// The Clients table id. The env override exists for preview environments;
+// production runs on the default — requiring a bespoke env var here was
+// the source of a permanent "HTTP 500 / AI service not configured" for
+// every widget-AI call (the var was never set in Vercel).
+const USERS_TABLE_ID = process.env.AIRTABLE_USERS_TABLE || 'tblikekpaTKraMktZ';
 
 // ═══════════════════════════════════════════════════════════════════
 // MAIN HANDLER
@@ -127,8 +143,8 @@ export default async function handler(req, res) {
   }
 
   // ── 2. Env sanity ───────────────────────────────────────────────
-  const { ANTHROPIC_API_KEY, AIRTABLE_PAT, AIRTABLE_BASE_ID, AIRTABLE_USERS_TABLE } = process.env;
-  if (!ANTHROPIC_API_KEY || !AIRTABLE_PAT || !AIRTABLE_BASE_ID || !AIRTABLE_USERS_TABLE) {
+  const { ANTHROPIC_API_KEY, AIRTABLE_PAT, AIRTABLE_BASE_ID } = process.env;
+  if (!ANTHROPIC_API_KEY || !AIRTABLE_PAT || !AIRTABLE_BASE_ID) {
     console.error('[widget-ai] Missing required env vars');
     return res.status(500).json({ error: 'AI service not configured' });
   }
@@ -317,13 +333,14 @@ function clampInt(v, min, max, dflt) {
 // Field IDs on the Users table. These are the three fields we read during
 // the AI endpoint flow. If any field is renamed in Airtable, the IDs stay
 // stable so this keeps working.
-const FIELD_EMAIL  = 'fldVRiIAlrTjxnNHP';
+// Read-path field id only (returnFieldsByFieldId). Email/Status constants
+// were removed with the formula fix — formulas take display names, and
+// keeping unused id constants around is how they end up back in one.
 const FIELD_PLAN   = 'fldBgDeQdtwMqTIS4';
-const FIELD_STATUS = 'fldgz6ScqvHQy2jdH';
 
 async function lookupUserByEmail(email) {
   const AT_BASE  = process.env.AIRTABLE_BASE_ID;
-  const AT_TABLE = process.env.AIRTABLE_USERS_TABLE;
+  const AT_TABLE = USERS_TABLE_ID;
 
   // Validate email format before building any formula. The regex is strict
   // enough that anything passing it is safe to interpolate into a quoted
@@ -333,10 +350,11 @@ async function lookupUserByEmail(email) {
   }
   const safeEmail = email.toLowerCase().replace(/'/g, "\\'");
 
-  // EXACT() with LOWER() for case-insensitive exact match on the email field,
-  // filtered to Active status only. Suspended accounts cannot generate AI
-  // even with a still-valid bearer token.
-  const formula = `AND(LOWER({${FIELD_EMAIL}})='${safeEmail}',{${FIELD_STATUS}}='Active')`;
+  // Case-insensitive exact match on the email field, filtered to Active
+  // status only. Suspended accounts cannot generate AI even with a
+  // still-valid bearer token. DISPLAY NAMES in the braces — the previous
+  // field-ID version matched nothing, so every account looked inactive.
+  const formula = `AND(LOWER({${FIELD_NAME_EMAIL}})='${safeEmail}',{${FIELD_NAME_STATUS}}='Active')`;
   const url = `https://api.airtable.com/v0/${AT_BASE}/${encodeURIComponent(AT_TABLE)}?filterByFormula=${encodeURIComponent(formula)}&maxRecords=1&returnFieldsByFieldId=true`;
 
   const res = await fetchWithTimeout(url, {
@@ -364,7 +382,7 @@ async function lookupUserByEmail(email) {
 async function checkAndIncrementLimit(userRecordId, planLimit) {
   const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD UTC
   const AT_BASE  = process.env.AIRTABLE_BASE_ID;
-  const AT_TABLE = process.env.AIRTABLE_USERS_TABLE;
+  const AT_TABLE = USERS_TABLE_ID;
   // returnFieldsByFieldId=true makes the GET response key fields by ID, not name.
   // That keeps the code stable if the UI field names are ever renamed.
   const getUrl = `https://api.airtable.com/v0/${AT_BASE}/${AT_TABLE}/${encodeURIComponent(userRecordId)}?returnFieldsByFieldId=true`;
