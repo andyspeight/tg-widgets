@@ -157,6 +157,38 @@ export async function lpush(key, value) {
 export async function ltrim(key, start, stop) {
   return await callRedis('ltrim', key, String(start), String(stop));
 }
+
+// Telemetry writes sit on the HOT PATH of the three busiest public endpoints
+// (offers, cached-offers, widget-config), so they must be cheaper and tighter
+// than a read: a hung write must not hold the function open, and two serial
+// round-trips (lpush then ltrim) per request is what pushed Upstash into the
+// lpush/ltrim timeout storm of 17-23 Jul 2026 (2,900+ aborts). This helper does
+// the prepend and the optional cap in ONE pipeline round-trip, bounded well
+// under the read timeout, and returns false (never throws) so the caller can
+// back off. See api/_lib/telemetry.js for the sample + circuit-breaker layer.
+const REDIS_WRITE_TIMEOUT_MS = 1000;
+/** LPUSH + (optional) LTRIM in a single bounded pipeline call. Returns true on
+ *  success, false on any failure/timeout/unconfigured. Never throws. */
+export async function lpushCapped(key, value, cap, includeTrim = true) {
+  if (!configured()) return false;
+  const commands = [['LPUSH', key, value]];
+  if (includeTrim) commands.push(['LTRIM', key, '0', String(Math.max(0, (cap | 0) - 1))]);
+  try {
+    const res = await fetch(`${REDIS_URL}/pipeline`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${REDIS_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(commands),
+      signal: AbortSignal.timeout(REDIS_WRITE_TIMEOUT_MS),
+    });
+    return res.ok;
+  } catch (e) {
+    console.error('[redis] lpushCapped', e.message);
+    return false;
+  }
+}
 /** LRANGE key start stop — returns the slice as an array ([] if none). */
 export async function lrange(key, start, stop) {
   const r = await callRedis('lrange', key, String(start), String(stop));

@@ -26,18 +26,41 @@
 
 import { createHash } from 'crypto';
 import { getRequestIp, getUserAgent } from './auth/http.js';
-import { lpush, ltrim, configured as redisConfigured } from '../_redis.js';
+import { lpushCapped, configured as redisConfigured } from '../_redis.js';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 const IP_SALT = process.env.TELEMETRY_IP_SALT || 'tg-widgets-telemetry-v1';
 const INSERT_TIMEOUT_MS = 1500;
 
-// Fallback sink: until Supabase env vars are set, we keep a capped rolling
+// Fallback sink: until the Supabase env vars are set, we keep a capped rolling
 // buffer of recent events in the Upstash Redis that's ALREADY provisioned, so
-// the traffic dashboard has something to show tonight. Bounded, best-effort.
+// the traffic dashboard has something to show. This was only ever a stopgap,
+// but with the Supabase vars never set it became the LIVE sink and — writing
+// lpush+ltrim to one hot key on every request to the three busiest public
+// endpoints — overwhelmed Upstash (2,900+ operation-timeout errors, 17-23 Jul
+// 2026), which held functions open and starved the cache reads on the same
+// instance, surfacing to visitors as "Failed to fetch" / "Unexpected end of
+// JSON input". The fallback is now deliberately CHEAP and SELF-THROTTLING:
+//   - sample: write only 1-in-N events (per instance) so one key isn't hammered
+//   - single bounded pipeline write (lpushCapped), not two serial round-trips
+//   - trim only occasionally (the cap is a ceiling, not a per-write invariant)
+//   - circuit-breaker: after a failed/timed-out write, stop writing for a
+//     cooldown so a struggling Upstash is never fed harder by our telemetry.
+// The real cure is setting SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY, which
+// routes telemetry to Supabase (its own 1.5s-bounded insert) and off Redis.
 export const REDIS_BUFFER_KEY = 'widget:events:recent:v1';
 const REDIS_BUFFER_CAP = 800;
+// 1-in-N sampling for the Redis fallback. Env-tunable: raise it to shed more
+// load, set to 1 to record every event once Upstash has headroom again.
+const REDIS_SAMPLE = Math.max(1, parseInt(process.env.TELEMETRY_REDIS_SAMPLE || '5', 10) || 5);
+// Trim the buffer roughly every this-many actual writes (not every request).
+const REDIS_TRIM_EVERY = 40;
+// After a failed/timed-out write, skip the Redis buffer for this long.
+const REDIS_COOLDOWN_MS = 60 * 1000;
+let _redisSeq = 0;          // per-instance request counter (drives sampling)
+let _redisWrites = 0;       // per-instance successful-write counter (drives trim)
+let _redisCooldownUntil = 0;
 
 export function telemetryConfigured() {
   return !!(SUPABASE_URL && SERVICE_KEY) && process.env.TELEMETRY_DISABLED !== '1';
@@ -175,12 +198,23 @@ async function insertSupabase(row) {
 
 async function pushRedisBuffer(row) {
   if (!redisConfigured()) return;
+  // Circuit-breaker: if a recent write failed/timed out, Upstash is under
+  // pressure — do not add to it. Self-heals after the cooldown.
+  if (Date.now() < _redisCooldownUntil) return;
+  // Sample: only 1-in-N events reach Redis, so a single hot key is not written
+  // on every request across the three busiest endpoints.
+  if ((++_redisSeq % REDIS_SAMPLE) !== 0) return;
   try {
     // Store ts as an ISO string so the dashboard can filter by window.
     const entry = { ...row, ts: new Date().toISOString() };
-    await lpush(REDIS_BUFFER_KEY, JSON.stringify(entry));
-    await ltrim(REDIS_BUFFER_KEY, 0, REDIS_BUFFER_CAP - 1);
+    // Trim only occasionally — the cap is a ceiling, so an exact trim on every
+    // write is wasted work (and a second round-trip). One bounded pipeline call.
+    const includeTrim = (_redisWrites % REDIS_TRIM_EVERY) === 0;
+    const ok = await lpushCapped(REDIS_BUFFER_KEY, JSON.stringify(entry), REDIS_BUFFER_CAP, includeTrim);
+    if (ok) _redisWrites++;
+    else _redisCooldownUntil = Date.now() + REDIS_COOLDOWN_MS;
   } catch (e) {
+    _redisCooldownUntil = Date.now() + REDIS_COOLDOWN_MS;
     console.warn('[telemetry] redis buffer push failed', e && e.message);
   }
 }
