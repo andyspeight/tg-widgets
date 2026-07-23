@@ -151,7 +151,7 @@
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
   const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
-  const VERSION = '1.11.0';
+  const VERSION = '1.12.0';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // Telemetry: report a one-time load heartbeat and any failure to
@@ -198,6 +198,30 @@
         });
     };
     return tryOnce(0);
+  }
+
+  // Defensively parse a fetch Response as JSON. The live offers path used a bare
+  // res.json(), so an empty or non-JSON body threw the cryptic "Unexpected end
+  // of JSON input" straight at the visitor and the alert. That empty body is an
+  // infra-level gateway kill of /api/offers (a Vercel-killed 504/502 has no
+  // body). This mirrors the proxy's own read-text-then-parse and the board
+  // path's res.ok intent, and preserves the proxy's error contract (a non-2xx
+  // JSON body still surfaces its .error). Messages are status-bearing and free
+  // of ids/timestamps so the /api/widget-log dedup groups a flapping upstream
+  // into a single alert instead of a flood.
+  async function parseJsonResponse(res, label) {
+    var what = label || 'Offers service';
+    var status = (res && typeof res.status === 'number') ? res.status : 0;
+    var text = '';
+    try { text = res ? await res.text() : ''; } catch (e) { text = ''; }
+    if (!text) throw new Error(what + ' unavailable (HTTP ' + status + ')');
+    var data;
+    try { data = JSON.parse(text); }
+    catch (e) { throw new Error(what + ' returned an invalid response (HTTP ' + status + ')'); }
+    if (!(res && res.ok)) {
+      throw new Error((data && data.error) ? data.error : (what + ' unavailable (HTTP ' + status + ')'));
+    }
+    return data;
   }
 
   // Is this the signature of a transient network failure / a fetch the visitor
@@ -6260,7 +6284,10 @@
           const res = await fetch(CACHED_OFFERS_URL + '?' + this._cachedOffersQuery(payload), {
             headers: { 'Accept': 'application/json' },
           });
-          const data = await res.json();
+          // Defensive parse: an empty/non-JSON cache body throws here and is
+          // caught below, falling through to the live proxy (fail-open) exactly
+          // as before — never surfacing "Unexpected end of JSON input".
+          const data = await parseJsonResponse(res, 'Offers cache');
           if (data && data.success && Array.isArray(data.data) && data.data.length > 0) {
             this.rawOffers = gateSuppliers(data.data, this.cfg.supplierFilter);
             this._offersSource = 'cache';
@@ -6299,7 +6326,11 @@
             _widgetId: this.cfg._widgetId || '',
           }),
         });
-        const data = await res.json();
+        // Defensive parse (the 23 Jul 2026 incident site): an empty-bodied
+        // gateway 504/502 no longer throws "Unexpected end of JSON input" — it
+        // throws a clean, status-bearing message caught below. A non-2xx JSON
+        // error body (429/404/502) still surfaces its .error to the visitor.
+        const data = await parseJsonResponse(res, 'Offers service');
         if (!data.success) {
           this._showError(data.error || 'Travelify returned an error.');
           return;
@@ -9150,8 +9181,7 @@
             _widgetId: this.cfg._widgetId || '',
           }),
         });
-        if (!res.ok) throw new Error('API ' + res.status);
-        const data = await res.json();
+        const data = await parseJsonResponse(res, 'Offers service');
         this.rawOffers = gateSuppliers((data && data.data) ? data.data : [], this.cfg.supplierFilter);
       } catch (err) {
         console.warn('[TGOffers/board]', err);

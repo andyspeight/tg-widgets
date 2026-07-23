@@ -7,7 +7,7 @@
  *
  * Run: node test/widget-log-alert-smoke.mjs
  */
-import { isActionableError } from '../api/widget-log.js';
+import { isActionableError, alertKind } from '../api/widget-log.js';
 
 let passed = 0, failed = 0;
 const ok = (c, label) => { if (c) { passed++; } else { failed++; console.error('  FAIL:', label); } };
@@ -35,6 +35,22 @@ ok(isActionableError({ event: 'load', widget: 'consent', widgetId: 'tgw_9', mess
   'a load heartbeat is never an alert, however well populated');
 ok(isActionableError(null) === false, 'null entry is safe (no throw, not actionable)');
 ok(isActionableError({}) === false, 'empty object is not actionable');
+
+// ── Classified offers errors: actionable, dedupe-stable, and no raw parser noise
+// The 23 Jul 2026 incident sent the cryptic "Unexpected end of JSON input". The
+// widget now sends a status-bearing classified message. It must still alert, and
+// repeats of the SAME message must collapse to one dedup kind.
+const OFFERS_504 = 'Offers service unavailable (HTTP 504)';
+ok(isActionableError({ event: 'error', widget: 'offers', widgetId: 'tgw_1', message: OFFERS_504 }) === true,
+  'a classified offers outage still alerts (it names a widget + message)');
+ok(/http 504/i.test(OFFERS_504) && !/unexpected end of json input/i.test(OFFERS_504),
+  'the classified message is actionable (carries the HTTP status, not the raw parser error)');
+ok(alertKind(OFFERS_504) === alertKind(OFFERS_504) && alertKind(OFFERS_504) === 'offers-service-unavailable-http-504-',
+  'identical outages derive the SAME dedup kind → one email per widget+site / 30 min');
+ok(alertKind('Offers service unavailable (HTTP 502)') !== alertKind(OFFERS_504),
+  'a different status is a different kind (502 vs 504 are seen separately, by design)');
+ok(alertKind("Failed to execute 'json' on 'Response': Unexpected end of JSON input") !== alertKind(OFFERS_504),
+  'the old raw parser message is no longer what the live path reports');
 
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
