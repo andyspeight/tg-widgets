@@ -1075,6 +1075,82 @@
   }
 
   // ── Expose ─────────────────────────────────────────────────
+  /**
+   * Coach an AI "describe your business" prompt toward something usable, and
+   * stop thin/empty generations reaching the paid endpoint in the first place.
+   *
+   * Wires a description <textarea> to a Generate <button>:
+   *   - renders a "who you are / what you sell / who your customers are"
+   *     checklist under the field (once)
+   *   - keeps the button disabled until the text meets minChars + minWords
+   *   - shows a gentle live hint while it is still too thin
+   *
+   * The server enforces the same floor as the hard guard (api/widget-ai.js);
+   * this is the friendly front line that saves the client a wasted click and
+   * saves us the AI credits. Additive and opt-in — editors that only rewrite
+   * existing copy never call it. CSP-safe: inline styles via CSSOM, no classes
+   * that need external CSS, no injected <script>.
+   *
+   * @param {{textarea:(string|Element), button:(string|Element), hintEl?:(string|Element),
+   *          minChars?:number, minWords?:number, checklist?:string[]}} opts
+   * @returns {{ isReady:()=>boolean, refresh:()=>void }}
+   */
+  function wireAiPrompt(opts) {
+    opts = opts || {};
+    const sel = (x) => (typeof x === 'string' ? document.querySelector(x) : x) || null;
+    const ta = sel(opts.textarea);
+    const btn = sel(opts.button);
+    if (!ta || !btn) return { isReady: () => true, refresh: () => {} };
+
+    const minChars = opts.minChars != null ? opts.minChars : 30;
+    const minWords = opts.minWords != null ? opts.minWords : 5;
+    const items = (opts.checklist && opts.checklist.length)
+      ? opts.checklist
+      : ['who you are', 'what you sell', 'who your customers are'];
+
+    // Checklist, rendered once immediately after the textarea.
+    let list = ta.parentElement && ta.parentElement.querySelector('[data-tgse-ai-checklist]');
+    if (!list) {
+      list = document.createElement('div');
+      list.setAttribute('data-tgse-ai-checklist', '');
+      list.style.cssText = 'font-size:12px;line-height:1.5;color:#64748b;margin-top:6px;';
+      list.textContent = 'A good description covers ' + items.join(' · ') + '.';
+      ta.insertAdjacentElement('afterend', list);
+    }
+    const hint = opts.hintEl ? sel(opts.hintEl) : null;
+
+    const TOO_THIN = 'Add a little more detail so the AI has something to work with — a sentence or two is plenty.';
+    const assess = () => {
+      const v = (ta.value || '').trim();
+      const words = v ? v.split(/\s+/).filter(Boolean).length : 0;
+      return v.length >= minChars && words >= minWords;
+    };
+    const refresh = () => {
+      const ready = assess();
+      btn.disabled = !ready;
+      btn.setAttribute('aria-disabled', ready ? 'false' : 'true');
+      btn.style.opacity = ready ? '' : '0.55';
+      btn.style.cursor = ready ? '' : 'not-allowed';
+      list.style.color = ready ? '#059669' : '#64748b';
+      if (hint) hint.textContent = ready ? '' : TOO_THIN;
+    };
+    ta.addEventListener('input', refresh);
+    // Capture-phase guard: block a generate click whenever the description is
+    // thin, even if the editor's own code re-enabled the button after a
+    // previous run. Belt-and-braces in front of the disabled state.
+    btn.addEventListener('click', (ev) => {
+      if (!assess()) {
+        ev.preventDefault();
+        ev.stopImmediatePropagation();
+        refresh();
+        if (hint) hint.textContent = TOO_THIN;
+        try { ta.focus(); } catch (_) {}
+      }
+    }, true);
+    refresh();
+    return { isReady: assess, refresh };
+  }
+
   window.tgse = {
     init,
     onReady,
@@ -1089,8 +1165,9 @@
     getAuthToken,
     getCurrentUser,
     mountFontPicker,
+    wireAiPrompt,
     FONTS,
-    version: '1.2.0',
+    version: '1.3.0',
   };
 
 })();

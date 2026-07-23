@@ -2234,6 +2234,18 @@
           <button class="btn btn-primary" id="ai-go">${icn('sparkle', 14)}Generate</button>
         `,
         onMount(root) {
+          // Coach the description toward a usable prompt and keep Generate
+          // disabled until it is substantive (shared shell helper; the server
+          // enforces the same floor as the hard guard).
+          if (window.tgse && tgse.wireAiPrompt) {
+            tgse.wireAiPrompt({
+              textarea: $('#ai-prompt', root),
+              button: $('#ai-go', root),
+              hintEl: $('#ai-status', root),
+              checklist: ['who you are', 'what you sell', 'who your customers are', 'what customers usually ask'],
+            });
+            $('#ai-status', root).style.display = '';
+          }
           $$('#ai-merge-replace, #ai-merge-append', root).forEach(b => b.addEventListener('click', () => {
             $$('#ai-merge-replace, #ai-merge-append', root).forEach(x => x.setAttribute('aria-pressed', 'false'));
             b.setAttribute('aria-pressed', 'true');
