@@ -78,7 +78,15 @@ const MODEL        = process.env.WIDGET_AI_MODEL || 'claude-sonnet-5';
 // Headroom for the largest ask (12 FAQs with full answers) — 1500 could
 // truncate mid-JSON, which surfaced to users as "invalid response" 502s.
 const MAX_TOKENS   = 2500;
-const FETCH_TIMEOUT_MS = 30_000;
+// A rewrite is short and fast, so it keeps the tight default. Generation of a
+// big multi-topic FAQ can legitimately take longer than 30s to stream, which
+// was surfacing as "AI request timed out" 504s (23 Jul 2026) — generation uses
+// the longer per-attempt cap below, bounded by a total budget that stays under
+// the function's 90s maxDuration (set in vercel.json) so a slow model can never
+// run the instance to a platform kill.
+const FETCH_TIMEOUT_MS   = 30_000;   // default (rewrite)
+const AI_MAX_ATTEMPT_MS  = 55_000;   // per generation attempt
+const AI_TOTAL_BUDGET_MS = 80_000;   // across both attempts, < 90s maxDuration
 
 const PROMPT_MIN_LEN = 5;
 const PROMPT_MAX_LEN = 1000;
@@ -361,17 +369,24 @@ export default async function handler(req, res) {
   // genuine refusal gets an actionable message instead of the opaque "invalid
   // response", and so the real cause is visible in the logs next time.
   const maxTokens = maxTokensFor(widgetType, options);
+  const genStart = Date.now();
   let cleaned = null, lastStop = '', lastErr = null;
   for (let attempt = 0; attempt < 2 && !cleaned; attempt++) {
+    // Deadline-aware: never start an attempt we cannot finish inside the
+    // function budget. A retry only fires if enough time is left for it, so two
+    // attempts can never overrun the 90s maxDuration.
+    const elapsed = Date.now() - genStart;
+    if (attempt > 0 && (AI_TOTAL_BUDGET_MS - elapsed) < 15_000) break;
+    const timeoutMs = Math.max(10_000, Math.min(AI_MAX_ATTEMPT_MS, AI_TOTAL_BUDGET_MS - elapsed - 3_000));
     let aiResponse;
     try {
-      const r = await callAnthropic({ system, userMsg, apiKey: ANTHROPIC_API_KEY, maxTokens });
+      const r = await callAnthropic({ system, userMsg, apiKey: ANTHROPIC_API_KEY, maxTokens, timeoutMs });
       aiResponse = r.text;
       if (r.stopReason) lastStop = r.stopReason;
     } catch (err) {
       if (err.name === 'AbortError' || err.name === 'TimeoutError') {
-        console.error('[widget-ai] Anthropic timeout');
-        return res.status(504).json({ error: 'AI request timed out. Please try again.' });
+        console.error(`[widget-ai] Anthropic timeout after ${Math.round((Date.now() - genStart) / 1000)}s`);
+        return res.status(504).json({ error: 'The AI took too long on this request. Large requests can time out — try asking for less (for example fewer FAQ questions, or shorter answers) and try again.' });
       }
       console.error('[widget-ai] Anthropic error:', err.message);
       return res.status(502).json({ error: 'AI service error. Please try again.' });
@@ -1093,7 +1108,7 @@ Rules:
 // ANTHROPIC CALL
 // ═══════════════════════════════════════════════════════════════════
 
-async function callAnthropic({ system, userMsg, apiKey, maxTokens }) {
+async function callAnthropic({ system, userMsg, apiKey, maxTokens, timeoutMs }) {
   const res = await fetchWithTimeout('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -1107,7 +1122,7 @@ async function callAnthropic({ system, userMsg, apiKey, maxTokens }) {
       system,
       messages: [{ role: 'user', content: userMsg }],
     }),
-  }, FETCH_TIMEOUT_MS);
+  }, timeoutMs || FETCH_TIMEOUT_MS);
 
   if (!res.ok) {
     const bodyText = await res.text().catch(() => '');

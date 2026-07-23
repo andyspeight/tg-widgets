@@ -1,6 +1,9 @@
 {
   "version": 2,
   "functions": {
+    "api/widget-ai.js": {
+      "maxDuration": 90
+    },
     "api/offers.js": {
       "maxDuration": 30
     },

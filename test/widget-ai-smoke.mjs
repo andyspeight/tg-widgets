@@ -78,6 +78,9 @@ global.fetch = async (url, opts = {}) => {
   if (u.startsWith('https://api.anthropic.com/')) {
     const sent = JSON.parse(body);
     state.anthropicBodies.push(sent);
+    // Simulate a slow model that aborts (timeout). Set state.aiThrow to an error
+    // name ('TimeoutError' / 'AbortError').
+    if (state.aiThrow) { const e = new Error('aborted'); e.name = state.aiThrow; throw e; }
     // Test-scripted responses (for the empty/retry/refusal/prose cases):
     // consume one { text, stopReason } per call, in order.
     if (Array.isArray(state.aiScript) && state.aiScript.length) {
@@ -291,6 +294,17 @@ ok(!process.env.AIRTABLE_USERS_TABLE, 'no bespoke env var needed — the 500 "AI
   let r = mockRes();
   await handler(request(faqReq({ prompt: uniqueDesc('TOKENS'), options: { count: 12, tone: 'professional', existingCategories: [] } })), r);
   ok(state.anthropicBodies.at(-1)?.max_tokens === 2500 + 12 * 450, 'FAQ token budget scales with the requested count (12 → 7900)');
+}
+{
+  // A slow model that aborts returns a clear 504 with guidance, and the model
+  // call is bounded (a timeout is not retried into an overrun).
+  state.aiThrow = 'TimeoutError';
+  let r = mockRes();
+  const before = state.anthropicBodies.length;
+  await handler(request(faqReq({ prompt: uniqueDesc('SLOW') })), r);
+  ok(r.statusCode === 504 && /too long/i.test(r.body?.error || ''), 'a model timeout returns 504 with actionable "took too long" guidance');
+  ok(state.anthropicBodies.length === before + 1, 'a timeout is returned immediately, not retried into an overrun');
+  state.aiThrow = null;
 }
 
 // ── Per-type floors ──────────────────────────────────────────────────────────
