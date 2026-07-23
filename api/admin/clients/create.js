@@ -136,17 +136,30 @@ export default async function handler(req, res) {
     errors.push('apiKey must be a UUID like A41D180E-CBFE-4E30-A47D-FAAB424A650D');
   }
 
-  const primaryContactName = String(body.primaryContactName || '').trim();
-  if (primaryContactName.length < 2 || primaryContactName.length > 120) errors.push('primaryContactName must be 2–120 characters');
+  // Staff-led setup: Travelgenix builds the client's site BEFORE handover, so
+  // the account is created with NO client contact and NO invite email. The
+  // account email stays BLANK (never a staff address — that caused the
+  // 23 Jul cross-tenant widget-list leak); it is healed automatically when
+  // the first owner/admin is invited at handover (see invite-user.js). Staff
+  // work inside the account via "act as", exactly as with any client.
+  const staffLedSetup = body.staffLedSetup === true;
 
-  const primaryContactEmail = normaliseEmail(body.primaryContactEmail);
-  if (!isValidEmail(primaryContactEmail)) errors.push('primaryContactEmail must be a valid email');
-  // Travelgenix staff must never be a client's primary contact. Doing so links
-  // them as an owner/user of the client account, which breaks tenant isolation
-  // (the cause of the widget-list leaks) and is redundant — staff already reach
-  // any client via "act as". Enforce the rule at the point of entry.
-  if (primaryContactEmail && isStaffEmail(primaryContactEmail)) {
-    errors.push('primaryContactEmail must be the client\'s own address — a Travelgenix staff email can\'t be the client contact (you already have access via "act as")');
+  const primaryContactName = String(body.primaryContactName || '').trim();
+  if (!staffLedSetup || primaryContactName) {
+    if (primaryContactName.length < 2 || primaryContactName.length > 120) errors.push('primaryContactName must be 2–120 characters');
+  }
+
+  const primaryContactEmail = staffLedSetup ? '' : normaliseEmail(body.primaryContactEmail);
+  if (!staffLedSetup) {
+    if (!isValidEmail(primaryContactEmail)) errors.push('primaryContactEmail must be a valid email');
+    // Travelgenix staff must never be a client's primary contact. Doing so links
+    // them as an owner/user of the client account, which breaks tenant isolation
+    // (the cause of the widget-list leaks) and is redundant — staff already reach
+    // any client via "act as". Enforce the rule at the point of entry; the
+    // sanctioned route for building ahead of the client is staff-led setup.
+    if (primaryContactEmail && isStaffEmail(primaryContactEmail)) {
+      errors.push('primaryContactEmail must be the client\'s own address — a Travelgenix staff email can\'t be the client contact. Tick "Staff-led setup" to build before handover (you already have access via "act as")');
+    }
   }
 
   const primaryContactPhone = String(body.primaryContactPhone || '').trim();
@@ -187,6 +200,9 @@ export default async function handler(req, res) {
     if (accent && !HEX_COLOR_RE.test(accent)) errors.push('Luna Chat accentColor must be a hex like #00B4D8');
     if (welcome.length > 500) errors.push('Luna Chat welcomeMessage max 500 chars');
 
+    if (useContact && staffLedSetup) {
+      errors.push('Luna Chat cannot reuse the primary contact in a staff-led setup (there is no contact yet) — give an agent email, or add Luna Chat at handover');
+    }
     if (!useContact) {
       const agentEmail = normaliseEmail(lc.agentEmail);
       const agentName = String(lc.agentName || '').trim();
@@ -223,8 +239,10 @@ export default async function handler(req, res) {
 
     const websiteNorm = normaliseUrl(websiteUrl);
     const conflicts = [];
-    if (clients.find((c) => normaliseEmail(c.fields[CLIENTS.fields.email]) === primaryContactEmail)) conflicts.push('A client already uses this primary email');
-    if (users.find((u) => normaliseEmail(u.fields[USERS.fields.email]) === primaryContactEmail)) conflicts.push('A user with the primary contact email already exists');
+    if (primaryContactEmail) {
+      if (clients.find((c) => normaliseEmail(c.fields[CLIENTS.fields.email]) === primaryContactEmail)) conflicts.push('A client already uses this primary email');
+      if (users.find((u) => normaliseEmail(u.fields[USERS.fields.email]) === primaryContactEmail)) conflicts.push('A user with the primary contact email already exists');
+    }
     if (websiteNorm && clients.find((c) => normaliseUrl(c.fields[CLIENTS.fields.websiteUrl]) === websiteNorm)) conflicts.push('A client with this website already exists');
     if (travelifyAppId && clients.find((c) => String(c.fields[CLIENTS.fields.travelifyAppId] || '').trim() === travelifyAppId)) conflicts.push('A client with this Travelify App ID already exists');
     if (lunaChatPayload && !lunaChatPayload.useContact) {
@@ -274,11 +292,14 @@ export default async function handler(req, res) {
       [CLIENTS.fields.createdAt]:           new Date().toISOString(),
     };
 
-    if (lunaChatPayload) {
-      clientFields[CLIENTS.fields.notes] =
-        '[Luna Chat config captured at onboarding]\n' +
-        JSON.stringify(lunaChatPayload, null, 2);
+    const noteParts = [];
+    if (staffLedSetup) {
+      noteParts.push(`[Staff-led setup] Created by ${ctx.email} on ${new Date().toISOString().slice(0, 10)} with no client contact — account email is healed automatically when the first owner/admin is invited at handover.`);
     }
+    if (lunaChatPayload) {
+      noteParts.push('[Luna Chat config captured at onboarding]\n' + JSON.stringify(lunaChatPayload, null, 2));
+    }
+    if (noteParts.length) clientFields[CLIENTS.fields.notes] = noteParts.join('\n\n');
 
     clientRec = await createRecord(CLIENTS.tableId, clientFields);
   } catch (err) {
@@ -320,31 +341,38 @@ export default async function handler(req, res) {
   const inviteResults = [];
   let primaryUserRecordId = null;
 
-  try {
-    const r = await sendAdminInvite({
-      email: primaryContactEmail,
-      role: USERS.roles.ADMIN,
-      targetClientRecordId: clientId,
-      invitedByUserRecordId: ctx.userRecordId,
-      fullName: primaryContactName,
-      inviterName: ctx.fullName || ctx.email,
-    });
-    primaryUserRecordId = r.userRecordId;
-    inviteResults.push({
-      kind: 'primary',
-      email: primaryContactEmail,
-      ok: true,
-      alreadyMember: !!r.alreadyMember,
-      userRecordId: r.userRecordId,
-    });
-  } catch (err) {
-    console.error('[admin/clients/create] primary invite failed:', err);
-    inviteResults.push({
-      kind: 'primary',
-      email: primaryContactEmail,
-      ok: false,
-      error: err.code || err.message || 'unknown',
-    });
+  if (staffLedSetup) {
+    // No contact yet by design: staff build via "act as", the client's first
+    // owner/admin is invited at handover (which also heals the account email).
+    inviteResults.push({ kind: 'primary', ok: true, skipped: 'staff-led setup — invite the client at handover' });
+    console.log('[admin/clients/create] staff-led setup by', ctx.email, '— no contact invited for', clientId);
+  } else {
+    try {
+      const r = await sendAdminInvite({
+        email: primaryContactEmail,
+        role: USERS.roles.ADMIN,
+        targetClientRecordId: clientId,
+        invitedByUserRecordId: ctx.userRecordId,
+        fullName: primaryContactName,
+        inviterName: ctx.fullName || ctx.email,
+      });
+      primaryUserRecordId = r.userRecordId;
+      inviteResults.push({
+        kind: 'primary',
+        email: primaryContactEmail,
+        ok: true,
+        alreadyMember: !!r.alreadyMember,
+        userRecordId: r.userRecordId,
+      });
+    } catch (err) {
+      console.error('[admin/clients/create] primary invite failed:', err);
+      inviteResults.push({
+        kind: 'primary',
+        email: primaryContactEmail,
+        ok: false,
+        error: err.code || err.message || 'unknown',
+      });
+    }
   }
 
   // ─── 4. Grant Permissions for unique product slugs ───────────────
@@ -465,6 +493,7 @@ export default async function handler(req, res) {
   return res.status(200).json({
     ok: true,
     clientId,
+    staffLed: staffLedSetup,
     entitlementsCreated,
     entitlementsSkipped: skippedInactive.length,
     invites: inviteResults,

@@ -35,7 +35,8 @@
     "test:popup-routing": "node test/popup-routing-smoke.mjs",
     "test:payment-reminders": "node test/payment-reminders-smoke.mjs",
     "test:worldmap-departures": "node test/worldmap-departure-filter-smoke.mjs",
-    "test:widget-list-scope": "node test/widget-list-scope-smoke.mjs"
+    "test:widget-list-scope": "node test/widget-list-scope-smoke.mjs",
+    "test:staff-led-setup": "node test/staff-led-setup-smoke.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",

@@ -35,8 +35,9 @@ import {
 } from '../../_lib/auth/http.js';
 import { limiters } from '../../_lib/auth/ratelimit.js';
 import {
-  getRecord, listAllRecords, createRecord,
+  getRecord, listAllRecords, createRecord, updateRecord,
 } from '../../_lib/auth/airtable.js';
+import { isStaffEmail } from '../../_lib/auth/staff.js';
 import {
   USERS, CLIENTS, PERMISSIONS, PRODUCTS, AUTH_EVENTS,
 } from '../../_lib/auth/schema.js';
@@ -46,6 +47,26 @@ import { logAuthEvent } from '../../_lib/auth/audit.js';
 
 const REC_ID_RE = /^rec[A-Za-z0-9]{14}$/;
 const ALLOWED_ROLES = [USERS.roles.OWNER, USERS.roles.ADMIN, USERS.roles.MEMBER];
+
+/**
+ * Handover heal: should inviting this user become the account's login email?
+ *
+ * Staff-led setups (and older accounts created under a staff address — the
+ * 23 Jul Worldchoice incident) leave the Clients.Email either blank or
+ * pointing at Travelgenix staff. Neither identifies the client, and a staff
+ * address there is what let staff test widgets surface in a client's
+ * dashboard. The moment a real owner/admin is invited — the handover — the
+ * account email is set to that person. Members never trigger it (a junior
+ * addition is not a handover), and a genuine client email is never
+ * overwritten. Pure and exported for tests.
+ */
+export function shouldHealAccountEmail(currentAccountEmail, invitedRole) {
+  const role = String(invitedRole || '').toLowerCase();
+  if (role !== USERS.roles.OWNER && role !== USERS.roles.ADMIN) return false;
+  const current = String(currentAccountEmail || '').trim();
+  if (!current) return true;
+  return isStaffEmail(current);
+}
 
 export default async function handler(req, res) {
   if (setCors(req, res)) return;
@@ -136,11 +157,26 @@ export default async function handler(req, res) {
       inviterName: ctx.fullName || ctx.email,
     });
 
+    // Handover heal: a blank (staff-led setup) or staff-address account email
+    // becomes the invited owner/admin's address the moment they are brought
+    // in. Best-effort — the invite itself must never fail over this.
+    let healedAccountEmail = null;
+    if (shouldHealAccountEmail(targetClient.fields?.[CLIENTS.fields.email], newUserRole)) {
+      try {
+        await updateRecord(CLIENTS.tableId, clientId, { [CLIENTS.fields.email]: email });
+        healedAccountEmail = email;
+        console.log('[admin/clients/invite-user] account email healed for', clientId, '→', email);
+      } catch (err) {
+        console.warn('[admin/clients/invite-user] account email heal failed:', err.message);
+      }
+    }
+
     // If they were already a member of this client, no permission changes needed.
     if (inviteResult.alreadyMember) {
       return jsonOk(res, {
         alreadyMember: true,
         userRecordId: inviteResult.userRecordId,
+        healedAccountEmail,
       });
     }
 
@@ -180,6 +216,7 @@ export default async function handler(req, res) {
       userRecordId: inviteResult.userRecordId,
       inviteRecordId: inviteResult.inviteRecordId,
       productNames: resolvedProducts.map((p) => p.name),
+      healedAccountEmail,
     });
   } catch (err) {
     if (err.code === 'email_taken') {
