@@ -299,7 +299,7 @@ export default async function handler(req, res) {
     const rwPrompt = buildRewritePrompt(rw);
     let rwResponse;
     try {
-      rwResponse = await callAnthropic({ system: rwPrompt.system, userMsg: rwPrompt.userMsg, apiKey: ANTHROPIC_API_KEY });
+      rwResponse = (await callAnthropic({ system: rwPrompt.system, userMsg: rwPrompt.userMsg, apiKey: ANTHROPIC_API_KEY })).text;
     } catch (err) {
       if (err.name === 'AbortError' || err.name === 'TimeoutError') {
         return res.status(504).json({ error: 'AI request timed out. Please try again.' });
@@ -353,24 +353,55 @@ export default async function handler(req, res) {
   const accountContext = buildAccountContext(userRecord);
   if (accountContext) userMsg = `${accountContext}\n\n${userMsg}`;
 
-  let aiResponse;
-  try {
-    aiResponse = await callAnthropic({ system, userMsg, apiKey: ANTHROPIC_API_KEY });
-  } catch (err) {
-    if (err.name === 'AbortError' || err.name === 'TimeoutError') {
-      console.error('[widget-ai] Anthropic timeout');
-      return res.status(504).json({ error: 'AI request timed out. Please try again.' });
+  // ── 8. Call the model (with one retry) + validate ───────────────
+  // Generation is non-deterministic: an occasional empty completion (a model
+  // refusal, a stray truncation) or unparseable output should not fail a paid
+  // request outright. Try up to twice — the daily counter was already spent
+  // above, so the retry costs the visitor nothing. We track stop_reason so a
+  // genuine refusal gets an actionable message instead of the opaque "invalid
+  // response", and so the real cause is visible in the logs next time.
+  const maxTokens = maxTokensFor(widgetType, options);
+  let cleaned = null, lastStop = '', lastErr = null;
+  for (let attempt = 0; attempt < 2 && !cleaned; attempt++) {
+    let aiResponse;
+    try {
+      const r = await callAnthropic({ system, userMsg, apiKey: ANTHROPIC_API_KEY, maxTokens });
+      aiResponse = r.text;
+      if (r.stopReason) lastStop = r.stopReason;
+    } catch (err) {
+      if (err.name === 'AbortError' || err.name === 'TimeoutError') {
+        console.error('[widget-ai] Anthropic timeout');
+        return res.status(504).json({ error: 'AI request timed out. Please try again.' });
+      }
+      console.error('[widget-ai] Anthropic error:', err.message);
+      return res.status(502).json({ error: 'AI service error. Please try again.' });
     }
-    console.error('[widget-ai] Anthropic error:', err.message);
-    return res.status(502).json({ error: 'AI service error. Please try again.' });
+
+    if (!aiResponse || !aiResponse.trim()) {
+      lastErr = new Error('empty response');
+      console.error(`[widget-ai] Empty model response (stop_reason: ${lastStop || 'none'}, attempt ${attempt + 1})`);
+      continue; // retry
+    }
+    try {
+      cleaned = parseAndValidate(widgetType, aiResponse, options);
+    } catch (err) {
+      lastErr = err;
+      console.error(`[widget-ai] Output validation failed: ${err.message} (stop_reason: ${lastStop || 'none'}) raw:`, aiResponse.slice(0, 300));
+      // retry
+    }
   }
 
-  // ── 8. Parse + validate output ──────────────────────────────────
-  let cleaned;
-  try {
-    cleaned = parseAndValidate(widgetType, aiResponse, options);
-  } catch (err) {
-    console.error('[widget-ai] Output validation failed:', err.message, 'raw:', aiResponse.slice(0, 200));
+  if (!cleaned) {
+    // A model refusal, or a {"error":...} it returned on purpose, is a response
+    // to the CLIENT's request, not a server fault — steer them plainly rather
+    // than showing an opaque error. Everything else is a genuine bad response.
+    const declined = lastStop === 'refusal' || /^Model declined/.test(lastErr?.message || '');
+    if (declined) {
+      return res.status(422).json({
+        error: 'The AI could not produce a usable result for this request. Try simplifying it — describe plainly what you want and avoid asking it to insert specific marketing or SEO keywords — then try again.',
+        code: 'ai_declined',
+      });
+    }
     return res.status(502).json({ error: 'AI returned an invalid response. Please rephrase and try again.' });
   }
 
@@ -1062,7 +1093,7 @@ Rules:
 // ANTHROPIC CALL
 // ═══════════════════════════════════════════════════════════════════
 
-async function callAnthropic({ system, userMsg, apiKey }) {
+async function callAnthropic({ system, userMsg, apiKey, maxTokens }) {
   const res = await fetchWithTimeout('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -1072,7 +1103,7 @@ async function callAnthropic({ system, userMsg, apiKey }) {
     },
     body: JSON.stringify({
       model: MODEL,
-      max_tokens: MAX_TOKENS,
+      max_tokens: maxTokens || MAX_TOKENS,
       system,
       messages: [{ role: 'user', content: userMsg }],
     }),
@@ -1085,7 +1116,23 @@ async function callAnthropic({ system, userMsg, apiKey }) {
 
   const data = await res.json();
   const text = (data.content || []).map(b => b.text || '').join('');
-  return text;
+  // stop_reason surfaces WHY the completion ended: 'refusal' (model declined),
+  // 'max_tokens' (truncated — output likely unparseable), 'end_turn' (clean).
+  // The caller uses it to give an actionable message and to log the real cause.
+  return { text, stopReason: data.stop_reason || '' };
+}
+
+// Token budget per request. FAQ answers are long-form (up to 1500 chars each),
+// so a big multi-topic ask needs far more than the small default or the JSON
+// truncates mid-answer and fails to parse (the 23 Jul 2026 "invalid response").
+// Scale with the requested count; other widget types return small configs and
+// keep the modest default.
+function maxTokensFor(widgetType, options) {
+  if (widgetType === 'FAQ') {
+    const count = (options && Number.isFinite(options.count)) ? options.count : 8;
+    return Math.min(8192, 2500 + count * 450); // 8 → 6100, 20 → capped at 8192
+  }
+  return MAX_TOKENS;
 }
 
 function fetchWithTimeout(url, options, timeoutMs) {
@@ -1102,13 +1149,27 @@ function fetchWithTimeout(url, options, timeoutMs) {
 // OUTPUT PARSING + VALIDATION
 // ═══════════════════════════════════════════════════════════════════
 
+// Parse a JSON object from model output, tolerating stray prose the model may
+// have added before or after it despite instructions (a leading "Here is the
+// JSON:" or a trailing note). Returns the parsed value, or undefined if nothing
+// parseable is present. Only used for the strict per-type validators below —
+// each still validates the shape, so a salvaged object is not trusted blindly.
+function parseJsonObjectLoose(s) {
+  try { return JSON.parse(s); } catch { /* fall through to salvage */ }
+  const first = s.indexOf('{');
+  const last = s.lastIndexOf('}');
+  if (first >= 0 && last > first) {
+    try { return JSON.parse(s.slice(first, last + 1)); } catch { /* unrecoverable */ }
+  }
+  return undefined;
+}
+
 function parseAndValidate(widgetType, rawText, options) {
   // Strip any accidental markdown fences the model may have added despite instructions.
   const cleaned = rawText.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
 
-  let obj;
-  try { obj = JSON.parse(cleaned); }
-  catch (err) { throw new Error('JSON parse failed'); }
+  const obj = parseJsonObjectLoose(cleaned);
+  if (obj === undefined) throw new Error('JSON parse failed');
 
   if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
     throw new Error('Response is not an object');
