@@ -772,11 +772,6 @@
           Templates
           <span class="tgse-kbd">T</span>
         </button>
-        <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
-          AI builder
-          <span class="tgse-kbd">A</span>
-        </button>
       </div>
 
       <!-- Name + Save (60px) -->
@@ -874,7 +869,9 @@
     const API_AUTH   = '/api/widget-auth';
     const API_CONFIG = '/api/widget-config';
     const API_LIST   = '/api/widget-list';
-    const API_AI     = '/api/widget-ai';
+    // No API_AI: AI testimonial generation was removed by design. Publishing
+    // AI-invented testimonials as genuine is unlawful in the UK (DMCC Act
+    // 2024) and against ASA rules.
     const WIDGET_TYPE = 'Testimonials';
     const STORAGE_KEY = 'tgw_session';
 
@@ -1430,7 +1427,6 @@
       const tsBody = `
         <div class="row-wrap" style="margin-bottom:10px">
           <button class="btn btn-sm btn-primary" data-add-testimonial>${icn('plus', 14)}Add testimonial</button>
-          <button class="btn btn-sm" data-open-ai>${icn('sparkle', 14)}AI generate</button>
           <button class="btn btn-sm" data-open-templates>${icn('build', 14)}Template</button>
         </div>
         <div class="field">
@@ -1440,7 +1436,7 @@
           </div>
         </div>
         <div class="q-list" id="q-list">${renderTestimonialList(c.testimonials)}</div>
-        ${c.testimonials.length === 0 ? '<p class="text-muted" style="padding:16px 0;text-align:center;font-size:13px;">No testimonials yet — add one, generate with AI, or use a template.</p>' : ''}
+        ${c.testimonials.length === 0 ? '<p class="text-muted" style="padding:16px 0;text-align:center;font-size:13px;">No testimonials yet — add one from real customer feedback, or use a template.</p>' : ''}
       `;
 
       // Import/export
@@ -1791,8 +1787,7 @@
       // Drag to reorder
       bindDragReorder(body);
 
-      // AI / Templates
-      $$('[data-open-ai]', body).forEach(el => el.addEventListener('click', openAIModal));
+      // Templates (AI generation removed — see note by the old openAIModal)
       $$('[data-open-templates]', body).forEach(el => el.addEventListener('click', openTemplatesModal));
 
       // CSV
@@ -2053,107 +2048,10 @@
     }
 
     /* ============================ AI MODAL ============================ */
-    function openAIModal() {
-      openModal({
-        title: 'Generate Testimonials with AI',
-        body: `
-          <p class="field-hint" style="margin-bottom:12px">Describe your business and what kind of testimonials you need. The more specific you are, the better the results.</p>
-          <div class="field">
-            <label class="field-label">Business description</label>
-            <textarea class="textarea" id="ai-prompt" style="min-height:120px" placeholder="e.g. Luxury travel agent in London specialising in honeymoons and bespoke itineraries. Need testimonials from couples, families, and solo travellers covering destinations like Maldives, Japan, Santorini."></textarea>
-          </div>
-          <div class="row-wrap">
-            <div class="field" style="flex:1;min-width:140px">
-              <label class="field-label">Count</label>
-              <select class="select" id="ai-count">
-                <option value="4">4 testimonials</option>
-                <option value="6" selected>6 testimonials</option>
-                <option value="8">8 testimonials</option>
-                <option value="10">10 testimonials</option>
-              </select>
-            </div>
-            <div class="field" style="flex:1;min-width:140px">
-              <label class="field-label">Tone</label>
-              <select class="select" id="ai-tone">
-                <option value="warm">Warm & friendly</option>
-                <option value="professional" selected>Professional</option>
-                <option value="casual">Casual</option>
-              </select>
-            </div>
-          </div>
-          <div class="field">
-            <label class="field-label">Merge behaviour</label>
-            <div class="btn-group">
-              <button id="ai-merge-replace" aria-pressed="true">Replace existing</button>
-              <button id="ai-merge-append" aria-pressed="false">Append</button>
-            </div>
-          </div>
-          <div id="ai-status" class="field-hint" style="display:none;margin-top:8px"></div>
-        `,
-        foot: `
-          <div style="flex:1"></div>
-          <button class="btn" data-modal-close>Cancel</button>
-          <button class="btn btn-primary" id="ai-go">${icn('sparkle', 14)}Generate</button>
-        `,
-        onMount(root) {
-          $$('#ai-merge-replace, #ai-merge-append', root).forEach(b => b.addEventListener('click', () => {
-            $$('#ai-merge-replace, #ai-merge-append', root).forEach(x => x.setAttribute('aria-pressed', 'false'));
-            b.setAttribute('aria-pressed', 'true');
-          }));
-          $('#ai-go', root).addEventListener('click', async () => {
-            const prompt = $('#ai-prompt', root).value.trim();
-            if (!prompt) { showToast('Describe your business first', 'error'); return; }
-            const count = parseInt($('#ai-count', root).value, 10);
-            const tone  = $('#ai-tone', root).value;
-            const merge = $('#ai-merge-append', root).getAttribute('aria-pressed') === 'true' ? 'append' : 'replace';
-            const status = $('#ai-status', root);
-            const btn = $('#ai-go', root);
-            status.style.display = ''; status.textContent = 'Generating — usually takes 10–20 seconds…';
-            btn.disabled = true; btn.innerHTML = `${icn('sparkle', 14).replace('>','  class="spin">')}Generating…`;
-            try {
-              const res = await fetch(API_AI, {
-                method: 'POST',
-                headers: authHeaders(),
-                body: JSON.stringify({
-                  widgetType: WIDGET_TYPE,
-                  action: 'generate',
-                  prompt,
-                  options: { count, tone }
-                })
-              });
-              if (res.status === 401) { showToast('Session expired — please sign in again', 'error'); clearSession(); location.reload(); return; }
-              if (!res.ok) throw new Error('HTTP ' + res.status);
-              const data = await res.json();
-              const arr = data.testimonials || data.result?.testimonials || data.result || [];
-              if (!Array.isArray(arr) || arr.length === 0) throw new Error('No testimonials returned');
-              mutate(cfg => {
-                const built = arr.map(t => ({
-                  id: uid('t'),
-                  quote: t.quote || t.text || '',
-                  author: t.author || t.name || '',
-                  role: t.role || '',
-                  location: t.location || '',
-                  avatar: '', rating: t.rating || 5,
-                  destination: t.destination || '',
-                  tripType: t.tripType || t.trip_type || '',
-                  travelDate: t.travelDate || t.travel_date || '',
-                  source: t.source || 'Google',
-                  verified: !!t.verified,
-                  video: '', featured: !!t.featured, hidden: false
-                })).filter(t => t.quote);
-                if (merge === 'replace') cfg.testimonials = built;
-                else cfg.testimonials = cfg.testimonials.concat(built);
-              });
-              closeModal(); setTab('content'); showToast(`Generated ${arr.length} testimonials`, 'success');
-            } catch (err) {
-              status.textContent = 'Error: ' + (err.message || 'Could not generate');
-              status.style.color = 'var(--danger)';
-              btn.disabled = false; btn.innerHTML = `${icn('sparkle', 14)}Try again`;
-            }
-          });
-        }
-      });
-    }
+    /* AI testimonial generation removed on purpose: publishing AI-invented
+       testimonials as genuine customer quotes is unlawful in the UK
+       (DMCC Act 2024) and against ASA rules. Testimonials are entered
+       manually from real customer feedback, or started from a template. */
 
     /* ============================ EMBED MODAL ============================ */
     /* ============================ EMBED MODAL — provided by shell ============================ */
@@ -2551,8 +2449,7 @@
         renderAll(); updatePreview();
       },
 
-      // Hooks
-      onAIBuild: () => openAIModal(),
+      // Hooks (no onAIBuild — AI testimonial generation removed by design)
       onTemplates: () => openTemplatesModal(),
       onThemeToggle: () => {
         // Testimonials widget supports config.theme = 'light' | 'dark'

@@ -69,15 +69,26 @@ global.fetch = async (url, opts = {}) => {
     return json(200, { id: 'recCLIENT00000001', fields: { [F.count]: state.account.count, [F.date]: state.account.date } });
   }
   if (u.startsWith('https://api.anthropic.com/')) {
-    state.anthropicBodies.push(JSON.parse(body));
-    const reply = JSON.stringify({
-      questions: [
-        { question: 'Do you offer ATOL protection?', answer: 'Yes, every package holiday we sell is ATOL protected.', category: '', popular: true },
-        { question: 'Can I pay in instalments?', answer: 'Yes, spread the cost with a deposit and monthly payments.', category: '', popular: false },
-      ],
-      categories: [],
-    });
-    return json(200, { content: [{ type: 'text', text: reply }] });
+    const sent = JSON.parse(body);
+    state.anthropicBodies.push(sent);
+    const sys = sent.system || '';
+    const userMsg = sent.messages?.[0]?.content || '';
+    let obj;
+    if (/configuration generator for the Travelgenix Widget Suite, producing short website content/.test(sys)) {
+      // Passthrough (Logo Showcase / Text FX): echo the requested schema shape.
+      obj = /"logos"/.test(userMsg)
+        ? { logos: [{ name: 'TUI', group: 'Suppliers', image: '' }, { name: 'Jet2holidays', group: 'Suppliers', image: '' }] }
+        : { phrases: ['Find your perfect beach escape', 'Find your perfect city break'] };
+    } else {
+      obj = {
+        questions: [
+          { question: 'Do you offer ATOL protection?', answer: 'Yes, every package holiday we sell is ATOL protected.', category: '', popular: true },
+          { question: 'Can I pay in instalments?', answer: 'Yes, spread the cost with a deposit and monthly payments.', category: '', popular: false },
+        ],
+        categories: [],
+      };
+    }
+    return json(200, { content: [{ type: 'text', text: JSON.stringify(obj) }] });
   }
   throw new Error('unmocked fetch: ' + u);
 };
@@ -167,6 +178,35 @@ res = mockRes();
 await handler(request({ widgetType: 'COUNTDOWN TIMER', action: 'generate', prompt: 'sale', options: {} }), res);
 ok(res.statusCode === 400 && res.body?.code === 'prompt_too_thin', 'Countdown still rejects a one-word prompt');
 
+// ── Passthrough types (Logo Showcase, Text FX): relay the editor's schema ────
+// These editors own their output schema and send a full instruction template.
+// The endpoint relays it under a hardened system prompt and returns the parsed
+// JSON both at the top level and under `result` (the shape both editors read).
+{
+  const tfPrompt = 'You are helping a UK travel agent write typewriter phrases for their website hero. Generate 3-5 short punchy phrases. Context: summer beach holidays to Greece and Spain';
+  res = mockRes();
+  await handler(request({ widgetType: 'Text FX', prompt: tfPrompt, responseFormat: 'json', schema: { phrases: 'array of strings' } }), res);
+  ok(res.statusCode === 200 && Array.isArray(res.body?.result?.phrases) && res.body.result.phrases.length >= 1,
+    'Text FX passthrough returns parsed JSON under result (the shape the editor reads)');
+  const sent = state.anthropicBodies.at(-1);
+  ok(/Never fabricate trust signals/.test(sent?.system || ''), 'passthrough call uses the hardened SYSTEM_PASSTHROUGH');
+  ok(/"phrases"/.test(sent?.messages?.[0]?.content || ''), 'the editor-declared schema is relayed to the model');
+
+  const logoPrompt = 'You are helping a UK travel agent populate a "logos" widget. Suggest 6-10 partner or supplier brand names. Do not provide image URLs. Description: package holidays, we sell TUI and Jet2';
+  res = mockRes();
+  await handler(request({ widgetType: 'Logo Showcase', prompt: logoPrompt, responseFormat: 'json', schema: { logos: 'array of { name: string, group: string }' } }), res);
+  ok(res.statusCode === 200 && Array.isArray(res.body?.result?.logos) && res.body.result.logos.length >= 1,
+    'Logo Showcase passthrough returns parsed logos under result');
+}
+
+// ── Reviews / Testimonials are refused outright (unlawful to generate) ────────
+for (const wt of ['REVIEWS', 'Reviews', 'TESTIMONIALS', 'Testimonials']) {
+  res = mockRes();
+  await handler(request({ widgetType: wt, prompt: GOOD_DESC, options: {} }), res);
+  ok(res.statusCode === 400 && /Invalid widgetType/.test(res.body?.error || ''),
+    `${wt} is refused — the server cannot generate fake reviews/testimonials`);
+}
+
 // ── Unknown / inactive account → 403 with a human message ────────────────────
 res = mockRes();
 await handler(request(faqReq(), 'stranger@nowhere.example'), res);
@@ -195,6 +235,28 @@ ok(/process\.env\.AIRTABLE_USERS_TABLE \|\| 'tblikekpaTKraMktZ'/.test(src), 'tab
 ok(!/\{\$\{FIELD_EMAIL\}\}|\{\$\{FIELD_STATUS\}\}/.test(src), 'no field-id formulas remain');
 const faqEd = readFileSync(new URL('../public/editor-faq.html', import.meta.url), 'utf8');
 ok(/if \(b && b\.error\) msg = b\.error/.test(faqEd), 'FAQ editor surfaces the server message instead of a bare HTTP status');
+
+// ── Passthrough + illegal-type guardrails pinned in source ───────────────────
+ok(/const SYSTEM_PASSTHROUGH/.test(src), 'passthrough uses a dedicated hardened system prompt');
+ok(/Never fabricate trust signals/.test(src) && /Never invent an image, logo, file, or link URL/.test(src),
+  'passthrough forbids fabricated accreditations and invented asset URLs (the fake-accreditation cousin of fake reviews)');
+ok(/PASSTHROUGH_WIDGET_TYPES = \['LOGO SHOWCASE', 'TEXT FX'\]/.test(src), 'only Logo Showcase and Text FX are passthrough types');
+const allowedLiteral = (src.match(/const ALLOWED_WIDGET_TYPES = \[[^\]]*\]/) || [''])[0];
+ok(allowedLiteral && !/REVIEWS|TESTIMONIALS/i.test(allowedLiteral), 'REVIEWS/TESTIMONIALS are not in the allowed widget-type list');
+
+const logosEd = readFileSync(new URL('../public/editor-logos.html', import.meta.url), 'utf8');
+ok(!/data-ai-mode="find"/.test(logosEd) && !/official logo image URL|logo CDN|Wikipedia commons/.test(logosEd),
+  'Logos editor dropped the broken URL-inventing "find" mode');
+ok(/widgetType: 'Logo Showcase'/.test(logosEd) && /Do not provide image URLs/.test(logosEd),
+  'Logos editor still suggests names via AI, without image URLs');
+
+const textfxEd = readFileSync(new URL('../public/editor-textfx.html', import.meta.url), 'utf8');
+ok(/widgetType: 'Text FX'/.test(textfxEd) && /data\.result \|\| data/.test(textfxEd), 'Text FX editor calls the AI endpoint and reads result');
+
+const reviewsEd = readFileSync(new URL('../public/editor-reviews.html', import.meta.url), 'utf8');
+ok(!/widget-ai/.test(reviewsEd), 'Reviews editor no longer references the AI endpoint at all');
+const testiEd = readFileSync(new URL('../public/editor-testimonials.html', import.meta.url), 'utf8');
+ok(!/const API_AI\s*=|onAIBuild\s*:/.test(testiEd), 'Testimonials editor no longer wires AI generation');
 
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
