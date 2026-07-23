@@ -41,10 +41,15 @@ const TABLE_FORMS = 'tblpw4TCmQfJHZIlF';
 
 // Field IDs on the Enquiry Forms table
 const F = {
-  widgetId:   'fld4LTXFnaJahj0uX',
-  ownerEmail: 'fldLzWF0XnEXeZYH1',
-  formName:   'fldC0MLSyJqg6U1zT',
-  clientName: 'fldrw1eTFYCFIo0pp',
+  widgetId:            'fld4LTXFnaJahj0uX',
+  ownerEmail:          'fldLzWF0XnEXeZYH1',
+  formName:            'fldC0MLSyJqg6U1zT',
+  clientName:          'fldrw1eTFYCFIo0pp',
+  // Routing config we write back so the freshly-created sheet is wired to the
+  // form immediately, server-side.
+  sheetId:             'fldtfW0lFELg7yiv2',
+  sheetTab:            'fldJ9KIeaiVsU4jP4',
+  routingGoogleSheets: 'fldGg7Yew1GCkmW08',
 };
 
 const PROVISION_RATE_LIMIT = { max: 10, windowMs: 15 * 60 * 1000 };
@@ -136,12 +141,38 @@ export default async function handler(req, res) {
       headers: HEADERS,
     });
 
-    console.log('[sheets-provision] created', sheetId, 'for', widgetId, 'shared with', ownerEmail);
+    // Wire the sheet to the form SERVER-SIDE, so routing works whether or not
+    // the editor completes its own save. Previously the endpoint only returned
+    // the id "for the editor to save", and a missed save-back left forms with
+    // Sheets routing ON but no sheet id — every submission then failed with
+    // "No Google Sheet ID configured" (the 23 Jul 2026 report). Best-effort: a
+    // sheet was still created, so a save hiccup here should not 500 the caller;
+    // the returned id remains the editor's fallback.
+    let saved = false;
+    try {
+      const patchRes = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_FORMS}/${form.id}`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${PAT}`, 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(5000),
+        body: JSON.stringify({ fields: {
+          [F.sheetId]: sheetId,
+          [F.sheetTab]: TAB_NAME,
+          [F.routingGoogleSheets]: true,
+        } }),
+      });
+      saved = patchRes.ok;
+      if (!patchRes.ok) console.error('[sheets-provision] form save-back failed:', patchRes.status);
+    } catch (err) {
+      console.error('[sheets-provision] form save-back error:', err.message);
+    }
+
+    console.log('[sheets-provision] created', sheetId, 'for', widgetId, 'shared with', ownerEmail, 'saved:', saved);
     return res.status(200).json({
       created: true,
       sheetId,
       url,
       tab: TAB_NAME,
+      savedToForm: saved,
       sharedWith: ownerEmail,
       serviceAccount: SERVICE_ACCOUNT_EMAIL,
     });
