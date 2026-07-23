@@ -26,9 +26,11 @@
  *   1. Auth — requires valid bearer token (via _auth.js)
  * ─── Security layers ────────────────────────────────────────────────
  *   1. Auth — requires valid bearer token (via _auth.js)
- *   2. User resolution — session token carries email only; we look up the
- *      Airtable record by email on every call. Filters on Active status,
- *      so suspended accounts are denied even with a still-valid token.
+ *   2. User resolution — the session carries either an email (legacy bearer
+ *      token) or the Clients record id as clientId (current SSO cookie, no
+ *      email). We resolve the Airtable Clients record from whichever is present
+ *      on every call, filtered on Active status, so suspended accounts are
+ *      denied even with a still-valid token.
  *   3. Plan gate — blocks Spark tier; enforces per-plan daily caps.
  *      Plan is read fresh from Airtable on every call so upgrades/downgrades
  *      take effect immediately (not at token expiry).
@@ -208,9 +210,13 @@ export default async function handler(req, res) {
   if (auth.error) return res.status(auth.status).json({ error: auth.error });
 
   const user = extractUser(auth);
-  if (!user.email) {
-    console.error('[widget-ai] Auth returned no email — check _auth.js token shape');
-    return res.status(500).json({ error: 'Session error' });
+  if (!user.email && !user.clientId) {
+    // A validated session with neither an email (legacy bearer token) nor a
+    // clientId (current SSO cookie) — nothing to resolve an account from. This
+    // is a token-shape problem, not the visitor's fault: ask them to re-sign-in
+    // rather than returning a bare "Session error" 500 (the 23 Jul 2026 report).
+    console.error('[widget-ai] Auth carried neither email nor clientId — check _auth.js token shape');
+    return res.status(403).json({ error: 'Account not found. Please sign in again.' });
   }
 
   // ── 2. Env sanity ───────────────────────────────────────────────
@@ -220,20 +226,23 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'AI service not configured' });
   }
 
-  // ── 3. Resolve Airtable user record ─────────────────────────────
-  // The session token carries email/plan/clientName (from _auth.js), but not
-  // the Airtable record ID needed for rate-limit tracking. Look it up now.
-  // Also confirms the user still exists and is Active — catches suspended
-  // accounts whose tokens haven't expired yet.
+  // ── 3. Resolve Airtable Clients record ──────────────────────────
+  // The session gives us either an email (legacy bearer token) or the Clients
+  // record id as clientId (current SSO cookie, which has no email). Resolve the
+  // record from whichever is present — both paths return the same shape and the
+  // record id needed for rate-limit tracking. Also confirms the account exists
+  // and is Active, catching suspended accounts whose tokens haven't expired.
   let userRecord;
   try {
-    userRecord = await lookupUserByEmail(user.email);
+    userRecord = user.email
+      ? await lookupUserByEmail(user.email)
+      : await lookupClientByRecordId(user.clientId);
   } catch (err) {
-    console.error('[widget-ai] User lookup failed:', err.message);
+    console.error('[widget-ai] Account lookup failed:', err.message);
     return res.status(503).json({ error: 'Service temporarily unavailable. Please try again.' });
   }
   if (!userRecord) {
-    console.error('[widget-ai] No active user record for', user.email);
+    console.error('[widget-ai] No active client record for', user.email || user.clientId);
     return res.status(403).json({ error: 'Account not found or inactive. Please sign in again.' });
   }
 
@@ -364,13 +373,16 @@ export default async function handler(req, res) {
 // ═══════════════════════════════════════════════════════════════════
 
 function extractUser(auth) {
-  // _auth.js returns { user: {...tokenPayload} } where tokenPayload contains
-  // email, clientName, plan (per the widget-auth login endpoint).
+  // _auth.js returns { user: {...} }. A legacy bearer token carries
+  // email/clientName/plan. The current SSO cookie (id.travelify.io) carries the
+  // Clients record id as clientId but NO email — so we surface clientId too and
+  // resolve the account by whichever identifier the session provides.
   const u = auth.user || auth;
   return {
     email:      (u.email || '').toLowerCase().trim(),
     plan:       u.plan || '',
     clientName: u.clientName || '',
+    clientId:   String(u.clientId || '').trim(),
   };
 }
 
@@ -492,6 +504,49 @@ async function lookupUserByEmail(email) {
 
   // Brand context, so the AI can ground generated content in the client's
   // real business even when their typed description is thin.
+  return {
+    recordId:    rec.id,
+    plan,
+    clientName:  str(fields[FIELD_CLIENT_NAME]),
+    tradingName: str(fields[FIELD_TRADING_NAME]),
+    website:     str(fields[FIELD_WEBSITE]),
+  };
+}
+
+// Resolve the Clients record directly by its Airtable record id. Used for the
+// current SSO cookie flow (id.travelify.io), whose JWT carries the Clients
+// record id as clientId but no email. Mirrors lookupUserByEmail exactly — same
+// Active gate, same returnFieldsByFieldId reads, same return shape — but keys on
+// RECORD_ID() instead of the email field. clientId comes straight from the
+// signed session (api/auth/*: signSessionToken({ clientId: <Clients rec id> })),
+// so it is trusted, but we still shape-validate it before interpolating.
+async function lookupClientByRecordId(clientRecordId) {
+  const AT_BASE  = process.env.AIRTABLE_BASE_ID;
+  const AT_TABLE = USERS_TABLE_ID;
+
+  const id = String(clientRecordId == null ? '' : clientRecordId);
+  if (!/^rec[A-Za-z0-9]{14,20}$/.test(id)) return null;
+
+  // Match on the record id, gated to Active. RECORD_ID() is an Airtable formula
+  // function; the id is a validated rec-id literal (no quotes/backslashes get
+  // through the regex above), and Status uses the display name like every other
+  // formula here. Field reads stay id-keyed via returnFieldsByFieldId.
+  const formula = `AND(RECORD_ID()='${id}',{${FIELD_NAME_STATUS}}='Active')`;
+  const url = `https://api.airtable.com/v0/${AT_BASE}/${encodeURIComponent(AT_TABLE)}?filterByFormula=${encodeURIComponent(formula)}&maxRecords=1&returnFieldsByFieldId=true`;
+
+  const res = await fetchWithTimeout(url, {
+    headers: { 'Authorization': `Bearer ${process.env.AIRTABLE_PAT}` },
+  }, 8000);
+  if (!res.ok) throw new Error(`Airtable GET ${res.status}`);
+
+  const data = await res.json();
+  const rec = (data.records || [])[0];
+  if (!rec) return null;
+
+  const fields = rec.fields || {};
+  const planRaw = fields[FIELD_PLAN];
+  const plan = typeof planRaw === 'string' ? planRaw : (planRaw?.name || '');
+  const str = (v) => (typeof v === 'string' ? v.trim() : '');
   return {
     recordId:    rec.id,
     plan,
