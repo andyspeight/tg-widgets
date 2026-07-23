@@ -24,6 +24,7 @@
     "test:worldmap-resilience": "node test/worldmap-offers-resilience-smoke.mjs",
     "test:appointment-time": "node test/appointment-time-format-smoke.mjs",
     "test:offers-resilience": "node test/offers-resilience-smoke.mjs",
+    "test:offers-preview-exemption": "node test/offers-preview-exemption-smoke.mjs",
     "test:offers-proxy-timeout": "node test/offers-proxy-timeout-smoke.mjs",
     "test:trai-alert": "node test/trai-endpoint-alert-smoke.mjs",
     "test:rss-cors": "node test/rss-feed-cors-smoke.mjs",

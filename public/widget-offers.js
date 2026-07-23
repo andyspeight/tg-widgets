@@ -151,7 +151,7 @@
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
   const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
-  const VERSION = '1.12.0';
+  const VERSION = '1.13.0';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // Telemetry: report a one-time load heartbeat and any failure to
@@ -198,6 +198,17 @@
         });
     };
     return tryOnce(0);
+  }
+
+  // Tag editor/preview requests so our public rate limiter exempts them. The
+  // offers editor fans out several live availability lookups per edit, far more
+  // than any visitor, so counting those against the public per-IP budget locked
+  // a real client out for an hour and blanked their live site too (23 Jul 2026).
+  // The live widget on a customer site never sets _preview, so its traffic stays
+  // fully throttled. The header only helps from our own platform origins — the
+  // limiter also checks Origin/Referer, which a browser cannot forge.
+  function withPreview(headers, cfg) {
+    return (cfg && cfg._preview) ? Object.assign({}, headers, { 'X-TG-Preview': '1' }) : headers;
   }
 
   // Defensively parse a fetch Response as JSON. The live offers path used a bare
@@ -6282,7 +6293,7 @@
       if (this._cacheEligible(payload)) {
         try {
           const res = await fetch(CACHED_OFFERS_URL + '?' + this._cachedOffersQuery(payload), {
-            headers: { 'Accept': 'application/json' },
+            headers: withPreview({ 'Accept': 'application/json' }, this.cfg),
           });
           // Defensive parse: an empty/non-JSON cache body throws here and is
           // caught below, falling through to the live proxy (fail-open) exactly
@@ -6314,9 +6325,7 @@
         // or '250' and the proxy falls through to demo credentials.
         const res = await fetchWithRetry(OFFERS_PROXY, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: withPreview({ 'Content-Type': 'application/json' }, this.cfg),
           body: JSON.stringify({
             ...payload,
             appId: this.cfg.appId || '',
@@ -6326,10 +6335,23 @@
             _widgetId: this.cfg._widgetId || '',
           }),
         });
+        // Rate limited by OUR OWN throttle → degrade quietly. This is not a
+        // broken embed, so never paint a raw "retry in 3600 seconds" banner at
+        // the visitor and never fire a failure alert. Show the neutral empty
+        // state (respecting the client's empty behaviour). With the editor now
+        // exempt from the public limit this is rare, but a genuinely busy shared
+        // address (office or mobile network) can still reach it. (23 Jul 2026.)
+        if (res && res.status === 429) {
+          this.rawOffers = [];
+          this._offersSource = 'live';
+          this._availableTotal = null;
+          this._showEmpty();
+          return;
+        }
         // Defensive parse (the 23 Jul 2026 incident site): an empty-bodied
         // gateway 504/502 no longer throws "Unexpected end of JSON input" — it
         // throws a clean, status-bearing message caught below. A non-2xx JSON
-        // error body (429/404/502) still surfaces its .error to the visitor.
+        // error body (404/502) still surfaces its .error to the visitor.
         const data = await parseJsonResponse(res, 'Offers service');
         if (!data.success) {
           this._showError(data.error || 'Travelify returned an error.');
@@ -9169,9 +9191,7 @@
         // proxy resolve the right client's full credentials server-side.
         const res = await fetch(OFFERS_PROXY, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: withPreview({ 'Content-Type': 'application/json' }, this.cfg),
           body: JSON.stringify({
             ...payload,
             appId: this.cfg.appId || '',
@@ -9181,6 +9201,9 @@
             _widgetId: this.cfg._widgetId || '',
           }),
         });
+        // A rate-limit 429 lands here as a non-ok parse throw and is swallowed
+        // by the catch below (the board already fails quietly — no banner, no
+        // alert), so a throttled board simply keeps its last rows.
         const data = await parseJsonResponse(res, 'Offers service');
         this.rawOffers = gateSuppliers((data && data.data) ? data.data : [], this.cfg.supplierFilter);
       } catch (err) {

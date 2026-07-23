@@ -2592,7 +2592,7 @@
         if (base.DatesMin != null) q.set('DatesMin', base.DatesMin);
         if (base.DatesMax != null) q.set('DatesMax', base.DatesMax);
         q.set('maxOffers', '1');
-        const r = await fetch('/api/cached-offers?' + q.toString(), { headers: { 'Accept': 'application/json' } });
+        const r = await fetch('/api/cached-offers?' + q.toString(), { headers: { 'Accept': 'application/json', 'X-TG-Preview': '1' } });
         const d = await r.json();
         if (seq !== availabilitySeq) return;
         if (d && d.success && Number.isFinite(d.totalMatched) && d.totalMatched > 0) {
@@ -2617,7 +2617,11 @@
           try {
             const res = await fetch('/api/offers', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              // X-TG-Preview marks this as our own editor probe so the public
+              // rate limiter exempts it. Without this, a builder adding several
+              // destinations fans out enough live lookups to trip the visitor
+              // limit and lock their own live site out for an hour (23 Jul 2026).
+              headers: { 'Content-Type': 'application/json', 'X-TG-Preview': '1' },
               body: JSON.stringify({ ...payload, appId: TG_TRAVELIFY_APPID || '' }),
             });
             const data = await res.json();
@@ -2649,7 +2653,10 @@
 
     function scheduleAvailabilityProbe() {
       clearTimeout(availabilityTimer);
-      availabilityTimer = setTimeout(runAvailabilityProbe, 900);
+      // Longer debounce so a run of quick edits coalesces into one probe instead
+      // of a fan-out per keystroke — the probe is exempt from the public limit
+      // now, but it still hits the upstream service, so stay polite.
+      availabilityTimer = setTimeout(runAvailabilityProbe, 1500);
     }
 
     /* Show / hide layout-specific fields. Grid-only fields (Columns) hide when

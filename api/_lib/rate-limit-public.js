@@ -78,6 +78,31 @@ function safeFrag(s, max = 80) {
     .slice(0, max);
 }
 
+// Requests from our OWN editor/preview must never trip the PUBLIC abuse limit.
+// A logged-in staff member or client building a widget on our platform is not
+// the abuse vector: the offers editor legitimately fans out several live
+// availability lookups per edit (one per destination), which far exceeds the
+// visitor-facing budget. Counting those against the shared per-IP bucket locked
+// a real client out for an hour and blanked their live site too (the 23 Jul
+// 2026 incident). Editor/preview calls send X-TG-Preview:1 AND originate from
+// one of our own platform hosts; a browser cannot forge Origin/Referer to our
+// domain, and the live widget on a customer site sends neither header, so the
+// public surface stays fully throttled. READ endpoints only — a write path
+// (popup-lead) is never relaxed this way.
+function isTrustedPreviewRequest(req) {
+  try {
+    const h = (req && req.headers) || {};
+    if (String(h['x-tg-preview'] || '') !== '1') return false;
+    const hostOf = (v) => { try { return new URL(v).host.toLowerCase(); } catch { return ''; } };
+    const cands = [hostOf(h.origin || ''), hostOf(h.referer || h.referrer || '')];
+    return cands.some((host) => !!host && (
+      host === 'localhost' || host.indexOf('localhost:') === 0 ||
+      /(^|\.)travelify\.io$/.test(host) ||
+      /(^|\.)vercel\.app$/.test(host)
+    ));
+  } catch { return false; }
+}
+
 /**
  * Increment every counter in one Redis round trip. Returns an array of new
  * counts aligned to `entries`, or null on ANY failure (→ caller fails open).
@@ -140,6 +165,12 @@ export async function evaluatePublicRateLimit(req, res, { event, widgetId } = {}
 
   if (process.env.RL_DISABLED === '1') {
     return { allowed: true, ip, widgetId: wid, failOpen: false };
+  }
+
+  // Our own editor/preview never counts against the public limit (read paths).
+  // popup-lead is a write and keeps its full protection regardless.
+  if (event !== 'popup-lead' && isTrustedPreviewRequest(req)) {
+    return { allowed: true, ip, widgetId: wid, preview: true };
   }
 
   const windows = limitsFor(event);
