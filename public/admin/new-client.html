@@ -551,6 +551,7 @@
       apiKey: '',
       primaryContactName: '',
       primaryContactEmail: '',
+      staffLedSetup: false,
       primaryContactPhone: '',
 
       // Step 2
@@ -823,21 +824,29 @@
               <p>This person becomes the workspace admin and gets the first invite.</p>
             </div>
 
+            <div class="field">
+              <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:600;">
+                <input type="checkbox" id="f-staff-led" ${state.staffLedSetup ? 'checked' : ''} style="width:auto; margin:0;" />
+                <span>Staff-led setup — we're building this for the client, don't invite anyone yet</span>
+              </label>
+              <div class="field-help">No invite email is sent and no contact details are needed. Work in the account via "act as". When the site is ready, invite the client's owner from Client Detail &rarr; Users &rarr; Add User — that fills in the account email automatically.</div>
+            </div>
+
             <div class="field-row">
               <div class="field">
-                <label for="f-contact-name">Full name <span class="required">*</span></label>
-                <input type="text" id="f-contact-name" maxlength="120" value="${escapeHtml(state.primaryContactName)}" placeholder="Sarah Jones" />
+                <label for="f-contact-name">Full name ${state.staffLedSetup ? '' : '<span class="required">*</span>'}</label>
+                <input type="text" id="f-contact-name" maxlength="120" value="${escapeHtml(state.primaryContactName)}" placeholder="Sarah Jones" ${state.staffLedSetup ? 'disabled' : ''} />
               </div>
               <div class="field">
-                <label for="f-contact-email">Email address <span class="required">*</span></label>
-                <input type="email" id="f-contact-email" autocomplete="off" value="${escapeHtml(state.primaryContactEmail)}" placeholder="sarah@acme-travel.co.uk" />
+                <label for="f-contact-email">Email address ${state.staffLedSetup ? '' : '<span class="required">*</span>'}</label>
+                <input type="email" id="f-contact-email" autocomplete="off" value="${escapeHtml(state.primaryContactEmail)}" placeholder="sarah@acme-travel.co.uk" ${state.staffLedSetup ? 'disabled' : ''} />
                 <div id="avail-primary-email" class="field-error" ${emailErrContent ? '' : 'hidden'}>${emailErrContent}</div>
               </div>
             </div>
 
             <div class="field">
               <label for="f-contact-phone">Phone</label>
-              <input type="tel" id="f-contact-phone" maxlength="40" value="${escapeHtml(state.primaryContactPhone)}" placeholder="+44 20 7946 0000" />
+              <input type="tel" id="f-contact-phone" maxlength="40" value="${escapeHtml(state.primaryContactPhone)}" placeholder="+44 20 7946 0000" ${state.staffLedSetup ? 'disabled' : ''} />
             </div>
           </div>
         </div>
@@ -862,6 +871,13 @@
       bind('f-contact-name', 'primaryContactName');
       bind('f-contact-email', 'primaryContactEmail', scheduleAvailabilityCheck);
       bind('f-contact-phone', 'primaryContactPhone');
+      const staffLedBox = document.getElementById('f-staff-led');
+      if (staffLedBox) staffLedBox.addEventListener('change', (e) => {
+        state.staffLedSetup = e.target.checked;
+        // No contact exists in a staff-led setup, so Luna Chat can't reuse it.
+        if (e.target.checked) state.useContactForAgent = false;
+        render();
+      });
     }
 
     // Travelgenix staff addresses must never be a client's primary contact —
@@ -883,10 +899,12 @@
         try { new URL(state.websiteUrl.startsWith('http') ? state.websiteUrl : 'https://' + state.websiteUrl); }
         catch { errs.push('Website URL is not valid'); }
       }
-      if (state.primaryContactName.trim().length < 2) errs.push('Primary contact name is required');
-      if (!EMAIL_RE.test(state.primaryContactEmail.trim())) errs.push('Primary contact email is not valid');
-      else if (isStaffEmailClient(state.primaryContactEmail)) errs.push('Primary contact can\'t be a Travelgenix staff email — use the client\'s own address (you already have access via "act as")');
-      if (state.availability.primaryEmail?.conflict) errs.push('Primary email conflict — use a different email');
+      if (!state.staffLedSetup) {
+        if (state.primaryContactName.trim().length < 2) errs.push('Primary contact name is required');
+        if (!EMAIL_RE.test(state.primaryContactEmail.trim())) errs.push('Primary contact email is not valid');
+        else if (isStaffEmailClient(state.primaryContactEmail)) errs.push('Primary contact can\'t be a Travelgenix staff email — tick "Staff-led setup" to build before handover (you already have access via "act as")');
+        if (state.availability.primaryEmail?.conflict) errs.push('Primary email conflict — use a different email');
+      }
       if (state.availability.websiteUrl?.conflict) errs.push('Website URL conflict — already in use');
       if (state.availability.travelifyAppId?.conflict) errs.push('Travelify App ID conflict');
       if (state.travelifyAppId && !/^\d{1,10}$/.test(state.travelifyAppId)) errs.push('Travelify App ID must be numeric');
@@ -1175,10 +1193,12 @@
             </div>
 
             <label class="checkbox-row" for="f-use-contact">
-              <input type="checkbox" id="f-use-contact" ${state.useContactForAgent ? 'checked' : ''} />
+              <input type="checkbox" id="f-use-contact" ${state.staffLedSetup ? 'disabled' : (state.useContactForAgent ? 'checked' : '')} />
               <span>
                 Use the primary contact as the initial agent
-                <span class="desc">${escapeHtml(state.primaryContactName || 'Primary contact')} will get one invite that grants both widget admin and Luna Chat agent access.</span>
+                <span class="desc">${state.staffLedSetup
+                  ? 'Not available in a staff-led setup (there is no contact yet) — give an agent email below, or add Luna Chat at handover.'
+                  : escapeHtml(state.primaryContactName || 'Primary contact') + ' will get one invite that grants both widget admin and Luna Chat agent access.'}</span>
               </span>
             </label>
 
@@ -1317,9 +1337,11 @@
               <button type="button" class="review-edit-btn" data-jump="0">Edit</button>
             </div>
             <div class="review-grid">
-              ${fld('Name', state.primaryContactName)}
+              ${state.staffLedSetup
+                ? fld('Contact', 'Staff-led setup — no invite sent; account email fills in at handover')
+                : `${fld('Name', state.primaryContactName)}
               ${fld('Email', state.primaryContactEmail, { mono: true })}
-              ${fld('Phone', state.primaryContactPhone)}
+              ${fld('Phone', state.primaryContactPhone)}`}
             </div>
           </div>
 
@@ -1488,9 +1510,10 @@
         travelifyAppId: state.travelifyAppId.trim(),
         travelifySiteId: state.travelifySiteId.trim(),
         apiKey: state.apiKey.trim(),
-        primaryContactName: state.primaryContactName.trim(),
-        primaryContactEmail: state.primaryContactEmail.trim().toLowerCase(),
-        primaryContactPhone: state.primaryContactPhone.trim(),
+        staffLedSetup: state.staffLedSetup === true,
+        primaryContactName: state.staffLedSetup ? '' : state.primaryContactName.trim(),
+        primaryContactEmail: state.staffLedSetup ? '' : state.primaryContactEmail.trim().toLowerCase(),
+        primaryContactPhone: state.staffLedSetup ? '' : state.primaryContactPhone.trim(),
         packageId: state.packageId,
         mrr: state.mrr === '' ? null : Number(state.mrr),
         setupFee: state.setupFee === '' ? null : Number(state.setupFee),
