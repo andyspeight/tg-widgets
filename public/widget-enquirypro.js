@@ -32,7 +32,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.2.3';
+  var WIDGET_VERSION = '1.2.4';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (labels, placeholders, step names, buttons, validation,
@@ -1115,10 +1115,16 @@
     foot.appendChild(next);
     this.card.appendChild(foot);
 
-    // Move focus to the new step's heading so the change is announced and Tab
-    // resumes inside the form. Programmatic focus on the first mount is skipped
-    // so the widget does not yank the host page on load.
-    if (!firstRender) {
+    // Move focus to the heading ONLY when the step actually CHANGED — real
+    // forward/back navigation — so a screen reader announces it and Tab resumes
+    // inside the form. A same-step re-render (a counter tick, a destination
+    // edit) or a passive config update() from the editor's live preview must NOT
+    // yank focus: doing so pulled focus out of the field an agent was typing
+    // into in the editor on every keystroke (23 Jul 2026, client report).
+    // First mount is skipped too, so the widget never grabs the host page on load.
+    var stepChanged = this._focusedStep !== this.S.step;
+    this._focusedStep = this.S.step;
+    if (!firstRender && stepChanged) {
       var heading = step.querySelector('.ep-q') || step;
       heading.setAttribute('tabindex', '-1');
       try { heading.focus(); } catch (e) {}
