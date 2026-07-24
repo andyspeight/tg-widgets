@@ -644,6 +644,35 @@ async function writeMasterRecord({ form, payload, meta, sequential, reference })
   if (typeof p.budget_pp === 'number') body.fields[SUB_FIELDS.budgetPP] = p.budget_pp;
   if (p.board && BOARD_BASIS_LABEL[p.board]) body.fields[SUB_FIELDS.boardBasis] = BOARD_BASIS_LABEL[p.board];
 
+  // The write we least want to lose. A timeout or dropped connection is
+  // AMBIGUOUS — the record may or may not have committed — so rather than drop
+  // the lead (the old behaviour, which lost a real enquiry from
+  // thatsmydreamholiday.com on 24 Jul 2026) or blindly retry (which could
+  // duplicate), we VERIFY: read the record back by its reference + email, and
+  // only ask for a retry once we have confirmed nothing landed. A
+  // verified-not-committed write throws a retryable error, which the handler
+  // turns into a 503 and the widgets re-send once as a fresh request — turning a
+  // would-be lost lead into a saved one, with no duplicate.
+  const email = normaliseEmail(p.email);
+  try {
+    return await postMasterRecord(body);
+  } catch (err) {
+    if (err.httpError) throw err; // a definitive Airtable status, not ambiguous
+    console.warn(`[submit] master write ${err.name || 'error'} — verifying whether it committed (ref ${reference})`);
+    const landedId = await findSubmissionByReference(reference, email);
+    if (landedId) return landedId; // it committed despite the abort — success, no duplicate
+    const retryErr = new Error('master write timed out (verified not committed)');
+    retryErr.retryable = true;
+    throw retryErr;
+  }
+}
+
+// POST the master record. Returns the new record id, or throws. A non-2xx
+// Airtable response is a DEFINITIVE answer (err.httpError = true): only a 429 is
+// safe to auto-retry (rate-limited requests never commit). A timeout or network
+// error throws WITHOUT httpError, so writeMasterRecord treats it as ambiguous
+// and verifies via a read-back rather than dropping or blindly retrying.
+async function postMasterRecord(body) {
   const url = `https://api.airtable.com/v0/${ENQUIRIES_BASE_ID}/${SUBMISSIONS_TABLE_ID}`;
   const response = await fetch(url, {
     method: 'POST',
@@ -652,29 +681,49 @@ async function writeMasterRecord({ form, payload, meta, sequential, reference })
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ ...body, typecast: true }),
-    // This is the ONE call we least want to lose — an aborted master write drops
-    // the visitor's enquiry entirely (a lost lead), and a timeout is treated as
-    // non-retryable on purpose (it MAY have committed, so a blind retry could
-    // duplicate). The whole platform shares one Airtable base's ~5 req/s budget,
-    // so a write can legitimately queue for several seconds under load; an 8s
-    // abort was too eager and dropped a real lead (thatsmydreamholiday.com,
-    // 24 Jul 2026). 15s gives a slow-but-fine write room to land while still
-    // leaving ample margin under the 30s maxDuration (routing adds only 1-3s).
+    // Generous abort: the whole platform shares one Airtable base's ~5 req/s
+    // budget, so a write can legitimately queue for several seconds under load.
+    // 15s leaves ample margin under the 30s maxDuration (routing adds only 1-3s).
     signal: AbortSignal.timeout(WRITE_TIMEOUT_MS),
   });
   if (!response.ok) {
     const errBody = await response.text();
     console.error('[submit] writeMasterRecord failed:', response.status, errBody.slice(0, 500));
     const err = new Error(`Airtable write failed: ${response.status}`);
-    // 429 is the ONLY status marked safe to auto-retry: rate-limited requests
-    // are never committed, so a retry cannot duplicate the enquiry. A 5xx or
-    // network failure MAY have committed — those stay a manual "please try
-    // again" so the visitor decides.
+    err.httpError = true;
     err.retryable = response.status === 429;
     throw err;
   }
   const data = await response.json();
   return data.id;
+}
+
+// Read a just-attempted submission back by its reference + email, to tell whether
+// an ambiguous (timed-out / dropped) write actually committed. The reference is
+// unique enough within the short window we care about; pairing it with the email
+// guards against the rare per-instance sequential collision. Bounded and
+// fail-safe: on ANY error it returns null (treated as "not committed" — the
+// caller then asks for a retry, and a rare duplicate is far less bad than a lost
+// lead).
+async function findSubmissionByReference(reference, email) {
+  try {
+    const safeRef = escapeForFormula(reference);
+    const formula = email
+      ? `AND({Reference}="${safeRef}",LOWER({Email})="${escapeForFormula(email)}")`
+      : `{Reference}="${safeRef}"`;
+    const url = `https://api.airtable.com/v0/${ENQUIRIES_BASE_ID}/${SUBMISSIONS_TABLE_ID}`
+      + `?filterByFormula=${encodeURIComponent(formula)}&maxRecords=1`;
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${ENQUIRIES_PAT}` },
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const rec = (data.records || [])[0];
+    return rec ? rec.id : null;
+  } catch {
+    return null;
+  }
 }
 
 // ---------- Routing log entry ------------------------------------------------
@@ -1053,6 +1102,9 @@ export default async function handler(req, res) {
     thankYou,
   });
 }
+
+// Test surface — the write-recovery read-back (drivable with a mocked fetch).
+export const _test = { findSubmissionByReference };
 
 // =============================================================================
 //  ENV VARS REQUIRED

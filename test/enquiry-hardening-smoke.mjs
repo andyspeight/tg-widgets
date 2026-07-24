@@ -128,9 +128,14 @@ ok(/i18nJSON:\s*'fld0phLw3nKqM7UG6'/.test(copySrc), 'form-copy preserves transla
 const configSrc = readFileSync(new URL('../api/enquiry-form-config.js', import.meta.url), 'utf8');
 ok(/sort%5B0%5D%5Bfield%5D=Sequential/.test(configSrc), 'sequential sort keys on the display name');
 
-// ── 8. Widget source guards (v1.1.7 hardening) ───────────────────────────────
+// ── 8. Widget source guards (v1.1.7+ hardening) ──────────────────────────────
 const w = readFileSync(new URL('../public/widget-enquiry.js', import.meta.url), 'utf8');
-ok(/WIDGET_VERSION = '1\.1\.7'/.test(w), 'widget version 1.1.7');
+// Assert the version is AT LEAST the hardening baseline, not an exact string —
+// legitimate bumps (scroll fix, draft-form notice, retry contract) must not fail
+// this guard; the feature assertions below are what actually matter.
+const wv = (w.match(/WIDGET_VERSION = '(\d+)\.(\d+)\.(\d+)'/) || []).slice(1).map(Number);
+const atLeast = (a, b, c) => wv.length === 3 && (wv[0] > a || (wv[0] === a && (wv[1] > b || (wv[1] === b && wv[2] >= c))));
+ok(atLeast(1, 1, 7), `widget-enquiry version >= 1.1.7 (is ${wv.join('.')})`);
 ok(/if \(depart\.value\) td\.depart = depart\.value;/.test(w), 'daterange omits blank dates (no more null)');
 ok(!/depart: depart\.value \|\| null/.test(w), 'null-date serialisation removed');
 ok((w.match(/interests_required:/g) || []).length === 6, 'interests-required message in all six languages');

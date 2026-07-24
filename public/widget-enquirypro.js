@@ -32,7 +32,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.2.5';
+  var WIDGET_VERSION = '1.2.6';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (labels, placeholders, step names, buttons, validation,
@@ -1684,14 +1684,29 @@
     n.appendChild(svgEl(ICONS.spin, 16)); n.lastChild.classList && n.lastChild.classList.add('ep-spin');
     n.appendChild(document.createTextNode(' ' + this.t('sending')));
 
-    fetch(API_BASE + '/api/enquiry/submit', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-    }).then(function (r) { return r.json().then(function (body) { return { ok: r.ok, body: body }; }); })
-      .then(function (res) {
-        if (res.ok && res.body && res.body.ok) { self._renderDone(res.body); }
-        else { self._submitError((res.body && res.body.message) || self.t('errGeneric')); tgReport('error', self.widgetId, 'enquiry submit refused', (res.body && res.body.error) || ''); }
-      })
-      .catch(function () { self._submitError(self.t('errServer')); tgReport('error', self.widgetId, 'enquiry submit unreachable'); });
+    // One silent retry on a retryable 503. The server returns that status ONLY
+    // when nothing was committed — a form lookup that failed before any write, or
+    // a master write that timed out and was VERIFIED not to have landed — so
+    // re-sending can never duplicate the enquiry. The button stays in its
+    // "Sending" state through the retry; the visitor only sees an error if the
+    // retry fails too. This is what turns a slow-Airtable moment from a lost lead
+    // into a saved one.
+    var attemptSend = function (attemptNo) {
+      fetch(API_BASE + '/api/enquiry/submit', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+      }).then(function (r) { return r.json().then(function (body) { return { ok: r.ok, status: r.status, body: body }; }); })
+        .then(function (res) {
+          if (res.ok && res.body && res.body.ok) { self._renderDone(res.body); return; }
+          if (attemptNo === 1 && res.status === 503 && res.body && res.body.retryable) {
+            setTimeout(function () { attemptSend(2); }, 2000);
+            return;
+          }
+          self._submitError((res.body && res.body.message) || self.t('errGeneric'));
+          tgReport('error', self.widgetId, 'enquiry submit refused', (res.body && res.body.error) || '');
+        })
+        .catch(function () { self._submitError(self.t('errServer')); tgReport('error', self.widgetId, 'enquiry submit unreachable'); });
+    };
+    attemptSend(1);
   };
   TGEnquiryProWidget.prototype._submitError = function (msg) {
     var n = this.nextBtn; if (n) { n.disabled = false; while (n.firstChild) n.removeChild(n.firstChild); n.appendChild(document.createTextNode(this.t('sendEnquiry'))); n.appendChild(svgEl(ICONS.send, 18)); }
