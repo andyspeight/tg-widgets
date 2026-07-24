@@ -46,7 +46,8 @@
     "test:widget-list-scope": "node test/widget-list-scope-smoke.mjs",
     "test:staff-led-setup": "node test/staff-led-setup-smoke.mjs",
     "test:widget-ai": "node test/widget-ai-smoke.mjs",
-    "test:ai-prompt-coach": "node test/ai-prompt-coach-smoke.mjs"
+    "test:ai-prompt-coach": "node test/ai-prompt-coach-smoke.mjs",
+    "test:monitor-probes": "node test/monitor-probes-smoke.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",
