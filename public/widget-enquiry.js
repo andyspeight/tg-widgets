@@ -38,7 +38,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.1.8';
+  var WIDGET_VERSION = '1.1.9';
   var VISITOR_ID_KEY = 'tg_visitor_id_v1';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -3373,6 +3373,16 @@
   //  widgetId from the API, and mounts a widget instance.
   // ============================================================================
 
+  // Calm, muted notice for an EXPECTED state (e.g. a Draft form not published
+  // yet) — role="status", no alarm styling, and the caller fires no alert.
+  function renderNotice(shadow, msg) {
+    while (shadow.firstChild) shadow.removeChild(shadow.firstChild);
+    shadow.appendChild(el('style', {
+      text: '.tg-note{padding:40px 32px;text-align:center;font-family:-apple-system,sans-serif;color:#64748b;font-size:14px;line-height:1.5}'
+    }));
+    shadow.appendChild(el('div', { class: 'tg-note', role: 'status' }, [el('p', { text: msg })]));
+  }
+
   function renderError(shadow, msg, t) {
     t = t || makeT(null);
     while (shadow.firstChild) shadow.removeChild(shadow.firstChild);
@@ -3439,6 +3449,14 @@
       while (shadow.firstChild) shadow.removeChild(shadow.firstChild);
 
       if (!response.ok) {
+        // A Draft form not published yet is an expected setup state, not a
+        // failure — show a calm notice and fire NO alert (it was paging us every
+        // time an agent previewed an unpublished embed). Genuine errors still
+        // alert. (24 Jul 2026.)
+        if (data && data.code === 'not_published') {
+          renderNotice(shadow, (data && data.error) || 'This form is not published yet.');
+          return;
+        }
         renderError(shadow, (data && data.error) || t('unableToLoad'), t);
         try { console.warn('[TGEnquiryWidget] config load failed for', widgetId, 'HTTP', response.status, '-', data && data.error, '(' + configUrl + ')'); } catch (e) {}
         report('config load failed', 'HTTP ' + response.status + ' ' + ((data && data.error) || ''), widgetId);

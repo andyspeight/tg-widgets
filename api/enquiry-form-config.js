@@ -647,7 +647,9 @@ export default async function handler(req, res) {
         // load — an agent testing an unpublished embed learns the real reason,
         // and it stays presentable if a Draft form is ever embedded publicly.
         res.setHeader('Cache-Control', 'no-store');
-        return res.status(404).json({ error: 'This form is not published yet.' });
+        // `code` lets the widget treat this as a calm setup state (show a quiet
+        // notice, no failure alert) rather than a hard error. (24 Jul 2026.)
+        return res.status(404).json({ error: 'This form is not published yet.', code: 'not_published' });
       }
 
       const pub = readEnquiryFormRecord(record);

@@ -30,6 +30,17 @@ ok(isActionableError({ event: 'error', widget: 'unknown', widgetId: 'tgw_456', m
 ok(isActionableError({ event: 'error', widget: 'unknown', widgetId: '', message: 'config load failed' }) === true,
   'a message alone is enough to alert');
 
+// ── A Draft / unpublished form is an expected setup state, never an alert ────
+// (24 Jul 2026) An agent placed an embed before setting the form Live in the
+// builder. The reason arrives in the detail (enquirypro) or the message
+// (enquiry) depending on the widget version — both must be suppressed.
+ok(isActionableError({ event: 'error', widget: 'enquirypro', widgetId: 'tgw_x', message: 'config load failed', detail: 'This form is not published yet.' }) === false,
+  'not-published in the DETAIL is suppressed (no alert)');
+ok(isActionableError({ event: 'error', widget: 'enquiry', widgetId: 'tgw_y', message: 'This form is not published yet.', detail: '' }) === false,
+  'not-published in the MESSAGE is suppressed (no alert)');
+ok(isActionableError({ event: 'error', widget: 'enquirypro', widgetId: 'tgw_z', message: 'config load failed', detail: 'HTTP 500 Server error' }) === true,
+  'a genuine config-load failure (not a Draft form) still alerts');
+
 // ── Loads and junk are never alertable ──────────────────────────────────────
 ok(isActionableError({ event: 'load', widget: 'consent', widgetId: 'tgw_9', message: '' }) === false,
   'a load heartbeat is never an alert, however well populated');
