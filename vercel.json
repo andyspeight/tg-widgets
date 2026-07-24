@@ -49,6 +49,9 @@
     "api/offer-draft.js": {
       "maxDuration": 60
     },
+    "api/cron/monitor.js": {
+      "maxDuration": 30
+    },
     "api/enquiry-translate.js": {
       "maxDuration": 60
     },
@@ -81,6 +84,10 @@
     }
   },
   "crons": [
+    {
+      "path": "/api/cron/monitor",
+      "schedule": "*/5 * * * *"
+    },
     {
       "path": "/api/cron/payment-reminders",
       "schedule": "*/5 * * * *"
