@@ -167,7 +167,9 @@ async function fetchEventsFromAirtable(filters, monthsAhead, pat) {
   fieldIds.forEach(id => params.append('fields[]', id));
 
   const url = `${AIRTABLE_API}/${EVENTS_BASE_ID}/${EVENTS_TABLE_ID}?${params.toString()}`;
-  const resp = await fetch(url, { headers: { Authorization: `Bearer ${pat}` } });
+  // Timeout so a slow Airtable returns a clean error rather than hanging the
+  // function to its ceiling and emitting an empty gateway body (23 Jul 2026 audit).
+  const resp = await fetch(url, { headers: { Authorization: `Bearer ${pat}` }, signal: AbortSignal.timeout(8000) });
   if (!resp.ok) {
     const status = resp.status;
     let body = '';
@@ -258,7 +260,7 @@ export default async function handler(req, res) {
       const widgetsUrl = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${WIDGETS_TABLE_NAME}`
         + `?filterByFormula=${widgetsFormula}&maxRecords=1&fields%5B%5D=Config`;
 
-      const wResp = await fetch(widgetsUrl, { headers: { Authorization: `Bearer ${AIRTABLE_KEY}` } });
+      const wResp = await fetch(widgetsUrl, { headers: { Authorization: `Bearer ${AIRTABLE_KEY}` }, signal: AbortSignal.timeout(8000) });
       if (!wResp.ok) throw new Error('upstream-widgets');
 
       const wData = await wResp.json();

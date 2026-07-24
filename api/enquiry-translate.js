@@ -323,6 +323,9 @@ async function handler(req, res) {
   let raw, stopReason;
   try {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
+      // Bound the model call so a hung upstream returns a clean error before the
+      // function is killed (23 Jul 2026 audit). Sits under the 60s maxDuration.
+      signal: AbortSignal.timeout(45000),
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
       body: JSON.stringify({

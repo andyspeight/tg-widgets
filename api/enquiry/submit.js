@@ -771,6 +771,9 @@ async function fanOutRouting({ form, payload, submissionId, reference, meta }) {
   // Write summary back to the master record
   try {
     const url = `https://api.airtable.com/v0/${ENQUIRIES_BASE_ID}/${SUBMISSIONS_TABLE_ID}/${submissionId}`;
+    // This runs before the visitor's confirmation is returned, so bound it — a
+    // hung Airtable here must not stall the response until the function is killed
+    // (23 Jul 2026 audit). The enquiry is already saved and routed by this point.
     await fetch(url, {
       method: 'PATCH',
       headers: {
@@ -778,6 +781,7 @@ async function fanOutRouting({ form, payload, submissionId, reference, meta }) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ fields: { [SUB_FIELDS.routingStatusJSON]: JSON.stringify(summary) } }),
+      signal: AbortSignal.timeout(5000),
     });
   } catch (err) {
     console.error('[submit] Routing summary write failed:', err);

@@ -35,7 +35,7 @@
   }
   const CONFIG_API  = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || resolveBase('/api/widget-config');
   const CONTENT_API = (typeof window !== 'undefined' && window.__TG_ATTRACTION_API__) || resolveBase('/api/attraction-content');
-  const VERSION = '1.2.0';
+  const VERSION = '1.2.1';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (fact/section labels, badges, CTA button, empty/error
@@ -425,11 +425,16 @@
     }
 
     async _load() {
+      // Timeout-guard the content fetch — a hung upstream (dead proxy, captive
+      // portal) aborts and falls through to the error notice instead of leaving
+      // the loading skeleton shimmering forever (23 Jul 2026 audit).
+      const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      const timer = ctrl ? setTimeout(() => ctrl.abort(), 9000) : null;
       try {
         const qs = this.c.recordId
           ? '?recordId=' + encodeURIComponent(this.c.recordId)
           : '?id=' + encodeURIComponent(this.c.widgetId);
-        const res = await fetch(CONTENT_API + qs, { credentials: 'omit' });
+        const res = await fetch(CONTENT_API + qs, ctrl ? { credentials: 'omit', signal: ctrl.signal } : { credentials: 'omit' });
         if (!res.ok) { if (res.status === 404) return this._renderNotFound(); throw new Error('fetch ' + res.status); }
         const data = await res.json();
         if (!data || data.found === false || !data.attraction) return this._renderNotFound();
@@ -438,6 +443,8 @@
       } catch (err) {
         console.error('[TG Attraction] load failed:', err);
         this._renderError();
+      } finally {
+        if (timer) clearTimeout(timer);
       }
     }
 

@@ -95,7 +95,7 @@
     } catch (e) { /* fall through */ }
     return '/api/destination-content';
   })();
-  const VERSION = '1.4.0';
+  const VERSION = '1.4.1';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (section default headings, fact/planning labels,
@@ -1416,6 +1416,11 @@
     }
 
     async _loadDestination() {
+      // Timeout-guard the content fetch — a hung upstream aborts and falls
+      // through to the error notice instead of leaving the loading skeleton
+      // spinning forever (23 Jul 2026 audit).
+      const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      const timer = ctrl ? setTimeout(() => ctrl.abort(), 9000) : null;
       try {
         // Auto-detect mode: extract a slug from the host page and ask the
         // API to resolve it. The server returns { found: false } when no
@@ -1435,7 +1440,7 @@
             '&slug=' + encodeURIComponent(slug) +
             orderQs;
 
-          const slugRes = await fetch(slugUrl, { credentials: 'omit' });
+          const slugRes = await fetch(slugUrl, ctrl ? { credentials: 'omit', signal: ctrl.signal } : { credentials: 'omit' });
           if (!slugRes.ok) {
             // Hard upstream error — show error state, NOT silent hide,
             // so we don't mask infra problems.
@@ -1454,7 +1459,7 @@
 
         // Fixed-destination mode: resolve via the saved widget config.
         const url = CONTENT_API + '?id=' + encodeURIComponent(this.c.widgetId);
-        const res = await fetch(url, { credentials: 'omit' });
+        const res = await fetch(url, ctrl ? { credentials: 'omit', signal: ctrl.signal } : { credentials: 'omit' });
         if (!res.ok) {
           if (res.status === 404) return this._renderNotFound();
           throw new Error('Content fetch failed (' + res.status + ')');
@@ -1464,6 +1469,8 @@
       } catch (err) {
         console.error('[TG Spotlight] Failed to load destination:', err);
         this._renderError();
+      } finally {
+        if (timer) clearTimeout(timer);
       }
     }
 

@@ -84,7 +84,7 @@
     } catch (e) { /* fall through */ }
     return '/api/airport-content';
   })();
-  const VERSION = '1.2.0';
+  const VERSION = '1.2.1';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (section/fact labels, tab labels, CTA buttons, map
@@ -1054,7 +1054,12 @@
 
     _loadAirport() {
       const url = CONTENT_API + '?widgetId=' + encodeURIComponent(this.c.widgetId);
-      fetch(url, { credentials: 'omit' })
+      // Timeout-guard the content fetch — a hung upstream aborts and falls
+      // through to the error notice instead of leaving the loading shell
+      // spinning forever (23 Jul 2026 audit).
+      const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      const timer = ctrl ? setTimeout(() => ctrl.abort(), 9000) : null;
+      fetch(url, ctrl ? { credentials: 'omit', signal: ctrl.signal } : { credentials: 'omit' })
         .then(r => {
           if (r.status === 404) { this._renderNotFound(); return null; }
           if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -1066,7 +1071,8 @@
           this._airport = this._withOverrides(d.airport || null);
           this._renderContent();
         })
-        .catch(() => this._renderError());
+        .catch(() => this._renderError())
+        .finally(() => { if (timer) clearTimeout(timer); });
     }
 
     _renderShell() {

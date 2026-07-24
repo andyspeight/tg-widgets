@@ -285,8 +285,11 @@ async function fetchDestinationsForLevel(level, recordIds, pat) {
   qs.append('returnFieldsByFieldId', 'true');
 
   const url = `${AIRTABLE_API}/${DESTINATION_BASE_ID}/${map.tableId}?${qs.toString()}`;
+  // Timeout so a slow Airtable returns a clean error rather than hanging the
+  // function to its ceiling and emitting an empty gateway body (23 Jul 2026 audit).
   const resp = await fetch(url, {
     headers: { 'Authorization': `Bearer ${pat}` },
+    signal: AbortSignal.timeout(8000),
   });
 
   if (!resp.ok) {
@@ -392,6 +395,7 @@ export default async function handler(req, res) {
 
       const widgetsResp = await fetch(widgetsUrl, {
         headers: { 'Authorization': `Bearer ${AIRTABLE_KEY}` },
+        signal: AbortSignal.timeout(8000),
       });
       if (!widgetsResp.ok) throw new Error('upstream-widgets');
 

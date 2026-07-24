@@ -76,6 +76,7 @@ export async function setJson(key, valueObject) {
         'Content-Type': 'text/plain',
       },
       body,
+      signal: AbortSignal.timeout(REDIS_WRITE_TIMEOUT_MS),
     });
     if (!res.ok) {
       console.error('[redis] SET HTTP', res.status);
@@ -107,6 +108,7 @@ export async function setString(key, value) {
     const res = await fetch(`${REDIS_URL}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${REDIS_TOKEN}` },
+      signal: AbortSignal.timeout(REDIS_WRITE_TIMEOUT_MS),
     });
     return res.ok;
   } catch { return false; }
@@ -240,6 +242,7 @@ export async function setNxEx(key, value, ttlSeconds) {
       method: 'POST',
       headers: { Authorization: `Bearer ${REDIS_TOKEN}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(['SET', key, value, 'NX', 'EX', Math.max(1, Math.floor(ttlSeconds))]),
+      signal: AbortSignal.timeout(REDIS_WRITE_TIMEOUT_MS),
     });
     if (!res.ok) return false;
     const j = await res.json();
