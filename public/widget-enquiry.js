@@ -38,7 +38,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.1.7';
+  var WIDGET_VERSION = '1.1.8';
   var VISITOR_ID_KEY = 'tg_visitor_id_v1';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -2989,8 +2989,8 @@
         summaryError:       summaryError,
         fields:             fields,
       });
-      // Show step 1 initially
-      this._stepState.goToStep(0);
+      // Show step 1 initially — no scroll (mount / editor-preview re-render).
+      this._stepState.goToStep(0, true);
     }
   };
 
@@ -3052,7 +3052,7 @@
 
     // Transition to a given step index. Does NOT validate — callers that
     // need validation (next button, submit) check first.
-    function goToStep(idx) {
+    function goToStep(idx, skipScroll) {
       if (idx < 0 || idx >= totalSteps) return;
       currentIdx = idx;
 
@@ -3089,11 +3089,16 @@
       // Clear any step-validation error from the previous step
       clearSummaryError();
 
-      // Scroll to top of card on step change (otherwise users can land
-      // mid-form after a long previous step)
-      try {
-        self.shadow.host.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } catch (e) { /* ignore */ }
+      // Scroll to top of card on a real step change (otherwise users can land
+      // mid-form after a long previous step). NOT on the initial mount or a
+      // passive editor-preview re-render — scrolling then yanks the visitor's
+      // page down to the widget on load, and jumps the editor on every keystroke
+      // (23 Jul 2026, same family as the Enquiry Pro focus fix).
+      if (!skipScroll) {
+        try {
+          self.shadow.host.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (e) { /* ignore */ }
+      }
     }
 
     // Wire nav buttons
