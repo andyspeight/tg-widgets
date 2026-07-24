@@ -120,3 +120,12 @@ carry placeholder widget types but are not live client editors.
   paying client if rushed: #13 (plan-tier gate on the translate endpoints), #14
   (AI daily-cap race — no atomic primitive in Airtable), #16 (manual auth
   fallbacks across several editors).
+- 24 Jul 2026: Shipped the quote-email fix (finding #8, PR pending). Diagnosis
+  corrected the plan's assumption: the live widget ALREADY sends id+key on a
+  normal viewer page (and the demo seeds one), so the safe server-fetch path is
+  the default, not a rewrite. Fix: the email action is now send-by-reference
+  only — `emailAllowed(v)` requires id+key, and the handler re-fetches the quote
+  server-side and emails ITS recipient, never a browser-supplied doc. Download is
+  unchanged (it returns the PDF only to the caller). No grace window needed
+  because real sends already carry id+key. Guarded by
+  test/quote-pdf-email-guard-smoke.mjs.

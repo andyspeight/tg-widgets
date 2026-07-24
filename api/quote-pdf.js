@@ -18,12 +18,22 @@
  *
  * action:
  *   - "download" (default): returns application/pdf for the browser to save.
+ *     Page-data mode is fine here — the PDF is returned only to the caller.
  *   - "email":              generates the PDF and emails it (SendGrid) to the
- *                           quote's lead email, returns { ok: true }.
+ *                           quote's lead email, returns { ok: true }. Email ALWAYS
+ *                           resolves the quote server-side by id+key (the per-quote
+ *                           secret from the viewer URL); it never takes the
+ *                           recipient from a browser-supplied quoteDocument. See
+ *                           emailAllowed() and the brand-impersonation note below.
  *
  * Security (travelgenix-security):
  *   - Method check (POST only), setCors() like the other widget endpoints
  *   - Input validation (doc shape OR id+key; action enum)
+ *   - Email is send-by-reference only: the recipient + brand come from the
+ *     server-fetched quote, never from the browser. Without this, a caller could
+ *     pass any client's public widgetId (for that client's branding) plus an
+ *     attacker-authored doc with an arbitrary recipient, and the platform would
+ *     email a client-branded PDF to anyone. emailAllowed() enforces the id+key.
  *   - Cost scrubbing server-side (never trust the client) — nett/member/cost
  *     fields stripped before the renderer sees the doc
  *   - Rate limited per IP
@@ -151,6 +161,16 @@ function validate(body) {
     widgetId: (body && typeof body.widgetId === 'string' && /^[A-Za-z0-9_-]{1,64}$/.test(body.widgetId))
       ? body.widgetId : null,
   };
+}
+
+// Email may only ever send a server-held quote, resolved by id+key (the
+// per-quote secret from the viewer URL). A caller can NEVER email a
+// browser-supplied doc, because the recipient and brand would then be
+// attacker-chosen. This one predicate is the brand-impersonation guard; the
+// download action is deliberately not subject to it (it returns the PDF only to
+// the caller). Kept pure and exported so it is unit-tested directly.
+function emailAllowed(v) {
+  return !!(v && v.quoteId && v.key);
 }
 
 // ----- Demo credentials (mirrors booking-pdf.js / retrieve-order.js) -----
@@ -446,23 +466,32 @@ export default async function handler(req, res) {
       return res.status(status).json({ error: code });
     }
 
-    // Page-data mode uses the scrubbed doc the browser sent. Server-fetch mode
-    // pulls it from Travelify (with the resolved creds) and scrubs it here.
-    const doc = v.hasDoc
-      ? v.quoteDocument
-      : scrubCosts(await fetchQuoteDocument(v.quoteId, v.key, ctx.appId, ctx.apiKey));
-
-    const pdf = await generateQuotePdf(doc, ctx.opts);
-
+    // EMAIL: send-by-reference only. Resolve the quote server-side from id+key
+    // and email its own recipient/content — never a browser-supplied doc. This
+    // closes the brand-impersonation vector. The live widget already sends id+key
+    // on a normal viewer page (and the demo seeds one), so real sends are
+    // unaffected; only a doc-without-reference "email" (the attack shape) is
+    // refused.
     if (v.action === 'email') {
+      if (!emailAllowed(v)) {
+        return res.status(400).json({ error: 'email_requires_quote_ref' });
+      }
+      const emailDoc = scrubCosts(await fetchQuoteDocument(v.quoteId, v.key, ctx.appId, ctx.apiKey));
+      const emailPdf = await generateQuotePdf(emailDoc, ctx.opts);
       // The merged PDF already contains the attachments; also send each one as a
       // SEPARATE attachment so the customer gets standalone copies too.
       const extraAttachments = await fetchAttachmentBuffers(ctx.opts && ctx.opts.attachments);
-      const result = await emailQuotePdf(doc, pdf, extraAttachments, ctx.opts);
+      const result = await emailQuotePdf(emailDoc, emailPdf, extraAttachments, ctx.opts);
       return res.status(200).json({ ok: true, emailed: result });
     }
 
-    // download
+    // DOWNLOAD: page-data mode uses the scrubbed doc the browser sent; otherwise
+    // the server fetches it. Safe either way — the PDF goes only to the caller.
+    const doc = v.hasDoc
+      ? v.quoteDocument
+      : scrubCosts(await fetchQuoteDocument(v.quoteId, v.key, ctx.appId, ctx.apiKey));
+    const pdf = await generateQuotePdf(doc, ctx.opts);
+
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Length', pdf.length);
     res.setHeader('Content-Disposition', `attachment; filename="${pdfFilename(doc)}"`);
@@ -475,4 +504,4 @@ export default async function handler(req, res) {
 }
 
 // Exposed for tests.
-export { validate, fetchQuoteDocument, quoteFromName };
+export { validate, fetchQuoteDocument, quoteFromName, emailAllowed };
