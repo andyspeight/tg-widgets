@@ -135,4 +135,11 @@ Each pattern has a standard, repeatable fix, so this is not 40 bespoke jobs:
 
 - 23 Jul 2026: Plan written. Same evening, fixed the live run of AI and offers
   failures (PRs #92 to #98) and turned telemetry back on so we now have
-  production data flowing. Awaiting approval to run the Stage 1 audit.
+  production data flowing.
+- 23 Jul 2026: Fixed a further offers incident where a client building a widget
+  tripped the public rate limit and blanked their own live site (PR #103), then
+  ran the Stage 1 audit across the whole suite. Findings are in
+  `widget-suite-audit-findings.md`. Headline: the scary classes (XSS, raw error
+  leaks, cross-client access) are clean; the dominant weakness is missing
+  timeouts on outside calls, one repeatable fix. Awaiting Andy's decision on fix
+  order.

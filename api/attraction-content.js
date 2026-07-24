@@ -129,7 +129,9 @@ function memSet(key, data) {
 
 // ---- Airtable fetch ----
 async function airtableFetch(url, pat) {
-  const resp = await fetch(url, { headers: { 'Authorization': `Bearer ${pat}` } });
+  // Timeout so a slow Airtable returns a clean error rather than hanging the
+  // function to its ceiling and emitting an empty gateway body (23 Jul 2026 audit).
+  const resp = await fetch(url, { headers: { 'Authorization': `Bearer ${pat}` }, signal: AbortSignal.timeout(8000) });
   if (!resp.ok) {
     const err = new Error(`Airtable upstream ${resp.status}`);
     err.status = resp.status;
@@ -156,7 +158,7 @@ async function readWidgetConfig(widgetId, key) {
   const formula = encodeURIComponent(`{WidgetID} = '${widgetId}'`);
   const url = `${AIRTABLE_API}/${process.env.AIRTABLE_BASE_ID}/${WIDGETS_TABLE_NAME}`
     + `?filterByFormula=${formula}&maxRecords=1&fields%5B%5D=Config`;
-  const resp = await fetch(url, { headers: { 'Authorization': `Bearer ${key}` } });
+  const resp = await fetch(url, { headers: { 'Authorization': `Bearer ${key}` }, signal: AbortSignal.timeout(8000) });
   if (!resp.ok) { const e = new Error(`Widgets fetch ${resp.status}`); e.status = resp.status; throw e; }
   const data = await resp.json();
   if (!data.records || data.records.length === 0) return null;

@@ -59,6 +59,7 @@ async function airtableGet(path, params) {
   const qs = parts.length ? '?' + parts.join('&') : '';
   const res = await fetch(AIRTABLE_API + '/' + DESTINATION_BASE_ID + '/' + path + qs, {
     headers: { 'Authorization': 'Bearer ' + AIRTABLE_KEY },
+    signal: AbortSignal.timeout(8000),
   });
   if (!res.ok) {
     const body = await res.text().catch(() => '');

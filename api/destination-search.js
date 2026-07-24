@@ -96,6 +96,7 @@ export default async function handler(req, res) {
       const url = `${AIRTABLE_API}/${DESTINATION_BASE_ID}/${lvl.tableId}?${qs.toString()}`;
       const resp = await fetch(url, {
         headers: { 'Authorization': `Bearer ${AIRTABLE_DESTINATION_CONTENT_PAT}` },
+        signal: AbortSignal.timeout(8000),
       });
       if (!resp.ok) return; // degrade silently per-level
 

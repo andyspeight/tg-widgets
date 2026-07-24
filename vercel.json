@@ -46,6 +46,9 @@
     "api/offer-translate.js": {
       "maxDuration": 60
     },
+    "api/offer-draft.js": {
+      "maxDuration": 60
+    },
     "api/enquiry-translate.js": {
       "maxDuration": 60
     },

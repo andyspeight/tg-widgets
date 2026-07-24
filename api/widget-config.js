@@ -604,7 +604,7 @@ async function countUserWidgetsOfType(email, widgetType, headers, baseId) {
   // always captures enough to detect "over limit" without paginating.
   const url = `${AIRTABLE_API}/${baseId}/${TABLE_NAME}`
     + `?filterByFormula=${formula}&maxRecords=100&fields%5B%5D=WidgetID`;
-  const resp = await fetch(url, { headers });
+  const resp = await fetch(url, { headers, signal: AbortSignal.timeout(8000) });
   if (!resp.ok) await throwAirtableError('Count query failed', resp);
   const data = await resp.json();
   return (data.records || []).length;
@@ -683,7 +683,7 @@ export default async function handler(req, res) {
       const formula = encodeURIComponent(`{WidgetID} = '${safeId}'`);
       const url = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}?filterByFormula=${formula}&maxRecords=1`;
 
-      const resp = await fetch(url, { headers });
+      const resp = await fetch(url, { headers, signal: AbortSignal.timeout(8000) });
       if (!resp.ok) await throwAirtableError('GET upstream failed', resp);
 
       const data = await resp.json();
@@ -888,7 +888,7 @@ export default async function handler(req, res) {
         const safeWid = sanitiseForFormula(widgetId);
         const formula = encodeURIComponent(`{WidgetID} = '${safeWid}'`);
         const searchUrl = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}?filterByFormula=${formula}&maxRecords=1`;
-        const searchResp = await fetch(searchUrl, { headers });
+        const searchResp = await fetch(searchUrl, { headers, signal: AbortSignal.timeout(8000) });
         if (!searchResp.ok) await throwAirtableError('Update lookup failed', searchResp);
         const searchData = await searchResp.json();
 
@@ -912,6 +912,7 @@ export default async function handler(req, res) {
 
           const updateUrl = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}/${record.id}`;
           const updateResp = await fetch(updateUrl, {
+            signal: AbortSignal.timeout(8000),
             method: 'PATCH',
             headers,
             body: JSON.stringify({
@@ -1074,6 +1075,7 @@ export default async function handler(req, res) {
           `Credential resolution will fall back to ClientEmail.`);
       }
       const createResp = await fetch(createUrl, {
+        signal: AbortSignal.timeout(8000),
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -1121,7 +1123,7 @@ export default async function handler(req, res) {
       const safeWid = sanitiseForFormula(widgetId);
       const formula = encodeURIComponent(`{WidgetID} = '${safeWid}'`);
       const searchUrl = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}?filterByFormula=${formula}&maxRecords=1`;
-      const searchResp = await fetch(searchUrl, { headers });
+      const searchResp = await fetch(searchUrl, { headers, signal: AbortSignal.timeout(8000) });
       if (!searchResp.ok) await throwAirtableError('Lookup failed', searchResp);
       const searchData = await searchResp.json();
 
@@ -1147,7 +1149,7 @@ export default async function handler(req, res) {
 
       // Delete from Airtable
       const deleteUrl = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}/${record.id}`;
-      const deleteResp = await fetch(deleteUrl, { method: 'DELETE', headers });
+      const deleteResp = await fetch(deleteUrl, { method: 'DELETE', headers, signal: AbortSignal.timeout(8000) });
       if (!deleteResp.ok) await throwAirtableError('Delete failed', deleteResp);
 
       return res.status(200).json({ success: true, widgetId, recordId: record.id });

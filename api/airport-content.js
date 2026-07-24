@@ -70,8 +70,12 @@ async function airtableGet(baseId, path, params) {
   const allParams = Object.assign({ returnFieldsByFieldId: 'true' }, params || {});
   const qs = '?' + new URLSearchParams(allParams).toString();
   const url = AIRTABLE_API + '/' + baseId + '/' + path + qs;
+  // Bound the Airtable call so a slow upstream returns a clean error instead of
+  // hanging the function to its ceiling and emitting an empty gateway body (the
+  // "Failed to fetch" class, 23 Jul 2026 audit).
   const res = await fetch(url, {
     headers: { 'Authorization': 'Bearer ' + AIRTABLE_KEY },
+    signal: AbortSignal.timeout(8000),
   });
   if (!res.ok) {
     const body = await res.text().catch(() => '');
