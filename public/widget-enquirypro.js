@@ -32,7 +32,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.2.4';
+  var WIDGET_VERSION = '1.2.5';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (labels, placeholders, step names, buttons, validation,
@@ -1762,6 +1762,16 @@
     o.appendChild(h); o.appendChild(p); card.appendChild(o); root.appendChild(card); shadow.appendChild(root);
   }
 
+  // Calm, muted notice for an EXPECTED state (e.g. a Draft form not published
+  // yet) — no alarm styling, no failure alert. Distinct from renderOops.
+  function renderNotice(shadow, msg) {
+    while (shadow.firstChild) shadow.removeChild(shadow.firstChild);
+    var st = document.createElement('style'); st.textContent = styleText() + '.ep-note{padding:40px 32px;text-align:center;color:var(--muted);font-family:var(--ff-body);font-size:14px;line-height:1.5}'; shadow.appendChild(st);
+    var root = document.createElement('div'); root.className = 'ep-root';
+    var n = document.createElement('div'); n.className = 'ep-note'; n.setAttribute('role', 'status'); n.textContent = msg;
+    root.appendChild(n); shadow.appendChild(root);
+  }
+
   function initContainer(container) {
     if (container.__tgMounted) return; container.__tgMounted = true;
     // No config yet at this stage, so language resolves from the browser/document.
@@ -1785,7 +1795,14 @@
       .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
       .then(function (res) {
         while (shadow.firstChild) shadow.removeChild(shadow.firstChild);
-        if (!res.ok) { renderOops(shadow, (res.d && res.d.error) || t('oopsLoad'), t); tgReport('error', widgetId, 'config load failed', (res.d && res.d.error) || 'HTTP error'); return; }
+        if (!res.ok) {
+          // A Draft form that isn't published yet is an expected setup state, not
+          // a failure — show a calm notice and DON'T fire a failure alert (it was
+          // paging us every time an agent previewed an unpublished embed). Genuine
+          // errors still alert. (24 Jul 2026.)
+          if (res.d && res.d.code === 'not_published') { renderNotice(shadow, (res.d && res.d.error) || 'This form is not published yet.'); return; }
+          renderOops(shadow, (res.d && res.d.error) || t('oopsLoad'), t); tgReport('error', widgetId, 'config load failed', (res.d && res.d.error) || 'HTTP error'); return;
+        }
         var w = Object.create(TGEnquiryProWidget.prototype);
         w.instance = ++INSTANCE_COUNTER; w.container = container; w.shadow = shadow; w.widgetId = widgetId;
         w.t = makeT(res.d); w.config = w._normalise(res.d); w.config.isLiveEmbed = true; w._applyI18n(); w._resetState(); w._render();
