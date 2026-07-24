@@ -56,20 +56,49 @@ function buildTokens({ form, payload, reference, submissionId, meta }) {
 
   const travellerParts = [];
   if (travellers.adults)   travellerParts.push(`${travellers.adults} ${travellers.adults === 1 ? 'adult' : 'adults'}`);
-  if (travellers.children) travellerParts.push(`${travellers.children} ${travellers.children === 1 ? 'child' : 'children'}`);
+  if (travellers.children) {
+    // Child ages materially change a quote, so surface them next to the count
+    // rather than dropping them (they were captured but never shown before).
+    const ages = Array.isArray(travellers.childAges) && travellers.childAges.length
+      ? ` (ages ${travellers.childAges.join(', ')})` : '';
+    travellerParts.push(`${travellers.children} ${travellers.children === 1 ? 'child' : 'children'}${ages}`);
+  }
   if (travellers.infants)  travellerParts.push(`${travellers.infants} ${travellers.infants === 1 ? 'infant' : 'infants'}`);
+
+  // Rooms — only meaningful above the default of one.
+  const roomsStr = (typeof travellers.rooms === 'number' && travellers.rooms > 1) ? `${travellers.rooms} rooms` : '';
 
   const durationStr = duration.custom
     ? duration.custom
     : duration.nights ? `${duration.nights} nights` : '—';
 
+  // Dates — a firm depart date, else "Flexible" when the visitor said so, rather
+  // than a bare dash that reads as missing data. A month preference, when given,
+  // lands in the notes.
   const datesStr = dates.depart
     ? (dates.return ? `${dates.depart} → ${dates.return}` : dates.depart) + (dates.flexible ? ' (flexible)' : '')
-    : '—';
+    : (dates.flexible ? 'Flexible' : '—');
 
   const budgetStr = typeof f.budget_pp === 'number'
     ? `£${f.budget_pp.toLocaleString('en-GB')} per person`
     : '—';
+
+  // Flights (Enquiry Pro) — whether the customer wants flights in the quote. This
+  // was captured but shown NOWHERE in the email, so agents missed it entirely.
+  const flightsStr = f.flights_included === true ? 'Included'
+    : f.flights_included === false ? 'Not required' : '';
+
+  // Style — stars and/or board, cleanly joined so an absent value never prints a
+  // lone "—" (the old template rendered "— · —").
+  const styleParts = [];
+  if (f.stars) styleParts.push(`${f.stars}-star`);
+  if (f.board) styleParts.push(BOARD_BASIS_LABEL[f.board] || f.board);
+  const styleStr = styleParts.join(' · ');
+
+  // Marketing consent — so the agent knows whether they may add this customer to
+  // marketing. Contact consent is implied by the submission itself.
+  const marketingStr = f.marketing_consent === true ? 'Opted in'
+    : f.marketing_consent === false ? 'Not opted in' : '';
 
   return {
     reference,
@@ -89,6 +118,10 @@ function buildTokens({ form, payload, reference, submissionId, meta }) {
     budget: budgetStr,
     stars: f.stars ? `${f.stars}-star` : '—',
     boardBasis: f.board ? (BOARD_BASIS_LABEL[f.board] || f.board) : '—',
+    style: styleStr,
+    rooms: roomsStr,
+    flightsIncluded: flightsStr,
+    marketingConsent: marketingStr,
     interests: (f.interests || []).join(', ') || '—',
     notes: f.notes || '—',
     submittedAt: new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' }),

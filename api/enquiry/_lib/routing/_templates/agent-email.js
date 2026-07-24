@@ -112,13 +112,16 @@ export function renderDefaultAgentEmail(t) {
               <h2 style="margin:0 0 12px;color:#0F172A;font-size:15px;font-weight:600;">Enquiry details</h2>
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;">
                 ${row('Destination', t.destinations)}
-                ${row('Departing from', t.departureAirport)}
+                ${t.departureAirport && t.departureAirport !== '—' ? row('Departing from', t.departureAirport) : ''}
                 ${row('Dates', t.dates)}
                 ${row('Duration', t.duration)}
                 ${row('Travellers', t.travellers)}
-                ${row('Budget', t.budget)}
-                ${row('Style', `${t.stars} · ${t.boardBasis}`)}
-                ${t.interests !== '—' ? row('Interests', t.interests) : ''}
+                ${t.rooms ? row('Rooms', t.rooms) : ''}
+                ${t.flightsIncluded ? row('Flights', t.flightsIncluded) : ''}
+                ${t.budget && t.budget !== '—' ? row('Budget', t.budget) : ''}
+                ${t.style ? row('Style', t.style) : ''}
+                ${t.interests && t.interests !== '—' ? row('Interests', t.interests) : ''}
+                ${t.marketingConsent ? row('Marketing consent', t.marketingConsent) : ''}
               </table>
             </td>
           </tr>
