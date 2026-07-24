@@ -70,6 +70,18 @@ Shadow DOM with `:host{all:initial}` — the ONE deliberate exception is Smart
 Section, which wraps light-DOM user content. Storage keys are prefixed
 (popup `tgp_`, rule engine `tgsr_`), JSON-encoded, try/catch-safe.
 
+**Render must not grab the host page.** A widget's render/`update()` path must
+be side-effect-free for the page: never call `.focus()`, `.select()` or
+`scrollIntoView()` (nor autofocus) as part of drawing itself. Those belong ONLY
+to a real user action — a click, a genuine step change, a submit. Why: an editor
+preview calls the widget's `update()` on EVERY keystroke, so a focus/scroll on
+render steals the cursor out of the field the agent is typing into (forcing a
+re-click per letter) and yanks a visitor's page to the widget on load. When you
+DO need to move focus/scroll on a real navigation, gate it on the state actually
+changing (e.g. the new step index differing from the last), and skip it on the
+first mount and on passive re-renders. (The Enquiry / Enquiry Pro bug, 23 Jul
+2026 — a step heading was focused on every `_renderStep`.)
+
 **Editor pages** (`public/editor-*.html`) follow the shell contract
 (`editor-shell.js` v1.2, spec in `/editor-shell-spec.md`, skeleton in
 `editor-shell-template.html`):
