@@ -41,6 +41,16 @@ ok(isActionableError({ event: 'error', widget: 'enquiry', widgetId: 'tgw_y', mes
 ok(isActionableError({ event: 'error', widget: 'enquirypro', widgetId: 'tgw_z', message: 'config load failed', detail: 'HTTP 500 Server error' }) === true,
   'a genuine config-load failure (not a Draft form) still alerts');
 
+// ── A 2xx "failure" is a client-side blip (dropped connection), never pageable ──
+// (24 Jul 2026) An empty-bodied 200 from a mobile visitor read as an error, but
+// the server answered OK — it's a truncated download, not a service outage.
+ok(isActionableError({ event: 'error', widget: 'offers', widgetId: 'tgw_a', message: 'Offers service unavailable (HTTP 200)', detail: 'cards' }) === false,
+  'a 200-status "unavailable" (empty body / dropped connection) is not an alert');
+ok(isActionableError({ event: 'error', widget: 'offers', widgetId: 'tgw_b', message: 'Offers service unavailable (HTTP 504)', detail: 'cards' }) === true,
+  'a genuine gateway outage (HTTP 504) still alerts');
+ok(isActionableError({ event: 'error', widget: 'offers', widgetId: 'tgw_c', message: 'Offers service unavailable (HTTP 502)', detail: 'cards' }) === true,
+  'a genuine bad-gateway (HTTP 502) still alerts');
+
 // ── Loads and junk are never alertable ──────────────────────────────────────
 ok(isActionableError({ event: 'load', widget: 'consent', widgetId: 'tgw_9', message: '' }) === false,
   'a load heartbeat is never an alert, however well populated');
