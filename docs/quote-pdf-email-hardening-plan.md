@@ -2,6 +2,26 @@
 
 Owner: Andy Speight. Author: Claude Code. Written: 23 July 2026.
 
+## Outcome (24 July 2026) — DONE
+
+Shipped, and simpler than this plan feared. When I read the live widget I found
+it already sends the quote id+key on a normal viewer page (the demo seeds one
+too), so the safe server-fetch path is the DEFAULT, not something we had to
+build. The page-data path is only a rarely-hit fallback.
+
+So the fix was small: the email action is now send-by-reference only. A new
+`emailAllowed(v)` requires an id+key, and the handler re-fetches the quote from
+Travelify itself and emails THAT quote's recipient and branding, never a
+browser-supplied doc. A stranger with no valid quote reference simply cannot
+make the platform email anything. Download is untouched (it returns the PDF only
+to the caller). No grace window was needed because real sends already carry the
+reference, and the interim brand-lock was not needed either. Guarded by
+`test/quote-pdf-email-guard-smoke.mjs`.
+
+The original plan is kept below for the record.
+
+---
+
 This is the short plan you asked for before I change how quote emails work.
 Nothing here is built yet.
 
