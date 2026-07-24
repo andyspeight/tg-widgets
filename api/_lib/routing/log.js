@@ -171,6 +171,12 @@ export async function writeSubmission(lead, options = {}) {
   if (lead.source.ipAddress) fields[f.ipAddress] = lead.source.ipAddress;
   if (lead.source.userAgent) fields[f.userAgent] = lead.source.userAgent;
   if (lead.source.clientName) fields[f.clientName] = lead.source.clientName;
+  // Owner Email scopes submissions per agent in the inbox, which filters
+  // strictly by it. Without this stamp a popup lead not also delivered to an
+  // external destination became an orphan the agent never saw (23 Jul 2026
+  // audit). The canonical schema guarantees a valid, normalised clientEmail, and
+  // the enquiry submit path already writes this same field on the same table.
+  if (lead.source.clientEmail) fields[f.ownerEmail] = lead.source.clientEmail;
 
   // Travel canonical → existing fields
   if (lead.travel.destinations.length) fields[f.destinationsJSON] = JSON.stringify(lead.travel.destinations);
