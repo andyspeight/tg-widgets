@@ -68,7 +68,7 @@
 
   const API_BASE = resolveApiOrigin();
 
-  const VERSION = '1.0.5';
+  const VERSION = '1.0.6';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (nav controls, badges, rating wording, the localised
@@ -734,13 +734,6 @@
       }
       .tgt-empty-title { font-size: 16px; font-weight: 700; color: var(--tgt-text); margin: 0 0 6px; }
       .tgt-empty-text { font-size: 14px; margin: 0; }
-
-      /* ── Error ──────────────────────────────── */
-      .tgt-error {
-        padding: 16px; border-radius: var(--tgt-radius-sm);
-        background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B;
-        font-size: 13px; font-family: var(--tgt-font);
-      }
     `;
   }
 
@@ -1325,9 +1318,19 @@
 
   async function loadConfig(widgetId) {
     const url = `${API_BASE}/api/widget-config?id=${encodeURIComponent(widgetId)}`;
-    const r = await fetch(url, { headers: { 'Accept': 'application/json' } });
-    if (!r.ok) throw new Error(`Failed to load widget config (HTTP ${r.status})`);
-    return r.json();
+    // Timeout-guard the config fetch so a hung upstream fails fast into the
+    // quiet catch below instead of leaving the block unrendered (23 Jul 2026 audit).
+    const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timer = ctrl ? setTimeout(() => ctrl.abort(), 9000) : null;
+    try {
+      const r = await fetch(url, ctrl
+        ? { headers: { 'Accept': 'application/json' }, signal: ctrl.signal }
+        : { headers: { 'Accept': 'application/json' } });
+      if (!r.ok) throw new Error(`Failed to load widget config (HTTP ${r.status})`);
+      return await r.json();
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
   }
 
   function initHost(host) {
@@ -1343,7 +1346,9 @@
         return;
       } catch (e) {
         console.error('[tg-testimonials] Invalid data-tg-config JSON:', e);
-        host.innerHTML = `<div style="padding:16px;border:1px solid #FECACA;border-radius:8px;background:#FEF2F2;color:#991B1B;font-family:sans-serif;font-size:13px">Testimonials widget: invalid configuration.</div>`;
+        // Fail quiet on a client's live page — hide, never paint an error box.
+        host.innerHTML = '';
+        host.style.display = 'none';
         return;
       }
     }
@@ -1359,7 +1364,9 @@
       .then(cfg => { new TestimonialsWidget(host, cfg); })
       .catch(err => {
         console.error('[tg-testimonials]', err);
-        host.innerHTML = `<div style="padding:16px;border:1px solid #FECACA;border-radius:8px;background:#FEF2F2;color:#991B1B;font-family:sans-serif;font-size:13px">Testimonials widget failed to load.</div>`;
+        // Fail quiet on a client's live page — hide, never paint an error box.
+        host.innerHTML = '';
+        host.style.display = 'none';
       });
   }
 

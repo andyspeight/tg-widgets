@@ -16,7 +16,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.2';
+  const VERSION = '1.0.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (labels, aria, the approximate-time prefix, the
@@ -331,7 +331,7 @@
           let cfg = {};
           try { const raw = el.getAttribute('data-tg-config'); if (raw) cfg = JSON.parse(raw); } catch (e) { cfg = {}; }
           const t = makeT(cfg);
-          el.innerHTML = '<p style="color:#64748b;font:14px/1.5 system-ui,sans-serif;padding:16px;text-align:center;border:1px dashed #e2e8f0;border-radius:8px;margin:0">' + esc(t('loadError')) + '</p>';
+          el.innerHTML = ''; el.style.display = 'none'; // fail quiet — never paint an error box on a client page
         } catch (e) {}
       }
     }

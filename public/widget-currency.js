@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.3';
+  const VERSION = '1.0.4';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (field labels, the swap control, the rates status and
@@ -353,8 +353,7 @@
       } catch (err) {
         console.error('[TG Currency] Failed to initialise:', err);
         try {
-          const msg = makeT(null)('loadError');
-          el.innerHTML = '<p style="color:#64748b;font:14px/1.5 system-ui,sans-serif;padding:16px;text-align:center;border:1px dashed #e2e8f0;border-radius:8px;margin:0">' + esc(msg) + '</p>';
+          el.innerHTML = ''; el.style.display = 'none'; // fail quiet — never paint an error box on a client page
         } catch (e) {}
       }
     }
