@@ -3581,7 +3581,9 @@
       {
         id: 'lunaChat',
         name: 'Luna Chat',
-        desc: 'Pass submission context to Luna Chat if the visitor continues.',
+        desc: 'Pass submission context to Luna Chat. Coming soon.',
+        badge: 'coming-soon',
+        comingSoon: true,
         icon: '<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>',
         configKey: 'lunaChat',
         defaultEnabled: false,
@@ -3590,7 +3592,9 @@
       {
         id: 'lunaMarketing',
         name: 'Luna Marketing',
-        desc: 'Auto-enrol consenting visitors in drip campaigns.',
+        desc: 'Auto-enrol consenting visitors in drip campaigns. Coming soon.',
+        badge: 'coming-soon',
+        comingSoon: true,
         icon: '<path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/>',
         configKey: 'lunaMarketing',
         defaultEnabled: false,
@@ -3601,6 +3605,7 @@
         name: 'Luna Work',
         desc: 'Create a lead in the CRM. Launching when Luna Work goes live.',
         badge: 'coming-soon',
+        comingSoon: true,
         icon: '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>',
         configKey: 'lunaWork',
         defaultEnabled: false,
@@ -3624,9 +3629,11 @@
 
       ROUTING_DESTINATIONS.forEach(dest => {
         const routingConfig = (state.config.routing && state.config.routing[dest.configKey]) || {};
-        const enabled = dest.toggleable
-          ? !!routingConfig.enabled
-          : (routingConfig.enabled !== false);  // email defaults on unless explicitly off
+        const enabled = dest.comingSoon
+          ? false  // not built yet — always shown off, never enable-able
+          : (dest.toggleable
+            ? !!routingConfig.enabled
+            : (routingConfig.enabled !== false));  // email defaults on unless explicitly off
         const isSelected = state.selectedItem
           && state.selectedItem.kind === 'routing'
           && state.selectedItem.destination === dest.id;
@@ -3672,21 +3679,31 @@
           toggleLabel.setAttribute('onclick', 'event.stopPropagation()');
           const toggleInput = document.createElement('input');
           toggleInput.type = 'checkbox';
-          toggleInput.checked = enabled;
-          toggleInput.addEventListener('change', (e) => {
-            e.stopPropagation();
-            mutate(cfg => {
-              if (!cfg.routing) cfg.routing = {};
-              if (!cfg.routing[dest.configKey]) cfg.routing[dest.configKey] = {};
-              cfg.routing[dest.configKey].enabled = toggleInput.checked;
+          if (dest.comingSoon) {
+            // Not built yet — a disabled, off switch so a client cannot enable a
+            // destination that would silently never deliver. (24 Jul 2026.)
+            toggleInput.checked = false;
+            toggleInput.disabled = true;
+            toggleLabel.style.opacity = '0.45';
+            toggleLabel.style.cursor = 'not-allowed';
+            toggleLabel.title = dest.name + ' is coming soon';
+          } else {
+            toggleInput.checked = enabled;
+            toggleInput.addEventListener('change', (e) => {
+              e.stopPropagation();
+              mutate(cfg => {
+                if (!cfg.routing) cfg.routing = {};
+                if (!cfg.routing[dest.configKey]) cfg.routing[dest.configKey] = {};
+                cfg.routing[dest.configKey].enabled = toggleInput.checked;
+              });
+              renderPalette();
+              // If this destination is selected in the inspector, re-render it
+              // so any "enabled-dependent" fields reflect the new state
+              if (state.selectedItem && state.selectedItem.kind === 'routing' && state.selectedItem.destination === dest.id) {
+                renderInspector();
+              }
             });
-            renderPalette();
-            // If this destination is selected in the inspector, re-render it
-            // so any "enabled-dependent" fields reflect the new state
-            if (state.selectedItem && state.selectedItem.kind === 'routing' && state.selectedItem.destination === dest.id) {
-              renderInspector();
-            }
-          });
+          }
           const track = document.createElement('span');
           track.className = 'switch-track';
           toggleLabel.appendChild(toggleInput);
@@ -3705,6 +3722,7 @@
         // Click the card body (not the toggle) → open in inspector
         card.addEventListener('click', (e) => {
           if (e.target.closest('.route-card-toggle')) return;
+          if (dest.comingSoon) return;  // nothing to configure for an unavailable destination
           selectItem({ kind: 'routing', destination: dest.id });
         });
 
