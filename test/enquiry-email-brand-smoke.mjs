@@ -137,7 +137,9 @@ ok(evn >= 1001006, `Enquiry widget version at or beyond 1.1.6 (got ${evm && evm[
 
 const proSrc = readFileSync(new URL('../public/widget-enquirypro.js', import.meta.url), 'utf8');
 ok(!/ep-brand/.test(proSrc), 'Enquiry Pro widget: powered-by footer fully removed');
-ok(/WIDGET_VERSION = '1\.2\.3'/.test(proSrc), 'Enquiry Pro version bumped to 1.2.3');
+const proVer = proSrc.match(/WIDGET_VERSION = '(\d+)\.(\d+)\.(\d+)'/);
+const proVn = proVer ? (+proVer[1]) * 1e6 + (+proVer[2]) * 1e3 + (+proVer[3]) : 0;
+ok(proVn >= 1002004, `Enquiry Pro version at or beyond 1.2.4 (got ${proVer && proVer[0]})`);
 
 const configSrc = readFileSync(new URL('../api/enquiry-form-config.js', import.meta.url), 'utf8');
 ok(/efFields\[EF\.clientName\] = safeStr\(user\.clientName, 200\)/.test(configSrc), 'config stamps the account client name');

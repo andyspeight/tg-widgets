@@ -107,4 +107,16 @@ carry placeholder widget types but are not live client editors.
 - 23 Jul 2026: Shipped the small-bugs batch (PR #106) — findings #6, #7. The dead
   "connect your own Airtable" endpoint (wrong import path) is fixed with a
   module-load test, and the My Booking duplicate-save is gone (the shell now owns
-  saving). Remaining: the access gaps (#8, #9), then the SEV3 hardening (#13-#18).
+  saving).
+- 23 Jul 2026: Shipped the orphan-lead fix (PR #107) — finding #9. Popup leads
+  are now stamped with the Owner Email, so they appear in the agent's inbox
+  instead of vanishing.
+- 23 Jul 2026: Shipped two safe SEV3 items (PR #108) — findings #15, #18. The
+  countdown editor uses the canonical widget type (no alias dependency) and the
+  map-deals endpoint no longer leaks a raw error message.
+- 23 Jul 2026: Wrote `quote-pdf-email-hardening-plan.md` for finding #8 (the
+  quote email needs a change to how quotes are stored — awaiting Andy's approval).
+  Remaining SEV3 held for careful follow-up because each could break a legitimate
+  paying client if rushed: #13 (plan-tier gate on the translate endpoints), #14
+  (AI daily-cap race — no atomic primitive in Airtable), #16 (manual auth
+  fallbacks across several editors).

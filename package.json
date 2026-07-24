@@ -29,6 +29,7 @@
     "test:quiet-failure": "node test/quiet-failure-smoke.mjs",
     "test:enquiry-modules-load": "node test/enquiry-modules-load-smoke.mjs",
     "test:orphan-lead-owner": "node test/orphan-lead-owner-smoke.mjs",
+    "test:enquirypro-focus": "node test/enquirypro-focus-smoke.mjs",
     "test:offers-proxy-timeout": "node test/offers-proxy-timeout-smoke.mjs",
     "test:trai-alert": "node test/trai-endpoint-alert-smoke.mjs",
     "test:rss-cors": "node test/rss-feed-cors-smoke.mjs",
