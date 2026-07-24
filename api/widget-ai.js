@@ -65,6 +65,7 @@
 
 import { requireAuth, setCors } from './_auth.js';
 import { sanitiseSmartSectionConfig } from './_lib/smartsection-rules.js';
+import { PLAN_DAILY_LIMITS } from './_lib/ai-plan.js';
 
 // ═══════════════════════════════════════════════════════════════════
 // CONSTANTS
@@ -180,14 +181,9 @@ const OFFERS_SORTS     = ['price:asc', 'price:desc'];
 const PASSTHROUGH_PROMPT_MAX_LEN = 4000;
 const PASSTHROUGH_SCHEMA_MAX     = 2000;
 
-// Per-plan daily caps. Adjust here without touching logic.
-// Cost at £0.025/call: Boost = £0.38/day/user max, Bespoke = £2.50/day max.
-const PLAN_DAILY_LIMITS = {
-  Spark:   0,   // blocked
-  Boost:   15,
-  Ignite:  40,
-  Bespoke: 100,
-};
+// Per-plan daily caps now live in ./_lib/ai-plan.js so widget-ai, faq-translate
+// and enquiry-translate all gate on ONE map (imported as PLAN_DAILY_LIMITS
+// above). Cost at £0.025/call: Boost = £0.38/day/user max, Bespoke = £2.50/day.
 
 // FAQ output caps (enforced after parsing)
 const FAQ_MAX_QUESTIONS      = 20;
