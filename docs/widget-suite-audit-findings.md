@@ -99,7 +99,12 @@ carry placeholder widget types but are not live client editors.
 - 23 Jul 2026: Shipped the systemic timeout batch (PR #104) — findings #1, #3,
   #4, #10, #11, #12. Every outside call (Airtable, the AI model, Redis writes,
   the submit PATCH, and the three content widgets) is now time-bounded, with a
-  source-scan test guarding against regression. Remaining, awaiting Andy's steer:
-  the loud client-facing failures (#2, #5), the dead Airtable-connect feature
-  and the duplicate-save bug (#6, #7), the access gaps (#8, #9), then the SEV3
-  hardening (#13-#18).
+  source-scan test guarding against regression.
+- 23 Jul 2026: Shipped the loud-failure batch (PR #105) — findings #2, #5, #17.
+  Testimonials no longer paints a red "failed to load" card, the grey "Unable to
+  load X widget" box is gone from six widgets, and reviews/testimonials config
+  fetches are now bounded. All fail quiet on a client page.
+- 23 Jul 2026: Shipped the small-bugs batch (PR #106) — findings #6, #7. The dead
+  "connect your own Airtable" endpoint (wrong import path) is fixed with a
+  module-load test, and the My Booking duplicate-save is gone (the shell now owns
+  saving). Remaining: the access gaps (#8, #9), then the SEV3 hardening (#13-#18).
