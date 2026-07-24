@@ -20,6 +20,7 @@
     "test:enquiry-load": "node test/enquiry-load-smoke.mjs",
     "test:enquiry-notes": "node test/enquiry-notes-smoke.mjs",
     "test:enquiry-options": "node test/enquiry-options-smoke.mjs",
+    "test:enquiry-luna-comingsoon": "node test/enquiry-luna-comingsoon-smoke.mjs",
     "test:quote-pdf": "node test/quote-pdf-brand-smoke.mjs",
     "test:worldmap-resilience": "node test/worldmap-offers-resilience-smoke.mjs",
     "test:appointment-time": "node test/appointment-time-format-smoke.mjs",
