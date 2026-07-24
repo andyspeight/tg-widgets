@@ -21,6 +21,8 @@ import { sendViaSendGrid, buildFromField } from '../_lib/sendgrid.js';
 const SELF_ORIGIN = process.env.MONITOR_ORIGIN || 'https://tg-widgets.vercel.app';
 const STATUS_KEY = 'monitor:status:v1';
 const ALERT_TTL_SECONDS = 1800; // re-alert a still-failing check at most every 30 min
+const HEARTBEAT_KEY = 'monitor:heartbeat:v1';
+const HEARTBEAT_TTL_SECONDS = 60 * 60 * 24 * 30; // one "monitor is live" note per 30 days max
 
 export default async function handler(req, res) {
   const auth = req.headers['authorization'] || '';
@@ -62,6 +64,17 @@ export default async function handler(req, res) {
     if (p.ok && prevOk[p.name] === false) { await safeAlert('recovered', p, at); alerted++; }
   }
 
+  // One-time "monitor is live" confirmation — sent on the first run after the
+  // system is switched on (or at most once per 30 days), so we can prove the
+  // whole alert path reaches the inbox without waiting for a real outage.
+  let firstEver = false;
+  try { firstEver = await setNxEx(HEARTBEAT_KEY, at, HEARTBEAT_TTL_SECONDS); } catch { firstEver = false; }
+  if (firstEver) {
+    const summary = probes.map((p) => p.name + '=' + (p.ok ? 'ok' : 'FAIL')).join(', ');
+    await safeAlert('live', { name: 'startup', detail: (overallOk ? 'all healthy — ' : 'DEGRADED — ') + summary }, at);
+    alerted++;
+  }
+
   console.log('[monitor]', overallOk ? 'all healthy' : 'DEGRADED', '|', probes.map((p) => p.name + '=' + (p.ok ? 'ok' : 'FAIL')).join(' '));
   return res.status(200).json({ ok: overallOk, at, probes, alerted });
 }
@@ -75,27 +88,34 @@ async function sendMonitorAlert(kind, probe, at) {
   if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_FROM_EMAIL) return;
   const to = process.env.WIDGET_ALERT_EMAIL || process.env.ALERT_EMAIL || 'andy.speight@agendas.group';
   const recovered = kind === 'recovered';
+  const live = kind === 'live';
   const esc = (s) => String(s || '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const row = (k, v) => '<tr><td style="padding:3px 12px 3px 0;color:#64748b;vertical-align:top">' + esc(k) + '</td><td style="padding:3px 0"><b>' + esc(v) + '</b></td></tr>';
+  const lead = live
+    ? 'Your early-warning monitor is now live. This is a one-time confirmation that alerts reach this inbox — you will not get this note again. From now on you only hear from the monitor when a check starts failing, or recovers.'
+    : (recovered
+      ? 'A monitored check has recovered — the platform is healthy again.'
+      : 'Our own monitor found a problem, ahead of any client report. A platform check is failing.');
+  const statusText = live ? 'LIVE' : (recovered ? 'OK' : 'FAILING');
   const html =
     '<div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;font-size:14px;color:#0f172a;line-height:1.5">' +
-    '<p style="margin:0 0 12px">' +
-    (recovered
-      ? 'A monitored check has recovered — the platform is healthy again.'
-      : 'Our own monitor found a problem, ahead of any client report. A platform check is failing.') +
-    '</p>' +
+    '<p style="margin:0 0 12px">' + esc(lead) + '</p>' +
     '<table style="border-collapse:collapse;font-size:13px">' +
-    row('Check', probe.name) +
-    row('Status', recovered ? 'OK' : 'FAILING') +
+    row(live ? 'Monitor' : 'Check', probe.name) +
+    row('Status', statusText) +
     row('Detail', probe.detail || '—') +
     row('When', at) +
     '</table>' +
-    (recovered ? '' : '<p style="margin:14px 0 0;color:#94a3b8;font-size:12px">You will not get another alert for this check for 30 minutes. Live status is at /api/status.</p>') +
-    '</div>';
+    (live
+      ? '<p style="margin:14px 0 0;color:#94a3b8;font-size:12px">Live status any time at /api/status.</p>'
+      : (recovered ? '' : '<p style="margin:14px 0 0;color:#94a3b8;font-size:12px">You will not get another alert for this check for 30 minutes. Live status is at /api/status.</p>'));
+  const subject = live
+    ? 'Travelgenix Monitor is live'
+    : (recovered ? 'Recovered: ' : 'Monitor alert: ') + probe.name + (recovered ? ' is healthy again' : ' is failing');
   await sendViaSendGrid({
     to,
     from: buildFromField('Travelgenix Monitor'),
-    subject: (recovered ? 'Recovered: ' : 'Monitor alert: ') + probe.name + (recovered ? ' is healthy again' : ' is failing'),
-    html,
+    subject,
+    html: html + '</div>',
   });
 }
