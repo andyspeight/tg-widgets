@@ -1038,49 +1038,8 @@ import { renderEmailHtml } from '/_email-template.js';
   // Click handler is wired by the shell via tgse.init({ onSave }) below.
   // We keep the save logic here because it does MyBooking-specific things
   // (updateEmbedCode, etc) that the shell's generic save doesn't do.
-  // Keyboard ⌘S is also wired by the shell.
-
-  async function saveWidget() {
-    if (!ensureAuth()) return;
-    const tgse = window.tgse;
-    if (tgse && typeof tgse.setSaveState === 'function') tgse.setSaveState('saving');
-    try {
-      const body = {
-        widgetType: 'My Booking',
-        name: state.name || 'Untitled My Booking widget',
-        config: state.config,
-      };
-      if (state.widgetId) body.widgetId = state.widgetId;
-
-      const res = await fetch('/api/widget-config', {
-        method: 'POST',
-        headers: authH(),
-        body: JSON.stringify(body),
-      });
-      if (res.status === 401) {
-        if (tgse && typeof tgse.showLogin === 'function') tgse.showLogin();
-        else redirectToDashboard();
-        return;
-      }
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Save failed');
-
-      const newId = data.id || data.widgetId;
-      if (newId && !state.widgetId) {
-        state.widgetId = newId;
-        const url = new URL(window.location.href);
-        url.searchParams.set('id', newId);
-        window.history.replaceState({}, '', url.toString());
-      }
-
-      if (tgse && typeof tgse.setSaveState === 'function') tgse.setSaveState('saved');
-      toast('Saved');
-      updateEmbedCode();
-    } catch (e) {
-      if (tgse && typeof tgse.setSaveState === 'function') tgse.setSaveState('dirty');
-      toast('Save failed: ' + e.message, 'error');
-    }
-  }
+  // Saving is owned entirely by the shell (button click, ⌘S, auth, in-flight
+  // guard, URL ?id sync). The editor reacts via onAfterSave in tgse.init above.
 
   // ===== Luna Chat Integration =====
   // Extracts the data-clientName attribute from a Luna install snippet.
@@ -1236,14 +1195,19 @@ import { renderEmailHtml } from '/_email-template.js';
       widgetTag: 'mybooking',
       scriptFile: 'widget-mybooking.js',
 
-      // Shell asks us for the current config when the user hits ⌘S directly.
-      // But we want our own saveWidget() to run because it does extra things
-      // (updateEmbedCode, the URL ?id sync, etc). So we wire btn-save click
-      // ourselves below — and also override the shell's save by passing
-      // getConfig that returns null, which makes the shell skip its own save.
-      // Cleaner: we just attach to btn-save click and also intercept ⌘S.
+      // The shell owns the save: button click, ⌘S, auth, the in-flight guard and
+      // the URL ?id sync. We just supply the config and react afterwards with our
+      // extras (mirror the new id, refresh the embed code). Previously the editor
+      // ALSO wired its own save onto btn-save, so the first save fired twice and
+      // created a duplicate widget record the client could not match to their
+      // embed (23 Jul 2026 audit).
       getConfig: () => state.config,
       setConfig: (c) => { if (c && typeof c === 'object') Object.assign(state.config, c); renderPreview(); },
+      onAfterSave: (d) => {
+        const newId = (d && (d.widgetId || d.id)) || '';
+        if (newId) state.widgetId = newId;
+        updateEmbedCode();
+      },
 
       // No AI/templates buttons in the chrome (MyBooking doesn't have them)
       // so onAIBuild and onTemplates aren't needed.
@@ -1260,19 +1224,6 @@ import { renderEmailHtml } from '/_email-template.js';
     });
   }
 
-  // Wire the shell's save button to our own saveWidget (with all the extras).
-  document.getElementById('btn-save')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    saveWidget();
-  });
-  // Catch ⌘S — let our save run instead of the shell's generic one.
-  document.addEventListener('keydown', (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 's') {
-      e.preventDefault();
-      e.stopPropagation();
-      saveWidget();
-    }
-  }, true);  // useCapture so we run before the shell
 
   // ===== Bootstrap =====
   async function bootstrap() {

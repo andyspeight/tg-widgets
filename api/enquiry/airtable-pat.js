@@ -31,7 +31,7 @@ import {
   RATE_LIMITS,
   sanitiseForFormula,
 } from '../_auth.js';
-import { encryptPat } from './_lib/pat-crypt.js';
+import { encryptPat } from './_lib/routing/pat-crypt.js';
 
 const BASE_ID = process.env.AIRTABLE_BASE_ID;
 const PAT = process.env.AIRTABLE_KEY;
