@@ -37,6 +37,7 @@
     "test:rss-cors": "node test/rss-feed-cors-smoke.mjs",
     "test:enquiry-submit": "node test/enquiry-submit-lookup-smoke.mjs",
     "test:enquiry-email": "node test/enquiry-email-brand-smoke.mjs",
+    "test:enquiry-email-fields": "node test/enquiry-email-fields-smoke.mjs",
     "test:enquiry-hardening": "node test/enquiry-hardening-smoke.mjs",
     "test:enquiry-write-recovery": "node test/enquiry-write-recovery-smoke.mjs",
     "test:enquiry-e2e": "node test/enquiry-e2e-smoke.cjs",

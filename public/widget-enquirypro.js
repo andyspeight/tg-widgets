@@ -32,7 +32,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.2.6';
+  var WIDGET_VERSION = '1.2.7';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (labels, placeholders, step names, buttons, validation,
@@ -99,8 +99,8 @@
       contactSub: 'One of our travel experts will be in touch personally, no call centre.',
       firstName: 'First name', lastName: 'Last name',
       email: 'Email', phone: 'Phone', emailPlaceholder: 'you@email.com', phonePlaceholder: '07700 900000',
-      bestWay: 'Best way to reach you', prefEmail: 'Email', prefPhone: 'Phone', prefWhatsApp: 'WhatsApp',
-      bestTime: 'Best time', timeMorning: 'Morning', timeAfternoon: 'Afternoon', timeEvening: 'Evening',
+      bestWay: 'Best way to reach you', prefEmail: 'Email', prefPhone: 'Phone', prefWhatsApp: 'WhatsApp', prefAny: "I don't mind",
+      bestTime: 'Best time', timeMorning: 'Morning', timeAfternoon: 'Afternoon', timeEvening: 'Evening', timeAny: 'Anytime',
       anythingElse: 'Anything else we should know?',
       messagePlaceholder: 'Special occasions, must-haves, questions...',
       leaveBlank: 'Leave blank',
@@ -182,8 +182,8 @@
       contactSub: 'L’un de nos experts voyage vous contactera personnellement, sans centre d’appels.',
       firstName: 'Prénom', lastName: 'Nom',
       email: 'Adresse e-mail', phone: 'Téléphone', emailPlaceholder: 'vous@email.com', phonePlaceholder: '06 12 34 56 78',
-      bestWay: 'Meilleur moyen de vous joindre', prefEmail: 'E-mail', prefPhone: 'Téléphone', prefWhatsApp: 'WhatsApp',
-      bestTime: 'Meilleur moment', timeMorning: 'Matin', timeAfternoon: 'Après-midi', timeEvening: 'Soir',
+      bestWay: 'Meilleur moyen de vous joindre', prefEmail: 'E-mail', prefPhone: 'Téléphone', prefWhatsApp: 'WhatsApp', prefAny: 'Peu importe',
+      bestTime: 'Meilleur moment', timeMorning: 'Matin', timeAfternoon: 'Après-midi', timeEvening: 'Soir', timeAny: "N'importe quand",
       anythingElse: 'Autre chose à nous signaler ?',
       messagePlaceholder: 'Occasions spéciales, incontournables, questions...',
       leaveBlank: 'Laissez vide',
@@ -262,8 +262,8 @@
       contactSub: 'Einer unserer Reiseexperten meldet sich persönlich, kein Callcenter.',
       firstName: 'Vorname', lastName: 'Nachname',
       email: 'E-Mail-Adresse', phone: 'Telefon', emailPlaceholder: 'sie@email.com', phonePlaceholder: '0151 23456789',
-      bestWay: 'Beste Erreichbarkeit', prefEmail: 'E-Mail', prefPhone: 'Telefon', prefWhatsApp: 'WhatsApp',
-      bestTime: 'Beste Zeit', timeMorning: 'Vormittag', timeAfternoon: 'Nachmittag', timeEvening: 'Abend',
+      bestWay: 'Beste Erreichbarkeit', prefEmail: 'E-Mail', prefPhone: 'Telefon', prefWhatsApp: 'WhatsApp', prefAny: 'Egal',
+      bestTime: 'Beste Zeit', timeMorning: 'Vormittag', timeAfternoon: 'Nachmittag', timeEvening: 'Abend', timeAny: 'Jederzeit',
       anythingElse: 'Sonst noch etwas, das wir wissen sollten?',
       messagePlaceholder: 'Besondere Anlässe, Wünsche, Fragen...',
       leaveBlank: 'Leer lassen',
@@ -342,8 +342,8 @@
       contactSub: 'Uno de nuestros expertos en viajes te contactará personalmente, sin centralita.',
       firstName: 'Nombre', lastName: 'Apellidos',
       email: 'Correo electrónico', phone: 'Teléfono', emailPlaceholder: 'tu@email.com', phonePlaceholder: '600 123 456',
-      bestWay: 'Mejor forma de contactarte', prefEmail: 'Correo', prefPhone: 'Teléfono', prefWhatsApp: 'WhatsApp',
-      bestTime: 'Mejor momento', timeMorning: 'Mañana', timeAfternoon: 'Tarde', timeEvening: 'Noche',
+      bestWay: 'Mejor forma de contactarte', prefEmail: 'Correo', prefPhone: 'Teléfono', prefWhatsApp: 'WhatsApp', prefAny: 'Me da igual',
+      bestTime: 'Mejor momento', timeMorning: 'Mañana', timeAfternoon: 'Tarde', timeEvening: 'Noche', timeAny: 'Cualquier momento',
       anythingElse: '¿Algo más que debamos saber?',
       messagePlaceholder: 'Ocasiones especiales, imprescindibles, preguntas...',
       leaveBlank: 'Déjalo en blanco',
@@ -422,8 +422,8 @@
       contactSub: 'Uno dei nostri esperti di viaggio ti contatterà di persona, niente call center.',
       firstName: 'Nome', lastName: 'Cognome',
       email: 'Indirizzo email', phone: 'Telefono', emailPlaceholder: 'tu@email.com', phonePlaceholder: '345 123 4567',
-      bestWay: 'Modo migliore per contattarti', prefEmail: 'Email', prefPhone: 'Telefono', prefWhatsApp: 'WhatsApp',
-      bestTime: 'Momento migliore', timeMorning: 'Mattina', timeAfternoon: 'Pomeriggio', timeEvening: 'Sera',
+      bestWay: 'Modo migliore per contattarti', prefEmail: 'Email', prefPhone: 'Telefono', prefWhatsApp: 'WhatsApp', prefAny: 'Indifferente',
+      bestTime: 'Momento migliore', timeMorning: 'Mattina', timeAfternoon: 'Pomeriggio', timeEvening: 'Sera', timeAny: 'In qualsiasi momento',
       anythingElse: 'Altro che dovremmo sapere?',
       messagePlaceholder: 'Occasioni speciali, cose imprescindibili, domande...',
       leaveBlank: 'Lascia vuoto',
@@ -502,8 +502,8 @@
       contactSub: 'Unul dintre experții noștri în călătorii vă va contacta personal, fără call center.',
       firstName: 'Prenume', lastName: 'Nume de familie',
       email: 'Adresă de e-mail', phone: 'Telefon', emailPlaceholder: 'tu@email.com', phonePlaceholder: '0712 345 678',
-      bestWay: 'Cel mai bun mod de a vă contacta', prefEmail: 'E-mail', prefPhone: 'Telefon', prefWhatsApp: 'WhatsApp',
-      bestTime: 'Cel mai bun moment', timeMorning: 'Dimineață', timeAfternoon: 'După-amiază', timeEvening: 'Seară',
+      bestWay: 'Cel mai bun mod de a vă contacta', prefEmail: 'E-mail', prefPhone: 'Telefon', prefWhatsApp: 'WhatsApp', prefAny: 'Nu contează',
+      bestTime: 'Cel mai bun moment', timeMorning: 'Dimineață', timeAfternoon: 'După-amiază', timeEvening: 'Seară', timeAny: 'Oricând',
       anythingElse: 'Altceva ce ar trebui să știm?',
       messagePlaceholder: 'Ocazii speciale, lucruri esențiale, întrebări...',
       leaveBlank: 'Lăsați necompletat',
@@ -1455,10 +1455,10 @@
     // contact preference / time: stable logic key (sent to the pipeline in notes)
     // + localised label. [key, i18nKey]
     var pf = fieldWrap(this.t('bestWay'), this.t('optional')); var pc = document.createElement('div'); pc.className = 'ep-chips';
-    [['Email', 'prefEmail'], ['Phone', 'prefPhone'], ['WhatsApp', 'prefWhatsApp']].forEach(function (p) { pc.appendChild(self._inPlaceChip(self.t(p[1]), p[0], 'contactPref', pc)); });
+    [['Email', 'prefEmail'], ['Phone', 'prefPhone'], ['WhatsApp', 'prefWhatsApp'], ["I don't mind", 'prefAny']].forEach(function (p) { pc.appendChild(self._inPlaceChip(self.t(p[1]), p[0], 'contactPref', pc)); });
     pf.appendChild(pc); root.appendChild(pf);
     var tf = fieldWrap(this.t('bestTime'), this.t('optional')); var tc = document.createElement('div'); tc.className = 'ep-chips';
-    [['Morning', 'timeMorning'], ['Afternoon', 'timeAfternoon'], ['Evening', 'timeEvening']].forEach(function (t) { tc.appendChild(self._inPlaceChip(self.t(t[1]), t[0], 'contactTime', tc)); });
+    [['Morning', 'timeMorning'], ['Afternoon', 'timeAfternoon'], ['Evening', 'timeEvening'], ['Anytime', 'timeAny']].forEach(function (t) { tc.appendChild(self._inPlaceChip(self.t(t[1]), t[0], 'contactTime', tc)); });
     tf.appendChild(tc); root.appendChild(tf);
 
     var mf = fieldWrap(this.t('anythingElse'), this.t('optional'));
