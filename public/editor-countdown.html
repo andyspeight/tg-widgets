@@ -2137,7 +2137,10 @@
        ========================================================= */
     if (window.tgse && typeof window.tgse.init === 'function') {
       window.tgse.init({
-        widgetType: 'Countdown',
+        // Canonical catalogue name. Sending 'Countdown' worked only via a server
+        // compatibility alias; the editor's own save() and AI calls already use
+        // the canonical form (23 Jul 2026 audit).
+        widgetType: 'Countdown Timer',
         widgetTag: 'countdown',
         scriptFile: 'widget-countdown.js',
 
