@@ -59,7 +59,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.2.4';
+  const VERSION = '1.2.5';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome, per language. English is the source + fallback. The author's
@@ -1281,7 +1281,7 @@
       } catch (err) {
         console.error('[TG FAQ Widget] Failed to initialise:', err);
         try {
-          el.innerHTML = '<p style="color:#6b7280;font:14px/1.5 -apple-system,sans-serif;padding:16px;text-align:center;border:1px dashed #e5e7eb;border-radius:8px;margin:0">Unable to load FAQ widget</p>';
+          el.innerHTML = ''; el.style.display = 'none'; // fail quiet — never paint an error box on a client page
         } catch (e) { /* noop */ }
       }
     }

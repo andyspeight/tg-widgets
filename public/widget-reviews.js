@@ -44,7 +44,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.4';
+  const VERSION = '1.0.5';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (rating summary, section labels, controls). Platform
@@ -789,9 +789,15 @@
       const widgetId = el.dataset.tgId;
       if (widgetId) {
         try {
-          const resp = await fetch(`${API_BASE}?id=${encodeURIComponent(widgetId)}`);
-          if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-          new TGReviewsWidget(el, await resp.json());
+          // Timeout-guard the config fetch so a hung upstream fails fast into the
+          // quiet catch instead of an indefinite load (23 Jul 2026 audit).
+          const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+          const timer = ctrl ? setTimeout(() => ctrl.abort(), 9000) : null;
+          try {
+            const resp = await fetch(`${API_BASE}?id=${encodeURIComponent(widgetId)}`, ctrl ? { signal: ctrl.signal } : undefined);
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            new TGReviewsWidget(el, await resp.json());
+          } finally { if (timer) clearTimeout(timer); }
         } catch (e) { console.error('[TG Reviews] Failed to load:', e); }
         continue;
       }

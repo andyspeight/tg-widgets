@@ -95,5 +95,11 @@ carry placeholder widget types but are not live client editors.
 ## Progress log
 
 - 23 Jul 2026: Stage 1 audit run across the whole suite. 18 findings after
-  dedupe, verified. Dominant class is missing timeouts on outside calls. Awaiting
-  Andy's decision on fix order before any change reaches the live site.
+  dedupe, verified. Dominant class is missing timeouts on outside calls.
+- 23 Jul 2026: Shipped the systemic timeout batch (PR #104) — findings #1, #3,
+  #4, #10, #11, #12. Every outside call (Airtable, the AI model, Redis writes,
+  the submit PATCH, and the three content widgets) is now time-bounded, with a
+  source-scan test guarding against regression. Remaining, awaiting Andy's steer:
+  the loud client-facing failures (#2, #5), the dead Airtable-connect feature
+  and the duplicate-save bug (#6, #7), the access gaps (#8, #9), then the SEV3
+  hardening (#13-#18).

@@ -16,7 +16,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.4.1';
+  const VERSION = '1.4.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the spin button, result flow, lead-capture labels and
@@ -620,7 +620,7 @@
         console.warn('[TG Spin Wheel] Container has neither data-tg-id nor data-tg-config');
       } catch (err) {
         console.error('[TG Spin Wheel] Failed to initialise:', err);
-        try { el.innerHTML = '<p style="color:#64748b;font:14px/1.5 system-ui,sans-serif;padding:16px;text-align:center;border:1px dashed #e2e8f0;border-radius:8px;margin:0">Unable to load Spin the Wheel widget</p>'; } catch (e) {}
+        try { el.innerHTML = ''; el.style.display = 'none'; } catch (e) {} // fail quiet — never paint an error box on a client page
       }
     }
   }

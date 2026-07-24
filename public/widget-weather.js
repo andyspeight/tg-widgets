@@ -86,7 +86,7 @@
     } catch (e) { /* fall through */ }
     return '/api/destination-content';
   })();
-  const VERSION = '1.0.3';
+  const VERSION = '1.0.4';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only: month names, climate-band reason labels, the
@@ -1394,7 +1394,7 @@
       } catch (err) {
         console.error('[TG Weather] Failed to initialise:', err);
         try {
-          el.innerHTML = '<p style="color:#64748b;font:14px/1.5 -apple-system,sans-serif;padding:16px;text-align:center;border:1px dashed #e2e8f0;border-radius:8px;margin:0">Unable to load Weather widget</p>';
+          el.innerHTML = ''; el.style.display = 'none'; // fail quiet — never paint an error box on a client page
         } catch (e) { /* noop */ }
       }
     }
