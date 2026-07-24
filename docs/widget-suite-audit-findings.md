@@ -120,6 +120,17 @@ carry placeholder widget types but are not live client editors.
   paying client if rushed: #13 (plan-tier gate on the translate endpoints), #14
   (AI daily-cap race — no atomic primitive in Airtable), #16 (manual auth
   fallbacks across several editors).
+- 24 Jul 2026: Closed the last of the audit (findings #16 + #14). #16: removed
+  the hand-rolled Bearer fallback from nine editors (weather, textfx, mybooking,
+  countdown, logos, spotlight, faq, testimonials — plus enquiry, found in the
+  sweep). They now delegate auth to the shell (tgse.authHeaders() + the cookie
+  interceptor), so a stale local-storage token can no longer 401 a save while the
+  cookie session is valid. Guarded by test/editor-auth-no-bearer-smoke.mjs, which
+  fails if any editor reconstructs a Bearer in code. #14: the AI daily-cap
+  read-then-write race is documented as an accepted minor overspend (Airtable has
+  no atomic counter; the cap stops runaway accounts, not exact billing; a one/two
+  overspend at £0.025/call is immaterial, and the Anthropic console alert is the
+  real ceiling). With this, all 18 audit findings are resolved.
 - 24 Jul 2026: Shipped the AI plan gate (finding #13). The paid translate
   endpoints (faq-translate, enquiry-translate) now gate on plan entitlement, not
   just the per-client rate limit — a Spark or suspended account calling the API

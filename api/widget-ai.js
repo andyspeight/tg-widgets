@@ -641,6 +641,14 @@ function buildAccountContext(account) {
 // RATE LIMITING — Airtable-backed, persists across cold starts
 // ═══════════════════════════════════════════════════════════════════
 
+// Accepted limitation (audit #14): this is a read-then-write, not an atomic
+// increment, so two requests that land in the same instant can both read the
+// pre-increment count and both proceed — a client can exceed their daily cap by
+// roughly the number of truly-simultaneous requests (in practice one or two).
+// Airtable has no atomic counter primitive, and the daily cap exists to stop a
+// runaway account draining the AI budget, not to bill to the exact call — a
+// one-or-two overspend at £0.025/call is immaterial. Left as-is deliberately;
+// the real budget ceiling is the Anthropic console spend alert.
 async function checkAndIncrementLimit(userRecordId, planLimit) {
   const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD UTC
   const AT_BASE  = process.env.AIRTABLE_BASE_ID;

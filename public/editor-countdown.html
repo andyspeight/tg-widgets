@@ -1184,18 +1184,16 @@
       const s = getSession();
       return !!(s && s.token);
     }
-    function getAuthToken() {
-      const s = getSession();
-      return s?.token || '';
-    }
     function authH() {
+      // Auth is the shell's job. tgse.authHeaders() sets a Bearer only for a
+      // legacy token session, and nothing for a cookie session — the global
+      // fetch interceptor adds credentials:'include' so the cookie carries auth.
+      // We never hand-roll a Bearer from local storage: a stale token there would
+      // 401 a save even when the cookie session is perfectly valid (audit #16).
       if (window.tgse && typeof window.tgse.authHeaders === 'function') {
         return window.tgse.authHeaders();
       }
-      const t = getAuthToken();
-      const h = { 'Content-Type': 'application/json' };
-      if (t) h['Authorization'] = 'Bearer ' + t;
-      return h;
+      return { 'Content-Type': 'application/json' };
     }
     function showLogin() {
       // Delegated to shell — the shell shows its own login overlay.
