@@ -3007,20 +3007,18 @@
       } catch (e) {}
     }
     function authHeaders(extra) {
-      // PHASE 1 SHELL MIGRATION:
-      // Cookie auth carries identity via HttpOnly cookies. The shell's
-      // fetch interceptor (v1.2.0) automatically attaches credentials:'include'
-      // to all same-origin /api/* requests, so no Authorization header is
-      // needed. We retain the function for callers' convenience and the
-      // fallback path (legacy users still on Bearer tokens), but generally
-      // emit no Authorization header for new SSO sessions.
-      const s = getSession();
-      const h = Object.assign({ 'Content-Type': 'application/json' }, extra || {});
-      // Only attach Authorization if we actually have a token string (i.e. legacy
-      // localStorage user, NOT cookie-borne session). For cookie sessions s.token
-      // is '' and we skip — credentials:'include' is what authenticates.
-      if (s && s.token) h['Authorization'] = 'Bearer ' + s.token;
-      return h;
+      // Auth is the shell's job. tgse.authHeaders() sets a Bearer only for a
+      // legacy token session, and nothing for a cookie session — the shell's
+      // fetch interceptor (v1.2.0) attaches credentials:'include' to same-origin
+      // /api/* calls, so the cookie carries auth. We never hand-roll a Bearer
+      // from local storage: a stale token there would 401 a save even when the
+      // cookie session is valid (audit #16).
+      if (window.tgse && typeof window.tgse.authHeaders === 'function') {
+        const h = window.tgse.authHeaders();
+        if (extra) Object.assign(h, extra);
+        return h;
+      }
+      return Object.assign({ 'Content-Type': 'application/json' }, extra || {});
     }
 
     // PHASE 1 SHELL MIGRATION:
