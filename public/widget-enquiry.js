@@ -3211,9 +3211,11 @@
     submitBtn.appendChild(document.createTextNode(' ' + t('sending')));
 
     // One silent retry on a retryable 503: the server answers that ONLY when
-    // the form lookup failed before anything was written, so re-sending can
-    // never duplicate a submission. The button stays in its "Sending" state
-    // through the retry; the visitor only ever sees an error if that fails too.
+    // nothing was committed — a form lookup that failed before any write, or a
+    // master write that timed out and was VERIFIED not to have landed — so
+    // re-sending can never duplicate a submission. The button stays in its
+    // "Sending" state through the retry; the visitor only ever sees an error if
+    // that fails too.
     var attemptSend = function (attemptNo) {
       fetch(API_BASE + '/api/enquiry/submit', {
         method: 'POST',
