@@ -68,6 +68,12 @@ const DEMO_ORIGINS = [
 
 const MAX_PAYLOAD_BYTES = 64 * 1024; // 64KB
 
+// Abort budget for the master-record write. Deliberately generous: dropping this
+// write loses the visitor's enquiry outright, and a timeout is treated as
+// non-retryable (it may have committed). See writeMasterRecord for the full
+// reasoning. Must stay well under the 30s function maxDuration (vercel.json).
+const WRITE_TIMEOUT_MS = 15000;
+
 // Enquiry Forms field IDs (config source)
 const FORM_FIELDS = {
   formName:          'fldC0MLSyJqg6U1zT',
@@ -646,7 +652,15 @@ async function writeMasterRecord({ form, payload, meta, sequential, reference })
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ ...body, typecast: true }),
-    signal: AbortSignal.timeout(8000),
+    // This is the ONE call we least want to lose — an aborted master write drops
+    // the visitor's enquiry entirely (a lost lead), and a timeout is treated as
+    // non-retryable on purpose (it MAY have committed, so a blind retry could
+    // duplicate). The whole platform shares one Airtable base's ~5 req/s budget,
+    // so a write can legitimately queue for several seconds under load; an 8s
+    // abort was too eager and dropped a real lead (thatsmydreamholiday.com,
+    // 24 Jul 2026). 15s gives a slow-but-fine write room to land while still
+    // leaving ample margin under the 30s maxDuration (routing adds only 1-3s).
+    signal: AbortSignal.timeout(WRITE_TIMEOUT_MS),
   });
   if (!response.ok) {
     const errBody = await response.text();

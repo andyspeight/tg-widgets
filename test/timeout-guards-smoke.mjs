@@ -48,6 +48,16 @@ const submit = read('api/enquiry/submit.js');
 ok(/routingStatusJSON[\s\S]{0,120}signal:\s*AbortSignal\.timeout/.test(submit),
   'enquiry submit routing-summary PATCH is timeout-bounded');
 
+// The master-record write is the one call we least want to lose: an aborted
+// write drops the lead, and a timeout is non-retryable on purpose. Its abort
+// budget must be generous (>= 15s) so a write merely queued behind Airtable's
+// shared rate budget still lands, and it must be bounded (never unlimited).
+const writeTimeout = submit.match(/const WRITE_TIMEOUT_MS\s*=\s*(\d+)/);
+ok(writeTimeout && Number(writeTimeout[1]) >= 15000,
+  'enquiry submit master-record write timeout is >= 15s');
+ok(/signal:\s*AbortSignal\.timeout\(WRITE_TIMEOUT_MS\)/.test(submit),
+  'enquiry submit master-record write uses the WRITE_TIMEOUT_MS abort budget');
+
 // The three content widgets guard their fetch with a 9s AbortController so a
 // hung upstream reaches the error state instead of an eternal loading skeleton.
 for (const f of ['public/widget-attraction.js', 'public/widget-airport.js', 'public/widget-spotlight.js']) {
