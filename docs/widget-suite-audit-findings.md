@@ -120,6 +120,15 @@ carry placeholder widget types but are not live client editors.
   paying client if rushed: #13 (plan-tier gate on the translate endpoints), #14
   (AI daily-cap race — no atomic primitive in Airtable), #16 (manual auth
   fallbacks across several editors).
+- 24 Jul 2026: Shipped the AI plan gate (finding #13). The paid translate
+  endpoints (faq-translate, enquiry-translate) now gate on plan entitlement, not
+  just the per-client rate limit — a Spark or suspended account calling the API
+  directly is refused (403). Extracted the caps + Active-gated plan resolution to
+  a shared `api/_lib/ai-plan.js` (aiEntitlement + resolveClientPlan), and pointed
+  widget-ai at the same PLAN_DAILY_LIMITS map so all three AI endpoints share one
+  source of truth. Fail-closed on an Airtable lookup error. Guarded by
+  test/ai-plan-gate-smoke.mjs. #14 (daily-cap race) and #16 (manual auth
+  fallbacks) still to do.
 - 24 Jul 2026: Shipped the quote-email fix (finding #8, PR pending). Diagnosis
   corrected the plan's assumption: the live widget ALREADY sends id+key on a
   normal viewer page (and the demo seeds one), so the safe server-fetch path is

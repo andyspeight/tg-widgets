@@ -45,6 +45,7 @@
  */
 import { createHash } from 'crypto';
 import { requireAuth, applyRateLimit, setCors, RATE_LIMITS } from './_auth.js';
+import { resolveClientPlan, aiEntitlement } from './_lib/ai-plan.js';
 
 const MODEL = process.env.FAQ_TRANSLATE_MODEL || 'claude-haiku-4-5-20251001';
 const MAX_TOKENS = parseInt(process.env.FAQ_TRANSLATE_MAX_TOKENS || '8000', 10);
@@ -313,6 +314,21 @@ async function handler(req, res) {
 
   const rlKey = 'faq:translate:' + (user.clientId || user.recordId || user.email || 'unknown');
   if (!applyRateLimit(res, rlKey, RATE_LIMITS.widgetWrite)) return;
+
+  // Plan gate — translating costs money, so only AI-entitled plans may run it.
+  // The rate limit alone did not stop a Spark (or suspended) account calling the
+  // API directly. Plan is read fresh from Airtable so an upgrade/downgrade
+  // applies at once; fail closed on a lookup error (503, not a free pass).
+  let plan;
+  try {
+    plan = await resolveClientPlan(user);
+  } catch (err) {
+    console.error('[faq-translate] plan lookup failed:', err.message);
+    return res.status(503).json({ error: 'Service temporarily unavailable. Please try again in a moment.' });
+  }
+  if (!plan) return res.status(403).json({ error: 'Account not found or inactive. Please sign in again.' });
+  const entitlement = aiEntitlement(plan.plan);
+  if (!entitlement.allowed) return res.status(403).json({ error: entitlement.reason });
 
   let body = req.body;
   if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
