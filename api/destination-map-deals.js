@@ -175,7 +175,10 @@ export default async function handler(req, res) {
       offers: sliced,
     });
   } catch (err) {
+    // Log the real error server-side; return a generic message so this public
+    // endpoint never leaks internal implementation detail (23 Jul 2026 audit).
+    console.error('[destination-map-deals]', err && err.message);
     res.setHeader('Cache-Control', 'no-store');
-    res.status(500).json({ ok: false, error: err.message, offers: [] });
+    res.status(500).json({ ok: false, error: 'Deals are temporarily unavailable', offers: [] });
   }
 }
