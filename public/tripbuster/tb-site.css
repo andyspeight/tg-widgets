@@ -242,3 +242,50 @@ input[type=range] { width:100%; accent-color:var(--coral); }
 @media (prefers-reduced-motion:reduce) {
   * { transition:none !important; animation:none !important; }
 }
+
+/* ── ringing the agency ─────────────────────────────────────────────────────
+   The call button sits beside the book button rather than replacing it, because
+   plenty of agencies want both. On a desktop it reveals the number in place; on
+   a phone it is a tel: link and dials. */
+.btn-call { background:var(--surface); color:var(--sky-deep); border:1.5px solid var(--sky-deep);
+  font-weight:800; display:inline-flex; align-items:center; gap:7px; }
+.btn-call:hover { background:var(--sky-wash); }
+.btn-call svg { width:15px; height:15px; }
+/* Once revealed it is a number to read, not a button to press again. */
+.btn-call.is-revealed { border-style:dashed; cursor:text; font-variant-numeric:tabular-nums;
+  letter-spacing:.01em; }
+/* A phone number must never wrap: "0141 555 907" broken across three lines
+   reads as a broken page, not as a number. nowrap widens the column instead. */
+.ar-call { font-size:12px; padding:7px 10px; margin-top:5px; width:100%;
+  justify-content:center; white-space:nowrap; }
+.ar-call.is-revealed { font-size:13px; font-weight:800; }
+
+/* ── ask us to ring you ──────────────────────────────────────────────────── */
+.cbf { background:var(--surface); border:1px solid var(--border); border-radius:16px;
+  padding:20px; margin-top:16px; }
+.cbf h3 { margin:0 0 5px; font-size:16px; font-weight:800; letter-spacing:-.02em; }
+.cbf-lead { margin:0 0 14px; font-size:13.5px; color:var(--tx-2); line-height:1.5; }
+.cbf label { display:block; font-size:12.5px; font-weight:700; color:var(--tx); margin-bottom:5px; }
+.cbf input, .cbf textarea { width:100%; margin-top:5px; padding:10px 12px; border-radius:10px;
+  border:1px solid var(--border-2); background:var(--surface-2); color:var(--tx);
+  font:inherit; font-weight:500; }
+.cbf input:focus, .cbf textarea:focus { outline:none; border-color:var(--coral);
+  box-shadow:0 0 0 3px var(--coral-wash); background:var(--surface); }
+.cbf textarea { resize:vertical; min-height:56px; }
+.cbf-row { margin-bottom:12px; }
+.cbf-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.cbf-hint { margin:6px 0 12px; font-size:12px; color:var(--tx-3); }
+.cbf-opt { font-weight:600; color:var(--tx-3); font-size:11.5px; }
+.cbf-go { width:100%; justify-content:center; margin-top:4px; }
+.cbf-privacy { margin:12px 0 0; font-size:11.5px; color:var(--tx-3); line-height:1.5; }
+.cbf-err { background:var(--danger-wash); color:var(--danger); border-radius:10px;
+  padding:10px 12px; font-size:13px; font-weight:600; margin-bottom:12px; }
+/* Hidden from people, irresistible to bots. Kept out of the tab order and off
+   screen rather than display:none, which some bots skip. */
+.cbf-hp { position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
+.cbf-done { text-align:center; padding:14px 4px; }
+.cbf-done svg { width:34px; height:34px; stroke:var(--live); fill:none; stroke-width:2.5;
+  stroke-linecap:round; stroke-linejoin:round; margin-bottom:8px; }
+.cbf-done h3 { margin:0 0 4px; }
+.cbf-done p { margin:0; font-size:13.5px; color:var(--tx-2); }
+@media (max-width:560px){ .cbf-grid { grid-template-columns:1fr; } }

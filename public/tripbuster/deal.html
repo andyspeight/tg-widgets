@@ -138,10 +138,16 @@
     return [{
       dealId: d.id, agent: d.agent && d.agent.name, agentSlug: d.agent && d.agent.slug,
       atol: d.atol, price: d.priceFrom, clickoutUrl: d.clickoutUrl,
+      phone: d.phone, billingMode: d.billingMode,
     }];
   }
 
   function tick() { return TB.svg('<path d="M20 6 9 17l-5-5"/>'); }
+
+  /** What a given agency charges for. Already resolved server-side. */
+  function mode(entry) {
+    return (entry && entry.billingMode) || (deal && deal.billingMode) || 'click';
+  }
 
   function render(d) {
     var agents = agentList(d);
@@ -229,14 +235,30 @@
                   'ATOL ' + TB.esc(a.atol) + '</span>' : '') + '</span>' +
               '<span class="ar-right"><span class="ar-price tnum">' +
                 TB.esc(TB.money(a.price, d.currency)) + '<small> pp</small></span><br>' +
-                '<button class="ar-book" type="button" data-idx="' + i + '">Book</button></span>' +
-              '</div>';
+                // Which routes this agency offers. On "both" the traveller gets
+                // the choice; on call-only there is nothing to click through to.
+                (mode(a) !== 'call' && a.clickoutUrl
+                  ? '<button class="ar-book" type="button" data-idx="' + i + '">Book</button>' : '') +
+                (mode(a) !== 'click'
+                  ? TB.callCta(a, { className: 'btn btn-call ar-call',
+                    label: TB.dialer() ? 'Call' : 'Show number' }) : '') +
+              '</span></div>';
           }).join('') +
           '<div class="book-foot">' + TB.svg('<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>') +
             '<span>Tripbuster is free to use. Each holiday is sold and financially protected by the agent you book with.</span>' +
           '</div>' +
-        '</div></aside>' +
+        '</div>' +
+        // Offered whenever the cheapest agency takes calls. It suits the people
+        // a phone number does not: anyone browsing at their desk, anyone who
+        // would rather be emailed, and anyone looking outside office hours.
+        (mode(best) !== 'click' ? TB.callbackForm(d) : '') +
+        '</aside>' +
       '</div>';
+
+    // Both are delegated, so a later re-render needs no re-binding.
+    TB.wireCalls($('content'), 'site');
+    var cbf = $('content').querySelector('.cbf');
+    if (cbf) TB.wireCallback(cbf, d, 'site');
 
     // The deal was shown, so report it.
     TB.reportImpressions([d], 'site');

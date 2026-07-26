@@ -174,11 +174,13 @@
     var list = (d.compare && d.compare.length) ? d.compare : [{
       dealId: d.id, agent: d.agent && d.agent.name, atol: d.atol,
       price: d.priceFrom, clickoutUrl: d.clickoutUrl,
+      phone: d.phone, billingMode: d.billingMode,
     }];
     return list.map(function (c, i) {
       var initials = String(c.agent || '?').split(/\s+/).map(function (w) { return w[0]; })
         .join('').slice(0, 2).toUpperCase();
       var href = TB.safeUrl(c.clickoutUrl);
+      var cmode = c.billingMode || d.billingMode || 'click';
       return '<div class="prov' + (i === 0 ? ' best' : '') + '">' +
         '<span class="prov-av">' + TB.esc(initials) + '</span>' +
         '<span><span class="prov-nm">' + TB.esc(c.agent) +
@@ -186,9 +188,15 @@
           (c.atol ? '<span class="prot" style="font-size:11px">' + TB.svg(TB.IC.shield) +
             'ATOL ' + TB.esc(c.atol) + '</span>' : '') + '</span>' +
         '<span class="prov-price tnum">' + TB.esc(TB.money(c.price, d.currency)) + '<small> pp</small></span>' +
-        (href
+        // A rival on a call-first agency is rung, not clicked through to, so the
+        // drawer has to offer whatever that agency actually takes.
+        (cmode !== 'call' && href
           ? '<a class="prov-go" href="' + TB.esc(href) + '" target="_blank" rel="noopener nofollow" ' +
             'data-click="' + TB.esc(c.dealId || '') + '">Book</a>'
+          : '') +
+        (cmode !== 'click'
+          ? TB.callCta(c, { className: 'prov-go btn-call',
+            label: TB.dialer() ? 'Call' : 'Show number' })
           : '') +
         '</div>';
     }).join('');
@@ -299,6 +307,9 @@
       total = Number(data.total) || 0;
       renderResults();
       renderCount();
+      // Delegated once on the results container, so rows added by "load more"
+      // and by re-filtering are covered without re-binding.
+      TB.wireCalls($('results'), 'site');
       TB.reportImpressions(incoming, 'site');
     } catch (err) {
       if (mine !== reqId) return;

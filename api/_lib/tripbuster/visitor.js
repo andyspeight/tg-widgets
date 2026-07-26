@@ -36,6 +36,23 @@ function salt() {
   return cachedSalt;
 }
 
+/**
+ * Salted hash of an arbitrary contact detail, under its own label so it can
+ * never collide with an IP hash of the same string.
+ *
+ * Used to spot the same person asking to be rung twice. Deliberately keyed on
+ * the contact detail rather than the IP: one person asking from home and again
+ * from work is a single enquiry, while a family sharing a wifi connection is
+ * genuinely two.
+ */
+export function contactHash(value) {
+  const s = salt();
+  if (!s || !value) return null;
+  const key = String(value).toLowerCase().replace(/[^a-z0-9@.+]/g, '');
+  if (!key) return null;
+  return createHash('sha256').update(s + ':contact:' + key).digest('hex').slice(0, 40);
+}
+
 /** Salted hash of the caller's IP, or null when no salt is configured. */
 export function ipHash(req) {
   const s = salt();

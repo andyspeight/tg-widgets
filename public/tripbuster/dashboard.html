@@ -259,6 +259,36 @@
   }
   @media (prefers-reduced-motion:reduce){ * { transition:none !important; } }
 
+  /* ── enquiries ───────────────────────────────────────────────────────────
+     The only screen holding a real person's name and number, so it stays plain
+     and puts the contact details first. */
+  .lead-row { display:grid; grid-template-columns:1fr auto; gap:14px; align-items:start;
+    padding:14px 16px; border-bottom:1px solid var(--border); }
+  .lead-row:last-child { border-bottom:0; }
+  .lead-nm { font-size:14.5px; font-weight:800; display:flex; align-items:center; gap:8px;
+    flex-wrap:wrap; }
+  .lead-ways { display:flex; gap:8px; flex-wrap:wrap; margin-top:5px; }
+  .lead-way { font-size:13px; font-weight:700; color:var(--sky-deep); background:var(--sky-wash);
+    padding:4px 9px; border-radius:7px; white-space:nowrap; }
+  .lead-way:hover { background:var(--surface-2); }
+  .lead-meta { font-size:12px; color:var(--tx-2); margin-top:6px; }
+  .lead-msg { font-size:13px; color:var(--tx); margin-top:7px; padding:8px 11px;
+    background:var(--surface-2); border-radius:9px; line-height:1.45; }
+  .lead-acts { display:flex; flex-direction:column; gap:5px; }
+  .lead-btn { font-size:11.5px; font-weight:700; padding:5px 10px; border-radius:7px;
+    border:1px solid var(--border-2); background:var(--surface); color:var(--tx-2);
+    cursor:pointer; white-space:nowrap; }
+  .lead-btn:hover { border-color:var(--sky); color:var(--sky-deep); }
+  .lead-btn.on { background:var(--sky-deep); border-color:var(--sky-deep); color:#fff; }
+  .pill-new { background:var(--coral-wash); color:var(--coral-ink); }
+  .pill-contacted { background:var(--sky-wash); color:var(--sky-deep); }
+  .pill-booked { background:var(--live-wash); color:var(--live); }
+  .pill-not_interested, .pill-junk { background:var(--surface-2); color:var(--tx-3); }
+  @media (max-width:640px){
+    .lead-row { grid-template-columns:1fr; }
+    .lead-acts { flex-direction:row; flex-wrap:wrap; }
+  }
+
   /* ── bulk import ─────────────────────────────────────────────────────────
      Three routes into the same deal table: type one in, upload a sheet, or pull
      from the Travelgenix live feed. The route cards are the chooser; each route
@@ -393,6 +423,10 @@
     </button>
     <button class="nav-i" data-view="editor" id="navNew">
       <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Add a deal
+    </button>
+    <button class="nav-i" data-view="leads">
+      <svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/></svg>
+      Enquiries <span class="count" id="navLeads">0</span>
     </button>
     <button class="nav-i" data-view="import">
       <svg viewBox="0 0 24 24"><path d="M12 3v12M8 11l4 4 4-4M4 19h16"/></svg> Add deals in bulk
@@ -660,6 +694,30 @@
             <div id="previewHost"></div>
             <p class="preview-note">This is the real Tripbuster deal card, so it is exactly what a traveller sees.</p>
           </div>
+        </div>
+      </section>
+
+      <!-- ── enquiries ── -->
+      <section class="view" id="v-leads">
+        <div class="lead">
+          <div><h2>Enquiries</h2>
+            <p>People who asked you to call them back about one of your deals.</p></div>
+        </div>
+        <div class="toolbar">
+          <div class="segs" id="leadFilters" role="group" aria-label="Filter enquiries">
+            <button class="seg" data-lead-filter="" aria-pressed="true">All</button>
+            <button class="seg" data-lead-filter="new" aria-pressed="false">New</button>
+            <button class="seg" data-lead-filter="contacted" aria-pressed="false">Contacted</button>
+            <button class="seg" data-lead-filter="booked" aria-pressed="false">Booked</button>
+          </div>
+          <span class="save-note" id="leadSummary" style="margin-left:auto"></span>
+        </div>
+        <div class="card" id="leadList"><div class="empty">Loading your enquiries…</div></div>
+        <div class="note" style="margin-top:16px">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <span>Telling us what came of each one is worth doing. It is how you and we both
+            know what these enquiries are actually worth, and it is what we look at first if you
+            ever query a bill.</span>
         </div>
       </section>
 
@@ -1308,8 +1366,8 @@
     renderDeals();
   });
 
-  const TITLES = { deals: 'My deals', editor: 'Add a deal', import: 'Add deals in bulk',
-    embed: 'Embed on your site', plan: 'Your plan' };
+  const TITLES = { deals: 'My deals', editor: 'Add a deal', leads: 'Enquiries',
+    import: 'Add deals in bulk', embed: 'Embed on your site', plan: 'Your plan' };
   function show(view) {
     document.querySelectorAll('.view').forEach((v) => v.classList.remove('on'));
     const el = $('v-' + view);
@@ -1321,6 +1379,7 @@
       loadHistory();
     }
     if (view === 'plan') loadBilling();
+    if (view === 'leads') loadLeads();
     document.querySelectorAll('.nav-i').forEach((n) => {
       if (n.getAttribute('data-view') === view) n.setAttribute('aria-current', 'page');
       else n.removeAttribute('aria-current');
@@ -1471,6 +1530,105 @@
   }
   $('saveLive').addEventListener('click', () => save('live'));
   $('saveDraft').addEventListener('click', () => save('draft'));
+
+  // ══ enquiries ═════════════════════════════════════════════
+  // Callback requests. This is the one screen holding somebody's real name and
+  // number, so it stays plain: who asked, about what, and what came of it.
+  var leadFilter = '';
+  var leadRows = [];
+
+  const LEAD_LABEL = {
+    new: 'New', contacted: 'Contacted', booked: 'Booked',
+    not_interested: 'Not interested', junk: 'Junk',
+  };
+
+  function when(value) {
+    if (!value) return '';
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? '' : d.toLocaleString('en-GB');
+  }
+
+  async function loadLeads() {
+    try {
+      const data = await api('/api/tripbuster/my-leads' + (leadFilter ? '?status=' + leadFilter : ''));
+      leadRows = data.leads || [];
+      const c = data.counts;
+      $('navLeads').textContent = c ? (c.new || 0) : 0;
+      $('leadSummary').textContent = c
+        ? [c.new + ' new', c.contacted + ' contacted', c.booked + ' booked'].join(' · ') : '';
+      renderLeads();
+    } catch (err) {
+      if (err.message === 'unauthorised') return;
+      $('leadList').innerHTML = '<div class="empty">' + esc(err.message) + '</div>';
+    }
+  }
+
+  function renderLeads() {
+    if (!leadRows.length) {
+      $('leadList').innerHTML = '<div class="empty">'
+        + (leadFilter ? 'Nothing with that status yet.'
+          : 'No enquiries yet. They appear here the moment someone asks you to call them back.')
+        + '</div>';
+      return;
+    }
+    $('leadList').innerHTML = leadRows.map(function (l) {
+      // The contact details are the point of the screen, so they are the one
+      // thing made easy to act on: tap to ring, tap to email.
+      var ways = [];
+      if (l.phone) {
+        ways.push('<a class="lead-way" href="tel:' + esc(String(l.phone).replace(/[^\d+]/g, '')) + '">'
+          + esc(l.phone) + '</a>');
+      }
+      if (l.email) {
+        ways.push('<a class="lead-way" href="mailto:' + esc(l.email) + '">' + esc(l.email) + '</a>');
+      }
+      return '<div class="lead-row" data-lead="' + esc(l.id) + '">'
+        + '<div class="lead-main">'
+        + '<div class="lead-nm">' + esc(l.name)
+        + '<span class="pill pill-' + esc(l.status) + '">' + esc(LEAD_LABEL[l.status] || l.status) + '</span></div>'
+        + '<div class="lead-ways">' + ways.join('') + '</div>'
+        + '<div class="lead-meta">' + esc(l.deal_title || 'a deal')
+        + (l.preferred_time ? ' · best time: ' + esc(l.preferred_time) : '')
+        + ' · ' + esc(when(l.created_at)) + '</div>'
+        + (l.message ? '<div class="lead-msg">' + esc(l.message) + '</div>' : '')
+        + '</div>'
+        + '<div class="lead-acts">'
+        + ['contacted', 'booked', 'not_interested', 'junk'].map(function (st) {
+          return '<button class="lead-btn' + (l.status === st ? ' on' : '') + '" type="button"'
+            + ' data-lead-set="' + esc(st) + '">' + esc(LEAD_LABEL[st]) + '</button>';
+        }).join('')
+        + '</div></div>';
+    }).join('');
+  }
+
+  $('leadFilters').addEventListener('click', function (e) {
+    var b = e.target.closest('.seg');
+    if (!b) return;
+    leadFilter = b.getAttribute('data-lead-filter') || '';
+    document.querySelectorAll('#leadFilters .seg').forEach(function (x) {
+      x.setAttribute('aria-pressed', String(x === b));
+    });
+    loadLeads();
+  });
+
+  $('leadList').addEventListener('click', async function (e) {
+    var btn = e.target.closest('[data-lead-set]');
+    if (!btn) return;
+    var row = btn.closest('[data-lead]');
+    var id = row && row.getAttribute('data-lead');
+    if (!id) return;
+    btn.disabled = true;
+    try {
+      await api('/api/tripbuster/my-leads?id=' + encodeURIComponent(id), {
+        method: 'PATCH', body: { status: btn.getAttribute('data-lead-set') },
+      });
+      toast('Enquiry updated');
+      await loadLeads();
+    } catch (err) {
+      if (err.message !== 'unauthorised') toast(err.message, 'err');
+      btn.disabled = false;
+    }
+  });
 
   // ══ what the agency is charged for ════════════════════════
   // The agency default. Any deal can override it in its own settings, and the

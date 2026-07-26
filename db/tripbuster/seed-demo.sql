@@ -16,6 +16,7 @@
 --   4 properties advertised by more than one agency, which is what makes the
 --     multi-agent price compare visible on the consumer site
 --   one agency on each billing mode: clicks, calls, and both
+--   callback requests, some with a phone number, some an email, some both
 --   30 days of impressions, clicks and phone enquiries, generated so they reconcile:
 --     click_events are EXPANDED FROM deal_daily_stats rather than invented
 --     alongside them, because tb_agent_stats reads impressions and clicks from
@@ -86,6 +87,7 @@ update public.agents set billing_mode = 'both',  call_min_seconds = 90 where slu
 -- deals, but they are cleared explicitly so the intent is obvious.
 delete from public.click_events     where agent_id in (select id from public.agents where slug in ('sunseeker-travel','coastline-holidays','jetaway-travel'));
 delete from public.deal_daily_stats where agent_id in (select id from public.agents where slug in ('sunseeker-travel','coastline-holidays','jetaway-travel'));
+delete from public.leads            where agent_id in (select id from public.agents where slug in ('sunseeker-travel','coastline-holidays','jetaway-travel'));
 delete from public.import_runs      where agent_id in (select id from public.agents where slug in ('sunseeker-travel','coastline-holidays','jetaway-travel'));
 delete from public.deals            where agent_id in (select id from public.agents where slug in ('sunseeker-travel','coastline-holidays','jetaway-travel'));
 
@@ -491,22 +493,27 @@ select p.deal_id, p.agent_id, d.day::date, v.imp,
 -- Roughly one click in eight is not billable: a repeat from the same visitor
 -- inside the 30 minute window, or something that looked automated. The agency
 -- still sees it, they are simply not charged twice.
+--
+-- Every per-event value is keyed on the DATE as well as the deal and the index.
+-- Without the date a deal with one click a day gets the same hour, the same
+-- browser and the same billable answer on all thirty days, which shows up as
+-- whole deals earning nothing rather than the odd repeat visitor.
 insert into public.click_events
   (deal_id, agent_id, occurred_at, surface, ip_hash, ua_family, referrer_host, country_code, is_billable)
 select s.deal_id, s.agent_id,
        s.stat_date
-         + (interval '1 hour'   * (7 + (abs(hashtext(d.reference || g::text || 'h')) % 15)))
-         + (interval '1 minute' * (abs(hashtext(d.reference || g::text || 'm')) % 60)),
-       case when (abs(hashtext(d.reference || g::text || 's')) % 5) = 0 then 'widget' else 'site' end,
+         + (interval '1 hour'   * (7 + (abs(hashtext(d.reference || s.stat_date::text || g::text || 'h')) % 15)))
+         + (interval '1 minute' * (abs(hashtext(d.reference || s.stat_date::text || g::text || 'm')) % 60)),
+       case when (abs(hashtext(d.reference || s.stat_date::text || g::text || 's')) % 5) = 0 then 'widget' else 'site' end,
        -- The shape the real recorder writes: a salted hash truncated to 40 chars,
        -- never an IP address.
        substr(encode(sha256(convert_to('demo-seed' || d.reference || s.stat_date::text || g::text, 'UTF8')), 'hex'), 1, 40),
        (array['chrome','chrome','chrome','safari','safari','edge','firefox','samsung'])
-         [1 + (abs(hashtext(d.reference || g::text || 'ua')) % 8)],
+         [1 + (abs(hashtext(d.reference || s.stat_date::text || g::text || 'ua')) % 8)],
        (array['google.com','google.com','facebook.com',null,'bing.com','sunseekertravel.co.uk'])
-         [1 + (abs(hashtext(d.reference || g::text || 'r')) % 6)],
+         [1 + (abs(hashtext(d.reference || s.stat_date::text || g::text || 'r')) % 6)],
        'GB',
-       (abs(hashtext(d.reference || g::text || 'b')) % 8) <> 0
+       (abs(hashtext(d.reference || s.stat_date::text || g::text || 'b')) % 8) <> 0
   from public.deal_daily_stats s
   join public.deals d on d.id = s.deal_id
   cross join generate_series(1, s.clicks) as g
@@ -545,40 +552,98 @@ update public.deal_daily_stats s
  where d.id = s.deal_id and coalesce(d.billing_mode, a.billing_mode) = 'call';
 
 -- Expanded from the daily counts for the same reason clicks are: the two must
--- never disagree. Roughly one call in six rings out, and of those answered some
--- are a quick availability check rather than a real enquiry, so `is_billable`
--- is computed with the SAME rule tb_record_click applies — connected, and past
--- the agency's own qualifying length. Coastline's 90 seconds against Jetaway's
--- 60 is why their billable share is visibly lower.
+-- never disagree.
+--
+-- BILLABLE MEANS DELIBERATE, NOT ANSWERED. We do not own the agency's phone
+-- number, so we never learn whether the call connected or how long it lasted.
+-- What we can see is that somebody pressed the button, which is the charge.
+-- call_seconds and call_connected stay NULL for exactly that reason: seeding
+-- them would imply a capability the platform does not have.
+--
+-- Roughly one call in eight is the same person coming back for a number they
+-- lost. Recorded so the agency sees it, charged once. Keyed on the date as well
+-- as the deal, for the same reason the clicks above are.
 insert into public.click_events
   (deal_id, agent_id, occurred_at, surface, ip_hash, ua_family, referrer_host, country_code,
    is_billable, event_type, call_seconds, call_connected, caller_hash)
 select s.deal_id, s.agent_id,
        s.stat_date
-         + (interval '1 hour'   * (9 + (abs(hashtext(d.reference || g::text || 'ch')) % 9)))
-         + (interval '1 minute' * (abs(hashtext(d.reference || g::text || 'cm')) % 60)),
-       case when (abs(hashtext(d.reference || g::text || 'cs')) % 6) = 0 then 'widget' else 'site' end,
+         + (interval '1 hour'   * (9 + (abs(hashtext(d.reference || s.stat_date::text || g::text || 'ch')) % 9)))
+         + (interval '1 minute' * (abs(hashtext(d.reference || s.stat_date::text || g::text || 'cm')) % 60)),
+       case when (abs(hashtext(d.reference || s.stat_date::text || g::text || 'cs')) % 6) = 0 then 'widget' else 'site' end,
        substr(encode(sha256(convert_to('demo-call' || d.reference || s.stat_date::text || g::text, 'UTF8')), 'hex'), 1, 40),
        (array['chrome','chrome','safari','safari','safari','edge'])
-         [1 + (abs(hashtext(d.reference || g::text || 'cua')) % 6)],
+         [1 + (abs(hashtext(d.reference || s.stat_date::text || g::text || 'cua')) % 6)],
        (array['google.com','google.com','facebook.com',null])
-         [1 + (abs(hashtext(d.reference || g::text || 'cr')) % 4)],
+         [1 + (abs(hashtext(d.reference || s.stat_date::text || g::text || 'cr')) % 4)],
        'GB',
-       v.connected and v.secs >= a.call_min_seconds,
-       'call', v.secs, v.connected,
-       -- The caller's number would be hashed and salted exactly like the IP.
+       (abs(hashtext(d.reference || s.stat_date::text || g::text || 'cb')) % 8) <> 0,
+       'call', null, null,
        substr(encode(sha256(convert_to('caller' || d.reference || s.stat_date::text || g::text, 'UTF8')), 'hex'), 1, 40)
   from public.deal_daily_stats s
-  join public.agents a on a.id = s.agent_id
   join public.deals d on d.id = s.deal_id
   cross join generate_series(1, s.calls) as g
-  cross join lateral (
-    select
-      (abs(hashtext(d.reference || g::text || 'conn')) % 6) <> 0        as connected,
-      (15 + (abs(hashtext(d.reference || g::text || 'secs')) % 400))    as secs
-  ) v
- where s.calls > 0
-   and s.agent_id in (select id from public.agents where slug in ('sunseeker-travel','coastline-holidays','jetaway-travel'));
+ where s.calls > 0;
+
+-- ── callback requests ───────────────────────────────────────────────────────
+-- A bigger ask of the traveller than tapping a number, and a better lead for the
+-- agency, so they run at roughly a fifth of the rate.
+update public.deal_daily_stats s
+   set leads = case when (abs(hashtext(d.reference || s.stat_date::text || 'ld')) % 5) = 0
+                    then greatest(1, round(s.calls * 0.3))::int else 0 end
+  from public.deals d join public.agents a on a.id = d.agent_id
+ where d.id = s.deal_id
+   and coalesce(d.billing_mode, a.billing_mode) in ('call', 'both')
+   and s.calls > 0;
+
+-- Some leave a phone number, some an email, some both. That mix is the point:
+-- refusing the ones who would rather be emailed loses the enquiry.
+--
+-- Phone numbers come from Ofcom's reserved drama range (07700 900xxx) and emails
+-- are on example.co.uk, so nothing in this demo can ever ring or email a real
+-- person.
+with gen as (
+  select s.deal_id, s.agent_id, s.stat_date, d.title, d.reference, g,
+         abs(hashtext(d.reference || s.stat_date::text || g::text || 'lead')) as h
+    from public.deal_daily_stats s
+    join public.deals d on d.id = s.deal_id
+    cross join generate_series(1, s.leads) as g
+   where s.leads > 0
+)
+insert into public.leads
+  (agent_id, deal_id, deal_title, name, phone, email, message, preferred_time,
+   status, contacted_at, ip_hash, ua_family, referrer_host, country_code, created_at)
+select agent_id, deal_id, title,
+       (array['Sarah Whitfield','Tom Ashby','Priya Nair','Gareth Lloyd','Denise Okafor',
+              'Michael Brennan','Aisha Rahman','Colin Fraser','Hannah Piper','Raj Chandra'])[1 + (h % 10)],
+       case when h % 4 = 0 then null
+            else '07700 900' || lpad(((h / 7) % 1000)::text, 3, '0') end,
+       case when h % 3 = 0 or h % 4 = 0
+            then lower(replace((array['sarah.w','t.ashby','p.nair','g.lloyd','d.okafor',
+                                      'm.brennan','a.rahman','c.fraser','h.piper','r.chandra'])[1 + (h % 10)], ' ', ''))
+                 || '@example.co.uk'
+            else null end,
+       (array['Is late July still available for four of us?',
+              'Could you do a room with a sea view?',
+              'We have a toddler, is there a cot?',
+              null, null,
+              'What is the deposit and when is the balance due?'])[1 + (h % 6)],
+       (array['Evenings after 6', 'Weekends', null, null, 'Any time', 'Mornings'])[1 + ((h / 3) % 6)],
+       (array['new','new','contacted','contacted','booked','not_interested','junk','contacted'])[1 + ((h / 11) % 8)],
+       case when ((h / 11) % 8) > 1 then stat_date + interval '4 hours' else null end,
+       substr(encode(sha256(convert_to('leadip' || reference || stat_date::text || g::text, 'UTF8')), 'hex'), 1, 40),
+       'chrome', 'google.com', 'GB',
+       stat_date + (interval '1 hour' * (9 + (h % 10)))
+  from gen;
+
+-- The billable event behind each enquiry, so the inbox and the meter agree.
+insert into public.click_events
+  (deal_id, agent_id, occurred_at, surface, ip_hash, ua_family, referrer_host, country_code,
+   is_billable, event_type, caller_hash)
+select l.deal_id, l.agent_id, l.created_at, 'site', l.ip_hash, l.ua_family, l.referrer_host, 'GB',
+       true, 'lead',
+       substr(encode(sha256(convert_to('contact' || coalesce(l.phone, l.email), 'UTF8')), 'hex'), 1, 40)
+  from public.leads l;
 
 -- ── a little import history ─────────────────────────────────────────────────
 -- So the "Recent imports" panel has something to show, matching how the deals

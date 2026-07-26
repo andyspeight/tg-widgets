@@ -60,7 +60,8 @@
     arrow: '<path d="M7 17 17 7M9 7h8v8"/>',
     search: '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
     chev: '<path d="m6 9 6 6 6-6"/>',
-    people: '<circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/>'
+    people: '<circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/>',
+    phone: '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/>'
   };
   function svg(paths, extra) {
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
@@ -127,6 +128,196 @@
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body, keepalive: true,
       }).catch(function () {});
     } catch (e) { /* tracking must never break the journey */ }
+  }
+
+  // ── ringing the agency ────────────────────────────────────────────────────
+
+  /**
+   * Can this device actually place a call?
+   *
+   * A coarse pointer with no hover is a phone or a tablet. Deliberately not
+   * user-agent sniffing, which is wrong about new devices roughly as soon as
+   * they ship. If the answer is no we reveal the number instead of dialling it.
+   */
+  function dialer() {
+    try {
+      return window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /** Strip a phone number down to something `tel:` will accept. */
+  function telHref(phone) {
+    var digits = String(phone || '').replace(/[^\d+]/g, '');
+    return digits ? 'tel:' + digits : '';
+  }
+
+  /**
+   * Report that a traveller went to ring an agency.
+   *
+   * Fired on the deliberate act — the tap that dials, or the click that reveals
+   * the number. Both count, because both mean somebody wants to speak to this
+   * agency about this holiday. What we cannot see is whether the phone was
+   * answered: we do not own the number.
+   */
+  function reportCall(dealId, surface) {
+    if (!dealId) return;
+    beacon('/click', { dealId: dealId, eventType: 'call', surface: surface || 'site' });
+  }
+
+  /**
+   * The call button.
+   *
+   * On a phone it is a `tel:` link, so a tap dials and a long press still offers
+   * copy and save the way people expect. On a desktop it is a plain button with
+   * no href, because "Show number" that reveals itself on hover would be a lie.
+   */
+  function callCta(entry, opts) {
+    var o = opts || {};
+    var phone = (entry && entry.phone) || '';
+    if (!phone) return '';
+    var cls = o.className || 'btn btn-call';
+    var id = (entry && (entry.dealId || entry.id)) || '';
+    if (dialer()) {
+      return '<a class="' + cls + '" data-call="' + esc(id) + '" href="' + esc(telHref(phone)) + '">'
+        + svg(IC.phone) + (o.label || 'Call us') + '</a>';
+    }
+    return '<button class="' + cls + '" type="button" data-call="' + esc(id) + '"'
+      + ' data-phone="' + esc(phone) + '">' + svg(IC.phone) + (o.label || 'Show number') + '</button>';
+  }
+
+  /**
+   * Wire every call button inside `root`.
+   *
+   * One delegated listener, so buttons added by a later render are covered
+   * without re-binding. The event is reported before anything else happens,
+   * because on a phone the browser is about to leave for the dialler.
+   */
+  function wireCalls(root, surface) {
+    if (!root || root._tbCallsWired) return;
+    root._tbCallsWired = true;
+    root.addEventListener('click', function (e) {
+      var el = e.target.closest('[data-call]');
+      if (!el) return;
+      var id = el.getAttribute('data-call');
+      reportCall(id, surface);
+
+      var phone = el.getAttribute('data-phone');
+      if (!phone) return; // the `tel:` anchor: let the browser dial
+
+      // Desktop: swap the button for the number itself, still as a tel: link so
+      // a laptop with a softphone can use it.
+      e.preventDefault();
+      var shown = document.createElement('a');
+      shown.className = el.className + ' is-revealed';
+      shown.href = telHref(phone);
+      shown.textContent = phone;
+      el.replaceWith(shown);
+    });
+  }
+
+  /** POST a callback request. Resolves with the response, or throws. */
+  async function submitLead(payload) {
+    var res = await fetch(API + '/lead', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    var data = null;
+    try { data = await res.json(); } catch (e) { /* empty body */ }
+    if (!res.ok) {
+      var err = new Error((data && data.error) || 'Could not send that just now');
+      err.status = res.status;
+      err.fieldErrors = (data && data.errors) || null;
+      throw err;
+    }
+    return data || {};
+  }
+
+  /**
+   * The "ask us to ring you" form.
+   *
+   * Either a phone number or an email address will do, which is the whole point:
+   * plenty of people would rather be emailed, and refusing them loses the
+   * enquiry. The line naming the agency is not decoration — someone handing over
+   * their number deserves to know exactly who receives it.
+   */
+  function callbackForm(deal) {
+    var agent = (deal.agent && deal.agent.name) || 'the agency';
+    return '<form class="cbf" novalidate>'
+      + '<h3>Prefer a call back?</h3>'
+      + '<p class="cbf-lead">Leave your details and <b>' + esc(agent)
+      + '</b> will get in touch about this holiday.</p>'
+      + '<div class="cbf-err" role="alert" hidden></div>'
+      + '<div class="cbf-row"><label>Your name'
+      + '<input name="name" autocomplete="name" required></label></div>'
+      + '<div class="cbf-grid">'
+      + '<label>Phone<input name="phone" type="tel" autocomplete="tel" '
+      + 'placeholder="07700 900123"></label>'
+      + '<label>Email<input name="email" type="email" autocomplete="email" '
+      + 'placeholder="you@example.co.uk"></label>'
+      + '</div>'
+      + '<p class="cbf-hint">Either is fine, or both if you like.</p>'
+      + '<div class="cbf-row"><label>Best time to call '
+      + '<span class="cbf-opt">optional</span>'
+      + '<input name="preferredTime" placeholder="Evenings, or weekends"></label></div>'
+      + '<div class="cbf-row"><label>Anything else? <span class="cbf-opt">optional</span>'
+      + '<textarea name="message" rows="2" placeholder="Dates, how many of you, questions"></textarea>'
+      + '</label></div>'
+      // Hidden from people, irresistible to bots that fill in every input.
+      + '<div class="cbf-hp" aria-hidden="true">'
+      + '<label>Website<input name="website" tabindex="-1" autocomplete="off"></label></div>'
+      + '<button class="btn btn-primary cbf-go" type="submit">Ask ' + esc(agent) + ' to call me</button>'
+      + '<p class="cbf-privacy">Your details go to ' + esc(agent)
+      + ' so they can reply about this holiday. Tripbuster does not use them for anything else.</p>'
+      + '</form>';
+  }
+
+  /** Wire a callback form: validate lightly, submit, and confirm in place. */
+  function wireCallback(form, deal, surface) {
+    if (!form || form._tbWired) return;
+    form._tbWired = true;
+    var errBox = form.querySelector('.cbf-err');
+    var go = form.querySelector('.cbf-go');
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      errBox.hidden = true;
+      var fd = new FormData(form);
+      var payload = {
+        dealId: deal.id,
+        surface: surface || 'site',
+        name: (fd.get('name') || '').trim(),
+        phone: (fd.get('phone') || '').trim(),
+        email: (fd.get('email') || '').trim(),
+        message: (fd.get('message') || '').trim(),
+        preferredTime: (fd.get('preferredTime') || '').trim(),
+        website: (fd.get('website') || '').trim(),
+      };
+
+      // Checked here only to save a round trip and give an instant answer. The
+      // server checks the same thing and is the one that decides.
+      if (!payload.phone && !payload.email) {
+        errBox.textContent = 'Leave a phone number or an email address so they can reply.';
+        errBox.hidden = false;
+        return;
+      }
+
+      go.disabled = true;
+      go.textContent = 'Sending…';
+      try {
+        var out = await submitLead(payload);
+        form.innerHTML = '<div class="cbf-done">' + svg('<path d="M20 6 9 17l-5-5"/>')
+          + '<h3>That is on its way</h3><p>'
+          + esc(out.agentName || 'The agency') + ' has your details and will be in touch.</p></div>';
+      } catch (err) {
+        errBox.textContent = ((err.fieldErrors || [])[0] || {}).message || err.message;
+        errBox.hidden = false;
+        go.disabled = false;
+        go.textContent = 'Ask ' + ((deal.agent && deal.agent.name) || 'them') + ' to call me';
+      }
+    });
   }
 
   function chipsFor(d) {
@@ -210,6 +401,8 @@
     esc: esc, safeUrl: safeUrl, money: money, num: num, gradClass: gradClass, bgStyle: bgStyle,
     IC: IC, svg: svg, starsMarkup: starsMarkup, scoreColour: scoreColour, scoreWord: scoreWord,
     fetchDeals: fetchDeals, reportClick: reportClick, reportImpressions: reportImpressions,
+    dialer: dialer, telHref: telHref, reportCall: reportCall, callCta: callCta, wireCalls: wireCalls,
+    submitLead: submitLead, callbackForm: callbackForm, wireCallback: wireCallback,
     chipsFor: chipsFor, priceBlock: priceBlock, dealCard: dealCard,
     header: header, footer: footer,
   };

@@ -72,6 +72,8 @@ session secret without resetting click de-duplication.
 | `GET/POST /api/tripbuster/import` | agent token | Spreadsheet import. `?format=csv` is the template, `?history=1` past runs. `mode=preview` writes nothing. |
 | `GET/POST /api/tripbuster/offer-import` | agent token | Live offer cache. `GET` browses, `POST` imports chosen refs, `{resync:true}` refreshes prices. |
 | `GET/PATCH /api/tripbuster/account` | agent token | Billing mode, qualifying call length, phone. Deliberately cannot touch plan, status or the Travelgenix link. |
+| `POST /api/tripbuster/lead` | public | A callback request. Needs a name plus a phone number or an email address. |
+| `GET/PATCH /api/tripbuster/my-leads` | agent token | The agency's enquiry inbox, and marking an outcome against one. |
 
 Public read endpoints send a wildcard CORS origin because the widget runs on
 customer sites and the data is deliberately public. The authenticated endpoints
@@ -94,6 +96,13 @@ something. Under UK GDPR data minimisation, neither stores more than it needs:
   address or session token in its query string cannot leak into the database.
 - **Impressions store nothing per visitor at all** — they are a counter.
 
+`leads` is the one deliberate exception, and a different thing entirely: a person
+typed their name and contact details in and asked to be rung back, so storing
+them is the whole purpose rather than a side effect. The form says which agency
+receives them and that they are not used for anything else, and the row carries
+the same minimised tracking fields as everything else — which the agency is not
+shown.
+
 Two behaviours worth knowing:
 
 - A repeat click on the same deal from the same hashed IP within 30 minutes is
@@ -115,8 +124,9 @@ impressions.
 ## Tests
 
 ```
-npm run test:tripbuster           # 213 assertions, no network needed
+npm run test:tripbuster           # 233 assertions, no network needed
 npm run test:tripbuster-import    # 69 assertions, drives the dashboard in Chromium
+npm run test:tripbuster-call      # 26 assertions, drives the call journey in Chromium
 ```
 
 `test:tripbuster` covers seven layers:
@@ -136,6 +146,10 @@ npm run test:tripbuster-import    # 69 assertions, drives the dashboard in Chrom
 - pay per call: mode resolution in both directions, what each mode needs before
   it can go live, the `both` fallback, and that the settings screen cannot be
   used to upgrade a plan or unsuspend an account
+- calls and callback requests: that a tap with no telephony detail is charged,
+  that only an explicit non-connection or a short duration takes that away, the
+  24 hour de-duplication, the phone-or-email rule, the honeypot, and that the
+  enquiry inbox never hands an agency the visitor tracking columns
 
 Both stand-ins are **real HTTP servers on localhost** — PostgREST and Upstash REST
 — rather than stubbed modules, so the code under test runs its own fetch, parse
@@ -152,6 +166,16 @@ screen: choosing a mode, being refused a switch to calls with no number, and the
 performance tiles swapping click-through rate for calls. It asserts no uncaught
 JavaScript anywhere in the journey. Screenshots go to a temporary directory, or to
 `TB_SHOT_DIR` if you set one.
+
+`test:tripbuster-call` runs the deal page twice, once as a laptop and once as a
+phone, using Chromium's **real touch and pointer emulation** rather than a faked
+user agent, so the page's own capability test is what decides. It covers the
+desktop reveal and the mobile dial, both being recorded, the compare drawer
+offering each agency its own route, a click-first agency showing no call button
+at all, and the callback form including its phone-or-email refusal and its bot
+trap. It also measures that the revealed number sits on one line — counted with
+a Range over the text node, which gives one rectangle per line box, because
+dividing the element's height by its line height just measures the padding.
 
 The advertiser dashboard is additionally driven in a real browser with puppeteer
 (33 assertions), covering sign-in, publishing, the plan limit, and the widget's
@@ -181,6 +205,12 @@ Apply in order. They are idempotent enough to run on a fresh project.
 | `005_tracking.sql` | `tb_record_click`, `tb_record_impressions`, `tb_agent_stats` |
 | `006_import.sql` | UNIQUE `(agent_id, external_ref)`; `deals.synced_at`; `import_runs`; `tb_agent_source_counts` |
 | `007_pay_per_call.sql` | `billing_mode` on agents and deals; call columns on `click_events`; `deal_daily_stats.calls`; relaxed live-deal constraint |
+| `008_calls_and_leads.sql` | Corrects the call billing rule to "billable unless"; `leads` table; `tb_record_lead`; `tb_agent_lead_counts`; `deal_daily_stats.leads` |
+
+Migration 008 replaces `tb_record_click` rather than altering it. Adding
+parameters to a Postgres function creates an **overload**, and with defaults in
+play a call can then match both signatures and fail with "function is not
+unique", so the old signature is dropped first. Re-running the file is safe.
 
 ## Demo data
 
@@ -189,8 +219,10 @@ db/tripbuster/seed-demo.sql
 ```
 
 Three invented agencies, 34 deals (26 live, 6 draft, 2 paused) across 11
-countries, and 30 days of traffic. Safe to re-run: it clears and rebuilds only
-what belongs to those three agencies, so it doubles as a reset button.
+countries, and 30 days of traffic: roughly 124,000 cards shown, 3,000
+click-throughs, 600 calls and 100 callback requests. Safe to re-run: it clears
+and rebuilds only what belongs to those three agencies, so it doubles as a reset
+button.
 
 Four properties are advertised by more than one agency on purpose, because the
 multi-agent price compare is the thing worth showing:
@@ -208,26 +240,39 @@ panel shows for the other two. Jetaway sits on Boost with exactly its 5 live
 deals used, so the plan limit is demonstrable rather than described. And each is
 on a different billing mode:
 
-| Agency | Charges for | Qualifying call |
+| Agency | Charges for | Qualifying call length |
 |---|---|---|
 | Sunseeker | clicks | n/a |
 | Jetaway | calls | 60 seconds |
 | Coastline | both | 90 seconds |
 
-Two deals deliberately disagree with their agency, so the per-deal override is
-something you can point at. Jetaway earns no click-throughs at all, because a
-call-first card shows a number rather than a booking link. Coastline's higher
-qualifying length visibly costs them billable calls against Jetaway's, which is
-the qualification rule doing its job.
+The qualifying lengths are stored and shown but change nothing in the figures,
+because no tracked number is feeding durations in. That is the point: the demo
+shows the setting existing without pretending it is doing work.
 
-**Clicks and calls are expanded from `deal_daily_stats`, never invented alongside it.**
-`tb_agent_stats` reads impressions and clicks from the daily table and billable
-clicks from `click_events`, so generating the two independently produces an
-impossible click-through rate — which is exactly what happened the first time
-this was seeded. Randomness comes from hashes of each deal's own REFERENCE rather than from
-`random()` or the row id, so re-running gives exactly the same demo and a
-screenshot stays true. Keying on the id would have quietly broken that, since
-deal ids are regenerated on every run.
+Two deals deliberately disagree with their agency, so the per-deal override is
+something you can point at — it is why a click-first Sunseeker still takes a few
+calls. Jetaway earns no click-throughs at all, because a call-first card shows a
+number rather than a booking link.
+
+**Clicks, calls and enquiries are all expanded from `deal_daily_stats`, never
+invented alongside it.** `tb_agent_stats` reads impressions and clicks from the
+daily table and billable clicks from `click_events`, so generating the two
+independently produces an impossible click-through rate — which is exactly what
+happened the first time this was seeded.
+
+**Calls are seeded with `call_seconds` and `call_connected` left null**, because
+that is what the real code path produces. An earlier version wrote qualified
+calls straight into the table and so demonstrated a capability the platform does
+not have.
+
+Randomness comes from hashes of each deal's own REFERENCE **and the date**,
+rather than from `random()` or the row id, so re-running gives exactly the same
+demo and a screenshot stays true. Both halves of that key were learned the hard
+way: keying on the id broke reproducibility, because deal ids are regenerated on
+every run, and leaving the date out gave a deal with one call a day the same
+hour, the same browser and the same billable answer on all thirty days, which
+showed up as whole deals earning nothing at all.
 
 Sign-in is **not** part of the seed: no working credential belongs in the repo.
 The file ends with the one statement to run afterwards, and the one to clear the
@@ -252,12 +297,23 @@ hashes again before anything is exposed publicly.
   - `search_vector` — full-text index over the fields travellers actually type.
   A CHECK constraint refuses to let a deal go `live` without both a price and a
   click-out URL, so a broken card can never reach a traveller.
-- **`click_events`** — one row per click-out. This is the billable event, so it is
-  stored per event rather than aggregated. **No raw IP addresses**: only a salted
-  hash, for de-duplication and abuse detection, per UK GDPR data minimisation.
+- **`click_events`** — one row per billable event, which despite the name now
+  means a click-out, a call or a callback request: `event_type` says which. They
+  share a table because they are the same thing commercially, they de-duplicate
+  the same way, and a bill has to be able to add them up. Stored per event rather
+  than aggregated, because that is what an agency queries when it disputes a
+  charge. **No raw IP addresses**: only a salted hash, for de-duplication and
+  abuse detection, per UK GDPR data minimisation.
+- **`leads`** — the callback requests themselves, with the contact details the
+  agency needs to reply and an outcome the agency sets. Separate from
+  `click_events` because it holds personal data on a different footing and has a
+  life after the charge: the agency works through it, marks people contacted or
+  booked, and comes back to it.
 - **`deal_daily_stats`** — impressions run orders of magnitude higher than clicks
   and are only ever read in aggregate, so they are upserted into a daily counter
-  instead of stored per event.
+  instead of stored per event. It also carries the daily click, call and lead
+  counts, and every one of those is expanded from here rather than counted
+  independently, so the meters cannot disagree.
 - **`import_runs`** — one row per bulk import, with what it created, updated,
   skipped and refused. Counts are stored rather than derived because deals can be
   edited or deleted afterwards and the run should still say what happened at the
@@ -295,18 +351,54 @@ route" rule as a backstop.
 That last row is the fallback: a `both` deal with no booking link simply becomes
 a call-only card rather than being blocked.
 
-**A call is only billable when it is proven.** `tb_record_click` marks a call
-billable only when the telephony provider confirms it connected AND it ran past
-the agency's `call_min_seconds`. A tap-to-call arrives with `call_connected`
-null and is recorded but never charged for, because a browser cannot tell us
-whether anyone answered — and the endpoint refuses to accept duration or
-connection from the request body for exactly that reason. Calls also
-de-duplicate over 24 hours rather than 30 minutes, keyed on the caller's number
-where we have it: the same person ringing twice in a day is one lead.
+### What counts as a call, and what is charged for
 
-Tracked numbers are the missing piece and the reason `agents.tracked_number`
-exists unused. They are also the only way to attribute a desktop call at all,
-since there is nothing to tap.
+**We do not own the agency's phone number.** The traveller rings the agency
+directly, so nothing tells us whether the phone was answered or how long the
+conversation lasted. The billable event is therefore the **deliberate act**, the
+same as it is for a click:
+
+- **On a phone**, the call button is a `tel:` link. A tap dials and is charged.
+- **On a desktop**, it is a "Show number" button. Pressing it reveals the number
+  and is charged, because nobody presses it by accident. The revealed number is
+  still a `tel:` link so a laptop with a softphone can use it.
+
+Which one a visitor gets is decided by `matchMedia('(hover: none) and
+(pointer: coarse)')` — what the device can actually do, not what its user agent
+claims to be.
+
+`tb_record_click` starts from "billable unless we have a reason it is not", and
+the reasons are the same two that apply to clicks: it looked automated, or it
+repeats a recent event from the same visitor. **Telephony detail, if a tracked
+number ever supplies it, can only take billing away** — an explicit
+`call_connected = false`, or a duration under the agency's `call_min_seconds`,
+marks a call unbillable. It can never add billing back, so a call is never
+charged for twice and the missing detail never blocks a genuine one.
+
+Calls de-duplicate over 24 hours rather than 30 minutes, keyed on the caller
+where we have them: the same person ringing twice in a day is one enquiry.
+
+`agents.tracked_number` and `call_min_seconds` exist for the day tracked numbers
+are added. Until then `call_min_seconds` is stored and shown but never fires,
+which is the honest position — the earlier version of this rule required proof
+of connection and so quietly made **every** call unbillable.
+
+### Callback requests
+
+A traveller who does not want to ring can leave their details instead, and
+`leads` holds those. The constraint that matters is
+`coalesce(phone,'') <> '' or coalesce(email,'') <> ''`: **a name plus a phone
+number or an email address**, either one on its own being enough. Insisting on a
+phone number would lose the people who would rather be emailed, which for a
+phone-first agency is exactly the wrong trade.
+
+A lead is recorded as a `lead` event in `click_events` too, so the enquiry
+inbox and the meter cannot disagree. The form carries a honeypot field, and a
+bot that fills it in gets a cheerful `200` and is dropped. The endpoint never
+echoes back what was submitted, so it cannot be used to reflect content at
+anyone. `my-leads` hands the agency the contact details it needs to reply and
+deliberately withholds the visitor tracking columns — `ip_hash`, `ua_family`
+and `referrer_host` are ours for abuse detection, not the agency's to browse.
 
 ## The three ingestion routes
 
@@ -359,21 +451,16 @@ Per-plan deal limits (Spark / Boost / Ignite / Bespoke) are enforced in the API,
 not the database, because the pricing model is still an open decision. Keeping
 them out means the numbers can change without a migration.
 
-## Seed data
+## Clearing the seed
 
-The project currently holds development seed data: three agents
-(Sunseeker Travel on Boost, Coastline Holidays on Ignite, Jetaway Travel on Spark)
-and five live deals. Two details are deliberate:
+The development project holds the demo data described above and nothing else.
+All three seed agents share a throwaway development password. **Rotate or clear
+it before anything goes public**; it is not recorded in this repo, and the last
+statement in `seed-demo.sql` is the one that clears it.
 
-- Three deals are the **same hotel** (Sol Beach Benidorm) at different prices, so
-  the multi-agent compare can be exercised.
-- Jetaway is on Spark, whose allowance is one live deal, and already has one — so
-  it is the account that exercises the plan-limit path.
-
-All three seed agents share a throwaway development password. **Rotate or clear it
-before anything goes public**; it is not recorded in this repo.
-
-Clear the seed with:
+Re-running `seed-demo.sql` is the normal reset, since it rebuilds only what
+belongs to the three demo agencies and leaves the password hashes alone. To
+remove them altogether:
 
 ```sql
 delete from public.deals;

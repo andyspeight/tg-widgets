@@ -38,6 +38,9 @@ const offerCache = await import('../api/_lib/tripbuster/offer-cache.js');
 const { default: importHandler } = await import('../api/tripbuster/import.js');
 const { default: offerImport } = await import('../api/tripbuster/offer-import.js');
 const { default: account } = await import('../api/tripbuster/account.js');
+const { default: leadHandler } = await import('../api/tripbuster/lead.js');
+const { default: myLeads } = await import('../api/tripbuster/my-leads.js');
+const { validateLead } = await import('../api/_lib/tripbuster/lead-schema.js');
 
 // ── tiny test harness ───────────────────────────────────────────
 let passed = 0;
@@ -233,7 +236,7 @@ test('garbage is refused without throwing', () => {
 // ════════════════════════════════════════════════════════════════
 // In-memory PostgREST stand-in. Only the surface the handlers use.
 // ════════════════════════════════════════════════════════════════
-const db = { agents: [], deals: [], clicks: [], impressions: {}, import_runs: [] };
+const db = { agents: [], deals: [], clicks: [], impressions: {}, import_runs: [], leads: [] };
 let dealSeq = 0;
 const uuid = (n) => `${String(n).padStart(8, '0')}-0000-4000-8000-000000000000`;
 
@@ -242,6 +245,7 @@ function resetDb() {
   db.clicks = [];
   db.impressions = {};
   db.import_runs = [];
+  db.leads = [];
   db.agents = [
     { id: AGENT_A, slug: 'agent-a', name: 'Agent A', email: 'a@b.co', plan: 'Boost', status: 'active',
       default_clickout_url: 'https://agent-a.co.uk', atol_number: '11111', abta_number: null,
@@ -302,6 +306,40 @@ const fakePg = http.createServer((req, res) => {
         paused: mine.filter((d) => d.status === 'paused').length,
         expired: 0,
         total: mine.length,
+      });
+    }
+
+    // Callback requests: writes the lead AND its billable event, exactly as
+    // tb_record_lead does, so the inbox and the meter cannot disagree.
+    if (table === 'rpc/tb_record_lead') {
+      const deal = db.deals.find((d) => d.id === body.p_deal_id);
+      if (!deal) return send(200, null);
+      const agent = db.agents.find((a) => a.id === deal.agent_id);
+      const dup = db.clicks.some((c) => c.deal_id === deal.id && c.event_type === 'lead'
+        && c.caller_hash && c.caller_hash === body.p_contact_hash && c.is_billable);
+      const lead = {
+        id: uuid(++dealSeq), agent_id: deal.agent_id, deal_id: deal.id, deal_title: deal.title,
+        name: body.p_name, phone: body.p_phone, email: body.p_email, message: body.p_message,
+        preferred_time: body.p_preferred_time, status: 'new', created_at: new Date().toISOString(),
+      };
+      db.leads.push(lead);
+      const billable = !(body.p_suspect_bot || dup);
+      db.clicks.push({
+        deal_id: deal.id, agent_id: deal.agent_id, event_type: 'lead',
+        caller_hash: body.p_contact_hash, is_billable: billable,
+      });
+      return send(200, {
+        recorded: true, leadId: lead.id, agentName: agent && agent.name,
+        dealTitle: deal.title, billable,
+      });
+    }
+
+    if (table === 'rpc/tb_agent_lead_counts') {
+      const mine = db.leads.filter((l) => l.agent_id === body.p_agent_id);
+      const by = (st) => mine.filter((l) => l.status === st).length;
+      return send(200, {
+        new: by('new'), contacted: by('contacted'), booked: by('booked'),
+        not_interested: by('not_interested'), junk: by('junk'), total: mine.length,
       });
     }
 
@@ -1936,6 +1974,160 @@ await testAsync('a deal can charge for calls while the agency charges for clicks
   });
   assert.equal(r.status, 201);
   assert.equal(db.deals.find((d) => d.title === 'This one is phone only').billing_mode, 'call');
+});
+
+// ════════════════════════════════════════════════════════════════
+console.log('\n─── callback requests ───');
+
+const A_DEAL = () => db.deals.find((d) => d.agent_id === AGENT_A).id;
+const askForCall = (body) => callPublic(leadHandler, { body: { dealId: A_DEAL(), ...body } });
+
+test('a name on its own is not a callback request', () => {
+  const r = validateLead({ name: 'Jo Bloggs' });
+  assert.equal(r.ok, false);
+  assert.ok(r.errors.some((e) => /phone number or an email/.test(e.message)));
+});
+
+test('a phone number alone is enough', () => {
+  assert.equal(validateLead({ name: 'Jo Bloggs', phone: '07700 900123' }).ok, true);
+});
+
+test('an email address alone is enough', () => {
+  assert.equal(validateLead({ name: 'Jo Bloggs', email: 'jo@example.co.uk' }).ok, true);
+});
+
+test('the phone number keeps its spacing, because a human reads it back', () => {
+  assert.equal(validateLead({ name: 'Jo B', phone: '07700 900 123' }).lead.phone, '07700 900 123');
+});
+
+test('an email address is lower-cased', () => {
+  assert.equal(validateLead({ name: 'Jo B', email: 'Jo.Bloggs@Example.CO.UK' }).lead.email,
+    'jo.bloggs@example.co.uk');
+});
+
+test('a number too short to ring is refused', () => {
+  assert.equal(validateLead({ name: 'Jo B', phone: '12345' }).ok, false);
+});
+
+test('nothing but the whitelisted fields survives', () => {
+  const r = validateLead({
+    name: 'Jo B', phone: '07700900123', agent_id: 'someone-else', status: 'booked', id: 'x',
+  });
+  assert.deepEqual(Object.keys(r.lead).sort(), ['name', 'phone']);
+});
+
+await testAsync('a callback request is stored and counted', async () => {
+  resetDb();
+  const r = await askForCall({ name: 'Jo Bloggs', phone: '07700 900123' });
+  assert.equal(r.status, 200);
+  assert.equal(db.leads.length, 1);
+  assert.equal(db.leads[0].name, 'Jo Bloggs');
+  assert.equal(db.leads[0].agent_id, AGENT_A);
+  // The enquiry and the meter are written together.
+  assert.ok(db.clicks.some((c) => c.event_type === 'lead' && c.is_billable));
+});
+
+await testAsync('the traveller is told who will ring, and nothing else', async () => {
+  resetDb();
+  const r = await askForCall({ name: 'Jo Bloggs', email: 'jo@example.co.uk' });
+  assert.equal(r.body.agentName, 'Agent A');
+  // Our business, not theirs.
+  assert.equal(r.body.billable, undefined);
+  assert.equal(r.body.leadId, undefined);
+});
+
+await testAsync('a request with no way to reply is refused', async () => {
+  resetDb();
+  const r = await askForCall({ name: 'Jo Bloggs' });
+  assert.equal(r.status, 422);
+  assert.equal(db.leads.length, 0);
+});
+
+await testAsync('the same person asking twice is stored but charged once', async () => {
+  resetDb();
+  await askForCall({ name: 'Jo Bloggs', phone: '07700 900123' });
+  await askForCall({ name: 'Jo Bloggs', phone: '07700900123' });
+  assert.equal(db.leads.length, 2, 'the agency should still see both');
+  assert.equal(db.clicks.filter((c) => c.event_type === 'lead' && c.is_billable).length, 1);
+});
+
+await testAsync('a bot that fills in the hidden field is thanked and ignored', async () => {
+  resetDb();
+  const r = await askForCall({ name: 'Spam Bot', phone: '07700900123', website: 'http://spam.example' });
+  assert.equal(r.status, 200);
+  assert.equal(db.leads.length, 0);
+});
+
+await testAsync('an unknown deal cannot be used to accumulate enquiries', async () => {
+  resetDb();
+  const r = await callPublic(leadHandler, {
+    body: { dealId: uuid(999), name: 'Jo Bloggs', phone: '07700900123' },
+  });
+  assert.equal(r.status, 404);
+  assert.equal(db.leads.length, 0);
+});
+
+// ════════════════════════════════════════════════════════════════
+console.log('\n─── the enquiries inbox ───');
+
+await testAsync('the inbox needs a session', async () => {
+  resetDb();
+  assert.equal((await call(myLeads)).status, 401);
+});
+
+await testAsync('an agency sees its own enquiries with the contact details', async () => {
+  resetDb();
+  await askForCall({ name: 'Jo Bloggs', phone: '07700 900123' });
+  const r = await call(myLeads, { token: tokenA });
+  assert.equal(r.status, 200);
+  assert.equal(r.body.leads.length, 1);
+  assert.equal(r.body.leads[0].phone, '07700 900123');
+  assert.equal(r.body.counts.new, 1);
+});
+
+await testAsync('one agency cannot see another\'s enquiries', async () => {
+  resetDb();
+  await askForCall({ name: 'Jo Bloggs', phone: '07700 900123' });
+  const r = await call(myLeads, { token: tokenB });
+  assert.equal(r.body.leads.length, 0);
+});
+
+await testAsync('marking an outcome sticks and stamps when it happened', async () => {
+  resetDb();
+  await askForCall({ name: 'Jo Bloggs', phone: '07700 900123' });
+  const id = db.leads[0].id;
+  const r = await call(myLeads, { method: 'PATCH', token: tokenA, query: { id }, body: { status: 'booked' } });
+  assert.equal(r.status, 200);
+  assert.equal(db.leads[0].status, 'booked');
+  assert.ok(db.leads[0].contacted_at);
+});
+
+await testAsync('an invented outcome is refused', async () => {
+  resetDb();
+  await askForCall({ name: 'Jo Bloggs', phone: '07700 900123' });
+  const r = await call(myLeads, {
+    method: 'PATCH', token: tokenA, query: { id: db.leads[0].id }, body: { status: 'sold-them-a-yacht' },
+  });
+  assert.equal(r.status, 422);
+});
+
+await testAsync('one agency cannot mark another\'s enquiry', async () => {
+  resetDb();
+  await askForCall({ name: 'Jo Bloggs', phone: '07700 900123' });
+  const id = db.leads[0].id;
+  const r = await call(myLeads, { method: 'PATCH', token: tokenB, query: { id }, body: { status: 'junk' } });
+  assert.equal(r.status, 404, 'same answer as an enquiry that does not exist');
+  assert.equal(db.leads[0].status, 'new');
+});
+
+await testAsync('the inbox never hands over the visitor tracking columns', async () => {
+  resetDb();
+  await askForCall({ name: 'Jo Bloggs', phone: '07700 900123' });
+  const r = await call(myLeads, { token: tokenA });
+  const keys = Object.keys(r.body.leads[0]);
+  for (const hidden of ['ip_hash', 'ua_family', 'referrer_host']) {
+    assert.ok(!keys.includes(hidden), `${hidden} must not reach the agency`);
+  }
 });
 
 // ── report ──────────────────────────────────────────────────────

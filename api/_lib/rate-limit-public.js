@@ -86,6 +86,15 @@ export function limitsFor(event) {
         { name: 'm', max: envInt('RL_TB_CLICK_PER_MIN', 30), seconds: 60 },
         { name: 'h', max: envInt('RL_TB_CLICK_PER_HR', 400), seconds: 3600 },
       ];
+    // A callback request writes personal data and sends an agency an enquiry, so
+    // it is throttled hardest of the lot. Nobody legitimately asks to be rung
+    // back about six holidays in a minute, and a form is the obvious spam target
+    // on the whole site.
+    case 'tb-lead':
+      return [
+        { name: 'm', max: envInt('RL_TB_LEAD_PER_MIN', 4), seconds: 60 },
+        { name: 'h', max: envInt('RL_TB_LEAD_PER_HR', 20), seconds: 3600 },
+      ];
     // Impressions are batched (one call per widget render, many deals) and only
     // ever increment a counter, so the ceiling sits between reads and clicks.
     case 'tb-impression':
