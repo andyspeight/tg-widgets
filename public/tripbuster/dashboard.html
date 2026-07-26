@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Dashboard · Tripbuster</title>
+<!-- Inline favicon: saves a pointless request on every page load. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23FF5C39'/%3E%3Cpath d='M6 16h20M19 9l7 7-7 7M10 12v8' stroke='white' stroke-width='2.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<!--
+  Tripbuster advertiser dashboard.
+
+  A Tripbuster-branded surface, deliberately NOT built on editor-shell.js: that
+  shell belongs to the Travelgenix widget suite, and Tripbuster is a separate
+  product with its own sign-in and its own users.
+
+  Talks to the real API:
+    POST   /api/tripbuster/login
+    GET    /api/tripbuster/my-deals
+    POST   /api/tripbuster/my-deals
+    PATCH  /api/tripbuster/my-deals?id=<uuid>
+    DELETE /api/tripbuster/my-deals?id=<uuid>
+
+  The deal preview instantiates the real widget-tripbuster.js, so what an agent
+  sees here is literally what a traveller sees.
+
+  Session token lives in sessionStorage, so closing the tab ends the session.
+  All API-supplied text goes through esc() before reaching innerHTML, and every
+  handler is attached with addEventListener — no inline handlers, CSP-clean.
+-->
+<style>
+  :root {
+    --bg:#F1F8FC; --surface:#FFFFFF; --surface-2:#EFF6FB; --border:#E3EDF3; --border-2:#D3E2EB;
+    --tx:#123249; --tx-2:#52707F; --tx-3:#8AA3B0;
+    --coral:#FF5C39; --coral-ink:#E5451F; --coral-wash:#FFEDE7;
+    --live:#0CA678; --live-wash:#E3F7F0; --warn:#E8850C; --warn-wash:#FCF1E1;
+    --danger:#E03131; --danger-wash:#FDECEC;
+    --sky:#12A0D4; --sky-deep:#0B7BA8; --sky-wash:#E3F4FB;
+    --shadow-sm:0 1px 2px rgba(18,50,73,.05); --shadow-md:0 6px 18px rgba(18,50,73,.08);
+    --shadow-lg:0 18px 44px rgba(18,50,73,.16);
+    --ff: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --fm: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    --r:13px;
+  }
+  /* Holiday product: stays bright whatever the device asks for. */
+  * { box-sizing:border-box; }
+  html,body { margin:0; padding:0; }
+  body { background:var(--bg); color:var(--tx); font-family:var(--ff); font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased; }
+  button,input,select,textarea { font-family:inherit; font-size:inherit; }
+  button { cursor:pointer; }
+  a { color:var(--sky-deep); }
+  :focus-visible { outline:2px solid var(--coral); outline-offset:2px; border-radius:6px; }
+  .tnum { font-variant-numeric:tabular-nums; }
+  [hidden] { display:none !important; }
+  .sr { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+
+  /* ─── sign in ─────────────────────────────────────────── */
+  .login-wrap { min-height:100vh; display:grid; place-items:center; padding:24px; }
+  .login { width:100%; max-width:380px; background:var(--surface); border:1px solid var(--border);
+    border-radius:18px; box-shadow:var(--shadow-lg); padding:28px; }
+  .login .brand { display:flex; align-items:center; gap:10px; margin-bottom:20px; }
+  .login h1 { font-size:19px; font-weight:800; letter-spacing:-.02em; margin:0 0 4px; }
+  .login p.sub { margin:0 0 20px; color:var(--tx-2); font-size:13px; }
+
+  .ticket { position:relative; width:34px; height:34px; border-radius:9px;
+    background:linear-gradient(135deg,var(--coral),#FF8A4C); display:grid; place-items:center;
+    box-shadow:0 4px 12px rgba(255,92,57,.35); flex:none; }
+  .ticket svg { width:18px; height:18px; stroke:#fff; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+  .brand-name { font-weight:800; font-size:17px; letter-spacing:-.03em; }
+  .brand-name b { color:var(--coral); }
+  .brand-tag { font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--tx-3); }
+
+  /* ─── app shell ───────────────────────────────────────── */
+  .app { display:grid; grid-template-columns:242px 1fr; min-height:100vh; }
+  .side { background:var(--surface); border-right:1px solid var(--border); padding:20px 14px;
+    display:flex; flex-direction:column; gap:4px; position:sticky; top:0; height:100vh; }
+  .side .brand { display:flex; align-items:center; gap:10px; padding:4px 8px 16px; }
+  .who { display:flex; align-items:center; gap:10px; padding:10px; margin-bottom:12px;
+    background:var(--surface-2); border:1px solid var(--border); border-radius:12px; }
+  .who-av { width:34px; height:34px; border-radius:9px; background:var(--sky-wash); color:var(--sky-deep);
+    display:grid; place-items:center; font-weight:800; font-size:13px; flex:none; }
+  /* Both are spans inside a span, so they need to be blocks or the name and the
+     slug run together on one line. */
+  .who-nm { display:block; font-weight:700; font-size:13px; line-height:1.25; word-break:break-word; }
+  .who-sub { display:block; font-size:11px; color:var(--tx-3); }
+  .nav-h { font-size:10px; font-weight:800; letter-spacing:.13em; text-transform:uppercase; color:var(--tx-3); padding:12px 10px 6px; }
+  .nav-i { display:flex; align-items:center; gap:11px; padding:9px 10px; border-radius:10px; color:var(--tx-2);
+    font-weight:600; font-size:13.5px; border:0; background:none; width:100%; text-align:left; }
+  .nav-i svg { width:17px; height:17px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex:none; }
+  .nav-i:hover { background:var(--surface-2); color:var(--tx); }
+  .nav-i[aria-current="page"] { background:var(--coral-wash); color:var(--coral-ink); }
+  .nav-i .count { margin-left:auto; font-size:11px; font-weight:800; background:var(--surface-2);
+    color:var(--tx-2); border-radius:999px; padding:1px 8px; }
+  .side-foot { margin-top:auto; }
+  .plan-card { background:linear-gradient(150deg,#22B6E4,#0E86B8); color:#fff; border-radius:13px; padding:14px; }
+  .plan-card .row { display:flex; align-items:center; justify-content:space-between; }
+  .plan-badge { font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+    background:rgba(255,255,255,.22); padding:3px 9px; border-radius:999px; }
+  .plan-card h4 { margin:10px 0 3px; font-size:15px; font-weight:800; }
+  .plan-meter { height:6px; border-radius:99px; background:rgba(255,255,255,.28); margin:10px 0 0; overflow:hidden; }
+  .plan-meter i { display:block; height:100%; background:#fff; border-radius:99px; width:0; }
+  .signout { width:100%; margin-top:10px; background:none; border:1px solid var(--border-2); color:var(--tx-2);
+    border-radius:9px; padding:8px; font-weight:700; font-size:12.5px; }
+  .signout:hover { color:var(--danger); border-color:var(--danger); }
+
+  .main { min-width:0; display:flex; flex-direction:column; }
+  .top { position:sticky; top:0; z-index:20; background:color-mix(in srgb,var(--bg) 85%,transparent);
+    backdrop-filter:blur(10px); border-bottom:1px solid var(--border); padding:13px 24px;
+    display:flex; align-items:center; gap:12px; }
+  .top h1 { margin:0; font-size:16px; font-weight:800; letter-spacing:-.02em; }
+  .scroll { padding:24px; max-width:1080px; width:100%; }
+  .view { display:none; } .view.on { display:block; }
+
+  .lead { display:flex; align-items:flex-end; justify-content:space-between; gap:14px; margin-bottom:18px; flex-wrap:wrap; }
+  .lead h2 { margin:0 0 3px; font-size:21px; font-weight:800; letter-spacing:-.03em; }
+  .lead p { margin:0; color:var(--tx-2); font-size:13.5px; }
+
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:7px; border-radius:10px;
+    padding:10px 15px; font-weight:800; font-size:13px; border:1px solid transparent; }
+  .btn svg { width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+  .btn-primary { background:var(--coral); color:#fff; box-shadow:0 4px 12px rgba(255,92,57,.28); }
+  .btn-primary:hover { background:var(--coral-ink); }
+  .btn-primary[disabled] { opacity:.6; cursor:default; box-shadow:none; }
+  .btn-ghost { background:var(--surface); color:var(--tx); border-color:var(--border-2); }
+  .btn-ghost:hover { border-color:var(--tx-3); }
+  .btn-danger { background:var(--surface); color:var(--danger); border-color:var(--border-2); }
+  .btn-danger:hover { background:var(--danger-wash); border-color:var(--danger); }
+
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); box-shadow:var(--shadow-sm); }
+  .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:13px; margin-bottom:20px; }
+  .stat { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:15px 16px; }
+  .stat-lab { font-size:12px; font-weight:600; color:var(--tx-2); margin-bottom:8px; }
+  .stat-val { font-size:26px; font-weight:800; letter-spacing:-.03em; line-height:1; }
+  .stat-val small { font-size:14px; color:var(--tx-3); font-weight:700; }
+  .stat-foot { font-size:11.5px; color:var(--tx-3); margin-top:7px; }
+
+  .note { display:flex; gap:11px; padding:13px 15px; border-radius:12px; background:var(--sky-wash);
+    border:1px solid color-mix(in srgb,var(--sky) 22%,transparent); margin-bottom:18px; font-size:13px; color:var(--tx-2); }
+  .note svg { width:17px; height:17px; stroke:var(--sky-deep); fill:none; stroke-width:2; flex:none; margin-top:1px; }
+  .note b { color:var(--tx); }
+
+  /* deal rows */
+  .deal { display:grid; grid-template-columns:1fr auto auto; gap:14px; align-items:center;
+    padding:13px 16px; border-bottom:1px solid var(--border); }
+  .deal:last-child { border-bottom:0; }
+  .deal:hover { background:var(--surface-2); }
+  .deal-nm { font-weight:700; font-size:13.5px; letter-spacing:-.01em; }
+  .deal-meta { font-size:12px; color:var(--tx-2); margin-top:3px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .pill { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:800; padding:2px 9px; border-radius:999px; }
+  .pill i { width:6px; height:6px; border-radius:50%; background:currentColor; }
+  .pill.live { color:var(--live); background:var(--live-wash); }
+  .pill.paused { color:var(--warn); background:var(--warn-wash); }
+  .pill.draft { color:var(--tx-2); background:var(--surface-2); }
+  .pill.expired { color:var(--danger); background:var(--danger-wash); }
+  .deal-price { text-align:right; font-weight:800; font-size:15px; letter-spacing:-.02em; white-space:nowrap; }
+  .deal-price small { display:block; font-size:11px; color:var(--tx-3); font-weight:700; }
+  .row-acts { display:flex; gap:6px; flex-wrap:wrap; }
+  .mini { border:1px solid var(--border-2); background:var(--surface); color:var(--tx-2);
+    border-radius:8px; padding:6px 10px; font-size:12px; font-weight:700; }
+  .mini:hover { color:var(--tx); border-color:var(--tx-3); }
+  .mini.danger:hover { color:var(--danger); border-color:var(--danger); }
+  .empty { padding:44px 20px; text-align:center; color:var(--tx-2); }
+  .empty b { display:block; font-size:15px; color:var(--tx); margin-bottom:5px; }
+
+  .toolbar { display:flex; align-items:center; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+  .segs { display:inline-flex; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:3px; gap:2px; }
+  .seg { border:0; background:none; padding:6px 13px; border-radius:8px; font-size:12.5px; font-weight:700; color:var(--tx-2); }
+  .seg[aria-pressed="true"] { background:var(--coral-wash); color:var(--coral-ink); }
+
+  /* editor */
+  .editor { display:grid; grid-template-columns:1fr 320px; gap:20px; align-items:start; }
+  .sec { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); margin-bottom:14px; overflow:hidden; }
+  .sec-head { width:100%; display:flex; align-items:center; gap:10px; padding:14px 16px; background:none; border:0; text-align:left; }
+  .sec-head:hover { background:var(--surface-2); }
+  .sec-n { width:26px; height:26px; border-radius:8px; background:var(--coral-wash); color:var(--coral-ink);
+    font-weight:800; font-size:12px; display:grid; place-items:center; flex:none; }
+  .sec-head h3 { margin:0; font-size:14px; font-weight:800; flex:1; }
+  .sec-chev { width:16px; height:16px; stroke:var(--tx-3); fill:none; stroke-width:2.4; transition:transform .18s; }
+  .sec[open] .sec-chev { transform:rotate(180deg); }
+  .sec-body { padding:0 16px 16px; border-top:1px solid var(--border); padding-top:16px; }
+  .field { margin-bottom:13px; }
+  .field label { display:block; font-size:12px; font-weight:700; color:var(--tx-2); margin-bottom:5px; }
+  .field .req { color:var(--coral); }
+  .field .hint { font-weight:500; color:var(--tx-3); }
+  .field input, .field select, .field textarea { width:100%; padding:9px 11px; border-radius:9px;
+    border:1px solid var(--border-2); background:var(--surface-2); color:var(--tx); }
+  .field textarea { min-height:76px; resize:vertical; line-height:1.5; }
+  .field input:focus, .field select:focus, .field textarea:focus { outline:none; border-color:var(--coral);
+    box-shadow:0 0 0 3px var(--coral-wash); background:var(--surface); }
+  .field.bad input, .field.bad select, .field.bad textarea { border-color:var(--danger); background:var(--danger-wash); }
+  .field .err { display:none; font-size:12px; color:var(--danger); font-weight:600; margin-top:5px; }
+  .field.bad .err { display:block; }
+  .g2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+  .prefix { position:relative; }
+  .prefix span { position:absolute; left:11px; top:50%; transform:translateY(-50%); font-weight:700; color:var(--tx-3); }
+  .prefix input { padding-left:25px; }
+
+  .editor-bar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:4px; }
+  .save-note { font-size:12.5px; color:var(--tx-3); }
+  .form-error { display:none; margin-bottom:14px; padding:12px 14px; border-radius:11px;
+    background:var(--danger-wash); border:1px solid color-mix(in srgb,var(--danger) 30%,transparent);
+    color:var(--tx); font-size:13px; font-weight:600; }
+  .form-error.on { display:block; }
+
+  .preview-wrap { position:sticky; top:76px; }
+  .preview-lab { font-size:10px; font-weight:800; letter-spacing:.13em; text-transform:uppercase; color:var(--tx-3); margin-bottom:9px; }
+  .preview-note { font-size:11.5px; color:var(--tx-3); margin-top:10px; text-align:center; line-height:1.5; }
+
+  /* embed */
+  .code { background:#0E2E44; border:1px solid #1C4560; border-radius:12px; padding:16px; font-family:var(--fm);
+    font-size:12.5px; line-height:1.7; color:#DCEAF2; overflow-x:auto; position:relative; white-space:pre-wrap; word-break:break-all; }
+  .copy { position:absolute; top:10px; right:10px; background:rgba(255,255,255,.1); color:#E7F2F8;
+    border:1px solid rgba(255,255,255,.18); border-radius:8px; padding:6px 11px; font-size:11.5px; font-weight:700; }
+  .copy:hover { background:rgba(255,255,255,.2); }
+  .steps { list-style:none; margin:0; padding:0; counter-reset:s; }
+  .steps li { position:relative; padding:0 0 15px 32px; counter-increment:s; }
+  .steps li::before { content:counter(s); position:absolute; left:0; top:-1px; width:22px; height:22px;
+    border-radius:7px; background:var(--coral-wash); color:var(--coral-ink); font-weight:800; font-size:11.5px;
+    display:grid; place-items:center; }
+  .steps li:last-child { padding-bottom:0; }
+  .steps b { display:block; font-size:13px; margin-bottom:1px; }
+  .steps p { margin:0; font-size:12.5px; color:var(--tx-2); }
+
+  .plans { display:grid; grid-template-columns:repeat(4,1fr); gap:13px; }
+  .plan { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:17px; }
+  .plan.is-current { border:2px solid var(--coral); }
+  .plan-nm { font-size:12px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--sky-deep); }
+  .plan-allow { font-size:22px; font-weight:800; letter-spacing:-.03em; margin:8px 0 2px; }
+  .plan-desc { font-size:12.5px; color:var(--tx-2); }
+
+  .toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--tx); color:#fff; padding:12px 18px; border-radius:12px; font-weight:700; font-size:13px;
+    box-shadow:var(--shadow-lg); opacity:0; pointer-events:none; transition:opacity .25s, transform .25s;
+    z-index:90; max-width:min(90vw,460px); }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+  .toast.err { background:var(--danger); }
+
+  .modal-back { position:fixed; inset:0; background:rgba(18,50,73,.5); backdrop-filter:blur(3px);
+    display:none; align-items:center; justify-content:center; padding:20px; z-index:80; }
+  .modal-back.on { display:flex; }
+  .modal { background:var(--surface); border-radius:16px; box-shadow:var(--shadow-lg); max-width:400px; width:100%; padding:22px; }
+  .modal h3 { margin:0 0 8px; font-size:17px; font-weight:800; }
+  .modal p { margin:0 0 18px; color:var(--tx-2); font-size:13.5px; }
+  .modal-acts { display:flex; gap:10px; justify-content:flex-end; }
+
+  @media (max-width:920px){
+    .app { grid-template-columns:1fr; }
+    .side { position:static; height:auto; }
+    .side-foot { margin-top:16px; }
+    .stats, .plans { grid-template-columns:1fr 1fr; }
+    .editor { grid-template-columns:1fr; }
+    .preview-wrap { position:static; }
+  }
+  @media (max-width:560px){
+    .stats, .plans, .g2, .g3 { grid-template-columns:1fr; }
+    .deal { grid-template-columns:1fr; }
+    .deal-price { text-align:left; }
+  }
+  @media (prefers-reduced-motion:reduce){ * { transition:none !important; } }
+</style>
+</head>
+<body>
+
+<!-- ═══ SIGN IN ═══ -->
+<div class="login-wrap" id="loginView">
+  <form class="login" id="loginForm" novalidate>
+    <div class="brand">
+      <span class="ticket" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M2 12h20M14 5l7 7-7 7M6 8v8"/></svg></span>
+      <span><span class="brand-name">Trip<b>buster</b></span><br><span class="brand-tag">For agents</span></span>
+    </div>
+    <h1>Sign in</h1>
+    <p class="sub">Manage the deals you advertise on Tripbuster.</p>
+    <div class="form-error" id="loginError" role="alert"></div>
+    <div class="field">
+      <label for="li-email">Email</label>
+      <input type="email" id="li-email" autocomplete="username" required>
+    </div>
+    <div class="field">
+      <label for="li-pass">Password</label>
+      <input type="password" id="li-pass" autocomplete="current-password" required>
+    </div>
+    <button class="btn btn-primary" type="submit" id="loginBtn" style="width:100%">Sign in</button>
+  </form>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div class="app" id="appView" hidden>
+  <aside class="side">
+    <div class="brand">
+      <span class="ticket" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M2 12h20M14 5l7 7-7 7M6 8v8"/></svg></span>
+      <span><span class="brand-name">Trip<b>buster</b></span><br><span class="brand-tag">Advertiser</span></span>
+    </div>
+    <div class="who">
+      <span class="who-av" id="whoAv">–</span>
+      <span><span class="who-nm" id="whoNm">–</span><span class="who-sub" id="whoSub">–</span></span>
+    </div>
+    <div class="nav-h">Manage</div>
+    <button class="nav-i" data-view="deals" aria-current="page">
+      <svg viewBox="0 0 24 24"><path d="M20.6 8.4 12 17l-8.6-8.6a4 4 0 0 1 5.7-5.7L12 5l2.9-2.3a4 4 0 0 1 5.7 5.7Z"/></svg>
+      My deals <span class="count" id="navCount">0</span>
+    </button>
+    <button class="nav-i" data-view="editor" id="navNew">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Add a deal
+    </button>
+    <button class="nav-i" data-view="embed">
+      <svg viewBox="0 0 24 24"><path d="m8 18-6-6 6-6M16 6l6 6-6 6"/></svg> Embed on your site
+    </button>
+    <button class="nav-i" data-view="plan">
+      <svg viewBox="0 0 24 24"><path d="M3 10h18M7 15h4M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/></svg> Plan
+    </button>
+    <div class="side-foot">
+      <div class="plan-card">
+        <div class="row">
+          <span class="plan-badge" id="planBadge">–</span>
+          <span style="font-size:12px;font-weight:700" id="planUse">–</span>
+        </div>
+        <h4 id="planLeft">–</h4>
+        <div class="plan-meter"><i id="planBar"></i></div>
+      </div>
+      <button class="signout" id="signOut">Sign out</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="top"><h1 id="topTitle">My deals</h1></header>
+    <div class="scroll">
+
+      <!-- ── deals ── -->
+      <section class="view on" id="v-deals">
+        <div class="lead">
+          <div><h2 id="greeting">Your deals</h2><p>Add, edit, pause and publish the deals you advertise.</p></div>
+          <button class="btn btn-primary" data-view="editor" id="newDeal2">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Add a deal
+          </button>
+        </div>
+
+        <div class="stats" id="stats"></div>
+
+        <div class="note">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <span><b>Impressions and click-throughs are not being counted yet.</b> Deal counts below are live and accurate. Performance figures appear here once click tracking is switched on.</span>
+        </div>
+
+        <div class="toolbar">
+          <div class="segs" id="filters" role="group" aria-label="Filter deals by status">
+            <button class="seg" data-filter="all" aria-pressed="true">All</button>
+            <button class="seg" data-filter="live" aria-pressed="false">Live</button>
+            <button class="seg" data-filter="draft" aria-pressed="false">Drafts</button>
+            <button class="seg" data-filter="paused" aria-pressed="false">Paused</button>
+          </div>
+          <span class="save-note" id="allowNote"></span>
+        </div>
+
+        <div class="card" id="dealList"><div class="empty">Loading your deals…</div></div>
+      </section>
+
+      <!-- ── editor ── -->
+      <section class="view" id="v-editor">
+        <div class="lead">
+          <div><h2 id="editorTitle">Add a deal</h2><p>Fill in what you know. Only a few fields are needed to save a draft.</p></div>
+          <button class="btn btn-ghost" data-view="deals">Back to deals</button>
+        </div>
+
+        <div class="form-error" id="editorError" role="alert"></div>
+
+        <div class="editor">
+          <form id="dealForm" novalidate>
+            <!-- 1 -->
+            <details class="sec" open>
+              <summary class="sec-head"><span class="sec-n">1</span><h3>Type &amp; headline</h3>
+                <svg class="sec-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></summary>
+              <div class="sec-body">
+                <div class="g2">
+                  <div class="field"><label for="f-holiday_type">Holiday type</label>
+                    <select id="f-holiday_type" name="holiday_type">
+                      <option>Package holiday</option><option>Hotel only</option><option>Flight + hotel</option>
+                      <option>City break</option><option>Cruise</option><option>Escorted tour</option><option>Flight only</option>
+                    </select><span class="err"></span></div>
+                  <div class="field"><label for="f-reference">Your reference <span class="hint">optional</span></label>
+                    <input id="f-reference" name="reference"><span class="err"></span></div>
+                </div>
+                <div class="field"><label for="f-title">Deal title <span class="req">*</span></label>
+                  <input id="f-title" name="title" required><span class="err"></span></div>
+                <div class="field"><label for="f-strapline">Strapline <span class="hint">one short selling line</span></label>
+                  <input id="f-strapline" name="strapline"><span class="err"></span></div>
+              </div>
+            </details>
+            <!-- 2 -->
+            <details class="sec" open>
+              <summary class="sec-head"><span class="sec-n">2</span><h3>Destination &amp; accommodation</h3>
+                <svg class="sec-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></summary>
+              <div class="sec-body">
+                <div class="g3">
+                  <div class="field"><label for="f-country">Country</label><input id="f-country" name="country"><span class="err"></span></div>
+                  <div class="field"><label for="f-region">Region</label><input id="f-region" name="region"><span class="err"></span></div>
+                  <div class="field"><label for="f-resort">Resort or town</label><input id="f-resort" name="resort"><span class="err"></span></div>
+                </div>
+                <div class="g2">
+                  <div class="field"><label for="f-accommodation_name">Accommodation name</label>
+                    <input id="f-accommodation_name" name="accommodation_name"><span class="err"></span></div>
+                  <div class="field"><label for="f-star_rating">Hotel rating <span class="hint">1–5</span></label>
+                    <input id="f-star_rating" name="star_rating" type="number" min="1" max="5" step="1"><span class="err"></span></div>
+                </div>
+                <div class="g3">
+                  <div class="field"><label for="f-guest_score">Guest score <span class="hint">/10</span></label>
+                    <input id="f-guest_score" name="guest_score" type="number" min="0" max="10" step="0.1"><span class="err"></span></div>
+                  <div class="field"><label for="f-distance_to_beach">To the beach</label><input id="f-distance_to_beach" name="distance_to_beach" placeholder="0.2 km"><span class="err"></span></div>
+                  <div class="field"><label for="f-distance_to_airport">To the airport</label><input id="f-distance_to_airport" name="distance_to_airport" placeholder="11 km"><span class="err"></span></div>
+                </div>
+                <div class="field"><label for="f-overview">Description</label><textarea id="f-overview" name="overview"></textarea><span class="err"></span></div>
+              </div>
+            </details>
+            <!-- 3 -->
+            <details class="sec">
+              <summary class="sec-head"><span class="sec-n">3</span><h3>Room &amp; board</h3>
+                <svg class="sec-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></summary>
+              <div class="sec-body">
+                <div class="g2">
+                  <div class="field"><label for="f-board_basis">Board basis</label>
+                    <select id="f-board_basis" name="board_basis">
+                      <option value="">Not specified</option><option>All inclusive</option><option>Ultra all inclusive</option>
+                      <option>Full board</option><option>Half board</option><option>Bed &amp; breakfast</option>
+                      <option>Self catering</option><option>Room only</option>
+                    </select><span class="err"></span></div>
+                  <div class="field"><label for="f-room_type">Room type</label><input id="f-room_type" name="room_type"><span class="err"></span></div>
+                </div>
+                <div class="g3">
+                  <div class="field"><label for="f-adults">Adults</label><input id="f-adults" name="adults" type="number" min="0" max="30" value="2"><span class="err"></span></div>
+                  <div class="field"><label for="f-children">Children</label><input id="f-children" name="children" type="number" min="0" max="30" value="0"><span class="err"></span></div>
+                  <div class="field"><label for="f-infants">Infants</label><input id="f-infants" name="infants" type="number" min="0" max="30" value="0"><span class="err"></span></div>
+                </div>
+                <div class="field"><label for="f-facilities">Facilities <span class="hint">separate with commas</span></label>
+                  <input id="f-facilities" name="facilities" placeholder="Outdoor pool, Free WiFi, Kids club"><span class="err"></span></div>
+              </div>
+            </details>
+            <!-- 4 -->
+            <details class="sec">
+              <summary class="sec-head"><span class="sec-n">4</span><h3>Flights &amp; transfers</h3>
+                <svg class="sec-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></summary>
+              <div class="sec-body">
+                <div class="field"><label for="f-departure_airports">Departure airports <span class="hint">separate with commas</span></label>
+                  <input id="f-departure_airports" name="departure_airports" placeholder="Leeds Bradford, Manchester"><span class="err"></span></div>
+                <div class="g2">
+                  <div class="field"><label for="f-airline">Airline</label><input id="f-airline" name="airline"><span class="err"></span></div>
+                  <div class="field"><label for="f-flight_duration">Flight time</label><input id="f-flight_duration" name="flight_duration" placeholder="2h 55m"><span class="err"></span></div>
+                </div>
+                <div class="g3">
+                  <div class="field"><label for="f-cabin_bag">Cabin bag</label><input id="f-cabin_bag" name="cabin_bag" placeholder="Included"><span class="err"></span></div>
+                  <div class="field"><label for="f-hold_luggage">Hold luggage</label><input id="f-hold_luggage" name="hold_luggage" placeholder="20kg included"><span class="err"></span></div>
+                  <div class="field"><label for="f-transfers">Transfers</label><input id="f-transfers" name="transfers" placeholder="Shared, included"><span class="err"></span></div>
+                </div>
+              </div>
+            </details>
+            <!-- 5 -->
+            <details class="sec" open>
+              <summary class="sec-head"><span class="sec-n">5</span><h3>Dates &amp; availability</h3>
+                <svg class="sec-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></summary>
+              <div class="sec-body">
+                <div class="g3">
+                  <div class="field"><label for="f-nights">Nights</label><input id="f-nights" name="nights" type="number" min="1" max="60"><span class="err"></span></div>
+                  <div class="field"><label for="f-travel_from">Travel from</label><input id="f-travel_from" name="travel_from" type="date"><span class="err"></span></div>
+                  <div class="field"><label for="f-travel_until">Travel until</label><input id="f-travel_until" name="travel_until" type="date"><span class="err"></span></div>
+                </div>
+                <div class="g3">
+                  <div class="field"><label for="f-booking_deadline">Book by</label><input id="f-booking_deadline" name="booking_deadline" type="date"><span class="err"></span></div>
+                  <div class="field"><label for="f-availability_status">Availability</label>
+                    <select id="f-availability_status" name="availability_status"><option>Available</option><option>On request</option><option>Limited</option></select><span class="err"></span></div>
+                  <div class="field"><label for="f-spaces_left">Spaces left <span class="hint">optional</span></label>
+                    <input id="f-spaces_left" name="spaces_left" type="number" min="0"><span class="err"></span></div>
+                </div>
+              </div>
+            </details>
+            <!-- 6 -->
+            <details class="sec" open>
+              <summary class="sec-head"><span class="sec-n">6</span><h3>Pricing</h3>
+                <svg class="sec-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></summary>
+              <div class="sec-body">
+                <div class="g3">
+                  <div class="field"><label for="f-price_from">Price from <span class="req">*</span> <span class="hint">to go live</span></label>
+                    <div class="prefix"><span id="curSym">£</span><input id="f-price_from" name="price_from" type="number" min="0" step="0.01"></div><span class="err"></span></div>
+                  <div class="field"><label for="f-was_price">Was price <span class="hint">shows a saving</span></label>
+                    <div class="prefix"><span>£</span><input id="f-was_price" name="was_price" type="number" min="0" step="0.01"></div><span class="err"></span></div>
+                  <div class="field"><label for="f-currency">Currency</label>
+                    <select id="f-currency" name="currency"><option>GBP</option><option>EUR</option><option>USD</option></select><span class="err"></span></div>
+                </div>
+                <div class="g3">
+                  <div class="field"><label for="f-deposit_from">Deposit from</label><div class="prefix"><span>£</span><input id="f-deposit_from" name="deposit_from" type="number" min="0" step="0.01"></div><span class="err"></span></div>
+                  <div class="field"><label for="f-child_price_from">Child price</label><div class="prefix"><span>£</span><input id="f-child_price_from" name="child_price_from" type="number" min="0" step="0.01"></div><span class="err"></span></div>
+                  <div class="field"><label for="f-single_supplement">Single supplement</label><div class="prefix"><span>£</span><input id="f-single_supplement" name="single_supplement" type="number" min="0" step="0.01"></div><span class="err"></span></div>
+                </div>
+                <div class="field"><label for="f-price_includes">Price includes <span class="hint">separate with commas</span></label>
+                  <input id="f-price_includes" name="price_includes" placeholder="Flights, Transfers, Baggage"><span class="err"></span></div>
+                <div class="field"><label for="f-local_charges">Local charges payable</label>
+                  <input id="f-local_charges" name="local_charges" placeholder="Tourist tax approx €1.50 pppn, paid at the hotel"><span class="err"></span></div>
+              </div>
+            </details>
+            <!-- 7 -->
+            <details class="sec">
+              <summary class="sec-head"><span class="sec-n">7</span><h3>Offer &amp; selling points</h3>
+                <svg class="sec-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></summary>
+              <div class="sec-body">
+                <div class="field"><label for="f-offer_badges">Offer badges <span class="hint">commas, up to 8</span></label>
+                  <input id="f-offer_badges" name="offer_badges" placeholder="Free child places, Low deposit"><span class="err"></span></div>
+                <div class="field"><label for="f-selling_points">Selling points <span class="hint">one per line</span></label>
+                  <textarea id="f-selling_points" name="selling_points" placeholder="Directly on the beach&#10;Free kids places for under 12s"></textarea><span class="err"></span></div>
+              </div>
+            </details>
+            <!-- 8 -->
+            <details class="sec">
+              <summary class="sec-head"><span class="sec-n">8</span><h3>Photos</h3>
+                <svg class="sec-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></summary>
+              <div class="sec-body">
+                <div class="field"><label for="f-hero_image_url">Main photo URL</label>
+                  <input id="f-hero_image_url" name="hero_image_url" type="url" placeholder="https://…"><span class="err"></span></div>
+                <div class="field"><label for="f-gallery">Gallery URLs <span class="hint">commas</span></label>
+                  <input id="f-gallery" name="gallery" placeholder="https://…, https://…"><span class="err"></span></div>
+                <div class="field"><label for="f-video_url">Video URL <span class="hint">optional</span></label>
+                  <input id="f-video_url" name="video_url" type="url"><span class="err"></span></div>
+              </div>
+            </details>
+            <!-- 9 -->
+            <details class="sec" open>
+              <summary class="sec-head"><span class="sec-n">9</span><h3>Booking link &amp; protection</h3>
+                <svg class="sec-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></summary>
+              <div class="sec-body">
+                <div class="field"><label for="f-clickout_url">Booking link <span class="hint">where the traveller books, on your own site</span></label>
+                  <input id="f-clickout_url" name="clickout_url" type="url" placeholder="https://yoursite.co.uk/the-deal"><span class="err"></span>
+                  <p class="save-note" style="margin:6px 0 0" id="clickoutHint"></p></div>
+                <div class="g2">
+                  <div class="field"><label for="f-booking_phone">Booking phone</label><input id="f-booking_phone" name="booking_phone"><span class="err"></span></div>
+                  <div class="field"><label for="f-protection_type">Protection</label>
+                    <select id="f-protection_type" name="protection_type"><option value="">Use my account default</option>
+                      <option>ATOL</option><option>ABTA</option><option>ATOL + ABTA</option><option>Trust account</option><option>None</option></select><span class="err"></span></div>
+                </div>
+                <div class="g3">
+                  <div class="field"><label for="f-atol_number">ATOL number</label><input id="f-atol_number" name="atol_number"><span class="err"></span></div>
+                  <div class="field"><label for="f-abta_number">ABTA number</label><input id="f-abta_number" name="abta_number"><span class="err"></span></div>
+                  <div class="field"><label for="f-terms_url">Terms URL</label><input id="f-terms_url" name="terms_url" type="url"><span class="err"></span></div>
+                </div>
+                <div class="note" style="margin:4px 0 0">
+                  <svg viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5 3.5 8.5 8 11 4.5-2.5 8-6 8-11V5l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg>
+                  <span>Travellers book on <b>your</b> site under <b>your</b> protection. Tripbuster advertises the deal and sends you the click.</span>
+                </div>
+              </div>
+            </details>
+
+            <div class="editor-bar">
+              <button class="btn btn-primary" type="button" id="saveLive">
+                <svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-11"/></svg> <span id="saveLiveLabel">Publish deal</span>
+              </button>
+              <button class="btn btn-ghost" type="button" id="saveDraft">Save as draft</button>
+              <span class="save-note" id="saveNote"></span>
+            </div>
+          </form>
+
+          <div class="preview-wrap">
+            <div class="preview-lab">Live preview</div>
+            <div id="previewHost"></div>
+            <p class="preview-note">This is the real Tripbuster deal card, so it is exactly what a traveller sees.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── embed ── -->
+      <section class="view" id="v-embed">
+        <div class="lead"><div><h2>Embed on your site</h2><p>Show your live Tripbuster deals on your own website. One line, no coding.</p></div></div>
+        <div class="card" style="padding:18px;margin-bottom:16px">
+          <div class="code" id="embedCode"><button class="copy" id="copyBtn">Copy</button></div>
+        </div>
+        <div class="card" style="padding:18px">
+          <h3 style="margin:0 0 14px;font-size:14px;font-weight:800">How it works</h3>
+          <ol class="steps">
+            <li><b>Copy the snippet</b><p>It works on any site or page builder.</p></li>
+            <li><b>Paste it where you want the deals</b><p>Anywhere on any page.</p></li>
+            <li><b>Edit here, and your site follows</b><p>Only live deals appear. Drafts and paused deals stay hidden.</p></li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- ── plan ── -->
+      <section class="view" id="v-plan">
+        <div class="lead"><div><h2>Your plan</h2><p>What your plan allows today.</p></div></div>
+        <div class="plans" id="planGrid"></div>
+        <div class="note" style="margin-top:18px">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <span><b>Pricing is not finalised.</b> The allowances shown are what the platform enforces right now. Upgrades and billing are not switched on yet, so get in touch if you need more live deals.</span>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal-back" id="confirmBack">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <h3 id="confirmTitle">Delete this deal?</h3>
+    <p id="confirmBody">This cannot be undone.</p>
+    <div class="modal-acts">
+      <button class="btn btn-ghost" id="confirmNo">Keep it</button>
+      <button class="btn btn-danger" id="confirmYes">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="/widget-tripbuster.js" defer></script>
+<script>
+(function () {
+  'use strict';
+
+  // ── helpers ───────────────────────────────────────────────
+  function esc(s) {
+    if (s === null || s === undefined) return '';
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+  }
+  const $ = (id) => document.getElementById(id);
+  const SYM = { GBP: '£', EUR: '€', USD: '$' };
+
+  let toastTimer;
+  function toast(msg, kind) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.toggle('err', kind === 'err');
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+  }
+
+  // ── session ───────────────────────────────────────────────
+  const KEY = 'tb_agent_session';
+  function saveSession(s) { try { sessionStorage.setItem(KEY, JSON.stringify(s)); } catch (e) {} }
+  function loadSession() {
+    try { return JSON.parse(sessionStorage.getItem(KEY) || 'null'); } catch (e) { return null; }
+  }
+  function clearSession() { try { sessionStorage.removeItem(KEY); } catch (e) {} }
+
+  const state = { token: null, agent: null, deals: [], counts: {}, plan: '', allowance: 0, remaining: 0,
+    filter: 'all', editingId: null };
+
+  // ── api ───────────────────────────────────────────────────
+  async function api(path, { method = 'GET', body = null } = {}) {
+    const res = await fetch(path, {
+      method,
+      headers: Object.assign(
+        { Accept: 'application/json' },
+        state.token ? { Authorization: 'Bearer ' + state.token } : {},
+        body ? { 'Content-Type': 'application/json' } : {}
+      ),
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    let data = null;
+    try { data = await res.json(); } catch (e) { /* empty body */ }
+    // A 401 only means "your session ended" if we actually had a session. During
+    // sign-in there is no token yet, so a 401 there is simply a failed credential
+    // check and must fall through to the message the endpoint sent back.
+    if (res.status === 401 && state.token) {
+      signOut('Your session has ended. Please sign in again.');
+      throw new Error('unauthorised');
+    }
+    if (!res.ok) {
+      const err = new Error((data && data.error) || 'Something went wrong');
+      err.status = res.status;
+      err.fieldErrors = (data && data.errors) || null;
+      throw err;
+    }
+    return data;
+  }
+
+  // ── sign in / out ─────────────────────────────────────────
+  $('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('loginBtn');
+    const box = $('loginError');
+    box.classList.remove('on');
+    btn.disabled = true;
+    btn.textContent = 'Signing in…';
+    try {
+      const data = await api('/api/tripbuster/login', {
+        method: 'POST',
+        body: { email: $('li-email').value, password: $('li-pass').value },
+      });
+      state.token = data.token;
+      state.agent = data.agent;
+      saveSession({ token: data.token, agent: data.agent });
+      $('li-pass').value = '';
+      await enterApp();
+    } catch (err) {
+      box.textContent = err.message || 'Could not sign you in';
+      box.classList.add('on');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Sign in';
+    }
+  });
+
+  function signOut(message) {
+    clearSession();
+    state.token = null;
+    state.agent = null;
+    $('appView').hidden = true;
+    $('loginView').hidden = false;
+    if (message) {
+      const box = $('loginError');
+      box.textContent = message;
+      box.classList.add('on');
+    }
+  }
+  $('signOut').addEventListener('click', () => signOut(null));
+
+  async function enterApp() {
+    $('loginView').hidden = true;
+    $('appView').hidden = false;
+    const a = state.agent || {};
+    const initials = String(a.name || '?').split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+    $('whoAv').textContent = initials;
+    $('whoNm').textContent = a.name || '';
+    $('whoSub').textContent = a.slug ? a.slug : '';
+    $('greeting').textContent = a.name ? a.name + '’s deals' : 'Your deals';
+    renderEmbed();
+    await refresh();
+  }
+
+  // ── data ──────────────────────────────────────────────────
+  async function refresh() {
+    try {
+      const data = await api('/api/tripbuster/my-deals');
+      state.deals = data.deals || [];
+      state.counts = data.counts || {};
+      state.plan = data.plan || '';
+      state.allowance = Number(data.liveAllowance);
+      state.remaining = Number(data.liveRemaining);
+      renderAll();
+    } catch (err) {
+      if (err.message !== 'unauthorised') {
+        $('dealList').innerHTML = '<div class="empty"><b>Could not load your deals</b>' + esc(err.message) + '</div>';
+      }
+    }
+  }
+
+  function renderAll() { renderStats(); renderPlanCard(); renderDeals(); renderPlanGrid(); renderClickoutHint(); }
+
+  function renderStats() {
+    const c = state.counts;
+    const unlimited = state.allowance === -1;
+    const tiles = [
+      { lab: 'Live deals', val: c.live || 0, foot: unlimited ? 'Unlimited on ' + esc(state.plan) : 'of ' + state.allowance + ' on ' + esc(state.plan) },
+      { lab: 'Drafts', val: c.draft || 0, foot: 'Not visible to travellers' },
+      { lab: 'Paused', val: c.paused || 0, foot: 'Hidden until you resume them' },
+      { lab: 'Total deals', val: c.total || 0, foot: 'All statuses' },
+    ];
+    $('stats').innerHTML = tiles.map((t) =>
+      '<div class="stat"><div class="stat-lab">' + esc(t.lab) + '</div>' +
+      '<div class="stat-val tnum">' + esc(t.val) + '</div>' +
+      '<div class="stat-foot">' + t.foot + '</div></div>').join('');
+    $('navCount').textContent = c.total || 0;
+  }
+
+  function renderPlanCard() {
+    const unlimited = state.allowance === -1;
+    $('planBadge').textContent = state.plan || '–';
+    $('planUse').textContent = unlimited
+      ? (state.counts.live || 0) + ' live'
+      : (state.counts.live || 0) + ' / ' + state.allowance + ' live';
+    $('planLeft').textContent = unlimited ? 'Unlimited live deals'
+      : (state.remaining > 0 ? state.remaining + ' more can go live' : 'All live slots in use');
+    const pct = unlimited ? 100
+      : (state.allowance > 0 ? Math.min(100, ((state.counts.live || 0) / state.allowance) * 100) : 0);
+    $('planBar').style.width = pct + '%';
+    $('allowNote').textContent = unlimited
+      ? 'Unlimited live deals on ' + state.plan
+      : 'Using ' + (state.counts.live || 0) + ' of ' + state.allowance + ' live deals on ' + state.plan;
+  }
+
+  function dealRow(d) {
+    const sym = SYM[d.currency] || '£';
+    const bits = [];
+    if (d.resort) bits.push(esc(d.resort));
+    if (d.nights) bits.push(esc(d.nights) + ' nights');
+    if (d.board_basis) bits.push(esc(d.board_basis));
+    if (d.discount_pct) bits.push('<strong>-' + esc(d.discount_pct) + '%</strong>');
+    const canToggle = d.status === 'live' || d.status === 'paused';
+    return '<div class="deal">' +
+      '<div><div class="deal-nm">' + esc(d.title) + '</div>' +
+      '<div class="deal-meta"><span class="pill ' + esc(d.status) + '"><i></i>' +
+        esc(d.status.charAt(0).toUpperCase() + d.status.slice(1)) + '</span>' +
+        (bits.length ? '<span>' + bits.join(' · ') + '</span>' : '') + '</div></div>' +
+      '<div class="deal-price">' + (d.price_from != null ? sym + esc(Number(d.price_from).toLocaleString('en-GB')) : '—') +
+        '<small>' + (d.price_from != null ? 'from · pp' : 'no price yet') + '</small></div>' +
+      '<div class="row-acts">' +
+        '<button class="mini" data-act="edit" data-id="' + esc(d.id) + '">Edit</button>' +
+        (canToggle
+          ? '<button class="mini" data-act="toggle" data-id="' + esc(d.id) + '">' + (d.status === 'live' ? 'Pause' : 'Resume') + '</button>'
+          : '<button class="mini" data-act="publish" data-id="' + esc(d.id) + '">Publish</button>') +
+        '<button class="mini danger" data-act="delete" data-id="' + esc(d.id) + '">Delete</button>' +
+      '</div></div>';
+  }
+
+  function renderDeals() {
+    const list = state.filter === 'all' ? state.deals : state.deals.filter((d) => d.status === state.filter);
+    const host = $('dealList');
+    if (!state.deals.length) {
+      host.innerHTML = '<div class="empty"><b>No deals yet</b>Add your first deal and it can be live in minutes.</div>';
+      return;
+    }
+    if (!list.length) { host.innerHTML = '<div class="empty"><b>Nothing here</b>No deals with that status.</div>'; return; }
+    host.innerHTML = list.map(dealRow).join('');
+  }
+
+  function renderPlanGrid() {
+    const rows = [
+      { nm: 'Spark', allow: '1', desc: 'One live deal at a time.' },
+      { nm: 'Boost', allow: '5', desc: 'Up to five live deals.' },
+      { nm: 'Ignite', allow: 'Unlimited', desc: 'As many live deals as you like.' },
+      { nm: 'Bespoke', allow: 'Unlimited', desc: 'Multi-branch, talk to us.' },
+    ];
+    $('planGrid').innerHTML = rows.map((r) =>
+      '<div class="plan' + (r.nm === state.plan ? ' is-current' : '') + '">' +
+      '<div class="plan-nm">' + esc(r.nm) + (r.nm === state.plan ? ' · current' : '') + '</div>' +
+      '<div class="plan-allow">' + esc(r.allow) + '</div>' +
+      '<div class="plan-desc">live deals · ' + esc(r.desc) + '</div></div>').join('');
+  }
+
+  function renderEmbed() {
+    const slug = (state.agent && state.agent.slug) || 'your-agency';
+    const origin = location.origin;
+    const snippet = '<div data-tg-widget="tripbuster" data-tg-agent="' + slug + '"></div>\n' +
+      '<script src="' + origin + '/widget-tripbuster.js" defer><\/script>';
+    $('embedCode').innerHTML = '<button class="copy" id="copyBtn">Copy</button>' + esc(snippet);
+    $('copyBtn').addEventListener('click', () => {
+      if (navigator.clipboard) navigator.clipboard.writeText(snippet).then(
+        () => toast('Embed code copied'), () => toast('Could not copy', 'err'));
+      else toast('Select the code and copy it', 'err');
+    });
+  }
+
+  function renderClickoutHint() {
+    $('clickoutHint').textContent = 'Leave this blank and we will send travellers to your account’s default website instead.';
+  }
+
+  // ── deal list actions ─────────────────────────────────────
+  $('dealList').addEventListener('click', async (e) => {
+    const btn = e.target.closest('button[data-act]');
+    if (!btn) return;
+    const id = btn.getAttribute('data-id');
+    const act = btn.getAttribute('data-act');
+    const deal = state.deals.find((d) => d.id === id);
+    if (!deal) return;
+
+    if (act === 'edit') { openEditor(deal); return; }
+
+    if (act === 'delete') {
+      confirmDelete(deal);
+      return;
+    }
+
+    const nextStatus = act === 'publish' ? 'live' : (deal.status === 'live' ? 'paused' : 'live');
+    btn.disabled = true;
+    try {
+      await api('/api/tripbuster/my-deals?id=' + encodeURIComponent(id), { method: 'PATCH', body: { status: nextStatus } });
+      toast(nextStatus === 'live' ? 'Deal is live' : 'Deal paused');
+      await refresh();
+    } catch (err) {
+      if (err.message !== 'unauthorised') toast(err.message, 'err');
+      btn.disabled = false;
+    }
+  });
+
+  // ── delete confirmation ───────────────────────────────────
+  let pendingDelete = null;
+  function confirmDelete(deal) {
+    pendingDelete = deal.id;
+    $('confirmBody').textContent = '“' + (deal.title || 'This deal') + '” will be removed from Tripbuster and from your website. This cannot be undone.';
+    $('confirmBack').classList.add('on');
+    $('confirmNo').focus();
+  }
+  function closeConfirm() { pendingDelete = null; $('confirmBack').classList.remove('on'); }
+  $('confirmNo').addEventListener('click', closeConfirm);
+  $('confirmBack').addEventListener('click', (e) => { if (e.target === $('confirmBack')) closeConfirm(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConfirm(); });
+  $('confirmYes').addEventListener('click', async () => {
+    if (!pendingDelete) return;
+    const id = pendingDelete;
+    closeConfirm();
+    try {
+      await api('/api/tripbuster/my-deals?id=' + encodeURIComponent(id), { method: 'DELETE' });
+      toast('Deal deleted');
+      await refresh();
+    } catch (err) { if (err.message !== 'unauthorised') toast(err.message, 'err'); }
+  });
+
+  // ── filters and nav ───────────────────────────────────────
+  $('filters').addEventListener('click', (e) => {
+    const b = e.target.closest('.seg');
+    if (!b) return;
+    state.filter = b.getAttribute('data-filter');
+    document.querySelectorAll('#filters .seg').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    renderDeals();
+  });
+
+  const TITLES = { deals: 'My deals', editor: 'Add a deal', embed: 'Embed on your site', plan: 'Your plan' };
+  function show(view) {
+    document.querySelectorAll('.view').forEach((v) => v.classList.remove('on'));
+    const el = $('v-' + view);
+    if (el) el.classList.add('on');
+    document.querySelectorAll('.nav-i').forEach((n) => {
+      if (n.getAttribute('data-view') === view) n.setAttribute('aria-current', 'page');
+      else n.removeAttribute('aria-current');
+    });
+    $('topTitle').textContent = TITLES[view] || '';
+    window.scrollTo(0, 0);
+  }
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-view]');
+    if (!t) return;
+    const view = t.getAttribute('data-view');
+    if (view === 'editor' && (t.id === 'navNew' || t.id === 'newDeal2')) openEditor(null);
+    else show(view);
+  });
+
+  // ── editor ────────────────────────────────────────────────
+  const FORM = $('dealForm');
+  const CSV_FIELDS = ['facilities', 'departure_airports', 'price_includes', 'offer_badges', 'gallery'];
+  const NUM_FIELDS = ['star_rating', 'guest_score', 'adults', 'children', 'infants', 'nights',
+    'spaces_left', 'price_from', 'was_price', 'deposit_from', 'child_price_from', 'single_supplement'];
+
+  function clearFieldErrors() {
+    FORM.querySelectorAll('.field.bad').forEach((f) => { f.classList.remove('bad'); const e = f.querySelector('.err'); if (e) e.textContent = ''; });
+    $('editorError').classList.remove('on');
+  }
+
+  function showFieldErrors(err) {
+    const box = $('editorError');
+    box.textContent = err.message || 'Some details need fixing';
+    box.classList.add('on');
+    (err.fieldErrors || []).forEach((fe) => {
+      const input = FORM.querySelector('[name="' + fe.field + '"]');
+      const field = input && input.closest('.field');
+      if (field) {
+        field.classList.add('bad');
+        const slot = field.querySelector('.err');
+        if (slot) slot.textContent = fe.message;
+        const sec = field.closest('details');
+        if (sec) sec.open = true;
+      }
+    });
+    const first = FORM.querySelector('.field.bad input, .field.bad select, .field.bad textarea');
+    if (first) first.focus();
+    else box.scrollIntoView({ block: 'nearest' });
+  }
+
+  function openEditor(deal) {
+    clearFieldErrors();
+    state.editingId = deal ? deal.id : null;
+    FORM.reset();
+    $('editorTitle').textContent = deal ? 'Edit deal' : 'Add a deal';
+    $('saveLiveLabel').textContent = deal && deal.status === 'live' ? 'Save changes' : 'Publish deal';
+    $('saveNote').textContent = deal ? '' : 'Nothing goes live until you publish it.';
+
+    if (deal) {
+      Object.keys(deal).forEach((k) => {
+        const input = FORM.querySelector('[name="' + k + '"]');
+        if (!input) return;
+        const v = deal[k];
+        if (Array.isArray(v)) input.value = k === 'selling_points' ? v.join('\n') : v.join(', ');
+        else if (v !== null && v !== undefined) input.value = v;
+      });
+    }
+    show('editor');
+    updatePreview();
+  }
+
+  function collect() {
+    const out = {};
+    new FormData(FORM).forEach((raw, name) => {
+      const v = typeof raw === 'string' ? raw.trim() : raw;
+      if (CSV_FIELDS.includes(name)) {
+        out[name] = v ? v.split(',').map((s) => s.trim()).filter(Boolean) : [];
+      } else if (name === 'selling_points') {
+        out[name] = v ? v.split('\n').map((s) => s.trim()).filter(Boolean) : [];
+      } else if (NUM_FIELDS.includes(name)) {
+        out[name] = v === '' ? null : Number(v);
+      } else {
+        out[name] = v === '' ? null : v;
+      }
+    });
+    return out;
+  }
+
+  // Live preview through the real widget, so the agent sees the traveller's view.
+  let previewInst = null;
+  function updatePreview() {
+    if (!window.TGTripbusterWidget) return;
+    const d = collect();
+    const airports = Array.isArray(d.departure_airports) ? d.departure_airports : [];
+    const card = {
+      title: d.title || 'Your deal title',
+      destination: [d.resort, d.country].filter(Boolean).join(', '),
+      board: d.board_basis || '',
+      nights: d.nights || '',
+      airport: airports[0] || '',
+      dates: '',
+      priceFrom: d.price_from || '',
+      wasPrice: d.was_price || '',
+      currency: d.currency || 'GBP',
+      image: d.hero_image_url || '',
+      clickoutUrl: d.clickout_url || '#',
+      atol: d.atol_number || '',
+      badge: (Array.isArray(d.offer_badges) && d.offer_badges[0]) || '',
+    };
+    const host = $('previewHost');
+    if (previewInst) { try { previewInst.destroy(); } catch (e) {} }
+    host.textContent = '';
+    const mount = document.createElement('div');
+    host.appendChild(mount);
+    previewInst = new window.TGTripbusterWidget(mount, {
+      layout: 'grid', columns: 1, credit: false, showAtol: true, deals: [card],
+    });
+  }
+  FORM.addEventListener('input', updatePreview);
+  FORM.addEventListener('change', updatePreview);
+
+  async function save(status) {
+    clearFieldErrors();
+    const payload = collect();
+    payload.status = status;
+    const buttons = [$('saveLive'), $('saveDraft')];
+    buttons.forEach((b) => { b.disabled = true; });
+    try {
+      if (state.editingId) {
+        await api('/api/tripbuster/my-deals?id=' + encodeURIComponent(state.editingId), { method: 'PATCH', body: payload });
+        toast(status === 'live' ? 'Deal saved and live' : 'Draft saved');
+      } else {
+        await api('/api/tripbuster/my-deals', { method: 'POST', body: payload });
+        toast(status === 'live' ? 'Deal published' : 'Draft saved');
+      }
+      await refresh();
+      show('deals');
+    } catch (err) {
+      if (err.message === 'unauthorised') return;
+      if (err.fieldErrors && err.fieldErrors.length) showFieldErrors(err);
+      else {
+        const box = $('editorError');
+        box.textContent = err.message;
+        box.classList.add('on');
+        box.scrollIntoView({ block: 'nearest' });
+      }
+    } finally {
+      buttons.forEach((b) => { b.disabled = false; });
+    }
+  }
+  $('saveLive').addEventListener('click', () => save('live'));
+  $('saveDraft').addEventListener('click', () => save('draft'));
+
+  // ── boot ──────────────────────────────────────────────────
+  const existing = loadSession();
+  if (existing && existing.token) {
+    state.token = existing.token;
+    state.agent = existing.agent;
+    enterApp();
+  }
+})();
+</script>
+</body>
+</html>

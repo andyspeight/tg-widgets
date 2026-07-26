@@ -1,5 +1,5 @@
 /**
- * Tripbuster Deals Widget v1.0.0
+ * Tripbuster Deals Widget v1.1.1
  * Self-contained, embeddable widget — renders a travel agent's holiday deals
  * as cards that click through to the agent's own booking page.
  *
@@ -41,6 +41,10 @@
  *   <div data-tg-widget="tripbuster" data-tg-agent="sunseeker-travel"></div>
  *
  * Changelog:
+ *   v1.1.1 (Jul 2026) — Card footer wraps instead of clipping. In a narrow column
+ *     the price and the CTA could not sit side by side, and because .tgtb-card
+ *     sets overflow:hidden the button was cut off rather than overflowing
+ *     visibly. Found while driving the advertiser dashboard preview.
  *   v1.1.0 (Jul 2026) — Live deal feed: data-tg-agent / config.agentSlug fetches
  *     the agent's live deals from the Tripbuster API, with maxDeals to cap them.
  *   v1.0.0 (Jul 2026) — First cut. Grid + list layouts, discount auto-calc,
@@ -81,7 +85,7 @@
 
   const API_BASE = resolveApiBase();
   const DEALS_API = resolveDealsApi();
-  const VERSION = '1.1.0';
+  const VERSION = '1.1.1';
 
   // ── Helpers ─────────────────────────────────────────────────
   function esc(s) {
@@ -242,7 +246,11 @@
     }
     .tgtb-atol svg { width: 13px; height: 13px; }
 
-    .tgtb-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; padding: 12px 15px 15px; }
+    /* Wraps rather than clips: the card is often embedded in a narrow column
+       (an agent's sidebar, the dashboard preview) where the price and the button
+       cannot sit side by side, and .tgtb-card has overflow:hidden. */
+    .tgtb-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px 12px; flex-wrap: wrap; padding: 12px 15px 15px; }
+    .tgtb-foot > * { min-width: 0; }
     .tgtb-was { font-size: 12px; color: var(--tgtb-muted); text-decoration: line-through; }
     .tgtb-price { font-size: 22px; font-weight: 800; letter-spacing: -.03em; line-height: 1.1; }
     .tgtb-price small { font-size: 12px; color: var(--tgtb-muted); font-weight: 700; }

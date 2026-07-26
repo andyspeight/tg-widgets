@@ -277,6 +277,14 @@
       "destination": "/demo-whatsapp.html"
     },
     {
+      "source": "/tripbuster",
+      "destination": "/tripbuster/dashboard.html"
+    },
+    {
+      "source": "/tripbuster/dashboard",
+      "destination": "/tripbuster/dashboard.html"
+    },
+    {
       "source": "/demo-tripbuster",
       "destination": "/demo-tripbuster.html"
     },
