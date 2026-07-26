@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tripbuster Deals Widget — Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#123249; --sub:#52707F; --line:#E3EDF3; --coral:#FF5C39; --sky:#12A0D4; --bg:#F1F8FC; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:'Inter',-apple-system,sans-serif; color:var(--ink); background:var(--bg); }
+
+  /* faux client site chrome so the widget is shown in context */
+  .site-nav { background:#fff; border-bottom:1px solid var(--line); }
+  .site-nav-in { max-width:1080px; margin:0 auto; padding:0 22px; height:60px; display:flex; align-items:center; gap:16px; }
+  .site-logo { font-weight:800; font-size:18px; letter-spacing:-.02em; }
+  .site-logo span { color:var(--sky); }
+  .site-links { margin-left:auto; display:flex; gap:20px; font-size:14px; font-weight:600; color:var(--sub); }
+  .site-hero { background:linear-gradient(135deg,#0E86C4,#22A8DC); color:#fff; padding:40px 0; }
+  .site-hero-in { max-width:1080px; margin:0 auto; padding:0 22px; }
+  .site-hero h1 { margin:0 0 6px; font-size:28px; font-weight:800; letter-spacing:-.02em; }
+  .site-hero p { margin:0; opacity:.92; }
+
+  .wrap { max-width:1080px; margin:0 auto; padding:0 22px; }
+  .demo-bar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:20px 0 6px; }
+  .demo-bar strong { font-size:13px; font-weight:800; color:var(--sub); margin-right:4px; }
+  .seg { display:inline-flex; background:#fff; border:1px solid var(--line); border-radius:10px; padding:3px; gap:2px; }
+  .seg button { border:0; background:none; padding:7px 14px; border-radius:8px; font-family:inherit; font-size:13px; font-weight:700; color:var(--sub); cursor:pointer; }
+  .seg button.on { background:#FFEDE7; color:#E5451F; }
+  .demo-section { padding:14px 0 44px; }
+  .demo-note { font-size:12.5px; color:var(--sub); padding:10px 0 0; }
+  .site-foot { border-top:1px solid var(--line); background:#fff; }
+  .site-foot-in { max-width:1080px; margin:0 auto; padding:22px; font-size:12.5px; color:#8AA3B0; text-align:center; }
+</style>
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="site-nav-in">
+      <div class="site-logo">Sunseeker <span>Travel</span></div>
+      <div class="site-links"><span>Holidays</span><span>Cruises</span><span>About</span><span>Contact</span></div>
+    </div>
+  </nav>
+
+  <header class="site-hero">
+    <div class="site-hero-in">
+      <h1>This week's holiday deals</h1>
+      <p>Hand-picked by our team. Tap a deal to book direct with us.</p>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="demo-bar">
+      <strong>Layout</strong>
+      <div class="seg" id="layoutSeg">
+        <button class="on" data-layout="grid">Grid</button>
+        <button data-layout="list">List</button>
+      </div>
+      <strong style="margin-left:10px">Theme</strong>
+      <div class="seg" id="themeSeg">
+        <button class="on" data-theme="light">Light</button>
+        <button data-theme="dark">Dark</button>
+      </div>
+    </div>
+
+    <section class="demo-section">
+      <!-- The embed: one div + one script. Config inline here for the demo; a
+           real client would use data-tg-id and load it from the API. -->
+      <div data-tg-widget="tripbuster" id="tgDemo"></div>
+      <p class="demo-note">Embed code: <code>&lt;div data-tg-widget="tripbuster" data-tg-id="tgw_..."&gt;&lt;/div&gt;</code> plus the script tag.</p>
+    </section>
+  </div>
+
+  <footer class="site-foot">
+    <div class="site-foot-in">Sunseeker Travel · demo host page · the Tripbuster widget renders above</div>
+  </footer>
+
+  <script src="/widget-tripbuster.js"></script>
+  <script>
+    (function () {
+      var DEALS = [
+        { title: '7 nights Benidorm, all inclusive', destination: 'Benidorm, Spain', board: 'All inclusive', nights: 7, airport: 'Leeds Bradford', dates: 'Apr – Jun', priceFrom: 329, wasPrice: 459, currency: 'GBP', atol: '11542', clickoutUrl: 'https://example.com/benidorm', badge: 'Free child places' },
+        { title: '10 nights Tenerife, half board', destination: 'Costa Adeje, Tenerife', board: 'Half board', nights: 10, airport: 'Manchester', dates: 'May – Jul', priceFrom: 549, wasPrice: 699, currency: 'GBP', atol: '11542', clickoutUrl: 'https://example.com/tenerife' },
+        { title: '7 nights Antalya, all inclusive', destination: 'Antalya, Turkey', board: 'All inclusive', nights: 7, airport: 'Birmingham', dates: 'Jun – Sep', priceFrom: 399, wasPrice: 529, currency: 'GBP', atol: '11542', clickoutUrl: 'https://example.com/antalya' },
+        { title: '4 nights Marrakech city break', destination: 'Marrakech, Morocco', board: 'Bed & breakfast', nights: 4, airport: 'Leeds Bradford', dates: 'Mar – May', priceFrom: 259, wasPrice: 319, currency: 'GBP', atol: '11542', clickoutUrl: 'https://example.com/marrakech' },
+        { title: '7 nights Paphos, all inclusive', destination: 'Paphos, Cyprus', board: 'All inclusive', nights: 7, airport: 'Manchester', dates: 'Jun – Aug', priceFrom: 449, wasPrice: 589, currency: 'GBP', atol: '11542', clickoutUrl: 'https://example.com/paphos' },
+        { title: '7 nights Algarve, self catering', destination: 'Albufeira, Portugal', board: 'Self catering', nights: 7, airport: 'Bristol', dates: 'Apr – Jun', priceFrom: 279, wasPrice: 349, currency: 'GBP', atol: '11542', clickoutUrl: 'https://example.com/algarve' }
+      ];
+
+      var state = { layout: 'grid', theme: 'light' };
+      var host = document.getElementById('tgDemo');
+      var inst = null;
+
+      function build() {
+        if (inst) { try { inst.destroy(); } catch (e) {} }
+        inst = new window.TGTripbusterWidget(host, {
+          title: "This week's top deals",
+          layout: state.layout,
+          columns: 3,
+          theme: state.theme,
+          accent: '#FF5C39',
+          showAtol: true,
+          ctaLabel: 'View deal',
+          deals: DEALS
+        });
+      }
+
+      document.getElementById('layoutSeg').addEventListener('click', function (e) {
+        var b = e.target.closest('button'); if (!b) return;
+        this.querySelectorAll('button').forEach(function (x) { x.classList.remove('on'); });
+        b.classList.add('on'); state.layout = b.dataset.layout; build();
+      });
+      document.getElementById('themeSeg').addEventListener('click', function (e) {
+        var b = e.target.closest('button'); if (!b) return;
+        this.querySelectorAll('button').forEach(function (x) { x.classList.remove('on'); });
+        b.classList.add('on'); state.theme = b.dataset.theme; build();
+      });
+
+      build();
+    })();
+  </script>
+</body>
+</html>
