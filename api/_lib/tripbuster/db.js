@@ -80,6 +80,75 @@ export async function tbRpc(fn, args = {}) {
   }
 }
 
+// PostgREST column names appear in the query string, so they are checked against
+// a strict pattern. Values go through URLSearchParams, which encodes them, so a
+// value can never break out into filter syntax.
+function buildQuery(params = {}) {
+  const qs = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined || value === null) continue;
+    if (!/^[a-z_][a-z0-9_.]*$/.test(key)) throw new TbError('bad_column', `Invalid column "${key}"`);
+    qs.append(key, String(value));
+  }
+  return qs.toString();
+}
+
+async function tbFetch(pathAndQuery, init, label) {
+  if (!tbConfigured()) throw new TbError('not_configured', 'Tripbuster database not configured');
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
+  try {
+    const res = await fetch(`${TB_URL}/rest/v1/${pathAndQuery}`, { ...init, signal: ctrl.signal });
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      console.warn(`[tripbuster] ${label} ${res.status}`, body.slice(0, 300));
+      throw new TbError('request_failed', `${label} returned ${res.status}`, res.status);
+    }
+    const text = await res.text();
+    return text ? JSON.parse(text) : null;
+  } catch (e) {
+    if (e instanceof TbError) throw e;
+    const aborted = e && e.name === 'AbortError';
+    console.warn(`[tripbuster] ${label} ${aborted ? 'timeout' : 'error'}`, e && e.message);
+    throw new TbError(aborted ? 'timeout' : 'network', 'Database request failed');
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Read rows. `params` maps directly onto PostgREST query syntax, e.g.
+ *   tbSelect('agents', { select: 'id,slug', email: 'eq.a@b.co', limit: 1 })
+ */
+export async function tbSelect(table, params = {}) {
+  if (!/^[a-z_][a-z0-9_]*$/.test(table)) throw new TbError('bad_table', 'Invalid table name');
+  const qs = buildQuery(params);
+  return tbFetch(`${table}${qs ? `?${qs}` : ''}`, { headers: authHeaders() }, `select ${table}`);
+}
+
+/** Patch rows matching `params`. Always constrain by owner as well as id. */
+export async function tbUpdate(table, params, patch, { returning = true } = {}) {
+  if (!/^[a-z_][a-z0-9_]*$/.test(table)) throw new TbError('bad_table', 'Invalid table name');
+  const qs = buildQuery(params);
+  if (!qs) throw new TbError('unfiltered_update', 'Refusing to update every row');
+  return tbFetch(`${table}?${qs}`, {
+    method: 'PATCH',
+    headers: { ...authHeaders(), Prefer: returning ? 'return=representation' : 'return=minimal' },
+    body: JSON.stringify(patch),
+  }, `update ${table}`);
+}
+
+/** Delete rows matching `params`. Refuses to run without a filter. */
+export async function tbDelete(table, params, { returning = true } = {}) {
+  if (!/^[a-z_][a-z0-9_]*$/.test(table)) throw new TbError('bad_table', 'Invalid table name');
+  const qs = buildQuery(params);
+  if (!qs) throw new TbError('unfiltered_delete', 'Refusing to delete every row');
+  return tbFetch(`${table}?${qs}`, {
+    method: 'DELETE',
+    headers: { ...authHeaders(), Prefer: returning ? 'return=representation' : 'return=minimal' },
+  }, `delete ${table}`);
+}
+
 /**
  * Insert rows into a table. Used by the click recorder and the deal importers.
  * `returning: false` keeps the response empty, which is what fire-and-forget

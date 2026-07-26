@@ -71,6 +71,14 @@ export function limitsFor(event) {
         { name: 'm', max: envInt('RL_TB_DEALS_PER_MIN', 90), seconds: 60 },
         { name: 'h', max: envInt('RL_TB_DEALS_PER_HR', 1500), seconds: 3600 },
       ];
+    // Agent sign-in. Deliberately strict: counted per IP and per IP+email, so
+    // neither one account nor the endpoint as a whole can be ground down by
+    // guessing. Well above what a person fumbling a password needs.
+    case 'tb-login':
+      return [
+        { name: 'm', max: envInt('RL_TB_LOGIN_PER_MIN', 6), seconds: 60 },
+        { name: 'h', max: envInt('RL_TB_LOGIN_PER_HR', 40), seconds: 3600 },
+      ];
     // Click-outs are the billable event and a write, so they are tighter. A real
     // visitor clicks a handful of deals; anything near this ceiling is a bot.
     case 'tb-click':
