@@ -17,7 +17,8 @@
     "test:qa-highs": "node test/qa-highs-smoke.mjs",
     "test:boot": "node test/boot-smoke.mjs",
     "test:widget-log": "node test/widget-log-alert-smoke.mjs",
-    "test:tripbuster": "node tests/tripbuster.test.mjs"
+    "test:tripbuster": "node tests/tripbuster.test.mjs",
+    "test:tripbuster-import": "node test/tripbuster-import-drive.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",

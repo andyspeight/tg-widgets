@@ -258,6 +258,97 @@
     .deal-price { text-align:left; }
   }
   @media (prefers-reduced-motion:reduce){ * { transition:none !important; } }
+
+  /* ── bulk import ─────────────────────────────────────────────────────────
+     Three routes into the same deal table: type one in, upload a sheet, or pull
+     from the Travelgenix live feed. The route cards are the chooser; each route
+     then reveals its own panel below. */
+  .routes { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
+  .route { position:relative; text-align:left; background:var(--surface); border:1.5px solid var(--border);
+    border-radius:14px; padding:18px; cursor:pointer; font:inherit; color:inherit;
+    transition:border-color .15s, box-shadow .15s, transform .15s; }
+  .route:hover { border-color:var(--border-2); transform:translateY(-1px); box-shadow:var(--shadow-md); }
+  .route[aria-pressed="true"] { border-color:var(--coral); box-shadow:0 0 0 3px var(--coral-wash); }
+  .route svg { width:22px; height:22px; stroke:var(--sky-deep); fill:none; stroke-width:2;
+    stroke-linecap:round; stroke-linejoin:round; margin-bottom:10px; }
+  .route h3 { margin:0 0 5px; font-size:14px; font-weight:800; }
+  .route p { margin:0; font-size:12.5px; color:var(--tx-2); line-height:1.45; }
+  .route .pill { position:absolute; top:14px; right:14px; }
+  .route[disabled] { opacity:.62; cursor:not-allowed; }
+  .route[disabled]:hover { transform:none; box-shadow:none; border-color:var(--border); }
+
+  .drop { border:2px dashed var(--border-2); border-radius:14px; padding:30px 20px; text-align:center;
+    background:var(--surface-2); transition:border-color .15s, background .15s; }
+  .drop.over { border-color:var(--coral); background:var(--coral-wash); }
+  .drop h4 { margin:0 0 6px; font-size:14.5px; font-weight:800; }
+  .drop p { margin:0 0 14px; font-size:12.5px; color:var(--tx-2); }
+  .drop-acts { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+
+  /* Wide, scrollable tables: the page itself must never scroll sideways. */
+  .tw { overflow-x:auto; border:1px solid var(--border); border-radius:12px; background:var(--surface); }
+  table.tb { width:100%; border-collapse:collapse; font-size:12.5px; min-width:660px; }
+  table.tb th, table.tb td { padding:9px 12px; text-align:left; border-bottom:1px solid var(--border);
+    vertical-align:top; }
+  table.tb th { background:var(--surface-2); font-size:11px; font-weight:800; text-transform:uppercase;
+    letter-spacing:.05em; color:var(--tx-2); position:sticky; top:0; }
+  table.tb tr:last-child td { border-bottom:0; }
+  table.tb tr.bad td { background:var(--danger-wash); }
+  table.tb tr.warn td { background:var(--warn-wash); }
+  .act { display:inline-block; padding:2px 8px; border-radius:999px; font-size:10.5px; font-weight:800;
+    text-transform:uppercase; letter-spacing:.04em; }
+  .act-create { background:var(--live-wash); color:var(--live); }
+  .act-update { background:var(--sky-wash); color:var(--sky-deep); }
+  .act-skip { background:var(--surface-2); color:var(--tx-3); }
+  .act-error { background:var(--danger-wash); color:var(--danger); }
+  .why { display:block; margin-top:3px; font-size:11.5px; color:var(--tx-2); line-height:1.4; }
+
+  .maps { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px; }
+  .map-row { display:flex; align-items:center; gap:8px; font-size:12.5px; }
+  .map-row b { flex:0 0 auto; max-width:44%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  /* Match the house field styling: a bare native select looks like a bug here. */
+  .map-row select { flex:1; min-width:0; padding:8px 10px; border-radius:9px;
+    border:1px solid var(--border-2); background:var(--surface-2); color:var(--tx); font:inherit; }
+  .map-row select:focus { outline:none; border-color:var(--coral);
+    box-shadow:0 0 0 3px var(--coral-wash); background:var(--surface); }
+  /* The paste fallback is a plain textarea outside .field, so style it here. */
+  #pasteBox { padding:10px 12px; border-radius:9px; border:1px solid var(--border-2);
+    background:var(--surface-2); color:var(--tx); resize:vertical; }
+  #pasteBox:focus { outline:none; border-color:var(--coral);
+    box-shadow:0 0 0 3px var(--coral-wash); background:var(--surface); }
+
+  .switch { display:flex; align-items:flex-start; gap:10px; padding:13px 15px; background:var(--surface-2);
+    border:1px solid var(--border); border-radius:11px; font-size:13px; cursor:pointer; }
+  .switch input { margin:2px 0 0; width:16px; height:16px; flex:0 0 auto; accent-color:var(--coral); }
+  .switch span { line-height:1.45; }
+  .switch small { display:block; color:var(--tx-2); font-size:11.5px; margin-top:2px; }
+
+  .filters { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px;
+    align-items:end; margin-bottom:16px; }
+
+  .offers { display:grid; gap:10px; max-height:520px; overflow-y:auto; padding:2px; }
+  .offer { display:grid; grid-template-columns:auto 74px 1fr auto; gap:12px; align-items:center;
+    background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:10px 12px; }
+  .offer.on { border-color:var(--coral); box-shadow:0 0 0 2px var(--coral-wash); }
+  .offer input[type=checkbox] { width:17px; height:17px; accent-color:var(--coral); }
+  .offer-img { width:74px; height:56px; border-radius:8px; background:var(--surface-2) center/cover no-repeat; }
+  /* Both are spans inside a span, so they need to be told to stack — otherwise
+     the hotel name and its details run together on one line. */
+  .offer-nm { display:block; font-size:13px; font-weight:700; line-height:1.3; }
+  .offer-meta { display:block; font-size:11.5px; color:var(--tx-2); margin-top:3px; }
+  .offer-price { text-align:right; font-size:15px; font-weight:800; white-space:nowrap; }
+  .offer-price small { display:block; font-size:10.5px; font-weight:600; color:var(--tx-3); }
+  .offer.done { opacity:.6; }
+
+  .runs { display:grid; gap:8px; }
+  .run { display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; padding:11px 13px;
+    background:var(--surface); border:1px solid var(--border); border-radius:11px; font-size:12.5px; }
+  .run-when { color:var(--tx-2); font-size:11.5px; }
+  @media (max-width:900px){ .routes { grid-template-columns:1fr; } }
+  @media (max-width:560px){
+    .offer { grid-template-columns:auto 1fr; }
+    .offer-img { display:none; }
+    .offer-price { text-align:left; grid-column:2; }
+  }
 </style>
 </head>
 <body>
@@ -302,6 +393,9 @@
     </button>
     <button class="nav-i" data-view="editor" id="navNew">
       <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Add a deal
+    </button>
+    <button class="nav-i" data-view="import">
+      <svg viewBox="0 0 24 24"><path d="M12 3v12M8 11l4 4 4-4M4 19h16"/></svg> Add deals in bulk
     </button>
     <button class="nav-i" data-view="embed">
       <svg viewBox="0 0 24 24"><path d="m8 18-6-6 6-6M16 6l6 6-6 6"/></svg> Embed on your site
@@ -558,6 +652,195 @@
         </div>
       </section>
 
+      <!-- ── bulk import ── -->
+      <section class="view" id="v-import">
+        <div class="lead">
+          <div>
+            <h2>Add deals in bulk</h2>
+            <p>Three ways to get your deals onto Tripbuster. Pick whichever suits how you already work.</p>
+          </div>
+        </div>
+
+        <div class="routes" id="routes">
+          <button class="route" type="button" data-route="manual" aria-pressed="false">
+            <svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            <h3>One at a time</h3>
+            <p>Fill in the full deal form yourself. Best when you have a handful of deals and want every detail right.</p>
+          </button>
+          <button class="route" type="button" data-route="sheet" aria-pressed="false">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>
+            <h3>Upload a spreadsheet</h3>
+            <p>Bring a CSV straight out of Excel or Google Sheets. We show you what we read before anything is saved.</p>
+          </button>
+          <button class="route" type="button" data-route="feed" aria-pressed="false" id="routeFeed">
+            <span class="pill" id="feedPill">Travelgenix</span>
+            <svg viewBox="0 0 24 24"><path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1.5"/></svg>
+            <h3>Pull from your live feed</h3>
+            <p>Already a Travelgenix client? Bring your live offers in automatically and keep their prices fresh.</p>
+          </button>
+        </div>
+
+        <!-- route: manual -->
+        <div class="card" id="panelManual" style="padding:20px;display:none">
+          <h3 style="margin:0 0 8px;font-size:14px;font-weight:800">Add one deal</h3>
+          <p style="margin:0 0 16px;font-size:13px;color:var(--tx-2)">
+            The full form covers everything a traveller sees: the hotel, the board, the flights, the pricing and your booking link.
+          </p>
+          <button class="btn btn-primary" type="button" id="goEditor">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Open the deal form
+          </button>
+        </div>
+
+        <!-- route: spreadsheet -->
+        <div id="panelSheet" style="display:none">
+          <div class="card" style="padding:20px;margin-bottom:16px">
+            <div class="drop" id="drop">
+              <h4>Drop your spreadsheet here</h4>
+              <p>A CSV from Excel, Numbers or Google Sheets. Up to 500 deals at a time.</p>
+              <div class="drop-acts">
+                <button class="btn btn-primary" type="button" id="pickFile">Choose a file</button>
+                <button class="btn btn-ghost" type="button" id="getTemplate">Download the template</button>
+              </div>
+              <input type="file" id="fileInput" accept=".csv,.tsv,.txt,text/csv,text/plain" hidden>
+            </div>
+            <details style="margin-top:16px">
+              <summary style="cursor:pointer;font-size:13px;font-weight:700">Or paste your rows instead</summary>
+              <textarea id="pasteBox" rows="6" placeholder="Paste from your spreadsheet, including the heading row"
+                style="width:100%;margin-top:10px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px"></textarea>
+              <button class="btn btn-ghost" type="button" id="usePaste" style="margin-top:10px">Use these rows</button>
+            </details>
+            <div class="note" style="margin-top:16px">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+              <span>
+                Save as <b>CSV UTF-8</b> so pound signs and accented resort names come through cleanly.
+                Dates are read <b>day first</b>, so 01/02/2027 means 1 February.
+                Put several values in one cell by separating them with a <b>|</b> bar.
+                Include a <b>reference</b> column and future uploads will update these same deals instead of adding copies.
+              </span>
+            </div>
+          </div>
+
+          <div class="card" id="mapCard" style="padding:20px;margin-bottom:16px;display:none">
+            <h3 style="margin:0 0 6px;font-size:14px;font-weight:800">Headings we did not recognise</h3>
+            <p style="margin:0 0 14px;font-size:12.5px;color:var(--tx-2)">
+              Tell us what these are, or leave them as “Ignore” and we will skip them.
+            </p>
+            <div class="maps" id="mapRows"></div>
+            <button class="btn btn-ghost" type="button" id="remap" style="margin-top:14px">Check again</button>
+          </div>
+
+          <div class="card" id="previewCard" style="padding:20px;display:none">
+            <div class="toolbar" style="margin-bottom:14px">
+              <h3 style="margin:0;font-size:14px;font-weight:800">What will happen</h3>
+              <span class="save-note" id="previewSummary" style="margin-left:auto"></span>
+            </div>
+            <div id="previewNotes"></div>
+            <div class="tw" style="margin-bottom:16px"><table class="tb" id="previewTable"></table></div>
+            <p class="save-note" id="previewMore" style="margin:-8px 0 16px"></p>
+            <label class="switch" style="margin-bottom:14px">
+              <input type="checkbox" id="publishSheet">
+              <span>Publish the deals marked live in my sheet
+                <small>Leave this off to bring everything in as drafts and check them first. Your plan's live limit still applies.</small>
+              </span>
+            </label>
+            <div class="editor-bar" style="justify-content:flex-end">
+              <button class="btn btn-ghost" type="button" id="cancelSheet">Start again</button>
+              <button class="btn btn-primary" type="button" id="doImport">Import these deals</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- route: live feed -->
+        <div id="panelFeed" style="display:none">
+          <!-- Not-a-client state: an offer, not an error. -->
+          <div class="card" id="feedLocked" style="padding:24px;display:none">
+            <h3 style="margin:0 0 8px;font-size:15px;font-weight:800">This one is for Travelgenix clients</h3>
+            <p style="margin:0 0 14px;font-size:13px;color:var(--tx-2);max-width:60ch">
+              Travelgenix powers the search and booking engine on travel agency websites. If your site runs on it,
+              Tripbuster can read your live offers directly: pick the ones you want to advertise, and their prices
+              stay in step with your feed instead of going stale.
+            </p>
+            <p style="margin:0 0 18px;font-size:13px;color:var(--tx-2);max-width:60ch">
+              You can still upload a spreadsheet or add deals by hand. Nothing here is locked behind it.
+            </p>
+            <div class="drop-acts" style="justify-content:flex-start">
+              <button class="btn btn-primary" type="button" data-route="sheet">Upload a spreadsheet instead</button>
+            </div>
+          </div>
+
+          <!-- Connected state. -->
+          <div id="feedLive" style="display:none">
+            <div class="card" style="padding:20px;margin-bottom:16px">
+              <div class="toolbar" style="margin-bottom:14px">
+                <h3 style="margin:0;font-size:14px;font-weight:800">Your live offers</h3>
+                <span class="save-note" id="feedMeta" style="margin-left:auto"></span>
+              </div>
+              <div class="filters">
+                <div class="field" style="margin:0">
+                  <label for="fCountry">Destination</label>
+                  <select id="fCountry"><option value="">Anywhere</option></select>
+                </div>
+                <div class="field" style="margin:0">
+                  <label for="fBoard">Board</label>
+                  <select id="fBoard"><option value="">Any board</option></select>
+                </div>
+                <div class="field" style="margin:0">
+                  <label for="fBudget">Up to (per person)</label>
+                  <input id="fBudget" type="number" min="1" step="10" placeholder="Any price">
+                </div>
+                <div class="field" style="margin:0">
+                  <label for="fNights">Nights</label>
+                  <select id="fNights">
+                    <option value="">Any length</option>
+                    <option value="2,4">2 to 4</option>
+                    <option value="5,7">5 to 7</option>
+                    <option value="8,14">8 to 14</option>
+                    <option value="15,28">15 or more</option>
+                  </select>
+                </div>
+                <div class="field" style="margin:0">
+                  <label for="fWithin">Departing</label>
+                  <select id="fWithin">
+                    <option value="">Any time</option>
+                    <option value="30">Within a month</option>
+                    <option value="90">Within 3 months</option>
+                    <option value="180">Within 6 months</option>
+                  </select>
+                </div>
+                <button class="btn btn-primary" type="button" id="feedSearch">Show offers</button>
+              </div>
+            </div>
+
+            <div class="card" style="padding:20px">
+              <div class="toolbar" style="margin-bottom:14px">
+                <button class="btn btn-ghost" type="button" id="selAll">Select all</button>
+                <button class="btn btn-ghost" type="button" id="selNone">Clear</button>
+                <span class="save-note" id="selCount" style="margin-left:auto"></span>
+              </div>
+              <div class="offers" id="offerList"><div class="empty">Choose your filters, then show offers.</div></div>
+              <label class="switch" style="margin:16px 0 14px">
+                <input type="checkbox" id="publishFeed">
+                <span>Publish these straight away
+                  <small>Leave off to bring them in as drafts. Your plan's live limit still applies.</small>
+                </span>
+              </label>
+              <div class="editor-bar" style="justify-content:space-between">
+                <button class="btn btn-ghost" type="button" id="resync">
+                  <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/></svg> Refresh prices on imported deals
+                </button>
+                <button class="btn btn-primary" type="button" id="doFeedImport">Import selected</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" id="historyCard" style="padding:20px;margin-top:16px;display:none">
+          <h3 style="margin:0 0 4px;font-size:14px;font-weight:800">Recent imports</h3>
+          <p style="margin:0 0 14px;font-size:12.5px;color:var(--tx-2)" id="historyLead"></p>
+          <div class="runs" id="runs"></div>
+        </div>
+      </section>
+
       <!-- ── embed ── -->
       <section class="view" id="v-embed">
         <div class="lead"><div><h2>Embed on your site</h2><p>Show your live Tripbuster deals on your own website. One line, no coding.</p></div></div>
@@ -660,6 +943,10 @@
       const err = new Error((data && data.error) || 'Something went wrong');
       err.status = res.status;
       err.fieldErrors = (data && data.errors) || null;
+      // The whole body travels with the error: a rejected import still returns
+      // the header list the mapping panel needs to offer a way forward, and the
+      // live feed returns connected:false rather than a plain failure.
+      err.data = data || null;
       throw err;
     }
     return data;
@@ -932,11 +1219,18 @@
     renderDeals();
   });
 
-  const TITLES = { deals: 'My deals', editor: 'Add a deal', embed: 'Embed on your site', plan: 'Your plan' };
+  const TITLES = { deals: 'My deals', editor: 'Add a deal', import: 'Add deals in bulk',
+    embed: 'Embed on your site', plan: 'Your plan' };
   function show(view) {
     document.querySelectorAll('.view').forEach((v) => v.classList.remove('on'));
     const el = $('v-' + view);
     if (el) el.classList.add('on');
+    // Land on the spreadsheet route, the one most agents come here for, rather
+    // than on three cards above an empty panel.
+    if (view === 'import') {
+      if (!imp.route) setRoute('sheet');
+      loadHistory();
+    }
     document.querySelectorAll('.nav-i').forEach((n) => {
       if (n.getAttribute('data-view') === view) n.setAttribute('aria-current', 'page');
       else n.removeAttribute('aria-current');
@@ -1087,6 +1381,443 @@
   }
   $('saveLive').addEventListener('click', () => save('live'));
   $('saveDraft').addEventListener('click', () => save('draft'));
+
+  // ══ bulk import ═══════════════════════════════════════════
+  // Three routes, one deal table. The spreadsheet route always previews before
+  // it writes; the live-feed route sends only the references of the offers the
+  // agent ticked, and the server rebuilds each deal from the cache itself.
+  const imp = {
+    route: null, text: '', filename: null, mapping: {},
+    columns: [], unmapped: [], offers: [], picked: new Set(), loadedFeed: false,
+  };
+
+  function setRoute(route) {
+    imp.route = route;
+    document.querySelectorAll('#routes .route').forEach((b) => {
+      b.setAttribute('aria-pressed', String(b.getAttribute('data-route') === route));
+    });
+    $('panelManual').style.display = route === 'manual' ? '' : 'none';
+    $('panelSheet').style.display = route === 'sheet' ? '' : 'none';
+    $('panelFeed').style.display = route === 'feed' ? '' : 'none';
+    if (route === 'feed' && !imp.loadedFeed) loadFeed();
+  }
+
+  $('routes').addEventListener('click', (e) => {
+    const b = e.target.closest('.route');
+    if (b && !b.disabled) setRoute(b.getAttribute('data-route'));
+  });
+  // The locked panel offers the spreadsheet route as a way forward.
+  $('feedLocked').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-route]');
+    if (b) setRoute(b.getAttribute('data-route'));
+  });
+  $('goEditor').addEventListener('click', () => { openEditor(null); show('editor'); });
+
+  // ── the template download ─────────────────────────────────
+  // Fetched rather than linked: the endpoint needs the bearer token, which a
+  // plain anchor cannot send.
+  $('getTemplate').addEventListener('click', async () => {
+    try {
+      const res = await fetch('/api/tripbuster/import?format=csv', {
+        headers: { Authorization: 'Bearer ' + state.token },
+      });
+      if (!res.ok) throw new Error('Could not fetch the template');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'tripbuster-deals-template.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast('Template downloaded');
+    } catch (err) { toast(err.message, 'err'); }
+  });
+
+  // ── picking a file ────────────────────────────────────────
+  $('pickFile').addEventListener('click', () => $('fileInput').click());
+  $('fileInput').addEventListener('change', (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (f) readFile(f);
+  });
+
+  const drop = $('drop');
+  ['dragenter', 'dragover'].forEach((ev) => drop.addEventListener(ev, (e) => {
+    e.preventDefault();
+    drop.classList.add('over');
+  }));
+  ['dragleave', 'drop'].forEach((ev) => drop.addEventListener(ev, (e) => {
+    e.preventDefault();
+    drop.classList.remove('over');
+  }));
+  drop.addEventListener('drop', (e) => {
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) readFile(f);
+  });
+
+  function readFile(file) {
+    const reader = new FileReader();
+    reader.onerror = () => toast('Could not read that file', 'err');
+    reader.onload = () => {
+      imp.text = String(reader.result || '');
+      imp.filename = file.name;
+      imp.mapping = {};
+      runPreview();
+    };
+    // UTF-8 covers the template and anything saved as "CSV UTF-8". A sheet saved
+    // in a legacy Windows encoding may show odd characters, which is why the
+    // help text asks for UTF-8 and why the preview exists.
+    reader.readAsText(file, 'UTF-8');
+  }
+
+  $('usePaste').addEventListener('click', () => {
+    const t = $('pasteBox').value;
+    if (!t.trim()) { toast('Paste your rows first', 'err'); return; }
+    imp.text = t;
+    imp.filename = 'pasted rows';
+    imp.mapping = {};
+    runPreview();
+  });
+
+  $('cancelSheet').addEventListener('click', () => {
+    imp.text = '';
+    imp.filename = null;
+    imp.mapping = {};
+    $('previewCard').style.display = 'none';
+    $('mapCard').style.display = 'none';
+    $('fileInput').value = '';
+    $('pasteBox').value = '';
+  });
+
+  $('remap').addEventListener('click', () => {
+    $('mapRows').querySelectorAll('select').forEach((s) => {
+      imp.mapping[s.getAttribute('data-header')] = s.value;
+    });
+    runPreview();
+  });
+
+  // ── preview ───────────────────────────────────────────────
+  async function runPreview() {
+    if (!imp.text.trim()) return;
+    try {
+      const data = await api('/api/tripbuster/import', {
+        method: 'POST',
+        body: { mode: 'preview', text: imp.text, filename: imp.filename, mapping: imp.mapping },
+      });
+      imp.columns = data.headers || [];
+      imp.unmapped = data.unmapped || [];
+      renderMapping(data);
+      renderPreview(data);
+    } catch (err) {
+      if (err.message === 'unauthorised') return;
+      $('previewCard').style.display = 'none';
+      // A 422 carries the header list, so the mapping panel can still help the
+      // agent point their columns at the right fields instead of dead-ending.
+      const d = err.data || {};
+      if (err.status === 422 && d.headers) {
+        renderMapping({ headers: d.headers, unmapped: d.unmapped || [] });
+      }
+      toast(err.message, 'err');
+    }
+  }
+
+  const COLUMN_OPTIONS = () => imp.allColumns || [];
+
+  async function ensureColumns() {
+    if (imp.allColumns) return;
+    try {
+      const meta = await api('/api/tripbuster/import');
+      imp.allColumns = meta.columns || [];
+    } catch (e) { imp.allColumns = []; }
+  }
+
+  async function renderMapping(data) {
+    const unmapped = data.unmapped || [];
+    const card = $('mapCard');
+    if (!unmapped.length) { card.style.display = 'none'; return; }
+    await ensureColumns();
+    const opts = COLUMN_OPTIONS()
+      .map((c) => '<option value="' + esc(c.col) + '">' + esc(c.col.replace(/_/g, ' ')) + '</option>')
+      .join('');
+    $('mapRows').innerHTML = unmapped.map((h) => (
+      '<div class="map-row"><b title="' + esc(h) + '">' + esc(h) + '</b>'
+      + '<select data-header="' + esc(h) + '"><option value="">Ignore</option>' + opts + '</select></div>'
+    )).join('');
+    // Restore anything the agent already chose, so "check again" is not a reset.
+    $('mapRows').querySelectorAll('select').forEach((s) => {
+      const chosen = imp.mapping[s.getAttribute('data-header')];
+      if (chosen) s.value = chosen;
+    });
+    card.style.display = '';
+  }
+
+  const ACT_LABEL = { create: 'New', update: 'Update', skip: 'No change', error: 'Skipped' };
+
+  function renderPreview(data) {
+    const s = data.summary || {};
+    $('previewSummary').textContent =
+      [s.create ? s.create + ' new' : '', s.update ? s.update + ' updated' : '',
+        s.skip ? s.skip + ' unchanged' : '', s.errors ? s.errors + ' skipped' : '']
+        .filter(Boolean).join(' · ') || 'Nothing to import';
+
+    $('previewNotes').innerHTML = (data.notes || []).map((n) => (
+      '<div class="note" style="margin-bottom:10px">'
+      + '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>'
+      + '<span>' + esc(n) + '</span></div>'
+    )).join('');
+
+    const rows = (data.rows || []).map((r) => {
+      const d = r.deal || {};
+      const why = [].concat(
+        (r.errors || []).map((e) => e.message),
+        r.problems || [],
+      );
+      const cls = r.action === 'error' ? ' class="bad"' : (why.length ? ' class="warn"' : '');
+      const price = d.price_from != null
+        ? (SYM[d.currency || 'GBP'] || '£') + Number(d.price_from).toLocaleString('en-GB') : '—';
+      const dates = d.travel_from ? esc(d.travel_from) + (d.travel_until ? ' to ' + esc(d.travel_until) : '') : '—';
+      return '<tr' + cls + '>'
+        + '<td class="tnum">' + r.row + '</td>'
+        + '<td><span class="act act-' + esc(r.action) + '">' + esc(ACT_LABEL[r.action] || r.action) + '</span></td>'
+        + '<td>' + esc(r.title || '—')
+        + (why.length ? '<span class="why">' + esc(why.join(' ')) + '</span>' : '') + '</td>'
+        + '<td>' + esc(d.resort || '—') + '</td>'
+        + '<td class="tnum">' + esc(price) + '</td>'
+        + '<td>' + dates + '</td>'
+        + '<td>' + esc(d.status === 'live' ? 'Live' : (d.status || 'draft')) + '</td>'
+        + '</tr>';
+    }).join('');
+
+    $('previewTable').innerHTML =
+      '<thead><tr><th>Row</th><th>Action</th><th>Deal</th><th>Resort</th>'
+      + '<th>Price</th><th>Travel</th><th>Status</th></tr></thead><tbody>' + rows + '</tbody>';
+
+    const hidden = (s.total || 0) - (data.rowsShown || 0);
+    $('previewMore').textContent = hidden > 0
+      ? hidden + ' more row' + (hidden === 1 ? '' : 's') + ' will be imported the same way.' : '';
+
+    $('doImport').disabled = !(s.create || s.update);
+    $('previewCard').style.display = '';
+  }
+
+  // ── commit ────────────────────────────────────────────────
+  $('doImport').addEventListener('click', async () => {
+    const btn = $('doImport');
+    btn.disabled = true;
+    btn.textContent = 'Importing…';
+    try {
+      const data = await api('/api/tripbuster/import', {
+        method: 'POST',
+        body: {
+          mode: 'commit', text: imp.text, filename: imp.filename,
+          mapping: imp.mapping, publish: $('publishSheet').checked,
+        },
+      });
+      const bits = [];
+      if (data.created) bits.push(data.created + ' added');
+      if (data.updated) bits.push(data.updated + ' updated');
+      if (data.failed) bits.push(data.failed + ' skipped');
+      toast(bits.join(', ') || 'Nothing to import', data.failed && !data.created && !data.updated ? 'err' : '');
+      $('cancelSheet').click();
+      await refresh();
+      await loadHistory();
+    } catch (err) {
+      if (err.message !== 'unauthorised') toast(err.message, 'err');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Import these deals';
+    }
+  });
+
+  // ── the live feed ─────────────────────────────────────────
+  async function loadFeed() {
+    imp.loadedFeed = true;
+    try {
+      const data = await api('/api/tripbuster/offer-import');
+      $('feedLocked').style.display = 'none';
+      $('feedLive').style.display = '';
+      const cSel = $('fCountry');
+      cSel.innerHTML = '<option value="">Anywhere</option>'
+        + (data.countries || []).map((c) => '<option value="' + esc(c.code) + '">' + esc(c.name) + '</option>').join('');
+      $('fBoard').innerHTML = '<option value="">Any board</option>'
+        + (data.boards || []).map((b) => '<option value="' + esc(b) + '">' + esc(b) + '</option>').join('');
+      $('feedPill').textContent = 'Connected';
+      renderOffers(data);
+    } catch (err) {
+      if (err.message === 'unauthorised') return;
+      // connected:false is a state with a panel, not a failure to report loudly.
+      if (err.status === 403) {
+        $('feedLive').style.display = 'none';
+        $('feedLocked').style.display = '';
+        $('feedPill').textContent = 'Travelgenix';
+        return;
+      }
+      $('offerList').innerHTML = '<div class="empty">' + esc(err.message) + '</div>';
+      toast(err.message, 'err');
+    }
+  }
+
+  function feedFilters() {
+    const nights = ($('fNights').value || '').split(',');
+    const q = {};
+    if ($('fCountry').value) q.countries = $('fCountry').value;
+    if ($('fBoard').value) q.boards = $('fBoard').value;
+    if ($('fBudget').value) q.budgetMax = $('fBudget').value;
+    if (nights[0]) { q.nightsMin = nights[0]; q.nightsMax = nights[1] || ''; }
+    if ($('fWithin').value) q.withinDays = $('fWithin').value;
+    return q;
+  }
+
+  $('feedSearch').addEventListener('click', async () => {
+    const btn = $('feedSearch');
+    btn.disabled = true;
+    try {
+      const qs = new URLSearchParams(feedFilters()).toString();
+      const data = await api('/api/tripbuster/offer-import' + (qs ? '?' + qs : ''));
+      imp.picked.clear();
+      renderOffers(data);
+    } catch (err) {
+      if (err.message !== 'unauthorised') toast(err.message, 'err');
+    } finally { btn.disabled = false; }
+  });
+
+  function renderOffers(data) {
+    imp.offers = data.offers || [];
+    const meta = [];
+    if (data.totalMatched != null) meta.push(data.totalMatched + ' matching offer' + (data.totalMatched === 1 ? '' : 's'));
+    if (when(data.refreshedAt)) meta.push('feed updated ' + when(data.refreshedAt));
+    $('feedMeta').textContent = meta.join(' · ');
+
+    if (!imp.offers.length) {
+      $('offerList').innerHTML = '<div class="empty">No offers match those filters. Try widening them.</div>';
+      updateSelCount();
+      return;
+    }
+    $('offerList').innerHTML = imp.offers.map((o) => {
+      const price = o.price != null
+        ? (SYM[o.currency || 'GBP'] || '£') + Number(o.price).toLocaleString('en-GB') : '—';
+      const bits = [o.board, o.nights ? o.nights + ' nights' : '', o.departs, o.stars ? o.stars + ' star' : '']
+        .filter(Boolean).join(' · ');
+      return '<label class="offer' + (o.imported ? ' done' : '') + '" data-ref="' + esc(o.ref) + '">'
+        + '<input type="checkbox" data-ref="' + esc(o.ref) + '"' + (o.imported ? ' disabled' : '') + '>'
+        + '<span class="offer-img"' + (o.image ? ' style="background-image:url(' + esc(o.image) + ')"' : '') + '></span>'
+        + '<span><span class="offer-nm">' + esc(o.title) + '</span>'
+        + '<span class="offer-meta">' + esc(bits) + (o.imported ? ' · already imported' : '') + '</span></span>'
+        + '<span class="offer-price">' + esc(price) + '<small>per person</small></span>'
+        + '</label>';
+    }).join('');
+    updateSelCount();
+  }
+
+  $('offerList').addEventListener('change', (e) => {
+    const cb = e.target.closest('input[type=checkbox]');
+    if (!cb) return;
+    const ref = cb.getAttribute('data-ref');
+    if (cb.checked) imp.picked.add(ref); else imp.picked.delete(ref);
+    const row = cb.closest('.offer');
+    if (row) row.classList.toggle('on', cb.checked);
+    updateSelCount();
+  });
+
+  function setAll(on) {
+    imp.picked.clear();
+    $('offerList').querySelectorAll('input[type=checkbox]:not([disabled])').forEach((cb) => {
+      cb.checked = on;
+      const row = cb.closest('.offer');
+      if (row) row.classList.toggle('on', on);
+      if (on) imp.picked.add(cb.getAttribute('data-ref'));
+    });
+    updateSelCount();
+  }
+  $('selAll').addEventListener('click', () => setAll(true));
+  $('selNone').addEventListener('click', () => setAll(false));
+
+  function updateSelCount() {
+    const n = imp.picked.size;
+    $('selCount').textContent = n ? n + ' selected' : 'Nothing selected yet';
+    $('doFeedImport').disabled = n === 0;
+  }
+
+  $('doFeedImport').addEventListener('click', async () => {
+    const btn = $('doFeedImport');
+    btn.disabled = true;
+    btn.textContent = 'Importing…';
+    try {
+      const data = await api('/api/tripbuster/offer-import', {
+        method: 'POST',
+        body: { refs: Array.from(imp.picked), publish: $('publishFeed').checked },
+      });
+      const bits = [];
+      if (data.created) bits.push(data.created + ' added');
+      if (data.updated) bits.push(data.updated + ' refreshed');
+      if (data.skipped) bits.push(data.skipped + ' no longer available');
+      toast(bits.join(', ') || 'Nothing imported');
+      (data.problems || []).slice(0, 1).forEach((p) => { if (p.message) toast(p.message, 'err'); });
+      imp.picked.clear();
+      await refresh();
+      await loadHistory();
+      $('feedSearch').click();
+    } catch (err) {
+      if (err.message !== 'unauthorised') toast(err.message, 'err');
+    } finally {
+      btn.textContent = 'Import selected';
+      updateSelCount();
+    }
+  });
+
+  $('resync').addEventListener('click', async () => {
+    const btn = $('resync');
+    btn.disabled = true;
+    try {
+      const data = await api('/api/tripbuster/offer-import', { method: 'POST', body: { resync: true } });
+      if (!data.checked) toast('Nothing imported from the feed yet');
+      else {
+        const bits = [data.resynced + ' refreshed'];
+        if (data.paused) bits.push(data.paused + ' paused, no longer on sale');
+        toast(bits.join(', '));
+      }
+      await refresh();
+      await loadHistory();
+    } catch (err) {
+      if (err.message !== 'unauthorised') toast(err.message, 'err');
+    } finally { btn.disabled = false; }
+  });
+
+  // ── import history ────────────────────────────────────────
+  const SOURCE_LABEL = { spreadsheet: 'Spreadsheet', live_cache: 'Live feed', manual: 'Added by hand' };
+
+  /** Dates are only ever decoration here, so never show the agent "Invalid Date". */
+  function when(value) {
+    if (!value) return '';
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? '' : d.toLocaleString('en-GB');
+  }
+
+  async function loadHistory() {
+    try {
+      const data = await api('/api/tripbuster/import?history=1');
+      const runs = data.runs || [];
+      const by = data.bySource;
+      $('historyLead').textContent = by
+        ? [by.manual + ' added by hand', by.spreadsheet + ' from a spreadsheet', by.live_cache + ' from your live feed']
+          .join(' · ')
+        : '';
+      if (!runs.length) { $('historyCard').style.display = by && by.total ? '' : 'none'; }
+      else $('historyCard').style.display = '';
+      $('runs').innerHTML = runs.map((r) => {
+        const bits = [];
+        if (r.created_count) bits.push(r.created_count + ' added');
+        if (r.updated_count) bits.push(r.updated_count + ' updated');
+        if (r.skipped_count) bits.push(r.skipped_count + ' unchanged');
+        if (r.failed_count) bits.push(r.failed_count + ' skipped');
+        return '<div class="run"><span><b>' + esc(SOURCE_LABEL[r.source] || r.source) + '</b>'
+          + (r.filename ? ' · ' + esc(r.filename) : '')
+          + '<span class="why">' + esc(bits.join(', ') || 'nothing changed') + '</span></span>'
+          + '<span class="run-when">' + esc(when(r.created_at)) + '</span></div>';
+      }).join('');
+    } catch (err) { /* history is a nicety; never block the page on it */ }
+  }
 
   // ── boot ──────────────────────────────────────────────────
   const existing = loadSession();

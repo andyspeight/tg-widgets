@@ -16,15 +16,11 @@
 import { requireAgent } from '../_lib/tripbuster/auth.js';
 import { validateDeal } from '../_lib/tripbuster/deal-schema.js';
 import { tbConfigured, tbSelect, tbInsert, tbUpdate, tbDelete, tbRpc } from '../_lib/tripbuster/db.js';
-
-/**
- * Provisional live-deal allowance per plan. -1 is unlimited.
- *
- * These live here rather than in the database because the pricing model is still
- * an open decision — changing a number must not need a migration. They mirror the
- * mockups; treat them as placeholders until pricing is settled.
- */
-const LIVE_DEAL_LIMITS = { Spark: 1, Boost: 5, Ignite: -1, Bespoke: -1 };
+// The publish rules and agent-default inheritance are shared with the two bulk
+// importers, so all three ingestion routes behave identically.
+import {
+  allowanceFor, loadAgent, dealCounts as counts, applyAgentDefaults, publishBlockers,
+} from '../_lib/tripbuster/deal-write.js';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -44,53 +40,6 @@ const DEAL_COLUMNS = [
   'clickout_url', 'booking_phone', 'protection_type', 'atol_number', 'abta_number', 'terms_url',
   'source', 'external_ref', 'discount_pct', 'created_at', 'updated_at', 'published_at',
 ].join(',');
-
-function allowanceFor(plan) {
-  return Object.prototype.hasOwnProperty.call(LIVE_DEAL_LIMITS, plan) ? LIVE_DEAL_LIMITS[plan] : 0;
-}
-
-async function counts(agentId) {
-  const data = await tbRpc('tb_agent_deal_counts', { p_agent_id: agentId });
-  return data || { live: 0, draft: 0, paused: 0, expired: 0, total: 0 };
-}
-
-/** Load the agent's own fallbacks, used to complete a deal that omits them. */
-async function loadAgent(agentId) {
-  const rows = await tbSelect('agents', {
-    select: 'id,slug,name,plan,status,default_clickout_url,atol_number,abta_number,protection_type',
-    id: `eq.${agentId}`,
-    limit: 1,
-  });
-  return Array.isArray(rows) && rows[0] ? rows[0] : null;
-}
-
-/**
- * Fill the blanks a deal can inherit from its agent, then decide whether it is
- * publishable. The database refuses a live deal without a price and a link; doing
- * the inheritance here means "no booking link" falls back to the agent's own site
- * instead of being rejected, which is what the spreadsheet importer promises.
- */
-function applyAgentDefaults(deal, agent) {
-  if (!deal.clickout_url && agent.default_clickout_url) deal.clickout_url = agent.default_clickout_url;
-  if (!deal.atol_number && agent.atol_number) deal.atol_number = agent.atol_number;
-  if (!deal.abta_number && agent.abta_number) deal.abta_number = agent.abta_number;
-  if (!deal.protection_type && agent.protection_type) deal.protection_type = agent.protection_type;
-  return deal;
-}
-
-function publishBlockers(merged) {
-  const problems = [];
-  if (merged.price_from === null || merged.price_from === undefined) {
-    problems.push({ field: 'price_from', message: 'Add a price before this deal can go live' });
-  }
-  if (!merged.clickout_url) {
-    problems.push({
-      field: 'clickout_url',
-      message: 'Add a booking link, or set a default website on your account, before this deal can go live',
-    });
-  }
-  return problems;
-}
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');

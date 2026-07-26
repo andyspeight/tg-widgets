@@ -69,6 +69,8 @@ session secret without resetting click de-duplication.
 | `GET/POST/PATCH/DELETE /api/tripbuster/my-deals` | agent token | Agent-scoped deal management. `?days=` sets the stats window. |
 | `POST /api/tripbuster/click` | public | Records a click-out and returns the agent's booking URL. |
 | `POST /api/tripbuster/impressions` | public | Batched impression counts, one call per widget render. |
+| `GET/POST /api/tripbuster/import` | agent token | Spreadsheet import. `?format=csv` is the template, `?history=1` past runs. `mode=preview` writes nothing. |
+| `GET/POST /api/tripbuster/offer-import` | agent token | Live offer cache. `GET` browses, `POST` imports chosen refs, `{resync:true}` refreshes prices. |
 
 Public read endpoints send a wildcard CORS origin because the widget runs on
 customer sites and the data is deliberately public. The authenticated endpoints
@@ -112,10 +114,11 @@ impressions.
 ## Tests
 
 ```
-npm run test:tripbuster
+npm run test:tripbuster           # 188 assertions, no network needed
+npm run test:tripbuster-import    # 54 assertions, drives the import UI in Chromium
 ```
 
-86 assertions across four layers:
+`test:tripbuster` covers six layers:
 
 - payload validation (whitelisting, enums, URL and date rules)
 - token handling (tampering, expiry, scope confusion)
@@ -124,6 +127,25 @@ npm run test:tripbuster
 - tracking and privacy: that a raw IP never reaches a stored row, that the hash is
   salted, that a repeat click is recorded but not billable, and that a crawler's
   impressions are not counted
+- the spreadsheet parser: quoted fields, embedded newlines, doubled quotes, BOMs,
+  CRLF, tab and semicolon delimiters, European decimal commas, Excel date serials,
+  day-first dates, and the header synonyms agents actually type
+- the live offer cache: staleness, filtering, dedupe across pools, the
+  non-Travelgenix gate, and that a resync refreshes prices without touching copy
+
+Both stand-ins are **real HTTP servers on localhost** — PostgREST and Upstash REST
+— rather than stubbed modules, so the code under test runs its own fetch, parse
+and error paths. The PostgREST stand-in enforces the UNIQUE
+`(agent_id, external_ref)` index from migration 006, so duplicate handling is
+exercised rather than taken on trust.
+
+`test:tripbuster-import` drives the whole import journey in a real browser:
+template download, a genuine file upload through `FileReader`, mapping an
+unrecognised heading, the preview, the commit, a re-upload that updates instead of
+duplicating, the publish switch, the non-Travelgenix upsell, the connected offer
+browser, an import, a resync, and the history list. It asserts no uncaught
+JavaScript anywhere in the journey. Screenshots go to a temporary directory, or to
+`TB_SHOT_DIR` if you set one.
 
 The advertiser dashboard is additionally driven in a real browser with puppeteer
 (33 assertions), covering sign-in, publishing, the plan limit, and the widget's
@@ -151,6 +173,7 @@ Apply in order. They are idempotent enough to run on a fresh project.
 | `003_search_function.sql` | `tb_search_deals` — the single consumer read path |
 | `004_agent_auth.sql` | `password_hash` / `last_login_at` on agents; `tb_agent_deal_counts` |
 | `005_tracking.sql` | `tb_record_click`, `tb_record_impressions`, `tb_agent_stats` |
+| `006_import.sql` | UNIQUE `(agent_id, external_ref)`; `deals.synced_at`; `import_runs`; `tb_agent_source_counts` |
 
 ## Tables
 
@@ -177,6 +200,56 @@ Apply in order. They are idempotent enough to run on a fresh project.
 - **`deal_daily_stats`** — impressions run orders of magnitude higher than clicks
   and are only ever read in aggregate, so they are upserted into a daily counter
   instead of stored per event.
+- **`import_runs`** — one row per bulk import, with what it created, updated,
+  skipped and refused. Counts are stored rather than derived because deals can be
+  edited or deleted afterwards and the run should still say what happened at the
+  time. Andy relies on the dashboard as an external record, so an import has to
+  be readable back later rather than living only in a toast that has gone.
+
+## The three ingestion routes
+
+Every route ends in the same `deals` table and every route applies the same
+publish rules, which is why those rules live in
+`api/_lib/tripbuster/deal-write.js` rather than in any one handler. `source`
+records which route created a deal and is always set server-side — a caller
+cannot forge it.
+
+| `source` | Route | Dedupe key |
+|---|---|---|
+| `manual` | the deal form in the dashboard | none |
+| `spreadsheet` | CSV upload | `external_ref` = `sheet:<reference>` |
+| `live_cache` | the Travelgenix offer cache | `external_ref` = `cache:<id>\|<origin>\|<type>` |
+
+`external_ref` is UNIQUE per agent (migration 006). That is what makes
+re-uploading the same sheet an **update** rather than a second copy of every
+deal, and it turns two simultaneous uploads into a reported conflict instead of
+silent duplicates. The two namespaces cannot collide.
+
+**The spreadsheet route always previews before it writes.** The preview shows the
+dates and prices we read back, because a spreadsheet is a blunt instrument and
+`01/02/2027` needs to be visibly 1 February before anything is saved. Dates are
+read **day first**, and a row with more cells than the header is reported rather
+than guessed at — that pattern almost always means an unquoted comma in a price,
+which would otherwise import `£1,299` as `1`. **Commit re-parses the raw text**
+and never trusts the normalised rows the preview returned.
+
+**The live-cache route reads Redis directly** rather than calling
+`GET /api/cached-offers`. That endpoint is public and rate-limited per IP, so a
+server-to-server call would put every agent behind one Vercel egress IP and spend
+the budget that exists to protect customer widgets. The contract is the stored
+offer shape written by `normaliseOffer` in `api/cron/refresh-map-offers.js`, and
+the same 70-hour staleness rule is enforced independently on read so a stalled
+cron can never let a stale price reach a traveller.
+
+The client sends only the **references** of the offers it wants; the deal itself
+is rebuilt server-side from the cache. A hand-edited request can choose which
+offers to import but never what they say.
+
+**A resync refreshes prices, not copy.** Only the fields in `RESYNC_FIELDS` move
+(price, was-price, currency, travel window, nights, board). An agent who rewrote a
+headline or added selling points keeps that work. An offer that has left the feed
+gets its deal **paused, not deleted** — the holiday is off sale, but the agent's
+edits are still worth keeping.
 
 ## Plan limits are deliberately not in the schema
 
