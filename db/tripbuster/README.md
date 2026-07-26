@@ -175,6 +175,42 @@ Apply in order. They are idempotent enough to run on a fresh project.
 | `005_tracking.sql` | `tb_record_click`, `tb_record_impressions`, `tb_agent_stats` |
 | `006_import.sql` | UNIQUE `(agent_id, external_ref)`; `deals.synced_at`; `import_runs`; `tb_agent_source_counts` |
 
+## Demo data
+
+```
+db/tripbuster/seed-demo.sql
+```
+
+Three invented agencies, 34 deals (26 live, 6 draft, 2 paused) across 11
+countries, and 30 days of traffic. Safe to re-run: it clears and rebuilds only
+what belongs to those three agencies, so it doubles as a reset button.
+
+Four properties are advertised by more than one agency on purpose, because the
+multi-agent price compare is the thing worth showing:
+
+| Property | Advertised by |
+|---|---|
+| Sol Pelicanos Ocean, Benidorm | all three, at £329 / £342 / £355 |
+| Balaia Golf Village, Albufeira | Sunseeker, Coastline |
+| Louis Phaethon Beach, Paphos | Coastline, Jetaway |
+| Melia Costa del Sol, Torremolinos | Sunseeker, Coastline |
+
+Each agency is set up to show a different part of the product: Coastline carries
+a `tg_client_email` so the live-feed import is connected for them and the upsell
+panel shows for the other two, and Jetaway sits on Boost with exactly its 5 live
+deals used so the plan limit is demonstrable rather than described.
+
+**Clicks are expanded from `deal_daily_stats`, never invented alongside it.**
+`tb_agent_stats` reads impressions and clicks from the daily table and billable
+clicks from `click_events`, so generating the two independently produces an
+impossible click-through rate — which is exactly what happened the first time
+this was seeded. Randomness comes from hashes of each row rather than `random()`,
+so re-running gives the same demo and a screenshot stays true.
+
+Sign-in is **not** part of the seed: no working credential belongs in the repo.
+The file ends with the one statement to run afterwards, and the one to clear the
+hashes again before anything is exposed publicly.
+
 ## Tables
 
 - **`agents`** — the advertisers. Slug, contact details, their own ATOL/ABTA
