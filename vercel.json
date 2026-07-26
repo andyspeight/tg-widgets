@@ -277,6 +277,10 @@
       "destination": "/demo-whatsapp.html"
     },
     {
+      "source": "/demo-tripbuster",
+      "destination": "/demo-tripbuster.html"
+    },
+    {
       "source": "/demo-hours",
       "destination": "/demo-hours.html"
     },
@@ -1139,6 +1143,23 @@
     },
     {
       "source": "/widget-whatsapp.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-tripbuster.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",

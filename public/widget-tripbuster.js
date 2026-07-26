@@ -32,7 +32,17 @@
  *     ]
  *   }
  *
+ * Live deals:
+ *   Add data-tg-agent="<agent-slug>" (or agentSlug in config) and the widget
+ *   pulls that agent's live deals from /api/tripbuster/deals instead of needing
+ *   them embedded in the config. An explicit `deals` array always wins, so
+ *   inline config stays useful for previews and tests.
+ *
+ *   <div data-tg-widget="tripbuster" data-tg-agent="sunseeker-travel"></div>
+ *
  * Changelog:
+ *   v1.1.0 (Jul 2026) — Live deal feed: data-tg-agent / config.agentSlug fetches
+ *     the agent's live deals from the Tripbuster API, with maxDeals to cap them.
  *   v1.0.0 (Jul 2026) — First cut. Grid + list layouts, discount auto-calc,
  *     protection badge, CSP-safe click-out, Shadow DOM isolation, light/dark.
  */
@@ -57,8 +67,21 @@
     return '/api/widget-config';
   }
 
+  // The deals feed lives alongside the config API on the same deployment, so it
+  // is derived from the same origin rather than configured twice.
+  function resolveDealsApi() {
+    if (typeof window !== 'undefined' && window.__TG_TRIPBUSTER_API__) return window.__TG_TRIPBUSTER_API__;
+    try {
+      const origin = new URL(resolveApiBase(), (typeof location !== 'undefined' ? location.href : undefined)).origin;
+      return origin + '/api/tripbuster/deals';
+    } catch (e) {
+      return '/api/tripbuster/deals';
+    }
+  }
+
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.0';
+  const DEALS_API = resolveDealsApi();
+  const VERSION = '1.1.0';
 
   // ── Helpers ─────────────────────────────────────────────────
   function esc(s) {
@@ -258,6 +281,8 @@
     showAtol: true,
     ctaLabel: 'View deal',
     credit: true,
+    agentSlug: '',
+    maxDeals: 6,
     deals: []
   };
 
@@ -381,6 +406,36 @@
   }
 
   // ── Auto-initializer ────────────────────────────────────────
+  /**
+   * Mount one container. Deals come from whichever source is available, in
+   * priority order: an explicit `deals` array in the config, otherwise the live
+   * feed for the agent named by data-tg-agent / config.agentSlug.
+   */
+  async function mount(el, cfg) {
+    const config = Object.assign({}, cfg || {});
+    const slug = el.getAttribute('data-tg-agent') || config.agentSlug || '';
+    const hasOwnDeals = Array.isArray(config.deals) && config.deals.length > 0;
+
+    if (slug && !hasOwnDeals) {
+      const limit = num(config.maxDeals, 1, 60, 6);
+      try {
+        const res = await fetch(DEALS_API + '?agent=' + encodeURIComponent(slug) + '&limit=' + limit);
+        if (res.ok) {
+          const data = await res.json();
+          config.deals = (data && Array.isArray(data.deals)) ? data.deals : [];
+        } else {
+          console.warn('[TG Tripbuster] deals feed returned', res.status);
+          config.deals = [];
+        }
+      } catch (e) {
+        // A failed feed shows the empty state rather than breaking the host page.
+        console.warn('[TG Tripbuster] deals feed error', e && e.message);
+        config.deals = [];
+      }
+    }
+    new TGTripbusterWidget(el, config);
+  }
+
   async function init() {
     const containers = document.querySelectorAll('[data-tg-widget="tripbuster"]');
     for (const el of containers) {
@@ -390,7 +445,7 @@
       const inline = el.getAttribute('data-tg-config');
       if (inline) {
         try {
-          new TGTripbusterWidget(el, JSON.parse(inline));
+          await mount(el, JSON.parse(inline));
           continue;
         } catch (e) {
           console.warn('[TG Tripbuster] invalid data-tg-config', e);
@@ -403,12 +458,16 @@
           const res = await fetch(API_BASE + '?id=' + encodeURIComponent(id));
           if (!res.ok) throw new Error('Config load failed');
           const data = await res.json();
-          new TGTripbusterWidget(el, (data && data.config) ? data.config : data);
+          await mount(el, (data && data.config) ? data.config : data);
         } catch (e) {
           console.warn('[TG Tripbuster] remote config error', e);
           el.textContent = '';
         }
+        continue;
       }
+
+      // No inline config and no id: still valid if the agent is named directly.
+      if (el.getAttribute('data-tg-agent')) await mount(el, {});
     }
   }
 

@@ -64,6 +64,20 @@ export function limitsFor(event) {
         { name: 'm', max: envInt('RL_POPUP_PER_MIN', 20), seconds: 60 },
         { name: 'h', max: envInt('RL_POPUP_PER_HR', 200), seconds: 3600 },
       ];
+    // Tripbuster deal search: read-only, CDN-cached, and hit by both the
+    // consumer site and every embedded agent widget, so the ceiling is high.
+    case 'tb-deals':
+      return [
+        { name: 'm', max: envInt('RL_TB_DEALS_PER_MIN', 90), seconds: 60 },
+        { name: 'h', max: envInt('RL_TB_DEALS_PER_HR', 1500), seconds: 3600 },
+      ];
+    // Click-outs are the billable event and a write, so they are tighter. A real
+    // visitor clicks a handful of deals; anything near this ceiling is a bot.
+    case 'tb-click':
+      return [
+        { name: 'm', max: envInt('RL_TB_CLICK_PER_MIN', 30), seconds: 60 },
+        { name: 'h', max: envInt('RL_TB_CLICK_PER_HR', 400), seconds: 3600 },
+      ];
     default:
       return null;
   }
