@@ -86,6 +86,13 @@ export function limitsFor(event) {
         { name: 'm', max: envInt('RL_TB_CLICK_PER_MIN', 30), seconds: 60 },
         { name: 'h', max: envInt('RL_TB_CLICK_PER_HR', 400), seconds: 3600 },
       ];
+    // Impressions are batched (one call per widget render, many deals) and only
+    // ever increment a counter, so the ceiling sits between reads and clicks.
+    case 'tb-impression':
+      return [
+        { name: 'm', max: envInt('RL_TB_IMPRESSION_PER_MIN', 60), seconds: 60 },
+        { name: 'h', max: envInt('RL_TB_IMPRESSION_PER_HR', 900), seconds: 3600 },
+      ];
     default:
       return null;
   }

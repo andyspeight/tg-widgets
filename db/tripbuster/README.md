@@ -19,7 +19,7 @@ Postgres project rather than sharing the Widgets Airtable base.
 
 ## Required environment variables (Vercel)
 
-Both are **server-side only** and must never reach the browser.
+All three are **server-side only** and must never reach the browser.
 
 ```
 TRIPBUSTER_SUPABASE_URL               = https://kdaavrqqapizashvlecb.supabase.co
@@ -46,7 +46,19 @@ Optional rate-limit overrides (defaults in brackets):
 RL_TB_DEALS_PER_MIN (90)   RL_TB_DEALS_PER_HR (1500)
 RL_TB_CLICK_PER_MIN (30)   RL_TB_CLICK_PER_HR (400)
 RL_TB_LOGIN_PER_MIN (6)    RL_TB_LOGIN_PER_HR (40)
+RL_TB_IMPRESSION_PER_MIN (60)  RL_TB_IMPRESSION_PER_HR (900)
 ```
+
+Optional:
+
+```
+TRIPBUSTER_IP_SALT — dedicated salt for hashing visitor IPs.
+```
+
+When it is absent one is derived from `TRIPBUSTER_SESSION_SECRET` under a fixed
+label, so the salt is never the signing secret itself and tracking works without a
+second variable to set. Set a dedicated salt if you ever want to rotate the
+session secret without resetting click de-duplication.
 
 ## Endpoints
 
@@ -54,7 +66,9 @@ RL_TB_LOGIN_PER_MIN (6)    RL_TB_LOGIN_PER_HR (40)
 |---|---|---|
 | `GET /api/tripbuster/deals` | public | Consumer search, widget feed, compare panel. CDN-cached. |
 | `POST /api/tripbuster/login` | public | Agent sign-in, returns a 24-hour bearer token. |
-| `GET/POST/PATCH/DELETE /api/tripbuster/my-deals` | agent token | Agent-scoped deal management. |
+| `GET/POST/PATCH/DELETE /api/tripbuster/my-deals` | agent token | Agent-scoped deal management. `?days=` sets the stats window. |
+| `POST /api/tripbuster/click` | public | Records a click-out and returns the agent's booking URL. |
+| `POST /api/tripbuster/impressions` | public | Batched impression counts, one call per widget render. |
 
 Public read endpoints send a wildcard CORS origin because the widget runs on
 customer sites and the data is deliberately public. The authenticated endpoints
@@ -65,16 +79,55 @@ updates and deletes filter on `agent_id` as well as `id`. A valid session plus a
 guessed deal id returns `404`, the same as a deal that does not exist — there is
 nothing to probe.
 
+## Tracking, and what is deliberately not stored
+
+Click-outs are the billable event. Impressions exist so click-through rate means
+something. Under UK GDPR data minimisation, neither stores more than it needs:
+
+- **No raw IP addresses.** Only a salted SHA-256, truncated. The salt matters: an
+  unsalted hash of the IPv4 space is small enough to reverse by brute force.
+- **No full user-agent strings.** Only a coarse family (`chrome`, `safari`, `bot`).
+- **No full referrer URLs.** Only the host, so a referrer carrying an email
+  address or session token in its query string cannot leak into the database.
+- **Impressions store nothing per visitor at all** — they are a counter.
+
+Two behaviours worth knowing:
+
+- A repeat click on the same deal from the same hashed IP within 30 minutes is
+  **recorded but flagged not billable**. Keeping the row means refresh-happy
+  visitors and click fraud stay visible; the agent is billed once. `billableClicks`
+  in `tb_agent_stats` is the figure to bill on, not `clicks`.
+- **Bots are treated asymmetrically on purpose.** A bot's click is recorded and
+  flagged (it happened, and the pattern is worth seeing) but a bot's impression is
+  dropped entirely, because counting it would dilute a real agent's click-through
+  rate. Crawlers get a `200` so they have no reason to retry.
+
+The widget never intercepts the CTA. The anchor points at the agent's own URL and
+the click is reported with `sendBeacon` alongside it, so middle-click, copy-link
+and a JS-blocked browser all still reach the agent — a tracking failure costs a
+count, never the visit. Set `track: false` on the widget for previews; the
+dashboard's editor preview does exactly that so an agent cannot inflate its own
+impressions.
+
 ## Tests
 
 ```
 npm run test:tripbuster
 ```
 
-55 assertions across three layers: payload validation, token handling (tampering,
-expiry, scope confusion), and the HTTP handlers against an in-memory PostgREST
-stand-in — which is what lets the suite prove one agent cannot read, edit or
-delete another's deals.
+86 assertions across four layers:
+
+- payload validation (whitelisting, enums, URL and date rules)
+- token handling (tampering, expiry, scope confusion)
+- the HTTP handlers against an in-memory PostgREST stand-in — which is what lets
+  the suite prove one agent cannot read, edit or delete another's deals
+- tracking and privacy: that a raw IP never reaches a stored row, that the hash is
+  salted, that a repeat click is recorded but not billable, and that a crawler's
+  impressions are not counted
+
+The advertiser dashboard is additionally driven in a real browser with puppeteer
+(33 assertions), covering sign-in, publishing, the plan limit, and the widget's
+impression and click beacons actually firing.
 
 ## Access model — fail closed
 
@@ -97,6 +150,7 @@ Apply in order. They are idempotent enough to run on a fresh project.
 | `002_move_pg_trgm.sql` | Moves `pg_trgm` out of `public` into `extensions` |
 | `003_search_function.sql` | `tb_search_deals` — the single consumer read path |
 | `004_agent_auth.sql` | `password_hash` / `last_login_at` on agents; `tb_agent_deal_counts` |
+| `005_tracking.sql` | `tb_record_click`, `tb_record_impressions`, `tb_agent_stats` |
 
 ## Tables
 

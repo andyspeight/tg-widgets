@@ -337,11 +337,6 @@
 
         <div class="stats" id="stats"></div>
 
-        <div class="note">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-          <span><b>Impressions and click-throughs are not being counted yet.</b> Deal counts below are live and accurate. Performance figures appear here once click tracking is switched on.</span>
-        </div>
-
         <div class="toolbar">
           <div class="segs" id="filters" role="group" aria-label="Filter deals by status">
             <button class="seg" data-filter="all" aria-pressed="true">All</button>
@@ -349,7 +344,8 @@
             <button class="seg" data-filter="draft" aria-pressed="false">Drafts</button>
             <button class="seg" data-filter="paused" aria-pressed="false">Paused</button>
           </div>
-          <span class="save-note" id="allowNote"></span>
+          <span class="save-note" id="breakdown"></span>
+          <span class="save-note" id="allowNote" style="margin-left:auto"></span>
         </div>
 
         <div class="card" id="dealList"><div class="empty">Loading your deals…</div></div>
@@ -732,6 +728,8 @@
       state.plan = data.plan || '';
       state.allowance = Number(data.liveAllowance);
       state.remaining = Number(data.liveRemaining);
+      state.stats = data.stats || null;
+      if (data.agent) state.agent = Object.assign({}, state.agent, data.agent);
       renderAll();
     } catch (err) {
       if (err.message !== 'unauthorised') {
@@ -742,20 +740,47 @@
 
   function renderAll() { renderStats(); renderPlanCard(); renderDeals(); renderPlanGrid(); renderClickoutHint(); }
 
+  const nf = (n) => Number(n || 0).toLocaleString('en-GB');
+
   function renderStats() {
     const c = state.counts;
+    const s = state.stats;
     const unlimited = state.allowance === -1;
+    // stats is best-effort on the API: if the rollup was unavailable, say so
+    // rather than showing zeroes that would read as "nobody saw your deals".
+    const have = !!s;
+    const days = (s && s.days) || 30;
     const tiles = [
-      { lab: 'Live deals', val: c.live || 0, foot: unlimited ? 'Unlimited on ' + esc(state.plan) : 'of ' + state.allowance + ' on ' + esc(state.plan) },
-      { lab: 'Drafts', val: c.draft || 0, foot: 'Not visible to travellers' },
-      { lab: 'Paused', val: c.paused || 0, foot: 'Hidden until you resume them' },
-      { lab: 'Total deals', val: c.total || 0, foot: 'All statuses' },
+      {
+        lab: 'Times shown',
+        val: have ? nf(s.impressions) : '—',
+        foot: have ? 'Last ' + days + ' days' : 'Not available right now',
+      },
+      {
+        lab: 'Click-throughs',
+        val: have ? nf(s.clicks) : '—',
+        foot: have ? 'Travellers sent to your site' : 'Not available right now',
+      },
+      {
+        lab: 'Click-through rate',
+        val: have && s.ctr !== null && s.ctr !== undefined ? s.ctr + '%' : '—',
+        foot: have && s.impressions > 0 ? 'Of everyone who saw a deal' : 'Needs some views first',
+      },
+      {
+        lab: 'Live deals',
+        val: (c.live || 0) + (unlimited ? '' : ' <small>/ ' + state.allowance + '</small>'),
+        foot: unlimited ? 'Unlimited on ' + esc(state.plan) : 'on ' + esc(state.plan),
+      },
     ];
     $('stats').innerHTML = tiles.map((t) =>
       '<div class="stat"><div class="stat-lab">' + esc(t.lab) + '</div>' +
-      '<div class="stat-val tnum">' + esc(t.val) + '</div>' +
+      '<div class="stat-val tnum">' + t.val + '</div>' +
       '<div class="stat-foot">' + t.foot + '</div></div>').join('');
     $('navCount').textContent = c.total || 0;
+
+    // Secondary line: the deal-status breakdown the tiles no longer carry.
+    $('breakdown').textContent =
+      (c.live || 0) + ' live · ' + (c.draft || 0) + ' draft · ' + (c.paused || 0) + ' paused';
   }
 
   function renderPlanCard() {
@@ -782,11 +807,18 @@
     if (d.board_basis) bits.push(esc(d.board_basis));
     if (d.discount_pct) bits.push('<strong>-' + esc(d.discount_pct) + '%</strong>');
     const canToggle = d.status === 'live' || d.status === 'paused';
+    // Per-deal performance, when the rollup has anything for this deal.
+    const perDeal = (state.stats && state.stats.perDeal && state.stats.perDeal[d.id]) || null;
+    const perf = perDeal
+      ? '<span title="Last ' + esc((state.stats && state.stats.days) || 30) + ' days">' +
+        nf(perDeal.impressions) + ' shown · <strong>' + nf(perDeal.clicks) + '</strong> clicks</span>'
+      : '';
     return '<div class="deal">' +
       '<div><div class="deal-nm">' + esc(d.title) + '</div>' +
       '<div class="deal-meta"><span class="pill ' + esc(d.status) + '"><i></i>' +
         esc(d.status.charAt(0).toUpperCase() + d.status.slice(1)) + '</span>' +
-        (bits.length ? '<span>' + bits.join(' · ') + '</span>' : '') + '</div></div>' +
+        (bits.length ? '<span>' + bits.join(' · ') + '</span>' : '') +
+        (perf ? '<span style="color:var(--tx-3)">|</span>' + perf : '') + '</div></div>' +
       '<div class="deal-price">' + (d.price_from != null ? sym + esc(Number(d.price_from).toLocaleString('en-GB')) : '—') +
         '<small>' + (d.price_from != null ? 'from · pp' : 'no price yet') + '</small></div>' +
       '<div class="row-acts">' +
@@ -1017,6 +1049,8 @@
     host.appendChild(mount);
     previewInst = new window.TGTripbusterWidget(mount, {
       layout: 'grid', columns: 1, credit: false, showAtol: true, deals: [card],
+      // An agent editing their own deal must not inflate its impression count.
+      track: false,
     });
   }
   FORM.addEventListener('input', updatePreview);

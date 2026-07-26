@@ -1,5 +1,5 @@
 /**
- * Tripbuster Deals Widget v1.1.1
+ * Tripbuster Deals Widget v1.2.0
  * Self-contained, embeddable widget — renders a travel agent's holiday deals
  * as cards that click through to the agent's own booking page.
  *
@@ -41,6 +41,10 @@
  *   <div data-tg-widget="tripbuster" data-tg-agent="sunseeker-travel"></div>
  *
  * Changelog:
+ *   v1.2.0 (Jul 2026) — Reporting. Impressions are batched and sent once per deal
+ *     per widget instance; click-outs are sent with sendBeacon on the way out
+ *     without ever intercepting the anchor, so a tracking failure cannot cost the
+ *     agent the visit. `track:false` turns it all off for previews.
  *   v1.1.1 (Jul 2026) — Card footer wraps instead of clipping. In a narrow column
  *     the price and the CTA could not sit side by side, and because .tgtb-card
  *     sets overflow:hidden the button was cut off rather than overflowing
@@ -85,7 +89,8 @@
 
   const API_BASE = resolveApiBase();
   const DEALS_API = resolveDealsApi();
-  const VERSION = '1.1.1';
+  const TRACK_BASE = DEALS_API.replace(/\/deals$/, '');
+  const VERSION = '1.2.0';
 
   // ── Helpers ─────────────────────────────────────────────────
   function esc(s) {
@@ -137,6 +142,29 @@
     let h = 0;
     for (let i = 0; i < s.length; i++) h = (h + s.charCodeAt(i)) % 6;
     return h;
+  }
+
+  // ── Tracking ────────────────────────────────────────────────
+  // Impressions and click-outs are reported to Tripbuster so agents can see what
+  // their listings are doing. Both are fire-and-forget and wrapped in try/catch:
+  // tracking must never delay a traveller or break the host page.
+  //
+  // The click uses sendBeacon where available, which the browser delivers even as
+  // the page unloads — the exact situation a click-out creates. The CTA stays a
+  // real anchor pointing at the agent's own URL, so middle-click, copy-link and a
+  // JS-blocked browser all still work; the count is what is lost, not the journey.
+  function track(path, payload) {
+    try {
+      const url = TRACK_BASE + path;
+      const json = JSON.stringify(payload);
+      if (navigator.sendBeacon) {
+        // Sent as text/plain: an unusual content type would trigger a CORS
+        // preflight that a beacon cannot complete. The endpoint parses either.
+        if (navigator.sendBeacon(url, new Blob([json], { type: 'text/plain;charset=UTF-8' }))) return;
+      }
+      fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: json, keepalive: true })
+        .catch(function () { /* tracking is not worth surfacing */ });
+    } catch (e) { /* never let tracking throw into the host page */ }
   }
 
   const IC = {
@@ -291,6 +319,11 @@
     credit: true,
     agentSlug: '',
     maxDeals: 6,
+    // Reporting is on by default, and off wherever the render is not a real
+    // traveller seeing a real listing — the dashboard preview sets track:false so
+    // an agent editing a deal cannot inflate its own impression count.
+    track: true,
+    surface: 'widget',
     deals: []
   };
 
@@ -299,6 +332,7 @@
     constructor(container, config) {
       this.el = container;
       this.c = this._defaults(config);
+      this._seen = new Set(); // deal ids already reported by this instance
       this.shadow = container.attachShadow({ mode: 'open' });
       this._render();
     }
@@ -310,6 +344,8 @@
       c.theme = c.theme === 'dark' ? 'dark' : 'light';
       c.accent = safeColor(c.accent, '#FF5C39');
       c.deals = Array.isArray(c.deals) ? c.deals : [];
+      c.track = c.track !== false;
+      c.surface = ['site', 'widget', 'directory'].indexOf(c.surface) !== -1 ? c.surface : 'widget';
       return c;
     }
 
@@ -350,8 +386,11 @@
 
       // CTA is an anchor so it works without JS and stays keyboard-accessible.
       // rel=noopener strips window.opener; target=_blank so the host page stays.
+      // data-deal-id lets the click be counted without changing the href, so the
+      // link still shows the agent's real destination.
       const cta = href
-        ? '<a class="tgtb-go" href="' + esc(href) + '" target="_blank" rel="noopener nofollow" data-clickout>' +
+        ? '<a class="tgtb-go" href="' + esc(href) + '" target="_blank" rel="noopener nofollow"' +
+          ' data-clickout' + (d.id ? ' data-deal-id="' + esc(d.id) + '"' : '') + '>' +
           esc(this.c.ctaLabel) + svg(IC.arrow, '') + '</a>'
         : '';
 
@@ -392,6 +431,7 @@
           head + inner + credit +
         '</div>';
       this._bind();
+      this._trackImpressions();
     }
 
     _bind() {
@@ -401,6 +441,30 @@
       this.shadow.querySelectorAll('img[data-fb]').forEach((img) => {
         img.addEventListener('error', () => { if (img.parentNode) img.remove(); }, { once: true });
       });
+
+      if (!this.c.track) return;
+      // Recorded on the way out. The anchor is never intercepted or prevented, so
+      // a tracking failure cannot cost the agent the visit.
+      this.shadow.querySelectorAll('a[data-clickout][data-deal-id]').forEach((a) => {
+        a.addEventListener('click', () => {
+          track('/click', { dealId: a.getAttribute('data-deal-id'), surface: this.c.surface });
+        });
+      });
+    }
+
+    /**
+     * Report the deals now on screen, once each per widget instance. update()
+     * re-renders, so without the guard a colour tweak in an editor would inflate
+     * an agent's impression count.
+     */
+    _trackImpressions() {
+      if (!this.c.track) return;
+      const fresh = this.c.deals
+        .map((d) => d && d.id)
+        .filter((id) => typeof id === 'string' && id && !this._seen.has(id));
+      if (!fresh.length) return;
+      fresh.forEach((id) => this._seen.add(id));
+      track('/impressions', { dealIds: fresh, surface: this.c.surface });
     }
 
     update(newConfig) {

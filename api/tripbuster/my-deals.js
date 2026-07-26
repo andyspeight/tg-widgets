@@ -108,7 +108,9 @@ export default async function handler(req, res) {
   try {
     // ── list ────────────────────────────────────────────────────
     if (req.method === 'GET') {
-      const [deals, stats, agent] = await Promise.all([
+      // Window for the performance figures. Defaults to 30 days.
+      const days = Math.max(1, Math.min(365, parseInt(req.query?.days, 10) || 30));
+      const [deals, stats, agent, perf] = await Promise.all([
         tbSelect('deals', {
           select: DEAL_COLUMNS,
           agent_id: `eq.${agentId}`,
@@ -117,6 +119,12 @@ export default async function handler(req, res) {
         }),
         counts(agentId),
         loadAgent(agentId),
+        // Performance is best-effort: an agent must still be able to manage their
+        // deals if the stats rollup is unavailable for any reason.
+        tbRpc('tb_agent_stats', { p_agent_id: agentId, p_days: days }).catch((e) => {
+          console.warn('[tripbuster/my-deals] stats unavailable', e && e.code);
+          return null;
+        }),
       ]);
       const limit = allowanceFor(agent?.plan || gate.agent.plan);
       return res.status(200).json({
@@ -125,6 +133,10 @@ export default async function handler(req, res) {
         plan: agent?.plan || gate.agent.plan,
         liveAllowance: limit,
         liveRemaining: limit === -1 ? -1 : Math.max(0, limit - Number(stats.live || 0)),
+        stats: perf,
+        agent: agent
+          ? { slug: agent.slug, name: agent.name, defaultClickoutUrl: agent.default_clickout_url || null }
+          : null,
       });
     }
 
