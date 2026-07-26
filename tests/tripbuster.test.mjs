@@ -246,15 +246,20 @@ function resetDb() {
   db.impressions = {};
   db.import_runs = [];
   db.leads = [];
+  db.agent_hours = [];
+  db.agent_special_days = [];
+  db.agent_phones = [];
   db.agents = [
     { id: AGENT_A, slug: 'agent-a', name: 'Agent A', email: 'a@b.co', plan: 'Boost', status: 'active',
       default_clickout_url: 'https://agent-a.co.uk', atol_number: '11111', abta_number: null,
       protection_type: 'ATOL', password_hash: null, phone: '01204 555 118',
-      billing_mode: 'click', call_min_seconds: 60 },
+      billing_mode: 'click', call_min_seconds: 60,
+      time_zone: 'Europe/London', hours_mode: 'always', closed_behaviour: 'callback' },
     { id: AGENT_B, slug: 'agent-b', name: 'Agent B', email: 'b@b.co', plan: 'Spark', status: 'active',
       default_clickout_url: null, atol_number: '22222', abta_number: null,
       protection_type: 'ATOL', password_hash: null, phone: null,
-      billing_mode: 'click', call_min_seconds: 60 },
+      billing_mode: 'click', call_min_seconds: 60,
+      time_zone: 'Europe/London', hours_mode: 'always', closed_behaviour: 'callback' },
   ];
   db.deals = [
     { id: uuid(++dealSeq), agent_id: AGENT_A, status: 'live', title: 'A live deal',
@@ -380,6 +385,76 @@ const fakePg = http.createServer((req, res) => {
         both: mine.filter((d) => resolved(d) === 'both').length,
         overridden: mine.filter((d) => !!d.billing_mode).length,
         total: mine.length,
+      });
+    }
+
+    // Added by migration 009. The same shape the consumer site receives, with
+    // the agency's primary number first and the extras after it.
+    if (table === 'rpc/tb_agent_contact') {
+      const agent = db.agents.find((a) => a.id === body.p_agent_id);
+      if (!agent) return send(200, null);
+      return send(200, {
+        timeZone: agent.time_zone || 'Europe/London',
+        hoursMode: agent.hours_mode || 'always',
+        closedBehaviour: agent.closed_behaviour || 'callback',
+        phones: (agent.phone
+          ? [{ label: 'Main number', phone: agent.phone, whenShown: 'always' }] : [])
+          .concat(db.agent_phones
+            .filter((p) => p.agent_id === agent.id)
+            .sort((x, y) => x.sort_order - y.sort_order)
+            .map((p) => ({ label: p.label, phone: p.phone, whenShown: p.when_shown }))),
+        hours: db.agent_hours
+          .filter((h) => h.agent_id === agent.id)
+          .map((h) => ({ day: h.day_of_week, opens: h.opens, closes: h.closes }))
+          .sort((x, y) => (x.day - y.day) || x.opens.localeCompare(y.opens)),
+        specialDays: db.agent_special_days
+          .filter((s) => s.agent_id === agent.id)
+          .map((s) => ({ date: s.on_date, opens: s.opens, closes: s.closes, note: s.note }))
+          .sort((x, y) => x.date.localeCompare(y.date)),
+      });
+    }
+
+    // Added by migration 009. The real one is one transaction; the stand-in is
+    // synchronous, which gives it the same all-or-nothing behaviour for free.
+    if (table === 'rpc/tb_save_agent_settings') {
+      const agent = db.agents.find((a) => a.id === body.p_agent_id);
+      if (!agent) return send(200, null);
+      if (body.p_billing_mode !== null && body.p_billing_mode !== undefined) {
+        agent.billing_mode = body.p_billing_mode;
+      }
+      if (body.p_call_min_seconds !== null && body.p_call_min_seconds !== undefined) {
+        agent.call_min_seconds = body.p_call_min_seconds;
+      }
+      if (body.p_clear_phone) agent.phone = null;
+      else if (body.p_phone !== null && body.p_phone !== undefined) agent.phone = body.p_phone;
+      if (body.p_time_zone) agent.time_zone = body.p_time_zone;
+      if (body.p_hours_mode) agent.hours_mode = body.p_hours_mode;
+      if (body.p_closed_behaviour) agent.closed_behaviour = body.p_closed_behaviour;
+
+      if (Array.isArray(body.p_hours)) {
+        db.agent_hours = db.agent_hours.filter((h) => h.agent_id !== agent.id)
+          .concat(body.p_hours.map((h) => ({
+            agent_id: agent.id, day_of_week: h.day, opens: h.opens, closes: h.closes,
+          })));
+      }
+      if (Array.isArray(body.p_special_days)) {
+        db.agent_special_days = db.agent_special_days.filter((s) => s.agent_id !== agent.id)
+          .concat(body.p_special_days.map((s) => ({
+            agent_id: agent.id, on_date: s.date, opens: s.opens, closes: s.closes, note: s.note,
+          })));
+      }
+      if (Array.isArray(body.p_phones)) {
+        db.agent_phones = db.agent_phones.filter((p) => p.agent_id !== agent.id)
+          .concat(body.p_phones.map((p, i) => ({
+            agent_id: agent.id, label: p.label, phone: p.phone,
+            when_shown: p.whenShown, sort_order: p.sortOrder ?? i,
+          })));
+      }
+      return send(200, {
+        billingMode: agent.billing_mode,
+        callMinSeconds: agent.call_min_seconds,
+        phone: agent.phone || '',
+        contact: null,
       });
     }
 
@@ -1950,8 +2025,25 @@ await testAsync('a call-first agency can publish a deal that has no booking link
   assert.equal(r.status, 201);
   const made = db.deals.find((d) => d.title === 'Ring us about Corfu');
   assert.equal(made.status, 'live');
-  // Inherited from the agency, which is what makes it publishable.
-  assert.equal(made.booking_phone, '01204 555 118');
+  // NOT copied onto the deal, which is the change migration 009 made. Copying it
+  // would pin this deal to one number for good and defeat the opening-hours
+  // routing; null means "use whichever of the agency's numbers applies now", and
+  // the read path resolves it. What makes the deal publishable is that the agency
+  // HAS a number, which publishBlockers checks against the agents row.
+  assert.equal(made.booking_phone ?? null, null);
+});
+
+await testAsync('a number typed onto a deal is kept, because it is a deliberate override', async () => {
+  resetDb();
+  db.agents[0].billing_mode = 'call';
+  const r = await call(myDeals, {
+    method: 'POST', token: tokenA,
+    body: { title: 'Ring the Corfu desk', price_from: 449, status: 'live',
+      booking_phone: '01204 555 999' },
+  });
+  assert.equal(r.status, 201);
+  const made = db.deals.find((d) => d.title === 'Ring the Corfu desk');
+  assert.equal(made.booking_phone, '01204 555 999');
 });
 
 await testAsync('a click-first agency still cannot publish without a link', async () => {
@@ -2128,6 +2220,332 @@ await testAsync('the inbox never hands over the visitor tracking columns', async
   for (const hidden of ['ip_hash', 'ua_family', 'referrer_host']) {
     assert.ok(!keys.includes(hidden), `${hidden} must not reach the agency`);
   }
+});
+
+// ════════════════════════════════════════════════════════════════
+// OPENING HOURS
+//
+// The rules live in three places on purpose (the page shows, the API validates,
+// the database charges) and the risk of that is drift. THE_CASES below is the
+// shared truth: the same table is run against the JavaScript evaluator here and
+// against the copy inside tb-site.js, and any disagreement fails. The SQL copy
+// was checked against this same table by hand when 009 was applied.
+// ════════════════════════════════════════════════════════════════
+const hours = await import('../api/_lib/tripbuster/hours.js');
+const { isOpenAt, openState, validateSchedule, toMinutes, phonesFor } = hours;
+
+// Weekdays nine to half five, Saturday split around lunch, Sunday shut.
+// Christmas Day closed outright, August bank holiday on short hours.
+const SHOP = {
+  hoursMode: 'scheduled',
+  timeZone: 'Europe/London',
+  hours: [1, 2, 3, 4, 5].map((d) => ({ day: d, opens: '09:00', closes: '17:30' }))
+    .concat([{ day: 6, opens: '10:00', closes: '13:00' },
+      { day: 6, opens: '14:00', closes: '16:00' }]),
+  specialDays: [
+    { date: '2026-12-25', opens: null, closes: null, note: 'Christmas Day' },
+    { date: '2026-08-31', opens: '11:00', closes: '15:00', note: 'Bank holiday' },
+  ],
+  phones: [
+    { label: 'Main number', phone: '01204 555 118', whenShown: 'always' },
+    { label: 'Out of hours', phone: '07700 900123', whenShown: 'closed' },
+    { label: 'Shop', phone: '01204 555 200', whenShown: 'open' },
+  ],
+};
+
+const THE_CASES = [
+  ['a Monday mid-morning in summer', '2026-07-27T09:00:00Z', true],
+  ['half an hour before opening', '2026-07-27T07:30:00Z', false],
+  ['the minute before closing', '2026-07-27T16:29:00Z', true],
+  // Start inclusive, end exclusive. Without this a 17:30 close would be open at
+  // 17:30, and the agency would be charged for a call as they locked the door.
+  ['the closing instant itself', '2026-07-27T16:30:00Z', false],
+  ['a Sunday, with no hours set for it', '2026-07-26T11:00:00Z', false],
+  ['Saturday morning', '2026-08-01T10:00:00Z', true],
+  ['Saturday, during the lunch break', '2026-08-01T12:30:00Z', false],
+  ['Saturday afternoon, after the break', '2026-08-01T14:00:00Z', true],
+  ['Christmas Day, a special day that closes all day', '2026-12-25T12:00:00Z', false],
+  ['an August bank holiday, on special hours', '2026-08-31T11:00:00Z', true],
+  ['that same bank holiday, before the special opening', '2026-08-31T09:00:00Z', false],
+  // THE ONE THAT MATTERS. Times are stored as local wall-clock, so 09:30 is
+  // inside 09:00-17:30 in January and in July alike. Storing UTC offsets would
+  // have needed every agency's hours editing twice a year.
+  ['half nine on a January Monday, in GMT', '2027-01-04T09:30:00Z', true],
+  ['half eight on that same January Monday', '2027-01-04T08:30:00Z', false],
+];
+
+for (const [what, iso, expected] of THE_CASES) {
+  test(`open or shut: ${what}`, () => {
+    assert.equal(isOpenAt(SHOP, new Date(iso)), expected);
+  });
+}
+
+test('an agency with no hours set is never closed', () => {
+  assert.equal(isOpenAt({ hoursMode: 'always' }, new Date('2026-07-26T03:00:00Z')), true);
+  assert.equal(isOpenAt(null, new Date('2026-07-26T03:00:00Z')), true);
+});
+
+test('a full 24 hour day is 00:00 to 24:00, not a magic flag', () => {
+  // 1440, not 0. Read as midnight-at-the-start a 00:00-24:00 day would be a
+  // zero-length day, and a round-the-clock agency would read as never open.
+  assert.equal(toMinutes('24:00'), 1440, 'end of day, not midnight at the start');
+  const allWeek = {
+    hoursMode: 'scheduled',
+    hours: [0, 1, 2, 3, 4, 5, 6].map((d) => ({ day: d, opens: '00:00', closes: '24:00' })),
+  };
+  // Every hour of a full day, including both midnights, which is where an
+  // off-by-one in the boundary handling would show up.
+  for (let h = 0; h < 24; h += 1) {
+    const at = new Date(Date.UTC(2026, 6, 26, h, 0, 0));
+    assert.equal(isOpenAt(allWeek, at), true, `should be open at ${h}:00 UTC`);
+  }
+  assert.equal(isOpenAt(allWeek, new Date('2026-07-26T23:59:59Z')), true);
+});
+
+test('closed now, and it says when it opens next', () => {
+  const s = openState(SHOP, new Date('2026-08-01T12:30:00Z'));
+  assert.equal(s.open, false);
+  assert.equal(s.opensAt, '14:00', 'later the same day, not next week');
+  assert.equal(s.opensDay, 6);
+});
+
+test('open now, and it says when it shuts', () => {
+  const s = openState(SHOP, new Date('2026-07-27T09:00:00Z'));
+  assert.equal(s.open, true);
+  assert.equal(s.closesAt, '17:30');
+});
+
+test('the next opening skips over a day that is closed all day', () => {
+  // Christmas Eve is a Thursday; Christmas Day is closed, so the answer is
+  // Saturday morning rather than Friday.
+  const s = openState(SHOP, new Date('2026-12-24T18:00:00Z'));
+  assert.equal(s.open, false);
+  assert.equal(s.opensDate, '2026-12-26');
+  assert.equal(s.opensAt, '10:00');
+});
+
+test('which number shows depends on whether they are open', () => {
+  const open = phonesFor(SHOP, true).map((p) => p.label);
+  const shut = phonesFor(SHOP, false).map((p) => p.label);
+  assert.deepEqual(open, ['Main number', 'Shop']);
+  assert.deepEqual(shut, ['Main number', 'Out of hours']);
+});
+
+// ── the page's copy of the rules must agree with this one ────────
+await testAsync('the consumer site and the API never disagree about opening hours', async () => {
+  const fs = await import('node:fs');
+  const src = fs.readFileSync(new URL('../public/tripbuster/tb-site.js', import.meta.url), 'utf8');
+  // tb-site.js is a browser IIFE that assigns window.TB, so it is run here with a
+  // window stubbed in rather than imported. Nothing else about it is exercised.
+  const sandbox = { window: {}, document: { addEventListener() {} }, navigator: {}, location: { origin: 'https://x' } };
+  // eslint-disable-next-line no-new-func
+  new Function('window', 'document', 'navigator', 'location', src)(
+    sandbox.window, sandbox.document, sandbox.navigator, sandbox.location,
+  );
+  const TB = sandbox.window.TB;
+  assert.ok(TB && typeof TB.openState === 'function', 'tb-site.js should expose openState');
+
+  for (const [what, iso, expected] of THE_CASES) {
+    const mine = isOpenAt(SHOP, new Date(iso));
+    const theirs = TB.openState(SHOP, new Date(iso)).open;
+    assert.equal(theirs, expected, `tb-site.js disagrees on ${what}`);
+    assert.equal(theirs, mine, `the two copies disagree on ${what}`);
+  }
+  // And the labels a traveller actually reads.
+  assert.equal(TB.openLabel(SHOP, new Date('2026-07-27T09:00:00Z')), 'Open now, until 5:30pm');
+  assert.equal(TB.openLabel(SHOP, new Date('2026-08-01T12:30:00Z')), 'Closed, opens at 2pm');
+  assert.equal(TB.openLabel(SHOP, new Date('2026-07-26T20:30:00Z')), 'Closed, opens 9am tomorrow');
+  assert.equal(TB.clockLabel('00:00'), 'midnight', 'because 12am reads as noon to half of everybody');
+  assert.equal(TB.clockLabel('12:00'), 'midday');
+});
+
+// ── validation ──────────────────────────────────────────────────
+const badSchedule = (body) => validateSchedule(body).errors.map((e) => e.field);
+
+test('a closing time before its opening time is refused', () => {
+  assert.deepEqual(badSchedule({ hours: [{ day: 1, opens: '17:00', closes: '09:00' }] }), ['hours[0]']);
+});
+
+test('two periods on the same day that overlap are refused, not merged', () => {
+  // Merging would silently change what the agent typed. Somebody who meant
+  // 09:00-17:00 and typed two overlapping shifts wants telling.
+  const errs = badSchedule({
+    hours: [{ day: 1, opens: '09:00', closes: '13:00' }, { day: 1, opens: '12:00', closes: '17:00' }],
+  });
+  assert.deepEqual(errs, ['hours[1]']);
+});
+
+test('two periods on the same day that merely touch are fine', () => {
+  const r = validateSchedule({
+    hours: [{ day: 1, opens: '09:00', closes: '13:00' }, { day: 1, opens: '13:00', closes: '17:00' }],
+  });
+  assert.equal(r.ok, true);
+  assert.equal(r.clean.hours.length, 2);
+});
+
+test('a nonsense time is refused', () => {
+  assert.deepEqual(badSchedule({ hours: [{ day: 1, opens: '25:00', closes: '26:00' }] }), ['hours[0]']);
+  assert.deepEqual(badSchedule({ hours: [{ day: 1, opens: 'nine', closes: '17:00' }] }), ['hours[0]']);
+});
+
+test('a day that is not a day is refused', () => {
+  assert.deepEqual(badSchedule({ hours: [{ day: 9, opens: '09:00', closes: '17:00' }] }), ['hours[0].day']);
+});
+
+test('turning hours on with nothing open is refused', () => {
+  // Otherwise a half-finished form leaves the agency permanently shut, with every
+  // call button swapped for a form and no obvious reason why.
+  const errs = badSchedule({ hoursMode: 'scheduled', hours: [] });
+  assert.deepEqual(errs, ['hours']);
+});
+
+test('an agency already on scheduled hours cannot clear its week either', () => {
+  // The dangerous case: the mode is not resent, so only the stored one reveals it.
+  const errs = badSchedule({ hours: [], currentHoursMode: 'scheduled' });
+  assert.deepEqual(errs, ['hours']);
+});
+
+test('clearing the week while switching back to always available is fine', () => {
+  const r = validateSchedule({ hoursMode: 'always', hours: [], currentHoursMode: 'scheduled' });
+  assert.equal(r.ok, true);
+});
+
+test('a date that does not exist is refused', () => {
+  // Date.parse accepts 31 February and rolls it into March, so the value is
+  // round-tripped rather than merely parsed.
+  assert.deepEqual(badSchedule({ specialDays: [{ date: '2026-02-31' }] }), ['specialDays[0].date']);
+  assert.deepEqual(badSchedule({ specialDays: [{ date: '25/12/2026' }] }), ['specialDays[0].date']);
+});
+
+test('the same special day twice is refused', () => {
+  const errs = badSchedule({
+    specialDays: [{ date: '2026-12-25' }, { date: '2026-12-25', opens: '10:00', closes: '14:00' }],
+  });
+  assert.deepEqual(errs, ['specialDays[1].date']);
+});
+
+test('a special day with no times means closed all day', () => {
+  const r = validateSchedule({ specialDays: [{ date: '2026-12-25', note: 'Christmas' }] });
+  assert.equal(r.ok, true);
+  assert.deepEqual(r.clean.specialDays[0], { date: '2026-12-25', opens: null, closes: null, note: 'Christmas' });
+});
+
+test('a special day with one time only is refused', () => {
+  assert.deepEqual(badSchedule({ specialDays: [{ date: '2026-12-24', opens: '10:00' }] }), ['specialDays[0]']);
+});
+
+test('an extra number needs a label, because a bare number tells a traveller nothing', () => {
+  assert.deepEqual(badSchedule({ phones: [{ phone: '07700 900123' }] }), ['phones[0].label']);
+});
+
+test('an extra number that is not a number is refused, naming the label', () => {
+  const r = validateSchedule({ phones: [{ label: 'Out of hours', phone: 'ring us' }] });
+  assert.deepEqual(r.errors.map((e) => e.field), ['phones[0].phone']);
+  assert.match(r.errors[0].message, /Out of hours/);
+});
+
+test('an unknown "show it when" falls back to always rather than failing', () => {
+  const r = validateSchedule({ phones: [{ label: 'Shop', phone: '01204 555 200', whenShown: 'sometimes' }] });
+  assert.equal(r.ok, true);
+  assert.equal(r.clean.phones[0].whenShown, 'always');
+});
+
+test('a made-up time zone is refused', () => {
+  assert.deepEqual(badSchedule({ timeZone: 'Europe/Bolton' }), ['timeZone']);
+  assert.equal(validateSchedule({ timeZone: 'Europe/London' }).ok, true);
+});
+
+test('spacing in an extra number is preserved, the same as the main one', () => {
+  const r = validateSchedule({ phones: [{ label: 'Shop', phone: '01204 555 200' }] });
+  assert.equal(r.clean.phones[0].phone, '01204 555 200');
+});
+
+// ── through the endpoint ────────────────────────────────────────
+await testAsync('an agency can set its opening hours', async () => {
+  resetDb();
+  const r = await call(account, {
+    method: 'PATCH', token: tokenA,
+    body: {
+      billingMode: 'call',
+      hoursMode: 'scheduled',
+      closedBehaviour: 'callback',
+      hours: [{ day: 1, opens: '09:00', closes: '17:30' }],
+      specialDays: [{ date: '2026-12-25', note: 'Christmas Day' }],
+    },
+  });
+  assert.equal(r.status, 200);
+  assert.equal(db.agents[0].hours_mode, 'scheduled');
+  assert.equal(db.agent_hours.length, 1);
+  assert.equal(db.agent_special_days.length, 1);
+});
+
+await testAsync('saving a week replaces the old one rather than adding to it', async () => {
+  resetDb();
+  const send = (hours) => call(account, {
+    method: 'PATCH', token: tokenA, body: { hoursMode: 'scheduled', hours },
+  });
+  await send([{ day: 1, opens: '09:00', closes: '17:30' }, { day: 2, opens: '09:00', closes: '17:30' }]);
+  await send([{ day: 1, opens: '10:00', closes: '16:00' }]);
+  assert.equal(db.agent_hours.length, 1, 'Tuesday is gone, not still lurking');
+  assert.equal(db.agent_hours[0].opens, '10:00');
+});
+
+await testAsync('an agency can hold several labelled numbers', async () => {
+  resetDb();
+  const r = await call(account, {
+    method: 'PATCH', token: tokenA,
+    body: {
+      phones: [
+        { label: 'Out of hours', phone: '07700 900123', whenShown: 'closed' },
+        { label: 'Cruise desk', phone: '01204 555 300' },
+      ],
+    },
+  });
+  assert.equal(r.status, 200);
+  assert.equal(db.agent_phones.length, 2);
+  assert.equal(db.agent_phones[0].when_shown, 'closed');
+  // The main number is still the agents row, and still comes first.
+  assert.equal(db.agents[0].phone, '01204 555 118');
+});
+
+await testAsync('one agency cannot touch another agency\'s hours', async () => {
+  resetDb();
+  await call(account, {
+    method: 'PATCH', token: tokenA,
+    body: { hoursMode: 'scheduled', hours: [{ day: 1, opens: '09:00', closes: '17:30' }] },
+  });
+  assert.equal(db.agents[1].hours_mode, 'always');
+  assert.equal(db.agent_hours.every((h) => h.agent_id === db.agents[0].id), true);
+});
+
+await testAsync('the settings screen still cannot upgrade a plan or set hours on someone else', async () => {
+  resetDb();
+  await call(account, {
+    method: 'PATCH', token: tokenA,
+    body: { plan: 'Bespoke', status: 'active', agentId: db.agents[1].id, hoursMode: 'scheduled',
+      hours: [{ day: 1, opens: '09:00', closes: '17:30' }] },
+  });
+  assert.equal(db.agents[0].plan, 'Boost', 'the plan is not the agency\'s to change');
+  assert.equal(db.agents[1].hours_mode, 'always', 'and neither is another agency\'s week');
+});
+
+await testAsync('the account screen hands back the same contact shape the site receives', async () => {
+  resetDb();
+  await call(account, {
+    method: 'PATCH', token: tokenA,
+    body: { hoursMode: 'scheduled', hours: [{ day: 1, opens: '09:00', closes: '17:30' }],
+      phones: [{ label: 'Out of hours', phone: '07700 900123', whenShown: 'closed' }] },
+  });
+  const r = await call(account, { token: tokenA });
+  assert.equal(r.status, 200);
+  const c = r.body.contact;
+  assert.equal(c.hoursMode, 'scheduled');
+  assert.deepEqual(c.hours, [{ day: 1, opens: '09:00', closes: '17:30' }]);
+  assert.deepEqual(c.phones.map((p) => p.label), ['Main number', 'Out of hours']);
+  // And it evaluates with the same function the page uses, which is the point of
+  // returning the same shape.
+  assert.equal(isOpenAt(c, new Date('2026-07-27T09:00:00Z')), true);
+  assert.equal(isOpenAt(c, new Date('2026-07-26T09:00:00Z')), false);
 });
 
 // ── report ──────────────────────────────────────────────────────

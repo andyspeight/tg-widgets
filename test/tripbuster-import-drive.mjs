@@ -115,6 +115,67 @@ const pg = http.createServer((req, res) => {
       });
     }
 
+    // Migration 009. The real one replaces three child tables in one
+    // transaction; this stand-in is synchronous, which gives it the same
+    // all-or-nothing behaviour for free.
+    if (table === 'rpc/tb_agent_contact') {
+      const agent = db.agents.find((a) => a.id === body.p_agent_id);
+      if (!agent) return send(200, null);
+      return send(200, {
+        timeZone: agent.time_zone || 'Europe/London',
+        hoursMode: agent.hours_mode || 'always',
+        closedBehaviour: agent.closed_behaviour || 'callback',
+        phones: (agent.phone
+          ? [{ label: 'Main number', phone: agent.phone, whenShown: 'always' }] : [])
+          .concat((db.agent_phones || []).filter((p) => p.agent_id === agent.id)
+            .map((p) => ({ label: p.label, phone: p.phone, whenShown: p.when_shown }))),
+        hours: (db.agent_hours || []).filter((h) => h.agent_id === agent.id)
+          .map((h) => ({ day: h.day_of_week, opens: h.opens, closes: h.closes })),
+        specialDays: (db.agent_special_days || []).filter((s) => s.agent_id === agent.id)
+          .map((s) => ({ date: s.on_date, opens: s.opens, closes: s.closes, note: s.note })),
+      });
+    }
+
+    if (table === 'rpc/tb_save_agent_settings') {
+      const agent = db.agents.find((a) => a.id === body.p_agent_id);
+      if (!agent) return send(200, null);
+      if (body.p_billing_mode != null) agent.billing_mode = body.p_billing_mode;
+      if (body.p_call_min_seconds != null) agent.call_min_seconds = body.p_call_min_seconds;
+      if (body.p_clear_phone) agent.phone = null;
+      else if (body.p_phone != null) agent.phone = body.p_phone;
+      if (body.p_time_zone) agent.time_zone = body.p_time_zone;
+      if (body.p_hours_mode) agent.hours_mode = body.p_hours_mode;
+      if (body.p_closed_behaviour) agent.closed_behaviour = body.p_closed_behaviour;
+      db.agent_hours = db.agent_hours || [];
+      db.agent_special_days = db.agent_special_days || [];
+      db.agent_phones = db.agent_phones || [];
+      if (Array.isArray(body.p_hours)) {
+        db.agent_hours = db.agent_hours.filter((h) => h.agent_id !== agent.id)
+          .concat(body.p_hours.map((h) => ({
+            agent_id: agent.id, day_of_week: h.day, opens: h.opens, closes: h.closes,
+          })));
+      }
+      if (Array.isArray(body.p_special_days)) {
+        db.agent_special_days = db.agent_special_days.filter((s) => s.agent_id !== agent.id)
+          .concat(body.p_special_days.map((s) => ({
+            agent_id: agent.id, on_date: s.date, opens: s.opens, closes: s.closes, note: s.note,
+          })));
+      }
+      if (Array.isArray(body.p_phones)) {
+        db.agent_phones = db.agent_phones.filter((p) => p.agent_id !== agent.id)
+          .concat(body.p_phones.map((p, i) => ({
+            agent_id: agent.id, label: p.label, phone: p.phone,
+            when_shown: p.whenShown, sort_order: p.sortOrder ?? i,
+          })));
+      }
+      return send(200, {
+        billingMode: agent.billing_mode,
+        callMinSeconds: agent.call_min_seconds,
+        phone: agent.phone || '',
+        contact: null,
+      });
+    }
+
     const store = db[table];
     if (!store) return send(404, { message: 'no table' });
     if (req.method === 'GET') return send(200, store.filter((r) => matches(r, url.searchParams)));
@@ -525,6 +586,20 @@ try {
   const noteText = await text('#callNote');
   check('the note is honest that an unproven tap is not charged for',
     /never charged for/.test(noteText), noteText.slice(0, 140));
+  check('and it does not claim we can see whether the phone was answered',
+    /do not own your phone line/.test(noteText), noteText.slice(0, 200));
+
+  // The hours and numbers panels are only relevant to an agency taking calls, so
+  // they appear with the phone settings and hide again with them.
+  const hoursShownOnCall = await page.$eval('#hoursCard', (el) => el.style.display !== 'none');
+  check('the opening hours panel appears once calls are being charged for', hoursShownOnCall);
+  await page.click('.route[data-mode="click"]');
+  await wait(200);
+  const hoursHiddenOnClick = await page.$eval('#hoursCard', (el) => el.style.display === 'none');
+  const numsHiddenOnClick = await page.$eval('#numbersCard', (el) => el.style.display === 'none');
+  check('and both panels go away again on clicks', hoursHiddenOnClick && numsHiddenOnClick);
+  await page.click('.route[data-mode="call"]');
+  await wait(200);
 
   // Saving with no number must be refused, not silently accepted.
   await page.$eval('#acctPhone', (el) => { el.value = ''; });
@@ -544,6 +619,105 @@ try {
     String(db.agents[0].call_min_seconds));
   check('the number keeps its spacing for travellers to read',
     db.agents[0].phone === '0141 555 907', db.agents[0].phone);
+
+  // ── opening hours ─────────────────────────────────────────
+  const weekHidden = await page.$eval('#hoursBody', (el) => el.hidden);
+  check('the week stays out of the way until hours are switched on', weekHidden);
+
+  await page.click('.route[data-hmode="scheduled"]');
+  await wait(200);
+  const dayRows = await page.$$eval('#hrsDays .hrs-row', (r) => r.map((el) => el.innerText.trim().split('\n')[0]));
+  check('all seven days are offered, Monday first',
+    dayRows.length === 7 && dayRows[0] === 'Monday' && dayRows[6] === 'Sunday', JSON.stringify(dayRows));
+
+  const allShutFirst = await page.$$eval('#hrsDays .hrs-on', (b) => b.every((el) => !el.checked));
+  check('and none are ticked to start with, so nothing is assumed', allShutFirst);
+
+  // Saving hours on with no day open would leave the agency permanently shut.
+  await page.click('#saveHours');
+  await wait(700);
+  const hoursErr = await page.$eval('#hoursErr', (el) => el.classList.contains('on'));
+  const hoursErrText = await text('#hoursErr');
+  check('turning hours on with nothing open is refused', hoursErr, hoursErrText);
+  check('and the message says what to do about it',
+    /at least one day/.test(hoursErrText), hoursErrText);
+  check('nothing was saved', (db.agent_hours || []).length === 0,
+    String((db.agent_hours || []).length));
+
+  // Tick Monday, set the times, then copy across.
+  await page.$eval('#hrsDays .hrs-row[data-dow="1"] .hrs-on', (el) => {
+    el.checked = true;
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  await page.$eval('#hrsDays .hrs-row[data-dow="1"] .hrs-o', (el) => { el.value = '09:00'; });
+  await page.$eval('#hrsDays .hrs-row[data-dow="1"] .hrs-c', (el) => { el.value = '17:30'; });
+  await page.click('#hrsCopy');
+  await wait(300);
+  const ticked = await page.$$eval('#hrsDays .hrs-on', (b) => b.filter((el) => el.checked).length);
+  check('copying Monday fills Tuesday to Friday and leaves the weekend alone',
+    ticked === 5, `${ticked} days ticked`);
+
+  // A split shift on Saturday: open, then add a break.
+  await page.$eval('#hrsDays .hrs-row[data-dow="6"] .hrs-on', (el) => {
+    el.checked = true;
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  await page.click('#hrsDays .hrs-row[data-dow="6"] .hrs-add');
+  await wait(200);
+  const satPeriods = await page.$$eval('#hrsDays .hrs-row[data-dow="6"] .hrs-per', (p) => p.length);
+  check('a day can hold a second period, for a shop that shuts for lunch',
+    satPeriods === 2, String(satPeriods));
+
+  // A bank holiday.
+  await page.click('#hrsAddSpecial');
+  await wait(200);
+  await page.$eval('#hrsSpecial .sp-date', (el) => { el.value = '2026-12-25'; });
+  await page.$eval('#hrsSpecial .sp-note', (el) => { el.value = 'Christmas Day'; });
+
+  await page.click('.route[data-cmode="callback"]');
+  await page.click('#saveHours');
+  await wait(900);
+  check('the week saves', (db.agent_hours || []).length === 7,
+    `${(db.agent_hours || []).length} periods`);
+  check('and the agency is on scheduled hours', db.agents[0].hours_mode === 'scheduled',
+    db.agents[0].hours_mode);
+  check('Saturday kept both of its periods',
+    (db.agent_hours || []).filter((h) => h.day_of_week === 6).length === 2);
+  check('the bank holiday saved as a full day closed',
+    (db.agent_special_days || []).length === 1
+    && (db.agent_special_days || [])[0].opens === null,
+    JSON.stringify(db.agent_special_days));
+  check('and the closed behaviour saved', db.agents[0].closed_behaviour === 'callback',
+    db.agents[0].closed_behaviour);
+
+  await shot('tb-imp-6-hours.png');
+
+  // ── other numbers ─────────────────────────────────────────
+  await page.click('#numsAdd');
+  await wait(200);
+  await page.type('#numsList .nm-lb', 'Out of hours');
+  await page.type('#numsList .nm-ph', '07700 900123');
+  await page.select('#numsList .nm-when', 'closed');
+  await page.click('#saveNums');
+  await wait(800);
+  check('an extra number saves with its label', (db.agent_phones || []).length === 1
+    && db.agent_phones[0].label === 'Out of hours', JSON.stringify(db.agent_phones));
+  check('and with when it should show', db.agent_phones[0].when_shown === 'closed',
+    db.agent_phones[0].when_shown);
+  check('the main number is untouched by that', db.agents[0].phone === '0141 555 907',
+    db.agents[0].phone);
+
+  // A number with no label is no use to a traveller choosing which to ring.
+  await page.click('#numsAdd');
+  await wait(200);
+  const rows = await page.$$('#numsList .rowset');
+  await rows[rows.length - 1].$eval('.nm-ph', (el) => { el.value = '01204 555 300'; });
+  await page.click('#saveNums');
+  await wait(800);
+  const numsErrText = await text('#numsErr');
+  check('a number with no label is refused', /label/i.test(numsErrText), numsErrText);
+  check('and the good one is still there, not wiped by the failed save',
+    (db.agent_phones || []).length === 1, String((db.agent_phones || []).length));
 
   // The performance tiles follow the mode: no click-through rate on a call-first
   // agency, because that figure means nothing to them.

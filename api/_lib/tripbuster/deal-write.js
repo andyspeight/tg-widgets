@@ -54,20 +54,22 @@ export async function dealCounts(agentId) {
 /**
  * Fill the blanks a deal can inherit from its agent.
  *
- * The database refuses a live deal without a price and a link. Doing the
- * inheritance HERE, at write time, is what makes the importers' promise true —
- * "we will use your default website" — and keeps that database constraint
- * meaningful rather than something the read path papers over.
+ * Doing the inheritance HERE, at write time, is what makes the importers'
+ * promise true — "we will use your default website" — rather than something the
+ * read path papers over.
+ *
+ * THE PHONE IS DELIBERATELY NOT INHERITED HERE, and it used to be. Once an
+ * agency can hold several numbers and route them by opening hours, copying one
+ * onto the deal pins it to whichever number happened to be primary that day, and
+ * no amount of routing will ever reach it. booking_phone now means "this deal
+ * rings somewhere different"; null means "use whichever of the agency's numbers
+ * applies right now", which is what the read path already resolved anyway.
  *
  * Mutates and returns `deal`.
  */
 export function applyAgentDefaults(deal, agent) {
   if (!agent) return deal;
   if (!deal.clickout_url && agent.default_clickout_url) deal.clickout_url = agent.default_clickout_url;
-  // A call-first deal needs a number on the row for the same reason a click-first
-  // one needs a link: the database constraint checks the deal's own columns, not
-  // what it could inherit at read time.
-  if (!deal.booking_phone && agent.phone) deal.booking_phone = agent.phone;
   if (!deal.atol_number && agent.atol_number) deal.atol_number = agent.atol_number;
   if (!deal.abta_number && agent.abta_number) deal.abta_number = agent.abta_number;
   if (!deal.protection_type && agent.protection_type) deal.protection_type = agent.protection_type;
@@ -101,9 +103,13 @@ export function resolveBillingMode(deal, agent) {
  * simply shows whichever it has: a missing link makes the card call-only rather
  * than blocking it.
  *
- * This lives here rather than in a CHECK constraint because the resolved mode
- * depends on the agents row, which a constraint cannot see. The database keeps
- * the weaker "price plus at least one route" rule as a backstop.
+ * THIS IS NOW THE ONLY PLACE THE ROUTE IS CHECKED. It always was the only place
+ * that could check it correctly, because the resolved mode and the agency's
+ * numbers both live on the agents row and a CHECK constraint cannot see them.
+ * Migration 009 dropped the database's route backstop for exactly that reason:
+ * once the phone is inherited rather than copied, a valid call-only deal has
+ * neither route column set on its own row, and the constraint refused it. The
+ * database keeps the half it can verify, which is that a live deal needs a price.
  */
 export function publishBlockers(merged, agent) {
   const problems = [];

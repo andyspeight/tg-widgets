@@ -198,6 +198,12 @@
           ? TB.callCta(c, { className: 'prov-go btn-call',
             label: TB.dialer() ? 'Call' : 'Show number' })
           : '') +
+        // One agency in a compare list can be open while the next is shut, and
+        // that difference is worth showing: it is often the reason to ring the
+        // second-cheapest rather than the cheapest.
+        (cmode !== 'click' && TB.openState(c.contact).scheduled
+          ? '<span class="prov-open' + (TB.callRoute(c).open ? ' is-on' : '') + '">' +
+            TB.esc(TB.openLabel(c.contact)) + '</span>' : '') +
         '</div>';
     }).join('');
   }

@@ -71,7 +71,7 @@ session secret without resetting click de-duplication.
 | `POST /api/tripbuster/impressions` | public | Batched impression counts, one call per widget render. |
 | `GET/POST /api/tripbuster/import` | agent token | Spreadsheet import. `?format=csv` is the template, `?history=1` past runs. `mode=preview` writes nothing. |
 | `GET/POST /api/tripbuster/offer-import` | agent token | Live offer cache. `GET` browses, `POST` imports chosen refs, `{resync:true}` refreshes prices. |
-| `GET/PATCH /api/tripbuster/account` | agent token | Billing mode, qualifying call length, phone. Deliberately cannot touch plan, status or the Travelgenix link. |
+| `GET/PATCH /api/tripbuster/account` | agent token | Billing mode, phone, opening hours, special days, extra numbers. Deliberately cannot touch plan, status or the Travelgenix link. |
 | `POST /api/tripbuster/lead` | public | A callback request. Needs a name plus a phone number or an email address. |
 | `GET/PATCH /api/tripbuster/my-leads` | agent token | The agency's enquiry inbox, and marking an outcome against one. |
 
@@ -124,9 +124,9 @@ impressions.
 ## Tests
 
 ```
-npm run test:tripbuster           # 233 assertions, no network needed
-npm run test:tripbuster-import    # 69 assertions, drives the dashboard in Chromium
-npm run test:tripbuster-call      # 26 assertions, drives the call journey in Chromium
+npm run test:tripbuster           # 277 assertions, no network needed
+npm run test:tripbuster-import    # 90 assertions, drives the dashboard in Chromium
+npm run test:tripbuster-call      # 42 assertions, drives the call journey in Chromium
 ```
 
 `test:tripbuster` covers seven layers:
@@ -150,6 +150,11 @@ npm run test:tripbuster-call      # 26 assertions, drives the call journey in Ch
   that only an explicit non-connection or a short duration takes that away, the
   24 hour de-duplication, the phone-or-email rule, the honeypot, and that the
   enquiry inbox never hands an agency the visitor tracking columns
+- opening hours, including the boundary cases that actually bite: the closing
+  instant, a split shift's lunch gap, a special day that closes outright, a
+  24-hour day stored as `00:00`-`24:00`, and **the same weekday time in January
+  and in July**, which is the test that proves storing local wall-clock times
+  rather than UTC offsets was the right call
 
 Both stand-ins are **real HTTP servers on localhost** — PostgREST and Upstash REST
 — rather than stubbed modules, so the code under test runs its own fetch, parse
@@ -206,6 +211,7 @@ Apply in order. They are idempotent enough to run on a fresh project.
 | `006_import.sql` | UNIQUE `(agent_id, external_ref)`; `deals.synced_at`; `import_runs`; `tb_agent_source_counts` |
 | `007_pay_per_call.sql` | `billing_mode` on agents and deals; call columns on `click_events`; `deal_daily_stats.calls`; relaxed live-deal constraint |
 | `008_calls_and_leads.sql` | Corrects the call billing rule to "billable unless"; `leads` table; `tb_record_lead`; `tb_agent_lead_counts`; `deal_daily_stats.leads` |
+| `009_hours_and_numbers.sql` | `agent_hours`, `agent_special_days`, `agent_phones`; `tb_agent_is_open`; `tb_agent_contact`; `tb_save_agent_settings`; `click_events.out_of_hours`; drops the database's route check |
 
 Migration 008 replaces `tb_record_click` rather than altering it. Adding
 parameters to a Postgres function creates an **overload**, and with defaults in
@@ -220,7 +226,7 @@ db/tripbuster/seed-demo.sql
 
 Three invented agencies, 34 deals (26 live, 6 draft, 2 paused) across 11
 countries, and 30 days of traffic: roughly 124,000 cards shown, 3,000
-click-throughs, 600 calls and 100 callback requests. Safe to re-run: it clears
+click-throughs, 440 calls and 100 callback requests. Safe to re-run: it clears
 and rebuilds only what belongs to those three agencies, so it doubles as a reset
 button.
 
@@ -249,6 +255,36 @@ on a different billing mode:
 The qualifying lengths are stored and shown but change nothing in the figures,
 because no tracked number is feeding durations in. That is the point: the demo
 shows the setting existing without pretending it is doing work.
+
+**Opening hours are set on the two that take calls, and deliberately differently:**
+
+| Agency | Hours | Extra numbers |
+|---|---|---|
+| Sunseeker | always available (they sell on clicks, so hours would be noise) | — |
+| Jetaway | weekdays 9–5:30, Saturday morning, **shut Sundays** | an out-of-hours mobile |
+| Coastline | seven days, late on Thursdays | Brighton shop, cruise desk, evenings mobile |
+
+That contrast is the demonstration. Jetaway loses about a quarter of its calls to
+being closed and takes most of its callback requests then; Coastline, open all
+week, loses under a tenth. Same feature, very different effect, which is a more
+honest thing to show than two agencies that both look the same.
+
+**Call times are drawn from a weighted spread, not a flat one.** Most people ring
+a travel agent during the working day with a tail into the evening. A flat
+8am-to-10pm spread put 62% of Jetaway's calls outside their own opening hours,
+which is not a figure any real agency would recognise and would have undersold the
+product on a demo.
+
+**Most out-of-hours calls are then dropped**, because of what the site actually
+does: faced with a closed shop the page leads with the callback form, so the
+majority of those people leave their details instead of pressing a number nobody
+will answer. One in three is kept — the real minority who ring anyway.
+
+That dropping is why **`deal_daily_stats.calls` is recomputed from the events**
+afterwards rather than the events being expanded from it. The counter it started
+from is no longer the number the events add up to, and those two disagreeing is
+precisely the bug that produced a 350% click-through rate the first time this was
+written. Deriving one from the other makes them equal by construction.
 
 Two deals deliberately disagree with their agency, so the per-deal override is
 something you can point at — it is why a click-first Sunseeker still takes a few
@@ -382,6 +418,109 @@ where we have them: the same person ringing twice in a day is one enquiry.
 are added. Until then `call_min_seconds` is stored and shown but never fires,
 which is the honest position — the earlier version of this rule required proof
 of connection and so quietly made **every** call unbillable.
+
+### Opening hours
+
+The corrected call rule above has one uncomfortable edge: a traveller tapping at
+eleven at night gets no answer, and that tap is still a deliberate act. Opening
+hours close it, and they close it by **keeping the enquiry rather than throwing it
+away**:
+
+| | Out of hours |
+|---|---|
+| A call | recorded, flagged `out_of_hours`, **not charged for** |
+| A callback request | recorded, flagged, **still charged for** |
+
+That asymmetry is the whole design. A call to a shut shop is worth nothing to the
+agency, so they should not pay for it. A callback left at midnight is worth *more*
+than a ring into an empty room: it arrives with a name and a way to reply, and it
+is the enquiry that would otherwise have been lost. So the closed state does not
+remove the call to action, it **changes** it — which is why the default
+`closed_behaviour` is `callback` rather than `hide`.
+
+`hours_mode` defaults to `always`, so nothing changes for any agency until they
+actually fill the form in.
+
+**Times are stored as local wall-clock times** against `agents.time_zone`, never
+as offsets from UTC. That is the whole reason British Summer Time needs no thought
+anywhere in the system: nine in the morning is nine in the morning in January and
+in July, and `at time zone` does the work. Storing offsets would have meant
+editing every agency's hours twice a year. There is a test for exactly this.
+
+Structure:
+
+- **`agent_hours`** — one row per period, so a shop that shuts for lunch is two
+  rows rather than a special case. **No rows for a day means closed that day**,
+  which is why a missing Sunday needs no "closed" flag beside it. `day_of_week`
+  matches `extract(dow)` and JavaScript's `getDay()` (0 = Sunday) so neither side
+  has to shift it. A period runs from `opens` **inclusive** to `closes`
+  **exclusive**, so a 17:30 close is shut at 17:30 rather than charging for a call
+  as the door is locked. `time '24:00'` is a real Postgres value and means end of
+  day, so a genuinely round-the-clock Saturday is `00:00`–`24:00` rather than a
+  magic flag. Periods that wrap past midnight are deliberately refused: no travel
+  agency is open 23:00–01:00, and allowing it would make "when do you next open"
+  ambiguous for the sake of nobody.
+- **`agent_special_days`** — bank holidays, the Christmas shutdown, a late night.
+  A special day **replaces** the weekly pattern for that date rather than adding to
+  it, because "closed on Boxing Day" has to override "open Fridays". Null times
+  mean closed all day.
+- **`agent_phones`** — the extras. `agents.phone` stays **the** primary number:
+  it is what every deal falls back to and what the write path and settings screen
+  already reference, and duplicating it into this table would create two places to
+  change it and one of them to forget. `tb_agent_contact` returns the primary
+  first, then these. `when_shown` is `always`, `open` or `closed`, resolved against
+  the same hours — an out-of-hours mobile shown at ten in the morning is simply the
+  wrong number.
+
+**`click_events.out_of_hours` records WHY a call was not charged for**, rather
+than leaving it to be worked out later from the hours. Hours change: an agency that
+starts opening on Sundays must not retrospectively turn last month's unbilled
+Sunday calls into billed ones, and an auditor asking "why was this one free"
+deserves an answer from the row itself. `tb_agent_stats` reports it as
+`afterHoursCalls` and `afterHoursLeads`, and the dashboard shows it, because the
+demand an agency is currently turning away is the number it needs in order to
+decide whether Saturday is worth staffing.
+
+#### The rules live in three places, on purpose
+
+| Copy | Asks the question to decide | Authority |
+|---|---|---|
+| `tb_agent_is_open` (migration 009) | what to **charge** | **yes** |
+| `isOpenAt` in `api/_lib/tripbuster/hours.js` | validate, and answer the API | no |
+| `openState` in `public/tripbuster/tb-site.js` | what to **show** | no |
+
+The duplication is deliberate and is not free. It exists because
+`GET /api/tripbuster/deals` is **CDN-cached**, so the response cannot carry a
+computed "open right now" — a cached yes would still read yes an hour after
+closing time. `tb_agent_contact` therefore hands out the **schedule**, which
+cannot go stale, and the page evaluates it. The database then evaluates it again
+from its own clock when there is money involved, so a page that was cached, left
+open overnight or edited by hand cannot mint a chargeable out-of-hours call.
+
+`tb-site.js` is a classic script rather than a module, so it cannot import the
+API's copy. The mitigation is a test that runs **both JavaScript copies against
+the same table of cases** and fails if they ever disagree; that same table was
+checked against the SQL copy by hand when 009 was applied. Change a rule in one
+place and that test will tell you about the other.
+
+#### A deal's phone is now an override, not a copy
+
+Before 009, saving a deal copied the agency's number onto it. With one number that
+was invisible. With several it would pin every deal to whichever number happened
+to be primary that day, and no amount of hours routing would ever reach it.
+
+`booking_phone` now means "this deal rings somewhere different"; null means "use
+whichever of the agency's numbers applies right now". The read path already
+coalesced in that order, so nothing about a single-number agency changed.
+
+This is also why **009 drops the database's route check**. The old constraint
+required a live deal to carry a link or a phone *on its own row*, and a valid
+call-only deal now carries neither — so the check would refuse it, and would have
+refused the migration itself on any agency whose only route was the inherited
+number. That check was never able to judge a route correctly anyway: the resolved
+billing mode and the agency's numbers both live on the agents row, and a CHECK
+cannot see them. `publishBlockers` can, and does. The database keeps the half it
+can verify, which is that a live deal needs a price.
 
 ### Callback requests
 

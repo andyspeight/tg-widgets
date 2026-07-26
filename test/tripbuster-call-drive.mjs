@@ -73,7 +73,71 @@ const clickDeal = {
   agentCount: 1,
 };
 
-const DEALS = { [CALL_DEAL]: callDeal, [CLICK_DEAL]: clickDeal };
+// ── opening hours ───────────────────────────────────────────
+// Built relative to the moment the test runs, so "currently closed" is true
+// whenever this is run rather than only on a Tuesday afternoon.
+const SHUT_DEAL = uid(4);
+const OPEN_DEAL = uid(5);
+
+const londonDow = () => {
+  const short = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London', weekday: 'short',
+  }).format(new Date());
+  return { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }[short];
+};
+
+// One period, on a day three days from today. Never today, so this agency is
+// always shut while the test runs.
+const shutContact = {
+  timeZone: 'Europe/London',
+  hoursMode: 'scheduled',
+  closedBehaviour: 'callback',
+  hours: [{ day: (londonDow() + 3) % 7, opens: '09:00', closes: '17:30' }],
+  specialDays: [],
+  phones: [
+    { label: 'Main number', phone: '0141 555 907', whenShown: 'always' },
+    { label: 'Out of hours', phone: '07700 900123', whenShown: 'closed' },
+    { label: 'Shop counter', phone: '0141 555 100', whenShown: 'open' },
+  ],
+};
+
+// Every day, all day. Always open while the test runs.
+const openContact = {
+  timeZone: 'Europe/London',
+  hoursMode: 'scheduled',
+  closedBehaviour: 'callback',
+  hours: [0, 1, 2, 3, 4, 5, 6].map((d) => ({ day: d, opens: '00:00', closes: '24:00' })),
+  specialDays: [],
+  phones: [{ label: 'Main number', phone: '0141 555 907', whenShown: 'always' }],
+};
+
+const shutDeal = {
+  ...base,
+  id: SHUT_DEAL,
+  title: 'Louis Phaethon Beach, Paphos, 7 nights all inclusive',
+  resort: 'Paphos', country: 'Cyprus', accommodation: 'Louis Phaethon Beach',
+  billingMode: 'call',
+  phone: '0141 555 907',
+  clickoutUrl: '',
+  contact: shutContact,
+  agent: { name: 'Jetaway Travel', slug: 'jetaway-travel', town: 'Glasgow' },
+  agentCount: 1,
+};
+
+const openDeal = {
+  ...shutDeal,
+  id: OPEN_DEAL,
+  title: 'Melia Costa del Sol, Torremolinos, 7 nights half board',
+  resort: 'Torremolinos', country: 'Spain', accommodation: 'Melia Costa del Sol',
+  contact: openContact,
+};
+
+const DEALS = {
+  [CALL_DEAL]: callDeal,
+  [CLICK_DEAL]: clickDeal,
+  [SHUT_DEAL]: shutDeal,
+  [OPEN_DEAL]: openDeal,
+};
 
 // ── what the pages posted back to us ────────────────────────
 const events = [];
@@ -271,6 +335,104 @@ try {
   check('a click-first deal shows no call button and no callback form',
     clickFirst.call === 0 && clickFirst.form === 0, JSON.stringify(clickFirst));
   check('and still shows Book', clickFirst.book === 1, JSON.stringify(clickFirst));
+
+  // ── closed: the form takes over, the number stays ─────────
+  events.length = 0;
+  await desk.goto(`http://127.0.0.1:${APP_PORT}/tripbuster/deal?id=${SHUT_DEAL}`,
+    { waitUntil: 'domcontentloaded' });
+  await desk.waitForSelector('.agent-row', { visible: true });
+
+  const shutBtn = await desk.$eval('.ar-call', (el) => ({
+    tag: el.tagName.toLowerCase(),
+    shut: el.classList.contains('is-shut'),
+    text: el.innerText.trim(),
+    href: el.getAttribute('href'),
+  }));
+  check('out of hours the button becomes the number itself', shutBtn.shut, JSON.stringify(shutBtn));
+  check('and it is still a tel: link, for ringing first thing tomorrow',
+    shutBtn.tag === 'a' && shutBtn.href === 'tel:0141555907', JSON.stringify(shutBtn));
+  check('the number is shown rather than hidden behind "Show number"',
+    /0141 555 907/.test(shutBtn.text), shutBtn.text);
+
+  const shutLabel = await desk.$eval('.ar-open', (el) => el.innerText.trim());
+  check('it says when they open, not just that they are closed',
+    /^Closed, opens /.test(shutLabel), shutLabel);
+
+  // The closed state puts a number, a sentence and a labelled extra into the
+  // right-hand column, and the agency's name is the only thing in the row that
+  // can shrink. Held on one line those three squeezed "Jetaway Travel" down to
+  // two lines of about six characters, which reads as a broken page.
+  const nameLines = await desk.$eval('.ar-nm', (el) => {
+    const node = [...el.childNodes].find((n) => n.nodeType === 3 && n.textContent.trim());
+    if (!node) return -1;
+    const range = document.createRange();
+    range.selectNodeContents(node);
+    return range.getClientRects().length;
+  });
+  check('the agency name still sits on one line beside all of that',
+    nameLines === 1, `line boxes: ${nameLines}`);
+
+  const noOverflow = await desk.$eval('.book-card',
+    (el) => el.scrollWidth <= el.clientWidth);
+  check('and nothing spills out of the booking card sideways', noOverflow, String(noOverflow));
+
+  const cbfPrimary = await desk.$eval('.cbf', (el) => ({
+    primary: el.classList.contains('is-primary'),
+    head: el.querySelector('h3').innerText.trim(),
+    lead: el.querySelector('.cbf-lead').innerText,
+  }));
+  check('the callback form leads instead of being the alternative',
+    cbfPrimary.primary && /Ask for a call back/i.test(cbfPrimary.head), JSON.stringify(cbfPrimary));
+  check('and it says why, naming the agency that is shut',
+    /Jetaway Travel/.test(cbfPrimary.lead) && /closed/i.test(cbfPrimary.lead),
+    cbfPrimary.lead.slice(0, 120));
+
+  // The out-of-hours mobile shows; the shop counter does not.
+  const shutExtras = await desk.$$eval('.ar-more li', (els) => els.map((el) => el.innerText.trim()));
+  check('the out-of-hours number is offered while they are closed',
+    shutExtras.length === 1 && /Out of hours/.test(shutExtras[0]), JSON.stringify(shutExtras));
+  check('and the shop counter is not, because nobody is standing at it',
+    !shutExtras.some((t) => /Shop counter/.test(t)), JSON.stringify(shutExtras));
+
+  const week = await desk.$$eval('.oh-tbl tr', (rows) => rows.map((r) => r.innerText.replace(/\s+/g, ' ').trim()));
+  check('the whole week is shown, Monday first', week.length === 7 && /^Monday/.test(week[0]),
+    JSON.stringify(week.slice(0, 2)));
+  check('and the days they are shut say so', week.filter((r) => /Closed/.test(r)).length === 6,
+    JSON.stringify(week));
+
+  // Still reported, so the agency can see the demand it is turning away. The
+  // database decides it is not chargeable; the page does not get a say.
+  await desk.click('.ar-call');
+  await wait(400);
+  check('an out-of-hours press is still recorded, so the demand is visible',
+    events.some((e) => e.dealId === SHUT_DEAL && e.eventType === 'call'), JSON.stringify(events));
+
+  await desk.screenshot({ path: path.join(SHOT_DIR, 'tb-call-5-closed.png'), fullPage: true });
+
+  // ── open: the ordinary button is back ─────────────────────
+  await desk.goto(`http://127.0.0.1:${APP_PORT}/tripbuster/deal?id=${OPEN_DEAL}`,
+    { waitUntil: 'domcontentloaded' });
+  await desk.waitForSelector('.agent-row', { visible: true });
+
+  const openBtn = await desk.$eval('.ar-call', (el) => ({
+    tag: el.tagName.toLowerCase(),
+    shut: el.classList.contains('is-shut'),
+    text: el.innerText.trim(),
+  }));
+  check('while open it is a Show number button again',
+    openBtn.tag === 'button' && !openBtn.shut && /show number/i.test(openBtn.text),
+    JSON.stringify(openBtn));
+
+  const openLabel = await desk.$eval('.ar-open', (el) => ({
+    text: el.innerText.trim(), on: el.classList.contains('is-on'),
+  }));
+  check('and it says they are open now', /^Open now/.test(openLabel.text) && openLabel.on,
+    JSON.stringify(openLabel));
+
+  const openCbf = await desk.$eval('.cbf', (el) => el.classList.contains('is-primary'));
+  check('the callback form goes back to being the alternative', openCbf === false, String(openCbf));
+
+  await desk.screenshot({ path: path.join(SHOT_DIR, 'tb-call-6-open.png'), fullPage: true });
 
   // ── mobile: the button dials ──────────────────────────────
   events.length = 0;

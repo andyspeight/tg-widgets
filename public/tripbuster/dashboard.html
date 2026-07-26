@@ -374,6 +374,41 @@
     background:var(--surface); border:1px solid var(--border); border-radius:11px; font-size:12.5px; }
   .run-when { color:var(--tx-2); font-size:11.5px; }
   @media (max-width:900px){ .routes { grid-template-columns:1fr; } }
+
+  /* ── opening hours editor ─────────────────────────────────────────────── */
+  /* One row per day, so the whole week reads at a glance. A closed day dims
+     rather than disappearing, because an agent scanning for a mistake needs to
+     see the day is still there. */
+  .hrs-row { display:grid; grid-template-columns:104px 62px 1fr; gap:10px; align-items:center;
+    padding:7px 0; border-top:1px solid var(--border); }
+  .hrs-row:first-child { border-top:0; }
+  .hrs-day { font-size:13px; font-weight:700; }
+  .hrs-tog { display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--tx-2);
+    font-weight:600; cursor:pointer; }
+  .hrs-times { display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+  .hrs-times input[type=time] { padding:6px 8px; border-radius:8px; border:1px solid var(--border-2);
+    background:var(--surface-2); color:var(--tx); font:inherit; font-size:12.5px; font-weight:600; }
+  .hrs-to { font-size:12px; color:var(--tx-3); }
+  .hrs-row.is-shut .hrs-times { opacity:.4; }
+  .hrs-shut-lb { font-size:12.5px; color:var(--tx-3); font-weight:600; }
+  .hrs-add, .hrs-del { background:none; border:0; padding:2px 4px; cursor:pointer;
+    font-size:11.5px; font-weight:700; color:var(--sky-deep); }
+  .hrs-del { color:var(--danger); }
+  .hrs-add:hover, .hrs-del:hover { text-decoration:underline; }
+  /* Special days and extra numbers share a shape: a few fields and a remove. */
+  .rowset { display:grid; grid-template-columns:150px 1fr 1fr auto; gap:10px; align-items:end;
+    padding:9px 0; border-top:1px solid var(--border); }
+  .rowset:first-child { border-top:0; }
+  .rowset input, .rowset select { width:100%; padding:8px 10px; border-radius:8px;
+    border:1px solid var(--border-2); background:var(--surface-2); color:var(--tx);
+    font:inherit; font-size:12.5px; font-weight:600; }
+  .rowset label { display:block; font-size:11px; font-weight:700; color:var(--tx-3);
+    margin-bottom:4px; }
+  .rowset-empty { font-size:12.5px; color:var(--tx-3); padding:6px 0; }
+  @media (max-width:760px){
+    .hrs-row { grid-template-columns:1fr; gap:5px; }
+    .rowset { grid-template-columns:1fr 1fr; }
+  }
   @media (max-width:560px){
     .offer { grid-template-columns:auto 1fr; }
     .offer-img { display:none; }
@@ -946,7 +981,7 @@
             <button class="route" type="button" data-mode="call" aria-pressed="false">
               <svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/></svg>
               <h3>Calls to my number</h3>
-              <p>Travellers ring you. You pay only for calls that connect and last long enough to be real.</p>
+              <p>Travellers ring you, or ask you to ring them. You pay when somebody asks for your number.</p>
             </button>
             <button class="route" type="button" data-mode="both" aria-pressed="false">
               <svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
@@ -961,8 +996,8 @@
               <input id="acctPhone" type="tel" placeholder="01204 555 118"><span class="err"></span>
             </div>
             <div class="field">
-              <label for="acctMinSecs">A call counts after
-                <span class="hint">shorter calls are shown but never charged</span></label>
+              <label for="acctMinSecs">Ignore calls shorter than
+                <span class="hint">saved, but not in use yet</span></label>
               <select id="acctMinSecs">
                 <option value="30">30 seconds</option>
                 <option value="60">60 seconds</option>
@@ -974,15 +1009,107 @@
 
           <div class="note" id="callNote" style="margin:4px 0 14px">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-            <span>Your dashboard counts every phone enquiry. You are only charged for calls that
-              connect and run past the length you set above, so wrong numbers and hang-ups cost you
-              nothing. Until call tracking numbers are switched on we can see that someone pressed
-              call, but not whether you answered, and those are never charged for.</span>
+            <span><b>What counts as a call.</b> On a phone, a traveller taps your number and it dials.
+              On a computer they press to see it. Either way somebody has deliberately asked how to
+              reach you, and that is what you pay for, the same as a click. We do not own your phone
+              line, so we cannot tell you whether it rang out or how long you spoke, and we will never
+              pretend otherwise. Calls that arrive while you are closed are shown to you but never
+              charged for, and the length above does nothing until call tracking is added.</span>
           </div>
 
           <div class="editor-bar" style="justify-content:space-between;margin-top:4px">
             <span class="save-note" id="billNote"></span>
             <button class="btn btn-primary" type="button" id="saveBilling">Save</button>
+          </div>
+        </div>
+
+        <!-- ── opening hours ── -->
+        <div class="card" style="padding:20px;margin-bottom:18px" id="hoursCard">
+          <h3 style="margin:0 0 6px;font-size:14px;font-weight:800">When you are open</h3>
+          <p style="margin:0 0 16px;font-size:13px;color:var(--tx-2);max-width:64ch">
+            Nobody should be charged for a call to a shut shop. Tell us your hours and we stop
+            charging for calls outside them, and ask travellers to leave their details instead so
+            you still get the enquiry.
+          </p>
+          <div class="form-error" id="hoursErr" role="alert"></div>
+
+          <div class="routes" id="hoursModes" style="grid-template-columns:repeat(2,1fr);margin-bottom:16px">
+            <button class="route" type="button" data-hmode="always" aria-pressed="false">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              <h3>Always available</h3>
+              <p>No hours. Your number shows around the clock and every call counts.</p>
+            </button>
+            <button class="route" type="button" data-hmode="scheduled" aria-pressed="false">
+              <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              <h3>Set opening hours</h3>
+              <p>Out of hours we stop charging for calls and lead with a call-back form.</p>
+            </button>
+          </div>
+
+          <div id="hoursBody" hidden>
+            <div id="hrsDays" class="hrs"></div>
+
+            <div class="editor-bar" style="justify-content:flex-start;gap:10px;margin:2px 0 18px">
+              <button class="btn btn-ghost" type="button" id="hrsCopy">Copy Monday to Tuesday–Friday</button>
+            </div>
+
+            <div class="field" style="max-width:340px">
+              <label for="acctTz">Time zone
+                <span class="hint">your hours are read in this zone, so the clocks changing looks after itself</span></label>
+              <select id="acctTz">
+                <option value="Europe/London">United Kingdom (Europe/London)</option>
+                <option value="Europe/Dublin">Ireland (Europe/Dublin)</option>
+                <option value="Atlantic/Canary">Canary Islands (Atlantic/Canary)</option>
+                <option value="Europe/Madrid">Spain (Europe/Madrid)</option>
+              </select><span class="err"></span>
+            </div>
+
+            <h4 style="margin:20px 0 8px;font-size:13px;font-weight:800">While you are closed</h4>
+            <div class="routes" id="closedModes" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px">
+              <button class="route" type="button" data-cmode="callback" aria-pressed="false">
+                <h3>Ask for a call back</h3>
+                <p>Recommended. The form leads, your number still shows, and the enquiry still
+                  reaches you in the morning.</p>
+              </button>
+              <button class="route" type="button" data-cmode="show" aria-pressed="false">
+                <h3>Show the number anyway</h3>
+                <p>For an answering machine you actually listen to.</p>
+              </button>
+              <button class="route" type="button" data-cmode="hide" aria-pressed="false">
+                <h3>Show nothing</h3>
+                <p>No number and no form until you open again. You will lose those enquiries.</p>
+              </button>
+            </div>
+
+            <h4 style="margin:20px 0 4px;font-size:13px;font-weight:800">Days that are different</h4>
+            <p style="margin:0 0 10px;font-size:12.5px;color:var(--tx-2)">
+              Bank holidays, the Christmas break, a late night. These override the week above.
+              Leave the times blank to close all day.
+            </p>
+            <div id="hrsSpecial"></div>
+            <button class="btn btn-ghost" type="button" id="hrsAddSpecial" style="margin-top:10px">Add a date</button>
+          </div>
+
+          <div class="editor-bar" style="justify-content:space-between;margin-top:18px">
+            <span class="save-note" id="hoursNote"></span>
+            <button class="btn btn-primary" type="button" id="saveHours">Save</button>
+          </div>
+        </div>
+
+        <!-- ── other numbers ── -->
+        <div class="card" style="padding:20px;margin-bottom:18px" id="numbersCard">
+          <h3 style="margin:0 0 6px;font-size:14px;font-weight:800">Other numbers</h3>
+          <p style="margin:0 0 16px;font-size:13px;color:var(--tx-2);max-width:64ch">
+            A second shop, a mobile for evenings, a dedicated cruise line. Your main number is set
+            under <b>What you pay for</b> above and always shows first. Give each of these a label,
+            because "01273 555 240" means nothing on its own.
+          </p>
+          <div class="form-error" id="numsErr" role="alert"></div>
+          <div id="numsList"></div>
+          <button class="btn btn-ghost" type="button" id="numsAdd" style="margin-top:10px">Add a number</button>
+          <div class="editor-bar" style="justify-content:space-between;margin-top:18px">
+            <span class="save-note" id="numsNote"></span>
+            <button class="btn btn-primary" type="button" id="saveNums">Save</button>
           </div>
         </div>
 
@@ -1185,10 +1312,15 @@
     const calls = {
       lab: 'Calls',
       val: have ? nf(s.calls || 0) : '—',
-      // Deliberately neutral: some of these are proven connected calls and some
-      // are taps we cannot verify, and the tile shows the total of both. What is
-      // actually chargeable is explained on the plan screen, next to the rule.
-      foot: have ? 'Phone enquiries from your deals' : 'Not available right now',
+      // The out-of-hours count is the interesting half of this tile, not a
+      // footnote: it is the demand the agency is currently turning away, and the
+      // number they need in order to decide whether Saturday is worth staffing.
+      // Those calls are NOT charged for, and the tile says so rather than leaving
+      // them to wonder why the totals differ.
+      foot: !have ? 'Not available right now'
+        : (s.afterHoursCalls
+          ? nf(s.afterHoursCalls) + ' arrived while you were closed, not charged'
+          : 'Phone enquiries from your deals'),
     };
     const callRate = {
       lab: 'Call rate',
@@ -1644,10 +1776,14 @@
     document.querySelectorAll('#billModes .route').forEach((b) => {
       b.setAttribute('aria-pressed', String(b.getAttribute('data-mode') === billingMode));
     });
-    // The phone and qualifying length only matter once calls are being charged for.
+    // The phone, the hours and the extra numbers only matter once calls are being
+    // charged for. Hiding them keeps a click-only agency's settings page short
+    // rather than making them read past three panels that do nothing for them.
     const wantsCalls = billingMode === 'call' || billingMode === 'both';
     $('callSettings').style.display = wantsCalls ? '' : 'none';
     $('callNote').style.display = wantsCalls ? '' : 'none';
+    $('hoursCard').style.display = wantsCalls ? '' : 'none';
+    $('numbersCard').style.display = wantsCalls ? '' : 'none';
   }
 
   $('billModes').addEventListener('click', (e) => {
@@ -1664,6 +1800,10 @@
       $('acctPhone').value = a.phone || '';
       $('acctMinSecs').value = String(a.callMinSeconds || 60);
       paintBilling();
+      // The same contact object the consumer site receives, so the editor is
+      // filling in exactly what a traveller will be shown.
+      loadHours(a.contact);
+      loadNumbers(a.contact);
 
       const by = a.dealsByMode;
       $('billNote').textContent = by && by.overridden
@@ -1693,6 +1833,385 @@
       // The performance tiles show different figures per mode, so redraw them.
       await refresh();
       loadBilling();
+    } catch (err) {
+      if (err.message === 'unauthorised') return;
+      errBox.textContent = ((err.fieldErrors || [])[0] || {}).message || err.message;
+      errBox.classList.add('on');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // ══ opening hours ═════════════════════════════════════════
+  // The agent edits the whole week and saves the whole week, which is why the API
+  // replaces the lot in one transaction rather than patching a row at a time. A
+  // half-saved week would leave them looking shut on a day they never chose.
+  //
+  // Monday first, because a British week starts on Monday even though the stored
+  // day number does not.
+  const WEEK = [
+    { dow: 1, name: 'Monday' }, { dow: 2, name: 'Tuesday' }, { dow: 3, name: 'Wednesday' },
+    { dow: 4, name: 'Thursday' }, { dow: 5, name: 'Friday' }, { dow: 6, name: 'Saturday' },
+    { dow: 0, name: 'Sunday' },
+  ];
+  let hoursMode = 'always';
+  let closedBehaviour = 'callback';
+
+  function dayRow(d) {
+    const row = document.createElement('div');
+    row.className = 'hrs-row';
+    row.dataset.dow = String(d.dow);
+    row.innerHTML =
+      '<span class="hrs-day">' + d.name + '</span>'
+      + '<label class="hrs-tog"><input type="checkbox" class="hrs-on"> open</label>'
+      + '<span class="hrs-times"></span>';
+    return row;
+  }
+
+  function periodFields(opens, closes, first) {
+    const wrap = document.createElement('span');
+    wrap.className = 'hrs-per';
+    wrap.innerHTML =
+      '<input type="time" class="hrs-o" value="' + (opens || '09:00') + '">'
+      + '<span class="hrs-to">to</span>'
+      + '<input type="time" class="hrs-c" value="' + (closes || '17:30') + '">'
+      + (first ? '<button class="hrs-add" type="button">+ add a break</button>'
+        : '<button class="hrs-del" type="button">remove</button>');
+    return wrap;
+  }
+
+  function paintDayRow(row) {
+    const on = row.querySelector('.hrs-on').checked;
+    row.classList.toggle('is-shut', !on);
+    const times = row.querySelector('.hrs-times');
+    times.querySelectorAll('input,button').forEach((el) => { el.disabled = !on; });
+    let lb = row.querySelector('.hrs-shut-lb');
+    if (!on && !lb) {
+      lb = document.createElement('span');
+      lb.className = 'hrs-shut-lb';
+      lb.textContent = 'Closed';
+      times.appendChild(lb);
+    } else if (on && lb) {
+      lb.remove();
+    }
+  }
+
+  function setWeek(hours) {
+    const box = $('hrsDays');
+    box.innerHTML = '';
+    WEEK.forEach((d) => {
+      const row = dayRow(d);
+      const mine = (hours || []).filter((h) => h.day === d.dow)
+        .sort((a, b) => String(a.opens).localeCompare(String(b.opens)));
+      const times = row.querySelector('.hrs-times');
+      if (mine.length) {
+        mine.forEach((p, i) => times.appendChild(periodFields(p.opens, p.closes, i === 0)));
+        row.querySelector('.hrs-on').checked = true;
+      } else {
+        times.appendChild(periodFields(null, null, true));
+      }
+      box.appendChild(row);
+      paintDayRow(row);
+    });
+  }
+
+  function readWeek() {
+    const out = [];
+    $('hrsDays').querySelectorAll('.hrs-row').forEach((row) => {
+      if (!row.querySelector('.hrs-on').checked) return;
+      const dow = Number(row.dataset.dow);
+      row.querySelectorAll('.hrs-per').forEach((p) => {
+        const o = p.querySelector('.hrs-o').value;
+        const c = p.querySelector('.hrs-c').value;
+        if (o && c) out.push({ day: dow, opens: o, closes: c });
+      });
+    });
+    return out;
+  }
+
+  function specialRow(s) {
+    const row = document.createElement('div');
+    row.className = 'rowset';
+    row.innerHTML =
+      '<div><label>Date</label><input type="date" class="sp-date" value="' + ((s && s.date) || '') + '"></div>'
+      + '<div><label>Opens <span style="font-weight:600">(blank = closed)</span></label>'
+      + '<input type="time" class="sp-o" value="' + ((s && s.opens) || '') + '"></div>'
+      + '<div><label>Closes</label><input type="time" class="sp-c" value="' + ((s && s.closes) || '') + '"></div>'
+      + '<div><button class="hrs-del sp-del" type="button">remove</button></div>';
+    // Note goes on its own line so a long "Christmas Eve, closing early" is readable.
+    const note = document.createElement('div');
+    note.style.gridColumn = '1 / -1';
+    note.innerHTML = '<label>Why <span style="font-weight:600">(optional, shown to travellers)</span></label>'
+      + '<input class="sp-note" maxlength="80" placeholder="Bank holiday">';
+    note.querySelector('.sp-note').value = (s && s.note) || '';
+    row.appendChild(note);
+    return row;
+  }
+
+  function paintSpecialEmpty() {
+    const box = $('hrsSpecial');
+    const has = box.querySelector('.rowset');
+    let empty = box.querySelector('.rowset-empty');
+    if (!has && !empty) {
+      empty = document.createElement('p');
+      empty.className = 'rowset-empty';
+      empty.textContent = 'Nothing yet. Your week above applies every week.';
+      box.appendChild(empty);
+    } else if (has && empty) {
+      empty.remove();
+    }
+  }
+
+  function setSpecial(days) {
+    const box = $('hrsSpecial');
+    box.innerHTML = '';
+    (days || []).forEach((s) => box.appendChild(specialRow(s)));
+    paintSpecialEmpty();
+  }
+
+  function readSpecial() {
+    const out = [];
+    $('hrsSpecial').querySelectorAll('.rowset').forEach((row) => {
+      const date = row.querySelector('.sp-date').value;
+      if (!date) return;
+      const o = row.querySelector('.sp-o').value;
+      const c = row.querySelector('.sp-c').value;
+      out.push({
+        date,
+        opens: o || null,
+        closes: c || null,
+        note: row.querySelector('.sp-note').value.trim() || null,
+      });
+    });
+    return out;
+  }
+
+  function paintHours() {
+    document.querySelectorAll('#hoursModes .route').forEach((b) => {
+      b.setAttribute('aria-pressed', String(b.getAttribute('data-hmode') === hoursMode));
+    });
+    document.querySelectorAll('#closedModes .route').forEach((b) => {
+      b.setAttribute('aria-pressed', String(b.getAttribute('data-cmode') === closedBehaviour));
+    });
+    $('hoursBody').hidden = hoursMode !== 'scheduled';
+  }
+
+  function loadHours(contact) {
+    const c = contact || {};
+    hoursMode = c.hoursMode || 'always';
+    closedBehaviour = c.closedBehaviour || 'callback';
+    $('acctTz').value = c.timeZone || 'Europe/London';
+    setWeek(c.hours);
+    setSpecial(c.specialDays);
+    paintHours();
+  }
+
+  $('hoursModes').addEventListener('click', (e) => {
+    const b = e.target.closest('.route');
+    if (!b) return;
+    hoursMode = b.getAttribute('data-hmode');
+    paintHours();
+  });
+
+  $('closedModes').addEventListener('click', (e) => {
+    const b = e.target.closest('.route');
+    if (!b) return;
+    closedBehaviour = b.getAttribute('data-cmode');
+    paintHours();
+  });
+
+  $('hrsDays').addEventListener('change', (e) => {
+    const row = e.target.closest('.hrs-row');
+    if (row && e.target.classList.contains('hrs-on')) paintDayRow(row);
+  });
+
+  const toMins = (v) => {
+    const m = /^(\d{1,2}):(\d{2})$/.exec(v || '');
+    return m ? Number(m[1]) * 60 + Number(m[2]) : null;
+  };
+  const toClock = (n) => String(Math.floor(n / 60)).padStart(2, '0') + ':' + String(n % 60).padStart(2, '0');
+
+  /**
+   * "Add a break" SPLITS the shift rather than appending a second one.
+   *
+   * That is what the words mean, and appending a fixed 14:00–17:30 next to a
+   * 09:00–17:30 shift produced an overlapping pair that the save then refused —
+   * so the button reliably created an error the agent had not made.
+   */
+  function addBreak(row) {
+    const pers = row.querySelectorAll('.hrs-per');
+    const last = pers[pers.length - 1];
+    if (!last) return;
+    const openInput = last.querySelector('.hrs-o');
+    const closeInput = last.querySelector('.hrs-c');
+    const from = toMins(openInput.value);
+    const to = toMins(closeInput.value);
+    const times = row.querySelector('.hrs-times');
+    if (from === null || to === null || to - from < 180) {
+      // Too short to carve a lunch hour out of, so put the new period after it.
+      const start = Math.min((to === null ? 1080 : to) + 60, 1320);
+      times.appendChild(periodFields(toClock(start), toClock(Math.min(start + 120, 1440)), false));
+      return;
+    }
+    const mid = Math.floor((from + to) / 2);
+    closeInput.value = toClock(mid - 30);
+    times.appendChild(periodFields(toClock(mid + 30), toClock(to), false));
+  }
+
+  $('hrsDays').addEventListener('click', (e) => {
+    if (e.target.classList.contains('hrs-add')) {
+      const row = e.target.closest('.hrs-row');
+      // Three is the most the database holds, and more than any real shop needs.
+      if (row.querySelectorAll('.hrs-per').length >= 3) return;
+      addBreak(row);
+      paintDayRow(row);
+    }
+    if (e.target.classList.contains('hrs-del')) {
+      const per = e.target.closest('.hrs-per');
+      if (per) per.remove();
+    }
+  });
+
+  // Filling in Monday and copying it is how most agents will do this, so it is
+  // one button rather than five repetitions. Weekends are left alone on purpose:
+  // Saturday is almost never the same as a weekday, and Sunday usually differs.
+  $('hrsCopy').addEventListener('click', () => {
+    const rows = Array.from($('hrsDays').querySelectorAll('.hrs-row'));
+    const monday = rows.find((r) => r.dataset.dow === '1');
+    if (!monday) return;
+    const periods = Array.from(monday.querySelectorAll('.hrs-per')).map((p) => ({
+      opens: p.querySelector('.hrs-o').value, closes: p.querySelector('.hrs-c').value,
+    }));
+    const on = monday.querySelector('.hrs-on').checked;
+    ['2', '3', '4', '5'].forEach((dow) => {
+      const row = rows.find((r) => r.dataset.dow === dow);
+      if (!row) return;
+      const times = row.querySelector('.hrs-times');
+      times.innerHTML = '';
+      (periods.length ? periods : [{ opens: '09:00', closes: '17:30' }])
+        .forEach((p, i) => times.appendChild(periodFields(p.opens, p.closes, i === 0)));
+      row.querySelector('.hrs-on').checked = on;
+      paintDayRow(row);
+    });
+    toast('Monday copied to Tuesday to Friday');
+  });
+
+  $('hrsAddSpecial').addEventListener('click', () => {
+    $('hrsSpecial').appendChild(specialRow(null));
+    paintSpecialEmpty();
+  });
+
+  $('hrsSpecial').addEventListener('click', (e) => {
+    if (!e.target.classList.contains('sp-del')) return;
+    e.target.closest('.rowset').remove();
+    paintSpecialEmpty();
+  });
+
+  $('saveHours').addEventListener('click', async () => {
+    const btn = $('saveHours');
+    const errBox = $('hoursErr');
+    errBox.classList.remove('on');
+    btn.disabled = true;
+    try {
+      const payload = { hoursMode, closedBehaviour, timeZone: $('acctTz').value };
+      // Only send the week when it is in use. Sending an empty one alongside
+      // "always available" would be refused, and rightly: the API cannot tell
+      // "I have no hours" from "I cleared my hours by accident".
+      if (hoursMode === 'scheduled') {
+        payload.hours = readWeek();
+        payload.specialDays = readSpecial();
+      }
+      const saved = await api('/api/tripbuster/account', { method: 'PATCH', body: payload });
+      if (saved.contact) loadHours(saved.contact);
+      toast(hoursMode === 'scheduled' ? 'Opening hours saved' : 'Always available');
+      await refresh();
+    } catch (err) {
+      if (err.message === 'unauthorised') return;
+      errBox.textContent = ((err.fieldErrors || [])[0] || {}).message || err.message;
+      errBox.classList.add('on');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // ══ other numbers ═════════════════════════════════════════
+  // The main number stays where it is, under what the agency is charged for,
+  // because that is the one every deal falls back to. These are the extras, and a
+  // number without a label is no use to a traveller deciding which to ring.
+  function numberRow(p) {
+    const row = document.createElement('div');
+    row.className = 'rowset';
+    row.innerHTML =
+      '<div><label>Label</label><input class="nm-lb" maxlength="40" placeholder="Out of hours" value=""></div>'
+      + '<div><label>Number</label><input class="nm-ph" type="tel" placeholder="07700 900123" value=""></div>'
+      + '<div><label>Show it</label><select class="nm-when">'
+      + '<option value="always">All the time</option>'
+      + '<option value="open">Only while open</option>'
+      + '<option value="closed">Only while closed</option>'
+      + '</select></div>'
+      + '<div><button class="hrs-del nm-del" type="button">remove</button></div>';
+    row.querySelector('.nm-lb').value = (p && p.label) || '';
+    row.querySelector('.nm-ph').value = (p && p.phone) || '';
+    row.querySelector('.nm-when').value = (p && p.whenShown) || 'always';
+    return row;
+  }
+
+  function paintNumsEmpty() {
+    const box = $('numsList');
+    const has = box.querySelector('.rowset');
+    let empty = box.querySelector('.rowset-empty');
+    if (!has && !empty) {
+      empty = document.createElement('p');
+      empty.className = 'rowset-empty';
+      empty.textContent = 'Just your main number for now.';
+      box.appendChild(empty);
+    } else if (has && empty) {
+      empty.remove();
+    }
+  }
+
+  function loadNumbers(contact) {
+    const box = $('numsList');
+    box.innerHTML = '';
+    // The first entry is the main number from the agents row, which is edited
+    // above rather than here, so it is skipped.
+    (((contact || {}).phones) || []).slice(1).forEach((p) => box.appendChild(numberRow(p)));
+    paintNumsEmpty();
+  }
+
+  $('numsAdd').addEventListener('click', () => {
+    if ($('numsList').querySelectorAll('.rowset').length >= 6) {
+      toast('Six extra numbers is the most we hold', 'err');
+      return;
+    }
+    $('numsList').appendChild(numberRow(null));
+    paintNumsEmpty();
+  });
+
+  $('numsList').addEventListener('click', (e) => {
+    if (!e.target.classList.contains('nm-del')) return;
+    e.target.closest('.rowset').remove();
+    paintNumsEmpty();
+  });
+
+  $('saveNums').addEventListener('click', async () => {
+    const btn = $('saveNums');
+    const errBox = $('numsErr');
+    errBox.classList.remove('on');
+    btn.disabled = true;
+    try {
+      const phones = [];
+      $('numsList').querySelectorAll('.rowset').forEach((row) => {
+        const label = row.querySelector('.nm-lb').value.trim();
+        const phone = row.querySelector('.nm-ph').value.trim();
+        if (!label && !phone) return; // an untouched blank row is not an error
+        phones.push({ label, phone, whenShown: row.querySelector('.nm-when').value });
+      });
+      const saved = await api('/api/tripbuster/account', { method: 'PATCH', body: { phones } });
+      if (saved.contact) loadNumbers(saved.contact);
+      $('numsNote').textContent = phones.length
+        ? phones.length + (phones.length === 1 ? ' extra number' : ' extra numbers') : '';
+      toast('Numbers saved');
     } catch (err) {
       if (err.message === 'unauthorised') return;
       errBox.textContent = ((err.fieldErrors || [])[0] || {}).message || err.message;

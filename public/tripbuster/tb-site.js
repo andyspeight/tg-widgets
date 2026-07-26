@@ -167,24 +167,89 @@
   }
 
   /**
+   * Everything the page needs to decide how to offer a phone call.
+   *
+   * One place, because the deal page, the compare drawer and the widget all have
+   * to reach the same answer, and three separate readings of "are they open and
+   * which number" is how they would drift apart.
+   */
+  function callRoute(entry) {
+    var contact = (entry && entry.contact) || null;
+    var state = openState(contact, new Date());
+    var applicable = phonesFor(contact, state.open);
+    // Falling back to entry.phone matters: it is the single resolved number the
+    // read path has always returned, so a surface that has not been given the
+    // full contact object still works rather than losing its call button.
+    var primary = applicable.length ? applicable[0]
+      : ((entry && entry.phone)
+        ? { label: 'Main number', phone: entry.phone, whenShown: 'always' } : null);
+    var behaviour = (contact && contact.closedBehaviour) || 'callback';
+    var shut = state.scheduled && !state.open;
+    return {
+      state: state,
+      open: state.open,
+      phones: applicable.length ? applicable : (primary ? [primary] : []),
+      primary: primary,
+      behaviour: behaviour,
+      // Nothing to show: no number anywhere, or closed and set to hide.
+      silent: !primary || (shut && behaviour === 'hide'),
+      // Closed, with the callback form taking over. The number still shows, but
+      // as information rather than as a call we are pushing.
+      muted: shut && behaviour === 'callback',
+    };
+  }
+
+  /**
    * The call button.
    *
    * On a phone it is a `tel:` link, so a tap dials and a long press still offers
    * copy and save the way people expect. On a desktop it is a plain button with
    * no href, because "Show number" that reveals itself on hover would be a lie.
+   *
+   * OUT OF HOURS it becomes the number itself, plainly, with the time they open
+   * next to it. Still a `tel:` link, because somebody may want to ring first thing
+   * tomorrow, and still REPORTED, because an agency deciding whether Saturday
+   * afternoons are worth staffing needs to see the demand it is currently turning
+   * away. It is NOT chargeable: the database settles that from its own clock, so
+   * nothing here has to be trusted for the bill to be right.
    */
   function callCta(entry, opts) {
     var o = opts || {};
-    var phone = (entry && entry.phone) || '';
-    if (!phone) return '';
+    var route = o.route || callRoute(entry);
+    if (route.silent) return '';
     var cls = o.className || 'btn btn-call';
     var id = (entry && (entry.dealId || entry.id)) || '';
+    var phone = route.primary.phone;
+
+    if (route.muted) {
+      return '<a class="' + cls + ' is-shut" data-call="' + esc(id) + '"'
+        + ' href="' + esc(telHref(phone)) + '">' + svg(IC.phone) + esc(phone) + '</a>';
+    }
     if (dialer()) {
       return '<a class="' + cls + '" data-call="' + esc(id) + '" href="' + esc(telHref(phone)) + '">'
         + svg(IC.phone) + (o.label || 'Call us') + '</a>';
     }
     return '<button class="' + cls + '" type="button" data-call="' + esc(id) + '"'
       + ' data-phone="' + esc(phone) + '">' + svg(IC.phone) + (o.label || 'Show number') + '</button>';
+  }
+
+  /**
+   * The agency's other numbers, when there are any.
+   *
+   * A branch line or an out-of-hours mobile is only useful if it says which it
+   * is, so the label travels with the number. The first one is already the button
+   * above, so this lists the rest.
+   */
+  function extraPhones(entry, opts) {
+    var o = opts || {};
+    var route = o.route || callRoute(entry);
+    if (route.silent || route.phones.length < 2) return '';
+    var id = (entry && (entry.dealId || entry.id)) || '';
+    return '<ul class="ar-more">' + route.phones.slice(1).map(function (p) {
+      return '<li><span class="ar-more-lb">' + esc(p.label) + '</span>'
+        + '<a data-call="' + esc(id) + '" href="' + esc(telHref(p.phone)) + '">'
+        + esc(p.phone) + '</a></li>';
+    }).join('') + '</ul>';
   }
 
   /**
@@ -235,6 +300,210 @@
     return data || {};
   }
 
+  // ── opening hours ─────────────────────────────────────────────────────────
+  //
+  // THIS IS A MIRROR OF api/_lib/tripbuster/hours.js, AND THAT IS DELIBERATE BUT
+  // NOT FREE. There are three implementations of the same few rules: this one for
+  // what the page shows, hours.js for the API, and tb_agent_is_open in the
+  // database for what gets charged. The database one is the authority.
+  //
+  // The duplication exists because /api/tripbuster/deals is CDN-cached, so the
+  // response cannot carry a computed "open right now" — a cached yes would still
+  // read yes an hour after closing. The page therefore has to work it out itself,
+  // and this file is a classic script rather than a module, so it cannot import
+  // the API's copy.
+  //
+  // The mitigation is a test that runs THIS copy and hours.js against the same
+  // table of cases and fails if they ever disagree. If you change a rule here,
+  // change it in both other places or that test will tell you.
+
+  var DAY_LABEL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  /** 'HH:MM' to minutes past midnight. '24:00' is 1440, meaning end of day. */
+  function hhmm(value) {
+    if (typeof value !== 'string') return null;
+    var m = /^(\d{1,2}):(\d{2})$/.exec(value);
+    if (!m) return null;
+    var h = Number(m[1]);
+    var min = Number(m[2]);
+    if (min > 59 || h > 24 || (h === 24 && min > 0)) return null;
+    return h * 60 + min;
+  }
+
+  /** The agency's own wall clock, whatever the traveller's device is set to. */
+  function agencyNow(contact, at) {
+    var tz = (contact && contact.timeZone) || 'Europe/London';
+    var parts = {};
+    try {
+      var fmt = new Intl.DateTimeFormat('en-GB', {
+        timeZone: tz, weekday: 'short', year: 'numeric', month: '2-digit',
+        day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+      });
+      fmt.formatToParts(at).forEach(function (p) { parts[p.type] = p.value; });
+    } catch (e) {
+      return null;
+    }
+    var days = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+    return {
+      date: parts.year + '-' + parts.month + '-' + parts.day,
+      day: days[parts.weekday],
+      minutes: Number(parts.hour) * 60 + Number(parts.minute),
+    };
+  }
+
+  function periodsOn(contact, dateStr, dow) {
+    var special = ((contact && contact.specialDays) || []).filter(function (s) {
+      return s && s.date === dateStr;
+    })[0];
+    if (special) {
+      return (special.opens && special.closes)
+        ? [{ opens: special.opens, closes: special.closes }] : [];
+    }
+    return ((contact && contact.hours) || []).filter(function (h) {
+      return h && h.day === dow;
+    }).map(function (h) {
+      return { opens: h.opens, closes: h.closes };
+    }).sort(function (a, b) { return hhmm(a.opens) - hhmm(b.opens); });
+  }
+
+  function shiftDate(dateStr, n) {
+    var d = new Date(dateStr + 'T00:00:00Z');
+    d.setUTCDate(d.getUTCDate() + n);
+    return d.toISOString().slice(0, 10);
+  }
+
+  /**
+   * Open or closed, and when that next changes.
+   *
+   * An agency with no schedule is never closed, so every agency that has not
+   * filled the form in behaves exactly as it did before hours existed. If the
+   * browser cannot do the time zone at all we also say open, because failing that
+   * way shows a working phone number instead of hiding one.
+   */
+  function openState(contact, at) {
+    var c = contact || {};
+    var now = at || new Date();
+    if (c.hoursMode !== 'scheduled') {
+      return { open: true, scheduled: false, closesAt: null, opensAt: null, opensDay: null };
+    }
+    var local = agencyNow(c, now);
+    if (!local) {
+      return { open: true, scheduled: false, closesAt: null, opensAt: null, opensDay: null };
+    }
+
+    var today = periodsOn(c, local.date, local.day);
+    var i;
+    for (i = 0; i < today.length; i += 1) {
+      if (local.minutes >= hhmm(today[i].opens) && local.minutes < hhmm(today[i].closes)) {
+        return {
+          open: true, scheduled: true, closesAt: today[i].closes, opensAt: null, opensDay: null,
+        };
+      }
+    }
+    for (i = 0; i < today.length; i += 1) {
+      if (hhmm(today[i].opens) > local.minutes) {
+        return {
+          open: false, scheduled: true, closesAt: null,
+          opensAt: today[i].opens, opensDay: local.day,
+        };
+      }
+    }
+    for (i = 1; i <= 14; i += 1) {
+      var ahead = periodsOn(c, shiftDate(local.date, i), (local.day + i) % 7);
+      if (ahead.length) {
+        return {
+          open: false, scheduled: true, closesAt: null,
+          opensAt: ahead[0].opens, opensDay: (local.day + i) % 7,
+        };
+      }
+    }
+    return { open: false, scheduled: true, closesAt: null, opensAt: null, opensDay: null };
+  }
+
+  /** "5:30pm" from "17:30". Midnight and noon get words, because 12am confuses. */
+  function clockLabel(value) {
+    var mins = hhmm(value);
+    if (mins === null) return '';
+    if (mins === 0 || mins === 1440) return 'midnight';
+    if (mins === 720) return 'midday';
+    var h = Math.floor(mins / 60);
+    var m = mins % 60;
+    var suffix = h < 12 ? 'am' : 'pm';
+    var h12 = h % 12 === 0 ? 12 : h % 12;
+    return h12 + (m ? ':' + String(m).padStart(2, '0') : '') + suffix;
+  }
+
+  /**
+   * The sentence a traveller reads. "Closed" on its own stops somebody; "Closed,
+   * opens 9am tomorrow" tells them what to do instead.
+   */
+  function openLabel(contact, at) {
+    var state = openState(contact, at);
+    if (!state.scheduled) return '';
+    if (state.open) {
+      return state.closesAt ? 'Open now, until ' + clockLabel(state.closesAt) : 'Open now';
+    }
+    if (!state.opensAt) return 'Closed at the moment';
+    var local = agencyNow(contact, at || new Date());
+    if (local && state.opensDay === local.day) return 'Closed, opens at ' + clockLabel(state.opensAt);
+    if (local && state.opensDay === (local.day + 1) % 7) {
+      return 'Closed, opens ' + clockLabel(state.opensAt) + ' tomorrow';
+    }
+    return 'Closed, opens ' + clockLabel(state.opensAt) + ' ' + DAY_LABEL[state.opensDay];
+  }
+
+  /** Which numbers apply right now: a shop line while open, a mobile while shut. */
+  function phonesFor(contact, open) {
+    return (((contact || {}).phones) || []).filter(function (p) {
+      if (!p || !p.phone) return false;
+      if (p.whenShown === 'open') return open;
+      if (p.whenShown === 'closed') return !open;
+      return true;
+    });
+  }
+
+  /**
+   * The whole week, for the panel on a deal page.
+   *
+   * Worth showing even when they are open: it is a small trust signal that this
+   * is a real shop with real hours, and it explains why the callback form is
+   * there at nine at night.
+   */
+  function hoursTable(contact) {
+    var c = contact || {};
+    if (c.hoursMode !== 'scheduled') return '';
+    var local = agencyNow(c, new Date());
+    var rows = '';
+    // Monday first, because a British week starts on Monday even though dow does not.
+    var order = [1, 2, 3, 4, 5, 6, 0];
+    order.forEach(function (dow) {
+      var periods = ((c.hours) || []).filter(function (h) { return h && h.day === dow; })
+        .sort(function (a, b) { return hhmm(a.opens) - hhmm(b.opens); });
+      var text = periods.length
+        ? periods.map(function (p) {
+          return clockLabel(p.opens) + ' to ' + clockLabel(p.closes);
+        }).join(', ')
+        : 'Closed';
+      rows += '<tr' + (local && local.day === dow ? ' class="oh-today"' : '') + '>'
+        + '<th scope="row">' + esc(DAY_LABEL[dow]) + '</th>'
+        + '<td>' + esc(text) + '</td></tr>';
+    });
+
+    var upcoming = ((c.specialDays) || []).filter(function (s) {
+      return s && (!local || s.date >= local.date);
+    }).slice(0, 4).map(function (s) {
+      var when = (s.opens && s.closes)
+        ? clockLabel(s.opens) + ' to ' + clockLabel(s.closes) : 'Closed';
+      return '<li>' + esc(s.date) + (s.note ? ' — ' + esc(s.note) : '')
+        + ': <b>' + esc(when) + '</b></li>';
+    }).join('');
+
+    return '<div class="oh"><h3>Opening hours</h3>'
+      + '<table class="oh-tbl"><tbody>' + rows + '</tbody></table>'
+      + (upcoming ? '<ul class="oh-special">' + upcoming + '</ul>' : '')
+      + '</div>';
+  }
+
   /**
    * The "ask us to ring you" form.
    *
@@ -242,13 +511,20 @@
    * plenty of people would rather be emailed, and refusing them loses the
    * enquiry. The line naming the agency is not decoration — someone handing over
    * their number deserves to know exactly who receives it.
+   *
+   * `closed` changes the framing rather than the form. Out of hours this IS the
+   * main call to action, so it says so, and it is the reason an out-of-hours
+   * enquiry still earns the agency something instead of being lost.
    */
-  function callbackForm(deal) {
+  function callbackForm(deal, closed) {
     var agent = (deal.agent && deal.agent.name) || 'the agency';
-    return '<form class="cbf" novalidate>'
-      + '<h3>Prefer a call back?</h3>'
-      + '<p class="cbf-lead">Leave your details and <b>' + esc(agent)
-      + '</b> will get in touch about this holiday.</p>'
+    return '<form class="cbf' + (closed ? ' is-primary' : '') + '" novalidate>'
+      + '<h3>' + (closed ? 'Ask for a call back' : 'Prefer a call back?') + '</h3>'
+      + '<p class="cbf-lead">' + (closed
+        ? '<b>' + esc(agent) + '</b> is closed at the moment. Leave your details and '
+          + 'they will get in touch about this holiday when they open.'
+        : 'Leave your details and <b>' + esc(agent)
+          + '</b> will get in touch about this holiday.') + '</p>'
       + '<div class="cbf-err" role="alert" hidden></div>'
       + '<div class="cbf-row"><label>Your name'
       + '<input name="name" autocomplete="name" required></label></div>'
@@ -403,6 +679,8 @@
     fetchDeals: fetchDeals, reportClick: reportClick, reportImpressions: reportImpressions,
     dialer: dialer, telHref: telHref, reportCall: reportCall, callCta: callCta, wireCalls: wireCalls,
     submitLead: submitLead, callbackForm: callbackForm, wireCallback: wireCallback,
+    openState: openState, openLabel: openLabel, phonesFor: phonesFor, hoursTable: hoursTable,
+    clockLabel: clockLabel, callRoute: callRoute, extraPhones: extraPhones,
     chipsFor: chipsFor, priceBlock: priceBlock, dealCard: dealCard,
     header: header, footer: footer,
   };

@@ -47,7 +47,11 @@
     display:grid; place-items:center; font-weight:800; font-size:13px; flex:none; }
   .agent-row.best .ar-av { background:var(--live); color:#fff; }
   .ar-nm { font-weight:700; font-size:13.5px; }
-  .ar-right { margin-left:auto; text-align:right; }
+  /* The name takes the slack and the routes take what they need. Without this the
+     name is the only thing in the row that CAN shrink, so it collapses to a
+     couple of characters per line the moment the call column grows. */
+  .ar-mid { flex:1 1 auto; min-width:0; }
+  .ar-right { margin-left:auto; text-align:right; flex:0 1 auto; max-width:52%; }
   .ar-price { font-weight:800; font-size:16px; letter-spacing:-.02em; }
   .ar-price small { font-size:10.5px; color:var(--tx-3); font-weight:700; }
   .agent-row.best .ar-price { color:var(--live); }
@@ -138,7 +142,7 @@
     return [{
       dealId: d.id, agent: d.agent && d.agent.name, agentSlug: d.agent && d.agent.slug,
       atol: d.atol, price: d.priceFrom, clickoutUrl: d.clickoutUrl,
-      phone: d.phone, billingMode: d.billingMode,
+      phone: d.phone, billingMode: d.billingMode, contact: d.contact,
     }];
   }
 
@@ -227,9 +231,14 @@
           agents.map(function (a, i) {
             var initials = String(a.agent || '?').split(/\s+/).map(function (w) { return w[0]; })
               .join('').slice(0, 2).toUpperCase();
+            // Worked out once per agency and handed to both the button and the
+            // extra-numbers list, so they cannot disagree about whether the shop
+            // is open — which they would if each asked separately either side of
+            // a closing time.
+            var route = TB.callRoute(a);
             return '<div class="agent-row' + (i === 0 ? ' best' : '') + '">' +
               '<span class="ar-av">' + TB.esc(initials) + '</span>' +
-              '<span><span class="ar-nm">' + TB.esc(a.agent) +
+              '<span class="ar-mid"><span class="ar-nm">' + TB.esc(a.agent) +
                 (i === 0 && agents.length > 1 ? '<span class="best-tag">CHEAPEST</span>' : '') + '</span>' +
                 (a.atol ? '<span class="prot" style="font-size:11px">' + TB.svg(TB.IC.shield) +
                   'ATOL ' + TB.esc(a.atol) + '</span>' : '') + '</span>' +
@@ -240,8 +249,14 @@
                 (mode(a) !== 'call' && a.clickoutUrl
                   ? '<button class="ar-book" type="button" data-idx="' + i + '">Book</button>' : '') +
                 (mode(a) !== 'click'
-                  ? TB.callCta(a, { className: 'btn btn-call ar-call',
+                  ? TB.callCta(a, { route: route, className: 'btn btn-call ar-call',
                     label: TB.dialer() ? 'Call' : 'Show number' }) : '') +
+                // "Closed, opens 9am tomorrow" rather than a bare Closed, so a
+                // traveller knows what to do instead of just being stopped.
+                (mode(a) !== 'click' && route.state.scheduled
+                  ? '<span class="ar-open' + (route.open ? ' is-on' : '') + '">' +
+                    TB.esc(TB.openLabel(a.contact)) + '</span>' : '') +
+                (mode(a) !== 'click' ? TB.extraPhones(a, { route: route }) : '') +
               '</span></div>';
           }).join('') +
           '<div class="book-foot">' + TB.svg('<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>') +
@@ -251,7 +266,13 @@
         // Offered whenever the cheapest agency takes calls. It suits the people
         // a phone number does not: anyone browsing at their desk, anyone who
         // would rather be emailed, and anyone looking outside office hours.
-        (mode(best) !== 'click' ? TB.callbackForm(d) : '') +
+        // Out of hours it stops being the alternative and becomes the main route,
+        // which is the whole reason a closed agency still earns an enquiry.
+        (mode(best) !== 'click'
+          ? TB.callbackForm(d, !TB.callRoute(best).open) : '') +
+        // The week itself. A small trust signal that this is a real shop, and it
+        // explains why the form is there at nine at night.
+        (mode(best) !== 'click' ? TB.hoursTable(best.contact) : '') +
         '</aside>' +
       '</div>';
 

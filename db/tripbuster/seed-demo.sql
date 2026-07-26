@@ -17,6 +17,8 @@
 --     multi-agent price compare visible on the consumer site
 --   one agency on each billing mode: clicks, calls, and both
 --   callback requests, some with a phone number, some an email, some both
+--   opening hours on the two agencies that take calls, one of them shut on Sundays
+--   more than one number, labelled, including an out-of-hours mobile
 --   30 days of impressions, clicks and phone enquiries, generated so they reconcile:
 --     click_events are EXPANDED FROM deal_daily_stats rather than invented
 --     alongside them, because tb_agent_stats reads impressions and clicks from
@@ -76,11 +78,89 @@ update public.agents set tg_client_email = null
 
 -- One agency on each billing mode, so all three are visible in the demo:
 --   Sunseeker sells online, Jetaway sells on the phone, Coastline does both.
--- Jetaway's shorter qualifying length against Coastline's 90 seconds is what
--- makes the "only proven calls are charged for" rule visible in the figures.
+-- The qualifying lengths differ between the two that take calls, but neither
+-- changes a figure: no tracked number is feeding durations in, and the demo does
+-- not pretend one is.
 update public.agents set billing_mode = 'click' where slug = 'sunseeker-travel';
 update public.agents set billing_mode = 'call',  call_min_seconds = 60 where slug = 'jetaway-travel';
 update public.agents set billing_mode = 'both',  call_min_seconds = 90 where slug = 'coastline-holidays';
+
+-- ── opening hours ───────────────────────────────────────────────────────────
+-- Two different shapes, because the interesting part of this feature is the
+-- difference between them:
+--
+--   JETAWAY keeps shop hours and shuts on Sundays. They are the agency whose
+--   dashboard shows out-of-hours demand it is not being charged for, and whose
+--   deal pages swap the call button for a call-back form in the evenings.
+--   COASTLINE is open seven days and late, so nearly everything they take is
+--   inside hours. Same feature, almost no effect, which is the honest comparison.
+--   SUNSEEKER is left on 'always'. They sell on clicks, so hours would be noise.
+delete from public.agent_hours where agent_id in (select id from public.agents where slug in ('sunseeker-travel','coastline-holidays','jetaway-travel'));
+delete from public.agent_special_days where agent_id in (select id from public.agents where slug in ('sunseeker-travel','coastline-holidays','jetaway-travel'));
+delete from public.agent_phones where agent_id in (select id from public.agents where slug in ('sunseeker-travel','coastline-holidays','jetaway-travel'));
+
+update public.agents
+   set hours_mode = 'scheduled', closed_behaviour = 'callback', time_zone = 'Europe/London'
+ where slug in ('jetaway-travel', 'coastline-holidays');
+
+-- Jetaway: weekdays nine to half five, Saturday morning only, Sunday shut.
+insert into public.agent_hours (agent_id, day_of_week, opens, closes)
+select a.id, d.dow, d.o, d.c
+from public.agents a, (values
+  (1::smallint, '09:00'::time, '17:30'::time),
+  (2::smallint, '09:00'::time, '17:30'::time),
+  (3::smallint, '09:00'::time, '17:30'::time),
+  (4::smallint, '09:00'::time, '17:30'::time),
+  (5::smallint, '09:00'::time, '17:30'::time),
+  (6::smallint, '09:30'::time, '13:00'::time)
+) as d(dow, o, c)
+where a.slug = 'jetaway-travel';
+
+-- Coastline: open every day, and late on a Thursday, which is when people who
+-- have been thinking about a holiday all week finally ring.
+insert into public.agent_hours (agent_id, day_of_week, opens, closes)
+select a.id, d.dow, d.o, d.c
+from public.agents a, (values
+  (1::smallint, '09:00'::time, '18:00'::time),
+  (2::smallint, '09:00'::time, '18:00'::time),
+  (3::smallint, '09:00'::time, '18:00'::time),
+  (4::smallint, '09:00'::time, '20:00'::time),
+  (5::smallint, '09:00'::time, '18:00'::time),
+  (6::smallint, '09:00'::time, '17:00'::time),
+  (0::smallint, '10:00'::time, '16:00'::time)
+) as d(dow, o, c)
+where a.slug = 'coastline-holidays';
+
+-- The August bank holiday and Christmas, so the exceptions have something to
+-- show. Jetaway shuts outright; Coastline runs a short day, which exercises both
+-- shapes a special day can take.
+insert into public.agent_special_days (agent_id, on_date, opens, closes, note)
+select a.id, d.on_date, d.o, d.c, d.note
+from public.agents a, (values
+  ('jetaway-travel',     date '2026-08-31', null::time, null::time, 'August bank holiday'),
+  ('jetaway-travel',     date '2026-12-25', null::time, null::time, 'Christmas Day'),
+  ('jetaway-travel',     date '2026-12-26', null::time, null::time, 'Boxing Day'),
+  ('coastline-holidays', date '2026-08-31', '11:00'::time, '15:00'::time, 'August bank holiday'),
+  ('coastline-holidays', date '2026-12-25', null::time, null::time, 'Christmas Day')
+) as d(slug, on_date, o, c, note)
+where a.slug = d.slug;
+
+-- ── more than one number ────────────────────────────────────────────────────
+-- agents.phone stays the main number. These are the extras, and each one only
+-- makes sense with its label: an out-of-hours mobile shown at ten in the morning
+-- would be the wrong number, which is what when_shown is for.
+--
+-- Every number is in Ofcom's reserved drama range, so nothing here can ring a
+-- real person.
+insert into public.agent_phones (agent_id, label, phone, when_shown, sort_order)
+select a.id, d.label, d.phone, d.when_shown, d.sort_order
+from public.agents a, (values
+  ('jetaway-travel',     'Out of hours',  '07700 900461', 'closed', 0),
+  ('coastline-holidays', 'Brighton shop', '01273 555 240', 'open',   0),
+  ('coastline-holidays', 'Cruise desk',   '01273 555 288', 'always', 1),
+  ('coastline-holidays', 'Evenings and weekends', '07700 900782', 'closed', 2)
+) as d(slug, label, phone, when_shown, sort_order)
+where a.slug = d.slug;
 
 -- ── clear what this seed owns ───────────────────────────────────────────────
 -- Scoped to the demo agents. click_events and deal_daily_stats cascade from
@@ -563,27 +643,74 @@ update public.deal_daily_stats s
 -- Roughly one call in eight is the same person coming back for a number they
 -- lost. Recorded so the agency sees it, charged once. Keyed on the date as well
 -- as the deal, for the same reason the clicks above are.
+--
+-- WHEN a call happens matters now, so the hour is drawn from a WEIGHTED spread
+-- rather than a flat one. Most people ring a travel agent during the working
+-- day, with a tail into the evening. A flat 8am-to-10pm spread put 62% of
+-- Jetaway's calls outside their own opening hours, which is not a number any real
+-- agency would recognise and would have undersold the product on a demo.
+--
+-- OUT OF HOURS IS ASKED OF tb_agent_is_open, not worked out here. The seed uses
+-- the same function the live code uses, so the demo cannot show a pattern the real
+-- billing rule would not produce.
+--
+-- AND MOST OUT-OF-HOURS CALLS ARE DROPPED, because of what the site does. Faced
+-- with a closed shop the page leads with the call-back form, so the majority of
+-- those people leave their details instead of pressing a number nobody will
+-- answer. Keeping one in three is the honest shape: a real but minority stream of
+-- people who ring anyway.
+with raw as (
+  select s.deal_id, s.agent_id, s.stat_date, d.reference, g,
+         abs(hashtext(d.reference || s.stat_date::text || g::text || 'ch')) as h,
+         s.stat_date
+           + (interval '1 hour' *
+               (array[9,10,10,11,11,12,12,13,14,14,15,15,16,16,17,18,19,20])
+                 [1 + (abs(hashtext(d.reference || s.stat_date::text || g::text || 'ch')) % 18)])
+           + (interval '1 minute' * (abs(hashtext(d.reference || s.stat_date::text || g::text || 'cm')) % 60))
+           as occurred_at
+    from public.deal_daily_stats s
+    join public.deals d on d.id = s.deal_id
+    cross join generate_series(1, s.calls) as g
+   where s.calls > 0
+),
+stamped as (
+  select r.*, not public.tb_agent_is_open(r.agent_id, r.occurred_at) as shut from raw r
+),
+kept as (
+  select * from stamped where not shut or (h % 3) = 0
+)
 insert into public.click_events
   (deal_id, agent_id, occurred_at, surface, ip_hash, ua_family, referrer_host, country_code,
-   is_billable, event_type, call_seconds, call_connected, caller_hash)
-select s.deal_id, s.agent_id,
-       s.stat_date
-         + (interval '1 hour'   * (9 + (abs(hashtext(d.reference || s.stat_date::text || g::text || 'ch')) % 9)))
-         + (interval '1 minute' * (abs(hashtext(d.reference || s.stat_date::text || g::text || 'cm')) % 60)),
-       case when (abs(hashtext(d.reference || s.stat_date::text || g::text || 'cs')) % 6) = 0 then 'widget' else 'site' end,
-       substr(encode(sha256(convert_to('demo-call' || d.reference || s.stat_date::text || g::text, 'UTF8')), 'hex'), 1, 40),
+   is_billable, event_type, call_seconds, call_connected, caller_hash, out_of_hours)
+select deal_id, agent_id, occurred_at,
+       case when (abs(hashtext(reference || stat_date::text || g::text || 'cs')) % 6) = 0 then 'widget' else 'site' end,
+       substr(encode(sha256(convert_to('demo-call' || reference || stat_date::text || g::text, 'UTF8')), 'hex'), 1, 40),
        (array['chrome','chrome','safari','safari','safari','edge'])
-         [1 + (abs(hashtext(d.reference || s.stat_date::text || g::text || 'cua')) % 6)],
+         [1 + (abs(hashtext(reference || stat_date::text || g::text || 'cua')) % 6)],
        (array['google.com','google.com','facebook.com',null])
-         [1 + (abs(hashtext(d.reference || s.stat_date::text || g::text || 'cr')) % 4)],
+         [1 + (abs(hashtext(reference || stat_date::text || g::text || 'cr')) % 4)],
        'GB',
-       (abs(hashtext(d.reference || s.stat_date::text || g::text || 'cb')) % 8) <> 0,
+       -- Deliberate AND reachable. A repeat visitor is not charged for, and
+       -- neither is a call to a shut shop.
+       (abs(hashtext(reference || stat_date::text || g::text || 'cb')) % 8) <> 0 and not shut,
        'call', null, null,
-       substr(encode(sha256(convert_to('caller' || d.reference || s.stat_date::text || g::text, 'UTF8')), 'hex'), 1, 40)
-  from public.deal_daily_stats s
-  join public.deals d on d.id = s.deal_id
-  cross join generate_series(1, s.calls) as g
- where s.calls > 0;
+       substr(encode(sha256(convert_to('caller' || reference || stat_date::text || g::text, 'UTF8')), 'hex'), 1, 40),
+       shut
+  from kept;
+
+-- THE DAILY COUNTER IS NOW RECOMPUTED FROM THE EVENTS, not the other way round.
+-- Dropping out-of-hours calls above means the count the events add up to is no
+-- longer the count the counter was seeded with, and the two disagreeing is the
+-- exact bug that produced a 350% click-through rate the first time this was
+-- written. Deriving one from the other makes them equal by construction rather
+-- than by care.
+update public.deal_daily_stats s
+   set calls = coalesce((
+         select count(*) from public.click_events e
+          where e.deal_id = s.deal_id and e.event_type = 'call'
+            and e.occurred_at::date = s.stat_date
+       ), 0)
+ where s.agent_id in (select id from public.agents where slug in ('sunseeker-travel','coastline-holidays','jetaway-travel'));
 
 -- ── callback requests ───────────────────────────────────────────────────────
 -- A bigger ask of the traveller than tapping a number, and a better lead for the
@@ -633,16 +760,27 @@ select agent_id, deal_id, title,
        case when ((h / 11) % 8) > 1 then stat_date + interval '4 hours' else null end,
        substr(encode(sha256(convert_to('leadip' || reference || stat_date::text || g::text, 'UTF8')), 'hex'), 1, 40),
        'chrome', 'google.com', 'GB',
-       stat_date + (interval '1 hour' * (9 + (h % 10)))
+       -- Spread across the day and into the evening, because that is when
+       -- somebody who cannot ring leaves their details instead.
+       stat_date + (interval '1 hour' * (9 + (h % 13)))
+                 + (interval '1 minute' * ((h / 5) % 60))
   from gen;
 
 -- The billable event behind each enquiry, so the inbox and the meter agree.
+--
+-- ALWAYS BILLABLE, INCLUDING OUT OF HOURS, and that is the point of the whole
+-- feature rather than an oversight. A callback left at nine at night is the
+-- enquiry that would otherwise have been lost: it arrives with a name and a way
+-- to reply, and it is worth more to the agency than a ring into an empty shop.
+-- out_of_hours is still recorded, because "most of my enquiries come in the
+-- evening" is worth an agency knowing.
 insert into public.click_events
   (deal_id, agent_id, occurred_at, surface, ip_hash, ua_family, referrer_host, country_code,
-   is_billable, event_type, caller_hash)
+   is_billable, event_type, caller_hash, out_of_hours)
 select l.deal_id, l.agent_id, l.created_at, 'site', l.ip_hash, l.ua_family, l.referrer_host, 'GB',
        true, 'lead',
-       substr(encode(sha256(convert_to('contact' || coalesce(l.phone, l.email), 'UTF8')), 'hex'), 1, 40)
+       substr(encode(sha256(convert_to('contact' || coalesce(l.phone, l.email), 'UTF8')), 'hex'), 1, 40),
+       not public.tb_agent_is_open(l.agent_id, l.created_at)
   from public.leads l;
 
 -- ── a little import history ─────────────────────────────────────────────────

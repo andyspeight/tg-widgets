@@ -87,6 +87,12 @@ function toDeal(r) {
     // Drives which calls to action the card shows: a link, a number, or both.
     billingMode: r.effective_billing_mode || 'click',
     phone: r.effective_phone || '',
+    // Opening hours, the time zone they are read in, what to show while closed,
+    // and every number with its label. Deliberately a SCHEDULE rather than an
+    // "open now" answer: this response is CDN-cached, so a computed yes would
+    // still read yes an hour after closing time. The page works it out; the
+    // database works it out again, from its own clock, when there is money in it.
+    contact: r.agent_contact || null,
     discount: r.discount_pct || 0,
     badge: Array.isArray(r.offer_badges) && r.offer_badges.length ? r.offer_badges[0] : '',
 
@@ -121,6 +127,10 @@ function toDeal(r) {
           // A rival on a call-first agency is rung, not clicked.
           phone: c.phone || '',
           billingMode: c.billingMode || 'click',
+          // Per rival, because one agency in a compare list can be open while
+          // the next is shut, and that is often the reason to ring the second
+          // cheapest rather than the cheapest.
+          contact: c.contact || null,
         }))
       : undefined,
   };

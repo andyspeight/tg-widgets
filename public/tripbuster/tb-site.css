@@ -260,9 +260,54 @@ input[type=range] { width:100%; accent-color:var(--coral); }
   justify-content:center; white-space:nowrap; }
 .ar-call.is-revealed { font-size:13px; font-weight:800; }
 
+/* ── closed, and when they open ──────────────────────────────────────────── */
+/* Out of hours the button stops being a button and becomes the number itself.
+   Deliberately quieter than the live version: we are telling somebody the number
+   for later, not selling them a call nobody will answer. */
+.btn-call.is-shut { border-style:dashed; border-color:var(--border-2); color:var(--tx-2);
+  font-weight:700; font-variant-numeric:tabular-nums; }
+.btn-call.is-shut:hover { background:var(--surface-2); }
+/* Sized to the number rather than to the column. A full-width button holding
+   "0141 555 907" and refusing to wrap squeezes the agency's name into two lines
+   beside it, which looks like a bug in the page rather than a shut shop. */
+.ar-call.is-shut { width:auto; font-size:11.5px; padding:6px 9px; }
+/* This one is a sentence, not a number, so it is allowed to wrap. Keeping it on
+   one line was what pushed the column wide enough to break the name. */
+.ar-open, .prov-open { display:block; margin-top:4px; font-size:11px; font-weight:700;
+  color:var(--tx-3); line-height:1.35; }
+.ar-open.is-on, .prov-open.is-on { color:var(--live); }
+/* The other numbers: a branch line, or the mobile they answer in the evening.
+   The label carries the meaning, so it leads. */
+.ar-more { list-style:none; margin:6px 0 0; padding:0; }
+/* Label and number sit side by side when there is room and stack when there is
+   not. Held on one line they were the widest thing in the column, which is what
+   squeezed the agency's name next to them. */
+.ar-more li { display:flex; justify-content:space-between; gap:2px 8px; font-size:11.5px;
+  padding:3px 0; border-top:1px dashed var(--border); flex-wrap:wrap; }
+.ar-more-lb { color:var(--tx-3); font-weight:700; }
+.ar-more a { color:var(--sky-deep); font-weight:700; text-decoration:none;
+  font-variant-numeric:tabular-nums; white-space:nowrap; }
+.ar-more a:hover { text-decoration:underline; }
+
+/* ── the week ────────────────────────────────────────────────────────────── */
+.oh { background:var(--surface); border:1px solid var(--border); border-radius:16px;
+  padding:18px 20px; margin-top:16px; }
+.oh h3 { margin:0 0 10px; font-size:15px; font-weight:800; letter-spacing:-.02em; }
+.oh-tbl { width:100%; border-collapse:collapse; font-size:13px; }
+.oh-tbl th { text-align:left; font-weight:600; color:var(--tx-2); padding:4px 0; }
+.oh-tbl td { text-align:right; color:var(--tx); font-weight:700; padding:4px 0;
+  font-variant-numeric:tabular-nums; }
+.oh-tbl tr.oh-today th, .oh-tbl tr.oh-today td { color:var(--coral-ink); }
+.oh-special { list-style:none; margin:12px 0 0; padding:12px 0 0; font-size:12px;
+  color:var(--tx-2); border-top:1px solid var(--border); }
+.oh-special li { padding:2px 0; }
+
 /* ── ask us to ring you ──────────────────────────────────────────────────── */
 .cbf { background:var(--surface); border:1px solid var(--border); border-radius:16px;
   padding:20px; margin-top:16px; }
+/* Out of hours this IS the call to action, not the alternative to one, so it
+   stops looking like a secondary panel. */
+.cbf.is-primary { border-color:var(--coral); box-shadow:0 0 0 3px var(--coral-wash); }
 .cbf h3 { margin:0 0 5px; font-size:16px; font-weight:800; letter-spacing:-.02em; }
 .cbf-lead { margin:0 0 14px; font-size:13.5px; color:var(--tx-2); line-height:1.5; }
 .cbf label { display:block; font-size:12.5px; font-weight:700; color:var(--tx); margin-bottom:5px; }
