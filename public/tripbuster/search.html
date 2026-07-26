@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Holiday deals — Tripbuster</title>
+<meta name="description" content="Compare holiday deals from independent UK travel agents. Filter by price, board and airport, and see which agent is cheapest.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23FF5C39'/%3E%3Cpath d='M6 16h20M19 9l7 7-7 7M10 12v8' stroke='white' stroke-width='2.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/tripbuster/tb-site.css">
+<style>
+  .sumbar { background:linear-gradient(135deg,#0E86C4,#22A8DC); color:#fff; }
+  .sum-in { display:flex; align-items:center; gap:10px; padding:14px 0; flex-wrap:wrap; }
+  .sum-field { display:flex; align-items:center; gap:8px; background:rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.24); border-radius:11px; padding:8px 13px; }
+  .sum-field svg { width:15px; height:15px; stroke:#fff; fill:none; stroke-width:2.2; opacity:.9; }
+  .sum-field .lab { font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; opacity:.82; }
+  .sum-field .val { font-size:14px; font-weight:800; letter-spacing:-.01em; }
+  .sum-edit { margin-left:auto; background:#fff; color:var(--sky-deep); font-weight:800; font-size:13px;
+    padding:10px 18px; border:0; border-radius:10px; }
+  .starbtns { display:flex; gap:6px; }
+  .starbtn { flex:1; border:1px solid var(--border-2); background:var(--surface); border-radius:8px;
+    padding:7px 0; font-size:12.5px; font-weight:800; color:var(--tx-2);
+    display:flex; align-items:center; justify-content:center; gap:3px; }
+  .starbtn svg { width:12px; height:12px; fill:var(--star); }
+  .starbtn[aria-pressed="true"] { border-color:var(--coral); background:var(--coral-wash); color:var(--coral-ink); }
+  .more { text-align:center; margin-top:24px; }
+  .mobile-filters { display:none; }
+  @media (max-width:1000px) { .mobile-filters { display:inline-flex; } }
+</style>
+</head>
+<body>
+<div id="chrome"></div>
+
+<div class="sumbar">
+  <div class="wrap sum-in" id="sumBar"></div>
+</div>
+
+<main id="main" class="wrap layout">
+  <aside class="filters" id="filters">
+    <div class="filt-h">
+      <h2>Filter</h2>
+      <button type="button" id="clearAll">Clear all</button>
+    </div>
+
+    <div class="fgroup">
+      <h3><label for="fq">Search</label></h3>
+      <input class="fld" id="fq" type="search" placeholder="Resort, hotel or country">
+    </div>
+
+    <div class="fgroup">
+      <h3>Price per person</h3>
+      <div class="prices"><span>Any</span><span>up to <b id="pmaxLabel">Any</b></span></div>
+      <input type="range" id="pmax" min="150" max="1500" step="25" value="1500"
+             aria-label="Maximum price per person">
+    </div>
+
+    <div class="fgroup">
+      <h3>Board basis</h3>
+      <div id="boards"></div>
+    </div>
+
+    <div class="fgroup">
+      <h3>Hotel stars</h3>
+      <div class="starbtns" id="starbtns">
+        <button class="starbtn" type="button" data-star="3" aria-pressed="false">3<svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg>+</button>
+        <button class="starbtn" type="button" data-star="4" aria-pressed="false">4<svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg>+</button>
+        <button class="starbtn" type="button" data-star="5" aria-pressed="false">5<svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg></button>
+      </div>
+    </div>
+
+    <div class="fgroup">
+      <h3><label for="fairport">Flying from</label></h3>
+      <input class="fld" id="fairport" type="text" placeholder="Any UK airport">
+    </div>
+
+    <div class="fgroup">
+      <h3><label for="fnights">Nights</label></h3>
+      <select class="fld" id="fnights">
+        <option value="">Any length</option>
+        <option value="3">3 nights</option>
+        <option value="4">4 nights</option>
+        <option value="7">7 nights</option>
+        <option value="10">10 nights</option>
+        <option value="14">14 nights</option>
+      </select>
+    </div>
+  </aside>
+
+  <div>
+    <div class="sec-head">
+      <div>
+        <h1 style="font-size:22px;font-weight:800;letter-spacing:-.03em;margin:0" id="resTitle">Holiday deals</h1>
+        <p id="resCount">Loading…</p>
+      </div>
+      <div class="sortrow">
+        <button class="btn btn-ghost mobile-filters" type="button" id="toggleFilters">Filters</button>
+        <label for="sort">Sort</label>
+        <select id="sort">
+          <option value="recommended">Recommended</option>
+          <option value="price">Lowest price</option>
+          <option value="discount">Biggest saving</option>
+          <option value="score">Guest rating</option>
+          <option value="recent">Newest</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="rows" id="results"><div class="loading">Searching deals…</div></div>
+    <div class="more"><button class="btn btn-ghost" id="loadMore" hidden>Show more deals</button></div>
+  </div>
+</main>
+
+<div id="footer"></div>
+
+<script src="/tripbuster/tb-site.js"></script>
+<script>
+(function () {
+  'use strict';
+  document.getElementById('chrome').innerHTML = TB.header('search');
+  document.getElementById('footer').innerHTML = TB.footer();
+
+  var BOARDS = ['All inclusive', 'Half board', 'Bed & breakfast', 'Self catering', 'Full board', 'Room only'];
+  var PAGE = 12;
+
+  var state = { q:'', maxPrice:'', board:'', airport:'', nights:'', minStars:0, sort:'recommended', offset:0 };
+  var loaded = [];
+  var total = 0;
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  // ── filter controls ─────────────────────────────────────────
+  $('boards').innerHTML = BOARDS.map(function (b) {
+    return '<label class="check"><input type="radio" name="board" value="' + TB.esc(b) + '"> ' + TB.esc(b) + '</label>';
+  }).join('') + '<label class="check"><input type="radio" name="board" value="" checked> Any board</label>';
+
+  /** Read the URL into state, so a shared or bookmarked search reopens intact. */
+  function fromUrl() {
+    var p = new URLSearchParams(location.search);
+    state.q = p.get('q') || '';
+    state.maxPrice = p.get('maxPrice') || '';
+    state.board = p.get('board') || '';
+    state.airport = p.get('airport') || '';
+    state.nights = p.get('nights') || '';
+    state.minStars = parseInt(p.get('minStars'), 10) || 0;
+    state.sort = p.get('sort') || 'recommended';
+
+    $('fq').value = state.q;
+    $('fairport').value = state.airport;
+    $('fnights').value = state.nights;
+    $('sort').value = state.sort;
+    if (state.maxPrice) { $('pmax').value = state.maxPrice; }
+    $('pmaxLabel').textContent = state.maxPrice ? TB.money(state.maxPrice, 'GBP') : 'Any';
+    var radio = document.querySelector('input[name="board"][value="' + (state.board || '') + '"]');
+    if (radio) radio.checked = true;
+    document.querySelectorAll('#starbtns .starbtn').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(Number(b.dataset.star) === state.minStars));
+    });
+  }
+
+  /** Push state to the URL without reloading, so Back works through searches. */
+  function toUrl() {
+    var p = new URLSearchParams();
+    ['q', 'maxPrice', 'board', 'airport', 'nights'].forEach(function (k) {
+      if (state[k]) p.set(k, state[k]);
+    });
+    if (state.minStars) p.set('minStars', state.minStars);
+    if (state.sort !== 'recommended') p.set('sort', state.sort);
+    var qs = p.toString();
+    history.replaceState(null, '', qs ? '?' + qs : location.pathname);
+  }
+
+  // ── rendering ───────────────────────────────────────────────
+  function providerRows(d) {
+    var list = (d.compare && d.compare.length) ? d.compare : [{
+      dealId: d.id, agent: d.agent && d.agent.name, atol: d.atol,
+      price: d.priceFrom, clickoutUrl: d.clickoutUrl,
+    }];
+    return list.map(function (c, i) {
+      var initials = String(c.agent || '?').split(/\s+/).map(function (w) { return w[0]; })
+        .join('').slice(0, 2).toUpperCase();
+      var href = TB.safeUrl(c.clickoutUrl);
+      return '<div class="prov' + (i === 0 ? ' best' : '') + '">' +
+        '<span class="prov-av">' + TB.esc(initials) + '</span>' +
+        '<span><span class="prov-nm">' + TB.esc(c.agent) +
+          (i === 0 && list.length > 1 ? '<span class="best-tag">CHEAPEST</span>' : '') + '</span>' +
+          (c.atol ? '<span class="prot" style="font-size:11px">' + TB.svg(TB.IC.shield) +
+            'ATOL ' + TB.esc(c.atol) + '</span>' : '') + '</span>' +
+        '<span class="prov-price tnum">' + TB.esc(TB.money(c.price, d.currency)) + '<small> pp</small></span>' +
+        (href
+          ? '<a class="prov-go" href="' + TB.esc(href) + '" target="_blank" rel="noopener nofollow" ' +
+            'data-click="' + TB.esc(c.dealId || '') + '">Book</a>'
+          : '') +
+        '</div>';
+    }).join('');
+  }
+
+  function resultRow(d) {
+    var count = d.agentCount || 1;
+    var dealHref = '/tripbuster/deal?id=' + encodeURIComponent(d.id || '');
+    return '<article class="rc" data-id="' + TB.esc(d.id) + '">' +
+      '<a class="rc-img ' + TB.gradClass(d.resort || d.title) + '"' + TB.bgStyle(d) +
+        ' href="' + TB.esc(dealHref) + '" aria-label="' + TB.esc(d.title) + '">' +
+        (d.discount ? '<span class="tag">-' + TB.esc(d.discount) + '%</span>' : '') +
+        (d.badge ? '<span class="tag-dark">' + TB.esc(d.badge) + '</span>' : '') +
+      '</a>' +
+      '<div class="rc-mid">' +
+        TB.starsMarkup(d.starRating) +
+        '<h2 class="rc-name"><a href="' + TB.esc(dealHref) + '">' +
+          TB.esc(d.accommodation || d.title) + '</a></h2>' +
+        '<div class="rc-loc">' + TB.svg(TB.IC.pin) + TB.esc([d.resort, d.country].filter(Boolean).join(', ')) +
+          (d.distanceToBeach ? ' · ' + TB.esc(d.distanceToBeach) + ' to the beach' : '') + '</div>' +
+        (d.guestScore
+          ? '<div class="score"><span class="score-box" style="background:' + TB.scoreColour(d.guestScore) + '">' +
+            TB.esc(Number(d.guestScore).toFixed(1)) + '</span><span class="score-txt"><b>' +
+            TB.esc(TB.scoreWord(d.guestScore)) + '</b><span>guest rating</span></span></div>'
+          : '') +
+        '<div class="chips">' + TB.chipsFor(d) + '</div>' +
+      '</div>' +
+      '<div class="rc-right">' +
+        (d.discount >= 25 ? '<span class="greatprice">GREAT PRICE</span>' : '') +
+        '<div class="rc-from">' + (d.nights ? TB.esc(d.nights) + ' nights · ' : '') +
+          TB.esc(d.board || '') + '</div>' +
+        TB.priceBlock(d) +
+        '<div class="cheapest-with">' + (count > 1 ? 'Cheapest with ' : 'With ') +
+          '<b>' + TB.esc(d.agent && d.agent.name) + '</b></div>' +
+        '<a class="btn btn-primary" style="margin-top:10px" href="' + TB.esc(dealHref) + '">View deal</a>' +
+        (count > 1
+          ? '<button class="compare-btn" type="button" data-compare="' + TB.esc(d.id) + '" aria-expanded="false">' +
+            'Compare ' + count + ' agents ' + TB.svg(TB.IC.chev) + '</button>'
+          : '') +
+      '</div>' +
+      (count > 1
+        ? '<div class="drawer" id="drawer-' + TB.esc(d.id) + '" hidden>' +
+          '<div class="drawer-h">Every agent advertising this hotel</div>' + providerRows(d) + '</div>'
+        : '') +
+    '</article>';
+  }
+
+  function renderSummary() {
+    $('sumBar').innerHTML =
+      '<span class="sum-field">' + TB.svg(TB.IC.pin) + '<span><span class="lab">Where</span>' +
+        '<span class="val">' + TB.esc(state.q || 'Anywhere') + '</span></span></span>' +
+      '<span class="sum-field">' + TB.svg(TB.IC.plane) + '<span><span class="lab">From</span>' +
+        '<span class="val">' + TB.esc(state.airport || 'Any UK airport') + '</span></span></span>' +
+      '<span class="sum-field">' + TB.svg(TB.IC.board) + '<span><span class="lab">Board</span>' +
+        '<span class="val">' + TB.esc(state.board || 'Any board') + '</span></span></span>' +
+      '<a class="sum-edit" href="/tripbuster' + location.search + '">Edit search</a>';
+  }
+
+  function renderResults() {
+    var host = $('results');
+    if (!loaded.length) {
+      host.innerHTML = '<div class="empty"><b>No deals match that</b>' +
+        'Try widening the price, board or airport filters — or <a href="/tripbuster/search">see everything</a>.</div>';
+      $('loadMore').hidden = true;
+      return;
+    }
+    host.innerHTML = loaded.map(resultRow).join('');
+    $('loadMore').hidden = loaded.length >= total;
+  }
+
+  function renderCount() {
+    $('resTitle').textContent = state.q ? 'Holidays matching “' + state.q + '”' : 'Holiday deals';
+    $('resCount').textContent = total
+      ? 'Showing ' + TB.num(loaded.length) + ' of ' + TB.num(total) + ' hotel' + (total === 1 ? '' : 's') +
+        ', with every agent’s price compared'
+      : '';
+  }
+
+  // ── loading ─────────────────────────────────────────────────
+  var reqId = 0;
+  async function search(append) {
+    var mine = ++reqId;
+    if (!append) { state.offset = 0; $('results').innerHTML = '<div class="loading">Searching deals…</div>'; }
+    try {
+      var data = await TB.fetchDeals({
+        compare: 1,
+        q: state.q,
+        maxPrice: state.maxPrice,
+        board: state.board,
+        airport: state.airport,
+        nights: state.nights,
+        sort: state.sort,
+        limit: PAGE,
+        offset: state.offset,
+      });
+      // A slower earlier request must not overwrite a newer one's results.
+      if (mine !== reqId) return;
+
+      var incoming = data.deals || [];
+      // Star filtering is applied here rather than in the API: the feed has no
+      // star parameter, and adding one to the shared read path for a single
+      // consumer control was not worth it. Flagged because it means the count
+      // below reflects the API total, not the filtered total.
+      if (state.minStars) {
+        incoming = incoming.filter(function (d) { return (d.starRating || 0) >= state.minStars; });
+      }
+      loaded = append ? loaded.concat(incoming) : incoming;
+      total = Number(data.total) || 0;
+      renderResults();
+      renderCount();
+      TB.reportImpressions(incoming, 'site');
+    } catch (err) {
+      if (mine !== reqId) return;
+      $('results').innerHTML = '<div class="empty"><b>Could not load deals</b>' + TB.esc(err.message) + '</div>';
+    }
+  }
+
+  function apply() { toUrl(); renderSummary(); search(false); }
+
+  // ── events ──────────────────────────────────────────────────
+  var debounce;
+  $('fq').addEventListener('input', function () {
+    clearTimeout(debounce);
+    var v = this.value;
+    debounce = setTimeout(function () { state.q = v.trim(); apply(); }, 350);
+  });
+  $('fairport').addEventListener('input', function () {
+    clearTimeout(debounce);
+    var v = this.value;
+    debounce = setTimeout(function () { state.airport = v.trim(); apply(); }, 350);
+  });
+  $('pmax').addEventListener('input', function () {
+    // Top of the range means "no maximum" rather than exactly £1,500.
+    state.maxPrice = Number(this.value) >= 1500 ? '' : this.value;
+    $('pmaxLabel').textContent = state.maxPrice ? TB.money(state.maxPrice, 'GBP') : 'Any';
+  });
+  $('pmax').addEventListener('change', apply);
+  $('boards').addEventListener('change', function (e) {
+    if (e.target.name === 'board') { state.board = e.target.value; apply(); }
+  });
+  $('fnights').addEventListener('change', function () { state.nights = this.value; apply(); });
+  $('sort').addEventListener('change', function () { state.sort = this.value; apply(); });
+  $('starbtns').addEventListener('click', function (e) {
+    var b = e.target.closest('.starbtn');
+    if (!b) return;
+    var v = Number(b.dataset.star);
+    state.minStars = state.minStars === v ? 0 : v;
+    document.querySelectorAll('#starbtns .starbtn').forEach(function (x) {
+      x.setAttribute('aria-pressed', String(Number(x.dataset.star) === state.minStars));
+    });
+    apply();
+  });
+  $('clearAll').addEventListener('click', function () {
+    state = { q:'', maxPrice:'', board:'', airport:'', nights:'', minStars:0, sort:'recommended', offset:0 };
+    $('fq').value = ''; $('fairport').value = ''; $('fnights').value = '';
+    $('sort').value = 'recommended'; $('pmax').value = 1500; $('pmaxLabel').textContent = 'Any';
+    var any = document.querySelector('input[name="board"][value=""]');
+    if (any) any.checked = true;
+    document.querySelectorAll('#starbtns .starbtn').forEach(function (x) { x.setAttribute('aria-pressed', 'false'); });
+    apply();
+  });
+  $('loadMore').addEventListener('click', function () {
+    state.offset += PAGE;
+    search(true);
+  });
+  $('toggleFilters').addEventListener('click', function () {
+    var f = $('filters');
+    var open = f.style.display !== 'none';
+    f.style.display = open ? 'none' : '';
+    this.textContent = open ? 'Show filters' : 'Hide filters';
+  });
+
+  // Compare drawer, and the click-out from inside it.
+  $('results').addEventListener('click', function (e) {
+    var toggle = e.target.closest('[data-compare]');
+    if (toggle) {
+      var drawer = document.getElementById('drawer-' + toggle.getAttribute('data-compare'));
+      if (drawer) {
+        var open = drawer.hidden;
+        drawer.hidden = !open;
+        toggle.setAttribute('aria-expanded', String(open));
+      }
+      return;
+    }
+    // Recorded on the way out; the anchor itself is never intercepted.
+    var book = e.target.closest('a[data-click]');
+    if (book) TB.reportClick(book.getAttribute('data-click'), 'site');
+  });
+
+  fromUrl();
+  renderSummary();
+  search(false);
+})();
+</script>
+</body>
+</html>

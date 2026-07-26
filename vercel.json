@@ -278,7 +278,15 @@
     },
     {
       "source": "/tripbuster",
-      "destination": "/tripbuster/dashboard.html"
+      "destination": "/tripbuster/index.html"
+    },
+    {
+      "source": "/tripbuster/search",
+      "destination": "/tripbuster/search.html"
+    },
+    {
+      "source": "/tripbuster/deal",
+      "destination": "/tripbuster/deal.html"
     },
     {
       "source": "/tripbuster/dashboard",
