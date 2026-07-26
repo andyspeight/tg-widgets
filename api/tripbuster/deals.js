@@ -83,6 +83,10 @@ function toDeal(r) {
     image: r.hero_image_url || '',
     clickoutUrl: r.effective_clickout || '',
     atol: r.effective_atol || '',
+    // What this deal charges for, already resolved against the agency default.
+    // Drives which calls to action the card shows: a link, a number, or both.
+    billingMode: r.effective_billing_mode || 'click',
+    phone: r.effective_phone || '',
     discount: r.discount_pct || 0,
     badge: Array.isArray(r.offer_badges) && r.offer_badges.length ? r.offer_badges[0] : '',
 
@@ -114,6 +118,9 @@ function toDeal(r) {
           atol: c.atol || '',
           price: c.price != null ? Number(c.price) : null,
           clickoutUrl: c.clickoutUrl || '',
+          // A rival on a call-first agency is rung, not clicked.
+          phone: c.phone || '',
+          billingMode: c.billingMode || 'click',
         }))
       : undefined,
   };

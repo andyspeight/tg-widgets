@@ -15,14 +15,17 @@
 --   3 agencies, 34 deals (26 live, 6 draft, 2 paused)
 --   4 properties advertised by more than one agency, which is what makes the
 --     multi-agent price compare visible on the consumer site
---   30 days of daily impressions and clicks, generated so the numbers reconcile:
+--   one agency on each billing mode: clicks, calls, and both
+--   30 days of impressions, clicks and phone enquiries, generated so they reconcile:
 --     click_events are EXPANDED FROM deal_daily_stats rather than invented
 --     alongside them, because tb_agent_stats reads impressions and clicks from
 --     the daily table and billable clicks from the events table. Generating them
 --     independently is what produced a 350% click-through rate the first time.
 --
--- Randomness is derived from hashes of the row rather than random(), so running
--- this twice gives the same demo and a screenshot stays true.
+-- Randomness is derived from hashes of the agency's own deal REFERENCE rather
+-- than from random() or the row id, so running this twice gives exactly the same
+-- demo and a screenshot stays true. Deal ids are regenerated on every run, so
+-- keying on them would have quietly broken that promise.
 
 begin;
 
@@ -69,6 +72,14 @@ update public.agents
  where slug = 'coastline-holidays';
 update public.agents set tg_client_email = null
  where slug in ('sunseeker-travel', 'jetaway-travel');
+
+-- One agency on each billing mode, so all three are visible in the demo:
+--   Sunseeker sells online, Jetaway sells on the phone, Coastline does both.
+-- Jetaway's shorter qualifying length against Coastline's 90 seconds is what
+-- makes the "only proven calls are charged for" rule visible in the figures.
+update public.agents set billing_mode = 'click' where slug = 'sunseeker-travel';
+update public.agents set billing_mode = 'call',  call_min_seconds = 60 where slug = 'jetaway-travel';
+update public.agents set billing_mode = 'both',  call_min_seconds = 90 where slug = 'coastline-holidays';
 
 -- ── clear what this seed owns ───────────────────────────────────────────────
 -- Scoped to the demo agents. click_events and deal_daily_stats cascade from
@@ -437,6 +448,12 @@ update public.deals d
                                else null end
  where d.agent_id in (select id from public.agents where slug in ('sunseeker-travel','coastline-holidays','jetaway-travel'));
 
+-- Two deals that deliberately disagree with their agency, so the per-deal
+-- override is something you can point at rather than describe. A long-haul trip
+-- is the sort people ring about; a cheap city break is pure click-through.
+update public.deals set billing_mode = 'both'  where reference = 'SUN-1010';
+update public.deals set billing_mode = 'click' where reference = 'CST-2010';
+
 -- ── 30 days of traffic ──────────────────────────────────────────────────────
 -- Only live deals earn impressions: a draft is not on the site to be seen.
 --
@@ -449,9 +466,9 @@ select p.deal_id, p.agent_id, d.day::date, v.imp,
        -- click-through rate is always a real ratio.
        greatest(0, round(v.imp * p.ctr_bp / 10000.0))::int
   from (
-    select dl.id as deal_id, dl.agent_id,
-           45 + (abs(hashtext(dl.id::text || 'pop')) % 180) as base_imp,
-           160 + (abs(hashtext(dl.id::text || 'ctr')) % 290) as ctr_bp  -- 1.60% to 4.49%
+    select dl.id as deal_id, dl.agent_id, dl.reference,
+           45 + (abs(hashtext(dl.reference || 'pop')) % 180) as base_imp,
+           160 + (abs(hashtext(dl.reference || 'ctr')) % 290) as ctr_bp  -- 1.60% to 4.49%
       from public.deals dl
      where dl.status = 'live'
        and dl.agent_id in (select id from public.agents where slug in ('sunseeker-travel','coastline-holidays','jetaway-travel'))
@@ -460,7 +477,7 @@ select p.deal_id, p.agent_id, d.day::date, v.imp,
   cross join lateral (
     select greatest(6, round(
              p.base_imp
-             * (70 + (abs(hashtext(p.deal_id::text || d.day::text)) % 61)) / 100.0   -- 0.70 to 1.30
+             * (70 + (abs(hashtext(p.reference || d.day::text)) % 61)) / 100.0   -- 0.70 to 1.30
              * (case when extract(dow from d.day) in (0, 6) then 1.28 else 1.0 end)
            ))::int as imp
   ) v;
@@ -478,21 +495,89 @@ insert into public.click_events
   (deal_id, agent_id, occurred_at, surface, ip_hash, ua_family, referrer_host, country_code, is_billable)
 select s.deal_id, s.agent_id,
        s.stat_date
-         + (interval '1 hour'   * (7 + (abs(hashtext(s.deal_id::text || g::text || 'h')) % 15)))
-         + (interval '1 minute' * (abs(hashtext(s.deal_id::text || g::text || 'm')) % 60)),
-       case when (abs(hashtext(s.deal_id::text || g::text || 's')) % 5) = 0 then 'widget' else 'site' end,
+         + (interval '1 hour'   * (7 + (abs(hashtext(d.reference || g::text || 'h')) % 15)))
+         + (interval '1 minute' * (abs(hashtext(d.reference || g::text || 'm')) % 60)),
+       case when (abs(hashtext(d.reference || g::text || 's')) % 5) = 0 then 'widget' else 'site' end,
        -- The shape the real recorder writes: a salted hash truncated to 40 chars,
        -- never an IP address.
-       substr(encode(sha256(convert_to('demo-seed' || s.deal_id::text || s.stat_date::text || g::text, 'UTF8')), 'hex'), 1, 40),
+       substr(encode(sha256(convert_to('demo-seed' || d.reference || s.stat_date::text || g::text, 'UTF8')), 'hex'), 1, 40),
        (array['chrome','chrome','chrome','safari','safari','edge','firefox','samsung'])
-         [1 + (abs(hashtext(s.deal_id::text || g::text || 'ua')) % 8)],
+         [1 + (abs(hashtext(d.reference || g::text || 'ua')) % 8)],
        (array['google.com','google.com','facebook.com',null,'bing.com','sunseekertravel.co.uk'])
-         [1 + (abs(hashtext(s.deal_id::text || g::text || 'r')) % 6)],
+         [1 + (abs(hashtext(d.reference || g::text || 'r')) % 6)],
        'GB',
-       (abs(hashtext(s.deal_id::text || g::text || 'b')) % 8) <> 0
+       (abs(hashtext(d.reference || g::text || 'b')) % 8) <> 0
   from public.deal_daily_stats s
+  join public.deals d on d.id = s.deal_id
   cross join generate_series(1, s.clicks) as g
  where s.clicks > 0
+   and s.agent_id in (select id from public.agents where slug in ('sunseeker-travel','coastline-holidays','jetaway-travel'));
+
+-- ── phone enquiries ─────────────────────────────────────────────────────────
+-- A call-first agency's cards show a number rather than a booking link, so they
+-- should not be accruing click-throughs at all. Clearing them is what makes the
+-- dashboard read honestly for Jetaway.
+delete from public.click_events
+ where event_type = 'click'
+   and agent_id in (select id from public.agents where billing_mode = 'call');
+
+update public.deal_daily_stats s set clicks = 0
+  from public.agents a
+ where a.id = s.agent_id and a.billing_mode = 'call';
+
+-- Calls run at a much lower rate than clicks, because ringing someone is a
+-- bigger step than clicking. Only deals whose RESOLVED mode includes calls earn
+-- any, which is what makes the per-deal override visible in the figures.
+update public.deal_daily_stats s
+   set calls = greatest(0, round(s.impressions
+         * (30 + (abs(hashtext(d.reference || 'callrate')) % 70)) / 10000.0))::int
+  from public.deals d
+  join public.agents a on a.id = d.agent_id
+ where d.id = s.deal_id
+   and coalesce(d.billing_mode, a.billing_mode) in ('call', 'both');
+
+-- An agency that sells on the phone converts phone enquiries better than one
+-- that merely accepts them.
+update public.deal_daily_stats s
+   set calls = greatest(1, round(s.calls * 2.4))::int
+  from public.deals d
+  join public.agents a on a.id = d.agent_id
+ where d.id = s.deal_id and coalesce(d.billing_mode, a.billing_mode) = 'call';
+
+-- Expanded from the daily counts for the same reason clicks are: the two must
+-- never disagree. Roughly one call in six rings out, and of those answered some
+-- are a quick availability check rather than a real enquiry, so `is_billable`
+-- is computed with the SAME rule tb_record_click applies — connected, and past
+-- the agency's own qualifying length. Coastline's 90 seconds against Jetaway's
+-- 60 is why their billable share is visibly lower.
+insert into public.click_events
+  (deal_id, agent_id, occurred_at, surface, ip_hash, ua_family, referrer_host, country_code,
+   is_billable, event_type, call_seconds, call_connected, caller_hash)
+select s.deal_id, s.agent_id,
+       s.stat_date
+         + (interval '1 hour'   * (9 + (abs(hashtext(d.reference || g::text || 'ch')) % 9)))
+         + (interval '1 minute' * (abs(hashtext(d.reference || g::text || 'cm')) % 60)),
+       case when (abs(hashtext(d.reference || g::text || 'cs')) % 6) = 0 then 'widget' else 'site' end,
+       substr(encode(sha256(convert_to('demo-call' || d.reference || s.stat_date::text || g::text, 'UTF8')), 'hex'), 1, 40),
+       (array['chrome','chrome','safari','safari','safari','edge'])
+         [1 + (abs(hashtext(d.reference || g::text || 'cua')) % 6)],
+       (array['google.com','google.com','facebook.com',null])
+         [1 + (abs(hashtext(d.reference || g::text || 'cr')) % 4)],
+       'GB',
+       v.connected and v.secs >= a.call_min_seconds,
+       'call', v.secs, v.connected,
+       -- The caller's number would be hashed and salted exactly like the IP.
+       substr(encode(sha256(convert_to('caller' || d.reference || s.stat_date::text || g::text, 'UTF8')), 'hex'), 1, 40)
+  from public.deal_daily_stats s
+  join public.agents a on a.id = s.agent_id
+  join public.deals d on d.id = s.deal_id
+  cross join generate_series(1, s.calls) as g
+  cross join lateral (
+    select
+      (abs(hashtext(d.reference || g::text || 'conn')) % 6) <> 0        as connected,
+      (15 + (abs(hashtext(d.reference || g::text || 'secs')) % 400))    as secs
+  ) v
+ where s.calls > 0
    and s.agent_id in (select id from public.agents where slug in ('sunseeker-travel','coastline-holidays','jetaway-travel'));
 
 -- ── a little import history ─────────────────────────────────────────────────

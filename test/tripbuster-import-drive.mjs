@@ -34,6 +34,7 @@ const { default: loginHandler } = await import('../api/tripbuster/login.js');
 const { default: dealsHandler } = await import('../api/tripbuster/my-deals.js');
 const { default: importHandler } = await import('../api/tripbuster/import.js');
 const { default: offerImport } = await import('../api/tripbuster/offer-import.js');
+const { default: accountHandler } = await import('../api/tripbuster/account.js');
 
 const AGENT_ID = '00000001-0000-4000-8000-000000000000';
 let n = 100;
@@ -49,6 +50,7 @@ function seed() {
     default_clickout_url: 'https://sunseekertravel.co.uk',
     atol_number: '11542', abta_number: null, protection_type: 'ATOL',
     tg_client_email: null, password_hash: bcrypt.hashSync('right-password', 10),
+    phone: '01204 555 118', billing_mode: 'click', call_min_seconds: 60,
   }];
 }
 
@@ -95,7 +97,22 @@ const pg = http.createServer((req, res) => {
       });
     }
     if (table === 'rpc/tb_agent_stats') {
-      return send(200, { days: body.p_days, impressions: 0, clicks: 0, billableClicks: 0, ctr: 0, perDeal: {} });
+      return send(200, {
+        days: body.p_days, impressions: 4200, clicks: 130, billableClicks: 118,
+        calls: 46, billableCalls: 29, ctr: 3.1, callRate: 1.1, perDeal: {},
+      });
+    }
+    if (table === 'rpc/tb_agent_billing_counts') {
+      const agent = db.agents.find((a) => a.id === body.p_agent_id);
+      const mine = db.deals.filter((d) => d.agent_id === body.p_agent_id);
+      const resolved = (d) => d.billing_mode || (agent && agent.billing_mode) || 'click';
+      return send(200, {
+        click: mine.filter((d) => resolved(d) === 'click').length,
+        call: mine.filter((d) => resolved(d) === 'call').length,
+        both: mine.filter((d) => resolved(d) === 'both').length,
+        overridden: mine.filter((d) => !!d.billing_mode).length,
+        total: mine.length,
+      });
     }
 
     const store = db[table];
@@ -177,6 +194,7 @@ const app = http.createServer(async (req, res) => {
     '/api/tripbuster/my-deals': dealsHandler,
     '/api/tripbuster/import': importHandler,
     '/api/tripbuster/offer-import': offerImport,
+    '/api/tripbuster/account': accountHandler,
   }[url.pathname];
   if (route) {
     let raw = '';
@@ -481,6 +499,72 @@ try {
     /from a spreadsheet/.test(lead) && /from your live feed/.test(lead), lead);
 
   await shot('tb-imp-5-history.png');
+
+  // ── what the agency is charged for ────────────────────────
+  await page.click('.nav-i[data-view="plan"]');
+  await page.waitForSelector('#v-plan.on', { visible: true });
+  await wait(500);
+
+  const modeCount = await page.$$eval('#billModes .route', (b) => b.length);
+  check('all three billing modes are offered', modeCount === 3, `${modeCount}`);
+
+  const clickSelected = await page.$eval('.route[data-mode="click"]', (b) => b.getAttribute('aria-pressed'));
+  check('the current mode is shown as selected', clickSelected === 'true', `aria-pressed=${clickSelected}`);
+
+  // On clicks, the phone settings are irrelevant and stay out of the way.
+  const phoneHiddenOnClick = await page.$eval('#callSettings', (el) => el.style.display === 'none');
+  check('phone settings are hidden while charging for clicks', phoneHiddenOnClick);
+
+  await page.click('.route[data-mode="call"]');
+  await wait(200);
+  const phoneShown = await page.$eval('#callSettings', (el) => el.style.display !== 'none');
+  const noteShown = await page.$eval('#callNote', (el) => el.style.display !== 'none');
+  check('choosing calls reveals the number and qualifying length', phoneShown);
+  check('and explains what is actually chargeable', noteShown);
+
+  const noteText = await text('#callNote');
+  check('the note is honest that an unproven tap is not charged for',
+    /never charged for/.test(noteText), noteText.slice(0, 140));
+
+  // Saving with no number must be refused, not silently accepted.
+  await page.$eval('#acctPhone', (el) => { el.value = ''; });
+  await page.click('#saveBilling');
+  await wait(700);
+  const errShown = await page.$eval('#billErr', (el) => el.classList.contains('on'));
+  check('switching to calls with no number is refused', errShown);
+  check('and the agency was not switched over', db.agents[0].billing_mode === 'click',
+    db.agents[0].billing_mode);
+
+  await page.type('#acctPhone', '0141 555 907');
+  await page.select('#acctMinSecs', '90');
+  await page.click('#saveBilling');
+  await wait(900);
+  check('with a number it saves', db.agents[0].billing_mode === 'call', db.agents[0].billing_mode);
+  check('the qualifying length saves too', db.agents[0].call_min_seconds === 90,
+    String(db.agents[0].call_min_seconds));
+  check('the number keeps its spacing for travellers to read',
+    db.agents[0].phone === '0141 555 907', db.agents[0].phone);
+
+  // The performance tiles follow the mode: no click-through rate on a call-first
+  // agency, because that figure means nothing to them.
+  await page.click('.nav-i[data-view="deals"]');
+  await page.waitForSelector('#v-deals.on', { visible: true });
+  await wait(700);
+  const statsText = await text('#stats');
+  check('the figures switch to calls', /Calls/i.test(statsText), statsText.replace(/\n/g, ' | ').slice(0, 160));
+  check('and drop the click-through rate', !/Click-through rate/i.test(statsText),
+    statsText.replace(/\n/g, ' | ').slice(0, 160));
+
+  // A single deal can disagree with its agency.
+  await page.click('.nav-i[data-view="editor"]');
+  await page.waitForSelector('#v-editor.on', { visible: true });
+  await wait(300);
+  const overrideOptions = await page.$$eval('#f-billing_mode option', (o) => o.map((x) => x.value));
+  check('a deal can override the agency billing mode',
+    overrideOptions.join(',') === ',click,call,both', overrideOptions.join(','));
+  const inheritHint = await text('#billingHint');
+  check('the editor says what the deal would inherit',
+    /calls to your number/.test(inheritHint), inheritHint);
 
   const pageText = await page.evaluate(() => document.body.innerText);
   check('no date anywhere reads as "Invalid Date"', !/Invalid Date/.test(pageText));

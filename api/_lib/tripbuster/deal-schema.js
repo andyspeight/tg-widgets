@@ -24,6 +24,9 @@ const PROTECTIONS = ['ATOL', 'ABTA', 'ATOL + ABTA', 'Trust account', 'None'];
 // 'expired' is deliberately absent: that transition belongs to the system, not
 // to whoever is posting.
 const STATUSES = ['draft', 'live', 'paused'];
+// What a deal charges for. Absent means inherit the agency default, which is
+// why this is only ever set deliberately and never defaulted here.
+const BILLING_MODES = ['click', 'call', 'both'];
 
 const MAX_ARRAY_ITEMS = 30;
 const MAX_ARRAY_ITEM_LEN = 120;
@@ -249,6 +252,12 @@ export function validateDeal(input, { partial = false } = {}) {
   // status
   pick('status', (v) => enumValue(v, STATUSES) ?? undefined, 'Status');
 
+  // What this deal charges for. An empty value clears the override and puts the
+  // deal back on the agency default, which is why '' maps to null rather than
+  // being rejected.
+  pick('billing_mode', (v) => (v === '' || v === null ? null : enumValue(v, BILLING_MODES) ?? undefined),
+    'Billing mode');
+
   // Cross-field checks. The database enforces these too; catching them here gives
   // the agent a sentence they can act on instead of a constraint name.
   const from = deal.travel_from ?? (partial ? undefined : null);
@@ -265,4 +274,5 @@ export function validateDeal(input, { partial = false } = {}) {
 
 export const DEAL_ENUMS = {
   HOLIDAY_TYPES, BOARDS, AVAIL_TYPES, AVAIL_STATUS, PRICE_BASIS, CURRENCIES, PROTECTIONS, STATUSES,
+  BILLING_MODES,
 };

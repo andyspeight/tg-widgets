@@ -37,6 +37,7 @@ const sheet = await import('../api/_lib/tripbuster/sheet.js');
 const offerCache = await import('../api/_lib/tripbuster/offer-cache.js');
 const { default: importHandler } = await import('../api/tripbuster/import.js');
 const { default: offerImport } = await import('../api/tripbuster/offer-import.js');
+const { default: account } = await import('../api/tripbuster/account.js');
 
 // ── tiny test harness ───────────────────────────────────────────
 let passed = 0;
@@ -244,10 +245,12 @@ function resetDb() {
   db.agents = [
     { id: AGENT_A, slug: 'agent-a', name: 'Agent A', email: 'a@b.co', plan: 'Boost', status: 'active',
       default_clickout_url: 'https://agent-a.co.uk', atol_number: '11111', abta_number: null,
-      protection_type: 'ATOL', password_hash: null },
+      protection_type: 'ATOL', password_hash: null, phone: '01204 555 118',
+      billing_mode: 'click', call_min_seconds: 60 },
     { id: AGENT_B, slug: 'agent-b', name: 'Agent B', email: 'b@b.co', plan: 'Spark', status: 'active',
       default_clickout_url: null, atol_number: '22222', abta_number: null,
-      protection_type: 'ATOL', password_hash: null },
+      protection_type: 'ATOL', password_hash: null, phone: null,
+      billing_mode: 'click', call_min_seconds: 60 },
   ];
   db.deals = [
     { id: uuid(++dealSeq), agent_id: AGENT_A, status: 'live', title: 'A live deal',
@@ -326,6 +329,20 @@ const fakePg = http.createServer((req, res) => {
       const hits = ids.filter((id) => db.deals.some((d) => d.id === id));
       hits.forEach((id) => { db.impressions[id] = (db.impressions[id] || 0) + 1; });
       return send(200, hits.length);
+    }
+
+    // Added by migration 007, for "8 of your deals are set differently".
+    if (table === 'rpc/tb_agent_billing_counts') {
+      const agent = db.agents.find((a) => a.id === body.p_agent_id);
+      const mine = db.deals.filter((d) => d.agent_id === body.p_agent_id);
+      const resolved = (d) => d.billing_mode || (agent && agent.billing_mode) || 'click';
+      return send(200, {
+        click: mine.filter((d) => resolved(d) === 'click').length,
+        call: mine.filter((d) => resolved(d) === 'call').length,
+        both: mine.filter((d) => resolved(d) === 'both').length,
+        overridden: mine.filter((d) => !!d.billing_mode).length,
+        total: mine.length,
+      });
     }
 
     // Added by migration 006, for the "where did my deals come from" line.
@@ -1725,6 +1742,200 @@ await testAsync('an empty cache is reported honestly rather than as no offers', 
   assert.equal(r.status, 200);
   assert.equal(r.body.totalMatched, 0);
   assert.deepEqual(r.body.offers, []);
+});
+
+// ════════════════════════════════════════════════════════════════
+console.log('\n─── pay per call: resolution and publish rules ───');
+
+const { resolveBillingMode, publishBlockers } = await import('../api/_lib/tripbuster/deal-write.js');
+
+const agentOn = (mode, extra = {}) => ({ billing_mode: mode, phone: '01204 555 118',
+  default_clickout_url: 'https://agent-a.co.uk', ...extra });
+const fields = (deal, agent) => publishBlockers(deal, agent).map((b) => b.field);
+
+test('a deal with no mode of its own follows the agency', () => {
+  assert.equal(resolveBillingMode({}, agentOn('call')), 'call');
+  assert.equal(resolveBillingMode({ billing_mode: null }, agentOn('both')), 'both');
+});
+
+test('a deal can overrule the agency in either direction', () => {
+  assert.equal(resolveBillingMode({ billing_mode: 'call' }, agentOn('click')), 'call');
+  assert.equal(resolveBillingMode({ billing_mode: 'click' }, agentOn('call')), 'click');
+});
+
+test('an unknown or missing mode falls back to clicks rather than guessing', () => {
+  assert.equal(resolveBillingMode({ billing_mode: 'carrier pigeon' }, agentOn('click')), 'click');
+  assert.equal(resolveBillingMode({}, null), 'click');
+});
+
+test('a click-first deal still needs somewhere to send the traveller', () => {
+  assert.deepEqual(fields({ price_from: 100 }, agentOn('click', { phone: null })), ['clickout_url']);
+});
+
+test('a call-first deal needs a number, not a link', () => {
+  assert.deepEqual(fields({ price_from: 100 }, agentOn('call', { phone: null })), ['booking_phone']);
+  // The agency's own number is enough; the deal need not repeat it.
+  assert.deepEqual(fields({ price_from: 100 }, agentOn('call')), []);
+});
+
+test('a call-first deal can go live with no booking link at all', () => {
+  assert.deepEqual(fields({ price_from: 100, booking_phone: '0141 555 907' },
+    { billing_mode: 'call' }), []);
+});
+
+test('"both" publishes on either route, so a missing link is not a blocker', () => {
+  assert.deepEqual(fields({ price_from: 100, clickout_url: 'https://x.co.uk' },
+    agentOn('both', { phone: null })), []);
+  assert.deepEqual(fields({ price_from: 100, booking_phone: '01273 555 240' },
+    agentOn('both', { default_clickout_url: null, phone: null })), []);
+});
+
+test('"both" with neither route is still refused', () => {
+  assert.deepEqual(fields({ price_from: 100 }, { billing_mode: 'both' }), ['clickout_url']);
+});
+
+test('a price is required whatever the mode', () => {
+  assert.ok(fields({ booking_phone: '0141' }, agentOn('call')).includes('price_from'));
+});
+
+test('billing_mode is whitelisted, and an empty value clears the override', () => {
+  assert.equal(validateDeal({ title: 'x', billing_mode: 'call' }).deal.billing_mode, 'call');
+  assert.equal(validateDeal({ title: 'x', billing_mode: '' }).deal.billing_mode, null);
+  assert.equal(validateDeal({ title: 'x', billing_mode: 'phone' }).ok, false);
+});
+
+// ════════════════════════════════════════════════════════════════
+console.log('\n─── the account settings endpoint ───');
+
+await testAsync('settings need a session', async () => {
+  resetDb();
+  assert.equal((await call(account)).status, 401);
+});
+
+await testAsync('an agency can read what it is charged for', async () => {
+  resetDb();
+  const r = await call(account, { token: tokenA });
+  assert.equal(r.status, 200);
+  assert.equal(r.body.billingMode, 'click');
+  assert.equal(r.body.callMinSeconds, 60);
+  assert.equal(r.body.dealsByMode.total, 1);
+});
+
+await testAsync('switching to calls is saved', async () => {
+  resetDb();
+  const r = await call(account, { method: 'PATCH', token: tokenA, body: { billingMode: 'call' } });
+  assert.equal(r.status, 200);
+  assert.equal(db.agents[0].billing_mode, 'call');
+});
+
+await testAsync('switching to calls without a number is refused with a reason', async () => {
+  resetDb();
+  const r = await call(account, { method: 'PATCH', token: tokenB, body: { billingMode: 'call' } });
+  assert.equal(r.status, 422);
+  assert.ok(r.body.errors.some((e) => e.field === 'phone'));
+  assert.equal(db.agents[1].billing_mode, 'click', 'the change must not have been applied');
+});
+
+await testAsync('supplying a number alongside the switch is accepted', async () => {
+  resetDb();
+  const r = await call(account, {
+    method: 'PATCH', token: tokenB, body: { billingMode: 'both', phone: '0141 555 907' },
+  });
+  assert.equal(r.status, 200);
+  assert.equal(db.agents[1].billing_mode, 'both');
+  // Spacing is kept on purpose: this number is shown to travellers.
+  assert.equal(db.agents[1].phone, '0141 555 907');
+});
+
+await testAsync('clearing the number while charging for calls is refused', async () => {
+  resetDb();
+  const r = await call(account, {
+    method: 'PATCH', token: tokenA, body: { billingMode: 'call', phone: '' },
+  });
+  assert.equal(r.status, 422);
+});
+
+await testAsync('a nonsense phone number is refused', async () => {
+  resetDb();
+  const r = await call(account, { method: 'PATCH', token: tokenA, body: { phone: 'ring me maybe' } });
+  assert.equal(r.status, 422);
+});
+
+await testAsync('the qualifying length is bounded', async () => {
+  resetDb();
+  assert.equal((await call(account, {
+    method: 'PATCH', token: tokenA, body: { billingMode: 'call', callMinSeconds: 9999 },
+  })).status, 422);
+});
+
+await testAsync('an unknown mode is refused', async () => {
+  resetDb();
+  assert.equal((await call(account, {
+    method: 'PATCH', token: tokenA, body: { billingMode: 'telepathy' },
+  })).status, 422);
+});
+
+await testAsync('the plan cannot be upgraded through the settings screen', async () => {
+  resetDb();
+  const before = db.agents[0].plan;
+  const r = await call(account, {
+    method: 'PATCH', token: tokenA, body: { plan: 'Bespoke', billingMode: 'both' },
+  });
+  assert.equal(r.status, 200);
+  assert.equal(db.agents[0].plan, before);
+});
+
+await testAsync('status and the Travelgenix link cannot be set here either', async () => {
+  resetDb();
+  await call(account, {
+    method: 'PATCH', token: tokenA,
+    body: { billingMode: 'click', status: 'suspended', tg_client_email: 'me@travelgenix.io' },
+  });
+  assert.equal(db.agents[0].status, 'active');
+  assert.equal(db.agents[0].tg_client_email, undefined);
+});
+
+await testAsync('a settings change touches only the agency that asked', async () => {
+  resetDb();
+  await call(account, { method: 'PATCH', token: tokenA, body: { billingMode: 'both' } });
+  assert.equal(db.agents[1].billing_mode, 'click');
+});
+
+await testAsync('a call-first agency can publish a deal that has no booking link', async () => {
+  resetDb();
+  db.agents[0].billing_mode = 'call';
+  db.agents[0].default_clickout_url = null;
+  const r = await call(myDeals, {
+    method: 'POST', token: tokenA,
+    body: { title: 'Ring us about Corfu', price_from: 449, status: 'live' },
+  });
+  assert.equal(r.status, 201);
+  const made = db.deals.find((d) => d.title === 'Ring us about Corfu');
+  assert.equal(made.status, 'live');
+  // Inherited from the agency, which is what makes it publishable.
+  assert.equal(made.booking_phone, '01204 555 118');
+});
+
+await testAsync('a click-first agency still cannot publish without a link', async () => {
+  resetDb();
+  db.agents[0].default_clickout_url = null;
+  const r = await call(myDeals, {
+    method: 'POST', token: tokenA,
+    body: { title: 'Nowhere to go', price_from: 449, status: 'live' },
+  });
+  assert.equal(r.status, 422);
+  assert.ok(r.body.errors.some((e) => e.field === 'clickout_url'));
+});
+
+await testAsync('a deal can charge for calls while the agency charges for clicks', async () => {
+  resetDb();
+  db.agents[0].default_clickout_url = null;
+  const r = await call(myDeals, {
+    method: 'POST', token: tokenA,
+    body: { title: 'This one is phone only', price_from: 299, status: 'live', billing_mode: 'call' },
+  });
+  assert.equal(r.status, 201);
+  assert.equal(db.deals.find((d) => d.title === 'This one is phone only').billing_mode, 'call');
 });
 
 // ── report ──────────────────────────────────────────────────────

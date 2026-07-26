@@ -38,7 +38,7 @@ const DEAL_COLUMNS = [
   'single_supplement', 'currency', 'price_includes', 'local_charges',
   'offer_badges', 'selling_points', 'hero_image_url', 'gallery', 'video_url',
   'clickout_url', 'booking_phone', 'protection_type', 'atol_number', 'abta_number', 'terms_url',
-  'source', 'external_ref', 'discount_pct', 'created_at', 'updated_at', 'published_at',
+  'source', 'external_ref', 'billing_mode', 'discount_pct', 'created_at', 'updated_at', 'published_at',
 ].join(',');
 
 export default async function handler(req, res) {
@@ -84,7 +84,15 @@ export default async function handler(req, res) {
         liveRemaining: limit === -1 ? -1 : Math.max(0, limit - Number(stats.live || 0)),
         stats: perf,
         agent: agent
-          ? { slug: agent.slug, name: agent.name, defaultClickoutUrl: agent.default_clickout_url || null }
+          ? {
+            slug: agent.slug,
+            name: agent.name,
+            defaultClickoutUrl: agent.default_clickout_url || null,
+            phone: agent.phone || null,
+            // The agency default a deal falls back to when its own mode is null.
+            billingMode: agent.billing_mode || 'click',
+            callMinSeconds: agent.call_min_seconds ?? 60,
+          }
           : null,
       });
     }
@@ -102,7 +110,7 @@ export default async function handler(req, res) {
 
       const wantsLive = deal.status === 'live';
       if (wantsLive) {
-        const blockers = publishBlockers(deal);
+        const blockers = publishBlockers(deal, agent);
         if (blockers.length) {
           return res.status(422).json({ error: 'This deal is not ready to go live', errors: blockers });
         }
@@ -140,7 +148,9 @@ export default async function handler(req, res) {
       if (!Object.keys(deal).length) return res.status(400).json({ error: 'Nothing to update' });
 
       const existingRows = await tbSelect('deals', {
-        select: 'id,status,price_from,clickout_url',
+        // booking_phone and billing_mode come along because whether this deal is
+        // publishable now depends on what it charges for, not just on having a link.
+        select: 'id,status,price_from,clickout_url,booking_phone,billing_mode',
         id: `eq.${id}`,
         agent_id: `eq.${agentId}`,
         limit: 1,
@@ -157,12 +167,15 @@ export default async function handler(req, res) {
         const merged = applyAgentDefaults({
           price_from: deal.price_from !== undefined ? deal.price_from : existing.price_from,
           clickout_url: deal.clickout_url !== undefined ? deal.clickout_url : existing.clickout_url,
+          booking_phone: deal.booking_phone !== undefined ? deal.booking_phone : existing.booking_phone,
+          billing_mode: deal.billing_mode !== undefined ? deal.billing_mode : existing.billing_mode,
         }, agent);
-        const blockers = publishBlockers(merged);
+        const blockers = publishBlockers(merged, agent);
         if (blockers.length) {
           return res.status(422).json({ error: 'This deal is not ready to go live', errors: blockers });
         }
         if (merged.clickout_url && !deal.clickout_url) deal.clickout_url = merged.clickout_url;
+        if (merged.booking_phone && !deal.booking_phone) deal.booking_phone = merged.booking_phone;
 
         const limit = allowanceFor(agent.plan);
         if (limit === 0) {

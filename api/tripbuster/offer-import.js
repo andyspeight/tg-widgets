@@ -335,7 +335,7 @@ export default async function handler(req, res) {
       applyAgentDefaults(deal, agent);
 
       if (publish) {
-        const blockers = publishBlockers(deal);
+        const blockers = publishBlockers(deal, agent);
         const needsSlot = !(prior && prior.status === 'live');
         if (blockers.length) {
           if (!prior) deal.status = 'draft';

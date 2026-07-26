@@ -47,6 +47,14 @@ export default async function handler(req, res) {
   const surfaceRaw = typeof body.surface === 'string' ? body.surface.trim() : '';
   const surface = SURFACES.includes(surfaceRaw) ? surfaceRaw : 'site';
 
+  // A traveller pressing "call" is the other way Tripbuster delivers a lead.
+  // Note this records an INTENT, not a proven call: the caller cannot tell us
+  // whether anyone answered, so the database refuses to make it billable. Only a
+  // telephony provider reporting a connected call of sufficient length can do
+  // that, which is why call tracking numbers are the next step. Nothing a client
+  // posts here can make an unproven call chargeable.
+  const eventType = body.eventType === 'call' ? 'call' : 'click';
+
   const rl = await evaluatePublicRateLimit(req, res, { event: 'tb-click', widgetId: dealId });
   if (!rl.allowed) return res.status(429).json({ error: 'Too many requests' });
 
@@ -62,6 +70,13 @@ export default async function handler(req, res) {
       p_referrer_host: v.referrerHost,
       p_country_code: v.countryCode,
       p_suspect_bot: v.suspectBot,
+      p_event_type: eventType,
+      // Deliberately not passed on from the body. Duration and whether the phone
+      // was answered are facts only the telephony provider knows, and accepting
+      // them from a browser would let anyone mint a billable call.
+      p_call_seconds: null,
+      p_call_connected: null,
+      p_caller_hash: null,
     });
 
     // The function returns null for a deal that does not exist, so unknown ids
@@ -70,7 +85,12 @@ export default async function handler(req, res) {
 
     // `billable` is intentionally not exposed: it is our billing business, not
     // something a caller needs or should be able to probe.
-    return res.status(200).json({ recorded: true, clickoutUrl: result.clickoutUrl || null });
+    return res.status(200).json({
+      recorded: true,
+      clickoutUrl: result.clickoutUrl || null,
+      // The number to ring, so a call CTA has somewhere to go.
+      phone: result.phone || null,
+    });
   } catch (e) {
     console.error('[tripbuster/click] failed', e && e.code, e && e.message);
     // A tracking failure must never block the traveller. The caller already holds

@@ -32,7 +32,8 @@ export function allowanceFor(plan) {
 
 /** The agent fields the write path needs. Explicit, so no column leaks by accident. */
 export const AGENT_WRITE_COLUMNS =
-  'id,slug,name,plan,status,default_clickout_url,atol_number,abta_number,protection_type,tg_client_email';
+  'id,slug,name,plan,status,default_clickout_url,phone,atol_number,abta_number,'
+  + 'protection_type,tg_client_email,billing_mode,call_min_seconds';
 
 /** Load an agent's own settings and fallbacks. Returns null when not found. */
 export async function loadAgent(agentId) {
@@ -63,6 +64,10 @@ export async function dealCounts(agentId) {
 export function applyAgentDefaults(deal, agent) {
   if (!agent) return deal;
   if (!deal.clickout_url && agent.default_clickout_url) deal.clickout_url = agent.default_clickout_url;
+  // A call-first deal needs a number on the row for the same reason a click-first
+  // one needs a link: the database constraint checks the deal's own columns, not
+  // what it could inherit at read time.
+  if (!deal.booking_phone && agent.phone) deal.booking_phone = agent.phone;
   if (!deal.atol_number && agent.atol_number) deal.atol_number = agent.atol_number;
   if (!deal.abta_number && agent.abta_number) deal.abta_number = agent.abta_number;
   if (!deal.protection_type && agent.protection_type) deal.protection_type = agent.protection_type;
@@ -70,18 +75,62 @@ export function applyAgentDefaults(deal, agent) {
 }
 
 /**
+ * What this deal charges for: click, call, or both.
+ *
+ * Resolved on READ, deliberately unlike the content defaults above. Those are
+ * copied onto the deal when it is written, because they are part of the advert.
+ * Billing mode is a commercial setting, so switching an agency from click to
+ * call has to take effect across every one of their deals at once rather than
+ * needing hundreds of rows rewritten. A null on the deal means "inherit".
+ *
+ * Mirrors the coalesce in tb_search_deals and tb_record_click. If this changes,
+ * change those too.
+ */
+export function resolveBillingMode(deal, agent) {
+  const mode = (deal && deal.billing_mode) || (agent && agent.billing_mode) || 'click';
+  return ['click', 'call', 'both'].includes(mode) ? mode : 'click';
+}
+
+/**
  * Why this deal cannot go live yet, as sentences an agent can act on.
  * Empty array means it is publishable.
+ *
+ * What counts as publishable depends on what the deal charges for. A click-first
+ * deal is useless without somewhere to send the traveller; a call-first one is
+ * useless without a number to ring. On `both` either route will do, and the deal
+ * simply shows whichever it has: a missing link makes the card call-only rather
+ * than blocking it.
+ *
+ * This lives here rather than in a CHECK constraint because the resolved mode
+ * depends on the agents row, which a constraint cannot see. The database keeps
+ * the weaker "price plus at least one route" rule as a backstop.
  */
-export function publishBlockers(merged) {
+export function publishBlockers(merged, agent) {
   const problems = [];
   if (merged.price_from === null || merged.price_from === undefined) {
     problems.push({ field: 'price_from', message: 'Add a price before this deal can go live' });
   }
-  if (!merged.clickout_url) {
+
+  const mode = resolveBillingMode(merged, agent);
+  const hasLink = !!merged.clickout_url;
+  const hasPhone = !!merged.booking_phone || !!(agent && agent.phone);
+
+  if (mode === 'click' && !hasLink) {
     problems.push({
       field: 'clickout_url',
       message: 'Add a booking link, or set a default website on your account, before this deal can go live',
+    });
+  }
+  if (mode === 'call' && !hasPhone) {
+    problems.push({
+      field: 'booking_phone',
+      message: 'Add a phone number, or set one on your account, before this call-only deal can go live',
+    });
+  }
+  if (mode === 'both' && !hasLink && !hasPhone) {
+    problems.push({
+      field: 'clickout_url',
+      message: 'Add a booking link or a phone number before this deal can go live',
     });
   }
   return problems;

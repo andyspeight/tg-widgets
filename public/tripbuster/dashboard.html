@@ -619,6 +619,17 @@
                   <p class="save-note" style="margin:6px 0 0" id="clickoutHint"></p></div>
                 <div class="g2">
                   <div class="field"><label for="f-booking_phone">Booking phone</label><input id="f-booking_phone" name="booking_phone"><span class="err"></span></div>
+                  <div class="field"><label for="f-billing_mode">How this deal is charged
+                      <span class="hint">leave on your account default unless this one is different</span></label>
+                    <select id="f-billing_mode" name="billing_mode">
+                      <option value="">Use my account default</option>
+                      <option value="click">Clicks to my website</option>
+                      <option value="call">Calls to my number</option>
+                      <option value="both">Both, book online or call us</option>
+                    </select><span class="err"></span>
+                    <p class="save-note" style="margin:6px 0 0" id="billingHint"></p></div>
+                </div>
+                <div class="g2">
                   <div class="field"><label for="f-protection_type">Protection</label>
                     <select id="f-protection_type" name="protection_type"><option value="">Use my account default</option>
                       <option>ATOL</option><option>ABTA</option><option>ATOL + ABTA</option><option>Trust account</option><option>None</option></select><span class="err"></span></div>
@@ -859,7 +870,64 @@
 
       <!-- ── plan ── -->
       <section class="view" id="v-plan">
-        <div class="lead"><div><h2>Your plan</h2><p>What your plan allows today.</p></div></div>
+        <div class="lead"><div><h2>Your plan</h2><p>What your plan allows today, and what you are charged for.</p></div></div>
+
+        <div class="card" style="padding:20px;margin-bottom:18px">
+          <h3 style="margin:0 0 6px;font-size:14px;font-weight:800">What you pay for</h3>
+          <p style="margin:0 0 16px;font-size:13px;color:var(--tx-2);max-width:64ch">
+            Some agencies sell online, some sell on the phone, and plenty do both. Choose what suits you.
+            Any deal can be set differently in its own settings.
+          </p>
+          <div class="form-error" id="billErr" role="alert"></div>
+          <div class="routes" id="billModes" style="margin-bottom:16px">
+            <button class="route" type="button" data-mode="click" aria-pressed="false">
+              <svg viewBox="0 0 24 24"><path d="M9 11V6a2 2 0 0 1 4 0v5M13 11V4a2 2 0 0 1 4 0v7M17 11V7a2 2 0 0 1 4 0v9a5 5 0 0 1-5 5h-3a6 6 0 0 1-6-6v-4a2 2 0 0 1 4 0"/></svg>
+              <h3>Clicks to my website</h3>
+              <p>Travellers go straight to your booking page. You pay for the visit.</p>
+            </button>
+            <button class="route" type="button" data-mode="call" aria-pressed="false">
+              <svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/></svg>
+              <h3>Calls to my number</h3>
+              <p>Travellers ring you. You pay only for calls that connect and last long enough to be real.</p>
+            </button>
+            <button class="route" type="button" data-mode="both" aria-pressed="false">
+              <svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+              <h3>Both</h3>
+              <p>Book online or call us, side by side. If a deal has no booking link it simply shows the number.</p>
+            </button>
+          </div>
+
+          <div class="g2" id="callSettings">
+            <div class="field">
+              <label for="acctPhone">Phone number <span class="hint">the number travellers ring</span></label>
+              <input id="acctPhone" type="tel" placeholder="01204 555 118"><span class="err"></span>
+            </div>
+            <div class="field">
+              <label for="acctMinSecs">A call counts after
+                <span class="hint">shorter calls are shown but never charged</span></label>
+              <select id="acctMinSecs">
+                <option value="30">30 seconds</option>
+                <option value="60">60 seconds</option>
+                <option value="90">90 seconds</option>
+                <option value="120">2 minutes</option>
+              </select><span class="err"></span>
+            </div>
+          </div>
+
+          <div class="note" id="callNote" style="margin:4px 0 14px">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            <span>Your dashboard counts every phone enquiry. You are only charged for calls that
+              connect and run past the length you set above, so wrong numbers and hang-ups cost you
+              nothing. Until call tracking numbers are switched on we can see that someone pressed
+              call, but not whether you answered, and those are never charged for.</span>
+          </div>
+
+          <div class="editor-bar" style="justify-content:space-between;margin-top:4px">
+            <span class="save-note" id="billNote"></span>
+            <button class="btn btn-primary" type="button" id="saveBilling">Save</button>
+          </div>
+        </div>
+
         <div class="plans" id="planGrid"></div>
         <div class="note" style="margin-top:18px">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
@@ -1037,28 +1105,46 @@
     // rather than showing zeroes that would read as "nobody saw your deals".
     const have = !!s;
     const days = (s && s.days) || 30;
-    const tiles = [
-      {
-        lab: 'Times shown',
-        val: have ? nf(s.impressions) : '—',
-        foot: have ? 'Last ' + days + ' days' : 'Not available right now',
-      },
-      {
-        lab: 'Click-throughs',
-        val: have ? nf(s.clicks) : '—',
-        foot: have ? 'Travellers sent to your site' : 'Not available right now',
-      },
-      {
-        lab: 'Click-through rate',
-        val: have && s.ctr !== null && s.ctr !== undefined ? s.ctr + '%' : '—',
-        foot: have && s.impressions > 0 ? 'Of everyone who saw a deal' : 'Needs some views first',
-      },
-      {
-        lab: 'Live deals',
-        val: (c.live || 0) + (unlimited ? '' : ' <small>/ ' + state.allowance + '</small>'),
-        foot: unlimited ? 'Unlimited on ' + esc(state.plan) : 'on ' + esc(state.plan),
-      },
-    ];
+    // Show what this agency is actually charged for. On clicks they want the
+    // click-through rate; on calls that number is meaningless to them. Always
+    // four tiles, so the row never wraps awkwardly.
+    const mode = (state.agent && state.agent.billingMode) || 'click';
+    const shown = {
+      lab: 'Times shown',
+      val: have ? nf(s.impressions) : '—',
+      foot: have ? 'Last ' + days + ' days' : 'Not available right now',
+    };
+    const clicks = {
+      lab: 'Click-throughs',
+      val: have ? nf(s.clicks) : '—',
+      foot: have ? 'Travellers sent to your site' : 'Not available right now',
+    };
+    const ctr = {
+      lab: 'Click-through rate',
+      val: have && s.ctr !== null && s.ctr !== undefined ? s.ctr + '%' : '—',
+      foot: have && s.impressions > 0 ? 'Of everyone who saw a deal' : 'Needs some views first',
+    };
+    const calls = {
+      lab: 'Calls',
+      val: have ? nf(s.calls || 0) : '—',
+      // Deliberately neutral: some of these are proven connected calls and some
+      // are taps we cannot verify, and the tile shows the total of both. What is
+      // actually chargeable is explained on the plan screen, next to the rule.
+      foot: have ? 'Phone enquiries from your deals' : 'Not available right now',
+    };
+    const callRate = {
+      lab: 'Call rate',
+      val: have && s.callRate !== null && s.callRate !== undefined ? s.callRate + '%' : '—',
+      foot: have && s.impressions > 0 ? 'Of everyone who saw a deal' : 'Needs some views first',
+    };
+    const live = {
+      lab: 'Live deals',
+      val: (c.live || 0) + (unlimited ? '' : ' <small>/ ' + state.allowance + '</small>'),
+      foot: unlimited ? 'Unlimited on ' + esc(state.plan) : 'on ' + esc(state.plan),
+    };
+    const tiles = mode === 'call' ? [shown, calls, callRate, live]
+      : mode === 'both' ? [shown, clicks, calls, live]
+        : [shown, clicks, ctr, live];
     $('stats').innerHTML = tiles.map((t) =>
       '<div class="stat"><div class="stat-lab">' + esc(t.lab) + '</div>' +
       '<div class="stat-val tnum">' + t.val + '</div>' +
@@ -1157,6 +1243,9 @@
 
   function renderClickoutHint() {
     $('clickoutHint').textContent = 'Leave this blank and we will send travellers to your account’s default website instead.';
+    const acctMode = (state.agent && state.agent.billingMode) || 'click';
+    $('billingHint').textContent = 'Your account is set to ' + (MODE_WORDS[acctMode] || acctMode)
+      + '. Change this only if this one deal works differently.';
   }
 
   // ── deal list actions ─────────────────────────────────────
@@ -1231,6 +1320,7 @@
       if (!imp.route) setRoute('sheet');
       loadHistory();
     }
+    if (view === 'plan') loadBilling();
     document.querySelectorAll('.nav-i').forEach((n) => {
       if (n.getAttribute('data-view') === view) n.setAttribute('aria-current', 'page');
       else n.removeAttribute('aria-current');
@@ -1381,6 +1471,78 @@
   }
   $('saveLive').addEventListener('click', () => save('live'));
   $('saveDraft').addEventListener('click', () => save('draft'));
+
+  // ══ what the agency is charged for ════════════════════════
+  // The agency default. Any deal can override it in its own settings, and the
+  // override wins wherever it is set.
+  const MODE_WORDS = {
+    click: 'clicks to your website',
+    call: 'calls to your number',
+    both: 'clicks and calls',
+  };
+  let billingMode = 'click';
+
+  function paintBilling() {
+    document.querySelectorAll('#billModes .route').forEach((b) => {
+      b.setAttribute('aria-pressed', String(b.getAttribute('data-mode') === billingMode));
+    });
+    // The phone and qualifying length only matter once calls are being charged for.
+    const wantsCalls = billingMode === 'call' || billingMode === 'both';
+    $('callSettings').style.display = wantsCalls ? '' : 'none';
+    $('callNote').style.display = wantsCalls ? '' : 'none';
+  }
+
+  $('billModes').addEventListener('click', (e) => {
+    const b = e.target.closest('.route');
+    if (!b) return;
+    billingMode = b.getAttribute('data-mode');
+    paintBilling();
+  });
+
+  async function loadBilling() {
+    try {
+      const a = await api('/api/tripbuster/account');
+      billingMode = a.billingMode || 'click';
+      $('acctPhone').value = a.phone || '';
+      $('acctMinSecs').value = String(a.callMinSeconds || 60);
+      paintBilling();
+
+      const by = a.dealsByMode;
+      $('billNote').textContent = by && by.overridden
+        ? by.overridden + ' of your ' + by.total + ' deals are set differently'
+        : (by && by.total ? 'All ' + by.total + ' of your deals follow this' : '');
+    } catch (err) {
+      if (err.message !== 'unauthorised') $('billNote').textContent = '';
+    }
+  }
+
+  $('saveBilling').addEventListener('click', async () => {
+    const btn = $('saveBilling');
+    const errBox = $('billErr');
+    errBox.classList.remove('on');
+    btn.disabled = true;
+    try {
+      const payload = { billingMode: billingMode };
+      if (billingMode === 'call' || billingMode === 'both') {
+        payload.phone = $('acctPhone').value.trim();
+        payload.callMinSeconds = Number($('acctMinSecs').value);
+      }
+      const saved = await api('/api/tripbuster/account', { method: 'PATCH', body: payload });
+      billingMode = saved.billingMode;
+      if (state.agent) state.agent.billingMode = saved.billingMode;
+      paintBilling();
+      toast('Now charging for ' + (MODE_WORDS[saved.billingMode] || saved.billingMode));
+      // The performance tiles show different figures per mode, so redraw them.
+      await refresh();
+      loadBilling();
+    } catch (err) {
+      if (err.message === 'unauthorised') return;
+      errBox.textContent = ((err.fieldErrors || [])[0] || {}).message || err.message;
+      errBox.classList.add('on');
+    } finally {
+      btn.disabled = false;
+    }
+  });
 
   // ══ bulk import ═══════════════════════════════════════════
   // Three routes, one deal table. The spreadsheet route always previews before

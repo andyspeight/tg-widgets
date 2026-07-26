@@ -71,6 +71,7 @@ session secret without resetting click de-duplication.
 | `POST /api/tripbuster/impressions` | public | Batched impression counts, one call per widget render. |
 | `GET/POST /api/tripbuster/import` | agent token | Spreadsheet import. `?format=csv` is the template, `?history=1` past runs. `mode=preview` writes nothing. |
 | `GET/POST /api/tripbuster/offer-import` | agent token | Live offer cache. `GET` browses, `POST` imports chosen refs, `{resync:true}` refreshes prices. |
+| `GET/PATCH /api/tripbuster/account` | agent token | Billing mode, qualifying call length, phone. Deliberately cannot touch plan, status or the Travelgenix link. |
 
 Public read endpoints send a wildcard CORS origin because the widget runs on
 customer sites and the data is deliberately public. The authenticated endpoints
@@ -114,11 +115,11 @@ impressions.
 ## Tests
 
 ```
-npm run test:tripbuster           # 188 assertions, no network needed
-npm run test:tripbuster-import    # 54 assertions, drives the import UI in Chromium
+npm run test:tripbuster           # 213 assertions, no network needed
+npm run test:tripbuster-import    # 69 assertions, drives the dashboard in Chromium
 ```
 
-`test:tripbuster` covers six layers:
+`test:tripbuster` covers seven layers:
 
 - payload validation (whitelisting, enums, URL and date rules)
 - token handling (tampering, expiry, scope confusion)
@@ -132,6 +133,9 @@ npm run test:tripbuster-import    # 54 assertions, drives the import UI in Chrom
   day-first dates, and the header synonyms agents actually type
 - the live offer cache: staleness, filtering, dedupe across pools, the
   non-Travelgenix gate, and that a resync refreshes prices without touching copy
+- pay per call: mode resolution in both directions, what each mode needs before
+  it can go live, the `both` fallback, and that the settings screen cannot be
+  used to upgrade a plan or unsuspend an account
 
 Both stand-ins are **real HTTP servers on localhost** — PostgREST and Upstash REST
 — rather than stubbed modules, so the code under test runs its own fetch, parse
@@ -143,7 +147,9 @@ exercised rather than taken on trust.
 template download, a genuine file upload through `FileReader`, mapping an
 unrecognised heading, the preview, the commit, a re-upload that updates instead of
 duplicating, the publish switch, the non-Travelgenix upsell, the connected offer
-browser, an import, a resync, and the history list. It asserts no uncaught
+browser, an import, a resync, and the history list. It also covers the billing
+screen: choosing a mode, being refused a switch to calls with no number, and the
+performance tiles swapping click-through rate for calls. It asserts no uncaught
 JavaScript anywhere in the journey. Screenshots go to a temporary directory, or to
 `TB_SHOT_DIR` if you set one.
 
@@ -174,6 +180,7 @@ Apply in order. They are idempotent enough to run on a fresh project.
 | `004_agent_auth.sql` | `password_hash` / `last_login_at` on agents; `tb_agent_deal_counts` |
 | `005_tracking.sql` | `tb_record_click`, `tb_record_impressions`, `tb_agent_stats` |
 | `006_import.sql` | UNIQUE `(agent_id, external_ref)`; `deals.synced_at`; `import_runs`; `tb_agent_source_counts` |
+| `007_pay_per_call.sql` | `billing_mode` on agents and deals; call columns on `click_events`; `deal_daily_stats.calls`; relaxed live-deal constraint |
 
 ## Demo data
 
@@ -195,17 +202,32 @@ multi-agent price compare is the thing worth showing:
 | Louis Phaethon Beach, Paphos | Coastline, Jetaway |
 | Melia Costa del Sol, Torremolinos | Sunseeker, Coastline |
 
-Each agency is set up to show a different part of the product: Coastline carries
+Each agency is set up to show a different part of the product. Coastline carries
 a `tg_client_email` so the live-feed import is connected for them and the upsell
-panel shows for the other two, and Jetaway sits on Boost with exactly its 5 live
-deals used so the plan limit is demonstrable rather than described.
+panel shows for the other two. Jetaway sits on Boost with exactly its 5 live
+deals used, so the plan limit is demonstrable rather than described. And each is
+on a different billing mode:
 
-**Clicks are expanded from `deal_daily_stats`, never invented alongside it.**
+| Agency | Charges for | Qualifying call |
+|---|---|---|
+| Sunseeker | clicks | n/a |
+| Jetaway | calls | 60 seconds |
+| Coastline | both | 90 seconds |
+
+Two deals deliberately disagree with their agency, so the per-deal override is
+something you can point at. Jetaway earns no click-throughs at all, because a
+call-first card shows a number rather than a booking link. Coastline's higher
+qualifying length visibly costs them billable calls against Jetaway's, which is
+the qualification rule doing its job.
+
+**Clicks and calls are expanded from `deal_daily_stats`, never invented alongside it.**
 `tb_agent_stats` reads impressions and clicks from the daily table and billable
 clicks from `click_events`, so generating the two independently produces an
 impossible click-through rate — which is exactly what happened the first time
-this was seeded. Randomness comes from hashes of each row rather than `random()`,
-so re-running gives the same demo and a screenshot stays true.
+this was seeded. Randomness comes from hashes of each deal's own REFERENCE rather than from
+`random()` or the row id, so re-running gives exactly the same demo and a
+screenshot stays true. Keying on the id would have quietly broken that, since
+deal ids are regenerated on every run.
 
 Sign-in is **not** part of the seed: no working credential belongs in the repo.
 The file ends with the one statement to run afterwards, and the one to clear the
@@ -241,6 +263,50 @@ hashes again before anything is exposed publicly.
   edited or deleted afterwards and the run should still say what happened at the
   time. Andy relies on the dashboard as an external record, so an import has to
   be readable back later rather than living only in a toast that has gone.
+
+## Pay per click, pay per call, or both
+
+Many independent agencies are phone-first, and a few have no booking engine at
+all. Those are exactly the agencies the big comparison sites shut out, so the
+call is arguably the more natural billable event for part of this market.
+
+Set at two levels: `agents.billing_mode` is the agency default, and
+`deals.billing_mode` overrides it. **The override resolves on READ**, which is
+deliberately the opposite of how protection and booking links work. Those are
+content, copied onto the deal when it is written. Billing mode is a commercial
+setting, so switching an agency from click to call has to take effect across
+every one of their deals at once rather than needing hundreds of rows rewritten.
+A null on the deal means inherit.
+
+The same `coalesce` appears in `tb_search_deals`, `tb_record_click` and
+`resolveBillingMode` in `deal-write.js`. Change one, change all three.
+
+**What each mode needs before it can go live** is enforced in `publishBlockers`,
+not in a constraint, because the resolved mode depends on the agents row and a
+CHECK cannot see it. The database keeps the weaker "a price plus at least one
+route" rule as a backstop.
+
+| Mode | Needs | If a route is missing |
+|---|---|---|
+| `click` | a booking link | refused |
+| `call` | a phone number | refused |
+| `both` | either one | publishes, showing whatever it has |
+
+That last row is the fallback: a `both` deal with no booking link simply becomes
+a call-only card rather than being blocked.
+
+**A call is only billable when it is proven.** `tb_record_click` marks a call
+billable only when the telephony provider confirms it connected AND it ran past
+the agency's `call_min_seconds`. A tap-to-call arrives with `call_connected`
+null and is recorded but never charged for, because a browser cannot tell us
+whether anyone answered — and the endpoint refuses to accept duration or
+connection from the request body for exactly that reason. Calls also
+de-duplicate over 24 hours rather than 30 minutes, keyed on the caller's number
+where we have it: the same person ringing twice in a day is one lead.
+
+Tracked numbers are the missing piece and the reason `agents.tracked_number`
+exists unused. They are also the only way to attribute a desktop call at all,
+since there is nothing to tap.
 
 ## The three ingestion routes
 

@@ -303,7 +303,7 @@ export default async function handler(req, res) {
           clickout_url: clean.clickout_url !== undefined ? clean.clickout_url
             : (existing ? existing.clickout_url : null),
         }, agent);
-        const blockers = publishBlockers(merged);
+        const blockers = publishBlockers(merged, agent);
         if (blockers.length) {
           doNotPublish();
           entry.problems.push(`Not published: ${blockers.map((b) => b.message).join('; ')}`);
