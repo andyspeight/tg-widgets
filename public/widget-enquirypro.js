@@ -32,7 +32,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.2.7';
+  var WIDGET_VERSION = '1.2.8';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (labels, placeholders, step names, buttons, validation,
@@ -1806,25 +1806,42 @@
     load.appendChild(svgEl(ICONS.spin, 24)); load.appendChild(document.createElement('div')).textContent = t('loadingForm');
     root.appendChild(load); shadow.appendChild(root);
 
-    fetch(API_BASE + '/api/enquiry-form-config?id=' + encodeURIComponent(widgetId), { credentials: 'omit' })
-      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
-      .then(function (res) {
-        while (shadow.firstChild) shadow.removeChild(shadow.firstChild);
-        if (!res.ok) {
-          // A Draft form that isn't published yet is an expected setup state, not
-          // a failure — show a calm notice and DON'T fire a failure alert (it was
-          // paging us every time an agent previewed an unpublished embed). Genuine
-          // errors still alert. (24 Jul 2026.)
-          if (res.d && res.d.code === 'not_published') { renderNotice(shadow, (res.d && res.d.error) || 'This form is not published yet.'); return; }
-          renderOops(shadow, (res.d && res.d.error) || t('oopsLoad'), t); tgReport('error', widgetId, 'config load failed', (res.d && res.d.error) || 'HTTP error'); return;
-        }
-        var w = Object.create(TGEnquiryProWidget.prototype);
-        w.instance = ++INSTANCE_COUNTER; w.container = container; w.shadow = shadow; w.widgetId = widgetId;
-        w.t = makeT(res.d); w.config = w._normalise(res.d); w.config.isLiveEmbed = true; w._applyI18n(); w._resetState(); w._render();
-        container.__tgWidget = w;
-        tgReport('load', widgetId, 'ok');
-      })
-      .catch(function (err) { console.error('[TGEnquiryProWidget] config load failed:', err); renderOops(shadow, t('oopsReach'), t); tgReport('error', widgetId, 'config unreachable', err && err.message); });
+    var CONFIG_MAX_ATTEMPTS = 3;
+    function loadConfig(attempt) {
+      fetch(API_BASE + '/api/enquiry-form-config?id=' + encodeURIComponent(widgetId), { credentials: 'omit' })
+        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+        .then(function (res) {
+          while (shadow.firstChild) shadow.removeChild(shadow.firstChild);
+          if (!res.ok) {
+            // A Draft form that isn't published yet is an expected setup state, not
+            // a failure — show a calm notice and DON'T fire a failure alert (it was
+            // paging us every time an agent previewed an unpublished embed). Genuine
+            // errors still alert. (24 Jul 2026.)
+            if (res.d && res.d.code === 'not_published') { renderNotice(shadow, (res.d && res.d.error) || 'This form is not published yet.'); return; }
+            renderOops(shadow, (res.d && res.d.error) || t('oopsLoad'), t); tgReport('error', widgetId, 'config load failed', (res.d && res.d.error) || 'HTTP error'); return;
+          }
+          var w = Object.create(TGEnquiryProWidget.prototype);
+          w.instance = ++INSTANCE_COUNTER; w.container = container; w.shadow = shadow; w.widgetId = widgetId;
+          w.t = makeT(res.d); w.config = w._normalise(res.d); w.config.isLiveEmbed = true; w._applyI18n(); w._resetState(); w._render();
+          container.__tgWidget = w;
+          tgReport('load', widgetId, 'ok');
+        })
+        .catch(function (err) {
+          // A network REJECT (Safari reports "Load failed") is a dropped/aborted
+          // connection — a transient blip, or the visitor navigating away
+          // mid-load — NOT an outage: the config endpoint answers fine for
+          // everyone else. Retry a couple of times so a one-off blip doesn't fail
+          // the form for a real visitor (the spinner stays up meanwhile).
+          if (attempt < CONFIG_MAX_ATTEMPTS) { setTimeout(function () { loadConfig(attempt + 1); }, 400 * attempt); return; }
+          console.error('[TGEnquiryProWidget] config load failed:', err);
+          renderOops(shadow, t('oopsReach'), t);
+          // Don't page us when the tab is hidden/unloading — that fetch was almost
+          // certainly aborted by the visitor leaving, which is benign noise.
+          var hidden = false; try { hidden = (document.visibilityState === 'hidden'); } catch (e) {}
+          if (!hidden) tgReport('error', widgetId, 'config unreachable', err && err.message);
+        });
+    }
+    loadConfig(1);
   }
 
   function autoInit() {

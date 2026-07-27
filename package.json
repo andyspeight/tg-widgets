@@ -39,6 +39,7 @@
     "test:enquiry-submit": "node test/enquiry-submit-lookup-smoke.mjs",
     "test:enquiry-email": "node test/enquiry-email-brand-smoke.mjs",
     "test:enquiry-email-fields": "node test/enquiry-email-fields-smoke.mjs",
+    "test:enquiry-config-resilience": "node test/enquiry-config-resilience-smoke.mjs",
     "test:enquiry-hardening": "node test/enquiry-hardening-smoke.mjs",
     "test:enquiry-write-recovery": "node test/enquiry-write-recovery-smoke.mjs",
     "test:enquiry-e2e": "node test/enquiry-e2e-smoke.cjs",
