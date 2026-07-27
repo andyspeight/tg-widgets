@@ -34,6 +34,12 @@ export function toDeal(r) {
     // The stable public URL, minted by the database at first publish. Null on a
     // draft, which has no page to link to.
     slug: r.slug || '',
+    // The slug of the PAGE this deal appears on, which is not always its own: a
+    // deal page shows every agent advertising the same hotel, so the group
+    // agrees on one URL. Deliberately the earliest published deal in the group
+    // rather than the cheapest — cheapest moves every time somebody undercuts,
+    // and a canonical that moves undoes the point of a stable slug.
+    canonicalSlug: r.canonical_slug || r.slug || '',
     // card essentials — these key names are what widget-tripbuster.js expects
     title: r.title,
     destination,

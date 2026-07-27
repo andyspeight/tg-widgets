@@ -168,12 +168,20 @@ async function renderDeal(req, res, slug) {
   }
 
   const deal = toDeal(rows[0]);
+
+  // One hotel, one page, one URL. Every agent advertising the same hotel gets
+  // the same page, so asking for a rival's slug redirects here rather than
+  // serving a second copy for Google to weigh separately. A single hop, never a
+  // chain: the canonical slug always resolves to itself.
+  if (deal.canonicalSlug && deal.canonicalSlug !== slug) {
+    res.setHeader('Location', `/tripbuster/holiday/${encodeURIComponent(deal.canonicalSlug)}`);
+    res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=3600');
+    return res.status(301).end();
+  }
+
   const canonical = absolute(req, TB.dealHref(deal));
   const trail = TB.dealCrumbs(deal);
 
-  // The compare group is keyed on the hotel, so a rival's slug can be the one
-  // that was asked for. Every agent in the group shares this page, and this is
-  // the URL all of them canonicalise to.
   const body = `${TB.dealPage(deal)}
 <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="mTitle">
   <div class="modal">
@@ -482,13 +490,16 @@ async function redirectLegacy(req, res, id) {
     return unavailable(req, res);
   }
   const hit = (((data && data.deals) || [])).find((r) => r.id === id);
-  if (!hit || !hit.slug) {
+  const target = hit && (hit.canonical_slug || hit.slug);
+  if (!target) {
     return notFound(req, res, {
       title: 'This deal is no longer available',
       body: 'It may have sold out or expired.',
     });
   }
-  res.setHeader('Location', `/tripbuster/holiday/${encodeURIComponent(hit.slug)}`);
+  // Straight to the canonical page, not to this deal's own slug, or an old link
+  // would redirect twice.
+  res.setHeader('Location', `/tripbuster/holiday/${encodeURIComponent(target)}`);
   res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=3600');
   return res.status(301).end();
 }

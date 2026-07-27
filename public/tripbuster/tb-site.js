@@ -118,16 +118,22 @@ export function slugify(text) {
 }
 
 /**
- * A deal's own page.
+ * The page a deal appears on.
  *
- * The slug is minted by the database when a deal first goes live and never
- * changes after, so this link is safe to print, share and index. The legacy
- * query-string form is kept only as a fallback for a deal that somehow has no
- * slug; /tripbuster/deal redirects it to the real URL rather than serving a
- * second page with the same content on it.
+ * canonicalSlug first, and that is the whole point. A deal page shows every
+ * agent advertising the same hotel, so three agents share one page, and the
+ * group agrees on one URL: the earliest published deal in it. Linking to a
+ * deal's own slug instead would send half the internal links through a redirect
+ * and ask Google to index three copies of one page.
+ *
+ * Slugs are minted by the database at first publish and never change after, so
+ * these links are safe to print, share and index. The legacy query-string form
+ * is a fallback for a deal that somehow has no slug at all; /tripbuster/deal
+ * redirects it rather than serving a second page with the same content on it.
  */
 export function dealHref(d) {
-  var slug = d && (d.slug || (d.compare && d.compare[0] && d.compare[0].slug));
+  var slug = d && (d.canonicalSlug || d.slug
+    || (d.compare && d.compare[0] && d.compare[0].slug));
   if (slug) return '/tripbuster/holiday/' + encodeURIComponent(slug);
   return '/tripbuster/deal?id=' + encodeURIComponent((d && d.id) || '');
 }

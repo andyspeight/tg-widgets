@@ -58,6 +58,7 @@ function dealRow(over = {}) {
   return {
     id: 'a1509144-61ae-4a17-bb6e-1d005d696171',
     slug: 'hotel-wawel-old-town-krakow-a1509144',
+    canonical_slug: 'hotel-wawel-old-town-krakow-a1509144',
     title: 'Krakow, 3 nights bed and breakfast',
     strapline: 'A long weekend in the old town',
     accommodation_name: 'Hotel Wawel Old Town',
@@ -288,7 +289,13 @@ test('slugify never produces a leading, trailing or doubled hyphen', () => {
   }
 });
 
-test('a deal links to its slug, and falls back to the legacy URL without one', () => {
+test('a deal links to the page its group shares, not to its own slug', () => {
+  // Three agents on one hotel is one page. Linking each agent's own slug would
+  // send half the internal links through a redirect.
+  assert.equal(
+    TB.dealHref({ slug: 'x-abc12345', canonicalSlug: 'y-def67890' }),
+    '/tripbuster/holiday/y-def67890',
+  );
   assert.equal(TB.dealHref({ slug: 'x-abc12345' }), '/tripbuster/holiday/x-abc12345');
   assert.equal(TB.dealHref({ id: 'u-1' }), '/tripbuster/deal?id=u-1');
   // In compare mode the group's slug can live on the cheapest rival.
@@ -426,6 +433,50 @@ await testAsync('a malformed slug is refused before it reaches the database', as
   rpcHandlers = defaultRpcs();
 });
 
+await testAsync('a rival agent\u2019s slug redirects to the shared page', async () => {
+  const row = twoAgentRow();
+  // Jetaway is the dearer of the two and owns a slug of its own, but the page
+  // belongs to the group and the group's page is Coastline's.
+  rpcHandlers = {
+    ...defaultRpcs(row),
+    tb_search_deals: () => ({ total: 1, compare: true, deals: [row] }),
+  };
+  const r = await call(page, {
+    query: { type: 'deal', slug: 'hotel-wawel-old-town-krakow-b2609255' },
+  });
+  assert.equal(r.status, 301);
+  assert.equal(r.headers.location, '/tripbuster/holiday/hotel-wawel-old-town-krakow-a1509144');
+  rpcHandlers = defaultRpcs();
+});
+
+await testAsync('the canonical page does not move when an agent undercuts another', async () => {
+  // Same group, but now the OTHER agent is cheapest. The read path returns the
+  // cheapest row first, so a canonical taken from "whichever came back first"
+  // would flip here. It must not: a URL that moves loses everything pointing at
+  // it, which is the entire reason slugs are stable in the first place.
+  const row = twoAgentRow();
+  const undercut = {
+    ...row,
+    id: row.compare[1].dealId,
+    slug: row.compare[1].slug,
+    price_from: 149,
+    agent_name: 'Jetaway Travel',
+    canonical_slug: 'hotel-wawel-old-town-krakow-a1509144',
+  };
+  rpcHandlers = {
+    ...defaultRpcs(),
+    tb_search_deals: () => ({ total: 1, compare: true, deals: [undercut] }),
+  };
+  const r = await call(page, {
+    query: { type: 'deal', slug: 'hotel-wawel-old-town-krakow-a1509144' },
+  });
+  assert.equal(r.status, 200, 'the canonical URL must still serve the page');
+  assert.ok(r.body.includes(
+    '<link rel="canonical" href="https://tripbuster.example/tripbuster/holiday/hotel-wawel-old-town-krakow-a1509144">',
+  ), 'the canonical followed the price instead of staying put');
+  rpcHandlers = defaultRpcs();
+});
+
 // ════════════════════════════════════════════════════════════════
 // 4. injection
 // ════════════════════════════════════════════════════════════════
@@ -550,6 +601,25 @@ await testAsync('the legacy deal URL moves permanently to the slug', async () =>
   assert.equal(r.headers.location, '/tripbuster/holiday/hotel-wawel-old-town-krakow-a1509144');
 });
 
+await testAsync('a legacy URL lands on the canonical page in one hop, not two', async () => {
+  // ?id= for a rival must go straight to the group's page. Redirecting to that
+  // deal's own slug first would make every old link a two-hop chain.
+  const row = twoAgentRow();
+  rpcHandlers = {
+    ...defaultRpcs(row),
+    tb_search_deals: () => ({
+      total: 1,
+      deals: [{ ...row, id: row.compare[1].dealId, slug: row.compare[1].slug }],
+    }),
+  };
+  const r = await call(page, {
+    query: { type: 'legacy', id: 'b2609255-61ae-4a17-bb6e-1d005d696172' },
+  });
+  assert.equal(r.status, 301);
+  assert.equal(r.headers.location, '/tripbuster/holiday/hotel-wawel-old-town-krakow-a1509144');
+  rpcHandlers = defaultRpcs();
+});
+
 await testAsync('a legacy URL for a deal that has gone is a 404, not a redirect loop', async () => {
   const r = await call(page, {
     query: { type: 'legacy', id: '00000000-0000-0000-0000-000000000000' },
@@ -581,6 +651,29 @@ await testAsync('the sitemap lists every page type with absolute URLs', async ()
   }
   // lastmod must be a real date per URL, not today's date on everything.
   assert.ok(r.body.includes('<lastmod>2026-07-27</lastmod>'));
+
+  // And no URL may appear twice, nor may two URLs render the same page.
+  assert.equal(new Set(locs).size, locs.length, 'the sitemap repeats a URL');
+});
+
+await testAsync('the sitemap lists one URL per hotel, not one per agent', async () => {
+  // Three agents advertising the same hotel is ONE page. Listing three URLs that
+  // all redirect to a fourth asks Google to crawl three pages to be told to
+  // ignore them, and shows up in Search Console as duplicate content.
+  rpcHandlers = {
+    ...defaultRpcs(),
+    tb_sitemap: () => ({
+      deals: [{ slug: 'hotel-wawel-old-town-krakow-a1509144', lastmod: '2026-07-27T15:05:48Z' }],
+      destinations: DESTINATIONS,
+      generated: '2026-07-27T16:00:00Z',
+    }),
+  };
+  const r = await call(sitemap, {});
+  const dealLocs = [...r.body.matchAll(/<loc>([^<]*\/holiday\/[^<]*)<\/loc>/g)].map((m) => m[1]);
+  assert.equal(dealLocs.length, 1, 'one hotel should contribute one URL');
+  assert.ok(!dealLocs.some((l) => l.includes('b2609255')),
+    'a non-canonical member slug reached the sitemap');
+  rpcHandlers = defaultRpcs();
 });
 
 await testAsync('the sitemap says 503 rather than serving a broken one', async () => {

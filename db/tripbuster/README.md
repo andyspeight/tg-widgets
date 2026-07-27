@@ -141,7 +141,7 @@ impressions.
 
 ```
 npm run test:tripbuster           # 277 assertions, no network needed
-npm run test:tripbuster-seo       # 31 assertions, the indexable surface
+npm run test:tripbuster-seo       # 35 assertions, the indexable surface
 npm run test:tripbuster-import    # 95 assertions, drives the dashboard in Chromium
 npm run test:tripbuster-call      # 43 assertions, drives the call journey in Chromium
 ```
@@ -267,6 +267,21 @@ resort and still get one page each.
 would have left two URLs serving one page, which is the duplicate-content split
 the slugs were introduced to avoid.
 
+### One hotel, one page, one URL
+
+A deal page shows every agent advertising the same hotel, so three agents share
+one page — and therefore have to share one URL. Each deal carries a
+`canonical_slug`: the slug of the **earliest published** deal in its group.
+Requesting any other member's slug 301s there, and the sitemap lists one URL per
+hotel rather than one per deal. On the demo data that is 21 pages from 26 deals.
+
+**Earliest published, deliberately not cheapest.** The read path returns the
+cheapest agent first, so taking the canonical from "whichever row came back"
+would move a page's URL every time somebody undercut somebody else. Publication
+dates and ids never change; prices change all day. A canonical that moves undoes
+the entire point of a stable slug, and the suite has a test that fails if it
+starts following the price again.
+
 ### What the structured data deliberately does not claim
 
 No `aggregateRating` and no `review`. Deals carry a `guest_score`, but that number
@@ -304,6 +319,7 @@ Apply in order. They are idempotent enough to run on a fresh project.
 | `009_hours_and_numbers.sql` | `agent_hours`, `agent_special_days`, `agent_phones`; `tb_agent_is_open`; `tb_agent_contact`; `tb_save_agent_settings`; `click_events.out_of_hours`; drops the database's route check |
 | `010_all_calls_chargeable.sql` | Every call is billable whatever the hour; `out_of_hours` becomes a reporting flag only |
 | `011_seo_slugs_and_destinations.sql` | `tb_slugify`; a stable unique `deals.slug` minted at first publish; `p_deal_slug` and `p_holiday_type` on `tb_search_deals`; `tb_destinations`, `tb_destination`, `tb_sitemap` |
+| `012_canonical_deal_page.sql` | `canonical_slug` on every returned row, so one hotel is one page; the sitemap lists pages rather than deals |
 
 Migration 008 replaces `tb_record_click` rather than altering it. Adding
 parameters to a Postgres function creates an **overload**, and with defaults in
