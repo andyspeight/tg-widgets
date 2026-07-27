@@ -261,12 +261,13 @@ input[type=range] { width:100%; accent-color:var(--coral); }
 .ar-call.is-revealed { font-size:13px; font-weight:800; }
 
 /* ── closed, and when they open ──────────────────────────────────────────── */
-/* Out of hours the button stops being a button and becomes the number itself.
-   Deliberately quieter than the live version: we are telling somebody the number
-   for later, not selling them a call nobody will answer. */
+/* Out of hours, under "ask for a call back", the button stops being a button at
+   all. It is a span with no href and no tracking, because every call is
+   chargeable now and offering a tappable number here would bill the agency for
+   calls it deliberately chose not to invite. Styled as information: dashed,
+   quieter, and no hover state, because there is nothing to press. */
 .btn-call.is-shut { border-style:dashed; border-color:var(--border-2); color:var(--tx-2);
-  font-weight:700; font-variant-numeric:tabular-nums; }
-.btn-call.is-shut:hover { background:var(--surface-2); }
+  font-weight:700; font-variant-numeric:tabular-nums; cursor:default; }
 /* Sized to the number rather than to the column. A full-width button holding
    "0141 555 907" and refusing to wrap squeezes the agency's name into two lines
    beside it, which looks like a bug in the page rather than a shut shop. */
@@ -285,9 +286,11 @@ input[type=range] { width:100%; accent-color:var(--coral); }
 .ar-more li { display:flex; justify-content:space-between; gap:2px 8px; font-size:11.5px;
   padding:3px 0; border-top:1px dashed var(--border); flex-wrap:wrap; }
 .ar-more-lb { color:var(--tx-3); font-weight:700; }
-.ar-more a { color:var(--sky-deep); font-weight:700; text-decoration:none;
+.ar-more a, .ar-more-nm { color:var(--sky-deep); font-weight:700; text-decoration:none;
   font-variant-numeric:tabular-nums; white-space:nowrap; }
 .ar-more a:hover { text-decoration:underline; }
+/* The not-dialable variant, for the same reason as .is-shut above. */
+.ar-more-nm { color:var(--tx-2); }
 
 /* ── the week ────────────────────────────────────────────────────────────── */
 .oh { background:var(--surface); border:1px solid var(--border); border-radius:16px;

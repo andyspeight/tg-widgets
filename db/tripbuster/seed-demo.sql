@@ -89,9 +89,10 @@ update public.agents set billing_mode = 'both',  call_min_seconds = 90 where slu
 -- Two different shapes, because the interesting part of this feature is the
 -- difference between them:
 --
---   JETAWAY keeps shop hours and shuts on Sundays. They are the agency whose
---   dashboard shows out-of-hours demand it is not being charged for, and whose
---   deal pages swap the call button for a call-back form in the evenings.
+--   JETAWAY keeps shop hours and shuts on Sundays, on the default "leave us a
+--   message" setting. Their deal pages swap the call button for a call-back form
+--   in the evenings, so out-of-hours demand reaches them as ENQUIRIES rather than
+--   as calls nobody answers. That is the setting doing its job.
 --   COASTLINE is open seven days and late, so nearly everything they take is
 --   inside hours. Same feature, almost no effect, which is the honest comparison.
 --   SUNSEEKER is left on 'always'. They sell on clicks, so hours would be noise.
@@ -100,8 +101,15 @@ delete from public.agent_special_days where agent_id in (select id from public.a
 delete from public.agent_phones where agent_id in (select id from public.agents where slug in ('sunseeker-travel','coastline-holidays','jetaway-travel'));
 
 update public.agents
-   set hours_mode = 'scheduled', closed_behaviour = 'callback', time_zone = 'Europe/London'
+   set hours_mode = 'scheduled', time_zone = 'Europe/London'
  where slug in ('jetaway-travel', 'coastline-holidays');
+
+-- The two closed behaviours, one each, so both are demonstrable:
+--   Jetaway asks for a message. No call button out of hours, nothing charged.
+--   Coastline takes the calls anyway (they divert to a mobile), so their few
+--   out-of-hours calls ARE charged for, exactly like any other call.
+update public.agents set closed_behaviour = 'callback' where slug = 'jetaway-travel';
+update public.agents set closed_behaviour = 'show'     where slug = 'coastline-holidays';
 
 -- Jetaway: weekdays nine to half five, Saturday morning only, Sunday shut.
 insert into public.agent_hours (agent_id, day_of_week, opens, closes)
@@ -654,11 +662,16 @@ update public.deal_daily_stats s
 -- the same function the live code uses, so the demo cannot show a pattern the real
 -- billing rule would not produce.
 --
--- AND MOST OUT-OF-HOURS CALLS ARE DROPPED, because of what the site does. Faced
--- with a closed shop the page leads with the call-back form, so the majority of
--- those people leave their details instead of pressing a number nobody will
--- answer. Keeping one in three is the honest shape: a real but minority stream of
--- people who ring anyway.
+-- AND MOST OUT-OF-HOURS CALLS ARE DROPPED, because of what the site does. Under
+-- the default "leave us a message" setting a closed shop shows NO call button at
+-- all, so those people leave their details instead. Jetaway is on that setting,
+-- so the few out-of-hours calls it does take are the ones that came through the
+-- widget on somebody else's site, or from a page left open. Keeping one in three
+-- is the honest shape.
+--
+-- WHEN THEY DO HAPPEN THEY ARE CHARGED FOR, whatever the hour. Andy's rule: the
+-- agency decides whether a call can happen, by setting hours and choosing what to
+-- show; we do not decide afterwards what the call was worth.
 with raw as (
   select s.deal_id, s.agent_id, s.stat_date, d.reference, g,
          abs(hashtext(d.reference || s.stat_date::text || g::text || 'ch')) as h,
@@ -690,9 +703,9 @@ select deal_id, agent_id, occurred_at,
        (array['google.com','google.com','facebook.com',null])
          [1 + (abs(hashtext(reference || stat_date::text || g::text || 'cr')) % 4)],
        'GB',
-       -- Deliberate AND reachable. A repeat visitor is not charged for, and
-       -- neither is a call to a shut shop.
-       (abs(hashtext(reference || stat_date::text || g::text || 'cb')) % 8) <> 0 and not shut,
+       -- Deliberate is the whole test. A repeat visitor is not charged for; the
+       -- hour of the day has nothing to do with it.
+       (abs(hashtext(reference || stat_date::text || g::text || 'cb')) % 8) <> 0,
        'call', null, null,
        substr(encode(sha256(convert_to('caller' || reference || stat_date::text || g::text, 'UTF8')), 'hex'), 1, 40),
        shut

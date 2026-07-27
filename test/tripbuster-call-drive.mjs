@@ -349,8 +349,11 @@ try {
     href: el.getAttribute('href'),
   }));
   check('out of hours the button becomes the number itself', shutBtn.shut, JSON.stringify(shutBtn));
-  check('and it is still a tel: link, for ringing first thing tomorrow',
-    shutBtn.tag === 'a' && shutBtn.href === 'tel:0141555907', JSON.stringify(shutBtn));
+  // EVERY CALL IS CHARGEABLE now, so under "leave us a message" this must not be
+  // dialable. A tappable number here would bill the agency for calls it chose not
+  // to invite, which is the exact complaint the setting exists to prevent.
+  check('and it is NOT a link, because this agency asked for messages instead',
+    shutBtn.tag === 'span' && !shutBtn.href, JSON.stringify(shutBtn));
   check('the number is shown rather than hidden behind "Show number"',
     /0141 555 907/.test(shutBtn.text), shutBtn.text);
 
@@ -400,12 +403,16 @@ try {
   check('and the days they are shut say so', week.filter((r) => /Closed/.test(r)).length === 6,
     JSON.stringify(week));
 
-  // Still reported, so the agency can see the demand it is turning away. The
-  // database decides it is not chargeable; the page does not get a say.
+  // Nothing to press, so nothing is reported and nothing is charged.
   await desk.click('.ar-call');
   await wait(400);
-  check('an out-of-hours press is still recorded, so the demand is visible',
-    events.some((e) => e.dealId === SHUT_DEAL && e.eventType === 'call'), JSON.stringify(events));
+  check('pressing it reports nothing, so nothing can be charged for',
+    events.length === 0, JSON.stringify(events));
+
+  // The extra numbers follow the same rule.
+  const shutExtraLink = await desk.$$eval('.ar-more li a', (els) => els.length);
+  check('and the out-of-hours number is readable but not dialable either',
+    shutExtraLink === 0, String(shutExtraLink));
 
   await desk.screenshot({ path: path.join(SHOT_DIR, 'tb-call-5-closed.png'), fullPage: true });
 

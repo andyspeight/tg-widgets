@@ -108,6 +108,14 @@
     backdrop-filter:blur(10px); border-bottom:1px solid var(--border); padding:13px 24px;
     display:flex; align-items:center; gap:12px; }
   .top h1 { margin:0; font-size:16px; font-weight:800; letter-spacing:-.02em; }
+  /* The topbar is sticky, so anything brought to the top of the page lands
+     UNDERNEATH it — a button a keyboard user has just tabbed to, an error field
+     that scrollIntoView() jumped to, or anything a script scrolls into view. A
+     scroll margin the height of the bar keeps it clear. Found because a real
+     mouse click in the test suite kept landing on the topbar instead of the
+     button beneath it, which is exactly what would happen to a person. */
+  .card, .route, .field, .hrs-row, .rowset, details,
+  button, input, select, textarea { scroll-margin-top: 84px; }
   .scroll { padding:24px; max-width:1080px; width:100%; }
   .view { display:none; } .view.on { display:block; }
 
@@ -405,6 +413,10 @@
   .rowset label { display:block; font-size:11px; font-weight:700; color:var(--tx-3);
     margin-bottom:4px; }
   .rowset-empty { font-size:12.5px; color:var(--tx-3); padding:6px 0; }
+  /* The date echo. Small, quiet when right, coral when it is not a date yet. */
+  .datesay { display:block; font-size:11.5px; font-weight:600; color:var(--tx-3); margin-top:4px;
+    min-height:1em; }
+  .datesay.bad { color:var(--coral-ink); }
   @media (max-width:760px){
     .hrs-row { grid-template-columns:1fr; gap:5px; }
     .rowset { grid-template-columns:1fr 1fr; }
@@ -618,11 +630,11 @@
               <div class="sec-body">
                 <div class="g3">
                   <div class="field"><label for="f-nights">Nights</label><input id="f-nights" name="nights" type="number" min="1" max="60"><span class="err"></span></div>
-                  <div class="field"><label for="f-travel_from">Travel from</label><input id="f-travel_from" name="travel_from" type="date"><span class="err"></span></div>
-                  <div class="field"><label for="f-travel_until">Travel until</label><input id="f-travel_until" name="travel_until" type="date"><span class="err"></span></div>
+                  <div class="field"><label for="f-travel_from">Travel from</label><input id="f-travel_from" name="travel_from" type="text" data-uk-date inputmode="numeric" placeholder="dd/mm/yyyy" maxlength="10" autocomplete="off"><span class="datesay"></span><span class="err"></span></div>
+                  <div class="field"><label for="f-travel_until">Travel until</label><input id="f-travel_until" name="travel_until" type="text" data-uk-date inputmode="numeric" placeholder="dd/mm/yyyy" maxlength="10" autocomplete="off"><span class="datesay"></span><span class="err"></span></div>
                 </div>
                 <div class="g3">
-                  <div class="field"><label for="f-booking_deadline">Book by</label><input id="f-booking_deadline" name="booking_deadline" type="date"><span class="err"></span></div>
+                  <div class="field"><label for="f-booking_deadline">Book by</label><input id="f-booking_deadline" name="booking_deadline" type="text" data-uk-date inputmode="numeric" placeholder="dd/mm/yyyy" maxlength="10" autocomplete="off"><span class="datesay"></span><span class="err"></span></div>
                   <div class="field"><label for="f-availability_status">Availability</label>
                     <select id="f-availability_status" name="availability_status"><option>Available</option><option>On request</option><option>Limited</option></select><span class="err"></span></div>
                   <div class="field"><label for="f-spaces_left">Spaces left <span class="hint">optional</span></label>
@@ -1011,10 +1023,11 @@
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
             <span><b>What counts as a call.</b> On a phone, a traveller taps your number and it dials.
               On a computer they press to see it. Either way somebody has deliberately asked how to
-              reach you, and that is what you pay for, the same as a click. We do not own your phone
-              line, so we cannot tell you whether it rang out or how long you spoke, and we will never
-              pretend otherwise. Calls that arrive while you are closed are shown to you but never
-              charged for, and the length above does nothing until call tracking is added.</span>
+              reach you, and that is what you pay for, the same as a click. Every call counts,
+              whatever the time — if you would rather not take calls outside your opening hours, set
+              those hours below and choose what to show instead. We do not own your phone line, so we
+              cannot tell you whether it rang out or how long you spoke, and we will never pretend
+              otherwise. The length above does nothing until call tracking is added.</span>
           </div>
 
           <div class="editor-bar" style="justify-content:space-between;margin-top:4px">
@@ -1027,9 +1040,9 @@
         <div class="card" style="padding:20px;margin-bottom:18px" id="hoursCard">
           <h3 style="margin:0 0 6px;font-size:14px;font-weight:800">When you are open</h3>
           <p style="margin:0 0 16px;font-size:13px;color:var(--tx-2);max-width:64ch">
-            Nobody should be charged for a call to a shut shop. Tell us your hours and we stop
-            charging for calls outside them, and ask travellers to leave their details instead so
-            you still get the enquiry.
+            Every call is chargeable, whatever the time. So if you would rather not take calls after
+            hours, tell us when you are open and pick what travellers see instead — a call-back form,
+            or nothing at all. You stay in control of when the phone can ring.
           </p>
           <div class="form-error" id="hoursErr" role="alert"></div>
 
@@ -1037,12 +1050,12 @@
             <button class="route" type="button" data-hmode="always" aria-pressed="false">
               <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
               <h3>Always available</h3>
-              <p>No hours. Your number shows around the clock and every call counts.</p>
+              <p>No hours. Your number shows around the clock, and every call counts.</p>
             </button>
             <button class="route" type="button" data-hmode="scheduled" aria-pressed="false">
               <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
               <h3>Set opening hours</h3>
-              <p>Out of hours we stop charging for calls and lead with a call-back form.</p>
+              <p>Outside them, travellers get whatever you choose below instead of your number.</p>
             </button>
           </div>
 
@@ -1067,17 +1080,19 @@
             <h4 style="margin:20px 0 8px;font-size:13px;font-weight:800">While you are closed</h4>
             <div class="routes" id="closedModes" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px">
               <button class="route" type="button" data-cmode="callback" aria-pressed="false">
-                <h3>Ask for a call back</h3>
-                <p>Recommended. The form leads, your number still shows, and the enquiry still
-                  reaches you in the morning.</p>
+                <h3>Leave us a message</h3>
+                <p>Recommended. No call button, so nothing to pay for. The form leads, your number
+                  is still readable, and the enquiry reaches you in the morning.</p>
               </button>
               <button class="route" type="button" data-cmode="show" aria-pressed="false">
-                <h3>Show the number anyway</h3>
-                <p>For an answering machine you actually listen to.</p>
+                <h3>Take the calls anyway</h3>
+                <p>Your number stays live and out-of-hours calls are charged for, the same as any
+                  other. For a diverted line or a machine you actually listen to.</p>
               </button>
               <button class="route" type="button" data-cmode="hide" aria-pressed="false">
                 <h3>Show nothing</h3>
-                <p>No number and no form until you open again. You will lose those enquiries.</p>
+                <p>No number and no form until you open again. Nothing to pay for, and you lose
+                  those enquiries entirely.</p>
               </button>
             </div>
 
@@ -1317,9 +1332,12 @@
       // number they need in order to decide whether Saturday is worth staffing.
       // Those calls are NOT charged for, and the tile says so rather than leaving
       // them to wonder why the totals differ.
+      // Reporting, not billing. Every call counts, so this is here because an
+      // agency deciding whether to open on a Saturday needs to know when the
+      // demand actually arrives, not because those calls were free.
       foot: !have ? 'Not available right now'
         : (s.afterHoursCalls
-          ? nf(s.afterHoursCalls) + ' arrived while you were closed, not charged'
+          ? nf(s.afterHoursCalls) + ' of them came in outside your opening hours'
           : 'Phone enquiries from your deals'),
     };
     const callRate = {
@@ -1527,6 +1545,78 @@
     else show(view);
   });
 
+  // ── UK dates ──────────────────────────────────────────────
+  // A native input[type=date] renders in the BROWSER's locale, not the page's.
+  // A UK agency on a laptop that shipped configured for the US therefore sees
+  // 12/25/2026 on a British travel product, and there is no markup or CSS that
+  // changes that. So these are plain text fields that only ever speak day first,
+  // and every one echoes the date back IN WORDS underneath. The echo is the real
+  // fix: "Friday 25 December 2026" cannot be misread whatever anyone is used to.
+  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+    'August', 'September', 'October', 'November', 'December'];
+  const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  /** 'dd/mm/yyyy' to the ISO the API wants. Null for anything that is not a real date. */
+  function isoDate(uk) {
+    const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(String(uk || '').trim());
+    if (!m) return null;
+    const [, dd, mm, yyyy] = m;
+    const iso = yyyy + '-' + mm + '-' + dd;
+    // Round-tripped, because Date accepts 31 February and rolls it into March.
+    const d = new Date(iso + 'T00:00:00Z');
+    return !isNaN(d.getTime()) && d.toISOString().slice(0, 10) === iso ? iso : null;
+  }
+
+  /** ISO back to 'dd/mm/yyyy' for display. Anything unrecognisable passes through. */
+  function ukDate(iso) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || '').trim());
+    return m ? m[3] + '/' + m[2] + '/' + m[1] : (iso || '');
+  }
+
+  /** "Friday 25 December 2026", the line that removes all doubt. */
+  function dateInWords(iso) {
+    if (!iso) return '';
+    const d = new Date(iso + 'T00:00:00Z');
+    if (isNaN(d.getTime())) return '';
+    return WEEKDAYS[d.getUTCDay()] + ' ' + d.getUTCDate() + ' '
+      + MONTHS[d.getUTCMonth()] + ' ' + d.getUTCFullYear();
+  }
+
+  /** Slashes appear as you type, so nobody has to guess the separator. */
+  function maskUkDate(value) {
+    const digits = String(value || '').replace(/\D/g, '').slice(0, 8);
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 4) return digits.slice(0, 2) + '/' + digits.slice(2);
+    return digits.slice(0, 2) + '/' + digits.slice(2, 4) + '/' + digits.slice(4);
+  }
+
+  function paintDateSay(input) {
+    const say = input.parentElement && input.parentElement.querySelector('.datesay');
+    if (!say) return;
+    const raw = input.value.trim();
+    if (!raw) { say.textContent = ''; say.classList.remove('bad'); return; }
+    const iso = isoDate(raw);
+    say.textContent = iso ? dateInWords(iso) : 'Use day/month/year, like 25/12/2026';
+    say.classList.toggle('bad', !iso);
+  }
+
+  // Delegated, so fields rendered later (special days) need no extra wiring.
+  document.addEventListener('input', (e) => {
+    const el = e.target;
+    if (!el.matches || !el.matches('[data-uk-date]')) return;
+    const before = el.selectionStart;
+    const atEnd = before === el.value.length;
+    const masked = maskUkDate(el.value);
+    if (masked !== el.value) {
+      el.value = masked;
+      if (!atEnd) el.setSelectionRange(before, before);
+    }
+    paintDateSay(el);
+  });
+  document.addEventListener('focusout', (e) => {
+    if (e.target.matches && e.target.matches('[data-uk-date]')) paintDateSay(e.target);
+  });
+
   // ── editor ────────────────────────────────────────────────
   const FORM = $('dealForm');
   const CSV_FIELDS = ['facilities', 'departure_airports', 'price_includes', 'offer_badges', 'gallery'];
@@ -1572,8 +1662,11 @@
         if (!input) return;
         const v = deal[k];
         if (Array.isArray(v)) input.value = k === 'selling_points' ? v.join('\n') : v.join(', ');
+        // Stored ISO, shown day first.
+        else if (input.hasAttribute('data-uk-date')) input.value = ukDate(v);
         else if (v !== null && v !== undefined) input.value = v;
       });
+      FORM.querySelectorAll('[data-uk-date]').forEach(paintDateSay);
     }
     show('editor');
     updatePreview();
@@ -1589,6 +1682,11 @@
         out[name] = v ? v.split('\n').map((s) => s.trim()).filter(Boolean) : [];
       } else if (NUM_FIELDS.includes(name)) {
         out[name] = v === '' ? null : Number(v);
+      } else if (FORM.querySelector('[name="' + name + '"][data-uk-date]')) {
+        // Day-first in, ISO out. Something typed but unparseable is passed
+        // through UNCHANGED so the API refuses it with a message, rather than
+        // being quietly swallowed as null and the agent losing what they typed.
+        out[name] = v === '' ? null : (isoDate(v) || v);
       } else {
         out[name] = v === '' ? null : v;
       }
@@ -1933,7 +2031,9 @@
     const row = document.createElement('div');
     row.className = 'rowset';
     row.innerHTML =
-      '<div><label>Date</label><input type="date" class="sp-date" value="' + ((s && s.date) || '') + '"></div>'
+      '<div><label>Date</label><input type="text" class="sp-date" data-uk-date inputmode="numeric" '
+      + 'placeholder="dd/mm/yyyy" maxlength="10" autocomplete="off" value="'
+      + ukDate(((s && s.date) || '')) + '"><span class="datesay"></span></div>'
       + '<div><label>Opens <span style="font-weight:600">(blank = closed)</span></label>'
       + '<input type="time" class="sp-o" value="' + ((s && s.opens) || '') + '"></div>'
       + '<div><label>Closes</label><input type="time" class="sp-c" value="' + ((s && s.closes) || '') + '"></div>'
@@ -1972,8 +2072,11 @@
   function readSpecial() {
     const out = [];
     $('hrsSpecial').querySelectorAll('.rowset').forEach((row) => {
-      const date = row.querySelector('.sp-date').value;
-      if (!date) return;
+      const typed = row.querySelector('.sp-date').value.trim();
+      if (!typed) return;
+      // Unparseable goes through as typed, so the API names the offending row
+      // instead of the date silently vanishing.
+      const date = isoDate(typed) || typed;
       const o = row.querySelector('.sp-o').value;
       const c = row.querySelector('.sp-c').value;
       out.push({

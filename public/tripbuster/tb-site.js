@@ -206,12 +206,17 @@
    * copy and save the way people expect. On a desktop it is a plain button with
    * no href, because "Show number" that reveals itself on hover would be a lie.
    *
-   * OUT OF HOURS it becomes the number itself, plainly, with the time they open
-   * next to it. Still a `tel:` link, because somebody may want to ring first thing
-   * tomorrow, and still REPORTED, because an agency deciding whether Saturday
-   * afternoons are worth staffing needs to see the demand it is currently turning
-   * away. It is NOT chargeable: the database settles that from its own clock, so
-   * nothing here has to be trusted for the bill to be right.
+   * EVERY CALL IS CHARGEABLE, whatever the time. So out of hours, under the
+   * "ask for a call back" setting, this stops being a BUTTON at all: the number
+   * shows as plain text, not a link, and nothing is reported. That is the whole
+   * point of the setting — the agency said they would rather have a message than
+   * a ring, and offering a tappable number anyway would bill them for calls they
+   * explicitly chose not to invite.
+   *
+   * An agency that DOES want out-of-hours calls sets "show the number anyway",
+   * and then it is an ordinary chargeable button at midnight exactly as it is at
+   * midday. The agency decides whether a call can happen; we do not decide what
+   * it was worth afterwards.
    */
   function callCta(entry, opts) {
     var o = opts || {};
@@ -221,9 +226,10 @@
     var id = (entry && (entry.dealId || entry.id)) || '';
     var phone = route.primary.phone;
 
+    // Information, not an invitation. No href and no data-call, so a tap cannot
+    // dial and nothing reaches the recorder.
     if (route.muted) {
-      return '<a class="' + cls + ' is-shut" data-call="' + esc(id) + '"'
-        + ' href="' + esc(telHref(phone)) + '">' + svg(IC.phone) + esc(phone) + '</a>';
+      return '<span class="' + cls + ' is-shut">' + svg(IC.phone) + esc(phone) + '</span>';
     }
     if (dialer()) {
       return '<a class="' + cls + '" data-call="' + esc(id) + '" href="' + esc(telHref(phone)) + '">'
@@ -245,10 +251,15 @@
     var route = o.route || callRoute(entry);
     if (route.silent || route.phones.length < 2) return '';
     var id = (entry && (entry.dealId || entry.id)) || '';
+    // Same rule as the button above: under "ask for a call back" these are
+    // readable but not dialable, so an agency is never billed for a number it
+    // chose not to offer at this hour.
     return '<ul class="ar-more">' + route.phones.slice(1).map(function (p) {
-      return '<li><span class="ar-more-lb">' + esc(p.label) + '</span>'
-        + '<a data-call="' + esc(id) + '" href="' + esc(telHref(p.phone)) + '">'
-        + esc(p.phone) + '</a></li>';
+      var value = route.muted
+        ? '<span class="ar-more-nm">' + esc(p.phone) + '</span>'
+        : '<a data-call="' + esc(id) + '" href="' + esc(telHref(p.phone)) + '">'
+          + esc(p.phone) + '</a>';
+      return '<li><span class="ar-more-lb">' + esc(p.label) + '</span>' + value + '</li>';
     }).join('') + '</ul>';
   }
 

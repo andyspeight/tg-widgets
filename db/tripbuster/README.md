@@ -125,8 +125,8 @@ impressions.
 
 ```
 npm run test:tripbuster           # 277 assertions, no network needed
-npm run test:tripbuster-import    # 90 assertions, drives the dashboard in Chromium
-npm run test:tripbuster-call      # 42 assertions, drives the call journey in Chromium
+npm run test:tripbuster-import    # 95 assertions, drives the dashboard in Chromium
+npm run test:tripbuster-call      # 43 assertions, drives the call journey in Chromium
 ```
 
 `test:tripbuster` covers seven layers:
@@ -212,6 +212,7 @@ Apply in order. They are idempotent enough to run on a fresh project.
 | `007_pay_per_call.sql` | `billing_mode` on agents and deals; call columns on `click_events`; `deal_daily_stats.calls`; relaxed live-deal constraint |
 | `008_calls_and_leads.sql` | Corrects the call billing rule to "billable unless"; `leads` table; `tb_record_lead`; `tb_agent_lead_counts`; `deal_daily_stats.leads` |
 | `009_hours_and_numbers.sql` | `agent_hours`, `agent_special_days`, `agent_phones`; `tb_agent_is_open`; `tb_agent_contact`; `tb_save_agent_settings`; `click_events.out_of_hours`; drops the database's route check |
+| `010_all_calls_chargeable.sql` | Every call is billable whatever the hour; `out_of_hours` becomes a reporting flag only |
 
 Migration 008 replaces `tb_record_click` rather than altering it. Adding
 parameters to a Postgres function creates an **overload**, and with defaults in
@@ -261,13 +262,15 @@ shows the setting existing without pretending it is doing work.
 | Agency | Hours | Extra numbers |
 |---|---|---|
 | Sunseeker | always available (they sell on clicks, so hours would be noise) | — |
-| Jetaway | weekdays 9–5:30, Saturday morning, **shut Sundays** | an out-of-hours mobile |
-| Coastline | seven days, late on Thursdays | Brighton shop, cruise desk, evenings mobile |
+| Jetaway | weekdays 9–5:30, Saturday morning, **shut Sundays**, asks for a message when closed | an out-of-hours mobile |
+| Coastline | seven days, late on Thursdays, **takes calls when closed** | Brighton shop, cruise desk, evenings mobile |
 
-That contrast is the demonstration. Jetaway loses about a quarter of its calls to
-being closed and takes most of its callback requests then; Coastline, open all
-week, loses under a tenth. Same feature, very different effect, which is a more
-honest thing to show than two agencies that both look the same.
+The contrast is the demonstration, and it is now a contrast of CHOICES rather
+than of billing. Jetaway asks for a message out of hours, so most of its evening
+demand arrives as callback requests rather than as calls. Coastline takes the
+calls anyway and is charged for them like any other. Both are legitimate ways to
+run a shop, and the point of showing them side by side is that the platform does
+not decide which is right.
 
 **Call times are drawn from a weighted spread, not a flat one.** Most people ring
 a travel agent during the working day with a tail into the evening. A flat
@@ -276,9 +279,11 @@ which is not a figure any real agency would recognise and would have undersold t
 product on a demo.
 
 **Most out-of-hours calls are then dropped**, because of what the site actually
-does: faced with a closed shop the page leads with the callback form, so the
-majority of those people leave their details instead of pressing a number nobody
-will answer. One in three is kept — the real minority who ring anyway.
+does: under "leave us a message" a closed shop shows no call button at all, so
+those people leave their details instead. One in three is kept, standing in for
+the calls that still arrive through a widget on somebody else's site or a page
+left open since the afternoon. When they do arrive they are charged for, exactly
+like any other call.
 
 That dropping is why **`deal_daily_stats.calls` is recomputed from the events**
 afterwards rather than the events being expanded from it. The counter it started
@@ -421,22 +426,28 @@ of connection and so quietly made **every** call unbillable.
 
 ### Opening hours
 
-The corrected call rule above has one uncomfortable edge: a traveller tapping at
-eleven at night gets no answer, and that tap is still a deliberate act. Opening
-hours close it, and they close it by **keeping the enquiry rather than throwing it
-away**:
+**Every call is chargeable, whatever the time.** Opening hours do not change
+that, and an earlier version of this that made out-of-hours calls free was wrong
+for a reason worth remembering: it took the decision away from the agency. We
+were guessing on their behalf that a call at half five was worthless, when plenty
+of shops answer after the door is locked, divert to a mobile, or would simply
+rather have the enquiry than not.
 
-| | Out of hours |
-|---|---|
-| A call | recorded, flagged `out_of_hours`, **not charged for** |
-| A callback request | recorded, flagged, **still charged for** |
+What hours actually control is **whether a call can happen at all**, and that is
+the agency's choice:
 
-That asymmetry is the whole design. A call to a shut shop is worth nothing to the
-agency, so they should not pay for it. A callback left at midnight is worth *more*
-than a ring into an empty room: it arrives with a name and a way to reply, and it
-is the enquiry that would otherwise have been lost. So the closed state does not
-remove the call to action, it **changes** it — which is why the default
-`closed_behaviour` is `callback` rather than `hide`.
+| `closed_behaviour` | Out of hours the traveller gets | Charged? |
+|---|---|---|
+| `callback` (default) | the call-back form, and the number as **plain text** | nothing to charge |
+| `show` | the ordinary call button | yes, like any other call |
+| `hide` | nothing at all | nothing to charge |
+
+The `callback` row matters more than it looks. Because every call counts, that
+state must not render a tappable number: doing so would bill an agency for calls
+it explicitly chose not to invite, which is the complaint this whole area exists
+to prevent. So out of hours under `callback` the number is a `<span>` with no
+`href` and no `data-call` - readable for tomorrow, not a call to action, and never
+reported. There is a browser assertion for exactly that.
 
 `hours_mode` defaults to `always`, so nothing changes for any agency until they
 actually fill the form in.
@@ -472,13 +483,12 @@ Structure:
   the same hours — an out-of-hours mobile shown at ten in the morning is simply the
   wrong number.
 
-**`click_events.out_of_hours` records WHY a call was not charged for**, rather
-than leaving it to be worked out later from the hours. Hours change: an agency that
-starts opening on Sundays must not retrospectively turn last month's unbilled
-Sunday calls into billed ones, and an auditor asking "why was this one free"
-deserves an answer from the row itself. `tb_agent_stats` reports it as
-`afterHoursCalls` and `afterHoursLeads`, and the dashboard shows it, because the
-demand an agency is currently turning away is the number it needs in order to
+**`click_events.out_of_hours` is a REPORTING flag, not a billing one.** It is
+recorded on the row rather than worked out later from the hours, because hours
+change and a row should still be able to explain itself long after the schedule
+that produced it was edited. `tb_agent_stats` reports it as `afterHoursCalls` and
+`afterHoursLeads`, and the dashboard shows it, because "nineteen of your enquiries
+arrived while you were closed" is exactly the figure an agency needs in order to
 decide whether Saturday is worth staffing.
 
 #### The rules live in three places, on purpose

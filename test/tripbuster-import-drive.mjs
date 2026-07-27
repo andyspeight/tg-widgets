@@ -584,8 +584,8 @@ try {
   check('and explains what is actually chargeable', noteShown);
 
   const noteText = await text('#callNote');
-  check('the note is honest that an unproven tap is not charged for',
-    /never charged for/.test(noteText), noteText.slice(0, 140));
+  check('the note says plainly that every call counts, whatever the time',
+    /Every call counts, whatever the time/.test(noteText), noteText.slice(0, 200));
   check('and it does not claim we can see whether the phone was answered',
     /do not own your phone line/.test(noteText), noteText.slice(0, 200));
 
@@ -671,7 +671,38 @@ try {
   // A bank holiday.
   await page.click('#hrsAddSpecial');
   await wait(200);
-  await page.$eval('#hrsSpecial .sp-date', (el) => { el.value = '2026-12-25'; });
+
+  // ── UK dates ──────────────────────────────────────────────
+  // Typed as a British person would, digit by digit, because the whole point is
+  // that this field never speaks month-first whatever the browser's locale is.
+  await page.click('#hrsSpecial .sp-date');
+  await page.type('#hrsSpecial .sp-date', '25122026', { delay: 10 });
+  await wait(200);
+  const dateTyped = await page.$eval('#hrsSpecial .sp-date', (el) => el.value);
+  check('slashes appear as you type, so nobody guesses the separator',
+    dateTyped === '25/12/2026', dateTyped);
+
+  const dateSaid = await page.$eval('#hrsSpecial .datesay', (el) => el.innerText.trim());
+  check('and the date is echoed back in words, which cannot be misread',
+    dateSaid === 'Friday 25 December 2026', dateSaid);
+
+  // 25/12 must never be read as the 12th of month 25.
+  const notUs = await page.$eval('#hrsSpecial .sp-date', (el) => el.type);
+  check('the field is not a native date input, which would follow the browser locale',
+    notUs === 'text', notUs);
+
+  // A date that does not exist is called out rather than silently rolled forward.
+  await page.$eval('#hrsSpecial .sp-date', (el) => { el.value = ''; });
+  await page.type('#hrsSpecial .sp-date', '31022026', { delay: 10 });
+  await wait(200);
+  const badSaid = await page.$eval('#hrsSpecial .datesay', (el) => ({
+    text: el.innerText.trim(), bad: el.classList.contains('bad'),
+  }));
+  check('31 February is refused rather than rolled into March',
+    badSaid.bad && /day\/month\/year/.test(badSaid.text), JSON.stringify(badSaid));
+
+  await page.$eval('#hrsSpecial .sp-date', (el) => { el.value = ''; });
+  await page.type('#hrsSpecial .sp-date', '25122026', { delay: 10 });
   await page.$eval('#hrsSpecial .sp-note', (el) => { el.value = 'Christmas Day'; });
 
   await page.click('.route[data-cmode="callback"]');
@@ -687,6 +718,11 @@ try {
     (db.agent_special_days || []).length === 1
     && (db.agent_special_days || [])[0].opens === null,
     JSON.stringify(db.agent_special_days));
+  // Typed day-first, stored as ISO. If these ever crossed over, Christmas Day
+  // would be saved as the 12th of the 25th month and silently rejected.
+  check('and the date reached the database as ISO, not as the typed text',
+    (db.agent_special_days || [])[0].on_date === '2026-12-25',
+    (db.agent_special_days || [])[0].on_date);
   check('and the closed behaviour saved', db.agents[0].closed_behaviour === 'callback',
     db.agents[0].closed_behaviour);
 
