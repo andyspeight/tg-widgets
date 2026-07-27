@@ -14,7 +14,9 @@
  *   - Generic 500s to client; detailed errors logged server-side
  *
  * Modes:
- *   ?widgetId=recXXXXX         → look up saved widget config, fetch airport
+ *   ?widgetId=tgw_... | recXXX → look up saved widget config, fetch airport. The
+ *                                live widget sends its PUBLIC WidgetID (data-tg-id);
+ *                                a rec id also works (editor / direct).
  *   ?iata=DLM                  → direct fetch by IATA (editor preview, public)
  *   ?recordId=recXXXXX         → direct fetch by Airport record id (editor preview)
  *
@@ -35,6 +37,9 @@ const CITIES_TABLE_ID    = 'tblTkKujdVZgWPAQe';
 const RESORTS_TABLE_ID   = 'tblwV9gnbVEyZ99gI';
 const COUNTRIES_TABLE_ID = 'tblsxbqbyhTDoWhbo';
 const WIDGETS_TABLE_ID   = 'tblVAThVqAjqtria2';
+// "Config" on the Widgets table. Read by field ID because airtableGet forces
+// returnFieldsByFieldId=true, so widget.fields['Config'] (by name) is undefined.
+const WIDGET_CONFIG_FIELD = 'fldSLN8AteAGB7qE1';
 
 const AIRTABLE_API = 'https://api.airtable.com/v0';
 
@@ -390,11 +395,31 @@ async function findAirportByIata(iata) {
   return (data.records && data.records[0]) || null;
 }
 
+// Resolve the Widgets record from EITHER the public WidgetID (tgw_...) that the
+// live widget sends via data-tg-id, OR an Airtable record id (editor / direct).
+// The public WidgetID is looked up via {WidgetID} like /api/widget-config does;
+// a rec id still resolves by getRecord. Previously this only accepted a rec id,
+// so every live embed (which sends the public WidgetID) was rejected 400 and
+// showed "Could not load airport details".
+async function getWidgetRecord(widgetIdOrRecId) {
+  if (isRecordId(widgetIdOrRecId)) {
+    return airtableGetRecord(WIDGETS_BASE_ID, WIDGETS_TABLE_ID, widgetIdOrRecId);
+  }
+  const data = await airtableGet(WIDGETS_BASE_ID, WIDGETS_TABLE_ID, {
+    filterByFormula: "{WidgetID}='" + sanitiseForFormula(widgetIdOrRecId) + "'",
+    maxRecords: '1',
+  });
+  return (data.records && data.records[0]) || null;
+}
+
 // --- Look up airport via saved widget config ------------------------
 async function findAirportFromWidget(widgetId) {
-  const widget = await airtableGetRecord(WIDGETS_BASE_ID, WIDGETS_TABLE_ID, widgetId);
+  const widget = await getWidgetRecord(widgetId);
   if (!widget || !widget.fields) return null;
-  const configRaw = widget.fields['Config'];
+  // Read Config by FIELD ID — airtableGet returns id-keyed fields, so reading
+  // widget.fields['Config'] by name silently returned undefined (a second reason
+  // this path never worked).
+  const configRaw = widget.fields[WIDGET_CONFIG_FIELD];
   if (!configRaw) return null;
   let cfg;
   try { cfg = JSON.parse(configRaw); }
@@ -446,7 +471,9 @@ export default async function handler(req, res) {
     let airportRec = null;
 
     if (widgetId) {
-      if (!isRecordId(widgetId)) return res.status(400).json({ error: 'Bad widgetId' });
+      // Accept the public WidgetID (tgw_...) the live widget sends, or a rec id.
+      // Bounded charset keeps it safe for the sanitised filterByFormula lookup.
+      if (!/^[\w-]{1,100}$/.test(widgetId)) return res.status(400).json({ error: 'Bad widgetId' });
       airportRec = await findAirportFromWidget(widgetId);
     } else if (recordId) {
       if (!isRecordId(recordId)) return res.status(400).json({ error: 'Bad recordId' });
