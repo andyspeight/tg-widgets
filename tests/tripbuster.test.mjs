@@ -2333,17 +2333,12 @@ test('which number shows depends on whether they are open', () => {
 
 // ── the page's copy of the rules must agree with this one ────────
 await testAsync('the consumer site and the API never disagree about opening hours', async () => {
-  const fs = await import('node:fs');
-  const src = fs.readFileSync(new URL('../public/tripbuster/tb-site.js', import.meta.url), 'utf8');
-  // tb-site.js is a browser IIFE that assigns window.TB, so it is run here with a
-  // window stubbed in rather than imported. Nothing else about it is exercised.
-  const sandbox = { window: {}, document: { addEventListener() {} }, navigator: {}, location: { origin: 'https://x' } };
-  // eslint-disable-next-line no-new-func
-  new Function('window', 'document', 'navigator', 'location', src)(
-    sandbox.window, sandbox.document, sandbox.navigator, sandbox.location,
-  );
-  const TB = sandbox.window.TB;
-  assert.ok(TB && typeof TB.openState === 'function', 'tb-site.js should expose openState');
+  // tb-site.js used to be a browser IIFE and had to be run here inside a stubbed
+  // window. It is an ES module now — the server renders pages with it — so it
+  // imports directly, and that import doubles as the check that nothing in it
+  // reaches for `window` at module scope.
+  const TB = await import('../public/tripbuster/tb-site.js');
+  assert.ok(typeof TB.openState === 'function', 'tb-site.js should export openState');
 
   for (const [what, iso, expected] of THE_CASES) {
     const mine = isOpenAt(SHOP, new Date(iso));

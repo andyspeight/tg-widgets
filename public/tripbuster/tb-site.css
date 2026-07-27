@@ -337,3 +337,188 @@ input[type=range] { width:100%; accent-color:var(--coral); }
 .cbf-done h3 { margin:0 0 4px; }
 .cbf-done p { margin:0; font-size:13.5px; color:var(--tx-2); }
 @media (max-width:560px){ .cbf-grid { grid-template-columns:1fr; } }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Server-rendered pages
+   ══════════════════════════════════════════════════════════════════════════
+   Moved here from the <style> blocks that used to sit in index.html and
+   deal.html. Those pages are now produced by api/tripbuster/page.js, which has
+   no <style> block to inherit, and a second stylesheet per page type would be a
+   second round trip for a few kilobytes. */
+
+/* ── the call button, before the device has been asked ────────────────────
+   Rendered on the server there is no window to ask whether this is a phone, so
+   callCta() emits BOTH shapes and this picks. Doing it in CSS rather than in
+   JavaScript means it is right in cached HTML, right with JavaScript disabled,
+   and never flashes the wrong one first.
+   display:contents so the wrapper itself adds nothing to the layout. */
+.tb-onphone { display:none; }
+.tb-ondesk { display:contents; }
+@media (hover: none) and (pointer: coarse) {
+  .tb-onphone { display:contents; }
+  .tb-ondesk { display:none; }
+}
+
+/* ── front page ───────────────────────────────────────────────────────── */
+.hero { position:relative; overflow:hidden; color:#fff; padding:56px 0 116px;
+  background:linear-gradient(135deg,#0E86C4 0%, #35B8E0 38%, #FFB07A 80%, #FF7A45 100%); }
+.hero::before { content:""; position:absolute; top:-90px; right:-40px; width:340px; height:340px;
+  border-radius:50%; background:radial-gradient(circle,rgba(255,200,90,.5),transparent 62%); pointer-events:none; }
+.hero::after { content:""; position:absolute; left:0; right:0; bottom:-1px; height:70px;
+  background:linear-gradient(to top,var(--bg),transparent); pointer-events:none; }
+.hero-in { position:relative; z-index:2; }
+.hero-badge { display:inline-flex; align-items:center; gap:7px; background:rgba(255,255,255,.16);
+  border:1px solid rgba(255,255,255,.24); padding:6px 13px; border-radius:999px; font-size:12.5px;
+  font-weight:700; margin-bottom:18px; }
+.hero-badge i { width:7px; height:7px; border-radius:50%; background:#7CF3C4; }
+.hero h1 { font-size:clamp(32px,5vw,54px); line-height:1.03; letter-spacing:-.04em; font-weight:800;
+  margin:0 0 14px; text-wrap:balance; text-shadow:0 2px 16px rgba(8,50,80,.26); }
+.hero h1 em { font-style:normal; color:#FFE3A6; }
+.hero p.sub { font-size:clamp(15px,1.6vw,18px); max-width:520px; margin:0;
+  text-shadow:0 1px 10px rgba(8,50,80,.24); }
+.searchwrap { position:relative; z-index:3; margin-top:-70px; }
+.dest-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:12px; }
+.dest { position:relative; height:118px; border-radius:14px; overflow:hidden; display:flex;
+  align-items:flex-end; padding:12px; color:#fff; background-size:cover; }
+.dest::after { content:""; position:absolute; inset:0;
+  background:linear-gradient(to top,rgba(0,0,0,.44),transparent 60%); }
+.dest span { position:relative; z-index:2; font-weight:800; font-size:14px; }
+.dest small { position:relative; z-index:2; display:block; font-size:11px; font-weight:600; opacity:.92; }
+.destsec { background:var(--surface); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+.advcard { position:relative; overflow:hidden; border-radius:22px; padding:36px 38px; color:#fff;
+  background:linear-gradient(140deg,#12A0D4,#0B7BA8); display:flex; align-items:center; gap:28px; flex-wrap:wrap; }
+.advcard::before { content:""; position:absolute; top:-60px; right:-30px; width:250px; height:250px;
+  border-radius:50%; background:radial-gradient(circle,rgba(255,92,57,.5),transparent 62%); }
+.advcard-txt { position:relative; z-index:2; flex:1; min-width:280px; }
+.advcard h2 { font-size:25px; font-weight:800; letter-spacing:-.03em; margin:0 0 8px; text-wrap:balance; }
+.advcard p { margin:0; font-size:14.5px; opacity:.94; max-width:440px; }
+.advcard .acts { position:relative; z-index:2; display:flex; gap:10px; flex-wrap:wrap; }
+.adv-primary { background:#fff; color:var(--sky-deep); font-weight:800; font-size:14px;
+  padding:13px 22px; border-radius:12px; }
+@media (max-width:1000px){ .dest-grid { grid-template-columns:repeat(3,1fr); } }
+@media (max-width:560px){ .dest-grid { grid-template-columns:repeat(2,1fr); } .advcard { padding:26px 22px; } }
+
+/* ── deal page ────────────────────────────────────────────────────────── */
+.crumb { display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--tx-2);
+  font-weight:600; padding:14px 0 4px; flex-wrap:wrap; }
+.crumb a { color:var(--sky-deep); font-weight:700; }
+.crumb svg { width:13px; height:13px; stroke:var(--tx-3); fill:none; stroke-width:2.2; }
+.dhead { display:flex; align-items:flex-start; justify-content:space-between; gap:16px;
+  padding:6px 0 16px; flex-wrap:wrap; }
+.dhead h1 { margin:0 0 6px; font-size:26px; font-weight:800; letter-spacing:-.03em; text-wrap:balance; }
+.hero-img { height:340px; border-radius:16px; background-size:cover; background-position:center;
+  position:relative; }
+.hero-img .score-badge { position:absolute; top:14px; left:14px; display:inline-flex; align-items:center;
+  gap:8px; background:rgba(255,255,255,.94); padding:7px 11px; border-radius:11px; box-shadow:var(--shadow-sm); }
+/* The article and the booking panel are siblings inside one grid, so the panel
+   can be sticky against the whole column rather than against one card. The
+   breadcrumb, headline and photo span both columns. */
+.dlayout { display:grid; grid-template-columns:1fr 340px; gap:0 26px; padding:0 0 50px;
+  align-items:start; }
+.dlayout > .crumb, .dlayout > .dhead, .dlayout > .hero-img { grid-column:1 / -1; }
+.dlayout > .hero-img { margin-bottom:20px; }
+.dlayout > .card { grid-column:1; }
+.dlayout > .book { grid-column:2; }
+.card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r);
+  box-shadow:var(--shadow-sm); }
+.sec { padding:20px 22px; border-bottom:1px solid var(--border); }
+.sec:last-child { border-bottom:0; }
+.sec h2 { margin:0 0 12px; font-size:17px; font-weight:800; letter-spacing:-.02em; }
+.sec p { margin:0; color:var(--tx-2); font-size:14px; line-height:1.65; }
+.glance { display:flex; gap:8px; flex-wrap:wrap; }
+.facil { display:grid; grid-template-columns:repeat(2,1fr); gap:10px 20px; }
+.fac { display:flex; align-items:center; gap:10px; font-size:13.5px; font-weight:600; }
+.fac svg { width:16px; height:16px; stroke:var(--live); fill:none; stroke-width:2.2; flex:none; }
+.points { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px; }
+.points li { display:flex; gap:10px; font-size:14px; }
+.points svg { width:17px; height:17px; stroke:var(--live); fill:none; stroke-width:2.2; flex:none; margin-top:2px; }
+
+.book { position:sticky; top:76px; }
+.book-card { background:var(--surface); border:1px solid var(--border); border-radius:16px;
+  box-shadow:var(--shadow-md); overflow:hidden; }
+.book-top { padding:16px 18px 14px; border-bottom:1px solid var(--border); }
+.book-h { padding:13px 18px 8px; font-size:11px; font-weight:800; letter-spacing:.07em;
+  text-transform:uppercase; color:var(--tx-3); display:flex; justify-content:space-between; align-items:center; }
+.book-h span { text-transform:none; letter-spacing:0; font-weight:700; color:var(--live); font-size:11.5px; }
+.agent-row { display:flex; align-items:center; gap:11px; padding:11px 18px; border-top:1px solid var(--border); }
+.agent-row.best { background:var(--live-wash); }
+.ar-av { width:34px; height:34px; border-radius:9px; background:var(--sky-wash); color:var(--sky-deep);
+  display:grid; place-items:center; font-weight:800; font-size:13px; flex:none; }
+.agent-row.best .ar-av { background:var(--live); color:#fff; }
+.ar-nm { font-weight:700; font-size:13.5px; }
+/* The name takes the slack and the routes take what they need. Without this the
+   name is the only thing in the row that CAN shrink, so it collapses to a
+   couple of characters per line the moment the call column grows. */
+.ar-mid { flex:1 1 auto; min-width:0; }
+.ar-right { margin-left:auto; text-align:right; flex:0 1 auto; max-width:52%; }
+.ar-price { font-weight:800; font-size:16px; letter-spacing:-.02em; }
+.ar-price small { font-size:10.5px; color:var(--tx-3); font-weight:700; }
+.agent-row.best .ar-price { color:var(--live); }
+.ar-book { margin-top:3px; background:var(--coral); color:#fff; border:0; border-radius:8px;
+  padding:7px 14px; font-weight:800; font-size:12px; }
+.ar-book:hover { background:var(--coral-ink); }
+.agent-row:not(.best) .ar-book { background:var(--surface); color:var(--coral-ink); border:1px solid var(--coral); }
+.agent-row:not(.best) .ar-book:hover { background:var(--coral); color:#fff; }
+.book-foot { padding:12px 18px; background:var(--surface-2); font-size:11.5px; color:var(--tx-2);
+  display:flex; gap:8px; align-items:flex-start; }
+.book-foot svg { width:15px; height:15px; stroke:var(--tx-3); fill:none; stroke-width:2; flex:none; margin-top:1px; }
+
+/* click-out interstitial */
+.overlay { position:fixed; inset:0; z-index:100; background:rgba(18,50,73,.55);
+  backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; padding:20px; }
+.overlay.on { display:flex; }
+.modal { background:var(--surface); border-radius:18px; box-shadow:var(--shadow-lg);
+  max-width:420px; width:100%; overflow:hidden; text-align:center; }
+.modal-top { padding:26px 26px 18px; }
+.plane { width:56px; height:56px; margin:0 auto 16px; border-radius:16px;
+  background:linear-gradient(135deg,var(--coral),#FF8A4C); display:grid; place-items:center;
+  box-shadow:0 8px 20px rgba(255,92,57,.38); }
+.plane svg { width:28px; height:28px; stroke:#fff; fill:none; stroke-width:2; }
+.modal h2 { margin:0 0 6px; font-size:19px; font-weight:800; letter-spacing:-.02em; }
+.modal h2 span { color:var(--coral-ink); }
+.modal p { margin:0; font-size:13px; color:var(--tx-2); line-height:1.6; }
+.m-protect { margin:18px 26px; padding:12px 14px; border-radius:12px; background:var(--live-wash);
+  border:1px dashed color-mix(in srgb,var(--live) 40%, transparent); display:flex; gap:10px;
+  text-align:left; font-size:12.5px; color:var(--tx-2); }
+.m-protect svg { width:18px; height:18px; stroke:var(--live); fill:none; stroke-width:2; flex:none; margin-top:1px; }
+.m-protect b { color:var(--tx); }
+.modal-acts { display:flex; gap:10px; padding:4px 26px 22px; }
+.modal-acts .btn { flex:1; }
+.m-note { font-size:11px; color:var(--tx-3); padding:0 26px 18px; }
+@media (max-width:900px) {
+  .dlayout { grid-template-columns:1fr; }
+  .dlayout > .card, .dlayout > .book { grid-column:1; }
+  .book { position:static; margin-top:20px; }
+  .facil { grid-template-columns:1fr; }
+  .hero-img { height:230px; }
+}
+
+/* ── destination pages ────────────────────────────────────────────────── */
+.dest-head { padding:6px 0 22px; }
+.dest-head h1 { margin:0 0 8px; font-size:clamp(26px,3.4vw,36px); font-weight:800;
+  letter-spacing:-.035em; text-wrap:balance; }
+.dest-lead { margin:0 0 14px; font-size:14.5px; color:var(--tx-2); line-height:1.6; max-width:620px; }
+.dest-kids { background:var(--surface); border:1px solid var(--border); border-radius:var(--r);
+  padding:18px 20px; margin-bottom:24px; }
+.dest-kids h2 { margin:0 0 12px; font-size:15px; font-weight:800; letter-spacing:-.02em; }
+.dest-kids ul { list-style:none; margin:0; padding:0; display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:8px; }
+.dest-kids a { display:flex; flex-direction:column; gap:2px; padding:10px 12px; border-radius:10px;
+  background:var(--surface-2); border:1px solid var(--border); }
+.dest-kids a:hover { border-color:var(--sky); background:var(--sky-wash); }
+.dest-kids b { font-size:13.5px; font-weight:700; }
+.dest-kids span { font-size:11.5px; color:var(--tx-3); font-weight:600; }
+.dest-more { text-align:center; padding:26px 0 40px; }
+
+.dest-cols { columns:3 260px; column-gap:24px; padding-bottom:40px; }
+.dest-block { break-inside:avoid; margin-bottom:22px; background:var(--surface);
+  border:1px solid var(--border); border-radius:var(--r); padding:16px 18px; }
+.dest-block h2 { margin:0 0 4px; font-size:16px; font-weight:800; letter-spacing:-.02em; }
+.dest-count { display:block; font-size:11.5px; font-weight:600; color:var(--tx-3);
+  letter-spacing:0; margin-top:2px; }
+.dest-list { list-style:none; margin:10px 0 0; padding:0; display:flex;
+  flex-direction:column; gap:2px; }
+.dest-list a { display:flex; justify-content:space-between; gap:10px; padding:5px 8px;
+  border-radius:8px; font-size:13px; font-weight:600; }
+.dest-list a:hover { background:var(--sky-wash); }
+.dest-list span { color:var(--tx-3); font-weight:700; font-size:11.5px; }

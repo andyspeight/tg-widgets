@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Holiday deals — Tripbuster</title>
 <meta name="description" content="Compare holiday deals from independent UK travel agents. Filter by price, board and airport, and see which agent is cheapest.">
+<!-- Crawlable, not indexable. Every combination of q, board, airport, price and
+     sort is a distinct URL, and indexing that space would spend the whole crawl
+     budget on near-duplicates of pages we already publish properly at
+     /tripbuster/holidays/<country>. "follow" matters: the crawler still walks
+     the deal links out of here. -->
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="/tripbuster/search">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23FF5C39'/%3E%3Cpath d='M6 16h20M19 9l7 7-7 7M10 12v8' stroke='white' stroke-width='2.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="/tripbuster/tb-site.css">
 <style>
@@ -112,8 +119,8 @@
 
 <div id="footer"></div>
 
-<script src="/tripbuster/tb-site.js"></script>
-<script>
+<script type="module">
+import * as TB from '/tripbuster/tb-site.js';
 (function () {
   'use strict';
   document.getElementById('chrome').innerHTML = TB.header('search');
@@ -210,7 +217,7 @@
 
   function resultRow(d) {
     var count = d.agentCount || 1;
-    var dealHref = '/tripbuster/deal?id=' + encodeURIComponent(d.id || '');
+    var dealHref = TB.dealHref(d);
     return '<article class="rc" data-id="' + TB.esc(d.id) + '">' +
       '<a class="rc-img ' + TB.gradClass(d.resort || d.title) + '"' + TB.bgStyle(d) +
         ' href="' + TB.esc(dealHref) + '" aria-label="' + TB.esc(d.title) + '">' +

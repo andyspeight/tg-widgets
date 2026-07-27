@@ -19,7 +19,8 @@
     "test:widget-log": "node test/widget-log-alert-smoke.mjs",
     "test:tripbuster": "node tests/tripbuster.test.mjs",
     "test:tripbuster-import": "node test/tripbuster-import-drive.mjs",
-    "test:tripbuster-call": "node test/tripbuster-call-drive.mjs"
+    "test:tripbuster-call": "node test/tripbuster-call-drive.mjs",
+    "test:tripbuster-seo": "node tests/tripbuster-seo.test.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",

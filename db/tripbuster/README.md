@@ -27,6 +27,19 @@ TRIPBUSTER_SUPABASE_SERVICE_ROLE_KEY  = <service_role key>
 TRIPBUSTER_SESSION_SECRET             = <random string, min 32 chars>
 ```
 
+One more, optional today and **required before anything is indexed**:
+
+```
+TRIPBUSTER_SITE_ORIGIN                = https://tripbuster.co.uk
+```
+
+Every canonical URL, every `og:url` and every entry in the sitemap is written
+against it. Left unset it falls back to whichever host answered the request,
+which is honest but means `tg-widgets.vercel.app`, `widgets.travelify.io` and
+each preview deployment all canonicalise to themselves. Two hosts serving the
+same pages with no shared canonical is the textbook way to split one page's
+ranking in half, so set this the moment Tripbuster has a domain.
+
 Get the service role key from the Supabase dashboard:
 **Project settings → API keys → `service_role`**. It is deliberately not recorded
 in this repo or in any chat transcript.
@@ -74,6 +87,9 @@ session secret without resetting click de-duplication.
 | `GET/PATCH /api/tripbuster/account` | agent token | Billing mode, phone, opening hours, special days, extra numbers. Deliberately cannot touch plan, status or the Travelgenix link. |
 | `POST /api/tripbuster/lead` | public | A callback request. Needs a name plus a phone number or an email address. |
 | `GET/PATCH /api/tripbuster/my-leads` | agent token | The agency's enquiry inbox, and marking an outcome against one. |
+| `GET /api/tripbuster/page` | public | Renders the front page, deal pages and destination pages. Reached through the rewrites in `vercel.json`, never directly. |
+| `GET /api/tripbuster/sitemap` | public | `/tripbuster/sitemap.xml`, generated from the live catalogue. |
+| `GET /api/robots` | public | `/robots.txt`. A function, not a static file, so the `Sitemap:` line names whichever host answered. |
 
 Public read endpoints send a wildcard CORS origin because the widget runs on
 customer sites and the data is deliberately public. The authenticated endpoints
@@ -125,6 +141,7 @@ impressions.
 
 ```
 npm run test:tripbuster           # 277 assertions, no network needed
+npm run test:tripbuster-seo       # 31 assertions, the indexable surface
 npm run test:tripbuster-import    # 95 assertions, drives the dashboard in Chromium
 npm run test:tripbuster-call      # 43 assertions, drives the call journey in Chromium
 ```
@@ -186,6 +203,79 @@ The advertiser dashboard is additionally driven in a real browser with puppeteer
 (33 assertions), covering sign-in, publishing, the plan limit, and the widget's
 impression and click beacons actually firing.
 
+## Public URLs, and why they are rendered on the server
+
+| URL | What it is |
+|---|---|
+| `/tripbuster` | Front page |
+| `/tripbuster/destinations` | Hub linking to every country and resort |
+| `/tripbuster/holidays/<country>` | Country landing page |
+| `/tripbuster/holidays/<country>/<resort>` | Resort landing page |
+| `/tripbuster/holiday/<slug>` | One deal, and every agent advertising the same hotel |
+| `/tripbuster/search` | Filter UI. `noindex, follow` on purpose |
+| `/tripbuster/sitemap.xml` | Generated from the live catalogue |
+| `/robots.txt` | Generated, so the `Sitemap:` line names the right host |
+
+All except `/tripbuster/search` and `/tripbuster/dashboard` are produced by
+`api/tripbuster/page.js`. They used to be static files that rendered their whole
+body from JavaScript after two round trips, and every deal page carried a
+`noindex`. For a comparison site that is not one channel missing, it is the
+channel missing.
+
+**Search results are deliberately not indexed.** Every combination of `q`,
+`board`, `airport`, `maxPrice` and `sort` is a distinct URL, and letting a crawler
+into that space spends the whole crawl budget on near-duplicates of pages we
+already publish properly as destination landing pages. `follow` is kept so the
+crawler still walks the deal links out of it, and `robots.txt` does **not**
+disallow it — a page has to be fetchable for its `noindex` to be readable.
+
+### The markup is not written twice
+
+`public/tripbuster/tb-site.js` is an **ES module**, loaded by the browser with
+`<script type="module">` and imported directly by the renderer. One file produces
+the HTML on both sides. It was an IIFE assigning `window.TB` until the SEO work;
+the alternative to converting it was a second copy of every piece of markup on
+the server, and the opening-hours rules already show where that leads.
+
+The constraint that comes with it: **nothing in that file may touch `window`,
+`document`, `navigator` or `fetch` at module scope.** Every browser-only call sits
+inside a function body the server never reaches. The test suite imports it, which
+is what makes a violation fail immediately rather than in production.
+
+### What the browser still does
+
+`bookingPanel()` is re-rendered on load, because that block depends on the clock
+(is this agency open) and on the device (does a tap dial or reveal a number) and
+the page is cached at the edge for five minutes. Everything above it reads the
+same at any hour and is left exactly as the server sent it.
+
+`dialer()` returns `null` on the server rather than guessing, and `callCta()` then
+emits both shapes wrapped in `.tb-onphone` / `.tb-ondesk` for a media query to
+pick. That way a phone gets a dialable number out of cached HTML with no
+JavaScript at all, and never flashes the wrong one first.
+
+### Deal slugs are stable
+
+A slug is minted **once**, when a deal first goes live, and never rewritten. If an
+agent corrects a hotel's spelling afterwards the URL stays put, because a URL that
+moves loses every link and every ranking pointing at it. Draft deals get no slug:
+they have no public page to name. The eight hex characters on the end are the
+deal's own id, which is what lets two agents advertise the same hotel in the same
+resort and still get one page each.
+
+`/tripbuster/deal?id=<uuid>` still works and **301s** to the real URL. A rewrite
+would have left two URLs serving one page, which is the duplicate-content split
+the slugs were introduced to avoid.
+
+### What the structured data deliberately does not claim
+
+No `aggregateRating` and no `review`. Deals carry a `guest_score`, but that number
+is typed in by the advertising agent and we have not verified it or collected a
+single review ourselves. Publishing it as review markup would tell Google we hold
+ratings we do not hold: a manual-action risk, and a consumer-protection risk under
+the DMCC Act. Showing the agent's score on the page as the agent's score is fine.
+Star ratings in the search results have to be earned by collecting real reviews.
+
 ## Access model — fail closed
 
 Every table has **RLS enabled with no policies**, and `anon`/`authenticated` have
@@ -213,6 +303,7 @@ Apply in order. They are idempotent enough to run on a fresh project.
 | `008_calls_and_leads.sql` | Corrects the call billing rule to "billable unless"; `leads` table; `tb_record_lead`; `tb_agent_lead_counts`; `deal_daily_stats.leads` |
 | `009_hours_and_numbers.sql` | `agent_hours`, `agent_special_days`, `agent_phones`; `tb_agent_is_open`; `tb_agent_contact`; `tb_save_agent_settings`; `click_events.out_of_hours`; drops the database's route check |
 | `010_all_calls_chargeable.sql` | Every call is billable whatever the hour; `out_of_hours` becomes a reporting flag only |
+| `011_seo_slugs_and_destinations.sql` | `tb_slugify`; a stable unique `deals.slug` minted at first publish; `p_deal_slug` and `p_holiday_type` on `tb_search_deals`; `tb_destinations`, `tb_destination`, `tb_sitemap` |
 
 Migration 008 replaces `tb_record_click` rather than altering it. Adding
 parameters to a Postgres function creates an **overload**, and with defaults in

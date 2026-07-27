@@ -277,8 +277,32 @@
       "destination": "/demo-whatsapp.html"
     },
     {
+      "source": "/robots.txt",
+      "destination": "/api/robots"
+    },
+    {
+      "source": "/tripbuster/sitemap.xml",
+      "destination": "/api/tripbuster/sitemap"
+    },
+    {
       "source": "/tripbuster",
-      "destination": "/tripbuster/index.html"
+      "destination": "/api/tripbuster/page?type=home"
+    },
+    {
+      "source": "/tripbuster/destinations",
+      "destination": "/api/tripbuster/page?type=destinations"
+    },
+    {
+      "source": "/tripbuster/holiday/:slug",
+      "destination": "/api/tripbuster/page?type=deal&slug=:slug"
+    },
+    {
+      "source": "/tripbuster/holidays/:country",
+      "destination": "/api/tripbuster/page?type=destination&country=:country"
+    },
+    {
+      "source": "/tripbuster/holidays/:country/:resort",
+      "destination": "/api/tripbuster/page?type=destination&country=:country&resort=:resort"
     },
     {
       "source": "/tripbuster/search",
@@ -286,7 +310,7 @@
     },
     {
       "source": "/tripbuster/deal",
-      "destination": "/tripbuster/deal.html"
+      "destination": "/api/tripbuster/page?type=legacy"
     },
     {
       "source": "/tripbuster/dashboard",
@@ -1164,6 +1188,19 @@
           "key": "Access-Control-Allow-Origin",
           "value": "*"
         },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/tripbuster/(tb-site|deal-page|list-page).js",
+      "headers": [
         {
           "key": "Cache-Control",
           "value": "public, max-age=300, s-maxage=86400"

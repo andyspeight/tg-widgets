@@ -139,11 +139,108 @@ const DEALS = {
   [OPEN_DEAL]: openDeal,
 };
 
+// Deal pages live at /tripbuster/holiday/<slug> now, not at ?id=<uuid>, and they
+// are rendered by api/tripbuster/page.js rather than served as a static file. So
+// this harness has to stand in for the DATABASE rather than for the deals API:
+// the page handler calls tb_search_deals itself.
+const SLUGS = {
+  [CALL_DEAL]: 'sol-pelicanos-ocean-benidorm-00000001',
+  [CLICK_DEAL]: 'balaia-golf-village-albufeira-00000002',
+  [SHUT_DEAL]: 'louis-phaethon-beach-paphos-00000004',
+  [OPEN_DEAL]: 'melia-costa-del-sol-torremolinos-00000005',
+};
+Object.entries(SLUGS).forEach(([id, slug]) => { DEALS[id].slug = slug; });
+const BY_SLUG = Object.fromEntries(Object.entries(SLUGS).map(([id, slug]) => [slug, DEALS[id]]));
+
+/**
+ * Fixture -> the snake_case row tb_search_deals returns.
+ *
+ * The fixtures are written in the camelCase shape the pages consume, because
+ * that is what makes them readable. The page handler reads rows and maps them
+ * itself, so this reverses the mapping rather than bypassing it — which means
+ * the real toDeal() still runs and is still under test.
+ */
+function toRow(d) {
+  return {
+    id: d.id,
+    slug: d.slug,
+    title: d.title,
+    strapline: d.strapline || null,
+    overview: d.overview || null,
+    accommodation_name: d.accommodation,
+    country: d.country,
+    region: d.region || null,
+    resort: d.resort,
+    star_rating: d.starRating,
+    guest_score: d.guestScore,
+    holiday_type: d.holidayType || 'Package holiday',
+    board_basis: d.board,
+    nights: d.nights,
+    price_from: d.priceFrom,
+    was_price: d.wasPrice,
+    discount_pct: d.discount,
+    currency: d.currency,
+    availability_status: d.availability,
+    distance_to_beach: d.distanceToBeach || null,
+    departure_airports: d.allAirports || [],
+    facilities: d.facilities || [],
+    selling_points: d.sellingPoints || [],
+    offer_badges: d.badges || [],
+    hero_image_url: d.image || null,
+    updated_at: '2026-07-27T12:00:00Z',
+    published_at: '2026-07-20T12:00:00Z',
+    agent_name: d.agent.name,
+    agent_slug: d.agent.slug,
+    agent_town: d.agent.town,
+    effective_atol: d.atol,
+    effective_protection: d.protection,
+    effective_clickout: d.clickoutUrl,
+    effective_phone: d.phone,
+    effective_billing_mode: d.billingMode,
+    agent_contact: d.contact || null,
+    agentCount: d.agentCount || 1,
+    compare: (d.compare || [{
+      dealId: d.id, slug: d.slug, agent: d.agent.name, agentSlug: d.agent.slug,
+      atol: d.atol, price: d.priceFrom, clickoutUrl: d.clickoutUrl,
+      phone: d.phone, billingMode: d.billingMode, contact: d.contact || null,
+    }]).map((c) => ({ slug: d.slug, contact: d.contact || null, ...c })),
+  };
+}
+
 // ── what the pages posted back to us ────────────────────────
 const events = [];
 const leads = [];
 
 const MIME = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css' };
+
+// The page handler talks to Postgres through api/_lib/tripbuster/db.js, which
+// reads its env at module load, so this has to be set before the import below.
+const PG_PORT = 8371;
+process.env.TRIPBUSTER_SUPABASE_URL = `http://127.0.0.1:${PG_PORT}`;
+process.env.TRIPBUSTER_SUPABASE_SERVICE_ROLE_KEY = 'call-drive-key';
+process.env.TRIPBUSTER_SITE_ORIGIN = `http://127.0.0.1:${APP_PORT}`;
+
+const { default: pageHandler } = await import('../api/tripbuster/page.js');
+
+const fakePg = http.createServer((req, res) => {
+  let raw = '';
+  req.on('data', (c) => { raw += c; });
+  req.on('end', () => {
+    const fn = req.url.replace('/rest/v1/rpc/', '');
+    const args = raw ? JSON.parse(raw) : {};
+    let out = {};
+    if (fn === 'tb_search_deals') {
+      const hit = args.p_deal_slug ? BY_SLUG[args.p_deal_slug] : null;
+      const list = args.p_deal_slug ? [hit].filter(Boolean) : Object.values(DEALS);
+      out = { total: list.length, limit: 20, offset: 0, compare: true, deals: list.map(toRow) };
+    } else if (fn === 'tb_destinations') {
+      out = { countries: [], resorts: [] };
+    }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(out));
+  });
+});
+await new Promise((r) => fakePg.listen(PG_PORT, r));
 
 const app = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://127.0.0.1:${APP_PORT}`);
@@ -186,9 +283,28 @@ const app = http.createServer(async (req, res) => {
     return json(404, { error: 'nope' });
   }
 
-  const rel = url.pathname === '/tripbuster/deal' ? '/tripbuster/deal.html'
-    : url.pathname === '/tripbuster/search' ? '/tripbuster/search.html'
-      : url.pathname === '/tripbuster' ? '/tripbuster/index.html' : url.pathname;
+  // The rendered pages. Mirrors the rewrites in vercel.json, so the harness and
+  // production disagree about routing only if somebody changes one of them.
+  const holiday = /^\/tripbuster\/holiday\/([^/]+)$/.exec(url.pathname);
+  if (holiday || url.pathname === '/tripbuster') {
+    const query = holiday
+      ? { type: 'deal', slug: decodeURIComponent(holiday[1]) }
+      : { type: 'home' };
+    const out = { status: 200, headers: {} };
+    await pageHandler(
+      { method: 'GET', query, headers: { host: `127.0.0.1:${APP_PORT}` } },
+      {
+        setHeader(k, v) { out.headers[k] = v; },
+        status(code) { out.status = code; return this; },
+        send(payload) { res.writeHead(out.status, out.headers); res.end(payload); return this; },
+        json(payload) { res.writeHead(out.status, out.headers); res.end(JSON.stringify(payload)); return this; },
+        end(payload) { res.writeHead(out.status, out.headers); res.end(payload || ''); return this; },
+      },
+    );
+    return;
+  }
+
+  const rel = url.pathname === '/tripbuster/search' ? '/tripbuster/search.html' : url.pathname;
   const file = path.join(PUBLIC_DIR, rel);
   if (!file.startsWith(PUBLIC_DIR) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
     res.writeHead(404).end('nf'); return;
@@ -239,7 +355,7 @@ async function openPage({ mobile }) {
 try {
   // ── desktop: the button reveals the number ────────────────
   const desk = await openPage({ mobile: false });
-  await desk.goto(`http://127.0.0.1:${APP_PORT}/tripbuster/deal?id=${CALL_DEAL}`,
+  await desk.goto(`http://127.0.0.1:${APP_PORT}/tripbuster/holiday/${SLUGS[CALL_DEAL]}`,
     { waitUntil: 'domcontentloaded' });
   await desk.waitForSelector('.agent-row', { visible: true });
 
@@ -324,7 +440,7 @@ try {
   await desk.screenshot({ path: path.join(SHOT_DIR, 'tb-call-2-callback.png'), fullPage: true });
 
   // ── a click-first deal has no call anything ───────────────
-  await desk.goto(`http://127.0.0.1:${APP_PORT}/tripbuster/deal?id=${CLICK_DEAL}`,
+  await desk.goto(`http://127.0.0.1:${APP_PORT}/tripbuster/holiday/${SLUGS[CLICK_DEAL]}`,
     { waitUntil: 'domcontentloaded' });
   await desk.waitForSelector('.agent-row', { visible: true });
   const clickFirst = await desk.evaluate(() => ({
@@ -338,7 +454,7 @@ try {
 
   // ── closed: the form takes over, the number stays ─────────
   events.length = 0;
-  await desk.goto(`http://127.0.0.1:${APP_PORT}/tripbuster/deal?id=${SHUT_DEAL}`,
+  await desk.goto(`http://127.0.0.1:${APP_PORT}/tripbuster/holiday/${SLUGS[SHUT_DEAL]}`,
     { waitUntil: 'domcontentloaded' });
   await desk.waitForSelector('.agent-row', { visible: true });
 
@@ -417,7 +533,7 @@ try {
   await desk.screenshot({ path: path.join(SHOT_DIR, 'tb-call-5-closed.png'), fullPage: true });
 
   // ── open: the ordinary button is back ─────────────────────
-  await desk.goto(`http://127.0.0.1:${APP_PORT}/tripbuster/deal?id=${OPEN_DEAL}`,
+  await desk.goto(`http://127.0.0.1:${APP_PORT}/tripbuster/holiday/${SLUGS[OPEN_DEAL]}`,
     { waitUntil: 'domcontentloaded' });
   await desk.waitForSelector('.agent-row', { visible: true });
 
@@ -444,7 +560,7 @@ try {
   // ── mobile: the button dials ──────────────────────────────
   events.length = 0;
   const phone = await openPage({ mobile: true });
-  await phone.goto(`http://127.0.0.1:${APP_PORT}/tripbuster/deal?id=${CALL_DEAL}`,
+  await phone.goto(`http://127.0.0.1:${APP_PORT}/tripbuster/holiday/${SLUGS[CALL_DEAL]}`,
     { waitUntil: 'domcontentloaded' });
   await phone.waitForSelector('.ar-call', { visible: true });
 
@@ -508,6 +624,8 @@ try {
   // them. Without this the run hangs after the last assertion has passed.
   app.closeAllConnections?.();
   await new Promise((r) => app.close(r));
+  fakePg.closeAllConnections?.();
+  await new Promise((r) => fakePg.close(r));
 }
 
 const pass = results.filter((r) => r.pass).length;
