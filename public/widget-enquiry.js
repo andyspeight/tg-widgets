@@ -38,7 +38,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.1.9';
+  var WIDGET_VERSION = '1.1.10';
   var VISITOR_ID_KEY = 'tg_visitor_id_v1';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -3494,8 +3494,12 @@
       renderError(shadow, t('unableToReach'), t);
       // Attempt the beacon even though the network just failed — a CSP block
       // on the config fetch often still allows sendBeacon, and this is the
-      // only trace the outage leaves.
-      report('config load threw', String((err && err.message) || err).slice(0, 200), widgetId);
+      // only trace the outage leaves. But NOT when the tab is hidden/unloading:
+      // that fetch was almost certainly aborted by the visitor navigating away
+      // (Safari reports it as "Load failed"), which is benign and paged us as a
+      // false config failure. A CSP block still fires on a visible page.
+      var hidden = false; try { hidden = (document.visibilityState === 'hidden'); } catch (e2) {}
+      if (!hidden) report('config load threw', String((err && err.message) || err).slice(0, 200), widgetId);
     }
   }
 
