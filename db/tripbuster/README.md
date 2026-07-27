@@ -219,6 +219,38 @@ parameters to a Postgres function creates an **overload**, and with defaults in
 play a call can then match both signatures and fail with "function is not
 unique", so the old signature is dropped first. Re-running the file is safe.
 
+## After applying a migration, check it actually landed
+
+Migration 009 taught this the hard way. The file was correct and committed, but
+it was applied to the live database in two chunks and one section fell in the
+gap: `tb_search_deals` never got its `agent_contact` column. Everything still
+worked — no error anywhere — except every deal came back with `contact: null`, so
+opening hours and extra numbers were silently inert on the live site while
+passing every test locally. It was only caught by reading an actual API response.
+
+Anything that replaces a function can fail this way, because `create or replace`
+leaves the old version happily in place if you never run the new one. So after
+applying, ask the database what it actually has:
+
+```sql
+select p.proname, pg_get_function_identity_arguments(p.oid) as args,
+       md5(pg_get_functiondef(p.oid)) as body
+from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+where n.nspname = 'public' and p.proname like 'tb\\_%'
+order by p.proname;
+```
+
+Then grep the migration for something distinctive the new version contains and
+confirm the live definition has it:
+
+```sql
+select position('agent_contact' in pg_get_functiondef(p.oid)) > 0
+from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+where n.nspname = 'public' and p.proname = 'tb_search_deals';
+```
+
+A `false` there means the migration is in git but not in the database.
+
 ## Demo data
 
 ```
