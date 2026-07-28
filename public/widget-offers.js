@@ -19,15 +19,18 @@
  *   - BothPackages:   send packageType:'Any' (omitting returns DynamicPackages only)
  *
  * Changelog:
+ *   v1.15.2 (Jul 2026) — Airport-named hotel deeplink resolves:
+ *     • A hotel-only offer whose location NAME is an airport ("Miami
+ *       International Airport") dead-ended the deeplink with "Unable to match
+ *       location City", because the accommodation link defaults loct=City. The
+ *       Travelify Deep Linking Instructions define loct=Airport, and its
+ *       gazetteer matches by name, so an airport-named location is now sent with
+ *       loct=Airport. Real city names keep the City default; no property pin and
+ *       no per-widget setting involved. (yourticketgenie, 28 Jul 2026.)
  *   v1.15.1 (Jul 2026) — Deeplink board-basis synonyms:
  *     • brdCode dropped the deeplink board filter for "Bed & Breakfast" (which
  *       normalises to bedbreakfast, previously unmapped) and "Breakfast". It now
  *       maps every B&B synonym, matching the cache read side.
- *     • KNOWN OPEN: a hotel-only offer whose destination NAME is not a Travelify
- *       city (e.g. "Miami International Airport", an airport) still dead-ends the
- *       deeplink with "Unable to match location City". The name IS a valid
- *       Travelify location; the fix is to pass the correct location TYPE, which
- *       the cached offer does not yet carry. Under investigation with Travelify.
  *   v1.15.0 (Jul 2026) — Free-text destinations use the cache too:
  *     • A widget whose destination was saved as a place name ("Orlando") was
  *       forced onto slow live Travelify because the cache path required 2-3
@@ -169,7 +172,7 @@
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
   const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
-  const VERSION = '1.15.1';
+  const VERSION = '1.15.2';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // Telemetry: report a one-time load heartbeat and any failure to
@@ -843,7 +846,17 @@
           p.set('loc', destIata);
           p.set('loct', 'Airport');
         } else if (acc.destination && acc.destination.name) {
-          p.set('loc', acc.destination.name);
+          const locName = acc.destination.name;
+          p.set('loc', locName);
+          // `loct` chooses WHICH gazetteer Travelify matches `loc` against
+          // (Deep Linking Instructions: City | Airport | PointOfInterest |
+          // Property, default City). A hotel-only offer's location name is
+          // frequently not a city — when it is an airport ("Miami International
+          // Airport") the default City lookup fails the whole link ("Unable to
+          // match location City"). The airport gazetteer matches by name (just
+          // as City matches "Barcelona"), so name it as an Airport. Real city
+          // names keep the City default. (yourticketgenie, 28 Jul 2026.)
+          if (/\bairport\b/i.test(locName)) p.set('loct', 'Airport');
         }
         const ctry = (acc.destination && acc.destination.countryCode) || (fl && fl.destination && fl.destination.countryCode);
         if (ctry) p.set('ctry', ctry);
