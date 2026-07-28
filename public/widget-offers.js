@@ -19,6 +19,15 @@
  *   - BothPackages:   send packageType:'Any' (omitting returns DynamicPackages only)
  *
  * Changelog:
+ *   v1.15.0 (Jul 2026) — Free-text destinations use the cache too:
+ *     • A widget whose destination was saved as a place name ("Orlando") was
+ *       forced onto slow live Travelify because the cache path required 2-3
+ *       letter codes. _cacheEligible now lets a destination NAME reach the
+ *       cache, which resolves it against its own airport index and treats an
+ *       unresolved name as a miss (still falls through to live) — so a name can
+ *       never widen a widget to worldwide offers, and "Orlando" now loads fast.
+ *       (Origins still require codes.) Pairs with the cached-offers type
+ *       classifier fix so a "UK to anywhere, dynamic" widget matches the cache.
  *   v1.10.15 (Jul 2026) — Harden the offer-data load against transient failures:
  *     • The live-proxy offer fetch had no timeout and no retry, so a transient
  *       network blip (or a visitor navigating away mid-load, which aborts the
@@ -151,7 +160,7 @@
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
   const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
-  const VERSION = '1.14.0';
+  const VERSION = '1.15.0';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // Telemetry: report a one-time load heartbeat and any failure to
@@ -6405,19 +6414,27 @@
 
     /** The cache serves the stay types. Flight-centric widgets and templates
      *  keep the live proxy (their rows need departure times the cache lacks).
-     *  Filters must all be 2-3 letter codes (IATA airports / country codes /
-     *  GB-IE markets): the cache can't resolve free-text names like
-     *  "Tenerife", and a dropped filter must never widen a client's widget
-     *  to worldwide offers — those configs go straight to the live proxy. */
+     *  Origins must be 2-3 letter codes (IATA airports / GB-IE markets).
+     *  Destinations may be codes OR free-text place NAMES: the cache resolves a
+     *  name against its own airport index and treats a name it can't resolve as
+     *  a miss (falls through to live), so a name can never widen a client's
+     *  widget to worldwide offers. This lets a "Orlando"-configured widget use
+     *  the fast cache instead of always hitting slow live Travelify. */
     _cacheEligible(payload) {
       if (this.cfg.template === 'departure-board' || this.cfg.template === 'boarding-pass') return false;
       const t = this.cfg.type;
       if (t === 'Flights' || t === 'Flight') return false;
       const isCode = (v) => /^[A-Za-z]{2,3}$/.test(String(v == null ? '' : v).trim());
+      // A place name the cache can attempt to resolve: letters plus spaces,
+      // dots, apostrophes and hyphens (e.g. "Costa del Sol"). A token with
+      // digits or other symbols is neither a code nor a resolvable name, so the
+      // widget keeps that config on live rather than guessing.
+      const isResolvableName = (v) => { const s = String(v == null ? '' : v).trim(); return s.length >= 2 && s.length <= 60 && /^[A-Za-z][A-Za-z .'-]*$/.test(s); };
       const dests = (payload && Array.isArray(payload.destinations)) ? payload.destinations : [];
       const origs = (payload && Array.isArray(payload.origins)) ? payload.origins : [];
       if (dests.length > 60 || origs.length > 60) return false;
-      if (!dests.every(isCode) || !origs.every(isCode)) return false;
+      if (!origs.every(isCode)) return false;
+      if (!dests.every((d) => isCode(d) || isResolvableName(d))) return false;
       return true;
     }
 

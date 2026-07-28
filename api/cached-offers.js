@@ -63,6 +63,24 @@ const csv = (v, re, cap = 60) => {
 
 const normBoard = (s) => String(s || '').toLowerCase().replace(/[^a-z]/g, '');
 
+// Board-basis synonym classes. Travelify labels the SAME board several ways —
+// "Bed & Breakfast" normalises to "bedbreakfast", "Breakfast" to "breakfast",
+// "Bed and Breakfast" to "bedandbreakfast" — so an exact normBoard match makes a
+// "BedAndBreakfast" filter silently drop genuine B&B offers spelled otherwise
+// (the CT ribbon's ~41% cache miss, 28 Jul 2026). The widget already folds these
+// together for display (boardBasisLabel); the cache filter must fold them the
+// same way. Keys are normBoard() output; each maps to one canonical class.
+const BOARD_CANON = {
+  bedandbreakfast: 'breakfast', bedbreakfast: 'breakfast', breakfast: 'breakfast', breakfastincluded: 'breakfast',
+  roomonly: 'roomonly',
+  selfcatering: 'selfcatering',
+  halfboard: 'halfboard',
+  fullboard: 'fullboard',
+  allinclusive: 'allinclusive',
+  allinclusiveplus: 'allinclusiveplus',
+};
+const canonBoard = (s) => { const k = normBoard(s); return BOARD_CANON[k] || k; };
+
 function num(v) { const n = Number(v); return Number.isFinite(n) ? n : null; }
 
 // Serve-time stale guard — the same expiry rules the cron purges on (past
@@ -81,16 +99,82 @@ function isServable(o, nowMs) {
   return true;
 }
 
+/**
+ * Operator package (one tour operator) vs dynamic package (flight + hotel from
+ * two different suppliers). packageType is authoritative; supplier-sid
+ * inequality is the fallback for offers Travelify left UNTYPED (packageType
+ * null) — a large share of the feed. Identical to the cron's packageKindOf and
+ * the widget's own isDynamic test, so a type-specific widget sees the SAME
+ * offers whether it is served from the cache or from live Travelify.
+ *
+ * Why this matters: the read side used to test `packageType === 'DynamicPackages'`
+ * literally, which hid every untyped offer from a Dynamic-type widget. A broad
+ * "UK to anywhere, dynamic" widget then matched only the tagged minority, kept
+ * missing a cache that in fact held the offers, and fell through to slow live
+ * Travelify (the 27 Jul 2026 overnight timeouts).
+ */
+function packageKindOf(o) {
+  if (o.packageType === 'DynamicPackages') return 'DynamicPackages';
+  if (o.packageType === 'PackageHolidays') return 'PackageHolidays';
+  return (Number.isFinite(o.flightSid) && Number.isFinite(o.accommodationSid) && o.flightSid !== o.accommodationSid)
+    ? 'DynamicPackages' : 'PackageHolidays';
+}
+
 /** Which stored offers satisfy the requested type. */
 function typePredicate(requested) {
   const t = String(requested || 'BothPackages');
   if (t === 'Any') return () => true; // "Mixed everything" — every stored type
   if (t === 'Accommodation') return (o) => o.type === 'Accommodation';
   if (t === 'Flights') return (o) => o.type === 'Flights';
-  if (t === 'DynamicPackages') return (o) => (o.type || 'Packages') === 'Packages' && o.packageType === 'DynamicPackages';
-  if (t === 'PackageHolidays') return (o) => (o.type || 'Packages') === 'Packages' && o.packageType === 'PackageHolidays';
+  if (t === 'DynamicPackages') return (o) => (o.type || 'Packages') === 'Packages' && packageKindOf(o) === 'DynamicPackages';
+  if (t === 'PackageHolidays') return (o) => (o.type || 'Packages') === 'Packages' && packageKindOf(o) === 'PackageHolidays';
   // Packages / BothPackages / anything else → the whole Packages family.
   return (o) => (o.type || 'Packages') === 'Packages';
+}
+
+/**
+ * Resolve a free-text destination NAME (e.g. "Orlando", "Tenerife") to the
+ * cached airports it names, using the summary's own airport index — the same
+ * airportName the cron already stores. A whole-word / phrase boundary match so
+ * "Orlando" hits "Orlando International Airport" but a fragment can't sneak a
+ * false match (the char after must be a non-letter). This self-heals the
+ * handful of widgets whose destinations were saved as place names instead of
+ * codes, with no migration: an unresolved name is treated as a cache miss by
+ * the caller, never as "no filter", so a name can never widen a widget to
+ * worldwide offers.
+ */
+function nameMatchesAirport(airportName, token) {
+  const A = String(airportName || '').toUpperCase();
+  const T = String(token || '').toUpperCase().trim();
+  if (!A || T.length < 2) return false;
+  let from = 0;
+  for (;;) {
+    const idx = A.indexOf(T, from);
+    if (idx < 0) return false;
+    const before = idx === 0 ? ' ' : A[idx - 1];
+    const after = (idx + T.length >= A.length) ? ' ' : A[idx + T.length];
+    if (!/[A-Z]/.test(before) && !/[A-Z]/.test(after)) return true;
+    from = idx + 1;
+  }
+}
+
+/** Split destination tokens into 2-3 letter codes and free-text place names.
+ *  A token that is neither a clean code nor a plausible place name (letters,
+ *  spaces, dots, apostrophes, hyphens) is invalid, and the caller MUST treat an
+ *  invalid or unresolved destination as a cache miss — never as "no filter",
+ *  which would serve worldwide offers for a widget that asked for one place. */
+function parseDestinations(v, cap = 60) {
+  const rawTokens = String(v || '').split(',').map((s) => s.trim()).filter(Boolean);
+  const codes = [];
+  const names = [];
+  let invalid = rawTokens.length > cap;
+  for (const tok of rawTokens.slice(0, cap)) {
+    const up = tok.toUpperCase();
+    if (/^[A-Z]{2,3}$/.test(up)) codes.push(up);
+    else if (/^[A-Za-z][A-Za-z .'-]{1,59}$/.test(tok)) names.push(up);
+    else invalid = true;
+  }
+  return { codes, names, invalid };
 }
 
 /** GBP display string in the shape Travelify uses (whole pounds). */
@@ -237,7 +321,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    const dest = csv(q.destinations, /^[A-Z]{2,3}$/);
+    // Destinations may be 2-3 letter codes OR free-text place names — a name is
+    // resolved against the cache's own airport index below (self-heals configs
+    // saved as "Orlando" instead of "MCO"). A name that resolves to nothing is
+    // an honest miss, never a widened filter.
+    const dest = parseDestinations(q.destinations);
     // Origins accept 3-letter airport IATAs AND 2-letter country codes (the
     // editor documents both and its presets use 'GB'). Country origins map to
     // the sweep market: GB-market offers depart UK airports, IE-market
@@ -250,13 +338,17 @@ export default async function handler(req, res) {
       res.setHeader('Cache-Control', 'no-store');
       return done(200, { success: true, source: 'cache', totalMatched: 0, data: [], unresolvedFilters: true });
     }
-    const destTokens = dest.tokens;
-    const ccs = new Set(destTokens.filter((s) => s.length === 2));
-    const iatas = new Set(destTokens.filter((s) => s.length === 3));
+    const ccs = new Set(dest.codes.filter((s) => s.length === 2));
+    const iatas = new Set(dest.codes.filter((s) => s.length === 3));
+    // "Destinations were given" if the widget named ANY place — code or name.
+    // Kept separate from `iatas`/`ccs` because free-text names are folded into
+    // `iatas` only after resolution, and the no-destination "read everything"
+    // branch must never fire for a widget that did name a place.
+    const hasDestFilter = dest.codes.length > 0 || dest.names.length > 0;
     const origins = new Set(orig.tokens.filter((s) => s.length === 3));
     const originMarkets = new Set(orig.tokens.filter((s) => s.length === 2));
     const hasOriginFilter = orig.tokens.length > 0;
-    const boards = new Set(boardsCsv.tokens.map(normBoard));
+    const boards = new Set(boardsCsv.tokens.map(canonBoard));
     const cabinsCsv = csv(q.cabinClasses, /^[A-Z]/i, 8);
     if (cabinsCsv.invalid) {
       res.setHeader('Cache-Control', 'no-store');
@@ -276,11 +368,15 @@ export default async function handler(req, res) {
     const matchesType = typePredicate(q.type);
 
     // ── Which country keys to read ─────────────────────────────────────────
-    // 2-letter tokens name countries directly. 3-letter tokens are airports —
-    // resolve them to countries via the summary's airport index. If no
-    // destinations were given, read everything (edge cache absorbs the cost).
+    // 2-letter tokens name countries directly. 3-letter tokens are airports,
+    // and free-text tokens are place NAMES — both resolve against the summary's
+    // airport index (airport IATA + its country). A named place resolves to the
+    // specific airport IATAs it matches (added to `iatas`, so the per-offer
+    // filter stays precise — "Orlando" matches MCO offers, not all of the US),
+    // while its country code selects which key to read. If no destinations were
+    // given at all, read everything (edge cache absorbs the cost).
     const targetCCs = new Set(ccs);
-    if (iatas.size) {
+    if (iatas.size || dest.names.length) {
       const summary = await getJson(SUMMARY_KEY);
       const airports = summary && Array.isArray(summary.airports) ? summary.airports : [];
       for (const a of airports) {
@@ -288,11 +384,29 @@ export default async function handler(req, res) {
           targetCCs.add(String(a.countryCode).toUpperCase());
         }
       }
+      // Resolve each free-text name to the airports it names. A name that
+      // matches nothing in the cache is an honest miss for the WHOLE query
+      // (same rule as an invalid code) — the widget then falls back to live,
+      // which resolves free-text names itself. Never widen to "no filter".
+      for (const name of dest.names) {
+        let resolved = 0;
+        for (const a of airports) {
+          if (a && a.airport && nameMatchesAirport(a.airportName, name)) {
+            iatas.add(String(a.airport).toUpperCase());
+            if (a.countryCode) targetCCs.add(String(a.countryCode).toUpperCase());
+            resolved++;
+          }
+        }
+        if (!resolved) {
+          res.setHeader('Cache-Control', 'no-store');
+          return done(200, { success: true, source: 'cache', totalMatched: 0, data: [], unresolvedFilters: true });
+        }
+      }
     }
     let ccList;
     if (targetCCs.size) {
       ccList = Array.from(targetCCs);
-    } else if (!destTokens.length) {
+    } else if (!hasDestFilter) {
       ccList = (await keys(`${COUNTRY_PREFIX}*`))
         .map((k) => String(k).slice(COUNTRY_PREFIX.length).toUpperCase())
         .filter((cc) => /^[A-Z]{2}$/.test(cc));
@@ -329,8 +443,9 @@ export default async function handler(req, res) {
           if (!o || !matchesType(o)) continue;
           if (!isServable(o, now)) continue;
           // Destination semantics: an offer matches when its arrival airport
-          // is one of the requested IATAs, or its country one of the codes.
-          if (destTokens.length) {
+          // is one of the requested IATAs (including those resolved from a
+          // free-text place name), or its country one of the requested codes.
+          if (hasDestFilter) {
             const apOk = iatas.size && o.airport && iatas.has(String(o.airport).toUpperCase());
             const ccOk = ccs.size && o.countryCode && ccs.has(String(o.countryCode).toUpperCase());
             if (!apOk && !ccOk) continue;
@@ -338,9 +453,20 @@ export default async function handler(req, res) {
           if (hasOriginFilter) {
             const apOk = origins.size && o.origin && origins.has(String(o.origin).toUpperCase());
             const mkOk = originMarkets.size && originMarkets.has(String(o.market || 'GB').toUpperCase());
-            if (!apOk && !mkOk) continue;
+            // A hotel-only offer has NO departure airport, so a departure-airport
+            // origin filter cannot describe it — gate it on market alone (and let
+            // it through when only airports were named). Without this an
+            // Accommodation widget with airport origins matched nothing at all,
+            // because every hotel lacks o.origin (the 100% miss on the hotel
+            // "cards" widgets, 28 Jul 2026). Flight and package offers, which
+            // carry a real departure airport, keep the full airport-or-market gate.
+            if (!o.origin) {
+              if (originMarkets.size && !mkOk) continue;
+            } else if (!apOk && !mkOk) {
+              continue;
+            }
           }
-          if (boards.size && !boards.has(normBoard(o.boardBasis))) continue;
+          if (boards.size && !boards.has(canonBoard(o.boardBasis))) continue;
           if (cabins.size && !cabins.has(normBoard(o.cabinClass))) continue;
           const pp = Number.isFinite(o.pricePP) ? o.pricePP : o.price;
           if (budgetMin != null && !(Number.isFinite(pp) && pp >= budgetMin)) continue;
