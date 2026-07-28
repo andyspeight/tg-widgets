@@ -1278,7 +1278,7 @@ test('every template example validates as a real deal', () => {
 // ════════════════════════════════════════════════════════════════
 console.log('\n─── live offer cache mapping ───');
 
-const { queryOfferCache, offerToDeal, offerRef, RESYNC_FIELDS } = offerCache;
+const { queryOfferCache, offerToDeal, offerRef, RESYNC_FIELDS, airportCity } = offerCache;
 const nowMs = Date.now();
 const inDays = (d) => new Date(nowMs + d * 86400000).toISOString();
 const freshly = new Date(nowMs - 3600e3).toISOString();
@@ -1377,6 +1377,57 @@ test('a cached offer maps onto deal columns', () => {
 
 test('a mapped cache offer passes the deal schema', () => {
   assert.equal(validateDeal(offerToDeal(cacheOffer({}))).ok, true);
+});
+
+// ── flight-only offers ──────────────────────────────────────────────────
+// The mapper was built when everything in the cache was a package, so a flight
+// fell through the stay-shaped title builder and came out as a bare airport
+// name. These shapes are taken from real offers served by the live cache on
+// 28 July 2026, not invented.
+const flightOffer = (o = {}) => ({
+  id: 'F1', type: 'Flights', price: 44, pricePP: 22, currency: 'GBP',
+  airport: 'BCN', airportName: 'Barcelona Intl. (BCN)', countryCode: 'ES',
+  origin: 'LGW', originName: 'Gatwick (LGW)', carrier: 'British Airways',
+  direct: true, outboundDate: inDays(60), returnDate: inDays(65),
+  fetchedAt: freshly, url: 'https://agency.co.uk/book/F1', adults: 1, ...o,
+});
+
+test('a flight is titled as a flight, not as a place', () => {
+  const d = offerToDeal(flightOffer());
+  assert.equal(d.holiday_type, 'Flight only');
+  assert.equal(d.title, 'Flights to Barcelona from London, direct');
+  assert.equal(d.nights, null, 'a flight has no nights');
+  assert.equal(d.board_basis, null);
+});
+
+test('a flight to a well-known airport gets its city as the destination', () => {
+  assert.equal(offerToDeal(flightOffer()).resort, 'Barcelona');
+});
+
+test('an airport named after a person never becomes a destination page', () => {
+  // Venice Marco Polo. The title may say Marco Polo, which is merely clumsy.
+  // The resort must not, because that would mint /holidays/italy/marco-polo.
+  const d = offerToDeal(flightOffer({
+    airport: 'VCE', airportName: 'Marco Polo (VCE)', countryCode: 'IT',
+  }));
+  assert.equal(d.resort, 'Venice', 'VCE is mapped, so it resolves properly');
+
+  const unknown = offerToDeal(flightOffer({
+    airport: 'ZZZ', airportName: 'Kranebitten (ZZZ)', countryCode: 'AT',
+  }));
+  assert.equal(unknown.resort, null, 'an unmapped airport gets NO destination');
+  assert.match(unknown.title, /Flights to Kranebitten/, 'but the title still reads');
+});
+
+test('airport codes never survive into the words', () => {
+  assert.equal(airportCity('Barcelona Intl. (BCN)'), 'Barcelona');
+  assert.equal(airportCity('East Midlands, England, UK (EMA)'), 'East Midlands');
+  assert.equal(airportCity('GNB-Grenoble - Isere'), 'Grenoble - Isere');
+  assert.equal(airportCity(null), null);
+});
+
+test('a mapped flight passes the deal schema', () => {
+  assert.equal(validateDeal(offerToDeal(flightOffer())).ok, true);
 });
 
 test('a was-price below the selling price is suppressed', () => {

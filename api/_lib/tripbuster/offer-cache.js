@@ -107,6 +107,68 @@ export function countryName(code) {
   return COUNTRY_NAMES[cc] || (cc || null);
 }
 
+/**
+ * "Barcelona Intl. (BCN)" -> "Barcelona". "East Midlands, England, UK (EMA)"
+ * -> "East Midlands".
+ *
+ * Airport names in the feed carry an IATA code in brackets and sometimes a
+ * region and country after commas. None of that belongs in a headline or in a
+ * destination URL, and the code in brackets is the part that would survive
+ * slugification and look like a typo.
+ */
+/**
+ * Airports whose NAME is not their city.
+ *
+ * Plenty are named after a person or the district they sit in, so cleaning the
+ * string is not enough: Venice Marco Polo cleans to "Marco Polo", Seville to
+ * "San Pablo", Heraklion to "Nikos Kazantzakis". A traveller does not fly to
+ * Marco Polo. Keyed on the IATA code, which is the stable part.
+ *
+ * Deliberately short and only covers what the feed actually serves. Anything
+ * unmapped falls back to the cleaned airport name for the TITLE, and is refused
+ * a destination page entirely, so a gap here reads slightly oddly rather than
+ * inventing a place that does not exist.
+ */
+const IATA_CITY = {
+  VCE: 'Venice', TSF: 'Venice', SVQ: 'Seville', HER: 'Heraklion', INN: 'Innsbruck',
+  MXP: 'Milan', LIN: 'Milan', BGY: 'Milan', CIA: 'Rome', FCO: 'Rome',
+  CDG: 'Paris', ORY: 'Paris', BVA: 'Paris', LHR: 'London', LGW: 'London',
+  STN: 'London', LTN: 'London', LCY: 'London', SEN: 'London',
+  JFK: 'New York', EWR: 'New York', LGA: 'New York',
+  BCN: 'Barcelona', MAD: 'Madrid', AGP: 'Malaga', ALC: 'Alicante', PMI: 'Majorca',
+  IBZ: 'Ibiza', MAH: 'Menorca', TFS: 'Tenerife', TFN: 'Tenerife', LPA: 'Gran Canaria',
+  ACE: 'Lanzarote', FUE: 'Fuerteventura', FAO: 'Algarve', LIS: 'Lisbon', OPO: 'Porto',
+  AYT: 'Antalya', DLM: 'Dalaman', BJV: 'Bodrum', IST: 'Istanbul', SAW: 'Istanbul',
+  HRG: 'Hurghada', SSH: 'Sharm el Sheikh', RAK: 'Marrakech', DXB: 'Dubai',
+  ATH: 'Athens', RHO: 'Rhodes', CFU: 'Corfu', ZTH: 'Zante', KGS: 'Kos',
+  JMK: 'Mykonos', JTR: 'Santorini', CHQ: 'Chania', SKG: 'Thessaloniki',
+  LCA: 'Larnaca', PFO: 'Paphos', KEF: 'Reykjavik', GVA: 'Geneva', ZRH: 'Zurich',
+  NCE: 'Nice', LYS: 'Lyon', TLS: 'Toulouse', BLQ: 'Bologna', NAP: 'Naples',
+  PSA: 'Pisa', CTA: 'Catania', PMO: 'Palermo', OLB: 'Sardinia', CAG: 'Sardinia',
+};
+
+/** The city a flight is actually going to, or null when we cannot say. */
+export function airportCityStrict(code, name) {
+  const iata = String(code || '').toUpperCase();
+  if (IATA_CITY[iata]) return IATA_CITY[iata];
+  return null;
+}
+
+export function airportCity(name) {
+  if (typeof name !== 'string') return null;
+  const city = name
+    .replace(/\s*\([A-Z]{3}\)\s*$/, '')   // a trailing code: "Barcelona (BCN)"
+    .replace(/^[A-Z]{3}\s*-\s*/, '')      // a leading one: "GNB-Grenoble - Isere"
+    .split(',')[0]                         // "…, England, UK"
+    // The trailing \.? matters: \b sits BEFORE the full stop in "Intl.", so
+    // without it the abbreviation goes and its dot stays, leaving "Barcelona .".
+    .replace(/\b(intl|international|airport)\b\.?/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/[\s.,-]+$/, '')
+    .trim();
+  return city || null;
+}
+
 /** Travelify product types mapped onto the Tripbuster holiday_type enum. */
 function holidayTypeFor(o) {
   if (o.type === 'Flights') return 'Flight only';
@@ -286,7 +348,18 @@ export function offerToDeal(o, { resyncOnly = false } = {}) {
   };
   if (resyncOnly) return volatile;
 
-  const resort = o.resort || o.airportName || null;
+  const type = holidayTypeFor(o);
+  const isFlight = type === 'Flight only';
+  // A flight's destination is an airport, not a resort. Using the raw airport
+  // name would put "Barcelona Intl. (BCN)" in the resort column and mint a
+  // destination page at /holidays/spain/barcelona-intl-bcn, so flights get the
+  // city and stays keep the resort the feed gave them.
+  // A flight only earns a resort when we can name the CITY with confidence.
+  // Falling back to the airport name here is what would put "Marco Polo" in the
+  // destination column and mint /holidays/italy/marco-polo, so it does not.
+  const resort = o.resort
+    || (isFlight ? airportCityStrict(o.airport, o.airportName) : o.airportName)
+    || null;
   const hotel = o.hotel || null;
   const country = countryName(o.countryCode);
 
@@ -299,7 +372,23 @@ export function offerToDeal(o, { resyncOnly = false } = {}) {
   if (Number.isFinite(o.nights)) stay.push(`${o.nights} night${o.nights === 1 ? '' : 's'}`);
   if (boardName && boardName !== 'Room only') stay.push(boardName.toLowerCase());
   const lead = place.length ? place.join(', ') : (country || 'Holiday offer');
-  const title = stay.length ? `${lead}, ${stay.join(' ')}` : lead;
+  let title = stay.length ? `${lead}, ${stay.join(' ')}` : lead;
+
+  // A flight has no hotel, no nights and no board, so the stay-shaped sentence
+  // above collapses to a bare place name — "Barcelona Intl. (BCN)" — which
+  // reads as a destination rather than as something for sale. Flights get a
+  // sentence of their own that says what is actually being advertised.
+  if (isFlight) {
+    // The title may use the cleaned airport name even when the city is unknown,
+    // because "Flights to Kranebitten from Gatwick" is merely clumsy, whereas a
+    // destination PAGE for Kranebitten would be a place we invented.
+    const to = resort || airportCity(o.airportName) || country;
+    const from = airportCityStrict(o.origin, o.originName)
+      || airportCity(o.originName) || o.origin || null;
+    title = to
+      ? `Flights to ${to}${from ? ` from ${from}` : ''}${o.direct ? ', direct' : ''}`
+      : 'Flight offer';
+  }
 
   return {
     ...volatile,
