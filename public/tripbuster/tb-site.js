@@ -1213,8 +1213,13 @@ export function header(active) {
     '<div class="nav-links">' +
       link('/tripbuster/destinations', 'Destinations') +
       link('/tripbuster/agents', 'Our agents') +
+      // Two product types in the nav rather than five. These are the ones a
+      // traveller sets out looking for by name, and a nav listing all seven
+      // would say "we have a database" rather than "we have holidays".
+      // Everything else is a click away in the search filters.
+      link('/tripbuster/search?holidayType=Cruise', 'Cruises') +
+      link('/tripbuster/search?holidayType=Flight+only', 'Flights') +
       link('/tripbuster/search?board=All+inclusive', 'All inclusive') +
-      link('/tripbuster/search?maxPrice=299', 'Under £299') +
       link('/tripbuster/search?sort=discount', 'Biggest savings') +
     '</div>' +
     '<div class="nav-right"><a class="nav-cta" href="/tripbuster/dashboard">List your deals</a></div>' +

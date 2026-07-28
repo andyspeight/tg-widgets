@@ -61,6 +61,15 @@
              aria-label="Maximum price per person">
     </div>
 
+    <!-- First filter in the rail on purpose. What KIND of trip somebody wants is
+         a bigger decision than the board basis, and it changes which of the
+         other filters even mean anything: board and stars say nothing about a
+         flight. -->
+    <div class="fgroup">
+      <h3>Type of trip</h3>
+      <div id="types"></div>
+    </div>
+
     <div class="fgroup">
       <h3>Board basis</h3>
       <div id="boards"></div>
@@ -128,15 +137,25 @@ import * as TB from '/tripbuster/tb-site.js';
   document.getElementById('footer').innerHTML = TB.footer();
 
   var BOARDS = ['All inclusive', 'Half board', 'Bed & breakfast', 'Self catering', 'Full board', 'Room only'];
+  // The seven the schema allows, in the order a traveller is likely to want
+  // them rather than alphabetically. Must match HOLIDAY_TYPES in
+  // api/_lib/tripbuster/deal-schema.js exactly: the API whitelists against that
+  // list and silently ignores anything else, so a typo here filters nothing.
+  var TYPES = ['Package holiday', 'Flight + hotel', 'Hotel only', 'Flight only',
+    'City break', 'Cruise', 'Escorted tour'];
   var PAGE = 12;
 
-  var state = { q:'', maxPrice:'', board:'', airport:'', nights:'', minStars:0, sort:'recommended', offset:0 };
+  var state = { q:'', holidayType:'', maxPrice:'', board:'', airport:'', nights:'', minStars:0, sort:'recommended', offset:0 };
   var loaded = [];
   var total = 0;
 
   var $ = function (id) { return document.getElementById(id); };
 
   // ── filter controls ─────────────────────────────────────────
+  $('types').innerHTML = TYPES.map(function (t) {
+    return '<label class="check"><input type="radio" name="holidayType" value="' + TB.esc(t) + '"> ' + TB.esc(t) + '</label>';
+  }).join('') + '<label class="check"><input type="radio" name="holidayType" value="" checked> Any type</label>';
+
   $('boards').innerHTML = BOARDS.map(function (b) {
     return '<label class="check"><input type="radio" name="board" value="' + TB.esc(b) + '"> ' + TB.esc(b) + '</label>';
   }).join('') + '<label class="check"><input type="radio" name="board" value="" checked> Any board</label>';
@@ -147,6 +166,7 @@ import * as TB from '/tripbuster/tb-site.js';
     state.q = p.get('q') || '';
     state.maxPrice = p.get('maxPrice') || '';
     state.board = p.get('board') || '';
+    state.holidayType = p.get('holidayType') || '';
     state.airport = p.get('airport') || '';
     state.nights = p.get('nights') || '';
     state.minStars = parseInt(p.get('minStars'), 10) || 0;
@@ -160,6 +180,8 @@ import * as TB from '/tripbuster/tb-site.js';
     $('pmaxLabel').textContent = state.maxPrice ? TB.money(state.maxPrice, 'GBP') : 'Any';
     var radio = document.querySelector('input[name="board"][value="' + (state.board || '') + '"]');
     if (radio) radio.checked = true;
+    var tradio = document.querySelector('input[name="holidayType"][value="' + (state.holidayType || '') + '"]');
+    if (tradio) tradio.checked = true;
     document.querySelectorAll('#starbtns .starbtn').forEach(function (b) {
       b.setAttribute('aria-pressed', String(Number(b.dataset.star) === state.minStars));
     });
@@ -168,7 +190,7 @@ import * as TB from '/tripbuster/tb-site.js';
   /** Push state to the URL without reloading, so Back works through searches. */
   function toUrl() {
     var p = new URLSearchParams();
-    ['q', 'maxPrice', 'board', 'airport', 'nights'].forEach(function (k) {
+    ['q', 'holidayType', 'maxPrice', 'board', 'airport', 'nights'].forEach(function (k) {
       if (state[k]) p.set(k, state[k]);
     });
     if (state.minStars) p.set('minStars', state.minStars);
@@ -265,6 +287,8 @@ import * as TB from '/tripbuster/tb-site.js';
         '<span class="val">' + TB.esc(state.q || 'Anywhere') + '</span></span></span>' +
       '<span class="sum-field">' + TB.svg(TB.IC.plane) + '<span><span class="lab">From</span>' +
         '<span class="val">' + TB.esc(state.airport || 'Any UK airport') + '</span></span></span>' +
+      '<span class="sum-field">' + TB.svg(TB.IC.cal) + '<span><span class="lab">Type</span>' +
+        '<span class="val">' + TB.esc(state.holidayType || 'Any type') + '</span></span></span>' +
       '<span class="sum-field">' + TB.svg(TB.IC.board) + '<span><span class="lab">Board</span>' +
         '<span class="val">' + TB.esc(state.board || 'Any board') + '</span></span></span>' +
       '<a class="sum-edit" href="/tripbuster' + location.search + '">Edit search</a>';
@@ -305,6 +329,7 @@ import * as TB from '/tripbuster/tb-site.js';
         q: state.q,
         maxPrice: state.maxPrice,
         board: state.board,
+        holidayType: state.holidayType,
         airport: state.airport,
         nights: state.nights,
         sort: state.sort,
@@ -356,6 +381,10 @@ import * as TB from '/tripbuster/tb-site.js';
     $('pmaxLabel').textContent = state.maxPrice ? TB.money(state.maxPrice, 'GBP') : 'Any';
   });
   $('pmax').addEventListener('change', apply);
+  $('types').addEventListener('change', function (e) {
+    if (e.target.name === 'holidayType') { state.holidayType = e.target.value; apply(); }
+  });
+
   $('boards').addEventListener('change', function (e) {
     if (e.target.name === 'board') { state.board = e.target.value; apply(); }
   });
@@ -372,9 +401,11 @@ import * as TB from '/tripbuster/tb-site.js';
     apply();
   });
   $('clearAll').addEventListener('click', function () {
-    state = { q:'', maxPrice:'', board:'', airport:'', nights:'', minStars:0, sort:'recommended', offset:0 };
+    state = { q:'', holidayType:'', maxPrice:'', board:'', airport:'', nights:'', minStars:0, sort:'recommended', offset:0 };
     $('fq').value = ''; $('fairport').value = ''; $('fnights').value = '';
     $('sort').value = 'recommended'; $('pmax').value = 1500; $('pmaxLabel').textContent = 'Any';
+    var anyType = document.querySelector('input[name="holidayType"][value=""]');
+    if (anyType) anyType.checked = true;
     var any = document.querySelector('input[name="board"][value=""]');
     if (any) any.checked = true;
     document.querySelectorAll('#starbtns .starbtn').forEach(function (x) { x.setAttribute('aria-pressed', 'false'); });

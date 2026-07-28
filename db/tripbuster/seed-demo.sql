@@ -512,7 +512,136 @@ from (values
    'Czech Republic','Prague','Prague','Hotel Karlova',3,8.2,'Inland',
    'Bed & breakfast','Double room',3,
    array['Edinburgh'],'Ryanair','2027-02-06','2027-05-15',199,null,
-   array[]::text[],array[]::text[],array['Old town','Breakfast'],'manual')
+   array[]::text[],array[]::text[],array['Old town','Breakfast'],'manual'),
+
+  -- ── the other five product types ──────────────────────────────────────────
+  -- Until now every seeded deal was a package or a city break, so five of the
+  -- seven types the schema allows had never once been rendered. A product type
+  -- with no rows is a product type nobody can see is broken.
+  --
+  -- Each one is given to the agency it actually suits: Coastline grew out of a
+  -- cruise desk and says so on its profile, Jetaway would rather you rang them
+  -- and sells the flight-only and tailor-made end, Sunseeker does the beach.
+
+  -- CRUISE. No airports and no board in the package sense: full board is what a
+  -- cruise fare means, and the "resort" is where it sails from.
+  ('coastline-holidays','live','Cruise','CST-4001',
+   'Western Mediterranean, 7 nights full board from Southampton',
+   'Barcelona, Palma, Marseille and Genoa, no flying',
+   -- The resort is a PORT OF CALL, not Southampton. Departure port belongs in
+   -- the strapline: "Southampton, Spain" as a destination line is nonsense.
+   'Spain','Western Mediterranean','Barcelona','MSC Virtuosa',4,8.1,'Onboard',
+   'Full board','Inside cabin, twin',7,
+   array[]::text[],null,'2027-04-10','2027-09-25',649,829,
+   array['Sails from Southampton, no flights needed','Four ports in seven nights','All meals and entertainment included'],
+   array['No fly'],array['Pools','Theatre','Kids club','Wi-Fi'],'manual'),
+
+  ('coastline-holidays','live','Cruise','CST-4002',
+   'Norwegian Fjords, 7 nights full board from Southampton',
+   'Stavanger, Olden and Bergen, balcony cabins available',
+   'Norway','Fjords','Bergen','Bolette',4,8.6,'Onboard',
+   'Full board','Ocean view twin',7,
+   array[]::text[],null,'2027-05-15','2027-08-28',899,1099,
+   array['Three fjord ports','Smaller ship, no queues','All meals included'],
+   array['Adults only'],array['Observation lounge','Spa','Wi-Fi'],'manual'),
+
+  ('coastline-holidays','live','Cruise','CST-4003',
+   'Caribbean fly-cruise, 14 nights full board',
+   'Barbados return, with a night either side in a beach hotel',
+   'Barbados','Caribbean','Bridgetown','Britannia',4,8.4,'Onboard',
+   'Full board','Balcony cabin',14,
+   array['Gatwick','Manchester'],'TUI Airways','2027-01-09','2027-03-20',1849,2199,
+   array['Flights and transfers included','Balcony cabin as standard','Hotel night either side'],
+   array['Five star'],array['Balcony','Pools','Speciality dining'],'manual'),
+
+  -- ESCORTED TOUR. A guide, a coach and a fixed itinerary. Nights matter, board
+  -- matters, there is no single hotel.
+  ('coastline-holidays','live','Escorted tour','CST-4004',
+   'Highlights of Italy, 10 nights half board escorted',
+   'Rome, Florence, Venice and Lake Garda with a tour manager',
+   'Italy','Northern Italy','Rome',null,4,8.7,'Inland',
+   'Half board','Twin, hotels throughout',10,
+   array['Gatwick'],'British Airways','2027-04-03','2027-10-16',1249,1499,
+   array['Four cities, one unpacking','English speaking tour manager','All coach travel included'],
+   array['Small group'],array['Guided tours','Half board','Wi-Fi'],'manual'),
+
+  ('jetaway-travel','live','Escorted tour','JET-4005',
+   'Vietnam and Cambodia, 14 nights escorted',
+   'Hanoi to Angkor Wat, with Halong Bay overnight',
+   'Vietnam','South East Asia','Hanoi',null,4,9.1,'Inland',
+   'Half board','Twin, hotels throughout',14,
+   array['Glasgow','Heathrow'],'Emirates','2027-01-16','2027-11-20',2395,null,
+   array['Halong Bay overnight cruise','Small group, maximum 18','Internal flights included'],
+   array['Once in a lifetime'],array['Guided','Internal flights','Half board'],'manual'),
+
+  -- FLIGHT ONLY. No hotel, no nights, no board. This is the shape that broke the
+  -- offer-cache title builder, so the seed carries it deliberately.
+  ('jetaway-travel','live','Flight only','JET-4006',
+   'Flights to Malaga from Glasgow, direct',
+   'Return, hand luggage included',
+   'Spain','Costa del Sol','Malaga',null,null,null,null,
+   null,null,null,
+   array['Glasgow'],'Jet2','2027-02-01','2027-06-30',89,null,
+   array['Direct, no changes','Hand luggage included','Return fare'],
+   array[]::text[],array[]::text[],'manual'),
+
+  ('jetaway-travel','live','Flight only','JET-4007',
+   'Flights to Alicante from Edinburgh, direct',
+   'Return, morning outbound',
+   'Spain','Costa Blanca','Alicante',null,null,null,null,
+   null,null,null,
+   array['Edinburgh'],'easyJet','2027-03-06','2027-07-24',74,109,
+   array['Direct, no changes','Morning departure','Return fare'],
+   array[]::text[],array[]::text[],'manual'),
+
+  ('sunseeker-travel','live','Flight only','SUN-4008',
+   'Flights to Dalaman from Manchester, direct',
+   'Return, 20kg bag included',
+   'Turkey','Turkish Riviera','Dalaman',null,null,null,null,
+   null,null,null,
+   array['Manchester'],'Jet2','2027-05-01','2027-09-30',179,null,
+   array['Direct, no changes','20kg hold bag included','Return fare'],
+   array[]::text[],array[]::text[],'manual'),
+
+  -- HOTEL ONLY. Nights and board, but the traveller sorts their own flights, so
+  -- no airports and no airline.
+  ('sunseeker-travel','live','Hotel only','SUN-4009',
+   'Sol Pelicanos Ocean, Benidorm, 7 nights all inclusive, room only booking',
+   'Room only booking, arrange your own flights',
+   'Spain','Costa Blanca','Benidorm','Sol Pelicanos Ocean',3,7.9,'200m',
+   'All inclusive','Twin room, side sea view',7,
+   array[]::text[],null,'2026-11-01','2027-03-28',219,289,
+   array['Book the room, sort your own flights','Two minutes from Levante beach','All inclusive board'],
+   array[]::text[],array['Outdoor pool','Rooftop terrace','Wi-Fi'],'manual'),
+
+  ('coastline-holidays','live','Hotel only','CST-4010',
+   'Riad Anaya, Marrakech, 4 nights bed and breakfast, room only booking',
+   'Rooftop plunge pool, ten minutes from the Medina',
+   'Morocco','Marrakech','Marrakech','Riad Anaya',4,9.2,'Inland',
+   'Bed & breakfast','Courtyard double',4,
+   array[]::text[],null,'2026-10-10','2027-04-30',185,null,
+   array['Book the room, sort your own flights','Rooftop plunge pool','Airport transfer included'],
+   array['Highly rated'],array['Plunge pool','Courtyard','Breakfast'],'manual'),
+
+  -- FLIGHT + HOTEL. What a dynamic package is. Priced together, sold together,
+  -- but it is not an operator package holiday and the schema says so.
+  ('sunseeker-travel','live','Flight + hotel','SUN-4011',
+   'Melia Costa del Sol, Torremolinos, 7 nights half board with flights',
+   'Put together for you, flights and hotel booked as one',
+   'Spain','Costa del Sol','Torremolinos','Melia Costa del Sol',4,8.2,'Beachfront',
+   'Half board','Double, sea view',7,
+   array['Birmingham','Manchester'],'Ryanair','2026-10-17','2027-04-24',379,479,
+   array['Flights and hotel booked together','Beachfront, right on the promenade','Half board included'],
+   array[]::text[],array['Beachfront','Pool','Wi-Fi'],'live_cache'),
+
+  ('jetaway-travel','live','Flight + hotel','JET-4012',
+   'Hotel Borealis, Reykjavik, 3 nights bed and breakfast with flights',
+   'Northern lights season, small hotel near the harbour',
+   'Iceland','Reykjanes','Reykjavik','Hotel Borealis',3,8.8,'Inland',
+   'Bed & breakfast','Double room',3,
+   array['Glasgow','Edinburgh'],'easyJet','2026-11-07','2027-03-14',449,null,
+   array['Flights and hotel booked together','Northern lights season','Ten minutes from the harbour'],
+   array['Northern lights'],array['Breakfast','Wi-Fi'],'live_cache')
 ) as v(slug, status, holiday_type, reference, title, strapline,
        country, region, resort, hotel, stars, score,
        beach, board, room, nights, airports, airline,
