@@ -1509,7 +1509,16 @@
     // agency has to go looking for: they are being charged per event, and the
     // number they will be invoiced ought to be as easy to find as the number of
     // clicks it came from.
-    const spend = {
+    // While an agency is inside its free period the honest headline is what the
+    // activity was WORTH, not a £0 that teaches them the platform is worth
+    // nothing. The zero is still said, underneath, so nobody is confused about
+    // whether they owe anything.
+    const free = have && s.free;
+    const spend = free ? {
+      lab: 'Worth so far',
+      val: money(s.worthPence && s.worthPence.total),
+      foot: 'Free until ' + ukLongDate(s.freeUntil),
+    } : {
       lab: 'Spend',
       val: have ? money(s.costPence && s.costPence.total) : '—',
       foot: have ? 'Last ' + days + ' days, ' + (s.rateTier === 'premium' ? 'premium' : 'standard') + ' rate'
@@ -1528,6 +1537,20 @@
     // Secondary line: the deal-status breakdown the tiles no longer carry.
     $('breakdown').textContent =
       (c.live || 0) + ' live · ' + (c.draft || 0) + ' draft · ' + (c.paused || 0) + ' paused';
+  }
+
+  const TB_TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+    + 'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    + '<path d="M20 6 9 17l-5-5"/></svg>';
+
+  /** 2027-01-31 as "31 January 2027". UK product, so day first, and in words. */
+  function ukLongDate(iso) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''));
+    if (!m) return String(iso || '');
+    const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+    return new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'UTC', day: 'numeric', month: 'long', year: 'numeric',
+    }).format(d);
   }
 
   /** Pence to "£1,234.56", or "£0" when there is nothing to round. */
@@ -1555,20 +1578,23 @@
     const s = state.stats;
     if (!s || !s.costPence) { host.innerHTML = ''; return; }
 
-    const c = s.costPence;
+    const c = s.free ? (s.worthPence || {}) : (s.costPence || {});
     const tier = s.rateTier === 'premium' ? 'premium' : 'standard';
     const lines = Array.isArray(s.rateLines) ? s.rateLines : [];
+    const free = !!s.free;
 
     const tile = (lab, amt, sub, cls) =>
       '<div class="cost-tile' + (cls || '') + '"><div class="lab">' + esc(lab) + '</div>' +
       '<div class="amt tnum">' + amt + '</div>' +
       '<div class="sub">' + esc(sub) + '</div></div>';
 
+    const counted = free ? ' counted' : ' charged';
     const tiles = [
-      tile('Click-throughs', money(c.clicks), nf(s.billableClicks || 0) + ' charged'),
-      tile('Calls', money(c.calls), nf(s.billableCalls || 0) + ' charged'),
-      tile('Enquiries', money(c.leads), nf(s.billableLeads || 0) + ' charged'),
-      tile('Total', money(c.total), 'Last ' + ((s && s.days) || 30) + ' days', ' is-total'),
+      tile('Click-throughs', money(c.clicks), nf(s.billableClicks || 0) + counted),
+      tile('Calls', money(c.calls), nf(s.billableCalls || 0) + counted),
+      tile('Enquiries', money(c.leads), nf(s.billableLeads || 0) + counted),
+      tile(free ? 'Worth' : 'Total', money(c.total),
+        'Last ' + ((s && s.days) || 30) + ' days', ' is-total'),
     ].join('');
 
     // One row per distinct rate actually applied, so an override shows up as its
@@ -1577,9 +1603,10 @@
       '<tr><td>' + esc(EVENT_WORDS[l.eventType] || l.eventType) + '</td>' +
       '<td class="num">' + money(l.pence) + '</td>' +
       '<td class="num">' + nf(l.events) + '</td>' +
-      '<td class="num">' + money(l.costPence) + '</td>' +
+      '<td class="num">' + money(free ? l.worthPence : l.costPence) + '</td>' +
       '<td><span class="rate-src">' + esc(SOURCE_WORDS[l.source] || l.source) + '</span></td></tr>').join('')
-      : '<tr><td colspan="5" style="color:var(--tx-3)">Nothing charged for in this period.</td></tr>';
+      : '<tr><td colspan="5" style="color:var(--tx-3)">Nothing '
+        + (free ? 'counted' : 'charged for') + ' in this period.</td></tr>';
 
     host.innerHTML =
       '<div class="card" style="padding:20px;margin-bottom:18px">' +
@@ -1590,10 +1617,17 @@
         '<p class="sub" style="margin:0 0 14px">You are charged for the deliberate acts: '
           + 'a traveller clicking through to you, ringing you, or leaving their details. '
           + 'Nothing is charged for simply being shown.</p>' +
+        (free
+          ? '<div class="free-banner">' + TB_TICK
+            + '<span><b>You are not being charged.</b> Everything below is what your '
+            + 'activity would have been worth at your rates. Your free period runs '
+            + 'until <b>' + esc(ukLongDate(s.freeUntil)) + '</b>, and we will let you '
+            + 'know before it ends.</span></div>'
+          : '') +
         '<div class="cost-grid">' + tiles + '</div>' +
         '<table class="rate-tbl"><thead><tr>' +
           '<th>What for</th><th class="num">Rate</th><th class="num">Number</th>' +
-          '<th class="num">Cost</th><th>Why that rate</th>' +
+          '<th class="num">' + (free ? 'Worth' : 'Cost') + '</th><th>Why that rate</th>' +
         '</tr></thead><tbody>' + rows + '</tbody></table>' +
         '<p class="sub" style="margin:12px 0 0;font-size:12px">' +
           'The rate is fixed at the moment each event happens, so a change to your '

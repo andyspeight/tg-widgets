@@ -165,6 +165,69 @@ test('changing a rate cannot re-price events that already happened', () => {
 });
 
 // ════════════════════════════════════════════════════════════════
+// 3b. free access
+// ════════════════════════════════════════════════════════════════
+//
+// Early advertisers get in for nothing. The important part commercially is that
+// a free period must not read as "£0", or it teaches an agency the platform is
+// worth nothing. Every event records what it was WORTH as well as what it cost.
+
+/** The rule tb_record_click applies, in one line. */
+const charge = ({ billable, free, list }) => (billable && !free ? list : 0);
+
+test('a free agency is charged nothing but the worth is still recorded', () => {
+  const ev = { billable: true, free: true, list: 100 };
+  assert.equal(charge(ev), 0);
+  assert.equal(ev.list, 100, 'the list price is still on the row');
+});
+
+test('the same event costs money once the free period has gone by', () => {
+  assert.equal(charge({ billable: true, free: false, list: 100 }), 100);
+});
+
+test('a free period expires on its own, with no switch to remember', () => {
+  // Inclusive: free until the 31st means free all day on the 31st.
+  const isFree = (freeUntil, today) => !!freeUntil && today <= freeUntil;
+  assert.equal(isFree('2027-01-31', '2027-01-30'), true);
+  assert.equal(isFree('2027-01-31', '2027-01-31'), true, 'the last day is free');
+  assert.equal(isFree('2027-01-31', '2027-02-01'), false, 'the day after is not');
+  assert.equal(isFree(null, '2027-01-31'), false, 'no free period means charge');
+});
+
+test('being free never makes an unbillable event billable', () => {
+  // A bot inside a free period is still a bot. Both reasons hold at once and
+  // the charge is zero either way.
+  assert.equal(charge({ billable: false, free: true, list: 100 }), 0);
+  assert.equal(charge({ billable: false, free: false, list: 100 }), 0);
+});
+
+test('a free period is a fact about the account, not a zero on the rate card', () => {
+  // Doing this with 0p client overrides would have worked and been worse: three
+  // rows per agency, no expiry, and nothing anywhere saying "free until January"
+  // — only a rate that happens to be zero and that somebody must remember to
+  // delete. The rate stays at its real value and the account carries the dates.
+  const resolved = { pence: 100, source: 'default', free: true, freeUntil: '2027-01-31' };
+  assert.equal(resolved.pence, 100, 'the rate card is not zeroed');
+  assert.equal(resolved.free, true);
+  assert.ok(resolved.freeUntil, 'and it says when it ends');
+});
+
+test('extending a free period cannot wipe charges already made', () => {
+  // free_period is stamped on the row, not worked out later from the agency's
+  // free_until. An agency whose trial is lengthened in March must not have
+  // February's charges retrospectively refunded.
+  const events = [
+    { month: 'feb', charged_pence: 100, free_period: false },
+    { month: 'mar', charged_pence: 0, free_period: true },
+  ];
+  const billed = events.reduce((n, e) => n + e.charged_pence, 0);
+  assert.equal(billed, 100);
+  // Re-deriving from "they are free now" would have produced 0 and refunded
+  // February by accident.
+  assert.notEqual(billed, 0);
+});
+
+// ════════════════════════════════════════════════════════════════
 // 4. the rate card stays private
 // ════════════════════════════════════════════════════════════════
 

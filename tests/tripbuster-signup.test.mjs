@@ -107,6 +107,7 @@ const rpc = {
     }
     const row = {
       id: AGENT_ID, slug: 'new-agency', name: a.p_name, email,
+      free_until: a.p_free_until || null,
       status: 'pending', plan: a.p_plan, password_hash: a.p_password_hash,
       verify_token_hash: a.p_token_hash, verify_expires_at: a.p_expires_at,
       verified_at: null, approved_at: null, signup_ip_hash: a.p_ip_hash,
@@ -396,6 +397,32 @@ await testAsync('sign-up is refused outright when mail is not configured', async
   assert.equal(r.status, 503);
   // Nothing half-made: no account with an address nobody can ever verify.
   assert.equal(db.agents.length, 0);
+});
+
+await testAsync('a new agency joins the free period when one is running', async () => {
+  freshRun();
+  const future = new Date(Date.now() + 90 * 86400000).toISOString().slice(0, 10);
+  process.env.TRIPBUSTER_FREE_UNTIL = future;
+  await call(register, { body: GOOD_SIGNUP });
+  delete process.env.TRIPBUSTER_FREE_UNTIL;
+  assert.equal(db.agents[0].free_until, future);
+});
+
+await testAsync('a free period that has already gone by is not applied', async () => {
+  freshRun();
+  // The launch offer simply lapses. No code change, no switch to remember.
+  process.env.TRIPBUSTER_FREE_UNTIL = '2020-01-01';
+  await call(register, { body: GOOD_SIGNUP });
+  delete process.env.TRIPBUSTER_FREE_UNTIL;
+  assert.equal(db.agents[0].free_until, null);
+});
+
+await testAsync('a malformed free-until date is ignored rather than guessed at', async () => {
+  freshRun();
+  process.env.TRIPBUSTER_FREE_UNTIL = 'next spring';
+  await call(register, { body: GOOD_SIGNUP });
+  delete process.env.TRIPBUSTER_FREE_UNTIL;
+  assert.equal(db.agents[0].free_until, null);
 });
 
 // ════════════════════════════════════════════════════════════════

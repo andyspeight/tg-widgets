@@ -563,3 +563,9 @@ input[type=range] { width:100%; accent-color:var(--coral); }
   font-weight:800; letter-spacing:.04em; text-transform:uppercase; }
 .tier-badge.is-premium { background:var(--coral-wash); color:var(--coral-ink); }
 .tier-badge.is-standard { background:var(--sky-wash); color:var(--sky-deep); }
+.free-banner { display:flex; gap:10px; align-items:flex-start; margin:0 0 16px;
+  padding:12px 14px; border-radius:12px; background:var(--live-wash);
+  border:1px dashed color-mix(in srgb,var(--live) 45%, transparent);
+  font-size:13px; line-height:1.55; color:var(--tx-2); }
+.free-banner svg { width:17px; height:17px; stroke:var(--live); fill:none; flex:none; margin-top:1px; }
+.free-banner b { color:var(--tx); }

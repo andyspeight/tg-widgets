@@ -64,6 +64,7 @@ SENDGRID_FROM_EMAIL       verified sender on a domain we control
 TRIPBUSTER_FROM_EMAIL     optional, once Tripbuster has its own verified domain
 TRIPBUSTER_ADMIN_EMAIL    where new sign-ups go for approval
 TRIPBUSTER_AGENT_APPROVAL 'auto' to skip approval. Anything else means manual.
+TRIPBUSTER_FREE_UNTIL     YYYY-MM-DD. New sign-ups advertise free until this day.
 ```
 
 **Set `TRIPBUSTER_ADMIN_EMAIL`.** Without it a new agency can confirm its email
@@ -168,9 +169,9 @@ impressions.
 ```
 npm run test:tripbuster           # 277 assertions, no network needed
 npm run test:tripbuster-seo       # 35 assertions, the indexable surface
-npm run test:tripbuster-signup    # 34 assertions, sign-up and enquiry emails
-npm run test:tripbuster-rates     # 19 assertions, the rate card and disclosure
-npm run test:tripbuster-import    # 107 assertions, drives the dashboard in Chromium
+npm run test:tripbuster-signup    # 37 assertions, sign-up and enquiry emails
+npm run test:tripbuster-rates     # 25 assertions, the rate card, free access and disclosure
+npm run test:tripbuster-import    # 112 assertions, drives the dashboard in Chromium
 npm run test:tripbuster-call      # 43 assertions, drives the call journey in Chromium
 ```
 
@@ -403,6 +404,56 @@ is listed underneath in price order, so the cheaper option is always one glance
 away. That is the line between advertising and burying the cheaper option, and
 it is not a line to move for revenue.
 
+## Free access
+
+Early advertisers get in for nothing. That is a property of the **account**, not
+of the rate card: `agents.free_until` is the inclusive last day, and null means
+charge normally.
+
+Doing it with zero-pence client overrides would have worked and been worse —
+three rows per agency, no expiry, and nothing anywhere saying "free until
+January", only a rate that happens to be zero and that somebody has to remember
+to delete. A date expires on its own.
+
+`TRIPBUSTER_FREE_UNTIL=2027-01-31` puts every new sign-up on the same terms
+ending on the same day. A **date rather than a duration** because the early-days
+offer is "free until we go live", which is one moment for everybody, not a
+rolling ninety days starting whenever somebody happens to join. Unset, or once
+past, new agencies are charged from their first click — no code change needed to
+get there, the date simply goes by.
+
+### Every event records what it was worth as well as what it cost
+
+```
+list_pence     what the event was worth at that agency's rate
+charged_pence  what we actually charged — 0 while free, 0 when not billable
+free_period    whether the free period was the reason
+```
+
+A free period that shows an agency **£0** teaches them the platform is worth
+nothing. So the dashboard says *"142 enquiries this month, worth £186, free until
+31 January"*. That sentence is the whole argument for staying when billing
+starts, and it cannot be reconstructed later if the number was not kept at the
+time.
+
+`free_period` is stamped on the row rather than worked out later from
+`free_until`, because free periods get extended. An agency whose trial is
+lengthened in March must not have February's charges retrospectively wiped.
+
+`list_pence` is filled in for the ordinary non-billable reasons too — a bot, a
+repeat inside the window, a call under the minimum. "This was worth £2 and we did
+not charge for it" is the fact an agency rings up about.
+
+### Expected volumes
+
+Andy's expectation at launch is **no more than 100 chargeable events per agency
+per week**, mixed across clicks, calls and enquiries. At the standard rates that
+is roughly **£160 a month**, or **£340** on premium.
+
+Worth writing down because the demo seed is about **four times** that, so the
+figures in the demo dashboard overstate a real bill. If the seed is ever
+regenerated, aim for around 100 a week.
+
 ## Signing up, and who is allowed to advertise
 
 ```
@@ -506,6 +557,7 @@ Apply in order. They are idempotent enough to run on a fresh project.
 | `012_canonical_deal_page.sql` | `canonical_slug` on every returned row, so one hotel is one page; the sitemap lists pages rather than deals |
 | `013_registration_and_notifications.sql` | Verification, approval and notification columns; `tb_unique_agent_slug`, `tb_register_agent`, `tb_verify_agent`, `tb_approve_agent`, `tb_claim_lead_notification` |
 | `014_rate_card.sql` | `agents.rate_tier`; the `rate_card` table; `tb_resolve_rate`; the charge stamped onto `click_events`; costs in `tb_agent_stats`; premium placement in `tb_search_deals` |
+| `015_free_access.sql` | `agents.free_until`; `list_pence` and `free_period` on every event; `tb_resolve_rate` returns the list price plus a free flag |
 
 Migration 008 replaces `tb_record_click` rather than altering it. Adding
 parameters to a Postgres function creates an **overload**, and with defaults in

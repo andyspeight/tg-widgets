@@ -42,6 +42,27 @@ const TOKEN_TTL_MS = 48 * 60 * 60 * 1000;
 // turns out to be a nuisance can put in front of a traveller.
 const STARTING_PLAN = 'Spark';
 
+/**
+ * How long a new agency advertises for nothing.
+ *
+ * A DATE rather than a duration, because the early-days offer is "free until we
+ * go live", which is one moment in time for everybody, not a rolling ninety days
+ * that starts whenever somebody happens to sign up. Set
+ * TRIPBUSTER_FREE_UNTIL=2027-01-31 and every sign-up from now until then joins
+ * on the same terms and starts being charged on the same day.
+ *
+ * Unset, or already past, means new agencies are charged from their first click.
+ * That is the correct behaviour after launch and needs no code change to reach —
+ * the date simply goes by.
+ */
+export function freeUntil() {
+  const raw = (process.env.TRIPBUSTER_FREE_UNTIL || '').trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return null;
+  const when = new Date(`${raw}T23:59:59Z`);
+  if (Number.isNaN(when.getTime()) || when.getTime() < Date.now()) return null;
+  return raw;
+}
+
 /** What a caller is told, every time, whatever actually happened. */
 const SAME_ANSWER = {
   ok: true,
@@ -116,6 +137,7 @@ export default async function handler(req, res) {
       p_town: agent.town,
       p_ip_hash: v.ipHash,
       p_plan: STARTING_PLAN,
+      p_free_until: freeUntil(),
     });
 
     const reason = result && result.reason;
