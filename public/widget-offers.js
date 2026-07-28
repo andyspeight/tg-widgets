@@ -19,14 +19,15 @@
  *   - BothPackages:   send packageType:'Any' (omitting returns DynamicPackages only)
  *
  * Changelog:
- *   v1.15.1 (Jul 2026) — Hotel-only "View deal" no longer dead-ends:
- *     • A hotel-only offer has no flight leg, so the deeplink had no airport IATA
- *       to anchor on and fell back to a City lookup on the destination NAME. When
- *       that name was an airport ("Miami International Airport") Travelify replied
- *       "Unable to match location City" and the whole search broke (the first US
- *       hotel on yourticketgenie). Hotel-only offers now always pin the exact
- *       property (loct=Property + the offer's uniqueRef), landing on that hotel
- *       and mirroring Travelify's own links. Package offers are unchanged.
+ *   v1.15.1 (Jul 2026) — Deeplink board-basis synonyms:
+ *     • brdCode dropped the deeplink board filter for "Bed & Breakfast" (which
+ *       normalises to bedbreakfast, previously unmapped) and "Breakfast". It now
+ *       maps every B&B synonym, matching the cache read side.
+ *     • KNOWN OPEN: a hotel-only offer whose destination NAME is not a Travelify
+ *       city (e.g. "Miami International Airport", an airport) still dead-ends the
+ *       deeplink with "Unable to match location City". The name IS a valid
+ *       Travelify location; the fix is to pass the correct location TYPE, which
+ *       the cached offer does not yet carry. Under investigation with Travelify.
  *   v1.15.0 (Jul 2026) — Free-text destinations use the cache too:
  *     • A widget whose destination was saved as a place name ("Orlando") was
  *       forced onto slow live Travelify because the cache path required 2-3
@@ -813,17 +814,11 @@
       if (destIata) p.set('dst', destIata);
     }
     if (st !== 'Flights' && acc) {
-      // Property pinning: when the widget opted in (all offers), OR ALWAYS for a
-      // hotel-only offer, which has no flight leg and therefore no airport IATA to
-      // anchor on. Without a pin, a hotel-only offer falls back to a City lookup
-      // on the destination NAME, which dead-errors whenever that name is not a
-      // Travelify city — e.g. "Miami International Airport" (an airport, not a
-      // city) returned "Unable to match location City" for the first US hotel on
-      // yourticketgenie (28 Jul 2026). A pinned link lands on the exact property,
-      // needs the offer's property code (uniqueRef), and mirrors Travelify's own
-      // generator (loct=Property, no ctry). Package offers keep the airport anchor
-      // below, so their behaviour is unchanged unless the widget opted in.
-      const pinned = (PROPERTY_PIN || !destIata) && setPropertyAnchor(
+      // Property pinning first, when the widget opted in AND the offer carries
+      // the property code. A pinned link mirrors Travelify's own generator
+      // (loct=Property, no ctry). Anything less falls through to the proven
+      // airport anchor below, so a link can never dead-end on missing data.
+      const pinned = PROPERTY_PIN && setPropertyAnchor(
         p,
         acc.name,
         acc.destination && acc.destination.name,
