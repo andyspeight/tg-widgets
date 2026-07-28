@@ -155,6 +155,83 @@ export function destinationHref(countrySlug, resortSlug) {
   return resortSlug ? base + '/' + encodeURIComponent(resortSlug) : base;
 }
 
+/**
+ * The seven product types, as pages.
+ *
+ * `type` MUST match the CHECK constraint on deals.holiday_type exactly. That
+ * string is the authority and lives in the database; everything else here is
+ * presentation and lives in the repo, which is why the slugs are not in a
+ * migration. A slug is minted once and never changed, same rule as a deal's.
+ *
+ * `lead` is the sentence at the top of the page. Written per type rather than
+ * templated, because "cruises" and "flight only" want genuinely different
+ * things said about them, and a template would produce the sort of prose that
+ * makes a page look automatically generated. Which it would be.
+ */
+export var TRIP_TYPES = [
+  {
+    slug: 'package-holidays', type: 'Package holiday',
+    plural: 'Package holidays', one: 'package holiday',
+    lead: 'Flights, hotel and transfers booked together and protected together. '
+      + 'Every one of these is sold by an independent UK agent you deal with direct.',
+  },
+  {
+    slug: 'cruises', type: 'Cruise', plural: 'Cruises', one: 'cruise',
+    lead: 'Ocean and river sailings from UK ports and further afield. '
+      + 'Cruise is where a good agent earns their keep, so ring them and ask.',
+  },
+  {
+    slug: 'city-breaks', type: 'City break', plural: 'City breaks', one: 'city break',
+    lead: 'Two, three or four nights somewhere with plenty to walk to. '
+      + 'Short enough to go twice a year.',
+  },
+  {
+    slug: 'flight-and-hotel', type: 'Flight + hotel',
+    plural: 'Flight and hotel', one: 'flight and hotel trip',
+    lead: 'Put together for you rather than bought off a shelf: the flights and '
+      + 'the room booked as one, so there is one person to ring if anything moves.',
+  },
+  {
+    slug: 'escorted-tours', type: 'Escorted tour',
+    plural: 'Escorted tours', one: 'escorted tour',
+    lead: 'A guide, a route and somebody else doing the driving. '
+      + 'You unpack once and see four places.',
+  },
+  {
+    slug: 'hotels', type: 'Hotel only', plural: 'Hotels', one: 'hotel stay',
+    lead: 'The room on its own, for when you already have your flights '
+      + 'or you are not flying at all.',
+  },
+  {
+    slug: 'flights', type: 'Flight only', plural: 'Flights', one: 'flight',
+    lead: 'Seats only, sold by an agent rather than a search engine. '
+      + 'Worth a call if the dates are awkward or there are more than four of you.',
+  },
+];
+
+/** Look a trip type up by its URL slug, or null. */
+export function tripTypeBySlug(slug) {
+  var want = String(slug || '').toLowerCase();
+  for (var i = 0; i < TRIP_TYPES.length; i++) {
+    if (TRIP_TYPES[i].slug === want) return TRIP_TYPES[i];
+  }
+  return null;
+}
+
+/** Look a trip type up by the string stored on the deal, or null. */
+export function tripTypeByName(type) {
+  var want = String(type || '');
+  for (var i = 0; i < TRIP_TYPES.length; i++) {
+    if (TRIP_TYPES[i].type === want) return TRIP_TYPES[i];
+  }
+  return null;
+}
+
+/** A trip type landing page. */
+export function tripTypeHref(slug) {
+  return '/tripbuster/trips/' + encodeURIComponent(slug || '');
+}
+
 /** GET the public deals feed. Returns { deals, total, ... } or throws. */
 export async function fetchDeals(params) {
   var qs = new URLSearchParams();
@@ -1084,6 +1161,42 @@ export function agentDirectory(list) {
   }).join('') + '</div>';
 }
 
+/**
+ * The trip-type hub.
+ *
+ * Driven by what tb_trip_types() says is actually on sale, NOT by the TRIP_TYPES
+ * list, so a type with nothing live simply does not appear rather than offering
+ * a crawler an empty page. Order comes from the database too: most deals first,
+ * which is the honest ranking and needs no editorial decision.
+ */
+export function tripTypeDirectory(rows) {
+  var list = (rows || []).map(function (r) {
+    var meta = tripTypeByName(r.holiday_type);
+    return meta ? { meta: meta, row: r } : null;
+  }).filter(Boolean);
+
+  if (!list.length) {
+    return '<div class="empty"><b>Nothing on sale just now</b>Come back shortly.</div>';
+  }
+  return '<div class="ag-grid">' + list.map(function (x) {
+    var r = x.row;
+    var facts = [];
+    if (r.countries) facts.push(esc(r.countries) + ' countr' + (r.countries === 1 ? 'y' : 'ies'));
+    if (r.agents) facts.push(esc(r.agents) + ' agent' + (r.agents === 1 ? '' : 's'));
+    return '<a class="ag-card" href="' + esc(tripTypeHref(x.meta.slug)) + '">'
+      + '<div class="ag-card-top"><span><span class="ag-card-nm">' + esc(x.meta.plural) + '</span>'
+      + (facts.length ? '<span class="ag-card-where">' + facts.join(' · ') + '</span>' : '')
+      + '</span></div>'
+      + '<p class="ag-card-about">' + esc(x.meta.lead) + '</p>'
+      + '<div class="ag-card-foot"><span>' + esc(r.deals) + ' deal'
+        + (Number(r.deals) === 1 ? '' : 's')
+        + (r.min_price != null ? ' from ' + esc(money(r.min_price, 'GBP')) + 'pp' : '')
+        + '</span>'
+      + (r.max_discount ? '<span class="prot">up to ' + esc(r.max_discount) + '% off</span>' : '')
+      + '</div></a>';
+  }).join('') + '</div>';
+}
+
 // ── the front page ──────────────────────────────────────────────────────────
 
 /**
@@ -1232,7 +1345,8 @@ export function footer() {
     ' Every deal on Tripbuster is advertised by the agent, who pays us when you '
     + 'get in touch. Holidays are sold and financially protected by that agent, '
     + 'not by Tripbuster, and we never add anything to the price.</span>' +
-    '<span><a href="/tripbuster/destinations">All destinations</a> &middot; ' +
+    '<span><a href="/tripbuster/trips">Types of trip</a> &middot; ' +
+    '<a href="/tripbuster/destinations">All destinations</a> &middot; ' +
     '<a href="/tripbuster/agents">Our agents</a> &middot; ' +
     '&copy; 2026 Tripbuster &middot; a Travelgenix product</span>' +
     '</div></footer>';

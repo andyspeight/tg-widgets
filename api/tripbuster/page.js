@@ -410,6 +410,131 @@ ${deals.length >= 24 ? `<p class="dest-more"><a class="btn btn-dark" href="/trip
   return sendHtml(res, 200, html, CACHE);
 }
 
+// ── trip types ──────────────────────────────────────────────────────────────
+//
+// Somebody googling "cruises from Southampton" had nothing to land on: the only
+// way to see a cruise was to know the search filter existed, and search is
+// noindex on purpose. These pages are the answer, built the same way the
+// destination pages are, off the same single read path with p_holiday_type set.
+
+async function renderTripType(req, res, slug) {
+  const meta = TB.tripTypeBySlug(slug);
+  // An unknown slug is a 404 rather than an empty list. The seven are fixed by
+  // the CHECK constraint, so anything else is a typo or a probe.
+  if (!meta) {
+    return notFound(req, res, {
+      title: 'We do not have that kind of trip',
+      body: 'Try the full list of what our agents are advertising.',
+    });
+  }
+
+  let data;
+  let counts;
+  try {
+    [data, counts] = await Promise.all([
+      tbRpc('tb_search_deals', {
+        p_holiday_type: meta.type, p_compare: false, p_sort: 'discount', p_limit: 24,
+      }),
+      tbRpc('tb_trip_types', {}).catch(() => null),
+    ]);
+  } catch (e) {
+    console.error('[tripbuster/page] trip type failed', e && e.code);
+    return unavailable(req, res);
+  }
+
+  const deals = (((data || {}).deals) || []).map(toDeal);
+  // A type nobody is advertising has no page. Same rule as a destination: the
+  // page exists exactly while somebody is selling one.
+  if (!deals.length) {
+    return notFound(req, res, {
+      title: `No ${esc(meta.one)}s advertised at the moment`,
+      body: 'No agent has one live just now. There is plenty else on.',
+    });
+  }
+
+  const row = (Array.isArray(counts) ? counts : [])
+    .find((r) => r.holiday_type === meta.type) || {};
+  const total = Number(row.deals) || deals.length;
+  const facts = [
+    `${total} live now`,
+    row.agents ? `${row.agents} agent${Number(row.agents) === 1 ? '' : 's'}` : '',
+    row.countries ? `${row.countries} countr${Number(row.countries) === 1 ? 'y' : 'ies'}` : '',
+    row.min_price != null ? `from ${TB.money(row.min_price, 'GBP')}pp` : '',
+    row.max_discount ? `up to ${row.max_discount}% off` : '',
+  ].filter(Boolean);
+
+  const trail = [
+    { label: 'Home', href: '/tripbuster' },
+    { label: 'Types of trip', href: '/tripbuster/trips' },
+    { label: meta.plural },
+  ];
+  const canonical = absolute(req, TB.tripTypeHref(meta.slug));
+
+  const body = `${TB.crumbs(trail)}
+<header class="dest-head">
+  <h1>${esc(meta.plural)} from independent UK travel agents</h1>
+  <p class="dest-lead">${esc(meta.lead)}</p>
+  <div class="chips">${facts.map((f) => `<span class="chip">${esc(f)}</span>`).join('')}</div>
+</header>
+<section class="grid">${deals.map((d) => TB.dealCard(d)).join('')}</section>
+${TB.rankingNote()}
+${total > deals.length ? `<p class="dest-more"><a class="btn btn-dark" href="/tripbuster/search?holidayType=${
+  encodeURIComponent(meta.type)}">See all ${total} ${esc(meta.plural.toLowerCase())}</a></p>` : ''}`;
+
+  const html = shell(body, {
+    title: clamp(`${meta.plural} from UK travel agents | ${SITE_NAME}`, 70),
+    ogTitle: meta.plural,
+    description: clamp(`${total} ${meta.plural.toLowerCase()} advertised by independent UK `
+      + `travel agents${row.min_price != null ? `, from ${TB.money(row.min_price, 'GBP')}pp` : ''}. `
+      + 'Compare the prices then book direct with the agent.', 158),
+    canonical,
+    navActive: meta.slug === 'cruises' ? 'Cruises' : (meta.slug === 'flights' ? 'Flights' : ''),
+    image: deals.length ? deals[0].image : '',
+    jsonLd: [breadcrumbLd(req, trail), itemListLd(req, deals, (d) => TB.dealHref(d))],
+    scripts: [
+      `<script type="application/json" id="tb-shown">${
+        JSON.stringify(deals.map((d) => d.id))}</script>`,
+      '<script type="module" src="/tripbuster/list-page.js"></script>',
+    ],
+  });
+
+  return sendHtml(res, 200, html, CACHE);
+}
+
+async function renderTripTypeIndex(req, res) {
+  let rows;
+  try {
+    rows = await tbRpc('tb_trip_types', {});
+  } catch (e) {
+    console.error('[tripbuster/page] trip types failed', e && e.code);
+    return unavailable(req, res);
+  }
+  const list = Array.isArray(rows) ? rows : [];
+  const trail = [{ label: 'Home', href: '/tripbuster' }, { label: 'Types of trip' }];
+  const named = list.map((r) => TB.tripTypeByName(r.holiday_type)).filter(Boolean);
+
+  const body = `${TB.crumbs(trail)}
+<header class="dest-head">
+  <h1>What our agents are advertising</h1>
+  <p class="dest-lead">Not just package holidays. Independent agents sell the awkward
+    things a website is bad at, which is exactly when it is worth ringing one.</p>
+</header>
+${TB.tripTypeDirectory(list)}`;
+
+  const html = shell(body, {
+    title: `Types of trip from UK travel agents | ${SITE_NAME}`,
+    ogTitle: 'What our agents are advertising',
+    description: clamp(`${named.map((m) => m.plural.toLowerCase()).join(', ')} `
+      + 'from independent UK travel agents. Compare the prices then book direct.', 158),
+    canonical: absolute(req, '/tripbuster/trips'),
+    jsonLd: [breadcrumbLd(req, trail), itemListLd(req, named.map((m) => ({
+      title: m.plural, id: m.slug,
+    })), (m) => TB.tripTypeHref(m.id))],
+  });
+
+  return sendHtml(res, 200, html, CACHE);
+}
+
 // ── the hub ─────────────────────────────────────────────────────────────────
 //
 // Every destination page needs a crawlable path from the home page, and a link
@@ -636,6 +761,8 @@ export default async function handler(req, res) {
     if (type === 'destinations') return await renderDestinationIndex(req, res);
     if (type === 'agent') return await renderAgent(req, res, str(q.slug, 90));
     if (type === 'agents') return await renderAgentIndex(req, res);
+    if (type === 'trip') return await renderTripType(req, res, str(q.slug, 40));
+    if (type === 'trips') return await renderTripTypeIndex(req, res);
     if (type === 'destination') {
       return await renderDestination(req, res, str(q.country, 80), str(q.resort, 80));
     }

@@ -170,7 +170,7 @@ impressions.
 
 ```
 npm run test:tripbuster           # 277 assertions, no network needed
-npm run test:tripbuster-seo       # 42 assertions, the indexable surface
+npm run test:tripbuster-seo       # 49 assertions, the indexable surface
 npm run test:tripbuster-signup    # 49 assertions, sign-up, enquiry emails, owner console
 npm run test:tripbuster-rates     # 25 assertions, the rate card, free access and disclosure
 npm run test:tripbuster-import    # 112 assertions, drives the dashboard in Chromium
@@ -243,6 +243,8 @@ impression and click beacons actually firing.
 | `/tripbuster/holidays/<country>` | Country landing page |
 | `/tripbuster/holidays/<country>/<resort>` | Resort landing page |
 | `/tripbuster/holiday/<slug>` | One deal, and every agent advertising the same hotel |
+| `/tripbuster/trips` | Hub of every product type with something live |
+| `/tripbuster/trips/<type>` | One product type: cruises, flights, escorted tours and the rest |
 | `/tripbuster/agents` | Directory of every agency with something live |
 | `/tripbuster/agent/<slug>` | One agency: who they are, how to reach them, everything they advertise |
 | `/tripbuster/search` | Filter UI. `noindex, follow` on purpose |
@@ -323,6 +325,36 @@ single review ourselves. Publishing it as review markup would tell Google we hol
 ratings we do not hold: a manual-action risk, and a consumer-protection risk under
 the DMCC Act. Showing the agent's score on the page as the agent's score is fine.
 Star ratings in the search results have to be earned by collecting real reviews.
+
+## Trip types are pages, not just a filter
+
+Added 28 July 2026, migration 017. The schema has allowed seven product types
+since 001 and the site only ever spoke about one of them: every public URL says
+`holidays`, and the only way to see a cruise was to know the search filter
+existed. Search is `noindex` on purpose, so somebody googling "cruises from
+Southampton" had nothing to land on.
+
+`/tripbuster/trips/<type>` fixes that, built exactly like a destination page and
+off the same single read path — `tb_search_deals` with `p_holiday_type` set.
+There is no new query for the deals themselves.
+
+**A type page exists exactly while somebody is selling one.** A type with nothing
+live 404s rather than publishing an empty page for a crawler, the same rule
+destinations already follow. An unknown slug 404s too: the seven are fixed by the
+CHECK constraint on `deals.holiday_type`, so anything else is a typo or a probe.
+
+**The type strings live in the database, the URL slugs live in the repo.** The
+CHECK constraint is the authority for what a type IS; `TRIP_TYPES` in
+`public/tripbuster/tb-site.js` decides what it is CALLED in a URL and what the
+page says about it. Slugs are a presentation decision and putting them in a
+migration would mean a schema change every time a word improved. The sitemap
+imports the same module, so a slug is defined once.
+
+A row the database returns with no matching entry in `TRIP_TYPES` is skipped
+everywhere — the hub, the sitemap, the lot. That is deliberate: a new type added
+to the constraint should be invisible until somebody writes the page copy for
+it, rather than appearing as a link to nothing. There is a test that adds a
+fictional type to the fixture and fails if it ever surfaces.
 
 ## Agent profiles
 
@@ -648,6 +680,7 @@ Apply in order. They are idempotent enough to run on a fresh project.
 | `014_rate_card.sql` | `agents.rate_tier`; the `rate_card` table; `tb_resolve_rate`; the charge stamped onto `click_events`; costs in `tb_agent_stats`; premium placement in `tb_search_deals` |
 | `015_free_access.sql` | `agents.free_until`; `list_pence` and `free_period` on every event; `tb_resolve_rate` returns the list price plus a free flag |
 | `016_agent_profiles.sql` | `agents.about` and `agents.founded_year`; `tb_agent_profile` and `tb_agents_public`, both on a strict column whitelist; agencies added to `tb_sitemap` |
+| `017_trip_types.sql` | `tb_trip_types`; trip types added to `tb_sitemap`. No new read path: a type page is `tb_search_deals` with `p_holiday_type` set |
 
 Migration 008 replaces `tb_record_click` rather than altering it. Adding
 parameters to a Postgres function creates an **overload**, and with defaults in

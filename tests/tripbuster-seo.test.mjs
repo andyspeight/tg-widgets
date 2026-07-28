@@ -134,6 +134,19 @@ function twoAgentRow() {
   };
 }
 
+// Shaped exactly as tb_trip_types() returns it: snake_case straight out of
+// Postgres, not the camelCase the renderer uses elsewhere.
+const TRIP_TYPE_ROWS = [
+  { holiday_type: 'Package holiday', deals: 23, min_price: 199, max_discount: 28,
+    countries: 12, agents: 3, last_change: '2026-07-28T14:31:20Z' },
+  { holiday_type: 'Cruise', deals: 3, min_price: 649, max_discount: 22,
+    countries: 3, agents: 1, last_change: '2026-07-28T14:31:20Z' },
+  // A type the database knows about but the site has no page for. It must be
+  // skipped everywhere rather than producing a link to nothing.
+  { holiday_type: 'Something we never shipped', deals: 5, min_price: 99,
+    countries: 1, agents: 1, last_change: '2026-07-28T14:31:20Z' },
+];
+
 const DESTINATIONS = {
   countries: [
     { name: 'Poland', slug: 'poland', deal_count: 1, min_price: 179, max_discount: 22, last_change: '2026-07-27T15:05:48Z', image: null },
@@ -219,9 +232,11 @@ function defaultRpcs(row = dealRow()) {
         results: { total: 1, deals: [row] },
       };
     },
+    tb_trip_types: () => TRIP_TYPE_ROWS,
     tb_sitemap: () => ({
       deals: [{ slug: row.slug, lastmod: '2026-07-27T15:05:48Z' }],
       destinations: DESTINATIONS,
+      tripTypes: TRIP_TYPE_ROWS,
       generated: '2026-07-27T16:00:00Z',
     }),
   };
@@ -870,6 +885,66 @@ await testAsync('a database failure is a 503, so a crawler comes back', async ()
   assert.ok(/content="noindex/.test(r.body));
   assert.equal(r.headers['cache-control'], 'no-store');
   rpcHandlers = defaultRpcs();
+});
+
+// ── trip type pages ─────────────────────────────────────────────
+// The site spoke only about holidays for its whole life. Somebody googling
+// "cruises" had nowhere to land, because the only way to see one was a filter
+// on /tripbuster/search, which is noindex on purpose.
+
+await testAsync('a trip type has its own indexable page', async () => {
+  const r = await call(page, { query: { type: 'trip', slug: 'cruises' } });
+  assert.equal(r.status, 200);
+  assert.ok(/<h1>Cruises from independent UK travel agents<\/h1>/.test(r.body), 'h1');
+  assert.ok(/content="index, follow/.test(r.body), 'indexable, unlike search');
+  assert.ok(/rel="canonical" href="[^"]*\/tripbuster\/trips\/cruises"/.test(r.body), 'canonical');
+});
+
+await testAsync('and leads with what is actually on sale', async () => {
+  const r = await call(page, { query: { type: 'trip', slug: 'cruises' } });
+  // Straight off tb_trip_types, so the page cannot claim a price no search
+  // would reproduce.
+  assert.ok(/3 live now/.test(r.body), 'count');
+  assert.ok(/from £649pp/.test(r.body), 'lead-in price');
+});
+
+await testAsync('an unknown trip type is a 404, not an empty list', async () => {
+  const r = await call(page, { query: { type: 'trip', slug: 'safaris' } });
+  assert.equal(r.status, 404);
+  assert.ok(/content="noindex/.test(r.body));
+});
+
+await testAsync('a trip type nobody is advertising has no page', async () => {
+  // The seven are fixed by the CHECK constraint, but a real one with nothing
+  // live must still 404 rather than publish an empty page for a crawler.
+  rpcHandlers = { ...defaultRpcs(), tb_search_deals: () => ({ total: 0, deals: [] }) };
+  const r = await call(page, { query: { type: 'trip', slug: 'escorted-tours' } });
+  assert.equal(r.status, 404);
+  rpcHandlers = defaultRpcs();
+});
+
+await testAsync('the hub lists every type that has something live', async () => {
+  const r = await call(page, { query: { type: 'trips' } });
+  assert.equal(r.status, 200);
+  assert.ok(/\/tripbuster\/trips\/cruises/.test(r.body), 'links to cruises');
+  assert.ok(/\/tripbuster\/trips\/package-holidays/.test(r.body), 'links to packages');
+});
+
+await testAsync('a type the site has no page for is never linked', async () => {
+  const r = await call(page, { query: { type: 'trips' } });
+  assert.ok(!/Something we never shipped/.test(r.body),
+    'a database row with no matching page must not reach the hub');
+});
+
+await testAsync('trip types are in the sitemap, and unknown ones are not', async () => {
+  const r = await call(sitemap, {});
+  assert.equal(r.status, 200);
+  assert.ok(r.body.includes('/tripbuster/trips</loc>'), 'the hub');
+  assert.ok(r.body.includes('/tripbuster/trips/cruises</loc>'), 'each type');
+  // The unmapped row carries a real count and a real lastmod, so the only thing
+  // stopping it becoming a URL is the slug lookup. Prove that it does.
+  assert.equal((r.body.match(/\/tripbuster\/trips\//g) || []).length, 2,
+    'exactly the two types the site has pages for');
 });
 
 // ── report ──────────────────────────────────────────────────────

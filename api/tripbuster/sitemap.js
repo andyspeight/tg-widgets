@@ -17,6 +17,8 @@
  */
 import { tbConfigured, tbRpc } from '../_lib/tripbuster/db.js';
 import { siteOrigin } from '../_lib/tripbuster/seo.js';
+// Same module the pages render from, so a type's URL slug is defined once.
+import * as TB from '../../public/tripbuster/tb-site.js';
 
 // Google stops reading a sitemap at 50,000 URLs or 50MB. We are a very long way
 // from either, but a cap that is never hit still beats discovering the limit in
@@ -84,6 +86,20 @@ ${urlNode(base, '', 'daily', '1.0')}
     urlNode(base, isoDay(data && data.generated), 'daily', '1.0'),
     urlNode(`${base}/destinations`, isoDay(data && data.generated), 'daily', '0.9'),
   ];
+
+  // Trip types sit high on purpose. There are at most seven of them, they never
+  // expire, and "cruises" is the sort of thing somebody actually types into
+  // Google — unlike any single deal, which is gone in a fortnight.
+  const tripTypes = Array.isArray(data && data.tripTypes) ? data.tripTypes : [];
+  if (tripTypes.length) {
+    urls.push(urlNode(`${base}/trips`, isoDay(data && data.generated), 'weekly', '0.9'));
+  }
+  tripTypes.forEach((t) => {
+    const meta = TB.tripTypeByName(t.holiday_type);
+    if (!meta) return;   // a type with no page defined is simply not listed
+    urls.push(urlNode(`${base}/trips/${encodeURIComponent(meta.slug)}`,
+      isoDay(t.last_change), 'daily', '0.8'));
+  });
 
   if (agents.length) {
     urls.push(urlNode(`${base}/agents`, isoDay(data && data.generated), 'weekly', '0.8'));

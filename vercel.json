@@ -301,6 +301,14 @@
       "destination": "/api/tripbuster/page?type=agent&slug=:slug"
     },
     {
+      "source": "/tripbuster/trips",
+      "destination": "/api/tripbuster/page?type=trips"
+    },
+    {
+      "source": "/tripbuster/trips/:slug",
+      "destination": "/api/tripbuster/page?type=trip&slug=:slug"
+    },
+    {
       "source": "/tripbuster/holiday/:slug",
       "destination": "/api/tripbuster/page?type=deal&slug=:slug"
     },
