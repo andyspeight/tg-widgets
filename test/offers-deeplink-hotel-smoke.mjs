@@ -9,12 +9,11 @@
  *      when the widget turned propertyDeeplinks on; otherwise it anchors on the
  *      destination name. This is the behaviour task #14 deliberately chose.
  *
- * KNOWN-OPEN, documented here as a characterisation test (NOT asserted fixed):
- * a hotel-only offer whose destination NAME is not a Travelify city — e.g.
- * "Miami International Airport" — still anchors on that name with the default
- * City lookup, which Travelify rejects ("Unable to match location City"). The
- * name is a genuine Travelify location; the real fix is to pass the correct
- * location TYPE, which the cached offer does not yet carry. Under investigation.
+ * Airport-named location fix (v1.15.2): a hotel-only offer whose destination
+ * NAME is an airport ("Miami International Airport") used to dead-end with the
+ * default City lookup ("Unable to match location City"). The Travelify Deep
+ * Linking Instructions define loct=Airport (matched by name), so an airport-
+ * named location is now sent with loct=Airport. Real city names keep City.
  *
  * Drives the REAL offersDeeplink from the shipped file.
  * Run: node test/offers-deeplink-hotel-smoke.mjs
@@ -103,12 +102,15 @@ p = q(offersDeeplink(pkg));
 ok(p.loct === 'Airport' && p.loc === 'ALC', 'package offer anchors on the destination airport IATA');
 ok(p.brd === 'BedAndBreakfast', 'package board synonym also mapped');
 
-// ── 4. KNOWN-OPEN characterisation: airport-named hotel still City-anchors ────
-// This documents the still-broken case so a future fix has a red test to turn
-// green. It is NOT the desired end state.
-p = q(offersDeeplink(mkHotel('Miami International Airport', 'Room Only', 'TTI:HOTEL123')));
-ok(p.loct == null && p.loc === 'Miami International Airport',
-  'KNOWN-OPEN: airport-named hotel still anchors on the name with a City lookup (Travelify rejects this — fix pending the location type)');
+// ── 4. Airport-named hotel now resolves via loct=Airport (the fix) ────────────
+p = q(offersDeeplink(mkHotel('Miami International Airport', 'Room Only')));
+ok(p.loc === 'Miami International Airport' && p.loct === 'Airport' && p.ctry === 'US',
+  'airport-named hotel location is sent with loct=Airport (was defaulting to City and dead-ending)');
+// A real city is NOT mistaken for an airport, and names like "Newport" that merely
+// contain "port" must not trigger the airport type.
+ok(q(offersDeeplink(mkHotel('Miami', 'Room Only'))).loct == null, 'a real city keeps the City default (no loct)');
+ok(q(offersDeeplink(mkHotel('Newport', 'Room Only'))).loct == null, '"Newport" is not treated as an airport (word-boundary match)');
+ok(q(offersDeeplink(mkHotel('Gatwick Airport', 'Room Only'))).loct === 'Airport', '"Gatwick Airport" -> loct=Airport');
 
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
