@@ -151,7 +151,7 @@
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
   const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
-  const VERSION = '1.13.0';
+  const VERSION = '1.14.0';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // Telemetry: report a one-time load heartbeat and any failure to
@@ -6348,13 +6348,33 @@
           this._showEmpty();
           return;
         }
+        // An upstream/gateway 5xx (502/503/504) is Travelify being slow or briefly
+        // unavailable, NOT a broken widget. Fail SOFT to the calm empty state like
+        // a 429 — never a red banner at the visitor — and don't page per visitor:
+        // the server telemetry logs every /api/offers status and the synthetic
+        // monitor probes the offers path every 5 min, so the signal is retained.
+        // (Overnight 27 Jul 2026: Travelify timeouts on a few sites painted red
+        // "Offers service unavailable (HTTP 504)" errors and fired alerts.)
+        if (res && typeof res.status === 'number' && res.status >= 500) {
+          this.rawOffers = [];
+          this._offersSource = 'live';
+          this._availableTotal = null;
+          this._showEmpty();
+          return;
+        }
         // Defensive parse (the 23 Jul 2026 incident site): an empty-bodied
         // gateway 504/502 no longer throws "Unexpected end of JSON input" — it
-        // throws a clean, status-bearing message caught below. A non-2xx JSON
-        // error body (404/502) still surfaces its .error to the visitor.
+        // throws a clean, status-bearing message caught below.
         const data = await parseJsonResponse(res, 'Offers service');
         if (!data.success) {
-          this._showError(data.error || 'Travelify returned an error.');
+          // The proxy answers 200 here, so server telemetry won't flag it — keep a
+          // beacon so a genuinely misconfigured widget still reaches us, but show
+          // the visitor the calm empty state rather than a red banner.
+          tgReport('error', this.cfg && this.cfg._widgetId, 'offers error: ' + (data.error || 'unknown'), this.cfg && this.cfg.template);
+          this.rawOffers = [];
+          this._offersSource = 'live';
+          this._availableTotal = null;
+          this._showEmpty();
           return;
         }
         this.rawOffers = gateSuppliers(data.data || [], this.cfg.supplierFilter);
@@ -6364,7 +6384,22 @@
         this._renderOffers();
         this._fireDataLoaded();
       } catch (err) {
-        this._showError(err.message || 'Network error.');
+        // A network reject or the client-side timeout abort (upstream too slow —
+        // the offer fetch already retried). Fail soft to the calm empty state,
+        // never a red banner. A timeout is upstream slowness (the server logs the
+        // 504) and a hidden page is a navigate-away — neither pages us. A true
+        // network error on a VISIBLE page (e.g. a CSP block) still beacons once so
+        // a real reachability problem isn't hidden.
+        this.rawOffers = [];
+        this._offersSource = 'live';
+        this._availableTotal = null;
+        this._showEmpty();
+        let hidden = false;
+        try { hidden = (typeof document !== 'undefined' && document.visibilityState === 'hidden'); } catch (e) {}
+        const isTimeout = err && (err.name === 'AbortError' || /abort|timeout/i.test(err.message || ''));
+        if (!isTimeout && !hidden) {
+          tgReport('error', this.cfg && this.cfg._widgetId, 'offers unreachable', err && err.message);
+        }
       }
     }
 

@@ -73,12 +73,18 @@ export async function checkOffers(selfOrigin, secret) {
 // The config endpoint EVERY widget calls. A clean 200 or 404 proves the endpoint
 // is alive and Airtable was reached (404 = reached, this probe id doesn't exist);
 // a 5xx or a timeout is a real problem (Airtable down / function killed).
-export async function checkWidgetConfig(selfOrigin) {
+export async function checkWidgetConfig(selfOrigin, secret) {
   const started = Date.now();
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 10000);
   try {
-    const res = await fetch(selfOrigin + '/api/widget-config?id=tgw_monitor_probe', { signal: ctrl.signal });
+    const res = await fetch(selfOrigin + '/api/widget-config?id=tgw_monitor_probe', {
+      // Mark the probe as internal so widget-config skips telemetry for it (its
+      // throwaway id 404s by design and would otherwise pollute the config error
+      // counts). Exempt only when the secret matches CRON_SECRET server-side.
+      headers: secret ? { 'x-tgs-internal': secret } : {},
+      signal: ctrl.signal,
+    });
     await res.text().catch(() => '');
     const latencyMs = Date.now() - started;
     const ok = res.status === 200 || res.status === 404;
@@ -110,7 +116,7 @@ export async function checkRedis() {
 export async function runAllProbes({ selfOrigin, secret }) {
   const [offers, widgetConfig, redis] = await Promise.all([
     checkOffers(selfOrigin, secret),
-    checkWidgetConfig(selfOrigin),
+    checkWidgetConfig(selfOrigin, secret),
     checkRedis(),
   ]);
   return [offers, widgetConfig, redis, checkConfig()];
