@@ -99,7 +99,16 @@ const pg = http.createServer((req, res) => {
     if (table === 'rpc/tb_agent_stats') {
       return send(200, {
         days: body.p_days, impressions: 4200, clicks: 130, billableClicks: 118,
-        calls: 46, billableCalls: 29, ctr: 3.1, callRate: 1.1, perDeal: {},
+        calls: 46, billableCalls: 29, leads: 12, billableLeads: 11,
+        ctr: 3.1, callRate: 1.1, perDeal: {},
+        rateTier: 'standard',
+        // 118 clicks at 10p, 29 calls at £1, 11 enquiries at £1 = £51.80.
+        costPence: { clicks: 1180, calls: 2900, leads: 1100, total: 5180 },
+        rateLines: [
+          { eventType: 'click', pence: 10, source: 'default', events: 118, costPence: 1180 },
+          { eventType: 'call', pence: 100, source: 'client', events: 29, costPence: 2900 },
+          { eventType: 'lead', pence: 100, source: 'default', events: 11, costPence: 1100 },
+        ],
       });
     }
     if (table === 'rpc/tb_agent_billing_counts') {
@@ -623,6 +632,22 @@ try {
   await page.click('.nav-i[data-view="plan"]');
   await page.waitForSelector('#v-plan.on', { visible: true });
   await wait(500);
+
+  // ── what it is costing them ──
+  // An agency charged per event has to be able to find the number they will be
+  // invoiced as easily as the number of clicks it came from.
+  const spendTile = await page.$$eval('#stats .stat', (tiles) =>
+    tiles.map((t) => t.textContent).find((t) => /Spend/.test(t)) || '');
+  check('spend is one of the headline tiles', /£51\.80/.test(spendTile), spendTile);
+
+  const costText = await page.$eval('#costs', (el) => el.textContent.replace(/\s+/g, ' '));
+  check('the cost breakdown totals correctly', /£51\.80/.test(costText), costText.slice(0, 160));
+  check('and splits by what was charged for',
+    /£11\.80/.test(costText) && /£29/.test(costText) && /£11/.test(costText));
+  check('each rate line says why that rate applied',
+    /Standard rate/.test(costText) && /Your agreed rate/.test(costText));
+  check('the rate itself is shown, not just the total', /10p|£0\.10/.test(costText)
+    || /£0.1/.test(costText), costText.slice(0, 200));
 
   // ── enquiry notifications ──
   // An enquiry used to sit in the database until somebody happened to log in
