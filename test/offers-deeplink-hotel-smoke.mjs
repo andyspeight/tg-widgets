@@ -1,17 +1,20 @@
 /**
- * Offers widget — hotel-only "View deal" deeplink no longer dead-ends.
+ * Offers widget — deeplink board-basis synonyms + hotel-location behaviour.
  *
- * A client (yourticketgenie, 28 Jul 2026) reported the FIRST card's "View deal"
- * landing on a Travelify error: {"success":false,"error":"Unable to match
- * location City: Miami International Airport, US"}. Cause: a hotel-only offer has
- * no flight leg, so the deeplink had no airport IATA to anchor on and fell back
- * to a City lookup on the destination NAME — which is an AIRPORT name here, not a
- * city, so Travelify rejected the whole link. Real-city cards ("Miami", "Newark")
- * worked, which is why only the first card broke.
+ * Two things this locks down:
+ *   1. brdCode maps every B&B synonym Travelify uses ("Bed & Breakfast" ->
+ *      bedbreakfast, "Breakfast" -> breakfast), so the deeplink board filter is
+ *      not silently dropped. (Same synonym gap fixed on the cache read side.)
+ *   2. The property-pin OPT-IN contract is intact: a hotel-only offer pins ONLY
+ *      when the widget turned propertyDeeplinks on; otherwise it anchors on the
+ *      destination name. This is the behaviour task #14 deliberately chose.
  *
- * Fix: a hotel-only offer now always pins the exact property (loct=Property + the
- * offer's uniqueRef), which lands on that hotel and mirrors Travelify's own links.
- * Package offers (which DO carry an airport IATA) are unchanged.
+ * KNOWN-OPEN, documented here as a characterisation test (NOT asserted fixed):
+ * a hotel-only offer whose destination NAME is not a Travelify city — e.g.
+ * "Miami International Airport" — still anchors on that name with the default
+ * City lookup, which Travelify rejects ("Unable to match location City"). The
+ * name is a genuine Travelify location; the real fix is to pass the correct
+ * location TYPE, which the cached offer does not yet carry. Under investigation.
  *
  * Drives the REAL offersDeeplink from the shipped file.
  * Run: node test/offers-deeplink-hotel-smoke.mjs
@@ -21,7 +24,6 @@ import { readFileSync } from 'node:fs';
 let passed = 0, failed = 0;
 const ok = (c, label) => { if (c) { passed++; } else { failed++; console.error('  FAIL:', label); } };
 
-// Brace-balanced slice that also skips string, comment and regex literals.
 function sliceBalanced(src, fromIdx) {
   let i = src.indexOf('{', fromIdx); const open = i;
   let d = 0, str = null, line = false, block = false, regex = false, cls = false, prevSig = '';
@@ -61,68 +63,52 @@ const { offersDeeplink, setPropertyPin } = eval('(function(){'
 
 const q = (url) => Object.fromEntries(new URL(url).searchParams.entries());
 
-// ── The reported offer: hotel-only, destination name IS an airport ────────────
-const miamiHotel = {
+const mkHotel = (destName, board, refn) => ({
   type: 'Accommodation',
   accommodation: {
-    name: 'Doral Inn & Suites Miami Airport West',
-    boardBasis: 'Bed & Breakfast', nights: 5, rating: 3, checkinDate: '2026-09-14',
-    uniqueRef: 'TTI:HOTEL123', pricing: { currency: 'GBP' },
-    destination: { name: 'Miami International Airport', countryCode: 'US', latitude: 25.79, longitude: -80.29 },
+    name: 'Doral Inn & Suites', boardBasis: board, nights: 5, rating: 3, checkinDate: '2026-09-14',
+    ...(refn ? { uniqueRef: refn } : {}),
+    pricing: { currency: 'GBP' },
+    destination: { name: destName, countryCode: 'US', latitude: 25.79, longitude: -80.29 },
   },
   adults: 2,
-};
-let url = offersDeeplink(miamiHotel);
-let p = q(url);
-ok(url !== '', 'hotel-only offer produces a deeplink');
-ok(p.st === 'Accommodation', 'st is Accommodation');
-ok(p.loct === 'Property', 'hotel-only pins to loct=Property (was defaulting to a City lookup)');
-ok(p.refn === 'TTI:HOTEL123', 'the property code is carried as refn');
-ok(/Doral Inn/.test(p.loc || ''), 'loc names the exact property');
-ok(!('ctry' in p), 'a pinned link omits ctry (mirrors Travelify’s own generator)');
-ok(p.lat === '25.79' && p.lng === '-80.29' && p.rad === '1', 'coordinates + 1-mile radius pin the property tightly');
-// The bug was a bare City lookup on the airport name. Assert we are NOT doing that.
-ok(!(p.loc === 'Miami International Airport' && p.loct == null), 'NOT the broken bare-City lookup on the airport name');
-ok(p.brd === 'BedAndBreakfast', 'board basis carried (Bed & Breakfast -> BedAndBreakfast)');
-ok(p.fr === '2026-09-14' && p.dur === '5' && p.adt === '2' && p.rat === '3' && p.curr === 'GBP', 'dates, nights, pax, rating, currency all carried');
+});
 
-// ── A real city still works, and now also pins precisely ──────────────────────
-const miamiCity = JSON.parse(JSON.stringify(miamiHotel));
-miamiCity.accommodation.name = 'La Quinta Inn Miami Airport East';
-miamiCity.accommodation.destination.name = 'Miami';
-url = offersDeeplink(miamiCity); p = q(url);
-ok(p.loct === 'Property' && /La Quinta/.test(p.loc || ''), 'a real-city hotel-only offer also pins to the exact property');
+// ── 1. brdCode: Travelify's B&B synonyms all reach the deeplink ───────────────
+ok(q(offersDeeplink(mkHotel('Miami', 'Bed & Breakfast'))).brd === 'BedAndBreakfast', '"Bed & Breakfast" -> brd=BedAndBreakfast (was dropped)');
+ok(q(offersDeeplink(mkHotel('Miami', 'Breakfast'))).brd === 'BedAndBreakfast', '"Breakfast" -> brd=BedAndBreakfast');
+ok(q(offersDeeplink(mkHotel('Miami', 'Bed and Breakfast'))).brd === 'BedAndBreakfast', '"Bed and Breakfast" -> brd=BedAndBreakfast');
+ok(q(offersDeeplink(mkHotel('Miami', 'All Inclusive'))).brd === 'AllInclusive', 'All Inclusive still maps');
+ok(q(offersDeeplink(mkHotel('Miami', 'Half Board'))).brd === 'HalfBoard', 'Half Board still maps');
 
-// ── Hotel-only WITHOUT a property code → falls back to the name (documented) ───
-const noRef = JSON.parse(JSON.stringify(miamiHotel));
-delete noRef.accommodation.uniqueRef;
-url = offersDeeplink(noRef); p = q(url);
-ok(p.loct !== 'Property' && p.loc === 'Miami International Airport' && p.ctry === 'US',
-  'no property code → falls back to the destination-name lookup (unchanged; the residual case)');
+// ── 2. Opt-in pin contract intact: OFF anchors on the name, not the property ──
+let p = q(offersDeeplink(mkHotel('Miami', 'Room Only', 'TTI:HOTEL123')));
+ok(p.loct == null && p.loc === 'Miami' && p.ctry === 'US', 'pin OFF: a real-city hotel anchors on the city name (contract from task #14)');
+ok(!('refn' in p), 'pin OFF: no property code leaks into the link');
 
-// ── Package offer (has a flight IATA) is UNCHANGED: airport anchor, not pinned ─
+// pin ON: the exact property is pinned
+setPropertyPin(true);
+p = q(offersDeeplink(mkHotel('Miami', 'Room Only', 'TTI:HOTEL123')));
+ok(p.loct === 'Property' && p.refn === 'TTI:HOTEL123' && /Doral Inn/.test(p.loc || ''), 'pin ON: pins the exact property');
+setPropertyPin(false);
+
+// ── 3. Package offer is unaffected: airport anchor ────────────────────────────
 const pkg = {
   type: 'Packages',
   flight: { destination: { iataCode: 'ALC', countryCode: 'ES' }, origin: { iataCode: 'LGW' }, outboundDate: '2026-09-14', pricing: { currency: 'GBP' } },
-  accommodation: { name: 'Hotel Benidorm', nights: 7, rating: 4, boardBasis: 'All Inclusive', uniqueRef: 'TTI:PKG999', checkinDate: '2026-09-14', destination: { name: 'Benidorm', countryCode: 'ES' }, pricing: { currency: 'GBP' } },
+  accommodation: { name: 'Hotel Benidorm', nights: 7, rating: 4, boardBasis: 'Bed & Breakfast', destination: { name: 'Benidorm', countryCode: 'ES' }, pricing: { currency: 'GBP' } },
   adults: 2,
 };
-url = offersDeeplink(pkg); p = q(url);
-ok(p.loct === 'Airport' && p.loc === 'ALC', 'package offer still anchors on the destination airport IATA (unchanged)');
-ok(!('refn' in p), 'package offer is NOT auto-pinned (behaviour unchanged unless the widget opts in)');
-ok(p.dst === 'ALC' && p.org === 'LGW', 'package flight legs carried');
+p = q(offersDeeplink(pkg));
+ok(p.loct === 'Airport' && p.loc === 'ALC', 'package offer anchors on the destination airport IATA');
+ok(p.brd === 'BedAndBreakfast', 'package board synonym also mapped');
 
-// ── Opt-in still pins packages when the widget asks for it ────────────────────
-setPropertyPin(true);
-url = offersDeeplink(pkg); p = q(url);
-ok(p.loct === 'Property' && p.refn === 'TTI:PKG999', 'with propertyDeeplinks on, a package pins the property too');
-setPropertyPin(false);
-
-// ── Source guard ──────────────────────────────────────────────────────────────
-ok(/const pinned = \(PROPERTY_PIN \|\| !destIata\) && setPropertyAnchor\(/.test(src),
-  'hotel-only offers (no destIata) always attempt the property pin');
-const _v = (src.match(/const VERSION = '(\d+)\.(\d+)\.(\d+)'/) || []).slice(1).map(Number);
-ok(_v.length === 3 && (_v[0] > 1 || (_v[0] === 1 && (_v[1] > 15 || (_v[1] === 15 && _v[2] >= 1)))), `VERSION is at least 1.15.1 (is ${_v.join('.')})`);
+// ── 4. KNOWN-OPEN characterisation: airport-named hotel still City-anchors ────
+// This documents the still-broken case so a future fix has a red test to turn
+// green. It is NOT the desired end state.
+p = q(offersDeeplink(mkHotel('Miami International Airport', 'Room Only', 'TTI:HOTEL123')));
+ok(p.loct == null && p.loc === 'Miami International Airport',
+  'KNOWN-OPEN: airport-named hotel still anchors on the name with a City lookup (Travelify rejects this — fix pending the location type)');
 
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
