@@ -63,6 +63,24 @@ const csv = (v, re, cap = 60) => {
 
 const normBoard = (s) => String(s || '').toLowerCase().replace(/[^a-z]/g, '');
 
+// Board-basis synonym classes. Travelify labels the SAME board several ways —
+// "Bed & Breakfast" normalises to "bedbreakfast", "Breakfast" to "breakfast",
+// "Bed and Breakfast" to "bedandbreakfast" — so an exact normBoard match makes a
+// "BedAndBreakfast" filter silently drop genuine B&B offers spelled otherwise
+// (the CT ribbon's ~41% cache miss, 28 Jul 2026). The widget already folds these
+// together for display (boardBasisLabel); the cache filter must fold them the
+// same way. Keys are normBoard() output; each maps to one canonical class.
+const BOARD_CANON = {
+  bedandbreakfast: 'breakfast', bedbreakfast: 'breakfast', breakfast: 'breakfast', breakfastincluded: 'breakfast',
+  roomonly: 'roomonly',
+  selfcatering: 'selfcatering',
+  halfboard: 'halfboard',
+  fullboard: 'fullboard',
+  allinclusive: 'allinclusive',
+  allinclusiveplus: 'allinclusiveplus',
+};
+const canonBoard = (s) => { const k = normBoard(s); return BOARD_CANON[k] || k; };
+
 function num(v) { const n = Number(v); return Number.isFinite(n) ? n : null; }
 
 // Serve-time stale guard — the same expiry rules the cron purges on (past
@@ -330,7 +348,7 @@ export default async function handler(req, res) {
     const origins = new Set(orig.tokens.filter((s) => s.length === 3));
     const originMarkets = new Set(orig.tokens.filter((s) => s.length === 2));
     const hasOriginFilter = orig.tokens.length > 0;
-    const boards = new Set(boardsCsv.tokens.map(normBoard));
+    const boards = new Set(boardsCsv.tokens.map(canonBoard));
     const cabinsCsv = csv(q.cabinClasses, /^[A-Z]/i, 8);
     if (cabinsCsv.invalid) {
       res.setHeader('Cache-Control', 'no-store');
@@ -435,9 +453,20 @@ export default async function handler(req, res) {
           if (hasOriginFilter) {
             const apOk = origins.size && o.origin && origins.has(String(o.origin).toUpperCase());
             const mkOk = originMarkets.size && originMarkets.has(String(o.market || 'GB').toUpperCase());
-            if (!apOk && !mkOk) continue;
+            // A hotel-only offer has NO departure airport, so a departure-airport
+            // origin filter cannot describe it — gate it on market alone (and let
+            // it through when only airports were named). Without this an
+            // Accommodation widget with airport origins matched nothing at all,
+            // because every hotel lacks o.origin (the 100% miss on the hotel
+            // "cards" widgets, 28 Jul 2026). Flight and package offers, which
+            // carry a real departure airport, keep the full airport-or-market gate.
+            if (!o.origin) {
+              if (originMarkets.size && !mkOk) continue;
+            } else if (!apOk && !mkOk) {
+              continue;
+            }
           }
-          if (boards.size && !boards.has(normBoard(o.boardBasis))) continue;
+          if (boards.size && !boards.has(canonBoard(o.boardBasis))) continue;
           if (cabins.size && !cabins.has(normBoard(o.cabinClass))) continue;
           const pp = Number.isFinite(o.pricePP) ? o.pricePP : o.price;
           if (budgetMin != null && !(Number.isFinite(pp) && pp >= budgetMin)) continue;

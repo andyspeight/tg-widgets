@@ -147,12 +147,38 @@ ok(elig({ template: 'grid', type: 'Packages' }, { destinations: ['Orlando123'], 
 ok(elig({ template: 'departure-board', type: 'Packages' }, { destinations: ['MCO'], origins: ['GB'] }) === false, 'departure-board template never uses the cache');
 ok(elig({ template: 'grid', type: 'Flights' }, { destinations: ['MCO'], origins: ['GB'] }) === false, 'flight-type widgets never use the cache');
 
+// ── canonBoard: Travelify's B&B synonyms all fold to one class ────────────────
+// (the CT-Travel-Offer-Ribbon's ~41% miss — a "BedAndBreakfast" filter dropped
+// every offer Travelify labelled "Bed & Breakfast" or "Breakfast").
+const normBoardSrc = (cached.match(/const normBoard = [^\n]+/) || [])[0];
+const boardCanonSrc = ex(cached, 'const BOARD_CANON =');
+const canonBoardSrc = (cached.match(/const canonBoard = [^\n]+/) || [])[0];
+// eslint-disable-next-line no-eval
+const { canonBoard } = eval('(function(){' + normBoardSrc + '\n' + boardCanonSrc + '\n' + canonBoardSrc + '\nreturn { canonBoard };})')();
+
+const bb = canonBoard('BedAndBreakfast'); // the value the editor stores
+ok(canonBoard('Bed & Breakfast') === bb, '"Bed & Breakfast" (Travelify ampersand form) matches a BedAndBreakfast filter');
+ok(canonBoard('Bed and Breakfast') === bb, '"Bed and Breakfast" matches');
+ok(canonBoard('Breakfast') === bb, '"Breakfast" (Travelify short form) matches');
+ok(canonBoard('Breakfast Included') === bb, '"Breakfast Included" matches');
+ok(canonBoard('All Inclusive') === canonBoard('AllInclusive'), 'All Inclusive folds by spacing/case');
+ok(canonBoard('All Inclusive') !== bb, 'All Inclusive is NOT the same class as B&B');
+ok(canonBoard('AllInclusivePlus') !== canonBoard('AllInclusive'), 'All Inclusive Plus stays distinct from All Inclusive');
+ok(canonBoard('Half Board') === canonBoard('HalfBoard'), 'Half Board folds by spacing');
+ok(canonBoard('Room Only') === canonBoard('RoomOnly'), 'Room Only folds by spacing');
+ok(canonBoard('Some New Board') === 'somenewboard', 'an unknown board falls back to its normalised self (still filterable)');
+
 // ── Source guards: the handler wires the new helpers on the hot path ──────────
 ok(/const hasDestFilter =/.test(cached), 'handler tracks hasDestFilter (never falls into "read everything" for a named place)');
 ok(/parseDestinations\(q\.destinations\)/.test(cached), 'handler parses destinations via parseDestinations (codes + names)');
 ok(/nameMatchesAirport\(a\.airportName, name\)/.test(cached), 'handler resolves free-text names against the summary airport index');
 ok(/if \(!resolved\)[\s\S]{0,220}unresolvedFilters: true/.test(cached), 'an unresolved place name is an honest miss (unresolvedFilters), never a widened filter');
 ok(!/destTokens/.test(cached), 'the old destTokens variable is fully removed');
+ok(/const boards = new Set\(boardsCsv\.tokens\.map\(canonBoard\)\)/.test(cached), 'the board filter uses canonBoard (synonym-aware), not the exact normBoard');
+ok(/if \(boards\.size && !boards\.has\(canonBoard\(o\.boardBasis\)\)\)/.test(cached), 'offers are board-matched through canonBoard too');
+// A hotel-only offer (no o.origin) must not be excluded by an airport-only
+// origin filter — that was the 100% miss on the Accommodation "cards" widgets.
+ok(/if \(!o\.origin\)\s*\{[\s\S]{0,160}originMarkets\.size && !mkOk[\s\S]{0,60}\} else if \(!apOk && !mkOk\)/.test(cached), 'a flightless (hotel-only) offer is gated on market only, never on departure airport');
 const _v = (widget.match(/const VERSION = '(\d+)\.(\d+)\.(\d+)'/) || []).slice(1).map(Number);
 ok(_v.length === 3 && (_v[0] > 1 || (_v[0] === 1 && _v[1] >= 15)), `widget VERSION is at least 1.15.0 (is ${_v.join('.')})`);
 
