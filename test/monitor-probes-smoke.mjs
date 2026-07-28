@@ -60,6 +60,14 @@ global.fetch = async () => { const e = new Error('aborted'); e.name = 'AbortErro
 r = await checkWidgetConfig(SELF);
 ok(r.ok === false && /timed out/.test(r.detail), 'widget-config: timeout → fail');
 
+// The probe must carry the internal-cron secret so widget-config skips telemetry
+// for it (its throwaway id 404s by design and would otherwise inflate the config
+// error counts).
+let cfgSecret = null;
+global.fetch = async (url, opts) => { cfgSecret = opts && opts.headers && opts.headers['x-tgs-internal']; return { status: 404, text: async () => '{}' }; };
+await checkWidgetConfig(SELF, 'sekret');
+ok(cfgSecret === 'sekret', 'widget-config probe sends the internal-cron secret (telemetry exempt)');
+
 // ── config probe ─────────────────────────────────────────────────────────────
 const saved = {};
 for (const k of REQUIRED_ENV) { saved[k] = process.env[k]; process.env[k] = 'present'; }

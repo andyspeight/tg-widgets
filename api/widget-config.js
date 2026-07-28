@@ -657,6 +657,13 @@ export default async function handler(req, res) {
       let widgetTypeVal = null;
       async function done(status, jsonBody) {
         res.status(status).json(jsonBody);
+        // The synthetic monitor (api/cron/monitor.js) probes this endpoint every
+        // 5 min with a throwaway id that 404s by design. Skip telemetry for it,
+        // authenticated by the cron secret, so it doesn't inflate the config
+        // error counts (it was ~137 fake 404s/night). Mirrors the offers proxy's
+        // internal-cron exemption.
+        const internal = req.headers['x-tgs-internal'];
+        if (internal && process.env.CRON_SECRET && internal === process.env.CRON_SECRET) return;
         await logWidgetEvent(req, {
           event: 'config',
           widgetId,

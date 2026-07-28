@@ -59,14 +59,20 @@ ok(isNavAwayError('') === false, 'empty → NOT nav-away');
 // ── Source guards: the defensive parser replaced the bare res.json() sites ────
 ok(/async function parseJsonResponse\(res, label\)/.test(widget), 'shared defensive JSON parser is defined');
 ok((widget.match(/parseJsonResponse\(res, '/g) || []).length >= 3, 'defensive parser wired at the live, cache and board offer sites');
-ok(/const VERSION = '1\.13\.0'/.test(widget), 'VERSION bumped to 1.13.0');
+const _v = (widget.match(/const VERSION = '(\d+)\.(\d+)\.(\d+)'/) || []).slice(1).map(Number);
+ok(_v.length === 3 && (_v[0] > 1 || (_v[0] === 1 && _v[1] >= 14)), `VERSION is at least 1.14.0 (is ${_v.join('.')})`);
 
 // ── 23 Jul 2026 rate-limit lockout: editor/preview exemption + fail-soft ─────
 ok(/function withPreview\(headers, cfg\)/.test(widget), 'withPreview helper tags editor/preview requests for limiter exemption');
 ok((widget.match(/withPreview\(/g) || []).length >= 4, 'withPreview wired at the live, cache and board fetch sites (plus its definition)');
 ok(/res && res\.status === 429/.test(widget), 'live path detects a 429 from our own limiter');
 ok(/res && res\.status === 429[\s\S]{0,400}_showEmpty\(\)/.test(widget), 'a 429 fails soft via _showEmpty — no raw "retry in 3600s" banner, no alert');
-ok(/if \(res && res\.status === 429\)[\s\S]{0,900}parseJsonResponse/.test(widget), 'the 429 soft-path runs BEFORE parseJsonResponse (which would otherwise throw and alert)');
+ok(/if \(res && res\.status === 429\)[\s\S]{0,1800}parseJsonResponse/.test(widget), 'the 429 soft-path runs BEFORE parseJsonResponse (which would otherwise throw and alert)');
+// An upstream/gateway 5xx (502/503/504) must also fail SOFT (empty state), not a
+// red "Offers service unavailable" banner — the overnight 27 Jul 2026 Travelify
+// timeouts. And it must be handled BEFORE parseJsonResponse, which would throw.
+ok(/res\.status >= 500[\s\S]{0,300}_showEmpty\(\)/.test(widget), 'a 5xx upstream/gateway error fails soft via _showEmpty');
+ok(/if \(res && typeof res\.status === 'number' && res\.status >= 500\)[\s\S]{0,900}parseJsonResponse/.test(widget), 'the 5xx soft-path also runs BEFORE parseJsonResponse');
 
 async function run() {
   let calls;
