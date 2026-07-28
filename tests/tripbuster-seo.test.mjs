@@ -947,6 +947,30 @@ await testAsync('trip types are in the sitemap, and unknown ones are not', async
     'exactly the two types the site has pages for');
 });
 
+await testAsync('a type page carries a search box scoped to that type', async () => {
+  const r = await call(page, { query: { type: 'trip', slug: 'cruises' } });
+  assert.ok(/action="\/tripbuster\/search"/.test(r.body), 'a real GET form');
+  assert.ok(/<input type="hidden" name="holidayType" value="Cruise">/.test(r.body),
+    'scoped, so the search it runs is the one the page promised');
+});
+
+await testAsync('and drops the fields that mean nothing for that type', async () => {
+  const flights = await call(page, { query: { type: 'trip', slug: 'flights' } });
+  assert.ok(!/name="board"/.test(flights.body), 'board says nothing about a seat');
+  assert.ok(/name="airport"/.test(flights.body), 'but where you fly from still does');
+
+  const hotels = await call(page, { query: { type: 'trip', slug: 'hotels' } });
+  assert.ok(!/name="airport"/.test(hotels.body),
+    'somebody else is arranging the flights, so a departure airport is noise');
+  assert.ok(/name="board"/.test(hotels.body), 'board still matters for a room');
+});
+
+await testAsync('the front page form is unscoped, as it was', async () => {
+  const r = await call(page, { query: { type: 'home' } });
+  assert.ok(/action="\/tripbuster\/search"/.test(r.body));
+  assert.ok(!/name="holidayType"/.test(r.body), 'the home page searches everything');
+});
+
 // ── report ──────────────────────────────────────────────────────
 await new Promise((r) => fakePg.close(r));
 console.log(`\n${passed}/${passed + failures.length} passed`);

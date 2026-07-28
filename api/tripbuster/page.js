@@ -476,6 +476,7 @@ async function renderTripType(req, res, slug) {
   <p class="dest-lead">${esc(meta.lead)}</p>
   <div class="chips">${facts.map((f) => `<span class="chip">${esc(f)}</span>`).join('')}</div>
 </header>
+${TB.searchForm({ holidayType: meta.type, placeholder: meta.placeholder })}
 <section class="grid">${deals.map((d) => TB.dealCard(d)).join('')}</section>
 ${TB.rankingNote()}
 ${total > deals.length ? `<p class="dest-more"><a class="btn btn-dark" href="/tripbuster/search?holidayType=${

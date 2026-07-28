@@ -171,39 +171,44 @@ export function destinationHref(countrySlug, resortSlug) {
 export var TRIP_TYPES = [
   {
     slug: 'package-holidays', type: 'Package holiday',
-    plural: 'Package holidays', one: 'package holiday',
+    plural: 'Package holidays', one: 'package holiday', placeholder: 'Anywhere sunny',
     lead: 'Flights, hotel and transfers booked together and protected together. '
       + 'Every one of these is sold by an independent UK agent you deal with direct.',
   },
   {
     slug: 'cruises', type: 'Cruise', plural: 'Cruises', one: 'cruise',
+    placeholder: 'Fjords, Caribbean, Med',
     lead: 'Ocean and river sailings from UK ports and further afield. '
       + 'Cruise is where a good agent earns their keep, so ring them and ask.',
   },
   {
     slug: 'city-breaks', type: 'City break', plural: 'City breaks', one: 'city break',
+    placeholder: 'Prague, Rome, Krakow',
     lead: 'Two, three or four nights somewhere with plenty to walk to. '
       + 'Short enough to go twice a year.',
   },
   {
     slug: 'flight-and-hotel', type: 'Flight + hotel',
-    plural: 'Flight and hotel', one: 'flight and hotel trip',
+    plural: 'Flight and hotel', one: 'flight and hotel trip', placeholder: 'Anywhere sunny',
     lead: 'Put together for you rather than bought off a shelf: the flights and '
       + 'the room booked as one, so there is one person to ring if anything moves.',
   },
   {
     slug: 'escorted-tours', type: 'Escorted tour',
     plural: 'Escorted tours', one: 'escorted tour',
+    placeholder: 'Italy, Vietnam, Peru',
     lead: 'A guide, a route and somebody else doing the driving. '
       + 'You unpack once and see four places.',
   },
   {
     slug: 'hotels', type: 'Hotel only', plural: 'Hotels', one: 'hotel stay',
+    placeholder: 'Resort or hotel name',
     lead: 'The room on its own, for when you already have your flights '
       + 'or you are not flying at all.',
   },
   {
     slug: 'flights', type: 'Flight only', plural: 'Flights', one: 'flight',
+    placeholder: 'Where are you flying to',
     lead: 'Seats only, sold by an agent rather than a search engine. '
       + 'Worth a call if the dates are awkward or there are more than four of you.',
   },
@@ -1207,8 +1212,18 @@ export function tripTypeDirectory(rows) {
  * caller passes, which is how "no results, widen your search" keeps what the
  * traveller typed.
  */
-function searchForm(values) {
+export function searchForm(values) {
   var v = values || {};
+  // A type page scopes its form to that type, so the search it runs is the one
+  // the page promised. Carried as a hidden field rather than baked into the
+  // action, so it survives the form being submitted with everything else empty.
+  var type = v.holidayType || '';
+  // Which fields even MEAN anything depends on the type, and that is derived
+  // here rather than passed in: a caller cannot then ask for a board filter on
+  // a flights page. Board says nothing about a seat, and an airport says
+  // nothing about a room somebody else is flying them to.
+  var showBoard = type !== 'Flight only';
+  var showAirport = type !== 'Hotel only';
   var sel = function (name, label, options) {
     return '<div class="s-field"><label for="' + name + '">' + esc(label) + '</label>'
       + '<select id="' + name + '" name="' + name + '">'
@@ -1219,19 +1234,20 @@ function searchForm(values) {
       }).join('') + '</select></div>';
   };
   return '<form class="searchcard" id="searchForm" action="/tripbuster/search" method="get">'
+    + (type ? '<input type="hidden" name="holidayType" value="' + esc(type) + '">' : '')
     + '<div class="s-field"><label for="q">Where to</label>'
-    + '<input id="q" name="q" type="search" placeholder="Anywhere sunny" autocomplete="off"'
-    + ' value="' + esc(v.q || '') + '"></div>'
-    + '<div class="s-field"><label for="airport">Flying from</label>'
-    + '<input id="airport" name="airport" type="text" placeholder="Any UK airport"'
-    + ' autocomplete="off" value="' + esc(v.airport || '') + '"></div>'
-    + sel('board', 'Board', [
+    + '<input id="q" name="q" type="search" placeholder="' + esc(v.placeholder || 'Anywhere sunny')
+    + '" autocomplete="off" value="' + esc(v.q || '') + '"></div>'
+    + (showAirport ? '<div class="s-field"><label for="airport">Flying from</label>'
+      + '<input id="airport" name="airport" type="text" placeholder="Any UK airport"'
+      + ' autocomplete="off" value="' + esc(v.airport || '') + '"></div>' : '')
+    + (showBoard ? sel('board', 'Board', [
       { value: '', label: 'Any board' },
       { value: 'All inclusive', label: 'All inclusive' },
       { value: 'Half board', label: 'Half board' },
       { value: 'Bed & breakfast', label: 'Bed & breakfast' },
       { value: 'Self catering', label: 'Self catering' },
-    ])
+    ]) : '')
     + sel('maxPrice', 'Up to', [
       { value: '', label: 'Any price' },
       { value: '299', label: '£299 per person' },
