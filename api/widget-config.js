@@ -793,7 +793,17 @@ export default async function handler(req, res) {
           // then serve it to an anonymous embed. Keep authed responses private.
           res.setHeader('Cache-Control', 'private, no-store');
         } else {
-          res.setHeader('Cache-Control', 's-maxage=300, max-age=60, stale-while-revalidate=600');
+          // A client edits a widget in the editor and expects a page refresh to
+          // show the change. The old 5-minute CDN window (s-maxage=300) plus a
+          // 60s browser cache meant saved settings took minutes to appear, which
+          // reads as "my changes aren't saving" (Halal World Travel, 28 Jul 2026).
+          // max-age=0 makes a refresh always revalidate (served from the edge, no
+          // Airtable hit), and a 60s edge window keeps the change visible within a
+          // minute while still collapsing bursts so Airtable's ~5 req/s limit is
+          // safe at the current widget count. SCALING NOTE: once hundreds of
+          // distinct widgets are viewed concurrently, put a short Redis cache in
+          // front of the Airtable read (bust it on POST) so this stays cheap.
+          res.setHeader('Cache-Control', 's-maxage=60, max-age=0, stale-while-revalidate=60');
         }
         return done(200, payload);
       } catch {
