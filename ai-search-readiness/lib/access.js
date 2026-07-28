@@ -237,7 +237,9 @@ async function probe(url, ua, { maxBytes = PROBE_BYTES, timeoutMs = 8000 } = {})
       body: res.body,
       finalUrl: res.finalUrl,
       redirects: res.redirects.length,
-      server: (res.headers && (res.headers.server || res.headers['cf-ray'] ? res.headers.server || 'cloudflare' : null)) || null,
+      // A cf-ray header is a reliable tell that Cloudflare sits in front, which
+      // is worth knowing when a block turns up.
+      edge: res.headers && res.headers['cf-ray'] ? 'cloudflare' : (res.headers && res.headers.server) || null,
     };
   } catch (err) {
     return {

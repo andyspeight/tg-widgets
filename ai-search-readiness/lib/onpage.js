@@ -154,7 +154,7 @@ function analyseSchema(html) {
       invalid += 1;
       continue;
     }
-    collectTypes(parsed.__proto__ === undefined ? parsed : parsed, typeSet, flags);
+    collectTypes(parsed, typeSet, flags);
   }
 
   // Microdata is second-class but it is still structured data.
