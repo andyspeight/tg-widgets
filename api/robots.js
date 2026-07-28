@@ -8,8 +8,8 @@
  * wrong on all but one of them, and a Sitemap line pointing at the wrong host is
  * ignored.
  *
- * SCOPE: this is deliberately narrow. It disallows the API and the Tripbuster
- * advertiser dashboard, and allows everything else, which is what was already
+ * SCOPE: this is deliberately narrow. It disallows the API, the Tripbuster
+ * advertiser dashboard and the owner console, and allows everything else, which is what was already
  * happening when there was no robots.txt at all. The widget product's own
  * indexing posture — the client dashboard at /, the editor pages — is a separate
  * decision and is not being made here by accident.
@@ -33,6 +33,7 @@ export default function handler(req, res) {
 User-agent: *
 Disallow: /api/
 Disallow: /tripbuster/dashboard
+Disallow: /tripbuster/admin
 Allow: /
 
 Sitemap: ${origin}/tripbuster/sitemap.xml

@@ -65,6 +65,7 @@ TRIPBUSTER_FROM_EMAIL     optional, once Tripbuster has its own verified domain
 TRIPBUSTER_ADMIN_EMAIL    where new sign-ups go for approval
 TRIPBUSTER_AGENT_APPROVAL 'auto' to skip approval. Anything else means manual.
 TRIPBUSTER_FREE_UNTIL     YYYY-MM-DD. New sign-ups advertise free until this day.
+TRIPBUSTER_ADMIN_PASSWORD Opens the owner console at /tripbuster/admin. Min 12 chars.
 ```
 
 **Set `TRIPBUSTER_ADMIN_EMAIL`.** Without it a new agency can confirm its email
@@ -117,6 +118,7 @@ session secret without resetting click de-duplication.
 | `POST /api/tripbuster/register` | public | Agent sign-up. Answers identically whatever happened. |
 | `GET /tripbuster/verify` | link | The confirmation link from the sign-up email. Works once. |
 | `GET/POST /tripbuster/approve` | signed link | Approve a new agency. The GET only asks; the POST does it. |
+| `GET/POST/PATCH /api/tripbuster/admin` | owner password | The owner console: every agency, what they generate, what it is worth, and their free period, rate tier and status. |
 
 Public read endpoints send a wildcard CORS origin because the widget runs on
 customer sites and the data is deliberately public. The authenticated endpoints
@@ -169,7 +171,7 @@ impressions.
 ```
 npm run test:tripbuster           # 277 assertions, no network needed
 npm run test:tripbuster-seo       # 35 assertions, the indexable surface
-npm run test:tripbuster-signup    # 37 assertions, sign-up and enquiry emails
+npm run test:tripbuster-signup    # 46 assertions, sign-up, enquiry emails, owner console
 npm run test:tripbuster-rates     # 25 assertions, the rate card, free access and disclosure
 npm run test:tripbuster-import    # 112 assertions, drives the dashboard in Chromium
 npm run test:tripbuster-call      # 43 assertions, drives the call journey in Chromium
@@ -404,6 +406,27 @@ is listed underneath in price order, so the cheaper option is always one glance
 away. That is the line between advertising and burying the cheaper option, and
 it is not a line to move for revenue.
 
+## The owner console
+
+`/tripbuster/admin`, behind `TRIPBUSTER_ADMIN_PASSWORD`. Every agency, what they
+are generating, what it is worth, and the three commercial levers: **a free
+period, a rate tier, and whether they are trading**.
+
+**A password rather than accounts, for now.** There is one owner, and a users
+table with invitations and roles is real work in service of one person. The thing
+that actually matters — that this cannot be reached by an agency or by the public
+— comes from a separate token **scope**, not from the login mechanism. An agent
+token presented here is a 401, and an owner token presented to `/account` is a
+401 too. Both directions have tests. When a second person needs this, it wants
+turning into proper accounts.
+
+The session is eight hours rather than an agent's twenty-four, because this token
+can change what every agency on the platform is charged.
+
+**The free period is set here**, per agency, with a date picker and a "start
+charging now" button. That was the only way to set one before this existed short
+of writing SQL.
+
 ## Free access
 
 Early advertisers get in for nothing. That is a property of the **account**, not
@@ -450,9 +473,22 @@ Andy's expectation at launch is **no more than 100 chargeable events per agency
 per week**, mixed across clicks, calls and enquiries. At the standard rates that
 is roughly **£160 a month**, or **£340** on premium.
 
-Worth writing down because the demo seed is about **four times** that, so the
-figures in the demo dashboard overstate a real bill. If the seed is ever
-regenerated, aim for around 100 a week.
+The demo seed is sized against exactly that. Everything downstream is derived
+from impressions, so `base_imp` in `seed-demo.sql` is the only dial: change it and
+clicks, calls, enquiries and the bill all move together and stay in proportion.
+
+As seeded, over 30 days:
+
+| Agency | Chargeable a week | Worth | Charged |
+|---|---|---|---|
+| Coastline, premium | 105 | £138.75 | £138.75 |
+| Sunseeker, standard, clicks only | 94 | £41.20 | £41.20 |
+| Jetaway, standard, on a free run | 32 | £139.00 | £0.00 |
+
+Worth reading the last two rows together: Sunseeker generates three times the
+events of Jetaway and is worth a third as much, because clicks are 10p and calls
+are £1. That contrast is the argument for the call model, and it is why the demo
+carries one agency on each.
 
 ## Signing up, and who is allowed to advertise
 

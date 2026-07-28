@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tripbuster owner console</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23123249'/%3E%3Cpath d='M6 16h20M19 9l7 7-7 7M10 12v8' stroke='white' stroke-width='2.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/tripbuster/tb-site.css">
+<style>
+  body { background:var(--bg); }
+  .abar { background:var(--tx); color:#fff; padding:14px 0; }
+  .abar-in { display:flex; align-items:center; gap:14px; }
+  .abar h1 { margin:0; font-size:17px; font-weight:800; letter-spacing:-.02em; }
+  .abar .tagline { font-size:12px; opacity:.7; }
+  .abar .right { margin-left:auto; display:flex; align-items:center; gap:10px; }
+  .abar select { background:rgba(255,255,255,.14); color:#fff; border:1px solid rgba(255,255,255,.24);
+    border-radius:9px; padding:7px 10px; font:inherit; font-size:13px; font-weight:600; }
+  .abar button { background:rgba(255,255,255,.14); color:#fff; border:1px solid rgba(255,255,255,.24);
+    border-radius:9px; padding:7px 12px; font:inherit; font-size:13px; font-weight:700; }
+
+  .gate { max-width:380px; margin:80px auto; background:var(--surface); border:1px solid var(--border);
+    border-radius:16px; padding:28px; box-shadow:var(--shadow-md); }
+  .gate h1 { margin:0 0 6px; font-size:20px; font-weight:800; letter-spacing:-.02em; }
+  .gate p { margin:0 0 18px; font-size:13.5px; color:var(--tx-2); }
+  .gate input { width:100%; padding:11px 13px; border-radius:10px; border:1px solid var(--border-2);
+    background:var(--surface-2); font:inherit; margin-bottom:12px; }
+  .gate button { width:100%; }
+
+  .totals { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px;
+    margin:22px 0 18px; }
+  .ag { background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:16px 18px; margin-bottom:12px; }
+  .ag-top { display:flex; align-items:flex-start; gap:12px; flex-wrap:wrap; }
+  .ag-name { font-size:16px; font-weight:800; letter-spacing:-.02em; }
+  .ag-sub { font-size:12px; color:var(--tx-3); font-weight:600; }
+  .ag-money { margin-left:auto; text-align:right; }
+  .ag-money .big { font-size:20px; font-weight:800; letter-spacing:-.03em; }
+  .ag-money .lab { font-size:11px; font-weight:700; color:var(--tx-3);
+    text-transform:uppercase; letter-spacing:.05em; }
+  .ag-nums { display:flex; gap:16px; flex-wrap:wrap; margin:12px 0 0;
+    font-size:12.5px; color:var(--tx-2); }
+  .ag-nums b { color:var(--tx); font-variant-numeric:tabular-nums; }
+  .ag-edit { display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;
+    margin-top:14px; padding-top:14px; border-top:1px solid var(--border); }
+  .ag-edit label { font-size:11px; font-weight:800; letter-spacing:.05em;
+    text-transform:uppercase; color:var(--tx-3); display:block; margin-bottom:5px; }
+  .ag-edit input, .ag-edit select { padding:8px 10px; border-radius:9px;
+    border:1px solid var(--border-2); background:var(--surface-2); font:inherit; font-size:13px; }
+  .ag-edit .msg { font-size:12px; font-weight:700; margin-left:auto; align-self:center; }
+  .ag-edit .msg.ok { color:var(--live); }
+  .ag-edit .msg.bad { color:var(--danger); }
+  .pill { display:inline-flex; padding:3px 9px; border-radius:999px; font-size:11px;
+    font-weight:800; letter-spacing:.04em; text-transform:uppercase; }
+  .pill.free { background:var(--live-wash); color:var(--live); }
+  .pill.paid { background:var(--surface-2); color:var(--tx-2); border:1px solid var(--border-2); }
+  .pill.pending { background:var(--coral-wash); color:var(--coral-ink); }
+  @media (max-width:620px) { .ag-money { margin-left:0; text-align:left; } }
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate">
+  <h1>Owner console</h1>
+  <p>Tripbuster, not an agency. Everyone advertising, what they are generating,
+    and what it is worth.</p>
+  <div class="form-error" id="gateErr" role="alert"></div>
+  <input type="password" id="pw" placeholder="Owner password" autocomplete="current-password">
+  <button class="btn btn-primary" type="button" id="go">Sign in</button>
+</div>
+
+<div id="app" hidden>
+  <div class="abar"><div class="wrap abar-in">
+    <div>
+      <h1>Tripbuster owner console</h1>
+      <div class="tagline" id="tagline"></div>
+    </div>
+    <div class="right">
+      <select id="days">
+        <option value="7">Last 7 days</option>
+        <option value="30" selected>Last 30 days</option>
+        <option value="90">Last 90 days</option>
+      </select>
+      <button type="button" id="out">Sign out</button>
+    </div>
+  </div></div>
+
+  <main class="wrap" style="padding-bottom:50px">
+    <div class="totals" id="totals"></div>
+    <div id="list"></div>
+  </main>
+</div>
+
+<script type="module">
+import * as TB from '/tripbuster/tb-site.js';
+(function () {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const KEY = 'tb_admin_token';
+  let token = null;
+  try { token = sessionStorage.getItem(KEY); } catch (e) { token = null; }
+
+  // sessionStorage, not localStorage: this token can change what every agency
+  // is charged, so it should not outlive the browser tab.
+  function keep(t) {
+    token = t;
+    try { if (t) sessionStorage.setItem(KEY, t); else sessionStorage.removeItem(KEY); } catch (e) {}
+  }
+
+  async function api(path, opts) {
+    const o = opts || {};
+    const res = await fetch(path, {
+      method: o.method || 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: 'Bearer ' + token } : {}),
+      },
+      body: o.body ? JSON.stringify(o.body) : undefined,
+    });
+    let data = null;
+    try { data = await res.json(); } catch (e) {}
+    if (res.status === 401) { keep(null); show(false); throw new Error('unauthorised'); }
+    if (!res.ok) {
+      const err = new Error((data && data.error) || 'Something went wrong');
+      err.fieldErrors = (data && data.errors) || null;
+      throw err;
+    }
+    return data;
+  }
+
+  function show(signedIn) {
+    $('gate').hidden = signedIn;
+    $('app').hidden = !signedIn;
+  }
+
+  const money = (p) => {
+    const n = Number(p || 0) / 100;
+    return '£' + n.toLocaleString('en-GB', {
+      minimumFractionDigits: n % 1 === 0 ? 0 : 2, maximumFractionDigits: 2,
+    });
+  };
+  const nf = (n) => Number(n || 0).toLocaleString('en-GB');
+  const longDate = (iso) => {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''));
+    if (!m) return '';
+    return new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'UTC', day: 'numeric', month: 'short', year: 'numeric',
+    }).format(new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])));
+  };
+
+  function agencyCard(a) {
+    const events = Number(a.clicks) + Number(a.calls) + Number(a.leads);
+    // A weekly figure alongside the window total, because the expectation this
+    // is all sized against ("no more than 100 a week") is a weekly one.
+    const perWeek = $('days').value ? Math.round(events / (Number($('days').value) / 7)) : 0;
+    return '<div class="ag" data-id="' + TB.esc(a.id) + '">'
+      + '<div class="ag-top"><div>'
+        + '<div class="ag-name">' + TB.esc(a.name) + '</div>'
+        + '<div class="ag-sub">' + TB.esc(a.email) + ' · ' + TB.esc(a.plan)
+          + ' · ' + nf(a.liveDeals) + ' live of ' + nf(a.totalDeals) + '</div>'
+        + '<div style="margin-top:7px;display:flex;gap:6px;flex-wrap:wrap">'
+          + '<span class="pill ' + (a.free ? 'free' : 'paid') + '">'
+            + (a.free ? 'Free to ' + TB.esc(longDate(a.freeUntil)) : 'Charging') + '</span>'
+          + '<span class="pill paid">' + TB.esc(a.rateTier) + '</span>'
+          + (a.status !== 'active'
+            ? '<span class="pill pending">' + TB.esc(a.status) + '</span>' : '')
+        + '</div>'
+      + '</div>'
+      + '<div class="ag-money">'
+        + '<div class="lab">' + (a.free ? 'Worth' : 'Charged') + '</div>'
+        + '<div class="big">' + money(a.free ? a.worthPence : a.chargedPence) + '</div>'
+        + (a.free && Number(a.worthPence) > 0
+          ? '<div class="ag-sub">not charged</div>' : '')
+      + '</div></div>'
+      + '<div class="ag-nums">'
+        + '<span>Shown <b>' + nf(a.impressions) + '</b></span>'
+        + '<span>Clicks <b>' + nf(a.clicks) + '</b></span>'
+        + '<span>Calls <b>' + nf(a.calls) + '</b></span>'
+        + '<span>Enquiries <b>' + nf(a.leads) + '</b></span>'
+        + '<span>About <b>' + nf(perWeek) + '</b> chargeable a week</span>'
+      + '</div>'
+      + '<div class="ag-edit">'
+        + '<div><label>Free until</label>'
+          + '<input type="date" class="f-free" value="' + TB.esc(a.freeUntil || '') + '"></div>'
+        + '<div><label>Rate tier</label><select class="f-tier">'
+          + '<option value="standard"' + (a.rateTier === 'standard' ? ' selected' : '') + '>Standard</option>'
+          + '<option value="premium"' + (a.rateTier === 'premium' ? ' selected' : '') + '>Premium</option>'
+          + '</select></div>'
+        + '<div><label>Status</label><select class="f-status">'
+          + ['pending', 'active', 'paused', 'suspended'].map((st) =>
+            '<option value="' + st + '"' + (a.status === st ? ' selected' : '') + '>'
+            + st.charAt(0).toUpperCase() + st.slice(1) + '</option>').join('')
+          + '</select></div>'
+        + '<button class="btn btn-primary f-save" type="button">Save</button>'
+        + '<button class="btn btn-ghost f-clear" type="button">Start charging now</button>'
+        + '<span class="msg"></span>'
+      + '</div></div>';
+  }
+
+  async function load() {
+    const days = $('days').value;
+    const data = await api('/api/tripbuster/admin?days=' + encodeURIComponent(days));
+    const list = data.agencies || [];
+
+    const charged = list.reduce((n, a) => n + Number(a.chargedPence || 0), 0);
+    const worth = list.reduce((n, a) => n + Number(a.worthPence || 0), 0);
+    const free = list.filter((a) => a.free).length;
+    const pending = list.filter((a) => a.status === 'pending').length;
+
+    const tile = (lab, val, sub) => '<div class="cost-tile"><div class="lab">' + lab + '</div>'
+      + '<div class="amt tnum">' + val + '</div><div class="sub">' + sub + '</div></div>';
+    $('totals').innerHTML = [
+      tile('Agencies', nf(list.length), free + ' on a free period'),
+      tile('Charged', money(charged), 'Last ' + days + ' days'),
+      // The number that matters while everyone is free: revenue that begins the
+      // day the free periods end.
+      tile('Worth', money(worth), 'Including the free ones'),
+      tile('Waiting', nf(pending), pending ? 'Need approving' : 'Nothing to approve'),
+    ].join('');
+
+    $('list').innerHTML = list.length
+      ? list.map(agencyCard).join('')
+      : '<div class="empty"><b>No agencies yet</b>Nobody has signed up.</div>';
+    $('tagline').textContent = list.length + ' agencies · last ' + days + ' days';
+  }
+
+  // Delegated, so cards redrawn by a reload need no re-binding.
+  $('list').addEventListener('click', async (e) => {
+    const save = e.target.closest('.f-save');
+    const clear = e.target.closest('.f-clear');
+    if (!save && !clear) return;
+    const card = e.target.closest('.ag');
+    const msg = card.querySelector('.msg');
+    const btn = save || clear;
+    btn.disabled = true;
+    msg.className = 'msg';
+    msg.textContent = '';
+    try {
+      const payload = { agentId: card.getAttribute('data-id') };
+      if (clear) {
+        payload.clearFree = true;
+      } else {
+        const f = card.querySelector('.f-free').value;
+        if (f) payload.freeUntil = f;
+        payload.rateTier = card.querySelector('.f-tier').value;
+        payload.status = card.querySelector('.f-status').value;
+      }
+      const saved = await api('/api/tripbuster/admin', { method: 'PATCH', body: payload });
+      msg.className = 'msg ok';
+      msg.textContent = saved.free
+        ? 'Free until ' + longDate(saved.freeUntil)
+        : 'Charging from now';
+      await load();
+    } catch (err) {
+      if (err.message === 'unauthorised') return;
+      msg.className = 'msg bad';
+      msg.textContent = ((err.fieldErrors || [])[0] || {}).message || err.message;
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  $('days').addEventListener('change', () => load().catch(() => {}));
+  $('out').addEventListener('click', () => { keep(null); show(false); });
+
+  $('go').addEventListener('click', async () => {
+    const err = $('gateErr');
+    err.classList.remove('on');
+    try {
+      const data = await api('/api/tripbuster/admin?action=login', {
+        method: 'POST', body: { password: $('pw').value },
+      });
+      keep(data.token);
+      $('pw').value = '';
+      show(true);
+      await load();
+    } catch (e2) {
+      err.textContent = e2.message || 'Could not sign you in';
+      err.classList.add('on');
+    }
+  });
+  $('pw').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('go').click(); });
+
+  if (token) {
+    show(true);
+    load().catch(() => { keep(null); show(false); });
+  }
+}());
+</script>
+</body>
+</html>

@@ -557,7 +557,16 @@ select p.deal_id, p.agent_id, d.day::date, v.imp,
        greatest(0, round(v.imp * p.ctr_bp / 10000.0))::int
   from (
     select dl.id as deal_id, dl.agent_id, dl.reference,
-           45 + (abs(hashtext(dl.reference || 'pop')) % 180) as base_imp,
+           -- SIZED AGAINST A REAL EXPECTATION, not against what looks impressive.
+           -- The figure at launch is no more than 100 CHARGEABLE events per
+           -- agency per week, mixed across clicks, calls and enquiries. This was
+           -- four times that, so the demo dashboard showed a bill four times too
+           -- big, which oversells the cost of the platform to an agency.
+           --
+           -- Everything downstream is derived from impressions, so this range is
+           -- the only dial: change it and clicks, calls, enquiries and the bill
+           -- all move together and stay in proportion.
+           12 + (abs(hashtext(dl.reference || 'pop')) % 45) as base_imp,
            160 + (abs(hashtext(dl.reference || 'ctr')) % 290) as ctr_bp  -- 1.60% to 4.49%
       from public.deals dl
      where dl.status = 'live'
@@ -795,6 +804,33 @@ select l.deal_id, l.agent_id, l.created_at, 'site', l.ip_hash, l.ua_family, l.re
        substr(encode(sha256(convert_to('contact' || coalesce(l.phone, l.email), 'UTF8')), 'hex'), 1, 40),
        not public.tb_agent_is_open(l.agent_id, l.created_at)
   from public.leads l;
+
+-- ── what each event was worth, and what it cost ─────────────────────────────
+-- The events above are inserted DIRECTLY rather than through tb_record_click, so
+-- nothing has priced them. Without this a freshly seeded demo shows a cost panel
+-- full of zeroes, which reads as "the platform earns nothing".
+--
+-- One premium agency and one on a free run first, so the demo shows both tiers
+-- and both billing states rather than three identical accounts.
+update public.agents set rate_tier  = 'premium'        where slug = 'coastline-holidays';
+update public.agents set free_until = current_date + 60 where slug = 'jetaway-travel';
+update public.agents set free_until = null              where slug in ('sunseeker-travel','coastline-holidays');
+
+-- INVENTED DATA ON A DEVELOPMENT DATABASE. No agency has been billed for any of
+-- it. Live events price themselves as they happen and are never rewritten.
+update public.click_events c
+   set list_pence    = (public.tb_resolve_rate(c.agent_id, d.holiday_type, c.event_type)->>'pence')::int,
+       charged_pence = case
+         when not c.is_billable then 0
+         when coalesce((public.tb_resolve_rate(c.agent_id, d.holiday_type, c.event_type)->>'free')::boolean, false) then 0
+         else (public.tb_resolve_rate(c.agent_id, d.holiday_type, c.event_type)->>'pence')::int
+       end,
+       free_period = coalesce((public.tb_resolve_rate(c.agent_id, d.holiday_type, c.event_type)->>'free')::boolean, false),
+       rate_tier   = public.tb_resolve_rate(c.agent_id, d.holiday_type, c.event_type)->>'tier',
+       rate_source = public.tb_resolve_rate(c.agent_id, d.holiday_type, c.event_type)->>'source'
+  from public.deals d
+ where d.id = c.deal_id
+   and c.agent_id in (select id from public.agents where slug in ('sunseeker-travel','coastline-holidays','jetaway-travel'));
 
 -- ── a little import history ─────────────────────────────────────────────────
 -- So the "Recent imports" panel has something to show, matching how the deals

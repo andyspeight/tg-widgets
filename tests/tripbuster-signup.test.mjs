@@ -29,6 +29,7 @@ process.env.SENDGRID_API_KEY = 'SG.test';
 process.env.SENDGRID_FROM_EMAIL = 'noreply@travelify.io';
 process.env.TRIPBUSTER_ADMIN_EMAIL = 'andy@example.co.uk';
 process.env.RL_DISABLED = '1';
+process.env.TRIPBUSTER_ADMIN_PASSWORD = 'an-owner-password-long-enough';
 
 // ── intercept SendGrid ──────────────────────────────────────────
 // Everything else (the fake PostgREST) still goes over real fetch.
@@ -61,6 +62,7 @@ const { default: verify } = await import('../api/tripbuster/verify.js');
 const { default: approve } = await import('../api/tripbuster/approve.js');
 const { default: lead } = await import('../api/tripbuster/lead.js');
 const { default: account } = await import('../api/tripbuster/account.js');
+const { default: admin } = await import('../api/tripbuster/admin.js');
 const { validateRegistration } = await import('../api/_lib/tripbuster/register-schema.js');
 const { signAdminLink, createAgentToken } = await import('../api/_lib/tripbuster/auth.js');
 
@@ -89,6 +91,7 @@ function resetDb() {
       id: AGENT_ID, name: 'Jetaway Travel', slug: 'jetaway-travel',
       email: 'bookings@example.co.uk', notify_email: null, notify_leads: true,
       phone: '0141 555 907', hours_mode: 'always', plan: 'Boost', status: 'active',
+      rate_tier: 'standard', free_until: null,
     },
   };
 }
@@ -176,6 +179,28 @@ const rpc = {
   tb_release_lead_notification(a) {
     if (a.p_lead_id === db.leadRow.id) db.leadRow.notified_at = null;
     return null;
+  },
+
+  tb_admin_agencies() {
+    return [{
+      id: AGENT_ID, name: 'Jetaway Travel', slug: 'jetaway-travel',
+      email: 'bookings@example.co.uk', status: 'active', plan: 'Boost',
+      rateTier: 'standard', freeUntil: null, free: false,
+      liveDeals: 5, totalDeals: 5, impressions: 4200,
+      clicks: 0, calls: 167, leads: 38, chargedPence: 20500, worthPence: 20500,
+    }];
+  },
+  tb_admin_set_agency(a) {
+    const ag = db.notifyAgent;
+    if (a.p_clear_free) ag.free_until = null;
+    else if (a.p_free_until) ag.free_until = a.p_free_until;
+    if (a.p_rate_tier) ag.rate_tier = a.p_rate_tier;
+    if (a.p_status) ag.status = a.p_status;
+    return {
+      ok: true, id: ag.id, name: ag.name, freeUntil: ag.free_until || null,
+      rateTier: ag.rate_tier || 'standard', status: ag.status,
+      free: !!ag.free_until,
+    };
   },
 
   tb_agent_billing_counts() { return { total: 3, overridden: 0 }; },
@@ -718,6 +743,111 @@ await testAsync('the settings screen still refuses to touch plan or status', asy
   });
   assert.equal(db.notifyAgent.plan, 'Boost', 'a settings screen must not upgrade a plan');
   assert.equal(db.notifyAgent.status, 'active');
+});
+
+// ════════════════════════════════════════════════════════════════
+// 7. the owner console
+// ════════════════════════════════════════════════════════════════
+
+async function ownerToken() {
+  const r = await call(admin, {
+    method: 'POST', query: { action: 'login' },
+    body: { password: 'an-owner-password-long-enough' },
+  });
+  return r.json.token;
+}
+
+await testAsync('the owner console refuses the wrong password', async () => {
+  freshRun();
+  const r = await call(admin, {
+    method: 'POST', query: { action: 'login' }, body: { password: 'wrong' },
+  });
+  assert.equal(r.status, 401);
+  assert.ok(!r.json.token);
+});
+
+await testAsync('and refuses anyone with no token at all', async () => {
+  freshRun();
+  assert.equal((await call(admin, { method: 'GET' })).status, 401);
+  assert.equal((await call(admin, { method: 'PATCH', body: { agentId: AGENT_ID } })).status, 401);
+});
+
+await testAsync('AN AGENT TOKEN IS NOT AN OWNER TOKEN', async () => {
+  freshRun();
+  // The whole reason the scope claim exists. Any agency holding a valid session
+  // must not be able to reach the screen that sets what every agency is charged.
+  const r = await call(admin, { method: 'GET', headers: asAgent });
+  assert.equal(r.status, 401);
+});
+
+await testAsync('an owner token is not an agent token either', async () => {
+  freshRun();
+  const t = await ownerToken();
+  const r = await call(account, {
+    method: 'GET', headers: { authorization: `Bearer ${t}` },
+  });
+  assert.equal(r.status, 401, 'the owner must not be able to act as an agency');
+});
+
+await testAsync('the console lists every agency with what it is worth', async () => {
+  freshRun();
+  const t = await ownerToken();
+  const r = await call(admin, { method: 'GET', headers: { authorization: `Bearer ${t}` } });
+  assert.equal(r.status, 200);
+  assert.equal(r.json.agencies.length, 1);
+  assert.equal(r.json.agencies[0].name, 'Jetaway Travel');
+  assert.equal(r.json.agencies[0].worthPence, 20500);
+});
+
+await testAsync('a free period can be set on one agency', async () => {
+  freshRun();
+  const t = await ownerToken();
+  const r = await call(admin, {
+    method: 'PATCH',
+    headers: { authorization: `Bearer ${t}` },
+    body: { agentId: AGENT_ID, freeUntil: '2027-01-31' },
+  });
+  assert.equal(r.status, 200);
+  assert.equal(db.notifyAgent.free_until, '2027-01-31');
+});
+
+await testAsync('and cleared again, which starts charging from now', async () => {
+  freshRun();
+  db.notifyAgent.free_until = '2027-01-31';
+  const t = await ownerToken();
+  const r = await call(admin, {
+    method: 'PATCH',
+    headers: { authorization: `Bearer ${t}` },
+    body: { agentId: AGENT_ID, clearFree: true },
+  });
+  assert.equal(r.status, 200);
+  assert.equal(db.notifyAgent.free_until, null);
+});
+
+await testAsync('a nonsense date is refused rather than stored', async () => {
+  freshRun();
+  const t = await ownerToken();
+  for (const freeUntil of ['31/01/2027', 'next spring', '2027-13-45']) {
+    const r = await call(admin, {
+      method: 'PATCH',
+      headers: { authorization: `Bearer ${t}` },
+      body: { agentId: AGENT_ID, freeUntil },
+    });
+    assert.equal(r.status, 422, freeUntil);
+  }
+  assert.equal(db.notifyAgent.free_until, null);
+});
+
+await testAsync('a rate tier outside the two we have is refused', async () => {
+  freshRun();
+  const t = await ownerToken();
+  const r = await call(admin, {
+    method: 'PATCH',
+    headers: { authorization: `Bearer ${t}` },
+    body: { agentId: AGENT_ID, rateTier: 'platinum' },
+  });
+  assert.equal(r.status, 422);
+  assert.equal(db.notifyAgent.rate_tier, 'standard', 'nothing was written');
 });
 
 // ── report ──────────────────────────────────────────────────────
