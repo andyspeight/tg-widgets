@@ -586,6 +586,7 @@
         </div>
 
         <div class="stats" id="stats"></div>
+        <div id="costs"></div>
 
         <div class="toolbar">
           <div class="segs" id="filters" role="group" aria-label="Filter deals by status">
@@ -1504,18 +1505,100 @@
       val: (c.live || 0) + (unlimited ? '' : ' <small>/ ' + state.allowance + '</small>'),
       foot: unlimited ? 'Unlimited on ' + esc(state.plan) : 'on ' + esc(state.plan),
     };
-    const tiles = mode === 'call' ? [shown, calls, callRate, live]
-      : mode === 'both' ? [shown, clicks, calls, live]
-        : [shown, clicks, ctr, live];
+    // What it comes to. Deliberately a headline tile rather than something an
+    // agency has to go looking for: they are being charged per event, and the
+    // number they will be invoiced ought to be as easy to find as the number of
+    // clicks it came from.
+    const spend = {
+      lab: 'Spend',
+      val: have ? money(s.costPence && s.costPence.total) : '—',
+      foot: have ? 'Last ' + days + ' days, ' + (s.rateTier === 'premium' ? 'premium' : 'standard') + ' rate'
+        : 'Not available right now',
+    };
+    const tiles = mode === 'call' ? [shown, calls, spend, live]
+      : mode === 'both' ? [shown, clicks, calls, spend]
+        : [shown, clicks, ctr, spend];
     $('stats').innerHTML = tiles.map((t) =>
       '<div class="stat"><div class="stat-lab">' + esc(t.lab) + '</div>' +
       '<div class="stat-val tnum">' + t.val + '</div>' +
       '<div class="stat-foot">' + t.foot + '</div></div>').join('');
     $('navCount').textContent = c.total || 0;
+    renderCosts();
 
     // Secondary line: the deal-status breakdown the tiles no longer carry.
     $('breakdown').textContent =
       (c.live || 0) + ' live · ' + (c.draft || 0) + ' draft · ' + (c.paused || 0) + ' paused';
+  }
+
+  /** Pence to "£1,234.56", or "£0" when there is nothing to round. */
+  function money(pence) {
+    const n = Number(pence || 0) / 100;
+    return '£' + n.toLocaleString('en-GB', {
+      minimumFractionDigits: n % 1 === 0 ? 0 : 2, maximumFractionDigits: 2,
+    });
+  }
+
+  const EVENT_WORDS = { click: 'Click-throughs', call: 'Calls', lead: 'Enquiries' };
+  // Where the rate came from. An agency asking "why am I paying 30p" deserves a
+  // sentence rather than a shrug, and this is the sentence.
+  const SOURCE_WORDS = {
+    default: 'Standard rate',
+    product: 'Rate for this type of holiday',
+    client: 'Your agreed rate',
+    client_product: 'Your agreed rate for this type of holiday',
+    unrated: 'No rate set',
+  };
+
+  function renderCosts() {
+    const host = $('costs');
+    if (!host) return;
+    const s = state.stats;
+    if (!s || !s.costPence) { host.innerHTML = ''; return; }
+
+    const c = s.costPence;
+    const tier = s.rateTier === 'premium' ? 'premium' : 'standard';
+    const lines = Array.isArray(s.rateLines) ? s.rateLines : [];
+
+    const tile = (lab, amt, sub, cls) =>
+      '<div class="cost-tile' + (cls || '') + '"><div class="lab">' + esc(lab) + '</div>' +
+      '<div class="amt tnum">' + amt + '</div>' +
+      '<div class="sub">' + esc(sub) + '</div></div>';
+
+    const tiles = [
+      tile('Click-throughs', money(c.clicks), nf(s.billableClicks || 0) + ' charged'),
+      tile('Calls', money(c.calls), nf(s.billableCalls || 0) + ' charged'),
+      tile('Enquiries', money(c.leads), nf(s.billableLeads || 0) + ' charged'),
+      tile('Total', money(c.total), 'Last ' + ((s && s.days) || 30) + ' days', ' is-total'),
+    ].join('');
+
+    // One row per distinct rate actually applied, so an override shows up as its
+    // own line rather than being averaged into invisibility.
+    const rows = lines.length ? lines.map((l) =>
+      '<tr><td>' + esc(EVENT_WORDS[l.eventType] || l.eventType) + '</td>' +
+      '<td class="num">' + money(l.pence) + '</td>' +
+      '<td class="num">' + nf(l.events) + '</td>' +
+      '<td class="num">' + money(l.costPence) + '</td>' +
+      '<td><span class="rate-src">' + esc(SOURCE_WORDS[l.source] || l.source) + '</span></td></tr>').join('')
+      : '<tr><td colspan="5" style="color:var(--tx-3)">Nothing charged for in this period.</td></tr>';
+
+    host.innerHTML =
+      '<div class="card" style="padding:20px;margin-bottom:18px">' +
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">' +
+          '<h3 style="margin:0;font-size:16px;font-weight:800;letter-spacing:-.02em">What you are paying</h3>' +
+          '<span class="tier-badge is-' + tier + '">' + tier + '</span>' +
+        '</div>' +
+        '<p class="sub" style="margin:0 0 14px">You are charged for the deliberate acts: '
+          + 'a traveller clicking through to you, ringing you, or leaving their details. '
+          + 'Nothing is charged for simply being shown.</p>' +
+        '<div class="cost-grid">' + tiles + '</div>' +
+        '<table class="rate-tbl"><thead><tr>' +
+          '<th>What for</th><th class="num">Rate</th><th class="num">Number</th>' +
+          '<th class="num">Cost</th><th>Why that rate</th>' +
+        '</tr></thead><tbody>' + rows + '</tbody></table>' +
+        '<p class="sub" style="margin:12px 0 0;font-size:12px">' +
+          'The rate is fixed at the moment each event happens, so a change to your '
+          + 'rates never alters a period you have already been billed for.</p>' +
+      '</div>';
   }
 
   function renderPlanCard() {

@@ -86,6 +86,11 @@ export function toDeal(r) {
     availability: r.availability_status || '',
     protection: r.effective_protection || '',
     updatedAt: r.updated_at || r.published_at || null,
+    // This agency pays the premium rate, which buys position: top five in the
+    // results and the headline slot on a compare card. It is surfaced so the
+    // page can LABEL it. Paid placement that is not labelled is undisclosed
+    // advertising, and the DMCC Act is explicit about that.
+    sponsored: r.is_premium === true,
     agent: { name: r.agent_name || '', slug: r.agent_slug || '', town: r.agent_town || '' },
 
     // present only in compare mode: every agent advertising this same hotel
@@ -102,6 +107,7 @@ export function toDeal(r) {
           // A rival on a call-first agency is rung, not clicked.
           phone: c.phone || '',
           billingMode: c.billingMode || 'click',
+          sponsored: c.sponsored === true,
           // Per rival, because one agency in a compare list can be open while
           // the next is shut, and that is often the reason to ring the second
           // cheapest rather than the cheapest.

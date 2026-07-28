@@ -169,6 +169,7 @@ impressions.
 npm run test:tripbuster           # 277 assertions, no network needed
 npm run test:tripbuster-seo       # 35 assertions, the indexable surface
 npm run test:tripbuster-signup    # 34 assertions, sign-up and enquiry emails
+npm run test:tripbuster-rates     # 19 assertions, the rate card and disclosure
 npm run test:tripbuster-import    # 107 assertions, drives the dashboard in Chromium
 npm run test:tripbuster-call      # 43 assertions, drives the call journey in Chromium
 ```
@@ -318,6 +319,90 @@ ratings we do not hold: a manual-action risk, and a consumer-protection risk und
 the DMCC Act. Showing the agent's score on the page as the agent's score is fine.
 Star ratings in the search results have to be earned by collecting real reviews.
 
+## The rate card
+
+Decided 28 July 2026.
+
+| | Standard | Premium |
+|---|---|---|
+| Click-through | 10p | 25p |
+| Call | £1 | £2 |
+| Details left | £1 | £2 |
+
+Premium also buys **position**: top five in the results, and the headline agency
+on a compare card.
+
+Those are defaults, overridable three ways. **Most specific wins:**
+
+| Scope | Beats | Example |
+|---|---|---|
+| Client + product | everything | Sunseeker pays 50p a click on cruises |
+| Client | product, default | Sunseeker pays 30p a click on everything |
+| Product | default | everyone pays 4p a click on flight-only |
+| Default | — | everyone pays 10p a click |
+
+**A client rate beats a product rate.** If flights are 4p for everyone and
+Sunseeker has an agreed 30p, Sunseeker pays 30p on flights. To make one product
+cheap for one client, set a client-and-product rate. This surprises people, so it
+has its own test.
+
+There is no separate defaults table. The defaults are rows with `agent_id` and
+`holiday_type` both null, which makes them the least specific match, so there is
+one table, one lookup and one precedence rule rather than a constant in the code
+plus three kinds of override to keep in step with it.
+
+### The price is frozen onto the event
+
+`tb_record_click` resolves the rate as the event happens and writes the pence to
+`click_events.charged_pence`, alongside the tier and which scope the rate came
+from. An invoice sums that column; it never re-runs the rate card.
+
+**So changing a rate only affects events from that moment on.** That is the
+intended behaviour and it is what makes a bill defensible in an argument. The
+alternative — working the charge out at invoice time — means a rate change
+silently re-prices months an agency has already paid for.
+
+The rate is resolved even when the event is **not** billable, and stores zero.
+"This call was worth £2 and we did not charge for it" is a different fact from
+"we have no idea what this call was worth", and the first is the one an agency
+rings up about.
+
+### What an event cost never reaches a browser
+
+`tb_record_click` returns `chargedPence`, and `api/tripbuster/click.js` picks out
+only the click-out URL and the phone number. Returning the charge would publish
+the rate card one event at a time, and let any agency read every other agency's
+rates. There is a test that reads the response construction and fails if it ever
+carries a charge.
+
+## Everything here is advertising, and the site says so
+
+Standard agents pay per click, per call and per enquiry. Premium agents pay more
+and get position for it. **All of it is advertising**, which shapes the
+disclosure into three parts:
+
+| Where | What it says |
+|---|---|
+| Footer, every page | the whole site is advertising, agents pay when you get in touch, we never add anything to the price |
+| `rankingNote()`, any page listing deals | agents can pay to appear higher, and those are marked |
+| The `Promoted` badge | this individual listing paid for position |
+
+**The badge says "Promoted", not "Sponsored", deliberately.** On a site where
+every listing is paid for, badging five of them "Sponsored" implies the other
+twenty are editorial picks — misleading in the opposite direction, and its own
+compliance problem. "Promoted" carries the narrower, accurate claim: this one
+paid to be higher up than it otherwise would be.
+
+The note appears on every listing page whether or not anything on it is promoted,
+because the first half is always true and a disclosure that comes and goes
+teaches people that its absence means something.
+
+**The compare list stays cheapest-first regardless of who paid.** A promoted
+agency takes the headline slot on a card, but every agent selling the same hotel
+is listed underneath in price order, so the cheaper option is always one glance
+away. That is the line between advertising and burying the cheaper option, and
+it is not a line to move for revenue.
+
 ## Signing up, and who is allowed to advertise
 
 ```
@@ -420,6 +505,7 @@ Apply in order. They are idempotent enough to run on a fresh project.
 | `011_seo_slugs_and_destinations.sql` | `tb_slugify`; a stable unique `deals.slug` minted at first publish; `p_deal_slug` and `p_holiday_type` on `tb_search_deals`; `tb_destinations`, `tb_destination`, `tb_sitemap` |
 | `012_canonical_deal_page.sql` | `canonical_slug` on every returned row, so one hotel is one page; the sitemap lists pages rather than deals |
 | `013_registration_and_notifications.sql` | Verification, approval and notification columns; `tb_unique_agent_slug`, `tb_register_agent`, `tb_verify_agent`, `tb_approve_agent`, `tb_claim_lead_notification` |
+| `014_rate_card.sql` | `agents.rate_tier`; the `rate_card` table; `tb_resolve_rate`; the charge stamped onto `click_events`; costs in `tb_agent_stats`; premium placement in `tb_search_deals` |
 
 Migration 008 replaces `tb_record_click` rather than altering it. Adding
 parameters to a Postgres function creates an **overload**, and with defaults in

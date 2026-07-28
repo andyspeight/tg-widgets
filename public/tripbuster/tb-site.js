@@ -698,6 +698,47 @@ export function wireCallback(form, deal, surface) {
   });
 }
 
+/**
+ * The promoted label.
+ *
+ * EVERY LISTING ON TRIPBUSTER IS ADVERTISING. Standard agents pay per click, per
+ * call and per enquiry; premium agents pay more, and what the extra buys is
+ * POSITION — top five in the results and the headline slot on a compare card.
+ *
+ * So this badge does NOT mean "this one is paid for". They all are, and saying
+ * otherwise on a per-listing basis would imply the unbadged ones are editorial
+ * picks, which is misleading in the opposite direction and is its own compliance
+ * problem. The badge means "this one paid to be higher up than it otherwise
+ * would be", which is the only thing that distinguishes it.
+ *
+ * "Promoted" rather than "Sponsored" for exactly that reason. The fact that
+ * money changed hands is carried site-wide by the footer and by rankingNote();
+ * this word carries the narrower claim about ORDER. It is a disclosure either
+ * way, so do not drop it to tidy a layout and do not soften it to "Featured" or
+ * "Recommended" — "Recommended" implies we are recommending, which we are not.
+ */
+export function sponsoredTag(cls) {
+  return '<span class="' + (cls || 'spon') + '" title="This agent pays more to appear '
+    + 'higher up. Every deal on Tripbuster is advertising.">Promoted</span>';
+}
+
+/**
+ * How this site makes its money and how the order is decided.
+ *
+ * Shown on every page that lists deals, whether or not anything on it is
+ * promoted, because the first half is always true. A disclosure that only
+ * appears sometimes teaches people that its absence means something.
+ */
+export function rankingNote() {
+  return '<p class="rank-note">' + svg(IC.info)
+    + '<span><b>Every deal here is an advert.</b> Agents pay us when you click '
+    + 'through, ring them or leave your details, and some pay more to appear '
+    + 'higher up — those are marked <b>Promoted</b>. Everything else is ordered '
+    + 'by the filters you chose. Prices are set by the agent, we never add '
+    + 'anything to them, and we show you every agent selling the same holiday so '
+    + 'you can always find the cheapest.</span></p>';
+}
+
 export function chipsFor(d) {
   var out = [];
   if (d.nights) out.push('<span class="chip">' + svg(IC.moon) + esc(d.nights) + ' nights</span>');
@@ -734,6 +775,7 @@ export function dealCard(d) {
       '<h3 class="dc-title">' + esc(d.title) + '</h3>' +
       '<div class="chips">' + chipsFor(d) + '</div>' +
       '<div class="byagent">by <b>' + esc(d.agent && d.agent.name) + '</b>' +
+        (d.sponsored ? sponsoredTag() : '') +
         (d.atol ? '<span class="prot">' + svg(IC.shield) + 'ATOL ' + esc(d.atol) + '</span>' : '') +
         (d.agentCount > 1
           ? '<span>+' + (d.agentCount - 1) + ' more agent' + (d.agentCount > 2 ? 's' : '') + '</span>'
@@ -894,7 +936,11 @@ export function bookingPanel(d) {
       return '<div class="agent-row' + (i === 0 ? ' best' : '') + '">' +
         '<span class="ar-av">' + esc(initials) + '</span>' +
         '<span class="ar-mid"><span class="ar-nm">' + esc(a.agent) +
-          (i === 0 && agents.length > 1 ? '<span class="best-tag">CHEAPEST</span>' : '') + '</span>' +
+          // Cheapest is a fact about the price; sponsored is a fact about who
+          // paid. They are different claims and both can be true at once, so
+          // neither replaces the other.
+          (i === 0 && agents.length > 1 ? '<span class="best-tag">CHEAPEST</span>' : '') +
+          (a.sponsored ? sponsoredTag() : '') + '</span>' +
           (a.atol ? '<span class="prot" style="font-size:11px">' + svg(IC.shield) +
             'ATOL ' + esc(a.atol) + '</span>' : '') + '</span>' +
         '<span class="ar-right"><span class="ar-price tnum">' +
@@ -1029,7 +1075,9 @@ export function homePage(view) {
     + '<div><h2>This week\'s best savings</h2>'
     + '<p>The biggest discounts our agents are advertising right now.</p></div>'
     + '<a class="btn btn-ghost" href="/tripbuster/search">See all deals</a></div>'
-    + '<div class="grid" id="featured">' + featured + '</div></section>'
+    + '<div class="grid" id="featured">' + featured + '</div>'
+    + (deals.length ? rankingNote() : '')
+    + '</section>'
 
     + (tiles
       ? '<section class="destsec"><div class="wrap section"><div class="sec-head">'
@@ -1072,7 +1120,9 @@ export function header(active) {
 export function footer() {
   return '<footer class="foot"><div class="wrap foot-in">' +
     '<span class="atol">' + svg(IC.shield) +
-    ' Holidays are sold and financially protected by the advertising agent, not by Tripbuster.</span>' +
+    ' Every deal on Tripbuster is advertised by the agent, who pays us when you '
+    + 'get in touch. Holidays are sold and financially protected by that agent, '
+    + 'not by Tripbuster, and we never add anything to the price.</span>' +
     '<span><a href="/tripbuster/destinations">All destinations</a> &middot; ' +
     '&copy; 2026 Tripbuster &middot; a Travelgenix product</span>' +
     '</div></footer>';

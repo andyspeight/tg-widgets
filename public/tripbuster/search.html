@@ -113,6 +113,7 @@
     </div>
 
     <div class="rows" id="results"><div class="loading">Searching deals…</div></div>
+    <div id="rankNote"></div>
     <div class="more"><button class="btn btn-ghost" id="loadMore" hidden>Show more deals</button></div>
   </div>
 </main>
@@ -227,7 +228,8 @@ import * as TB from '/tripbuster/tb-site.js';
       '<div class="rc-mid">' +
         TB.starsMarkup(d.starRating) +
         '<h2 class="rc-name"><a href="' + TB.esc(dealHref) + '">' +
-          TB.esc(d.accommodation || d.title) + '</a></h2>' +
+          TB.esc(d.accommodation || d.title) + '</a>' +
+          (d.sponsored ? TB.sponsoredTag() : '') + '</h2>' +
         '<div class="rc-loc">' + TB.svg(TB.IC.pin) + TB.esc([d.resort, d.country].filter(Boolean).join(', ')) +
           (d.distanceToBeach ? ' · ' + TB.esc(d.distanceToBeach) + ' to the beach' : '') + '</div>' +
         (d.guestScore
@@ -277,6 +279,10 @@ import * as TB from '/tripbuster/tb-site.js';
       return;
     }
     host.innerHTML = loaded.map(resultRow).join('');
+    // Always, not only when something on the page is promoted. Every listing is
+    // advertising whether or not it paid for position, and a notice that comes
+    // and goes teaches people that its absence means something.
+    $('rankNote').innerHTML = loaded.length ? TB.rankingNote() : '';
     $('loadMore').hidden = loaded.length >= total;
   }
 

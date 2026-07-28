@@ -522,3 +522,44 @@ input[type=range] { width:100%; accent-color:var(--coral); }
   border-radius:8px; font-size:13px; font-weight:600; }
 .dest-list a:hover { background:var(--sky-wash); }
 .dest-list span { color:var(--tx-3); font-weight:700; font-size:11.5px; }
+
+/* ── sponsored placement ──────────────────────────────────────────────────
+   A premium agency pays more per event and buys position with it. Under the
+   DMCC Act that has to be identifiable as advertising, so this label is a
+   compliance control rather than decoration: do not remove it to tidy a
+   layout, and do not soften the word to "Featured" — the CMA's test is
+   whether a normal person reads it as "somebody paid", and Featured fails. */
+.spon { display:inline-flex; align-items:center; margin-left:6px; padding:2px 7px;
+  border-radius:999px; font-size:10px; font-weight:800; letter-spacing:.04em;
+  text-transform:uppercase; background:var(--surface-2); color:var(--tx-2);
+  border:1px solid var(--border-2); white-space:nowrap; }
+.rc-name .spon, .ar-nm .spon { vertical-align:middle; }
+.rank-note { display:flex; gap:9px; align-items:flex-start; margin:18px 0 4px;
+  padding:12px 14px; border-radius:12px; background:var(--surface-2);
+  border:1px solid var(--border); font-size:12.5px; line-height:1.55; color:var(--tx-2); }
+.rank-note svg { width:16px; height:16px; stroke:var(--tx-3); fill:none;
+  stroke-width:2; flex:none; margin-top:1px; }
+.rank-note b { color:var(--tx); }
+
+/* ── what an agency is spending ───────────────────────────────────────── */
+.cost-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:12px; margin-bottom:16px; }
+.cost-tile { background:var(--surface-2); border:1px solid var(--border);
+  border-radius:12px; padding:14px 16px; }
+.cost-tile .lab { font-size:11px; font-weight:800; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--tx-3); }
+.cost-tile .amt { font-size:22px; font-weight:800; letter-spacing:-.03em; margin-top:4px; }
+.cost-tile .sub { font-size:11.5px; color:var(--tx-3); font-weight:600; margin-top:2px; }
+.cost-tile.is-total { background:var(--coral-wash); border-color:var(--coral); }
+.cost-tile.is-total .amt { color:var(--coral-ink); }
+.rate-tbl { width:100%; border-collapse:collapse; font-size:13px; }
+.rate-tbl th { text-align:left; font-size:11px; font-weight:800; letter-spacing:.05em;
+  text-transform:uppercase; color:var(--tx-3); padding:6px 8px; border-bottom:1px solid var(--border); }
+.rate-tbl td { padding:8px; border-bottom:1px solid var(--border); }
+.rate-tbl td.num { text-align:right; font-variant-numeric:tabular-nums; }
+.rate-tbl tr:last-child td { border-bottom:0; }
+.rate-src { font-size:11px; color:var(--tx-3); font-weight:600; }
+.tier-badge { display:inline-flex; padding:3px 9px; border-radius:999px; font-size:11px;
+  font-weight:800; letter-spacing:.04em; text-transform:uppercase; }
+.tier-badge.is-premium { background:var(--coral-wash); color:var(--coral-ink); }
+.tier-badge.is-standard { background:var(--sky-wash); color:var(--sky-deep); }

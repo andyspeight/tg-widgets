@@ -387,6 +387,7 @@ ${children.length ? `<nav class="dest-kids" aria-label="Resorts in ${esc(place.c
   c.minPrice != null ? `, from ${esc(TB.money(c.minPrice, 'GBP'))}pp` : ''}</span></a></li>`).join('')}</ul>
 </nav>` : ''}
 <section class="grid">${deals.map((d) => TB.dealCard(d)).join('')}</section>
+${deals.length ? TB.rankingNote() : ''}
 ${deals.length >= 24 ? `<p class="dest-more"><a class="btn btn-dark" href="/tripbuster/search?country=${
   encodeURIComponent(place.country)}${place.resort ? `&resort=${encodeURIComponent(place.resort)}` : ''}">
   See all ${place.dealCount} deals</a></p>` : ''}`;
