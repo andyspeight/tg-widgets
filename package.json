@@ -16,6 +16,7 @@
     "test:mybooking": "node test/mybooking-extras-smoke.mjs && node test/mybooking-parse-robustness.mjs",
     "test:qa-highs": "node test/qa-highs-smoke.mjs",
     "test:boot": "node test/boot-smoke.mjs",
+    "test:shell-history-shadow": "node test/editor-shell-history-shadow-smoke.mjs",
     "test:widget-log": "node test/widget-log-alert-smoke.mjs",
     "test:enquiry-load": "node test/enquiry-load-smoke.mjs",
     "test:enquiry-notes": "node test/enquiry-notes-smoke.mjs",
