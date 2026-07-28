@@ -569,3 +569,38 @@ input[type=range] { width:100%; accent-color:var(--coral); }
   font-size:13px; line-height:1.55; color:var(--tx-2); }
 .free-banner svg { width:17px; height:17px; stroke:var(--live); fill:none; flex:none; margin-top:1px; }
 .free-banner b { color:var(--tx); }
+
+/* ── agent profiles ───────────────────────────────────────────────────────
+   The independent agent is the differentiator, so their page gets the same
+   care as a deal page rather than being a stub. */
+.ag-head { display:flex; gap:18px; align-items:flex-start; padding:10px 0 20px; flex-wrap:wrap; }
+.ag-badge { width:64px; height:64px; border-radius:16px; flex:none;
+  background:linear-gradient(135deg,var(--sky),var(--sky-deep)); color:#fff;
+  display:grid; place-items:center; font-size:24px; font-weight:800; letter-spacing:-.02em; }
+.ag-badge.sm { width:40px; height:40px; border-radius:11px; font-size:15px; }
+.ag-head-txt { flex:1; min-width:240px; }
+.ag-head h1 { margin:0 0 4px; font-size:clamp(24px,3.2vw,32px); font-weight:800;
+  letter-spacing:-.035em; text-wrap:balance; }
+.ag-prot { display:flex; gap:10px; align-items:flex-start; margin:0 0 20px;
+  padding:13px 15px; border-radius:12px; background:var(--live-wash);
+  border:1px dashed color-mix(in srgb,var(--live) 40%, transparent);
+  font-size:13px; line-height:1.55; color:var(--tx-2); }
+.ag-prot svg { width:18px; height:18px; stroke:var(--live); fill:none; flex:none; margin-top:1px; }
+.ag-prot b { color:var(--tx); }
+
+.ag-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:14px; padding-bottom:40px; }
+.ag-card { display:flex; flex-direction:column; gap:10px; background:var(--surface);
+  border:1px solid var(--border); border-radius:var(--r); padding:18px;
+  box-shadow:var(--shadow-sm); }
+.ag-card:hover { border-color:var(--sky); box-shadow:var(--shadow-md); }
+.ag-card-top { display:flex; gap:11px; align-items:center; }
+.ag-card-nm { display:block; font-size:15.5px; font-weight:800; letter-spacing:-.02em; }
+.ag-card-where { display:block; font-size:12px; color:var(--tx-3); font-weight:600; }
+.ag-card-about { margin:0; font-size:13px; line-height:1.55; color:var(--tx-2);
+  display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.ag-card-foot { margin-top:auto; padding-top:10px; border-top:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  font-size:12.5px; font-weight:700; color:var(--tx-2); flex-wrap:wrap; }
+.ar-nm a { color:inherit; }
+.ar-nm a:hover { color:var(--sky-deep); text-decoration:underline; }

@@ -745,6 +745,64 @@ await testAsync('the settings screen still refuses to touch plan or status', asy
   assert.equal(db.notifyAgent.status, 'active');
 });
 
+await testAsync('an agency can write its own profile', async () => {
+  freshRun();
+  const r = await call(account, {
+    method: 'PATCH',
+    headers: asAgent,
+    body: {
+      about: '  Glasgow, family run.  ', town: 'Glasgow', region: 'Lanarkshire',
+      website: 'jetawaytravel.co.uk', foundedYear: '2011',
+    },
+  });
+  assert.equal(r.status, 200);
+  assert.equal(db.notifyAgent.about, 'Glasgow, family run.', 'trimmed');
+  assert.equal(db.notifyAgent.town, 'Glasgow');
+  assert.equal(db.notifyAgent.website, 'https://jetawaytravel.co.uk/', 'made absolute');
+  assert.equal(db.notifyAgent.founded_year, 2011);
+});
+
+await testAsync('but NOT its own protection numbers or rate tier', async () => {
+  freshRun();
+  // The whole value of showing ATOL on an agency page is that we checked it.
+  // A settings screen where an agency types its own is worth nothing.
+  //
+  // Compare against a snapshot rather than asserting the columns are absent.
+  // Some of them ARE set on the fixture (rate_tier is 'standard'), and a test
+  // that only passes while a column happens to be null stops testing anything
+  // the moment somebody seeds it.
+  const FORBIDDEN = ['atol_number', 'abta_number', 'protection_type', 'rate_tier', 'free_until'];
+  const before = Object.fromEntries(FORBIDDEN.map((k) => [k, db.notifyAgent[k]]));
+  await call(account, {
+    method: 'PATCH',
+    headers: asAgent,
+    body: {
+      about: 'Legitimate change', atolNumber: '99999', abtaNumber: 'FAKE',
+      protectionType: 'ATOL', rateTier: 'premium', freeUntil: '2030-01-01',
+    },
+  });
+  assert.equal(db.notifyAgent.about, 'Legitimate change', 'the allowed field went through');
+  for (const forbidden of FORBIDDEN) {
+    assert.equal(db.notifyAgent[forbidden], before[forbidden],
+      `an agency wrote its own ${forbidden}`);
+  }
+});
+
+await testAsync('a nonsense website or founding year is refused', async () => {
+  freshRun();
+  const bad = await call(account, {
+    method: 'PATCH', headers: asAgent, body: { website: 'not a website' },
+  });
+  assert.equal(bad.status, 422);
+  assert.equal(bad.json.errors[0].field, 'website');
+
+  const year = await call(account, {
+    method: 'PATCH', headers: asAgent, body: { foundedYear: '3200' },
+  });
+  assert.equal(year.status, 422);
+  assert.equal(year.json.errors[0].field, 'foundedYear');
+});
+
 // ════════════════════════════════════════════════════════════════
 // 7. the owner console
 // ════════════════════════════════════════════════════════════════

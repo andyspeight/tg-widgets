@@ -138,6 +138,17 @@ export function dealHref(d) {
   return '/tripbuster/deal?id=' + encodeURIComponent((d && d.id) || '');
 }
 
+/**
+ * An agency's own page.
+ *
+ * The independent agent is the entire differentiator: the big comparison sites
+ * cannot show you a person in a shop who will answer the phone. Until this
+ * existed, "by Coastline Holidays" on a card was text that went nowhere.
+ */
+export function agentHref(slug) {
+  return '/tripbuster/agent/' + encodeURIComponent(slug || '');
+}
+
 /** A country or resort landing page. Resort pages hang off their country. */
 export function destinationHref(countrySlug, resortSlug) {
   var base = '/tripbuster/holidays/' + encodeURIComponent(countrySlug || '');
@@ -935,7 +946,10 @@ export function bookingPanel(d) {
       var mode = modeOf(a, d);
       return '<div class="agent-row' + (i === 0 ? ' best' : '') + '">' +
         '<span class="ar-av">' + esc(initials) + '</span>' +
-        '<span class="ar-mid"><span class="ar-nm">' + esc(a.agent) +
+        '<span class="ar-mid"><span class="ar-nm">' +
+          (a.agentSlug
+            ? '<a href="' + esc(agentHref(a.agentSlug)) + '">' + esc(a.agent) + '</a>'
+            : esc(a.agent)) +
           // Cheapest is a fact about the price; sponsored is a fact about who
           // paid. They are different claims and both can be true at once, so
           // neither replaces the other.
@@ -979,6 +993,95 @@ export function bookingPanel(d) {
 export function dealPage(d) {
   return '<div class="dlayout">' + dealArticle(d) +
     '<aside class="book" id="book">' + bookingPanel(d) + '</aside></div>';
+}
+
+// ── an agency's own page ────────────────────────────────────────────────────
+
+/** "Trading since 1998", "3 shops", the things that say this is a real business. */
+function agentFacts(p) {
+  var out = [];
+  if (p.liveDeals) {
+    out.push(p.liveDeals + ' holiday' + (p.liveDeals === 1 ? '' : 's') + ' on offer');
+  }
+  if (p.countries > 1) out.push(p.countries + ' countries');
+  if (p.minPrice != null) out.push('from ' + money(p.minPrice, 'GBP') + 'pp');
+  if (p.foundedYear) out.push('trading since ' + p.foundedYear);
+  if (p.maxDiscount) out.push('up to ' + p.maxDiscount + '% off');
+  return out.map(function (f) { return '<span class="chip">' + esc(f) + '</span>'; }).join('');
+}
+
+/** ATOL, ABTA, the protection the AGENT holds. Never Tripbuster's. */
+function agentProtection(p) {
+  var bits = [];
+  if (p.atolNumber) bits.push('ATOL ' + p.atolNumber);
+  if (p.abtaNumber) bits.push('ABTA ' + p.abtaNumber);
+  if (!bits.length && p.protectionType) bits.push(p.protectionType);
+  if (!bits.length) return '';
+  return '<div class="ag-prot">' + svg(IC.shield)
+    + '<span>Your holiday is financially protected by <b>' + esc(p.name)
+    + '</b> under ' + esc(bits.join(' and ')) + '. Tripbuster does not sell it '
+    + 'and does not hold your money.</span></div>';
+}
+
+export function agentProfile(p, deals) {
+  var where = [p.town, p.region].filter(Boolean).join(', ');
+  var site = safeUrl(p.website);
+
+  return '<header class="ag-head">'
+    + '<div class="ag-badge">' + esc(String(p.name || '?').split(/\s+/)
+      .map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase()) + '</div>'
+    + '<div class="ag-head-txt">'
+      + '<h1>' + esc(p.name) + '</h1>'
+      + (where ? '<div class="rc-loc">' + svg(IC.pin) + esc(where) + '</div>' : '')
+      + '<div class="chips" style="margin-top:10px">' + agentFacts(p) + '</div>'
+    + '</div></header>'
+
+    + agentProtection(p)
+
+    + (p.about
+      ? '<div class="card"><div class="sec"><h2>About ' + esc(p.name) + '</h2>'
+        + '<p>' + esc(p.about) + '</p>'
+        + (site
+          ? '<p style="margin-top:10px"><a href="' + esc(site) + '" rel="nofollow noopener" '
+            + 'target="_blank">Their own website ' + svg(IC.arrow) + '</a></p>'
+          : '')
+        + '</div></div>'
+      : '')
+
+    + hoursTable(p.contact)
+
+    + '<div class="sec-head" style="margin-top:22px"><div>'
+      + '<h2>Holidays ' + esc(p.name) + ' is advertising</h2>'
+      + '<p>Book direct with them. Tripbuster never takes the booking.</p>'
+    + '</div></div>'
+    + (deals.length
+      ? '<section class="grid">' + deals.map(dealCard).join('') + '</section>' + rankingNote()
+      : '<div class="empty"><b>Nothing live just now</b>'
+        + 'This agency has no holidays on offer at the moment.</div>');
+}
+
+/** The directory. Every agency with something live, and a reason to click. */
+export function agentDirectory(list) {
+  if (!list.length) {
+    return '<div class="empty"><b>No agencies yet</b>Nobody is advertising just now.</div>';
+  }
+  return '<div class="ag-grid">' + list.map(function (a) {
+    var where = [a.town, a.region].filter(Boolean).join(', ');
+    return '<a class="ag-card" href="' + esc(agentHref(a.slug)) + '">'
+      + '<div class="ag-card-top">'
+        + '<span class="ag-badge sm">' + esc(String(a.name || '?').split(/\s+/)
+          .map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase()) + '</span>'
+        + '<span><span class="ag-card-nm">' + esc(a.name) + '</span>'
+        + (where ? '<span class="ag-card-where">' + esc(where) + '</span>' : '') + '</span>'
+      + '</div>'
+      + (a.about ? '<p class="ag-card-about">' + esc(a.about) + '</p>' : '')
+      + '<div class="ag-card-foot">'
+        + '<span>' + esc(a.liveDeals) + ' holiday' + (a.liveDeals === 1 ? '' : 's')
+        + (a.minPrice != null ? ' from ' + esc(money(a.minPrice, 'GBP')) + 'pp' : '') + '</span>'
+        + (a.atolNumber
+          ? '<span class="prot">' + svg(IC.shield) + 'ATOL ' + esc(a.atolNumber) + '</span>' : '')
+      + '</div></a>';
+  }).join('') + '</div>';
 }
 
 // ── the front page ──────────────────────────────────────────────────────────
@@ -1109,6 +1212,7 @@ export function header(active) {
       '<span class="brand-name">Trip<b>buster</b></span></a>' +
     '<div class="nav-links">' +
       link('/tripbuster/destinations', 'Destinations') +
+      link('/tripbuster/agents', 'Our agents') +
       link('/tripbuster/search?board=All+inclusive', 'All inclusive') +
       link('/tripbuster/search?maxPrice=299', 'Under £299') +
       link('/tripbuster/search?sort=discount', 'Biggest savings') +
@@ -1124,6 +1228,7 @@ export function footer() {
     + 'get in touch. Holidays are sold and financially protected by that agent, '
     + 'not by Tripbuster, and we never add anything to the price.</span>' +
     '<span><a href="/tripbuster/destinations">All destinations</a> &middot; ' +
+    '<a href="/tripbuster/agents">Our agents</a> &middot; ' +
     '&copy; 2026 Tripbuster &middot; a Travelgenix product</span>' +
     '</div></footer>';
 }

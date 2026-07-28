@@ -170,8 +170,8 @@ impressions.
 
 ```
 npm run test:tripbuster           # 277 assertions, no network needed
-npm run test:tripbuster-seo       # 35 assertions, the indexable surface
-npm run test:tripbuster-signup    # 46 assertions, sign-up, enquiry emails, owner console
+npm run test:tripbuster-seo       # 42 assertions, the indexable surface
+npm run test:tripbuster-signup    # 49 assertions, sign-up, enquiry emails, owner console
 npm run test:tripbuster-rates     # 25 assertions, the rate card, free access and disclosure
 npm run test:tripbuster-import    # 112 assertions, drives the dashboard in Chromium
 npm run test:tripbuster-call      # 43 assertions, drives the call journey in Chromium
@@ -243,6 +243,8 @@ impression and click beacons actually firing.
 | `/tripbuster/holidays/<country>` | Country landing page |
 | `/tripbuster/holidays/<country>/<resort>` | Resort landing page |
 | `/tripbuster/holiday/<slug>` | One deal, and every agent advertising the same hotel |
+| `/tripbuster/agents` | Directory of every agency with something live |
+| `/tripbuster/agent/<slug>` | One agency: who they are, how to reach them, everything they advertise |
 | `/tripbuster/search` | Filter UI. `noindex, follow` on purpose |
 | `/tripbuster/sitemap.xml` | Generated from the live catalogue |
 | `/robots.txt` | Generated, so the `Sitemap:` line names the right host |
@@ -321,6 +323,57 @@ single review ourselves. Publishing it as review markup would tell Google we hol
 ratings we do not hold: a manual-action risk, and a consumer-protection risk under
 the DMCC Act. Showing the agent's score on the page as the agent's score is fine.
 Star ratings in the search results have to be earned by collecting real reviews.
+
+## Agent profiles
+
+Added 28 July 2026, migration 016. Until then an agency existed on this site as
+a name in small type under a price, and that text went nowhere. The independent
+agent is the entire reason to use Tripbuster instead of Icelolly, so leaving them
+anonymous was giving away the only thing we have that the big comparison sites
+do not.
+
+`/tripbuster/agent/<slug>` shows who they are, where they are, how long they have
+been trading, how to reach them, what protection they hold, and everything they
+currently advertise. `/tripbuster/agents` lists every agency with something live.
+Both are server-rendered like the rest of the public site, both are in the
+sitemap, and the agency name on a deal's booking panel now links to the profile.
+
+The name is **not** linked on a deal card in the results list, because the whole
+card is already a link and an anchor inside an anchor is invalid HTML.
+
+### The select list is the security boundary
+
+An agency row holds the sign-in address, the password hash, the Travelgenix link,
+the rate tier, what they have spent, when their free period ends and a hash of the
+IP they signed up from. None of that may reach a traveller.
+
+So `tb_agent_profile` and `tb_agents_public` **name every column they return**.
+No `to_jsonb(a)`, no `a.*`, no "everything except". A whitelist fails safe when
+somebody adds a column later; a blacklist publishes it. There is a test that reads
+a profile and fails if any private column name appears anywhere in the response,
+and the same check is written out at the top of the migration for whoever adds the
+next field.
+
+A profile returns `null` for an agency that is not `active`, so a paused or
+suspended agency 404s rather than lingering with stale deals on it. The directory
+only lists agencies with at least one live deal, because an agency with nothing on
+is an empty page for a crawler to find.
+
+### What an agency may write about itself, and what it may not
+
+The settings screen accepts `about`, `town`, `region`, `website` and
+`foundedYear`. It does **not** accept the ATOL number, the ABTA number, the
+protection type, the rate tier, the free period, the plan or the status. The whole
+value of an ATOL number on an agency page is that we checked it, so a screen where
+an agency types its own is worth nothing.
+
+`about` is plain text on purpose, capped at 1200 characters. The page escapes
+everything it renders, and offering markup would mean either trusting agent-written
+HTML or writing a sanitiser for the sake of one paragraph.
+
+The structured data is `TravelAgency` — the agency, not Tripbuster. Tripbuster is
+not the seller and must not appear as one anywhere in that markup. Still no
+`aggregateRating`, for the same reason deal pages carry none.
 
 ## The rate card
 
@@ -594,6 +647,7 @@ Apply in order. They are idempotent enough to run on a fresh project.
 | `013_registration_and_notifications.sql` | Verification, approval and notification columns; `tb_unique_agent_slug`, `tb_register_agent`, `tb_verify_agent`, `tb_approve_agent`, `tb_claim_lead_notification` |
 | `014_rate_card.sql` | `agents.rate_tier`; the `rate_card` table; `tb_resolve_rate`; the charge stamped onto `click_events`; costs in `tb_agent_stats`; premium placement in `tb_search_deals` |
 | `015_free_access.sql` | `agents.free_until`; `list_pence` and `free_period` on every event; `tb_resolve_rate` returns the list price plus a free flag |
+| `016_agent_profiles.sql` | `agents.about` and `agents.founded_year`; `tb_agent_profile` and `tb_agents_public`, both on a strict column whitelist; agencies added to `tb_sitemap` |
 
 Migration 008 replaces `tb_record_click` rather than altering it. Adding
 parameters to a Postgres function creates an **overload**, and with defaults in

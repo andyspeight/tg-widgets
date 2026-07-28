@@ -468,6 +468,118 @@ async function renderDestinationIndex(req, res) {
   return sendHtml(res, 200, html, CACHE);
 }
 
+// ── an agency ───────────────────────────────────────────────────────────────
+
+async function renderAgent(req, res, slug) {
+  if (!SLUG_RE.test(slug)) {
+    return notFound(req, res, {
+      title: 'We could not find that agency',
+      body: 'That link does not look like one of ours.',
+    });
+  }
+
+  let p;
+  try {
+    p = await tbRpc('tb_agent_profile', { p_slug: slug, p_limit: 24 });
+  } catch (e) {
+    console.error('[tripbuster/page] agent lookup failed', e && e.code);
+    return unavailable(req, res);
+  }
+  // Null covers both "no such agency" and "not trading", deliberately. A paused
+  // agency's page should go away rather than linger with stale deals on it.
+  if (!p || !p.name) {
+    return notFound(req, res, {
+      title: 'That agency is not advertising with us',
+      body: 'They may have paused their account.',
+    });
+  }
+
+  const deals = (((p.results || {}).deals) || []).map(toDeal);
+  const where = [p.town, p.region].filter(Boolean).join(', ');
+  const canonical = absolute(req, TB.agentHref(p.slug));
+  const trail = [
+    { label: 'Home', href: '/tripbuster' },
+    { label: 'Our agents', href: '/tripbuster/agents' },
+    { label: p.name },
+  ];
+
+  // TravelAgency, because that is what they are. Tripbuster is not the seller
+  // and must not appear as one anywhere in this markup.
+  const ld = {
+    '@context': 'https://schema.org',
+    '@type': 'TravelAgency',
+    name: p.name,
+    url: canonical,
+    ...(p.about ? { description: clamp(p.about, 300) } : {}),
+    ...(p.website ? { sameAs: [p.website] } : {}),
+    ...(where ? { address: { '@type': 'PostalAddress', addressLocality: p.town || where, addressCountry: 'GB' } } : {}),
+  };
+  const phone = ((p.contact || {}).phones || [])[0];
+  if (phone && phone.phone) ld.telephone = phone.phone;
+
+  const html = shell(`${TB.crumbs(trail)}${TB.agentProfile(p, deals)}`, {
+    title: clamp(`${p.name}${where ? `, ${where}` : ''} — holiday deals | ${SITE_NAME}`, 70),
+    ogTitle: p.name,
+    description: clamp(
+      p.about
+        ? `${p.name}${where ? ` in ${where}` : ''}. ${p.about}`
+        : `${p.name}${where ? ` in ${where}` : ''} advertises ${p.liveDeals} holiday`
+          + `${p.liveDeals === 1 ? '' : 's'} on Tripbuster. Book direct with them.`,
+      158,
+    ),
+    canonical,
+    navActive: 'Our agents',
+    image: deals.length ? deals[0].image : '',
+    jsonLd: [breadcrumbLd(req, trail), ld],
+    scripts: [
+      `<script type="application/json" id="tb-shown">${
+        JSON.stringify(deals.map((d) => d.id))}</script>`,
+      '<script type="module" src="/tripbuster/list-page.js"></script>',
+    ],
+  });
+
+  return sendHtml(res, 200, html, CACHE);
+}
+
+async function renderAgentIndex(req, res) {
+  let list;
+  try {
+    list = await tbRpc('tb_agents_public', {});
+  } catch (e) {
+    console.error('[tripbuster/page] agents failed', e && e.code);
+    return unavailable(req, res);
+  }
+  const agents = Array.isArray(list) ? list : [];
+  const trail = [{ label: 'Home', href: '/tripbuster' }, { label: 'Our agents' }];
+  const towns = [...new Set(agents.map((a) => a.town).filter(Boolean))];
+
+  const body = `${TB.crumbs(trail)}
+<header class="dest-head">
+  <h1>The agents advertising on Tripbuster</h1>
+  <p class="dest-lead">Independent UK travel agents, most of them small, most of them
+    with a shop and a phone somebody actually answers. You book with them direct,
+    and they hold the financial protection for your trip.</p>
+</header>
+${TB.agentDirectory(agents)}`;
+
+  const html = shell(body, {
+    title: `Independent UK travel agents | ${SITE_NAME}`,
+    description: clamp(
+      `${agents.length} independent UK travel agent${agents.length === 1 ? '' : 's'} `
+      + `advertising holidays on Tripbuster${towns.length ? `, from ${towns.slice(0, 4).join(', ')}` : ''}. `
+      + 'Compare their prices then book direct.',
+      158,
+    ),
+    canonical: absolute(req, '/tripbuster/agents'),
+    navActive: 'Our agents',
+    jsonLd: [breadcrumbLd(req, trail), itemListLd(req, agents.map((a) => ({
+      accommodation: a.name, title: a.name, slug: a.slug,
+    })), (a) => TB.agentHref(a.slug))],
+  });
+
+  return sendHtml(res, 200, html, CACHE);
+}
+
 // ── the old URL ─────────────────────────────────────────────────────────────
 
 /**
@@ -522,6 +634,8 @@ export default async function handler(req, res) {
     if (type === 'home') return await renderHome(req, res);
     if (type === 'deal') return await renderDeal(req, res, str(q.slug, 140));
     if (type === 'destinations') return await renderDestinationIndex(req, res);
+    if (type === 'agent') return await renderAgent(req, res, str(q.slug, 90));
+    if (type === 'agents') return await renderAgentIndex(req, res);
     if (type === 'destination') {
       return await renderDestination(req, res, str(q.country, 80), str(q.resort, 80));
     }

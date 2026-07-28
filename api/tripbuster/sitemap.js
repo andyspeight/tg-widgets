@@ -78,11 +78,21 @@ ${urlNode(base, '', 'daily', '1.0')}
   const countries = Array.isArray(destinations.countries) ? destinations.countries : [];
   const resorts = Array.isArray(destinations.resorts) ? destinations.resorts : [];
   const deals = Array.isArray(data && data.deals) ? data.deals : [];
+  const agents = Array.isArray(data && data.agents) ? data.agents : [];
 
   const urls = [
     urlNode(base, isoDay(data && data.generated), 'daily', '1.0'),
     urlNode(`${base}/destinations`, isoDay(data && data.generated), 'daily', '0.9'),
   ];
+
+  if (agents.length) {
+    urls.push(urlNode(`${base}/agents`, isoDay(data && data.generated), 'weekly', '0.8'));
+  }
+  agents.forEach((a) => {
+    // An agency page changes when their deals do, which is what lastmod carries.
+    urls.push(urlNode(`${base}/agent/${encodeURIComponent(a.slug)}`,
+      isoDay(a.lastChange), 'daily', '0.7'));
+  });
 
   countries.forEach((c) => {
     urls.push(urlNode(`${base}/holidays/${encodeURIComponent(c.slug)}`,

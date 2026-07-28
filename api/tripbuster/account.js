@@ -76,7 +76,8 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       const [rows, byMode, contact] = await Promise.all([
         tbSelect('agents', {
-          select: `${AGENT_WRITE_COLUMNS},email,notify_leads,notify_email`,
+          select: `${AGENT_WRITE_COLUMNS},email,notify_leads,notify_email,`
+            + 'about,town,region,website,founded_year',
           id: `eq.${agentId}`,
           limit: 1,
         }),
@@ -103,6 +104,13 @@ export default async function handler(req, res) {
         protectionType: agent.protection_type || '',
         atolNumber: agent.atol_number || '',
         travelgenixClient: !!agent.tg_client_email,
+        // Their own public profile. Editable because it is theirs to say;
+        // protection numbers and plan stay out, because those are ours to verify.
+        about: agent.about || '',
+        town: agent.town || '',
+        region: agent.region || '',
+        website: agent.website || '',
+        foundedYear: agent.founded_year || '',
         // Where an enquiry lands. notifyEmail empty means "use the sign-in
         // address", which is why the sign-in address is sent alongside it —
         // the screen can show what will actually be used rather than a blank box.
@@ -126,6 +134,9 @@ export default async function handler(req, res) {
     // collection semantics, so they do not need — and are not worth widening —
     // the all-or-nothing RPC that exists to protect the weekly schedule.
     const notify = {};
+    // Same treatment as the notification settings: plain columns with no
+    // collection semantics, so they do not need the all-or-nothing RPC.
+    const profile = {};
     const errors = [];
 
     // Read the row FIRST. Two rules need to know what is already stored rather
@@ -164,6 +175,55 @@ export default async function handler(req, res) {
       }
     }
 
+    // ── the public profile ──────────────────────────────────────────────
+    // Widened deliberately and narrowly. An agency may say who it is, where it
+    // is and how long it has been trading. It still may NOT touch its plan, its
+    // status, its ATOL number or its rate tier — those are facts we verify or
+    // sell, not claims an agency gets to make about itself on a settings screen.
+    if (Object.prototype.hasOwnProperty.call(body, 'about')) {
+      const about = typeof body.about === 'string' ? body.about.trim().slice(0, 1200) : '';
+      // Plain text on purpose. It is rendered by a page that escapes everything,
+      // and offering markup would mean either trusting it or writing a sanitiser
+      // for the sake of one paragraph.
+      profile.about = about || null;
+    }
+    ['town', 'region'].forEach((f) => {
+      if (Object.prototype.hasOwnProperty.call(body, f)) {
+        const v = typeof body[f] === 'string' ? body[f].trim().slice(0, 80) : '';
+        profile[f] = v || null;
+      }
+    });
+    if (Object.prototype.hasOwnProperty.call(body, 'website')) {
+      const raw = typeof body.website === 'string' ? body.website.trim().slice(0, 200) : '';
+      if (!raw) {
+        profile.website = null;
+      } else {
+        const withScheme = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+        try {
+          const u = new URL(withScheme);
+          if ((u.protocol !== 'http:' && u.protocol !== 'https:') || !u.hostname.includes('.')) {
+            throw new Error('bad');
+          }
+          profile.website = u.toString();
+        } catch {
+          errors.push({ field: 'website', message: 'That website address does not look right' });
+        }
+      }
+    }
+    if (Object.prototype.hasOwnProperty.call(body, 'foundedYear')) {
+      const raw = body.foundedYear;
+      if (raw === '' || raw === null) {
+        profile.founded_year = null;
+      } else {
+        const n = Number(raw);
+        if (!Number.isInteger(n) || n < 1800 || n > new Date().getFullYear()) {
+          errors.push({ field: 'foundedYear', message: 'Use a year like 1998' });
+        } else {
+          profile.founded_year = n;
+        }
+      }
+    }
+
     if (Object.prototype.hasOwnProperty.call(body, 'notifyLeads')) {
       if (typeof body.notifyLeads !== 'boolean') {
         errors.push({ field: 'notifyLeads', message: 'Choose whether to be emailed about enquiries' });
@@ -198,6 +258,7 @@ export default async function handler(req, res) {
     Object.assign(patch, schedule.clean);
 
     if (errors.length) return res.status(422).json({ error: 'Some details need fixing', errors });
+    Object.assign(notify, profile);
     if (!Object.keys(patch).length && !Object.keys(notify).length) {
       return res.status(400).json({ error: 'Nothing to update' });
     }

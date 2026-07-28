@@ -482,7 +482,10 @@ try {
   // can shrink. Held on one line those three squeezed "Jetaway Travel" down to
   // two lines of about six characters, which reads as a broken page.
   const nameLines = await desk.$eval('.ar-nm', (el) => {
-    const node = [...el.childNodes].find((n) => n.nodeType === 3 && n.textContent.trim());
+    // The name is a link to the agency's profile when it has one and bare text
+    // when it does not, so measure whichever is actually holding the words.
+    const host = el.querySelector('a') || el;
+    const node = [...host.childNodes].find((n) => n.nodeType === 3 && n.textContent.trim());
     if (!node) return -1;
     const range = document.createRange();
     range.selectNodeContents(node);

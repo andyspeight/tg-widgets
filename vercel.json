@@ -293,6 +293,14 @@
       "destination": "/api/tripbuster/page?type=destinations"
     },
     {
+      "source": "/tripbuster/agents",
+      "destination": "/api/tripbuster/page?type=agents"
+    },
+    {
+      "source": "/tripbuster/agent/:slug",
+      "destination": "/api/tripbuster/page?type=agent&slug=:slug"
+    },
+    {
       "source": "/tripbuster/holiday/:slug",
       "destination": "/api/tripbuster/page?type=deal&slug=:slug"
     },

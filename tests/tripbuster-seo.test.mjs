@@ -145,6 +145,20 @@ const DESTINATIONS = {
   ],
 };
 
+
+const AGENT_PROFILE = {
+  name: 'Coastline Holidays', slug: 'coastline-holidays', town: 'Brighton',
+  region: 'East Sussex', about: 'A Brighton agency that grew out of a cruise desk.',
+  website: 'https://coastlineholidays.co.uk/', logoUrl: null, foundedYear: 2006,
+  protectionType: 'ATOL + ABTA', atolNumber: '9840', abtaNumber: 'Y1842',
+  memberSince: '2026-07-26T12:00:00Z',
+  contact: { hoursMode: 'always', timeZone: 'Europe/London', hours: [], specialDays: [],
+    phones: [{ label: 'Main number', phone: '01273 555 240', whenShown: 'always' }] },
+  liveDeals: 10, minPrice: 179, maxDiscount: 22, countries: 5,
+  lastChange: '2026-07-27T15:05:48Z',
+  results: { total: 1, deals: [] },
+};
+
 // What the fake database is currently pretending to hold. Tests reassign this.
 let rpcHandlers = {};
 
@@ -180,6 +194,14 @@ function defaultRpcs(row = dealRow()) {
       return { total: 1, limit: 20, offset: 0, compare: !!a.p_compare, deals: [row] };
     },
     tb_destinations: () => DESTINATIONS,
+    tb_agent_profile: (a) => (a.p_slug === 'coastline-holidays'
+      ? { ...AGENT_PROFILE, results: { total: 1, deals: [row] } } : null),
+    tb_agents_public: () => [{
+      name: 'Coastline Holidays', slug: 'coastline-holidays', town: 'Brighton',
+      region: 'East Sussex', about: 'A Brighton agency.', protectionType: 'ATOL + ABTA',
+      atolNumber: '9840', liveDeals: 10, minPrice: 179,
+      countries: ['Spain'], lastChange: '2026-07-27T15:05:48Z',
+    }],
     tb_destination: (a) => {
       if (a.p_country_slug !== 'poland') return { country: null };
       if (a.p_resort_slug && a.p_resort_slug !== 'krakow') return { country: null };
@@ -560,6 +582,87 @@ await testAsync('the destinations hub links to every country and resort', async 
     '/tripbuster/holidays/spain/benidorm', '/tripbuster/holidays/poland/krakow']) {
     assert.ok(r.body.includes(`href="${href}"`), `hub is missing ${href}`);
   }
+});
+
+// ════════════════════════════════════════════════════════════════
+// 5b. agent profiles
+// ════════════════════════════════════════════════════════════════
+
+await testAsync('an agency page is indexable and says who they are', async () => {
+  const r = await call(page, { query: { type: 'agent', slug: 'coastline-holidays' } });
+  assert.equal(r.status, 200);
+  assert.ok(!/content="[^"]*noindex/.test(r.body), 'agency pages must be indexable');
+  assert.ok(r.body.includes('<h1>Coastline Holidays</h1>'));
+  assert.ok(r.body.includes('grew out of a cruise desk'), 'their own words should be there');
+  assert.ok(r.body.includes('Brighton'));
+  assert.ok(r.body.includes('trading since 2006'));
+  assert.ok(r.body.includes(
+    '<link rel="canonical" href="https://tripbuster.example/tripbuster/agent/coastline-holidays">',
+  ));
+});
+
+await testAsync('the page says the AGENT protects the holiday, never Tripbuster', async () => {
+  const r = await call(page, { query: { type: 'agent', slug: 'coastline-holidays' } });
+  assert.ok(/ATOL 9840/.test(r.body));
+  assert.ok(/financially protected by <b>Coastline Holidays<\/b>/.test(r.body));
+  // The structured data must describe THEM as the travel agency. Tripbuster
+  // appearing as the seller anywhere here would be a claim we cannot make.
+  const [ld] = jsonLdOf(r.body).filter((o) => o['@type'] === 'TravelAgency');
+  assert.ok(ld, 'no TravelAgency markup');
+  assert.equal(ld.name, 'Coastline Holidays');
+  assert.equal(ld.telephone, '01273 555 240');
+  assert.ok(!JSON.stringify(ld).includes('Tripbuster'));
+});
+
+await testAsync('nothing private about an agency reaches the page', async () => {
+  // The profile function names every column it returns rather than excluding
+  // ones it does not want. This is the test that makes that pay off: if
+  // somebody widens it to to_jsonb(a), this fails.
+  const r = await call(page, { query: { type: 'agent', slug: 'coastline-holidays' } });
+  for (const secret of [
+    'password', 'tg_client', 'rate_tier', 'rateTier', 'free_until', 'freeUntil',
+    'signup_ip', 'verify_token', 'notify_email', 'charged_pence',
+  ]) {
+    assert.ok(!r.body.includes(secret), `an agency page leaked: ${secret}`);
+  }
+});
+
+await testAsync('an agency that is not trading has no page', async () => {
+  const r = await call(page, { query: { type: 'agent', slug: 'gone-away' } });
+  assert.equal(r.status, 404);
+  assert.ok(/content="noindex/.test(r.body));
+});
+
+await testAsync('the directory links to every agency', async () => {
+  const r = await call(page, { query: { type: 'agents' } });
+  assert.equal(r.status, 200);
+  assert.ok(r.body.includes('href="/tripbuster/agent/coastline-holidays"'));
+  assert.ok(r.body.includes('Brighton'));
+  assert.ok(!/content="[^"]*noindex/.test(r.body));
+});
+
+await testAsync('a deal page links each agency to its own page', async () => {
+  // "by Coastline Holidays" used to be text that went nowhere.
+  const r = await call(page, { query: { type: 'deal', slug: 'hotel-wawel-old-town-krakow-a1509144' } });
+  assert.ok(r.body.includes('href="/tripbuster/agent/coastline-holidays"'),
+    'the agency name on a deal page should link to them');
+});
+
+await testAsync('the sitemap carries the agency pages', async () => {
+  rpcHandlers = {
+    ...defaultRpcs(),
+    tb_sitemap: () => ({
+      deals: [{ slug: 'hotel-wawel-old-town-krakow-a1509144', lastmod: '2026-07-27T15:05:48Z' }],
+      destinations: DESTINATIONS,
+      agents: [{ slug: 'coastline-holidays', lastChange: '2026-07-27T15:05:48Z' }],
+      generated: '2026-07-27T16:00:00Z',
+    }),
+  };
+  const r = await call(sitemap, {});
+  const locs = [...r.body.matchAll(/<loc>([^<]*)<\/loc>/g)].map((m) => m[1]);
+  assert.ok(locs.includes('https://tripbuster.example/tripbuster/agents'));
+  assert.ok(locs.includes('https://tripbuster.example/tripbuster/agent/coastline-holidays'));
+  rpcHandlers = defaultRpcs();
 });
 
 // ════════════════════════════════════════════════════════════════
