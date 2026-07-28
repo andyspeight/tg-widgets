@@ -1,5 +1,5 @@
 /* ============================================================
-   Travelgenix Widget Editor — Unified Shell JS v1.2.1
+   Travelgenix Widget Editor — Unified Shell JS v1.2.2
    Source of truth: /editor-shell-spec.md
 
    Loaded by every editor via:
@@ -55,6 +55,17 @@
    forever, and guards against stacking parallel saves while one is in
    flight. showLogin() only redirects once (no boot-time redirect loop)
    and warns before discarding unsaved edits when a session expires.
+
+   ── v1.2.2 (Jul 2026) ──
+   Fix: doSave() now uses window.history / window.location for the post-save
+   URL sync instead of the bare globals. Editors are classic scripts, so a
+   top-level `let history` in an editor (the weather and spotlight editors
+   keep one for their undo stack) shares the global lexical scope and SHADOWS
+   window.history for this shared shell. The bare history.replaceState then
+   hit an array and threw, was swallowed, and the URL never picked up the
+   widgetId the CREATE returned — so the embed modal (which reads the id off
+   the URL) stayed empty until reload, and every subsequent save created a
+   NEW record instead of updating the one being edited.
    ============================================================ */
 
 (function () {
@@ -761,11 +772,20 @@
       // Sync URL with the widgetId the API returned. The API mints a fresh
       // widgetId on the CREATE path even if the client sent one (anti-squatting),
       // so we must always trust the response — not just on first save.
+      //
+      // MUST use window.history / window.location, not the bare globals: an
+      // editor is a classic (non-module) script, so a top-level `let history`
+      // (the weather and spotlight editors use one for their undo stack) shares
+      // the global lexical scope and SHADOWS window.history for this shared
+      // shell. A bare history.replaceState then hit an array, threw, was
+      // swallowed here, and the URL never picked up the new widgetId — so the
+      // embed modal (which reads the id off the URL) stayed empty and EVERY
+      // subsequent save created a NEW record instead of updating. (28 Jul 2026.)
       try {
         if (d.widgetId && d.widgetId !== wId) {
-          const u = new URL(location);
+          const u = new URL(window.location.href);
           u.searchParams.set('id', d.widgetId);
-          history.replaceState(null, '', u);
+          window.history.replaceState(null, '', u);
         }
       } catch (e) { console.error('[tgse] URL sync threw', e); }
 
