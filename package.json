@@ -27,6 +27,7 @@
     "test:airport-content-widgetid": "node test/airport-content-widgetid-smoke.mjs",
     "test:appointment-time": "node test/appointment-time-format-smoke.mjs",
     "test:offers-resilience": "node test/offers-resilience-smoke.mjs",
+    "test:offers-cache-namematch": "node test/offers-cache-namematch-smoke.mjs",
     "test:offers-preview-exemption": "node test/offers-preview-exemption-smoke.mjs",
     "test:timeout-guards": "node test/timeout-guards-smoke.mjs",
     "test:quiet-failure": "node test/quiet-failure-smoke.mjs",
