@@ -14,6 +14,7 @@
     "test:deeplink": "node tests/test-deeplink.cjs",
     "test:deeplink-post": "node test/deeplink-post-smoke.mjs",
     "test:mybooking": "node test/mybooking-extras-smoke.mjs && node test/mybooking-parse-robustness.mjs",
+    "test:pay-balance-nobalance": "node test/pay-balance-nobalance-smoke.mjs",
     "test:qa-highs": "node test/qa-highs-smoke.mjs",
     "test:boot": "node test/boot-smoke.mjs",
     "test:shell-history-shadow": "node test/editor-shell-history-shadow-smoke.mjs",

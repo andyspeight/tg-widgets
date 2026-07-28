@@ -188,13 +188,22 @@ export function decideCharge(raw, requested) {
   const next = computeNextPayment(plan, outstanding);
 
   if (!(outstanding > 0)) return { noBalance: true, total, paid, outstanding };
-  if (!next || !(next.amount > 0)) return { noBalance: true, total, paid, outstanding };
 
-  const currency = next.currency;
+  // `next` comes from the payment SCHEDULE and is used ONLY to pick an
+  // instalment amount. A booking can owe money with NO schedule — paid in full
+  // at booking, or Travelify attached no deposit breakdown — in which case
+  // `next` is null but the FULL outstanding is still payable. The widget already
+  // shows the balance as owed, so the server must agree and collect the full
+  // outstanding rather than report "nothing to pay". Bailing here on a missing
+  // schedule made a genuine £1,800 balance uncollectable (Karen / My Booking,
+  // 28 Jul 2026). Only a real multi-instalment plan caps the default below the
+  // outstanding.
+  const currency = (next && next.currency) || raw.currency || 'GBP';
+  const isInstalment = !!(next && next.isInstalment && next.amount > 0);
 
-  // Default (no custom amount): next instalment, capped at outstanding;
-  // single balance → the full outstanding.
-  const defaultAmount = next.isInstalment
+  // Default (no custom amount): the next instalment (capped at outstanding) when
+  // a plan is running; otherwise the full outstanding balance.
+  const defaultAmount = isInstalment
     ? Math.min(Math.round(next.amount * 100) / 100, outstanding)
     : outstanding;
 
@@ -224,8 +233,8 @@ export function decideCharge(raw, requested) {
     total, paid, outstanding,
     amount: chargeAmount,
     currency,
-    dueDate: next.dueDate,
-    isInstalment: next.isInstalment && followAmount > 0,
+    dueDate: (next && next.dueDate) || null,
+    isInstalment: isInstalment && followAmount > 0,
     remainingAmount: followAmount,
   };
 }
