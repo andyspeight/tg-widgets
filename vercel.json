@@ -317,6 +317,14 @@
       "destination": "/tripbuster/dashboard.html"
     },
     {
+      "source": "/tripbuster/verify",
+      "destination": "/api/tripbuster/verify"
+    },
+    {
+      "source": "/tripbuster/approve",
+      "destination": "/api/tripbuster/approve"
+    },
+    {
       "source": "/demo-tripbuster",
       "destination": "/demo-tripbuster.html"
     },

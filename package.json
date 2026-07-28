@@ -20,7 +20,8 @@
     "test:tripbuster": "node tests/tripbuster.test.mjs",
     "test:tripbuster-import": "node test/tripbuster-import-drive.mjs",
     "test:tripbuster-call": "node test/tripbuster-call-drive.mjs",
-    "test:tripbuster-seo": "node tests/tripbuster-seo.test.mjs"
+    "test:tripbuster-seo": "node tests/tripbuster-seo.test.mjs",
+    "test:tripbuster-signup": "node tests/tripbuster-signup.test.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",

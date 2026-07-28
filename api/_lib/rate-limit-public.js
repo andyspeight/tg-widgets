@@ -79,6 +79,15 @@ export function limitsFor(event) {
         { name: 'm', max: envInt('RL_TB_LOGIN_PER_MIN', 6), seconds: 60 },
         { name: 'h', max: envInt('RL_TB_LOGIN_PER_HR', 40), seconds: 3600 },
       ];
+    // Creating an account costs us a bcrypt hash and an outbound email, and is
+    // worthless to whoever is doing it in bulk, so this sits near the sign-in
+    // ceiling rather than the click one. Counted per IP and per IP+email, so one
+    // address cannot be hammered and one connection cannot mint accounts.
+    case 'tb-register':
+      return [
+        { name: 'm', max: envInt('RL_TB_REGISTER_PER_MIN', 3), seconds: 60 },
+        { name: 'h', max: envInt('RL_TB_REGISTER_PER_HR', 12), seconds: 3600 },
+      ];
     // Click-outs are the billable event and a write, so they are tighter. A real
     // visitor clicks a handful of deals; anything near this ceiling is a bot.
     case 'tb-click':

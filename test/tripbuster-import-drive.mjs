@@ -248,6 +248,9 @@ function vercelify(req, res, url) {
   res.send = (s) => { res.end(String(s)); return res; };
 }
 
+// What the sign-up panel actually posted.
+const signups = [];
+
 const app = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://127.0.0.1:${APP_PORT}`);
   const route = {
@@ -256,6 +259,23 @@ const app = http.createServer(async (req, res) => {
     '/api/tripbuster/import': importHandler,
     '/api/tripbuster/offer-import': offerImport,
     '/api/tripbuster/account': accountHandler,
+    // Stood in rather than run for real: the real one hashes a password, writes
+    // an agent and sends an email, none of which this drive is about. What is
+    // being tested here is the PANEL — that it validates, swaps and confirms.
+    '/api/tripbuster/register': async (req, res) => {
+      const b = req.body || {};
+      if (!b.agreed) {
+        return res.status(422).json({
+          error: 'Some details need fixing',
+          errors: [{ field: 'agreed', message: 'Please confirm you have read how Tripbuster works' }],
+        });
+      }
+      signups.push(b);
+      return res.status(200).json({
+        ok: true,
+        message: 'Check your email. We have sent a link to confirm your address.',
+      });
+    },
   }[url.pathname];
   if (route) {
     let raw = '';
@@ -332,6 +352,44 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 try {
   await page.goto(`http://127.0.0.1:${APP_PORT}/tripbuster/dashboard`, { waitUntil: 'domcontentloaded' });
   await page.waitForSelector('#loginForm', { visible: true });
+
+  // ── sign-up, before we sign in as somebody who already exists ──
+  await page.click('#toSignup');
+  await page.waitForSelector('#signupForm', { visible: true });
+  check('the sign-up panel opens from the sign-in one',
+    await page.$eval('#loginForm', (el) => el.hidden) === true);
+
+  await page.type('#su-name', 'Brand New Travel');
+  await page.type('#su-email', 'hello@brandnew.example');
+  await page.type('#su-pass', 'a-long-enough-password');
+  await page.type('#su-town', 'Bolton');
+
+  // Submitted without ticking the box: the server refuses and the reason has to
+  // reach the person, not just the console.
+  await page.click('#signupBtn');
+  await page.waitForFunction(() => document.getElementById('signupError').classList.contains('on'));
+  const agreeMsg = await page.$eval('#signupError', (el) => el.textContent.trim());
+  check('signing up without agreeing is refused, in words', /confirm you have read/i.test(agreeMsg),
+    agreeMsg);
+  check('and nothing was submitted', signups.length === 0);
+
+  await page.click('#su-agreed');
+  await page.click('#signupBtn');
+  await page.waitForSelector('#signupDone', { visible: true });
+  check('a good sign-up confirms in place', true);
+  const doneMsg = await page.$eval('#signupDoneMsg', (el) => el.textContent.trim());
+  check('and says to check your email', /check your email/i.test(doneMsg), doneMsg);
+  check('the details reached the endpoint',
+    signups.length === 1 && signups[0].name === 'Brand New Travel'
+      && signups[0].town === 'Bolton' && signups[0].agreed === true);
+  // A password must not sit in the DOM after it has been used.
+  check('the password field is cleared afterwards',
+    await page.$eval('#su-pass', (el) => el.value) === '');
+
+  await page.click('#backToLogin');
+  await page.waitForSelector('#loginForm', { visible: true });
+  check('and there is a way back to sign in', true);
+
   await page.type('#li-email', 'hello@sunseeker.co.uk');
   await page.type('#li-pass', 'right-password');
   await page.click('#loginBtn');
@@ -565,6 +623,31 @@ try {
   await page.click('.nav-i[data-view="plan"]');
   await page.waitForSelector('#v-plan.on', { visible: true });
   await wait(500);
+
+  // ── enquiry notifications ──
+  // An enquiry used to sit in the database until somebody happened to log in
+  // and find it, which is worst for the out-of-hours ones we deliberately steer
+  // people towards.
+  const notifyOn = await page.$eval('#notifyLeads', (el) => el.checked);
+  check('enquiry emails are on by default', notifyOn);
+
+  const fallback = await page.$eval('#notifyFallback', (el) => el.textContent.trim());
+  check('the screen says where enquiries go when the box is left empty',
+    /leave empty to use .+@/.test(fallback), fallback);
+
+  await page.click('#notifyLeads');
+  await wait(150);
+  const addrOff = await page.$eval('#notifyEmail', (el) => el.disabled);
+  check('turning them off disables the address, which now means nothing', addrOff);
+  await page.click('#notifyLeads');
+  await wait(150);
+
+  await page.type('#notifyEmail', 'not-an-address');
+  await page.click('#saveNotify');
+  await page.waitForFunction(() => document.getElementById('notifyErr').classList.contains('on'));
+  const notifyMsg = await page.$eval('#notifyErr', (el) => el.textContent.trim());
+  check('a bad notification address is refused, in words',
+    /does not look right/i.test(notifyMsg), notifyMsg);
 
   const modeCount = await page.$$eval('#billModes .route', (b) => b.length);
   check('all three billing modes are offered', modeCount === 3, `${modeCount}`);

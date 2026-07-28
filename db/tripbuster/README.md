@@ -53,6 +53,28 @@ Until these are set the endpoints degrade honestly rather than erroring:
 `/api/tripbuster/deals` returns a clean `503` with an empty deal list, and sign-in
 returns `503`. Deploying ahead of them is harmless.
 
+### Email
+
+Sign-up and enquiry notifications both send mail, through the same SendGrid
+wrapper the widget suite uses:
+
+```
+SENDGRID_API_KEY          shared with the widget suite
+SENDGRID_FROM_EMAIL       verified sender on a domain we control
+TRIPBUSTER_FROM_EMAIL     optional, once Tripbuster has its own verified domain
+TRIPBUSTER_ADMIN_EMAIL    where new sign-ups go for approval
+TRIPBUSTER_AGENT_APPROVAL 'auto' to skip approval. Anything else means manual.
+```
+
+**Set `TRIPBUSTER_ADMIN_EMAIL`.** Without it a new agency can confirm its email
+address and then sit in `pending` with nobody told it is waiting. The code logs
+loudly when this happens, but a log is not a person.
+
+Mail is always sent **from our own verified sender**, never from the agency's
+address, with Reply-To carrying the address that should get the reply. Sending as
+a domain we do not control fails SPF and DKIM and lands in spam, which for "a
+customer is waiting for your call" is the worst possible outcome.
+
 Optional rate-limit overrides (defaults in brackets):
 
 ```
@@ -60,6 +82,7 @@ RL_TB_DEALS_PER_MIN (90)   RL_TB_DEALS_PER_HR (1500)
 RL_TB_CLICK_PER_MIN (30)   RL_TB_CLICK_PER_HR (400)
 RL_TB_LOGIN_PER_MIN (6)    RL_TB_LOGIN_PER_HR (40)
 RL_TB_IMPRESSION_PER_MIN (60)  RL_TB_IMPRESSION_PER_HR (900)
+RL_TB_REGISTER_PER_MIN (3)     RL_TB_REGISTER_PER_HR (12)
 ```
 
 Optional:
@@ -90,6 +113,9 @@ session secret without resetting click de-duplication.
 | `GET /api/tripbuster/page` | public | Renders the front page, deal pages and destination pages. Reached through the rewrites in `vercel.json`, never directly. |
 | `GET /api/tripbuster/sitemap` | public | `/tripbuster/sitemap.xml`, generated from the live catalogue. |
 | `GET /api/robots` | public | `/robots.txt`. A function, not a static file, so the `Sitemap:` line names whichever host answered. |
+| `POST /api/tripbuster/register` | public | Agent sign-up. Answers identically whatever happened. |
+| `GET /tripbuster/verify` | link | The confirmation link from the sign-up email. Works once. |
+| `GET/POST /tripbuster/approve` | signed link | Approve a new agency. The GET only asks; the POST does it. |
 
 Public read endpoints send a wildcard CORS origin because the widget runs on
 customer sites and the data is deliberately public. The authenticated endpoints
@@ -142,7 +168,8 @@ impressions.
 ```
 npm run test:tripbuster           # 277 assertions, no network needed
 npm run test:tripbuster-seo       # 35 assertions, the indexable surface
-npm run test:tripbuster-import    # 95 assertions, drives the dashboard in Chromium
+npm run test:tripbuster-signup    # 34 assertions, sign-up and enquiry emails
+npm run test:tripbuster-import    # 107 assertions, drives the dashboard in Chromium
 npm run test:tripbuster-call      # 43 assertions, drives the call journey in Chromium
 ```
 
@@ -291,6 +318,78 @@ ratings we do not hold: a manual-action risk, and a consumer-protection risk und
 the DMCC Act. Showing the agent's score on the page as the agent's score is fine.
 Star ratings in the search results have to be earned by collecting real reviews.
 
+## Signing up, and who is allowed to advertise
+
+```
+sign up  ──►  pending, unverified
+                 │  clicks the emailed link
+                 ▼
+             pending, verified   ──►  Tripbuster approves  ──►  active
+                 │
+                 └─ or straight to active, if TRIPBUSTER_AGENT_APPROVAL=auto
+```
+
+`verified_at` and `approved_at` are **separate columns because they are separate
+facts**: one says the agent owns the mailbox, the other says a human at
+Tripbuster said yes. Only `status = 'active'` puts anything in front of a
+traveller.
+
+**Manual approval is the default, deliberately.** A verified mailbox is proof of
+a mailbox, not of a travel agency, and what gets published here is a holiday
+advert with a phone number on it. Approval is a click in an email rather than a
+database query, so the friction lands on us rather than on the agency. Set
+`TRIPBUSTER_AGENT_APPROVAL=auto` to remove the step entirely.
+
+New agencies land on **Spark**, which allows one live deal. Enough to set
+themselves up and prove the thing works, and it bounds what a sign-up that turns
+out to be a nuisance can put in front of anybody.
+
+### The sign-up form never says whether an address is taken
+
+Every outcome — brand new, half-registered, or a live agency — returns the same
+200 and the same sentence. A form that says "that email is already registered" is
+a way to ask, one address at a time, which travel agencies advertise here.
+
+The difference is in which email goes out. A real person who forgot they had
+signed up gets told; the person at the keyboard does not.
+
+### The approval link asks before it acts
+
+`GET /tripbuster/approve` renders a page with a button. `POST` does the work.
+Mail providers, security appliances and link previewers all follow links in email
+before a person sees them, so a GET that approved would mean every agency was
+approved by a scanner within seconds and the review step existed only on paper.
+
+The link is HMAC-signed with the session secret under its own purpose string and
+expires in a fortnight, so it authorises one thing, for one agency, for a bounded
+time, and cannot be replayed as a session. When there is a proper admin area this
+should move behind it.
+
+## Enquiry notifications
+
+A callback request used to sit in the database until an agency happened to log in
+and find it. That was worst for exactly the enquiries that matter most: out of
+hours the callback form IS the call to action, so the ones most likely to go
+stale overnight are the ones we deliberately steer people towards.
+
+**The send is awaited, not fired and forgotten.** A serverless function can be
+frozen the instant it responds, so work left running after the response may never
+happen at all. The traveller waits a few hundred milliseconds longer and the
+agency gets told, which is the right way round for the one event on this platform
+where a real person is expecting a phone call.
+
+**Claimed before sending.** `tb_claim_lead_notification` stamps `notified_at` and
+returns the details in one statement, so two concurrent attempts cannot both
+decide they are the one sending — an agency ringing the same customer twice is
+worse than a slow email. If the send then fails the claim is released, leaving
+the enquiry owed an email rather than silently marked as handled.
+
+**A mail failure never loses the enquiry.** It is already stored and already in
+the agency's inbox. The email is the second-best copy of it.
+
+Agencies control this under Settings: an on/off switch, and an optional separate
+address, because whoever signs in is often not whoever rings customers back.
+
 ## Access model — fail closed
 
 Every table has **RLS enabled with no policies**, and `anon`/`authenticated` have
@@ -320,6 +419,7 @@ Apply in order. They are idempotent enough to run on a fresh project.
 | `010_all_calls_chargeable.sql` | Every call is billable whatever the hour; `out_of_hours` becomes a reporting flag only |
 | `011_seo_slugs_and_destinations.sql` | `tb_slugify`; a stable unique `deals.slug` minted at first publish; `p_deal_slug` and `p_holiday_type` on `tb_search_deals`; `tb_destinations`, `tb_destination`, `tb_sitemap` |
 | `012_canonical_deal_page.sql` | `canonical_slug` on every returned row, so one hotel is one page; the sitemap lists pages rather than deals |
+| `013_registration_and_notifications.sql` | Verification, approval and notification columns; `tb_unique_agent_slug`, `tb_register_agent`, `tb_verify_agent`, `tb_approve_agent`, `tb_claim_lead_notification` |
 
 Migration 008 replaces `tb_record_click` rather than altering it. Adding
 parameters to a Postgres function creates an **overload**, and with defaults in
@@ -755,10 +855,10 @@ delete from public.deals;
 delete from public.agents;
 ```
 
-## Registration is not built yet
+## There is still no password reset
 
-There is no self-service sign-up endpoint. Agents are created directly in the
-database and a password hash is set for them. Registration needs its own thinking
-(email verification, abuse control, which plan a new account lands on) and that
-last part depends on the pricing decision, so it is deliberately a later piece of
-work rather than something half-built here.
+Sign-up exists; forgetting your password does not. Today the only route back is
+to email us. The pieces are already here — a token column, a hash-only pattern, a
+mailer and a notice page — so it is a small piece of work rather than a new
+mechanism, but it is genuinely missing and the first agency to forget a password
+will find it.

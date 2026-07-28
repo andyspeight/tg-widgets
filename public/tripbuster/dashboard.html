@@ -430,6 +430,21 @@
 </head>
 <body>
 
+<style>
+  /* Sign-up sits in the same shell as sign-in. */
+  .login-swap { margin:14px 0 0; text-align:center; font-size:13px; color:var(--tx-2); }
+  .linkish { background:none; border:0; padding:0; font:inherit; font-weight:700;
+    color:var(--coral-ink); cursor:pointer; text-decoration:underline; }
+  .linkish:hover { color:var(--coral); }
+  .login .opt { font-weight:600; color:var(--tx-3); font-size:11.5px; }
+  .login .hint { display:block; margin-top:5px; font-size:11.5px; color:var(--tx-3); }
+  .login .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .check-line { display:flex; gap:10px; align-items:flex-start; margin:4px 0 16px;
+    font-size:12.5px; line-height:1.5; color:var(--tx-2); }
+  .check-line input { margin-top:2px; flex:none; }
+  @media (max-width:460px){ .login .grid-2 { grid-template-columns:1fr; } }
+</style>
+
 <!-- ═══ SIGN IN ═══ -->
 <div class="login-wrap" id="loginView">
   <form class="login" id="loginForm" novalidate>
@@ -449,7 +464,67 @@
       <input type="password" id="li-pass" autocomplete="current-password" required>
     </div>
     <button class="btn btn-primary" type="submit" id="loginBtn" style="width:100%">Sign in</button>
+    <p class="login-swap">New to Tripbuster?
+      <button type="button" class="linkish" id="toSignup">Create an account</button></p>
   </form>
+
+  <!-- Sign-up. One panel, swapped with sign-in rather than a second page, so
+       somebody who picked the wrong one is one click from the other. -->
+  <form class="login" id="signupForm" novalidate hidden>
+    <div class="brand">
+      <span class="ticket" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M2 12h20M14 5l7 7-7 7M6 8v8"/></svg></span>
+      <span><span class="brand-name">Trip<b>buster</b></span><br><span class="brand-tag">For agents</span></span>
+    </div>
+    <h1>Advertise your deals</h1>
+    <p class="sub">Free to set up. You keep every booking, and travellers book direct with you.</p>
+    <div class="form-error" id="signupError" role="alert"></div>
+    <div class="field">
+      <label for="su-name">Agency name</label>
+      <input type="text" id="su-name" autocomplete="organization" required>
+    </div>
+    <div class="field">
+      <label for="su-email">Email</label>
+      <input type="email" id="su-email" autocomplete="email" required>
+    </div>
+    <div class="field">
+      <label for="su-pass">Password</label>
+      <input type="password" id="su-pass" autocomplete="new-password" required minlength="10">
+      <span class="hint">At least 10 characters.</span>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label for="su-phone">Phone <span class="opt">optional</span></label>
+        <input type="tel" id="su-phone" autocomplete="tel" placeholder="01204 555 118">
+      </div>
+      <div class="field">
+        <label for="su-town">Town <span class="opt">optional</span></label>
+        <input type="text" id="su-town" autocomplete="address-level2" placeholder="Bolton">
+      </div>
+    </div>
+    <div class="field">
+      <label for="su-website">Website <span class="opt">optional</span></label>
+      <input type="text" id="su-website" autocomplete="url" placeholder="yourtravelagency.co.uk">
+    </div>
+    <label class="check-line">
+      <input type="checkbox" id="su-agreed">
+      <span>I understand Tripbuster advertises my deals and that I sell and financially
+        protect every holiday myself.</span>
+    </label>
+    <button class="btn btn-primary" type="submit" id="signupBtn" style="width:100%">Create my account</button>
+    <p class="login-swap">Already signed up?
+      <button type="button" class="linkish" id="toLogin">Sign in</button></p>
+  </form>
+
+  <!-- Shown in place of both once a sign-up has gone through. -->
+  <div class="login" id="signupDone" hidden>
+    <div class="brand">
+      <span class="ticket" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M2 12h20M14 5l7 7-7 7M6 8v8"/></svg></span>
+      <span><span class="brand-name">Trip<b>buster</b></span><br><span class="brand-tag">For agents</span></span>
+    </div>
+    <h1>Check your email</h1>
+    <p class="sub" id="signupDoneMsg"></p>
+    <button type="button" class="btn btn-ghost" id="backToLogin" style="width:100%">Back to sign in</button>
+  </div>
 </div>
 
 <!-- ═══ APP ═══ -->
@@ -1036,6 +1111,33 @@
           </div>
         </div>
 
+        <!-- ── enquiry notifications ── -->
+        <div class="card" style="padding:20px;margin-bottom:18px" id="notifyCard">
+          <h3 style="margin:0 0 6px;font-size:16px;font-weight:800;letter-spacing:-.02em">
+            Enquiry emails</h3>
+          <p class="sub" style="margin:0 0 14px">
+            When a traveller asks you to ring them back, we can email you straight away
+            so it does not sit here waiting to be found.</p>
+          <div class="form-error" id="notifyErr" role="alert"></div>
+
+          <label class="check-line" style="margin:0 0 14px">
+            <input type="checkbox" id="notifyLeads" checked>
+            <span><b>Email me every enquiry.</b> Most callback requests arrive outside
+              opening hours, which are exactly the ones worth answering first thing.</span>
+          </label>
+
+          <div class="field" style="max-width:360px">
+            <label for="notifyEmail">Send them to
+              <span class="hint" id="notifyFallback"></span></label>
+            <input type="email" id="notifyEmail" autocomplete="email"
+              placeholder="bookings@youragency.co.uk"><span class="err"></span>
+          </div>
+
+          <div class="editor-bar" style="justify-content:flex-end;margin-top:4px">
+            <button class="btn btn-primary" type="button" id="saveNotify">Save</button>
+          </div>
+        </div>
+
         <!-- ── opening hours ── -->
         <div class="card" style="padding:20px;margin-bottom:18px" id="hoursCard">
           <h3 style="margin:0 0 6px;font-size:14px;font-weight:800">When you are open</h3>
@@ -1247,12 +1349,64 @@
     }
   });
 
+  // ── sign up ───────────────────────────────────────────────
+  // Swaps the two panels rather than navigating, so somebody who picked the
+  // wrong one is a click from the other rather than a page load.
+  function showPanel(which) {
+    $('loginForm').hidden = which !== 'login';
+    $('signupForm').hidden = which !== 'signup';
+    $('signupDone').hidden = which !== 'done';
+    const focus = which === 'login' ? 'li-email' : which === 'signup' ? 'su-name' : null;
+    if (focus) $(focus).focus();
+  }
+  $('toSignup').addEventListener('click', () => showPanel('signup'));
+  $('toLogin').addEventListener('click', () => showPanel('login'));
+  $('backToLogin').addEventListener('click', () => showPanel('login'));
+
+  $('signupForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('signupBtn');
+    const box = $('signupError');
+    box.classList.remove('on');
+    btn.disabled = true;
+    btn.textContent = 'Creating…';
+    try {
+      const data = await api('/api/tripbuster/register', {
+        method: 'POST',
+        body: {
+          name: $('su-name').value,
+          email: $('su-email').value,
+          password: $('su-pass').value,
+          phone: $('su-phone').value,
+          town: $('su-town').value,
+          website: $('su-website').value,
+          agreed: $('su-agreed').checked,
+        },
+      });
+      // The password never stays in the DOM after it has been used.
+      $('su-pass').value = '';
+      $('signupDoneMsg').textContent = data.message
+        || 'Check your email. We have sent a link to confirm your address.';
+      showPanel('done');
+    } catch (err) {
+      // Field-level messages when the server gave them, so the sentence points
+      // at the box that is wrong rather than at the form in general.
+      const first = (err.fieldErrors || [])[0];
+      box.textContent = (first && first.message) || err.message || 'Could not sign you up';
+      box.classList.add('on');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Create my account';
+    }
+  });
+
   function signOut(message) {
     clearSession();
     state.token = null;
     state.agent = null;
     $('appView').hidden = true;
     $('loginView').hidden = false;
+    showPanel('login');
     if (message) {
       const box = $('loginError');
       box.textContent = message;
@@ -1903,6 +2057,14 @@
       loadHours(a.contact);
       loadNumbers(a.contact);
 
+      $('notifyLeads').checked = a.notifyLeads !== false;
+      $('notifyEmail').value = a.notifyEmail || '';
+      // Says what will actually be used when the box is left empty, rather than
+      // leaving an agency to guess where their enquiries are going.
+      $('notifyFallback').textContent = a.signInEmail
+        ? 'leave empty to use ' + a.signInEmail : '';
+      paintNotify();
+
       const by = a.dealsByMode;
       $('billNote').textContent = by && by.overridden
         ? by.overridden + ' of your ' + by.total + ' deals are set differently'
@@ -1911,6 +2073,37 @@
       if (err.message !== 'unauthorised') $('billNote').textContent = '';
     }
   }
+
+  // An address is only meaningful while the emails are switched on.
+  function paintNotify() {
+    const on = $('notifyLeads').checked;
+    $('notifyEmail').disabled = !on;
+    $('notifyEmail').closest('.field').style.opacity = on ? '1' : '.5';
+  }
+  $('notifyLeads').addEventListener('change', paintNotify);
+
+  $('saveNotify').addEventListener('click', async () => {
+    const btn = $('saveNotify');
+    const errBox = $('notifyErr');
+    errBox.classList.remove('on');
+    btn.disabled = true;
+    try {
+      await api('/api/tripbuster/account', {
+        method: 'PATCH',
+        body: {
+          notifyLeads: $('notifyLeads').checked,
+          notifyEmail: $('notifyEmail').value.trim(),
+        },
+      });
+      toast($('notifyLeads').checked ? 'We will email you every enquiry' : 'Enquiry emails are off');
+    } catch (err) {
+      if (err.message === 'unauthorised') return;
+      errBox.textContent = ((err.fieldErrors || [])[0] || {}).message || err.message;
+      errBox.classList.add('on');
+    } finally {
+      btn.disabled = false;
+    }
+  });
 
   $('saveBilling').addEventListener('click', async () => {
     const btn = $('saveBilling');

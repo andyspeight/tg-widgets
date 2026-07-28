@@ -26,9 +26,10 @@
  */
 
 import { requireAgent } from '../_lib/tripbuster/auth.js';
-import { tbConfigured, tbSelect, tbRpc } from '../_lib/tripbuster/db.js';
+import { tbConfigured, tbSelect, tbUpdate, tbRpc } from '../_lib/tripbuster/db.js';
 import { AGENT_WRITE_COLUMNS, LIVE_DEAL_LIMITS } from '../_lib/tripbuster/deal-write.js';
 import { validateSchedule } from '../_lib/tripbuster/hours.js';
+import { isValidEmail } from '../_lib/sendgrid.js';
 
 const BILLING_MODES = ['click', 'call', 'both'];
 
@@ -54,6 +55,14 @@ function cleanPhone(value) {
   return /^[+(\d][\d\s()+.-]{5,}$/.test(s) ? s : undefined;
 }
 
+/** Echo back what the notification settings became, for the screen to redraw from. */
+function describeNotify(notify) {
+  const out = {};
+  if (Object.prototype.hasOwnProperty.call(notify, 'notify_leads')) out.notifyLeads = notify.notify_leads;
+  if (Object.prototype.hasOwnProperty.call(notify, 'notify_email')) out.notifyEmail = notify.notify_email || '';
+  return out;
+}
+
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
 
@@ -66,7 +75,11 @@ export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
       const [rows, byMode, contact] = await Promise.all([
-        tbSelect('agents', { select: AGENT_WRITE_COLUMNS, id: `eq.${agentId}`, limit: 1 }),
+        tbSelect('agents', {
+          select: `${AGENT_WRITE_COLUMNS},email,notify_leads,notify_email`,
+          id: `eq.${agentId}`,
+          limit: 1,
+        }),
         tbRpc('tb_agent_billing_counts', { p_agent_id: agentId }).catch(() => null),
         tbRpc('tb_agent_contact', { p_agent_id: agentId }).catch(() => null),
       ]);
@@ -90,6 +103,12 @@ export default async function handler(req, res) {
         protectionType: agent.protection_type || '',
         atolNumber: agent.atol_number || '',
         travelgenixClient: !!agent.tg_client_email,
+        // Where an enquiry lands. notifyEmail empty means "use the sign-in
+        // address", which is why the sign-in address is sent alongside it —
+        // the screen can show what will actually be used rather than a blank box.
+        notifyLeads: agent.notify_leads !== false,
+        notifyEmail: agent.notify_email || '',
+        signInEmail: agent.email || '',
         // How the agency's deals actually resolve, so the screen can say
         // "8 of your deals override this" rather than leaving it a mystery.
         dealsByMode: byMode,
@@ -103,6 +122,10 @@ export default async function handler(req, res) {
 
     const body = (req.body && typeof req.body === 'object' && !Array.isArray(req.body)) ? req.body : {};
     const patch = {};
+    // Kept apart from `patch` because these two are plain scalar columns with no
+    // collection semantics, so they do not need — and are not worth widening —
+    // the all-or-nothing RPC that exists to protect the weekly schedule.
+    const notify = {};
     const errors = [];
 
     // Read the row FIRST. Two rules need to know what is already stored rather
@@ -141,6 +164,27 @@ export default async function handler(req, res) {
       }
     }
 
+    if (Object.prototype.hasOwnProperty.call(body, 'notifyLeads')) {
+      if (typeof body.notifyLeads !== 'boolean') {
+        errors.push({ field: 'notifyLeads', message: 'Choose whether to be emailed about enquiries' });
+      } else {
+        notify.notify_leads = body.notifyLeads;
+      }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(body, 'notifyEmail')) {
+      const raw = typeof body.notifyEmail === 'string' ? body.notifyEmail.trim().slice(0, 200) : '';
+      if (!raw) {
+        // Cleared, which means fall back to the sign-in address rather than stop
+        // sending. Turning notifications off is a separate, deliberate switch.
+        notify.notify_email = null;
+      } else if (!isValidEmail(raw)) {
+        errors.push({ field: 'notifyEmail', message: 'That email address does not look right' });
+      } else {
+        notify.notify_email = raw.toLowerCase();
+      }
+    }
+
     // Hours, special days and extra numbers. The validator is told the mode the
     // agency will END UP on — the submitted one if they changed it, otherwise the
     // stored one — so clearing every day is refused whether or not the mode came
@@ -154,7 +198,9 @@ export default async function handler(req, res) {
     Object.assign(patch, schedule.clean);
 
     if (errors.length) return res.status(422).json({ error: 'Some details need fixing', errors });
-    if (!Object.keys(patch).length) return res.status(400).json({ error: 'Nothing to update' });
+    if (!Object.keys(patch).length && !Object.keys(notify).length) {
+      return res.status(400).json({ error: 'Nothing to update' });
+    }
 
     // Switching to call without a number to ring would take every call-first deal
     // off the site the moment it was saved. Caught here with a sentence the agency
@@ -166,6 +212,12 @@ export default async function handler(req, res) {
         error: 'Some details need fixing',
         errors: [{ field: 'phone', message: 'Add a phone number before charging for calls' }],
       });
+    }
+
+    if (!Object.keys(patch).length) {
+      // Only the notification settings changed. Nothing needs the transaction.
+      await tbUpdate('agents', { id: `eq.${agentId}` }, notify, { returning: false });
+      return res.status(200).json({ saved: true, ...describeNotify(notify) });
     }
 
     // One transaction, so a failed save can never leave an agency on scheduled
@@ -187,7 +239,14 @@ export default async function handler(req, res) {
     });
     if (!saved) return res.status(404).json({ error: 'Account not found' });
 
-    return res.status(200).json(saved);
+    // After the schedule, and only if it succeeded. The ordering matters: a
+    // failed schedule save must not leave the agency's notification settings
+    // changed behind an error message saying nothing was saved.
+    if (Object.keys(notify).length) {
+      await tbUpdate('agents', { id: `eq.${agentId}` }, notify, { returning: false });
+    }
+
+    return res.status(200).json({ ...saved, ...describeNotify(notify) });
   } catch (e) {
     console.error('[tripbuster/account] failed', req.method, e && e.code, e && e.message);
     return res.status(502).json({ error: 'Could not save that just now. Try again.' });

@@ -29,9 +29,52 @@ import { evaluatePublicRateLimit } from '../_lib/rate-limit-public.js';
 import { tbConfigured, tbRpc } from '../_lib/tripbuster/db.js';
 import { visitorContext, contactHash } from '../_lib/tripbuster/visitor.js';
 import { validateLead } from '../_lib/tripbuster/lead-schema.js';
+import { sendLeadEmail } from '../_lib/tripbuster/mail.js';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SURFACES = ['site', 'widget', 'directory', 'api'];
+
+/**
+ * Email the agency that somebody wants a call back.
+ *
+ * WAITED FOR RATHER THAN FIRED AND FORGOTTEN, on purpose. A serverless function
+ * can be frozen the instant it responds, so work left running after res.json()
+ * is work that may simply never happen. The traveller waits a few hundred
+ * milliseconds longer; the agency gets told. That is the right way round for the
+ * one event on this platform where a real person is expecting a phone call.
+ *
+ * CLAIMED BEFORE SENDING. tb_claim_lead_notification stamps notified_at and
+ * hands back the details in a single statement, so two concurrent attempts
+ * cannot both decide they are the one sending. If the send then fails the claim
+ * is released, leaving the enquiry owed an email rather than silently marked as
+ * handled.
+ *
+ * NOTHING HERE CAN FAIL THE ENQUIRY. It is already stored and already visible in
+ * the agency's inbox. A mail outage must cost a notification, never the lead.
+ */
+async function notifyAgency(req, leadId) {
+  if (!leadId) return;
+  let claim = null;
+  try {
+    claim = await tbRpc('tb_claim_lead_notification', { p_lead_id: leadId });
+  } catch (e) {
+    console.warn('[tripbuster/lead] could not claim the notification', e && e.code);
+    return;
+  }
+  // Null means there is nothing to do: already notified, or this agency has
+  // notifications switched off.
+  if (!claim || !claim.sendTo) return;
+
+  const mail = await sendLeadEmail(req, claim);
+  if (!mail.sent) {
+    try {
+      await tbRpc('tb_release_lead_notification', { p_lead_id: leadId });
+    } catch {
+      // Then it stays marked as notified. The enquiry is still in the inbox,
+      // which is the thing that actually matters.
+    }
+  }
+}
 
 export default async function handler(req, res) {
   setCors(res);
@@ -97,6 +140,9 @@ export default async function handler(req, res) {
     });
 
     if (!result) return res.status(404).json({ error: 'Deal not found' });
+
+    // The enquiry is stored. Now tell somebody about it.
+    await notifyAgency(req, result.leadId);
 
     // Only the agency's name goes back, so the traveller knows who will ring.
     // `billable` and the lead id are ours, not theirs.

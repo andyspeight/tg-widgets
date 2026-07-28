@@ -66,6 +66,46 @@ export function verifyAgentToken(token) {
   }
 }
 
+/**
+ * Sign a link we email to ourselves, such as "approve this agency".
+ *
+ * Same secret and the same HMAC as a session token, but a different shape and
+ * its own purpose string, so an approval link can never be presented as a
+ * session and a session can never be presented as an approval. The expiry is
+ * inside the signed material rather than beside it, or anybody could extend it.
+ *
+ * Deliberately NOT a session: an approval link lands in an inbox, gets forwarded,
+ * and sits in a mail archive for years. It has to be narrow and short-lived.
+ */
+const ADMIN_PURPOSE = 'tb-approve';
+const ADMIN_LINK_TTL_MS = 14 * 24 * 60 * 60 * 1000; // a fortnight to notice an email
+
+export function signAdminLink(agentId, ttlMs = ADMIN_LINK_TTL_MS) {
+  const s = secret();
+  if (!s) throw new Error('TRIPBUSTER_SESSION_SECRET not configured or too short');
+  const exp = Date.now() + ttlMs;
+  const material = `${ADMIN_PURPOSE}.${agentId}.${exp}`;
+  const sig = createHmac('sha256', s).update(material).digest('base64url');
+  return { exp: String(exp), sig };
+}
+
+/** True only for a link we signed, for this agent, that has not expired. */
+export function verifyAdminLink(agentId, exp, sig) {
+  const s = secret();
+  if (!s || !agentId || !exp || !sig) return false;
+  const expiry = Number(exp);
+  if (!Number.isFinite(expiry) || Date.now() > expiry) return false;
+  const material = `${ADMIN_PURPOSE}.${agentId}.${expiry}`;
+  const expected = createHmac('sha256', s).update(material).digest('base64url');
+  try {
+    const a = Buffer.from(String(sig), 'base64url');
+    const b = Buffer.from(expected, 'base64url');
+    return a.length === b.length && timingSafeEqual(a, b);
+  } catch {
+    return false;
+  }
+}
+
 function bearer(req) {
   const h = (req.headers && (req.headers.authorization || req.headers.Authorization)) || '';
   return h.startsWith('Bearer ') ? h.slice(7) : null;
