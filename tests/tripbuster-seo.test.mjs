@@ -560,7 +560,7 @@ await testAsync('a country page ranks for the country and links to its resorts',
   assert.equal(r.status, 200);
   const title = /<title>([^<]*)<\/title>/.exec(r.body)[1];
   assert.ok(title.startsWith('Cheap Poland holidays'), title);
-  assert.ok(r.body.includes('<h1>Poland holidays</h1>'));
+  assert.ok(r.body.includes('<h1>Poland holidays from<br><em>independent UK agents</em></h1>'));
   assert.ok(r.body.includes('href="/tripbuster/holidays/poland/krakow"'), 'no link to the resort');
   assert.ok(r.body.includes('<link rel="canonical" href="https://tripbuster.example/tripbuster/holidays/poland">'));
   assert.ok(!/content="[^"]*noindex/.test(r.body), 'destination pages must be indexable');
@@ -574,7 +574,7 @@ await testAsync('a country page ranks for the country and links to its resorts',
 await testAsync('a resort page sits under its country and offers no children', async () => {
   const r = await call(page, { query: { type: 'destination', country: 'poland', resort: 'krakow' } });
   assert.equal(r.status, 200);
-  assert.ok(r.body.includes('<h1>Krakow holidays</h1>'));
+  assert.ok(r.body.includes('<h1>Krakow holidays from<br><em>independent UK agents</em></h1>'));
   assert.ok(r.body.includes('<link rel="canonical" href="https://tripbuster.example/tripbuster/holidays/poland/krakow">'));
   assert.ok(!r.body.includes('Where in Poland'), 'a resort page has nothing below it');
 });
@@ -895,7 +895,12 @@ await testAsync('a database failure is a 503, so a crawler comes back', async ()
 await testAsync('a trip type has its own indexable page', async () => {
   const r = await call(page, { query: { type: 'trip', slug: 'cruises' } });
   assert.equal(r.status, 200);
-  assert.ok(/<h1>Cruises from independent UK travel agents<\/h1>/.test(r.body), 'h1');
+  // The hero splits the headline over two lines, same as the front page, so the
+  // assertion checks the words rather than one exact string.
+  assert.ok(/<h1>Cruises from<br><em>independent UK agents<\/em><\/h1>/.test(r.body), 'h1');
+  assert.ok(/class="hero"/.test(r.body), 'mirrors the front page hero');
+  assert.ok(r.body.indexOf('searchwrap') > r.body.indexOf('</header>'),
+    'the search card must follow the hero, or its negative margin has nothing to overlap');
   assert.ok(/content="index, follow/.test(r.body), 'indexable, unlike search');
   assert.ok(/rel="canonical" href="[^"]*\/tripbuster\/trips\/cruises"/.test(r.body), 'canonical');
 });
@@ -969,6 +974,16 @@ await testAsync('the front page form is unscoped, as it was', async () => {
   const r = await call(page, { query: { type: 'home' } });
   assert.ok(/action="\/tripbuster\/search"/.test(r.body));
   assert.ok(!/name="holidayType"/.test(r.body), 'the home page searches everything');
+});
+
+await testAsync('a destination page gets the same top, with the place prefilled', async () => {
+  const r = await call(page, { query: { type: 'destination', country: 'poland' } });
+  assert.equal(r.status, 200);
+  assert.ok(/class="hero"/.test(r.body), 'same hero as the front page');
+  assert.ok(r.body.indexOf('searchwrap') > r.body.indexOf('</header>'), 'overlap intact');
+  // Prefilled, so the box narrows where they already are rather than starting
+  // them again from an empty field.
+  assert.ok(/id="q" name="q" type="search"[^>]*value="Poland"/.test(r.body), 'q prefilled');
 });
 
 // ── report ──────────────────────────────────────────────────────

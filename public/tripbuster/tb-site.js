@@ -1268,6 +1268,40 @@ export function searchForm(values) {
  * than a search query — which is what gives every country page a crawlable route
  * in from the home page.
  */
+/**
+ * The top of a landing page: hero, then the search card overlapping it.
+ *
+ * ONE helper for the home page and every landing page, because the overlap is
+ * load-bearing and easy to break. .searchwrap has margin-top:-70px, which only
+ * works if it is the element immediately after .hero — bolt a form on anywhere
+ * else and it sits flat against whatever follows, which is exactly what the
+ * first version of the type pages did.
+ *
+ * The headline is taken in two pieces rather than as markup, so a caller cannot
+ * pass HTML through it and every page gets the same two-line treatment.
+ */
+export function landingHero(o) {
+  var v = o || {};
+  return '<header class="hero"><div class="wrap hero-in">'
+    + (v.badge
+      ? '<span class="hero-badge"><i></i> <span'
+        + (v.badgeId ? ' id="' + esc(v.badgeId) + '"' : '') + '>'
+        + esc(v.badge) + '</span></span>'
+      : '')
+    + '<h1>' + esc(v.h1 || '') + (v.h1em ? '<br><em>' + esc(v.h1em) + '</em>' : '') + '</h1>'
+    + (v.sub ? '<p class="sub">' + esc(v.sub) + '</p>' : '')
+    + '</div></header>'
+    + '<div class="wrap searchwrap">' + searchForm(v.search || {})
+    + '<div class="trust">'
+    + '<span>' + svg(IC.shield) + ' Every deal <b>protected by the agent</b> who sells it</span>'
+    + (v.agentCount
+      ? '<span>' + svg(IC.tick) + ' <b>' + esc(num(v.agentCount)) + '</b> independent UK agent'
+        + (Number(v.agentCount) === 1 ? '' : 's') + '</span>'
+      : '')
+    + '<span>' + svg(IC.tick) + ' You book direct, <b>no booking fee</b></span>'
+    + '</div></div>';
+}
+
 export function homePage(view) {
   var v = view || {};
   var deals = v.deals || [];
@@ -1285,23 +1319,18 @@ export function homePage(view) {
       + '</span></a>';
   }).join('');
 
-  return '<header class="hero"><div class="wrap hero-in">'
-    + '<span class="hero-badge"><i></i> <span id="dealCount">'
-    + (v.total
-      ? esc(num(v.total)) + ' hotel' + (v.total === 1 ? '' : 's') + ' with live deals today'
-      : 'Deals from independent UK agents')
-    + '</span></span>'
-    + '<h1>Cheap holidays,<br><em>price busted.</em></h1>'
-    + '<p class="sub">Compare package deals from independent UK travel agents, then '
-    + 'book direct with them. No booking fee, no middleman markup.</p>'
-    + '</div></header>'
-
-    + '<div class="wrap searchwrap">' + searchForm(v.search) + '<div class="trust">'
-    + '<span>' + svg(IC.shield) + ' Every deal <b>protected by the agent</b> who sells it</span>'
-    + '<span>' + svg(IC.tick) + ' <b>' + esc(num(v.agentCount || 0))
-    + '</b> independent UK agent' + (v.agentCount === 1 ? '' : 's') + '</span>'
-    + '<span>' + svg(IC.tick) + ' You book direct, <b>no booking fee</b></span>'
-    + '</div></div>'
+  return landingHero({
+    badgeId: 'dealCount',
+    badge: v.total
+      ? num(v.total) + ' hotel' + (v.total === 1 ? '' : 's') + ' with live deals today'
+      : 'Deals from independent UK agents',
+    h1: 'Cheap holidays,',
+    h1em: 'price busted.',
+    sub: 'Compare package deals from independent UK travel agents, then '
+      + 'book direct with them. No booking fee, no middleman markup.',
+    search: v.search,
+    agentCount: v.agentCount || 0,
+  })
 
     + '<section class="wrap section"><div class="sec-head">'
     + '<div><h2>This week\'s best savings</h2>'

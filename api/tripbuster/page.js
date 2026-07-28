@@ -372,11 +372,26 @@ async function renderDestination(req, res, countrySlug, resortSlug) {
     place.maxDiscount ? `up to ${place.maxDiscount}% off` : '',
   ].filter(Boolean);
 
+  // Same top as the front page and the type pages. A destination page had the
+  // same defect the type pages did — a wall of cards and no way to narrow them —
+  // except here there was no search box at all.
   const body = `${TB.crumbs(trail)}
-<header class="dest-head">
-  <h1>${esc(copy.h1)}</h1>
-  <p class="dest-lead">Every deal below is advertised by an independent UK travel agent.
-    Compare their prices, then book direct with whichever one you pick.</p>
+${TB.landingHero({
+    badge: `${place.dealCount} live now`,
+    // The page's own headline, not a second one. copy.h1 is built from the
+    // place and is what this page ranks for; duplicating it in an h2 below
+    // would just be the same words twice.
+    h1: `${copy.h1} from`,
+    h1em: 'independent UK agents',
+    sub: 'Every deal below is advertised by an independent UK travel agent. '
+      + 'Compare their prices, then book direct with whichever one you pick.',
+    // Prefilled with where they already are, so the box narrows this place
+    // rather than starting them again from nothing.
+    search: { q: place.resort || place.country, placeholder: 'Resort, hotel or country' },
+    agentCount: place.agentCount,
+  })}
+<div class="wrap">
+<header class="dest-head" style="margin-top:28px">
   <div class="chips">${facts.map((f) => `<span class="chip">${esc(f)}</span>`).join('')}</div>
 </header>
 ${children.length ? `<nav class="dest-kids" aria-label="Resorts in ${esc(place.country)}">
@@ -390,7 +405,8 @@ ${children.length ? `<nav class="dest-kids" aria-label="Resorts in ${esc(place.c
 ${deals.length ? TB.rankingNote() : ''}
 ${deals.length >= 24 ? `<p class="dest-more"><a class="btn btn-dark" href="/tripbuster/search?country=${
   encodeURIComponent(place.country)}${place.resort ? `&resort=${encodeURIComponent(place.resort)}` : ''}">
-  See all ${place.dealCount} deals</a></p>` : ''}`;
+  See all ${place.dealCount} deals</a></p>` : ''}
+</div>`;
 
   const html = shell(body, {
     title: copy.title,
@@ -470,17 +486,28 @@ async function renderTripType(req, res, slug) {
   ];
   const canonical = absolute(req, TB.tripTypeHref(meta.slug));
 
+  // Same shape as the front page: hero, the search card overlapping it, then the
+  // deals in a titled section. The crumb sits ABOVE the hero rather than inside
+  // it, so the hero's gradient still runs full width.
   const body = `${TB.crumbs(trail)}
-<header class="dest-head">
-  <h1>${esc(meta.plural)} from independent UK travel agents</h1>
-  <p class="dest-lead">${esc(meta.lead)}</p>
-  <div class="chips">${facts.map((f) => `<span class="chip">${esc(f)}</span>`).join('')}</div>
-</header>
-${TB.searchForm({ holidayType: meta.type, placeholder: meta.placeholder })}
-<section class="grid">${deals.map((d) => TB.dealCard(d)).join('')}</section>
-${TB.rankingNote()}
-${total > deals.length ? `<p class="dest-more"><a class="btn btn-dark" href="/tripbuster/search?holidayType=${
-  encodeURIComponent(meta.type)}">See all ${total} ${esc(meta.plural.toLowerCase())}</a></p>` : ''}`;
+${TB.landingHero({
+    badge: `${total} live now`,
+    h1: `${meta.plural} from`,
+    h1em: 'independent UK agents',
+    sub: meta.lead,
+    search: { holidayType: meta.type, placeholder: meta.placeholder },
+    agentCount: Number(row.agents) || 0,
+  })}
+<section class="wrap section">
+  <div class="sec-head">
+    <div><h2>${esc(meta.plural)} on offer now</h2>
+      <p>${esc(facts.join(' · '))}</p></div>
+    <a class="btn btn-ghost" href="/tripbuster/search?holidayType=${
+  encodeURIComponent(meta.type)}">See all ${total}</a>
+  </div>
+  <div class="grid">${deals.map((d) => TB.dealCard(d)).join('')}</div>
+  ${TB.rankingNote()}
+</section>`;
 
   const html = shell(body, {
     title: clamp(`${meta.plural} from UK travel agents | ${SITE_NAME}`, 70),
