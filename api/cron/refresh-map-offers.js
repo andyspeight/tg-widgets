@@ -538,26 +538,38 @@ async function fetchEnabledCountries() {
 const MARKETS = [
   // flightOrigins: departure airports for FLIGHT sweeps, ONE REQUEST EACH
   // (the single-`origin` request is the only shape the feed returns flight
-  // offers for — proven by the departure-board widget). The UK list is every
-  // UK airport in the Travelify team's own origins dump (2 Jul 2026). Cork
-  // and Shannon are NOT in that dump, but stay on the Irish list by Andy's
-  // call (2 Jul): keep asking, so inventory appearing later flows in on its
-  // own. Same principle destination-side: flight requests go to EVERY swept
-  // destination, held today or not.
+  // offers for — proven by the departure-board widget). Flight requests go to
+  // EVERY swept destination, held today or not.
+  //
+  // 28 Jul 2026 — WIDENED back to (nearly) every UK/Irish airport with
+  // scheduled leisure service, on Travelify's advice that thousands of flight
+  // offers depart UK and Irish airports. This reverses the 6 Jul trim to 10 UK
+  // hubs, which was made because a whole sweep was only yielding ~15 flight-only
+  // offers and the requests were starving the Packages/Accommodation budget.
+  // The cron's cursor-based partial-sweep continuation absorbs the extra
+  // fan-out: each run STARTS fewer countries, but every country it starts runs
+  // to completion, and the rotation picks up the rest next run — so no country
+  // is left half-swept, package freshness just spreads over a little more time.
+  //
+  // WATCH THIS: if the flight-only count does NOT rise materially after this,
+  // the bottleneck is the flight REQUEST SHAPE, not the airport list (20 origins
+  // already gave ~15 offers on 6 Jul). In that case Travelify needs to confirm
+  // the exact flight query that returns their thousands — likely those flights
+  // are embedded in the Packages we already cache, not a standalone Flights
+  // product. The per-type sweep stats (SWEEP_STATS_KEY / the Cache tab) show the
+  // real fetched-vs-kept per type, so the answer is measurable after one sweep.
   {
     id: 'GB', nationality: 'GB',
-    // Flight-only sweeps fire ONE request per origin per destination, so this
-    // list multiplies the request budget hard (20 origins was ~1,100 flight
-    // requests per full sweep). Travelify returns very little flight-only
-    // inventory — a whole sweep yields ~15 offers with nothing dropped by our
-    // filters — so those requests were mostly empty and were starving the time
-    // budget the Packages and Accommodation sweeps need. Trimmed to the busiest
-    // UK hubs (6 Jul 2026). Dropped the smaller regionals: LCY, SEN, EMA, LBA,
-    // LPL, MME, ABZ, INV, NQY, LDY — add any back here if a client needs that
-    // departure point.
-    flightOrigins: ['LHR', 'LGW', 'LTN', 'STN', 'MAN', 'BHX', 'EDI', 'GLA', 'BRS', 'NCL'],
+    flightOrigins: [
+      'LHR', 'LGW', 'LTN', 'STN', 'LCY', 'SEN',           // London area
+      'MAN', 'BHX', 'EDI', 'GLA', 'BRS', 'NCL', 'LPL',     // major regionals
+      'LBA', 'EMA', 'ABZ', 'SOU', 'CWL', 'BOH', 'EXT',     // regionals
+      'NWI', 'INV', 'NQY', 'MME', 'PIK', 'HUY', 'DND',     // smaller regionals
+      'BFS', 'BHD', 'LDY',                                 // Northern Ireland
+    ],
   },
-  { id: 'IE', nationality: 'IE', flightOrigins: ['DUB', 'ORK', 'SNN'] }, // Irish departures for the Irish clients
+  // Irish departures for the Irish clients — every airport with scheduled service.
+  { id: 'IE', nationality: 'IE', flightOrigins: ['DUB', 'ORK', 'SNN', 'NOC', 'KIR'] },
 ];
 
 // Offer types swept into the cache. The cache powers the offer-box widgets
