@@ -142,6 +142,41 @@
   .stat-val small { font-size:14px; color:var(--tx-3); font-weight:700; }
   .stat-foot { font-size:11.5px; color:var(--tx-3); margin-top:7px; }
 
+  /* ── what an agency is spending ─────────────────────────────────────────
+     These belong HERE and not in tb-site.css. This page carries its whole
+     stylesheet inline and links nothing, so a rule written into the consumer
+     site's stylesheet never reaches it. That is exactly what happened when the
+     rate card was built: the markup shipped, the styles went to the wrong file,
+     and the cost card rendered as bare text with a full-width tick where the
+     free-period icon should have been. */
+  .cost-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:12px; margin-bottom:16px; }
+  .cost-tile { background:var(--surface-2); border:1px solid var(--border);
+    border-radius:12px; padding:14px 16px; }
+  .cost-tile .lab { font-size:11px; font-weight:800; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--tx-3); }
+  .cost-tile .amt { font-size:22px; font-weight:800; letter-spacing:-.03em; margin-top:4px; }
+  .cost-tile .sub { font-size:11.5px; color:var(--tx-3); font-weight:600; margin-top:2px; }
+  .cost-tile.is-total { background:var(--coral-wash); border-color:var(--coral); }
+  .cost-tile.is-total .amt { color:var(--coral-ink); }
+  .rate-tbl { width:100%; border-collapse:collapse; font-size:13px; }
+  .rate-tbl th { text-align:left; font-size:11px; font-weight:800; letter-spacing:.05em;
+    text-transform:uppercase; color:var(--tx-3); padding:6px 8px; border-bottom:1px solid var(--border); }
+  .rate-tbl td { padding:8px; border-bottom:1px solid var(--border); }
+  .rate-tbl td.num { text-align:right; font-variant-numeric:tabular-nums; }
+  .rate-tbl tr:last-child td { border-bottom:0; }
+  .rate-src { font-size:11px; color:var(--tx-3); font-weight:600; }
+  .tier-badge { display:inline-flex; padding:3px 9px; border-radius:999px; font-size:11px;
+    font-weight:800; letter-spacing:.04em; text-transform:uppercase; }
+  .tier-badge.is-premium { background:var(--coral-wash); color:var(--coral-ink); }
+  .tier-badge.is-standard { background:var(--sky-wash); color:var(--sky-deep); }
+  .free-banner { display:flex; gap:10px; align-items:flex-start; margin:0 0 16px;
+    padding:12px 14px; border-radius:12px; background:var(--live-wash);
+    border:1px dashed color-mix(in srgb,var(--live) 45%, transparent);
+    font-size:13px; line-height:1.55; color:var(--tx-2); }
+  .free-banner svg { width:17px; height:17px; stroke:var(--live); fill:none; flex:none; margin-top:1px; }
+  .free-banner b { color:var(--tx); }
+
   .note { display:flex; gap:11px; padding:13px 15px; border-radius:12px; background:var(--sky-wash);
     border:1px solid color-mix(in srgb,var(--sky) 22%,transparent); margin-bottom:18px; font-size:13px; color:var(--tx-2); }
   .note svg { width:17px; height:17px; stroke:var(--sky-deep); fill:none; stroke-width:2; flex:none; margin-top:1px; }
@@ -1292,7 +1327,7 @@
         <div class="plans" id="planGrid"></div>
         <div class="note" style="margin-top:18px">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-          <span><b>Pricing is not finalised.</b> The allowances shown are what the platform enforces right now. Upgrades and billing are not switched on yet, so get in touch if you need more live deals.</span>
+          <span><b>There is no limit on how many deals you list.</b> Put up everything you have. You are charged for what travellers actually do, not for the size of your shop window, so more deals costs you nothing until somebody gets in touch.</span>
         </div>
       </section>
 
@@ -1597,7 +1632,11 @@
       (c.live || 0) + ' live · ' + (c.draft || 0) + ' draft · ' + (c.paused || 0) + ' paused';
   }
 
-  const TB_TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+  // width and height are on the ELEMENT, not left to CSS alone. An inline svg
+  // with only a viewBox has no intrinsic size, so the moment its styling rule
+  // goes missing it is free to expand to whatever contains it. Two attributes
+  // make that impossible, wherever this icon ends up being rendered.
+  const TB_TICK = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" '
     + 'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
     + '<path d="M20 6 9 17l-5-5"/></svg>';
 
@@ -1752,10 +1791,12 @@
   }
 
   function renderPlanGrid() {
+    // Nobody is capped on any plan. We are paid per click, per call and per
+    // enquiry, so a deal an agency cannot publish is money neither of us makes.
     const rows = [
-      { nm: 'Spark', allow: '1', desc: 'One live deal at a time.' },
-      { nm: 'Boost', allow: '5', desc: 'Up to five live deals.' },
-      { nm: 'Ignite', allow: 'Unlimited', desc: 'As many live deals as you like.' },
+      { nm: 'Spark', allow: 'Unlimited', desc: 'Get started, one shop.' },
+      { nm: 'Boost', allow: 'Unlimited', desc: 'For a busy independent.' },
+      { nm: 'Ignite', allow: 'Unlimited', desc: 'Higher volume, more support.' },
       { nm: 'Bespoke', allow: 'Unlimited', desc: 'Multi-branch, talk to us.' },
     ];
     $('planGrid').innerHTML = rows.map((r) =>

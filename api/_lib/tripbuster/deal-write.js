@@ -16,14 +16,26 @@
 import { tbSelect, tbRpc } from './db.js';
 
 /**
- * Provisional live-deal allowance per plan. -1 is unlimited, 0 locks the plan
- * out of publishing entirely.
+ * Live-deal allowance per plan. -1 is unlimited, 0 locks the plan out of
+ * publishing entirely.
  *
- * Deliberately NOT in the database: the pricing model is still an open decision,
- * and changing a number must not need a migration. These mirror the mockups;
- * treat them as placeholders until pricing is settled.
+ * NOBODY IS CAPPED. Andy's decision, 28 July 2026: "there is no limit for
+ * anyone, the more deals the more clicks the more we earn."
+ *
+ * That follows from the rate card rather than contradicting it. Tripbuster is
+ * paid per click, per call and per enquiry, so a deal an agency cannot publish
+ * is revenue neither of us earns. The old Spark 1 / Boost 5 numbers came from
+ * the mockups, when the model still looked like a monthly subscription and a cap
+ * was the thing you paid to lift. Once the money moved to the event, the cap was
+ * only ever throttling our own income.
+ *
+ * The machinery is kept rather than deleted. allowanceFor and publishHeadroom
+ * still run on every route, they simply never refuse anything today, and one
+ * number here reimposes a cap if an agency ever floods the index.
+ *
+ * Deliberately NOT in the database, so changing a number never needs a migration.
  */
-export const LIVE_DEAL_LIMITS = { Spark: 1, Boost: 5, Ignite: -1, Bespoke: -1 };
+export const LIVE_DEAL_LIMITS = { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 };
 
 /** Live allowance for a plan. An unknown plan gets 0 — fail closed. */
 export function allowanceFor(plan) {

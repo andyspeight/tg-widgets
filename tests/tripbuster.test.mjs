@@ -591,11 +591,11 @@ await testAsync('GET returns only this agent\'s deals', async () => {
   assert.equal(r.body.deals[0].title, 'A live deal');
 });
 
-await testAsync('GET reports plan allowance and what is left', async () => {
+await testAsync('GET reports an unlimited allowance, because nobody is capped', async () => {
   resetDb();
   const r = await call(myDeals, { token: tokenA });
-  assert.equal(r.body.liveAllowance, 5);   // Boost
-  assert.equal(r.body.liveRemaining, 4);   // one already live
+  assert.equal(r.body.liveAllowance, -1);  // -1 is unlimited, on every plan
+  assert.equal(r.body.liveRemaining, -1);
   assert.equal(r.body.counts.live, 1);
 });
 
@@ -677,16 +677,51 @@ await testAsync('POST live with no link anywhere → 422 mentioning the default 
   assert.match(r.body.errors.find((e) => e.field === 'clickout_url').message, /default website/);
 });
 
-await testAsync('POST live is blocked once the plan allowance is used up', async () => {
+// The capping machinery survives the decision to cap nobody, so that one number
+// reimposes a limit if an agency ever floods the index. Machinery that can never
+// fire is machinery nobody notices has broken, so exercise it directly with a
+// temporary limit rather than trusting it will still work when it is wanted.
+{
+  const { LIVE_DEAL_LIMITS, allowanceFor, publishHeadroom } =
+    await import('../api/_lib/tripbuster/deal-write.js');
+
+  test('every plan is unlimited today', () => {
+    for (const plan of ['Spark', 'Boost', 'Ignite', 'Bespoke']) {
+      assert.equal(allowanceFor(plan), -1, `${plan} is capped`);
+      assert.equal(publishHeadroom(plan, 500), Infinity);
+    }
+  });
+
+  test('an unknown plan still fails closed', () => {
+    assert.equal(allowanceFor('Platinum'), 0);
+    assert.equal(publishHeadroom('Platinum', 0), 0);
+  });
+
+  test('but a cap still works the moment a number is put back', () => {
+    const was = LIVE_DEAL_LIMITS.Spark;
+    try {
+      LIVE_DEAL_LIMITS.Spark = 3;
+      assert.equal(publishHeadroom('Spark', 0), 3);
+      assert.equal(publishHeadroom('Spark', 2), 1);
+      assert.equal(publishHeadroom('Spark', 9), 0, 'never goes negative');
+    } finally {
+      LIVE_DEAL_LIMITS.Spark = was;
+    }
+  });
+}
+
+await testAsync('POST live is NOT blocked, however many the agency already has', async () => {
   resetDb();
-  // Agent B is Spark (allowance 1) and already has one live deal.
+  // Agent B is on Spark, the smallest plan, and already has a live deal. Under
+  // the old caps this was the refusal case. It must now go through: we are paid
+  // per click, per call and per enquiry, so a deal an agency cannot publish is
+  // revenue neither of us earns.
   const r = await call(myDeals, {
     method: 'POST', token: tokenB,
     body: { title: 'Second live', status: 'live', price_from: 250, clickout_url: 'https://agent-b.co.uk/2' },
   });
-  assert.equal(r.status, 403);
-  assert.match(r.body.error, /Spark/);
-  assert.equal(r.body.liveAllowance, 1);
+  assert.equal(r.status, 201);
+  assert.ok(db.deals.find((d) => d.title === 'Second live').published_at);
 });
 
 await testAsync('POST live succeeds while allowance remains, and stamps published_at', async () => {
@@ -699,14 +734,16 @@ await testAsync('POST live succeeds while allowance remains, and stamps publishe
   assert.ok(db.deals.find((d) => d.title === 'Within allowance').published_at);
 });
 
-await testAsync('PATCH draft → live respects the plan allowance', async () => {
+await testAsync('PATCH draft → live is not capped either', async () => {
   resetDb();
-  // give Agent B a draft, then try to publish it while already at the Spark limit
+  // Agent B on Spark, already live, publishing another. The other half of the
+  // same rule: a cap removed on create but left on publish would just move the
+  // wall somewhere less obvious.
   db.deals.push({ id: uuid(++dealSeq), agent_id: AGENT_B, status: 'draft', title: 'B draft', price_from: 150, clickout_url: 'https://agent-b.co.uk/d' });
   const draft = db.deals.find((d) => d.title === 'B draft');
   const r = await call(myDeals, { method: 'PATCH', token: tokenB, query: { id: draft.id }, body: { status: 'live' } });
-  assert.equal(r.status, 403);
-  assert.equal(db.deals.find((d) => d.id === draft.id).status, 'draft');
+  assert.equal(r.status, 200);
+  assert.equal(db.deals.find((d) => d.id === draft.id).status, 'live');
 });
 
 await testAsync('PATCH with nothing usable → 400', async () => {
@@ -1502,17 +1539,20 @@ await testAsync('with publishing on, rows marked live go live', async () => {
   assert.ok(made.published_at);
 });
 
-await testAsync('publishing stops at the plan allowance and leaves the rest as drafts', async () => {
+await testAsync('a bulk upload publishes every row, with no allowance to run out of', async () => {
   resetDb();
-  // Agent B is on Spark (1 live) and already has one live deal, so nothing fits.
+  // Agent B on Spark, already live. This used to be the case where the importer
+  // published what fitted and left the rest as drafts. There is nothing to fit
+  // inside now, and a 200-row upload goes live in full.
   const r = await commit(
     'reference,title,price,clickout_url,status\nB1,B one,100,https://agent-b.co.uk/1,live\n'
     + 'B2,B two,120,https://agent-b.co.uk/2,live',
     { publish: true }, tokenB,
   );
   assert.equal(r.body.created, 2);
-  assert.ok(db.deals.filter((d) => d.source === 'spreadsheet').every((d) => d.status === 'draft'));
-  assert.ok(r.body.problems.some((p) => /all 1 live deals on Spark/.test(p.message)));
+  assert.ok(db.deals.filter((d) => d.source === 'spreadsheet').every((d) => d.status === 'live'));
+  assert.ok(!r.body.problems.some((p) => /live deals on/.test(p.message)),
+    'nothing complains about an allowance any more');
 });
 
 await testAsync('a row with no price is imported but not published', async () => {
@@ -1813,10 +1853,10 @@ await testAsync('a resync with nothing imported yet is a clean no-op', async () 
   assert.equal(r.body.resynced, 0);
 });
 
-await testAsync('publishing from the feed respects the plan allowance', async () => {
+await testAsync('publishing from the feed is not capped by the plan either', async () => {
   resetDb();
   makeTgClient();
-  db.agents[0].plan = 'Spark'; // 1 live, and agent A already has one
+  db.agents[0].plan = 'Spark'; // the smallest plan, and agent A already has one live
   seedOfferCache({ 'offers:packages:ES': [cacheOffer({}), cacheOffer({ id: 'X2', pricePP: 350 })] });
   const r = await call(offerImport, {
     method: 'POST',
@@ -1824,8 +1864,8 @@ await testAsync('publishing from the feed respects the plan allowance', async ()
     body: { refs: [offerRef(cacheOffer({})), offerRef(cacheOffer({ id: 'X2' }))], publish: true },
   });
   assert.equal(r.body.created, 2);
-  assert.ok(db.deals.filter((d) => d.source === 'live_cache').every((d) => d.status === 'draft'));
-  assert.ok(r.body.problems.some((p) => /all 1 live deals/.test(p.message)));
+  assert.ok(db.deals.filter((d) => d.source === 'live_cache').every((d) => d.status === 'live'));
+  assert.ok(!r.body.problems.some((p) => /live deals/.test(p.message)));
 });
 
 await testAsync('importing more than the per-request cap is refused with advice', async () => {

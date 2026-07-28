@@ -41,6 +41,11 @@ let n = 100;
 const uid = () => `${String(++n).padStart(8, '0')}-0000-4000-8000-000000000000`;
 
 const db = { agents: [], deals: [], import_runs: [] };
+
+// Flipped part-way through the run so the free-period variant of the cost card
+// gets driven too. It renders a banner the charged variant does not, and that
+// banner is where an unstyled icon went unnoticed once already.
+let statsFree = false;
 function seed() {
   db.deals = [];
   db.import_runs = [];
@@ -109,6 +114,13 @@ const pg = http.createServer((req, res) => {
           { eventType: 'call', pence: 100, source: 'client', events: 29, costPence: 2900 },
           { eventType: 'lead', pence: 100, source: 'default', events: 11, costPence: 1100 },
         ],
+        // On a free run the same figures come back as what the activity was
+        // WORTH, plus the date the run ends. Nothing is zeroed at source.
+        ...(statsFree ? {
+          free: true,
+          freeUntil: '2026-09-26',
+          worthPence: { clicks: 1180, calls: 2900, leads: 1100, total: 5180 },
+        } : {}),
       });
     }
     if (table === 'rpc/tb_agent_billing_counts') {
@@ -648,6 +660,43 @@ try {
     /Standard rate/.test(costText) && /Your agreed rate/.test(costText));
   check('the rate itself is shown, not just the total', /10p|£0\.10/.test(costText)
     || /£0.1/.test(costText), costText.slice(0, 200));
+
+  // ── and it is actually STYLED ──
+  // Everything above passes on bare unstyled text, which is exactly how this
+  // card shipped: the markup was right and the CSS had been written into the
+  // consumer site's stylesheet, which this page does not load. Reading
+  // textContent could never see that. So measure the box instead.
+  const tileBox = await page.$eval('.cost-tile', (el) => {
+    const cs = getComputedStyle(el);
+    return { pad: parseFloat(cs.paddingLeft), radius: parseFloat(cs.borderTopLeftRadius) };
+  });
+  check('the cost tiles are laid out as tiles, not bare text',
+    tileBox.pad >= 8 && tileBox.radius >= 4, JSON.stringify(tileBox));
+
+  // ── the free-period variant ──
+  statsFree = true;
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('#appView', { visible: true }); // session survives in sessionStorage
+  await page.click('.nav-i[data-view="plan"]');
+  await page.waitForSelector('#v-plan.on', { visible: true });
+  await wait(500);
+
+  const freeText = await page.$eval('.free-banner', (el) => el.textContent.replace(/\s+/g, ' '));
+  check('a free agency is told plainly that it is not being charged',
+    /not being charged/i.test(freeText), freeText.slice(0, 120));
+  check('and when the free run ends, in words and day first',
+    /26 September 2026/.test(freeText), freeText.slice(0, 200));
+
+  // THE ONE THAT WOULD HAVE CAUGHT IT. An <svg> with no matching CSS rule has no
+  // intrinsic size, so it expands to fill its container: a 17px tick became a
+  // full-width one and swallowed the screen. Any icon this big is a missing rule.
+  const bigIcons = await page.$$eval('svg', (els) => els
+    .map((e) => ({ w: Math.round(e.getBoundingClientRect().width), cls: e.parentElement?.className || '' }))
+    .filter((x) => x.w > 64));
+  check('no icon anywhere on the dashboard has escaped its size rule',
+    bigIcons.length === 0, JSON.stringify(bigIcons).slice(0, 200));
+
+  statsFree = false;
 
   // ── enquiry notifications ──
   // An enquiry used to sit in the database until somebody happened to log in

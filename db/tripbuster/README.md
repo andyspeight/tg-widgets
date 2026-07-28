@@ -1061,11 +1061,31 @@ headline or added selling points keeps that work. An offer that has left the fee
 gets its deal **paused, not deleted** — the holiday is off sale, but the agent's
 edits are still worth keeping.
 
-## Plan limits are deliberately not in the schema
+## Nobody is capped on how many deals they list
 
-Per-plan deal limits (Spark / Boost / Ignite / Bespoke) are enforced in the API,
-not the database, because the pricing model is still an open decision. Keeping
-them out means the numbers can change without a migration.
+Andy's decision, 28 July 2026: "there is no limit for anyone, the more deals the
+more clicks the more we earn." Every plan in `LIVE_DEAL_LIMITS` is `-1`.
+
+That follows from the rate card rather than fighting it. Tripbuster is paid per
+click, per call and per enquiry, so a deal an agency cannot publish is revenue
+neither of us earns. The old Spark 1 / Boost 5 numbers came from the mockups,
+back when the model still looked like a monthly subscription and the cap was the
+thing you paid to lift. Once the money moved onto the event, the cap was only
+ever throttling our own income.
+
+**The machinery is kept, not deleted.** `allowanceFor` and `publishHeadroom` still
+run on all three ingestion routes, they simply never refuse anything, and one
+number in `api/_lib/tripbuster/deal-write.js` reimposes a limit if an agency ever
+floods the index. Because code that can never fire is code nobody notices has
+broken, the suite exercises it directly with a temporary cap as well as asserting
+that no cap applies today.
+
+An unknown plan still gets `0` and fails closed. That is unreachable while the
+database's CHECK constraint holds the four names, and it stays as the backstop
+for the day somebody adds a fifth.
+
+The limits live in the API and not the database, so changing a number never needs
+a migration.
 
 ## Clearing the seed
 
