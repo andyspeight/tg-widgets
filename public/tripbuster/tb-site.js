@@ -1330,8 +1330,11 @@ export function header(active) {
       // traveller sets out looking for by name, and a nav listing all seven
       // would say "we have a database" rather than "we have holidays".
       // Everything else is a click away in the search filters.
-      link('/tripbuster/search?holidayType=Cruise', 'Cruises') +
-      link('/tripbuster/search?holidayType=Flight+only', 'Flights') +
+      // These point at the real landing pages, not the search filter. Sending
+      // the nav at /search would aim every internal link on the site at a
+      // noindex URL, which is the opposite of why those pages were built.
+      link(tripTypeHref('cruises'), 'Cruises') +
+      link(tripTypeHref('flights'), 'Flights') +
       link('/tripbuster/search?board=All+inclusive', 'All inclusive') +
       link('/tripbuster/search?sort=discount', 'Biggest savings') +
     '</div>' +
