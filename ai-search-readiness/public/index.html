@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Visibility Score | Can AI search engines find your travel business?</title>
+<meta name="description" content="A free check that tells you whether ChatGPT, Perplexity, Claude and Google can reach your website, read it and quote it. Score out of 100 with the fixes.">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#1B2B5B">
+<meta property="og:title" content="AI Visibility Score">
+<meta property="og:description" content="Find out whether AI search engines can reach your website, read it and quote it. Free, no sign up.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231B2B5B'/%3E%3Ccircle cx='16' cy='16' r='7' fill='none' stroke='%2300B4D8' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='%2300B4D8'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<a class="skip" href="#scan">Skip to the check</a>
+
+<header class="masthead">
+  <div class="shell masthead-inner">
+    <a class="wordmark" href="/">
+      <svg class="wordmark-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+        <rect width="32" height="32" rx="7"></rect>
+        <circle class="wm-ring" cx="16" cy="16" r="7"></circle>
+        <circle class="wm-dot" cx="16" cy="16" r="2.5"></circle>
+      </svg>
+      <span class="wordmark-text">AI Visibility Score</span>
+    </a>
+    <div class="masthead-side">
+      <span class="by">by Travelgenix</span>
+      <button type="button" id="theme-toggle" class="icon-btn" aria-label="Switch between light and dark">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="icon-sun"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path></svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="icon-moon"><path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.4 8.4 0 1 0 10.2 10.2z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── Hero: split, not centred ─────────────────────────────────── -->
+  <section class="hero" id="scan">
+    <div class="shell hero-grid">
+
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>Free check, no sign up</p>
+        <h1>Can AI search engines<br>actually find your website?</h1>
+        <p class="lede">
+          More of your customers now start with a question rather than a search box. This check tells you
+          whether the engines behind those answers can reach your site, read it and quote it. It takes
+          about twenty seconds.
+        </p>
+
+        <form id="scan-form" class="scan-form" novalidate>
+          <label class="field-label" for="url-input">Your website address</label>
+          <div class="field-row">
+            <input
+              id="url-input"
+              name="url"
+              type="text"
+              inputmode="url"
+              autocomplete="url"
+              spellcheck="false"
+              placeholder="yourtravelbusiness.co.uk"
+              aria-describedby="url-help url-error"
+              required>
+            <button type="submit" id="scan-btn" class="btn-primary">
+              <span class="btn-label">Check my site</span>
+              <span class="btn-spinner" aria-hidden="true"></span>
+            </button>
+          </div>
+          <p class="field-help" id="url-help">We only read your home page and your robots.txt. Nothing is stored.</p>
+          <p class="field-error" id="url-error" role="alert" hidden></p>
+        </form>
+
+        <p class="hero-note">
+          The check that matters most is the first one. Bot protection is on by default on a lot of
+          hosting, and it turns AI crawlers away without telling anyone.
+        </p>
+      </div>
+
+      <!-- The console. Idle, then live during a scan. -->
+      <aside class="console" aria-labelledby="console-title">
+        <div class="console-head">
+          <h2 id="console-title">Crawler console</h2>
+          <span class="console-state" id="console-state" role="status">Idle</span>
+        </div>
+        <ul class="console-list" id="console-list">
+          <li class="console-row" data-probe="control">
+            <span class="dot" aria-hidden="true"></span>
+            <span class="probe-name">Browser control</span>
+            <span class="probe-engine">the honesty check</span>
+            <span class="probe-state">waiting</span>
+          </li>
+          <li class="console-row" data-probe="robots">
+            <span class="dot" aria-hidden="true"></span>
+            <span class="probe-name">robots.txt</span>
+            <span class="probe-engine">your instructions</span>
+            <span class="probe-state">waiting</span>
+          </li>
+          <li class="console-row" data-probe="oai-search">
+            <span class="dot" aria-hidden="true"></span>
+            <span class="probe-name">ChatGPT Search</span>
+            <span class="probe-engine">OpenAI</span>
+            <span class="probe-state">waiting</span>
+          </li>
+          <li class="console-row" data-probe="chatgpt-user">
+            <span class="dot" aria-hidden="true"></span>
+            <span class="probe-name">ChatGPT live fetch</span>
+            <span class="probe-engine">OpenAI</span>
+            <span class="probe-state">waiting</span>
+          </li>
+          <li class="console-row" data-probe="perplexity">
+            <span class="dot" aria-hidden="true"></span>
+            <span class="probe-name">Perplexity</span>
+            <span class="probe-engine">Perplexity</span>
+            <span class="probe-state">waiting</span>
+          </li>
+          <li class="console-row" data-probe="claudebot">
+            <span class="dot" aria-hidden="true"></span>
+            <span class="probe-name">Claude</span>
+            <span class="probe-engine">Anthropic</span>
+            <span class="probe-state">waiting</span>
+          </li>
+          <li class="console-row" data-probe="google-extended">
+            <span class="dot" aria-hidden="true"></span>
+            <span class="probe-name">Gemini and AI Overviews</span>
+            <span class="probe-engine">Google</span>
+            <span class="probe-state">waiting</span>
+          </li>
+          <li class="console-row" data-probe="googlebot">
+            <span class="dot" aria-hidden="true"></span>
+            <span class="probe-name">Google index</span>
+            <span class="probe-engine">Google</span>
+            <span class="probe-state">waiting</span>
+          </li>
+        </ul>
+        <p class="console-foot">
+          Every probe uses the crawler's own user agent. We never pretend to be a browser to get past a
+          block, because that would tell you nothing.
+        </p>
+      </aside>
+
+    </div>
+  </section>
+
+  <!-- ── Results ──────────────────────────────────────────────────── -->
+  <section class="results" id="results" hidden aria-live="polite">
+    <div class="shell">
+
+      <div class="preview-banner" id="preview-banner" hidden>
+        <strong>This is a preview, not a scan of your site.</strong>
+        We could not reach our checking service, so you are looking at example figures to show what the
+        report contains. Nothing here describes your website. Please try again in a few minutes.
+      </div>
+
+      <!-- Score readout: left-aligned, dial + summary. No card grid. -->
+      <div class="readout">
+        <div class="dial-wrap">
+          <svg class="dial" viewBox="0 0 200 116" role="img" aria-labelledby="dial-title">
+            <title id="dial-title">Overall AI visibility score</title>
+            <path class="dial-track" d="M14 106 A 86 86 0 0 1 186 106" fill="none"></path>
+            <path class="dial-fill" id="dial-fill" d="M14 106 A 86 86 0 0 1 186 106" fill="none"></path>
+            <g class="dial-ticks" id="dial-ticks" aria-hidden="true"></g>
+          </svg>
+          <div class="dial-centre">
+            <span class="dial-score" id="score-value">--</span>
+            <span class="dial-outof">out of 100</span>
+          </div>
+        </div>
+        <div class="readout-copy">
+          <p class="band" id="band-value">Checking</p>
+          <p class="summary" id="summary-value"></p>
+          <p class="scanned" id="scanned-value"></p>
+        </div>
+      </div>
+
+      <!-- Pillars: divided rows, never four equal cards. -->
+      <div class="block">
+        <div class="block-head">
+          <h2>The four things we score</h2>
+          <p>Each one counts the same. Anything we could not judge honestly is left out of the score rather than marked down.</p>
+        </div>
+        <ul class="pillars" id="pillars"></ul>
+      </div>
+
+      <!-- Crawler access detail -->
+      <div class="block">
+        <div class="block-head">
+          <h2>Which engines got through</h2>
+          <p>What happened when each crawler asked for your home page, judged against the browser control.</p>
+        </div>
+        <ul class="crawlers" id="crawlers"></ul>
+        <p class="caveat" id="caveat"></p>
+      </div>
+
+      <!-- Findings -->
+      <div class="block">
+        <div class="block-head">
+          <h2>What to do about it</h2>
+          <p>Ordered by what costs you most. Every one comes with the fix.</p>
+        </div>
+        <ol class="findings" id="findings"></ol>
+      </div>
+
+      <!-- Locked paid teaser. Never a fabricated result. -->
+      <div class="teaser" id="teaser">
+        <div class="teaser-lock" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false"><rect x="4.5" y="10.5" width="15" height="10" rx="2.2"></rect><path d="M8.2 10.5V7.8a3.8 3.8 0 0 1 7.6 0v2.7"></path></svg>
+        </div>
+        <div class="teaser-body">
+          <p class="teaser-kicker">Part of the paid layer</p>
+          <h2 id="teaser-title">Live AI presence and share of model</h2>
+          <p id="teaser-blurb"></p>
+          <div class="teaser-redacted" aria-hidden="true">
+            <span class="redact w1"></span><span class="redact w2"></span><span class="redact w3"></span>
+            <span class="redact w4"></span><span class="redact w5"></span><span class="redact w6"></span>
+          </div>
+          <a class="btn-secondary" href="mailto:hello@travelgenix.io?subject=AI%20Visibility%20Score%20-%20the%20paid%20layer">Talk to us about it</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Explainer, asymmetric, no three-card row ──────────────────── -->
+  <section class="explain">
+    <div class="shell explain-grid">
+      <div class="explain-lead">
+        <h2>Why the first check is the one that matters</h2>
+        <p>
+          Everything else is downstream of it. Schema, headings, reviews, none of it counts for anything
+          if the crawler never reaches the page.
+        </p>
+      </div>
+      <ul class="explain-list">
+        <li>
+          <h3>Bot protection is on by default</h3>
+          <p>
+            Cloudflare's Bot Fight Mode is switched on for new domains and it turns AI retrieval bots
+            away at network level. Nobody gets told. Your site looks perfectly healthy in a browser.
+          </p>
+        </li>
+        <li>
+          <h3>We prove it rather than guess</h3>
+          <p>
+            A browser request runs first on every check. If a crawler is refused and the browser was not,
+            that is a block and we say so. If both are refused we say inconclusive, because anything else
+            would be a guess dressed up as a finding.
+          </p>
+        </li>
+        <li>
+          <h3>Then we fix it</h3>
+          <p>
+            Other tools stop at the report. We build and run the sites, so the fixes can be done rather
+            than just listed.
+          </p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="shell footer-inner">
+    <p>Travelgenix. Travel technology for agencies and tour operators.</p>
+    <p class="footer-note">
+      We read your home page and robots.txt once per check. We do not store the page or the result.
+    </p>
+  </div>
+</footer>
+
+<script src="/app.js" defer></script>
+</body>
+</html>

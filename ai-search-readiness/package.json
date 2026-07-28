@@ -1,0 +1,17 @@
+{
+  "name": "ai-search-readiness",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI Visibility Score. A free public tool that scores whether AI search engines can find and understand a website.",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node test-engine.js",
+    "test:live": "node test-engine.js --live",
+    "benchmarks": "node scripts/benchmarks.js"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

@@ -1,0 +1,24 @@
+# Secrets. Never commit these. Git history is permanent.
+.env
+.env.*
+!.env.example
+
+# Vercel
+.vercel
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Editors and OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Local scratch
+*.local
+/tmp/
