@@ -2,6 +2,9 @@
   "name": "tg-sites",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "description": "Travelgenix Sites. The CMS shell: content model, block library, renderer and editor.",
   "scripts": {
     "dev": "next dev -p 3100",
