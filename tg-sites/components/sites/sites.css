@@ -292,61 +292,138 @@
   display: grid;
   place-items: center;
   padding: var(--ed-4);
-  background: rgba(15, 23, 42, 0.5);
+  background: rgba(15, 23, 42, 0.55);
+  /* Enough to push the page back without hiding where you were. */
+  backdrop-filter: blur(2px);
   z-index: 50;
 }
 
 .sv-dialog {
-  width: min(420px, 100%);
-  padding: var(--ed-6);
+  width: min(480px, 100%);
   border-radius: var(--ed-r-lg);
   background: var(--ed-panel);
   box-shadow: var(--ed-shadow-xl);
+  overflow: hidden;
+  animation: sv-rise 140ms ease-out;
 }
 
-.sv-dialog h2 {
-  margin: 0 0 var(--ed-4);
+@keyframes sv-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Three bands: title, fields, buttons. The hairlines do the separating so
+   the padding does not have to be huge to make the grouping read. */
+.sv-dialog__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ed-3);
+  padding: var(--ed-4) var(--ed-4) var(--ed-4) var(--ed-6);
+  border-bottom: 1px solid var(--ed-line);
+}
+
+.sv-dialog__head h2 {
+  margin: 0;
   font-size: var(--ed-text-lg);
+  letter-spacing: -0.01em;
 }
 
-.sv-field { margin-bottom: var(--ed-4); }
+.sv-dialog__body { padding: var(--ed-6); }
+
+.sv-field { margin-bottom: var(--ed-5); }
+.sv-field:last-child { margin-bottom: 0; }
 
 .sv-field label {
   display: block;
-  margin-bottom: var(--ed-1);
+  margin-bottom: var(--ed-2);
   font-size: var(--ed-text-sm);
-  font-weight: 500;
-  color: var(--ed-ink-2);
+  font-weight: 600;
+  color: var(--ed-ink);
 }
 
+/*
+ * Both inputs look identical whether focused or not.
+ *
+ * They used to sit on a grey well, and next to a focused white field the
+ * unfocused one read as disabled. A field you are allowed to type in should
+ * never look like one you are not.
+ */
 .sv-field input {
   width: 100%;
   min-height: 44px;
   padding: 0 var(--ed-3);
   border: 1px solid var(--ed-line);
   border-radius: var(--ed-r-md);
-  background: var(--ed-well);
+  background: var(--ed-panel);
   color: var(--ed-ink);
   font: inherit;
+  transition: border-color 120ms ease-out, box-shadow 120ms ease-out;
 }
 
-.sv-field input:focus-visible {
-  outline: 2px solid var(--ed-select);
-  outline-offset: -1px;
-  background: var(--ed-panel);
+.sv-field input::placeholder { color: var(--ed-ink-3); }
+
+.sv-field input:hover { border-color: var(--ed-ink-3); }
+
+.sv-field input:focus-visible,
+.sv-field input:focus {
+  outline: none;
+  border-color: var(--ed-select);
+  box-shadow: 0 0 0 3px var(--ed-select-wash);
 }
 
 .sv-field small {
   display: block;
-  margin-top: var(--ed-1);
+  margin-top: var(--ed-2);
   font-size: var(--ed-text-xs);
-  color: var(--ed-ink-3);
+  color: var(--ed-ink-2);
+}
+
+/*
+ * What you are about to get, before you press the button.
+ *
+ * Green when it is an ordinary page, amber when the address is empty and the
+ * page will therefore become the home page. That second case used to be one
+ * line of grey helper text and it caught people out.
+ */
+.sv-preview {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ed-2);
+  margin: 0;
+  padding: var(--ed-3);
+  border-radius: var(--ed-r-md);
+  background: #f0fdf4;
+  color: #14532d;
+  font-size: var(--ed-text-sm);
+  line-height: 1.45;
+}
+
+.sv-preview svg { flex: none; margin-top: 1px; }
+
+.sv-preview code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--ed-text-xs);
+  word-break: break-all;
+}
+
+.sv-preview[data-tone='warn'] { background: #fffbeb; color: #78350f; }
+
+.sv-root[data-theme='dark'] .sv-preview { background: #052e16; color: #bbf7d0; }
+.sv-root[data-theme='dark'] .sv-preview[data-tone='warn'] { background: #422006; color: #fde68a; }
+
+@media (prefers-color-scheme: dark) {
+  .sv-root[data-theme='system'] .sv-preview { background: #052e16; color: #bbf7d0; }
+  .sv-root[data-theme='system'] .sv-preview[data-tone='warn'] { background: #422006; color: #fde68a; }
 }
 
 .sv-actions {
   display: flex;
   justify-content: flex-end;
   gap: var(--ed-2);
+  padding: var(--ed-4) var(--ed-6);
+  border-top: 1px solid var(--ed-line);
+  background: var(--ed-well);
 }
 
 .sv-msg {
@@ -364,6 +441,15 @@
   .sv-root[data-theme='system'] .sv-msg { background: #450a0a; color: #fecaca; }
 }
 
+/* Icon-only buttons keep the full 44px hit area while looking compact. */
+.sv-btn[data-icon='true'] {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .sv-btn { transition: none; }
+  .sv-btn,
+  .sv-field input { transition: none; }
+  .sv-dialog { animation: none; }
 }

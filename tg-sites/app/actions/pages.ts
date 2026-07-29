@@ -33,6 +33,7 @@ import {
   type PageSummary,
   type PageWithContent,
 } from '../../lib/db/pages';
+import { slugify } from '../../lib/content/slug';
 import { chooseWorkspace, requireTenantId } from '../../lib/session';
 
 export type ActionResult<T = undefined> =
@@ -187,23 +188,6 @@ export async function chooseWorkspaceAction(slug: string): Promise<ActionResult<
 
 // ---------------------------------------------------------------------------
 
-/**
- * Turn a title or a typed address into a legal slug.
- *
- * An empty result is legal and meaningful: it is the home page. The database
- * has the final say either way, this is only here so an agent typing
- * "About Us" gets "about-us" rather than an error.
- */
-function slugify(value: string): string {
-  return value
-    .normalize('NFKD')
-    // Combining marks, so "Málaga" becomes "malaga" rather than "m-laga".
-    // Escape sequences, never literal marks: raw combining characters in a
-    // source file survive Node and get mangled by a bundler, which is how
-    // the sanitiser shipped an invalid character class earlier today.
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 120);
-}
+// The slug helper lives in lib/content/slug.ts so the dialog and this
+// action derive the same address from the same name.
+
