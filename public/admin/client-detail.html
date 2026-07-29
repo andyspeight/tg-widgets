@@ -1651,7 +1651,16 @@
           if (row) { row.enabled = item.enabled; row.source = item.source; row.entitlementId = item.entitlementId; }
         }
 
-        toast(`${item.productName} ${item.enabled ? 'enabled' : 'disabled'}`, 'ok');
+        // Luna Chat keeps its own client records, so enabling it here also
+        // provisions the client over there. That call is deliberately not fatal
+        // — the entitlement is saved either way — so if it did not land, say so
+        // rather than showing a plain success and leaving the client live here
+        // but missing from Luna Chat entirely.
+        if (data.warning) {
+          toast(data.warning, 'err');
+        } else {
+          toast(`${item.productName} ${item.enabled ? 'enabled' : 'disabled'}`, 'ok');
+        }
 
         // Re-render the entitlements tab and refresh the tab count.
         const tc = document.getElementById('tab-content');
