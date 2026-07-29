@@ -1,5 +1,12 @@
 # Turning the database on
 
+> **Done on 29 July 2026.** Both roles have passwords, both connection strings
+> are in Vercel on `tg-sites-shell` (Production and Preview), and the check in
+> step 4 came back clean: `set` / `yes` / `no` for both roles.
+>
+> Kept because it will be needed again for the next environment, and because
+> the two poolers catch everyone out once.
+
 Written for Andy, 29 July 2026. Five minutes, two browser tabs, one paste.
 
 Everything else is built and tested. This is the only step that needs a human,
