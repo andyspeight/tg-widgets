@@ -1,7 +1,0 @@
-# Keeps the Travelgenix Sites app out of the widget suite's deployment.
-#
-# tg-sites is a separate Next.js application that happens to live in this repo
-# until it gets its own. It is never built or served by tg-widgets.vercel.app,
-# and excluding it stops Vercel's framework detection seeing a nested Next app
-# and keeps the upload small.
-tg-sites
