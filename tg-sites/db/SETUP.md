@@ -15,16 +15,37 @@ in git.
 
 Open <https://supabase.com/dashboard/project/qvzbothxlrzeklcvdhzp>
 
-Click the green **Connect** button at the top of the page. A panel opens.
+Click the green **Connect** button at the top of the page. A panel opens with
+five tabs. Click the third one, **Direct, Connection string**.
 
-Find the section called **Transaction pooler**. It shows a connection string
-that looks like this:
+Ignore the **Framework** tab. That is the client-library route, which connects
+as `anon`, and `anon` is revoked from every table in this database. The
+publishable key it offers you is deliberately useless here.
 
-```
-postgresql://postgres.qvzbothxlrzeklcvdhzp:[YOUR-PASSWORD]@aws-0-eu-west-2.pooler.supabase.com:6543/postgres
-```
+### Two poolers, and only one of them works
 
-You only need the bit in the middle, the host. It is the part between the `@`
+The panel lists several connection strings and **two of them end in `:6543`**.
+They are not interchangeable.
+
+| | Host | Works from Vercel? |
+|---|---|---|
+| Shared Pooler (Supavisor) | `aws-N-eu-west-2.pooler.supabase.com:6543` | **Yes.** IPv4 on every tier |
+| Dedicated Pooler (PgBouncer) | `db.qvzbothxlrzeklcvdhzp.supabase.co:6543` | **No.** IPv6 only without the IPv4 add-on |
+
+The dedicated one is faster and it is tempting because it carries the project
+name. It is also the wrong answer: Vercel's functions need IPv4, which is the
+whole reason the shared pooler exists.
+
+The two also differ in username format, so swapping the host alone does not
+convert one into the other. Shared needs the project ref appended to the role
+(`tg_sites_app.qvzbothxlrzeklcvdhzp`), dedicated does not (`tg_sites_app`).
+
+**The tell: if the host starts `db.` it is wrong. It must contain
+`pooler.supabase.com`.**
+
+### What to copy
+
+From the Shared Pooler string, take only the host, the part between the `@`
 and the `:6543`:
 
 ```
