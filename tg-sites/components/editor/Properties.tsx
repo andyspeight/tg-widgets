@@ -10,6 +10,7 @@
  * undo step rather than one per character.
  */
 
+import { useState, type CSSProperties, type ReactNode } from 'react';
 import type { Page } from '../../lib/content/schema';
 import {
   MAX_GAP,
@@ -95,6 +96,43 @@ export function Properties({ page, selected, isStaff, onCommit, onBack }: Props)
         )}
       </div>
     </aside>
+  );
+}
+
+/**
+ * A collapsible group of related settings.
+ *
+ * The pane used to be ten controls in a flat list, which is fine to build and
+ * miserable to scan: nothing tells you that tone and width are the same kind
+ * of decision and padding is a different one. Groups give the pane a shape,
+ * and closing the ones you are not using is the difference between a wall and
+ * a tool.
+ *
+ * Open state lives here rather than in the parent because it is a property of
+ * the panel, not of the page, and it should survive selecting a different
+ * section.
+ */
+function Group({
+  title,
+  children,
+  defaultOpen = true,
+}: {
+  title: string;
+  children: ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <section className="ed-group" data-open={open ? 'true' : 'false'}>
+      <h3 className="ed-group__head">
+        <button type="button" aria-expanded={open} onClick={() => setOpen(!open)}>
+          <Icon name={open ? 'chevron-down' : 'chevron-right'} size={14} />
+          {title}
+        </button>
+      </h3>
+      {open && <div className="ed-group__body">{children}</div>}
+    </section>
   );
 }
 
@@ -220,6 +258,7 @@ function SectionFields({
 
   return (
     <>
+      <Group title="Name">
       <div className="ed-field">
         <label className="ed-label">Name</label>
         <input
@@ -231,6 +270,9 @@ function SectionFields({
         <p className="ed-help">Shown in the outline only. Visitors never see it.</p>
       </div>
 
+      </Group>
+
+      <Group title="Layout">
       <Segmented
         label="Background"
         value={section.tone}
@@ -260,6 +302,9 @@ function SectionFields({
         answer and keep a site consistent; the drag is for when a section
         needs to be a particular height and no preset is it.
       */}
+      </Group>
+
+      <Group title="Spacing and size">
       <Segmented
         label="Space above and below"
         value={String(section.paddingY)}
@@ -286,11 +331,17 @@ function SectionFields({
         onChange={(minHeight) => set({ minHeight }, `sec:${index}:minh`)}
       />
 
-      <BoxPanel
-        what="section"
-        box={section.box}
-        onChange={(box) => set({ box }, `sec:${index}:box`)}
-      />
+      </Group>
+
+      <Group title="Style" defaultOpen={false}>
+        <BoxPanel
+          what="section"
+          box={section.box}
+          onChange={(box) => set({ box }, `sec:${index}:box`)}
+        />
+      </Group>
+
+      <Group title="Background image" defaultOpen={false}>
 
       <div className="ed-field">
         <label className="ed-label">Background image</label>
@@ -304,6 +355,7 @@ function SectionFields({
           A dark scrim goes over it automatically so text still passes contrast.
         </p>
       </div>
+      </Group>
     </>
   );
 }
@@ -578,7 +630,18 @@ function Segmented({
   return (
     <div className="ed-field">
       <label className="ed-label">{label}</label>
-      <div className="ed-segmented" role="group" aria-label={label}>
+      {/*
+        One track with equal segments, not N separate buttons.
+        As five buttons this wrapped, so "XL" sat on its own line under the
+        other four and the control stopped reading as one choice. Equal
+        fractions of a single track cannot wrap and cannot mislead.
+      */}
+      <div
+        className="ed-segmented"
+        role="group"
+        aria-label={label}
+        style={{ '--ed-seg-count': options.length } as CSSProperties}
+      >
         {options.map((option) => (
           <button
             key={option.value}

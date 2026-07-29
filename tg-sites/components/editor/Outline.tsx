@@ -254,7 +254,7 @@ export function Outline({ page, selectedKey, onSelect, onCommit, onPickBlock, on
         <button
           type="button"
           className="ed-btn"
-          data-variant="primary"
+          data-variant="secondary"
           style={{ width: '100%' }}
           onClick={onAddSection}
         >

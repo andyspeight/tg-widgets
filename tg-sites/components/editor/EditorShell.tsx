@@ -496,7 +496,7 @@ export function EditorShell({
         <button
           type="button"
           className="ed-btn"
-          data-cta="true"
+          data-variant="primary"
           onClick={publish}
           disabled={publishing || (status === 'published' && !unpublished)}
           title={

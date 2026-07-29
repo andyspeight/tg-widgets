@@ -704,14 +704,6 @@
 }
 
 .ed-canvas-frame [data-path] { position: relative; }
-.ed-canvas-frame [data-path]:hover {
-  outline: 1px dashed rgba(29, 78, 216, 0.4);
-  outline-offset: -1px;
-}
-.ed-canvas-frame [data-path].is-selected {
-  outline: 2px solid var(--ed-select);
-  outline-offset: -2px;
-}
 .ed-canvas-frame [data-path].is-selected::after {
   content: attr(data-kind);
   position: absolute;
@@ -1253,17 +1245,13 @@
   .ed-root[data-theme='system'] .ed-warn { background: #422006; color: #fde68a; }
 }
 
-/* The publish button. One clear next action, so it carries the brand. */
-.ed-btn[data-cta='true'] {
-  background: var(--ed-primary);
-  border-color: var(--ed-primary);
-  color: var(--ed-on-brand);
-}
-
-.ed-btn[data-cta='true']:hover:not(:disabled) {
-  background: var(--ed-primary-light);
-  border-color: var(--ed-primary-light);
-}
+/*
+ * Publish uses the primary variant rather than a one-off of its own.
+ *
+ * It had data-cta="true" with an identical rule, which meant the screen had
+ * two ways to say "this is the important button" and the contrast check,
+ * which looks for the primary variant, found nothing to measure.
+ */
 
 /*
  * A save that failed. Stated in the top bar next to the work rather than in
@@ -1626,3 +1614,289 @@
   outline: 2px solid var(--ed-select);
   outline-offset: 1px;
 }
+
+/* ================================================================== */
+/* DESIGN PASS                                                        */
+/*                                                                    */
+/* Andy: "a million miles from what a modern SaaS company would       */
+/* offer". He was right, and the diagnosis was structural rather than  */
+/* decorative:                                                         */
+/*                                                                    */
+/*   1. Everything was a box. Cards inside cards inside cards.         */
+/*   2. The properties pane was ten controls in a flat list.           */
+/*   3. Controls were sized for a phone, in a desktop side panel.      */
+/*   4. Labels, values and help text were all one size, so nothing led.*/
+/*                                                                    */
+/* Dials, per the taste skill's preset for editor screens:             */
+/* variance 5, motion 4, density 6.                                    */
+/* ================================================================== */
+
+/* ------------------------------------------------------------------ */
+/* Groups                                                              */
+/* ------------------------------------------------------------------ */
+
+.ed-group + .ed-group { border-top: 1px solid var(--ed-line-soft); }
+
+.ed-group__head { margin: 0; }
+
+.ed-group__head button {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-2);
+  width: 100%;
+  /* 40px visual, and the whole row is the target, so it clears 44 with the
+     padding below. */
+  min-height: 44px;
+  padding: 0 var(--ed-4);
+  border: 0;
+  background: transparent;
+  color: var(--ed-ink-2);
+  /* Small, uppercase and tracked. A group heading is a signpost, not a
+     heading in the document sense, and it should never compete with the
+     labels underneath it. */
+  font: inherit;
+  font-size: var(--ed-text-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.ed-group__head button:hover { color: var(--ed-ink); }
+.ed-group__head svg { color: var(--ed-ink-3); flex: none; }
+.ed-group__body { padding: 0 var(--ed-4) var(--ed-4); }
+
+/* ------------------------------------------------------------------ */
+/* Fields                                                              */
+/* ------------------------------------------------------------------ */
+
+/*
+ * A properties pane is not a form on a phone. 13px labels and 36px controls
+ * are what every builder in this category uses, and they let twice as much
+ * fit before you have to scroll. The 44px touch rule is met by extending hit
+ * areas rather than by inflating what you look at.
+ */
+.ed-props .ed-field,
+.ed-props .ed-measure,
+.ed-props .ed-colour,
+.ed-props .ed-pad { margin-bottom: var(--ed-5); }
+
+.ed-props .ed-label {
+  margin-bottom: var(--ed-2);
+  font-size: var(--ed-text-sm);
+  font-weight: 500;
+  color: var(--ed-ink-2);
+}
+
+.ed-props .ed-input,
+.ed-props .ed-select,
+.ed-props .ed-textarea {
+  min-height: 36px;
+  padding: var(--ed-1) var(--ed-3);
+  font-size: var(--ed-text-sm);
+  border-radius: var(--ed-r-md);
+}
+
+.ed-props .ed-textarea { min-height: 76px; }
+
+.ed-props .ed-help {
+  margin-top: var(--ed-2);
+  font-size: var(--ed-text-xs);
+  line-height: 1.45;
+  color: var(--ed-ink-3);
+}
+
+/* ------------------------------------------------------------------ */
+/* Segmented control                                                   */
+/* ------------------------------------------------------------------ */
+
+/*
+ * One inset track, equal fractions. It cannot wrap, so five options stay one
+ * control instead of four plus an orphan.
+ */
+.ed-segmented {
+  display: grid;
+  grid-template-columns: repeat(var(--ed-seg-count, 3), 1fr);
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--ed-r-md);
+  background: var(--ed-sunken);
+  border: 1px solid var(--ed-line-soft);
+}
+
+.ed-segmented button {
+  position: relative;
+  min-height: 32px;
+  padding: 0 var(--ed-2);
+  border: 0;
+  border-radius: calc(var(--ed-r-md) - 3px);
+  background: transparent;
+  color: var(--ed-ink-2);
+  font: inherit;
+  font-size: var(--ed-text-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: background-color 120ms ease-out, color 120ms ease-out;
+}
+
+/* 32px visual, 44px reachable. The overlay only grows vertically, so
+   neighbouring segments never steal each other's clicks. */
+.ed-segmented button::after {
+  content: '';
+  position: absolute;
+  inset: -6px 0;
+}
+
+.ed-segmented button:hover { color: var(--ed-ink); }
+
+.ed-segmented button[aria-pressed='true'] {
+  background: var(--ed-panel);
+  color: var(--ed-ink);
+  font-weight: 600;
+  box-shadow: var(--ed-shadow-sm);
+}
+
+.ed-segmented button:focus-visible {
+  outline: 2px solid var(--ed-accent);
+  outline-offset: -2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ed-segmented button { transition: none; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Outline: a list, not a stack of cards                               */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Anti-card. The outline had a bordered card per section, per block and per
+ * add-button, three deep, which is a lot of lines drawn to say very little.
+ * Structure now comes from indentation, a hover wash and one hairline
+ * between sections.
+ */
+.ed-outline .ed-sec {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  margin: 0;
+  border-bottom: 1px solid var(--ed-line-soft);
+}
+
+.ed-outline .ed-sec[data-selected='true'],
+.ed-outline .ed-sec:has(> .ed-sec-head [aria-pressed='true']) {
+  background: var(--ed-select-wash);
+}
+
+.ed-outline .ed-item {
+  border: 0;
+  border-radius: var(--ed-r-sm);
+  background: transparent;
+  box-shadow: none;
+}
+
+.ed-outline .ed-item:hover { background: var(--ed-well); }
+
+.ed-outline .ed-item[aria-current='true'],
+.ed-outline .ed-item[data-selected='true'] {
+  background: var(--ed-select-wash);
+  color: var(--ed-select);
+}
+
+/* The add buttons were dashed boxes competing with the content. Quiet text
+   with an icon, until you hover them. */
+.ed-outline .ed-add {
+  border: 0;
+  background: transparent;
+  color: var(--ed-ink-3);
+  font-size: var(--ed-text-sm);
+  justify-content: flex-start;
+}
+
+.ed-outline .ed-add:hover {
+  background: var(--ed-well);
+  color: var(--ed-brand-ink);
+}
+
+/* ------------------------------------------------------------------ */
+/* Canvas                                                              */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The page floats on a neutral field with a soft, navy-tinted shadow, rather
+ * than filling a hard-outlined rectangle. It is the difference between
+ * looking at a document and looking at a div.
+ */
+.ed-canvas-wrap { background: var(--ed-bg); }
+
+.ed-canvas-frame {
+  /* Navy-tinted, not neutral grey. A shadow the same hue as the surface it
+     falls on is the difference between depth and dirt. */
+  box-shadow: 0 1px 2px rgba(27, 43, 91, 0.06), 0 24px 48px -20px rgba(27, 43, 91, 0.16);
+}
+
+.ed-root[data-theme='dark'] .ed-canvas-frame {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 24px 48px -20px rgba(0, 0, 0, 0.65);
+}
+
+/*
+ * Selection: a soft ring and a wash, not a 2px hard edge.
+ *
+ * The old treatment drew a heavy blue rectangle round the section AND round
+ * its card in the outline at the same time, which read as dev tools
+ * inspecting a div rather than a builder showing you what you picked.
+ */
+.ed-canvas-frame [data-path].is-selected {
+  outline: 2px solid var(--ed-select);
+  outline-offset: -2px;
+  box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.12);
+}
+
+.ed-canvas-frame [data-path]:hover {
+  outline: 1px solid rgba(29, 78, 216, 0.28);
+  outline-offset: -1px;
+}
+
+/*
+ * Selection is a ring outside the element, not a border on it.
+ *
+ * A 2px border was both loud and dishonest: it changed the thing it was
+ * describing, so a selected section sat 4px taller than an unselected one.
+ */
+
+/*
+ * Secondary: outlined, brand-coloured text.
+ *
+ * "Add a section" was a full-width navy block sitting under the outline,
+ * which made it the loudest thing on the screen and put it in direct
+ * competition with Publish. There is one primary action per screen and it is
+ * Publish; adding a section is frequent but not the point of the visit.
+ */
+.ed-btn[data-variant='secondary'] {
+  background: var(--ed-panel);
+  border-color: var(--ed-line);
+  color: var(--ed-brand-ink);
+  font-weight: 600;
+}
+
+.ed-btn[data-variant='secondary']:hover:not(:disabled) {
+  background: var(--ed-select-wash);
+  border-color: var(--ed-select);
+  color: var(--ed-select);
+}
+
+/*
+ * The top bar: brand and title left, tools right, and a real gap between the
+ * two groups rather than a vacuum in the middle of the row.
+ */
+.ed-titlewrap { margin-right: auto; }
+
+.ed-topbar { padding: 0 var(--ed-4) 0 var(--ed-3); }
+
+/* Undo and redo are a pair, so they sit as one unit with a divider after,
+   rather than floating as two lone squares. */
+.ed-topbar > .ed-btn[data-icon='true'] + .ed-btn[data-icon='true'] { margin-left: calc(var(--ed-2) * -1); }

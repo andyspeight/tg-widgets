@@ -478,9 +478,24 @@ await check('dark mode: body text clears 4.5:1 on the panel', async () => {
 await page.reload();
 await page.waitForSelector('.ed-root');
 
+/*
+ * Select something, then open every collapsed group before reading labels.
+ *
+ * The pane groups its settings and Style opens closed, which is deliberate:
+ * an agent who wants a tone should not scroll past a border colour to reach
+ * it. A test that assumed everything was on screen at once was testing the
+ * old flat list.
+ */
 async function labelsAfter(select) {
   await select();
   await page.waitForTimeout(200);
+
+  const closed = page.locator('.ed-group__head button[aria-expanded="false"]');
+  for (let i = await closed.count(); i > 0; i = await closed.count()) {
+    await closed.first().click();
+    await page.waitForTimeout(80);
+  }
+
   return page.evaluate(() =>
     [...document.querySelectorAll('.ed-props .ed-label')].map((l) => l.textContent?.trim()));
 }
@@ -506,8 +521,7 @@ await check('a section and a column offer the same style controls', async () => 
 });
 
 await check('padding typed into the box reaches the page', async () => {
-  await page.locator('.ed-sec-name').first().click();
-  await page.waitForTimeout(200);
+  await labelsAfter(() => page.locator('.ed-sec-name').first().click());
 
   const section = page.locator('.tgs-section').first();
   const before = (await section.boundingBox())?.height ?? 0;
