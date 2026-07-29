@@ -121,6 +121,25 @@ export function forgetHostname(hostname: unknown): void {
 // Reading a tenant
 // ---------------------------------------------------------------------------
 
+/**
+ * A jsonb column as an object, whatever shape it arrives in.
+ *
+ * Same guard as lib/db/pages.ts, and for the same reason: a jsonb value
+ * written as a pre-stringified string comes back double encoded, and a
+ * client's theme is not worth losing over it.
+ */
+function asObject(value: unknown): Record<string, unknown> {
+  if (value && typeof value === 'object') return value as Record<string, unknown>;
+  if (typeof value === 'string') {
+    try {
+      return asObject(JSON.parse(value));
+    } catch {
+      return {};
+    }
+  }
+  return {};
+}
+
 function toTenant(row: Record<string, unknown>): Tenant {
   return {
     id: String(row.id),
@@ -128,8 +147,8 @@ function toTenant(row: Record<string, unknown>): Tenant {
     name: String(row.name),
     plan: row.plan as Tenant['plan'],
     status: row.status as Tenant['status'],
-    theme: (row.theme ?? {}) as Record<string, unknown>,
-    settings: (row.settings ?? {}) as Record<string, unknown>,
+    theme: asObject(row.theme),
+    settings: asObject(row.settings),
   };
 }
 

@@ -70,6 +70,10 @@ function fakeSql(role: string) {
   // already does.
   const sql = query as unknown as Record<string, unknown> & typeof query;
 
+  // The real driver wraps a value so it is sent as JSON. The fake marks it so
+  // a test can tell a wrapped object from a pre-stringified one.
+  sql.json = (value: unknown) => ({ __json: value });
+
   sql.begin = async (fn: (tx: unknown) => Promise<unknown>) => {
     openTransactions += 1;
     maxConcurrentTransactions = Math.max(maxConcurrentTransactions, openTransactions);
@@ -332,6 +336,75 @@ describe('page queries', () => {
       /Refusing to save a malformed page/,
     );
     expect(log).toHaveLength(0);
+  });
+
+  /*
+   * THE BUG THIS EXISTS FOR
+   *
+   * jsonb used to be written as `${JSON.stringify(value)}::jsonb`. The driver
+   * serialised that JS string to JSON and the cast read it back, so what
+   * landed in the database was a JSON *string* containing JSON. Reading `seo`
+   * threw, which is how it was found. Reading `draft_content` did NOT throw:
+   * the mapping layer skipped anything that was not already an object, so a
+   * saved page came back empty and looked lost.
+   *
+   * Nothing in the unit suite caught it, because a fake driver happily
+   * accepts a string. So the invariant is asserted directly: a JSON column is
+   * handed an OBJECT, never a string someone stringified first.
+   */
+  it('sends JSON columns as objects, never pre-stringified', async () => {
+    const { saveDraft } = await import('../lib/db/pages');
+    const { createPage } = await import('../lib/content/factory');
+
+    await saveDraft(ALPHA, 'aaaa', createPage('Home', ''));
+
+    const write = log.find((s) => s.sql.includes('draft_content ='));
+    expect(write, 'no draft write happened').toBeTruthy();
+
+    // Not "no param is a string": `title` is legitimately one. The invariant
+    // is narrower and exact: no parameter may be JSON that someone has
+    // already serialised, because that is what gets double encoded.
+    for (const param of write!.params) {
+      if (typeof param !== 'string') continue;
+
+      let isSerialisedJson = false;
+      try {
+        const decoded: unknown = JSON.parse(param);
+        isSerialisedJson = decoded !== null && typeof decoded === 'object';
+      } catch {
+        // Ordinary text. Exactly what a text column should get.
+      }
+
+      expect(
+        isSerialisedJson,
+        `pre-stringified JSON was passed as a parameter: ${param.slice(0, 60)}`,
+      ).toBe(false);
+    }
+
+    // And the content really is wrapped by the driver's helper.
+    expect(write!.params.some((p) => p !== null && typeof p === 'object' && '__json' in (p as object)))
+      .toBe(true);
+  });
+
+  it('reads a page whose JSON was stored double encoded', async () => {
+    const { getPage } = await import('../lib/db/pages');
+    const { createPage } = await import('../lib/content/factory');
+
+    // Exactly what the old writes left behind: the whole tree as a string.
+    const content = createPage('Home', '');
+    respond('draft_content', [{
+      id: 'aaaa', parent_id: null, slug: '', title: 'Home', status: 'draft',
+      published_at: null, updated_at: '2026-07-29T00:00:00Z',
+      has_unpublished_changes: true,
+      seo: JSON.stringify({ noindex: false }),
+      draft_content: JSON.stringify(content),
+    }]);
+
+    const page = await getPage(ALPHA, 'aaaa');
+
+    // Not an empty page, and not a throw. The content survives.
+    expect(page?.content.title).toBe('Home');
+    expect(page?.content.sections).toEqual(content.sections);
   });
 
   it('refuses to make a page its own parent', async () => {

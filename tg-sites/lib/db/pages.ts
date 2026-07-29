@@ -57,6 +57,18 @@ function summary(tx: Tx) {
   `;
 }
 
+/**
+ * Hand a value to the driver as JSON.
+ *
+ * The cast is unavoidable rather than lazy: the driver types its JSON
+ * parameter as an index-signature shape, and TypeScript will not accept a
+ * concrete interface like Page as one even though every value inside it is
+ * plain JSON. Everything reaching here has already been through parsePage.
+ */
+function json(tx: Tx, value: unknown) {
+  return tx.json(value as Parameters<Tx['json']>[0]);
+}
+
 function toSummary(row: Record<string, unknown>): PageSummary {
   return {
     id: String(row.id),
@@ -71,6 +83,39 @@ function toSummary(row: Record<string, unknown>): PageSummary {
 }
 
 /**
+ * A jsonb column as an object, whatever shape it arrives in.
+ *
+ * WHY THIS IS NOT PARANOIA
+ *
+ * Every jsonb write here used to be `${JSON.stringify(x)}::jsonb`, which
+ * double encodes: the driver serialises the JS string to JSON, and the cast
+ * then reads it back as a JSON *string* containing JSON. `jsonb_typeof` says
+ * "string" instead of "object". The writes use tx.json() now, but rows saved
+ * before that fix are still wrapped, and there is no version of this worth
+ * failing to read a client's page over.
+ *
+ * The old code did `typeof raw === 'object' ? raw : {}`, which turned a
+ * wrapped page into an EMPTY one and silently threw the content away. That
+ * was the worse half of the bug: the 500 on `seo` was at least loud.
+ */
+function asObject(value: unknown): Record<string, unknown> | null {
+  if (value === null || value === undefined) return null;
+  if (typeof value === 'object') return value as Record<string, unknown>;
+
+  if (typeof value === 'string') {
+    try {
+      const parsed: unknown = JSON.parse(value);
+      // A string can nest more than once. Keep unwrapping.
+      return asObject(parsed);
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
+}
+
+/**
  * Turn a stored tree back into a Page, with the columns overwriting the
  * JSON's copies of id, slug, title and SEO.
  *
@@ -79,7 +124,7 @@ function toSummary(row: Record<string, unknown>): PageSummary {
  * and a silent repair would hide that until it mattered.
  */
 function hydrate(row: Record<string, unknown>, raw: unknown): Page {
-  const source = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
+  const source = asObject(raw) ?? {};
 
   const parsed = parsePage({
     version: 1,
@@ -88,7 +133,7 @@ function hydrate(row: Record<string, unknown>, raw: unknown): Page {
     id: String(row.id),
     slug: String(row.slug ?? ''),
     title: String(row.title),
-    seo: row.seo ?? {},
+    seo: asObject(row.seo) ?? {},
   });
 
   if (!parsed.ok) {
@@ -176,7 +221,7 @@ export async function getPublishedPage(
     if (!row) return null;
 
     // Published but never given content is not a page anyone should see.
-    if (row.published_content == null) return null;
+    if (asObject(row.published_content) === null) return null;
 
     return {
       id: String(row.id),
@@ -221,7 +266,7 @@ export async function createPage(
         ${input.parentId ?? null}::uuid,
         ${slug},
         ${title},
-        ${JSON.stringify(content)}::jsonb
+        ${json(tx, content)}
       )
       returning ${summary(tx)}, seo, draft_content
     `;
@@ -283,9 +328,9 @@ export async function saveDraft(
   return withTenant(tenantId, async (tx) => {
     const rows = await tx`
       update public.pages set
-        draft_content = ${JSON.stringify(content)}::jsonb,
+        draft_content = ${json(tx, content)},
         title         = ${content.title},
-        seo           = ${JSON.stringify(content.seo)}::jsonb,
+        seo           = ${json(tx, content.seo)},
         updated_by    = ${userId ?? null}::text
       where id = ${pageId}::uuid
       returning ${summary(tx)}
