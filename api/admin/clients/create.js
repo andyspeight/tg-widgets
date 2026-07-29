@@ -26,6 +26,7 @@ import {
   listAllRecords,
   getRecord,
 } from '../../_lib/auth/airtable.js';
+import { provisionLunaChat } from '../../_lib/luna-chat-provision.js';
 import { jsonError } from '../../_lib/auth/http.js';
 import {
   PRODUCTS,
@@ -490,6 +491,19 @@ export default async function handler(req, res) {
       clientId, 'but Luna Chat record creation deferred to a later phase');
   }
 
+  // Create the client in Luna Chat as well. This was the `lunaChatRecordCreated:
+  // false` placeholder below — onboarding configured Luna Chat here but never
+  // told Luna Chat about it, so someone had to make the record by hand. When
+  // that was missed the client existed in Client Control and nowhere else: no
+  // dashboard, no client list entry, not even visible under "Act as".
+  //
+  // Not fatal — the client and their entitlements are already saved, so a Luna
+  // Chat outage must not fail onboarding. The result is reported instead.
+  let lunaChat;
+  if (lunaChatPayload) {
+    lunaChat = await provisionLunaChat(clientRec, true);
+  }
+
   return res.status(200).json({
     ok: true,
     clientId,
@@ -499,6 +513,7 @@ export default async function handler(req, res) {
     invites: inviteResults,
     permissionsCreated,
     lunaChatConfigured: !!lunaChatPayload,
-    lunaChatRecordCreated: false,
+    lunaChatRecordCreated: !!(lunaChat && lunaChat.ok),
+    ...(lunaChat && lunaChat.warning ? { warning: lunaChat.warning } : {}),
   });
 }

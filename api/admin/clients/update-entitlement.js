@@ -31,6 +31,7 @@ import {
   createRecord,
 } from '../../_lib/auth/airtable.js';
 import { jsonError } from '../../_lib/auth/http.js';
+import { provisionLunaChat } from '../../_lib/luna-chat-provision.js';
 import {
   PRODUCTS,
   PERMISSIONS,
@@ -163,6 +164,21 @@ export default async function handler(req, res) {
       source = MANUAL_OVERRIDE;
     }
 
+    // Luna Chat keeps its own client records, so switching the product on here
+    // has to create the client over there as well. Before this, that step was
+    // done by hand and routinely missed: a client could be live in Client
+    // Control and simply not exist in Luna Chat — invisible in its client list
+    // and in "Act as" — or exist with no App ID (so Luna invented booking links
+    // that 404'd) or no AuthClientId (so they could not sign in at all).
+    //
+    // Deliberately NOT fatal. The entitlement above is the source of truth and
+    // must stand even if Luna Chat is unreachable; we return a warning instead
+    // so the admin can retry rather than being told the whole save failed.
+    let lunaChat;
+    if (catalogueItem.fields[CATALOGUE.fields.productSlug] === PRODUCTS.slugs.LUNA_CHAT) {
+      lunaChat = await provisionLunaChat(client, enabled);
+    }
+
     return res.status(200).json({
       ok: true,
       entitlement: {
@@ -171,6 +187,8 @@ export default async function handler(req, res) {
         enabled,
         source,
       },
+      ...(lunaChat ? { lunaChat } : {}),
+      ...(lunaChat && lunaChat.warning ? { warning: lunaChat.warning } : {}),
     });
   } catch (err) {
     console.error('[update-entitlement] write failed:', err);
