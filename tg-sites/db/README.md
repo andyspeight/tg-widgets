@@ -83,15 +83,16 @@ Both roles are created with `LOGIN` but **no password**, so neither can
 authenticate yet. That is deliberate: a password in a migration is a password
 in git.
 
-Set them once, out of band, in the Supabase SQL editor:
+**Step by step, with the right URLs and a block to paste: [SETUP.md](./SETUP.md).**
+
+The short version, in the Supabase SQL editor:
 
 ```sql
 alter role tg_sites_app      with password 'generate-a-long-random-one';
 alter role tg_sites_renderer with password 'generate-a-different-one';
 ```
 
-Generate them with something like `openssl rand -base64 32`. Then put the
-connection strings in the environment, never in the repo:
+Then put the connection strings in the environment, never in the repo:
 
 ```
 DATABASE_URL=postgresql://tg_sites_app:PASSWORD@HOST:6543/postgres
