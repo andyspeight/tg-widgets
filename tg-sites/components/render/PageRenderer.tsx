@@ -12,7 +12,7 @@
  */
 
 import { Fragment, type CSSProperties, type ReactElement } from 'react';
-import type { Column, Page, Row, Section } from '../../lib/content/schema';
+import type { Box, Column, Page, Row, Section } from '../../lib/content/schema';
 import { safeUrl } from '../../lib/content/sanitise';
 import { BlockRenderer } from './BlockRenderer';
 
@@ -99,7 +99,12 @@ export function SectionRenderer({
       className="tgs-section"
       data-tone={section.tone}
       data-width={section.width}
-      style={{ '--tgs-pad': `${section.paddingY}px` } as CSSProperties}
+      style={{
+        ...boxStyle(section.box),
+        '--tgs-pad': `${section.paddingY}px`,
+        '--tgs-min-h': `${section.minHeight}px`,
+      } as CSSProperties}
+      data-shadow={section.box.shadow}
       {...pathAttr(editable, `s${index}`)}
     >
       {background && (
@@ -143,6 +148,29 @@ export function SectionRenderer({
   );
 }
 
+/**
+ * A box style as custom properties.
+ *
+ * ALWAYS EMITS THE WHOLE SET, even the zeroes. Custom properties inherit, so
+ * a column that left one out would silently pick up its section's value and
+ * a padding set on the section would appear again inside every column.
+ * Writing all of them at every level is what stops that.
+ */
+function boxStyle(box: Box): CSSProperties {
+  return {
+    '--tgs-pt': `${box.padding.top}px`,
+    '--tgs-pr': `${box.padding.right}px`,
+    '--tgs-pb': `${box.padding.bottom}px`,
+    '--tgs-pl': `${box.padding.left}px`,
+    '--tgs-radius': `${box.radius}px`,
+    '--tgs-bw': `${box.borderWidth}px`,
+    '--tgs-bc': box.borderColour ?? 'transparent',
+    // 'transparent' rather than 'inherit': a column with no background of its
+    // own should show the section behind it, not repaint it.
+    '--tgs-bg': box.background ?? 'transparent',
+  } as CSSProperties;
+}
+
 // ---------------------------------------------------------------------------
 // Row
 // ---------------------------------------------------------------------------
@@ -163,13 +191,13 @@ export function RowRenderer({
    */
   const style = {
     '--tgs-cols': row.columns.map((column) => `${column.width}%`).join(' '),
+    '--tgs-gap': `${row.gap}px`,
   } as CSSProperties;
 
   return (
     <div
       className="tgs-row"
       style={style}
-      data-gap={row.gap}
       data-stack={row.stackBelow}
       data-reverse={row.reverseOnStack ? 'true' : undefined}
       {...pathAttr(editable, `s${sectionIndex}r${index}`)}
@@ -210,7 +238,13 @@ export function ColumnRenderer({
   const path = `s${sectionIndex}r${rowIndex}c${index}`;
 
   return (
-    <div className="tgs-col" data-align={column.align} {...pathAttr(editable, path)}>
+    <div
+      className="tgs-col"
+      data-align={column.align}
+      data-shadow={column.box.shadow}
+      style={boxStyle(column.box)}
+      {...pathAttr(editable, path)}
+    >
       {column.blocks.map((block, blockIndex) => (
         <div
           key={block.id}

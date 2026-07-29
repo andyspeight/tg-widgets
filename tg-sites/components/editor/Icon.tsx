@@ -54,6 +54,8 @@ export type IconName =
   | 'search'
   | 'warning'
   | 'edit'
+  | 'link'
+  | 'link-off'
   | 'blank'
   // viewports
   | 'desktop'
@@ -98,6 +100,9 @@ const PATHS: Record<IconName, string> = {
   check: 'M4 12l5 5L20 6',
   // A pencil. Drawn at the same 2px weight as the rest of the set.
   edit: 'M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3zM14.5 6.5l3 3',
+  // Two links of a chain, joined. Its broken twin below drops the middle bar.
+  link: 'M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1',
+  'link-off': 'M9 15l-2 2a3.5 3.5 0 0 1-5-5l2-2M15 9l2-2a3.5 3.5 0 0 1 5 5l-2 2M3 3l18 18',
   // Triangle with a bar and a dot. Drawn rather than filled so it sits at the
   // same 2px weight as everything else and never reads as an error icon.
   warning: 'M12 4L2.5 20h19L12 4zM12 10v5M12 17.5v.5',

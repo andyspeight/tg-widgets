@@ -10,7 +10,7 @@
  * that replaces it: a section takes its name from its own first heading.
  */
 
-import type { Page } from './schema';
+import { EMPTY_BOX, type Page } from './schema';
 
 export const SEED_PAGE: Page = {
   version: 1,
@@ -28,10 +28,12 @@ export const SEED_PAGE: Page = {
       tone: 'dark',
       width: 'contained',
       paddingY: 64,
+      minHeight: 0,
+      box: { ...EMPTY_BOX },
       rows: [
         {
           id: 'row_hero',
-          gap: 'xl',
+          gap: 64,
           stackBelow: 'mobile',
           reverseOnStack: true,
           columns: [
@@ -39,6 +41,7 @@ export const SEED_PAGE: Page = {
               id: 'col_hero_text',
               width: 55,
               align: 'centre',
+              box: { ...EMPTY_BOX },
               blocks: [
                 {
                   id: 'blk_hero_eyebrow',
@@ -76,6 +79,7 @@ export const SEED_PAGE: Page = {
               id: 'col_hero_media',
               width: 45,
               align: 'top',
+              box: { ...EMPTY_BOX },
               blocks: [
                 {
                   id: 'blk_hero_image',
@@ -101,10 +105,12 @@ export const SEED_PAGE: Page = {
       tone: 'light',
       width: 'contained',
       paddingY: 64,
+      minHeight: 0,
+      box: { ...EMPTY_BOX },
       rows: [
         {
           id: 'row_why_head',
-          gap: 'm',
+          gap: 16,
           stackBelow: 'mobile',
           reverseOnStack: false,
           columns: [
@@ -112,6 +118,7 @@ export const SEED_PAGE: Page = {
               id: 'col_why_head',
               width: 100,
               align: 'top',
+              box: { ...EMPTY_BOX },
               blocks: [
                 {
                   id: 'blk_why_title',
@@ -124,7 +131,7 @@ export const SEED_PAGE: Page = {
         },
         {
           id: 'row_why_items',
-          gap: 'l',
+          gap: 32,
           stackBelow: 'tablet',
           reverseOnStack: false,
           columns: [
@@ -132,6 +139,7 @@ export const SEED_PAGE: Page = {
               id: 'col_why_1',
               width: 33.33,
               align: 'top',
+              box: { ...EMPTY_BOX },
               blocks: [
                 {
                   id: 'blk_why_1',
@@ -148,6 +156,7 @@ export const SEED_PAGE: Page = {
               id: 'col_why_2',
               width: 33.33,
               align: 'top',
+              box: { ...EMPTY_BOX },
               blocks: [
                 {
                   id: 'blk_why_2',
@@ -164,6 +173,7 @@ export const SEED_PAGE: Page = {
               id: 'col_why_3',
               width: 33.34,
               align: 'top',
+              box: { ...EMPTY_BOX },
               blocks: [
                 {
                   id: 'blk_why_3',
@@ -185,10 +195,12 @@ export const SEED_PAGE: Page = {
       tone: 'accent',
       width: 'narrow',
       paddingY: 64,
+      minHeight: 0,
+      box: { ...EMPTY_BOX },
       rows: [
         {
           id: 'row_cta',
-          gap: 'm',
+          gap: 16,
           stackBelow: 'mobile',
           reverseOnStack: false,
           columns: [
@@ -196,6 +208,7 @@ export const SEED_PAGE: Page = {
               id: 'col_cta',
               width: 100,
               align: 'top',
+              box: { ...EMPTY_BOX },
               blocks: [
                 {
                   id: 'blk_cta_title',

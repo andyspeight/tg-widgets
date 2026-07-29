@@ -1413,3 +1413,216 @@
   color: var(--ed-ink-3);
   line-height: 1.45;
 }
+
+/* ------------------------------------------------------------------ */
+/* Spacing, size and style controls                                    */
+/* ------------------------------------------------------------------ */
+
+.ed-measure { margin-bottom: var(--ed-4); }
+
+.ed-measure__row {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-3);
+}
+
+/*
+ * The slider takes the space, the number box is a fixed width.
+ * A number that changes width as you drag is unreadable while dragging,
+ * which is exactly when you want to read it.
+ */
+.ed-measure__slider {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--ed-primary);
+  height: 44px;
+  cursor: pointer;
+}
+
+.ed-measure__field {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  width: 84px;
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+  overflow: hidden;
+}
+
+.ed-measure__field:focus-within {
+  border-color: var(--ed-select);
+  box-shadow: 0 0 0 3px var(--ed-select-wash);
+}
+
+.ed-measure__input {
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  padding: 0 var(--ed-2);
+  border: 0;
+  background: transparent;
+  color: var(--ed-ink);
+  font: inherit;
+  font-size: var(--ed-text-sm);
+  text-align: right;
+}
+
+.ed-measure__input:focus { outline: none; }
+
+.ed-measure__unit {
+  flex: none;
+  padding: 0 var(--ed-2) 0 var(--ed-1);
+  font-size: var(--ed-text-xs);
+  color: var(--ed-ink-3);
+}
+
+.ed-measure__hint {
+  display: block;
+  margin-top: var(--ed-1);
+  font-size: var(--ed-text-xs);
+  color: var(--ed-ink-3);
+  line-height: 1.45;
+}
+
+/* ------------------------------------------------------------------ */
+/* Padding box                                                         */
+/* ------------------------------------------------------------------ */
+
+.ed-pad { margin-bottom: var(--ed-4); }
+
+/*
+ * Four inputs arranged as the box they describe.
+ *
+ * A grid rather than absolute positioning, so it reflows rather than
+ * overlapping when the pane is narrow.
+ */
+.ed-pad__box {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-rows: auto auto auto;
+  grid-template-areas:
+    '.    top    .'
+    'left link  right'
+    '.    bottom .';
+  gap: var(--ed-2);
+  place-items: center;
+  padding: var(--ed-4);
+  border: 1px dashed var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-well);
+}
+
+.ed-pad__cell--top { grid-area: top; }
+.ed-pad__cell--right { grid-area: right; }
+.ed-pad__cell--bottom { grid-area: bottom; }
+.ed-pad__cell--left { grid-area: left; }
+
+.ed-pad__input {
+  width: 60px;
+  min-height: 36px;
+  padding: 0 var(--ed-1);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-sm);
+  background: var(--ed-panel);
+  color: var(--ed-ink);
+  font: inherit;
+  font-size: var(--ed-text-sm);
+  text-align: center;
+}
+
+.ed-pad__input:focus-visible {
+  outline: none;
+  border-color: var(--ed-select);
+  box-shadow: 0 0 0 3px var(--ed-select-wash);
+}
+
+.ed-pad__link {
+  grid-area: link;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+  color: var(--ed-ink-3);
+  cursor: pointer;
+}
+
+/* Pressed is a real state change, so it gets colour AND a filled look, not
+   colour alone. */
+.ed-pad__link[aria-pressed='true'] {
+  border-color: var(--ed-select);
+  background: var(--ed-select-wash);
+  color: var(--ed-select);
+}
+
+.ed-pad__link:focus-visible {
+  outline: 2px solid var(--ed-select);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Colour                                                              */
+/* ------------------------------------------------------------------ */
+
+.ed-colour { margin-bottom: var(--ed-4); }
+
+.ed-colour__row {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-2);
+}
+
+.ed-colour__row .ed-input { flex: 1; min-width: 0; }
+
+.ed-colour__swatch {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  padding: 2px;
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+  cursor: pointer;
+}
+
+.ed-colour__swatch::-webkit-color-swatch-wrapper { padding: 0; }
+.ed-colour__swatch::-webkit-color-swatch { border: 0; border-radius: var(--ed-r-sm); }
+
+/*
+ * The column label is a control now, not a caption.
+ *
+ * Styled to still read as a label, because that is what it is most of the
+ * time. It only announces itself as a button on hover and focus, and as
+ * pressed when its column is the thing being edited.
+ */
+.ed-side-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 var(--ed-1);
+  margin-left: calc(var(--ed-1) * -1);
+  border: 0;
+  border-radius: var(--ed-r-sm);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.ed-side-btn:hover { background: var(--ed-well); color: var(--ed-ink); }
+
+.ed-side-btn[aria-pressed='true'] {
+  background: var(--ed-select-wash);
+  color: var(--ed-select);
+}
+
+.ed-side-btn:focus-visible {
+  outline: 2px solid var(--ed-select);
+  outline-offset: 1px;
+}

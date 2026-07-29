@@ -15,6 +15,8 @@ import {
   type Row,
   type Section,
   DEFAULT_SECTION_PADDING,
+  DEFAULT_GAP,
+  EMPTY_BOX,
 } from './schema';
 import { blockDefinition, defaultPropsFor } from './blocks';
 import { DEFAULT_LAYOUT, type Layout } from './layouts';
@@ -42,6 +44,7 @@ export function createColumn(width: number, blocks: Block[] = []): Column {
     id: newId('col'),
     width: Math.max(MIN_COLUMN_WIDTH, width),
     align: 'top',
+    box: { ...EMPTY_BOX },
     blocks,
   };
 }
@@ -66,7 +69,7 @@ export function createRow(preset = '1'): Row {
   return {
     id: newId('row'),
     columns: widths.map((width) => createColumn(width)),
-    gap: 'm',
+    gap: DEFAULT_GAP,
     stackBelow: 'mobile',
     reverseOnStack: false,
   };
@@ -78,6 +81,8 @@ export function createSection(preset = '1'): Section {
     tone: 'light',
     width: 'contained',
     paddingY: DEFAULT_SECTION_PADDING,
+    minHeight: 0,
+    box: { ...EMPTY_BOX },
     rows: [createRow(preset)],
   };
 }
@@ -95,6 +100,8 @@ export function createSectionFromLayout(layout: Layout = DEFAULT_LAYOUT): Sectio
     tone: 'light',
     width: 'contained',
     paddingY: DEFAULT_SECTION_PADDING,
+    minHeight: 0,
+    box: { ...EMPTY_BOX },
     rows: layout.rows.map((ratios) => createRow(ratios.join('-'))),
   };
 }

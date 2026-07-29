@@ -467,6 +467,61 @@ await check('dark mode: body text clears 4.5:1 on the panel', async () => {
   return ratio >= 4.5 ? true : `only ${ratio.toFixed(2)}:1`;
 });
 
+/*
+ * Run last, after a reload.
+ *
+ * Everything above has clicked around the editor, so the selection is
+ * whatever the previous check left. These two depend on selecting a specific
+ * thing, so they start from a clean page rather than from wherever we ended
+ * up. The first version of them failed for exactly that reason.
+ */
+await page.reload();
+await page.waitForSelector('.ed-root');
+
+async function labelsAfter(select) {
+  await select();
+  await page.waitForTimeout(200);
+  return page.evaluate(() =>
+    [...document.querySelectorAll('.ed-props .ed-label')].map((l) => l.textContent?.trim()));
+}
+
+await check('a section and a column offer the same style controls', async () => {
+  const section = await labelsAfter(() => page.locator('.ed-sec-name').first().click());
+  // Through the outline's column label, not by clicking the column on the
+  // canvas: a click there lands on the block inside it, which is the right
+  // behaviour and the reason the label had to become a control.
+  const column = await labelsAfter(async () => {
+    await page.locator('.ed-side-btn').first().click();
+  });
+
+  // Every style control a section has, a column has too. That is the whole
+  // reason BoxSchema and BoxPanel exist rather than two of each.
+  const shared = ['Padding (inner spacing)', 'Background colour', 'Corner radius', 'Border', 'Shadow'];
+  const missingOnSection = shared.filter((l) => !section.includes(l));
+  const missingOnColumn = shared.filter((l) => !column.includes(l));
+
+  if (missingOnSection.length) return `section is missing ${JSON.stringify(missingOnSection)}`;
+  if (missingOnColumn.length) return `column is missing ${JSON.stringify(missingOnColumn)}`;
+  return true;
+});
+
+await check('padding typed into the box reaches the page', async () => {
+  await page.locator('.ed-sec-name').first().click();
+  await page.waitForTimeout(200);
+
+  const section = page.locator('.tgs-section').first();
+  const before = (await section.boundingBox())?.height ?? 0;
+
+  const top = page.locator('.ed-pad__input').first();
+  if ((await top.count()) === 0) return 'no padding box in the pane';
+  await top.fill('60');
+  await page.waitForTimeout(250);
+
+  const after = (await section.boundingBox())?.height ?? 0;
+  // Linked by default, so 60 lands on all four sides: top and bottom both.
+  return after > before + 100 ? true : `${Math.round(before)}px then ${Math.round(after)}px`;
+});
+
 await browser.close();
 
 let failed = false;

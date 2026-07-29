@@ -137,7 +137,43 @@
  * --tgs-pad until it has been through the schema, and 48px is what the old
  * default meant.
  */
-.tgs-section { padding-block: var(--tgs-pad, 48px); }
+.tgs-section {
+  /*
+   * paddingY and box.padding are ADDED, not one overriding the other.
+   * paddingY is the section's rhythm, set by the presets and the foot handle.
+   * box.padding is the fine control on top. Adding them means neither
+   * silently wins, and setting one never wipes out the other.
+   */
+  padding-top: calc(var(--tgs-pad, 48px) + var(--tgs-pt, 0px));
+  padding-bottom: calc(var(--tgs-pad, 48px) + var(--tgs-pb, 0px));
+  padding-left: var(--tgs-pl, 0px);
+  padding-right: var(--tgs-pr, 0px);
+  min-height: var(--tgs-min-h, 0px);
+  border-radius: var(--tgs-radius, 0px);
+  border: var(--tgs-bw, 0px) solid var(--tgs-bc, transparent);
+}
+
+/*
+ * A box background sits ON TOP of the tone, so a tone stays the default and a
+ * colour is an override rather than a second way to say the same thing.
+ * transparent is the no-op, which is why boxStyle always emits it.
+ */
+.tgs-section[style*='--tgs-bg'],
+.tgs-col[style*='--tgs-bg'] {
+  background-color: var(--tgs-bg, transparent);
+}
+
+.tgs-col {
+  padding: var(--tgs-pt, 0px) var(--tgs-pr, 0px) var(--tgs-pb, 0px) var(--tgs-pl, 0px);
+  border-radius: var(--tgs-radius, 0px);
+  border: var(--tgs-bw, 0px) solid var(--tgs-bc, transparent);
+}
+
+/* Shadow is an enum, so a client cannot invent one that does not match the
+   rest of the site. */
+.tgs-section[data-shadow='soft'],   .tgs-col[data-shadow='soft']   { box-shadow: 0 1px 3px rgba(15, 23, 42, 0.10); }
+.tgs-section[data-shadow='medium'], .tgs-col[data-shadow='medium'] { box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12); }
+.tgs-section[data-shadow='strong'], .tgs-col[data-shadow='strong'] { box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18); }
 
 .tgs-section__bg {
   position: absolute;
@@ -181,17 +217,11 @@
  * like and the phone view still reads.
  */
 .tgs-row {
+  gap: var(--tgs-gap, 16px);
   display: grid;
   grid-template-columns: var(--tgs-cols, 1fr);
   align-items: start;
 }
-
-.tgs-row[data-gap='none'] { gap: 0; }
-.tgs-row[data-gap='xs']   { gap: var(--tgs-space-xs); }
-.tgs-row[data-gap='s']    { gap: var(--tgs-space-s); }
-.tgs-row[data-gap='m']    { gap: var(--tgs-space-m); }
-.tgs-row[data-gap='l']    { gap: var(--tgs-space-l); }
-.tgs-row[data-gap='xl']   { gap: var(--tgs-space-xl); }
 
 .tgs-row + .tgs-row { margin-top: var(--tgs-space-l); }
 

@@ -12,10 +12,13 @@
 
 import type { Page } from '../../lib/content/schema';
 import {
+  MAX_GAP,
+  MAX_MIN_HEIGHT,
   MIN_COLUMN_WIDTH,
   normaliseSectionPadding,
   SECTION_PADDING_PRESETS,
 } from '../../lib/content/schema';
+import { BoxPanel, Measure } from './BoxControls';
 import { blockDefinition } from '../../lib/content/blocks';
 import {
   type Path,
@@ -274,6 +277,21 @@ function SectionFields({
         section to fine tune it.
       </p>
 
+      <Measure
+        label="Minimum height"
+        value={section.minHeight}
+        max={MAX_MIN_HEIGHT}
+        step={10}
+        hint="A floor, not a fixed height. A section with more content in it still grows."
+        onChange={(minHeight) => set({ minHeight }, `sec:${index}:minh`)}
+      />
+
+      <BoxPanel
+        what="section"
+        box={section.box}
+        onChange={(box) => set({ box }, `sec:${index}:box`)}
+      />
+
       <div className="ed-field">
         <label className="ed-label">Background image</label>
         <input
@@ -378,17 +396,12 @@ function RowFields({
         </p>
       </div>
 
-      <Segmented
-        label="Gap between columns"
+      <Measure
+        label="Spacing between columns"
         value={node.gap}
-        options={[
-          { value: 'none', label: 'None' },
-          { value: 's', label: 'S' },
-          { value: 'm', label: 'M' },
-          { value: 'l', label: 'L' },
-          { value: 'xl', label: 'XL' },
-        ]}
-        onChange={(value) => set({ gap: value as typeof node.gap }, `row:${section}:${row}:gap`)}
+        max={MAX_GAP}
+        step={2}
+        onChange={(gap) => set({ gap }, `row:${section}:${row}:gap`)}
       />
 
       <Segmented
@@ -467,6 +480,18 @@ function ColumnFields({
             (current) =>
               updateColumn(current, section, row, column, { align: value as typeof node.align }),
             `col:${section}:${row}:${column}:align`,
+          )
+        }
+      />
+
+      {/* The same panel a section gets, from the same component. */}
+      <BoxPanel
+        what="column"
+        box={node.box}
+        onChange={(box) =>
+          onCommit(
+            (current) => updateColumn(current, section, row, column, { box }),
+            `col:${section}:${row}:${column}:box`,
           )
         }
       />

@@ -307,9 +307,29 @@ function Band({
     <div className="ed-rowgroup">
       {row.columns.map((column, columnIndex) => (
         <div className="ed-side" key={column.id}>
+          {/*
+            The column label selects the column.
+            It used to be a caption and nothing more, which was fine while a
+            column had no settings of its own. Now it has padding, background,
+            corners, border and shadow, and there was no obvious way to reach
+            any of them: clicking a column on the canvas selects the block
+            inside it. A label that does nothing next to a panel you cannot
+            open is worse than no label.
+          */}
           {multi && (
             <div className="ed-side-label">
-              <span>{columnWord(columnIndex, row.columns.length)}</span>
+              <button
+                type="button"
+                className="ed-side-btn"
+                aria-pressed={
+                  selectedKey === pathKey({ kind: 'column', section: sectionIndex, row: rowIndex, column: columnIndex })
+                }
+                onClick={() =>
+                  onSelect({ kind: 'column', section: sectionIndex, row: rowIndex, column: columnIndex })
+                }
+              >
+                {columnWord(columnIndex, row.columns.length)}
+              </button>
             </div>
           )}
 

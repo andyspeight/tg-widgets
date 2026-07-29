@@ -17,6 +17,15 @@ import {
   normaliseWidths,
   parsePage,
   SECTION_PADDING_PRESETS,
+  boxIsEmpty,
+  DEFAULT_GAP,
+  EMPTY_BOX,
+  LEGACY_GAP,
+  MAX_GAP,
+  MAX_PADDING,
+  normaliseGap,
+  px,
+  safeColour,
 } from '../lib/content/schema';
 import { createPage, createRow, createSectionFromLayout, newId } from '../lib/content/factory';
 import { LAYOUTS, layoutCells } from '../lib/content/layouts';
@@ -590,5 +599,103 @@ describe('section height', () => {
     const parsed = parsePage(page);
     expect(parsed.ok).toBe(true);
     if (parsed.ok) expect(parsed.page.sections[0].paddingY).toBe(64);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+describe('box styling, shared by sections and columns', () => {
+  it('is literally the same shape in both places', () => {
+    // Not a tautology. Andy asked for the same controls on sections and on
+    // columns, and the only durable way to guarantee that is one schema used
+    // twice. If someone forks them, this fails.
+    const page = createPage('T', 't');
+    const section = createSectionFromLayout(LAYOUTS[0]);
+
+    expect(Object.keys(section.box).sort())
+      .toEqual(Object.keys(section.rows[0].columns[0].box).sort());
+
+    // And a freshly created page's sections carry it too, so a new section is
+    // stylable the moment it exists rather than after its first save.
+    for (const created of page.sections) {
+      expect(Object.keys(created.box).sort()).toEqual(Object.keys(section.box).sort());
+    }
+  });
+
+  it.each([
+    ['#fff', '#fff'],
+    ['#1B2B5B', '#1b2b5b'],
+    ['#11223344', '#11223344'],
+    ['rgb(1,2,3)', 'rgb(1,2,3)'],
+    ['rgba(1, 2, 3, 0.5)', 'rgba(1, 2, 3, 0.5)'],
+    ['transparent', 'transparent'],
+  ])('accepts the colour %s', (input, expected) => {
+    expect(safeColour(input)).toBe(expected);
+  });
+
+  it.each([
+    ['a url', 'url(https://evil.example/x.png)'],
+    ['an escape out of the declaration', '#fff; background: url(x)'],
+    ['a css expression', 'expression(alert(1))'],
+    ['a var reference', 'var(--anything)'],
+    ['a colour name', 'rebeccapurple'],
+    ['empty', ''],
+    ['a number', 123],
+  ])('refuses %s', (_label, input) => {
+    // The value goes straight into a CSS custom property the renderer emits,
+    // so this is a whitelist and not a tidy-up.
+    expect(safeColour(input)).toBeUndefined();
+  });
+
+  it.each([
+    ['a negative', -20, 0],
+    ['past the ceiling', 9999, MAX_PADDING],
+    ['a fraction', 12.6, 13],
+    ['a numeric string', '24', 24],
+    ['nonsense', 'wide', 0],
+    ['NaN', Number.NaN, 0],
+  ])('clamps padding %s', (_label, input, expected) => {
+    expect(px(input, MAX_PADDING)).toBe(expected);
+  });
+
+  it('translates the old named column gaps', () => {
+    for (const [name, pixels] of Object.entries(LEGACY_GAP)) {
+      expect(normaliseGap(name), name).toBe(pixels);
+    }
+    expect(normaliseGap(undefined)).toBe(DEFAULT_GAP);
+    expect(normaliseGap(9999)).toBe(MAX_GAP);
+  });
+
+  it('a page written before any of this existed still parses', () => {
+    // No box, no minHeight, gap and paddingY both still named sizes.
+    const legacy = {
+      version: 1, id: 'p', title: 'Old', slug: '', seo: {},
+      sections: [{
+        id: 's', tone: 'light', width: 'contained', paddingY: 'xl',
+        rows: [{
+          id: 'r', gap: 'l', stackBelow: 'tablet',
+          columns: [{ id: 'c', width: 100, align: 'top', blocks: [] }],
+        }],
+      }],
+    };
+
+    const parsed = parsePage(legacy);
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+
+    const section = parsed.page.sections[0];
+    expect(section.paddingY).toBe(64);
+    expect(section.minHeight).toBe(0);
+    expect(section.box).toEqual(EMPTY_BOX);
+    expect(section.rows[0].gap).toBe(32);
+    expect(section.rows[0].columns[0].box).toEqual(EMPTY_BOX);
+  });
+
+  it('knows when a box would draw nothing', () => {
+    expect(boxIsEmpty(EMPTY_BOX)).toBe(true);
+    expect(boxIsEmpty({ ...EMPTY_BOX, radius: 8 })).toBe(false);
+    expect(boxIsEmpty({ ...EMPTY_BOX, background: '#fff' })).toBe(false);
+    expect(boxIsEmpty({ ...EMPTY_BOX, padding: { top: 4, right: 0, bottom: 0, left: 0 } }))
+      .toBe(false);
   });
 });

@@ -99,6 +99,118 @@ export function normaliseSectionPadding(value: unknown): number {
   return Math.min(MAX_SECTION_PADDING, Math.max(MIN_SECTION_PADDING, snapped));
 }
 
+/** What the old named gaps meant, so stored rows keep their spacing. */
+export const LEGACY_GAP: Readonly<Record<string, number>> = {
+  none: 0,
+  xs: 4,
+  s: 8,
+  m: 16,
+  l: 32,
+  xl: 64,
+};
+
+export const MAX_GAP = 96;
+export const DEFAULT_GAP = 16;
+
+/** Any input, coerced to a legal column gap. Never throws. */
+export function normaliseGap(value: unknown): number {
+  const raw = typeof value === 'string' ? LEGACY_GAP[value] : value;
+  const n = typeof raw === 'number' && Number.isFinite(raw) ? raw : DEFAULT_GAP;
+  return Math.min(MAX_GAP, Math.max(0, Math.round(n)));
+}
+
+// ---------------------------------------------------------------------------
+// Box style: padding, background, corners, border, shadow
+// ---------------------------------------------------------------------------
+
+/**
+ * ONE SHAPE, USED BY BOTH SECTIONS AND COLUMNS.
+ *
+ * Andy asked for the same spacing and style controls on sections and on
+ * columns. Writing that twice would guarantee they drift, so it is written
+ * once and embedded in both. The properties pane renders the same component
+ * for either, and the renderer emits the same custom properties, so a control
+ * added here appears in both places by construction.
+ *
+ * Pixels, not percentages. Percentage padding in CSS resolves against the
+ * container's WIDTH even for top and bottom, so "10%" on a wide section is a
+ * huge vertical gap and on a narrow one is nothing. That surprise is not
+ * worth the flexibility. The unit shows in the UI so the fixed choice is
+ * visible rather than hidden.
+ */
+export const MAX_PADDING = 240;
+export const MAX_RADIUS = 64;
+export const MAX_BORDER = 16;
+export const MAX_MIN_HEIGHT = 1200;
+
+/** A length in pixels, clamped and rounded. Never throws, never NaN. */
+export function px(value: unknown, max: number, fallback = 0): number {
+  const n = typeof value === 'number' && Number.isFinite(value) ? value : Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(max, Math.max(0, Math.round(n)));
+}
+
+export const PaddingSchema = z.object({
+  top: z.unknown().transform((v) => px(v, MAX_PADDING)),
+  right: z.unknown().transform((v) => px(v, MAX_PADDING)),
+  bottom: z.unknown().transform((v) => px(v, MAX_PADDING)),
+  left: z.unknown().transform((v) => px(v, MAX_PADDING)),
+});
+
+export type Padding = z.infer<typeof PaddingSchema>;
+
+export const Shadow = z.enum(['none', 'soft', 'medium', 'strong']);
+export type Shadow = z.infer<typeof Shadow>;
+
+/**
+ * A colour, or nothing.
+ *
+ * Whitelisted rather than free text, because this string goes into a CSS
+ * custom property that the renderer emits. Hex, rgb/rgba and the theme token
+ * names only, so nothing can smuggle a url() or a closing brace through it.
+ */
+export function safeColour(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  const colour = value.trim().toLowerCase();
+  if (!colour) return undefined;
+
+  if (/^#[0-9a-f]{3}$|^#[0-9a-f]{4}$|^#[0-9a-f]{6}$|^#[0-9a-f]{8}$/.test(colour)) return colour;
+  if (/^rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(,\s*(0|1|0?\.\d+)\s*)?\)$/.test(colour)) {
+    return colour;
+  }
+  if (/^(transparent|inherit|currentcolor)$/.test(colour)) return colour;
+
+  return undefined;
+}
+
+export const BoxSchema = z.object({
+  padding: PaddingSchema.default({ top: 0, right: 0, bottom: 0, left: 0 }),
+  /** Overrides the tone's background when set. */
+  background: z.unknown().transform(safeColour).optional(),
+  radius: z.unknown().transform((v) => px(v, MAX_RADIUS)),
+  borderWidth: z.unknown().transform((v) => px(v, MAX_BORDER)),
+  borderColour: z.unknown().transform(safeColour).optional(),
+  shadow: Shadow.catch('none').default('none'),
+});
+
+export type Box = z.infer<typeof BoxSchema>;
+
+export const EMPTY_BOX: Box = {
+  padding: { top: 0, right: 0, bottom: 0, left: 0 },
+  radius: 0,
+  borderWidth: 0,
+  shadow: 'none',
+};
+
+/** True when a box would render nothing, so the UI can say "not set". */
+export function boxIsEmpty(box: Box): boolean {
+  const { padding: p } = box;
+  return (
+    p.top === 0 && p.right === 0 && p.bottom === 0 && p.left === 0 &&
+    !box.background && box.radius === 0 && box.borderWidth === 0 && box.shadow === 'none'
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Shared enums
 // ---------------------------------------------------------------------------
@@ -156,6 +268,8 @@ export const ColumnSchema = z.object({
   /** Percentage of the row. Normalised so a row's columns sum to 100. */
   width: z.number().min(MIN_COLUMN_WIDTH).max(100),
   align: VerticalAlign.default('top'),
+  /** The same shape a section has. See BoxSchema. */
+  box: BoxSchema.default(EMPTY_BOX),
   blocks: z.array(BlockSchema).default([]),
 });
 
@@ -169,7 +283,14 @@ export const RowSchema = z
   .object({
     id: z.string().min(1),
     columns: z.array(ColumnSchema).min(1).max(MAX_COLUMNS_PER_ROW),
-    gap: Spacing.default('m'),
+  /**
+   * Space between columns, in pixels.
+   *
+   * A number rather than one of six names, for the same reason section height
+   * is: it is a thing people want to nudge. LEGACY_GAP translates what the
+   * field used to hold.
+   */
+  gap: z.unknown().transform(normaliseGap),
     stackBelow: StackBelow.default('mobile'),
     /** Reverse the visual order once stacked, so an image can lead on mobile. */
     reverseOnStack: z.boolean().default(false),
@@ -193,8 +314,20 @@ export const SectionSchema = z.object({
   name: z.string().max(80).optional(),
   tone: Tone.default('light'),
   width: SectionWidth.default('contained'),
-  /** Pixels above and below. See normaliseSectionPadding. */
+  /**
+   * Pixels above and below.
+   *
+   * Kept alongside box.padding rather than folded into it. This is what the
+   * foot handle drags and what the presets set, and it is how a section's
+   * rhythm is normally expressed. box.padding is the fine control for when a
+   * section needs something the presets cannot say. The renderer adds the
+   * two, so neither silently wins.
+   */
   paddingY: z.unknown().transform(normaliseSectionPadding),
+  /** Floor on the section's height, so a short section can still be tall. */
+  minHeight: z.unknown().transform((v) => px(v, MAX_MIN_HEIGHT)),
+  /** The same shape a column has. See BoxSchema. */
+  box: BoxSchema.default(EMPTY_BOX),
   /** Media id or absolute URL. Rendered behind the content with a scrim. */
   backgroundImage: z.string().max(2048).optional(),
   rows: z.array(RowSchema).default([]),
