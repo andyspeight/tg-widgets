@@ -64,6 +64,21 @@ ok(isActionableError({ event: 'error', widget: 'offers', widgetId: 'tgw_d', mess
 ok(isActionableError({ event: 'error', widget: 'mybooking', widgetId: 'tgw_e', message: 'order lookup failed', detail: 'HTTP 404' }) === true,
   'a 404 that is NOT a config load still alerts (only widget-config 404 is a stale embed)');
 
+// ── A config-load NETWORK error is a navigate-away / transient blip, not a fault ─
+// (29 Jul 2026) yourticketgenie's healthy homepage widget (296 clean config
+// loads) fired one "config load failed / Failed to fetch" — a visitor navigating
+// away as the page fetched, before visibilityState flipped to hidden.
+ok(isActionableError({ event: 'error', widget: 'offers', widgetId: 'tgw_1783436471386_hv9ltx', message: 'config load failed', detail: 'Failed to fetch' }) === false,
+  'config load + "Failed to fetch" (navigate-away) is NOT alerted');
+ok(isActionableError({ event: 'error', widget: 'offers', widgetId: 'tgw_f', message: 'config load failed', detail: 'Load failed' }) === false,
+  'config load + Safari "Load failed" is NOT alerted');
+ok(isActionableError({ event: 'error', widget: 'enquiry', widgetId: 'tgw_g', message: 'config load failed', detail: 'The user aborted a request.' }) === false,
+  'config load + abort is NOT alerted');
+// Scope: only CONFIG network errors are suppressed. A live-data reachability
+// beacon (no "config") still alerts, so a real outage is not hidden.
+ok(isActionableError({ event: 'error', widget: 'offers', widgetId: 'tgw_h', message: 'offers unreachable', detail: 'Failed to fetch' }) === true,
+  'a non-config "Failed to fetch" (offers data) still alerts');
+
 // ── Loads and junk are never alertable ──────────────────────────────────────
 ok(isActionableError({ event: 'load', widget: 'consent', widgetId: 'tgw_9', message: '' }) === false,
   'a load heartbeat is never an alert, however well populated');
