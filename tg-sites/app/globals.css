@@ -1,0 +1,454 @@
+/**
+ * Travelgenix Sites — tokens and the rendered page.
+ *
+ * Two layers live in this file and they must not bleed into each other:
+ *
+ *   1. TOKENS plus .tgs-* rules. This is the rendered client page. Every
+ *      value comes from a custom property so a tenant theme can replace the
+ *      lot. No component anywhere hardcodes a colour.
+ *   2. .ed-* rules. The editor chrome. Never shipped to a client site.
+ *
+ * Spacing is a 4px grid. Type is a scale, not arbitrary sizes. Body text
+ * never drops below 15px.
+ */
+
+/* ------------------------------------------------------------------ */
+/* Tokens                                                              */
+/* ------------------------------------------------------------------ */
+
+:root {
+  /* Colour. Overridden per tenant from the theme JSON. */
+  --tgs-primary: #1b2b5b;
+  --tgs-primary-light: #2a3f7a;
+  --tgs-accent: #00b4d8;
+  --tgs-surface: #ffffff;
+  --tgs-surface-alt: #f8fafc;
+  --tgs-surface-dark: #0f172a;
+  --tgs-text: #0f172a;
+  --tgs-text-muted: #475569;
+  --tgs-text-invert: #f8fafc;
+  --tgs-border: #e2e8f0;
+  --tgs-border-strong: #cbd5e1;
+
+  /* Spacing, 4px grid. */
+  --tgs-space-xs: 4px;
+  --tgs-space-s: 8px;
+  --tgs-space-m: 16px;
+  --tgs-space-l: 32px;
+  --tgs-space-xl: 64px;
+
+  /* Type scale. */
+  --tgs-font-body: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --tgs-font-display: var(--tgs-font-body);
+  --tgs-text-s: 0.9375rem;   /* 15px, the floor */
+  --tgs-text-m: 1.0625rem;   /* 17px */
+  --tgs-text-l: 1.25rem;     /* 20px */
+  --tgs-h-s: 1.375rem;
+  --tgs-h-m: 1.75rem;
+  --tgs-h-l: 2.25rem;
+  --tgs-h-xl: 3rem;
+  --tgs-leading-tight: 1.2;
+  --tgs-leading-body: 1.6;
+
+  /* Shape. */
+  --tgs-radius-sm: 4px;
+  --tgs-radius-md: 10px;
+  --tgs-radius-lg: 20px;
+  --tgs-shadow-soft: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.08);
+
+  /* Layout. */
+  --tgs-width-narrow: 680px;
+  --tgs-width-contained: 1100px;
+  --tgs-width-wide: 1400px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Page shell                                                          */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The page is the query container. That is what lets the editor's viewport
+ * switcher restack rows for real by resizing this element, with no iframe
+ * and no separate mobile preview mode. A published page gets the same
+ * behaviour because the container is the full viewport width.
+ */
+.tgs-page {
+  container-type: inline-size;
+  container-name: tgs-page;
+  font-family: var(--tgs-font-body);
+  font-size: var(--tgs-text-m);
+  line-height: var(--tgs-leading-body);
+  color: var(--tgs-text);
+  background: var(--tgs-surface);
+  /* A rendered page must never scroll sideways. Non-negotiable. */
+  overflow-x: hidden;
+}
+
+.tgs-page *,
+.tgs-page *::before,
+.tgs-page *::after {
+  box-sizing: border-box;
+}
+
+/* ------------------------------------------------------------------ */
+/* Sections                                                            */
+/* ------------------------------------------------------------------ */
+
+.tgs-section {
+  position: relative;
+  background: var(--tgs-surface);
+  color: var(--tgs-text);
+}
+
+.tgs-section[data-tone='subtle'] { background: var(--tgs-surface-alt); }
+.tgs-section[data-tone='dark'] {
+  background: var(--tgs-surface-dark);
+  color: var(--tgs-text-invert);
+  --tgs-text: var(--tgs-text-invert);
+  --tgs-text-muted: #94a3b8;
+  --tgs-border: #1e293b;
+}
+.tgs-section[data-tone='accent'] {
+  background: var(--tgs-primary);
+  color: var(--tgs-text-invert);
+  --tgs-text: var(--tgs-text-invert);
+  --tgs-text-muted: #c7d2e5;
+  --tgs-border: var(--tgs-primary-light);
+}
+
+.tgs-section[data-pad='none'] { padding-block: 0; }
+.tgs-section[data-pad='xs']   { padding-block: var(--tgs-space-s); }
+.tgs-section[data-pad='s']    { padding-block: var(--tgs-space-m); }
+.tgs-section[data-pad='m']    { padding-block: var(--tgs-space-l); }
+.tgs-section[data-pad='l']    { padding-block: calc(var(--tgs-space-l) * 1.5); }
+.tgs-section[data-pad='xl']   { padding-block: var(--tgs-space-xl); }
+
+.tgs-section__bg {
+  position: absolute;
+  inset: 0;
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+/* A scrim so text over a photo still clears 4.5:1. */
+.tgs-section__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.55), rgba(15, 23, 42, 0.65));
+  z-index: 1;
+}
+
+.tgs-section__inner {
+  position: relative;
+  z-index: 2;
+  margin-inline: auto;
+  padding-inline: var(--tgs-space-m);
+  width: 100%;
+}
+
+.tgs-section[data-width='narrow']    .tgs-section__inner { max-width: var(--tgs-width-narrow); }
+.tgs-section[data-width='contained'] .tgs-section__inner { max-width: var(--tgs-width-contained); }
+.tgs-section[data-width='wide']      .tgs-section__inner { max-width: var(--tgs-width-wide); }
+.tgs-section[data-width='full']      .tgs-section__inner { max-width: none; padding-inline: 0; }
+
+/* ------------------------------------------------------------------ */
+/* Rows and columns                                                    */
+/* ------------------------------------------------------------------ */
+
+/*
+ * --tgs-cols carries the client's dragged widths, for example "37% 63%".
+ * It is the ONLY layout number in the system and it only ever applies above
+ * the stacking breakpoint. Below it, one column, always. That is what makes
+ * free widths safe: a client can make a desktop column as narrow as they
+ * like and the phone view still reads.
+ */
+.tgs-row {
+  display: grid;
+  grid-template-columns: var(--tgs-cols, 1fr);
+  align-items: start;
+}
+
+.tgs-row[data-gap='none'] { gap: 0; }
+.tgs-row[data-gap='xs']   { gap: var(--tgs-space-xs); }
+.tgs-row[data-gap='s']    { gap: var(--tgs-space-s); }
+.tgs-row[data-gap='m']    { gap: var(--tgs-space-m); }
+.tgs-row[data-gap='l']    { gap: var(--tgs-space-l); }
+.tgs-row[data-gap='xl']   { gap: var(--tgs-space-xl); }
+
+.tgs-row + .tgs-row { margin-top: var(--tgs-space-l); }
+
+.tgs-col { min-width: 0; } /* stops a long word forcing the grid wider */
+.tgs-col[data-align='centre'] { align-self: center; }
+.tgs-col[data-align='bottom'] { align-self: end; }
+
+@container tgs-page (max-width: 1023px) {
+  .tgs-row[data-stack='tablet'] { grid-template-columns: 1fr; }
+  .tgs-row[data-stack='tablet'][data-reverse='true'] { direction: rtl; }
+  .tgs-row[data-stack='tablet'][data-reverse='true'] > * { direction: ltr; }
+}
+
+@container tgs-page (max-width: 767px) {
+  .tgs-row { grid-template-columns: 1fr; }
+  .tgs-row[data-reverse='true'] { display: flex; flex-direction: column-reverse; }
+  .tgs-section__inner { padding-inline: var(--tgs-space-m); }
+  :root { --tgs-h-xl: 2.25rem; --tgs-h-l: 1.875rem; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Blocks                                                              */
+/* ------------------------------------------------------------------ */
+
+.tgs-block + .tgs-block { margin-top: var(--tgs-space-m); }
+.tgs-block[data-align='centre'] { text-align: center; }
+.tgs-block[data-align='right']  { text-align: right; }
+
+/* Heading */
+.tgs-heading {
+  font-family: var(--tgs-font-display);
+  line-height: var(--tgs-leading-tight);
+  letter-spacing: -0.015em;
+  margin: 0;
+  text-wrap: balance;
+}
+.tgs-heading[data-size='s']  { font-size: var(--tgs-h-s); }
+.tgs-heading[data-size='m']  { font-size: var(--tgs-h-m); }
+.tgs-heading[data-size='l']  { font-size: var(--tgs-h-l); }
+.tgs-heading[data-size='xl'] { font-size: var(--tgs-h-xl); }
+
+/* Rich text */
+.tgs-text { max-width: 75ch; }
+.tgs-block[data-align='centre'] .tgs-text { margin-inline: auto; }
+.tgs-block[data-align='right']  .tgs-text { margin-inline: 0 0 0 auto; }
+.tgs-text[data-size='s'] { font-size: var(--tgs-text-s); }
+.tgs-text[data-size='l'] { font-size: var(--tgs-text-l); }
+.tgs-text > :first-child { margin-top: 0; }
+.tgs-text > :last-child  { margin-bottom: 0; }
+.tgs-text p { margin: 0 0 var(--tgs-space-m); }
+.tgs-text a { color: var(--tgs-primary); text-underline-offset: 2px; }
+.tgs-section[data-tone='dark'] .tgs-text a,
+.tgs-section[data-tone='accent'] .tgs-text a { color: var(--tgs-accent); }
+.tgs-text ul, .tgs-text ol { margin: 0 0 var(--tgs-space-m); padding-left: 1.25em; }
+.tgs-text li { margin-bottom: var(--tgs-space-xs); }
+.tgs-text h2, .tgs-text h3, .tgs-text h4 {
+  font-family: var(--tgs-font-display);
+  line-height: var(--tgs-leading-tight);
+  margin: var(--tgs-space-l) 0 var(--tgs-space-s);
+}
+.tgs-text blockquote {
+  margin: var(--tgs-space-m) 0;
+  padding-left: var(--tgs-space-m);
+  border-left: 3px solid var(--tgs-accent);
+  color: var(--tgs-text-muted);
+}
+.tgs-text code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em;
+  background: var(--tgs-surface-alt);
+  padding: 0.1em 0.35em;
+  border-radius: var(--tgs-radius-sm);
+}
+
+/* Image */
+.tgs-image figure { margin: 0; }
+.tgs-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+}
+.tgs-image__frame { overflow: hidden; background: var(--tgs-surface-alt); }
+.tgs-image__frame[data-radius='none'] { border-radius: 0; }
+.tgs-image__frame[data-radius='sm']   { border-radius: var(--tgs-radius-sm); }
+.tgs-image__frame[data-radius='md']   { border-radius: var(--tgs-radius-md); }
+.tgs-image__frame[data-radius='lg']   { border-radius: var(--tgs-radius-lg); }
+.tgs-image__frame[data-radius='full'] { border-radius: 999px; }
+.tgs-image figcaption {
+  margin-top: var(--tgs-space-s);
+  font-size: var(--tgs-text-s);
+  color: var(--tgs-text-muted);
+}
+
+/* Placeholder shown when a media block has no source yet. */
+.tgs-placeholder {
+  display: grid;
+  place-items: center;
+  min-height: 160px;
+  border: 1px dashed var(--tgs-border-strong);
+  border-radius: var(--tgs-radius-md);
+  background: var(--tgs-surface-alt);
+  color: var(--tgs-text-muted);
+  font-size: var(--tgs-text-s);
+  text-align: center;
+  padding: var(--tgs-space-m);
+}
+
+/* Video */
+.tgs-video__frame { overflow: hidden; background: #000; position: relative; }
+.tgs-video__frame[data-radius='none'] { border-radius: 0; }
+.tgs-video__frame[data-radius='sm']   { border-radius: var(--tgs-radius-sm); }
+.tgs-video__frame[data-radius='md']   { border-radius: var(--tgs-radius-md); }
+.tgs-video__frame[data-radius='lg']   { border-radius: var(--tgs-radius-lg); }
+.tgs-video__frame iframe,
+.tgs-video__frame video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Buttons */
+.tgs-buttons { display: flex; flex-wrap: wrap; gap: var(--tgs-space-s); }
+.tgs-block[data-align='centre'] .tgs-buttons { justify-content: center; }
+.tgs-block[data-align='right']  .tgs-buttons { justify-content: flex-end; }
+
+.tgs-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* 44px minimum touch target. */
+  min-height: 44px;
+  padding: var(--tgs-space-s) var(--tgs-space-l);
+  border-radius: var(--tgs-radius-md);
+  border: 1px solid transparent;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.tgs-button[data-size='s'] { min-height: 44px; padding-inline: var(--tgs-space-m); font-size: var(--tgs-text-s); }
+.tgs-button[data-size='l'] { min-height: 52px; padding-inline: calc(var(--tgs-space-l) * 1.25); font-size: var(--tgs-text-l); }
+
+.tgs-button[data-variant='primary'] { background: var(--tgs-primary); color: #fff; }
+.tgs-button[data-variant='primary']:hover { background: var(--tgs-primary-light); }
+.tgs-button[data-variant='secondary'] { background: transparent; color: var(--tgs-text); border-color: var(--tgs-border-strong); }
+.tgs-button[data-variant='secondary']:hover { border-color: var(--tgs-text); }
+.tgs-button[data-variant='ghost'] { background: transparent; color: var(--tgs-primary); padding-inline: var(--tgs-space-s); }
+.tgs-button[data-variant='ghost']:hover { text-decoration: underline; }
+.tgs-section[data-tone='dark'] .tgs-button[data-variant='ghost'],
+.tgs-section[data-tone='accent'] .tgs-button[data-variant='ghost'] { color: var(--tgs-accent); }
+.tgs-section[data-tone='accent'] .tgs-button[data-variant='primary'] { background: #fff; color: var(--tgs-primary); }
+
+/* Quote */
+.tgs-quote { margin: 0; }
+.tgs-quote__text {
+  font-size: var(--tgs-h-s);
+  line-height: 1.4;
+  margin: 0;
+  text-wrap: pretty;
+}
+.tgs-quote__by {
+  margin-top: var(--tgs-space-m);
+  font-size: var(--tgs-text-s);
+  color: var(--tgs-text-muted);
+  font-style: normal;
+}
+.tgs-quote__by strong { color: var(--tgs-text); font-weight: 600; }
+
+/* List */
+.tgs-list { margin: 0; padding-left: 1.25em; }
+.tgs-list li { margin-bottom: var(--tgs-space-s); }
+.tgs-list[data-style='tick'] { list-style: none; padding-left: 0; }
+.tgs-list[data-style='tick'] li { position: relative; padding-left: 1.75em; }
+.tgs-list[data-style='tick'] li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--tgs-accent);
+  font-weight: 700;
+}
+
+/* Icon item */
+.tgs-icon-item { display: flex; gap: var(--tgs-space-m); align-items: flex-start; }
+.tgs-icon-item__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--tgs-radius-md);
+  background: var(--tgs-surface-alt);
+  color: var(--tgs-primary);
+  font-size: var(--tgs-text-l);
+}
+.tgs-section[data-tone='dark'] .tgs-icon-item__icon,
+.tgs-section[data-tone='accent'] .tgs-icon-item__icon {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--tgs-accent);
+}
+.tgs-icon-item__title { margin: 0 0 var(--tgs-space-xs); font-size: var(--tgs-text-l); font-weight: 600; }
+.tgs-icon-item__body { margin: 0; color: var(--tgs-text-muted); }
+
+/* Gallery */
+.tgs-gallery { display: grid; }
+.tgs-gallery[data-columns='2'] { grid-template-columns: repeat(2, 1fr); }
+.tgs-gallery[data-columns='3'] { grid-template-columns: repeat(3, 1fr); }
+.tgs-gallery[data-columns='4'] { grid-template-columns: repeat(4, 1fr); }
+.tgs-gallery[data-gap='none'] { gap: 0; }
+.tgs-gallery[data-gap='xs']   { gap: var(--tgs-space-xs); }
+.tgs-gallery[data-gap='s']    { gap: var(--tgs-space-s); }
+.tgs-gallery[data-gap='m']    { gap: var(--tgs-space-m); }
+.tgs-gallery[data-gap='l']    { gap: var(--tgs-space-l); }
+.tgs-gallery[data-gap='xl']   { gap: var(--tgs-space-xl); }
+.tgs-gallery img { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; }
+
+@container tgs-page (max-width: 767px) {
+  .tgs-gallery[data-columns='3'],
+  .tgs-gallery[data-columns='4'] { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Divider and spacer */
+.tgs-divider { border: 0; border-top: 1px solid var(--tgs-border); }
+.tgs-divider[data-style='dashed'] { border-top-style: dashed; }
+.tgs-divider[data-style='dots']   { border-top-style: dotted; border-top-width: 3px; }
+.tgs-divider[data-spacing='none'] { margin-block: 0; }
+.tgs-divider[data-spacing='xs']   { margin-block: var(--tgs-space-xs); }
+.tgs-divider[data-spacing='s']    { margin-block: var(--tgs-space-s); }
+.tgs-divider[data-spacing='m']    { margin-block: var(--tgs-space-m); }
+.tgs-divider[data-spacing='l']    { margin-block: var(--tgs-space-l); }
+.tgs-divider[data-spacing='xl']   { margin-block: var(--tgs-space-xl); }
+
+.tgs-spacer[data-height='xs'] { height: var(--tgs-space-xs); }
+.tgs-spacer[data-height='s']  { height: var(--tgs-space-s); }
+.tgs-spacer[data-height='m']  { height: var(--tgs-space-m); }
+.tgs-spacer[data-height='l']  { height: var(--tgs-space-l); }
+.tgs-spacer[data-height='xl'] { height: var(--tgs-space-xl); }
+
+/* Embed */
+.tgs-embed iframe { max-width: 100%; }
+
+/* ------------------------------------------------------------------ */
+/* Accessibility                                                       */
+/* ------------------------------------------------------------------ */
+
+.tgs-page a:focus-visible,
+.tgs-page button:focus-visible {
+  outline: 3px solid var(--tgs-accent);
+  outline-offset: 2px;
+  border-radius: var(--tgs-radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tgs-page *,
+  .tgs-page *::before,
+  .tgs-page *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.tgs-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
