@@ -215,18 +215,29 @@
   color: var(--ed-muted);
 }
 .ed-node__label {
-  flex: 1;
+  flex: 1 1 auto;
+  /* Without a floor the tools squeeze the label to nothing on a deep node,
+     so a selected block shows a row of icons and no name. */
+  min-width: 56px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.ed-node__tools { display: none; gap: 2px; flex: none; }
+.ed-node__tools { display: none; gap: 1px; flex: none; }
 .ed-node:hover .ed-node__tools,
 .ed-node[aria-current='true'] .ed-node__tools { display: flex; }
 
-.ed-depth-1 { padding-left: 14px; }
-.ed-depth-2 { padding-left: 28px; }
-.ed-depth-3 { padding-left: 42px; }
+/* Compact inside the tree, where four of them share the row with a label. */
+.ed-node__tools .ed-btn-icon {
+  min-height: 22px;
+  min-width: 22px;
+  padding: 0 3px;
+  font-size: 11px;
+}
+
+.ed-depth-1 { padding-left: 12px; }
+.ed-depth-2 { padding-left: 22px; }
+.ed-depth-3 { padding-left: 32px; }
 
 .ed-node[draggable='true'] { cursor: grab; }
 .ed-node.is-dragover { border-color: var(--ed-accent); background: #ecfeff; }
