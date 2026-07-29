@@ -3,12 +3,12 @@
 The CMS shell for the Travelgenix website builder. Content model, block
 library, server-side renderer and a working three-pane editor.
 
-Not deployed anywhere. It lives inside the `tg-widgets` repo for now so the
-work is committed and reviewable, and it is self-contained so it can be
-lifted into `andyspeight/tg-sites` whenever that repo exists. Nothing here
-imports from the widget suite and nothing in the widget suite imports from
-here. The root `.vercelignore` keeps this directory out of the widgets
-deployment.
+It lives inside the `tg-widgets` repo for now so the work is committed and
+reviewable, and it is self-contained so it can be lifted into
+`andyspeight/tg-sites` whenever that repo exists. Nothing here imports from
+the widget suite and nothing in the widget suite imports from here. It
+deploys as its own Vercel project rooted at `tg-sites`, separately from the
+widgets deployment.
 
 ## Running it
 
@@ -130,9 +130,21 @@ Before real client content ships it should be swapped for DOMPurify under
 jsdom on the server. Its interface is deliberately narrow so that is a
 one-file change, and the embed block stays staff-only until then.
 
+## The database
+
+Postgres 17 on Supabase. Schema, roles and row level security are in `db/`,
+with the reasoning and the password setup step in `db/README.md`.
+
+The short version: one database holds every client's site, every table
+carries `tenant_id`, RLS is enabled and forced on all of them, and every
+policy keys off a transaction-local setting. With no tenant set that setting
+is NULL, so a query that forgets to scope itself returns nothing rather than
+everything. `db/isolation-check.sql` tries seventeen ways to break that and
+expects to fail at all of them.
+
 ## What is deliberately not here
 
-No database, no auth, no tenants, no media library, no publishing, no
-sections library, no widget bridge. Those are the WP1 foundations and they
-land next. The draft lives in localStorage and `commit()` in `EditorShell`
-already has the shape a server action will want.
+No auth, no media library, no publishing, no sections library, no widget
+bridge. The draft still lives in localStorage: the database exists but the
+editor does not talk to it yet. `commit()` in `EditorShell` already has the
+shape a server action will want.
