@@ -4,6 +4,10 @@
  *
  * Written as a plain object rather than through the factories so it is
  * readable as an example of the content model, which is half its job.
+ *
+ * Deliberately no section `name` values. Naming them "Hero" and "CTA" would
+ * be our jargon in their outline, and leaving them blank shows off the thing
+ * that replaces it: a section takes its name from its own first heading.
  */
 
 import type { Page } from './schema';
@@ -21,7 +25,6 @@ export const SEED_PAGE: Page = {
   sections: [
     {
       id: 'sec_hero',
-      name: 'Hero',
       tone: 'dark',
       width: 'contained',
       paddingY: 'xl',
@@ -95,7 +98,6 @@ export const SEED_PAGE: Page = {
     },
     {
       id: 'sec_why',
-      name: 'Why us',
       tone: 'light',
       width: 'contained',
       paddingY: 'xl',
@@ -180,7 +182,6 @@ export const SEED_PAGE: Page = {
     },
     {
       id: 'sec_cta',
-      name: 'Closing call to action',
       tone: 'accent',
       width: 'narrow',
       paddingY: 'xl',

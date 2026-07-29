@@ -9,6 +9,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { blocksByGroup } from '../../lib/content/blocks';
+import { Icon } from './Icon';
 
 export function BlockPicker({
   isStaff,
@@ -61,8 +62,8 @@ export function BlockPicker({
       <div className="ed-modal" role="dialog" aria-modal="true" aria-label="Add a block" ref={dialogRef}>
         <div className="ed-modal-head">
           <span>Add a block</span>
-          <button type="button" className="ed-btn ed-btn-icon" onClick={onClose} aria-label="Close">
-            ✕
+          <button type="button" className="ed-btn" data-variant="ghost" data-icon="true" onClick={onClose} aria-label="Close">
+            <Icon name="close" size={18} />
           </button>
         </div>
 
@@ -91,11 +92,13 @@ export function BlockPicker({
                     className="ed-block-card"
                     onClick={() => onPick(definition.type)}
                   >
-                    <span className="ed-block-card__icon" aria-hidden="true">
-                      {definition.icon}
+                    <span className="ed-block-card__icon">
+                      <Icon name={definition.icon} size={18} />
                     </span>
-                    <strong>{definition.label}</strong>
-                    <small>{definition.description}</small>
+                    <span>
+                      <strong>{definition.label}</strong>
+                      <small>{definition.description}</small>
+                    </span>
                   </button>
                 ))}
               </div>

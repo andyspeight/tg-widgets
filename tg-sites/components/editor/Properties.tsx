@@ -25,6 +25,8 @@ import {
   updateBlockProps,
 } from '../../lib/content/tree';
 import { FieldRenderer } from './Fields';
+import { Icon } from './Icon';
+import { columnWord, sectionNameAt } from '../../lib/content/naming';
 
 interface Props {
   page: Page;
@@ -39,15 +41,17 @@ export function Properties({ page, selected, isStaff, onCommit, onBack }: Props)
   return (
     <aside className="ed-props" aria-label="Properties">
       <div className="ed-panel-head">
-        <span>{selected ? headingFor(selected) : 'Properties'}</span>
+        <span className="ed-panel-title">{selected ? headingFor(selected, page) : 'Settings'}</span>
         <button
           type="button"
-          className="ed-btn ed-btn-icon"
+          className="ed-btn"
+          data-variant="ghost"
+          data-icon="true"
           onClick={onBack}
           aria-label="Back to the preview"
           title="Back to the preview"
         >
-          ←
+          <Icon name="chevron-right" size={18} style={{ transform: 'rotate(180deg)' }} />
         </button>
       </div>
 
@@ -87,18 +91,27 @@ export function Properties({ page, selected, isStaff, onCommit, onBack }: Props)
   );
 }
 
-function headingFor(path: Path): string {
+/**
+ * The header names the thing being edited in the agent's words. "BLOCK" told
+ * them nothing; "Heading" tells them exactly what they clicked.
+ */
+function headingFor(path: Path, page: Page): string {
   switch (path.kind) {
     case 'page':
       return 'Page settings';
     case 'section':
-      return `Section ${path.section + 1}`;
+      return sectionNameAt(page, path.section);
     case 'row':
-      return 'Row';
-    case 'column':
-      return `Column ${path.column + 1}`;
-    case 'block':
-      return 'Block';
+      return 'Layout';
+    case 'column': {
+      const count = page.sections[path.section]?.rows[path.row]?.columns.length ?? 1;
+      return columnWord(path.column, count);
+    }
+    case 'block': {
+      const block =
+        page.sections[path.section]?.rows[path.row]?.columns[path.column]?.blocks[path.block];
+      return blockDefinition(block?.type ?? '')?.label ?? 'Content';
+    }
   }
 }
 

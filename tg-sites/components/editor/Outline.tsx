@@ -3,27 +3,39 @@
 /**
  * The outline pane.
  *
- * A tree of sections, rows, columns and blocks. This is where structure is
- * changed: add, delete, duplicate and reorder. The canvas is for selecting
- * and for dragging column widths, nothing else.
+ * WHAT CHANGED AND WHY
+ * The first version drew the data model: Section, then Row, then Column,
+ * then Block, four levels deep, every node carrying percentages and four
+ * unlabelled icon buttons. Andy's verdict was that it would frighten a basic
+ * user, and he was right. A travel agent does not think in columns and they
+ * certainly do not think in 33.34%.
  *
- * Reordering works by drag AND by the up/down buttons, because a drag-only
- * tree is unusable with a keyboard and most of these clients are not mouse
- * enthusiasts.
+ * So this shows their PAGE instead of our schema:
+ *
+ *   - Sections are cards, collapsed by default. The default state of the
+ *     pane is now a short calm list of named parts of the page.
+ *   - A section names itself from its first heading when nobody has named
+ *     it, so the list reads "Greece, planned properly" not "Section 1".
+ *   - Rows are never named. More than one shows as a hairline, nothing else.
+ *   - Columns are not nodes. They are "Left" and "Right" group labels, and
+ *     only when there is more than one.
+ *   - Percentages are gone. Layout reads as "Two columns". The numbers live
+ *     in the properties pane and on the canvas handles, where they are being
+ *     deliberately adjusted rather than idly read.
+ *   - Four hover-only icon buttons became one labelled menu, which also
+ *     fixes the fact that hover does not exist on a tablet.
  */
 
-import { useState } from 'react';
-import type { Page } from '../../lib/content/schema';
+import { useEffect, useRef, useState } from 'react';
+import type { Page, Row } from '../../lib/content/schema';
 import { ROW_PRESETS, blockLabel, createRow, createSection } from '../../lib/content/factory';
 import {
   type Path,
   type Reid,
   addRow,
   duplicateBlock,
-  duplicateRow,
   duplicateSection,
   moveBlockWithinColumn,
-  moveRow,
   moveSection,
   pathKey,
   removeBlock,
@@ -31,6 +43,15 @@ import {
   removeSection,
 } from '../../lib/content/tree';
 import { blockDefinition } from '../../lib/content/blocks';
+import {
+  TONE_WORDS,
+  columnWord,
+  contentCount,
+  layoutWords,
+  sectionName,
+} from '../../lib/content/naming';
+import { Icon } from './Icon';
+import { Menu } from './Menu';
 
 interface Props {
   page: Page;
@@ -43,14 +64,36 @@ interface Props {
 
 type DragItem =
   | { kind: 'section'; section: number }
-  | { kind: 'row'; section: number; row: number }
   | { kind: 'block'; section: number; row: number; column: number; block: number };
 
+// ---------------------------------------------------------------------------
+
 export function Outline({ page, selectedKey, onSelect, onCommit, onPickBlock, newId }: Props) {
+  const [open, setOpen] = useState<Set<string>>(() => new Set());
   const [drag, setDrag] = useState<DragItem | null>(null);
   const [over, setOver] = useState<string | null>(null);
+  const [adding, setAdding] = useState(false);
 
-  const isSelected = (path: Path) => selectedKey === pathKey(path);
+  /*
+   * Selecting something on the canvas has to reveal it here, otherwise the
+   * two panes disagree about what is being edited. Opening only ever adds,
+   * so this never closes a section the agent opened themselves.
+   */
+  useEffect(() => {
+    if (!selectedKey) return;
+    const match = selectedKey.match(/^s(\d+)/);
+    if (!match) return;
+    const id = page.sections[Number(match[1])]?.id;
+    if (!id) return;
+    setOpen((current) => (current.has(id) ? current : new Set(current).add(id)));
+  }, [selectedKey, page]);
+
+  const toggle = (id: string) =>
+    setOpen((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
 
   function handleDrop(target: DragItem) {
     const source = drag;
@@ -64,32 +107,14 @@ export function Outline({ page, selectedKey, onSelect, onCommit, onPickBlock, ne
       return;
     }
 
-    if (source.kind === 'row' && target.kind === 'row') {
-      // Moving a row between sections is a bigger operation than a reorder
-      // and is not wired up yet, so keep it inside its own section.
-      if (source.section !== target.section || source.row === target.row) return;
-      onCommit((current) => moveRow(current, source.section, source.row, target.row));
-      return;
-    }
-
     if (source.kind === 'block' && target.kind === 'block') {
-      if (
-        source.section !== target.section ||
-        source.row !== target.row ||
-        source.column !== target.column ||
-        source.block === target.block
-      ) {
-        return;
-      }
+      const sameColumn =
+        source.section === target.section &&
+        source.row === target.row &&
+        source.column === target.column;
+      if (!sameColumn || source.block === target.block) return;
       onCommit((current) =>
-        moveBlockWithinColumn(
-          current,
-          source.section,
-          source.row,
-          source.column,
-          source.block,
-          target.block,
-        ),
+        moveBlockWithinColumn(current, source.section, source.row, source.column, source.block, target.block),
       );
     }
   }
@@ -97,363 +122,354 @@ export function Outline({ page, selectedKey, onSelect, onCommit, onPickBlock, ne
   return (
     <aside className="ed-outline" aria-label="Page outline">
       <div className="ed-panel-head">
-        <span>Outline</span>
-        <span className="ed-kbd">{page.sections.length} sections</span>
+        <span className="ed-panel-title">Page</span>
+        <span className="ed-panel-sub">
+          {page.sections.length} section{page.sections.length === 1 ? '' : 's'}
+        </span>
       </div>
 
       <div className="ed-panel-body" style={{ flex: 1 }}>
-        <ul className="ed-tree">
+        <div className="ed-sections">
           {page.sections.map((section, sectionIndex) => {
-            const sectionPath: Path = { kind: 'section', section: sectionIndex };
+            const isOpen = open.has(section.id);
+            const selected = selectedKey === pathKey({ kind: 'section', section: sectionIndex });
             const dragKey = `sec:${sectionIndex}`;
+            const blocks = contentCount(section);
 
             return (
-              <li key={section.id}>
-                <button
-                  type="button"
-                  className={`ed-node${over === dragKey ? ' is-dragover' : ''}`}
-                  aria-current={isSelected(sectionPath)}
-                  draggable
-                  onDragStart={() => setDrag({ kind: 'section', section: sectionIndex })}
-                  onDragEnd={() => { setDrag(null); setOver(null); }}
-                  onDragOver={(event) => {
-                    if (drag?.kind !== 'section') return;
-                    event.preventDefault();
-                    setOver(dragKey);
-                  }}
-                  onDragLeave={() => setOver((k) => (k === dragKey ? null : k))}
-                  onDrop={(event) => {
-                    event.preventDefault();
-                    handleDrop({ kind: 'section', section: sectionIndex });
-                  }}
-                  onClick={() => onSelect(sectionPath)}
-                >
-                  <span className="ed-node__icon">▤</span>
-                  <span className="ed-node__label">
-                    {section.name || `Section ${sectionIndex + 1}`}
+              <div
+                key={section.id}
+                className={`ed-sec${over === dragKey ? ' is-dragover' : ''}`}
+                data-open={isOpen}
+                data-selected={selected}
+                onDragOver={(event) => {
+                  if (drag?.kind !== 'section') return;
+                  event.preventDefault();
+                  setOver(dragKey);
+                }}
+                onDragLeave={() => setOver((k) => (k === dragKey ? null : k))}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  handleDrop({ kind: 'section', section: sectionIndex });
+                }}
+              >
+                <div className="ed-sec-head">
+                  <button
+                    type="button"
+                    className="ed-sec-toggle"
+                    aria-expanded={isOpen}
+                    draggable
+                    onDragStart={() => setDrag({ kind: 'section', section: sectionIndex })}
+                    onDragEnd={() => { setDrag(null); setOver(null); }}
+                    onClick={() => {
+                      toggle(section.id);
+                      onSelect({ kind: 'section', section: sectionIndex });
+                    }}
+                  >
+                    <Icon name="chevron-right" size={16} className="ed-sec-chevron" />
+                    <span className="ed-sec-name">{sectionName(section, sectionIndex)}</span>
+                  </button>
+
+                  <Menu
+                    label={`Options for ${sectionName(section, sectionIndex)}`}
+                    items={[
+                      {
+                        icon: 'arrow-up',
+                        label: 'Move up',
+                        disabled: sectionIndex === 0,
+                        onClick: () => onCommit((c) => moveSection(c, sectionIndex, sectionIndex - 1)),
+                      },
+                      {
+                        icon: 'arrow-down',
+                        label: 'Move down',
+                        disabled: sectionIndex === page.sections.length - 1,
+                        onClick: () => onCommit((c) => moveSection(c, sectionIndex, sectionIndex + 1)),
+                      },
+                      {
+                        icon: 'copy',
+                        label: 'Duplicate',
+                        onClick: () => onCommit((c) => duplicateSection(c, sectionIndex, newId)),
+                      },
+                      { separator: true },
+                      {
+                        icon: 'trash',
+                        label: 'Delete section',
+                        danger: true,
+                        onClick: () => onCommit((c) => removeSection(c, sectionIndex)),
+                      },
+                    ]}
+                  />
+                </div>
+
+                <div className="ed-sec-meta">
+                  <span className="ed-chip">
+                    <span className="ed-chip__dot" data-tone={section.tone} />
+                    {TONE_WORDS[section.tone]}
                   </span>
-                  <span className="ed-node__tools">
-                    <Tool
-                      label="Move section up"
-                      disabled={sectionIndex === 0}
-                      onClick={() => onCommit((c) => moveSection(c, sectionIndex, sectionIndex - 1))}
-                    >
-                      ↑
-                    </Tool>
-                    <Tool
-                      label="Move section down"
-                      disabled={sectionIndex === page.sections.length - 1}
-                      onClick={() => onCommit((c) => moveSection(c, sectionIndex, sectionIndex + 1))}
-                    >
-                      ↓
-                    </Tool>
-                    <Tool
-                      label="Duplicate section"
-                      onClick={() => onCommit((c) => duplicateSection(c, sectionIndex, newId))}
-                    >
-                      ⧉
-                    </Tool>
-                    <Tool
-                      label="Delete section"
-                      danger
-                      onClick={() => onCommit((c) => removeSection(c, sectionIndex))}
-                    >
-                      ✕
-                    </Tool>
-                  </span>
-                </button>
+                  <span>{layoutWords(section)}</span>
+                  {!isOpen && (
+                    <span>
+                      · {blocks} item{blocks === 1 ? '' : 's'}
+                    </span>
+                  )}
+                </div>
 
-                <ul>
-                  {section.rows.map((row, rowIndex) => {
-                    const rowPath: Path = { kind: 'row', section: sectionIndex, row: rowIndex };
-                    const rowKey = `row:${sectionIndex}:${rowIndex}`;
+                {isOpen && (
+                  <div className="ed-sec-body">
+                    {section.rows.map((row, rowIndex) => (
+                      <Band
+                        key={row.id}
+                        row={row}
+                        sectionIndex={sectionIndex}
+                        rowIndex={rowIndex}
+                        canRemove={section.rows.length > 1}
+                        selectedKey={selectedKey}
+                        drag={drag}
+                        over={over}
+                        setDrag={setDrag}
+                        setOver={setOver}
+                        onDropItem={handleDrop}
+                        onSelect={onSelect}
+                        onCommit={onCommit}
+                        onPickBlock={onPickBlock}
+                        newId={newId}
+                      />
+                    ))}
 
-                    return (
-                      <li key={row.id}>
-                        <button
-                          type="button"
-                          className={`ed-node ed-depth-1${over === rowKey ? ' is-dragover' : ''}`}
-                          aria-current={isSelected(rowPath)}
-                          draggable
-                          onDragStart={() => setDrag({ kind: 'row', section: sectionIndex, row: rowIndex })}
-                          onDragEnd={() => { setDrag(null); setOver(null); }}
-                          onDragOver={(event) => {
-                            if (drag?.kind !== 'row') return;
-                            event.preventDefault();
-                            setOver(rowKey);
-                          }}
-                          onDragLeave={() => setOver((k) => (k === rowKey ? null : k))}
-                          onDrop={(event) => {
-                            event.preventDefault();
-                            handleDrop({ kind: 'row', section: sectionIndex, row: rowIndex });
-                          }}
-                          onClick={() => onSelect(rowPath)}
-                        >
-                          <span className="ed-node__icon">▭</span>
-                          <span className="ed-node__label">
-                            Row · {row.columns.map((column) => `${Math.round(column.width)}%`).join(' / ')}
-                          </span>
-                          <span className="ed-node__tools">
-                            <Tool
-                              label="Move row up"
-                              disabled={rowIndex === 0}
-                              onClick={() => onCommit((c) => moveRow(c, sectionIndex, rowIndex, rowIndex - 1))}
-                            >
-                              ↑
-                            </Tool>
-                            <Tool
-                              label="Move row down"
-                              disabled={rowIndex === section.rows.length - 1}
-                              onClick={() => onCommit((c) => moveRow(c, sectionIndex, rowIndex, rowIndex + 1))}
-                            >
-                              ↓
-                            </Tool>
-                            <Tool
-                              label="Duplicate row"
-                              onClick={() => onCommit((c) => duplicateRow(c, sectionIndex, rowIndex, newId))}
-                            >
-                              ⧉
-                            </Tool>
-                            <Tool
-                              label="Delete row"
-                              danger
-                              onClick={() => onCommit((c) => removeRow(c, sectionIndex, rowIndex))}
-                            >
-                              ✕
-                            </Tool>
-                          </span>
-                        </button>
-
-                        <ul>
-                          {row.columns.map((column, columnIndex) => {
-                            const columnPath: Path = {
-                              kind: 'column',
-                              section: sectionIndex,
-                              row: rowIndex,
-                              column: columnIndex,
-                            };
-
-                            return (
-                              <li key={column.id}>
-                                <button
-                                  type="button"
-                                  className="ed-node ed-depth-2"
-                                  aria-current={isSelected(columnPath)}
-                                  onClick={() => onSelect(columnPath)}
-                                >
-                                  <span className="ed-node__icon">▯</span>
-                                  <span className="ed-node__label">
-                                    Column {columnIndex + 1} · {Math.round(column.width)}%
-                                  </span>
-                                  <span className="ed-node__tools">
-                                    <Tool
-                                      label="Add a block to this column"
-                                      onClick={() =>
-                                        onPickBlock({
-                                          section: sectionIndex,
-                                          row: rowIndex,
-                                          column: columnIndex,
-                                        })
-                                      }
-                                    >
-                                      +
-                                    </Tool>
-                                  </span>
-                                </button>
-
-                                <ul>
-                                  {column.blocks.map((block, blockIndex) => {
-                                    const blockPath: Path = {
-                                      kind: 'block',
-                                      section: sectionIndex,
-                                      row: rowIndex,
-                                      column: columnIndex,
-                                      block: blockIndex,
-                                    };
-                                    const blockKey = `blk:${sectionIndex}:${rowIndex}:${columnIndex}:${blockIndex}`;
-                                    const definition = blockDefinition(block.type);
-
-                                    return (
-                                      <li key={block.id}>
-                                        <button
-                                          type="button"
-                                          className={`ed-node ed-depth-3${over === blockKey ? ' is-dragover' : ''}`}
-                                          aria-current={isSelected(blockPath)}
-                                          draggable
-                                          onDragStart={() =>
-                                            setDrag({
-                                              kind: 'block',
-                                              section: sectionIndex,
-                                              row: rowIndex,
-                                              column: columnIndex,
-                                              block: blockIndex,
-                                            })
-                                          }
-                                          onDragEnd={() => { setDrag(null); setOver(null); }}
-                                          onDragOver={(event) => {
-                                            if (drag?.kind !== 'block') return;
-                                            event.preventDefault();
-                                            setOver(blockKey);
-                                          }}
-                                          onDragLeave={() => setOver((k) => (k === blockKey ? null : k))}
-                                          onDrop={(event) => {
-                                            event.preventDefault();
-                                            handleDrop({
-                                              kind: 'block',
-                                              section: sectionIndex,
-                                              row: rowIndex,
-                                              column: columnIndex,
-                                              block: blockIndex,
-                                            });
-                                          }}
-                                          onClick={() => onSelect(blockPath)}
-                                        >
-                                          <span className="ed-node__icon">{definition?.icon ?? '?'}</span>
-                                          <span className="ed-node__label">{blockLabel(block)}</span>
-                                          <span className="ed-node__tools">
-                                            <Tool
-                                              label="Move block up"
-                                              disabled={blockIndex === 0}
-                                              onClick={() =>
-                                                onCommit((c) =>
-                                                  moveBlockWithinColumn(c, sectionIndex, rowIndex, columnIndex, blockIndex, blockIndex - 1),
-                                                )
-                                              }
-                                            >
-                                              ↑
-                                            </Tool>
-                                            <Tool
-                                              label="Move block down"
-                                              disabled={blockIndex === column.blocks.length - 1}
-                                              onClick={() =>
-                                                onCommit((c) =>
-                                                  moveBlockWithinColumn(c, sectionIndex, rowIndex, columnIndex, blockIndex, blockIndex + 1),
-                                                )
-                                              }
-                                            >
-                                              ↓
-                                            </Tool>
-                                            <Tool
-                                              label="Duplicate block"
-                                              onClick={() =>
-                                                onCommit((c) =>
-                                                  duplicateBlock(c, sectionIndex, rowIndex, columnIndex, blockIndex, newId),
-                                                )
-                                              }
-                                            >
-                                              ⧉
-                                            </Tool>
-                                            <Tool
-                                              label="Delete block"
-                                              danger
-                                              onClick={() =>
-                                                onCommit((c) =>
-                                                  removeBlock(c, sectionIndex, rowIndex, columnIndex, blockIndex),
-                                                )
-                                              }
-                                            >
-                                              ✕
-                                            </Tool>
-                                          </span>
-                                        </button>
-                                      </li>
-                                    );
-                                  })}
-                                </ul>
-                              </li>
-                            );
-                          })}
-                        </ul>
-
-                        <div className="ed-add-row" style={{ paddingLeft: 28 }}>
-                          <AddRowMenu
-                            onAdd={(preset) =>
-                              onCommit((c) => addRow(c, sectionIndex, createRow(preset), rowIndex + 1))
-                            }
-                          />
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </li>
+                    <AddRow onAdd={(preset) => onCommit((c) => addRow(c, sectionIndex, createRow(preset)))} />
+                  </div>
+                )}
+              </div>
             );
           })}
-        </ul>
+        </div>
+      </div>
 
-        <div className="ed-add-row">
+      <div className="ed-outline-foot">
+        {adding ? (
+          <div className="ed-segmented" style={{ flexDirection: 'column' }}>
+            {ROW_PRESETS.map((preset) => (
+              <button
+                key={preset.preset}
+                type="button"
+                aria-pressed={false}
+                onClick={() => {
+                  onCommit((c) => ({ ...c, sections: [...c.sections, createSection(preset.preset)] }));
+                  setAdding(false);
+                }}
+              >
+                {preset.label}
+              </button>
+            ))}
+            <button type="button" aria-pressed={false} onClick={() => setAdding(false)}>
+              Cancel
+            </button>
+          </div>
+        ) : (
           <button
             type="button"
             className="ed-btn"
-            style={{ flex: 1 }}
-            onClick={() => onCommit((c) => ({ ...c, sections: [...c.sections, createSection('1')] }))}
+            data-variant="primary"
+            style={{ width: '100%' }}
+            onClick={() => setAdding(true)}
           >
-            + Add section
+            <Icon name="plus" size={16} />
+            Add a section
           </button>
-        </div>
+        )}
       </div>
     </aside>
   );
 }
 
-function Tool({
-  children,
-  label,
-  onClick,
-  disabled,
-  danger,
+// ---------------------------------------------------------------------------
+// A row, which never calls itself a row
+// ---------------------------------------------------------------------------
+
+function Band({
+  row,
+  sectionIndex,
+  rowIndex,
+  canRemove,
+  selectedKey,
+  drag,
+  over,
+  setDrag,
+  setOver,
+  onDropItem,
+  onSelect,
+  onCommit,
+  onPickBlock,
+  newId,
 }: {
-  children: React.ReactNode;
-  label: string;
-  onClick: () => void;
-  disabled?: boolean;
-  danger?: boolean;
+  row: Row;
+  sectionIndex: number;
+  rowIndex: number;
+  canRemove: boolean;
+  selectedKey: string | null;
+  drag: DragItem | null;
+  over: string | null;
+  setDrag: (item: DragItem | null) => void;
+  setOver: (key: string | null) => void;
+  onDropItem: (target: DragItem) => void;
+  onSelect: (path: Path) => void;
+  onCommit: Props['onCommit'];
+  onPickBlock: Props['onPickBlock'];
+  newId: Reid;
 }) {
+  const multi = row.columns.length > 1;
+
   return (
-    <span
-      role="button"
-      tabIndex={disabled ? -1 : 0}
-      className="ed-btn ed-btn-icon"
-      aria-label={label}
-      title={label}
-      aria-disabled={disabled}
-      data-variant={danger ? 'danger' : undefined}
-      style={disabled ? { opacity: 0.35, pointerEvents: 'none' } : undefined}
-      onClick={(event) => {
-        // The tools sit inside the node button, so stop the click from also
-        // changing the selection.
-        event.stopPropagation();
-        if (!disabled) onClick();
-      }}
-      onKeyDown={(event) => {
-        if (event.key !== 'Enter' && event.key !== ' ') return;
-        event.preventDefault();
-        event.stopPropagation();
-        if (!disabled) onClick();
-      }}
-    >
-      {children}
-    </span>
+    <div className="ed-rowgroup">
+      {row.columns.map((column, columnIndex) => (
+        <div className="ed-side" key={column.id}>
+          {multi && (
+            <div className="ed-side-label">
+              <span>{columnWord(columnIndex, row.columns.length)}</span>
+            </div>
+          )}
+
+          {column.blocks.map((block, blockIndex) => {
+            const path: Path = {
+              kind: 'block',
+              section: sectionIndex,
+              row: rowIndex,
+              column: columnIndex,
+              block: blockIndex,
+            };
+            const key = `blk:${sectionIndex}:${rowIndex}:${columnIndex}:${blockIndex}`;
+            const definition = blockDefinition(block.type);
+
+            return (
+              <div
+                key={block.id}
+                className={`ed-item${over === key ? ' is-dragover' : ''}`}
+                data-selected={selectedKey === pathKey(path)}
+                onDragOver={(event) => {
+                  if (drag?.kind !== 'block') return;
+                  event.preventDefault();
+                  setOver(key);
+                }}
+                onDragLeave={() => setOver(over === key ? null : over)}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  onDropItem({
+                    kind: 'block',
+                    section: sectionIndex,
+                    row: rowIndex,
+                    column: columnIndex,
+                    block: blockIndex,
+                  });
+                }}
+              >
+                <button
+                  type="button"
+                  className="ed-item-main"
+                  draggable
+                  onDragStart={() =>
+                    setDrag({
+                      kind: 'block',
+                      section: sectionIndex,
+                      row: rowIndex,
+                      column: columnIndex,
+                      block: blockIndex,
+                    })
+                  }
+                  onDragEnd={() => { setDrag(null); setOver(null); }}
+                  onClick={() => onSelect(path)}
+                >
+                  <Icon name={definition?.icon ?? 'text'} size={16} className="ed-item-icon" />
+                  <span className="ed-item-text">
+                    <span className="ed-item-label">{blockLabel(block)}</span>
+                    <span className="ed-item-kind">{definition?.label ?? block.type}</span>
+                  </span>
+                </button>
+
+                <Menu
+                  label={`Options for ${blockLabel(block)}`}
+                  items={[
+                    {
+                      icon: 'arrow-up',
+                      label: 'Move up',
+                      disabled: blockIndex === 0,
+                      onClick: () =>
+                        onCommit((c) =>
+                          moveBlockWithinColumn(c, sectionIndex, rowIndex, columnIndex, blockIndex, blockIndex - 1),
+                        ),
+                    },
+                    {
+                      icon: 'arrow-down',
+                      label: 'Move down',
+                      disabled: blockIndex === column.blocks.length - 1,
+                      onClick: () =>
+                        onCommit((c) =>
+                          moveBlockWithinColumn(c, sectionIndex, rowIndex, columnIndex, blockIndex, blockIndex + 1),
+                        ),
+                    },
+                    {
+                      icon: 'copy',
+                      label: 'Duplicate',
+                      onClick: () =>
+                        onCommit((c) => duplicateBlock(c, sectionIndex, rowIndex, columnIndex, blockIndex, newId)),
+                    },
+                    { separator: true },
+                    {
+                      icon: 'trash',
+                      label: 'Delete',
+                      danger: true,
+                      onClick: () =>
+                        onCommit((c) => removeBlock(c, sectionIndex, rowIndex, columnIndex, blockIndex)),
+                    },
+                  ]}
+                />
+              </div>
+            );
+          })}
+
+          <button
+            type="button"
+            className="ed-add"
+            onClick={() => onPickBlock({ section: sectionIndex, row: rowIndex, column: columnIndex })}
+          >
+            <Icon name="plus" size={16} />
+            Add content
+          </button>
+        </div>
+      ))}
+
+      {canRemove && (
+        <button
+          type="button"
+          className="ed-row-remove"
+          onClick={() => onCommit((c) => removeRow(c, sectionIndex, rowIndex))}
+        >
+          <Icon name="trash" size={14} />
+          Remove this row
+        </button>
+      )}
+    </div>
   );
 }
 
-function AddRowMenu({ onAdd }: { onAdd: (preset: string) => void }) {
+function AddRow({ onAdd }: { onAdd: (preset: string) => void }) {
   const [open, setOpen] = useState(false);
 
   if (!open) {
     return (
-      <button type="button" className="ed-btn" style={{ flex: 1 }} onClick={() => setOpen(true)}>
-        + Add row
+      <button type="button" className="ed-add" onClick={() => setOpen(true)}>
+        <Icon name="columns" size={16} />
+        Add columns
       </button>
     );
   }
 
   return (
-    <div className="ed-segmented" style={{ flexDirection: 'column', width: '100%' }}>
+    <div className="ed-segmented" style={{ flexDirection: 'column' }}>
       {ROW_PRESETS.map((preset) => (
         <button
           key={preset.preset}
           type="button"
+          aria-pressed={false}
           onClick={() => {
             onAdd(preset.preset);
             setOpen(false);
@@ -462,7 +478,7 @@ function AddRowMenu({ onAdd }: { onAdd: (preset: string) => void }) {
           {preset.label}
         </button>
       ))}
-      <button type="button" onClick={() => setOpen(false)}>
+      <button type="button" aria-pressed={false} onClick={() => setOpen(false)}>
         Cancel
       </button>
     </div>

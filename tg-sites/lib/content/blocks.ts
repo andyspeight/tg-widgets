@@ -18,6 +18,8 @@
  * Add a test alongside if the block has non-trivial props.
  */
 
+import type { IconName } from '../../components/editor/Icon';
+
 // ---------------------------------------------------------------------------
 // Editor field definitions
 // ---------------------------------------------------------------------------
@@ -41,8 +43,8 @@ export interface BlockDefinition {
   type: string;
   label: string;
   group: BlockGroup;
-  /** Single character or emoji shown in the block picker and outline. */
-  icon: string;
+  /** Icon shown in the block picker and the outline. */
+  icon: IconName;
   description: string;
   defaults: Record<string, unknown>;
   fields: Field[];
@@ -101,7 +103,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'heading',
     label: 'Heading',
     group: 'Text',
-    icon: 'H',
+    icon: 'heading',
     description: 'A section or sub-section title.',
     defaults: { text: 'A new heading', level: 'h2', size: 'm', align: 'left' },
     summarise: (props) => asString(props.text) || 'Heading',
@@ -139,7 +141,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'text',
     label: 'Text',
     group: 'Text',
-    icon: '¶',
+    icon: 'text',
     description: 'A paragraph or a few. Bold, italics, links and lists.',
     defaults: {
       html: '<p>Write something here. Keep it plain and say the useful thing first.</p>',
@@ -166,7 +168,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'quote',
     label: 'Quote',
     group: 'Text',
-    icon: '“',
+    icon: 'quote',
     description: 'A pulled-out quotation with an attribution.',
     defaults: { text: 'Something worth repeating.', attribution: '', role: '' },
     summarise: (props) => firstWords(asString(props.text), 5) || 'Quote',
@@ -180,7 +182,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'list',
     label: 'List',
     group: 'Text',
-    icon: '•',
+    icon: 'list',
     description: 'Bulleted, numbered or ticked points.',
     defaults: {
       style: 'bullet',
@@ -215,7 +217,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'icon-item',
     label: 'Icon and text',
     group: 'Text',
-    icon: '◆',
+    icon: 'sparkle',
     description: 'An icon with a short title and a line of copy.',
     defaults: { icon: '★', title: 'A benefit', body: 'One sentence on why it matters.' },
     summarise: (props) => asString(props.title) || 'Icon and text',
@@ -231,7 +233,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'image',
     label: 'Image',
     group: 'Media',
-    icon: '▣',
+    icon: 'image',
     description: 'A picture, with the alt text search engines and screen readers need.',
     defaults: { src: '', alt: '', ratio: 'auto', fit: 'cover', radius: 'md', caption: '', href: '' },
     summarise: (props) => asString(props.alt) || asString(props.caption) || 'Image',
@@ -263,7 +265,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'video',
     label: 'Video',
     group: 'Media',
-    icon: '▶',
+    icon: 'video',
     description: 'A YouTube or Vimeo video, or a hosted file.',
     defaults: { url: '', ratio: '16/9', radius: 'md', caption: '' },
     summarise: (props) => asString(props.caption) || 'Video',
@@ -289,7 +291,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'gallery',
     label: 'Gallery',
     group: 'Media',
-    icon: '⊞',
+    icon: 'gallery',
     description: 'A grid of images.',
     defaults: { columns: '3', gap: 'm', radius: 'md', images: [] },
     summarise: (props) => {
@@ -328,7 +330,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'button',
     label: 'Button',
     group: 'Actions',
-    icon: '▭',
+    icon: 'button',
     description: 'A call to action.',
     defaults: {
       label: 'Enquire',
@@ -370,7 +372,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'button-group',
     label: 'Button group',
     group: 'Actions',
-    icon: '▭▭',
+    icon: 'buttons',
     description: 'Two or more buttons side by side.',
     defaults: {
       align: 'left',
@@ -415,7 +417,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'divider',
     label: 'Divider',
     group: 'Layout',
-    icon: '─',
+    icon: 'divider',
     description: 'A horizontal rule.',
     defaults: { style: 'line', spacing: 'm' },
     summarise: () => 'Divider',
@@ -437,7 +439,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'spacer',
     label: 'Spacer',
     group: 'Layout',
-    icon: '↕',
+    icon: 'spacer',
     description: 'Empty vertical space.',
     defaults: { height: 'm' },
     summarise: (props) => `Spacer (${asString(props.height) || 'm'})`,
@@ -456,7 +458,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'embed',
     label: 'Embed code',
     group: 'Advanced',
-    icon: '&lt;&gt;',
+    icon: 'code',
     description: 'Raw HTML. Travelgenix staff only.',
     staffOnly: true,
     defaults: { html: '' },

@@ -50,8 +50,94 @@ await check('editor mounts', async () => (await page.locator('.ed-root').count()
 await check('seed page renders', async () =>
   (await page.locator('.tgs-section').count()) === 3);
 
-await check('outline lists sections', async () =>
-  (await page.locator('.ed-outline .ed-node').count()) > 5);
+await check('outline lists sections as cards', async () =>
+  (await page.locator('.ed-sec').count()) === 3);
+
+// The whole point of the redesign: the pane opens calm, not as a tree.
+await check('sections start collapsed', async () =>
+  (await page.locator('.ed-sec[data-open="true"]').count()) === 0);
+
+await check('a section names itself from its heading', async () =>
+  (await page.locator('.ed-sec-name', { hasText: 'Greece, planned properly' }).count()) === 1);
+
+// Percentages belong in the properties pane and on the canvas handles, not
+// in a list an agent reads at a glance.
+await check('no percentages in the outline', async () => {
+  const text = (await page.locator('.ed-outline').innerText()) ?? '';
+  return text.includes('%') ? `outline still shows "${text.match(/\S*%\S*/)?.[0]}"` : true;
+});
+
+await check('layout reads in words', async () => {
+  const text = await page.locator('.ed-outline').innerText();
+  return text.includes('Two columns') && text.includes('Full width');
+});
+
+// Every icon must be an SVG. Any leftover glyph would show up as a bare
+// character inside a button with no svg child.
+await check('no glyph icons anywhere in the chrome', async () => {
+  const bad = await page.evaluate(() => {
+    const glyphs = /[\u2190-\u21FF\u2500-\u27BF\u25A0-\u25FF\u00B6]/;
+    const hits = [];
+    for (const node of document.querySelectorAll('.ed-root button, .ed-root .ed-item-icon')) {
+      const own = [...node.childNodes]
+        .filter((n) => n.nodeType === 3)
+        .map((n) => n.textContent)
+        .join('');
+      if (glyphs.test(own)) hits.push(own.trim());
+    }
+    return hits;
+  });
+  return bad.length === 0 ? true : `found ${JSON.stringify(bad)}`;
+});
+
+await check('every icon-only control has an accessible name', async () => {
+  const unnamed = await page.evaluate(() => {
+    const hits = [];
+    for (const el of document.querySelectorAll('.ed-root button')) {
+      const text = (el.textContent ?? '').trim();
+      const label = el.getAttribute('aria-label') ?? el.getAttribute('title');
+      if (!text && !label) hits.push(el.className);
+    }
+    return hits;
+  });
+  return unnamed.length === 0 ? true : `unnamed: ${JSON.stringify(unnamed)}`;
+});
+
+await check('touch targets meet the 44px rule', async () => {
+  const small = await page.evaluate(() => {
+    const hits = [];
+    for (const el of document.querySelectorAll('.ed-root button')) {
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 && r.height === 0) continue; // hidden
+      if (r.height < 44) hits.push(`${el.className || el.tagName} ${Math.round(r.height)}px`);
+    }
+    return hits;
+  });
+  return small.length === 0 ? true : `too small: ${JSON.stringify(small.slice(0, 4))}`;
+});
+
+// Contrast is the one rule you cannot eyeball, and dark mode is where it
+// slips. This measures the real computed colours rather than trusting them.
+await check('primary button clears 4.5:1 in this theme', async () => {
+  const ratio = await page.evaluate(() => {
+    const el = document.querySelector('.ed-btn[data-variant="primary"]');
+    if (!el) return null;
+    const style = getComputedStyle(el);
+    const parse = (value) => (value.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number);
+    const lum = ([r, g, b]) => {
+      const f = (c) => {
+        const v = c / 255;
+        return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+      };
+      return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+    };
+    const a = lum(parse(style.color));
+    const b = lum(parse(style.backgroundColor));
+    return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  });
+  if (ratio === null) return 'no primary button found';
+  return ratio >= 4.5 ? true : `only ${ratio.toFixed(2)}:1`;
+});
 
 await check('hero row uses dragged widths', async () => {
   const style = await page.locator('.tgs-row').first().getAttribute('style');
@@ -117,21 +203,81 @@ await check('phone viewport stacks columns', async () => {
   return columns.split(' ').length === 1 ? true : `grid is "${columns}"`;
 });
 
-await check('block picker opens', async () => {
+await check('block picker opens from a section', async () => {
   await page.getByRole('button', { name: 'Desktop' }).click();
   await page.waitForTimeout(200);
-  // The per-node tools only appear on hover or once the node is selected, so
-  // hover the row first, the way a person would.
-  const columnNode = page.locator('.ed-node.ed-depth-2').first();
-  await columnNode.hover();
-  const adder = page.locator('.ed-node__tools [aria-label="Add a block to this column"]').first();
-  await adder.click();
+  await page.locator('.ed-sec-toggle').first().click();
+  await page.waitForTimeout(300);
+  await page.locator('.ed-add', { hasText: 'Add content' }).first().click();
   await page.waitForTimeout(300);
   return (await page.locator('.ed-modal').count()) === 1;
 });
 
 await check('block picker offers the full library', async () =>
   (await page.locator('.ed-block-card').count()) === 13);
+
+/*
+ * Dark mode gets its own pass. It is where contrast quietly fails, because
+ * nobody looks at it as often, and a token that works as a background in one
+ * theme can be a foreground in the other.
+ */
+const darkPage = await browser.newPage({
+  viewport: { width: 1440, height: 900 },
+  colorScheme: 'dark',
+});
+darkPage.on('pageerror', (error) => errors.push(`dark pageerror: ${error.message}`));
+await darkPage.goto(pathToFileURL(file).href);
+await darkPage.waitForSelector('.ed-root', { timeout: 15000 });
+
+const contrastIn = (target) => async () => {
+  const ratio = await target.evaluate(() => {
+    const el = document.querySelector('.ed-btn[data-variant="primary"]');
+    if (!el) return null;
+    const style = getComputedStyle(el);
+    const parse = (value) => (value.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number);
+    const lum = ([r, g, b]) => {
+      const f = (c) => {
+        const v = c / 255;
+        return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+      };
+      return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+    };
+    const a = lum(parse(style.color));
+    const b = lum(parse(style.backgroundColor));
+    return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  });
+  if (ratio === null) return 'no primary button found';
+  return ratio >= 4.5 ? true : `only ${ratio.toFixed(2)}:1`;
+};
+
+await check('dark mode actually changes the chrome', async () => {
+  const bg = await darkPage.locator('.ed-root').evaluate((n) => getComputedStyle(n).backgroundColor);
+  const light = await page.locator('.ed-root').evaluate((n) => getComputedStyle(n).backgroundColor);
+  return bg !== light ? true : `both themes render ${bg}`;
+});
+
+await check('dark mode: primary button clears 4.5:1', contrastIn(darkPage));
+
+await check('dark mode: body text clears 4.5:1 on the panel', async () => {
+  const ratio = await darkPage.evaluate(() => {
+    const el = document.querySelector('.ed-sec-name');
+    if (!el) return null;
+    const panel = document.querySelector('.ed-outline');
+    const parse = (value) => (value.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number);
+    const lum = ([r, g, b]) => {
+      const f = (c) => {
+        const v = c / 255;
+        return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+      };
+      return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+    };
+    const a = lum(parse(getComputedStyle(el).color));
+    const b = lum(parse(getComputedStyle(panel).backgroundColor));
+    return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  });
+  if (ratio === null) return 'no section name found';
+  return ratio >= 4.5 ? true : `only ${ratio.toFixed(2)}:1`;
+});
 
 await browser.close();
 

@@ -18,6 +18,7 @@
 
 import { useEffect, useRef } from 'react';
 import type { Field } from '../../lib/content/blocks';
+import { Icon } from './Icon';
 
 interface FieldProps {
   field: Field;
@@ -218,33 +219,34 @@ function Repeater({ field, value, onChange, ownerId }: FieldProps) {
         <div className="ed-repeat-item" key={index}>
           <div className="ed-repeat-head">
             <span>{`${field.itemLabel} ${index + 1}`}</span>
-            <span style={{ display: 'flex', gap: 2 }}>
+            <span className="ed-repeat-tools">
               <button
                 type="button"
-                className="ed-btn ed-btn-icon"
+                className="ed-btn" data-variant="ghost" data-icon="true"
                 onClick={() => move(index, index - 1)}
                 disabled={index === 0}
                 aria-label={`Move ${field.itemLabel} ${index + 1} up`}
               >
-                ↑
+                <Icon name="arrow-up" size={16} />
               </button>
               <button
                 type="button"
-                className="ed-btn ed-btn-icon"
+                className="ed-btn" data-variant="ghost" data-icon="true"
                 onClick={() => move(index, index + 1)}
                 disabled={index === items.length - 1}
                 aria-label={`Move ${field.itemLabel} ${index + 1} down`}
               >
-                ↓
+                <Icon name="arrow-down" size={16} />
               </button>
               <button
                 type="button"
-                className="ed-btn ed-btn-icon"
+                className="ed-btn"
                 data-variant="danger"
+                data-icon="true"
                 onClick={() => update(items.filter((_, i) => i !== index))}
                 aria-label={`Remove ${field.itemLabel} ${index + 1}`}
               >
-                ✕
+                <Icon name="trash" size={16} />
               </button>
             </span>
           </div>

@@ -23,6 +23,8 @@ import { Outline } from './Outline';
 import { Canvas } from './Canvas';
 import { Properties } from './Properties';
 import { BlockPicker } from './BlockPicker';
+import { Icon, type IconName } from './Icon';
+import { Menu } from './Menu';
 import './editor.css';
 
 const STORAGE_KEY = 'tg-sites:draft:v1';
@@ -31,6 +33,13 @@ const HISTORY_LIMIT = 50;
 const COALESCE_MS = 700;
 
 export type Viewport = 'desktop' | 'tablet' | 'phone';
+
+/** Label and icon together. An icon-only control is a guess. */
+const VIEWPORTS: ReadonlyArray<{ value: Viewport; label: string; icon: IconName }> = [
+  { value: 'desktop', label: 'Desktop', icon: 'desktop' },
+  { value: 'tablet', label: 'Tablet', icon: 'tablet' },
+  { value: 'phone', label: 'Phone', icon: 'phone' },
+];
 
 const VIEWPORT_WIDTH: Record<Viewport, string> = {
   desktop: '100%',
@@ -57,7 +66,7 @@ export function EditorShell({ isStaff = true }: { isStaff?: boolean }) {
   const [viewport, setViewport] = useState<Viewport>('desktop');
   const [picker, setPicker] = useState<{ section: number; row: number; column: number } | null>(null);
   const [saved, setSaved] = useState<'idle' | 'saving' | 'saved'>('idle');
-  const [mobilePane, setMobilePane] = useState<'canvas' | 'props'>('canvas');
+  const [mobilePane, setMobilePane] = useState<'canvas' | 'props' | 'outline'>('canvas');
 
   const page = history.present;
 
@@ -257,8 +266,10 @@ export function EditorShell({ isStaff = true }: { isStaff?: boolean }) {
   const fileInput = useRef<HTMLInputElement>(null);
 
   const savedLabel = useMemo(() => {
-    if (saved === 'saving') return 'Saving…';
-    if (saved === 'saved') return 'Saved to this browser';
+    // "Saved to this browser" was developer-speak. An agent wants to know
+    // their work is safe, not where the bytes went.
+    if (saved === 'saving') return 'Saving';
+    if (saved === 'saved') return 'All changes saved';
     return '';
   }, [saved]);
 
@@ -267,31 +278,54 @@ export function EditorShell({ isStaff = true }: { isStaff?: boolean }) {
   return (
     <div className="ed-root" data-pane={mobilePane}>
       <header className="ed-topbar">
-        <span className="ed-brand">Travelgenix Sites</span>
+        <span className="ed-brand">
+          <span className="ed-brand__mark" aria-hidden="true">
+            TG
+          </span>
+          <span>Sites</span>
+        </span>
 
-        <input
-          className="ed-title-input"
-          value={page.title}
-          aria-label="Page title"
-          onChange={(event) =>
-            commit((current) => ({ ...current, title: event.target.value }), 'page:title')
-          }
-        />
+        <button
+          type="button"
+          className="ed-btn ed-mobile-only"
+          data-icon="true"
+          aria-label="Show the page outline"
+          onClick={() => setMobilePane(mobilePane === 'outline' ? 'canvas' : 'outline')}
+        >
+          <Icon name="section" size={18} />
+        </button>
 
-        <span className="ed-spacer" />
+        <div className="ed-titlewrap">
+          <input
+            className="ed-title-input"
+            value={page.title}
+            aria-label="Page title"
+            onChange={(event) =>
+              commit((current) => ({ ...current, title: event.target.value }), 'page:title')
+            }
+          />
+          <span className="ed-save ed-desktop-only" data-state={saved}>
+            {saved === 'saved' && <Icon name="check" size={14} />}
+            {savedLabel}
+          </span>
+        </div>
 
-        <span className="ed-dirty">{savedLabel}</span>
-
-        <div className="ed-viewports" role="group" aria-label="Preview width">
-          {(['desktop', 'tablet', 'phone'] as Viewport[]).map((option) => (
+        {/*
+          Icons carry a label on desktop and stand alone on narrow screens,
+          where they keep their aria-label. Never icon-only without one.
+        */}
+        <div className="ed-seg ed-desktop-only" role="group" aria-label="Preview width">
+          {VIEWPORTS.map((option) => (
             <button
-              key={option}
+              key={option.value}
               type="button"
               className="ed-btn"
-              aria-pressed={viewport === option}
-              onClick={() => setViewport(option)}
+              aria-pressed={viewport === option.value}
+              title={option.label}
+              onClick={() => setViewport(option.value)}
             >
-              {option === 'desktop' ? 'Desktop' : option === 'tablet' ? 'Tablet' : 'Phone'}
+              <Icon name={option.icon} size={16} />
+              {option.label}
             </button>
           ))}
         </div>
@@ -299,28 +333,41 @@ export function EditorShell({ isStaff = true }: { isStaff?: boolean }) {
         <button
           type="button"
           className="ed-btn"
+          data-icon="true"
           onClick={undo}
           disabled={history.past.length === 0}
+          aria-label="Undo"
           title="Undo (Cmd+Z)"
         >
-          Undo
+          <Icon name="undo" size={18} />
         </button>
         <button
           type="button"
           className="ed-btn"
+          data-icon="true"
           onClick={redo}
           disabled={history.future.length === 0}
+          aria-label="Redo"
           title="Redo (Cmd+Shift+Z)"
         >
-          Redo
+          <Icon name="redo" size={18} />
         </button>
 
-        <button type="button" className="ed-btn" onClick={() => fileInput.current?.click()}>
-          Import
-        </button>
-        <button type="button" className="ed-btn" data-variant="primary" onClick={exportJson}>
-          Export JSON
-        </button>
+        <Menu
+          label="More actions"
+          items={[
+            {
+              icon: 'download',
+              label: 'Export this page',
+              onClick: exportJson,
+            },
+            {
+              icon: 'upload',
+              label: 'Import a page',
+              onClick: () => fileInput.current?.click(),
+            },
+          ]}
+        />
 
         <input
           ref={fileInput}
