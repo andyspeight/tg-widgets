@@ -35,14 +35,23 @@ delete from public.pages where id in (
   'aaaaaaaa-0000-0000-0000-00000000a002',
   'bbbbbbbb-0000-0000-0000-00000000b001'
 );
+-- Domains cascade with their tenant, so this clears them too.
 delete from public.tenants where id in (
   '11111111-1111-1111-1111-111111111111',
-  '22222222-2222-2222-2222-222222222222'
+  '22222222-2222-2222-2222-222222222222',
+  '33333333-3333-3333-3333-333333333333'
 );
 
-insert into public.tenants (id, slug, name) values
-  ('11111111-1111-1111-1111-111111111111', 'iso-alpha', 'Isolation Alpha'),
-  ('22222222-2222-2222-2222-222222222222', 'iso-beta',  'Isolation Beta');
+insert into public.tenants (id, slug, name, status) values
+  ('11111111-1111-1111-1111-111111111111', 'iso-alpha', 'Isolation Alpha', 'active'),
+  ('22222222-2222-2222-2222-222222222222', 'iso-beta',  'Isolation Beta',  'active'),
+  -- Suspended, to prove a switched-off site stops resolving.
+  ('33333333-3333-3333-3333-333333333333', 'iso-gamma', 'Isolation Gamma', 'suspended');
+
+insert into public.domains (tenant_id, hostname, is_primary) values
+  ('11111111-1111-1111-1111-111111111111', 'iso-alpha-live.example', true),
+  ('22222222-2222-2222-2222-222222222222', 'iso-beta-live.example',  true),
+  ('33333333-3333-3333-3333-333333333333', 'iso-gamma-live.example', true);
 
 insert into public.pages (id, tenant_id, slug, title, status, published_content) values
   ('aaaaaaaa-0000-0000-0000-00000000a001', '11111111-1111-1111-1111-111111111111', 'iso-live',  'Alpha live',  'published', '{"version":1,"sections":[]}'),
@@ -239,21 +248,87 @@ begin
 end $$;
 
 -- ---------------------------------------------------------------------------
--- Report, then clear up
+-- Resolving a hostname, the one thing that runs before a tenant is known
 -- ---------------------------------------------------------------------------
 
-select case when passed then 'PASS' else 'FAIL' end as result, name, detail
-from checks order by passed, ord;
+-- resolve_tenant is SECURITY DEFINER, so it is the one place in this database
+-- that sees past RLS. These checks exist to hold it to exactly that: a
+-- hostname in, one id out, and nothing else opened up on the way.
+insert into checks (name, passed, detail)
+select 'only one function sees past RLS',
+  count(*) = 1 and bool_and(p.proname = 'resolve_tenant'),
+  'security definer: ' || coalesce(string_agg(p.proname, ', '), 'none')
+from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+where n.nspname = 'public' and p.prosecdef;
 
-select
-  count(*) filter (where passed)     as passed,
-  count(*) filter (where not passed) as failed,
-  case when count(*) filter (where not passed) = 0
-    then 'Tenant isolation holds.'
-    else 'SHIP BLOCKER: isolation is broken.'
-  end as verdict
-from checks;
+-- Postgres grants EXECUTE to PUBLIC by default, so this is not hypothetical.
+insert into checks (name, passed, detail)
+select 'anon and authenticated cannot resolve a hostname',
+  not bool_or(has_function_privilege('anon', p.oid, 'EXECUTE')
+           or has_function_privilege('authenticated', p.oid, 'EXECUTE')),
+  ''
+from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+where n.nspname = 'public' and p.proname = 'resolve_tenant';
 
+do $$
+declare
+  staging uuid; custom uuid; unknown uuid; suspended uuid; domains_seen int;
+begin
+  set local role tg_sites_renderer;
+  -- No tenant. That is the point: this call happens before one is known.
+  perform set_config('app.current_tenant_id', '', true);
+
+  staging   := public.resolve_tenant('iso-alpha.tgsites.io');
+  -- Mixed case on purpose. Hostnames are case insensitive in DNS and a
+  -- Host header can arrive in any case at all.
+  custom    := public.resolve_tenant('ISO-Beta-Live.example');
+  unknown   := public.resolve_tenant('nobody.example');
+  suspended := public.resolve_tenant('iso-gamma-live.example');
+
+  -- The function reads `domains`. Calling it must not leave that table
+  -- readable to the caller.
+  select count(*) into domains_seen from public.domains;
+
+  reset role;
+  insert into checks (name, passed, detail) values
+    ('a staging subdomain resolves with no tenant set',
+     staging = '11111111-1111-1111-1111-111111111111', coalesce(staging::text, 'null')),
+    ('a custom domain resolves, whatever its case',
+     custom = '22222222-2222-2222-2222-222222222222', coalesce(custom::text, 'null')),
+    ('an unknown hostname resolves to nothing',
+     unknown is null, coalesce(unknown::text, 'null')),
+    ('a suspended tenant does not resolve',
+     suspended is null, coalesce(suspended::text, 'null')),
+    ('resolving does not open up the domains table',
+     domains_seen = 0, 'rows visible: ' || domains_seen);
+end $$;
+
+-- Run as the admin role deliberately. This is a CHECK constraint, not a
+-- policy, and constraints bind everyone including a superuser. If it holds
+-- here it holds everywhere.
+do $$
+declare refused boolean := false;
+begin
+  begin
+    insert into public.domains (tenant_id, hostname)
+      values ('22222222-2222-2222-2222-222222222222', 'iso-alpha.tgsites.io');
+  exception when others then refused := true;
+  end;
+
+  insert into checks (name, passed, detail) values
+    ('a staging subdomain cannot be claimed as a custom domain', refused,
+     case when refused then 'the check constraint refused it'
+          else 'ONE TENANT COULD HIJACK ANOTHERS STAGING URL' end);
+end $$;
+
+-- ---------------------------------------------------------------------------
+-- Clear up, then report
+-- ---------------------------------------------------------------------------
+
+-- Cleanup runs first so the report is the last statement in the file. Tools
+-- that show only the final result set then show the verdict rather than a
+-- row count from a DELETE. The results already live in the temp table, so
+-- removing the fixtures cannot affect them.
 delete from public.pages where id in (
   'aaaaaaaa-0000-0000-0000-00000000a001',
   'aaaaaaaa-0000-0000-0000-00000000a002',
@@ -261,5 +336,25 @@ delete from public.pages where id in (
 );
 delete from public.tenants where id in (
   '11111111-1111-1111-1111-111111111111',
-  '22222222-2222-2222-2222-222222222222'
+  '22222222-2222-2222-2222-222222222222',
+  '33333333-3333-3333-3333-333333333333'
 );
+
+-- One result set, failures at the top, verdict on the last line.
+select result, name, detail from (
+  select
+    case when passed then 'PASS' else 'FAIL' end as result,
+    name, detail, passed, ord
+  from checks
+  union all
+  select
+    case when count(*) filter (where not passed) = 0 then '=====' else '!!!!!' end,
+    case when count(*) filter (where not passed) = 0
+      then 'Tenant isolation holds.'
+      else 'SHIP BLOCKER: isolation is broken.' end,
+    count(*) filter (where passed) || ' passed, '
+      || count(*) filter (where not passed) || ' failed',
+    true, 2147483647
+  from checks
+) r
+order by passed, ord;

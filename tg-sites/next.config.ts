@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
 
+  // The Postgres driver opens raw sockets and must stay a real Node module.
+  // Bundling it works until it does not, and the way it fails is a runtime
+  // error on a deployed server rather than anything the build would catch.
+  serverExternalPackages: ['postgres'],
+
   async headers() {
     return [
       {

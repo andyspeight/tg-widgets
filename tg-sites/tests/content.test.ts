@@ -28,6 +28,7 @@ import {
 } from '../lib/content/tree';
 import { createBlock } from '../lib/content/factory';
 import { sanitiseHtml, safeUrl } from '../lib/content/sanitise';
+import { sanitisePage } from '../lib/content/sanitise-page';
 import { resolveVideo } from '../lib/content/video';
 import { SEED_PAGE } from '../lib/content/seed';
 
@@ -445,5 +446,91 @@ describe('layouts', () => {
   it('has no duplicate ids or labels', () => {
     expect(new Set(LAYOUTS.map((l) => l.id)).size).toBe(LAYOUTS.length);
     expect(new Set(LAYOUTS.map((l) => l.label)).size).toBe(LAYOUTS.length);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+describe('sanitising a whole page on the way in', () => {
+  function pageWith(type: string, props: Record<string, unknown>) {
+    const page = createPage('Test', 'test');
+    const section = createSectionFromLayout(LAYOUTS[0]);
+    section.rows[0].columns[0].blocks = [{ id: newId('b'), type, props }];
+    page.sections = [section];
+    return page;
+  }
+
+  it('strips a script out of rich text before it is stored', () => {
+    const clean = sanitisePage(pageWith('text', {
+      html: '<p>Hello<script>alert(1)</script></p>',
+    }));
+
+    const props = clean.sections[0].rows[0].columns[0].blocks[0].props;
+    expect(props.html).not.toContain('script');
+    expect(props.html).toContain('Hello');
+  });
+
+  it('empties a javascript: link rather than storing it', () => {
+    const clean = sanitisePage(pageWith('button', {
+      label: 'Click',
+      href: 'javascript:alert(1)',
+    }));
+
+    expect(clean.sections[0].rows[0].columns[0].blocks[0].props.href).toBe('');
+  });
+
+  it('reaches inside a repeater', () => {
+    const clean = sanitisePage(pageWith('button-group', {
+      buttons: [
+        { label: 'Safe', href: 'https://example.com' },
+        { label: 'Nasty', href: 'javascript:alert(1)' },
+      ],
+    }));
+
+    const buttons = clean.sections[0].rows[0].columns[0].blocks[0].props
+      .buttons as Array<Record<string, unknown>>;
+    expect(buttons[0].href).toBe('https://example.com');
+    expect(buttons[1].href).toBe('');
+  });
+
+  it('cleans a section background image', () => {
+    const page = pageWith('text', { html: '<p>hi</p>' });
+    page.sections[0].backgroundImage = 'javascript:alert(1)';
+
+    expect(sanitisePage(page).sections[0].backgroundImage).toBe('');
+  });
+
+  it('cleans the SEO image and canonical URL', () => {
+    const page = pageWith('text', { html: '<p>hi</p>' });
+    page.seo = { noindex: false, ogImage: 'javascript:alert(1)', canonical: '//evil.com' };
+
+    const clean = sanitisePage(page);
+    expect(clean.seo.ogImage).toBe('');
+    expect(clean.seo.canonical).toBe('');
+  });
+
+  it('leaves a block it does not recognise completely alone', () => {
+    // A page saved by a newer build has to survive an older one. The
+    // renderer refuses to draw an unknown block anyway, and it is sanitised
+    // again on render once its build knows what it is.
+    const clean = sanitisePage(pageWith('from-the-future', {
+      html: '<p>Hello</p>',
+      anything: { nested: true },
+    }));
+
+    expect(clean.sections[0].rows[0].columns[0].blocks[0].props).toEqual({
+      html: '<p>Hello</p>',
+      anything: { nested: true },
+    });
+  });
+
+  it('is idempotent', () => {
+    const once = sanitisePage(pageWith('text', { html: '<p onclick="x">Hi</p>' }));
+    expect(sanitisePage(once)).toEqual(once);
+  });
+
+  it('leaves a legitimate page untouched', () => {
+    const page = pageWith('text', { html: '<p>Greek islands, <strong>from £599</strong>.</p>' });
+    expect(sanitisePage(page)).toEqual(page);
   });
 });

@@ -133,18 +133,35 @@ one-file change, and the embed block stays staff-only until then.
 ## The database
 
 Postgres 17 on Supabase. Schema, roles and row level security are in `db/`,
-with the reasoning and the password setup step in `db/README.md`.
+with the reasoning and the password setup step in `db/README.md`. The access
+layer is `lib/db/`.
 
-The short version: one database holds every client's site, every table
-carries `tenant_id`, RLS is enabled and forced on all of them, and every
-policy keys off a transaction-local setting. With no tenant set that setting
-is NULL, so a query that forgets to scope itself returns nothing rather than
-everything. `db/isolation-check.sql` tries seventeen ways to break that and
-expects to fail at all of them.
+The short version: one database holds every client's site, every table carries
+`tenant_id`, RLS is enabled and forced on all of them, and every policy keys
+off a transaction-local setting. With no tenant set that setting is NULL, so a
+query that forgets to scope itself returns nothing rather than everything.
+`db/isolation-check.sql` tries twenty five ways to break that and expects to
+fail at all of them.
+
+```ts
+await withTenant(tenantId, async (tx) => {
+  await tx`select * from public.pages`;   // this tenant's pages, only
+});
+```
+
+`withTenant` is the only door. It opens a transaction, sets the tenant as the
+first statement, refuses anything that is not a uuid, and refuses a nested
+call for a different tenant. `withPublicTenant` is the same thing on the
+read-only role, for anything a visitor triggers.
+
+Two roles rather than one: `tg_sites_app` for the editor, `tg_sites_renderer`
+for the public site. The renderer cannot write, cannot see a draft and cannot
+read the publish history, so a compromised public site cannot become a
+compromised database.
 
 ## What is deliberately not here
 
-No auth, no media library, no publishing, no sections library, no widget
-bridge. The draft still lives in localStorage: the database exists but the
-editor does not talk to it yet. `commit()` in `EditorShell` already has the
-shape a server action will want.
+No auth, no media library, no sections library, no widget bridge. The editor
+still saves to localStorage: the database and its access layer exist, but the
+editor does not call them yet. `commit()` in `EditorShell` already has the
+shape `saveDraft` wants.
