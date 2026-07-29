@@ -7,9 +7,10 @@
  * category, staff-only blocks hidden unless the user is staff.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { blocksByGroup } from '../../lib/content/blocks';
 import { Icon } from './Icon';
+import { Modal } from '../ui/Modal';
 
 export function BlockPicker({
   isStaff,
@@ -22,22 +23,9 @@ export function BlockPicker({
 }) {
   const [query, setQuery] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
-  const dialogRef = useRef<HTMLDivElement>(null);
 
-  // Focusing on open IS a real user action: the modal only exists because
-  // they clicked to add a block. The rule about never focusing on render
-  // applies to re-renders of persistent UI, not to a dialog appearing.
-  useEffect(() => {
-    searchRef.current?.focus();
-  }, []);
-
-  useEffect(() => {
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') onClose();
-    }
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [onClose]);
+  // Escape, the scrim and the focus trap all belong to Modal. Modal also
+  // moves focus to the first control, which here is the search box.
 
   const needle = query.trim().toLowerCase();
   const groups = blocksByGroup(isStaff)
@@ -53,21 +41,12 @@ export function BlockPicker({
     .filter((group) => group.blocks.length > 0);
 
   return (
-    <div
-      className="ed-modal-backdrop"
-      onClick={(event) => {
-        if (event.target === event.currentTarget) onClose();
-      }}
+    <Modal
+      title="Add a block"
+      description="Text, media, buttons and layout pieces. Search if you know what you want."
+      size="large"
+      onClose={onClose}
     >
-      <div className="ed-modal" role="dialog" aria-modal="true" aria-label="Add a block" ref={dialogRef}>
-        <div className="ed-modal-head">
-          <span>Add a block</span>
-          <button type="button" className="ed-btn" data-variant="ghost" data-icon="true" onClick={onClose} aria-label="Close">
-            <Icon name="close" size={18} />
-          </button>
-        </div>
-
-        <div className="ed-modal-body">
           <div className="ed-field">
             <input
               ref={searchRef}
@@ -104,8 +83,6 @@ export function BlockPicker({
               </div>
             </div>
           ))}
-        </div>
-      </div>
-    </div>
+    </Modal>
   );
 }

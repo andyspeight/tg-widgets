@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import '../../../components/sites/sites.css';
 import { PageRenderer } from '../../../components/render/PageRenderer';
 import { getPublishedPage } from '../../../lib/db/pages';
 import { currentTenantId, currentWorkspace } from '../../../lib/session';
@@ -99,21 +100,16 @@ export default async function PublishedPage({ params }: Params) {
  */
 function Notice({ heading, children }: { heading: string; children: React.ReactNode }) {
   return (
-    <main
-      style={{
-        maxWidth: 560,
-        margin: '0 auto',
-        padding: '96px 24px',
-        fontFamily: 'ui-sans-serif, system-ui, sans-serif',
-        lineHeight: 1.6,
-        color: '#0f172a',
-      }}
-    >
-      <h1 style={{ fontSize: 24, margin: '0 0 8px', letterSpacing: '-0.01em' }}>{heading}</h1>
-      <p style={{ color: '#475569', margin: '0 0 24px' }}>{children}</p>
-      <Link href="/sites" style={{ color: '#1b2b5b', fontWeight: 600 }}>
-        Back to the page list
-      </Link>
-    </main>
+    <div className="sv-root" data-theme="light">
+      <main className="tg-door" data-narrow="true">
+        <h1 className="tg-door__title" data-small="true">{heading}</h1>
+        <p className="tg-door__lede">{children}</p>
+        <div className="tg-door__actions">
+          <Link className="tg-btn" data-variant="primary" href="/sites">
+            Back to your pages
+          </Link>
+        </div>
+      </main>
+    </div>
   );
 }

@@ -328,7 +328,7 @@ await check('block picker opens from a section', async () => {
   await page.waitForTimeout(300);
   await page.locator('.ed-add', { hasText: 'Add content' }).first().click();
   await page.waitForTimeout(300);
-  return (await page.locator('.ed-modal').count()) === 1;
+  return (await page.locator('.tg-modal').count()) === 1;
 });
 
 await check('block picker offers the full library', async () =>
@@ -356,7 +356,7 @@ await check('insert points do not shift the page', async () => {
 await check('an insert point opens the layout picker', async () => {
   await page.locator('.ed-insert__btn').first().click();
   await page.waitForTimeout(300);
-  const heading = await page.locator('.ed-modal-head').innerText();
+  const heading = await page.locator('.tg-modal__head').innerText();
   return heading.includes('Choose a layout') ? true : `head reads "${heading}"`;
 });
 
@@ -534,6 +534,97 @@ await check('padding typed into the box reaches the page', async () => {
   const after = (await section.boundingBox())?.height ?? 0;
   // Linked by default, so 60 lands on all four sides: top and bottom both.
   return after > before + 100 ? true : `${Math.round(before)}px then ${Math.round(after)}px`;
+});
+
+/*
+ * Behaviours the shared Modal gives every dialog.
+ *
+ * There used to be four dialogs with four implementations of this, only one
+ * of which trapped focus. Checking it once is only honest because there is
+ * now only one implementation to check.
+ */
+await page.reload();
+await page.waitForSelector('.ed-root');
+
+/*
+ * Expand the first section, if it is not already.
+ *
+ * Clicking the name TOGGLES, so calling it twice closes the card again and
+ * the add-buttons vanish with it. Checking first makes this safe to call from
+ * every check rather than only from the first one.
+ */
+/*
+ * Leave no dialog open behind you.
+ *
+ * These checks run in order against one page, so a dialog one check forgets
+ * to close is a scrim the next one cannot click through. The failure reads as
+ * "the button is not there", which sends you looking in the wrong place.
+ */
+async function closeAnyDialog() {
+  for (let i = 0; i < 4 && (await page.locator('.tg-modal').count()) > 0; i += 1) {
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(150);
+  }
+}
+
+async function expandFirstSection() {
+  await closeAnyDialog();
+  if ((await page.locator('.ed-add').count()) === 0) {
+    await page.locator('.ed-sec-name').first().click();
+    await page.waitForTimeout(200);
+  }
+}
+
+async function openBlockPicker() {
+  await expandFirstSection();
+  await page.locator('.ed-add').first().click();
+  await page.waitForSelector('.tg-modal', { timeout: 5000 });
+}
+
+await check('Escape closes a dialog', async () => {
+  await openBlockPicker();
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(200);
+  return (await page.locator('.tg-modal').count()) === 0 ? true : 'still open';
+});
+
+await check('clicking the scrim closes a dialog', async () => {
+  await openBlockPicker();
+  // Left edge, halfway down: clear of the dialog AND clear of the standalone
+  // build's own notice bar, which is fixed across the top at a higher z-index
+  // and was quietly swallowing a click aimed at the scrim.
+  await page.mouse.click(12, 450);
+  await page.waitForTimeout(200);
+  return (await page.locator('.tg-modal').count()) === 0 ? true : 'still open';
+});
+
+await check('Tab cannot leave an open dialog', async () => {
+  await openBlockPicker();
+
+  // Round the whole thing twice. Without a trap this walks out into the page
+  // behind, and the modal is still covering everything.
+  for (let i = 0; i < 40; i += 1) await page.keyboard.press('Tab');
+
+  const inside = await page.evaluate(() =>
+    document.querySelector('.tg-modal')?.contains(document.activeElement) ?? false);
+
+  await page.keyboard.press('Escape');
+  return inside === true ? true : 'focus escaped the dialog';
+});
+
+await check('closing a dialog gives focus back to what opened it', async () => {
+  await closeAnyDialog();
+  await expandFirstSection();
+
+  const opener = page.locator('.ed-add').first();
+  await opener.click();
+  await page.waitForSelector('.tg-modal');
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(250);
+
+  const restored = await page.evaluate(() =>
+    document.activeElement?.classList.contains('ed-add') ?? false);
+  return restored === true ? true : 'focus was dropped on the body';
 });
 
 await browser.close();

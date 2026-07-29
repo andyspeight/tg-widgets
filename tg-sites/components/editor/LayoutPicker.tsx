@@ -11,9 +11,9 @@
  * never show a picture of something other than what it builds.
  */
 
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { LAYOUTS, layoutCells, type Layout } from '../../lib/content/layouts';
-import { Icon } from './Icon';
+import { Modal } from '../ui/Modal';
 
 export function LayoutThumb({ layout }: { layout: Layout }) {
   const cells = layoutCells(layout);
@@ -47,71 +47,36 @@ export function LayoutPicker({
   onPick: (layout: Layout) => void;
   onClose: () => void;
 }) {
+  // Escape, the scrim, the focus trap and moving focus in all belong to
+  // Modal now. This component is a grid of layouts and nothing else.
   const first = useRef<HTMLButtonElement>(null);
 
-  // Focusing here is a real user action: the dialog only exists because they
-  // clicked to add a section.
-  useEffect(() => {
-    first.current?.focus();
-  }, []);
-
-  useEffect(() => {
-    function onKey(event: KeyboardEvent) {
-      if (event.key === 'Escape') onClose();
-    }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
-
   return (
-    <div
-      className="ed-modal-backdrop"
-      onClick={(event) => {
-        if (event.target === event.currentTarget) onClose();
-      }}
+    <Modal
+      title="Choose a layout"
+      description="Every layout stacks into one column on a phone, whichever you pick."
+      size="large"
+      onClose={onClose}
     >
-      <div
-        className="ed-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Choose a layout for your section"
-      >
-        <div className="ed-modal-head">
-          <span>Choose a layout for your section</span>
+      <div className="ed-layout-grid">
+        {LAYOUTS.map((layout, index) => (
           <button
+            key={layout.id}
+            ref={index === 0 ? first : undefined}
             type="button"
-            className="ed-btn"
-            data-variant="ghost"
-            data-icon="true"
-            onClick={onClose}
-            aria-label="Close"
+            className="ed-layout-card"
+            onClick={() => onPick(layout)}
           >
-            <Icon name="close" size={18} />
+            <LayoutThumb layout={layout} />
+            <span>{layout.label}</span>
           </button>
-        </div>
-
-        <div className="ed-modal-body">
-          <div className="ed-layout-grid">
-            {LAYOUTS.map((layout, index) => (
-              <button
-                key={layout.id}
-                ref={index === 0 ? first : undefined}
-                type="button"
-                className="ed-layout-card"
-                onClick={() => onPick(layout)}
-              >
-                <LayoutThumb layout={layout} />
-                <span>{layout.label}</span>
-              </button>
-            ))}
-          </div>
-
-          <p className="ed-help" style={{ marginTop: 16 }}>
-            You can change any of this afterwards. Drag the edge between two
-            columns in the preview to make one wider than the other.
-          </p>
-        </div>
+        ))}
       </div>
-    </div>
+
+      <p className="ed-modal__note">
+        You can change any of this afterwards. Drag the edge between two
+        columns in the preview to make one wider than the other.
+      </p>
+    </Modal>
   );
 }

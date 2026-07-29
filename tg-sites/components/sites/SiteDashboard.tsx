@@ -23,6 +23,7 @@ import { slugify } from '../../lib/content/slug';
 import type { PageSummary } from '../../lib/db/pages';
 import { OPEN_ACCESS_WARNING } from '../../lib/auth/temporary';
 import { Icon } from '../editor/Icon';
+import { ConfirmDialog, Modal } from '../ui/Modal';
 import './sites.css';
 
 const THEME_KEY = 'tg-sites:theme:v1';
@@ -84,13 +85,18 @@ export function SiteDashboard({ workspace, siteName, siteUrl, pages: initial, op
     [patch],
   );
 
+  /**
+   * The page waiting to be deleted, or null.
+   *
+   * window.confirm did this before. It cannot be styled, cannot speak in the
+   * product's voice, blocks the main thread, and looks like the browser
+   * telling you off rather than the product checking with you.
+   */
+  const [deleting, setDeleting] = useState<PageSummary | null>(null);
+
   const remove = useCallback(
     (page: PageSummary) => {
-      // A page is hours of someone's work and there is no undo for this one.
-      // Worth an interruption, and worth naming the page in the question.
-      const label = page.title || 'this page';
-      if (!window.confirm(`Delete "${label}"? This cannot be undone.`)) return;
-
+      setDeleting(null);
       setError(null);
       startTransition(async () => {
         const result = await deletePageAction(page.id);
@@ -158,6 +164,10 @@ export function SiteDashboard({ workspace, siteName, siteUrl, pages: initial, op
             </button>
           </div>
         ) : (
+          <>
+          <p className="sv-list-label">
+            {pages.length} {pages.length === 1 ? 'page' : 'pages'}
+          </p>
           <ul className="sv-list">
             {pages.map((page) => (
               <li className="sv-item" key={page.id}>
@@ -211,15 +221,27 @@ export function SiteDashboard({ workspace, siteName, siteUrl, pages: initial, op
                   data-danger="true"
                   disabled={busy}
                   aria-label={`Delete ${page.title}`}
-                  onClick={() => remove(page)}
+                  onClick={() => setDeleting(page)}
                 >
                   <Icon name="trash" size={16} />
                 </button>
               </li>
             ))}
           </ul>
+          </>
         )}
       </div>
+
+      {deleting && (
+        <ConfirmDialog
+          title={`Delete "${deleting.title}"?`}
+          description="The page and everything on it goes. This one cannot be undone."
+          confirmLabel="Delete page"
+          destructive
+          onConfirm={() => remove(deleting)}
+          onCancel={() => setDeleting(null)}
+        />
+      )}
 
       {dialog?.kind === 'new' && (
         <PageDialog
@@ -349,174 +371,57 @@ function PageDialog({
    */
   const [slugIsMine, setSlugIsMine] = useState(initialSlug !== undefined);
   const [message, setMessage] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
 
   const effectiveSlug = slugIsMine ? slugify(slug) : slugify(title);
   const isHome = effectiveSlug === '';
 
-  const dialog = useRef<HTMLFormElement>(null);
+  const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    function onKey(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        onClose();
-        return;
-      }
-
-      // Keep Tab inside the dialog. Without this, tabbing walks off into the
-      // page behind, which for a screen reader user means the modal has
-      // effectively vanished while still covering everything.
-      if (event.key !== 'Tab' || !dialog.current) return;
-
-      const focusable = dialog.current.querySelectorAll<HTMLElement>(
-        'button, input, [href], select, textarea, [tabindex]:not([tabindex="-1"])',
-      );
-      if (focusable.length === 0) return;
-
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      const active = document.activeElement;
-
-      if (event.shiftKey && active === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && active === last) {
-        event.preventDefault();
-        first.focus();
-      }
+  async function submit() {
+    if (!title.trim()) {
+      setMessage('Give the page a name.');
+      return;
     }
-
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
+    setSaving(true);
+    setMessage(await onSubmit(title.trim(), effectiveSlug));
+    setSaving(false);
+  }
 
   return (
-    <div
-      className="sv-scrim"
-      onClick={(event) => {
-        if (event.target === event.currentTarget) onClose();
-      }}
-    >
-      <form
-        ref={dialog}
-        className="sv-dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="sv-dialog-title"
-        onSubmit={async (event) => {
-          event.preventDefault();
-          if (!title.trim()) {
-            setMessage('Give the page a name.');
-            return;
-          }
-          setSaving(true);
-          setMessage(await onSubmit(title.trim(), effectiveSlug));
-          setSaving(false);
-        }}
-      >
-        <div className="sv-dialog__head">
-          <h2 id="sv-dialog-title">{heading}</h2>
-          <button
-            type="button"
-            className="sv-btn"
-            data-variant="quiet"
-            data-icon="true"
-            aria-label="Close"
-            onClick={onClose}
-          >
-            <Icon name="close" size={18} />
-          </button>
-        </div>
-
-        <div className="sv-dialog__body">
-          {message && (
-            <p className="sv-msg" role="alert">
-              {message}
-            </p>
-          )}
-
-          <div className="sv-field">
-            <label htmlFor="page-title">Page name</label>
-            <input
-              id="page-title"
-              value={title}
-              placeholder="About us"
-              /* The one place autofocus belongs: a dialog the agent opened on
-                 purpose, with a single obvious first field. */
-              autoFocus
-              onChange={(event) => setTitle(event.target.value)}
-            />
-            <small>What it is called in your list of pages.</small>
-          </div>
-
-          <div className="sv-field">
-            <label htmlFor="page-slug">Address</label>
-            <input
-              id="page-slug"
-              value={slugIsMine ? slug : slugify(title)}
-              placeholder="about-us"
-              onChange={(event) => {
-                setSlugIsMine(true);
-                setSlug(event.target.value);
-              }}
-            />
-            <small>
-              {isRename
-                ? 'Changing this breaks any existing link to the page.'
-                : slugIsMine
-                  ? 'Leave it empty and this becomes the home page.'
-                  : 'Filled in from the name. Change it if you want something shorter.'}
-            </small>
-          </div>
-
-          {/*
-            The consequence, stated rather than implied.
-
-            An empty address quietly means "home page", which is right for the
-            first page and almost never right for the fifth. Hiding that in
-            grey helper text meant naming a page "About us", leaving the
-            address alone and silently making a second home page, which the
-            database then refused with a duplicate error that explained
-            nothing. Now the outcome is on screen before the button is pressed.
-          */}
-          <p
-            className="sv-preview"
-            data-tone={isHome && !homeIsExpected ? 'warn' : 'ok'}
-          >
-            <Icon name={isHome && !homeIsExpected ? 'warning' : 'check'} size={16} />
-            {isHome ? (
-              <span>
-                {homeIsExpected ? (
-                  <>
-                    This will be the <strong>home page</strong>, at <code>{host}</code>
-                  </>
-                ) : (
-                  <>
-                    An empty address means the <strong>home page</strong>, and this site
-                    already has one. Give it an address unless that is what you meant.
-                  </>
-                )}
-              </span>
-            ) : (
-              <span>
-                Will live at{' '}
-                <code>
-                  {host}/<strong>{effectiveSlug}</strong>
-                </code>
-              </span>
-            )}
-          </p>
-        </div>
-
-        <div className="sv-actions">
-          <button type="button" className="sv-btn" onClick={onClose}>
+    <Modal
+      title={heading}
+      description={
+        isRename
+          ? 'The name is yours. The address is what visitors and search engines see.'
+          : 'Give it a name and it works out the address for you.'
+      }
+      onClose={onClose}
+      footer={
+        <>
+          <button type="button" className="tg-btn" onClick={onClose}>
             Cancel
           </button>
-          <button type="submit" className="sv-btn" data-variant="primary" disabled={saving}>
+          <button
+            type="button"
+            className="tg-btn"
+            data-variant="primary"
+            disabled={saving}
+            onClick={submit}
+          >
             {saving ? 'Working' : confirmLabel}
           </button>
-        </div>
+        </>
+      }
+    >
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          void submit();
+        }}
+      >
+        {/* Submit on Enter, without a second visible button. */}
+        <button type="submit" className="tg-visually-hidden" tabIndex={-1} aria-hidden="true" />
       </form>
-    </div>
+    </Modal>
   );
 }

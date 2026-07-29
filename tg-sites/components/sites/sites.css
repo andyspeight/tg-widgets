@@ -482,3 +482,291 @@
   .sv-item { flex-wrap: wrap; }
   .sv-item__main { flex-basis: 100%; }
 }
+
+
+/* ================================================================== */
+/* DESIGN PASS                                                        */
+/*                                                                    */
+/* Same treatment as the editor: de-carded, tighter type, structure    */
+/* from dividers and space rather than from borders. The dashboard is  */
+/* the first screen anyone sees, so it had been the least designed.    */
+/* ================================================================== */
+
+.sv-wrap {
+  /* 1080, not 880. The design law targets 1440 and the old width left a
+     third of a large screen empty either side of a list of four rows. */
+  max-width: 1080px;
+  padding: var(--ed-8) var(--ed-6) 96px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Header                                                              */
+/* ------------------------------------------------------------------ */
+
+.sv-head {
+  align-items: center;
+  padding-bottom: var(--ed-6);
+  margin-bottom: var(--ed-6);
+  border-bottom: 1px solid var(--ed-line);
+}
+
+.sv-eyebrow {
+  font-size: var(--ed-text-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ed-ink-3);
+}
+
+.sv-title {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.sv-url { display: inline-flex; align-items: center; gap: var(--ed-2); }
+
+.sv-url code {
+  font-size: var(--ed-text-sm);
+  padding: 2px var(--ed-2);
+  background: var(--ed-sunken);
+  border: 1px solid var(--ed-line-soft);
+}
+
+/* ------------------------------------------------------------------ */
+/* The page list: rows, not a bordered table                           */
+/* ------------------------------------------------------------------ */
+
+.sv-list {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+  border-top: 1px solid var(--ed-line);
+}
+
+.sv-item {
+  gap: var(--ed-4);
+  padding: var(--ed-4) var(--ed-3);
+  border-bottom: 1px solid var(--ed-line-soft);
+  border-radius: var(--ed-r-md);
+  transition: background-color 120ms ease-out;
+}
+
+.sv-item:hover { background: var(--ed-well); }
+
+.sv-item__title {
+  font-size: var(--ed-text-md);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.sv-item__meta { margin-top: var(--ed-1); gap: var(--ed-3); }
+.sv-path { color: var(--ed-ink-2); }
+
+/*
+ * Row actions appear on hover and on focus, and are always there for touch.
+ * Four buttons on every row at full strength turned a list of pages into a
+ * wall of controls; the page names are what you are scanning.
+ */
+.sv-item .sv-btn { opacity: 0; transition: opacity 120ms ease-out; }
+.sv-item:hover .sv-btn,
+.sv-item:focus-within .sv-btn { opacity: 1; }
+
+@media (hover: none) {
+  .sv-item .sv-btn { opacity: 1; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Status pills                                                        */
+/* ------------------------------------------------------------------ */
+
+/*
+ * A dot plus a word, not a filled lozenge per row. Four saturated pills down
+ * a list is a fruit salad; the state matters but it is not the headline.
+ */
+.sv-pill {
+  padding: 0;
+  background: transparent;
+  color: var(--ed-ink-3);
+  font-weight: 500;
+}
+
+.sv-pill::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+.sv-pill[data-state='published'] { background: transparent; color: #15803d; }
+.sv-pill[data-state='changed'] { background: transparent; color: #a16207; }
+
+.sv-root[data-theme='dark'] .sv-pill[data-state='published'] { background: transparent; color: #4ade80; }
+.sv-root[data-theme='dark'] .sv-pill[data-state='changed'] { background: transparent; color: #fbbf24; }
+
+@media (prefers-color-scheme: dark) {
+  .sv-root[data-theme='system'] .sv-pill[data-state='published'] { background: transparent; color: #4ade80; }
+  .sv-root[data-theme='system'] .sv-pill[data-state='changed'] { background: transparent; color: #fbbf24; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Buttons                                                             */
+/* ------------------------------------------------------------------ */
+
+.sv-btn { min-height: 36px; font-size: var(--ed-text-sm); font-weight: 600; }
+.sv-btn:active:not(:disabled) { transform: translateY(1px); }
+
+.sv-btn[data-variant='primary'] { min-height: 40px; }
+
+.sv-btn[data-variant='edit'] {
+  border-color: var(--ed-line);
+  color: var(--ed-brand-ink);
+}
+
+.sv-btn[data-danger='true']:hover:not(:disabled) {
+  background: #fef2f2;
+  color: var(--ed-danger);
+}
+
+.sv-root[data-theme='dark'] .sv-btn[data-danger='true']:hover:not(:disabled) { background: #450a0a; }
+
+/* ------------------------------------------------------------------ */
+/* Empty state                                                         */
+/* ------------------------------------------------------------------ */
+
+.sv-empty {
+  padding: 88px var(--ed-6);
+  border-style: solid;
+  border-color: var(--ed-line);
+  background: var(--ed-panel);
+}
+
+.sv-empty h2 { font-size: var(--ed-text-xl, 22px); letter-spacing: -0.02em; }
+
+/* ------------------------------------------------------------------ */
+/* The open-door notice                                                */
+/* ------------------------------------------------------------------ */
+
+.sv-warn {
+  justify-content: center;
+  font-size: var(--ed-text-xs);
+  font-weight: 600;
+  padding: var(--ed-2) var(--ed-4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sv-item, .sv-item .sv-btn { transition: none; }
+  .sv-btn:active:not(:disabled) { transform: none; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Front door, and the notices the published site shows                */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Both of these were inline style objects, which is what a placeholder looks
+ * like once everything around it has been designed. Same tokens, same type
+ * scale, same buttons as the screens they link to.
+ *
+ * Left aligned, not centred: the design law bans a centred hero at this
+ * variance, and a centred column of three things is the single most common
+ * tell that nobody made a decision.
+ */
+.tg-door {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 96px var(--ed-6);
+}
+
+.tg-door[data-narrow='true'] { max-width: 560px; }
+
+.tg-door__eyebrow {
+  margin: 0;
+  font-size: var(--ed-text-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ed-accent-dark);
+}
+
+.tg-door__title {
+  margin: var(--ed-3) 0 0;
+  font-size: 44px;
+  line-height: 1.08;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--ed-ink);
+}
+
+.tg-door__title[data-small='true'] { font-size: 28px; letter-spacing: -0.02em; }
+
+.tg-door__lede {
+  margin: var(--ed-5) 0 0;
+  /* 65ch is the readable ceiling and this sits under it. */
+  max-width: 58ch;
+  font-size: var(--ed-text-lg);
+  line-height: 1.6;
+  color: var(--ed-ink-2);
+}
+
+.tg-door__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ed-3);
+  margin-top: var(--ed-8);
+}
+
+.tg-door__actions .tg-btn { min-height: 44px; padding: 0 var(--ed-5); }
+
+.tg-door__note {
+  margin: 64px 0 0;
+  padding-top: var(--ed-5);
+  border-top: 1px solid var(--ed-line);
+  max-width: 58ch;
+  font-size: var(--ed-text-sm);
+  line-height: 1.6;
+  color: var(--ed-ink-3);
+}
+
+@media (max-width: 640px) {
+  .tg-door { padding: 56px var(--ed-5); }
+  .tg-door__title { font-size: 34px; }
+  .tg-door__actions .tg-btn { width: 100%; }
+}
+
+/*
+ * The list gets a surface; the heading stays outside it.
+ *
+ * Flat rows straight onto the grey field looked unanchored, and the hairlines
+ * between them were invisible because a soft line on a grey background is the
+ * same colour twice. A white panel gives the rows something to sit on and
+ * makes the dividers do their job, and keeping the title above rather than
+ * inside it is the rule about labelling a group from outside.
+ */
+.sv-list {
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-lg);
+  background: var(--ed-panel);
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(27, 43, 91, 0.04);
+}
+
+.sv-item {
+  border-radius: 0;
+  border-bottom: 1px solid var(--ed-line-soft);
+  padding: var(--ed-4) var(--ed-5);
+}
+
+.sv-item:last-child { border-bottom: 0; }
+
+.sv-list-label {
+  margin: 0 0 var(--ed-3);
+  font-size: var(--ed-text-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ed-ink-3);
+}
