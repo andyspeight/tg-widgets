@@ -15,12 +15,30 @@ in git.
 
 Open <https://supabase.com/dashboard/project/qvzbothxlrzeklcvdhzp>
 
+**Already done on 29 July 2026. The host is `aws-1-eu-west-2.pooler.supabase.com`.**
+Skip to step 2 unless something has changed. The rest of this step is kept
+because it will be needed again for the next project.
+
 Click the green **Connect** button at the top of the page. A panel opens with
 five tabs. Click the third one, **Direct, Connection string**.
 
 Ignore the **Framework** tab. That is the client-library route, which connects
 as `anon`, and `anon` is revoked from every table in this database. The
 publishable key it offers you is deliberately useless here.
+
+### The one switch that matters
+
+Under **Connection Method**, pick **Transaction pooler** (usually already
+selected). Then flip **"Use IPv4 connection"** ON.
+
+That toggle is free and it is the whole job: it swaps the endpoint from the
+dedicated pooler to the shared one. Its own help text says so, "Uses the
+shared pooler".
+
+Do **not** click **"Enable IPv4 add-on"** in the grey box just below. Very
+similar name, completely different thing: that is a $4/month add-on which
+makes the *dedicated* pooler reachable over IPv4. You do not need it, because
+the shared pooler is IPv4 already.
 
 ### Two poolers, and only one of them works
 
@@ -61,15 +79,15 @@ copying it rather than trusting what is written here.
 
 Open <https://supabase.com/dashboard/project/qvzbothxlrzeklcvdhzp/sql/new>
 
-Paste the whole block below in. **Before running it**, replace
-`PASTE-POOLER-HOST-HERE` on the third line with what you copied in step 1.
+Paste the whole block below in and press Run. The host from step 1 is already
+in it.
 
 ```sql
 -- Generates two strong passwords, sets them on the two roles, and prints
 -- the finished connection strings ready to paste into Vercel.
 create temp table setup as
-select 'PASTE-POOLER-HOST-HERE'::text as pooler_host,
-       'qvzbothxlrzeklcvdhzp'::text   as project_ref,
+select 'aws-1-eu-west-2.pooler.supabase.com'::text as pooler_host,
+       'qvzbothxlrzeklcvdhzp'::text                as project_ref,
        replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', '') as app_pw,
        replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', '') as renderer_pw;
 
