@@ -13,6 +13,7 @@ import { Icon, type IconName } from './Icon';
 
 export type MenuItem =
   | { separator: true }
+  | { heading: string; separator?: false }
   | {
       separator?: false;
       icon: IconName;
@@ -20,6 +21,8 @@ export type MenuItem =
       onClick: () => void;
       disabled?: boolean;
       danger?: boolean;
+      /** Set for items that form a choice. Renders a tick and marks the role. */
+      checked?: boolean;
     };
 
 export function Menu({
@@ -74,14 +77,22 @@ export function Menu({
 
       {open && (
         <div className="ed-menu" role="menu">
-          {items.map((item, index) =>
-            item.separator ? (
-              <hr key={index} />
-            ) : (
+          {items.map((item, index) => {
+            if ('separator' in item && item.separator) return <hr key={index} />;
+            if ('heading' in item) {
+              return (
+                <p key={index} className="ed-menu__heading">
+                  {item.heading}
+                </p>
+              );
+            }
+            const isChoice = item.checked !== undefined;
+            return (
               <button
                 key={index}
                 type="button"
-                role="menuitem"
+                role={isChoice ? 'menuitemradio' : 'menuitem'}
+                aria-checked={isChoice ? item.checked : undefined}
                 disabled={item.disabled}
                 data-variant={item.danger ? 'danger' : undefined}
                 onClick={() => {
@@ -89,11 +100,11 @@ export function Menu({
                   item.onClick();
                 }}
               >
-                <Icon name={item.icon} size={16} />
+                <Icon name={isChoice ? (item.checked ? 'check' : 'blank') : item.icon} size={16} />
                 {item.label}
               </button>
-            ),
-          )}
+            );
+          })}
         </div>
       )}
     </div>

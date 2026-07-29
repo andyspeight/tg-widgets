@@ -16,6 +16,7 @@ import {
   type Section,
 } from './schema';
 import { blockDefinition, defaultPropsFor } from './blocks';
+import { DEFAULT_LAYOUT, type Layout } from './layouts';
 
 let counter = 0;
 
@@ -77,6 +78,23 @@ export function createSection(preset = '1'): Section {
     width: 'contained',
     paddingY: 'l',
     rows: [createRow(preset)],
+  };
+}
+
+/**
+ * Build a section from a picked layout.
+ *
+ * A layout is a list of rows, each a list of relative column widths, so this
+ * is createRow per row with the ratios turned back into the preset string
+ * createRow already understands.
+ */
+export function createSectionFromLayout(layout: Layout = DEFAULT_LAYOUT): Section {
+  return {
+    id: newId('sec'),
+    tone: 'light',
+    width: 'contained',
+    paddingY: 'l',
+    rows: layout.rows.map((ratios) => createRow(ratios.join('-'))),
   };
 }
 

@@ -13,7 +13,8 @@ import {
   normaliseWidths,
   parsePage,
 } from '../lib/content/schema';
-import { createPage, createRow, newId } from '../lib/content/factory';
+import { createPage, createRow, createSectionFromLayout, newId } from '../lib/content/factory';
+import { LAYOUTS, layoutCells } from '../lib/content/layouts';
 import {
   addBlock,
   addColumn,
@@ -399,5 +400,50 @@ describe('factory', () => {
     const b = createBlock('list');
     (a.props.items as unknown[]).push({ text: 'extra' });
     expect((b.props.items as unknown[]).length).toBe(3);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+describe('layouts', () => {
+  it('every layout builds a section matching its own shape', () => {
+    for (const layout of LAYOUTS) {
+      const section = createSectionFromLayout(layout);
+      expect(section.rows.map((row) => row.columns.length)).toEqual(
+        layout.rows.map((ratios) => ratios.length),
+      );
+      for (const row of section.rows) {
+        expect(sum(row.columns.map((c) => c.width))).toBeCloseTo(100, 2);
+      }
+    }
+  });
+
+  it('respects the declared ratios', () => {
+    const wide = createSectionFromLayout(
+      LAYOUTS.find((l) => l.id === 'sidebar-right')!,
+    );
+    const [a, b] = wide.rows[0].columns;
+    // 2:1 means the first column is twice the second.
+    expect(a.width / b.width).toBeCloseTo(2, 1);
+  });
+
+  it('thumbnail cells stay inside the box and never overlap', () => {
+    for (const layout of LAYOUTS) {
+      const cells = layoutCells(layout);
+      expect(cells).toHaveLength(layout.rows.flat().length);
+      for (const cell of cells) {
+        expect(cell.x).toBeGreaterThanOrEqual(0);
+        expect(cell.y).toBeGreaterThanOrEqual(0);
+        expect(cell.x + cell.width).toBeLessThanOrEqual(1.0001);
+        expect(cell.y + cell.height).toBeLessThanOrEqual(1.0001);
+        expect(cell.width).toBeGreaterThan(0);
+        expect(cell.height).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('has no duplicate ids or labels', () => {
+    expect(new Set(LAYOUTS.map((l) => l.id)).size).toBe(LAYOUTS.length);
+    expect(new Set(LAYOUTS.map((l) => l.label)).size).toBe(LAYOUTS.length);
   });
 });

@@ -216,6 +216,61 @@ await check('block picker opens from a section', async () => {
 await check('block picker offers the full library', async () =>
   (await page.locator('.ed-block-card').count()) === 13);
 
+// Leave the page as we found it, or the open modal eats the next click.
+await page.keyboard.press('Escape');
+await page.waitForTimeout(200);
+
+// --- adding a section ------------------------------------------------
+
+await check('there is an insert point on every section seam', async () =>
+  // One before the first section and one after each of the three.
+  (await page.locator('.ed-insert__btn').count()) === 4);
+
+// The preview has to stay pixel-accurate to the published page, so the
+// insert affordance must float over the seam rather than occupy it.
+await check('insert points do not shift the page', async () => {
+  const heights = await page.evaluate(() =>
+    [...document.querySelectorAll('.ed-insert')].map((n) => n.getBoundingClientRect().height),
+  );
+  return heights.every((h) => h === 0) ? true : `heights ${JSON.stringify(heights)}`;
+});
+
+await check('an insert point opens the layout picker', async () => {
+  await page.locator('.ed-insert__btn').first().click();
+  await page.waitForTimeout(300);
+  const heading = await page.locator('.ed-modal-head').innerText();
+  return heading.includes('Choose a layout') ? true : `head reads "${heading}"`;
+});
+
+await check('the picker offers the full layout set', async () =>
+  (await page.locator('.ed-layout-card').count()) === 12);
+
+await check('layout thumbnails are drawn, not described', async () =>
+  (await page.locator('.ed-layout-card .ed-thumb rect').count()) > 12);
+
+await check('picking a layout inserts a section in the right place', async () => {
+  const before = await page.locator('.tgs-section').count();
+  // "Two by two" is the only four-cell layout, so the shape is checkable.
+  await page.locator('.ed-layout-card', { hasText: 'Two by two' }).click();
+  await page.waitForTimeout(400);
+
+  const after = await page.locator('.tgs-section').count();
+  if (after !== before + 1) return `sections went ${before} -> ${after}`;
+
+  // Inserted at index 0, so it must be the first section, with two rows of
+  // two columns each.
+  const shape = await page.locator('.tgs-section').first().evaluate((node) =>
+    [...node.querySelectorAll('.tgs-row')].map((row) => row.querySelectorAll('.tgs-col').length),
+  );
+  return JSON.stringify(shape) === '[2,2]' ? true : `shape ${JSON.stringify(shape)}`;
+});
+
+await check('the new section is undoable', async () => {
+  await page.keyboard.press('Control+z');
+  await page.waitForTimeout(300);
+  return (await page.locator('.tgs-section').count()) === 3;
+});
+
 /*
  * Dark mode gets its own pass. It is where contrast quietly fails, because
  * nobody looks at it as often, and a token that works as a background in one
@@ -228,6 +283,21 @@ const darkPage = await browser.newPage({
 darkPage.on('pageerror', (error) => errors.push(`dark pageerror: ${error.message}`));
 await darkPage.goto(pathToFileURL(file).href);
 await darkPage.waitForSelector('.ed-root', { timeout: 15000 });
+
+// A dark operating system must NOT hand over a dark editor on its own.
+await check('a dark system still opens in light', async () => {
+  const theme = await darkPage.locator('.ed-root').getAttribute('data-theme');
+  return theme === 'light' ? true : `opened as "${theme}"`;
+});
+
+await check('choosing Dark switches the chrome', async () => {
+  await darkPage.getByRole('button', { name: 'More actions' }).click();
+  await darkPage.waitForTimeout(200);
+  await darkPage.getByRole('menuitemradio', { name: 'Dark' }).click();
+  await darkPage.waitForTimeout(300);
+  const theme = await darkPage.locator('.ed-root').getAttribute('data-theme');
+  return theme === 'dark' ? true : `theme is "${theme}"`;
+});
 
 const contrastIn = (target) => async () => {
   const ratio = await target.evaluate(() => {

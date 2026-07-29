@@ -17,22 +17,37 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Page } from '../../lib/content/schema';
 import { parsePage } from '../../lib/content/schema';
 import { SEED_PAGE } from '../../lib/content/seed';
-import { createBlock, newId } from '../../lib/content/factory';
+import { createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
 import { addBlock, type Path, pathKey, resolve } from '../../lib/content/tree';
 import { Outline } from './Outline';
 import { Canvas } from './Canvas';
 import { Properties } from './Properties';
 import { BlockPicker } from './BlockPicker';
+import { LayoutPicker } from './LayoutPicker';
 import { Icon, type IconName } from './Icon';
 import { Menu } from './Menu';
 import './editor.css';
 
 const STORAGE_KEY = 'tg-sites:draft:v1';
+const THEME_KEY = 'tg-sites:theme:v1';
 const HISTORY_LIMIT = 50;
 /** Edits to the same field inside this window collapse into one undo step. */
 const COALESCE_MS = 700;
 
 export type Viewport = 'desktop' | 'tablet' | 'phone';
+
+/**
+ * Light is the default and stays the default, whatever the operating system
+ * is set to. Following the OS meant anyone on a dark Mac was handed a dark
+ * editor they never asked for.
+ */
+export type Theme = 'light' | 'dark' | 'system';
+
+const THEMES: ReadonlyArray<{ value: Theme; label: string }> = [
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+  { value: 'system', label: 'Match my computer' },
+];
 
 /** Label and icon together. An icon-only control is a guess. */
 const VIEWPORTS: ReadonlyArray<{ value: Viewport; label: string; icon: IconName }> = [
@@ -65,8 +80,11 @@ export function EditorShell({ isStaff = true }: { isStaff?: boolean }) {
   const [selected, setSelected] = useState<Path | null>(null);
   const [viewport, setViewport] = useState<Viewport>('desktop');
   const [picker, setPicker] = useState<{ section: number; row: number; column: number } | null>(null);
+  /** Where a new section would go. null means the picker is closed. */
+  const [insertAt, setInsertAt] = useState<number | null>(null);
   const [saved, setSaved] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [mobilePane, setMobilePane] = useState<'canvas' | 'props' | 'outline'>('canvas');
+  const [theme, setTheme] = useState<Theme>('light');
 
   const page = history.present;
 
@@ -99,6 +117,26 @@ export function EditorShell({ isStaff = true }: { isStaff?: boolean }) {
       console.warn('[tg-sites] saved draft was not valid JSON, starting fresh');
     }
   }, []);
+
+  // Remember the appearance choice. Read before first paint would be better
+  // still, but a shell with no server session cannot do that yet, and the
+  // default being light means the common case never flashes.
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(THEME_KEY);
+      if (stored === 'light' || stored === 'dark' || stored === 'system') setTheme(stored);
+    } catch {
+      // Storage blocked. Light is a fine place to stay.
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(THEME_KEY, theme);
+    } catch {
+      // Not worth surfacing: the choice still applies for this session.
+    }
+  }, [theme]);
 
   // ---------------------------------------------------------------------
   // Autosave
@@ -276,7 +314,7 @@ export function EditorShell({ isStaff = true }: { isStaff?: boolean }) {
   // ---------------------------------------------------------------------
 
   return (
-    <div className="ed-root" data-pane={mobilePane}>
+    <div className="ed-root" data-pane={mobilePane} data-theme={theme}>
       <header className="ed-topbar">
         <span className="ed-brand">
           <span className="ed-brand__mark" aria-hidden="true">
@@ -356,14 +394,25 @@ export function EditorShell({ isStaff = true }: { isStaff?: boolean }) {
         <Menu
           label="More actions"
           items={[
+            { heading: 'Appearance' },
+            ...THEMES.map((option) => ({
+              icon: 'blank' as const,
+              label: option.label,
+              checked: theme === option.value,
+              onClick: () => setTheme(option.value),
+            })),
+            { separator: true },
             {
               icon: 'download',
-              label: 'Export this page',
+              label: 'Save a copy of this page',
               onClick: exportJson,
             },
             {
+              // Named for what it does. It restores a page this editor
+              // exported, and calling it "Import" invited the reasonable
+              // assumption that it takes HTML or a Figma file.
               icon: 'upload',
-              label: 'Import a page',
+              label: 'Open a saved page file',
               onClick: () => fileInput.current?.click(),
             },
           ]}
@@ -383,6 +432,7 @@ export function EditorShell({ isStaff = true }: { isStaff?: boolean }) {
       </header>
 
       <Outline
+        onAddSection={() => setInsertAt(page.sections.length)}
         page={page}
         selectedKey={selectedKey}
         onSelect={select}
@@ -392,6 +442,7 @@ export function EditorShell({ isStaff = true }: { isStaff?: boolean }) {
       />
 
       <Canvas
+        onInsertSection={setInsertAt}
         page={page}
         selectedKey={selectedKey}
         selected={selected}
@@ -410,6 +461,22 @@ export function EditorShell({ isStaff = true }: { isStaff?: boolean }) {
         onCommit={commit}
         onBack={() => setMobilePane('canvas')}
       />
+
+      {insertAt !== null && (
+        <LayoutPicker
+          onClose={() => setInsertAt(null)}
+          onPick={(layout) => {
+            const at = insertAt;
+            setInsertAt(null);
+            commit((current) => {
+              const sections = [...current.sections];
+              sections.splice(at, 0, createSectionFromLayout(layout));
+              return { ...current, sections };
+            });
+            setSelected({ kind: 'section', section: at });
+          }}
+        />
+      )}
 
       {picker && (
         <BlockPicker

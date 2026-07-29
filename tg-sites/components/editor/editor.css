@@ -77,8 +77,45 @@
   --ed-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+/*
+ * Dark tokens.
+ *
+ * Light is the default and stays the default. Dark applies only when the
+ * agent asks for it, or when they have chosen "match system" and their
+ * system is dark. Following the OS unasked meant anyone on a dark Mac was
+ * handed a dark editor they never chose, which is exactly what happened.
+ *
+ * The block is written twice on purpose. CSS has no way to share a token set
+ * between two selectors without a preprocessor, and the alternative (a single
+ * selector list) would make the media query apply to the explicit choice too.
+ */
+.ed-root[data-theme='dark'] {
+    /* Desaturated lighter tones rather than inverted values. */
+    --ed-bg: #0b1220;
+    --ed-panel: #0f172a;
+    --ed-well: #1e293b;
+    --ed-sunken: #172033;
+    --ed-line: #334155;
+    --ed-line-soft: #1e293b;
+    --ed-ink: #f8fafc;
+    --ed-ink-2: #cbd5e1;
+    --ed-ink-3: #64748b;
+    /* Keep the navy: white on the light slate this used to be came out
+       around 2:1, well under the 4.5 minimum. */
+    --ed-primary: #2a3f7a;
+    --ed-primary-light: #3a5296;
+    --ed-brand-ink: #93c5fd;
+    --ed-danger: #fca5a5;
+    --ed-select: #60a5fa;
+    --ed-select-wash: #172554;
+    --ed-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+    --ed-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
+    --ed-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.55);
+    --ed-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.6);
+}
+
 @media (prefers-color-scheme: dark) {
-  .ed-root {
+  .ed-root[data-theme='system'] {
     /* Desaturated lighter tones rather than inverted values. */
     --ed-bg: #0b1220;
     --ed-panel: #0f172a;
@@ -1027,3 +1064,148 @@
   line-height: 1.6;
 }
 .ed-empty-note strong { color: var(--ed-ink); }
+
+/* ------------------------------------------------------------------ */
+/* Insert a section                                                    */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Sits ON the seam between two sections, at zero height, so it never pushes
+ * them apart. The canvas has to stay pixel-accurate to what gets published,
+ * and a strip of padding between every section would quietly make the
+ * preview a lie.
+ */
+.ed-insert {
+  position: relative;
+  height: 0;
+  z-index: 6;
+}
+
+.ed-insert__btn {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ed-1);
+  height: 32px;
+  padding: 0 var(--ed-3);
+  border: 0;
+  border-radius: var(--ed-r-full);
+  background: var(--ed-accent);
+  color: #fff;
+  font-family: var(--ed-font);
+  font-size: var(--ed-text-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: var(--ed-shadow-md);
+  /* Visible but quiet until wanted. Never fully hidden, because hover does
+     not exist on a tablet. */
+  opacity: 0.55;
+  transition: opacity 150ms ease-out, transform 150ms ease-out;
+}
+.ed-insert__btn::after {
+  /* Claims the full 44px touch height without a 44px visual pill. */
+  content: '';
+  position: absolute;
+  inset: -6px -8px;
+}
+.ed-insert__btn:hover,
+.ed-insert__btn:focus-visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.04);
+}
+.ed-insert__plus { display: inline-flex; }
+@media (prefers-reduced-motion: reduce) {
+  .ed-insert__btn { transition: none; }
+  .ed-insert__btn:hover { transform: translate(-50%, -50%); }
+}
+
+/* ------------------------------------------------------------------ */
+/* Layout picker                                                       */
+/* ------------------------------------------------------------------ */
+
+.ed-layout-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: var(--ed-3);
+}
+
+.ed-layout-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--ed-2);
+  padding: var(--ed-3);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+  color: var(--ed-ink);
+  font: inherit;
+  font-size: var(--ed-text-sm);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 150ms ease-out, background-color 150ms ease-out;
+}
+.ed-layout-card:hover { border-color: var(--ed-accent); background: var(--ed-well); }
+@media (prefers-reduced-motion: reduce) { .ed-layout-card { transition: none; } }
+
+.ed-thumb {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 100 / 68;
+}
+.ed-thumb rect {
+  fill: none;
+  stroke: var(--ed-ink-2);
+  stroke-width: 3;
+}
+.ed-layout-card:hover .ed-thumb rect { stroke: var(--ed-accent-dark); }
+
+/* The same thumbnails, smaller, for choosing a row inside a section. */
+.ed-rowpick {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+  gap: var(--ed-1);
+  padding: var(--ed-2);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+}
+.ed-rowpick__item {
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  padding: var(--ed-1);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-sm);
+  background: var(--ed-panel);
+  cursor: pointer;
+}
+.ed-rowpick__item:hover { border-color: var(--ed-accent); }
+.ed-rowpick__item .ed-thumb { width: 100%; }
+.ed-rowpick__cancel {
+  grid-column: 1 / -1;
+  min-height: 44px;
+  border: 0;
+  border-radius: var(--ed-r-sm);
+  background: none;
+  color: var(--ed-ink-2);
+  font: inherit;
+  font-size: var(--ed-text-sm);
+  cursor: pointer;
+}
+.ed-rowpick__cancel:hover { background: var(--ed-well); }
+
+.ed-menu__heading {
+  margin: var(--ed-1) 0 2px;
+  padding: 0 var(--ed-3);
+  font-size: var(--ed-text-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ed-ink-3);
+}

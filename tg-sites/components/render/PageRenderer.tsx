@@ -11,7 +11,7 @@
  * side, which is the point: the preview cannot drift from what ships.
  */
 
-import type { CSSProperties, ReactElement } from 'react';
+import { Fragment, type CSSProperties, type ReactElement } from 'react';
 import type { Column, Page, Row, Section } from '../../lib/content/schema';
 import { safeUrl } from '../../lib/content/sanitise';
 import { BlockRenderer } from './BlockRenderer';
@@ -39,19 +39,46 @@ function pathAttr(editable: boolean, key: string): { 'data-path'?: string } {
 export function PageRenderer({ page, editable = false }: { page: Page } & Editable): ReactElement {
   return (
     <div className="tgs-page" {...pathAttr(editable, 'page')}>
+      {editable && <InsertPoint index={0} />}
+
       {page.sections.map((section, index) => (
-        <SectionRenderer
-          key={section.id}
-          section={section}
-          index={index}
-          editable={editable}
-        />
+        <Fragment key={section.id}>
+          <SectionRenderer section={section} index={index} editable={editable} />
+          {editable && <InsertPoint index={index + 1} />}
+        </Fragment>
       ))}
+
       {editable && page.sections.length === 0 && (
         <div className="tgs-placeholder" style={{ margin: 32 }}>
           This page is empty. Add a section to get started.
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * The "Add Section" affordance that sits on the seam between two sections.
+ *
+ * Zero height and absolutely positioned, so it floats over the join without
+ * pushing the sections apart. That matters more than it sounds: the canvas
+ * has to stay pixel-accurate to what gets published, and a 24px strip
+ * between every section would quietly make the preview a lie.
+ *
+ * No handler here. The canvas reads data-insert from a delegated click, which
+ * is what keeps this file usable as a server component.
+ */
+function InsertPoint({ index }: { index: number }): ReactElement {
+  return (
+    <div className="ed-insert">
+      <button type="button" className="ed-insert__btn" data-insert={index}>
+        <span className="ed-insert__plus" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+        </span>
+        <span className="ed-insert__label">Add Section</span>
+      </button>
     </div>
   );
 }

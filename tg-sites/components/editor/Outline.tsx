@@ -28,7 +28,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { Page, Row } from '../../lib/content/schema';
-import { ROW_PRESETS, blockLabel, createRow, createSection } from '../../lib/content/factory';
+import { blockLabel, createRow } from '../../lib/content/factory';
 import {
   type Path,
   type Reid,
@@ -52,6 +52,11 @@ import {
 } from '../../lib/content/naming';
 import { Icon } from './Icon';
 import { Menu } from './Menu';
+import { LayoutThumb } from './LayoutPicker';
+import { LAYOUTS } from '../../lib/content/layouts';
+
+/** The single-row layouts, which are the only ones that make sense as a row. */
+const ROW_LAYOUTS = LAYOUTS.filter((layout) => layout.rows.length === 1);
 
 interface Props {
   page: Page;
@@ -59,6 +64,7 @@ interface Props {
   onSelect: (path: Path) => void;
   onCommit: (next: (current: Page) => Page, coalesceKey?: string) => void;
   onPickBlock: (target: { section: number; row: number; column: number }) => void;
+  onAddSection: () => void;
   newId: Reid;
 }
 
@@ -68,11 +74,10 @@ type DragItem =
 
 // ---------------------------------------------------------------------------
 
-export function Outline({ page, selectedKey, onSelect, onCommit, onPickBlock, newId }: Props) {
+export function Outline({ page, selectedKey, onSelect, onCommit, onPickBlock, onAddSection, newId }: Props) {
   const [open, setOpen] = useState<Set<string>>(() => new Set());
   const [drag, setDrag] = useState<DragItem | null>(null);
   const [over, setOver] = useState<string | null>(null);
-  const [adding, setAdding] = useState(false);
 
   /*
    * Selecting something on the canvas has to reveal it here, otherwise the
@@ -246,37 +251,16 @@ export function Outline({ page, selectedKey, onSelect, onCommit, onPickBlock, ne
       </div>
 
       <div className="ed-outline-foot">
-        {adding ? (
-          <div className="ed-segmented" style={{ flexDirection: 'column' }}>
-            {ROW_PRESETS.map((preset) => (
-              <button
-                key={preset.preset}
-                type="button"
-                aria-pressed={false}
-                onClick={() => {
-                  onCommit((c) => ({ ...c, sections: [...c.sections, createSection(preset.preset)] }));
-                  setAdding(false);
-                }}
-              >
-                {preset.label}
-              </button>
-            ))}
-            <button type="button" aria-pressed={false} onClick={() => setAdding(false)}>
-              Cancel
-            </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            className="ed-btn"
-            data-variant="primary"
-            style={{ width: '100%' }}
-            onClick={() => setAdding(true)}
-          >
-            <Icon name="plus" size={16} />
-            Add a section
-          </button>
-        )}
+        <button
+          type="button"
+          className="ed-btn"
+          data-variant="primary"
+          style={{ width: '100%' }}
+          onClick={onAddSection}
+        >
+          <Icon name="plus" size={16} />
+          Add a section
+        </button>
       </div>
     </aside>
   );
@@ -451,6 +435,13 @@ function Band({
   );
 }
 
+/**
+ * Adding a row of columns inside an existing section.
+ *
+ * Shows the same generated thumbnails as the section layout picker, so the
+ * two ways of choosing a shape look like the same idea rather than two
+ * unrelated controls.
+ */
 function AddRow({ onAdd }: { onAdd: (preset: string) => void }) {
   const [open, setOpen] = useState(false);
 
@@ -464,21 +455,23 @@ function AddRow({ onAdd }: { onAdd: (preset: string) => void }) {
   }
 
   return (
-    <div className="ed-segmented" style={{ flexDirection: 'column' }}>
-      {ROW_PRESETS.map((preset) => (
+    <div className="ed-rowpick">
+      {ROW_LAYOUTS.map((layout) => (
         <button
-          key={preset.preset}
+          key={layout.id}
           type="button"
-          aria-pressed={false}
+          className="ed-rowpick__item"
+          title={layout.label}
+          aria-label={layout.label}
           onClick={() => {
-            onAdd(preset.preset);
+            onAdd(layout.rows[0].join('-'));
             setOpen(false);
           }}
         >
-          {preset.label}
+          <LayoutThumb layout={layout} />
         </button>
       ))}
-      <button type="button" aria-pressed={false} onClick={() => setOpen(false)}>
+      <button type="button" className="ed-rowpick__cancel" onClick={() => setOpen(false)}>
         Cancel
       </button>
     </div>

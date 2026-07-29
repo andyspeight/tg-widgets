@@ -52,6 +52,7 @@ export type IconName =
   | 'check'
   | 'close'
   | 'search'
+  | 'blank'
   // viewports
   | 'desktop'
   | 'tablet'
@@ -94,6 +95,7 @@ const PATHS: Record<IconName, string> = {
   download: 'M4 17v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2M12 3v12M7 10l5 5 5-5',
   check: 'M4 12l5 5L20 6',
   close: 'M6 6l12 12M18 6L6 18',
+  blank: '',
   search: 'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3',
 
   desktop: 'M3 5h18v11H3zM8 20h8M12 16v4',
@@ -120,7 +122,13 @@ interface IconProps extends Omit<SVGProps<SVGSVGElement>, 'name'> {
 
 export function Icon({ name, size = 16, label, ...rest }: IconProps) {
   const path = PATHS[name];
-  if (!path) return null;
+  if (path === undefined) return null;
+
+  // A deliberate empty icon, used to keep unticked menu rows aligned with
+  // ticked ones. Renders the box without drawing in it.
+  if (path === '') {
+    return <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true" focusable="false" />;
+  }
 
   return (
     <svg

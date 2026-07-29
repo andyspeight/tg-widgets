@@ -38,6 +38,7 @@ interface Props {
   onSelect: (path: Path) => void;
   onCommit: (next: (current: Page) => Page, coalesceKey?: string) => void;
   onPickBlock: (target: { section: number; row: number; column: number }) => void;
+  onInsertSection: (index: number) => void;
 }
 
 /** Live state of a width drag. Kept in a ref: it changes faster than React. */
@@ -59,6 +60,7 @@ export function Canvas({
   onSelect,
   onCommit,
   onPickBlock,
+  onInsertSection,
 }: Props) {
   const frameRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<DragState | null>(null);
@@ -113,6 +115,13 @@ export function Canvas({
     (event: React.MouseEvent<HTMLDivElement>) => {
       const target = event.target as HTMLElement;
 
+      // "Add Section" on the seam between two sections.
+      const inserter = target.closest<HTMLElement>('[data-insert]');
+      if (inserter) {
+        onInsertSection(Number(inserter.dataset.insert));
+        return;
+      }
+
       // The empty-column placeholder opens the block picker instead.
       const adder = target.closest<HTMLElement>('[data-add]');
       if (adder) {
@@ -135,7 +144,7 @@ export function Canvas({
       const path = parsePathKey(node.dataset.path);
       if (path) onSelect(path);
     },
-    [onSelect, onPickBlock],
+    [onSelect, onPickBlock, onInsertSection],
   );
 
   // ---------------------------------------------------------------------
