@@ -40,6 +40,29 @@ const result = await esbuild.build({
   entryNames: 'app',
   metafile: true,
   logLevel: 'info',
+
+  plugins: [
+    {
+      /**
+       * Swap the server actions for in-memory doubles.
+       *
+       * The real ones import a Postgres driver and Next's cache, neither of
+       * which can exist in a file served from a static host. This is the ONLY
+       * substitution the standalone build makes, and it is confined to
+       * persistence: every component, every style and every validation rule
+       * is the real one.
+       *
+       * standalone/demo-actions.ts type-checks itself against the real
+       * signatures, so this cannot silently drift.
+       */
+      name: 'demo-actions',
+      setup(build) {
+        build.onResolve({ filter: /(^|\/)app\/actions\/pages$/ }, () => ({
+          path: resolve(root, 'standalone/demo-actions.ts'),
+        }));
+      },
+    },
+  ],
 });
 
 const js = await readFile(resolve(outDir, 'app.js'), 'utf8');
@@ -83,7 +106,7 @@ body { background: #f1f5f9; }
 
 const banner = `<div class="sa-note">
   <strong>Travelgenix Sites</strong>
-  <span>CMS shell, work in progress. Your draft saves to this browser.</span>
+  <span>Review copy. Nothing you change here is saved, close the tab and it is gone.</span>
   <b>Images and video need the hosted version, this sandbox blocks outside requests</b>
 </div>`;
 

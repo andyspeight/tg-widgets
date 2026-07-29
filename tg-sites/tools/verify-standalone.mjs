@@ -103,13 +103,48 @@ await check('every icon-only control has an accessible name', async () => {
   return unnamed.length === 0 ? true : `unnamed: ${JSON.stringify(unnamed)}`;
 });
 
+/*
+ * Measured by probing, not by reading a box.
+ *
+ * Several controls here are deliberately a compact pill with an ::after
+ * overlay claiming the rest of the 44px, so the visual stays small while the
+ * target does not. getBoundingClientRect only sees the pill and called those
+ * a failure, which is the test being wrong rather than the button.
+ *
+ * What matters is where a finger can land, so this asks the page: at the top
+ * and bottom of the 44px band, what would a tap actually hit? A pseudo
+ * element reports as its owner, so the overlay pattern passes and a genuinely
+ * small button still fails.
+ */
 await check('touch targets meet the 44px rule', async () => {
   const small = await page.evaluate(() => {
+    const MIN = 44;
     const hits = [];
+
     for (const el of document.querySelectorAll('.ed-root button')) {
       const r = el.getBoundingClientRect();
       if (r.width === 0 && r.height === 0) continue; // hidden
-      if (r.height < 44) hits.push(`${el.className || el.tagName} ${Math.round(r.height)}px`);
+      if (r.height >= MIN) continue;
+
+      const x = r.left + r.width / 2;
+      const midY = r.top + r.height / 2;
+
+      // Hit testing only means anything inside the viewport. Below the fold
+      // elementFromPoint returns null for everything, which says nothing
+      // about the control and would fail every long page.
+      if (midY - MIN / 2 < 0 || midY + MIN / 2 > window.innerHeight) continue;
+      // One pixel inside each edge of the band, so a target that is exactly
+      // 44px counts.
+      const probes = [midY - MIN / 2 + 1, midY + MIN / 2 - 1];
+
+      // Strictly the button or something inside it. An ancestor happening to
+      // cover the point is not the same as the button being tappable there.
+      const reaches = probes.every((y) => {
+        const at = document.elementFromPoint(x, y);
+        return at !== null && (at === el || el.contains(at));
+      });
+
+      if (!reaches) hits.push(`${el.className || el.tagName} ${Math.round(r.height)}px`);
     }
     return hits;
   });

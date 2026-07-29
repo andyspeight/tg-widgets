@@ -18,7 +18,10 @@
 /* Tokens                                                              */
 /* ------------------------------------------------------------------ */
 
-.ed-root {
+/* Shared with the site dashboard (.sv-root), which is the same chrome doing a
+   different job. One palette, two screens. */
+.ed-root,
+.sv-root {
   /* Brand */
   --ed-primary: #1b2b5b;
   --ed-primary-light: #2a3f7a;
@@ -89,7 +92,8 @@
  * between two selectors without a preprocessor, and the alternative (a single
  * selector list) would make the media query apply to the explicit choice too.
  */
-.ed-root[data-theme='dark'] {
+.ed-root[data-theme='dark'],
+.sv-root[data-theme='dark'] {
     /* Desaturated lighter tones rather than inverted values. */
     --ed-bg: #0b1220;
     --ed-panel: #0f172a;
@@ -115,7 +119,8 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  .ed-root[data-theme='system'] {
+  .ed-root[data-theme='system'],
+  .sv-root[data-theme='system'] {
     /* Desaturated lighter tones rather than inverted values. */
     --ed-bg: #0b1220;
     --ed-panel: #0f172a;
@@ -1208,4 +1213,111 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--ed-ink-3);
+}
+
+/* ------------------------------------------------------------------ */
+/* Saving, publishing, and the notice about there being no sign in      */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The banner is fixed rather than another grid row.
+ *
+ * Adding a row would mean repeating grid-template-areas in all four
+ * responsive variants below, and the banner is temporary: it goes when auth
+ * lands. Pinning it and shrinking the shell is one rule instead of five, and
+ * it deletes cleanly.
+ */
+.ed-warn {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ed-2);
+  margin: 0;
+  height: 32px;
+  background: #fef3c7;
+  color: #78350f;
+  font-size: var(--ed-text-xs);
+  font-weight: 600;
+}
+
+.ed-root[data-open-access='true'] { top: 32px; }
+
+.ed-root[data-theme='dark'] .ed-warn { background: #422006; color: #fde68a; }
+
+@media (prefers-color-scheme: dark) {
+  .ed-root[data-theme='system'] .ed-warn { background: #422006; color: #fde68a; }
+}
+
+/* The publish button. One clear next action, so it carries the brand. */
+.ed-btn[data-cta='true'] {
+  background: var(--ed-primary);
+  border-color: var(--ed-primary);
+  color: var(--ed-on-brand);
+}
+
+.ed-btn[data-cta='true']:hover:not(:disabled) {
+  background: var(--ed-primary-light);
+  border-color: var(--ed-primary-light);
+}
+
+/*
+ * A save that failed. Stated in the top bar next to the work rather than in
+ * a toast, because it is not an event that happened, it is a state the page
+ * is still in.
+ */
+.ed-savefail {
+  margin: 0;
+  padding: var(--ed-1) var(--ed-3);
+  border-radius: var(--ed-r-sm);
+  background: #fee2e2;
+  color: #7f1d1d;
+  font-size: var(--ed-text-xs);
+  font-weight: 500;
+  max-width: 30ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ed-root[data-theme='dark'] .ed-savefail { background: #450a0a; color: #fecaca; }
+
+@media (prefers-color-scheme: dark) {
+  .ed-root[data-theme='system'] .ed-savefail { background: #450a0a; color: #fecaca; }
+}
+
+.ed-save[data-state='error'] { color: var(--ed-danger); }
+
+/* The brand is a link back to the page list now, so it needs link styling. */
+.ed-brand { text-decoration: none; }
+.ed-brand:hover { text-decoration: underline; }
+
+/*
+ * The first insert pill sits below the seam rather than straddling it.
+ *
+ * Every other one is centred on the join between two sections, which is
+ * right: it belongs to both. The first one has nothing above it, so half of
+ * it hung over the top edge of the page and the canvas clipped that half out
+ * of hit testing. A finger aiming at the top of it hit the canvas instead.
+ * Found by probing rather than by looking, because six missing pixels do not
+ * show up in a screenshot.
+ */
+.tgs-page > .ed-insert:first-child .ed-insert__btn {
+  /* 6px clears the overlay's own reach, so the whole 44px band lands inside
+     the page box rather than in the clipped area above it. */
+  top: 6px;
+  transform: translate(-50%, 0);
+}
+.tgs-page > .ed-insert:first-child .ed-insert__btn:hover,
+.tgs-page > .ed-insert:first-child .ed-insert__btn:focus-visible {
+  transform: translate(-50%, 0) scale(1.04);
+}
+@media (prefers-reduced-motion: reduce) {
+  .tgs-page > .ed-insert:first-child .ed-insert__btn:hover {
+    transform: translate(-50%, 0);
+  }
 }

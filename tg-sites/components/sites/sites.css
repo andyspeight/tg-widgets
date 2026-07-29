@@ -1,0 +1,369 @@
+/**
+ * The site dashboard: the list of pages, and what you can do to them.
+ *
+ * Tokens come from editor.css, which defines them for .ed-root and .sv-root
+ * together. This file holds layout only, so there is one palette rather than
+ * two that drift.
+ */
+
+@import '../editor/editor.css';
+
+.sv-root {
+  min-height: 100vh;
+  font-family: var(--ed-font);
+  font-size: var(--ed-text-base);
+  line-height: 1.5;
+  color: var(--ed-ink);
+  background: var(--ed-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+.sv-wrap {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: var(--ed-8) var(--ed-6) 96px;
+}
+
+/* ------------------------------------------------------------------ */
+/* The open-door notice                                                */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Amber rather than red. This is a true statement about an unfinished
+ * system, not an error, and crying wolf in red teaches people to ignore red.
+ */
+.sv-warn {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-2);
+  padding: var(--ed-3) var(--ed-4);
+  background: #fef3c7;
+  color: #78350f;
+  font-size: var(--ed-text-sm);
+  font-weight: 500;
+}
+
+.sv-root[data-theme='dark'] .sv-warn {
+  background: #422006;
+  color: #fde68a;
+}
+
+@media (prefers-color-scheme: dark) {
+  .sv-root[data-theme='system'] .sv-warn {
+    background: #422006;
+    color: #fde68a;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Header                                                              */
+/* ------------------------------------------------------------------ */
+
+.sv-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ed-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--ed-6);
+}
+
+.sv-eyebrow {
+  margin: 0;
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink-3);
+}
+
+.sv-title {
+  margin: var(--ed-1) 0 0;
+  font-size: 28px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.sv-url {
+  margin: var(--ed-2) 0 0;
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink-2);
+}
+
+.sv-url code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--ed-text-xs);
+  padding: 2px var(--ed-1);
+  border-radius: var(--ed-r-sm);
+  background: var(--ed-sunken);
+}
+
+/* ------------------------------------------------------------------ */
+/* Buttons                                                             */
+/* ------------------------------------------------------------------ */
+
+.sv-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ed-2);
+  /* 44px, the minimum comfortable touch target. */
+  min-height: 44px;
+  padding: 0 var(--ed-4);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+  color: var(--ed-ink);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.sv-btn:hover:not(:disabled) { background: var(--ed-well); }
+.sv-btn:disabled { opacity: 0.5; cursor: default; }
+
+.sv-btn:focus-visible {
+  outline: 2px solid var(--ed-select);
+  outline-offset: 2px;
+}
+
+.sv-btn[data-variant='primary'] {
+  background: var(--ed-primary);
+  border-color: var(--ed-primary);
+  color: var(--ed-on-brand);
+}
+
+.sv-btn[data-variant='primary']:hover:not(:disabled) {
+  background: var(--ed-primary-light);
+  border-color: var(--ed-primary-light);
+}
+
+.sv-btn[data-variant='quiet'] {
+  min-height: 36px;
+  padding: 0 var(--ed-3);
+  border-color: transparent;
+  background: transparent;
+  color: var(--ed-ink-2);
+  font-size: var(--ed-text-sm);
+}
+
+.sv-btn[data-variant='quiet']:hover:not(:disabled) {
+  background: var(--ed-well);
+  color: var(--ed-ink);
+}
+
+.sv-btn[data-variant='danger'] { color: var(--ed-danger); }
+
+/* ------------------------------------------------------------------ */
+/* The page list                                                       */
+/* ------------------------------------------------------------------ */
+
+.sv-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-lg);
+  background: var(--ed-panel);
+  overflow: hidden;
+}
+
+.sv-item {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-3);
+  padding: var(--ed-3) var(--ed-4);
+  border-bottom: 1px solid var(--ed-line-soft);
+}
+
+.sv-item:last-child { border-bottom: 0; }
+.sv-item:hover { background: var(--ed-well); }
+
+.sv-item__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.sv-item__title {
+  display: block;
+  font-weight: 500;
+  color: var(--ed-ink);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sv-item__title:hover { text-decoration: underline; }
+
+.sv-item__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-2);
+  margin-top: 2px;
+  font-size: var(--ed-text-xs);
+  color: var(--ed-ink-3);
+}
+
+.sv-path {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* ------------------------------------------------------------------ */
+/* Status pills                                                        */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Never colour alone. Each pill carries a word, so the difference between
+ * live and draft survives a monochrome screen and colour blindness both.
+ */
+.sv-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ed-1);
+  padding: 2px var(--ed-2);
+  border-radius: var(--ed-r-full);
+  font-size: var(--ed-text-xs);
+  font-weight: 600;
+  background: var(--ed-sunken);
+  color: var(--ed-ink-2);
+}
+
+.sv-pill[data-state='published'] { background: #dcfce7; color: #14532d; }
+.sv-pill[data-state='changed'] { background: #fef3c7; color: #78350f; }
+
+.sv-root[data-theme='dark'] .sv-pill[data-state='published'] { background: #052e16; color: #86efac; }
+.sv-root[data-theme='dark'] .sv-pill[data-state='changed'] { background: #422006; color: #fde68a; }
+
+@media (prefers-color-scheme: dark) {
+  .sv-root[data-theme='system'] .sv-pill[data-state='published'] { background: #052e16; color: #86efac; }
+  .sv-root[data-theme='system'] .sv-pill[data-state='changed'] { background: #422006; color: #fde68a; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Empty state and errors                                              */
+/* ------------------------------------------------------------------ */
+
+.sv-empty {
+  padding: 64px var(--ed-6);
+  text-align: center;
+  border: 1px dashed var(--ed-line);
+  border-radius: var(--ed-r-lg);
+  background: var(--ed-panel);
+}
+
+.sv-empty h2 {
+  margin: 0 0 var(--ed-2);
+  font-size: var(--ed-text-lg);
+}
+
+.sv-empty p {
+  margin: 0 auto var(--ed-5);
+  max-width: 42ch;
+  color: var(--ed-ink-2);
+}
+
+.sv-error {
+  padding: var(--ed-4);
+  border: 1px solid var(--ed-danger);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+  color: var(--ed-ink);
+}
+
+.sv-error h2 { margin: 0 0 var(--ed-2); font-size: var(--ed-text-md); }
+.sv-error p { margin: 0 0 var(--ed-2); color: var(--ed-ink-2); }
+
+.sv-error pre {
+  margin: 0;
+  padding: var(--ed-3);
+  border-radius: var(--ed-r-sm);
+  background: var(--ed-sunken);
+  font-size: var(--ed-text-xs);
+  overflow-x: auto;
+}
+
+/* ------------------------------------------------------------------ */
+/* Dialog                                                              */
+/* ------------------------------------------------------------------ */
+
+.sv-scrim {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--ed-4);
+  background: rgba(15, 23, 42, 0.5);
+  z-index: 50;
+}
+
+.sv-dialog {
+  width: min(420px, 100%);
+  padding: var(--ed-6);
+  border-radius: var(--ed-r-lg);
+  background: var(--ed-panel);
+  box-shadow: var(--ed-shadow-xl);
+}
+
+.sv-dialog h2 {
+  margin: 0 0 var(--ed-4);
+  font-size: var(--ed-text-lg);
+}
+
+.sv-field { margin-bottom: var(--ed-4); }
+
+.sv-field label {
+  display: block;
+  margin-bottom: var(--ed-1);
+  font-size: var(--ed-text-sm);
+  font-weight: 500;
+  color: var(--ed-ink-2);
+}
+
+.sv-field input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--ed-3);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-well);
+  color: var(--ed-ink);
+  font: inherit;
+}
+
+.sv-field input:focus-visible {
+  outline: 2px solid var(--ed-select);
+  outline-offset: -1px;
+  background: var(--ed-panel);
+}
+
+.sv-field small {
+  display: block;
+  margin-top: var(--ed-1);
+  font-size: var(--ed-text-xs);
+  color: var(--ed-ink-3);
+}
+
+.sv-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--ed-2);
+}
+
+.sv-msg {
+  margin: 0 0 var(--ed-4);
+  padding: var(--ed-2) var(--ed-3);
+  border-radius: var(--ed-r-sm);
+  background: #fee2e2;
+  color: #7f1d1d;
+  font-size: var(--ed-text-sm);
+}
+
+.sv-root[data-theme='dark'] .sv-msg { background: #450a0a; color: #fecaca; }
+
+@media (prefers-color-scheme: dark) {
+  .sv-root[data-theme='system'] .sv-msg { background: #450a0a; color: #fecaca; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sv-btn { transition: none; }
+}

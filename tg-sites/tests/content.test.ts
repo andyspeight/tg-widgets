@@ -298,7 +298,7 @@ describe('sanitiseHtml', () => {
   });
 
   it('sees through control characters in a scheme', () => {
-    expect(safeUrl('java script:alert(1)')).toBeNull();
+    expect(safeUrl('java\u0000script:alert(1)')).toBeNull();
     expect(safeUrl('java\tscript:alert(1)')).toBeNull();
   });
 

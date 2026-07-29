@@ -28,7 +28,7 @@ export default function Home() {
 
       <div style={{ display: 'flex', gap: 12, marginTop: 32, flexWrap: 'wrap' }}>
         <Link
-          href="/editor"
+          href="/sites"
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -41,7 +41,7 @@ export default function Home() {
             fontWeight: 600,
           }}
         >
-          Open the editor
+          Open your pages
         </Link>
         <Link
           href="/preview"

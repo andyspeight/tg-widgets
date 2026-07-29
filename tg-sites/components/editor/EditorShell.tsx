@@ -8,15 +8,18 @@
  * callbacks handed down from here.
  *
  * WHERE THE DRAFT LIVES
- * localStorage, for now. There is no database in this package. The shape of
- * `commit` is already what a server action will want, so swapping the
- * persistence layer later is a change to two functions, not to the editor.
+ * Postgres, one row in `pages`, saved through a server action. The editor
+ * never sees a tenant id: the action takes it from the session, and every
+ * query underneath runs inside withTenant. There is no localStorage path and
+ * no scratch mode, because two persistence paths means every save, undo and
+ * publish has to work twice and only one of them gets exercised.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { publishPageAction, saveDraftAction } from '../../app/actions/pages';
+import { OPEN_ACCESS_WARNING } from '../../lib/auth/temporary';
 import type { Page } from '../../lib/content/schema';
 import { parsePage } from '../../lib/content/schema';
-import { SEED_PAGE } from '../../lib/content/seed';
 import { createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
 import { addBlock, type Path, pathKey, resolve } from '../../lib/content/tree';
 import { Outline } from './Outline';
@@ -28,11 +31,18 @@ import { Icon, type IconName } from './Icon';
 import { Menu } from './Menu';
 import './editor.css';
 
-const STORAGE_KEY = 'tg-sites:draft:v1';
 const THEME_KEY = 'tg-sites:theme:v1';
 const HISTORY_LIMIT = 50;
 /** Edits to the same field inside this window collapse into one undo step. */
 const COALESCE_MS = 700;
+/**
+ * How long the editor waits after the last keystroke before saving.
+ *
+ * Longer than the old localStorage delay because this one crosses a network.
+ * Short enough that an agent who types a heading and immediately closes the
+ * tab still gets a save away, helped by the warning on unload below.
+ */
+const SAVE_DEBOUNCE_MS = 900;
 
 export type Viewport = 'desktop' | 'tablet' | 'phone';
 
@@ -71,10 +81,29 @@ interface History {
   future: Page[];
 }
 
-export function EditorShell({ isStaff = true }: { isStaff?: boolean }) {
+type SaveState = 'idle' | 'saving' | 'saved' | 'error';
+
+interface EditorProps {
+  isStaff?: boolean;
+  pageId: string;
+  initialPage: Page;
+  initialStatus: 'draft' | 'published';
+  initialHasUnpublishedChanges: boolean;
+  /** True while there is no sign in. Comes from lib/auth/temporary. */
+  openAccess?: boolean;
+}
+
+export function EditorShell({
+  isStaff = true,
+  pageId,
+  initialPage,
+  initialStatus,
+  initialHasUnpublishedChanges,
+  openAccess = false,
+}: EditorProps) {
   const [history, setHistory] = useState<History>({
     past: [],
-    present: SEED_PAGE,
+    present: initialPage,
     future: [],
   });
   const [selected, setSelected] = useState<Path | null>(null);
@@ -82,7 +111,11 @@ export function EditorShell({ isStaff = true }: { isStaff?: boolean }) {
   const [picker, setPicker] = useState<{ section: number; row: number; column: number } | null>(null);
   /** Where a new section would go. null means the picker is closed. */
   const [insertAt, setInsertAt] = useState<number | null>(null);
-  const [saved, setSaved] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [saved, setSaved] = useState<SaveState>('idle');
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [status, setStatus] = useState<'draft' | 'published'>(initialStatus);
+  const [unpublished, setUnpublished] = useState(initialHasUnpublishedChanges);
+  const [publishing, setPublishing] = useState(false);
   const [mobilePane, setMobilePane] = useState<'canvas' | 'props' | 'outline'>('canvas');
   const [theme, setTheme] = useState<Theme>('light');
 
@@ -90,33 +123,6 @@ export function EditorShell({ isStaff = true }: { isStaff?: boolean }) {
 
   /** Identifies the last edit, so rapid edits to one field coalesce. */
   const lastEdit = useRef<{ key: string; at: number } | null>(null);
-
-  // ---------------------------------------------------------------------
-  // Load the saved draft
-  // ---------------------------------------------------------------------
-
-  useEffect(() => {
-    let raw: string | null = null;
-    try {
-      raw = window.localStorage.getItem(STORAGE_KEY);
-    } catch {
-      // Private browsing or a blocked origin. The seed page is a fine
-      // fallback and the editor still works, it just will not persist.
-      return;
-    }
-    if (!raw) return;
-
-    try {
-      const result = parsePage(JSON.parse(raw));
-      if (result.ok) {
-        setHistory({ past: [], present: result.page, future: [] });
-      } else {
-        console.warn('[tg-sites] saved draft failed validation, starting fresh', result.errors);
-      }
-    } catch {
-      console.warn('[tg-sites] saved draft was not valid JSON, starting fresh');
-    }
-  }, []);
 
   // Remember the appearance choice. Read before first paint would be better
   // still, but a shell with no server session cannot do that yet, and the
@@ -142,18 +148,69 @@ export function EditorShell({ isStaff = true }: { isStaff?: boolean }) {
   // Autosave
   // ---------------------------------------------------------------------
 
+  /**
+   * Counts saves so a slow one cannot overwrite a fast one that followed it.
+   *
+   * Without this, two saves in flight can land out of order and the editor
+   * would report "saved" against the older of the two. The debounce makes
+   * that unlikely rather than impossible, and unlikely is not a guarantee
+   * worth resting a client's copy on.
+   */
+  const saveSeq = useRef(0);
+  /** Skips the save that a fresh mount would otherwise fire immediately. */
+  const mounted = useRef(false);
+
   useEffect(() => {
+    if (!mounted.current) {
+      mounted.current = true;
+      return;
+    }
+
     setSaved('saving');
-    const timer = window.setTimeout(() => {
-      try {
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(page));
+    setSaveError(null);
+
+    const timer = window.setTimeout(async () => {
+      const seq = ++saveSeq.current;
+      const result = await saveDraftAction(pageId, page);
+      if (seq !== saveSeq.current) return;
+
+      if (result.ok) {
         setSaved('saved');
-      } catch {
-        setSaved('idle');
+        // A saved edit is by definition not yet published.
+        setUnpublished(true);
+      } else {
+        setSaved('error');
+        setSaveError(result.error);
       }
-    }, 400);
+    }, SAVE_DEBOUNCE_MS);
+
     return () => window.clearTimeout(timer);
-  }, [page]);
+  }, [page, pageId]);
+
+  const publish = useCallback(async () => {
+    setPublishing(true);
+    setSaveError(null);
+
+    // Flush any pending edit first, so publishing cannot capture the version
+    // from before the last keystroke. The debounce means that gap is real.
+    const pending = await saveDraftAction(pageId, page);
+    if (!pending.ok) {
+      setSaved('error');
+      setSaveError(pending.error);
+      setPublishing(false);
+      return;
+    }
+    setSaved('saved');
+
+    const result = await publishPageAction(pageId);
+    if (result.ok && result.data) {
+      setStatus(result.data.status);
+      setUnpublished(result.data.hasUnpublishedChanges);
+    } else if (!result.ok) {
+      setSaveError(result.error);
+    }
+    setPublishing(false);
+  }, [page, pageId]);
 
   // ---------------------------------------------------------------------
   // Commits
@@ -239,10 +296,12 @@ export function EditorShell({ isStaff = true }: { isStaff?: boolean }) {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [undo, redo]);
 
-  // Warn on navigate away while a save is still pending.
+  // Warn on navigate away while a save is pending or has failed. The failed
+  // case matters more than the pending one: that work exists only in this
+  // tab, and closing it loses the lot.
   useEffect(() => {
     function onBeforeUnload(event: BeforeUnloadEvent) {
-      if (saved === 'saving') event.preventDefault();
+      if (saved === 'saving' || saved === 'error') event.preventDefault();
     }
     window.addEventListener('beforeunload', onBeforeUnload);
     return () => window.removeEventListener('beforeunload', onBeforeUnload);
@@ -304,24 +363,50 @@ export function EditorShell({ isStaff = true }: { isStaff?: boolean }) {
   const fileInput = useRef<HTMLInputElement>(null);
 
   const savedLabel = useMemo(() => {
-    // "Saved to this browser" was developer-speak. An agent wants to know
-    // their work is safe, not where the bytes went.
+    // Plain language about the work, not about the mechanism. An agent wants
+    // to know their page is safe, not which system it went to.
     if (saved === 'saving') return 'Saving';
     if (saved === 'saved') return 'All changes saved';
+    if (saved === 'error') return 'Not saved';
     return '';
   }, [saved]);
+
+  const publishLabel = useMemo(() => {
+    if (publishing) return 'Publishing';
+    if (status !== 'published') return 'Publish';
+    return unpublished ? 'Publish changes' : 'Published';
+  }, [publishing, status, unpublished]);
 
   // ---------------------------------------------------------------------
 
   return (
-    <div className="ed-root" data-pane={mobilePane} data-theme={theme}>
+    <div
+      className="ed-root"
+      data-pane={mobilePane}
+      data-theme={theme}
+      data-open-access={openAccess ? 'true' : undefined}
+    >
+      {openAccess && (
+        <p className="ed-warn" role="status">
+          <Icon name="warning" size={14} />
+          {OPEN_ACCESS_WARNING}
+        </p>
+      )}
+
       <header className="ed-topbar">
-        <span className="ed-brand">
+        {/*
+          A plain anchor, not next/link, for two reasons. Leaving the editor
+          should re-fetch the page list from the server rather than soft
+          navigate to a cached one that predates these edits. And next/link
+          drags Next's runtime into the standalone bundle, which has no Next
+          in it, so importing it broke that build outright.
+        */}
+        <a className="ed-brand" href="/sites" title="All pages">
           <span className="ed-brand__mark" aria-hidden="true">
             TG
           </span>
           <span>Sites</span>
-        </span>
+        </a>
 
         <button
           type="button"
@@ -344,9 +429,21 @@ export function EditorShell({ isStaff = true }: { isStaff?: boolean }) {
           />
           <span className="ed-save ed-desktop-only" data-state={saved}>
             {saved === 'saved' && <Icon name="check" size={14} />}
+            {saved === 'error' && <Icon name="warning" size={14} />}
             {savedLabel}
           </span>
         </div>
+
+        {/*
+          The failure is stated where the work is, not in a toast that fades.
+          Losing an unsaved page is the worst thing this editor can do to
+          someone, so the message stays put until a save succeeds.
+        */}
+        {saveError && (
+          <p className="ed-savefail" role="alert">
+            {saveError}
+          </p>
+        )}
 
         {/*
           Icons carry a label on desktop and stand alone on narrow screens,
@@ -389,6 +486,27 @@ export function EditorShell({ isStaff = true }: { isStaff?: boolean }) {
           title="Redo (Cmd+Shift+Z)"
         >
           <Icon name="redo" size={18} />
+        </button>
+
+        {/*
+          Disabled once published with nothing new to say, rather than hidden.
+          A button that vanishes leaves an agent wondering where it went; one
+          that reads "Published" and sits still answers the question.
+        */}
+        <button
+          type="button"
+          className="ed-btn"
+          data-cta="true"
+          onClick={publish}
+          disabled={publishing || (status === 'published' && !unpublished)}
+          title={
+            status === 'published' && !unpublished
+              ? 'The live page already matches this draft'
+              : 'Make this the version visitors see'
+          }
+        >
+          <Icon name={status === 'published' && !unpublished ? 'check' : 'upload'} size={16} />
+          {publishLabel}
         </button>
 
         <Menu

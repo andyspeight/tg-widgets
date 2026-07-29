@@ -362,7 +362,7 @@ describe('hostname handling', () => {
     ['a path', 'example.com/evil'],
     ['a scheme', 'https://example.com'],
     ['a space', 'exa mple.com'],
-    ['a null byte', 'example.com .evil.com'],
+    ['a null byte', 'example.com\u0000.evil.com'],
     ['a leading hyphen', '-example.com'],
     ['something absurd', 'a'.repeat(300)],
     ['a non-string', 12345],
@@ -483,5 +483,63 @@ describe('nothing queries round the side', () => {
 
       expect(raw.length, `${name} reaches for a pool directly`).toBeLessThanOrEqual(allowed);
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+describe('source hygiene', () => {
+  const ROOT = join(__dirname, '..');
+  const SKIP = new Set(['node_modules', '.next', '.git', 'out']);
+
+  function sources(dir: string, found: string[] = []): string[] {
+    for (const entry of readdirSync(dir)) {
+      if (SKIP.has(entry)) continue;
+      const full = join(dir, entry);
+      if (statSync(full).isDirectory()) sources(full, found);
+      else if (/\.(ts|tsx|mjs|js)$/.test(entry)) found.push(full);
+    }
+    return found;
+  }
+
+  /**
+   * This has cost real time twice in one day.
+   *
+   * A regex written with LITERAL control bytes or combining marks parses
+   * perfectly in Node, so every unit test and the whole build pass. esbuild
+   * then re-encodes the file and the character class becomes invalid at
+   * runtime. The sanitiser shipped a broken safeUrl exactly that way, and
+   * safeUrl guards every href, image src and iframe src in the product.
+   *
+   * The rule is simple and the fix is always the same: write the escape,
+   * never the byte. Tab, newline and carriage return are the only exceptions.
+   *
+   * Built with new RegExp from a string of escapes rather than a literal,
+   * because a literal here would have to contain the very characters it is
+   * banning.
+   */
+  it('no literal control characters or combining marks in source', () => {
+    const forbidden = new RegExp(
+      '[' +
+        '\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F' + // C0 controls, minus tab/LF/CR
+        '\\u0300-\\u036F' + // combining diacritical marks
+        '\\u200B-\\u200D\\uFEFF' + // zero width spaces and the byte order mark
+        ']',
+    );
+
+    const offenders: string[] = [];
+
+    for (const file of sources(ROOT)) {
+      readFileSync(file, 'utf8')
+        .split('\n')
+        .forEach((line, index) => {
+          const match = forbidden.exec(line);
+          if (!match) return;
+          const code = match[0].codePointAt(0)!.toString(16).toUpperCase().padStart(4, '0');
+          offenders.push(`${file.slice(ROOT.length + 1)}:${index + 1} has U+${code}`);
+        });
+    }
+
+    expect(offenders, 'write these as \\uXXXX escapes, not as the raw byte').toEqual([]);
   });
 });
