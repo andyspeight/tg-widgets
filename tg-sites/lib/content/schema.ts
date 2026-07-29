@@ -43,6 +43,62 @@ export const MAX_COLUMNS_PER_ROW = 6;
 /** Rounding tolerance when checking that widths sum to 100. */
 export const WIDTH_SUM_TOLERANCE = 0.01;
 
+/**
+ * Vertical breathing room on a section, in pixels.
+ *
+ * A NUMBER, NOT AN ENUM, and the second deliberate exception to "no layout
+ * data in the schema". Same reason as the column widths: Andy asked to drag a
+ * section taller, and every CMS an agent has used before lets them.
+ *
+ * Contained the same way the widths are. It snaps to the 4px grid so the site
+ * keeps a rhythm, it is clamped at both ends so nothing can be dragged to
+ * nothing or to absurdity, and the horizontal padding stays a token, so a
+ * section can be taller or shorter but never a different shape.
+ */
+export const MIN_SECTION_PADDING = 0;
+export const MAX_SECTION_PADDING = 240;
+export const SECTION_PADDING_STEP = 4;
+export const DEFAULT_SECTION_PADDING = 48;
+
+/**
+ * What the old named sizes meant.
+ *
+ * paddingY used to be 'none' | 'xs' | ... | 'xl'. Content saved before the
+ * change still says so, and an editor that threw away a client's spacing on
+ * upgrade would be unforgivable, so the names are translated on read.
+ */
+export const LEGACY_PADDING: Readonly<Record<string, number>> = {
+  none: 0,
+  xs: 8,
+  s: 16,
+  m: 32,
+  l: 48,
+  xl: 64,
+};
+
+/**
+ * The quick answers in the properties pane.
+ *
+ * Numbers, so they are the same kind of thing the drag produces. Keeping a
+ * separate enum for presets and a number for drags would mean two ways to say
+ * the same height and a rounding argument about which one won.
+ */
+export const SECTION_PADDING_PRESETS: ReadonlyArray<{ value: number; label: string }> = [
+  { value: 0, label: 'None' },
+  { value: 16, label: 'S' },
+  { value: 32, label: 'M' },
+  { value: 48, label: 'L' },
+  { value: 64, label: 'XL' },
+];
+
+/** Any input, coerced to a legal section padding. Never throws. */
+export function normaliseSectionPadding(value: unknown): number {
+  const raw = typeof value === 'string' ? LEGACY_PADDING[value] : value;
+  const n = typeof raw === 'number' && Number.isFinite(raw) ? raw : DEFAULT_SECTION_PADDING;
+  const snapped = Math.round(n / SECTION_PADDING_STEP) * SECTION_PADDING_STEP;
+  return Math.min(MAX_SECTION_PADDING, Math.max(MIN_SECTION_PADDING, snapped));
+}
+
 // ---------------------------------------------------------------------------
 // Shared enums
 // ---------------------------------------------------------------------------
@@ -137,7 +193,8 @@ export const SectionSchema = z.object({
   name: z.string().max(80).optional(),
   tone: Tone.default('light'),
   width: SectionWidth.default('contained'),
-  paddingY: Spacing.default('l'),
+  /** Pixels above and below. See normaliseSectionPadding. */
+  paddingY: z.unknown().transform(normaliseSectionPadding),
   /** Media id or absolute URL. Rendered behind the content with a scrim. */
   backgroundImage: z.string().max(2048).optional(),
   rows: z.array(RowSchema).default([]),

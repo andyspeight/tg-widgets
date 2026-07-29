@@ -27,7 +27,7 @@ export const SEED_PAGE: Page = {
       id: 'sec_hero',
       tone: 'dark',
       width: 'contained',
-      paddingY: 'xl',
+      paddingY: 64,
       rows: [
         {
           id: 'row_hero',
@@ -100,7 +100,7 @@ export const SEED_PAGE: Page = {
       id: 'sec_why',
       tone: 'light',
       width: 'contained',
-      paddingY: 'xl',
+      paddingY: 64,
       rows: [
         {
           id: 'row_why_head',
@@ -184,7 +184,7 @@ export const SEED_PAGE: Page = {
       id: 'sec_cta',
       tone: 'accent',
       width: 'narrow',
-      paddingY: 'xl',
+      paddingY: 64,
       rows: [
         {
           id: 'row_cta',

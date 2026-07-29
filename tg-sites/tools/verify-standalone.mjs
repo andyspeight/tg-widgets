@@ -126,29 +126,112 @@ await check('touch targets meet the 44px rule', async () => {
       if (r.width === 0 && r.height === 0) continue; // hidden
       if (r.height >= MIN) continue;
 
-      const x = r.left + r.width / 2;
       const midY = r.top + r.height / 2;
 
       // Hit testing only means anything inside the viewport. Below the fold
       // elementFromPoint returns null for everything, which says nothing
       // about the control and would fail every long page.
       if (midY - MIN / 2 < 0 || midY + MIN / 2 > window.innerHeight) continue;
-      // One pixel inside each edge of the band, so a target that is exactly
-      // 44px counts.
-      const probes = [midY - MIN / 2 + 1, midY + MIN / 2 - 1];
 
       // Strictly the button or something inside it. An ancestor happening to
       // cover the point is not the same as the button being tappable there.
-      const reaches = probes.every((y) => {
+      const ownsAt = (x, y) => {
+        if (y < 0 || y > window.innerHeight) return false;
         const at = document.elementFromPoint(x, y);
         return at !== null && (at === el || el.contains(at));
-      });
+      };
+
+      /*
+       * Try several points across the width before giving up.
+       *
+       * A wide control can be partly covered by something that legitimately
+       * sits above it: the section height strip runs the full width of the
+       * canvas and the Add Section pill sits on top of the middle of it. The
+       * strip is still perfectly grabbable, just not at dead centre, and a
+       * probe that only samples the centre calls that unreachable.
+       */
+      const columns = [0.5, 0.25, 0.75, 0.9, 0.1];
+      const x = columns
+        .map((f) => r.left + r.width * f)
+        .find((candidate) => ownsAt(candidate, midY));
+
+      if (x === undefined) {
+        hits.push(`${el.className || el.tagName} unreachable`);
+        continue;
+      }
+
+      const owns = (y) => ownsAt(x, y);
+
+      /*
+       * Walk outwards to find how tall the reachable band actually is.
+       *
+       * Not the same as probing a band centred on the element. The section
+       * height grip extends its target upward only, on purpose, so it cannot
+       * swallow a click meant for the section below it. That is still a 44px
+       * target; it is just not a symmetrical one, and a centred probe called
+       * it a failure.
+       */
+      let top = midY;
+      let bottom = midY;
+      while (midY - top < 80 && owns(top - 1)) top -= 1;
+      while (bottom - midY < 80 && owns(bottom + 1)) bottom += 1;
+
+      const reaches = bottom - top + 1 >= MIN;
 
       if (!reaches) hits.push(`${el.className || el.tagName} ${Math.round(r.height)}px`);
     }
     return hits;
   });
   return small.length === 0 ? true : `too small: ${JSON.stringify(small.slice(0, 4))}`;
+});
+
+await check('a section has a height handle', async () => {
+  const count = await page.locator('.ed-vresize').count();
+  return count >= 3 ? true : `found ${count}`;
+});
+
+await check('dragging the handle makes the section taller', async () => {
+  const section = page.locator('.tgs-section').first();
+  const before = (await section.boundingBox())?.height ?? 0;
+
+  const grip = page.locator('.ed-vresize__grip').first();
+  const box = await grip.boundingBox();
+  if (!box) return 'no grip';
+
+  // Grabbed at the grip, not at the centre of the strip: the Add Section pill
+  // sits above the middle of the same seam and would take the pointer.
+  const x = box.x + box.width / 2;
+  const y = box.y + box.height / 2;
+
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  // Padding applies top and bottom, so 80px of pointer is 40px each end.
+  await page.mouse.move(x, y + 80, { steps: 8 });
+  await page.mouse.up();
+
+  const after = (await section.boundingBox())?.height ?? 0;
+  return after > before + 40 ? true : `${Math.round(before)}px then ${Math.round(after)}px`;
+});
+
+await check('the whole drag is one undo step', async () => {
+  const section = page.locator('.tgs-section').first();
+  const before = (await section.boundingBox())?.height ?? 0;
+  await page.keyboard.press('Control+z');
+  await page.waitForTimeout(120);
+  const after = (await section.boundingBox())?.height ?? 0;
+  return after < before ? true : `still ${Math.round(after)}px`;
+});
+
+await check('the height is reachable by keyboard', async () => {
+  const section = page.locator('.tgs-section').first();
+  const before = (await section.boundingBox())?.height ?? 0;
+
+  await page.locator('.ed-vresize').first().focus();
+  for (let i = 0; i < 5; i += 1) await page.keyboard.press('ArrowDown');
+  await page.waitForTimeout(120);
+
+  const after = (await section.boundingBox())?.height ?? 0;
+  return after > before ? true : `${Math.round(before)}px then ${Math.round(after)}px`;
 });
 
 // Contrast is the one rule you cannot eyeball, and dark mode is where it

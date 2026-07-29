@@ -11,7 +11,11 @@
  */
 
 import type { Page } from '../../lib/content/schema';
-import { MIN_COLUMN_WIDTH } from '../../lib/content/schema';
+import {
+  MIN_COLUMN_WIDTH,
+  normaliseSectionPadding,
+  SECTION_PADDING_PRESETS,
+} from '../../lib/content/schema';
 import { blockDefinition } from '../../lib/content/blocks';
 import {
   type Path,
@@ -248,18 +252,27 @@ function SectionFields({
         onChange={(value) => set({ width: value as typeof section.width }, `sec:${index}:width`)}
       />
 
+      {/*
+        Presets plus a drag, not one or the other. The buttons are the quick
+        answer and keep a site consistent; the drag is for when a section
+        needs to be a particular height and no preset is it.
+      */}
       <Segmented
         label="Space above and below"
-        value={section.paddingY}
-        options={[
-          { value: 'none', label: 'None' },
-          { value: 's', label: 'S' },
-          { value: 'm', label: 'M' },
-          { value: 'l', label: 'L' },
-          { value: 'xl', label: 'XL' },
-        ]}
-        onChange={(value) => set({ paddingY: value as typeof section.paddingY }, `sec:${index}:pad`)}
+        value={String(section.paddingY)}
+        options={SECTION_PADDING_PRESETS.map((preset) => ({
+          value: String(preset.value),
+          label: preset.label,
+        }))}
+        onChange={(value) =>
+          set({ paddingY: normaliseSectionPadding(Number(value)) }, `sec:${index}:pad`)
+        }
       />
+
+      <p className="ed-hint">
+        {section.paddingY}px above and below. Drag the handle at the foot of the
+        section to fine tune it.
+      </p>
 
       <div className="ed-field">
         <label className="ed-label">Background image</label>

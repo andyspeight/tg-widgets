@@ -1321,3 +1321,95 @@
     transform: translate(-50%, 0);
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Section height handle                                               */
+/* ------------------------------------------------------------------ */
+
+/*
+ * A grab bar across the foot of every section.
+ *
+ * Quiet until the section is hovered or the handle is focused, because there
+ * is one per section and three of them shouting at once would make the canvas
+ * look like a construction site.
+ */
+.ed-vresize {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* Visually a thin strip, but a proper 20px of grabbable height. Pointing
+     devices are not all mice. */
+  height: 20px;
+  display: flex;
+  align-items: center;
+  /*
+   * Pushed to the right, NOT centred.
+   *
+   * The Add Section pill owns the middle of the same seam and sits above
+   * this, so a grip drawn in the centre would be a handle you can see and
+   * cannot grab. The pill winning the middle is correct: someone aiming at
+   * the centre of a seam almost always means "add a section". The grip goes
+   * where it actually works.
+   */
+  justify-content: flex-end;
+  padding: 0 var(--ed-6) 0 0;
+  border: 0;
+  background: transparent;
+  cursor: ns-resize;
+  opacity: 0;
+  transition: opacity 150ms ease-out;
+  z-index: 5;
+  /* Never let the handle be the thing that adds a scrollbar. */
+  touch-action: none;
+}
+
+.tgs-section:hover > .ed-vresize,
+.ed-vresize:focus-visible,
+.ed-vresize.is-dragging {
+  opacity: 1;
+}
+
+/* Claims the full 44px of touch height without a 44px visual strip. Upward
+   only, into this section's own padding, so it cannot swallow a click meant
+   for the section below. */
+.ed-vresize::after {
+  content: '';
+  position: absolute;
+  inset: -24px 0 0 0;
+}
+
+.ed-vresize__grip {
+  width: 56px;
+  height: 4px;
+  border-radius: var(--ed-r-full);
+  background: var(--ed-accent);
+  box-shadow: var(--ed-shadow-sm);
+}
+
+.ed-vresize:hover .ed-vresize__grip,
+.ed-vresize.is-dragging .ed-vresize__grip {
+  width: 72px;
+  background: var(--ed-accent-dark);
+}
+
+.ed-vresize:focus-visible {
+  outline: 2px solid var(--ed-accent);
+  outline-offset: -2px;
+}
+
+/* A section with no padding at all still needs somewhere to grab. */
+.tgs-section { min-height: 24px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ed-vresize { transition: none; }
+}
+
+/* A quiet note under a control, saying what the current value is and what
+   else you can do with it. */
+.ed-hint {
+  margin: calc(var(--ed-2) * -1) 0 var(--ed-4);
+  font-size: var(--ed-text-xs);
+  color: var(--ed-ink-3);
+  line-height: 1.45;
+}

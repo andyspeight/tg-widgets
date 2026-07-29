@@ -14,6 +14,7 @@ import {
   type Page,
   type Row,
   type Section,
+  DEFAULT_SECTION_PADDING,
 } from './schema';
 import { blockDefinition, defaultPropsFor } from './blocks';
 import { DEFAULT_LAYOUT, type Layout } from './layouts';
@@ -76,7 +77,7 @@ export function createSection(preset = '1'): Section {
     id: newId('sec'),
     tone: 'light',
     width: 'contained',
-    paddingY: 'l',
+    paddingY: DEFAULT_SECTION_PADDING,
     rows: [createRow(preset)],
   };
 }
@@ -93,7 +94,7 @@ export function createSectionFromLayout(layout: Layout = DEFAULT_LAYOUT): Sectio
     id: newId('sec'),
     tone: 'light',
     width: 'contained',
-    paddingY: 'l',
+    paddingY: DEFAULT_SECTION_PADDING,
     rows: layout.rows.map((ratios) => createRow(ratios.join('-'))),
   };
 }

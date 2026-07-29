@@ -18,16 +18,21 @@ npm install
 npm run dev          # http://localhost:3100
 ```
 
+Needs `DATABASE_URL` and `RENDERER_DATABASE_URL`. See `db/SETUP.md`.
+
 | Route | What it is |
 |---|---|
-| `/` | Front door with links to the other two |
-| `/editor` | The editor. Draft saves to localStorage |
-| `/preview` | A server-rendered page. View source, the content is all there |
+| `/` | Front door |
+| `/sites` | The page list. Create, rename, delete, publish |
+| `/editor?page=<id>` | The editor. Saves to Postgres as you type |
+| `/preview/<path>` | The published page, server rendered. View source, it is all there |
 
 ```bash
-npm test         # 43 tests
+npm test                            # 111 tests
 npm run typecheck
 npm run build
+node tools/build-standalone.mjs     # one shareable HTML file
+node tools/verify-standalone.mjs    # 37 checks in a real browser
 ```
 
 ## The content model
@@ -49,9 +54,13 @@ The V1 spec banned layout data in the content schema. Andy overruled that on
 29 July 2026 in favour of draggable column widths, because that is how every
 CMS an agent has used before behaves.
 
-So `width` is stored, and it is the only layout number in the entire model.
-Everything else that could have been a pixel value is an enum. There are no
-positions, no margins and no per-breakpoint overrides.
+So `width` is stored. Section height followed on 29 July for the same reason
+and under the same conditions: Andy asked to drag a section taller, and every
+CMS an agent has used before lets them.
+
+Those two are the whole list. Everything else that could have been a pixel
+value is an enum, and there are no positions, no margins and no
+per-breakpoint overrides.
 
 Three rules contain the overrule, enforced in `lib/content/schema.ts` rather
 than in the editor, because the editor is not the only thing that can write:
@@ -64,6 +73,15 @@ than in the editor, because the editor is not the only thing that can write:
 Rule 3 is what makes free widths safe. Desktop layout is completely open,
 and there is still no combination of editor actions that produces horizontal
 scroll or an unreadable phone view. Elementor and Duda behave the same way.
+
+Section height is contained the same way: it snaps to the 4px grid so a site
+keeps a rhythm, it is clamped at both ends so nothing can be dragged to
+nothing or to absurdity, and the HORIZONTAL padding stays a token. A section
+can be taller or shorter, never a different shape.
+
+`normaliseSectionPadding` also translates the six names the field used to
+hold, so content saved before the change keeps its spacing rather than
+silently reverting to a default.
 
 ## The blocks
 
@@ -113,8 +131,10 @@ build is never destroyed by an older one.
 - Iframes are refused entirely in rich text, and in embeds only from an
   allowlisted host.
 - The embed block is staff only.
-- Column widths ride on a CSS custom property, so there is no inline CSS and
-  a strict CSP needs no `unsafe-inline`.
+- Column widths and section heights ride on CSS custom properties rather than
+  on generated rules, so the values are content and the rules stay in the
+  stylesheet. They are still set through a `style` attribute, so a strict CSP
+  needs `style-src 'unsafe-inline'` until that is replaced with a nonce.
 - `npm audit` is clean. `sharp` and `postcss` are pinned forward via
   `overrides` because the versions Next depends on carry advisories, and
   `next` itself is pinned exactly to 15.5.22, the patched 15.x (15.1.6 has
@@ -161,7 +181,12 @@ compromised database.
 
 ## What is deliberately not here
 
-No auth, no media library, no sections library, no widget bridge. The editor
-still saves to localStorage: the database and its access layer exist, but the
-editor does not call them yet. `commit()` in `EditorShell` already has the
-shape `saveDraft` wants.
+**No auth.** The editor is open to anyone who can reach it, and both it and
+the dashboard say so in a banner. `lib/auth/temporary.ts` grants that access
+and supplies the banner text from the same file, so the door and the sign
+cannot be separated. Delete that file when auth lands.
+
+No media library, no sections library, no widget bridge.
+
+The dashboard has no browser coverage of its own, where the editor has 37
+checks. Worth adding before it grows further.

@@ -9,9 +9,14 @@
 
 import { describe, expect, it } from 'vitest';
 import {
+  DEFAULT_SECTION_PADDING,
+  LEGACY_PADDING,
+  MAX_SECTION_PADDING,
   MIN_COLUMN_WIDTH,
+  normaliseSectionPadding,
   normaliseWidths,
   parsePage,
+  SECTION_PADDING_PRESETS,
 } from '../lib/content/schema';
 import { createPage, createRow, createSectionFromLayout, newId } from '../lib/content/factory';
 import { LAYOUTS, layoutCells } from '../lib/content/layouts';
@@ -532,5 +537,58 @@ describe('sanitising a whole page on the way in', () => {
   it('leaves a legitimate page untouched', () => {
     const page = pageWith('text', { html: '<p>Greek islands, <strong>from £599</strong>.</p>' });
     expect(sanitisePage(page)).toEqual(page);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+describe('section height', () => {
+  it('translates the old named sizes rather than losing them', () => {
+    // paddingY used to be 'none' | 'xs' | ... | 'xl'. Content saved before the
+    // change still says so, and throwing away a client's spacing on upgrade
+    // would be unforgivable.
+    for (const [name, pixels] of Object.entries(LEGACY_PADDING)) {
+      expect(normaliseSectionPadding(name), name).toBe(pixels);
+    }
+  });
+
+  it('snaps to the 4px grid so a site keeps its rhythm', () => {
+    expect(normaliseSectionPadding(33)).toBe(32);
+    expect(normaliseSectionPadding(35)).toBe(36);
+    // Exactly between two steps. Ties round up, which is only worth stating
+    // because it is the kind of thing a later refactor changes by accident.
+    expect(normaliseSectionPadding(50)).toBe(52);
+  });
+
+  it('cannot be dragged below zero or past the ceiling', () => {
+    expect(normaliseSectionPadding(-400)).toBe(0);
+    expect(normaliseSectionPadding(99999)).toBe(MAX_SECTION_PADDING);
+  });
+
+  it.each([
+    ['undefined', undefined],
+    ['null', null],
+    ['NaN', Number.NaN],
+    ['Infinity', Number.POSITIVE_INFINITY],
+    ['a nonsense name', 'enormous'],
+    ['an object', { px: 40 }],
+  ])('falls back to the default for %s', (_label, value) => {
+    expect(normaliseSectionPadding(value)).toBe(DEFAULT_SECTION_PADDING);
+  });
+
+  it('every preset is already a legal value', () => {
+    for (const preset of SECTION_PADDING_PRESETS) {
+      expect(normaliseSectionPadding(preset.value)).toBe(preset.value);
+    }
+  });
+
+  it('a whole page of legacy sections survives a parse', () => {
+    const page = createPage('Old', 'old');
+    const section = createSectionFromLayout(LAYOUTS[0]);
+    page.sections = [{ ...section, paddingY: 'xl' as unknown as number }];
+
+    const parsed = parsePage(page);
+    expect(parsed.ok).toBe(true);
+    if (parsed.ok) expect(parsed.page.sections[0].paddingY).toBe(64);
   });
 });

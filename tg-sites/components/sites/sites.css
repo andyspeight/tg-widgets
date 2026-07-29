@@ -453,3 +453,32 @@
   .sv-field input { transition: none; }
   .sv-dialog { animation: none; }
 }
+
+/*
+ * Edit is the action almost everybody wants, so it is the one that looks
+ * like a button. The others stay quiet next to it rather than competing.
+ */
+.sv-btn[data-variant='edit'] {
+  min-height: 36px;
+  padding: 0 var(--ed-3);
+  border-color: var(--ed-line);
+  background: var(--ed-panel);
+  color: var(--ed-brand-ink);
+  font-size: var(--ed-text-sm);
+  font-weight: 600;
+}
+
+.sv-btn[data-variant='edit']:hover {
+  background: var(--ed-select-wash);
+  border-color: var(--ed-select);
+}
+
+.sv-btn[data-variant='danger'],
+.sv-btn[data-danger='true'] { color: var(--ed-danger); }
+
+/* The row gets busy at four controls. Below this they wrap under the title
+   rather than squeezing the page name to nothing. */
+@media (max-width: 720px) {
+  .sv-item { flex-wrap: wrap; }
+  .sv-item__main { flex-basis: 100%; }
+}

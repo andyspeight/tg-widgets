@@ -53,6 +53,7 @@ export type IconName =
   | 'close'
   | 'search'
   | 'warning'
+  | 'edit'
   | 'blank'
   // viewports
   | 'desktop'
@@ -95,6 +96,8 @@ const PATHS: Record<IconName, string> = {
   upload: 'M4 17v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2M12 15V3M7 8l5-5 5 5',
   download: 'M4 17v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2M12 3v12M7 10l5 5 5-5',
   check: 'M4 12l5 5L20 6',
+  // A pencil. Drawn at the same 2px weight as the rest of the set.
+  edit: 'M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3zM14.5 6.5l3 3',
   // Triangle with a bar and a dot. Drawn rather than filled so it sits at the
   // same 2px weight as everything else and never reads as an error icon.
   warning: 'M12 4L2.5 20h19L12 4zM12 10v5M12 17.5v.5',

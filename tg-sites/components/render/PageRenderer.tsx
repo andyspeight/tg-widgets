@@ -99,7 +99,7 @@ export function SectionRenderer({
       className="tgs-section"
       data-tone={section.tone}
       data-width={section.width}
-      data-pad={section.paddingY}
+      style={{ '--tgs-pad': `${section.paddingY}px` } as CSSProperties}
       {...pathAttr(editable, `s${index}`)}
     >
       {background && (
@@ -122,6 +122,23 @@ export function SectionRenderer({
           <div className="tgs-placeholder">This section has no rows yet</div>
         )}
       </div>
+
+      {/*
+        Drag the foot of a section to change its height.
+        A button, not a bare div: it has to be reachable by keyboard, and the
+        arrow keys in Canvas do the same job as the drag.
+      */}
+      {editable && (
+        <button
+          type="button"
+          className="ed-vresize"
+          data-vresize={`s${index}`}
+          aria-label={`Space above and below this section, ${section.paddingY} pixels`}
+          title="Drag to change the height"
+        >
+          <span className="ed-vresize__grip" aria-hidden="true" />
+        </button>
+      )}
     </section>
   );
 }

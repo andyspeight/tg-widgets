@@ -13,6 +13,24 @@
  */
 
 /* ------------------------------------------------------------------ */
+/* Reset                                                               */
+/* ------------------------------------------------------------------ */
+
+/*
+ * border-box everywhere, not just inside .tgs-page.
+ *
+ * It used to be scoped to the rendered page only, so every width:100% input
+ * in the editor chrome and the dashboard added its own padding and border on
+ * top of the 100% and overflowed its container by 26px. That is what made the
+ * fields in the new page dialog run past the edge of the box.
+ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* ------------------------------------------------------------------ */
 /* Tokens                                                              */
 /* ------------------------------------------------------------------ */
 
@@ -84,12 +102,6 @@
   overflow-x: hidden;
 }
 
-.tgs-page *,
-.tgs-page *::before,
-.tgs-page *::after {
-  box-sizing: border-box;
-}
-
 /* ------------------------------------------------------------------ */
 /* Sections                                                            */
 /* ------------------------------------------------------------------ */
@@ -116,12 +128,16 @@
   --tgs-border: var(--tgs-primary-light);
 }
 
-.tgs-section[data-pad='none'] { padding-block: 0; }
-.tgs-section[data-pad='xs']   { padding-block: var(--tgs-space-s); }
-.tgs-section[data-pad='s']    { padding-block: var(--tgs-space-m); }
-.tgs-section[data-pad='m']    { padding-block: var(--tgs-space-l); }
-.tgs-section[data-pad='l']    { padding-block: calc(var(--tgs-space-l) * 1.5); }
-.tgs-section[data-pad='xl']   { padding-block: var(--tgs-space-xl); }
+/*
+ * Vertical space is a number now, not one of six names, so a section can be
+ * dragged taller. It rides on a custom property for the same reason column
+ * widths do: the value is content, the rule is a stylesheet.
+ *
+ * The fallback matters. A section saved before the change carries no
+ * --tgs-pad until it has been through the schema, and 48px is what the old
+ * default meant.
+ */
+.tgs-section { padding-block: var(--tgs-pad, 48px); }
 
 .tgs-section__bg {
   position: absolute;

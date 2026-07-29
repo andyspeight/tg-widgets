@@ -171,6 +171,26 @@ export function SiteDashboard({ workspace, siteName, siteUrl, pages: initial, op
                   </span>
                 </div>
 
+                {/*
+                  An explicit Edit button, not just a clickable title.
+                  "Click the row" is obvious once you know and invisible until
+                  then, and this is the one action almost everybody wants.
+                */}
+                <Link className="sv-btn" data-variant="edit" href={`/editor?page=${page.id}`}>
+                  <Icon name="edit" size={16} />
+                  Edit
+                </Link>
+
+                <button
+                  type="button"
+                  className="sv-btn"
+                  data-variant="quiet"
+                  disabled={busy}
+                  onClick={() => publish(page)}
+                >
+                  {page.status === 'published' ? 'Unpublish' : 'Publish'}
+                </button>
+
                 <button
                   type="button"
                   className="sv-btn"
@@ -182,16 +202,6 @@ export function SiteDashboard({ workspace, siteName, siteUrl, pages: initial, op
                   }}
                 >
                   Rename
-                </button>
-
-                <button
-                  type="button"
-                  className="sv-btn"
-                  data-variant="quiet"
-                  disabled={busy}
-                  onClick={() => publish(page)}
-                >
-                  {page.status === 'published' ? 'Unpublish' : 'Publish'}
                 </button>
 
                 <button

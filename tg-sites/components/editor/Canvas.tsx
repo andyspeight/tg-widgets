@@ -19,7 +19,12 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Page } from '../../lib/content/schema';
-import { STACK_BREAKPOINTS } from '../../lib/content/schema';
+import {
+  DEFAULT_SECTION_PADDING,
+  normaliseSectionPadding,
+  SECTION_PADDING_STEP,
+  STACK_BREAKPOINTS,
+} from '../../lib/content/schema';
 import {
   type Path,
   parsePathKey,
@@ -39,6 +44,20 @@ interface Props {
   onCommit: (next: (current: Page) => Page, coalesceKey?: string) => void;
   onPickBlock: (target: { section: number; row: number; column: number }) => void;
   onInsertSection: (index: number) => void;
+}
+
+/**
+ * Live state of a height drag.
+ *
+ * Separate from the width drag rather than one union: they cannot both be in
+ * progress, but keeping them apart means neither has to check which kind it
+ * is on every pointer move.
+ */
+interface HeightDrag {
+  section: number;
+  startY: number;
+  startPadding: number;
+  handle: HTMLElement;
 }
 
 /** Live state of a width drag. Kept in a ref: it changes faster than React. */
@@ -64,6 +83,7 @@ export function Canvas({
 }: Props) {
   const frameRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<DragState | null>(null);
+  const heightRef = useRef<HeightDrag | null>(null);
   const [badge, setBadge] = useState<{ x: number; y: number; text: string } | null>(null);
 
   // ---------------------------------------------------------------------
@@ -152,6 +172,24 @@ export function Canvas({
   // ---------------------------------------------------------------------
 
   const onPointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    const grip = (event.target as HTMLElement).closest<HTMLElement>('.ed-vresize');
+    if (grip?.dataset.vresize) {
+      const path = parsePathKey(grip.dataset.vresize);
+      if (path?.kind !== 'section') return;
+
+      event.preventDefault();
+      grip.setPointerCapture(event.pointerId);
+      grip.classList.add('is-dragging');
+
+      heightRef.current = {
+        section: path.section,
+        startY: event.clientY,
+        startPadding: page.sections[path.section]?.paddingY ?? DEFAULT_SECTION_PADDING,
+        handle: grip,
+      };
+      return;
+    }
+
     const handle = (event.target as HTMLElement).closest<HTMLElement>('.ed-resize');
     if (!handle) return;
 
@@ -180,10 +218,33 @@ export function Canvas({
       startX: event.clientX,
       handle,
     };
-  }, []);
+  }, [page]);
 
   const onPointerMove = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
+      const height = heightRef.current;
+      if (height) {
+        // Halved because the padding applies top AND bottom: without it the
+        // section grows at twice the speed of the pointer and the grip runs
+        // away from the finger holding it.
+        const delta = (event.clientY - height.startY) / 2;
+        const next = normaliseSectionPadding(height.startPadding + delta);
+
+        onCommit(
+          (current) => {
+            if (current.sections[height.section]?.paddingY === next) return current;
+            const sections = [...current.sections];
+            sections[height.section] = { ...sections[height.section], paddingY: next };
+            return { ...current, sections };
+          },
+          // One undo step for the whole drag, as with the width drag.
+          `pad:${height.section}`,
+        );
+
+        setBadge({ x: event.clientX, y: event.clientY, text: `${next}px` });
+        return;
+      }
+
       const drag = dragRef.current;
       if (!drag) return;
 
@@ -215,6 +276,19 @@ export function Canvas({
   );
 
   const endDrag = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    const height = heightRef.current;
+    if (height) {
+      try {
+        height.handle.releasePointerCapture(event.pointerId);
+      } catch {
+        // The pointer may already be gone. Nothing to release.
+      }
+      height.handle.classList.remove('is-dragging');
+      heightRef.current = null;
+      setBadge(null);
+      return;
+    }
+
     const drag = dragRef.current;
     if (!drag) return;
     try {
@@ -231,6 +305,31 @@ export function Canvas({
   // a mouse. 2% a press, 10% with shift.
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
+      // Height first: same keys would otherwise be ambiguous on a page that
+      // has both handles focusable.
+      const grip = (event.target as HTMLElement).closest<HTMLElement>('.ed-vresize');
+      if (grip?.dataset.vresize) {
+        if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+        const path = parsePathKey(grip.dataset.vresize);
+        if (path?.kind !== 'section') return;
+
+        event.preventDefault();
+        // One step a press, five with shift, matching the widths' 2 and 10.
+        const step = (event.shiftKey ? 5 : 1) * SECTION_PADDING_STEP;
+        const delta = event.key === 'ArrowUp' ? -step : step;
+
+        onCommit((current) => {
+          const section = current.sections[path.section];
+          if (!section) return current;
+          const next = normaliseSectionPadding(section.paddingY + delta);
+          if (next === section.paddingY) return current;
+          const sections = [...current.sections];
+          sections[path.section] = { ...section, paddingY: next };
+          return { ...current, sections };
+        }, `pad:${path.section}`);
+        return;
+      }
+
       if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
       const handle = (event.target as HTMLElement).closest<HTMLElement>('.ed-resize');
       if (!handle?.dataset.resize) return;
