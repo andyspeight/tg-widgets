@@ -51,6 +51,19 @@ ok(isActionableError({ event: 'error', widget: 'offers', widgetId: 'tgw_b', mess
 ok(isActionableError({ event: 'error', widget: 'offers', widgetId: 'tgw_c', message: 'Offers service unavailable (HTTP 502)', detail: 'cards' }) === true,
   'a genuine bad-gateway (HTTP 502) still alerts');
 
+// ── A widget-config 404 is a DELETED / stale embed, not a platform failure ────
+// (27-29 Jul 2026) travelhubworld left two deleted offers widgets embedded on
+// /last-minute-deals, so each page view re-fired "Config load failed: 404".
+ok(isActionableError({ event: 'error', widget: 'offers', widgetId: 'tgw_1784733883811_bzxnql', message: 'config load failed', detail: 'Config load failed: 404' }) === false,
+  'a config-load 404 (deleted / stale embed) is NOT alerted');
+ok(isActionableError({ event: 'error', widget: 'spotlight', widgetId: 'tgw_x', message: 'config load failed', detail: 'HTTP 404 Not Found' }) === false,
+  'any config 404 phrasing is suppressed');
+// But only CONFIG 404s: a genuine config 5xx, and a non-config 404, still alert.
+ok(isActionableError({ event: 'error', widget: 'offers', widgetId: 'tgw_d', message: 'config load failed', detail: 'Config load failed: 503' }) === true,
+  'a config 503 still alerts (real outage, not a missing widget)');
+ok(isActionableError({ event: 'error', widget: 'mybooking', widgetId: 'tgw_e', message: 'order lookup failed', detail: 'HTTP 404' }) === true,
+  'a 404 that is NOT a config load still alerts (only widget-config 404 is a stale embed)');
+
 // ── Loads and junk are never alertable ──────────────────────────────────────
 ok(isActionableError({ event: 'load', widget: 'consent', widgetId: 'tgw_9', message: '' }) === false,
   'a load heartbeat is never an alert, however well populated');
