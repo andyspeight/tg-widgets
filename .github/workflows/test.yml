@@ -1,0 +1,53 @@
+# Run the test suite on every pull request and every push to main.
+#
+# Until now nothing enforced these. They were only ever run because someone
+# remembered to.
+#
+# Scope: test/*.test.mjs only. The *-smoke.mjs files in the same folder make real
+# calls to live services and spend real API budget, so they stay a deliberate
+# manual step rather than something that fires on every push.
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: node --test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # npm install rather than npm ci: there is no root lockfile. Some tests
+      # import modules that pull in real packages (jsonwebtoken via the auth
+      # helpers), so a bare checkout is not enough here.
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Run tests
+        run: node --test test/*.test.mjs
+
+      # A suite that silently stops running is worse than no suite. If the count
+      # collapses, something has stopped loading rather than started passing.
+      - name: Check the suite did not silently shrink
+        run: |
+          COUNT=$(node --test test/*.test.mjs 2>&1 | grep -E '^# tests [0-9]+' | grep -oE '[0-9]+' | head -1)
+          echo "Test count: $COUNT"
+          if [ -z "$COUNT" ] || [ "$COUNT" -lt 15 ]; then
+            echo "::error::Expected at least 15 tests, found '${COUNT:-none}'. A test file has probably stopped loading."
+            exit 1
+          fi
