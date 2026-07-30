@@ -1,5 +1,5 @@
 /**
- * Travelgenix Form Widget v1.0.0
+ * Travelgenix Form Widget v1.1.0
  * A general-purpose (non travel) conversational form: one question at a time,
  * keyboard-first, with a welcome screen, progress and a custom thank-you.
  *
@@ -26,6 +26,16 @@
  * on first mount. See _renderStep / _focusStep.
  *
  * Changelog:
+ *   v1.1.0 (Jul 2026) — Design pass. The first cut used ad-hoc spacing and type
+ *     sizes, which reads as unconsidered. Rebuilt against the Travelgenix design
+ *     system: a 4px spacing grid, the type scale, tokenised colour/radius/
+ *     elevation with a brand-tinted navy shadow, 44px minimum touch targets
+ *     everywhere (the opinion scale was 42px and the stars had no hit area at
+ *     all), focus rings that shift the border and add a 3px ring rather than a
+ *     bare outline, a deliberate question-to-answer rhythm, balanced headline
+ *     wrapping, tabular numerals, and a full dark theme. Accent ink is now
+ *     derived from the client's colour by relative luminance, so a pale brand
+ *     colour no longer ships unreadable white text.
  *   v1.0.0 (Jul 2026) — Phase 1: 13 generic question types, conversational
  *     renderer, keyboard navigation, validation, welcome/thank-you screens,
  *     progress bar. Branching logic is Phase 2 and is deliberately absent.
@@ -33,7 +43,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.0';
+  const VERSION = '1.1.0';
 
   // ─── API base ────────────────────────────────────────────────────────
   // The widget runs on CUSTOMER sites, so a relative '/api' path would resolve
@@ -69,6 +79,25 @@
   function safeColour(v, fallback) {
     return /^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(String(v || '').trim())
       ? String(v).trim() : fallback;
+  }
+
+  /**
+   * Pick readable text for whatever accent the client chose.
+   * A client can set any brand colour, including a pale yellow or lime, and
+   * white text on those is unreadable — a contrast failure we would be shipping
+   * on their behalf. Relative luminance (WCAG) decides ink vs paper.
+   */
+  function inkFor(hex) {
+    let h = String(hex || '').replace('#', '');
+    if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+    if (h.length < 6) return '#FFFFFF';
+    const chan = (i) => {
+      const c = parseInt(h.slice(i, i + 2), 16) / 255;
+      return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    };
+    const L = 0.2126 * chan(0) + 0.7152 * chan(2) + 0.0722 * chan(4);
+    // Contrast against white vs against near-black; pick the better one.
+    return (1.05 / (L + 0.05)) >= ((L + 0.05) / 0.0947) ? '#FFFFFF' : '#0F172A';
   }
 
   function clampInt(v, min, max, fallback) {
@@ -310,105 +339,334 @@
   const STYLES = `
     :host { all: initial; display: block; }
     *, *::before, *::after { box-sizing: border-box; }
+
     .tgf-root {
+      /* ── Brand (client-overridable) ── */
       --tgf-accent: #1B2B5B;
       --tgf-accent-ink: #FFFFFF;
-      --tgf-ink: #0F172A;
-      --tgf-muted: #64748B;
-      --tgf-border: #E2E8F0;
+
+      /* ── Surfaces + text ── */
       --tgf-bg: #FFFFFF;
-      --tgf-radius: 12px;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --tgf-bg-sunken: #F8FAFC;
+      --tgf-ink: #0F172A;
+      --tgf-ink-2: #475569;
+      --tgf-ink-3: #94A3B8;
+      --tgf-border: #E2E8F0;
+      --tgf-border-strong: #CBD5E1;
+      --tgf-danger: #DC2626;
+
+      /* ── 4px spacing grid ── */
+      --tgf-s1: 4px;  --tgf-s2: 8px;  --tgf-s3: 12px; --tgf-s4: 16px;
+      --tgf-s5: 20px; --tgf-s6: 24px; --tgf-s8: 32px; --tgf-s10: 40px;
+
+      /* ── Radius + elevation ── */
+      --tgf-r-sm: 8px;
+      --tgf-r-md: 12px;
+      --tgf-r-lg: 16px;
+      /* Navy-tinted, not a default grey drop shadow. */
+      --tgf-shadow: 0 1px 2px rgba(15,23,42,.04), 0 12px 32px -16px rgba(27,43,91,.18);
+
+      --tgf-ease: cubic-bezier(.22,.61,.36,1);
+
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
       color: var(--tgf-ink);
       background: var(--tgf-bg);
       border: 1px solid var(--tgf-border);
-      border-radius: var(--tgf-radius);
+      border-radius: var(--tgf-r-lg);
+      box-shadow: var(--tgf-shadow);
       position: relative;
       overflow: hidden;
       /* Contain our own stacking so nothing here can paint over a host page's
          sticky header (the World Map lesson, 29 Jul 2026). */
       isolation: isolate;
     }
+
     .tgf-root[data-theme="dark"] {
-      --tgf-ink: #F8FAFC; --tgf-muted: #CBD5E1; --tgf-border: #334155; --tgf-bg: #0F172A;
+      --tgf-bg: #0F172A;
+      --tgf-bg-sunken: #1E293B;
+      --tgf-ink: #F8FAFC;
+      --tgf-ink-2: #CBD5E1;
+      --tgf-ink-3: #64748B;
+      --tgf-border: #334155;
+      --tgf-border-strong: #475569;
+      --tgf-danger: #FCA5A5;
+      --tgf-shadow: 0 1px 2px rgba(0,0,0,.2), 0 12px 32px -16px rgba(0,0,0,.5);
     }
-    .tgf-progress { height: 4px; background: var(--tgf-border); }
-    .tgf-progress-bar { height: 100%; width: 0%; background: var(--tgf-accent); transition: width 280ms cubic-bezier(.22,.61,.36,1); }
-    @media (prefers-reduced-motion: reduce) { .tgf-progress-bar { transition: none; } }
 
-    .tgf-stage { padding: 32px 28px 24px; min-height: 260px; display: flex; flex-direction: column; justify-content: center; }
-    @media (max-width: 520px) { .tgf-stage { padding: 24px 18px 20px; min-height: 220px; } }
+    /* ── Progress ─────────────────────────────────────────────────── */
+    .tgf-progress { height: 3px; background: var(--tgf-border); }
+    .tgf-progress-bar {
+      height: 100%; width: 0%;
+      background: var(--tgf-accent);
+      border-radius: 0 999px 999px 0;
+      transition: width 320ms var(--tgf-ease);
+    }
 
-    .tgf-step { animation: tgf-in 280ms cubic-bezier(.22,.61,.36,1); }
-    @keyframes tgf-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
-    @media (prefers-reduced-motion: reduce) { .tgf-step { animation: none; } }
+    /* ── Stage ────────────────────────────────────────────────────── */
+    /* A conversational form is one question at a time, so the stage is
+       deliberately generous. Density dial: 3. */
+    .tgf-stage {
+      padding: var(--tgf-s10) var(--tgf-s8) var(--tgf-s6);
+      min-height: 288px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .tgf-step { animation: tgf-in 320ms var(--tgf-ease) both; }
+    @keyframes tgf-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: none; }
+    }
 
-    .tgf-count { font-size: 12px; font-weight: 600; color: var(--tgf-accent); letter-spacing: .02em; margin: 0 0 8px; }
-    .tgf-q { margin: 0 0 6px; font-size: 20px; line-height: 1.3; font-weight: 700; letter-spacing: -.01em; }
-    .tgf-help { margin: 0 0 16px; font-size: 14px; color: var(--tgf-muted); line-height: 1.5; }
-    .tgf-optional { font-weight: 500; color: var(--tgf-muted); font-size: 14px; }
+    /* ── Question head ────────────────────────────────────────────── */
+    .tgf-count {
+      margin: 0 0 var(--tgf-s2);
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1.4;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--tgf-ink-3);
+      font-variant-numeric: tabular-nums;
+    }
+    .tgf-q {
+      display: block;
+      margin: 0 0 var(--tgf-s2);
+      font-size: 22px;
+      font-weight: 600;
+      line-height: 1.3;
+      letter-spacing: -.015em;
+      color: var(--tgf-ink);
+      /* Questions read as prose, so hold them to a comfortable measure. */
+      max-width: 34ch;
+      text-wrap: balance;
+    }
+    .tgf-optional { font-size: 15px; font-weight: 400; color: var(--tgf-ink-3); letter-spacing: 0; }
+    .tgf-help {
+      margin: 0 0 var(--tgf-s2);
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--tgf-ink-2);
+      max-width: 56ch;
+    }
+    /* The gap between the question block and the answer is the main rhythm
+       cue: it separates "what we asked" from "what you do". */
+    .tgf-answer { margin-top: var(--tgf-s6); }
 
+    /* ── Text inputs ──────────────────────────────────────────────── */
     .tgf-input {
-      width: 100%; padding: 12px 14px; font: inherit; font-size: 16px; color: var(--tgf-ink);
-      background: transparent; border: 1px solid var(--tgf-border); border-radius: 10px;
+      width: 100%;
+      max-width: 480px;
+      min-height: 48px;
+      padding: var(--tgf-s3) var(--tgf-s4);
+      font: inherit;
+      font-size: 16px;              /* 16px avoids iOS auto-zoom on focus */
+      line-height: 1.5;
+      color: var(--tgf-ink);
+      background: var(--tgf-bg);
+      border: 1px solid var(--tgf-border-strong);
+      border-radius: var(--tgf-r-sm);
+      transition: border-color 140ms var(--tgf-ease), box-shadow 140ms var(--tgf-ease);
     }
-    .tgf-input:focus-visible { outline: 2px solid var(--tgf-accent); outline-offset: 2px; border-color: var(--tgf-accent); }
-    .tgf-textarea { resize: vertical; min-height: 96px; }
-    .tgf-select { appearance: none; background-image: none; }
+    .tgf-input::placeholder { color: var(--tgf-ink-3); }
+    .tgf-input:hover { border-color: var(--tgf-accent); }
+    .tgf-input:focus { outline: none; }
+    .tgf-input:focus-visible {
+      outline: none;
+      border-color: var(--tgf-accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--tgf-accent) 18%, transparent);
+    }
+    .tgf-textarea { resize: vertical; min-height: 112px; max-width: 560px; }
+    .tgf-select { appearance: none; cursor: pointer; padding-right: var(--tgf-s8); }
 
+    /* ── Choices ──────────────────────────────────────────────────── */
     .tgf-fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
-    .tgf-choices { display: flex; flex-direction: column; gap: 8px; }
+    .tgf-choices { display: flex; flex-direction: column; gap: var(--tgf-s2); max-width: 480px; }
     .tgf-choice {
-      display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer;
-      border: 1px solid var(--tgf-border); border-radius: 10px; font-size: 15px; line-height: 1.4;
-      transition: border-color 140ms, background-color 140ms;
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: var(--tgf-s3);
+      min-height: 52px;
+      padding: var(--tgf-s3) var(--tgf-s4);
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1.4;
+      background: var(--tgf-bg);
+      border: 1px solid var(--tgf-border-strong);
+      border-radius: var(--tgf-r-sm);
+      transition: border-color 140ms var(--tgf-ease), background-color 140ms var(--tgf-ease), transform 100ms var(--tgf-ease);
     }
-    .tgf-choice:hover { border-color: var(--tgf-accent); }
-    .tgf-choice-input { margin: 0; accent-color: var(--tgf-accent); }
-    .tgf-choice:has(.tgf-choice-input:checked) { border-color: var(--tgf-accent); background: color-mix(in srgb, var(--tgf-accent) 8%, transparent); }
-    .tgf-choice:has(.tgf-choice-input:focus-visible) { outline: 2px solid var(--tgf-accent); outline-offset: 2px; }
+    .tgf-choice:hover { border-color: var(--tgf-accent); background: var(--tgf-bg-sunken); }
+    .tgf-choice:active { transform: scale(.99); }
+    .tgf-choice:has(.tgf-choice-input:checked) {
+      border-color: var(--tgf-accent);
+      background: color-mix(in srgb, var(--tgf-accent) 7%, var(--tgf-bg));
+      box-shadow: inset 0 0 0 1px var(--tgf-accent);
+    }
+    .tgf-choice:has(.tgf-choice-input:focus-visible) {
+      border-color: var(--tgf-accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--tgf-accent) 18%, transparent);
+    }
+    /* The native control is the accessible source of truth; the letter badge is
+       the visible affordance. */
+    .tgf-choice-input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
     .tgf-choice-key {
-      flex: none; width: 22px; height: 22px; display: grid; place-items: center;
-      border: 1px solid var(--tgf-border); border-radius: 5px; font-size: 11px; font-weight: 700; color: var(--tgf-muted);
+      flex: none;
+      width: 24px; height: 24px;
+      display: grid; place-items: center;
+      border: 1px solid var(--tgf-border-strong);
+      border-radius: 6px;
+      font-size: 11px; font-weight: 600; line-height: 1;
+      color: var(--tgf-ink-3);
+      background: var(--tgf-bg);
+      transition: border-color 140ms var(--tgf-ease), color 140ms var(--tgf-ease), background-color 140ms var(--tgf-ease);
     }
-    .tgf-choice-label { flex: 1 1 auto; }
+    .tgf-choice:has(.tgf-choice-input:checked) .tgf-choice-key {
+      border-color: var(--tgf-accent);
+      background: var(--tgf-accent);
+      color: var(--tgf-accent-ink);
+    }
+    .tgf-choice-label { flex: 1 1 auto; color: var(--tgf-ink); }
 
-    .tgf-stars { display: flex; gap: 6px; }
-    .tgf-star { cursor: pointer; line-height: 1; }
-    .tgf-star-mark { font-size: 30px; color: var(--tgf-border); transition: color 120ms; }
-    .tgf-star:hover .tgf-star-mark { color: var(--tgf-accent); }
+    /* ── Rating ───────────────────────────────────────────────────── */
+    .tgf-stars { display: flex; gap: var(--tgf-s1); }
+    .tgf-star {
+      position: relative;
+      /* 44px hit area even though the glyph is smaller. */
+      width: 44px; height: 44px;
+      display: grid; place-items: center;
+      cursor: pointer;
+      border-radius: var(--tgf-r-sm);
+      transition: transform 120ms var(--tgf-ease);
+    }
+    .tgf-star:hover { transform: translateY(-1px); }
+    .tgf-star:active { transform: scale(.94); }
+    .tgf-star-mark { font-size: 30px; line-height: 1; color: var(--tgf-border-strong); transition: color 120ms var(--tgf-ease); }
     .tgf-star.is-on .tgf-star-mark { color: var(--tgf-accent); }
-    .tgf-star:has(.tgf-choice-input:focus-visible) .tgf-star-mark { outline: 2px solid var(--tgf-accent); outline-offset: 2px; }
+    .tgf-star:has(.tgf-choice-input:focus-visible) {
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--tgf-accent) 18%, transparent);
+    }
 
-    .tgf-scale { display: flex; flex-wrap: wrap; gap: 6px; }
-    .tgf-scale-item { cursor: pointer; }
+    /* ── Opinion scale ────────────────────────────────────────────── */
+    .tgf-scale { display: flex; flex-wrap: wrap; gap: var(--tgf-s1); }
+    .tgf-scale-item { position: relative; cursor: pointer; }
     .tgf-scale-num {
-      display: grid; place-items: center; min-width: 42px; height: 42px; padding: 0 6px;
-      border: 1px solid var(--tgf-border); border-radius: 8px; font-size: 15px; font-weight: 600;
-      transition: border-color 140ms, background-color 140ms;
+      display: grid; place-items: center;
+      min-width: 44px; height: 44px;
+      padding: 0 var(--tgf-s2);
+      background: var(--tgf-bg);
+      border: 1px solid var(--tgf-border-strong);
+      border-radius: var(--tgf-r-sm);
+      font-size: 15px; font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      color: var(--tgf-ink);
+      transition: border-color 140ms var(--tgf-ease), background-color 140ms var(--tgf-ease), color 140ms var(--tgf-ease), transform 100ms var(--tgf-ease);
     }
     .tgf-scale-item:hover .tgf-scale-num { border-color: var(--tgf-accent); }
-    .tgf-scale-item:has(.tgf-choice-input:checked) .tgf-scale-num { background: var(--tgf-accent); color: var(--tgf-accent-ink); border-color: var(--tgf-accent); }
-    .tgf-scale-item:has(.tgf-choice-input:focus-visible) .tgf-scale-num { outline: 2px solid var(--tgf-accent); outline-offset: 2px; }
-    .tgf-scale-labels { display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; color: var(--tgf-muted); }
-
-    .tgf-consent { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.5; cursor: pointer; }
-    .tgf-consent-input { margin-top: 3px; accent-color: var(--tgf-accent); }
-
-    .tgf-err { margin: 10px 0 0; font-size: 13px; font-weight: 600; color: #B91C1C; }
-    .tgf-root[data-theme="dark"] .tgf-err { color: #FCA5A5; }
-
-    .tgf-foot { display: flex; align-items: center; gap: 12px; padding: 0 28px 24px; }
-    @media (max-width: 520px) { .tgf-foot { padding: 0 18px 20px; } }
-    .tgf-btn {
-      font: inherit; font-size: 15px; font-weight: 600; padding: 11px 20px; border-radius: 10px;
-      border: 1px solid transparent; cursor: pointer; background: var(--tgf-accent); color: var(--tgf-accent-ink);
+    .tgf-scale-item:active .tgf-scale-num { transform: scale(.96); }
+    .tgf-scale-item:has(.tgf-choice-input:checked) .tgf-scale-num {
+      background: var(--tgf-accent);
+      border-color: var(--tgf-accent);
+      color: var(--tgf-accent-ink);
     }
-    .tgf-btn:focus-visible { outline: 2px solid var(--tgf-accent); outline-offset: 2px; }
-    .tgf-btn[disabled] { opacity: .6; cursor: default; }
-    .tgf-btn--ghost { background: transparent; color: var(--tgf-muted); border-color: var(--tgf-border); }
-    .tgf-hint { font-size: 12px; color: var(--tgf-muted); margin-left: auto; }
-    @media (max-width: 520px) { .tgf-hint { display: none; } }
+    .tgf-scale-item:has(.tgf-choice-input:focus-visible) .tgf-scale-num {
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--tgf-accent) 18%, transparent);
+    }
+    .tgf-scale-labels {
+      display: flex; justify-content: space-between;
+      max-width: 480px; margin-top: var(--tgf-s2);
+      font-size: 13px; color: var(--tgf-ink-3);
+    }
+
+    /* ── Consent ──────────────────────────────────────────────────── */
+    .tgf-consent {
+      display: flex; gap: var(--tgf-s3); align-items: flex-start;
+      max-width: 520px; min-height: 44px; padding: var(--tgf-s2) 0;
+      font-size: 15px; line-height: 1.6; color: var(--tgf-ink-2); cursor: pointer;
+    }
+    .tgf-consent-input {
+      flex: none; width: 20px; height: 20px; margin: 2px 0 0;
+      accent-color: var(--tgf-accent); cursor: pointer;
+    }
+    .tgf-consent-input:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--tgf-accent) 18%, transparent);
+      border-radius: 4px;
+    }
+
+    /* ── Error ────────────────────────────────────────────────────── */
+    /* Reserves no space when empty, so the layout does not jump. */
+    .tgf-err {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.5;
+      color: var(--tgf-danger);
+    }
+    .tgf-err:not(:empty) { margin-top: var(--tgf-s2); }
+
+    /* ── Footer ───────────────────────────────────────────────────── */
+    .tgf-foot {
+      display: flex; align-items: center; gap: var(--tgf-s2);
+      padding: 0 var(--tgf-s8) var(--tgf-s8);
+    }
+    .tgf-foot--inline { padding: var(--tgf-s6) 0 0; }
+    .tgf-btn {
+      font: inherit;
+      font-size: 15px; font-weight: 600; line-height: 1;
+      min-height: 44px;
+      padding: 0 var(--tgf-s5);
+      display: inline-flex; align-items: center; justify-content: center; gap: var(--tgf-s2);
+      border: 1px solid transparent;
+      border-radius: var(--tgf-r-sm);
+      background: var(--tgf-accent);
+      color: var(--tgf-accent-ink);
+      cursor: pointer;
+      text-decoration: none;
+      transition: filter 140ms var(--tgf-ease), transform 100ms var(--tgf-ease), box-shadow 140ms var(--tgf-ease);
+    }
+    .tgf-btn:hover { filter: brightness(1.08); }
+    .tgf-btn:active { transform: translateY(1px); }
+    .tgf-btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--tgf-accent) 28%, transparent);
+    }
+    .tgf-btn[disabled] { opacity: .55; cursor: default; pointer-events: none; }
+    .tgf-btn--ghost {
+      background: transparent;
+      color: var(--tgf-ink-2);
+      border-color: var(--tgf-border-strong);
+    }
+    .tgf-btn--ghost:hover { filter: none; border-color: var(--tgf-accent); color: var(--tgf-ink); }
+    .tgf-hint {
+      margin-left: auto;
+      font-size: 13px;
+      color: var(--tgf-ink-3);
+      white-space: nowrap;
+    }
+    .tgf-hint b { font-weight: 600; color: var(--tgf-ink-2); }
+
+    /* ── Mobile ───────────────────────────────────────────────────── */
+    @media (max-width: 560px) {
+      .tgf-stage { padding: var(--tgf-s6) var(--tgf-s5) var(--tgf-s5); min-height: 240px; }
+      .tgf-foot { padding: 0 var(--tgf-s5) var(--tgf-s6); flex-wrap: wrap; }
+      .tgf-q { font-size: 20px; max-width: none; }
+      .tgf-hint { display: none; }
+      .tgf-btn { flex: 1 1 auto; }
+      .tgf-btn--ghost { flex: 0 0 auto; }
+    }
+
+    /* ── Reduced motion ───────────────────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      .tgf-step { animation: none; }
+      .tgf-progress-bar, .tgf-input, .tgf-choice, .tgf-choice-key,
+      .tgf-star, .tgf-star-mark, .tgf-scale-num, .tgf-btn { transition: none; }
+      .tgf-choice:active, .tgf-btn:active, .tgf-star:hover,
+      .tgf-star:active, .tgf-scale-item:active .tgf-scale-num { transform: none; }
+    }
 
     .tgf-sr-only {
       position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
@@ -453,6 +711,7 @@
     // ── Render ────────────────────────────────────────────────────────
     _render() {
       const accent = safeColour(this.cfg.accentColor, '#1B2B5B');
+      const accentInk = inkFor(accent);
       const theme = this.cfg.theme === 'dark' ? 'dark' : 'light';
       const total = this.questions.length;
 
@@ -466,7 +725,7 @@
 
       this.shadow.innerHTML =
         '<style>' + STYLES + '</style>' +
-        '<div class="tgf-root" data-theme="' + esc(theme) + '" style="--tgf-accent:' + esc(accent) + '">' +
+        '<div class="tgf-root" data-theme="' + esc(theme) + '" style="--tgf-accent:' + esc(accent) + ';--tgf-accent-ink:' + esc(accentInk) + '">' +
           (this.cfg.showProgress === false || this.done ? '' :
             '<div class="tgf-progress"><div class="tgf-progress-bar" style="width:' + pct + '%"></div></div>') +
           '<div class="tgf-stage">' + bodyHtml + '</div>' +
@@ -480,7 +739,7 @@
       return '<div class="tgf-step">' +
         '<h2 class="tgf-q">' + esc(this._t('welcomeTitle', 'Hello')) + '</h2>' +
         (this.cfg.welcomeBody ? '<p class="tgf-help">' + esc(this.cfg.welcomeBody) + '</p>' : '') +
-        '<div class="tgf-foot" style="padding:16px 0 0">' +
+        '<div class="tgf-foot tgf-foot--inline">' +
           '<button type="button" class="tgf-btn" data-start>' + esc(this._t('startLabel', 'Start')) + '</button>' +
           '<span class="tgf-hint">press <b>Enter</b></span>' +
         '</div></div>';
@@ -496,7 +755,7 @@
         '<h2 class="tgf-q">' + esc(this._t('thankYouTitle', 'Thank you')) + '</h2>' +
         '<p class="tgf-help">' + esc(this._t('thankYouBody', 'Your answers have been sent.')) + '</p>' +
         (this.cfg.thankYouCtaUrl && this.cfg.thankYouCtaText
-          ? '<div class="tgf-foot" style="padding:16px 0 0"><a class="tgf-btn" data-cta href="#">' + esc(this.cfg.thankYouCtaText) + '</a></div>'
+          ? '<div class="tgf-foot tgf-foot--inline"><a class="tgf-btn" data-cta href="#">' + esc(this.cfg.thankYouCtaText) + '</a></div>'
           : '') +
         '</div>';
     }
@@ -511,7 +770,9 @@
         '<label class="tgf-q" for="' + esc(id) + '">' + esc(q.label) +
           (optional ? ' <span class="tgf-optional">(optional)</span>' : '') + '</label>' +
         (q.help ? '<p class="tgf-help">' + esc(q.help) + '</p>' : '') +
-        '<div data-input>' + spec.input(q, id) + '</div>' +
+        // The answer sits in its own block: the gap above it is the rhythm cue
+        // separating "what we asked" from "what you do".
+        '<div class="tgf-answer" data-input>' + spec.input(q, id) + '</div>' +
         // Errors are announced, not just shown, or a screen-reader user never
         // learns why the form refused to advance.
         '<p class="tgf-err" data-err role="alert" aria-live="assertive"></p>' +
