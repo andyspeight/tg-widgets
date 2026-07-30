@@ -67,12 +67,6 @@ const combined =
 const api = eval('(function(){' + combined + '\nreturn { packageKindOf, typePredicate, nameMatchesAirport, parseDestinations };})')();
 const { packageKindOf, typePredicate, nameMatchesAirport, parseDestinations } = api;
 
-// ── Pull the real _cacheEligible method out of public/widget-offers.js. ───────
-const eligBody = sliceBalanced(widget, widget.indexOf('_cacheEligible(payload) {'));
-// eslint-disable-next-line no-eval
-const _cacheEligible = eval('(function(payload)' + eligBody + ')');
-const elig = (cfg, payload) => _cacheEligible.call({ cfg }, payload);
-
 // ── packageKindOf: sid fallback when packageType is absent ────────────────────
 ok(packageKindOf({ packageType: 'DynamicPackages' }) === 'DynamicPackages', 'explicit DynamicPackages tag → dynamic');
 ok(packageKindOf({ packageType: 'PackageHolidays' }) === 'PackageHolidays', 'explicit PackageHolidays tag → holiday');
@@ -138,14 +132,20 @@ ok(p.codes.length === 0 && p.names.length === 0 && !p.invalid, 'empty destinatio
 p = parseDestinations(Array.from({ length: 61 }, (_, i) => 'ES').join(','));
 ok(p.invalid === true, 'over the token cap → invalid');
 
-// ── _cacheEligible: free-text destinations now reach the cache ────────────────
-ok(elig({ template: 'grid', type: 'Packages' }, { destinations: ['MCO'], origins: ['GB'] }) === true, 'codes + code origin → cache eligible');
-ok(elig({ template: 'grid', type: 'Packages' }, { destinations: ['Orlando'], origins: ['GB'] }) === true, 'a place-name destination is now cache eligible (the fix)');
-ok(elig({ template: 'grid', type: 'Packages' }, { destinations: ['Costa del Sol'], origins: [] }) === true, 'a multi-word place name is cache eligible');
-ok(elig({ template: 'grid', type: 'Packages' }, { destinations: ['Orlando'], origins: ['Manchester'] }) === false, 'a free-text ORIGIN keeps the widget on live (origins must be codes)');
-ok(elig({ template: 'grid', type: 'Packages' }, { destinations: ['Orlando123'], origins: [] }) === false, 'a destination with digits is not resolvable → stays on live');
-ok(elig({ template: 'departure-board', type: 'Packages' }, { destinations: ['MCO'], origins: ['GB'] }) === false, 'departure-board template never uses the cache');
-ok(elig({ template: 'grid', type: 'Flights' }, { destinations: ['MCO'], origins: ['GB'] }) === false, 'flight-type widgets never use the cache');
+// ── Free-text destinations still reach the cache ──────────────────────────────
+// _cacheEligible is GONE as of v1.16.0: there is no live path left to be
+// eligible FOR, so every widget reads the cache and the gate would only have
+// been a way to send some of them nowhere. The behaviour it protected is now
+// enforced server-side by parseDestinations, which is asserted above: a name
+// that resolves is used, a name that does not is an honest miss, and neither
+// can widen a widget's filters. These pin the removal so it cannot creep back.
+// Scoped past the changelog, which legitimately still names the removed gate
+// when describing the v1.15.0 change that introduced it.
+const widgetCode = widget.slice(widget.indexOf("'use strict'"));
+ok(!/_cacheEligible/.test(widgetCode), 'the _cacheEligible gate is gone (every widget reads the cache)');
+ok(!/OFFERS_PROXY/.test(widgetCode), 'the widget holds no reference to the live offers proxy at all');
+ok(!/api\/offers['"`]/.test(widgetCode) && !/'\/offers'/.test(widgetCode),
+  'no live /api/offers URL is built anywhere in the widget');
 
 // ── canonBoard: Travelify's B&B synonyms all fold to one class ────────────────
 // (the CT-Travel-Offer-Ribbon's ~41% miss — a "BedAndBreakfast" filter dropped

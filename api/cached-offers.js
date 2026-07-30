@@ -4,8 +4,15 @@
  * Serves the OFFER-BOX widgets from the Travelgenix offer cache in Redis —
  * the pool the refresh-map-offers cron builds up from Travelify in
  * 250-offer increments (per destination × market × type). Locked decision
- * 2 Jul 2026: offer boxes read this cache, not live Travelify; the widget
- * falls back to the live proxy only when the cache has nothing matching.
+ * 2 Jul 2026: offer boxes read this cache, not live Travelify.
+ *
+ * 30 Jul 2026 — THIS IS NOW THE ONLY OFFER SOURCE A VISITOR CAN REACH. The
+ * widget's live-Travelify fallback is gone: a visitor's browser never triggers
+ * a Travelify search, whatever this endpoint answers. The only live search left
+ * in the product is the one Travelify runs when a visitor CLICKS an offer.
+ * So an empty or degraded answer here is not "the widget will go and ask
+ * Travelify instead" any more — it is a blank widget. Every branch that returns
+ * zero has to be a branch that genuinely has nothing to serve.
  *
  * Query params (all optional):
  *   type          Accommodation | Flights | Packages | DynamicPackages |
@@ -19,6 +26,8 @@
  *   DatesMin, DatesMax   departure window in days from today
  *   sort          price:asc (default) | price:desc
  *   maxOffers     1..500 (default 100)
+ *   hasFlight     '1' → only offers carrying a flight leg WITH a departure
+ *                 time (what the departure board can actually draw a row from)
  *
  * Response mirrors /api/offers: { success, data: [...] } — data entries are
  * rebuilt into the raw Travelify shape the widget renderer already reads
@@ -290,8 +299,9 @@ export default async function handler(req, res) {
 
   // Send the response then log telemetry (after the bytes are flushed, so no
   // client-visible latency). cacheHit reflects whether the cache actually
-  // served offers — a 0-match result is effectively a miss that makes the
-  // widget fall back to the live proxy. Never throws.
+  // served offers. Since the live fallback was removed a 0-match result is a
+  // BLANK WIDGET, not a slower path, so this metric is now the health signal
+  // for the whole offers product. Never throws.
   async function done(status, jsonBody) {
     res.status(status).json(jsonBody);
     await logWidgetEvent(req, {
@@ -315,9 +325,12 @@ export default async function handler(req, res) {
   }
 
   if (!configured()) {
-    // No Redis in this deploy — tell the widget honestly so it falls back to live.
+    // No Redis in this deploy. Flagged as degraded rather than a plain empty
+    // result: there is no live fallback behind us now, so "we cannot answer"
+    // and "there is nothing to show" must stay distinguishable — the widget
+    // shows the same calm empty state for both but only beacons for this one.
     res.setHeader('Cache-Control', 'no-store');
-    return done(200, { success: true, source: 'cache', totalMatched: 0, data: [] });
+    return done(200, { success: true, source: 'cache', totalMatched: 0, data: [], degraded: true });
   }
 
   try {
@@ -332,8 +345,9 @@ export default async function handler(req, res) {
     // offers depart Irish airports.
     const orig = csv(q.origins, /^[A-Z]{2,3}$/);
     const boardsCsv = csv(q.boardBases, /^[A-Z]/i, 12);
-    // Any filter token we cannot faithfully apply → honest miss (the widget
-    // then falls back to live Travelify, which resolves free-text names).
+    // Any filter token we cannot faithfully apply → honest miss. Serving a
+    // WIDER result than the client configured would be worse than serving
+    // none: a widget scoped to one place must never show the world.
     if (dest.invalid || orig.invalid || boardsCsv.invalid) {
       res.setHeader('Cache-Control', 'no-store');
       return done(200, { success: true, source: 'cache', totalMatched: 0, data: [], unresolvedFilters: true });
@@ -366,6 +380,21 @@ export default async function handler(req, res) {
     const sortDesc = String(q.sort || '') === 'price:desc';
     const maxOffers = Math.min(MAX_OFFERS_CAP, Math.max(1, num(q.maxOffers) || DEFAULT_MAX));
     const matchesType = typePredicate(q.type);
+    // hasFlight=1 → only offers that actually carry a flight leg.
+    //
+    // The departure board renders one row per FLIGHT: departure time, route,
+    // carrier, stops. It discards anything without a flight after the fetch, so
+    // without this filter a cheapest-first read hands it a page of hotel-only
+    // offers and it draws an empty board while the cache holds hundreds of
+    // usable package flights. The board asks for what it can actually render
+    // rather than filtering the answer afterwards.
+    //
+    // A departure TIME is required too, not just a flight: the board's whole
+    // format is a time column, and a date-only offer would render 00:00 for
+    // every row, which reads as broken. Offers without one are simply not
+    // board material.
+    const needsFlight = String(q.hasFlight || '') === '1';
+    const hasDepartureTime = (o) => /T\d{2}:\d{2}/.test(String(o.outboundDate || ''));
 
     // ── Which country keys to read ─────────────────────────────────────────
     // 2-letter tokens name countries directly. 3-letter tokens are airports,
@@ -386,8 +415,9 @@ export default async function handler(req, res) {
       }
       // Resolve each free-text name to the airports it names. A name that
       // matches nothing in the cache is an honest miss for the WHOLE query
-      // (same rule as an invalid code) — the widget then falls back to live,
-      // which resolves free-text names itself. Never widen to "no filter".
+      // (same rule as an invalid code). Never widen to "no filter" — a widget
+      // configured for one place showing worldwide offers is a worse failure
+      // than showing none.
       for (const name of dest.names) {
         let resolved = 0;
         for (const a of airports) {
@@ -442,6 +472,7 @@ export default async function handler(req, res) {
         for (const o of allOffers) {
           if (!o || !matchesType(o)) continue;
           if (!isServable(o, now)) continue;
+          if (needsFlight && !(o.origin && hasDepartureTime(o))) continue;
           // Destination semantics: an offer matches when its arrival airport
           // is one of the requested IATAs (including those resolved from a
           // free-text place name), or its country one of the requested codes.
@@ -513,8 +544,10 @@ export default async function handler(req, res) {
     });
   } catch (err) {
     console.error('[cached-offers] failed:', err?.message);
-    // Fail soft with an empty result — the widget treats this as a miss and
-    // falls back to the live proxy, so visitors always see offers.
+    // Fail soft with an empty result. `degraded` is what separates this from a
+    // genuine "nothing matched": the widget paints the same calm empty state
+    // either way, but only beacons on this one, so a real cache outage still
+    // reaches us instead of hiding behind thousands of quiet blank widgets.
     res.setHeader('Cache-Control', 'no-store');
     return done(200, { success: true, source: 'cache', totalMatched: 0, data: [], degraded: true });
   }
