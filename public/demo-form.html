@@ -6,86 +6,186 @@
   <title>Form widget — Travelgenix</title>
   <meta name="robots" content="noindex">
   <style>
-    :root { --ink:#0F172A; --muted:#64748B; --border:#E2E8F0; --bg:#F8FAFC; }
+    :root {
+      --ink: #0F172A;
+      --ink-2: #475569;
+      --ink-3: #94A3B8;
+      --border: #E2E8F0;
+      --bg: #FFFFFF;
+      --bg-page: #F8FAFC;
+      --accent: #1B2B5B;
+
+      --s2: 8px; --s3: 12px; --s4: 16px; --s6: 24px; --s8: 32px; --s12: 48px; --s16: 64px;
+    }
+    [data-theme="dark"] {
+      --ink: #F8FAFC; --ink-2: #CBD5E1; --ink-3: #64748B;
+      --border: #334155; --bg: #0F172A; --bg-page: #020617;
+    }
     * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
     body {
-      margin: 0; padding: 48px 20px; background: var(--bg); color: var(--ink);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: var(--s16) var(--s6) var(--s16);
+      background: var(--bg-page);
+      color: var(--ink);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      font-size: 16px;
       line-height: 1.5;
     }
-    .wrap { max-width: 680px; margin: 0 auto; }
-    h1 { font-size: 26px; letter-spacing: -.02em; margin: 0 0 6px; }
-    .sub { color: var(--muted); margin: 0 0 28px; font-size: 15px; }
-    h2 { font-size: 15px; margin: 36px 0 10px; letter-spacing: -.01em; }
-    .note {
-      background: #fff; border: 1px solid var(--border); border-radius: 10px;
-      padding: 14px 16px; font-size: 14px; color: var(--muted); margin: 0 0 24px;
+    .wrap { max-width: 720px; margin: 0 auto; }
+
+    .eyebrow {
+      margin: 0 0 var(--s2);
+      font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+      color: var(--ink-3);
     }
+    h1 {
+      margin: 0 0 var(--s3);
+      font-size: 32px; font-weight: 600; line-height: 1.15; letter-spacing: -.02em;
+      text-wrap: balance;
+    }
+    .lede {
+      margin: 0 0 var(--s8);
+      font-size: 17px; line-height: 1.6; color: var(--ink-2); max-width: 56ch;
+    }
+
+    .keys {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: var(--s3);
+      padding: var(--s6);
+      margin: 0 0 var(--s12);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+    .key { display: flex; gap: var(--s3); align-items: baseline; font-size: 14px; color: var(--ink-2); }
     kbd {
-      font: inherit; font-size: 12px; background: #fff; border: 1px solid var(--border);
-      border-bottom-width: 2px; border-radius: 4px; padding: 1px 5px;
+      flex: none;
+      display: inline-block; min-width: 24px; padding: 2px 6px;
+      font: inherit; font-size: 12px; font-weight: 600; text-align: center;
+      color: var(--ink); background: var(--bg-page);
+      border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 6px;
     }
+
+    .demo { margin: 0 0 var(--s12); }
+    .demo-head {
+      display: flex; align-items: baseline; gap: var(--s3);
+      margin: 0 0 var(--s4); padding-bottom: var(--s3);
+      border-bottom: 1px solid var(--border);
+    }
+    h2 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+    .demo-note { font-size: 13px; color: var(--ink-3); margin-left: auto; }
+
     #log {
-      margin-top: 16px; font-size: 13px; color: var(--muted);
+      margin-top: var(--s4); min-height: 20px;
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 13px; color: var(--ink-3);
+    }
+    .foot {
+      margin-top: var(--s16); padding-top: var(--s6);
+      border-top: 1px solid var(--border);
+      font-size: 13px; color: var(--ink-3);
+    }
+    @media (max-width: 560px) {
+      body { padding: var(--s8) var(--s4) var(--s12); }
+      h1 { font-size: 26px; }
+      .lede { font-size: 16px; }
+      .keys { padding: var(--s4); }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Form widget</h1>
-    <p class="sub">A general-purpose conversational form: one question at a time, keyboard first.</p>
+    <p class="eyebrow">Widget suite</p>
+    <h1>Form</h1>
+    <p class="lede">
+      A general-purpose form that asks one question at a time. Built for speed of
+      answering: every question can be completed without touching the mouse.
+    </p>
 
-    <div class="note">
-      Try it with the keyboard alone. <kbd>Enter</kbd> moves on, letter keys
-      (<kbd>A</kbd>, <kbd>B</kbd>, <kbd>C</kbd>) pick an option, number keys set a
-      rating. In a long answer <kbd>Enter</kbd> makes a new line, so
-      <kbd>Ctrl</kbd>+<kbd>Enter</kbd> moves on instead.
-      This demo posts nowhere — it is configured inline and the submit is stubbed.
+    <div class="keys">
+      <div class="key"><kbd>Enter</kbd><span>Move to the next question</span></div>
+      <div class="key"><kbd>A</kbd><span>Pick that option, and move on</span></div>
+      <div class="key"><kbd>4</kbd><span>Set a rating or scale point</span></div>
+      <div class="key"><kbd>Ctrl</kbd><span>With <kbd>Enter</kbd>, finishes a long answer</span></div>
     </div>
 
-    <h2>Contact form</h2>
-    <div data-tg-widget="form" data-tg-config='{
-      "accentColor": "#1B2B5B",
-      "welcomeTitle": "Get in touch",
-      "welcomeBody": "Five quick questions, about a minute.",
-      "startLabel": "Start",
-      "thankYouTitle": "Thanks, that is everything",
-      "thankYouBody": "We will come back to you within one working day.",
-      "questions": [
-        { "id": "name",  "label": "What is your name?", "type": "short-text", "required": true, "mapTo": "fullName", "placeholder": "Jane Doe" },
-        { "id": "email", "label": "What is your email?", "type": "email", "required": true, "mapTo": "email", "help": "So we can reply." },
-        { "id": "topic", "label": "What is this about?", "type": "multiple-choice", "required": true, "options": ["A new project", "An existing booking", "Careers", "Something else"] },
-        { "id": "budget","label": "Roughly what budget?", "type": "dropdown", "required": false, "placeholder": "Choose a range", "options": ["Under £1,000", "£1,000 to £5,000", "£5,000 to £20,000", "Over £20,000"] },
-        { "id": "rate",  "label": "How likely are you to recommend us?", "type": "opinion-scale", "required": false, "min": 0, "max": 10, "minLabel": "Not likely", "maxLabel": "Very likely" },
-        { "id": "notes", "label": "Anything else we should know?", "type": "long-text", "required": false, "placeholder": "Optional" },
-        { "id": "ok",    "label": "Keep me updated", "type": "consent", "required": false, "mapTo": "marketingConsent", "consentText": "Email me occasional updates. Unsubscribe any time." }
-      ]
-    }'></div>
-    <div id="log"></div>
+    <section class="demo">
+      <div class="demo-head">
+        <h2>Contact form</h2>
+        <span class="demo-note">Light, with a welcome screen</span>
+      </div>
+      <div data-tg-widget="form" data-tg-config='{
+        "accentColor": "#1B2B5B",
+        "welcomeTitle": "Get in touch",
+        "welcomeBody": "Five quick questions, about a minute.",
+        "startLabel": "Start",
+        "thankYouTitle": "Thanks, that is everything",
+        "thankYouBody": "We will come back to you within one working day.",
+        "questions": [
+          { "id": "name",  "label": "What is your name?", "type": "short-text", "required": true, "mapTo": "fullName", "placeholder": "Jane Doe" },
+          { "id": "email", "label": "What is your email?", "type": "email", "required": true, "mapTo": "email", "help": "So we can reply. We never pass it on." },
+          { "id": "topic", "label": "What is this about?", "type": "multiple-choice", "required": true, "options": ["A new project", "An existing booking", "Careers", "Something else"] },
+          { "id": "budget","label": "Roughly what budget?", "type": "dropdown", "required": false, "placeholder": "Choose a range", "options": ["Under £1,000", "£1,000 to £5,000", "£5,000 to £20,000", "Over £20,000"] },
+          { "id": "rate",  "label": "How likely are you to recommend us?", "type": "opinion-scale", "required": false, "min": 0, "max": 10, "minLabel": "Not likely", "maxLabel": "Very likely" },
+          { "id": "notes", "label": "Anything else we should know?", "type": "long-text", "required": false, "placeholder": "Optional" },
+          { "id": "ok",    "label": "Keep me updated", "type": "consent", "required": false, "mapTo": "marketingConsent", "consentText": "Email me occasional updates. Unsubscribe any time." }
+        ]
+      }'></div>
+      <div id="log"></div>
+    </section>
 
-    <h2>Feedback survey (dark)</h2>
-    <div data-tg-widget="form" data-tg-config='{
-      "theme": "dark",
-      "accentColor": "#00B4D8",
-      "showWelcome": false,
-      "thankYouTitle": "Thank you",
-      "thankYouBody": "Your feedback helps us improve.",
-      "questions": [
-        { "id": "stars", "label": "How was your experience?", "type": "rating", "required": true, "max": 5 },
-        { "id": "email2","label": "Your email", "type": "email", "required": true, "mapTo": "email" },
-        { "id": "again", "label": "Would you book with us again?", "type": "yes-no", "required": true },
-        { "id": "why",   "label": "What could we do better?", "type": "long-text", "required": false }
-      ]
-    }'></div>
+    <section class="demo">
+      <div class="demo-head">
+        <h2>Feedback survey</h2>
+        <span class="demo-note">Dark, straight into the first question</span>
+      </div>
+      <div data-tg-widget="form" data-tg-config='{
+        "theme": "dark",
+        "accentColor": "#00B4D8",
+        "showWelcome": false,
+        "thankYouTitle": "Thank you",
+        "thankYouBody": "Your feedback goes straight to the team.",
+        "questions": [
+          { "id": "stars", "label": "How was your experience?", "type": "rating", "required": true, "max": 5 },
+          { "id": "email2","label": "Your email", "type": "email", "required": true, "mapTo": "email" },
+          { "id": "again", "label": "Would you book with us again?", "type": "yes-no", "required": true },
+          { "id": "why",   "label": "What could we do better?", "type": "long-text", "required": false, "placeholder": "Optional, but useful" }
+        ]
+      }'></div>
+    </section>
+
+    <section class="demo">
+      <div class="demo-head">
+        <h2>Brand colour check</h2>
+        <span class="demo-note">Pale accent, text stays readable</span>
+      </div>
+      <div data-tg-widget="form" data-tg-config='{
+        "accentColor": "#FFC93C",
+        "showWelcome": false,
+        "showProgress": true,
+        "thankYouTitle": "Done",
+        "thankYouBody": "Note the button text went dark automatically.",
+        "questions": [
+          { "id": "pick",  "label": "Which suits you best?", "type": "multiple-choice", "required": true, "options": ["Morning", "Afternoon", "Evening"] },
+          { "id": "email3","label": "Your email", "type": "email", "required": true, "mapTo": "email" }
+        ]
+      }'></div>
+    </section>
+
+    <p class="foot">
+      Nothing is sent from this page: each form is configured inline and the
+      submit is stubbed. Resize the window or tab through with the keyboard to
+      check the responsive and focus behaviour.
+    </p>
   </div>
 
   <script src="/widget-form.js" defer></script>
   <script>
-    // Demo only: report the submit event rather than sending anything anywhere.
     document.addEventListener('tgf:submitted', function (e) {
       var log = document.getElementById('log');
-      if (log) log.textContent = 'Submitted. Lead: ' + (e.detail && e.detail.leadId ? e.detail.leadId : '(none)');
+      if (log) log.textContent = 'Submitted. Lead reference: ' + (e.detail && e.detail.leadId ? e.detail.leadId : '(none)');
     });
   </script>
 </body>
