@@ -220,14 +220,23 @@ const root = execSync('git rev-parse --show-toplevel', { encoding: 'utf8' }).tri
 const head = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
 const arena = `/tmp/tg-sites-probe-${head.slice(0, 12)}`;
 
-execSync(`git worktree remove --force ${arena}`, { cwd: root, stdio: 'ignore' });
+/** Best effort, because most of the time there is nothing there to remove. */
+const tidy = () => {
+  try {
+    execSync(`git worktree remove --force ${arena}`, { cwd: root, stdio: 'ignore' });
+  } catch {
+    // No such worktree, which is the normal case on the way in.
+  }
+};
+
+tidy();
 execSync(`git worktree add --detach ${arena} ${head}`, { cwd: root, stdio: 'ignore' });
 
 /*
  * node_modules is not in the worktree and installing again would take longer
  * than the whole probe. Linked, not copied: the packages are read-only here.
  */
-execSync(`ln -s ${root}/tg-sites/node_modules ${arena}/tg-sites/node_modules`, { stdio: 'ignore' });
+execSync(`ln -sfn ${root}/tg-sites/node_modules ${arena}/tg-sites/node_modules`);
 
 const here = `${arena}/tg-sites`;
 const run = (command) => execSync(command, { cwd: here, encoding: 'utf8', stdio: 'pipe' });
@@ -271,7 +280,7 @@ try {
     }
   }
 } finally {
-  execSync(`git worktree remove --force ${arena}`, { cwd: root, stdio: 'ignore' });
+  tidy();
 }
 
 console.log(bad === 0 ? '\n  Every mutation was caught.' : `\n  ${bad} not caught.`);
