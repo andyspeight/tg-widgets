@@ -12,7 +12,12 @@
  * or body HTML at all, whatever they send.
  */
 
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { describe, expect, it } from 'vitest';
+
+import { isStaffEmail, STAFF_DOMAINS } from '../lib/auth/staff';
 
 import {
   analytics,
@@ -352,5 +357,77 @@ describe('settingsAreEmpty', () => {
     expect(settingsAreEmpty(withSettings({ gtmId: 'GTM-ABC1234' }))).toBe(false);
     expect(settingsAreEmpty(withSettings({ faviconUrl: '/f.png' }))).toBe(false);
     expect(settingsAreEmpty(withSettings({ locale: 'fr-FR' }))).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Who counts as staff
+// ---------------------------------------------------------------------------
+
+describe('the staff check', () => {
+  it('recognises a Travelgenix address and nothing else', () => {
+    for (const email of [
+      'andy.speight@agendas.group',
+      'someone@travelgenix.com',
+      'someone@travelgenix.io',
+      'Someone@TravelGenix.IO',
+      '  someone@travelgenix.io  ',
+    ]) {
+      expect(isStaffEmail(email), email).toBe(true);
+    }
+
+    for (const email of [
+      'owner@someagency.co.uk',
+      // The domain is what counts, and it is what comes after the LAST @.
+      'agendas.group@gmail.com',
+      'someone@notagendas.group',
+      'someone@agendas.group.evil.test',
+      'agendas.group',
+      // No local part, so not an address. This is where the check is
+      // deliberately stricter than the widget suite's, which grants it.
+      '@agendas.group',
+      '@travelgenix.io',
+      '',
+      null,
+      undefined,
+      42,
+      {},
+    ]) {
+      expect(isStaffEmail(email as unknown), String(email)).toBe(false);
+    }
+  });
+
+  /*
+   * An address may legally contain more than one @ inside a quoted local part, so
+   * the domain is whatever follows the LAST one. Splitting on the first would read
+   * this as the domain "b".
+   */
+  it('reads the domain after the last @, not the first', () => {
+    expect(isStaffEmail('"a@b"@travelgenix.io')).toBe(true);
+    expect(isStaffEmail('"a@travelgenix.io"@evil.test')).toBe(false);
+  });
+
+  /*
+   * THE DRIFT CATCHER.
+   *
+   * api/_lib/auth/staff.js in the widget suite is the original and its header says
+   * never to re-implement the check, so the rule cannot drift. That cannot be
+   * followed literally across two runtimes: it is JavaScript in the repository root
+   * with its own imports, this is a TypeScript app in a subdirectory with its own
+   * build. So the definition is mirrored and this test is what keeps the mirror
+   * honest. If somebody adds a domain over there and not here, a Travelgenix person
+   * would silently not be staff in this product.
+   */
+  it('agrees with the widget suite about which domains are Travelgenix', () => {
+    const source = readFileSync(
+      join(__dirname, '..', '..', 'api', '_lib', 'auth', 'staff.js'),
+      'utf8',
+    );
+
+    const match = source.match(/export const STAFF_DOMAINS = \[([^\]]+)\]/);
+    expect(match, 'STAFF_DOMAINS moved or was renamed in the widget suite').toBeTruthy();
+
+    const theirs = [...match![1].matchAll(/'([^']+)'/g)].map((m) => m[1]).sort();
+    expect(theirs).toEqual([...STAFF_DOMAINS].sort());
   });
 });
