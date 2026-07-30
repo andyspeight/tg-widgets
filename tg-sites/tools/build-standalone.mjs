@@ -60,6 +60,17 @@ const result = await esbuild.build({
         build.onResolve({ filter: /(^|\/)app\/actions\/pages$/ }, () => ({
           path: resolve(root, 'standalone/demo-actions.ts'),
         }));
+        /*
+         * The media actions too, for the same reason and one more.
+         *
+         * They import the Postgres driver, and they also import the blob store SDK
+         * and reach api.pexels.com, neither of which exists in a file served from a
+         * static host. Without this the image picker could not be opened in the
+         * review copy at all.
+         */
+        build.onResolve({ filter: /(^|\/)app\/actions\/media$/ }, () => ({
+          path: resolve(root, 'standalone/demo-media-actions.ts'),
+        }));
       },
     },
   ],

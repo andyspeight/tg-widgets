@@ -101,6 +101,18 @@ insert into public.font_files
   ('22222222-2222-2222-2222-222222222222', 'dddd0000-0000-0000-0000-00000000d001',
    400, 'normal', 'woff2', null, null, decode('774f4632bbbbbbbb', 'hex'), 8);
 
+-- An image each. Unlike a font file, the bytes are not here: they live in the
+-- blob store and are served by its CDN. What this table holds is the row that
+-- says the image is this tenant's, which is the thing that has to be scoped.
+insert into public.media
+  (id, tenant_id, storage_key, url, filename, mime, bytes, width, height, alt, source) values
+  ('eeee0000-0000-0000-0000-00000000e001', '11111111-1111-1111-1111-111111111111',
+   'sites/alpha/media/alpha-hero.jpg', 'https://blob.example/alpha-hero.jpg',
+   'alpha-hero.jpg', 'image/jpeg', 240000, 2400, 1600, 'Alpha hero', 'upload'),
+  ('ffff0000-0000-0000-0000-00000000f001', '22222222-2222-2222-2222-222222222222',
+   'sites/beta/media/beta-hero.jpg', 'https://blob.example/beta-hero.jpg',
+   'beta-hero.jpg', 'image/jpeg', 180000, 1920, 1080, 'Beta hero', 'pexels');
+
 create temp table if not exists checks (
   ord    serial,
   name   text,
@@ -148,7 +160,7 @@ where n.nspname = 'public' and c.relkind = 'r'
 -- rather than everything.
 do $$
 declare pages int; tenants int; domains int; members int; creds int;
-        fonts int; font_files int;
+        fonts int; font_files int; media int;
 begin
   set local role tg_sites_app;
   -- All three, by name. This block does not depend on running early, so
@@ -164,6 +176,7 @@ begin
   select count(*) into creds   from public.auth_users;
   select count(*) into fonts   from public.fonts;
   select count(*) into font_files from public.font_files;
+  select count(*) into media   from public.media;
 
   -- Step back out before recording. The roles under test have no business
   -- writing anywhere, including to this scratch table.
@@ -171,9 +184,9 @@ begin
   insert into checks (name, passed, detail) values
     ('a query with nothing set returns nothing',
      pages = 0 and tenants = 0 and domains = 0 and members = 0 and creds = 0
-       and fonts = 0 and font_files = 0,
-     format('pages %s, tenants %s, domains %s, memberships %s, credentials %s, fonts %s, files %s',
-            pages, tenants, domains, members, creds, fonts, font_files));
+       and fonts = 0 and font_files = 0 and media = 0,
+     format('pages %s, tenants %s, domains %s, memberships %s, credentials %s, fonts %s, files %s, media %s',
+            pages, tenants, domains, members, creds, fonts, font_files, media));
 end $$;
 
 -- ---------------------------------------------------------------------------
@@ -582,10 +595,104 @@ begin
      not deleted, case when deleted then 'IT DELETED THEM' else 'refused' end);
 end $$;
 
--- Deleting a tenant must take its fonts and their bytes with it, or a removed
--- client's licensed font files stay in the database indefinitely.
+-- ---------------------------------------------------------------------------
+-- The image bank
+-- ---------------------------------------------------------------------------
+
+/*
+ * Media sits between a page and a font file, and the difference matters.
+ *
+ * The bytes are not in this database. They are in a blob store and served by its
+ * CDN to anyone with the URL, so nothing here can make an image private and
+ * these checks do not pretend to. What they cover is the row: the filename, the
+ * dimensions, the alt text and the credit. That is a list of what a client has
+ * uploaded, and one travel agency being able to enumerate another's image
+ * library would be a straightforward leak even with the pictures themselves
+ * public.
+ *
+ * The renderer still needs select, because a published page names a media id and
+ * the row carries the URL and the alt text that go into the markup.
+ */
+
 do $$
-declare fonts_left int; files_left int;
+declare
+  own int; other int; by_id int; wrote boolean := true;
+begin
+  set local role tg_sites_app;
+  perform set_config('app.current_tenant_id', '11111111-1111-1111-1111-111111111111', true);
+  perform set_config('app.current_user_id',   '', true);
+  perform set_config('app.login_email',       '', true);
+
+  select count(*) into own   from public.media;
+  select count(*) into other from public.media where filename = 'beta-hero.jpg';
+  -- Straight at the row by its id, which is what a page's image block stores.
+  select count(*) into by_id from public.media
+    where id = 'ffff0000-0000-0000-0000-00000000f001';
+
+  -- Writing a row that claims to belong to the other tenant. The WITH CHECK on
+  -- media_app is the half of the policy a read-only test never exercises, and
+  -- without it one client could plant an image in another's library.
+  begin
+    insert into public.media
+      (tenant_id, storage_key, url, filename, mime, bytes)
+    values ('22222222-2222-2222-2222-222222222222', 'sites/beta/media/planted.jpg',
+            'https://blob.example/planted.jpg', 'planted.jpg', 'image/jpeg', 1000);
+  exception when others then wrote := false; end;
+
+  reset role;
+  insert into checks (name, passed, detail) values
+    ('a tenant sees its own media',              own = 1,   'saw ' || own || ' of 1'),
+    ('a tenant sees none of the others media',   other = 0, 'leaked ' || other),
+    ('asking for a media row by id is scoped',   by_id = 0, 'leaked ' || by_id),
+    ('a tenant cannot file an image under another tenant',
+     not wrote, case when wrote then 'IT PLANTED ONE' else 'the policy refused it' end);
+end $$;
+
+do $$
+declare
+  can_read int; leaked int; wrote boolean := true; deleted boolean := true;
+  the_url text;
+begin
+  set local role tg_sites_renderer;
+  perform set_config('app.current_tenant_id', '11111111-1111-1111-1111-111111111111', true);
+
+  select count(*) into can_read from public.media;
+  select count(*) into leaked   from public.media
+    where tenant_id = '22222222-2222-2222-2222-222222222222';
+  -- The URL specifically, because putting it in an img tag is the whole reason
+  -- this role reads the table at all.
+  select url into the_url from public.media limit 1;
+
+  begin
+    insert into public.media (tenant_id, storage_key, url, filename, mime, bytes)
+    values ('11111111-1111-1111-1111-111111111111', 'sites/alpha/media/planted.jpg',
+            'https://blob.example/planted.jpg', 'planted.jpg', 'image/jpeg', 1000);
+  exception when others then wrote := false; end;
+
+  begin
+    delete from public.media;
+  exception when others then deleted := false; end;
+
+  reset role;
+  insert into checks (name, passed, detail) values
+    ('the renderer can read a media row, which it must',
+     can_read = 1, 'saw ' || can_read || ' of 1'),
+    ('the renderer gets the image url back',
+     the_url = 'https://blob.example/alpha-hero.jpg', 'url: ' || coalesce(the_url, 'null')),
+    ('the renderer cannot see another tenants media',
+     leaked = 0, 'leaked ' || leaked),
+    ('the renderer cannot add media',
+     not wrote, case when wrote then 'IT WROTE ONE' else 'refused' end),
+    ('the renderer cannot delete media',
+     not deleted, case when deleted then 'IT DELETED THEM' else 'refused' end);
+end $$;
+
+-- Deleting a tenant must take its fonts, their bytes and its media rows with it.
+-- A removed client's licensed font files must not stay in the database, and a
+-- media row left behind is a dangling reference to a blob nobody will ever tidy
+-- up: the row is the only record that the object exists.
+do $$
+declare fonts_left int; files_left int; media_left int;
 begin
   delete from public.tenants where id = '22222222-2222-2222-2222-222222222222';
 
@@ -593,11 +700,15 @@ begin
     where slug = 'beta-grotesk';
   select count(*) into files_left from public.font_files
     where font_id = 'dddd0000-0000-0000-0000-00000000d001';
+  select count(*) into media_left from public.media
+    where id = 'ffff0000-0000-0000-0000-00000000f001';
 
   insert into checks (name, passed, detail) values
     ('deleting a tenant removes its fonts and their bytes',
      fonts_left = 0 and files_left = 0,
-     format('fonts %s, files %s', fonts_left, files_left));
+     format('fonts %s, files %s', fonts_left, files_left)),
+    ('deleting a tenant removes its media rows',
+     media_left = 0, 'left behind ' || media_left);
 end $$;
 
 -- ---------------------------------------------------------------------------

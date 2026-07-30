@@ -1,0 +1,691 @@
+'use client';
+
+/**
+ * Choosing a picture.
+ *
+ * Three tabs, in the order somebody actually reaches for them: the images they
+ * already have, then adding their own, then the photo library. Your images first
+ * matters more than it sounds. Most placements are a picture the client already
+ * uploaded, and opening on an upload box asks them to find a file they do not need
+ * to find.
+ *
+ * Built on the shared Modal, so focus trapping, Escape, the scrim and the header
+ * are not reimplemented here. The one rule this file has to keep on its own is the
+ * one from Fields.tsx: nothing focuses or scrolls as part of rendering. A tile
+ * grid that scrolled itself into view on every state change would fight the person
+ * scrolling it.
+ */
+
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+import {
+  deleteMediaAction,
+  importStockAction,
+  loadMediaAction,
+  recordUploadAction,
+  searchStockAction,
+} from '../../app/actions/media';
+import { prepareImageForUpload } from '../../lib/media/downscale';
+import {
+  filenameStem,
+  humanBytes,
+  MAX_UPLOAD_BYTES,
+  MEDIA_MIME,
+} from '../../lib/media/limits';
+import type { MediaItem, StockPhoto } from '../../lib/media/types';
+import { Icon } from '../editor/Icon';
+import { ConfirmDialog, Modal } from '../ui/Modal';
+
+type Tab = 'bank' | 'upload' | 'stock';
+
+interface Props {
+  /** Called with the chosen image. The caller decides what to do with it. */
+  onChoose: (item: MediaItem) => void;
+  onClose: () => void;
+  /** Highlighted in the grid, so "which one is on this block" is answerable. */
+  currentUrl?: string;
+}
+
+export function MediaPicker({ onChoose, onClose, currentUrl }: Props) {
+  const [tab, setTab] = useState<Tab>('bank');
+
+  const [items, setItems] = useState<MediaItem[]>([]);
+  const [hasMore, setHasMore] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const [canUpload, setCanUpload] = useState(true);
+  const [canSearchStock, setCanSearchStock] = useState(true);
+  /* Where this site's uploads are filed. Comes from the server, because the
+     browser has no other way to know the tenant id, and is re-derived from the
+     session by the token route so editing it here buys nothing. */
+  const [uploadPrefix, setUploadPrefix] = useState('');
+
+  const [pendingDelete, setPendingDelete] = useState<MediaItem | null>(null);
+
+  const load = useCallback(async (offset: number) => {
+    setBusy(true);
+    setError(null);
+    const result = await loadMediaAction(offset);
+    setBusy(false);
+
+    if (!result.ok) {
+      setError(result.error);
+      setLoaded(true);
+      return;
+    }
+
+    setItems((current) => (offset === 0 ? result.data.items : [...current, ...result.data.items]));
+    setHasMore(result.data.hasMore);
+    setCanUpload(result.data.canUpload);
+    setCanSearchStock(result.data.canSearchStock);
+    setUploadPrefix(result.data.uploadPrefix);
+    setLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    void load(0);
+  }, [load]);
+
+  /** A new image goes to the front of the bank and the tab switches to show it. */
+  const added = useCallback((item: MediaItem) => {
+    setItems((current) => [item, ...current.filter((existing) => existing.id !== item.id)]);
+    setTab('bank');
+  }, []);
+
+  async function confirmDelete(item: MediaItem) {
+    setPendingDelete(null);
+    setBusy(true);
+    const result = await deleteMediaAction(item.id);
+    setBusy(false);
+
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    setItems((current) => current.filter((existing) => existing.id !== item.id));
+  }
+
+  return (
+    <>
+      <Modal
+        title="Images"
+        description="Your own pictures, and a photo library for when you need one."
+        size="large"
+        onClose={onClose}
+      >
+        <div className="mp-root">
+          <div className="mp-tabs" role="tablist" aria-label="Where to get an image">
+            <TabButton id="bank" current={tab} onSelect={setTab} label="Your images" icon="gallery" />
+            <TabButton id="upload" current={tab} onSelect={setTab} label="Upload" icon="upload" />
+            <TabButton id="stock" current={tab} onSelect={setTab} label="Photo library" icon="search" />
+          </div>
+
+          {error && (
+            <p className="mp-error" role="alert">
+              <Icon name="warning" size={16} />
+              {error}
+            </p>
+          )}
+
+          {tab === 'bank' && (
+            <Bank
+              items={items}
+              hasMore={hasMore}
+              loaded={loaded}
+              busy={busy}
+              currentUrl={currentUrl}
+              onChoose={onChoose}
+              onDelete={setPendingDelete}
+              onMore={() => void load(items.length)}
+              onUploadInstead={() => setTab(canUpload ? 'upload' : 'stock')}
+            />
+          )}
+
+          {tab === 'upload' && (
+            <UploadPanel
+              canUpload={canUpload}
+              uploadPrefix={uploadPrefix}
+              onAdded={added}
+              onError={setError}
+            />
+          )}
+
+          {tab === 'stock' && (
+            <StockPanel canSearch={canSearchStock} onAdded={added} onError={setError} />
+          )}
+        </div>
+      </Modal>
+
+      {pendingDelete && (
+        <ConfirmDialog
+          title={`Remove ${pendingDelete.filename}?`}
+          description="It goes from your library and from your storage. Pages that already use it and are published keep showing it, but any draft using it will show a gap."
+          confirmLabel="Remove it"
+          destructive
+          onConfirm={() => void confirmDelete(pendingDelete)}
+          onCancel={() => setPendingDelete(null)}
+        />
+      )}
+    </>
+  );
+}
+
+function TabButton({
+  id,
+  current,
+  onSelect,
+  label,
+  icon,
+}: {
+  id: Tab;
+  current: Tab;
+  onSelect: (tab: Tab) => void;
+  label: string;
+  icon: 'gallery' | 'upload' | 'search';
+}) {
+  return (
+    <button
+      type="button"
+      className="mp-tab"
+      role="tab"
+      aria-selected={current === id}
+      onClick={() => onSelect(id)}
+    >
+      <Icon name={icon} size={15} />
+      {label}
+    </button>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Your images
+// ---------------------------------------------------------------------------
+
+function Bank({
+  items,
+  hasMore,
+  loaded,
+  busy,
+  currentUrl,
+  onChoose,
+  onDelete,
+  onMore,
+  onUploadInstead,
+}: {
+  items: MediaItem[];
+  hasMore: boolean;
+  loaded: boolean;
+  busy: boolean;
+  currentUrl?: string;
+  onChoose: (item: MediaItem) => void;
+  onDelete: (item: MediaItem) => void;
+  onMore: () => void;
+  onUploadInstead: () => void;
+}) {
+  if (!loaded) return <p className="mp-quiet">Opening your images…</p>;
+
+  if (items.length === 0) {
+    return (
+      <div className="mp-empty">
+        <Icon name="gallery" size={28} />
+        <h3>No images yet</h3>
+        <p>
+          Add your own photographs, or find one in the library. Anything you add
+          stays here for every page on this site.
+        </p>
+        <button type="button" className="tg-btn" data-variant="primary" onClick={onUploadInstead}>
+          Add an image
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="mp-grid">
+        {items.map((item) => (
+          <figure className="mp-tile" key={item.id} data-current={item.url === currentUrl}>
+            {/*
+              A button wrapping the picture rather than a click handler on the
+              figure. The whole tile is the target either way, and this way it is
+              reachable by Tab, announced as a control, and works on Enter.
+            */}
+            <button
+              type="button"
+              className="mp-tile__pick"
+              onClick={() => onChoose(item)}
+              title={`Use ${item.filename}`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={item.url} alt={item.alt || item.filename} loading="lazy" decoding="async" />
+              {item.url === currentUrl && (
+                <span className="mp-tile__badge">
+                  <Icon name="check" size={13} /> In use
+                </span>
+              )}
+            </button>
+
+            <figcaption className="mp-tile__meta">
+              <span className="mp-tile__name" title={item.filename}>
+                {item.filename}
+              </span>
+              <span className="mp-tile__size">
+                {item.width && item.height ? `${item.width}×${item.height} · ` : ''}
+                {humanBytes(item.bytes)}
+              </span>
+              {/*
+                No alt text is worth saying out loud here, not hiding. This grid is
+                the one screen where somebody can see all their images at once and
+                fix the ones nobody described.
+              */}
+              {!item.alt && <span className="mp-tile__warn">No description</span>}
+              {item.source === 'pexels' && item.credit.photographer && (
+                <span className="mp-tile__credit">{item.credit.photographer} · Pexels</span>
+              )}
+            </figcaption>
+
+            <button
+              type="button"
+              className="mp-tile__remove"
+              aria-label={`Remove ${item.filename}`}
+              disabled={busy}
+              onClick={() => onDelete(item)}
+            >
+              <Icon name="trash" size={14} />
+            </button>
+          </figure>
+        ))}
+      </div>
+
+      {hasMore && (
+        <div className="mp-more">
+          <button type="button" className="tg-btn" disabled={busy} onClick={onMore}>
+            {busy ? 'Loading…' : 'Show more'}
+          </button>
+        </div>
+      )}
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Upload
+// ---------------------------------------------------------------------------
+
+function UploadPanel({
+  canUpload,
+  uploadPrefix,
+  onAdded,
+  onError,
+}: {
+  canUpload: boolean;
+  uploadPrefix: string;
+  onAdded: (item: MediaItem) => void;
+  onError: (message: string) => void;
+}) {
+  const [dragging, setDragging] = useState(false);
+  const [progress, setProgress] = useState<string | null>(null);
+  const input = useRef<HTMLInputElement>(null);
+
+  if (!canUpload) {
+    /*
+     * Named, not hidden. Same reasoning as the sign-in page's "not set up yet"
+     * panel: a tab that quietly does nothing sends somebody looking for a bug in
+     * their own file, and this is one setting away from working.
+     */
+    return (
+      <div className="mp-error mp-error--panel">
+        <h3>Image storage is not connected yet</h3>
+        <p>
+          Uploads go to a Vercel Blob store, and this project does not have one
+          attached. In Vercel, open this project, go to Storage, and connect a Blob
+          store. The token appears by itself and the next deployment picks it up.
+        </p>
+        <p>
+          The photo library tab does not need this, so that one works as soon as its
+          own key is in place.
+        </p>
+      </div>
+    );
+  }
+
+  async function handleFiles(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    onError('');
+
+    const chosen = Array.from(files).slice(0, 12);
+
+    for (const [index, file] of chosen.entries()) {
+      const label = chosen.length > 1 ? ` (${index + 1} of ${chosen.length})` : '';
+
+      if (file.size > MAX_UPLOAD_BYTES * 4) {
+        // Refused before the browser tries to decode it. A 200MB file will not
+        // fit in a canvas and there is no point finding that out slowly.
+        onError(`${file.name} is far too large. Images need to be under 15MB.`);
+        continue;
+      }
+
+      try {
+        setProgress(`Preparing ${file.name}${label}`);
+        const prepared = await prepareImageForUpload(file);
+
+        if (prepared.body.size > MAX_UPLOAD_BYTES) {
+          onError(`${file.name} is larger than 15MB, even after shrinking it.`);
+          continue;
+        }
+
+        setProgress(
+          prepared.resized
+            ? `Uploading ${prepared.filename}${label}, shrunk to ${humanBytes(prepared.body.size)}`
+            : `Uploading ${prepared.filename}${label}`,
+        );
+
+        /*
+         * Imported here rather than at the top of the file.
+         *
+         * @vercel/blob/client pulls in the whole upload machinery, and this dialog
+         * is opened from the editor, which everybody loads. Nobody should pay for
+         * the uploader in their first byte of JavaScript when most placements are a
+         * picture that is already in the bank.
+         */
+        const { upload } = await import('@vercel/blob/client');
+
+        const result = await upload(
+          // The pathname is a request, not a decision: the route recomputes this
+          // prefix from the session and refuses to mint a token for anything
+          // outside it, and the store adds its own random suffix on top.
+          `${uploadPrefix}${filenameStem(prepared.filename)}.${MEDIA_MIME[prepared.mime]}`,
+          prepared.body,
+          {
+            access: 'public',
+            handleUploadUrl: '/api/media/upload',
+            contentType: prepared.mime,
+          },
+        );
+
+        setProgress(`Saving ${prepared.filename}${label}`);
+        const recorded = await recordUploadAction({
+          url: result.url,
+          filename: prepared.filename,
+          width: prepared.width ?? undefined,
+          height: prepared.height ?? undefined,
+        });
+
+        if (!recorded.ok) {
+          onError(recorded.error);
+          continue;
+        }
+        onAdded(recorded.data);
+      } catch (error) {
+        onError(error instanceof Error ? error.message : `Could not upload ${file.name}.`);
+      }
+    }
+
+    setProgress(null);
+    // The same file chosen twice in a row fires no change event unless the input
+    // is cleared, which reads as the second attempt being ignored.
+    if (input.current) input.current.value = '';
+  }
+
+  return (
+    <div
+      className="mp-drop"
+      data-dragging={dragging}
+      onDragOver={(event) => {
+        event.preventDefault();
+        setDragging(true);
+      }}
+      onDragLeave={() => setDragging(false)}
+      onDrop={(event) => {
+        event.preventDefault();
+        setDragging(false);
+        void handleFiles(event.dataTransfer.files);
+      }}
+    >
+      <Icon name="upload" size={26} />
+      <h3>Drop images here</h3>
+      <p>
+        JPEG, PNG, WebP, AVIF or GIF, up to 15MB each. Large photographs are shrunk
+        to 2400px before uploading, which keeps your pages fast without you having
+        to think about it.
+      </p>
+
+      <input
+        ref={input}
+        type="file"
+        className="mp-drop__input"
+        id="mp-file"
+        accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
+        multiple
+        onChange={(event) => void handleFiles(event.target.files)}
+      />
+      <label className="tg-btn" data-variant="primary" htmlFor="mp-file">
+        Choose files
+      </label>
+
+      {progress && (
+        <p className="mp-progress" role="status">
+          {progress}…
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Photo library
+// ---------------------------------------------------------------------------
+
+const SUGGESTIONS = ['Santorini', 'Amalfi coast', 'Dubai skyline', 'Cornwall beach', 'Safari'];
+
+function StockPanel({
+  canSearch,
+  onAdded,
+  onError,
+}: {
+  canSearch: boolean;
+  onAdded: (item: MediaItem) => void;
+  onError: (message: string) => void;
+}) {
+  const [query, setQuery] = useState('');
+  const [orientation, setOrientation] = useState<string>('landscape');
+  const [photos, setPhotos] = useState<StockPhoto[]>([]);
+  const [imported, setImported] = useState<Set<string>>(new Set());
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [importing, setImporting] = useState<string | null>(null);
+  const [searched, setSearched] = useState(false);
+
+  const search = useCallback(
+    async (text: string, wantedPage: number, wantedOrientation: string) => {
+      setBusy(true);
+      onError('');
+      const result = await searchStockAction({
+        query: text,
+        page: wantedPage,
+        orientation: wantedOrientation || null,
+      });
+      setBusy(false);
+      setSearched(true);
+
+      if (!result.ok) {
+        onError(result.error);
+        return;
+      }
+
+      setPhotos((current) =>
+        wantedPage === 1 ? result.data.photos : [...current, ...result.data.photos],
+      );
+      setImported(new Set(result.data.alreadyImported));
+      setPage(result.data.page);
+      setHasMore(result.data.hasMore);
+    },
+    [onError],
+  );
+
+  /*
+   * The curated feed on open, so the tab has photographs in it before anybody
+   * types. An empty grid with a search box asks for work before showing anything.
+   */
+  useEffect(() => {
+    if (canSearch) void search('', 1, 'landscape');
+  }, [canSearch, search]);
+
+  if (!canSearch) {
+    return (
+      <div className="mp-error mp-error--panel">
+        <h3>The photo library is not connected yet</h3>
+        <p>
+          It needs a free Pexels API key. Get one at pexels.com/api, add it to this
+          project in Vercel as <code>PEXELS_API_KEY</code>, and redeploy.
+        </p>
+        <p>
+          Uploading your own images does not need this, so that tab works
+          independently.
+        </p>
+      </div>
+    );
+  }
+
+  async function add(photo: StockPhoto) {
+    setImporting(photo.id);
+    onError('');
+    const result = await importStockAction(photo);
+    setImporting(null);
+
+    if (!result.ok) {
+      onError(result.error);
+      return;
+    }
+    setImported((current) => new Set(current).add(photo.id));
+    onAdded(result.data);
+  }
+
+  return (
+    <div className="mp-stock">
+      <form
+        className="mp-search"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void search(query, 1, orientation);
+        }}
+      >
+        <input
+          className="ed-input"
+          type="search"
+          value={query}
+          placeholder="Search millions of free photographs"
+          onChange={(event) => setQuery(event.target.value)}
+        />
+        <select
+          className="ed-select"
+          value={orientation}
+          aria-label="Shape"
+          onChange={(event) => {
+            setOrientation(event.target.value);
+            void search(query, 1, event.target.value);
+          }}
+        >
+          <option value="landscape">Landscape</option>
+          <option value="portrait">Portrait</option>
+          <option value="square">Square</option>
+          <option value="">Any shape</option>
+        </select>
+        <button type="submit" className="tg-btn" data-variant="primary" disabled={busy}>
+          {busy ? 'Searching…' : 'Search'}
+        </button>
+      </form>
+
+      {!query && (
+        <div className="mp-suggest">
+          {SUGGESTIONS.map((suggestion) => (
+            <button
+              key={suggestion}
+              type="button"
+              className="mp-chip"
+              onClick={() => {
+                setQuery(suggestion);
+                void search(suggestion, 1, orientation);
+              }}
+            >
+              {suggestion}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {searched && photos.length === 0 && !busy && (
+        <p className="mp-quiet">Nothing matched that. Try a place name, or something plainer.</p>
+      )}
+
+      <div className="mp-grid">
+        {photos.map((photo) => (
+          <figure className="mp-tile" key={photo.id}>
+            <button
+              type="button"
+              className="mp-tile__pick"
+              disabled={importing === photo.id}
+              onClick={() => void add(photo)}
+              title={photo.description || 'Add this photo'}
+            >
+              {/*
+                The average colour behind the thumbnail, so the grid does not flash
+                white and reflow as forty images arrive at different speeds.
+              */}
+              <span
+                className="mp-tile__wash"
+                style={photo.averageColour ? { background: photo.averageColour } : undefined}
+              />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={photo.thumbUrl} alt={photo.description} loading="lazy" decoding="async" />
+              {importing === photo.id && <span className="mp-tile__badge">Adding…</span>}
+              {imported.has(photo.id) && importing !== photo.id && (
+                <span className="mp-tile__badge">
+                  <Icon name="check" size={13} /> Added
+                </span>
+              )}
+            </button>
+
+            <figcaption className="mp-tile__meta">
+              {/*
+                The credit is not decoration. The Pexels API terms require the
+                photographer to be named and a link back to the photo, wherever
+                their work appears, so it is shown here and stored on import.
+              */}
+              <a
+                className="mp-tile__credit"
+                href={photo.credit.photographerUrl ?? photo.credit.providerUrl ?? '#'}
+                target="_blank"
+                rel="noreferrer noopener"
+              >
+                {photo.credit.photographer ?? 'Pexels'}
+              </a>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+
+      {hasMore && (
+        <div className="mp-more">
+          <button
+            type="button"
+            className="tg-btn"
+            disabled={busy}
+            onClick={() => void search(query, page + 1, orientation)}
+          >
+            {busy ? 'Loading…' : 'Show more'}
+          </button>
+        </div>
+      )}
+
+      <p className="mp-note">
+        Photographs from <a href="https://www.pexels.com" target="_blank" rel="noreferrer noopener">Pexels</a>,
+        free to use commercially. Adding one copies it into your own storage, so your
+        pages never depend on somebody else keeping it online.
+      </p>
+    </div>
+  );
+}

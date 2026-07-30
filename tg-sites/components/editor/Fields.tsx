@@ -18,6 +18,7 @@
 
 import { useEffect, useRef } from 'react';
 import type { Field } from '../../lib/content/blocks';
+import { ImageField } from '../media/ImageField';
 import { Icon } from './Icon';
 
 interface FieldProps {
@@ -26,9 +27,18 @@ interface FieldProps {
   onChange: (value: unknown) => void;
   /** Stable identity of the thing being edited. Remounts uncontrolled inputs. */
   ownerId: string;
+  /**
+   * Set more than one prop in a single commit.
+   *
+   * Only the image field uses it, and only to fill an empty alt text from the
+   * picture that was chosen. Optional rather than required because a field can be
+   * rendered somewhere with no sibling to patch, and a required callback would mean
+   * every caller inventing a no-op.
+   */
+  onPatch?: (patch: Record<string, unknown>) => void;
 }
 
-export function FieldRenderer({ field, value, onChange, ownerId }: FieldProps) {
+export function FieldRenderer({ field, value, onChange, ownerId, onPatch }: FieldProps) {
   switch (field.kind) {
     case 'text':
     case 'url':
@@ -70,18 +80,24 @@ export function FieldRenderer({ field, value, onChange, ownerId }: FieldProps) {
     case 'image':
       return (
         <Wrapper field={field}>
-          <input
-            className="ed-input"
-            type="text"
-            inputMode="url"
-            placeholder="https://images.example.com/photo.jpg"
+          {/*
+            onPatch and the two key names are passed through so that choosing a
+            picture which already has a description fills the alt field beside it,
+            in ONE commit. Two commits would give the undo history two steps for one
+            action, so undoing the choice would leave the description behind.
+
+            altKey is 'alt' by convention: it is the key the image block and every
+            gallery item use. A block whose alt field is called something else gets
+            the picker and no alt filling, which is the right way round for a
+            convention to fail.
+          */}
+          <ImageField
             value={asString(value)}
-            onChange={(event) => onChange(event.target.value)}
+            onChange={onChange}
+            onPatch={onPatch}
+            urlKey={field.key}
+            altKey="alt"
           />
-          <p className="ed-help">
-            Paste an image URL for now. The media library with upload, alt text and
-            automatic responsive sizes arrives in a later package.
-          </p>
         </Wrapper>
       );
 
@@ -262,6 +278,17 @@ function Repeater({ field, value, onChange, ownerId }: FieldProps) {
                   items.map((existing, i) =>
                     i === index ? { ...existing, [child.key]: childValue } : existing,
                   ),
+                )
+              }
+              /*
+               * So a gallery item gets the same behaviour as a standalone image
+               * block: choosing a picture that already has a description fills the
+               * alt field of THAT item, not of the first one. Spreading the patch
+               * over the matching item is what keeps that true.
+               */
+              onPatch={(patch) =>
+                update(
+                  items.map((existing, i) => (i === index ? { ...existing, ...patch } : existing)),
                 )
               }
             />

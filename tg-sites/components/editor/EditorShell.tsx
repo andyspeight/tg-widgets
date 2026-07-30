@@ -29,6 +29,7 @@ import { LayoutPicker } from './LayoutPicker';
 import { Icon, type IconName } from './Icon';
 import { Menu } from './Menu';
 import './editor.css';
+import '../media/media.css';
 
 const THEME_KEY = 'tg-sites:theme:v1';
 const HISTORY_LIMIT = 50;

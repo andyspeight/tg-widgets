@@ -1,0 +1,472 @@
+/*
+ * The image bank.
+ *
+ * Every value here is an --ed- token. Nothing is a raw hex colour, a raw pixel
+ * spacing or a raw radius, which is what makes this work in dark mode without a
+ * single dark-mode rule of its own: the tokens already flip.
+ *
+ * Two tokens do not exist and must not be invented by analogy: there is no --ed-7
+ * in the spacing scale (it runs 1 2 3 4 5 6 8) and no bare --ed-r (the radii are
+ * -sm, -md, -lg, -xl, -full). Both were shipped once, and a var() that resolves to
+ * nothing drops the whole declaration with no warning anywhere, so `gap: var(--ed-7)`
+ * silently becomes no gap. tests/db.test.ts fails the build for it now.
+ */
+
+.mp-root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-4);
+  /*
+   * The dialog body scrolls, not the page behind it, and the grid inside must not
+   * push the dialog wider than the viewport. min-height 0 is what lets a flex
+   * child actually shrink; without it the grid sets the floor and the dialog grows
+   * past the bottom of the screen.
+   */
+  min-height: 0;
+}
+
+/* --- Tabs ---------------------------------------------------------------- */
+
+.mp-tabs {
+  display: flex;
+  gap: var(--ed-1);
+  padding: var(--ed-1);
+  background: var(--ed-sunken);
+  border-radius: var(--ed-r-lg);
+}
+
+.mp-tab {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ed-2);
+  padding: var(--ed-2) var(--ed-3);
+  border: 0;
+  border-radius: var(--ed-r-md);
+  background: transparent;
+  color: var(--ed-ink-2);
+  font: inherit;
+  font-size: var(--ed-text-sm);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.mp-tab:hover { color: var(--ed-ink); }
+
+.mp-tab[aria-selected='true'] {
+  background: var(--ed-panel);
+  color: var(--ed-ink);
+  box-shadow: var(--ed-shadow-sm);
+}
+
+/* --- The grid ------------------------------------------------------------ */
+
+.mp-grid {
+  display: grid;
+  /*
+   * auto-fill with a minimum, so the same grid works in the 820px dialog and on a
+   * phone without a media query. Four across on a desktop, two on a phone, and
+   * nothing to keep in sync with a breakpoint.
+   */
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--ed-3);
+}
+
+.mp-tile {
+  position: relative;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-2);
+}
+
+.mp-tile__pick {
+  position: relative;
+  display: block;
+  width: 100%;
+  /* 4:3, which flatters a landscape photograph and does not stretch a portrait
+     one: the image inside is cover-fitted, so the tile shape is the tile's. */
+  aspect-ratio: 4 / 3;
+  padding: 0;
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  overflow: hidden;
+  background: var(--ed-sunken);
+  cursor: pointer;
+}
+
+.mp-tile__pick:hover { border-color: var(--ed-select); }
+
+.mp-tile__pick:focus-visible {
+  outline: 2px solid var(--ed-select);
+  outline-offset: 2px;
+}
+
+.mp-tile__pick:disabled { cursor: progress; }
+
+.mp-tile__pick img {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* The average colour, painted behind a thumbnail that has not arrived yet, so a
+   grid of forty photographs does not flash white a tile at a time. */
+.mp-tile__wash {
+  position: absolute;
+  inset: 0;
+  background: var(--ed-sunken);
+}
+
+.mp-tile[data-current='true'] .mp-tile__pick {
+  border-color: var(--ed-select);
+  box-shadow: 0 0 0 2px var(--ed-select-wash);
+}
+
+.mp-tile__badge {
+  position: absolute;
+  inset-block-end: var(--ed-2);
+  inset-inline-start: var(--ed-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px var(--ed-2);
+  border-radius: var(--ed-r-full);
+  background: var(--ed-select);
+  color: #ffffff;
+  font-size: var(--ed-text-xs);
+  font-weight: 600;
+}
+
+.mp-tile__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--ed-text-xs);
+  color: var(--ed-ink-3);
+  /* Long filenames must not widen the column and blow out the grid. */
+  min-width: 0;
+}
+
+.mp-tile__name {
+  color: var(--ed-ink-2);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mp-tile__warn { color: var(--ed-danger); }
+
+.mp-tile__credit {
+  color: var(--ed-ink-3);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mp-tile__credit:hover { text-decoration: underline; }
+
+.mp-tile__remove {
+  position: absolute;
+  inset-block-start: var(--ed-2);
+  inset-inline-end: var(--ed-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: var(--ed-r-sm);
+  background: rgba(15, 23, 42, 0.72);
+  color: #ffffff;
+  cursor: pointer;
+  /*
+   * Hidden until the tile is hovered or something inside it has focus, because a
+   * delete button on every tile of a forty-image grid reads as a wall of red.
+   * :focus-within is what keeps it reachable by keyboard, where there is no hover.
+   */
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.mp-tile:hover .mp-tile__remove,
+.mp-tile:focus-within .mp-tile__remove { opacity: 1; }
+
+.mp-tile__remove:hover { background: var(--ed-danger); }
+
+.mp-more {
+  display: flex;
+  justify-content: center;
+}
+
+/* --- Empty and quiet states --------------------------------------------- */
+
+.mp-empty,
+.mp-drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ed-3);
+  padding: var(--ed-8) var(--ed-5);
+  text-align: center;
+  border: 1px dashed var(--ed-line);
+  border-radius: var(--ed-r-lg);
+  color: var(--ed-ink-3);
+}
+
+.mp-empty h3,
+.mp-drop h3 {
+  margin: 0;
+  font-size: var(--ed-text-md);
+  color: var(--ed-ink);
+}
+
+.mp-empty p,
+.mp-drop p {
+  margin: 0;
+  max-width: 42ch;
+  font-size: var(--ed-text-sm);
+  line-height: 1.5;
+}
+
+.mp-drop[data-dragging='true'] {
+  border-color: var(--ed-select);
+  background: var(--ed-select-wash);
+}
+
+/* Visually hidden, not display:none. A hidden input cannot be focused, so the
+   label would stop being reachable by keyboard. */
+.mp-drop__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.mp-drop__input:focus-visible + .tg-btn {
+  outline: 2px solid var(--ed-select);
+  outline-offset: 2px;
+}
+
+.mp-progress {
+  margin: 0;
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.mp-quiet {
+  margin: 0;
+  padding: var(--ed-6) 0;
+  text-align: center;
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink-3);
+}
+
+/* --- Errors and unconfigured panels ------------------------------------- */
+
+.mp-error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ed-2);
+  margin: 0;
+  padding: var(--ed-3);
+  border: 1px solid var(--ed-danger);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-well);
+  color: var(--ed-ink);
+  font-size: var(--ed-text-sm);
+  line-height: 1.5;
+}
+
+.mp-error--panel {
+  flex-direction: column;
+  gap: var(--ed-3);
+  padding: var(--ed-5);
+  /* Not an error the person caused, so it is not outlined in red. */
+  border-color: var(--ed-line);
+}
+
+.mp-error--panel h3 {
+  margin: 0;
+  font-size: var(--ed-text-md);
+}
+
+.mp-error--panel p { margin: 0; color: var(--ed-ink-2); }
+
+.mp-error--panel code {
+  padding: 1px 5px;
+  border-radius: var(--ed-r-sm);
+  background: var(--ed-sunken);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.92em;
+}
+
+/* --- Searching the photo library ---------------------------------------- */
+
+.mp-stock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-3);
+}
+
+.mp-search {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ed-2);
+}
+
+/*
+ * The search box collapsed to nothing, and it took a screenshot to notice.
+ *
+ * .ed-input and .ed-select both carry width:100% from the editor's base styles. In a
+ * flex row that gives the select a flex-basis of the FULL row, so with `flex: 1`
+ * (basis 0) and min-width:0 on the input, the select won everything and the search
+ * field rendered about eight pixels wide. Every one of the twenty-six browser checks
+ * passed while it was unusable, because none of them measured it.
+ *
+ * The fix is to stop the select claiming the row and give the input a floor it
+ * cannot be squeezed below. There is a check for the width now.
+ */
+.mp-search .ed-input {
+  flex: 1 1 16rem;
+  min-width: 12ch;
+}
+
+.mp-search .ed-select {
+  flex: 0 0 auto;
+  width: auto;
+}
+
+.mp-search .tg-btn { flex: none; }
+
+.mp-suggest {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ed-2);
+}
+
+.mp-chip {
+  padding: 4px var(--ed-3);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-full);
+  background: var(--ed-panel);
+  color: var(--ed-ink-2);
+  font: inherit;
+  font-size: var(--ed-text-xs);
+  cursor: pointer;
+}
+
+.mp-chip:hover {
+  border-color: var(--ed-select);
+  color: var(--ed-ink);
+}
+
+.mp-note {
+  margin: 0;
+  font-size: var(--ed-text-xs);
+  color: var(--ed-ink-3);
+  line-height: 1.6;
+}
+
+.mp-note a { color: var(--ed-ink-2); }
+
+/* --- The field control -------------------------------------------------- */
+
+.mp-choose {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-3);
+  width: 100%;
+  padding: var(--ed-3);
+  border: 1px dashed var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+  color: var(--ed-ink-3);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.mp-choose:hover {
+  border-color: var(--ed-select);
+  color: var(--ed-ink-2);
+}
+
+.mp-choose span {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: var(--ed-text-xs);
+  line-height: 1.4;
+}
+
+.mp-choose strong {
+  color: var(--ed-ink);
+  font-size: var(--ed-text-sm);
+  font-weight: 600;
+}
+
+.mp-chosen {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-3);
+}
+
+.mp-chosen__thumb {
+  width: 64px;
+  height: 48px;
+  flex: none;
+  object-fit: cover;
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-sm);
+  background: var(--ed-sunken);
+}
+
+.mp-chosen__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ed-2);
+  min-width: 0;
+}
+
+.mp-url { margin-top: var(--ed-2); }
+
+.mp-url__toggle {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ed-ink-3);
+  font: inherit;
+  font-size: var(--ed-text-xs);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.mp-url__toggle:hover { color: var(--ed-ink-2); }
+
+.mp-url .ed-input { margin-top: var(--ed-2); }
+
+.mp-url__warn {
+  margin: var(--ed-2) 0 0;
+  font-size: var(--ed-text-xs);
+  line-height: 1.5;
+  color: var(--ed-danger);
+}
+
+.mp-url__warn code {
+  padding: 1px 4px;
+  border-radius: var(--ed-r-sm);
+  background: var(--ed-sunken);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}

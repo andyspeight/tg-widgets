@@ -32,6 +32,7 @@ import {
   updateSection,
   updateBlockProps,
 } from '../../lib/content/tree';
+import { ImageField } from '../media/ImageField';
 import { FieldRenderer } from './Fields';
 import { Icon } from './Icon';
 import { columnWord, sectionNameAt } from '../../lib/content/naming';
@@ -345,11 +346,15 @@ function SectionFields({
 
       <div className="ed-field">
         <label className="ed-label">Background image</label>
-        <input
-          className="ed-input"
+        {/*
+          The same control as every other image, rather than the bare URL box this
+          used to be. No alt text to fill: a background is decorative by definition,
+          and the scrim over it means any text on top belongs to the blocks inside
+          the section, not to the picture.
+        */}
+        <ImageField
           value={section.backgroundImage ?? ''}
-          placeholder="https://…"
-          onChange={(event) => set({ backgroundImage: event.target.value }, `sec:${index}:bg`)}
+          onChange={(url) => set({ backgroundImage: url }, `sec:${index}:bg`)}
         />
         <p className="ed-help">
           A dark scrim goes over it automatically so text still passes contrast.
@@ -605,6 +610,19 @@ function BlockFields({
                 updateBlockProps(current, path.section, path.row, path.column, path.block, {
                   [field.key]: value,
                 }),
+              `blk:${block.id}:${field.key}`,
+            )
+          }
+          /*
+           * The same commit, with more than one prop in it. updateBlockProps already
+           * takes a patch, so this is the shape it wanted anyway. Used by the image
+           * field to set the picture and its description together, which keeps undo
+           * to one step for what a person did in one action.
+           */
+          onPatch={(patch) =>
+            onCommit(
+              (current) =>
+                updateBlockProps(current, path.section, path.row, path.column, path.block, patch),
               `blk:${block.id}:${field.key}`,
             )
           }

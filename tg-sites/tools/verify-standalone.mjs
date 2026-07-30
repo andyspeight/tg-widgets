@@ -26,9 +26,25 @@ const CHROMIUM = process.env.TG_CHROMIUM
 const browser = await chromium.launch({ executablePath: CHROMIUM });
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 
+/*
+ * One expected network failure, and only one.
+ *
+ * The image checks type a deliberately fake address into the field to prove it
+ * reaches the rendered img tag. The browser then tries to load it and cannot, which
+ * is the point: the assertion is about the src attribute, not about the picture
+ * arriving. Everything else that fails to load is still a real failure.
+ *
+ * Matched on the ADDRESS the failure came from rather than on a flag set around the
+ * check. A flag looked tidier and did not work: a failed image load is asynchronous,
+ * so the console message arrived after the check had finished and cleared it.
+ */
+const EXPECTED_TO_FAIL = 'images.example.test';
+
 const errors = [];
 page.on('console', (message) => {
-  if (message.type() === 'error') errors.push(`console: ${message.text()}`);
+  if (message.type() !== 'error') return;
+  if ((message.location()?.url ?? '').includes(EXPECTED_TO_FAIL)) return;
+  errors.push(`console: ${message.text()}`);
 });
 page.on('pageerror', (error) => errors.push(`pageerror: ${error.message}`));
 
@@ -813,6 +829,305 @@ await check('a hostile theme value cannot escape the style attribute', async () 
 
 // Back to the default, so anything added after this is not looking at gold.
 await page.evaluate(() => window.__TG_SET_THEME__({}));
+
+
+// ---------------------------------------------------------------------------
+// The image bank
+// ---------------------------------------------------------------------------
+
+/*
+ * Driven here because it cannot be driven anywhere else.
+ *
+ * Both services behind the picker are refused by this environment's egress policy:
+ * blob.vercel-storage.com and api.pexels.com. So a real upload and a real search
+ * are impossible to run, and without these checks the only evidence for the whole
+ * dialog would be that it compiles. The doubles in standalone/demo-media-actions.ts
+ * type-check against the real actions, so what is exercised below is the real
+ * component tree talking to the real signatures.
+ *
+ * What is still NOT covered, and is named in the handover rather than counted:
+ * the browser-to-store upload, a live Pexels response, and the token route.
+ */
+
+/** Select an image block, so the properties pane shows an image field. */
+async function selectAnImageBlock() {
+  await closeAnyDialog();
+  await openBlockPicker();
+  await page.locator('.ed-block-card', { hasText: 'Image' }).first().click();
+  await page.waitForTimeout(300);
+}
+
+await check('an image block offers a picker, not a URL box', async () => {
+  await selectAnImageBlock();
+  const choose = await page.locator('.mp-choose').count();
+  return choose === 1 ? true : `${choose} choose buttons`;
+});
+
+await check('the web address box is still there, just out of the way', async () => {
+  const toggle = page.locator('.mp-url__toggle');
+  if ((await toggle.count()) !== 1) return 'no toggle';
+  if ((await page.locator('.mp-url .ed-input').count()) !== 0) return 'shown by default';
+  await toggle.click();
+  await page.waitForTimeout(150);
+  return (await page.locator('.mp-url .ed-input').count()) === 1 ? true : 'did not open';
+});
+
+/*
+ * Open the picker from whichever control the field is currently showing.
+ *
+ * An empty field shows "Choose an image"; a filled one shows Replace and Remove. The
+ * first version of this only knew about the empty case, so once a picture had been
+ * chosen it fell through to selectAnImageBlock and quietly ADDED A SECOND BLOCK,
+ * then made assertions about that one. The check that caught it reported "0 tiles
+ * marked as in use", which points at the grid rather than at the helper.
+ */
+async function openPicker() {
+  await closeAnyDialog();
+  if ((await page.locator('.mp-choose, .mp-chosen').count()) === 0) await selectAnImageBlock();
+
+  const choose = page.locator('.mp-choose').first();
+  if (await choose.count()) await choose.click();
+  else await page.locator('.mp-chosen__actions button', { hasText: 'Replace' }).first().click();
+
+  await page.waitForSelector('.mp-root', { timeout: 5000 });
+  await page.waitForTimeout(250);
+}
+
+await check('the picker opens on the images already there', async () => {
+  await openPicker();
+  const selected = await page.locator('.mp-tab[aria-selected="true"]').innerText();
+  return selected.includes('Your images') ? true : `opened on "${selected}"`;
+});
+
+await check('the bank lists what the site has', async () => {
+  const tiles = await page.locator('.mp-tile').count();
+  return tiles === 4 ? true : `${tiles} tiles`;
+});
+
+/*
+ * An image with no alt text is called out, not hidden. This grid is the only screen
+ * where somebody sees all their images at once, so it is the only place the ones
+ * nobody described can realistically be fixed.
+ */
+await check('an image with no description says so', async () => {
+  const warned = await page.locator('.mp-tile__warn').count();
+  return warned === 1 ? true : `${warned} warnings for 1 undescribed image`;
+});
+
+await check('a photo from the library carries its credit', async () => {
+  const credit = await page.locator('.mp-tile__credit').first().innerText();
+  return credit.includes('Pexels') ? true : `credit reads "${credit}"`;
+});
+
+await check('the delete button is hidden until a tile is hovered', async () => {
+  const before = await page.locator('.mp-tile__remove').first().evaluate(
+    (el) => getComputedStyle(el).opacity);
+  await page.locator('.mp-tile').first().hover();
+  await page.waitForTimeout(250);
+  const after = await page.locator('.mp-tile__remove').first().evaluate(
+    (el) => getComputedStyle(el).opacity);
+  return before === '0' && after === '1' ? true : `opacity ${before} then ${after}`;
+});
+
+await check('removing an image asks first', async () => {
+  await page.locator('.mp-tile').first().hover();
+  await page.locator('.mp-tile__remove').first().click();
+  await page.waitForTimeout(250);
+  const dialogs = await page.locator('.tg-modal').count();
+  const asked = await page.locator('.tg-modal__title').last().innerText();
+  // Two dialogs: the picker, and the confirmation on top of it.
+  return dialogs === 2 && /^Remove /.test(asked) ? true : `${dialogs} dialogs, asked "${asked}"`;
+});
+
+await check('cancelling the removal keeps the image', async () => {
+  await page.locator('.tg-modal', { hasText: 'Remove ' }).locator('button', { hasText: 'Cancel' })
+    .first().click();
+  await page.waitForTimeout(250);
+  const tiles = await page.locator('.mp-tile').count();
+  return tiles === 4 ? true : `${tiles} tiles after cancelling`;
+});
+
+await check('choosing an image fills the block and closes the dialog', async () => {
+  await page.locator('.mp-tile__pick').first().click();
+  await page.waitForTimeout(300);
+
+  if ((await page.locator('.mp-root').count()) !== 0) return 'the dialog stayed open';
+  const thumb = await page.locator('.mp-chosen__thumb').count();
+  return thumb === 1 ? true : 'no thumbnail in the field';
+});
+
+/*
+ * The reason onPatch exists. Choosing a described picture has to fill the alt field
+ * BESIDE it, in the same commit, or every image on every client site ends up with
+ * an empty alt attribute because the person placing it had already described it
+ * three times.
+ */
+await check('choosing a described image fills the alt text beside it', async () => {
+  const alt = await page.locator('.ed-field', { hasText: 'Alt text' })
+    .locator('input').inputValue();
+  return alt.length > 0 ? true : 'alt text was left empty';
+});
+
+/*
+ * Typed in rather than picked, and that is deliberate.
+ *
+ * The demo doubles hand back data: URIs so the offline review copy shows real
+ * pictures, and safeUrl refuses data: URIs on purpose, so a picked demo image
+ * renders as the placeholder. Rather than weaken either side, this drives the same
+ * pipeline with an address the product accepts.
+ */
+await check('an address reaches the rendered page', async () => {
+  const box = page.locator('.mp-url .ed-input').first();
+  if ((await box.count()) === 0) await page.locator('.mp-url__toggle').first().click();
+  await page.locator('.mp-url .ed-input').first().fill('https://images.example.test/hero.jpg');
+  await page.waitForTimeout(300);
+
+  const src = await page.locator('.ed-canvas-frame .tgs-image__frame img').first()
+    .getAttribute('src');
+  return src === `https://${EXPECTED_TO_FAIL}/hero.jpg` ? true : `src is "${src}"`;
+});
+
+/*
+ * The gap this closed. An address the renderer will not accept used to leave a
+ * thumbnail in the properties pane, because a browser loads it happily, and
+ * "Choose an image" on the page. Anybody would read that as the picture being
+ * broken rather than the address.
+ */
+await check('an address the renderer refuses is explained, not ignored', async () => {
+  await page.locator('.mp-url .ed-input').first().fill('data:image/svg+xml,%3Csvg%3E%3C/svg%3E');
+  await page.waitForTimeout(250);
+  const warned = await page.locator('.mp-url__warn').count();
+  if (warned !== 1) return `${warned} warnings`;
+
+  await page.locator('.mp-url .ed-input').first().fill(`https://${EXPECTED_TO_FAIL}/hero.jpg`);
+  await page.waitForTimeout(200);
+  return (await page.locator('.mp-url__warn').count()) === 0 ? true : 'the warning stuck';
+});
+
+await check('the picture that is in use is marked in the grid', async () => {
+  // Put a real bank image on the block first, by picking it, so there is something
+  // for the grid to recognise.
+  await openPicker();
+  await page.locator('.mp-tile__pick').nth(1).click();
+  await page.waitForTimeout(300);
+
+  await openPicker();
+  const marked = await page.locator('.mp-tile[data-current="true"]').count();
+  return marked === 1 ? true : `${marked} tiles marked as in use`;
+});
+
+await check('the upload tab explains what it accepts', async () => {
+  await page.locator('.mp-tab', { hasText: 'Upload' }).click();
+  await page.waitForTimeout(200);
+  const text = await page.locator('.mp-drop').innerText();
+  return text.includes('15MB') && text.includes('2400px') ? true : 'the limits are not stated';
+});
+
+/*
+ * A hidden file input must still be reachable by keyboard. display:none would take
+ * it out of the focus order and the label with it, which is the usual way this
+ * pattern gets broken.
+ */
+await check('the file input is hidden but still focusable', async () => {
+  const state = await page.locator('.mp-drop__input').evaluate((el) => {
+    const style = getComputedStyle(el);
+    el.focus();
+    return {
+      display: style.display,
+      visibility: style.visibility,
+      focused: document.activeElement === el,
+    };
+  });
+  return state.display !== 'none' && state.visibility !== 'hidden' && state.focused
+    ? true
+    : `display ${state.display}, visibility ${state.visibility}, focused ${state.focused}`;
+});
+
+await check('the photo library opens with photographs in it', async () => {
+  await page.locator('.mp-tab', { hasText: 'Photo library' }).click();
+  await page.waitForTimeout(400);
+  const tiles = await page.locator('.mp-grid .mp-tile').count();
+  return tiles === 12 ? true : `${tiles} photographs before anybody typed`;
+});
+
+/*
+ * Measured, because the alternative was believing it looked right.
+ *
+ * This field rendered about eight pixels wide for a while and every other check in
+ * this file passed. "The control exists" and "the control is usable" are different
+ * claims and only one of them was being made.
+ */
+await check('the search box is actually wide enough to type in', async () => {
+  const width = await page.locator('.mp-search .ed-input').first()
+    .evaluate((el) => el.getBoundingClientRect().width);
+  return width > 200 ? true : `${Math.round(width)}px wide`;
+});
+
+await check('every library photograph names its photographer', async () => {
+  const tiles = await page.locator('.mp-grid .mp-tile').count();
+  const credits = await page.locator('.mp-tile__credit').count();
+  return credits === tiles ? true : `${credits} credits for ${tiles} photographs`;
+});
+
+await check('a photograph already added is marked as added', async () => {
+  const badges = await page.locator('.mp-tile__badge', { hasText: 'Added' }).count();
+  return badges === 1 ? true : `${badges} badges for 1 already-imported photo`;
+});
+
+await check('the average colour is painted behind a loading thumbnail', async () => {
+  const wash = await page.locator('.mp-tile__wash').first().evaluate(
+    (el) => getComputedStyle(el).backgroundColor);
+  return /^rgb\(/.test(wash) && wash !== 'rgba(0, 0, 0, 0)' ? true : `wash is "${wash}"`;
+});
+
+await check('a search with no matches says so plainly', async () => {
+  await page.locator('.mp-search input').fill('nothing');
+  await page.locator('.mp-search button[type="submit"]').click();
+  await page.waitForTimeout(400);
+  const text = await page.locator('.mp-quiet').innerText();
+  return text.includes('Nothing matched') ? true : `it said "${text}"`;
+});
+
+await check('adding a photograph puts it in the bank', async () => {
+  await page.locator('.mp-search input').fill('');
+  await page.locator('.mp-search button[type="submit"]').click();
+  await page.waitForTimeout(400);
+  await page.locator('.mp-grid .mp-tile__pick').first().click();
+  await page.waitForTimeout(400);
+
+  // It switches back to the bank, because that is where the new image now is.
+  const selected = await page.locator('.mp-tab[aria-selected="true"]').innerText();
+  const tiles = await page.locator('.mp-tile').count();
+  return selected.includes('Your images') && tiles === 5
+    ? true
+    : `on "${selected}" with ${tiles} tiles`;
+});
+
+await check('the picker traps focus like every other dialog', async () => {
+  for (let i = 0; i < 40; i += 1) await page.keyboard.press('Tab');
+  const inside = await page.evaluate(() =>
+    document.querySelector('.tg-modal')?.contains(document.activeElement) ?? false);
+  return inside === true ? true : 'focus escaped the picker';
+});
+
+await check('the picker survives a round trip with no console errors', async () => {
+  await closeAnyDialog();
+  return (await page.locator('.mp-root').count()) === 0 ? true : 'it would not close';
+});
+
+/*
+ * The grid must not push the dialog wider than the screen. A long filename in a
+ * fixed-width tile is the usual cause, and it shows up as the whole page scrolling
+ * sideways rather than as anything obviously wrong with the grid.
+ */
+await check('the picker does not scroll the page sideways', async () => {
+  await openPicker();
+  const overflow = await page.evaluate(() =>
+    document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  await closeAnyDialog();
+  return overflow <= 0 ? true : `${overflow}px of horizontal overflow`;
+});
+
 
 
 await browser.close();
