@@ -127,7 +127,7 @@ const MUTATIONS = [
       continue;`,
   },
   {
-    check: 'a size applies, and it is a real size rather than an attribute nothing reads',
+    check: 'and the size survives the sanitiser, not just the canvas',
     why: 'Let the sanitiser keep the attribute but strip the size out of it.',
     file: 'lib/content/styles.ts',
     from: `  'font-size': sizeValue,`,
@@ -162,14 +162,14 @@ const MUTATIONS = [
     to: `    paint(tray ?? 'color', value);`,
   },
   {
-    check: 'and one that is not a colour is refused rather than half applied',
+    check: 'and one that is not a colour we keep is refused rather than half applied',
     why: 'Take whatever was typed, and let the sanitiser be the only gate.',
     file: 'components/editor/TextToolbar.tsx',
     from: `    if (!/^#([0-9a-f]{3}|[0-9a-f]{6})$/.test(value)) return;`,
     to: '',
   },
   {
-    check: 'the toolbar keeps clear of the words it is editing',
+    check: 'the toolbar keeps clear of the words even when it grows',
     why: 'Stop re-anchoring once measured, so a two-row bar sits over the words.',
     file: 'components/editor/TextToolbar.tsx',
     from: `          anchorTop.current !== null && measured`,

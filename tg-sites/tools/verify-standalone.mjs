@@ -1890,6 +1890,37 @@ await check('a size applies, and it is a real size rather than an attribute noth
 });
 
 /*
+ * AND THE SIZE MAKES THE ROUND TRIP, which the check above cannot tell you.
+ *
+ * While a block is being edited, the canvas DOM is written straight by the
+ * editor and never passes through the sanitiser. So a check that only measures
+ * the canvas proves the toolbar applied something, and says nothing at all about
+ * whether it would survive a save. Deleting the sanitiser's font-size rule left
+ * that check passing, which is how this gap was found.
+ *
+ * Deselecting sends the block back through the renderer, which sanitises stored
+ * HTML on the way to the screen: the same gate a save goes through.
+ */
+await check('and the size survives the sanitiser, not just the canvas', async () => {
+  const before = await page.locator('[data-rt-host]:not([data-rt-plain])').first().innerHTML();
+  if (!/font-size/i.test(before)) return 'no size on the canvas to begin with';
+
+  for (const block of await page.locator('.tgs-block').all()) {
+    if (await block.locator('.tgs-buttons, .tgs-image, .tgs-media').count()) {
+      await block.click();
+      break;
+    }
+  }
+  await page.waitForTimeout(400);
+  if (await page.locator('[data-rt-host]').count()) return 'the paragraph is still being edited';
+
+  const rendered = await page.locator('.tgs-text').first().innerHTML();
+  return /font-size:\s*2rem/i.test(rendered)
+    ? true
+    : `after rendering: "${rendered.slice(0, 160)}"`;
+});
+
+/*
  * A whole-block selection is a different shape, and the right one.
  *
  * Wrapping a whole paragraph in a span gives `<span><p>…</p></span>`, an inline
@@ -1949,13 +1980,38 @@ await check('a colour of your own is taken as a hex', async () => {
     : `html is "${html.slice(0, 140)}"`;
 });
 
-await check('and one that is not a colour is refused rather than half applied', async () => {
+/*
+ * A NAMED COLOUR, not something malformed, and the difference matters.
+ *
+ * This first typed `red; position: fixed`, which the browser's own style object
+ * rejects as invalid before anything of ours is involved. So the check passed
+ * with the toolbar's guard deleted: it was reading the browser's refusal, not
+ * ours. A check that passes for somebody else's reason is not a check.
+ *
+ * `red` is a real CSS colour, so the browser takes it happily. The sanitiser
+ * does not, because named colours are not in the closed set. Without the guard
+ * in the toolbar it would therefore land on the canvas, look right, and be gone
+ * after a save, which is precisely the complaint all of this exists to fix.
+ */
+await check('and one that is not a colour we keep is refused rather than half applied', async () => {
   const host = await selectOnCanvas();
   if (!host) return 'no editable paragraph';
   const before = await host.innerHTML();
 
   await page.locator('.ed-tt__btn[aria-label="Text colour"]').click();
   await page.waitForTimeout(250);
+  await page.locator('.ed-tt__tray .ed-tt__url').fill('red');
+  await page.locator('.ed-tt__btn[aria-label="Use this colour"]').click();
+  await page.waitForTimeout(350);
+
+  const after = await host.innerHTML();
+  return after === before ? true : `the words changed to "${after.slice(0, 140)}"`;
+});
+
+await check('and so is something that is not a colour at all', async () => {
+  const host = page.locator('[data-rt-host]:not([data-rt-plain])').first();
+  const before = await host.innerHTML();
+
   await page.locator('.ed-tt__tray .ed-tt__url').fill('red; position: fixed');
   await page.locator('.ed-tt__btn[aria-label="Use this colour"]').click();
   await page.waitForTimeout(350);
@@ -2025,17 +2081,46 @@ async function freshToolbar() {
   return selectOnCanvas();
 }
 
-await check('the toolbar keeps clear of the words it is editing', async () => {
+/*
+ * MEASURED WHILE THE TOOLBAR IS TALL, which is the only time it can go wrong.
+ *
+ * At its usual size it is one row of about 40px, under the 44px it guesses
+ * before it has measured itself, so it clears the words whether or not it
+ * re-anchors. This check passed with the re-anchor deleted, reading a guess that
+ * happened to be generous enough rather than the rule it was meant to be about.
+ *
+ * Opening the link panel makes it wrap for real, which is an ordinary thing to
+ * do rather than a contrivance, and it is what the ResizeObserver and the
+ * re-anchor exist for. Narrowing the window instead would have been the obvious
+ * move and does not work: below about 1024px the editor folds down to one pane
+ * at a time and the canvas is not on screen to measure against.
+ */
+await check('the toolbar keeps clear of the words even when it grows', async () => {
   await freshToolbar();
+
+  const row = await page.locator('.ed-tt__btn').first().boundingBox();
+  await page.locator('.ed-tt__btn[aria-label="Add a link"]').click();
+  await page.waitForTimeout(400);
+
   const bar = await page.locator('.ed-tt').boundingBox();
   const block = await page.locator('[data-path].is-selected').boundingBox();
   if (!bar || !block) return 'no toolbar or no selected block';
+
+  // If it did not grow, this check is not exercising what it claims to.
+  if (bar.height < row.height * 1.5) {
+    return `the toolbar is only ${Math.round(bar.height)}px tall, so it did not wrap`;
+  }
 
   const gap = Math.round(block.y - (bar.y + bar.height));
   return gap >= 0 ? true : `the toolbar overlaps the block by ${-gap}px`;
 });
 
 await check('and fits on one row on an ordinary screen', async () => {
+  // Its own fresh toolbar, because the check above deliberately grows one and
+  // the link panel it opens stays open. Measuring that would be measuring the
+  // previous check's setup.
+  await freshToolbar();
+
   const bar = await page.locator('.ed-tt').boundingBox();
   const row = await page.locator('.ed-tt__btn').first().boundingBox();
   // One row of 32px buttons in 4px of padding is about 40px. Two would be 74.
