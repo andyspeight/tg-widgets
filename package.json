@@ -30,6 +30,7 @@
     "test:appointment-time": "node test/appointment-time-format-smoke.mjs",
     "test:offers-resilience": "node test/offers-resilience-smoke.mjs",
     "test:offers-cache-namematch": "node test/offers-cache-namematch-smoke.mjs",
+    "test:offers-cache-only": "node test/offers-cache-only-smoke.mjs",
     "test:offers-deeplink-hotel": "node test/offers-deeplink-hotel-smoke.mjs",
     "test:offers-preview-exemption": "node test/offers-preview-exemption-smoke.mjs",
     "test:timeout-guards": "node test/timeout-guards-smoke.mjs",

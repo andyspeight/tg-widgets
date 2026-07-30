@@ -1,7 +1,8 @@
 /**
- * Travelgenix Travel Offers Widget v1.7.0
- * Self-contained, embeddable widget served from the Travelgenix offer cache,
- * with a live Travelify fallback.
+ * Travelgenix Travel Offers Widget v1.16.0
+ * Self-contained, embeddable widget served ENTIRELY from the Travelgenix offer
+ * cache. A visitor's browser never triggers a Travelify search; the only live
+ * search left is the one Travelify runs when a visitor clicks an offer.
  *
  * Usage:
  *   <div data-tg-widget="offers" data-tg-id="YOUR_WIDGET_ID"></div>
@@ -27,6 +28,37 @@
  *       gazetteer matches by name, so an airport-named location is now sent with
  *       loct=Airport. Real city names keep the City default; no property pin and
  *       no per-widget setting involved. (yourticketgenie, 28 Jul 2026.)
+ *   v1.16.0 (30 Jul 2026) — CACHE-ONLY. The live-Travelify fallback is gone
+ *     from the visitor path entirely. Travelify search capacity now goes into
+ *     FILLING the cache on our own schedule instead of competing with it once
+ *     per visitor.
+ *     • Every template reads /api/cached-offers, including the flight-centric
+ *       ones that were held back. That block turned out to rest on a wrong
+ *       assumption: cached offers DO carry a real departure time
+ *       ("2026-08-18T07:25:00Z"). Checked against the live cache rather than
+ *       assumed — the flights the boards need ride inside the packages we
+ *       already cache in bulk, not in the standalone Flights product, of which
+ *       a whole sweep yields a handful.
+ *     • The departure board asks the cache for hasFlight=1 instead of filtering
+ *       afterwards. Cheapest-first over everything handed it a page of
+ *       hotel-only offers it then discarded, so it could draw an empty board
+ *       while the cache held hundreds of usable ones.
+ *     • The board no longer applies board basis, star rating or nights, which
+ *       describe a hotel and cannot describe a flight row. One live board
+ *       asking for All Inclusive had cut itself from 494 eligible offers to 3.
+ *     • The board fetches ONCE on load. It used to refetch on a 5-minute timer
+ *       AND on every tab focus, which is how a single board on one homepage
+ *       produced 986 of the 1,250 live searches in the three days to 30 Jul.
+ *       Its clock still ticks and the flaps still animate, so it still reads as
+ *       live, and the refresh button still works because that is a person
+ *       asking.
+ *     • A cache that cannot answer is now told apart from a cache with nothing
+ *       to say. Both show the client's calm empty state; only the first
+ *       beacons. With no fallback left, that beacon is the only way a real
+ *       outage reaches us instead of hiding behind quiet blank widgets.
+ *     • The cache read is retried on network failure. With nothing behind it, a
+ *       single dropped request on a flaky connection is now the difference
+ *       between a full widget and an empty one.
  *   v1.15.1 (Jul 2026) — Deeplink board-basis synonyms:
  *     • brdCode dropped the deeplink board filter for "Bed & Breakfast" (which
  *       normalises to bedbreakfast, previously unmapped) and "Breakfast". It now
@@ -148,31 +180,31 @@
   const API_BASE = resolveApiBase();
   const TRAVELIFY_ENDPOINT = 'https://api.travelify.io/widgetsvc/traveloffers';
 
-  // The widget calls the /api/offers proxy on widgets.travelify.io, not
-  // Travelify directly. The proxy:
-  //   1. Reads `appId` from the request body
-  //   2. Looks up the client's full credentials (App ID + private API Key)
-  //      in the Travelgenix Clients table
-  //   3. Adds the Authorization header server-side and forwards to Travelify
+  // CACHE-ONLY (locked decision 30 Jul 2026). This widget reads the Travelgenix
+  // offer cache and NOTHING else. There is no live-Travelify call anywhere on
+  // the visitor path any more — not on a cache miss, not on a cache outage, not
+  // on the departure board's refresh.
   //
-  // This means the apiKey never ships to the browser, and each customer's
-  // requests are auth'd against their own Travelify account.
+  // Why: the whole point of the cache is that Travelify search capacity goes
+  // into FILLING it, on our schedule, once per destination. Spending that same
+  // capacity on per-visitor searches competes with the thing that makes the
+  // product fast. In the week to 30 Jul the visitor path made 4,256 live
+  // searches; 986 of them came from a single departure board refreshing itself
+  // every five minutes.
   //
-  // appId is injected into this.cfg by widget-config.js at GET time from the
-  // ClientIntegrations table, keyed off the widget's ClientEmail. For widgets
-  // on Travelgenix's own demo site (no client setup), the appId is empty or
-  // '250' and the proxy falls through to demo credentials.
-  const OFFERS_PROXY = API_BASE.replace('/widget-config', '/offers');
-  // The Travelgenix offer cache — the pool the refresh cron builds up from
-  // Travelify in 250-offer increments. Offer boxes read THIS first (locked
-  // decision 2 Jul 2026) and only fall back to the live proxy when the cache
-  // has nothing matching the widget's filters.
+  // The one live search left in the product is the one Travelify runs when a
+  // visitor CLICKS an offer and lands on the booking page. That is a real
+  // intent signal, and it is not ours to make.
+  //
+  // Consequence to keep in mind when editing: an empty cache answer is now a
+  // blank widget, not a slower path. The calm empty state and the `degraded`
+  // beacon are the whole safety net, so do not weaken either.
   const CACHED_OFFERS_URL = API_BASE.replace('/widget-config', '/cached-offers');
   // Our own FX proxy (ECB/Frankfurter). The cache is GBP; we convert at display
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
   const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
-  const VERSION = '1.15.2';
+  const VERSION = '1.16.0';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // Telemetry: report a one-time load heartbeat and any failure to
@@ -6317,156 +6349,127 @@
         }
       }
 
-      // ── Cache first ──────────────────────────────────────────────
-      // Stay-type widgets (hotels + every package flavour) are served from
-      // the Travelgenix offer cache: no Travelify call from the visitor's
-      // browser, instant loads, thousands-deep pool. Flight-centric widgets
-      // stay on the live proxy for now — cached flight records don't yet
-      // carry the departure times those templates are built around. Any
-      // cache miss or error falls through to the live proxy (fail-open: a
-      // filling or unreachable cache never blanks a widget).
-      if (this._cacheEligible(payload)) {
-        try {
-          const res = await fetch(CACHED_OFFERS_URL + '?' + this._cachedOffersQuery(payload), {
-            headers: withPreview({ 'Accept': 'application/json' }, this.cfg),
-          });
-          // Defensive parse: an empty/non-JSON cache body throws here and is
-          // caught below, falling through to the live proxy (fail-open) exactly
-          // as before — never surfacing "Unexpected end of JSON input".
-          const data = await parseJsonResponse(res, 'Offers cache');
-          if (data && data.success && Array.isArray(data.data) && data.data.length > 0) {
-            this.rawOffers = gateSuppliers(data.data, this.cfg.supplierFilter);
-            this._offersSource = 'cache';
-            this._availableTotal = Number.isFinite(data.totalMatched) ? data.totalMatched : data.data.length;
-            if (ttlMs > 0) cacheSet(ck, this.rawOffers);
-            this._renderOffers();
-            this._fireDataLoaded();
-            return;
-          }
-        } catch (err) {
-          // Cache path failed — fall through to live.
-        }
-      }
+      await this._fetchFromCache(payload, ck, ttlMs);
+    }
 
+    /**
+     * The ONLY offer fetch in the widget. Reads the Travelgenix cache and
+     * renders whatever comes back — there is no live-Travelify fallback behind
+     * it (see CACHED_OFFERS_URL above for why).
+     *
+     * Three outcomes, and the visitor sees a calm face in all three:
+     *   offers      → render them
+     *   no matches  → the client's configured empty state, NO beacon (a cache
+     *                 legitimately holding nothing for these filters is not a
+     *                 fault, and beaconing it would bury the real faults)
+     *   degraded    → the same empty state, but DO beacon: the cache could not
+     *                 answer, which is the failure this design has to surface
+     *                 because nothing else will
+     */
+    async _fetchFromCache(payload, ck, ttlMs) {
       try {
-        // Call the Travelgenix offers proxy. The proxy adds the Authorization
-        // header server-side, looking up the client's full credentials by the
-        // appId we pass in the body. The apiKey never travels through here —
-        // it's only on the proxy/Airtable side.
-        //
-        // appId comes from this.cfg.appId, which is injected into the widget
-        // config server-side by widget-config.js (see lookupTravelifyCredentials
-        // there). For Travelgenix's own demo widgets the field will be empty
-        // or '250' and the proxy falls through to demo credentials.
-        const res = await fetchWithRetry(OFFERS_PROXY, {
-          method: 'POST',
-          headers: withPreview({ 'Content-Type': 'application/json' }, this.cfg),
-          body: JSON.stringify({
-            ...payload,
-            appId: this.cfg.appId || '',
-            // Sent purely so the proxy can attribute traffic to this widget /
-            // account for abuse triage. The proxy strips it before forwarding
-            // to Travelify; older widgets that omit it still work.
-            _widgetId: this.cfg._widgetId || '',
-          }),
+        // Retried: with no live fallback behind it, a single dropped request on
+        // a flaky mobile connection is now the difference between a full widget
+        // and an empty one. fetchWithRetry only re-sends network-level
+        // failures, so a real 4xx/5xx still comes straight back.
+        const res = await fetchWithRetry(CACHED_OFFERS_URL + '?' + this._cachedOffersQuery(payload), {
+          headers: withPreview({ 'Accept': 'application/json' }, this.cfg),
         });
-        // Rate limited by OUR OWN throttle → degrade quietly. This is not a
-        // broken embed, so never paint a raw "retry in 3600 seconds" banner at
-        // the visitor and never fire a failure alert. Show the neutral empty
-        // state (respecting the client's empty behaviour). With the editor now
-        // exempt from the public limit this is rare, but a genuinely busy shared
-        // address (office or mobile network) can still reach it. (23 Jul 2026.)
+        this._offersSource = 'cache';
+
+        // Rate limited by OUR OWN public limiter. This is not a fault and not a
+        // broken embed — a busy shared address (an office, a mobile network) can
+        // reach it legitimately. Fail soft to the calm empty state, and do NOT
+        // beacon: alerting per throttled visitor is how a quiet afternoon turns
+        // into an alert storm that buries the real outages (23 Jul 2026).
+        // Handled BEFORE parseJsonResponse, which would throw and be treated as
+        // an outage.
         if (res && res.status === 429) {
           this.rawOffers = [];
-          this._offersSource = 'live';
-          this._availableTotal = null;
+          this._availableTotal = 0;
           this._showEmpty();
+          this._fireDataLoaded();
           return;
         }
-        // An upstream/gateway 5xx (502/503/504) is Travelify being slow or briefly
-        // unavailable, NOT a broken widget. Fail SOFT to the calm empty state like
-        // a 429 — never a red banner at the visitor — and don't page per visitor:
-        // the server telemetry logs every /api/offers status and the synthetic
-        // monitor probes the offers path every 5 min, so the signal is retained.
-        // (Overnight 27 Jul 2026: Travelify timeouts on a few sites painted red
-        // "Offers service unavailable (HTTP 504)" errors and fired alerts.)
+        // A 5xx from our OWN cache endpoint is a genuine outage on our side, and
+        // with no fallback left it blanks the widget. Still calm at the visitor
+        // — never a red banner over a customer's page — but it must beacon,
+        // because nothing else will now tell us.
         if (res && typeof res.status === 'number' && res.status >= 500) {
           this.rawOffers = [];
-          this._offersSource = 'live';
-          this._availableTotal = null;
+          this._availableTotal = 0;
+          this._cacheDegraded = true;
           this._showEmpty();
+          this._fireDataLoaded();
+          tgReport('error', this.cfg && this.cfg._widgetId, 'offer cache degraded', 'HTTP ' + res.status);
           return;
         }
-        // Defensive parse (the 23 Jul 2026 incident site): an empty-bodied
-        // gateway 504/502 no longer throws "Unexpected end of JSON input" — it
-        // throws a clean, status-bearing message caught below.
-        const data = await parseJsonResponse(res, 'Offers service');
-        if (!data.success) {
-          // The proxy answers 200 here, so server telemetry won't flag it — keep a
-          // beacon so a genuinely misconfigured widget still reaches us, but show
-          // the visitor the calm empty state rather than a red banner.
-          tgReport('error', this.cfg && this.cfg._widgetId, 'offers error: ' + (data.error || 'unknown'), this.cfg && this.cfg.template);
-          this.rawOffers = [];
-          this._offersSource = 'live';
-          this._availableTotal = null;
-          this._showEmpty();
+        // Defensive parse: an empty or non-JSON body throws a clean,
+        // status-bearing message rather than "Unexpected end of JSON input".
+        const data = await parseJsonResponse(res, 'Offers cache');
+
+        if (data && data.success && Array.isArray(data.data) && data.data.length > 0) {
+          this.rawOffers = gateSuppliers(data.data, this.cfg.supplierFilter);
+          this._availableTotal = Number.isFinite(data.totalMatched) ? data.totalMatched : data.data.length;
+          if (ttlMs > 0) cacheSet(ck, this.rawOffers);
+          this._renderOffers();
+          this._fireDataLoaded();
           return;
         }
-        this.rawOffers = gateSuppliers(data.data || [], this.cfg.supplierFilter);
-        this._offersSource = 'live';
-        this._availableTotal = null;
-        if (ttlMs > 0) cacheSet(ck, this.rawOffers);
-        this._renderOffers();
-        this._fireDataLoaded();
-      } catch (err) {
-        // A network reject or the client-side timeout abort (upstream too slow —
-        // the offer fetch already retried). Fail soft to the calm empty state,
-        // never a red banner. A timeout is upstream slowness (the server logs the
-        // 504) and a hidden page is a navigate-away — neither pages us. A true
-        // network error on a VISIBLE page (e.g. a CSP block) still beacons once so
-        // a real reachability problem isn't hidden.
+
         this.rawOffers = [];
-        this._offersSource = 'live';
-        this._availableTotal = null;
+        this._availableTotal = 0;
+        this._cacheDegraded = !!(data && data.degraded);
         this._showEmpty();
+        this._fireDataLoaded();
+        if (this._cacheDegraded) {
+          tgReport('error', this.cfg && this.cfg._widgetId, 'offer cache degraded', this.cfg && this.cfg.template);
+        }
+      } catch (err) {
+        // The cache endpoint was unreachable, timed out, or answered
+        // unparseably. With no fallback left this is the one failure mode that
+        // genuinely blanks a widget, so it beacons — unless the page is hidden
+        // (a navigate-away, not a fault) or the request was our own timeout
+        // abort, which the server already logs.
+        this.rawOffers = [];
+        this._offersSource = 'cache';
+        this._availableTotal = 0;
+        this._cacheDegraded = true;
+        this._showEmpty();
+        this._fireDataLoaded();
         let hidden = false;
         try { hidden = (typeof document !== 'undefined' && document.visibilityState === 'hidden'); } catch (e) {}
         const isTimeout = err && (err.name === 'AbortError' || /abort|timeout/i.test(err.message || ''));
         if (!isTimeout && !hidden) {
-          tgReport('error', this.cfg && this.cfg._widgetId, 'offers unreachable', err && err.message);
+          tgReport('error', this.cfg && this.cfg._widgetId, 'offer cache unreachable', err && err.message);
         }
       }
     }
 
-    /** The cache serves the stay types. Flight-centric widgets and templates
-     *  keep the live proxy (their rows need departure times the cache lacks).
-     *  Origins must be 2-3 letter codes (IATA airports / GB-IE markets).
-     *  Destinations may be codes OR free-text place NAMES: the cache resolves a
-     *  name against its own airport index and treats a name it can't resolve as
-     *  a miss (falls through to live), so a name can never widen a client's
-     *  widget to worldwide offers. This lets a "Orlando"-configured widget use
-     *  the fast cache instead of always hitting slow live Travelify. */
-    _cacheEligible(payload) {
-      if (this.cfg.template === 'departure-board' || this.cfg.template === 'boarding-pass') return false;
-      const t = this.cfg.type;
-      if (t === 'Flights' || t === 'Flight') return false;
-      const isCode = (v) => /^[A-Za-z]{2,3}$/.test(String(v == null ? '' : v).trim());
-      // A place name the cache can attempt to resolve: letters plus spaces,
-      // dots, apostrophes and hyphens (e.g. "Costa del Sol"). A token with
-      // digits or other symbols is neither a code nor a resolvable name, so the
-      // widget keeps that config on live rather than guessing.
-      const isResolvableName = (v) => { const s = String(v == null ? '' : v).trim(); return s.length >= 2 && s.length <= 60 && /^[A-Za-z][A-Za-z .'-]*$/.test(s); };
-      const dests = (payload && Array.isArray(payload.destinations)) ? payload.destinations : [];
-      const origs = (payload && Array.isArray(payload.origins)) ? payload.origins : [];
-      if (dests.length > 60 || origs.length > 60) return false;
-      if (!origs.every(isCode)) return false;
-      if (!dests.every((d) => isCode(d) || isResolvableName(d))) return false;
-      return true;
+    /** True for templates whose every row IS a flight, so an offer without a
+     *  flight leg (or without a departure TIME) is not merely unwanted, it is
+     *  unrenderable — the board would print 00:00 and the boarding pass would
+     *  print a blank stub.
+     *
+     *  Deliberately NOT extended to "anything with a flight". These two
+     *  templates present their price as a FARE, and a package's price is the
+     *  whole holiday. Letting packages in would fill the board at the cost of
+     *  labelling holiday prices as flight fares, which is not a trade we make.
+     *  The board stays on flight-only stock and shows fewer, true rows. */
+    _needsFlightRows() {
+      return this.cfg.template === 'departure-board' || this.cfg.template === 'boarding-pass';
     }
 
-    /** Translate the live-proxy payload into /api/cached-offers query params.
+    /** Translate the payload into /api/cached-offers query params.
      *  packageType wins over the generic type so DynamicPackages and
-     *  PackageHolidays widgets filter precisely. */
+     *  PackageHolidays widgets filter precisely.
+     *
+     *  Every template reads the cache now, including the flight-centric ones.
+     *  That became possible once we checked what is actually stored rather than
+     *  assuming: cached offers DO carry a real departure time
+     *  ("2026-08-18T07:25:00Z"), and the flights the boards need are riding
+     *  inside the packages we already cache in bulk, not in the standalone
+     *  Flights product (which the cron only manages a handful of per sweep). */
     _cachedOffersQuery(payload) {
       const q = new URLSearchParams();
       const type = (payload.packageType && payload.packageType !== 'Any')
@@ -6474,14 +6477,39 @@
         : (payload.type || 'Packages');
       q.set('type', type);
       if (Array.isArray(payload.destinations) && payload.destinations.length) q.set('destinations', payload.destinations.join(','));
-      if (Array.isArray(payload.origins) && payload.origins.length) q.set('origins', payload.origins.join(','));
-      if (Array.isArray(payload.boardBases) && payload.boardBases.length) q.set('boardBases', payload.boardBases.join(','));
+      // Origins. The departure board sets a SINGULAR `origin` once it has
+      // detected the visitor's airport, and that airport REPLACES the
+      // configured origins rather than joining them. The cache treats origins
+      // as "any of these", so sending origins=GB plus origin=LHR would mean
+      // "the GB market OR Heathrow" — and the board would fill with Manchester
+      // and Gatwick departures under a heading that reads "Departures from
+      // London (LHR)". The header names one airport, so the rows must be from
+      // that one airport.
+      const origins = payload.origin
+        ? [payload.origin]
+        : (Array.isArray(payload.origins) ? payload.origins.slice() : []);
+      if (origins.length) q.set('origins', origins.join(','));
+      // A flight board can only draw a row from an offer that HAS a flight with
+      // a departure time. Ask the cache for those rather than filtering after
+      // the fact: cheapest-first over everything hands back hotel-only offers
+      // the board then throws away, and it draws an empty board while the cache
+      // holds hundreds of usable ones.
+      if (this._needsFlightRows()) q.set('hasFlight', '1');
+      // A departure board's rows are FLIGHTS: time, route, carrier, stops,
+      // fare. Board basis, star rating and nights describe a hotel, so they
+      // cannot describe anything on that board — sending them only shrinks the
+      // pool the board draws from. (Measured 30 Jul 2026: one live board asking
+      // for All Inclusive went from 494 eligible cached offers to 3.)
+      const flightRows = this._needsFlightRows();
+      if (!flightRows) {
+        if (Array.isArray(payload.boardBases) && payload.boardBases.length) q.set('boardBases', payload.boardBases.join(','));
+        if (payload.ratingMin) q.set('ratingMin', payload.ratingMin);
+        if (payload.durationMin) q.set('durationMin', payload.durationMin);
+        if (payload.durationMax) q.set('durationMax', payload.durationMax);
+      }
       if (Array.isArray(payload.cabinClasses) && payload.cabinClasses.length) q.set('cabinClasses', payload.cabinClasses.join(','));
       if (payload.budgetMin) q.set('budgetMin', payload.budgetMin);
       if (payload.budgetMax) q.set('budgetMax', payload.budgetMax);
-      if (payload.ratingMin) q.set('ratingMin', payload.ratingMin);
-      if (payload.durationMin) q.set('durationMin', payload.durationMin);
-      if (payload.durationMax) q.set('durationMax', payload.durationMax);
       if (payload.DatesMin != null) q.set('DatesMin', payload.DatesMin);
       if (payload.DatesMax != null) q.set('DatesMax', payload.DatesMax);
       if (payload.sort) q.set('sort', payload.sort);
@@ -6501,7 +6529,12 @@
             breakdown: dedupeBreakdown(this.rawOffers),
             // Provenance for the editor: which source served this render, and
             // the cache's TRUE matching total when it did.
-            source: this._offersSource || 'live',
+            source: this._offersSource || 'cache',
+            // True when the cache could not answer at all, as opposed to
+            // answering "nothing matches". The editor uses this to tell an
+            // agent "we cannot reach the cache" rather than "you have no
+            // offers", which are very different problems to hand someone.
+            degraded: !!this._cacheDegraded,
             availableTotal: this._availableTotal != null ? this._availableTotal : null,
           },
         });
@@ -9260,38 +9293,28 @@
       if (this.cfg.boardAnimate) this._runBoardFlipAnimation();
     }
 
-    // Re-runs the Travelify fetch with the board-specific filters and
-    // re-renders. Used when switching airports or hitting refresh.
+    // Re-reads the CACHE with the board-specific filters and re-renders. Used
+    // when the visitor switches airports or hits refresh — both real user
+    // actions. There is no timed refresh any more (see _scheduleBoardRefresh).
     async _fetchAndRenderBoard() {
       try {
         const payload = this._buildPayload();
-        // See _fetchAndRender for the rationale — appId in the body lets the
-        // proxy resolve the right client's full credentials server-side.
-        const res = await fetch(OFFERS_PROXY, {
-          method: 'POST',
-          headers: withPreview({ 'Content-Type': 'application/json' }, this.cfg),
-          body: JSON.stringify({
-            ...payload,
-            appId: this.cfg.appId || '',
-            // Sent purely so the proxy can attribute traffic to this widget /
-            // account for abuse triage. The proxy strips it before forwarding
-            // to Travelify; older widgets that omit it still work.
-            _widgetId: this.cfg._widgetId || '',
-          }),
+        const res = await fetchWithRetry(CACHED_OFFERS_URL + '?' + this._cachedOffersQuery(payload), {
+          headers: withPreview({ 'Accept': 'application/json' }, this.cfg),
         });
-        // A rate-limit 429 lands here as a non-ok parse throw and is swallowed
-        // by the catch below (the board already fails quietly — no banner, no
-        // alert), so a throttled board simply keeps its last rows.
-        const data = await parseJsonResponse(res, 'Offers service');
+        const data = await parseJsonResponse(res, 'Offers cache');
         this.rawOffers = gateSuppliers((data && data.data) ? data.data : [], this.cfg.supplierFilter);
+        this._offersSource = 'cache';
+        this._availableTotal = Number.isFinite(data && data.totalMatched) ? data.totalMatched : this.rawOffers.length;
       } catch (err) {
+        // The board fails quietly by design: it keeps its last rows and shows
+        // its own empty state rather than painting a banner over a homepage.
         console.warn('[TGOffers/board]', err);
       }
       this._renderBoardShell();
       this._renderBoardRows();
       this._wireBoardEvents();
       this._startBoardClock();
-      this._scheduleBoardRefresh();
       if (this.cfg.boardAnimate) this._runBoardFlipAnimation();
     }
 
@@ -9600,21 +9623,27 @@
         + ' · updated ' + formatBoardNow();
     }
 
+    /**
+     * The board fetches ONCE, on load. It used to refetch on a timer AND on
+     * every tab focus, which is how one board on one homepage produced 986 of
+     * the 1,250 live searches in the three days to 30 Jul 2026 — a board left
+     * open in a background tab re-searched all day for a visitor who had gone.
+     *
+     * The rows do not go stale in a way a visitor can perceive: they are the
+     * cheapest fares over a 30-to-90-day departure window, and the cache behind
+     * them only moves every ten minutes. The clock keeps ticking
+     * (_startBoardClock) and the flaps still animate, so the board still reads
+     * as live. The refresh BUTTON still works, because that is a person asking.
+     *
+     * Kept as a method rather than deleted so an older config carrying
+     * boardAutoRefresh / boardRefreshSeconds simply has no effect, and so any
+     * timer left over from a previous render is torn down.
+     */
     _scheduleBoardRefresh() {
       if (this._boardRefreshTimer) { clearInterval(this._boardRefreshTimer); this._boardRefreshTimer = null; }
-      if (!this.cfg.boardAutoRefresh) return;
-      const ms = Math.max(60, this.cfg.boardRefreshSeconds || 300) * 1000;
-      this._boardRefreshTimer = setInterval(() => {
-        if (document.hidden) return;
-        this._fetchAndRenderBoard();
-      }, ms);
-      if (!this._boardVisHandler) {
-        this._boardVisHandler = () => {
-          if (!document.hidden && this.cfg.template === 'departure-board') {
-            this._fetchAndRenderBoard();
-          }
-        };
-        document.addEventListener('visibilitychange', this._boardVisHandler);
+      if (this._boardVisHandler) {
+        try { document.removeEventListener('visibilitychange', this._boardVisHandler); } catch (e) {}
+        this._boardVisHandler = null;
       }
     }
 

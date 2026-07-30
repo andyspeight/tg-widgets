@@ -58,21 +58,35 @@ ok(isNavAwayError('') === false, 'empty → NOT nav-away');
 
 // ── Source guards: the defensive parser replaced the bare res.json() sites ────
 ok(/async function parseJsonResponse\(res, label\)/.test(widget), 'shared defensive JSON parser is defined');
-ok((widget.match(/parseJsonResponse\(res, '/g) || []).length >= 3, 'defensive parser wired at the live, cache and board offer sites');
+// Two offer fetches remain since the widget went cache-only (v1.16.0): the
+// main read and the board's re-read. The live-proxy site is gone, not unwired.
+ok((widget.match(/parseJsonResponse\(res, '/g) || []).length >= 2, 'defensive parser wired at both remaining offer fetch sites');
 const _v = (widget.match(/const VERSION = '(\d+)\.(\d+)\.(\d+)'/) || []).slice(1).map(Number);
 ok(_v.length === 3 && (_v[0] > 1 || (_v[0] === 1 && _v[1] >= 14)), `VERSION is at least 1.14.0 (is ${_v.join('.')})`);
 
 // ── 23 Jul 2026 rate-limit lockout: editor/preview exemption + fail-soft ─────
 ok(/function withPreview\(headers, cfg\)/.test(widget), 'withPreview helper tags editor/preview requests for limiter exemption');
-ok((widget.match(/withPreview\(/g) || []).length >= 4, 'withPreview wired at the live, cache and board fetch sites (plus its definition)');
-ok(/res && res\.status === 429/.test(widget), 'live path detects a 429 from our own limiter');
-ok(/res && res\.status === 429[\s\S]{0,400}_showEmpty\(\)/.test(widget), 'a 429 fails soft via _showEmpty — no raw "retry in 3600s" banner, no alert');
-ok(/if \(res && res\.status === 429\)[\s\S]{0,1800}parseJsonResponse/.test(widget), 'the 429 soft-path runs BEFORE parseJsonResponse (which would otherwise throw and alert)');
-// An upstream/gateway 5xx (502/503/504) must also fail SOFT (empty state), not a
-// red "Offers service unavailable" banner — the overnight 27 Jul 2026 Travelify
-// timeouts. And it must be handled BEFORE parseJsonResponse, which would throw.
-ok(/res\.status >= 500[\s\S]{0,300}_showEmpty\(\)/.test(widget), 'a 5xx upstream/gateway error fails soft via _showEmpty');
-ok(/if \(res && typeof res\.status === 'number' && res\.status >= 500\)[\s\S]{0,900}parseJsonResponse/.test(widget), 'the 5xx soft-path also runs BEFORE parseJsonResponse');
+ok((widget.match(/withPreview\(/g) || []).length >= 3, 'withPreview wired at both offer fetch sites (plus its definition)');
+// The fail-soft rules moved from the live proxy onto the cache read when the
+// widget went cache-only. The reasons they exist did not change: a 429 is our
+// own limiter throttling a busy shared address, not a fault, and must never
+// alert; a 5xx is a real outage and must. Both must be handled BEFORE
+// parseJsonResponse, which would otherwise throw and be read as unreachable.
+const cacheFetch = widget.slice(widget.indexOf('async _fetchFromCache('), widget.indexOf('\n    _needsFlightRows()'));
+ok(/res && res\.status === 429/.test(cacheFetch), 'the cache read detects a 429 from our own limiter');
+ok(/res && res\.status === 429[\s\S]{0,400}_showEmpty\(\)/.test(cacheFetch),
+  'a 429 fails soft via _showEmpty — no raw "retry in 3600s" banner');
+const after429 = cacheFetch.slice(cacheFetch.indexOf('if (res && res.status === 429)'));
+ok(after429.indexOf('parseJsonResponse') > 0, 'the 429 soft-path runs BEFORE parseJsonResponse');
+// A 429 must NOT beacon. Alerting per throttled visitor is how a busy office
+// buries the outages that matter.
+const block429 = cacheFetch.slice(cacheFetch.indexOf('if (res && res.status === 429)'),
+  cacheFetch.indexOf('if (res && typeof res.status'));
+ok(!/tgReport/.test(block429), 'a 429 does NOT fire an alert');
+ok(/res\.status >= 500[\s\S]{0,400}_showEmpty\(\)/.test(cacheFetch), 'a 5xx fails soft via _showEmpty');
+const after5xx = cacheFetch.slice(cacheFetch.indexOf("if (res && typeof res.status === 'number' && res.status >= 500)"));
+ok(after5xx.indexOf('parseJsonResponse') > 0, 'the 5xx soft-path also runs BEFORE parseJsonResponse');
+ok(/res\.status >= 500[\s\S]{0,500}tgReport/.test(cacheFetch), 'a 5xx DOES alert — it is our own outage and nothing else reports it');
 
 async function run() {
   let calls;

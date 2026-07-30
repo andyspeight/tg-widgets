@@ -53,6 +53,17 @@ Session Summary, Decisions Locked, Files Touched, Blockers).
 
 ## Widget suite conventions
 
+**Offers are cache-only.** A visitor's browser must NEVER trigger a Travelify
+search. Every offer widget reads `GET /api/cached-offers` and nothing else; the
+cache is filled on our own schedule by `api/cron/refresh-map-offers.js`, which
+is the only thing that may call `/api/offers`. The one live search left in the
+product is the one Travelify runs when a visitor CLICKS an offer. Do not add a
+"just fall back to live if the cache is empty" path — that is the exact
+behaviour removed on 30 Jul 2026, when it was costing ~4,000 searches a week
+and starving the cache it was supposed to be a safety net for. An empty cache
+answer means the calm empty state, not a live search. Guarded by
+`npm run test:offers-cache-only`.
+
 **Embed contract.** Every widget is a container div plus one script:
 `<div data-tg-widget="<tag>" data-tg-id="tgw_...">` +
 `<script src="<origin>/widget-<tag>.js" defer>`. Optional

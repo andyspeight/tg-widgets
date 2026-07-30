@@ -1229,7 +1229,10 @@
   async function purgeCacheCountry(btn) {
     const cc = btn.getAttribute('data-cc');
     const name = ccName(cc);
-    if (!confirm(`Purge every cached offer for ${name} — packages, hotels and flights? The country disappears from the map and the offer boxes fall back to live until it is re-polled (the next cron run, or the re-poll button here).`)) return;
+    // Offer widgets have been cache-only since 30 Jul 2026, so a purge no
+    // longer degrades them to live — it EMPTIES them until the cron refills the
+    // country. An admin about to do this needs to know that.
+    if (!confirm(`Purge every cached offer for ${name} — packages, hotels and flights?\n\nThe country disappears from the map, and any offer widget showing ${name} goes EMPTY until the cache is refilled. Widgets read the cache only; there is no live fallback. Refill happens on the next cron run, or straight away with the re-poll button here.`)) return;
     btn.disabled = true;
     try {
       const r = await fetch(API_CACHE, { method: 'DELETE', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ country: cc }) });
