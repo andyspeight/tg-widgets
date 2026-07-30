@@ -185,22 +185,28 @@ const MUTATIONS = [
 ];
 
 /*
- * REFUSE TO START ON A TREE THAT IS NOT COMMITTED.
+ * IT RUNS IN ITS OWN WORKTREE, NOT IN YOURS.
  *
- * This deliberately breaks real source files and puts them back. The finally
- * below does that, and a finally does not run when the process is killed, times
- * out, or the machine goes away. It happened: the run died partway and left
- * Canvas.tsx with one line deleted, which was then nearly committed.
+ * This deliberately breaks real source files and puts them back afterwards. Two
+ * things went wrong doing that in the working checkout, and both are the same
+ * mistake at different scales:
  *
- * Requiring a clean tree makes the damage recoverable by definition, because
- * `git checkout` can undo anything this does. It also makes the belt-and-braces
- * restore at the end safe to run.
+ *  - A run died partway and left Canvas.tsx with one line deleted, because a
+ *    `finally` does not run when the process is killed. That was nearly
+ *    committed as real work.
+ *  - While it runs, `git status` shows a mutation, so anything watching for a
+ *    clean tree sees uncommitted work that is not work.
+ *
+ * A throwaway worktree fixes both. The mutations happen over there, the checkout
+ * you are looking at is never touched, and if the process is killed the worst
+ * case is a directory left in /tmp. Requiring a committed HEAD is what makes the
+ * worktree the same code you are testing.
  */
-const dirty = execSync('git status --porcelain -- . ', { encoding: 'utf8' }).trim();
+const dirty = execSync('git status --porcelain -- .', { encoding: 'utf8' }).trim();
 if (dirty) {
   console.error(
-    '\n  Commit or stash first. This script edits real source files, and a run\n' +
-      '  that dies partway leaves one of those edits behind:\n\n' +
+    '\n  Commit or stash first. This runs against a worktree of HEAD, so\n' +
+      '  uncommitted work would simply not be in what it tests:\n\n' +
       dirty
         .split('\n')
         .map((line) => `    ${line}`)
@@ -210,25 +216,49 @@ if (dirty) {
   process.exit(1);
 }
 
+const root = execSync('git rev-parse --show-toplevel', { encoding: 'utf8' }).trim();
+const head = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
+const arena = `/tmp/tg-sites-probe-${head.slice(0, 12)}`;
+
+execSync(`git worktree remove --force ${arena}`, { cwd: root, stdio: 'ignore' });
+execSync(`git worktree add --detach ${arena} ${head}`, { cwd: root, stdio: 'ignore' });
+
+/*
+ * node_modules is not in the worktree and installing again would take longer
+ * than the whole probe. Linked, not copied: the packages are read-only here.
+ */
+execSync(`ln -s ${root}/tg-sites/node_modules ${arena}/tg-sites/node_modules`, { stdio: 'ignore' });
+
+const here = `${arena}/tg-sites`;
+const run = (command) => execSync(command, { cwd: here, encoding: 'utf8', stdio: 'pipe' });
+
 let bad = 0;
 try {
   for (const mutation of MUTATIONS) {
-    const original = readFileSync(mutation.file, 'utf8');
+    const target = `${here}/${mutation.file}`;
+    const original = readFileSync(target, 'utf8');
+
+    /*
+     * A mutation that no longer applies is a FAILURE, not something to skip.
+     * The code moved and this file did not follow, so the check it was meant to
+     * exercise is now unproven. A probe that quietly stops probing is worse than
+     * no probe, because it goes on printing reassurance.
+     */
     if (!original.includes(mutation.from)) {
       console.log(`  ?? could not apply    ${mutation.check}`);
       bad += 1;
       continue;
     }
 
-    writeFileSync(mutation.file, original.replace(mutation.from, mutation.to));
+    writeFileSync(target, original.replace(mutation.from, mutation.to));
     let output = '';
     try {
-      execSync('node tools/build-standalone.mjs', { stdio: 'ignore' });
-      output = execSync('node tools/verify-standalone.mjs', { encoding: 'utf8' });
+      run('node tools/build-standalone.mjs');
+      output = run('node tools/verify-standalone.mjs');
     } catch (error) {
       output = `${error.stdout ?? ''}${error.stderr ?? ''}`;
     } finally {
-      writeFileSync(mutation.file, original);
+      writeFileSync(target, original);
     }
 
     const line = output.split('\n').find((row) => row.includes(mutation.check)) ?? '';
@@ -241,11 +271,8 @@ try {
     }
   }
 } finally {
-  // Belt and braces over the per-mutation restore above, and safe only because
-  // the tree was clean when this started.
-  execSync('git checkout -- .', { stdio: 'ignore' });
+  execSync(`git worktree remove --force ${arena}`, { cwd: root, stdio: 'ignore' });
 }
 
-execSync('node tools/build-standalone.mjs', { stdio: 'ignore' });
 console.log(bad === 0 ? '\n  Every mutation was caught.' : `\n  ${bad} not caught.`);
 process.exit(bad === 0 ? 0 : 1);
