@@ -9,11 +9,50 @@
  */
 
 import { chromium } from 'playwright';
-import { resolve, dirname } from 'node:path';
+import { readdirSync, statSync } from 'node:fs';
+import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const file = resolve(here, '../standalone/out/tg-sites-editor.html');
+
+/*
+ * REFUSE TO RUN AGAINST A STALE BUNDLE.
+ *
+ * This file drives a built artefact, not the source. Editing a component and
+ * running the checks without rebuilding tests the PREVIOUS build, which reports
+ * a wall of passes over work that is not in it, and reports failures for fixes
+ * that are. Both have happened, and the second is worse: it sends you debugging
+ * code that is already correct.
+ *
+ * Cheaper to compare timestamps than to trust anybody to remember.
+ */
+const WATCHED = ['components', 'lib', 'app', 'standalone'];
+const SKIP = new Set(['node_modules', '.next', 'out']);
+
+function newestUnder(dir) {
+  let newest = 0;
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (SKIP.has(entry.name) || entry.name.startsWith('.')) continue;
+    const full = join(dir, entry.name);
+    newest = Math.max(newest, entry.isDirectory() ? newestUnder(full) : statSync(full).mtimeMs);
+  }
+  return newest;
+}
+
+const built = statSync(file).mtimeMs;
+const newestSource = Math.max(
+  ...WATCHED.map((name) => newestUnder(resolve(here, '..', name))),
+);
+
+if (newestSource > built) {
+  const behind = Math.round((newestSource - built) / 1000);
+  console.error(
+    `\n  The bundle is ${behind}s older than the source it was built from.\n` +
+      '  Run: node tools/build-standalone.mjs\n',
+  );
+  process.exit(1);
+}
 
 /*
  * This image ships Chromium at a fixed path and the npm playwright version
@@ -1470,18 +1509,37 @@ await check('the picker does not scroll the page sideways', async () => {
  * editing is worse than no toolbar.
  */
 
-/** Select a text block and put the caret in its rich text field. */
-async function focusRichText() {
+/**
+ * Click a paragraph on the canvas and select every word in it.
+ *
+ * ON THE CANVAS, not in the properties pane, and that is the whole point. This
+ * helper used to click into the pane's rich text field, because that is where
+ * the words were edited. The toolbar formats the canvas selection now, so a
+ * helper that drove the pane would be setting up a state the product no longer
+ * has and asserting against a field the toolbar does not touch.
+ */
+async function selectOnCanvas() {
   for (const block of await page.locator('.tgs-block').all()) {
-    await block.click();
-    await page.waitForTimeout(180);
-    if (await page.locator('.ed-rt').count()) {
-      await page.locator('.ed-rt').first().click();
-      await page.waitForTimeout(250);
-      return true;
+    const text = await block.innerText().catch(() => '');
+    if (text.trim().length > 60) {
+      await block.click();
+      await page.waitForTimeout(400);
+      break;
     }
   }
-  return false;
+  const host = page.locator('[data-rt-host]:not([data-rt-plain])').first();
+  if (!(await host.count())) return null;
+
+  await page.evaluate(() => {
+    const el = document.querySelector('[data-rt-host]:not([data-rt-plain])');
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  });
+  await page.waitForTimeout(150);
+  return host;
 }
 
 /*
@@ -1525,7 +1583,7 @@ await check('and it sits above the words rather than beside the pane', async () 
 });
 
 await check('editing text raises a floating toolbar', async () => {
-  if (!(await focusRichText())) return 'no rich text field anywhere';
+  if (!(await selectOnCanvas())) return 'no editable paragraph on the canvas';
 
   const bars = await page.locator('.ed-tt').count();
   const fixed = await page.locator('.ed-tt').evaluate((el) => getComputedStyle(el).position);
@@ -1548,20 +1606,13 @@ await check('it carries drawn icons rather than the letters B and I', async () =
 });
 
 await check('bold applies to the selection and lights up', async () => {
-  // Select everything in the field, then press Bold.
-  await page.locator('.ed-rt').first().evaluate((el) => {
-    const range = document.createRange();
-    range.selectNodeContents(el);
-    const selection = window.getSelection();
-    selection.removeAllRanges();
-    selection.addRange(range);
-  });
-  await page.waitForTimeout(150);
+  const host = await selectOnCanvas();
+  if (!host) return 'no editable paragraph on the canvas';
 
   await page.locator('.ed-tt__btn[aria-label="Bold"]').click();
   await page.waitForTimeout(300);
 
-  const html = await page.locator('.ed-rt').first().innerHTML();
+  const html = await host.innerHTML();
   const pressed = await page.locator('.ed-tt__btn[aria-label="Bold"]').getAttribute('aria-pressed');
 
   // <b> or <strong>, either is kept by the sanitiser.
@@ -1586,14 +1637,17 @@ await check('clicking a button does not take the selection away', async () => {
 });
 
 await check('a web address becomes a link', async () => {
+  const host = await selectOnCanvas();
+  if (!host) return 'no editable paragraph on the canvas';
+
   await page.locator('.ed-tt__btn[aria-label="Add a link"]').click();
   await page.waitForTimeout(250);
   await page.locator('.ed-tt__url').fill('https://travelgenix.io');
   await page.locator('.ed-tt__btn[aria-label="Apply the link"]').click();
   await page.waitForTimeout(300);
 
-  const html = await page.locator('.ed-rt').first().innerHTML();
-  const wraps = await page.locator('.ed-rt a').first().innerText().catch(() => '');
+  const html = await host.innerHTML();
+  const wraps = await host.locator('a').first().innerText().catch(() => '');
 
   /*
    * The anchor must WRAP the words, not just exist. A link applied to a
@@ -1612,14 +1666,8 @@ await check('a web address becomes a link', async () => {
  * editor showing a working link in the preview that vanishes on publish.
  */
 await check('a javascript URL is refused rather than inserted', async () => {
-  await focusRichText();
-  await page.locator('.ed-rt').first().evaluate((el) => {
-    const range = document.createRange();
-    range.selectNodeContents(el);
-    const selection = window.getSelection();
-    selection.removeAllRanges();
-    selection.addRange(range);
-  });
+  const host = await selectOnCanvas();
+  if (!host) return 'no editable paragraph on the canvas';
 
   await page.locator('.ed-tt__btn[aria-label="Add a link"]').click();
   await page.waitForTimeout(200);
@@ -1627,8 +1675,37 @@ await check('a javascript URL is refused rather than inserted', async () => {
   await page.locator('.ed-tt__btn[aria-label="Apply the link"]').click();
   await page.waitForTimeout(300);
 
-  const html = await page.locator('.ed-rt').first().innerHTML();
+  const html = await host.innerHTML();
   return !/javascript:/i.test(html) ? true : `html is "${html.slice(0, 100)}"`;
+});
+
+/*
+ * AND IT SAYS SO, rather than emptying the box and doing nothing.
+ *
+ * The refusal used to clear the field and return, which reads as a button that
+ * eats what you typed. Worth catching for its own sake, and it also stopped the
+ * next check from finding an Apply button: the panel stayed open, so the click
+ * meant to open it toggled it shut.
+ */
+await check('a refused address is explained rather than silently swallowed', async () => {
+  const note = page.locator('.ed-tt__refused');
+  if (!(await note.count())) return 'nothing was said about the refused address';
+
+  const said = await note.innerText();
+  const kept = await page.locator('.ed-tt__url').inputValue();
+
+  // Still in the box, so it can be corrected rather than retyped.
+  return said.trim().length > 10 && kept.includes('javascript:')
+    ? true
+    : `said "${said.trim()}", box holds "${kept}"`;
+});
+
+await check('and the complaint goes as soon as the address is being changed', async () => {
+  await page.locator('.ed-tt__url').fill('https://travelgenix.io');
+  await page.waitForTimeout(200);
+  return (await page.locator('.ed-tt__refused').count()) === 0
+    ? true
+    : 'the complaint is still up over a valid address';
 });
 
 await check('it can be dragged out of the way and stays where it is put', async () => {
@@ -1662,9 +1739,15 @@ await check('it can be dragged out of the way and stays where it is put', async 
  * which is a link nobody can finish making.
  */
 await check('opening the link panel keeps it on screen', async () => {
-  await focusRichText();
-  await page.locator('.ed-tt__btn[aria-label="Add a link"]').click();
-  await page.waitForTimeout(400);
+  await selectOnCanvas();
+
+  // Opened only if it is not open already. The button is a toggle and the panel
+  // survives re-selecting the same paragraph, so an unconditional click here
+  // shut the panel this check is about and then timed out looking for it.
+  if (!(await page.locator('.ed-tt__url').count())) {
+    await page.locator('.ed-tt__btn[aria-label="Add a link"]').click();
+    await page.waitForTimeout(400);
+  }
 
   const box = await page.locator('.ed-tt').boundingBox();
   const apply = await page.locator('.ed-tt__btn[aria-label="Apply the link"]').boundingBox();
@@ -1675,14 +1758,303 @@ await check('opening the link panel keeps it on screen', async () => {
     : `right edge ${Math.round(box.x + box.width)}, apply ends ${Math.round(apply.x + apply.width)}, viewport ${width}`;
 });
 
-await check('it is put away when focus leaves the text', async () => {
-  // Clicking the canvas, which is a real "I am done here" rather than a click
-  // on the toolbar itself.
+/*
+ * IT BELONGS TO THE SELECTED BLOCK, NOT TO FOCUS, and that is the fix rather
+ * than a side effect of it.
+ *
+ * This check used to click the top bar and require the toolbar to vanish,
+ * because the toolbar closed whenever focus left the pane's text field. That
+ * rule is precisely what Andy hit: dragging across the words moves focus, so
+ * the toolbar went away at the exact moment he had something to format.
+ *
+ * The rule now is that the toolbar is up for as long as a paragraph is
+ * selected. Clicking elsewhere in the chrome does not deselect, so it stays,
+ * which is right: you can reach for the toolbar, the pane and back again
+ * without losing your place. Selecting something that is not text puts it away.
+ */
+await check('the toolbar survives a click on the chrome, because the block is still selected', async () => {
+  await selectOnCanvas();
   await page.locator('.ed-topbar').click({ position: { x: 5, y: 5 } });
   await page.waitForTimeout(400);
-  return (await page.locator('.ed-tt').count()) === 0
+  return (await page.locator('.ed-tt').count()) === 1
     ? true
-    : 'the toolbar is still on screen';
+    : 'the toolbar went away when nothing had been deselected';
+});
+
+await check('and is put away by selecting something that is not text', async () => {
+  let picked = false;
+  for (const block of await page.locator('.tgs-block').all()) {
+    // A button group, an image, anything with no words of its own to format.
+    if (await block.locator('.tgs-buttons, .tgs-image, .tgs-media').count()) {
+      await block.click();
+      picked = true;
+      break;
+    }
+  }
+  if (!picked) return 'no non-text block on the seeded page to select';
+  await page.waitForTimeout(400);
+
+  const bars = await page.locator('.ed-tt').count();
+  const hosts = await page.locator('[data-rt-host]').count();
+  return bars === 0 && hosts === 0 ? true : `${bars} toolbars, ${hosts} editable hosts`;
+});
+
+// ---------------------------------------------------------------------------
+// Editing the words where they are
+// ---------------------------------------------------------------------------
+
+/*
+ * ANDY'S EXACT COMPLAINT, 30 Jul 2026:
+ *
+ *   "when you click on text box, it appears, but if you then go to select the
+ *    text you want to style, the toolbar disappears, so you can't apply any
+ *    formatting"
+ *
+ * The words were rendered on the canvas but edited in a field in the pane. The
+ * toolbar hung off that field's focus, so selecting the words you could see
+ * moved focus out of it and took the toolbar with it. Even if it had stayed,
+ * Bold would have applied to whatever was selected in the pane rather than to
+ * the highlighted words.
+ *
+ * So the block itself is the editable now. The checks that matter are that a
+ * REAL DRAG across the words keeps the toolbar, that the caret survives the
+ * commit that every keystroke causes, and that what is typed reaches state
+ * rather than only the DOM.
+ */
+
+/** Click a paragraph on the canvas and return its editable host. */
+async function editParagraph() {
+  for (const block of await page.locator('.tgs-block').all()) {
+    const text = await block.innerText().catch(() => '');
+    if (text.trim().length > 60) {
+      await block.click();
+      await page.waitForTimeout(400);
+      const host = page.locator('[data-rt-host]:not([data-rt-plain])').first();
+      return (await host.count()) ? host : null;
+    }
+  }
+  return null;
+}
+
+await check('one click makes the words themselves editable', async () => {
+  const host = await editParagraph();
+  if (!host) return 'no paragraph became an editable host';
+  const on = await host.getAttribute('contenteditable');
+  return on === 'true' ? true : `contenteditable is ${on}`;
+});
+
+/*
+ * THE CARET TEST.
+ *
+ * Every keystroke commits and every commit re-renders. If React still owned the
+ * children of this element it would rewrite them and drop the caret at the
+ * start, so typing "ONE" at the end would come out somewhere near the beginning
+ * and probably backwards. Fourteen characters is enough to make that obvious.
+ *
+ * The caret is placed with a Range rather than by clicking and pressing End,
+ * because End goes to the end of the wrapped LINE that was clicked, which had me
+ * reading a passing feature as a broken one.
+ */
+await check('typing lands where the caret is, not at the start', async () => {
+  const host = await editParagraph();
+  if (!host) return 'no editable paragraph';
+
+  await page.evaluate(() => {
+    const el = document.querySelector('[data-rt-host]:not([data-rt-plain])');
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    range.collapse(false);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  });
+  await page.keyboard.type(' ONE TWO THREE', { delay: 30 });
+  await page.waitForTimeout(350);
+
+  const text = (await host.innerText()).trim();
+  return text.endsWith('ONE TWO THREE') ? true : `ends "${text.slice(-40)}"`;
+});
+
+await check('and mid-paragraph, not just at the end', async () => {
+  const host = page.locator('[data-rt-host]:not([data-rt-plain])').first();
+  const before = (await host.innerText()).trim().slice(0, 12);
+
+  await page.evaluate(() => {
+    const el = document.querySelector('[data-rt-host]:not([data-rt-plain])');
+    const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    const node = walk.nextNode();
+    const range = document.createRange();
+    range.setStart(node, 0);
+    range.collapse(true);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  });
+  await page.keyboard.type('MID', { delay: 30 });
+  await page.waitForTimeout(350);
+
+  const after = (await host.innerText()).trim();
+  return after.startsWith(`MID${before}`) ? true : `starts "${after.slice(0, 20)}"`;
+});
+
+await check('what is typed on the canvas reaches the page, not just the DOM', async () => {
+  // The properties pane reads from state, so it seeing the edit is proof the
+  // edit was committed rather than left sitting in the browser's own DOM.
+  const pane = await page.locator('.ed-rt').first().innerText();
+  return pane.includes('MID') && pane.includes('ONE TWO THREE')
+    ? true
+    : `the pane says "${pane.slice(0, 60)}"`;
+});
+
+/*
+ * THE ONE ANDY HIT. Drag the mouse across the words and the toolbar must stay.
+ *
+ * A real drag, not a Range: the whole failure was about what a mouse does to
+ * focus, and a programmatic selection moves no focus at all, so it could never
+ * have reproduced this.
+ */
+await check('selecting the words with the mouse keeps the toolbar', async () => {
+  const host = await editParagraph();
+  if (!host) return 'no editable paragraph';
+  if (!(await page.locator('.ed-tt').count())) return 'no toolbar to begin with';
+
+  const box = await host.boundingBox();
+  await page.mouse.move(box.x + 6, box.y + 12);
+  await page.mouse.down();
+  await page.mouse.move(box.x + 180, box.y + 12, { steps: 12 });
+  await page.mouse.up();
+  await page.waitForTimeout(300);
+
+  const selected = await page.evaluate(() => String(window.getSelection()));
+  if (selected.trim().length < 4) return `the drag selected "${selected}"`;
+
+  const bars = await page.locator('.ed-tt').count();
+  return bars === 1 ? true : `${bars} toolbars after selecting "${selected.trim()}"`;
+});
+
+await check('and Bold then applies to those words', async () => {
+  const host = page.locator('[data-rt-host]:not([data-rt-plain])').first();
+  await page.locator('.ed-tt__btn[aria-label="Bold"]').click();
+  await page.waitForTimeout(350);
+
+  const html = await host.innerHTML();
+  const onCanvas = /<(b|strong)[ >]/i.test(html);
+  // And in state, so it survives the save rather than looking right until reload.
+  const inState = /<(b|strong)[ >]/i.test(await page.locator('.ed-rt').first().innerHTML());
+
+  return onCanvas && inState ? true : `canvas ${onCanvas}, state ${inState}`;
+});
+
+/*
+ * HEADINGS TOO, because the seeded page is four headings to two paragraphs and a
+ * heading that does nothing when clicked reads as the whole feature being broken.
+ *
+ * A heading stores PLAIN TEXT and the renderer escapes it, so it is marked as a
+ * different kind of host: read back as textContent, no formatting toolbar. Bold
+ * inside a heading could not survive a save, and a button that appears to work
+ * and does not is worse than no button.
+ */
+async function editHeading() {
+  for (const block of await page.locator('.tgs-block').all()) {
+    if (await block.locator('.tgs-heading').count()) {
+      await block.click();
+      await page.waitForTimeout(400);
+      const host = page.locator('[data-rt-host][data-rt-plain]').first();
+      return (await host.count()) ? host : null;
+    }
+  }
+  return null;
+}
+
+await check('a heading is typed in place as well', async () => {
+  const host = await editHeading();
+  if (!host) return 'no heading became an editable host';
+
+  await page.evaluate(() => {
+    const el = document.querySelector('[data-rt-host][data-rt-plain]');
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    range.collapse(false);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  });
+  await page.keyboard.type(' NOW', { delay: 30 });
+  await page.waitForTimeout(350);
+
+  const text = (await host.innerText()).trim();
+  const inState = await page.locator('.ed-input').first().inputValue();
+  return text.endsWith('NOW') && inState.endsWith('NOW')
+    ? true
+    : `canvas "${text.slice(-20)}", state "${inState.slice(-20)}"`;
+});
+
+await check('no formatting toolbar on a heading, because none of it would survive', async () => {
+  const bars = await page.locator('.ed-tt').count();
+  return bars === 0 ? true : `${bars} toolbars over a heading`;
+});
+
+/*
+ * Enter inside a heading does nothing. Left to the browser it inserts a div or a
+ * br, and reading textContent back out welds the two lines into one word with no
+ * space, which looks like the editor eating a keystroke.
+ */
+/*
+ * THE PANE FIELD IS STILL THE SECOND WAY IN, and it must not go stale.
+ *
+ * It seeded itself once on mount and never again, which was fine while it was
+ * the only editor. With the canvas editing the same words, that field sat
+ * showing the content as it was BEFORE the canvas edit, and the next keystroke
+ * in it would commit what it was showing, wiping everything typed on the canvas.
+ *
+ * So it catches up whenever it is not the thing being typed into. That
+ * condition is the whole design: writing into a focused contentEditable is the
+ * caret fight this field has always existed to avoid.
+ */
+await check('the pane field catches up with what was typed on the canvas', async () => {
+  const host = await editParagraph();
+  if (!host) return 'no editable paragraph';
+
+  await page.evaluate(() => {
+    const el = document.querySelector('[data-rt-host]:not([data-rt-plain])');
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    range.collapse(false);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  });
+  await page.keyboard.type(' CAUGHTUP', { delay: 30 });
+  await page.waitForTimeout(400);
+
+  const pane = await page.locator('.ed-rt').first().innerText();
+  return pane.includes('CAUGHTUP') ? true : `the pane says "${pane.slice(-40)}"`;
+});
+
+await check('and typing in the pane still reaches the canvas', async () => {
+  const field = page.locator('.ed-rt').first();
+  await field.click();
+  await page.waitForTimeout(200);
+  await page.keyboard.press('End');
+  await page.keyboard.type(' FROMPANE', { delay: 30 });
+  await page.waitForTimeout(400);
+
+  const canvas = await page.locator('[data-rt-host]:not([data-rt-plain])').first().innerText();
+  return canvas.includes('FROMPANE') ? true : `the canvas says "${canvas.slice(-40)}"`;
+});
+
+await check('Enter in a heading is refused rather than silently mangled', async () => {
+  // Selects its own heading rather than inheriting one from the check above,
+  // so the checks in between can move without quietly breaking this one.
+  const host = await editHeading();
+  if (!host) return 'no heading became an editable host';
+
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('X');
+  await page.waitForTimeout(300);
+
+  const html = await host.innerHTML();
+  return !/<(div|br|p)[ >/]/i.test(html) ? true : `heading contains "${html.slice(0, 60)}"`;
 });
 
 // ---------------------------------------------------------------------------

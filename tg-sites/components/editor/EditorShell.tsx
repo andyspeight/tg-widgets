@@ -22,12 +22,13 @@ import type { Page, Section } from '../../lib/content/schema';
 import { parsePage } from '../../lib/content/schema';
 import { createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
 import { buildPresetSection } from '../../lib/content/presets';
-import { addBlock, type Path, pathKey, resolve } from '../../lib/content/tree';
+import { addBlock, parsePathKey, type Path, pathKey, resolve, updateBlockProps } from '../../lib/content/tree';
 import { Outline } from './Outline';
 import { Canvas } from './Canvas';
 import { Properties } from './Properties';
 import { BlockPicker } from './BlockPicker';
 import { SectionPicker } from './SectionPicker';
+import { TextToolbar } from './TextToolbar';
 import { Icon, type IconName } from './Icon';
 import { Menu } from './Menu';
 import './editor.css';
@@ -134,6 +135,7 @@ export function EditorShell({
   /** Where a new section would go. null means the picker is closed. */
   const [insertAt, setInsertAt] = useState<number | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
+
   const [saved, setSaved] = useState<SaveState>('idle');
   const [saveError, setSaveError] = useState<string | null>(null);
   const [status, setStatus] = useState<'draft' | 'published'>(initialStatus);
@@ -143,6 +145,30 @@ export function EditorShell({
   const [theme, setTheme] = useState<Theme>('light');
 
   const page = history.present;
+
+  /*
+   * Which block is being typed into ON THE CANVAS, and what kind it is.
+   *
+   * Headings and paragraphs, because those are the two blocks whose whole
+   * content is words a person wants to type where they can see them. Derived
+   * rather than stored, because "what is selected" is already state and a
+   * second copy of it would be one to keep in step. Canvas takes the element
+   * over; see its effect.
+   *
+   * The kind matters because only a paragraph gets the formatting toolbar. A
+   * heading stores plain text and the renderer escapes it, so bold inside one
+   * could not survive a save, and a button that appears to work and does not is
+   * worse than no button.
+   */
+  const editing = useMemo(() => {
+    if (selected?.kind !== 'block') return null;
+    const block = page.sections[selected.section]?.rows[selected.row]
+      ?.columns[selected.column]?.blocks[selected.block];
+    if (block?.type !== 'text' && block?.type !== 'heading') return null;
+    return { path: pathKey(selected), rich: block.type === 'text' };
+  }, [selected, page]);
+
+  const editingPath = editing?.path ?? null;
 
   /** Identifies the last edit, so rapid edits to one field coalesce. */
   const lastEdit = useRef<{ key: string; at: number } | null>(null);
@@ -601,6 +627,7 @@ export function EditorShell({
 
       <Canvas
         onInsertSection={setInsertAt}
+        editingPath={editingPath}
         page={page}
         selectedKey={selectedKey}
         selected={selected}
@@ -620,6 +647,40 @@ export function EditorShell({
         onCommit={commit}
         onBack={() => setMobilePane('canvas')}
       />
+
+      {/*
+        THE TOOLBAR LIVES HERE NOW, not inside the properties pane's field.
+        It formats whatever is selected on the CANVAS, which is where the words
+        are. Mounted only while a text block is being edited, which is exactly
+        when there is something for it to format.
+      */}
+      {editing?.rich && (
+        <TextToolbar
+          key={editing.path}
+          anchor={null}
+          onExec={(command, value) => {
+            const host = document.querySelector<HTMLElement>(
+              `[data-path="${CSS.escape(editing.path)}"] [data-rt-host]`,
+            );
+            if (!host) return;
+
+            // Focus first: a toolbar click is a real user action, and the
+            // command applies to the selection inside this element.
+            host.focus();
+            document.execCommand(command, false, value);
+
+            const path = parsePathKey(editing.path);
+            if (path?.kind !== 'block') return;
+            commit(
+              (current) =>
+                updateBlockProps(current, path.section, path.row, path.column, path.block, {
+                  html: host.innerHTML,
+                }),
+              `rt:${editing.path}`,
+            );
+          }}
+        />
+      )}
 
       {historyOpen && (
         <PublishHistory

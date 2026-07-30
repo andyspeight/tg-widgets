@@ -133,6 +133,8 @@ export function TextToolbar({
   const [position, setPosition] = useState<Point | null>(null);
   const [linking, setLinking] = useState(false);
   const [href, setHref] = useState('');
+  /** The last address was not one we will link to. Shown, not swallowed. */
+  const [refused, setRefused] = useState(false);
   const [, setTick] = useState(0);
 
   const drag = useRef<{ dx: number; dy: number } | null>(null);
@@ -303,9 +305,18 @@ export function TextToolbar({
      */
     const clean = safeUrl(href.trim());
     if (!clean) {
-      setHref('');
+      /*
+       * SAY SO, rather than emptying the box and doing nothing.
+       *
+       * This used to clear the field and return, which from the other side of
+       * the screen is a button that eats what you typed. Whoever typed it needs
+       * to know it was refused and roughly why, and the panel stays open so the
+       * address can be corrected rather than retyped from scratch.
+       */
+      setRefused(true);
       return;
     }
+    setRefused(false);
 
     /*
      * PUT THE SELECTION BACK FIRST, and be honest about why.
@@ -336,6 +347,7 @@ export function TextToolbar({
     onExec('createLink', clean);
     setLinking(false);
     setHref('');
+    setRefused(false);
     savedRange.current = null;
   }
 
@@ -459,7 +471,14 @@ export function TextToolbar({
             placeholder="https://"
             value={href}
             aria-label="Web address"
-            onChange={(event) => setHref(event.target.value)}
+            aria-invalid={refused || undefined}
+            aria-describedby={refused ? 'ed-tt-refused' : undefined}
+            onChange={(event) => {
+              setHref(event.target.value);
+              // The complaint is about what was there a moment ago, so it goes
+              // as soon as the address is being changed.
+              setRefused(false);
+            }}
             onKeyDown={(event) => {
               if (event.key === 'Enter') {
                 event.preventDefault();
@@ -469,6 +488,7 @@ export function TextToolbar({
                 event.preventDefault();
                 setLinking(false);
                 setHref('');
+                setRefused(false);
               }
             }}
           />
@@ -484,10 +504,17 @@ export function TextToolbar({
               onExec('unlink');
               setLinking(false);
               setHref('');
+              setRefused(false);
             }}
           >
             <Icon name="close" size={16} />
           </button>
+
+          {refused && (
+            <p className="ed-tt__refused" id="ed-tt-refused" role="alert">
+              That is not a web address we can link to. Try one starting https://
+            </p>
+          )}
         </div>
       )}
     </div>

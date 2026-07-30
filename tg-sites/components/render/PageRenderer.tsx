@@ -18,6 +18,14 @@ import { BlockRenderer } from './BlockRenderer';
 
 interface Editable {
   editable?: boolean;
+  /**
+   * The data-path of the block currently being typed into on the canvas.
+   *
+   * Passed down rather than looked up, because this file has no state and no
+   * handlers by design. The block at this path renders an empty shell and the
+   * editor owns its contents: see TextBlock's editingHost.
+   */
+  editingPath?: string | null;
 }
 
 /**
@@ -39,6 +47,7 @@ function pathAttr(editable: boolean, key: string): { 'data-path'?: string } {
 export function PageRenderer({
   page,
   editable = false,
+  editingPath = null,
   theme,
 }: {
   page: Page;
@@ -64,7 +73,12 @@ export function PageRenderer({
 
       {page.sections.map((section, index) => (
         <Fragment key={section.id}>
-          <SectionRenderer section={section} index={index} editable={editable} />
+          <SectionRenderer
+            section={section}
+            index={index}
+            editable={editable}
+            editingPath={editingPath}
+          />
           {editable && <InsertPoint index={index + 1} />}
         </Fragment>
       ))}
@@ -112,6 +126,7 @@ export function SectionRenderer({
   section,
   index,
   editable = false,
+  editingPath = null,
 }: { section: Section; index: number } & Editable): ReactElement {
   const background = safeUrl(section.backgroundImage ?? '');
 
@@ -142,6 +157,7 @@ export function SectionRenderer({
             sectionIndex={index}
             index={rowIndex}
             editable={editable}
+            editingPath={editingPath}
           />
         ))}
         {editable && section.rows.length === 0 && (
@@ -201,6 +217,7 @@ export function RowRenderer({
   sectionIndex,
   index,
   editable = false,
+  editingPath = null,
 }: { row: Row; sectionIndex: number; index: number } & Editable): ReactElement {
   /*
    * The dragged widths become a single custom property, for example
@@ -232,6 +249,7 @@ export function RowRenderer({
           index={columnIndex}
           isLast={columnIndex === row.columns.length - 1}
           editable={editable}
+          editingPath={editingPath}
         />
       ))}
     </div>
@@ -249,6 +267,7 @@ export function ColumnRenderer({
   index,
   isLast,
   editable = false,
+  editingPath = null,
 }: {
   column: Column;
   sectionIndex: number;
@@ -273,7 +292,11 @@ export function ColumnRenderer({
           data-align={typeof block.props?.align === 'string' ? block.props.align : undefined}
           {...pathAttr(editable, `${path}b${blockIndex}`)}
         >
-          <BlockRenderer block={block} editable={editable} />
+          <BlockRenderer
+            block={block}
+            editable={editable}
+            editingHost={editable && editingPath === `${path}b${blockIndex}`}
+          />
         </div>
       ))}
 

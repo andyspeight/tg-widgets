@@ -16,9 +16,8 @@
  * contentEditable puts the caret back at the start on every render.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import type { Field } from '../../lib/content/blocks';
-import { TextToolbar } from './TextToolbar';
 import { ImageField } from '../media/ImageField';
 import { Icon } from './Icon';
 
@@ -310,147 +309,67 @@ function Repeater({ field, value, onChange, ownerId }: FieldProps) {
 // ---------------------------------------------------------------------------
 
 /**
- * A deliberately small rich text field.
+ * The rich text field in the properties pane. THE SECOND WAY IN.
  *
- * Uncontrolled: the DOM owns the content while the field is mounted and we
- * read it out on input. React never writes back mid-edit, which is what
- * keeps the caret where the agent put it. The value is only pushed in when
- * the field mounts, and the parent remounts it (via key) when the selected
- * block changes.
+ * The words are edited on the canvas now, in place. This stays because some
+ * people reach for a pane, and because a keyboard-only route to the content
+ * that does not depend on selecting text inside a preview is worth keeping.
+ *
+ * Half-controlled, on purpose:
+ *
+ *  - While this field has focus, the DOM owns the content and React never
+ *    writes into it. That is what keeps the caret where the agent put it. A
+ *    controlled contentEditable throws the caret to the start on every letter.
+ *  - While it does NOT have focus, any change to `html` came from somewhere
+ *    else (the canvas), so take it. Without that this field seeded once and
+ *    went stale, and the next keystroke in it would commit the stale content
+ *    it was still showing, wiping whatever had been typed on the canvas.
  *
  * execCommand is deprecated but still implemented everywhere and is by far
  * the smallest thing that works. When this needs to grow, replace it with a
  * proper editor behind the same props rather than extending it.
  *
- * THE TOOLBAR IS NO LONGER IN HERE. It floats, it is draggable, and it only
- * appears while this field has focus: see components/editor/TextToolbar.tsx for
- * why, and for what is deliberately missing from it.
+ * NO TOOLBAR IN HERE. It formats what is selected on the CANVAS, and it is
+ * mounted by EditorShell for as long as a text block is being edited there. A
+ * toolbar hanging off this field could only ever format this field, which is
+ * the bug Andy hit: he selected the words he could see, which moved focus out
+ * of here, and the toolbar went with it.
+ *
+ * NO focus() ON MOUNT either. The canvas takes focus when a text block is
+ * selected, because that is where the words are. Two fields both grabbing
+ * focus on the same commit is a race decided by effect order.
  */
 function RichText({ html, onChange }: { html: string; onChange: (value: string) => void }) {
   const ref = useRef<HTMLDivElement>(null);
 
-  /*
-   * OPEN AS SOON AS THE FIELD EXISTS, not once it has been clicked into.
-   *
-   * This was false until focus, and Andy could not find the toolbar at all. He
-   * was right not to: this field lives in a 320px pane on the right, only the
-   * `text` block type has one, and selecting a block does not focus it. So the
-   * toolbar for editing text appeared only after you had already found the box
-   * that edits text. On the seeded page, four of the ten blocks are headings,
-   * which have no rich text field and could never show it.
-   *
-   * The field only mounts when a text block is selected, so "it exists" and
-   * "somebody is editing text" are the same statement.
-   */
-  const [editing, setEditing] = useState(true);
-
   useEffect(() => {
-    const node = ref.current;
-    if (node && node.innerHTML !== html) node.innerHTML = html;
-
-    /*
-     * Focused on mount, and this is the exception the rule names rather than a
-     * breach of it.
-     *
-     * editor.css and the repo conventions forbid .focus() as part of DRAWING,
-     * because the editor preview re-renders on every keystroke and a focus in
-     * that path steals the caret out of the field being typed in. This is not
-     * that path. This component is keyed on the block id, so it mounts exactly
-     * once per block, when somebody has just clicked that block. That is a real
-     * user action and a genuine step change, which is precisely when the rule
-     * says moving focus is correct.
-     *
-     * Without it the toolbar would be on screen with nothing selected, and the
-     * first press of Bold would apply to an empty caret and appear to do
-     * nothing.
-     */
-    node?.focus();
-
-    // Runs on mount only. The key prop remounts this for a new block, which
-    // is what re-seeds the content. Deliberately not depending on `html`:
-    // that would fight the caret on every keystroke.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const exec = (command: string, value?: string) => {
     const node = ref.current;
     if (!node) return;
-    // Focus here is a real user action (a toolbar click), not a render.
-    node.focus();
-    document.execCommand(command, false, value);
-    onChange(node.innerHTML);
-  };
-
-  /*
-   * The toolbar goes when focus leaves BOTH the field and the toolbar.
-   *
-   * Written first as an onBlur on the field, checking relatedTarget. That closed
-   * it correctly when somebody clicked away from the field, and never when they
-   * had been typing in the toolbar's link box: focus was in the input by then,
-   * so the field's blur had already happened and nothing was listening for the
-   * second departure. The toolbar stayed on screen over a field nobody was
-   * editing.
-   *
-   * A document listener asks the only question that matters, which is where
-   * focus IS, rather than trying to infer it from where it went next.
-   */
-  useEffect(() => {
-    if (!editing) return;
-
-    let pending = 0;
-
-    /*
-     * CHECKED ON THE NEXT TICK, and that is the whole trick.
-     *
-     * During focusout the new element has not been focused yet, so
-     * document.activeElement is usually document.body. Asking then says "focus
-     * is nowhere" every single time, which closed the toolbar the instant the
-     * link input tried to take focus, and the input vanished from under the
-     * cursor. A tick later activeElement is where focus actually went.
-     */
-    const settle = () => {
-      window.clearTimeout(pending);
-      pending = window.setTimeout(() => {
-        const active = document.activeElement;
-        const inField = !!ref.current && (active === ref.current || ref.current.contains(active));
-        const inToolbar = !!active?.closest?.('.ed-tt');
-        if (!inField && !inToolbar) setEditing(false);
-      }, 0);
-    };
-
-    // focusout bubbles where blur does not, so one listener covers the field,
-    // the toolbar and anything either of them grows later.
-    document.addEventListener('focusout', settle);
-    return () => {
-      window.clearTimeout(pending);
-      document.removeEventListener('focusout', settle);
-    };
-  }, [editing]);
+    // Typing in here? Leave it alone. Anything else? Catch up.
+    if (document.activeElement === node) return;
+    if (node.innerHTML !== html) node.innerHTML = html;
+  }, [html]);
 
   return (
-    <>
-      {editing && <TextToolbar anchor={ref.current} onExec={exec} />}
-      <div
-        ref={ref}
-        className="ed-rt"
-        contentEditable
-        suppressContentEditableWarning
-        role="textbox"
-        aria-multiline="true"
-        aria-label="Content"
-        onFocus={() => setEditing(true)}
-        onInput={(event) => onChange(event.currentTarget.innerHTML)}
-        onBlur={(event) => onChange(event.currentTarget.innerHTML)}
-        onPaste={(event) => {
-          // Paste as plain text. Pasting from Word otherwise drags in a
-          // paragraph of inline styles that the sanitiser then strips,
-          // which looks to the agent like the paste silently failed.
-          event.preventDefault();
-          const text = event.clipboardData.getData('text/plain');
-          document.execCommand('insertText', false, text);
-        }}
-      />
-    </>
+    <div
+      ref={ref}
+      className="ed-rt"
+      contentEditable
+      suppressContentEditableWarning
+      role="textbox"
+      aria-multiline="true"
+      aria-label="Content"
+      onInput={(event) => onChange(event.currentTarget.innerHTML)}
+      onBlur={(event) => onChange(event.currentTarget.innerHTML)}
+      onPaste={(event) => {
+        // Paste as plain text. Pasting from Word otherwise drags in a
+        // paragraph of inline styles that the sanitiser then strips,
+        // which looks to the agent like the paste silently failed.
+        event.preventDefault();
+        const text = event.clipboardData.getData('text/plain');
+        document.execCommand('insertText', false, text);
+      }}
+    />
   );
 }
 

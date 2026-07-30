@@ -30,18 +30,21 @@ import {
 export function BlockRenderer({
   block,
   editable = false,
+  editingHost = false,
 }: {
   block: Block;
   editable?: boolean;
+  /** This block is being typed into on the canvas. See TextBlock. */
+  editingHost?: boolean;
 }): ReactElement | null {
   const props = block.props ?? {};
 
   const body = (() => {
     switch (block.type) {
       case 'heading':
-        return <HeadingBlock props={props} />;
+        return <HeadingBlock props={props} editingHost={editingHost} />;
       case 'text':
-        return <TextBlock props={props} />;
+        return <TextBlock props={props} editingHost={editingHost} />;
       case 'quote':
         return <QuoteBlock props={props} />;
       case 'list':

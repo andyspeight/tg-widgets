@@ -65,7 +65,14 @@ const RADII = ['none', 'sm', 'md', 'lg', 'full'] as const;
  */
 const LEGACY_SIZE_TO_STYLE = { xl: 'h1', l: 'h2', m: 'h3', s: 'h4' } as const;
 
-export function HeadingBlock({ props }: { props: Props }): ReactElement {
+export function HeadingBlock({
+  props,
+  editingHost = false,
+}: {
+  props: Props;
+  /** See TextBlock. A heading is typed in place too, it just holds no markup. */
+  editingHost?: boolean;
+}): ReactElement {
   // The TAG. Still h2 to h4 only: the page title owns the single h1, and a
   // client must not be able to make a second one or skip a level.
   const level = oneOf(props, 'level', ['h2', 'h3', 'h4'] as const, 'h2');
@@ -85,6 +92,25 @@ export function HeadingBlock({ props }: { props: Props }): ReactElement {
   const text = str(props, 'text');
   const Tag = level;
 
+  /*
+   * Typed in place, like the paragraph, and for the same reason: the words are
+   * on the canvas, so that is where people reach for them.
+   *
+   * data-rt-plain rather than data-rt-host. A heading stores plain text, not
+   * markup, and the renderer escapes it. Marking it as the plain kind is what
+   * tells the canvas to read textContent back rather than innerHTML, so a
+   * pasted-in <b> is dropped instead of being stored and then silently
+   * escaped into visible angle brackets on the published page. It is also why
+   * the formatting toolbar stays away from headings: bold inside one could not
+   * survive a save, and a button that appears to work and does not is worse
+   * than no button.
+   */
+  if (editingHost) {
+    return (
+      <Tag className="tgs-heading" data-style={style} data-rt-host="" data-rt-plain="" suppressHydrationWarning />
+    );
+  }
+
   return (
     <Tag className="tgs-heading" data-style={style}>
       {text || 'Heading'}
@@ -92,11 +118,35 @@ export function HeadingBlock({ props }: { props: Props }): ReactElement {
   );
 }
 
-export function TextBlock({ props }: { props: Props }): ReactElement {
+export function TextBlock({
+  props,
+  editingHost = false,
+}: {
+  props: Props;
+  /**
+   * Render the shell and NOTHING inside it, because the editor is about to take
+   * this element over and type in it.
+   *
+   * THIS IS THE WHOLE TRICK OF INLINE EDITING. A contentEditable that React also
+   * renders into is a fight: every keystroke commits, the commit re-renders, and
+   * React rewrites the children and drops the caret at the start. Giving React
+   * no children for this one element means it has nothing to rewrite, so the
+   * DOM owns the text while it is being edited and the editor reads it back out.
+   * The pane field solved the same problem the same way, with an uncontrolled
+   * div seeded once on mount.
+   *
+   * Only ever true in the editor: the published page passes nothing.
+   */
+  editingHost?: boolean;
+}): ReactElement {
   const size = oneOf(props, 'size', ['s', 'm', 'l'] as const, 'm');
   // Sanitised again here even though it was sanitised on save. Stored HTML
   // is never trusted, and this is the last gate before the browser.
   const html = sanitiseHtml(props.html, 'richtext');
+
+  if (editingHost) {
+    return <div className="tgs-text" data-size={size} data-rt-host="" suppressHydrationWarning />;
+  }
 
   return (
     <div

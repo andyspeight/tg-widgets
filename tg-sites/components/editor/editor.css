@@ -1184,6 +1184,7 @@
 .ed-tt__block option { background: #fff; color: #0f172a; }
 
 .ed-tt__link {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 2px;
@@ -1206,6 +1207,22 @@
 
 .ed-tt__url::placeholder { color: #64748b; }
 .ed-tt__url:focus { outline: none; border-color: var(--ed-accent); }
+.ed-tt__url[aria-invalid='true'] { border-color: #fca5a5; }
+
+/* Under the row rather than inside it, so a refused address does not shove the
+   Apply button sideways while it is being read. */
+.ed-tt__refused {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 6px);
+  margin: 0;
+  padding: var(--ed-2) var(--ed-3);
+  border-radius: var(--ed-r-sm);
+  background: #7f1d1d;
+  color: #fff;
+  font-size: var(--ed-text-sm);
+  white-space: nowrap;
+}
 
 .ed-rt {
   min-height: 132px;

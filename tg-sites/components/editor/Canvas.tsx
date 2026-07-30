@@ -17,7 +17,7 @@
  * separate mobile preview mode to drift out of sync, and no iframe.
  */
 
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import type { Page } from '../../lib/content/schema';
 import {
   DEFAULT_SECTION_PADDING,
@@ -30,6 +30,7 @@ import {
   parsePathKey,
   pathKindLabel,
   resizeColumnBoundary,
+  updateBlockProps,
 } from '../../lib/content/tree';
 import { PageRenderer } from '../render/PageRenderer';
 import type { Viewport } from './EditorShell';
@@ -44,6 +45,13 @@ interface Props {
   onCommit: (next: (current: Page) => Page, coalesceKey?: string) => void;
   onPickBlock: (target: { section: number; row: number; column: number }) => void;
   onInsertSection: (index: number) => void;
+  /**
+   * The block being typed into on the canvas, as a path key, or null.
+   *
+   * Decided by EditorShell rather than here, because the canvas does not own
+   * the selection and two places deciding what is being edited is one too many.
+   */
+  editingPath?: string | null;
   /**
    * The client's theme, as custom properties.
    *
@@ -89,6 +97,7 @@ export function Canvas({
   onCommit,
   onPickBlock,
   onInsertSection,
+  editingPath = null,
   theme,
 }: Props) {
   const frameRef = useRef<HTMLDivElement>(null);
@@ -119,6 +128,151 @@ export function Canvas({
     node.classList.add('is-selected');
     node.setAttribute('data-kind', pathKindLabel(selected));
   }, [selectedKey, selected, page]);
+
+  // ---------------------------------------------------------------------
+  // Editing the words where they are
+  // ---------------------------------------------------------------------
+
+  /*
+   * TAKE OVER THE SELECTED TEXT BLOCK AND LET THE DOM OWN IT.
+   *
+   * PageRenderer renders this one element with no children (see TextBlock's
+   * editingHost), so React has nothing in there to rewrite. That is what makes
+   * a contentEditable survivable: every keystroke commits, every commit
+   * re-renders, and a React-managed contentEditable would have its children
+   * replaced and its caret thrown to the start on every letter.
+   */
+
+  /**
+   * What the block being edited currently holds, read from state rather than
+   * from the DOM.
+   *
+   * Two kinds, because two kinds of block. A paragraph stores markup. A heading
+   * stores plain text and the renderer escapes it, so it is written and read
+   * back as textContent: that is also what stops a paste from putting a tag into
+   * it, which would be stored and then shown on the published page as visible
+   * angle brackets.
+   */
+  const editingValue = useMemo(() => {
+    if (!editingPath) return null;
+    const path = parsePathKey(editingPath);
+    if (path?.kind !== 'block') return null;
+
+    const block = page.sections[path.section]?.rows[path.row]?.columns[path.column]
+      ?.blocks[path.block];
+    if (!block) return null;
+
+    const plain = block.type === 'heading';
+    const raw = plain ? block.props?.text : block.props?.html;
+    return { plain, value: typeof raw === 'string' ? raw : '' };
+  }, [editingPath, page]);
+
+  const findHost = useCallback(() => {
+    const frame = frameRef.current;
+    if (!frame || !editingPath) return null;
+    return frame.querySelector<HTMLElement>(
+      `[data-path="${CSS.escape(editingPath)}"] [data-rt-host]`,
+    );
+  }, [editingPath]);
+
+  // Take the element over, seed it, and put the caret in it. Once per block.
+  useEffect(() => {
+    const host = findHost();
+    if (!host || !editingValue) return;
+
+    if (editingValue.plain) host.textContent = editingValue.value;
+    else host.innerHTML = editingValue.value;
+
+    host.contentEditable = 'true';
+    host.spellcheck = true;
+
+    /*
+     * Focused because somebody just clicked this block, which is a real user
+     * action and a genuine step change: the exception the no-focus-on-render
+     * rule names. Keyed on editingPath, so it happens once per block and not on
+     * the re-render that every keystroke causes.
+     */
+    host.focus();
+
+    return () => {
+      host.contentEditable = 'false';
+    };
+    // Deliberately not depending on editingValue: re-seeding from state while
+    // somebody is typing is the caret fight by another route. Catching up is the
+    // next effect's job, and it knows when it is safe.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editingPath, findHost]);
+
+  /*
+   * CATCH UP WITH AN EDIT THAT CAME FROM SOMEWHERE ELSE.
+   *
+   * The properties pane edits the same words. Without this the canvas kept
+   * showing the content as it was when it was taken over, so typing in the pane
+   * changed the page and the canvas silently disagreed with it, and the next
+   * keystroke on the canvas committed the stale version over the top.
+   *
+   * Only when this element is NOT the one being typed into. That condition is
+   * the whole thing: writing into a focused contentEditable is exactly the caret
+   * fight the no-children trick exists to avoid. The pane field has the same
+   * rule in the other direction, which is what makes the two safe together.
+   */
+  useEffect(() => {
+    const host = findHost();
+    if (!host || !editingValue) return;
+    if (document.activeElement === host) return;
+
+    if (editingValue.plain) {
+      if (host.textContent !== editingValue.value) host.textContent = editingValue.value;
+    } else if (host.innerHTML !== editingValue.value) {
+      host.innerHTML = editingValue.value;
+    }
+  }, [editingValue, findHost]);
+
+  /*
+   * Paste as plain text, on both kinds of host.
+   *
+   * Pasting from Word or a web page otherwise drags in a paragraph of spans and
+   * inline styles. The sanitiser strips them on save, so the formatting appears
+   * to take and then vanishes, which reads as the save having failed. Taking the
+   * text only means what you see after pasting is what you get. Same reasoning,
+   * same handler, as the properties pane field.
+   */
+  const onPaste = useCallback((event: React.ClipboardEvent<HTMLDivElement>) => {
+    const host = (event.target as HTMLElement).closest<HTMLElement>('[data-rt-host]');
+    if (!host) return;
+    event.preventDefault();
+    const text = event.clipboardData.getData('text/plain');
+    document.execCommand('insertText', false, text);
+  }, []);
+
+  /*
+   * Read the words back out on input.
+   *
+   * Straight to the same updateBlockProps the properties pane uses, so both
+   * ways of editing land in one place. Coalesced under one key so a paragraph
+   * of typing is one undo step rather than one per letter, which is what the
+   * pane field already does.
+   */
+  const onInput = useCallback(
+    (event: React.FormEvent<HTMLDivElement>) => {
+      const host = (event.target as HTMLElement).closest<HTMLElement>('[data-rt-host]');
+      if (!host || !editingPath) return;
+
+      const path = parsePathKey(editingPath);
+      if (path?.kind !== 'block') return;
+
+      const patch = host.hasAttribute('data-rt-plain')
+        ? { text: host.textContent ?? '' }
+        : { html: host.innerHTML };
+
+      onCommit(
+        (current) =>
+          updateBlockProps(current, path.section, path.row, path.column, path.block, patch),
+        `rt:${editingPath}`,
+      );
+    },
+    [editingPath, onCommit],
+  );
 
   // Scroll the selection into view, but only when the selection actually
   // changes. Doing it on every render would yank the page around while the
@@ -315,6 +469,20 @@ export function Canvas({
   // a mouse. 2% a press, 10% with shift.
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
+      /*
+       * A heading is one line, so Enter inside one does nothing.
+       *
+       * Left alone, the browser puts a <div> or a <br> inside the heading, and
+       * reading textContent back out silently welds the two lines into one word.
+       * Refusing the key is honest about what a heading is. Paragraphs keep
+       * Enter: that is how you get a second paragraph.
+       */
+      const plainHost = (event.target as HTMLElement).closest<HTMLElement>('[data-rt-plain]');
+      if (plainHost && event.key === 'Enter') {
+        event.preventDefault();
+        return;
+      }
+
       // Height first: same keys would otherwise be ambiguous on a page that
       // has both handles focusable.
       const grip = (event.target as HTMLElement).closest<HTMLElement>('.ed-vresize');
@@ -370,13 +538,15 @@ export function Canvas({
           className="ed-canvas-frame"
           style={{ maxWidth: '100%' }}
           onClick={onClick}
+          onInput={onInput}
+          onPaste={onPaste}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
           onKeyDown={onKeyDown}
         >
-          <PageRenderer page={page} editable theme={theme} />
+          <PageRenderer page={page} editable editingPath={editingPath} theme={theme} />
         </div>
 
         {stackNote && <p className="ed-stack-note">{stackNote}</p>}
