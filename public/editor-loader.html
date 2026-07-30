@@ -283,13 +283,13 @@
             <div class="sec-body">
               <div class="exp-grid">
                 <button class="exp-item" data-export="gif" type="button"><span><span class="exp-fmt">GIF</span><span class="exp-desc">Universal. Hard-cut transparency</span></span><span class="exp-go">Ready</span></button>
-                <button class="exp-item" data-export="webm" type="button" disabled><span><span class="exp-fmt">WebM</span><span class="exp-desc">Smooth alpha transparency</span></span><span class="exp-go">Coming soon</span></button>
+                <button class="exp-item" data-export="webm" type="button"><span><span class="exp-fmt">WebM</span><span class="exp-desc">Smooth alpha. For the web</span></span><span class="exp-go">Ready</span></button>
                 <button class="exp-item" data-export="apng" type="button" disabled><span><span class="exp-fmt">APNG</span><span class="exp-desc">Smooth alpha, wide support</span></span><span class="exp-go">Coming soon</span></button>
                 <button class="exp-item" data-export="mp4" type="button" disabled><span><span class="exp-fmt">MP4</span><span class="exp-desc">Solid background only</span></span><span class="exp-go">Coming soon</span></button>
                 <button class="exp-item" data-export="png-sequence" type="button" disabled><span><span class="exp-fmt">PNG sequence</span><span class="exp-desc">For video editors</span></span><span class="exp-go">Coming soon</span></button>
               </div>
               <p class="exp-note">The download uses the current template, colours and the transparent or matte choice from the Design tab.</p>
-              <p class="exp-note">The other formats are not built yet. GIF is the one that works everywhere — email, Duda, PowerPoint, Slack.</p>
+              <p class="exp-note">APNG, MP4 and PNG sequence are not built yet. GIF works everywhere — email, Duda, PowerPoint, Slack. WebM keeps soft edges and stays small as the loader gets bigger, but it needs a video tag on a web page. At small sizes GIF is often the smaller file.</p>
             </div>
           </div>
         </div>
@@ -672,6 +672,30 @@
   // we drop the frame rate rather than the loop length, and say so.
   var GIF_PIXEL_BUDGET = 24e6;
 
+  /* WebM codecs, in the order we want them, and NOT a list to extend casually.
+   *
+   * Measured in Chromium on 30 Jul 2026 by recording a magenta disc on a
+   * transparent canvas and reading the alpha back out of the decoded video:
+   *   vp9   → 89% transparent, no black. Alpha kept.
+   *   vp8   → 89% transparent, no black. Alpha kept.
+   *   av01  → 0% transparent, the disc composited onto BLACK. Alpha lost.
+   *
+   * MediaRecorder.isTypeSupported('video/webm;codecs=av01') answers true, so
+   * anyone "modernising" this by reaching for the newest codec would quietly
+   * turn every transparent export into a black box. Nor may this fall back to
+   * a bare 'video/webm', which lets the browser choose. The whole point of
+   * offering WebM next to GIF is the soft alpha edge.
+   */
+  var WEBM_CODECS = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8'];
+
+  function webmMime() {
+    if (typeof MediaRecorder === 'undefined' || !MediaRecorder.isTypeSupported) return null;
+    for (var i = 0; i < WEBM_CODECS.length; i++) {
+      if (MediaRecorder.isTypeSupported(WEBM_CODECS[i])) return WEBM_CODECS[i];
+    }
+    return null;                                   // Safari, mostly
+  }
+
   function exportPlan() {
     var tpl = TPL[C.template] || TPL.spinner;
     var d = DIMS(tpl.aspect, C.size);
@@ -689,19 +713,48 @@
       w: d.w, h: d.h, frames: frames, delayCs: delayCs,
       asked: fps, fps: Math.round(100 / delayCs), reduced: reduced,
       transparent: C.background === 'transparent',
+      // WebM records in real time and has no hundredths-of-a-second rule, so
+      // it takes the frame rate as asked and runs for exactly one loop.
+      loopMs: loopMs,
+      webmFps: fps,
+      webmMime: webmMime(),
+      // Generous for a loader — flat colour and hard edges compress to almost
+      // nothing anyway, and starving the rate is what makes edges crawl.
+      bitrate: Math.min(8e6, Math.max(1e6, Math.round(d.w * d.h * fps * 2))),
+    };
+  }
+
+  /* One frame, drawn the way the live widget draws it.
+   *
+   * Two canvases rather than one because opacity is a CSS property on the
+   * widget's ROOT, which composites the finished drawing once. Setting
+   * globalAlpha and drawing straight into one canvas is a different thing:
+   * it fades each shape separately, so overlapping parts of a loader show
+   * through each other. Drawing whole, then compositing once, is what keeps
+   * an exported file identical to the preview. Shared by both formats. */
+  function makeFramePainter(w, h, readback) {
+    var src = document.createElement('canvas');
+    src.width = w; src.height = h;
+    var sctx = src.getContext('2d');
+    var out = document.createElement('canvas');
+    out.width = w; out.height = h;
+    var octx = out.getContext('2d', readback ? { willReadFrequently: true } : undefined);
+    return {
+      canvas: out,
+      ctx: octx,
+      paint: function (t) {
+        sctx.clearRect(0, 0, w, h);
+        DRAW(sctx, t, C, w, h);
+        octx.clearRect(0, 0, w, h);
+        octx.globalAlpha = C.opacity;
+        octx.drawImage(src, 0, 0);
+        octx.globalAlpha = 1;
+      },
     };
   }
 
   function renderFrames(plan, onFrame, done) {
-    // Two canvases: one to draw into, one to apply the widget's opacity while
-    // compositing. Opacity is a CSS property on the live widget's root, so
-    // folding it in here is what keeps the file matching the preview.
-    var src = document.createElement('canvas');
-    src.width = plan.w; src.height = plan.h;
-    var sctx = src.getContext('2d');
-    var out = document.createElement('canvas');
-    out.width = plan.w; out.height = plan.h;
-    var octx = out.getContext('2d', { willReadFrequently: true });
+    var painter = makeFramePainter(plan.w, plan.h, true);
     var frames = [];
     var i = 0;
 
@@ -710,13 +763,8 @@
       // Several frames per tick when they are small, one when they are big —
       // keeps the progress readable without making the export crawl.
       while (i < plan.frames && budget < 400000) {
-        sctx.clearRect(0, 0, plan.w, plan.h);
-        DRAW(sctx, i / plan.frames, C, plan.w, plan.h);
-        octx.clearRect(0, 0, plan.w, plan.h);
-        octx.globalAlpha = C.opacity;
-        octx.drawImage(src, 0, 0);
-        octx.globalAlpha = 1;
-        frames.push(octx.getImageData(0, 0, plan.w, plan.h).data);
+        painter.paint(i / plan.frames);
+        frames.push(painter.ctx.getImageData(0, 0, plan.w, plan.h).data);
         budget += plan.w * plan.h;
         i++;
       }
@@ -725,6 +773,64 @@
       else done(frames);
     }
     requestAnimationFrame(step);
+  }
+
+  /* WebM. MediaRecorder stamps frames by the wall clock, so this records in
+   * real time: exactly one loop, which is also what makes the file loop
+   * seamlessly. The loop position is driven from elapsed time rather than a
+   * frame counter, so a dropped animation frame shifts nothing — the drawing
+   * is still correct for the moment it was captured. */
+  function recordWebm(plan, onTick, done, fail) {
+    if (!plan.webmMime) { fail('This browser cannot record WebM.'); return; }
+    var painter = makeFramePainter(plan.w, plan.h, false);
+    var stream, rec;
+    try {
+      stream = painter.canvas.captureStream(plan.webmFps);
+      rec = new MediaRecorder(stream, { mimeType: plan.webmMime, videoBitsPerSecond: plan.bitrate });
+    } catch (e) {
+      fail('This browser refused to start the recorder.');
+      return;
+    }
+    var chunks = [];
+    var failed = false;
+    function stopTracks() {
+      try {
+        var tracks = stream.getTracks();
+        for (var i = 0; i < tracks.length; i++) tracks[i].stop();
+      } catch (e) { /* noop */ }
+    }
+    rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+    rec.onerror = function () {
+      if (failed) return;
+      failed = true;
+      stopTracks();
+      fail('The recording stopped unexpectedly.');
+    };
+    rec.onstop = function () {
+      stopTracks();
+      if (failed) return;
+      if (!chunks.length) { fail('The recording came back empty.'); return; }
+      done(new Blob(chunks, { type: plan.webmMime }));
+    };
+
+    // Paint one frame BEFORE starting, so the stream has something to capture
+    // from its very first tick rather than opening on a blank canvas.
+    painter.paint(0);
+    try { rec.start(); } catch (e) { fail('This browser refused to start the recorder.'); return; }
+
+    var t0 = performance.now();
+    function frame(now) {
+      if (failed) return;
+      var elapsed = now - t0;
+      // Clamped, not wrapped: the last frame lands on t just under 1, and the
+      // player's own loop carries it back to 0. Wrapping here would repeat
+      // frame 0 at the end and show as a stutter every time round.
+      painter.paint(Math.min(0.999999, elapsed / plan.loopMs));
+      onTick(Math.min(99, Math.round((elapsed / plan.loopMs) * 100)));
+      if (elapsed < plan.loopMs) requestAnimationFrame(frame);
+      else { try { rec.stop(); } catch (e) { fail('The recording could not be closed.'); } }
+    }
+    requestAnimationFrame(frame);
   }
 
   function downloadBlob(blob, filename) {
@@ -742,6 +848,7 @@
 
   function wireExport() {
     var gifBtn = document.querySelector('[data-export="gif"]');
+    var webmBtn = document.querySelector('[data-export="webm"]');
     var fpsRange = document.getElementById('rng-fps');
     var note = document.querySelector('.exp-note');
     if (!gifBtn) return;
@@ -753,43 +860,69 @@
     }
 
     gifBtn.disabled = false;
-    var go = gifBtn.querySelector('.exp-go');
+    var gifGo = gifBtn.querySelector('.exp-go');
+    var webmGo = webmBtn ? webmBtn.querySelector('.exp-go') : null;
+    // Safari has MediaRecorder but no WebM. Leave the button off and say why,
+    // rather than offering a download that produces nothing.
+    var canWebm = !!webmMime();
+    if (webmBtn) webmBtn.disabled = !canWebm;
     var busy = false;
 
-    function label(text) { if (go) go.textContent = text; }
+    function label(el, text) { if (el) el.textContent = text; }
 
     function describe() {
       if (busy) return;
       var p = exportPlan();
-      label(p.w + '×' + p.h);
+      label(gifGo, p.w + '×' + p.h);
+      label(webmGo, canWebm ? p.w + '×' + p.h : 'Not in this browser');
       if (!note) return;
-      var bits = ['GIF: ' + p.w + ' by ' + p.h + ' pixels, ' + p.frames + ' frames at ' + p.fps + ' per second.'];
+      var bits = ['Both formats export at ' + p.w + ' by ' + p.h + ' pixels and run for one full loop.'];
+      bits.push('GIF: ' + p.frames + ' frames at ' + p.fps + ' per second.');
       // A GIF delay is a whole number of hundredths of a second, so most rates
       // land on a neighbour: ask for 30 and the nearest it can express is 33.
       // Say so, or the Export tab looks like it is ignoring the slider.
       if (p.asked !== p.fps) {
-        bits.push('You asked for ' + p.asked + '. GIF times frames in whole hundredths of a second, so ' + p.fps + ' is the closest it can hold.');
+        bits.push('You asked for ' + p.asked + '. GIF times frames in whole hundredths of a second, so ' + p.fps + ' is the closest it can hold. WebM takes ' + p.asked + ' as asked.');
       }
-      if (p.reduced) bits.push('The frame rate was eased back to keep the file a sensible size — the loop still runs for the same length of time.');
-      bits.push(p.transparent
-        ? 'The background is transparent, and GIF transparency is all-or-nothing, so soft edges become hard ones. A matte colour on the Design tab avoids that.'
-        : 'The matte colour from the Design tab is baked in, so edges stay smooth.');
-      bits.push('The caption is not part of the file — the animation is exported on its own.');
+      if (p.reduced) bits.push('The GIF frame rate was eased back to keep the file a sensible size — the loop still runs for the same length of time.');
+      if (p.transparent) {
+        bits.push(canWebm
+          ? 'On a transparent background GIF gives hard edges, because its transparency is all-or-nothing. WebM keeps the soft ones, so pick WebM for the web and GIF where you need it to work anywhere.'
+          : 'The background is transparent, and GIF transparency is all-or-nothing, so soft edges become hard ones. A matte colour on the Design tab avoids that.');
+      } else {
+        bits.push('The matte colour from the Design tab is baked in, so edges stay smooth in both.');
+      }
+      if (canWebm) bits.push('WebM records in real time, so it takes about ' + (Math.round(p.loopMs / 100) / 10) + ' seconds. Use it in a looping video tag, not an image tag.');
+      bits.push('The caption is not part of either file — the animation is exported on its own.');
       note.textContent = bits.join(' ');
+    }
+
+    function finish(btn, go, blob, name) {
+      downloadBlob(blob, name);
+      busy = false;
+      btn.disabled = false;
+      label(go, 'Saved');
+      setTimeout(describe, 2500);
+    }
+    function abort(btn, go, message) {
+      busy = false;
+      btn.disabled = false;
+      label(go, 'Failed');
+      if (note) note.textContent = message;
     }
 
     gifBtn.addEventListener('click', function () {
       if (busy) return;
-      if (!window.TGGif) { label('Unavailable'); return; }
+      if (!window.TGGif) { label(gifGo, 'Unavailable'); return; }
       busy = true;
       gifBtn.disabled = true;
       var plan = exportPlan();
-      label('Drawing…');
+      label(gifGo, 'Drawing…');
 
       renderFrames(plan, function (done, total) {
-        label('Drawing ' + done + '/' + total);
+        label(gifGo, 'Drawing ' + done + '/' + total);
       }, function (frames) {
-        label('Encoding…');
+        label(gifGo, 'Encoding…');
         // Let the label paint before the encoder takes the thread.
         requestAnimationFrame(function () { requestAnimationFrame(function () {
           var bytes;
@@ -799,22 +932,33 @@
               delayCs: plan.delayCs, transparent: plan.transparent,
             });
           } catch (err) {
-            busy = false; gifBtn.disabled = false;
-            label('Failed');
-            if (note) note.textContent = 'The GIF could not be built. Try a smaller size or a lower frame rate.';
+            abort(gifBtn, gifGo, 'The GIF could not be built. Try a smaller size or a lower frame rate.');
             return;
           }
-          var name = 'loader-' + C.template + '-' + plan.w + 'x' + plan.h + '.gif';
-          downloadBlob(new Blob([bytes], { type: 'image/gif' }), name);
-          busy = false;
-          gifBtn.disabled = false;
-          label('Saved');
-          setTimeout(describe, 2500);
+          finish(gifBtn, gifGo, new Blob([bytes], { type: 'image/gif' }),
+            'loader-' + C.template + '-' + plan.w + 'x' + plan.h + '.gif');
         }); });
       });
     });
 
-    // Keep the button honest as the loader is edited.
+    if (webmBtn && canWebm) {
+      webmBtn.addEventListener('click', function () {
+        if (busy) return;
+        busy = true;
+        webmBtn.disabled = true;
+        var plan = exportPlan();
+        label(webmGo, 'Recording…');
+        recordWebm(plan, function (pct) {
+          label(webmGo, 'Recording ' + pct + '%');
+        }, function (blob) {
+          finish(webmBtn, webmGo, blob, 'loader-' + C.template + '-' + plan.w + 'x' + plan.h + '.webm');
+        }, function (why) {
+          abort(webmBtn, webmGo, why + ' Try GIF instead — it works everywhere.');
+        });
+      });
+    }
+
+    // Keep the buttons honest as the loader is edited.
     wireExport.refresh = describe;
     describe();
   }

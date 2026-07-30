@@ -1,9 +1,10 @@
 /**
- * Loader — animated GIF export.
+ * Loader — animated export (GIF and WebM).
  *
  * The Export tab shipped as a shell: a format grid, an fps slider, and a note
  * saying "encoders are wired in the next build step". This suite covers the
- * encoder that finally does that, /public/tg-gif.js.
+ * two formats that now work — GIF via our own encoder in /public/tg-gif.js,
+ * and WebM via the browser's MediaRecorder.
  *
  * The encoder is written from scratch because every script we serve must be
  * CSP-clean, and the off-the-shelf browser GIF libraries spawn a worker from a
@@ -26,7 +27,7 @@
  * mismatches and a mean colour error of 0, and the editor's GIF button produces
  * a downloadable image/gif blob the browser then renders.
  *
- * Run: node test/loader-gif-export-smoke.mjs
+ * Run: node test/loader-export-smoke.mjs
  */
 import { readFileSync } from 'node:fs';
 import '../public/tg-gif.js';
@@ -264,25 +265,87 @@ ok(/data-export="webm"[^>]*disabled/.test(ED), 'the formats that are not built s
 ok(!/Encoders are wired in the next build step/.test(ED), 'the "coming soon" note is gone');
 ok(/function exportPlan\(\)/.test(ED), 'the editor works out what it is about to produce');
 ok(/function renderFrames\(/.test(ED), 'frames are rendered from the draw function, not screen-grabbed');
-ok(/DRAW\(sctx, i \/ plan\.frames, C, plan\.w, plan\.h\)/.test(ED),
-  'each frame is the widget engine evaluated at a fixed loop position');
-ok(/octx\.globalAlpha = C\.opacity/.test(ED), 'the opacity setting is folded in, so the file matches the preview');
+ok(/function makeFramePainter\(w, h, readback\)/.test(ED), 'both formats paint frames through one shared helper');
+ok(/DRAW\(sctx, t, C, w, h\)/.test(ED), 'each frame is the widget engine evaluated at a fixed loop position');
+ok(/painter\.paint\(i \/ plan\.frames\)/.test(ED), 'GIF steps the loop by frame index');
+// Opacity is a CSS property on the widget's ROOT, so it composites the whole
+// drawing once. Setting globalAlpha and drawing straight in would fade each
+// shape separately and overlapping parts would show through each other.
+ok(/octx\.globalAlpha = C\.opacity;\s+octx\.drawImage\(src, 0, 0\);\s+octx\.globalAlpha = 1;/.test(ED),
+  'opacity is applied by compositing a finished drawing, not per shape');
 ok(/GIF_MAX_FPS = 50/.test(ED), 'the frame rate is capped at what GIF can express');
 ok(/max="50"/.test(ED), 'the slider agrees with that cap');
 ok(/GIF_PIXEL_BUDGET/.test(ED), 'a huge export is bounded rather than locking the tab');
 ok(/delayCs\+\+;\s+\/\/ slower frames, same loop/.test(ED), 'the budget lowers the frame rate, never the loop length');
 ok(/p\.asked !== p\.fps/.test(ED), 'the editor explains when GIF cannot hold the exact rate asked for');
 ok(/requestAnimationFrame\(step\)/.test(ED), 'rendering yields between batches so the progress label paints');
-ok(/label\('Drawing '/.test(ED) && /label\('Encoding…'\)/.test(ED), 'the button reports progress');
-ok(/catch \(err\) \{[\s\S]{0,200}label\('Failed'\)/.test(ED), 'a failed encode says so and re-enables the button');
+ok(/label\(gifGo, 'Drawing '/.test(ED) && /label\(gifGo, 'Encoding…'\)/.test(ED), 'the GIF button reports progress');
+ok(/function abort\(btn, go, message\)/.test(ED) && /btn\.disabled = false;\s+label\(go, 'Failed'\)/.test(ED),
+  'a failure says so and re-enables the button it came from');
 ok(/setTimeout\(function \(\) \{ URL\.revokeObjectURL\(url\); \}/.test(ED),
   'the object URL is revoked later, not synchronously (which can cancel the download)');
 ok(/wireExport\.refresh/.test(ED) && /if \(wireExport\.refresh\) wireExport\.refresh\(\)/.test(ED),
   'editing the loader updates what the Export tab promises');
-ok(/The caption is not part of the file/.test(ED), 'the editor says the caption is not exported');
+ok(/The caption is not part of either file/.test(ED), 'the editor says the caption is not exported');
 ok(/\.exp-item \.exp-fmt \{ display: block/.test(ED),
   'the format name and description are separate lines (both were inline)');
 ok(!/\beval\s*\(/.test(ED) && !/new Function/.test(ED), 'no eval in the editor');
+
+/* ── WebM ─────────────────────────────────────────────────────────────────── */
+/* THE CODEC LIST IS THE WHOLE FEATURE. Measured in Chromium on 30 Jul 2026 by
+ * recording a magenta disc on a transparent canvas and reading the alpha back
+ * out of the decoded video:
+ *     vp9   → 89% transparent, no black.   Alpha kept.
+ *     vp8   → 89% transparent, no black.   Alpha kept.
+ *     av01  → 0% transparent, 12,737 black. Alpha LOST, composited onto black.
+ * Chromium reports av01 as supported, so a well-meaning "use the newest codec"
+ * change would turn every transparent export into a black box, silently. These
+ * assertions exist to make that change fail loudly instead. */
+const codecList = (ED.match(/var WEBM_CODECS = \[([^\]]*)\]/) || [])[1] || '';
+ok(codecList.length > 0, 'the WebM codec list is explicit');
+ok(!/av01/.test(codecList), 'AV1 is NOT in the codec list — it drops the alpha channel');
+ok(!/'video\/webm'/.test(codecList),
+  'no bare video/webm fallback — that lets the browser pick, and it may pick AV1');
+ok(/vp9/.test(codecList) && /vp8/.test(codecList), 'VP9 and VP8 are the choices, both of which keep alpha');
+ok(codecList.indexOf('vp9') < codecList.indexOf('vp8'), 'VP9 is preferred — smaller for the same picture');
+ok(/Alpha lost|Alpha LOST|alpha lost/.test(ED) || /turn every transparent export into a black box/.test(ED),
+  'the reason AV1 is excluded is written down next to the list');
+
+ok(/function webmMime\(\)/.test(ED), 'the editor resolves a codec at runtime');
+ok(/typeof MediaRecorder === 'undefined' \|\| !MediaRecorder\.isTypeSupported/.test(ED),
+  'a browser without MediaRecorder is handled, not assumed away');
+ok(/return null;\s+\/\/ Safari, mostly/.test(ED), 'an unsupported browser resolves to nothing');
+ok(/var canWebm = !!webmMime\(\);/.test(ED) && /webmBtn\.disabled = !canWebm/.test(ED),
+  'the button is disabled where WebM cannot be recorded, rather than failing on click');
+ok(/'Not in this browser'/.test(ED), 'and it says why');
+
+ok(/function recordWebm\(plan, onTick, done, fail\)/.test(ED), 'WebM is recorded, not encoded by us');
+ok(/captureStream\(plan\.webmFps\)/.test(ED), 'the canvas stream runs at the chosen frame rate');
+ok(/videoBitsPerSecond: plan\.bitrate/.test(ED), 'the bitrate scales with the size and rate');
+// Driving from elapsed time rather than a frame counter means a dropped
+// animation frame shifts nothing — the drawing still matches the moment.
+ok(/var elapsed = now - t0;/.test(ED) && /elapsed \/ plan\.loopMs/.test(ED),
+  'the loop position comes from elapsed time, not a frame counter');
+ok(/Math\.min\(0\.999999, elapsed \/ plan\.loopMs\)/.test(ED),
+  'the last frame is clamped just under 1, so looping does not repeat frame 0 as a stutter');
+ok(/if \(elapsed < plan\.loopMs\)/.test(ED), 'it records exactly one loop');
+ok(/painter\.paint\(0\);\s+try \{ rec\.start/.test(ED),
+  'a frame is painted before recording starts, so the stream never opens on a blank canvas');
+ok(/function stopTracks\(\)/.test(ED) && /tracks\[i\]\.stop\(\)/.test(ED),
+  'the capture track is stopped — a live track keeps the canvas pinned');
+ok(/rec\.onerror = function/.test(ED), 'a recorder error is handled');
+ok(/if \(!chunks\.length\) \{ fail\('The recording came back empty\.'\)/.test(ED),
+  'an empty recording is reported, not saved as a 0-byte file');
+ok(/var failed = false;/.test(ED) && /if \(failed\) return;/.test(ED),
+  'an error and a stop cannot both resolve the same export');
+ok(/label\(webmGo, 'Recording '/.test(ED), 'the WebM button reports progress');
+ok(/\.webm'/.test(ED), 'the download is named .webm');
+ok(/Try GIF instead/.test(ED), 'a WebM failure points at the format that always works');
+ok(/Use it in a looping video tag, not an image tag/.test(ED),
+  'the note says WebM needs a video tag — pasting it into an img is the obvious mistake');
+ok(/data-export="webm" type="button">/.test(ED), 'the WebM button is enabled in the markup');
+ok(/data-export="apng"[^>]*disabled/.test(ED) && /data-export="mp4"[^>]*disabled/.test(ED),
+  'the formats still not built stay disabled');
 
 /* ── Serving ──────────────────────────────────────────────────────────────── */
 ok((VERCEL.headers || []).some((h) => h.source === '/tg-gif.js'), 'vercel serves tg-gif.js with the shared script headers');
