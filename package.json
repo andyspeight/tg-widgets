@@ -63,9 +63,10 @@
     "test:editor-auth-no-bearer": "node test/editor-auth-no-bearer-smoke.mjs",
     "test:form-submit": "node test/form-submit-smoke.mjs",
     "test:form-widget": "node test/form-widget-smoke.mjs",
-    "test:form": "node test/form-submit-smoke.mjs && node test/form-widget-smoke.mjs && node test/form-design-smoke.mjs && node test/form-editor-smoke.mjs",
+    "test:form": "node test/form-submit-smoke.mjs && node test/form-widget-smoke.mjs && node test/form-design-smoke.mjs && node test/form-editor-smoke.mjs && node test/form-logic-smoke.mjs",
     "test:form-design": "node test/form-design-smoke.mjs",
-    "test:form-editor": "node test/form-editor-smoke.mjs"
+    "test:form-editor": "node test/form-editor-smoke.mjs",
+    "test:form-logic": "node test/form-logic-smoke.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",

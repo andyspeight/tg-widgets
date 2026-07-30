@@ -1,5 +1,5 @@
 /**
- * Travelgenix Form Widget v1.1.1
+ * Travelgenix Form Widget v1.2.0
  * A general-purpose (non travel) conversational form: one question at a time,
  * keyboard-first, with a welcome screen, progress and a custom thank-you.
  *
@@ -26,6 +26,19 @@
  * on first mount. See _renderStep / _focusStep.
  *
  * Changelog:
+ *   v1.2.0 (Jul 2026) — Phase 2: branching logic. A question can carry rules
+ *     ("if the answer is X, go to question 5, otherwise finish"), so one form
+ *     can serve several audiences without showing everyone every question.
+ *     The engine is PURE DATA — operators live in a hardcoded dispatch table
+ *     (the tgse-rules.js pattern), so a config can never name a function that
+ *     is not on the list and there is no eval anywhere near it. It also fails
+ *     OPEN: a malformed rule, an unknown operator or a missing target falls
+ *     through to the next question rather than trapping the visitor.
+ *     Navigation now keeps a route stack, so Back retraces the path actually
+ *     taken rather than walking indices, and only visited questions are
+ *     submitted (a skipped branch must not arrive as a blank answer). The
+ *     counter drops "of N" when a form branches, because the total is unknown
+ *     until the answers are given. A deliberate loop is capped at MAX_STEPS.
  *   v1.1.1 (Jul 2026) — Second design pass, this time reviewed by SCREENSHOTTING
  *     the rendered widget in Chromium rather than reading the CSS. Three things
  *     only a rendered view showed:
@@ -56,7 +69,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.1.1';
+  const VERSION = '1.2.0';
 
   // ─── API base ────────────────────────────────────────────────────────
   // The widget runs on CUSTOMER sites, so a relative '/api' path would resolve
@@ -362,6 +375,105 @@
   };
 
   const DEFAULT_TYPE = 'short-text';
+
+  // ─── Branching logic ─────────────────────────────────────────────────
+  //
+  // A question may carry rules that decide what comes next:
+  //
+  //   q.logic = {
+  //     rules: [ { op: 'is', value: 'Careers', goTo: 'q_cv' } ],
+  //     otherwise: 'q_thanks' | 'end' | undefined
+  //   }
+  //
+  // Rules are PURE DATA evaluated by a hardcoded dispatch table of named
+  // functions — the same stance as tgse-rules.js. No eval, no Function
+  // constructor, so a rule can never carry executable code, and a malformed
+  // rule can only ever be ignored.
+  //
+  // Every unknown or malformed input FAILS OPEN to "just go to the next
+  // question". A broken rule must never strand a visitor mid-form.
+
+  function normVal(v) {
+    if (v === null || v === undefined) return '';
+    if (typeof v === 'boolean') return v ? 'yes' : 'no';
+    return String(v).trim().toLowerCase();
+  }
+  /** Answers can be scalars or arrays (multi-select); compare over a list. */
+  function asList(v) {
+    if (Array.isArray(v)) return v.map(normVal).filter(Boolean);
+    const s = normVal(v);
+    return s ? [s] : [];
+  }
+  function asNumber(v) {
+    if (Array.isArray(v)) return NaN;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : NaN;
+  }
+
+  const LOGIC_OPS = {
+    is: (a, r) => asList(a).indexOf(normVal(r.value)) !== -1,
+    'is-not': (a, r) => asList(a).indexOf(normVal(r.value)) === -1,
+    contains: (a, r) => asList(a).some((x) => x.indexOf(normVal(r.value)) !== -1),
+    'not-contains': (a, r) => !asList(a).some((x) => x.indexOf(normVal(r.value)) !== -1),
+    'is-any-of': (a, r) => {
+      const want = Array.isArray(r.value) ? r.value.map(normVal) : [normVal(r.value)];
+      return asList(a).some((x) => want.indexOf(x) !== -1);
+    },
+    answered: (a) => asList(a).length > 0,
+    'not-answered': (a) => asList(a).length === 0,
+    gt: (a, r) => { const n = asNumber(a), m = asNumber(r.value); return !isNaN(n) && !isNaN(m) && n > m; },
+    lt: (a, r) => { const n = asNumber(a), m = asNumber(r.value); return !isNaN(n) && !isNaN(m) && n < m; },
+    gte: (a, r) => { const n = asNumber(a), m = asNumber(r.value); return !isNaN(n) && !isNaN(m) && n >= m; },
+    lte: (a, r) => { const n = asNumber(a), m = asNumber(r.value); return !isNaN(n) && !isNaN(m) && n <= m; },
+  };
+
+  /** Resolve a jump target to an index. -1 finishes the form. */
+  function targetIndex(questions, goTo, from) {
+    const fallthrough = (from + 1 < questions.length) ? from + 1 : -1;
+    if (goTo === 'end') return -1;
+    if (!goTo) return fallthrough;
+    for (let i = 0; i < questions.length; i++) if (questions[i].id === goTo) return i;
+    // The target was deleted or renamed — carry on rather than dead-end.
+    return fallthrough;
+  }
+
+  /**
+   * Which question follows `from`, given the answers so far.
+   * Returns an index, or -1 meaning "finish".
+   * Exported on the global for tests.
+   */
+  function resolveNext(questions, from, answers) {
+    if (!Array.isArray(questions) || from < 0 || from >= questions.length) return -1;
+    const q = questions[from] || {};
+    const logic = q.logic;
+    const fallthrough = (from + 1 < questions.length) ? from + 1 : -1;
+    if (!logic || typeof logic !== 'object') return fallthrough;
+
+    const rules = Array.isArray(logic.rules) ? logic.rules : [];
+    for (let i = 0; i < rules.length; i++) {
+      const rule = rules[i];
+      if (!rule || typeof rule !== 'object') continue;
+      const fn = LOGIC_OPS[rule.op];
+      if (!fn) continue;                       // unknown operator — ignore it
+      let hit = false;
+      try { hit = !!fn(answers ? answers[from] : undefined, rule); }
+      catch (e) { hit = false; }               // a rule must never throw the form
+      if (hit) return targetIndex(questions, rule.goTo, from);
+    }
+    if (logic.otherwise) return targetIndex(questions, logic.otherwise, from);
+    return fallthrough;
+  }
+
+  /** True when any question in the form branches. */
+  function hasBranching(questions) {
+    return (questions || []).some((q) => q && q.logic && Array.isArray(q.logic.rules) && q.logic.rules.length > 0);
+  }
+
+  // A jump can point backwards, which is legitimate ("go back and correct
+  // that") but could loop forever if a form is misconfigured. Cap the number of
+  // steps one submission may take; past that we finish the form rather than
+  // trap the visitor.
+  const MAX_STEPS = 200;
   function typeOf(q) { return TYPES[q && q.type] ? q.type : DEFAULT_TYPE; }
 
   // ─── Styles ──────────────────────────────────────────────────────────
@@ -753,6 +865,7 @@
       this.questions = (Array.isArray(this.cfg.questions) ? this.cfg.questions : []).filter((q) => q && q.label);
       this.answers = {};
       this.idx = 0;               // -1 = welcome, questions.length = thank-you
+      this.path = [];             // questions visited to get here (the real route)
       this._lastRenderedIdx = null; // drives the focus rule (see _focusStep)
       this.submitting = false;
       this.done = false;
@@ -761,6 +874,7 @@
     }
 
     _boot() {
+      this.path = [];
       if (this.cfg.showWelcome !== false && (this.cfg.welcomeTitle || this.cfg.welcomeBody)) this.idx = -1;
       this._render();
     }
@@ -770,6 +884,10 @@
       this.cfg = Object.assign({}, this.cfg, cfg || {});
       this.questions = (Array.isArray(this.cfg.questions) ? this.cfg.questions : []).filter((q) => q && q.label);
       if (this.idx > this.questions.length) this.idx = this.questions.length;
+      // The question set may have changed under us (the editor rewrites it on
+      // every keystroke), so a remembered route could point at the wrong
+      // questions. Drop it rather than retrace a route that no longer exists.
+      this.path = [];
       this._render();
     }
 
@@ -784,6 +902,7 @@
       const n = Number(index);
       if (!Number.isFinite(n)) return;
       this.done = false;
+      this.path = [];
       this.idx = Math.max(-1, Math.min(this.questions.length - 1, Math.round(n)));
       this._suppressFocus = !(opts && opts.focus === true);
       this._render();
@@ -808,7 +927,13 @@
       else if (!total) bodyHtml = this._emptyHtml();
       else bodyHtml = this._stepHtml(this.questions[this.idx], this.idx, total);
 
-      const pct = this.done ? 100 : (total ? Math.round((Math.max(0, this.idx) / total) * 100) : 0);
+      // With branching, the number of questions THIS visitor will see is not
+      // knowable in advance, so the bar tracks how far along the route they are
+      // and the counter drops the "of N" rather than state a total that is very
+      // likely wrong.
+      const branching = hasBranching(this.questions);
+      const done = branching ? this.path.length : Math.max(0, this.idx);
+      const pct = this.done ? 100 : (total ? Math.min(95, Math.round((done / total) * 100)) : 0);
 
       this.shadow.innerHTML =
         '<style>' + STYLES + '</style>' +
@@ -847,13 +972,19 @@
         '</div>';
     }
 
+    /** "3 of 7" normally; just "Question 3" once branching makes a total a lie. */
+    _counter(i, total) {
+      if (hasBranching(this.questions)) return 'Question ' + (this.path.length + 1);
+      return (i + 1) + ' of ' + total;
+    }
+
     _stepHtml(q, i, total) {
       const t = typeOf(q);
       const spec = TYPES[t];
       const id = 'q_' + i;
       const optional = q.required === false || !q.required;
       return '<div class="tgf-step">' +
-        '<p class="tgf-count">' + (i + 1) + ' of ' + total + '</p>' +
+        '<p class="tgf-count">' + this._counter(i, total) + '</p>' +
         '<label class="tgf-q" for="' + esc(id) + '">' + esc(q.label) +
           (optional ? ' <span class="tgf-optional">(optional)</span>' : '') + '</label>' +
         (q.help ? '<p class="tgf-help">' + esc(q.help) + '</p>' : '') +
@@ -865,9 +996,9 @@
         '<p class="tgf-err" data-err role="alert" aria-live="assertive"></p>' +
       '</div>' +
       '<div class="tgf-foot">' +
-        (i > 0 ? '<button type="button" class="tgf-btn tgf-btn--ghost" data-back>' + esc(this._t('backLabel', 'Back')) + '</button>' : '') +
+        (this.path.length ? '<button type="button" class="tgf-btn tgf-btn--ghost" data-back>' + esc(this._t('backLabel', 'Back')) + '</button>' : '') +
         '<button type="button" class="tgf-btn" data-next>' +
-          esc(i === total - 1 ? this._t('submitLabel', 'Submit') : this._t('nextLabel', 'OK')) + '</button>' +
+          esc(resolveNext(this.questions, i, this.answers) < 0 ? this._t('submitLabel', 'Submit') : this._t('nextLabel', 'OK')) + '</button>' +
         '<span class="tgf-hint">' + (spec.autoAdvance ? 'press a letter or <b>Enter</b>' : 'press <b>Enter</b>') + '</span>' +
       '</div>';
     }
@@ -1001,10 +1132,15 @@
       if (el) el.textContent = msg || '';
     }
 
+    /**
+     * Step back along the route actually taken. With branching, the previous
+     * question is NOT idx-1: a jump may have skipped several, or gone
+     * backwards. `this.path` is the stack of questions visited to get here.
+     */
     _back() {
-      if (this.idx <= 0) return;
+      if (!this.path.length) return;
       this.answers[this.idx] = this._readCurrent();
-      this.idx -= 1;
+      this.idx = this.path.pop();
       this._render();
       this._restore();
     }
@@ -1040,24 +1176,37 @@
       this._showError('');
       this.answers[this.idx] = value;
 
-      if (this.idx < this.questions.length - 1) {
-        this.idx += 1;
-        this._render();
-        this._restore();
-        return;
-      }
-      this._submit();
+      const next = resolveNext(this.questions, this.idx, this.answers);
+      // A backwards jump is legitimate, but a misconfigured form could loop.
+      // Cap the route length and finish rather than trap the visitor.
+      if (next < 0 || this.path.length >= MAX_STEPS) { this._submit(); return; }
+
+      this.path.push(this.idx);
+      this.idx = next;
+      this._render();
+      this._restore();
     }
 
     // ── Submit ────────────────────────────────────────────────────────
     _payload() {
-      const answers = this.questions.map((q, i) => ({
-        id: q.id || 'q' + i,
-        label: q.label,
-        type: typeOf(q),
-        value: this.answers[i] === undefined ? '' : this.answers[i],
-        mapTo: q.mapTo || undefined,
-      }));
+      // Only the questions actually SEEN. With branching, a skipped branch was
+      // never asked, so sending empty answers for it would put misleading blank
+      // columns in the client's sheet for questions this visitor never saw.
+      const seen = this.path.concat([this.idx]);
+      const order = [];
+      for (let i = 0; i < seen.length; i++) if (order.indexOf(seen[i]) === -1) order.push(seen[i]);
+      const answers = order
+        .filter((i) => this.questions[i])
+        .map((i) => {
+          const q = this.questions[i];
+          return {
+            id: q.id || 'q' + i,
+            label: q.label,
+            type: typeOf(q),
+            value: this.answers[i] === undefined ? '' : this.answers[i],
+            mapTo: q.mapTo || undefined,
+          };
+        });
       return {
         widgetId: this.cfg._widgetId || '',
         answers,
@@ -1168,6 +1317,9 @@
   if (typeof window !== 'undefined') {
     window.TGFormWidget = TGFormWidget;
     window.__TG_FORM_VERSION__ = VERSION;
+    // Exposed so the logic engine can be driven directly by tests and by the
+    // editor's rule builder.
+    window.TGFormLogic = { resolveNext, hasBranching, ops: Object.keys(LOGIC_OPS) };
   }
   if (typeof document !== 'undefined') {
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
