@@ -1116,6 +1116,13 @@
   /* The toolbar is a tool, not content: a drag that starts on it must not turn
      into a text selection of its labels. */
   user-select: none;
+  /* One row on any normal screen, and wrapping rather than running off the edge
+     on a narrow one. Colour, size, font and alignment took it past 700px, and
+     the first cap at 720 left a second row holding two buttons, which looks like
+     something went wrong rather than like a design. Measured at 1500px: 806px in
+     one row. */
+  flex-wrap: wrap;
+  max-width: min(860px, calc(100vw - 32px));
 }
 
 .ed-tt__btn {
@@ -1208,6 +1215,83 @@
 .ed-tt__url::placeholder { color: #64748b; }
 .ed-tt__url:focus { outline: none; border-color: var(--ed-accent); }
 .ed-tt__url[aria-invalid='true'] { border-color: #fca5a5; }
+
+/* The swatch tray hangs below the toolbar rather than sitting in the row. Six
+   colours plus a hex box would have doubled the width of a bar that is already
+   wrapping. */
+/* LIGHT, where the toolbar itself is dark.
+   The swatches are the client's own theme colours, and a client whose brand is
+   navy had two of six drawn in navy on a navy tray: invisible, and the two most
+   likely to be wanted. A menu on a light card is also what a colour picker
+   looks like everywhere else. */
+.ed-tt__tray {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 4px;
+  width: 216px;
+  padding: var(--ed-3);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+  box-shadow: var(--ed-shadow-lg);
+}
+
+.ed-tt__tray-title {
+  margin: 0 0 var(--ed-2);
+  color: var(--ed-ink-2);
+  font-size: var(--ed-text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.ed-tt__swatches {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+
+.ed-tt__swatch {
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-sm);
+  cursor: pointer;
+}
+
+/* A 28px swatch is under the 44px rule, so the target is grown around it rather
+   than the square being drawn bigger. Six readable colours in 216px is the
+   point of the tray. */
+.ed-tt__swatch::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+}
+
+.ed-tt__swatch { position: relative; }
+.ed-tt__swatch:hover { border-color: #fff; }
+.ed-tt__swatch:focus-visible { outline: 2px solid var(--ed-accent); outline-offset: 2px; }
+
+.ed-tt__custom {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: var(--ed-3);
+}
+
+/* The url input is drawn for the dark bar. Inside the light tray it needs the
+   panel's own colours, or it is white text on white. */
+.ed-tt__custom .ed-tt__url {
+  width: 100%;
+  border-color: var(--ed-line);
+  background: var(--ed-well);
+  color: var(--ed-ink);
+}
+
+.ed-tt__custom .ed-tt__url::placeholder { color: var(--ed-ink-3); }
+
+.ed-tt__custom .ed-tt__btn { color: var(--ed-ink-2); }
+.ed-tt__custom .ed-tt__btn:hover { background: var(--ed-well); color: var(--ed-ink); }
 
 /* Under the row rather than inside it, so a refused address does not shove the
    Apply button sideways while it is being read. */

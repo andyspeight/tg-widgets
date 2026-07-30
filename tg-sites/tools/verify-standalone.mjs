@@ -1772,6 +1772,278 @@ await check('opening the link panel keeps it on screen', async () => {
  * which is right: you can reach for the toolbar, the pane and back again
  * without losing your place. Selecting something that is not text puts it away.
  */
+// ---------------------------------------------------------------------------
+// Colour, size, font and alignment
+// ---------------------------------------------------------------------------
+
+/*
+ * These were left out of the first toolbar because the sanitiser dropped every
+ * `style` attribute, so they would have looked like they worked and lost the
+ * formatting on save. Andy, 30 Jul 2026: "we need to overcome the problem you
+ * raised with losing on saving and get a much better text toolbar".
+ *
+ * So the check that matters most here is not "does it apply" but "does it still
+ * apply after the sanitiser has seen it". That is what deselecting the block
+ * does: the renderer sanitises stored HTML on the way to the screen, so a style
+ * that survives a deselect is a style that survives a save.
+ */
+
+await check('a colour applies to the selected words', async () => {
+  const host = await selectOnCanvas();
+  if (!host) return 'no editable paragraph';
+
+  await page.locator('.ed-tt__btn[aria-label="Text colour"]').click();
+  await page.waitForTimeout(300);
+  await page.locator('.ed-tt__swatch[aria-label="Accent"]').click();
+  await page.waitForTimeout(350);
+
+  const html = await host.innerHTML();
+  return /style="[^"]*color:/i.test(html) ? true : `html is "${html.slice(0, 120)}"`;
+});
+
+/*
+ * A TOKEN, NOT THE HEX IT RESOLVES TO, and this is the whole reason the toolbar
+ * does not use execCommand for colour.
+ *
+ * The browser resolves a colour before storing it, so asking it for the brand
+ * would store whatever the brand happened to be that day. A client who later
+ * changed their brand on the Theme screen would find these words stayed behind,
+ * and nobody would ever connect the two.
+ */
+await check('and it stores the theme token, so the words follow the theme', async () => {
+  const html = await page.locator('[data-rt-host]:not([data-rt-plain])').first().innerHTML();
+  return /var\(--tgs-accent\)/.test(html)
+    ? true
+    : `stored "${(html.match(/style="[^"]*"/) ?? ['nothing'])[0]}"`;
+});
+
+/*
+ * THE ONE ANDY'S COMPLAINT IS ABOUT. Deselecting re-renders the block through
+ * sanitiseHtml, which is the same gate a save goes through.
+ */
+await check('and it survives the sanitiser rather than vanishing', async () => {
+  const before = await page.locator('[data-rt-host]:not([data-rt-plain])').first().innerHTML();
+  if (!/var\(--tgs-accent\)/.test(before)) return 'the colour was not there to begin with';
+
+  // Select a block with no words of its own, so the paragraph stops being an
+  // editing host and goes back through the renderer, which sanitises stored HTML
+  // on the way to the screen. Same gate a save goes through.
+  for (const block of await page.locator('.tgs-block').all()) {
+    if (await block.locator('.tgs-buttons, .tgs-image, .tgs-media').count()) {
+      await block.click();
+      break;
+    }
+  }
+  await page.waitForTimeout(400);
+  if (await page.locator('[data-rt-host]').count()) return 'the paragraph is still being edited';
+
+  const rendered = await page.locator('.tgs-text').first().innerHTML();
+  return /var\(--tgs-accent\)/.test(rendered)
+    ? true
+    : `after rendering: "${rendered.slice(0, 140)}"`;
+});
+
+/**
+ * Select PART of a paragraph, by dragging across a bit of the first line.
+ *
+ * Different from selectOnCanvas, which takes the whole block. A whole-block
+ * selection is styled by setting the declaration on the paragraph itself, so it
+ * produces no span at all: correct, and useless for checking what a span does.
+ * A part-selection is also the ordinary case, because people colour a phrase.
+ */
+async function selectPartOnCanvas() {
+  const host = await editParagraph();
+  if (!host) return null;
+  const box = await host.boundingBox();
+  await page.mouse.move(box.x + 6, box.y + 12);
+  await page.mouse.down();
+  await page.mouse.move(box.x + 200, box.y + 12, { steps: 10 });
+  await page.mouse.up();
+  await page.waitForTimeout(250);
+  return host;
+}
+
+await check('a size applies, and it is a real size rather than an attribute nothing reads', async () => {
+  const host = await selectPartOnCanvas();
+  if (!host) return 'no editable paragraph';
+
+  await page.locator('select[aria-label="Size"]').selectOption('2rem');
+  await page.waitForTimeout(350);
+
+  // Measured, not read off the attribute. An attribute no rule picks up is the
+  // same as no attribute, and the point of these controls is that what you set
+  // is what you get.
+  const sizes = await page.evaluate(() => {
+    const span = document.querySelector('[data-rt-host] span[style*="font-size"]');
+    const para = document.querySelector('[data-rt-host] p');
+    if (!span || !para) return null;
+    return {
+      span: parseFloat(getComputedStyle(span).fontSize),
+      around: parseFloat(getComputedStyle(para).fontSize),
+    };
+  });
+
+  if (!sizes) return 'no sized span on the canvas';
+  return sizes.span > sizes.around + 4
+    ? true
+    : `the span is ${sizes.span}px against ${sizes.around}px around it`;
+});
+
+/*
+ * A whole-block selection is a different shape, and the right one.
+ *
+ * Wrapping a whole paragraph in a span gives `<span><p>…</p></span>`, an inline
+ * element around a block one. Browsers render it, so the first version of this
+ * looked right and was invalid, stacked another layer every time the block was
+ * restyled, and made the paragraph report the span's font size as its own.
+ */
+await check('styling a whole paragraph sets it on the paragraph, not in a span around it', async () => {
+  const host = await selectOnCanvas();
+  if (!host) return 'no editable paragraph';
+
+  await page.locator('select[aria-label="Size"]').selectOption('1.25rem');
+  await page.waitForTimeout(350);
+
+  const html = await host.innerHTML();
+  const onParagraph = /<p style="[^"]*font-size/i.test(html);
+  const spanAroundBlock = /<span[^>]*>\s*<p[\s>]/i.test(html);
+
+  return onParagraph && !spanAroundBlock
+    ? true
+    : `on the p: ${onParagraph}, span around it: ${spanAroundBlock}, html "${html.slice(0, 120)}"`;
+});
+
+await check('a font applies, as one of the site’s own rather than a raw family', async () => {
+  const host = await selectOnCanvas();
+  if (!host) return 'no editable paragraph';
+
+  await page.locator('select[aria-label="Font"]').selectOption('var(--tgs-font-display)');
+  await page.waitForTimeout(350);
+
+  const html = await host.innerHTML();
+  return /font-family:\s*var\(--tgs-font-display\)/.test(html)
+    ? true
+    : `html is "${html.slice(0, 140)}"`;
+});
+
+await check('a colour of your own is taken as a hex', async () => {
+  const host = await selectOnCanvas();
+  if (!host) return 'no editable paragraph';
+
+  await page.locator('.ed-tt__btn[aria-label="Text colour"]').click();
+  await page.waitForTimeout(250);
+  await page.locator('.ed-tt__tray .ed-tt__url').fill('#ff8800');
+  await page.locator('.ed-tt__btn[aria-label="Use this colour"]').click();
+  await page.waitForTimeout(350);
+
+  /*
+   * Either spelling. Setting a hex through the CSS object model and reading it
+   * back gives rgb(), because that is the browser's normal form for a colour and
+   * nothing we do changes that. The sanitiser turns it back into a hex on save,
+   * which the unit tests cover; here the question is only whether the colour that
+   * was asked for is the colour that landed.
+   */
+  const html = await host.innerHTML();
+  return /color:\s*(#ff8800|rgb\(255,\s*136,\s*0\))/i.test(html)
+    ? true
+    : `html is "${html.slice(0, 140)}"`;
+});
+
+await check('and one that is not a colour is refused rather than half applied', async () => {
+  const host = await selectOnCanvas();
+  if (!host) return 'no editable paragraph';
+  const before = await host.innerHTML();
+
+  await page.locator('.ed-tt__btn[aria-label="Text colour"]').click();
+  await page.waitForTimeout(250);
+  await page.locator('.ed-tt__tray .ed-tt__url').fill('red; position: fixed');
+  await page.locator('.ed-tt__btn[aria-label="Use this colour"]').click();
+  await page.waitForTimeout(350);
+
+  const after = await host.innerHTML();
+  return after === before ? true : `the words changed to "${after.slice(0, 140)}"`;
+});
+
+/*
+ * ALIGNMENT IS THE BLOCK'S OWN FIELD, not a style on the selection.
+ *
+ * A paragraph with an inline text-align AND a block alignment has two sources of
+ * truth for one thing, and which one you see depends on which you touched last.
+ * So the toolbar drives the same field the pane shows, and this checks they
+ * agree rather than merely that something happened.
+ */
+await check('alignment drives the block, and the properties pane agrees', async () => {
+  const host = await selectOnCanvas();
+  if (!host) return 'no editable paragraph';
+
+  await page.locator('.ed-tt__btn[aria-label="Align centre"]').click();
+  await page.waitForTimeout(350);
+
+  const pane = await page
+    .locator('.ed-segmented button', { hasText: 'Centre' })
+    .first()
+    .getAttribute('aria-pressed');
+  const drawn = await page.evaluate(() => {
+    const block = document.querySelector('[data-rt-host]')?.closest('.tgs-block');
+    return block ? getComputedStyle(block).textAlign : null;
+  });
+  const lit = await page
+    .locator('.ed-tt__btn[aria-label="Align centre"]')
+    .getAttribute('aria-pressed');
+
+  return pane === 'true' && lit === 'true' && drawn === 'center'
+    ? true
+    : `pane ${pane}, toolbar ${lit}, drawn ${drawn}`;
+});
+
+/*
+ * The toolbar grew from nine controls to nineteen, and both of these broke.
+ *
+ * It wrapped to two rows, which made it taller than the 44px it anchors itself
+ * above, so it settled over the first line of the paragraph being edited. Which
+ * is the thing Andy asked for it to be draggable to avoid.
+ */
+/**
+ * A toolbar as somebody would meet it: never dragged, nothing open on it.
+ *
+ * Needed because the checks above deliberately drag it and leave the link panel
+ * up, and both are remembered. Measuring the position of a toolbar somebody just
+ * put somewhere tells you where they put it, not where it opens.
+ */
+async function freshToolbar() {
+  await page.evaluate(() => window.localStorage.removeItem('tg-sites:text-toolbar'));
+  // Away from any text, so the toolbar unmounts and loses its open panels, then
+  // back to a paragraph so it mounts again and re-reads where to sit.
+  await page.locator('.ed-topbar').click({ position: { x: 5, y: 5 } });
+  for (const block of await page.locator('.tgs-block').all()) {
+    if (await block.locator('.tgs-buttons, .tgs-image, .tgs-media').count()) {
+      await block.click();
+      break;
+    }
+  }
+  await page.waitForTimeout(300);
+  return selectOnCanvas();
+}
+
+await check('the toolbar keeps clear of the words it is editing', async () => {
+  await freshToolbar();
+  const bar = await page.locator('.ed-tt').boundingBox();
+  const block = await page.locator('[data-path].is-selected').boundingBox();
+  if (!bar || !block) return 'no toolbar or no selected block';
+
+  const gap = Math.round(block.y - (bar.y + bar.height));
+  return gap >= 0 ? true : `the toolbar overlaps the block by ${-gap}px`;
+});
+
+await check('and fits on one row on an ordinary screen', async () => {
+  const bar = await page.locator('.ed-tt').boundingBox();
+  const row = await page.locator('.ed-tt__btn').first().boundingBox();
+  // One row of 32px buttons in 4px of padding is about 40px. Two would be 74.
+  return bar.height < row.height * 2
+    ? true
+    : `the toolbar is ${Math.round(bar.height)}px tall, so it has wrapped`;
+});
+
 await check('the toolbar survives a click on the chrome, because the block is still selected', async () => {
   await selectOnCanvas();
   await page.locator('.ed-topbar').click({ position: { x: 5, y: 5 } });

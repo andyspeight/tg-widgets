@@ -19,29 +19,53 @@
  * embed block stays staff-only.
  */
 
-/** Tags allowed in rich text, mapped to the attributes each may carry. */
+import { sanitiseStyle } from './styles';
+
+/**
+ * Tags allowed in rich text, mapped to the attributes each may carry.
+ *
+ * `style` is on nearly all of them, and the allowlist that matters for it is in
+ * lib/content/styles.ts rather than here: the attribute is admitted, and then
+ * every property and every value inside it has to be named before it survives.
+ * That is what lets the toolbar offer a colour and a size without a free-text
+ * style attribute being the price. `br` has none because there is nothing to
+ * paint.
+ */
 const RICH_TEXT_TAGS: Record<string, readonly string[]> = {
-  p: [],
+  p: ['style'],
   br: [],
-  strong: [],
-  b: [],
-  em: [],
-  i: [],
-  u: [],
-  s: [],
-  a: ['href', 'title', 'target', 'rel'],
-  ul: [],
-  ol: [],
-  li: [],
-  h2: [],
-  h3: [],
-  h4: [],
-  blockquote: [],
+  strong: ['style'],
+  b: ['style'],
+  em: ['style'],
+  i: ['style'],
+  u: ['style'],
+  s: ['style'],
+  a: ['href', 'title', 'target', 'rel', 'style'],
+  ul: ['style'],
+  ol: ['style'],
+  li: ['style'],
+  h2: ['style'],
+  h3: ['style'],
+  h4: ['style'],
+  blockquote: ['style'],
   code: [],
   pre: [],
-  span: [],
-  sup: [],
-  sub: [],
+  span: ['style'],
+  sup: ['style'],
+  sub: ['style'],
+  /*
+   * NO `font` TAG, deliberately.
+   *
+   * A browser asked for a colour through execCommand reaches for <font color>,
+   * which is why the toolbar does not ask it: colour, size and family are
+   * applied by wrapping the selection ourselves (see TextToolbar's applyInline),
+   * so the value stored is the theme token we chose rather than whatever the
+   * browser resolved it to. A <font> reaching here therefore did not come from
+   * us. Allowing it would mean translating three presentational attributes into
+   * the CSS they mean, which is surface bought for a case that should not
+   * happen. Dropped, and because the tag walk keeps what is inside an unknown
+   * tag, the words survive even if the colour does not.
+   */
 };
 
 /** Tags additionally allowed inside a staff embed. */
@@ -188,6 +212,17 @@ function filterAttributes(
       }
       if (tag === 'iframe' && !allowedIframeUrl(safe)) return null;
       out.push(`${name}="${escapeAttribute(safe)}"`);
+      continue;
+    }
+
+    if (name === 'style') {
+      /*
+       * Every property and every value has to be named in styles.ts before it
+       * survives. An empty result means nothing in the attribute was allowed, so
+       * the attribute goes rather than being emitted as style="".
+       */
+      const clean = sanitiseStyle(value);
+      if (clean) out.push(`style="${escapeAttribute(clean)}"`);
       continue;
     }
 

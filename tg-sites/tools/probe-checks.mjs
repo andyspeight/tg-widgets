@@ -105,6 +105,82 @@ const MUTATIONS = [
     host.spellcheck = true;`,
     to: `    host.spellcheck = true;`,
   },
+
+  // --- colour, size, font and alignment -----------------------------------
+
+  {
+    check: 'and it stores the theme token, so the words follow the theme',
+    why: 'Offer the swatches as the hex they resolve to today, freezing the brand.',
+    file: 'lib/content/styles.ts',
+    from: `  { value: 'var(--tgs-accent)', label: 'Accent' },
+  { value: 'var(--tgs-text-invert)', label: 'For a dark background' },`,
+    to: `  { value: '#00b4d8', label: 'Accent' },
+  { value: 'var(--tgs-text-invert)', label: 'For a dark background' },`,
+  },
+  {
+    check: 'and it survives the sanitiser rather than vanishing',
+    why: 'Go back to dropping every style attribute, which is the bug Andy hit.',
+    file: 'lib/content/sanitise.ts',
+    from: `    if (name === 'style') {`,
+    to: `    if (name === 'style') {
+      continue;`,
+  },
+  {
+    check: 'a size applies, and it is a real size rather than an attribute nothing reads',
+    why: 'Let the sanitiser keep the attribute but strip the size out of it.',
+    file: 'lib/content/styles.ts',
+    from: `  'font-size': sizeValue,`,
+    to: `  'font-size': () => null,`,
+  },
+  {
+    check: 'styling a whole paragraph sets it on the paragraph, not in a span around it',
+    why: 'Wrap everything in one span, including block elements.',
+    file: 'components/editor/EditorShell.tsx',
+    from: `    if (element && BLOCK_TAGS.has(element.tagName)) {`,
+    to: `    if (false && element && BLOCK_TAGS.has(element.tagName)) {`,
+  },
+  {
+    check: 'alignment drives the block, and the properties pane agrees',
+    why: 'Spell it the CSS way, which the block discards as an unknown value.',
+    file: 'components/editor/TextToolbar.tsx',
+    from: `  { value: 'centre', icon: 'align-centre', title: 'Align centre' },`,
+    to: `  { value: 'center', icon: 'align-centre', title: 'Align centre' },`,
+  },
+  {
+    check: 'a colour of your own is taken as a hex',
+    why: 'Do not put the selection back, so the colour paints the empty input.',
+    file: 'components/editor/TextToolbar.tsx',
+    from: `    const range = savedRange.current;
+    if (range) {
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+    }
+
+    paint(tray ?? 'color', value);`,
+    to: `    paint(tray ?? 'color', value);`,
+  },
+  {
+    check: 'and one that is not a colour is refused rather than half applied',
+    why: 'Take whatever was typed, and let the sanitiser be the only gate.',
+    file: 'components/editor/TextToolbar.tsx',
+    from: `    if (!/^#([0-9a-f]{3}|[0-9a-f]{6})$/.test(value)) return;`,
+    to: '',
+  },
+  {
+    check: 'the toolbar keeps clear of the words it is editing',
+    why: 'Stop re-anchoring once measured, so a two-row bar sits over the words.',
+    file: 'components/editor/TextToolbar.tsx',
+    from: `          anchorTop.current !== null && measured`,
+    to: `          false && anchorTop.current !== null && measured`,
+  },
+  {
+    check: 'and fits on one row on an ordinary screen',
+    why: 'Put the width cap back where it forced a second row holding two buttons.',
+    file: 'components/editor/editor.css',
+    from: `  max-width: min(860px, calc(100vw - 32px));`,
+    to: `  max-width: min(700px, calc(100vw - 32px));`,
+  },
 ];
 
 let bad = 0;

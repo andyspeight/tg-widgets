@@ -13,27 +13,40 @@
  * to be draggable, because a toolbar that covers the thing you are editing is
  * worse than no toolbar.
  *
- * WHAT IS DELIBERATELY NOT HERE, AND IT IS NOT AN OVERSIGHT
+ * COLOUR, SIZE AND FONT ARE HERE NOW
  *
- * Andy's reference had text colour, a font picker and a size picker. All three
- * would be a lie in this product. lib/content/sanitise.ts allows no `style`
- * attribute on anything in rich text, so a colour or a size set here would look
- * right until the page was saved and then quietly vanish. Font and size belong on
- * the Theme screen, where they are set once for the whole site rather than per
- * paragraph, which is the thing that keeps a site looking like one site.
- * Alignment is a property of the block and lives in the properties pane.
+ * They were left out of the first version because the sanitiser dropped every
+ * `style` attribute, so they would have looked like they worked and then lost
+ * the formatting on save. Andy, 30 Jul 2026: "we need to overcome the problem
+ * you raised with losing on saving and get a much better text toolbar". So the
+ * sanitiser was opened to a closed set of properties and values, and these
+ * controls produce exactly what that set allows. See lib/content/styles.ts.
  *
- * A button that appears to work and does not is worse than no button, so the ones
- * that cannot work are absent rather than disabled.
+ * They are applied by wrapping the selection OURSELVES rather than through
+ * execCommand's foreColor and friends. Two reasons. The browser reaches for the
+ * old <font> tag unless coaxed, and more importantly it resolves a value before
+ * storing it: asking it for the brand colour would store the hex the brand
+ * happens to be today, so a client who later changed their brand would find
+ * these words stayed behind. Wrapping it ourselves stores `var(--tgs-primary)`,
+ * and the words follow the theme.
  *
- * WHAT IS HERE: bold, italic, underline, strikethrough, a link, both lists, the
- * block format, quote and clear. Every one of them maps to a tag the sanitiser
- * keeps.
+ * WHAT IS STILL DELIBERATELY NOT HERE: a long list of font families. This site
+ * carries its own fonts, chosen on the Theme screen, and offering a family it
+ * has not loaded gives a different site on every visitor's screen.
+ *
+ * A button that appears to work and does not is worse than no button, so the
+ * ones that cannot work are absent rather than disabled.
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { safeUrl } from '../../lib/content/sanitise';
+import {
+  COLOUR_SWATCHES,
+  FONT_CHOICES,
+  FONT_SIZES,
+  HIGHLIGHT_SWATCHES,
+} from '../../lib/content/styles';
 import { Icon, type IconName } from './Icon';
 
 /** Where the toolbar was left, so it stays put between blocks and sessions. */
@@ -89,6 +102,32 @@ interface Point {
   y: number;
 }
 
+/** A toolbar button that opens a tray of swatches. */
+function SwatchButton({
+  icon,
+  title,
+  open,
+  onToggle,
+}: {
+  icon: IconName;
+  title: string;
+  open: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className="ed-tt__btn"
+      title={title}
+      aria-label={title}
+      aria-expanded={open}
+      onClick={onToggle}
+    >
+      <Icon name={icon} size={16} />
+    </button>
+  );
+}
+
 function readStored(): Point | null {
   try {
     const raw = window.localStorage.getItem(POSITION_KEY);
@@ -122,19 +161,58 @@ function clamp(point: Point, size?: { width: number; height: number }): Point {
   };
 }
 
+/**
+ * The alignments, which are a property of the BLOCK rather than of a phrase.
+ *
+ * `centre`, not `center`. These values are the block's own, and the block spells
+ * it the way the rest of the product does. Written as `center` first, which the
+ * renderer discarded as an unknown value and fell back to left, so the button
+ * lit up and nothing moved.
+ */
+const ALIGNMENTS: ReadonlyArray<{ value: string; icon: IconName; title: string }> = [
+  { value: 'left', icon: 'align-left', title: 'Align left' },
+  { value: 'centre', icon: 'align-centre', title: 'Align centre' },
+  { value: 'right', icon: 'align-right', title: 'Align right' },
+];
+
 export function TextToolbar({
   anchor,
   onExec,
+  onStyle,
+  align,
+  onAlign,
 }: {
   /** The element being edited, so the toolbar can sit above it before it is moved. */
   anchor: HTMLElement | null;
   onExec: (command: string, value?: string) => void;
+  /**
+   * Wrap what is selected in one CSS declaration.
+   *
+   * Separate from onExec because these do not go through execCommand at all: see
+   * the note at the top of this file for why the browser is not asked.
+   */
+  onStyle: (property: string, value: string) => void;
+  /**
+   * The block's alignment, and a way to change it.
+   *
+   * ALIGNMENT IS NOT AN INLINE STYLE HERE. It is the block's own `align` field,
+   * the same one the properties pane shows, so the two controls always agree.
+   * Doing it as CSS on the selection would have given a paragraph two sources of
+   * truth that could disagree, and the one you could see would depend on which
+   * you touched last.
+   */
+  align: string;
+  onAlign: (value: string) => void;
 }) {
   const [position, setPosition] = useState<Point | null>(null);
   const [linking, setLinking] = useState(false);
   const [href, setHref] = useState('');
   /** The last address was not one we will link to. Shown, not swallowed. */
   const [refused, setRefused] = useState(false);
+  /** Which swatch tray is open, if any. Only ever one. */
+  const [tray, setTray] = useState<'color' | 'background-color' | null>(null);
+  /** A colour typed in rather than picked. Held while it is being typed. */
+  const [custom, setCustom] = useState('#');
   const [, setTick] = useState(0);
 
   const drag = useRef<{ dx: number; dy: number } | null>(null);
@@ -142,6 +220,14 @@ export function TextToolbar({
   const el = useRef<HTMLDivElement>(null);
   /** The selection to put the link on, saved before the input steals it. */
   const savedRange = useRef<Range | null>(null);
+  /**
+   * The top of the block this toolbar opened above, or null.
+   *
+   * Null once the toolbar has been moved by hand or restored from a stored
+   * position, because after that its place is its own business and re-anchoring
+   * would yank it back to the words the moment it grew.
+   */
+  const anchorTop = useRef<number | null>(null);
 
   /** The toolbar's real box, or undefined before it has one. */
   const size = () => {
@@ -180,6 +266,15 @@ export function TextToolbar({
       '.ed-canvas-frame [data-path].is-selected',
     );
     const box = (onCanvas ?? anchor)?.getBoundingClientRect();
+
+    /*
+     * Remembered so the position can be corrected once the toolbar has a real
+     * height. HEIGHT_GUESS was right when this was one row of buttons; colour,
+     * size, font and alignment made it wrap to two, and a guess 36px short put
+     * the toolbar over the first line of the paragraph being edited. Which is
+     * the thing Andy said was worse than having no toolbar at all.
+     */
+    anchorTop.current = box ? box.top : null;
 
     setPosition(
       clamp(
@@ -228,7 +323,24 @@ export function TextToolbar({
     const node = el.current;
     if (!ready || !node) return;
 
-    const settle = () => setPosition((current) => (current ? clamp(current, size()) : current));
+    /*
+     * Re-clamped, and re-anchored if it is still sitting where it opened.
+     *
+     * The re-anchor is what keeps a toolbar that has grown a second row from
+     * settling over the first line of the paragraph. Only while anchorTop is
+     * set: once somebody has dragged it, moving it for them is the bug this is
+     * fixing, in reverse.
+     */
+    const settle = () =>
+      setPosition((current) => {
+        if (!current) return current;
+        const measured = size();
+        const above =
+          anchorTop.current !== null && measured
+            ? { x: current.x, y: anchorTop.current - measured.height - 12 }
+            : current;
+        return clamp(above, measured);
+      });
 
     const observer = new ResizeObserver(settle);
     observer.observe(node);
@@ -269,6 +381,8 @@ export function TextToolbar({
 
   function startDrag(event: React.PointerEvent) {
     if (!position) return;
+    // Moved by hand, so stop putting it back above the words.
+    anchorTop.current = null;
     // Not preventDefault here: the grip is not a formatting button and the
     // selection is not at risk, and preventing it would stop the pointer capture.
     drag.current = { dx: event.clientX - position.x, dy: event.clientY - position.y };
@@ -351,6 +465,48 @@ export function TextToolbar({
     savedRange.current = null;
   }
 
+  /**
+   * Paint the selection, then leave it selected.
+   *
+   * Reselecting matters: without it, choosing a colour and then a size would put
+   * the size somewhere else, because applying the first one consumed the range.
+   */
+  function paint(property: string, value: string) {
+    onStyle(property, value);
+    setTray(null);
+  }
+
+  /**
+   * A colour typed in by hand.
+   *
+   * Held to the same shape the sanitiser will accept, and checked HERE as well
+   * so a mistyped one is refused while it can still be corrected rather than
+   * appearing to work and vanishing on save.
+   */
+  function applyCustom() {
+    const value = custom.trim().toLowerCase();
+    if (!/^#([0-9a-f]{3}|[0-9a-f]{6})$/.test(value)) return;
+
+    /*
+     * The words back first, like the link does and for the same reason.
+     *
+     * Typing in the box moves the document's selection into the box, so by the
+     * time this runs the words are no longer selected and painting them would
+     * paint nothing. The swatches above need none of this: they never take focus,
+     * because the toolbar refuses mousedown for everything except this input.
+     */
+    const range = savedRange.current;
+    if (range) {
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+    }
+
+    paint(tray ?? 'color', value);
+    setCustom('#');
+    savedRange.current = null;
+  }
+
   /** Remember what is selected, before anything can take it away. */
   function rememberSelection() {
     const selection = window.getSelection();
@@ -393,6 +549,42 @@ export function TextToolbar({
         onChange={(event) => onExec('formatBlock', event.target.value)}
       >
         {BLOCKS.map((entry) => (
+          <option key={entry.value} value={entry.value}>
+            {entry.label}
+          </option>
+        ))}
+      </select>
+
+      {/*
+        Font and size read as "choose one" rather than showing what is already
+        set, because the selection can span two of them and there is no honest
+        single answer to show in that case. Both reset to their placeholder after
+        a choice, so the control never claims to be reporting the current state.
+      */}
+      <select
+        className="ed-tt__block"
+        value=""
+        aria-label="Font"
+        onMouseDown={(event) => event.stopPropagation()}
+        onChange={(event) => event.target.value && paint('font-family', event.target.value)}
+      >
+        <option value="">Font</option>
+        {FONT_CHOICES.map((entry) => (
+          <option key={entry.value} value={entry.value}>
+            {entry.label}
+          </option>
+        ))}
+      </select>
+
+      <select
+        className="ed-tt__block"
+        value=""
+        aria-label="Size"
+        onMouseDown={(event) => event.stopPropagation()}
+        onChange={(event) => event.target.value && paint('font-size', event.target.value)}
+      >
+        <option value="">Size</option>
+        {FONT_SIZES.map((entry) => (
           <option key={entry.value} value={entry.value}>
             {entry.label}
           </option>
@@ -451,6 +643,57 @@ export function TextToolbar({
 
       <span className="ed-tt__rule" aria-hidden="true" />
 
+      {/*
+        Two trays rather than two rows of swatches always on show. The toolbar is
+        already wide, and a colour is chosen far less often than bold is pressed.
+      */}
+      {/*
+        rememberSelection on opening, because the hex box inside the tray takes
+        focus the moment it is typed into and the words stop being selected. The
+        swatches do not need it, and it costs nothing to have it either way.
+      */}
+      <SwatchButton
+        icon="text-colour"
+        title="Text colour"
+        open={tray === 'color'}
+        onToggle={() => {
+          rememberSelection();
+          setTray((current) => (current === 'color' ? null : 'color'));
+        }}
+      />
+      <SwatchButton
+        icon="highlight"
+        title="Highlight"
+        open={tray === 'background-color'}
+        onToggle={() => {
+          rememberSelection();
+          setTray((current) => (current === 'background-color' ? null : 'background-color'));
+        }}
+      />
+
+      <span className="ed-tt__rule" aria-hidden="true" />
+
+      {/*
+        Alignment sets the BLOCK's own field, the same one the properties pane
+        shows. See the prop's note: two controls for one thing is fine, two
+        sources of truth for it is not.
+      */}
+      {ALIGNMENTS.map((item) => (
+        <button
+          key={item.value}
+          type="button"
+          className="ed-tt__btn"
+          title={item.title}
+          aria-label={item.title}
+          aria-pressed={align === item.value}
+          onClick={() => onAlign(item.value)}
+        >
+          <Icon name={item.icon} size={16} />
+        </button>
+      ))}
+
+      <span className="ed-tt__rule" aria-hidden="true" />
+
       <button
         type="button"
         className="ed-tt__btn"
@@ -460,6 +703,75 @@ export function TextToolbar({
       >
         <Icon name="clear-format" size={16} />
       </button>
+
+      {tray && (
+        /*
+         * NO stopPropagation ON THE TRAY ITSELF.
+         *
+         * The toolbar root refuses mousedown, which is what keeps the selection
+         * alive in the block behind it. A tray that stopped that from reaching
+         * the root would blur the editable on every swatch click, collapsing the
+         * selection so the colour landed on nothing. Only the text box below
+         * re-enables mousedown, because a box you cannot click into is not a box.
+         */
+        <div className="ed-tt__tray">
+          <p className="ed-tt__tray-title">
+            {tray === 'color' ? 'Text colour' : 'Highlight'}
+          </p>
+          <div className="ed-tt__swatches">
+            {(tray === 'color' ? COLOUR_SWATCHES : HIGHLIGHT_SWATCHES).map((swatch) => (
+              <button
+                key={swatch.value}
+                type="button"
+                className="ed-tt__swatch"
+                style={{ background: swatch.value }}
+                title={swatch.label}
+                aria-label={swatch.label}
+                onClick={() => paint(tray, swatch.value)}
+              />
+            ))}
+          </div>
+
+          {/*
+            A hex box as well as the palette, because somebody will want a colour
+            the theme does not have. Checked here to the same shape the sanitiser
+            accepts, so a mistyped one is refused while it can still be fixed.
+          */}
+          <div className="ed-tt__custom">
+            <input
+              className="ed-tt__url"
+              type="text"
+              value={custom}
+              aria-label="A colour of your own, as a hex code"
+              placeholder="#336699"
+              maxLength={7}
+              // The one thing in here that may take focus. Typing in it moves the
+              // document's selection into it, which is why applyCustom puts the
+              // words back before painting them.
+              onMouseDown={(event) => event.stopPropagation()}
+              onChange={(event) => setCustom(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault();
+                  applyCustom();
+                }
+                if (event.key === 'Escape') {
+                  event.preventDefault();
+                  setTray(null);
+                }
+              }}
+            />
+            <button
+              type="button"
+              className="ed-tt__btn"
+              aria-label="Use this colour"
+              onClick={applyCustom}
+            >
+              <Icon name="check" size={16} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {linking && (
         <div className="ed-tt__link" onMouseDown={(event) => event.stopPropagation()}>

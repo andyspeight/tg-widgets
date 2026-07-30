@@ -51,6 +51,7 @@ import {
 } from '../lib/content/tree';
 import { createBlock } from '../lib/content/factory';
 import { sanitiseHtml, safeUrl } from '../lib/content/sanitise';
+import { sanitiseStyle } from '../lib/content/styles';
 import { sanitisePage } from '../lib/content/sanitise-page';
 import { resolveVideo } from '../lib/content/video';
 import { SEED_PAGE } from '../lib/content/seed';
@@ -357,6 +358,151 @@ describe('sanitiseHtml', () => {
     for (const value of [null, undefined, 42, {}, []]) {
       expect(sanitiseHtml(value)).toBe('');
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Inline styling
+// ---------------------------------------------------------------------------
+
+/*
+ * The sanitiser used to drop every style attribute, which is why the toolbar had
+ * no colour or size: they would have looked like they worked and then been lost
+ * on save. Andy asked for them back on 30 Jul 2026, so `style` is admitted and
+ * lib/content/styles.ts decides what may be inside it.
+ *
+ * The tests that matter are the ones about what does NOT get through. A closed
+ * set is only closed if the things outside it stay outside.
+ */
+describe('sanitiseStyle', () => {
+  it('keeps a hex colour', () => {
+    expect(sanitiseStyle('color: #ff0000')).toBe('color: #ff0000');
+    expect(sanitiseStyle('color: #F00')).toBe('color: #f00');
+  });
+
+  it('normalises the rgb() a browser hands back into hex', () => {
+    // Setting #ff0000 and reading the style attribute afterwards gives this.
+    // Rejecting it would mean every colour set through the toolbar was lost.
+    expect(sanitiseStyle('color: rgb(255, 0, 0)')).toBe('color: #ff0000');
+    expect(sanitiseStyle('background-color: rgb(0, 128, 255)')).toBe('background-color: #0080ff');
+  });
+
+  it('refuses an rgb() channel that is out of range', () => {
+    expect(sanitiseStyle('color: rgb(300, 0, 0)')).toBe('');
+  });
+
+  it('keeps a theme colour token but not an invented one', () => {
+    expect(sanitiseStyle('color: var(--tgs-accent)')).toBe('color: var(--tgs-accent)');
+    expect(sanitiseStyle('color: var(--tgs-radius-lg)')).toBe('');
+    expect(sanitiseStyle('color: var(--anything-else)')).toBe('');
+  });
+
+  it('keeps a size from the scale and refuses one off it', () => {
+    expect(sanitiseStyle('font-size: 1.5rem')).toBe('font-size: 1.5rem');
+    expect(sanitiseStyle('font-size: 400vw')).toBe('');
+    expect(sanitiseStyle('font-size: 99rem')).toBe('');
+  });
+
+  it('keeps a font token and refuses a raw family name', () => {
+    // A raw family is whatever the visitor's machine happens to have, which is
+    // a different site on every screen. The library exists so it never is.
+    expect(sanitiseStyle('font-family: var(--tgs-h2-font)')).toBe('font-family: var(--tgs-h2-font)');
+    expect(sanitiseStyle('font-family: Georgia, serif')).toBe('');
+  });
+
+  it('refuses a url(), however it is spelled', () => {
+    // A paragraph that fetches an image is a paragraph that reports back to
+    // whoever wrote it every time the page is opened.
+    expect(sanitiseStyle('background-color: url(https://tracker.example/p.gif)')).toBe('');
+    expect(sanitiseStyle('color: #fff; background-color: URL("x")')).toBe('');
+    expect(sanitiseStyle('color: \\75 rl(x)')).toBe('');
+  });
+
+  it('refuses the properties that let a paragraph cover the page', () => {
+    const overlay = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999';
+    expect(sanitiseStyle(overlay)).toBe('');
+  });
+
+  it('drops what it does not know and keeps what it does, in one declaration list', () => {
+    expect(sanitiseStyle('color: #123456; position: fixed; font-size: 1rem')).toBe(
+      'color: #123456; font-size: 1rem',
+    );
+  });
+
+  /*
+   * What this really proves is the ANCHORING, not the !important guard.
+   *
+   * Every validator matches end to end, so anything trailing a value makes the
+   * whole declaration fail rather than being trimmed off and ignored. Deleting
+   * the !important line in styles.ts changes nothing here, which is why that
+   * line is commented as belt and braces rather than as the thing doing the
+   * work. A test that credits the wrong line sends the next person to the wrong
+   * place.
+   */
+  it('refuses a value with anything trailing it, such as !important', () => {
+    expect(sanitiseStyle('color: #fff !important')).toBe('');
+    expect(sanitiseStyle('color: #fff red')).toBe('');
+    expect(sanitiseStyle('font-size: 1rem 2rem')).toBe('');
+    expect(sanitiseStyle('text-align: left center')).toBe('');
+  });
+
+  it('refuses a comment, which is how a naive split gets fooled', () => {
+    expect(sanitiseStyle('color: #fff /* ; position: fixed */')).toBe('');
+  });
+
+  it('refuses an at-rule and anything with angle brackets', () => {
+    expect(sanitiseStyle('@import "evil.css"')).toBe('');
+    expect(sanitiseStyle('color: #fff; </style><script>alert(1)</script>')).toBe('');
+  });
+
+  it('has a length limit, because a long one is not from our toolbar', () => {
+    expect(sanitiseStyle(`color: #fff;${' '.repeat(700)}`)).toBe('');
+  });
+
+  it('returns an empty string for anything that is not a string', () => {
+    for (const value of [null, undefined, 42, {}, []]) {
+      expect(sanitiseStyle(value)).toBe('');
+    }
+  });
+});
+
+describe('styling through the whole sanitiser', () => {
+  it('lets a coloured span survive a save', () => {
+    const out = sanitiseHtml('<p>a <span style="color: #ff0000">red</span> word</p>');
+    expect(out).toContain('style="color: #ff0000"');
+  });
+
+  it('keeps the words when the styling is refused', () => {
+    // The formatting is lost, the writing is not. Losing somebody's sentence
+    // because of an attribute is the worse of the two failures by a distance.
+    const out = sanitiseHtml('<p>a <span style="position: fixed">word</span></p>');
+    expect(out).toContain('word');
+    expect(out).not.toContain('style');
+  });
+
+  it('emits no empty style attribute when nothing in it was allowed', () => {
+    const out = sanitiseHtml('<span style="animation: spin 1s">x</span>');
+    expect(out).not.toContain('style');
+  });
+
+  it('does not let a style attribute break out of its own quotes', () => {
+    const out = sanitiseHtml('<span style="color: #fff&quot; onclick=&quot;alert(1)">x</span>');
+    expect(out).not.toContain('onclick');
+  });
+
+  it('drops a font tag but keeps what it wrapped', () => {
+    // The editor is told to use CSS, so a font tag did not come from us.
+    const out = sanitiseHtml('<p><font color="#ff0000">words</font></p>');
+    expect(out).toContain('words');
+    expect(out).not.toContain('<font');
+  });
+
+  it('still refuses a style on an image or an iframe in an embed', () => {
+    const out = sanitiseHtml(
+      '<img src="https://x.test/a.png" style="position: fixed" alt="">',
+      'embed',
+    );
+    expect(out).not.toContain('style');
   });
 });
 

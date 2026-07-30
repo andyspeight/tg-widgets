@@ -51,6 +51,11 @@ export type IconName =
   | 'strikethrough'
   | 'list-ordered'
   | 'clear-format'
+  | 'text-colour'
+  | 'highlight'
+  | 'align-left'
+  | 'align-centre'
+  | 'align-right'
   | 'history'
   | 'undo'
   | 'redo'
@@ -123,6 +128,13 @@ const PATHS: Record<IconName, string> = {
   'list-ordered': 'M10 6h11M10 12h11M10 18h11M4 4h1.5v4.5M3.5 8.5h3M3 14.5c0-1 1-1.5 2-1.5s1.5.7 1.5 1.4c0 1.3-3 1.9-3 4.1H6.5',
   // A capital T with a stroke through it: remove the formatting, keep the text.
   'clear-format': 'M4.5 6.5V4.5h11v2M10 4.5V15M7.5 19.5h5M15.5 14.5l6 6M21.5 14.5l-6 6',
+  // An A over a bar, which is the shape everybody already reads as text colour.
+  'text-colour': 'M4 16.5 9.5 4h1.5l5.5 12.5M6.5 12h8M4 20.5h16',
+  // A marker nib over the same bar.
+  highlight: 'M13 4.5l6.5 6.5-7 7H6l-1.5-1.5L13 4.5ZM4 21.5h16',
+  'align-left': 'M4 6h16M4 11h10M4 16h16M4 21h10',
+  'align-centre': 'M4 6h16M7 11h10M4 16h16M7 21h10',
+  'align-right': 'M4 6h16M10 11h10M4 16h16M10 21h10',
   history: 'M3.5 9a9 9 0 1 1 .6 5M3.5 4.5V9H8M12 7.5V12l3.5 2',
   undo: 'M4 10h11a5 5 0 0 1 0 10h-5M4 10l5-5M4 10l5 5',
   redo: 'M20 10H9a5 5 0 0 0 0 10h5M20 10l-5-5M20 10l-5 5',

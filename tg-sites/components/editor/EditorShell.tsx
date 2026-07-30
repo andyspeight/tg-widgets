@@ -47,6 +47,104 @@ const COALESCE_MS = 700;
  */
 const SAVE_DEBOUNCE_MS = 900;
 
+/**
+ * Wrap what is selected in a span carrying one CSS declaration.
+ *
+ * WHY NOT execCommand
+ *
+ * foreColor and fontSize exist and would be two lines. They also resolve the
+ * value before storing it, so asking for the brand colour stores the hex the
+ * brand is today and a client who later changes their brand finds these words
+ * left behind. And they reach for the old <font> tag, which the sanitiser does
+ * not keep. Doing it here stores `var(--tgs-primary)` and the words follow.
+ *
+ * HOW
+ *
+ * extractContents rather than surroundContents. surroundContents throws the
+ * moment a selection crosses an element boundary, which is most of the time in
+ * real writing: half of a bold word and half of the plain text after it. Extract
+ * and re-insert copes, because it splits the boundary nodes for us.
+ *
+ * WHAT IS NOT ONE SPAN
+ *
+ * Selecting a whole paragraph and wrapping the lot gives `<span><p>…</p></span>`,
+ * an inline element around a block one. Browsers render it, so the first version
+ * of this looked right and was wrong: the nesting is invalid, it accumulates a
+ * layer every time somebody restyles the block, and a `<p>` inside a sized span
+ * reports the span's size as its own, which had a check comparing 32px with 32px.
+ *
+ * So the extracted fragment is walked. A block element gets the declaration set
+ * on ITSELF. Runs of inline content between blocks get one span each. A selection
+ * inside a single paragraph is the common case and still comes out as one span,
+ * which is what it should be.
+ *
+ * The same property is stripped from anything inside first, so applying a second
+ * colour over a first one wins rather than being overridden from further in.
+ * Then what was painted is reselected, so a colour and a size can be applied to
+ * the same words one after the other.
+ *
+ * Does nothing on a collapsed caret: there is no honest answer to "make this
+ * nothing red", and the alternative is an empty span left in the markup.
+ */
+const BLOCK_TAGS = new Set(['P', 'H2', 'H3', 'H4', 'UL', 'OL', 'LI', 'BLOCKQUOTE', 'DIV', 'PRE']);
+
+function wrapSelection(host: HTMLElement, property: string, value: string): void {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return;
+
+  const range = selection.getRangeAt(0);
+  if (range.collapsed) return;
+
+  // Only paint inside the block being edited. A selection that started here and
+  // ran off the end of it would otherwise rewrite part of the page.
+  if (!host.contains(range.commonAncestorContainer)) return;
+
+  /** Take the property off descendants, so the one being set is the one that wins. */
+  const clearInside = (node: Element) => {
+    node.querySelectorAll('[style]').forEach((inner) => {
+      const el = inner as HTMLElement;
+      el.style.removeProperty(property);
+      if (!el.getAttribute('style')) el.removeAttribute('style');
+    });
+  };
+
+  const contents = range.extractContents();
+  const out = document.createDocumentFragment();
+  const painted: Element[] = [];
+  let run: HTMLSpanElement | null = null;
+
+  for (const node of Array.from(contents.childNodes)) {
+    const element = node.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : null;
+
+    if (element && BLOCK_TAGS.has(element.tagName)) {
+      run = null;
+      clearInside(element);
+      element.style.setProperty(property, value);
+      out.appendChild(element);
+      painted.push(element);
+      continue;
+    }
+
+    if (!run) {
+      run = document.createElement('span');
+      run.style.setProperty(property, value);
+      out.appendChild(run);
+      painted.push(run);
+    }
+    if (element) clearInside(element);
+    run.appendChild(node);
+  }
+
+  range.insertNode(out);
+
+  if (painted.length === 0) return;
+  const next = document.createRange();
+  next.setStartBefore(painted[0]);
+  next.setEndAfter(painted[painted.length - 1]);
+  selection.removeAllRanges();
+  selection.addRange(next);
+}
+
 export type Viewport = 'desktop' | 'tablet' | 'phone';
 
 /**
@@ -165,7 +263,9 @@ export function EditorShell({
     const block = page.sections[selected.section]?.rows[selected.row]
       ?.columns[selected.column]?.blocks[selected.block];
     if (block?.type !== 'text' && block?.type !== 'heading') return null;
-    return { path: pathKey(selected), rich: block.type === 'text' };
+
+    const align = typeof block.props?.align === 'string' ? block.props.align : 'left';
+    return { path: pathKey(selected), rich: block.type === 'text', align };
   }, [selected, page]);
 
   const editingPath = editing?.path ?? null;
@@ -295,6 +395,38 @@ export function EditorShell({
       return { past, present: resolved, future: [] };
     });
   }, []);
+
+  /**
+   * Run a formatting action against the block being edited on the canvas.
+   *
+   * Every one of them does the same three things: find the element, focus it so
+   * the action lands on the selection inside it, and commit whatever the element
+   * says afterwards. Written once because two copies of it drifted: the second
+   * one forgot the focus and its command silently applied to nothing.
+   *
+   * Focusing here is the exception the no-focus-on-render rule names. This runs
+   * from a click on the toolbar, which is as real as a user action gets.
+   */
+  const withHost = useCallback(
+    (pathKeyValue: string, act: (host: HTMLElement) => string) => {
+      const host = document.querySelector<HTMLElement>(
+        `[data-path="${CSS.escape(pathKeyValue)}"] [data-rt-host]`,
+      );
+      if (!host) return;
+
+      host.focus();
+      const html = act(host);
+
+      const path = parsePathKey(pathKeyValue);
+      if (path?.kind !== 'block') return;
+      commit(
+        (current) =>
+          updateBlockProps(current, path.section, path.row, path.column, path.block, { html }),
+        `rt:${pathKeyValue}`,
+      );
+    },
+    [commit],
+  );
 
   const undo = useCallback(() => {
     lastEdit.current = null;
@@ -658,25 +790,34 @@ export function EditorShell({
         <TextToolbar
           key={editing.path}
           anchor={null}
-          onExec={(command, value) => {
-            const host = document.querySelector<HTMLElement>(
-              `[data-path="${CSS.escape(editing.path)}"] [data-rt-host]`,
-            );
-            if (!host) return;
-
-            // Focus first: a toolbar click is a real user action, and the
-            // command applies to the selection inside this element.
-            host.focus();
-            document.execCommand(command, false, value);
-
+          onExec={(command, value) =>
+            withHost(editing.path, (host) => {
+              document.execCommand(command, false, value);
+              return host.innerHTML;
+            })
+          }
+          /*
+           * Colour, size and font, applied by wrapping the selection ourselves.
+           *
+           * Not through execCommand: the browser resolves a value before storing
+           * it, so asking it for the brand colour would freeze these words at
+           * whatever the brand happened to be today. Wrapping it here stores the
+           * token, and the words follow the theme when it changes.
+           */
+          onStyle={(property, value) =>
+            withHost(editing.path, (host) => {
+              wrapSelection(host, property, value);
+              return host.innerHTML;
+            })
+          }
+          align={editing.align}
+          onAlign={(value) => {
             const path = parsePathKey(editing.path);
             if (path?.kind !== 'block') return;
-            commit(
-              (current) =>
-                updateBlockProps(current, path.section, path.row, path.column, path.block, {
-                  html: host.innerHTML,
-                }),
-              `rt:${editing.path}`,
+            commit((current) =>
+              updateBlockProps(current, path.section, path.row, path.column, path.block, {
+                align: value,
+              }),
             );
           }}
         />
