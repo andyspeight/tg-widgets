@@ -276,6 +276,13 @@
                 <input class="range" type="range" id="rng-fps" min="10" max="50" step="1">
                 <p class="field-hint">Higher is smoother but makes a bigger file. 24 to 30 suits most loaders. GIF times its frames in hundredths of a second, so 50 is the ceiling.</p>
               </div>
+              <div class="field" id="matteWrap" hidden>
+                <div class="colour-row">
+                  <span class="field-label">GIF: blend soft shading against</span>
+                  <span class="colour-swatch-wrap"><input type="color" id="exportMatte" value="#FFFFFF"></span>
+                </div>
+                <p class="field-hint">Parts of a loader are drawn faintly — the globe fills itself at 8% and draws its grid lines at about a third. GIF has no half-transparency, so those are blended against this colour. Set it to the background of the page the GIF will sit on. WebM keeps them see-through and ignores this.</p>
+              </div>
             </div>
           </div>
           <div class="sec is-open">
@@ -342,9 +349,12 @@
   var DIMS = window.TGLoader.dimsFor;
   var DRAW = window.TGLoader.draw;
 
-  // Working config (starts from engine defaults)
+  // Working config (starts from engine defaults). exportMatte is an editor-only
+  // setting: it changes what a downloaded GIF looks like, never the live widget,
+  // so the widget engine has no idea it exists and ignores it on the way past.
   var C = Object.assign({}, window.TGLoader.DEFAULTS, {
-    colors: Object.assign({}, window.TGLoader.DEFAULTS.colors)
+    colors: Object.assign({}, window.TGLoader.DEFAULTS.colors),
+    exportMatte: '#FFFFFF'
   });
 
   var widgetInst = null;
@@ -713,6 +723,7 @@
       w: d.w, h: d.h, frames: frames, delayCs: delayCs,
       asked: fps, fps: Math.round(100 / delayCs), reduced: reduced,
       transparent: C.background === 'transparent',
+      matte: C.exportMatte || '#FFFFFF',
       // WebM records in real time and has no hundredths-of-a-second rule, so
       // it takes the frame rate as asked and runs for exactly one loop.
       loopMs: loopMs,
@@ -859,6 +870,18 @@
       if (C.fps > GIF_MAX_FPS) { C.fps = GIF_MAX_FPS; }
     }
 
+    // The matte only means anything when there is transparency to blend.
+    var matteWrap = document.getElementById('matteWrap');
+    var matteInput = document.getElementById('exportMatte');
+    if (matteInput) {
+      matteInput.value = C.exportMatte || '#FFFFFF';
+      matteInput.addEventListener('input', function () {
+        C.exportMatte = matteInput.value;
+        shell.markDirty();
+        describe();
+      });
+    }
+
     gifBtn.disabled = false;
     var gifGo = gifBtn.querySelector('.exp-go');
     var webmGo = webmBtn ? webmBtn.querySelector('.exp-go') : null;
@@ -876,6 +899,8 @@
       label(gifGo, p.w + '×' + p.h);
       label(webmGo, canWebm ? p.w + '×' + p.h : 'Not in this browser');
       if (!note) return;
+      if (matteWrap) matteWrap.hidden = !p.transparent;
+      if (matteInput && C.exportMatte) matteInput.value = C.exportMatte;
       var bits = ['Both formats export at ' + p.w + ' by ' + p.h + ' pixels and run for one full loop.'];
       bits.push('GIF: ' + p.frames + ' frames at ' + p.fps + ' per second.');
       // A GIF delay is a whole number of hundredths of a second, so most rates
@@ -885,14 +910,23 @@
         bits.push('You asked for ' + p.asked + '. GIF times frames in whole hundredths of a second, so ' + p.fps + ' is the closest it can hold. WebM takes ' + p.asked + ' as asked.');
       }
       if (p.reduced) bits.push('The GIF frame rate was eased back to keep the file a sensible size — the loop still runs for the same length of time.');
+      // Frame count is what drives GIF size, and a long loop at a high rate
+      // adds up quietly: a 1.4 second loop at 30 a second is 47 full pictures.
+      if (p.frames > 30) bits.push('That is a lot of frames for a GIF, so expect a chunky file. Dropping the frame rate is the quickest way to shrink it.');
       if (p.transparent) {
-        bits.push(canWebm
-          ? 'On a transparent background GIF gives hard edges, because its transparency is all-or-nothing. WebM keeps the soft ones, so pick WebM for the web and GIF where you need it to work anywhere.'
-          : 'The background is transparent, and GIF transparency is all-or-nothing, so soft edges become hard ones. A matte colour on the Design tab avoids that.');
+        bits.push('GIF has no half-transparency, so anything drawn faintly is blended against the colour set above. Only the area where nothing is drawn stays see-through.');
+        if (canWebm) bits.push('WebM keeps the faint shading properly see-through, so it needs no blend colour.');
       } else {
         bits.push('The matte colour from the Design tab is baked in, so edges stay smooth in both.');
       }
-      if (canWebm) bits.push('WebM records in real time, so it takes about ' + (Math.round(p.loopMs / 100) / 10) + ' seconds. Use it in a looping video tag, not an image tag.');
+      if (canWebm) {
+        bits.push('WebM records in real time, so it takes about ' + (Math.round(p.loopMs / 100) / 10) + ' seconds.');
+        // The commonest way to conclude the export is broken: double-click the
+        // downloaded file. Most desktop players and a bare browser tab read the
+        // colour and ignore the transparency, so a faintly drawn loader comes
+        // back as a solid blob on black. The file is fine; the viewer is not.
+        bits.push('Put it in a looping video tag on a page, not an image tag. Opening the .webm straight from your downloads will look wrong — solid colour on black — because those viewers ignore transparency.');
+      }
       bits.push('The caption is not part of either file — the animation is exported on its own.');
       note.textContent = bits.join(' ');
     }
@@ -901,8 +935,16 @@
       downloadBlob(blob, name);
       busy = false;
       btn.disabled = false;
+      var kb = blob.size / 1024;
+      var size = kb >= 1024 ? (kb / 1024).toFixed(1) + ' MB' : Math.round(kb) + ' KB';
       label(go, 'Saved');
-      setTimeout(describe, 2500);
+      // Report the REAL size rather than guessing beforehand. A detailed loader
+      // at 30fps runs to a few hundred kilobytes, which is worth knowing before
+      // it goes in an email footer.
+      if (note) note.textContent = 'Saved ' + name + ' — ' + size + '. ' +
+        (kb > 400 ? 'That is on the large side. A lower frame rate on this tab is the quickest way to shrink it, and a smaller size on the Settings tab helps most of all. ' : '') +
+        'Change a setting to see the export options again.';
+      setTimeout(describe, 6000);
     }
     function abort(btn, go, message) {
       busy = false;
@@ -929,7 +971,7 @@
           try {
             bytes = window.TGGif.encode({
               width: plan.w, height: plan.h, frames: frames,
-              delayCs: plan.delayCs, transparent: plan.transparent,
+              delayCs: plan.delayCs, transparent: plan.transparent, matte: plan.matte,
             });
           } catch (err) {
             abort(gifBtn, gifGo, 'The GIF could not be built. Try a smaller size or a lower frame rate.');

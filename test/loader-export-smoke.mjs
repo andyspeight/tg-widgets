@@ -205,6 +205,123 @@ if (g) {
   ok(new Set(counts).size <= 2, 'the opaque pixel count stays flat — frames are not stacking');
 }
 
+/* ── Faint artwork survives (the globe bug, 30 Jul 2026) ──────────────────── */
+/* The loader's globe fills its interior at alpha 0.08 and draws its grid lines
+ * between 0.25 and 0.35. A half-alpha threshold deleted 16,514 of its 18,097
+ * visible pixels and shipped a bare ring. GIF genuinely cannot store a
+ * half-transparent pixel — but blending onto a matte keeps the artwork, which
+ * is what the eye sees on the page anyway. Only what is truly invisible is cut. */
+const FAINT = 20;                       // alpha 0.08, as the globe draws it
+const faint = frame(16, 16, (set) => {
+  for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
+    // Left half faint, right half solid, so one frame covers both paths.
+    set(x, y, 0, 179, 217, x < 8 ? FAINT : 255);
+  }
+});
+const faintGif = decodeGif(TGGif.encode({ width: 16, height: 16, frames: [faint], transparent: true }));
+let faintKept = 0, solidKept = 0;
+{
+  const f = faintGif.frames[0];
+  for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
+    const idx = f.indices[y * 16 + x];
+    if (idx === f.gce.transIndex) continue;
+    if (x < 8) faintKept++; else solidKept++;
+  }
+}
+ok(faintKept === 128, `faint pixels survive instead of being cut (${faintKept} of 128)`);
+ok(solidKept === 128, `solid pixels survive too (${solidKept} of 128)`);
+// And they are PALE, not full strength: alpha 0.08 of #00B3D9 over white.
+{
+  const f = faintGif.frames[0];
+  const c = faintGif.gct[f.indices[0]];
+  const expect = [Math.round(0 * 20 / 255 + 255 * (1 - 20 / 255)),
+                  Math.round(179 * 20 / 255 + 255 * (1 - 20 / 255)),
+                  Math.round(217 * 20 / 255 + 255 * (1 - 20 / 255))];
+  const near = Math.abs(c[0] - expect[0]) + Math.abs(c[1] - expect[1]) + Math.abs(c[2] - expect[2]) <= 4;
+  ok(near, `a faint pixel becomes its pale blend, not full strength (got ${c}, expected about ${expect})`);
+}
+// Nothing at all drawn must still be a cut-out, or the shape loses its edge.
+{
+  const half = frame(16, 16, (set) => {
+    for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) set(x, y, 0, 179, 217, x < 8 ? 0 : FAINT);
+  });
+  const g2 = decodeGif(TGGif.encode({ width: 16, height: 16, frames: [half], transparent: true }));
+  let cut = 0;
+  for (let p = 0; p < 256; p++) if (g2.frames[0].indices[p] === g2.frames[0].gce.transIndex) cut++;
+  ok(cut === 128, `fully invisible pixels are still cut out (${cut} of 128)`);
+}
+// The matte is the client's choice, because a GIF over a dark page needs a dark blend.
+{
+  const navy = decodeGif(TGGif.encode({ width: 16, height: 16, frames: [faint], transparent: true, matte: '#1B2B5B' }));
+  const c = navy.gct[navy.frames[0].indices[0]];
+  ok(c[0] < 60 && c[2] > 80, `a navy matte blends faint pixels toward navy (got ${c})`);
+}
+ok(/function composite\(d, i, matte\)/.test(GIF), 'the blend is a named, documented step');
+ok(/var alphaCut = typeof o\.alphaCut === 'number' \? o\.alphaCut : 8;/.test(GIF),
+  'the invisible threshold is LOW (8), not half — 128 is what deleted the globe');
+ok(/globe/i.test(GIF), 'the case that caused this is written down in the encoder');
+
+/* ── Dithering decides for itself ─────────────────────────────────────────── */
+/* Measured on the loader templates: dithering made files ~10% bigger AND
+ * slightly less accurate, because 256 palette entries already cover a handful
+ * of near-identical blues. It earns its place on photographs and wide
+ * gradients. So measure the palette error and choose, rather than assume. */
+ok(/function paletteError\(/.test(GIF), 'the encoder measures how far its palette falls short');
+ok(/DITHER_WORTH_IT/.test(GIF), 'and compares that against a named threshold');
+{
+  const flatArt = frame(64, 64, (set) => {
+    for (let y = 0; y < 64; y++) for (let x = 0; x < 64; x++) set(x, y, x < 32 ? 10 : 200, 120, 200);
+  });
+  const gradArt = frame(64, 64, (set) => {
+    for (let y = 0; y < 64; y++) for (let x = 0; x < 64; x++) {
+      set(x, y, Math.round(255 * x / 64), Math.round(255 * y / 64), Math.round(255 * ((x + y) % 64) / 64));
+    }
+  });
+  const pick = (f) => {
+    const auto = TGGif.encode({ width: 64, height: 64, frames: [f], transparent: false }).length;
+    const on = TGGif.encode({ width: 64, height: 64, frames: [f], transparent: false, dither: true }).length;
+    const off = TGGif.encode({ width: 64, height: 64, frames: [f], transparent: false, dither: false }).length;
+    return auto === off ? 'flat' : (auto === on ? 'dither' : 'neither');
+  };
+  ok(pick(flatArt) !== 'neither', 'auto always resolves to one of the two real modes on flat art');
+  ok(pick(gradArt) === 'dither', 'a wide gradient still gets dithered, where it genuinely helps');
+}
+
+/* ── The encoder is deterministic ─────────────────────────────────────────── */
+/* It was not, briefly: the matcher memoises on a bit-shifted key, which
+ * truncates, while the dither path fed it fractional channel values. Two
+ * different floats shared one cache entry and whichever arrived first won, so
+ * output changed depending on what had been encoded before it. */
+ok(/v = Math\.round\(v\);/.test(GIF), 'channel values are rounded before matching, so one colour means one cache key');
+{
+  const art = frame(48, 48, (set) => {
+    for (let y = 0; y < 48; y++) for (let x = 0; x < 48; x++) {
+      set(x, y, Math.round(255 * x / 48), Math.round(255 * y / 48), 128);
+    }
+  });
+  const a = TGGif.encode({ width: 48, height: 48, frames: [art], transparent: false });
+  const b = TGGif.encode({ width: 48, height: 48, frames: [art], transparent: false });
+  ok(a.length === b.length, 'the same input encodes to the same length twice');
+  let same = a.length === b.length;
+  if (same) for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) { same = false; break; }
+  ok(same, 'byte for byte identical');
+  // And encoding something else first must not change it.
+  TGGif.encode({ width: 48, height: 48, frames: [frame(48, 48, (set) => set(0, 0, 1, 2, 3))], transparent: false });
+  const c = TGGif.encode({ width: 48, height: 48, frames: [art], transparent: false });
+  let stable = c.length === a.length;
+  if (stable) for (let i = 0; i < a.length; i++) if (a[i] !== c[i]) { stable = false; break; }
+  ok(stable, 'and unchanged by whatever was encoded before it');
+}
+// The source frames are the caller's; the encoder must not scribble on them.
+{
+  const art = frame(32, 32, (set) => { for (let y = 0; y < 32; y++) for (let x = 0; x < 32; x++) set(x, y, x * 8 % 256, y * 8 % 256, 90, 200); });
+  const before = art.slice();
+  TGGif.encode({ width: 32, height: 32, frames: [art], transparent: true });
+  let untouched = true;
+  for (let i = 0; i < art.length; i++) if (art[i] !== before[i]) { untouched = false; break; }
+  ok(untouched, 'encoding does not mutate the frames it was given');
+}
+
 /* ── Edge cases that must not throw ───────────────────────────────────────── */
 const cases = [
   ['1x1', () => TGGif.encode({ width: 1, height: 1, frames: [frame(1, 1, (s) => s(0, 0, 9, 9, 9))], transparent: false })],
@@ -341,11 +458,32 @@ ok(/var failed = false;/.test(ED) && /if \(failed\) return;/.test(ED),
 ok(/label\(webmGo, 'Recording '/.test(ED), 'the WebM button reports progress');
 ok(/\.webm'/.test(ED), 'the download is named .webm');
 ok(/Try GIF instead/.test(ED), 'a WebM failure points at the format that always works');
-ok(/Use it in a looping video tag, not an image tag/.test(ED),
+ok(/Put it in a looping video tag on a page, not an image tag/.test(ED),
   'the note says WebM needs a video tag — pasting it into an img is the obvious mistake');
+// The commonest way to conclude the export is broken: double-click the file.
+// Most desktop players and a bare browser tab ignore the alpha plane, so a
+// faintly drawn loader comes back as a solid blob on black.
+ok(/Opening the \.webm straight from your downloads will look wrong/.test(ED),
+  'the note warns that opening the .webm directly looks wrong, because those viewers ignore transparency');
 ok(/data-export="webm" type="button">/.test(ED), 'the WebM button is enabled in the markup');
 ok(/data-export="apng"[^>]*disabled/.test(ED) && /data-export="mp4"[^>]*disabled/.test(ED),
   'the formats still not built stay disabled');
+
+/* ── The matte control ────────────────────────────────────────────────────── */
+ok(/id="matteWrap"/.test(ED) && /id="exportMatte"/.test(ED), 'the editor exposes the blend colour');
+ok(/exportMatte: '#FFFFFF'/.test(ED), 'it defaults to white, which is what almost every page is');
+ok(/matte: C\.exportMatte \|\| '#FFFFFF'/.test(ED), 'the plan carries it');
+ok(/transparent: plan\.transparent, matte: plan\.matte/.test(ED), 'and it reaches the encoder');
+ok(/matteWrap\.hidden = !p\.transparent/.test(ED),
+  'the control only appears when there is transparency to blend');
+ok(/blended against the colour set above/.test(ED), 'the note explains what the colour does');
+ok(/WebM keeps the faint shading properly see-through/.test(ED),
+  'and that WebM does not need it');
+// A loader is often a few hundred KB once it has real artwork in it. Say so
+// rather than letting someone discover it in an email footer.
+ok(/Saved ' \+ name \+ ' — ' \+ size/.test(ED), 'the real file size is reported after export');
+ok(/kb > 400 \?/.test(ED), 'a large file gets a word of advice');
+ok(/p\.frames > 30/.test(ED), 'a high frame count is flagged before exporting, since that is what drives GIF size');
 
 /* ── Serving ──────────────────────────────────────────────────────────────── */
 ok((VERCEL.headers || []).some((h) => h.source === '/tg-gif.js'), 'vercel serves tg-gif.js with the shared script headers');
