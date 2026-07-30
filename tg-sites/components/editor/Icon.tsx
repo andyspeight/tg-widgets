@@ -45,6 +45,12 @@ export type IconName =
   | 'arrow-up'
   | 'arrow-down'
   | 'grip'
+  | 'bold'
+  | 'italic'
+  | 'underline'
+  | 'strikethrough'
+  | 'list-ordered'
+  | 'clear-format'
   | 'history'
   | 'undo'
   | 'redo'
@@ -102,6 +108,21 @@ const PATHS: Record<IconName, string> = {
    * last edit, and one glyph meaning both "step back one change" and "browse every
    * published version" would be a worse icon than no icon.
    */
+  /*
+   * The text formatting set. Letterforms drawn as paths at the same 2px weight
+   * as the rest, rather than the characters B, I and a bulleted dot the rich
+   * text toolbar used to use. Those render differently on every platform, are
+   * invisible to a screen reader and read as clip art, which is what the note
+   * at the top of this file is about. The toolbar was the last place in the
+   * editor still doing it.
+   */
+  bold: 'M6.5 12H14a4 4 0 0 1 0 8H7a.5.5 0 0 1-.5-.5V4.5A.5.5 0 0 1 7 4h6a4 4 0 0 1 0 8',
+  italic: 'M19 4h-8M13 20H5M15 4 9 20',
+  underline: 'M6 4v6a6 6 0 0 0 12 0V4M4 20h16',
+  strikethrough: 'M16 4H9.5a3.5 3.5 0 0 0-2.6 5.8M13.5 14A3.5 3.5 0 0 1 14 20H6M3 12h18',
+  'list-ordered': 'M10 6h11M10 12h11M10 18h11M4 4h1.5v4.5M3.5 8.5h3M3 14.5c0-1 1-1.5 2-1.5s1.5.7 1.5 1.4c0 1.3-3 1.9-3 4.1H6.5',
+  // A capital T with a stroke through it: remove the formatting, keep the text.
+  'clear-format': 'M4.5 6.5V4.5h11v2M10 4.5V15M7.5 19.5h5M15.5 14.5l6 6M21.5 14.5l-6 6',
   history: 'M3.5 9a9 9 0 1 1 .6 5M3.5 4.5V9H8M12 7.5V12l3.5 2',
   undo: 'M4 10h11a5 5 0 0 1 0 10h-5M4 10l5-5M4 10l5 5',
   redo: 'M20 10H9a5 5 0 0 0 0 10h5M20 10l-5-5M20 10l-5 5',

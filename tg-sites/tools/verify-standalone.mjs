@@ -1459,6 +1459,193 @@ await check('the picker does not scroll the page sideways', async () => {
 
 
 // ---------------------------------------------------------------------------
+// The floating text toolbar
+// ---------------------------------------------------------------------------
+
+/*
+ * It replaced a wrapping row of buttons inside a 320px pane that used the
+ * characters B, I and a bulleted dot as its icons. The interesting properties
+ * are that it does not steal the selection, that what it applies survives, and
+ * that it can be moved out of the way, because a toolbar over the thing you are
+ * editing is worse than no toolbar.
+ */
+
+/** Select a text block and put the caret in its rich text field. */
+async function focusRichText() {
+  for (const block of await page.locator('.tgs-block').all()) {
+    await block.click();
+    await page.waitForTimeout(180);
+    if (await page.locator('.ed-rt').count()) {
+      await page.locator('.ed-rt').first().click();
+      await page.waitForTimeout(250);
+      return true;
+    }
+  }
+  return false;
+}
+
+await check('editing text raises a floating toolbar', async () => {
+  if (!(await focusRichText())) return 'no rich text field anywhere';
+
+  const bars = await page.locator('.ed-tt').count();
+  const fixed = await page.locator('.ed-tt').evaluate((el) => getComputedStyle(el).position);
+
+  // Fixed, not absolute: it is dragged in viewport coordinates and would
+  // otherwise be clipped by the properties pane's own overflow.
+  return bars === 1 && fixed === 'fixed' ? true : `${bars} toolbars, position ${fixed}`;
+});
+
+await check('it carries drawn icons rather than the letters B and I', async () => {
+  // The old one used characters as functional icons, which render differently
+  // on every platform and are invisible to a screen reader. Icon.tsx says so at
+  // the top of itself, and this toolbar was the last place still doing it.
+  const svgs = await page.locator('.ed-tt__btn svg').count();
+  const labelled = await page.locator('.ed-tt__btn[aria-label]').count();
+  const buttons = await page.locator('.ed-tt__btn').count();
+  return svgs === buttons && labelled === buttons
+    ? true
+    : `${buttons} buttons, ${svgs} with an icon, ${labelled} with a label`;
+});
+
+await check('bold applies to the selection and lights up', async () => {
+  // Select everything in the field, then press Bold.
+  await page.locator('.ed-rt').first().evaluate((el) => {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  });
+  await page.waitForTimeout(150);
+
+  await page.locator('.ed-tt__btn[aria-label="Bold"]').click();
+  await page.waitForTimeout(300);
+
+  const html = await page.locator('.ed-rt').first().innerHTML();
+  const pressed = await page.locator('.ed-tt__btn[aria-label="Bold"]').getAttribute('aria-pressed');
+
+  // <b> or <strong>, either is kept by the sanitiser.
+  return /<(b|strong)[ >]/i.test(html) && pressed === 'true'
+    ? true
+    : `pressed ${pressed}, html "${html.slice(0, 80)}"`;
+});
+
+/*
+ * THE ONE THAT MAKES THE REST POSSIBLE. Every button refuses mousedown, so the
+ * caret and the selection stay in the field behind it. Without that, clicking
+ * Bold blurs the editable, the selection collapses, and the command applies to
+ * nothing at all.
+ */
+await check('clicking a button does not take the selection away', async () => {
+  const stillThere = await page.evaluate(() => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return false;
+    return !selection.getRangeAt(0).collapsed;
+  });
+  return stillThere ? true : 'the selection collapsed';
+});
+
+await check('a web address becomes a link', async () => {
+  await page.locator('.ed-tt__btn[aria-label="Add a link"]').click();
+  await page.waitForTimeout(250);
+  await page.locator('.ed-tt__url').fill('https://travelgenix.io');
+  await page.locator('.ed-tt__btn[aria-label="Apply the link"]').click();
+  await page.waitForTimeout(300);
+
+  const html = await page.locator('.ed-rt').first().innerHTML();
+  const wraps = await page.locator('.ed-rt a').first().innerText().catch(() => '');
+
+  /*
+   * The anchor must WRAP the words, not just exist. A link applied to a
+   * collapsed selection produces an empty anchor, which is the failure this is
+   * really guarding: the URL input takes the selection away when it is typed
+   * into.
+   */
+  return /<a[^>]+href="https:\/\/travelgenix\.io/i.test(html) && wraps.trim().length > 0
+    ? true
+    : `wraps "${wraps.slice(0, 30)}", html "${html.slice(0, 80)}"`;
+});
+
+/*
+ * createLink will happily insert javascript:alert(1). The sanitiser strips it on
+ * save, so this is the second of two gates, and it is the one that stops the
+ * editor showing a working link in the preview that vanishes on publish.
+ */
+await check('a javascript URL is refused rather than inserted', async () => {
+  await focusRichText();
+  await page.locator('.ed-rt').first().evaluate((el) => {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  });
+
+  await page.locator('.ed-tt__btn[aria-label="Add a link"]').click();
+  await page.waitForTimeout(200);
+  await page.locator('.ed-tt__url').fill('javascript:alert(1)');
+  await page.locator('.ed-tt__btn[aria-label="Apply the link"]').click();
+  await page.waitForTimeout(300);
+
+  const html = await page.locator('.ed-rt').first().innerHTML();
+  return !/javascript:/i.test(html) ? true : `html is "${html.slice(0, 100)}"`;
+});
+
+await check('it can be dragged out of the way and stays where it is put', async () => {
+  const before = await page.locator('.ed-tt').boundingBox();
+  const grip = await page.locator('.ed-tt__grip').boundingBox();
+
+  await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(grip.x + 160, grip.y + 120, { steps: 8 });
+  await page.mouse.up();
+  await page.waitForTimeout(300);
+
+  const after = await page.locator('.ed-tt').boundingBox();
+  /*
+   * Distance, not a signed direction. The drag asks for a position and the
+   * clamp has the last word, so a toolbar dragged towards an edge legitimately
+   * ends up somewhere other than where the pointer let go. Written as
+   * `moved > 100` first and it failed on a perfectly correct leftward clamp.
+   */
+  const moved = Math.round(Math.hypot(after.x - before.x, after.y - before.y));
+
+  // And remembered, so it does not spring back to the next block being edited.
+  const stored = await page.evaluate(() => window.localStorage.getItem('tg-sites:text-toolbar'));
+
+  return moved > 100 && stored ? true : `moved ${moved}px, stored ${stored}`;
+});
+
+/*
+ * The link panel adds an input and two buttons, about 250px. A toolbar near the
+ * right edge grew straight off the screen and took its Apply button with it,
+ * which is a link nobody can finish making.
+ */
+await check('opening the link panel keeps it on screen', async () => {
+  await focusRichText();
+  await page.locator('.ed-tt__btn[aria-label="Add a link"]').click();
+  await page.waitForTimeout(400);
+
+  const box = await page.locator('.ed-tt').boundingBox();
+  const apply = await page.locator('.ed-tt__btn[aria-label="Apply the link"]').boundingBox();
+  const width = page.viewportSize().width;
+
+  return box.x + box.width <= width && apply.x + apply.width <= width
+    ? true
+    : `right edge ${Math.round(box.x + box.width)}, apply ends ${Math.round(apply.x + apply.width)}, viewport ${width}`;
+});
+
+await check('it is put away when focus leaves the text', async () => {
+  // Clicking the canvas, which is a real "I am done here" rather than a click
+  // on the toolbar itself.
+  await page.locator('.ed-topbar').click({ position: { x: 5, y: 5 } });
+  await page.waitForTimeout(400);
+  return (await page.locator('.ed-tt').count()) === 0
+    ? true
+    : 'the toolbar is still on screen';
+});
+
+// ---------------------------------------------------------------------------
 // The plus in an empty column
 // ---------------------------------------------------------------------------
 

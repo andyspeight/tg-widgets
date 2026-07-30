@@ -962,28 +962,119 @@
 }
 
 /* Rich text */
-.ed-rt-toolbar {
+/* ---------------------------------------------------------------------------
+   The floating text toolbar
+
+   Replaces .ed-rt-toolbar, which was a wrapping row of buttons inside a 320px
+   pane. Dark, because it floats over the client's own page in the canvas and a
+   pale bar would disappear against a pale section. Fixed rather than absolute:
+   it is dragged in viewport coordinates and must not be clipped by the pane's
+   overflow.
+   --------------------------------------------------------------------------- */
+
+.ed-tt {
+  position: fixed;
+  z-index: 60;
   display: flex;
+  align-items: center;
   gap: 2px;
-  flex-wrap: wrap;
-  padding: var(--ed-1);
-  border: 1px solid var(--ed-line);
-  border-bottom: 0;
-  border-radius: var(--ed-r-md) var(--ed-r-md) 0 0;
-  background: var(--ed-well);
+  padding: 4px;
+  border-radius: var(--ed-r-md);
+  background: #1e293b;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.28);
+  /* The toolbar is a tool, not content: a drag that starts on it must not turn
+     into a text selection of its labels. */
+  user-select: none;
 }
-.ed-rt-toolbar button {
-  min-width: 44px;
-  min-height: 44px;
-  border: 1px solid transparent;
+
+.ed-tt__btn {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
   border-radius: var(--ed-r-sm);
-  background: transparent;
-  color: var(--ed-ink-2);
+  background: none;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+
+.ed-tt__btn:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+
+/* Pressed means the caret is inside that formatting, read from the document's
+   own selection rather than from anything this component stores. */
+.ed-tt__btn[aria-pressed='true'] {
+  background: var(--ed-accent);
+  color: #fff;
+}
+
+.ed-tt__btn:focus-visible {
+  outline: 2px solid var(--ed-accent);
+  outline-offset: 1px;
+}
+
+.ed-tt__grip {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #64748b;
+  cursor: grab;
+}
+
+.ed-tt__grip:active { cursor: grabbing; }
+.ed-tt__grip:hover { color: #cbd5e1; }
+
+.ed-tt__rule {
+  width: 1px;
+  height: 20px;
+  margin: 0 4px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.ed-tt__block {
+  height: 32px;
+  padding: 0 var(--ed-2);
+  border: 0;
+  border-radius: var(--ed-r-sm);
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
   font: inherit;
   font-size: var(--ed-text-sm);
   cursor: pointer;
 }
-.ed-rt-toolbar button:hover { background: var(--ed-sunken); color: var(--ed-ink); }
+
+/* The native menu is drawn by the OS in its own colours, so the options need a
+   readable background of their own rather than inheriting the dark bar. */
+.ed-tt__block option { background: #fff; color: #0f172a; }
+
+.ed-tt__link {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 4px;
+  padding-left: 4px;
+  border-left: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.ed-tt__url {
+  width: 180px;
+  height: 32px;
+  padding: 0 var(--ed-2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--ed-r-sm);
+  background: rgba(0, 0, 0, 0.25);
+  color: #fff;
+  font: inherit;
+  font-size: var(--ed-text-sm);
+}
+
+.ed-tt__url::placeholder { color: #64748b; }
+.ed-tt__url:focus { outline: none; border-color: var(--ed-accent); }
 
 .ed-rt {
   min-height: 132px;
