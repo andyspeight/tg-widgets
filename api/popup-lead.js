@@ -189,13 +189,25 @@ export default async function handler(req, res) {
     return done(400, { error: 'Invalid widget ID' });
   }
 
-  // Resolve the widget for client identity
+  // Resolve the public WidgetID (tgw_...) to the Airtable record ID (rec...).
+  // Everything downstream — the canonical lead's source.widgetId and the
+  // routing-config lookup — is keyed on the RECORD id, not the public id:
+  // buildCanonicalLead enforces isRecId(source.widgetId) and throws otherwise.
+  //
+  // This endpoint used to resolve the record and then pass the public tgw_ id
+  // anyway, so EVERY popup lead failed validation with "Invalid or missing
+  // source.widgetId", returned 400 and was lost — it never reached Submissions
+  // or any destination. Mirrors the newsletter-submit resolver, which was
+  // already correct. (30 Jul 2026.)
   const widget = await resolveWidget(widgetId);
-  // Even if widget lookup fails we proceed — the canonical schema tolerates
-  // a missing clientName, but we need a clientEmail to satisfy validation.
-  // Fall back to a placeholder so the lead still lands in Submissions.
-  const clientEmail = widget?.clientEmail || 'unknown@travelgenix.io';
-  const clientName = widget?.clientName || '';
+  if (!widget || !widget.recordId) {
+    // Fail loudly rather than proceed: without the record id the lead cannot be
+    // stored or routed, so reporting success would silently drop it.
+    return done(404, { error: 'Widget not found' });
+  }
+  const widgetRecordId = widget.recordId;
+  const clientEmail = widget.clientEmail || 'unknown@travelgenix.io';
+  const clientName = widget.clientName || '';
   logAccount = clientName || clientEmail || null;
 
   // Build the popup → canonical lead
@@ -203,7 +215,7 @@ export default async function handler(req, res) {
   const partialLead = {
     source: {
       widget: 'popup',
-      widgetId,
+      widgetId: widgetRecordId,
       clientName,
       clientEmail,
       sourceUrl,

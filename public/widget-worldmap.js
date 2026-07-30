@@ -49,11 +49,18 @@
  * "map init failed" alert. The fetch now bounds each attempt and retries once,
  * mirroring loadFxRates' resilient-by-default stance, and a network/abort error
  * on an already-hidden page no longer raises an operational alert.
+ *
+ * v3.13.1: the map no longer paints over the host page's sticky header. The
+ * Leaflet panes, price pins and controls resolved their z-index against the
+ * PAGE's root stacking context (nothing above .tgwm-map-wrap created one), so on
+ * a site whose header had a lower z-index the map covered the header logo, text
+ * and colour. .tgwm-map-wrap now isolates its own stacking; the fullscreen
+ * overlay is a sibling and still escapes above the page when opened.
  */
 (function () {
   'use strict';
 
-  const VERSION = '3.13.0';
+  const VERSION = '3.13.1';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -1489,6 +1496,18 @@ svg.leaflet-image-layer.leaflet-interactive path {
       aspect-ratio: 16 / 9;
       background: #A5D2EC;  /* MapTiler Streets ocean tone while tiles load */
       overflow: hidden;
+      /* Contain the map's internal stacking. The Leaflet panes, price pins
+         (.tg-price-tag z-index 1000) and controls otherwise resolve their
+         z-index against the PAGE's root stacking context — nothing above
+         .tgwm-map-wrap creates one (it and .tgwm-root are position:relative with
+         no z-index, and :host is static) — so on a client site whose sticky
+         header has a lower z-index the map painted OVER the header logo, text
+         and colour (Snow Dragon, 29 Jul 2026). isolation:isolate makes this a
+         stacking context so every map z-index stays contained inside the widget.
+         It does NOT trap the fullscreen overlay, which is a SIBLING of this wrap
+         (a child of .tgwm-root) and keeps its own position:fixed max z-index so
+         it still covers the page when opened. */
+      isolation: isolate;
     }
     .tgwm-map {
       position: absolute;
