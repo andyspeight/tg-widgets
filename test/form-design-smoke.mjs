@@ -68,8 +68,18 @@ ok(minHeightOf(ruleFor('.tgf-star')) >= 44, 'star targets are a full 44px hit ar
 ok(minHeightOf(ruleFor('.tgf-scale-num')) >= 44, 'scale points are at least 44px');
 ok(/min-width:\s*44px/.test(ruleFor('.tgf-scale-num')), 'scale points are at least 44px wide too');
 
-// 16px inputs, or iOS zooms the page on focus.
-ok(/font-size:\s*16px/.test(ruleFor('.tgf-input')), 'inputs use 16px text (prevents iOS auto-zoom)');
+// Inputs must be AT LEAST 16px or iOS zooms the page on focus.
+const inputFont = Number((ruleFor('.tgf-input').match(/font-size:\s*(\d+)px/) || [])[1] || 0);
+ok(inputFont >= 16, `inputs are at least 16px text, preventing iOS auto-zoom (is ${inputFont}px)`);
+
+// A single-line answer is a RULE, not a box: the answer should read as a
+// continuation of the question rather than as paperwork.
+const inputRule = ruleFor('.tgf-input');
+ok(/border:\s*0/.test(inputRule) && /border-bottom:\s*2px/.test(inputRule),
+  'a single-line answer is an underline, not a boxed field');
+ok(/background:\s*transparent/.test(inputRule), 'the answer line has no fill');
+ok(/border-bottom-color:\s*var\(--tgf-accent\)/.test(CSS), 'the answer line lights up in the accent colour on focus');
+ok(inputFont >= 20, `the answer is set larger than the help text so it reads as writing (is ${inputFont}px)`);
 
 // ── Tokens, not hardcoded values, in components ──────────────────────────────
 const strayHex = (componentCss.match(/#[0-9a-fA-F]{3,8}\b/g) || []);
@@ -126,6 +136,10 @@ ok(/max-width:\s*\d+ch/.test(CSS), 'text is held to a readable measure');
 
 // ── Layout rhythm ────────────────────────────────────────────────────────────
 ok(/\.tgf-answer \{[^}]*margin-top/.test(CSS), 'the answer block is separated from the question by deliberate space');
+ok(/margin-top:\s*var\(--tgf-s8\)/.test(ruleFor('.tgf-foot')), 'the action row has real air above it, not crowding the answer');
+// The keyboard hint belongs beside the button it describes, not flung to the
+// far edge where it reads as an orphaned label.
+ok(!/margin-left:\s*auto/.test(ruleFor('.tgf-hint')), 'the keyboard hint sits beside its button, not pushed to the far edge');
 ok(!/style="padding:/.test(SRC), 'no inline padding left in the markup (spacing lives in the stylesheet)');
 ok(/@media \(max-width: 560px\)/.test(CSS), 'a mobile breakpoint exists');
 const mob = (CSS.match(/@media \(max-width: 560px\) \{([\s\S]*?)\n    \}/) || [])[1] || '';

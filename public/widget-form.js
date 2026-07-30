@@ -1,5 +1,5 @@
 /**
- * Travelgenix Form Widget v1.1.0
+ * Travelgenix Form Widget v1.1.1
  * A general-purpose (non travel) conversational form: one question at a time,
  * keyboard-first, with a welcome screen, progress and a custom thank-you.
  *
@@ -26,6 +26,19 @@
  * on first mount. See _renderStep / _focusStep.
  *
  * Changelog:
+ *   v1.1.1 (Jul 2026) — Second design pass, this time reviewed by SCREENSHOTTING
+ *     the rendered widget in Chromium rather than reading the CSS. Three things
+ *     only a rendered view showed:
+ *     • The action row was double-padded. It sits inside the already-padded
+ *       stage and carried its own horizontal padding, so OK sat 32px proud of
+ *       the question's left edge. Everything now shares one left edge.
+ *     • An empty answer line read as a broken field: a rule floating under dead
+ *       space. Single-line answers now carry a default placeholder per type, so
+ *       an empty state reads as an invitation.
+ *     • The rating stars used the border colour and looked disabled.
+ *     Also: the answer is an underline rather than a boxed field, so it reads as
+ *     writing rather than paperwork; the answer line tracks the question's
+ *     measure instead of overshooting it; and the card is no longer bottom-heavy.
  *   v1.1.0 (Jul 2026) — Design pass. The first cut used ad-hoc spacing and type
  *     sizes, which reads as unconsidered. Rebuilt against the Travelgenix design
  *     system: a 4px spacing grid, the type scale, tokenised colour/radius/
@@ -43,7 +56,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.1.0';
+  const VERSION = '1.1.1';
 
   // ─── API base ────────────────────────────────────────────────────────
   // The widget runs on CUSTOMER sites, so a relative '/api' path would resolve
@@ -136,6 +149,24 @@
   //   autoAdvance       → true when picking an option should move on by itself
   //   focusSel          → selector for the control that receives focus
 
+  /**
+   * Default placeholder per question type. An underline answer with no
+   * placeholder looks like a floating rule under dead space; giving it a prompt
+   * makes an empty state read as an invitation. A client-set placeholder always
+   * wins.
+   */
+  const PLACEHOLDERS = {
+    'short-text': 'Type your answer',
+    'long-text': 'Type your answer',
+    email: 'name@example.com',
+    phone: '07700 900000',
+    number: 'Enter a number',
+  };
+  function placeholderFor(q, type) {
+    if (typeof q.placeholder === 'string' && q.placeholder.trim()) return q.placeholder;
+    return PLACEHOLDERS[type] || '';
+  }
+
   function optionList(q) {
     const raw = Array.isArray(q.options) ? q.options : [];
     return raw.slice(0, 26).map((o) => String(o == null ? '' : o)).filter((o) => o !== '');
@@ -181,7 +212,7 @@
     'short-text': {
       focusSel: 'input',
       input: (q, id) => '<input type="text" id="' + esc(id) + '" class="tgf-input" autocomplete="off"' +
-        (q.placeholder ? ' placeholder="' + esc(q.placeholder) + '"' : '') +
+        ' placeholder="' + esc(placeholderFor(q, 'short-text')) + '"' +
         ' maxlength="' + clampInt(q.maxLength, 1, 1000, 200) + '">',
       read: (w) => (w.querySelector('input') || {}).value || '',
       validate: (v, q) => (q.required && !String(v).trim() ? 'Please answer this question.' : ''),
@@ -191,7 +222,7 @@
       // Enter inserts a newline here, so the hint tells the visitor how to move
       // on. _onKeydown honours Cmd/Ctrl+Enter for this type only.
       input: (q, id) => '<textarea id="' + esc(id) + '" class="tgf-input tgf-textarea" rows="4"' +
-        (q.placeholder ? ' placeholder="' + esc(q.placeholder) + '"' : '') +
+        ' placeholder="' + esc(placeholderFor(q, 'long-text')) + '"' +
         ' maxlength="' + clampInt(q.maxLength, 1, 5000, 1000) + '"></textarea>',
       read: (w) => (w.querySelector('textarea') || {}).value || '',
       validate: (v, q) => (q.required && !String(v).trim() ? 'Please answer this question.' : ''),
@@ -199,7 +230,7 @@
     email: {
       focusSel: 'input',
       input: (q, id) => '<input type="email" id="' + esc(id) + '" class="tgf-input" autocomplete="email" inputmode="email"' +
-        (q.placeholder ? ' placeholder="' + esc(q.placeholder) + '"' : '') + '>',
+        ' placeholder="' + esc(placeholderFor(q, 'email')) + '">',
       read: (w) => (w.querySelector('input') || {}).value || '',
       validate: (v, q) => {
         const s = String(v || '').trim();
@@ -210,7 +241,7 @@
     phone: {
       focusSel: 'input',
       input: (q, id) => '<input type="tel" id="' + esc(id) + '" class="tgf-input" autocomplete="tel" inputmode="tel"' +
-        (q.placeholder ? ' placeholder="' + esc(q.placeholder) + '"' : '') + '>',
+        ' placeholder="' + esc(placeholderFor(q, 'phone')) + '">',
       read: (w) => (w.querySelector('input') || {}).value || '',
       validate: (v, q) => {
         const s = String(v || '').trim();
@@ -223,7 +254,7 @@
       input: (q, id) => '<input type="number" id="' + esc(id) + '" class="tgf-input" inputmode="numeric"' +
         (q.min != null ? ' min="' + esc(q.min) + '"' : '') +
         (q.max != null ? ' max="' + esc(q.max) + '"' : '') +
-        (q.placeholder ? ' placeholder="' + esc(q.placeholder) + '"' : '') + '>',
+        ' placeholder="' + esc(placeholderFor(q, 'number')) + '">',
       read: (w) => {
         const raw = (w.querySelector('input') || {}).value;
         if (raw === '' || raw == null) return '';
@@ -408,8 +439,8 @@
     /* A conversational form is one question at a time, so the stage is
        deliberately generous. Density dial: 3. */
     .tgf-stage {
-      padding: var(--tgf-s10) var(--tgf-s8) var(--tgf-s6);
-      min-height: 288px;
+      padding: var(--tgf-s10) var(--tgf-s8);
+      min-height: 232px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -453,33 +484,66 @@
     }
     /* The gap between the question block and the answer is the main rhythm
        cue: it separates "what we asked" from "what you do". */
-    .tgf-answer { margin-top: var(--tgf-s6); }
+    .tgf-answer { margin-top: var(--tgf-s5); }
 
     /* ── Text inputs ──────────────────────────────────────────────── */
+    /* A boxed field makes this read as paperwork. The answer should read as a
+       continuation of the question, so a single-line answer is a RULE, not a
+       box: no border, no fill, larger type, and the rule lights up on focus.
+       This is the difference between "fill in the form" and "write your
+       answer". (Andy, 30 Jul 2026.) */
     .tgf-input {
       width: 100%;
-      max-width: 480px;
-      min-height: 48px;
-      padding: var(--tgf-s3) var(--tgf-s4);
+      /* Tracks the question's measure so the rule does not overshoot it. */
+      max-width: 440px;
+      min-height: 44px;
+      padding: var(--tgf-s1) 0;
       font: inherit;
-      font-size: 16px;              /* 16px avoids iOS auto-zoom on focus */
-      line-height: 1.5;
+      font-size: 22px;              /* comfortably above the 16px iOS zoom floor */
+      font-weight: 400;
+      line-height: 1.4;
+      letter-spacing: -.01em;
       color: var(--tgf-ink);
-      background: var(--tgf-bg);
-      border: 1px solid var(--tgf-border-strong);
-      border-radius: var(--tgf-r-sm);
-      transition: border-color 140ms var(--tgf-ease), box-shadow 140ms var(--tgf-ease);
+      background: transparent;
+      border: 0;
+      border-bottom: 2px solid var(--tgf-border-strong);
+      border-radius: 0;
+      transition: border-color 160ms var(--tgf-ease);
     }
-    .tgf-input::placeholder { color: var(--tgf-ink-3); }
-    .tgf-input:hover { border-color: var(--tgf-accent); }
+    .tgf-input::placeholder { color: var(--tgf-ink-3); font-weight: 400; }
+    .tgf-input:hover { border-bottom-color: var(--tgf-ink-3); }
     .tgf-input:focus { outline: none; }
     .tgf-input:focus-visible {
       outline: none;
-      border-color: var(--tgf-accent);
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--tgf-accent) 18%, transparent);
+      border-bottom-color: var(--tgf-accent);
     }
-    .tgf-textarea { resize: vertical; min-height: 112px; max-width: 560px; }
-    .tgf-select { appearance: none; cursor: pointer; padding-right: var(--tgf-s8); }
+    /* A multi-line answer still needs an edge to show its size, but a quiet one:
+       a sunken panel rather than a hard-bordered field. */
+    .tgf-textarea {
+      font-size: 17px;
+      min-height: 112px;
+      max-width: 480px;
+      padding: var(--tgf-s3) var(--tgf-s4);
+      resize: vertical;
+      background: var(--tgf-bg-sunken);
+      border: 1px solid transparent;
+      border-bottom: 2px solid var(--tgf-border-strong);
+      border-radius: var(--tgf-r-sm) var(--tgf-r-sm) 0 0;
+    }
+    .tgf-textarea:focus-visible { border-bottom-color: var(--tgf-accent); }
+    /* A select must still look pressable, so it keeps a light chrome. */
+    .tgf-select {
+      font-size: 18px;
+      max-width: 400px;
+      padding: var(--tgf-s3) var(--tgf-s10) var(--tgf-s3) var(--tgf-s4);
+      appearance: none;
+      cursor: pointer;
+      background: var(--tgf-bg-sunken);
+      border: 1px solid transparent;
+      border-bottom: 2px solid var(--tgf-border-strong);
+      border-radius: var(--tgf-r-sm) var(--tgf-r-sm) 0 0;
+    }
+    .tgf-select:focus-visible { border-bottom-color: var(--tgf-accent); }
 
     /* ── Choices ──────────────────────────────────────────────────── */
     .tgf-fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
@@ -544,7 +608,7 @@
     }
     .tgf-star:hover { transform: translateY(-1px); }
     .tgf-star:active { transform: scale(.94); }
-    .tgf-star-mark { font-size: 30px; line-height: 1; color: var(--tgf-border-strong); transition: color 120ms var(--tgf-ease); }
+    .tgf-star-mark { font-size: 32px; line-height: 1; color: var(--tgf-ink-3); transition: color 120ms var(--tgf-ease); }
     .tgf-star.is-on .tgf-star-mark { color: var(--tgf-accent); }
     .tgf-star:has(.tgf-choice-input:focus-visible) {
       box-shadow: 0 0 0 3px color-mix(in srgb, var(--tgf-accent) 18%, transparent);
@@ -610,10 +674,15 @@
 
     /* ── Footer ───────────────────────────────────────────────────── */
     .tgf-foot {
-      display: flex; align-items: center; gap: var(--tgf-s2);
-      padding: 0 var(--tgf-s8) var(--tgf-s8);
+      display: flex; align-items: center; gap: var(--tgf-s3); flex-wrap: wrap;
+      /* The actions need real air above them: the answer was breathing and the
+         buttons were crowding it. NO horizontal padding — this sits inside the
+         already-padded stage, and its own padding was indenting the buttons a
+         further 32px, so OK sat proud of the question's left edge. */
+      margin-top: var(--tgf-s8);
+      padding: 0;
     }
-    .tgf-foot--inline { padding: var(--tgf-s6) 0 0; }
+    .tgf-foot--inline { margin-top: var(--tgf-s6); padding: 0; }
     .tgf-btn {
       font: inherit;
       font-size: 15px; font-weight: 600; line-height: 1;
@@ -641,8 +710,9 @@
       border-color: var(--tgf-border-strong);
     }
     .tgf-btn--ghost:hover { filter: none; border-color: var(--tgf-accent); color: var(--tgf-ink); }
+    /* Sits immediately after the button it describes. Pushed to the far edge it
+       read as an orphaned label belonging to nothing. */
     .tgf-hint {
-      margin-left: auto;
       font-size: 13px;
       color: var(--tgf-ink-3);
       white-space: nowrap;
@@ -651,8 +721,8 @@
 
     /* ── Mobile ───────────────────────────────────────────────────── */
     @media (max-width: 560px) {
-      .tgf-stage { padding: var(--tgf-s6) var(--tgf-s5) var(--tgf-s5); min-height: 240px; }
-      .tgf-foot { padding: 0 var(--tgf-s5) var(--tgf-s6); flex-wrap: wrap; }
+      .tgf-stage { padding: var(--tgf-s6) var(--tgf-s5); min-height: 200px; }
+      .tgf-foot { margin-top: var(--tgf-s6); }
       .tgf-q { font-size: 20px; max-width: none; }
       .tgf-hint { display: none; }
       .tgf-btn { flex: 1 1 auto; }
