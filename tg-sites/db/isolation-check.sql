@@ -1,7 +1,10 @@
 -- Tenant isolation, proven rather than assumed.
 --
--- Seeds two tenants, tries every way one could reach the other's data,
--- reports a pass or fail per check, and removes its own fixtures.
+-- Seeds three tenants and two people, tries every way one could reach the
+-- other's data, reports a pass or fail per check, and removes its own
+-- fixtures. Covers the three questions this database answers before it knows
+-- whose data it is looking at: which tenant does this hostname mean, who is
+-- signing in, and which sites are theirs.
 --
 --   psql "$DATABASE_URL" -f db/isolation-check.sql
 --
@@ -18,7 +21,11 @@
 -- 2. set_config with a local flag lasts for the whole TRANSACTION, not for
 --    one block. A later block testing "no tenant set" is still holding the
 --    tenant an earlier block set. It has to clear the value explicitly, or
---    the single most important check in this file is a no-op.
+--    the single most important check in this file is a no-op. There are three
+--    of these settings now, one per question: which tenant, which user, which
+--    email is signing in. A block that tests the absence of one must clear it
+--    by name, and a block that only cares about one of them should clear the
+--    other two so it is testing what it says it is.
 --
 -- 3. Absolute row counts are fragile. Any row left behind by someone poking
 --    at the database makes a correct policy look broken. Every count below
@@ -35,12 +42,16 @@ delete from public.pages where id in (
   'aaaaaaaa-0000-0000-0000-00000000a002',
   'bbbbbbbb-0000-0000-0000-00000000b001'
 );
--- Domains cascade with their tenant, so this clears them too.
+-- Domains and memberships both cascade with their tenant, so this clears them
+-- too. auth_users does not: it has no foreign key to anything, deliberately,
+-- because tenant_users.user_id holds whatever subject the identity provider
+-- issues and that provider is not this database.
 delete from public.tenants where id in (
   '11111111-1111-1111-1111-111111111111',
   '22222222-2222-2222-2222-222222222222',
   '33333333-3333-3333-3333-333333333333'
 );
+delete from public.auth_users where id in ('iso-user-ann', 'iso-user-bob');
 
 insert into public.tenants (id, slug, name, status) values
   ('11111111-1111-1111-1111-111111111111', 'iso-alpha', 'Isolation Alpha', 'active'),
@@ -57,6 +68,23 @@ insert into public.pages (id, tenant_id, slug, title, status, published_content)
   ('aaaaaaaa-0000-0000-0000-00000000a001', '11111111-1111-1111-1111-111111111111', 'iso-live',  'Alpha live',  'published', '{"version":1,"sections":[]}'),
   ('aaaaaaaa-0000-0000-0000-00000000a002', '11111111-1111-1111-1111-111111111111', 'iso-draft', 'Alpha draft', 'draft',     null),
   ('bbbbbbbb-0000-0000-0000-00000000b001', '22222222-2222-2222-2222-222222222222', 'iso-live',  'Beta live',   'published', '{"version":1,"sections":[]}');
+
+-- Two people. The hash is a placeholder; nothing here verifies a password,
+-- only who is allowed to read the row a password would be checked against.
+insert into public.auth_users (id, email, password_hash, name) values
+  ('iso-user-ann', 'ann@iso.example', 'not-a-real-hash', 'Ann'),
+  ('iso-user-bob', 'bob@iso.example', 'not-a-real-hash', 'Bob');
+
+-- Ann is in two tenants, one of them suspended. Bob is in the third.
+--
+-- The suspended membership is the interesting fixture: it is a real row, so a
+-- site picker that trusts tenant_users alone would offer Ann a switched-off
+-- site. The tenants_mine policy is what stops that, and there is a check for
+-- it below.
+insert into public.tenant_users (tenant_id, user_id, role) values
+  ('11111111-1111-1111-1111-111111111111', 'iso-user-ann', 'owner'),
+  ('33333333-3333-3333-3333-333333333333', 'iso-user-ann', 'owner'),
+  ('22222222-2222-2222-2222-222222222222', 'iso-user-bob', 'owner');
 
 create temp table if not exists checks (
   ord    serial,
@@ -104,22 +132,29 @@ where n.nspname = 'public' and c.relkind = 'r'
 -- check here: it is what makes a forgotten withTenant call return nothing
 -- rather than everything.
 do $$
-declare pages int; tenants int; domains int;
+declare pages int; tenants int; domains int; members int; creds int;
 begin
   set local role tg_sites_app;
+  -- All three, by name. This block does not depend on running early, so
+  -- reordering the file cannot quietly turn it into a no-op.
   perform set_config('app.current_tenant_id', '', true);
+  perform set_config('app.current_user_id',   '', true);
+  perform set_config('app.login_email',       '', true);
 
   select count(*) into pages   from public.pages;
   select count(*) into tenants from public.tenants;
   select count(*) into domains from public.domains;
+  select count(*) into members from public.tenant_users;
+  select count(*) into creds   from public.auth_users;
 
   -- Step back out before recording. The roles under test have no business
   -- writing anywhere, including to this scratch table.
   reset role;
   insert into checks (name, passed, detail) values
-    ('a query with no tenant set returns nothing',
-     pages = 0 and tenants = 0 and domains = 0,
-     format('pages %s, tenants %s, domains %s', pages, tenants, domains));
+    ('a query with nothing set returns nothing',
+     pages = 0 and tenants = 0 and domains = 0 and members = 0 and creds = 0,
+     format('pages %s, tenants %s, domains %s, memberships %s, credentials %s',
+            pages, tenants, domains, members, creds));
 end $$;
 
 -- ---------------------------------------------------------------------------
@@ -261,14 +296,17 @@ select 'only one function sees past RLS',
 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
 where n.nspname = 'public' and p.prosecdef;
 
--- Postgres grants EXECUTE to PUBLIC by default, so this is not hypothetical.
+-- Every function, not just that one. Postgres grants EXECUTE to PUBLIC the
+-- moment a function is created, so the safe state is one you have to go and
+-- ask for. Checking the whole schema rather than naming resolve_tenant means
+-- the next function somebody adds is covered before they think to cover it.
 insert into checks (name, passed, detail)
-select 'anon and authenticated cannot resolve a hostname',
-  not bool_or(has_function_privilege('anon', p.oid, 'EXECUTE')
-           or has_function_privilege('authenticated', p.oid, 'EXECUTE')),
-  ''
+select 'anon and authenticated cannot execute any function', count(*) = 0,
+  'callable: ' || coalesce(string_agg(p.proname, ', '), 'none')
 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-where n.nspname = 'public' and p.proname = 'resolve_tenant';
+where n.nspname = 'public'
+  and (has_function_privilege('anon', p.oid, 'EXECUTE')
+    or has_function_privilege('authenticated', p.oid, 'EXECUTE'));
 
 do $$
 declare
@@ -322,6 +360,130 @@ begin
 end $$;
 
 -- ---------------------------------------------------------------------------
+-- Signing in, and finding your own sites
+-- ---------------------------------------------------------------------------
+
+-- The other thing that happens before a tenant is known. Everything above
+-- keys off current_tenant(); none of it can answer "who is this" or "which
+-- sites are theirs", because the tenant is the answer to the second question
+-- and there is no tenant yet.
+
+-- Sign in: one email in, at most one row out.
+do $$
+declare found int; total int; wrong int; who text;
+begin
+  set local role tg_sites_app;
+  -- No user. Sign-in runs before there is one; that is the whole difficulty.
+  perform set_config('app.current_tenant_id', '', true);
+  perform set_config('app.current_user_id',   '', true);
+  perform set_config('app.login_email', 'ann@iso.example', true);
+
+  select count(*) into found from public.auth_users where email = 'ann@iso.example';
+  select id       into who   from public.auth_users where email = 'ann@iso.example';
+  -- The enumeration check. Naming one email must not open the table: the only
+  -- row visible in the whole of auth_users is the one just named.
+  select count(*) into total from public.auth_users;
+
+  perform set_config('app.login_email', 'nobody@iso.example', true);
+  select count(*) into wrong from public.auth_users;
+
+  reset role;
+  insert into checks (name, passed, detail) values
+    ('signing in can read the row it names',
+     found = 1 and who = 'iso-user-ann', 'saw ' || found || ', id ' || coalesce(who, 'null')),
+    ('signing in cannot enumerate other people',
+     total = 1, 'rows visible while naming one email: ' || total),
+    ('an unknown email reveals nothing',
+     wrong = 0, 'rows visible: ' || wrong);
+end $$;
+
+-- A signed-in person, reading their own things.
+do $$
+declare
+  mine int; others int; tenants_seen int; suspended_seen int; beta_seen int;
+  own_creds int; other_creds int;
+begin
+  set local role tg_sites_app;
+  -- A user and no tenant, which is exactly the state the site picker runs in.
+  -- login_email cleared, or the credentials checks below would pass through
+  -- the sign-in policy instead of the one they mean to test. See trap 2.
+  perform set_config('app.current_tenant_id', '', true);
+  perform set_config('app.login_email',       '', true);
+  perform set_config('app.current_user_id', 'iso-user-ann', true);
+
+  select count(*) into mine   from public.tenant_users where user_id = 'iso-user-ann';
+  select count(*) into others from public.tenant_users where user_id = 'iso-user-bob';
+
+  select count(*) into tenants_seen from public.tenants
+    where id in ('11111111-1111-1111-1111-111111111111',
+                 '22222222-2222-2222-2222-222222222222',
+                 '33333333-3333-3333-3333-333333333333');
+  select count(*) into suspended_seen from public.tenants
+    where id = '33333333-3333-3333-3333-333333333333';
+  select count(*) into beta_seen from public.tenants
+    where id = '22222222-2222-2222-2222-222222222222';
+
+  select count(*) into own_creds   from public.auth_users where id = 'iso-user-ann';
+  select count(*) into other_creds from public.auth_users where id = 'iso-user-bob';
+
+  reset role;
+  insert into checks (name, passed, detail) values
+    ('a user sees their own memberships with no tenant set',
+     mine = 2, 'saw ' || mine || ' of 2'),
+    ('a user sees nobody elses memberships',
+     others = 0, 'leaked ' || others),
+    ('the site picker offers only tenants the user is in',
+     tenants_seen = 1, 'saw ' || tenants_seen || ' of 3 fixture tenants'),
+    ('a membership of a suspended tenant is not offered',
+     suspended_seen = 0, 'leaked ' || suspended_seen),
+    ('a tenant the user is not in stays hidden',
+     beta_seen = 0, 'leaked ' || beta_seen),
+    ('a user can read their own credentials row',
+     own_creds = 1, 'saw ' || own_creds || ' of 1'),
+    ('a user cannot read anyone elses credentials',
+     other_creds = 0, 'leaked ' || other_creds);
+end $$;
+
+-- Writes, from a signed-in person with no tenant chosen yet.
+do $$
+declare hijacked int; granted boolean := true; promoted int;
+begin
+  -- Role and settings outside every exception block. See trap 1.
+  set local role tg_sites_app;
+  perform set_config('app.current_tenant_id', '', true);
+  perform set_config('app.login_email',       '', true);
+  perform set_config('app.current_user_id', 'iso-user-ann', true);
+
+  update public.auth_users set password_hash = 'planted' where id = 'iso-user-bob';
+  get diagnostics hijacked = row_count;
+
+  -- The one that matters most. tenant_users_own_memberships is SELECT only, so
+  -- it has no WITH CHECK to widen; the write still has to go through
+  -- tenant_users_app, which needs a tenant, and there is none. Being able to
+  -- write your own membership row would mean being able to join any site.
+  begin
+    insert into public.tenant_users (tenant_id, user_id, role)
+      values ('22222222-2222-2222-2222-222222222222', 'iso-user-ann', 'owner');
+  exception when others then granted := false;
+  end;
+
+  -- Nor upgrade a membership already held.
+  update public.tenant_users set role = 'owner'
+    where tenant_id = '11111111-1111-1111-1111-111111111111' and user_id = 'iso-user-ann';
+  get diagnostics promoted = row_count;
+
+  reset role;
+  insert into checks (name, passed, detail) values
+    ('a user cannot overwrite anyone elses credentials',
+     hijacked = 0, 'rows changed: ' || hijacked),
+    ('a user cannot grant themselves a membership',
+     not granted,
+     case when granted then 'ANN JOINED BETA BY ASKING' else 'the policy refused it' end),
+    ('reading a membership does not make it writable',
+     promoted = 0, 'rows changed: ' || promoted);
+end $$;
+
+-- ---------------------------------------------------------------------------
 -- Clear up, then report
 -- ---------------------------------------------------------------------------
 
@@ -339,6 +501,7 @@ delete from public.tenants where id in (
   '22222222-2222-2222-2222-222222222222',
   '33333333-3333-3333-3333-333333333333'
 );
+delete from public.auth_users where id in ('iso-user-ann', 'iso-user-bob');
 
 -- One result set, failures at the top, verdict on the last line.
 select result, name, detail from (
