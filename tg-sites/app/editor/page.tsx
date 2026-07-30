@@ -40,7 +40,8 @@ export default async function EditorPage({
    * from a made-up one by which way it was bounced, and a page id is a uuid
    * that appears in a URL an agent might paste anywhere.
    */
-  if (!(await currentUserId())) {
+  const userId = await currentUserId();
+  if (!userId) {
     const next = pageId
       ? `/signin?next=${encodeURIComponent(`/editor?page=${pageId}`)}`
       : '/signin?next=%2Fsites';
@@ -83,6 +84,9 @@ export default async function EditorPage({
       initialStatus={page.status}
       initialHasUnpublishedChanges={page.hasUnpublishedChanges}
         siteTheme={themeTokens(theme, familiesFromFiles(faces)).style}
+        // Cosmetic only: version history marks the entries this person published.
+        // Nothing is gated on it.
+        currentUserId={userId}
       />
     </>
   );

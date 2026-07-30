@@ -44,6 +44,8 @@ function App() {
   return (
     <EditorShell
       isStaff
+      // So version history can mark the entries this person published.
+      currentUserId="demo-user"
       pageId="demo"
       initialPage={SEED_PAGE}
       initialStatus="draft"

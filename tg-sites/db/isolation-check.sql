@@ -392,6 +392,80 @@ begin
 end $$;
 
 -- ---------------------------------------------------------------------------
+-- The version history
+-- ---------------------------------------------------------------------------
+
+-- publish_events holds what a page USED to say, including prices that were
+-- changed for a reason. Three properties, and the third is the one a schema
+-- change is most likely to lose by accident.
+
+insert into public.publish_events (tenant_id, page_id, snapshot, title) values
+  ('11111111-1111-1111-1111-111111111111', 'aaaaaaaa-0000-0000-0000-00000000a001',
+   '{"v":"alpha"}', 'Alpha live'),
+  ('22222222-2222-2222-2222-222222222222', 'bbbbbbbb-0000-0000-0000-00000000b001',
+   '{"v":"beta"}', 'Beta live');
+
+do $$
+declare denied boolean := false; seen int := 0;
+begin
+  set local role tg_sites_renderer;
+  perform set_config('app.current_tenant_id', '11111111-1111-1111-1111-111111111111', true);
+  begin
+    select count(*) into seen from public.publish_events;
+  exception when insufficient_privilege then denied := true;
+  end;
+  reset role;
+
+  insert into checks (name, passed, detail) values
+    ('the public renderer cannot read the version history', denied,
+     case when denied then 'permission denied, as it should be'
+          else 'THE PUBLIC SITE ROLE READ ' || seen || ' HISTORY ROWS' end);
+end $$;
+
+do $$
+declare mine int; theirs int; reachable int;
+begin
+  set local role tg_sites_app;
+  perform set_config('app.current_tenant_id', '11111111-1111-1111-1111-111111111111', true);
+
+  select count(*) into mine from public.publish_events;
+  select count(*) into theirs from public.publish_events
+    where page_id = 'bbbbbbbb-0000-0000-0000-00000000b001';
+
+  -- The restore's own lookup, run as Alpha reaching for Beta's version. It
+  -- matches on publish id AND page id, which is the scope the tenant policy
+  -- does not cover: one page of a tenant restored from another page's history.
+  select count(*) into reachable from public.publish_events
+    where id = (select id from public.publish_events limit 1)
+      and page_id = 'bbbbbbbb-0000-0000-0000-00000000b001';
+
+  reset role;
+  insert into checks (name, passed, detail) values
+    ('a tenant sees only its own versions', mine = 1, mine || ' visible'),
+    ('another tenant''s versions are invisible', theirs = 0, theirs || ' visible'),
+    ('a restore cannot reach across tenants', reachable = 0, reachable || ' matched');
+end $$;
+
+do $$
+declare refused boolean := false;
+begin
+  set local role tg_sites_app;
+  perform set_config('app.current_tenant_id', '11111111-1111-1111-1111-111111111111', true);
+  begin
+    update public.publish_events set snapshot = '{"v":"tampered"}';
+  exception when insufficient_privilege then refused := true;
+  end;
+  reset role;
+
+  -- There is deliberately no UPDATE grant. A snapshot that can be edited after
+  -- the fact is not a snapshot, it is just another copy of the page.
+  insert into checks (name, passed, detail) values
+    ('a stored snapshot cannot be rewritten', refused,
+     case when refused then 'no UPDATE grant, as intended'
+          else 'A SNAPSHOT WAS EDITED IN PLACE' end);
+end $$;
+
+-- ---------------------------------------------------------------------------
 -- Signing in, and finding your own sites
 -- ---------------------------------------------------------------------------
 

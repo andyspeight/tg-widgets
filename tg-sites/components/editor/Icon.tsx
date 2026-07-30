@@ -45,6 +45,7 @@ export type IconName =
   | 'arrow-up'
   | 'arrow-down'
   | 'grip'
+  | 'history'
   | 'undo'
   | 'redo'
   | 'upload'
@@ -95,6 +96,13 @@ const PATHS: Record<IconName, string> = {
   'arrow-up': 'M12 19V5M6 11l6-6 6 6',
   'arrow-down': 'M12 5v14M6 13l6 6 6-6',
   grip: 'M9 6h.01M9 12h.01M9 18h.01M15 6h.01M15 12h.01M15 18h.01',
+  /*
+   * A clock with an anticlockwise arrow, which is the conventional history mark.
+   * Deliberately NOT the undo arrow: this editor already uses that for undoing the
+   * last edit, and one glyph meaning both "step back one change" and "browse every
+   * published version" would be a worse icon than no icon.
+   */
+  history: 'M3.5 9a9 9 0 1 1 .6 5M3.5 4.5V9H8M12 7.5V12l3.5 2',
   undo: 'M4 10h11a5 5 0 0 1 0 10h-5M4 10l5-5M4 10l5 5',
   redo: 'M20 10H9a5 5 0 0 0 0 10h5M20 10l-5-5M20 10l-5 5',
   upload: 'M4 17v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2M12 15V3M7 8l5-5 5 5',

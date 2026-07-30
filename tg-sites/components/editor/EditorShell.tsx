@@ -17,6 +17,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { publishPageAction, saveDraftAction } from '../../app/actions/pages';
+import { PublishHistory } from './PublishHistory';
 import type { Page } from '../../lib/content/schema';
 import { parsePage } from '../../lib/content/schema';
 import { createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
@@ -103,6 +104,13 @@ interface EditorProps {
    * tokens in globals.css, which are the values the default theme derives to.
    */
   siteTheme?: CSSProperties;
+  /**
+   * The signed-in person's id, so version history can mark their own entries.
+   *
+   * Optional and cosmetic. Nothing is gated on it, so the standalone build
+   * omitting it costs a label rather than a permission.
+   */
+  currentUserId?: string | null;
 }
 
 export function EditorShell({
@@ -112,6 +120,7 @@ export function EditorShell({
   initialStatus,
   initialHasUnpublishedChanges,
   siteTheme,
+  currentUserId = null,
 }: EditorProps) {
   const [history, setHistory] = useState<History>({
     past: [],
@@ -123,6 +132,7 @@ export function EditorShell({
   const [picker, setPicker] = useState<{ section: number; row: number; column: number } | null>(null);
   /** Where a new section would go. null means the picker is closed. */
   const [insertAt, setInsertAt] = useState<number | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [saved, setSaved] = useState<SaveState>('idle');
   const [saveError, setSaveError] = useState<string | null>(null);
   const [status, setStatus] = useState<'draft' | 'published'>(initialStatus);
@@ -521,6 +531,12 @@ export function EditorShell({
             })),
             { separator: true },
             {
+              icon: 'history',
+              label: 'Version history',
+              onClick: () => setHistoryOpen(true),
+            },
+            { separator: true },
+            {
               icon: 'download',
               label: 'Save a copy of this page',
               onClick: exportJson,
@@ -580,6 +596,27 @@ export function EditorShell({
         onCommit={commit}
         onBack={() => setMobilePane('canvas')}
       />
+
+      {historyOpen && (
+        <PublishHistory
+          pageId={pageId}
+          currentUserId={currentUserId}
+          onClose={() => setHistoryOpen(false)}
+          onRestore={(restored) => {
+            /*
+             * Through commit, like every other whole-page change, so a restore
+             * joins the undo stack. Somebody who puts back the wrong version
+             * presses Ctrl+Z rather than hunting for the one they were on.
+             *
+             * The selection is cleared first because it points at a path in the
+             * page that just went away: keeping it would leave the properties
+             * pane describing a block that no longer exists.
+             */
+            setSelected(null);
+            commit(restored);
+          }}
+        />
+      )}
 
       {insertAt !== null && (
         <LayoutPicker

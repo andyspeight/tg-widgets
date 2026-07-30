@@ -2116,3 +2116,84 @@
   .tg-modal__foot { flex-direction: column-reverse; }
   .tg-modal__foot .tg-btn { width: 100%; min-height: 44px; }
 }
+
+/* ---------------------------------------------------------------------------
+   Version history
+
+   Lives in editor.css rather than its own file because it is a dialog inside the
+   editor and uses the editor's tokens. Every value below is an --ed- token that
+   exists: there is no --ed-7 and no bare --ed-r, both are easy to write by
+   analogy, and a var() that resolves to nothing drops the declaration silently.
+   tests/db.test.ts fails the build for it.
+   --------------------------------------------------------------------------- */
+
+.ph-quiet {
+  margin: 0;
+  color: var(--ed-ink-2);
+  font-size: var(--ed-text-sm);
+  line-height: 1.6;
+}
+
+.ph-error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ed-2);
+  margin: 0 0 var(--ed-4);
+  padding: var(--ed-3);
+  border: 1px solid var(--ed-danger);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-well);
+  color: var(--ed-ink);
+  font-size: var(--ed-text-sm);
+}
+
+.ph-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ph-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ed-4);
+  padding: var(--ed-3) 0;
+  border-bottom: 1px solid var(--ed-line);
+}
+
+.ph-item:last-child { border-bottom: 0; }
+
+/* min-width 0 so a long title truncates instead of shoving the button off the
+   right edge of the dialog. A flex item's default min-width is auto, which
+   refuses to shrink below its content. */
+.ph-item__what {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ph-item__title {
+  overflow: hidden;
+  color: var(--ed-ink);
+  font-size: var(--ed-text-sm);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ph-item__when {
+  color: var(--ed-ink-3);
+  font-size: var(--ed-text-xs);
+}
+
+/* Not a button, because there is nothing to do to it. Sized to sit on the same
+   line as the buttons beside it so the column does not jog. */
+.ph-item__live {
+  flex: none;
+  padding: var(--ed-2) var(--ed-3);
+  color: var(--ed-ink-2);
+  font-size: var(--ed-text-xs);
+  font-weight: 600;
+}

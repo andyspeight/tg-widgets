@@ -832,6 +832,110 @@ await page.evaluate(() => window.__TG_SET_THEME__({}));
 
 
 // ---------------------------------------------------------------------------
+// Version history
+// ---------------------------------------------------------------------------
+
+/*
+ * The rollback path, driven for real against the doubles.
+ *
+ * Two properties matter more than the rest and neither is expressible as a claim
+ * about a function: that the NEWEST entry offers no restore button, because
+ * restoring what is already live is a no-op dressed up as a rescue, and that a
+ * restore lands in the editor rather than just closing the dialog.
+ */
+
+await check('version history opens from the More actions menu', async () => {
+  await page.getByRole('button', { name: 'More actions' }).click();
+  await page.waitForTimeout(200);
+  await page.getByRole('menuitem', { name: 'Version history' }).click();
+  await page.waitForSelector('.ph-list', { timeout: 3000 });
+  return (await page.locator('.ph-item').count()) === 2
+    ? true
+    : `${await page.locator('.ph-item').count()} entries`;
+});
+
+await check('the newest entry is labelled live, not offered as a restore', async () => {
+  const first = page.locator('.ph-item').first();
+  const live = await first.locator('.ph-item__live').count();
+  const buttons = await first.locator('button').count();
+  return live === 1 && buttons === 0 ? true : `${live} live labels, ${buttons} buttons`;
+});
+
+await check('an older entry offers one', async () => {
+  const second = page.locator('.ph-item').nth(1);
+  const label = await second.locator('button').innerText();
+  return label === 'Put this back' ? true : `it says "${label}"`;
+});
+
+await check('each entry is dated in full rather than "3 days ago"', async () => {
+  // Relative time makes somebody count backwards on their fingers to answer
+  // "put it back to how it was on Tuesday".
+  const when = await page.locator('.ph-item__when').first().innerText();
+  return /\d{4}/.test(when) && /\d{2}:\d{2}/.test(when) ? true : `it says "${when}"`;
+});
+
+await check('your own publishes are marked and other people\'s are not', async () => {
+  const mine = await page.locator('.ph-item__when').first().innerText();
+  const theirs = await page.locator('.ph-item__when').nth(1).innerText();
+  return mine.includes('by you') && !theirs.includes('by you')
+    ? true
+    : `"${mine}" then "${theirs}"`;
+});
+
+await check('a long title truncates instead of pushing the button off the dialog', async () => {
+  const overflow = await page.locator('.ph-item__title').first().evaluate((el) => ({
+    overflow: getComputedStyle(el).textOverflow,
+    parentMin: getComputedStyle(el.parentElement).minWidth,
+  }));
+  return overflow.overflow === 'ellipsis' && overflow.parentMin === '0px'
+    ? true
+    : JSON.stringify(overflow);
+});
+
+/*
+ * Captured rather than hardcoded, so the undo check compares against what was
+ * really there. Written the other way first, asserting the title went back to the
+ * double's 'Demo page', and it failed: the editor's page comes from the entry
+ * fixture, so the real title was 'Greece, planned properly'. Undo was working the
+ * whole time and the expectation was wrong.
+ */
+let titleBeforeRestore = '';
+
+await check('putting a version back changes the page and closes the dialog', async () => {
+  /*
+   * Read from the title INPUT, which is where the page's title actually lives.
+   * The first version of this check read the outline pane, found the static word
+   * "Page" in its heading, and reported a failure that was entirely its own.
+   */
+  const before = await page.locator('.ed-title-input').inputValue();
+  titleBeforeRestore = before;
+
+  await page.locator('.ph-item').nth(1).locator('button').click();
+  await page.waitForTimeout(500);
+
+  if ((await page.locator('.ph-list').count()) !== 0) return 'the dialog is still open';
+
+  const after = await page.locator('.ed-title-input').inputValue();
+  return after === 'The version before that'
+    ? true
+    : `the title went from "${before}" to "${after}"`;
+});
+
+/*
+ * A restore goes through the editor's commit, so it joins the undo stack. That is
+ * the reason there is no confirm dialog in front of it, which makes this check the
+ * evidence for that decision rather than a nice extra.
+ */
+await check('and a restore can be undone', async () => {
+  await page.keyboard.press('Control+z');
+  await page.waitForTimeout(400);
+  const after = await page.locator('.ed-title-input').inputValue();
+  return after === titleBeforeRestore
+    ? true
+    : `the title is "${after}" after undo, was "${titleBeforeRestore}" before the restore`;
+});
+
+// ---------------------------------------------------------------------------
 // The image bank
 // ---------------------------------------------------------------------------
 

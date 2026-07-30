@@ -147,6 +147,13 @@ create unique index if not exists domains_one_primary_per_tenant
  * pages.published_content would show the version that is live now, which is the
  * one thing a person restoring a version is definitely not looking for.
  */
+-- SUPERSEDED BY 0014_publish_snapshots.sql, WHICH DROPS THIS TABLE.
+--
+-- Nothing was ever written to it. publish_events had existed since 0003 for exactly
+-- this job, was already written inside the publish transaction, and was already
+-- under test; this migration added a second table for it without noticing. The SQL
+-- below is left exactly as it ran, because a migration is a record of what happened
+-- rather than a description of the current schema. Do not build against it.
 create table if not exists public.page_versions (
   id         uuid primary key default gen_random_uuid(),
 
