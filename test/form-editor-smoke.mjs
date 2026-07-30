@@ -87,10 +87,66 @@ for (const t of edTypes) {
 const SUBMIT = readFileSync(new URL('../api/form-submit.js', import.meta.url), 'utf8');
 const serverMappable = ((SUBMIT.match(/const MAPPABLE = new Set\(\[([^\]]+)\]/) || [])[1] || '')
   .split(',').map((s) => s.trim().replace(/'/g, '')).filter(Boolean);
-const edMappable = [...ED.matchAll(/\{ id: '([a-zA-Z]*)',\s+name: '[^']*' \}/g)].map((m) => m[1]).filter(Boolean);
+// Scoped to the MAPPABLE list itself — the rule builder uses the same
+// { id, name } shape, so an unscoped sweep would test operators as mapTo targets.
+const mappableBlock = ED.slice(ED.indexOf('var MAPPABLE = ['), ED.indexOf('var DEFAULT_CONFIG'));
+const edMappable = [...mappableBlock.matchAll(/\{ id: '([a-zA-Z]*)',\s+name: '[^']*' \}/g)].map((m) => m[1]).filter(Boolean);
+ok(edMappable.length >= 6, `the editor offers the mapTo targets (has ${edMappable.length})`);
 for (const m of edMappable) {
   ok(serverMappable.includes(m), `mapTo target "${m}" is on the server whitelist`);
 }
+
+// ── Rule builder (Phase 2 branching) ─────────────────────────────────────────
+// Verified separately by driving the page in Chromium: adding a rule to a
+// multiple-choice question offers is/is-not/answered/not-answered, the value is
+// a dropdown of that question's own options, the target list is just "end", the
+// Else row appears once a rule exists, the rule reaches the config, the preview
+// counter drops its total, and changing the type clears the rules.
+ok(/function logicFields\(q, qi\)/.test(ED), 'the builder renders a logic block per question');
+ok(/data-act="rule-add"/.test(ED) && /data-act="rule-del"/.test(ED), 'rules can be added and removed');
+ok(/Everyone goes to the next question\./.test(ED), 'a form with no rules says so in plain words');
+ok(/Rules are checked in order and the first match wins\./.test(ED), 'rule order is explained where the rules are');
+
+// Every operator the editor can write must exist in the widget's dispatch
+// table, or the rule silently never matches.
+const widgetOps = [...(WIDGET.match(/const LOGIC_OPS = \{[\s\S]*?\n  \};/) || [''])[0]
+  .matchAll(/^\s{4}'?([a-z-]+)'?:\s*\(/gm)].map((m) => m[1]);
+const opBlock = ED.slice(ED.indexOf('function opOptions('), ED.indexOf('function valueField('));
+const edOps = [...opBlock.matchAll(/\{ id: '([a-z-]+)', name: '[^']+' \}/g)].map((m) => m[1]);
+ok(edOps.length > 0, `the editor offers operators (has ${edOps.length})`);
+for (const o of [...new Set(edOps)]) {
+  ok(widgetOps.includes(o), `editor operator "${o}" exists in the widget's LOGIC_OPS`);
+}
+// Type-aware operators: text can "contain", a number cannot; a scale compares
+// numerically rather than by string.
+ok(/if \(def\.scale \|\| def\.id === 'number'\)/.test(opBlock), 'numeric questions get numeric comparisons');
+ok(/\{ id: 'lte', name: 'is at most' \}/.test(opBlock) && /\{ id: 'gte', name: 'is at least' \}/.test(opBlock),
+  'numeric questions offer at-most / at-least');
+ok(/\{ id: 'contains'/.test(opBlock), 'free-text questions offer "contains"');
+ok(/ops\.push\(\{ id: 'answered'/.test(opBlock) && /ops\.push\(\{ id: 'not-answered'/.test(opBlock),
+  'every type can branch on answered / left blank');
+
+// A rule must not be typed against a value the question cannot produce.
+const valBlock = ED.slice(ED.indexOf('function valueField('), ED.indexOf('function targetOptions('));
+ok(/def\.opts && Array\.isArray\(q\.options\) && q\.options\.length/.test(valBlock),
+  'choice questions offer their own options as the rule value');
+ok(/q\.type === 'yes-no'/.test(valBlock), 'a yes/no question offers its own two labels');
+ok(/type="number"/.test(valBlock), 'numeric questions get a number input');
+
+// Jump targets: only forwards, plus finishing. A backwards jump from the
+// builder is an easy way to build a loop the visitor cannot escape.
+const tgtBlock = ED.slice(ED.indexOf('function targetOptions('), ED.indexOf('function ensureLogic('));
+ok(/for \(var i = qi \+ 1; i < C\.questions\.length; i\+\+\)/.test(tgtBlock),
+  'only LATER questions are offered as jump targets');
+ok(/value="end"/.test(tgtBlock), '"finish the form" is a target');
+ok(/>the next question</.test(tgtBlock), 'the default target is the next question');
+
+// Stale rules are worse than no rules: they look configured and never fire.
+ok(/if \(q\.logic\) delete q\.logic;/.test(ED), 'changing a question type clears rules written for the old type');
+ok(/if \(r\.goTo === goneId\) r\.goTo = '';/.test(ED), 'deleting a question clears rules pointing at it');
+ok(/if \(other\.logic\.otherwise === goneId\) delete other\.logic\.otherwise;/.test(ED),
+  'deleting a question clears an Else pointing at it');
+ok(/function tidyLogic\(q\)/.test(ED) && /delete q\.logic;/.test(ED), 'an emptied logic block is dropped from the config');
 
 // ── Registration (the 5 places + vercel) ─────────────────────────────────────
 ok(/'Form',/.test(CFG), "'Form' is in ALLOWED_WIDGET_TYPES");

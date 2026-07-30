@@ -116,6 +116,21 @@
   .addmenu button:hover { background: var(--tgse-hover); }
   .addmenu .mt { flex: none; font-size: 10px; font-weight: 600; color: var(--tgse-ink-3); text-transform: uppercase; }
 
+  /* ── Logic rules ─────────────────────────────────────────────── */
+  .rule {
+    display: flex; flex-direction: column; gap: 6px;
+    padding: 8px; margin-bottom: 6px;
+    background: var(--tgse-panel); border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-md);
+  }
+  .rule-row { display: flex; align-items: center; gap: 6px; }
+  .rule-lead {
+    flex: none; font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .04em; color: var(--tgse-ink-3); min-width: 26px;
+  }
+  .rule .fld { height: 30px; font-size: 12px; }
+  .rule-then { border-top: 1px dashed var(--tgse-border); padding-top: 6px; }
+
   /* ── Empty state ─────────────────────────────────────────────── */
   .empty {
     padding: 22px 14px; text-align: center;
@@ -576,6 +591,8 @@
 
     h += '<div class="tgse-field"><label class="tog"><input type="checkbox" data-f="required"' + (q.required ? ' checked' : '') + '> Answer required</label></div>';
 
+    h += logicFields(q, i);
+
     h += '<div class="qrow" style="justify-content:flex-end">' +
       '<button class="iconbtn" data-act="up" title="Move up" aria-label="Move up"' + (i === 0 ? ' disabled' : '') + '><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg></button>' +
       '<button class="iconbtn" data-act="down" title="Move down" aria-label="Move down"' + (i === C.questions.length - 1 ? ' disabled' : '') + '><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>' +
@@ -584,6 +601,143 @@
       '</div>';
 
     return h;
+  }
+
+  /**
+   * Rule builder for one question.
+   *
+   * Rules are pure data — { op, value, goTo } — matching the widget's hardcoded
+   * operator table. Nothing here can produce executable code.
+   *
+   * Only questions AFTER this one are offered as jump targets by default,
+   * because a backwards jump is a loop risk and rarely what someone means. The
+   * widget tolerates one if a config carries it; the builder just does not
+   * encourage it.
+   */
+  function logicFields(q, qi) {
+    var def = typeDef(q.type);
+    var rules = (q.logic && Array.isArray(q.logic.rules)) ? q.logic.rules : [];
+
+    var h = '<div class="tgse-field" style="border-top:1px solid var(--tgse-border);padding-top:10px">' +
+      '<label class="tgse-field-label">If they answer&hellip;</label>';
+
+    if (!rules.length) {
+      h += '<p class="fld-help" style="margin:0 0 8px">Everyone goes to the next question.</p>';
+    }
+
+    for (var r = 0; r < rules.length; r++) {
+      var rule = rules[r] || {};
+      h += '<div class="rule" data-rule="' + r + '">' +
+        '<div class="rule-row">' +
+          '<span class="rule-lead">' + (r === 0 ? 'If' : 'Or') + '</span>' +
+          '<select class="fld" data-r="op">' + opOptions(def, rule.op) + '</select>' +
+        '</div>';
+      if (rule.op !== 'answered' && rule.op !== 'not-answered') {
+        h += '<div class="rule-row">' +
+          '<span class="rule-lead"></span>' +
+          valueField(q, def, rule) +
+          '</div>';
+      }
+      h += '<div class="rule-row rule-then">' +
+          '<span class="rule-lead">Go to</span>' +
+          '<select class="fld" data-r="goTo">' + targetOptions(qi, rule.goTo) + '</select>' +
+          '<button class="iconbtn iconbtn--danger" data-act="rule-del" data-rule="' + r + '" title="Remove rule" aria-label="Remove rule">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+          '</button>' +
+        '</div>' +
+      '</div>';
+    }
+
+    h += '<button class="addbtn" style="height:30px;font-size:12px" data-act="rule-add">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
+      'Add a rule</button>';
+
+    if (rules.length) {
+      h += '<div class="rule-row" style="margin-top:8px">' +
+        '<span class="rule-lead">Else</span>' +
+        '<select class="fld" data-f="otherwise">' + targetOptions(qi, (q.logic && q.logic.otherwise) || '') + '</select>' +
+        '</div>' +
+        '<p class="fld-help">Rules are checked in order and the first match wins.</p>';
+    }
+
+    h += '</div>';
+    return h;
+  }
+
+  // Operators worth offering per type. A scale/number question compares
+  // numerically; a choice question compares against its options.
+  function opOptions(def, current) {
+    var ops = [
+      { id: 'is', name: 'is' },
+      { id: 'is-not', name: 'is not' }
+    ];
+    if (def.scale || def.id === 'number') {
+      ops = [
+        { id: 'is', name: 'is' },
+        { id: 'lte', name: 'is at most' },
+        { id: 'gte', name: 'is at least' },
+        { id: 'lt', name: 'is under' },
+        { id: 'gt', name: 'is over' }
+      ];
+    } else if (!def.opts && def.id !== 'yes-no') {
+      ops = [
+        { id: 'is', name: 'is' },
+        { id: 'is-not', name: 'is not' },
+        { id: 'contains', name: 'contains' },
+        { id: 'not-contains', name: 'does not contain' }
+      ];
+    }
+    ops.push({ id: 'answered', name: 'is answered' });
+    ops.push({ id: 'not-answered', name: 'is left blank' });
+    var h = '';
+    for (var i = 0; i < ops.length; i++) {
+      h += '<option value="' + esc(ops[i].id) + '"' + (ops[i].id === current ? ' selected' : '') + '>' + esc(ops[i].name) + '</option>';
+    }
+    return h;
+  }
+
+  // A choice question offers its own options, so a rule cannot be typed
+  // against a value that does not exist.
+  function valueField(q, def, rule) {
+    if (def.opts && Array.isArray(q.options) && q.options.length) {
+      var h = '<select class="fld" data-r="value">';
+      for (var i = 0; i < q.options.length; i++) {
+        h += '<option value="' + esc(q.options[i]) + '"' + (String(q.options[i]) === String(rule.value) ? ' selected' : '') + '>' + esc(q.options[i]) + '</option>';
+      }
+      return h + '</select>';
+    }
+    if (q.type === 'yes-no') {
+      var yes = q.yesLabel || 'Yes', no = q.noLabel || 'No';
+      return '<select class="fld" data-r="value">' +
+        '<option value="' + esc(yes) + '"' + (String(rule.value) === String(yes) ? ' selected' : '') + '>' + esc(yes) + '</option>' +
+        '<option value="' + esc(no) + '"' + (String(rule.value) === String(no) ? ' selected' : '') + '>' + esc(no) + '</option>' +
+        '</select>';
+    }
+    if (def.scale || q.type === 'number') {
+      return '<input type="number" class="fld" data-r="value" value="' + esc(rule.value == null ? '' : rule.value) + '">';
+    }
+    return '<input type="text" class="fld" data-r="value" value="' + esc(rule.value == null ? '' : rule.value) + '" placeholder="Their answer">';
+  }
+
+  function targetOptions(qi, current) {
+    var h = '<option value=""' + (!current ? ' selected' : '') + '>the next question</option>';
+    for (var i = qi + 1; i < C.questions.length; i++) {
+      var t = C.questions[i];
+      h += '<option value="' + esc(t.id) + '"' + (t.id === current ? ' selected' : '') + '>' +
+        esc((i + 1) + '. ' + (t.label || 'Untitled question')) + '</option>';
+    }
+    h += '<option value="end"' + (current === 'end' ? ' selected' : '') + '>finish the form</option>';
+    return h;
+  }
+
+  function ensureLogic(q) {
+    if (!q.logic || typeof q.logic !== 'object') q.logic = {};
+    if (!Array.isArray(q.logic.rules)) q.logic.rules = [];
+    return q.logic;
+  }
+  /** Drop an empty logic block so a saved config stays clean. */
+  function tidyLogic(q) {
+    if (q.logic && (!q.logic.rules || !q.logic.rules.length) && !q.logic.otherwise) delete q.logic;
   }
 
   // ── Question list events (delegated, so a re-render keeps working) ──
@@ -608,6 +762,29 @@
       }
       if (i < 0) return;
 
+      if (act === 'rule-add') {
+        var lg = ensureLogic(C.questions[i]);
+        var d = typeDef(C.questions[i].type);
+        var seed = { op: 'is', value: '', goTo: '' };
+        if (d.opts && C.questions[i].options && C.questions[i].options.length) seed.value = C.questions[i].options[0];
+        if (C.questions[i].type === 'yes-no') seed.value = C.questions[i].yesLabel || 'Yes';
+        if (d.scale || C.questions[i].type === 'number') { seed.op = 'lte'; seed.value = ''; }
+        lg.rules.push(seed);
+        renderQuestions();
+        changed();
+        return;
+      }
+      if (act === 'rule-del') {
+        var ri = parseInt(btn.getAttribute('data-rule'), 10);
+        if (C.questions[i].logic && Array.isArray(C.questions[i].logic.rules)) {
+          C.questions[i].logic.rules.splice(ri, 1);
+          tidyLogic(C.questions[i]);
+        }
+        renderQuestions();
+        changed();
+        return;
+      }
+
       if (act === 'up' && i > 0) {
         C.questions.splice(i - 1, 0, C.questions.splice(i, 1)[0]);
       } else if (act === 'down' && i < C.questions.length - 1) {
@@ -618,8 +795,17 @@
         C.questions.splice(i + 1, 0, copy);
         openId = copy.id;
       } else if (act === 'del') {
+        var goneId = C.questions[i].id;
         C.questions.splice(i, 1);
         if (openId === id) openId = null;
+        // Any rule pointing at the deleted question would dead-end. The widget
+        // falls through safely, but the config should not carry a broken target.
+        C.questions.forEach(function (other) {
+          if (!other.logic) return;
+          (other.logic.rules || []).forEach(function (r) { if (r.goTo === goneId) r.goTo = ''; });
+          if (other.logic.otherwise === goneId) delete other.logic.otherwise;
+          tidyLogic(other);
+        });
       } else {
         return;
       }
@@ -629,6 +815,30 @@
 
     // Live edits. 'input' for text, 'change' for select/checkbox.
     function apply(e) {
+      // Rule fields first — they live inside a question card and carry data-r.
+      var rf = e.target.getAttribute && e.target.getAttribute('data-r');
+      if (rf) {
+        var rcard = e.target.closest('.qcard');
+        var rwrap = e.target.closest('[data-rule]');
+        if (!rcard || !rwrap) return;
+        var qi = indexOf(rcard.getAttribute('data-qid'));
+        var ri = parseInt(rwrap.getAttribute('data-rule'), 10);
+        if (qi < 0 || isNaN(ri)) return;
+        var lg = ensureLogic(C.questions[qi]);
+        var rule = lg.rules[ri];
+        if (!rule) return;
+        if (rf === 'op') {
+          rule.op = e.target.value;
+          renderQuestions();     // the value field depends on the operator
+        } else if (rf === 'value') {
+          rule.value = e.target.value;
+        } else if (rf === 'goTo') {
+          rule.goTo = e.target.value;
+        }
+        changed();
+        return;
+      }
+
       var f = e.target.getAttribute && e.target.getAttribute('data-f');
       if (!f) return;
       var card = e.target.closest('.qcard');
@@ -652,9 +862,16 @@
         // A type with an obvious contact meaning links itself, unless the agent
         // has already chosen otherwise.
         if (d.mapTo && !q.mapTo) q.mapTo = d.mapTo;
+        // Rules were written against the OLD type's operators and values, so
+        // they would be meaningless (or silently never match) against the new
+        // one. Clear them rather than leave a rule that quietly does nothing.
+        if (q.logic) delete q.logic;
         renderQuestions();       // the fields on show depend on the type
       } else if (f === 'mapTo') {
         q.mapTo = e.target.value || undefined;
+      } else if (f === 'otherwise') {
+        ensureLogic(q).otherwise = e.target.value || undefined;
+        tidyLogic(q);
       } else {
         q[f] = e.target.value;
         if (f === 'label') {
