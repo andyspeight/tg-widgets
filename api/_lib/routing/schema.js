@@ -20,6 +20,9 @@ export const KNOWN_WIDGETS = [
   'newsletter',
   'popup',
   'enquiry-form',
+  // General-purpose (non travel) conversational form — the Typeform-style
+  // widget. Its answers travel in lead.custom; the travel.* block stays empty.
+  'form',
   'brochure',
   'quiz',
   'calculator',

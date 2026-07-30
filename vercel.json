@@ -251,6 +251,10 @@
       "destination": "/demo-enquiry.html"
     },
     {
+      "source": "/demo-form",
+      "destination": "/demo-form.html"
+    },
+    {
       "source": "/demo-enquirypro",
       "destination": "/demo-enquirypro.html"
     },
@@ -469,6 +473,10 @@
     {
       "source": "/editor-enquiry",
       "destination": "/editor-enquiry.html"
+    },
+    {
+      "source": "/editor-form",
+      "destination": "/editor-form.html"
     },
     {
       "source": "/editor-enquirypro",
@@ -1002,6 +1010,23 @@
     },
     {
       "source": "/widget-enquiry.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-form.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
