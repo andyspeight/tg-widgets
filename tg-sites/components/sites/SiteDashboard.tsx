@@ -146,6 +146,16 @@ export function SiteDashboard({ account, site, siteName, siteUrl, pages: initial
               Theme
             </a>
 
+            {/*
+              A plain anchor for the same reason as Theme above: these settings are
+              in the head of every rendered page, so coming back wants fresh server
+              output rather than a tree built before the change.
+            */}
+            <a className="sv-btn" href="/settings">
+              <Icon name="edit" size={16} />
+              Settings
+            </a>
+
             <button
               type="button"
               className="sv-btn"

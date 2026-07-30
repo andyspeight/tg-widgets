@@ -1,0 +1,78 @@
+/*
+ * The settings screen.
+ *
+ * Almost everything is borrowed from theme.css, deliberately: tv-wrap, tv-head,
+ * tv-tabs, tv-group, tv-field and tv-bar are all shared, so the two screens are one
+ * design rather than two. What is here is only what settings needs and theme does
+ * not.
+ *
+ * Every value is an --ed- token. No --ed-7 and no bare --ed-r: neither exists, both
+ * are easy to write by analogy, and a var() that resolves to nothing drops the whole
+ * declaration silently. tests/db.test.ts fails the build for it.
+ */
+
+/* A quiet mark on the Travelgenix tab, so it is obvious at a glance which panel a
+   client would never see. Not a colour alone: it sits beside a text label. */
+.st-staff-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-inline-start: var(--ed-2);
+  border-radius: var(--ed-r-full);
+  background: var(--ed-danger);
+  vertical-align: middle;
+}
+
+.st-staff {
+  border: 1px solid var(--ed-danger);
+  border-radius: var(--ed-r-lg);
+  padding: var(--ed-5);
+}
+
+.st-warn {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ed-2);
+  margin: 0 0 var(--ed-4);
+  padding: var(--ed-3);
+  border: 1px solid var(--ed-danger);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-well);
+  color: var(--ed-ink);
+  font-size: var(--ed-text-sm);
+  line-height: 1.5;
+}
+
+/*
+ * A code field, and the monospace matters more than it looks.
+ *
+ * This is where somebody reads a pasted snippet back to check it. In the UI sans a
+ * stray quote, an l against a 1 and an O against a 0 all look the same, which is
+ * exactly the class of mistake that breaks a script tag. Tabs are shown at four
+ * spaces rather than eight so an indented snippet does not wrap.
+ */
+.st-code {
+  width: 100%;
+  min-height: 160px;
+  padding: var(--ed-3);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-sunken);
+  color: var(--ed-ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--ed-text-sm);
+  line-height: 1.6;
+  tab-size: 4;
+  /* Vertical only. Horizontal resize inside a fixed-width panel just clips. */
+  resize: vertical;
+  /* A long minified snippet must wrap rather than scroll sideways, or the end of it
+     is unreachable without dragging. */
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.st-code:focus {
+  outline: none;
+  border-color: var(--ed-accent);
+  box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.15);
+}
