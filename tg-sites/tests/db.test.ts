@@ -540,22 +540,73 @@ describe('nothing queries round the side', () => {
     expect(offenders, 'these import the pool directly instead of using withTenant').toEqual([]);
   });
 
-  it('every query in lib/db goes through a tenant scope', () => {
-    const files = walk(join(ROOT, 'lib', 'db'));
+  /*
+   * This was an allow-list keyed on filename, and the allowance was unlimited:
+   * once a file was named, it could open as many unscoped connections as it
+   * liked. That got the wrong answer twice. It flagged lib/db/users.ts, which
+   * legitimately opens two doors of its own for the questions that HAVE no
+   * tenant, and it would have said nothing had tenants.ts grown a second
+   * unscoped query.
+   *
+   * So it now checks the property rather than the file: a connection is opened
+   * inside a transaction whose first statement sets a scope. The set of files
+   * allowed to open one at all is still pinned, because a fourth door is a
+   * decision worth making on purpose rather than by writing a line of code.
+   */
+  /*
+   * A source, not a RegExp, and a fresh one built at each use.
+   *
+   * A shared /g regex advances lastIndex on every .test(), so calling it once
+   * per file in a filter checks the first file, skips the second, checks the
+   * third. The first version of this test did exactly that and quietly dropped
+   * withTenant.ts from the list of doors, which is the one file the whole rule
+   * is about.
+   */
+  const DOOR_PATTERN = String.raw`\bdb\((?:'app'|'renderer'|role)\)`;
 
-    for (const file of files) {
-      const source = readFileSync(file, 'utf8');
+  it('only the documented doors open a connection', () => {
+    const opens = walk(join(ROOT, 'lib', 'db'))
+      .filter((file) => !file.endsWith('client.ts')) // client.ts IS the pool
+      .filter((file) => new RegExp(DOOR_PATTERN).test(readFileSync(file, 'utf8')))
+      .map((file) => file.slice(ROOT.length + 1))
+      .sort();
+
+    expect(opens, 'a new file opens its own connection, which needs a look').toEqual([
+      join('lib', 'db', 'tenants.ts'), // resolve_tenant, before a tenant is known
+      join('lib', 'db', 'users.ts'), // withLogin and withUser, likewise
+      join('lib', 'db', 'withTenant.ts'), // withTenant and withPublicTenant
+    ]);
+  });
+
+  it('every connection is opened inside a transaction', () => {
+    const offenders: string[] = [];
+
+    for (const file of walk(join(ROOT, 'lib', 'db'))) {
       const name = file.slice(ROOT.length + 1);
-
-      // client.ts creates the pools. tenants.ts holds the single documented
-      // exception, the hostname lookup that runs before a tenant is known.
       if (name.endsWith('client.ts')) continue;
 
-      const raw = source.match(/\bdb\((?:'app'|'renderer'|role)\)/g) ?? [];
-      const allowed = name.endsWith('tenants.ts') || name.endsWith('withTenant.ts') ? raw.length : 0;
+      const source = readFileSync(file, 'utf8');
 
-      expect(raw.length, `${name} reaches for a pool directly`).toBeLessThanOrEqual(allowed);
+      for (const match of source.matchAll(new RegExp(DOOR_PATTERN, 'g'))) {
+        const after = source.slice(match.index!, match.index! + 240);
+
+        // .begin() is the only way to get a transaction, and every begin body
+        // in this codebase sets its scope as the first statement. That last
+        // part is asserted behaviourally, per door, further up this file.
+        if (after.includes('.begin(')) continue;
+
+        // The one documented exception. resolve_tenant takes the hostname as an
+        // argument rather than reading a setting, so there is nothing for a
+        // transaction to scope, and it is SECURITY DEFINER precisely so that it
+        // needs no scope. See db/migrations/0006_resolve_tenant.sql.
+        if (after.includes('resolve_tenant')) continue;
+
+        const line = source.slice(0, match.index!).split('\n').length;
+        offenders.push(`${name}:${line}`);
+      }
     }
+
+    expect(offenders, 'these query a pool with no transaction and so no scope').toEqual([]);
   });
 });
 

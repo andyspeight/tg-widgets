@@ -1,3 +1,5 @@
+import { fileURLToPath } from 'node:url';
+
 import { defineConfig } from 'vitest/config';
 
 /**
@@ -13,5 +15,15 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['tests/**/*.test.ts'],
+    // The stub is a module, not a suite. Without this it is collected as an
+    // empty test file and reported as a failure.
+    exclude: ['tests/stubs/**'],
+  },
+  resolve: {
+    alias: {
+      // See tests/stubs/server-only.ts. The real package throws on import
+      // anywhere that is not a React Server Component, which is every test.
+      'server-only': fileURLToPath(new URL('./tests/stubs/server-only.ts', import.meta.url)),
+    },
   },
 });

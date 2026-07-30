@@ -57,6 +57,8 @@ export type IconName =
   | 'link'
   | 'link-off'
   | 'blank'
+  // people
+  | 'user'
   // viewports
   | 'desktop'
   | 'tablet'
@@ -110,6 +112,10 @@ const PATHS: Record<IconName, string> = {
   blank: '',
   search: 'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3',
 
+  // A head and shoulders, same 24x24 box and 2px stroke as the rest.
+  // Drawn open at the bottom so it reads as a person rather than a filled
+  // avatar chip, which at 16px turns into a grey blob.
+  user: 'M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4.5 21a7.5 7.5 0 0 1 15 0',
   desktop: 'M3 5h18v11H3zM8 20h8M12 16v4',
   tablet: 'M6 3h12v18H6zM11 18h2',
   phone: 'M8 3h8v18H8zM11 18h2',

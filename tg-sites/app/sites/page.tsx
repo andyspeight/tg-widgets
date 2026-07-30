@@ -1,14 +1,14 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 
 // Imported here as well as in SiteDashboard. The error paths below render
 // .sv- classes without mounting the dashboard, and a bare unstyled error is a
 // poor way to explain a misconfiguration.
 import '../../components/sites/sites.css';
 import { SiteDashboard } from '../../components/sites/SiteDashboard';
-import { AUTH_IS_NOT_BUILT_YET } from '../../lib/auth/temporary';
+import { activeSite, currentUser } from '../../lib/auth/session';
 import { listPages } from '../../lib/db/pages';
 import { getTenant, siteUrl } from '../../lib/db/tenants';
-import { currentTenantId, currentWorkspace, DEFAULT_WORKSPACE } from '../../lib/session';
 
 export const metadata: Metadata = {
   title: 'Pages · Travelgenix Sites',
@@ -23,13 +23,15 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function SitesPage() {
-  const workspace = await currentWorkspace();
-
-  let tenantId: string | null = null;
+  let user: Awaited<ReturnType<typeof currentUser>> = null;
+  let site: Awaited<ReturnType<typeof activeSite>> = null;
   let failure: string | null = null;
 
   try {
-    tenantId = await currentTenantId();
+    user = await currentUser();
+    // Only ask which site once there is somebody to ask about. Reversing these
+    // would run a membership query for an anonymous request on every hit.
+    if (user) site = await activeSite();
   } catch (error) {
     failure = error instanceof Error ? error.message : String(error);
   }
@@ -38,34 +40,38 @@ export default async function SitesPage() {
   // saying so beats a stack trace nobody can act on.
   if (failure) return <Unreachable detail={failure} />;
 
-  if (!tenantId) {
+  // Not signed in, or signed in as somebody whose account has since gone.
+  // Both end up at the same place, and ?next= brings them back here after.
+  if (!user) redirect('/signin?next=%2Fsites');
+
+  if (!site) {
     return (
-      <Problem heading={`No site called "${workspace}"`}>
+      <Problem heading="No sites yet">
         <p>
-          The workspace this browser remembers does not exist in the database.
-          It may have been renamed or removed.
+          You are signed in as <code>{user.email}</code>, but this account is not
+          a member of any site.
         </p>
         <p>
-          The seeded site is <code>{DEFAULT_WORKSPACE}</code>. Adding one is a
-          row in <code>tenants</code> until there is a screen for it.
+          Somebody with owner access has to add you to one. Until then there is
+          nothing here to edit.
         </p>
       </Problem>
     );
   }
 
   const [tenant, url, pages] = await Promise.all([
-    getTenant(tenantId),
-    siteUrl(tenantId),
-    listPages(tenantId),
+    getTenant(site.tenantId),
+    siteUrl(site.tenantId),
+    listPages(site.tenantId),
   ]);
 
   return (
     <SiteDashboard
-      workspace={workspace}
-      siteName={tenant?.name ?? workspace}
+      account={{ email: user.email, name: user.name }}
+      site={{ slug: site.slug, available: site.available }}
+      siteName={tenant?.name ?? site.name}
       siteUrl={url}
       pages={pages}
-      openAccess={AUTH_IS_NOT_BUILT_YET}
     />
   );
 }

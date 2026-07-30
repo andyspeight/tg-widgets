@@ -20,7 +20,6 @@
 
 import { revalidatePath } from 'next/cache';
 
-import { currentUserId } from '../../lib/auth/temporary';
 import {
   createPage,
   deletePage,
@@ -34,7 +33,7 @@ import {
   type PageWithContent,
 } from '../../lib/db/pages';
 import { slugify } from '../../lib/content/slug';
-import { chooseWorkspace, requireTenantId } from '../../lib/session';
+import { currentUserId, requireTenantId } from '../../lib/auth/session';
 
 export type ActionResult<T = undefined> =
   | { ok: true; data: T }
@@ -66,7 +65,12 @@ function explain(error: unknown): string {
   if (message.includes('pages_slug_check') || message.includes('violates check constraint')) {
     return 'That address has characters it cannot use. Lowercase letters, numbers and hyphens only.';
   }
-  if (message.startsWith('No workspace called')) return message;
+  // Raised by requireSite when a signed-in person belongs to no site, and by
+  // SignInRequired when the cookie has run out. Both are worth showing as
+  // written: one needs an invitation, the other needs signing in again, and
+  // "something went wrong" would send somebody looking for a bug.
+  if (message.startsWith('This account is not a member')) return message;
+  if (message.startsWith('Your session has ended')) return message;
   if (message.startsWith('Refusing to save')) return message;
   if (message.includes('own parent')) return 'A page cannot sit inside itself.';
 
@@ -144,7 +148,7 @@ export async function saveDraftAction(
   page: unknown,
 ): Promise<ActionResult<PageSummary | null>> {
   return attempt(async () =>
-    saveDraft(await requireTenantId(), pageId, page, currentUserId() ?? undefined),
+    saveDraft(await requireTenantId(), pageId, page, (await currentUserId()) ?? undefined),
   );
 }
 
@@ -152,7 +156,7 @@ export async function publishPageAction(
   pageId: string,
 ): Promise<ActionResult<PageSummary | null>> {
   const result = await attempt(async () =>
-    publishPage(await requireTenantId(), pageId, currentUserId() ?? undefined),
+    publishPage(await requireTenantId(), pageId, (await currentUserId()) ?? undefined),
   );
 
   if (result.ok) {
@@ -172,18 +176,6 @@ export async function unpublishPageAction(
     revalidatePath('/preview');
   }
   return result;
-}
-
-// ---------------------------------------------------------------------------
-// Workspace
-// ---------------------------------------------------------------------------
-
-export async function chooseWorkspaceAction(slug: string): Promise<ActionResult<boolean>> {
-  const ok = await chooseWorkspace(slug);
-  if (!ok) return { ok: false, error: `No workspace called "${slug}".` };
-
-  revalidatePath('/sites');
-  return { ok: true, data: true };
 }
 
 // ---------------------------------------------------------------------------

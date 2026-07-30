@@ -1,9 +1,8 @@
 import { redirect } from 'next/navigation';
 
 import { EditorShell } from '../../components/editor/EditorShell';
-import { AUTH_IS_NOT_BUILT_YET } from '../../lib/auth/temporary';
+import { activeSite, currentUserId } from '../../lib/auth/session';
 import { getPage } from '../../lib/db/pages';
-import { currentTenantId } from '../../lib/session';
 
 export const metadata = {
   title: 'Editor · Travelgenix Sites',
@@ -21,9 +20,6 @@ export const dynamic = 'force-dynamic';
  * There is no scratch mode. It was tempting, because the shell already had
  * one in localStorage, but two persistence paths means every save, undo and
  * publish has to work twice and only one of them ever gets exercised.
- *
- * `isStaff` is still hardcoded, because there is no auth. It becomes a
- * session lookup at the same time as everything else in lib/auth/temporary.
  */
 export default async function EditorPage({
   searchParams,
@@ -31,25 +27,42 @@ export default async function EditorPage({
   searchParams: Promise<{ page?: string }>;
 }) {
   const { page: pageId } = await searchParams;
+
+  /*
+   * The guard comes first, before the page id is even looked at.
+   *
+   * Reversing these would mean an anonymous request could tell a real page id
+   * from a made-up one by which way it was bounced, and a page id is a uuid
+   * that appears in a URL an agent might paste anywhere.
+   */
+  if (!(await currentUserId())) {
+    const next = pageId
+      ? `/signin?next=${encodeURIComponent(`/editor?page=${pageId}`)}`
+      : '/signin?next=%2Fsites';
+    redirect(next);
+  }
+
   if (!pageId) redirect('/sites');
 
-  const tenantId = await currentTenantId();
-  if (!tenantId) redirect('/sites');
+  const site = await activeSite();
+  if (!site) redirect('/sites');
 
   // Not found and not yours give the same answer here, deliberately. RLS
   // makes another tenant's page indistinguishable from one that does not
   // exist, so a guessed id confirms nothing.
-  const page = await getPage(tenantId, pageId);
+  const page = await getPage(site.tenantId, pageId);
   if (!page) redirect('/sites');
 
   return (
     <EditorShell
-      isStaff
+      // Staff tools are for Travelgenix people, not for a client's agent.
+      // Owner is the closest thing the membership table has to that today; it
+      // becomes a real staff flag on the user when there is one to read.
+      isStaff={site.role === 'owner'}
       pageId={page.id}
       initialPage={page.content}
       initialStatus={page.status}
       initialHasUnpublishedChanges={page.hasUnpublishedChanges}
-      openAccess={AUTH_IS_NOT_BUILT_YET}
     />
   );
 }

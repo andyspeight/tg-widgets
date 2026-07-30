@@ -53,7 +53,20 @@ export function Modal({
         dialog.current?.querySelectorAll<HTMLElement>(
           'button:not([disabled]), input:not([disabled]), select, textarea, a[href], [tabindex]:not([tabindex="-1"])',
         ) ?? [],
-      ).filter((el) => el.offsetParent !== null),
+      )
+        .filter((el) => el.offsetParent !== null)
+        /*
+         * tabindex="-1" means "reachable by script, not by Tab", and the
+         * selector above cannot express that: `button:not([disabled])` matches
+         * a button whatever its tabindex, so the exclusion in the last clause
+         * only covers elements that have nothing else to match on.
+         *
+         * It matters because a dialog whose form submits on Enter carries a
+         * hidden submit button with tabindex="-1". Without this filter that
+         * button joins the focus ring, so opening the dialog puts focus on an
+         * invisible control and Tab cycles through a stop nobody can see.
+         */
+        .filter((el) => el.getAttribute('tabindex') !== '-1'),
     [],
   );
 

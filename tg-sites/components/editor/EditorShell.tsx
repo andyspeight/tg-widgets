@@ -17,7 +17,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { publishPageAction, saveDraftAction } from '../../app/actions/pages';
-import { OPEN_ACCESS_WARNING } from '../../lib/auth/temporary';
 import type { Page } from '../../lib/content/schema';
 import { parsePage } from '../../lib/content/schema';
 import { createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
@@ -89,8 +88,6 @@ interface EditorProps {
   initialPage: Page;
   initialStatus: 'draft' | 'published';
   initialHasUnpublishedChanges: boolean;
-  /** True while there is no sign in. Comes from lib/auth/temporary. */
-  openAccess?: boolean;
 }
 
 export function EditorShell({
@@ -99,7 +96,6 @@ export function EditorShell({
   initialPage,
   initialStatus,
   initialHasUnpublishedChanges,
-  openAccess = false,
 }: EditorProps) {
   const [history, setHistory] = useState<History>({
     past: [],
@@ -380,19 +376,7 @@ export function EditorShell({
   // ---------------------------------------------------------------------
 
   return (
-    <div
-      className="ed-root"
-      data-pane={mobilePane}
-      data-theme={theme}
-      data-open-access={openAccess ? 'true' : undefined}
-    >
-      {openAccess && (
-        <p className="ed-warn" role="status">
-          <Icon name="warning" size={14} />
-          {OPEN_ACCESS_WARNING}
-        </p>
-      )}
-
+    <div className="ed-root" data-pane={mobilePane} data-theme={theme}>
       <header className="ed-topbar">
         {/*
           A plain anchor, not next/link, for two reasons. Leaving the editor

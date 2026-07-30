@@ -26,7 +26,7 @@
  *     fixes the fact that hover does not exist on a tablet.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Page, Row } from '../../lib/content/schema';
 import { blockLabel, createRow } from '../../lib/content/factory';
 import {

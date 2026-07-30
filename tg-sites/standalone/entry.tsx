@@ -26,10 +26,11 @@ if (container) {
       initialStatus="draft"
       initialHasUnpublishedChanges
       /*
-        openAccess is deliberately NOT set here. The notice it shows warns
-        that anyone with the link can edit these pages, which is true of the
-        deployed editor and false of a local file with no database behind it.
-        The wrapper's own banner says the accurate thing for this build.
+        There is no openAccess prop any more. It carried a notice saying that
+        anyone with the link could edit these pages, which was true of the
+        deployed editor until sign-in landed and was never true of a local file
+        with no database behind it. The wrapper's own banner says the accurate
+        thing for this build.
       */
     />,
   );

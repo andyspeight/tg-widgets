@@ -9,7 +9,7 @@
  * keeps a publish or a rename instant.
  */
 
-import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
+import { useCallback, useEffect, useState, useTransition } from 'react';
 import Link from 'next/link';
 
 import {
@@ -21,7 +21,8 @@ import {
 } from '../../app/actions/pages';
 import { slugify } from '../../lib/content/slug';
 import type { PageSummary } from '../../lib/db/pages';
-import { OPEN_ACCESS_WARNING } from '../../lib/auth/temporary';
+import type { Membership } from '../../lib/db/users';
+import { AccountBar } from '../auth/AccountBar';
 import { Icon } from '../editor/Icon';
 import { ConfirmDialog, Modal } from '../ui/Modal';
 import './sites.css';
@@ -34,15 +35,16 @@ type Dialog =
   | null;
 
 interface Props {
-  workspace: string;
+  /** Who is signed in. There is always somebody: the page redirects if not. */
+  account: { email: string; name: string | null };
+  /** Which site, and the others this person could switch to. */
+  site: { slug: string; available: Membership[] };
   siteName: string;
   siteUrl: string;
   pages: PageSummary[];
-  /** True while there is no sign in. Comes from lib/auth/temporary. */
-  openAccess: boolean;
 }
 
-export function SiteDashboard({ workspace, siteName, siteUrl, pages: initial, openAccess }: Props) {
+export function SiteDashboard({ account, site, siteName, siteUrl, pages: initial }: Props) {
   const [pages, setPages] = useState(initial);
   const [dialog, setDialog] = useState<Dialog>(null);
   const [error, setError] = useState<string | null>(null);
@@ -109,17 +111,23 @@ export function SiteDashboard({ workspace, siteName, siteUrl, pages: initial, op
 
   return (
     <div className="sv-root" data-theme={theme}>
-      {openAccess && (
-        <p className="sv-warn" role="status">
-          <Icon name="warning" size={16} />
-          {OPEN_ACCESS_WARNING}
-        </p>
-      )}
+      <AccountBar
+        email={account.email}
+        name={account.name}
+        currentSlug={site.slug}
+        available={site.available}
+      />
 
       <div className="sv-wrap">
         <header className="sv-head">
           <div>
-            <p className="sv-eyebrow">Workspace: {workspace}</p>
+            {/*
+              The eyebrow said "Workspace: demo" when a workspace was a slug in
+              a cookie. Now the site's name is the h1 and the switcher is in the
+              bar above, so repeating either here would be the same fact three
+              times. It says what the screen is instead.
+            */}
+            <p className="sv-eyebrow">Pages</p>
             <h1 className="sv-title">{siteName}</h1>
             <p className="sv-url">
               Lives at <code>{siteUrl}</code>
@@ -419,7 +427,84 @@ function PageDialog({
           void submit();
         }}
       >
-        {/* Submit on Enter, without a second visible button. */}
+        {message && (
+          <p className="sv-msg" role="alert">
+            {message}
+          </p>
+        )}
+
+        <div className="sv-field">
+          <label htmlFor="page-title">Page name</label>
+          <input
+            id="page-title"
+            value={title}
+            placeholder="About us"
+            onChange={(event) => setTitle(event.target.value)}
+          />
+          <small>What it is called in your list of pages.</small>
+        </div>
+
+        <div className="sv-field">
+          <label htmlFor="page-slug">Address</label>
+          <input
+            id="page-slug"
+            value={slugIsMine ? slug : slugify(title)}
+            placeholder="about-us"
+            onChange={(event) => {
+              setSlugIsMine(true);
+              setSlug(event.target.value);
+            }}
+          />
+          <small>
+            {isRename
+              ? 'Changing this breaks any existing link to the page.'
+              : slugIsMine
+                ? 'Leave it empty and this becomes the home page.'
+                : 'Filled in from the name. Change it if you want something shorter.'}
+          </small>
+        </div>
+
+        {/*
+          The consequence, stated rather than implied.
+
+          An empty address quietly means "home page", which is right for the
+          first page and almost never right for the fifth. Hiding that in grey
+          helper text meant naming a page "About us", leaving the address alone
+          and silently making a second home page, which the database then
+          refused with a duplicate error that explained nothing. Now the
+          outcome is on screen before the button is pressed.
+        */}
+        <p className="sv-preview" data-tone={isHome && !homeIsExpected ? 'warn' : 'ok'}>
+          <Icon name={isHome && !homeIsExpected ? 'warning' : 'check'} size={16} />
+          {isHome ? (
+            <span>
+              {homeIsExpected ? (
+                <>
+                  This will be the <strong>home page</strong>, at <code>{host}</code>
+                </>
+              ) : (
+                <>
+                  An empty address means the <strong>home page</strong>, and this site
+                  already has one. Give it an address unless that is what you meant.
+                </>
+              )}
+            </span>
+          ) : (
+            <span>
+              Will live at{' '}
+              <code>
+                {host}/<strong>{effectiveSlug}</strong>
+              </code>
+            </span>
+          )}
+        </p>
+
+        {/*
+          Submit on Enter, without a second visible button.
+
+          Last in the form on purpose. The Modal focuses the first control it
+          finds when it opens, and it should find the page name field, not this.
+        */}
         <button type="submit" className="tg-visually-hidden" tabIndex={-1} aria-hidden="true" />
       </form>
     </Modal>

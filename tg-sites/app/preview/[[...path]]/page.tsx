@@ -4,7 +4,7 @@ import Link from 'next/link';
 import '../../../components/sites/sites.css';
 import { PageRenderer } from '../../../components/render/PageRenderer';
 import { getPublishedPage } from '../../../lib/db/pages';
-import { currentTenantId, currentWorkspace } from '../../../lib/session';
+import { activeSite } from '../../../lib/auth/session';
 
 /**
  * The published site, rendered on the server.
@@ -20,8 +20,19 @@ import { currentTenantId, currentWorkspace } from '../../../lib/session';
  *
  * Living under /preview because the editor and the sites share one domain for
  * now. On a client's own hostname this becomes the root route and the tenant
- * comes from the Host header rather than the workspace cookie. Nothing else
- * about it changes.
+ * comes from the Host header. Nothing else about it changes.
+ *
+ * WHY THIS ONE NEEDS A SESSION
+ *
+ * Two separate questions, and only one of them is about permission. WHICH
+ * tenant is being asked for is answered here by the session, because on a
+ * shared domain there is nothing else to answer it with: the hostname is ours,
+ * not the client's. WHAT can be seen is still answered by the renderer role,
+ * which cannot see a draft even with the right tenant set.
+ *
+ * So this is a staff preview, and it says so rather than showing a sign-in
+ * screen for content that is genuinely public. The public path is the client's
+ * own hostname, and that is a later job.
  */
 
 export const dynamic = 'force-dynamic';
@@ -29,9 +40,9 @@ export const dynamic = 'force-dynamic';
 type Params = { params: Promise<{ path?: string[] }> };
 
 async function load(path: string[] | undefined) {
-  const tenantId = await currentTenantId();
-  if (!tenantId) return null;
-  return getPublishedPage(tenantId, (path ?? []).join('/'));
+  const site = await activeSite();
+  if (!site) return null;
+  return getPublishedPage(site.tenantId, (path ?? []).join('/'));
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
@@ -69,13 +80,25 @@ export default async function PublishedPage({ params }: Params) {
   if (failure) return <Notice heading="Cannot reach the database">{failure}</Notice>;
 
   if (!found) {
-    const workspace = await currentWorkspace();
+    const site = await activeSite();
     const where = (path ?? []).join('/');
+
+    // No site at all means no session, or a session with no memberships.
+    // Either way the answer is not "nothing is published here".
+    if (!site) {
+      return (
+        <Notice heading="Sign in to preview a site">
+          On this domain there is no way to tell which site you mean, so the
+          preview reads it from whoever is signed in.
+        </Notice>
+      );
+    }
+
     return (
       <Notice heading="Nothing published here yet">
         {where
-          ? `The "${workspace}" site has no published page at /${where}.`
-          : `The "${workspace}" site has no published home page.`}
+          ? `${site.name} has no published page at /${where}.`
+          : `${site.name} has no published home page.`}
       </Notice>
     );
   }

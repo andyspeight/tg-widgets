@@ -770,3 +770,160 @@
   text-transform: uppercase;
   color: var(--ed-ink-3);
 }
+
+/* ------------------------------------------------------------------ */
+/* Sign in                                                             */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The form on the front door.
+ *
+ * Narrower than the reading column, because a field wider than about 40
+ * characters reads as "type a paragraph here" and an email is not one. The
+ * fields keep their own sv-field styling so this screen and every dialog have
+ * the same input, rather than a login page with its own idea of a text box.
+ */
+.tg-door__form {
+  margin-top: var(--ed-7);
+  max-width: 380px;
+}
+
+.tg-door__form .sv-msg {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-2);
+  margin-bottom: var(--ed-5);
+}
+
+.tg-door__form .sv-msg svg { flex: none; }
+
+/* One primary action, full width, so there is no doubt what to press. */
+.tg-door__form .tg-door__actions { margin-top: var(--ed-6); }
+.tg-door__form .tg-door__actions .tg-btn { width: 100%; justify-content: center; }
+
+.tg-door__form .tg-door__note { margin-top: var(--ed-7); }
+
+/* ------------------------------------------------------------------ */
+/* Who is signed in, and which site                                    */
+/* ------------------------------------------------------------------ */
+
+/*
+ * A quiet bar above the page title.
+ *
+ * It carries three things that are all context rather than content: which site
+ * you are in, who you are, and the way out. Context belongs at a lower
+ * contrast than the thing it frames, so this is small, grey and separated by a
+ * hairline instead of being a second header competing with the first.
+ */
+.sv-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-3);
+  padding: var(--ed-3) var(--ed-6);
+  border-bottom: 1px solid var(--ed-line);
+  background: var(--ed-panel);
+  font-size: var(--ed-text-sm);
+}
+
+.sv-bar__spacer { flex: 1 1 auto; }
+
+.sv-bar__who {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-2);
+  min-width: 0;
+  color: var(--ed-ink-2);
+}
+
+.sv-bar__who strong {
+  font-weight: 600;
+  color: var(--ed-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+ * The site switcher.
+ *
+ * A native select, on purpose. A custom menu would need its own keyboard
+ * handling, its own focus trap and its own mobile behaviour, and would end up
+ * worse than the one the platform gives away. It is styled to match the
+ * buttons beside it rather than left looking like a form control from 1998.
+ */
+.sv-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ed-2);
+  min-width: 0;
+}
+
+.sv-switch label {
+  font-size: var(--ed-text-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ed-ink-3);
+}
+
+.sv-switch select {
+  appearance: none;
+  max-width: 220px;
+  padding: 6px 28px 6px var(--ed-3);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r);
+  background-color: var(--ed-bg);
+  /* The chevron, inline so there is no request and no icon font. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  color: var(--ed-ink);
+  font: inherit;
+  font-size: var(--ed-text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  text-overflow: ellipsis;
+}
+
+.sv-switch select:hover { border-color: var(--ed-ink-3); }
+
+.sv-switch select:focus-visible {
+  outline: 2px solid var(--ed-accent);
+  outline-offset: 1px;
+  border-color: var(--ed-accent);
+}
+
+.sv-switch select:disabled { opacity: 1; cursor: default; background-image: none; }
+
+/*
+ * Both controls in the bar are small on purpose, and both get a 44px hit area
+ * without growing: the pseudo-element extends the target past the visual edge,
+ * which is the rule about touch targets. Inflating the visuals instead would
+ * make a context bar louder than the page it frames.
+ */
+.sv-bar .tg-btn {
+  position: relative;
+  min-height: 30px;
+  padding: 0 var(--ed-3);
+  font-size: var(--ed-text-sm);
+}
+
+.sv-bar .tg-btn::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 44px;
+  transform: translateY(-50%);
+}
+
+@media (max-width: 640px) {
+  .sv-bar {
+    flex-wrap: wrap;
+    padding: var(--ed-3) var(--ed-5);
+  }
+  .sv-bar__spacer { display: none; }
+  .sv-bar__who { order: 3; width: 100%; }
+  .sv-switch select { max-width: none; flex: 1 1 auto; }
+}

@@ -179,14 +179,66 @@ for the public site. The renderer cannot write, cannot see a draft and cannot
 read the publish history, so a compromised public site cannot become a
 compromised database.
 
-## What is deliberately not here
+## Signing in
 
-**No auth.** The editor is open to anyone who can reach it, and both it and
-the dashboard say so in a banner. `lib/auth/temporary.ts` grants that access
-and supplies the banner text from the same file, so the door and the sign
-cannot be separated. Delete that file when auth lands.
+Two cookies. `tgs_session` is signed with `SESSION_SECRET` and says who you
+are; only the server can write a valid one. `tgs_site` holds a tenant slug and
+is not signed, because it is a preference rather than a permission: every read
+of it goes through the membership list, so a hand-edited value either names a
+site you belong to or is ignored.
+
+**A tenant id only ever comes from the database**, in answer to "which sites
+does this user belong to". Nothing accepts one from a request. That is why the
+site cookie stores a slug: a slug has to be looked up, and the lookup is the
+check.
+
+Three questions run before a tenant is known, and each has its own
+transaction-local setting rather than its own privileged function:
+
+| Question | Setting | Door |
+| --- | --- | --- |
+| Which tenant owns this hostname | none, argument | `resolve_tenant` |
+| Who is signing in | `app.login_email` | `findCredentials` |
+| Which sites are mine | `app.current_user_id` | `listMemberships` |
+
+`resolve_tenant` is still the only `SECURITY DEFINER` function in the
+database, and `db/isolation-check.sql` asserts it.
+
+Identity sits behind `IdentityProvider`, with a scrypt password provider that
+works today and a Travelify SSO adapter that throws rather than pretending.
+`id.travelify.io` is meant to own identity; `auth_users` exists so the sign-in
+path could be finished and tested before those endpoint details arrived, and
+can be dropped when they do.
+
+There is no self-service sign-up and should not be one. Make the first account
+with:
+
+```
+node --experimental-strip-types db/make-user.mjs you@example.com 'a long passphrase' demo
+```
+
+It prints SQL to paste into the Supabase editor and touches nothing itself.
+
+## What is deliberately not here
 
 No media library, no sections library, no widget bridge.
 
-The dashboard has no browser coverage of its own, where the editor has 37
-checks. Worth adding before it grows further.
+**Travelify SSO.** The adapter is written and throws on use. It needs three
+facts from the Travelify side: the authorise and token endpoints, the client
+credentials, and which claim carries the subject that `tenant_users.user_id`
+should match.
+
+**Sessions cannot be revoked one at a time.** The token is signed rather than
+stored, so a stolen one stays valid until it expires, and the only way to kill
+every session is to rotate `SESSION_SECRET`. The fix, if that ever stops being
+the right trade, is a revocation list keyed on the token's `jti`, not a
+rewrite.
+
+**No sliding expiry.** Thirty days fixed, so a daily user signs in again once
+a month. Renewal needs middleware or an action, and neither is worth adding
+until somebody minds.
+
+The dashboard has no browser coverage of its own, where the editor has 43
+checks. That gap is why a broken dialog shipped once, and `noUnusedLocals`
+now catches that particular shape of it. Worth adding properly before this
+grows further.

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import '../components/sites/sites.css';
+import { currentUserId } from '../lib/auth/session';
 
 /**
  * The front door.
@@ -10,9 +11,14 @@ import '../components/sites/sites.css';
  * and buttons as the two screens it points at, so arriving here and then
  * going to the dashboard is one product rather than two.
  *
- * Replaced by a real sign-in once auth exists.
+ * The primary action changes depending on whether anyone is signed in, so it
+ * never sends somebody to a screen that will bounce them straight back.
  */
-export default function Home() {
+export const dynamic = 'force-dynamic';
+
+export default async function Home() {
+  const signedIn = Boolean(await currentUserId());
+
   return (
     <div className="sv-root" data-theme="light">
       <main className="tg-door">
@@ -26,12 +32,22 @@ export default function Home() {
         </p>
 
         <div className="tg-door__actions">
-          <Link className="tg-btn" data-variant="primary" href="/sites">
-            Open your pages
-          </Link>
-          <Link className="tg-btn" href="/preview">
-            See a published page
-          </Link>
+          {signedIn ? (
+            <>
+              <Link className="tg-btn" data-variant="primary" href="/sites">
+                Open your pages
+              </Link>
+              <Link className="tg-btn" href="/preview">
+                See a published page
+              </Link>
+            </>
+          ) : (
+            // One action, because the other one needs a session too and would
+            // only bounce. Two buttons where one works is worse than one.
+            <Link className="tg-btn" data-variant="primary" href="/signin">
+              Sign in
+            </Link>
+          )}
         </div>
 
         <p className="tg-door__note">

@@ -14,6 +14,21 @@
     "jsx": "preserve",
     "incremental": true,
     "noUncheckedIndexedAccess": false,
+
+    // Not tidiness. This catches a class of bug that had already shipped once.
+    //
+    // The new-page dialog was moved onto the shared Modal shell and its entire
+    // body was lost in the move: both fields, the error line and the outcome
+    // preview. Everything still compiled, because the state was all declared
+    // and the submit handler still read the title. The result was a dialog you
+    // could open and could not type into, on the dashboard's primary action,
+    // and it sat on the branch until somebody happened to look.
+    //
+    // With this flag on, that commit fails to build. It names five dead locals,
+    // including isHome and every setter, which is exactly the shape of "this
+    // component computes things it no longer renders".
+    "noUnusedLocals": true,
+
     "plugins": [{ "name": "next" }],
     "paths": { "@/*": ["./*"] }
   },
