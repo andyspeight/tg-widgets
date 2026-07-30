@@ -269,6 +269,137 @@ describe('page queries', () => {
     expect(inside.some((s) => s.sql.includes('insert into public.publish_events'))).toBe(true);
   });
 
+  /*
+   * The prune runs in the SAME transaction as the insert, and that is not a
+   * detail. A publish that recorded its snapshot and then failed to prune would
+   * leave the history one over the limit, which is harmless. A publish that
+   * pruned and then failed to insert would delete the oldest version to make room
+   * for one that never arrived, which is not.
+   */
+  it('prunes the history inside the publish transaction', async () => {
+    const { publishPage, PUBLISH_HISTORY_LIMIT } = await import('../lib/db/pages');
+
+    respond('published_content = draft_content', [{
+      id: 'aaaa', parent_id: null, slug: '', title: 'Home',
+      status: 'published', published_at: '2026-07-29T00:00:00Z',
+      updated_at: '2026-07-29T00:00:00Z', has_unpublished_changes: false,
+    }]);
+
+    await publishPage(ALPHA, 'aaaa', 'user-1');
+
+    const inside = log.slice(
+      log.findIndex((s) => s.sql === 'BEGIN'),
+      log.findIndex((s) => s.sql === 'COMMIT'),
+    );
+
+    const prune = inside.find((s) => s.sql.includes('delete from public.publish_events'));
+    expect(prune, 'nothing prunes the history').toBeTruthy();
+
+    // After the insert, or it makes room for a row that may never land.
+    const insertAt = inside.findIndex((s) => s.sql.includes('insert into public.publish_events'));
+    const pruneAt = inside.findIndex((s) => s.sql.includes('delete from public.publish_events'));
+    expect(pruneAt).toBeGreaterThan(insertAt);
+
+    // Scoped to this page, carrying the limit, and ordered totally. created_at
+    // alone is not unique, so two publishes in one clock tick would either both
+    // survive or both go.
+    expect(prune!.sql).toContain('order by created_at desc, id desc');
+    expect(prune!.params).toContain(PUBLISH_HISTORY_LIMIT);
+    expect(prune!.params.filter((v) => v === 'aaaa')).toHaveLength(2);
+  });
+
+  it('records the title alongside the snapshot, from the row rather than JavaScript', async () => {
+    const { publishPage } = await import('../lib/db/pages');
+
+    respond('published_content = draft_content', [{
+      id: 'aaaa', parent_id: null, slug: '', title: 'Home',
+      status: 'published', published_at: '2026-07-29T00:00:00Z',
+      updated_at: '2026-07-29T00:00:00Z', has_unpublished_changes: false,
+    }]);
+
+    await publishPage(ALPHA, 'aaaa', 'user-1');
+
+    const insert = log.find((s) => s.sql.includes('insert into public.publish_events'))!;
+    // select ... from public.pages, not a parameter: the snapshot and the title
+    // are read back out of the row so they cannot drift from what was published.
+    expect(insert.sql).toContain('from public.pages');
+    expect(insert.sql).toContain('snapshot, title');
+    expect(insert.params).not.toContain('Home');
+  });
+
+  it('the version list does not drag every snapshot across the wire', async () => {
+    const { listPublishes } = await import('../lib/db/pages');
+
+    respond('from public.publish_events', [
+      { id: 'p1', user_id: 'user-1', title: 'Home', created_at: '2026-07-29T00:00:00Z' },
+      { id: 'p2', user_id: null, title: null, created_at: '2026-07-28T00:00:00Z' },
+    ]);
+
+    const rows = await listPublishes(ALPHA, 'aaaa');
+
+    const select = log.find((s) => s.sql.includes('from public.publish_events'))!;
+    // The whole reason the title column exists. Selecting the snapshot here would
+    // pull a page-sized blob per row to render one line of text from each.
+    expect(select.sql).not.toContain('snapshot');
+    expect(select.sql).toContain('order by created_at desc, id desc');
+
+    expect(rows[0].title).toBe('Home');
+    // Null rather than an invented empty string: written before 0014, title unknown.
+    expect(rows[1].title).toBeNull();
+    expect(rows[1].userId).toBeNull();
+  });
+
+  it('restores a version to the DRAFT and leaves the live copy alone', async () => {
+    const { restorePublish } = await import('../lib/db/pages');
+
+    respond('from public.publish_events', [{
+      snapshot: { version: 1, id: 'aaaa', title: 'Tuesday', slug: '', sections: [] },
+    }]);
+    respond('update public.pages', [{
+      id: 'aaaa', parent_id: null, slug: '', title: 'Tuesday', seo: {},
+      status: 'published', published_at: '2026-07-29T00:00:00Z',
+      updated_at: '2026-07-30T00:00:00Z', has_unpublished_changes: true,
+      draft_content: { version: 1, id: 'aaaa', title: 'Tuesday', slug: '', sections: [] },
+    }]);
+
+    const restored = await restorePublish(ALPHA, 'aaaa', 'p1', 'user-1');
+
+    const update = log.find((s) => s.sql.includes('update public.pages'))!;
+    expect(update.sql).toContain('draft_content =');
+    // The three things that must NOT be touched. Restoring is not publishing.
+    expect(update.sql).not.toContain('published_content');
+    expect(update.sql).not.toContain('published_at');
+    expect(update.sql).not.toContain("status");
+
+    // The title and SEO come back too, from the snapshot's own JSON.
+    expect(update.sql).toContain('title');
+    expect(update.sql).toContain('seo');
+    expect(restored?.content.title).toBe('Tuesday');
+  });
+
+  it('will not restore a version belonging to another page', async () => {
+    const { restorePublish } = await import('../lib/db/pages');
+
+    // No canned answer: the lookup matches on publish id AND page id, so a
+    // borrowed id from a sibling page finds nothing.
+    const restored = await restorePublish(ALPHA, 'aaaa', 'belongs-to-bbbb');
+
+    expect(restored).toBeNull();
+    const lookup = log.find((s) => s.sql.includes('from public.publish_events'))!;
+    expect(lookup.params).toEqual(expect.arrayContaining(['belongs-to-bbbb', 'aaaa']));
+    // And nothing was written.
+    expect(log.some((s) => s.sql.includes('update public.pages'))).toBe(false);
+  });
+
+  it('refuses a snapshot that will not parse rather than writing it back', async () => {
+    const { restorePublish } = await import('../lib/db/pages');
+
+    respond('from public.publish_events', [{ snapshot: { nonsense: true } }]);
+
+    await expect(restorePublish(ALPHA, 'aaaa', 'p1')).rejects.toThrow(/cannot be restored/);
+    expect(log.some((s) => s.sql.includes('update public.pages'))).toBe(false);
+  });
+
   it('does not write the audit row when there was nothing to publish', async () => {
     const { publishPage } = await import('../lib/db/pages');
 
@@ -423,7 +554,7 @@ describe('hostname handling', () => {
   it.each([
     ['strips the port', 'Example.COM:3000', 'example.com'],
     ['strips a trailing dot', 'example.com.', 'example.com'],
-    ['handles a staging subdomain', 'iso-alpha.tgsites.io', 'iso-alpha.tgsites.io'],
+    ['handles a preview subdomain', 'iso-alpha.travelgenixsites.com', 'iso-alpha.travelgenixsites.com'],
     ['keeps a bare host', 'localhost', 'localhost'],
   ])('%s', async (_label, input, expected) => {
     const { normaliseHostname } = await import('../lib/db/tenants');

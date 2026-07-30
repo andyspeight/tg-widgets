@@ -23,6 +23,20 @@ import { withPublicTenant, withTenant, type Tx } from './withTenant';
 /** How deep a path may nest. A guard against a cycle, not a product limit. */
 const MAX_PATH_DEPTH = 6;
 
+/**
+ * How many publishes are kept per page.
+ *
+ * A snapshot is the whole page, so this is real storage: a busy page published
+ * twice a day reaches this in three months and then stops growing. Fifty is far
+ * more than anybody scrolls and far less than unbounded.
+ *
+ * Pruned inside the publish transaction rather than by a trigger or a cron. A
+ * trigger would be more robust against a second writer, and there is exactly one
+ * writer, asserted by a test. Doing it in code keeps it visible next to the insert
+ * it belongs to, and testable without a database.
+ */
+export const PUBLISH_HISTORY_LIMIT = 50;
+
 export interface PageSummary {
   id: string;
   parentId: string | null;
@@ -368,11 +382,35 @@ export async function publishPage(
 
     // The snapshot is read back out of the row rather than passed through
     // JavaScript, so it is exactly the bytes that were published and cannot
-    // drift from them.
+    // drift from them. The title comes from the same row for the same reason.
     await tx`
-      insert into public.publish_events (tenant_id, page_id, user_id, snapshot)
-      select tenant_id, id, ${userId ?? null}::text, published_content
+      insert into public.publish_events (tenant_id, page_id, user_id, snapshot, title)
+      select tenant_id, id, ${userId ?? null}::text, published_content, title
       from public.pages where id = ${pageId}::uuid
+    `;
+
+    /*
+     * Prune, in the same transaction as the insert.
+     *
+     * Deleting by id from a subquery rather than by a date or a row number
+     * comparison, because created_at has no uniqueness: two publishes inside the
+     * same clock tick would either both survive a `<` comparison or both be
+     * deleted by a `<=` one. Ordering by (created_at desc, id desc) is total, so
+     * the set of survivors is exactly the newest PUBLISH_HISTORY_LIMIT rows
+     * whatever the timestamps do.
+     *
+     * Scoped to this page: another page's history is not this publish's business,
+     * and the tenant scope is the policy's job as everywhere else in this file.
+     */
+    await tx`
+      delete from public.publish_events
+      where page_id = ${pageId}::uuid
+        and id not in (
+          select id from public.publish_events
+          where page_id = ${pageId}::uuid
+          order by created_at desc, id desc
+          limit ${PUBLISH_HISTORY_LIMIT}
+        )
     `;
 
     return toSummary(rows[0] as Record<string, unknown>);
@@ -417,25 +455,117 @@ export async function deletePage(tenantId: string, pageId: string): Promise<bool
   });
 }
 
-/** The last few publishes, newest first, for a rollback list. */
+export interface PublishRecord {
+  id: string;
+  /** Who pressed publish. Null when it was published before sign-in existed. */
+  userId: string | null;
+  /** The page's title at that moment. Null for rows written before 0014. */
+  title: string | null;
+  createdAt: Date;
+}
+
+/**
+ * The last few publishes, newest first, for a rollback list.
+ *
+ * Deliberately does NOT select the snapshot. Each one is a whole page, so a list of
+ * twenty would drag twenty page-sized blobs across the wire to render twenty lines
+ * of text. The title column exists precisely so this query does not have to.
+ *
+ * Ordered by (created_at desc, id desc) to match the prune in publishPage. Two
+ * publishes in the same clock tick would otherwise come back in an order the
+ * database is free to change between calls, which reads as rows jumping about.
+ */
 export async function listPublishes(
   tenantId: string,
   pageId: string,
   limit = 20,
-): Promise<Array<{ id: string; userId: string | null; createdAt: Date }>> {
+): Promise<PublishRecord[]> {
   const capped = Math.min(Math.max(1, Math.floor(limit) || 1), 100);
 
   return withTenant(tenantId, async (tx) => {
     const rows = await tx`
-      select id, user_id, created_at from public.publish_events
+      select id, user_id, title, created_at from public.publish_events
       where page_id = ${pageId}::uuid
-      order by created_at desc
+      order by created_at desc, id desc
       limit ${capped}
     `;
-    return rows.map((row) => ({
-      id: String(row.id),
-      userId: row.user_id ? String(row.user_id) : null,
-      createdAt: new Date(row.created_at as string),
-    }));
+    return rows.map(toPublishRecord);
+  });
+}
+
+function toPublishRecord(row: Record<string, unknown>): PublishRecord {
+  return {
+    id: String(row.id),
+    userId: row.user_id ? String(row.user_id) : null,
+    title: row.title == null ? null : String(row.title),
+    createdAt: new Date(row.created_at as string),
+  };
+}
+
+/**
+ * Put an old version back, AS A DRAFT.
+ *
+ * THE RESTORE DOES NOT PUBLISH, and that is the whole design. Somebody reaching for
+ * this is already having a bad day: they have published something wrong and want
+ * Tuesday's version back. Restoring straight to live would be a second unreviewed
+ * publish inside a minute, made by the person least able to check it calmly. So it
+ * lands in the draft, they look at it, and they press Publish like any other change,
+ * which also writes its own snapshot and keeps the history honest.
+ *
+ * The side effect of that: the live page is unchanged until they publish. Worth
+ * saying in the UI, because "restore" sounds instant.
+ *
+ * WHAT COMES BACK. The snapshot is the whole Page object, so the title and the SEO
+ * come with it. They are re-stamped onto their columns from the snapshot's own JSON
+ * rather than from the title column, which is only a projection for the list. That
+ * keeps the rule at the top of this file intact: the columns win, and they are
+ * written from the same object that becomes the content.
+ *
+ * Everything goes through parsePage and sanitisePage on the way out. A snapshot is
+ * stored bytes, and stored bytes from an older version of the schema are exactly the
+ * case where a shape can have drifted. It is also the one path in this file that
+ * writes content the current editor did not just produce.
+ */
+export async function restorePublish(
+  tenantId: string,
+  pageId: string,
+  publishId: string,
+  userId?: string,
+): Promise<PageWithContent | null> {
+  return withTenant(tenantId, async (tx) => {
+    const found = await tx`
+      select snapshot from public.publish_events
+      where id = ${publishId}::uuid and page_id = ${pageId}::uuid
+    `;
+    /*
+     * Both ids in the WHERE, so a publish id belonging to another page of the same
+     * tenant restores nothing rather than restoring the wrong page. The tenant scope
+     * is the policy's job; this is the scope the policy does not cover.
+     */
+    if (!found.length) return null;
+
+    const parsed = parsePage(found[0].snapshot);
+    if (!parsed.ok) {
+      throw new Error(
+        `That version cannot be restored, its stored content will not parse: ${parsed.errors.join('; ')}`,
+      );
+    }
+
+    const content = sanitisePage(parsed.page);
+
+    const rows = await tx`
+      update public.pages set
+        draft_content = ${json(tx, content)},
+        title         = ${content.title},
+        seo           = ${json(tx, content.seo)},
+        updated_by    = ${userId ?? null}::text
+      where id = ${pageId}::uuid
+      returning ${summary(tx)}, seo, draft_content
+    `;
+
+    if (!rows.length) return null;
+
+    const row = rows[0] as Record<string, unknown>;
+    return { ...toSummary(row), content: hydrate(row, row.draft_content) };
   });
 }

@@ -369,11 +369,24 @@ await check('insert points do not shift the page', async () => {
   return heights.every((h) => h === 0) ? true : `heights ${JSON.stringify(heights)}`;
 });
 
-await check('an insert point opens the layout picker', async () => {
+await check('an insert point opens the section picker', async () => {
   await page.locator('.ed-insert__btn').first().click();
   await page.waitForTimeout(300);
   const heading = await page.locator('.tg-modal__head').innerText();
-  return heading.includes('Choose a layout') ? true : `head reads "${heading}"`;
+  return heading.includes('Add a section') ? true : `head reads "${heading}"`;
+});
+
+/*
+ * Three ways in, Andy's ask on 30 Jul 2026. Layouts is what this dialog used to
+ * be and stays the tab it opens on, because it is the one somebody reaches for
+ * when they already know what they are building.
+ */
+await check('it offers Layouts, Designed and AI, opening on Layouts', async () => {
+  const tabs = (await page.locator('.ed-tab').allInnerTexts()).map((t) => t.trim());
+  const selected = await page.locator('.ed-tab[aria-selected="true"]').innerText();
+  return JSON.stringify(tabs) === '["Layouts","Designed","AI"]' && selected === 'Layouts'
+    ? true
+    : `${JSON.stringify(tabs)}, on "${selected}"`;
 });
 
 await check('the picker offers the full layout set', async () =>
@@ -381,6 +394,94 @@ await check('the picker offers the full layout set', async () =>
 
 await check('layout thumbnails are drawn, not described', async () =>
   (await page.locator('.ed-layout-card .ed-thumb rect').count()) > 12);
+
+await check('Designed shows ready-made sections in a category', async () => {
+  await page.locator('.ed-tab', { hasText: 'Designed' }).click();
+  await page.waitForTimeout(300);
+
+  const cards = await page.locator('.ed-preset-card').count();
+  const cats = (await page.locator('.ed-designed__cat').allInnerTexts()).map((t) => t.trim());
+  // Layouts must be gone, or both grids would be on screen at once.
+  const layouts = await page.locator('.ed-layout-card').count();
+
+  return cards >= 6 && cats.includes('Text') && layouts === 0
+    ? true
+    : `${cards} cards, categories ${JSON.stringify(cats)}, ${layouts} layout cards still shown`;
+});
+
+/*
+ * The thumbnails are drawn from the same rows and blocks that build the section,
+ * which is the reason presets are data. A hand-made picture per entry can promise
+ * something the entry does not build and nothing catches it, which is the lesson
+ * layouts.ts records at the top of itself.
+ */
+await check('every designed card draws its own wireframe', async () => {
+  const perCard = await page.locator('.ed-preset-card').evaluateAll((cards) =>
+    cards.map((card) => card.querySelectorAll('.ed-thumb--preset rect').length));
+
+  const empty = perCard.filter((count) => count === 0).length;
+  const distinct = new Set(perCard).size;
+
+  // Not all the same, or they are being drawn from something other than the
+  // preset. Not zero, or a card is blank and looks like it failed to load.
+  return empty === 0 && distinct > 2
+    ? true
+    : `${empty} blank, ${distinct} distinct bar counts across ${perCard.length} cards`;
+});
+
+await check('a preset builds a section with its content already in it', async () => {
+  const before = await page.locator('.tgs-section').count();
+
+  await page.locator('.ed-preset-card', { hasText: 'Four short points' }).click();
+  await page.waitForTimeout(500);
+
+  const after = await page.locator('.tgs-section').count();
+  if (after !== before + 1) return `sections went ${before} -> ${after}`;
+
+  const section = page.locator('.tgs-section').first();
+  const columns = await section.locator('.tgs-col').count();
+  const text = await section.innerText();
+  const ok = columns === 4 && /short title/i.test(text);
+
+  /*
+   * Undone before returning, so this check leaves the page as it found it.
+   * The harness is sequential and a later check counts sections absolutely, so
+   * a section left behind here fails a check three screens away that has
+   * nothing to do with presets. It also proves a preset insert joins the undo
+   * stack like every other whole-page change.
+   */
+  await page.keyboard.press('Control+z');
+  await page.waitForTimeout(300);
+  const restored = await page.locator('.tgs-section').count();
+
+  if (!ok) return `${columns} columns, saying "${text.slice(0, 60)}"`;
+  return restored === before ? true : `undo left ${restored} sections, expected ${before}`;
+});
+
+await check('the AI tab is an honest stub rather than a dead form', async () => {
+  await page.locator('.ed-insert__btn').first().click();
+  await page.waitForTimeout(300);
+  await page.locator('.ed-tab', { hasText: 'AI' }).click();
+  await page.waitForTimeout(300);
+
+  const text = await page.locator('.ed-ai-stub').innerText();
+  // Nothing to type into, because a disabled box looks like it might work if
+  // you found the right words.
+  const inputs = await page.locator('.ed-ai-stub input, .ed-ai-stub textarea').count();
+
+  await closeAnyDialog();
+  return /not built yet/i.test(text) && inputs === 0
+    ? true
+    : `${inputs} inputs, saying "${text.slice(0, 60)}"`;
+});
+
+// Back to Layouts for the check below, which picks one.
+await check('the picker reopens on Layouts', async () => {
+  await page.locator('.ed-insert__btn').first().click();
+  await page.waitForTimeout(300);
+  const selected = await page.locator('.ed-tab[aria-selected="true"]').innerText();
+  return selected === 'Layouts' ? true : `it reopened on "${selected}"`;
+});
 
 await check('picking a layout inserts a section in the right place', async () => {
   const before = await page.locator('.tgs-section').count();
@@ -534,6 +635,130 @@ await check('a section and a column offer the same style controls', async () => 
   if (missingOnSection.length) return `section is missing ${JSON.stringify(missingOnSection)}`;
   if (missingOnColumn.length) return `column is missing ${JSON.stringify(missingOnColumn)}`;
   return true;
+});
+
+/*
+ * THE PRESETS, WHICH ARE THE REASON A COLUMN NOW MATCHES A SECTION.
+ *
+ * A section had a quick None/S/M/L/XL row and a column had only the four numeric
+ * fields, so a comfortable inset on a column meant typing a number four times or
+ * knowing to press the link button first. Andy asked for the same padding options
+ * in both, 30 Jul 2026. They live in PaddingBox, which both panes embed, so the
+ * interesting check is that BOTH show them rather than that one does.
+ */
+await check('both a section and a column offer the padding presets', async () => {
+  const count = async () => page.locator('.ed-pad__presets button').count();
+
+  await page.locator('.ed-sec-name').first().click();
+  await page.waitForTimeout(200);
+
+  /*
+   * The Style group has to be opened on a section, and that asymmetry is real
+   * rather than a flaw in the check. A section's padding box lives under Style
+   * because a section already has a visible preset row of its own for the
+   * vertical space above and below it. A column has no such row, which is
+   * exactly the gap this change closes, so its box is not tucked away.
+   *
+   * The first version of this check counted without opening the group, got zero
+   * on the section, and reported a missing control that was merely collapsed.
+   */
+  const styleGroup = page.locator('.ed-group__head button', { hasText: 'Style' }).first();
+  if ((await styleGroup.count()) > 0
+      && (await styleGroup.getAttribute('aria-expanded')) === 'false') {
+    await styleGroup.click();
+    await page.waitForTimeout(200);
+  }
+  const onSection = await count();
+
+  await page.locator('.ed-side-btn').first().click();
+  await page.waitForTimeout(200);
+  const onColumn = await count();
+
+  return onSection === 5 && onColumn === 5
+    ? true
+    : `${onSection} on the section, ${onColumn} on the column`;
+});
+
+await check('a preset sets all four sides at once', async () => {
+  // Still on the column from the check above.
+  await page.locator('.ed-pad__presets button', { hasText: 'M' }).first().click();
+  await page.waitForTimeout(250);
+
+  const sides = await page.locator('.ed-pad__input').evaluateAll((els) =>
+    els.map((el) => Number(el.value)));
+
+  return sides.length === 4 && sides.every((v) => v === 32)
+    ? true
+    : `sides are ${JSON.stringify(sides)}`;
+});
+
+await check('and reaches the rendered column', async () => {
+  const padding = await page.locator('.tgs-col').first().evaluate((el) => {
+    const c = getComputedStyle(el);
+    return [c.paddingTop, c.paddingRight, c.paddingBottom, c.paddingLeft];
+  });
+  return padding.every((v) => v === '32px') ? true : JSON.stringify(padding);
+});
+
+await check('the chosen preset is the one lit up', async () => {
+  const pressed = await page.locator('.ed-pad__presets button[aria-pressed="true"]').allInnerTexts();
+  return pressed.length === 1 && pressed[0] === 'M' ? true : JSON.stringify(pressed);
+});
+
+/*
+ * The honest answer when no preset describes the padding. Lighting one up would
+ * claim 40/0/40/0 is "M", and the four numbers underneath would contradict it.
+ */
+await check('uneven sides leave every preset unlit', async () => {
+  // Unlink first, or typing into one field sets all four.
+  await page.locator('.ed-pad__link').click();
+  await page.waitForTimeout(150);
+
+  /*
+   * 48, which IS a preset and is NOT what the other three sides hold. Both halves
+   * of that matter, and both were got wrong in turn.
+   *
+   * First written as 40: the check passed with the uniform guard deleted, because
+   * 40 matches no preset so nothing lit up for a reason unrelated to the guard.
+   * Then as 32: the previous check had just set all four sides to 32, so typing 32
+   * into one of them changed nothing and they stayed uniform.
+   *
+   * 48 on top over 32 on the rest is the case the guard is actually for: one side
+   * matches a preset exactly, and that preset still describes only a quarter of
+   * the padding.
+   */
+  await page.locator('.ed-pad__input').first().fill('48');
+  await page.waitForTimeout(250);
+
+  const pressed = await page.locator('.ed-pad__presets button[aria-pressed="true"]').count();
+  const sides = await page.locator('.ed-pad__input').evaluateAll((els) =>
+    els.map((el) => Number(el.value)));
+
+  return pressed === 0 && sides[0] === 48 && sides[1] === 32
+    ? true
+    : `${pressed} lit with sides ${JSON.stringify(sides)}`;
+});
+
+await check('choosing a preset from there relinks the sides', async () => {
+  // The link button must not still say "separate" over four identical numbers.
+  await page.locator('.ed-pad__presets button', { hasText: 'S' }).first().click();
+  await page.waitForTimeout(250);
+
+  const linked = await page.locator('.ed-pad__link').getAttribute('aria-pressed');
+  const sides = await page.locator('.ed-pad__input').evaluateAll((els) =>
+    els.map((el) => Number(el.value)));
+
+  return linked === 'true' && sides.every((v) => v === 16)
+    ? true
+    : `link is ${linked}, sides are ${JSON.stringify(sides)}`;
+});
+
+await check('None puts it back to nothing', async () => {
+  await page.locator('.ed-pad__presets button', { hasText: 'None' }).first().click();
+  await page.waitForTimeout(250);
+  const sides = await page.locator('.ed-pad__input').evaluateAll((els) =>
+    els.map((el) => Number(el.value)));
+  return sides.every((v) => v === 0) ? true : JSON.stringify(sides);
 });
 
 await check('padding typed into the box reaches the page', async () => {
@@ -832,6 +1057,110 @@ await page.evaluate(() => window.__TG_SET_THEME__({}));
 
 
 // ---------------------------------------------------------------------------
+// Version history
+// ---------------------------------------------------------------------------
+
+/*
+ * The rollback path, driven for real against the doubles.
+ *
+ * Two properties matter more than the rest and neither is expressible as a claim
+ * about a function: that the NEWEST entry offers no restore button, because
+ * restoring what is already live is a no-op dressed up as a rescue, and that a
+ * restore lands in the editor rather than just closing the dialog.
+ */
+
+await check('version history opens from the More actions menu', async () => {
+  await page.getByRole('button', { name: 'More actions' }).click();
+  await page.waitForTimeout(200);
+  await page.getByRole('menuitem', { name: 'Version history' }).click();
+  await page.waitForSelector('.ph-list', { timeout: 3000 });
+  return (await page.locator('.ph-item').count()) === 2
+    ? true
+    : `${await page.locator('.ph-item').count()} entries`;
+});
+
+await check('the newest entry is labelled live, not offered as a restore', async () => {
+  const first = page.locator('.ph-item').first();
+  const live = await first.locator('.ph-item__live').count();
+  const buttons = await first.locator('button').count();
+  return live === 1 && buttons === 0 ? true : `${live} live labels, ${buttons} buttons`;
+});
+
+await check('an older entry offers one', async () => {
+  const second = page.locator('.ph-item').nth(1);
+  const label = await second.locator('button').innerText();
+  return label === 'Put this back' ? true : `it says "${label}"`;
+});
+
+await check('each entry is dated in full rather than "3 days ago"', async () => {
+  // Relative time makes somebody count backwards on their fingers to answer
+  // "put it back to how it was on Tuesday".
+  const when = await page.locator('.ph-item__when').first().innerText();
+  return /\d{4}/.test(when) && /\d{2}:\d{2}/.test(when) ? true : `it says "${when}"`;
+});
+
+await check('your own publishes are marked and other people\'s are not', async () => {
+  const mine = await page.locator('.ph-item__when').first().innerText();
+  const theirs = await page.locator('.ph-item__when').nth(1).innerText();
+  return mine.includes('by you') && !theirs.includes('by you')
+    ? true
+    : `"${mine}" then "${theirs}"`;
+});
+
+await check('a long title truncates instead of pushing the button off the dialog', async () => {
+  const overflow = await page.locator('.ph-item__title').first().evaluate((el) => ({
+    overflow: getComputedStyle(el).textOverflow,
+    parentMin: getComputedStyle(el.parentElement).minWidth,
+  }));
+  return overflow.overflow === 'ellipsis' && overflow.parentMin === '0px'
+    ? true
+    : JSON.stringify(overflow);
+});
+
+/*
+ * Captured rather than hardcoded, so the undo check compares against what was
+ * really there. Written the other way first, asserting the title went back to the
+ * double's 'Demo page', and it failed: the editor's page comes from the entry
+ * fixture, so the real title was 'Greece, planned properly'. Undo was working the
+ * whole time and the expectation was wrong.
+ */
+let titleBeforeRestore = '';
+
+await check('putting a version back changes the page and closes the dialog', async () => {
+  /*
+   * Read from the title INPUT, which is where the page's title actually lives.
+   * The first version of this check read the outline pane, found the static word
+   * "Page" in its heading, and reported a failure that was entirely its own.
+   */
+  const before = await page.locator('.ed-title-input').inputValue();
+  titleBeforeRestore = before;
+
+  await page.locator('.ph-item').nth(1).locator('button').click();
+  await page.waitForTimeout(500);
+
+  if ((await page.locator('.ph-list').count()) !== 0) return 'the dialog is still open';
+
+  const after = await page.locator('.ed-title-input').inputValue();
+  return after === 'The version before that'
+    ? true
+    : `the title went from "${before}" to "${after}"`;
+});
+
+/*
+ * A restore goes through the editor's commit, so it joins the undo stack. That is
+ * the reason there is no confirm dialog in front of it, which makes this check the
+ * evidence for that decision rather than a nice extra.
+ */
+await check('and a restore can be undone', async () => {
+  await page.keyboard.press('Control+z');
+  await page.waitForTimeout(400);
+  const after = await page.locator('.ed-title-input').inputValue();
+  return after === titleBeforeRestore
+    ? true
+    : `the title is "${after}" after undo, was "${titleBeforeRestore}" before the restore`;
+});
+
+// ---------------------------------------------------------------------------
 // The image bank
 // ---------------------------------------------------------------------------
 
@@ -1128,6 +1457,285 @@ await check('the picker does not scroll the page sideways', async () => {
   return overflow <= 0 ? true : `${overflow}px of horizontal overflow`;
 });
 
+
+// ---------------------------------------------------------------------------
+// The floating text toolbar
+// ---------------------------------------------------------------------------
+
+/*
+ * It replaced a wrapping row of buttons inside a 320px pane that used the
+ * characters B, I and a bulleted dot as its icons. The interesting properties
+ * are that it does not steal the selection, that what it applies survives, and
+ * that it can be moved out of the way, because a toolbar over the thing you are
+ * editing is worse than no toolbar.
+ */
+
+/** Select a text block and put the caret in its rich text field. */
+async function focusRichText() {
+  for (const block of await page.locator('.tgs-block').all()) {
+    await block.click();
+    await page.waitForTimeout(180);
+    if (await page.locator('.ed-rt').count()) {
+      await page.locator('.ed-rt').first().click();
+      await page.waitForTimeout(250);
+      return true;
+    }
+  }
+  return false;
+}
+
+await check('editing text raises a floating toolbar', async () => {
+  if (!(await focusRichText())) return 'no rich text field anywhere';
+
+  const bars = await page.locator('.ed-tt').count();
+  const fixed = await page.locator('.ed-tt').evaluate((el) => getComputedStyle(el).position);
+
+  // Fixed, not absolute: it is dragged in viewport coordinates and would
+  // otherwise be clipped by the properties pane's own overflow.
+  return bars === 1 && fixed === 'fixed' ? true : `${bars} toolbars, position ${fixed}`;
+});
+
+await check('it carries drawn icons rather than the letters B and I', async () => {
+  // The old one used characters as functional icons, which render differently
+  // on every platform and are invisible to a screen reader. Icon.tsx says so at
+  // the top of itself, and this toolbar was the last place still doing it.
+  const svgs = await page.locator('.ed-tt__btn svg').count();
+  const labelled = await page.locator('.ed-tt__btn[aria-label]').count();
+  const buttons = await page.locator('.ed-tt__btn').count();
+  return svgs === buttons && labelled === buttons
+    ? true
+    : `${buttons} buttons, ${svgs} with an icon, ${labelled} with a label`;
+});
+
+await check('bold applies to the selection and lights up', async () => {
+  // Select everything in the field, then press Bold.
+  await page.locator('.ed-rt').first().evaluate((el) => {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  });
+  await page.waitForTimeout(150);
+
+  await page.locator('.ed-tt__btn[aria-label="Bold"]').click();
+  await page.waitForTimeout(300);
+
+  const html = await page.locator('.ed-rt').first().innerHTML();
+  const pressed = await page.locator('.ed-tt__btn[aria-label="Bold"]').getAttribute('aria-pressed');
+
+  // <b> or <strong>, either is kept by the sanitiser.
+  return /<(b|strong)[ >]/i.test(html) && pressed === 'true'
+    ? true
+    : `pressed ${pressed}, html "${html.slice(0, 80)}"`;
+});
+
+/*
+ * THE ONE THAT MAKES THE REST POSSIBLE. Every button refuses mousedown, so the
+ * caret and the selection stay in the field behind it. Without that, clicking
+ * Bold blurs the editable, the selection collapses, and the command applies to
+ * nothing at all.
+ */
+await check('clicking a button does not take the selection away', async () => {
+  const stillThere = await page.evaluate(() => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return false;
+    return !selection.getRangeAt(0).collapsed;
+  });
+  return stillThere ? true : 'the selection collapsed';
+});
+
+await check('a web address becomes a link', async () => {
+  await page.locator('.ed-tt__btn[aria-label="Add a link"]').click();
+  await page.waitForTimeout(250);
+  await page.locator('.ed-tt__url').fill('https://travelgenix.io');
+  await page.locator('.ed-tt__btn[aria-label="Apply the link"]').click();
+  await page.waitForTimeout(300);
+
+  const html = await page.locator('.ed-rt').first().innerHTML();
+  const wraps = await page.locator('.ed-rt a').first().innerText().catch(() => '');
+
+  /*
+   * The anchor must WRAP the words, not just exist. A link applied to a
+   * collapsed selection produces an empty anchor, which is the failure this is
+   * really guarding: the URL input takes the selection away when it is typed
+   * into.
+   */
+  return /<a[^>]+href="https:\/\/travelgenix\.io/i.test(html) && wraps.trim().length > 0
+    ? true
+    : `wraps "${wraps.slice(0, 30)}", html "${html.slice(0, 80)}"`;
+});
+
+/*
+ * createLink will happily insert javascript:alert(1). The sanitiser strips it on
+ * save, so this is the second of two gates, and it is the one that stops the
+ * editor showing a working link in the preview that vanishes on publish.
+ */
+await check('a javascript URL is refused rather than inserted', async () => {
+  await focusRichText();
+  await page.locator('.ed-rt').first().evaluate((el) => {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  });
+
+  await page.locator('.ed-tt__btn[aria-label="Add a link"]').click();
+  await page.waitForTimeout(200);
+  await page.locator('.ed-tt__url').fill('javascript:alert(1)');
+  await page.locator('.ed-tt__btn[aria-label="Apply the link"]').click();
+  await page.waitForTimeout(300);
+
+  const html = await page.locator('.ed-rt').first().innerHTML();
+  return !/javascript:/i.test(html) ? true : `html is "${html.slice(0, 100)}"`;
+});
+
+await check('it can be dragged out of the way and stays where it is put', async () => {
+  const before = await page.locator('.ed-tt').boundingBox();
+  const grip = await page.locator('.ed-tt__grip').boundingBox();
+
+  await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(grip.x + 160, grip.y + 120, { steps: 8 });
+  await page.mouse.up();
+  await page.waitForTimeout(300);
+
+  const after = await page.locator('.ed-tt').boundingBox();
+  /*
+   * Distance, not a signed direction. The drag asks for a position and the
+   * clamp has the last word, so a toolbar dragged towards an edge legitimately
+   * ends up somewhere other than where the pointer let go. Written as
+   * `moved > 100` first and it failed on a perfectly correct leftward clamp.
+   */
+  const moved = Math.round(Math.hypot(after.x - before.x, after.y - before.y));
+
+  // And remembered, so it does not spring back to the next block being edited.
+  const stored = await page.evaluate(() => window.localStorage.getItem('tg-sites:text-toolbar'));
+
+  return moved > 100 && stored ? true : `moved ${moved}px, stored ${stored}`;
+});
+
+/*
+ * The link panel adds an input and two buttons, about 250px. A toolbar near the
+ * right edge grew straight off the screen and took its Apply button with it,
+ * which is a link nobody can finish making.
+ */
+await check('opening the link panel keeps it on screen', async () => {
+  await focusRichText();
+  await page.locator('.ed-tt__btn[aria-label="Add a link"]').click();
+  await page.waitForTimeout(400);
+
+  const box = await page.locator('.ed-tt').boundingBox();
+  const apply = await page.locator('.ed-tt__btn[aria-label="Apply the link"]').boundingBox();
+  const width = page.viewportSize().width;
+
+  return box.x + box.width <= width && apply.x + apply.width <= width
+    ? true
+    : `right edge ${Math.round(box.x + box.width)}, apply ends ${Math.round(apply.x + apply.width)}, viewport ${width}`;
+});
+
+await check('it is put away when focus leaves the text', async () => {
+  // Clicking the canvas, which is a real "I am done here" rather than a click
+  // on the toolbar itself.
+  await page.locator('.ed-topbar').click({ position: { x: 5, y: 5 } });
+  await page.waitForTimeout(400);
+  return (await page.locator('.ed-tt').count()) === 0
+    ? true
+    : 'the toolbar is still on screen';
+});
+
+// ---------------------------------------------------------------------------
+// The plus in an empty column
+// ---------------------------------------------------------------------------
+
+/*
+ * WHY THIS CHANGED, because the old behaviour was not a bug.
+ *
+ * The whole dashed area of an empty column used to open the block picker, which
+ * was right while a column had nothing of its own to configure. Columns got
+ * padding presets and the rest of the style panel earlier on 30 Jul 2026, and at
+ * that point an empty column became the one thing on the canvas you could not
+ * select and style. So the area selects the column and the plus adds to it.
+ *
+ * Placed at the very end of this file on purpose: it adds a section, and a new
+ * section shifts every index the checks above depend on.
+ */
+
+await check('an empty column offers a plus rather than a whole clickable area', async () => {
+  await page.locator('[data-insert]').first().click();
+  await page.waitForTimeout(400);
+  const twoCol = page.locator('button', { hasText: 'Two columns' }).first();
+  if ((await twoCol.count()) === 0) return 'the layout picker did not open';
+  await twoCol.click();
+  await page.waitForTimeout(600);
+
+  const areas = await page.locator('.ed-empty-col').count();
+  const buttons = await page.locator('.ed-empty-col__add').count();
+
+  // The area must no longer carry the add hook itself. If it does, a click
+  // anywhere in the column still adds and the column cannot be selected.
+  const areaAdds = await page.locator('.ed-empty-col[data-add]').count();
+
+  return areas === 2 && buttons === 2 && areaAdds === 0
+    ? true
+    : `${areas} areas, ${buttons} buttons, ${areaAdds} areas still carrying data-add`;
+});
+
+await check('it is a real button, so it can be reached by keyboard', async () => {
+  const tag = await page.locator('.ed-empty-col__add').first().evaluate((el) => ({
+    tag: el.tagName,
+    label: el.getAttribute('aria-label'),
+    // A div with a click handler is invisible to a keyboard and to a screen
+    // reader, which is what the icon set's own header warns about.
+    focusable: el.tabIndex >= 0,
+  }));
+  return tag.tag === 'BUTTON' && tag.focusable && tag.label
+    ? true
+    : JSON.stringify(tag);
+});
+
+await check('clicking the plus opens the block picker', async () => {
+  await page.locator('.ed-empty-col__add').first().click();
+  await page.waitForTimeout(400);
+
+  const open = await page.locator('[role="dialog"]').count();
+  const text = open ? await page.locator('[role="dialog"]').innerText() : '';
+  await closeAnyDialog();
+
+  return open === 1 && /heading|text|image/i.test(text)
+    ? true
+    : `${open} dialogs, saying "${text.slice(0, 60)}"`;
+});
+
+/*
+ * THE POINT OF THE WHOLE CHANGE. A click on the column that is not on the plus
+ * has to select the column, or an empty column is the one thing on the canvas
+ * that cannot be styled.
+ */
+await check('clicking the column itself selects it for styling', async () => {
+  const area = await page.locator('.ed-empty-col').first().boundingBox();
+  if (!area) return 'no empty column on screen';
+
+  // Deliberately off-centre, well clear of the 40px button in the middle.
+  await page.mouse.click(area.x + 24, area.y + 16);
+  await page.waitForTimeout(350);
+
+  const labels = await page.evaluate(() =>
+    [...document.querySelectorAll('.ed-props .ed-label')].map((l) => l.textContent?.trim()));
+
+  // A column pane, not a section pane and not a block pane.
+  return labels.includes('Vertical alignment') && labels.includes('Padding (inner spacing)')
+    ? true
+    : `the pane shows ${JSON.stringify(labels.slice(0, 6))}`;
+});
+
+await check('and the padding presets are right there on it', async () => {
+  // Which is what makes selecting an empty column worth doing at all.
+  return (await page.locator('.ed-pad__presets button').count()) === 5
+    ? true
+    : `${await page.locator('.ed-pad__presets button').count()} presets`;
+});
 
 
 await browser.close();

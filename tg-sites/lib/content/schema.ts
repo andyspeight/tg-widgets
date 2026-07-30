@@ -82,8 +82,14 @@ export const LEGACY_PADDING: Readonly<Record<string, number>> = {
  * Numbers, so they are the same kind of thing the drag produces. Keeping a
  * separate enum for presets and a number for drags would mean two ways to say
  * the same height and a rounding argument about which one won.
+ *
+ * Used by a SECTION's vertical padding and by the four-sided padding box that
+ * sections and columns share, so the same five words mean the same five numbers
+ * wherever spacing is set. It was SECTION_PADDING_PRESETS while only sections
+ * had it; the name moved with the meaning when columns got the same control on
+ * 30 Jul 2026.
  */
-export const SECTION_PADDING_PRESETS: ReadonlyArray<{ value: number; label: string }> = [
+export const PADDING_PRESETS: ReadonlyArray<{ value: number; label: string }> = [
   { value: 0, label: 'None' },
   { value: 16, label: 'S' },
   { value: 32, label: 'M' },

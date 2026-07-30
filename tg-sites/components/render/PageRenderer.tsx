@@ -277,9 +277,49 @@ export function ColumnRenderer({
         </div>
       ))}
 
-      {editable && column.blocks.length === 0 && (
-        <div className="ed-empty-col" data-add={path}>
-          Drop a block here
+      {/*
+       * AN EMPTY COLUMN IS A COLUMN, NOT A BUTTON.
+       *
+       * The whole dashed area used to carry data-add, so clicking anywhere in an
+       * empty column opened the block picker. That was right when a column had
+       * nothing of its own to configure. It stopped being right on 30 Jul 2026,
+       * when columns got padding presets and the rest of the style panel: a click
+       * on a column now has to be able to mean "select this column", or the one
+       * thing you cannot style is an empty one.
+       *
+       * So the dashed area is part of the column and selects it, and the plus in
+       * the middle is the only thing that adds. Andy's call, and the same shape
+       * every other builder uses.
+       */
+      editable && column.blocks.length === 0 && (
+        <div className="ed-empty-col">
+          <button
+            type="button"
+            className="ed-empty-col__add"
+            data-add={path}
+            aria-label="Add content to this column"
+            title="Add content"
+          >
+            {/*
+             * Inlined rather than imported from the editor's Icon set. This file
+             * is deliberately dependency-light so it can be a server component on
+             * the published side, and a static import of an editor component
+             * would follow it into that bundle whether or not it renders. Same
+             * 24x24 box and 2px round-capped stroke as the rest of the set.
+             */}
+            <svg
+              viewBox="0 0 24 24"
+              width="14"
+              height="14"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </button>
         </div>
       )}
 

@@ -9,7 +9,7 @@
  * today. The schema does the same thing with BoxSchema.
  */
 
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 
 import {
   boxIsEmpty,
@@ -17,6 +17,7 @@ import {
   MAX_BORDER,
   MAX_PADDING,
   MAX_RADIUS,
+  PADDING_PRESETS,
   safeColour,
   type Box,
   type Padding,
@@ -101,13 +102,27 @@ export function Measure({
 // ---------------------------------------------------------------------------
 
 /**
- * Four inputs arranged like the thing they describe.
+ * Presets and four inputs arranged like the thing they describe.
  *
  * The diagram is the point. Four fields in a list called Top, Right, Bottom
  * and Left make you translate; four fields in the shape of a box do not.
  *
  * The link in the middle ties all four together, which is what most people
  * want most of the time and is the difference between one edit and four.
+ *
+ * THE PRESETS ARE WHY COLUMNS NOW MATCH SECTIONS. A section had a quick
+ * None/S/M/L/XL row for its vertical padding and a column had only the four
+ * numeric fields, so setting a comfortable inset on a column meant typing a
+ * number four times or knowing to press the link button first. Andy asked for
+ * the same padding options in both places on 30 Jul 2026. Putting them here
+ * rather than in the column pane is what makes that true by construction: this
+ * component is embedded in both, so neither can drift from the other, which is
+ * the same reasoning as BoxSchema in the schema.
+ *
+ * They set all four sides, unlike a section's paddingY which is vertical only.
+ * A section's left and right come from its content width, so vertical is the
+ * only axis a preset can mean. A column is a box, and a column with a
+ * background and no side padding has text against its edges.
  */
 export function PaddingBox({
   padding,
@@ -128,9 +143,41 @@ export function PaddingBox({
     );
   }
 
+  function preset(value: number) {
+    onChange({ top: value, right: value, bottom: value, left: value });
+    // A preset makes the four sides equal, so the link button has to agree.
+    // Leaving it saying "separate" over four identical numbers is the same
+    // inconsistency the toggle below already guards against in the other
+    // direction.
+    setLinked(true);
+  }
+
   return (
     <div className="ed-pad">
       <span className="ed-label">Padding (inner spacing)</span>
+
+      {/*
+        Nothing is pressed when the sides are uneven, which is the honest answer:
+        no preset describes 40/0/40/0, and lighting one up would claim otherwise.
+        The numbers below still say exactly what it is.
+      */}
+      <div
+        className="ed-segmented ed-pad__presets"
+        role="group"
+        aria-label="Padding presets"
+        style={{ '--ed-seg-count': PADDING_PRESETS.length } as CSSProperties}
+      >
+        {PADDING_PRESETS.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            aria-pressed={uniform && padding.top === option.value}
+            onClick={() => preset(option.value)}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
 
       <div className="ed-pad__box">
         {SIDES.map((side) => (

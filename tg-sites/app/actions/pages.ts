@@ -25,12 +25,15 @@ import {
   deletePage,
   getPage,
   listPages,
+  listPublishes,
   publishPage,
+  restorePublish,
   saveDraft,
   unpublishPage,
   updatePageMeta,
   type PageSummary,
   type PageWithContent,
+  type PublishRecord,
 } from '../../lib/db/pages';
 import { slugify } from '../../lib/content/slug';
 import { currentUserId, requireTenantId } from '../../lib/auth/session';
@@ -176,6 +179,44 @@ export async function unpublishPageAction(
     revalidatePath('/preview');
   }
   return result;
+}
+
+// ---------------------------------------------------------------------------
+// History and rollback
+// ---------------------------------------------------------------------------
+
+/** Every publish we still hold for a page, newest first. */
+export async function listPublishesAction(
+  pageId: string,
+): Promise<ActionResult<PublishRecord[]>> {
+  return attempt(async () => listPublishes(await requireTenantId(), pageId));
+}
+
+/**
+ * Put an old version back as the draft.
+ *
+ * Both ids come from the caller and both are guesses, which is fine: the query
+ * matches on publish id AND page id, inside withTenant, so a wrong or borrowed id
+ * restores nothing rather than restoring the wrong thing. Rule 2 at the top of this
+ * file, with one addition, because the tenant policy alone would not stop one page
+ * of a tenant being restored from another page's history.
+ *
+ * NOT revalidated, deliberately, unlike publish and unpublish. This changes the
+ * draft and leaves the live site exactly as it was, so there is nothing public to
+ * rebuild. The editor reloads the page it is holding, which is a client concern.
+ */
+export async function restorePublishAction(
+  pageId: string,
+  publishId: string,
+): Promise<ActionResult<PageWithContent | null>> {
+  return attempt(async () =>
+    restorePublish(
+      await requireTenantId(),
+      pageId,
+      publishId,
+      (await currentUserId()) ?? undefined,
+    ),
+  );
 }
 
 // ---------------------------------------------------------------------------

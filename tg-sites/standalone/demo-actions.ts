@@ -16,8 +16,8 @@
  */
 
 import type { ActionResult } from '../app/actions/pages';
-import type { PageSummary } from '../lib/db/pages';
-import { parsePage } from '../lib/content/schema';
+import type { PageSummary, PageWithContent, PublishRecord } from '../lib/db/pages';
+import { parsePage, type Page } from '../lib/content/schema';
 
 const state: PageSummary = {
   id: 'demo',
@@ -56,11 +56,83 @@ export async function publishPageAction(
   return { ok: true, data: { ...state } };
 }
 
+/*
+ * Version history, with two entries that exist from the start.
+ *
+ * Seeded rather than built up by publishing, because the interesting thing to
+ * check in a browser is the LIST and the restore, and a harness that had to
+ * publish twice before it could look at either would be testing the publish
+ * button. Dated relative to nothing: the timestamps are fixed so a screenshot
+ * taken tomorrow looks the same as one taken today.
+ */
+/**
+ * A fixture page, or a thrown error.
+ *
+ * parsePage returns a discriminated union and the fixtures below are written by
+ * hand, so the failure case is a typo in this file rather than anything a user
+ * did. Throwing makes that a build failure instead of a fixture that silently
+ * becomes undefined and a harness that checks nothing.
+ */
+function fixture(input: unknown): Page {
+  const parsed = parsePage(input);
+  if (!parsed.ok) throw new Error(`Bad demo fixture: ${parsed.errors.join('; ')}`);
+  return parsed.page;
+}
+
+const HISTORY: Array<PublishRecord & { snapshot: Page }> = [
+  {
+    id: 'pub-2',
+    userId: 'demo-user',
+    title: 'Demo page',
+    createdAt: new Date('2026-07-29T14:30:00Z'),
+    snapshot: fixture({
+      version: 1, id: 'demo', slug: '', title: 'Demo page', sections: [],
+    }),
+  },
+  {
+    id: 'pub-1',
+    userId: 'someone-else',
+    title: 'The version before that',
+    createdAt: new Date('2026-07-27T09:05:00Z'),
+    snapshot: fixture({
+      version: 1, id: 'demo', slug: '', title: 'The version before that', sections: [],
+    }),
+  },
+];
+
+export async function listPublishesAction(
+  _pageId: string,
+): Promise<ActionResult<PublishRecord[]>> {
+  return {
+    ok: true,
+    data: HISTORY.map(({ snapshot: _snapshot, ...row }) => ({ ...row })),
+  };
+}
+
+export async function restorePublishAction(
+  _pageId: string,
+  publishId: string,
+): Promise<ActionResult<PageWithContent | null>> {
+  const found = HISTORY.find((row) => row.id === publishId);
+  // Null rather than an error for an unknown id, which is what the real one
+  // does when the version belongs to another page or has been pruned.
+  if (!found) return { ok: true, data: null };
+
+  return {
+    ok: true,
+    data: { ...state, title: found.snapshot.title, content: found.snapshot },
+  };
+}
+
 // Compile-time proof that the doubles still match the real thing. If a real
 // action gains an argument or changes its return type, this stops building.
 import type * as real from '../app/actions/pages';
 
 const _saveMatches = saveDraftAction satisfies typeof real.saveDraftAction;
 const _publishMatches = publishPageAction satisfies typeof real.publishPageAction;
+const _listMatches = listPublishesAction satisfies typeof real.listPublishesAction;
+const _restoreMatches = restorePublishAction satisfies typeof real.restorePublishAction;
 void _saveMatches;
 void _publishMatches;
+void _listMatches;
+void _restoreMatches;

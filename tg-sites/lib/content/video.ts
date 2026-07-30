@@ -25,7 +25,9 @@ export function resolveVideo(rawUrl: string): ResolvedVideo | null {
 
   let parsed: URL;
   try {
-    parsed = new URL(url, 'https://tgsites.io');
+    // A base only so a relative URL does not throw, and a reserved one on purpose.
+    // See the note in lib/content/sanitise.ts.
+    parsed = new URL(url, 'https://base.invalid');
   } catch {
     return null;
   }

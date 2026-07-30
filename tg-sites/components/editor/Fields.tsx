@@ -16,8 +16,9 @@
  * contentEditable puts the caret back at the start on every render.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Field } from '../../lib/content/blocks';
+import { TextToolbar } from './TextToolbar';
 import { ImageField } from '../media/ImageField';
 import { Icon } from './Icon';
 
@@ -308,16 +309,6 @@ function Repeater({ field, value, onChange, ownerId }: FieldProps) {
 // Rich text
 // ---------------------------------------------------------------------------
 
-const RT_COMMANDS: Array<{ command: string; label: string; title: string; value?: string }> = [
-  { command: 'bold', label: 'B', title: 'Bold' },
-  { command: 'italic', label: 'I', title: 'Italic' },
-  { command: 'insertUnorderedList', label: '•', title: 'Bulleted list' },
-  { command: 'insertOrderedList', label: '1.', title: 'Numbered list' },
-  { command: 'formatBlock', value: 'h3', label: 'H', title: 'Heading' },
-  { command: 'formatBlock', value: 'p', label: '¶', title: 'Paragraph' },
-  { command: 'removeFormat', label: '⨯', title: 'Clear formatting' },
-];
-
 /**
  * A deliberately small rich text field.
  *
@@ -330,9 +321,14 @@ const RT_COMMANDS: Array<{ command: string; label: string; title: string; value?
  * execCommand is deprecated but still implemented everywhere and is by far
  * the smallest thing that works. When this needs to grow, replace it with a
  * proper editor behind the same props rather than extending it.
+ *
+ * THE TOOLBAR IS NO LONGER IN HERE. It floats, it is draggable, and it only
+ * appears while this field has focus: see components/editor/TextToolbar.tsx for
+ * why, and for what is deliberately missing from it.
  */
 function RichText({ html, onChange }: { html: string; onChange: (value: string) => void }) {
   const ref = useRef<HTMLDivElement>(null);
+  const [editing, setEditing] = useState(false);
 
   useEffect(() => {
     const node = ref.current;
@@ -352,22 +348,55 @@ function RichText({ html, onChange }: { html: string; onChange: (value: string) 
     onChange(node.innerHTML);
   };
 
+  /*
+   * The toolbar goes when focus leaves BOTH the field and the toolbar.
+   *
+   * Written first as an onBlur on the field, checking relatedTarget. That closed
+   * it correctly when somebody clicked away from the field, and never when they
+   * had been typing in the toolbar's link box: focus was in the input by then,
+   * so the field's blur had already happened and nothing was listening for the
+   * second departure. The toolbar stayed on screen over a field nobody was
+   * editing.
+   *
+   * A document listener asks the only question that matters, which is where
+   * focus IS, rather than trying to infer it from where it went next.
+   */
+  useEffect(() => {
+    if (!editing) return;
+
+    let pending = 0;
+
+    /*
+     * CHECKED ON THE NEXT TICK, and that is the whole trick.
+     *
+     * During focusout the new element has not been focused yet, so
+     * document.activeElement is usually document.body. Asking then says "focus
+     * is nowhere" every single time, which closed the toolbar the instant the
+     * link input tried to take focus, and the input vanished from under the
+     * cursor. A tick later activeElement is where focus actually went.
+     */
+    const settle = () => {
+      window.clearTimeout(pending);
+      pending = window.setTimeout(() => {
+        const active = document.activeElement;
+        const inField = !!ref.current && (active === ref.current || ref.current.contains(active));
+        const inToolbar = !!active?.closest?.('.ed-tt');
+        if (!inField && !inToolbar) setEditing(false);
+      }, 0);
+    };
+
+    // focusout bubbles where blur does not, so one listener covers the field,
+    // the toolbar and anything either of them grows later.
+    document.addEventListener('focusout', settle);
+    return () => {
+      window.clearTimeout(pending);
+      document.removeEventListener('focusout', settle);
+    };
+  }, [editing]);
+
   return (
     <>
-      <div className="ed-rt-toolbar">
-        {RT_COMMANDS.map((item) => (
-          <button
-            key={`${item.command}-${item.value ?? ''}`}
-            type="button"
-            title={item.title}
-            aria-label={item.title}
-            onMouseDown={(event) => event.preventDefault()} // keep the selection
-            onClick={() => exec(item.command, item.value)}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
+      {editing && <TextToolbar anchor={ref.current} onExec={exec} />}
       <div
         ref={ref}
         className="ed-rt"
@@ -376,6 +405,7 @@ function RichText({ html, onChange }: { html: string; onChange: (value: string) 
         role="textbox"
         aria-multiline="true"
         aria-label="Content"
+        onFocus={() => setEditing(true)}
         onInput={(event) => onChange(event.currentTarget.innerHTML)}
         onBlur={(event) => onChange(event.currentTarget.innerHTML)}
         onPaste={(event) => {

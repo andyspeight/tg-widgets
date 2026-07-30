@@ -17,15 +17,17 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { publishPageAction, saveDraftAction } from '../../app/actions/pages';
-import type { Page } from '../../lib/content/schema';
+import { PublishHistory } from './PublishHistory';
+import type { Page, Section } from '../../lib/content/schema';
 import { parsePage } from '../../lib/content/schema';
 import { createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
+import { buildPresetSection } from '../../lib/content/presets';
 import { addBlock, type Path, pathKey, resolve } from '../../lib/content/tree';
 import { Outline } from './Outline';
 import { Canvas } from './Canvas';
 import { Properties } from './Properties';
 import { BlockPicker } from './BlockPicker';
-import { LayoutPicker } from './LayoutPicker';
+import { SectionPicker } from './SectionPicker';
 import { Icon, type IconName } from './Icon';
 import { Menu } from './Menu';
 import './editor.css';
@@ -103,6 +105,13 @@ interface EditorProps {
    * tokens in globals.css, which are the values the default theme derives to.
    */
   siteTheme?: CSSProperties;
+  /**
+   * The signed-in person's id, so version history can mark their own entries.
+   *
+   * Optional and cosmetic. Nothing is gated on it, so the standalone build
+   * omitting it costs a label rather than a permission.
+   */
+  currentUserId?: string | null;
 }
 
 export function EditorShell({
@@ -112,6 +121,7 @@ export function EditorShell({
   initialStatus,
   initialHasUnpublishedChanges,
   siteTheme,
+  currentUserId = null,
 }: EditorProps) {
   const [history, setHistory] = useState<History>({
     past: [],
@@ -123,6 +133,7 @@ export function EditorShell({
   const [picker, setPicker] = useState<{ section: number; row: number; column: number } | null>(null);
   /** Where a new section would go. null means the picker is closed. */
   const [insertAt, setInsertAt] = useState<number | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [saved, setSaved] = useState<SaveState>('idle');
   const [saveError, setSaveError] = useState<string | null>(null);
   const [status, setStatus] = useState<'draft' | 'published'>(initialStatus);
@@ -372,6 +383,29 @@ export function EditorShell({
     [commit],
   );
 
+  /**
+   * Put a built section in at the pending index and select it.
+   *
+   * The index is read from insertAt and cleared BEFORE the commit, not after: the
+   * commit is what closes the dialog by re-rendering, and reading insertAt inside
+   * the updater would be reading state the updater is not allowed to depend on.
+   */
+  const insertSection = useCallback(
+    (section: Section) => {
+      const at = insertAt;
+      if (at === null) return;
+
+      setInsertAt(null);
+      commit((current) => {
+        const sections = [...current.sections];
+        sections.splice(at, 0, section);
+        return { ...current, sections };
+      });
+      setSelected({ kind: 'section', section: at });
+    },
+    [insertAt, commit],
+  );
+
   const fileInput = useRef<HTMLInputElement>(null);
 
   const savedLabel = useMemo(() => {
@@ -521,6 +555,12 @@ export function EditorShell({
             })),
             { separator: true },
             {
+              icon: 'history',
+              label: 'Version history',
+              onClick: () => setHistoryOpen(true),
+            },
+            { separator: true },
+            {
               icon: 'download',
               label: 'Save a copy of this page',
               onClick: exportJson,
@@ -581,19 +621,37 @@ export function EditorShell({
         onBack={() => setMobilePane('canvas')}
       />
 
-      {insertAt !== null && (
-        <LayoutPicker
-          onClose={() => setInsertAt(null)}
-          onPick={(layout) => {
-            const at = insertAt;
-            setInsertAt(null);
-            commit((current) => {
-              const sections = [...current.sections];
-              sections.splice(at, 0, createSectionFromLayout(layout));
-              return { ...current, sections };
-            });
-            setSelected({ kind: 'section', section: at });
+      {historyOpen && (
+        <PublishHistory
+          pageId={pageId}
+          currentUserId={currentUserId}
+          onClose={() => setHistoryOpen(false)}
+          onRestore={(restored) => {
+            /*
+             * Through commit, like every other whole-page change, so a restore
+             * joins the undo stack. Somebody who puts back the wrong version
+             * presses Ctrl+Z rather than hunting for the one they were on.
+             *
+             * The selection is cleared first because it points at a path in the
+             * page that just went away: keeping it would leave the properties
+             * pane describing a block that no longer exists.
+             */
+            setSelected(null);
+            commit(restored);
           }}
+        />
+      )}
+
+      {insertAt !== null && (
+        <SectionPicker
+          onClose={() => setInsertAt(null)}
+          /*
+           * Two callbacks rather than one taking a union, so neither path has to
+           * ask what it was handed. They do the same three things afterwards,
+           * which insertSection holds once.
+           */
+          onPickLayout={(layout) => insertSection(createSectionFromLayout(layout))}
+          onPickPreset={(preset) => insertSection(buildPresetSection(preset))}
         />
       )}
 

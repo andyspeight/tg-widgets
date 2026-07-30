@@ -2,6 +2,7 @@
  * Tenants, and the hostname lookup that has to happen before one is known.
  */
 
+import { PREVIEW_DOT_SUFFIX } from '../domains/preview';
 import { db, type DbRole } from './client';
 import { withTenant, type Tx } from './withTenant';
 
@@ -15,8 +16,16 @@ export interface Tenant {
   settings: Record<string, unknown>;
 }
 
-/** The suffix every tenant gets for free, reachable before DNS is pointed. */
-export const STAGING_SUFFIX = '.tgsites.io';
+/**
+ * The suffix every tenant gets for free, reachable before DNS is pointed.
+ *
+ * Re-exported rather than defined, and it used to be defined here as '.tgsites.io'.
+ * lib/domains/preview.ts is the one place the domain is written down in TypeScript,
+ * for reasons its header sets out at length. The alias stays because "staging" is
+ * what the database layer and the fonts route already call this, and one rename is
+ * cheaper to read than two names for the same string.
+ */
+export const STAGING_SUFFIX = PREVIEW_DOT_SUFFIX;
 
 /**
  * Tidy a Host header into something worth looking up.
@@ -191,7 +200,7 @@ export async function listDomains(
 /**
  * The address to show a client for their site.
  *
- * Their own domain once one is live, the staging subdomain until then, so the
+ * Their own domain once one is live, the preview subdomain until then, so the
  * editor never shows a link that does not work yet.
  */
 export async function siteUrl(tenantId: string): Promise<string> {

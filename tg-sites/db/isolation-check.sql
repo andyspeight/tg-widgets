@@ -342,13 +342,13 @@ where n.nspname = 'public'
 
 do $$
 declare
-  staging uuid; custom uuid; unknown uuid; suspended uuid; domains_seen int;
+  preview uuid; custom uuid; unknown uuid; suspended uuid; domains_seen int;
 begin
   set local role tg_sites_renderer;
   -- No tenant. That is the point: this call happens before one is known.
   perform set_config('app.current_tenant_id', '', true);
 
-  staging   := public.resolve_tenant('iso-alpha.tgsites.io');
+  preview   := public.resolve_tenant('iso-alpha.travelgenixsites.com');
   -- Mixed case on purpose. Hostnames are case insensitive in DNS and a
   -- Host header can arrive in any case at all.
   custom    := public.resolve_tenant('ISO-Beta-Live.example');
@@ -361,8 +361,8 @@ begin
 
   reset role;
   insert into checks (name, passed, detail) values
-    ('a staging subdomain resolves with no tenant set',
-     staging = '11111111-1111-1111-1111-111111111111', coalesce(staging::text, 'null')),
+    ('a preview subdomain resolves with no tenant set',
+     preview = '11111111-1111-1111-1111-111111111111', coalesce(preview::text, 'null')),
     ('a custom domain resolves, whatever its case',
      custom = '22222222-2222-2222-2222-222222222222', coalesce(custom::text, 'null')),
     ('an unknown hostname resolves to nothing',
@@ -381,14 +381,88 @@ declare refused boolean := false;
 begin
   begin
     insert into public.domains (tenant_id, hostname)
-      values ('22222222-2222-2222-2222-222222222222', 'iso-alpha.tgsites.io');
+      values ('22222222-2222-2222-2222-222222222222', 'iso-alpha.travelgenixsites.com');
   exception when others then refused := true;
   end;
 
   insert into checks (name, passed, detail) values
-    ('a staging subdomain cannot be claimed as a custom domain', refused,
+    ('a preview subdomain cannot be claimed as a custom domain', refused,
      case when refused then 'the check constraint refused it'
-          else 'ONE TENANT COULD HIJACK ANOTHERS STAGING URL' end);
+          else 'ONE TENANT COULD HIJACK ANOTHERS PREVIEW URL' end);
+end $$;
+
+-- ---------------------------------------------------------------------------
+-- The version history
+-- ---------------------------------------------------------------------------
+
+-- publish_events holds what a page USED to say, including prices that were
+-- changed for a reason. Three properties, and the third is the one a schema
+-- change is most likely to lose by accident.
+
+insert into public.publish_events (tenant_id, page_id, snapshot, title) values
+  ('11111111-1111-1111-1111-111111111111', 'aaaaaaaa-0000-0000-0000-00000000a001',
+   '{"v":"alpha"}', 'Alpha live'),
+  ('22222222-2222-2222-2222-222222222222', 'bbbbbbbb-0000-0000-0000-00000000b001',
+   '{"v":"beta"}', 'Beta live');
+
+do $$
+declare denied boolean := false; seen int := 0;
+begin
+  set local role tg_sites_renderer;
+  perform set_config('app.current_tenant_id', '11111111-1111-1111-1111-111111111111', true);
+  begin
+    select count(*) into seen from public.publish_events;
+  exception when insufficient_privilege then denied := true;
+  end;
+  reset role;
+
+  insert into checks (name, passed, detail) values
+    ('the public renderer cannot read the version history', denied,
+     case when denied then 'permission denied, as it should be'
+          else 'THE PUBLIC SITE ROLE READ ' || seen || ' HISTORY ROWS' end);
+end $$;
+
+do $$
+declare mine int; theirs int; reachable int;
+begin
+  set local role tg_sites_app;
+  perform set_config('app.current_tenant_id', '11111111-1111-1111-1111-111111111111', true);
+
+  select count(*) into mine from public.publish_events;
+  select count(*) into theirs from public.publish_events
+    where page_id = 'bbbbbbbb-0000-0000-0000-00000000b001';
+
+  -- The restore's own lookup, run as Alpha reaching for Beta's version. It
+  -- matches on publish id AND page id, which is the scope the tenant policy
+  -- does not cover: one page of a tenant restored from another page's history.
+  select count(*) into reachable from public.publish_events
+    where id = (select id from public.publish_events limit 1)
+      and page_id = 'bbbbbbbb-0000-0000-0000-00000000b001';
+
+  reset role;
+  insert into checks (name, passed, detail) values
+    ('a tenant sees only its own versions', mine = 1, mine || ' visible'),
+    ('another tenant''s versions are invisible', theirs = 0, theirs || ' visible'),
+    ('a restore cannot reach across tenants', reachable = 0, reachable || ' matched');
+end $$;
+
+do $$
+declare refused boolean := false;
+begin
+  set local role tg_sites_app;
+  perform set_config('app.current_tenant_id', '11111111-1111-1111-1111-111111111111', true);
+  begin
+    update public.publish_events set snapshot = '{"v":"tampered"}';
+  exception when insufficient_privilege then refused := true;
+  end;
+  reset role;
+
+  -- There is deliberately no UPDATE grant. A snapshot that can be edited after
+  -- the fact is not a snapshot, it is just another copy of the page.
+  insert into checks (name, passed, detail) values
+    ('a stored snapshot cannot be rewritten', refused,
+     case when refused then 'no UPDATE grant, as intended'
+          else 'A SNAPSHOT WAS EDITED IN PLACE' end);
 end $$;
 
 -- ---------------------------------------------------------------------------
