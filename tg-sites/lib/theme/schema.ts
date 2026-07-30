@@ -1,10 +1,10 @@
 /**
  * A site theme: the handful of things a client chooses about how their site looks.
  *
- * SEVEN SETTINGS, NOT THIRTY
+ * FOUR COLOURS, ONE CORNER STYLE, AND SEVEN TEXT STYLES
  *
- * app/globals.css declares about thirty custom properties. This exposes seven
- * of them, and derives the rest.
+ * app/globals.css declares about thirty custom properties. This exposes the
+ * handful that are a brand decision and derives the rest.
  *
  * That is the important decision in this file. Asking a travel agent for a
  * "primary light" colour, a border colour and a muted text colour is asking
@@ -29,6 +29,14 @@
 import { z } from 'zod';
 
 import { normaliseHex } from './colour';
+import {
+  DEFAULT_TYPOGRAPHY,
+  parseTypography,
+  TEXT_STYLES,
+  TypographySchema,
+  typographyIsDefault,
+  type Typography,
+} from './typography';
 
 // ---------------------------------------------------------------------------
 // Fonts
@@ -37,16 +45,17 @@ import { normaliseHex } from './colour';
 /**
  * The font choices, as ids.
  *
- * SYSTEM STACKS ONLY, and no webfonts yet. A hosted font is a network request
- * from a client's page to somewhere else, which costs the thing this whole
- * renderer exists to protect: the page arriving complete in the first response.
- * Google Fonts also means every visitor to a travel agency hits Google, which
- * is somebody else's decision to make.
+ * THE BUILT-IN STACKS, which cost nothing to use because they are already on
+ * the reader's device. Still the right default: no request, no wait, no reflow.
  *
- * Keyed by id so a client picks from a list and the stack string is always
- * ours. That is also the seam for real fonts later: adding a hosted family
- * means adding a row here and a preload, and no schema change, because the
- * stored value was never the font name.
+ * They are no longer the only option. A tenant's font library holds imported
+ * Google families and uploaded brand fonts, and a text style's `family` is a
+ * slug that can name either one of those or one of these. lib/theme/fonts.ts
+ * resolves a slug to a stack and does not care which kind it turned out to be.
+ *
+ * These also serve as the FALLBACK behind every custom font, chosen by
+ * classification so a serif brand font falls back to a serif rather than
+ * reflowing the page into a sans for the second before the woff2 lands.
  */
 export const FONTS = {
   system: {
@@ -84,8 +93,6 @@ export const FONTS = {
 export type FontId = keyof typeof FONTS;
 
 export const FONT_IDS = Object.keys(FONTS) as FontId[];
-
-const FontEnum = z.enum(FONT_IDS as [FontId, ...FontId[]]);
 
 // ---------------------------------------------------------------------------
 // Corners
@@ -127,8 +134,6 @@ export const DEFAULT_THEME = {
   accent: '#00b4d8',
   pageBackground: '#ffffff',
   text: '#0f172a',
-  bodyFont: 'system',
-  headingFont: 'system',
   corners: 'soft',
 } as const;
 
@@ -165,9 +170,16 @@ export const ThemeSchema = z.object({
   /** Body text. Everything else in the type palette is derived from it. */
   text: colour(DEFAULT_THEME.text),
 
-  bodyFont: FontEnum.catch(DEFAULT_THEME.bodyFont),
-  headingFont: FontEnum.catch(DEFAULT_THEME.headingFont),
   corners: CornerEnum.catch(DEFAULT_THEME.corners),
+
+  /**
+   * The seven text styles. See lib/theme/typography.ts.
+   *
+   * Replaced the single bodyFont and headingFont pair, which could say only
+   * "everything is this typeface" and "headings are that one". Andy asked for
+   * H1 to H6 and paragraph, which is what a client actually thinks in.
+   */
+  typography: TypographySchema,
 });
 
 export type Theme = z.infer<typeof ThemeSchema>;
@@ -180,13 +192,62 @@ export type Theme = z.infer<typeof ThemeSchema>;
  * with the defaults filling the gaps.
  */
 export function parseTheme(value: unknown): Theme {
-  const input = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
-  return ThemeSchema.parse({ ...DEFAULT_THEME, ...input });
+  const input: Record<string, unknown> =
+    value && typeof value === 'object' && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
+
+  return ThemeSchema.parse({
+    ...DEFAULT_THEME,
+    ...input,
+    // Parsed separately, because it fills all seven styles from the defaults
+    // before layering the input on. Spreading it above would replace the whole
+    // object and a theme holding only h1 would lose the other six.
+    // parseTypography rather than leaving it to ThemeSchema, because it fills
+    // all seven styles from the defaults first. TypographySchema on its own has
+    // no default, so handing it undefined fails the whole parse, which is how
+    // the first version of this broke every theme including the empty one.
+    typography: parseTypography(input.typography ?? migrateFonts(input)),
+  });
+}
+
+/**
+ * Typography, honouring the two font fields this replaced.
+ *
+ * bodyFont and headingFont were the whole of the type system until the styles
+ * below existed. A theme saved with them and no typography should keep the
+ * typefaces somebody chose rather than silently reverting to the system stack,
+ * so they are read once and mapped: the body font becomes the paragraph, the
+ * heading font becomes all six headings.
+ *
+ * Only when there is no typography at all. Once a theme has been saved through
+ * the new screen, the old fields are ignored and will drop out of the column the
+ * next time it is written, because parseTheme never puts them back.
+ */
+function migrateFonts(input: Record<string, unknown>): unknown {
+  if (input.typography) return input.typography;
+
+  const body = typeof input.bodyFont === 'string' ? input.bodyFont : null;
+  const heading = typeof input.headingFont === 'string' ? input.headingFont : null;
+  // Nothing to carry across. parseTypography turns undefined into the defaults.
+  if (!body && !heading) return undefined;
+
+  const migrated: Record<string, unknown> = {};
+  for (const id of TEXT_STYLES) {
+    migrated[id] = {
+      ...DEFAULT_TYPOGRAPHY[id],
+      family: id === 'p' ? body : (heading ?? body),
+    };
+  }
+  return migrated;
 }
 
 /** True when this theme is the default one, so a screen can say "not set yet". */
 export function themeIsDefault(theme: Theme): boolean {
-  return (Object.keys(DEFAULT_THEME) as Array<keyof Theme>).every(
+  const scalarsMatch = (Object.keys(DEFAULT_THEME) as Array<keyof typeof DEFAULT_THEME>).every(
     (key) => theme[key] === DEFAULT_THEME[key],
   );
+  return scalarsMatch && typographyIsDefault(theme.typography);
 }
+
+export type { Typography };

@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import '../../components/theme/theme.css';
 import { ThemeEditor } from '../../components/theme/ThemeEditor';
 import { activeSite, currentUserId } from '../../lib/auth/session';
+import { listFonts } from '../../lib/db/fonts';
 import { getTheme } from '../../lib/db/theme';
 
 export const metadata: Metadata = {
@@ -20,7 +21,10 @@ export default async function ThemePage() {
   const site = await activeSite();
   if (!site) redirect('/sites');
 
-  const theme = await getTheme(site.tenantId);
+  const [theme, fonts] = await Promise.all([
+    getTheme(site.tenantId),
+    listFonts(site.tenantId),
+  ]);
 
-  return <ThemeEditor siteName={site.name} initial={theme} />;
+  return <ThemeEditor siteName={site.name} initial={theme} initialFonts={fonts} />;
 }

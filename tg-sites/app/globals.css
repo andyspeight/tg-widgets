@@ -84,16 +84,68 @@
   --tgs-space-l: 32px;
   --tgs-space-xl: 64px;
 
-  /* Type scale. */
-  --tgs-font-body: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   /*
-   * The literal stack, not var(--tgs-font-body).
+   * Type. SEVEN STYLES, five tokens each, and all of them GENERATED.
    *
-   * The indirection was tidier and made this token impossible to compare
-   * against what the derivation emits, which is a literal. Two lists that
-   * cannot be diffed are two lists that drift.
+   * These are what lib/theme/typography.ts defaults to, emitted by
+   * lib/theme/fonts.ts, and tests/theme.test.ts asserts this block matches.
+   * Same rule as the colours above: do not hand edit, change the defaults and
+   * paste what the test tells you.
+   *
+   * The literal stack rather than var(--tgs-font-body) in each one, because the
+   * derivation emits literals and two lists that cannot be diffed are two lists
+   * that drift.
    */
+  --tgs-h1-font: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --tgs-h1-weight: 700;
+  --tgs-h1-size: 48px;
+  --tgs-h1-leading: 1.1;
+  --tgs-h1-tracking: -0.030em;
+  --tgs-h2-font: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --tgs-h2-weight: 700;
+  --tgs-h2-size: 36px;
+  --tgs-h2-leading: 1.15;
+  --tgs-h2-tracking: -0.020em;
+  --tgs-h3-font: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --tgs-h3-weight: 700;
+  --tgs-h3-size: 28px;
+  --tgs-h3-leading: 1.2;
+  --tgs-h3-tracking: -0.020em;
+  --tgs-h4-font: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --tgs-h4-weight: 600;
+  --tgs-h4-size: 22px;
+  --tgs-h4-leading: 1.25;
+  --tgs-h4-tracking: -0.010em;
+  --tgs-h5-font: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --tgs-h5-weight: 600;
+  --tgs-h5-size: 19px;
+  --tgs-h5-leading: 1.3;
+  --tgs-h5-tracking: 0.000em;
+  --tgs-h6-font: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --tgs-h6-weight: 600;
+  --tgs-h6-size: 17px;
+  --tgs-h6-leading: 1.35;
+  --tgs-h6-tracking: 0.000em;
+  --tgs-p-font: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --tgs-p-weight: 400;
+  --tgs-p-size: 17px;
+  --tgs-p-leading: 1.6;
+  --tgs-p-tracking: 0.000em;
+
+  /*
+   * Aliases onto the styles above, kept because they are referenced all over
+   * this file: the page shell, the quote, the button, the pill. Pointing them at
+   * the new tokens meant per-style typography landed without rewriting every one
+   * of those rules, and anything added later that reaches for the old name still
+   * gets a sensible answer.
+   */
+  --tgs-font-body: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --tgs-font-display: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /*
+   * The old scale, still here because blocks other than heading and text use it
+   * for their own furniture: a pill, a caption, a price. Not a client's to set.
+   */
   --tgs-text-s: 0.9375rem;   /* 15px, the floor */
   --tgs-text-m: 1.0625rem;   /* 17px */
   --tgs-text-l: 1.25rem;     /* 20px */
@@ -129,9 +181,10 @@
 .tgs-page {
   container-type: inline-size;
   container-name: tgs-page;
-  font-family: var(--tgs-font-body);
-  font-size: var(--tgs-text-m);
-  line-height: var(--tgs-leading-body);
+  /* The paragraph style, so anything not inside a block still inherits it. */
+  font-family: var(--tgs-p-font);
+  font-size: var(--tgs-p-size);
+  line-height: var(--tgs-p-leading);
   color: var(--tgs-text);
   background: var(--tgs-surface);
   /* A rendered page must never scroll sideways. Non-negotiable. */
@@ -320,24 +373,93 @@
 .tgs-block[data-align='right']  { text-align: right; }
 
 /* Heading */
+/*
+ * A heading takes all five of its type properties from its STYLE, not from its
+ * level.
+ *
+ * data-style is which of the seven text styles it looks like. data-level, which
+ * is the actual tag, is a separate decision and is not styled here at all, so a
+ * section can open with h1-sized text while being an h2 in the markup. That
+ * separation is why the page can have exactly one h1 without every big heading
+ * having to be it.
+ *
+ * The default is h2, matching the block's own default, so a heading saved before
+ * data-style existed still gets a size.
+ */
 .tgs-heading {
-  font-family: var(--tgs-font-display);
-  line-height: var(--tgs-leading-tight);
-  letter-spacing: -0.015em;
   margin: 0;
   text-wrap: balance;
+  font-family: var(--tgs-h2-font);
+  font-weight: var(--tgs-h2-weight);
+  font-size: var(--tgs-h2-size);
+  line-height: var(--tgs-h2-leading);
+  letter-spacing: var(--tgs-h2-tracking);
 }
-.tgs-heading[data-size='s']  { font-size: var(--tgs-h-s); }
-.tgs-heading[data-size='m']  { font-size: var(--tgs-h-m); }
-.tgs-heading[data-size='l']  { font-size: var(--tgs-h-l); }
-.tgs-heading[data-size='xl'] { font-size: var(--tgs-h-xl); }
+
+.tgs-heading[data-style='h1'] {
+  font-family: var(--tgs-h1-font);
+  font-weight: var(--tgs-h1-weight);
+  font-size: var(--tgs-h1-size);
+  line-height: var(--tgs-h1-leading);
+  letter-spacing: var(--tgs-h1-tracking);
+}
+.tgs-heading[data-style='h2'] {
+  font-family: var(--tgs-h2-font);
+  font-weight: var(--tgs-h2-weight);
+  font-size: var(--tgs-h2-size);
+  line-height: var(--tgs-h2-leading);
+  letter-spacing: var(--tgs-h2-tracking);
+}
+.tgs-heading[data-style='h3'] {
+  font-family: var(--tgs-h3-font);
+  font-weight: var(--tgs-h3-weight);
+  font-size: var(--tgs-h3-size);
+  line-height: var(--tgs-h3-leading);
+  letter-spacing: var(--tgs-h3-tracking);
+}
+.tgs-heading[data-style='h4'] {
+  font-family: var(--tgs-h4-font);
+  font-weight: var(--tgs-h4-weight);
+  font-size: var(--tgs-h4-size);
+  line-height: var(--tgs-h4-leading);
+  letter-spacing: var(--tgs-h4-tracking);
+}
+.tgs-heading[data-style='h5'] {
+  font-family: var(--tgs-h5-font);
+  font-weight: var(--tgs-h5-weight);
+  font-size: var(--tgs-h5-size);
+  line-height: var(--tgs-h5-leading);
+  letter-spacing: var(--tgs-h5-tracking);
+}
+.tgs-heading[data-style='h6'] {
+  font-family: var(--tgs-h6-font);
+  font-weight: var(--tgs-h6-weight);
+  font-size: var(--tgs-h6-size);
+  line-height: var(--tgs-h6-leading);
+  letter-spacing: var(--tgs-h6-tracking);
+}
 
 /* Rich text */
-.tgs-text { max-width: 75ch; }
+/*
+ * Body copy takes the PARAGRAPH style.
+ *
+ * The small and large options stay, as a step either side of it rather than as
+ * fixed sizes: a caption should be smaller than whatever the client set their
+ * paragraph to, not smaller than 17px. em rather than px is what makes that
+ * relative, so changing the paragraph size moves all three together.
+ */
+.tgs-text {
+  max-width: 75ch;
+  font-family: var(--tgs-p-font);
+  font-weight: var(--tgs-p-weight);
+  font-size: var(--tgs-p-size);
+  line-height: var(--tgs-p-leading);
+  letter-spacing: var(--tgs-p-tracking);
+}
 .tgs-block[data-align='centre'] .tgs-text { margin-inline: auto; }
 .tgs-block[data-align='right']  .tgs-text { margin-inline: 0 0 0 auto; }
-.tgs-text[data-size='s'] { font-size: var(--tgs-text-s); }
-.tgs-text[data-size='l'] { font-size: var(--tgs-text-l); }
+.tgs-text[data-size='s'] { font-size: calc(var(--tgs-p-size) * 0.88); }
+.tgs-text[data-size='l'] { font-size: calc(var(--tgs-p-size) * 1.18); }
 .tgs-text > :first-child { margin-top: 0; }
 .tgs-text > :last-child  { margin-bottom: 0; }
 .tgs-text p { margin: 0 0 var(--tgs-space-m); }

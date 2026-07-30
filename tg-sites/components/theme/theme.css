@@ -502,3 +502,419 @@
   .tv-bar__state { width: 100%; margin: 0 0 var(--ed-2); }
   .tv-bar .tg-btn { flex: 1 1 auto; justify-content: center; }
 }
+
+/* ------------------------------------------------------------------ */
+/* Tabs                                                                */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Three sections, separated by a rule rather than boxed.
+ *
+ * The underline sits on the same hairline that divides the tabs from the panel
+ * below, so the selected tab reads as connected to its content rather than as a
+ * button that happens to be highlighted.
+ */
+.tv-tabs {
+  display: flex;
+  gap: var(--ed-1);
+  margin-bottom: var(--ed-6);
+  border-bottom: 1px solid var(--ed-line);
+}
+
+.tv-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ed-2);
+  padding: var(--ed-3) var(--ed-4);
+  border: 0;
+  background: none;
+  color: var(--ed-ink-2);
+  font: inherit;
+  font-size: var(--ed-text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  /* Sits ON the container's border, so the selected state replaces it. */
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+}
+
+.tv-tab:hover { color: var(--ed-ink); }
+
+.tv-tab:focus-visible {
+  outline: 2px solid var(--ed-accent);
+  outline-offset: -2px;
+  border-radius: var(--ed-r-sm);
+}
+
+.tv-tab[data-selected='true'] {
+  color: var(--ed-ink);
+  border-bottom-color: var(--ed-accent);
+}
+
+/* ------------------------------------------------------------------ */
+/* The text style list                                                 */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The list IS the type scale.
+ *
+ * Each row renders its own sample in its own style, scaled to fit, so the
+ * relationship between the seven is visible rather than described. A list of
+ * labels saying "Heading 1, 48px" tells you the number and nothing about whether
+ * it is right.
+ */
+.tp-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+  overflow: hidden;
+}
+
+.tp-row {
+  display: grid;
+  grid-template-columns: 68px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--ed-3);
+  padding: var(--ed-3) var(--ed-4);
+  border: 0;
+  border-bottom: 1px solid var(--ed-line-soft);
+  background: none;
+  color: var(--ed-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tp-row:last-child { border-bottom: 0; }
+.tp-row:hover { background: var(--ed-well); }
+
+.tp-row:focus-visible {
+  outline: 2px solid var(--ed-accent);
+  outline-offset: -2px;
+}
+
+.tp-row[data-selected='true'] {
+  background: var(--ed-well);
+  box-shadow: inset 2px 0 0 var(--ed-accent);
+}
+
+.tp-row__name {
+  font-size: var(--ed-text-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ed-ink-3);
+}
+
+.tp-row[data-selected='true'] .tp-row__name { color: var(--ed-ink); }
+
+/* One line only: the sample is about shape and size, not about wrapping. */
+.tp-row__sample {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ed-ink);
+}
+
+.tp-row__spec {
+  font-size: var(--ed-text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--ed-ink-3);
+}
+
+/* ------------------------------------------------------------------ */
+/* Slider plus number                                                  */
+/* ------------------------------------------------------------------ */
+
+.tp-slider__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ed-3);
+  margin-bottom: var(--ed-2);
+}
+
+.tp-slider__head .tv-field__label { margin-bottom: 0; }
+
+.tp-slider__value {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.tp-slider__suffix { font-size: var(--ed-text-xs); color: var(--ed-ink-3); }
+
+.tp-number {
+  width: 66px;
+  height: 30px;
+  padding: 0 var(--ed-2);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-sm);
+  background: var(--ed-panel);
+  color: var(--ed-ink);
+  font: inherit;
+  font-size: var(--ed-text-sm);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.tp-number:focus-visible {
+  outline: 2px solid var(--ed-accent);
+  outline-offset: -1px;
+  border-color: var(--ed-accent);
+}
+
+/*
+ * The track and the thumb, drawn rather than left to the platform.
+ *
+ * A default range input is a different height, colour and thumb size in every
+ * browser, and next to a set of matched controls that reads as broken. The 44px
+ * hit area comes from padding on the input rather than from a taller track, so
+ * the control stays visually quiet while still being easy to grab.
+ */
+.tp-range {
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  background: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.tp-range:focus-visible { outline: 2px solid var(--ed-accent); outline-offset: 2px; border-radius: var(--ed-r-sm); }
+
+.tp-range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--ed-line);
+}
+
+.tp-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -6px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ed-accent);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.3);
+}
+
+.tp-range::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--ed-line);
+}
+
+.tp-range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ed-accent);
+}
+
+/* ------------------------------------------------------------------ */
+/* The font library                                                    */
+/* ------------------------------------------------------------------ */
+
+.fp-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--ed-accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.fp-owned {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+  overflow: hidden;
+}
+
+.fp-owned__item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--ed-2) var(--ed-3);
+  padding: var(--ed-3) var(--ed-4);
+  border-bottom: 1px solid var(--ed-line-soft);
+}
+
+.fp-owned__item:last-child { border-bottom: 0; }
+
+/*
+ * The name rendered in its own typeface.
+ *
+ * Possible here and NOT in the search results below, and the difference is the
+ * point: an owned font has been downloaded and is being served from this domain,
+ * so showing it costs nothing. A search result has not, and rendering it would
+ * mean linking to Google, which is the exact thing importing avoids.
+ */
+/*
+ * Every cell placed explicitly.
+ *
+ * The first version gave only the button a grid-row and left its column to
+ * auto-placement, which put it in column 1 and pushed the name into column 2:
+ * the delete button ended up on the left and the font name right-aligned beside
+ * it. Once ONE item in a grid is explicitly positioned, the auto-placement of
+ * the rest is no longer the order they are written in.
+ */
+.fp-owned__name {
+  grid-column: 1;
+  grid-row: 1;
+  font-size: var(--ed-text-md, 17px);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fp-owned__meta {
+  grid-column: 1;
+  grid-row: 2;
+  font-size: var(--ed-text-xs);
+  color: var(--ed-ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.fp-owned__item .tg-btn {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+}
+
+.fp-search {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 140px;
+  gap: var(--ed-2);
+  margin-bottom: var(--ed-4);
+}
+
+.fp-search__input { height: 44px; font-family: inherit; }
+.fp-search__category { height: 44px; }
+
+/*
+ * A bounded, scrolling list.
+ *
+ * Forty results is the cap from the action, and forty rows would be taller than
+ * the panel. Scrolling inside keeps the search box and the upload form both
+ * reachable without the page becoming a mile long.
+ */
+.fp-results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 340px;
+  overflow-y: auto;
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+}
+
+.fp-result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ed-3);
+  padding: var(--ed-2) var(--ed-3) var(--ed-2) var(--ed-4);
+  border-bottom: 1px solid var(--ed-line-soft);
+}
+
+.fp-result:last-child { border-bottom: 0; }
+.fp-result:hover { background: var(--ed-well); }
+
+.fp-result__main { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+
+.fp-result__name {
+  font-size: var(--ed-text-sm);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fp-result__kind { font-size: var(--ed-text-xs); color: var(--ed-ink-3); }
+
+.fp-result .tg-btn { flex: none; min-height: 30px; padding: 0 var(--ed-3); font-size: var(--ed-text-xs); }
+
+.fp-file {
+  width: 100%;
+  padding: var(--ed-3);
+  border: 1px dashed var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-well);
+  color: var(--ed-ink-2);
+  font: inherit;
+  font-size: var(--ed-text-sm);
+  cursor: pointer;
+}
+
+.fp-file:hover { border-color: var(--ed-ink-3); }
+.fp-file:focus-visible { outline: 2px solid var(--ed-accent); outline-offset: 1px; }
+
+/* ------------------------------------------------------------------ */
+/* The type specimen                                                   */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Full size, on the client's own page background.
+ *
+ * Inside .tv-frame, so it inherits --tgs-surface and --tgs-text: the specimen is
+ * shown on the colour the text will actually sit on, because 48px type on white
+ * and 48px type on charcoal are not the same decision.
+ */
+.tv-specimen { padding: var(--ed-6); }
+
+.tv-specimen__row {
+  padding-bottom: var(--ed-5);
+  margin-bottom: var(--ed-5);
+  border-bottom: 1px solid var(--tgs-border);
+}
+
+.tv-specimen__row:last-child { padding-bottom: 0; margin-bottom: 0; border-bottom: 0; }
+
+.tv-specimen__tag {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ed-3);
+  margin: 0 0 var(--ed-2);
+  /* The editor's own type, not the client's: this is a label ON the preview,
+     not part of it, and it must stay readable whatever the theme does. */
+  font-family: var(--ed-font);
+  font-size: var(--ed-text-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tgs-text-muted);
+}
+
+.tv-specimen__spec {
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.tv-specimen__sample {
+  margin: 0;
+  color: var(--tgs-text);
+  /* Long words at 64px have to break rather than push the panel sideways. */
+  overflow-wrap: anywhere;
+}

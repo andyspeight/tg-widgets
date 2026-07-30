@@ -219,9 +219,59 @@ node --experimental-strip-types db/make-user.mjs you@example.com 'a long passphr
 
 It prints SQL to paste into the Supabase editor and touches nothing itself.
 
+## Fonts and type
+
+Seven text styles, H1 to H6 and paragraph, each with a typeface, weight, size,
+line height and letter spacing. A heading with no typeface of its own follows
+the paragraph, so setting one font sets the site.
+
+**Style is not level.** A heading block picks a LEVEL, which is the tag and is
+still h2 to h4 only because the page title owns the single h1, and separately a
+STYLE, which is how it looks. So a section can open with H1-sized text while
+being an h2 in the markup. Wix and Squarespace both work this way and for the
+same reason.
+
+**Any Google font, self-hosted.** Choosing one downloads it here, once, and
+stores the file. After that it is served from this domain and Google is never
+contacted again by us or by any visitor. That is faster (no second DNS lookup
+and TLS handshake to fonts.gstatic.com), it is what makes preload actually
+work, and it keeps a client's visitors off Google's servers, which a German
+court has already found matters.
+
+The picker searches a committed snapshot of all 1,941 families
+(`lib/fonts/catalogue.ts`, regenerate with `node tools/build-font-catalogue.mjs`).
+The snapshot is for BROWSING only: any name typed is checked against Google
+itself, so a family published after it was generated still imports. Google's
+endpoint is case sensitive, so a typed name is matched against the catalogue
+first, which is why "playfair display" works.
+
+**Uploads** take woff2, woff, ttf and otf, up to 1MB each, one weight at a
+time. The bytes are sniffed for a real font signature; the filename is not
+trusted for anything.
+
+**Where the files live.** In Postgres, as `bytea`. Object storage would be
+conventional and needs a `service_role` key, which is exactly what
+`lib/db/client.ts` refuses to let near this database. A family is about 230KB
+and a site uses one or two, so this stays inside the isolation model already
+proven by `db/isolation-check.sql` with no new subsystem and no new secret. The
+threshold for changing that is images, not fonts.
+
+Served from `/fonts/<tenant>/<file-id>.woff2`, cached for a year as immutable
+because the id never changes for a given set of bytes. Re-importing makes new
+rows and therefore new URLs.
+
 ## What is deliberately not here
 
 No media library, no sections library, no widget bridge.
+
+**Italics.** The Google importer fetches four weights in normal style only.
+An italic face doubles every family's storage and no block asks for one yet.
+The schema has the column.
+
+**A Content-Security-Policy on the rendered site.** There is none, which is why
+the `@font-face` rules can go in an inline `<style>`. When one is added that tag
+needs a nonce or a hash. Written down in `components/render/FontHead.tsx` so it
+is a known constraint rather than a discovery.
 
 **Travelify SSO.** The adapter is written and throws on use. It needs three
 facts from the Travelify side: the authorise and token endpoints, the client
@@ -238,7 +288,13 @@ rewrite.
 a month. Renewal needs middleware or an action, and neither is worth adding
 until somebody minds.
 
-The dashboard has no browser coverage of its own, where the editor has 43
-checks. That gap is why a broken dialog shipped once, and `noUnusedLocals`
-now catches that particular shape of it. Worth adding properly before this
-grows further.
+The dashboard and the theme screen have no browser coverage of their own,
+where the editor has 52 checks. That gap is why a broken dialog shipped once,
+and it is why the theme screen has had to be checked by hand-building a
+throwaway harness twice. Worth adding properly before this grows further.
+
+The font-serving route has not been exercised end to end: this container
+cannot reach Postgres, so the driver's `bytea` mapping is the one link in the
+chain proven only by reading it. Postgres itself round-trips the bytes with the
+woff2 signature intact, and the first real import on a preview will confirm the
+rest.

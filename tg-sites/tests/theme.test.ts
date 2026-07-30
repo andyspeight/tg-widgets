@@ -45,6 +45,7 @@ import {
   parseTheme,
   themeIsDefault,
 } from '../lib/theme/schema';
+import { DEFAULT_TYPOGRAPHY } from '../lib/theme/typography';
 import { themeTokens, themeWarnings } from '../lib/theme/tokens';
 
 // ---------------------------------------------------------------------------
@@ -224,8 +225,20 @@ describe('nudging until readable', () => {
 
 describe('parsing a theme', () => {
   it('turns nothing into the defaults', () => {
-    expect(parseTheme({})).toEqual(DEFAULT_THEME);
+    // Compared field by field rather than against DEFAULT_THEME whole, because
+    // DEFAULT_THEME holds the scalars and typography has its own defaults.
+    expect(parseTheme({})).toEqual({ ...DEFAULT_THEME, typography: DEFAULT_TYPOGRAPHY });
     expect(themeIsDefault(parseTheme({}))).toBe(true);
+  });
+
+  it('fills all seven text styles, whatever it is given', () => {
+    const theme = parseTheme({ typography: { h1: { size: 60 } } });
+    expect(Object.keys(theme.typography).sort()).toEqual(
+      ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p'],
+    );
+    expect(theme.typography.h1.size).toBe(60);
+    // And the rest keep their defaults rather than being dropped.
+    expect(theme.typography.h2).toEqual(DEFAULT_TYPOGRAPHY.h2);
   });
 
   it.each([
@@ -236,15 +249,39 @@ describe('parsing a theme', () => {
     ['an array', ['#fff']],
     ['a double encoded blob', '{"brand":"#ff0000"}'],
   ])('turns %s into the defaults rather than throwing', (_label, input) => {
-    expect(parseTheme(input)).toEqual(DEFAULT_THEME);
+    expect(parseTheme(input)).toEqual({ ...DEFAULT_THEME, typography: DEFAULT_TYPOGRAPHY });
   });
 
   it('keeps the fields it understands and defaults the rest', () => {
-    const theme = parseTheme({ brand: '#ff0000', bodyFont: 'serif', nonsense: 'ignored' });
+    const theme = parseTheme({ brand: '#ff0000', corners: 'round', nonsense: 'ignored' });
     expect(theme.brand).toBe('#ff0000');
-    expect(theme.bodyFont).toBe('serif');
+    expect(theme.corners).toBe('round');
     expect(theme.accent).toBe(DEFAULT_THEME.accent);
     expect(theme).not.toHaveProperty('nonsense');
+  });
+
+  /*
+   * The two fields per-style typography replaced.
+   *
+   * A theme saved before the styles existed said only "the body is this and the
+   * headings are that". Losing those on the first read would silently revert a
+   * client's site to the system stack, so they are mapped across once.
+   */
+  it('carries the old bodyFont and headingFont across to the styles', () => {
+    const theme = parseTheme({ bodyFont: 'serif', headingFont: 'grotesque' });
+    expect(theme.typography.p.family).toBe('serif');
+    expect(theme.typography.h1.family).toBe('grotesque');
+    expect(theme.typography.h6.family).toBe('grotesque');
+    // And the scale is untouched, because those fields never described one.
+    expect(theme.typography.h1.size).toBe(DEFAULT_TYPOGRAPHY.h1.size);
+  });
+
+  it('ignores the old fields once typography exists', () => {
+    const theme = parseTheme({
+      bodyFont: 'serif',
+      typography: { p: { family: 'my-brand-font' } },
+    });
+    expect(theme.typography.p.family).toBe('my-brand-font');
   });
 
   it('normalises a shorthand colour on the way in', () => {
@@ -262,8 +299,7 @@ describe('parsing a theme', () => {
     expect(parseTheme({ brand }).brand).toBe(DEFAULT_THEME.brand);
   });
 
-  it('refuses a font or corner style it does not have', () => {
-    expect(parseTheme({ bodyFont: 'comic-sans' }).bodyFont).toBe(DEFAULT_THEME.bodyFont);
+  it('refuses a corner style it does not have', () => {
     expect(parseTheme({ corners: 'spiky' }).corners).toBe(DEFAULT_THEME.corners);
   });
 });
@@ -494,7 +530,10 @@ describe('globals.css and the derivation agree', () => {
     const root = css.slice(css.indexOf(':root {'), css.indexOf('}', css.indexOf(':root {')));
 
     const declared = new Map<string, string>();
-    for (const match of root.matchAll(/(--tgs-[a-z-]+)\s*:\s*([^;]+);/g)) {
+    // [a-z0-9-] and not [a-z-]: every typography token has a digit in it, so the
+      // first version of this collected none of them and then reported all 35 as
+      // missing from a stylesheet they were sitting in.
+      for (const match of root.matchAll(/(--tgs-[a-z0-9-]+)\s*:\s*([^;]+);/g)) {
       declared.set(match[1], match[2].trim());
     }
 

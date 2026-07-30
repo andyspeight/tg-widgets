@@ -3,7 +3,10 @@ import { redirect } from 'next/navigation';
 import { EditorShell } from '../../components/editor/EditorShell';
 import { activeSite, currentUserId } from '../../lib/auth/session';
 import { getPage } from '../../lib/db/pages';
+import { FontHead } from '../../components/render/FontHead';
+import { listFontFaces } from '../../lib/db/fonts';
 import { getTheme } from '../../lib/db/theme';
+import { familiesFromFiles } from '../../lib/theme/fonts';
 import { themeTokens } from '../../lib/theme/tokens';
 
 export const metadata = {
@@ -55,14 +58,22 @@ export default async function EditorPage({
   //
   // Theme alongside it, in parallel: the canvas has to show the site in the
   // client's own colours, or the preview is a preview of a different site.
-  const [page, theme] = await Promise.all([
+  const [page, theme, faces] = await Promise.all([
     getPage(site.tenantId, pageId),
     getTheme(site.tenantId),
+    // The app role, not the renderer: the editor is behind sign-in and reads its
+    // own tenant's library through the connection it already has.
+    listFontFaces(site.tenantId, 'app'),
   ]);
   if (!page) redirect('/sites');
 
   return (
-    <EditorShell
+    <>
+      {/* The canvas shows the client's real typefaces, so the same rules the
+          published page gets are needed here too. */}
+      <FontHead tenantSlug={site.slug} files={faces} typography={theme.typography} />
+
+      <EditorShell
       // Staff tools are for Travelgenix people, not for a client's agent.
       // Owner is the closest thing the membership table has to that today; it
       // becomes a real staff flag on the user when there is one to read.
@@ -71,7 +82,8 @@ export default async function EditorPage({
       initialPage={page.content}
       initialStatus={page.status}
       initialHasUnpublishedChanges={page.hasUnpublishedChanges}
-      siteTheme={themeTokens(theme).style}
-    />
+        siteTheme={themeTokens(theme, familiesFromFiles(faces)).style}
+      />
+    </>
   );
 }

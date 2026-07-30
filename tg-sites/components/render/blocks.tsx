@@ -56,14 +56,37 @@ const RADII = ['none', 'sm', 'md', 'lg', 'full'] as const;
 // Text
 // ---------------------------------------------------------------------------
 
+/**
+ * The four visual sizes this block used to have, mapped onto the seven styles.
+ *
+ * A heading saved before the styles existed carries size: 's' | 'm' | 'l' | 'xl'.
+ * Dropping those would resize every heading on every existing page, so they are
+ * read and translated. New headings store a style directly.
+ */
+const LEGACY_SIZE_TO_STYLE = { xl: 'h1', l: 'h2', m: 'h3', s: 'h4' } as const;
+
 export function HeadingBlock({ props }: { props: Props }): ReactElement {
+  // The TAG. Still h2 to h4 only: the page title owns the single h1, and a
+  // client must not be able to make a second one or skip a level.
   const level = oneOf(props, 'level', ['h2', 'h3', 'h4'] as const, 'h2');
-  const size = oneOf(props, 'size', ['s', 'm', 'l', 'xl'] as const, 'm');
+
+  /*
+   * The STYLE, which is how it looks, and is not the tag.
+   *
+   * Reading `style` first and falling back to the old `size` means a page saved
+   * either way renders, and a page saved the old way keeps the size it had.
+   */
+  const chosen = props.style;
+  const style =
+    typeof chosen === 'string' && /^h[1-6]$/.test(chosen)
+      ? chosen
+      : LEGACY_SIZE_TO_STYLE[oneOf(props, 'size', ['s', 'm', 'l', 'xl'] as const, 'm')];
+
   const text = str(props, 'text');
   const Tag = level;
 
   return (
-    <Tag className="tgs-heading" data-size={size}>
+    <Tag className="tgs-heading" data-style={style}>
       {text || 'Heading'}
     </Tag>
   );

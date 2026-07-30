@@ -35,7 +35,8 @@ import {
   nudgeUntilReadable,
   readableOn,
 } from './colour';
-import { CORNERS, FONTS, type Theme } from './schema';
+import { typographyTokens, type LibraryFont } from './fonts';
+import { CORNERS, type Theme } from './schema';
 
 /**
  * How far a derived colour travels from the page background.
@@ -123,7 +124,7 @@ export interface ThemeTokens {
  * product's rhythm rather than a client's brand, and a client who could set
  * them would be able to break the 4px grid the whole thing is built on.
  */
-export function themeTokens(theme: Theme): ThemeTokens {
+export function themeTokens(theme: Theme, library: LibraryFont[] = []): ThemeTokens {
   const page = theme.pageBackground;
 
   // Text first: everything else is measured against the pair of page and text.
@@ -237,12 +238,19 @@ export function themeTokens(theme: Theme): ThemeTokens {
     '--tgs-on-primary-accent': accentOnBrand,
     '--tgs-on-primary-border': mix(theme.brand, onBrand, ON_COLOUR.border),
 
-    '--tgs-font-body': FONTS[theme.bodyFont].stack,
-    '--tgs-font-display': FONTS[theme.headingFont].stack,
-
     '--tgs-radius-sm': `${corners.sm}px`,
     '--tgs-radius-md': `${corners.md}px`,
     '--tgs-radius-lg': `${corners.lg}px`,
+
+    /*
+     * The typography half, five tokens per style across seven styles.
+     *
+     * Merged here rather than emitted separately so a caller has one object to
+     * put on one element. Splitting them would mean every screen and every route
+     * remembering to spread both, and forgetting the second one would give a
+     * page the right colours in the wrong typeface.
+     */
+    ...typographyTokens(theme.typography, library),
   } as CSSProperties;
 
   return {

@@ -3,8 +3,11 @@ import Link from 'next/link';
 
 import '../../../components/sites/sites.css';
 import { PageRenderer } from '../../../components/render/PageRenderer';
+import { FontHead } from '../../../components/render/FontHead';
+import { listFontFaces } from '../../../lib/db/fonts';
 import { getPublishedPage } from '../../../lib/db/pages';
 import { getPublicTheme } from '../../../lib/db/theme';
+import { familiesFromFiles } from '../../../lib/theme/fonts';
 import { themeTokens } from '../../../lib/theme/tokens';
 import { activeSite } from '../../../lib/auth/session';
 
@@ -53,12 +56,13 @@ async function load(path: string[] | undefined) {
    * theme cannot be read for a tenant the request is not scoped to, and neither
    * call can write anything.
    */
-  const [page, theme] = await Promise.all([
+  const [page, theme, faces] = await Promise.all([
     getPublishedPage(site.tenantId, (path ?? []).join('/')),
     getPublicTheme(site.tenantId),
+    listFontFaces(site.tenantId),
   ]);
 
-  return page ? { page, theme } : null;
+  return page ? { page, theme, faces, slug: site.slug } : null;
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
@@ -124,7 +128,21 @@ export default async function PublishedPage({ params }: Params) {
       {/* The page's only h1. Section headings start at h2, which the heading
           block enforces by not offering h1 at all. */}
       <h1 className="tgs-sr-only">{found.page.title}</h1>
-      <PageRenderer page={found.page.content} theme={themeTokens(found.theme).style} />
+
+      {/*
+        The @font-face rules and the preloads. Before the content, so the browser
+        starts fetching the font while it is still reading the page.
+      */}
+      <FontHead
+        tenantSlug={found.slug}
+        files={found.faces}
+        typography={found.theme.typography}
+      />
+
+      <PageRenderer
+        page={found.page.content}
+        theme={themeTokens(found.theme, familiesFromFiles(found.faces)).style}
+      />
     </>
   );
 }

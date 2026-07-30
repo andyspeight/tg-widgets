@@ -105,7 +105,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     group: 'Text',
     icon: 'heading',
     description: 'A section or sub-section title.',
-    defaults: { text: 'A new heading', level: 'h2', size: 'm', align: 'left' },
+    defaults: { text: 'A new heading', level: 'h2', style: 'h3', align: 'left' },
     summarise: (props) => asString(props.text) || 'Heading',
     fields: [
       { kind: 'text', key: 'text', label: 'Text', max: 200 },
@@ -124,15 +124,29 @@ export const BLOCKS: readonly BlockDefinition[] = [
       },
       {
         kind: 'select',
-        key: 'size',
-        label: 'Size',
+        key: 'style',
+        label: 'Style',
+        /*
+         * The seven text styles from the theme, minus paragraph.
+         *
+         * These are APPEARANCE, and the Level field above is the tag. Keeping
+         * them separate is what lets a section open with H1-sized text while
+         * still being an h2 in the markup, so a page has exactly one h1 without
+         * every large heading having to be it.
+         *
+         * Named H1 to H6 because that is what everybody already calls them, and
+         * because it matches the Type panel on the theme screen where the
+         * client set what each one looks like.
+         */
         options: [
-          { value: 's', label: 'Small' },
-          { value: 'm', label: 'Medium' },
-          { value: 'l', label: 'Large' },
-          { value: 'xl', label: 'Display' },
+          { value: 'h1', label: 'H1, the largest' },
+          { value: 'h2', label: 'H2' },
+          { value: 'h3', label: 'H3' },
+          { value: 'h4', label: 'H4' },
+          { value: 'h5', label: 'H5' },
+          { value: 'h6', label: 'H6, the smallest' },
         ],
-        help: 'Visual size only. It does not change the heading level.',
+        help: 'How it looks, set on the Theme screen. The Level above is the tag.',
       },
       { kind: 'select', key: 'align', label: 'Alignment', options: ALIGN_OPTIONS },
     ],

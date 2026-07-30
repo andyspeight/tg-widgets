@@ -86,6 +86,21 @@ insert into public.tenant_users (tenant_id, user_id, role) values
   ('33333333-3333-3333-3333-333333333333', 'iso-user-ann', 'owner'),
   ('22222222-2222-2222-2222-222222222222', 'iso-user-bob', 'owner');
 
+-- A font each, with a file. The bytes carry the real woff2 signature so a check
+-- can tell a corrupted read from an empty one.
+insert into public.fonts (id, tenant_id, family, slug, source, fallback) values
+  ('cccc0000-0000-0000-0000-00000000c001', '11111111-1111-1111-1111-111111111111',
+   'Alpha Display', 'alpha-display', 'google', 'serif'),
+  ('dddd0000-0000-0000-0000-00000000d001', '22222222-2222-2222-2222-222222222222',
+   'Beta Grotesk', 'beta-grotesk', 'upload', 'sans');
+
+insert into public.font_files
+  (tenant_id, font_id, weight, style, format, subset, unicode_range, bytes, byte_size) values
+  ('11111111-1111-1111-1111-111111111111', 'cccc0000-0000-0000-0000-00000000c001',
+   400, 'normal', 'woff2', 'latin', 'U+0000-00FF', decode('774f4632aaaaaaaa', 'hex'), 8),
+  ('22222222-2222-2222-2222-222222222222', 'dddd0000-0000-0000-0000-00000000d001',
+   400, 'normal', 'woff2', null, null, decode('774f4632bbbbbbbb', 'hex'), 8);
+
 create temp table if not exists checks (
   ord    serial,
   name   text,
@@ -133,6 +148,7 @@ where n.nspname = 'public' and c.relkind = 'r'
 -- rather than everything.
 do $$
 declare pages int; tenants int; domains int; members int; creds int;
+        fonts int; font_files int;
 begin
   set local role tg_sites_app;
   -- All three, by name. This block does not depend on running early, so
@@ -146,15 +162,18 @@ begin
   select count(*) into domains from public.domains;
   select count(*) into members from public.tenant_users;
   select count(*) into creds   from public.auth_users;
+  select count(*) into fonts   from public.fonts;
+  select count(*) into font_files from public.font_files;
 
   -- Step back out before recording. The roles under test have no business
   -- writing anywhere, including to this scratch table.
   reset role;
   insert into checks (name, passed, detail) values
     ('a query with nothing set returns nothing',
-     pages = 0 and tenants = 0 and domains = 0 and members = 0 and creds = 0,
-     format('pages %s, tenants %s, domains %s, memberships %s, credentials %s',
-            pages, tenants, domains, members, creds));
+     pages = 0 and tenants = 0 and domains = 0 and members = 0 and creds = 0
+       and fonts = 0 and font_files = 0,
+     format('pages %s, tenants %s, domains %s, memberships %s, credentials %s, fonts %s, files %s',
+            pages, tenants, domains, members, creds, fonts, font_files));
 end $$;
 
 -- ---------------------------------------------------------------------------
@@ -481,6 +500,104 @@ begin
      case when granted then 'ANN JOINED BETA BY ASKING' else 'the policy refused it' end),
     ('reading a membership does not make it writable',
      promoted = 0, 'rows changed: ' || promoted);
+end $$;
+
+-- ---------------------------------------------------------------------------
+-- Fonts, which are the one thing the public role must be able to READ
+-- ---------------------------------------------------------------------------
+
+/*
+ * Fonts sit differently from everything else in this schema.
+ *
+ * A draft page is invisible to the renderer, on purpose. A font file cannot be:
+ * it is fetched by an unauthenticated browser while painting a published page,
+ * so the read-only role has to see it. That makes these the checks worth having.
+ * The renderer must read a font and still be unable to write one, and neither
+ * role may see another tenant's, because the bytes are somebody's licensed
+ * property and the family names give away who a client is.
+ */
+
+do $$
+declare
+  own int; other int; own_files int; other_files int; by_id int;
+begin
+  set local role tg_sites_app;
+  perform set_config('app.current_tenant_id', '11111111-1111-1111-1111-111111111111', true);
+  perform set_config('app.current_user_id',   '', true);
+  perform set_config('app.login_email',       '', true);
+
+  select count(*) into own   from public.fonts;
+  select count(*) into other from public.fonts where slug = 'beta-grotesk';
+  select count(*) into own_files   from public.font_files;
+  select count(*) into other_files from public.font_files
+    where font_id = 'dddd0000-0000-0000-0000-00000000d001';
+  -- Straight at the row by its id, which is what a font URL carries.
+  select count(*) into by_id from public.font_files
+    where tenant_id = '22222222-2222-2222-2222-222222222222';
+
+  reset role;
+  insert into checks (name, passed, detail) values
+    ('a tenant sees its own fonts',            own = 1,          'saw ' || own || ' of 1'),
+    ('a tenant sees none of the others fonts', other = 0,        'leaked ' || other),
+    ('a tenant sees only its own font files',  own_files = 1,    'saw ' || own_files || ' of 1'),
+    ('font files do not leak across tenants',  other_files = 0,  'leaked ' || other_files),
+    ('asking for a font file by id is scoped', by_id = 0,        'leaked ' || by_id);
+end $$;
+
+do $$
+declare
+  can_read int; leaked int; wrote boolean := true; deleted boolean := true;
+  signature bytea;
+begin
+  set local role tg_sites_renderer;
+  perform set_config('app.current_tenant_id', '11111111-1111-1111-1111-111111111111', true);
+
+  select count(*) into can_read from public.font_files;
+  select count(*) into leaked   from public.font_files
+    where tenant_id = '22222222-2222-2222-2222-222222222222';
+  -- The bytes themselves, since serving them is the entire job of this role.
+  select substring(bytes from 1 for 4) into signature from public.font_files limit 1;
+
+  begin
+    insert into public.fonts (tenant_id, family, slug, source, fallback)
+      values ('11111111-1111-1111-1111-111111111111', 'Planted', 'planted', 'upload', 'sans');
+  exception when others then wrote := false; end;
+
+  begin
+    delete from public.font_files;
+  exception when others then deleted := false; end;
+
+  reset role;
+  insert into checks (name, passed, detail) values
+    ('the renderer can read a font file, which it must',
+     can_read = 1, 'saw ' || can_read || ' of 1'),
+    ('the renderer gets the bytes back intact',
+     signature = decode('774f4632', 'hex'),
+     'signature: ' || coalesce(encode(signature, 'escape'), 'null')),
+    ('the renderer cannot see another tenants font',
+     leaked = 0, 'leaked ' || leaked),
+    ('the renderer cannot add a font',
+     not wrote, case when wrote then 'IT WROTE ONE' else 'refused' end),
+    ('the renderer cannot delete a font file',
+     not deleted, case when deleted then 'IT DELETED THEM' else 'refused' end);
+end $$;
+
+-- Deleting a tenant must take its fonts and their bytes with it, or a removed
+-- client's licensed font files stay in the database indefinitely.
+do $$
+declare fonts_left int; files_left int;
+begin
+  delete from public.tenants where id = '22222222-2222-2222-2222-222222222222';
+
+  select count(*) into fonts_left from public.fonts
+    where slug = 'beta-grotesk';
+  select count(*) into files_left from public.font_files
+    where font_id = 'dddd0000-0000-0000-0000-00000000d001';
+
+  insert into checks (name, passed, detail) values
+    ('deleting a tenant removes its fonts and their bytes',
+     fonts_left = 0 and files_left = 0,
+     format('fonts %s, files %s', fonts_left, files_left));
 end $$;
 
 -- ---------------------------------------------------------------------------

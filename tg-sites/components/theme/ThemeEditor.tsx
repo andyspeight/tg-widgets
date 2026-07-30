@@ -1,118 +1,143 @@
 'use client';
 
 /**
- * The theme screen: four colours, two fonts, one corner style, and a preview
- * that shows what they do.
+ * The theme screen. Colour, type, and the font library.
  *
- * WHY THE PREVIEW IS THE POINT
+ * TABS, because it outgrew a column. Colour is four fields; type is seven styles
+ * times five properties; fonts is a searchable list of 1941 families plus an
+ * upload form. Stacked in one scroll that is a screen nobody reaches the bottom
+ * of, and the three jobs are genuinely separate: you pick colours once, set type
+ * once, and come back to fonts when a client sends their brand pack.
  *
- * A row of colour swatches tells a client nothing. Nobody can look at a hex
- * code and know whether the label on their button will be readable, whether
- * their captions will disappear, or whether their brand colour works as a
- * section background. So the right hand side is a small real page built from
- * the same .tgs-* classes and the same tokens the published site uses, and it
- * repaints on every keystroke.
+ * WHY THE PREVIEW CHANGES WITH THE TAB
  *
- * It deliberately shows the things that GO WRONG rather than the things that
- * look nice: a filled button whose label has to be legible, muted text that can
- * vanish, a hairline that can disappear, and both coloured bands. A preview of
- * only the happy path is decoration.
- *
- * WHAT IT IS NOT
- *
- * Not PageRenderer. It uses the same stylesheet, so the colours and the type
- * are honest, but the arrangement is chosen to exercise the tokens rather than
- * to be a real page. The real check is the canvas in the editor, which does use
- * PageRenderer and now carries the same theme.
+ * A preview should show the thing being changed. On the colour tab that is a
+ * small page, because colour is about how bands and buttons sit against each
+ * other. On the type tab it is a specimen of all seven styles at full size,
+ * because type is about the relationship between them and a mini page shows
+ * three of the seven. Showing the same thing for both means showing the wrong
+ * thing for one of them.
  */
 
 import { useEffect, useMemo, useState, useTransition } from 'react';
 
 import { saveThemeAction } from '../../app/actions/theme';
-import {
-  CORNER_IDS,
-  CORNERS,
-  DEFAULT_THEME,
-  FONT_IDS,
-  FONTS,
-  parseTheme,
-  type FontId,
-  type Theme,
-} from '../../lib/theme/schema';
+import type { FontFamily } from '../../lib/db/fonts';
 import { contrastRatio, normaliseHex } from '../../lib/theme/colour';
+import { resolveStack, type LibraryFont } from '../../lib/theme/fonts';
+import { CORNERS, CORNER_IDS, parseTheme, type Theme } from '../../lib/theme/schema';
 import { themeTokens, themeWarnings } from '../../lib/theme/tokens';
+import {
+  TEXT_STYLES,
+  TEXT_STYLE_LABEL,
+  type TextStyle,
+  type TextStyleId,
+} from '../../lib/theme/typography';
 import { Icon } from '../editor/Icon';
+import { FontsPanel } from './FontsPanel';
+import { TypePanel } from './TypePanel';
 import './theme.css';
 
-const THEME_KEY = 'tg-sites:theme:v1';
+const CHROME_KEY = 'tg-sites:theme:v1';
+
+type Tab = 'colour' | 'type' | 'fonts';
+
+const TABS: Array<{ id: Tab; label: string }> = [
+  { id: 'colour', label: 'Colour' },
+  { id: 'type', label: 'Type' },
+  { id: 'fonts', label: 'Fonts' },
+];
 
 interface Props {
   siteName: string;
   initial: Theme;
+  initialFonts: FontFamily[];
 }
 
 type ColourField = 'brand' | 'accent' | 'pageBackground' | 'text';
 
 const COLOUR_FIELDS: Array<{ key: ColourField; label: string; help: string }> = [
-  {
-    key: 'brand',
-    label: 'Brand colour',
-    help: 'Buttons, links, and the coloured bands between sections.',
-  },
-  {
-    key: 'accent',
-    label: 'Accent colour',
-    help: 'Highlights and second-choice actions. Used sparingly.',
-  },
-  {
-    key: 'pageBackground',
-    label: 'Page background',
-    help: 'Usually white. A very pale tint reads as warmer.',
-  },
-  {
-    key: 'text',
-    label: 'Text colour',
-    help: 'Body copy. Everything else in the type palette is worked out from it.',
-  },
+  { key: 'brand', label: 'Brand colour', help: 'Buttons, links, and the coloured bands between sections.' },
+  { key: 'accent', label: 'Accent colour', help: 'Highlights and second-choice actions. Used sparingly.' },
+  { key: 'pageBackground', label: 'Page background', help: 'Usually white. A very pale tint reads as warmer.' },
+  { key: 'text', label: 'Text colour', help: 'Body copy. Everything else in the type palette is worked out from it.' },
 ];
 
-export function ThemeEditor({ siteName, initial }: Props) {
+const SAMPLE: Record<TextStyleId, string> = {
+  h1: 'Ten nights in the Maldives',
+  h2: 'Why book with us',
+  h3: 'Overwater villas and a private reef',
+  h4: 'What is included',
+  h5: 'Flights, transfers and the hotel',
+  h6: 'Prices per person, two sharing',
+  p: 'Talk to someone who has actually been. We build the trip around how you like to travel, then we are on the end of the phone while you are away.',
+};
+
+export function ThemeEditor({ siteName, initial, initialFonts }: Props) {
   const [theme, setTheme] = useState<Theme>(initial);
-  /** What is in the database, so the screen knows whether anything is pending. */
   const [saved, setSaved] = useState<Theme>(initial);
+  const [library, setLibrary] = useState<FontFamily[]>(initialFonts);
+  const [tab, setTab] = useState<Tab>('colour');
   const [message, setMessage] = useState<string | null>(null);
   const [busy, startTransition] = useTransition();
   const [chrome, setChrome] = useState<'light' | 'dark' | 'system'>('light');
 
-  /*
-   * Same appearance key as the editor and the dashboard, so moving between the
-   * three screens does not flip the lights. This is the EDITOR's light or dark,
-   * not the client's site theme.
-   *
-   * useEffect, not useMemo. A memo runs during render, including the server
-   * render, where there is no window to read. Reaching for it here because it
-   * "only needs to happen once" is how a client component starts throwing
-   * during SSR.
-   */
   useEffect(() => {
     try {
-      const stored = window.localStorage.getItem(THEME_KEY);
+      const stored = window.localStorage.getItem(CHROME_KEY);
       if (stored === 'light' || stored === 'dark' || stored === 'system') setChrome(stored);
     } catch {
       // Storage blocked. Light is a fine place to stay.
     }
   }, []);
 
-  const tokens = useMemo(() => themeTokens(theme), [theme]);
-  const warnings = useMemo(() => themeWarnings(theme), [theme]);
-  const dirty = useMemo(
-    () => (Object.keys(DEFAULT_THEME) as Array<keyof Theme>).some((k) => theme[k] !== saved[k]),
-    [theme, saved],
+  const fonts: LibraryFont[] = useMemo(
+    () =>
+      library.map((font) => ({
+        slug: font.slug,
+        family: font.family,
+        fallback: font.fallback,
+        weights: font.weights,
+      })),
+    [library],
   );
+
+  const tokens = useMemo(() => themeTokens(theme, fonts), [theme, fonts]);
+  const warnings = useMemo(() => themeWarnings(theme), [theme]);
+
+  /*
+   * Compared as JSON rather than field by field.
+   *
+   * The theme is now nested: seven styles of five properties each, under the
+   * colours. A per-key comparison would have to recurse, and the version that
+   * did not recurse would call a size change "saved" and quietly lose it.
+   */
+  const dirty = useMemo(() => JSON.stringify(theme) !== JSON.stringify(saved), [theme, saved]);
 
   function set<K extends keyof Theme>(key: K, value: Theme[K]) {
     setMessage(null);
     setTheme((current) => ({ ...current, [key]: value }));
+  }
+
+  function setStyle(id: TextStyleId, changes: Partial<TextStyle>) {
+    setMessage(null);
+    setTheme((current) => ({
+      ...current,
+      typography: { ...current.typography, [id]: { ...current.typography[id], ...changes } },
+    }));
+  }
+
+  /** Every heading at once, which is the first thing anybody wants to do. */
+  function setAllHeadings(changes: Partial<TextStyle>) {
+    setMessage(null);
+    setTheme((current) => {
+      const next = { ...current.typography };
+      for (const id of TEXT_STYLES) {
+        if (id === 'p') continue;
+        next[id] = { ...next[id], ...changes };
+      }
+      return { ...current, typography: next };
+    });
   }
 
   function save() {
@@ -123,14 +148,14 @@ export function ThemeEditor({ siteName, initial }: Props) {
         setMessage(result.error);
         return;
       }
-      // The returned theme, not the local one. If the schema tidied anything
-      // the screen should show what is actually stored.
+      // What was stored, not what was sent. If the schema clamped anything the
+      // screen should show the truth.
       setTheme(result.data);
       setSaved(result.data);
     });
   }
 
-  const warningFor = (field: ColourField) => warnings.find((w) => w.field === field);
+  const warningFor = (field: ColourField) => warnings.find((w) => w.field === field)?.message;
 
   return (
     <div className="sv-root tv-root" data-theme={chrome}>
@@ -140,7 +165,7 @@ export function ThemeEditor({ siteName, initial }: Props) {
             <p className="sv-eyebrow">Theme</p>
             <h1 className="sv-title">{siteName}</h1>
             <p className="sv-url">
-              Four colours and a typeface. Everything else is worked out from them.
+              Four colours, seven text styles, and whichever typefaces you want.
             </p>
           </div>
           <a className="sv-btn" href="/sites">
@@ -155,191 +180,120 @@ export function ThemeEditor({ siteName, initial }: Props) {
           </p>
         )}
 
+        <div className="tv-tabs" role="tablist" aria-label="Theme sections">
+          {TABS.map((entry) => (
+            <button
+              key={entry.id}
+              type="button"
+              role="tab"
+              aria-selected={tab === entry.id}
+              className="tv-tab"
+              data-selected={tab === entry.id ? 'true' : undefined}
+              onClick={() => setTab(entry.id)}
+            >
+              {entry.label}
+              {entry.id === 'fonts' && library.length > 0 && (
+                <span className="fp-count">{library.length}</span>
+              )}
+            </button>
+          ))}
+        </div>
+
         <div className="tv-grid">
-          {/* ---------------------------------------------------------- */}
-          {/* Controls                                                    */}
-          {/* ---------------------------------------------------------- */}
           <div className="tv-controls">
-            <section className="tv-group">
-              <h2 className="tv-group__title">Colour</h2>
-
-              {COLOUR_FIELDS.map((field) => (
-                <ColourRow
-                  key={field.key}
-                  label={field.label}
-                  help={field.help}
-                  value={theme[field.key]}
-                  against={field.key === 'pageBackground' ? theme.text : theme.pageBackground}
-                  againstLabel={field.key === 'pageBackground' ? 'text' : 'the page'}
-                  warning={warningFor(field.key)?.message}
-                  onChange={(hex) => set(field.key, hex)}
-                />
-              ))}
-            </section>
-
-            <section className="tv-group">
-              <h2 className="tv-group__title">Type</h2>
-
-              <FontRow
-                id="body-font"
-                label="Body text"
-                value={theme.bodyFont}
-                onChange={(id) => set('bodyFont', id)}
-              />
-              <FontRow
-                id="heading-font"
-                label="Headings"
-                value={theme.headingFont}
-                onChange={(id) => set('headingFont', id)}
-              />
-
-              <p className="tv-note">
-                These are the fonts already on your visitor&rsquo;s device, so
-                nothing has to be downloaded and the page paints straight away.
-                Loading your own brand font is a later job.
-              </p>
-            </section>
-
-            <section className="tv-group">
-              <h2 className="tv-group__title">Corners</h2>
-
-              <div className="tv-corners" role="radiogroup" aria-label="Corner style">
-                {CORNER_IDS.map((id) => (
-                  <button
-                    key={id}
-                    type="button"
-                    className="tv-corner"
-                    role="radio"
-                    aria-checked={theme.corners === id}
-                    data-selected={theme.corners === id ? 'true' : undefined}
-                    onClick={() => set('corners', id)}
-                  >
-                    <span
-                      className="tv-corner__shape"
-                      style={{ borderRadius: CORNERS[id].md }}
-                      aria-hidden="true"
+            {tab === 'colour' && (
+              <>
+                <section className="tv-group">
+                  <h2 className="tv-group__title">Colour</h2>
+                  {COLOUR_FIELDS.map((field) => (
+                    <ColourRow
+                      key={field.key}
+                      label={field.label}
+                      help={field.help}
+                      value={theme[field.key]}
+                      against={field.key === 'pageBackground' ? theme.text : theme.pageBackground}
+                      againstLabel={field.key === 'pageBackground' ? 'text' : 'the page'}
+                      warning={warningFor(field.key)}
+                      onChange={(hex) => set(field.key, hex)}
                     />
-                    {CORNERS[id].label}
-                  </button>
-                ))}
-              </div>
-            </section>
+                  ))}
+                </section>
 
-            <section className="tv-group">
-              <h2 className="tv-group__title">Worked out for you</h2>
-              <p className="tv-note">
-                From the four colours above. Nothing here is yours to set, and
-                every one of them is checked for contrast against whatever it
-                sits on.
-              </p>
+                <section className="tv-group">
+                  <h2 className="tv-group__title">Corners</h2>
+                  <div className="tv-corners" role="radiogroup" aria-label="Corner style">
+                    {CORNER_IDS.map((id) => (
+                      <button
+                        key={id}
+                        type="button"
+                        className="tv-corner"
+                        role="radio"
+                        aria-checked={theme.corners === id}
+                        data-selected={theme.corners === id ? 'true' : undefined}
+                        onClick={() => set('corners', id)}
+                      >
+                        <span
+                          className="tv-corner__shape"
+                          style={{ borderRadius: CORNERS[id].md }}
+                          aria-hidden="true"
+                        />
+                        {CORNERS[id].label}
+                      </button>
+                    ))}
+                  </div>
+                </section>
 
-              <ul className="tv-derived">
-                <Derived label="Button label" colour={tokens.derived.onBrand} on={theme.brand} />
-                <Derived label="Brand hover" colour={tokens.derived.brandLight} on={theme.pageBackground} />
-                <Derived label="Dark band" colour={tokens.derived.brandDark} on={theme.pageBackground} />
-                <Derived label="Quiet text" colour={tokens.derived.textMuted} on={theme.pageBackground} />
-                <Derived label="Hairline" colour={tokens.derived.border} on={theme.pageBackground} />
-                <Derived label="Faint band" colour={tokens.derived.surfaceAlt} on={theme.pageBackground} />
-              </ul>
-            </section>
+                <section className="tv-group">
+                  <h2 className="tv-group__title">Worked out for you</h2>
+                  <p className="tv-note">
+                    From the four colours above. Nothing here is yours to set, and
+                    every one is checked for contrast against whatever it sits on.
+                  </p>
+                  <ul className="tv-derived">
+                    <Derived label="Button label" colour={tokens.derived.onBrand} on={theme.brand} />
+                    <Derived label="Brand hover" colour={tokens.derived.brandLight} on={theme.pageBackground} />
+                    <Derived label="Dark band" colour={tokens.derived.brandDark} on={theme.pageBackground} />
+                    <Derived label="Quiet text" colour={tokens.derived.textMuted} on={theme.pageBackground} />
+                    <Derived label="Hairline" colour={tokens.derived.border} on={theme.pageBackground} />
+                    <Derived label="Faint band" colour={tokens.derived.surfaceAlt} on={theme.pageBackground} />
+                  </ul>
+                </section>
+              </>
+            )}
+
+            {tab === 'type' && (
+              <TypePanel
+                typography={theme.typography}
+                library={library}
+                onChange={setStyle}
+                onSetAllHeadings={setAllHeadings}
+              />
+            )}
+
+            {tab === 'fonts' && (
+              <FontsPanel library={library} onLibraryChange={setLibrary} />
+            )}
           </div>
 
-          {/* ---------------------------------------------------------- */}
-          {/* Preview                                                     */}
-          {/* ---------------------------------------------------------- */}
+          {/* ------------------------------------------------------------ */}
           <div className="tv-preview">
             <p className="tv-preview__label">
-              Your site, as a visitor sees it
+              {tab === 'type' ? 'Your text styles' : 'Your site, as a visitor sees it'}
             </p>
 
             {/*
-              The theme tokens go on this element, exactly as they go on the
-              page element of a published site. Same object, same mechanism, no
-              stylesheet involved.
+              The theme tokens go on this element, exactly as they go on the page
+              element of a published site. Same object, same mechanism.
             */}
             <div className="tv-frame tgs-page" style={tokens.style}>
-              <section className="tgs-section" data-tone="dark" data-width="contained">
-                <div className="tgs-section__inner tv-demo">
-                  <h2 className="tgs-heading" data-level="2">
-                    Ten nights in the Maldives
-                  </h2>
-                  <p className="tgs-text">
-                    Overwater villas, seaplane transfers and a private reef, from
-                    March through to October.
-                  </p>
-                  <p className="tv-demo__row">
-                    <span className="tgs-button" data-variant="primary" data-size="s">
-                      See the offer
-                    </span>
-                    <span className="tgs-button" data-variant="ghost" data-size="s">
-                      Ask a question
-                    </span>
-                  </p>
-                </div>
-              </section>
-
-              <section className="tgs-section" data-width="contained">
-                <div className="tgs-section__inner tv-demo">
-                  <h2 className="tgs-heading" data-level="2">
-                    Why book with us
-                  </h2>
-                  <p className="tgs-text">
-                    Thirty years of arranging this exact trip, and one person
-                    looking after yours from the first call to the last transfer.
-                  </p>
-                  {/* Muted text and a hairline, the two things that vanish. */}
-                  <p className="tv-demo__quiet">
-                    ATOL protected. Prices per person, based on two sharing.
-                  </p>
-                  <hr className="tv-demo__rule" />
-                  <p className="tv-demo__row">
-                    <span className="tgs-button" data-variant="primary" data-size="s">
-                      Get a quote
-                    </span>
-                    <span className="tgs-button" data-variant="secondary" data-size="s">
-                      Brochure
-                    </span>
-                  </p>
-                </div>
-              </section>
-
-              <section className="tgs-section" data-tone="accent" data-width="contained">
-                <div className="tgs-section__inner tv-demo">
-                  <h2 className="tgs-heading" data-level="3">
-                    Talk to someone who has been
-                  </h2>
-                  <p className="tv-demo__quiet">
-                    Lines open until eight on weekdays.
-                  </p>
-                  <p className="tv-demo__row">
-                    <span className="tgs-button" data-variant="primary" data-size="s">
-                      Call us
-                    </span>
-                  </p>
-                </div>
-              </section>
-
-              <section className="tgs-section" data-tone="subtle" data-width="contained">
-                <div className="tgs-section__inner tv-demo">
-                  <p className="tv-demo__quiet">
-                    The faint band, for alternating one section against the next.
-                  </p>
-                </div>
-              </section>
+              {tab === 'type' ? <Specimen theme={theme} fonts={fonts} /> : <SitePreview />}
             </div>
           </div>
         </div>
       </div>
 
-      {/*
-        One primary action, and it only lights up when there is something to
-        save. The bar is fixed because the controls are taller than a screen and
-        a Save button you have to scroll to find is a Save button people miss.
-      */}
       <div className="tv-bar" data-dirty={dirty ? 'true' : undefined}>
-        <span className="tv-bar__state">
-          {dirty ? 'Not saved yet' : 'Saved'}
-        </span>
+        <span className="tv-bar__state">{dirty ? 'Not saved yet' : 'Saved'}</span>
 
         <button
           type="button"
@@ -359,8 +313,8 @@ export function ThemeEditor({ siteName, initial }: Props) {
           disabled={busy}
           onClick={() => {
             setMessage(null);
-            // parseTheme({}) fills every field from DEFAULT_THEME, so this
-            // cannot drift from the defaults the way listing them here would.
+            // parseTheme({}) fills every field from the defaults, so this cannot
+            // drift from them the way listing them here would.
             setTheme(parseTheme({}));
           }}
         >
@@ -384,11 +338,132 @@ export function ThemeEditor({ siteName, initial }: Props) {
 // ---------------------------------------------------------------------------
 
 /**
+ * All seven styles at their real size, in order.
+ *
+ * At FULL size, not scaled. The list in the type panel is scaled because it has
+ * to fit seven rows in a sidebar; this is the place to find out that a 64px H1 is
+ * too big for the space it will occupy. Scaling here would make the preview agree
+ * with the control and disagree with the site.
+ */
+function Specimen({ theme, fonts }: { theme: Theme; fonts: LibraryFont[] }) {
+  return (
+    <div className="tv-specimen">
+      {TEXT_STYLES.map((id) => {
+        const style = theme.typography[id];
+        return (
+          <div className="tv-specimen__row" key={id}>
+            <p className="tv-specimen__tag">
+              {TEXT_STYLE_LABEL[id]}
+              <span className="tv-specimen__spec">
+                {style.size}px · {style.weight} · {style.lineHeight}
+              </span>
+            </p>
+            <p
+              className="tv-specimen__sample"
+              style={{
+                fontFamily: resolveStack(style.family, fonts, theme.typography.p.family),
+                fontWeight: style.weight,
+                fontSize: `${style.size}px`,
+                lineHeight: style.lineHeight,
+                letterSpacing: `${style.tracking / 100}em`,
+              }}
+            >
+              {SAMPLE[id]}
+            </p>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
+ * A small page, using the real .tgs-* classes so the colours are honest.
+ *
+ * Shows the things that go wrong rather than the things that look nice: a filled
+ * button whose label has to be legible, muted text that can vanish, a hairline
+ * that can disappear, and both coloured bands.
+ */
+function SitePreview() {
+  return (
+    <>
+      <section className="tgs-section" data-tone="dark" data-width="contained">
+        <div className="tgs-section__inner tv-demo">
+          <h2 className="tgs-heading" data-style="h2">
+            Ten nights in the Maldives
+          </h2>
+          <p className="tgs-text">
+            Overwater villas, seaplane transfers and a private reef, from March
+            through to October.
+          </p>
+          <p className="tv-demo__row">
+            <span className="tgs-button" data-variant="primary" data-size="s">
+              See the offer
+            </span>
+            <span className="tgs-button" data-variant="ghost" data-size="s">
+              Ask a question
+            </span>
+          </p>
+        </div>
+      </section>
+
+      <section className="tgs-section" data-width="contained">
+        <div className="tgs-section__inner tv-demo">
+          <h2 className="tgs-heading" data-style="h2">
+            Why book with us
+          </h2>
+          <p className="tgs-text">
+            Thirty years of arranging this exact trip, and one person looking
+            after yours from the first call to the last transfer.
+          </p>
+          <p className="tv-demo__quiet">
+            ATOL protected. Prices per person, based on two sharing.
+          </p>
+          <hr className="tv-demo__rule" />
+          <p className="tv-demo__row">
+            <span className="tgs-button" data-variant="primary" data-size="s">
+              Get a quote
+            </span>
+            <span className="tgs-button" data-variant="secondary" data-size="s">
+              Brochure
+            </span>
+          </p>
+        </div>
+      </section>
+
+      <section className="tgs-section" data-tone="accent" data-width="contained">
+        <div className="tgs-section__inner tv-demo">
+          <h2 className="tgs-heading" data-style="h3">
+            Talk to someone who has been
+          </h2>
+          <p className="tv-demo__quiet">Lines open until eight on weekdays.</p>
+          <p className="tv-demo__row">
+            <span className="tgs-button" data-variant="primary" data-size="s">
+              Call us
+            </span>
+          </p>
+        </div>
+      </section>
+
+      <section className="tgs-section" data-tone="subtle" data-width="contained">
+        <div className="tgs-section__inner tv-demo">
+          <p className="tv-demo__quiet">
+            The faint band, for alternating one section against the next.
+          </p>
+        </div>
+      </section>
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+
+/**
  * One colour: a swatch that opens the picker, a hex box, and the ratio.
  *
- * BOTH INPUTS, because both are how people actually work. A brand guide gives
- * you a hex code to paste, and a native picker is how you find a colour you do
- * not already have. Offering only the picker means retyping a code by eye.
+ * BOTH INPUTS, because both are how people work. A brand guide gives you a hex
+ * code to paste, and a native picker is how you find a colour you do not already
+ * have. Offering only the picker means retyping a code by eye.
  */
 function ColourRow({
   label,
@@ -402,7 +477,6 @@ function ColourRow({
   label: string;
   help: string;
   value: string;
-  /** The colour this one is measured against, for the ratio. */
   against: string;
   againstLabel: string;
   warning?: string;
@@ -411,23 +485,15 @@ function ColourRow({
   /*
    * The text box keeps its own copy while it is being typed.
    *
-   * Pushing every keystroke up would mean "#1b2" is committed on the way to
-   * "#1b2b5b", and since that is a valid three digit hex the preview would
-   * flash a completely different colour mid-word. So the local value is what
-   * you see and the change is only committed when it parses.
+   * Pushing every keystroke up would commit "#1b2" on the way to "#1b2b5b", and
+   * since that is a valid three digit hex the preview would flash a completely
+   * different colour mid-word.
    */
   const [typed, setTyped] = useState(value);
   const [focused, setFocused] = useState(false);
 
   const shown = focused ? typed : value;
   const ratio = contrastRatio(value, against);
-
-  function commit(next: string) {
-    setTyped(next);
-    const hex = normaliseHex(next);
-    if (hex) onChange(hex);
-  }
-
   const id = `colour-${label.toLowerCase().replace(/[^a-z]+/g, '-')}`;
 
   return (
@@ -437,12 +503,6 @@ function ColourRow({
       </label>
 
       <div className="tv-colour">
-        {/*
-          A real <input type="color">, sized as a swatch. The native picker is
-          better than anything worth building here: it has an eyedropper, it
-          remembers recent colours, and it is the one your operating system
-          taught you.
-        */}
         <input
           className="tv-colour__swatch"
           type="color"
@@ -458,7 +518,6 @@ function ColourRow({
           className="tv-colour__hex"
           id={id}
           type="text"
-          inputMode="text"
           spellCheck={false}
           autoCapitalize="off"
           value={shown}
@@ -467,7 +526,11 @@ function ColourRow({
             setFocused(true);
           }}
           onBlur={() => setFocused(false)}
-          onChange={(event) => commit(event.target.value)}
+          onChange={(event) => {
+            setTyped(event.target.value);
+            const hex = normaliseHex(event.target.value);
+            if (hex) onChange(hex);
+          }}
         />
 
         <span className="tv-ratio" title={`Contrast against ${againstLabel}`}>
@@ -487,48 +550,7 @@ function ColourRow({
   );
 }
 
-// ---------------------------------------------------------------------------
-
-function FontRow({
-  id,
-  label,
-  value,
-  onChange,
-}: {
-  id: string;
-  label: string;
-  value: FontId;
-  onChange: (id: FontId) => void;
-}) {
-  return (
-    <div className="tv-field">
-      <label className="tv-field__label" htmlFor={id}>
-        {label}
-      </label>
-
-      <select
-        className="tv-select"
-        id={id}
-        value={value}
-        onChange={(event) => onChange(event.target.value as FontId)}
-        // Set in the font it is offering, so the list previews itself.
-        style={{ fontFamily: FONTS[value].stack }}
-      >
-        {FONT_IDS.map((font) => (
-          <option key={font} value={font} style={{ fontFamily: FONTS[font].stack }}>
-            {FONTS[font].label}
-          </option>
-        ))}
-      </select>
-
-      <p className="tv-field__help">{FONTS[value].note}</p>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-
-/** One derived colour, with the ratio it achieves against its own background. */
+/** One derived colour, with the colour it sits on as its border. */
 function Derived({ label, colour, on }: { label: string; colour: string; on: string }) {
   return (
     <li className="tv-derived__item">
