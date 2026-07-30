@@ -683,6 +683,21 @@ const WIDGETS = [
     access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'form',
+    name: 'Form',
+    airtableType: 'Form',
+    description: 'A general-purpose form that asks one question at a time, the way Typeform does. Thirteen question types (text, choice, dropdown, rating, opinion scale, date, consent), keyboard-first answering, a welcome screen and a branded thank-you. Answers route to your inbox, a Google Sheet, email, a webhook or your mailing list.',
+    category: 'Lead Gen',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/>'},
+    color: '#0EA5E9',
+    editorUrl: '/editor-form',
+    demoUrl: '/demo-form',
+    widgetTag: 'form',
+    scriptFile: 'widget-form.js',
+    access: { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'enquiry',
     name: 'Enquiry Form',
     airtableType: 'Enquiry Form',
@@ -2341,6 +2356,34 @@ function loadMiniPreview(w) {
         { title: 'Le Morne', subtitle: 'Wild. Majestic. Timeless.', image: 'https://picsum.photos/seed/lemorne-mountain/700/900' },
       ],
     });
+  }
+
+  if (w.id === 'form') {
+    container.innerHTML = `
+      <div style="
+        width: 100%; height: 100%;
+        padding: 30px 34px;
+        background: #FFFFFF;
+        border-radius: 14px;
+        box-shadow: 0 1px 3px rgba(15,23,42,.06);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        display: flex; flex-direction: column; justify-content: center;
+        box-sizing: border-box;
+      ">
+        <div style="height:3px; background:#E2E8F0; border-radius:999px; margin-bottom:24px;">
+          <div style="width:40%; height:100%; background:${w.color}; border-radius:999px;"></div>
+        </div>
+        <div style="font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#94A3B8; margin-bottom:8px;">2 of 5</div>
+        <div style="font-size:20px; font-weight:600; letter-spacing:-.015em; color:#0F172A; margin-bottom:8px;">What is your email?</div>
+        <div style="font-size:13px; color:#475569; margin-bottom:20px;">So we can reply. We never pass it on.</div>
+        <div style="font-size:19px; color:#94A3B8; padding-bottom:6px; border-bottom:2px solid #CBD5E1; max-width:300px; margin-bottom:26px;">name@example.com</div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="background:${w.color}; color:#FFFFFF; font-size:13px; font-weight:600; padding:10px 20px; border-radius:8px;">OK</div>
+          <div style="font-size:12px; color:#94A3B8;">press <b style="color:#475569">Enter</b></div>
+        </div>
+      </div>
+    `;
+    return;
   }
 
   if (w.id === 'enquirypro') {

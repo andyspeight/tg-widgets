@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Form editor — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<style>
+  /* Per-editor styles only. Shell tokens (--tgse-*) live in editor-shell.css. */
+
+  /* ── Shared field chrome ─────────────────────────────────────── */
+  .fld {
+    width: 100%; height: 34px; padding: 0 10px;
+    background: var(--tgse-panel-3);
+    border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-md);
+    color: var(--tgse-ink); font-family: inherit; font-size: 13px;
+    outline: none; transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  textarea.fld { height: auto; padding: 8px 10px; line-height: 1.5; resize: vertical; min-height: 60px; }
+  select.fld { cursor: pointer; }
+  .fld:hover { border-color: var(--tgse-border-strong); }
+  .fld:focus { border-color: var(--tgse-brand); box-shadow: 0 0 0 3px var(--tgse-brand-tint); }
+  .fld-help { margin: 6px 0 0; font-size: 11px; line-height: 1.5; color: var(--tgse-ink-3); }
+
+  /* ── Colour ──────────────────────────────────────────────────── */
+  .swatch {
+    position: relative; width: 34px; height: 34px; flex: none; overflow: hidden;
+    border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md);
+  }
+  .swatch input[type="color"] {
+    position: absolute; inset: -4px; width: calc(100% + 8px); height: calc(100% + 8px);
+    border: 0; padding: 0; cursor: pointer;
+  }
+  .hex { flex: 1; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; font-size: 12px; }
+
+  /* ── Toggle ──────────────────────────────────────────────────── */
+  .tog { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13px; color: var(--tgse-ink-2); }
+  .tog input { width: 16px; height: 16px; accent-color: var(--tgse-brand); cursor: pointer; margin: 0; }
+
+  /* ── Question list ───────────────────────────────────────────── */
+  .qlist { display: flex; flex-direction: column; gap: 6px; }
+  .qcard {
+    background: var(--tgse-panel-3);
+    border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-md);
+    overflow: hidden;
+    transition: border-color .15s ease;
+  }
+  .qcard.is-open { border-color: var(--tgse-brand); }
+  .qcard.is-drag { opacity: .45; }
+  .qcard.is-over { border-color: var(--tgse-brand); border-style: dashed; }
+
+  .qhead {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px; cursor: pointer; user-select: none;
+  }
+  .qhead:hover { background: var(--tgse-hover); }
+  .qgrip {
+    flex: none; width: 16px; height: 16px; color: var(--tgse-ink-3);
+    cursor: grab; display: grid; place-items: center;
+  }
+  .qgrip svg { width: 14px; height: 14px; }
+  .qnum {
+    flex: none; min-width: 18px; height: 18px; padding: 0 4px;
+    display: grid; place-items: center;
+    background: var(--tgse-panel); border: 1px solid var(--tgse-border);
+    border-radius: 5px; font-size: 10px; font-weight: 600; color: var(--tgse-ink-3);
+  }
+  .qtitle {
+    flex: 1; min-width: 0; font-size: 13px; font-weight: 500; color: var(--tgse-ink);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .qtitle .muted { color: var(--tgse-ink-3); font-weight: 400; }
+  .qtype {
+    flex: none; font-size: 10px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase;
+    color: var(--tgse-ink-3);
+  }
+  .qbody { padding: 0 10px 10px; border-top: 1px solid var(--tgse-border); padding-top: 10px; }
+
+  .qrow { display: flex; align-items: center; gap: 6px; }
+  .iconbtn {
+    flex: none; width: 26px; height: 26px; display: grid; place-items: center;
+    background: transparent; border: 1px solid transparent; border-radius: 6px;
+    color: var(--tgse-ink-3); cursor: pointer; transition: all .15s ease;
+  }
+  .iconbtn:hover { background: var(--tgse-panel); border-color: var(--tgse-border); color: var(--tgse-ink); }
+  .iconbtn:focus-visible { outline: 2px solid var(--tgse-brand); outline-offset: 1px; }
+  .iconbtn[disabled] { opacity: .35; cursor: default; }
+  .iconbtn svg { width: 14px; height: 14px; }
+  .iconbtn--danger:hover { color: var(--tgse-danger); border-color: var(--tgse-danger); }
+
+  /* ── Add question ────────────────────────────────────────────── */
+  .addwrap { position: relative; margin-top: 10px; }
+  .addbtn {
+    width: 100%; height: 36px; display: flex; align-items: center; justify-content: center; gap: 6px;
+    background: var(--tgse-panel-3); border: 1px dashed var(--tgse-border-strong);
+    border-radius: var(--tgse-radius-md); color: var(--tgse-ink-2);
+    font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: all .15s ease;
+  }
+  .addbtn:hover { border-color: var(--tgse-brand); color: var(--tgse-brand); background: var(--tgse-brand-tint); }
+  .addbtn svg { width: 14px; height: 14px; }
+  .addmenu {
+    position: absolute; left: 0; right: 0; bottom: calc(100% + 6px); z-index: 30;
+    background: var(--tgse-panel); border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-md); box-shadow: var(--tgse-shadow-lg);
+    padding: 4px; max-height: 320px; overflow-y: auto; display: none;
+  }
+  .addmenu.is-open { display: block; }
+  .addmenu button {
+    width: 100%; display: flex; align-items: center; gap: 8px;
+    padding: 7px 8px; background: transparent; border: 0; border-radius: 6px;
+    color: var(--tgse-ink); font-family: inherit; font-size: 13px; text-align: left; cursor: pointer;
+  }
+  .addmenu button:hover { background: var(--tgse-hover); }
+  .addmenu .mt { flex: none; font-size: 10px; font-weight: 600; color: var(--tgse-ink-3); text-transform: uppercase; }
+
+  /* ── Empty state ─────────────────────────────────────────────── */
+  .empty {
+    padding: 22px 14px; text-align: center;
+    border: 1px dashed var(--tgse-border); border-radius: var(--tgse-radius-md);
+    color: var(--tgse-ink-3); font-size: 13px; line-height: 1.6;
+  }
+
+  /* ── Preview frame ───────────────────────────────────────────── */
+  #pv-frame { display: flex; align-items: flex-start; justify-content: center; padding: 32px 24px; }
+  #widget-mount { width: 100%; max-width: 640px; }
+  #pv-frame[data-vp="mobile"] #widget-mount { max-width: 358px; }
+  #pv-frame[data-vp="tablet"] #widget-mount { max-width: 520px; }
+</style>
+</head>
+<body>
+
+<div class="tgse-app">
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Form</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled form" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="questions" role="tab" aria-selected="true">Questions</button>
+      <button data-tab="design" role="tab" aria-selected="false">Design</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+
+      <!-- ===== QUESTIONS ===== -->
+      <div class="tgse-panel is-active" data-tab="questions">
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/><circle cx="12" cy="12" r="10"/></svg>
+            <span class="tgse-section-label">Questions</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="qlist" id="qlist"></div>
+            <div class="addwrap">
+              <div class="addmenu" id="addmenu" role="menu"></div>
+              <button class="addbtn" id="btn-add" aria-haspopup="true" aria-expanded="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add question
+              </button>
+            </div>
+            <p class="fld-help">
+              Every form needs one email question so replies can reach the person
+              who filled it in.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== DESIGN ===== -->
+      <div class="tgse-panel" data-tab="design">
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+            <span class="tgse-section-label">Colours</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="cfgAccent">Accent colour</label>
+              <div class="tgse-field-row">
+                <span class="swatch"><input type="color" id="cfgAccent" value="#1B2B5B" aria-label="Accent colour"></span>
+                <input type="text" class="fld hex" id="cfgAccentHex" maxlength="7" aria-label="Accent colour hex">
+              </div>
+              <p class="fld-help">Used for buttons, the progress bar and the selected answer. Button text switches between light and dark automatically so it stays readable.</p>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="cfgTheme">Theme</label>
+              <select class="fld" id="cfgTheme">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
+            <span class="tgse-section-label">Display</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tog"><input type="checkbox" id="cfgProgress" checked> Show the progress bar</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== SETTINGS ===== -->
+      <div class="tgse-panel" data-tab="settings">
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M12 3v18"/></svg>
+            <span class="tgse-section-label">Welcome screen</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tog"><input type="checkbox" id="cfgShowWelcome" checked> Start with a welcome screen</label>
+              <p class="fld-help">Turn this off to open straight on the first question.</p>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="cfgWelcomeTitle">Heading</label>
+              <input type="text" class="fld" id="cfgWelcomeTitle" maxlength="80">
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="cfgWelcomeBody">Sub-heading</label>
+              <textarea class="fld" id="cfgWelcomeBody" rows="2" maxlength="200"></textarea>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="cfgStartLabel">Button label</label>
+              <input type="text" class="fld" id="cfgStartLabel" maxlength="30" placeholder="Start">
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span class="tgse-section-label">Thank you screen</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="cfgThanksTitle">Heading</label>
+              <input type="text" class="fld" id="cfgThanksTitle" maxlength="80">
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="cfgThanksBody">Message</label>
+              <textarea class="fld" id="cfgThanksBody" rows="2" maxlength="200"></textarea>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="cfgThanksCtaText">Button label (optional)</label>
+              <input type="text" class="fld" id="cfgThanksCtaText" maxlength="30" placeholder="Leave empty for no button">
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="cfgThanksCtaUrl">Button link</label>
+              <input type="url" class="fld" id="cfgThanksCtaUrl" maxlength="300" placeholder="https://">
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
+            <span class="tgse-section-label">Button wording</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="cfgNextLabel">Next</label>
+              <input type="text" class="fld" id="cfgNextLabel" maxlength="24" placeholder="OK">
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="cfgBackLabel">Back</label>
+              <input type="text" class="fld" id="cfgBackLabel" maxlength="24" placeholder="Back">
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="cfgSubmitLabel">Submit</label>
+              <input type="text" class="fld" id="cfgSubmitLabel" maxlength="24" placeholder="Submit">
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H5.17L4 17.17V4z"/></svg>
+            <span class="tgse-section-label">Where answers go</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <p class="fld-help" style="margin-top:0">
+              Answers are saved to your submissions inbox as soon as the form is
+              live. To also send them to a Google Sheet, an email address, your
+              mailing list or a webhook, open the Routing panel from the
+              dashboard for this widget.
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop" aria-label="Desktop view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+        </button>
+        <button data-vp="tablet" title="Tablet" aria-label="Tablet view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+        <button data-vp="mobile" title="Mobile" aria-label="Mobile view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+      </div>
+      <div class="tgse-divider"></div>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle widget theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        Theme
+      </button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Get embed code
+      </button>
+    </div>
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame">
+        <div id="widget-mount"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="/editor-shell.js"></script>
+<script src="/widget-form.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  // ── Question types ───────────────────────────────────────────
+  // Mirrors the TYPES registry in widget-form.js. `opts` marks a type that
+  // takes a list of options; `scale` marks one with numeric bounds.
+  var TYPES = [
+    { id: 'short-text',    name: 'Short text',     group: 'Text' },
+    { id: 'long-text',     name: 'Long text',      group: 'Text' },
+    { id: 'email',         name: 'Email',          group: 'Contact', mapTo: 'email' },
+    { id: 'phone',         name: 'Phone',          group: 'Contact', mapTo: 'phone' },
+    { id: 'multiple-choice', name: 'Multiple choice', group: 'Choice', opts: true },
+    { id: 'multi-select',  name: 'Select several', group: 'Choice', opts: true },
+    { id: 'dropdown',      name: 'Dropdown',       group: 'Choice', opts: true },
+    { id: 'yes-no',        name: 'Yes / No',       group: 'Choice' },
+    { id: 'rating',        name: 'Star rating',    group: 'Scale', scale: true },
+    { id: 'opinion-scale', name: 'Opinion scale',  group: 'Scale', scale: true },
+    { id: 'number',        name: 'Number',         group: 'Other' },
+    { id: 'date',          name: 'Date',           group: 'Other' },
+    { id: 'consent',       name: 'Consent tickbox', group: 'Other' }
+  ];
+  function typeDef(id) {
+    for (var i = 0; i < TYPES.length; i++) if (TYPES[i].id === id) return TYPES[i];
+    return TYPES[0];
+  }
+
+  // Canonical contact fields a question can feed. Keep in step with MAPPABLE
+  // in api/form-submit.js — anything else is ignored server-side.
+  var MAPPABLE = [
+    { id: '',                name: 'Not linked' },
+    { id: 'email',           name: 'Email address' },
+    { id: 'fullName',        name: 'Full name' },
+    { id: 'firstName',       name: 'First name' },
+    { id: 'lastName',        name: 'Last name' },
+    { id: 'phone',           name: 'Phone number' },
+    { id: 'marketingConsent', name: 'Marketing consent' }
+  ];
+
+  var DEFAULT_CONFIG = {
+    theme: 'light',
+    accentColor: '#1B2B5B',
+    showProgress: true,
+    showWelcome: true,
+    welcomeTitle: 'Get in touch',
+    welcomeBody: 'A few quick questions, about a minute.',
+    startLabel: 'Start',
+    nextLabel: 'OK',
+    backLabel: 'Back',
+    submitLabel: 'Submit',
+    thankYouTitle: 'Thank you',
+    thankYouBody: 'We will come back to you shortly.',
+    thankYouCtaText: '',
+    thankYouCtaUrl: '',
+    questions: [
+      { id: 'q_name',  type: 'short-text', label: 'What is your name?', required: true, mapTo: 'fullName' },
+      { id: 'q_email', type: 'email',      label: 'What is your email?', required: true, mapTo: 'email', help: 'So we can reply.' }
+    ]
+  };
+
+  var C = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+  var openId = null;          // which question card is expanded
+  var widget = null;
+
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function uid() { return 'q_' + Math.random().toString(36).slice(2, 8); }
+
+  // ── Preview ──────────────────────────────────────────────────
+  /**
+   * The config the PREVIEW sees. The widget drops questions with no label —
+   * correct for a live form, but in the editor it means a question you have just
+   * added is invisible, and every index after it shifts, so the preview jumps to
+   * the wrong question. Give unlabelled questions a stand-in for preview only;
+   * the saved config keeps the empty label.
+   */
+  function previewConfig() {
+    var c = JSON.parse(JSON.stringify(C));
+    c.questions = (c.questions || []).map(function (q) {
+      if (!q.label) q.label = 'Untitled question';
+      return q;
+    });
+    return c;
+  }
+
+  function mountPreview() {
+    var host = $('widget-mount');
+    if (!host || !window.TGFormWidget) return;
+    host.innerHTML = '';
+    var el = document.createElement('div');
+    el.setAttribute('data-tg-widget', 'form');
+    host.appendChild(el);
+    widget = new window.TGFormWidget(el, previewConfig());
+    // Match the auto-init contract so anything inspecting the preview (tests,
+    // future tooling) finds the instance the same way it would on a live page.
+    el.__tgFormInstance = widget;
+  }
+
+  /**
+   * Push the current config into the preview. Uses update() rather than a
+   * re-mount so typing stays smooth, and goTo() keeps the preview on whichever
+   * question is being edited. Neither moves focus — the agent is typing in the
+   * sidebar and the cursor must stay there.
+   */
+  function refreshPreview() {
+    if (!widget) { mountPreview(); return; }
+    try {
+      widget.update(previewConfig());
+      if (openId) {
+        var i = indexOf(openId);
+        if (i >= 0) widget.goTo(i);
+      }
+    } catch (e) {
+      // A malformed config should never leave a dead preview.
+      mountPreview();
+    }
+  }
+
+  function indexOf(id) {
+    for (var i = 0; i < C.questions.length; i++) if (C.questions[i].id === id) return i;
+    return -1;
+  }
+
+  function changed() {
+    if (window.tgse && tgse.markDirty) tgse.markDirty();
+    refreshPreview();
+  }
+
+  // ── Question list ────────────────────────────────────────────
+  function renderQuestions() {
+    var list = $('qlist');
+    if (!list) return;
+
+    if (!C.questions.length) {
+      list.innerHTML = '<div class="empty">No questions yet.<br>Add your first one below.</div>';
+      return;
+    }
+
+    var html = '';
+    for (var i = 0; i < C.questions.length; i++) {
+      var q = C.questions[i];
+      var def = typeDef(q.type);
+      var isOpen = q.id === openId;
+      html += '<div class="qcard' + (isOpen ? ' is-open' : '') + '" data-qid="' + esc(q.id) + '" draggable="true">' +
+        '<div class="qhead" data-act="toggle" data-qid="' + esc(q.id) + '">' +
+          '<span class="qgrip" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/></svg></span>' +
+          '<span class="qnum">' + (i + 1) + '</span>' +
+          '<span class="qtitle">' + (q.label ? esc(q.label) : '<span class="muted">Untitled question</span>') +
+            (q.required ? '' : ' <span class="muted">(optional)</span>') + '</span>' +
+          '<span class="qtype">' + esc(def.name) + '</span>' +
+        '</div>';
+
+      if (isOpen) {
+        html += '<div class="qbody">' + questionFields(q, i) + '</div>';
+      }
+      html += '</div>';
+    }
+    list.innerHTML = html;
+  }
+
+  function questionFields(q, i) {
+    var def = typeDef(q.type);
+    var h = '';
+
+    h += '<div class="tgse-field"><label class="tgse-field-label">Question</label>' +
+      '<input type="text" class="fld" data-f="label" value="' + esc(q.label || '') + '" maxlength="200" placeholder="What would you like to ask?"></div>';
+
+    h += '<div class="tgse-field"><label class="tgse-field-label">Helper text</label>' +
+      '<input type="text" class="fld" data-f="help" value="' + esc(q.help || '') + '" maxlength="200" placeholder="Optional, shown under the question"></div>';
+
+    h += '<div class="tgse-field"><label class="tgse-field-label">Type</label><select class="fld" data-f="type">';
+    var lastGroup = '';
+    for (var t = 0; t < TYPES.length; t++) {
+      if (TYPES[t].group !== lastGroup) {
+        if (lastGroup) h += '</optgroup>';
+        h += '<optgroup label="' + esc(TYPES[t].group) + '">';
+        lastGroup = TYPES[t].group;
+      }
+      h += '<option value="' + esc(TYPES[t].id) + '"' + (TYPES[t].id === q.type ? ' selected' : '') + '>' + esc(TYPES[t].name) + '</option>';
+    }
+    h += '</optgroup></select></div>';
+
+    if (def.opts) {
+      h += '<div class="tgse-field"><label class="tgse-field-label">Options, one per line</label>' +
+        '<textarea class="fld" data-f="options" rows="4" placeholder="First option&#10;Second option">' +
+        esc((q.options || []).join('\n')) + '</textarea>' +
+        '<p class="fld-help">Up to 26. Each gets a letter so it can be picked from the keyboard.</p></div>';
+    }
+
+    if (def.scale) {
+      h += '<div class="tgse-field"><label class="tgse-field-label">Highest value</label>' +
+        '<input type="number" class="fld" data-f="max" value="' + esc(q.max == null ? (q.type === 'rating' ? 5 : 10) : q.max) + '" min="3" max="10"></div>';
+    }
+
+    if (q.type === 'consent') {
+      h += '<div class="tgse-field"><label class="tgse-field-label">Wording beside the tickbox</label>' +
+        '<textarea class="fld" data-f="consentText" rows="2" maxlength="300" placeholder="I agree to…">' + esc(q.consentText || '') + '</textarea></div>';
+    }
+
+    h += '<div class="tgse-field"><label class="tgse-field-label">Save this answer as</label><select class="fld" data-f="mapTo">';
+    for (var m = 0; m < MAPPABLE.length; m++) {
+      h += '<option value="' + esc(MAPPABLE[m].id) + '"' + (MAPPABLE[m].id === (q.mapTo || '') ? ' selected' : '') + '>' + esc(MAPPABLE[m].name) + '</option>';
+    }
+    h += '</select><p class="fld-help">Linking an answer lets it fill the contact details on the submission. Every other answer is still saved.</p></div>';
+
+    h += '<div class="tgse-field"><label class="tog"><input type="checkbox" data-f="required"' + (q.required ? ' checked' : '') + '> Answer required</label></div>';
+
+    h += '<div class="qrow" style="justify-content:flex-end">' +
+      '<button class="iconbtn" data-act="up" title="Move up" aria-label="Move up"' + (i === 0 ? ' disabled' : '') + '><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg></button>' +
+      '<button class="iconbtn" data-act="down" title="Move down" aria-label="Move down"' + (i === C.questions.length - 1 ? ' disabled' : '') + '><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>' +
+      '<button class="iconbtn" data-act="dup" title="Duplicate" aria-label="Duplicate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>' +
+      '<button class="iconbtn iconbtn--danger" data-act="del" title="Delete" aria-label="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>' +
+      '</div>';
+
+    return h;
+  }
+
+  // ── Question list events (delegated, so a re-render keeps working) ──
+  function wireQuestionList() {
+    var list = $('qlist');
+    if (!list) return;
+
+    list.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-act]');
+      if (!btn) return;
+      var card = e.target.closest('.qcard');
+      if (!card) return;
+      var id = card.getAttribute('data-qid');
+      var i = indexOf(id);
+      var act = btn.getAttribute('data-act');
+
+      if (act === 'toggle') {
+        openId = (openId === id) ? null : id;
+        renderQuestions();
+        if (openId) refreshPreview();
+        return;
+      }
+      if (i < 0) return;
+
+      if (act === 'up' && i > 0) {
+        C.questions.splice(i - 1, 0, C.questions.splice(i, 1)[0]);
+      } else if (act === 'down' && i < C.questions.length - 1) {
+        C.questions.splice(i + 1, 0, C.questions.splice(i, 1)[0]);
+      } else if (act === 'dup') {
+        var copy = JSON.parse(JSON.stringify(C.questions[i]));
+        copy.id = uid();
+        C.questions.splice(i + 1, 0, copy);
+        openId = copy.id;
+      } else if (act === 'del') {
+        C.questions.splice(i, 1);
+        if (openId === id) openId = null;
+      } else {
+        return;
+      }
+      renderQuestions();
+      changed();
+    });
+
+    // Live edits. 'input' for text, 'change' for select/checkbox.
+    function apply(e) {
+      var f = e.target.getAttribute && e.target.getAttribute('data-f');
+      if (!f) return;
+      var card = e.target.closest('.qcard');
+      if (!card) return;
+      var i = indexOf(card.getAttribute('data-qid'));
+      if (i < 0) return;
+      var q = C.questions[i];
+
+      if (f === 'required') q.required = !!e.target.checked;
+      else if (f === 'options') {
+        q.options = e.target.value.split('\n').map(function (s) { return s.trim(); })
+          .filter(Boolean).slice(0, 26);
+      } else if (f === 'max') {
+        var n = parseInt(e.target.value, 10);
+        q.max = isNaN(n) ? undefined : Math.min(10, Math.max(3, n));
+      } else if (f === 'type') {
+        q.type = e.target.value;
+        var d = typeDef(q.type);
+        // Give a choice type something to show rather than an empty list.
+        if (d.opts && (!q.options || !q.options.length)) q.options = ['First option', 'Second option'];
+        // A type with an obvious contact meaning links itself, unless the agent
+        // has already chosen otherwise.
+        if (d.mapTo && !q.mapTo) q.mapTo = d.mapTo;
+        renderQuestions();       // the fields on show depend on the type
+      } else if (f === 'mapTo') {
+        q.mapTo = e.target.value || undefined;
+      } else {
+        q[f] = e.target.value;
+        if (f === 'label') {
+          // Keep the collapsed title in step without a full re-render, which
+          // would blur the field being typed into.
+          var t = card.querySelector('.qtitle');
+          if (t) t.innerHTML = e.target.value ? esc(e.target.value) : '<span class="muted">Untitled question</span>';
+        }
+      }
+      changed();
+    }
+    list.addEventListener('input', apply);
+    list.addEventListener('change', apply);
+
+    // ── Drag to reorder (mouse). The up/down buttons above are the
+    //    keyboard-accessible equivalent, so this is an enhancement only. ──
+    var dragId = null;
+    list.addEventListener('dragstart', function (e) {
+      var card = e.target.closest('.qcard');
+      if (!card) return;
+      dragId = card.getAttribute('data-qid');
+      card.classList.add('is-drag');
+      try { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', dragId); } catch (err) {}
+    });
+    list.addEventListener('dragend', function () {
+      dragId = null;
+      Array.prototype.forEach.call(list.querySelectorAll('.qcard'), function (c) {
+        c.classList.remove('is-drag'); c.classList.remove('is-over');
+      });
+    });
+    list.addEventListener('dragover', function (e) {
+      if (!dragId) return;
+      e.preventDefault();
+      var card = e.target.closest('.qcard');
+      Array.prototype.forEach.call(list.querySelectorAll('.qcard'), function (c) { c.classList.remove('is-over'); });
+      if (card && card.getAttribute('data-qid') !== dragId) card.classList.add('is-over');
+    });
+    list.addEventListener('drop', function (e) {
+      if (!dragId) return;
+      e.preventDefault();
+      var card = e.target.closest('.qcard');
+      if (!card) return;
+      var from = indexOf(dragId);
+      var to = indexOf(card.getAttribute('data-qid'));
+      if (from < 0 || to < 0 || from === to) return;
+      C.questions.splice(to, 0, C.questions.splice(from, 1)[0]);
+      renderQuestions();
+      changed();
+    });
+  }
+
+  // ── Add question menu ────────────────────────────────────────
+  function buildAddMenu() {
+    var menu = $('addmenu');
+    if (!menu) return;
+    var html = '';
+    var lastGroup = '';
+    for (var i = 0; i < TYPES.length; i++) {
+      if (TYPES[i].group !== lastGroup) { lastGroup = TYPES[i].group; }
+      html += '<button type="button" role="menuitem" data-type="' + esc(TYPES[i].id) + '">' +
+        '<span>' + esc(TYPES[i].name) + '</span><span class="mt">' + esc(TYPES[i].group) + '</span></button>';
+    }
+    menu.innerHTML = html;
+  }
+
+  function wireAdd() {
+    var btn = $('btn-add');
+    var menu = $('addmenu');
+    if (!btn || !menu) return;
+
+    function close() { menu.classList.remove('is-open'); btn.setAttribute('aria-expanded', 'false'); }
+
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = menu.classList.toggle('is-open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    document.addEventListener('click', function (e) {
+      if (!menu.contains(e.target) && e.target !== btn) close();
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+
+    menu.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-type]');
+      if (!b) return;
+      var type = b.getAttribute('data-type');
+      var def = typeDef(type);
+      var q = { id: uid(), type: type, label: '', required: true };
+      if (def.opts) q.options = ['First option', 'Second option'];
+      if (def.mapTo) q.mapTo = def.mapTo;
+      if (type === 'consent') { q.required = false; q.consentText = 'I agree'; }
+      C.questions.push(q);
+      openId = q.id;
+      close();
+      renderQuestions();
+      changed();
+      // Put the cursor straight in the new question's label — this IS a
+      // deliberate user action, so moving focus is right here.
+      var f = $('qlist').querySelector('.qcard.is-open input[data-f="label"]');
+      if (f) f.focus();
+    });
+  }
+
+  // ── Settings + design bindings ───────────────────────────────
+  function bindText(id, key) {
+    var el = $(id);
+    if (!el) return;
+    el.addEventListener('input', function () { C[key] = el.value; changed(); });
+  }
+  function bindCheck(id, key) {
+    var el = $(id);
+    if (!el) return;
+    el.addEventListener('change', function () { C[key] = !!el.checked; changed(); });
+  }
+
+  function wireSettings() {
+    bindText('cfgWelcomeTitle', 'welcomeTitle');
+    bindText('cfgWelcomeBody', 'welcomeBody');
+    bindText('cfgStartLabel', 'startLabel');
+    bindText('cfgThanksTitle', 'thankYouTitle');
+    bindText('cfgThanksBody', 'thankYouBody');
+    bindText('cfgThanksCtaText', 'thankYouCtaText');
+    bindText('cfgThanksCtaUrl', 'thankYouCtaUrl');
+    bindText('cfgNextLabel', 'nextLabel');
+    bindText('cfgBackLabel', 'backLabel');
+    bindText('cfgSubmitLabel', 'submitLabel');
+    bindCheck('cfgShowWelcome', 'showWelcome');
+    bindCheck('cfgProgress', 'showProgress');
+
+    var theme = $('cfgTheme');
+    if (theme) theme.addEventListener('change', function () { C.theme = theme.value; changed(); });
+
+    var col = $('cfgAccent'), hex = $('cfgAccentHex');
+    function setAccent(v, syncBoth) {
+      if (!/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v)) return;
+      C.accentColor = v.toUpperCase();
+      if (col && syncBoth !== 'col') col.value = C.accentColor;
+      if (hex && syncBoth !== 'hex') hex.value = C.accentColor;
+      changed();
+    }
+    if (col) col.addEventListener('input', function () { setAccent(col.value, 'col'); });
+    if (hex) hex.addEventListener('input', function () { setAccent(hex.value.trim(), 'hex'); });
+  }
+
+  // ── Hydrate the sidebar from config ──────────────────────────
+  function hydrate() {
+    var set = function (id, v) { var e = $(id); if (e) e.value = v == null ? '' : v; };
+    var chk = function (id, v) { var e = $(id); if (e) e.checked = !!v; };
+    set('cfgWelcomeTitle', C.welcomeTitle);
+    set('cfgWelcomeBody', C.welcomeBody);
+    set('cfgStartLabel', C.startLabel);
+    set('cfgThanksTitle', C.thankYouTitle);
+    set('cfgThanksBody', C.thankYouBody);
+    set('cfgThanksCtaText', C.thankYouCtaText);
+    set('cfgThanksCtaUrl', C.thankYouCtaUrl);
+    set('cfgNextLabel', C.nextLabel);
+    set('cfgBackLabel', C.backLabel);
+    set('cfgSubmitLabel', C.submitLabel);
+    set('cfgTheme', C.theme || 'light');
+    set('cfgAccent', C.accentColor || '#1B2B5B');
+    set('cfgAccentHex', C.accentColor || '#1B2B5B');
+    chk('cfgShowWelcome', C.showWelcome !== false);
+    chk('cfgProgress', C.showProgress !== false);
+    renderQuestions();
+  }
+
+  /**
+   * Refuse to save a form with no email question. Without one the canonical
+   * lead cannot be built, so every submission would be rejected — the visitor
+   * would see an error and the answers would be lost. Better to catch it here
+   * than to let a client publish a form that cannot accept an answer.
+   */
+  function canSave() {
+    var hasEmail = C.questions.some(function (q) { return q.mapTo === 'email' || q.type === 'email'; });
+    if (!hasEmail) {
+      tgse.toast('Add an email question before saving, or submissions cannot be delivered', 'err');
+      return false;
+    }
+    if (!C.questions.length) {
+      tgse.toast('Add at least one question', 'err');
+      return false;
+    }
+    return true;
+  }
+
+  // ── Shell ────────────────────────────────────────────────────
+  var shell = window.tgse.init({
+    widgetType: 'Form',
+    widgetTag: 'form',
+    scriptFile: 'widget-form.js',
+
+    getConfig: function () { return C; },
+    setConfig: function (c) {
+      if (c && typeof c === 'object') C = Object.assign(C, c);
+      if (!Array.isArray(C.questions)) C.questions = [];
+      // Older saves may predate stable ids.
+      C.questions.forEach(function (q) { if (!q.id) q.id = uid(); });
+      hydrate();
+      refreshPreview();
+    },
+
+    canSave: canSave,
+
+    onThemeToggle: function () {
+      C.theme = C.theme === 'dark' ? 'light' : 'dark';
+      var t = $('cfgTheme'); if (t) t.value = C.theme;
+      changed();
+    },
+    onLoginSuccess: function () { boot(); }
+  });
+
+  function boot() {
+    buildAddMenu();
+    wireQuestionList();
+    wireAdd();
+    wireSettings();
+    hydrate();
+    mountPreview();
+  }
+
+  // Boot only once auth has resolved — a synchronous isLoggedIn() here races
+  // the cookie check and leaves the page blank for SSO users.
+  if (window.tgse && typeof window.tgse.onReady === 'function') {
+    window.tgse.onReady(function () { if (window.tgse.isLoggedIn()) boot(); });
+  } else if (window.tgse && window.tgse.isLoggedIn && window.tgse.isLoggedIn()) {
+    boot();
+  }
+})();
+</script>
+
+</body>
+</html>

@@ -773,6 +773,23 @@
       this._render();
     }
 
+    /**
+     * Public: jump the form to a question (-1 is the welcome screen).
+     * The editor uses this so the preview follows whichever question is being
+     * edited. Focus is NOT moved: the agent is typing in the sidebar, and
+     * pulling focus into the preview would take the cursor out of the field
+     * they are in — the exact failure the focus rule exists to prevent.
+     */
+    goTo(index, opts) {
+      const n = Number(index);
+      if (!Number.isFinite(n)) return;
+      this.done = false;
+      this.idx = Math.max(-1, Math.min(this.questions.length - 1, Math.round(n)));
+      this._suppressFocus = !(opts && opts.focus === true);
+      this._render();
+      this._suppressFocus = false;
+    }
+
     _t(key, fallback) {
       const s = this.cfg[key];
       return typeof s === 'string' && s.trim() ? s : fallback;
@@ -866,6 +883,9 @@
       const changed = this._lastRenderedIdx !== null && this._lastRenderedIdx !== this.idx;
       const first = this._lastRenderedIdx === null;
       this._lastRenderedIdx = this.idx;
+      // goTo() from the editor changes the step, but the agent is typing in the
+      // sidebar — moving focus here would steal their cursor.
+      if (this._suppressFocus) return;
       if (first || !changed) return;
 
       const q = this.questions[this.idx];
