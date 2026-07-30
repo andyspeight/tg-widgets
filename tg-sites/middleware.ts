@@ -28,6 +28,13 @@
 
 import { NextResponse, type NextRequest } from 'next/server';
 
+/*
+ * A pure module, deliberately. lib/domains/preview.ts has no imports at all, which
+ * is what lets middleware use it: see the note above about what must never end up
+ * in this bundle.
+ */
+import { PREVIEW_DOT_SUFFIX } from './lib/domains/preview';
+
 /**
  * The hostnames that mean "the editor product".
  *
@@ -53,11 +60,16 @@ function appHostnames(): string[] {
  * which reads as the branch being broken.
  *
  * THE ONE THING THIS MUST NOT SWALLOW is the preview subdomains. Those are under
- * sites.travelify.io and are genuine client sites, so they are excluded
+ * travelgenixsites.com and are genuine client sites, so they are excluded
  * explicitly, before the suffix checks, or a client's preview URL would land on
  * the Travelgenix front door.
+ *
+ * The suffix is a parameter with a default rather than a literal, so a test can
+ * drive it, and the default comes from lib/domains/preview.ts rather than being
+ * written out again here. It used to be a literal, which is how a guard elsewhere
+ * ended up naming a domain nobody owned.
  */
-export function isAppHost(host: string, reservedSuffix = '.sites.travelify.io'): boolean {
+export function isAppHost(host: string, reservedSuffix = PREVIEW_DOT_SUFFIX): boolean {
   const clean = host.toLowerCase().split(':')[0];
 
   // Checked first. A preview hostname is a client site whatever else it matches.

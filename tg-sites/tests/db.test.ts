@@ -423,7 +423,7 @@ describe('hostname handling', () => {
   it.each([
     ['strips the port', 'Example.COM:3000', 'example.com'],
     ['strips a trailing dot', 'example.com.', 'example.com'],
-    ['handles a staging subdomain', 'iso-alpha.tgsites.io', 'iso-alpha.tgsites.io'],
+    ['handles a preview subdomain', 'iso-alpha.travelgenixsites.com', 'iso-alpha.travelgenixsites.com'],
     ['keeps a bare host', 'localhost', 'localhost'],
   ])('%s', async (_label, input, expected) => {
     const { normaliseHostname } = await import('../lib/db/tenants');

@@ -13,7 +13,7 @@ export const metadata = {
   title: 'Editor · Travelgenix Sites',
   // The editor must never be indexed, and it must never be framed. The
   // framing rule becomes a real frame-ancestors header once this sits
-  // behind auth at sites.travelify.io.
+  // behind auth on its own hostname.
   robots: { index: false, follow: false },
 };
 

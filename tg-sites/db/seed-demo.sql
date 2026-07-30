@@ -10,7 +10,7 @@ insert into public.tenants (slug, name, plan, status)
 values ('demo', 'Demo Travel', 'ignite', 'active')
 on conflict (slug) do nothing;
 
--- The staging hostname (demo.tgsites.io) resolves without a domains row,
+-- The preview hostname (demo.travelgenixsites.com) resolves without a domains row,
 -- because resolve_tenant derives it from the slug. A custom domain is added
 -- here so the other half of the resolver has something to answer with too.
 insert into public.domains (tenant_id, hostname, is_primary, ssl_status)

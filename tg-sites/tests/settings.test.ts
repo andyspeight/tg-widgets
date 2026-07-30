@@ -18,6 +18,13 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { isStaffEmail, STAFF_DOMAINS } from '../lib/auth/staff';
+import {
+  isPreviewHostname,
+  previewHostname,
+  PREVIEW_DOT_SUFFIX,
+  PREVIEW_SUFFIX,
+  RESERVED_LABELS,
+} from '../lib/domains/preview';
 import { isAppHost } from '../middleware';
 
 import {
@@ -588,9 +595,11 @@ describe('isAppHost', () => {
    * by adding a rule above it.
    */
   it('treats a preview subdomain as a site, not as the editor', () => {
-    expect(isAppHost('demo-travel.sites.travelify.io')).toBe(false);
+    expect(isAppHost('demo-travel.travelgenixsites.com')).toBe(false);
+    expect(isAppHost('kuoni.travelgenixsites.com')).toBe(false);
+    expect(isAppHost('DEMO-TRAVEL.TRAVELGENIXSITES.COM')).toBe(false);
+    // And the domain it used to be is now just somebody else's hostname to us.
     expect(isAppHost('kuoni.sites.travelify.io')).toBe(false);
-    expect(isAppHost('DEMO-TRAVEL.SITES.TRAVELIFY.IO')).toBe(false);
   });
 
   /*
@@ -602,7 +611,10 @@ describe('isAppHost', () => {
     expect(isAppHost('evil-vercel.app')).toBe(false);
     expect(isAppHost('notlocalhost')).toBe(false);
     // And the reserved suffix cannot be faked into being a site either way round.
-    expect(isAppHost('sites.travelify.io.evil.test')).toBe(false);
+    expect(isAppHost('travelgenixsites.com.evil.test')).toBe(false);
+    // The leading dot is what makes this refuse. Without it, a registration of
+    // eviltravelgenixsites.com would be read as one of our preview hostnames.
+    expect(isAppHost('eviltravelgenixsites.com')).toBe(false);
   });
 
   it('is case and port insensitive', () => {
@@ -614,5 +626,168 @@ describe('isAppHost', () => {
     // An empty Host header is not ours, so it renders as a site and 404s. Better
     // than serving the editor to something that could not name us.
     expect(isAppHost('')).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The preview domain
+// ---------------------------------------------------------------------------
+
+/**
+ * WHERE CLIENT SITES LIVE, AND WHY IT IS NOT A TRAVELIFY SUBDOMAIN.
+ *
+ * Owners can put arbitrary script on their own site. tg_session is set on
+ * Domain=.travelify.io and shared by five other products, HttpOnly and
+ * SameSite=Lax, so a client site on any *.travelify.io hostname runs script inside
+ * that cookie's scope: it cannot read the token and the browser still attaches it to
+ * same-site requests. Cookie scope is per registrable domain, so the fix is a
+ * different registrable domain. Andy chose travelgenixsites.com, 30 Jul 2026.
+ *
+ * The drift catchers below are the point of this block. The suffix is written down
+ * in TypeScript and again in a check constraint, because a constraint cannot import
+ * a module, and a guard naming a domain nobody owns is exactly the bug that has now
+ * happened twice in this table: 0002 reserved .tgsites.io and 0012 replaced it with
+ * sites.travelify.io. A test that reads the SQL is the only thing that makes "the
+ * two agree" a fact rather than an intention.
+ */
+describe('the preview domain', () => {
+  const MIGRATIONS = join(__dirname, '..', 'db', 'migrations');
+
+  /** The newest migration that defines a constraint, so a later one wins. */
+  function constraintSource(name: string): string {
+    const files = readdirSync(MIGRATIONS).filter((f) => f.endsWith('.sql')).sort();
+
+    for (const file of [...files].reverse()) {
+      const sql = readFileSync(join(MIGRATIONS, file), 'utf8');
+      const at = sql.indexOf(`add constraint ${name} check`);
+      if (at !== -1) return sql.slice(at, sql.indexOf(';', at));
+    }
+    throw new Error(`no migration defines ${name}`);
+  }
+
+  it('is not on travelify.io, whatever else changes', () => {
+    // The one property that must never regress, stated on its own so a failure
+    // reads as what it is rather than as a string mismatch.
+    expect(PREVIEW_SUFFIX.endsWith('travelify.io')).toBe(false);
+    expect(PREVIEW_SUFFIX.endsWith('.io')).toBe(false);
+    expect(PREVIEW_DOT_SUFFIX).toBe(`.${PREVIEW_SUFFIX}`);
+  });
+
+  it('the reserved-suffix constraint names the same domain as the module', () => {
+    const sql = constraintSource('domains_reserved_suffix');
+
+    // The "theirs" half: hostname not like '%.<domain>'
+    const theirs = /not like '%\.([a-z0-9.-]+)'/.exec(sql);
+    expect(theirs, 'the else branch changed shape').toBeTruthy();
+    expect(theirs![1]).toBe(PREVIEW_SUFFIX);
+
+    // And the "ours" half, whose regex escapes every dot.
+    const ours = /\)\?((?:\\\.[a-z0-9-]+)+)\$/.exec(sql);
+    expect(ours, 'the preview regex changed shape').toBeTruthy();
+    expect(ours![1].replaceAll('\\.', '.')).toBe(PREVIEW_DOT_SUFFIX);
+
+    // The apex on its own is refused too. '%.<domain>' does not match it.
+    expect(sql).toContain(`hostname <> '${PREVIEW_SUFFIX}'`);
+  });
+
+  it('the reserved labels agree with the module', () => {
+    const sql = constraintSource('domains_reserved_label');
+
+    /*
+     * ONLY the not-in list, not every quoted string in the constraint.
+     *
+     * The first version matched all of them, which swept up the 'preview' in
+     * `kind <> 'preview'` as if it were a label. 'preview' is also genuinely on the
+     * list, so the duplicate had to be deduped away, and deduping is what would let
+     * a real mismatch through: drop 'preview' from the SQL list and the kind
+     * comparison still supplies it, so the test would pass with the label
+     * unprotected. Slicing the list first means the comparison can be exact.
+     */
+    const list = /not in \(([^)]*)\)/.exec(sql);
+    expect(list, 'the reserved-label constraint changed shape').toBeTruthy();
+
+    const listed = [...list![1].matchAll(/'([a-z0-9-]+)'/g)].map((m) => m[1]).sort();
+
+    expect(listed).toEqual([...RESERVED_LABELS].sort());
+  });
+
+  /*
+   * THE ONE THAT WAS NEARLY MISSED.
+   *
+   * A preview hostname needs no domains row: resolve_tenant matches
+   * slug || suffix by string comparison inside the function. So the constraints
+   * govern only what can be WRITTEN, and changing them plus the middleware while
+   * leaving the resolver on the old suffix would have left every preview URL
+   * resolving to nothing. Three places, one domain name.
+   */
+  it('the resolver matches the same suffix the module names', () => {
+    const files = readdirSync(MIGRATIONS).filter((f) => f.endsWith('.sql')).sort();
+
+    let body: string | null = null;
+    for (const file of [...files].reverse()) {
+      const sql = readFileSync(join(MIGRATIONS, file), 'utf8');
+      // The newest definition wins, same reasoning as constraintSource.
+      const at = sql.indexOf('function public.resolve_tenant');
+      if (at !== -1) {
+        body = sql.slice(at);
+        break;
+      }
+    }
+
+    expect(body, 'no migration defines resolve_tenant').toBeTruthy();
+
+    const match = /t\.slug \|\| '(\.[a-z0-9.-]+)'/.exec(body!);
+    expect(match, 'the resolver stopped concatenating a suffix onto the slug').toBeTruthy();
+    expect(match![1]).toBe(PREVIEW_DOT_SUFFIX);
+  });
+
+  it('builds a hostname from a slug', () => {
+    expect(previewHostname('kuoni')).toBe('kuoni.travelgenixsites.com');
+    expect(previewHostname('demo-travel')).toBe('demo-travel.travelgenixsites.com');
+    expect(previewHostname('KUONI')).toBe('kuoni.travelgenixsites.com');
+  });
+
+  it('refuses a slug that cannot be a hostname', () => {
+    for (const value of [
+      'a',                    // one character, below the slug floor
+      'x'.repeat(64),         // over the DNS label limit
+      '-leading',
+      'trailing-',
+      'has.a.dot',
+      'has_underscore',
+      'has space',
+      'UPPER-ok-but',         // fine once lowered, so this one is the control
+    ]) {
+      const built = previewHostname(value);
+      if (value === 'UPPER-ok-but') {
+        expect(built).toBe('upper-ok-but.travelgenixsites.com');
+      } else {
+        expect(built, value).toBeNull();
+      }
+    }
+    for (const value of [null, undefined, 42, {}, []]) {
+      expect(previewHostname(value as unknown), String(value)).toBeNull();
+    }
+  });
+
+  it('refuses a label that would look like us', () => {
+    // www.travelgenixsites.com reads as the apex, api and admin read as
+    // infrastructure, and both are useful to somebody phishing.
+    for (const label of RESERVED_LABELS) {
+      expect(previewHostname(label), label).toBeNull();
+    }
+  });
+
+  it('recognises its own hostnames and not lookalikes', () => {
+    expect(isPreviewHostname('kuoni.travelgenixsites.com')).toBe(true);
+    expect(isPreviewHostname('travelgenixsites.com')).toBe(true);
+    expect(isPreviewHostname('KUONI.TRAVELGENIXSITES.COM')).toBe(true);
+    expect(isPreviewHostname('kuoni.travelgenixsites.com:3000')).toBe(true);
+
+    // A registration that merely ends in the same letters is a different domain.
+    expect(isPreviewHostname('eviltravelgenixsites.com')).toBe(false);
+    expect(isPreviewHostname('travelgenixsites.com.evil.test')).toBe(false);
+    expect(isPreviewHostname('kuoni.sites.travelify.io')).toBe(false);
+    expect(isPreviewHostname(null)).toBe(false);
   });
 });

@@ -342,13 +342,13 @@ where n.nspname = 'public'
 
 do $$
 declare
-  staging uuid; custom uuid; unknown uuid; suspended uuid; domains_seen int;
+  preview uuid; custom uuid; unknown uuid; suspended uuid; domains_seen int;
 begin
   set local role tg_sites_renderer;
   -- No tenant. That is the point: this call happens before one is known.
   perform set_config('app.current_tenant_id', '', true);
 
-  staging   := public.resolve_tenant('iso-alpha.tgsites.io');
+  preview   := public.resolve_tenant('iso-alpha.travelgenixsites.com');
   -- Mixed case on purpose. Hostnames are case insensitive in DNS and a
   -- Host header can arrive in any case at all.
   custom    := public.resolve_tenant('ISO-Beta-Live.example');
@@ -361,8 +361,8 @@ begin
 
   reset role;
   insert into checks (name, passed, detail) values
-    ('a staging subdomain resolves with no tenant set',
-     staging = '11111111-1111-1111-1111-111111111111', coalesce(staging::text, 'null')),
+    ('a preview subdomain resolves with no tenant set',
+     preview = '11111111-1111-1111-1111-111111111111', coalesce(preview::text, 'null')),
     ('a custom domain resolves, whatever its case',
      custom = '22222222-2222-2222-2222-222222222222', coalesce(custom::text, 'null')),
     ('an unknown hostname resolves to nothing',
@@ -381,14 +381,14 @@ declare refused boolean := false;
 begin
   begin
     insert into public.domains (tenant_id, hostname)
-      values ('22222222-2222-2222-2222-222222222222', 'iso-alpha.tgsites.io');
+      values ('22222222-2222-2222-2222-222222222222', 'iso-alpha.travelgenixsites.com');
   exception when others then refused := true;
   end;
 
   insert into checks (name, passed, detail) values
-    ('a staging subdomain cannot be claimed as a custom domain', refused,
+    ('a preview subdomain cannot be claimed as a custom domain', refused,
      case when refused then 'the check constraint refused it'
-          else 'ONE TENANT COULD HIJACK ANOTHERS STAGING URL' end);
+          else 'ONE TENANT COULD HIJACK ANOTHERS PREVIEW URL' end);
 end $$;
 
 -- ---------------------------------------------------------------------------

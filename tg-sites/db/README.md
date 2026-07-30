@@ -58,9 +58,17 @@ that privilege allows: a hostname in, one uuid out, nothing else reachable.
 The isolation suite asserts there is exactly one such function, so a second
 one cannot be added quietly.
 
-The staging suffix `.tgsites.io` is reserved by a check constraint on
-`domains`. Without it, one tenant could register another's staging hostname
-as a custom domain and the resolver would have two honest answers.
+Every tenant is reachable at `{slug}.travelgenixsites.com` before any DNS is
+pointed, and that suffix is reserved by a check constraint on `domains`.
+Without it, one tenant could register another's preview hostname as a custom
+domain and the resolver would have two honest answers.
+
+The suffix is a separate registrable domain, not a subdomain of `travelify.io`,
+and that is deliberate: site owners can inject script, and the `tg_session`
+cookie is scoped to `.travelify.io` across five other products. See
+`0013_preview_domain.sql` and `tg-sites/lib/domains/preview.ts`. It has been the
+wrong domain twice, so the suffix is written in one TypeScript module and the
+tests read the migrations to check the SQL agrees.
 
 ## The two roles
 

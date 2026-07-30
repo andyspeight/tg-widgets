@@ -266,7 +266,15 @@ export function safeUrl(value: unknown, options: { allowMailto?: boolean } = {})
 
 function allowedIframeUrl(url: string): boolean {
   try {
-    const parsed = new URL(url, 'https://tgsites.io');
+    /*
+     * A base only so a relative URL does not throw. Nothing from it is emitted.
+     *
+     * .invalid is reserved by RFC 2606 and can never be registered, which is the
+     * point: this used to be tgsites.io, a domain we do not own, and a base that
+     * names a REAL host is one line away from being a hole. If that host ever
+     * appeared in IFRAME_HOSTS, every relative URL would resolve to it and pass.
+     */
+    const parsed = new URL(url, 'https://base.invalid');
     if (parsed.protocol !== 'https:') return false;
     return IFRAME_HOSTS.has(parsed.hostname);
   } catch {
