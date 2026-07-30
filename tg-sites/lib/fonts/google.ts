@@ -57,7 +57,7 @@ export type Weight = (typeof WEIGHTS)[number];
  * This is not a trick, it is the documented behaviour of the endpoint, and
  * getting it wrong is a silent three-times-bigger download.
  */
-const BROWSER_UA =
+export const BROWSER_UA =
   'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) ' +
   'Chrome/120.0.0.0 Safari/537.36';
 
@@ -194,7 +194,7 @@ export function parseGoogleCss(css: string): ParsedFace[] {
     // Only ever fetch from Google's own font host. The URL comes out of a
     // response, so it is input, and input that becomes a fetch is a request
     // somebody else could aim.
-    if (!url.startsWith('https://fonts.gstatic.com/')) continue;
+    if (!url.startsWith(GSTATIC_ORIGIN)) continue;
 
     faces.push({
       family,
@@ -217,6 +217,15 @@ export function parseGoogleCss(css: string): ParsedFace[] {
  * does not. So a name typed by a person is checked against Google itself
  * rather than against a list we would have to keep up to date.
  */
+/**
+ * The host every font file must come from.
+ *
+ * Exported because the preview route fetches a file whose URL came out of
+ * Google's own CSS, and that check has to be the same one the importer makes.
+ * Two spellings of the same whitelist is one spelling too many.
+ */
+export const GSTATIC_ORIGIN = 'https://fonts.gstatic.com/';
+
 export async function familyExists(
   family: string,
   fetchImpl: typeof fetch = fetch,

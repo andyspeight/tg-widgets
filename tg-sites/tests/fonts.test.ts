@@ -15,6 +15,13 @@ import { describe, expect, it } from 'vitest';
 
 import { GOOGLE_FONTS } from '../lib/fonts/catalogue';
 import {
+  parsePreviewCss,
+  previewCssUrl,
+  previewText,
+  resolvePreviewFamily,
+} from '../lib/fonts/preview';
+import { previewFamily, previewHref, previewStack } from '../lib/fonts/use-preview';
+import {
   familySlug,
   looksLikeWoff2,
   normaliseFamilyName,
@@ -474,5 +481,110 @@ describe('font faces and preloads', () => {
     expect(fontFileUrl('demo', 'abc-123', 'woff2')).toBe('/fonts/demo/abc-123.woff2');
     expect(fontFileUrl('demo', 'abc-123', 'opentype')).toBe('/fonts/demo/abc-123.otf');
     expect(fontFileUrl('demo', 'abc-123', 'truetype')).toBe('/fonts/demo/abc-123.ttf');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Previewing a font nobody has downloaded
+// ---------------------------------------------------------------------------
+
+describe('preview URLs', () => {
+  /*
+   * Deduplicated AND sorted, and the sort is the part that matters.
+   *
+   * `text` is a set of characters, not a string to typeset, so repeats only make the
+   * URL longer. Sorting makes the URL deterministic, and a deterministic URL is what
+   * lets the response be cached for a year. Without it, iteration order changes could
+   * mint a new URL for the same font and the cache would never be hit.
+   */
+  it('asks for each character of the name once, in a stable order', () => {
+    // R, o, b, t: four distinct characters out of six, capital first because the
+    // sort is by code point.
+    expect(previewText('Roboto')).toBe('Rbot');
+    expect(previewText('aaa')).toBe('a');
+    // The same characters in a different order must give the same request.
+    expect(previewText('Open Sans')).toBe(previewText('Sans Open'));
+  });
+
+  it('builds a css2 URL with one weight and the name as its text', () => {
+    const url = new URL(previewCssUrl('Playfair Display'));
+    expect(url.origin + url.pathname).toBe('https://fonts.googleapis.com/css2');
+    expect(url.searchParams.get('family')).toBe('Playfair Display:wght@400');
+    expect(url.searchParams.get('text')).toBe(previewText('Playfair Display'));
+    expect(url.searchParams.get('display')).toBe('swap');
+  });
+
+  /*
+   * THE SSRF CASE. The URL this returns is handed to a server-side fetch, so a
+   * response naming any other host has to produce nothing rather than a fetch.
+   */
+  it('takes a file URL only from Googles own file host', () => {
+    expect(parsePreviewCss("src: url(https://fonts.gstatic.com/s/a/b.woff2) format('woff2')"))
+      .toBe('https://fonts.gstatic.com/s/a/b.woff2');
+
+    for (const hostile of [
+      'src: url(https://evil.test/a.woff2)',
+      // Starts with the right text and is a different host entirely.
+      'src: url(https://fonts.gstatic.com.evil.test/a.woff2)',
+      'src: url(http://fonts.gstatic.com/a.woff2)',
+      'src: url(//fonts.gstatic.com/a.woff2)',
+      'font-family: nothing here',
+      '',
+    ]) {
+      expect(parsePreviewCss(hostile), hostile).toBeNull();
+    }
+  });
+});
+
+describe('resolvePreviewFamily', () => {
+  it('finds a real family however it was capitalised', () => {
+    expect(resolvePreviewFamily('playfair display')).toBe('Playfair Display');
+    expect(resolvePreviewFamily('PLAYFAIR DISPLAY')).toBe('Playfair Display');
+    // The names that broke the importer, because css2 is case sensitive and
+    // title-casing gets all three wrong.
+    expect(resolvePreviewFamily('pt sans')).toBe('PT Sans');
+    expect(resolvePreviewFamily('dm serif text')).toBe('DM Serif Text');
+    expect(resolvePreviewFamily('ibm plex sans')).toBe('IBM Plex Sans');
+  });
+
+  /*
+   * Deliberately stricter than the importer, which falls back to the typed spelling
+   * so that "any Google font" stays true for a family published since the snapshot.
+   * This is reached by a URL and forwards to a third party, so an unknown name gets
+   * nothing rather than being passed along.
+   */
+  it('refuses anything not in the catalogue, unlike the importer', () => {
+    expect(resolvePreviewFamily('Not A Real Font At All')).toBeNull();
+    expect(resolvePreviewFamily('')).toBeNull();
+    expect(resolvePreviewFamily(null)).toBeNull();
+    expect(resolvePreviewFamily(42)).toBeNull();
+    expect(resolvePreviewFamily("Roboto'); }")).toBeNull();
+    expect(resolvePreviewFamily('../../etc/passwd')).toBeNull();
+  });
+});
+
+describe('preview families in the browser', () => {
+  /*
+   * The prefix is not cosmetic. A preview file contains only the letters of the
+   * family's own name. Registered under the REAL family name it would compete with
+   * the imported font for the same family, weight and style, and the browser picks
+   * one face per weight rather than composing them, so every character outside the
+   * name could vanish from the specimen.
+   */
+  it('never uses the real family name', () => {
+    expect(previewFamily('Playfair Display')).toBe('TGP Playfair Display');
+    expect(previewFamily('Playfair Display')).not.toBe('Playfair Display');
+  });
+
+  it('serves previews from our own origin, escaped', () => {
+    expect(previewHref('Playfair Display')).toBe('/api/font-preview/Playfair%20Display');
+    // A name is matched against the catalogue on the way in, but escaping is still
+    // this function's job: an unescaped space would be a different request.
+    expect(previewHref('PT Sans')).toBe('/api/font-preview/PT%20Sans');
+  });
+
+  it('uses the fallback until the file has landed, then the font', () => {
+    expect(previewStack('Lato', false, 'sans-serif')).toBe('sans-serif');
+    expect(previewStack('Lato', true, 'sans-serif')).toBe("'TGP Lato', sans-serif");
   });
 });

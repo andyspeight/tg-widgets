@@ -778,8 +778,11 @@
 .fp-owned__name {
   grid-column: 1;
   grid-row: 1;
-  font-size: var(--ed-text-md, 17px);
-  font-weight: 600;
+  /* A specimen, like the search rows below it, so the two lists agree about how
+     big a typeface has to be drawn to be judged. */
+  font-size: var(--ed-text-lg);
+  font-weight: 400;
+  line-height: 1.45;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -841,9 +844,22 @@
 
 .fp-result__main { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 
+/*
+ * Bigger than UI text, and lighter, because this row IS the specimen.
+ *
+ * It was 13px semibold, which is right for a label and wrong for the thing you are
+ * meant to judge a typeface by: at that size a Playfair and a Lato are two grey
+ * smudges of the same width. 19px regular is enough to see a serif, a stroke
+ * contrast and a bowl.
+ *
+ * A fixed line-height matters as much as the size. Every font has its own metrics,
+ * so without one the row height changes the instant a preview lands and a list of
+ * forty jumps about as they arrive one by one.
+ */
 .fp-result__name {
-  font-size: var(--ed-text-sm);
-  font-weight: 600;
+  font-size: var(--ed-text-lg);
+  font-weight: 400;
+  line-height: 1.45;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -917,4 +933,111 @@
   color: var(--tgs-text);
   /* Long words at 64px have to break rather than push the panel sideways. */
   overflow-wrap: anywhere;
+}
+
+/* ---------------------------------------------------------------------------
+ * The typeface dropdown
+ *
+ * Replaces a native select, because font-family on an <option> is ignored by
+ * Safari and by Chrome on macOS, so the one thing the control exists to do could
+ * never work while it was a select. See components/theme/FontSelect.tsx.
+ * ------------------------------------------------------------------------- */
+
+.fs-wrap {
+  position: relative;
+}
+
+/* Matches .tv-select exactly, so replacing the native control changed how it
+   behaves and not how it looks. */
+.fs-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ed-2);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--ed-2) var(--ed-3);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+  color: var(--ed-ink);
+  font: inherit;
+  font-size: var(--ed-text-base);
+  text-align: start;
+  cursor: pointer;
+}
+
+.fs-button:focus-visible {
+  outline: none;
+  border-color: var(--ed-accent);
+  box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.15);
+}
+
+/* The label can be a long family name in a narrow panel. It truncates; the
+   chevron does not move. min-width:0 is what allows the truncation inside a flex
+   row at all. */
+.fs-button__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fs-list {
+  position: absolute;
+  z-index: 20;
+  inset-inline: 0;
+  top: calc(100% + 4px);
+  margin: 0;
+  padding: var(--ed-1);
+  list-style: none;
+  /* Tall enough to show a dozen rows, short enough to leave the panel behind it
+     visible so the list reads as attached to the control. */
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+  box-shadow: var(--ed-shadow-lg);
+}
+
+.fs-group {
+  display: block;
+  padding: var(--ed-2) var(--ed-2) var(--ed-1);
+  font-size: var(--ed-text-xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ed-ink-3);
+}
+
+.fs-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ed-2);
+  padding: var(--ed-2) var(--ed-2);
+  border-radius: var(--ed-r-sm);
+  color: var(--ed-ink);
+  /* The row is set in the font it names, so the sizes have to be generous enough
+     that a display face is legible and a script face is not a smear. */
+  font-size: var(--ed-text-md);
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+/*
+ * One highlight, driven by data-active rather than :hover.
+ *
+ * The keyboard and the pointer have to agree: if :hover also painted a row, moving
+ * the mouse away from the list would leave two rows looking chosen, and arrowing
+ * down would highlight one row while the cursor still sat on another.
+ */
+.fs-option[data-active='true'] {
+  background: var(--ed-select-wash);
+  color: var(--ed-select);
+}
+
+.fs-option[aria-selected='true'] {
+  font-weight: 600;
 }

@@ -23,8 +23,20 @@ const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
 const outDir = resolve(root, 'standalone/out');
 
-await rm(outDir, { recursive: true, force: true });
+/*
+ * Removes ONLY this build's own files, not the whole directory.
+ *
+ * It used to be `rm -rf` on standalone/out, which was fine while this was the only
+ * thing writing there and became a trap the moment the theme harness arrived:
+ * building the editor silently deleted theme-harness.html, so running the two
+ * verifications in the obvious order made the second one report zero checks. Zero
+ * checks reads as "nothing to test" rather than as "the fixture is missing", which
+ * is the worst way for a harness to fail.
+ */
 await mkdir(outDir, { recursive: true });
+for (const name of ['app.js', 'app.css', 'tg-sites-editor.html', 'tg-sites-editor.artifact.html']) {
+  await rm(resolve(outDir, name), { force: true });
+}
 
 const result = await esbuild.build({
   entryPoints: [resolve(root, 'standalone/entry.tsx')],

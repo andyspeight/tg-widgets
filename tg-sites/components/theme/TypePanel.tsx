@@ -19,7 +19,8 @@
 import { useState } from 'react';
 
 import type { FontFamily } from '../../lib/db/fonts';
-import { resolveStack, type LibraryFont } from '../../lib/theme/fonts';
+import { FALLBACK_STACK, resolveStack, type LibraryFont } from '../../lib/theme/fonts';
+import { FontSelect, type FontOption } from './FontSelect';
 import { FONTS, FONT_IDS } from '../../lib/theme/schema';
 import {
   FONT_WEIGHTS,
@@ -79,6 +80,32 @@ export function TypePanel({ typography, library, onChange, onSetAllHeadings }: P
    * A system stack has no such limit, because the operating system synthesises
    * what it does not have.
    */
+  /*
+   * The options both typeface controls offer, built once.
+   *
+   * They were two copies of the same optgroup markup before, which is two places
+   * to add a font to. Building the list here also means the STACK travels with
+   * each option, so the dropdown can draw every row in its own typeface without
+   * knowing anything about where a font came from.
+   */
+  const familyOptions: FontOption[] = [
+    ...library.map((font) => ({
+      value: font.slug,
+      label: font.family,
+      // The real family name: these are imported, so the page has @font-face rules
+      // for them. Falling back to the font's own category, not to sans, so a serif
+      // does not flash as a sans on the way in.
+      stack: `'${font.family}', ${FALLBACK_STACK[font.fallback]}`,
+      group: 'Your fonts',
+    })),
+    ...FONT_IDS.map((id) => ({
+      value: id,
+      label: FONTS[id].label,
+      stack: FONTS[id].stack,
+      group: 'Already on every device',
+    })),
+  ];
+
   const availableWeights = (() => {
     const ref = style.family ?? typography.p.family;
     const custom = library.find((font) => font.slug === ref);
@@ -136,42 +163,40 @@ export function TypePanel({ typography, library, onChange, onSetAllHeadings }: P
         <h2 className="tv-group__title">{TEXT_STYLE_LABEL[selected]}</h2>
 
         <div className="tv-field">
-          <label className="tv-field__label" htmlFor="style-family">
+          <label className="tv-field__label" id="style-family-label">
             Typeface
           </label>
-          <select
-            className="tv-select"
+          {/*
+            Every row drawn in the typeface it names, which is what a font picker
+            is for and what a native select could never do: font-family on an
+            <option> is ignored by Safari and by Chrome on macOS.
+          */}
+          <FontSelect
             id="style-family"
+            labelledBy="style-family-label"
             value={style.family ?? ''}
-            style={{ fontFamily: stackFor(selected) }}
-            onChange={(event) =>
-              onChange(selected, { family: event.target.value || null })
-            }
-          >
-            {/*
-              The inherit option only for headings. Offering "same as paragraph"
-              on the paragraph itself would be a circular choice.
-            */}
-            {selected !== 'p' && <option value="">Same as paragraph</option>}
+            options={[
+              /*
+                The inherit option only for headings. Offering "same as paragraph"
+                on the paragraph itself would be a circular choice.
 
-            {library.length > 0 && (
-              <optgroup label="Your fonts">
-                {library.map((font) => (
-                  <option key={font.slug} value={font.slug}>
-                    {font.family}
-                  </option>
-                ))}
-              </optgroup>
-            )}
-
-            <optgroup label="Already on every device">
-              {FONT_IDS.map((id) => (
-                <option key={id} value={id}>
-                  {FONTS[id].label}
-                </option>
-              ))}
-            </optgroup>
-          </select>
+                Drawn in whatever the paragraph currently resolves to, so the row
+                shows what choosing it would actually give you rather than being
+                the one row set in the UI font.
+              */
+              ...(selected === 'p'
+                ? []
+                : [
+                    {
+                      value: '',
+                      label: 'Same as paragraph',
+                      stack: stackFor('p'),
+                    },
+                  ]),
+              ...familyOptions,
+            ]}
+            onChange={(value) => onChange(selected, { family: value || null })}
+          />
 
           {library.length === 0 && (
             <p className="tv-field__help">
@@ -254,42 +279,29 @@ export function TypePanel({ typography, library, onChange, onSetAllHeadings }: P
         </p>
 
         <div className="tv-field">
-          <label className="tv-field__label" htmlFor="all-headings">
+          <label className="tv-field__label" id="all-headings-label">
             Typeface for every heading
           </label>
-          <select
-            className="tv-select"
+          <FontSelect
             id="all-headings"
-            // Deliberately not bound to a value. It is an action, not a setting:
-            // the six styles it writes to can differ from each other afterwards,
-            // so there is no single current value it could honestly show.
-            defaultValue=""
-            onChange={(event) => {
-              onSetAllHeadings({ family: event.target.value || null });
-              event.currentTarget.selectedIndex = 0;
-            }}
-          >
-            <option value="" disabled>
-              Choose a typeface
-            </option>
-            <option value="">Same as paragraph</option>
-            {library.length > 0 && (
-              <optgroup label="Your fonts">
-                {library.map((font) => (
-                  <option key={font.slug} value={font.slug}>
-                    {font.family}
-                  </option>
-                ))}
-              </optgroup>
-            )}
-            <optgroup label="Already on every device">
-              {FONT_IDS.map((id) => (
-                <option key={id} value={id}>
-                  {FONTS[id].label}
-                </option>
-              ))}
-            </optgroup>
-          </select>
+            labelledBy="all-headings-label"
+            /*
+             * Never bound to a value, hence the placeholder.
+             *
+             * It is an action, not a setting: the six styles it writes to can
+             * differ from each other afterwards, so there is no single current
+             * value it could honestly show. The old select faked this with a
+             * disabled first option and a selectedIndex reset; passing a value
+             * that matches nothing is the same idea without the sleight of hand.
+             */
+            value="__none__"
+            placeholder="Choose a typeface"
+            options={[
+              { value: '', label: 'Same as paragraph', stack: stackFor('p') },
+              ...familyOptions,
+            ]}
+            onChange={(value) => onSetAllHeadings({ family: value || null })}
+          />
         </div>
       </section>
     </>

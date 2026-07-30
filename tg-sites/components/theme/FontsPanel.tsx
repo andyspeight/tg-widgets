@@ -14,7 +14,7 @@
  * both faster and nobody else's business. See lib/fonts/google.ts.
  */
 
-import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 
 import {
   deleteFontAction,
@@ -25,6 +25,8 @@ import {
 } from '../../app/actions/fonts';
 import type { FontFamily } from '../../lib/db/fonts';
 import { CATEGORY_LABEL, type FontCategory } from '../../lib/fonts/catalogue';
+import { previewStack, useFontPreviews } from '../../lib/fonts/use-preview';
+import { FALLBACK_STACK } from '../../lib/theme/fonts';
 import { Icon } from '../editor/Icon';
 import { ConfirmDialog } from '../ui/Modal';
 
@@ -77,6 +79,15 @@ export function FontsPanel({ library, onLibraryChange }: Props) {
 
   const owned = new Set(library.map((font) => font.slug));
 
+  /*
+   * Previews for exactly what is on screen, no more.
+   *
+   * Forty names at two to four kilobytes each is about the weight of one full
+   * font, and every one of them is cached for a year afterwards, so scrolling
+   * back through a search costs nothing the second time.
+   */
+  const previews = useFontPreviews(useMemo(() => matches.map((m) => m.family), [matches]));
+
   function importFont(family: string) {
     setMessage(null);
     setBusyFamily(family);
@@ -124,9 +135,19 @@ export function FontsPanel({ library, onLibraryChange }: Props) {
           <ul className="fp-owned">
             {library.map((font) => (
               <li className="fp-owned__item" key={font.slug}>
+                {/*
+                  The real family name, not a preview one: these are imported, so
+                  the page has proper @font-face rules for them via
+                  LibraryFontFaces. Until that component existed this line was
+                  silently drawing every name in the system sans, because an
+                  unresolvable font-family is a fallback rather than an error.
+
+                  Falling back to the font's OWN category rather than to
+                  sans-serif, so a serif in the library does not flash as a sans.
+                */}
                 <span
                   className="fp-owned__name"
-                  style={{ fontFamily: `'${font.family}', sans-serif` }}
+                  style={{ fontFamily: `'${font.family}', ${FALLBACK_STACK[font.fallback]}` }}
                 >
                   {font.family}
                 </span>
@@ -197,13 +218,30 @@ export function FontsPanel({ library, onLibraryChange }: Props) {
                 <li className="fp-result" key={match.family}>
                   <span className="fp-result__main">
                     {/*
-                      The name in the system stack, not in the font itself. The
-                      file has not been downloaded yet, so rendering it in itself
-                      is impossible without linking to Google, which is the exact
-                      thing this feature avoids. Honest and plain beats a preview
-                      that costs the privacy it was built to protect.
+                      The name IN the font, which is the whole point of a font
+                      picker and used to say "impossible" here.
+                      It was not impossible, it was impossible the obvious way.
+                      Linking fonts.googleapis.com would have put a Google request
+                      in a browser, which is the one thing this feature exists to
+                      avoid; instead /api/font-preview fetches a two-kilobyte
+                      subset server-side and serves it from this domain. The rule
+                      holds and the preview is real.
+                      Until the file lands, the category's own fallback stack, so
+                      a serif candidate is standing in as a serif and the row does
+                      not change shape when it arrives.
                     */}
-                    <span className="fp-result__name">{match.family}</span>
+                    <span
+                      className="fp-result__name"
+                      style={{
+                        fontFamily: previewStack(
+                          match.family,
+                          previews.has(match.family),
+                          FALLBACK_STACK[match.category],
+                        ),
+                      }}
+                    >
+                      {match.family}
+                    </span>
                     <span className="fp-result__kind">{match.categoryLabel}</span>
                   </span>
 

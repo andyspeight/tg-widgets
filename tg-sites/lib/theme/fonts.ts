@@ -80,8 +80,14 @@ export function familiesFromFiles(files: LibraryFontFile[]): LibraryFont[] {
  * fail, the visitor can be on a metered connection with fonts blocked, or the
  * page can paint before it lands. What shows in that moment should be the same
  * SHAPE of letter, so the page does not reflow into something unrecognisable.
+ *
+ * Exported for the font picker, which has the same problem in miniature. A
+ * preview row has to show something before its file arrives, and showing a serif
+ * candidate in a sans means the row changes shape as it lands, so a list of forty
+ * reflows forty times. Using the stack the published page would use keeps the
+ * movement down and keeps one answer to "what stands in for a slab".
  */
-const FALLBACK_STACK: Record<LibraryFont['fallback'], string> = {
+export const FALLBACK_STACK: Record<LibraryFont['fallback'], string> = {
   sans: FONTS.system.stack,
   serif: FONTS.serif.stack,
   slab: FONTS.slab.stack,

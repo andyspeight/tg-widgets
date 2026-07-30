@@ -17,7 +17,8 @@
 import { describe, expect, it } from 'vitest';
 
 import { GOOGLE_FONTS } from '../lib/fonts/catalogue';
-import { familyExists, importGoogleFamily, sniffFontFormat } from '../lib/fonts/google';
+import { familyExists, importGoogleFamily, looksLikeWoff2, sniffFontFormat } from '../lib/fonts/google';
+import { fetchPreviewFont, resolvePreviewFamily } from '../lib/fonts/preview';
 
 const live = process.env.TG_LIVE_FONTS === '1';
 
@@ -67,5 +68,50 @@ describe.skipIf(!live)('Google, live', () => {
       (family) => !GOOGLE_FONTS.some(([name]) => name === family),
     );
     expect(missing, 'run node tools/build-font-catalogue.mjs').toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+/**
+ * The preview path, live.
+ *
+ * Worth its own block because the preview uses a DIFFERENT css2 response shape
+ * from the importer: subset by `text`, which comes back with no subset comments at
+ * all. That is the shape the importer's parser silently returns nothing for, so a
+ * captured fixture proves the parser and this proves the shape.
+ */
+describe.skipIf(!live)('font previews, live', () => {
+  it('fetches a real, tiny woff2 for a family it has never seen', async () => {
+    const got = await fetchPreviewFont('Playfair Display');
+
+    expect(got, 'Google returned no usable preview').not.toBeNull();
+    expect(looksLikeWoff2(got!.bytes)).toBe(true);
+
+    /*
+     * The whole economic argument for previewing every row. A full Latin weight is
+     * twenty-odd kilobytes; subset to the eleven distinct letters of "Playfair
+     * Display" it should be a few. If this ever starts coming back full size, the
+     * text parameter has stopped working and forty previews just became a megabyte.
+     */
+    expect(got!.bytes.byteLength).toBeLessThan(8_000);
+    expect(got!.bytes.byteLength).toBeGreaterThan(500);
+  });
+
+  it('works for the names that title-casing gets wrong', async () => {
+    // PT Sans and DM Serif Text are the families that broke the importer, because
+    // css2 is case sensitive and neither is Title Case.
+    for (const family of ['PT Sans', 'DM Serif Text', 'IBM Plex Sans']) {
+      const resolved = resolvePreviewFamily(family.toLowerCase());
+      expect(resolved, `${family} did not resolve`).toBe(family);
+      const got = await fetchPreviewFont(resolved!);
+      expect(got, `${family} returned no preview`).not.toBeNull();
+      expect(looksLikeWoff2(got!.bytes)).toBe(true);
+    }
+  });
+
+  it('returns nothing for a family that does not exist', async () => {
+    // Not resolvable, so the route 404s before any fetch happens.
+    expect(resolvePreviewFamily('Not A Real Font At All')).toBeNull();
   });
 });
