@@ -180,6 +180,10 @@
 <p class="config-note">
   Currently showing: <kbd id="current-layout">grid</kbd>
 </p>
+<p class="config-note" id="reveal-note">
+  Grid and Masonry start with two rows and open the rest a row at a time. A row is
+  three cards on a desktop and one on a phone, so try narrowing the window.
+</p>
 
 <section class="demo-section">
   <div id="widget-mount"></div>
@@ -326,11 +330,14 @@
     radius: 16
   };
 
-  // Per-layout overrides
+  // Per-layout overrides.
+  // Grid and masonry show the progressive reveal: the first two rows appear and
+  // the rest open a row at a time. With 8 testimonials and 3 columns that means
+  // 6 up front and the last 2 behind the button.
   const LAYOUT_CONFIG = {
     featured:  { showFilters: false },
-    grid:      { showFilters: true,  gridCols: 3 },
-    masonry:   { showFilters: true },
+    grid:      { showFilters: true,  gridCols: 3, reveal: { rows: 2, step: 1, moreLabel: 'View more customer reviews' } },
+    masonry:   { showFilters: true,  reveal: { rows: 2, step: 1, moreLabel: 'View more customer reviews' } },
     carousel:  { showFilters: false },
     marquee:   { showFilters: false },
     spotlight: { showFilters: false }
@@ -363,6 +370,9 @@
       btn.setAttribute('aria-pressed', active ? 'true' : 'false');
     });
     document.getElementById('current-layout').textContent = layout;
+    // Only mention the reveal on the layouts that have it.
+    const note = document.getElementById('reveal-note');
+    if (note) note.hidden = (layout !== 'grid' && layout !== 'masonry');
 
     // Update URL hash so refreshing preserves the layout
     try { history.replaceState(null, '', '#' + layout); } catch (e) { /* noop */ }

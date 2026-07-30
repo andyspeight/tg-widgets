@@ -67,7 +67,8 @@
     "test:form": "node test/form-submit-smoke.mjs && node test/form-widget-smoke.mjs && node test/form-design-smoke.mjs && node test/form-editor-smoke.mjs && node test/form-logic-smoke.mjs",
     "test:form-design": "node test/form-design-smoke.mjs",
     "test:form-editor": "node test/form-editor-smoke.mjs",
-    "test:form-logic": "node test/form-logic-smoke.mjs"
+    "test:form-logic": "node test/form-logic-smoke.mjs",
+    "test:testimonials-reveal": "node test/testimonials-reveal-smoke.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",

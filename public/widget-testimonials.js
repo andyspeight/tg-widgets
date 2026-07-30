@@ -1,5 +1,5 @@
 /**
- * Travelgenix Testimonials Widget v1.0.0
+ * Travelgenix Testimonials Widget v1.1.0
  * Self-contained, embeddable testimonials widget.
  * Zero dependencies — works on any website via a single script tag.
  *
@@ -8,6 +8,8 @@
  *  - Rich data: destination, tripType, travelDate, source badge, verified, video
  *  - Source logos (Google, Facebook, Trustpilot, TripAdvisor) + verified tick
  *  - Optional trip-type chip filter on grid / masonry
+ *  - Optional progressive reveal on grid / masonry: show the first N rows and
+ *    open the rest a row at a time behind a Show more button
  *  - Video testimonials (YouTube, Vimeo, MP4) with click-to-play
  *  - Dark mode (`theme: "dark" | "light" | "auto"`)
  *  - Respects prefers-reduced-motion (disables marquee, carousel autoplay, spotlight fade)
@@ -22,6 +24,18 @@
  * Usage (inline config):
  *   <div data-tg-widget="testimonials" data-tg-config='{"layout":"grid",...}'></div>
  *   <script src="https://tg-widgets.vercel.app/widget-testimonials.js"></script>
+ *
+ * Changelog:
+ *   v1.1.0 (30 Jul 2026) — Progressive reveal for grid and masonry. A client
+ *     with thirty testimonials had no way to show a taste of them without
+ *     pushing the rest of the page below the fold. `reveal.rows` sets how many
+ *     rows appear first and `reveal.step` how many more each press opens.
+ *     Rows are measured from the layout the browser ACTUALLY rendered, not from
+ *     gridCols: both layouts are responsive, so a config-derived number would
+ *     reveal three cards at a time on a phone that shows one per row. Pressing
+ *     the button mutates the cards in place rather than re-rendering, so the
+ *     button survives the click and focus is not dropped to the top of the
+ *     page. Off by default (rows 0), so no existing widget changes.
  *
  * © Travelgenix. All rights reserved.
  */
@@ -68,7 +82,7 @@
 
   const API_BASE = resolveApiOrigin();
 
-  const VERSION = '1.0.6';
+  const VERSION = '1.1.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (nav controls, badges, rating wording, the localised
@@ -77,12 +91,12 @@
   // content (quotes, author names, roles, locations) are author content and
   // are never translated. English is the source + fallback.
   const MESSAGES = {
-    en: { readMore: 'Read more', readLess: 'Read less', verified: 'Verified', previous: 'Previous', next: 'Next', accept: 'Accept', direct: 'Direct', outOf5: 'out of 5', ratedOutOf5: 'Rated {n} out of 5', testimonials: 'Testimonials', lovedByTravellers: 'Loved by travellers', all: 'All', filterByTripType: 'Filter by trip type', testimonialSlide: 'Testimonial slide', showTestimonial: 'Show testimonial {n}', testimonialNavigation: 'Testimonial navigation', goToTestimonial: 'Go to testimonial {n}', testimonialsRegion: 'Testimonials', testimonialSelector: 'Testimonial selector', playVideoFrom: 'Play video testimonial from {author}', videoTestimonial: 'Video testimonial', noTestimonials: 'No testimonials to show', noTestimonialsHint: 'Testimonials will appear here once added.' },
-    fr: { readMore: 'Lire la suite', readLess: 'Réduire', verified: 'Vérifié', previous: 'Précédent', next: 'Suivant', accept: 'Accepter', direct: 'Direct', outOf5: 'sur 5', ratedOutOf5: 'Noté {n} sur 5', testimonials: 'Témoignages', lovedByTravellers: 'Apprécié des voyageurs', all: 'Tous', filterByTripType: 'Filtrer par type de voyage', testimonialSlide: 'Diapositive de témoignage', showTestimonial: 'Afficher le témoignage {n}', testimonialNavigation: 'Navigation des témoignages', goToTestimonial: 'Aller au témoignage {n}', testimonialsRegion: 'Témoignages', testimonialSelector: 'Sélecteur de témoignages', playVideoFrom: 'Lire la vidéo témoignage de {author}', videoTestimonial: 'Vidéo témoignage', noTestimonials: 'Aucun témoignage à afficher', noTestimonialsHint: 'Les témoignages apparaîtront ici une fois ajoutés.' },
-    de: { readMore: 'Mehr lesen', readLess: 'Weniger anzeigen', verified: 'Verifiziert', previous: 'Zurück', next: 'Weiter', accept: 'Akzeptieren', direct: 'Direkt', outOf5: 'von 5', ratedOutOf5: 'Bewertet mit {n} von 5', testimonials: 'Erfahrungsberichte', lovedByTravellers: 'Von Reisenden geliebt', all: 'Alle', filterByTripType: 'Nach Reiseart filtern', testimonialSlide: 'Erfahrungsbericht-Folie', showTestimonial: 'Erfahrungsbericht {n} anzeigen', testimonialNavigation: 'Navigation der Erfahrungsberichte', goToTestimonial: 'Zu Erfahrungsbericht {n}', testimonialsRegion: 'Erfahrungsberichte', testimonialSelector: 'Auswahl der Erfahrungsberichte', playVideoFrom: 'Video-Erfahrungsbericht von {author} abspielen', videoTestimonial: 'Video-Erfahrungsbericht', noTestimonials: 'Keine Erfahrungsberichte vorhanden', noTestimonialsHint: 'Erfahrungsberichte erscheinen hier, sobald sie hinzugefügt wurden.' },
-    es: { readMore: 'Leer más', readLess: 'Mostrar menos', verified: 'Verificado', previous: 'Anterior', next: 'Siguiente', accept: 'Aceptar', direct: 'Directo', outOf5: 'de 5', ratedOutOf5: 'Valorado con {n} de 5', testimonials: 'Testimonios', lovedByTravellers: 'Querido por los viajeros', all: 'Todos', filterByTripType: 'Filtrar por tipo de viaje', testimonialSlide: 'Diapositiva de testimonio', showTestimonial: 'Mostrar testimonio {n}', testimonialNavigation: 'Navegación de testimonios', goToTestimonial: 'Ir al testimonio {n}', testimonialsRegion: 'Testimonios', testimonialSelector: 'Selector de testimonios', playVideoFrom: 'Reproducir vídeo testimonio de {author}', videoTestimonial: 'Vídeo testimonio', noTestimonials: 'No hay testimonios para mostrar', noTestimonialsHint: 'Los testimonios aparecerán aquí una vez añadidos.' },
-    it: { readMore: 'Leggi tutto', readLess: 'Mostra meno', verified: 'Verificato', previous: 'Precedente', next: 'Successivo', accept: 'Accetta', direct: 'Diretto', outOf5: 'su 5', ratedOutOf5: 'Valutato {n} su 5', testimonials: 'Testimonianze', lovedByTravellers: 'Amato dai viaggiatori', all: 'Tutti', filterByTripType: 'Filtra per tipo di viaggio', testimonialSlide: 'Diapositiva della testimonianza', showTestimonial: 'Mostra testimonianza {n}', testimonialNavigation: 'Navigazione delle testimonianze', goToTestimonial: 'Vai alla testimonianza {n}', testimonialsRegion: 'Testimonianze', testimonialSelector: 'Selettore delle testimonianze', playVideoFrom: 'Riproduci video testimonianza di {author}', videoTestimonial: 'Video testimonianza', noTestimonials: 'Nessuna testimonianza da mostrare', noTestimonialsHint: 'Le testimonianze appariranno qui una volta aggiunte.' },
-    ro: { readMore: 'Citește mai mult', readLess: 'Arată mai puțin', verified: 'Verificat', previous: 'Anterior', next: 'Următorul', accept: 'Acceptă', direct: 'Direct', outOf5: 'din 5', ratedOutOf5: 'Evaluat cu {n} din 5', testimonials: 'Testimoniale', lovedByTravellers: 'Iubit de călători', all: 'Toate', filterByTripType: 'Filtrează după tipul de călătorie', testimonialSlide: 'Diapozitiv testimonial', showTestimonial: 'Afișează testimonialul {n}', testimonialNavigation: 'Navigare testimoniale', goToTestimonial: 'Mergi la testimonialul {n}', testimonialsRegion: 'Testimoniale', testimonialSelector: 'Selector testimoniale', playVideoFrom: 'Redă videoclipul testimonial de la {author}', videoTestimonial: 'Videoclip testimonial', noTestimonials: 'Niciun testimonial de afișat', noTestimonialsHint: 'Testimonialele vor apărea aici după ce sunt adăugate.' },
+    en: { showMore: 'Show more', showLess: 'Show less', showingOf: 'Showing {n} of {total} testimonials', readMore: 'Read more', readLess: 'Read less', verified: 'Verified', previous: 'Previous', next: 'Next', accept: 'Accept', direct: 'Direct', outOf5: 'out of 5', ratedOutOf5: 'Rated {n} out of 5', testimonials: 'Testimonials', lovedByTravellers: 'Loved by travellers', all: 'All', filterByTripType: 'Filter by trip type', testimonialSlide: 'Testimonial slide', showTestimonial: 'Show testimonial {n}', testimonialNavigation: 'Testimonial navigation', goToTestimonial: 'Go to testimonial {n}', testimonialsRegion: 'Testimonials', testimonialSelector: 'Testimonial selector', playVideoFrom: 'Play video testimonial from {author}', videoTestimonial: 'Video testimonial', noTestimonials: 'No testimonials to show', noTestimonialsHint: 'Testimonials will appear here once added.' },
+    fr: { showMore: 'Voir plus', showLess: 'Voir moins', showingOf: '{n} témoignages affichés sur {total}', readMore: 'Lire la suite', readLess: 'Réduire', verified: 'Vérifié', previous: 'Précédent', next: 'Suivant', accept: 'Accepter', direct: 'Direct', outOf5: 'sur 5', ratedOutOf5: 'Noté {n} sur 5', testimonials: 'Témoignages', lovedByTravellers: 'Apprécié des voyageurs', all: 'Tous', filterByTripType: 'Filtrer par type de voyage', testimonialSlide: 'Diapositive de témoignage', showTestimonial: 'Afficher le témoignage {n}', testimonialNavigation: 'Navigation des témoignages', goToTestimonial: 'Aller au témoignage {n}', testimonialsRegion: 'Témoignages', testimonialSelector: 'Sélecteur de témoignages', playVideoFrom: 'Lire la vidéo témoignage de {author}', videoTestimonial: 'Vidéo témoignage', noTestimonials: 'Aucun témoignage à afficher', noTestimonialsHint: 'Les témoignages apparaîtront ici une fois ajoutés.' },
+    de: { showMore: 'Mehr anzeigen', showLess: 'Weniger anzeigen', showingOf: '{n} von {total} Erfahrungsberichten werden angezeigt', readMore: 'Mehr lesen', readLess: 'Weniger anzeigen', verified: 'Verifiziert', previous: 'Zurück', next: 'Weiter', accept: 'Akzeptieren', direct: 'Direkt', outOf5: 'von 5', ratedOutOf5: 'Bewertet mit {n} von 5', testimonials: 'Erfahrungsberichte', lovedByTravellers: 'Von Reisenden geliebt', all: 'Alle', filterByTripType: 'Nach Reiseart filtern', testimonialSlide: 'Erfahrungsbericht-Folie', showTestimonial: 'Erfahrungsbericht {n} anzeigen', testimonialNavigation: 'Navigation der Erfahrungsberichte', goToTestimonial: 'Zu Erfahrungsbericht {n}', testimonialsRegion: 'Erfahrungsberichte', testimonialSelector: 'Auswahl der Erfahrungsberichte', playVideoFrom: 'Video-Erfahrungsbericht von {author} abspielen', videoTestimonial: 'Video-Erfahrungsbericht', noTestimonials: 'Keine Erfahrungsberichte vorhanden', noTestimonialsHint: 'Erfahrungsberichte erscheinen hier, sobald sie hinzugefügt wurden.' },
+    es: { showMore: 'Ver más', showLess: 'Ver menos', showingOf: 'Mostrando {n} de {total} testimonios', readMore: 'Leer más', readLess: 'Mostrar menos', verified: 'Verificado', previous: 'Anterior', next: 'Siguiente', accept: 'Aceptar', direct: 'Directo', outOf5: 'de 5', ratedOutOf5: 'Valorado con {n} de 5', testimonials: 'Testimonios', lovedByTravellers: 'Querido por los viajeros', all: 'Todos', filterByTripType: 'Filtrar por tipo de viaje', testimonialSlide: 'Diapositiva de testimonio', showTestimonial: 'Mostrar testimonio {n}', testimonialNavigation: 'Navegación de testimonios', goToTestimonial: 'Ir al testimonio {n}', testimonialsRegion: 'Testimonios', testimonialSelector: 'Selector de testimonios', playVideoFrom: 'Reproducir vídeo testimonio de {author}', videoTestimonial: 'Vídeo testimonio', noTestimonials: 'No hay testimonios para mostrar', noTestimonialsHint: 'Los testimonios aparecerán aquí una vez añadidos.' },
+    it: { showMore: 'Mostra altri', showLess: 'Mostra meno', showingOf: 'Visualizzate {n} testimonianze su {total}', readMore: 'Leggi tutto', readLess: 'Mostra meno', verified: 'Verificato', previous: 'Precedente', next: 'Successivo', accept: 'Accetta', direct: 'Diretto', outOf5: 'su 5', ratedOutOf5: 'Valutato {n} su 5', testimonials: 'Testimonianze', lovedByTravellers: 'Amato dai viaggiatori', all: 'Tutti', filterByTripType: 'Filtra per tipo di viaggio', testimonialSlide: 'Diapositiva della testimonianza', showTestimonial: 'Mostra testimonianza {n}', testimonialNavigation: 'Navigazione delle testimonianze', goToTestimonial: 'Vai alla testimonianza {n}', testimonialsRegion: 'Testimonianze', testimonialSelector: 'Selettore delle testimonianze', playVideoFrom: 'Riproduci video testimonianza di {author}', videoTestimonial: 'Video testimonianza', noTestimonials: 'Nessuna testimonianza da mostrare', noTestimonialsHint: 'Le testimonianze appariranno qui una volta aggiunte.' },
+    ro: { showMore: 'Vezi mai multe', showLess: 'Vezi mai puține', showingOf: 'Se afișează {n} din {total} testimoniale', readMore: 'Citește mai mult', readLess: 'Arată mai puțin', verified: 'Verificat', previous: 'Anterior', next: 'Următorul', accept: 'Acceptă', direct: 'Direct', outOf5: 'din 5', ratedOutOf5: 'Evaluat cu {n} din 5', testimonials: 'Testimoniale', lovedByTravellers: 'Iubit de călători', all: 'Toate', filterByTripType: 'Filtrează după tipul de călătorie', testimonialSlide: 'Diapozitiv testimonial', showTestimonial: 'Afișează testimonialul {n}', testimonialNavigation: 'Navigare testimoniale', goToTestimonial: 'Mergi la testimonialul {n}', testimonialsRegion: 'Testimoniale', testimonialSelector: 'Selector testimoniale', playVideoFrom: 'Redă videoclipul testimonial de la {author}', videoTestimonial: 'Videoclip testimonial', noTestimonials: 'Niciun testimonial de afișat', noTestimonialsHint: 'Testimonialele vor apărea aici după ce sunt adăugate.' },
   };
   // Uses the shared TGi18n core when present; otherwise an identical inline
   // resolver keeps the widget self-contained.
@@ -298,6 +312,18 @@
     showTravelDate: true,
     showVideo: true,
     showFilters: false,         // chip filter on grid / masonry
+    // Progressive reveal (grid / masonry only). A long wall of testimonials
+    // pushes the rest of the page below the fold, so a client can show the
+    // first few rows and let the visitor open the rest a row at a time.
+    //   rows 0 = OFF, everything shows. This is the default, so no existing
+    //   widget changes behaviour when it picks up this version.
+    reveal: {
+      rows: 0,        // rows visible before the button is pressed (0 = off)
+      step: 1,        // rows added per press
+      showLess: true, // offer a collapse once everything is on screen
+      moreLabel: '',  // empty = localised default ('Show more')
+      lessLabel: '',  // empty = localised default ('Show less')
+    },
     // Grid
     gridCols: 3,                 // 2 or 3
     // Carousel
@@ -632,6 +658,52 @@
       }
       .tgt-masonry .tgt-card:hover { transform: none; }
 
+      /* ── Progressive reveal (grid / masonry) ─── */
+      /* !important because a masonry card is display:inline-block and a grid
+         card is a flex column — both would otherwise beat [hidden]. */
+      .tgt-card[hidden] { display: none !important; }
+      .tgt-reveal {
+        display: flex; justify-content: center;
+        margin-top: 28px;
+      }
+      /* An explicit display beats the browser's [hidden]{display:none}, so
+         setting wrap.hidden alone left a "Show less" button sitting under a
+         list that had nothing hidden. Same trap as .tgt-card[hidden] above. */
+      .tgt-reveal[hidden] { display: none !important; }
+      .tgt-reveal-btn {
+        font: inherit; font-size: 15px; font-weight: 600;
+        display: inline-flex; align-items: center; gap: 8px;
+        /* 44px min target — a fingertip, not a pixel */
+        min-height: 44px; padding: 11px 22px;
+        border-radius: 999px;
+        background: transparent; color: var(--tgt-brand);
+        border: 1px solid var(--tgt-border);
+        cursor: pointer;
+        transition: background 150ms, border-color 150ms, color 150ms;
+      }
+      .tgt-reveal-btn:hover {
+        background: var(--tgt-hover);
+        border-color: var(--tgt-brand);
+      }
+      .tgt-reveal-btn:focus-visible {
+        outline: 2px solid var(--tgt-brand);
+        outline-offset: 2px;
+      }
+      .tgt-reveal-arrow {
+        transition: transform 200ms;
+      }
+      .tgt-reveal-btn[data-dir="less"] .tgt-reveal-arrow { transform: rotate(180deg); }
+      @media (prefers-reduced-motion: reduce) {
+        .tgt-reveal-arrow { transition: none; }
+      }
+      /* Visually hidden, still announced. The count change is the only signal a
+         screen-reader user gets that pressing the button did anything. */
+      .tgt-reveal-status {
+        position: absolute; width: 1px; height: 1px;
+        margin: -1px; padding: 0; overflow: hidden;
+        clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+      }
+
       /* ── Carousel ─────────────────────────────── */
       .tgt-carousel { position: relative; }
       .tgt-carousel-track {
@@ -752,6 +824,8 @@
         featuredIndex: 0,        // featured layout rotation
         spotlightIndex: 0,       // spotlight main index
         featuredTimer: null,
+        revealRows: 0,           // rows opened so far (0 = the configured start)
+        revealTouched: false,    // has the visitor pressed the button yet
       };
       this._init();
     }
@@ -777,6 +851,7 @@
         header: { ...DEFAULT_CONFIG.header, ...(u.header || {}) },
         carousel: { ...DEFAULT_CONFIG.carousel, ...(u.carousel || {}) },
         marquee: { ...DEFAULT_CONFIG.marquee, ...(u.marquee || {}) },
+        reveal: { ...DEFAULT_CONFIG.reveal, ...(u.reveal || {}) },
       };
       // Sanitise enums
       const L = ['featured', 'grid', 'masonry', 'carousel', 'marquee', 'spotlight'];
@@ -784,6 +859,14 @@
       const T = ['light', 'dark', 'auto'];
       if (!T.includes(merged.theme)) merged.theme = 'auto';
       merged.gridCols = clamp(merged.gridCols, 2, 3);
+      // Reveal. rows 0 keeps it off; anything else is bounded so a bad config
+      // cannot ask for 10,000 rows or a step of 0 (which would make the button
+      // do nothing and look broken).
+      merged.reveal.rows = clamp(Math.round(Number(merged.reveal.rows) || 0), 0, 50);
+      merged.reveal.step = clamp(Math.round(Number(merged.reveal.step) || 1), 1, 50);
+      merged.reveal.showLess = merged.reveal.showLess !== false;
+      merged.reveal.moreLabel = String(merged.reveal.moreLabel || '').trim().slice(0, 60);
+      merged.reveal.lessLabel = String(merged.reveal.lessLabel || '').trim().slice(0, 60);
       // Validate the font-family before it reaches the <style> block (XSS sink)
       merged.fontFamily = safeFontStack(merged.fontFamily, '');
       // Normalise testimonials array
@@ -858,8 +941,100 @@
           default:          body = this._renderGrid(list);      break;
         }
       }
-      this.container.innerHTML = header + filters + body;
+      this.container.innerHTML = header + filters + body + this._renderReveal(list);
       this._bind();
+      // Hide the overflow rows AFTER the markup is in the DOM: how many cards
+      // make a row depends on the column count the browser actually chose,
+      // which cannot be known while building a string.
+      this._applyReveal();
+    }
+
+    /** Progressive reveal applies to the two layouts that stack into rows.
+     *  A carousel or marquee already limits what is on screen, and featured /
+     *  spotlight show one at a time, so there is nothing to reveal. */
+    _revealActive() {
+      if (this.c.layout !== 'grid' && this.c.layout !== 'masonry') return false;
+      return this.c.reveal.rows > 0;
+    }
+
+    _renderReveal(list) {
+      if (!this._revealActive() || !list.length) return '';
+      // The button is rendered up front but hidden by _applyReveal when every
+      // card already fits — building it here keeps the markup in one place.
+      const chev = '<svg class="tgt-reveal-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>';
+      return `<div class="tgt-reveal" hidden>
+        <button class="tgt-reveal-btn" type="button" data-reveal-btn data-dir="more" aria-controls="tgt-list">
+          <span data-reveal-label>${esc(this.c.reveal.moreLabel || this.t('showMore'))}</span>${chev}
+        </button>
+      </div>
+      <p class="tgt-reveal-status" role="status" aria-live="polite" data-reveal-status></p>`;
+    }
+
+    /** How many cards sit on one row, read from the layout the browser actually
+     *  rendered rather than from the config. Both layouts are responsive (1
+     *  column on a phone, up to 3 on a desktop), so a config-derived number
+     *  would reveal three cards at a time on a phone that shows one per row. */
+    _perRow(listEl) {
+      if (!listEl) return 1;
+      let n = 1;
+      try {
+        const cs = getComputedStyle(listEl);
+        if (this.c.layout === 'masonry') {
+          n = parseInt(cs.columnCount, 10);
+        } else {
+          // 'repeat(3, 1fr)' is resolved to concrete track sizes by the time it
+          // is computed, so counting the tracks gives the real column count.
+          const tracks = String(cs.gridTemplateColumns || '').trim();
+          n = tracks && tracks !== 'none' ? tracks.split(/\s+/).length : 1;
+        }
+      } catch (e) { /* fall through to 1 */ }
+      return Number.isFinite(n) && n > 0 ? n : 1;
+    }
+
+    /** Show the first N rows and hide the rest, then label the button for what
+     *  pressing it will do next. Mutates in place rather than re-rendering, so
+     *  the button keeps DOM identity and the visitor's focus stays on it. */
+    _applyReveal() {
+      const wrap = this.root.querySelector('.tgt-reveal');
+      const listEl = this.root.querySelector('#tgt-list');
+      if (!listEl) return;
+      const cards = Array.from(listEl.querySelectorAll('.tgt-card'));
+
+      if (!this._revealActive()) {
+        cards.forEach((c) => c.removeAttribute('hidden'));
+        if (wrap) wrap.hidden = true;
+        return;
+      }
+
+      const perRow = this._perRow(listEl);
+      const rows = Math.max(1, this.state.revealRows || this.c.reveal.rows);
+      const visible = Math.min(cards.length, rows * perRow);
+      cards.forEach((card, i) => {
+        if (i < visible) card.removeAttribute('hidden');
+        else card.setAttribute('hidden', '');
+      });
+
+      if (!wrap) return;
+      const btn = wrap.querySelector('[data-reveal-btn]');
+      const label = wrap.querySelector('[data-reveal-label]');
+      const allShown = visible >= cards.length;
+      // Nothing to reveal and nothing worth collapsing → no button at all,
+      // rather than a control that does nothing.
+      const canCollapse = allShown && this.c.reveal.showLess && cards.length > this.c.reveal.rows * perRow;
+      wrap.hidden = allShown && !canCollapse;
+      if (btn && label) {
+        const more = !allShown;
+        btn.setAttribute('data-dir', more ? 'more' : 'less');
+        label.textContent = more
+          ? (this.c.reveal.moreLabel || this.t('showMore'))
+          : (this.c.reveal.lessLabel || this.t('showLess'));
+      }
+      const status = this.root.querySelector('[data-reveal-status]');
+      // Only announce once the visitor has actually pressed something. On first
+      // paint this would be an unprompted screen-reader interruption.
+      if (status && this.state.revealTouched) {
+        status.textContent = this.t('showingOf', { n: visible, total: cards.length });
+      }
     }
 
     _filtered() {
@@ -1039,13 +1214,15 @@
       </section>`;
     }
 
+    // id="tgt-list" is what the reveal button points at with aria-controls, and
+    // what _applyReveal measures the column count from.
     _renderGrid(list) {
       const cls = `tgt-grid tgt-grid--${this.c.gridCols}`;
-      return `<div class="${cls}">${list.map(t => this._card(t)).join('')}</div>`;
+      return `<div class="${cls}" id="tgt-list">${list.map(t => this._card(t)).join('')}</div>`;
     }
 
     _renderMasonry(list) {
-      return `<div class="tgt-masonry">${list.map(t => this._card(t)).join('')}</div>`;
+      return `<div class="tgt-masonry" id="tgt-list">${list.map(t => this._card(t)).join('')}</div>`;
     }
 
     _renderCarousel(list) {
@@ -1118,9 +1295,46 @@
           const f = btn.getAttribute('data-filter');
           if (!f || f === this.state.activeFilter) return;
           this.state.activeFilter = f;
+          // A new filter is a new list, so collapse back to the first rows.
+          // Carrying the opened rows over would mean picking a chip with three
+          // matches silently showed all of them while another showed a button.
+          this.state.revealRows = 0;
+          this.state.revealTouched = false;
           this.render();
         });
       });
+
+      // ── Progressive reveal ──
+      const revealBtn = this.root.querySelector('[data-reveal-btn]');
+      if (revealBtn) {
+        revealBtn.addEventListener('click', () => {
+          const listEl = this.root.querySelector('#tgt-list');
+          const perRow = this._perRow(listEl);
+          const total = listEl ? listEl.querySelectorAll('.tgt-card').length : 0;
+          const shownRows = Math.max(1, this.state.revealRows || this.c.reveal.rows);
+          this.state.revealTouched = true;
+          if (revealBtn.getAttribute('data-dir') === 'less') {
+            this.state.revealRows = 0;   // back to the configured opening rows
+          } else {
+            const maxRows = Math.ceil(total / perRow);
+            this.state.revealRows = Math.min(maxRows, shownRows + this.c.reveal.step);
+          }
+          // Re-apply rather than re-render: the button must survive the click
+          // so focus is not dropped back to the top of the document.
+          this._applyReveal();
+        });
+      }
+
+      // The column count changes with the viewport, so a row is a different
+      // number of cards at different widths. Re-apply on resize or the reveal
+      // silently shows the wrong amount after a rotate or a window drag.
+      if (this._revealActive() && typeof ResizeObserver === 'function' && !this._revealRO) {
+        this._revealRO = new ResizeObserver(() => {
+          if (this.host && !this.host.isConnected) { this.destroy(); return; }
+          this._applyReveal();
+        });
+        try { this._revealRO.observe(this.container); } catch (e) { /* noop */ }
+      }
 
       // Featured dots
       this.root.querySelectorAll('.tgt-featured-dot').forEach(dot => {
@@ -1306,6 +1520,9 @@
 
     destroy() {
       this._clearTimers();
+      // The observer holds a reference to this instance, so leaving it attached
+      // would keep a removed widget alive on an SPA client site.
+      if (this._revealRO) { try { this._revealRO.disconnect(); } catch (e) { /* noop */ } this._revealRO = null; }
       if (this.root && this.root.host === this.host) {
         this.host.innerHTML = '';
       }

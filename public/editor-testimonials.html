@@ -979,6 +979,9 @@
         showTravelDate: true,
         showVideo: true,
         showFilters: false,           // trip-type chip filter — grid/masonry only
+        // Progressive reveal — grid/masonry only. rows 0 = off, which is the
+        // default so an existing widget is untouched by this setting arriving.
+        reveal: { rows: 0, step: 1, showLess: true, moreLabel: '', lessLabel: '' },
         // Grid
         gridCols: 3,                   // 2 or 3
         // Carousel
@@ -1621,7 +1624,55 @@
             <p class="field-hint" style="margin-top:6px">Two rows scroll in opposite directions — classic social-proof strip.</p>
           </div>
         ` : ''}
-        ${(c.layout !== 'grid' && c.layout !== 'carousel' && c.layout !== 'marquee') ? `
+        ${(c.layout === 'grid' || c.layout === 'masonry') ? `
+          ${c.layout === 'masonry' ? '' : '<div class="divider"></div>'}
+          <div class="toggle-row">
+            <div class="toggle-row-main">
+              <div class="toggle-row-label">Show a few at first</div>
+              <div class="toggle-row-hint">Start with a couple of rows and let visitors open the rest</div>
+            </div>
+            <button class="toggle" role="switch" data-toggle-reveal aria-pressed="${(c.reveal && c.reveal.rows > 0)}"></button>
+          </div>
+          ${(c.reveal && c.reveal.rows > 0) ? `
+            <div class="field">
+              <label class="field-label">Rows shown first <span class="field-hint">${c.reveal.rows}</span></label>
+              <div class="slider-row">
+                <input type="range" class="slider-input" data-slider="reveal.rows" min="1" max="10" step="1" value="${c.reveal.rows}">
+                <span class="slider-val">${c.reveal.rows}</span>
+              </div>
+              <p class="field-hint" style="margin-top:6px">A row is 3 cards on a desktop and 1 on a phone, so the widget works this out from the screen it is on.</p>
+              ${(c.testimonials || []).length <= c.reveal.rows * (c.layout === 'grid' ? c.gridCols : 3) ? `
+                <p class="field-hint" style="margin-top:6px;color:var(--warning)">You have ${(c.testimonials || []).length} testimonial${(c.testimonials || []).length === 1 ? '' : 's'}, which already fit in the first ${c.reveal.rows} row${c.reveal.rows === 1 ? '' : 's'} on a desktop, so nothing is hidden and no button appears there yet. It will still work on narrower screens, where a row holds fewer.</p>
+              ` : ''}
+            </div>
+            <div class="field">
+              <label class="field-label">Rows added per press <span class="field-hint">${c.reveal.step}</span></label>
+              <div class="slider-row">
+                <input type="range" class="slider-input" data-slider="reveal.step" min="1" max="10" step="1" value="${c.reveal.step}">
+                <span class="slider-val">${c.reveal.step}</span>
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label" for="reveal-more">Button text</label>
+              <input id="reveal-more" class="input" type="text" data-set="reveal.moreLabel" maxlength="60" value="${esc(c.reveal.moreLabel || '')}" placeholder="Show more">
+              <p class="field-hint" style="margin-top:6px">Leave empty to use "Show more" in the visitor's own language.</p>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-row-main">
+                <div class="toggle-row-label">Let them collapse it again</div>
+                <div class="toggle-row-hint">Once everything is showing, the button becomes "Show less"</div>
+              </div>
+              <button class="toggle" role="switch" data-toggle="reveal.showLess" data-rerender aria-pressed="${c.reveal.showLess !== false}"></button>
+            </div>
+            ${c.reveal.showLess !== false ? `
+              <div class="field">
+                <label class="field-label" for="reveal-less">Collapse text</label>
+                <input id="reveal-less" class="input" type="text" data-set="reveal.lessLabel" maxlength="60" value="${esc(c.reveal.lessLabel || '')}" placeholder="Show less">
+              </div>
+            ` : ''}
+          ` : ''}
+        ` : ''}
+        ${(c.layout !== 'grid' && c.layout !== 'masonry' && c.layout !== 'carousel' && c.layout !== 'marquee') ? `
           <p class="text-muted" style="font-size:13px;text-align:center;padding:16px 0">No layout-specific settings for "${esc(c.layout)}".</p>
         ` : ''}
       `;
@@ -1655,11 +1706,24 @@
         if (sec) sec.dataset.open = String(state.sections[k]);
       }));
 
-      // Generic toggles (path-based)
+      // Generic toggles (path-based). A toggle marked data-rerender changes
+      // WHICH fields belong on screen, not just a value, so the panel is
+      // rebuilt — safe here because a toggle is a click, never a keystroke.
       $$('[data-toggle]', body).forEach(el => el.addEventListener('click', () => {
         const path = el.dataset.toggle;
         mutate(cfg => setAtPath(cfg, path, !getAtPath(cfg, path)));
         el.setAttribute('aria-pressed', String(getAtPath(state.config, path)));
+        if (el.hasAttribute('data-rerender')) renderTabBody();
+      }));
+
+      // Progressive reveal on/off. rows is the single source of truth (0 = off)
+      // so the widget needs no separate enabled flag to keep in step.
+      $$('[data-toggle-reveal]', body).forEach(el => el.addEventListener('click', () => {
+        mutate(cfg => {
+          if (!cfg.reveal) cfg.reveal = { rows: 0, step: 1, showLess: true, moreLabel: '', lessLabel: '' };
+          cfg.reveal.rows = cfg.reveal.rows > 0 ? 0 : 2;
+        });
+        renderTabBody();
       }));
 
       // Generic set (text, select) — on input (light) + on blur (commit history)
@@ -1710,12 +1774,19 @@
           // "carousel.interval" top-level key — otherwise the widget, which reads
           // cfg.carousel.interval, never sees the change and junk keys pile up.
           mutateLight(cfg => setAtPath(cfg, k, raw));
-          // Format the readout to match how each slider renders: the carousel
-          // interval is a time (seconds), the marquee speed is px/s.
-          const isTime = k === 'carousel.interval';
-          if (val) val.textContent = isTime ? (raw / 1000).toFixed(1) + 's' : String(raw);
-          const hint = el.closest('.field').querySelector('.field-hint');
-          if (hint) hint.textContent = isTime ? (raw / 1000).toFixed(1) + 's' : raw + 'px/s';
+          // Format the readout to match how each slider renders. The unit is
+          // per-slider, not a two-way guess: the reveal sliders are plain counts
+          // and were reading "2px/s" while the marquee speed default applied.
+          const UNITS = {
+            'carousel.interval': (n) => (n / 1000).toFixed(1) + 's',
+            'marquee.speed': (n) => n + 'px/s',
+          };
+          const fmt = UNITS[k] || String;
+          if (val) val.textContent = k === 'carousel.interval' ? fmt(raw) : String(raw);
+          // Only the label's own inline hint, never a paragraph hint below the
+          // slider — those carry explanatory copy that must not be overwritten.
+          const hint = el.closest('.field').querySelector('.field-label .field-hint');
+          if (hint) hint.textContent = fmt(raw);
         });
         el.addEventListener('change', () => pushHistory());
       });
