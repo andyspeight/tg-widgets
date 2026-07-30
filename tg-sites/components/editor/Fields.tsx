@@ -328,11 +328,44 @@ function Repeater({ field, value, onChange, ownerId }: FieldProps) {
  */
 function RichText({ html, onChange }: { html: string; onChange: (value: string) => void }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [editing, setEditing] = useState(false);
+
+  /*
+   * OPEN AS SOON AS THE FIELD EXISTS, not once it has been clicked into.
+   *
+   * This was false until focus, and Andy could not find the toolbar at all. He
+   * was right not to: this field lives in a 320px pane on the right, only the
+   * `text` block type has one, and selecting a block does not focus it. So the
+   * toolbar for editing text appeared only after you had already found the box
+   * that edits text. On the seeded page, four of the ten blocks are headings,
+   * which have no rich text field and could never show it.
+   *
+   * The field only mounts when a text block is selected, so "it exists" and
+   * "somebody is editing text" are the same statement.
+   */
+  const [editing, setEditing] = useState(true);
 
   useEffect(() => {
     const node = ref.current;
     if (node && node.innerHTML !== html) node.innerHTML = html;
+
+    /*
+     * Focused on mount, and this is the exception the rule names rather than a
+     * breach of it.
+     *
+     * editor.css and the repo conventions forbid .focus() as part of DRAWING,
+     * because the editor preview re-renders on every keystroke and a focus in
+     * that path steals the caret out of the field being typed in. This is not
+     * that path. This component is keyed on the block id, so it mounts exactly
+     * once per block, when somebody has just clicked that block. That is a real
+     * user action and a genuine step change, which is precisely when the rule
+     * says moving focus is correct.
+     *
+     * Without it the toolbar would be on screen with nothing selected, and the
+     * first press of Bold would apply to an empty caret and appear to do
+     * nothing.
+     */
+    node?.focus();
+
     // Runs on mount only. The key prop remounts this for a new block, which
     // is what re-seeds the content. Deliberately not depending on `html`:
     // that would fight the caret on every keystroke.

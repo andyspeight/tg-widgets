@@ -161,11 +161,28 @@ export function TextToolbar({
       return;
     }
 
-    const box = anchor?.getBoundingClientRect();
+    /*
+     * ABOVE THE WORDS ON THE CANVAS, not above the field in the pane.
+     *
+     * The field is a box on the right-hand side; the block is the paragraph the
+     * person is actually looking at. Andy asked for a toolbar that appears above
+     * the text being edited and the first version put it above the field, which
+     * is why he could not find it. The canvas marks the selected node with
+     * .is-selected (see Canvas.tsx), so the block is findable without threading
+     * the selection path through three components.
+     *
+     * Falls back to the field, and then to a corner, because a toolbar in the
+     * wrong place beats a toolbar that does not appear.
+     */
+    const onCanvas = document.querySelector<HTMLElement>(
+      '.ed-canvas-frame [data-path].is-selected',
+    );
+    const box = (onCanvas ?? anchor)?.getBoundingClientRect();
+
     setPosition(
       clamp(
         box
-          ? { x: box.left, y: box.top - HEIGHT_GUESS - 8 }
+          ? { x: box.left, y: box.top - HEIGHT_GUESS - 12 }
           : { x: 24, y: 24 },
       ),
     );

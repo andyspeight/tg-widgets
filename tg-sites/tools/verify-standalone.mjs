@@ -1484,6 +1484,46 @@ async function focusRichText() {
   return false;
 }
 
+/*
+ * ONE CLICK ON THE CANVAS, and nothing else. This is the check that was missing.
+ *
+ * The first version of this file selected a block and then clicked into the
+ * rich text field in the properties pane before looking for the toolbar, which
+ * is exactly what the toolbar used to require and exactly why Andy could not
+ * find it: that field is a box on the right-hand side, only the `text` block
+ * type has one, and selecting a block does not focus it. Nine checks passed
+ * over a feature nobody could reach.
+ *
+ * A check that performs the workaround cannot see the bug.
+ */
+await check('one click on a text block raises the toolbar', async () => {
+  let clicked = false;
+  for (const block of await page.locator('.tgs-block').all()) {
+    const text = await block.innerText().catch(() => '');
+    if (text.trim().length > 60) { await block.click(); clicked = true; break; }
+  }
+  if (!clicked) return 'no text block on the canvas to click';
+  await page.waitForTimeout(500);
+
+  const bars = await page.locator('.ed-tt').count();
+  return bars === 1 ? true : `${bars} toolbars after a single canvas click`;
+});
+
+await check('and it sits above the words rather than beside the pane', async () => {
+  const bar = await page.locator('.ed-tt').boundingBox();
+  const block = await page.locator('[data-path].is-selected').boundingBox();
+  if (!bar || !block) return 'no toolbar or no selected block';
+
+  // Above the block, and horizontally over the canvas rather than parked on the
+  // properties pane, which is where it used to appear.
+  const above = bar.y + bar.height <= block.y + 8;
+  const nearBlock = Math.abs(bar.x - block.x) < 40;
+
+  return above && nearBlock
+    ? true
+    : `toolbar at ${Math.round(bar.x)},${Math.round(bar.y)} against block at ${Math.round(block.x)},${Math.round(block.y)}`;
+});
+
 await check('editing text raises a floating toolbar', async () => {
   if (!(await focusRichText())) return 'no rich text field anywhere';
 
