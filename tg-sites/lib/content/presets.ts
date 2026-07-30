@@ -311,6 +311,240 @@ export const SECTION_PRESETS: readonly SectionPreset[] = [
       },
     ],
   },
+
+  // --- from Andy's second reference, 30 Jul 2026 ---------------------------
+
+  {
+    id: 'text-lead-and-pair',
+    category: 'text',
+    label: 'Lead and two points',
+    description: 'A paragraph that sets it up, with two shorter points beside it.',
+    rows: [
+      {
+        widths: [2, 1, 1],
+        columns: [
+          [
+            {
+              type: 'text',
+              props: {
+                html:
+                  '<p>This is a paragraph. Writing in paragraphs lets visitors find what '
+                  + 'they are looking for quickly and easily.</p>',
+              },
+            },
+          ],
+          [
+            { type: 'heading', props: { text: 'First point', style: 'h5', level: 'h3' } },
+            { type: 'text', props: { html: '<p>A couple of lines on this one.</p>', size: 's' } },
+          ],
+          [
+            { type: 'heading', props: { text: 'Second point', style: 'h5', level: 'h3' } },
+            { type: 'text', props: { html: '<p>And a couple on this one.</p>', size: 's' } },
+          ],
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'text-label-and-copy',
+    category: 'text',
+    label: 'Label and copy',
+    description: 'A small label in the margin, the writing beside it. Good for a long page.',
+    rows: [
+      {
+        widths: [1, 2],
+        columns: [
+          [{ type: 'heading', props: { text: 'About us', style: 'h6', level: 'h3' } }],
+          [
+            {
+              type: 'text',
+              props: {
+                html:
+                  '<p>This is a paragraph. Writing in paragraphs lets visitors find what '
+                  + 'they are looking for quickly and easily.</p>'
+                  + '<p>A second paragraph, because one long block of text is harder to '
+                  + 'read than two short ones.</p>',
+              },
+            },
+            { type: 'button-group' },
+          ],
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'text-title-and-bullets',
+    category: 'text',
+    label: 'Title and two lists',
+    description: 'A title and an introduction, with the points split into two columns.',
+    rows: [
+      {
+        widths: [1, 2],
+        columns: [
+          [{ type: 'heading', props: { text: 'What you get', style: 'h6', level: 'h3' } }],
+          [
+            { type: 'heading', props: { text: 'Add your medium length title here', style: 'h2' } },
+            {
+              type: 'text',
+              props: {
+                html: '<p>One or two sentences before the list, so the points have something to hang on.</p>',
+              },
+            },
+          ],
+        ],
+      },
+      {
+        widths: [1, 1],
+        columns: [
+          [
+            {
+              type: 'list',
+              props: {
+                items: [{ text: 'Bullet point' }, { text: 'Bullet point' }, { text: 'Bullet point' }],
+              },
+            },
+          ],
+          [
+            {
+              type: 'list',
+              props: {
+                items: [{ text: 'Bullet point' }, { text: 'Bullet point' }, { text: 'Bullet point' }],
+              },
+            },
+          ],
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'text-six-points',
+    category: 'text',
+    label: 'Six points',
+    description: 'A title over two rows of three. For a list of features or destinations.',
+    rows: [
+      {
+        widths: [1],
+        columns: [[{ type: 'heading', props: { text: 'Add your medium length title here', style: 'h2' } }]],
+      },
+      ...[0, 1].map(() => ({
+        widths: [1, 1, 1],
+        columns: [1, 2, 3].map(() => [
+          { type: 'heading', props: { text: 'This is a short title', style: 'h5', level: 'h3' } },
+          {
+            type: 'text',
+            props: {
+              html: '<p>Two or three lines. Keep the six about the same length or the grid looks uneven.</p>',
+              size: 's',
+            },
+          },
+        ]),
+      })),
+    ],
+  },
+
+  {
+    id: 'text-large-title',
+    category: 'text',
+    label: 'Large title, two columns',
+    description: 'A title that takes up the width, with the detail underneath in two columns.',
+    rows: [
+      {
+        widths: [2, 1],
+        columns: [
+          [{ type: 'heading', props: { text: 'Add your large length title here and here too', style: 'h1' } }],
+          [{ type: 'heading', props: { text: 'Where to next', style: 'h6', level: 'h3' } }],
+        ],
+      },
+      {
+        widths: [1, 1],
+        columns: [
+          [
+            {
+              type: 'text',
+              props: {
+                html:
+                  '<p>This is the text area for this paragraph. Once you have added your '
+                  + 'content, you can change how it looks on the Theme screen.</p>',
+              },
+            },
+          ],
+          [
+            {
+              type: 'text',
+              props: {
+                html:
+                  '<p>The second column. Two narrow columns of text are easier to read '
+                  + 'than one that runs the full width of a screen.</p>',
+              },
+            },
+          ],
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'text-centred-links',
+    category: 'text',
+    label: 'Centred title with links',
+    description: 'A title and a short row of places to go next.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { text: 'Add your medium length title here', style: 'h2', ...CENTRED } },
+            { type: 'button-group', props: { align: 'centre' } },
+            {
+              type: 'text',
+              props: {
+                html: '<p>A line underneath, for anything the buttons do not say.</p>',
+                size: 's',
+                ...CENTRED,
+              },
+            },
+          ],
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'text-definitions',
+    category: 'text',
+    label: 'Title and definitions',
+    description: 'A heading beside a set of short question and answer pairs.',
+    rows: [
+      {
+        widths: [1, 2],
+        columns: [
+          [{ type: 'heading', props: { text: 'Add title here', style: 'h2' } }],
+          [
+            { type: 'heading', props: { text: 'This is a short title', style: 'h5', level: 'h3' } },
+            {
+              type: 'text',
+              props: {
+                html: '<p>The answer, in a sentence or two. Short answers get read.</p>',
+                size: 's',
+              },
+            },
+            { type: 'divider' },
+            { type: 'heading', props: { text: 'This is a short title', style: 'h5', level: 'h3' } },
+            {
+              type: 'text',
+              props: {
+                html: '<p>Another one. Three or four of these is usually enough.</p>',
+                size: 's',
+              },
+            },
+          ],
+        ],
+      },
+    ],
+  },
 ];
 
 export function presetById(id: string): SectionPreset | undefined {
