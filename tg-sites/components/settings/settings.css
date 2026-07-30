@@ -11,22 +11,54 @@
  * declaration silently. tests/db.test.ts fails the build for it.
  */
 
-/* A quiet mark on the Travelgenix tab, so it is obvious at a glance which panel a
-   client would never see. Not a colour alone: it sits beside a text label. */
-.st-staff-dot {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  margin-inline-start: var(--ed-2);
-  border-radius: var(--ed-r-full);
-  background: var(--ed-danger);
-  vertical-align: middle;
-}
-
-.st-staff {
+/*
+ * The custom code panel, framed in the danger colour.
+ *
+ * There used to be a red dot on the tab as well, marking it staff-only. That went
+ * when the tab opened up to site owners on 30 Jul 2026: beside a tab a client is
+ * meant to use, a red dot reads as an unread badge or an error, which is the wrong
+ * thing to say about a panel that is working fine. The border stays, because it is
+ * attached to the fields it is warning about rather than to the way in.
+ */
+/*
+ * .tv-group AS WELL AS .st-code-panel, and the doubled class is load-bearing.
+ *
+ * theme.css sets `.tv-group { border-top: 1px solid var(--ed-line) }`. That is the
+ * same specificity as a single class here, so which one wins comes down to which
+ * stylesheet the bundler happens to put last, and it put theme.css last: the panel
+ * drew with three red sides and a grey top. It looked like a mistake because it was
+ * one. Two classes is (0,2,0) against (0,1,0) and settles it whatever the order.
+ *
+ * A browser check measures all four sides against the plain group, because the first
+ * version of that check read border-top-width, got the 1px .tv-group supplies, and
+ * passed with this rule deleted.
+ */
+.tv-group.st-code-panel {
   border: 1px solid var(--ed-danger);
   border-radius: var(--ed-r-lg);
   padding: var(--ed-5);
+}
+
+/*
+ * The panel's own save row.
+ *
+ * It was a bare .tv-field, which has no top margin, so the button sat directly under
+ * the grey note above it and read as part of that paragraph rather than as the thing
+ * that commits the change. It also carries the saved state in words, because this
+ * panel is the one place on the screen with no global save bar to say it.
+ */
+.st-code-save {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-3);
+  margin-top: var(--ed-5);
+  padding-top: var(--ed-4);
+  border-top: 1px solid var(--ed-line);
+}
+
+.st-code-save__state {
+  color: var(--ed-ink-3);
+  font-size: var(--ed-text-sm);
 }
 
 .st-warn {

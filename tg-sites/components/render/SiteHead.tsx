@@ -67,10 +67,11 @@ export function SiteHead({ settings }: Props): ReactElement {
       ))}
 
       {/*
-        Staff head HTML, last of the head.
-        Raw and unsanitised on purpose: it is written only by a Travelgenix action
-        behind a staff check, and sanitising it would strip the script tag that is
-        the only reason the field exists. See lib/settings/schema.ts.
+        The site's own head HTML, last of the head.
+        Raw and unsanitised on purpose: it is written only by an action that requires
+        the site's owner or Travelgenix staff, and sanitising it would strip the
+        script tag that is the only reason the field exists. See
+        lib/settings/schema.ts.
       */}
       {settings.headHtml ? <span dangerouslySetInnerHTML={{ __html: settings.headHtml }} /> : null}
     </>
@@ -78,7 +79,8 @@ export function SiteHead({ settings }: Props): ReactElement {
 }
 
 /**
- * The end of the body: the tag manager's noscript fallback, and staff body HTML.
+ * The end of the body: the tag manager's noscript fallback, and the site's own body
+ * HTML.
  *
  * Separate component rather than a prop on SiteHead, because it renders in a
  * different place in the tree and a single component returning two fragments for

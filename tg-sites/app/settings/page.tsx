@@ -28,26 +28,35 @@ export default async function SettingsPage() {
   const [settings, user] = await Promise.all([getSettings(site.tenantId), currentUser()]);
 
   /*
-   * Whether this person is staff is decided HERE and passed down.
+   * Who may edit head and body HTML is decided HERE and passed down.
    *
-   * The screen uses it to decide whether to draw the Travelgenix tab, and that is
-   * all it is for. The actions behind that tab check for themselves, because a
-   * server action is a public endpoint whose URL sits in the page's JavaScript and
-   * a prop is not a permission.
+   * The site's OWNER, or us. Andy opened this up on 30 Jul 2026: every CMS an agency
+   * has used before lets them add their own tracking and chat code, and one that
+   * makes them raise a ticket for it is one they will resent. An editor or a viewer
+   * still cannot, because this field runs on every page of the live site and that
+   * belongs to whoever answers for it.
    *
-   * Deliberately not site.role === 'owner', which is what the editor still uses for
-   * its own staff prop. Every client's own owner is an owner. See lib/auth/staff.ts.
+   * The staff half is deliberately isStaffEmail rather than a role, because every
+   * client's own owner is an owner and that tells us nothing. See lib/auth/staff.ts.
+   *
+   * The screen uses this to decide whether to draw the tab, and that is all it is
+   * for. The actions behind it check for themselves, because a server action is a
+   * public endpoint whose URL sits in the page's JavaScript and a prop is not a
+   * permission.
    */
-  const isStaff = isStaffEmail(user?.email);
+  const canEditCode = site.role === 'owner' || isStaffEmail(user?.email);
 
   /*
-   * The staff HTML is NOT read here.
+   * The head and body HTML is NOT read here.
    *
-   * It would be convenient to pass it as a prop and it would put the head HTML of
-   * this client's site into the server-rendered payload of this page, for anybody
-   * who opened it, staff tab drawn or not. The panel fetches it over an action that
-   * checks, so a client's copy of this page never contains it at all.
+   * It would be convenient to pass it as a prop and it would put it into the
+   * server-rendered payload of this page for anybody who opened the settings screen,
+   * tab drawn or not, including an editor and a viewer. It can hold an API key for
+   * whatever it was pasted to load. The panel fetches it over an action that checks,
+   * so a copy of this page that should not contain it does not contain it.
    */
 
-  return <SettingsEditor siteName={site.name} initial={settings} isStaff={isStaff} />;
+  return (
+    <SettingsEditor siteName={site.name} initial={settings} canEditCode={canEditCode} />
+  );
 }

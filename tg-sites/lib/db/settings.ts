@@ -5,9 +5,17 @@
  * model rather than tidiness. See db/migrations/0012_site_settings.sql.
  *
  * THE RULE THIS FILE EXISTS TO KEEP: there is exactly ONE function that writes
- * staff_settings, it is named for what it is, and no client-reachable action calls
- * it. Everything else writes `settings` and names that column in its SQL, so a
- * client's save has no path to the other one even if a caller is confused.
+ * staff_settings, and only the gated action calls it. Everything else writes
+ * `settings` and names that column in its SQL, so an ungated save has no path to the
+ * other one even if a caller is confused.
+ *
+ * THE COLUMN IS CALLED staff_settings AND THE PERMISSION IS NOT STAFF-ONLY. It was
+ * when the column was named, on 30 Jul 2026, and Andy opened it to site owners the
+ * same day. The name has not been chased through a migration because the name is not
+ * the control: app/actions/settings.ts is, and the point of the separate column is
+ * that a save of the ordinary settings cannot reach this one, which is true whatever
+ * either is called. If you are here to add a staff check because the name told you
+ * to, read that action first. A rename is noted as a tidy-up.
  *
  * Everything goes through withTenant or withPublicTenant, so the policies do the
  * scoping and there is no WHERE tenant_id here to get wrong.
@@ -52,11 +60,11 @@ export async function getSettings(tenantId: string): Promise<SiteSettings> {
 }
 
 /**
- * The staff-only settings.
+ * The head and body HTML.
  *
- * Named so that a call to it is obvious in a diff. There is no version of this
- * that a client-reachable action should be calling, and the name is the last line
- * of defence after the column split.
+ * Named so that a call to it is obvious in a diff. There is no version of this that
+ * an ungated action should be calling, and the name is the last line of defence
+ * after the column split.
  */
 export async function getStaffSettings(tenantId: string): Promise<StaffSettings> {
   return withTenant(tenantId, async (tx) => {
@@ -108,13 +116,14 @@ export async function saveSettings(
 }
 
 /**
- * Save the staff-only settings.
+ * Save the head and body HTML.
  *
- * THE ONLY FUNCTION IN THIS CODEBASE THAT WRITES staff_settings. The staff check
- * lives in the action that calls it, because that is where the session is; this
- * function's contribution is being the single, findable place, so "who can set head
- * HTML" is answered by looking at its callers rather than by auditing a whole
- * screen.
+ * THE ONLY FUNCTION IN THIS CODEBASE THAT WRITES staff_settings. The permission
+ * check lives in the action that calls it, because that is where the session is;
+ * this function's contribution is being the single, findable place, so "who can set
+ * head HTML" is answered by looking at its callers rather than by auditing a whole
+ * screen. Today that is one caller, saveCustomCodeAction, which requires the site's
+ * owner or Travelgenix staff.
  */
 export async function saveStaffSettings(
   tenantId: string,

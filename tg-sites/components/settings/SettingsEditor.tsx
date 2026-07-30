@@ -8,19 +8,19 @@
  * one to the other in the same session, and a settings screen that looked like a
  * different product would be the third design in a two-screen tool.
  *
- * THE STAFF TAB IS DRAWN ONLY FOR STAFF AND THAT IS NOT THE PROTECTION. The gate is
- * a refusal in app/actions/settings.ts. Every server action is a public endpoint
- * whose URL is in the page's own JavaScript, so a hidden panel stops nobody. It is
- * here so a client is not shown a field they cannot use, which is a courtesy, not a
- * control.
+ * THE CUSTOM CODE TAB IS DRAWN ONLY WHEN IT CAN BE USED AND THAT IS NOT THE
+ * PROTECTION. The gate is a refusal in app/actions/settings.ts. Every server action
+ * is a public endpoint whose URL is in the page's own JavaScript, so a hidden panel
+ * stops nobody. It is here so an editor or a viewer is not shown a field they cannot
+ * use, which is a courtesy, not a control.
  */
 
 import { useEffect, useMemo, useState, useTransition } from 'react';
 
 import {
-  loadStaffSettingsAction,
+  loadCustomCodeAction,
+  saveCustomCodeAction,
   saveSettingsAction,
-  saveStaffSettingsAction,
 } from '../../app/actions/settings';
 import { analytics } from '../../lib/settings/head';
 import {
@@ -34,16 +34,19 @@ import { Icon } from '../editor/Icon';
 import { ImageField } from '../media/ImageField';
 import './settings.css';
 
-type Tab = 'analytics' | 'branding' | 'language' | 'staff';
+type Tab = 'analytics' | 'branding' | 'language' | 'code';
 
 interface Props {
   siteName: string;
   initial: SiteSettings;
-  /** Decided by the server. The screen never works this out for itself. */
-  isStaff: boolean;
+  /**
+   * Whether this person may edit head and body HTML: the site's owner, or us.
+   * Decided by the server. The screen never works this out for itself.
+   */
+  canEditCode: boolean;
 }
 
-export function SettingsEditor({ siteName, initial, isStaff }: Props) {
+export function SettingsEditor({ siteName, initial, canEditCode }: Props) {
   const [settings, setSettings] = useState<SiteSettings>(initial);
   const [saved, setSaved] = useState<SiteSettings>(initial);
   const [tab, setTab] = useState<Tab>('analytics');
@@ -92,7 +95,7 @@ export function SettingsEditor({ siteName, initial, isStaff }: Props) {
     { id: 'analytics', label: 'Analytics' },
     { id: 'branding', label: 'Icons and sharing' },
     { id: 'language', label: 'Language' },
-    ...(isStaff ? [{ id: 'staff' as Tab, label: 'Travelgenix' }] : []),
+    ...(canEditCode ? [{ id: 'code' as Tab, label: 'Custom code' }] : []),
   ];
 
   return (
@@ -130,7 +133,6 @@ export function SettingsEditor({ siteName, initial, isStaff }: Props) {
               onClick={() => setTab(id)}
             >
               {label}
-              {id === 'staff' && <span className="st-staff-dot" aria-hidden="true" />}
             </button>
           ))}
         </div>
@@ -282,21 +284,21 @@ export function SettingsEditor({ siteName, initial, isStaff }: Props) {
           </section>
         )}
 
-        {tab === 'staff' && isStaff && <StaffPanel onError={setMessage} />}
+        {tab === 'code' && canEditCode && <CustomCodePanel onError={setMessage} />}
       </div>
 
       {/*
-        The global save bar is hidden on the Travelgenix tab, and that is a fix
+        The global save bar is hidden on the custom code tab, and that is a fix
         rather than a preference.
 
         That panel loads and saves its own values through its own gated actions, so
         it has its own button. With both on screen, somebody editing Head HTML and
         pressing "Save settings" at the bottom would get a success state and no
-        change: the bottom bar saves the client settings and has never heard of the
-        staff ones. Two save buttons where one silently ignores what you just typed
+        change: the bottom bar saves the other settings and has never heard of the
+        code ones. Two save buttons where one silently ignores what you just typed
         is worse than one button in the right place.
       */}
-      {tab !== 'staff' && (
+      {tab !== 'code' && (
       <div className="tv-bar" data-dirty={dirty ? 'true' : undefined}>
         <span className="tv-bar__state">{dirty ? 'Not saved yet' : 'Saved'}</span>
         <button
@@ -330,55 +332,68 @@ export function SettingsEditor({ siteName, initial, isStaff }: Props) {
 /**
  * Head and body HTML.
  *
- * Loaded on demand rather than passed in with the rest, so the page a client gets
- * never contains these values at all. If it were a prop, the head HTML of every
- * site would be in the server-rendered payload of the settings screen, staff tab
- * drawn or not, and a client could read it in view-source.
+ * Loaded on demand rather than passed in with the rest, so the page an editor or a
+ * viewer gets never contains these values at all. If it were a prop, the head HTML
+ * of the site would be in the server-rendered payload of the settings screen for
+ * everybody who opened it, tab drawn or not, and it can hold an API key for
+ * whatever it was pasted to load.
+ *
+ * The copy addresses the site's owner, because since 30 Jul 2026 that is who is
+ * usually reading it. It stays blunt about the risk: this is the one field in the
+ * product that puts unchecked script on a live site, and softening that to sound
+ * friendlier would be doing somebody a disservice.
  */
-function StaffPanel({ onError }: { onError: (message: string) => void }) {
-  const [staff, setStaff] = useState<StaffSettings | null>(null);
+function CustomCodePanel({ onError }: { onError: (message: string) => void }) {
+  const [code, setCode] = useState<StaffSettings | null>(null);
   const [saved, setSaved] = useState<StaffSettings | null>(null);
   const [busy, startTransition] = useTransition();
 
   useEffect(() => {
     startTransition(async () => {
-      const result = await loadStaffSettingsAction();
+      const result = await loadCustomCodeAction();
       if (!result.ok) {
         onError(result.error);
         return;
       }
-      setStaff(result.data);
+      setCode(result.data);
       setSaved(result.data);
     });
     // Once, on mount. onError is a setState function and stable.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!staff || !saved) return <p className="tv-note">Reading the current values…</p>;
+  if (!code || !saved) return <p className="tv-note">Reading the current values…</p>;
 
-  const dirty = staff.headHtml !== saved.headHtml || staff.bodyHtml !== saved.bodyHtml;
+  const dirty = code.headHtml !== saved.headHtml || code.bodyHtml !== saved.bodyHtml;
 
   function save() {
     startTransition(async () => {
-      const result = await saveStaffSettingsAction(staff);
+      const result = await saveCustomCodeAction(code);
       if (!result.ok) {
         onError(result.error);
         return;
       }
-      setStaff(result.data);
+      setCode(result.data);
       setSaved(result.data);
     });
   }
 
+  /*
+   * No group title, unlike every other panel on this screen. On the others it earns
+   * its place, because "Google Tag Manager" says something the tab label "Analytics"
+   * does not. Here it would read "CUSTOM CODE" directly under a tab called Custom
+   * code, which is a heading that tells you nothing twice. The warning takes the top
+   * of the panel instead, which is where it wants to be, and the section keeps an
+   * aria-label so it is still a named landmark without a visible duplicate.
+   */
   return (
-    <section className="tv-group st-staff">
-      <h2 className="tv-group__title">Travelgenix only</h2>
-
+    <section className="tv-group st-code-panel" aria-label="Custom code">
       <p className="st-warn">
         <Icon name="warning" size={16} />
-        Anything here runs on every page of this client&rsquo;s live site, exactly as
-        written. It is not checked or cleaned. A mistake here can break the site or
-        leak whatever the script has access to, so read it twice before saving.
+        Anything you put here runs on every page of your live site, exactly as
+        written. We do not check it or clean it, because the whole point is that it
+        goes through untouched. A mistake here can break the site, so read it twice
+        before you save, and paste code only from somewhere you trust.
       </p>
 
       <div className="tv-field">
@@ -391,13 +406,14 @@ function StaffPanel({ onError }: { onError: (message: string) => void }) {
           rows={8}
           maxLength={MAX_RAW_HTML}
           spellCheck={false}
-          value={staff.headHtml}
-          onChange={(event) => setStaff({ ...staff, headHtml: event.target.value })}
+          value={code.headHtml}
+          onChange={(event) => setCode({ ...code, headHtml: event.target.value })}
         />
         <p className="tv-field__help">
-          Goes in the head. Meta tags for verifying a domain, a tag manager the
-          client cannot express as an ID, that sort of thing.{' '}
-          {staff.headHtml.length} of {MAX_RAW_HTML} characters.
+          Goes in the head. Meta tags for verifying your domain with Google or
+          Facebook, a tracking script that is not Tag Manager or Analytics, a font or
+          stylesheet from somewhere else. {code.headHtml.length} of {MAX_RAW_HTML}{' '}
+          characters.
         </p>
       </div>
 
@@ -411,13 +427,13 @@ function StaffPanel({ onError }: { onError: (message: string) => void }) {
           rows={8}
           maxLength={MAX_RAW_HTML}
           spellCheck={false}
-          value={staff.bodyHtml}
-          onChange={(event) => setStaff({ ...staff, bodyHtml: event.target.value })}
+          value={code.bodyHtml}
+          onChange={(event) => setCode({ ...code, bodyHtml: event.target.value })}
         />
         <p className="tv-field__help">
-          Goes at the end of the body, which is where a chat widget belongs so it
-          does not hold up the page. {staff.bodyHtml.length} of {MAX_RAW_HTML}{' '}
-          characters.
+          Goes at the end of the body, which is where a live chat widget belongs so it
+          does not hold up the rest of the page. {code.bodyHtml.length} of{' '}
+          {MAX_RAW_HTML} characters.
         </p>
       </div>
 
@@ -427,12 +443,12 @@ function StaffPanel({ onError }: { onError: (message: string) => void }) {
         checking their work in the preview would otherwise conclude it had not saved.
       */}
       <p className="tv-note">
-        This does not appear in the editor preview, on purpose: the preview shares an
-        address with the editor, and running a client&rsquo;s script there would give
-        it access to your session. Check it on the site&rsquo;s own domain.
+        This does not appear in the editor preview, on purpose: the preview sits at
+        the same address as the editor, and running your code there would give it
+        access to your sign-in. Check it on your own domain.
       </p>
 
-      <div className="tv-field">
+      <div className="st-code-save">
         <button
           type="button"
           className="tg-btn"
@@ -440,8 +456,9 @@ function StaffPanel({ onError }: { onError: (message: string) => void }) {
           disabled={!dirty || busy}
           onClick={save}
         >
-          {busy ? 'Saving' : 'Save Travelgenix settings'}
+          {busy ? 'Saving' : 'Save custom code'}
         </button>
+        <span className="st-code-save__state">{dirty ? 'Not saved yet' : 'Saved'}</span>
       </div>
     </section>
   );

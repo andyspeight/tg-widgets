@@ -3,13 +3,19 @@
  *
  * WHY THIS EXISTS AND WHAT IT REPLACES
  *
- * Head and body HTML are staff-only (Andy, 30 Jul 2026), and until now there was
- * nothing in this application that knew what staff meant. The editor passes
+ * Nothing in this application knew what staff meant. The editor passes
  * `isStaff={site.role === 'owner'}`, and its own comment admits that is a
  * stand-in: "owner is the closest thing the membership table has to that today".
- * Every client's own owner is an owner, so gating raw HTML injection on that would
- * have shipped a field labelled staff-only that any agency could reach. Which is
- * the exact risk the staff-only decision was made to avoid.
+ * Every client's own owner is an owner, so anything gated on that is not gated on
+ * staff at all, it is gated on being a customer.
+ *
+ * That mattered on 30 Jul 2026 for the head and body HTML, which was specified
+ * staff-only. Andy reversed that later the same day and opened it to site owners,
+ * which makes the raw HTML field a poor illustration now: owner OR staff passes, so
+ * the stand-in would have given the right answer there by luck. This is still the
+ * only honest answer to "is this person one of us", the embed block still uses the
+ * stand-in and should move onto this, and anything genuinely internal that comes
+ * later needs it. Keep it.
  *
  * THE DEFINITION IS NOT NEW, IT IS MIRRORED
  *

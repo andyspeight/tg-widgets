@@ -177,7 +177,11 @@ export function settingsAreEmpty(settings: SiteSettings): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// Staff-only settings
+// Custom code: head and body HTML
+//
+// Still called StaffSettings, because that is the column it lives in and the type
+// name following the column is worth more than the type name following the
+// permission. Who may write it is app/actions/settings.ts: the site's owner, or us.
 // ---------------------------------------------------------------------------
 
 /**
@@ -189,11 +193,20 @@ export const MAX_RAW_HTML = 16_384;
 /**
  * Raw HTML for the head and the end of the body.
  *
- * DELIBERATELY NOT SANITISED, and that is the whole point of it being staff-only.
- * A sanitised head injection would strip the script tag that is the only reason
- * anybody wants the field. So the protection is not the parser, it is who can
- * reach it: this is written by a Travelgenix action behind a staff check, and by
- * nothing a client can call.
+ * DELIBERATELY NOT SANITISED, and that is the whole point of the field. A sanitised
+ * head injection would strip the script tag that is the only reason anybody wants
+ * it. So the protection is not the parser, it is who can reach it: the site's OWNER
+ * or Travelgenix staff, checked in app/actions/settings.ts. An editor or a viewer
+ * cannot, and neither can the save that writes the other settings, which names a
+ * different column.
+ *
+ * Note what that means and does not mean. An owner can put a script on their own
+ * site, which is a thing they could do with any CMS and their own hosting, and is
+ * why Andy opened it up. It is NOT permission to reach another tenant: the column is
+ * behind RLS, and the script runs on the visitor's browser on that site's own pages.
+ * The one place that stops being true is a site served from a hostname that shares
+ * cookies with something of ours, which is why the editor preview does not run this
+ * and why the preview domain question is still open.
  *
  * The only things done here are the ones that are never intentional: control
  * characters out, and a length cap.

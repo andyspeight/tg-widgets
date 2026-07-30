@@ -12,7 +12,7 @@
  * or body HTML at all, whatever they send.
  */
 
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
@@ -346,6 +346,113 @@ describe('staff settings are a different shape entirely', () => {
       expect(parseStaffSettings(value)).toEqual({ headHtml: '', bodyHtml: '' });
     }
   });
+});
+
+// ---------------------------------------------------------------------------
+// The gate on custom code
+// ---------------------------------------------------------------------------
+
+/**
+ * WHO MAY WRITE HEAD AND BODY HTML, asserted by reading the source.
+ *
+ * Reading source is a weaker test than calling the thing, and it is what is
+ * available: app/actions/settings.ts is a 'use server' module importing
+ * server-only, so importing it from vitest fails at the import rather than at the
+ * assertion. The same trade is already made for the staff domain list below and for
+ * the mime whitelist against its migration.
+ *
+ * What it is really defending is not the check as written today. It is the third
+ * action somebody adds next month that writes the column and forgets the check,
+ * which is exactly the mistake this file cannot catch any other way. On 30 Jul 2026
+ * this check changed from staff-only to owner-or-staff in about a minute, which is
+ * how easy it is to change, and nothing failed when it did.
+ */
+describe('the gate on custom code', () => {
+  const ROOT = join(__dirname, '..');
+  const ACTION = join(ROOT, 'app', 'actions', 'settings.ts');
+  const source = readFileSync(ACTION, 'utf8');
+
+  /** Each exported action, as its own chunk of text, so a claim can be per action. */
+  const actions = source
+    .split(/export async function /)
+    .slice(1)
+    .map((chunk) => ({ name: chunk.slice(0, chunk.indexOf('(')), body: chunk }));
+
+  it('found the actions to check, so the parse above still works', () => {
+    // Without this, a rename that broke the split would leave every test below
+    // passing over an empty list.
+    expect(actions.map((a) => a.name).sort()).toEqual([
+      'loadCustomCodeAction',
+      'loadSettingsAction',
+      'saveCustomCodeAction',
+      'saveSettingsAction',
+    ]);
+  });
+
+  it('every action that touches the column asks permission first', () => {
+    const unguarded = actions
+      .filter((a) => /\b(get|save)StaffSettings\(/.test(a.body))
+      .filter((a) => !a.body.includes('requireCodeAccess()'))
+      .map((a) => a.name);
+
+    expect(unguarded, 'these reach head or body HTML with no permission check').toEqual(
+      [],
+    );
+  });
+
+  it('the check is owner or staff, and it throws rather than returning false', () => {
+    const gate = source.slice(source.indexOf('async function requireCodeAccess'));
+    const body = gate.slice(0, gate.indexOf('\n}'));
+
+    // Both halves. Owner alone would lock us out of a client's site when they ask
+    // us to paste something; staff alone is the thing Andy reversed.
+    expect(body).toContain("site.role !== 'owner'");
+    expect(body).toContain('isStaffEmail(user.email)');
+
+    // An editor and a viewer are refused, which is the whole reason this is not
+    // just "is a member".
+    expect(body).toContain('throw new Error');
+
+    // And a missing session is refused before either, rather than falling through
+    // to a role comparison against undefined.
+    expect(body).toContain('if (!user)');
+  });
+
+  it('the client-editable save cannot reach the column', () => {
+    const save = actions.find((a) => a.name === 'saveSettingsAction')!;
+    expect(save.body).not.toContain('StaffSettings');
+  });
+
+  /*
+   * The claim lib/db/settings.ts makes about itself, checked. Its header says there
+   * is exactly one function that writes staff_settings and only the gated action
+   * calls it, and a header is a promise until something tests it.
+   */
+  it('one function writes the column, and one action calls it', () => {
+    const db = readFileSync(join(ROOT, 'lib', 'db', 'settings.ts'), 'utf8');
+    const writes = [...db.matchAll(/set\s+staff_settings\s*=/g)];
+    expect(writes.length, 'a second query writes head HTML').toBe(1);
+
+    const callers = walk(ROOT)
+      .filter((file) => file !== join(ROOT, 'lib', 'db', 'settings.ts'))
+      .filter((file) => /\bsaveStaffSettings\(/.test(readFileSync(file, 'utf8')))
+      .map((file) => file.slice(ROOT.length + 1));
+
+    expect(callers, 'something other than the gated action writes head HTML').toEqual([
+      join('app', 'actions', 'settings.ts'),
+    ]);
+  });
+
+  function walk(dir: string, found: string[] = []): string[] {
+    const SKIP = new Set(['node_modules', '.next', '.git', 'standalone', 'tests']);
+    for (const entry of readdirSync(dir)) {
+      if (SKIP.has(entry)) continue;
+      const full = join(dir, entry);
+      if (statSync(full).isDirectory()) walk(full, found);
+      else if (/\.tsx?$/.test(entry)) found.push(full);
+    }
+    return found;
+  }
 });
 
 describe('settingsAreEmpty', () => {

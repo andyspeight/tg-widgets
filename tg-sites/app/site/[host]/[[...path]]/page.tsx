@@ -144,7 +144,7 @@ export default async function SitePage({ params }: Params) {
         theme={themeTokens(found.theme, familiesFromFiles(found.faces)).style}
       />
 
-      {/* The tag manager noscript fallback, and any staff body HTML. Last, so
+      {/* The tag manager noscript fallback, and any custom body HTML. Last, so
           nothing here delays the content above it. */}
       <SiteBody settings={found.settings} />
     </>

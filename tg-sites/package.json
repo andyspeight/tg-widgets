@@ -12,7 +12,7 @@
     "start": "next start -p 3100",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "verify:browser": "node tools/build-standalone.mjs && node tools/build-theme-harness.mjs && node tools/verify-standalone.mjs && node tools/verify-theme.mjs",
+    "verify:browser": "node tools/build-standalone.mjs && node tools/build-theme-harness.mjs && node tools/verify-standalone.mjs && node tools/verify-theme.mjs && node tools/verify-settings.mjs",
     "test:live": "TG_LIVE_FONTS=1 vitest run tests/fonts.live.test.ts"
   },
   "dependencies": {
