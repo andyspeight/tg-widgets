@@ -882,6 +882,28 @@
 }
 @media (prefers-reduced-motion: reduce) { .ed-segmented button { transition: none; } }
 
+/*
+ * The preset row inside the padding box.
+ *
+ * Shorter than a standalone segmented control because it sits directly above the
+ * four numeric fields it drives, so it reads as their shortcut rather than as a
+ * separate question. 36px still clears the 24px minimum for a pointer target and
+ * this is a secondary control with the real one underneath it.
+ *
+ * The auto-fit minmax(56px) on .ed-segmented would wrap five presets in the
+ * properties pane, which is narrow. Five equal fractions cannot.
+ */
+.ed-pad__presets {
+  grid-template-columns: repeat(var(--ed-seg-count), 1fr);
+  margin-bottom: var(--ed-3);
+}
+
+.ed-pad__presets button {
+  min-height: 36px;
+  padding: 0 var(--ed-1);
+  font-size: var(--ed-text-xs);
+}
+
 /* Rich text */
 .ed-rt-toolbar {
   display: flex;

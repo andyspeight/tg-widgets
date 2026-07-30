@@ -536,6 +536,130 @@ await check('a section and a column offer the same style controls', async () => 
   return true;
 });
 
+/*
+ * THE PRESETS, WHICH ARE THE REASON A COLUMN NOW MATCHES A SECTION.
+ *
+ * A section had a quick None/S/M/L/XL row and a column had only the four numeric
+ * fields, so a comfortable inset on a column meant typing a number four times or
+ * knowing to press the link button first. Andy asked for the same padding options
+ * in both, 30 Jul 2026. They live in PaddingBox, which both panes embed, so the
+ * interesting check is that BOTH show them rather than that one does.
+ */
+await check('both a section and a column offer the padding presets', async () => {
+  const count = async () => page.locator('.ed-pad__presets button').count();
+
+  await page.locator('.ed-sec-name').first().click();
+  await page.waitForTimeout(200);
+
+  /*
+   * The Style group has to be opened on a section, and that asymmetry is real
+   * rather than a flaw in the check. A section's padding box lives under Style
+   * because a section already has a visible preset row of its own for the
+   * vertical space above and below it. A column has no such row, which is
+   * exactly the gap this change closes, so its box is not tucked away.
+   *
+   * The first version of this check counted without opening the group, got zero
+   * on the section, and reported a missing control that was merely collapsed.
+   */
+  const styleGroup = page.locator('.ed-group__head button', { hasText: 'Style' }).first();
+  if ((await styleGroup.count()) > 0
+      && (await styleGroup.getAttribute('aria-expanded')) === 'false') {
+    await styleGroup.click();
+    await page.waitForTimeout(200);
+  }
+  const onSection = await count();
+
+  await page.locator('.ed-side-btn').first().click();
+  await page.waitForTimeout(200);
+  const onColumn = await count();
+
+  return onSection === 5 && onColumn === 5
+    ? true
+    : `${onSection} on the section, ${onColumn} on the column`;
+});
+
+await check('a preset sets all four sides at once', async () => {
+  // Still on the column from the check above.
+  await page.locator('.ed-pad__presets button', { hasText: 'M' }).first().click();
+  await page.waitForTimeout(250);
+
+  const sides = await page.locator('.ed-pad__input').evaluateAll((els) =>
+    els.map((el) => Number(el.value)));
+
+  return sides.length === 4 && sides.every((v) => v === 32)
+    ? true
+    : `sides are ${JSON.stringify(sides)}`;
+});
+
+await check('and reaches the rendered column', async () => {
+  const padding = await page.locator('.tgs-col').first().evaluate((el) => {
+    const c = getComputedStyle(el);
+    return [c.paddingTop, c.paddingRight, c.paddingBottom, c.paddingLeft];
+  });
+  return padding.every((v) => v === '32px') ? true : JSON.stringify(padding);
+});
+
+await check('the chosen preset is the one lit up', async () => {
+  const pressed = await page.locator('.ed-pad__presets button[aria-pressed="true"]').allInnerTexts();
+  return pressed.length === 1 && pressed[0] === 'M' ? true : JSON.stringify(pressed);
+});
+
+/*
+ * The honest answer when no preset describes the padding. Lighting one up would
+ * claim 40/0/40/0 is "M", and the four numbers underneath would contradict it.
+ */
+await check('uneven sides leave every preset unlit', async () => {
+  // Unlink first, or typing into one field sets all four.
+  await page.locator('.ed-pad__link').click();
+  await page.waitForTimeout(150);
+
+  /*
+   * 48, which IS a preset and is NOT what the other three sides hold. Both halves
+   * of that matter, and both were got wrong in turn.
+   *
+   * First written as 40: the check passed with the uniform guard deleted, because
+   * 40 matches no preset so nothing lit up for a reason unrelated to the guard.
+   * Then as 32: the previous check had just set all four sides to 32, so typing 32
+   * into one of them changed nothing and they stayed uniform.
+   *
+   * 48 on top over 32 on the rest is the case the guard is actually for: one side
+   * matches a preset exactly, and that preset still describes only a quarter of
+   * the padding.
+   */
+  await page.locator('.ed-pad__input').first().fill('48');
+  await page.waitForTimeout(250);
+
+  const pressed = await page.locator('.ed-pad__presets button[aria-pressed="true"]').count();
+  const sides = await page.locator('.ed-pad__input').evaluateAll((els) =>
+    els.map((el) => Number(el.value)));
+
+  return pressed === 0 && sides[0] === 48 && sides[1] === 32
+    ? true
+    : `${pressed} lit with sides ${JSON.stringify(sides)}`;
+});
+
+await check('choosing a preset from there relinks the sides', async () => {
+  // The link button must not still say "separate" over four identical numbers.
+  await page.locator('.ed-pad__presets button', { hasText: 'S' }).first().click();
+  await page.waitForTimeout(250);
+
+  const linked = await page.locator('.ed-pad__link').getAttribute('aria-pressed');
+  const sides = await page.locator('.ed-pad__input').evaluateAll((els) =>
+    els.map((el) => Number(el.value)));
+
+  return linked === 'true' && sides.every((v) => v === 16)
+    ? true
+    : `link is ${linked}, sides are ${JSON.stringify(sides)}`;
+});
+
+await check('None puts it back to nothing', async () => {
+  await page.locator('.ed-pad__presets button', { hasText: 'None' }).first().click();
+  await page.waitForTimeout(250);
+  const sides = await page.locator('.ed-pad__input').evaluateAll((els) =>
+    els.map((el) => Number(el.value)));
+  return sides.every((v) => v === 0) ? true : JSON.stringify(sides);
+});
+
 await check('padding typed into the box reaches the page', async () => {
   await labelsAfter(() => page.locator('.ed-sec-name').first().click());
 

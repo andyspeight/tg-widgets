@@ -16,7 +16,7 @@ import {
   normaliseSectionPadding,
   normaliseWidths,
   parsePage,
-  SECTION_PADDING_PRESETS,
+  PADDING_PRESETS,
   boxIsEmpty,
   DEFAULT_GAP,
   EMPTY_BOX,
@@ -586,7 +586,7 @@ describe('section height', () => {
   });
 
   it('every preset is already a legal value', () => {
-    for (const preset of SECTION_PADDING_PRESETS) {
+    for (const preset of PADDING_PRESETS) {
       expect(normaliseSectionPadding(preset.value)).toBe(preset.value);
     }
   });

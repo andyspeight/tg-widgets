@@ -17,7 +17,7 @@ import {
   MAX_MIN_HEIGHT,
   MIN_COLUMN_WIDTH,
   normaliseSectionPadding,
-  SECTION_PADDING_PRESETS,
+  PADDING_PRESETS,
 } from '../../lib/content/schema';
 import { BoxPanel, Measure } from './BoxControls';
 import { blockDefinition } from '../../lib/content/blocks';
@@ -309,7 +309,7 @@ function SectionFields({
       <Segmented
         label="Space above and below"
         value={String(section.paddingY)}
-        options={SECTION_PADDING_PRESETS.map((preset) => ({
+        options={PADDING_PRESETS.map((preset) => ({
           value: String(preset.value),
           label: preset.label,
         }))}
