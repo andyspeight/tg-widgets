@@ -1357,6 +1357,98 @@ await check('the picker does not scroll the page sideways', async () => {
 });
 
 
+// ---------------------------------------------------------------------------
+// The plus in an empty column
+// ---------------------------------------------------------------------------
+
+/*
+ * WHY THIS CHANGED, because the old behaviour was not a bug.
+ *
+ * The whole dashed area of an empty column used to open the block picker, which
+ * was right while a column had nothing of its own to configure. Columns got
+ * padding presets and the rest of the style panel earlier on 30 Jul 2026, and at
+ * that point an empty column became the one thing on the canvas you could not
+ * select and style. So the area selects the column and the plus adds to it.
+ *
+ * Placed at the very end of this file on purpose: it adds a section, and a new
+ * section shifts every index the checks above depend on.
+ */
+
+await check('an empty column offers a plus rather than a whole clickable area', async () => {
+  await page.locator('[data-insert]').first().click();
+  await page.waitForTimeout(400);
+  const twoCol = page.locator('button', { hasText: 'Two columns' }).first();
+  if ((await twoCol.count()) === 0) return 'the layout picker did not open';
+  await twoCol.click();
+  await page.waitForTimeout(600);
+
+  const areas = await page.locator('.ed-empty-col').count();
+  const buttons = await page.locator('.ed-empty-col__add').count();
+
+  // The area must no longer carry the add hook itself. If it does, a click
+  // anywhere in the column still adds and the column cannot be selected.
+  const areaAdds = await page.locator('.ed-empty-col[data-add]').count();
+
+  return areas === 2 && buttons === 2 && areaAdds === 0
+    ? true
+    : `${areas} areas, ${buttons} buttons, ${areaAdds} areas still carrying data-add`;
+});
+
+await check('it is a real button, so it can be reached by keyboard', async () => {
+  const tag = await page.locator('.ed-empty-col__add').first().evaluate((el) => ({
+    tag: el.tagName,
+    label: el.getAttribute('aria-label'),
+    // A div with a click handler is invisible to a keyboard and to a screen
+    // reader, which is what the icon set's own header warns about.
+    focusable: el.tabIndex >= 0,
+  }));
+  return tag.tag === 'BUTTON' && tag.focusable && tag.label
+    ? true
+    : JSON.stringify(tag);
+});
+
+await check('clicking the plus opens the block picker', async () => {
+  await page.locator('.ed-empty-col__add').first().click();
+  await page.waitForTimeout(400);
+
+  const open = await page.locator('[role="dialog"]').count();
+  const text = open ? await page.locator('[role="dialog"]').innerText() : '';
+  await closeAnyDialog();
+
+  return open === 1 && /heading|text|image/i.test(text)
+    ? true
+    : `${open} dialogs, saying "${text.slice(0, 60)}"`;
+});
+
+/*
+ * THE POINT OF THE WHOLE CHANGE. A click on the column that is not on the plus
+ * has to select the column, or an empty column is the one thing on the canvas
+ * that cannot be styled.
+ */
+await check('clicking the column itself selects it for styling', async () => {
+  const area = await page.locator('.ed-empty-col').first().boundingBox();
+  if (!area) return 'no empty column on screen';
+
+  // Deliberately off-centre, well clear of the 40px button in the middle.
+  await page.mouse.click(area.x + 24, area.y + 16);
+  await page.waitForTimeout(350);
+
+  const labels = await page.evaluate(() =>
+    [...document.querySelectorAll('.ed-props .ed-label')].map((l) => l.textContent?.trim()));
+
+  // A column pane, not a section pane and not a block pane.
+  return labels.includes('Vertical alignment') && labels.includes('Padding (inner spacing)')
+    ? true
+    : `the pane shows ${JSON.stringify(labels.slice(0, 6))}`;
+});
+
+await check('and the padding presets are right there on it', async () => {
+  // Which is what makes selecting an empty column worth doing at all.
+  return (await page.locator('.ed-pad__presets button').count()) === 5
+    ? true
+    : `${await page.locator('.ed-pad__presets button').count()} presets`;
+});
+
 
 await browser.close();
 

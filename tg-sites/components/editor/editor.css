@@ -722,17 +722,57 @@
   z-index: 5;
 }
 
+/*
+ * An empty column: the dashed area shows where the column is, and the button in
+ * the middle is the only thing that adds to it.
+ *
+ * The area itself is NOT a pointer target any more. It used to be, and clicking
+ * anywhere in an empty column opened the block picker, which left no way to
+ * select an empty column and style it. The click now falls through to the
+ * column's own data-path.
+ */
 .ed-empty-col {
   display: grid;
   place-items: center;
-  min-height: 72px;
+  min-height: 96px;
   border: 1px dashed #cbd5e1;
   border-radius: var(--ed-r-md);
-  color: #64748b;
-  font-size: var(--ed-text-sm);
-  cursor: pointer;
 }
-.ed-empty-col:hover { border-color: #00b4d8; color: #0096b7; }
+
+/* Hover on the COLUMN, not on the button, so the whole area shows it is
+   selectable while only the middle adds. */
+.tgs-col:hover > .ed-empty-col { border-color: #94a3b8; }
+
+.ed-empty-col__add {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ed-r-full);
+  background: #e2e8f0;
+  color: #475569;
+  cursor: pointer;
+  transition: background-color 150ms ease-out, color 150ms ease-out;
+}
+
+.ed-empty-col__add:hover {
+  background: #00b4d8;
+  color: #fff;
+}
+
+/* Focus is visible on its own terms rather than inherited, because this button
+   sits on the canvas rather than in the chrome and the canvas is the client's
+   own colours. */
+.ed-empty-col__add:focus-visible {
+  outline: 2px solid #00b4d8;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ed-empty-col__add { transition: none; }
+}
 
 .ed-resize {
   position: absolute;
