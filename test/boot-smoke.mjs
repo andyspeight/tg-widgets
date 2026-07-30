@@ -30,6 +30,7 @@ const WIDGETS = {
   enquirypro: {},
   events: { events: [] },
   faq: { items: [{ q: 'Q', a: 'A' }] },
+  form: { questions: [{ id: 'q1', label: 'Your email', type: 'email', required: true, mapTo: 'email' }] },
   hours: { hours: { mon: [['09:00', '17:00']] } },
   logos: { logos: [] },
   mybooking: {},

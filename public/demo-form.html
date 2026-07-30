@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Form widget — Travelgenix</title>
+  <meta name="robots" content="noindex">
+  <style>
+    :root { --ink:#0F172A; --muted:#64748B; --border:#E2E8F0; --bg:#F8FAFC; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 48px 20px; background: var(--bg); color: var(--ink);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.5;
+    }
+    .wrap { max-width: 680px; margin: 0 auto; }
+    h1 { font-size: 26px; letter-spacing: -.02em; margin: 0 0 6px; }
+    .sub { color: var(--muted); margin: 0 0 28px; font-size: 15px; }
+    h2 { font-size: 15px; margin: 36px 0 10px; letter-spacing: -.01em; }
+    .note {
+      background: #fff; border: 1px solid var(--border); border-radius: 10px;
+      padding: 14px 16px; font-size: 14px; color: var(--muted); margin: 0 0 24px;
+    }
+    kbd {
+      font: inherit; font-size: 12px; background: #fff; border: 1px solid var(--border);
+      border-bottom-width: 2px; border-radius: 4px; padding: 1px 5px;
+    }
+    #log {
+      margin-top: 16px; font-size: 13px; color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Form widget</h1>
+    <p class="sub">A general-purpose conversational form: one question at a time, keyboard first.</p>
+
+    <div class="note">
+      Try it with the keyboard alone. <kbd>Enter</kbd> moves on, letter keys
+      (<kbd>A</kbd>, <kbd>B</kbd>, <kbd>C</kbd>) pick an option, number keys set a
+      rating. In a long answer <kbd>Enter</kbd> makes a new line, so
+      <kbd>Ctrl</kbd>+<kbd>Enter</kbd> moves on instead.
+      This demo posts nowhere — it is configured inline and the submit is stubbed.
+    </div>
+
+    <h2>Contact form</h2>
+    <div data-tg-widget="form" data-tg-config='{
+      "accentColor": "#1B2B5B",
+      "welcomeTitle": "Get in touch",
+      "welcomeBody": "Five quick questions, about a minute.",
+      "startLabel": "Start",
+      "thankYouTitle": "Thanks, that is everything",
+      "thankYouBody": "We will come back to you within one working day.",
+      "questions": [
+        { "id": "name",  "label": "What is your name?", "type": "short-text", "required": true, "mapTo": "fullName", "placeholder": "Jane Doe" },
+        { "id": "email", "label": "What is your email?", "type": "email", "required": true, "mapTo": "email", "help": "So we can reply." },
+        { "id": "topic", "label": "What is this about?", "type": "multiple-choice", "required": true, "options": ["A new project", "An existing booking", "Careers", "Something else"] },
+        { "id": "budget","label": "Roughly what budget?", "type": "dropdown", "required": false, "placeholder": "Choose a range", "options": ["Under £1,000", "£1,000 to £5,000", "£5,000 to £20,000", "Over £20,000"] },
+        { "id": "rate",  "label": "How likely are you to recommend us?", "type": "opinion-scale", "required": false, "min": 0, "max": 10, "minLabel": "Not likely", "maxLabel": "Very likely" },
+        { "id": "notes", "label": "Anything else we should know?", "type": "long-text", "required": false, "placeholder": "Optional" },
+        { "id": "ok",    "label": "Keep me updated", "type": "consent", "required": false, "mapTo": "marketingConsent", "consentText": "Email me occasional updates. Unsubscribe any time." }
+      ]
+    }'></div>
+    <div id="log"></div>
+
+    <h2>Feedback survey (dark)</h2>
+    <div data-tg-widget="form" data-tg-config='{
+      "theme": "dark",
+      "accentColor": "#00B4D8",
+      "showWelcome": false,
+      "thankYouTitle": "Thank you",
+      "thankYouBody": "Your feedback helps us improve.",
+      "questions": [
+        { "id": "stars", "label": "How was your experience?", "type": "rating", "required": true, "max": 5 },
+        { "id": "email2","label": "Your email", "type": "email", "required": true, "mapTo": "email" },
+        { "id": "again", "label": "Would you book with us again?", "type": "yes-no", "required": true },
+        { "id": "why",   "label": "What could we do better?", "type": "long-text", "required": false }
+      ]
+    }'></div>
+  </div>
+
+  <script src="/widget-form.js" defer></script>
+  <script>
+    // Demo only: report the submit event rather than sending anything anywhere.
+    document.addEventListener('tgf:submitted', function (e) {
+      var log = document.getElementById('log');
+      if (log) log.textContent = 'Submitted. Lead: ' + (e.detail && e.detail.leadId ? e.detail.leadId : '(none)');
+    });
+  </script>
+</body>
+</html>

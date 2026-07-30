@@ -60,7 +60,10 @@
     "test:ai-prompt-coach": "node test/ai-prompt-coach-smoke.mjs",
     "test:monitor-probes": "node test/monitor-probes-smoke.mjs",
     "test:ai-plan-gate": "node test/ai-plan-gate-smoke.mjs",
-    "test:editor-auth-no-bearer": "node test/editor-auth-no-bearer-smoke.mjs"
+    "test:editor-auth-no-bearer": "node test/editor-auth-no-bearer-smoke.mjs",
+    "test:form-submit": "node test/form-submit-smoke.mjs",
+    "test:form-widget": "node test/form-widget-smoke.mjs",
+    "test:form": "node test/form-submit-smoke.mjs && node test/form-widget-smoke.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",
