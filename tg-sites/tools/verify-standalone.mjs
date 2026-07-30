@@ -1702,6 +1702,69 @@ await check('it is put away when focus leaves the text', async () => {
  * section shifts every index the checks above depend on.
  */
 
+/*
+ * A COLUMN WITH CONTENT IS STILL A COLUMN.
+ *
+ * Andy: "when i add text (or anything) to a column, it stops being a column; it
+ * is just a block, so you can't add anything to it, and you can't style the
+ * column". Exactly right: the plus only existed while the column was empty, and
+ * a block fills its column, so every click landed on the block.
+ */
+await check('a column with content can still be added to', async () => {
+  const column = page.locator('.tgs-col').filter({ hasText: 'Talk to someone' }).first();
+  if ((await column.count()) === 0) return 'no column with content on the canvas';
+
+  await column.hover();
+  await page.waitForTimeout(300);
+
+  const append = column.locator('.ed-col-append');
+  if ((await append.count()) !== 1) return `${await append.count()} append buttons`;
+
+  await append.click();
+  await page.waitForTimeout(400);
+  const dialog = await page.locator('[role="dialog"]').count();
+  await closeAnyDialog();
+
+  return dialog === 1 ? true : 'the block picker did not open';
+});
+
+await check('and can still be selected, so it can be styled', async () => {
+  const column = page.locator('.tgs-col').filter({ hasText: 'Talk to someone' }).first();
+  await column.hover();
+  await page.waitForTimeout(300);
+
+  // The chip carries no data-add, so the click falls through to the column's
+  // own data-path. That is the whole trick, and it is why it is a span.
+  await column.locator('.ed-col-chip').click();
+  await page.waitForTimeout(400);
+
+  const labels = await page.evaluate(() =>
+    [...document.querySelectorAll('.ed-props .ed-label')].map((l) => l.textContent?.trim()));
+
+  return labels.includes('Vertical alignment') && labels.includes('Padding (inner spacing)')
+    ? true
+    : `the pane shows ${JSON.stringify(labels.slice(0, 6))}`;
+});
+
+await check('neither is on screen until the column is hovered', async () => {
+  /*
+   * The pointer has to be moved AWAY first. Written without this and it failed
+   * reporting opacity 1, because the check before it had just hovered the
+   * column and left the mouse there.
+   */
+  await page.mouse.move(5, 5);
+  await page.waitForTimeout(300);
+
+  // display:none, not opacity:0. An invisible button is still tabbable and
+  // still fails the 44px check as unreachable; a display:none one has no box.
+  const shown = await page.locator('.ed-col-chip').evaluateAll((els) =>
+    els.filter((el) => getComputedStyle(el).display !== 'none').length);
+
+  // One column still counts: whichever holds the current selection shows its
+  // chip on purpose, so a tablet with no hover can still reach it.
+  return shown <= 1 ? true : `${shown} chips on screen with nothing hovered`;
+});
+
 await check('an empty column offers a plus rather than a whole clickable area', async () => {
   await page.locator('[data-insert]').first().click();
   await page.waitForTimeout(400);

@@ -324,6 +324,51 @@ export function ColumnRenderer({
       )}
 
       {/*
+       * A COLUMN WITH CONTENT IS STILL A COLUMN.
+       *
+       * Until now the plus only existed while the column was empty, so putting
+       * one block in left no way to add a second from the canvas and no way to
+       * click the column rather than the block inside it. Andy: "when i add text
+       * (or anything) to a column, it stops being a column; it is just a block".
+       * He was describing exactly that.
+       *
+       * Two things, both only while editing and both only visible on hover, so
+       * they do not clutter a page somebody is reading:
+       *
+       *   the chip   selects the COLUMN. It carries no data-add, so the click
+       *              falls through to the column's own data-path, which is how
+       *              every other selection on this canvas works.
+       *   the plus   adds another block, at the end, where the next one goes.
+       */}
+      {editable && column.blocks.length > 0 && (
+        <>
+          <span className="ed-col-chip" aria-hidden="true">
+            Column
+          </span>
+          <button
+            type="button"
+            className="ed-col-append"
+            data-add={path}
+            aria-label="Add more content to this column"
+            title="Add content"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="14"
+              height="14"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </button>
+        </>
+      )}
+
+      {/*
        * The resize handle sits at the END of every column except the last,
        * absolutely positioned over the gap. Rendering it inside the column
        * rather than between columns keeps the grid to exactly one child per

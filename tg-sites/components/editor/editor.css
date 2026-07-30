@@ -779,6 +779,22 @@
   transform: scale(1.15);
 }
 
+/*
+ * The same 44px tap area, for the same reason.
+ *
+ * This one has been 24px since it was matched to Andy's reference and the touch
+ * target check never flagged it, because the check skips anything below the fold
+ * and the empty column it sits in usually is. That is a gap in the check rather
+ * than a licence, so it gets the overlay too.
+ */
+.ed-empty-col__add::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
+}
+
+.ed-empty-col__add { position: relative; }
+
 /* Focus is visible on its own terms rather than inherited, because this button
    sits on the canvas rather than in the chrome and the canvas is the client's
    own colours. */
@@ -789,6 +805,121 @@
 
 @media (prefers-reduced-motion: reduce) {
   .ed-empty-col__add { transition: none; }
+}
+
+/*
+ * A column that HAS content still needs to be a column.
+ *
+ * Both of these appear on hover only. The canvas has to stay pixel-accurate to
+ * what gets published, so anything permanently visible here would make the
+ * preview a lie, which is the same reasoning the Add Section strip already
+ * follows. Absolutely positioned for the same reason: neither takes up layout.
+ */
+.tgs-col { position: relative; }
+
+/*
+ * display:none rather than opacity:0, and that is not a style preference.
+ *
+ * An invisible-but-present button is still a button: it fails the 44px touch
+ * target check as "unreachable", because elementFromPoint cannot return
+ * something with pointer-events:none, and it is reachable by Tab while being
+ * invisible on screen. display:none gives it no box at all, which is honest and
+ * which the check skips.
+ *
+ * Shown on hover, and ALSO when something inside the column is selected. Hover
+ * does not exist on a touch screen, so hover alone would put these out of reach
+ * on a tablet, which is a viewport this editor already supports.
+ */
+.ed-col-chip,
+.ed-col-append {
+  display: none;
+}
+
+.tgs-col:hover > .ed-col-chip,
+.tgs-col:focus-within > .ed-col-chip,
+.tgs-col:has(.is-selected) > .ed-col-chip {
+  display: block;
+}
+
+.tgs-col:hover > .ed-col-append,
+.tgs-col:focus-within > .ed-col-append,
+.tgs-col:has(.is-selected) > .ed-col-append {
+  display: grid;
+}
+
+/* No data-add on the chip, deliberately: the click falls through to the
+   column's own data-path, which is how every other selection here works. */
+.ed-col-chip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translateY(-100%);
+  padding: 0 var(--ed-2);
+  border-radius: var(--ed-r-sm) var(--ed-r-sm) 0 0;
+  background: var(--ed-ink-3);
+  color: #fff;
+  font: 600 var(--ed-text-xs) / 1.7 var(--ed-font);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  z-index: 4;
+}
+
+.tgs-col:hover > .ed-col-chip { background: var(--ed-select); }
+
+/* Centred on the column's bottom edge, which is where the next block goes. */
+.ed-col-append {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ed-r-full);
+  transform: translate(-50%, 50%);
+  background: #94a3b8;
+  color: #fff;
+  cursor: pointer;
+  z-index: 4;
+}
+
+.ed-col-append:hover { background: #00b4d8; }
+
+/*
+ * A 44px tap area around a 24px disc, weighted upwards.
+ *
+ * The visible mark stays small, because Andy's reference showed a small one and
+ * a 44px disc on the canvas would read as part of the page. The touch target is
+ * what has to be 44, and a pseudo element reports as its owner to
+ * elementFromPoint, which is the pattern the check documents.
+ *
+ * NOT SYMMETRICAL, and that was measured rather than guessed. A symmetrical
+ * -10px inset gave a reachable band of 43px: the disc straddles the column's
+ * bottom edge, and .ed-vresize, the strip that drags the section's height, sits
+ * across that edge and owns the last two pixels downward. One short. So the
+ * room comes from above, where there is nothing but the column's own padding,
+ * and only while the column is hovered or selected because otherwise this
+ * button has no box at all.
+ */
+.ed-col-append::before {
+  content: '';
+  position: absolute;
+  inset: -20px -12px -4px;
+}
+
+.ed-col-append:focus-visible,
+.ed-col-chip:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+  outline: 2px solid #00b4d8;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ed-col-chip,
+  .ed-col-append { transition: none; }
 }
 
 .ed-resize {
