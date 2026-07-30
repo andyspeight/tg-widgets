@@ -10,8 +10,9 @@
  *   node tools/probe-checks.mjs
  *
  * Every mutation is applied to a real source file and restored afterwards, so
- * this is safe to run on a dirty tree but not while something else is building.
- * Roughly a minute per mutation: a full rebuild and the whole browser suite.
+ * it REFUSES TO RUN unless the tree is committed: see the guard below for what
+ * happened the time it was not. Roughly a minute per mutation, being a full
+ * rebuild and the whole browser suite each time, so give it twenty.
  *
  * WHEN THE SOURCE MOVES, THIS BREAKS, and it says "could not apply" and exits
  * non-zero rather than skipping. That is deliberate. A probe that quietly stops
@@ -183,34 +184,66 @@ const MUTATIONS = [
   },
 ];
 
+/*
+ * REFUSE TO START ON A TREE THAT IS NOT COMMITTED.
+ *
+ * This deliberately breaks real source files and puts them back. The finally
+ * below does that, and a finally does not run when the process is killed, times
+ * out, or the machine goes away. It happened: the run died partway and left
+ * Canvas.tsx with one line deleted, which was then nearly committed.
+ *
+ * Requiring a clean tree makes the damage recoverable by definition, because
+ * `git checkout` can undo anything this does. It also makes the belt-and-braces
+ * restore at the end safe to run.
+ */
+const dirty = execSync('git status --porcelain -- . ', { encoding: 'utf8' }).trim();
+if (dirty) {
+  console.error(
+    '\n  Commit or stash first. This script edits real source files, and a run\n' +
+      '  that dies partway leaves one of those edits behind:\n\n' +
+      dirty
+        .split('\n')
+        .map((line) => `    ${line}`)
+        .join('\n') +
+      '\n',
+  );
+  process.exit(1);
+}
+
 let bad = 0;
-for (const mutation of MUTATIONS) {
-  const original = readFileSync(mutation.file, 'utf8');
-  if (!original.includes(mutation.from)) {
-    console.log(`  ?? could not apply    ${mutation.check}`);
-    bad += 1;
-    continue;
-  }
+try {
+  for (const mutation of MUTATIONS) {
+    const original = readFileSync(mutation.file, 'utf8');
+    if (!original.includes(mutation.from)) {
+      console.log(`  ?? could not apply    ${mutation.check}`);
+      bad += 1;
+      continue;
+    }
 
-  writeFileSync(mutation.file, original.replace(mutation.from, mutation.to));
-  let output = '';
-  try {
-    execSync('node tools/build-standalone.mjs', { stdio: 'ignore' });
-    output = execSync('node tools/verify-standalone.mjs', { encoding: 'utf8' });
-  } catch (error) {
-    output = `${error.stdout ?? ''}${error.stderr ?? ''}`;
-  } finally {
-    writeFileSync(mutation.file, original);
-  }
+    writeFileSync(mutation.file, original.replace(mutation.from, mutation.to));
+    let output = '';
+    try {
+      execSync('node tools/build-standalone.mjs', { stdio: 'ignore' });
+      output = execSync('node tools/verify-standalone.mjs', { encoding: 'utf8' });
+    } catch (error) {
+      output = `${error.stdout ?? ''}${error.stderr ?? ''}`;
+    } finally {
+      writeFileSync(mutation.file, original);
+    }
 
-  const line = output.split('\n').find((row) => row.includes(mutation.check)) ?? '';
-  const noticed = line.includes('FAIL');
-  console.log(`  ${noticed ? 'caught ' : 'MISSED '} ${mutation.check}`);
-  if (!noticed) {
-    bad += 1;
-    console.log(`           ${mutation.why}`);
-    console.log(`           got: ${line.trim() || '(no such check ran)'}`);
+    const line = output.split('\n').find((row) => row.includes(mutation.check)) ?? '';
+    const noticed = line.includes('FAIL');
+    console.log(`  ${noticed ? 'caught ' : 'MISSED '} ${mutation.check}`);
+    if (!noticed) {
+      bad += 1;
+      console.log(`           ${mutation.why}`);
+      console.log(`           got: ${line.trim() || '(no such check ran)'}`);
+    }
   }
+} finally {
+  // Belt and braces over the per-mutation restore above, and safe only because
+  // the tree was clean when this started.
+  execSync('git checkout -- .', { stdio: 'ignore' });
 }
 
 execSync('node tools/build-standalone.mjs', { stdio: 'ignore' });
