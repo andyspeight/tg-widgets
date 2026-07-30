@@ -18,15 +18,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { publishPageAction, saveDraftAction } from '../../app/actions/pages';
 import { PublishHistory } from './PublishHistory';
-import type { Page } from '../../lib/content/schema';
+import type { Page, Section } from '../../lib/content/schema';
 import { parsePage } from '../../lib/content/schema';
 import { createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
+import { buildPresetSection } from '../../lib/content/presets';
 import { addBlock, type Path, pathKey, resolve } from '../../lib/content/tree';
 import { Outline } from './Outline';
 import { Canvas } from './Canvas';
 import { Properties } from './Properties';
 import { BlockPicker } from './BlockPicker';
-import { LayoutPicker } from './LayoutPicker';
+import { SectionPicker } from './SectionPicker';
 import { Icon, type IconName } from './Icon';
 import { Menu } from './Menu';
 import './editor.css';
@@ -382,6 +383,29 @@ export function EditorShell({
     [commit],
   );
 
+  /**
+   * Put a built section in at the pending index and select it.
+   *
+   * The index is read from insertAt and cleared BEFORE the commit, not after: the
+   * commit is what closes the dialog by re-rendering, and reading insertAt inside
+   * the updater would be reading state the updater is not allowed to depend on.
+   */
+  const insertSection = useCallback(
+    (section: Section) => {
+      const at = insertAt;
+      if (at === null) return;
+
+      setInsertAt(null);
+      commit((current) => {
+        const sections = [...current.sections];
+        sections.splice(at, 0, section);
+        return { ...current, sections };
+      });
+      setSelected({ kind: 'section', section: at });
+    },
+    [insertAt, commit],
+  );
+
   const fileInput = useRef<HTMLInputElement>(null);
 
   const savedLabel = useMemo(() => {
@@ -619,18 +643,15 @@ export function EditorShell({
       )}
 
       {insertAt !== null && (
-        <LayoutPicker
+        <SectionPicker
           onClose={() => setInsertAt(null)}
-          onPick={(layout) => {
-            const at = insertAt;
-            setInsertAt(null);
-            commit((current) => {
-              const sections = [...current.sections];
-              sections.splice(at, 0, createSectionFromLayout(layout));
-              return { ...current, sections };
-            });
-            setSelected({ kind: 'section', section: at });
-          }}
+          /*
+           * Two callbacks rather than one taking a union, so neither path has to
+           * ask what it was handed. They do the same three things afterwards,
+           * which insertSection holds once.
+           */
+          onPickLayout={(layout) => insertSection(createSectionFromLayout(layout))}
+          onPickPreset={(preset) => insertSection(buildPresetSection(preset))}
         />
       )}
 

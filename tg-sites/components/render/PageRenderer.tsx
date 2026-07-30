@@ -309,11 +309,11 @@ export function ColumnRenderer({
              */}
             <svg
               viewBox="0 0 24 24"
-              width="20"
-              height="20"
+              width="14"
+              height="14"
               fill="none"
               stroke="currentColor"
-              strokeWidth="2"
+              strokeWidth="2.5"
               strokeLinecap="round"
               aria-hidden="true"
             >

@@ -16,6 +16,7 @@ import {
   normaliseSectionPadding,
   normaliseWidths,
   parsePage,
+  WIDTH_SUM_TOLERANCE,
   PADDING_PRESETS,
   boxIsEmpty,
   DEFAULT_GAP,
@@ -28,6 +29,14 @@ import {
   safeColour,
 } from '../lib/content/schema';
 import { createPage, createRow, createSectionFromLayout, newId } from '../lib/content/factory';
+import {
+  buildPresetSection,
+  presetBars,
+  presetById,
+  presetsIn,
+  PRESET_CATEGORIES,
+  SECTION_PRESETS,
+} from '../lib/content/presets';
 import { LAYOUTS, layoutCells } from '../lib/content/layouts';
 import {
   addBlock,
@@ -697,5 +706,157 @@ describe('box styling, shared by sections and columns', () => {
     expect(boxIsEmpty({ ...EMPTY_BOX, background: '#fff' })).toBe(false);
     expect(boxIsEmpty({ ...EMPTY_BOX, padding: { top: 4, right: 0, bottom: 0, left: 0 } }))
       .toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Designed sections
+// ---------------------------------------------------------------------------
+
+/**
+ * THE ONE THAT MATTERS: every preset builds a section the schema accepts.
+ *
+ * A preset is hand-written data, so the ways it can be wrong are the ways
+ * hand-written data is wrong: a widths array with three entries and a columns
+ * array with two, a block type that no longer exists, ratios that normalise to
+ * something other than 100. None of those show up until somebody clicks the
+ * card, and then the editor throws while they are trying to add a section.
+ *
+ * Checking the built section rather than the description is deliberate. The
+ * description is not what ships; the section is.
+ */
+describe('the designed section presets', () => {
+  it.each(SECTION_PRESETS.map((preset) => [preset.label, preset] as const))(
+    '%s builds a section the schema accepts',
+    (_label, preset) => {
+      const section = buildPresetSection(preset);
+
+      const parsed = parsePage({
+        version: 1,
+        id: 'pg_test',
+        title: 'Test',
+        slug: '',
+        seo: { noindex: false },
+        sections: [section],
+      });
+
+      expect(parsed.ok ? [] : parsed.errors).toEqual([]);
+    },
+  );
+
+  it('describes as many columns as it gives widths', () => {
+    // An off-by-one here builds a section with an empty column in the middle
+    // and no error anywhere, which reads as the preset being badly designed.
+    const wrong = SECTION_PRESETS.flatMap((preset) =>
+      preset.rows
+        .filter((row) => row.widths.length !== row.columns.length)
+        .map((row) => `${preset.id}: ${row.widths.length} widths, ${row.columns.length} columns`),
+    );
+    expect(wrong).toEqual([]);
+  });
+
+  it('gives every column a share of the row that adds up', () => {
+    for (const preset of SECTION_PRESETS) {
+      for (const row of buildPresetSection(preset).rows) {
+        const sum = row.columns.reduce((total, column) => total + column.width, 0);
+        expect(Math.abs(sum - 100), `${preset.id}`).toBeLessThanOrEqual(WIDTH_SUM_TOLERANCE);
+      }
+    }
+  });
+
+  /*
+   * Adding the same preset twice must give two independent sections. A shared
+   * id would collide in the outline's keys and make the editor's path lookups
+   * ambiguous, and it would show up as the wrong block being edited rather than
+   * as an error.
+   */
+  it('gives fresh ids every time, so the same preset can be added twice', () => {
+    const preset = SECTION_PRESETS[0];
+    const a = buildPresetSection(preset);
+    const b = buildPresetSection(preset);
+
+    const ids = (section: ReturnType<typeof buildPresetSection>) => [
+      section.id,
+      ...section.rows.flatMap((row) => [
+        row.id,
+        ...row.columns.flatMap((column) => [column.id, ...column.blocks.map((block) => block.id)]),
+      ]),
+    ];
+
+    const all = [...ids(a), ...ids(b)];
+    expect(new Set(all).size, 'an id is reused').toBe(all.length);
+  });
+
+  /*
+   * Props MERGE over the block's defaults rather than replacing them. A preset
+   * that says only { style: 'h1' } must still get the text, level and align the
+   * block type defines, or a new field on a block type would arrive empty in
+   * every preset that does not mention it.
+   */
+  it('keeps a block type defaults for anything the preset does not say', () => {
+    const centred = presetById('text-centred-intro')!;
+    const blocks = buildPresetSection(centred).rows[0].columns[0].blocks;
+
+    // Three blocks: the small label, the title, then the line under it. Written
+    // first as blocks[0] expecting the title, which is the eyebrow.
+    const [eyebrow, title, body] = blocks;
+
+    expect(eyebrow.props?.style).toBe('h6');
+    expect(title.props?.style).toBe('h1');
+
+    // The preset says nothing about the title's text length or its tag, so both
+    // come from the block definition. That is what makes a new field on a block
+    // type reach every preset without any of them being edited.
+    expect(title.props).toHaveProperty('level');
+    expect(title.props?.align).toBe('centre');
+    expect(body.type).toBe('text');
+  });
+
+  it('puts every preset in a category the picker actually draws', () => {
+    const known = new Set(PRESET_CATEGORIES.map((entry) => entry.id));
+    for (const preset of SECTION_PRESETS) {
+      expect(known.has(preset.category), `${preset.id} is in "${preset.category}"`).toBe(true);
+    }
+  });
+
+  it('leaves no category with an empty grid', () => {
+    for (const entry of PRESET_CATEGORIES) {
+      expect(presetsIn(entry.id).length, `${entry.id} has nothing in it`).toBeGreaterThan(0);
+    }
+  });
+
+  /*
+   * The thumbnail is drawn from the same data that builds the section, which is
+   * the reason this file is data at all. What it must not do is draw outside
+   * its box: the SVG has no clipping, so a bar at y 1.2 renders over the card's
+   * label.
+   */
+  it('draws every thumbnail inside its box', () => {
+    for (const preset of SECTION_PRESETS) {
+      for (const bar of presetBars(preset)) {
+        expect(bar.x, `${preset.id} x`).toBeGreaterThanOrEqual(0);
+        expect(bar.y, `${preset.id} y`).toBeGreaterThanOrEqual(0);
+        expect(bar.x + bar.width, `${preset.id} right edge`).toBeLessThanOrEqual(1.001);
+        expect(bar.y + bar.height, `${preset.id} bottom edge`).toBeLessThanOrEqual(1.001);
+      }
+    }
+  });
+
+  it('draws something for every preset', () => {
+    // A preset whose blocks all fell through to nothing would show a blank card
+    // and look like a loading bug.
+    for (const preset of SECTION_PRESETS) {
+      expect(presetBars(preset).length, `${preset.id} draws nothing`).toBeGreaterThan(0);
+    }
+  });
+
+  it('centres a centred preset and does not centre a left-aligned one', () => {
+    const centred = presetBars(presetById('text-centred-intro')!);
+    const left = presetBars(presetById('text-intro')!);
+
+    // A centred single-column preset has no bar starting hard against the left.
+    expect(centred.every((bar) => bar.x > 0.001)).toBe(true);
+    // The left-aligned one does.
+    expect(left.some((bar) => bar.x < 0.001)).toBe(true);
   });
 });

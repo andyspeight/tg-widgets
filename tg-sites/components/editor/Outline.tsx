@@ -52,7 +52,7 @@ import {
 } from '../../lib/content/naming';
 import { Icon } from './Icon';
 import { Menu } from './Menu';
-import { LayoutThumb } from './LayoutPicker';
+import { LayoutThumb } from './SectionPicker';
 import { LAYOUTS } from '../../lib/content/layouts';
 
 /** The single-row layouts, which are the only ones that make sense as a row. */

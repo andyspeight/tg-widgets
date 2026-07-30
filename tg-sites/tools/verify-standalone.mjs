@@ -369,11 +369,24 @@ await check('insert points do not shift the page', async () => {
   return heights.every((h) => h === 0) ? true : `heights ${JSON.stringify(heights)}`;
 });
 
-await check('an insert point opens the layout picker', async () => {
+await check('an insert point opens the section picker', async () => {
   await page.locator('.ed-insert__btn').first().click();
   await page.waitForTimeout(300);
   const heading = await page.locator('.tg-modal__head').innerText();
-  return heading.includes('Choose a layout') ? true : `head reads "${heading}"`;
+  return heading.includes('Add a section') ? true : `head reads "${heading}"`;
+});
+
+/*
+ * Three ways in, Andy's ask on 30 Jul 2026. Layouts is what this dialog used to
+ * be and stays the tab it opens on, because it is the one somebody reaches for
+ * when they already know what they are building.
+ */
+await check('it offers Layouts, Designed and AI, opening on Layouts', async () => {
+  const tabs = (await page.locator('.ed-tab').allInnerTexts()).map((t) => t.trim());
+  const selected = await page.locator('.ed-tab[aria-selected="true"]').innerText();
+  return JSON.stringify(tabs) === '["Layouts","Designed","AI"]' && selected === 'Layouts'
+    ? true
+    : `${JSON.stringify(tabs)}, on "${selected}"`;
 });
 
 await check('the picker offers the full layout set', async () =>
@@ -381,6 +394,94 @@ await check('the picker offers the full layout set', async () =>
 
 await check('layout thumbnails are drawn, not described', async () =>
   (await page.locator('.ed-layout-card .ed-thumb rect').count()) > 12);
+
+await check('Designed shows ready-made sections in a category', async () => {
+  await page.locator('.ed-tab', { hasText: 'Designed' }).click();
+  await page.waitForTimeout(300);
+
+  const cards = await page.locator('.ed-preset-card').count();
+  const cats = (await page.locator('.ed-designed__cat').allInnerTexts()).map((t) => t.trim());
+  // Layouts must be gone, or both grids would be on screen at once.
+  const layouts = await page.locator('.ed-layout-card').count();
+
+  return cards >= 6 && cats.includes('Text') && layouts === 0
+    ? true
+    : `${cards} cards, categories ${JSON.stringify(cats)}, ${layouts} layout cards still shown`;
+});
+
+/*
+ * The thumbnails are drawn from the same rows and blocks that build the section,
+ * which is the reason presets are data. A hand-made picture per entry can promise
+ * something the entry does not build and nothing catches it, which is the lesson
+ * layouts.ts records at the top of itself.
+ */
+await check('every designed card draws its own wireframe', async () => {
+  const perCard = await page.locator('.ed-preset-card').evaluateAll((cards) =>
+    cards.map((card) => card.querySelectorAll('.ed-thumb--preset rect').length));
+
+  const empty = perCard.filter((count) => count === 0).length;
+  const distinct = new Set(perCard).size;
+
+  // Not all the same, or they are being drawn from something other than the
+  // preset. Not zero, or a card is blank and looks like it failed to load.
+  return empty === 0 && distinct > 2
+    ? true
+    : `${empty} blank, ${distinct} distinct bar counts across ${perCard.length} cards`;
+});
+
+await check('a preset builds a section with its content already in it', async () => {
+  const before = await page.locator('.tgs-section').count();
+
+  await page.locator('.ed-preset-card', { hasText: 'Four short points' }).click();
+  await page.waitForTimeout(500);
+
+  const after = await page.locator('.tgs-section').count();
+  if (after !== before + 1) return `sections went ${before} -> ${after}`;
+
+  const section = page.locator('.tgs-section').first();
+  const columns = await section.locator('.tgs-col').count();
+  const text = await section.innerText();
+  const ok = columns === 4 && /short title/i.test(text);
+
+  /*
+   * Undone before returning, so this check leaves the page as it found it.
+   * The harness is sequential and a later check counts sections absolutely, so
+   * a section left behind here fails a check three screens away that has
+   * nothing to do with presets. It also proves a preset insert joins the undo
+   * stack like every other whole-page change.
+   */
+  await page.keyboard.press('Control+z');
+  await page.waitForTimeout(300);
+  const restored = await page.locator('.tgs-section').count();
+
+  if (!ok) return `${columns} columns, saying "${text.slice(0, 60)}"`;
+  return restored === before ? true : `undo left ${restored} sections, expected ${before}`;
+});
+
+await check('the AI tab is an honest stub rather than a dead form', async () => {
+  await page.locator('.ed-insert__btn').first().click();
+  await page.waitForTimeout(300);
+  await page.locator('.ed-tab', { hasText: 'AI' }).click();
+  await page.waitForTimeout(300);
+
+  const text = await page.locator('.ed-ai-stub').innerText();
+  // Nothing to type into, because a disabled box looks like it might work if
+  // you found the right words.
+  const inputs = await page.locator('.ed-ai-stub input, .ed-ai-stub textarea').count();
+
+  await closeAnyDialog();
+  return /not built yet/i.test(text) && inputs === 0
+    ? true
+    : `${inputs} inputs, saying "${text.slice(0, 60)}"`;
+});
+
+// Back to Layouts for the check below, which picks one.
+await check('the picker reopens on Layouts', async () => {
+  await page.locator('.ed-insert__btn').first().click();
+  await page.waitForTimeout(300);
+  const selected = await page.locator('.ed-tab[aria-selected="true"]').innerText();
+  return selected === 'Layouts' ? true : `it reopened on "${selected}"`;
+});
 
 await check('picking a layout inserts a section in the right place', async () => {
   const before = await page.locator('.tgs-section').count();

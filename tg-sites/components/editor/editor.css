@@ -734,7 +734,14 @@
 .ed-empty-col {
   display: grid;
   place-items: center;
-  min-height: 96px;
+  /*
+   * Tall, and matched to the reference Andy sent on 30 Jul 2026 rather than
+   * guessed. An empty column is a drop target and a promise about where the
+   * content goes, and at 96px it read as a thin strip rather than as the
+   * column it stands for. It is a MINIMUM: a column with anything in it does
+   * not use this rule at all.
+   */
+  min-height: 200px;
   border: 1px dashed #cbd5e1;
   border-radius: var(--ed-r-md);
 }
@@ -743,23 +750,33 @@
    selectable while only the middle adds. */
 .tgs-col:hover > .ed-empty-col { border-color: #94a3b8; }
 
+/*
+ * Small, mid-grey, with a white plus. Drawn from Andy's reference.
+ *
+ * It was 40px with a dark glyph on a pale disc, which competed with the
+ * content around it. This is a quiet invitation in the middle of an empty
+ * space: big enough to hit, small enough not to look like the point of the
+ * section. 24px is under the 44px pointer target guidance, and the whole
+ * 200px column is the generous target here, so the disc is the mark rather
+ * than the hit area.
+ */
 .ed-empty-col__add {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 24px;
+  height: 24px;
   padding: 0;
   border: 0;
   border-radius: var(--ed-r-full);
-  background: #e2e8f0;
-  color: #475569;
+  background: #94a3b8;
+  color: #fff;
   cursor: pointer;
-  transition: background-color 150ms ease-out, color 150ms ease-out;
+  transition: background-color 150ms ease-out, transform 150ms ease-out;
 }
 
 .ed-empty-col__add:hover {
   background: #00b4d8;
-  color: #fff;
+  transform: scale(1.15);
 }
 
 /* Focus is visible on its own terms rather than inherited, because this button
@@ -1225,6 +1242,155 @@
   stroke-width: 3;
 }
 .ed-layout-card:hover .ed-thumb rect { stroke: var(--ed-accent-dark); }
+
+/* ---------------------------------------------------------------------------
+   Adding a section: Layouts, Designed, AI
+
+   The tabs and the designed grid. A preset thumbnail is FILLED rather than
+   outlined, unlike a layout thumbnail, and that difference is doing work: a
+   layout is an empty shape and draws as an outline, a preset has content in it
+   and draws as solid bars. At thumbnail size that is the fastest way to tell
+   the two tabs apart if you have landed on the wrong one.
+   --------------------------------------------------------------------------- */
+
+.ed-tabs {
+  display: flex;
+  gap: var(--ed-1);
+  margin-bottom: var(--ed-4);
+  border-bottom: 1px solid var(--ed-line);
+}
+
+.ed-tab {
+  padding: var(--ed-2) var(--ed-3);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--ed-ink-2);
+  font: inherit;
+  font-size: var(--ed-text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  /* Pulled down by the border width so the active underline sits ON the
+     container's line rather than above it. */
+  margin-bottom: -1px;
+}
+
+.ed-tab:hover { color: var(--ed-ink); }
+
+.ed-tab[aria-selected='true'] {
+  border-bottom-color: var(--ed-accent);
+  color: var(--ed-ink);
+}
+
+.ed-designed {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: var(--ed-4);
+  align-items: start;
+}
+
+.ed-designed__cats {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ed-designed__cat {
+  padding: var(--ed-2) var(--ed-3);
+  border: 0;
+  border-radius: var(--ed-r-md);
+  background: none;
+  color: var(--ed-ink-2);
+  font: inherit;
+  font-size: var(--ed-text-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ed-designed__cat:hover { background: var(--ed-well); color: var(--ed-ink); }
+
+.ed-designed__cat[aria-current='true'] {
+  background: var(--ed-well);
+  color: var(--ed-ink);
+  font-weight: 600;
+}
+
+.ed-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--ed-3);
+}
+
+.ed-preset-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--ed-1);
+  padding: var(--ed-3);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+  color: var(--ed-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 150ms ease-out, background-color 150ms ease-out;
+}
+
+.ed-preset-card:hover { border-color: var(--ed-accent); background: var(--ed-well); }
+
+.ed-preset-card__name {
+  margin-top: var(--ed-2);
+  font-size: var(--ed-text-sm);
+  font-weight: 600;
+}
+
+.ed-preset-card__what {
+  color: var(--ed-ink-2);
+  font-size: var(--ed-text-xs);
+  line-height: 1.4;
+}
+
+/* Filled, not outlined. See the note at the top of this block. */
+.ed-thumb--preset rect { stroke: none; }
+.ed-thumb--preset rect[data-tone='strong'] { fill: var(--ed-ink-2); }
+.ed-thumb--preset rect[data-tone='soft'] { fill: var(--ed-line); }
+.ed-preset-card:hover .ed-thumb--preset rect[data-tone='strong'] { fill: var(--ed-accent-dark); }
+
+.ed-ai-stub {
+  display: grid;
+  justify-items: center;
+  gap: var(--ed-2);
+  padding: var(--ed-6) var(--ed-4);
+  color: var(--ed-ink-2);
+  text-align: center;
+}
+
+.ed-ai-stub h3 {
+  margin: 0;
+  color: var(--ed-ink);
+  font-size: var(--ed-text-md);
+}
+
+.ed-ai-stub p {
+  max-width: 44ch;
+  margin: 0;
+  font-size: var(--ed-text-sm);
+  line-height: 1.6;
+}
+
+.ed-ai-stub__meanwhile { color: var(--ed-ink-3); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ed-preset-card { transition: none; }
+}
+
+/* The dialog is narrow on a phone, so the category rail goes above the grid
+   rather than squeezing both. */
+@media (max-width: 640px) {
+  .ed-designed { grid-template-columns: 1fr; }
+  .ed-designed__cats { flex-direction: row; flex-wrap: wrap; }
+}
 
 /* The same thumbnails, smaller, for choosing a row inside a section. */
 .ed-rowpick {
