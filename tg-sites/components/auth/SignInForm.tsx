@@ -62,12 +62,36 @@ export function SignInForm({ configured, usesPasswordForm, next }: Props) {
       </h1>
 
       {!configured ? (
+        /*
+         * The two causes, both named, because the first version of this said
+         * only "it is missing" and pointed at db/SETUP.md, which is the DATABASE
+         * walkthrough and says nothing about this variable at all.
+         *
+         * The second cause is the one that actually happens. Vercel attaches
+         * environment variables to a deployment when the deployment is created,
+         * so adding the variable and then reloading an existing preview changes
+         * nothing: that build has no SESSION_SECRET and never will. It reads
+         * exactly like the variable not having been saved, which is why the
+         * message has to say so rather than leaving somebody to check the
+         * settings page three times.
+         */
         <div className="sv-error">
           <h2>Sign in is not set up yet</h2>
           <p>
-            <code>SESSION_SECRET</code> is missing from this environment, so no
+            <code>SESSION_SECRET</code> is not reaching this deployment, so no
             session can be signed and nobody can get in. It is one value, set
-            once, and the walkthrough is in <code>tg-sites/db/SETUP.md</code>.
+            once, and there are only two reasons it is not here.
+          </p>
+          <p>
+            <strong>This build is older than the variable.</strong> Vercel gives a
+            deployment its environment variables when the deployment is made, so
+            adding one afterwards does not reach a build that already exists.
+            Redeploy, or push a commit, and this screen goes away.
+          </p>
+          <p>
+            <strong>It is set for the wrong environment.</strong> A preview URL
+            reads the Preview environment, not Production. Tick all three when
+            adding it.
           </p>
         </div>
       ) : !usesPasswordForm ? (
