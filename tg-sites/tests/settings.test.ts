@@ -18,6 +18,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { isStaffEmail, STAFF_DOMAINS } from '../lib/auth/staff';
+import { isAppHost } from '../middleware';
 
 import {
   analytics,
@@ -429,5 +430,82 @@ describe('the staff check', () => {
 
     const theirs = [...match![1].matchAll(/'([^']+)'/g)].map((m) => m[1]).sort();
     expect(theirs).toEqual([...STAFF_DOMAINS].sort());
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Which product a hostname gets
+// ---------------------------------------------------------------------------
+
+/**
+ * The routing decision, tested because getting it wrong is invisible in one
+ * direction and catastrophic in the other.
+ *
+ * Wrong towards "app": a client's real domain serves the Travelgenix front door,
+ * which they and their customers see immediately.
+ *
+ * Wrong towards "site": a preview deployment 404s, which reads as the branch being
+ * broken and sends somebody looking in the wrong place for an hour.
+ */
+describe('isAppHost', () => {
+  it('keeps our own hostnames on the editor', () => {
+    for (const host of [
+      'localhost',
+      'localhost:3100',
+      '127.0.0.1:3100',
+      'tg-sites-shell.vercel.app',
+      // Every preview deployment gets its own generated name under vercel.app, so
+      // the whole suffix is ours. A list would be one nobody could keep current.
+      'tg-sites-shell-71ajh2qpp-agendasgroup.vercel.app',
+    ]) {
+      expect(isAppHost(host), host).toBe(true);
+    }
+  });
+
+  it('sends a client domain to their website', () => {
+    for (const host of [
+      'www.demotravel.co.uk',
+      'demotravel.co.uk',
+      'kuoni.com',
+      'www.demotravel.co.uk:443',
+    ]) {
+      expect(isAppHost(host), host).toBe(false);
+    }
+  });
+
+  /*
+   * THE CASE THAT WOULD HAVE BROKEN THE FEATURE.
+   *
+   * A preview subdomain is a client's SITE, not the editor. Checked before the
+   * suffix rules for exactly this reason, and it would be easy to get wrong later
+   * by adding a rule above it.
+   */
+  it('treats a preview subdomain as a site, not as the editor', () => {
+    expect(isAppHost('demo-travel.sites.travelify.io')).toBe(false);
+    expect(isAppHost('kuoni.sites.travelify.io')).toBe(false);
+    expect(isAppHost('DEMO-TRAVEL.SITES.TRAVELIFY.IO')).toBe(false);
+  });
+
+  /*
+   * A hostname that merely ends with the right text is a different host. The check
+   * is on a leading dot, so this cannot be spoofed by registering a domain that
+   * ends in the same letters.
+   */
+  it('is not fooled by a lookalike suffix', () => {
+    expect(isAppHost('evil-vercel.app')).toBe(false);
+    expect(isAppHost('notlocalhost')).toBe(false);
+    // And the reserved suffix cannot be faked into being a site either way round.
+    expect(isAppHost('sites.travelify.io.evil.test')).toBe(false);
+  });
+
+  it('is case and port insensitive', () => {
+    expect(isAppHost('LOCALHOST:3100')).toBe(true);
+    expect(isAppHost('TG-Sites-Shell.Vercel.App')).toBe(true);
+  });
+
+  it('fails towards the site for an empty or nonsense host', () => {
+    // An empty Host header is not ours, so it renders as a site and 404s. Better
+    // than serving the editor to something that could not name us.
+    expect(isAppHost('')).toBe(false);
   });
 });
