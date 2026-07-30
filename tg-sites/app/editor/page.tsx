@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation';
 import { EditorShell } from '../../components/editor/EditorShell';
 import { activeSite, currentUserId } from '../../lib/auth/session';
 import { getPage } from '../../lib/db/pages';
+import { getTheme } from '../../lib/db/theme';
+import { themeTokens } from '../../lib/theme/tokens';
 
 export const metadata = {
   title: 'Editor · Travelgenix Sites',
@@ -50,7 +52,13 @@ export default async function EditorPage({
   // Not found and not yours give the same answer here, deliberately. RLS
   // makes another tenant's page indistinguishable from one that does not
   // exist, so a guessed id confirms nothing.
-  const page = await getPage(site.tenantId, pageId);
+  //
+  // Theme alongside it, in parallel: the canvas has to show the site in the
+  // client's own colours, or the preview is a preview of a different site.
+  const [page, theme] = await Promise.all([
+    getPage(site.tenantId, pageId),
+    getTheme(site.tenantId),
+  ]);
   if (!page) redirect('/sites');
 
   return (
@@ -63,6 +71,7 @@ export default async function EditorPage({
       initialPage={page.content}
       initialStatus={page.status}
       initialHasUnpublishedChanges={page.hasUnpublishedChanges}
+      siteTheme={themeTokens(theme).style}
     />
   );
 }

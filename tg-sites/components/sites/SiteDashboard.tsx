@@ -134,18 +134,31 @@ export function SiteDashboard({ account, site, siteName, siteUrl, pages: initial
             </p>
           </div>
 
-          <button
-            type="button"
-            className="sv-btn"
-            data-variant="primary"
-            onClick={() => {
-              setError(null);
-              setDialog({ kind: 'new' });
-            }}
-          >
-            <Icon name="plus" size={16} />
-            New page
-          </button>
+          <div className="sv-head__actions">
+            {/*
+              A plain anchor, not next/link. Leaving for the theme screen should
+              be a real navigation: the theme changes what the editor canvas and
+              every preview render, so coming back wants fresh server output
+              rather than a cached tree from before the change.
+            */}
+            <a className="sv-btn" href="/theme">
+              <Icon name="sparkle" size={16} />
+              Theme
+            </a>
+
+            <button
+              type="button"
+              className="sv-btn"
+              data-variant="primary"
+              onClick={() => {
+                setError(null);
+                setDialog({ kind: 'new' });
+              }}
+            >
+              <Icon name="plus" size={16} />
+              New page
+            </button>
+          </div>
         </header>
 
         {error && (

@@ -36,9 +36,30 @@ function pathAttr(editable: boolean, key: string): { 'data-path'?: string } {
 // Page
 // ---------------------------------------------------------------------------
 
-export function PageRenderer({ page, editable = false }: { page: Page } & Editable): ReactElement {
+export function PageRenderer({
+  page,
+  editable = false,
+  theme,
+}: {
+  page: Page;
+  /**
+   * The tenant's theme, already turned into custom properties by
+   * lib/theme/tokens.ts.
+   *
+   * Optional, and omitting it is a real case rather than an oversight: the
+   * fallbacks in globals.css are the same values the default theme derives to,
+   * so a page rendered without one looks correct rather than unstyled.
+   *
+   * Custom properties in a style attribute, not a <style> tag. That keeps this
+   * CSP clean with no style-src unsafe-inline, and it is the same mechanism the
+   * column widths already use. It also means the editor canvas can carry a
+   * client's theme with the identical object the published page uses, so the
+   * preview cannot drift from what ships.
+   */
+  theme?: CSSProperties;
+} & Editable): ReactElement {
   return (
-    <div className="tgs-page" {...pathAttr(editable, 'page')}>
+    <div className="tgs-page" style={theme} {...pathAttr(editable, 'page')}>
       {editable && <InsertPoint index={0} />}
 
       {page.sections.map((section, index) => (

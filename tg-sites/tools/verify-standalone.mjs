@@ -627,6 +627,194 @@ await check('closing a dialog gives focus back to what opened it', async () => {
   return restored === true ? true : 'focus was dropped on the body';
 });
 
+
+// ---------------------------------------------------------------------------
+// The site theme
+// ---------------------------------------------------------------------------
+
+/*
+ * Measured in a real browser, not asserted in Node.
+ *
+ * tests/theme.test.ts already proves the arithmetic. What it cannot prove is
+ * that the numbers reach the page: that custom properties on the page element
+ * beat the :root fallbacks, that the cascade carries them into a section that
+ * declares its own, and that a button ends up painted the colour the
+ * derivation chose. Those are questions about the cascade, and only a browser
+ * answers them.
+ *
+ * The brand used here is PALE GOLD, which is the colour that catches a naive
+ * derivation. Anything that assumes a brand colour is dark puts white text on
+ * it and produces an unreadable button, so if the theme were wrong these
+ * checks go red rather than merely looking odd.
+ */
+
+const GOLD = '#f5d76e';
+
+/** getComputedStyle gives rgb(); the tests think in hex. */
+const toHex = (rgb) => {
+  const m = String(rgb).match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+  if (!m) return null;
+  return `#${[1, 2, 3].map((i) => Number(m[i]).toString(16).padStart(2, '0')).join('')}`;
+};
+
+/** WCAG contrast, computed here so the check does not trust the app's own maths. */
+const ratio = (a, b) => {
+  const lum = (hex) => {
+    const v = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+    const c = v.map((x) => (x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  };
+  const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p);
+  return (x + 0.05) / (y + 0.05);
+};
+
+await check('a theme reaches the rendered page', async () => {
+  await closeAnyDialog();
+  await page.evaluate((brand) => window.__TG_SET_THEME__({ brand, accent: '#0f766e' }), GOLD);
+  await page.waitForTimeout(200);
+
+  const applied = await page.evaluate(() =>
+    getComputedStyle(document.querySelector('.tgs-page')).getPropertyValue('--tgs-primary').trim());
+
+  return applied.toLowerCase() === GOLD ? true : `--tgs-primary is "${applied}"`;
+});
+
+await check('a themed button is painted the brand colour', async () => {
+  const background = await page.evaluate(() => {
+    const button = document.querySelector('.tgs-button[data-variant="primary"]');
+    return button ? getComputedStyle(button).backgroundColor : null;
+  });
+
+  const hex = toHex(background);
+  // The first primary button in the seed page sits in a dark-tone section, so
+  // it is the brand colour itself rather than an inverted one.
+  return hex === GOLD ? true : `button background is ${hex ?? background}`;
+});
+
+await check('a button label on a pale brand is dark, not white', async () => {
+  const measured = await page.evaluate(() => {
+    const button = document.querySelector('.tgs-button[data-variant="primary"]');
+    const style = getComputedStyle(button);
+    return { colour: style.color, background: style.backgroundColor };
+  });
+
+  const label = toHex(measured.colour);
+  const background = toHex(measured.background);
+  const contrast = ratio(label, background);
+
+  // The whole point. A derivation that assumed dark brands would put #ffffff
+  // here, which on pale gold is about 1.7:1 and unreadable.
+  return contrast >= 3
+    ? true
+    : `${label} on ${background} is only ${contrast.toFixed(1)}:1`;
+});
+
+/*
+ * A section tone has to actually paint.
+ *
+ * This check exists because the first version of the two below passed while
+ * every tone in the product was invisible. They read the section's computed
+ * backgroundColor, got rgba(0, 0, 0, 0) for transparent, and the hex converter
+ * turned that into #000000. White heading on "black" measured 21:1 and went
+ * green, on a section that was rendering as bare white page.
+ *
+ * So the colour is asserted to be OPAQUE first, separately, and by its alpha
+ * rather than by what it looks like once converted.
+ */
+const bandBackground = async (tone) =>
+  page.evaluate((t) => {
+    const section = document.querySelector(`.tgs-section[data-tone="${t}"]`);
+    const style = getComputedStyle(section);
+    return {
+      background: style.backgroundColor,
+      image: style.backgroundImage,
+      heading: getComputedStyle(section.querySelector('.tgs-heading')).color,
+      muted: style.getPropertyValue('--tgs-text-muted').trim(),
+    };
+  }, tone);
+
+await check('a section tone actually paints', async () => {
+  const dark = await bandBackground('dark');
+  const accent = await bandBackground('accent');
+
+  const transparent = (colour) => /rgba\([^)]*,\s*0\s*\)/.test(String(colour));
+
+  if (transparent(dark.background)) return `dark tone is ${dark.background}`;
+  if (transparent(accent.background)) return `accent tone is ${accent.background}`;
+  return true;
+});
+
+await check('the dark band stays dark enough for its text', async () => {
+  const dark = await bandBackground('dark');
+  const contrast = ratio(toHex(dark.heading), toHex(dark.background));
+  return contrast >= 4.5
+    ? true
+    : `heading on the dark band is only ${contrast.toFixed(1)}:1`;
+});
+
+await check('muted text on the brand band still reads', async () => {
+  const accent = await bandBackground('accent');
+  const background = toHex(accent.background);
+  const muted = accent.muted.startsWith('#') ? accent.muted : toHex(accent.muted);
+  const measured = ratio(muted, background);
+
+  return measured >= 4.5
+    ? true
+    : `muted ${muted} on the brand band is only ${measured.toFixed(1)}:1`;
+});
+
+await check('a ghost button label reads on the dark band', async () => {
+  // Found by screenshot, not by a unit test: a teal accent on a gold brand's
+  // dark band vanished. The accent is text here, so it gets measured.
+  const measured = await page.evaluate(() => {
+    const section = document.querySelector('.tgs-section[data-tone="dark"]');
+    const ghost = section.querySelector('.tgs-button[data-variant="ghost"]');
+    return {
+      colour: getComputedStyle(ghost).color,
+      background: getComputedStyle(section).backgroundColor,
+    };
+  });
+
+  const contrast = ratio(toHex(measured.colour), toHex(measured.background));
+  return contrast >= 4.5
+    ? true
+    : `ghost label is only ${contrast.toFixed(1)}:1 on the dark band`;
+});
+
+await check('corner style reaches the rendered page', async () => {
+  await page.evaluate(() => window.__TG_SET_THEME__({ corners: 'sharp' }));
+  await page.waitForTimeout(150);
+  const sharp = await page.evaluate(() =>
+    getComputedStyle(document.querySelector('.tgs-page')).getPropertyValue('--tgs-radius-md').trim());
+
+  await page.evaluate(() => window.__TG_SET_THEME__({ corners: 'round' }));
+  await page.waitForTimeout(150);
+  const round = await page.evaluate(() =>
+    getComputedStyle(document.querySelector('.tgs-page')).getPropertyValue('--tgs-radius-md').trim());
+
+  return sharp === '0px' && round === '18px' ? true : `sharp ${sharp}, round ${round}`;
+});
+
+await check('a hostile theme value cannot escape the style attribute', async () => {
+  await page.evaluate(() =>
+    window.__TG_SET_THEME__({ brand: 'red; } body { display: none } .x {' }));
+  await page.waitForTimeout(150);
+
+  // The page is still visible, and the brand fell back to a valid colour.
+  const state = await page.evaluate(() => ({
+    bodyDisplay: getComputedStyle(document.body).display,
+    brand: getComputedStyle(document.querySelector('.tgs-page'))
+      .getPropertyValue('--tgs-primary').trim(),
+  }));
+
+  if (state.bodyDisplay === 'none') return 'the injection worked';
+  return /^#[0-9a-f]{6}$/i.test(state.brand) ? true : `brand is "${state.brand}"`;
+});
+
+// Back to the default, so anything added after this is not looking at gold.
+await page.evaluate(() => window.__TG_SET_THEME__({}));
+
+
 await browser.close();
 
 let failed = false;

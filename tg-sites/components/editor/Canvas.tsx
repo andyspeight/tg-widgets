@@ -17,7 +17,7 @@
  * separate mobile preview mode to drift out of sync, and no iframe.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import type { Page } from '../../lib/content/schema';
 import {
   DEFAULT_SECTION_PADDING,
@@ -44,6 +44,15 @@ interface Props {
   onCommit: (next: (current: Page) => Page, coalesceKey?: string) => void;
   onPickBlock: (target: { section: number; row: number; column: number }) => void;
   onInsertSection: (index: number) => void;
+  /**
+   * The client's theme, as custom properties.
+   *
+   * Passed straight through to PageRenderer, which is the point: the canvas
+   * shows the site in the client's real colours and fonts rather than in
+   * Travelgenix navy. A preview in the wrong palette is a preview of a
+   * different site.
+   */
+  theme?: CSSProperties;
 }
 
 /**
@@ -80,6 +89,7 @@ export function Canvas({
   onCommit,
   onPickBlock,
   onInsertSection,
+  theme,
 }: Props) {
   const frameRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<DragState | null>(null);
@@ -366,7 +376,7 @@ export function Canvas({
           onPointerCancel={endDrag}
           onKeyDown={onKeyDown}
         >
-          <PageRenderer page={page} editable />
+          <PageRenderer page={page} editable theme={theme} />
         </div>
 
         {stackNote && <p className="ed-stack-note">{stackNote}</p>}

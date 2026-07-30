@@ -1,0 +1,504 @@
+/**
+ * The theme screen.
+ *
+ * Two columns: controls that scroll, and a preview that does not. Tokens come
+ * from editor.css through sites.css, so this file is layout and the one or two
+ * things a colour picker needs that nothing else does.
+ *
+ * NOTE THE TWO PALETTES ON THIS SCREEN. Everything outside .tv-frame is editor
+ * chrome and uses --ed-* tokens. Everything inside .tv-frame is the client's
+ * site and uses --tgs-* tokens, which arrive as custom properties on that
+ * element. They must not borrow from each other, or a client with a dark page
+ * background would darken the panel around it too.
+ */
+
+@import '../sites/sites.css';
+
+.tv-root {
+  /* Room for the fixed action bar, so the last control is never under it. */
+  padding-bottom: 88px;
+}
+
+.tv-wrap {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: var(--ed-8) var(--ed-6) var(--ed-8);
+}
+
+.tv-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ed-4);
+  margin-bottom: var(--ed-8);
+}
+
+/* ------------------------------------------------------------------ */
+/* The two columns                                                     */
+/* ------------------------------------------------------------------ */
+
+/*
+ * 380px of controls, and the rest for the preview.
+ *
+ * The controls get a fixed width rather than a fraction because a colour field
+ * has a natural size and stretching it to half of a wide screen just puts the
+ * hex box a long way from its swatch. The preview takes whatever is left,
+ * because it is standing in for a browser window and wants to be as wide as it
+ * can get.
+ */
+.tv-grid {
+  display: grid;
+  grid-template-columns: 380px minmax(0, 1fr);
+  gap: var(--ed-8);
+  align-items: start;
+}
+
+.tv-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-6);
+  min-width: 0;
+}
+
+/*
+ * Sticky, and bounded so it cannot run under the action bar.
+ *
+ * Without the max-height the panel is as tall as its content, sticks at the
+ * top, and its last section disappears behind the fixed Save bar. Bounding it
+ * to the space actually available and letting the frame scroll is the honest
+ * fix: this is standing in for a browser window, and a browser window scrolls.
+ */
+.tv-preview {
+  position: sticky;
+  /* Clear of the top so it does not feel jammed against the viewport edge. */
+  top: var(--ed-5);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  /* 20px of clearance at the top, and 88px for the bar plus a little air. */
+  max-height: calc(100vh - 20px - 88px);
+}
+
+@media (max-width: 1080px) {
+  .tv-grid { grid-template-columns: minmax(0, 1fr); }
+  /*
+   * Preview first on a narrow screen.
+   *
+   * Sticky positioning inside a single column would pin it over the controls,
+   * so it stops being sticky and moves above them instead. Seeing the effect
+   * matters more than seeing the control, and a client scrolling down to a
+   * colour still has the result in mind.
+   */
+  /*
+   * And the height bound comes off with the sticky.
+   *
+   * The max-height exists to keep a stuck panel clear of the action bar. Once
+   * it scrolls with the page it should just be as tall as it is; leaving the
+   * bound on turns the preview into a scroll trap, where a phone user has to
+   * scroll through the sample to reach the controls under it.
+   */
+  .tv-preview { position: static; order: -1; max-height: none; }
+  .tv-frame { overflow: hidden; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Groups of controls                                                  */
+/* ------------------------------------------------------------------ */
+
+/*
+ * A hairline and a heading, not a card.
+ *
+ * There are four groups on this screen and the preview is already a bordered
+ * panel. Boxing each group as well would make six framed rectangles competing
+ * for the same attention, which is the density rule: past about six elements,
+ * separate by space and a rule rather than by drawing a box round everything.
+ */
+.tv-group {
+  padding-top: var(--ed-5);
+  border-top: 1px solid var(--ed-line);
+}
+
+.tv-group:first-child { padding-top: 0; border-top: 0; }
+
+.tv-group__title {
+  margin: 0 0 var(--ed-4);
+  font-size: var(--ed-text-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ed-ink-3);
+}
+
+.tv-note {
+  margin: var(--ed-4) 0 0;
+  font-size: var(--ed-text-sm);
+  line-height: 1.55;
+  color: var(--ed-ink-3);
+}
+
+/* ------------------------------------------------------------------ */
+/* A field                                                             */
+/* ------------------------------------------------------------------ */
+
+.tv-field { margin-bottom: var(--ed-5); }
+.tv-field:last-child { margin-bottom: 0; }
+
+.tv-field__label {
+  display: block;
+  margin-bottom: var(--ed-2);
+  font-size: var(--ed-text-sm);
+  font-weight: 600;
+  color: var(--ed-ink);
+}
+
+.tv-field__help {
+  margin: var(--ed-2) 0 0;
+  font-size: var(--ed-text-xs);
+  line-height: 1.5;
+  color: var(--ed-ink-3);
+}
+
+/* ------------------------------------------------------------------ */
+/* Colour input                                                        */
+/* ------------------------------------------------------------------ */
+
+.tv-colour {
+  display: flex;
+  align-items: stretch;
+  gap: var(--ed-2);
+}
+
+/*
+ * A native colour input, dressed as a swatch.
+ *
+ * Every browser draws this control differently and all of them draw it badly,
+ * so the chrome is stripped and the well is stretched to fill. What is kept is
+ * everything that matters: the system picker, its eyedropper, and its memory of
+ * recent colours. None of that is worth rebuilding.
+ */
+.tv-colour__swatch {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: none;
+  cursor: pointer;
+  /* Safari needs the outer box stripped before the well fills it. */
+  -webkit-appearance: none;
+  appearance: none;
+  overflow: hidden;
+}
+
+.tv-colour__swatch::-webkit-color-swatch-wrapper { padding: 0; }
+.tv-colour__swatch::-webkit-color-swatch { border: 0; border-radius: 5px; }
+.tv-colour__swatch::-moz-color-swatch { border: 0; border-radius: 5px; }
+
+.tv-colour__swatch:hover { border-color: var(--ed-ink-3); }
+.tv-colour__swatch:focus-visible {
+  outline: 2px solid var(--ed-accent);
+  outline-offset: 1px;
+}
+
+.tv-colour__hex {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 44px;
+  padding: 0 var(--ed-3);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+  color: var(--ed-ink);
+  font: inherit;
+  /* Tabular so the field does not jitter while a code is being typed. */
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
+  font-size: var(--ed-text-sm);
+}
+
+.tv-colour__hex:hover { border-color: var(--ed-ink-3); }
+.tv-colour__hex:focus-visible,
+.tv-colour__hex:focus {
+  outline: 2px solid var(--ed-accent);
+  outline-offset: -1px;
+  border-color: var(--ed-accent);
+}
+
+/*
+ * The measured ratio, sitting quietly beside the field.
+ *
+ * Always shown, not only when it fails. A number that appears only on a problem
+ * is a number nobody learns to read, and an agent who can see 12.4:1 on a good
+ * choice understands what 2.1:1 means when they get there.
+ */
+.tv-ratio {
+  flex: none;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--ed-3);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-well);
+  color: var(--ed-ink-2);
+  font-size: var(--ed-text-xs);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/*
+ * Amber, not red. A contrast warning is a true statement about a choice
+ * somebody is allowed to make, not an error, and red here would be crying wolf
+ * on their own brand colour.
+ */
+.tv-warn {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ed-2);
+  margin: var(--ed-3) 0 0;
+  padding: var(--ed-3);
+  border-radius: var(--ed-r-md);
+  background: #fef3c7;
+  color: #78350f;
+  font-size: var(--ed-text-xs);
+  line-height: 1.5;
+}
+
+.tv-warn svg { flex: none; margin-top: 1px; }
+
+.tv-root[data-theme='dark'] .tv-warn { background: #422006; color: #fde68a; }
+
+@media (prefers-color-scheme: dark) {
+  .tv-root[data-theme='system'] .tv-warn { background: #422006; color: #fde68a; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Font select                                                         */
+/* ------------------------------------------------------------------ */
+
+.tv-select {
+  width: 100%;
+  height: 44px;
+  padding: 0 32px 0 var(--ed-3);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background-color: var(--ed-panel);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  color: var(--ed-ink);
+  font-size: var(--ed-text-base);
+  appearance: none;
+  cursor: pointer;
+}
+
+.tv-select:hover { border-color: var(--ed-ink-3); }
+.tv-select:focus-visible {
+  outline: 2px solid var(--ed-accent);
+  outline-offset: 1px;
+  border-color: var(--ed-accent);
+}
+
+/* ------------------------------------------------------------------ */
+/* Corners                                                             */
+/* ------------------------------------------------------------------ */
+
+.tv-corners {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--ed-2);
+}
+
+.tv-corner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ed-2);
+  padding: var(--ed-3) var(--ed-2);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+  color: var(--ed-ink-2);
+  font: inherit;
+  font-size: var(--ed-text-xs);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tv-corner:hover { border-color: var(--ed-ink-3); background: var(--ed-well); }
+
+.tv-corner:focus-visible {
+  outline: 2px solid var(--ed-accent);
+  outline-offset: 1px;
+}
+
+.tv-corner[data-selected='true'] {
+  border-color: var(--ed-accent);
+  color: var(--ed-ink);
+  box-shadow: inset 0 0 0 1px var(--ed-accent);
+}
+
+/* The shape IS the label. A swatch showing the actual radius beats the word. */
+.tv-corner__shape {
+  width: 100%;
+  height: 28px;
+  background: var(--ed-well);
+  border: 1.5px solid var(--ed-ink-3);
+}
+
+.tv-corner[data-selected='true'] .tv-corner__shape {
+  border-color: var(--ed-accent);
+  background: var(--ed-well);
+}
+
+/* ------------------------------------------------------------------ */
+/* The derived palette                                                 */
+/* ------------------------------------------------------------------ */
+
+.tv-derived {
+  list-style: none;
+  margin: var(--ed-4) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-1);
+}
+
+.tv-derived__item {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-3);
+  padding: var(--ed-2) 0;
+  font-size: var(--ed-text-xs);
+}
+
+.tv-derived__chip {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--ed-r-sm, 4px);
+  /* Bordered in the colour it sits on, so a near-white chip is still a shape. */
+  border: 1px solid;
+}
+
+.tv-derived__label { flex: 1 1 auto; color: var(--ed-ink-2); }
+
+.tv-derived__hex {
+  color: var(--ed-ink-3);
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------------ */
+/* The preview                                                         */
+/* ------------------------------------------------------------------ */
+
+.tv-preview__label {
+  margin: 0 0 var(--ed-3);
+  font-size: var(--ed-text-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ed-ink-3);
+}
+
+/*
+ * The frame around the client's site.
+ *
+ * Its own border and radius come from the EDITOR tokens, and everything inside
+ * comes from the client's. That separation is the whole reason the frame is a
+ * separate element from .tgs-page rather than the same one.
+ */
+.tv-frame {
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-lg);
+  /* hidden across, auto down: the radius still clips, and a tall sample can
+     be scrolled rather than hidden behind the bar. */
+  overflow: hidden auto;
+  min-height: 0;
+  box-shadow: 0 1px 2px rgba(27, 43, 91, 0.04), 0 12px 32px rgba(27, 43, 91, 0.06);
+}
+
+/* Tighter than a real page: this is a sample, not a mock-up of a full screen. */
+.tv-demo { padding-block: var(--ed-6); }
+
+.tv-demo > * + * { margin-top: var(--ed-3); }
+
+.tv-demo__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ed-2);
+  margin-top: var(--ed-4);
+}
+
+/* The muted token, shown at the size real caption text would be. */
+.tv-demo__quiet {
+  margin: 0;
+  color: var(--tgs-text-muted);
+  font-size: var(--tgs-text-s);
+}
+
+.tv-demo__rule {
+  margin: var(--ed-4) 0 0;
+  border: 0;
+  border-top: 1px solid var(--tgs-border);
+}
+
+/* ------------------------------------------------------------------ */
+/* The action bar                                                      */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Fixed to the bottom.
+ *
+ * The controls column is taller than a screen on a laptop, and a Save button
+ * at the end of it is one somebody scrolls past the preview to find. Fixing it
+ * also means the state word is always visible, so "not saved yet" cannot be
+ * missed by being off screen.
+ */
+.tv-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--ed-3);
+  padding: var(--ed-3) var(--ed-6);
+  border-top: 1px solid var(--ed-line);
+  background: var(--ed-panel);
+  box-shadow: 0 -1px 3px rgba(27, 43, 91, 0.05);
+}
+
+.tv-bar__state {
+  margin-right: auto;
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink-3);
+}
+
+/*
+ * The one piece of colour in the bar, and only when it means something.
+ *
+ * "Not saved yet" in amber while there are changes; plain grey once there are
+ * none. A permanent coloured badge would be noise, and a badge that says
+ * "Saved" in green is congratulating somebody for nothing.
+ */
+.tv-bar[data-dirty='true'] .tv-bar__state {
+  color: #92400e;
+  font-weight: 600;
+}
+
+.tv-root[data-theme='dark'] .tv-bar[data-dirty='true'] .tv-bar__state { color: #fbbf24; }
+
+@media (prefers-color-scheme: dark) {
+  .tv-root[data-theme='system'] .tv-bar[data-dirty='true'] .tv-bar__state { color: #fbbf24; }
+}
+
+@media (max-width: 640px) {
+  .tv-wrap { padding: var(--ed-6) var(--ed-5) var(--ed-8); }
+  .tv-head { flex-direction: column; }
+  .tv-bar { padding: var(--ed-3) var(--ed-4); flex-wrap: wrap; }
+  .tv-bar__state { width: 100%; margin: 0 0 var(--ed-2); }
+  .tv-bar .tg-btn { flex: 1 1 auto; justify-content: center; }
+}

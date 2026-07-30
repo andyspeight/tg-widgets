@@ -4,6 +4,8 @@ import Link from 'next/link';
 import '../../../components/sites/sites.css';
 import { PageRenderer } from '../../../components/render/PageRenderer';
 import { getPublishedPage } from '../../../lib/db/pages';
+import { getPublicTheme } from '../../../lib/db/theme';
+import { themeTokens } from '../../../lib/theme/tokens';
 import { activeSite } from '../../../lib/auth/session';
 
 /**
@@ -42,7 +44,21 @@ type Params = { params: Promise<{ path?: string[] }> };
 async function load(path: string[] | undefined) {
   const site = await activeSite();
   if (!site) return null;
-  return getPublishedPage(site.tenantId, (path ?? []).join('/'));
+
+  /*
+   * Page and theme together, both through the read-only role.
+   *
+   * In parallel rather than in sequence: they are independent reads and this is
+   * the request a visitor waits on. Both go through withPublicTenant, so a
+   * theme cannot be read for a tenant the request is not scoped to, and neither
+   * call can write anything.
+   */
+  const [page, theme] = await Promise.all([
+    getPublishedPage(site.tenantId, (path ?? []).join('/')),
+    getPublicTheme(site.tenantId),
+  ]);
+
+  return page ? { page, theme } : null;
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
@@ -52,7 +68,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     const found = await load(path);
     if (!found) return { title: 'Not published', robots: { index: false, follow: false } };
 
-    const { seo, title } = { seo: found.content.seo, title: found.title };
+    const { seo, title } = { seo: found.page.content.seo, title: found.page.title };
     return {
       title: seo.title ?? title,
       description: seo.description,
@@ -107,8 +123,8 @@ export default async function PublishedPage({ params }: Params) {
     <>
       {/* The page's only h1. Section headings start at h2, which the heading
           block enforces by not offering h1 at all. */}
-      <h1 className="tgs-sr-only">{found.title}</h1>
-      <PageRenderer page={found.content} />
+      <h1 className="tgs-sr-only">{found.page.title}</h1>
+      <PageRenderer page={found.page.content} theme={themeTokens(found.theme).style} />
     </>
   );
 }

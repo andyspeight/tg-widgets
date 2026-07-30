@@ -35,18 +35,47 @@
 /* ------------------------------------------------------------------ */
 
 :root {
-  /* Colour. Overridden per tenant from the theme JSON. */
+  /*
+   * Colour. EVERY ONE OF THESE IS GENERATED, not chosen.
+   *
+   * They are exactly what lib/theme/tokens.ts derives from the default theme,
+   * and tests/theme.test.ts reads this file and asserts it. Do not hand edit
+   * them: change DEFAULT_THEME or the derivation, run the test, paste what it
+   * tells you.
+   *
+   * The reason is drift. A themed site gets these as custom properties on the
+   * page element and an unthemed one falls back to here, so two hand-maintained
+   * lists of hex codes would mean the same site looking different depending on
+   * whether anybody had opened the theme screen. The values moved very slightly
+   * when this became generated: the greys are a shade less blue, because a
+   * straight mix of the text colour with white cannot reproduce the extra
+   * saturation the old hand-tuned slate palette had.
+   */
   --tgs-primary: #1b2b5b;
-  --tgs-primary-light: #2a3f7a;
+  --tgs-primary-light: #3b4972;
   --tgs-accent: #00b4d8;
   --tgs-surface: #ffffff;
-  --tgs-surface-alt: #f8fafc;
-  --tgs-surface-dark: #0f172a;
+  --tgs-surface-alt: #f8f8f9;
+  --tgs-surface-dark: #0c1329;
   --tgs-text: #0f172a;
-  --tgs-text-muted: #475569;
-  --tgs-text-invert: #f8fafc;
-  --tgs-border: #e2e8f0;
-  --tgs-border-strong: #cbd5e1;
+  --tgs-text-muted: #4d5361;
+  --tgs-text-invert: #ffffff;
+  --tgs-border: #e2e3e5;
+  --tgs-border-strong: #caccd0;
+
+  /*
+   * Labels and furniture ON a coloured band, each measured against the band it
+   * sits on rather than assumed. This is what stops a pale brand colour getting
+   * white text on it.
+   */
+  --tgs-on-primary: #ffffff;
+  --tgs-on-accent: #0f172a;
+  --tgs-on-dark-muted: #acafb6;
+  --tgs-on-dark-border: #383d50;
+  --tgs-on-dark-accent: #00b4d8;
+  --tgs-on-primary-muted: #b1b7c7;
+  --tgs-on-primary-border: #445179;
+  --tgs-on-primary-accent: #00b4d8;
 
   /* Spacing, 4px grid. */
   --tgs-space-xs: 4px;
@@ -57,7 +86,14 @@
 
   /* Type scale. */
   --tgs-font-body: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --tgs-font-display: var(--tgs-font-body);
+  /*
+   * The literal stack, not var(--tgs-font-body).
+   *
+   * The indirection was tidier and made this token impossible to compare
+   * against what the derivation emits, which is a literal. Two lists that
+   * cannot be diffed are two lists that drift.
+   */
+  --tgs-font-display: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --tgs-text-s: 0.9375rem;   /* 15px, the floor */
   --tgs-text-m: 1.0625rem;   /* 17px */
   --tgs-text-l: 1.25rem;     /* 20px */
@@ -113,19 +149,32 @@
 }
 
 .tgs-section[data-tone='subtle'] { background: var(--tgs-surface-alt); }
+/*
+ * The two coloured bands.
+ *
+ * Both used to carry fixed slate values for their muted text and hairline,
+ * which was fine while every site was Travelgenix navy and wrong the moment a
+ * client themed one burgundy: cool grey captions inside a warm brand section.
+ * Both now read tokens that were measured against the band they sit on.
+ *
+ * Note which background each one uses. The dark band is --tgs-surface-dark, so
+ * its text is --tgs-text-invert. The accent band is --tgs-primary despite the
+ * name, so its text is --tgs-on-primary. Those are two different measurements
+ * and swapping them is how a pale brand ends up unreadable.
+ */
 .tgs-section[data-tone='dark'] {
   background: var(--tgs-surface-dark);
   color: var(--tgs-text-invert);
   --tgs-text: var(--tgs-text-invert);
-  --tgs-text-muted: #94a3b8;
-  --tgs-border: #1e293b;
+  --tgs-text-muted: var(--tgs-on-dark-muted);
+  --tgs-border: var(--tgs-on-dark-border);
 }
 .tgs-section[data-tone='accent'] {
   background: var(--tgs-primary);
-  color: var(--tgs-text-invert);
-  --tgs-text: var(--tgs-text-invert);
-  --tgs-text-muted: #c7d2e5;
-  --tgs-border: var(--tgs-primary-light);
+  color: var(--tgs-on-primary);
+  --tgs-text: var(--tgs-on-primary);
+  --tgs-text-muted: var(--tgs-on-primary-muted);
+  --tgs-border: var(--tgs-on-primary-border);
 }
 
 /*
@@ -157,10 +206,30 @@
  * A box background sits ON TOP of the tone, so a tone stays the default and a
  * colour is an override rather than a second way to say the same thing.
  * transparent is the no-op, which is why boxStyle always emits it.
+ *
+ * PAINTED AS A LAYER, NOT AS background-color, AND THAT IS THE WHOLE POINT.
+ *
+ * The first version of this rule was:
+ *
+ *   .tgs-section[style*='--tgs-bg'] { background-color: var(--tgs-bg, transparent); }
+ *
+ * which quietly broke every section tone in the product. boxStyle always emits
+ * --tgs-bg, deliberately, because custom properties inherit and a column that
+ * omitted it would pick up its section's colour. So EVERY section matched that
+ * attribute selector, and the rule sits later in this file at the same
+ * specificity as .tgs-section[data-tone='dark'], so it won. Every tone resolved
+ * to background-color: transparent and the dark band, the brand band and the
+ * subtle band all rendered as bare page. It shipped that way and nobody caught
+ * it until a browser check measured a section and found nothing there.
+ *
+ * A gradient of one colour is the fix. It paints into background-image, which
+ * is a separate layer from background-color, so the tone underneath survives
+ * and a real colour still covers it. transparent becomes a genuine no-op
+ * instead of an eraser, which is what the comment above always claimed.
  */
 .tgs-section[style*='--tgs-bg'],
 .tgs-col[style*='--tgs-bg'] {
-  background-color: var(--tgs-bg, transparent);
+  background-image: linear-gradient(var(--tgs-bg, transparent), var(--tgs-bg, transparent));
 }
 
 .tgs-col {
@@ -273,8 +342,14 @@
 .tgs-text > :last-child  { margin-bottom: 0; }
 .tgs-text p { margin: 0 0 var(--tgs-space-m); }
 .tgs-text a { color: var(--tgs-primary); text-underline-offset: 2px; }
-.tgs-section[data-tone='dark'] .tgs-text a,
-.tgs-section[data-tone='accent'] .tgs-text a { color: var(--tgs-accent); }
+/*
+ * A link inside a coloured band is TEXT on that band, not a fill, so it uses
+ * the accent measured against the band rather than the raw accent. A client
+ * picks an accent that reads on their page; whether it reads on their dark
+ * band is a different question and one they should not have to ask.
+ */
+.tgs-section[data-tone='dark'] .tgs-text a { color: var(--tgs-on-dark-accent); }
+.tgs-section[data-tone='accent'] .tgs-text a { color: var(--tgs-on-primary-accent); }
 .tgs-text ul, .tgs-text ol { margin: 0 0 var(--tgs-space-m); padding-left: 1.25em; }
 .tgs-text li { margin-bottom: var(--tgs-space-xs); }
 .tgs-text h2, .tgs-text h3, .tgs-text h4 {
@@ -367,15 +442,21 @@
 .tgs-button[data-size='s'] { min-height: 44px; padding-inline: var(--tgs-space-m); font-size: var(--tgs-text-s); }
 .tgs-button[data-size='l'] { min-height: 52px; padding-inline: calc(var(--tgs-space-l) * 1.25); font-size: var(--tgs-text-l); }
 
-.tgs-button[data-variant='primary'] { background: var(--tgs-primary); color: #fff; }
+.tgs-button[data-variant='primary'] { background: var(--tgs-primary); color: var(--tgs-on-primary); }
 .tgs-button[data-variant='primary']:hover { background: var(--tgs-primary-light); }
 .tgs-button[data-variant='secondary'] { background: transparent; color: var(--tgs-text); border-color: var(--tgs-border-strong); }
 .tgs-button[data-variant='secondary']:hover { border-color: var(--tgs-text); }
 .tgs-button[data-variant='ghost'] { background: transparent; color: var(--tgs-primary); padding-inline: var(--tgs-space-s); }
 .tgs-button[data-variant='ghost']:hover { text-decoration: underline; }
-.tgs-section[data-tone='dark'] .tgs-button[data-variant='ghost'],
-.tgs-section[data-tone='accent'] .tgs-button[data-variant='ghost'] { color: var(--tgs-accent); }
-.tgs-section[data-tone='accent'] .tgs-button[data-variant='primary'] { background: #fff; color: var(--tgs-primary); }
+/* Same for a ghost button, whose label is the only thing it has. */
+.tgs-section[data-tone='dark'] .tgs-button[data-variant='ghost'] { color: var(--tgs-on-dark-accent); }
+.tgs-section[data-tone='accent'] .tgs-button[data-variant='ghost'] { color: var(--tgs-on-primary-accent); }
+/*
+ * On a brand-coloured band the primary button inverts: the page colour behind
+ * the brand colour. --tgs-surface rather than #fff, so a site on a cream page
+ * gets a cream button rather than a white one that looks like a hole.
+ */
+.tgs-section[data-tone='accent'] .tgs-button[data-variant='primary'] { background: var(--tgs-surface); color: var(--tgs-primary); }
 
 /* Quote */
 .tgs-quote { margin: 0; }

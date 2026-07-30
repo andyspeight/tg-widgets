@@ -642,6 +642,45 @@ describe('source hygiene', () => {
    * because a literal here would have to contain the very characters it is
    * banning.
    */
+  /*
+   * An undefined custom property is invisible until somebody looks at the screen.
+   *
+   * var(--ed-7) with no fallback makes the whole declaration invalid at computed
+   * value time, so `gap: var(--ed-7)` silently becomes no gap and
+   * `border-radius: var(--ed-r)` silently becomes square. No console warning, no
+   * build error, nothing in any test. The spacing scale here runs 4 8 12 16 20
+   * 24 32 with NO 7, and the radii are --ed-r-sm/md/lg/xl with no bare --ed-r,
+   * so both are easy to write by analogy and wrong.
+   *
+   * They shipped that way: the sign-in form and the account bar both went out
+   * with zero spacing and square corners, and it took a screenshot of a third
+   * screen to notice. This is the check that would have caught it.
+   */
+  it('every custom property used in CSS is defined somewhere', () => {
+    const css = sources(ROOT).filter((f) => f.endsWith('.css'));
+
+    const defined = new Set<string>();
+    for (const file of css) {
+      for (const match of readFileSync(file, 'utf8').matchAll(/^\s*(--[a-z0-9-]+)\s*:/gm)) {
+        defined.add(match[1]);
+      }
+    }
+
+    const offenders: string[] = [];
+    for (const file of css) {
+      const source = readFileSync(file, 'utf8');
+      // The second group is a comma: var(--x, fallback) is fine even if --x is
+      // undefined, because the fallback is what makes it defined enough.
+      for (const match of source.matchAll(/var\(\s*(--[a-z0-9-]+)\s*(,)?/g)) {
+        if (defined.has(match[1]) || match[2]) continue;
+        const line = source.slice(0, match.index!).split('\n').length;
+        offenders.push(`${file.slice(ROOT.length + 1)}:${line} uses ${match[1]}`);
+      }
+    }
+
+    expect(offenders, 'these resolve to nothing, so the declaration is dropped').toEqual([]);
+  });
+
   it('no literal control characters or combining marks in source', () => {
     const forbidden = new RegExp(
       '[' +

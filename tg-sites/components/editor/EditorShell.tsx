@@ -15,7 +15,7 @@
  * publish has to work twice and only one of them gets exercised.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { publishPageAction, saveDraftAction } from '../../app/actions/pages';
 import type { Page } from '../../lib/content/schema';
 import { parsePage } from '../../lib/content/schema';
@@ -88,6 +88,20 @@ interface EditorProps {
   initialPage: Page;
   initialStatus: 'draft' | 'published';
   initialHasUnpublishedChanges: boolean;
+  /**
+   * The client's SITE theme, as custom properties, for the canvas.
+   *
+   * Called siteTheme, not theme. This component already has a `theme` for
+   * whether the editor chrome is light or dark, which is an operator preference
+   * stored in localStorage. This one is the client's brand, stored in the
+   * database and shipped to visitors. Two completely different things, and the
+   * first attempt at this named them both `theme` and shadowed one with the
+   * other.
+   *
+   * Optional so the standalone build still works: omitting it falls back to the
+   * tokens in globals.css, which are the values the default theme derives to.
+   */
+  siteTheme?: CSSProperties;
 }
 
 export function EditorShell({
@@ -96,6 +110,7 @@ export function EditorShell({
   initialPage,
   initialStatus,
   initialHasUnpublishedChanges,
+  siteTheme,
 }: EditorProps) {
   const [history, setHistory] = useState<History>({
     past: [],
@@ -553,6 +568,7 @@ export function EditorShell({
         onSelect={select}
         onCommit={commit}
         onPickBlock={setPicker}
+        theme={siteTheme}
       />
 
       <Properties
