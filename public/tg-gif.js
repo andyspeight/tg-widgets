@@ -11,7 +11,9 @@
  *     width, height,
  *     frames: [Uint8ClampedArray],   // RGBA, width*height*4, one per frame
  *     delayCs: 4,                    // hundredths of a second per frame
- *     transparent: true,             // keep alpha as a hard cut-out
+ *     transparent: true,             // keep a cut-out where nothing is drawn
+ *     matte: '#FFFFFF',              // blend partly-transparent pixels onto this
+ *     dither: 'auto',                // 'auto' (default) | true | false
  *     maxColors: 256,
  *     onProgress: (done, total) => {},
  *   });
@@ -21,8 +23,9 @@
  *  - 256 colours per file, so smooth gradients get banded. The quantiser picks
  *    the best 256 for THIS animation, and dithering softens the banding.
  *  - Exactly ONE transparent colour, fully on or fully off. There is no
- *    semi-transparency in the format, so antialiased edges against a
- *    transparent background become hard edges. A matte colour avoids that.
+ *    semi-transparency in the format. Anything drawn faintly is therefore
+ *    BLENDED onto the matte rather than thrown away — see composite() for
+ *    why that matters more than it sounds.
  *  - Frame timing is in hundredths of a second, so 50fps is the practical
  *    ceiling and browsers historically clamp anything under 2cs.
  */
@@ -54,17 +57,46 @@
    * Colour quantisation — median cut over a histogram                   *
    * ------------------------------------------------------------------ */
 
+  /**
+   * The colour a pixel becomes once GIF's one-bit transparency is applied.
+   *
+   * GIF cannot store a half-transparent pixel, so every pixel has to end up
+   * either fully solid or fully gone. Thresholding alpha — keep it if it is
+   * over half, drop it otherwise — throws away everything drawn faintly, and
+   * a lot of artwork IS drawn faintly. The loader's globe fills its interior
+   * at alpha 0.08 and draws its grid lines between 0.25 and 0.35, so a
+   * threshold deleted 16,514 of its 18,097 visible pixels and left a bare
+   * ring (reported 30 Jul 2026).
+   *
+   * Blending against a matte is the answer instead: a pixel at alpha 0.08
+   * over white becomes a very pale version of itself, which is exactly what
+   * the eye sees on the page. Only pixels that are essentially invisible are
+   * cut, so the cut-out still follows the shape.
+   */
+  function composite(d, i, matte) {
+    var a = d[i + 3] / 255;
+    if (a >= 1) return [d[i], d[i + 1], d[i + 2]];
+    var inv = 1 - a;
+    return [
+      Math.round(d[i] * a + matte[0] * inv),
+      Math.round(d[i + 1] * a + matte[1] * inv),
+      Math.round(d[i + 2] * a + matte[2] * inv),
+    ];
+  }
+
   /** Histogram of packed RGB → count, across every frame at once.
    *  ONE palette for the whole animation, deliberately: a per-frame palette
    *  makes colours shimmer between frames, which on a spinner reads as a
-   *  rendering fault rather than a compression artefact. */
-  function histogram(frames, alphaCut) {
+   *  rendering fault rather than a compression artefact.
+   *  Counts the COMPOSITED colours, since those are what gets written. */
+  function histogram(frames, alphaCut, matte) {
     var hist = new Map();
     for (var f = 0; f < frames.length; f++) {
       var d = frames[f];
       for (var i = 0; i < d.length; i += 4) {
-        if (d[i + 3] < alphaCut) continue;         // transparent, not a colour
-        var key = (d[i] << 16) | (d[i + 1] << 8) | d[i + 2];
+        if (d[i + 3] < alphaCut) continue;         // invisible, not a colour
+        var c = matte ? composite(d, i, matte) : [d[i], d[i + 1], d[i + 2]];
+        var key = (c[0] << 16) | (c[1] << 8) | c[2];
         hist.set(key, (hist.get(key) || 0) + 1);
       }
     }
@@ -176,13 +208,16 @@
   /* ------------------------------------------------------------------ *
    * Frame → palette indices                                             *
    * ------------------------------------------------------------------ */
-  function indexFrame(rgba, w, h, match, palette, transIndex, alphaCut, dither) {
+  function indexFrame(rgba, w, h, match, palette, transIndex, alphaCut, dither, matte) {
+    var rgbAt = matte
+      ? function (i) { return composite(rgba, i, matte); }
+      : function (i) { return [rgba[i], rgba[i + 1], rgba[i + 2]]; };
     var out = new Uint8Array(w * h);
     if (!dither) {
       for (var i = 0, p = 0; i < rgba.length; i += 4, p++) {
-        out[p] = (transIndex >= 0 && rgba[i + 3] < alphaCut)
-          ? transIndex
-          : match(rgba[i], rgba[i + 1], rgba[i + 2]);
+        if (transIndex >= 0 && rgba[i + 3] < alphaCut) { out[p] = transIndex; continue; }
+        var c0 = rgbAt(i);
+        out[p] = match(c0[0], c0[1], c0[2]);
       }
       return out;
     }
@@ -195,9 +230,10 @@
       for (var x = 0; x < w; x++) {
         var p2 = y * w + x, i2 = p2 * 4, e = p2 * 3;
         if (transIndex >= 0 && rgba[i2 + 3] < alphaCut) { out[p2] = transIndex; continue; }
-        var r = clamp255(rgba[i2] + err[e]);
-        var g = clamp255(rgba[i2 + 1] + err[e + 1]);
-        var b = clamp255(rgba[i2 + 2] + err[e + 2]);
+        var base = rgbAt(i2);
+        var r = clamp255(base[0] + err[e]);
+        var g = clamp255(base[1] + err[e + 1]);
+        var b = clamp255(base[2] + err[e + 2]);
         var idx = match(r, g, b);
         out[p2] = idx;
         var pal = palette[idx];
@@ -210,7 +246,17 @@
     }
     return out;
   }
-  function clamp255(v) { return v < 0 ? 0 : (v > 255 ? 255 : v); }
+  /* ROUNDS as well as clamps, and the rounding is not cosmetic. The dither
+   * path adds a fractional error term to each channel, so without this the
+   * matcher receives floats. Its memo key is built with bit shifts, which
+   * truncate — so 123.4 and 123.6 share one cache entry while their distances
+   * are computed from the full value, and the answer depends on which arrived
+   * first. That made the encoder's output vary with call order: warming the
+   * cache elsewhere changed the pixels. Integers in, one key per colour. */
+  function clamp255(v) {
+    v = Math.round(v);
+    return v < 0 ? 0 : (v > 255 ? 255 : v);
+  }
   function spread(err, rgba, w, h, x, y, dr, dg, db, f, transIndex, alphaCut) {
     if (x < 0 || x >= w || y >= h) return;
     var p = y * w + x;
@@ -290,6 +336,45 @@
     bytes.u8(0);
   }
 
+  /* Mean per-pixel palette error, summed across the three channels, above which
+   * dithering starts earning back the size it costs. A loader lands near 1-3;
+   * a full-spectrum gradient reduced to 256 colours lands near 40. */
+  var DITHER_WORTH_IT = 12;
+
+  /** How far the chosen palette actually is from the source. Sampled rather
+   *  than exhaustive: this only has to pick a side, not be precise. */
+  function paletteError(frames, match, palette, alphaCut, matte) {
+    var sum = 0, n = 0;
+    for (var f = 0; f < frames.length; f++) {
+      var d = frames[f];
+      // Step over whole pixels, thinning out big frames so the check stays cheap.
+      var step = 4 * Math.max(1, Math.round(d.length / 4 / 20000));
+      for (var i = 0; i < d.length; i += step) {
+        if (alphaCut && d[i + 3] < alphaCut) continue;
+        var c = matte ? composite(d, i, matte) : [d[i], d[i + 1], d[i + 2]];
+        var p = palette[match(c[0], c[1], c[2])];
+        sum += Math.abs(c[0] - p[0]) + Math.abs(c[1] - p[1]) + Math.abs(c[2] - p[2]);
+        n++;
+      }
+    }
+    return n ? sum / n : 0;
+  }
+
+  /** Accept '#RRGGBB', [r,g,b], or nothing at all (white). */
+  function normaliseMatte(v) {
+    if (Array.isArray(v) && v.length >= 3) {
+      return [clamp255(Number(v[0]) || 0), clamp255(Number(v[1]) || 0), clamp255(Number(v[2]) || 0)];
+    }
+    if (typeof v === 'string') {
+      var m = /^#?([0-9a-f]{6})$/i.exec(v.trim());
+      if (m) {
+        var n = parseInt(m[1], 16);
+        return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+      }
+    }
+    return [255, 255, 255];
+  }
+
   /* ------------------------------------------------------------------ *
    * Encode                                                              *
    * ------------------------------------------------------------------ */
@@ -303,8 +388,21 @@
     // a fast loader crawl. Refuse to write a delay we know gets rewritten.
     var delayCs = Math.max(2, Math.min(655, Math.round(o.delayCs || 4)));
     var transparent = o.transparent !== false;
-    var alphaCut = typeof o.alphaCut === 'number' ? o.alphaCut : 128;
-    var dither = o.dither !== false;
+    // What counts as invisible. Deliberately LOW: everything above it is kept
+    // and blended onto the matte, so faint artwork survives. It used to be 128,
+    // which quietly deleted anything drawn at under half opacity.
+    var alphaCut = typeof o.alphaCut === 'number' ? o.alphaCut : 8;
+    // The colour partly-transparent pixels are blended onto. White by default
+    // because that is what almost every page is. Pass null to go back to a
+    // hard threshold, which is only right for artwork with no soft edges.
+    var matte = (o.matte === null) ? null : normaliseMatte(o.matte);
+    // Dithering: 'auto' by default, and auto usually means OFF for our artwork.
+    // Measured on the loader templates, where 256 palette entries cover about
+    // 1,150 near-identical blues almost exactly: dithering made the files 10%
+    // BIGGER (its noise breaks the runs LZW compresses) and slightly LESS
+    // accurate. It earns its place on photographs and wide gradients, where the
+    // palette genuinely cannot reach — so decide by measuring, not by assuming.
+    var dither = o.dither;
     var loop = typeof o.loop === 'number' ? o.loop : 0;   // 0 = forever
     var onProgress = typeof o.onProgress === 'function' ? o.onProgress : null;
 
@@ -312,7 +410,9 @@
     var maxColors = Math.max(2, Math.min(256, Math.round(o.maxColors || 256)));
     var colorBudget = transparent ? maxColors - 1 : maxColors;
 
-    var hist = histogram(frames, transparent ? alphaCut : 0);
+    // An opaque export has no alpha to blend, so the matte never applies.
+    var useMatte = transparent ? matte : null;
+    var hist = histogram(frames, transparent ? alphaCut : 0, useMatte);
     var palette = buildPalette(hist, colorBudget);
 
     var transIndex = -1;
@@ -332,6 +432,9 @@
     var gctBits = Math.round(Math.log(tableSize) / Math.LN2) - 1;   // 0..7
 
     var match = makeMatcher(palette);
+    if (dither === undefined || dither === 'auto') {
+      dither = paletteError(frames, match, palette, transparent ? alphaCut : 0, useMatte) > DITHER_WORTH_IT;
+    }
     var minCodeSize = Math.max(2, gctBits + 1);
 
     var bytes = new Bytes();
@@ -358,7 +461,7 @@
     var disposal = transparent ? 2 : 1;
 
     for (var f = 0; f < frames.length; f++) {
-      var indices = indexFrame(frames[f], w, h, match, palette, transIndex, alphaCut, dither);
+      var indices = indexFrame(frames[f], w, h, match, palette, transIndex, alphaCut, dither, useMatte);
 
       bytes.u8(0x21); bytes.u8(0xF9); bytes.u8(0x04);
       bytes.u8((disposal << 2) | (transparent ? 0x01 : 0x00));
