@@ -354,6 +354,165 @@ export const BLOCKS: readonly BlockDefinition[] = [
     ],
   },
 
+  {
+    /*
+     * ONE CARD SHAPE, REPEATED, EDITED AS A LIST.
+     *
+     * Andy, 31 Jul 2026, on what the block library still needs: this was top of
+     * the list after the header, and it is the one that decides whether an
+     * imported design is EDITABLE or merely accurate. Relume's blog grids,
+     * portfolios, team pages, event listings, job listings and feature grids are
+     * all the same pattern underneath: one shape, repeated. Expressed as loose
+     * blocks in a row they render correctly and are horrible to change, because
+     * adding a seventh card means building a seventh column by hand and matching
+     * six other cards' settings from memory. As one block they are a list with an
+     * Add button, and the shape is set once for all of them.
+     *
+     * WHY IT IS NOT JUST COLUMNS. A three-column row of image-plus-heading-plus-
+     * text is already possible and always was. What it cannot do is stay
+     * consistent: the pictures end up different heights, the padding drifts, and
+     * reordering means dragging blocks between columns. A card grid trades some
+     * freedom for the thing a grid is actually for.
+     *
+     * SO THE FIELDS ARE DELIBERATELY FEW. Every one of them is set once and
+     * applies to every card. If a design needs one card to differ from the rest,
+     * that design wants columns, not a grid, and it still has them.
+     */
+    type: 'cards',
+    label: 'Cards',
+    group: 'Media',
+    icon: 'cards',
+    description: 'A grid of the same shape repeated: destinations, offers, the team.',
+    defaults: {
+      columns: '3',
+      gap: 'm',
+      style: 'bordered',
+      imagePosition: 'top',
+      ratio: '4/3',
+      radius: 'md',
+      align: 'left',
+      wholeCardLinks: true,
+      items: [
+        {
+          src: '',
+          alt: '',
+          label: 'Greece',
+          title: 'Island hopping, planned properly',
+          body: 'Seven nights across three islands, with the ferries booked for you.',
+          linkLabel: 'See the trip',
+          linkHref: '',
+        },
+        {
+          src: '',
+          alt: '',
+          label: 'Italy',
+          title: 'The Amalfi coast, slowly',
+          body: 'A week between Positano and Ravello, with a driver for the coast road.',
+          linkLabel: 'See the trip',
+          linkHref: '',
+        },
+        {
+          src: '',
+          alt: '',
+          label: 'Portugal',
+          title: 'Lisbon and the Algarve',
+          body: 'Three nights in the city, then four with your feet up by the sea.',
+          linkLabel: 'See the trip',
+          linkHref: '',
+        },
+      ],
+    },
+    summarise: (props) => {
+      const count = Array.isArray(props.items) ? props.items.length : 0;
+      return `Cards (${count})`;
+    },
+    fields: [
+      {
+        kind: 'repeater',
+        key: 'items',
+        label: 'Cards',
+        itemLabel: 'Card',
+        max: 24,
+        fields: [
+          { kind: 'image', key: 'src', label: 'Image' },
+          {
+            kind: 'text',
+            key: 'alt',
+            label: 'Alt text',
+            max: 200,
+            help: 'Describe the picture for anyone who cannot see it.',
+          },
+          {
+            kind: 'text',
+            key: 'label',
+            label: 'Small label',
+            max: 60,
+            help: 'The line above the title. A destination, a date, a price.',
+          },
+          { kind: 'text', key: 'title', label: 'Title', max: 120 },
+          { kind: 'textarea', key: 'body', label: 'Text', rows: 3, max: 400 },
+          { kind: 'text', key: 'linkLabel', label: 'Link text', max: 60 },
+          { kind: 'url', key: 'linkHref', label: 'Links to', placeholder: '/greece or https://' },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'columns',
+        label: 'Across',
+        options: [
+          { value: '2', label: 'Two' },
+          { value: '3', label: 'Three' },
+          { value: '4', label: 'Four' },
+        ],
+        help: 'Fewer on a tablet and one on a phone, automatically.',
+      },
+      { kind: 'select', key: 'gap', label: 'Space between', options: SPACING_OPTIONS },
+      {
+        kind: 'select',
+        key: 'style',
+        label: 'Card style',
+        options: [
+          { value: 'plain', label: 'Plain' },
+          { value: 'bordered', label: 'Outlined' },
+          { value: 'raised', label: 'Raised' },
+          { value: 'tinted', label: 'Tinted' },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'imagePosition',
+        label: 'Picture',
+        options: [
+          { value: 'top', label: 'Above the words' },
+          { value: 'left', label: 'Beside the words' },
+          { value: 'none', label: 'No pictures' },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'ratio',
+        label: 'Picture shape',
+        // No 'Original' here, unlike the Image block, and that is the point of a
+        // grid: pictures of three different heights in one row is the exact mess
+        // this block exists to prevent.
+        options: RATIO_OPTIONS.filter((option) => option.value !== 'auto'),
+      },
+      { kind: 'select', key: 'radius', label: 'Corners', options: RADIUS_OPTIONS },
+      {
+        kind: 'select',
+        key: 'align',
+        label: 'Alignment',
+        options: ALIGN_OPTIONS.filter((option) => option.value !== 'right'),
+      },
+      {
+        kind: 'toggle',
+        key: 'wholeCardLinks',
+        label: 'The whole card is clickable',
+        help: 'Still one link, so a keyboard tabs through the cards once each.',
+      },
+    ],
+  },
+
   // --- Actions ----------------------------------------------------------
   {
     type: 'button',

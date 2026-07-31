@@ -29,6 +29,7 @@ export type IconName =
   | 'quote'
   | 'list'
   | 'nav'
+  | 'cards'
   | 'sparkle'
   | 'image'
   | 'video'
@@ -98,6 +99,10 @@ const PATHS: Record<IconName, string> = {
   // Three separated dashes on one line: a row of links. Deliberately not the
   // burger, which is `section`, and not full-width rules, which is `text`.
   nav: 'M3 12h4M10 12h4M17 12h4',
+  // Two cards, each with a picture area above a line of words. Deliberately not
+  // `columns`, which is the same two boxes with nothing in them, and not
+  // `gallery`, which is four squares.
+  cards: 'M3 4h8v16H3zM13 4h8v16h-8zM3 11h8M13 11h8',
   sparkle: 'M12 3l2.1 5.4L19.5 10l-5.4 2.1L12 17.5l-2.1-5.4L4.5 10l5.4-1.6z',
   image: 'M3 5h18v14H3zM8.5 10.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM21 15l-5-5L5 19',
   video: 'M3 6h12v12H3zM15 10l6-3v10l-6-3z',

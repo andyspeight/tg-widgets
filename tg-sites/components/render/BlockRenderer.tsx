@@ -14,6 +14,7 @@ import { isKnownBlock } from '../../lib/content/blocks';
 import {
   ButtonBlock,
   ButtonGroupBlock,
+  CardsBlock,
   DividerBlock,
   EmbedBlock,
   EmbedWidgetBlock,
@@ -60,6 +61,8 @@ export function BlockRenderer({
         return <VideoBlock props={props} />;
       case 'gallery':
         return <GalleryBlock props={props} />;
+      case 'cards':
+        return <CardsBlock props={props} />;
       case 'button':
         return <ButtonBlock props={props} />;
       case 'button-group':

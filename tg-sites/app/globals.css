@@ -747,6 +747,194 @@
 .tgs-embed iframe { max-width: 100%; }
 
 /* ------------------------------------------------------------------ */
+/* Cards                                                               */
+/* ------------------------------------------------------------------ */
+
+.tgs-cards { display: grid; }
+.tgs-cards[data-columns='2'] { grid-template-columns: repeat(2, 1fr); }
+.tgs-cards[data-columns='3'] { grid-template-columns: repeat(3, 1fr); }
+.tgs-cards[data-columns='4'] { grid-template-columns: repeat(4, 1fr); }
+
+.tgs-cards[data-gap='none'] { gap: 0; }
+.tgs-cards[data-gap='xs']   { gap: var(--tgs-space-xs); }
+.tgs-cards[data-gap='s']    { gap: var(--tgs-space-s); }
+.tgs-cards[data-gap='m']    { gap: var(--tgs-space-m); }
+.tgs-cards[data-gap='l']    { gap: var(--tgs-space-l); }
+.tgs-cards[data-gap='xl']   { gap: var(--tgs-space-xl); }
+
+.tgs-card {
+  /* Positioned, so the covering pseudo-element below has something to cover. */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  /* Stops a long unbroken word forcing the whole grid wider, the same guard
+     .tgs-col carries. A card is a grid child and has the same problem. */
+  min-width: 0;
+  overflow: hidden;
+  background: transparent;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.tgs-cards[data-radius='none'] .tgs-card { border-radius: 0; }
+.tgs-cards[data-radius='sm']   .tgs-card { border-radius: var(--tgs-radius-sm); }
+.tgs-cards[data-radius='md']   .tgs-card { border-radius: var(--tgs-radius-md); }
+.tgs-cards[data-radius='lg']   .tgs-card { border-radius: var(--tgs-radius-lg); }
+/* Not a circle. A pill-shaped card is not a thing anybody wants, and `full`
+   exists in the shared list because an avatar wants it. */
+.tgs-cards[data-radius='full'] .tgs-card { border-radius: var(--tgs-radius-lg); }
+
+.tgs-cards[data-style='bordered'] .tgs-card { border: 1px solid var(--tgs-border); }
+.tgs-cards[data-style='tinted']   .tgs-card { background: var(--tgs-surface-alt); }
+.tgs-cards[data-style='raised']   .tgs-card {
+  background: var(--tgs-surface);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+/* The picture. The frame owns the shape and clips, so a portrait photograph in
+   a landscape card crops rather than making that one card taller than its
+   neighbours, which is the whole reason a grid is a grid. */
+.tgs-card__frame {
+  position: relative;
+  overflow: hidden;
+  flex: none;
+  background: var(--tgs-surface-alt);
+}
+.tgs-card__frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  object-fit: cover;
+}
+.tgs-card__noimage { display: block; width: 100%; height: 100%; }
+
+/* The frame's own corners follow the card's, but only on the outside edges, or
+   a picture at the top of a rounded card shows square corners over it. */
+.tgs-card__frame { border-radius: inherit; }
+.tgs-cards[data-image='top'] .tgs-card__frame { border-end-start-radius: 0; border-end-end-radius: 0; }
+.tgs-cards[data-image='left'] .tgs-card__frame { border-start-end-radius: 0; border-end-end-radius: 0; }
+
+.tgs-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tgs-space-s);
+  /* Fills the leftover height so a "See the trip" link can sit at the bottom of
+     every card in a row, however much text is above it. */
+  flex: 1;
+  padding: var(--tgs-space-l);
+}
+/* A plain card has no box around it, so the padding would be indenting the
+   words from nothing. */
+.tgs-cards[data-style='plain'] .tgs-card__body { padding-inline: 0; }
+.tgs-cards[data-style='plain'][data-image='none'] .tgs-card__body { padding: 0; }
+
+.tgs-cards[data-align='centre'] .tgs-card__body { text-align: center; align-items: center; }
+
+.tgs-card__label {
+  margin: 0;
+  font-size: var(--tgs-text-s);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--tgs-primary);
+}
+/*
+ * The client's own H4, all five properties of it, exactly as
+ * .tgs-heading[data-style='h4'] takes them. A card title that picked its own
+ * size would be the one heading on the page the Theme screen cannot change.
+ */
+.tgs-card__title {
+  margin: 0;
+  font-family: var(--tgs-h4-font);
+  font-weight: var(--tgs-h4-weight);
+  font-size: var(--tgs-h4-size);
+  line-height: var(--tgs-h4-leading);
+  letter-spacing: var(--tgs-h4-tracking);
+  text-wrap: balance;
+}
+.tgs-card__text { margin: 0; color: var(--tgs-text-muted); }
+.tgs-card__link {
+  /* Pushed to the bottom of the body, so a row of cards lines its links up
+     however different the text above them is. */
+  margin-top: auto;
+  align-self: flex-start;
+  font-weight: 600;
+  color: var(--tgs-primary);
+  text-decoration: none;
+}
+.tgs-cards[data-align='centre'] .tgs-card__link { align-self: center; }
+.tgs-card__link:hover { text-decoration: underline; }
+
+/*
+ * THE WHOLE CARD IS CLICKABLE, WITH ONE LINK.
+ *
+ * The pseudo-element covers the card, so a pointer anywhere on it hits the
+ * anchor. The markup stays one anchor per card, which keeps it valid and keeps
+ * a keyboard to one stop per card. See renderCard in components/render/blocks.tsx
+ * for why the obvious alternative, wrapping the card in an anchor, is not used.
+ */
+.tgs-cards[data-whole='true'] .tgs-card__link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+.tgs-cards[data-whole='true'] .tgs-card:hover { border-color: var(--tgs-border-strong); }
+.tgs-cards[data-whole='true'][data-style='raised'] .tgs-card:hover {
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.08), 0 12px 32px rgba(15, 23, 42, 0.12);
+}
+/*
+ * The focus ring belongs on the CARD, not on the invisible rectangle. Without
+ * this, tabbing to a card draws an outline round the link text alone while the
+ * thing that responds is the whole card.
+ *
+ * BOTH RULES ARE INSIDE THE @supports, and that pairing is the point. Moving the
+ * ring to the card needs :has(); taking it off the link does not. Written as two
+ * plain rules, a browser without :has() would apply the second and skip the
+ * first, and a keyboard user would have no visible focus at all. Together, they
+ * either both apply or neither does.
+ */
+@supports selector(:has(*)) {
+  .tgs-cards[data-whole='true'] .tgs-card:has(.tgs-card__link:focus-visible) {
+    outline: 3px solid var(--tgs-accent);
+    outline-offset: 2px;
+  }
+  .tgs-cards[data-whole='true'] .tgs-card__link:focus-visible { outline: none; }
+}
+
+/* Picture beside the words rather than above them. A blog list, a what's-on. */
+.tgs-cards[data-image='left'] .tgs-card { flex-direction: row; align-items: stretch; }
+.tgs-cards[data-image='left'] .tgs-card__frame {
+  /* A share of the card rather than a fixed width, and the aspect ratio gives
+     way to the card's own height so both sides of a wide card stay level. */
+  flex: 0 0 40%;
+  aspect-ratio: auto;
+}
+
+@container tgs-page (max-width: 1023px) {
+  .tgs-cards[data-columns='4'] { grid-template-columns: repeat(2, 1fr); }
+}
+
+@container tgs-page (max-width: 767px) {
+  /*
+   * One across on a phone. Two 190px cards side by side is two cards nobody can
+   * read, which is the same argument .tgs-row makes for stacking.
+   *
+   * EVERY COLUMN COUNT NAMED, rather than a bare `.tgs-cards`, and that is not
+   * tidiness. A container query does not change specificity, so
+   * `.tgs-cards[data-columns='3']` at (0,2,0) beats a plain `.tgs-cards` at
+   * (0,1,0) however far down the file it sits. Written the short way this rule
+   * silently did nothing and cards stayed three abreast on a phone. The browser
+   * suite caught it.
+   */
+  .tgs-cards[data-columns='2'],
+  .tgs-cards[data-columns='3'],
+  .tgs-cards[data-columns='4'] { grid-template-columns: 1fr; }
+  /* And the picture goes back on top, because 40 per cent of a phone is a
+     thumbnail and the words next to it are a column three words wide. */
+  .tgs-cards[data-image='left'] .tgs-card { flex-direction: column; }
+  .tgs-cards[data-image='left'] .tgs-card__frame { flex: none; aspect-ratio: 16 / 9; }
+}
+
+/* ------------------------------------------------------------------ */
 /* The menu                                                            */
 /* ------------------------------------------------------------------ */
 

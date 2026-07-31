@@ -456,17 +456,17 @@ await check('block picker opens from a section', async () => {
 });
 
 /*
- * The count MOVES DELIBERATELY. It was 13 until the two widget blocks landed on
- * 31 Jul 2026, and 15 until the menu joined them later the same day. A hardcoded
- * number is the point rather than a maintenance cost: adding a block should make
- * somebody look at the picker, and a block that silently stops rendering its
- * card is exactly what this catches.
+ * The count MOVES DELIBERATELY. 13 until the two widget blocks landed on 31 Jul
+ * 2026, 15 when the menu joined them, 16 when Cards did. A hardcoded number is
+ * the point rather than a maintenance cost: adding a block should make somebody
+ * look at the picker, and a block that silently stops rendering its card is
+ * exactly what this catches.
  *
- * Sixteen because the harness runs as staff, so the staff-only Embed block is in
- * there too.
+ * Seventeen because the harness runs as staff, so the staff-only Embed block is
+ * in there too.
  */
 await check('block picker offers the full library', async () =>
-  (await page.locator('.ed-block-card').count()) === 16);
+  (await page.locator('.ed-block-card').count()) === 17);
 
 await check('including both ways to put a widget on a page', async () => {
   const cards = (await page.locator('.ed-block-card').allInnerTexts()).join(' | ');
@@ -4114,7 +4114,7 @@ await check('the header offers the same blocks a page does', async () => {
   await page.keyboard.press('Escape');
   await page.waitForTimeout(200);
   // The whole library, because a header is sections and rows like anything else.
-  return count === 16 ? true : `${count} blocks in the header picker`;
+  return count === 17 ? true : `${count} blocks in the header picker`;
 });
 
 await check('a menu in a header saves through the region actions', async () => {
@@ -4157,6 +4157,195 @@ await check('going back to a page brings the title box back', async () => {
   const fixed = await page.locator('.ed-title-fixed').count();
   return boxes === 1 && fixed === 0 ? true : `${boxes} boxes, ${fixed} labels`;
 });
+
+
+// ---------------------------------------------------------------------------
+// Cards
+//
+// THE CLAIM THIS BLOCK MAKES IS A MEASUREMENT, which is why it belongs here
+// rather than in Node. A grid promises that the cards line up: same height, same
+// picture shape, however different their words are. That is a fact about laid-out
+// pixels and there is no way to assert it without a browser doing the laying out.
+//
+// The other claim is that the whole card is clickable while still being ONE link.
+// Node can read the markup and the CSS; only a browser can say what is actually
+// under the pointer at the corner of a card.
+// ---------------------------------------------------------------------------
+
+await page.reload();
+await page.waitForSelector('.ed-root');
+await showPanels();
+
+await check('Cards is in the block picker', async () => {
+  await openBlockPicker();
+  const found = await page.locator('.ed-block-card', { hasText: 'Cards' }).count();
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(200);
+  return found >= 1 ? true : 'no Cards card';
+});
+
+await check('a card grid arrives with real cards in it', async () => {
+  await addBlock('Cards');
+  const cards = await added().locator('.tgs-card').count();
+  // Three, with words in them. An empty grid of grey rectangles would leave
+  // somebody guessing what the block is for.
+  const titles = await added().locator('.tgs-card__title').allInnerTexts();
+  return cards === 3 && titles.every((t) => t.trim().length > 0)
+    ? true
+    : `${cards} cards, titles ${JSON.stringify(titles)}`;
+});
+
+await check('each card holds exactly one link', async () => {
+  const perCard = await added().evaluate((root) =>
+    [...root.querySelectorAll('.tgs-card')].map((card) => card.querySelectorAll('a').length));
+  // Zero here, because the default cards have link text and no address yet, and
+  // a link with nowhere to go is not rendered. Never two, which is the failure
+  // that wrapping the card in an anchor would produce.
+  return perCard.every((count) => count <= 1)
+    ? true
+    : `anchors per card: ${JSON.stringify(perCard)}`;
+});
+
+/*
+ * THE GRID'S CENTRAL PROMISE, MEASURED. The three default cards carry text of
+ * three different lengths. If a card sized itself to its own words, this is the
+ * check that catches it.
+ */
+await check('cards in a row are all the same height', async () => {
+  await foldPanels();
+  await page.waitForTimeout(300);
+
+  const heights = await added().evaluate((root) =>
+    [...root.querySelectorAll('.tgs-card')].map((card) => Math.round(card.getBoundingClientRect().height)));
+
+  const spread = Math.max(...heights) - Math.min(...heights);
+  return spread === 0 ? true : `heights ${JSON.stringify(heights)}, spread ${spread}px`;
+});
+
+await check('and their pictures are all the same shape', async () => {
+  const frames = await added().evaluate((root) =>
+    [...root.querySelectorAll('.tgs-card__frame')].map((frame) => {
+      const box = frame.getBoundingClientRect();
+      return Math.round((box.width / box.height) * 100) / 100;
+    }));
+
+  const spread = Math.max(...frames) - Math.min(...frames);
+  // 4:3 by default, and all of them, because a grid whose pictures differ is
+  // the exact mess this block exists to prevent.
+  return spread < 0.02 && Math.abs(frames[0] - 4 / 3) < 0.05
+    ? true
+    : `ratios ${JSON.stringify(frames)}`;
+});
+
+/*
+ * THE WHOLE CARD IS CLICKABLE, asked of the browser rather than of the CSS.
+ * elementFromPoint at the corner of a card returns whatever would receive the
+ * click there, and with the covering pseudo-element that is the anchor.
+ */
+await check('the whole card takes the click, through one link', async () => {
+  // Give the first card somewhere to go, since a link with no address is not
+  // rendered at all.
+  await added().locator('.tgs-card').first().click();
+  await page.waitForTimeout(300);
+  await showPanels();
+  const address = page.locator('.ed-props input').filter({ hasNot: page.locator('[type=checkbox]') });
+  const href = page.locator('.ed-props input[placeholder*="greece" i]').first();
+  await href.fill('/greece');
+  await page.waitForTimeout(700);
+  void address;
+
+  const hit = await page.locator('.ed-canvas-frame .tgs-card').first().evaluate((card) => {
+    const box = card.getBoundingClientRect();
+    // Ten pixels in from the top-left, which is picture, not link text.
+    const el = document.elementFromPoint(box.left + 10, box.top + 10);
+    return el ? el.className || el.tagName : 'nothing';
+  });
+
+  return /tgs-card__link/.test(String(hit))
+    ? true
+    : `the corner of the card belongs to "${hit}"`;
+});
+
+await check('turning that off gives the corner back to the picture', async () => {
+  const toggle = page.locator('.ed-props input[type="checkbox"]').last();
+  await toggle.uncheck();
+  await page.waitForTimeout(700);
+
+  const hit = await page.locator('.ed-canvas-frame .tgs-card').first().evaluate((card) => {
+    const box = card.getBoundingClientRect();
+    const el = document.elementFromPoint(box.left + 10, box.top + 10);
+    return el ? el.className || el.tagName : 'nothing';
+  });
+
+  const back = !/tgs-card__link/.test(String(hit));
+  await toggle.check();
+  await page.waitForTimeout(500);
+  return back ? true : `still the link: "${hit}"`;
+});
+
+await check('nothing inside a card is wider than the card', async () => {
+  // The open bug on images (task #61) is that one can render wider than the
+  // thing holding it. A card grid must not be able to join in.
+  const overflow = await added().evaluate((root) =>
+    [...root.querySelectorAll('.tgs-card')].flatMap((card) => {
+      const outer = card.getBoundingClientRect();
+      return [...card.querySelectorAll('*')]
+        .map((child) => Math.round(child.getBoundingClientRect().right - outer.right))
+        .filter((over) => over > 1);
+    }));
+
+  return overflow.length === 0 ? true : `${overflow.length} things stick out, by ${overflow}px`;
+});
+
+/*
+ * NOT A `select`, AND THE FIRST VERSION OF THIS CHECK ASSUMED IT WAS. A select
+ * field with four or fewer options renders as segmented buttons (see Fields.tsx),
+ * so `.ed-props select` found the six-option gap field instead, selectOption('4')
+ * threw, and a `.catch(() => {})` swallowed it. The check then reported "3 across,
+ * then 3" and read as a CSS failure. There is no catch here now: if the control
+ * moves, this fails loudly and says so.
+ */
+await check('four across becomes fewer on a tablet', async () => {
+  // The control needs the pane open; the measurement needs it shut. The canvas
+  // is the query container, so a "desktop" with both panels showing is about
+  // 750px and answers to the PHONE rules. Reading `wide` before folding is how
+  // the first run of this reported "1 across, then 1".
+  await showPanels();
+  await page.locator('[role="group"][aria-label="Across"] button', { hasText: 'Four' }).click();
+  await page.waitForTimeout(400);
+
+  await page.getByRole('button', { name: 'Desktop' }).click();
+  await foldPanels();
+  await page.waitForTimeout(400);
+
+  const wide = await added().evaluate((root) =>
+    getComputedStyle(root.querySelector('.tgs-cards')).gridTemplateColumns.split(' ').length);
+
+  // 834px, which sits between the two container breakpoints on purpose.
+  await page.getByRole('button', { name: 'Tablet' }).click();
+  await page.waitForTimeout(500);
+
+  const narrow = await added().evaluate((root) =>
+    getComputedStyle(root.querySelector('.tgs-cards')).gridTemplateColumns.split(' ').length);
+
+  return wide === 4 && narrow === 2 ? true : `${wide} across, then ${narrow}`;
+});
+
+await check('and one across on a phone', async () => {
+  await page.getByRole('button', { name: 'Phone' }).click();
+  await page.waitForTimeout(500);
+
+  const columns = await added().evaluate((root) =>
+    getComputedStyle(root.querySelector('.tgs-cards')).gridTemplateColumns.split(' ').length);
+
+  return columns === 1 ? true : `${columns} across on a phone`;
+});
+
+// Back to a desktop width, panels open, for anything that follows.
+await page.getByRole('button', { name: 'Desktop' }).click();
+await page.waitForTimeout(300);
+await showPanels();
+
 
 await browser.close();
 

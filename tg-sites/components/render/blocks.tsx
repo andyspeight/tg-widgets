@@ -480,6 +480,111 @@ export function GalleryBlock({ props }: { props: Props }): ReactElement {
   );
 }
 
+/**
+ * A grid of cards.
+ *
+ * ONE LINK PER CARD, NEVER TWO, and that is the whole reason this is not the
+ * obvious markup. The obvious markup wraps the card in an `<a>` so all of it is
+ * clickable, and then the "See the trip" link inside it is an anchor inside an
+ * anchor, which is invalid HTML, which browsers repair by hoisting one out. It
+ * also puts every card in the tab order twice.
+ *
+ * So the card is a positioned box and the ONE link inside it grows a
+ * pseudo-element covering the whole card. Valid markup, one stop per card for a
+ * keyboard, the link text still says where it goes, and the pointer still gets
+ * the big target. See `.tgs-cards[data-whole='true']` in globals.css.
+ *
+ * A CARD WITH NO LINK IS NOT A LINK. Cards are also how somebody lays out a row
+ * of features or a team, where nothing is clickable, so the covering
+ * pseudo-element only exists when there is a real address to go to.
+ */
+function renderCard(
+  card: Props,
+  index: number,
+  options: {
+    showImage: boolean;
+    ratio: string;
+    radius: (typeof RADII)[number];
+  },
+): ReactElement | null {
+  const title = str(card, 'title');
+  const body = str(card, 'body');
+  const label = str(card, 'label');
+  const src = safeUrl(str(card, 'src'));
+  const href = safeUrl(str(card, 'linkHref'));
+  const linkLabel = str(card, 'linkLabel');
+
+  // A card with nothing to say is not drawn at all rather than drawn empty. An
+  // agent who added one and has not filled it in yet still sees it in the
+  // properties pane, which is where they are working.
+  if (!title && !body && !label && !src) return null;
+
+  return (
+    <article className="tgs-card" key={index}>
+      {options.showImage && (
+        <div className="tgs-card__frame" data-radius={options.radius} style={ratioStyle(options.ratio)}>
+          {src ? (
+            <img src={src} alt={str(card, 'alt')} loading="lazy" decoding="async" />
+          ) : (
+            // A placeholder rather than nothing, so a half-built grid still has
+            // cards of the same height and the layout is honest about itself.
+            <span className="tgs-card__noimage" aria-hidden="true" />
+          )}
+        </div>
+      )}
+
+      <div className="tgs-card__body">
+        {label && <p className="tgs-card__label">{label}</p>}
+        {title && <h3 className="tgs-card__title">{title}</h3>}
+        {body && <p className="tgs-card__text">{body}</p>}
+
+        {href && linkLabel && (
+          <a className="tgs-card__link" href={href}>
+            {linkLabel}
+          </a>
+        )}
+      </div>
+    </article>
+  );
+}
+
+export function CardsBlock({ props }: { props: Props }): ReactElement {
+  const items = list(props, 'items');
+  const columns = oneOf(props, 'columns', ['2', '3', '4'] as const, '3');
+  const gap = oneOf(props, 'gap', ['none', 'xs', 's', 'm', 'l', 'xl'] as const, 'm');
+  const style = oneOf(props, 'style', ['plain', 'bordered', 'raised', 'tinted'] as const, 'bordered');
+  const imagePosition = oneOf(props, 'imagePosition', ['top', 'left', 'none'] as const, 'top');
+  const ratio = str(props, 'ratio', '4/3');
+  const radius = oneOf(props, 'radius', RADII, 'md');
+  const align = oneOf(props, 'align', ['left', 'centre'] as const, 'left');
+  const whole = bool(props, 'wholeCardLinks', true);
+
+  const cards = items
+    .map((card, index) =>
+      renderCard(card, index, { showImage: imagePosition !== 'none', ratio, radius }),
+    )
+    .filter((card): card is ReactElement => card !== null);
+
+  if (cards.length === 0) {
+    return <div className="tgs-placeholder">Add some cards</div>;
+  }
+
+  return (
+    <div
+      className="tgs-cards"
+      data-columns={columns}
+      data-gap={gap}
+      data-style={style}
+      data-image={imagePosition}
+      data-radius={radius}
+      data-align={align}
+      data-whole={whole ? 'true' : undefined}
+    >
+      {cards}
+    </div>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Actions
 // ---------------------------------------------------------------------------

@@ -934,6 +934,33 @@ describe('sanitising a whole page on the way in', () => {
   });
 
   /*
+   * A CARD'S ADDRESSES GO THROUGH THE ALLOWLIST TOO, and they are inside a
+   * repeater, which is the bit worth asserting. cleanValue recurses into a
+   * repeater's own fields, so a `url` field nested one level down is checked by
+   * the same code as a top-level one. If that recursion were ever lost, every
+   * block with a repeater would quietly stop being sanitised and nothing else
+   * in this file would notice.
+   */
+  it('strips a javascript: address out of a card, inside its repeater', () => {
+    const clean = sanitisePage(pageWith('cards', {
+      items: [
+        { title: 'Fine', linkHref: '/greece', src: '/greece.jpg' },
+        // eslint-disable-next-line no-script-url
+        { title: 'Not fine', linkHref: 'javascript:alert(1)', src: 'javascript:alert(2)' },
+      ],
+    }));
+
+    const items = clean.sections[0].rows[0].columns[0].blocks[0].props.items as Array<
+      Record<string, unknown>
+    >;
+
+    expect(items[0].linkHref).toBe('/greece');
+    expect(items[0].src).toBe('/greece.jpg');
+    expect(items[1].linkHref).toBe('');
+    expect(items[1].src).toBe('');
+  });
+
+  /*
    * The whole-page pass has to use the HEADING mode for a heading, not the
    * paragraph one. Without this, the toolbar's own commands are correctly
    * restricted but a paste or an import could still put a list inside an h2 and
