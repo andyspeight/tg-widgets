@@ -236,6 +236,72 @@ const MUTATIONS = [
     to: `  max-width: min(700px, calc(100vw - 32px));`,
   },
 
+  // --- the widget blocks ---------------------------------------------------
+
+  {
+    tag: 'widget',
+    check: 'and the editor loads no widget script at all',
+    /*
+     * The failure this block's design exists to prevent, and the one that is
+     * invisible: the canvas would look exactly the same. Emitting the scripts
+     * regardless of `editable` is the obvious way to write PageRenderer, and it
+     * would re-run every widget on every keystroke.
+     */
+    why: 'Emit the widget scripts in the editor too, which re-runs them on every keystroke.',
+    file: 'components/render/PageRenderer.tsx',
+    from: `      {!editable
+        && widgetScriptsFor(widgetTagsIn(page)).map((src) => (`,
+    to: `      {true
+        && widgetScriptsFor(widgetTagsIn(page)).map((src) => (`,
+  },
+  {
+    tag: 'widget',
+    check: 'nor draws the container the script would fill',
+    why: 'Draw the real container on the canvas rather than the labelled placeholder.',
+    file: 'components/render/blocks.tsx',
+    from: `  if (editing) {
+    return (
+      <div className="tgs-widget-ghost">`,
+    to: `  if (false) {
+    return (
+      <div className="tgs-widget-ghost">`,
+  },
+  {
+    tag: 'widget',
+    check: 'and their code does not run on the canvas either',
+    why: "Run somebody else's embed on the canvas, so it reloads on every keystroke.",
+    file: 'components/render/blocks.tsx',
+    from: `  if (editing) {
+    return (
+      <div className="tgs-widget-ghost" style={{ minHeight: height }}>`,
+    to: `  if (false) {
+    return (
+      <div className="tgs-widget-ghost" style={{ minHeight: height }}>`,
+  },
+  {
+    tag: 'widget',
+    check: 'and asks for the ID rather than rendering an empty box',
+    why: 'Render the container with no id, which publishes a box that never fills.',
+    file: 'components/render/blocks.tsx',
+    from: `  if (!kind || !id) {`,
+    to: `  if (false) {`,
+  },
+  {
+    tag: 'widget',
+    check: 'including both ways to put a widget on a page',
+    why: 'Make the third-party block staff only, so a client cannot reach it.',
+    file: 'lib/content/blocks.ts',
+    from: `    type: 'embed-widget',
+    label: 'Embedded widget',
+    group: 'Advanced',
+    icon: 'code',`,
+    to: `    type: 'embed-widget',
+    label: 'Embedded widget',
+    group: 'Advanced',
+    icon: 'code',
+    staffOnly: true,`,
+  },
+
   // --- a heading holds markup ----------------------------------------------
 
   {
