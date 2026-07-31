@@ -237,6 +237,7 @@ const MUTATIONS = [
   // --- the writing assistant -----------------------------------------------
 
   {
+    tag: 'assistant',
     check: 'and the copy is in the page state, not only on the canvas',
     why: 'Write the answer straight into the element, outside undo and outside the save.',
     file: 'components/editor/TextToolbar.tsx',
@@ -244,6 +245,7 @@ const MUTATIONS = [
     to: `    document.execCommand('insertHTML', false, result.data.html);`,
   },
   {
+    tag: 'assistant',
     check: 'making it shorter replaces the words rather than adding to them',
     why: 'Skip putting the selection back, so the copy lands after the words instead of over them.',
     file: 'components/editor/TextToolbar.tsx',
@@ -258,6 +260,7 @@ const MUTATIONS = [
     to: `    onExec('insertHTML', result.data.html);`,
   },
   {
+    tag: 'assistant',
     check: 'a refusal is shown in the panel rather than swallowed',
     why: 'Return quietly on a refusal, which is a button that does nothing and says nothing.',
     file: 'components/editor/TextToolbar.tsx',
@@ -270,6 +273,7 @@ const MUTATIONS = [
     }`,
   },
   {
+    tag: 'assistant',
     check: 'and the quick edits are not offered yet, because there is no this',
     why: 'Offer Improve and Shorter with nothing highlighted, so they act on nothing.',
     file: 'components/editor/TextToolbar.tsx',
@@ -279,6 +283,7 @@ const MUTATIONS = [
             <div className="ed-tt__ask-quick">`,
   },
   {
+    tag: 'assistant',
     check: 'and it is marked out from the twenty buttons beside it',
     why: 'Rename the rule, so the sparkle looks like every other button on the bar.',
     file: 'components/editor/editor.css',
@@ -286,6 +291,7 @@ const MUTATIONS = [
     to: `.ed-tt__btn.is-ai-renamed { color: #a5b4fc; }`,
   },
   {
+    tag: 'assistant',
     check: 'the panel opens inside the window, not off the edge of it',
     why: 'Anchor it to the button instead of the bar, which pushes 340px off the right edge.',
     file: 'components/editor/editor.css',
@@ -437,7 +443,7 @@ const chosen = only
   ? MUTATIONS.filter((m) =>
       // The suite name is searchable too, so "settings" runs every mutation
       // aimed at that screen without having to know what each one is called.
-      `${m.check} ${m.why} ${m.file} ${m.suite ?? 'editor'}`
+      `${m.check} ${m.why} ${m.file} ${m.suite ?? 'editor'} ${m.tag ?? ''}`
         .toLowerCase()
         .includes(only.toLowerCase()))
   : MUTATIONS;
