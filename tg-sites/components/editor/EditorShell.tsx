@@ -19,7 +19,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties }
 import { publishPageAction, saveDraftAction } from '../../app/actions/pages';
 import { PublishHistory } from './PublishHistory';
 import type { Page, Section } from '../../lib/content/schema';
-import { parsePage } from '../../lib/content/schema';
+import { parsePage, STACK_BREAKPOINTS } from '../../lib/content/schema';
 import { createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
 import { buildPresetSection } from '../../lib/content/presets';
 import { addBlock, parsePathKey, type Path, pathKey, resolve, updateBlockProps } from '../../lib/content/tree';
@@ -35,6 +35,8 @@ import './editor.css';
 import '../media/media.css';
 
 const THEME_KEY = 'tg-sites:theme:v1';
+/** Which side panels are folded away. A working preference, not page data. */
+const PANELS_KEY = 'tg-sites:panels:v1';
 const HISTORY_LIMIT = 50;
 /** Edits to the same field inside this window collapse into one undo step. */
 const COALESCE_MS = 700;
@@ -240,6 +242,13 @@ export function EditorShell({
   const [unpublished, setUnpublished] = useState(initialHasUnpublishedChanges);
   const [publishing, setPublishing] = useState(false);
   const [mobilePane, setMobilePane] = useState<'canvas' | 'props' | 'outline'>('canvas');
+  /**
+   * Which side panels are open. Both, until somebody folds one away.
+   *
+   * Remembered, like the light or dark choice and the toolbar's position: it is
+   * how somebody likes to work, not something about the page.
+   */
+  const [panels, setPanels] = useState({ outline: true, props: true });
   const [theme, setTheme] = useState<Theme>('light');
 
   const page = history.present;
@@ -292,6 +301,63 @@ export function EditorShell({
       // Not worth surfacing: the choice still applies for this session.
     }
   }, [theme]);
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(PANELS_KEY);
+      if (!raw) return;
+      const stored = JSON.parse(raw) as Partial<typeof panels>;
+      setPanels({
+        outline: stored?.outline !== false,
+        props: stored?.props !== false,
+      });
+    } catch {
+      // A hand-edited value or storage blocked. Both panels open is a fine
+      // place to start and nothing about the page depends on it.
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(PANELS_KEY, JSON.stringify(panels));
+    } catch {
+      // See above.
+    }
+  }, [panels]);
+
+  /**
+   * Choose a preview width, and make room for it if it is Desktop.
+   *
+   * THE PREVIEW FOLLOWS THE CANVAS, NOT THE WINDOW. It is a container query
+   * context, so a 752px canvas renders the phone layout however wide the screen
+   * is. On a 1440px screen the two 320px panels leave exactly that, which is why
+   * Desktop was showing a stacked page and Andy asked for this.
+   *
+   * So Desktop folds the panels away, but ONLY when the canvas cannot otherwise
+   * reach a tablet's width, and only ever folds: it never reopens one somebody
+   * closed. On a big screen nothing moves. The panels are one click away in the
+   * top bar either way, which is what makes this a shortcut rather than
+   * something being taken away.
+   */
+  const chooseViewport = useCallback((next: Viewport) => {
+    setViewport(next);
+    if (next !== 'desktop') return;
+
+    const frame = document.querySelector('.ed-canvas-frame');
+    const width = frame?.getBoundingClientRect().width ?? 0;
+    if (width >= STACK_BREAKPOINTS.tablet) return;
+
+    // What folding both would give back. 320 each, and only the ones still open.
+    setPanels((current) => {
+      const room = width + (current.outline ? 320 : 0) + (current.props ? 320 : 0);
+      if (room < STACK_BREAKPOINTS.tablet) {
+        // Even with both away it would not be a desktop. Leave them alone
+        // rather than hiding the whole workspace for nothing.
+        return current;
+      }
+      return { outline: false, props: false };
+    });
+  }, []);
 
   // ---------------------------------------------------------------------
   // Autosave
@@ -584,7 +650,13 @@ export function EditorShell({
   // ---------------------------------------------------------------------
 
   return (
-    <div className="ed-root" data-pane={mobilePane} data-theme={theme}>
+    <div
+      className="ed-root"
+      data-pane={mobilePane}
+      data-theme={theme}
+      data-outline={panels.outline ? undefined : 'folded'}
+      data-props={panels.props ? undefined : 'folded'}
+    >
       <header className="ed-topbar">
         {/*
           A plain anchor, not next/link, for two reasons. Leaving the editor
@@ -641,6 +713,41 @@ export function EditorShell({
           Icons carry a label on desktop and stand alone on narrow screens,
           where they keep their aria-label. Never icon-only without one.
         */}
+        {/*
+          THE TWO PANELS, FOLDED AWAY.
+          Andy, 31 Jul 2026: "the desktop button should force a wider canvas.
+          best way to achieve this is to make the l[e]ft and [right] areas
+          collapsible". The preview is a container query context, so what it
+          shows follows the CANVAS width and not the window's: at 1440px the two
+          320px panels leave it 752px, under the 767px phone breakpoint, so
+          Desktop was showing the phone layout. Folding a panel gives that width
+          back.
+        */}
+        <div className="ed-seg ed-desktop-only" role="group" aria-label="Panels">
+          <button
+            type="button"
+            className="ed-btn"
+            data-icon="true"
+            aria-pressed={!panels.outline}
+            aria-label={panels.outline ? 'Hide the page panel' : 'Show the page panel'}
+            title={panels.outline ? 'Hide the page panel' : 'Show the page panel'}
+            onClick={() => setPanels((current) => ({ ...current, outline: !current.outline }))}
+          >
+            <Icon name="panel-left" size={16} />
+          </button>
+          <button
+            type="button"
+            className="ed-btn"
+            data-icon="true"
+            aria-pressed={!panels.props}
+            aria-label={panels.props ? 'Hide the settings panel' : 'Show the settings panel'}
+            title={panels.props ? 'Hide the settings panel' : 'Show the settings panel'}
+            onClick={() => setPanels((current) => ({ ...current, props: !current.props }))}
+          >
+            <Icon name="panel-right" size={16} />
+          </button>
+        </div>
+
         <div className="ed-seg ed-desktop-only" role="group" aria-label="Preview width">
           {VIEWPORTS.map((option) => (
             <button
@@ -648,8 +755,12 @@ export function EditorShell({
               type="button"
               className="ed-btn"
               aria-pressed={viewport === option.value}
-              title={option.label}
-              onClick={() => setViewport(option.value)}
+              title={
+                option.value === 'desktop'
+                  ? 'Desktop. Folds the panels away if the preview is too narrow to be one.'
+                  : option.label
+              }
+              onClick={() => chooseViewport(option.value)}
             >
               <Icon name={option.icon} size={16} />
               {option.label}

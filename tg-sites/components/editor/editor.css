@@ -169,6 +169,37 @@
   -webkit-font-smoothing: antialiased;
 }
 
+/*
+ * FOLDING A SIDE PANEL AWAY.
+ *
+ * Andy, 31 Jul 2026. The preview is a container query context, so what it shows
+ * follows the CANVAS width and not the window's: on a 1440px screen the two
+ * 320px panels leave it 752px, under the 767px phone breakpoint, and Desktop
+ * was quietly showing the phone layout. Folding a panel hands that width back.
+ *
+ * The track goes to nothing rather than to a narrow rail. A rail costs width on
+ * exactly the screens where width is the problem, and the way back in is in the
+ * top bar, which is where it can always be found whichever panel is folded.
+ *
+ * Only above 1180px, where there are three panes to fold. Below that the shell
+ * already shows one pane at a time and these attributes must not fight it.
+ */
+@media (min-width: 1181px) {
+  .ed-root[data-outline='folded'] {
+    grid-template-columns: 0 1fr 320px;
+  }
+  .ed-root[data-props='folded'] {
+    grid-template-columns: 320px 1fr 0;
+  }
+  .ed-root[data-outline='folded'][data-props='folded'] {
+    grid-template-columns: 0 1fr 0;
+  }
+  .ed-root[data-outline='folded'] .ed-outline,
+  .ed-root[data-props='folded'] .ed-props {
+    display: none;
+  }
+}
+
 @media (max-width: 1180px) {
   .ed-root {
     grid-template-columns: 260px 1fr;

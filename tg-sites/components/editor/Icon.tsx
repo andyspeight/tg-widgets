@@ -46,6 +46,8 @@ export type IconName =
   | 'arrow-down'
   | 'arrow-left'
   | 'arrow-right'
+  | 'panel-left'
+  | 'panel-right'
   | 'grip'
   | 'bold'
   | 'italic'
@@ -109,6 +111,9 @@ const PATHS: Record<IconName, string> = {
   'arrow-up': 'M12 19V5M6 11l6-6 6 6',
   'arrow-down': 'M12 5v14M6 13l6 6 6-6',
   'arrow-left': 'M19 12H5M11 6l-6 6 6 6',
+  // A window with one side ruled off: the panel on that edge of the editor.
+  'panel-left': 'M3 4h18v16H3zM9 4v16',
+  'panel-right': 'M3 4h18v16H3zM15 4v16',
   'arrow-right': 'M5 12h14M13 6l6 6-6 6',
   grip: 'M9 6h.01M9 12h.01M9 18h.01M15 6h.01M15 12h.01M15 18h.01',
   /*

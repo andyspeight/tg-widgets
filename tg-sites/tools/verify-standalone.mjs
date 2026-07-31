@@ -2888,6 +2888,147 @@ await check('and the padding presets are right there on it', async () => {
 });
 
 
+// ---------------------------------------------------------------------------
+// Folding the side panels away
+// ---------------------------------------------------------------------------
+
+/*
+ * LAST IN THE FILE ON PURPOSE. These fold panels away, and a folded outline is
+ * a missing .ed-outline for everything above.
+ *
+ * Andy, 31 Jul 2026: "the desktop button should force a wider canvas. best way
+ * to achieve this is to make the l[e]ft and [right] areas collapsible".
+ *
+ * The preview is a container query context, so it follows the CANVAS width and
+ * not the window's. At the 1440px this file runs at, the two 320px panels leave
+ * the canvas 752px, under the 767px phone breakpoint, so Desktop was showing the
+ * phone layout. That is exactly the width this check runs at, which is what
+ * makes it worth measuring here.
+ */
+
+const canvasWidth = async () =>
+  Math.round((await page.locator('.ed-canvas-frame').boundingBox()).width);
+
+await check('the preview really is too narrow to be a desktop, before folding', async () => {
+  // If this stops being true the checks below prove nothing, so it is asserted
+  // rather than assumed.
+  const width = await canvasWidth();
+  return width < 768
+    ? true
+    : `the canvas is already ${width}px, so folding is not what makes the difference`;
+});
+
+await check('folding the page panel gives the width to the preview', async () => {
+  const before = await canvasWidth();
+  await page.locator('.ed-btn[aria-label="Hide the page panel"]').click();
+  await page.waitForTimeout(400);
+  const after = await canvasWidth();
+
+  return after >= before + 300
+    ? true
+    : `the canvas went from ${before}px to ${after}px`;
+});
+
+await check('and the preview stops being a phone', async () => {
+  // Measured on the page, not on the attribute: the point of the width is what
+  // it does to the layout, and a hero that stays stacked has gained nothing.
+  const columns = await page.locator('.tgs-col').evaluateAll((cols) =>
+    cols.slice(0, 2).map((col) => Math.round(col.getBoundingClientRect().width)));
+
+  const sideBySide = columns[0] > 200 && columns[1] > 200 && columns[0] < 900;
+  return sideBySide ? true : `the first two columns are ${JSON.stringify(columns)}`;
+});
+
+await check('folding the settings panel too gives the rest', async () => {
+  const before = await canvasWidth();
+  await page.locator('.ed-btn[aria-label="Hide the settings panel"]').click();
+  await page.waitForTimeout(400);
+  const after = await canvasWidth();
+
+  return after >= before + 300 ? true : `the canvas went from ${before}px to ${after}px`;
+});
+
+/*
+ * The way back has to be somewhere that does not depend on the panel being open,
+ * which is why both live in the top bar rather than on the panels themselves.
+ */
+await check('both can be brought back from the top bar', async () => {
+  await page.locator('.ed-btn[aria-label="Show the page panel"]').click();
+  await page.locator('.ed-btn[aria-label="Show the settings panel"]').click();
+  await page.waitForTimeout(400);
+
+  const outline = await page.locator('.ed-outline').isVisible();
+  const props = await page.locator('.ed-props').isVisible();
+  return outline && props ? true : `outline ${outline}, settings ${props}`;
+});
+
+await check('which way they are folded is remembered', async () => {
+  await page.locator('.ed-btn[aria-label="Hide the page panel"]').click();
+  await page.waitForTimeout(300);
+
+  await page.reload();
+  await page.waitForSelector('.ed-root');
+  await page.waitForTimeout(500);
+
+  const outline = await page.locator('.ed-outline').isVisible();
+  const props = await page.locator('.ed-props').isVisible();
+  return outline === false && props === true
+    ? true
+    : `after reloading: outline ${outline}, settings ${props}`;
+});
+
+/*
+ * THE ONE ANDY ASKED FOR. Desktop makes room for itself.
+ */
+await check('Desktop folds the panels when the preview is too narrow to be one', async () => {
+  await page.evaluate(() => window.localStorage.removeItem('tg-sites:panels:v1'));
+  await page.reload();
+  await page.waitForSelector('.ed-root');
+  await page.waitForTimeout(500);
+
+  const before = await canvasWidth();
+  if (before >= 1024) return `the canvas is already ${before}px, so there is nothing to make room for`;
+
+  await page.locator('.ed-btn', { hasText: 'Tablet' }).click();
+  await page.waitForTimeout(300);
+  await page.locator('.ed-btn', { hasText: 'Desktop' }).click();
+  await page.waitForTimeout(500);
+
+  const after = await canvasWidth();
+  return after >= 1024
+    ? true
+    : `the canvas is ${after}px after pressing Desktop, up from ${before}px`;
+});
+
+await check('and only folds, never reopens one somebody closed', async () => {
+  // Both are folded from the check above. Pressing Desktop again must leave
+  // them alone rather than treating "wide enough" as "put them back".
+  await page.locator('.ed-btn', { hasText: 'Phone' }).click();
+  await page.waitForTimeout(300);
+  await page.locator('.ed-btn', { hasText: 'Desktop' }).click();
+  await page.waitForTimeout(400);
+
+  const outline = await page.locator('.ed-outline').isVisible();
+  const props = await page.locator('.ed-props').isVisible();
+  return outline === false && props === false
+    ? true
+    : `outline ${outline}, settings ${props}`;
+});
+
+await check('the fold controls meet the 44px rule', async () => {
+  const small = await page.evaluate(() => {
+    const out = [];
+    for (const button of document.querySelectorAll('.ed-topbar .ed-btn[aria-label*="panel"]')) {
+      const box = button.getBoundingClientRect();
+      if (box.height < 44 || box.width < 44) {
+        out.push(`${button.getAttribute('aria-label')}: ${Math.round(box.width)}x${Math.round(box.height)}`);
+      }
+    }
+    return out;
+  });
+  return small.length === 0 ? true : `too small: ${small.join(', ')}`;
+});
+
 await browser.close();
 
 let failed = false;
