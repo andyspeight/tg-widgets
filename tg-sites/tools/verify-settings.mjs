@@ -134,8 +134,11 @@ async function openTab(page, label) {
   await page.waitForTimeout(250);
 }
 
+/** The tabs everybody gets, in order. Custom code is a fifth, for an owner. */
+const CLIENT_TABS = ['Your company', 'Analytics', 'Icons and sharing', 'Language'];
+
 // ---------------------------------------------------------------------------
-// Without permission: three tabs, and no way in
+// Without permission: four tabs, and no way in
 // ---------------------------------------------------------------------------
 
 const plain = await open({ canEditCode: false });
@@ -145,11 +148,9 @@ await check('the settings screen mounts', async () => {
   return tabs.length > 0 ? true : 'no tabs';
 });
 
-await check('somebody without permission gets three tabs and no custom code', async () => {
+await check('somebody without permission gets four tabs and no custom code', async () => {
   const tabs = (await plain.locator('.tv-tab').allInnerTexts()).map((t) => t.trim());
-  return JSON.stringify(tabs) === JSON.stringify(['Analytics', 'Icons and sharing', 'Language'])
-    ? true
-    : JSON.stringify(tabs);
+  return JSON.stringify(tabs) === JSON.stringify(CLIENT_TABS) ? true : JSON.stringify(tabs);
 });
 
 await check('and no code field is anywhere in their page', async () => {
@@ -167,9 +168,11 @@ await plain.close();
 
 const page = await open({ canEditCode: true });
 
-await check('an owner gets a fourth tab, called Custom code', async () => {
+await check('an owner gets one more tab, called Custom code, and it is last', async () => {
   const tabs = (await page.locator('.tv-tab').allInnerTexts()).map((t) => t.trim());
-  return tabs.length === 4 && tabs[3] === 'Custom code' ? true : JSON.stringify(tabs);
+  return JSON.stringify(tabs) === JSON.stringify([...CLIENT_TABS, 'Custom code'])
+    ? true
+    : JSON.stringify(tabs);
 });
 
 /*
@@ -183,13 +186,168 @@ await check('the tab carries no warning dot now that it is theirs to use', async
 // --- the save bar, which is the bug this file was written for ---------------
 
 await check('every other tab has exactly one save bar', async () => {
-  for (const label of ['Analytics', 'Icons and sharing', 'Language']) {
+  for (const label of CLIENT_TABS) {
     await openTab(page, label);
     const bars = await page.locator('.tv-bar').count();
     if (bars !== 1) return `${label} has ${bars}`;
   }
   return true;
 });
+
+// ---------------------------------------------------------------------------
+// Your company: the profile the writing assistant reads
+//
+// Checked in a browser rather than only in the schema tests, because everything
+// that can go wrong here is invisible to a unit test. The schema tests prove the
+// four values survive a round trip. They cannot see a textarea two lines tall,
+// a class name that matches no rule, or a panel wired to the wrong key.
+// ---------------------------------------------------------------------------
+
+await openTab(page, 'Your company');
+
+await check('the screen opens on Your company, and it is the first tab', async () => {
+  const fresh = await open({ canEditCode: true });
+  const selected = await fresh.locator('.tv-tab[aria-selected="true"]').allInnerTexts();
+  const first = (await fresh.locator('.tv-tab').first().innerText()).trim();
+  await fresh.close();
+  return selected.length === 1 && selected[0].trim() === 'Your company' && first === 'Your company'
+    ? true
+    : `selected ${JSON.stringify(selected)}, first "${first}"`;
+});
+
+await check('all four profile fields are there', async () => {
+  const ids = ['#company-name', '#company-about', '#tone-of-voice', '#avoid'];
+  for (const id of ids) {
+    if ((await page.locator(id).count()) !== 1) return `${id} is missing`;
+  }
+  return true;
+});
+
+/*
+ * THE CLASS-NAME GAP THIS FILE EXISTS FOR.
+ *
+ * .tv-input and .tv-textarea were written for this panel, so if either name were
+ * a typo, or the rule were deleted in a later tidy, the markup would still be
+ * correct and the fields would fall back to the browser's own control: a
+ * monospace textarea with a beveled grey border, next to two 44px fields styled
+ * like the rest of the product. Nothing else in the suite would notice.
+ */
+await check('the profile fields are styled, not the browser defaults', async () => {
+  const seen = await page.evaluate(() => {
+    const read = (id) => {
+      const c = getComputedStyle(document.querySelector(id));
+      return {
+        id,
+        font: c.fontFamily.toLowerCase(),
+        border: Math.round(parseFloat(c.borderTopWidth)),
+        radius: Math.round(parseFloat(c.borderTopLeftRadius)),
+      };
+    };
+    return ['#company-name', '#company-about'].map(read);
+  });
+
+  for (const { id, font, border, radius } of seen) {
+    // A textarea defaults to monospace and an input to the system UI font, so
+    // finding either means the class did not apply.
+    if (/monospace|monaco|menlo|courier/.test(font)) return `${id} is monospace: ${font}`;
+    if (border !== 1) return `${id} has a ${border}px border`;
+    if (radius < 4) return `${id} has a ${radius}px radius`;
+  }
+  return true;
+});
+
+/*
+ * A measurement, because "add a textarea" and "add a textarea somebody can write
+ * a paragraph in" are different jobs and only one of them is useful. Andy will
+ * put three or four sentences about the company in here.
+ */
+await check('the about box is tall enough to write a paragraph in', async () => {
+  const box = await page.locator('#company-about').evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    return { height: Math.round(r.height), width: Math.round(r.width) };
+  });
+  return box.height >= 100 && box.width >= 400
+    ? true
+    : `${box.width} by ${box.height}`;
+});
+
+/*
+ * The intro note is positioned by a selector rather than a class
+ * (.tv-group__title + .tv-note), so it is worth proving the selector matched.
+ * Unmatched, .tv-note keeps its trailing top margin and no bottom margin, and
+ * the paragraph sits jammed against the field below it.
+ */
+await check('the note under the heading has room before the first field', async () => {
+  const gap = await page.evaluate(() => {
+    const note = document.querySelector('.tv-group__title + .tv-note');
+    if (!note) return -1;
+    const field = note.nextElementSibling.getBoundingClientRect();
+    return Math.round(field.top - note.getBoundingClientRect().bottom);
+  });
+  return gap >= 12 ? true : gap === -1 ? 'the note is not under the heading' : `only ${gap}px`;
+});
+
+await check('typing a profile wakes the save bar', async () => {
+  await page.locator('#tone-of-voice').fill('Warm and unhurried. Never salesy.');
+  await page.waitForTimeout(200);
+  const bar = page.locator('.tv-bar');
+  return (await bar.getAttribute('data-dirty')) === 'true'
+    ? true
+    : 'the bar still says nothing changed';
+});
+
+/*
+ * Each box is wired to its OWN key. Four fields set through one generic handler
+ * is exactly the shape where a copy-paste leaves two of them writing to the same
+ * place, and the screen looks right until you type in the second one.
+ */
+await check('each box writes to its own field', async () => {
+  await page.locator('#company-name').fill('Sunvil');
+  await page.locator('#company-about').fill('Greece and Cyprus, tailor made.');
+  await page.locator('#avoid').fill('hidden gem');
+  await page.waitForTimeout(200);
+
+  const values = await page.evaluate(() =>
+    ['#company-name', '#company-about', '#tone-of-voice', '#avoid'].map(
+      (id) => document.querySelector(id).value,
+    ));
+
+  return values[0] === 'Sunvil'
+    && values[1] === 'Greece and Cyprus, tailor made.'
+    && /Warm and unhurried/.test(values[2])
+    && values[3] === 'hidden gem'
+    ? true
+    : JSON.stringify(values);
+});
+
+/*
+ * The cap is enforced in the schema too, but a field that silently drops the end
+ * of what somebody pasted is worse than one that stops accepting it: the schema
+ * cap is a last resort, and maxLength is the part they can see happening.
+ */
+await check('the long box stops at its limit rather than truncating on save', async () => {
+  const limits = await page.evaluate(() =>
+    ['#company-name', '#company-about', '#tone-of-voice', '#avoid'].map(
+      (id) => document.querySelector(id).maxLength,
+    ));
+  return JSON.stringify(limits) === JSON.stringify([120, 1200, 600, 600])
+    ? true
+    : JSON.stringify(limits);
+});
+
+await check('saving the profile settles the bar back down', async () => {
+  await page.locator('.tv-bar .tg-btn[data-variant="primary"]').click();
+  await page.waitForTimeout(500);
+  const bar = page.locator('.tv-bar');
+  const state = await bar.locator('.tv-bar__state').innerText();
+  const kept = await page.locator('#company-about').inputValue();
+  return (await bar.getAttribute('data-dirty')) === null && state === 'Saved'
+    && kept === 'Greece and Cyprus, tailor made.'
+    ? true
+    : `dirty ${await bar.getAttribute('data-dirty')}, "${state}", kept "${kept}"`;
+});
+
+// ---------------------------------------------------------------------------
 
 await openTab(page, 'Custom code');
 

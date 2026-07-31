@@ -20,6 +20,12 @@ npm run dev          # http://localhost:3100
 
 Needs `DATABASE_URL` and `RENDERER_DATABASE_URL`. See `db/SETUP.md`.
 
+`ANTHROPIC_API_KEY` switches on the writing assistant in the text toolbar.
+Without it the sparkle button still draws and the panel says the assistant is
+not switched on, which is what a preview deployment should say rather than
+falling over. The key is read in `lib/ai/anthropic.ts`, which is `server-only`,
+and it bills Travelgenix: the daily cap per site lives in `lib/db/ai.ts`.
+
 | Route | What it is |
 |---|---|
 | `/` | Front door |

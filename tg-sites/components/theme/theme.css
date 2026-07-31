@@ -136,6 +136,20 @@
   color: var(--ed-ink-3);
 }
 
+/*
+ * The same note, when it introduces a group rather than trailing one.
+ *
+ * Selected by POSITION rather than given a second class name, because that is
+ * the actual difference: a note directly under a group's heading is an
+ * introduction and everything else about it is identical. A .tv-lede would be
+ * the same six declarations under a name somebody has to learn, and the two
+ * would drift the first time one of them was adjusted.
+ */
+.tv-group__title + .tv-note {
+  margin-top: 0;
+  margin-bottom: var(--ed-5);
+}
+
 /* ------------------------------------------------------------------ */
 /* A field                                                             */
 /* ------------------------------------------------------------------ */
@@ -156,6 +170,77 @@
   font-size: var(--ed-text-xs);
   line-height: 1.5;
   color: var(--ed-ink-3);
+}
+
+/* ------------------------------------------------------------------ */
+/* Plain text fields                                                   */
+/* ------------------------------------------------------------------ */
+
+/*
+ * A line of text, and a paragraph of it.
+ *
+ * Matched to .tv-select on purpose: 44px, the same border, radius and panel
+ * colour. These three are the only controls on the settings screen and they sit
+ * one under another, so any difference in height or border weight reads as one
+ * of them being broken.
+ *
+ * NOT .tv-colour__hex, which the analytics tab borrows for its two ID fields.
+ * That one is monospace, which is right for GTM-ABC1234 and wrong for a company
+ * name or a paragraph about who you sell holidays to.
+ */
+.tv-input,
+.tv-textarea {
+  display: block;
+  width: 100%;
+  padding: 0 var(--ed-3);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+  color: var(--ed-ink);
+  /*
+   * Both needed, and for different reasons. A textarea defaults to monospace in
+   * every browser and an input defaults to the system UI font, so neither
+   * inherits the page's typeface without being told to.
+   */
+  font-family: inherit;
+  font-size: var(--ed-text-base);
+}
+
+.tv-input { height: 44px; }
+
+.tv-textarea {
+  /*
+   * Vertical only. Horizontal dragging pulls the field out past the panel it
+   * sits in, and there is nothing useful on the other side of that edge.
+   */
+  resize: vertical;
+  min-height: 88px;
+  padding: var(--ed-3);
+  line-height: 1.55;
+}
+
+.tv-input:hover,
+.tv-textarea:hover { border-color: var(--ed-ink-3); }
+
+.tv-input:focus-visible,
+.tv-input:focus,
+.tv-textarea:focus-visible,
+.tv-textarea:focus {
+  outline: 2px solid var(--ed-accent);
+  /* Inset, so the ring does not overlap the field above at 44px spacing. */
+  outline-offset: -1px;
+  border-color: var(--ed-accent);
+}
+
+.tv-input::placeholder,
+.tv-textarea::placeholder {
+  color: var(--ed-ink-3);
+  /*
+   * Faded further than the help text below it. A placeholder here is a worked
+   * example three lines long, and at full strength it reads as a filled-in
+   * field somebody has already answered.
+   */
+  opacity: 0.75;
 }
 
 /* ------------------------------------------------------------------ */

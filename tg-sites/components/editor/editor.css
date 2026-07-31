@@ -1224,9 +1224,14 @@
      on a narrow one. Colour, size, font and alignment took it past 700px, and
      the first cap at 720 left a second row holding two buttons, which looks like
      something went wrong rather than like a design. Measured at 1500px: 806px in
-     one row. */
+     one row.
+     Raised again to 900 on 31 Jul 2026 when the writing assistant added a
+     twenty-first button and 806 became 842, which the 860 cap could still hold
+     but with nothing left over. A cap with 18px of headroom is a cap that the
+     next control breaks, and the check for this failed the moment the sparkle
+     went in. */
   flex-wrap: wrap;
-  max-width: min(860px, calc(100vw - 32px));
+  max-width: min(900px, calc(100vw - 32px));
 }
 
 .ed-tt__btn {
@@ -1396,6 +1401,151 @@
 
 .ed-tt__custom .ed-tt__btn { color: var(--ed-ink-2); }
 .ed-tt__custom .ed-tt__btn:hover { background: var(--ed-well); color: var(--ed-ink); }
+
+/* ------------------------------------------------------------------ */
+/* The writing assistant                                               */
+/* ------------------------------------------------------------------ */
+
+/* Marked out from the other twenty buttons, because it is the only one that
+   does something you have to read afterwards. Accent-tinted rather than solid:
+   solid is what aria-pressed means on this bar, and a button that looks pressed
+   before you press it is a lie. */
+.ed-tt__btn.is-ai { color: #a5b4fc; }
+.ed-tt__btn.is-ai:hover { background: rgba(129, 140, 248, 0.22); color: #fff; }
+.ed-tt__btn.is-ai[aria-pressed='true'] { background: var(--ed-accent); color: #fff; }
+
+/* A light card under the dark bar, the same arrangement as the swatch tray and
+   for the same reason: this holds a box you read and type into, and a dark
+   textarea inside a floating dark bar reads as part of the page behind it.
+
+   Anchored RIGHT because the sparkle is the last control on the bar, so the
+   panel opens under the thing that opened it however the toolbar has wrapped. */
+.ed-tt__ask {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 4px;
+  width: 340px;
+  max-width: calc(100vw - 32px);
+  padding: var(--ed-3);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+  box-shadow: var(--ed-shadow-lg);
+}
+
+.ed-tt__ask-title {
+  margin: 0 0 var(--ed-2);
+  color: var(--ed-ink-2);
+  font-size: var(--ed-text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.ed-tt__ask-box {
+  display: block;
+  width: 100%;
+  padding: var(--ed-2);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-sm);
+  background: var(--ed-panel);
+  color: var(--ed-ink);
+  /* A textarea defaults to monospace everywhere. */
+  font-family: inherit;
+  font-size: var(--ed-text-sm);
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.ed-tt__ask-box::placeholder { color: var(--ed-ink-3); }
+.ed-tt__ask-box:focus {
+  outline: none;
+  border-color: var(--ed-accent);
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.18);
+}
+.ed-tt__ask-box:disabled { opacity: 0.6; cursor: progress; }
+
+.ed-tt__ask-row {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-2);
+  margin-top: var(--ed-2);
+}
+
+.ed-tt__ask-go {
+  flex: none;
+  height: 30px;
+  padding: 0 var(--ed-3);
+  border: 0;
+  border-radius: var(--ed-r-sm);
+  background: var(--ed-accent);
+  color: #fff;
+  font-size: var(--ed-text-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ed-tt__ask-go:hover { filter: brightness(1.08); }
+.ed-tt__ask-go:disabled { opacity: 0.65; cursor: progress; filter: none; }
+.ed-tt__ask-go:focus-visible { outline: 2px solid var(--ed-accent); outline-offset: 2px; }
+
+/* Wraps rather than pushing the button, which is why the row is not nowrap:
+   the sentence changes length depending on whether anything is highlighted. */
+.ed-tt__ask-note {
+  min-width: 0;
+  color: var(--ed-ink-3);
+  font-size: var(--ed-text-xs);
+  line-height: 1.4;
+}
+
+.ed-tt__ask-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: var(--ed-3);
+  padding-top: var(--ed-3);
+  border-top: 1px solid var(--ed-line);
+}
+
+.ed-tt__ask-chip {
+  height: 28px;
+  padding: 0 var(--ed-2);
+  border: 1px solid var(--ed-line);
+  border-radius: 999px;
+  background: var(--ed-panel);
+  color: var(--ed-ink-2);
+  font-size: var(--ed-text-xs);
+  cursor: pointer;
+}
+
+.ed-tt__ask-chip:hover { border-color: var(--ed-accent); color: var(--ed-ink); }
+.ed-tt__ask-chip:disabled { opacity: 0.6; cursor: progress; }
+.ed-tt__ask-chip:focus-visible { outline: 2px solid var(--ed-accent); outline-offset: 1px; }
+
+/* In the flow and allowed to wrap, unlike .ed-tt__refused below, which hangs
+   under a one-line row and can afford to be nowrap. These messages are
+   sentences: "this site has used all 200 of today's writing requests". */
+.ed-tt__ask-error {
+  margin: var(--ed-2) 0 0;
+  padding: var(--ed-2);
+  border-radius: var(--ed-r-sm);
+  background: #fef2f2;
+  color: #991b1b;
+  font-size: var(--ed-text-xs);
+  line-height: 1.45;
+}
+
+.ed-root[data-theme='dark'] .ed-tt__ask-error { background: #450a0a; color: #fecaca; }
+
+@media (prefers-color-scheme: dark) {
+  .ed-root[data-theme='system'] .ed-tt__ask-error { background: #450a0a; color: #fecaca; }
+}
+
+.ed-tt__ask-hint {
+  margin: var(--ed-3) 0 0;
+  color: var(--ed-ink-3);
+  font-size: var(--ed-text-xs);
+  line-height: 1.4;
+}
 
 /* Under the row rather than inside it, so a refused address does not shove the
    Apply button sideways while it is being read. */

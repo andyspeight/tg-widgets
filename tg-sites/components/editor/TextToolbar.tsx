@@ -176,12 +176,39 @@ const ALIGNMENTS: ReadonlyArray<{ value: string; icon: IconName; title: string }
   { value: 'right', icon: 'align-right', title: 'Align right' },
 ];
 
+/**
+ * What the assistant can be asked for, as buttons.
+ *
+ * ONLY OFFERED WITH WORDS SELECTED, all three of them, and that is not a
+ * technicality. "Make this shorter" has to know what "this" is, and the honest
+ * answer with nothing highlighted is nothing. Offering them anyway and quietly
+ * using the whole paragraph would be a button that sometimes rewrites more than
+ * you meant, which is the worst kind.
+ */
+const QUICK: ReadonlyArray<{ intent: string; label: string }> = [
+  { intent: 'improve', label: 'Improve it' },
+  { intent: 'shorter', label: 'Make it shorter' },
+  { intent: 'longer', label: 'Make it longer' },
+];
+
+/** What a request to the assistant looks like, and what comes back. */
+export interface WriteRequest {
+  intent: string;
+  instruction: string;
+  selection: string;
+}
+
+export type WriteResult =
+  | { ok: true; data: { html: string; text: string } }
+  | { ok: false; error: string };
+
 export function TextToolbar({
   anchor,
   onExec,
   onStyle,
   align,
   onAlign,
+  onWrite,
 }: {
   /** The element being edited, so the toolbar can sit above it before it is moved. */
   anchor: HTMLElement | null;
@@ -204,12 +231,37 @@ export function TextToolbar({
    */
   align: string;
   onAlign: (value: string) => void;
+  /**
+   * Ask the writing assistant for some copy.
+   *
+   * A PROP RATHER THAN A DIRECT CALL to the server action, for the same reason
+   * every other action in this component is one: the standalone review copy
+   * bundles this file and has no server behind it. The shell supplies the real
+   * one and the harness supplies a double, so the panel below is exercised in
+   * both. Absent means the assistant is not available, and the button is not
+   * drawn at all rather than drawn and disabled.
+   */
+  onWrite?: (request: WriteRequest) => Promise<WriteResult>;
 }) {
   const [position, setPosition] = useState<Point | null>(null);
   const [linking, setLinking] = useState(false);
   const [href, setHref] = useState('');
   /** The last address was not one we will link to. Shown, not swallowed. */
   const [refused, setRefused] = useState(false);
+  /** The writing panel: open, what has been typed, and what went wrong. */
+  const [asking, setAsking] = useState(false);
+  const [instruction, setInstruction] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [failure, setFailure] = useState<string | null>(null);
+  /**
+   * The words that were highlighted when the panel was opened.
+   *
+   * Captured then rather than read when Write is pressed, because typing in the
+   * panel's own box moves the document's selection into that box and the
+   * highlight is gone by the time there is anything to send. Same problem the
+   * link panel and the hex box have, and the same shape of answer.
+   */
+  const [selectedText, setSelectedText] = useState('');
   /** Which swatch tray is open, if any. Only ever one. */
   const [tray, setTray] = useState<'color' | 'background-color' | null>(null);
   /** A colour typed in rather than picked. Held while it is being typed. */
@@ -218,6 +270,7 @@ export function TextToolbar({
 
   const drag = useRef<{ dx: number; dy: number } | null>(null);
   const linkInput = useRef<HTMLInputElement>(null);
+  const askInput = useRef<HTMLTextAreaElement>(null);
   const el = useRef<HTMLDivElement>(null);
   /** The selection to put the link on, saved before the input steals it. */
   const savedRange = useRef<Range | null>(null);
@@ -508,6 +561,74 @@ export function TextToolbar({
     savedRange.current = null;
   }
 
+  /**
+   * Ask the assistant, then put what comes back where the words were.
+   *
+   * THE ANSWER GOES IN THROUGH THE SAME DOOR AS TYPING, which is the decision
+   * worth defending. insertHTML runs through onExec, which runs through the
+   * shell's withHost, which commits the block's HTML the same way a keystroke
+   * does. So the result lands in the undo history, gets sanitised on save, and
+   * can be deleted with one ctrl-Z if it is not wanted. An assistant that wrote
+   * straight into the document, outside undo, would be one whose mistakes you
+   * have to repair by hand.
+   *
+   * With words selected, insertHTML REPLACES them, which is what improve,
+   * shorter and longer mean. With nothing selected it inserts at the caret,
+   * which is what write means. That is the browser's own behaviour and it
+   * happens to be exactly right, so nothing here has to arrange it.
+   */
+  async function askFor(intent: string) {
+    if (!onWrite || busy) return;
+
+    const words = selectedText.trim();
+    if (intent !== 'write' && !words) {
+      setFailure('Highlight the words you would like changed first.');
+      return;
+    }
+    if (intent === 'write' && !instruction.trim()) {
+      setFailure('Say what you would like written.');
+      return;
+    }
+
+    setBusy(true);
+    setFailure(null);
+
+    let result: WriteResult;
+    try {
+      result = await onWrite({ intent, instruction: instruction.trim(), selection: words });
+    } catch {
+      // A thrown action means the network went, or the deploy did. Neither is
+      // something to show a stack trace for.
+      result = { ok: false, error: 'Could not reach the assistant. Try again in a moment.' };
+    }
+
+    setBusy(false);
+
+    if (!result.ok) {
+      setFailure(result.error);
+      return;
+    }
+
+    /*
+     * The words back first, like the link and the hex box do. Typing in the
+     * panel moved the selection into the panel, so without this the copy would
+     * be inserted wherever the caret happened to collapse to.
+     */
+    const range = savedRange.current;
+    if (range) {
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+    }
+
+    onExec('insertHTML', result.data.html);
+
+    setAsking(false);
+    setInstruction('');
+    setSelectedText('');
+    savedRange.current = null;
+  }
+
   /** Remember what is selected, before anything can take it away. */
   function rememberSelection() {
     const selection = window.getSelection();
@@ -715,6 +836,40 @@ export function TextToolbar({
         <Icon name="clear-format" size={16} />
       </button>
 
+      {/*
+        The assistant, LAST and marked out from the rest.
+
+        Last because the buttons to its left are the ones pressed twenty times a
+        page, and marked out because it is the only control here that does
+        something you have to read afterwards. Everything else is a formatting
+        change you can see happen.
+
+        Absent rather than disabled when there is no onWrite. A sparkle that does
+        nothing is the button-that-appears-to-work problem this file already has
+        a rule about.
+      */}
+      {onWrite && (
+        <button
+          type="button"
+          className="ed-tt__btn is-ai"
+          title="Ask for some writing"
+          aria-label="Ask for some writing"
+          aria-pressed={asking}
+          onClick={() => {
+            const selection = window.getSelection();
+            rememberSelection();
+            setSelectedText(selection ? selection.toString() : '');
+            setFailure(null);
+            setAsking((open) => !open);
+            // After the panel exists. A click, which is the exception the
+            // no-focus-on-render rule names.
+            window.setTimeout(() => askInput.current?.focus(), 0);
+          }}
+        >
+          <Icon name="sparkle" size={16} />
+        </button>
+      )}
+
       {tray && (
         /*
          * NO stopPropagation ON THE TRAY ITSELF.
@@ -838,6 +993,124 @@ export function TextToolbar({
               That is not a web address we can link to. Try one starting https://
             </p>
           )}
+        </div>
+      )}
+
+      {asking && onWrite && (
+        /*
+         * NO stopPropagation ON THE PANEL, only on the box you type in.
+         *
+         * The same arrangement the swatch tray uses, and the first version of
+         * this got it wrong. The toolbar root refuses mousedown, which is what
+         * keeps the highlighted words highlighted while you press something.
+         * Re-enabling it for the whole panel meant clicking "Make it shorter"
+         * blurred the paragraph and collapsed the selection, so the new copy was
+         * inserted AFTER the words instead of over them. Measured: 369
+         * characters became 428 when it should have got shorter.
+         *
+         * Only the textarea opts back in, because a box you cannot click into is
+         * not a box, and askFor puts the words back before it inserts anything.
+         */
+        <div className="ed-tt__ask">
+          <p className="ed-tt__ask-title">What would you like written?</p>
+
+          <textarea
+            ref={askInput}
+            className="ed-tt__ask-box"
+            rows={2}
+            maxLength={500}
+            value={instruction}
+            disabled={busy}
+            aria-label="What would you like written"
+            placeholder="A short paragraph about our tailor-made trips to Greece"
+            // The one thing in the panel that may take focus. See the note above.
+            onMouseDown={(event) => event.stopPropagation()}
+            onChange={(event) => {
+              setInstruction(event.target.value);
+              setFailure(null);
+            }}
+            onKeyDown={(event) => {
+              /*
+               * Enter sends, shift-Enter makes a new line. The box is two rows
+               * and the thing typed into it is a sentence, so sending is far
+               * more often what was meant.
+               */
+              if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                void askFor('write');
+              }
+              if (event.key === 'Escape') {
+                event.preventDefault();
+                setAsking(false);
+                setInstruction('');
+                setFailure(null);
+              }
+            }}
+          />
+
+          <div className="ed-tt__ask-row">
+            <button
+              type="button"
+              className="ed-tt__ask-go"
+              disabled={busy}
+              onClick={() => void askFor('write')}
+            >
+              {busy ? 'Writing…' : 'Write it'}
+            </button>
+            {/*
+              Said plainly rather than left to be worked out. With words
+              highlighted the answer replaces them; without, it lands at the
+              caret. Those are different enough that somebody should know which
+              they are about to get.
+            */}
+            <span className="ed-tt__ask-note">
+              {selectedText.trim()
+                ? 'This will replace the words you have highlighted.'
+                : 'This will be added where the cursor is.'}
+            </span>
+          </div>
+
+          {/*
+            The quick edits, only when there are words for them to work on. See
+            the note on QUICK: "make this shorter" with nothing highlighted has
+            no honest answer.
+          */}
+          {selectedText.trim() && (
+            <div className="ed-tt__ask-quick">
+              {QUICK.map((entry) => (
+                <button
+                  key={entry.intent}
+                  type="button"
+                  className="ed-tt__ask-chip"
+                  disabled={busy}
+                  onClick={() => void askFor(entry.intent)}
+                >
+                  {entry.label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/*
+            Its own class, not .ed-tt__refused. That one is absolutely
+            positioned and nowrap because it hangs under a one-line link row;
+            inside a panel it would sit below the panel and run off the side.
+          */}
+          {failure && (
+            <p className="ed-tt__ask-error" role="alert">
+              {failure}
+            </p>
+          )}
+
+          {/*
+            Where the tone comes from, said once, where somebody can act on it.
+            The first thing anybody asks when the copy does not sound like them
+            is how to change that, and the answer is a screen they have probably
+            never opened.
+          */}
+          <p className="ed-tt__ask-hint">
+            The tone comes from your company profile, in Settings.
+          </p>
         </div>
       )}
     </div>

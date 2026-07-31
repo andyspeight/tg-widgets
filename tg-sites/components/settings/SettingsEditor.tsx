@@ -34,7 +34,7 @@ import { Icon } from '../editor/Icon';
 import { ImageField } from '../media/ImageField';
 import './settings.css';
 
-type Tab = 'analytics' | 'branding' | 'language' | 'code';
+type Tab = 'company' | 'analytics' | 'branding' | 'language' | 'code';
 
 interface Props {
   siteName: string;
@@ -49,7 +49,15 @@ interface Props {
 export function SettingsEditor({ siteName, initial, canEditCode }: Props) {
   const [settings, setSettings] = useState<SiteSettings>(initial);
   const [saved, setSaved] = useState<SiteSettings>(initial);
-  const [tab, setTab] = useState<Tab>('analytics');
+  /*
+   * Opens on Your company, which is also the first tab.
+   *
+   * It used to open on Analytics because Analytics was the only thing here. Now
+   * that the profile decides what the writing assistant says on every page, it
+   * is both the most useful panel and the one a new site has not filled in, and
+   * a tablist whose first tab is not the selected one on load reads as a bug.
+   */
+  const [tab, setTab] = useState<Tab>('company');
   const [message, setMessage] = useState<string | null>(null);
   const [busy, startTransition] = useTransition();
 
@@ -92,6 +100,7 @@ export function SettingsEditor({ siteName, initial, canEditCode }: Props) {
   }
 
   const TABS: Array<{ id: Tab; label: string }> = [
+    { id: 'company', label: 'Your company' },
     { id: 'analytics', label: 'Analytics' },
     { id: 'branding', label: 'Icons and sharing' },
     { id: 'language', label: 'Language' },
@@ -106,8 +115,9 @@ export function SettingsEditor({ siteName, initial, canEditCode }: Props) {
             <p className="sv-eyebrow">Settings</p>
             <h1 className="sv-title">{siteName}</h1>
             <p className="sv-url">
-              Tracking, the icons in a browser tab and on a phone, and the picture
-              that shows when somebody shares a page.
+              What the writing assistant knows about you, tracking, the icons in a
+              browser tab and on a phone, and the picture that shows when somebody
+              shares a page.
             </p>
           </div>
           <a className="sv-btn" href="/sites">
@@ -136,6 +146,107 @@ export function SettingsEditor({ siteName, initial, canEditCode }: Props) {
             </button>
           ))}
         </div>
+
+        {/*
+          WHO THIS COMPANY IS, for the writing assistant to read.
+
+          Andy, 31 Jul 2026: "an area in settings where users can add a company
+          profile, so it tells the AI about the company, the writing style and
+          the tone of voice".
+
+          Four boxes rather than one, because "tell us about your company" gets a
+          postal address and "how should this sound" gets something usable. It
+          also means the AI can be given the tone WITHOUT the history, which is
+          usually the right prompt for a heading.
+
+          First tab, because it is the one that changes what the product does for
+          you rather than what a page reports to Google.
+        */}
+        {tab === 'company' && (
+          <section className="tv-group">
+            <h2 className="tv-group__title">Your company</h2>
+            <p className="tv-note">
+              This is what the writing assistant knows about you. The more you put
+              here, the more the copy it suggests will sound like you rather than
+              like anybody.
+            </p>
+
+            <div className="tv-field">
+              <label className="tv-field__label" htmlFor="company-name">
+                Company name
+              </label>
+              <input
+                id="company-name"
+                className="tv-input"
+                type="text"
+                maxLength={120}
+                value={settings.companyName}
+                placeholder="Sunvil Travel"
+                onChange={(event) => set('companyName', event.target.value)}
+              />
+            </div>
+
+            <div className="tv-field">
+              <label className="tv-field__label" htmlFor="company-about">
+                What you do, and who for
+              </label>
+              <textarea
+                id="company-about"
+                className="tv-textarea"
+                rows={5}
+                maxLength={1200}
+                value={settings.companyAbout}
+                placeholder={
+                  'Tailor-made holidays to Greece and Cyprus, mostly for couples '
+                  + 'and families in their forties and up. Every trip is put together '
+                  + 'by somebody who has been there. We do not sell package deals.'
+                }
+                onChange={(event) => set('companyAbout', event.target.value)}
+              />
+              <p className="tv-field__help">
+                The facts the writing has to stay inside. The assistant will not
+                invent a speciality, an award or a place you have not mentioned.
+              </p>
+            </div>
+
+            <div className="tv-field">
+              <label className="tv-field__label" htmlFor="tone-of-voice">
+                How it should sound
+              </label>
+              <textarea
+                id="tone-of-voice"
+                className="tv-textarea"
+                rows={3}
+                maxLength={600}
+                value={settings.toneOfVoice}
+                placeholder={
+                  'Warm and unhurried, like a person who has been there talking to '
+                  + 'a friend. Confident without pushing. Never salesy.'
+                }
+                onChange={(event) => set('toneOfVoice', event.target.value)}
+              />
+            </div>
+
+            <div className="tv-field">
+              <label className="tv-field__label" htmlFor="avoid">
+                Words and claims to keep out
+              </label>
+              <textarea
+                id="avoid"
+                className="tv-textarea"
+                rows={3}
+                maxLength={600}
+                value={settings.avoid}
+                placeholder={'bucket list, hidden gem, once in a lifetime, cheapest, guaranteed'}
+                onChange={(event) => set('avoid', event.target.value)}
+              />
+              <p className="tv-field__help">
+                Often the most useful box of the four. UK English, no em dashes and
+                no marketing cliche are already on by default, for every site.
+              </p>
+            </div>
+          </section>
+        )}
 
         {tab === 'analytics' && (
           <section className="tv-group">

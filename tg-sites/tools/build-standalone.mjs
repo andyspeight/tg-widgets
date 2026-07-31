@@ -83,6 +83,16 @@ const result = await esbuild.build({
         build.onResolve({ filter: /(^|\/)app\/actions\/media$/ }, () => ({
           path: resolve(root, 'standalone/demo-media-actions.ts'),
         }));
+        /*
+         * And the writing assistant, which has a third reason on top of the
+         * Postgres driver: the real one calls Anthropic with a key that bills
+         * Travelgenix. A review copy anybody can open must not be able to spend
+         * money, and a key bundled into a static file would not be a key for
+         * long either.
+         */
+        build.onResolve({ filter: /(^|\/)app\/actions\/ai$/ }, () => ({
+          path: resolve(root, 'standalone/demo-ai-actions.ts'),
+        }));
       },
     },
   ],

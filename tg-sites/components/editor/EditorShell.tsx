@@ -16,6 +16,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { writeCopyAction } from '../../app/actions/ai';
 import { publishPageAction, saveDraftAction } from '../../app/actions/pages';
 import { PublishHistory } from './PublishHistory';
 import type { Page, Section } from '../../lib/content/schema';
@@ -1103,6 +1104,16 @@ export function EditorShell({
               return host.innerHTML;
             })
           }
+          /*
+           * The writing assistant, behind the same door as everything else.
+           *
+           * The action does the deciding: whether this person is a member, what
+           * the site's tone of voice is, whether there is any allowance left. The
+           * toolbar is handed a promise and a result, and knows none of it. That
+           * is why the panel can be driven in the standalone review copy, which
+           * has a double for this and no server at all.
+           */
+          onWrite={(request) => writeCopyAction(request)}
           align={editing.align}
           onAlign={(value) => {
             const path = parsePathKey(editing.path);

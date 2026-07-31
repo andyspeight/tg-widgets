@@ -113,6 +113,14 @@ insert into public.media
    'sites/beta/media/beta-hero.jpg', 'https://blob.example/beta-hero.jpg',
    'beta-hero.jpg', 'image/jpeg', 180000, 1920, 1080, 'Beta hero', 'pexels');
 
+-- One writing-assistant request each. Inserted up here with the other fixtures
+-- rather than beside the checks that use them, so the "nothing set returns
+-- nothing" block further down has rows it could leak. A meter fixture created
+-- after that block would make its ai_usage count zero for the boring reason.
+insert into public.ai_usage (tenant_id, user_id, intent) values
+  ('11111111-1111-1111-1111-111111111111', 'iso-user-ann', 'write'),
+  ('22222222-2222-2222-2222-222222222222', 'iso-user-bob', 'write');
+
 create temp table if not exists checks (
   ord    serial,
   name   text,
@@ -160,7 +168,7 @@ where n.nspname = 'public' and c.relkind = 'r'
 -- rather than everything.
 do $$
 declare pages int; tenants int; domains int; members int; creds int;
-        fonts int; font_files int; media int;
+        fonts int; font_files int; media int; ai int;
 begin
   set local role tg_sites_app;
   -- All three, by name. This block does not depend on running early, so
@@ -177,6 +185,7 @@ begin
   select count(*) into fonts   from public.fonts;
   select count(*) into font_files from public.font_files;
   select count(*) into media   from public.media;
+  select count(*) into ai      from public.ai_usage;
 
   -- Step back out before recording. The roles under test have no business
   -- writing anywhere, including to this scratch table.
@@ -184,9 +193,9 @@ begin
   insert into checks (name, passed, detail) values
     ('a query with nothing set returns nothing',
      pages = 0 and tenants = 0 and domains = 0 and members = 0 and creds = 0
-       and fonts = 0 and font_files = 0 and media = 0,
-     format('pages %s, tenants %s, domains %s, memberships %s, credentials %s, fonts %s, files %s, media %s',
-            pages, tenants, domains, members, creds, fonts, font_files, media));
+       and fonts = 0 and font_files = 0 and media = 0 and ai = 0,
+     format('pages %s, tenants %s, domains %s, memberships %s, credentials %s, fonts %s, files %s, media %s, usage %s',
+            pages, tenants, domains, members, creds, fonts, font_files, media, ai));
 end $$;
 
 -- ---------------------------------------------------------------------------
@@ -761,12 +770,103 @@ begin
      not deleted, case when deleted then 'IT DELETED THEM' else 'refused' end);
 end $$;
 
+-- ---------------------------------------------------------------------------
+-- The writing assistant's spend limit
+-- ---------------------------------------------------------------------------
+--
+-- ai_usage is not client data, it is a METER, and that changes which properties
+-- matter. A leak here is minor: the worst it says is how often somebody asked for
+-- help writing a paragraph. What must hold is that the count cannot be got rid
+-- of, because the count is the only thing standing between a login and
+-- Travelgenix's Anthropic bill.
+--
+-- Three ways to get rid of it, and all three are checked: delete the rows, move
+-- them out of the window by rewriting created_at, or write them against somebody
+-- else's tenant so the cost lands on a different site.
+
+-- The fixtures are up at the top with the rest. See the note there.
+
+do $$
+declare
+  own int; other int;
+  planted boolean := true; removed boolean := true; backdated boolean := true;
+  counted int;
+begin
+  set local role tg_sites_app;
+  perform set_config('app.current_tenant_id', '11111111-1111-1111-1111-111111111111', true);
+
+  select count(*) into own   from public.ai_usage;
+  select count(*) into other from public.ai_usage
+    where tenant_id = '22222222-2222-2222-2222-222222222222';
+
+  -- Billing the other tenant for your own request. The WITH CHECK half of the
+  -- policy is what refuses this, and without it a site could spend somebody
+  -- else's allowance and leave them refused for the rest of the day.
+  begin
+    insert into public.ai_usage (tenant_id, user_id, intent)
+    values ('22222222-2222-2222-2222-222222222222', 'iso-user-ann', 'write');
+  exception when others then planted := false; end;
+
+  -- Clearing the meter. There is deliberately no DELETE grant.
+  begin
+    delete from public.ai_usage;
+  exception when others then removed := false; end;
+
+  /*
+   * The subtle one, and the reason the UPDATE grant names its columns.
+   *
+   * The limit counts rows newer than a moment. A table-wide UPDATE grant would
+   * carry created_at with it, so one statement moving every row back two days
+   * empties the window and hands the allowance back. recordTokens only ever
+   * writes the two token counts, so that is all the grant covers.
+   */
+  begin
+    update public.ai_usage set created_at = now() - interval '2 days';
+  exception when others then backdated := false; end;
+
+  select count(*) into counted from public.ai_usage
+    where created_at > now() - interval '24 hours';
+
+  reset role;
+  insert into checks (name, passed, detail) values
+    ('a tenant sees its own usage', own = 1, 'saw ' || own || ' of 1'),
+    ('and none of another tenants', other = 0, 'leaked ' || other),
+    ('a tenant cannot bill its requests to another site',
+     not planted, case when planted then 'IT PLANTED ONE' else 'the policy refused it' end),
+    ('the meter cannot be cleared by the thing being metered',
+     not removed, case when removed then 'IT DELETED THE ROWS' else 'no DELETE grant' end),
+    ('and it cannot be backdated out of the window either',
+     not backdated,
+     case when backdated then 'created_at WAS REWRITTEN' else 'no UPDATE grant on created_at' end),
+    ('so the request still counts against today',
+     counted = 1, counted || ' in the window');
+end $$;
+
+-- The token counts DO have to be writable, or nothing could record what a call
+-- cost. Checked as well, because a grant narrowed too far breaks the feature
+-- quietly: recordTokens swallows its own errors on purpose.
+do $$
+declare wrote boolean := true; got int;
+begin
+  set local role tg_sites_app;
+  perform set_config('app.current_tenant_id', '11111111-1111-1111-1111-111111111111', true);
+  begin
+    update public.ai_usage set input_tokens = 900, output_tokens = 120;
+  exception when others then wrote := false; end;
+  select coalesce(max(input_tokens), -1) into got from public.ai_usage;
+  reset role;
+
+  insert into checks (name, passed, detail) values
+    ('what a call cost can still be written down', wrote and got = 900,
+     case when wrote then 'recorded ' || got else 'THE UPDATE WAS REFUSED' end);
+end $$;
+
 -- Deleting a tenant must take its fonts, their bytes and its media rows with it.
 -- A removed client's licensed font files must not stay in the database, and a
 -- media row left behind is a dangling reference to a blob nobody will ever tidy
 -- up: the row is the only record that the object exists.
 do $$
-declare fonts_left int; files_left int; media_left int;
+declare fonts_left int; files_left int; media_left int; usage_left int;
 begin
   delete from public.tenants where id = '22222222-2222-2222-2222-222222222222';
 
@@ -776,13 +876,19 @@ begin
     where font_id = 'dddd0000-0000-0000-0000-00000000d001';
   select count(*) into media_left from public.media
     where id = 'ffff0000-0000-0000-0000-00000000f001';
+  select count(*) into usage_left from public.ai_usage
+    where tenant_id = '22222222-2222-2222-2222-222222222222';
 
   insert into checks (name, passed, detail) values
     ('deleting a tenant removes its fonts and their bytes',
      fonts_left = 0 and files_left = 0,
      format('fonts %s, files %s', fonts_left, files_left)),
     ('deleting a tenant removes its media rows',
-     media_left = 0, 'left behind ' || media_left);
+     media_left = 0, 'left behind ' || media_left),
+    -- Otherwise a removed client's meter rows keep pointing at a tenant that is
+    -- gone, and the table grows forever with nothing able to read it.
+    ('deleting a tenant removes its usage rows',
+     usage_left = 0, 'left behind ' || usage_left);
 end $$;
 
 -- ---------------------------------------------------------------------------

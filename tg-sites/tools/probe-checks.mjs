@@ -21,6 +21,25 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 
+/**
+ * The browser suites a mutation can be checked against.
+ *
+ * Two, because the editor and the settings screen are separate harnesses with
+ * separate bundles. A mutation names the one whose checks are supposed to catch
+ * it, and running only that suite keeps a probe to about a minute rather than
+ * building both every time.
+ */
+const SUITES = {
+  editor: {
+    build: 'node tools/build-standalone.mjs',
+    verify: 'node tools/verify-standalone.mjs',
+  },
+  settings: {
+    build: 'node tools/build-theme-harness.mjs',
+    verify: 'node tools/verify-settings.mjs',
+  },
+};
+
 const MUTATIONS = [
   {
     check: 'selecting the words with the mouse keeps the toolbar',
@@ -211,8 +230,134 @@ const MUTATIONS = [
     check: 'and fits on one row on an ordinary screen',
     why: 'Put the width cap back where it forced a second row holding two buttons.',
     file: 'components/editor/editor.css',
-    from: `  max-width: min(860px, calc(100vw - 32px));`,
+    from: `  max-width: min(900px, calc(100vw - 32px));`,
     to: `  max-width: min(700px, calc(100vw - 32px));`,
+  },
+
+  // --- the writing assistant -----------------------------------------------
+
+  {
+    check: 'and the copy is in the page state, not only on the canvas',
+    why: 'Write the answer straight into the element, outside undo and outside the save.',
+    file: 'components/editor/TextToolbar.tsx',
+    from: `    onExec('insertHTML', result.data.html);`,
+    to: `    document.execCommand('insertHTML', false, result.data.html);`,
+  },
+  {
+    check: 'making it shorter replaces the words rather than adding to them',
+    why: 'Skip putting the selection back, so the copy lands after the words instead of over them.',
+    file: 'components/editor/TextToolbar.tsx',
+    from: `    const range = savedRange.current;
+    if (range) {
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+    }
+
+    onExec('insertHTML', result.data.html);`,
+    to: `    onExec('insertHTML', result.data.html);`,
+  },
+  {
+    check: 'a refusal is shown in the panel rather than swallowed',
+    why: 'Return quietly on a refusal, which is a button that does nothing and says nothing.',
+    file: 'components/editor/TextToolbar.tsx',
+    from: `    if (!result.ok) {
+      setFailure(result.error);
+      return;
+    }`,
+    to: `    if (!result.ok) {
+      return;
+    }`,
+  },
+  {
+    check: 'and the quick edits are not offered yet, because there is no this',
+    why: 'Offer Improve and Shorter with nothing highlighted, so they act on nothing.',
+    file: 'components/editor/TextToolbar.tsx',
+    from: `          {selectedText.trim() && (
+            <div className="ed-tt__ask-quick">`,
+    to: `          {true && (
+            <div className="ed-tt__ask-quick">`,
+  },
+  {
+    check: 'and it is marked out from the twenty buttons beside it',
+    why: 'Rename the rule, so the sparkle looks like every other button on the bar.',
+    file: 'components/editor/editor.css',
+    from: `.ed-tt__btn.is-ai { color: #a5b4fc; }`,
+    to: `.ed-tt__btn.is-ai-renamed { color: #a5b4fc; }`,
+  },
+  {
+    check: 'the panel opens inside the window, not off the edge of it',
+    why: 'Anchor it to the button instead of the bar, which pushes 340px off the right edge.',
+    file: 'components/editor/editor.css',
+    from: `  top: calc(100% + 6px);
+  right: 4px;
+  width: 340px;`,
+    to: `  top: calc(100% + 6px);
+  left: calc(100% - 40px);
+  width: 340px;`,
+  },
+
+  // --- the brand profile, on the settings screen ---------------------------
+
+  {
+    suite: 'settings',
+    check: 'the profile fields are styled, not the browser defaults',
+    why: 'Rename the rule, so the class matches nothing and the fields go native.',
+    file: 'components/theme/theme.css',
+    from: `.tv-input,
+.tv-textarea {
+  display: block;`,
+    to: `.tv-input-renamed,
+.tv-textarea-renamed {
+  display: block;`,
+  },
+  {
+    suite: 'settings',
+    check: 'the about box is tall enough to write a paragraph in',
+    why: 'Two rows, which is what a textarea gives you if nobody asks for more.',
+    file: 'components/settings/SettingsEditor.tsx',
+    from: `                className="tv-textarea"
+                rows={5}
+                maxLength={1200}`,
+    to: `                className="tv-textarea"
+                rows={1}
+                maxLength={1200}`,
+  },
+  {
+    suite: 'settings',
+    check: 'the note under the heading has room before the first field',
+    why: 'Drop the positional rule, so the intro sits flush against the field.',
+    file: 'components/theme/theme.css',
+    from: `.tv-group__title + .tv-note {
+  margin-top: 0;
+  margin-bottom: var(--ed-5);
+}`,
+    to: '',
+  },
+  {
+    suite: 'settings',
+    check: 'each box writes to its own field',
+    why: 'The copy-paste bug: two boxes writing to the same key.',
+    file: 'components/settings/SettingsEditor.tsx',
+    from: `                onChange={(event) => set('avoid', event.target.value)}`,
+    to: `                onChange={(event) => set('toneOfVoice', event.target.value)}`,
+  },
+  {
+    suite: 'settings',
+    check: 'the screen opens on Your company, and it is the first tab',
+    why: 'Open on Analytics again, so the first tab is not the selected one.',
+    file: 'components/settings/SettingsEditor.tsx',
+    from: `  const [tab, setTab] = useState<Tab>('company');`,
+    to: `  const [tab, setTab] = useState<Tab>('analytics');`,
+  },
+  {
+    suite: 'settings',
+    check: 'the long box stops at its limit rather than truncating on save',
+    why: 'Leave the cap to the schema, which trims silently after the fact.',
+    file: 'components/settings/SettingsEditor.tsx',
+    from: `                maxLength={600}
+                value={settings.toneOfVoice}`,
+    to: `                value={settings.toneOfVoice}`,
   },
 ];
 
@@ -291,11 +436,13 @@ try {
       continue;
     }
 
+    const suite = SUITES[mutation.suite ?? 'editor'];
+
     writeFileSync(target, original.replace(mutation.from, mutation.to));
     let output = '';
     try {
-      run('node tools/build-standalone.mjs');
-      output = run('node tools/verify-standalone.mjs');
+      run(suite.build);
+      output = run(suite.verify);
     } catch (error) {
       output = `${error.stdout ?? ''}${error.stderr ?? ''}`;
     } finally {

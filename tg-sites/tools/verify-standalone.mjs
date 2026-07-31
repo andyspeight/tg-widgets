@@ -91,12 +91,33 @@ await page.goto(pathToFileURL(file).href);
 await page.waitForSelector('.ed-root', { timeout: 15000 });
 
 const checks = [];
+/*
+ * PROGRESS ON STDERR WHILE IT RUNS, and the reason is worth writing down.
+ *
+ * The results are collected and printed together at the end, which is right: a
+ * sorted list with the failures gathered is what somebody wants to read. What was
+ * wrong was that NOTHING came out until then. This suite takes several minutes and
+ * two sessions in a row have sat watching an empty file wondering whether it had
+ * hung, killed it, and started again.
+ *
+ * So each check names itself as it finishes, on stderr rather than stdout, which
+ * keeps `node tools/verify-standalone.mjs > out.txt` producing exactly the report
+ * it produced before. Set TG_QUIET=1 to turn it off.
+ */
+const quiet = process.env.TG_QUIET === '1';
+let done = 0;
+
 const check = async (name, fn) => {
   try {
     const value = await fn();
     checks.push([name, value === true ? 'PASS' : `FAIL (${value})`]);
   } catch (error) {
     checks.push([name, `FAIL (${error.message})`]);
+  }
+  done += 1;
+  if (!quiet) {
+    const [, status] = checks[checks.length - 1];
+    process.stderr.write(`  ${String(done).padStart(3)} ${status.slice(0, 4)}  ${name}\n`);
   }
 };
 
@@ -376,9 +397,47 @@ await check('phone viewport stacks columns', async () => {
   return columns.split(' ').length === 1 ? true : `grid is "${columns}"`;
 });
 
+/**
+ * Put the outline panel back, if choosing Desktop folded it away.
+ *
+ * DESKTOP FOLDS THE PANELS ON PURPOSE. Andy asked for it on 31 Jul 2026: a 1200px
+ * preview cannot be drawn in the 800px left between two panels, so Desktop takes
+ * the room it needs. Everything the outline holds goes with it, including the
+ * section toggles and the Add content buttons.
+ *
+ * Which broke these checks rather than the product: they clicked Desktop to undo
+ * the Phone click above, then clicked into an outline that was no longer there,
+ * and Playwright waited on an element that would never become clickable. Worth
+ * naming because the same trap is waiting for the next check that reaches into
+ * the outline after touching the viewport buttons.
+ */
+async function showOutline() {
+  await showPanels();
+}
+
+/**
+ * Both panels back, and it also has to survive a reload.
+ *
+ * The folded state is remembered in localStorage, deliberately, so somebody who
+ * folds a panel does not have to fold it again tomorrow. Which means a
+ * page.reload() in the middle of this file does NOT undo a fold: it restores it.
+ * Every check that reads the outline or the properties pane after touching the
+ * viewport buttons needs this, reload or no reload.
+ */
+async function showPanels() {
+  for (const label of ['Show the page panel', 'Show the settings panel']) {
+    const button = page.locator(`[aria-label="${label}"]`);
+    if (await button.count()) {
+      await button.click();
+      await page.waitForTimeout(150);
+    }
+  }
+}
+
 await check('block picker opens from a section', async () => {
   await page.getByRole('button', { name: 'Desktop' }).click();
   await page.waitForTimeout(200);
+  await showOutline();
   await page.locator('.ed-sec-toggle').first().click();
   await page.waitForTimeout(300);
   await page.locator('.ed-add', { hasText: 'Add content' }).first().click();
@@ -510,13 +569,42 @@ await check('every designed card draws its own wireframe', async () => {
 await check('a preset builds a section with its content already in it', async () => {
   const before = await page.locator('.tgs-section').count();
 
-  await page.locator('.ed-preset-card', { hasText: 'Four short points' }).click();
+  /*
+   * THE TEXT CATEGORY FIRST. The Designed tab opens on whichever category is
+   * first in the list, and since the Blank library landed that is Blank, not
+   * Text. This check names a Text preset, so it has to go and get it.
+   */
+  await page.locator('.ed-designed__cat', { hasText: 'Text' }).first().click();
+  await page.waitForTimeout(300);
+
+  /*
+   * MATCHED ON THE NAME ELEMENT, not on the card's text.
+   *
+   * hasText searches everything inside the card, name and description alike, and
+   * the Blank library added a card called "Four points" whose description opens
+   * "Four short points across the page". So `hasText: 'Four short points'` began
+   * matching two cards and the click failed on the ambiguity, which read as the
+   * preset being broken rather than as the selector being loose.
+   */
+  await page
+    .locator('.ed-preset-card')
+    .filter({ has: page.locator('.ed-preset-card__name', { hasText: /^Four short points$/ }) })
+    .first()
+    .click();
   await page.waitForTimeout(500);
 
   const after = await page.locator('.tgs-section').count();
   if (after !== before + 1) return `sections went ${before} -> ${after}`;
 
-  const section = page.locator('.tgs-section').first();
+  /*
+   * THE NEW SECTION, not the first one on the page.
+   *
+   * This read `.tgs-section` first and described the seed page's opening
+   * section back at you: "2 columns, saying Tailor-made travel". Add a section
+   * appends, so the new one is last, and a check that looks at the wrong
+   * section reports a working preset as broken.
+   */
+  const section = page.locator('.tgs-section').last();
   const columns = await section.locator('.tgs-col').count();
   const text = await section.innerText();
   const ok = columns === 4 && /short title/i.test(text);
@@ -716,6 +804,9 @@ await check('dark mode: body text clears 4.5:1 on the panel', async () => {
  */
 await page.reload();
 await page.waitForSelector('.ed-root');
+// A reload RESTORES a folded panel rather than clearing it, and both of these
+// read from the outline and the properties pane. See showPanels.
+await showPanels();
 
 /*
  * Select something, then open every collapsed group before reading labels.
@@ -729,8 +820,21 @@ async function labelsAfter(select) {
   await select();
   await page.waitForTimeout(200);
 
+  /*
+   * BOUNDED, and the bound is the point rather than tidiness.
+   *
+   * This was `while there is a closed group, click the first one`, with no cap. A
+   * group that does not open on click makes that loop run for ever, and it does
+   * it quietly: each turn is one click and an 80ms wait, so the process sits at
+   * almost no CPU producing no output. Three runs were killed on the suspicion
+   * that Playwright had hung before it turned out to be this.
+   *
+   * Twenty is far more than the pane has ever had. Reaching it means something
+   * is wrong with the pane, so it stops and lets the checks below fail on what
+   * they can see, which is a result somebody can read.
+   */
   const closed = page.locator('.ed-group__head button[aria-expanded="false"]');
-  for (let i = await closed.count(); i > 0; i = await closed.count()) {
+  for (let turn = 0; turn < 20 && (await closed.count()) > 0; turn += 1) {
     await closed.first().click();
     await page.waitForTimeout(80);
   }
@@ -908,6 +1012,8 @@ await check('padding typed into the box reaches the page', async () => {
  */
 await page.reload();
 await page.waitForSelector('.ed-root');
+// Everything below reaches into the outline, and a fold survives a reload.
+await showPanels();
 
 /*
  * Expand the first section, if it is not already.
@@ -2385,6 +2491,269 @@ await check('and Bold then applies to those words', async () => {
   return onCanvas && inState ? true : `canvas ${onCanvas}, state ${inState}`;
 });
 
+// ---------------------------------------------------------------------------
+// The writing assistant
+//
+// Driven against standalone/demo-ai-actions.ts, which answers with real-shaped
+// copy rather than a stub. That is what makes these worth running: the claims
+// below are about where the answer LANDS, and a double returning "ok" could not
+// tell you whether two paragraphs replaced the highlighted words or were added
+// after them.
+// ---------------------------------------------------------------------------
+
+/** Select some words in the first paragraph, so the toolbar is up and armed. */
+async function selectSomeWords() {
+  const host = page.locator('[data-rt-host]:not([data-rt-plain])').first();
+  if (!(await host.count())) return null;
+  const box = await host.boundingBox();
+  await page.mouse.move(box.x + 6, box.y + 12);
+  await page.mouse.down();
+  await page.mouse.move(box.x + 180, box.y + 12, { steps: 12 });
+  await page.mouse.up();
+  await page.waitForTimeout(250);
+  return host;
+}
+
+/**
+ * A caret in the paragraph and NOTHING highlighted.
+ *
+ * Its own helper because the checks below care about the difference, and because
+ * the check before this block leaves a drag-selection behind. The first version
+ * of these inherited it and reported "it says it will replace them" when it was
+ * meant to be testing the empty case, which looked like a bug in the panel and
+ * was a bug in the setup.
+ */
+async function placeCaret() {
+  const host = page.locator('[data-rt-host]:not([data-rt-plain])').first();
+  if (!(await host.count())) return null;
+  const box = await host.boundingBox();
+  await page.mouse.click(box.x + 20, box.y + 12);
+  await page.waitForTimeout(250);
+  return host;
+}
+
+/** Shut the writing panel if a check left it open, so the next toggle opens it. */
+async function closeAskPanel() {
+  if (await page.locator('.ed-tt__ask').count()) {
+    await page.locator('.ed-tt__btn[aria-label="Ask for some writing"]').click();
+    await page.waitForTimeout(200);
+  }
+}
+
+await check('the toolbar carries a button for the writing assistant', async () => {
+  const button = page.locator('.ed-tt__btn[aria-label="Ask for some writing"]');
+  return (await button.count()) === 1 ? true : `${await button.count()} of them`;
+});
+
+await check('and it is marked out from the twenty buttons beside it', async () => {
+  // Not just a class name: the class has to resolve to a rule, which is the gap
+  // nothing else in this suite covers.
+  const [ai, plain] = await page.evaluate(() => {
+    const read = (selector) => {
+      const el = document.querySelector(selector);
+      return el ? getComputedStyle(el).color : '';
+    };
+    return [
+      read('.ed-tt__btn[aria-label="Ask for some writing"]'),
+      read('.ed-tt__btn[aria-label="Bold"]'),
+    ];
+  });
+  return ai && plain && ai !== plain ? true : `assistant ${ai}, bold ${plain}`;
+});
+
+await check('clicking it asks what you want written', async () => {
+  await closeAskPanel();
+  // Caret only. The checks that follow are about the nothing-highlighted case.
+  if (!(await placeCaret())) return 'no paragraph to put a caret in';
+
+  await page.locator('.ed-tt__btn[aria-label="Ask for some writing"]').click();
+  await page.waitForTimeout(250);
+  const panel = page.locator('.ed-tt__ask');
+  if (!(await panel.count())) return 'no panel opened';
+  const title = await panel.locator('.ed-tt__ask-title').innerText();
+  return /what would you like written/i.test(title) ? true : `it says "${title}"`;
+});
+
+/*
+ * A measurement, because a panel is only useful if it is on the screen. The link
+ * panel had exactly this bug: it opened past the right edge with its Apply button
+ * unreachable, and it took a browser check to see it.
+ */
+await check('the panel opens inside the window, not off the edge of it', async () => {
+  const box = await page.locator('.ed-tt__ask').boundingBox();
+  const width = page.viewportSize().width;
+  if (!box) return 'no box';
+  return box.x >= 0 && box.x + box.width <= width + 1
+    ? true
+    : `x ${Math.round(box.x)}, width ${Math.round(box.width)}, viewport ${width}`;
+});
+
+await check('it says the copy will land where the cursor is, with nothing highlighted', async () => {
+  const note = await page.locator('.ed-tt__ask-note').innerText();
+  return /where the cursor is/i.test(note) ? true : `it says "${note}"`;
+});
+
+/*
+ * The quick edits are absent rather than disabled with nothing selected. "Make
+ * this shorter" has no honest answer when there is no this.
+ */
+await check('and the quick edits are not offered yet, because there is no this', async () =>
+  (await page.locator('.ed-tt__ask-chip').count()) === 0
+    ? true
+    : `${await page.locator('.ed-tt__ask-chip').count()} chips with nothing selected`);
+
+await check('an empty request is refused rather than sent', async () => {
+  await page.locator('.ed-tt__ask-go').click();
+  await page.waitForTimeout(300);
+  const error = await page.locator('.ed-tt__ask-error').count();
+  return error === 1 ? true : 'it went ahead with an empty request';
+});
+
+await check('asking for copy puts it in the paragraph', async () => {
+  const host = page.locator('[data-rt-host]:not([data-rt-plain])').first();
+  const before = await host.innerText();
+
+  await page.locator('.ed-tt__ask-box').fill('A paragraph about our trips to Greece');
+  await page.locator('.ed-tt__ask-go').click();
+  await page.waitForTimeout(600);
+
+  const after = await host.innerText();
+  return after.length > before.length && /tailor-made/i.test(after)
+    ? true
+    : `before ${before.length} chars, after ${after.length}`;
+});
+
+/*
+ * IN STATE, not only on the canvas. The whole point of routing the answer through
+ * the same door as typing is that it commits like typing does, so it survives a
+ * save and can be undone. On the canvas only would mean copy that vanishes on
+ * reload, which is the failure mode this codebase has hit before.
+ */
+await check('and the copy is in the page state, not only on the canvas', async () => {
+  const state = await page.locator('.ed-rt').first().innerText();
+  return /tailor-made/i.test(state) ? true : `state has "${state.slice(0, 60)}"`;
+});
+
+await check('the panel closes once the copy has landed', async () =>
+  (await page.locator('.ed-tt__ask').count()) === 0 ? true : 'it stayed open');
+
+await check('and one undo takes it back out again', async () => {
+  const host = page.locator('[data-rt-host]:not([data-rt-plain])').first();
+  await host.click();
+  await page.keyboard.press('Control+z');
+  await page.waitForTimeout(400);
+  const state = await page.locator('.ed-rt').first().innerText();
+  return !/tailor-made/i.test(state) ? true : 'the copy survived an undo';
+});
+
+await check('with words highlighted, the quick edits appear', async () => {
+  await closeAskPanel();
+  if (!(await selectSomeWords())) return 'could not select anything';
+  await page.locator('.ed-tt__btn[aria-label="Ask for some writing"]').click();
+  await page.waitForTimeout(250);
+  const chips = await page.locator('.ed-tt__ask-chip').allInnerTexts();
+  return chips.length === 3 ? true : JSON.stringify(chips);
+});
+
+await check('and the panel says it will replace them', async () => {
+  const note = await page.locator('.ed-tt__ask-note').innerText();
+  return /replace/i.test(note) ? true : `it says "${note}"`;
+});
+
+/*
+ * REPLACES rather than appends, which is the claim every quick edit rests on.
+ *
+ * NOT CHECKED BY LENGTH, and the first version of this was. It selected about
+ * seventeen characters, asked for shorter, and asserted the paragraph got
+ * shorter. It grew, and the growth was correct: a seventeen-character run
+ * replaced by a seventy-character sentence is a longer paragraph and a working
+ * feature. A check that reads "shorter" as "the block shrinks" is measuring the
+ * wrong thing.
+ *
+ * What matters is that the highlighted run is GONE. If the copy had been
+ * appended, those words would still be sitting there in front of it.
+ */
+await check('making it shorter replaces the words rather than adding to them', async () => {
+  const host = page.locator('[data-rt-host]:not([data-rt-plain])').first();
+
+  /*
+   * ITS OWN SELECTION, and the highlighted words READ BEFORE the panel opens.
+   *
+   * Opening the panel puts the cursor in its box, which is what you want when
+   * you are about to type a request, and it collapses the document's selection
+   * as a side effect. The toolbar keeps its own copy from before that happened,
+   * which is why the feature works; a check reading window.getSelection() after
+   * the panel is up reads an empty string and reports "only "" was
+   * highlighted", which looks like the selection never took.
+   */
+  await closeAskPanel();
+  if (!(await selectSomeWords())) return 'could not select anything';
+  const highlighted = (await page.evaluate(() => String(window.getSelection()))).trim();
+  if (highlighted.length < 6) return `only "${highlighted}" was highlighted`;
+
+  await page.locator('.ed-tt__btn[aria-label="Ask for some writing"]').click();
+  await page.waitForTimeout(250);
+
+  await page.locator('.ed-tt__ask-chip', { hasText: 'Make it shorter' }).click();
+  await page.waitForTimeout(600);
+
+  const after = await host.innerText();
+  const stillThere = after.includes(highlighted);
+  const arrived = /Tailor-made trips to Greece/i.test(after);
+
+  return !stillThere && arrived
+    ? true
+    : `the highlighted run is ${stillThere ? 'still there' : 'gone'}, the new copy ${arrived ? 'arrived' : 'did not'}`;
+});
+
+/*
+ * The failure path, visible rather than silent. The double refuses anything with
+ * "fail" in it, which is the shape a spent allowance or an unreachable model
+ * produces.
+ */
+await check('a refusal is shown in the panel rather than swallowed', async () => {
+  await closeAskPanel();
+  await placeCaret();
+  await page.locator('.ed-tt__btn[aria-label="Ask for some writing"]').click();
+  await page.waitForTimeout(250);
+  await page.locator('.ed-tt__ask-box').fill('please fail');
+  await page.locator('.ed-tt__ask-go').click();
+  await page.waitForTimeout(500);
+
+  const error = page.locator('.ed-tt__ask-error');
+  if (!(await error.count())) return 'nothing was said';
+  const text = await error.innerText();
+  const stillOpen = (await page.locator('.ed-tt__ask').count()) === 1;
+  return /busy/i.test(text) && stillOpen ? true : `"${text}", panel open ${stillOpen}`;
+});
+
+await check('and the panel stays open so the request can be corrected', async () => {
+  const value = await page.locator('.ed-tt__ask-box').inputValue();
+  return value === 'please fail' ? true : `the box now holds "${value}"`;
+});
+
+await check('escape closes it', async () => {
+  await page.locator('.ed-tt__ask-box').press('Escape');
+  await page.waitForTimeout(250);
+  return (await page.locator('.ed-tt__ask').count()) === 0 ? true : 'it stayed open';
+});
+
+/*
+ * LEAVE THE PAGE AS IT WAS FOUND.
+ *
+ * These checks put copy into the first paragraph and rewrite it shorter, and the
+ * undo above only takes back the one insert it was checking. The checks further
+ * down count blocks and read the first paragraph, and they started failing on a
+ * page this block had quietly rewritten, which reads as the breadcrumb being
+ * broken rather than as this block not tidying up.
+ *
+ * A reload rather than a stack of undos, because the number of steps to undo is
+ * a thing that changes every time a check is added here.
+ */
+await page.reload();
+await page.waitForSelector('.ed-root');
+await showPanels();
+
 /*
  * HEADINGS TOO, because the seeded page is four headings to two paragraphs and a
  * heading that does nothing when clicked reads as the whole feature being broken.
@@ -2982,38 +3351,73 @@ await check('each preview is drawn at a real width, desktop included', async () 
   return wrong.length === 0 ? true : JSON.stringify(Object.fromEntries(wrong));
 });
 
-await check('and a bigger one can be typed in', async () => {
+/*
+ * THE WIDTH IS A CEILING, NOT A DEMAND, and these two checks are the record of
+ * that decision.
+ *
+ * They used to assert the opposite: type 1600, expect exactly 1600 drawn. That
+ * was the first attempt at this feature on 31 Jul 2026 and it was wrong. A
+ * 1600px preview in 1392px of room overflowed the canvas, and 424px of the page
+ * ran off the right where nobody could reach it. Zooming to fit was tried next
+ * and shrank the editor's own chrome to unclickable sizes.
+ *
+ * What shipped is `width: 100%; max-width: <the number>`. The preview is as wide
+ * as you asked for OR as wide as the room, whichever is smaller, and a badge says
+ * which you got. So the honest claim is not "1600 is drawn" but "1600 is
+ * remembered, never exceeded, and the difference is admitted to".
+ */
+await check('and a bigger one can be typed in, up to the room there is', async () => {
   await page.locator('.ed-btn', { hasText: 'Desktop' }).click();
   await page.waitForTimeout(300);
   await page.locator('.ed-vw__num').fill('1600');
   await page.locator('.ed-vw__num').blur();
   await page.waitForTimeout(400);
 
+  const kept = Number(await page.locator('.ed-vw__num').inputValue());
   const drawn = Math.round((await page.locator('.ed-canvas-frame').boundingBox()).width);
-  return Math.abs(drawn - 1600) <= 2 ? true : `the preview is ${drawn}px`;
+  /*
+   * The room INSIDE the scroller, not its border box. The wrap carries padding,
+   * so its bounding box is about 48px wider than anything can be drawn in, and
+   * comparing against that reported a correct 1392px preview as 48px short.
+   */
+  const room = await page.locator('.ed-canvas-wrap').evaluate((el) => {
+    const style = getComputedStyle(el);
+    return Math.round(
+      el.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight),
+    );
+  });
+
+  if (kept !== 1600) return `the box now says ${kept}`;
+  if (drawn > room + 1) return `the preview is ${drawn}px in ${room}px of room`;
+  return Math.abs(drawn - Math.min(1600, room)) <= 2
+    ? true
+    : `${drawn}px drawn, ${Math.min(1600, room)}px of room`;
 });
 
 /*
- * A width wider than the room it has must still be drawn at that width, and
- * must still be reachable. `align-items: center` on an overflowing child pushes
- * its left edge off the scrollable area, so the first column becomes impossible
- * to get to; `safe center` is what stops that.
+ * And it SAYS SO. A preview quietly drawn at 1392 when the box says 1600 is a
+ * preview lying about what it is showing you, which is worse than the overflow
+ * it replaced: the overflow was at least visible. The badge is the whole reason
+ * the ceiling is an acceptable answer.
  */
-await check('a preview wider than the room is still fully reachable', async () => {
-  const reachable = await page.evaluate(() => {
-    const wrap = document.querySelector('.ed-canvas-wrap');
-    const frame = document.querySelector('.ed-canvas-frame');
-    if (!wrap || !frame) return { error: 'no canvas' };
-    wrap.scrollLeft = 0;
-    const left = frame.getBoundingClientRect().left - wrap.getBoundingClientRect().left;
-    return { overflowing: frame.scrollWidth > wrap.clientWidth, left: Math.round(left) };
-  });
+await check('and it says what it is actually showing when it cannot have it all', async () => {
+  const drawn = Math.round((await page.locator('.ed-canvas-frame').boundingBox()).width);
+  const asked = Number(await page.locator('.ed-vw__num').inputValue());
+  const badge = page.locator('.ed-vw__actual');
 
-  if (reachable.error) return reachable.error;
-  if (!reachable.overflowing) return 'the preview is not wider than the room, so this proves nothing';
-  return reachable.left >= 0
+  if (drawn >= asked - 1) {
+    // Nothing to admit to. Then the badge must NOT be there, or it would be
+    // telling you about a shortfall that does not exist.
+    return (await badge.count()) === 0
+      ? true
+      : `it is drawn at ${drawn} of ${asked} and still says "${await badge.innerText()}"`;
+  }
+
+  if (!(await badge.count())) return `drawn at ${drawn} of ${asked} and says nothing`;
+  const text = await badge.innerText();
+  return text.includes(String(drawn))
     ? true
-    : `scrolled fully left, the preview still starts ${reachable.left}px off the edge`;
+    : `drawn at ${drawn} but the badge says "${text}"`;
 });
 
 await check('a width is refused if it is not one, and clamped if it is silly', async () => {
