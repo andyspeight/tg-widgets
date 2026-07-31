@@ -642,6 +642,149 @@ export const BLOCKS: readonly BlockDefinition[] = [
     ],
   },
 
+  {
+    /*
+     * THE SAME CARDS, ON A RAIL THAT SCROLLS SIDEWAYS.
+     *
+     * A separate block rather than a setting on Cards, because a client looking
+     * for a slider looks for the word "slider" and would never find it inside
+     * a grid. It shares the drawing though: renderCard is the same function,
+     * so a card looks identical whichever of the two it is in and a change to
+     * one cannot leave the other behind.
+     *
+     * NO ARROWS, AND THAT IS A DECISION RATHER THAN AN OMISSION. Arrow buttons
+     * need a script to move the rail, and this render tree ships no JavaScript
+     * at all, which is the property the whole project is built on. What it does
+     * instead is what a modern carousel does anyway: swipe on a phone, trackpad
+     * or shift-wheel on a desktop, a real scrollbar, arrow keys once the rail
+     * has focus, and Tab through the cards. The next slide always peeks in from
+     * the edge so it is obvious there is more. If arrows are ever wanted badly
+     * enough to ship a bundle for them, that is a decision to take out loud.
+     */
+    type: 'slider',
+    label: 'Slider',
+    group: 'Media',
+    icon: 'slider',
+    description: 'Cards on a rail. Swipe or scroll sideways through them.',
+    defaults: {
+      slideWidth: 'medium',
+      gap: 'm',
+      style: 'bordered',
+      ratio: '4/3',
+      radius: 'md',
+      align: 'left',
+      wholeCardLinks: true,
+      items: [
+        {
+          src: '', alt: '', label: 'Greece',
+          title: 'Island hopping, planned properly',
+          body: 'Seven nights across three islands, with the ferries booked for you.',
+          linkLabel: 'See the trip', linkHref: '',
+        },
+        {
+          src: '', alt: '', label: 'Italy',
+          title: 'The Amalfi coast, slowly',
+          body: 'A week between Positano and Ravello, with a driver for the coast road.',
+          linkLabel: 'See the trip', linkHref: '',
+        },
+        {
+          src: '', alt: '', label: 'Portugal',
+          title: 'Lisbon and the Algarve',
+          body: 'Three nights in the city, then four with your feet up by the sea.',
+          linkLabel: 'See the trip', linkHref: '',
+        },
+        {
+          src: '', alt: '', label: 'Spain',
+          title: 'Northern Spain by train',
+          body: 'San Sebastian, Bilbao and Santander, with no driving at all.',
+          linkLabel: 'See the trip', linkHref: '',
+        },
+        {
+          src: '', alt: '', label: 'Croatia',
+          title: 'Dalmatia, end to end',
+          body: 'Split, Hvar and Dubrovnik, with the ferry times worked out.',
+          linkLabel: 'See the trip', linkHref: '',
+        },
+      ],
+    },
+    summarise: (props) => {
+      const count = Array.isArray(props.items) ? props.items.length : 0;
+      return `Slider (${count})`;
+    },
+    fields: [
+      {
+        kind: 'repeater',
+        key: 'items',
+        label: 'Slides',
+        itemLabel: 'Slide',
+        max: 30,
+        fields: [
+          { kind: 'image', key: 'src', label: 'Image' },
+          {
+            kind: 'text',
+            key: 'alt',
+            label: 'Alt text',
+            max: 200,
+            help: 'Describe the picture for anyone who cannot see it.',
+          },
+          {
+            kind: 'text',
+            key: 'label',
+            label: 'Small label',
+            max: 60,
+            help: 'The line above the title. A destination, a date, a price.',
+          },
+          { kind: 'text', key: 'title', label: 'Title', max: 120 },
+          { kind: 'textarea', key: 'body', label: 'Text', rows: 3, max: 400 },
+          { kind: 'text', key: 'linkLabel', label: 'Link text', max: 60 },
+          { kind: 'url', key: 'linkHref', label: 'Links to', placeholder: '/greece or https://' },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'slideWidth',
+        label: 'Slide width',
+        options: [
+          { value: 'narrow', label: 'Narrow' },
+          { value: 'medium', label: 'Medium' },
+          { value: 'wide', label: 'Wide' },
+        ],
+        help: 'How much of the next one shows depends on this.',
+      },
+      { kind: 'select', key: 'gap', label: 'Space between', options: SPACING_OPTIONS },
+      {
+        kind: 'select',
+        key: 'style',
+        label: 'Card style',
+        options: [
+          { value: 'plain', label: 'Plain' },
+          { value: 'bordered', label: 'Outlined' },
+          { value: 'raised', label: 'Raised' },
+          { value: 'tinted', label: 'Tinted' },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'ratio',
+        label: 'Picture shape',
+        options: RATIO_OPTIONS.filter((option) => option.value !== 'auto'),
+      },
+      { kind: 'select', key: 'radius', label: 'Corners', options: RADIUS_OPTIONS },
+      {
+        kind: 'select',
+        key: 'align',
+        label: 'Alignment',
+        options: ALIGN_OPTIONS.filter((option) => option.value !== 'right'),
+      },
+      {
+        kind: 'toggle',
+        key: 'wholeCardLinks',
+        label: 'The whole card is clickable',
+        help: 'Still one link, so a keyboard tabs through the slides once each.',
+      },
+    ],
+  },
+
   // --- Actions ----------------------------------------------------------
   {
     type: 'button',

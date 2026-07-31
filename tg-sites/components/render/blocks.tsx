@@ -758,6 +758,65 @@ export function TabsBlock({
   );
 }
 
+/**
+ * The same cards, on a rail that scrolls sideways.
+ *
+ * SHARES renderCard WITH THE GRID, which is the whole reason this is worth
+ * having as its own block rather than a copy: a card looks identical in either,
+ * and a change to one cannot leave the other behind. Only the container differs.
+ *
+ * NO ARROW BUTTONS. Moving a rail from a button needs a script, and this tree
+ * ships none. What it has instead is everything a rail already gets for free:
+ * swipe on a phone, trackpad or shift-wheel on a desktop, a real scrollbar,
+ * arrow keys once the rail has focus, and Tab through the cards, which scrolls
+ * each one into view as it goes. The next slide peeks in from the edge so it is
+ * obvious there is more.
+ *
+ * THE RAIL TAKES FOCUS, deliberately. A scrollable region that a keyboard
+ * cannot reach is a WCAG failure, and it is the only way to read a rail of
+ * cards that have no links in them. It is one extra tab stop and it is named.
+ */
+export function SliderBlock({ props }: { props: Props }): ReactElement {
+  const items = list(props, 'items');
+  const slideWidth = oneOf(props, 'slideWidth', ['narrow', 'medium', 'wide'] as const, 'medium');
+  const gap = oneOf(props, 'gap', ['none', 'xs', 's', 'm', 'l', 'xl'] as const, 'm');
+  const style = oneOf(props, 'style', ['plain', 'bordered', 'raised', 'tinted'] as const, 'bordered');
+  const ratio = str(props, 'ratio', '4/3');
+  const radius = oneOf(props, 'radius', RADII, 'md');
+  const align = oneOf(props, 'align', ['left', 'centre'] as const, 'left');
+  const whole = bool(props, 'wholeCardLinks', true);
+
+  const slides = items
+    .map((card, index) => renderCard(card, index, { showImage: true, ratio, radius }))
+    .filter((card): card is ReactElement => card !== null);
+
+  if (slides.length === 0) {
+    return <div className="tgs-placeholder">Add some slides</div>;
+  }
+
+  return (
+    <div
+      className="tgs-cards tgs-slider"
+      /*
+       * .tgs-cards as well as .tgs-slider, so every card rule already written
+       * applies here untouched: the styles, the corners, the covering link, the
+       * focus ring. .tgs-slider only replaces the grid with a rail.
+       */
+      data-slide={slideWidth}
+      data-gap={gap}
+      data-style={style}
+      data-radius={radius}
+      data-align={align}
+      data-whole={whole ? 'true' : undefined}
+      role="group"
+      aria-label="Slides. Scroll sideways to see more."
+      tabIndex={0}
+    >
+      {slides}
+    </div>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Actions
 // ---------------------------------------------------------------------------

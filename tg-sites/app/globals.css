@@ -1142,6 +1142,77 @@
 }
 
 /* ------------------------------------------------------------------ */
+/* Slider: the same cards, on a rail                                   */
+/* ------------------------------------------------------------------ */
+
+/*
+ * .tgs-slider carries .tgs-cards as well, so every card rule above applies to a
+ * slide untouched. All this does is replace the grid with a rail.
+ *
+ * NO ARROW BUTTONS, because moving a rail from a button needs a script and this
+ * tree ships none. What a rail already has: swipe, trackpad, shift-wheel, a real
+ * scrollbar, arrow keys once it has focus, and Tab through the cards, which the
+ * browser scrolls into view as it goes.
+ */
+.tgs-slider {
+  /* Overrides the grid's columns. `auto-flow: column` is what turns the same
+     children into one line rather than a wrapped set of rows. */
+  grid-auto-flow: column;
+  grid-auto-columns: var(--tgs-slide, 340px);
+  grid-template-columns: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  /* Room for the scrollbar, so it does not sit over the bottom of the cards. */
+  padding-bottom: var(--tgs-space-s);
+  /* A swipe that runs out of rail must not start scrolling the page behind it. */
+  overscroll-behavior-x: contain;
+}
+
+.tgs-slider[data-slide='narrow'] { --tgs-slide: 260px; }
+.tgs-slider[data-slide='medium'] { --tgs-slide: 340px; }
+.tgs-slider[data-slide='wide']   { --tgs-slide: 440px; }
+
+/* Each card comes to rest at the left edge of the rail. */
+.tgs-slider > .tgs-card { scroll-snap-align: start; }
+
+/*
+ * THE RAIL IS FOCUSABLE, and a focusable thing has to show it. Without a ring
+ * here, tabbing to the rail moves focus somewhere invisible and the arrow keys
+ * start working for no apparent reason.
+ */
+.tgs-slider:focus-visible {
+  outline: 3px solid var(--tgs-accent);
+  outline-offset: 4px;
+}
+
+/*
+ * A scrollbar worth seeing. The rail's whole affordance on a desktop is "this
+ * moves", and the default overlay scrollbar on a Mac appears only once somebody
+ * has already scrolled, which is too late to be a hint.
+ */
+.tgs-slider { scrollbar-width: thin; scrollbar-color: var(--tgs-border-strong) transparent; }
+.tgs-slider::-webkit-scrollbar { height: 8px; }
+.tgs-slider::-webkit-scrollbar-track { background: transparent; }
+.tgs-slider::-webkit-scrollbar-thumb {
+  background: var(--tgs-border-strong);
+  border-radius: 999px;
+}
+
+@container tgs-page (max-width: 767px) {
+  /*
+   * The grid collapses to one column on a phone. A RAIL MUST NOT: sideways is
+   * the entire point of it, and the phone is where swiping works best. The rule
+   * that brings cards down to one across names its column counts, so it does not
+   * reach a slider, but stating it here means a later broad rule cannot either.
+   */
+  .tgs-slider { grid-auto-flow: column; grid-template-columns: none; }
+  /* Narrower slides, so the next one still peeks in on a 390px screen. */
+  .tgs-slider[data-slide='medium'] { --tgs-slide: 76%; }
+  .tgs-slider[data-slide='wide']   { --tgs-slide: 86%; }
+  .tgs-slider[data-slide='narrow'] { --tgs-slide: 66%; }
+}
+
+/* ------------------------------------------------------------------ */
 /* The menu                                                            */
 /* ------------------------------------------------------------------ */
 

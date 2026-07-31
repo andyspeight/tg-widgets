@@ -26,6 +26,7 @@ import {
   ListBlock,
   NavBlock,
   QuoteBlock,
+  SliderBlock,
   SpacerBlock,
   TabsBlock,
   TextBlock,
@@ -74,6 +75,8 @@ export function BlockRenderer({
         return <GalleryBlock props={props} />;
       case 'cards':
         return <CardsBlock props={props} />;
+      case 'slider':
+        return <SliderBlock props={props} />;
       case 'button':
         return <ButtonBlock props={props} />;
       case 'button-group':

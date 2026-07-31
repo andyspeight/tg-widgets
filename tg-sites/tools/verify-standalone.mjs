@@ -458,15 +458,15 @@ await check('block picker opens from a section', async () => {
 /*
  * The count MOVES DELIBERATELY. 13 until the two widget blocks landed on 31 Jul
  * 2026, 15 when the menu joined them, 16 when Cards did, 18 with Accordion and
- * Tabs. A hardcoded number is the point rather than a maintenance cost: adding a
- * block should make somebody look at the picker, and a block that silently stops
- * rendering its card is exactly what this catches.
+ * Tabs, 19 with the Slider. A hardcoded number is the point rather than a
+ * maintenance cost: adding a block should make somebody look at the picker, and
+ * a block that silently stops rendering its card is exactly what this catches.
  *
- * Nineteen because the harness runs as staff, so the staff-only Embed block is
- * in there too.
+ * Twenty because the harness runs as staff, so the staff-only Embed block is in
+ * there too.
  */
 await check('block picker offers the full library', async () =>
-  (await page.locator('.ed-block-card').count()) === 19);
+  (await page.locator('.ed-block-card').count()) === 20);
 
 await check('including both ways to put a widget on a page', async () => {
   const cards = (await page.locator('.ed-block-card').allInnerTexts()).join(' | ');
@@ -4114,7 +4114,7 @@ await check('the header offers the same blocks a page does', async () => {
   await page.keyboard.press('Escape');
   await page.waitForTimeout(200);
   // The whole library, because a header is sections and rows like anything else.
-  return count === 19 ? true : `${count} blocks in the header picker`;
+  return count === 20 ? true : `${count} blocks in the header picker`;
 });
 
 await check('a menu in a header saves through the region actions', async () => {
@@ -4634,6 +4634,164 @@ await check('a background video does not play while you are editing', async () =
   const videos = await page.locator('.ed-canvas-frame video').count();
   return videos === 0 ? true : `${videos} videos on the canvas`;
 });
+
+
+
+// ---------------------------------------------------------------------------
+// The slider
+//
+// EVERY CLAIM HERE IS A MEASUREMENT. A rail either overflows its box or it does
+// not, either snaps or does not, and either scrolls when a key is pressed or
+// does not. None of that can be settled by reading a stylesheet, and the block
+// has no arrows precisely because it leans on what the browser already does.
+// ---------------------------------------------------------------------------
+
+await page.reload();
+await page.waitForSelector('.ed-root');
+await showPanels();
+
+await check('the Slider is in the block picker', async () => {
+  await openBlockPicker();
+  const found = await page.locator('.ed-block-card', { hasText: 'Slider' }).count();
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(200);
+  return found >= 1 ? true : 'no Slider card';
+});
+
+await check('a slider arrives with more slides than fit, which is the point', async () => {
+  await addBlock('Slider');
+  await foldPanels();
+  await page.waitForTimeout(400);
+
+  const slides = await added().locator('.tgs-card').count();
+  const overflows = await added().locator('.tgs-slider').evaluate((rail) =>
+    rail.scrollWidth > rail.clientWidth + 8);
+
+  return slides >= 5 && overflows ? true : `${slides} slides, overflows ${overflows}`;
+});
+
+await check('the slides are on one line rather than wrapped into rows', async () => {
+  const tops = await added().evaluate((root) =>
+    [...root.querySelectorAll('.tgs-card')].map((card) => Math.round(card.getBoundingClientRect().top)));
+  const spread = Math.max(...tops) - Math.min(...tops);
+  return spread === 0 ? true : `tops ${JSON.stringify(tops)}`;
+});
+
+await check('the next one peeks in, so it is obvious there is more', async () => {
+  const peek = await added().locator('.tgs-slider').evaluate((rail) => {
+    const cards = [...rail.querySelectorAll('.tgs-card')];
+    const edge = rail.getBoundingClientRect().right;
+    // A card that starts before the right edge and ends after it is the peek.
+    return cards.some((card) => {
+      const box = card.getBoundingClientRect();
+      return box.left < edge - 20 && box.right > edge + 20;
+    });
+  });
+  return peek ? true : 'every slide ends on or before the edge, so nothing hints at more';
+});
+
+/*
+ * IT SCROLLS, AND IT SNAPS. Both are the browser's own behaviour, which is the
+ * entire argument for having no arrow buttons.
+ */
+await check('the rail scrolls sideways', async () => {
+  const moved = await added().locator('.tgs-slider').evaluate(async (rail) => {
+    const before = rail.scrollLeft;
+    rail.scrollLeft = 400;
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    return { before, after: rail.scrollLeft };
+  });
+  return moved.after > moved.before ? true : `scrollLeft ${moved.before} -> ${moved.after}`;
+});
+
+await check('and the page behind it does not', async () => {
+  // The rendered page must never scroll sideways. A rail that could drag the
+  // whole page with it would break that for every site using one.
+  const sideways = await page.evaluate(() => {
+    const page_ = document.querySelector('.ed-canvas-frame .tgs-page');
+    return page_ ? page_.scrollWidth > page_.clientWidth + 1 : false;
+  });
+  return sideways === false ? true : 'the page itself scrolls sideways';
+});
+
+await check('a slide comes to rest at the edge rather than half shown', async () => {
+  const snap = await added().locator('.tgs-card').first().evaluate((card) =>
+    getComputedStyle(card).scrollSnapAlign);
+  const rail = await added().locator('.tgs-slider').evaluate((el) =>
+    getComputedStyle(el).scrollSnapType);
+  return snap.includes('start') && rail.includes('x')
+    ? true
+    : `align "${snap}", type "${rail}"`;
+});
+
+/*
+ * REACHED BY THE KEYBOARD, not by calling focus() on it.
+ *
+ * `:focus-visible` deliberately does not match focus a script moved, which is
+ * the whole reason to prefer it over `:focus`: a mouse click on the rail should
+ * not draw a ring. So the first version of this check focused the rail from
+ * Playwright, found no outline, and reported a bug that was not there.
+ *
+ * Shift+Tab then Tab lands back on the same element by a real key press, which
+ * is what a person does and what the selector is for.
+ */
+await check('the rail can be reached by a keyboard, and shows that it has been', async () => {
+  await added().locator('.tgs-slider').focus();
+  await page.keyboard.press('Shift+Tab');
+  await page.keyboard.press('Tab');
+  await page.waitForTimeout(250);
+
+  const focused = await added().locator('.tgs-slider').evaluate((rail) => ({
+    isFocused: document.activeElement === rail,
+    visible: rail.matches(':focus-visible'),
+    outline: getComputedStyle(rail).outlineWidth,
+    label: rail.getAttribute('aria-label'),
+  }));
+
+  return focused.isFocused && focused.visible && focused.outline !== '0px' && focused.label
+    ? true
+    : `focused ${focused.isFocused}, focus-visible ${focused.visible}, outline ${focused.outline}`;
+});
+
+await check('and arrow keys then move it, which is why there are no arrow buttons', async () => {
+  const rail = added().locator('.tgs-slider');
+  const before = await rail.evaluate((el) => el.scrollLeft);
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
+  await page.waitForTimeout(400);
+  const after = await rail.evaluate((el) => el.scrollLeft);
+  return after !== before ? true : `scrollLeft stayed at ${before}`;
+});
+
+/*
+ * A RAIL STAYS A RAIL ON A PHONE. The grid comes down to one column there, and a
+ * slider that did the same would stop being a slider on the one device where
+ * swiping is the natural way to use it.
+ */
+await check('it is still a rail at a phone width', async () => {
+  await page.getByRole('button', { name: 'Phone' }).click();
+  await page.waitForTimeout(500);
+
+  const tops = await added().evaluate((root) =>
+    [...root.querySelectorAll('.tgs-card')].map((card) => Math.round(card.getBoundingClientRect().top)));
+  const overflows = await added().locator('.tgs-slider').evaluate((rail) =>
+    rail.scrollWidth > rail.clientWidth + 8);
+
+  const oneLine = Math.max(...tops) - Math.min(...tops) === 0;
+  return oneLine && overflows ? true : `one line ${oneLine}, overflows ${overflows}`;
+});
+
+await check('and the page still does not scroll sideways on a phone', async () => {
+  const sideways = await page.evaluate(() => {
+    const page_ = document.querySelector('.ed-canvas-frame .tgs-page');
+    return page_ ? page_.scrollWidth > page_.clientWidth + 1 : false;
+  });
+  return sideways === false ? true : 'the phone preview scrolls sideways';
+});
+
+await page.getByRole('button', { name: 'Desktop' }).click();
+await page.waitForTimeout(300);
+await showPanels();
 
 
 await browser.close();
