@@ -18,9 +18,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { writeCopyAction } from '../../app/actions/ai';
 import { publishPageAction, saveDraftAction } from '../../app/actions/pages';
+import { publishRegionAction, saveRegionAction } from '../../app/actions/regions';
 import { PublishHistory } from './PublishHistory';
-import type { Page, Section } from '../../lib/content/schema';
+import type { Page, RegionName, Section } from '../../lib/content/schema';
 import { parsePage } from '../../lib/content/schema';
+import { pageAsRegion, REGION_TITLES } from '../../lib/content/region-page';
 import { createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
 import { buildPresetSection } from '../../lib/content/presets';
 import { addBlock, parsePathKey, type Path, pathKey, resolve, updateBlockProps } from '../../lib/content/tree';
@@ -273,6 +275,24 @@ interface EditorProps {
    * omitting it costs a label rather than a permission.
    */
   currentUserId?: string | null;
+  /**
+   * Editing the site's header or footer rather than a page.
+   *
+   * WHAT THIS CHANGES, AND WHAT IT DELIBERATELY DOES NOT
+   *
+   * It changes where a save goes, and it hides the handful of controls that
+   * mean nothing for furniture: the page title, the address, the search
+   * listing and the version history. Everything else, the canvas, the outline,
+   * the blocks, undo, the styling panel, is untouched, because a header is
+   * sections and rows exactly as a page is. That equivalence is the whole
+   * reason there is one editor and not two.
+   *
+   * The region's own two settings, sticky and overlay, are held here rather
+   * than in the Page, since a Page has nowhere to put them. See
+   * lib/content/region-page.ts for the wrapping.
+   */
+  region?: RegionName | null;
+  initialRegionFlags?: { sticky: boolean; overlay: boolean };
 }
 
 export function EditorShell({
@@ -283,6 +303,8 @@ export function EditorShell({
   initialHasUnpublishedChanges,
   siteTheme,
   currentUserId = null,
+  region = null,
+  initialRegionFlags,
 }: EditorProps) {
   const [history, setHistory] = useState<History>({
     past: [],
@@ -299,6 +321,17 @@ export function EditorShell({
   const [saved, setSaved] = useState<SaveState>('idle');
   const [saveError, setSaveError] = useState<string | null>(null);
   const [status, setStatus] = useState<'draft' | 'published'>(initialStatus);
+  /**
+   * The header's two settings, which have nowhere to live inside a Page.
+   *
+   * Not in the undo history, on purpose. Undo is about content, and pulling a
+   * header off the top of a hero is a layout decision somebody makes once and
+   * can un-tick. Threading them through History would have meant every undo
+   * step carrying a copy of them for the sake of a checkbox.
+   */
+  const [regionFlags, setRegionFlags] = useState(
+    initialRegionFlags ?? { sticky: false, overlay: false },
+  );
   const [unpublished, setUnpublished] = useState(initialHasUnpublishedChanges);
   const [publishing, setPublishing] = useState(false);
   const [mobilePane, setMobilePane] = useState<'canvas' | 'props' | 'outline'>('canvas');
@@ -502,6 +535,23 @@ export function EditorShell({
   /** Skips the save that a fresh mount would otherwise fire immediately. */
   const mounted = useRef(false);
 
+  /**
+   * One save, wherever this editor's content actually lives.
+   *
+   * The autosave and the publish both go through here so there is exactly one
+   * place that knows a header is stored differently from a page. A closure
+   * cannot be passed in from the server component that renders this, since only
+   * serialisable props and server actions cross that boundary, so the branch is
+   * on `region` rather than on an injected function.
+   */
+  const persist = useCallback(
+    (next: Page, flags: { sticky: boolean; overlay: boolean }) =>
+      region
+        ? saveRegionAction(region, pageAsRegion(next, region, flags))
+        : saveDraftAction(pageId, next),
+    [pageId, region],
+  );
+
   useEffect(() => {
     if (!mounted.current) {
       mounted.current = true;
@@ -513,7 +563,7 @@ export function EditorShell({
 
     const timer = window.setTimeout(async () => {
       const seq = ++saveSeq.current;
-      const result = await saveDraftAction(pageId, page);
+      const result = await persist(page, regionFlags);
       if (seq !== saveSeq.current) return;
 
       if (result.ok) {
@@ -527,7 +577,7 @@ export function EditorShell({
     }, SAVE_DEBOUNCE_MS);
 
     return () => window.clearTimeout(timer);
-  }, [page, pageId]);
+  }, [page, pageId, persist, region, regionFlags]);
 
   const publish = useCallback(async () => {
     setPublishing(true);
@@ -535,7 +585,7 @@ export function EditorShell({
 
     // Flush any pending edit first, so publishing cannot capture the version
     // from before the last keystroke. The debounce means that gap is real.
-    const pending = await saveDraftAction(pageId, page);
+    const pending = await persist(page, regionFlags);
     if (!pending.ok) {
       setSaved('error');
       setSaveError(pending.error);
@@ -544,15 +594,21 @@ export function EditorShell({
     }
     setSaved('saved');
 
-    const result = await publishPageAction(pageId);
+    const result = region
+      ? await publishRegionAction(region)
+      : await publishPageAction(pageId);
+
     if (result.ok && result.data) {
-      setStatus(result.data.status);
+      // A region has no status column: publishing one makes it live and there
+      // is no way to withdraw it short of emptying it. So it is published from
+      // here on, and only "are there newer changes" varies.
+      setStatus(region ? 'published' : (result.data as { status: 'draft' | 'published' }).status);
       setUnpublished(result.data.hasUnpublishedChanges);
     } else if (!result.ok) {
       setSaveError(result.error);
     }
     setPublishing(false);
-  }, [page, pageId]);
+  }, [page, pageId, persist, region, regionFlags]);
 
   // ---------------------------------------------------------------------
   // Commits
@@ -810,14 +866,24 @@ export function EditorShell({
         </button>
 
         <div className="ed-titlewrap">
-          <input
-            className="ed-title-input"
-            value={page.title}
-            aria-label="Page title"
-            onChange={(event) =>
-              commit((current) => ({ ...current, title: event.target.value }), 'page:title')
-            }
-          />
+          {/*
+            A region has no title to edit. It would have been easy to leave the
+            box there holding the word "Header", and it would have been a lie:
+            pageAsRegion throws the title away, so anything typed into it would
+            vanish on the next reload with nothing to explain why.
+          */}
+          {region ? (
+            <span className="ed-title-fixed">{REGION_TITLES[region]}</span>
+          ) : (
+            <input
+              className="ed-title-input"
+              value={page.title}
+              aria-label="Page title"
+              onChange={(event) =>
+                commit((current) => ({ ...current, title: event.target.value }), 'page:title')
+              }
+            />
+          )}
           <span className="ed-save ed-desktop-only" data-state={saved}>
             {saved === 'saved' && <Icon name="check" size={14} />}
             {saved === 'error' && <Icon name="warning" size={14} />}
@@ -994,8 +1060,10 @@ export function EditorShell({
           disabled={publishing || (status === 'published' && !unpublished)}
           title={
             status === 'published' && !unpublished
-              ? 'The live page already matches this draft'
-              : 'Make this the version visitors see'
+              ? `The live ${region ?? 'page'} already matches this draft`
+              : region
+                ? `Put this ${region} on every page of the site`
+                : 'Make this the version visitors see'
           }
         >
           <Icon name={status === 'published' && !unpublished ? 'check' : 'upload'} size={16} />
@@ -1012,16 +1080,25 @@ export function EditorShell({
               checked: theme === option.value,
               onClick: () => setTheme(option.value),
             })),
-            { separator: true },
-            {
-              icon: 'history',
-              label: 'Version history',
-              onClick: () => setHistoryOpen(true),
-            },
+            /*
+              Version history is per page, and publish_events has a page_id.
+              A region publishes without a snapshot, so there is nothing here to
+              list and the entry is left out rather than opening an empty box.
+            */
+            ...(region
+              ? []
+              : [
+                  { separator: true as const },
+                  {
+                    icon: 'history' as IconName,
+                    label: 'Version history',
+                    onClick: () => setHistoryOpen(true),
+                  },
+                ]),
             { separator: true },
             {
               icon: 'download',
-              label: 'Save a copy of this page',
+              label: region ? `Save a copy of this ${region}` : 'Save a copy of this page',
               onClick: exportJson,
             },
             {
@@ -1070,6 +1147,18 @@ export function EditorShell({
         onCommit={commit}
         onPickBlock={setPicker}
         theme={siteTheme}
+        /*
+          "This page is empty" is the wrong sentence on the header screen, and
+          it is the sentence somebody meets FIRST, since a client who has never
+          touched their header has an empty one. The browser harness caught it.
+        */
+        emptyNote={
+          region === 'header'
+            ? 'Your header is empty. Add a section for your logo and menu.'
+            : region === 'footer'
+              ? 'Your footer is empty. Add a section for your contact details and links.'
+              : undefined
+        }
       />
 
       <Properties
@@ -1079,6 +1168,9 @@ export function EditorShell({
         onSelect={select}
         onCommit={commit}
         onBack={() => setMobilePane('canvas')}
+        region={region}
+        regionFlags={regionFlags}
+        onRegionFlags={setRegionFlags}
       />
 
       {/*

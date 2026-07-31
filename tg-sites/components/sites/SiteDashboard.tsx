@@ -147,6 +147,29 @@ export function SiteDashboard({ account, site, siteName, siteUrl, pages: initial
             </a>
 
             {/*
+              THE HEADER AND THE FOOTER, edited once for the whole site.
+
+              Up here with Theme and Settings rather than in the list of pages
+              below, because that is what they are: things that apply to every
+              page rather than another page. Before 31 Jul 2026 a client had to
+              rebuild their nav bar as a section on every page and keep them all
+              in step by hand.
+
+              Plain anchors for the same reason as Theme: they change what every
+              preview renders, so coming back wants fresh server output rather
+              than a cached tree from before the change.
+            */}
+            <a className="sv-btn" href="/editor?region=header">
+              <Icon name="nav" size={16} />
+              Header
+            </a>
+
+            <a className="sv-btn" href="/editor?region=footer">
+              <Icon name="nav" size={16} />
+              Footer
+            </a>
+
+            {/*
               A plain anchor for the same reason as Theme above: these settings are
               in the head of every rendered page, so coming back wants fresh server
               output rather than a tree built before the change.

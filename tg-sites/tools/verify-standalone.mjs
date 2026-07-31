@@ -457,15 +457,16 @@ await check('block picker opens from a section', async () => {
 
 /*
  * The count MOVES DELIBERATELY. It was 13 until the two widget blocks landed on
- * 31 Jul 2026. A hardcoded number is the point rather than a maintenance cost:
- * adding a block should make somebody look at the picker, and a block that
- * silently stops rendering its card is exactly what this catches.
+ * 31 Jul 2026, and 15 until the menu joined them later the same day. A hardcoded
+ * number is the point rather than a maintenance cost: adding a block should make
+ * somebody look at the picker, and a block that silently stops rendering its
+ * card is exactly what this catches.
  *
- * Fifteen because the harness runs as staff, so the staff-only Embed block is in
+ * Sixteen because the harness runs as staff, so the staff-only Embed block is in
  * there too.
  */
 await check('block picker offers the full library', async () =>
-  (await page.locator('.ed-block-card').count()) === 15);
+  (await page.locator('.ed-block-card').count()) === 16);
 
 await check('including both ways to put a widget on a page', async () => {
   const cards = (await page.locator('.ed-block-card').allInnerTexts()).join(' | ');
@@ -3883,6 +3884,278 @@ await check('and their code does not run on the canvas either', async () => {
 await check('it shows what it is instead, so the layout is still readable', async () => {
   const ghost = await page.locator('.tgs-widget-ghost').last().innerText();
   return /published page/i.test(ghost) ? true : `it says "${ghost}"`;
+});
+
+
+// ---------------------------------------------------------------------------
+// The menu, the header and the footer
+//
+// TWO CLAIMS THAT ONLY A BROWSER CAN SETTLE.
+//
+// The first is that the phone menu needs no JavaScript. It is a `details` and a
+// `summary`, and the whole argument for that over a scripted burger is that the
+// BROWSER opens it. Asserting on the markup in Node would prove the elements are
+// there and prove nothing about whether clicking one does anything, which is the
+// only part anybody cares about.
+//
+// The second is that the editor really does edit a header with the page's own
+// controls minus the ones a header has no use for. That is a claim about which
+// controls are ABSENT from a rendered screen, which no unit test can make.
+//
+// ONE TRAP, AND IT CAUGHT THE FIRST VERSION OF THIS SECTION. The canvas is the
+// container query context, not the window, so "desktop" with both side panels
+// open leaves it about 750px and the PHONE rules apply. Three checks reported
+// the burger showing on a desktop and were reading a 750px canvas. The panels
+// have to be folded to ask a question about a wide screen.
+// ---------------------------------------------------------------------------
+
+await page.reload();
+await page.waitForSelector('.ed-root');
+await showPanels();
+
+/** Fold both side panels, so the canvas is as wide as the window allows. */
+async function foldPanels() {
+  for (const label of ['Hide the page panel', 'Hide the settings panel']) {
+    const button = page.locator(`[aria-label="${label}"]`);
+    if (await button.count()) {
+      await button.click();
+      await page.waitForTimeout(150);
+    }
+  }
+}
+
+await check('the menu is in the block picker', async () => {
+  await openBlockPicker();
+  const found = await page.locator('.ed-block-card', { hasText: 'Menu' }).count();
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(200);
+  return found >= 1 ? true : 'no Menu card';
+});
+
+await check('a menu draws its links straight away', async () => {
+  await addBlock('Menu');
+  const links = added().locator('.tgs-nav__link');
+  const count = await links.count();
+  // Four defaults, and they appear twice in the markup: once for a wide screen
+  // and once inside the phone menu. Both come from the same array.
+  return count === 8 ? true : `${count} links, expected 8`;
+});
+
+/*
+ * textContent, not innerText. The narrow copy sits inside a closed `details`,
+ * so it is not rendered and innerText correctly reports nothing for it. The
+ * first version of this check read innerText and compared four labels against
+ * four empty strings, which said nothing about the markup.
+ */
+await check('the two copies of the menu say the same thing', async () => {
+  const [wide, narrow] = await added().evaluate((root) => {
+    const text = (selector) =>
+      [...root.querySelectorAll(selector)].map((node) => node.textContent.trim());
+    return [
+      text('.tgs-nav__list:not(.tgs-nav__list--stacked) .tgs-nav__link'),
+      text('.tgs-nav__list--stacked .tgs-nav__link'),
+    ];
+  });
+
+  return JSON.stringify(wide) === JSON.stringify(narrow) && wide.length === 4
+    ? true
+    : `${JSON.stringify(wide)} vs ${JSON.stringify(narrow)}`;
+});
+
+/*
+ * ONE COPY IS ALWAYS HIDDEN, which is what makes the duplicate free.
+ * `display: none` is not read out by a screen reader, so the links are
+ * announced once however wide the screen is.
+ */
+await check('only one copy of the menu is showing at a time', async () => {
+  await foldPanels();
+  await page.waitForTimeout(300);
+  const visible = await added().locator('.tgs-nav__link:visible').count();
+  return visible === 4 ? true : `${visible} links visible, expected 4`;
+});
+
+await check('the menu button is hidden on a wide canvas', async () => {
+  const shown = await added().locator('.tgs-nav__burger').isVisible();
+  return shown === false ? true : 'the burger is showing on a desktop';
+});
+
+await check('and appears at a phone width', async () => {
+  await page.getByRole('button', { name: 'Phone' }).click();
+  await page.waitForTimeout(400);
+  const burger = added().locator('.tgs-nav__burger');
+  return (await burger.isVisible()) ? true : 'no menu button on a phone';
+});
+
+await check('the wide row gives way to it rather than both showing', async () => {
+  const wide = added().locator('.tgs-nav__list[data-collapse="true"]');
+  return (await wide.isVisible()) === false ? true : 'the row is still across the phone';
+});
+
+/*
+ * THE ONE THIS SECTION EXISTS FOR. No handler was attached by anything: the
+ * click goes to a `summary`, and the browser opens the `details` itself.
+ */
+await check('the menu button opens with no JavaScript behind it', async () => {
+  const disclosure = added().locator('.tgs-nav__disclosure');
+  const before = await disclosure.evaluate((el) => el.open);
+  await added().locator('.tgs-nav__burger').click();
+  await page.waitForTimeout(250);
+  const after = await disclosure.evaluate((el) => el.open);
+  const links = await added().locator('.tgs-nav__list--stacked .tgs-nav__link:visible').count();
+  return before === false && after === true && links === 4
+    ? true
+    : `open ${before} -> ${after}, ${links} links showing`;
+});
+
+await check('and closes again on a second click', async () => {
+  await added().locator('.tgs-nav__burger').click();
+  await page.waitForTimeout(250);
+  const open = await added().locator('.tgs-nav__disclosure').evaluate((el) => el.open);
+  return open === false ? true : 'it stayed open';
+});
+
+await check('the menu button is reachable by keyboard', async () => {
+  const disclosure = added().locator('.tgs-nav__disclosure');
+  await added().locator('.tgs-nav__burger').focus();
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(250);
+  const open = await disclosure.evaluate((el) => el.open);
+  if (open) await page.keyboard.press('Enter');
+  return open === true ? true : 'Enter did not open it';
+});
+
+// Back to a desktop width, panels open, for the region checks below.
+await page.getByRole('button', { name: 'Desktop' }).click();
+await page.waitForTimeout(300);
+await showPanels();
+
+// --- The header ------------------------------------------------------------
+//
+// A tenant that has never touched its header has no header, so this starts on
+// an EMPTY one. That is the state a real client meets first, and it is also the
+// only state in which the canvas root is easy to click, so the settings checks
+// come before anything is added to it.
+
+await check('the editor can be pointed at the header', async () => {
+  await closeAnyDialog();
+  await page.evaluate(() => window.__TG_SET_REGION__('header'));
+  await page.waitForTimeout(600);
+  await showPanels();
+  const title = await page.locator('.ed-title-fixed').innerText();
+  return title === 'Header' ? true : `the top bar says "${title}"`;
+});
+
+/*
+ * NOT A DISABLED FIELD, GONE. pageAsRegion throws a title away, so a box holding
+ * the word "Header" would take typing and lose it on the next reload with
+ * nothing to explain why.
+ */
+await check('and there is no page title box to type into', async () =>
+  (await page.locator('.ed-title-input').count()) === 0
+    ? true
+    : 'the page title box is still there');
+
+await check('an empty header says what to put in it', async () => {
+  const text = await page.locator('.ed-canvas-frame .tgs-placeholder').first().innerText();
+  return /header is empty|logo and menu/i.test(text) ? true : `it says "${text}"`;
+});
+
+await check('its root offers the header settings instead of a page address', async () => {
+  // The empty canvas IS the page root, so clicking it selects that.
+  await page.locator('.ed-canvas-frame [data-path="page"]').click({ position: { x: 20, y: 20 } });
+  await page.waitForTimeout(400);
+  const pane = await page.locator('.ed-props').innerText();
+  const wanted = /Stay on screen while scrolling/.test(pane)
+    && /Sit over the first section/.test(pane);
+  const unwanted = /Search description/.test(pane) || /Slug/.test(pane);
+  return wanted && !unwanted ? true : `wanted ${wanted}, page fields present ${unwanted}`;
+});
+
+await check('turning on sticky is a change worth saving', async () => {
+  await page.locator('.ed-props input[type="checkbox"]').first().check();
+  await page.waitForTimeout(1500);
+  const state = await page.locator('.ed-save').getAttribute('data-state');
+  const failure = await page.locator('.ed-savefail').count();
+  // The double validates through the real parseRegion, so "saved" means the
+  // tree it was handed really was a region the database would have taken.
+  return state === 'saved' && failure === 0 ? true : `save state "${state}"`;
+});
+
+await check('version history is not offered for a header', async () => {
+  await closeAnyDialog();
+  await page.getByRole('button', { name: 'More actions' }).click();
+  await page.waitForTimeout(300);
+  const items = (await page.locator('.ed-menu').innerText()).replace(/\n/g, ' | ');
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(200);
+  return /Version history/.test(items) === false
+    ? true
+    : 'it offers a history a region does not keep';
+});
+
+await check('publishing a header says it will reach every page', async () => {
+  const title = await page.locator('.ed-btn[data-variant="primary"]').getAttribute('title');
+  return /every page/i.test(title ?? '') ? true : `it says "${title}"`;
+});
+
+await check('a section can be added to a header like any other', async () => {
+  await page.locator('.ed-outline-foot .ed-btn').click();
+  await page.waitForTimeout(400);
+  await page.locator('.ed-layout-card').first().click();
+  await page.waitForTimeout(500);
+  return (await page.locator('.ed-canvas-frame .tgs-section').count()) === 1
+    ? true
+    : 'no section appeared';
+});
+
+await check('the header offers the same blocks a page does', async () => {
+  await openBlockPicker();
+  const count = await page.locator('.ed-block-card').count();
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(200);
+  // The whole library, because a header is sections and rows like anything else.
+  return count === 16 ? true : `${count} blocks in the header picker`;
+});
+
+await check('a menu in a header saves through the region actions', async () => {
+  await addBlock('Menu');
+  await page.waitForTimeout(1500);
+  const state = await page.locator('.ed-save').getAttribute('data-state');
+  const failure = await page.locator('.ed-savefail').count();
+  return state === 'saved' && failure === 0 ? true : `save state "${state}"`;
+});
+
+// --- The footer ------------------------------------------------------------
+
+await check('the editor can be pointed at the footer', async () => {
+  await closeAnyDialog();
+  await page.evaluate(() => window.__TG_SET_REGION__('footer'));
+  await page.waitForTimeout(600);
+  await showPanels();
+  const title = await page.locator('.ed-title-fixed').innerText();
+  return title === 'Footer' ? true : `the top bar says "${title}"`;
+});
+
+/*
+ * Sticky and overlay are both about a bar at the top of the screen. A footer
+ * pinned to the top of the window is not a footer, so the toggles are not there
+ * to be ticked rather than there and ignored.
+ */
+await check('a footer is not offered the two header settings', async () => {
+  await page.locator('.ed-canvas-frame [data-path="page"]').click({ position: { x: 20, y: 20 } });
+  await page.waitForTimeout(400);
+  const pane = await page.locator('.ed-props').innerText();
+  return /Stay on screen|Sit over the first/.test(pane) === false
+    ? true
+    : 'a footer is offered a header setting';
+});
+
+await check('going back to a page brings the title box back', async () => {
+  await page.evaluate(() => window.__TG_SET_REGION__(null));
+  await page.waitForTimeout(600);
+  const boxes = await page.locator('.ed-title-input').count();
+  const fixed = await page.locator('.ed-title-fixed').count();
+  return boxes === 1 && fixed === 0 ? true : `${boxes} boxes, ${fixed} labels`;
 });
 
 await browser.close();

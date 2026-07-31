@@ -516,6 +516,102 @@ export function ButtonGroupBlock({ props }: { props: Props }): ReactElement {
   return <div className="tgs-buttons">{buttons.map(renderButton)}</div>;
 }
 
+/**
+ * The menu.
+ *
+ * NO JAVASCRIPT, INCLUDING THE MENU BUTTON. The whole render tree is server
+ * components with no bundle behind them, and the navigation of a client's site
+ * is the last place to start shipping one: it is the thing every visitor needs
+ * before anything else has loaded. So the phone menu is a `details` and a
+ * `summary`, which the browser opens and closes by itself, reaches by keyboard
+ * by itself and announces to a screen reader by itself. Nothing to hydrate,
+ * nothing for a Content Security Policy to object to, and it works while the
+ * network is still fetching everything else.
+ *
+ * WHY THE LINKS APPEAR TWICE IN THE MARKUP
+ *
+ * Once as a plain list for a wide screen, once inside the `details` for a
+ * narrow one. A single list cannot do both: a closed `details` hides its own
+ * contents through the browser's internal slot, and page CSS could not reliably
+ * force them back into view across engines. The alternative was a
+ * checkbox-and-label hack, which is worse in every way that matters.
+ *
+ * The duplicate costs a few hundred bytes and costs nothing in the
+ * accessibility tree, because whichever copy is not in use is `display: none`,
+ * and `display: none` is not read out. Both copies come from the same array, so
+ * they cannot say different things.
+ */
+function navLinks(items: Props[], keyPrefix: string): ReactElement[] {
+  return items
+    .map((item, index) => {
+      const label = str(item, 'label');
+      if (!label) return null;
+
+      const href = safeUrl(str(item, 'href')) || '#';
+      const newTab = bool(item, 'newTab');
+
+      return (
+        <li key={`${keyPrefix}${index}`} className="tgs-nav__item">
+          <a
+            className="tgs-nav__link"
+            href={href}
+            {...(newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+          >
+            {label}
+          </a>
+        </li>
+      );
+    })
+    .filter((item): item is ReactElement => item !== null);
+}
+
+export function NavBlock({ props }: { props: Props }): ReactElement {
+  const items = list(props, 'items');
+  const layout = oneOf(props, 'layout', ['row', 'column'] as const, 'row');
+  const align = oneOf(props, 'align', ALIGNS, 'left');
+  const gap = oneOf(props, 'gap', ['none', 'xs', 's', 'm', 'l', 'xl'] as const, 'm');
+  // Default true, because a menu that does not collapse is the wrong default on
+  // a phone and this block exists mostly to be a header.
+  const collapse = bool(props, 'collapse', true);
+
+  if (items.length === 0) {
+    return <div className="tgs-placeholder">Add some links</div>;
+  }
+
+  return (
+    <nav className="tgs-nav" data-layout={layout} data-align={align} data-gap={gap}>
+      <ul className="tgs-nav__list" data-collapse={collapse ? 'true' : undefined}>
+        {navLinks(items, 'wide')}
+      </ul>
+
+      {collapse && (
+        <details className="tgs-nav__disclosure">
+          {/*
+            The label is on the summary rather than on an inner span, so a screen
+            reader announces "Menu, disclosure triangle, collapsed" from the one
+            element the browser already treats as the control.
+          */}
+          <summary className="tgs-nav__burger" aria-label="Menu">
+            <svg
+              viewBox="0 0 24 24"
+              width="22"
+              height="22"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <path d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
+          </summary>
+          <ul className="tgs-nav__list tgs-nav__list--stacked">{navLinks(items, 'narrow')}</ul>
+        </details>
+      )}
+    </nav>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Layout
 // ---------------------------------------------------------------------------

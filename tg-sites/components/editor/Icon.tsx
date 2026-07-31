@@ -28,6 +28,7 @@ export type IconName =
   | 'text'
   | 'quote'
   | 'list'
+  | 'nav'
   | 'sparkle'
   | 'image'
   | 'video'
@@ -94,6 +95,9 @@ const PATHS: Record<IconName, string> = {
   text: 'M4 6h16M4 12h16M4 18h10',
   quote: 'M9 7H6a2 2 0 0 0-2 2v3h5V7zM19 7h-3a2 2 0 0 0-2 2v3h5V7zM4 12v2a3 3 0 0 0 3 3M14 12v2a3 3 0 0 0 3 3',
   list: 'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',
+  // Three separated dashes on one line: a row of links. Deliberately not the
+  // burger, which is `section`, and not full-width rules, which is `text`.
+  nav: 'M3 12h4M10 12h4M17 12h4',
   sparkle: 'M12 3l2.1 5.4L19.5 10l-5.4 2.1L12 17.5l-2.1-5.4L4.5 10l5.4-1.6z',
   image: 'M3 5h18v14H3zM8.5 10.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM21 15l-5-5L5 19',
   video: 'M3 6h12v12H3zM15 10l6-3v10l-6-3z',

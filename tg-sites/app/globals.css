@@ -747,6 +747,143 @@
 .tgs-embed iframe { max-width: 100%; }
 
 /* ------------------------------------------------------------------ */
+/* The menu                                                            */
+/* ------------------------------------------------------------------ */
+
+.tgs-nav__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--tgs-space-m);
+}
+.tgs-nav[data-layout='column'] .tgs-nav__list { flex-direction: column; align-items: flex-start; }
+.tgs-nav[data-align='centre'] .tgs-nav__list { justify-content: center; align-items: center; }
+.tgs-nav[data-align='right']  .tgs-nav__list { justify-content: flex-end; }
+.tgs-nav[data-align='right'][data-layout='column'] .tgs-nav__list { align-items: flex-end; }
+
+.tgs-nav[data-gap='none'] .tgs-nav__list { gap: 0; }
+.tgs-nav[data-gap='xs']   .tgs-nav__list { gap: var(--tgs-space-xs); }
+.tgs-nav[data-gap='s']    .tgs-nav__list { gap: var(--tgs-space-s); }
+.tgs-nav[data-gap='m']    .tgs-nav__list { gap: var(--tgs-space-m); }
+.tgs-nav[data-gap='l']    .tgs-nav__list { gap: var(--tgs-space-l); }
+.tgs-nav[data-gap='xl']   .tgs-nav__list { gap: var(--tgs-space-xl); }
+
+.tgs-nav__link {
+  display: inline-block;
+  /* Half of a 44px target from the padding, the rest from the line box, so a
+     row of links is still tappable without being a row of buttons. */
+  padding: var(--tgs-space-s) 0;
+  color: inherit;
+  font-weight: 500;
+  text-decoration: none;
+}
+.tgs-nav__link:hover { color: var(--tgs-primary); text-decoration: underline; }
+.tgs-section[data-tone='dark'] .tgs-nav__link:hover,
+.tgs-section[data-tone='accent'] .tgs-nav__link:hover { color: inherit; }
+
+/*
+ * THE PHONE MENU, WITH NO JAVASCRIPT.
+ *
+ * A `details` and a `summary`, which the browser opens, closes, focuses and
+ * announces by itself. See NavBlock in components/render/blocks.tsx for why the
+ * links appear twice in the markup and why that costs nothing in the
+ * accessibility tree: whichever copy is not in use is `display: none`, and
+ * `display: none` is not read out.
+ */
+.tgs-nav__disclosure { display: none; }
+
+.tgs-nav__burger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  color: inherit;
+  border-radius: var(--tgs-radius-sm);
+  /* The default marker is a triangle beside a burger, which reads as two
+     controls. `list-style` covers Firefox, `::-webkit-details-marker` Safari. */
+  list-style: none;
+}
+.tgs-nav__burger::-webkit-details-marker { display: none; }
+
+.tgs-nav__list--stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--tgs-space-xs);
+  padding-top: var(--tgs-space-s);
+}
+.tgs-nav__list--stacked .tgs-nav__link { display: block; padding: var(--tgs-space-s) 0; }
+
+@container tgs-page (max-width: 767px) {
+  /* Below the phone breakpoint the plain row gives way to the button, but only
+     for a menu whose owner asked for one. */
+  .tgs-nav__list[data-collapse='true'] { display: none; }
+  .tgs-nav__disclosure { display: block; }
+}
+
+/* ------------------------------------------------------------------ */
+/* The header and the footer                                           */
+/* ------------------------------------------------------------------ */
+
+.tgs-region { position: relative; }
+
+/*
+ * Stay at the top as the page scrolls.
+ *
+ * The region's OWN `overflow-x: hidden` is not a problem, only an ancestor's
+ * would be, and a region is rendered as a sibling of the page rather than a
+ * wrapper around it precisely so there is no such ancestor.
+ */
+.tgs-region[data-region='header'][data-sticky='true'] {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+/*
+ * Float over the first section rather than sitting above it: the look every
+ * travel site opens with, a full-bleed photograph with the logo and menu on top
+ * of it. Out of the flow, so the hero starts at the top of the document.
+ */
+.tgs-region[data-region='header'][data-overlay='true'] {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  z-index: 50;
+  background: transparent;
+}
+
+/* Both together: pinned to the top of the window, over whatever scrolls under. */
+.tgs-region[data-region='header'][data-overlay='true'][data-sticky='true'] {
+  position: fixed;
+}
+
+/*
+ * Overlay means see-through. A section inside one keeps its tone's TEXT colour,
+ * which is how a client puts light lettering over a dark photograph, and loses
+ * its background, which is the entire point of floating over one.
+ */
+.tgs-region[data-overlay='true'] .tgs-section { background: transparent; }
+
+/*
+ * A footer is the end of the page, so it gets a hairline above it. Otherwise a
+ * white footer under a white page reads as the page having simply stopped.
+ *
+ * An inset shadow rather than border-top, deliberately. A border here would win
+ * on specificity over the section's own `border` shorthand, so a client who set
+ * a border on their footer section would get their colour on three sides and
+ * this one on the fourth. A shadow draws the line without touching any border
+ * property they might be using.
+ */
+.tgs-region[data-region='footer'] {
+  box-shadow: inset 0 1px 0 var(--tgs-border);
+}
+
+/* ------------------------------------------------------------------ */
 /* Accessibility                                                       */
 /* ------------------------------------------------------------------ */
 

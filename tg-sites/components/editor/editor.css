@@ -349,6 +349,18 @@
   color: inherit;
   text-overflow: ellipsis;
 }
+/* The header and the footer have no title to type, so the box becomes a
+   label. Same metrics as the input above, so the top bar does not jump by a
+   pixel between one screen and the other. */
+.ed-title-fixed {
+  font: inherit;
+  font-size: var(--ed-text-md);
+  font-weight: 600;
+  padding: var(--ed-2) var(--ed-3);
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
 .ed-title-input:hover { background: var(--ed-well); }
 .ed-title-input:focus {
   border-color: var(--ed-select);

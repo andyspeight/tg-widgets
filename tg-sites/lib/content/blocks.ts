@@ -441,6 +441,75 @@ export const BLOCKS: readonly BlockDefinition[] = [
     ],
   },
 
+  {
+    /*
+     * THE MENU.
+     *
+     * Added 31 Jul 2026 with the header and the footer, and it only makes sense
+     * alongside them. A menu block dropped on a single page would be a menu on
+     * that page alone, which is nobody's idea of navigation. Put in the header,
+     * which is one document drawn on every page, the links are edited once and
+     * change everywhere, so there is no separate menu manager to keep in step
+     * with anything. That is the entire reason there is no menus screen.
+     *
+     * It sits in Actions rather than a group of its own because that is where
+     * links already live, next to Button and Button group.
+     */
+    type: 'nav',
+    label: 'Menu',
+    group: 'Actions',
+    icon: 'nav',
+    description: 'The links across your header, or down your footer.',
+    defaults: {
+      layout: 'row',
+      align: 'left',
+      gap: 'm',
+      collapse: true,
+      items: [
+        { label: 'Home', href: '/', newTab: false },
+        { label: 'Holidays', href: '/holidays', newTab: false },
+        { label: 'About us', href: '/about', newTab: false },
+        { label: 'Contact', href: '/contact', newTab: false },
+      ],
+    },
+    summarise: (props) => {
+      const count = Array.isArray(props.items) ? props.items.length : 0;
+      return `Menu (${count} link${count === 1 ? '' : 's'})`;
+    },
+    fields: [
+      {
+        kind: 'repeater',
+        key: 'items',
+        label: 'Links',
+        itemLabel: 'Link',
+        max: 12,
+        fields: [
+          { kind: 'text', key: 'label', label: 'Label', max: 60 },
+          { kind: 'url', key: 'href', label: 'Links to', placeholder: '/about or https://' },
+          { kind: 'toggle', key: 'newTab', label: 'New tab' },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'layout',
+        label: 'Direction',
+        options: [
+          { value: 'row', label: 'Across' },
+          { value: 'column', label: 'Down' },
+        ],
+        help: 'Across for a header, down for a footer.',
+      },
+      { kind: 'select', key: 'align', label: 'Alignment', options: ALIGN_OPTIONS },
+      { kind: 'select', key: 'gap', label: 'Space between', options: SPACING_OPTIONS },
+      {
+        kind: 'toggle',
+        key: 'collapse',
+        label: 'Menu button on phones',
+        help: 'Seven links across a phone do not fit. This tucks them behind a button.',
+      },
+    ],
+  },
+
   // --- Layout -----------------------------------------------------------
   {
     type: 'divider',

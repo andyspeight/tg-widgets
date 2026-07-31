@@ -3,9 +3,12 @@ import { notFound } from 'next/navigation';
 
 import { FontHead } from '../../../../components/render/FontHead';
 import { PageRenderer } from '../../../../components/render/PageRenderer';
+import { RegionRenderer } from '../../../../components/render/RegionRenderer';
 import { SiteBody, SiteHead } from '../../../../components/render/SiteHead';
+import { WidgetScripts } from '../../../../components/render/WidgetScripts';
 import { listFontFaces } from '../../../../lib/db/fonts';
 import { getPublishedPage } from '../../../../lib/db/pages';
+import { getPublishedRegions } from '../../../../lib/db/regions';
 import { getPublicSettings } from '../../../../lib/db/settings';
 import { getPublicTheme } from '../../../../lib/db/theme';
 import { resolveTenantByHostname } from '../../../../lib/db/tenants';
@@ -48,20 +51,22 @@ async function load(host: string, path: string[] | undefined) {
   if (!tenantId) return null;
 
   /*
-   * Four reads, in parallel, all through the read-only role.
+   * Five reads, in parallel, all through the read-only role.
    *
    * In parallel rather than in sequence because they are independent and this is
-   * the request a visitor waits on. Sequentially it would be four round trips to
-   * eu-west-2 before a byte of HTML.
+   * the request a visitor waits on. Sequentially it would be five round trips to
+   * eu-west-2 before a byte of HTML. The header and the footer are one read
+   * between them rather than two, for the same reason.
    */
-  const [page, theme, faces, settings] = await Promise.all([
+  const [page, theme, faces, settings, regions] = await Promise.all([
     getPublishedPage(tenantId, (path ?? []).join('/')),
     getPublicTheme(tenantId),
     listFontFaces(tenantId),
     getPublicSettings(tenantId),
+    getPublishedRegions(tenantId),
   ]);
 
-  return page ? { page, theme, faces, settings, tenantId } : null;
+  return page ? { page, theme, faces, settings, regions, tenantId } : null;
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
@@ -121,6 +126,7 @@ export default async function SitePage({ params }: Params) {
   if (!found) notFound();
 
   const slug = decodeURIComponent(host);
+  const theme = themeTokens(found.theme, familiesFromFiles(found.faces)).style;
 
   return (
     <>
@@ -139,9 +145,27 @@ export default async function SitePage({ params }: Params) {
           block enforces by not offering h1 at all. */}
       <h1 className="tgs-sr-only">{found.page.title}</h1>
 
-      <PageRenderer
-        page={found.page.content}
-        theme={themeTokens(found.theme, familiesFromFiles(found.faces)).style}
+      {/*
+        THE HEADER, THE PAGE AND THE FOOTER ARE SIBLINGS, not nested.
+
+        A wrapper around the three would put its `overflow-x: hidden` between a
+        sticky header and the document, and an overflow ancestor is exactly what
+        stops `position: sticky` sticking. Each carries the theme itself for the
+        same reason: there is no shared parent to put it on.
+
+        Each renders nothing at all when the client has never published one, so
+        a site without a footer has no empty `<footer>` claiming a landmark.
+      */}
+      <RegionRenderer region={found.regions.header} theme={theme} />
+
+      <PageRenderer page={found.page.content} theme={theme} />
+
+      <RegionRenderer region={found.regions.footer} theme={theme} />
+
+      {/* One script per distinct widget across all three, rather than each tree
+          emitting its own and fetching the same file up to three times. */}
+      <WidgetScripts
+        trees={[found.regions.header, found.page.content, found.regions.footer]}
       />
 
       {/* The tag manager noscript fallback, and any custom body HTML. Last, so

@@ -62,6 +62,8 @@ interface Props {
    * different site.
    */
   theme?: CSSProperties;
+  /** What the canvas says when there is nothing here yet. See PageRenderer. */
+  emptyNote?: string;
 }
 
 /**
@@ -100,6 +102,7 @@ export function Canvas({
   onInsertSection,
   editingPath = null,
   theme,
+  emptyNote,
 }: Props) {
   const frameRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -592,7 +595,13 @@ export function Canvas({
           onPointerCancel={endDrag}
           onKeyDown={onKeyDown}
         >
-          <PageRenderer page={page} editable editingPath={editingPath} theme={theme} />
+          <PageRenderer
+            page={page}
+            editable
+            editingPath={editingPath}
+            emptyNote={emptyNote}
+            theme={theme}
+          />
         </div>
 
         {stackNote && <p className="ed-stack-note">{stackNote}</p>}

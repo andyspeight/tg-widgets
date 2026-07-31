@@ -406,6 +406,57 @@ export type Page = z.infer<typeof PageSchema>;
 export const CONTENT_VERSION = 1 as const;
 
 // ---------------------------------------------------------------------------
+// Regions: the header and the footer
+// ---------------------------------------------------------------------------
+
+/**
+ * A region is a page's worth of sections that appears on every page.
+ *
+ * SAME SECTIONS, DELIBERATELY. A header is not a special kind of object with a
+ * logo slot and a menu slot: it is sections, rows, columns and blocks, exactly
+ * like a page. That is what lets the same renderer draw it, the same editor
+ * edit it, and every block in the library work inside it, widgets included. The
+ * alternative, a bespoke header model, would have needed its own renderer and
+ * its own editor and would still have been less capable than the one we have.
+ *
+ * What a region does NOT have is a slug, a title, a parent or SEO. None of them
+ * mean anything for furniture that appears on every URL.
+ */
+export const REGIONS = ['header', 'footer'] as const;
+
+export const RegionName = z.enum(REGIONS);
+export type RegionName = (typeof REGIONS)[number];
+
+export const RegionSchema = z.object({
+  /** Bumped when the shape changes, exactly as a page's is. */
+  version: z.literal(1),
+  region: RegionName,
+  /**
+   * Stay put as the page scrolls. Header only.
+   *
+   * Pure CSS, `position: sticky`. Stored here rather than as a section property
+   * because it is a fact about the header as a whole: two sticky sections in one
+   * header would stack up and eat the screen.
+   */
+  sticky: z.boolean().default(false),
+  /**
+   * Sit OVER the first section instead of above it. Header only.
+   *
+   * The look every travel site opens with: a full-bleed hero photograph with the
+   * logo and menu floating on top of it. Without this the header is a white bar
+   * pushing the photograph down the page.
+   *
+   * It only works when the first section has something behind it, so the editor
+   * says so rather than letting somebody turn it on over a white section and
+   * wonder why nothing changed.
+   */
+  overlay: z.boolean().default(false),
+  sections: z.array(SectionSchema).default([]),
+});
+
+export type Region = z.infer<typeof RegionSchema>;
+
+// ---------------------------------------------------------------------------
 // Width normalisation
 // ---------------------------------------------------------------------------
 
@@ -526,6 +577,54 @@ export function parsePage(input: unknown): ParseResult {
       (issue) => `${issue.path.join('.') || '(root)'}: ${issue.message}`,
     ),
   };
+}
+
+export type RegionParseResult =
+  | { ok: true; region: Region }
+  | { ok: false; errors: string[] };
+
+/**
+ * Parse an unknown value into a header or a footer.
+ *
+ * The same two steps parsePage takes, over the same preNormalise, which is why
+ * that function keys off `sections` rather than off anything page-shaped: a
+ * region's stored tree gets its column widths repaired and its old blocks
+ * upgraded by exactly the code a page's does, and neither can quietly drift
+ * from the other.
+ *
+ * `region` is stamped by the caller rather than trusted from the JSON. It comes
+ * from the primary key of the row being read, and a stored blob claiming to be
+ * the footer while sitting in the header row should not be able to say so.
+ */
+export function parseRegion(input: unknown, region: RegionName): RegionParseResult {
+  const pre = preNormalise(input);
+  const base = pre && typeof pre === 'object' ? (pre as Record<string, unknown>) : {};
+  const result = RegionSchema.safeParse({ version: 1, ...base, region });
+
+  if (result.success) {
+    return {
+      ok: true,
+      region: {
+        ...result.data,
+        sections: result.data.sections.map((section) => ({
+          ...section,
+          rows: section.rows.map(normaliseRow),
+        })),
+      },
+    };
+  }
+
+  return {
+    ok: false,
+    errors: result.error.issues.map(
+      (issue) => `${issue.path.join('.') || '(root)'}: ${issue.message}`,
+    ),
+  };
+}
+
+/** An empty header or footer, for a tenant that has never had one. */
+export function emptyRegion(region: RegionName): Region {
+  return { version: CONTENT_VERSION, region, sticky: false, overlay: false, sections: [] };
 }
 
 /** Normalise widths on a raw object before it has been validated. */

@@ -14,7 +14,6 @@
 import { Fragment, type CSSProperties, type ReactElement } from 'react';
 import type { Box, Column, Page, Row, Section } from '../../lib/content/schema';
 import { safeUrl } from '../../lib/content/sanitise';
-import { widgetScriptsFor, widgetTagsIn } from '../../lib/content/widgets';
 import { BlockRenderer } from './BlockRenderer';
 
 interface Editable {
@@ -49,9 +48,23 @@ export function PageRenderer({
   page,
   editable = false,
   editingPath = null,
+  emptyNote = 'This page is empty. Add a section to get started.',
   theme,
 }: {
   page: Page;
+  /**
+   * What the editor says when there is nothing here yet.
+   *
+   * A prop rather than a constant because this same renderer draws the site's
+   * header and footer in the editor, wrapped as a page, and telling somebody
+   * who has opened their header that "this page is empty" is the sort of small
+   * wrongness that makes a product feel like scaffolding. The browser harness
+   * caught exactly that.
+   *
+   * Only ever seen while editing: a published page with no sections renders
+   * nothing at all.
+   */
+  emptyNote?: string;
   /**
    * The tenant's theme, already turned into custom properties by
    * lib/theme/tokens.ts.
@@ -86,34 +99,20 @@ export function PageRenderer({
 
       {editable && page.sections.length === 0 && (
         <div className="tgs-placeholder" style={{ margin: 32 }}>
-          This page is empty. Add a section to get started.
+          {emptyNote}
         </div>
       )}
 
       {/*
-        THE WIDGET SCRIPTS, one per distinct widget on the page.
+        THE WIDGET SCRIPTS ARE NOT HERE, and were until 31 Jul 2026.
 
-        Here rather than in the block, because the widget files auto-init on
-        every matching container and carry a double-init guard: three Opening
-        Hours blocks want one script and three containers, not three of each.
-
-        NEVER IN THE EDITOR. The canvas re-renders on every keystroke, and the
-        blocks draw a placeholder there anyway, so a script would be loading for
-        containers that do not exist. It also keeps the editor from hammering the
-        widget config API while somebody types.
-
-        `defer`, which is what the embed contract specifies: it runs after the
-        document is parsed, so it does not matter whether React hoists these into
-        the head or leaves them here, the containers exist either way.
-
-        The URL is built by lib/content/widgets.ts from a closed list. Nothing a
-        client typed can reach this src, which is the whole reason the widget
-        block can be theirs to use rather than staff-only.
+        A header and a footer are separate trees that can hold widgets of their
+        own, so a page emitting only its own scripts would miss theirs and each
+        tree emitting its own would fetch the same file three times. Whoever
+        assembles the whole document now collects the tags from all three and
+        renders components/render/WidgetScripts.tsx once. See the note in that
+        file. The editor renders none of it, for the same reason as before.
       */}
-      {!editable
-        && widgetScriptsFor(widgetTagsIn(page)).map((src) => (
-          <script key={src} src={src} defer />
-        ))}
     </div>
   );
 }

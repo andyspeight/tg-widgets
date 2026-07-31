@@ -11,7 +11,7 @@
  */
 
 import { useState, type CSSProperties, type ReactNode } from 'react';
-import type { Page } from '../../lib/content/schema';
+import type { Page, RegionName } from '../../lib/content/schema';
 import {
   MAX_GAP,
   MAX_MIN_HEIGHT,
@@ -46,6 +46,17 @@ interface Props {
   onSelect: (path: Path | null) => void;
   onCommit: (next: (current: Page) => Page, coalesceKey?: string) => void;
   onBack: () => void;
+  /**
+   * Set when this editor is on the site's header or footer rather than a page.
+   *
+   * The only thing it changes in here is the root of the tree: a page's root
+   * carries a title, an address and a search listing, and a region's carries
+   * neither of the first two and cannot have the third. Everything below the
+   * root is identical, because a section in a header is a section.
+   */
+  region?: RegionName | null;
+  regionFlags?: { sticky: boolean; overlay: boolean };
+  onRegionFlags?: (next: { sticky: boolean; overlay: boolean }) => void;
 }
 
 /**
@@ -72,10 +83,12 @@ interface Props {
 function Breadcrumb({
   selected,
   page,
+  region,
   onSelect,
 }: {
   selected: Path;
   page: Page;
+  region: RegionName | null;
   onSelect: (path: Path) => void;
 }) {
   const trail = ancestors(selected);
@@ -97,7 +110,7 @@ function Breadcrumb({
               aria-current={last ? 'true' : undefined}
               onClick={() => onSelect(path)}
             >
-              {crumbLabel(path, page)}
+              {crumbLabel(path, page, region)}
             </button>
           </span>
         );
@@ -128,10 +141,10 @@ function ancestors(path: Path): Path[] {
  * Short labels, because the pane is 320px and a full heading would wrap to three
  * lines. The title underneath already says what the selected thing is in full.
  */
-function crumbLabel(path: Path, page: Page): string {
+function crumbLabel(path: Path, page: Page, region: RegionName | null): string {
   switch (path.kind) {
     case 'page':
-      return 'Page';
+      return region === 'header' ? 'Header' : region === 'footer' ? 'Footer' : 'Page';
     case 'section':
       return `Section ${path.section + 1}`;
     case 'row':
@@ -148,11 +161,23 @@ function crumbLabel(path: Path, page: Page): string {
   }
 }
 
-export function Properties({ page, selected, isStaff, onSelect, onCommit, onBack }: Props) {
+export function Properties({
+  page,
+  selected,
+  isStaff,
+  onSelect,
+  onCommit,
+  onBack,
+  region = null,
+  regionFlags,
+  onRegionFlags,
+}: Props) {
   return (
     <aside className="ed-props" aria-label="Properties">
       <div className="ed-panel-head">
-        <span className="ed-panel-title">{selected ? headingFor(selected, page) : 'Settings'}</span>
+        <span className="ed-panel-title">
+          {selected ? headingFor(selected, page, region) : 'Settings'}
+        </span>
         <button
           type="button"
           className="ed-btn"
@@ -167,7 +192,9 @@ export function Properties({ page, selected, isStaff, onSelect, onCommit, onBack
       </div>
 
       <div className="ed-panel-body">
-        {selected && <Breadcrumb selected={selected} page={page} onSelect={onSelect} />}
+        {selected && (
+          <Breadcrumb selected={selected} page={page} region={region} onSelect={onSelect} />
+        )}
 
         {!selected && (
           <p className="ed-empty-note">
@@ -176,7 +203,16 @@ export function Properties({ page, selected, isStaff, onSelect, onCommit, onBack
           </p>
         )}
 
-        {selected?.kind === 'page' && <PageFields page={page} onCommit={onCommit} />}
+        {selected?.kind === 'page'
+          && (region ? (
+            <RegionFields
+              region={region}
+              flags={regionFlags ?? { sticky: false, overlay: false }}
+              onChange={onRegionFlags}
+            />
+          ) : (
+            <PageFields page={page} onCommit={onCommit} />
+          ))}
 
         {selected?.kind === 'section' && (
           <SectionFields page={page} index={selected.section} onCommit={onCommit} />
@@ -245,10 +281,14 @@ function Group({
  * The header names the thing being edited in the agent's words. "BLOCK" told
  * them nothing; "Heading" tells them exactly what they clicked.
  */
-function headingFor(path: Path, page: Page): string {
+function headingFor(path: Path, page: Page, region: RegionName | null): string {
   switch (path.kind) {
     case 'page':
-      return 'Page settings';
+      return region === 'header'
+        ? 'Header settings'
+        : region === 'footer'
+          ? 'Footer settings'
+          : 'Page settings';
     case 'section':
       return sectionNameAt(page, path.section);
     case 'row':
@@ -263,6 +303,89 @@ function headingFor(path: Path, page: Page): string {
       return blockDefinition(block?.type ?? '')?.label ?? 'Content';
     }
   }
+}
+
+// ---------------------------------------------------------------------------
+
+/**
+ * The root of a header or a footer.
+ *
+ * WHAT IS NOT HERE IS THE POINT. A page's root carries a title, an address and
+ * a search listing. A header has none of those: it is not a URL, it is not
+ * indexed on its own and its title is the word "Header". Showing those fields
+ * greyed out would have been the lazy option; leaving them out says plainly
+ * that this is a different kind of thing.
+ *
+ * A FOOTER GETS NO SETTINGS AT ALL, and that is honest rather than unfinished.
+ * Sticky and overlay are both about a bar at the top of the screen, and a
+ * footer at the top of the screen is not a footer.
+ */
+function RegionFields({
+  region,
+  flags,
+  onChange,
+}: {
+  region: RegionName;
+  flags: { sticky: boolean; overlay: boolean };
+  onChange?: (next: { sticky: boolean; overlay: boolean }) => void;
+}) {
+  if (region === 'footer') {
+    return (
+      <p className="ed-empty-note">
+        Your footer appears at the bottom of every page. Add sections to it just
+        as you would to a page, and publish when you are happy with it.
+      </p>
+    );
+  }
+
+  return (
+    <>
+      <p className="ed-empty-note">
+        Your header appears at the top of every page. Publishing it changes all
+        of them at once.
+      </p>
+
+      <div className="ed-field">
+        <label className="ed-toggle">
+          <input
+            type="checkbox"
+            checked={flags.sticky}
+            onChange={(event) => onChange?.({ ...flags, sticky: event.target.checked })}
+          />
+          <span>Stay on screen while scrolling</span>
+        </label>
+        <p className="ed-help">The header follows the visitor down the page.</p>
+      </div>
+
+      <div className="ed-field">
+        <label className="ed-toggle">
+          <input
+            type="checkbox"
+            checked={flags.overlay}
+            onChange={(event) => onChange?.({ ...flags, overlay: event.target.checked })}
+          />
+          <span>Sit over the first section</span>
+        </label>
+        <p className="ed-help">
+          For a page that opens with a big photograph. The header floats on top
+          of it instead of pushing it down, so give the section behind it
+          something to see and set the header text to suit.
+        </p>
+      </div>
+
+      {/*
+        Shown rather than prevented. The two settings are legitimate on their
+        own and legitimate together, and the combination is simply worth
+        knowing about before somebody publishes it to every page.
+      */}
+      {flags.sticky && flags.overlay && (
+        <p className="ed-help">
+          With both on, the header is pinned to the top of the window and
+          everything scrolls underneath it.
+        </p>
+      )}
+    </>
+  );
 }
 
 // ---------------------------------------------------------------------------

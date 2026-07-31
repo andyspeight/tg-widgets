@@ -93,6 +93,15 @@ const result = await esbuild.build({
         build.onResolve({ filter: /(^|\/)app\/actions\/ai$/ }, () => ({
           path: resolve(root, 'standalone/demo-ai-actions.ts'),
         }));
+        /*
+         * And the header and footer actions, for the plain Postgres reason. The
+         * double validates through the real parseRegion and sanitises through
+         * the real sanitiseRegion, so a malformed header is refused in the
+         * review copy exactly as it would be against the database.
+         */
+        build.onResolve({ filter: /(^|\/)app\/actions\/regions$/ }, () => ({
+          path: resolve(root, 'standalone/demo-region-actions.ts'),
+        }));
       },
     },
   ],

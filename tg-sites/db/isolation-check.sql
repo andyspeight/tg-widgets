@@ -861,6 +861,70 @@ begin
      case when wrote then 'recorded ' || got else 'THE UPDATE WAS REFUSED' end);
 end $$;
 
+-- ---------------------------------------------------------------------------
+-- The header and the footer
+-- ---------------------------------------------------------------------------
+--
+-- A page keeps its draft away from the public renderer with a row policy,
+-- because a draft page is a whole row. A region cannot: its draft and its live
+-- copy are two COLUMNS OF THE SAME ROW, so a row policy has nothing to bite on
+-- and the guarantee has to be a column grant instead.
+--
+-- That is a different mechanism from every other table here, which is exactly
+-- why it is worth proving rather than assuming. An unfinished header appearing
+-- on a live site would appear on every url of it.
+--
+-- The second block is the one that makes the first mean anything. A probe that
+-- reports "refused" for a column the renderer IS allowed would report "refused"
+-- for everything, and would be detecting nothing.
+do $$
+declare read_draft boolean := false; read_live boolean := false;
+begin
+  set local role tg_sites_renderer;
+  perform set_config('app.current_tenant_id', '11111111-1111-1111-1111-111111111111', true);
+
+  begin
+    perform draft_content from public.site_regions limit 1;
+    read_draft := true;
+  exception when insufficient_privilege then read_draft := false; end;
+
+  begin
+    perform published_content from public.site_regions limit 1;
+    read_live := true;
+  exception when insufficient_privilege then read_live := false; end;
+
+  reset role;
+  insert into checks (name, passed, detail) values
+    ('a visitor cannot be shown an unpublished header',
+     not read_draft,
+     case when read_draft then 'IT READ draft_content' else 'no grant on draft_content' end),
+    ('and the probe above can tell a granted column from a refused one',
+     read_live,
+     case when read_live then 'published_content read fine'
+          else 'THE PROBE REFUSES EVERYTHING, so it proves nothing' end);
+end $$;
+
+-- One header and one footer per tenant, said in the primary key so it is the
+-- database's promise rather than the application's hope.
+do $$
+declare doubled boolean := false;
+begin
+  insert into public.site_regions (tenant_id, region)
+    values ('11111111-1111-1111-1111-111111111111', 'header')
+    on conflict do nothing;
+
+  begin
+    insert into public.site_regions (tenant_id, region)
+      values ('11111111-1111-1111-1111-111111111111', 'header');
+    doubled := true;
+  exception when unique_violation then doubled := false; end;
+
+  insert into checks (name, passed, detail) values
+    ('a site cannot end up with two headers',
+     not doubled,
+     case when doubled then 'IT MADE A SECOND ONE' else 'the primary key refused it' end);
+end $$;
+
 -- Deleting a tenant must take its fonts, their bytes and its media rows with it.
 -- A removed client's licensed font files must not stay in the database, and a
 -- media row left behind is a dangling reference to a blob nobody will ever tidy

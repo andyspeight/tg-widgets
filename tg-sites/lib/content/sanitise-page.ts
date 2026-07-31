@@ -14,7 +14,7 @@
 
 import { blockDefinition, type Field } from './blocks';
 import { safeUrl, sanitiseHtml, type SanitiseMode } from './sanitise';
-import type { Block, Page, Section } from './schema';
+import type { Block, Page, Region, Section } from './schema';
 
 /**
  * The embed block stores raw HTML in a plain textarea, and the renderer
@@ -138,6 +138,19 @@ function sanitiseSection(section: Section): Section {
       })),
     })),
   };
+}
+
+/**
+ * The same treatment for a header or a footer.
+ *
+ * A region is sections and nothing else, so this is sanitiseSection across the
+ * lot with no SEO to clean. Sharing sanitiseSection rather than copying it is
+ * the point: a block whose sanitising changes cannot end up correct on a page
+ * and wrong in a header, which would be the worse of the two places to get it
+ * wrong since a header is on every URL.
+ */
+export function sanitiseRegion(region: Region): Region {
+  return { ...region, sections: region.sections.map(sanitiseSection) };
 }
 
 /** Every URL and every scrap of HTML in a page, run through the allowlist. */

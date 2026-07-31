@@ -3,9 +3,12 @@ import Link from 'next/link';
 
 import '../../../components/sites/sites.css';
 import { PageRenderer } from '../../../components/render/PageRenderer';
+import { RegionRenderer } from '../../../components/render/RegionRenderer';
+import { WidgetScripts } from '../../../components/render/WidgetScripts';
 import { FontHead } from '../../../components/render/FontHead';
 import { listFontFaces } from '../../../lib/db/fonts';
 import { getPublishedPage } from '../../../lib/db/pages';
+import { getPublishedRegions } from '../../../lib/db/regions';
 import { getPublicTheme } from '../../../lib/db/theme';
 import { familiesFromFiles } from '../../../lib/theme/fonts';
 import { themeTokens } from '../../../lib/theme/tokens';
@@ -56,13 +59,14 @@ async function load(path: string[] | undefined) {
    * theme cannot be read for a tenant the request is not scoped to, and neither
    * call can write anything.
    */
-  const [page, theme, faces] = await Promise.all([
+  const [page, theme, faces, regions] = await Promise.all([
     getPublishedPage(site.tenantId, (path ?? []).join('/')),
     getPublicTheme(site.tenantId),
     listFontFaces(site.tenantId),
+    getPublishedRegions(site.tenantId),
   ]);
 
-  return page ? { page, theme, faces, slug: site.slug } : null;
+  return page ? { page, theme, faces, regions, slug: site.slug } : null;
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
@@ -123,6 +127,8 @@ export default async function PublishedPage({ params }: Params) {
     );
   }
 
+  const theme = themeTokens(found.theme, familiesFromFiles(found.faces)).style;
+
   return (
     <>
       {/* The page's only h1. Section headings start at h2, which the heading
@@ -139,9 +145,18 @@ export default async function PublishedPage({ params }: Params) {
         typography={found.theme.typography}
       />
 
-      <PageRenderer
-        page={found.page.content}
-        theme={themeTokens(found.theme, familiesFromFiles(found.faces)).style}
+      {/* Header, page and footer as siblings rather than nested, and each
+          carrying the theme itself. See the note on the public route: a wrapper
+          would put an overflow ancestor between a sticky header and the
+          document, which is what stops sticky sticking. */}
+      <RegionRenderer region={found.regions.header} theme={theme} />
+
+      <PageRenderer page={found.page.content} theme={theme} />
+
+      <RegionRenderer region={found.regions.footer} theme={theme} />
+
+      <WidgetScripts
+        trees={[found.regions.header, found.page.content, found.regions.footer]}
       />
     </>
   );

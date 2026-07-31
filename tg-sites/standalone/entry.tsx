@@ -15,6 +15,8 @@ import { createRoot } from 'react-dom/client';
 
 import { EditorShell } from '../components/editor/EditorShell';
 import { SEED_PAGE } from '../lib/content/seed';
+import { emptyRegion, REGIONS, type RegionName } from '../lib/content/schema';
+import { regionAsPage } from '../lib/content/region-page';
 import { parseTheme, type Theme } from '../lib/theme/schema';
 import { themeTokens } from '../lib/theme/tokens';
 import '../app/globals.css';
@@ -36,18 +38,46 @@ import '../app/globals.css';
  */
 function App() {
   const [theme, setTheme] = useState<Theme>(() => parseTheme({}));
+  /**
+   * Which of the three things this editor is on: the demo page, the header or
+   * the footer.
+   *
+   * A handle rather than a control in the banner, for the same reason the theme
+   * is one: this file is also the review copy, and a mode switcher across the
+   * top would make it look like the product has one. tools/verify-standalone.mjs
+   * calls this, and the real app reaches the region editor through
+   * /editor?region=header instead.
+   */
+  const [region, setRegion] = useState<RegionName | null>(null);
 
-  (window as unknown as Record<string, unknown>).__TG_SET_THEME__ = (input: unknown) => {
+  const handles = window as unknown as Record<string, unknown>;
+  handles.__TG_SET_THEME__ = (input: unknown) => {
     setTheme(parseTheme(input));
+  };
+  handles.__TG_SET_REGION__ = (input: unknown) => {
+    setRegion(
+      typeof input === 'string' && (REGIONS as readonly string[]).includes(input)
+        ? (input as RegionName)
+        : null,
+    );
   };
 
   return (
     <EditorShell
+      /*
+       * Remounted rather than re-rendered when the mode changes. The shell takes
+       * its page as an INITIAL value and owns it from then on, which is right:
+       * a parent that could reset it mid-edit would be a way to lose work. So
+       * changing what is being edited is a new editor, and the key says so.
+       */
+      key={region ?? 'page'}
       isStaff
       // So version history can mark the entries this person published.
       currentUserId="demo-user"
-      pageId="demo"
-      initialPage={SEED_PAGE}
+      region={region}
+      initialRegionFlags={{ sticky: false, overlay: false }}
+      pageId={region ? `region-${region}` : 'demo'}
+      initialPage={region ? regionAsPage(emptyRegion(region)) : SEED_PAGE}
       initialStatus="draft"
       initialHasUnpublishedChanges
       siteTheme={themeTokens(theme).style}

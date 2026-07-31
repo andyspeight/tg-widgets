@@ -22,6 +22,7 @@ import {
   IconItemBlock,
   ImageBlock,
   ListBlock,
+  NavBlock,
   QuoteBlock,
   SpacerBlock,
   TextBlock,
@@ -63,6 +64,8 @@ export function BlockRenderer({
         return <ButtonBlock props={props} />;
       case 'button-group':
         return <ButtonGroupBlock props={props} />;
+      case 'nav':
+        return <NavBlock props={props} />;
       case 'divider':
         return <DividerBlock props={props} />;
       case 'spacer':
