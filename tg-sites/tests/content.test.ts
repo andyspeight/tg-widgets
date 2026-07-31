@@ -7,6 +7,9 @@
  * sanitiser hole looks fine until someone finds it.
  */
 
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_SECTION_PADDING,
@@ -39,6 +42,7 @@ import {
   SECTION_PRESETS,
 } from '../lib/content/presets';
 import { LAYOUTS, layoutCells } from '../lib/content/layouts';
+import { blockDefinition } from '../lib/content/blocks';
 import {
   addBlock,
   addColumn,
@@ -57,6 +61,14 @@ import { sanitiseStyle } from '../lib/content/styles';
 import { sanitisePage } from '../lib/content/sanitise-page';
 import { resolveVideo } from '../lib/content/video';
 import { SEED_PAGE } from '../lib/content/seed';
+import {
+  safeWidgetId,
+  WIDGET_GROUPS,
+  WIDGET_KINDS,
+  WIDGET_ORIGIN,
+  widgetScriptsFor,
+  widgetScriptUrl,
+} from '../lib/content/widgets';
 
 const sum = (values: number[]) => values.reduce((total, value) => total + value, 0);
 
@@ -1314,5 +1326,257 @@ describe('the designed section presets', () => {
     expect(centred.every((bar) => bar.x > 0.001)).toBe(true);
     // The left-aligned one does.
     expect(left.some((bar) => bar.x < 0.001)).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+/**
+ * The widget catalogue, checked against the widget suite's own registry.
+ *
+ * lib/content/widgets.ts is a COPY: tg-sites is a separate Vercel project and
+ * cannot read public/index.html at runtime. A copy drifts, and the way it drifts
+ * is silent, because a wrong tag is a 404 for a script and a widget that simply
+ * never appears on a client's page.
+ *
+ * Both live in this repo, so the test can read the real thing off disk. This is
+ * the check that turns "I copied it carefully" into a claim.
+ */
+describe('the Travelgenix widget catalogue', () => {
+  const suiteRoot = join(__dirname, '..', '..', 'public');
+
+  /** name, tag and script file for every widget on the dashboard. */
+  const registry = (() => {
+    const html = readFileSync(join(suiteRoot, 'index.html'), 'utf8');
+    const list = html.slice(html.indexOf('const WIDGETS = ['));
+    return list
+      .split('\n  {\n')
+      .slice(1)
+      .map((entry) => {
+        const get = (key: string) =>
+          new RegExp(`\\b${key}:\\s*'([^']*)'`).exec(entry)?.[1] ?? '';
+        const tag = get('widgetTag');
+        return { name: get('name'), tag, script: get('scriptFile') || `widget-${tag}.js` };
+      })
+      .filter((entry) => entry.tag);
+  })();
+
+  it('found the registry, so the checks below are not passing over an empty list', () => {
+    expect(registry.length).toBeGreaterThan(30);
+  });
+
+  it('every widget we offer exists in the suite registry', () => {
+    const known = new Set(registry.map((entry) => entry.tag));
+    const unknown = WIDGET_KINDS.filter((kind) => !known.has(kind.tag)).map((k) => k.tag);
+    expect(unknown, 'these tags are not widgets the suite has').toEqual([]);
+  });
+
+  /*
+   * THE ONE THAT WOULD HAVE BITTEN. Pricing Table is served from /widget.js, not
+   * widget-pricing.js: it predates the naming convention. Deriving the filename
+   * from the tag would have shipped a 404 and a widget that never appears.
+   */
+  it('and points at the script file the suite actually serves', () => {
+    const wrong = WIDGET_KINDS.filter((kind) => {
+      const entry = registry.find((r) => r.tag === kind.tag);
+      return entry && entry.script !== kind.script;
+    }).map((kind) => kind.tag);
+    expect(wrong, 'these name a different script from the registry').toEqual([]);
+  });
+
+  it('and that file is really on disk', () => {
+    const missing = WIDGET_KINDS.filter(
+      (kind) => !existsSync(join(suiteRoot, kind.script)),
+    ).map((kind) => `${kind.tag} -> ${kind.script}`);
+    expect(missing, 'no such script in public/').toEqual([]);
+  });
+
+  /*
+   * The eight left out are left out ON PURPOSE, and this pins the reasoning so a
+   * later "the list looks incomplete" tidy-up has to read it first. Each floats,
+   * sits across the whole site, wraps content that already exists, or is not a
+   * website widget at all.
+   */
+  it('leaves out the ones that are not a thing you put in a column', () => {
+    const offered = new Set(WIDGET_KINDS.map((kind) => kind.tag));
+    for (const tag of ['backtotop', 'loader', 'popup', 'consent', 'whatsapp', 'dealbar', 'smartsection', 'emailsig']) {
+      expect(offered.has(tag), `${tag} should not be a block`).toBe(false);
+    }
+  });
+
+  it('no tag is offered twice', () => {
+    const tags = WIDGET_KINDS.map((kind) => kind.tag);
+    expect(tags.length).toBe(new Set(tags).size);
+  });
+
+  it('every group is one of the declared ones', () => {
+    for (const kind of WIDGET_KINDS) {
+      expect(WIDGET_GROUPS).toContain(kind.group);
+    }
+  });
+});
+
+describe('building a widget script URL', () => {
+  it('is built from the catalogue, never from what was typed', () => {
+    expect(widgetScriptUrl('hours')).toBe(`${WIDGET_ORIGIN}/widget-hours.js`);
+    expect(widgetScriptUrl('pricing')).toBe(`${WIDGET_ORIGIN}/widget.js`);
+  });
+
+  /*
+   * The property that matters. An unknown tag must produce NO url rather than a
+   * guessed one, or whatever a client typed ends up inside a script src.
+   */
+  it('refuses a tag it does not know rather than guessing one', () => {
+    for (const bad of ['', 'nope', '../../evil', 'hours.js', 'https://evil.test/x.js', null, 42]) {
+      expect(widgetScriptUrl(bad)).toBeNull();
+    }
+  });
+
+  it('loads one script per tag however many blocks use it', () => {
+    expect(widgetScriptsFor(['hours', 'hours', 'reviews', 'hours'])).toEqual([
+      `${WIDGET_ORIGIN}/widget-hours.js`,
+      `${WIDGET_ORIGIN}/widget-reviews.js`,
+    ]);
+  });
+
+  it('and drops the ones it does not know on the way', () => {
+    expect(widgetScriptsFor(['hours', 'nope', null])).toEqual([
+      `${WIDGET_ORIGIN}/widget-hours.js`,
+    ]);
+  });
+});
+
+describe('a widget id', () => {
+  it('accepts the shape the widgets API issues', () => {
+    expect(safeWidgetId('tgw_abc123')).toBe('tgw_abc123');
+    expect(safeWidgetId('  tgw_abc123  ')).toBe('tgw_abc123');
+  });
+
+  it('refuses anything else, so a typo is caught while it can still be fixed', () => {
+    for (const bad of ['', 'abc123', 'tgw_', 'tgw_ab', 'tgw_<script>', 'tgw_a"b', null, 7]) {
+      expect(safeWidgetId(bad)).toBeNull();
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+/**
+ * The two widget blocks, and the properties that make them safe.
+ *
+ * The Travelgenix one is safe by CONSTRUCTION: nothing a client types reaches a
+ * URL, so it needs no permission gate and clients can use it themselves. The
+ * third-party one is safe by CONTAINMENT: the HTML is deliberately not
+ * sanitised, and the sandbox is what stands in for the parser.
+ *
+ * The sandbox is read out of the source rather than exercised in a browser,
+ * because the claim is about which tokens are present, and one token being
+ * wrong is invisible in a rendered page: it still draws, it is just no longer
+ * sealed.
+ */
+describe('the widget blocks', () => {
+  const ROOT = join(__dirname, '..');
+  const blocksSource = readFileSync(join(ROOT, 'components', 'render', 'blocks.tsx'), 'utf8');
+
+  function pageWithBlock(type: string, props: Record<string, unknown>) {
+    const page = createPage('Test', 'test');
+    const section = createSectionFromLayout(LAYOUTS[0]);
+    section.rows[0].columns[0].blocks = [{ id: newId('b'), type, props }];
+    page.sections = [section];
+    return page;
+  }
+  const propsAfterSave = (type: string, props: Record<string, unknown>) =>
+    sanitisePage(pageWithBlock(type, props)).sections[0].rows[0].columns[0].blocks[0].props;
+
+  it('are both in the registry, so the picker can offer them', () => {
+    expect(blockDefinition('widget')?.label).toBe('Travelgenix widget');
+    expect(blockDefinition('embed-widget')?.label).toBe('Embedded widget');
+  });
+
+  /*
+   * The one that decides whether this can be a client feature at all. The Embed
+   * block is staff-only because it puts unchecked HTML on a page; neither of
+   * these does, so neither is gated.
+   */
+  it('and neither is staff only, which is the whole point of the design', () => {
+    expect(blockDefinition('widget')?.staffOnly).toBeFalsy();
+    expect(blockDefinition('embed-widget')?.staffOnly).toBeFalsy();
+    // The old escape hatch is still gated, though.
+    expect(blockDefinition('embed')?.staffOnly).toBe(true);
+  });
+
+  it('the widget picker only offers widgets we have scripts for', () => {
+    const field = blockDefinition('widget')?.fields.find((f) => f.key === 'widget');
+    expect(field?.kind).toBe('select');
+    if (field?.kind !== 'select') return;
+    expect(field.options.length).toBe(WIDGET_KINDS.length);
+    for (const option of field.options) {
+      expect(widgetScriptUrl(option.value)).not.toBeNull();
+    }
+  });
+
+  // --- the sealed box -----------------------------------------------------
+
+  it('the sealed frame never gets allow-same-origin beside allow-scripts', () => {
+    const sandbox = /const SANDBOX = \[([\s\S]*?)\]\.join/.exec(blocksSource)?.[1] ?? '';
+    expect(sandbox, 'the sandbox list moved').toContain('allow-scripts');
+    /*
+     * THE FOOTGUN. Together these two let the framed document reach into the
+     * parent and remove its own sandbox attribute, so the box says sealed and is
+     * not. Every "my embed will not work in an iframe" answer online suggests
+     * it, which is exactly why this is a test and not a comment.
+     *
+     * Matched outside a comment line, because the reasoning above names the
+     * token and the reasoning is allowed to.
+     */
+    const live = sandbox
+      .split('\n')
+      .filter((line) => line.trim().startsWith("'"))
+      .join(' ');
+    expect(live).not.toContain('allow-same-origin');
+    // And an embed must not be able to redirect the whole site.
+    expect(live).not.toContain('allow-top-navigation');
+  });
+
+  it('and the frame always carries a sandbox at all', () => {
+    const frame = blocksSource.slice(blocksSource.indexOf('export function EmbedWidgetBlock'));
+    expect(frame).toContain('sandbox={SANDBOX}');
+    // srcDoc, not src: the HTML is the content, not an address to fetch.
+    expect(frame).toContain('srcDoc={html}');
+  });
+
+  /*
+   * DELIBERATELY NOT SANITISED, and the test says so out loud so nobody
+   * "fixes" it. Stripping the script would remove the only reason to paste an
+   * embed. The sandbox is what makes that acceptable.
+   */
+  it('keeps the third-party script, because the sandbox is the containment', () => {
+    const props = propsAfterSave('embed-widget', {
+      html: '<script src="https://widget.trustpilot.com/bootstrap/v5/tp.js"></script><div class="trustpilot-widget"></div>',
+      height: 400,
+    });
+    expect(props.html).toContain('<script');
+    expect(props.html).toContain('trustpilot');
+  });
+
+  it('but takes out control characters and caps the length', () => {
+    const props = propsAfterSave('embed-widget', {
+      html: `a\u0000b\u001Fc${'x'.repeat(30_000)}`,
+    });
+    expect(String(props.html)).not.toMatch(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/);
+    expect(String(props.html).length).toBe(20_000);
+  });
+
+  /*
+   * The contrast that makes the design legible: the SAME paste into the two
+   * blocks gets opposite treatment, because one runs in the page and one does
+   * not.
+   */
+  it('while the old Embed block still strips it, because that one runs in the page', () => {
+    const props = propsAfterSave('embed', {
+      html: '<div>hi</div><script src="https://evil.test/x.js"></script>',
+    });
+    expect(props.html).not.toContain('script');
+    expect(props.html).toContain('hi');
   });
 });

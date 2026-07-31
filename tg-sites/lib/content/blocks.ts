@@ -19,6 +19,7 @@
  */
 
 import type { IconName } from '../../components/editor/Icon';
+import { WIDGET_KINDS } from './widgets';
 
 // ---------------------------------------------------------------------------
 // Editor field definitions
@@ -483,11 +484,104 @@ export const BLOCKS: readonly BlockDefinition[] = [
 
   // --- Advanced ---------------------------------------------------------
   {
+    /*
+     * A TRAVELGENIX WIDGET, PICKED FROM A LIST.
+     *
+     * Andy, 31 Jul 2026: widgets are what Travelgenix is about, and until this
+     * there was no way to put one on a page. Pasting the dashboard's embed
+     * snippet into the Embed block below produced a bare <div></div>: the script
+     * went, and so did both data attributes.
+     *
+     * NOT STAFF ONLY, and that is the point of doing it this way. The widget is
+     * chosen from lib/content/widgets.ts and the script address is built there,
+     * so nothing a client types becomes a URL or code. Same shape as the
+     * analytics setting: they give an id, we generate what runs.
+     */
+    type: 'widget',
+    label: 'Travelgenix widget',
+    group: 'Advanced',
+    icon: 'sparkle',
+    description: 'One of your own widgets: offers, reviews, an enquiry form.',
+    defaults: { widget: 'hours', widgetId: '' },
+    summarise: (props) =>
+      WIDGET_KINDS.find((kind) => kind.tag === props.widget)?.label ?? 'Widget',
+    fields: [
+      {
+        kind: 'select',
+        key: 'widget',
+        label: 'Which widget',
+        options: WIDGET_KINDS.map((kind) => ({ value: kind.tag, label: kind.label })),
+        help: 'The ones that sit in a column. Site-wide widgets like the cookie banner are not here.',
+      },
+      {
+        kind: 'text',
+        key: 'widgetId',
+        label: 'Widget ID',
+        placeholder: 'tgw_...',
+        max: 80,
+        help: 'From your widgets dashboard, on the widget you want to show.',
+      },
+    ],
+  },
+  {
+    /*
+     * SOMEBODY ELSE'S WIDGET, IN A SEALED BOX.
+     *
+     * Andy's requirement alongside the block above: "it's important that a user
+     * can place a non-Travelgenix widget as well as our own." Trustpilot, a chat
+     * tool, another vendor's booking engine.
+     *
+     * That means arbitrary third-party script, which is the thing the sanitiser
+     * exists to keep off a page. So it does not go on the page: it goes inside a
+     * sandboxed iframe at a null origin, where it can draw in its own rectangle
+     * and do nothing else. It cannot read the page around it, reach the client's
+     * session, or touch another widget.
+     *
+     * The sealing is what makes this safe enough for a CLIENT rather than
+     * staff-only. See components/render/blocks.tsx for the sandbox tokens and
+     * the one combination that is deliberately not offered.
+     */
+    type: 'embed-widget',
+    label: 'Embedded widget',
+    group: 'Advanced',
+    icon: 'code',
+    description: "Code from somewhere else, run in a sealed box that cannot reach your page.",
+    defaults: { html: '', height: 420, title: '' },
+    summarise: (props) => asString(props.title) || 'Embedded widget',
+    fields: [
+      {
+        kind: 'textarea',
+        key: 'html',
+        label: 'The code they gave you',
+        rows: 6,
+        max: 20000,
+        help: 'Paste it exactly. It runs sealed off from the rest of your page.',
+      },
+      {
+        kind: 'number',
+        key: 'height',
+        label: 'Height',
+        min: 80,
+        max: 2000,
+        step: 20,
+        help: 'A sealed box cannot make the page taller by itself, so tell it how tall to be.',
+      },
+      {
+        kind: 'text',
+        key: 'title',
+        label: 'What it is',
+        placeholder: 'Trustpilot reviews',
+        max: 120,
+        help: 'Read out by a screen reader, and it names the block in the outline.',
+      },
+    ],
+  },
+  {
     type: 'embed',
     label: 'Embed code',
     group: 'Advanced',
     icon: 'code',
-    description: 'Raw HTML. Travelgenix staff only.',
+    description: 'Raw HTML that runs in the page itself. Travelgenix staff only.',
     staffOnly: true,
     defaults: { html: '' },
     summarise: () => 'Embed code',

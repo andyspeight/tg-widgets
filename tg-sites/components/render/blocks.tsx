@@ -14,6 +14,7 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { escapeHtml, safeUrl, sanitiseHtml } from '../../lib/content/sanitise';
 import { resolveVideo } from '../../lib/content/video';
+import { safeWidgetId, widgetKind } from '../../lib/content/widgets';
 
 type Props = Record<string, unknown>;
 
@@ -42,6 +43,20 @@ function list(props: Props, key: string): Props[] {
   const value = props[key];
   if (!Array.isArray(value)) return [];
   return value.filter((item): item is Props => !!item && typeof item === 'object');
+}
+
+/**
+ * A number from a prop, held inside sane bounds.
+ *
+ * The fallback covers a missing value AND a NaN, because a height that arrives
+ * as the string "four hundred" should give a box of the default size rather than
+ * a box of NaN pixels, which collapses to nothing and reads as the block having
+ * failed to load.
+ */
+function clamp(value: unknown, min: number, max: number, fallback: number): number {
+  const number = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(number)) return fallback;
+  return Math.min(max, Math.max(min, Math.round(number)));
 }
 
 /** 'auto' means let the image size itself, anything else is an aspect ratio. */
@@ -268,6 +283,144 @@ export function ImageBlock({ props }: { props: Props }): ReactElement {
         {href ? <a href={href}>{picture}</a> : picture}
         {caption && <figcaption>{caption}</figcaption>}
       </figure>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Widgets
+// ---------------------------------------------------------------------------
+
+/**
+ * A Travelgenix widget: the container, and nothing else.
+ *
+ * The SCRIPT is not here. PageRenderer collects every widget tag on the page and
+ * emits one script per distinct tag at the end, because the widget files auto
+ * init on every matching container and carry a double-init guard, so three
+ * Opening Hours blocks want one script and three containers rather than three of
+ * each.
+ *
+ * WHAT MAKES THIS SAFE is that neither attribute below can be anything a client
+ * chose. The tag comes back from widgetKind, which is a lookup in a closed list,
+ * and the id has been through safeWidgetId. An unknown tag or a malformed id
+ * draws the placeholder instead, which is honest: an empty box on a published
+ * page with no explanation is the failure this avoids.
+ */
+export function WidgetBlock({
+  props,
+  editing = false,
+}: {
+  props: Props;
+  /**
+   * Draw the placeholder rather than the real container.
+   *
+   * True on the editor canvas. The canvas re-renders on every keystroke, and a
+   * widget script re-initialising each time would thrash the page and hammer the
+   * config API. The editor's job is the layout; Preview is where the widget is
+   * checked. Same reasoning as the render-must-not-grab-the-page rule.
+   */
+  editing?: boolean;
+}): ReactElement {
+  const kind = widgetKind(props.widget);
+  const id = safeWidgetId(props.widgetId);
+
+  if (!kind || !id) {
+    return (
+      <div className="tgs-placeholder">
+        {!kind
+          ? 'Choose a widget'
+          : 'Add the widget ID from your dashboard, the one starting tgw_'}
+      </div>
+    );
+  }
+
+  if (editing) {
+    return (
+      <div className="tgs-widget-ghost">
+        <span className="tgs-widget-ghost__name">{kind.label}</span>
+        <span className="tgs-widget-ghost__id">{id}</span>
+        <span className="tgs-widget-ghost__note">Shown for real on the published page</span>
+      </div>
+    );
+  }
+
+  return <div className="tgs-widget" data-tg-widget={kind.tag} data-tg-id={id} />;
+}
+
+/**
+ * Somebody else's widget, in a sandboxed iframe.
+ *
+ * THE SANDBOX IS THE WHOLE SECURITY MODEL, so it is worth saying exactly what it
+ * buys. With `sandbox` present and `allow-same-origin` absent, the document
+ * inside gets a UNIQUE OPAQUE ORIGIN. It cannot read the parent document, the
+ * client's cookies, their session or localStorage, and it cannot reach any other
+ * widget. It can draw in its own rectangle and talk to its own servers.
+ *
+ * THE COMBINATION THAT IS NOT OFFERED: allow-same-origin together with
+ * allow-scripts. Every "my embed does not work in an iframe" answer online
+ * suggests it, and together they let the framed document reach into the parent
+ * and remove its own sandbox attribute. A box that says sealed and is not is
+ * worse than no box, so it is not a setting.
+ *
+ * srcdoc rather than a data: URL, because a data: URL is treated as opaque by
+ * some browsers in ways that break scripts, and React escapes the attribute for
+ * us. The HTML inside is NOT sanitised, on purpose: sanitising it would strip
+ * the script that is the only reason anybody pastes an embed, and the sandbox is
+ * what makes that acceptable. Same trade as the staff head and body HTML, with
+ * containment instead of a permission check.
+ */
+const SANDBOX = [
+  // The reason the block exists.
+  'allow-scripts',
+  // A "book now" link has to be able to open something.
+  'allow-popups',
+  // ...and what it opens should be an ordinary page, not another sealed box.
+  'allow-popups-to-escape-sandbox',
+  // Newsletter signups and enquiry forms submit.
+  'allow-forms',
+  // Deliberately absent: allow-same-origin (see above), allow-top-navigation
+  // (an embed must not be able to redirect the whole site), allow-modals.
+].join(' ');
+
+export function EmbedWidgetBlock({
+  props,
+  editing = false,
+}: {
+  props: Props;
+  editing?: boolean;
+}): ReactElement {
+  const html = typeof props.html === 'string' ? props.html : '';
+  const title = str(props, 'title') || 'Embedded widget';
+  const height = clamp(props.height, 80, 2000, 420);
+
+  if (!html.trim()) {
+    return <div className="tgs-placeholder">Paste the code you were given</div>;
+  }
+
+  /*
+   * NOT RUN ON THE CANVAS. It is sealed, so it could be run safely, and it is
+   * still the wrong thing: the canvas re-renders on every keystroke and each one
+   * would reload the frame and re-run somebody else's script, which is slow and
+   * makes their analytics count an editing session as traffic.
+   */
+  if (editing) {
+    return (
+      <div className="tgs-widget-ghost" style={{ minHeight: height }}>
+        <span className="tgs-widget-ghost__name">{title}</span>
+        <span className="tgs-widget-ghost__note">Shown for real on the published page</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="tgs-embed-widget" style={{ height }}>
+      <iframe
+        title={title}
+        sandbox={SANDBOX}
+        srcDoc={html}
+        loading="lazy"
+        referrerPolicy="no-referrer"
+      />
     </div>
   );
 }

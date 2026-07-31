@@ -58,6 +58,28 @@ function cleanValue(
       return typeof value === 'string' && value ? (safeUrl(value) ?? '') : value;
 
     case 'textarea':
+      /*
+       * THE EMBEDDED WIDGET IS DELIBERATELY NOT SANITISED, and that is the whole
+       * design of the block rather than an omission.
+       *
+       * Sanitising it would strip the script that is the only reason anybody
+       * pastes an embed, exactly as the staff head and body HTML says of itself.
+       * The difference is what stands in for the parser: this HTML never runs on
+       * the page. It goes into a sandboxed iframe with no allow-same-origin, so
+       * it executes at an opaque origin and can reach nothing outside its own
+       * rectangle. Containment instead of a permission check, which is what lets
+       * a client use it rather than only us.
+       *
+       * See components/render/blocks.tsx for the sandbox tokens, and the one
+       * combination that is deliberately never offered.
+       */
+      if (blockType === 'embed-widget' && field.key === 'html') {
+        return typeof value === 'string'
+          // Control characters out, which are never intentional in a paste, and
+          // a length cap. Nothing else.
+          ? value.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').slice(0, 20_000)
+          : '';
+      }
       return EMBED_MODE_PROPS[blockType]?.includes(field.key)
         ? sanitiseHtml(value, 'embed')
         : value;

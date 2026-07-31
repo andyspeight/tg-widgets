@@ -16,6 +16,7 @@ import {
   ButtonGroupBlock,
   DividerBlock,
   EmbedBlock,
+  EmbedWidgetBlock,
   GalleryBlock,
   HeadingBlock,
   IconItemBlock,
@@ -25,6 +26,7 @@ import {
   SpacerBlock,
   TextBlock,
   VideoBlock,
+  WidgetBlock,
 } from './blocks';
 
 export function BlockRenderer({
@@ -67,6 +69,16 @@ export function BlockRenderer({
         return <SpacerBlock props={props} />;
       case 'embed':
         return <EmbedBlock props={props} />;
+      /*
+       * `editable` is what tells these two to draw a placeholder rather than the
+       * real thing. It is already true exactly when this tree is the editor's
+       * canvas, so nothing new had to be threaded down for it: see the note on
+       * WidgetBlock for why the canvas must not run widget scripts.
+       */
+      case 'widget':
+        return <WidgetBlock props={props} editing={editable} />;
+      case 'embed-widget':
+        return <EmbedWidgetBlock props={props} editing={editable} />;
       default:
         return null;
     }

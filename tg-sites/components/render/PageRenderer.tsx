@@ -14,6 +14,7 @@
 import { Fragment, type CSSProperties, type ReactElement } from 'react';
 import type { Box, Column, Page, Row, Section } from '../../lib/content/schema';
 import { safeUrl } from '../../lib/content/sanitise';
+import { widgetScriptsFor, widgetTagsIn } from '../../lib/content/widgets';
 import { BlockRenderer } from './BlockRenderer';
 
 interface Editable {
@@ -88,6 +89,31 @@ export function PageRenderer({
           This page is empty. Add a section to get started.
         </div>
       )}
+
+      {/*
+        THE WIDGET SCRIPTS, one per distinct widget on the page.
+
+        Here rather than in the block, because the widget files auto-init on
+        every matching container and carry a double-init guard: three Opening
+        Hours blocks want one script and three containers, not three of each.
+
+        NEVER IN THE EDITOR. The canvas re-renders on every keystroke, and the
+        blocks draw a placeholder there anyway, so a script would be loading for
+        containers that do not exist. It also keeps the editor from hammering the
+        widget config API while somebody types.
+
+        `defer`, which is what the embed contract specifies: it runs after the
+        document is parsed, so it does not matter whether React hoists these into
+        the head or leaves them here, the containers exist either way.
+
+        The URL is built by lib/content/widgets.ts from a closed list. Nothing a
+        client typed can reach this src, which is the whole reason the widget
+        block can be theirs to use rather than staff-only.
+      */}
+      {!editable
+        && widgetScriptsFor(widgetTagsIn(page)).map((src) => (
+          <script key={src} src={src} defer />
+        ))}
     </div>
   );
 }
