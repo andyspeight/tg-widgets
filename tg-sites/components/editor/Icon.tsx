@@ -30,6 +30,10 @@ export type IconName =
   | 'list'
   | 'nav'
   | 'cards'
+  | 'accordion'
+  | 'tabs'
+  | 'slider'
+  | 'table'
   | 'sparkle'
   | 'image'
   | 'video'
@@ -103,6 +107,14 @@ const PATHS: Record<IconName, string> = {
   // `columns`, which is the same two boxes with nothing in them, and not
   // `gallery`, which is four squares.
   cards: 'M3 4h8v16H3zM13 4h8v16h-8zM3 11h8M13 11h8',
+  // Stacked bars, the top one opened to show a line under it.
+  accordion: 'M3 4h18v4H3zM3 12h18v8H3zM6 16h9',
+  // A row of tabs with the first one joined to the panel below.
+  tabs: 'M3 8h6v3H3zM10 8h5v3h-5zM16 8h5v3h-5zM3 11h18v9H3z',
+  // A wide middle panel with the edges of its neighbours showing.
+  slider: 'M7 5h10v14H7zM3.5 8v8M20.5 8v8',
+  // A grid with a ruled header row and a ruled first column.
+  table: 'M3 5h18v14H3zM3 9h18M9 9v10',
   sparkle: 'M12 3l2.1 5.4L19.5 10l-5.4 2.1L12 17.5l-2.1-5.4L4.5 10l5.4-1.6z',
   image: 'M3 5h18v14H3zM8.5 10.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM21 15l-5-5L5 19',
   video: 'M3 6h12v12H3zM15 10l6-3v10l-6-3z',

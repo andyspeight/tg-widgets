@@ -12,6 +12,7 @@ import type { ReactElement } from 'react';
 import type { Block } from '../../lib/content/schema';
 import { isKnownBlock } from '../../lib/content/blocks';
 import {
+  AccordionBlock,
   ButtonBlock,
   ButtonGroupBlock,
   CardsBlock,
@@ -26,6 +27,7 @@ import {
   NavBlock,
   QuoteBlock,
   SpacerBlock,
+  TabsBlock,
   TextBlock,
   VideoBlock,
   WidgetBlock,
@@ -55,6 +57,15 @@ export function BlockRenderer({
         return <ListBlock props={props} />;
       case 'icon-item':
         return <IconItemBlock props={props} />;
+      /*
+       * These two take the block's own id, which becomes the `name` grouping
+       * their controls. Nothing else in this file needs it, so it is passed
+       * here rather than threaded through every block.
+       */
+      case 'accordion':
+        return <AccordionBlock props={props} blockId={block.id} />;
+      case 'tabs':
+        return <TabsBlock props={props} blockId={block.id} />;
       case 'image':
         return <ImageBlock props={props} />;
       case 'video':

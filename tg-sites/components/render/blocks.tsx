@@ -585,6 +585,179 @@ export function CardsBlock({ props }: { props: Props }): ReactElement {
   );
 }
 
+/**
+ * A run of text into paragraphs, on blank lines.
+ *
+ * These blocks take a plain textarea rather than rich text, so what arrives is
+ * a string with newlines in it and React escapes every character of it. Without
+ * this the whole thing renders as one wall with the line breaks collapsed, and
+ * somebody who pressed Enter twice would be looking at a bug.
+ */
+function paragraphs(text: string): ReactElement[] {
+  return text
+    .split(/\n{2,}/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part, index) => <p key={index}>{part}</p>);
+}
+
+/** The chevron both of these use. Inlined for the same reason PageRenderer's is. */
+function Chevron({ className }: { className: string }): ReactElement {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  );
+}
+
+export function AccordionBlock({
+  props,
+  blockId,
+}: {
+  props: Props;
+  /**
+   * Used as the `name` that makes the panels exclusive.
+   *
+   * Unique within a page tree, which is all it needs to be: two accordions
+   * sharing a name would close each other's panels. It comes from the block
+   * rather than being generated here so it survives a re-render, and so the
+   * server and the client agree on it.
+   */
+  blockId: string;
+}): ReactElement {
+  const items = list(props, 'items');
+  const style = oneOf(props, 'style', ['plain', 'ruled', 'separated'] as const, 'separated');
+  const single = bool(props, 'single', true);
+  const openFirst = bool(props, 'openFirst', false);
+
+  const rows = items.filter((item) => str(item, 'title') || str(item, 'body'));
+
+  if (rows.length === 0) {
+    return <div className="tgs-placeholder">Add some sections</div>;
+  }
+
+  return (
+    <div className="tgs-accordion" data-style={style}>
+      {rows.map((item, index) => (
+        <details
+          key={index}
+          className="tgs-accordion__item"
+          /*
+           * `name` is what makes a set of details exclusive, and it is the
+           * browser doing it rather than a script. A browser that does not know
+           * the attribute yet simply lets two stay open, which is a worse
+           * accordion and not a broken page.
+           */
+          {...(single ? { name: `tgs-acc-${blockId}` } : {})}
+          {...(openFirst && index === 0 ? { open: true } : {})}
+        >
+          <summary className="tgs-accordion__head">
+            <span className="tgs-accordion__title">{str(item, 'title') || 'Untitled'}</span>
+            <Chevron className="tgs-accordion__mark" />
+          </summary>
+          <div className="tgs-accordion__body">{paragraphs(str(item, 'body'))}</div>
+        </details>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * The most tabs the stylesheet can show.
+ *
+ * A panel is revealed by one hand-written rule per position, because the
+ * selector has to name the position and CSS cannot count to "however many".
+ * Exported so the test suite can hold this number, the block's `max` and the
+ * number of rules in globals.css against each other: a ninth tab would render a
+ * heading that opens nothing.
+ */
+export const MAX_TABS = 8;
+
+export function TabsBlock({
+  props,
+  blockId,
+}: {
+  props: Props;
+  blockId: string;
+}): ReactElement {
+  const style = oneOf(props, 'style', ['underline', 'pills', 'boxed'] as const, 'underline');
+  const align = oneOf(props, 'align', ALIGNS, 'left');
+
+  const items = list(props, 'items')
+    .filter((item) => str(item, 'title'))
+    .slice(0, MAX_TABS);
+
+  if (items.length === 0) {
+    return <div className="tgs-placeholder">Add some tabs</div>;
+  }
+
+  const name = `tgs-tabs-${blockId}`;
+
+  return (
+    <div className="tgs-tabs" data-style={style} data-align={align}>
+      {/*
+        THE RADIOS COME FIRST AND ARE SIBLINGS OF THE PANELS, which is the whole
+        reason the markup is ordered like this rather than tab-then-panel. The
+        stylesheet shows a panel with `:checked ~ .tgs-tabs__panel`, and the
+        general sibling combinator only looks FORWARD from the checked input.
+
+        `defaultChecked`, not `checked`. Which tab is open is the browser's
+        business, and a controlled value would mean the editor canvas resetting
+        it to the first one on every keystroke.
+      */}
+      {items.map((item, index) => (
+        <input
+          key={`r${index}`}
+          className="tgs-tabs__radio tgs-sr-only"
+          type="radio"
+          name={name}
+          id={`${name}-${index}`}
+          /*
+           * The position, as an attribute the stylesheet can name.
+           *
+           * `:nth-of-type` looked like the obvious way to pair a radio with its
+           * panel and is a trap: it counts by ELEMENT type, the headings list is
+           * a div too, and every panel came out one place further along than the
+           * rule expected. So the position is written down instead of inferred.
+           */
+          data-index={index}
+          defaultChecked={index === 0}
+        />
+      ))}
+
+      <div className="tgs-tabs__list">
+        {items.map((item, index) => (
+          <label
+            key={`l${index}`}
+            className="tgs-tabs__tab"
+            data-index={index}
+            htmlFor={`${name}-${index}`}
+          >
+            {str(item, 'title')}
+          </label>
+        ))}
+      </div>
+
+      {items.map((item, index) => (
+        <div key={`p${index}`} className="tgs-tabs__panel" data-index={index}>
+          {paragraphs(str(item, 'body'))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Actions
 // ---------------------------------------------------------------------------

@@ -257,6 +257,135 @@ export const BLOCKS: readonly BlockDefinition[] = [
     ],
   },
 
+  {
+    /*
+     * PANELS THAT OPEN AND CLOSE, WITH NO JAVASCRIPT.
+     *
+     * `details` and `summary`, which the browser opens, closes, focuses and
+     * announces by itself. Same argument as the Menu block, and the same reason
+     * it matters: the render tree ships no bundle at all, so a scripted
+     * accordion would be the one thing on a client's page that needs
+     * JavaScript before it can be read.
+     *
+     * NOT THE FAQ WIDGET. That is questions and answers, configured in the
+     * widgets dashboard and reusable across sites. This is arbitrary page
+     * content: what is included, the itinerary day by day, the small print.
+     * Different jobs, and a client should not have to open another product to
+     * fold up three paragraphs.
+     */
+    type: 'accordion',
+    label: 'Accordion',
+    group: 'Text',
+    icon: 'accordion',
+    description: 'Headings that open to show what is under them.',
+    defaults: {
+      style: 'separated',
+      single: true,
+      openFirst: false,
+      items: [
+        { title: "What's included", body: 'Flights, transfers and seven nights bed and breakfast.' },
+        { title: "What's not", body: 'Travel insurance, and anything you buy while you are there.' },
+        { title: 'How to book', body: 'Call us, or send an enquiry and we will call you.' },
+      ],
+    },
+    summarise: (props) => {
+      const count = Array.isArray(props.items) ? props.items.length : 0;
+      return `Accordion (${count})`;
+    },
+    fields: [
+      {
+        kind: 'repeater',
+        key: 'items',
+        label: 'Sections',
+        itemLabel: 'Section',
+        max: 20,
+        fields: [
+          { kind: 'text', key: 'title', label: 'Heading', max: 200 },
+          { kind: 'textarea', key: 'body', label: 'Text', rows: 4, max: 2000 },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'style',
+        label: 'Style',
+        options: [
+          { value: 'plain', label: 'Plain' },
+          { value: 'ruled', label: 'Ruled' },
+          { value: 'separated', label: 'Separate boxes' },
+        ],
+      },
+      {
+        kind: 'toggle',
+        key: 'single',
+        label: 'Only one open at a time',
+        help: 'Opening one closes the last. Older browsers let both stay open, which is no worse.',
+      },
+      { kind: 'toggle', key: 'openFirst', label: 'Open the first one to start' },
+    ],
+  },
+  {
+    /*
+     * THE SAME CONTENT, SIDE BY SIDE INSTEAD OF STACKED, AND STILL NO JAVASCRIPT.
+     *
+     * Real ARIA tabs need a script: arrow-key roving focus, aria-selected,
+     * aria-controls. This is hidden radio buttons and their labels instead, which
+     * the browser already gives arrow-key movement, already groups, and already
+     * announces ("Overview, radio button, 1 of 3, selected"). It is not a
+     * tablist and it does not claim to be one, which is the honest trade: a
+     * `role="tablist"` with none of the behaviour behind it would be worse for a
+     * screen reader than plain radios that work.
+     *
+     * See the CSS in globals.css for why the radios sit as siblings of the
+     * panels, and lib/content/blocks.ts's cap of eight for why there are exactly
+     * eight rules there.
+     */
+    type: 'tabs',
+    label: 'Tabs',
+    group: 'Text',
+    icon: 'tabs',
+    description: 'A few panels of text with a row of headings to pick between them.',
+    defaults: {
+      style: 'underline',
+      align: 'left',
+      items: [
+        { title: 'Overview', body: 'A week in the Cyclades, at a pace you set yourself.' },
+        { title: 'Day by day', body: 'Two nights on Paros, three on Naxos, two back in Athens.' },
+        { title: 'Getting there', body: 'Direct from Manchester and Gatwick, then the fast ferry.' },
+      ],
+    },
+    summarise: (props) => {
+      const count = Array.isArray(props.items) ? props.items.length : 0;
+      return `Tabs (${count})`;
+    },
+    fields: [
+      {
+        kind: 'repeater',
+        key: 'items',
+        label: 'Tabs',
+        itemLabel: 'Tab',
+        // EIGHT, and the number is load-bearing. The panels are shown by eight
+        // hand-written CSS rules, one per position, so a ninth tab would have a
+        // heading nobody could open. See the note above those rules.
+        max: 8,
+        fields: [
+          { kind: 'text', key: 'title', label: 'Heading', max: 60 },
+          { kind: 'textarea', key: 'body', label: 'Text', rows: 5, max: 2000 },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'style',
+        label: 'Style',
+        options: [
+          { value: 'underline', label: 'Underlined' },
+          { value: 'pills', label: 'Pills' },
+          { value: 'boxed', label: 'Boxed' },
+        ],
+      },
+      { kind: 'select', key: 'align', label: 'Headings', options: ALIGN_OPTIONS },
+    ],
+  },
+
   // --- Media ------------------------------------------------------------
   {
     type: 'image',

@@ -747,6 +747,185 @@
 .tgs-embed iframe { max-width: 100%; }
 
 /* ------------------------------------------------------------------ */
+/* Accordion                                                           */
+/* ------------------------------------------------------------------ */
+
+.tgs-accordion { display: grid; gap: var(--tgs-space-s); }
+.tgs-accordion[data-style='plain'],
+.tgs-accordion[data-style='ruled'] { gap: 0; }
+
+.tgs-accordion__item { overflow: hidden; }
+.tgs-accordion[data-style='ruled'] .tgs-accordion__item { border-top: 1px solid var(--tgs-border); }
+.tgs-accordion[data-style='ruled'] .tgs-accordion__item:last-child { border-bottom: 1px solid var(--tgs-border); }
+.tgs-accordion[data-style='separated'] .tgs-accordion__item {
+  border: 1px solid var(--tgs-border);
+  border-radius: var(--tgs-radius-md);
+}
+
+.tgs-accordion__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--tgs-space-m);
+  /* 44px of target from the padding and the line box together. */
+  padding: var(--tgs-space-m) 0;
+  cursor: pointer;
+  font-weight: 600;
+  /* The default marker is a triangle beside our own chevron, which reads as two
+     controls. `list-style` covers Firefox, the pseudo-element covers Safari. */
+  list-style: none;
+}
+.tgs-accordion__head::-webkit-details-marker { display: none; }
+.tgs-accordion[data-style='separated'] .tgs-accordion__head { padding-inline: var(--tgs-space-l); }
+.tgs-accordion[data-style='ruled'] .tgs-accordion__head { padding-inline: var(--tgs-space-xs); }
+.tgs-accordion__head:hover .tgs-accordion__title { color: var(--tgs-primary); }
+
+.tgs-accordion__title { text-wrap: balance; }
+.tgs-accordion__mark { flex: none; transition: transform 0.15s ease; }
+.tgs-accordion__item[open] .tgs-accordion__mark { transform: rotate(180deg); }
+
+.tgs-accordion__body { padding-bottom: var(--tgs-space-m); color: var(--tgs-text-muted); }
+.tgs-accordion__body p { margin: 0 0 var(--tgs-space-s); }
+.tgs-accordion__body p:last-child { margin-bottom: 0; }
+.tgs-accordion[data-style='separated'] .tgs-accordion__body { padding-inline: var(--tgs-space-l); }
+.tgs-accordion[data-style='ruled'] .tgs-accordion__body { padding-inline: var(--tgs-space-xs); }
+
+/* ------------------------------------------------------------------ */
+/* Tabs                                                                */
+/* ------------------------------------------------------------------ */
+
+/*
+ * HIDDEN RADIO BUTTONS, NOT A SCRIPT.
+ *
+ * The radios are siblings of the panels and come before them in the markup,
+ * because `~` only looks forward. The headings live in `.tgs-tabs__list`, which
+ * is a sibling too, so `:checked` can reach both the panel to show and the
+ * heading to light up.
+ *
+ * EIGHT RULES, ONE PER POSITION, and the number is load-bearing: CSS cannot
+ * count to "however many tabs there are", so the block caps its repeater at
+ * eight and TabsBlock slices to MAX_TABS. A ninth tab would draw a heading that
+ * opens nothing. tests/panels.test.ts holds the three numbers together.
+ */
+.tgs-tabs { display: block; }
+
+.tgs-tabs__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tgs-space-xs);
+  margin-bottom: var(--tgs-space-l);
+  border-bottom: 1px solid var(--tgs-border);
+}
+.tgs-tabs[data-align='centre'] .tgs-tabs__list { justify-content: center; }
+.tgs-tabs[data-align='right']  .tgs-tabs__list { justify-content: flex-end; }
+.tgs-tabs[data-style='pills'] .tgs-tabs__list,
+.tgs-tabs[data-style='boxed'] .tgs-tabs__list { border-bottom: 0; }
+
+.tgs-tabs__tab {
+  display: inline-flex;
+  align-items: center;
+  /* 44px minimum target, the same rule every other control here follows. */
+  min-height: 44px;
+  padding: var(--tgs-space-s) var(--tgs-space-m);
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--tgs-text-muted);
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+.tgs-tabs__tab:hover { color: var(--tgs-text); }
+.tgs-tabs[data-style='pills'] .tgs-tabs__tab { border-radius: 999px; border-bottom-color: transparent; }
+.tgs-tabs[data-style='boxed'] .tgs-tabs__tab {
+  border: 1px solid transparent;
+  border-radius: var(--tgs-radius-md) var(--tgs-radius-md) 0 0;
+}
+
+.tgs-tabs__panel { display: none; }
+.tgs-tabs__panel p { margin: 0 0 var(--tgs-space-m); }
+.tgs-tabs__panel p:last-child { margin-bottom: 0; }
+
+/* The eight. Position n's radio shows position n's panel and lights position
+   n's heading, and gives that heading the focus ring when the radio has it. */
+/* The eight, one per position. `data-index` rather than `:nth-of-type`,
+   which counts by element type and would pair every radio with the wrong
+   panel because the headings list is a div as well. */
+.tgs-tabs__radio[data-index='0']:checked ~ .tgs-tabs__panel[data-index='0'],
+.tgs-tabs__radio[data-index='1']:checked ~ .tgs-tabs__panel[data-index='1'],
+.tgs-tabs__radio[data-index='2']:checked ~ .tgs-tabs__panel[data-index='2'],
+.tgs-tabs__radio[data-index='3']:checked ~ .tgs-tabs__panel[data-index='3'],
+.tgs-tabs__radio[data-index='4']:checked ~ .tgs-tabs__panel[data-index='4'],
+.tgs-tabs__radio[data-index='5']:checked ~ .tgs-tabs__panel[data-index='5'],
+.tgs-tabs__radio[data-index='6']:checked ~ .tgs-tabs__panel[data-index='6'],
+.tgs-tabs__radio[data-index='7']:checked ~ .tgs-tabs__panel[data-index='7'] {
+  display: block;
+}
+
+.tgs-tabs__radio[data-index='0']:checked ~ .tgs-tabs__list .tgs-tabs__tab[data-index='0'],
+.tgs-tabs__radio[data-index='1']:checked ~ .tgs-tabs__list .tgs-tabs__tab[data-index='1'],
+.tgs-tabs__radio[data-index='2']:checked ~ .tgs-tabs__list .tgs-tabs__tab[data-index='2'],
+.tgs-tabs__radio[data-index='3']:checked ~ .tgs-tabs__list .tgs-tabs__tab[data-index='3'],
+.tgs-tabs__radio[data-index='4']:checked ~ .tgs-tabs__list .tgs-tabs__tab[data-index='4'],
+.tgs-tabs__radio[data-index='5']:checked ~ .tgs-tabs__list .tgs-tabs__tab[data-index='5'],
+.tgs-tabs__radio[data-index='6']:checked ~ .tgs-tabs__list .tgs-tabs__tab[data-index='6'],
+.tgs-tabs__radio[data-index='7']:checked ~ .tgs-tabs__list .tgs-tabs__tab[data-index='7'] {
+  color: var(--tgs-primary);
+  border-bottom-color: var(--tgs-primary);
+}
+
+/*
+ * THE FOCUS RING GOES ON THE HEADING, because the thing that actually has focus
+ * is a radio nobody can see. Without this, tabbing into the group moves focus
+ * with no visible sign of where it went.
+ */
+.tgs-tabs__radio[data-index='0']:focus-visible ~ .tgs-tabs__list .tgs-tabs__tab[data-index='0'],
+.tgs-tabs__radio[data-index='1']:focus-visible ~ .tgs-tabs__list .tgs-tabs__tab[data-index='1'],
+.tgs-tabs__radio[data-index='2']:focus-visible ~ .tgs-tabs__list .tgs-tabs__tab[data-index='2'],
+.tgs-tabs__radio[data-index='3']:focus-visible ~ .tgs-tabs__list .tgs-tabs__tab[data-index='3'],
+.tgs-tabs__radio[data-index='4']:focus-visible ~ .tgs-tabs__list .tgs-tabs__tab[data-index='4'],
+.tgs-tabs__radio[data-index='5']:focus-visible ~ .tgs-tabs__list .tgs-tabs__tab[data-index='5'],
+.tgs-tabs__radio[data-index='6']:focus-visible ~ .tgs-tabs__list .tgs-tabs__tab[data-index='6'],
+.tgs-tabs__radio[data-index='7']:focus-visible ~ .tgs-tabs__list .tgs-tabs__tab[data-index='7'] {
+  outline: 3px solid var(--tgs-accent);
+  outline-offset: -3px;
+}
+
+/* Pills and boxes paint the chosen heading rather than underlining it. */
+.tgs-tabs[data-style='pills'] .tgs-tabs__radio:checked ~ .tgs-tabs__list .tgs-tabs__tab {
+  border-bottom-color: transparent;
+}
+
+.tgs-tabs[data-style='pills'] .tgs-tabs__radio[data-index='0']:checked ~ .tgs-tabs__list .tgs-tabs__tab[data-index='0'],
+.tgs-tabs[data-style='pills'] .tgs-tabs__radio[data-index='1']:checked ~ .tgs-tabs__list .tgs-tabs__tab[data-index='1'],
+.tgs-tabs[data-style='pills'] .tgs-tabs__radio[data-index='2']:checked ~ .tgs-tabs__list .tgs-tabs__tab[data-index='2'],
+.tgs-tabs[data-style='pills'] .tgs-tabs__radio[data-index='3']:checked ~ .tgs-tabs__list .tgs-tabs__tab[data-index='3'],
+.tgs-tabs[data-style='pills'] .tgs-tabs__radio[data-index='4']:checked ~ .tgs-tabs__list .tgs-tabs__tab[data-index='4'],
+.tgs-tabs[data-style='pills'] .tgs-tabs__radio[data-index='5']:checked ~ .tgs-tabs__list .tgs-tabs__tab[data-index='5'],
+.tgs-tabs[data-style='pills'] .tgs-tabs__radio[data-index='6']:checked ~ .tgs-tabs__list .tgs-tabs__tab[data-index='6'],
+.tgs-tabs[data-style='pills'] .tgs-tabs__radio[data-index='7']:checked ~ .tgs-tabs__list .tgs-tabs__tab[data-index='7'] {
+  background: var(--tgs-primary);
+  color: var(--tgs-on-primary);
+}
+
+.tgs-tabs[data-style='boxed'] .tgs-tabs__radio[data-index='0']:checked ~ .tgs-tabs__list .tgs-tabs__tab[data-index='0'],
+.tgs-tabs[data-style='boxed'] .tgs-tabs__radio[data-index='1']:checked ~ .tgs-tabs__list .tgs-tabs__tab[data-index='1'],
+.tgs-tabs[data-style='boxed'] .tgs-tabs__radio[data-index='2']:checked ~ .tgs-tabs__list .tgs-tabs__tab[data-index='2'],
+.tgs-tabs[data-style='boxed'] .tgs-tabs__radio[data-index='3']:checked ~ .tgs-tabs__list .tgs-tabs__tab[data-index='3'],
+.tgs-tabs[data-style='boxed'] .tgs-tabs__radio[data-index='4']:checked ~ .tgs-tabs__list .tgs-tabs__tab[data-index='4'],
+.tgs-tabs[data-style='boxed'] .tgs-tabs__radio[data-index='5']:checked ~ .tgs-tabs__list .tgs-tabs__tab[data-index='5'],
+.tgs-tabs[data-style='boxed'] .tgs-tabs__radio[data-index='6']:checked ~ .tgs-tabs__list .tgs-tabs__tab[data-index='6'],
+.tgs-tabs[data-style='boxed'] .tgs-tabs__radio[data-index='7']:checked ~ .tgs-tabs__list .tgs-tabs__tab[data-index='7'] {
+  background: var(--tgs-surface-alt);
+  border-color: var(--tgs-border);
+  border-bottom-color: transparent;
+}
+
+@container tgs-page (max-width: 767px) {
+  /* A row of headings that wraps to three lines is worse than a column of them. */
+  .tgs-tabs__list { flex-direction: column; align-items: stretch; }
+  .tgs-tabs__tab { justify-content: flex-start; }
+}
+
+/* ------------------------------------------------------------------ */
 /* Cards                                                               */
 /* ------------------------------------------------------------------ */
 

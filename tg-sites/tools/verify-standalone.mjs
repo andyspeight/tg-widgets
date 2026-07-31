@@ -457,16 +457,16 @@ await check('block picker opens from a section', async () => {
 
 /*
  * The count MOVES DELIBERATELY. 13 until the two widget blocks landed on 31 Jul
- * 2026, 15 when the menu joined them, 16 when Cards did. A hardcoded number is
- * the point rather than a maintenance cost: adding a block should make somebody
- * look at the picker, and a block that silently stops rendering its card is
- * exactly what this catches.
+ * 2026, 15 when the menu joined them, 16 when Cards did, 18 with Accordion and
+ * Tabs. A hardcoded number is the point rather than a maintenance cost: adding a
+ * block should make somebody look at the picker, and a block that silently stops
+ * rendering its card is exactly what this catches.
  *
- * Seventeen because the harness runs as staff, so the staff-only Embed block is
+ * Nineteen because the harness runs as staff, so the staff-only Embed block is
  * in there too.
  */
 await check('block picker offers the full library', async () =>
-  (await page.locator('.ed-block-card').count()) === 17);
+  (await page.locator('.ed-block-card').count()) === 19);
 
 await check('including both ways to put a widget on a page', async () => {
   const cards = (await page.locator('.ed-block-card').allInnerTexts()).join(' | ');
@@ -4114,7 +4114,7 @@ await check('the header offers the same blocks a page does', async () => {
   await page.keyboard.press('Escape');
   await page.waitForTimeout(200);
   // The whole library, because a header is sections and rows like anything else.
-  return count === 17 ? true : `${count} blocks in the header picker`;
+  return count === 19 ? true : `${count} blocks in the header picker`;
 });
 
 await check('a menu in a header saves through the region actions', async () => {
@@ -4342,6 +4342,187 @@ await check('and one across on a phone', async () => {
 });
 
 // Back to a desktop width, panels open, for anything that follows.
+await page.getByRole('button', { name: 'Desktop' }).click();
+await page.waitForTimeout(300);
+await showPanels();
+
+
+
+// ---------------------------------------------------------------------------
+// Accordion and Tabs
+//
+// BOTH CLAIM THE BROWSER DOES THE OPENING, and a claim about what a browser does
+// can only be settled by a browser. Node can read a `name` attribute off a
+// details element; it cannot tell you the second panel shut when the third was
+// clicked, which is the entire behaviour anybody is buying.
+// ---------------------------------------------------------------------------
+
+await page.reload();
+await page.waitForSelector('.ed-root');
+await showPanels();
+
+await check('both are in the block picker', async () => {
+  await openBlockPicker();
+  const cards = (await page.locator('.ed-block-card').allInnerTexts()).join(' | ');
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(200);
+  const accordion = /Accordion/.test(cards);
+  const tabs = /Tabs/.test(cards);
+  return accordion && tabs ? true : `accordion ${accordion}, tabs ${tabs}`;
+});
+
+// --- Accordion -------------------------------------------------------------
+
+await check('an accordion arrives with sections in it, all shut', async () => {
+  await addBlock('Accordion');
+  const items = await added().locator('.tgs-accordion__item').count();
+  const open = await added().locator('.tgs-accordion__item[open]').count();
+  return items === 3 && open === 0 ? true : `${items} sections, ${open} open`;
+});
+
+await check('the words under a shut section are not on the screen', async () => {
+  const visible = await added().locator('.tgs-accordion__body:visible').count();
+  return visible === 0 ? true : `${visible} bodies showing`;
+});
+
+/*
+ * THE ONE THIS SECTION EXISTS FOR. Nothing attached a handler: the click goes to
+ * a summary and the browser opens the details itself.
+ */
+await check('clicking a heading opens it, with no JavaScript behind it', async () => {
+  await added().locator('.tgs-accordion__head').first().click();
+  await page.waitForTimeout(300);
+
+  const open = await added().locator('.tgs-accordion__item[open]').count();
+  const words = await added().locator('.tgs-accordion__body:visible').count();
+  return open === 1 && words === 1 ? true : `${open} open, ${words} bodies showing`;
+});
+
+/*
+ * AND THE BROWSER CLOSES THE LAST ONE, because of the `name` attribute and
+ * nothing else. This is the check that would catch that attribute being dropped
+ * in a tidy-up, which is otherwise completely silent.
+ */
+await check('opening a second one closes the first, which is what the name does', async () => {
+  await added().locator('.tgs-accordion__head').nth(1).click();
+  await page.waitForTimeout(300);
+
+  const open = await added().evaluate((root) =>
+    [...root.querySelectorAll('.tgs-accordion__item')].map((item) => item.open));
+
+  return JSON.stringify(open) === JSON.stringify([false, true, false])
+    ? true
+    : `open states ${JSON.stringify(open)}`;
+});
+
+await check('a heading is reachable by keyboard and opens on Enter', async () => {
+  const third = added().locator('.tgs-accordion__head').nth(2);
+  await third.focus();
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(300);
+
+  const open = await added().locator('.tgs-accordion__item').nth(2).evaluate((el) => el.open);
+  return open ? true : 'Enter did not open it';
+});
+
+await check('there is one control per heading, not a triangle beside a chevron', async () => {
+  const marker = await added().locator('.tgs-accordion__head').first().evaluate((el) =>
+    getComputedStyle(el).listStyleType);
+  const chevrons = await added().locator('.tgs-accordion__mark').count();
+  return marker === 'none' && chevrons === 3 ? true : `marker "${marker}", ${chevrons} chevrons`;
+});
+
+// --- Tabs ------------------------------------------------------------------
+
+await check('tabs arrive with the first one open and the rest shut', async () => {
+  await showPanels();
+  await addBlock('Tabs');
+  await foldPanels();
+  await page.waitForTimeout(300);
+
+  const headings = await added().locator('.tgs-tabs__tab').count();
+  const panels = await added().locator('.tgs-tabs__panel:visible').count();
+  return headings === 3 && panels === 1 ? true : `${headings} headings, ${panels} panels showing`;
+});
+
+/*
+ * THE PAIRING, MEASURED. The first version of this stylesheet used
+ * :nth-of-type, which counts by element type: the headings list is a div too,
+ * so every panel sat one place along from the rule that was meant to show it and
+ * the first tab opened nothing. This is the check that would have caught it.
+ */
+await check('the panel showing is the one belonging to the open heading', async () => {
+  const shown = await added().evaluate((root) => {
+    const panel = [...root.querySelectorAll('.tgs-tabs__panel')]
+      .find((node) => getComputedStyle(node).display !== 'none');
+    return panel ? panel.getAttribute('data-index') : 'none showing';
+  });
+  return shown === '0' ? true : `panel ${shown} is the one showing`;
+});
+
+await check('clicking a heading swaps the panel, and only one is ever up', async () => {
+  await added().locator('.tgs-tabs__tab').nth(2).click();
+  await page.waitForTimeout(300);
+
+  const state = await added().evaluate((root) => ({
+    showing: [...root.querySelectorAll('.tgs-tabs__panel')]
+      .filter((node) => getComputedStyle(node).display !== 'none')
+      .map((node) => node.getAttribute('data-index')),
+    words: [...root.querySelectorAll('.tgs-tabs__panel')]
+      .filter((node) => getComputedStyle(node).display !== 'none')
+      .map((node) => node.textContent.trim().slice(0, 20)),
+  }));
+
+  return state.showing.length === 1 && state.showing[0] === '2'
+    ? true
+    : `showing ${JSON.stringify(state.showing)} (${JSON.stringify(state.words)})`;
+});
+
+/*
+ * The chosen heading is painted differently from the others. Written as "the
+ * clicked one differs from the other two, and those two match each other",
+ * because the first attempt at this had an `|| index === 2` in its filter and
+ * would have passed with every heading identical.
+ */
+await check('the heading that is open is the one marked as open', async () => {
+  const paint = await added().evaluate((root) =>
+    [...root.querySelectorAll('.tgs-tabs__tab')].map((tab) => {
+      const style = getComputedStyle(tab);
+      return `${style.color}|${style.borderBottomColor}|${style.backgroundColor}`;
+    }));
+
+  const chosen = paint[2];
+  const rest = [paint[0], paint[1]];
+  return chosen !== rest[0] && rest[0] === rest[1]
+    ? true
+    : `chosen "${chosen}", others ${JSON.stringify(rest)}`;
+});
+
+/*
+ * THE KEYBOARD, which is the reason for radios rather than buttons. Arrow keys
+ * moving through a radio group is behaviour the browser already has, and it is
+ * exactly what somebody expects of a row of tabs.
+ */
+await check('arrow keys move between tabs, because they are a radio group', async () => {
+  await added().locator('.tgs-tabs__radio').nth(2).focus();
+  await page.keyboard.press('ArrowLeft');
+  await page.waitForTimeout(300);
+
+  const shown = await added().evaluate((root) => {
+    const panel = [...root.querySelectorAll('.tgs-tabs__panel')]
+      .find((node) => getComputedStyle(node).display !== 'none');
+    return panel ? panel.getAttribute('data-index') : 'none showing';
+  });
+  return shown === '1' ? true : `after ArrowLeft, panel ${shown}`;
+});
+
+await check('and the focus ring lands on the heading, not on the hidden radio', async () => {
+  const outline = await added().locator('.tgs-tabs__tab').nth(1).evaluate((tab) =>
+    getComputedStyle(tab).outlineWidth);
+  return outline !== '0px' ? true : 'the heading has no focus ring';
+});
+
+// Back to a desktop with panels open for anything that follows.
 await page.getByRole('button', { name: 'Desktop' }).click();
 await page.waitForTimeout(300);
 await showPanels();
