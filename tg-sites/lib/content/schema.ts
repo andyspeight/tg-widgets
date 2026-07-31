@@ -229,9 +229,21 @@ export const TextAlign = z.enum(['left', 'centre', 'right']);
 
 /**
  * Where a row's columns collapse to a single stacked column.
- * There is deliberately no 'never'. See the header note.
+ *
+ * There is deliberately no 'never'. See the header note: a row that refuses to
+ * stack is a row that runs off the side of a phone.
+ *
+ * `always` is the opposite end and is safe, so it is allowed. Andy asked for it
+ * on 31 Jul 2026: a way to say "these columns sit one above the other" without
+ * having to make a row per item. It is the same field rather than a second
+ * `direction` one, because two fields that both decide whether a row is stacked
+ * can disagree, and then what you see depends on which was touched last.
  */
-export const StackBelow = z.enum(['tablet', 'mobile']);
+export const StackBelow = z.enum(['always', 'tablet', 'mobile']);
+
+/** How the blocks inside one column sit. */
+export const ColumnFlow = z.enum(['stacked', 'row']);
+export type ColumnFlow = z.infer<typeof ColumnFlow>;
 
 export type Tone = z.infer<typeof Tone>;
 export type SectionWidth = z.infer<typeof SectionWidth>;
@@ -240,8 +252,14 @@ export type VerticalAlign = z.infer<typeof VerticalAlign>;
 export type TextAlign = z.infer<typeof TextAlign>;
 export type StackBelow = z.infer<typeof StackBelow>;
 
-/** Pixel widths the stack breakpoints resolve to. Used by the renderer. */
+/**
+ * Pixel widths the stack breakpoints resolve to. Used by the renderer.
+ *
+ * `always` is Infinity, so "is this width below the stacking point" is true at
+ * every width without the caller needing a special case for it.
+ */
 export const STACK_BREAKPOINTS: Record<StackBelow, number> = {
+  always: Number.POSITIVE_INFINITY,
   tablet: 1024,
   mobile: 768,
 };
@@ -274,6 +292,19 @@ export const ColumnSchema = z.object({
   /** Percentage of the row. Normalised so a row's columns sum to 100. */
   width: z.number().min(MIN_COLUMN_WIDTH).max(100),
   align: VerticalAlign.default('top'),
+  /**
+   * How the blocks inside this column sit: one above the other, or side by side.
+   *
+   * Stacked is the default and is what a column has always done. Side by side is
+   * for the small cases that want it, like two buttons or an icon beside a line
+   * of text, without having to make a row of columns to hold two things. Andy
+   * asked for it on 31 Jul 2026, in the same breath as the row version.
+   *
+   * It always falls back to stacked on a phone. The reason is the same one the
+   * row's stacking has: two things side by side in a 390px column is two things
+   * nobody can read.
+   */
+  flow: ColumnFlow.default('stacked'),
   /** The same shape a section has. See BoxSchema. */
   box: BoxSchema.default(EMPTY_BOX),
   blocks: z.array(BlockSchema).default([]),

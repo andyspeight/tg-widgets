@@ -27,8 +27,9 @@ import {
   normaliseGap,
   px,
   safeColour,
+  STACK_BREAKPOINTS,
 } from '../lib/content/schema';
-import { createPage, createRow, createSectionFromLayout, newId } from '../lib/content/factory';
+import { createColumn, createPage, createRow, createSectionFromLayout, newId } from '../lib/content/factory';
 import {
   buildPresetSection,
   presetBars,
@@ -43,6 +44,7 @@ import {
   addColumn,
   evenColumns,
   moveBlockTo,
+  moveColumn,
   moveSection,
   parsePathKey,
   pathKey,
@@ -181,6 +183,116 @@ describe('columns', () => {
 });
 
 // ---------------------------------------------------------------------------
+
+/*
+ * Andy, 31 Jul 2026: move a column left and right; stack a row's columns
+ * vertically; and the same for the content inside a column.
+ */
+describe('moveColumn', () => {
+  const twoColumns = () => {
+    const page = createPage('T');
+    page.sections[0].rows[0] = createRow('3-1');
+    return page;
+  };
+
+  it('takes the width with it', () => {
+    // A 75/25 row whose wide column moves right becomes 25/75. The other
+    // reading, where the contents swap but the widths stay, is the one that
+    // surprises: a picture moved across should not arrive a different size.
+    const before = twoColumns();
+    const [wide, narrow] = before.sections[0].rows[0].columns;
+
+    const after = moveColumn(before, 0, 0, 0, 1);
+    const columns = after.sections[0].rows[0].columns;
+
+    expect(columns.map((c) => c.id)).toEqual([narrow.id, wide.id]);
+    expect(columns[1].width).toBeCloseTo(wide.width, 2);
+    expect(columns[0].width).toBeCloseTo(narrow.width, 2);
+  });
+
+  it('still sums to 100, because the same widths in a new order do', () => {
+    const after = moveColumn(twoColumns(), 0, 0, 0, 1);
+    expect(sum(after.sections[0].rows[0].columns.map((c) => c.width))).toBeCloseTo(100, 2);
+  });
+
+  it('is a no-op off either end', () => {
+    const before = twoColumns();
+    const ids = before.sections[0].rows[0].columns.map((c) => c.id);
+
+    for (const [from, to] of [[0, -1], [1, 2], [0, 9]]) {
+      const after = moveColumn(before, 0, 0, from, to);
+      expect(after.sections[0].rows[0].columns.map((c) => c.id)).toEqual(ids);
+    }
+  });
+
+  it('leaves the blocks with their own column', () => {
+    let page = twoColumns();
+    page = addBlock(page, 0, 0, 0, createBlock('heading'));
+    page = addBlock(page, 0, 0, 1, createBlock('text'));
+
+    const after = moveColumn(page, 0, 0, 0, 1);
+    const columns = after.sections[0].rows[0].columns;
+    expect(columns[0].blocks.map((b) => b.type)).toEqual(['text']);
+    expect(columns[1].blocks.map((b) => b.type)).toEqual(['heading']);
+  });
+});
+
+describe('stacking a row always', () => {
+  /** The seed page with one field on its first row changed, parsed. */
+  const withRow = (patch: Record<string, unknown>) => {
+    const raw = JSON.parse(JSON.stringify(SEED_PAGE));
+    Object.assign(raw.sections[0].rows[0], patch);
+    return parsePage(raw);
+  };
+
+  it('accepts always as a stacking point', () => {
+    const result = withRow({ stackBelow: 'always' });
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.page.sections[0].rows[0].stackBelow).toBe('always');
+  });
+
+  it('still refuses never, because a row that cannot stack breaks a phone', () => {
+    // The whole reason stackBelow has no 'never': a row that stays side by side
+    // runs off the edge of a phone, which is what the schema header is about.
+    expect(withRow({ stackBelow: 'never' }).ok).toBe(false);
+  });
+
+  it('resolves always to a width nothing is wider than', () => {
+    expect(STACK_BREAKPOINTS.always).toBe(Number.POSITIVE_INFINITY);
+    expect(STACK_BREAKPOINTS.always).toBeGreaterThan(STACK_BREAKPOINTS.tablet);
+  });
+});
+
+describe('how the content in a column sits', () => {
+  const withColumn = (patch: Record<string, unknown>) => {
+    const raw = JSON.parse(JSON.stringify(SEED_PAGE));
+    Object.assign(raw.sections[0].rows[0].columns[0], patch);
+    return parsePage(raw);
+  };
+
+  it('is stacked unless it says otherwise', () => {
+    expect(createColumn(50).flow).toBe('stacked');
+  });
+
+  it('keeps side by side when that is what was saved', () => {
+    const result = withColumn({ flow: 'row' });
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.page.sections[0].rows[0].columns[0].flow).toBe('row');
+  });
+
+  it('refuses a flow it does not recognise', () => {
+    expect(withColumn({ flow: 'diagonal' }).ok).toBe(false);
+  });
+
+  it('defaults it on a column saved before the field existed', () => {
+    const raw = JSON.parse(JSON.stringify(SEED_PAGE));
+    delete raw.sections[0].rows[0].columns[0].flow;
+
+    const result = parsePage(raw);
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.page.sections[0].rows[0].columns[0].flow).toBe('stacked');
+  });
+});
 
 describe('paths', () => {
   it('round trips through pathKey and parsePathKey', () => {

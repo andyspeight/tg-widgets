@@ -175,6 +175,38 @@ const MUTATIONS = [
     from: `          anchorTop.current !== null && measured`,
     to: `          false && anchorTop.current !== null && measured`,
   },
+  // --- moving a column, and which way things sit --------------------------
+
+  {
+    check: 'and its width goes with it',
+    why: 'Swap the contents and leave the widths, so a moved column changes size.',
+    file: 'lib/content/tree.ts',
+    from: `    return { ...r, columns: moveInArray(r.columns, from, to) };`,
+    to: `    const swapped = moveInArray(r.columns, from, to);
+    const widths = r.columns.map((c) => c.width);
+    return { ...r, columns: swapped.map((c, i) => ({ ...c, width: widths[i] })) };`,
+  },
+  {
+    check: 'the content in a column can sit side by side',
+    why: 'Never emit the attribute the side-by-side rule hangs off.',
+    file: 'components/render/PageRenderer.tsx',
+    from: `      data-flow={column.flow === 'row' ? 'row' : undefined}`,
+    to: `      data-flow={undefined}`,
+  },
+  {
+    check: "a row's columns can be stacked at every width",
+    why: 'Drop the always-stacked rule, so the setting stores and does nothing.',
+    file: 'app/globals.css',
+    from: `.tgs-row[data-stack='always'] { grid-template-columns: 1fr; }`,
+    to: '',
+  },
+  {
+    check: 'and the breakpoint question goes away, because it has no answer left',
+    why: 'Ask where to stack a row that is already always stacked.',
+    file: 'components/editor/Properties.tsx',
+    from: `      {node.stackBelow !== 'always' && (`,
+    to: `      {true && (`,
+  },
   {
     check: 'and fits on one row on an ordinary screen',
     why: 'Put the width cap back where it forced a second row holding two buttons.',

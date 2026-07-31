@@ -26,6 +26,7 @@ import {
   pathKey,
   addColumn,
   evenColumns,
+  moveColumn,
   removeColumn,
   resizeColumnBoundary,
   updateColumn,
@@ -564,21 +565,50 @@ function RowFields({
         onChange={(gap) => set({ gap }, `row:${section}:${row}:gap`)}
       />
 
+      {/*
+        TWO CONTROLS, ONE FIELD. Andy asked on 31 Jul 2026 for a way to stack a
+        row's columns vertically. That is the same stored value as the
+        breakpoint, not a second one: two fields both deciding whether a row is
+        stacked can disagree, and then what you see depends on which was touched
+        last. So "Always stacked" is stackBelow: 'always', and the breakpoint
+        question is only asked when it still has an answer.
+      */}
       <Segmented
-        label="Stack into one column"
-        value={node.stackBelow}
+        label="How the columns sit"
+        value={node.stackBelow === 'always' ? 'always' : 'side'}
         options={[
-          { value: 'mobile', label: 'On phones' },
-          { value: 'tablet', label: 'On tablets too' },
+          { value: 'side', label: 'Side by side' },
+          { value: 'always', label: 'Stacked' },
         ]}
         onChange={(value) =>
-          set({ stackBelow: value as typeof node.stackBelow }, `row:${section}:${row}:stack`)
+          set(
+            // Back to the default breakpoint when it goes side by side again,
+            // rather than to whatever it was before, which nobody remembers.
+            { stackBelow: value === 'always' ? 'always' : 'mobile' },
+            `row:${section}:${row}:stack`,
+          )
         }
       />
-      <p className="ed-help" style={{ marginTop: -8, marginBottom: 14 }}>
-        Columns always stack on small screens. That is what stops a layout
-        becoming unreadable on a phone.
-      </p>
+
+      {node.stackBelow !== 'always' && (
+        <>
+          <Segmented
+            label="Stack into one column"
+            value={node.stackBelow}
+            options={[
+              { value: 'mobile', label: 'On phones' },
+              { value: 'tablet', label: 'On tablets too' },
+            ]}
+            onChange={(value) =>
+              set({ stackBelow: value as typeof node.stackBelow }, `row:${section}:${row}:stack`)
+            }
+          />
+          <p className="ed-help" style={{ marginTop: -8, marginBottom: 14 }}>
+            Columns always stack on small screens. That is what stops a layout
+            becoming unreadable on a phone.
+          </p>
+        </>
+      )}
 
       <div className="ed-field">
         <label className="ed-toggle">
@@ -617,6 +647,8 @@ function ColumnFields({
   const node = page.sections[section]?.rows[row]?.columns[column];
   if (!node) return null;
 
+  const siblings = page.sections[section]?.rows[row]?.columns.length ?? 1;
+
   return (
     <>
       <div className="ed-field">
@@ -626,6 +658,69 @@ function ColumnFields({
           use the sliders on the row.
         </p>
       </div>
+
+      {/*
+        Andy asked for this on 31 Jul 2026. The WIDTH TRAVELS WITH THE COLUMN:
+        a 70/30 row whose wide column moves right becomes 30/70. Moving a hero's
+        picture across and having it arrive a different width would not be a
+        move, it would be a swap with something else.
+      */}
+      <div className="ed-field">
+        <label className="ed-label">Order in the row</label>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <button
+            type="button"
+            className="ed-btn"
+            style={{ flex: 1 }}
+            disabled={column === 0}
+            onClick={() =>
+              onCommit((current) => moveColumn(current, section, row, column, column - 1))
+            }
+          >
+            <Icon name="arrow-left" size={16} /> Move left
+          </button>
+          <button
+            type="button"
+            className="ed-btn"
+            style={{ flex: 1 }}
+            disabled={column >= siblings - 1}
+            onClick={() =>
+              onCommit((current) => moveColumn(current, section, row, column, column + 1))
+            }
+          >
+            Move right <Icon name="arrow-right" size={16} />
+          </button>
+        </div>
+        <p className="ed-help">
+          Column {column + 1} of {siblings}. Its width moves with it.
+        </p>
+      </div>
+
+      {/*
+        The same question as the row's, one level down: do the things inside sit
+        one above the other, or beside each other. Asked for in the same breath.
+      */}
+      <Segmented
+        label="How the content sits"
+        value={node.flow}
+        options={[
+          { value: 'stacked', label: 'Stacked' },
+          { value: 'row', label: 'Side by side' },
+        ]}
+        onChange={(value) =>
+          onCommit(
+            (current) =>
+              updateColumn(current, section, row, column, { flow: value as typeof node.flow }),
+            `col:${section}:${row}:${column}:flow`,
+          )
+        }
+      />
+      {node.flow === 'row' && (
+        <p className="ed-help" style={{ marginTop: -8, marginBottom: 14 }}>
+          Wraps to a second line when there is not enough width, and goes back to
+          stacked on a phone.
+        </p>
+      )}
 
       <Segmented
         label="Vertical alignment"

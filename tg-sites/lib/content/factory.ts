@@ -44,6 +44,7 @@ export function createColumn(width: number, blocks: Block[] = []): Column {
     id: newId('col'),
     width: Math.max(MIN_COLUMN_WIDTH, width),
     align: 'top',
+    flow: 'stacked' as const,
     box: { ...EMPTY_BOX },
     blocks,
   };

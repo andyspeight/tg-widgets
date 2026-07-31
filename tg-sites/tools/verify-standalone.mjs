@@ -2556,6 +2556,183 @@ await check('every step of the trail meets the 44px rule', async () => {
 });
 
 // ---------------------------------------------------------------------------
+// Moving a column, and which way things sit
+// ---------------------------------------------------------------------------
+
+/*
+ * Andy, 31 Jul 2026: "on the columns can you add the ability to move left and
+ * right / on the sections can you add a setting so the columns inside can be
+ * stacked vertically and horizontally / and then the same for the content in
+ * columns."
+ *
+ * All three reached through the breadcrumb, which is the point of it: a column
+ * with content in it has nothing left to click, so every one of these controls
+ * would have been unreachable without it.
+ */
+
+/*
+ * A WIDER WINDOW FOR THIS WHOLE SECTION, and it is not a contrivance.
+ *
+ * The canvas is a container query context, so what the preview shows depends on
+ * the CANVAS width and not the browser's. At the 1440px this file otherwise
+ * uses, the outline and the properties pane leave the canvas 752px, which is
+ * under the 767px phone breakpoint: everything is already stacked, so "make
+ * this stacked" changes nothing and a check for it passes or fails for reasons
+ * that have nothing to do with the setting. Measured: 752px at 1440, 1012px at
+ * 1700.
+ */
+const NARROW = page.viewportSize();
+await page.setViewportSize({ width: 1700, height: 900 });
+await page.waitForTimeout(300);
+
+/** Select the column that holds a given block, via the breadcrumb. */
+async function selectColumnOf(text) {
+  await page.locator('.tgs-block').filter({ hasText: text }).first().click();
+  await page.waitForTimeout(400);
+  await page.locator('.ed-crumbs__step', { hasText: 'Column' }).first().click();
+  await page.waitForTimeout(400);
+}
+
+await check('a column can be moved left and right', async () => {
+  await selectColumnOf('Talk to someone');
+
+  const before = await page.locator('.tgs-col').evaluateAll((cols) =>
+    cols.map((col) => col.textContent?.slice(0, 20)));
+
+  const right = page.locator('.ed-btn', { hasText: 'Move right' }).first();
+  if ((await right.count()) === 0) return 'no Move right button on a column';
+  await right.click();
+  await page.waitForTimeout(400);
+
+  const after = await page.locator('.tgs-col').evaluateAll((cols) =>
+    cols.map((col) => col.textContent?.slice(0, 20)));
+
+  return before[0] === after[1] && before[1] === after[0]
+    ? true
+    : `before ${JSON.stringify(before.slice(0, 2))}, after ${JSON.stringify(after.slice(0, 2))}`;
+});
+
+/*
+ * THE WIDTH TRAVELS WITH IT. A 55/45 row whose wide column moves right becomes
+ * 45/55. The other reading, where the contents swap and the widths stay put,
+ * makes moving a hero picture across change its size, which is not a move.
+ */
+await check('and its width goes with it', async () => {
+  const widths = await page.locator('.tgs-col').evaluateAll((cols) =>
+    cols.slice(0, 2).map((col) => Math.round(col.getBoundingClientRect().width)));
+
+  // Undo, measure, redo: the pair should come back swapped rather than equal.
+  await page.keyboard.press('Control+z');
+  await page.waitForTimeout(400);
+  const before = await page.locator('.tgs-col').evaluateAll((cols) =>
+    cols.slice(0, 2).map((col) => Math.round(col.getBoundingClientRect().width)));
+  await page.keyboard.press('Control+Shift+z');
+  await page.waitForTimeout(400);
+
+  // Within a couple of pixels: the gap between columns is not part of either.
+  const swapped = Math.abs(widths[0] - before[1]) <= 2 && Math.abs(widths[1] - before[0]) <= 2;
+  return swapped
+    ? true
+    : `was ${JSON.stringify(before)}, now ${JSON.stringify(widths)}`;
+});
+
+/*
+ * MEASURED AS "a short block stops being forced to the full width", not as
+ * "two blocks share a line".
+ *
+ * The second is what side by side looks like when the content is small, and it
+ * is not what it looks like here: the hero column holds a 539px-wide display
+ * heading, which cannot share a 539px line with anything, so it wraps. That is
+ * the designed behaviour, and a check asserting otherwise fails on working code.
+ *
+ * What does change, always, is that a block is laid out at its own width rather
+ * than stretched to the column. Measured: the eyebrow heading goes from 539px
+ * to 222px.
+ */
+await check('the content in a column can sit side by side', async () => {
+  await selectColumnOf('Talk to someone');
+
+  const before = await page.evaluate(() => {
+    const col = document.querySelector('.tgs-col');
+    const first = col?.querySelector(':scope > .tgs-block');
+    return first ? Math.round(first.getBoundingClientRect().width) : null;
+  });
+
+  const side = page.locator('.ed-segmented button', { hasText: 'Side by side' }).first();
+  if ((await side.count()) === 0) return 'no side by side control on a column';
+  await side.click();
+  await page.waitForTimeout(450);
+
+  const after = await page.evaluate(() => {
+    const col = document.querySelector('.tgs-col[data-flow="row"]');
+    if (!col) return { error: 'no column marked as a row' };
+    const first = col.querySelector(':scope > .tgs-block');
+    const style = getComputedStyle(col);
+    return {
+      width: first ? Math.round(first.getBoundingClientRect().width) : null,
+      display: style.display,
+      wrap: style.flexWrap,
+    };
+  });
+
+  if (after.error) return after.error;
+  if (after.display !== 'flex' || after.wrap !== 'wrap') {
+    return `the column is ${after.display} / ${after.wrap}`;
+  }
+  return after.width < before * 0.75
+    ? true
+    : `the first block was ${before}px and is now ${after.width}px`;
+});
+
+await check('and goes back to stacked when told to', async () => {
+  await page.locator('.ed-segmented button', { hasText: 'Stacked' }).first().click();
+  await page.waitForTimeout(400);
+  return (await page.locator('.tgs-col[data-flow="row"]').count()) === 0
+    ? true
+    : 'the column is still marked as a row';
+});
+
+/*
+ * The row's version of the same question. It is the SAME stored field as the
+ * breakpoint, so the breakpoint control disappears when there is nothing left
+ * for it to decide, rather than sitting there contradicting this one.
+ */
+await check("a row's columns can be stacked at every width", async () => {
+  await page.locator('.tgs-block').filter({ hasText: 'Talk to someone' }).first().click();
+  await page.waitForTimeout(400);
+  await page.locator('.ed-crumbs__step', { hasText: 'Row' }).first().click();
+  await page.waitForTimeout(400);
+
+  const before = await page.locator('.tgs-col').first().boundingBox();
+  await page.locator('.ed-segmented button', { hasText: 'Stacked' }).first().click();
+  await page.waitForTimeout(450);
+  const after = await page.locator('.tgs-col').first().boundingBox();
+
+  // A stacked row gives its first column the whole width.
+  return after.width > before.width * 1.4
+    ? true
+    : `the column was ${Math.round(before.width)}px and is now ${Math.round(after.width)}px`;
+});
+
+await check('and the breakpoint question goes away, because it has no answer left', async () => {
+  const asking = await page.locator('.ed-label', { hasText: 'Stack into one column' }).count();
+  return asking === 0
+    ? true
+    : 'the editor is still asking where to stack a row that is always stacked';
+});
+
+await check('putting it back side by side asks again', async () => {
+  await page.locator('.ed-segmented button', { hasText: 'Side by side' }).first().click();
+  await page.waitForTimeout(450);
+  const asking = await page.locator('.ed-label', { hasText: 'Stack into one column' }).count();
+  return asking === 1 ? true : `${asking} breakpoint controls`;
+});
+
+// Back to the width the rest of the file measures at.
+await page.setViewportSize(NARROW);
+await page.waitForTimeout(300);
+
+// ---------------------------------------------------------------------------
 // The plus in an empty column
 // ---------------------------------------------------------------------------
 

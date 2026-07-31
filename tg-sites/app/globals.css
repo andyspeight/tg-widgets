@@ -351,6 +351,22 @@
 .tgs-col[data-align='centre'] { align-self: center; }
 .tgs-col[data-align='bottom'] { align-self: end; }
 
+/* Columns one above the other at EVERY width, not just below a breakpoint.
+   Outside the container queries on purpose: those narrow the layout as the
+   screen shrinks, and this is a choice about the layout itself. */
+.tgs-row[data-stack='always'] { grid-template-columns: 1fr; }
+
+/* Blocks side by side inside one column. Wraps rather than squashing, so a
+   third button drops to a second line instead of three unreadable slivers. */
+.tgs-col[data-flow='row'] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--tgs-space-s, 8px);
+}
+
+.tgs-col[data-flow='row'] > .tgs-block { flex: 0 1 auto; }
+
 @container tgs-page (max-width: 1023px) {
   .tgs-row[data-stack='tablet'] { grid-template-columns: 1fr; }
   .tgs-row[data-stack='tablet'][data-reverse='true'] { direction: rtl; }
@@ -360,6 +376,11 @@
 @container tgs-page (max-width: 767px) {
   .tgs-row { grid-template-columns: 1fr; }
   .tgs-row[data-reverse='true'] { display: flex; flex-direction: column-reverse; }
+
+  /* Side by side gives up on a phone, for the same reason a row does: two
+     things sharing 390px is two things nobody can read. */
+  .tgs-col[data-flow='row'] { display: block; }
+  .tgs-col[data-flow='row'] > .tgs-block + .tgs-block { margin-top: var(--tgs-space-s, 8px); }
   .tgs-section__inner { padding-inline: var(--tgs-space-m); }
   :root { --tgs-h-xl: 2.25rem; --tgs-h-l: 1.875rem; }
 }

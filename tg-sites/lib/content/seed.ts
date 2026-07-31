@@ -41,6 +41,7 @@ export const SEED_PAGE: Page = {
               id: 'col_hero_text',
               width: 55,
               align: 'centre',
+              flow: 'stacked' as const,
               box: { ...EMPTY_BOX },
               blocks: [
                 {
@@ -79,6 +80,7 @@ export const SEED_PAGE: Page = {
               id: 'col_hero_media',
               width: 45,
               align: 'top',
+              flow: 'stacked' as const,
               box: { ...EMPTY_BOX },
               blocks: [
                 {
@@ -118,6 +120,7 @@ export const SEED_PAGE: Page = {
               id: 'col_why_head',
               width: 100,
               align: 'top',
+              flow: 'stacked' as const,
               box: { ...EMPTY_BOX },
               blocks: [
                 {
@@ -139,6 +142,7 @@ export const SEED_PAGE: Page = {
               id: 'col_why_1',
               width: 33.33,
               align: 'top',
+              flow: 'stacked' as const,
               box: { ...EMPTY_BOX },
               blocks: [
                 {
@@ -156,6 +160,7 @@ export const SEED_PAGE: Page = {
               id: 'col_why_2',
               width: 33.33,
               align: 'top',
+              flow: 'stacked' as const,
               box: { ...EMPTY_BOX },
               blocks: [
                 {
@@ -173,6 +178,7 @@ export const SEED_PAGE: Page = {
               id: 'col_why_3',
               width: 33.34,
               align: 'top',
+              flow: 'stacked' as const,
               box: { ...EMPTY_BOX },
               blocks: [
                 {
@@ -208,6 +214,7 @@ export const SEED_PAGE: Page = {
               id: 'col_cta',
               width: 100,
               align: 'top',
+              flow: 'stacked' as const,
               box: { ...EMPTY_BOX },
               blocks: [
                 {

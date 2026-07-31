@@ -281,6 +281,9 @@ export function ColumnRenderer({
     <div
       className="tgs-col"
       data-align={column.align}
+      /* Only when it is not the default, so the attribute selector in
+         globals.css does the work and a stacked column stays plain markup. */
+      data-flow={column.flow === 'row' ? 'row' : undefined}
       data-shadow={column.box.shadow}
       style={boxStyle(column.box)}
       {...pathAttr(editable, path)}

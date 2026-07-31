@@ -302,6 +302,31 @@ export function removeColumn(page: Page, section: number, row: number, column: n
   });
 }
 
+/**
+ * Move a column left or right within its row.
+ *
+ * THE WIDTH TRAVELS WITH IT. A 70/30 row whose wide column is moved right
+ * becomes 30/70, not 70/30 with the contents swapped. Andy asked for this on
+ * 31 Jul 2026, and the other reading is the one that surprises: moving a hero's
+ * picture to the other side and having it come out a different width is not
+ * "moved", it is "swapped with something else".
+ *
+ * No renormalising, because nothing about the total changed: the same widths in
+ * a different order still sum to what they summed to before.
+ */
+export function moveColumn(
+  page: Page,
+  section: number,
+  row: number,
+  from: number,
+  to: number,
+): Page {
+  return mapRow(page, section, row, (r) => {
+    if (to < 0 || to >= r.columns.length) return r;
+    return { ...r, columns: moveInArray(r.columns, from, to) };
+  });
+}
+
 export function updateColumn(
   page: Page,
   section: number,
