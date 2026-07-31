@@ -68,6 +68,41 @@ const RICH_TEXT_TAGS: Record<string, readonly string[]> = {
    */
 };
 
+/**
+ * Tags allowed inside a HEADING, which is a strict subset of the above.
+ *
+ * WHY A THIRD MODE RATHER THAN REUSING RICH TEXT
+ *
+ * Andy, 31 Jul 2026: "the text toolbar only appears on paragraph text, it needs
+ * to work on every style of text". Giving a heading rich text is what makes that
+ * possible, and it cannot simply be the paragraph's allowlist, because a heading
+ * is an h2, h3 or h4 element and this list is what may legally live inside one.
+ *
+ * A `p`, a `ul` or a `blockquote` inside an h2 is invalid HTML. Browsers do not
+ * refuse it, they SILENTLY RESTRUCTURE it: the block element is hoisted out of
+ * the heading and becomes its sibling, so the second half of a heading falls out
+ * of the heading and the page layout quietly changes. A nested h3 is worse,
+ * because it also corrupts the document outline a screen reader navigates by.
+ *
+ * Everything that survives is inline, which is exactly the set the toolbar's
+ * commands produce for a heading: bold, italics, underline, strike, a link, and
+ * a span carrying a colour, size or family from lib/content/styles.ts. No `br`
+ * either, because Enter is refused in a heading (see Canvas.tsx) and a heading
+ * that wraps does so on its own.
+ */
+const HEADING_TAGS: Record<string, readonly string[]> = {
+  strong: ['style'],
+  b: ['style'],
+  em: ['style'],
+  i: ['style'],
+  u: ['style'],
+  s: ['style'],
+  a: ['href', 'title', 'target', 'rel', 'style'],
+  span: ['style'],
+  sup: ['style'],
+  sub: ['style'],
+};
+
 /** Tags additionally allowed inside a staff embed. */
 const EMBED_TAGS: Record<string, readonly string[]> = {
   ...RICH_TEXT_TAGS,
@@ -99,7 +134,13 @@ const IFRAME_HOSTS = new Set([
   'maps.google.com',
 ]);
 
-export type SanitiseMode = 'richtext' | 'embed';
+export type SanitiseMode = 'richtext' | 'heading' | 'embed';
+
+const ALLOWED_BY_MODE: Record<SanitiseMode, Record<string, readonly string[]>> = {
+  richtext: RICH_TEXT_TAGS,
+  heading: HEADING_TAGS,
+  embed: EMBED_TAGS,
+};
 
 /**
  * Sanitise an HTML string against the allowlist for the given mode.
@@ -108,7 +149,12 @@ export type SanitiseMode = 'richtext' | 'embed';
 export function sanitiseHtml(input: unknown, mode: SanitiseMode = 'richtext'): string {
   if (typeof input !== 'string' || input.length === 0) return '';
 
-  const allowed = mode === 'embed' ? EMBED_TAGS : RICH_TEXT_TAGS;
+  /*
+   * A map rather than a chain of ternaries, so a fourth mode is one line here
+   * and cannot accidentally fall through to rich text, which is the most
+   * permissive of the three that a client can reach.
+   */
+  const allowed = ALLOWED_BY_MODE[mode] ?? RICH_TEXT_TAGS;
 
   // Strip anything whose CONTENT is dangerous, not just its tag. Dropping
   // only the <script> tag would leave its body behind as visible text, and

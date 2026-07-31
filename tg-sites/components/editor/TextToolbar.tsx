@@ -209,6 +209,7 @@ export function TextToolbar({
   align,
   onAlign,
   onWrite,
+  oneLine = false,
 }: {
   /** The element being edited, so the toolbar can sit above it before it is moved. */
   anchor: HTMLElement | null;
@@ -242,6 +243,19 @@ export function TextToolbar({
    * drawn at all rather than drawn and disabled.
    */
   onWrite?: (request: WriteRequest) => Promise<WriteResult>;
+  /**
+   * This host may hold inline markup but NOT block elements. A heading.
+   *
+   * Not "may this be formatted", which is true of both kinds. A heading is an
+   * h2, h3 or h4, and a p, a ul or a blockquote inside one is invalid HTML that
+   * no browser refuses and every browser silently restructures: the block gets
+   * hoisted out and the back half of the heading goes with it.
+   *
+   * So the commands that would nest a block are ABSENT here rather than
+   * disabled, the same rule this file follows everywhere else. Bold, italics,
+   * links, colour, size, font and alignment all still work, which is the point.
+   */
+  oneLine?: boolean;
 }) {
   const [position, setPosition] = useState<Point | null>(null);
   const [linking, setLinking] = useState(false);
@@ -577,15 +591,25 @@ export function TextToolbar({
    * which is what write means. That is the browser's own behaviour and it
    * happens to be exactly right, so nothing here has to arrange it.
    */
-  async function askFor(intent: string) {
+  async function askFor(requested: string) {
     if (!onWrite || busy) return;
 
+    /*
+     * IN A HEADING, "write it" MEANS "write a heading".
+     *
+     * The write intent asks for one to three paragraphs, which is the wrong
+     * thing entirely when the caret is in an h2. The title intent asks for one
+     * line, under twelve words, no full stop. Same button, right answer for
+     * where you are standing.
+     */
+    const intent = oneLine && requested === 'write' ? 'title' : requested;
+
     const words = selectedText.trim();
-    if (intent !== 'write' && !words) {
+    if (intent !== 'write' && intent !== 'title' && !words) {
       setFailure('Highlight the words you would like changed first.');
       return;
     }
-    if (intent === 'write' && !instruction.trim()) {
+    if ((intent === 'write' || intent === 'title') && !instruction.trim()) {
       setFailure('Say what you would like written.');
       return;
     }
@@ -621,7 +645,15 @@ export function TextToolbar({
       selection?.addRange(range);
     }
 
-    onExec('insertHTML', result.data.html);
+    /*
+     * A HEADING TAKES THE PLAIN FORM. lib/ai/copy.ts returns both shapes for
+     * exactly this: the answer is one to three paragraphs, and inserting that
+     * HTML into an h2 would put a <p> inside a heading. insertText is the right
+     * command rather than escaping the text into insertHTML, and it is why
+     * toCopy exists at all.
+     */
+    if (oneLine) onExec('insertText', result.data.text);
+    else onExec('insertHTML', result.data.html);
 
     setAsking(false);
     setInstruction('');
@@ -663,19 +695,28 @@ export function TextToolbar({
         <Icon name="grip" size={14} />
       </button>
 
-      <select
-        className="ed-tt__block"
-        value={currentBlock()}
-        aria-label="Text style"
-        onMouseDown={(event) => event.stopPropagation()}
-        onChange={(event) => onExec('formatBlock', event.target.value)}
-      >
-        {BLOCKS.map((entry) => (
-          <option key={entry.value} value={entry.value}>
-            {entry.label}
-          </option>
-        ))}
-      </select>
+      {/*
+        The block format, and NOT in a heading.
+        Every option here is a block element, and formatBlock inside an h2 would
+        put a p or a blockquote inside it. A heading's own level and appearance
+        are set in the properties pane, where they belong: they are what the
+        block IS, not formatting applied to a selection inside it.
+      */}
+      {!oneLine && (
+        <select
+          className="ed-tt__block"
+          value={currentBlock()}
+          aria-label="Text style"
+          onMouseDown={(event) => event.stopPropagation()}
+          onChange={(event) => onExec('formatBlock', event.target.value)}
+        >
+          {BLOCKS.map((entry) => (
+            <option key={entry.value} value={entry.value}>
+              {entry.label}
+            </option>
+          ))}
+        </select>
+      )}
 
       {/*
         Font and size read as "choose one" rather than showing what is already
@@ -759,19 +800,21 @@ export function TextToolbar({
         <Icon name="link" size={16} />
       </button>
 
-      {LISTS.map((item) => (
-        <button
-          key={item.command}
-          type="button"
-          className="ed-tt__btn"
-          title={item.title}
-          aria-label={item.title}
-          aria-pressed={isOn(item.command)}
-          onClick={() => onExec(item.command)}
-        >
-          <Icon name={item.icon} size={16} />
-        </button>
-      ))}
+      {/* Lists are block elements too, so they are absent in a heading. */}
+      {!oneLine
+        && LISTS.map((item) => (
+          <button
+            key={item.command}
+            type="button"
+            className="ed-tt__btn"
+            title={item.title}
+            aria-label={item.title}
+            aria-pressed={isOn(item.command)}
+            onClick={() => onExec(item.command)}
+          >
+            <Icon name={item.icon} size={16} />
+          </button>
+        ))}
 
       <span className="ed-tt__rule" aria-hidden="true" />
 

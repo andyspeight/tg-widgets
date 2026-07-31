@@ -349,10 +349,17 @@ export function EditorShell({
    * second copy of it would be one to keep in step. Canvas takes the element
    * over; see its effect.
    *
-   * The kind matters because only a paragraph gets the formatting toolbar. A
-   * heading stores plain text and the renderer escapes it, so bold inside one
-   * could not survive a save, and a button that appears to work and does not is
-   * worse than no button.
+   * BOTH GET THE TOOLBAR NOW. Andy, 31 Jul 2026: "the text toolbar only appears
+   * on paragraph text, it needs to work on every style of text". It used to be
+   * paragraphs only, because a heading stored a plain string the renderer
+   * escaped, so bold inside one could not have survived a save. A heading stores
+   * markup since that day, so the toolbar is honest in both.
+   *
+   * `oneLine` is what replaces the old `rich` flag, and it is a different
+   * question. Not "may this be formatted" but "may this contain BLOCKS". A
+   * heading is an h2, h3 or h4, and a paragraph, a list or a quote inside one is
+   * invalid HTML that browsers silently restructure. So the toolbar keeps its
+   * inline commands in a heading and hides the ones that would nest a block.
    */
   const editing = useMemo(() => {
     if (selected?.kind !== 'block') return null;
@@ -361,7 +368,7 @@ export function EditorShell({
     if (block?.type !== 'text' && block?.type !== 'heading') return null;
 
     const align = typeof block.props?.align === 'string' ? block.props.align : 'left';
-    return { path: pathKey(selected), rich: block.type === 'text', align };
+    return { path: pathKey(selected), oneLine: block.type === 'heading', align };
   }, [selected, page]);
 
   const editingPath = editing?.path ?? null;
@@ -1077,13 +1084,14 @@ export function EditorShell({
       {/*
         THE TOOLBAR LIVES HERE NOW, not inside the properties pane's field.
         It formats whatever is selected on the CANVAS, which is where the words
-        are. Mounted only while a text block is being edited, which is exactly
-        when there is something for it to format.
+        are. Mounted while a paragraph OR a heading is being edited, which since
+        31 Jul 2026 is both of the blocks you can type into in place.
       */}
-      {editing?.rich && (
+      {editing && (
         <TextToolbar
           key={editing.path}
           anchor={null}
+          oneLine={editing.oneLine}
           onExec={(command, value) =>
             withHost(editing.path, (host) => {
               document.execCommand(command, false, value);

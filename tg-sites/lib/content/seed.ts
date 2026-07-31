@@ -47,12 +47,12 @@ export const SEED_PAGE: Page = {
                 {
                   id: 'blk_hero_eyebrow',
                   type: 'heading',
-                  props: { text: 'Tailor-made travel', level: 'h3', size: 's', align: 'left' },
+                  props: { html: 'Tailor-made travel', level: 'h3', size: 's', align: 'left' },
                 },
                 {
                   id: 'blk_hero_title',
                   type: 'heading',
-                  props: { text: 'Greece, planned properly', level: 'h2', size: 'xl', align: 'left' },
+                  props: { html: 'Greece, planned properly', level: 'h2', size: 'xl', align: 'left' },
                 },
                 {
                   id: 'blk_hero_body',
@@ -126,7 +126,7 @@ export const SEED_PAGE: Page = {
                 {
                   id: 'blk_why_title',
                   type: 'heading',
-                  props: { text: 'What you get', level: 'h2', size: 'l', align: 'left' },
+                  props: { html: 'What you get', level: 'h2', size: 'l', align: 'left' },
                 },
               ],
             },
@@ -220,7 +220,7 @@ export const SEED_PAGE: Page = {
                 {
                   id: 'blk_cta_title',
                   type: 'heading',
-                  props: { text: 'Tell us where you fancy', level: 'h2', size: 'l', align: 'centre' },
+                  props: { html: 'Tell us where you fancy', level: 'h2', size: 'l', align: 'centre' },
                 },
                 {
                   id: 'blk_cta_body',

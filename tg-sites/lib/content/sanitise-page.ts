@@ -13,7 +13,7 @@
  */
 
 import { blockDefinition, type Field } from './blocks';
-import { safeUrl, sanitiseHtml } from './sanitise';
+import { safeUrl, sanitiseHtml, type SanitiseMode } from './sanitise';
 import type { Block, Page, Section } from './schema';
 
 /**
@@ -25,6 +25,20 @@ const EMBED_MODE_PROPS: Record<string, readonly string[]> = {
   embed: ['html'],
 };
 
+/**
+ * Which sanitise mode a block's RICH TEXT uses, when it is not the default.
+ *
+ * A heading is an h2, h3 or h4, and the paragraph's allowlist contains p, ul and
+ * blockquote, none of which may legally live inside one. A browser does not
+ * refuse invalid nesting, it hoists the block element out of the heading, so the
+ * back half of a heading silently falls out of it. Same shape as the map above,
+ * and kept as a map for the same reason: the two modes stay visibly deliberate
+ * rather than looking like an oversight.
+ */
+const RICHTEXT_MODE: Record<string, SanitiseMode> = {
+  heading: 'heading',
+};
+
 function cleanValue(
   blockType: string,
   field: Field,
@@ -32,7 +46,7 @@ function cleanValue(
 ): unknown {
   switch (field.kind) {
     case 'richtext':
-      return sanitiseHtml(value, 'richtext');
+      return sanitiseHtml(value, RICHTEXT_MODE[blockType] ?? 'richtext');
 
     case 'url':
       // An empty string rather than null: the field is optional and the

@@ -30,6 +30,8 @@
 
 import { z } from 'zod';
 
+import { escapeHtml } from './sanitise';
+
 // ---------------------------------------------------------------------------
 // Constraints
 // ---------------------------------------------------------------------------
@@ -556,14 +558,55 @@ function preNormalise(input: unknown): unknown {
 
           return {
             ...r,
-            columns: r.columns.map((column, index) =>
-              column && typeof column === 'object'
-                ? { ...(column as Record<string, unknown>), width: widths[index] }
-                : column,
-            ),
+            columns: r.columns.map((column, index) => {
+              if (!column || typeof column !== 'object') return column;
+              const c = column as Record<string, unknown>;
+              return {
+                ...c,
+                width: widths[index],
+                blocks: Array.isArray(c.blocks) ? c.blocks.map(upgradeBlock) : c.blocks,
+              };
+            }),
           };
         }),
       };
     }),
   };
+}
+
+/**
+ * Bring a block written by an older deploy up to the shape today's code expects.
+ *
+ * THE COMPLEMENT TO THE LOOSE BLOCK SCHEMA. BlockSchema deliberately does not
+ * validate props, so an unknown block round trips through a save instead of
+ * being destroyed by it. That makes the model forward compatible. This is the
+ * other direction: a block whose props have MOVED still has to render.
+ *
+ * It runs inside preNormalise, which every read, every save and every restore
+ * passes through (lib/db/pages.ts calls parsePage in all three), so a page is
+ * upgraded once on the way in and saved in the new shape from then on. No
+ * database migration, and nothing downstream has to carry a fallback.
+ *
+ * WHAT IT DOES TODAY: a heading used to store `text`, a plain string the
+ * renderer escaped. Since 31 Jul 2026 it stores `html`, which is what let the
+ * formatting toolbar reach a heading at all. So a heading with words in `text`
+ * and nothing in `html` gets its words escaped into `html`.
+ *
+ * `text` is LEFT IN PLACE rather than deleted, on purpose. Between this deploy
+ * and the next save, a rollback to the previous release must still find a
+ * heading it can render. It costs a few bytes and it buys a safe rollback.
+ */
+function upgradeBlock(block: unknown): unknown {
+  if (!block || typeof block !== 'object') return block;
+  const b = block as Record<string, unknown>;
+  if (b.type !== 'heading') return block;
+
+  const props = (b.props && typeof b.props === 'object' ? b.props : {}) as Record<string, unknown>;
+  const html = props.html;
+  if (typeof html === 'string' && html) return block;
+
+  const text = props.text;
+  if (typeof text !== 'string' || !text) return block;
+
+  return { ...b, props: { ...props, html: escapeHtml(text) } };
 }

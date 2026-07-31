@@ -105,10 +105,24 @@ export const BLOCKS: readonly BlockDefinition[] = [
     group: 'Text',
     icon: 'heading',
     description: 'A section or sub-section title.',
-    defaults: { text: 'A new heading', level: 'h2', style: 'h3', align: 'left' },
-    summarise: (props) => asString(props.text) || 'Heading',
+    /*
+     * `html`, not `text`, since 31 Jul 2026.
+     *
+     * A heading used to hold a plain string, which is why the formatting toolbar
+     * was kept away from it: bold inside one could not have survived a save.
+     * Andy asked for the toolbar on every style of text, so a heading holds
+     * markup now. Only INLINE markup: see the 'heading' mode in sanitise.ts for
+     * why a list inside an h2 is not a styling choice but a layout bug.
+     *
+     * A heading written before that has its words in `text`, and upgradeBlock in
+     * schema.ts moves them across on the way in, so nothing here has to carry a
+     * fallback and no page needs rewriting in the database.
+     */
+    defaults: { html: 'A new heading', level: 'h2', style: 'h3', align: 'left' },
+    summarise: (props) =>
+      firstWords(stripTags(asString(props.html)), 6) || asString(props.text) || 'Heading',
     fields: [
-      { kind: 'text', key: 'text', label: 'Text', max: 200 },
+      { kind: 'richtext', key: 'html', label: 'Text' },
       {
         kind: 'select',
         key: 'level',

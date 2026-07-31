@@ -18,6 +18,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { escapeHtml } from '../../lib/content/sanitise';
 import type { Page } from '../../lib/content/schema';
 import {
   DEFAULT_SECTION_PADDING,
@@ -148,11 +149,14 @@ export function Canvas({
    * What the block being edited currently holds, read from state rather than
    * from the DOM.
    *
-   * Two kinds, because two kinds of block. A paragraph stores markup. A heading
-   * stores plain text and the renderer escapes it, so it is written and read
-   * back as textContent: that is also what stops a paste from putting a tag into
-   * it, which would be stored and then shown on the published page as visible
-   * angle brackets.
+   * ONE KIND NOW. A paragraph and a heading both store markup since 31 Jul 2026,
+   * which is what let the formatting toolbar reach a heading. This used to have a
+   * `plain` branch that read block.props.text as textContent for headings.
+   *
+   * A heading written before that change has only `text`, so it is still read
+   * here and escaped, exactly as HeadingBlock does when it renders. Without this
+   * fallback, clicking an old heading would show an empty box and typing one
+   * letter would replace the whole thing.
    */
   const editingValue = useMemo(() => {
     if (!editingPath) return null;
@@ -163,9 +167,11 @@ export function Canvas({
       ?.blocks[path.block];
     if (!block) return null;
 
-    const plain = block.type === 'heading';
-    const raw = plain ? block.props?.text : block.props?.html;
-    return { plain, value: typeof raw === 'string' ? raw : '' };
+    const html = block.props?.html;
+    if (typeof html === 'string' && html) return { value: html };
+
+    const text = block.props?.text;
+    return { value: typeof text === 'string' ? escapeHtml(text) : '' };
   }, [editingPath, page]);
 
   const findHost = useCallback(() => {
@@ -181,8 +187,7 @@ export function Canvas({
     const host = findHost();
     if (!host || !editingValue) return;
 
-    if (editingValue.plain) host.textContent = editingValue.value;
-    else host.innerHTML = editingValue.value;
+    host.innerHTML = editingValue.value;
 
     host.contentEditable = 'true';
     host.spellcheck = true;
@@ -222,11 +227,7 @@ export function Canvas({
     if (!host || !editingValue) return;
     if (document.activeElement === host) return;
 
-    if (editingValue.plain) {
-      if (host.textContent !== editingValue.value) host.textContent = editingValue.value;
-    } else if (host.innerHTML !== editingValue.value) {
-      host.innerHTML = editingValue.value;
-    }
+    if (host.innerHTML !== editingValue.value) host.innerHTML = editingValue.value;
   }, [editingValue, findHost]);
 
   /*
@@ -262,9 +263,17 @@ export function Canvas({
       const path = parsePathKey(editingPath);
       if (path?.kind !== 'block') return;
 
-      const patch = host.hasAttribute('data-rt-plain')
-        ? { text: host.textContent ?? '' }
-        : { html: host.innerHTML };
+      /*
+       * ALWAYS innerHTML NOW. There used to be a data-rt-plain branch here that
+       * read textContent into `text` for headings, because a heading stored a
+       * plain string. A heading stores markup since 31 Jul 2026 (see
+       * HeadingBlock), so both kinds of host read back the same way and the
+       * formatting toolbar works in both.
+       *
+       * A heading is still one line: that is data-rt-oneline and the Enter
+       * handler below, which is the half of the old attribute that survived.
+       */
+      const patch = { html: host.innerHTML };
 
       onCommit(
         (current) =>
@@ -473,13 +482,18 @@ export function Canvas({
       /*
        * A heading is one line, so Enter inside one does nothing.
        *
-       * Left alone, the browser puts a <div> or a <br> inside the heading, and
-       * reading textContent back out silently welds the two lines into one word.
-       * Refusing the key is honest about what a heading is. Paragraphs keep
-       * Enter: that is how you get a second paragraph.
+       * Left alone, the browser puts a <div> or a <br> inside the heading. The
+       * div is dropped by the heading sanitiser, which welds the two lines into
+       * one word with no space between them, and refusing the key is honest
+       * about what a heading is. Paragraphs keep Enter: that is how you get a
+       * second paragraph.
+       *
+       * data-rt-oneline, not the old data-rt-plain. That attribute meant two
+       * things, "one line" and "holds no markup", and a heading is only the
+       * first of those now.
        */
-      const plainHost = (event.target as HTMLElement).closest<HTMLElement>('[data-rt-plain]');
-      if (plainHost && event.key === 'Enter') {
+      const oneLine = (event.target as HTMLElement).closest<HTMLElement>('[data-rt-oneline]');
+      if (oneLine && event.key === 'Enter') {
         event.preventDefault();
         return;
       }

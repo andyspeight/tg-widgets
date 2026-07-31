@@ -405,6 +405,156 @@ describe('parsePage', () => {
 
 // ---------------------------------------------------------------------------
 
+/**
+ * A heading holds markup since 31 Jul 2026, which is what let the formatting
+ * toolbar reach one. Andy: "the text toolbar only appears on paragraph text, it
+ * needs to work on every style of text."
+ *
+ * THE PROPERTY THAT MATTERS HERE IS NOT SECURITY, it is nesting. A heading is an
+ * h2, h3 or h4, and a p, a ul or a blockquote inside one is invalid HTML. No
+ * browser refuses it: they hoist the block element out of the heading, so the
+ * back half of a heading silently falls out of it and the page reflows. A nested
+ * heading is worse, because it also corrupts the outline a screen reader uses to
+ * navigate.
+ *
+ * So these tests are mostly "the block element is gone and its words are not".
+ */
+describe('a heading holds inline markup only', () => {
+  const kept = [
+    ['bold', '<strong>Greece</strong>'],
+    ['the old bold tag', '<b>Greece</b>'],
+    ['italics', '<em>Greece</em>'],
+    ['underline', '<u>Greece</u>'],
+    ['strikethrough', '<s>Greece</s>'],
+    ['a link', '<a href="/greece">Greece</a>'],
+    ['superscript', '<sup>2</sup>'],
+  ] as const;
+
+  it.each(kept)('keeps %s', (_name, html) => {
+    expect(sanitiseHtml(html, 'heading')).toBe(html);
+  });
+
+  it('keeps a styled span, which is how colour and size are stored', () => {
+    const out = sanitiseHtml('<span style="color: var(--tgs-accent)">Greece</span>', 'heading');
+    expect(out).toContain('color');
+    expect(out).toContain('Greece');
+  });
+
+  const dropped = [
+    ['a paragraph', '<p>Greece</p>'],
+    ['a list', '<ul><li>Greece</li></ul>'],
+    ['a numbered list', '<ol><li>Greece</li></ol>'],
+    ['a quote', '<blockquote>Greece</blockquote>'],
+    ['another heading', '<h3>Greece</h3>'],
+    ['a line break', 'Greece<br />Cyprus'],
+  ] as const;
+
+  /*
+   * The TAG goes and the WORDS stay, which is the sanitiser's existing rule for
+   * anything it does not allow. Losing the words would turn a paste into data
+   * loss; losing the tag is the whole point.
+   */
+  it.each(dropped)('drops %s but keeps the words', (_name, html) => {
+    const out = sanitiseHtml(html, 'heading');
+    expect(out).toContain('Greece');
+    expect(out).not.toMatch(/<(p|ul|ol|li|blockquote|h[1-6]|br)\b/i);
+  });
+
+  it('is still a security boundary, not only a nesting one', () => {
+    const out = sanitiseHtml(
+      '<script>alert(1)</script><a href="javascript:alert(1)">x</a><img src=x onerror=y>',
+      'heading',
+    );
+    expect(out).not.toContain('script');
+    expect(out).not.toContain('javascript:');
+    expect(out).not.toContain('onerror');
+  });
+
+  /*
+   * The mode has to be NARROWER than rich text, not merely different. If a later
+   * tidy-up ever pointed 'heading' at the paragraph allowlist this would catch
+   * it, where the tests above would all still pass.
+   */
+  it('allows strictly less than a paragraph does', () => {
+    const both = '<p>a</p><ul><li>b</li></ul><strong>c</strong>';
+    const rich = sanitiseHtml(both, 'richtext');
+    const heading = sanitiseHtml(both, 'heading');
+    expect(rich).toContain('<p>');
+    expect(heading).not.toContain('<p>');
+    expect(heading.length).toBeLessThan(rich.length);
+  });
+});
+
+/**
+ * The upgrade path, which is what makes this change safe on a live site.
+ *
+ * Every heading in the database today has its words in `text` and nothing in
+ * `html`. parsePage runs on every read, every save and every restore, so the
+ * move happens once on the way in and no page has to be rewritten.
+ */
+describe('a heading written before it held markup', () => {
+  function pageWithHeading(props: Record<string, unknown>) {
+    const page = createPage('Test', 'test');
+    const section = createSectionFromLayout(LAYOUTS[0]);
+    section.rows[0].columns[0].blocks = [{ id: newId('b'), type: 'heading', props }];
+    page.sections = [section];
+    return JSON.parse(JSON.stringify(page));
+  }
+
+  const headingIn = (page: unknown) => {
+    const result = parsePage(page);
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error('unparseable');
+    return result.page.sections[0].rows[0].columns[0].blocks[0].props;
+  };
+
+  it('has its words moved into html', () => {
+    const props = headingIn(pageWithHeading({ text: 'Greece and Cyprus', level: 'h2' }));
+    expect(props.html).toBe('Greece and Cyprus');
+  });
+
+  it('and they are ESCAPED on the way, not injected', () => {
+    // A heading someone typed angle brackets into was safe when it was a plain
+    // string the renderer escaped. It has to still be safe now it is markup.
+    const props = headingIn(pageWithHeading({ text: '<script>alert(1)</script>' }));
+    expect(props.html).not.toContain('<script');
+    expect(props.html).toContain('&lt;script');
+  });
+
+  it('keeps text as well, so a rollback still finds something to render', () => {
+    const props = headingIn(pageWithHeading({ text: 'Greece' }));
+    expect(props.text).toBe('Greece');
+  });
+
+  it('a heading that already holds markup is left alone', () => {
+    const props = headingIn(
+      pageWithHeading({ html: '<strong>Greece</strong>', text: 'stale' }),
+    );
+    expect(props.html).toBe('<strong>Greece</strong>');
+  });
+
+  it('an empty heading gains nothing', () => {
+    const props = headingIn(pageWithHeading({ text: '', level: 'h2' }));
+    expect(props.html).toBeUndefined();
+  });
+
+  it('and nothing else is touched', () => {
+    const page = createPage('Test', 'test');
+    const section = createSectionFromLayout(LAYOUTS[0]);
+    section.rows[0].columns[0].blocks = [
+      { id: newId('b'), type: 'text', props: { text: 'not a heading' } },
+    ];
+    page.sections = [section];
+
+    const result = parsePage(JSON.parse(JSON.stringify(page)));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.page.sections[0].rows[0].columns[0].blocks[0].props.html).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+
 describe('sanitiseHtml', () => {
   it('keeps ordinary rich text', () => {
     const html = '<p>Hello <strong>there</strong>, see <a href="/greece">Greece</a>.</p>';
@@ -749,6 +899,34 @@ describe('sanitising a whole page on the way in', () => {
     const props = clean.sections[0].rows[0].columns[0].blocks[0].props;
     expect(props.html).not.toContain('script');
     expect(props.html).toContain('Hello');
+  });
+
+  /*
+   * The whole-page pass has to use the HEADING mode for a heading, not the
+   * paragraph one. Without this, the toolbar's own commands are correctly
+   * restricted but a paste or an import could still put a list inside an h2 and
+   * have it stored, and it would only show up as a page that reflows oddly.
+   */
+  it('strips a block element out of a heading, which a paragraph would keep', () => {
+    const clean = sanitisePage(pageWith('heading', {
+      html: 'Greece<ul><li>and Cyprus</li></ul>',
+      level: 'h2',
+    }));
+
+    const props = clean.sections[0].rows[0].columns[0].blocks[0].props;
+    expect(props.html).not.toContain('<ul');
+    expect(props.html).toContain('Greece');
+    expect(props.html).toContain('and Cyprus');
+  });
+
+  it('but keeps the bold a heading is allowed', () => {
+    const clean = sanitisePage(pageWith('heading', {
+      html: '<strong>Greece</strong> and Cyprus',
+      level: 'h2',
+    }));
+
+    expect(clean.sections[0].rows[0].columns[0].blocks[0].props.html)
+      .toContain('<strong>Greece</strong>');
   });
 
   it('empties a javascript: link rather than storing it', () => {

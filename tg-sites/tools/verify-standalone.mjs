@@ -1716,11 +1716,11 @@ async function selectOnCanvas() {
       break;
     }
   }
-  const host = page.locator('[data-rt-host]:not([data-rt-plain])').first();
+  const host = page.locator('[data-rt-host]:not([data-rt-oneline])').first();
   if (!(await host.count())) return null;
 
   await page.evaluate(() => {
-    const el = document.querySelector('[data-rt-host]:not([data-rt-plain])');
+    const el = document.querySelector('[data-rt-host]:not([data-rt-oneline])');
     const range = document.createRange();
     range.selectNodeContents(el);
     const selection = window.getSelection();
@@ -2000,7 +2000,7 @@ await check('a colour applies to the selected words', async () => {
  * and nobody would ever connect the two.
  */
 await check('and it stores the theme token, so the words follow the theme', async () => {
-  const html = await page.locator('[data-rt-host]:not([data-rt-plain])').first().innerHTML();
+  const html = await page.locator('[data-rt-host]:not([data-rt-oneline])').first().innerHTML();
   return /var\(--tgs-accent\)/.test(html)
     ? true
     : `stored "${(html.match(/style="[^"]*"/) ?? ['nothing'])[0]}"`;
@@ -2011,7 +2011,7 @@ await check('and it stores the theme token, so the words follow the theme', asyn
  * sanitiseHtml, which is the same gate a save goes through.
  */
 await check('and it survives the sanitiser rather than vanishing', async () => {
-  const before = await page.locator('[data-rt-host]:not([data-rt-plain])').first().innerHTML();
+  const before = await page.locator('[data-rt-host]:not([data-rt-oneline])').first().innerHTML();
   if (!/var\(--tgs-accent\)/.test(before)) return 'the colour was not there to begin with';
 
   // Select a block with no words of its own, so the paragraph stops being an
@@ -2091,7 +2091,7 @@ await check('a size applies, and it is a real size rather than an attribute noth
  * HTML on the way to the screen: the same gate a save goes through.
  */
 await check('and the size survives the sanitiser, not just the canvas', async () => {
-  const before = await page.locator('[data-rt-host]:not([data-rt-plain])').first().innerHTML();
+  const before = await page.locator('[data-rt-host]:not([data-rt-oneline])').first().innerHTML();
   if (!/font-size/i.test(before)) return 'no size on the canvas to begin with';
 
   for (const block of await page.locator('.tgs-block').all()) {
@@ -2198,7 +2198,7 @@ await check('and one that is not a colour we keep is refused rather than half ap
 });
 
 await check('and so is something that is not a colour at all', async () => {
-  const host = page.locator('[data-rt-host]:not([data-rt-plain])').first();
+  const host = page.locator('[data-rt-host]:not([data-rt-oneline])').first();
   const before = await host.innerHTML();
 
   await page.locator('.ed-tt__tray .ed-tt__url').fill('red; position: fixed');
@@ -2375,7 +2375,7 @@ async function editParagraph() {
     if (text.trim().length > 60) {
       await block.click();
       await page.waitForTimeout(400);
-      const host = page.locator('[data-rt-host]:not([data-rt-plain])').first();
+      const host = page.locator('[data-rt-host]:not([data-rt-oneline])').first();
       return (await host.count()) ? host : null;
     }
   }
@@ -2406,7 +2406,7 @@ await check('typing lands where the caret is, not at the start', async () => {
   if (!host) return 'no editable paragraph';
 
   await page.evaluate(() => {
-    const el = document.querySelector('[data-rt-host]:not([data-rt-plain])');
+    const el = document.querySelector('[data-rt-host]:not([data-rt-oneline])');
     const range = document.createRange();
     range.selectNodeContents(el);
     range.collapse(false);
@@ -2422,11 +2422,11 @@ await check('typing lands where the caret is, not at the start', async () => {
 });
 
 await check('and mid-paragraph, not just at the end', async () => {
-  const host = page.locator('[data-rt-host]:not([data-rt-plain])').first();
+  const host = page.locator('[data-rt-host]:not([data-rt-oneline])').first();
   const before = (await host.innerText()).trim().slice(0, 12);
 
   await page.evaluate(() => {
-    const el = document.querySelector('[data-rt-host]:not([data-rt-plain])');
+    const el = document.querySelector('[data-rt-host]:not([data-rt-oneline])');
     const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
     const node = walk.nextNode();
     const range = document.createRange();
@@ -2479,7 +2479,7 @@ await check('selecting the words with the mouse keeps the toolbar', async () => 
 });
 
 await check('and Bold then applies to those words', async () => {
-  const host = page.locator('[data-rt-host]:not([data-rt-plain])').first();
+  const host = page.locator('[data-rt-host]:not([data-rt-oneline])').first();
   await page.locator('.ed-tt__btn[aria-label="Bold"]').click();
   await page.waitForTimeout(350);
 
@@ -2503,7 +2503,7 @@ await check('and Bold then applies to those words', async () => {
 
 /** Select some words in the first paragraph, so the toolbar is up and armed. */
 async function selectSomeWords() {
-  const host = page.locator('[data-rt-host]:not([data-rt-plain])').first();
+  const host = page.locator('[data-rt-host]:not([data-rt-oneline])').first();
   if (!(await host.count())) return null;
   const box = await host.boundingBox();
   await page.mouse.move(box.x + 6, box.y + 12);
@@ -2524,7 +2524,7 @@ async function selectSomeWords() {
  * was a bug in the setup.
  */
 async function placeCaret() {
-  const host = page.locator('[data-rt-host]:not([data-rt-plain])').first();
+  const host = page.locator('[data-rt-host]:not([data-rt-oneline])').first();
   if (!(await host.count())) return null;
   const box = await host.boundingBox();
   await page.mouse.click(box.x + 20, box.y + 12);
@@ -2622,7 +2622,7 @@ await check('an empty request is refused rather than sent', async () => {
 });
 
 await check('asking for copy puts it in the paragraph', async () => {
-  const host = page.locator('[data-rt-host]:not([data-rt-plain])').first();
+  const host = page.locator('[data-rt-host]:not([data-rt-oneline])').first();
   const before = await host.innerText();
 
   await page.locator('.ed-tt__ask-box').fill('A paragraph about our trips to Greece');
@@ -2650,7 +2650,7 @@ await check('the panel closes once the copy has landed', async () =>
   (await page.locator('.ed-tt__ask').count()) === 0 ? true : 'it stayed open');
 
 await check('and one undo takes it back out again', async () => {
-  const host = page.locator('[data-rt-host]:not([data-rt-plain])').first();
+  const host = page.locator('[data-rt-host]:not([data-rt-oneline])').first();
   await host.click();
   await page.keyboard.press('Control+z');
   await page.waitForTimeout(400);
@@ -2686,7 +2686,7 @@ await check('and the panel says it will replace them', async () => {
  * appended, those words would still be sitting there in front of it.
  */
 await check('making it shorter replaces the words rather than adding to them', async () => {
-  const host = page.locator('[data-rt-host]:not([data-rt-plain])').first();
+  const host = page.locator('[data-rt-host]:not([data-rt-oneline])').first();
 
   /*
    * ITS OWN SELECTION, and the highlighted words READ BEFORE the panel opens.
@@ -2770,17 +2770,25 @@ await showPanels();
  * HEADINGS TOO, because the seeded page is four headings to two paragraphs and a
  * heading that does nothing when clicked reads as the whole feature being broken.
  *
- * A heading stores PLAIN TEXT and the renderer escapes it, so it is marked as a
- * different kind of host: read back as textContent, no formatting toolbar. Bold
- * inside a heading could not survive a save, and a button that appears to work
- * and does not is worse than no button.
+ * A HEADING HOLDS MARKUP SINCE 31 JUL 2026, which reversed the rule these checks
+ * used to enforce. Andy: "the text toolbar only appears on paragraph text, it
+ * needs to work on every style of text."
+ *
+ * It used to store a plain string the renderer escaped, so it was marked as a
+ * different kind of host, read back as textContent, and deliberately given no
+ * toolbar: bold inside one could not have survived a save. Now it stores html
+ * like a paragraph and gets the toolbar.
+ *
+ * The attribute that survived is data-rt-oneline, and it means only what it
+ * says: a heading is ONE LINE. Enter is still refused, and the toolbar hides the
+ * commands that would put a block element inside an h2.
  */
 async function editHeading() {
   for (const block of await page.locator('.tgs-block').all()) {
     if (await block.locator('.tgs-heading').count()) {
       await block.click();
       await page.waitForTimeout(400);
-      const host = page.locator('[data-rt-host][data-rt-plain]').first();
+      const host = page.locator('[data-rt-host][data-rt-oneline]').first();
       return (await host.count()) ? host : null;
     }
   }
@@ -2792,7 +2800,7 @@ await check('a heading is typed in place as well', async () => {
   if (!host) return 'no heading became an editable host';
 
   await page.evaluate(() => {
-    const el = document.querySelector('[data-rt-host][data-rt-plain]');
+    const el = document.querySelector('[data-rt-host][data-rt-oneline]');
     const range = document.createRange();
     range.selectNodeContents(el);
     range.collapse(false);
@@ -2804,15 +2812,80 @@ await check('a heading is typed in place as well', async () => {
   await page.waitForTimeout(350);
 
   const text = (await host.innerText()).trim();
-  const inState = await page.locator('.ed-input').first().inputValue();
+  // .ed-rt, not .ed-input. A heading's pane field is a rich text field now that
+  // the block holds markup, which is the same change that gave it the toolbar.
+  const inState = (await page.locator('.ed-rt').first().innerText()).trim();
   return text.endsWith('NOW') && inState.endsWith('NOW')
     ? true
     : `canvas "${text.slice(-20)}", state "${inState.slice(-20)}"`;
 });
 
-await check('no formatting toolbar on a heading, because none of it would survive', async () => {
+/*
+ * THE THING ANDY ASKED FOR, and its opposite used to be a check in this file:
+ * "no formatting toolbar on a heading, because none of it would survive". It
+ * survives now.
+ */
+await check('a heading gets the formatting toolbar too', async () => {
   const bars = await page.locator('.ed-tt').count();
-  return bars === 0 ? true : `${bars} toolbars over a heading`;
+  return bars === 1 ? true : `${bars} toolbars over a heading`;
+});
+
+/*
+ * The commands that would nest a BLOCK inside an h2 are absent, and this is the
+ * check that keeps the feature honest rather than merely present. A p or a ul
+ * inside a heading is invalid HTML that no browser refuses: they hoist the block
+ * out, so the back half of the heading falls out of the heading with it.
+ */
+await check('but not the commands that would put a block inside a heading', async () => {
+  const style = await page.locator('.ed-tt select[aria-label="Text style"]').count();
+  const lists = await page.locator('.ed-tt__btn[aria-label="Bulleted list"]').count();
+  return style === 0 && lists === 0
+    ? true
+    : `${style} style dropdowns, ${lists} list buttons over a heading`;
+});
+
+await check('and the inline ones are all there, which is the point', async () => {
+  const wanted = ['Bold', 'Italic', 'Underline', 'Add a link', 'Text colour', 'Align centre'];
+  const missing = [];
+  for (const label of wanted) {
+    if ((await page.locator(`.ed-tt__btn[aria-label="${label}"]`).count()) === 0) {
+      missing.push(label);
+    }
+  }
+  // Size and font are selects rather than buttons, and they carry the styling a
+  // heading is most likely to want.
+  const size = await page.locator('.ed-tt select[aria-label="Size"]').count();
+  return missing.length === 0 && size === 1
+    ? true
+    : `missing ${JSON.stringify(missing)}, ${size} size pickers`;
+});
+
+/*
+ * BOLD IN A HEADING, ALL THE WAY THROUGH. The claim the old design could not
+ * make: it has to reach the canvas AND the page state, because state is what a
+ * save writes. On the canvas only would be the "appears to work" failure this
+ * codebase has a rule about, in the exact place that rule was written for.
+ */
+await check('bold in a heading reaches the page state, so it survives a save', async () => {
+  const host = page.locator('[data-rt-host][data-rt-oneline]').first();
+  if (!(await host.count())) return 'no heading host';
+
+  const box = await host.boundingBox();
+  await page.mouse.move(box.x + 4, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + Math.min(90, box.width - 4), box.y + box.height / 2, { steps: 10 });
+  await page.mouse.up();
+  await page.waitForTimeout(250);
+
+  const selected = (await page.evaluate(() => String(window.getSelection()))).trim();
+  if (selected.length < 3) return `only "${selected}" was selected`;
+
+  await page.locator('.ed-tt__btn[aria-label="Bold"]').click();
+  await page.waitForTimeout(400);
+
+  const onCanvas = /<(b|strong)[ >]/i.test(await host.innerHTML());
+  const inState = /<(b|strong)[ >]/i.test(await page.locator('.ed-rt').first().innerHTML());
+  return onCanvas && inState ? true : `canvas ${onCanvas}, state ${inState}`;
 });
 
 /*
@@ -2837,7 +2910,7 @@ await check('the pane field catches up with what was typed on the canvas', async
   if (!host) return 'no editable paragraph';
 
   await page.evaluate(() => {
-    const el = document.querySelector('[data-rt-host]:not([data-rt-plain])');
+    const el = document.querySelector('[data-rt-host]:not([data-rt-oneline])');
     const range = document.createRange();
     range.selectNodeContents(el);
     range.collapse(false);
@@ -2860,7 +2933,7 @@ await check('and typing in the pane still reaches the canvas', async () => {
   await page.keyboard.type(' FROMPANE', { delay: 30 });
   await page.waitForTimeout(400);
 
-  const canvas = await page.locator('[data-rt-host]:not([data-rt-plain])').first().innerText();
+  const canvas = await page.locator('[data-rt-host]:not([data-rt-oneline])').first().innerText();
   return canvas.includes('FROMPANE') ? true : `the canvas says "${canvas.slice(-40)}"`;
 });
 

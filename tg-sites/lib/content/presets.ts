@@ -124,7 +124,7 @@ export const SECTION_PRESETS: readonly SectionPreset[] = [
         widths: [1],
         columns: [
           [
-            { type: 'heading', props: { text: 'Add your title here', style: 'h2', ...CENTRED } },
+            { type: 'heading', props: { html: 'Add your title here', style: 'h2', ...CENTRED } },
             {
               type: 'text',
               props: {
@@ -153,8 +153,8 @@ export const SECTION_PRESETS: readonly SectionPreset[] = [
         columns: [
           [{ type: 'image', props: { alt: '' } }],
           [
-            { type: 'heading', props: { text: 'Tagline here', style: 'h6', level: 'h3' } },
-            { type: 'heading', props: { text: 'Add your title here', style: 'h2' } },
+            { type: 'heading', props: { html: 'Tagline here', style: 'h6', level: 'h3' } },
+            { type: 'heading', props: { html: 'Add your title here', style: 'h2' } },
             {
               type: 'text',
               props: {
@@ -180,8 +180,8 @@ export const SECTION_PRESETS: readonly SectionPreset[] = [
         widths: [1],
         columns: [
           [
-            { type: 'heading', props: { text: 'Tagline here', style: 'h6', level: 'h3', ...CENTRED } },
-            { type: 'heading', props: { text: 'Add your title here', style: 'h2', ...CENTRED } },
+            { type: 'heading', props: { html: 'Tagline here', style: 'h6', level: 'h3', ...CENTRED } },
+            { type: 'heading', props: { html: 'Add your title here', style: 'h2', ...CENTRED } },
           ],
         ],
       },
@@ -219,7 +219,7 @@ export const SECTION_PRESETS: readonly SectionPreset[] = [
         columnBox: [CARD, CARD],
         columns: [
           [
-            { type: 'heading', props: { text: 'Short title', style: 'h4' } },
+            { type: 'heading', props: { html: 'Short title', style: 'h4' } },
             {
               type: 'text',
               props: {
@@ -231,7 +231,7 @@ export const SECTION_PRESETS: readonly SectionPreset[] = [
             { type: 'button', props: { label: 'Learn more', variant: 'secondary' } },
           ],
           [
-            { type: 'heading', props: { text: 'Short title', style: 'h4' } },
+            { type: 'heading', props: { html: 'Short title', style: 'h4' } },
             {
               type: 'text',
               props: {
@@ -289,7 +289,7 @@ export const SECTION_PRESETS: readonly SectionPreset[] = [
         widths: [1],
         columns: [
           [
-            { type: 'heading', props: { text: 'Add your title here', style: 'h1', ...CENTRED } },
+            { type: 'heading', props: { html: 'Add your title here', style: 'h1', ...CENTRED } },
             { type: 'divider' },
             {
               type: 'text',
@@ -319,8 +319,8 @@ export const SECTION_PRESETS: readonly SectionPreset[] = [
         widths: [1, 1],
         columns: [
           [
-            { type: 'heading', props: { text: 'Tagline here', style: 'h6', level: 'h3' } },
-            { type: 'heading', props: { text: 'Add your title here', style: 'h2' } },
+            { type: 'heading', props: { html: 'Tagline here', style: 'h6', level: 'h3' } },
+            { type: 'heading', props: { html: 'Add your title here', style: 'h2' } },
             {
               type: 'text',
               props: {
@@ -346,7 +346,7 @@ export const SECTION_PRESETS: readonly SectionPreset[] = [
       {
         widths: [1, 2],
         columns: [
-          [{ type: 'heading', props: { text: 'About', style: 'h2' } }],
+          [{ type: 'heading', props: { html: 'About', style: 'h2' } }],
           [
             {
               type: 'text',
@@ -373,7 +373,7 @@ export const SECTION_PRESETS: readonly SectionPreset[] = [
       {
         widths: [1, 1],
         columns: [
-          [{ type: 'heading', props: { text: 'Add your medium length title here', style: 'h2' } }],
+          [{ type: 'heading', props: { html: 'Add your medium length title here', style: 'h2' } }],
           [
             {
               type: 'text',
@@ -399,8 +399,8 @@ export const SECTION_PRESETS: readonly SectionPreset[] = [
         widths: [1],
         columns: [
           [
-            { type: 'heading', props: { text: 'Where to next', style: 'h6', level: 'h3', ...CENTRED } },
-            { type: 'heading', props: { text: 'Add your medium length title here', style: 'h1', ...CENTRED } },
+            { type: 'heading', props: { html: 'Where to next', style: 'h6', level: 'h3', ...CENTRED } },
+            { type: 'heading', props: { html: 'Add your medium length title here', style: 'h1', ...CENTRED } },
             {
               type: 'text',
               props: {
@@ -453,7 +453,7 @@ export const SECTION_PRESETS: readonly SectionPreset[] = [
       {
         widths: [1, 1, 1, 1],
         columns: [1, 2, 3, 4].map(() => [
-          { type: 'heading', props: { text: 'Short title', style: 'h5', level: 'h3' } },
+          { type: 'heading', props: { html: 'Short title', style: 'h5', level: 'h3' } },
           {
             type: 'text',
             props: {
@@ -548,7 +548,7 @@ export const SECTION_PRESETS: readonly SectionPreset[] = [
         widths: [1, 2],
         columns: [
           [
-            { type: 'heading', props: { text: 'This is a short title', style: 'h3' } },
+            { type: 'heading', props: { html: 'This is a short title', style: 'h3' } },
             { type: 'button', props: { label: 'Start an enquiry' } },
           ],
           [
@@ -579,7 +579,7 @@ export const SECTION_PRESETS: readonly SectionPreset[] = [
         widths: [1],
         columns: [
           [
-            { type: 'heading', props: { text: 'Add your medium length title here', style: 'h2', ...CENTRED } },
+            { type: 'heading', props: { html: 'Add your medium length title here', style: 'h2', ...CENTRED } },
             {
               type: 'text',
               props: {
@@ -616,11 +616,11 @@ export const SECTION_PRESETS: readonly SectionPreset[] = [
             },
           ],
           [
-            { type: 'heading', props: { text: 'First point', style: 'h5', level: 'h3' } },
+            { type: 'heading', props: { html: 'First point', style: 'h5', level: 'h3' } },
             { type: 'text', props: { html: '<p>A couple of lines on this one.</p>', size: 's' } },
           ],
           [
-            { type: 'heading', props: { text: 'Second point', style: 'h5', level: 'h3' } },
+            { type: 'heading', props: { html: 'Second point', style: 'h5', level: 'h3' } },
             { type: 'text', props: { html: '<p>And a couple on this one.</p>', size: 's' } },
           ],
         ],
@@ -637,7 +637,7 @@ export const SECTION_PRESETS: readonly SectionPreset[] = [
       {
         widths: [1, 2],
         columns: [
-          [{ type: 'heading', props: { text: 'About us', style: 'h6', level: 'h3' } }],
+          [{ type: 'heading', props: { html: 'About us', style: 'h6', level: 'h3' } }],
           [
             {
               type: 'text',
@@ -665,9 +665,9 @@ export const SECTION_PRESETS: readonly SectionPreset[] = [
       {
         widths: [1, 2],
         columns: [
-          [{ type: 'heading', props: { text: 'What you get', style: 'h6', level: 'h3' } }],
+          [{ type: 'heading', props: { html: 'What you get', style: 'h6', level: 'h3' } }],
           [
-            { type: 'heading', props: { text: 'Add your medium length title here', style: 'h2' } },
+            { type: 'heading', props: { html: 'Add your medium length title here', style: 'h2' } },
             {
               type: 'text',
               props: {
@@ -709,12 +709,12 @@ export const SECTION_PRESETS: readonly SectionPreset[] = [
     rows: [
       {
         widths: [1],
-        columns: [[{ type: 'heading', props: { text: 'Add your medium length title here', style: 'h2' } }]],
+        columns: [[{ type: 'heading', props: { html: 'Add your medium length title here', style: 'h2' } }]],
       },
       ...[0, 1].map(() => ({
         widths: [1, 1, 1],
         columns: [1, 2, 3].map(() => [
-          { type: 'heading', props: { text: 'This is a short title', style: 'h5', level: 'h3' } },
+          { type: 'heading', props: { html: 'This is a short title', style: 'h5', level: 'h3' } },
           {
             type: 'text',
             props: {
@@ -736,8 +736,8 @@ export const SECTION_PRESETS: readonly SectionPreset[] = [
       {
         widths: [2, 1],
         columns: [
-          [{ type: 'heading', props: { text: 'Add your large length title here and here too', style: 'h1' } }],
-          [{ type: 'heading', props: { text: 'Where to next', style: 'h6', level: 'h3' } }],
+          [{ type: 'heading', props: { html: 'Add your large length title here and here too', style: 'h1' } }],
+          [{ type: 'heading', props: { html: 'Where to next', style: 'h6', level: 'h3' } }],
         ],
       },
       {
@@ -778,7 +778,7 @@ export const SECTION_PRESETS: readonly SectionPreset[] = [
         widths: [1],
         columns: [
           [
-            { type: 'heading', props: { text: 'Add your medium length title here', style: 'h2', ...CENTRED } },
+            { type: 'heading', props: { html: 'Add your medium length title here', style: 'h2', ...CENTRED } },
             { type: 'button-group', props: { align: 'centre' } },
             {
               type: 'text',
@@ -803,9 +803,9 @@ export const SECTION_PRESETS: readonly SectionPreset[] = [
       {
         widths: [1, 2],
         columns: [
-          [{ type: 'heading', props: { text: 'Add title here', style: 'h2' } }],
+          [{ type: 'heading', props: { html: 'Add title here', style: 'h2' } }],
           [
-            { type: 'heading', props: { text: 'This is a short title', style: 'h5', level: 'h3' } },
+            { type: 'heading', props: { html: 'This is a short title', style: 'h5', level: 'h3' } },
             {
               type: 'text',
               props: {
@@ -814,7 +814,7 @@ export const SECTION_PRESETS: readonly SectionPreset[] = [
               },
             },
             { type: 'divider' },
-            { type: 'heading', props: { text: 'This is a short title', style: 'h5', level: 'h3' } },
+            { type: 'heading', props: { html: 'This is a short title', style: 'h5', level: 'h3' } },
             {
               type: 'text',
               props: {

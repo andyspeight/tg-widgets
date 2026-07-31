@@ -12,7 +12,7 @@
  */
 
 import type { CSSProperties, ReactElement } from 'react';
-import { safeUrl, sanitiseHtml } from '../../lib/content/sanitise';
+import { escapeHtml, safeUrl, sanitiseHtml } from '../../lib/content/sanitise';
 import { resolveVideo } from '../../lib/content/video';
 
 type Props = Record<string, unknown>;
@@ -89,32 +89,58 @@ export function HeadingBlock({
       ? chosen
       : LEGACY_SIZE_TO_STYLE[oneOf(props, 'size', ['s', 'm', 'l', 'xl'] as const, 'm')];
 
-  const text = str(props, 'text');
   const Tag = level;
+
+  /*
+   * A HEADING HOLDS MARKUP NOW, and the two props are both read on purpose.
+   *
+   * It used to hold `text`, a plain string the renderer escaped, which is why
+   * the formatting toolbar was kept away from headings: bold inside one could
+   * not have survived a save. Andy asked for the toolbar on every style of text
+   * on 31 Jul 2026, and this is what makes that honest rather than a button that
+   * appears to work.
+   *
+   * `html` FIRST, `text` AS THE FALLBACK, escaped. That is the whole migration:
+   * every heading written before today has only `text`, and it keeps rendering
+   * exactly as it did. Nothing has to be rewritten in the database, and a page
+   * saved by an older deploy still renders. The same shape as the style/size
+   * fallback a few lines up, for the same reason.
+   *
+   * 'heading' mode, not 'richtext'. A p, a ul or another heading inside an h2 is
+   * invalid, and a browser does not refuse it, it hoists the block element out
+   * and the back half of the heading falls out with it. See sanitise.ts.
+   */
+  const stored = sanitiseHtml(props.html, 'heading');
+  const html = stored || escapeHtml(str(props, 'text'));
 
   /*
    * Typed in place, like the paragraph, and for the same reason: the words are
    * on the canvas, so that is where people reach for them.
    *
-   * data-rt-plain rather than data-rt-host. A heading stores plain text, not
-   * markup, and the renderer escapes it. Marking it as the plain kind is what
-   * tells the canvas to read textContent back rather than innerHTML, so a
-   * pasted-in <b> is dropped instead of being stored and then silently
-   * escaped into visible angle brackets on the published page. It is also why
-   * the formatting toolbar stays away from headings: bold inside one could not
-   * survive a save, and a button that appears to work and does not is worse
-   * than no button.
+   * data-rt-oneline rather than the old data-rt-plain. The attribute used to do
+   * two jobs, read textContent back AND refuse Enter, and only the second one
+   * still applies: a heading is one line, and letting Enter through has the
+   * browser put a div inside it. The read-back is now innerHTML like any other
+   * rich host, which is the change that makes the toolbar work here.
    */
   if (editingHost) {
     return (
-      <Tag className="tgs-heading" data-style={style} data-rt-host="" data-rt-plain="" suppressHydrationWarning />
+      <Tag
+        className="tgs-heading"
+        data-style={style}
+        data-rt-host=""
+        data-rt-oneline=""
+        suppressHydrationWarning
+      />
     );
   }
 
   return (
-    <Tag className="tgs-heading" data-style={style}>
-      {text || 'Heading'}
-    </Tag>
+    <Tag
+      className="tgs-heading"
+      data-style={style}
+      dangerouslySetInnerHTML={{ __html: html || 'Heading' }}
+    />
   );
 }
 
