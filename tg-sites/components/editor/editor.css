@@ -405,6 +405,61 @@
 .ed-panel-body { padding: var(--ed-3); }
 
 /* ------------------------------------------------------------------ */
+/* Breadcrumb: the way up out of a block                               */
+/* ------------------------------------------------------------------ */
+
+/* The only route to a column once it has content in it. Clicking the canvas
+   selects the innermost thing under the pointer, so a full column has nothing
+   left to click. Wraps rather than scrolls: four steps at 320px will not fit on
+   one line and a step you have to scroll sideways to reach is a step nobody
+   finds, which is the mistake this replaced. */
+.ed-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: var(--ed-3);
+  padding-bottom: var(--ed-2);
+  border-bottom: 1px solid var(--ed-line-soft);
+}
+
+.ed-crumbs > span { display: inline-flex; align-items: center; gap: 2px; }
+
+.ed-crumbs__sep { color: var(--ed-ink-3); flex: none; }
+
+.ed-crumbs__step {
+  position: relative;
+  padding: 3px 6px;
+  border: 0;
+  border-radius: var(--ed-r-sm);
+  background: none;
+  color: var(--ed-ink-2);
+  font: inherit;
+  font-size: var(--ed-text-sm);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* A 22px control against the 44px rule. Grown with a pseudo-element rather than
+   with padding, because four steps at 44px each would be taller than the pane
+   header and would read as a row of buttons rather than as a trail. */
+.ed-crumbs__step::after {
+  content: '';
+  position: absolute;
+  inset: -11px -2px;
+}
+
+.ed-crumbs__step:hover { background: var(--ed-well); color: var(--ed-ink); }
+.ed-crumbs__step:focus-visible { outline: 2px solid var(--ed-select); outline-offset: 1px; }
+
+/* Where you are. Not a link to itself. */
+.ed-crumbs__step[aria-current='true'] {
+  color: var(--ed-ink);
+  font-weight: 600;
+  cursor: default;
+}
+
+/* ------------------------------------------------------------------ */
 /* Outline: sections as cards                                          */
 /* ------------------------------------------------------------------ */
 
@@ -1619,6 +1674,10 @@
 }
 
 .ed-designed__cat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ed-2);
   padding: var(--ed-2) var(--ed-3);
   border: 0;
   border-radius: var(--ed-r-md);
@@ -1628,6 +1687,25 @@
   font-size: var(--ed-text-sm);
   text-align: left;
   cursor: pointer;
+}
+
+/* How many designs are in this category. The grid scrolls, and a half-clipped
+   row is the only other cue that there is more below. */
+.ed-designed__count {
+  flex: none;
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: var(--ed-r-full);
+  background: var(--ed-sunken);
+  color: var(--ed-ink-3);
+  font-size: var(--ed-text-xs);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.ed-designed__cat[aria-current='true'] .ed-designed__count {
+  background: var(--ed-select-wash);
+  color: var(--ed-select);
 }
 
 .ed-designed__cat:hover { background: var(--ed-well); color: var(--ed-ink); }

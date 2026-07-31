@@ -23,6 +23,7 @@ import { BoxPanel, Measure } from './BoxControls';
 import { blockDefinition } from '../../lib/content/blocks';
 import {
   type Path,
+  pathKey,
   addColumn,
   evenColumns,
   removeColumn,
@@ -46,7 +47,107 @@ interface Props {
   onBack: () => void;
 }
 
-export function Properties({ page, selected, isStaff, onCommit, onBack }: Props) {
+/**
+ * The chain from the page down to what is selected, each step selectable.
+ *
+ * WHY THIS EXISTS, and it is the second attempt at the problem.
+ *
+ * Clicking the canvas selects the innermost thing under the pointer, which is
+ * almost always a block. So once a column has any content in it, there is
+ * nowhere left to click to reach the COLUMN, and its width, padding, background
+ * and border become unreachable. Andy reported exactly that on 30 Jul 2026, and
+ * again after the first fix: "it still collapses, so you can't get to any of the
+ * column settings".
+ *
+ * The first fix put a small label on the column that appeared on hover and could
+ * be clicked. It worked, and a browser check proved it worked, and Andy still
+ * could not find it: 60 by 19 pixels, only on hover, and styled exactly like the
+ * badges that merely NAME what is selected. It read as a caption, not a control.
+ *
+ * This is the standard answer instead, and it fixes rows and sections too rather
+ * than only columns: show where you are, and let people step up. Nothing to
+ * hover, nothing to discover, and it cannot be covered by the content.
+ */
+function Breadcrumb({
+  selected,
+  page,
+  onSelect,
+}: {
+  selected: Path;
+  page: Page;
+  onSelect: (path: Path) => void;
+}) {
+  const trail = ancestors(selected);
+  // One step is just the thing itself, which is what the title already says.
+  if (trail.length < 2) return null;
+
+  return (
+    <nav className="ed-crumbs" aria-label="Where this sits">
+      {trail.map((path, index) => {
+        const last = index === trail.length - 1;
+        return (
+          <span key={pathKey(path)}>
+            {index > 0 && (
+              <Icon name="chevron-right" size={12} className="ed-crumbs__sep" aria-hidden="true" />
+            )}
+            <button
+              type="button"
+              className="ed-crumbs__step"
+              aria-current={last ? 'true' : undefined}
+              onClick={() => onSelect(path)}
+            >
+              {crumbLabel(path, page)}
+            </button>
+          </span>
+        );
+      })}
+    </nav>
+  );
+}
+
+/** Page, section, row, column, block: whichever of those the selection has. */
+function ancestors(path: Path): Path[] {
+  const trail: Path[] = [];
+  if (path.kind === 'page') return [path];
+
+  trail.push({ kind: 'section', section: path.section });
+  if (path.kind === 'section') return trail;
+
+  trail.push({ kind: 'row', section: path.section, row: path.row });
+  if (path.kind === 'row') return trail;
+
+  trail.push({ kind: 'column', section: path.section, row: path.row, column: path.column });
+  if (path.kind === 'column') return trail;
+
+  trail.push(path);
+  return trail;
+}
+
+/**
+ * Short labels, because the pane is 320px and a full heading would wrap to three
+ * lines. The title underneath already says what the selected thing is in full.
+ */
+function crumbLabel(path: Path, page: Page): string {
+  switch (path.kind) {
+    case 'page':
+      return 'Page';
+    case 'section':
+      return `Section ${path.section + 1}`;
+    case 'row':
+      return `Row ${path.row + 1}`;
+    case 'column':
+      return `Column ${path.column + 1}`;
+    case 'block': {
+      const block = page.sections[path.section]?.rows[path.row]?.columns[path.column]
+        ?.blocks[path.block];
+      return block ? (blockDefinition(block.type)?.label ?? 'Block') : 'Block';
+    }
+    default:
+      return 'Item';
+  }
+}
+
+export function Properties({ page, selected, isStaff, onSelect, onCommit, onBack }: Props) {
   return (
     <aside className="ed-props" aria-label="Properties">
       <div className="ed-panel-head">
@@ -65,6 +166,8 @@ export function Properties({ page, selected, isStaff, onCommit, onBack }: Props)
       </div>
 
       <div className="ed-panel-body">
+        {selected && <Breadcrumb selected={selected} page={page} onSelect={onSelect} />}
+
         {!selected && (
           <p className="ed-empty-note">
             Select a section, row or block in the outline or the preview and its

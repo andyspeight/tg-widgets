@@ -183,6 +183,15 @@ export function SectionPicker({
                 onClick={() => setCategory(entry.id)}
               >
                 {entry.label}
+                {/*
+                  THE COUNT, because without it nobody knows there is more.
+                  Fifteen designs, nine of which fit on a 1000px screen, and the
+                  rest below the fold with only a half-clipped row hinting at
+                  them. Andy asked on 30 Jul 2026 for seven designs to be added
+                  that had already been built and shipped a few hours earlier: he
+                  had seen what fitted and reasonably took it for the lot.
+                */}
+                <span className="ed-designed__count">{presetsIn(entry.id).length}</span>
               </button>
             ))}
           </nav>

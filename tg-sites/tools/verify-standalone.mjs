@@ -439,7 +439,10 @@ await check('Designed shows ready-made sections in a category', async () => {
   await page.waitForTimeout(300);
 
   const cards = await page.locator('.ed-preset-card').count();
-  const cats = (await page.locator('.ed-designed__cat').allInnerTexts()).map((t) => t.trim());
+  // The first line only: each category button now also carries a count badge,
+  // so its text reads "Text\n15".
+  const cats = (await page.locator('.ed-designed__cat').allInnerTexts()).map((t) =>
+    t.trim().split('\n')[0].trim());
   // Layouts must be gone, or both grids would be on screen at once.
   const layouts = await page.locator('.ed-layout-card').count();
 
@@ -495,6 +498,50 @@ await check('a preset builds a section with its content already in it', async ()
 
   if (!ok) return `${columns} columns, saying "${text.slice(0, 60)}"`;
   return restored === before ? true : `undo left ${restored} sections, expected ${before}`;
+});
+
+/*
+ * HOW MANY THERE ARE, said out loud.
+ *
+ * Nine of fifteen fit on a 1000px screen and the rest are below the fold behind
+ * a half-clipped row. Andy asked for seven designs to be added on 30 Jul 2026
+ * that had been built and shipped a few hours earlier: he saw what fitted and
+ * reasonably took it for all of them.
+ */
+/** Open the section picker on the Designed tab, from wherever we are. */
+async function openDesigned() {
+  await closeAnyDialog();
+  // The outline's own button, which is always on screen. The seam buttons the
+  // checks above use only appear on hover, so clicking one from a cold start
+  // waits for a visibility that never arrives.
+  await page.locator('.ed-outline button', { hasText: 'Add a section' }).first().click();
+  await page.waitForTimeout(400);
+  await page.locator('.ed-tab', { hasText: 'Designed' }).click();
+  await page.waitForTimeout(400);
+}
+
+await check('the category says how many designs are in it', async () => {
+  await openDesigned();
+  const shown = await page.locator('.ed-designed__count').first().innerText();
+  const cards = await page.locator('.ed-preset-card').count();
+  return Number(shown) === cards
+    ? true
+    : `the badge says ${shown} and there are ${cards} cards`;
+});
+
+await check('and there are more of them than fit on screen, so the count earns its place', async () => {
+  const counts = await page.evaluate(() => {
+    const cards = [...document.querySelectorAll('.ed-preset-card')];
+    const fits = cards.filter((card) => card.getBoundingClientRect().bottom <= window.innerHeight);
+    return { total: cards.length, visible: fits.length };
+  });
+  // Put the dialog away. The checks below open the picker from a seam button,
+  // which an open modal covers, so leaving it up broke two of them.
+  await closeAnyDialog();
+
+  return counts.total > counts.visible
+    ? true
+    : `all ${counts.total} are on screen, so nothing is hidden`;
 });
 
 await check('the AI tab is an honest stub rather than a dead form', async () => {
@@ -2412,6 +2459,100 @@ await check('Enter in a heading is refused rather than silently mangled', async 
 
   const html = await host.innerHTML();
   return !/<(div|br|p)[ >/]/i.test(html) ? true : `heading contains "${html.slice(0, 60)}"`;
+});
+
+// ---------------------------------------------------------------------------
+// The way back up out of a block
+// ---------------------------------------------------------------------------
+
+/*
+ * ANDY, TWICE, ON 30 Jul 2026. First: "when i add text (or anything) to a
+ * column, it stops being a column... you can't 'style' the column". Then, after
+ * the first fix and a passing check: "it still collapses, so you can't get to
+ * any of the column settings".
+ *
+ * The first fix put a label on the column that appeared on hover and could be
+ * clicked, and a check clicked it and passed. Measured afterwards: 60 by 19
+ * pixels, hover only, styled exactly like the badges that merely name what is
+ * selected. The mechanism worked and nobody could find it, which is why the
+ * check was green while the feature was unusable.
+ *
+ * A CHECK THAT PERFORMS THE WORKAROUND CANNOT SEE THE BUG. The one below does
+ * what Andy does: click the words, then look for a way to the column.
+ */
+/** The field labels currently showing in the properties pane. */
+const paneLabels = () =>
+  page.evaluate(() =>
+    [...document.querySelectorAll('.ed-props .ed-label')].map((label) => label.textContent?.trim()));
+
+await check('clicking inside a full column selects the block, as it should', async () => {
+  await page.locator('.tgs-block').filter({ hasText: 'Talk to someone' }).first().click();
+  await page.waitForTimeout(400);
+  const labels = await paneLabels();
+  return labels.includes('Content')
+    ? true
+    : `the pane shows ${JSON.stringify(labels)}`;
+});
+
+await check('and the breadcrumb shows the whole way up', async () => {
+  const steps = await page.locator('.ed-crumbs__step').allInnerTexts();
+  const expected = ['Section 1', 'Row 1', 'Column 1', 'Text'];
+  return JSON.stringify(steps) === JSON.stringify(expected)
+    ? true
+    : `the trail reads ${JSON.stringify(steps)}`;
+});
+
+/*
+ * THE ONE THAT MATTERS. Reaching the column's settings from a block, without
+ * hovering anything and without a bare patch of column to aim at.
+ */
+await check('so the column settings are reachable from a block', async () => {
+  await page.locator('.ed-crumbs__step', { hasText: 'Column' }).first().click();
+  await page.waitForTimeout(400);
+
+  const labels = await paneLabels();
+  const wanted = ['Width', 'Padding (inner spacing)', 'Background colour'];
+  const missing = wanted.filter((label) => !labels.includes(label));
+  return missing.length === 0 ? true : `missing ${JSON.stringify(missing)}`;
+});
+
+await check('and the row and the section too', async () => {
+  await page.locator('.ed-crumbs__step', { hasText: 'Row 1' }).first().click();
+  await page.waitForTimeout(350);
+  const row = await paneLabels();
+
+  await page.locator('.ed-crumbs__step', { hasText: 'Section 1' }).first().click();
+  await page.waitForTimeout(350);
+  const section = await paneLabels();
+
+  return row.length > 0 && section.length > 0
+    ? true
+    : `row ${JSON.stringify(row)}, section ${JSON.stringify(section)}`;
+});
+
+/*
+ * Every step is a real button at a real size. The chip this replaced was 19px
+ * tall, which is under half the 44px rule, and that was part of why it went
+ * unnoticed.
+ */
+await check('every step of the trail meets the 44px rule', async () => {
+  await page.locator('.tgs-block').filter({ hasText: 'Talk to someone' }).first().click();
+  await page.waitForTimeout(400);
+
+  const bad = await page.evaluate(() => {
+    const out = [];
+    for (const step of document.querySelectorAll('.ed-crumbs__step')) {
+      const box = step.getBoundingClientRect();
+      const after = getComputedStyle(step, '::after');
+      // The target is grown with a pseudo-element, so measure that when present.
+      const grow = parseFloat(after.getPropertyValue('inset-block-start')) || 0;
+      const height = box.height + Math.abs(grow) * 2;
+      if (height < 44) out.push(`${step.textContent}: ${Math.round(height)}px`);
+    }
+    return out;
+  });
+
+  return bad.length === 0 ? true : `too small: ${bad.join(', ')}`;
 });
 
 // ---------------------------------------------------------------------------

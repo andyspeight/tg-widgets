@@ -67,23 +67,44 @@ const COLOUR_TOKENS = new Set([
 const TEXT_STYLES = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p'] as const;
 
 /**
- * Sizes offered as plain values rather than tokens.
+ * The sizes the toolbar offers: THE SITE'S OWN, plus a small free scale.
  *
- * A closed rem scale, so a client can make one phrase bigger without being able
- * to type `font-size: 400vw` and push the page off the screen. Kept in step with
- * the toolbar's own list by being the thing the toolbar reads.
+ * The named ones come first and are what most people want. They are the sizes
+ * set on the Theme screen, one per text style, so a phrase set to H2 is the same
+ * size as every H2 on the site and moves with it if the theme is changed later.
+ * Andy asked for these on 30 Jul 2026: "You don't have all of the text sizes
+ * (H1-H6 and paragraph)". The first version offered only the abstract scale
+ * below, which is a different set of sizes from the ones the site actually uses,
+ * so picking "Large" gave you something that matched nothing.
+ *
+ * The fixed scale stays underneath for the times a phrase genuinely needs to be
+ * a bit bigger than the text around it without being a heading. It is a closed
+ * list, so nobody can type `font-size: 400vw` and push the page off the screen.
  */
-export const FONT_SIZES: ReadonlyArray<{ value: string; label: string }> = [
-  { value: '0.75rem', label: 'Tiny' },
-  { value: '0.875rem', label: 'Small' },
-  { value: '1rem', label: 'Normal' },
-  { value: '1.25rem', label: 'Large' },
-  { value: '1.5rem', label: 'Bigger' },
-  { value: '2rem', label: 'Huge' },
-  { value: '2.5rem', label: 'Giant' },
+export const FONT_SIZES: ReadonlyArray<{ value: string; label: string; group: string }> = [
+  { value: 'var(--tgs-p-size)', label: 'Paragraph', group: 'From your theme' },
+  { value: 'var(--tgs-h1-size)', label: 'H1', group: 'From your theme' },
+  { value: 'var(--tgs-h2-size)', label: 'H2', group: 'From your theme' },
+  { value: 'var(--tgs-h3-size)', label: 'H3', group: 'From your theme' },
+  { value: 'var(--tgs-h4-size)', label: 'H4', group: 'From your theme' },
+  { value: 'var(--tgs-h5-size)', label: 'H5', group: 'From your theme' },
+  { value: 'var(--tgs-h6-size)', label: 'H6', group: 'From your theme' },
+
+  { value: '0.75rem', label: 'Tiny', group: 'A fixed size' },
+  { value: '0.875rem', label: 'Small', group: 'A fixed size' },
+  { value: '1rem', label: 'Normal', group: 'A fixed size' },
+  { value: '1.25rem', label: 'Large', group: 'A fixed size' },
+  { value: '1.5rem', label: 'Bigger', group: 'A fixed size' },
+  { value: '2rem', label: 'Huge', group: 'A fixed size' },
+  { value: '2.5rem', label: 'Giant', group: 'A fixed size' },
 ];
 
-const SIZE_VALUES = new Set(FONT_SIZES.map((size) => size.value));
+/** The order the groups appear in, so the theme's own sizes are found first. */
+export const FONT_SIZE_GROUPS = ['From your theme', 'A fixed size'] as const;
+
+const SIZE_VALUES = new Set(
+  FONT_SIZES.map((size) => size.value).filter((value) => !value.startsWith('var(')),
+);
 
 /**
  * The colours the toolbar offers, as TOKENS rather than as hexes.

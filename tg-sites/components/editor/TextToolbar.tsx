@@ -44,6 +44,7 @@ import { safeUrl } from '../../lib/content/sanitise';
 import {
   COLOUR_SWATCHES,
   FONT_CHOICES,
+  FONT_SIZE_GROUPS,
   FONT_SIZES,
   HIGHLIGHT_SWATCHES,
 } from '../../lib/content/styles';
@@ -584,10 +585,20 @@ export function TextToolbar({
         onChange={(event) => event.target.value && paint('font-size', event.target.value)}
       >
         <option value="">Size</option>
-        {FONT_SIZES.map((entry) => (
-          <option key={entry.value} value={entry.value}>
-            {entry.label}
-          </option>
+        {/*
+          Grouped, with the theme's own sizes first. A flat list of fourteen put
+          H2 below Giant, which is the wrong way round: the named sizes are the
+          ones that keep a page looking like one page, and the fixed scale is the
+          exception. Andy asked for the named ones by name.
+        */}
+        {FONT_SIZE_GROUPS.map((group) => (
+          <optgroup key={group} label={group}>
+            {FONT_SIZES.filter((entry) => entry.group === group).map((entry) => (
+              <option key={entry.value} value={entry.value}>
+                {entry.label}
+              </option>
+            ))}
+          </optgroup>
         ))}
       </select>
 
