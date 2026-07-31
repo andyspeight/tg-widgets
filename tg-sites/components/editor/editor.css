@@ -798,11 +798,7 @@
   padding: var(--ed-6);
   display: flex;
   flex-direction: column;
-  /* Centred while it fits, and pinned to the left once it does not. `center`
-     alone shifts an overflowing child so its LEFT edge goes off screen and
-     cannot be scrolled back to, which is a preview whose first column is
-     unreachable. */
-  align-items: safe center;
+  align-items: center;
 }
 
 .ed-canvas-frame {
@@ -2922,4 +2918,19 @@
   color: var(--ed-ink-3);
   font-size: var(--ed-text-xs);
   padding-right: 2px;
+}
+
+/* What the preview is ACTUALLY showing, when the room caps the chosen width.
+   Without it the box says 1200 and the page is 800 wide, and nothing on screen
+   accounts for the difference. Folding a panel makes it disappear. */
+.ed-vw__actual {
+  flex: none;
+  padding: 1px 6px;
+  margin-right: 2px;
+  border-radius: var(--ed-r-full);
+  background: var(--ed-select-wash);
+  color: var(--ed-select);
+  font-size: var(--ed-text-xs);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }

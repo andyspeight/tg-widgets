@@ -310,6 +310,31 @@ export function EditorShell({
   const [panels, setPanels] = useState({ outline: true, props: true });
   /** What each preview is drawn at, in pixels. See VIEWPORTS_KEY. */
   const [widths, setWidths] = useState<Record<Viewport, number>>(VIEWPORT_DEFAULT);
+  /**
+   * What the preview is really showing, when there is not room for the choice.
+   *
+   * The chosen width is a CEILING, not a promise: a 1200px preview in 800px of
+   * room is drawn at 800. Saying so is the whole job of this number. Two earlier
+   * attempts tried to keep the promise instead, by overflowing and then by
+   * shrinking the page to fit, and both were worse than admitting it: see the
+   * note above the frame in Canvas.tsx.
+   */
+  const [actualWidth, setActualWidth] = useState<number | null>(null);
+
+  useEffect(() => {
+    const frame = document.querySelector('.ed-canvas-frame');
+    if (!frame) return;
+
+    const measure = () => {
+      const drawn = Math.round(frame.getBoundingClientRect().width);
+      setActualWidth(drawn < widths[viewport] - 2 ? drawn : null);
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(frame);
+    return () => observer.disconnect();
+  }, [widths, viewport, panels]);
   const [theme, setTheme] = useState<Theme>('light');
 
   const page = history.present;
@@ -893,6 +918,14 @@ export function EditorShell({
             }
           />
           <span className="ed-vw__unit" aria-hidden="true">px</span>
+          {actualWidth !== null && (
+            <span
+              className="ed-vw__actual"
+              title={`There is only room for ${actualWidth}px. Fold a panel for the full width.`}
+            >
+              showing {actualWidth}
+            </span>
+          )}
           <Menu
             label="Common widths"
             icon="chevron-down"

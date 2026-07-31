@@ -102,21 +102,6 @@ export function Canvas({
 }: Props) {
   const frameRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
-  /**
-   * How much the preview is shrunk to fit the room it has. 1 when it fits.
-   *
-   * WHY THIS EXISTS. The preview is drawn at the width somebody chose, which is
-   * the point of choosing one. At 1440px with both side panels open there is
-   * 800px of room for a 1200px preview, so it overflowed by 400 and cut 424px
-   * off the right: the whole right-hand column of every section, unreachable
-   * until you scrolled. Measured, after shipping it that way to a branch.
-   *
-   * So it shrinks instead. The page still LAYS OUT at 1200, because zoom scales
-   * the rendering and not the layout size, which is what the container queries
-   * read: you see the real desktop arrangement, just smaller. Folding a panel or
-   * choosing a narrower width takes it back to 1:1.
-   */
-  const [zoom, setZoom] = useState(1);
   const dragRef = useRef<DragState | null>(null);
   const heightRef = useRef<HeightDrag | null>(null);
   const [badge, setBadge] = useState<{ x: number; y: number; text: string } | null>(null);
@@ -407,18 +392,7 @@ export function Canvas({
         // Halved because the padding applies top AND bottom: without it the
         // section grows at twice the speed of the pointer and the grip runs
         // away from the finger holding it.
-        /*
-         * Divided by the zoom as well as by two.
-         *
-         * The pointer moves in screen pixels; the padding is in CSS pixels. They
-         * are the same thing at 1:1 and not otherwise, so on a preview shrunk to
-         * 0.67 a drag of 100 screen pixels is 150 CSS pixels of padding. Without
-         * this the handle lags behind the pointer by exactly the shrink.
-         *
-         * The COLUMN drag needs no such correction: it divides a screen-pixel
-         * delta by a screen-pixel row width, and the two shrink together.
-         */
-        const delta = (event.clientY - height.startY) / 2 / (zoom || 1);
+        const delta = (event.clientY - height.startY) / 2;
         const next = normaliseSectionPadding(height.startPadding + delta);
 
         onCommit(
@@ -463,9 +437,7 @@ export function Canvas({
 
       setBadge({ x: event.clientX, y: event.clientY, text });
     },
-    // zoom, because the height drag divides by it. Left out at first, which made
-    // the handle correct until the preview was shrunk and then stale after.
-    [onCommit, page, zoom],
+    [onCommit, page],
   );
 
   const endDrag = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
@@ -565,37 +537,34 @@ export function Canvas({
    */
   const widthPx = parseInt(viewportWidth, 10);
 
-  /*
-   * Remeasured whenever the room changes: a folded panel, a resized window, a
-   * different chosen width. A ResizeObserver rather than a window listener,
-   * because folding a panel changes the room without changing the window.
-   */
-  useEffect(() => {
-    const wrap = wrapRef.current;
-    if (!wrap || !Number.isFinite(widthPx) || widthPx <= 0) return;
-
-    const measure = () => {
-      // The padding either side, which the preview cannot use.
-      const room = wrap.clientWidth - 48;
-      setZoom(room >= widthPx ? 1 : Math.max(0.25, room / widthPx));
-    };
-
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(wrap);
-    return () => observer.disconnect();
-  }, [widthPx]);
   const stackNote = describeStacking(page, widthPx);
 
   return (
     <div className="ed-canvas-wrap" ref={wrapRef}>
       {/*
-        A FIXED WIDTH, not a maximum. A maximum means "this wide, or narrower if
-        that is all there is", so choosing 1200 on a screen with room for 752
-        silently gave you 752 and the phone layout with it. The wrapper scrolls,
-        and the panels fold, so the width asked for is the width drawn.
+        A CAP, NOT A FIXED WIDTH, and this is the third answer to the same
+        question rather than the first.
+        
+        The preview follows the CANVAS width, so on a 1440px screen with both
+        panels open it had 800px and drew the phone layout. Andy asked for a real
+        desktop. Two attempts failed:
+        
+          1. A fixed width overflowed. A 1200px preview in 800px of room put
+             424px off the right, taking the whole right-hand column of every
+             section somewhere unreachable.
+          2. Shrinking it to fit fixed that and broke something worse: the editor
+             chrome shrank with the page, so the insert buttons came out at 20px
+             and the height handle at 13px. Measured. A handle nobody can hit is
+             not a preview improvement.
+        
+        So the width is a ceiling, and the ROOM is what makes it reachable. That
+        is what the fold buttons are for, and why Desktop folds the panels when
+        it has to: at 1440 with both folded the canvas is 1392px, which holds a
+        1200px preview at 1:1 with every handle full size. When there is not
+        enough room, the preview says what it is actually showing rather than
+        pretending.
       */}
-      <div style={{ width: viewportWidth, flex: 'none', zoom }}>
+      <div style={{ width: '100%', maxWidth: viewportWidth }}>
         <div
           ref={frameRef}
           className="ed-canvas-frame"
