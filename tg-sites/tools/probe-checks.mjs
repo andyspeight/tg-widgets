@@ -98,8 +98,10 @@ const MUTATIONS = [
     check: 'Enter in a heading is refused rather than silently mangled',
     why: 'Let Enter through, so the browser puts a div inside the heading.',
     file: 'components/editor/Canvas.tsx',
-    from: `      if (plainHost && event.key === 'Enter') {`,
-    to: `      if (false && plainHost && event.key === 'Enter') {`,
+    // plainHost until 31 Jul 2026, when the attribute split into "one line" and
+    // "holds no markup" and only the first stayed true of a heading.
+    from: `      if (oneLine && event.key === 'Enter') {`,
+    to: `      if (false && oneLine && event.key === 'Enter') {`,
   },
   {
     check: 'a refused address is explained rather than silently swallowed',
@@ -263,12 +265,24 @@ const MUTATIONS = [
   {
     tag: 'heading',
     check: 'formatting a heading reaches the page state, so it survives a save',
-    why: 'Read the heading back as text again, so the markup never reaches state.',
-    file: 'components/editor/Canvas.tsx',
-    from: `      const patch = { html: host.innerHTML };`,
-    to: `      const patch = host.hasAttribute('data-rt-oneline')
-        ? { text: host.textContent ?? '' }
-        : { html: host.innerHTML };`,
+    /*
+     * IN withHost, NOT IN Canvas's onInput, and the first version of this got
+     * that wrong. It mutated onInput to read textContent back for a one-line
+     * host, and the probe reported MISSED. onInput only handles TYPING: a
+     * toolbar command goes execCommand -> onExec -> withHost, which reads the
+     * host and commits {html} itself. Mutating the typing path could not affect
+     * a check about pressing Bold, so nothing broke and nothing failed.
+     *
+     * Worth keeping written down, because "which door does this edit come
+     * through" is the thing that makes this component hard to reason about.
+     */
+    why: 'Read the host back as text, so a toolbar command never reaches state as markup.',
+    file: 'components/editor/EditorShell.tsx',
+    from: `      host.focus();
+      const html = act(host);`,
+    to: `      host.focus();
+      act(host);
+      const html = host.textContent ?? '';`,
   },
   {
     tag: 'heading',
@@ -278,14 +292,10 @@ const MUTATIONS = [
     from: `        const text = headingWords(block.props);`,
     to: `        const text = typeof block.props?.text === 'string' ? block.props.text.trim() : '';`,
   },
-  {
-    tag: 'heading',
-    check: 'Enter in a heading is refused rather than silently mangled',
-    why: 'Let Enter through now that the attribute has been renamed.',
-    file: 'components/editor/Canvas.tsx',
-    from: `      if (oneLine && event.key === 'Enter') {`,
-    to: `      if (false && oneLine && event.key === 'Enter') {`,
-  },
+  // Enter in a heading has a mutation already, further up. It was written when
+  // the attribute was called plainHost and it was UPDATED rather than duplicated
+  // here: two mutations sharing one check name means the probe reports on
+  // whichever ran last, and the stale one prints "could not apply" for ever.
 
   // --- the writing assistant -----------------------------------------------
 
