@@ -2,13 +2,16 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 import { FontHead } from '../../../../components/render/FontHead';
-import { PageRenderer } from '../../../../components/render/PageRenderer';
+import { PageRenderer, SectionRenderer } from '../../../../components/render/PageRenderer';
+import { safeUrl } from '../../../../lib/content/sanitise';
 import { RegionRenderer } from '../../../../components/render/RegionRenderer';
 import { SiteBody, SiteHead } from '../../../../components/render/SiteHead';
 import { WidgetScripts } from '../../../../components/render/WidgetScripts';
 import { listFontFaces } from '../../../../lib/db/fonts';
 import { getPublishedPage } from '../../../../lib/db/pages';
 import { getPublishedRegions } from '../../../../lib/db/regions';
+import { getPublishedItem, listPublished } from '../../../../lib/db/collections';
+import { fillPageListings, itemAsCard, listingsIn } from '../../../../lib/content/listings';
 import { getPublicSettings } from '../../../../lib/db/settings';
 import { getPublicTheme } from '../../../../lib/db/theme';
 import { resolveTenantByHostname } from '../../../../lib/db/tenants';
@@ -66,7 +69,67 @@ async function load(host: string, path: string[] | undefined) {
     getPublishedRegions(tenantId),
   ]);
 
-  return page ? { page, theme, faces, settings, regions, tenantId } : null;
+  const segments = (path ?? []).filter(Boolean);
+
+  /*
+   * NO PAGE AT THIS ADDRESS? TRY A COLLECTION.
+   *
+   * `/blog/ten-things-about-crete` is a collection key and an entry's address,
+   * and it is looked up only AFTER the pages have said no. That order is the
+   * whole rule: a real page always wins, so a client who makes a page at
+   * /blog/something has not had it quietly shadowed by an entry of the same
+   * name. Two segments exactly, because an entry has no children.
+   */
+  if (!page) {
+    if (segments.length !== 2) return null;
+    const entry = await getPublishedItem(tenantId, segments[0], segments[1]);
+    if (!entry) return null;
+
+    return {
+      page: null,
+      entry: { ...entry, collectionKey: segments[0], slug: segments[1] },
+      theme,
+      faces,
+      settings,
+      regions,
+      tenantId,
+    };
+  }
+
+  /*
+   * The listing blocks, filled in before anything renders.
+   *
+   * One read per distinct collection across the header, the page and the footer,
+   * for the largest count any block asked for, rather than one per block. See
+   * lib/content/listings.ts for why this is not the block's own job.
+   */
+  const wanted = listingsIn([regions.header, page.content, regions.footer]);
+  const listings = new Map<string, Array<Record<string, unknown>>>();
+
+  if (wanted.length > 0) {
+    const results = await Promise.all(
+      wanted.map(async (request) => ({
+        request,
+        items: await listPublished(tenantId, request.collection, request.count),
+      })),
+    );
+    for (const { request, items } of results) {
+      listings.set(
+        request.collection,
+        items.map((row) => itemAsCard(row.item, request.collection, row.slug)),
+      );
+    }
+  }
+
+  return {
+    page: { ...page, content: fillPageListings(page.content, listings) },
+    entry: null,
+    theme,
+    faces,
+    settings,
+    regions,
+    tenantId,
+  };
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
@@ -76,8 +139,15 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     const found = await load(host, path);
     if (!found) return { title: 'Not found', robots: { index: false, follow: false } };
 
-    const { seo } = found.page.content;
-    const title = seo.title ?? found.page.title;
+    /*
+     * An entry has no SEO of its own, on purpose: its summary IS the search
+     * description and its title is the title. Asking somebody to write the same
+     * sentence twice is how one of the two ends up stale.
+     */
+    const seo = found.page
+      ? found.page.content.seo
+      : { title: undefined, description: found.entry!.item.summary, ogImage: found.entry!.item.image, canonical: undefined, noindex: false };
+    const title = seo.title ?? (found.page ? found.page.title : found.entry!.item.title);
     const canonical = `https://${decodeURIComponent(host)}/${(path ?? []).join('/')}`.replace(
       /\/$/,
       '',
@@ -141,9 +211,18 @@ export default async function SitePage({ params }: Params) {
           fetching the font while it is still reading the page. */}
       <FontHead tenantSlug={slug} files={found.faces} typography={found.theme.typography} />
 
-      {/* The page's only h1. Section headings start at h2, which the heading
-          block enforces by not offering h1 at all. */}
-      <h1 className="tgs-sr-only">{found.page.title}</h1>
+      {/*
+        The page's only h1. Section headings start at h2, which the heading
+        block enforces by not offering h1 at all.
+
+        AN ENTRY SHOWS ITS h1 rather than hiding it. A page's title is often
+        repeated by a hero heading a few pixels below, which is why that one is
+        for screen readers only. An entry's title is the article's title and
+        there is nothing else on the page saying it.
+      */}
+      {found.page ? (
+        <h1 className="tgs-sr-only">{found.page.title}</h1>
+      ) : null}
 
       {/*
         THE HEADER, THE PAGE AND THE FOOTER ARE SIBLINGS, not nested.
@@ -158,14 +237,22 @@ export default async function SitePage({ params }: Params) {
       */}
       <RegionRenderer region={found.regions.header} theme={theme} />
 
-      <PageRenderer page={found.page.content} theme={theme} />
+      {found.page ? (
+        <PageRenderer page={found.page.content} theme={theme} />
+      ) : (
+        <EntryRenderer entry={found.entry!} theme={theme} />
+      )}
 
       <RegionRenderer region={found.regions.footer} theme={theme} />
 
       {/* One script per distinct widget across all three, rather than each tree
           emitting its own and fetching the same file up to three times. */}
       <WidgetScripts
-        trees={[found.regions.header, found.page.content, found.regions.footer]}
+        trees={[
+          found.regions.header,
+          found.page ? found.page.content : found.entry!.item,
+          found.regions.footer,
+        ]}
       />
 
       {/* The tag manager noscript fallback, and any custom body HTML. Last, so
@@ -173,4 +260,69 @@ export default async function SitePage({ params }: Params) {
       <SiteBody settings={found.settings} />
     </>
   );
+}
+
+/**
+ * An entry in a collection, rendered as an article.
+ *
+ * NOT A PAGE, and the difference is only what sits above the sections: a real
+ * h1, the date it carries, and its picture. Everything below that is the same
+ * SectionRenderer a page uses, drawn by the same PageRenderer, because an
+ * entry's body IS sections. See lib/content/collection.ts.
+ *
+ * The date is a `<time>` with a machine-readable attribute, so it is a date to
+ * anything reading the page rather than a string that happens to look like one.
+ */
+function EntryRenderer({
+  entry,
+  theme,
+}: {
+  entry: { item: import('../../../../lib/content/collection').CollectionItem };
+  theme: React.CSSProperties;
+}) {
+  const { item } = entry;
+  const image = safeUrl(item.image);
+
+  return (
+    <article className="tgs-page tgs-entry" style={theme}>
+      <header className="tgs-entry__head">
+        {item.date && (
+          <p className="tgs-entry__date">
+            <time dateTime={item.date}>{formatDate(item.date)}</time>
+          </p>
+        )}
+        <h1 className="tgs-entry__title">{item.title}</h1>
+        {item.summary && <p className="tgs-entry__summary">{item.summary}</p>}
+        {image && (
+          <div className="tgs-entry__image">
+            <img src={image} alt={item.alt} decoding="async" />
+          </div>
+        )}
+      </header>
+
+      {item.sections.map((section, index) => (
+        <SectionRenderer key={section.id} section={section} index={index} />
+      ))}
+    </article>
+  );
+}
+
+/**
+ * A stored YYYY-MM-DD as words.
+ *
+ * Built from the parts rather than through `new Date(...)`, deliberately. A
+ * date-only string is parsed as UTC midnight and then formatted in the server's
+ * zone, so anywhere west of Greenwich shows the day before. The date on an
+ * article is a date, not an instant: see safeDate in lib/content/collection.ts.
+ */
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+function formatDate(value: string): string {
+  const [year, month, day] = value.split('-');
+  const name = MONTHS[Number(month) - 1];
+  if (!name) return value;
+  return `${Number(day)} ${name} ${year}`;
 }

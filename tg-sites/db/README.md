@@ -14,7 +14,18 @@ security. That is why this directory has a test suite of its own.
 | `migrations/0004_future_tables.sql` | `media`, `collections`, `collection_items`, `navigations` |
 | `migrations/0005_test_role_membership.sql` | Lets the admin role assume the app roles, so the isolation suite can test them |
 | `migrations/0006_resolve_tenant.sql` | `resolve_tenant()`, and the reserved staging suffix |
-| `isolation-check.sql` | 25 checks that try to break isolation and expect to fail |
+| `migrations/0007_unwrap_double_encoded_json.sql` | A one-off repair for content stored as a string of JSON |
+| `migrations/0008_auth.sql` | `auth_users`, and the login-email setting |
+| `migrations/0009_close_public_function_grants.sql` | Takes EXECUTE back off `public`, `anon` and `authenticated` |
+| `migrations/0010_fonts.sql` | `fonts` and `font_files`, which the renderer may read and never write |
+| `migrations/0011_media.sql` | `media`, and its `updated_at` trigger |
+| `migrations/0012_site_settings.sql` | `site_settings`, with the staff-only columns apart |
+| `migrations/0013_preview_domain.sql` | The preview subdomain column |
+| `migrations/0014_publish_snapshots.sql` | Publish snapshots, with no UPDATE grant so history cannot be edited |
+| `migrations/0015_ai_usage.sql` | `ai_usage`, the daily meter |
+| `migrations/0016_site_regions.sql` | `site_regions`: the header and footer, with a COLUMN grant rather than a row policy |
+| `migrations/0017_collection_items_touch.sql` | The `updated_at` trigger `collection_items` never had |
+| `isolation-check.sql` | 90-odd checks that try to break isolation and expect to fail |
 
 Run them in order. Each is idempotent, so re-running is safe.
 

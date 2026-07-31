@@ -102,6 +102,15 @@ const result = await esbuild.build({
         build.onResolve({ filter: /(^|\/)app\/actions\/regions$/ }, () => ({
           path: resolve(root, 'standalone/demo-region-actions.ts'),
         }));
+        /*
+         * And the collection actions, since 31 Jul 2026. The shell holds a save
+         * and a publish for a blog entry as well as for a page and a header, so
+         * the real module is in the bundle's import graph whether or not the
+         * review copy ever edits an entry, and the real module reaches Postgres.
+         */
+        build.onResolve({ filter: /(^|\/)app\/actions\/collections$/ }, () => ({
+          path: resolve(root, 'standalone/demo-collection-actions.ts'),
+        }));
       },
     },
   ],

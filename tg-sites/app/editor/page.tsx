@@ -4,6 +4,8 @@ import { EditorShell } from '../../components/editor/EditorShell';
 import { activeSite, currentUserId } from '../../lib/auth/session';
 import { getPage } from '../../lib/db/pages';
 import { getRegion } from '../../lib/db/regions';
+import { getItem } from '../../lib/db/collections';
+import { itemAsPage, itemMeta } from '../../lib/content/collection-page';
 import { FontHead } from '../../components/render/FontHead';
 import { listFontFaces } from '../../lib/db/fonts';
 import { getTheme } from '../../lib/db/theme';
@@ -41,9 +43,9 @@ export const dynamic = 'force-dynamic';
 export default async function EditorPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; region?: string }>;
+  searchParams: Promise<{ page?: string; region?: string; item?: string }>;
 }) {
-  const { page: pageId, region: regionParam } = await searchParams;
+  const { page: pageId, region: regionParam, item: itemId } = await searchParams;
 
   /*
    * The guard comes first, before the page id is even looked at.
@@ -58,7 +60,9 @@ export default async function EditorPage({
       ? `/signin?next=${encodeURIComponent(`/editor?page=${pageId}`)}`
       : regionParam
         ? `/signin?next=${encodeURIComponent(`/editor?region=${regionParam}`)}`
-        : '/signin?next=%2Fsites';
+        : itemId
+          ? `/signin?next=${encodeURIComponent(`/editor?item=${itemId}`)}`
+          : '/signin?next=%2Fsites';
     redirect(next);
   }
 
@@ -69,7 +73,7 @@ export default async function EditorPage({
       ? (regionParam as RegionName)
       : null;
 
-  if (!pageId && !region) redirect('/sites');
+  if (!pageId && !region && !itemId) redirect('/sites');
 
   const site = await activeSite();
   if (!site) redirect('/sites');
@@ -120,6 +124,34 @@ export default async function EditorPage({
           // from then on, and only "are there newer changes" varies after that.
           initialStatus={record.publishedAt ? 'published' : 'draft'}
           initialHasUnpublishedChanges={record.hasUnpublishedChanges}
+        />
+      </>
+    );
+  }
+
+  if (itemId) {
+    /*
+     * AN ENTRY IN A COLLECTION: a blog post, a destination guide.
+     *
+     * The third thing this screen edits, and the same arrangement as the second:
+     * the entry's body is handed to the shell as a Page and the fields that are
+     * not sections travel beside it. See lib/content/collection-page.ts.
+     */
+    const found = await getItem(site.tenantId, itemId);
+    // Not found and not yours give the same answer, as everywhere else here.
+    if (!found) redirect('/collections');
+
+    return (
+      <>
+        {head}
+        <EditorShell
+          {...shared}
+          itemId={found.id}
+          initialItemMeta={itemMeta(found.item, found.slug)}
+          pageId={found.id}
+          initialPage={itemAsPage(found.item, found.id, found.slug)}
+          initialStatus={found.status}
+          initialHasUnpublishedChanges={found.hasUnpublishedChanges}
         />
       </>
     );

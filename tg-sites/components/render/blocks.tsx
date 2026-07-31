@@ -549,7 +549,22 @@ function renderCard(
   );
 }
 
-export function CardsBlock({ props }: { props: Props }): ReactElement {
+export function CardsBlock({
+  props,
+  editing = false,
+}: {
+  props: Props;
+  /**
+   * True on the editor canvas.
+   *
+   * The only thing it changes is what a COLLECTION-backed grid draws. The items
+   * are filled in by the route before it renders (see lib/content/listings.ts),
+   * and there is no route behind the canvas, so on the canvas it says what will
+   * appear instead of drawing an empty grid that reads as broken. Same
+   * arrangement the widget block uses.
+   */
+  editing?: boolean;
+}): ReactElement {
   const items = list(props, 'items');
   const columns = oneOf(props, 'columns', ['2', '3', '4'] as const, '3');
   const gap = oneOf(props, 'gap', ['none', 'xs', 's', 'm', 'l', 'xl'] as const, 'm');
@@ -566,7 +581,30 @@ export function CardsBlock({ props }: { props: Props }): ReactElement {
     )
     .filter((card): card is ReactElement => card !== null);
 
+  const fromCollection = str(props, 'source') === 'collection';
+  const collection = str(props, 'collection').trim();
+
+  if (editing && fromCollection) {
+    const count = clamp(props.count, 1, 60, 6);
+    return (
+      <div className="tgs-placeholder">
+        {collection
+          ? `The newest ${count} from "${collection}" will show here.`
+          : 'Say which collection these come from.'}
+      </div>
+    );
+  }
+
   if (cards.length === 0) {
+    // A collection with nothing published in it yet says so, rather than
+    // leaving somebody wondering whether the block is broken.
+    if (fromCollection) {
+      return (
+        <div className="tgs-placeholder">
+          Nothing published in &quot;{collection}&quot; yet.
+        </div>
+      );
+    }
     return <div className="tgs-placeholder">Add some cards</div>;
   }
 

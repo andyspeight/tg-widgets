@@ -925,6 +925,164 @@ begin
      case when doubled then 'IT MADE A SECOND ONE' else 'the primary key refused it' end);
 end $$;
 
+-- ---------------------------------------------------------------------------
+-- Collections and their entries
+-- ---------------------------------------------------------------------------
+--
+-- A blog post keeps its unfinished state away from visitors the way a page
+-- does, with a row policy: `tenant_id = current_tenant() and status =
+-- 'published'`, written in 0004. lib/db/collections.ts has NO status filter in
+-- its public queries and says so at the top, on the grounds that the database
+-- is the thing enforcing it. This is where that claim is checked.
+--
+-- The second half of each pair is what makes the first half mean anything. A
+-- probe that sees nothing at all would report "the draft is hidden" while
+-- proving only that it is blind.
+do $$
+declare saw_draft int; saw_live int; wrote boolean := false; other int;
+begin
+  insert into public.collections (id, tenant_id, key, name) values
+    ('cccc0000-0000-0000-0000-00000000c001',
+     '11111111-1111-1111-1111-111111111111', 'iso-blog', 'Blog'),
+    ('cccc0000-0000-0000-0000-00000000c002',
+     '22222222-2222-2222-2222-222222222222', 'iso-blog', 'Blog');
+
+  insert into public.collection_items (id, collection_id, tenant_id, slug, status, data) values
+    ('cccc0000-0000-0000-0000-0000000000d1',
+     'cccc0000-0000-0000-0000-00000000c001',
+     '11111111-1111-1111-1111-111111111111', 'unfinished', 'draft',
+     '{"version":1,"title":"Not ready"}'::jsonb),
+    ('cccc0000-0000-0000-0000-0000000000d2',
+     'cccc0000-0000-0000-0000-00000000c001',
+     '11111111-1111-1111-1111-111111111111', 'out-now', 'published',
+     '{"version":1,"title":"Out now"}'::jsonb),
+    -- The other client's post, published, so the only reason to miss it is
+    -- the tenant rather than the status.
+    ('cccc0000-0000-0000-0000-0000000000d3',
+     'cccc0000-0000-0000-0000-00000000c002',
+     '22222222-2222-2222-2222-222222222222', 'theirs', 'published',
+     '{"version":1,"title":"Theirs"}'::jsonb);
+
+  set local role tg_sites_renderer;
+  perform set_config('app.current_tenant_id', '11111111-1111-1111-1111-111111111111', true);
+
+  select count(*) into saw_draft from public.collection_items where slug = 'unfinished';
+  select count(*) into saw_live  from public.collection_items where slug = 'out-now';
+  select count(*) into other     from public.collection_items where slug = 'theirs';
+
+  begin
+    update public.collection_items set slug = 'hijacked' where slug = 'out-now';
+    wrote := true;
+  exception when others then wrote := false; end;
+
+  reset role;
+  insert into checks (name, passed, detail) values
+    ('a visitor cannot be shown an unpublished post',
+     saw_draft = 0, 'leaked ' || saw_draft),
+    ('and the probe above can still see a published one',
+     saw_live = 1,
+     case when saw_live = 1 then 'read it fine'
+          else 'THE PROBE SEES NOTHING, so it proves nothing' end),
+    ('a published post of another client stays hidden',
+     other = 0, 'leaked ' || other),
+    ('the renderer cannot edit a post',
+     not wrote, case when wrote then 'IT CHANGED THE ROW' else 'refused' end);
+end $$;
+
+-- ---------------------------------------------------------------------------
+-- The one thing the policies do NOT catch, written down so it stays caught
+-- ---------------------------------------------------------------------------
+--
+-- Every other check in this file proves the database refuses something. This one
+-- proves it does NOT, which is why lib/db/collections.ts has to.
+--
+-- collection_items.collection_id is a plain foreign key with no tenant in it.
+-- The WITH CHECK policy asks only whether the new row's tenant_id is ours, and
+-- with a straight INSERT ... VALUES it is: the row goes in pointing at another
+-- client's collection. Nothing would ever render it, but a client should not be
+-- able to write a row into somebody else's account at all.
+--
+-- So createItem inserts with SELECT ... FROM public.collections instead, which
+-- puts the id through that table's own policy first. The second half here is the
+-- proof that the fix works, run as SQL rather than taken on trust.
+do $$
+declare naive_worked boolean := false; scoped_wrote int;
+begin
+  set local role tg_sites_app;
+  perform set_config('app.current_tenant_id', '11111111-1111-1111-1111-111111111111', true);
+
+  -- What the obvious insert would do. Note the tenant is honestly ours.
+  begin
+    insert into public.collection_items (tenant_id, collection_id, slug, data)
+      values ('11111111-1111-1111-1111-111111111111',
+              'cccc0000-0000-0000-0000-00000000c002', 'planted', '{"version":1}'::jsonb);
+    naive_worked := true;
+  exception when others then naive_worked := false; end;
+
+  -- What the query layer actually does.
+  insert into public.collection_items (tenant_id, collection_id, slug, data)
+    select '11111111-1111-1111-1111-111111111111', c.id, 'scoped', '{"version":1}'::jsonb
+    from public.collections c
+    where c.id = 'cccc0000-0000-0000-0000-00000000c002';
+  get diagnostics scoped_wrote = row_count;
+
+  reset role;
+  insert into checks (name, passed, detail) values
+    -- Recorded as a PASS when the naive insert DID work, because that is the
+    -- true statement about this schema and the reason the query is shaped as it
+    -- is. If this ever starts failing, the database has grown a defence of its
+    -- own and the note in lib/db/collections.ts wants revisiting.
+    ('a policy alone would let an entry point at another clients collection',
+     naive_worked,
+     case when naive_worked then 'as expected, hence the scoped insert'
+          else 'the database refuses it now, so the note in collections.ts is stale' end),
+    ('selecting the collection first is what refuses it',
+     scoped_wrote = 0, 'rows written: ' || scoped_wrote);
+
+  delete from public.collection_items where slug in ('planted', 'scoped');
+end $$;
+
+-- An entry's address is unique inside its collection and nowhere wider. Two
+-- clients both wanting /blog/summer-in-crete is the normal case, not a clash.
+do $$
+declare doubled boolean := false; across boolean := false;
+begin
+  begin
+    insert into public.collection_items (collection_id, tenant_id, slug, data)
+      values ('cccc0000-0000-0000-0000-00000000c001',
+              '11111111-1111-1111-1111-111111111111', 'out-now', '{"version":1}'::jsonb);
+    doubled := true;
+  exception when unique_violation then doubled := false; end;
+
+  begin
+    insert into public.collection_items (collection_id, tenant_id, slug, data)
+      values ('cccc0000-0000-0000-0000-00000000c002',
+              '22222222-2222-2222-2222-222222222222', 'out-now', '{"version":1}'::jsonb);
+    across := true;
+  exception when unique_violation then across := false; end;
+
+  insert into checks (name, passed, detail) values
+    ('two entries cannot share an address in one collection',
+     not doubled, case when doubled then 'IT MADE A SECOND ONE' else 'refused' end),
+    ('but two clients can each have the same one',
+     across, case when across then 'both exist' else 'IT REFUSED A LEGITIMATE ADDRESS' end);
+end $$;
+
+-- Deleting a collection takes its entries. Otherwise a client who removes their
+-- blog leaves every post behind, invisible and undeletable, still counting
+-- towards their storage and still readable by a query that names the item id.
+do $$
+declare left_behind int;
+begin
+  delete from public.collections where id = 'cccc0000-0000-0000-0000-00000000c001';
+  select count(*) into left_behind from public.collection_items
+    where collection_id = 'cccc0000-0000-0000-0000-00000000c001';
+
+  insert into checks (name, passed, detail) values
+    ('deleting a collection removes its entries',
+     left_behind = 0, 'left behind ' || left_behind);
+end $$;
+
 -- Deleting a tenant must take its fonts, their bytes and its media rows with it.
 -- A removed client's licensed font files must not stay in the database, and a
 -- media row left behind is a dangling reference to a blob nobody will ever tidy

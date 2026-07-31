@@ -75,7 +75,7 @@ export function BlockRenderer({
       case 'gallery':
         return <GalleryBlock props={props} />;
       case 'cards':
-        return <CardsBlock props={props} />;
+        return <CardsBlock props={props} editing={editable} />;
       case 'slider':
         return <SliderBlock props={props} />;
       case 'button':

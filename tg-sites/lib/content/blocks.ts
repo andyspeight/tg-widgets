@@ -513,6 +513,9 @@ export const BLOCKS: readonly BlockDefinition[] = [
     icon: 'cards',
     description: 'A grid of the same shape repeated: destinations, offers, the team.',
     defaults: {
+      source: 'typed',
+      collection: '',
+      count: 6,
       columns: '3',
       gap: 'm',
       style: 'bordered',
@@ -556,6 +559,41 @@ export const BLOCKS: readonly BlockDefinition[] = [
       return `Cards (${count})`;
     },
     fields: [
+      {
+        /*
+         * TYPED IN HERE, OR FED FROM A COLLECTION.
+         *
+         * The second is the blog: a listing that stays in step with what has
+         * been written, rather than a grid somebody has to remember to update
+         * every time a post goes out. Same block either way, because it is the
+         * same grid, and a client should not have to learn a second one to get
+         * their posts on the home page.
+         */
+        kind: 'select',
+        key: 'source',
+        label: 'Where the cards come from',
+        options: [
+          { value: 'typed', label: 'Typed in here' },
+          { value: 'collection', label: 'From a collection' },
+        ],
+      },
+      {
+        kind: 'text',
+        key: 'collection',
+        label: 'Which collection',
+        placeholder: 'blog',
+        max: 120,
+        help: 'The short name from the Collections screen. Only used when the cards come from one.',
+      },
+      {
+        kind: 'number',
+        key: 'count',
+        label: 'How many',
+        min: 1,
+        max: 60,
+        step: 1,
+        help: 'The newest this many. Only used when the cards come from a collection.',
+      },
       {
         kind: 'repeater',
         key: 'items',

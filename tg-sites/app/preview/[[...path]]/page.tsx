@@ -9,6 +9,8 @@ import { FontHead } from '../../../components/render/FontHead';
 import { listFontFaces } from '../../../lib/db/fonts';
 import { getPublishedPage } from '../../../lib/db/pages';
 import { getPublishedRegions } from '../../../lib/db/regions';
+import { listPublished } from '../../../lib/db/collections';
+import { fillPageListings, itemAsCard, listingsIn } from '../../../lib/content/listings';
 import { getPublicTheme } from '../../../lib/db/theme';
 import { familiesFromFiles } from '../../../lib/theme/fonts';
 import { themeTokens } from '../../../lib/theme/tokens';
@@ -66,7 +68,43 @@ async function load(path: string[] | undefined) {
     getPublishedRegions(site.tenantId),
   ]);
 
-  return page ? { page, theme, faces, regions, slug: site.slug } : null;
+  if (!page) return null;
+
+  /*
+   * The listing blocks, filled in before anything renders. One read per distinct
+   * collection across all three trees, for the largest count anybody asked for.
+   * See lib/content/listings.ts for why this is not the block's own job.
+   *
+   * The entry pages themselves are not served here. /preview is a staff view of
+   * a site on OUR hostname, and an entry lives at the client's own address; the
+   * public route resolves those. The listing still shows, with links that work
+   * once the site is on its own domain.
+   */
+  const wanted = listingsIn([regions.header, page.content, regions.footer]);
+  const listings = new Map<string, Array<Record<string, unknown>>>();
+
+  if (wanted.length > 0) {
+    const results = await Promise.all(
+      wanted.map(async (request) => ({
+        request,
+        items: await listPublished(site.tenantId, request.collection, request.count),
+      })),
+    );
+    for (const { request, items } of results) {
+      listings.set(
+        request.collection,
+        items.map((row) => itemAsCard(row.item, request.collection, row.slug)),
+      );
+    }
+  }
+
+  return {
+    page: { ...page, content: fillPageListings(page.content, listings) },
+    theme,
+    faces,
+    regions,
+    slug: site.slug,
+  };
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {

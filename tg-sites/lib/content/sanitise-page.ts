@@ -14,6 +14,7 @@
 
 import { blockDefinition, type Field } from './blocks';
 import { safeUrl, sanitiseHtml, type SanitiseMode } from './sanitise';
+import type { CollectionItem } from './collection';
 import type { Block, Page, Region, Section } from './schema';
 
 /**
@@ -157,6 +158,22 @@ function sanitiseSection(section: Section): Section {
  */
 export function sanitiseRegion(region: Region): Region {
   return { ...region, sections: region.sections.map(sanitiseSection) };
+}
+
+/**
+ * The same treatment for a collection item.
+ *
+ * Its body is sections, so that half is sanitiseSection again. The two strings
+ * of its own that reach the browser as attributes rather than as text, the
+ * picture and nothing else, go through the same allowlist a section background
+ * does. Title, summary and alt are rendered as text by React and need nothing.
+ */
+export function sanitiseItem(item: CollectionItem): CollectionItem {
+  return {
+    ...item,
+    image: item.image ? (safeUrl(item.image) ?? '') : item.image,
+    sections: item.sections.map(sanitiseSection),
+  };
 }
 
 /** Every URL and every scrap of HTML in a page, run through the allowlist. */

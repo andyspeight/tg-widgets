@@ -4960,6 +4960,122 @@ await page.waitForTimeout(300);
 await showPanels();
 
 
+// ---------------------------------------------------------------------------
+// Cards fed from a collection: the blog
+// ---------------------------------------------------------------------------
+
+/*
+ * WHAT CAN AND CANNOT BE CHECKED HERE.
+ *
+ * A collection-backed grid is filled on the SERVER, before anything renders, so
+ * in this file there is no collection to read: the canvas re-renders on every
+ * keystroke and there is nothing on the other side of it. That is the arrangement
+ * being verified. What must hold in the editor is that the block SAYS what will
+ * appear rather than going blank or drawing three fake cards that will never be
+ * there, and that switching the source does not throw the typed-in cards away.
+ *
+ * A RELOAD FIRST, the same way the table section starts, and it is not optional.
+ * The checks above finish on the phone viewport, and clicking Desktop is not
+ * enough on its own: the outline stays hidden, so `.ed-add` is in the document
+ * and not visible, and the first click here waited thirty seconds for an element
+ * that was never going to appear. Reload, then showPanels, which also puts back
+ * a panel somebody folded, since that is remembered in localStorage.
+ */
+await page.reload();
+await page.waitForSelector('.ed-root');
+await showPanels();
+
+await check('a card grid can be fed from a collection instead of typed in', async () => {
+  await addBlock('Cards');
+  await showPanels();
+  await page.waitForTimeout(300);
+
+  const group = page.locator('.ed-props [role=group][aria-label="Where the cards come from"]');
+  const labels = await group.locator('button').allInnerTexts();
+  return labels.length === 2 && labels.join('|').includes('From a collection')
+    ? true
+    : `offered ${JSON.stringify(labels)}`;
+});
+
+await check('and until one is named it says so rather than going blank', async () => {
+  await page.locator('.ed-props [role=group][aria-label="Where the cards come from"] button')
+    .filter({ hasText: 'From a collection' })
+    .click();
+  await page.waitForTimeout(600);
+
+  const text = (await added().innerText()).trim();
+  const cards = await added().locator('.tgs-card').count();
+  return cards === 0 && /which collection/i.test(text)
+    ? true
+    : `${cards} cards, said "${text}"`;
+});
+
+/*
+ * The placeholder names the collection AND the count, because those are the two
+ * things somebody has just set and the only way to see whether they took.
+ */
+await check('naming one says which posts will appear, and how many', async () => {
+  await page.locator('.ed-props input[placeholder="blog"]').first().fill('blog');
+  await page.waitForTimeout(600);
+
+  const text = (await added().innerText()).trim();
+  return text.includes('"blog"') && /\b6\b/.test(text) ? true : `said "${text}"`;
+});
+
+/*
+ * FOUND BY LABEL, not by "the last number input in the pane". A block's box and
+ * spacing controls are number inputs too, so .last() picks up whichever control
+ * happens to be rendered furthest down and would keep passing while testing
+ * something else entirely.
+ */
+const howMany = () =>
+  page.locator('.ed-props .ed-field').filter({ hasText: 'How many' }).locator('input[type=number]');
+
+await check('changing how many changes what it promises', async () => {
+  const count = howMany();
+  await count.fill('3');
+  await count.blur();
+  await page.waitForTimeout(600);
+
+  const text = (await added().innerText()).trim();
+  return /\b3\b/.test(text) ? true : `said "${text}"`;
+});
+
+/*
+ * min and max on a number input are advisory: the browser marks the field
+ * invalid and hands the value over anyway. The clamp is in the control, so
+ * a pasted 900 has to come back as 60 rather than reaching a LIMIT.
+ */
+await check('a count far outside the range is pulled back rather than passed on', async () => {
+  const count = howMany();
+  await count.fill('900');
+  await count.blur();
+  await page.waitForTimeout(600);
+
+  const shown = await count.inputValue();
+  const text = (await added().innerText()).trim();
+  return shown === '60' && text.includes('60') ? true : `field "${shown}", said "${text}"`;
+});
+
+/*
+ * THE ONE THAT WOULD HURT. Switching source is a choice somebody makes to look
+ * at it, and switching back has to bring the typed-in cards with it. Throwing
+ * them away on the way out would be silent, and undone only by an undo nobody
+ * knows to press.
+ */
+await check('switching back brings the typed-in cards with it', async () => {
+  await page.locator('.ed-props [role=group][aria-label="Where the cards come from"] button')
+    .filter({ hasText: 'Typed in here' })
+    .click();
+  await page.waitForTimeout(600);
+
+  const cards = await added().locator('.tgs-card').count();
+  const titles = await added().locator('.tgs-card__title').allInnerTexts();
+  return cards === 3 && titles.every((title) => title.trim().length > 0)
+    ? true
+    : `${cards} cards, titles ${JSON.stringify(titles)}`;
+});
+
 await browser.close();
 
 let failed = false;

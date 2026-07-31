@@ -170,6 +170,20 @@ export function SiteDashboard({ account, site, siteName, siteUrl, pages: initial
             </a>
 
             {/*
+              THE BLOG, AND ANYTHING ELSE THAT IS A LIST.
+
+              Alongside the header and the footer rather than in the list of
+              pages, because a collection is not a page: it is a set of entries
+              that a Cards block anywhere on the site can be fed from. Publishing
+              one changes what those pages render, so this is a plain anchor
+              too.
+            */}
+            <a className="sv-btn" href="/collections">
+              <Icon name="cards" size={16} />
+              Collections
+            </a>
+
+            {/*
               A plain anchor for the same reason as Theme above: these settings are
               in the head of every rendered page, so coming back wants fresh server
               output rather than a tree built before the change.

@@ -688,8 +688,16 @@ export function emptyRegion(region: RegionName): Region {
   return { version: CONTENT_VERSION, region, sticky: false, overlay: false, sections: [] };
 }
 
-/** Normalise widths on a raw object before it has been validated. */
-function preNormalise(input: unknown): unknown {
+/**
+ * Normalise widths on a raw object before it has been validated.
+ *
+ * EXPORTED, because three things now have a `sections` array on the way in: a
+ * page, a region and a collection item. Keying off `sections` rather than off
+ * anything page-shaped is what lets all three share one repair, so a column
+ * dragged in a blog post is fixed by the same code that fixes one on a page and
+ * a block written by an older deploy is upgraded wherever it lives.
+ */
+export function preNormalise(input: unknown): unknown {
   if (!input || typeof input !== 'object') return input;
   const page = input as Record<string, unknown>;
   if (!Array.isArray(page.sections)) return input;

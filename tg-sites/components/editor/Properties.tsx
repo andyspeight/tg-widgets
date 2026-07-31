@@ -12,6 +12,8 @@
 
 import { useState, type CSSProperties, type ReactNode } from 'react';
 import type { Page, RegionName } from '../../lib/content/schema';
+import { safeSlug } from '../../lib/content/collection';
+import type { ItemMeta } from '../../lib/content/collection-page';
 import {
   anchorInput,
   safeAnchor,
@@ -59,6 +61,16 @@ interface Props {
   region?: RegionName | null;
   regionFlags?: { sticky: boolean; overlay: boolean };
   onRegionFlags?: (next: { sticky: boolean; overlay: boolean }) => void;
+  /**
+   * Set when this editor is on an entry in a collection rather than a page.
+   *
+   * Same shape of change as `region`: the only thing it touches is the root of
+   * the tree. A post has a summary, a picture and a date where a page has an
+   * address and a search listing, and everything below the root is identical.
+   */
+  isItem?: boolean;
+  itemMeta?: ItemMeta;
+  onItemMeta?: (next: ItemMeta) => void;
 }
 
 /**
@@ -173,12 +185,15 @@ export function Properties({
   region = null,
   regionFlags,
   onRegionFlags,
+  isItem = false,
+  itemMeta,
+  onItemMeta,
 }: Props) {
   return (
     <aside className="ed-props" aria-label="Properties">
       <div className="ed-panel-head">
         <span className="ed-panel-title">
-          {selected ? headingFor(selected, page, region) : 'Settings'}
+          {selected ? headingFor(selected, page, region, isItem) : 'Settings'}
         </span>
         <button
           type="button"
@@ -211,6 +226,11 @@ export function Properties({
               region={region}
               flags={regionFlags ?? { sticky: false, overlay: false }}
               onChange={onRegionFlags}
+            />
+          ) : isItem ? (
+            <ItemFields
+              meta={itemMeta ?? { title: '', summary: '', image: '', alt: '', date: '', slug: '' }}
+              onChange={onItemMeta}
             />
           ) : (
             <PageFields page={page} onCommit={onCommit} />
@@ -283,14 +303,21 @@ function Group({
  * The header names the thing being edited in the agent's words. "BLOCK" told
  * them nothing; "Heading" tells them exactly what they clicked.
  */
-function headingFor(path: Path, page: Page, region: RegionName | null): string {
+function headingFor(
+  path: Path,
+  page: Page,
+  region: RegionName | null,
+  isItem = false,
+): string {
   switch (path.kind) {
     case 'page':
       return region === 'header'
         ? 'Header settings'
         : region === 'footer'
           ? 'Footer settings'
-          : 'Page settings';
+          : isItem
+            ? 'This entry'
+            : 'Page settings';
     case 'section':
       return sectionNameAt(page, path.section);
     case 'row':
@@ -386,6 +413,96 @@ function RegionFields({
           everything scrolls underneath it.
         </p>
       )}
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+
+/**
+ * The root of a blog post, or anything else in a collection.
+ *
+ * WHAT IS NOT HERE. No search title and no search description of its own: the
+ * summary is both, because asking somebody to write the same sentence twice is
+ * how one of them ends up stale. The title is not here either, for the same
+ * reason it is not on a region: it is the box in the top bar.
+ */
+function ItemFields({
+  meta,
+  onChange,
+}: {
+  meta: ItemMeta;
+  onChange?: (next: ItemMeta) => void;
+}) {
+  const set = (patch: Partial<ItemMeta>) => onChange?.({ ...meta, ...patch });
+
+  return (
+    <>
+      <div className="ed-field">
+        <label className="ed-label">Address</label>
+        <input
+          className="ed-input"
+          value={meta.slug}
+          placeholder="ten-things-about-crete"
+          /*
+            Reduced as it is typed, the same as a section's anchor and for the
+            same reason: this becomes part of a URL, and showing something the
+            save will quietly correct is the one thing to avoid. Trailing hyphens
+            survive the keystroke and go on blur, or the second word could never
+            be started.
+          */
+          onChange={(event) =>
+            set({ slug: event.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, '-').slice(0, 120) })
+          }
+          onBlur={(event) => set({ slug: safeSlug(event.target.value) })}
+        />
+        <p className="ed-help">
+          {meta.slug ? `Lives at /.../${meta.slug}` : 'Taken from the title if you leave it blank.'}
+        </p>
+      </div>
+
+      <div className="ed-field">
+        <label className="ed-label">Date</label>
+        <input
+          className="ed-input"
+          type="date"
+          value={meta.date}
+          onChange={(event) => set({ date: event.target.value })}
+        />
+        <p className="ed-help">Shown on the card in a listing. Not when it was published.</p>
+      </div>
+
+      <div className="ed-field">
+        <label className="ed-label">Summary</label>
+        <textarea
+          className="ed-textarea"
+          rows={3}
+          maxLength={400}
+          value={meta.summary}
+          onChange={(event) => set({ summary: event.target.value })}
+        />
+        <p className="ed-help">
+          The line under the title in a listing, and what search engines show.
+          {' '}{meta.summary.length} of 400 characters.
+        </p>
+      </div>
+
+      <div className="ed-field">
+        <label className="ed-label">Picture</label>
+        <ImageField value={meta.image} onChange={(url) => set({ image: url })} />
+        <p className="ed-help">Shown on the card in a listing.</p>
+      </div>
+
+      <div className="ed-field">
+        <label className="ed-label">Alt text</label>
+        <input
+          className="ed-input"
+          maxLength={200}
+          value={meta.alt}
+          onChange={(event) => set({ alt: event.target.value })}
+        />
+        <p className="ed-help">Describe the picture for anyone who cannot see it.</p>
+      </div>
     </>
   );
 }

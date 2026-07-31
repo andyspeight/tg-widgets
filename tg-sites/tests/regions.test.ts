@@ -650,17 +650,34 @@ describe('one widget script, however many trees it appears in', () => {
     expect(text).toContain('if (!tree) continue;');
   });
 
+  /*
+   * Asserted as three claims rather than one exact string, because the middle
+   * tree stopped being a fixed expression on 31 Jul 2026: an address that
+   * resolves to a blog entry rather than a page hands the ENTRY's sections in
+   * that slot. A widget dropped into a blog post has to load its script the
+   * same way one on a page does.
+   */
   for (const [label, route] of [
     ['the public site', ['app', 'site', '[host]', '[[...path]]', 'page.tsx']],
     ['the preview', ['app', 'preview', '[[...path]]', 'page.tsx']],
   ] as const) {
     it(`${label} hands it all three trees`, () => {
       const text = source(...route).replace(/\s+/g, ' ');
-      expect(text).toContain(
-        'trees={[found.regions.header, found.page.content, found.regions.footer]}',
-      );
+      const call = text.slice(text.indexOf('<WidgetScripts'));
+      const trees = call.slice(0, call.indexOf('/>'));
+
+      expect(trees).toContain('found.regions.header');
+      expect(trees).toContain('found.regions.footer');
+      // Whatever is between the two, the page's own content is in it.
+      expect(trees).toContain('found.page');
     });
   }
+
+  it('the public site hands over an entry body as readily as a page', () => {
+    const text = source('app', 'site', '[host]', '[[...path]]', 'page.tsx').replace(/\s+/g, ' ');
+    const call = text.slice(text.indexOf('<WidgetScripts'));
+    expect(call.slice(0, call.indexOf('/>'))).toContain('found.entry!.item');
+  });
 });
 
 describe('the stylesheet', () => {

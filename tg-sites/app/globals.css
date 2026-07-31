@@ -1168,6 +1168,65 @@
 }
 
 /* ------------------------------------------------------------------ */
+/* An entry in a collection, rendered as an article                    */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Carries .tgs-page as well, so it is its own query container and inherits the
+ * paragraph style, exactly as a header does. It is a SIBLING of the header and
+ * the footer for the same reason: a wrapper would put an overflow ancestor
+ * between a sticky header and the document.
+ */
+.tgs-entry__head {
+  max-width: var(--tgs-width-narrow);
+  margin: 0 auto;
+  padding: var(--tgs-space-xl) var(--tgs-space-l) var(--tgs-space-l);
+}
+
+.tgs-entry__date {
+  margin: 0 0 var(--tgs-space-s);
+  font-size: var(--tgs-text-s);
+  font-weight: 600;
+  color: var(--tgs-primary);
+}
+
+.tgs-entry__title {
+  margin: 0;
+  font-family: var(--tgs-h1-font);
+  font-weight: var(--tgs-h1-weight);
+  font-size: var(--tgs-h1-size);
+  line-height: var(--tgs-h1-leading);
+  letter-spacing: var(--tgs-h1-tracking);
+  text-wrap: balance;
+}
+
+.tgs-entry__summary {
+  margin: var(--tgs-space-m) 0 0;
+  font-size: var(--tgs-text-l);
+  line-height: 1.5;
+  color: var(--tgs-text-muted);
+  text-wrap: pretty;
+}
+
+.tgs-entry__image {
+  margin-top: var(--tgs-space-l);
+  overflow: hidden;
+  border-radius: var(--tgs-radius-md);
+  background: var(--tgs-surface-alt);
+}
+.tgs-entry__image img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+@container tgs-page (max-width: 767px) {
+  .tgs-entry__head { padding: var(--tgs-space-l) var(--tgs-space-m) var(--tgs-space-m); }
+}
+
+/* ------------------------------------------------------------------ */
 /* Table                                                               */
 /* ------------------------------------------------------------------ */
 

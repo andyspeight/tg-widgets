@@ -772,6 +772,91 @@
 }
 
 /* ------------------------------------------------------------------ */
+/* Collections                                                         */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The collections themselves, as a row of links.
+ *
+ * Links rather than buttons because which collection is open lives in the URL:
+ * each of these is a real address somebody can bookmark or send, and the back
+ * button does the obvious thing. They look like tabs because that is what they
+ * behave like, but they are not ARIA tabs and must not claim to be: an ARIA
+ * tablist promises arrow-key movement between panels that are already in the
+ * document, and these navigate.
+ */
+.sv-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ed-2);
+  margin: 0 0 var(--ed-5);
+  padding-bottom: var(--ed-3);
+  border-bottom: 1px solid var(--ed-line-soft);
+}
+
+.sv-tab {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 var(--ed-4);
+  border: 1px solid transparent;
+  border-radius: var(--ed-r-md);
+  color: var(--ed-ink-2);
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.sv-tab:hover {
+  background: var(--ed-well);
+  color: var(--ed-ink);
+}
+
+.sv-tab:focus-visible {
+  outline: 2px solid var(--ed-select);
+  outline-offset: 2px;
+}
+
+/*
+ * The open one. aria-current is doing the work rather than a class, so the
+ * styling and the thing a screen reader announces cannot drift apart: there is
+ * only one fact on the element and both read it.
+ */
+.sv-tab[aria-current='page'] {
+  border-color: var(--ed-line);
+  background: var(--ed-panel);
+  color: var(--ed-ink);
+  font-weight: 600;
+}
+
+/* The line above the entries: how many, where they live, and the way out. */
+.sv-collection-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ed-3);
+  margin-bottom: var(--ed-3);
+}
+
+.sv-collection-bar .sv-list-label { margin: 0; }
+
+.sv-collection-bar__url {
+  margin: 0;
+  /* Takes the slack so the delete button sits at the far end, away from
+     everything else on the row. */
+  flex: 1 1 auto;
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink-3);
+}
+
+.sv-collection-bar__url code {
+  padding: 2px 6px;
+  border-radius: var(--ed-r-sm);
+  background: var(--ed-well);
+  font-size: 0.9em;
+}
+
+/* ------------------------------------------------------------------ */
 /* Sign in                                                             */
 /* ------------------------------------------------------------------ */
 

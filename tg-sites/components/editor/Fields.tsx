@@ -168,6 +168,26 @@ export function FieldRenderer({ field, value, onChange, ownerId, onPatch }: Fiel
               const next = Number(event.target.value);
               onChange(Number.isFinite(next) ? next : 0);
             }}
+            /*
+              THE CLAMP IS HERE, NOT IN min AND max. Those two are advisory: the
+              browser marks the field invalid and hands the value over anyway, so
+              typing 900 into a box that says 1 to 60 puts 900 in the block. The
+              renderer clamps it again on the way out, which meant the field said
+              900 while the canvas beside it drew 60, and the one thing to avoid
+              is showing somebody a number the product has quietly overruled.
+
+              On blur rather than on change, or 6 could never be typed in a box
+              whose minimum is 10: the 6 would be corrected before the 0 arrived.
+              Same rule as the spacing controls in BoxControls.
+            */
+            onBlur={(event) => {
+              const next = Number(event.target.value);
+              if (!Number.isFinite(next)) return;
+
+              const low = typeof field.min === 'number' ? Math.max(next, field.min) : next;
+              const capped = typeof field.max === 'number' ? Math.min(low, field.max) : low;
+              if (capped !== next) onChange(capped);
+            }}
           />
         </Wrapper>
       );

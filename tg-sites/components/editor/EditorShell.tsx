@@ -19,10 +19,12 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties }
 import { writeCopyAction } from '../../app/actions/ai';
 import { publishPageAction, saveDraftAction } from '../../app/actions/pages';
 import { publishRegionAction, saveRegionAction } from '../../app/actions/regions';
+import { publishItemAction, saveItemAction } from '../../app/actions/collections';
 import { PublishHistory } from './PublishHistory';
 import type { Page, RegionName, Section } from '../../lib/content/schema';
 import { parsePage } from '../../lib/content/schema';
 import { pageAsRegion, REGION_TITLES } from '../../lib/content/region-page';
+import { pageAsItem, type ItemMeta } from '../../lib/content/collection-page';
 import { createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
 import { buildPresetSection } from '../../lib/content/presets';
 import { addBlock, parsePathKey, type Path, pathKey, resolve, updateBlockProps } from '../../lib/content/tree';
@@ -293,6 +295,18 @@ interface EditorProps {
    */
   region?: RegionName | null;
   initialRegionFlags?: { sticky: boolean; overlay: boolean };
+  /**
+   * Editing an entry in a collection: a blog post, a destination guide.
+   *
+   * The third thing this shell edits, after a page and a region, and the same
+   * arrangement as the second: the body is handed over as a Page and everything
+   * that is not sections travels beside it. What it changes is where a save
+   * goes and what the root of the properties pane offers. Everything else, the
+   * canvas, the outline, the blocks, undo, the styling panel, is untouched,
+   * because a post is sections and rows exactly as a page is.
+   */
+  itemId?: string | null;
+  initialItemMeta?: ItemMeta;
 }
 
 export function EditorShell({
@@ -305,6 +319,8 @@ export function EditorShell({
   currentUserId = null,
   region = null,
   initialRegionFlags,
+  itemId = null,
+  initialItemMeta,
 }: EditorProps) {
   const [history, setHistory] = useState<History>({
     past: [],
@@ -331,6 +347,16 @@ export function EditorShell({
    */
   const [regionFlags, setRegionFlags] = useState(
     initialRegionFlags ?? { sticky: false, overlay: false },
+  );
+  /**
+   * A post's summary, picture and address, which have nowhere to live in a Page.
+   *
+   * Not in the undo history, for the same reason the header's two settings are
+   * not: undo is about content, and every step carrying a copy of six strings
+   * for the sake of a date field would be a poor trade.
+   */
+  const [itemMeta, setItemMeta] = useState<ItemMeta>(
+    initialItemMeta ?? { title: '', summary: '', image: '', alt: '', date: '', slug: '' },
   );
   const [unpublished, setUnpublished] = useState(initialHasUnpublishedChanges);
   const [publishing, setPublishing] = useState(false);
@@ -545,11 +571,12 @@ export function EditorShell({
    * on `region` rather than on an injected function.
    */
   const persist = useCallback(
-    (next: Page, flags: { sticky: boolean; overlay: boolean }) =>
-      region
-        ? saveRegionAction(region, pageAsRegion(next, region, flags))
-        : saveDraftAction(pageId, next),
-    [pageId, region],
+    (next: Page, flags: { sticky: boolean; overlay: boolean }, meta: ItemMeta) => {
+      if (region) return saveRegionAction(region, pageAsRegion(next, region, flags));
+      if (itemId) return saveItemAction(itemId, pageAsItem(next, meta), meta.slug);
+      return saveDraftAction(pageId, next);
+    },
+    [itemId, pageId, region],
   );
 
   useEffect(() => {
@@ -563,7 +590,7 @@ export function EditorShell({
 
     const timer = window.setTimeout(async () => {
       const seq = ++saveSeq.current;
-      const result = await persist(page, regionFlags);
+      const result = await persist(page, regionFlags, itemMeta);
       if (seq !== saveSeq.current) return;
 
       if (result.ok) {
@@ -577,7 +604,7 @@ export function EditorShell({
     }, SAVE_DEBOUNCE_MS);
 
     return () => window.clearTimeout(timer);
-  }, [page, pageId, persist, region, regionFlags]);
+  }, [page, pageId, persist, region, regionFlags, itemMeta]);
 
   const publish = useCallback(async () => {
     setPublishing(true);
@@ -585,7 +612,7 @@ export function EditorShell({
 
     // Flush any pending edit first, so publishing cannot capture the version
     // from before the last keystroke. The debounce means that gap is real.
-    const pending = await persist(page, regionFlags);
+    const pending = await persist(page, regionFlags, itemMeta);
     if (!pending.ok) {
       setSaved('error');
       setSaveError(pending.error);
@@ -596,19 +623,22 @@ export function EditorShell({
 
     const result = region
       ? await publishRegionAction(region)
-      : await publishPageAction(pageId);
+      : itemId
+        ? await publishItemAction(itemId)
+        : await publishPageAction(pageId);
 
     if (result.ok && result.data) {
       // A region has no status column: publishing one makes it live and there
       // is no way to withdraw it short of emptying it. So it is published from
-      // here on, and only "are there newer changes" varies.
+      // here on, and only "are there newer changes" varies. A page and an item
+      // both have one, and it is the answer.
       setStatus(region ? 'published' : (result.data as { status: 'draft' | 'published' }).status);
       setUnpublished(result.data.hasUnpublishedChanges);
     } else if (!result.ok) {
       setSaveError(result.error);
     }
     setPublishing(false);
-  }, [page, pageId, persist, region, regionFlags]);
+  }, [itemId, page, pageId, persist, region, regionFlags, itemMeta]);
 
   // ---------------------------------------------------------------------
   // Commits
@@ -1157,7 +1187,9 @@ export function EditorShell({
             ? 'Your header is empty. Add a section for your logo and menu.'
             : region === 'footer'
               ? 'Your footer is empty. Add a section for your contact details and links.'
-              : undefined
+              : itemId
+                ? 'Nothing written yet. Add a section and start the article.'
+                : undefined
         }
       />
 
@@ -1171,6 +1203,9 @@ export function EditorShell({
         region={region}
         regionFlags={regionFlags}
         onRegionFlags={setRegionFlags}
+        isItem={!!itemId}
+        itemMeta={itemMeta}
+        onItemMeta={setItemMeta}
       />
 
       {/*
