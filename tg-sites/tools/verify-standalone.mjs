@@ -3807,16 +3807,27 @@ async function addBlock(name) {
   await page.waitForTimeout(500);
 }
 
+/*
+ * SCOPED TO THE BLOCK THAT WAS JUST ADDED, via .is-selected.
+ *
+ * The first version used .tgs-placeholder last(), which found the seed page's
+ * own image placeholder and reported 'it says "Choose an image"'. Adding a block
+ * selects it, so the selection is the reliable handle, and it also means the
+ * check above cannot pass on placeholders that were already there.
+ */
+const added = () => page.locator('.ed-canvas-frame [data-path].is-selected');
+
 await check('a Travelgenix widget can be put on a page', async () => {
   await addBlock('Travelgenix widget');
-  const ghost = await page.locator('.tgs-widget-ghost').count();
-  const placeholder = await page.locator('.tgs-placeholder').count();
-  // Fresh, so it has no id yet and asks for one rather than drawing nothing.
-  return ghost + placeholder > 0 ? true : 'nothing was added';
+  const here = added();
+  if ((await here.count()) !== 1) return `${await here.count()} blocks selected after adding`;
+  const inside = await here.locator('.tgs-widget-ghost, .tgs-placeholder').count();
+  return inside > 0 ? true : 'the new block drew nothing';
 });
 
 await check('and asks for the ID rather than rendering an empty box', async () => {
-  const text = await page.locator('.ed-canvas-frame .tgs-placeholder').last().innerText();
+  // Fresh, so it has no id yet and says so rather than drawing nothing.
+  const text = await added().locator('.tgs-placeholder').first().innerText();
   return /tgw_/.test(text) ? true : `it says "${text}"`;
 });
 
