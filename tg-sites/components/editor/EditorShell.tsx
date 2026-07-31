@@ -19,7 +19,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties }
 import { publishPageAction, saveDraftAction } from '../../app/actions/pages';
 import { PublishHistory } from './PublishHistory';
 import type { Page, Section } from '../../lib/content/schema';
-import { parsePage, STACK_BREAKPOINTS } from '../../lib/content/schema';
+import { parsePage } from '../../lib/content/schema';
 import { createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
 import { buildPresetSection } from '../../lib/content/presets';
 import { addBlock, parsePathKey, type Path, pathKey, resolve, updateBlockProps } from '../../lib/content/tree';
@@ -37,6 +37,17 @@ import '../media/media.css';
 const THEME_KEY = 'tg-sites:theme:v1';
 /** Which side panels are folded away. A working preference, not page data. */
 const PANELS_KEY = 'tg-sites:panels:v1';
+/**
+ * The width each preview is drawn at.
+ *
+ * Per person, in this browser, alongside the light or dark choice and the
+ * folded panels. It is about how somebody looks at the site rather than about
+ * the site, so two people working on the same one can reasonably differ, and
+ * nothing a visitor sees depends on it. If it should instead be a decision the
+ * agency makes once for a project, it moves to the site settings row and this
+ * key goes: that is an additive change, which is why this is the safe way round.
+ */
+const VIEWPORTS_KEY = 'tg-sites:viewports:v1';
 const HISTORY_LIMIT = 50;
 /** Edits to the same field inside this window collapse into one undo step. */
 const COALESCE_MS = 700;
@@ -169,14 +180,62 @@ const VIEWPORTS: ReadonlyArray<{ value: Viewport; label: string; icon: IconName 
   { value: 'phone', label: 'Phone', icon: 'phone' },
 ];
 
-const VIEWPORT_WIDTH: Record<Viewport, string> = {
-  desktop: '100%',
-  // Chosen to sit clearly between the two container breakpoints (768 and
-  // 1024), so "stack below tablet" visibly does something here and "stack
-  // below mobile" visibly does not.
-  tablet: '834px',
-  phone: '390px',
+/**
+ * The width each preview is drawn at, and what somebody may change it to.
+ *
+ * Andy asked for these on 31 Jul 2026: "settings for the screen size the user
+ * wants to build to for each of the three break points... desktop default
+ * should be about 1200 but they should be able to select bigger or smaller".
+ *
+ * Desktop used to be '100%', which meant "however much room is left after the
+ * two side panels". That is not a screen size, it is an accident of the window
+ * and of which panels happen to be open, and it is why Desktop was rendering
+ * the phone layout on a 1440px screen. All three are real numbers now, so what
+ * you see is the width you asked for.
+ *
+ * The presets are the sizes worth having an opinion about rather than every
+ * device ever made: the common desktop widths, the two tablet orientations, and
+ * the three phone sizes that cover almost everything. Anything else can be
+ * typed in.
+ */
+const VIEWPORT_DEFAULT: Record<Viewport, number> = {
+  desktop: 1200,
+  // Sits clearly between the two container breakpoints (768 and 1024), so
+  // "stack below tablet" visibly does something here and "stack below mobile"
+  // visibly does not.
+  tablet: 834,
+  phone: 390,
 };
+
+const VIEWPORT_PRESETS: Record<Viewport, ReadonlyArray<{ width: number; label: string }>> = {
+  desktop: [
+    { width: 1024, label: 'Small laptop' },
+    { width: 1200, label: 'Standard' },
+    { width: 1440, label: 'Large laptop' },
+    { width: 1680, label: 'Wide' },
+    { width: 1920, label: 'Full HD' },
+  ],
+  tablet: [
+    { width: 768, label: 'Portrait, small' },
+    { width: 834, label: 'Portrait' },
+    { width: 1024, label: 'Landscape' },
+  ],
+  phone: [
+    { width: 360, label: 'Small' },
+    { width: 390, label: 'Standard' },
+    { width: 430, label: 'Large' },
+  ],
+};
+
+/** Nothing narrower than the narrowest phone, nothing wider than a big monitor. */
+const MIN_VIEWPORT = 320;
+const MAX_VIEWPORT = 2560;
+
+export function normaliseViewportWidth(value: unknown, fallback: number): number {
+  const n = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(MAX_VIEWPORT, Math.max(MIN_VIEWPORT, Math.round(n)));
+}
 
 interface History {
   past: Page[];
@@ -249,6 +308,8 @@ export function EditorShell({
    * how somebody likes to work, not something about the page.
    */
   const [panels, setPanels] = useState({ outline: true, props: true });
+  /** What each preview is drawn at, in pixels. See VIEWPORTS_KEY. */
+  const [widths, setWidths] = useState<Record<Viewport, number>>(VIEWPORT_DEFAULT);
   const [theme, setTheme] = useState<Theme>('light');
 
   const page = history.present;
@@ -325,6 +386,31 @@ export function EditorShell({
     }
   }, [panels]);
 
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(VIEWPORTS_KEY);
+      if (!raw) return;
+      const stored = JSON.parse(raw) as Partial<Record<Viewport, unknown>>;
+      // Each one clamped on the way in, so a hand-edited value cannot produce a
+      // canvas 40,000px wide or 3px wide.
+      setWidths({
+        desktop: normaliseViewportWidth(stored?.desktop, VIEWPORT_DEFAULT.desktop),
+        tablet: normaliseViewportWidth(stored?.tablet, VIEWPORT_DEFAULT.tablet),
+        phone: normaliseViewportWidth(stored?.phone, VIEWPORT_DEFAULT.phone),
+      });
+    } catch {
+      // The defaults are good ones.
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(VIEWPORTS_KEY, JSON.stringify(widths));
+    } catch {
+      // See above.
+    }
+  }, [widths]);
+
   /**
    * Choose a preview width, and make room for it if it is Desktop.
    *
@@ -339,25 +425,33 @@ export function EditorShell({
    * top bar either way, which is what makes this a shortcut rather than
    * something being taken away.
    */
-  const chooseViewport = useCallback((next: Viewport) => {
-    setViewport(next);
-    if (next !== 'desktop') return;
+  const chooseViewport = useCallback(
+    (next: Viewport) => {
+      setViewport(next);
+      if (next !== 'desktop') return;
 
-    const frame = document.querySelector('.ed-canvas-frame');
-    const width = frame?.getBoundingClientRect().width ?? 0;
-    if (width >= STACK_BREAKPOINTS.tablet) return;
+      /*
+        The room available, not the frame: the frame is now drawn at the chosen
+        width whether or not it fits, so measuring it would answer the wrong
+        question. What matters is whether the space around it can hold it.
+      */
+      const wrap = document.querySelector('.ed-canvas-wrap');
+      const room = wrap?.clientWidth ?? 0;
+      const wanted = widths.desktop;
+      if (room >= wanted) return;
 
-    // What folding both would give back. 320 each, and only the ones still open.
-    setPanels((current) => {
-      const room = width + (current.outline ? 320 : 0) + (current.props ? 320 : 0);
-      if (room < STACK_BREAKPOINTS.tablet) {
-        // Even with both away it would not be a desktop. Leave them alone
-        // rather than hiding the whole workspace for nothing.
-        return current;
-      }
-      return { outline: false, props: false };
-    });
-  }, []);
+      setPanels((current) => {
+        const folded = room + (current.outline ? 320 : 0) + (current.props ? 320 : 0);
+        if (folded < wanted) {
+          // Even with both away it would not fit. Leave them alone rather than
+          // hiding the whole workspace for a preview that still has to scroll.
+          return current;
+        }
+        return { outline: false, props: false };
+      });
+    },
+    [widths.desktop],
+  );
 
   // ---------------------------------------------------------------------
   // Autosave
@@ -768,6 +862,61 @@ export function EditorShell({
           ))}
         </div>
 
+        {/*
+          THE WIDTH IT IS DRAWN AT, for whichever preview is showing.
+          Andy, 31 Jul 2026: "desktop default should be about 1200 but they
+          should be able to select bigger or smaller". A box rather than only a
+          menu of presets, because "bigger or smaller" is a nudge and a menu
+          cannot do a nudge. The menu beside it carries the sizes worth having
+          an opinion about.
+        */}
+        <div className="ed-vw ed-desktop-only">
+          <input
+            className="ed-vw__num"
+            type="number"
+            min={MIN_VIEWPORT}
+            max={MAX_VIEWPORT}
+            step={10}
+            value={widths[viewport]}
+            aria-label={`${VIEWPORTS.find((v) => v.value === viewport)?.label} width in pixels`}
+            onChange={(event) => {
+              // Not clamped while it is being typed: clamping mid-keystroke
+              // turns "4" on the way to "430" into "320" and the caret jumps.
+              const next = Number(event.target.value);
+              if (Number.isFinite(next)) setWidths((c) => ({ ...c, [viewport]: next }));
+            }}
+            onBlur={(event) =>
+              setWidths((c) => ({
+                ...c,
+                [viewport]: normaliseViewportWidth(event.target.value, VIEWPORT_DEFAULT[viewport]),
+              }))
+            }
+          />
+          <span className="ed-vw__unit" aria-hidden="true">px</span>
+          <Menu
+            label="Common widths"
+            icon="chevron-down"
+            items={[
+              { heading: `${VIEWPORTS.find((v) => v.value === viewport)?.label} widths` },
+              ...VIEWPORT_PRESETS[viewport].map((preset) => ({
+                icon: 'blank' as IconName,
+                label: preset.label,
+                hint: `${preset.width}px`,
+                checked: widths[viewport] === preset.width,
+                onClick: () => setWidths((c) => ({ ...c, [viewport]: preset.width })),
+              })),
+              { separator: true as const },
+              {
+                icon: 'undo' as IconName,
+                label: 'Back to the standard',
+                hint: `${VIEWPORT_DEFAULT[viewport]}px`,
+                onClick: () =>
+                  setWidths((c) => ({ ...c, [viewport]: VIEWPORT_DEFAULT[viewport] })),
+              },
+            ]}
+          />
+        </div>
+
         <button
           type="button"
           className="ed-btn"
@@ -874,7 +1023,7 @@ export function EditorShell({
         page={page}
         selectedKey={selectedKey}
         selected={selected}
-        viewportWidth={VIEWPORT_WIDTH[viewport]}
+        viewportWidth={`${widths[viewport]}px`}
         viewport={viewport}
         onSelect={select}
         onCommit={commit}

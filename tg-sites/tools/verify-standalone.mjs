@@ -457,6 +457,42 @@ await check('Designed shows ready-made sections in a category', async () => {
  * something the entry does not build and nothing catches it, which is the lesson
  * layouts.ts records at the top of itself.
  */
+/*
+ * Andy asked for a second category on 31 Jul 2026: "Now adding more 'designed'
+ * sections - these are under a label of 'Blank'". Eight neutral starting
+ * arrangements, nothing about travel in any of them, which is why they are
+ * called Blank and sit above Text.
+ */
+await check('there is more than one category, and Blank leads', async () => {
+  const cats = (await page.locator('.ed-designed__cat').allInnerTexts()).map((t) =>
+    t.trim().split('\n')[0].trim());
+  return cats[0] === 'Blank' && cats.includes('Text')
+    ? true
+    : `the categories are ${JSON.stringify(cats)}`;
+});
+
+/*
+ * The card presets style the COLUMN, not a block inside it, which is a thing
+ * presets could not do until this category needed it. Checked on the page
+ * rather than in the data: a border in the preset that no column ends up
+ * drawing is a picture of a section nobody can build.
+ */
+await check('a card preset really produces bordered columns', async () => {
+  await page.locator('.ed-preset-card', { hasText: 'Three cards' }).click();
+  await page.waitForTimeout(600);
+
+  const bordered = await page.evaluate(() =>
+    [...document.querySelectorAll('.tgs-col')].filter(
+      (col) => parseFloat(getComputedStyle(col).borderTopWidth) > 0,
+    ).length);
+
+  await page.keyboard.press('Control+z');
+  await page.waitForTimeout(400);
+  await openDesigned();
+
+  return bordered === 3 ? true : `${bordered} columns came out with a border`;
+});
+
 await check('every designed card draws its own wireframe', async () => {
   const perCard = await page.locator('.ed-preset-card').evaluateAll((cards) =>
     cards.map((card) => card.querySelectorAll('.ed-thumb--preset rect').length));
@@ -2906,46 +2942,223 @@ await check('and the padding presets are right there on it', async () => {
  * makes it worth measuring here.
  */
 
-const canvasWidth = async () =>
-  Math.round((await page.locator('.ed-canvas-frame').boundingBox()).width);
+/*
+ * THE ROOM, not the frame. The frame is drawn at the width somebody chose,
+ * whether or not it fits, so measuring it would answer the wrong question:
+ * it reads 1200 with both panels open and 1200 with both folded. What folding
+ * changes is how much of that 1200 can be seen without scrolling.
+ */
+const canvasRoom = async () =>
+  page.locator('.ed-canvas-wrap').evaluate((wrap) => wrap.clientWidth);
 
-await check('the preview really is too narrow to be a desktop, before folding', async () => {
-  // If this stops being true the checks below prove nothing, so it is asserted
-  // rather than assumed.
-  const width = await canvasWidth();
-  return width < 768
-    ? true
-    : `the canvas is already ${width}px, so folding is not what makes the difference`;
+/*
+ * THE WIDTH EACH PREVIEW IS DRAWN AT.
+ *
+ * Andy, 31 Jul 2026: "settings for the screen size the user wants to build to
+ * for each of the three break points... desktop default should be about 1200
+ * but they should be able to select bigger or smaller".
+ *
+ * Desktop used to be '100%', which is not a screen size: it is an accident of
+ * the window and of which panels happen to be open.
+ */
+await check('each preview is drawn at a real width, desktop included', async () => {
+  await page.evaluate(() => window.localStorage.removeItem('tg-sites:viewports:v1'));
+  await page.reload();
+  await page.waitForSelector('.ed-root');
+  await page.waitForTimeout(400);
+
+  const seen = {};
+  for (const [label, expected] of [['Desktop', 1200], ['Tablet', 834], ['Phone', 390]]) {
+    await page.locator('.ed-btn', { hasText: label }).click();
+    await page.waitForTimeout(350);
+    const shown = Number(await page.locator('.ed-vw__num').inputValue());
+    const drawn = Math.round((await page.locator('.ed-canvas-frame').boundingBox()).width);
+    seen[label] = { shown, drawn, expected };
+  }
+
+  const wrong = Object.entries(seen).filter(
+    ([, v]) => v.shown !== v.expected || Math.abs(v.drawn - v.expected) > 2,
+  );
+  return wrong.length === 0 ? true : JSON.stringify(Object.fromEntries(wrong));
 });
 
-await check('folding the page panel gives the width to the preview', async () => {
-  const before = await canvasWidth();
+await check('and a bigger one can be typed in', async () => {
+  await page.locator('.ed-btn', { hasText: 'Desktop' }).click();
+  await page.waitForTimeout(300);
+  await page.locator('.ed-vw__num').fill('1600');
+  await page.locator('.ed-vw__num').blur();
+  await page.waitForTimeout(400);
+
+  const drawn = Math.round((await page.locator('.ed-canvas-frame').boundingBox()).width);
+  return Math.abs(drawn - 1600) <= 2 ? true : `the preview is ${drawn}px`;
+});
+
+/*
+ * A width wider than the room it has must still be drawn at that width, and
+ * must still be reachable. `align-items: center` on an overflowing child pushes
+ * its left edge off the scrollable area, so the first column becomes impossible
+ * to get to; `safe center` is what stops that.
+ */
+await check('a preview wider than the room is still fully reachable', async () => {
+  const reachable = await page.evaluate(() => {
+    const wrap = document.querySelector('.ed-canvas-wrap');
+    const frame = document.querySelector('.ed-canvas-frame');
+    if (!wrap || !frame) return { error: 'no canvas' };
+    wrap.scrollLeft = 0;
+    const left = frame.getBoundingClientRect().left - wrap.getBoundingClientRect().left;
+    return { overflowing: frame.scrollWidth > wrap.clientWidth, left: Math.round(left) };
+  });
+
+  if (reachable.error) return reachable.error;
+  if (!reachable.overflowing) return 'the preview is not wider than the room, so this proves nothing';
+  return reachable.left >= 0
+    ? true
+    : `scrolled fully left, the preview still starts ${reachable.left}px off the edge`;
+});
+
+await check('a width is refused if it is not one, and clamped if it is silly', async () => {
+  await page.locator('.ed-vw__num').fill('40000');
+  await page.locator('.ed-vw__num').blur();
+  await page.waitForTimeout(350);
+  const huge = Number(await page.locator('.ed-vw__num').inputValue());
+
+  await page.locator('.ed-vw__num').fill('12');
+  await page.locator('.ed-vw__num').blur();
+  await page.waitForTimeout(350);
+  const tiny = Number(await page.locator('.ed-vw__num').inputValue());
+
+  return huge === 2560 && tiny === 320 ? true : `40000 became ${huge}, 12 became ${tiny}`;
+});
+
+await check('the common widths are offered as well as typed', async () => {
+  await page.locator('.ed-vw .ed-btn').first().click();
+  await page.waitForTimeout(300);
+  const labels = await page.locator('[role="menu"] [role="menuitemradio"], [role="menu"] button').allInnerTexts();
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(200);
+
+  const hasStandard = labels.some((label) => label.includes('1200'));
+  const hasWider = labels.some((label) => label.includes('1680') || label.includes('1920'));
+  return hasStandard && hasWider ? true : `the menu offers ${JSON.stringify(labels)}`;
+});
+
+/*
+ * NO ROW IN ANY MENU WRAPS. Andy, 31 Jul 2026: "I think you can do better with
+ * the drop down, so it doesnt wrap for any option etc".
+ *
+ * The preset labels read "Small laptop · 1024px" as one string in a menu with a
+ * fixed 184px width, so half of them broke over two lines and the numbers ended
+ * up in a ragged column nobody could compare. The name and the size are two
+ * columns now, and the menu sizes itself to its longest row.
+ *
+ * Written against EVERY menu rather than this one, because the fix is in the
+ * shared component and the next long label should not have to rediscover it.
+ */
+await check('no row in a menu wraps to a second line', async () => {
+  const wrapped = [];
+
+  for (const trigger of await page.locator('.ed-topbar [aria-haspopup="menu"]').all()) {
+    await trigger.click();
+    await page.waitForTimeout(250);
+    wrapped.push(
+      ...(await page.locator('.ed-menu button').evaluateAll((rows) =>
+        rows
+          .filter((row) => {
+            const label = row.querySelector('.ed-menu__label') ?? row;
+            // One line at this font size is about 20px. Two is over 30.
+            return label.getBoundingClientRect().height > 28;
+          })
+          .map((row) => row.innerText.replace(/\n/g, ' ')))),
+    );
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(150);
+  }
+
+  return wrapped.length === 0 ? true : `these wrap: ${JSON.stringify(wrapped)}`;
+});
+
+await check('and the sizes line up in their own column', async () => {
+  await page.locator('.ed-vw .ed-btn').first().click();
+  await page.waitForTimeout(300);
+
+  const rights = await page.locator('.ed-menu__hint').evaluateAll((hints) =>
+    hints.map((hint) => Math.round(hint.getBoundingClientRect().right)));
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(200);
+
+  if (rights.length < 3) return `only ${rights.length} sizes shown`;
+  const spread = Math.max(...rights) - Math.min(...rights);
+  return spread <= 1 ? true : `their right edges vary by ${spread}px`;
+});
+
+await check('and the chosen widths are remembered', async () => {
+  await page.locator('.ed-vw__num').fill('1440');
+  await page.locator('.ed-vw__num').blur();
+  await page.waitForTimeout(350);
+
+  await page.reload();
+  await page.waitForSelector('.ed-root');
+  await page.waitForTimeout(500);
+
+  const shown = Number(await page.locator('.ed-vw__num').inputValue());
+  return shown === 1440 ? true : `after reloading it says ${shown}px`;
+});
+
+await check('the preview really is too narrow to be a desktop, before folding', async () => {
+  // Back to the defaults, because the width checks above deliberately leave a
+  // custom one behind and the folding maths below is about the standard 1200.
+  await page.evaluate(() => {
+    window.localStorage.removeItem('tg-sites:viewports:v1');
+    window.localStorage.removeItem('tg-sites:panels:v1');
+  });
+  await page.reload();
+  await page.waitForSelector('.ed-root');
+  await page.waitForTimeout(400);
+
+  // If this stops being true the checks below prove nothing, so it is asserted
+  // rather than assumed.
+  const room = await canvasRoom();
+  return room < 1200
+    ? true
+    : `there is already ${room}px of room for a 1200px preview, so folding changes nothing`;
+});
+
+await check('folding the page panel gives the room to the preview', async () => {
+  const before = await canvasRoom();
   await page.locator('.ed-btn[aria-label="Hide the page panel"]').click();
   await page.waitForTimeout(400);
-  const after = await canvasWidth();
+  const after = await canvasRoom();
 
   return after >= before + 300
     ? true
-    : `the canvas went from ${before}px to ${after}px`;
-});
-
-await check('and the preview stops being a phone', async () => {
-  // Measured on the page, not on the attribute: the point of the width is what
-  // it does to the layout, and a hero that stays stacked has gained nothing.
-  const columns = await page.locator('.tgs-col').evaluateAll((cols) =>
-    cols.slice(0, 2).map((col) => Math.round(col.getBoundingClientRect().width)));
-
-  const sideBySide = columns[0] > 200 && columns[1] > 200 && columns[0] < 900;
-  return sideBySide ? true : `the first two columns are ${JSON.stringify(columns)}`;
+    : `the room went from ${before}px to ${after}px`;
 });
 
 await check('folding the settings panel too gives the rest', async () => {
-  const before = await canvasWidth();
+  const before = await canvasRoom();
   await page.locator('.ed-btn[aria-label="Hide the settings panel"]').click();
   await page.waitForTimeout(400);
-  const after = await canvasWidth();
+  const after = await canvasRoom();
 
-  return after >= before + 300 ? true : `the canvas went from ${before}px to ${after}px`;
+  return after >= before + 300 ? true : `the room went from ${before}px to ${after}px`;
+});
+
+/*
+ * WHAT FOLDING IS FOR, now that the preview has a width of its own: seeing all
+ * of it at once instead of scrolling sideways to find the right-hand column.
+ */
+await check('and the whole preview fits without scrolling sideways', async () => {
+  const fits = await page.evaluate(() => {
+    const wrap = document.querySelector('.ed-canvas-wrap');
+    const frame = document.querySelector('.ed-canvas-frame');
+    return {
+      room: wrap.clientWidth,
+      preview: Math.round(frame.getBoundingClientRect().width),
+    };
+  });
+  return fits.room >= fits.preview
+    ? true
+    : `a ${fits.preview}px preview in ${fits.room}px of room`;
 });
 
 /*
@@ -2986,18 +3199,18 @@ await check('Desktop folds the panels when the preview is too narrow to be one',
   await page.waitForSelector('.ed-root');
   await page.waitForTimeout(500);
 
-  const before = await canvasWidth();
-  if (before >= 1024) return `the canvas is already ${before}px, so there is nothing to make room for`;
+  const before = await canvasRoom();
+  if (before >= 1200) return `there is already ${before}px of room, so there is nothing to make`;
 
   await page.locator('.ed-btn', { hasText: 'Tablet' }).click();
   await page.waitForTimeout(300);
   await page.locator('.ed-btn', { hasText: 'Desktop' }).click();
   await page.waitForTimeout(500);
 
-  const after = await canvasWidth();
-  return after >= 1024
+  const after = await canvasRoom();
+  return after >= 1200
     ? true
-    : `the canvas is ${after}px after pressing Desktop, up from ${before}px`;
+    : `there is ${after}px of room after pressing Desktop, up from ${before}px`;
 });
 
 await check('and only folds, never reopens one somebody closed', async () => {

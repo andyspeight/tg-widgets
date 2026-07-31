@@ -18,6 +18,15 @@ export type MenuItem =
       separator?: false;
       icon: IconName;
       label: string;
+      /**
+       * A second, quieter value: a size, a shortcut, a count.
+       *
+       * Its own column rather than glued to the label with a separator. The
+       * preview widths read "Small laptop · 1024px" as one string, which wrapped
+       * to two lines in a 184px menu and left the numbers in a ragged column
+       * nobody could compare. Right-aligned and tabular, they line up.
+       */
+      hint?: string;
       onClick: () => void;
       disabled?: boolean;
       danger?: boolean;
@@ -101,7 +110,8 @@ export function Menu({
                 }}
               >
                 <Icon name={isChoice ? (item.checked ? 'check' : 'blank') : item.icon} size={16} />
-                {item.label}
+                <span className="ed-menu__label">{item.label}</span>
+                {item.hint && <span className="ed-menu__hint">{item.hint}</span>}
               </button>
             );
           })}

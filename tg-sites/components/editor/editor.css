@@ -733,12 +733,17 @@
 
 .ed-menu-wrap { position: relative; flex: none; }
 
+/* Sized to its longest row, never narrower than 184px and never wider than the
+   window. A fixed width made "Small laptop · 1024px" wrap to two lines, which
+   is what Andy saw. */
 .ed-menu {
   position: absolute;
   top: calc(100% + var(--ed-1));
   right: 0;
   z-index: 20;
+  width: max-content;
   min-width: 184px;
+  max-width: min(320px, calc(100vw - 32px));
   padding: var(--ed-1);
   background: var(--ed-panel);
   border: 1px solid var(--ed-line);
@@ -764,7 +769,20 @@
   color: var(--ed-ink);
   text-align: left;
   cursor: pointer;
+  white-space: nowrap;
 }
+
+.ed-menu__label { flex: 1 1 auto; }
+
+/* The number, in its own column so the sizes line up under each other. */
+.ed-menu__hint {
+  flex: none;
+  margin-left: var(--ed-4);
+  color: var(--ed-ink-3);
+  font-size: var(--ed-text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
 .ed-menu button:hover:not(:disabled) { background: var(--ed-well); }
 .ed-menu button:disabled { opacity: 0.4; cursor: not-allowed; }
 .ed-menu button[data-variant='danger'] { color: var(--ed-danger); }
@@ -780,7 +798,11 @@
   padding: var(--ed-6);
   display: flex;
   flex-direction: column;
-  align-items: center;
+  /* Centred while it fits, and pinned to the left once it does not. `center`
+     alone shifts an overflowing child so its LEFT edge goes off screen and
+     cannot be scrolled back to, which is a preview whose first column is
+     unreachable. */
+  align-items: safe center;
 }
 
 .ed-canvas-frame {
@@ -2856,4 +2878,48 @@
   color: var(--ed-ink-2);
   font-size: var(--ed-text-xs);
   font-weight: 600;
+}
+
+/* ------------------------------------------------------------------ */
+/* The preview width                                                   */
+/* ------------------------------------------------------------------ */
+
+/* What width the current preview is drawn at. Desktop used to be "whatever is
+   left", which is not a screen size: it is an accident of the window and of
+   which panels are open. Andy asked for a real number, 31 Jul 2026. */
+.ed-vw {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 36px;
+  padding-left: var(--ed-2);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+}
+
+.ed-vw__num {
+  width: 58px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ed-ink);
+  font: inherit;
+  font-size: var(--ed-text-sm);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.ed-vw__num:focus-visible { outline: 2px solid var(--ed-select); outline-offset: 2px; }
+
+/* The steppers only on hover or focus, so the bar stays calm. They are a
+   convenience: the box is typed into and the menu beside it has the presets. */
+.ed-vw__num::-webkit-inner-spin-button { opacity: 0; }
+.ed-vw:hover .ed-vw__num::-webkit-inner-spin-button,
+.ed-vw__num:focus::-webkit-inner-spin-button { opacity: 1; }
+
+.ed-vw__unit {
+  color: var(--ed-ink-3);
+  font-size: var(--ed-text-xs);
+  padding-right: 2px;
 }

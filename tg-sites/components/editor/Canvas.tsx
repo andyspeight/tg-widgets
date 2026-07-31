@@ -527,12 +527,25 @@ export function Canvas({
 
   // ---------------------------------------------------------------------
 
-  const widthPx = viewport === 'desktop' ? Number.POSITIVE_INFINITY : parseInt(viewportWidth, 10);
+  /*
+   * Every preview has a real width now, desktop included, so the stacking note
+   * no longer has to special-case it. Desktop used to be '100%', which parsed
+   * to NaN and was treated as infinitely wide, which was wrong in the one
+   * direction that mattered: on a 1440px screen the canvas was 752px and the
+   * page was drawing itself as a phone while the note said otherwise.
+   */
+  const widthPx = parseInt(viewportWidth, 10);
   const stackNote = describeStacking(page, widthPx);
 
   return (
     <div className="ed-canvas-wrap">
-      <div style={{ width: '100%', maxWidth: viewportWidth }}>
+      {/*
+        A FIXED WIDTH, not a maximum. A maximum means "this wide, or narrower if
+        that is all there is", so choosing 1200 on a screen with room for 752
+        silently gave you 752 and the phone layout with it. The wrapper scrolls,
+        and the panels fold, so the width asked for is the width drawn.
+      */}
+      <div style={{ width: viewportWidth, flex: 'none' }}>
         <div
           ref={frameRef}
           className="ed-canvas-frame"

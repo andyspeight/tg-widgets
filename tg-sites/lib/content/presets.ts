@@ -34,6 +34,7 @@ import {
   EMPTY_BOX,
   normaliseWidths,
   type Block,
+  type Column,
   type Row,
   type Section,
 } from './schema';
@@ -46,6 +47,7 @@ import {
  * Text is the whole list today, which is what Andy asked to start with.
  */
 export const PRESET_CATEGORIES = [
+  { id: 'blank', label: 'Blank' },
   { id: 'text', label: 'Text' },
 ] as const;
 
@@ -62,6 +64,16 @@ export interface PresetRow {
   widths: number[];
   /** One list of blocks per column. Must be the same length as widths. */
   columns: PresetBlock[][];
+  /**
+   * Style on the columns themselves, for the presets built out of cards.
+   *
+   * A card is a column with a border, a radius and some padding, which the
+   * column already supports: the preset just needs a way to say so. One entry
+   * per column, and a gap in the array leaves that column plain.
+   */
+  columnBox?: ReadonlyArray<Partial<Column['box']> | undefined>;
+  /** Space between the columns, when the default is not right for a card grid. */
+  gap?: number;
 }
 
 export interface SectionPreset {
@@ -72,7 +84,7 @@ export interface SectionPreset {
   description: string;
   rows: PresetRow[];
   /** Overrides on the section itself, for the few that need more room. */
-  section?: { paddingY?: number; width?: Section['width'] };
+  section?: { paddingY?: number; width?: Section['width']; tone?: Section['tone'] };
 }
 
 // ---------------------------------------------------------------------------
@@ -81,7 +93,277 @@ export interface SectionPreset {
 
 const CENTRED = { align: 'centre' } as const;
 
+/**
+ * A column drawn as a card: a hairline border, soft corners, room inside.
+ *
+ * One constant rather than repeated per preset, so the cards in the Blank
+ * category are the same card. A client who changes one afterwards changes only
+ * theirs, which is the point of it being a starting arrangement.
+ */
+const CARD = { borderWidth: 1, radius: 12, padding: { top: 24, right: 24, bottom: 24, left: 24 } } as const;
+
+/*
+ * ---------------------------------------------------------------------------
+ * Blank
+ * ---------------------------------------------------------------------------
+ *
+ * Andy asked for these on 31 Jul 2026, as a category of their own. They are the
+ * neutral starting arrangements every site needs and no site is defined by: an
+ * opener, a picture beside some words, a row of cards, an about line. Nothing
+ * here is about travel, which is exactly why they are called Blank and sit above
+ * Text in the list.
+ */
 export const SECTION_PRESETS: readonly SectionPreset[] = [
+  {
+    id: 'blank-opener',
+    category: 'blank',
+    label: 'Title, words and a button',
+    description: 'A centred opener with somewhere to go next. Good at the top of a page.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { text: 'Add your title here', style: 'h2', ...CENTRED } },
+            {
+              type: 'text',
+              props: {
+                html:
+                  '<p>Two or three sentences that say what this page is for and why it is '
+                  + 'worth reading. Say the useful thing first.</p>',
+                ...CENTRED,
+              },
+            },
+            { type: 'button', props: { label: 'Learn more', align: 'centre' } },
+          ],
+        ],
+      },
+    ],
+    section: { paddingY: 80 },
+  },
+
+  {
+    id: 'blank-image-and-words',
+    category: 'blank',
+    label: 'Picture beside words',
+    description: 'A picture on one side, the explanation and a button on the other.',
+    rows: [
+      {
+        widths: [1, 1],
+        columns: [
+          [{ type: 'image', props: { alt: '' } }],
+          [
+            { type: 'heading', props: { text: 'Tagline here', style: 'h6', level: 'h3' } },
+            { type: 'heading', props: { text: 'Add your title here', style: 'h2' } },
+            {
+              type: 'text',
+              props: {
+                html:
+                  '<p>A short paragraph about what is in the picture, or about the thing '
+                  + 'the picture is standing in for.</p>',
+              },
+            },
+            { type: 'button', props: { label: 'Learn more' } },
+          ],
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'blank-three-cards',
+    category: 'blank',
+    label: 'Three cards',
+    description: 'A title, then three bordered cards. For three things of equal weight.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { text: 'Tagline here', style: 'h6', level: 'h3', ...CENTRED } },
+            { type: 'heading', props: { text: 'Add your title here', style: 'h2', ...CENTRED } },
+          ],
+        ],
+      },
+      {
+        widths: [1, 1, 1],
+        gap: 24,
+        columnBox: [CARD, CARD, CARD],
+        columns: [
+          [
+            { type: 'icon-item', props: { icon: '\u2708', title: 'Short title', body: 'One sentence on what this is and why it matters.' } },
+            { type: 'button', props: { label: 'Learn more', variant: 'ghost' } },
+          ],
+          [
+            { type: 'icon-item', props: { icon: '\u2691', title: 'Short title', body: 'One sentence on what this is and why it matters.' } },
+            { type: 'button', props: { label: 'Learn more', variant: 'ghost' } },
+          ],
+          [
+            { type: 'icon-item', props: { icon: '\u2605', title: 'Short title', body: 'One sentence on what this is and why it matters.' } },
+            { type: 'button', props: { label: 'Learn more', variant: 'ghost' } },
+          ],
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'blank-two-cards',
+    category: 'blank',
+    label: 'Two cards',
+    description: 'Two bordered panels side by side. For a pair of choices.',
+    rows: [
+      {
+        widths: [1, 1],
+        gap: 24,
+        columnBox: [CARD, CARD],
+        columns: [
+          [
+            { type: 'heading', props: { text: 'Short title', style: 'h4' } },
+            {
+              type: 'text',
+              props: {
+                html:
+                  '<p>A few lines on what this one is, and who it suits. Keep the two '
+                  + 'cards about the same length so neither looks like the afterthought.</p>',
+              },
+            },
+            { type: 'button', props: { label: 'Learn more', variant: 'secondary' } },
+          ],
+          [
+            { type: 'heading', props: { text: 'Short title', style: 'h4' } },
+            {
+              type: 'text',
+              props: {
+                html:
+                  '<p>A few lines on what this one is, and who it suits. Keep the two '
+                  + 'cards about the same length so neither looks like the afterthought.</p>',
+              },
+            },
+            { type: 'button', props: { label: 'Learn more', variant: 'secondary' } },
+          ],
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'blank-four-points',
+    category: 'blank',
+    label: 'Four points',
+    description: 'Four short points across the page. Stacks in pairs, then singly.',
+    rows: [
+      {
+        widths: [1, 1, 1, 1],
+        gap: 24,
+        columns: [
+          [
+            { type: 'icon-item', props: { icon: '\u2708', title: 'Short title', body: 'One line on this point.', ...CENTRED } },
+            { type: 'button', props: { label: 'Learn more', variant: 'ghost', align: 'centre' } },
+          ],
+          [
+            { type: 'icon-item', props: { icon: '\u2691', title: 'Short title', body: 'One line on this point.', ...CENTRED } },
+            { type: 'button', props: { label: 'Learn more', variant: 'ghost', align: 'centre' } },
+          ],
+          [
+            { type: 'icon-item', props: { icon: '\u2605', title: 'Short title', body: 'One line on this point.', ...CENTRED } },
+            { type: 'button', props: { label: 'Learn more', variant: 'ghost', align: 'centre' } },
+          ],
+          [
+            { type: 'icon-item', props: { icon: '\u2665', title: 'Short title', body: 'One line on this point.', ...CENTRED } },
+            { type: 'button', props: { label: 'Learn more', variant: 'ghost', align: 'centre' } },
+          ],
+        ],
+      },
+    ],
+    section: { tone: 'subtle' },
+  },
+
+  {
+    id: 'blank-statement',
+    category: 'blank',
+    label: 'Statement with a rule',
+    description: 'A large centred title over a line, then the detail underneath.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { text: 'Add your title here', style: 'h1', ...CENTRED } },
+            { type: 'divider' },
+            {
+              type: 'text',
+              props: {
+                html:
+                  '<p>The first paragraph, centred under the rule. This is where the '
+                  + 'thing you most want read should go.</p>'
+                  + '<p>A second paragraph, if there is more to say. Two is usually the '
+                  + 'point at which somebody stops reading.</p>',
+                ...CENTRED,
+              },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { paddingY: 96 },
+  },
+
+  {
+    id: 'blank-words-and-video',
+    category: 'blank',
+    label: 'Words beside a video',
+    description: 'The explanation on one side, something to watch on the other.',
+    rows: [
+      {
+        widths: [1, 1],
+        columns: [
+          [
+            { type: 'heading', props: { text: 'Tagline here', style: 'h6', level: 'h3' } },
+            { type: 'heading', props: { text: 'Add your title here', style: 'h2' } },
+            {
+              type: 'text',
+              props: {
+                html:
+                  '<p>A short paragraph setting up what the video shows, so somebody can '
+                  + 'decide whether to watch it before they press play.</p>',
+              },
+            },
+            { type: 'button', props: { label: 'Learn more', variant: 'ghost' } },
+          ],
+          [{ type: 'video' }],
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'blank-about',
+    category: 'blank',
+    label: 'About',
+    description: 'A heading on the left and the writing beside it, on a tinted band.',
+    rows: [
+      {
+        widths: [1, 2],
+        columns: [
+          [{ type: 'heading', props: { text: 'About', style: 'h2' } }],
+          [
+            {
+              type: 'text',
+              props: {
+                html:
+                  '<p>Who you are, in the words somebody would use out loud. Two or three '
+                  + 'sentences is plenty here: this is the part people read on the way to '
+                  + 'something else.</p>',
+              },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { tone: 'subtle' },
+  },
+
   {
     id: 'text-intro',
     category: 'text',
@@ -574,7 +856,7 @@ export function presetsIn(category: PresetCategory): SectionPreset[] {
 export function buildPresetSection(preset: SectionPreset): Section {
   return {
     id: newId('sec'),
-    tone: 'light',
+    tone: preset.section?.tone ?? 'light',
     width: preset.section?.width ?? 'contained',
     paddingY: preset.section?.paddingY ?? DEFAULT_SECTION_PADDING,
     minHeight: 0,
@@ -589,10 +871,12 @@ function buildRow(row: PresetRow): Row {
 
   return {
     id: newId('row'),
-    columns: widths.map((width, index) =>
-      createColumn(width, (row.columns[index] ?? []).map(buildBlock)),
-    ),
-    gap: DEFAULT_GAP,
+    columns: widths.map((width, index) => {
+      const column = createColumn(width, (row.columns[index] ?? []).map(buildBlock));
+      const box = row.columnBox?.[index];
+      return box ? { ...column, box: { ...column.box, ...box } } : column;
+    }),
+    gap: row.gap ?? DEFAULT_GAP,
     stackBelow: 'mobile',
     reverseOnStack: false,
   };
