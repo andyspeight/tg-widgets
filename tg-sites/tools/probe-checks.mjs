@@ -289,17 +289,24 @@ const MUTATIONS = [
   {
     tag: 'widget',
     check: 'including both ways to put a widget on a page',
-    why: 'Make the third-party block staff only, so a client cannot reach it.',
+    /*
+     * A GROUP THE PICKER DOES NOT DRAW, which is the shape of bug that removes a
+     * card while the block still exists and everything still typechecks.
+     *
+     * The first attempt made the block staffOnly and the probe reported MISSED.
+     * blocksByGroup keeps a staff-only block when isStaff, and the standalone
+     * harness runs as staff, so the card was still there. The claim that a
+     * client can reach these blocks is not one the harness can make: it lives in
+     * tests/content.test.ts instead, where staffOnly is read off the registry.
+     */
+    why: 'Put the block in a group the picker does not draw, so its card disappears.',
     file: 'lib/content/blocks.ts',
     from: `    type: 'embed-widget',
     label: 'Embedded widget',
-    group: 'Advanced',
-    icon: 'code',`,
+    group: 'Advanced',`,
     to: `    type: 'embed-widget',
     label: 'Embedded widget',
-    group: 'Advanced',
-    icon: 'code',
-    staffOnly: true,`,
+    group: 'Nowhere',`,
   },
 
   // --- a heading holds markup ----------------------------------------------
@@ -636,8 +643,21 @@ try {
       writeFileSync(target, original);
     }
 
+    /*
+     * PASS IS THE MARKER, NOT FAIL, and that is a fix rather than a preference.
+     *
+     * The verifier prints `<status> <name>`, where status is PASS or FAIL with a
+     * reason. When the reason contains newlines, which a Playwright call log
+     * always does, the name ends up on a LATER line than the word FAIL. Looking
+     * for FAIL on the name's line then reported MISSED for a check that had
+     * failed exactly as intended.
+     *
+     * A passing line always carries PASS and the name together, so the absence
+     * of PASS on the name's line is the reliable signal. The empty-line guard
+     * stays: no line at all means the check never ran, which is not a catch.
+     */
     const line = output.split('\n').find((row) => row.includes(mutation.check)) ?? '';
-    const noticed = line.includes('FAIL');
+    const noticed = line !== '' && !line.includes('PASS');
     console.log(`  ${noticed ? 'caught ' : 'MISSED '} ${mutation.check}`);
     if (!noticed) {
       bad += 1;
