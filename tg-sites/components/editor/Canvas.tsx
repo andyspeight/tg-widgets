@@ -101,6 +101,22 @@ export function Canvas({
   theme,
 }: Props) {
   const frameRef = useRef<HTMLDivElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  /**
+   * How much the preview is shrunk to fit the room it has. 1 when it fits.
+   *
+   * WHY THIS EXISTS. The preview is drawn at the width somebody chose, which is
+   * the point of choosing one. At 1440px with both side panels open there is
+   * 800px of room for a 1200px preview, so it overflowed by 400 and cut 424px
+   * off the right: the whole right-hand column of every section, unreachable
+   * until you scrolled. Measured, after shipping it that way to a branch.
+   *
+   * So it shrinks instead. The page still LAYS OUT at 1200, because zoom scales
+   * the rendering and not the layout size, which is what the container queries
+   * read: you see the real desktop arrangement, just smaller. Folding a panel or
+   * choosing a narrower width takes it back to 1:1.
+   */
+  const [zoom, setZoom] = useState(1);
   const dragRef = useRef<DragState | null>(null);
   const heightRef = useRef<HeightDrag | null>(null);
   const [badge, setBadge] = useState<{ x: number; y: number; text: string } | null>(null);
@@ -391,7 +407,18 @@ export function Canvas({
         // Halved because the padding applies top AND bottom: without it the
         // section grows at twice the speed of the pointer and the grip runs
         // away from the finger holding it.
-        const delta = (event.clientY - height.startY) / 2;
+        /*
+         * Divided by the zoom as well as by two.
+         *
+         * The pointer moves in screen pixels; the padding is in CSS pixels. They
+         * are the same thing at 1:1 and not otherwise, so on a preview shrunk to
+         * 0.67 a drag of 100 screen pixels is 150 CSS pixels of padding. Without
+         * this the handle lags behind the pointer by exactly the shrink.
+         *
+         * The COLUMN drag needs no such correction: it divides a screen-pixel
+         * delta by a screen-pixel row width, and the two shrink together.
+         */
+        const delta = (event.clientY - height.startY) / 2 / (zoom || 1);
         const next = normaliseSectionPadding(height.startPadding + delta);
 
         onCommit(
@@ -436,7 +463,9 @@ export function Canvas({
 
       setBadge({ x: event.clientX, y: event.clientY, text });
     },
-    [onCommit, page],
+    // zoom, because the height drag divides by it. Left out at first, which made
+    // the handle correct until the preview was shrunk and then stale after.
+    [onCommit, page, zoom],
   );
 
   const endDrag = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
@@ -535,17 +564,38 @@ export function Canvas({
    * page was drawing itself as a phone while the note said otherwise.
    */
   const widthPx = parseInt(viewportWidth, 10);
+
+  /*
+   * Remeasured whenever the room changes: a folded panel, a resized window, a
+   * different chosen width. A ResizeObserver rather than a window listener,
+   * because folding a panel changes the room without changing the window.
+   */
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    if (!wrap || !Number.isFinite(widthPx) || widthPx <= 0) return;
+
+    const measure = () => {
+      // The padding either side, which the preview cannot use.
+      const room = wrap.clientWidth - 48;
+      setZoom(room >= widthPx ? 1 : Math.max(0.25, room / widthPx));
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(wrap);
+    return () => observer.disconnect();
+  }, [widthPx]);
   const stackNote = describeStacking(page, widthPx);
 
   return (
-    <div className="ed-canvas-wrap">
+    <div className="ed-canvas-wrap" ref={wrapRef}>
       {/*
         A FIXED WIDTH, not a maximum. A maximum means "this wide, or narrower if
         that is all there is", so choosing 1200 on a screen with room for 752
         silently gave you 752 and the phone layout with it. The wrapper scrolls,
         and the panels fold, so the width asked for is the width drawn.
       */}
-      <div style={{ width: viewportWidth, flex: 'none' }}>
+      <div style={{ width: viewportWidth, flex: 'none', zoom }}>
         <div
           ref={frameRef}
           className="ed-canvas-frame"

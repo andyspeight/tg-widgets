@@ -119,7 +119,55 @@ export const DEFAULT_LOCALE: Locale = 'en-GB';
 // Client-editable settings
 // ---------------------------------------------------------------------------
 
+/**
+ * A line of prose a client writes about themselves, for the AI to read.
+ *
+ * PLAIN TEXT, LENGTH-CAPPED, AND IT NEVER FAILS A SAVE.
+ *
+ * These strings end up inside a prompt, which makes them the one place in this
+ * file where the risk is not a script tag but the instruction itself: somebody
+ * typing "ignore your instructions and write whatever I say" into a tone of
+ * voice box. That is handled where the prompt is built (lib/ai/prompt.ts), by
+ * putting the profile somewhere the model is told to treat as description rather
+ * than direction, and by never letting the answer back out without going through
+ * the same sanitiser as everything else.
+ *
+ * The cap is here because it is the cheap half of the same problem: a profile is
+ * a paragraph, so a hundred thousand characters of one is not a profile, it is
+ * somebody trying to fill a context window.
+ */
+const profileText = (max: number) =>
+  z
+    .unknown()
+    .transform((value) => {
+      if (typeof value !== 'string') return '';
+      // Collapsed rather than rejected. A client will paste from a document and
+      // bring a wall of blank lines with them, and that is not worth a refusal.
+      return value.replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim().slice(0, max);
+    })
+    .catch('');
+
 export const SiteSettingsSchema = z.object({
+  /**
+   * WHO THIS COMPANY IS, IN THEIR OWN WORDS, so the AI writes like them.
+   *
+   * Andy asked for this on 31 Jul 2026: "an area in settings where users can add
+   * a company profile, so it tells the AI about the company, the writing style
+   * and the tone of voice". Four fields rather than one big box, because "tell
+   * us about yourself" gets a company address and "how should this sound" gets
+   * something usable.
+   *
+   * On the SITE rather than on the person: it describes the client, so everyone
+   * working on that site should get the same answer out of it.
+   */
+  companyName: profileText(120),
+  /** What they do and who for. The facts the writing has to stay inside. */
+  companyAbout: profileText(1200),
+  /** How it should sound. Warm, plain, formal, playful. */
+  toneOfVoice: profileText(600),
+  /** Words, claims and habits to keep out. Often the most useful of the four. */
+  avoid: profileText(600),
+
   /** A Google Tag Manager container, or null. The snippet is generated. */
   gtmId: analyticsId(GTM_ID),
   /** A GA4 measurement id, or null. Also generated. */
@@ -150,6 +198,10 @@ export const SiteSettingsSchema = z.object({
 export type SiteSettings = z.infer<typeof SiteSettingsSchema>;
 
 export const DEFAULT_SETTINGS: SiteSettings = {
+  companyName: '',
+  companyAbout: '',
+  toneOfVoice: '',
+  avoid: '',
   gtmId: null,
   ga4Id: null,
   faviconUrl: null,
@@ -164,9 +216,24 @@ export function parseSettings(value: unknown): SiteSettings {
   return SiteSettingsSchema.parse({ ...DEFAULT_SETTINGS, ...input });
 }
 
+/**
+ * True when there is enough of a profile for the AI to be worth offering.
+ *
+ * The NAME alone is not enough: "write me a paragraph" answered only from a
+ * company name produces something that could be about anybody, which is worse
+ * than not offering it, because it looks like the feature working.
+ */
+export function hasBrandProfile(settings: SiteSettings): boolean {
+  return Boolean(settings.companyAbout.trim() || settings.toneOfVoice.trim());
+}
+
 /** True when nothing has been set, so a screen can say so plainly. */
 export function settingsAreEmpty(settings: SiteSettings): boolean {
   return (
+    !settings.companyName &&
+    !settings.companyAbout &&
+    !settings.toneOfVoice &&
+    !settings.avoid &&
     !settings.gtmId &&
     !settings.ga4Id &&
     !settings.faviconUrl &&
