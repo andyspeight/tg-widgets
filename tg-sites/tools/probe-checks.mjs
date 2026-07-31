@@ -434,7 +434,12 @@ const run = (command) => execSync(command, { cwd: here, encoding: 'utf8', stdio:
  */
 const only = process.argv[2];
 const chosen = only
-  ? MUTATIONS.filter((m) => (m.check + m.why).toLowerCase().includes(only.toLowerCase()))
+  ? MUTATIONS.filter((m) =>
+      // The suite name is searchable too, so "settings" runs every mutation
+      // aimed at that screen without having to know what each one is called.
+      `${m.check} ${m.why} ${m.file} ${m.suite ?? 'editor'}`
+        .toLowerCase()
+        .includes(only.toLowerCase()))
   : MUTATIONS;
 
 if (only) {
