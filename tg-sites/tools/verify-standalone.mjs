@@ -455,8 +455,24 @@ await check('block picker opens from a section', async () => {
   return (await page.locator('.tg-modal').count()) === 1;
 });
 
+/*
+ * The count MOVES DELIBERATELY. It was 13 until the two widget blocks landed on
+ * 31 Jul 2026. A hardcoded number is the point rather than a maintenance cost:
+ * adding a block should make somebody look at the picker, and a block that
+ * silently stops rendering its card is exactly what this catches.
+ *
+ * Fifteen because the harness runs as staff, so the staff-only Embed block is in
+ * there too.
+ */
 await check('block picker offers the full library', async () =>
-  (await page.locator('.ed-block-card').count()) === 13);
+  (await page.locator('.ed-block-card').count()) === 15);
+
+await check('including both ways to put a widget on a page', async () => {
+  const cards = (await page.locator('.ed-block-card').allInnerTexts()).join(' | ');
+  const ours = /Travelgenix widget/.test(cards);
+  const theirs = /Embedded widget/.test(cards);
+  return ours && theirs ? true : `ours ${ours}, theirs ${theirs}`;
+});
 
 // Leave the page as we found it, or the open modal eats the next click.
 await page.keyboard.press('Escape');
@@ -3764,6 +3780,98 @@ await check('the fold controls meet the 44px rule', async () => {
     return out;
   });
   return small.length === 0 ? true : `too small: ${small.join(', ')}`;
+});
+
+// ---------------------------------------------------------------------------
+// The widget blocks
+//
+// THE CLAIM WORTH CHECKING IN A BROWSER IS A NEGATIVE ONE: the editor must not
+// run anybody's widget. Not ours, because re-initialising a widget on every
+// keystroke would thrash the canvas and hammer the config API, and not a third
+// party's, because their analytics should not count an editing session as
+// traffic on the client's site.
+//
+// That is a claim about what is ABSENT from the document, which no unit test can
+// make. What the published page renders is covered in tests/content.test.ts,
+// where the sandbox tokens and the script URL construction live.
+// ---------------------------------------------------------------------------
+
+await page.reload();
+await page.waitForSelector('.ed-root');
+await showPanels();
+
+/** Add a block by its name in the picker, into the first section. */
+async function addBlock(name) {
+  await openBlockPicker();
+  await page.locator('.ed-block-card', { hasText: name }).first().click();
+  await page.waitForTimeout(500);
+}
+
+await check('a Travelgenix widget can be put on a page', async () => {
+  await addBlock('Travelgenix widget');
+  const ghost = await page.locator('.tgs-widget-ghost').count();
+  const placeholder = await page.locator('.tgs-placeholder').count();
+  // Fresh, so it has no id yet and asks for one rather than drawing nothing.
+  return ghost + placeholder > 0 ? true : 'nothing was added';
+});
+
+await check('and asks for the ID rather than rendering an empty box', async () => {
+  const text = await page.locator('.ed-canvas-frame .tgs-placeholder').last().innerText();
+  return /tgw_/.test(text) ? true : `it says "${text}"`;
+});
+
+await check('a valid ID turns it into a labelled placeholder, not a live widget', async () => {
+  const field = page.locator('.ed-props input.ed-input').last();
+  await field.fill('tgw_verify123');
+  await page.waitForTimeout(500);
+
+  const ghost = page.locator('.tgs-widget-ghost');
+  if (!(await ghost.count())) return 'no placeholder appeared';
+  const text = await ghost.last().innerText();
+  return /tgw_verify123/.test(text) ? true : `the placeholder says "${text}"`;
+});
+
+/*
+ * THE ONE THAT MATTERS. A widget script loading in the editor is the failure
+ * this design exists to avoid, and it is invisible: the page would look right.
+ */
+await check('and the editor loads no widget script at all', async () => {
+  const scripts = await page.evaluate(() =>
+    [...document.querySelectorAll('script[src]')]
+      .map((s) => s.getAttribute('src'))
+      .filter((src) => /travelify|widget-/.test(src ?? '')));
+  return scripts.length === 0 ? true : JSON.stringify(scripts);
+});
+
+await check('nor draws the container the script would fill', async () => {
+  const containers = await page.locator('[data-tg-widget]').count();
+  return containers === 0 ? true : `${containers} live widget containers on the canvas`;
+});
+
+await check("somebody else's widget can be put on a page too", async () => {
+  await addBlock('Embedded widget');
+  const added = await page.locator('.ed-canvas-frame .tgs-placeholder').count();
+  return added > 0 ? true : 'nothing was added';
+});
+
+/*
+ * And their code does not run while you edit either. A sealed frame would be
+ * safe, but it would still reload on every keystroke and report an editing
+ * session to their analytics as if it were a visitor.
+ */
+await check('and their code does not run on the canvas either', async () => {
+  const field = page.locator('.ed-props textarea').last();
+  await field.fill('<script>window.__TG_EMBED_RAN__ = true;</script><p>hello</p>');
+  await page.waitForTimeout(600);
+
+  const frames = await page.locator('.ed-canvas-frame iframe').count();
+  const ran = await page.evaluate(() => Boolean(window.__TG_EMBED_RAN__));
+  return frames === 0 && !ran ? true : `${frames} frames, script ran ${ran}`;
+});
+
+await check('it shows what it is instead, so the layout is still readable', async () => {
+  const ghost = await page.locator('.tgs-widget-ghost').last().innerText();
+  return /published page/i.test(ghost) ? true : `it says "${ghost}"`;
 });
 
 await browser.close();
