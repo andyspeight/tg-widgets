@@ -28,6 +28,7 @@ import {
   QuoteBlock,
   SliderBlock,
   SpacerBlock,
+  TableBlock,
   TabsBlock,
   TextBlock,
   VideoBlock,
@@ -83,6 +84,8 @@ export function BlockRenderer({
         return <ButtonGroupBlock props={props} />;
       case 'nav':
         return <NavBlock props={props} />;
+      case 'table':
+        return <TableBlock props={props} />;
       case 'divider':
         return <DividerBlock props={props} />;
       case 'spacer':

@@ -13,6 +13,7 @@
 
 import type { CSSProperties, ReactElement } from 'react';
 import { escapeHtml, safeUrl, sanitiseHtml } from '../../lib/content/sanitise';
+import { parseTable } from '../../lib/content/table';
 import { resolveVideo } from '../../lib/content/video';
 import { safeWidgetId, widgetKind } from '../../lib/content/widgets';
 
@@ -946,6 +947,75 @@ export function NavBlock({ props }: { props: Props }): ReactElement {
         </details>
       )}
     </nav>
+  );
+}
+
+/**
+ * A table.
+ *
+ * THE `scope` ATTRIBUTES ARE THE WHOLE ACCESSIBILITY STORY, and they are the
+ * reason this is a block rather than something somebody builds out of columns.
+ * A screen reader reading the third cell of the fourth row announces the column
+ * heading and, in a comparison table, the row heading with it. Without scope it
+ * reads out twenty-four numbers with nothing to attach them to.
+ *
+ * THE SCROLL BOX TAKES FOCUS for the same reason the slider's rail does: a
+ * table wider than a phone has to be scrollable, and a scrollable region a
+ * keyboard cannot reach is a WCAG failure.
+ */
+export function TableBlock({ props }: { props: Props }): ReactElement {
+  const rows = parseTable(props.data);
+  const headerRow = bool(props, 'headerRow', true);
+  const firstColumnHeader = bool(props, 'firstColumnHeader', true);
+  const style = oneOf(props, 'style', ['plain', 'lined', 'striped', 'boxed'] as const, 'lined');
+  const caption = str(props, 'caption');
+
+  if (rows.length === 0) {
+    return <div className="tgs-placeholder">Paste a table, one row per line</div>;
+  }
+
+  const head = headerRow ? rows[0] : null;
+  const body = headerRow ? rows.slice(1) : rows;
+
+  return (
+    <div
+      className="tgs-table__scroll"
+      role="region"
+      aria-label={caption || 'Table. Scroll sideways to see all of it.'}
+      tabIndex={0}
+    >
+      <table className="tgs-table" data-style={style}>
+        {caption && <caption className="tgs-table__caption">{caption}</caption>}
+
+        {head && (
+          <thead>
+            <tr>
+              {head.map((cell, index) => (
+                <th key={index} scope="col">
+                  {cell}
+                </th>
+              ))}
+            </tr>
+          </thead>
+        )}
+
+        <tbody>
+          {body.map((row, rowIndex) => (
+            <tr key={rowIndex}>
+              {row.map((cell, cellIndex) =>
+                firstColumnHeader && cellIndex === 0 ? (
+                  <th key={cellIndex} scope="row">
+                    {cell}
+                  </th>
+                ) : (
+                  <td key={cellIndex}>{cell}</td>
+                ),
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 

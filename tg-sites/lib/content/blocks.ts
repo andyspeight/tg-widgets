@@ -941,6 +941,86 @@ export const BLOCKS: readonly BlockDefinition[] = [
     ],
   },
 
+  {
+    /*
+     * A TABLE, PASTED RATHER THAN TYPED INTO A NESTED REPEATER.
+     *
+     * The obvious editor for a table is a repeater of rows each holding a
+     * repeater of cells, and it is miserable: adding a column means opening
+     * every row and adding a cell to each, in the right position, from memory.
+     * A four-by-six table is twenty-four boxes to fill in one at a time.
+     *
+     * So the whole grid is one box, one row per line. Cells split on a TAB, and
+     * a tab is exactly what a spreadsheet puts on the clipboard, so selecting a
+     * range in Excel or Sheets and pasting it here just works. A pipe is
+     * accepted too, for anybody typing one out by hand.
+     *
+     * The cost is that a cell cannot contain a line break or a tab. For a
+     * comparison table, a price list or a spec, that is not a cost anybody
+     * notices; for prose there is the Text block.
+     */
+    type: 'table',
+    label: 'Table',
+    group: 'Layout',
+    icon: 'table',
+    description: 'A grid of figures or facts. Paste it straight from a spreadsheet.',
+    defaults: {
+      headerRow: true,
+      firstColumnHeader: true,
+      style: 'lined',
+      caption: '',
+      data: [
+        'Board basis\tSpark\tBoost\tIgnite',
+        'Room only\tYes\tYes\tYes',
+        'Bed and breakfast\tNo\tYes\tYes',
+        'All inclusive\tNo\tNo\tYes',
+      ].join('\n'),
+    },
+    summarise: (props) => {
+      const rows = asString(props.data).split('\n').filter((line) => line.trim()).length;
+      return `Table (${rows} row${rows === 1 ? '' : 's'})`;
+    },
+    fields: [
+      {
+        kind: 'textarea',
+        key: 'data',
+        label: 'The table',
+        rows: 8,
+        max: 8000,
+        help: 'One row per line. Copy a range from a spreadsheet and paste it here, or type the columns apart with a | between them.',
+      },
+      {
+        kind: 'toggle',
+        key: 'headerRow',
+        label: 'The first line is the headings',
+      },
+      {
+        kind: 'toggle',
+        key: 'firstColumnHeader',
+        label: 'The first column is headings too',
+        help: 'For a comparison table, where the left column says what each row is.',
+      },
+      {
+        kind: 'select',
+        key: 'style',
+        label: 'Style',
+        options: [
+          { value: 'plain', label: 'Plain' },
+          { value: 'lined', label: 'Ruled' },
+          { value: 'striped', label: 'Banded' },
+          { value: 'boxed', label: 'Boxed' },
+        ],
+      },
+      {
+        kind: 'text',
+        key: 'caption',
+        label: 'Caption',
+        max: 200,
+        help: 'Read out before the table by a screen reader, and shown under it.',
+      },
+    ],
+  },
+
   // --- Layout -----------------------------------------------------------
   {
     type: 'divider',

@@ -403,7 +403,33 @@
 
 @container tgs-page (max-width: 767px) {
   .tgs-row { grid-template-columns: 1fr; }
-  .tgs-row[data-reverse='true'] { display: flex; flex-direction: column-reverse; }
+  /*
+   * A COLUMN FLEX CONTAINER TURNS EVERY VERTICAL ALIGNMENT INTO A HORIZONTAL
+   * ONE, and that is the bug these two rules exist to close.
+   *
+   * `.tgs-row` sets `align-items: start` and `.tgs-col[data-align='centre']`
+   * sets `align-self: center`, both meaning "how this column sits VERTICALLY
+   * beside the others" while the row is a grid. The moment this rule makes the
+   * row a COLUMN flex container the cross axis is horizontal, so the same two
+   * declarations now say "do not stretch across", and each column sizes itself
+   * to its widest content instead of to the row.
+   *
+   * Harmless until a block has an intrinsic width bigger than the screen. A
+   * table of eight columns on a 390px preview then made its column 464px wide,
+   * pushed the section past the viewport, and stopped the table's own scroll box
+   * from ever scrolling, because the box had been given all the room it asked
+   * for. The browser suite caught it as "the page scrolls sideways", which is
+   * the one thing a rendered page must never do.
+   *
+   * Nothing is lost by forcing stretch here: the columns are stacked, so where
+   * they sit vertically beside each other is no longer a question.
+   */
+  .tgs-row[data-reverse='true'] {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+  .tgs-row[data-reverse='true'] > .tgs-col { align-self: stretch; }
 
   /* Side by side gives up on a phone, for the same reason a row does: two
      things sharing 390px is two things nobody can read. */
@@ -1139,6 +1165,73 @@
      thumbnail and the words next to it are a column three words wide. */
   .tgs-cards[data-image='left'] .tgs-card { flex-direction: column; }
   .tgs-cards[data-image='left'] .tgs-card__frame { flex: none; aspect-ratio: 16 / 9; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Table                                                               */
+/* ------------------------------------------------------------------ */
+
+/*
+ * THE SCROLL BOX IS NOT OPTIONAL. A six-column table cannot be made to fit a
+ * 390px screen by any amount of wrapping, and a rendered page must never scroll
+ * sideways, so the table scrolls inside its own box instead. Focusable for the
+ * same reason the slider's rail is: a scrollable region a keyboard cannot reach
+ * is a WCAG failure.
+ */
+.tgs-table__scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--tgs-border-strong) transparent;
+}
+.tgs-table__scroll:focus-visible {
+  outline: 3px solid var(--tgs-accent);
+  outline-offset: 4px;
+}
+.tgs-table__scroll::-webkit-scrollbar { height: 8px; }
+.tgs-table__scroll::-webkit-scrollbar-thumb {
+  background: var(--tgs-border-strong);
+  border-radius: 999px;
+}
+
+.tgs-table {
+  border-collapse: collapse;
+  /* Fills the space when there is room and refuses to squash when there is not,
+     which is what makes the scroll box above do its job. */
+  width: 100%;
+  min-width: max-content;
+  font-size: var(--tgs-text-s);
+}
+
+.tgs-table th,
+.tgs-table td {
+  padding: var(--tgs-space-s) var(--tgs-space-m);
+  text-align: left;
+  vertical-align: top;
+}
+.tgs-table th { font-weight: 600; color: var(--tgs-text); }
+.tgs-table td { color: var(--tgs-text-muted); }
+
+.tgs-table thead th {
+  border-bottom: 2px solid var(--tgs-border-strong);
+  white-space: nowrap;
+}
+
+.tgs-table[data-style='lined'] tbody tr + tr th,
+.tgs-table[data-style='lined'] tbody tr + tr td { border-top: 1px solid var(--tgs-border); }
+
+.tgs-table[data-style='striped'] tbody tr:nth-child(even) th,
+.tgs-table[data-style='striped'] tbody tr:nth-child(even) td { background: var(--tgs-surface-alt); }
+
+.tgs-table[data-style='boxed'] th,
+.tgs-table[data-style='boxed'] td { border: 1px solid var(--tgs-border); }
+
+.tgs-table__caption {
+  caption-side: bottom;
+  padding-top: var(--tgs-space-s);
+  font-size: var(--tgs-text-s);
+  color: var(--tgs-text-muted);
+  text-align: left;
 }
 
 /* ------------------------------------------------------------------ */

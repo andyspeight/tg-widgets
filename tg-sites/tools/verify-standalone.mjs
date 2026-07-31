@@ -458,15 +458,16 @@ await check('block picker opens from a section', async () => {
 /*
  * The count MOVES DELIBERATELY. 13 until the two widget blocks landed on 31 Jul
  * 2026, 15 when the menu joined them, 16 when Cards did, 18 with Accordion and
- * Tabs, 19 with the Slider. A hardcoded number is the point rather than a
- * maintenance cost: adding a block should make somebody look at the picker, and
- * a block that silently stops rendering its card is exactly what this catches.
+ * Tabs, 19 with the Slider, 20 with the Table. A hardcoded number is the point
+ * rather than a maintenance cost: adding a block should make somebody look at
+ * the picker, and a block that silently stops rendering its card is exactly what
+ * this catches.
  *
- * Twenty because the harness runs as staff, so the staff-only Embed block is in
- * there too.
+ * Twenty-one because the harness runs as staff, so the staff-only Embed block is
+ * in there too.
  */
 await check('block picker offers the full library', async () =>
-  (await page.locator('.ed-block-card').count()) === 20);
+  (await page.locator('.ed-block-card').count()) === 21);
 
 await check('including both ways to put a widget on a page', async () => {
   const cards = (await page.locator('.ed-block-card').allInnerTexts()).join(' | ');
@@ -4114,7 +4115,7 @@ await check('the header offers the same blocks a page does', async () => {
   await page.keyboard.press('Escape');
   await page.waitForTimeout(200);
   // The whole library, because a header is sections and rows like anything else.
-  return count === 20 ? true : `${count} blocks in the header picker`;
+  return count === 21 ? true : `${count} blocks in the header picker`;
 });
 
 await check('a menu in a header saves through the region actions', async () => {
@@ -4787,6 +4788,171 @@ await check('and the page still does not scroll sideways on a phone', async () =
     return page_ ? page_.scrollWidth > page_.clientWidth + 1 : false;
   });
   return sideways === false ? true : 'the phone preview scrolls sideways';
+});
+
+await page.getByRole('button', { name: 'Desktop' }).click();
+await page.waitForTimeout(300);
+await showPanels();
+
+
+
+// ---------------------------------------------------------------------------
+// The table
+//
+// The parser is covered in Node, where it belongs. What only a browser can
+// settle is whether a table too wide for the space scrolls INSIDE ITS OWN BOX
+// rather than dragging the page sideways with it, which is the rule the whole
+// rendered page is held to.
+// ---------------------------------------------------------------------------
+
+await page.reload();
+await page.waitForSelector('.ed-root');
+await showPanels();
+
+await check('the Table is in the block picker', async () => {
+  await openBlockPicker();
+  const found = await page.locator('.ed-block-card', { hasText: 'Table' }).count();
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(200);
+  return found >= 1 ? true : 'no Table card';
+});
+
+await check('a table arrives drawn, not as an empty grid', async () => {
+  await addBlock('Table');
+  const rows = await added().locator('.tgs-table tbody tr').count();
+  const headings = await added().locator('.tgs-table thead th').count();
+  return rows === 3 && headings === 4 ? true : `${rows} rows, ${headings} headings`;
+});
+
+/*
+ * THE PART THAT MAKES IT READABLE TO A SCREEN READER, checked on the rendered
+ * DOM rather than in the source. Every heading has to say which way it points.
+ */
+await check('every heading says whether it is a column or a row', async () => {
+  const scopes = await added().evaluate((root) =>
+    [...root.querySelectorAll('th')].map((th) => th.getAttribute('scope')));
+
+  const columns = scopes.filter((scope) => scope === 'col').length;
+  const rowHeads = scopes.filter((scope) => scope === 'row').length;
+  const missing = scopes.filter((scope) => scope !== 'col' && scope !== 'row').length;
+
+  return columns === 4 && rowHeads === 3 && missing === 0
+    ? true
+    : `${columns} col, ${rowHeads} row, ${missing} with none`;
+});
+
+await check('pasting a spreadsheet range makes a table of it', async () => {
+  const box = page.locator('.ed-props textarea').first();
+  // Tab separated, which is exactly what a spreadsheet puts on the clipboard.
+  await box.fill('Airport\tFlight time\nManchester\t3h 40m\nGatwick\t3h 15m\nEdinburgh\t4h 05m');
+  await page.waitForTimeout(700);
+
+  const shape = await added().evaluate((root) => ({
+    headings: [...root.querySelectorAll('thead th')].map((th) => th.textContent.trim()),
+    rows: [...root.querySelectorAll('tbody tr')].length,
+    firstCell: root.querySelector('tbody td')?.textContent.trim(),
+  }));
+
+  return shape.headings.length === 2 && shape.rows === 3 && shape.firstCell === '3h 40m'
+    ? true
+    : `${JSON.stringify(shape)}`;
+});
+
+await check('a short line is padded rather than leaving a hole', async () => {
+  const box = page.locator('.ed-props textarea').first();
+  await box.fill('a\tb\tc\nd');
+  await page.waitForTimeout(700);
+
+  const cells = await added().evaluate((root) =>
+    [...root.querySelectorAll('tbody tr')].map((tr) => tr.children.length));
+  return JSON.stringify(cells) === '[3]' ? true : `cells per row ${JSON.stringify(cells)}`;
+});
+
+/*
+ * THE RULE THE WHOLE RENDERED PAGE IS HELD TO. A six-column table cannot be made
+ * to fit a phone, so it has to scroll, and it has to scroll inside its own box.
+ */
+await check('a table too wide for a phone scrolls inside its own box', async () => {
+  const wide = ['a\tb\tc\td\te\tf\tg\th'];
+  for (let i = 0; i < 4; i += 1) wide.push('a fairly long cell\t2\t3\t4\t5\t6\t7\t8');
+  await page.locator('.ed-props textarea').first().fill(wide.join('\n'));
+  await page.waitForTimeout(700);
+
+  await page.getByRole('button', { name: 'Phone' }).click();
+  await page.waitForTimeout(500);
+
+  const state = await page.evaluate(() => {
+    const box = document.querySelector('.ed-canvas-frame .tgs-table__scroll');
+    const page_ = document.querySelector('.ed-canvas-frame .tgs-page');
+    return {
+      boxScrolls: box ? box.scrollWidth > box.clientWidth + 4 : false,
+      pageScrolls: page_ ? page_.scrollWidth > page_.clientWidth + 1 : false,
+    };
+  });
+
+  return state.boxScrolls && !state.pageScrolls
+    ? true
+    : `box scrolls ${state.boxScrolls}, page scrolls ${state.pageScrolls}`;
+});
+
+await check('and that box can be reached by a keyboard, since it scrolls', async () => {
+  const box = page.locator('.ed-canvas-frame .tgs-table__scroll');
+  await box.focus();
+  await page.keyboard.press('Shift+Tab');
+  await page.keyboard.press('Tab');
+  await page.waitForTimeout(250);
+
+  const state = await box.evaluate((el) => ({
+    focused: document.activeElement === el,
+    outline: getComputedStyle(el).outlineWidth,
+    label: el.getAttribute('aria-label'),
+  }));
+
+  return state.focused && state.outline !== '0px' && state.label
+    ? true
+    : `focused ${state.focused}, outline ${state.outline}, label "${state.label}"`;
+});
+
+/*
+ * THE BUG THE TABLE EXPOSED, WHICH WAS NOT THE TABLE'S, kept as a check of its
+ * own because any wide block can do it.
+ *
+ * A row set to reverse when it stacks becomes a COLUMN flex container on a
+ * phone, and the vertical alignment it already carried then meant "do not
+ * stretch across", so every column sized itself to its widest CONTENT. An image
+ * is the everyday case: a 1600px photograph made its column 1600px wide, and
+ * `max-width: 100%` on the image resolved against that, so the picture rendered
+ * at full size and hung out of the section. Worth remembering next to the open
+ * report about images rendering wider than their column.
+ */
+await check('a wide picture in a reversed row stays inside its column', async () => {
+  await page.getByRole('button', { name: 'Phone' }).click();
+  await page.waitForTimeout(500);
+
+  const overflow = await page.evaluate(() => {
+    const cols = [...document.querySelectorAll('.ed-canvas-frame .tgs-col')];
+    const row = document.querySelector('.ed-canvas-frame .tgs-row');
+    if (!row) return 'no row';
+    const limit = row.getBoundingClientRect().width + 1;
+    const over = cols
+      .map((col) => Math.round(col.getBoundingClientRect().width))
+      .filter((width) => width > limit);
+    return over.length === 0 ? null : `columns wider than their row: ${over}`;
+  });
+
+  return overflow === null ? true : overflow;
+});
+
+await check('and nothing on the phone preview reaches past the page', async () => {
+  const wide = await page.evaluate(() => {
+    const page_ = document.querySelector('.ed-canvas-frame .tgs-page');
+    if (!page_) return 'no page';
+    const limit = page_.getBoundingClientRect().right + 1;
+    const over = [...page_.querySelectorAll('.tgs-section, .tgs-row, .tgs-col, .tgs-block')]
+      .filter((node) => node.getBoundingClientRect().right > limit).length;
+    return over === 0 ? null : `${over} things reach past the page`;
+  });
+  return wide === null ? true : wide;
 });
 
 await page.getByRole('button', { name: 'Desktop' }).click();
