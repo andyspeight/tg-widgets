@@ -239,10 +239,25 @@ const MUTATIONS = [
   {
     tag: 'assistant',
     check: 'and the copy is in the page state, not only on the canvas',
-    why: 'Write the answer straight into the element, outside undo and outside the save.',
+    /*
+     * SET innerHTML, which is the version of this bug that actually escapes.
+     *
+     * The first attempt at this mutation was execCommand('insertHTML') instead of
+     * onExec, and the probe reported MISSED: the check passed anyway. That is not
+     * a hole in the check, it is Canvas.tsx doing its job. It listens for `input`,
+     * and execCommand fires one, so the copy still reached the page state by the
+     * ordinary typing path. The mutation was not a bug.
+     *
+     * Assigning innerHTML fires NOTHING. The words appear on the canvas, the
+     * state never hears about them, and they are gone on the next render or the
+     * next save. That is the failure this check exists for, and it is exactly
+     * what somebody reaches for when insertHTML looks like overkill.
+     */
+    why: 'Set innerHTML, which puts words on the canvas that the page state never hears about.',
     file: 'components/editor/TextToolbar.tsx',
     from: `    onExec('insertHTML', result.data.html);`,
-    to: `    document.execCommand('insertHTML', false, result.data.html);`,
+    to: `    const rtHost = document.querySelector('[data-rt-host]');
+    if (rtHost) rtHost.innerHTML += result.data.html;`,
   },
   {
     tag: 'assistant',
@@ -285,10 +300,18 @@ const MUTATIONS = [
   {
     tag: 'assistant',
     check: 'and it is marked out from the twenty buttons beside it',
-    why: 'Rename the rule, so the sparkle looks like every other button on the bar.',
+    /*
+     * NEUTRALISED rather than renamed. Renaming the selector was the first
+     * attempt and the probe reported MISSED, for two reasons worth keeping: the
+     * check was reading a hover colour, and .is-ai:hover kept its own rule
+     * anyway, so the sparkle stayed distinct even with the base rule gone.
+     * Giving it the SAME colour as every other button is the bug the check
+     * actually names, and it cannot be dodged.
+     */
+    why: 'Give it the same colour as every other button, so it stops standing out.',
     file: 'components/editor/editor.css',
     from: `.ed-tt__btn.is-ai { color: #a5b4fc; }`,
-    to: `.ed-tt__btn.is-ai-renamed { color: #a5b4fc; }`,
+    to: `.ed-tt__btn.is-ai { color: #cbd5e1; }`,
   },
   {
     tag: 'assistant',

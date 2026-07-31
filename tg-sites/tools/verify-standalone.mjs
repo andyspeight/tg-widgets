@@ -2546,6 +2546,18 @@ await check('the toolbar carries a button for the writing assistant', async () =
 });
 
 await check('and it is marked out from the twenty buttons beside it', async () => {
+  /*
+   * THE POINTER MOVED AWAY FIRST, and that is not fussiness.
+   *
+   * Playwright leaves the mouse wherever the last click put it, and .is-ai:hover
+   * is a different colour again. With the pointer resting on the sparkle this
+   * compared a hover colour against a resting one and passed whatever the
+   * resting rule said, which the mutation probe caught by renaming that rule and
+   * watching the check pass anyway.
+   */
+  await page.mouse.move(0, 0);
+  await page.waitForTimeout(150);
+
   // Not just a class name: the class has to resolve to a rule, which is the gap
   // nothing else in this suite covers.
   const [ai, plain] = await page.evaluate(() => {
