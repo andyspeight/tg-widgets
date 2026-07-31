@@ -4528,6 +4528,114 @@ await page.waitForTimeout(300);
 await showPanels();
 
 
+
+// ---------------------------------------------------------------------------
+// What sits behind a section, and what a link can point at
+//
+// The scrim strength and the anchor are both settings whose whole existence is
+// an attribute on the rendered element, so the check is "does what I typed in
+// the pane reach the page". The video is checked for the opposite: that it does
+// NOT reach the canvas, which is a claim about absence and needs a real DOM.
+// ---------------------------------------------------------------------------
+
+await page.reload();
+await page.waitForSelector('.ed-root');
+await showPanels();
+
+/** Select the first section on the canvas and open a named group in the pane. */
+async function openSectionGroup(title) {
+  await page.locator('.ed-canvas-frame .tgs-section').first().click({ position: { x: 8, y: 8 } });
+  await page.waitForTimeout(400);
+  const head = page.locator('.ed-group__head button', { hasText: title });
+  if ((await head.count()) && (await head.first().getAttribute('aria-expanded')) === 'false') {
+    await head.first().click();
+    await page.waitForTimeout(250);
+  }
+}
+
+await check('a section offers a background video and an overlay', async () => {
+  await openSectionGroup('Background image');
+  const pane = await page.locator('.ed-props').innerText();
+  const video = /Background video/.test(pane);
+  const overlay = /Overlay/.test(pane);
+  return video && overlay ? true : `video ${video}, overlay ${overlay}`;
+});
+
+await check('the overlay reaches the section as a number it can use', async () => {
+  const box = page.locator('.ed-props input[type="number"]').last();
+  await box.fill('25');
+  await box.blur();
+  await page.waitForTimeout(400);
+
+  const value = await page.locator('.ed-canvas-frame .tgs-section').first().evaluate((el) =>
+    getComputedStyle(el).getPropertyValue('--tgs-scrim').trim());
+
+  return value === '25' ? true : `the section says "${value}"`;
+});
+
+await check('and it is held inside 0 to 100 rather than taken as typed', async () => {
+  const box = page.locator('.ed-props input[type="number"]').last();
+  await box.fill('900');
+  await box.blur();
+  await page.waitForTimeout(400);
+
+  const value = await page.locator('.ed-canvas-frame .tgs-section').first().evaluate((el) =>
+    getComputedStyle(el).getPropertyValue('--tgs-scrim').trim());
+
+  return value === '100' ? true : `900 became "${value}"`;
+});
+
+await check('a section can be given a name a link can point at', async () => {
+  await openSectionGroup('Link to this section');
+  const name = page.locator('.ed-props input[placeholder="prices"]');
+  await name.fill('Our Prices');
+  await page.waitForTimeout(500);
+
+  const id = await page.locator('.ed-canvas-frame .tgs-section').first().getAttribute('id');
+  // Slugified rather than refused: somebody typing "Our Prices" means this.
+  return id === 'our-prices' ? true : `the section's id is "${id}"`;
+});
+
+await check('the pane says what to point at it', async () => {
+  const pane = await page.locator('.ed-props').innerText();
+  return /#our-prices/.test(pane) ? true : 'it does not say what the address is';
+});
+
+await check('a name with nothing usable in it leaves no id behind', async () => {
+  const name = page.locator('.ed-props input[placeholder="prices"]');
+  await name.fill('!!!');
+  await page.waitForTimeout(500);
+
+  const id = await page.locator('.ed-canvas-frame .tgs-section').first().getAttribute('id');
+  // Not `id=""`, which is markup nobody meant and a selector that matches.
+  return id === null ? true : `it left id="${id}"`;
+});
+
+await check('a section that lands under a link leaves room for a sticky header', async () => {
+  await page.locator('.ed-props input[placeholder="prices"]').fill('prices');
+  await page.waitForTimeout(500);
+
+  const margin = await page.locator('.ed-canvas-frame .tgs-section[id]').first().evaluate((el) =>
+    getComputedStyle(el).scrollMarginTop);
+
+  return margin !== '0px' ? true : 'no scroll margin, so a sticky header would cover it';
+});
+
+/*
+ * NO FILM ON THE CANVAS. It would restart and re-download on every keystroke,
+ * which is a distraction while somebody works and a bill for nothing.
+ */
+await check('a background video does not play while you are editing', async () => {
+  await openSectionGroup('Background image');
+  const url = page.locator('.ed-props input[placeholder="https://.../hero.mp4"]');
+  await url.fill('https://cdn.example.com/hero.mp4');
+  await page.waitForTimeout(600);
+
+  const videos = await page.locator('.ed-canvas-frame video').count();
+  return videos === 0 ? true : `${videos} videos on the canvas`;
+});
+
+
 await browser.close();
 
 let failed = false;

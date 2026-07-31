@@ -369,8 +369,69 @@ export const SectionSchema = z.object({
   box: BoxSchema.default(EMPTY_BOX),
   /** Media id or absolute URL. Rendered behind the content with a scrim. */
   backgroundImage: z.string().max(2048).optional(),
+  /**
+   * A video behind the section, over the picture above.
+   *
+   * BOTH ARE RENDERED WHEN BOTH ARE SET, and that is what makes this safe to
+   * offer. The video sits over the picture, and a visitor who has asked their
+   * system for less motion gets the video hidden and the picture showing
+   * through. Without a picture they get the section's plain tone, which is
+   * honest but plainer, so the editor says to set one.
+   */
+  backgroundVideo: z.string().max(2048).optional(),
+  /**
+   * How dark the scrim over a background is, 0 to 100.
+   *
+   * It used to be a fixed 55 to 65 per cent, chosen so text on a photograph
+   * still cleared 4.5:1. That is still the default and it is still the reason
+   * the scrim exists. It is settable because a pale photograph with dark
+   * lettering over it is a legitimate design the fixed value made impossible,
+   * and because a video usually wants more of it than a still does.
+   */
+  overlay: z.unknown().transform((v) => {
+    const n = typeof v === 'number' ? v : Number(v);
+    if (!Number.isFinite(n)) return 60;
+    return Math.min(100, Math.max(0, Math.round(n)));
+  }),
+  /**
+   * A name a link can point at, rendered as the section's id.
+   *
+   * Without one there is no such thing as in-page navigation: a button could
+   * say "#prices" and there would be nothing on the page called that. Slugified
+   * on the way in rather than validated and refused, because somebody typing
+   * "Our prices" means `our-prices` and being told off for it helps nobody.
+   */
+  anchor: z.unknown().transform(safeAnchor).optional(),
   rows: z.array(RowSchema).default([]),
 });
+
+/**
+ * A section name, reduced to something that can be an id and a URL fragment.
+ *
+ * Undefined rather than an empty string when there is nothing usable left, so
+ * the renderer's `id` attribute is simply absent rather than present and empty.
+ */
+export function safeAnchor(value: unknown): string | undefined {
+  const slug = anchorInput(value).replace(/^-+|-+$/g, '');
+  return slug || undefined;
+}
+
+/**
+ * The same reduction, minus the trim, for a box somebody is still typing into.
+ *
+ * safeAnchor strips hyphens off both ends, which is right for the stored value
+ * and wrong while a name is being written: typing "our" then "-" would have the
+ * hyphen removed the instant it appeared, and "our-prices" could never be
+ * reached. So the editor uses this on every keystroke and safeAnchor when the
+ * box is left, and the schema uses safeAnchor whatever the editor did.
+ */
+export function anchorInput(value: unknown): string {
+  if (typeof value !== 'string') return '';
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .slice(0, 60);
+}
 
 export type Section = z.infer<typeof SectionSchema>;
 

@@ -130,6 +130,12 @@ function sanitiseSection(section: Section): Section {
     backgroundImage: section.backgroundImage
       ? (safeUrl(section.backgroundImage) ?? '')
       : section.backgroundImage,
+    // The same allowlist as the picture. A background video is a URL the
+    // renderer puts in a src, so it gets the same treatment and for the same
+    // reason: nothing a client types may become a scheme.
+    backgroundVideo: section.backgroundVideo
+      ? (safeUrl(section.backgroundVideo) ?? '')
+      : section.backgroundVideo,
     rows: section.rows.map((row) => ({
       ...row,
       columns: row.columns.map((column) => ({

@@ -306,12 +306,40 @@
   z-index: 0;
 }
 
-/* A scrim so text over a photo still clears 4.5:1. */
+/*
+ * A scrim so text over a photo still clears 4.5:1.
+ *
+ * The strength is the section's own `overlay`, 0 to 100, arriving as
+ * --tgs-scrim. It was fixed at 55 to 65 per cent, which is what 60 reproduces,
+ * and that is still the default and still the reason this element exists. It is
+ * settable because a pale photograph under dark lettering is a legitimate
+ * design the fixed value made impossible, and because a film usually wants more
+ * of it than a still does.
+ */
 .tgs-section__scrim {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.55), rgba(15, 23, 42, 0.65));
+  background: linear-gradient(
+    180deg,
+    rgb(15 23 42 / calc(var(--tgs-scrim, 60) * 0.9%)),
+    rgb(15 23 42 / calc(var(--tgs-scrim, 60) * 1.1%))
+  );
   z-index: 1;
+}
+
+/*
+ * THE FILM STOPS FOR ANYBODY WHO ASKED FOR LESS MOTION, and the picture behind
+ * it shows through. That is why SectionRenderer draws both rather than choosing
+ * between them: hiding the video here would otherwise leave a blank band where
+ * the hero should be. A section with a video and no picture falls back to its
+ * plain tone, which the editor says as it offers the setting.
+ *
+ * OUTSIDE the reduced-motion block in the accessibility section at the foot of
+ * this file, deliberately: that one shortens transitions, this one removes an
+ * element, and burying a display rule among a list of durations would hide it.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .tgs-section__bg--video { display: none; }
 }
 
 .tgs-section__inner {
@@ -1270,6 +1298,22 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/*
+ * IN-PAGE NAVIGATION, now that a section can have a name to point at.
+ *
+ * The scroll margin is what stops a sticky header covering the thing somebody
+ * has just jumped to: without it the section lands under the bar and reads as
+ * the link having gone to the wrong place.
+ *
+ * Smooth only for people who have not asked otherwise. A page that animates its
+ * own scrolling is exactly what prefers-reduced-motion is for.
+ */
+.tgs-section[id] { scroll-margin-top: var(--tgs-space-xl); }
+
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.tgs-section[id]) { scroll-behavior: smooth; }
 }
 
 .tgs-sr-only {

@@ -29,6 +29,8 @@ export const SEED_PAGE: Page = {
       width: 'contained',
       paddingY: 64,
       minHeight: 0,
+      // The scrim strength over a background. 60 is what it was fixed at.
+      overlay: 60,
       box: { ...EMPTY_BOX },
       rows: [
         {
@@ -108,6 +110,8 @@ export const SEED_PAGE: Page = {
       width: 'contained',
       paddingY: 64,
       minHeight: 0,
+      // The scrim strength over a background. 60 is what it was fixed at.
+      overlay: 60,
       box: { ...EMPTY_BOX },
       rows: [
         {
@@ -202,6 +206,8 @@ export const SEED_PAGE: Page = {
       width: 'narrow',
       paddingY: 64,
       minHeight: 0,
+      // The scrim strength over a background. 60 is what it was fixed at.
+      overlay: 60,
       box: { ...EMPTY_BOX },
       rows: [
         {

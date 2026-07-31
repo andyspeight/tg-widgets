@@ -860,6 +860,8 @@ export function buildPresetSection(preset: SectionPreset): Section {
     width: preset.section?.width ?? 'contained',
     paddingY: preset.section?.paddingY ?? DEFAULT_SECTION_PADDING,
     minHeight: 0,
+    // The scrim strength over a background. 60 is what it was fixed at.
+    overlay: 60,
     box: { ...EMPTY_BOX },
     rows: preset.rows.map(buildRow),
   };

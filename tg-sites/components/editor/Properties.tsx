@@ -13,6 +13,8 @@
 import { useState, type CSSProperties, type ReactNode } from 'react';
 import type { Page, RegionName } from '../../lib/content/schema';
 import {
+  anchorInput,
+  safeAnchor,
   MAX_GAP,
   MAX_MIN_HEIGHT,
   MIN_COLUMN_WIDTH,
@@ -584,7 +586,74 @@ function SectionFields({
           onChange={(url) => set({ backgroundImage: url }, `sec:${index}:bg`)}
         />
         <p className="ed-help">
-          A dark scrim goes over it automatically so text still passes contrast.
+          A scrim goes over it so text on top still passes contrast. How dark it
+          is, below.
+        </p>
+      </div>
+
+      <div className="ed-field">
+        <label className="ed-label">Background video</label>
+        <input
+          className="ed-input"
+          value={section.backgroundVideo ?? ''}
+          placeholder="https://.../hero.mp4"
+          onChange={(event) => set({ backgroundVideo: event.target.value }, `sec:${index}:video`)}
+        />
+        {/*
+          The picture is not optional advice, it is what somebody sees when they
+          have asked their system for less motion, and the editor should say so
+          before they publish a blank band to those visitors.
+        */}
+        <p className="ed-help">
+          A direct link to an .mp4 file. It plays silently and loops. Set a
+          background image too: that is what shows for anyone who has asked for
+          less movement, and it is the still while the film loads.
+        </p>
+      </div>
+
+      <Measure
+        label="Overlay"
+        value={section.overlay}
+        min={0}
+        max={100}
+        step={5}
+        unit="%"
+        onChange={(value) => set({ overlay: value }, `sec:${index}:overlay`)}
+      />
+      <p className="ed-help">
+        0 leaves the picture alone. 60 is the setting that keeps white text
+        readable over most photographs.
+      </p>
+      </Group>
+
+      <Group title="Link to this section" defaultOpen={false}>
+      <div className="ed-field">
+        <label className="ed-label">Name</label>
+        <input
+          className="ed-input"
+          value={section.anchor ?? ''}
+          placeholder="prices"
+          /*
+            NORMALISED HERE AS WELL AS IN THE SCHEMA, because this value becomes
+            an `id` on the canvas the moment it is typed. Left raw, "Our Prices"
+            showed as id="Our Prices" in the preview and was stored as
+            "our-prices", so the preview was showing something the save would
+            quietly correct. The browser suite caught it.
+
+            anchorInput while typing and safeAnchor on the way out: see the note
+            on those two in schema.ts for why they are not the same function.
+          */
+          onChange={(event) =>
+            set({ anchor: anchorInput(event.target.value) }, `sec:${index}:anchor`)
+          }
+          onBlur={(event) =>
+            set({ anchor: safeAnchor(event.target.value) }, `sec:${index}:anchor:done`)
+          }
+        />
+        <p className="ed-help">
+          {section.anchor
+            ? `A button pointing at #${section.anchor} jumps here.`
+            : 'Give it a name and a button can jump straight to it, from this page or another.'}
         </p>
       </div>
       </Group>

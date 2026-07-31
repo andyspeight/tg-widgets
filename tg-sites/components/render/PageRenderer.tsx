@@ -12,7 +12,7 @@
  */
 
 import { Fragment, type CSSProperties, type ReactElement } from 'react';
-import type { Box, Column, Page, Row, Section } from '../../lib/content/schema';
+import { safeAnchor, type Box, type Column, type Page, type Row, type Section } from '../../lib/content/schema';
 import { safeUrl } from '../../lib/content/sanitise';
 import { BlockRenderer } from './BlockRenderer';
 
@@ -154,26 +154,72 @@ export function SectionRenderer({
   editingPath = null,
 }: { section: Section; index: number } & Editable): ReactElement {
   const background = safeUrl(section.backgroundImage ?? '');
+  const video = safeUrl(section.backgroundVideo ?? '');
+  /*
+   * Reduced again here even though the schema already did it on the way in, the
+   * same belt-and-braces every other stored string in this tree gets.
+   *
+   * It earns its place on the CANVAS rather than on a published page. The editor
+   * holds a half-typed value between keystrokes, and "!!!" on its way to
+   * something real reduces to a bare hyphen. Rendered raw that is `id="-"`,
+   * which is a preview showing something the save would quietly correct.
+   */
+  const anchor = safeAnchor(section.anchor);
 
   return (
     <section
       className="tgs-section"
+      /*
+       * The name a link can point at.
+       *
+       * Slugified by the schema rather than validated here, and absent when
+       * there is nothing usable, so an `id=""` never reaches the page. This is
+       * the whole of in-page navigation: a button whose address is "#prices"
+       * has somewhere to land only because of this attribute.
+       */
+      {...(anchor ? { id: anchor } : {})}
       data-tone={section.tone}
       data-width={section.width}
       style={{
         ...boxStyle(section.box),
         '--tgs-pad': `${section.paddingY}px`,
         '--tgs-min-h': `${section.minHeight}px`,
+        '--tgs-scrim': section.overlay,
       } as CSSProperties}
       data-shadow={section.box.shadow}
       {...pathAttr(editable, `s${index}`)}
     >
-      {background && (
-        <>
-          <img className="tgs-section__bg" src={background} alt="" aria-hidden="true" />
-          <div className="tgs-section__scrim" aria-hidden="true" />
-        </>
+      {/*
+        THE PICTURE AND THE VIDEO ARE BOTH DRAWN WHEN BOTH ARE SET, with the
+        video over the picture. That is what makes a background video safe to
+        offer: a visitor who has asked their system for less motion gets the
+        video hidden by one CSS rule and the picture showing through, rather
+        than a blank band where a hero should be.
+
+        NEVER IN THE EDITOR for the video. A file that reloads and restarts on
+        every keystroke is not a preview, it is a distraction and a download.
+        The poster still shows, which is what the section will look like to
+        anybody who asked for less motion anyway.
+      */}
+      {background && <img className="tgs-section__bg" src={background} alt="" aria-hidden="true" />}
+
+      {video && !editable && (
+        <video
+          className="tgs-section__bg tgs-section__bg--video"
+          src={video}
+          poster={background || undefined}
+          autoPlay
+          muted
+          loop
+          playsInline
+          // Decorative by definition: the words over it belong to the blocks
+          // inside the section, never to the film.
+          aria-hidden="true"
+          tabIndex={-1}
+        />
       )}
+
+      {(background || video) && <div className="tgs-section__scrim" aria-hidden="true" />}
       <div className="tgs-section__inner">
         {section.rows.map((row, rowIndex) => (
           <RowRenderer

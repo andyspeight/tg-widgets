@@ -83,6 +83,8 @@ export function createSection(preset = '1'): Section {
     width: 'contained',
     paddingY: DEFAULT_SECTION_PADDING,
     minHeight: 0,
+    // The scrim strength over a background. 60 is what it was fixed at.
+    overlay: 60,
     box: { ...EMPTY_BOX },
     rows: [createRow(preset)],
   };
@@ -102,6 +104,8 @@ export function createSectionFromLayout(layout: Layout = DEFAULT_LAYOUT): Sectio
     width: 'contained',
     paddingY: DEFAULT_SECTION_PADDING,
     minHeight: 0,
+    // The scrim strength over a background. 60 is what it was fixed at.
+    overlay: 60,
     box: { ...EMPTY_BOX },
     rows: layout.rows.map((ratios) => createRow(ratios.join('-'))),
   };

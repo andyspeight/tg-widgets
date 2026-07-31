@@ -76,6 +76,19 @@ export function Measure({
         />
 
         <span className="ed-measure__field">
+          {/*
+            CLAMPED ON BLUR, NOT ON EVERY KEYSTROKE.
+            
+            `min` and `max` on a number input are advice: the browser marks the
+            field invalid and hands the value over anyway. So 900 typed into a
+            0-to-100 box reached the canvas, and the canvas showed something the
+            save would then quietly correct, which is the one thing this preview
+            must never do. The browser suite caught it on the section overlay.
+
+            On blur rather than on change for the same reason the viewport width
+            box gives: clamping mid-keystroke turns the "4" on the way to "40"
+            into the minimum and throws the caret to the end.
+          */}
           <input
             id={id}
             className="ed-measure__input"
@@ -85,6 +98,13 @@ export function Measure({
             step={step}
             value={value}
             onChange={(event) => onChange(Number(event.target.value))}
+            onBlur={(event) => {
+              const typed = Number(event.target.value);
+              const held = Number.isFinite(typed)
+                ? Math.min(max, Math.max(min, Math.round(typed)))
+                : min;
+              if (held !== value) onChange(held);
+            }}
           />
           <span className="ed-measure__unit" aria-hidden="true">
             {unit}
