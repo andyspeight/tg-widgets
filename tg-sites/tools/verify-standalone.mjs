@@ -348,11 +348,21 @@ await check('click to select loads properties', async () => {
 await check('selection outline is drawn', async () =>
   (await page.locator('.ed-canvas-frame [data-path].is-selected').count()) === 1);
 
-// Edit a heading and confirm the canvas updates.
+/*
+ * Edit a heading in the PANE and confirm the canvas follows.
+ *
+ * Through .ed-rt, the rich text field, not the plain input it used to be: a
+ * heading holds markup since 31 Jul 2026, which is what gave it the toolbar.
+ * The pane is still the second way in and still has to work.
+ */
 await check('editing a field updates the preview', async () => {
-  const input = page.locator('.ed-props input.ed-input').first();
-  await input.fill('Feedback test heading');
-  await page.waitForTimeout(300);
+  const field = page.locator('.ed-props .ed-rt').first();
+  if (!(await field.count())) return 'no rich text field on a heading';
+
+  await field.click();
+  await page.keyboard.press('Control+a');
+  await page.keyboard.type('Feedback test heading', { delay: 20 });
+  await page.waitForTimeout(400);
   return (await page.locator('.tgs-heading', { hasText: 'Feedback test heading' }).count()) > 0;
 });
 
@@ -2861,15 +2871,23 @@ await check('and the inline ones are all there, which is the point', async () =>
 });
 
 /*
- * BOLD IN A HEADING, ALL THE WAY THROUGH. The claim the old design could not
- * make: it has to reach the canvas AND the page state, because state is what a
- * save writes. On the canvas only would be the "appears to work" failure this
+ * FORMATTING IN A HEADING, ALL THE WAY THROUGH. The claim the old design could
+ * not make: it has to reach the canvas AND the page state, because state is what
+ * a save writes. On the canvas only would be the "appears to work" failure this
  * codebase has a rule about, in the exact place that rule was written for.
+ *
+ * NOT ASSERTED AS <strong>, and the first version of this was. A heading is
+ * ALREADY BOLD, so execCommand('bold') toggles it off, and Chromium expresses
+ * "less bold" the only way it can: a span with font-weight normal. The check
+ * failed reading "canvas false, state false" on a feature that was working
+ * perfectly. What matters is that markup appeared and that the heading
+ * allowlist keeps it, not which tag the browser reached for.
  */
-await check('bold in a heading reaches the page state, so it survives a save', async () => {
+await check('formatting a heading reaches the page state, so it survives a save', async () => {
   const host = page.locator('[data-rt-host][data-rt-oneline]').first();
   if (!(await host.count())) return 'no heading host';
 
+  const before = await host.innerHTML();
   const box = await host.boundingBox();
   await page.mouse.move(box.x + 4, box.y + box.height / 2);
   await page.mouse.down();
@@ -2883,9 +2901,26 @@ await check('bold in a heading reaches the page state, so it survives a save', a
   await page.locator('.ed-tt__btn[aria-label="Bold"]').click();
   await page.waitForTimeout(400);
 
-  const onCanvas = /<(b|strong)[ >]/i.test(await host.innerHTML());
-  const inState = /<(b|strong)[ >]/i.test(await page.locator('.ed-rt').first().innerHTML());
-  return onCanvas && inState ? true : `canvas ${onCanvas}, state ${inState}`;
+  const after = await host.innerHTML();
+  const inState = await page.locator('.ed-rt').first().innerHTML();
+
+  // Some element appeared where there was none, and the same one is in state.
+  const marked = /<(b|strong|span)[ >]/i.test(after);
+  return marked && after !== before && inState === after
+    ? true
+    : `before ${JSON.stringify(before.slice(0, 40))}, after ${JSON.stringify(after.slice(0, 60))}, state matches ${inState === after}`;
+});
+
+/*
+ * AND IT IS AN INLINE ELEMENT, not a block one hoisted out of the heading.
+ * The nesting rule, checked on real markup the editor produced rather than on a
+ * string handed to the sanitiser in a unit test.
+ */
+await check('and what it produced is inline, so the heading stays whole', async () => {
+  const html = await page.locator('[data-rt-host][data-rt-oneline]').first().innerHTML();
+  return !/<(p|div|ul|ol|li|blockquote|h[1-6])\b/i.test(html)
+    ? true
+    : `the heading now contains ${JSON.stringify(html.slice(0, 80))}`;
 });
 
 /*

@@ -9,6 +9,37 @@
 
 import type { Page, Section, Tone } from './schema';
 
+/**
+ * The words of a heading, whichever prop they are in and with no markup.
+ *
+ * A heading held a plain `text` string until 31 Jul 2026 and holds `html` now,
+ * which is what let the formatting toolbar reach one. This is the one place that
+ * has to read both, because it is the one place that wants the WORDS rather than
+ * the content: a section borrowing its name from a heading should be called
+ * "Greece, planned properly", not "Greece, <strong>planned</strong> properly".
+ *
+ * parsePage moves an old heading across on the way in, so the `text` branch is
+ * the belt to that braces: a Section handed straight to this function without
+ * passing through the parser still gets a name. The browser suite caught this
+ * one, when every section in the outline quietly became "Section 1".
+ */
+function headingWords(props: Record<string, unknown> | undefined): string {
+  const html = typeof props?.html === 'string' ? props.html : '';
+  if (html) {
+    return html
+      .replace(/<[^>]*>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#0?39;|&apos;/g, "'")
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+  return typeof props?.text === 'string' ? props.text.trim() : '';
+}
+
 export const TONE_WORDS: Record<Tone, string> = {
   light: 'White',
   subtle: 'Tinted',
@@ -36,7 +67,7 @@ export function sectionName(section: Section, index: number): string {
     for (const column of row.columns) {
       for (const block of column.blocks) {
         if (block.type !== 'heading') continue;
-        const text = typeof block.props?.text === 'string' ? block.props.text.trim() : '';
+        const text = headingWords(block.props);
         if (!text) continue;
         if (block.props?.level === 'h2') return text;
         if (!fallback) fallback = text;

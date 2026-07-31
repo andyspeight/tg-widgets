@@ -460,6 +460,26 @@ describe('a heading holds inline markup only', () => {
     expect(out).not.toMatch(/<(p|ul|ol|li|blockquote|h[1-6]|br)\b/i);
   });
 
+  /*
+   * WHAT THE BROWSER ACTUALLY PRODUCES when Bold is pressed in a heading, which
+   * is not what you would guess and is why this is a test rather than an
+   * assumption.
+   *
+   * A heading is already bold, so execCommand('bold') TOGGLES IT OFF, and
+   * Chromium has no tag for "less bold": it emits a span with font-weight
+   * normal. Measured in a real browser, not reasoned about. If the heading
+   * allowlist did not carry span, or styles.ts did not accept font-weight, the
+   * one thing somebody is most likely to try first would vanish on save.
+   */
+  it('keeps what Bold really produces in a heading, which is a weight span', () => {
+    const fromChromium = '<span style="font-weight: normal;">Tailor-m</span>ade travel';
+    const out = sanitiseHtml(fromChromium, 'heading');
+    expect(out).toContain('font-weight');
+    expect(out).toContain('normal');
+    expect(out).toContain('Tailor-m');
+    expect(out).toContain('ade travel');
+  });
+
   it('is still a security boundary, not only a nesting one', () => {
     const out = sanitiseHtml(
       '<script>alert(1)</script><a href="javascript:alert(1)">x</a><img src=x onerror=y>',
