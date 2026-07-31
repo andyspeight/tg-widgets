@@ -418,9 +418,33 @@ execSync(`ln -sfn ${root}/tg-sites/node_modules ${arena}/tg-sites/node_modules`)
 const here = `${arena}/tg-sites`;
 const run = (command) => execSync(command, { cwd: here, encoding: 'utf8', stdio: 'pipe' });
 
+/*
+ * A FILTER, because the whole probe is now hours rather than minutes.
+ *
+ *   node tools/probe-checks.mjs              every mutation
+ *   node tools/probe-checks.mjs assistant    only those whose check matches
+ *
+ * Each editor mutation rebuilds the bundle and runs all 195 browser checks,
+ * which is about eight minutes, so twenty-one of them is most of an afternoon.
+ * A subset run is the right tool when a session adds six checks to a file whose
+ * other twenty-one were proved months ago.
+ *
+ * NOT A DEFAULT. With no argument this still runs everything, because a probe
+ * that quietly narrows itself is the same failure as a probe that quietly stops.
+ */
+const only = process.argv[2];
+const chosen = only
+  ? MUTATIONS.filter((m) => (m.check + m.why).toLowerCase().includes(only.toLowerCase()))
+  : MUTATIONS;
+
+if (only) {
+  console.log(`\n  ${chosen.length} of ${MUTATIONS.length} mutations match "${only}".\n`);
+  if (chosen.length === 0) process.exit(1);
+}
+
 let bad = 0;
 try {
-  for (const mutation of MUTATIONS) {
+  for (const mutation of chosen) {
     const target = `${here}/${mutation.file}`;
     const original = readFileSync(target, 'utf8');
 
