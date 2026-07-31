@@ -234,6 +234,59 @@ const MUTATIONS = [
     to: `  max-width: min(700px, calc(100vw - 32px));`,
   },
 
+  // --- a heading holds markup ----------------------------------------------
+
+  {
+    tag: 'heading',
+    check: 'a heading gets the formatting toolbar too',
+    why: 'Put the paragraphs-only gate back, which is the bug Andy reported.',
+    file: 'components/editor/EditorShell.tsx',
+    from: `      {editing && (
+        <TextToolbar`,
+    to: `      {editing && !editing.oneLine && (
+        <TextToolbar`,
+  },
+  {
+    tag: 'heading',
+    check: 'but not the commands that would put a block inside a heading',
+    why: 'Offer the block formats in a heading, so formatBlock can nest a p inside an h2.',
+    file: 'components/editor/TextToolbar.tsx',
+    from: `      {!oneLine && (
+        <select
+          className="ed-tt__block"
+          value={currentBlock()}`,
+    to: `      {true && (
+        <select
+          className="ed-tt__block"
+          value={currentBlock()}`,
+  },
+  {
+    tag: 'heading',
+    check: 'formatting a heading reaches the page state, so it survives a save',
+    why: 'Read the heading back as text again, so the markup never reaches state.',
+    file: 'components/editor/Canvas.tsx',
+    from: `      const patch = { html: host.innerHTML };`,
+    to: `      const patch = host.hasAttribute('data-rt-oneline')
+        ? { text: host.textContent ?? '' }
+        : { html: host.innerHTML };`,
+  },
+  {
+    tag: 'heading',
+    check: 'a section names itself from its heading',
+    why: 'Read props.text again, which is where a heading no longer keeps its words.',
+    file: 'lib/content/naming.ts',
+    from: `        const text = headingWords(block.props);`,
+    to: `        const text = typeof block.props?.text === 'string' ? block.props.text.trim() : '';`,
+  },
+  {
+    tag: 'heading',
+    check: 'Enter in a heading is refused rather than silently mangled',
+    why: 'Let Enter through now that the attribute has been renamed.',
+    file: 'components/editor/Canvas.tsx',
+    from: `      if (oneLine && event.key === 'Enter') {`,
+    to: `      if (false && oneLine && event.key === 'Enter') {`,
+  },
+
   // --- the writing assistant -----------------------------------------------
 
   {
