@@ -1069,6 +1069,140 @@ export function StepsBlock({ props }: { props: Props }): ReactElement {
 }
 
 /**
+ * The stats row: a few big figures with a word under each.
+ *
+ * A `ul`, because it IS a list of statistics and nothing about it is ordered.
+ * Steps next door is an `ol` for the opposite reason.
+ *
+ * THE FIGURE COMES FIRST IN THE MARKUP as well as on the screen, so a screen
+ * reader reads "twelve thousand plus, holidays booked" rather than the label
+ * and then the number it belongs to. That is the reading order somebody wants,
+ * and it is the reason this is not a description list: a `dl` would need the
+ * label first to be valid, and then either the reading order or the visual
+ * order has to be faked with CSS.
+ *
+ * AN ENTRY NEEDS A FIGURE OR A LABEL, and one with neither is dropped. Unlike a
+ * step, whose position IS its number, a blank stat means nothing at all: it
+ * would draw an empty column and push the others out of true. Keeping the
+ * either-or rather than demanding both is what lets somebody type the figures
+ * for all four and then go back and label them.
+ */
+export function StatsBlock({ props }: { props: Props }): ReactElement {
+  const columns = oneOf(props, 'columns', ['2', '3', '4'] as const, '3');
+  const size = oneOf(props, 'size', ['m', 'l', 'xl'] as const, 'l');
+  const align = oneOf(props, 'align', ['left', 'centre', 'right'] as const, 'centre');
+  const divided = bool(props, 'divided');
+
+  const items = list(props, 'items')
+    .map((item) => ({
+      value: str(item, 'value'),
+      prefix: str(item, 'prefix'),
+      suffix: str(item, 'suffix'),
+      label: str(item, 'label'),
+      detail: str(item, 'detail'),
+    }))
+    .filter((item) => item.value !== '' || item.label !== '');
+
+  if (items.length === 0) {
+    return <div className="tgs-placeholder">Add a number or two</div>;
+  }
+
+  return (
+    <ul
+      className="tgs-stats"
+      data-columns={columns}
+      data-size={size}
+      data-align={align}
+      data-divided={divided ? 'true' : undefined}
+    >
+      {items.map((item, index) => (
+        <li className="tgs-stats__item" key={index}>
+          <p className="tgs-stats__figure">
+            {/*
+              The affixes are their own elements ONLY so they can be set
+              smaller. They are read aloud as part of the figure either way,
+              which is right: "£2m" and "4.9 out of 5" are single facts.
+            */}
+            {item.prefix && <span className="tgs-stats__affix">{item.prefix}</span>}
+            {item.value}
+            {item.suffix && <span className="tgs-stats__affix">{item.suffix}</span>}
+          </p>
+          {item.label && <p className="tgs-stats__label">{item.label}</p>}
+          {item.detail && <p className="tgs-stats__detail">{item.detail}</p>}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/**
+ * A strip of badges: ABTA, ATOL, the operators a shop sells.
+ *
+ * A COMMON HEIGHT, NOT A COMMON RATIO. Every logo gets the same vertical space
+ * and keeps its own width, set with object-fit: contain so nothing is ever
+ * cropped. That single line is the whole difference between this and the
+ * Gallery block, and it is why a gallery could never do this job: logos have no
+ * ratio in common, so any grid mangles most of them.
+ *
+ * A LOGO IS ONLY LINKED WHEN IT HAS A NAME. An anchor whose only child is an
+ * image with no alt text has no accessible name at all: a screen reader reaches
+ * it and announces "link", or reads out the file name, and neither tells anyone
+ * where it goes. So a linked logo with no name renders as a plain logo, and the
+ * editor says so on the field rather than letting it happen quietly. Same
+ * shape of rule as the Social block dropping an entry with no address.
+ */
+export function LogosBlock({ props }: { props: Props }): ReactElement {
+  const height = oneOf(props, 'height', ['s', 'm', 'l'] as const, 'm');
+  const gap = str(props, 'gap', 'l');
+  const tone = oneOf(props, 'tone', ['colour', 'grey', 'grey-hover'] as const, 'colour');
+  const align = oneOf(props, 'align', ['left', 'centre', 'right'] as const, 'centre');
+
+  const items = list(props, 'items')
+    .map((item) => ({
+      src: safeUrl(str(item, 'src')) ?? '',
+      alt: str(item, 'alt'),
+      href: safeUrl(str(item, 'href')) ?? '',
+    }))
+    .filter((item) => item.src !== '');
+
+  if (items.length === 0) {
+    return <div className="tgs-placeholder">Add your badges and partner logos</div>;
+  }
+
+  return (
+    <ul className="tgs-logos" data-height={height} data-gap={gap} data-tone={tone} data-align={align}>
+      {items.map((item, index) => {
+        const logo = (
+          <img
+            className="tgs-logos__img"
+            src={item.src}
+            alt={item.alt}
+            loading="lazy"
+            decoding="async"
+          />
+        );
+        // Both, not either. See the note above: a link needs a name, and the
+        // alt text is the only name a logo has.
+        const linked = item.href !== '' && item.alt !== '';
+        const external = /^https?:/i.test(item.href);
+
+        return (
+          <li className="tgs-logos__item" key={index}>
+            {linked ? (
+              <a href={item.href} rel={external ? 'noopener noreferrer' : undefined}>
+                {logo}
+              </a>
+            ) : (
+              logo
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+/**
  * A row of links to your own accounts.
  *
  * WHAT IS AND IS NOT CLIENT INPUT, because it is the whole security story of

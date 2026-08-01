@@ -1807,6 +1807,185 @@
 .tgs-social[data-size='l'][data-labels='true'] .tgs-social__link { width: auto; }
 
 /* ------------------------------------------------------------------ */
+/* Key numbers                                                         */
+/* ------------------------------------------------------------------ */
+
+.tgs-stats {
+  display: grid;
+  gap: var(--tgs-space-l);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tgs-stats[data-columns='2'] { grid-template-columns: repeat(2, 1fr); }
+.tgs-stats[data-columns='3'] { grid-template-columns: repeat(3, 1fr); }
+.tgs-stats[data-columns='4'] { grid-template-columns: repeat(4, 1fr); }
+
+.tgs-stats[data-align='centre'] { text-align: center; }
+.tgs-stats[data-align='right']  { text-align: right; }
+
+.tgs-stats__figure {
+  margin: 0 0 var(--tgs-space-xs);
+  font-family: var(--tgs-font-heading, var(--tgs-font-display));
+  font-weight: 700;
+  line-height: 1;
+  color: var(--tgs-primary);
+  /*
+   * Lining figures of a single width, so 1,111 and 8,888 occupy the same
+   * space. Without it a row of four numbers sits visibly off-centre from its
+   * label, because a 1 is narrower than an 8 in most proportional faces.
+   */
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.tgs-stats[data-size='m'] .tgs-stats__figure  { font-size: var(--tgs-h-l); }
+.tgs-stats[data-size='l'] .tgs-stats__figure  { font-size: var(--tgs-h-xl); }
+.tgs-stats[data-size='xl'] .tgs-stats__figure { font-size: calc(var(--tgs-h-xl) * 1.4); }
+
+/*
+ * The affixes, set smaller and lighter. This is the one thing a client cannot
+ * achieve by typing, and the thing that separates a designed stats row from a
+ * homemade one: a pound sign at the full size of a 67px figure reads as part
+ * of the number rather than a unit attached to it.
+ */
+.tgs-stats__affix {
+  font-size: 0.5em;
+  font-weight: 600;
+  vertical-align: 0.35em;
+  opacity: 0.75;
+}
+
+.tgs-stats__label {
+  margin: 0;
+  font-weight: 600;
+}
+
+.tgs-stats__detail {
+  margin: var(--tgs-space-xs) 0 0;
+  font-size: var(--tgs-text-s);
+  color: var(--tgs-text-muted);
+}
+
+/*
+ * Hairlines BETWEEN them, never around them, so the rule is hung off every
+ * item but the first. Logical border-inline-start rather than border-left, so
+ * the line moves to the other side if the page is ever set right to left.
+ */
+.tgs-stats[data-divided='true'] .tgs-stats__item:not(:first-child) {
+  border-inline-start: 1px solid var(--tgs-border);
+  padding-inline-start: var(--tgs-space-l);
+}
+
+/*
+ * Two across on a phone rather than one. A stats row is the one grid that
+ * survives being halved: the figures are short, and four of them stacked into
+ * a single column is a screen and a half of scrolling for four words.
+ */
+@container tgs-page (max-width: 767px) {
+  .tgs-stats[data-columns='3'],
+  .tgs-stats[data-columns='4'] { grid-template-columns: repeat(2, 1fr); }
+
+  .tgs-stats[data-size='xl'] .tgs-stats__figure { font-size: var(--tgs-h-xl); }
+
+  /*
+   * With two per row the dividers have to follow the ROW, not the list, so the
+   * first item of each row loses its line. Reset first, then put it back on
+   * the even ones, because :nth-child is the only handle a wrapped grid gives.
+   */
+  .tgs-stats[data-divided='true'] .tgs-stats__item {
+    border-inline-start: 0;
+    padding-inline-start: 0;
+  }
+
+  .tgs-stats[data-divided='true'] .tgs-stats__item:nth-child(even) {
+    border-inline-start: 1px solid var(--tgs-border);
+    padding-inline-start: var(--tgs-space-m);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* The logo strip                                                      */
+/* ------------------------------------------------------------------ */
+
+/*
+ * A COMMON HEIGHT AND CONTAINED SCALING, which is the entire block. Flex with
+ * wrap rather than a grid: logos have no common width, so a grid's equal
+ * columns would strand a narrow badge in the middle of a wide cell and leave
+ * the row looking gap-toothed. Flex lets each one take the width it needs.
+ */
+.tgs-logos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--tgs-space-l);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tgs-logos[data-align='centre'] { justify-content: center; }
+.tgs-logos[data-align='right']  { justify-content: flex-end; }
+
+.tgs-logos[data-gap='none'] { gap: 0; }
+.tgs-logos[data-gap='xs']   { gap: var(--tgs-space-xs); }
+.tgs-logos[data-gap='s']    { gap: var(--tgs-space-s); }
+.tgs-logos[data-gap='m']    { gap: var(--tgs-space-m); }
+.tgs-logos[data-gap='l']    { gap: var(--tgs-space-l); }
+.tgs-logos[data-gap='xl']   { gap: var(--tgs-space-xl); }
+
+.tgs-logos__item { display: flex; }
+.tgs-logos__item a { display: flex; border-radius: var(--tgs-radius-sm); }
+
+/*
+ * `contain` and a max width, together. The height is what every logo shares;
+ * `contain` keeps each one's own ratio inside it, so nothing is ever cropped.
+ * The max width is the guard against the one logo that is a long wordmark,
+ * which at a shared height would otherwise be half the row on its own.
+ */
+.tgs-logos__img {
+  display: block;
+  width: auto;
+  max-width: 200px;
+  object-fit: contain;
+  transition: filter 0.15s ease, opacity 0.15s ease;
+}
+
+.tgs-logos[data-height='s'] .tgs-logos__img { height: 28px; }
+.tgs-logos[data-height='m'] .tgs-logos__img { height: 40px; }
+.tgs-logos[data-height='l'] .tgs-logos__img { height: 56px; }
+
+/*
+ * Grey keeps a row of clashing brand colours quiet. The slight fade goes with
+ * it because a pure greyscale logo still reads darker than the text around it.
+ */
+.tgs-logos[data-tone='grey'] .tgs-logos__img,
+.tgs-logos[data-tone='grey-hover'] .tgs-logos__img {
+  filter: grayscale(1);
+  opacity: 0.7;
+}
+
+/*
+ * Colour on hover, and on FOCUS too, so somebody tabbing through a row of
+ * linked partners gets the same feedback a mouse does. There is no hover on a
+ * touch screen at all, which is why the grey state has to be legible on its
+ * own rather than treated as a thing you reveal.
+ */
+.tgs-logos[data-tone='grey-hover'] .tgs-logos__item:hover .tgs-logos__img,
+.tgs-logos[data-tone='grey-hover'] .tgs-logos__item:focus-within .tgs-logos__img {
+  filter: none;
+  opacity: 1;
+}
+
+@container tgs-page (max-width: 767px) {
+  /* Smaller and closer together, so six badges still make a tidy two or three
+     rows rather than six lines of one. */
+  .tgs-logos { gap: var(--tgs-space-m); }
+  .tgs-logos[data-height='l'] .tgs-logos__img { height: 40px; }
+  .tgs-logos__img { max-width: 140px; }
+}
+
+/* ------------------------------------------------------------------ */
 /* The header and the footer                                           */
 /* ------------------------------------------------------------------ */
 

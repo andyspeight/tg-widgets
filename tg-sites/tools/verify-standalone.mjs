@@ -467,7 +467,7 @@ await check('block picker opens from a section', async () => {
  * in there too.
  */
 await check('block picker offers the full library', async () =>
-  (await page.locator(".ed-block-card").count()) === 23);
+  (await page.locator(".ed-block-card").count()) === 25);
 
 await check('including both ways to put a widget on a page', async () => {
   const cards = (await page.locator('.ed-block-card').allInnerTexts()).join(' | ');
@@ -4128,7 +4128,7 @@ await check('the header offers the same blocks a page does', async () => {
   await page.keyboard.press('Escape');
   await page.waitForTimeout(200);
   // The whole library, because a header is sections and rows like anything else.
-  return count === 23 ? true : `${count} blocks in the header picker`;
+  return count === 25 ? true : `${count} blocks in the header picker`;
 });
 
 await check('a menu in a header saves through the region actions', async () => {
@@ -5584,6 +5584,237 @@ await check('a shaped edge never makes the page scroll sideways', async () => {
   return over === false ? true : 'the page scrolls sideways with a divider on it';
 });
 
+// --- Key numbers ------------------------------------------------------------
+
+/*
+ * The block exists because two designed sections were faking it with Icon and
+ * text, where the "figure" was a star and a heart set at title size. So the one
+ * thing a browser has to settle is that the figure really is the loudest thing
+ * in the block: everything else here is layout that the unit tests already pin.
+ */
+await check('a key number is set far larger than its own label', async () => {
+  // The divider checks above end on a viewport button, and the note at the top
+  // of this file is explicit: anything reading the outline or the properties
+  // pane after one of those has to put the panels back first. Without it
+  // .ed-add is in the DOM but inside a hidden outline, so the click waits out
+  // its full timeout on an element that will never be visible.
+  await showPanels();
+  await addBlock('Key numbers');
+
+  const sizes = await added().evaluate((root) => {
+    const figure = root.querySelector('.tgs-stats__figure');
+    const label = root.querySelector('.tgs-stats__label');
+    return figure && label
+      ? {
+          figure: parseFloat(getComputedStyle(figure).fontSize),
+          label: parseFloat(getComputedStyle(label).fontSize),
+        }
+      : null;
+  });
+
+  return sizes && sizes.figure >= sizes.label * 2
+    ? true
+    : JSON.stringify(sizes);
+});
+
+/*
+ * The affixes are separate elements ONLY so they can be set smaller. A £ or a
+ * /5 at the full size of the figure is the single thing that makes a stats row
+ * look homemade, and it is not something a client can fix by typing.
+ */
+await check('and a suffix is set smaller than the figure it hangs off', async () => {
+  // The affix, then the figure it belongs to. Not the FIRST figure: the block
+  // arrives with a plain "20" in slot one, which has no affix at all, so
+  // reaching for figure-then-affix finds nothing and says so.
+  const smaller = await added().evaluate((root) => {
+    const affix = root.querySelector('.tgs-stats__affix');
+    const figure = affix?.closest('.tgs-stats__figure');
+    if (!affix || !figure) return null;
+    return parseFloat(getComputedStyle(affix).fontSize) < parseFloat(getComputedStyle(figure).fontSize);
+  });
+
+  return smaller === true ? true : `affix comparison came back ${smaller}`;
+});
+
+/*
+ * The input of a named field in the LAST row of a repeater.
+ *
+ * SCOPED TO .ed-repeat-item, and that is the whole point. An .ed-field NESTS:
+ * the repeater's own wrapper is one, and it contains every row's labels, so a
+ * plain `.ed-field` filtered by label matches the wrapper as well as the field.
+ * Asking that set for `.locator('input').last()` then hands back the last input
+ * of the WHOLE repeater rather than the named one, which is how a fill meant
+ * for the last Figure landed in the last Detail and this check reported three
+ * stats twice over.
+ */
+const lastRowField = (label) =>
+  page.locator('.ed-props .ed-repeat-item').last()
+    .locator('.ed-field')
+    .filter({ has: page.locator('.ed-label', { hasText: new RegExp(`^${label}$`) }) })
+    .locator('input');
+
+/*
+ * Two across on a phone rather than one. A stats row is the one grid in this
+ * stylesheet that survives being halved, because the figures are short: four of
+ * them in a single column is a screen and a half of scrolling for four words.
+ */
+await check('four numbers become two rows of two on a phone, not four rows of one', async () => {
+  await showPanels();
+
+  // Three options, so this is a segmented row rather than a dropdown: the line
+  // Fields.tsx draws at four.
+  await page.getByRole('group', { name: 'Across' }).getByRole('button', { name: 'Four' }).click();
+  await page.waitForTimeout(400);
+
+  // The block ships with three numbers, so a fourth has to exist before the
+  // column setting means anything. Without this the check measures a
+  // three-item grid and calls a 2-plus-1 wrap a pass.
+  const addNumber = page.locator('.ed-props button', { hasText: 'Add number' });
+  if ((await addNumber.count()) === 0) return 'no Add number button in the pane';
+  await addNumber.first().click();
+  await page.waitForTimeout(600);
+
+  /*
+   * AND IT HAS TO BE GIVEN A FIGURE, because an entry with neither a figure nor
+   * a label draws nothing: it would be an empty column pushing the others out
+   * of true. So a freshly added row is invisible on the canvas until something
+   * is typed into it, exactly as a freshly added social link is.
+   */
+  await lastRowField('Figure').fill('60');
+  await page.waitForTimeout(700);
+
+  await page.getByRole('button', { name: 'Phone' }).click();
+  await page.waitForTimeout(700);
+
+  const laid = await added().evaluate((root) => {
+    const tops = [...root.querySelectorAll('.tgs-stats__item')].map((el) =>
+      Math.round(el.getBoundingClientRect().top));
+    return { count: tops.length, rows: new Set(tops).size };
+  });
+
+  await page.getByRole('button', { name: 'Desktop' }).click();
+  await page.waitForTimeout(400);
+
+  return laid.count === 4 && laid.rows === 2 ? true : JSON.stringify(laid);
+});
+
+// --- The logo strip ---------------------------------------------------------
+
+/*
+ * WHAT THIS HARNESS CAN AND CANNOT SETTLE ABOUT LOGOS.
+ *
+ * The block's claim is "one height, each keeps its own width", and proving the
+ * second half needs two pictures of different shapes that actually LOAD. This
+ * harness has none: the demo bank hands back data: URIs, which safeUrl refuses
+ * on purpose, and the only address the product accepts here points at a host
+ * that does not exist. Same limitation the image block checks already carry,
+ * and the reason they type an address rather than pick one.
+ *
+ * So the browser settles that the rules really are applied to a real element in
+ * a real layout, and that changing the setting changes the height. That the
+ * rules ADD UP to contained scaling is arithmetic on object-fit and a fixed
+ * height, pinned in tests/stats-logos.test.ts.
+ */
+await check('a logo takes the height it is given, not its own', async () => {
+  // Same again: the check above finishes on the Desktop button.
+  await showPanels();
+  await addBlock('Logo strip');
+
+  const addLogo = page.locator('.ed-props button', { hasText: 'Add logo' });
+  if ((await addLogo.count()) === 0) return 'no Add logo button in the pane';
+  await addLogo.first().click();
+  await page.waitForTimeout(500);
+
+  /*
+   * NO MODAL. "Or use a web address" is a control of the image FIELD, sitting
+   * in the properties pane next to the Choose button, not something inside the
+   * picker dialog. Opening the picker first put its own scrim over the very
+   * toggle this needs, which is what the second attempt at this check hit.
+   *
+   * An address rather than a picked image, for the reason the image block
+   * checks already give: the demo bank hands back data: URIs and safeUrl
+   * refuses those on purpose, so a picked demo picture would never render.
+   */
+  const row = page.locator('.ed-props .ed-repeat-item').last();
+  if ((await row.locator('.mp-url .ed-input').count()) === 0) {
+    await row.locator('.mp-url__toggle').click();
+    await page.waitForTimeout(300);
+  }
+  await row.locator('.mp-url .ed-input').first().fill(`https://${EXPECTED_TO_FAIL}/abta.svg`);
+  await page.waitForTimeout(900);
+
+  const drawn = await added().evaluate((root) => {
+    const img = root.querySelector('.tgs-logos__img');
+    if (!img) return null;
+    const style = getComputedStyle(img);
+    return { fit: style.objectFit, height: Math.round(parseFloat(style.height)) };
+  });
+
+  // 40px is the Medium setting, which is what a new strip arrives on.
+  return drawn && drawn.fit === 'contain' && drawn.height === 40
+    ? true
+    : JSON.stringify(drawn);
+});
+
+await check('and the height setting really moves it', async () => {
+  /*
+   * SMALL, NOT LARGE, and the reason is worth writing down because it cost a
+   * run to find: THE EDITOR CANVAS IS ONLY ~752px WIDE. A 1440px window less a
+   * 260px outline and a properties pane leaves less than the 767px breakpoint,
+   * so the canvas is inside the phone container query even on the Desktop
+   * setting. Large is capped at 40px there, which is exactly Medium, so
+   * checking Large could only ever compare a number with itself.
+   *
+   * Small is 28px at every width, so it is the one setting that proves the
+   * control moves the height wherever this check happens to run.
+   */
+  await page.getByRole('group', { name: 'Height' }).getByRole('button', { name: 'Small' }).click();
+  await page.waitForTimeout(700);
+
+  const state = await added().evaluate((root) => {
+    const img = root.querySelector('.tgs-logos__img');
+    const page_ = root.closest('.tgs-page');
+    return {
+      height: img ? Math.round(parseFloat(getComputedStyle(img).height)) : null,
+      canvas: page_ ? Math.round(page_.getBoundingClientRect().width) : null,
+    };
+  });
+
+  return state.height === 28
+    ? true
+    : `small came out at ${state.height}px on a ${state.canvas}px canvas`;
+});
+
+/*
+ * A LINK NEEDS A NAME. An anchor whose only child is an image with no alt text
+ * has no accessible name at all: a screen reader reaches it and announces
+ * "link", or reads out the file name. So the renderer refuses that combination
+ * and draws the plain logo instead, and this is the check that stops somebody
+ * "tidying" the condition down to just the address.
+ */
+await check('a logo with an address but no name is not made into a link', async () => {
+  await lastRowField('Link').fill('https://abta.com');
+  await page.waitForTimeout(700);
+
+  const links = await added().evaluate((root) => root.querySelectorAll('.tgs-logos a').length);
+  return links === 0 ? true : `${links} unnamed links drawn`;
+});
+
+await check('and it becomes a link the moment it is named', async () => {
+  await lastRowField('Name').fill('ABTA');
+  await page.waitForTimeout(800);
+
+  const state = await added().evaluate((root) => {
+    const a = root.querySelector('.tgs-logos a');
+    return a
+      ? { href: a.getAttribute('href'), rel: a.getAttribute('rel'), alt: a.querySelector('img')?.getAttribute('alt') }
+      : null;
+  });
+
+  return state && state.alt === 'ABTA' && state.href === 'https://abta.com' && /noopener/.test(state.rel ?? '')
+    ? true
+    : JSON.stringify(state);
+});
 
 await browser.close();
 

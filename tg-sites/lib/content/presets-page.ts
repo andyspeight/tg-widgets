@@ -1036,6 +1036,136 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
     section: { tone: 'subtle' },
   },
 
+  {
+    id: 'features-by-the-numbers',
+    category: 'features',
+    label: 'By the numbers',
+    description: 'Four figures across, with lines between them. The quickest way to say how long you have been at it.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'A few numbers', style: 'h2', ...CENTRED } },
+            {
+              type: 'stats',
+              props: {
+                columns: '4',
+                size: 'l',
+                align: 'centre',
+                divided: true,
+                items: [
+                  { value: '20', suffix: '+', label: 'Years on the high street', detail: '' },
+                  { value: '12,000', label: 'Holidays booked', detail: '' },
+                  { value: '4.9', suffix: '/5', label: 'Average review score', detail: '' },
+                  { value: '60', suffix: '+', label: 'Countries', detail: '' },
+                ],
+              },
+            },
+          ],
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'features-numbers-beside-words',
+    category: 'features',
+    label: 'Numbers beside the story',
+    description: 'A paragraph on one side and the figures that back it up on the other.',
+    rows: [
+      {
+        widths: [1, 1],
+        gap: 48,
+        align: 'centre',
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Twenty years of getting people away', style: 'h2' } },
+            {
+              type: 'text',
+              props: {
+                html: '<p>Two or three sentences on how the shop started and what has kept it going. The numbers next door do the boasting so this part does not have to.</p>',
+              },
+            },
+          ],
+          [
+            {
+              type: 'stats',
+              props: {
+                columns: '2',
+                size: 'm',
+                align: 'left',
+                divided: false,
+                items: [
+                  { value: '20', suffix: '+', label: 'Years', detail: '' },
+                  { value: '12,000', label: 'Holidays booked', detail: '' },
+                  { value: '4.9', suffix: '/5', label: 'Review score', detail: '' },
+                  { value: '100', suffix: '%', label: 'ATOL protected', detail: '' },
+                ],
+              },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { tone: 'subtle' },
+  },
+
+  /*
+   * THE BADGES, and the reason they are in Features rather than a category of
+   * their own: a client looking for somewhere to put ABTA and ATOL is looking
+   * for a reason to trust, which is what this whole category is.
+   *
+   * The logos arrive EMPTY, like every other picture in this library. A badge
+   * is the one thing that must never be a placeholder: a site showing an ABTA
+   * logo it is not entitled to is a trading standards problem, not a design
+   * one.
+   */
+  {
+    id: 'features-badges',
+    category: 'features',
+    label: 'Badges and memberships',
+    description: 'A quiet row of trade body logos: ABTA, ATOL, IATA. Add your own.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            {
+              type: 'text',
+              props: {
+                html: '<p>Your money is protected. Here is who by.</p>',
+                ...CENTRED,
+              },
+            },
+            { type: 'logos', props: { height: 'm', gap: 'xl', tone: 'grey', align: 'centre', items: [] } },
+          ],
+        ],
+      },
+    ],
+    // Tighter than a normal band: a row of badges is a strip, not a section
+    // with something in it. The default 48 makes it look like an empty gallery.
+    section: { tone: 'subtle', paddingY: 32 },
+  },
+
+  {
+    id: 'features-partners',
+    category: 'features',
+    label: 'Who we work with',
+    description: 'A heading over a row of operator or airline logos, in colour.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'The people we book with', style: 'h3', ...CENTRED } },
+            { type: 'logos', props: { height: 'l', gap: 'l', tone: 'grey-hover', align: 'centre', items: [] } },
+          ],
+        ],
+      },
+    ],
+  },
+
   /*
    * -------------------------------------------------------------------------
    * Call to action
@@ -1453,13 +1583,30 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
           [{ type: 'quote', props: { text: 'They sorted a flight change on a Sunday. I did not expect that.', attribution: 'A customer' } }],
         ],
       },
+      /*
+       * MOVED OFF Icon and text, 1 Aug 2026. This row was three icon-items with
+       * a star and a heart standing in for the numbers, because until the Key
+       * numbers block there was no way to set a figure at figure size. It was
+       * the clearest evidence that the block was missing, so it is the first
+       * thing to use it.
+       */
       {
-        widths: [1, 1, 1],
-        gap: 24,
+        widths: [1],
         columns: [
-          [{ type: 'icon-item', props: { icon: '★', title: '4.9 out of 5', body: 'Across 300 reviews.', ...CENTRED } }],
-          [{ type: 'icon-item', props: { icon: '✓', title: 'ATOL protected', body: 'Every package we sell.', ...CENTRED } }],
-          [{ type: 'icon-item', props: { icon: '♥', title: '20 years', body: 'Booking holidays from the same high street.', ...CENTRED } }],
+          [{
+            type: 'stats',
+            props: {
+              columns: '3',
+              size: 'l',
+              align: 'centre',
+              divided: true,
+              items: [
+                { value: '4.9', suffix: '/5', label: 'Average review score', detail: 'Across 300 reviews.' },
+                { value: '20', suffix: '+', label: 'Years on the high street', detail: '' },
+                { value: '100', suffix: '%', label: 'ATOL protected', detail: 'Every package we sell.' },
+              ],
+            },
+          }],
         ],
       },
     ],

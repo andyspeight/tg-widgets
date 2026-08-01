@@ -1071,6 +1071,176 @@ export const BLOCKS: readonly BlockDefinition[] = [
 
   {
     /*
+     * THE STATS ROW: 20 years, 4.9 out of 5, 12,000 holidays booked.
+     *
+     * WHAT IT REPLACES. Two designed sections were already faking this with the
+     * Icon and text block, one of them using a star and a heart where the number
+     * should be, because there was no way to make a figure big. A stat set at
+     * body size is not a stat, it is a sentence: the entire point is that the
+     * number is the loudest thing in the section and the words underneath
+     * explain it.
+     *
+     * THE FIGURE IS TEXT, NOT A NUMBER, and this is the decision to keep. What
+     * an agency actually writes in this slot is "12,000" and "4.9" and "24/7"
+     * and "£2m". A number input strips the comma, refuses the slash and cannot
+     * hold the pound sign, so it would be wrong for three of those four. A max
+     * length keeps the layout honest instead.
+     *
+     * SO WHY A SEPARATE PREFIX AND SUFFIX, if the figure is free text and could
+     * hold them? Because they are set smaller and lighter than the figure. A
+     * pound sign or a plus at the full size of a 56px number is the single
+     * thing that makes a stats row look homemade, and nobody can fix that by
+     * typing.
+     */
+    type: 'stats',
+    label: 'Key numbers',
+    group: 'Text',
+    icon: 'stats',
+    description: 'Big figures with a word under each: years, reviews, holidays booked.',
+    defaults: {
+      columns: '3',
+      size: 'l',
+      align: 'centre',
+      divided: false,
+      items: [
+        { value: '20', suffix: '', label: 'Years on the high street', detail: '' },
+        { value: '4.9', suffix: '/5', label: 'Average review score', detail: 'Across 300 reviews.' },
+        { value: '12,000', suffix: '+', label: 'Holidays booked', detail: '' },
+      ],
+    },
+    summarise: (props) => {
+      const count = Array.isArray(props.items) ? props.items.length : 0;
+      return `Key numbers (${count})`;
+    },
+    fields: [
+      {
+        kind: 'repeater',
+        key: 'items',
+        label: 'Numbers',
+        itemLabel: 'Number',
+        max: 8,
+        fields: [
+          {
+            kind: 'text',
+            key: 'value',
+            label: 'Figure',
+            max: 12,
+            help: 'Whatever you would write: 12,000 or 4.9 or 24/7.',
+          },
+          { kind: 'text', key: 'prefix', label: 'Before it', max: 4, help: 'A £ or a ~, set smaller.' },
+          { kind: 'text', key: 'suffix', label: 'After it', max: 8, help: 'A + or a % or /5, set smaller.' },
+          { kind: 'text', key: 'label', label: 'What it counts', max: 80 },
+          { kind: 'text', key: 'detail', label: 'Detail', max: 120, help: 'Optional, a size smaller again.' },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'columns',
+        label: 'Across',
+        options: [
+          { value: '2', label: 'Two' },
+          { value: '3', label: 'Three' },
+          { value: '4', label: 'Four' },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'size',
+        label: 'Figure size',
+        options: [
+          { value: 'm', label: 'Medium' },
+          { value: 'l', label: 'Large' },
+          { value: 'xl', label: 'Extra large' },
+        ],
+      },
+      { kind: 'select', key: 'align', label: 'Alignment', options: ALIGN_OPTIONS },
+      {
+        kind: 'toggle',
+        key: 'divided',
+        label: 'Lines between them',
+        help: 'A hairline between each one. Suits four across.',
+      },
+    ],
+  },
+
+  {
+    /*
+     * THE LOGO STRIP: ABTA, ATOL, IATA, and the operators a shop sells.
+     *
+     * WHY IT IS NOT THE GALLERY BLOCK, which is the tool a client would reach
+     * for today and which gets it wrong twice. A gallery crops every image to
+     * one ratio, and logos have no common ratio: ABTA's is wide, ATOL's is
+     * near square, an airline's is wider still. Cropped to 4:3 they are
+     * mangled, and a mangled trade body logo is worse than none. A gallery also
+     * treats them as photographs, in a grid, at whatever size the column gives.
+     *
+     * SO THE RULE HERE IS A COMMON HEIGHT AND CONTAINED SCALING. Every logo
+     * gets the same vertical space and keeps its own width, which is how a
+     * strip of badges is meant to sit and the one thing a grid cannot do.
+     *
+     * IN UK TRAVEL THIS IS NOT DECORATION. An agency displays its ABTA and ATOL
+     * membership because that is what tells somebody their money is protected,
+     * and until now the whole product could show those two facts only as words
+     * in a paragraph.
+     */
+    type: 'logos',
+    label: 'Logo strip',
+    group: 'Media',
+    icon: 'logos',
+    description: 'A row of badges or partner logos, all on a common height.',
+    defaults: { height: 'm', gap: 'l', tone: 'colour', align: 'centre', items: [] },
+    summarise: (props) => {
+      const count = Array.isArray(props.items) ? props.items.length : 0;
+      return `Logo strip (${count})`;
+    },
+    fields: [
+      {
+        kind: 'repeater',
+        key: 'items',
+        label: 'Logos',
+        itemLabel: 'Logo',
+        max: 24,
+        fields: [
+          { kind: 'image', key: 'src', label: 'Logo' },
+          {
+            kind: 'text',
+            key: 'alt',
+            label: 'Name',
+            max: 200,
+            help: 'ABTA, ATOL, the operator. A logo without a name cannot be linked.',
+          },
+          { kind: 'url', key: 'href', label: 'Link', help: 'Optional. Their site, or your membership page.' },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'height',
+        label: 'Height',
+        options: [
+          { value: 's', label: 'Small' },
+          { value: 'm', label: 'Medium' },
+          { value: 'l', label: 'Large' },
+        ],
+        help: 'Every logo gets this height and keeps its own width.',
+      },
+      { kind: 'select', key: 'gap', label: 'Space between', options: SPACING_OPTIONS },
+      {
+        kind: 'select',
+        key: 'tone',
+        label: 'Colour',
+        options: [
+          { value: 'colour', label: 'As they are' },
+          { value: 'grey', label: 'Grey' },
+          { value: 'grey-hover', label: 'Grey, colour on hover' },
+        ],
+        help: 'Grey keeps a row of clashing brand colours quiet.',
+      },
+      { kind: 'select', key: 'align', label: 'Alignment', options: ALIGN_OPTIONS },
+    ],
+  },
+
+  {
+    /*
      * A ROW OF SOCIAL LINKS, which every footer wants and nothing else here did.
      *
      * NOT THE SOCIAL SHARE WIDGET. That one shares the page somebody is looking

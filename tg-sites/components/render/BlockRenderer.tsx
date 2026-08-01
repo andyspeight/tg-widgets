@@ -24,11 +24,13 @@ import {
   IconItemBlock,
   ImageBlock,
   ListBlock,
+  LogosBlock,
   NavBlock,
   QuoteBlock,
   SliderBlock,
   SocialBlock,
   SpacerBlock,
+  StatsBlock,
   StepsBlock,
   TableBlock,
   TabsBlock,
@@ -63,6 +65,8 @@ export function BlockRenderer({
         return <IconItemBlock props={props} />;
       case 'steps':
         return <StepsBlock props={props} />;
+      case 'stats':
+        return <StatsBlock props={props} />;
       /*
        * These two take the block's own id, which becomes the `name` grouping
        * their controls. Nothing else in this file needs it, so it is passed
@@ -78,6 +82,8 @@ export function BlockRenderer({
         return <VideoBlock props={props} />;
       case 'gallery':
         return <GalleryBlock props={props} />;
+      case 'logos':
+        return <LogosBlock props={props} />;
       case 'cards':
         return <CardsBlock props={props} editing={editable} />;
       case 'slider':

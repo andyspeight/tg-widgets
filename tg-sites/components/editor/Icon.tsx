@@ -31,6 +31,8 @@ export type IconName =
   | 'nav'
   | 'social'
   | 'steps'
+  | 'stats'
+  | 'logos'
   | 'cards'
   | 'accordion'
   | 'tabs'
@@ -112,6 +114,15 @@ const PATHS: Record<IconName, string> = {
   // Three markers down the left with a line through them, and a line of words
   // beside each. The connector is what tells it apart from `list`.
   steps: 'M6 4v16M6 5.5a1.5 1.5 0 1 0 0 .01M6 12a1.5 1.5 0 1 0 0 .01M6 18.5a1.5 1.5 0 1 0 0 .01M11 5.5h9M11 12h9M11 18.5h9',
+  // Three tall figures with a short word under each: the shape of a stats row
+  // seen from across the room. Not `table`, which is a ruled grid, and not
+  // `chart`, because nothing here plots anything.
+  stats: 'M4 5v9M12 8v6M20 4v10M3 18h2M11 18h2M19 18h2',
+  // Three rounded badges on one line, the middle one taller, which is the point:
+  // logos have no common ratio and this block gives them a common HEIGHT.
+  // Deliberately not `gallery`, whose four equal squares are the very thing a
+  // logo strip must not be.
+  logos: 'M2 9h5.5v6H2zM9.5 7h5v10h-5zM17 9h5.5v6H17z',
   // Two cards, each with a picture area above a line of words. Deliberately not
   // `columns`, which is the same two boxes with nothing in them, and not
   // `gallery`, which is four squares.
