@@ -184,6 +184,18 @@ export function SiteDashboard({ account, site, siteName, siteUrl, pages: initial
             </a>
 
             {/*
+              Being found. A plain anchor like its neighbours, and for a reason of
+              its own on top of theirs: the report is computed from the PUBLISHED
+              content on every visit, so arriving with a tree built before the
+              last publish would show somebody the state of their site as it was
+              when they opened the dashboard.
+            */}
+            <a className="sv-btn" href="/seo">
+              <Icon name="search" size={16} />
+              Being found
+            </a>
+
+            {/*
               A plain anchor for the same reason as Theme above: these settings are
               in the head of every rendered page, so coming back wants fresh server
               output rather than a tree built before the change.

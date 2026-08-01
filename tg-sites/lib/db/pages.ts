@@ -322,6 +322,75 @@ export async function listPublishedPaths(tenantId: string): Promise<PublishedPat
   });
 }
 
+/** One page, with everything the visibility report needs to judge it. */
+export interface PageForAudit {
+  id: string;
+  title: string;
+  /** The URL path, without a leading slash. Empty string is the home page. */
+  path: string;
+  published: boolean;
+  /** The PUBLISHED tree, or null when the page has never been published. */
+  content: Page | null;
+}
+
+/**
+ * Every page, with its published content, for the visibility report.
+ *
+ * THE PUBLISHED TREE, NEVER THE DRAFT, and that is the whole reason this is its
+ * own function rather than listPages plus a loop. A draft with a lovely search
+ * description that nobody has published is not findable, and a report that
+ * scored the draft would tell a client their page is fine while the version on
+ * the internet is not. That is the one thing a report like this must never do.
+ *
+ * The authenticated role rather than the renderer's, because this runs on a
+ * dashboard for a member of the site and it has to be able to SEE the drafts in
+ * order to say they are not published.
+ *
+ * ONE QUERY, paths assembled here, same as listPublishedPaths. A parent that is
+ * itself a draft is still visible to this role, so a child's path assembles
+ * correctly and the report can say "not published" about both.
+ */
+export async function listPagesForAudit(tenantId: string): Promise<PageForAudit[]> {
+  return withTenant(tenantId, async (tx) => {
+    const rows = await tx`
+      select id, parent_id, slug, title, seo, published_content
+      from public.pages
+    `;
+
+    const byId = new Map<string, Record<string, unknown>>();
+    for (const raw of rows) byId.set(String((raw as Record<string, unknown>).id), raw as Record<string, unknown>);
+
+    const out: PageForAudit[] = [];
+
+    for (const row of byId.values()) {
+      const segments: string[] = [];
+      let current: Record<string, unknown> | undefined = row;
+      let hops = 0;
+
+      while (current && hops <= MAX_PATH_DEPTH) {
+        segments.unshift(String(current.slug ?? ''));
+        const parent: Record<string, unknown> | undefined = current.parent_id
+          ? byId.get(String(current.parent_id))
+          : undefined;
+        current = parent;
+        hops += 1;
+      }
+
+      const published = asObject(row.published_content) !== null;
+
+      out.push({
+        id: String(row.id),
+        title: String(row.title),
+        path: segments.filter(Boolean).join('/'),
+        published,
+        content: published ? hydrate(row, row.published_content) : null,
+      });
+    }
+
+    return out.sort((a, b) => a.path.localeCompare(b.path));
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Writing
 // ---------------------------------------------------------------------------

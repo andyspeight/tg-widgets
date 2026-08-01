@@ -1,0 +1,171 @@
+/*
+ * The search and AI visibility report.
+ *
+ * Every value here is an --ed- token, like media.css, which is what makes it
+ * work in dark mode with no dark-mode rules of its own: the tokens already flip.
+ * There is no --ed-7 in the spacing scale (it runs 1 2 3 4 5 6 8) and no bare
+ * --ed-r, and a var() that resolves to nothing drops the whole declaration
+ * silently, so gap: var(--ed-7) becomes no gap at all.
+ *
+ * THE SEVERITY COLOURS ARE THE ONLY REAL DESIGN DECISION HERE, and they are
+ * carried by a dot AND by the words, never by colour alone. Somebody who cannot
+ * tell the red dot from the amber one still reads "2 to fix" and "worth doing",
+ * which is the difference between a report and a traffic light nobody can use.
+ */
+
+.seo-root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-5);
+  max-width: 880px;
+  margin: 0 auto;
+  padding: var(--ed-6) 0;
+}
+
+.seo-head { display: flex; flex-direction: column; gap: var(--ed-2); }
+
+.seo-lede {
+  margin: 0;
+  max-width: 62ch;
+  color: var(--ed-ink-2);
+  line-height: 1.55;
+}
+
+.seo-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-3);
+  padding: var(--ed-5);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-lg);
+  background: var(--ed-panel);
+}
+
+.seo-panel__title {
+  margin: 0;
+  font-size: var(--ed-text-lg);
+  font-weight: 600;
+}
+
+.seo-links { margin: 0; font-size: var(--ed-text-sm); color: var(--ed-ink-3); }
+
+/* --- The counts ---------------------------------------------------- */
+
+.seo-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ed-2);
+  margin: 0;
+}
+
+.seo-count {
+  padding: 2px var(--ed-2);
+  border-radius: var(--ed-r-full);
+  font-size: var(--ed-text-xs);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.seo-count[data-severity='problem'] { background: color-mix(in srgb, var(--ed-danger) 14%, transparent); color: var(--ed-danger); }
+.seo-count[data-severity='warning'] { background: var(--ed-well); color: var(--ed-ink-2); }
+.seo-count[data-severity='good']    { background: var(--ed-select-wash); color: var(--ed-select); }
+
+/* --- The findings -------------------------------------------------- */
+
+.seo-findings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.seo-finding {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--ed-2);
+  align-items: start;
+}
+
+.seo-finding__dot {
+  width: 8px;
+  height: 8px;
+  margin-top: 7px;
+  border-radius: var(--ed-r-full);
+  background: var(--ed-ink-3);
+}
+
+.seo-finding[data-severity='problem'] .seo-finding__dot { background: var(--ed-danger); }
+.seo-finding[data-severity='good'] .seo-finding__dot { background: var(--ed-select); }
+
+.seo-finding__title { margin: 0; }
+.seo-finding__fix {
+  margin: 2px 0 0;
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink-2);
+  line-height: 1.5;
+}
+
+/*
+ * A finding that is already fine is quieter than one that is not. Somebody is
+ * here to find what is wrong, and the good ones are there to say "checked"
+ * rather than to be read.
+ */
+.seo-finding[data-severity='good'] .seo-finding__title {
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink-3);
+}
+
+/* --- The page list ------------------------------------------------- */
+
+.seo-pages {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.seo-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-3);
+  padding-top: var(--ed-4);
+  border-top: 1px solid var(--ed-line-soft);
+}
+
+.seo-page:first-child { padding-top: 0; border-top: 0; }
+
+.seo-page__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ed-3);
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.seo-page__right {
+  display: flex;
+  gap: var(--ed-3);
+  align-items: center;
+}
+
+.seo-page__title { margin: 0; font-size: var(--ed-text-md); font-weight: 600; }
+
+.seo-page__path {
+  margin: 2px 0 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--ed-text-xs);
+  color: var(--ed-ink-3);
+}
+
+/* Not published, so listed rather than judged. */
+.seo-pages--quiet .seo-page { gap: 0; }
+
+@media (max-width: 720px) {
+  .seo-root { padding: var(--ed-4) var(--ed-3); }
+  .seo-panel { padding: var(--ed-4); }
+  .seo-page__head { flex-direction: column; }
+}
