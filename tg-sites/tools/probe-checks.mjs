@@ -487,9 +487,9 @@ const MUTATIONS = [
     check: 'no address field invites a browser to autofill a personal address',
     why: 'Drop the attribute from one field, which is what a tidy would do.',
     file: 'components/settings/SettingsEditor.tsx',
-    from: `                maxLength={20}
-                autoComplete="off"`,
-    to: `                maxLength={20}`,
+    from: `                  maxLength={20}
+                  autoComplete="off"`,
+    to: `                  maxLength={20}`,
   },
 
   // --- the brand profile, on the settings screen ---------------------------
