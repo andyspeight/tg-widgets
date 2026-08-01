@@ -401,3 +401,45 @@ export async function getPublishedItem(
     };
   });
 }
+
+/** One published entry's address, for the sitemap. */
+export interface PublishedEntryPath {
+  /** collectionKey/slug, which is exactly how a visitor reaches it. */
+  path: string;
+  updatedAt: string | null;
+}
+
+/**
+ * Every published entry across every collection, as addresses.
+ *
+ * ONE QUERY FOR THE WHOLE SITE rather than one per collection, because a sitemap
+ * wants all of them and a site with six collections should not be six round
+ * trips to eu-west-2.
+ *
+ * NO STATUS FILTER, and no limit either. The renderer policy from migration 0004
+ * is what makes a draft invisible here, exactly as it is in listPublished next
+ * door. The cap that function carries is there because a listing block asks for a
+ * screenful; a sitemap asks for everything, so a cap would silently truncate a
+ * blog and nothing would say so. MAX_SITEMAP_URLS in lib/seo/sitemap.ts is where
+ * the honest limit lives, and it logs what it dropped.
+ */
+export async function listAllPublishedEntries(
+  tenantId: string,
+): Promise<PublishedEntryPath[]> {
+  return withPublicTenant(tenantId, async (tx) => {
+    const rows = await tx`
+      select c.key, i.slug, coalesce(i.updated_at, i.published_at) as changed_at
+      from public.collection_items i
+      join public.collections c on c.id = i.collection_id
+      order by changed_at desc nulls last
+    `;
+
+    return rows.map((raw) => {
+      const row = raw as Record<string, unknown>;
+      return {
+        path: `${String(row.key)}/${String(row.slug)}`,
+        updatedAt: row.changed_at ? new Date(String(row.changed_at)).toISOString() : null,
+      };
+    });
+  });
+}

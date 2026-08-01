@@ -16,6 +16,7 @@ import { getPublicSettings } from '../../../../lib/db/settings';
 import { getPublicTheme } from '../../../../lib/db/theme';
 import { resolveTenantByHostname } from '../../../../lib/db/tenants';
 import { socialMetas } from '../../../../lib/settings/head';
+import { jsonLdScript, pageJsonLd } from '../../../../lib/seo/jsonld';
 import { familiesFromFiles } from '../../../../lib/theme/fonts';
 import { themeTokens } from '../../../../lib/theme/tokens';
 
@@ -198,6 +199,40 @@ export default async function SitePage({ params }: Params) {
   const slug = decodeURIComponent(host);
   const theme = themeTokens(found.theme, familiesFromFiles(found.faces)).style;
 
+  /*
+   * STRUCTURED DATA, which is the difference between an AI engine summarising
+   * this page and NAMING the business in its answer. An engine has to resolve
+   * the site to a particular entity before it will credit it, and until 1 Aug
+   * 2026 there was none of this anywhere in the product.
+   *
+   * Built entirely from what the client has already given us: the company
+   * profile in settings, the page's own title and address, the questions in an
+   * accordion block. Nothing here is a new field somebody has to fill in, so
+   * nothing here can disagree with the visible page, which is the failure that
+   * gets structured data ignored as spam. See lib/seo/jsonld.ts.
+   */
+  const origin = `https://${slug}`;
+  const currentPath = (path ?? []).join('/');
+  const pageTitle = found.page ? found.page.title : found.entry!.item.title;
+
+  const nodes = pageJsonLd({
+    origin,
+    url: `${origin}/${currentPath}`.replace(/\/$/, ''),
+    path: currentPath,
+    siteName: found.settings.companyName || pageTitle,
+    settings: found.settings,
+    pageTitle,
+    page: found.page?.content ?? null,
+    entry: found.entry
+      ? {
+          title: found.entry.item.title,
+          summary: found.entry.item.summary,
+          image: found.entry.item.image,
+        }
+      : null,
+    publishedAt: found.entry?.publishedAt ?? null,
+  });
+
   return (
     <>
       {/*
@@ -206,6 +241,23 @@ export default async function SitePage({ params }: Params) {
         applies to rather than being threaded through a layout.
       */}
       <SiteHead settings={found.settings} />
+
+      {/*
+        ONE SCRIPT TAG HOLDING EVERY NODE, rather than one tag each. The nodes
+        reference one another by @id, and keeping them together is what lets an
+        engine see the article, the questions and the business as one story
+        rather than three unrelated claims that happen to share a page.
+
+        dangerouslySetInnerHTML is the only way to put text inside a script tag
+        from React, and jsonLdScript has already escaped the three characters
+        that could end the tag early. See the note on it.
+      */}
+      {nodes.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(nodes) }}
+        />
+      )}
 
       {/* @font-face and the preloads, before the content, so the browser starts
           fetching the font while it is still reading the page. */}

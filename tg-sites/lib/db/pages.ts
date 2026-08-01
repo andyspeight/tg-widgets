@@ -245,6 +245,83 @@ export async function getPublishedPage(
   });
 }
 
+/** One published address, for the sitemap. */
+export interface PublishedPath {
+  /** The URL path, without a leading slash. Empty string is the home page. */
+  path: string;
+  /** When it last changed, for <lastmod>. */
+  updatedAt: string | null;
+  /** Asked to be left out of every index, so it is left out of the sitemap too. */
+  noindex: boolean;
+}
+
+/**
+ * Every published address on this site.
+ *
+ * ONE QUERY AND THE PATHS BUILT IN JS, rather than a recursive CTE. A site is
+ * tens of pages, not thousands, and the recursive version has to be read twice
+ * to be believed. This is also the query a sitemap is asked for, which is a
+ * crawler rather than a visitor, so it is not on anybody's critical path.
+ *
+ * A CHILD UNDER AN UNPUBLISHED PARENT IS LEFT OUT, and that falls out of the
+ * renderer role rather than being coded here: the draft parent's row is invisible
+ * to this connection, so the child's path cannot be assembled and it is skipped.
+ * Which is exactly right. getPublishedPage walks the path a segment at a time and
+ * every segment has to be published, so that child's URL 404s for a visitor. A
+ * sitemap listing URLs that 404 is worse than a sitemap missing them.
+ */
+export async function listPublishedPaths(tenantId: string): Promise<PublishedPath[]> {
+  return withPublicTenant(tenantId, async (tx) => {
+    const rows = await tx`
+      select id, parent_id, slug, seo, updated_at
+      from public.pages
+      where published_content is not null
+    `;
+
+    const byId = new Map<string, Record<string, unknown>>();
+    for (const raw of rows) byId.set(String((raw as Record<string, unknown>).id), raw as Record<string, unknown>);
+
+    const paths: PublishedPath[] = [];
+
+    for (const row of byId.values()) {
+      const segments: string[] = [];
+      let current: Record<string, unknown> | undefined = row;
+      let hops = 0;
+
+      /*
+       * A depth cap, not because the schema allows a loop but because a
+       * self-referencing row would hang the request rather than fail it, and a
+       * sitemap must never be the thing that takes a site down.
+       */
+      while (current && hops <= MAX_PATH_DEPTH) {
+        segments.unshift(String(current.slug ?? ''));
+        const parent: Record<string, unknown> | undefined = current.parent_id
+          ? byId.get(String(current.parent_id))
+          : undefined;
+        if (current.parent_id && !parent) {
+          // The parent is a draft, so this address does not resolve. See above.
+          segments.length = 0;
+          break;
+        }
+        current = parent;
+        hops += 1;
+      }
+
+      if (segments.length === 0 && String(row.slug ?? '') !== '') continue;
+      if (hops > MAX_PATH_DEPTH) continue;
+
+      const seo = asObject(row.seo) ?? {};
+      paths.push({
+        path: segments.filter(Boolean).join('/'),
+        updatedAt: row.updated_at ? new Date(String(row.updated_at)).toISOString() : null,
+        noindex: seo.noindex === true,
+      });
+    }
+
+    return paths;
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Writing
 // ---------------------------------------------------------------------------
