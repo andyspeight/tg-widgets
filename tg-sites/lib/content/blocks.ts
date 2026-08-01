@@ -248,12 +248,27 @@ export const BLOCKS: readonly BlockDefinition[] = [
     group: 'Text',
     icon: 'sparkle',
     description: 'An icon with a short title and a line of copy.',
-    defaults: { icon: '★', title: 'A benefit', body: 'One sentence on why it matters.' },
+    defaults: { icon: '★', title: 'A benefit', body: 'One sentence on why it matters.', align: 'left' },
     summarise: (props) => asString(props.title) || 'Icon and text',
     fields: [
       { kind: 'text', key: 'icon', label: 'Icon', max: 4, help: 'A single character or emoji.' },
       { kind: 'text', key: 'title', label: 'Title', max: 80 },
       { kind: 'textarea', key: 'body', label: 'Body', rows: 3, max: 300 },
+      /*
+       * ADDED 1 AUG 2026, and it should have been here from the start. Four
+       * designed sections were already setting `align: 'centre'` on this block:
+       * the prop was carried through, ignored by the renderer, and drawn
+       * centred in the picker's thumbnail. Centred puts the icon ABOVE the
+       * words rather than beside them, which is what a row of three points
+       * under a centred heading wants.
+       */
+      {
+        kind: 'select',
+        key: 'align',
+        label: 'Alignment',
+        options: ALIGN_OPTIONS,
+        help: 'Centred puts the icon above the words rather than beside them.',
+      },
     ],
   },
 

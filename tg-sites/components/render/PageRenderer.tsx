@@ -50,6 +50,7 @@ export function PageRenderer({
   editingPath = null,
   emptyNote = 'This page is empty. Add a section to get started.',
   theme,
+  region = null,
 }: {
   page: Page;
   /**
@@ -80,9 +81,32 @@ export function PageRenderer({
    * preview cannot drift from what ships.
    */
   theme?: CSSProperties;
+  /**
+   * Which region this tree is, when it is one.
+   *
+   * ONLY THE EDITOR PASSES THIS, and it is here so the canvas can show a header
+   * as a header. A published header goes through RegionRenderer, which wraps it
+   * in a real `<header class="tgs-page tgs-region" data-region="header">`; the
+   * canvas renders the same sections through this component and got a bare
+   * `.tgs-page`, so every rule keyed on a region missed it. The footer's
+   * hairline was invisible in the editor from the day it shipped, and the
+   * header's phone bar would have been too.
+   *
+   * `data-sticky` and `data-overlay` are DELIBERATELY not carried across. Those
+   * two position the header against the document, and a canvas has no document
+   * to stick to: honouring them here would lift the header out of the flow of a
+   * preview that has nothing underneath it. They stay a property-pane setting
+   * whose effect you see on the site.
+   */
+  region?: 'header' | 'footer' | null;
 } & Editable): ReactElement {
   return (
-    <div className="tgs-page" style={theme} {...pathAttr(editable, 'page')}>
+    <div
+      className={region ? 'tgs-page tgs-region' : 'tgs-page'}
+      data-region={region ?? undefined}
+      style={theme}
+      {...pathAttr(editable, 'page')}
+    >
       {editable && <InsertPoint index={0} />}
 
       {page.sections.map((section, index) => (

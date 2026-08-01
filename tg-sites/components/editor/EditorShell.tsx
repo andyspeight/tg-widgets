@@ -1177,6 +1177,8 @@ export function EditorShell({
         onCommit={commit}
         onPickBlock={setPicker}
         theme={siteTheme}
+        // So the canvas draws a header as a header rather than as a page.
+        region={region}
         /*
           "This page is empty" is the wrong sentence on the header screen, and
           it is the sentence somebody meets FIRST, since a client who has never
@@ -1285,6 +1287,9 @@ export function EditorShell({
 
       {insertAt !== null && (
         <SectionPicker
+          // Which designed sections are worth offering. A page gets the page
+          // ones, the header screen gets headers, the footer screen footers.
+          scope={region ?? 'page'}
           onClose={() => setInsertAt(null)}
           /*
            * Two callbacks rather than one taking a union, so neither path has to

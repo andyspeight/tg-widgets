@@ -233,12 +233,26 @@ export function ListBlock({ props }: { props: Props }): ReactElement {
 }
 
 export function IconItemBlock({ props }: { props: Props }): ReactElement {
-  const icon = str(props, 'icon', '★');
+  const icon = str(props, 'icon', '\u2605');
   const title = str(props, 'title');
   const body = str(props, 'body');
+  const align = oneOf(props, 'align', ['left', 'centre', 'right'] as const, 'left');
 
+  /*
+   * CENTRED PUTS THE ICON ABOVE THE WORDS, not beside them, and that is the
+   * whole point of the setting rather than a side effect.
+   *
+   * Four presets asked for a centred icon item before the block had an align
+   * prop at all: `blank-four-points` shipped on 31 Jul 2026 setting it, and the
+   * three centred Features and Contact ones followed on 1 Aug. The prop was
+   * carried into the block, ignored, and drawn left-aligned, while the picker's
+   * thumbnail read the same prop and drew it centred. The thumbnail was telling
+   * the truth about what was asked for and a lie about what arrives, which is
+   * the one thing the whole draw-it-from-the-data arrangement exists to stop.
+   * tests/presets.test.ts checks every prop against the registry now.
+   */
   return (
-    <div className="tgs-icon-item">
+    <div className="tgs-icon-item" data-align={align}>
       {/* Decorative: the title carries the meaning. */}
       <span className="tgs-icon-item__icon" aria-hidden="true">
         {icon}

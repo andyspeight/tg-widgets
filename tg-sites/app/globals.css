@@ -431,6 +431,37 @@
   }
   .tgs-row[data-reverse='true'] > .tgs-col { align-self: stretch; }
 
+  /*
+   * THE ONE ROW ON A PHONE THAT STAYS A ROW: a header's nav bar.
+   *
+   * Everything above stacks because two columns sharing 390px is two columns
+   * nobody can read. A header bar is the exception and the reason is that it is
+   * not page content: it is a logo and a menu, the menu has ALREADY collapsed
+   * itself to a burger by this width, and stacking them turns a 60px bar into a
+   * 120px one that pushes the page down on the smallest screen there is.
+   *
+   * SCOPED TO THE ROW THAT HOLDS THE MENU, not to every row in the header, and
+   * that distinction is load-bearing. The two-tier header preset has a slim
+   * strip above the bar carrying the opening hours and a phone number, and those
+   * two SHOULD stack: side by side they get 170px each and wrap to three lines.
+   * `:has(.tgs-nav)` asks the only question that separates the two, which is
+   * whether the row is the bar.
+   *
+   * space-between rather than the desktop proportions, because a 1:3 split of
+   * 360px gives the logo 90px whatever the logo actually needs. Content width
+   * each, pushed to the two ends, is what a header bar is.
+   */
+  .tgs-region[data-region='header'] .tgs-row:has(.tgs-nav) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .tgs-region[data-region='header'] .tgs-row:has(.tgs-nav) > .tgs-col {
+    flex: 0 1 auto;
+    align-self: center;
+  }
+
   /* Side by side gives up on a phone, for the same reason a row does: two
      things sharing 390px is two things nobody can read. */
   .tgs-col[data-flow='row'] { display: block; }
@@ -743,6 +774,25 @@
 
 /* Icon item */
 .tgs-icon-item { display: flex; gap: var(--tgs-space-m); align-items: flex-start; }
+
+/*
+ * CENTRED STACKS THE ICON ABOVE THE WORDS. Keeping it beside them and merely
+ * centring the text would leave the icon hanging off the left of a column that
+ * is otherwise symmetrical, which looks like a mistake rather than a choice.
+ * Right does the mirror of it, icon still on top, because an icon to the right
+ * of its own title reads as belonging to the thing after it.
+ */
+.tgs-icon-item[data-align='centre'] {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.tgs-icon-item[data-align='right'] {
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+}
 .tgs-icon-item__icon {
   flex: none;
   display: grid;

@@ -1873,12 +1873,25 @@
 
 .ed-designed {
   display: grid;
-  grid-template-columns: 140px 1fr;
+  /* 160 rather than 140 since 1 Aug 2026: "Call to action" wrapped to two
+     lines at the old width once there were ten categories rather than two. */
+  grid-template-columns: 160px 1fr;
   gap: var(--ed-4);
   align-items: start;
 }
 
+/*
+ * The categories stay put while the designs scroll past.
+ *
+ * Two categories and fifteen designs fitted on a screen and this did not
+ * matter. Ten categories and a hundred-odd designs do not: scrolling to the
+ * bottom of Features used to take the category list with it, so changing your
+ * mind meant scrolling all the way back up to find the tabs. `align-items:
+ * start` on the grid above is what makes the sticky work.
+ */
 .ed-designed__cats {
+  position: sticky;
+  top: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -1967,6 +1980,21 @@
 .ed-thumb--preset rect { stroke: none; }
 .ed-thumb--preset rect[data-tone='strong'] { fill: var(--ed-ink-2); }
 .ed-thumb--preset rect[data-tone='soft'] { fill: var(--ed-line); }
+
+/*
+ * A picture, a card or a panel: anything that is not words.
+ *
+ * Between the two, so a photograph reads as a block of something rather than as
+ * a very fat line of text. Added with the eight new categories on 1 Aug 2026,
+ * half of which are built from pictures and cards and all of which drew the
+ * same grey smudge until this existed.
+ */
+.ed-thumb--preset rect[data-tone='frame'] {
+  fill: var(--ed-line);
+  stroke: var(--ed-line-soft);
+  stroke-width: 1;
+}
+
 .ed-preset-card:hover .ed-thumb--preset rect[data-tone='strong'] { fill: var(--ed-accent-dark); }
 
 .ed-ai-stub {

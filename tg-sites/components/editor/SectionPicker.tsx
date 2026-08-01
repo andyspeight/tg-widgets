@@ -22,10 +22,11 @@ import { useRef, useState } from 'react';
 
 import { LAYOUTS, layoutCells, type Layout } from '../../lib/content/layouts';
 import {
-  PRESET_CATEGORIES,
+  categoriesFor,
   presetBars,
   presetsIn,
   type PresetCategory,
+  type PresetScope,
   type SectionPreset,
 } from '../../lib/content/presets';
 import { Modal } from '../ui/Modal';
@@ -105,16 +106,37 @@ export function PresetThumb({ preset }: { preset: SectionPreset }) {
 // ---------------------------------------------------------------------------
 
 export function SectionPicker({
+  scope = 'page',
   onPickLayout,
   onPickPreset,
   onClose,
 }: {
+  /**
+   * Which screen this was opened from.
+   *
+   * A header preset and a page section are the same shape, so without this the
+   * Designed tab would offer a four-column footer in the middle of an About
+   * page, and offer "Three quotes" on the header screen. The editor knows which
+   * it is editing, so it says.
+   */
+  scope?: PresetScope;
   onPickLayout: (layout: Layout) => void;
   onPickPreset: (preset: SectionPreset) => void;
   onClose: () => void;
 }) {
-  const [tab, setTab] = useState<Tab>('layouts');
-  const [category, setCategory] = useState<PresetCategory>(PRESET_CATEGORIES[0].id);
+  const categories = categoriesFor(scope);
+
+  /*
+   * DESIGNED FIRST WHEN THERE IS SOMETHING SHAPED LIKE WHAT YOU ARE BUILDING.
+   *
+   * Layouts leads on a page, because somebody adding their fifth section
+   * usually knows the shape they want. On the header and footer screens the
+   * opposite is true: a client is there once, at the start, and an empty
+   * two-column row is not what they came for. Since 1 Aug 2026 there are
+   * designed headers and footers to open on.
+   */
+  const [tab, setTab] = useState<Tab>(scope === 'page' ? 'layouts' : 'designed');
+  const [category, setCategory] = useState<PresetCategory>(categories[0]?.id ?? 'blank');
 
   // Escape, the scrim, the focus trap and moving focus in all belong to Modal.
   const first = useRef<HTMLButtonElement>(null);
@@ -174,7 +196,7 @@ export function SectionPicker({
             second one lands, and somebody would have to notice it needed to.
           */}
           <nav className="ed-designed__cats" aria-label="Section categories">
-            {PRESET_CATEGORIES.map((entry) => (
+            {categories.map((entry) => (
               <button
                 key={entry.id}
                 type="button"

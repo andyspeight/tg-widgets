@@ -64,6 +64,8 @@ interface Props {
   theme?: CSSProperties;
   /** What the canvas says when there is nothing here yet. See PageRenderer. */
   emptyNote?: string;
+  /** Which region is being edited, when it is one rather than a page. */
+  region?: 'header' | 'footer' | null;
 }
 
 /**
@@ -103,6 +105,7 @@ export function Canvas({
   editingPath = null,
   theme,
   emptyNote,
+  region = null,
 }: Props) {
   const frameRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -601,6 +604,13 @@ export function Canvas({
             editingPath={editingPath}
             emptyNote={emptyNote}
             theme={theme}
+            /*
+              So a header draws as a header here, not as a page. See the note on
+              PageRenderer's own `region` prop: without it every rule keyed on
+              .tgs-region missed the canvas, and the preview quietly showed
+              something the published site does not.
+            */
+            region={region}
           />
         </div>
 

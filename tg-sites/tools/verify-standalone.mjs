@@ -4099,9 +4099,22 @@ await check('publishing a header says it will reach every page', async () => {
   return /every page/i.test(title ?? '') ? true : `it says "${title}"`;
 });
 
+/*
+ * AN EMPTY SHAPE STILL WORKS ON A HEADER, which is the point of this one: a
+ * region is sections and rows like anything else, so nothing about the header
+ * screen should take the Layouts tab away.
+ *
+ * The tab is clicked explicitly since 1 Aug 2026, and that is not the check
+ * working around a bug. The picker now OPENS on Designed for a header, because
+ * a client is on that screen once, at the start, and an empty two-column row is
+ * not what they came for. Layouts is still there, one click away, and this
+ * proves it.
+ */
 await check('a section can be added to a header like any other', async () => {
   await page.locator('.ed-outline-foot .ed-btn').click();
   await page.waitForTimeout(400);
+  await page.locator('.ed-tab', { hasText: 'Layouts' }).click();
+  await page.waitForTimeout(300);
   await page.locator('.ed-layout-card').first().click();
   await page.waitForTimeout(500);
   return (await page.locator('.ed-canvas-frame .tgs-section').count()) === 1
@@ -5075,6 +5088,278 @@ await check('switching back brings the typed-in cards with it', async () => {
     ? true
     : `${cards} cards, titles ${JSON.stringify(titles)}`;
 });
+
+// ---------------------------------------------------------------------------
+// Designed sections: ten page categories, plus headers and footers
+//
+// The library went from 24 designs in two categories to 81 in twelve on 1 Aug
+// 2026. What Node can check is the data: every block type real, every select
+// value one of its own options, every header row centre aligned. What only a
+// browser can settle is the three things below.
+//
+//   1. That the picker offers the right categories for the screen you are on.
+//      A header preset and a page section are the same shape, so this is the
+//      only thing stopping a four-column footer landing in an About page.
+//   2. That the thumbnails tell a picture from a paragraph. Twelve categories
+//      of identical grey bars is a picker nobody can use.
+//   3. That a header lays out like a header, on a desktop AND on a phone,
+//      which is a fact about pixels.
+// ---------------------------------------------------------------------------
+
+await page.reload();
+await page.waitForSelector('.ed-root');
+await showPanels();
+
+await check('a page is offered the ten page categories and neither region', async () => {
+  await openBlockPicker();
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(200);
+
+  await page.locator('.ed-insert__btn').first().click();
+  await page.waitForSelector('.tg-modal');
+  await page.locator('.ed-tab', { hasText: 'Designed' }).click();
+  await page.waitForTimeout(300);
+
+  const names = (await page.locator('.ed-designed__cat').allInnerTexts())
+    .map((text) => text.split('\n')[0]);
+
+  const ok = names.length === 10 && !names.includes('Header') && !names.includes('Footer');
+  return ok ? true : `offered ${JSON.stringify(names)}`;
+});
+
+await check('every category says how many are in it, and none is empty', async () => {
+  const counts = (await page.locator('.ed-designed__count').allInnerTexts()).map(Number);
+  return counts.length === 10 && counts.every((n) => n >= 4)
+    ? true
+    : `counts ${JSON.stringify(counts)}`;
+});
+
+/*
+ * The wireframe has to tell a photograph from a paragraph, or the whole
+ * draw-it-from-the-data arrangement buys nothing at thumbnail size.
+ */
+await check('a picture draws as a block, not as another line of text', async () => {
+  await page.locator('.ed-designed__cat', { hasText: 'Gallery' }).click();
+  await page.waitForTimeout(300);
+  const frames = await page.locator(".ed-preset-card .ed-thumb--preset rect[data-tone='frame']").count();
+  return frames > 0 ? true : 'no picture-toned bars in the Gallery thumbnails';
+});
+
+await check('and no thumbnail is drawn past the bottom of its box', async () => {
+  const over = await page.evaluate(() => {
+    const bad = [];
+    for (const svg of document.querySelectorAll('.ed-preset-card .ed-thumb--preset')) {
+      for (const rect of svg.querySelectorAll('rect')) {
+        const y = Number(rect.getAttribute('y')) + Number(rect.getAttribute('height'));
+        if (y > 68.5) bad.push(Math.round(y));
+      }
+    }
+    return bad;
+  });
+  return over.length === 0 ? true : `bars reaching to ${over.join(', ')} in a 68 tall box`;
+});
+
+/*
+ * Two categories and fifteen designs fitted on a screen. Ten categories and
+ * eighty do not, so scrolling to the bottom of one used to take the category
+ * list with it and changing your mind meant scrolling all the way back.
+ */
+await check('the category list stays put while the designs scroll', async () => {
+  const sticky = await page.locator('.ed-designed__cats').evaluate((el) =>
+    getComputedStyle(el).position);
+  return sticky === 'sticky' ? true : `position is ${sticky}`;
+});
+
+await check('a pricing design really arrives with prices in it', async () => {
+  await page.locator('.ed-designed__cat', { hasText: 'Pricing' }).click();
+  await page.waitForTimeout(300);
+  await page.locator('.ed-preset-card', { hasText: 'Three panels' }).first().click();
+  await page.waitForTimeout(800);
+
+  const text = await added().innerText();
+  const cols = await added().locator('.tgs-row').last().locator('> .tgs-col').count();
+  return cols === 3 && /£\d/.test(text) ? true : `${cols} columns, text ${JSON.stringify(text.slice(0, 60))}`;
+});
+
+/*
+ * THE ALIGNMENT THAT WAS BEING IGNORED. Four designed sections set
+ * `align: 'centre'` on an icon item before the block had the prop at all: it
+ * was carried through, dropped by the renderer, and drawn centred in the
+ * thumbnail. Centred means the icon sits ABOVE the words, so this measures the
+ * flex direction rather than reading the attribute back.
+ */
+await check('a centred icon item puts its icon above the words', async () => {
+  await page.locator('.ed-insert__btn').first().click();
+  await page.waitForSelector('.tg-modal');
+  await page.locator('.ed-tab', { hasText: 'Designed' }).click();
+  await page.waitForTimeout(200);
+  await page.locator('.ed-designed__cat', { hasText: 'Features' }).click();
+  await page.waitForTimeout(300);
+  await page.locator('.ed-preset-card', { hasText: 'Three points with icons' }).first().click();
+  await page.waitForTimeout(800);
+
+  const state = await added().locator('.tgs-icon-item').first().evaluate((el) => ({
+    align: el.getAttribute('data-align'),
+    direction: getComputedStyle(el).flexDirection,
+    text: getComputedStyle(el).textAlign,
+  }));
+
+  return state.align === 'centre' && state.direction === 'column' && state.text === 'center'
+    ? true
+    : JSON.stringify(state);
+});
+
+// --- Headers ----------------------------------------------------------------
+
+await check('the header screen offers headers, and opens on them', async () => {
+  await closeAnyDialog();
+  await page.evaluate(() => window.__TG_SET_REGION__('header'));
+  await page.waitForTimeout(700);
+  await showPanels();
+
+  await page.locator('.ed-insert__btn').first().click();
+  await page.waitForSelector('.tg-modal');
+
+  const tab = await page.locator('.ed-tab[aria-selected=true]').innerText();
+  const names = (await page.locator('.ed-designed__cat').allInnerTexts())
+    .map((text) => text.split('\n')[0]);
+
+  return tab === 'Designed' && names.length === 1 && names[0] === 'Header'
+    ? true
+    : `tab ${tab}, categories ${JSON.stringify(names)}`;
+});
+
+/*
+ * The canvas renders a header through the same PageRenderer a page uses, so
+ * until 1 Aug 2026 it drew a bare .tgs-page and every rule keyed on a region
+ * missed it. The footer's hairline was invisible in the editor from the day it
+ * shipped, which is how a preview quietly stops being a preview.
+ */
+await check('and the canvas marks itself as a header, so header styling applies', async () => {
+  await page.locator('.ed-preset-card', { hasText: 'Logo left, menu right' }).first().click();
+  await page.waitForTimeout(800);
+
+  const wrapper = await page.locator('.ed-canvas-frame .tgs-page').evaluate((el) => ({
+    classes: el.className,
+    region: el.getAttribute('data-region'),
+  }));
+
+  return wrapper.classes.includes('tgs-region') && wrapper.region === 'header'
+    ? true
+    : JSON.stringify(wrapper);
+});
+
+await check('a header arrives with a logo and a menu, side by side', async () => {
+  await foldPanels();
+  await page.waitForTimeout(400);
+
+  const state = await page.evaluate(() => {
+    const row = document.querySelector('.ed-canvas-frame .tgs-row');
+    const cols = [...row.querySelectorAll(':scope > .tgs-col')];
+    const boxes = cols.map((c) => c.getBoundingClientRect());
+    return {
+      columns: cols.length,
+      sideBySide: boxes.length === 2 && boxes[1].left > boxes[0].right - 1,
+      hasMenu: !!row.querySelector('.tgs-nav'),
+    };
+  });
+
+  return state.columns === 2 && state.sideBySide && state.hasMenu
+    ? true
+    : JSON.stringify(state);
+});
+
+/*
+ * THE ONE ROW ON A PHONE THAT STAYS A ROW. Everything else stacks below 767px
+ * because two columns sharing 390px is two columns nobody can read. A header
+ * bar is the exception: its menu has already collapsed to a burger by that
+ * width, and stacking turns a 60px bar into a 120px one on the smallest screen
+ * there is.
+ */
+await check('and it stays a bar on a phone rather than stacking', async () => {
+  await page.getByRole('button', { name: 'Phone' }).click();
+  await page.waitForTimeout(600);
+
+  const state = await page.evaluate(() => {
+    const row = document.querySelector('.ed-canvas-frame .tgs-row');
+    const boxes = [...row.querySelectorAll(':scope > .tgs-col')].map((c) => c.getBoundingClientRect());
+    return {
+      sideBySide: boxes.length === 2 && boxes[1].left > boxes[0].right - 1,
+      burgerAtTheRightEnd:
+        Math.round(row.getBoundingClientRect().right - boxes[1].right) <= 2,
+    };
+  });
+
+  return state.sideBySide && state.burgerAtTheRightEnd ? true : JSON.stringify(state);
+});
+
+await check('nothing in the header reaches past the phone screen', async () => {
+  const over = await page.evaluate(() => {
+    const page_ = document.querySelector('.ed-canvas-frame .tgs-page');
+    const limit = page_.getBoundingClientRect().right + 1;
+    return [...page_.querySelectorAll('.tgs-section, .tgs-row, .tgs-col, .tgs-block')]
+      .filter((n) => n.getBoundingClientRect().right > limit).length;
+  });
+  return over === 0 ? true : `${over} things reach past the page`;
+});
+
+// --- Footers ----------------------------------------------------------------
+
+await check('the footer screen offers footers', async () => {
+  await page.getByRole('button', { name: 'Desktop' }).click();
+  await page.waitForTimeout(300);
+  await showPanels();
+
+  await page.evaluate(() => window.__TG_SET_REGION__('footer'));
+  await page.waitForTimeout(700);
+  await showPanels();
+
+  await page.locator('.ed-insert__btn').first().click();
+  await page.waitForSelector('.tg-modal');
+  const names = (await page.locator('.ed-designed__cat').allInnerTexts())
+    .map((text) => text.split('\n')[0]);
+
+  return names.length === 1 && names[0] === 'Footer' ? true : `categories ${JSON.stringify(names)}`;
+});
+
+/*
+ * A FOOTER MENU MUST NOT COLLAPSE. The Menu block turns into a burger below the
+ * breakpoint, which is right at the top of a page and wrong at the bottom: it
+ * would hide the links somebody scrolled all the way down to find.
+ */
+await check('a footer keeps its links visible on a phone rather than hiding them', async () => {
+  await page.locator('.ed-preset-card', { hasText: 'Four columns' }).first().click();
+  await page.waitForTimeout(800);
+  await foldPanels();
+
+  await page.getByRole('button', { name: 'Phone' }).click();
+  await page.waitForTimeout(600);
+
+  const state = await page.evaluate(() => {
+    const frame = document.querySelector('.ed-canvas-frame');
+    const burgers = [...frame.querySelectorAll('.tgs-nav__burger')]
+      .filter((b) => b.getBoundingClientRect().height > 0).length;
+    const links = [...frame.querySelectorAll('.tgs-nav__link')]
+      .filter((a) => a.getBoundingClientRect().height > 0).length;
+    return { burgers, links };
+  });
+
+  return state.burgers === 0 && state.links >= 8 ? true : JSON.stringify(state);
+});
+
+await check('and the footer draws its hairline in the editor, as it does on the site', async () => {
+  const shadow = await page.locator('.ed-canvas-frame .tgs-page').evaluate((el) =>
+    getComputedStyle(el).boxShadow);
+  return shadow !== 'none' ? true : 'no hairline above the footer';
+});
+
+// Back to a page and a desktop, so anything after this starts where it expects.
+await page.getByRole('button', { name: 'Desktop' }).click();
+await page.waitForTimeout(300);
+await page.evaluate(() => window.__TG_SET_REGION__(null));
+await page.waitForTimeout(600);
+await showPanels();
+
 
 await browser.close();
 
