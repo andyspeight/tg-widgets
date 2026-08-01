@@ -1227,6 +1227,13 @@ function BlockFields({
           field={field}
           value={block.props[field.key]}
           ownerId={block.id}
+          /*
+           * The whole prop bag, for the one field kind that needs a sibling.
+           * An imported design's editable slots are decided by the design that
+           * was pasted, so the 'imported' field has to read props.fields to know
+           * what to draw. Every other kind ignores this.
+           */
+          siblings={block.props}
           onChange={(value) =>
             onCommit(
               (current) =>

@@ -29,15 +29,23 @@ import {
   type PresetScope,
   type SectionPreset,
 } from '../../lib/content/presets';
+import type { Section } from '../../lib/content/schema';
 import { Modal } from '../ui/Modal';
 import { Icon } from './Icon';
+import { ImportPanel } from './ImportPanel';
 
-type Tab = 'layouts' | 'designed' | 'ai';
+type Tab = 'layouts' | 'designed' | 'ai' | 'import';
 
+/*
+ * Import is LAST, and that is not a judgement on it. The order is the order
+ * somebody reaches for them, and an import is the thing you do once at the
+ * start of a site rather than the thing you do on your fifth section.
+ */
 const TABS: ReadonlyArray<{ id: Tab; label: string }> = [
   { id: 'layouts', label: 'Layouts' },
   { id: 'designed', label: 'Designed' },
   { id: 'ai', label: 'AI' },
+  { id: 'import', label: 'Import' },
 ];
 
 // ---------------------------------------------------------------------------
@@ -109,6 +117,7 @@ export function SectionPicker({
   scope = 'page',
   onPickLayout,
   onPickPreset,
+  onPickImported,
   onClose,
 }: {
   /**
@@ -122,6 +131,8 @@ export function SectionPicker({
   scope?: PresetScope;
   onPickLayout: (layout: Layout) => void;
   onPickPreset: (preset: SectionPreset) => void;
+  /** A whole design, cut into sections. Plural because one paste is often many. */
+  onPickImported: (sections: Section[]) => void;
   onClose: () => void;
 }) {
   const categories = categoriesFor(scope);
@@ -234,6 +245,8 @@ export function SectionPicker({
           </div>
         </div>
       )}
+
+      {tab === 'import' && <ImportPanel onAdd={onPickImported} />}
 
       {tab === 'ai' && (
         <div className="ed-ai-stub">

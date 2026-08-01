@@ -517,6 +517,90 @@ export function scopeImportCss(source: string, options: ScopeOptions): ScopeResu
 }
 
 /**
+ * The class names a selector mentions, as the MARKUP writes them.
+ *
+ * Tailwind escapes the characters that are illegal in a CSS identifier, so the
+ * stylesheet says `.md\:flex` where the class attribute says `md:flex`. Undoing
+ * the backslashes is the whole translation, and getting it wrong means a rule
+ * that cannot be matched to the element it styles.
+ */
+function classesIn(selector: string): string[] {
+  const found: string[] = [];
+  for (const match of selector.matchAll(/\.((?:[\w-]|\\.)+)/g)) {
+    found.push(match[1].replace(/\\(.)/g, '$1'));
+  }
+  return found;
+}
+
+/**
+ * Only the rules that can reach a given set of classes.
+ *
+ * WHY THIS EXISTS. A pasted page is cut into sections and each one carries its
+ * own copy of the stylesheet, because a section has to be movable and deletable
+ * on its own. Without trimming, eight sections off one Relume export would put
+ * eight copies of a Tailwind build on a single page: most of a megabyte of CSS
+ * to draw something that needs a few kilobytes of it.
+ *
+ * THE UNCERTAIN CASE KEEPS THE RULE. A selector with no class in it at all is
+ * kept, because it is an element or attribute rule and there is no cheap way to
+ * know whether it applies. So is anything inside @keyframes, and so are the
+ * custom properties on the scope element, which is where a Tailwind build puts
+ * its entire palette. Dropping a rule that was needed shows up as a section that
+ * looks wrong; keeping one that was not costs a line of CSS.
+ */
+export function trimCssToClasses(css: string, classes: ReadonlySet<string>): string {
+  if (typeof css !== 'string' || css.trim() === '') return '';
+
+  let root;
+  try {
+    root = parse(css);
+  } catch {
+    return '';
+  }
+
+  const prune = (container: Container): void => {
+    for (const node of [...((container.nodes ?? []) as ChildNode[])]) {
+      if (node.type === 'atrule') {
+        /*
+         * Keyframes are referenced by name from rules we may be keeping, and
+         * their children are `from`, `to` and `50%` rather than selectors.
+         *
+         * Belt and braces: a step carries no class, so the no-class rule below
+         * would keep every one of them anyway. Said explicitly because "why is
+         * this at-rule different" is a question worth answering once, rather
+         * than leaving somebody to work out that it happens to fall through
+         * correctly.
+         */
+        if (isKeyframesName(node.name.toLowerCase())) continue;
+        prune(node);
+        if (!node.nodes?.length) node.remove();
+        continue;
+      }
+
+      if (node.type !== 'rule') continue;
+
+      const wanted = splitSelectorList(node.selector)
+        .map((part) => part.trim())
+        .filter(Boolean)
+        .filter((part) => {
+          const names = classesIn(part);
+          return names.length === 0 || names.some((name) => classes.has(name));
+        });
+
+      if (!wanted.length) {
+        node.remove();
+        continue;
+      }
+
+      node.selector = wanted.join(', ');
+    }
+  };
+
+  prune(root);
+  return root.toString();
+}
+
+/**
  * CSS that cannot climb out of the `<style>` element it is about to sit in.
  *
  * THE HOLE THIS CLOSES. Everything above makes the CSS safe as CSS, and that is

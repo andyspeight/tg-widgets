@@ -827,20 +827,35 @@ export function EditorShell({
    * commit is what closes the dialog by re-rendering, and reading insertAt inside
    * the updater would be reading state the updater is not allowed to depend on.
    */
-  const insertSection = useCallback(
-    (section: Section) => {
+  /**
+   * Put one or more sections in at the insertion point.
+   *
+   * PLURAL AT THE BOTTOM, because an import is usually a whole page and calling
+   * the single version in a loop does not work: it clears insertAt on the first
+   * call, so every section after the first would find no insertion point and
+   * silently vanish. One splice, one commit, one entry in the undo history, so
+   * an import that was not what somebody wanted is one undo away rather than
+   * eight.
+   */
+  const insertSections = useCallback(
+    (incoming: Section[]) => {
       const at = insertAt;
-      if (at === null) return;
+      if (at === null || !incoming.length) return;
 
       setInsertAt(null);
       commit((current) => {
         const sections = [...current.sections];
-        sections.splice(at, 0, section);
+        sections.splice(at, 0, ...incoming);
         return { ...current, sections };
       });
       setSelected({ kind: 'section', section: at });
     },
     [insertAt, commit],
+  );
+
+  const insertSection = useCallback(
+    (section: Section) => insertSections([section]),
+    [insertSections],
   );
 
   const fileInput = useRef<HTMLInputElement>(null);
@@ -1298,6 +1313,14 @@ export function EditorShell({
            */
           onPickLayout={(layout) => insertSection(createSectionFromLayout(layout))}
           onPickPreset={(preset) => insertSection(buildPresetSection(preset))}
+          /*
+           * The third path takes MANY, because one paste is usually a whole
+           * page. Going through insertSections rather than calling
+           * insertSection in a loop is not tidiness: insertAt is cleared by the
+           * first call, so the second and every one after it would find no
+           * insertion point and quietly do nothing.
+           */
+          onPickImported={(sections) => insertSections(sections)}
         />
       )}
 

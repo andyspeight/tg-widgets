@@ -31,12 +31,14 @@ import { describe, expect, it } from 'vitest';
 
 import { cleanImportHtml, safeImportUrl } from '../lib/import/html';
 import { applyImportContent, tokeniseImport } from '../lib/import/tokenise';
+import { splitImport } from '../lib/import/sections';
 import { importContent, importFields, summariseImported } from '../lib/content/imported';
 import {
   importScopeClass,
   scopeImportCss,
   scopeSelectorPart,
   splitSelectorList,
+  trimCssToClasses,
 } from '../lib/import/css';
 
 const SCOPE = '.tgi-test';
@@ -1292,5 +1294,231 @@ describe('summariseImported', () => {
 
   it('says something rather than nothing when there is nothing to say', () => {
     expect(summariseImported({})).toBe('Imported section');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Cutting a paste into sections
+// ---------------------------------------------------------------------------
+
+/*
+ * Shaped like a real Relume export: a wrapper nobody wants, sections with a
+ * container inside them, and Tailwind utility classes throughout. The placeholder
+ * image really is an .svg on their CDN, which is safe in an <img> because a
+ * browser will not run script in one loaded that way.
+ */
+const RELUME = `
+<div id="root">
+  <section class="px-[5%] py-16 md:py-24">
+    <div class="container">
+      <h1 class="mb-5 text-6xl font-bold md:text-9xl">Escape to Crete</h1>
+      <p class="md:text-md">Seven nights, half board, flights included.</p>
+      <a class="btn" href="/holidays">See the holidays</a>
+      <img src="https://relume.io/placeholder-image.svg" alt="A harbour at dusk" class="w-full object-cover" />
+    </div>
+  </section>
+  <section class="px-[5%] py-16">
+    <div class="container">
+      <h2 class="text-5xl">Why book with us</h2>
+      <p>Thirty years on the same high street.</p>
+    </div>
+  </section>
+</div>`;
+
+const RELUME_CSS = `
+:root { --brand: #0a5 }
+.container { max-width: 80rem; margin: 0 auto }
+.btn { background: var(--brand); color: #fff }
+.text-6xl { font-size: 3.75rem }
+.text-5xl { font-size: 3rem }
+.never-used { color: hotpink }
+@media (min-width: 768px) { .md\\:text-9xl { font-size: 8rem } }
+`;
+
+describe('splitImport', () => {
+  /*
+   * The words are NOT in the markup any more, they are in the slots. Asserting
+   * the heading text is in candidate.html looks obvious and tests the opposite
+   * of what this module is for.
+   */
+  it('walks past the wrapper and cuts on the design\'s own sections', () => {
+    const { candidates } = splitImport(RELUME, RELUME_CSS);
+
+    expect(candidates).toHaveLength(2);
+    // The wrapper is gone and each section is its own unit, not one big block.
+    expect(candidates.every((c) => c.html.startsWith('<section'))).toBe(true);
+    expect(candidates[0].fields.map((f) => f.value)).toContain('Escape to Crete');
+    expect(candidates[1].fields.map((f) => f.value)).toContain('Why book with us');
+    expect(candidates[0].html).not.toContain('Why book with us');
+  });
+
+  /*
+   * A column of identical "Section 1, Section 2" rows in the outline is how
+   * somebody loses track of which one is the hero.
+   */
+  it('names each section after its own heading', () => {
+    const { candidates } = splitImport(RELUME, RELUME_CSS);
+
+    expect(candidates.map((c) => c.label)).toEqual(['Escape to Crete', 'Why book with us']);
+  });
+
+  it('makes the words and the pictures editable', () => {
+    const [hero] = splitImport(RELUME, RELUME_CSS).candidates;
+
+    expect(hero.fields.map((f) => f.kind).sort()).toEqual(['image', 'link', 'text', 'text', 'text']);
+    expect(hero.fields.find((f) => f.kind === 'image')?.value).toBe(
+      'https://relume.io/placeholder-image.svg',
+    );
+    expect(hero.html).toContain('{{tg:');
+  });
+
+  it('keeps the Tailwind classes the stylesheet needs', () => {
+    const [hero] = splitImport(RELUME, RELUME_CSS).candidates;
+
+    for (const name of ['px-[5%]', 'md:py-24', 'container', 'md:text-9xl']) {
+      expect(classesOf(hero.html), `lost ${name}`).toContain(name);
+    }
+  });
+
+  /*
+   * Each section carries its own stylesheet so it can be moved and deleted on
+   * its own. Without trimming, eight sections off one export would put eight
+   * copies of a Tailwind build on a single page.
+   */
+  it('gives each section only the rules that can reach it', () => {
+    const [hero, why] = splitImport(RELUME, RELUME_CSS).candidates;
+
+    expect(hero.css).toContain('.text-6xl');
+    expect(hero.css).not.toContain('.text-5xl');
+
+    expect(why.css).toContain('.text-5xl');
+    expect(why.css).not.toContain('.text-6xl');
+
+    // Neither wants a rule for a class nothing on the page carries.
+    expect(hero.css).not.toContain('hotpink');
+
+    // And both keep the palette, which is on a selector with no class in it.
+    expect(hero.css).toContain('--brand');
+    expect(why.css).toContain('--brand');
+  });
+
+  it('cleans the whole document before cutting it, not piece by piece', () => {
+    const { candidates, removed } = splitImport(
+      '<div><section><script>alert(1)</script><h2>Kept</h2></section></div>',
+      '',
+    );
+
+    expect(removed).toContain('<script>');
+    for (const candidate of candidates) assertInert(candidate.html);
+  });
+
+  /*
+   * THE COMMONEST PASTE OF ALL, and the fixture above does not exercise it: one
+   * Relume component copied on its own. Without the stop at a sectioning tag the
+   * walk keeps descending, straight through the <section> and its container, and
+   * a single hero arrives as four separate sections made of its own heading,
+   * paragraph, button and picture. Found by breaking the check and watching every
+   * test stay green.
+   */
+  it('keeps a single pasted section whole rather than descending into it', () => {
+    const { candidates } = splitImport(
+      '<section class="hero"><div class="container">' +
+        '<h1>Escape to Crete</h1><p>Seven nights.</p><a href="/x">Book</a>' +
+        '</div></section>',
+      '',
+    );
+
+    expect(candidates).toHaveLength(1);
+    expect(candidates[0].label).toBe('Escape to Crete');
+    expect(candidates[0].html.startsWith('<section')).toBe(true);
+  });
+
+  /*
+   * A logo strip, a gallery, a full-bleed photograph. A section with pictures and
+   * no words is still a section, and dropping it as empty loses content silently.
+   */
+  it('keeps a section that is pictures and no words', () => {
+    const { candidates } = splitImport(
+      '<div><section><h2>Words</h2></section>' +
+        '<section class="logos"><img src="a.png" alt="Atol"><img src="b.png" alt="Abta"></section></div>',
+      '',
+    );
+
+    expect(candidates).toHaveLength(2);
+    expect(candidates[1].fields.map((f) => f.kind)).toEqual(['image', 'image']);
+  });
+
+  /*
+   * A design tool leaves decorative wrappers between sections: a spacer, an
+   * absolutely positioned gradient, a cleared float. Each one would otherwise
+   * become an empty section in the outline that a client has to work out is
+   * safe to delete.
+   */
+  it('skips the empty wrappers a design tool leaves between sections', () => {
+    const { candidates } = splitImport(
+      '<div><section><h2>Real</h2></section><div class="spacer"></div>' +
+        '<section><h2>Also real</h2></section></div>',
+      '',
+    );
+
+    expect(candidates.map((c) => c.label)).toEqual(['Real', 'Also real']);
+  });
+
+  it('comes through whole when there is nothing to cut on', () => {
+    const { candidates } = splitImport('<p>Just a sentence.</p>', '');
+    expect(candidates).toHaveLength(1);
+  });
+
+  it('says nothing rather than guessing when the paste is empty', () => {
+    expect(splitImport('', '').candidates).toEqual([]);
+    expect(splitImport('<script>alert(1)</script>', '').candidates).toEqual([]);
+  });
+
+  it('stops at the section cap', () => {
+    const many = `<div>${'<section><p>x</p></section>'.repeat(60)}</div>`;
+    expect(splitImport(many, '', { maxSections: 10 }).candidates).toHaveLength(10);
+  });
+});
+
+describe('trimCssToClasses', () => {
+  const classes = new Set(['hero', 'md:flex']);
+
+  it('keeps a rule whose class is on the page', () => {
+    expect(trimCssToClasses('.hero { color: red }', classes)).toContain('.hero');
+  });
+
+  it('drops a rule whose class is not', () => {
+    expect(trimCssToClasses('.footer { color: red }', classes)).toBe('');
+  });
+
+  /*
+   * Tailwind escapes what is illegal in a CSS identifier, so the stylesheet
+   * says .md\:flex where the class attribute says md:flex. Undoing the
+   * backslashes is the whole translation, and getting it wrong drops every
+   * responsive rule in the export.
+   */
+  it('matches an escaped Tailwind selector to the class the markup carries', () => {
+    expect(trimCssToClasses('.md\\:flex { display: flex }', classes)).toContain('md\\:flex');
+  });
+
+  it('keeps a rule with no class in it, because there is no cheap way to know', () => {
+    expect(trimCssToClasses(':root { --brand: #0a5 }', classes)).toContain('--brand');
+    expect(trimCssToClasses('h1 { margin: 0 }', classes)).toContain('h1');
+  });
+
+  it('trims a selector list a part at a time', () => {
+    const out = trimCssToClasses('.hero, .footer { color: red }', classes);
+
+    expect(out).toContain('.hero');
+    expect(out).not.toContain('.footer');
+  });
+
+  it('drops a media query that ends up empty', () => {
+    expect(trimCssToClasses('@media (min-width: 1px) { .footer { color: red } }', classes)).toBe('');
+  });
+
+  it('keeps keyframes, which are referenced by name rather than matched', () => {
+    const out = trimCssToClasses('@keyframes fade { to { opacity: 1 } }', classes);
+    expect(out).toContain('@keyframes fade');
   });
 });

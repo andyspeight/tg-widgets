@@ -18,6 +18,7 @@
 
 import { useEffect, useRef } from 'react';
 import type { Field } from '../../lib/content/blocks';
+import { importContent, importFields } from '../../lib/content/imported';
 import { ImageField } from '../media/ImageField';
 import { IconField } from './IconField';
 import { Icon } from './Icon';
@@ -37,9 +38,25 @@ interface FieldProps {
    * every caller inventing a no-op.
    */
   onPatch?: (patch: Record<string, unknown>) => void;
+  /**
+   * The rest of the block's props.
+   *
+   * Only the imported field reads it, and it has to: an imported design's
+   * editable slots are decided by the design somebody pasted, not by the block
+   * definition, so the list of them lives in a sibling prop rather than in
+   * lib/content/blocks.ts like every other field's shape.
+   */
+  siblings?: Record<string, unknown>;
 }
 
-export function FieldRenderer({ field, value, onChange, ownerId, onPatch }: FieldProps) {
+export function FieldRenderer({
+  field,
+  value,
+  onChange,
+  ownerId,
+  onPatch,
+  siblings,
+}: FieldProps) {
   switch (field.kind) {
     case 'text':
     case 'url':
@@ -199,6 +216,58 @@ export function FieldRenderer({ field, value, onChange, ownerId, onPatch }: Fiel
           />
         </Wrapper>
       );
+
+    /*
+     * The words and the pictures of an imported design.
+     *
+     * DRAWN FROM THE BLOCK'S OWN SLOTS, in the order the design used them, so
+     * the fields read down the pane roughly as the section reads down the page.
+     *
+     * A SLOT NEVER EDITED SHOWS THE DESIGN'S WORDS AS A PLACEHOLDER, not as a
+     * value. Two reasons, and the second is the one that matters. Typing over a
+     * placeholder is one click rather than select-all-then-type. And an
+     * untouched slot stays genuinely untouched in the stored content, so a
+     * design re-imported later still picks up its own new wording instead of
+     * being overwritten by a copy of the old one that nobody ever chose.
+     */
+    case 'imported': {
+      const slots = importFields(siblings ?? {});
+      const stored = importContent(siblings ?? {});
+
+      if (!slots.length) {
+        return (
+          <p className="ed-help">
+            This design has no words or pictures we could make editable. Its
+            layout and styling are still yours to move and delete.
+          </p>
+        );
+      }
+
+      return (
+        <div className="ed-slots">
+          {slots.map((slot) => (
+            <label className="ed-field" key={slot.key}>
+              <span className="ed-label">{slot.label}</span>
+              {slot.kind === 'image' ? (
+                <ImageField
+                  value={stored[slot.key] ?? slot.value}
+                  onChange={(next) => onChange({ ...stored, [slot.key]: next })}
+                />
+              ) : (
+                <input
+                  className="ed-input"
+                  type="text"
+                  value={stored[slot.key] ?? ''}
+                  placeholder={slot.value}
+                  inputMode={slot.kind === 'link' ? 'url' : undefined}
+                  onChange={(event) => onChange({ ...stored, [slot.key]: event.target.value })}
+                />
+              )}
+            </label>
+          ))}
+        </div>
+      );
+    }
 
     case 'repeater':
       return (

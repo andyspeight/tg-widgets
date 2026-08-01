@@ -3221,3 +3221,173 @@
 }
 
 .ip-empty { padding: var(--ed-4) 0; }
+
+/* ------------------------------------------------------------------ */
+/* Import a design                                                     */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The fourth way to add a section. Two states in one panel: paste, then choose.
+ * No tokens of its own, everything comes from the editor scale, because a panel
+ * that invents its own greys is the one that looks wrong in dark mode.
+ */
+.ed-import {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ed-import__intro {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px;
+  border-radius: var(--ed-r-md);
+  background: var(--ed-well);
+}
+
+.ed-import__intro h3,
+.ed-import__found h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.ed-import__intro p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ed-ink-2);
+}
+
+.ed-import__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ed-import__field > span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ed-ink-2);
+}
+
+/*
+ * Monospace, because what goes in here is code and a proportional face makes a
+ * pasted tag wrap in a way that looks like it arrived broken.
+ */
+.ed-import__field textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+  color: var(--ed-ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.ed-import__actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.ed-import__note {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ed-ink-2);
+}
+
+.ed-import__error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--ed-r-md);
+  background: var(--ed-well);
+  color: var(--ed-danger);
+  font-size: 13px;
+}
+
+.ed-import__found {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ed-import__again {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--ed-ink-2);
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.ed-import__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.ed-import__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--ed-r-md);
+  cursor: pointer;
+}
+
+.ed-import__row:hover {
+  background: var(--ed-well);
+}
+
+.ed-import__name {
+  flex: 1;
+  font-size: 13px;
+  /* A heading pulled off a design can be long. One line, ellipsised, so the
+     count on the right never gets pushed off the panel. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ed-import__slots {
+  font-size: 12px;
+  color: var(--ed-ink-2);
+  white-space: nowrap;
+}
+
+.ed-import__removed {
+  padding: 12px 14px;
+  border-radius: var(--ed-r-md);
+  background: var(--ed-well);
+}
+
+.ed-import__removed h4 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ed-import__removed p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ed-ink-2);
+}
+
+/* The slots of an imported design, in the properties pane. */
+.ed-slots {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
