@@ -16,12 +16,11 @@
  */
 
 import { createPage as blankPage } from '../content/factory';
+import { livePaths, MAX_PATH_DEPTH, type PageNode } from '../content/paths';
 import { sanitisePage } from '../content/sanitise-page';
 import { parsePage, type Page } from '../content/schema';
+import { addressesBefore, recordMove } from './redirects';
 import { withPublicTenant, withTenant, type Tx } from './withTenant';
-
-/** How deep a path may nest. A guard against a cycle, not a product limit. */
-const MAX_PATH_DEPTH = 6;
 
 /**
  * How many publishes are kept per page.
@@ -263,12 +262,15 @@ export interface PublishedPath {
  * to be believed. This is also the query a sitemap is asked for, which is a
  * crawler rather than a visitor, so it is not on anybody's critical path.
  *
- * A CHILD UNDER AN UNPUBLISHED PARENT IS LEFT OUT, and that falls out of the
- * renderer role rather than being coded here: the draft parent's row is invisible
- * to this connection, so the child's path cannot be assembled and it is skipped.
- * Which is exactly right. getPublishedPage walks the path a segment at a time and
- * every segment has to be published, so that child's URL 404s for a visitor. A
- * sitemap listing URLs that 404 is worse than a sitemap missing them.
+ * THE WALK ITSELF MOVED TO lib/content/paths.ts on 1 Aug 2026, when the redirect
+ * table needed to work out what a page's address USED to be. Two copies of it
+ * would drift, and the symptom of that drift would be a redirect pointing at an
+ * address that does not exist. One definition, three callers.
+ *
+ * A CHILD UNDER AN UNPUBLISHED PARENT IS LEFT OUT, which is exactly right:
+ * getPublishedPage walks the path a segment at a time and every segment has to be
+ * published, so that child's URL 404s for a visitor. A sitemap listing URLs that
+ * 404 is worse than a sitemap missing them.
  */
 export async function listPublishedPaths(tenantId: string): Promise<PublishedPath[]> {
   return withPublicTenant(tenantId, async (tx) => {
@@ -281,38 +283,28 @@ export async function listPublishedPaths(tenantId: string): Promise<PublishedPat
     const byId = new Map<string, Record<string, unknown>>();
     for (const raw of rows) byId.set(String((raw as Record<string, unknown>).id), raw as Record<string, unknown>);
 
+    /*
+     * `published: true` for every row, because the query has already narrowed to
+     * pages with published content and the renderer's own policy narrowed it
+     * again before that. The unpublished-parent case still works: that parent is
+     * simply not in this list, so livePaths finds no ancestor and leaves the
+     * child out, which is the same answer the old walk gave.
+     */
+    const nodes: PageNode[] = [...byId.values()].map((row) => ({
+      id: String(row.id),
+      parentId: row.parent_id ? String(row.parent_id) : null,
+      slug: String(row.slug ?? ''),
+      published: true,
+    }));
+
     const paths: PublishedPath[] = [];
 
-    for (const row of byId.values()) {
-      const segments: string[] = [];
-      let current: Record<string, unknown> | undefined = row;
-      let hops = 0;
-
-      /*
-       * A depth cap, not because the schema allows a loop but because a
-       * self-referencing row would hang the request rather than fail it, and a
-       * sitemap must never be the thing that takes a site down.
-       */
-      while (current && hops <= MAX_PATH_DEPTH) {
-        segments.unshift(String(current.slug ?? ''));
-        const parent: Record<string, unknown> | undefined = current.parent_id
-          ? byId.get(String(current.parent_id))
-          : undefined;
-        if (current.parent_id && !parent) {
-          // The parent is a draft, so this address does not resolve. See above.
-          segments.length = 0;
-          break;
-        }
-        current = parent;
-        hops += 1;
-      }
-
-      if (segments.length === 0 && String(row.slug ?? '') !== '') continue;
-      if (hops > MAX_PATH_DEPTH) continue;
-
+    for (const [id, path] of livePaths(nodes)) {
+      const row = byId.get(id);
+      if (!row) continue;
       const seo = asObject(row.seo) ?? {};
       paths.push({
-        path: segments.filter(Boolean).join('/'),
+        path,
         updatedAt: row.updated_at ? new Date(String(row.updated_at)).toISOString() : null,
         noindex: seo.noindex === true,
       });
@@ -436,7 +428,22 @@ export async function createPage(
   });
 }
 
-/** Rename, re-slug or re-parent a page. Content is untouched. */
+/**
+ * Rename, re-slug or re-parent a page. Content is untouched.
+ *
+ * AND THE OLD ADDRESS KEEPS WORKING, since 1 Aug 2026. Before that, renaming a
+ * published page silently 404d every link anybody had ever made to it: the page
+ * was still there, the editor showed nothing wrong, and a visitor arriving from
+ * a search result got nothing. See lib/db/redirects.ts.
+ *
+ * IN THIS TRANSACTION, not after it and not in the action. A redirect written
+ * after a rename that then failed would forward an address that never moved; a
+ * rename that succeeded with the redirect lost would break the links it was
+ * supposed to protect. Both halves or neither.
+ *
+ * THE ADDRESSES ARE READ BEFORE THE UPDATE, because afterwards there is nothing
+ * left to work the old ones out from.
+ */
 export async function updatePageMeta(
   tenantId: string,
   pageId: string,
@@ -449,6 +456,12 @@ export async function updatePageMeta(
   return withTenant(tenantId, async (tx) => {
     const movingParent = 'parentId' in changes;
 
+    // A title-only change moves no addresses, so it reads no tree and writes no
+    // redirects. Renaming to fix a typo in a page's name is the common edit and
+    // it should stay one statement.
+    const mightMove = changes.slug !== undefined || movingParent;
+    const before = mightMove ? await addressesBefore(tx, pageId) : null;
+
     const rows = await tx`
       update public.pages set
         title     = coalesce(${changes.title?.trim() || null}::text, title),
@@ -460,7 +473,13 @@ export async function updatePageMeta(
       returning ${summary(tx)}
     `;
 
-    return rows.length ? toSummary(rows[0] as Record<string, unknown>) : null;
+    // Nothing was updated, so nothing moved. Writing redirects here would record
+    // a move that did not happen.
+    if (!rows.length) return null;
+
+    if (before) await recordMove(tx, tenantId, before);
+
+    return toSummary(rows[0] as Record<string, unknown>);
   });
 }
 

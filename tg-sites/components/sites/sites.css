@@ -1031,3 +1031,29 @@
   .sv-head__actions { width: 100%; }
   .sv-head__actions .sv-btn { flex: 1 1 auto; justify-content: center; }
 }
+
+/*
+ * What happens to the old address, said in the rename dialog.
+ *
+ * Quiet on purpose. The green panel above it already says where the page will
+ * live, and a second coloured box directly under the first is a dialog that
+ * shouts at somebody who is only fixing a typo. This is reassurance, not a
+ * warning, so it reads as a footnote to the panel above rather than as a rival
+ * to it.
+ */
+.sv-moved {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ed-2);
+  margin: var(--ed-3) 0 0;
+  font-size: var(--ed-text-xs);
+  line-height: 1.5;
+  color: var(--ed-ink-2);
+}
+
+.sv-moved svg { flex: none; margin-top: 1px; }
+
+.sv-moved code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  word-break: break-all;
+}

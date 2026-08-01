@@ -360,6 +360,7 @@ export function SiteDashboard({ account, site, siteName, siteUrl, pages: initial
           host={host}
           mode="rename"
           homeIsExpected={dialog.page.slug === ''}
+          isLive={dialog.page.status === 'published'}
           initialTitle={dialog.page.title}
           initialSlug={dialog.page.slug}
           onClose={() => setDialog(null)}
@@ -419,6 +420,7 @@ function PageDialog({
   host,
   mode,
   homeIsExpected,
+  isLive = false,
   initialTitle = '',
   initialSlug,
   onClose,
@@ -431,6 +433,14 @@ function PageDialog({
   mode: 'new' | 'rename';
   /** Whether an empty address is the wanted outcome here, or a surprise. */
   homeIsExpected: boolean;
+  /**
+   * Whether this page is on the internet right now.
+   *
+   * It decides what changing the address MEANS. A draft has no links pointing at
+   * it, so moving it costs nothing and saying anything about redirects would be
+   * noise. A live page does, and the reassurance is worth having on screen.
+   */
+  isLive?: boolean;
   initialTitle?: string;
   /** Given, the address starts as the agent's own and stops following the name. */
   initialSlug?: string;
@@ -454,6 +464,16 @@ function PageDialog({
 
   const effectiveSlug = slugIsMine ? slugify(slug) : slugify(title);
   const isHome = effectiveSlug === '';
+
+  /*
+   * A live page whose address is actually about to change.
+   *
+   * Both halves matter. Renaming a draft moves nothing anybody has linked to,
+   * and fixing a typo in a live page's NAME leaves its address alone, so
+   * announcing a redirect in either case would be telling somebody about
+   * machinery that is not going to run.
+   */
+  const addressIsMoving = isRename && isLive && effectiveSlug !== (initialSlug ?? '');
 
   const [saving, setSaving] = useState(false);
 
@@ -527,9 +547,15 @@ function PageDialog({
               setSlug(event.target.value);
             }}
           />
+          {/*
+            IT NO LONGER SAYS "changing this breaks any existing link".
+            Until 1 Aug 2026 that was true and it was the reason nobody dared
+            tidy an address. The old one now forwards to the new one, so the
+            warning became a lie that discouraged the right thing.
+          */}
           <small>
             {isRename
-              ? 'Changing this breaks any existing link to the page.'
+              ? 'What visitors and search engines see. Safe to change.'
               : slugIsMine
                 ? 'Leave it empty and this becomes the home page.'
                 : 'Filled in from the name. Change it if you want something shorter.'}
@@ -570,6 +596,32 @@ function PageDialog({
             </span>
           )}
         </p>
+
+        {/*
+          THE REASSURANCE, and it is the whole reason this feature was built.
+
+          A client who thinks renaming a page will break every link to it simply
+          never renames one, so an address written in a hurry on day one stays
+          wrong for years. Saying what actually happens is what makes tidying an
+          address a thing somebody will do.
+
+          Quiet rather than another coloured box. There is already a green panel
+          directly above it saying where the page will live, and two boxes in a
+          row is a dialog that shouts.
+        */}
+        {addressIsMoving && (
+          <p className="sv-moved">
+            <Icon name="check" size={16} />
+            <span>
+              <code>
+                {host}/{initialSlug}
+              </code>{' '}
+              will keep working. Anyone following an old link lands on the new
+              address, and search engines are told the page has moved for good, so
+              it keeps whatever standing it has earned.
+            </span>
+          </p>
+        )}
 
         {/*
           Submit on Enter, without a second visible button.

@@ -83,11 +83,14 @@ export function SeoDashboard({
   siteName,
   siteUrl,
   siteFindings,
+  redirects,
   pages,
 }: {
   siteName: string;
   siteUrl: string | null;
   siteFindings: Finding[];
+  /** How many old addresses are still being forwarded. */
+  redirects: number;
   pages: PageReport[];
 }) {
   const published = pages.filter((page) => page.published);
@@ -130,6 +133,22 @@ export function SeoDashboard({
               sitemap.xml
             </a>
             . Both are written for you and kept up to date.
+          </p>
+        )}
+
+        {/*
+          NOT A FINDING, because there is nothing to fix. It is the only visible
+          evidence that renaming a page did not break anything, and a feature
+          nobody can see is a feature nobody trusts. Said only when there is
+          something to say: "0 old addresses" on a site that has never renamed a
+          page is a line about nothing.
+        */}
+        {redirects > 0 && (
+          <p className="seo-links">
+            {redirects === 1
+              ? 'One old address still leads to the right page'
+              : `${redirects} old addresses still lead to the right page`}
+            , so links made before you renamed anything are still working.
           </p>
         )}
       </section>

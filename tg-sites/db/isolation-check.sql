@@ -1114,6 +1114,86 @@ begin
 end $$;
 
 -- ---------------------------------------------------------------------------
+-- Redirects: old addresses, and whose they are
+-- ---------------------------------------------------------------------------
+--
+-- page_redirects is the ONE table the renderer may read without a published
+-- filter, because a redirect is a fact about an address rather than content: it
+-- holds no words, no pictures and nothing a competitor could learn. So the
+-- tenant policy is doing all the work here, and it is worth checking on its own
+-- rather than assuming it works because the others do.
+--
+-- The second half of each pair is what makes the first mean anything. A probe
+-- that sees nothing at all would report "the other client's redirect is hidden"
+-- while proving only that it is blind.
+do $$
+declare mine int; theirs int; leaked boolean := false;
+begin
+  insert into public.page_redirects (tenant_id, from_path, page_id) values
+    ('11111111-1111-1111-1111-111111111111', 'iso-was-here',
+     'aaaaaaaa-0000-0000-0000-00000000a001'),
+    ('22222222-2222-2222-2222-222222222222', 'iso-beta-was-here',
+     'bbbbbbbb-0000-0000-0000-00000000b001');
+
+  set local role tg_sites_renderer;
+  perform set_config('app.current_tenant_id', '11111111-1111-1111-1111-111111111111', true);
+
+  select count(*) into mine from public.page_redirects where from_path = 'iso-was-here';
+  select count(*) into theirs from public.page_redirects where from_path = 'iso-beta-was-here';
+
+  reset role;
+  insert into checks (name, passed, detail) values
+    ('a visitor''s redirect lookup finds this site''s own old address',
+     mine = 1, 'saw ' || mine),
+    ('and never another client''s, even though redirects have no published flag',
+     theirs = 0,
+     case when theirs > 0 then 'IT READ ANOTHER TENANT''S REDIRECT'
+          else 'the tenant policy hid it' end);
+
+  -- And the app role cannot plant one in somebody else's site, the same claim
+  -- that is made for pages a few blocks up.
+  set local role tg_sites_app;
+  perform set_config('app.current_tenant_id', '11111111-1111-1111-1111-111111111111', true);
+
+  begin
+    insert into public.page_redirects (tenant_id, from_path, page_id)
+      values ('22222222-2222-2222-2222-222222222222', 'iso-planted',
+              'bbbbbbbb-0000-0000-0000-00000000b001');
+    leaked := true;
+  exception when others then leaked := false; end;
+
+  reset role;
+  insert into checks (name, passed, detail) values
+    ('a redirect cannot be written into another client''s site',
+     not leaked,
+     case when leaked then 'THE ROW WAS WRITTEN' else 'WITH CHECK rejected it' end);
+end $$;
+
+-- A redirect to a deleted page is a 404 with extra steps, so the row goes with
+-- the page. Stated in the schema as ON DELETE CASCADE, checked here.
+do $$
+declare left_behind int;
+begin
+  insert into public.pages (id, tenant_id, slug, title, status, published_content) values
+    ('aaaaaaaa-0000-0000-0000-00000000a003',
+     '11111111-1111-1111-1111-111111111111', 'iso-doomed', 'Doomed', 'published',
+     '{"version":1,"sections":[]}');
+
+  insert into public.page_redirects (tenant_id, from_path, page_id) values
+    ('11111111-1111-1111-1111-111111111111', 'iso-doomed-was-here',
+     'aaaaaaaa-0000-0000-0000-00000000a003');
+
+  delete from public.pages where id = 'aaaaaaaa-0000-0000-0000-00000000a003';
+
+  select count(*) into left_behind
+  from public.page_redirects where from_path = 'iso-doomed-was-here';
+
+  insert into checks (name, passed, detail) values
+    ('deleting a page removes the redirects pointing at it',
+     left_behind = 0, 'left behind ' || left_behind);
+end $$;
+
+-- ---------------------------------------------------------------------------
 -- Clear up, then report
 -- ---------------------------------------------------------------------------
 

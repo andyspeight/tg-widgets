@@ -550,6 +550,202 @@ describe('page queries', () => {
 
 // ---------------------------------------------------------------------------
 
+/**
+ * Renaming a page without breaking the links to it.
+ *
+ * THE STATEMENTS ARE THE CLAIM HERE, which is why this is in the fake-driver
+ * file rather than with the rest of the redirect tests. What matters is not what
+ * comes back but WHEN each query runs: the old addresses have to be read before
+ * the update, because afterwards there is nothing left to work them out from,
+ * and every one of them has to be inside the rename's own transaction.
+ *
+ * That is an ordering property, and ordering is something you assert on rather
+ * than something you observe by reading rows back.
+ */
+describe('renaming a page keeps its old address working', () => {
+  /** The one row the update returns, so updatePageMeta does not bail early. */
+  const RENAMED = {
+    id: 'aaaa', parent_id: null, slug: 'about-us', title: 'About us',
+    status: 'published', published_at: '2026-08-01T00:00:00Z',
+    updated_at: '2026-08-01T00:00:00Z', has_unpublished_changes: false,
+  };
+
+  /** One published page, at /about, before the rename. */
+  function seedTree() {
+    respond('published_content is not null as published', [
+      { id: 'aaaa', parent_id: null, slug: 'about', published: true },
+    ]);
+  }
+
+  it('reads the tree, updates, then reads it again and records the move', async () => {
+    const { updatePageMeta } = await import('../lib/db/pages');
+
+    seedTree();
+    respond('update public.pages set', [RENAMED]);
+    // The tree AFTER the update, where the page has moved.
+    respond('published_content is not null as published', [
+      { id: 'aaaa', parent_id: null, slug: 'about-us', published: true },
+    ]);
+
+    await updatePageMeta(ALPHA, 'aaaa', { slug: 'about-us' });
+
+    const inside = log.slice(
+      log.findIndex((s) => s.sql === 'BEGIN'),
+      log.findIndex((s) => s.sql === 'COMMIT'),
+    );
+
+    const readAt = inside.findIndex((s) => s.sql.includes('as published'));
+    const updateAt = inside.findIndex((s) => s.sql.includes('update public.pages set'));
+    const writeAt = inside.findIndex((s) => s.sql.includes('insert into public.page_redirects'));
+
+    expect(readAt, 'nothing read the addresses').toBeGreaterThan(-1);
+    expect(writeAt, 'nothing recorded the move').toBeGreaterThan(-1);
+
+    // The whole claim, in one line: before, then, after.
+    expect(readAt).toBeLessThan(updateAt);
+    expect(updateAt).toBeLessThan(writeAt);
+  });
+
+  it('records the address it used to have, not the one it has now', async () => {
+    const { updatePageMeta } = await import('../lib/db/pages');
+
+    seedTree();
+    respond('update public.pages set', [RENAMED]);
+    respond('published_content is not null as published', [
+      { id: 'aaaa', parent_id: null, slug: 'about-us', published: true },
+    ]);
+
+    await updatePageMeta(ALPHA, 'aaaa', { slug: 'about-us' });
+
+    const write = log.find((s) => s.sql.includes('insert into public.page_redirects'));
+    expect(write?.params).toEqual([ALPHA, 'about', 'aaaa']);
+  });
+
+  /*
+   * A title-only edit is the common one and moves nothing. Reading the whole
+   * tree twice for it would put two queries on every typo fix, and a redirect
+   * from an address to itself would be a row that says nothing.
+   */
+  it('reads no tree at all when only the title changes', async () => {
+    const { updatePageMeta } = await import('../lib/db/pages');
+
+    respond('update public.pages set', [RENAMED]);
+    await updatePageMeta(ALPHA, 'aaaa', { title: 'About us' });
+
+    expect(log.some((s) => s.sql.includes('as published'))).toBe(false);
+    expect(log.some((s) => s.sql.includes('page_redirects'))).toBe(false);
+  });
+
+  /*
+   * THE PAGE THAT WAS NEVER PUBLISHED. Nobody can have linked to an address it
+   * never had, so a redirect from one would be a row pointing at nothing.
+   */
+  it('records nothing for a draft, which has no address to lose', async () => {
+    const { updatePageMeta } = await import('../lib/db/pages');
+
+    respond('published_content is not null as published', [
+      { id: 'aaaa', parent_id: null, slug: 'about', published: false },
+    ]);
+    respond('update public.pages set', [{ ...RENAMED, status: 'draft', published_at: null }]);
+    respond('published_content is not null as published', [
+      { id: 'aaaa', parent_id: null, slug: 'about-us', published: false },
+    ]);
+
+    await updatePageMeta(ALPHA, 'aaaa', { slug: 'about-us' });
+
+    expect(log.some((s) => s.sql.includes('insert into public.page_redirects'))).toBe(false);
+  });
+
+  /*
+   * THE ONE A HUMAN WOULD FORGET. Renaming a parent changes the address of
+   * every page beneath it without any of them being touched, and nothing on
+   * screen would say those had moved.
+   */
+  it('records the children too, since a parent rename moves the whole branch', async () => {
+    const { updatePageMeta } = await import('../lib/db/pages');
+
+    respond('published_content is not null as published', [
+      { id: 'top', parent_id: null, slug: 'destinations', published: true },
+      { id: 'kid', parent_id: 'top', slug: 'greece', published: true },
+    ]);
+    respond('update public.pages set', [{ ...RENAMED, id: 'top', slug: 'where-to-go' }]);
+    respond('published_content is not null as published', [
+      { id: 'top', parent_id: null, slug: 'where-to-go', published: true },
+      { id: 'kid', parent_id: 'top', slug: 'greece', published: true },
+    ]);
+
+    await updatePageMeta(ALPHA, 'top', { slug: 'where-to-go' });
+
+    const written = log
+      .filter((s) => s.sql.includes('insert into public.page_redirects'))
+      .map((s) => s.params);
+
+    expect(written).toEqual([
+      [ALPHA, 'destinations', 'top'],
+      [ALPHA, 'destinations/greece', 'kid'],
+    ]);
+  });
+
+  /*
+   * A rename that matched no row moved nothing. Writing a redirect here would
+   * record a move that did not happen, and the address it invented would then
+   * forward somewhere real.
+   */
+  /*
+   * COUNTED, NOT JUST ABSENT. Asserting that no redirect was written would pass
+   * with the guard deleted, because the second tree read would come back empty
+   * and there would be nothing to compare. The honest claim is that recordMove
+   * is never reached at all, and its first act is to read the tree a second
+   * time, so one read means it did not run.
+   */
+  it('stops before recording anything when the update matched no page', async () => {
+    const { updatePageMeta } = await import('../lib/db/pages');
+
+    respond('published_content is not null as published', [
+      { id: 'aaaa', parent_id: null, slug: 'about', published: true },
+    ]);
+    // No response for the update, so it comes back empty.
+
+    expect(await updatePageMeta(ALPHA, 'aaaa', { slug: 'about-us' })).toBeNull();
+
+    const reads = log.filter((s) => s.sql.includes('as published')).length;
+    expect(reads, 'it went on and read the tree again').toBe(1);
+    expect(log.some((s) => s.sql.includes('insert into public.page_redirects'))).toBe(false);
+  });
+
+  it('looks a redirect up as the read-only role', async () => {
+    const { resolveRedirect } = await import('../lib/db/redirects');
+
+    respond('from public.page_redirects where from_path', [{ page_id: 'aaaa' }]);
+    respond('published_content is not null as published', [
+      { id: 'aaaa', parent_id: null, slug: 'about-us', published: true },
+    ]);
+
+    expect(await resolveRedirect(ALPHA, '/about/')).toBe('about-us');
+    expect(log.every((s) => s.role === 'renderer')).toBe(true);
+  });
+
+  it('asks nothing at all for a path that could not be an address here', async () => {
+    const { resolveRedirect } = await import('../lib/db/redirects');
+
+    expect(await resolveRedirect(ALPHA, 'a/b/c/d/e/f/g/h')).toBeNull();
+    expect(log).toHaveLength(0);
+  });
+
+  it('gives up when the page it points at is no longer reachable', async () => {
+    const { resolveRedirect } = await import('../lib/db/redirects');
+
+    respond('from public.page_redirects where from_path', [{ page_id: 'aaaa' }]);
+    respond('published_content is not null as published', [
+      { id: 'aaaa', parent_id: null, slug: 'about-us', published: false },
+    ]);
+
+    expect(await resolveRedirect(ALPHA, 'about')).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+
 describe('hostname handling', () => {
   it.each([
     ['strips the port', 'Example.COM:3000', 'example.com'],

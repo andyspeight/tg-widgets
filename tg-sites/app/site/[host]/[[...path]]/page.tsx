@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 
 import { Breadcrumb } from '../../../../components/render/Breadcrumb';
 import { FontHead } from '../../../../components/render/FontHead';
@@ -10,6 +10,7 @@ import { SiteBody, SiteHead } from '../../../../components/render/SiteHead';
 import { WidgetScripts } from '../../../../components/render/WidgetScripts';
 import { listFontFaces } from '../../../../lib/db/fonts';
 import { getPublishedPage } from '../../../../lib/db/pages';
+import { resolveRedirect } from '../../../../lib/db/redirects';
 import { getPublishedRegions } from '../../../../lib/db/regions';
 import { getPublishedItem, listPublished } from '../../../../lib/db/collections';
 import { fillPageListings, itemAsCard, listingsIn } from '../../../../lib/content/listings';
@@ -191,11 +192,44 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   }
 }
 
+/**
+ * Nothing lives at this address. Does anything used to?
+ *
+ * THE LAST THING TRIED, AFTER PAGES AND AFTER COLLECTIONS, which is what keeps
+ * it free: a request that reaches here was already going to be a 404, so the two
+ * extra reads cost nothing anybody was waiting on. A live page always wins, so a
+ * redirect can never shadow real content.
+ *
+ * A PERMANENT REDIRECT, NOT A TEMPORARY ONE. The distinction is the whole point.
+ * A temporary redirect tells a search engine to keep the old address and check
+ * back; a permanent one tells it the page has moved for good and to pass
+ * whatever standing the old address had earned on to the new one. Getting this
+ * wrong means the rename still costs the client their ranking, just more slowly.
+ * permanentRedirect issues a 308, which Google treats exactly as it treats a 301.
+ *
+ * NOT IN MIDDLEWARE, though a redirect is the sort of thing that belongs there.
+ * Middleware runs on every request, before caching, in an environment where the
+ * Postgres driver has no business being, and this needs two queries. See the
+ * note at the top of middleware.ts: that file must never touch the database.
+ */
+async function gone(host: string, path: string[] | undefined): Promise<never> {
+  const tenantId = await resolveTenantByHostname(decodeURIComponent(host));
+
+  if (tenantId) {
+    const moved = await resolveRedirect(tenantId, (path ?? []).join('/'));
+    // The empty string is the home page, so this tests for null rather than
+    // for falsiness.
+    if (moved !== null) permanentRedirect(`/${moved}`);
+  }
+
+  notFound();
+}
+
 export default async function SitePage({ params }: Params) {
   const { host, path } = await params;
 
   const found = await load(host, path);
-  if (!found) notFound();
+  if (!found) return gone(host, path);
 
   const slug = decodeURIComponent(host);
   const theme = themeTokens(found.theme, familiesFromFiles(found.faces)).style;

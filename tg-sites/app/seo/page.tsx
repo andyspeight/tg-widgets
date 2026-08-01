@@ -9,6 +9,7 @@ import '../../components/seo/seo.css';
 import { SeoDashboard, type PageReport } from '../../components/seo/SeoDashboard';
 import { activeSite, currentUser } from '../../lib/auth/session';
 import { listPagesForAudit } from '../../lib/db/pages';
+import { countRedirects } from '../../lib/db/redirects';
 import { getSettings } from '../../lib/db/settings';
 import { getTenant, siteUrl } from '../../lib/db/tenants';
 import { auditPage, auditSite } from '../../lib/seo/audit';
@@ -80,11 +81,12 @@ export default async function SeoPage() {
     );
   }
 
-  const [tenant, url, settings, pages] = await Promise.all([
+  const [tenant, url, settings, pages, redirects] = await Promise.all([
     getTenant(site.tenantId),
     siteUrl(site.tenantId),
     getSettings(site.tenantId),
     listPagesForAudit(site.tenantId),
+    countRedirects(site.tenantId),
   ]);
 
   const published = pages.filter((page) => page.published);
@@ -110,6 +112,7 @@ export default async function SeoPage() {
         siteName={settings.companyName || tenant?.name || 'this site'}
         siteUrl={url}
         siteFindings={auditSite(settings, published.length)}
+        redirects={redirects}
         pages={reports}
       />
     </main>
