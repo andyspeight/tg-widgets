@@ -3124,3 +3124,100 @@
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
+
+/* ------------------------------------------------------------------ */
+/* The icon field and the icon picker                                  */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The field is a preview, a button and a box: pick one from 1,817, or type a
+ * character. Both write the same prop, because the stored value has always been
+ * a plain string and the renderer decides at draw time which it is.
+ */
+.if-row {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: var(--ed-2);
+}
+
+.if-preview {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-well);
+  color: var(--ed-primary);
+  cursor: pointer;
+}
+
+.if-preview:hover { border-color: var(--ed-accent); }
+.if-preview__icon { width: 22px; height: 22px; }
+.if-preview__char { font-size: var(--ed-text-lg); line-height: 1; }
+
+/* The typed box is the escape hatch, so it is the quietest of the three. */
+.if-typed { min-width: 0; }
+
+/*
+ * THE GRID IS SIZED BY THE TILE, NOT BY A COLUMN COUNT. auto-fill with a
+ * minimum means the dialog decides how many fit, which matters because this one
+ * is wide on a laptop and narrow on a tablet and a fixed six across would be
+ * cramped on one and sparse on the other.
+ */
+.ip-search { margin-bottom: var(--ed-3); }
+
+.ip-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  gap: var(--ed-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  /* The dialog body scrolls, not the page behind it. Same as the image bank. */
+  max-height: 52vh;
+  overflow-y: auto;
+}
+
+.ip-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ed-1);
+  width: 100%;
+  padding: var(--ed-2) var(--ed-1);
+  border: 1px solid transparent;
+  border-radius: var(--ed-r-md);
+  background: none;
+  color: var(--ed-ink);
+  cursor: pointer;
+}
+
+.ip-tile:hover { background: var(--ed-well); border-color: var(--ed-line); }
+
+.ip-tile[aria-pressed='true'] {
+  border-color: var(--ed-accent);
+  background: var(--ed-select-wash);
+  color: var(--ed-select);
+}
+
+.ip-tile__icon { width: 24px; height: 24px; }
+
+/*
+ * The name under each one, clipped rather than wrapped. Some of these names are
+ * long (message-square-quote), and letting them wrap would give one tile in the
+ * grid three lines and knock the whole row out of alignment. The full name is
+ * on the button's title and is its accessible name, so nothing is lost.
+ */
+.ip-tile__name {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: var(--ed-text-xs);
+  color: var(--ed-ink-3);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ip-empty { padding: var(--ed-4) 0; }

@@ -14,6 +14,7 @@
 
 import { blockDefinition, type Field } from './blocks';
 import { safeUrl, sanitiseHtml, type SanitiseMode } from './sanitise';
+import { safeIconName } from './icons';
 import type { CollectionItem } from './collection';
 import type { Block, Page, Region, Section } from './schema';
 
@@ -92,6 +93,25 @@ function cleanValue(
         return cleanProps(blockType, field.fields, item as Record<string, unknown>);
       });
     }
+
+    /*
+     * AN ICON IS TRIMMED, NOT CHECKED AGAINST THE LIBRARY, and that is the
+     * same arrangement the widget blocks use: make the shape safe here, do the
+     * closed-list lookup at render. Two reasons it is right rather than lazy.
+     *
+     * The set is 558KB and the sanitiser runs on every save, so checking
+     * membership here would put the whole icon library into the save path.
+     * More importantly, a client saving a page on an older build that uses an
+     * icon added in a NEWER one would have that icon deleted from their
+     * content rather than merely not drawn today, and content loss is a far
+     * worse failure than a missing picture.
+     *
+     * Nothing is at risk in letting an unknown value through: the value is
+     * rendered either as an icon looked up in the closed list, or as text,
+     * which React escapes. See lib/content/icons.ts and ContentIcon.
+     */
+    case 'icon':
+      return safeIconName(value);
 
     default:
       // text, select, toggle and number render as text through React, which

@@ -5816,6 +5816,127 @@ await check('and it becomes a link the moment it is named', async () => {
     : JSON.stringify(state);
 });
 
+// --- The icon library -------------------------------------------------------
+
+/*
+ * THE GAP THIS CLOSED. Until 1 Aug 2026 the only icon a client could put on a
+ * page was a character typed into a text box, and the designed sections shipped
+ * a tick, a star and a heart as theirs. That is the exact practice the note at
+ * the top of components/editor/Icon.tsx bans in our own interface, left in the
+ * client's content.
+ */
+await check('an icon item offers the library rather than a box to type a character in', async () => {
+  await showPanels();
+  await addBlock('Icon and text');
+
+  const choose = page.locator('.ed-props .if-choose');
+  if ((await choose.count()) === 0) return 'no Choose an icon button in the pane';
+
+  // It arrives on a real icon now, not a typed star, so the canvas draws an
+  // SVG before anybody touches anything.
+  const drawn = await added().evaluate((root) => ({
+    kind: root.querySelector('.tgs-icon-item__icon')?.getAttribute('data-kind'),
+    svgs: root.querySelectorAll('.tgs-icon-item__icon svg').length,
+  }));
+
+  return drawn.kind === 'icon' && drawn.svgs === 1 ? true : JSON.stringify(drawn);
+});
+
+await check('the picker finds an icon for a word a travel agent would type', async () => {
+  await page.locator('.ed-props .if-choose').click();
+  await page.waitForSelector('.ip-grid, .ip-empty', { timeout: 5000 });
+
+  // The set ships no tags at all, so without the synonym map in
+  // lib/content/icons.ts the most obvious word in the trade finds nothing.
+  await page.locator('.tg-modal input[aria-label="Search icons"]').fill('holiday');
+  await page.waitForTimeout(400);
+
+  const names = await page.evaluate(() =>
+    [...document.querySelectorAll('.ip-tile__name')].slice(0, 6).map((el) => el.textContent));
+
+  return names.length > 0 ? true : 'nothing found for "holiday"';
+});
+
+await check('and every result draws a picture rather than an empty box', async () => {
+  const drawn = await page.evaluate(() => {
+    const tiles = [...document.querySelectorAll('.ip-tile')].slice(0, 12);
+    return {
+      tiles: tiles.length,
+      // A shape inside the svg, not merely an svg element: an icon whose body
+      // failed to parse would still leave the empty svg behind.
+      withShapes: tiles.filter((t) => (t.querySelector('svg')?.children.length ?? 0) > 0).length,
+    };
+  });
+
+  return drawn.tiles > 0 && drawn.withShapes === drawn.tiles ? true : JSON.stringify(drawn);
+});
+
+await check('choosing one puts it on the page', async () => {
+  const first = page.locator('.ip-tile').first();
+  const chosen = await first.locator('.ip-tile__name').textContent();
+  await first.click();
+  await page.waitForTimeout(700);
+
+  const state = await added().evaluate((root) => {
+    const svg = root.querySelector('.tgs-icon-item__icon svg');
+    return {
+      open: document.querySelectorAll('.ip-grid').length,
+      shapes: svg ? svg.children.length : 0,
+      // Decorative on purpose: the title beside it says the same thing in
+      // words, so announcing the picture would read the point twice.
+      hidden: svg?.getAttribute('aria-hidden'),
+    };
+  });
+
+  return state.open === 0 && state.shapes > 0 && state.hidden === 'true'
+    ? true
+    : `${chosen}: ${JSON.stringify(state)}`;
+});
+
+/*
+ * THE PATH THAT KEEPS OLD PAGES WORKING. Every icon on every page built before
+ * the library existed is a character somebody typed, and the value is still a
+ * plain string, so the renderer looks it up and prints it when it names nothing.
+ * Without this a client's site would lose every icon on it the day the library
+ * shipped.
+ */
+await check('a typed emoji is still drawn as a typed emoji', async () => {
+  const typed = page.locator('.ed-props input[aria-label="Icon name or a character"]');
+  await typed.fill('🏖️');
+  await typed.blur();
+  await page.waitForTimeout(700);
+
+  const state = await added().evaluate((root) => {
+    const span = root.querySelector('.tgs-icon-item__icon');
+    return { kind: span?.getAttribute('data-kind'), text: span?.textContent, svgs: span?.querySelectorAll('svg').length };
+  });
+
+  return state.kind === 'character' && state.text === '🏖️' && state.svgs === 0
+    ? true
+    : JSON.stringify(state);
+});
+
+/*
+ * An icon takes the colour of the words around it. Every path in the set is
+ * stroked with currentColor, which is what lets one icon sit on a light section
+ * and a dark one without a client choosing a colour for each.
+ */
+await check('an icon takes the colour of the text around it', async () => {
+  const typed = page.locator('.ed-props input[aria-label="Icon name or a character"]');
+  await typed.fill('plane-takeoff');
+  await typed.blur();
+  await page.waitForTimeout(700);
+
+  const same = await added().evaluate((root) => {
+    const svg = root.querySelector('.tgs-icon-item__icon svg');
+    const path = svg?.querySelector('path');
+    if (!svg || !path) return null;
+    return getComputedStyle(path).stroke === getComputedStyle(svg).color;
+  });
+
+  return same === true ? true : `stroke and colour comparison came back ${same}`;
+});
+
 await browser.close();
 
 let failed = false;

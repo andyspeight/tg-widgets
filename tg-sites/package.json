@@ -16,6 +16,7 @@
     "test:live": "TG_LIVE_FONTS=1 vitest run tests/fonts.live.test.ts"
   },
   "dependencies": {
+    "@iconify-json/lucide": "1.2.121",
     "@vercel/blob": "^2.6.1",
     "next": "15.5.22",
     "postgres": "^3.4.7",

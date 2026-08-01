@@ -33,6 +33,12 @@ export type Field =
   | { kind: 'richtext'; key: string; label: string; help?: string }
   | { kind: 'url'; key: string; label: string; placeholder?: string; help?: string }
   | { kind: 'image'; key: string; label: string; help?: string }
+  /*
+   * An icon from the library. Stores a NAME, not markup, and the field also
+   * accepts a typed character so that every page built before the library
+   * existed keeps drawing what it drew. See lib/content/icons.ts.
+   */
+  | { kind: 'icon'; key: string; label: string; help?: string }
   | { kind: 'select'; key: string; label: string; options: SelectOption[]; help?: string }
   | { kind: 'toggle'; key: string; label: string; help?: string }
   | { kind: 'number'; key: string; label: string; min?: number; max?: number; step?: number; help?: string }
@@ -248,10 +254,20 @@ export const BLOCKS: readonly BlockDefinition[] = [
     group: 'Text',
     icon: 'sparkle',
     description: 'An icon with a short title and a line of copy.',
-    defaults: { icon: '★', title: 'A benefit', body: 'One sentence on why it matters.', align: 'left' },
+    /*
+     * A REAL ICON BY DEFAULT since 1 Aug 2026. This used to be a star typed as
+     * a character, which is the practice the note at the top of Icon.tsx bans
+     * in our own interface and which was left in the client's content.
+     */
+    defaults: { icon: 'sparkles', title: 'A benefit', body: 'One sentence on why it matters.', align: 'left' },
     summarise: (props) => asString(props.title) || 'Icon and text',
     fields: [
-      { kind: 'text', key: 'icon', label: 'Icon', max: 4, help: 'A single character or emoji.' },
+      {
+        kind: 'icon',
+        key: 'icon',
+        label: 'Icon',
+        help: 'Pick one, or type an emoji if you would rather.',
+      },
       { kind: 'text', key: 'title', label: 'Title', max: 80 },
       { kind: 'textarea', key: 'body', label: 'Body', rows: 3, max: 300 },
       /*

@@ -19,6 +19,7 @@
 import { useEffect, useRef } from 'react';
 import type { Field } from '../../lib/content/blocks';
 import { ImageField } from '../media/ImageField';
+import { IconField } from './IconField';
 import { Icon } from './Icon';
 
 interface FieldProps {
@@ -98,6 +99,13 @@ export function FieldRenderer({ field, value, onChange, ownerId, onPatch }: Fiel
             urlKey={field.key}
             altKey="alt"
           />
+        </Wrapper>
+      );
+
+    case 'icon':
+      return (
+        <Wrapper field={field}>
+          <IconField value={asString(value)} onChange={onChange} />
         </Wrapper>
       );
 

@@ -18,6 +18,8 @@ import { resolveVideo } from '../../lib/content/video';
 import { socialNetwork } from '../../lib/content/social';
 import { safeWidgetId, widgetKind } from '../../lib/content/widgets';
 import { SocialIcon } from './social-icons';
+import { ContentIcon } from './content-icon';
+import { isIconName } from '../../lib/content/icons';
 
 type Props = Record<string, unknown>;
 
@@ -235,7 +237,9 @@ export function ListBlock({ props }: { props: Props }): ReactElement {
 }
 
 export function IconItemBlock({ props }: { props: Props }): ReactElement {
-  const icon = str(props, 'icon', '\u2605');
+  // Matches the block's own default. A star CHARACTER here would mean a
+  // block saved with no icon prop at all drew the one thing this replaced.
+  const icon = str(props, 'icon', 'sparkles');
   const title = str(props, 'title');
   const body = str(props, 'body');
   const align = oneOf(props, 'align', ['left', 'centre', 'right'] as const, 'left');
@@ -253,11 +257,37 @@ export function IconItemBlock({ props }: { props: Props }): ReactElement {
    * the one thing the whole draw-it-from-the-data arrangement exists to stop.
    * tests/presets.test.ts checks every prop against the registry now.
    */
+  /*
+   * A NAME DRAWS AN ICON, ANYTHING ELSE IS PRINTED AS TYPED, and that one line
+   * is what let the icon library arrive without a migration. Every icon on
+   * every page built before 1 Aug 2026 is a character somebody typed, and those
+   * pages have to keep drawing what they drew. So the value is looked up, and
+   * only a hit becomes a picture.
+   *
+   * data-kind is on the span rather than inferred in CSS, because "is this
+   * string an icon name" is a question only the icon set can answer and the
+   * two cases want different sizing: a drawing is set in em and scales with the
+   * text, a character is a glyph at whatever size its font gives it.
+   */
+  /*
+   * ASKED OF THE ICON SET, NOT OF THE ELEMENT. The first version of this wrote
+   * `const drawn = <ContentIcon .../>` and branched on `drawn`, which is always
+   * truthy: JSX builds an element object whatever the component will later
+   * return. So every value took the icon branch, ContentIcon returned null for
+   * anything that was not a name, and a typed emoji rendered as an empty box.
+   * Caught by the browser check for exactly that path, on 1 Aug 2026.
+   */
+  const drawable = isIconName(icon);
+
   return (
     <div className="tgs-icon-item" data-align={align}>
       {/* Decorative: the title carries the meaning. */}
-      <span className="tgs-icon-item__icon" aria-hidden="true">
-        {icon}
+      <span
+        className="tgs-icon-item__icon"
+        data-kind={drawable ? 'icon' : 'character'}
+        aria-hidden="true"
+      >
+        {drawable ? <ContentIcon name={icon} className="tgs-icon-item__svg" /> : icon}
       </span>
       <div>
         {title && <p className="tgs-icon-item__title">{title}</p>}

@@ -26,6 +26,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { blockDefinition, isKnownBlock } from '../lib/content/blocks';
+import { isIconName } from '../lib/content/icons';
 import { MAX_BORDER, MAX_RADIUS, safeColour } from '../lib/content/schema';
 import {
   buildPresetSection,
@@ -100,6 +101,37 @@ describe('every preset is built from blocks that exist', () => {
         if (value === undefined) return [];
 
         return field.options.some((option) => option.value === value)
+          ? []
+          : [`${preset.id}: ${spec.type}.${field.key} = ${JSON.stringify(value)}`];
+      });
+    });
+
+    expect(wrong).toEqual([]);
+  });
+
+  /*
+   * THE SAME TRAP AGAIN, ONE FIELD KIND ALONG. An icon prop is a plain string
+   * and the renderer falls back to printing it as text when it names nothing,
+   * which is exactly the behaviour that keeps every pre-1 Aug 2026 page
+   * working and exactly the behaviour that would hide a typo in a preset: a
+   * misspelt `plane-takoff` would draw the words "plane-takoff" in the tile
+   * and nothing would fail.
+   *
+   * A PRESET IS HELD TO A HIGHER BAR THAN A CLIENT'S PAGE here, deliberately.
+   * A client may type an emoji and should be allowed to. A designed section we
+   * ship must name a real icon.
+   */
+  it('names a real icon everywhere a preset sets one', () => {
+    const wrong = everyBlock().flatMap(({ preset, spec }) => {
+      const definition = blockDefinition(spec.type);
+      if (!definition) return [];
+
+      return (definition.fields ?? []).flatMap((field) => {
+        if (field.kind !== 'icon') return [];
+        const value = spec.props?.[field.key];
+        if (value === undefined) return [];
+
+        return isIconName(value)
           ? []
           : [`${preset.id}: ${spec.type}.${field.key} = ${JSON.stringify(value)}`];
       });

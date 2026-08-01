@@ -118,15 +118,15 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         columnBox: [CARD, CARD, CARD],
         columns: [
           [
-            { type: 'icon-item', props: { icon: '\u2708', title: 'Short title', body: 'One sentence on what this is and why it matters.' } },
+            { type: 'icon-item', props: { icon: 'plane-takeoff', title: 'Short title', body: 'One sentence on what this is and why it matters.' } },
             { type: 'button', props: { label: 'Learn more', variant: 'ghost' } },
           ],
           [
-            { type: 'icon-item', props: { icon: '\u2691', title: 'Short title', body: 'One sentence on what this is and why it matters.' } },
+            { type: 'icon-item', props: { icon: 'flag', title: 'Short title', body: 'One sentence on what this is and why it matters.' } },
             { type: 'button', props: { label: 'Learn more', variant: 'ghost' } },
           ],
           [
-            { type: 'icon-item', props: { icon: '\u2605', title: 'Short title', body: 'One sentence on what this is and why it matters.' } },
+            { type: 'icon-item', props: { icon: 'star', title: 'Short title', body: 'One sentence on what this is and why it matters.' } },
             { type: 'button', props: { label: 'Learn more', variant: 'ghost' } },
           ],
         ],
@@ -185,19 +185,19 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         gap: 24,
         columns: [
           [
-            { type: 'icon-item', props: { icon: '\u2708', title: 'Short title', body: 'One line on this point.', ...CENTRED } },
+            { type: 'icon-item', props: { icon: 'plane-takeoff', title: 'Short title', body: 'One line on this point.', ...CENTRED } },
             { type: 'button', props: { label: 'Learn more', variant: 'ghost', align: 'centre' } },
           ],
           [
-            { type: 'icon-item', props: { icon: '\u2691', title: 'Short title', body: 'One line on this point.', ...CENTRED } },
+            { type: 'icon-item', props: { icon: 'flag', title: 'Short title', body: 'One line on this point.', ...CENTRED } },
             { type: 'button', props: { label: 'Learn more', variant: 'ghost', align: 'centre' } },
           ],
           [
-            { type: 'icon-item', props: { icon: '\u2605', title: 'Short title', body: 'One line on this point.', ...CENTRED } },
+            { type: 'icon-item', props: { icon: 'star', title: 'Short title', body: 'One line on this point.', ...CENTRED } },
             { type: 'button', props: { label: 'Learn more', variant: 'ghost', align: 'centre' } },
           ],
           [
-            { type: 'icon-item', props: { icon: '\u2665', title: 'Short title', body: 'One line on this point.', ...CENTRED } },
+            { type: 'icon-item', props: { icon: 'heart', title: 'Short title', body: 'One line on this point.', ...CENTRED } },
             { type: 'button', props: { label: 'Learn more', variant: 'ghost', align: 'centre' } },
           ],
         ],
@@ -794,9 +794,9 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         widths: [1, 1, 1],
         gap: 32,
         columns: [
-          [{ type: 'icon-item', props: { icon: '✈', title: 'Everything arranged', body: 'Flights, transfers and the hotel, booked as one thing so nothing falls between them.', ...CENTRED } }],
-          [{ type: 'icon-item', props: { icon: '☎', title: 'A person to call', body: 'The same person who booked it, on a number that reaches them.', ...CENTRED } }],
-          [{ type: 'icon-item', props: { icon: '✓', title: 'Protected money', body: 'ATOL and ABTA, so what you pay is covered before you go and while you are away.', ...CENTRED } }],
+          [{ type: 'icon-item', props: { icon: 'plane-takeoff', title: 'Everything arranged', body: 'Flights, transfers and the hotel, booked as one thing so nothing falls between them.', ...CENTRED } }],
+          [{ type: 'icon-item', props: { icon: 'phone', title: 'A person to call', body: 'The same person who booked it, on a number that reaches them.', ...CENTRED } }],
+          [{ type: 'icon-item', props: { icon: 'circle-check', title: 'Protected money', body: 'ATOL and ABTA, so what you pay is covered before you go and while you are away.', ...CENTRED } }],
         ],
       },
     ],
@@ -822,10 +822,10 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         gap: 24,
         columnBox: [CARD, CARD, CARD, CARD],
         columns: [
-          [{ type: 'icon-item', props: { icon: '⚑', title: 'Short title', body: 'One sentence on this one.' } }],
-          [{ type: 'icon-item', props: { icon: '★', title: 'Short title', body: 'One sentence on this one.' } }],
-          [{ type: 'icon-item', props: { icon: '♥', title: 'Short title', body: 'One sentence on this one.' } }],
-          [{ type: 'icon-item', props: { icon: '☺', title: 'Short title', body: 'One sentence on this one.' } }],
+          [{ type: 'icon-item', props: { icon: 'flag', title: 'Short title', body: 'One sentence on this one.' } }],
+          [{ type: 'icon-item', props: { icon: 'star', title: 'Short title', body: 'One sentence on this one.' } }],
+          [{ type: 'icon-item', props: { icon: 'heart', title: 'Short title', body: 'One sentence on this one.' } }],
+          [{ type: 'icon-item', props: { icon: 'smile', title: 'Short title', body: 'One sentence on this one.' } }],
         ],
       },
     ],
@@ -976,18 +976,18 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         widths: [1, 1, 1],
         gap: 32,
         columns: [
-          [{ type: 'icon-item', props: { icon: '✈', title: 'Short title', body: 'One line on this point.' } }],
-          [{ type: 'icon-item', props: { icon: '⚑', title: 'Short title', body: 'One line on this point.' } }],
-          [{ type: 'icon-item', props: { icon: '★', title: 'Short title', body: 'One line on this point.' } }],
+          [{ type: 'icon-item', props: { icon: 'plane-takeoff', title: 'Short title', body: 'One line on this point.' } }],
+          [{ type: 'icon-item', props: { icon: 'flag', title: 'Short title', body: 'One line on this point.' } }],
+          [{ type: 'icon-item', props: { icon: 'star', title: 'Short title', body: 'One line on this point.' } }],
         ],
       },
       {
         widths: [1, 1, 1],
         gap: 32,
         columns: [
-          [{ type: 'icon-item', props: { icon: '♥', title: 'Short title', body: 'One line on this point.' } }],
-          [{ type: 'icon-item', props: { icon: '☺', title: 'Short title', body: 'One line on this point.' } }],
-          [{ type: 'icon-item', props: { icon: '✓', title: 'Short title', body: 'One line on this point.' } }],
+          [{ type: 'icon-item', props: { icon: 'heart', title: 'Short title', body: 'One line on this point.' } }],
+          [{ type: 'icon-item', props: { icon: 'smile', title: 'Short title', body: 'One line on this point.' } }],
+          [{ type: 'icon-item', props: { icon: 'circle-check', title: 'Short title', body: 'One line on this point.' } }],
         ],
       },
     ],
@@ -2364,9 +2364,9 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         gap: 24,
         columnBox: [CARD, CARD, CARD],
         columns: [
-          [{ type: 'icon-item', props: { icon: '☎', title: 'Ring us', body: 'Your number here. Say the hours if they are not obvious.', ...CENTRED } }],
-          [{ type: 'icon-item', props: { icon: '✉', title: 'Email us', body: 'Your address here. Say how quickly you answer.', ...CENTRED } }],
-          [{ type: 'icon-item', props: { icon: '⌂', title: 'Come in', body: 'Your street and town. Add the Maps widget underneath.', ...CENTRED } }],
+          [{ type: 'icon-item', props: { icon: 'phone', title: 'Ring us', body: 'Your number here. Say the hours if they are not obvious.', ...CENTRED } }],
+          [{ type: 'icon-item', props: { icon: 'mail', title: 'Email us', body: 'Your address here. Say how quickly you answer.', ...CENTRED } }],
+          [{ type: 'icon-item', props: { icon: 'map-pin', title: 'Come in', body: 'Your street and town. Add the Maps widget underneath.', ...CENTRED } }],
         ],
       },
     ],

@@ -809,6 +809,20 @@
   background: rgba(255, 255, 255, 0.12);
   color: var(--tgs-accent);
 }
+
+/*
+ * A DRAWING AND A CHARACTER WANT DIFFERENT SIZES, which is why the renderer
+ * marks which one it drew rather than leaving CSS to guess.
+ *
+ * An icon is an outline on a 24 by 24 grid and is set in em, so it scales with
+ * whatever the tile's font-size is and always fills the same share of it. A
+ * character is a glyph, and how much of its em box it fills is entirely up to
+ * the font: an emoji nearly fills it, a tick is about half. Setting the two to
+ * the same number leaves the drawings looking small beside the emoji that were
+ * there before 1 Aug 2026.
+ */
+.tgs-icon-item__icon[data-kind='icon'] { font-size: 24px; }
+.tgs-icon-item__svg { width: 1em; height: 1em; stroke-width: 2; }
 .tgs-icon-item__title { margin: 0 0 var(--tgs-space-xs); font-size: var(--tgs-text-l); font-weight: 600; }
 .tgs-icon-item__body { margin: 0; color: var(--tgs-text-muted); }
 
