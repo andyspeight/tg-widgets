@@ -314,13 +314,41 @@ export function ImageBlock({ props }: { props: Props }): ReactElement {
     return <div className="tgs-placeholder">Choose an image</div>;
   }
 
+  /*
+   * THE SHAPE OF THE FILE, WHICH IS WHAT STOPS THE PAGE JUMPING.
+   *
+   * A browser reads width and height off the tag, works out the ratio, and
+   * reserves that space before a byte of the picture arrives. Without them an
+   * image on the default Original shape reserves NOTHING and everything below
+   * it moves when it lands, which is Cumulative Layout Shift: bad to read and a
+   * ranking factor.
+   *
+   * ONLY WHEN THE RATIO IS 'auto'. Any other setting already puts an
+   * aspect-ratio on the frame, which reserves the space by itself, and the
+   * stored dimensions are the shape of the FILE rather than of the crop, so
+   * emitting them next to a 16/9 frame would describe a box that is not there.
+   *
+   * A picture chosen before 1 Aug 2026 has no dimensions recorded and gets
+   * none, exactly as before. Re-choosing it records them.
+   */
+  const width = clamp(props.width, 0, 20000, 0);
+  const height = clamp(props.height, 0, 20000, 0);
+  const measured = ratio === 'auto' && width > 0 && height > 0;
+
   const picture = (
     <div className="tgs-image__frame" data-radius={radius} style={ratioStyle(ratio)}>
       {/* Plain img rather than next/image: sources are arbitrary client URLs
           and the media pipeline with its own variants lands in a later
-          package. width/height come with the media record then, which is
-          what removes the layout shift. */}
-      <img src={src} alt={alt} loading="lazy" decoding="async" style={{ objectFit: fit }} />
+          package. */}
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+        width={measured ? width : undefined}
+        height={measured ? height : undefined}
+        style={{ objectFit: fit }}
+      />
     </div>
   );
 

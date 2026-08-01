@@ -607,6 +607,21 @@
   height: 100%;
   max-width: 100%;
 }
+/*
+ * A MEASURED PICTURE SIZES ITSELF, which is the whole point of putting width
+ * and height on the tag.
+ *
+ * A browser turns those two attributes into an internal aspect-ratio and
+ * reserves the space before the file arrives, but ONLY while one dimension is
+ * auto. The rule above sets both to 100%, so without this the hint is overruled
+ * and the page still jumps, which is the failure this was meant to fix.
+ *
+ * Keyed on the presence of the attribute rather than on a class, because the
+ * renderer only emits width and height when the shape is Original and the
+ * dimensions are known. That is exactly the case that needs it.
+ */
+.tgs-image img[width] { height: auto; }
+
 .tgs-image__frame { overflow: hidden; background: var(--tgs-surface-alt); }
 .tgs-image__frame[data-radius='none'] { border-radius: 0; }
 .tgs-image__frame[data-radius='sm']   { border-radius: var(--tgs-radius-sm); }
@@ -2106,3 +2121,43 @@
   white-space: nowrap;
   border: 0;
 }
+
+/* ------------------------------------------------------------------ */
+/* The breadcrumb trail                                                */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Quiet on purpose. A trail is orientation, not content: it should be findable
+ * when somebody looks for it and invisible when they are reading. The separator
+ * is a CSS ::before rather than a character in the markup, so a screen reader
+ * reads the names and not a row of slashes, and so copying the trail copies the
+ * words.
+ */
+.tgs-crumbs {
+  padding: var(--tgs-space-s) 0 0;
+  font-size: var(--tgs-text-s);
+  color: var(--tgs-text-muted);
+}
+
+.tgs-crumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tgs-space-xs);
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tgs-crumbs li { display: flex; gap: var(--tgs-space-xs); align-items: center; }
+
+.tgs-crumbs li + li::before {
+  content: '/';
+  opacity: 0.5;
+}
+
+.tgs-crumbs a { color: inherit; }
+.tgs-crumbs a:hover { color: var(--tgs-primary); }
+
+/* The page somebody is already on. Not a link, and said so. */
+.tgs-crumbs [aria-current='page'] { color: var(--tgs-text); }

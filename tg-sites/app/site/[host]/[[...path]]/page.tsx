@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
+import { Breadcrumb } from '../../../../components/render/Breadcrumb';
 import { FontHead } from '../../../../components/render/FontHead';
 import { PageRenderer, SectionRenderer } from '../../../../components/render/PageRenderer';
 import { safeUrl } from '../../../../lib/content/sanitise';
@@ -16,7 +17,7 @@ import { getPublicSettings } from '../../../../lib/db/settings';
 import { getPublicTheme } from '../../../../lib/db/theme';
 import { resolveTenantByHostname } from '../../../../lib/db/tenants';
 import { socialMetas } from '../../../../lib/settings/head';
-import { jsonLdScript, pageJsonLd } from '../../../../lib/seo/jsonld';
+import { jsonLdScript, pageJsonLd, profileLinks } from '../../../../lib/seo/jsonld';
 import { familiesFromFiles } from '../../../../lib/theme/fonts';
 import { themeTokens } from '../../../../lib/theme/tokens';
 
@@ -231,6 +232,17 @@ export default async function SitePage({ params }: Params) {
         }
       : null,
     publishedAt: found.entry?.publishedAt ?? null,
+    /*
+     * The client's own profiles, from the Social links blocks they already
+     * built. The footer is where they nearly always live, but the header and the
+     * page are read too rather than assuming: a site with its socials in a top
+     * strip should not lose them.
+     */
+    sameAs: profileLinks([
+      found.regions.header,
+      found.page ? found.page.content : found.entry!.item,
+      found.regions.footer,
+    ]),
   });
 
   return (
@@ -288,6 +300,18 @@ export default async function SitePage({ params }: Params) {
         a site without a footer has no empty `<footer>` claiming a landmark.
       */}
       <RegionRenderer region={found.regions.header} theme={theme} />
+
+      {/*
+        THE TRAIL, AND THE REASON IT IS HERE RATHER THAN A BLOCK A CLIENT ADDS.
+        We emit BreadcrumbList structured data for every nested page, and
+        Google's guidance is that markup must represent VISIBLE content. Left to
+        a block, the markup would be right on the pages somebody remembered and
+        a mismatch everywhere else, which is worse than not emitting it at all.
+
+        Between the header and the content, which is where a trail belongs, and
+        it draws nothing on the home page.
+      */}
+      <Breadcrumb path={currentPath} pageTitle={pageTitle} />
 
       {found.page ? (
         <PageRenderer page={found.page.content} theme={theme} />

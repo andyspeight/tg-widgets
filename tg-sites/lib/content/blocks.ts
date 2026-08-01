@@ -424,7 +424,14 @@ export const BLOCKS: readonly BlockDefinition[] = [
     group: 'Media',
     icon: 'image',
     description: 'A picture, with the alt text search engines and screen readers need.',
-    defaults: { src: '', alt: '', ratio: 'auto', fit: 'cover', radius: 'md', caption: '', href: '' },
+    /*
+     * width and height are RECORDED, NOT EDITED. They are facts about the file,
+     * written by the picker when a picture is chosen, and they exist so the
+     * renderer can reserve the right space before the image loads. There is no
+     * field for them below and there should not be: a client typing a wrong
+     * number would make the page jump rather than stop it.
+     */
+    defaults: { src: '', alt: '', ratio: 'auto', fit: 'cover', radius: 'md', caption: '', href: '', width: 0, height: 0 },
     summarise: (props) => asString(props.alt) || asString(props.caption) || 'Image',
     fields: [
       { kind: 'image', key: 'src', label: 'Image' },

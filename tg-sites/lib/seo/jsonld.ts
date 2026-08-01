@@ -52,6 +52,55 @@ function compact(node: JsonLd): JsonLd | null {
 }
 
 /**
+ * The client's own profiles, gathered from the Social links blocks they have
+ * already filled in.
+ *
+ * WHY THIS IS WORTH A WALK OF THE TREE. `sameAs` is how a search engine or an
+ * assistant confirms that the business on this website is the SAME ENTITY as
+ * that Facebook page and that Tripadvisor listing. Without it an engine has a
+ * name and a description and no way to connect them to anything it already
+ * knows, which is exactly the position it is in when it decides not to name a
+ * business in an answer.
+ *
+ * FROM THE FOOTER THEY ALREADY BUILT, never a new field. The addresses are in a
+ * Social links block because a visitor should be able to click them, and asking
+ * for them a second time in an SEO panel would be two lists to keep in step.
+ *
+ * ONLY http AND https. The Social block deliberately allows mailto: and tel:,
+ * because a follow us row usually ends with an email and a phone number, and
+ * neither is a "reference Web page that unambiguously indicates the identity of
+ * the item", which is what sameAs is defined as. A mailto: in there is not
+ * merely useless, it is a claim that does not parse.
+ */
+export function profileLinks(trees: ReadonlyArray<{ sections: Section[] } | null | undefined>): string[] {
+  const found: string[] = [];
+  const seen = new Set<string>();
+
+  for (const tree of trees) {
+    for (const section of tree?.sections ?? []) {
+      for (const row of section.rows) {
+        for (const column of row.columns) {
+          for (const block of column.blocks) {
+            if (block.type !== 'social') continue;
+
+            const items = Array.isArray(block.props.items) ? block.props.items : [];
+            for (const raw of items) {
+              const item = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
+              const href = typeof item.href === 'string' ? item.href.trim() : '';
+              if (!/^https?:\/\//i.test(href) || seen.has(href)) continue;
+              seen.add(href);
+              found.push(href);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return found;
+}
+
+/**
  * The business itself.
  *
  * TravelAgency RATHER THAN Organization, and this is the one judgement call in
@@ -65,6 +114,7 @@ export function organisationLd(
   settings: SiteSettings,
   origin: string,
   siteName: string,
+  sameAs: readonly string[] = [],
 ): JsonLd | null {
   const name = clean(settings.companyName) ?? clean(siteName);
   if (!name) return null;
@@ -80,6 +130,10 @@ export function organisationLd(
     url: origin,
     logo: clean(settings.socialImageUrl),
     image: clean(settings.socialImageUrl),
+    // Dropped by compact() when the client has not linked any profiles yet,
+    // rather than emitted as an empty array, which asserts "this business has
+    // no presence anywhere" instead of saying nothing.
+    sameAs: sameAs.length > 0 ? [...sameAs] : undefined,
   });
 }
 
@@ -269,11 +323,13 @@ export function pageJsonLd(input: {
   page?: Page | null;
   entry?: { title: string; summary?: string | null; image?: string | null } | null;
   publishedAt?: Date | null;
+  /** The client's own profile addresses, from their Social links blocks. */
+  sameAs?: readonly string[];
 }): JsonLd[] {
   const { origin, url, path, siteName, settings, pageTitle } = input;
 
   const nodes: Array<JsonLd | null> = [
-    organisationLd(settings, origin, siteName),
+    organisationLd(settings, origin, siteName, input.sameAs ?? []),
     websiteLd(origin, siteName),
     breadcrumbLd(origin, path, pageTitle),
     input.page ? faqLd(input.page) : null,

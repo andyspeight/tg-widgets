@@ -66,6 +66,31 @@ export function ImageField({ value, onChange, onPatch, altKey, urlKey }: Props) 
       // Only fills an EMPTY description. Somebody who wrote their own alt text for
       // this block meant it, and a picture swap is not a reason to lose it.
       if (altKey && item.alt) patch[altKey] = item.alt;
+
+      /*
+       * THE SHAPE OF THE PICTURE, RECORDED WITH IT, so the renderer can put
+       * width and height on the img tag.
+       *
+       * That is what stops the page jumping while the picture loads: a browser
+       * works the aspect ratio out from those two numbers and reserves the space
+       * before a byte of the image has arrived. Without them an image left on
+       * the default Original shape reserves nothing, everything below it moves
+       * when it lands, and that is Cumulative Layout Shift, which is a ranking
+       * factor as well as being horrible to read.
+       *
+       * HERE RATHER THAN AT RENDER TIME, because the block stores a URL and the
+       * dimensions live on the media row. Looking them up while rendering would
+       * be a database query per picture per visitor. The picker already knows
+       * them, so it writes them down once.
+       *
+       * They ride along in the SAME patch as the address and the alt text, so
+       * one undo takes the whole choice back.
+       */
+      if (item.width && item.height) {
+        patch.width = item.width;
+        patch.height = item.height;
+      }
+
       onPatch(patch);
       return;
     }
