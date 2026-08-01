@@ -40,11 +40,28 @@ import {
   type Finding,
 } from '../lib/seo/audit';
 
+/**
+ * A site with everything filled in, which is what "is happy with a site that has
+ * been filled in" below is measuring against.
+ *
+ * The contact details joined it on 1 Aug 2026 and broke that test, correctly:
+ * this fixture claimed to be a complete site and had stopped being one the
+ * moment auditSite started asking where the business is.
+ */
 const SETTINGS = {
   ...DEFAULT_SETTINGS,
   companyName: 'Someshop Travel',
   companyAbout: 'A high street agency in Leeds.',
   socialImageUrl: 'https://cdn.example.com/share.jpg',
+  streetAddress: '14 Market Street',
+  addressLocality: 'Leeds',
+  postalCode: 'LS1 6DT',
+  addressCountry: 'United Kingdom',
+  telephone: '+44 113 496 0000',
+  openingHours: [
+    { day: 'Monday' as const, opens: '09:00', closes: '17:30' },
+    { day: 'Saturday' as const, opens: '10:00', closes: '16:00' },
+  ],
 };
 
 /** A page with the blocks given, in one section and one column. */

@@ -116,6 +116,161 @@ export const LOCALE_IDS = Object.keys(LOCALES) as Locale[];
 export const DEFAULT_LOCALE: Locale = 'en-GB';
 
 // ---------------------------------------------------------------------------
+// Where the business is, and when it is open
+//
+// ADDED 1 AUG 2026, and it is the biggest single thing a client can do for their
+// own visibility. An assistant asked "who books tailor-made holidays to Greece
+// near Leeds" has to be confident that this website belongs to a particular
+// business in a particular place before it will name anybody, and an address, a
+// phone number and opening hours are what that confidence is made of. Without
+// them the engine has a description of a travel agency that could be anywhere,
+// which is the position it is in when it summarises the content and credits
+// nobody.
+//
+// It is also the only part of the visibility work that asks the client for
+// something new. Everything else was built out of what they had already typed.
+// ---------------------------------------------------------------------------
+
+/**
+ * One line of a contact detail.
+ *
+ * Single-line, unlike the profile boxes: these go into a PostalAddress node
+ * where a newline in the middle of a town name is meaningless, so whitespace is
+ * collapsed rather than preserved. Control characters out, because they are
+ * never typed on purpose and they end up in a JSON document.
+ */
+const contactLine = (max: number) =>
+  z
+    .unknown()
+    .transform((value) => {
+      if (typeof value !== 'string') return '';
+      return value.replace(/[\u0000-\u001F\u007F]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max);
+    })
+    .catch('');
+
+/**
+ * A phone number, in whatever shape the client writes it.
+ *
+ * NOT PATTERN-MATCHED, and that is deliberate rather than lazy. Phone number
+ * regexes are famous for rejecting real numbers, and this platform already has
+ * clients in Ireland and is meant for more: a UK-shaped check would refuse a
+ * perfectly good Dublin number and the client would have no idea why.
+ *
+ * The one check worth making is that it contains a DIGIT. A telephone property
+ * holding "call us" is not a lax value, it is a false statement in a document
+ * written specifically for something that cannot tell it is being lied to.
+ */
+const telephone = z
+  .unknown()
+  .transform((value) => {
+    if (typeof value !== 'string') return '';
+    const tidy = value.replace(/[\u0000-\u001F\u007F]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 40);
+    return /\d/.test(tidy) ? tidy : '';
+  })
+  .catch('');
+
+/** Monday first, because that is how a British business writes its week. */
+export const WEEKDAYS = [
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
+] as const;
+
+export type Weekday = (typeof WEEKDAYS)[number];
+
+/**
+ * One day's hours.
+ *
+ * EITHER TIME MAY BE BLANK, and the type says so rather than pretending
+ * otherwise. The reason is the editor: `<input type="time">` reports a value
+ * only once a whole time is entered, so a client picking an opening time gets
+ * one change with the closing time still empty. A model that only allowed
+ * complete pairs would throw that half away, the field would snap back to blank,
+ * and the row would be impossible to fill in.
+ *
+ * So a half-filled day is a legal value that SAYS NOTHING, and isOpenDay is the
+ * one place that decides what counts. Everything writing structured data or
+ * scoring a report asks that question rather than checking the strings itself.
+ */
+export interface OpeningHours {
+  day: Weekday;
+  /** 24-hour HH:MM, or empty. */
+  opens: string;
+  /** 24-hour HH:MM, or empty. */
+  closes: string;
+}
+
+/**
+ * True when this day states real hours.
+ *
+ * Equal times are not hours. 09:00 to 09:00 is a slip, and publishing it would
+ * tell an engine the business is open for no time at all, which is worse than
+ * saying nothing about that day.
+ */
+export function isOpenDay(entry: OpeningHours): boolean {
+  return entry.opens !== '' && entry.closes !== '' && entry.opens !== entry.closes;
+}
+
+/**
+ * HH:MM on a 24-hour clock, or empty.
+ *
+ * Padded rather than refused, so a hand-edited row holding 9:00 becomes 09:00
+ * instead of being dropped. The browser's own time input always sends the padded
+ * form, so this is entirely about values that did not come from the screen.
+ */
+const TIME = /^(\d{1,2}):(\d{2})$/;
+
+function clockTime(value: unknown): string {
+  if (typeof value !== 'string') return '';
+  const match = TIME.exec(value.trim());
+  if (!match) return '';
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (hours > 23 || minutes > 59) return '';
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+}
+
+/**
+ * The week, tidied: known days only, one entry each, in weekday order.
+ *
+ * Sorted here rather than at the point of use so the JSON-LD, the report and the
+ * screen cannot disagree about what order the week is in. Capped at 100 input
+ * entries before the walk, because the dedupe bounds the OUTPUT to seven and
+ * nothing bounds a payload.
+ */
+const openingHours = z
+  .unknown()
+  .transform((value): OpeningHours[] => {
+    if (!Array.isArray(value)) return [];
+
+    const byDay = new Map<Weekday, OpeningHours>();
+    for (const raw of value.slice(0, 100)) {
+      if (!raw || typeof raw !== 'object') continue;
+      const item = raw as Record<string, unknown>;
+      const day = WEEKDAYS.find((known) => known === item.day);
+      // First entry for a day wins. Two rows for Monday is a broken payload, and
+      // silently taking the last one would make which is kept depend on order.
+      if (!day || byDay.has(day)) continue;
+
+      const opens = clockTime(item.opens);
+      const closes = clockTime(item.closes);
+      // Nothing said about this day at all, so it is not a row.
+      if (opens === '' && closes === '') continue;
+
+      byDay.set(day, { day, opens, closes });
+    }
+
+    return WEEKDAYS.filter((day) => byDay.has(day)).map((day) => byDay.get(day) as OpeningHours);
+  })
+  // A function, not a literal: a shared array as the fallback would be one array
+  // handed to every site that has no hours set.
+  .catch(() => []);
+
+// ---------------------------------------------------------------------------
 // Client-editable settings
 // ---------------------------------------------------------------------------
 
@@ -168,6 +323,43 @@ export const SiteSettingsSchema = z.object({
   /** Words, claims and habits to keep out. Often the most useful of the four. */
   avoid: profileText(600),
 
+  /**
+   * WHERE THE BUSINESS IS AND HOW TO REACH IT, for the structured data.
+   *
+   * Five separate fields rather than one address box, because they go into a
+   * PostalAddress node with five separate properties. One box would have to be
+   * split back apart by guessing which line is the postcode, and a guess that is
+   * wrong puts a town where a county should be in a document an engine reads as
+   * fact.
+   *
+   * Every one of them is optional. Plenty of agencies are online only, and a
+   * settings screen that refused to save without a shop front would be wrong
+   * about a real customer.
+   */
+  streetAddress: contactLine(120),
+  /** Town or city. */
+  addressLocality: contactLine(80),
+  /** County or state. Often blank in the UK, and that is fine. */
+  addressRegion: contactLine(80),
+  postalCode: contactLine(20),
+  /**
+   * The country, as words.
+   *
+   * FREE TEXT RATHER THAN A PICKER, which is the opposite of the decision made
+   * for `locale` a few lines up, so it is worth saying why. A picker needs a
+   * list, and any list short enough to be usable leaves somebody unable to state
+   * their own country at all. schema.org accepts the country NAME as well as a
+   * two-letter code, so free text is a legal value here in a way a free-text
+   * language tag was not.
+   */
+  addressCountry: contactLine(60),
+
+  /** The number to ring, however they write it. */
+  telephone,
+
+  /** The week. An empty list means nobody has said. */
+  openingHours,
+
   /** A Google Tag Manager container, or null. The snippet is generated. */
   gtmId: analyticsId(GTM_ID),
   /** A GA4 measurement id, or null. Also generated. */
@@ -202,6 +394,13 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   companyAbout: '',
   toneOfVoice: '',
   avoid: '',
+  streetAddress: '',
+  addressLocality: '',
+  addressRegion: '',
+  postalCode: '',
+  addressCountry: '',
+  telephone: '',
+  openingHours: [],
   gtmId: null,
   ga4Id: null,
   faviconUrl: null,
@@ -227,6 +426,29 @@ export function hasBrandProfile(settings: SiteSettings): boolean {
   return Boolean(settings.companyAbout.trim() || settings.toneOfVoice.trim());
 }
 
+/**
+ * True when the address says WHERE the business is.
+ *
+ * A COUNTRY ON ITS OWN DOES NOT COUNT, and neither does a county. "United
+ * Kingdom" is not a location an engine can place a business at, and emitting a
+ * PostalAddress that says only that is worse than emitting none: it looks like
+ * an address, so nothing flags it as missing, and it answers no question anybody
+ * asked. A street, a town or a postcode is the line where it starts being useful.
+ *
+ * One definition, used by the structured data and by the report, so the screen
+ * can never say the address is set while the page emits nothing.
+ */
+export function hasPostalAddress(settings: SiteSettings): boolean {
+  return Boolean(
+    settings.streetAddress.trim() || settings.addressLocality.trim() || settings.postalCode.trim(),
+  );
+}
+
+/** True when at least one day of the week states real hours. */
+export function hasOpeningHours(settings: SiteSettings): boolean {
+  return settings.openingHours.some(isOpenDay);
+}
+
 /** True when nothing has been set, so a screen can say so plainly. */
 export function settingsAreEmpty(settings: SiteSettings): boolean {
   return (
@@ -234,6 +456,13 @@ export function settingsAreEmpty(settings: SiteSettings): boolean {
     !settings.companyAbout &&
     !settings.toneOfVoice &&
     !settings.avoid &&
+    !settings.streetAddress &&
+    !settings.addressLocality &&
+    !settings.addressRegion &&
+    !settings.postalCode &&
+    !settings.addressCountry &&
+    !settings.telephone &&
+    settings.openingHours.length === 0 &&
     !settings.gtmId &&
     !settings.ga4Id &&
     !settings.faviconUrl &&

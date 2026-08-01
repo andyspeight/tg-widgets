@@ -134,8 +134,14 @@ async function openTab(page, label) {
   await page.waitForTimeout(250);
 }
 
-/** The tabs everybody gets, in order. Custom code is a fifth, for an owner. */
-const CLIENT_TABS = ['Your company', 'Analytics', 'Icons and sharing', 'Language'];
+/** The tabs everybody gets, in order. Custom code is a sixth, for an owner. */
+const CLIENT_TABS = [
+  'Your company',
+  'Contact details',
+  'Analytics',
+  'Icons and sharing',
+  'Language',
+];
 
 // ---------------------------------------------------------------------------
 // Without permission: four tabs, and no way in
@@ -148,7 +154,7 @@ await check('the settings screen mounts', async () => {
   return tabs.length > 0 ? true : 'no tabs';
 });
 
-await check('somebody without permission gets four tabs and no custom code', async () => {
+await check('somebody without permission gets five tabs and no custom code', async () => {
   const tabs = (await plain.locator('.tv-tab').allInnerTexts()).map((t) => t.trim());
   return JSON.stringify(tabs) === JSON.stringify(CLIENT_TABS) ? true : JSON.stringify(tabs);
 });
@@ -345,6 +351,149 @@ await check('saving the profile settles the bar back down', async () => {
     && kept === 'Greece and Cyprus, tailor made.'
     ? true
     : `dirty ${await bar.getAttribute('data-dirty')}, "${state}", kept "${kept}"`;
+});
+
+// ---------------------------------------------------------------------------
+// Contact details: the address, the phone number and the week
+//
+// EVERY CLAIM DOWN HERE IS ABOUT SOMETHING A UNIT TEST CANNOT SEE. The schema
+// tests already prove the values survive a round trip and that a half-filled day
+// is kept. What they cannot see is the bug that made keeping it necessary: a
+// time input reports nothing until a whole time is entered, so if the state
+// dropped the half, the field would blank itself the moment somebody filled it
+// in and the row would be impossible to complete. That is a browser behaviour,
+// and it is checked in a browser.
+// ---------------------------------------------------------------------------
+
+await openTab(page, 'Contact details');
+
+await check('all six contact fields are there', async () => {
+  const ids = [
+    '#street-address',
+    '#address-locality',
+    '#address-region',
+    '#postal-code',
+    '#address-country',
+    '#telephone',
+  ];
+  for (const id of ids) {
+    if ((await page.locator(id).count()) !== 1) return `${id} is missing`;
+  }
+  return true;
+});
+
+/*
+ * These are the BUSINESS's details. A browser offering to fill them from the
+ * address book of whoever is signed in would put somebody's home address into
+ * the structured data of a public website in one click, and nothing downstream
+ * would question it. Read off the DOM rather than the source, because the
+ * attribute has to reach the element to do anything.
+ */
+await check('no address field invites a browser to autofill a personal address', async () => {
+  const on = await page.evaluate(() =>
+    ['#street-address', '#address-locality', '#address-region', '#postal-code',
+      '#address-country', '#telephone']
+      .filter((id) => document.querySelector(id)?.getAttribute('autocomplete') !== 'off'));
+  return on.length === 0 ? true : `still autofillable: ${on.join(', ')}`;
+});
+
+await check('town and county sit side by side rather than stacked', async () => {
+  const side = await page.evaluate(() => {
+    const town = document.querySelector('#address-locality').getBoundingClientRect();
+    const county = document.querySelector('#address-region').getBoundingClientRect();
+    return Math.abs(town.top - county.top) < 4 && county.left > town.right;
+  });
+  return side ? true : 'they are stacked';
+});
+
+await check('the week has a row for every day and two times in each', async () => {
+  const rows = await page.locator('.st-hours__row').count();
+  const times = await page.locator('.st-hours__time').count();
+  const days = (await page.locator('.st-hours__day').allInnerTexts()).map((t) => t.trim());
+  return rows === 7 && times === 14 && days[0] === 'Monday' && days[6] === 'Sunday'
+    ? true
+    : `${rows} rows, ${times} times, ${JSON.stringify(days)}`;
+});
+
+/*
+ * The grid claim, measured. Seven flex rows with day names of different lengths
+ * would put every time box in a different place, and the panel would read as
+ * ragged rather than as a table of hours.
+ */
+await check('the time boxes line up in a column down the week', async () => {
+  const lefts = await page.evaluate(() =>
+    [...document.querySelectorAll('.st-hours__row')]
+      .map((row) => Math.round(row.querySelector('.st-hours__time').getBoundingClientRect().left)));
+  return new Set(lefts).size === 1 ? true : JSON.stringify(lefts);
+});
+
+await check('a day with no times says Closed, so nobody has to infer it', async () => {
+  const states = (await page.locator('.st-hours__state').allInnerTexts()).map((t) => t.trim());
+  return states.every((state) => state === 'Closed')
+    ? true
+    : JSON.stringify(states);
+});
+
+/*
+ * THE ONE THIS SECTION WAS WRITTEN FOR.
+ *
+ * A time input fires change only once a whole time is entered, so the opening
+ * time arrives with the closing time still blank. State that only kept complete
+ * pairs would throw the half away, React would re-render the field from state,
+ * and the box would empty itself the instant it was filled in. Fill one, read it
+ * back: if it is empty, the row cannot be completed at all.
+ */
+await check('typing an opening time does not blank the field it was typed into', async () => {
+  const monday = page.locator('.st-hours__row').first();
+  await monday.locator('.st-hours__time').first().fill('09:00');
+  await page.waitForTimeout(200);
+  const kept = await monday.locator('.st-hours__time').first().inputValue();
+  return kept === '09:00' ? true : `the field went back to "${kept}"`;
+});
+
+await check('and the row stops saying Closed as soon as one end is set', async () => {
+  const state = (await page.locator('.st-hours__row').first()
+    .locator('.st-hours__state').innerText()).trim();
+  return state === '' ? true : `it still says "${state}"`;
+});
+
+await check('the other end goes in beside it', async () => {
+  const monday = page.locator('.st-hours__row').first();
+  await monday.locator('.st-hours__time').nth(1).fill('17:30');
+  await page.waitForTimeout(200);
+  const values = await monday.locator('.st-hours__time').evaluateAll((els) =>
+    els.map((el) => el.value));
+  return JSON.stringify(values) === JSON.stringify(['09:00', '17:30'])
+    ? true
+    : JSON.stringify(values);
+});
+
+await check('a day is its own row, not everybody sharing Monday', async () => {
+  const tuesday = page.locator('.st-hours__row').nth(1);
+  await tuesday.locator('.st-hours__time').first().fill('10:00');
+  await page.waitForTimeout(200);
+  const monday = await page.locator('.st-hours__row').first()
+    .locator('.st-hours__time').first().inputValue();
+  const set = await tuesday.locator('.st-hours__time').first().inputValue();
+  return monday === '09:00' && set === '10:00' ? true : `Monday ${monday}, Tuesday ${set}`;
+});
+
+await check('the contact fields are styled, not the browser defaults', async () => {
+  const bad = await page.evaluate(() =>
+    ['#street-address', '#telephone'].filter((id) => {
+      const c = getComputedStyle(document.querySelector(id));
+      return Math.round(parseFloat(c.borderTopWidth)) !== 1
+        || Math.round(parseFloat(c.borderTopLeftRadius)) < 4;
+    }));
+  return bad.length === 0 ? true : `unstyled: ${bad.join(', ')}`;
+});
+
+await check('filling in an address wakes the save bar', async () => {
+  await page.locator('#address-locality').fill('Leeds');
+  await page.waitForTimeout(200);
+  return (await page.locator('.tv-bar').getAttribute('data-dirty')) === 'true'
+    ? true
+    : 'the bar still says nothing changed';
 });
 
 // ---------------------------------------------------------------------------

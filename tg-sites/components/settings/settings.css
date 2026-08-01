@@ -108,3 +108,87 @@
   border-color: var(--ed-accent);
   box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.15);
 }
+
+/*
+ * Two fields side by side.
+ *
+ * Town and county, then postcode and country. They are short values and stacking
+ * four of them makes the address panel twice as tall as it needs to be, which
+ * matters here because the whole panel is one job somebody does once and should
+ * be able to see at once.
+ *
+ * Collapses on a narrow screen, and the margin moves to the pair: .tv-field's own
+ * bottom margin is cancelled by its :last-child rule, and inside a pair BOTH
+ * fields are a last child of their own wrapper, so without this the two rows
+ * would sit directly on top of each other.
+ */
+.st-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--ed-4);
+  margin-bottom: var(--ed-5);
+}
+
+@media (max-width: 560px) {
+  .st-pair { grid-template-columns: minmax(0, 1fr); }
+}
+
+/*
+ * The week.
+ *
+ * A grid rather than seven flex rows, so the times line up in a column down the
+ * panel whatever length the day names are. Sunday against Wednesday in a flex row
+ * would put every time input in a different place and the whole thing would read
+ * as ragged.
+ */
+.st-hours {
+  display: grid;
+  grid-template-columns: auto auto auto auto 1fr;
+  gap: var(--ed-2) var(--ed-3);
+  align-items: center;
+}
+
+/* The row is a grid item container: display contents so its five children land
+   in the parent grid and share its columns. */
+.st-hours__row { display: contents; }
+
+.st-hours__day {
+  font-size: var(--ed-text-sm);
+  font-weight: 600;
+  color: var(--ed-ink);
+}
+
+.st-hours__to {
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink-3);
+}
+
+/*
+ * A time box, matched to .tv-input's border, radius and panel colour so it does
+ * not read as a different kind of control from the fields above it. Not 44px
+ * tall, though: seven of those would make the week the tallest thing on the
+ * screen for the least important information on it.
+ */
+.st-hours__time {
+  height: 34px;
+  padding: 0 var(--ed-2);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+  color: var(--ed-ink);
+  font-family: inherit;
+  font-size: var(--ed-text-sm);
+}
+
+.st-hours__time:focus {
+  outline: none;
+  border-color: var(--ed-accent);
+  box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.15);
+}
+
+/* Says the convention back rather than leaving somebody to infer it from two
+   empty boxes. */
+.st-hours__state {
+  font-size: var(--ed-text-xs);
+  color: var(--ed-ink-3);
+}

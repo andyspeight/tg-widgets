@@ -27,14 +27,17 @@ import {
   LOCALES,
   LOCALE_IDS,
   MAX_RAW_HTML,
+  type OpeningHours,
   type SiteSettings,
   type StaffSettings,
+  WEEKDAYS,
+  type Weekday,
 } from '../../lib/settings/schema';
 import { Icon } from '../editor/Icon';
 import { ImageField } from '../media/ImageField';
 import './settings.css';
 
-type Tab = 'company' | 'analytics' | 'branding' | 'language' | 'code';
+type Tab = 'company' | 'contact' | 'analytics' | 'branding' | 'language' | 'code';
 
 interface Props {
   siteName: string;
@@ -101,6 +104,7 @@ export function SettingsEditor({ siteName, initial, canEditCode }: Props) {
 
   const TABS: Array<{ id: Tab; label: string }> = [
     { id: 'company', label: 'Your company' },
+    { id: 'contact', label: 'Contact details' },
     { id: 'analytics', label: 'Analytics' },
     { id: 'branding', label: 'Icons and sharing' },
     { id: 'language', label: 'Language' },
@@ -243,6 +247,158 @@ export function SettingsEditor({ siteName, initial, canEditCode }: Props) {
               <p className="tv-field__help">
                 Often the most useful box of the four. UK English, no em dashes and
                 no marketing cliche are already on by default, for every site.
+              </p>
+            </div>
+          </section>
+        )}
+
+        {/*
+          WHERE THE BUSINESS IS, added 1 Aug 2026.
+
+          Its own tab rather than more boxes under Your company, because the two
+          answer different questions. Your company is what the writing assistant
+          reads, and nothing on it is published as a fact. Everything here is: it
+          goes straight into the structured data on every page, where a search
+          engine and an AI assistant read it as a claim about a real place.
+
+          It is also the only panel in the product that asks a client for
+          something they have not already typed somewhere, so it says out loud
+          what it buys them.
+        */}
+        {tab === 'contact' && (
+          <section className="tv-group">
+            <h2 className="tv-group__title">Where you are</h2>
+            <p className="tv-note">
+              This is what tells a search engine and an AI assistant that you are a
+              real business in a real place. It is the strongest single thing you
+              can add: asked to recommend somebody local, an assistant will not
+              name a business it cannot place. Leave anything blank that does not
+              apply.
+            </p>
+
+            <div className="tv-field">
+              <label className="tv-field__label" htmlFor="street-address">
+                Street address
+              </label>
+              {/*
+                autoComplete off on all of these, deliberately. They are the
+                BUSINESS's details, and a browser offering to fill them from the
+                address book of whoever happens to be signed in would put
+                somebody's home address into the structured data of a public
+                website, one click, no warning.
+              */}
+              <input
+                id="street-address"
+                className="tv-input"
+                type="text"
+                maxLength={120}
+                autoComplete="off"
+                value={settings.streetAddress}
+                placeholder="14 Market Street"
+                onChange={(event) => set('streetAddress', event.target.value)}
+              />
+            </div>
+
+            <div className="st-pair">
+              <div className="tv-field">
+                <label className="tv-field__label" htmlFor="address-locality">
+                  Town or city
+                </label>
+                <input
+                  id="address-locality"
+                  className="tv-input"
+                  type="text"
+                  maxLength={80}
+                  autoComplete="off"
+                  value={settings.addressLocality}
+                  placeholder="Leeds"
+                  onChange={(event) => set('addressLocality', event.target.value)}
+                />
+              </div>
+
+              <div className="tv-field">
+                <label className="tv-field__label" htmlFor="address-region">
+                  County
+                </label>
+                <input
+                  id="address-region"
+                  className="tv-input"
+                  type="text"
+                  maxLength={80}
+                  autoComplete="off"
+                  value={settings.addressRegion}
+                  placeholder="West Yorkshire"
+                  onChange={(event) => set('addressRegion', event.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="st-pair">
+              <div className="tv-field">
+                <label className="tv-field__label" htmlFor="postal-code">
+                  Postcode
+                </label>
+                <input
+                  id="postal-code"
+                  className="tv-input"
+                  type="text"
+                  maxLength={20}
+                  autoComplete="off"
+                  value={settings.postalCode}
+                  placeholder="LS1 6DT"
+                  onChange={(event) => set('postalCode', event.target.value)}
+                />
+              </div>
+
+              <div className="tv-field">
+                <label className="tv-field__label" htmlFor="address-country">
+                  Country
+                </label>
+                <input
+                  id="address-country"
+                  className="tv-input"
+                  type="text"
+                  maxLength={60}
+                  autoComplete="off"
+                  value={settings.addressCountry}
+                  placeholder="United Kingdom"
+                  onChange={(event) => set('addressCountry', event.target.value)}
+                />
+              </div>
+            </div>
+
+            <h2 className="tv-group__title">How to reach you</h2>
+            <div className="tv-field">
+              <label className="tv-field__label" htmlFor="telephone">
+                Phone number
+              </label>
+              <input
+                id="telephone"
+                className="tv-input"
+                type="tel"
+                maxLength={40}
+                autoComplete="off"
+                value={settings.telephone}
+                placeholder="+44 113 496 0000"
+                onChange={(event) => set('telephone', event.target.value)}
+              />
+              <p className="tv-field__help">
+                Write it with the country code if you can, so it works when
+                somebody taps it on a phone abroad. We do not check the format,
+                because a check strict enough to be useful would refuse real
+                numbers.
+              </p>
+            </div>
+
+            <h2 className="tv-group__title">When you are open</h2>
+            <div className="tv-field">
+              <OpeningHoursField
+                value={settings.openingHours}
+                onChange={(next) => set('openingHours', next)}
+              />
+              <p className="tv-field__help">
+                Leave a day blank if you are closed. A day needs both a start and
+                an end time before it counts.
               </p>
             </div>
           </section>
@@ -434,6 +590,89 @@ export function SettingsEditor({ siteName, initial, canEditCode }: Props) {
         </button>
       </div>
       )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+
+/**
+ * The week, as seven rows of two times.
+ *
+ * BLANK MEANS CLOSED, rather than a Closed checkbox beside each day. A checkbox
+ * would be a second control saying the same thing as the two beside it, and the
+ * two could disagree: ticked Closed with times still in the boxes, and now
+ * something has to decide which one wins. Blank cannot disagree with itself, and
+ * the row says "Closed" back so nobody has to guess the convention.
+ *
+ * A HALF-FILLED ROW IS KEPT, which is the whole reason OpeningHours allows an
+ * empty time. A time input reports its value only once a whole time is entered,
+ * so picking an opening time arrives here with the closing time still empty. If
+ * that were thrown away the field would blank itself the instant it was filled
+ * in, and the row would be impossible to complete. It is stored, it counts for
+ * nothing, and isOpenDay is the one place that says so.
+ *
+ * The day name is a span with aria-labels on the inputs rather than a label
+ * element, because one label cannot name two fields and "Monday" on its own does
+ * not say which of the two it belongs to. A screen reader hears "Monday opening
+ * time" and "Monday closing time".
+ */
+function OpeningHoursField({
+  value,
+  onChange,
+}: {
+  value: OpeningHours[];
+  onChange: (next: OpeningHours[]) => void;
+}) {
+  const byDay = new Map(value.map((entry) => [entry.day, entry]));
+
+  function setTime(day: Weekday, key: 'opens' | 'closes', time: string) {
+    const next = new Map(byDay);
+    const updated = { ...(byDay.get(day) ?? { day, opens: '', closes: '' }), [key]: time };
+
+    // Both blank is not a row at all, so the day comes out rather than being
+    // stored as an entry that says nothing.
+    if (updated.opens === '' && updated.closes === '') next.delete(day);
+    else next.set(day, updated);
+
+    // Rebuilt in weekday order from WEEKDAYS, so the stored list never depends
+    // on the order somebody happened to fill the rows in.
+    onChange(WEEKDAYS.filter((day_) => next.has(day_)).map((day_) => next.get(day_) as OpeningHours));
+  }
+
+  return (
+    <div className="st-hours">
+      {WEEKDAYS.map((day) => {
+        const entry = byDay.get(day);
+        const opens = entry?.opens ?? '';
+        const closes = entry?.closes ?? '';
+
+        return (
+          <div className="st-hours__row" key={day}>
+            <span className="st-hours__day">{day}</span>
+            <input
+              className="st-hours__time"
+              type="time"
+              value={opens}
+              aria-label={`${day} opening time`}
+              onChange={(event) => setTime(day, 'opens', event.target.value)}
+            />
+            <span className="st-hours__to" aria-hidden="true">
+              to
+            </span>
+            <input
+              className="st-hours__time"
+              type="time"
+              value={closes}
+              aria-label={`${day} closing time`}
+              onChange={(event) => setTime(day, 'closes', event.target.value)}
+            />
+            <span className="st-hours__state">
+              {opens === '' && closes === '' ? 'Closed' : ''}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }

@@ -462,6 +462,36 @@ const MUTATIONS = [
   width: 340px;`,
   },
 
+  // --- contact details, on the settings screen -----------------------------
+
+  {
+    suite: 'settings',
+    check: 'typing an opening time does not blank the field it was typed into',
+    why: 'Keep only complete pairs, which is the obvious design and is unusable.',
+    file: 'components/settings/SettingsEditor.tsx',
+    from: `    if (updated.opens === '' && updated.closes === '') next.delete(day);
+    else next.set(day, updated);`,
+    to: `    if (updated.opens === '' || updated.closes === '') next.delete(day);
+    else next.set(day, updated);`,
+  },
+  {
+    suite: 'settings',
+    check: 'the time boxes line up in a column down the week',
+    why: 'Seven flex rows, so a day name of a different length moves the times.',
+    file: 'components/settings/settings.css',
+    from: `.st-hours__row { display: contents; }`,
+    to: `.st-hours__row { display: flex; gap: 8px; align-items: center; }`,
+  },
+  {
+    suite: 'settings',
+    check: 'no address field invites a browser to autofill a personal address',
+    why: 'Drop the attribute from one field, which is what a tidy would do.',
+    file: 'components/settings/SettingsEditor.tsx',
+    from: `                maxLength={20}
+                autoComplete="off"`,
+    to: `                maxLength={20}`,
+  },
+
   // --- the brand profile, on the settings screen ---------------------------
 
   {

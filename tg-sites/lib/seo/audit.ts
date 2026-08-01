@@ -26,7 +26,7 @@
  */
 
 import type { Page, Section } from '../content/schema';
-import type { SiteSettings } from '../settings/schema';
+import { hasOpeningHours, hasPostalAddress, type SiteSettings } from '../settings/schema';
 import { plainText } from './jsonld';
 
 export type Severity = 'problem' | 'warning' | 'good';
@@ -416,6 +416,52 @@ export function auditSite(settings: SiteSettings, pageCount: number): Finding[] 
     ));
   }
 
+  /*
+   * CONTACT DETAILS AS ONE FINDING, NOT THREE.
+   *
+   * The address, the phone number and the opening hours are three fields, one
+   * panel and one job, and a new site that had them as three separate warnings
+   * would open this report to six items, half of which say "go to Settings,
+   * Contact details". That is the shape that teaches somebody to skim past the
+   * warnings, which costs more than the extra detail buys.
+   *
+   * So it says what is missing in the title and where to go in the fix, and it
+   * is one line whether one thing is missing or all three.
+   */
+  const missing: Array<{ words: string; plural: boolean }> = [];
+  if (!hasPostalAddress(settings)) missing.push({ words: 'address', plural: false });
+  if (!settings.telephone.trim()) missing.push({ words: 'phone number', plural: false });
+  if (!hasOpeningHours(settings)) missing.push({ words: 'opening hours', plural: true });
+
+  /*
+   * The verb comes from the SUBJECT, not from the count, which is not the same
+   * thing and reads wrong the moment it is. Two or more of anything takes "are";
+   * one takes whatever that one is, and "opening hours" is already plural.
+   */
+  const verb = missing.length > 1 || missing[0]?.plural ? 'are' : 'is';
+
+  if (missing.length === 3) {
+    findings.push(finding(
+      'contact-missing',
+      'warning',
+      'AI engines do not know where you are or how to reach you',
+      'Settings, Contact details. An assistant asked to recommend somebody local will not name a business it cannot place. This is the single strongest thing you can add.',
+    ));
+  } else if (missing.length > 0) {
+    findings.push(finding(
+      'contact-partial',
+      'warning',
+      `Your ${listWords(missing.map((item) => item.words))} ${verb} not set`,
+      'Settings, Contact details. The more of these an AI engine has, the more confident it is that this website is a real business in a real place.',
+    ));
+  } else {
+    findings.push(finding(
+      'contact-ok',
+      'good',
+      'AI engines know where you are, how to reach you and when you are open',
+    ));
+  }
+
   // Nullable in the schema, unlike the profile strings, so it needs the guard.
   if (!settings.socialImageUrl?.trim()) {
     findings.push(finding(
@@ -436,6 +482,18 @@ export function auditSite(settings: SiteSettings, pageCount: number): Finding[] 
   }
 
   return findings;
+}
+
+/**
+ * "address", "phone number and opening hours", "address, phone number and
+ * opening hours".
+ *
+ * No Oxford comma, because this is customer-facing copy and the house style
+ * does not use one.
+ */
+function listWords(words: readonly string[]): string {
+  if (words.length <= 1) return words[0] ?? '';
+  return `${words.slice(0, -1).join(', ')} and ${words[words.length - 1]}`;
 }
 
 /** How many of each, for a summary line. Counted here so every screen agrees. */

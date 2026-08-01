@@ -28,7 +28,12 @@
  */
 
 import type { Page, Section } from '../content/schema';
-import type { SiteSettings } from '../settings/schema';
+import {
+  hasPostalAddress,
+  isOpenDay,
+  type OpeningHours,
+  type SiteSettings,
+} from '../settings/schema';
 
 /** A JSON-LD node. Loose on purpose: this is a document, not a domain model. */
 export type JsonLd = Record<string, unknown>;
@@ -39,14 +44,20 @@ function clean(value: unknown): string | undefined {
   return text === '' ? undefined : text;
 }
 
-/** An object with every undefined key removed, or null if nothing is left. */
-function compact(node: JsonLd): JsonLd | null {
+/** An object with every empty key removed. Keeps the key order it was given. */
+function dropEmpty(node: JsonLd): JsonLd {
   const out: JsonLd = {};
   for (const [key, value] of Object.entries(node)) {
     if (value === undefined || value === null) continue;
     if (Array.isArray(value) && value.length === 0) continue;
     out[key] = value;
   }
+  return out;
+}
+
+/** An object with every undefined key removed, or null if nothing is left. */
+function compact(node: JsonLd): JsonLd | null {
+  const out = dropEmpty(node);
   // '@context' and '@type' alone is not a statement about anything.
   return Object.keys(out).length > 2 ? out : null;
 }
@@ -101,6 +112,76 @@ export function profileLinks(trees: ReadonlyArray<{ sections: Section[] } | null
 }
 
 /**
+ * Where the business is.
+ *
+ * THIS IS THE PROPERTY THAT TURNS A WEBSITE INTO A PLACE. TravelAgency is a
+ * LocalBusiness, and a LocalBusiness with no address is a contradiction an
+ * engine resolves by treating the whole node as weak: it will summarise the
+ * page and credit nobody, which is exactly the outcome this work exists to
+ * stop. A street, a town and a postcode are what let an assistant answer "who
+ * near Leeds books tailor-made trips to Greece" with a name.
+ *
+ * NULL UNTIL IT SAYS WHERE, decided by hasPostalAddress so the report and the
+ * markup cannot disagree. A country on its own is not a location.
+ *
+ * NO geo, AND THAT IS ON PURPOSE. Latitude and longitude would be a better
+ * signal still, and there is no honest way to get them: asking a travel agent to
+ * type coordinates produces a blank field or a wrong one, and geocoding the
+ * address ourselves means a third-party lookup on every save and a number we
+ * cannot check. A correct address with no coordinates is worth more than an
+ * address with coordinates that put the shop in a field.
+ */
+export function postalAddressLd(settings: SiteSettings): JsonLd | null {
+  if (!hasPostalAddress(settings)) return null;
+
+  return dropEmpty({
+    '@type': 'PostalAddress',
+    streetAddress: clean(settings.streetAddress),
+    addressLocality: clean(settings.addressLocality),
+    addressRegion: clean(settings.addressRegion),
+    postalCode: clean(settings.postalCode),
+    addressCountry: clean(settings.addressCountry),
+  });
+}
+
+/**
+ * When it is open, grouped so the week reads the way a person writes it.
+ *
+ * GROUPED BY THE HOURS THEMSELVES rather than emitted one node per day. Monday
+ * to Friday nine to five is one statement, and seven near-identical nodes is the
+ * shape that makes a human reviewing the markup miss the one day that differs.
+ * Grouping by the opens/closes pair does that with no adjacency logic to get
+ * wrong: a business open the same hours on Monday to Friday and again on Sunday
+ * gets one node listing six days, which is correct and is what it means.
+ *
+ * dayOfWeek IS ALWAYS AN ARRAY, even for a single day. Both forms are valid, and
+ * one shape means nothing downstream has to handle two.
+ *
+ * A half-filled day is skipped rather than guessed at. isOpenDay is the only
+ * thing that decides, here and in the report.
+ */
+export function openingHoursLd(hours: readonly OpeningHours[]): JsonLd[] {
+  const groups = new Map<string, { opens: string; closes: string; days: string[] }>();
+
+  for (const entry of hours) {
+    if (!isOpenDay(entry)) continue;
+    const key = `${entry.opens}-${entry.closes}`;
+    const group = groups.get(key);
+    if (group) group.days.push(entry.day);
+    else groups.set(key, { opens: entry.opens, closes: entry.closes, days: [entry.day] });
+  }
+
+  // Insertion order, and the parser already sorted the week, so a group appears
+  // where its first day does. Deterministic without a second sort.
+  return [...groups.values()].map((group) => ({
+    '@type': 'OpeningHoursSpecification',
+    dayOfWeek: group.days,
+    opens: group.opens,
+    closes: group.closes,
+  }));
+}
+
+/**
  * The business itself.
  *
  * TravelAgency RATHER THAN Organization, and this is the one judgement call in
@@ -130,6 +211,17 @@ export function organisationLd(
     url: origin,
     logo: clean(settings.socialImageUrl),
     image: clean(settings.socialImageUrl),
+    /*
+     * The three that make this a PLACE rather than a page, added 1 Aug 2026.
+     *
+     * Each is dropped by compact() when it is not there, which is the same rule
+     * the rest of the node follows: an address property holding an empty object,
+     * or a telephone holding an empty string, is a claim that the business has
+     * no address and no phone. Saying nothing is the honest absence.
+     */
+    address: postalAddressLd(settings),
+    telephone: clean(settings.telephone),
+    openingHoursSpecification: openingHoursLd(settings.openingHours),
     // Dropped by compact() when the client has not linked any profiles yet,
     // rather than emitted as an empty array, which asserts "this business has
     // no presence anywhere" instead of saying nothing.
