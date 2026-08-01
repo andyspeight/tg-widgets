@@ -30,6 +30,8 @@ import { parse } from 'postcss';
 import { describe, expect, it } from 'vitest';
 
 import { cleanImportHtml, safeImportUrl } from '../lib/import/html';
+import { applyImportContent, tokeniseImport } from '../lib/import/tokenise';
+import { importContent, importFields, summariseImported } from '../lib/content/imported';
 import {
   importScopeClass,
   scopeImportCss,
@@ -668,6 +670,34 @@ describe('scopeImportCss refuses what runs or reaches out', () => {
     });
   }
 
+  /*
+   * SAFE AS CSS IS NOT THE SAME AS SAFE INSIDE A TAG. An HTML parser finds the
+   * closing tag before the CSS parser sees anything, so `</style>` inside a
+   * string is an ordinary string to postcss and the end of the stylesheet to a
+   * browser, with everything after it landing on the page as markup.
+   */
+  it('cannot climb out of the style element it will sit in', () => {
+    const payload = '</style><img src=x onerror=alert(1)>';
+
+    for (const css of [
+      `.a { content: "${payload}" }`,
+      `[data-x="${payload}"] { color: red }`,
+      `@media (min-width: 1px) { .a { content: "${payload}" } }`,
+    ]) {
+      const out = scopeImportCss(css, { scope: SCOPE }).css;
+      expect(out.toLowerCase(), css).not.toContain('</style');
+      expect(out.toLowerCase(), css).not.toContain('</');
+    }
+  });
+
+  it('escapes the closing tag rather than losing the rule', () => {
+    const { css } = scopeImportCss('.a { content: "</b>"; color: red }', { scope: SCOPE });
+
+    // The declaration survives, the sequence is written the CSS way instead.
+    expect(css).toContain('<\\/b>');
+    expect(css).toContain('color: red');
+  });
+
   it('keeps a raster data URL, which is how a small design ships its own icons', () => {
     const { css } = scopeImportCss('.a { background: url(data:image/png;base64,iVBORw0KGgo=) }', {
       scope: SCOPE,
@@ -940,5 +970,327 @@ describe('the HTML and CSS halves agree', () => {
     expect(css).toContain('.tgi-test .hero');
     // body became the section itself rather than the visitor's whole page.
     expect(css).toContain('.tgi-test {');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Slots: what makes an import editable
+// ---------------------------------------------------------------------------
+
+describe('tokeniseImport', () => {
+  it('takes the words out and leaves a numbered slot', () => {
+    const { html, fields } = tokeniseImport('<h1>Escape to Crete</h1><p>Seven nights.</p>');
+
+    expect(html).toBe('<h1>{{tg:t1}}</h1><p>{{tg:t2}}</p>');
+    expect(fields).toEqual([
+      { key: 't1', kind: 'text', label: 'Escape to Crete', value: 'Escape to Crete' },
+      { key: 't2', kind: 'text', label: 'Seven nights.', value: 'Seven nights.' },
+    ]);
+  });
+
+  /*
+   * "Hello " before a <strong> is a text node whose trailing space is doing
+   * real work. Swallowing it into the slot runs the two words together the
+   * moment anybody edits either of them, and it is invisible until they do.
+   */
+  it('keeps the whitespace around the words', () => {
+    const { html, fields } = tokeniseImport('<p>Hello <strong>world</strong></p>');
+
+    expect(html).toBe('<p>{{tg:t1}} <strong>{{tg:t2}}</strong></p>');
+    expect(fields[0].value).toBe('Hello');
+  });
+
+  it('makes a slot of an image and names it after its alt text', () => {
+    const { html, fields } = tokeniseImport('<img src="hero.jpg" alt="A harbour at dusk">');
+
+    expect(html).toContain('src="{{tg:i1}}"');
+    expect(html).toContain('alt="A harbour at dusk"');
+    expect(fields).toEqual([
+      { key: 'i1', kind: 'image', label: 'A harbour at dusk', value: 'hero.jpg' },
+    ]);
+  });
+
+  it('makes a slot of a link and names it after what the link says', () => {
+    const { fields } = tokeniseImport('<a href="/holidays">See our holidays</a>');
+
+    expect(fields).toEqual([
+      { key: 'u1', kind: 'link', label: 'See our holidays', value: '/holidays' },
+      { key: 't1', kind: 'text', label: 'See our holidays', value: 'See our holidays' },
+    ]);
+  });
+
+  /*
+   * An inline SVG is full of text nodes and none of them are content: the `d`
+   * of a path is not words, and a <title> is the icon's accessible name.
+   * Tokenising them buries the six real fields under forty pieces of noise,
+   * which is the same as having no fields at all.
+   */
+  it('leaves icons alone', () => {
+    const { html, fields } = tokeniseImport(
+      '<p>Book now</p><svg viewBox="0 0 24 24"><title>Arrow</title><path d="M4 12h16" /></svg>',
+    );
+
+    expect(fields).toHaveLength(1);
+    expect(fields[0].value).toBe('Book now');
+    expect(html).toContain('<title>Arrow</title>');
+    expect(html).toContain('d="M4 12h16"');
+  });
+
+  it('ignores whitespace and the separators a design draws with', () => {
+    const { fields } = tokeniseImport('<p>  </p><span>|</span><span>&middot;</span><span>&rarr;</span>');
+
+    expect(fields).toEqual([]);
+  });
+
+  /*
+   * Past the cap the content stays in the markup exactly as the design wrote
+   * it: still correct on the page, just not editable here. A properties pane
+   * three hundred fields long is one nobody can use.
+   */
+  it('stops making slots at the cap and leaves the rest as it was', () => {
+    const source = Array.from({ length: 20 }, (_, i) => `<p>Line ${i}</p>`).join('');
+    const { html, fields } = tokeniseImport(source, { maxFields: 5 });
+
+    expect(fields).toHaveLength(5);
+    expect(html).toContain('Line 19');
+    expect(html).not.toContain('{{tg:t6}}');
+  });
+
+  it('refuses a design that already contains the marker', () => {
+    const { html, fields } = tokeniseImport('<p>literal {{tg:t9}} here</p>');
+
+    expect(html).toBe('<p>{{tg:t1}}</p>');
+    expect(fields[0].value).toBe('literal  here');
+  });
+});
+
+describe('applyImportContent', () => {
+  const FIELDS = [
+    { key: 't1', kind: 'text' as const, label: 'Title', value: 'Escape to Crete' },
+    { key: 'i1', kind: 'image' as const, label: 'Hero', value: 'hero.jpg' },
+    { key: 'u1', kind: 'link' as const, label: 'Book', value: '/book' },
+  ];
+
+  it('falls back to what the design said when nothing has been edited', () => {
+    const out = applyImportContent('<h1>{{tg:t1}}</h1>', {}, FIELDS);
+    expect(out).toBe('<h1>Escape to Crete</h1>');
+  });
+
+  it('puts the client\'s words in when they have been', () => {
+    const out = applyImportContent('<h1>{{tg:t1}}</h1>', { t1: 'Escape to Rhodes' }, FIELDS);
+    expect(out).toBe('<h1>Escape to Rhodes</h1>');
+  });
+
+  /*
+   * The import pipeline has never seen what the client types, so this is not a
+   * second line of defence for it. It is the first and only one for them.
+   */
+  it('escapes what the client typed', () => {
+    const out = applyImportContent(
+      '<h1>{{tg:t1}}</h1>',
+      { t1: '<img src=x onerror=alert(1)>' },
+      FIELDS,
+    );
+
+    assertInert(out);
+    expect(out).toContain('&lt;img');
+  });
+
+  it('refuses a script URL typed into a link slot', () => {
+    const out = applyImportContent(
+      '<a href="{{tg:u1}}">x</a>',
+      { u1: 'javascript:alert(1)' },
+      FIELDS,
+    );
+
+    expect(out).toBe('<a href="">x</a>');
+    assertInert(out);
+  });
+
+  /*
+   * Asserted on the parsed attributes, not the output string. The quote that
+   * was meant to end the attribute early becomes &quot;, so the letters of
+   * `onerror=` are still in the output, inside one perfectly inert src. Reading
+   * the raw string here fails a working escape and invites somebody to "fix" it
+   * by escaping less. Third time this file has had to say so.
+   */
+  it('cannot break out of the attribute it sits in', () => {
+    const out = applyImportContent(
+      '<img src="{{tg:i1}}">',
+      { i1: '/a.png" onerror="alert(1)' },
+      FIELDS,
+    );
+
+    const [img] = elementsOf(out);
+    expect((img.attrs ?? []).map((attr) => attr.name)).toEqual(['src']);
+    expect((img.attrs ?? [])[0].value).toBe('/a.png" onerror="alert(1)');
+    assertInert(out);
+  });
+
+  /*
+   * One pass, so a client whose words happen to contain a marker get those
+   * characters on the page rather than a second substitution.
+   */
+  it('does not re-read what it has just written', () => {
+    const out = applyImportContent('<p>{{tg:t1}}</p>', { t1: '{{tg:i1}}' }, FIELDS);
+    expect(out).toBe('<p>{{tg:i1}}</p>');
+  });
+
+  it('drops a slot that has no field behind it', () => {
+    expect(applyImportContent('<p>{{tg:t9}}</p>', {}, FIELDS)).toBe('<p></p>');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Saving and rendering an imported design
+// ---------------------------------------------------------------------------
+
+describe('an imported block, saved and drawn', () => {
+  const BLOCK_ID = 'blk123';
+  const SCOPE = `.${importScopeClass(BLOCK_ID)}`;
+
+  /*
+   * THE BUG THIS EXISTS TO CATCH. An imported design is scoped on the way into
+   * the database and again on the way out, because stored CSS is never trusted.
+   * Without the already-scoped check the second pass produces
+   * `.tgi-blk123 .tgi-blk123 .hero`, which needs two nested elements carrying
+   * the class and so matches nothing. The design would arrive unstyled, and
+   * only after a save, which is the worst kind of bug to find.
+   */
+  it('scoping twice is the same as scoping once', () => {
+    const once = scopeImportCss('.hero { padding: 4rem } :root { --brand: #0a5 }', { scope: SCOPE });
+    const twice = scopeImportCss(once.css, { scope: SCOPE });
+
+    expect(twice.css).toBe(once.css);
+    assertConfined(twice.css, SCOPE);
+  });
+
+  it('does not mistake another block\'s scope for its own', () => {
+    const other = scopeImportCss('.hero { padding: 4rem }', { scope: '.tgi-blk123456' });
+    const mine = scopeImportCss(other.css, { scope: SCOPE });
+
+    // Re-scoped, because .tgi-blk123456 is not .tgi-blk123 however it starts.
+    expect(mine.css).toContain('.tgi-blk123 .tgi-blk123456 .hero');
+    assertConfined(mine.css, SCOPE);
+  });
+
+  it('cleaning twice is the same as cleaning once', () => {
+    const source =
+      '<section class="hero md:flex"><h1>Crete</h1><img src="a.png" alt="x">' +
+      '<a href="/book" target="_blank">Book</a></section>';
+
+    const once = cleanImportHtml(source).html;
+    expect(cleanImportHtml(once).html).toBe(once);
+  });
+
+  /*
+   * THE WHOLE ROUND TRIP, which is the only test that would catch the two
+   * halves drifting apart: tokenise, store, re-clean on render, substitute.
+   * The slot has to still be a slot after the renderer has cleaned the markup
+   * it did not trust, or every edited word silently disappears.
+   */
+  it('a slot survives being cleaned again on the way out', () => {
+    const { html, fields } = tokeniseImport(
+      cleanImportHtml('<h1>Escape to Crete</h1><img src="hero.jpg" alt="Harbour">').html,
+    );
+
+    const recleaned = cleanImportHtml(html).html;
+    const drawn = applyImportContent(recleaned, { t1: 'Escape to Rhodes' }, fields);
+
+    expect(drawn).toContain('Escape to Rhodes');
+    expect(drawn).toContain('src="hero.jpg"');
+    expect(drawn).not.toContain('{{tg:');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Reading an imported block's props
+// ---------------------------------------------------------------------------
+
+describe('importFields', () => {
+  const good = { key: 't1', kind: 'text', label: 'Title', value: 'Crete' };
+
+  it('reads the slots a block stores', () => {
+    expect(importFields({ fields: [good] })).toEqual([good]);
+  });
+
+  /*
+   * Block props are a loose record by design, so a page saved by a newer build,
+   * hand-edited, or restored from an old snapshot can hold anything at all.
+   * None of it may make the renderer throw.
+   */
+  it('survives props that are not slots', () => {
+    expect(importFields({})).toEqual([]);
+    expect(importFields({ fields: null })).toEqual([]);
+    expect(importFields({ fields: 'nope' })).toEqual([]);
+    expect(importFields({ fields: [null, 42, 'x', {}] })).toEqual([]);
+  });
+
+  /*
+   * A key that cannot appear in the markup can only be noise, and it would be
+   * built into a regular expression at render time. Refused rather than escaped.
+   */
+  it('refuses a key the markup could never write', () => {
+    for (const key of ['', 'T1', 't', 't1234', 'a.b', '../x', 't1 t2', '.*']) {
+      expect(importFields({ fields: [{ ...good, key }] }), key).toEqual([]);
+    }
+  });
+
+  it('refuses a kind it does not know', () => {
+    expect(importFields({ fields: [{ ...good, kind: 'script' }] })).toEqual([]);
+  });
+
+  it('keeps the first of two slots claiming the same key', () => {
+    const fields = importFields({
+      fields: [good, { key: 't1', kind: 'link', label: 'Other', value: '/x' }],
+    });
+
+    expect(fields).toEqual([good]);
+  });
+
+  it('caps a label and a value rather than storing a novel', () => {
+    const fields = importFields({
+      fields: [{ key: 't1', kind: 'text', label: 'a'.repeat(500), value: 'b'.repeat(9000) }],
+    });
+
+    expect(fields[0].label.length).toBe(120);
+    expect(fields[0].value.length).toBe(4000);
+  });
+});
+
+describe('importContent', () => {
+  it('reads the edits a client has made', () => {
+    expect(importContent({ content: { t1: 'Rhodes' } })).toEqual({ t1: 'Rhodes' });
+  });
+
+  it('ignores anything that is not a slot holding a string', () => {
+    expect(importContent({ content: { t1: 42, 'a.b': 'x', T1: 'y', i1: null } })).toEqual({});
+    expect(importContent({ content: [1, 2] })).toEqual({});
+    expect(importContent({})).toEqual({});
+  });
+});
+
+describe('summariseImported', () => {
+  it('prefers the name the import screen gave it', () => {
+    expect(summariseImported({ label: 'Hero' })).toBe('Hero');
+  });
+
+  /*
+   * A column of identical "Imported section" rows is how a client loses track
+   * of which one is the hero.
+   */
+  it('falls back to the first words, edited ones first', () => {
+    const props = {
+      fields: [{ key: 't1', kind: 'text', label: 'x', value: 'Escape to Crete' }],
+    };
+
+    expect(summariseImported(props)).toBe('Escape to Crete');
+    expect(summariseImported({ ...props, content: { t1: 'Escape to Rhodes' } })).toBe(
+      'Escape to Rhodes',
+    );
+  });
+
+  it('says something rather than nothing when there is nothing to say', () => {
+    expect(summariseImported({})).toBe('Imported section');
   });
 });

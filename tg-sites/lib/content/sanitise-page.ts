@@ -13,6 +13,9 @@
  */
 
 import { blockDefinition, type Field } from './blocks';
+import { importContent, importFields } from './imported';
+import { cleanImportHtml } from '../import/html';
+import { importScopeClass, scopeImportCss } from '../import/css';
 import { safeUrl, sanitiseHtml, type SanitiseMode } from './sanitise';
 import { safeIconName } from './icons';
 import type { CollectionItem } from './collection';
@@ -133,6 +136,54 @@ function cleanProps(
   return out;
 }
 
+/**
+ * An imported design, on the way into the database.
+ *
+ * NOT DRIVEN BY THE FIELD LIST like every other block, because the two props
+ * that matter are not fields. `html` and `css` are written by the import screen
+ * and never typed into, so no Field describes them, and a save path that only
+ * looked at fields would store whatever arrived on the wire. A server action is
+ * a public endpoint: the shape of the form is not a constraint on the request.
+ *
+ * The renderer cleans all of this again, so this is the belt to that pair of
+ * braces. It is still the cheaper of the two to get wrong, because stored
+ * content is what a future renderer, an export or a migration script would
+ * trust.
+ */
+function cleanImportedProps(blockId: string, props: Record<string, unknown>): Record<string, unknown> {
+  const fields = importFields(props);
+  const stored = importContent(props);
+
+  /*
+   * ONLY SLOTS THE MARKUP ACTUALLY USES. A design edited, then re-imported
+   * smaller, would otherwise carry the old slots' words around forever, and
+   * they would come back the moment anybody restored a snapshot.
+   */
+  const used = new Set(fields.map((field) => field.key));
+  const content: Record<string, string> = {};
+  for (const [key, value] of Object.entries(stored)) {
+    if (used.has(key)) content[key] = value;
+  }
+
+  return {
+    ...props,
+    html: cleanImportHtml(typeof props.html === 'string' ? props.html : '').html,
+    /*
+     * THE SAME SCOPE THE RENDERER WILL USE, worked out from the block's own id
+     * in both places. Scoping to anything else here would make the second pass
+     * nest one scope inside the other and match nothing, and scoping to nothing
+     * would leave a stored stylesheet that reaches the whole page if anything
+     * ever served it without asking the renderer.
+     */
+    css: scopeImportCss(typeof props.css === 'string' ? props.css : '', {
+      scope: `.${importScopeClass(blockId)}`,
+    }).css,
+    fields,
+    content,
+    label: typeof props.label === 'string' ? props.label.slice(0, 60) : '',
+  };
+}
+
 export function sanitiseBlock(block: Block): Block {
   const definition = blockDefinition(block.type);
 
@@ -141,6 +192,10 @@ export function sanitiseBlock(block: Block): Block {
   // unknown block anyway. It is still sanitised on render once its build
   // knows what it is.
   if (!definition) return block;
+
+  if (block.type === 'imported') {
+    return { ...block, props: cleanImportedProps(block.id, block.props) };
+  }
 
   return { ...block, props: cleanProps(block.type, definition.fields, block.props) };
 }

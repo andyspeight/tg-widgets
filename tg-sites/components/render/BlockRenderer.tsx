@@ -23,6 +23,7 @@ import {
   HeadingBlock,
   IconItemBlock,
   ImageBlock,
+  ImportedBlock,
   ListBlock,
   LogosBlock,
   NavBlock,
@@ -104,6 +105,14 @@ export function BlockRenderer({
         return <SpacerBlock props={props} />;
       case 'embed':
         return <EmbedBlock props={props} />;
+      /*
+       * Takes the block's own id, which becomes the class its stylesheet is
+       * scoped to. Same reason accordion and tabs take it: nothing else in this
+       * file needs an id, so it is passed here rather than threaded through
+       * every block.
+       */
+      case 'imported':
+        return <ImportedBlock props={props} blockId={block.id} />;
       /*
        * `editable` is what tells these two to draw a placeholder rather than the
        * real thing. It is already true exactly when this tree is the editor's

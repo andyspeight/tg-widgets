@@ -880,6 +880,38 @@
 .tgs-embed iframe { max-width: 100%; }
 
 /* ------------------------------------------------------------------ */
+/* Imported design                                                     */
+/* ------------------------------------------------------------------ */
+
+/*
+ * DELIBERATELY ALMOST NOTHING. An imported design brings its own stylesheet,
+ * scoped to the class beside this one, and every rule we add here is a rule
+ * arguing with it. The two that earn their place both stop the import damaging
+ * the page around it rather than styling it.
+ *
+ * A design laid out for a full viewport routinely overflows a column, and a
+ * horizontal scrollbar on the whole page is the most common way an imported
+ * section spoils a site that was fine before it.
+ */
+.tgs-imported {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/*
+ * box-sizing on the descendants, because the import's own reset was scoped
+ * along with everything else and `* { box-sizing: border-box }` became
+ * `.tgi-x *`, which does not include the wrapper itself. Set here so a design
+ * that never had a reset still measures its padding the way it was drawn.
+ */
+.tgs-imported,
+.tgs-imported *,
+.tgs-imported *::before,
+.tgs-imported *::after {
+  box-sizing: border-box;
+}
+
+/* ------------------------------------------------------------------ */
 /* Accordion                                                           */
 /* ------------------------------------------------------------------ */
 

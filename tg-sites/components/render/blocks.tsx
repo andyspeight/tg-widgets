@@ -13,6 +13,10 @@
 
 import type { CSSProperties, ReactElement } from 'react';
 import { escapeHtml, safeUrl, sanitiseHtml } from '../../lib/content/sanitise';
+import { importContent, importFields } from '../../lib/content/imported';
+import { cleanImportHtml } from '../../lib/import/html';
+import { importScopeClass, scopeImportCss } from '../../lib/import/css';
+import { applyImportContent } from '../../lib/import/tokenise';
 import { parseTable } from '../../lib/content/table';
 import { resolveVideo } from '../../lib/content/video';
 import { socialNetwork } from '../../lib/content/social';
@@ -1429,6 +1433,75 @@ export function EmbedBlock({ props }: { props: Props }): ReactElement {
   const html = sanitiseHtml(props.html, 'embed');
   if (!html) return <div className="tgs-placeholder">Paste embed code</div>;
   return <div className="tgs-embed" dangerouslySetInnerHTML={{ __html: html }} />;
+}
+
+/**
+ * An imported design.
+ *
+ * KNOWN COST, MEASURED, AND DELIBERATELY ACCEPTED FOR NOW. The imports at the
+ * top of this file pull parse5 and postcss into the EDITOR'S BROWSER BUNDLE,
+ * because the canvas renders blocks client side: Canvas.tsx is a client
+ * component, it renders PageRenderer, which renders BlockRenderer, which
+ * renders this. Measured on 1 Aug 2026: /editor went from 119kB to 197kB and
+ * first load from 271kB to 350kB.
+ *
+ * The alternative was to drop the render-time clean and trust what the save
+ * path stored, which is the one thing this whole module exists not to do, and
+ * it is worse than it sounds: staff open a client's site in this same editor,
+ * so a payload that only ran on the canvas would run in a session with staff
+ * powers. Bytes on an authenticated internal tool are the cheaper of the two.
+ *
+ * THE PROPER FIX, when somebody picks this up: clean and scope on the server,
+ * where these modules already belong, and pass the result down to the renderer
+ * as plain strings. Every page that draws content is a server component
+ * already; only the canvas is not. Task #94.
+ *
+ * RE-CLEANED ON EVERY RENDER, not trusted because it was cleaned on the way in.
+ * That is the same rule the rich text and the embed block follow, and it earns
+ * its keep here more than anywhere else: this markup came from a stranger's
+ * tool, and the thing standing between it and a live client site is
+ * cleanImportHtml, so a snapshot restored from before a fix, a row edited by
+ * hand, or a build where the save path changed all land on the same answer.
+ *
+ * THE ORDER MATTERS AND IT IS THE OPPOSITE OF THE OBVIOUS ONE. Clean first,
+ * then put the client's words in. Substituting first would hand the cleaner
+ * markup it had never checked, so a client typing into a slot would be typing
+ * into the sanitiser's input. Cleaning first means a slot is still a slot when
+ * the cleaner is done with it, and the words that replace it are escaped by
+ * applyImportContent according to what the slot IS.
+ *
+ * THE STYLESHEET IS SCOPED TO THIS BLOCK'S OWN CLASS, so two imported designs
+ * on one page cannot argue with each other or with ours. importScopeClass is
+ * the single place that name is decided, because the wrapper wearing it and the
+ * CSS depending on it have to agree and a mismatch is an unstyled section with
+ * no error anywhere.
+ */
+export function ImportedBlock({ props, blockId }: { props: Props; blockId: string }): ReactElement {
+  const scope = importScopeClass(blockId);
+  const fields = importFields(props);
+
+  const cleaned = cleanImportHtml(str(props, 'html'));
+  const html = applyImportContent(cleaned.html, importContent(props), fields);
+  const { css } = scopeImportCss(str(props, 'css'), { scope: `.${scope}` });
+
+  if (!html.trim()) {
+    return <div className="tgs-placeholder">This imported design has nothing in it</div>;
+  }
+
+  return (
+    <div className={`tgs-imported ${scope}`}>
+      {/*
+        * dangerouslySetInnerHTML rather than a text child, and it is the SAFE
+        * choice here rather than the reckless one. React escapes a text child
+        * of <style> when it renders on the server, so `&:hover` would ship as
+        * `&amp;:hover` and every nested rule in a modern export would break.
+        * What makes it safe is scopeImportCss, which escapes `</` on the way
+        * out so nothing in the stylesheet can close this tag early.
+        */}
+      {css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null}
+      <div dangerouslySetInnerHTML={{ __html: html }} />
+    </div>
+  );
 }
 
 export { ALIGNS };

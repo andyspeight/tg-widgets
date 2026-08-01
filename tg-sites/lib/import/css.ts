@@ -135,11 +135,42 @@ export function splitSelectorList(value: string): string[] {
  */
 const ROOTISH = /^(:root|:where\(:root\)|html|body)(?![\w-])/i;
 
+/**
+ * The characters that can follow a class name without continuing it.
+ *
+ * `-` and `_` are missing on purpose, because they DO continue one: without
+ * this, `.tgi-x` would look like a prefix of `.tgi-xyz` and a rule scoped to a
+ * different block would be mistaken for one already scoped to this one.
+ */
+const AFTER_SCOPE = new Set([' ', '\t', '\n', '.', '#', ':', '[', '>', '+', '~', ',']);
+
+/**
+ * Whether a selector is already confined to exactly this scope.
+ *
+ * WHY THIS IS NEEDED AT ALL: an imported design is scoped twice, once on the
+ * way into the database and again on the way out, because stored CSS is never
+ * trusted. Without this the second pass would produce `.tgi-x .tgi-x .a`, which
+ * needs two nested elements carrying the class and therefore matches nothing.
+ * The design would arrive unstyled, and only after a save, which is the worst
+ * kind of bug to find.
+ *
+ * It is not a hole. The selector has to begin with the EXACT scope this call
+ * was asked for, and the character after it has to be one that cannot continue
+ * a class name, so the containment claim is checked rather than assumed.
+ */
+function alreadyScoped(selector: string, scope: string): boolean {
+  if (!selector.startsWith(scope)) return false;
+  const next = selector.charAt(scope.length);
+  return next === '' || AFTER_SCOPE.has(next);
+}
+
 /** One selector, confined. Null when there is nothing usable in it. */
 export function scopeSelectorPart(part: string, scope: string): string | null {
   const trimmed = part.trim();
   if (!trimmed) return null;
   if (trimmed.length > 1000) return null;
+
+  if (alreadyScoped(trimmed, scope)) return trimmed;
 
   const match = ROOTISH.exec(trimmed);
   if (!match) return `${scope} ${trimmed}`;
@@ -482,5 +513,27 @@ export function scopeImportCss(source: string, options: ScopeOptions): ScopeResu
     });
   }
 
-  return { css: root.toString(), removed };
+  return { css: closeTagSafe(root.toString()), removed };
+}
+
+/**
+ * CSS that cannot climb out of the `<style>` element it is about to sit in.
+ *
+ * THE HOLE THIS CLOSES. Everything above makes the CSS safe as CSS, and that is
+ * not the same as safe as the CONTENTS OF A TAG. An HTML parser looks for the
+ * closing tag before it hands anything to the CSS parser, so a declaration of
+ * `content: "</style><img src=x onerror=alert(1)>"` is a perfectly ordinary
+ * string to postcss and the end of the stylesheet to a browser. Everything
+ * after it is markup, on the page, with a handler on it. A selector can carry
+ * the same payload inside an attribute value, which is why this runs over the
+ * whole output rather than over declaration values.
+ *
+ * ESCAPED RATHER THAN REFUSED, and it costs nothing. The only place a `</` can
+ * legally appear in a stylesheet is inside a string, and inside a string `\/`
+ * is a valid escape for `/` meaning exactly the same character. So the CSS is
+ * unchanged and the HTML parser no longer sees a closing tag. Same trick as
+ * escaping `</script>` inside embedded JSON, for the same reason.
+ */
+function closeTagSafe(css: string): string {
+  return css.replace(/<\//g, '<\\/');
 }

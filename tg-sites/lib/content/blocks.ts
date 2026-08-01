@@ -18,6 +18,7 @@
  * Add a test alongside if the block has non-trivial props.
  */
 import type { IconName } from '../../components/editor/Icon';
+import { summariseImported } from './imported';
 import { SOCIAL_OPTIONS } from './social';
 import { WIDGET_KINDS } from './widgets';
 
@@ -42,7 +43,17 @@ export type Field =
   | { kind: 'select'; key: string; label: string; options: SelectOption[]; help?: string }
   | { kind: 'toggle'; key: string; label: string; help?: string }
   | { kind: 'number'; key: string; label: string; min?: number; max?: number; step?: number; help?: string }
-  | { kind: 'repeater'; key: string; label: string; itemLabel: string; max?: number; fields: Field[]; help?: string };
+  | { kind: 'repeater'; key: string; label: string; itemLabel: string; max?: number; fields: Field[]; help?: string }
+  /*
+   * The editable slots of an imported design.
+   *
+   * THE ONLY FIELD WHOSE SHAPE IS NOT KNOWN HERE. Every other kind describes
+   * one named prop, because a block's props are decided when the block is
+   * written. An import's slots are decided by the design somebody pasted, so
+   * this says "draw the slots this block has" and the pane reads them off
+   * props.fields. See lib/content/imported.ts.
+   */
+  | { kind: 'imported'; key: string; label: string; help?: string };
 
 export type BlockGroup = 'Text' | 'Media' | 'Actions' | 'Layout' | 'Advanced';
 
@@ -1582,6 +1593,39 @@ export const BLOCKS: readonly BlockDefinition[] = [
         max: 20000,
         help: 'Sanitised on save and again on render. Scripts and event handlers are stripped.',
       },
+    ],
+  },
+  {
+    type: 'imported',
+    label: 'Imported design',
+    group: 'Advanced',
+    icon: 'code',
+    /*
+     * NOT staffOnly, and that is the point of the whole import pipeline.
+     *
+     * The embed block above is staff only because it holds markup nobody
+     * checks. Everything in this one has been through lib/import: parsed,
+     * rebuilt from a tree, and confined to its own section by an ancestor
+     * selector. Safe by construction rather than by permission is what lets a
+     * client paste their own design in.
+     */
+    description: 'A design brought in from Relume, Figma or the slicer. Add one from Import.',
+    defaults: { html: '', css: '', label: '', fields: [], content: {} },
+    summarise: (props) => summariseImported(props),
+    fields: [
+      /*
+       * ONE FIELD THAT STANDS FOR MANY. A design's editable slots are not known
+       * until it is imported, so they cannot be listed here the way every other
+       * block lists its own. This tells the properties pane to draw whatever
+       * slots THIS block turned out to have, from props.fields.
+       */
+      {
+        kind: 'imported',
+        key: 'content',
+        label: 'Content',
+        help: 'The words and pictures from the design. Its layout and styling are kept as they were.',
+      },
+      { kind: 'text', key: 'label', label: 'Name', max: 60, help: 'What this section is called in the outline.' },
     ],
   },
 ];
