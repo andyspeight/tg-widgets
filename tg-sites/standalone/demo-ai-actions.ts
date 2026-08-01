@@ -93,5 +93,33 @@ import type * as real from '../app/actions/ai';
 
 // The satisfies clause is what keeps this honest: a change to the real
 // signature fails the typecheck here rather than at the next browser run.
+/**
+ * Alt text, in the review copy.
+ *
+ * NOT A FIXED STRING, for the same reason the copy above is not lorem ipsum. A
+ * double answering "a photograph" would prove the button is wired and nothing
+ * else. This answers with something of a plausible SHAPE and LENGTH, so a check
+ * can see it land in the right field, replace what was there, and stay inside
+ * the cap.
+ *
+ * THE REAL ONE CANNOT RUN HERE ANYWAY, and it says so honestly rather than
+ * timing out: the demo image bank hands back data: URIs, and the API follows a
+ * URL rather than reading a file, so the real action refuses anything that is
+ * not https. This double stands in for the answer, not for that check.
+ */
+export async function describeImageAction(input: unknown): Promise<real.AltResult> {
+  const fields = (input ?? {}) as Record<string, unknown>;
+  const id = typeof fields.id === 'string' ? fields.id : '';
+  if (!id) return { ok: false, error: 'No picture was chosen.' };
+
+  return {
+    ok: true,
+    alt: 'A whitewashed church above a bay, with fishing boats moored below.',
+  };
+}
+
+const _describe = describeImageAction satisfies typeof real.describeImageAction;
+void _describe;
+
 const _write = writeCopyAction satisfies typeof real.writeCopyAction;
 void _write;

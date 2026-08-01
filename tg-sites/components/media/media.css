@@ -470,3 +470,71 @@
   background: var(--ed-sunken);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
+
+/* ------------------------------------------------------------------ */
+/* The description of a picture                                        */
+/* ------------------------------------------------------------------ */
+
+/*
+ * ON EVERY TILE, not behind a click. This grid is the one screen where somebody
+ * can see all their pictures at once, and the job people come here to do is fix
+ * the ones nobody described. Hiding the field behind an edit button would make
+ * that job one extra click per picture, which on a bank of forty is forty
+ * clicks somebody will not make.
+ */
+.mp-alt {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: var(--ed-1);
+}
+
+/* Present for a screen reader, which needs the field named, and not for the
+   eye, which has the placeholder and the picture right there. */
+.mp-alt__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.mp-alt__row { display: flex; gap: var(--ed-1); align-items: center; }
+
+.mp-alt__input {
+  flex: 1;
+  min-width: 0;
+  padding: 4px var(--ed-2);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-sm);
+  background: var(--ed-bg);
+  color: var(--ed-ink);
+  font: inherit;
+  font-size: var(--ed-text-xs);
+}
+
+.mp-alt__input:focus-visible {
+  outline: 2px solid var(--ed-accent);
+  outline-offset: -1px;
+}
+
+.mp-alt__ai {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-sm);
+  background: var(--ed-well);
+  color: var(--ed-primary);
+  cursor: pointer;
+}
+
+.mp-alt__ai:hover:not(:disabled) { border-color: var(--ed-accent); }
+.mp-alt__ai:disabled { opacity: 0.5; cursor: default; }

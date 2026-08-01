@@ -88,7 +88,31 @@ export class AiError extends Error {
   }
 }
 
-export async function ask(system: string, user: string): Promise<Answer> {
+/**
+ * A picture to look at alongside the words, or nothing.
+ *
+ * A URL rather than base64, which the API accepts and which matters here: the
+ * pictures are already on a public CDN, so sending the address is a few hundred
+ * bytes where sending the file would be a megabyte from our server for every
+ * description. It also means we are not reading a client's blob into memory.
+ */
+export interface AskImage {
+  url: string;
+}
+
+/**
+ * Ask the model, optionally about a picture.
+ *
+ * NO NEW MODEL FOR VISION. Haiku 4.5 is multimodal, so describing an image is
+ * the same call with one more content block, at the same price and inside the
+ * same daily allowance. That is worth stating because "we need alt text" reads
+ * like it needs a second, dearer model and a separate budget, and it does not.
+ */
+export async function ask(
+  system: string,
+  user: string,
+  image?: AskImage,
+): Promise<Answer> {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) {
     throw new AiError('The writing assistant is not switched on for this site yet.');
@@ -117,7 +141,22 @@ export async function ask(system: string, user: string): Promise<Answer> {
          * the same footing as the rules.
          */
         system,
-        messages: [{ role: 'user', content: user }],
+        /*
+         * THE PICTURE FIRST, THEN THE REQUEST. The order is the documented one
+         * and it is not arbitrary: a model reads the instruction better when it
+         * already has the thing the instruction is about.
+         */
+        messages: [
+          {
+            role: 'user',
+            content: image
+              ? [
+                  { type: 'image', source: { type: 'url', url: image.url } },
+                  { type: 'text', text: user },
+                ]
+              : user,
+          },
+        ],
       }),
       signal: controller.signal,
       // Never cached. Two people asking for the same paragraph should get two.

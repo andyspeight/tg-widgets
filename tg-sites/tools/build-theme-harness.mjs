@@ -44,6 +44,19 @@ const HARNESSES = [
     swap: [
       [/(^|\/)app\/actions\/settings$/, 'standalone/demo-settings-actions.ts'],
       [/(^|\/)app\/actions\/media$/, 'standalone/demo-media-actions.ts'],
+      /*
+       * The AI actions too, since 1 Aug 2026. The image bank's alt text field
+       * asks the assistant to describe a picture, so the settings screen now has
+       * app/actions/ai in its import graph whether or not anybody presses the
+       * button, and that module reaches Postgres AND Anthropic with a key that
+       * bills Travelgenix.
+       *
+       * The build FAILED rather than shipping a broken bundle, which is the
+       * right way round and is why esbuild's "Could not resolve node:async_hooks"
+       * is worth reading as "a server module has reached the browser build"
+       * rather than as a bundler problem.
+       */
+      [/(^|\/)app\/actions\/ai$/, 'standalone/demo-ai-actions.ts'],
     ],
   },
 ];

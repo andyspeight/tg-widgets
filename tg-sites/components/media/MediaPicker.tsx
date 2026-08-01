@@ -24,7 +24,10 @@ import {
   loadMediaAction,
   recordUploadAction,
   searchStockAction,
+  setMediaAltAction,
 } from '../../app/actions/media';
+import { describeImageAction } from '../../app/actions/ai';
+import { MAX_ALT } from '../../lib/ai/prompt';
 import { prepareImageForUpload } from '../../lib/media/downscale';
 import {
   filenameStem,
@@ -107,6 +110,17 @@ export function MediaPicker({ onChoose, onClose, currentUrl }: Props) {
     setItems((current) => current.filter((existing) => existing.id !== item.id));
   }
 
+  /*
+   * A description has been written or changed, so the tile stops warning.
+   *
+   * The row is replaced rather than the list reloaded: reloading would reset the
+   * scroll position of a grid somebody is working down, which is exactly what
+   * they are doing when they are fixing descriptions one at a time.
+   */
+  function onAltSaved(item: MediaItem) {
+    setItems((current) => current.map((existing) => (existing.id === item.id ? item : existing)));
+  }
+
   return (
     <>
       <Modal
@@ -138,6 +152,7 @@ export function MediaPicker({ onChoose, onClose, currentUrl }: Props) {
               currentUrl={currentUrl}
               onChoose={onChoose}
               onDelete={setPendingDelete}
+              onAltSaved={onAltSaved}
               onMore={() => void load(items.length)}
               onUploadInstead={() => setTab(canUpload ? 'upload' : 'stock')}
             />
@@ -203,6 +218,123 @@ function TabButton({
 // Your images
 // ---------------------------------------------------------------------------
 
+/**
+ * The description of one picture, edited in place.
+ *
+ * WHY THIS IS HERE AND NOT SOMEWHERE TIDIER. setMediaAltAction has existed
+ * since the image bank shipped and NOTHING CALLED IT: alt text could only ever
+ * arrive from a stock photograph that already had a description, and there was
+ * no way to write or change one anywhere in the product. The comment above this
+ * grid already said it was "the one screen where somebody can see all their
+ * images at once and fix the ones nobody described". It could not.
+ *
+ * SAVED ON BLUR, NEVER ON KEYSTROKE. Same rule as every numeric control in the
+ * editor: a save per character is a request per character, and a description is
+ * a sentence rather than a setting. Nothing is saved when the text has not
+ * changed, so tabbing through the grid costs nothing.
+ *
+ * THE ASSISTANT WRITES INTO THE FIELD, IT DOES NOT SAVE. Somebody reads what it
+ * said before it is kept, because a model that looked at a photograph and wrote
+ * straight to the database would be one whose mistakes are already published.
+ * The save then happens the same way as a typed one: on blur.
+ */
+function AltEditor({
+  item,
+  onSaved,
+}: {
+  item: MediaItem;
+  onSaved: (item: MediaItem) => void;
+}) {
+  const [value, setValue] = useState(item.alt ?? '');
+  const [state, setState] = useState<'idle' | 'asking' | 'saving'>('idle');
+  const [failed, setFailed] = useState('');
+
+  /*
+   * What is in the database, so blur can tell a real change from a visit. A ref
+   * rather than state: it is compared, never rendered, and putting it in state
+   * would re-render the tile on every save for no visible reason.
+   */
+  const saved = useRef(item.alt ?? '');
+
+  async function commit() {
+    const next = value.trim().slice(0, MAX_ALT);
+    if (next === saved.current) return;
+
+    setState('saving');
+    const result = await setMediaAltAction(item.id, next);
+    setState('idle');
+
+    if (!result.ok) {
+      setFailed(result.error);
+      return;
+    }
+    /*
+     * Null means the row was not this tenant's, or is gone. The action makes
+     * those the same answer on purpose, so this says the honest thing rather
+     * than pretending a save happened.
+     */
+    if (!result.data) {
+      setFailed('That picture is no longer in this image bank.');
+      return;
+    }
+
+    setFailed('');
+    saved.current = next;
+    setValue(next);
+    onSaved(result.data);
+  }
+
+  async function describe() {
+    setState('asking');
+    setFailed('');
+    const result = await describeImageAction({ id: item.id });
+    setState('idle');
+
+    if (!result.ok) {
+      setFailed(result.error);
+      return;
+    }
+    // Into the field, not into the database. See the note above.
+    setValue(result.alt);
+  }
+
+  const busy = state !== 'idle';
+
+  return (
+    <div className="mp-alt">
+      <label className="mp-alt__label" htmlFor={`alt-${item.id}`}>
+        Description
+      </label>
+      <div className="mp-alt__row">
+        <input
+          id={`alt-${item.id}`}
+          className="mp-alt__input"
+          type="text"
+          value={value}
+          maxLength={MAX_ALT}
+          disabled={busy}
+          placeholder="What is in this picture?"
+          onChange={(event) => setValue(event.target.value)}
+          onBlur={() => void commit()}
+        />
+        <button
+          type="button"
+          className="mp-alt__ai"
+          disabled={busy}
+          title="Ask the assistant to describe this picture"
+          onClick={() => void describe()}
+        >
+          {state === 'asking' ? '…' : <Icon name="sparkle" size={14} />}
+        </button>
+      </div>
+      {failed && <span className="mp-tile__warn">{failed}</span>}
+      {!failed && !value.trim() && (
+        <span className="mp-tile__warn">No description</span>
+      )}
+    </div>
+  );
+}
+
 function Bank({
   items,
   hasMore,
@@ -211,6 +343,7 @@ function Bank({
   currentUrl,
   onChoose,
   onDelete,
+  onAltSaved,
   onMore,
   onUploadInstead,
 }: {
@@ -221,6 +354,7 @@ function Bank({
   currentUrl?: string;
   onChoose: (item: MediaItem) => void;
   onDelete: (item: MediaItem) => void;
+  onAltSaved: (item: MediaItem) => void;
   onMore: () => void;
   onUploadInstead: () => void;
 }) {
@@ -280,7 +414,7 @@ function Bank({
                 the one screen where somebody can see all their images at once and
                 fix the ones nobody described.
               */}
-              {!item.alt && <span className="mp-tile__warn">No description</span>}
+              <AltEditor item={item} onSaved={onAltSaved} />
               {item.source === 'pexels' && item.credit.photographer && (
                 <span className="mp-tile__credit">{item.credit.photographer} · Pexels</span>
               )}

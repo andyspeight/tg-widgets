@@ -200,6 +200,37 @@ export async function insertMedia(tenantId: string, media: NewMedia): Promise<Me
 }
 
 /**
+ * One image, by id, scoped to this tenant.
+ *
+ * SEPARATE FROM listMedia because the caller that needs it, the alt text
+ * assistant, has an id and wants one row. Reading the whole bank to find one
+ * picture would be a query that grows with the client's library every time
+ * somebody presses a button.
+ *
+ * The uuid shape is checked before the query for the same reason setMediaAlt
+ * does it: a malformed id is a bad request, not a database error, and Postgres
+ * raises on a cast it cannot make.
+ *
+ * Null covers "no such image" AND "belongs to another tenant", because the
+ * policy makes them the same answer and a guessed id should confirm nothing.
+ */
+export async function getMediaItem(
+  tenantId: string,
+  id: string,
+): Promise<MediaItem | null> {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) return null;
+
+  return withTenant(tenantId, async (tx) => {
+    const rows = await tx`
+      select id, url, storage_key, filename, mime, bytes,
+             width, height, alt, source, credit, created_at
+      from public.media where id = ${id} limit 1
+    `;
+    return rows.length ? toItem(rows[0] as Record<string, unknown>) : null;
+  });
+}
+
+/**
  * Change the alt text.
  *
  * The only editable field, on purpose. A filename is a record of what arrived and

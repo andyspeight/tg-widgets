@@ -62,7 +62,7 @@ export const MAX_SELECTION = 4000;
  * prohibitions writes stiffly. The prohibitions are still there; they are just
  * not the whole of it.
  */
-const HOUSE_RULES = `You write copy for travel company websites, for Travelgenix.
+export const HOUSE_RULES = `You write copy for travel company websites, for Travelgenix.
 
 How the writing must read, always:
 - UK English. Colour, organised, travelling, personalise.
@@ -174,4 +174,60 @@ export function userPrompt(input: {
   );
 
   return parts.join('\n\n');
+}
+
+// ---------------------------------------------------------------------------
+// Describing a picture
+// ---------------------------------------------------------------------------
+
+/** The longest alt text worth having. Beyond this a screen reader drones. */
+export const MAX_ALT = 125;
+
+/**
+ * The system prompt for alt text, which is NOT the writing assistant's.
+ *
+ * DELIBERATELY WITHOUT THE COMPANY PROFILE, and that is the decision in this
+ * file. Alt text says what is in the picture; it is not marketing copy. Handed
+ * the profile, a model helpfully writes "a couple enjoying a luxury Someshop
+ * Travel escape in Crete", which is a caption for a brochure and a lie to
+ * somebody who cannot see the photograph, because none of the brand is visible
+ * in it. The tone of voice does not apply either: there is no voice in "a white
+ * church on a cliff above the sea".
+ *
+ * SO THE RULES ARE ABOUT ACCURACY AND LENGTH, and the house rules about UK
+ * English still apply because a harbour is not a harbor.
+ */
+export const ALT_RULES = `You write alt text for photographs on a travel
+company's website. Alt text is read aloud to somebody who cannot see the
+picture, and is read by search engines to understand what it shows.
+
+RULES, ALL OF THEM MANDATORY:
+- Describe only what is actually visible. Never guess a place name, a hotel
+  name, a country or a season. If you cannot tell where it is, describe what it
+  looks like instead.
+- Under ${MAX_ALT} characters. One sentence.
+- Do NOT begin with "Image of", "Photo of", "A picture showing" or similar. A
+  screen reader already says it is an image.
+- No marketing language, no adjectives that sell. "A quiet cove with turquoise
+  water" is right. "A breathtaking slice of paradise" is not.
+- UK English spelling.
+- Return the sentence and nothing else. No quotation marks, no explanation.`;
+
+/**
+ * What to send with the picture.
+ *
+ * The filename is included because it is sometimes the only real information
+ * available, elounda-bay-sunset.jpg being a good deal more use than a model's
+ * guess at a coastline. It is clearly labelled as a HINT that may be wrong: a
+ * file called img_4471.jpg tells nobody anything, and a model told to trust the
+ * filename would work "img 4471" into the sentence.
+ */
+export function altPrompt(filename: string): string {
+  const hint = filename.trim();
+  return hint
+    ? `Describe this photograph for alt text.
+
+The file is called "${hint.slice(0, 120)}". That MAY hint at what it shows, and
+may equally be meaningless. Use it only if what you can see agrees with it.`
+    : 'Describe this photograph for alt text.';
 }

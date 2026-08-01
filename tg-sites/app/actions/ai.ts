@@ -36,7 +36,11 @@ import {
 import { aiIsConfigured, AiError, ask } from '../../lib/ai/anthropic';
 import { toCopy, type Copy } from '../../lib/ai/copy';
 import {
+  altPrompt,
+  ALT_RULES,
+  HOUSE_RULES,
   isAiIntent,
+  MAX_ALT,
   MAX_INSTRUCTION,
   MAX_SELECTION,
   systemPrompt,
@@ -44,6 +48,7 @@ import {
   type AiIntent,
 } from '../../lib/ai/prompt';
 import { claimRequest, DAILY_LIMIT, recordTokens } from '../../lib/db/ai';
+import { getMediaItem } from '../../lib/db/media';
 import { getSettings } from '../../lib/db/settings';
 
 export type AiResult =
@@ -152,5 +157,117 @@ export async function writeCopyAction(input: unknown): Promise<AiResult> {
      */
     console.error('[tg-sites] the writing assistant failed', error);
     return { ok: false, error: 'Something went wrong asking for that. Try again.' };
+  }
+}
+
+export type AltResult =
+  | { ok: true; alt: string }
+  | { ok: false; error: string; retryable?: boolean };
+
+/**
+ * Alt text for one picture in the image bank.
+ *
+ * THE SAME FOUR GATES as writeCopyAction, and they are repeated rather than
+ * shared because a server action is a PUBLIC ENDPOINT: Next generates the URL
+ * and puts it in the page's own JavaScript, so a button that only appears for
+ * members is a courtesy to whoever is looking at the screen and no obstacle at
+ * all to anybody reading the bundle.
+ *
+ * THE ID IS RESOLVED AGAINST THIS TENANT'S OWN MEDIA, and that is the check
+ * that matters here rather than in the writing assistant. The caller sends an
+ * id and we send the picture at that id to a third party, so without the lookup
+ * a guessed id would have another client's photograph described and returned.
+ * getMediaItem runs inside the tenant's policy, so an id belonging to somebody
+ * else comes back as not found, exactly as a made-up one does.
+ *
+ * IT DOES NOT SAVE. It returns a sentence and the screen puts it in the field,
+ * where somebody reads it before it is kept. A model that looked at a
+ * photograph and wrote straight into the database would be one whose mistakes
+ * are already published.
+ */
+export async function describeImageAction(input: unknown): Promise<AltResult> {
+  try {
+    if (!aiIsConfigured()) {
+      return { ok: false, error: 'The writing assistant is not switched on yet.' };
+    }
+
+    const site = await requireSite();
+    const userId = await currentUserId();
+
+    const fields = (input ?? {}) as Record<string, unknown>;
+    const id = text(fields.id, 100);
+    if (!id) return { ok: false, error: 'No picture was chosen.' };
+
+    const item = await getMediaItem(site.tenantId, id);
+    if (!item) return { ok: false, error: 'That picture is not in this image bank.' };
+
+    /*
+     * The model is fetching this URL itself, so it has to be one anybody can
+     * fetch. A blob URL is; a data: URI is not a URL the API will follow, which
+     * is what the demo doubles hand back, so this fails honestly in a review
+     * copy rather than timing out.
+     */
+    if (!/^https:\/\//i.test(item.url)) {
+      return { ok: false, error: 'That picture is not somewhere the assistant can see it.' };
+    }
+
+    const claim = await claimRequest(site.tenantId, { userId, intent: 'alt' });
+    if (!claim.allowed) {
+      return {
+        ok: false,
+        error:
+          `This site has used all ${DAILY_LIMIT} of today's AI requests. `
+          + 'It resets through the day, so try again later.',
+      };
+    }
+
+    /*
+     * THE HOUSE RULES AND THE ALT RULES, AND NOT THE COMPANY PROFILE. Alt text
+     * says what is in the picture. Given the profile a model writes "a couple
+     * enjoying a luxury Someshop escape", which is a brochure caption and a lie
+     * to somebody who cannot see the photograph. See ALT_RULES.
+     */
+    const answer = await ask(
+      `${HOUSE_RULES}\n\n${ALT_RULES}`,
+      altPrompt(item.filename),
+      { url: item.url },
+    );
+
+    if (claim.id) {
+      await recordTokens(site.tenantId, claim.id, {
+        input: answer.inputTokens,
+        output: answer.outputTokens,
+      });
+    }
+
+    /*
+     * Trimmed of the quotation marks a model sometimes wraps a sentence in even
+     * when told not to, and capped. The cap is here as well as in the prompt
+     * because a prompt is a request and this is the boundary.
+     */
+    const alt = answer.text
+      .replace(/\s+/g, ' ')
+      .trim()
+      .replace(/^["\u201c\u2018']+|["\u201d\u2019']+$/g, '')
+      .slice(0, MAX_ALT);
+
+    if (!alt) {
+      return {
+        ok: false,
+        error: 'The assistant could not describe that one. Try again, or write it yourself.',
+        retryable: true,
+      };
+    }
+
+    return { ok: true, alt };
+  } catch (error) {
+    if (error instanceof AiError) {
+      return { ok: false, error: error.message, retryable: error.retryable };
+    }
+    if (isSignInRequired(error)) {
+      return { ok: false, error: (error as Error).message };
+    }
+    console.error('[tg-sites] describing an image failed', error);
+    return { ok: false, error: 'Something went wrong. Try again in a moment.' };
   }
 }
