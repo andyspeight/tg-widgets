@@ -118,6 +118,39 @@ export async function describeImageAction(input: unknown): Promise<real.AltResul
   };
 }
 
+/**
+ * The search title and description, in the review copy.
+ *
+ * BUILT FROM THE TEXT IT WAS GIVEN rather than fixed, because the thing worth
+ * checking in a browser is that the answer reaches the two fields and that a
+ * page with nothing on it is refused. A fixed pair would pass whether or not
+ * the editor ever sent the page's words.
+ */
+export async function writeSeoAction(input: unknown): Promise<real.SeoResult> {
+  const fields = (input ?? {}) as Record<string, unknown>;
+  const pageText = typeof fields.text === 'string' ? fields.text : '';
+  const pageTitle = typeof fields.pageTitle === 'string' ? fields.pageTitle : 'This page';
+
+  // The same refusal the real one makes, so the check for it is real.
+  if (pageText.trim().length < 40) {
+    return {
+      ok: false,
+      error: 'There is not enough on this page yet to describe. Add some words first.',
+    };
+  }
+
+  const words = pageText.split(/\s+/).filter(Boolean).slice(0, 18).join(' ');
+
+  return {
+    ok: true,
+    title: `${pageTitle} for UK travellers`.slice(0, 60),
+    description: `${words}`.slice(0, 160),
+  };
+}
+
+const _seo = writeSeoAction satisfies typeof real.writeSeoAction;
+void _seo;
+
 const _describe = describeImageAction satisfies typeof real.describeImageAction;
 void _describe;
 

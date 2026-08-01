@@ -33,6 +33,20 @@ function read(...parts: string[]): string {
   return readFileSync(join(__dirname, '..', ...parts), 'utf8');
 }
 
+/**
+ * The body of describeImageAction and nothing else.
+ *
+ * Bounded at the next top-level export rather than at the end of the file,
+ * because app/actions/ai.ts holds three actions and a slice to the end reads
+ * the wrong one's decisions as this one's.
+ */
+function describeAction(): string {
+  const source = read('app', 'actions', 'ai.ts');
+  const start = source.indexOf('export async function describeImageAction');
+  const after = source.indexOf('\nexport ', start + 10);
+  return after > start ? source.slice(start, after) : source.slice(start);
+}
+
 // ---------------------------------------------------------------------------
 // The prompt
 // ---------------------------------------------------------------------------
@@ -107,9 +121,15 @@ describe('the company profile and the alt text prompt', () => {
     expect(ALT_RULES).not.toMatch(/tone of voice/i);
   });
 
+  /*
+   * BOUNDED TO THIS ONE FUNCTION. The first version sliced from
+   * describeImageAction to the end of the file, which was fine until
+   * writeSeoAction was added below it on 1 Aug 2026: that one DOES call
+   * systemPrompt, correctly, because a search description is about the business.
+   * The check failed on the right grounds against the wrong text.
+   */
   it('and the action builds the alt prompt without ever calling systemPrompt', () => {
-    const source = read('app', 'actions', 'ai.ts');
-    const action = source.slice(source.indexOf('export async function describeImageAction'));
+    const action = describeAction();
 
     expect(action).toContain('ALT_RULES');
     expect(action).not.toContain('systemPrompt(');
@@ -127,8 +147,7 @@ describe('the company profile and the alt text prompt', () => {
 // ---------------------------------------------------------------------------
 
 describe('what the action does before a picture leaves the building', () => {
-  const source = read('app', 'actions', 'ai.ts');
-  const action = source.slice(source.indexOf('export async function describeImageAction'));
+  const action = describeAction();
 
   /*
    * THE CROSS-TENANT CHECK. The caller sends an id and we send the picture at

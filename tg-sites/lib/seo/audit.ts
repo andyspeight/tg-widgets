@@ -167,6 +167,53 @@ function sectionsOf(page: Page): readonly Section[] {
   return Array.isArray(page.sections) ? page.sections : [];
 }
 
+/**
+ * The words on a page, in reading order, for the writing assistant.
+ *
+ * SEPARATE FROM pageStats, which counts the same words but throws them away.
+ * The assistant has to READ the page to write a description of it, and the one
+ * thing that makes an AI-written description worthless is being written from the
+ * page's title alone: "Holidays in Greece. Browse our holidays in Greece."
+ *
+ * IN READING ORDER, AND HEADINGS FIRST WITHIN A BLOCK, because the first two
+ * hundred words of a page are what it is about and the cap below will cut the
+ * rest. A walker that gathered every `body` before every `title` would hand the
+ * model the footer small print and none of the headings.
+ *
+ * CAPPED, because this is sent to a model that charges by the token and a
+ * client can paste an entire brochure into one page. 6000 characters is several
+ * screens, far more than is needed to say what a page is for.
+ */
+export function pageText(page: Page, max = 6000): string {
+  const parts: string[] = [];
+
+  const take = (props: Record<string, unknown>) => {
+    for (const key of TEXT_PROPS) {
+      const words = plainText(props[key], 2000);
+      if (words) parts.push(words);
+    }
+  };
+
+  for (const section of sectionsOf(page)) {
+    for (const row of section.rows) {
+      for (const column of row.columns) {
+        for (const block of column.blocks) {
+          take(block.props);
+
+          for (const value of Object.values(block.props)) {
+            if (!Array.isArray(value)) continue;
+            for (const item of value) {
+              if (item && typeof item === 'object') take(item as Record<string, unknown>);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return parts.join('\n').slice(0, max).trim();
+}
+
 // ---------------------------------------------------------------------------
 // The findings
 // ---------------------------------------------------------------------------

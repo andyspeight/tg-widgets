@@ -41,6 +41,10 @@ import {
   HOUSE_RULES,
   isAiIntent,
   MAX_ALT,
+  MAX_PAGE_TEXT,
+  parseSeoAnswer,
+  seoPrompt,
+  seoRules,
   MAX_INSTRUCTION,
   MAX_SELECTION,
   systemPrompt,
@@ -49,6 +53,7 @@ import {
 } from '../../lib/ai/prompt';
 import { claimRequest, DAILY_LIMIT, recordTokens } from '../../lib/db/ai';
 import { getMediaItem } from '../../lib/db/media';
+import { DESCRIPTION_MAX, DESCRIPTION_MIN, TITLE_MAX } from '../../lib/seo/audit';
 import { getSettings } from '../../lib/db/settings';
 
 export type AiResult =
@@ -268,6 +273,120 @@ export async function describeImageAction(input: unknown): Promise<AltResult> {
       return { ok: false, error: (error as Error).message };
     }
     console.error('[tg-sites] describing an image failed', error);
+    return { ok: false, error: 'Something went wrong. Try again in a moment.' };
+  }
+}
+
+export type SeoResult =
+  | { ok: true; title: string; description: string }
+  | { ok: false; error: string; retryable?: boolean };
+
+/**
+ * A search title and description, written from what is on the page.
+ *
+ * THE SAME FOUR GATES, repeated for the same reason as describeImageAction: a
+ * server action is a public endpoint whatever the editor chooses to show.
+ *
+ * THE PAGE TEXT COMES FROM THE CALLER, and that is worth defending because it
+ * looks careless. The alternative is to take a page id and read the tree here,
+ * which sounds safer and is worse for this one job: the client is looking at a
+ * DRAFT they have not saved, and the description they want is of the page in
+ * front of them rather than of the version in the database. Nothing is trusted
+ * about the text either way, because all it ever becomes is a prompt: it is
+ * capped, and the model is told to treat it as content rather than instructions.
+ *
+ * WRITTEN TO THE SAME LIMITS THE REPORT ENFORCES. Without that the product does
+ * something absurd: a client presses this, gets a 190 character description, and
+ * the Being found screen immediately says it is too long. The constants come
+ * from lib/seo/audit.ts so there is one place to change them.
+ *
+ * IT DOES NOT SAVE. It returns two strings and the editor puts them in the two
+ * fields, through the same undo history as typing.
+ */
+export async function writeSeoAction(input: unknown): Promise<SeoResult> {
+  try {
+    if (!aiIsConfigured()) {
+      return { ok: false, error: 'The writing assistant is not switched on yet.' };
+    }
+
+    const site = await requireSite();
+    const userId = await currentUserId();
+
+    const fields = (input ?? {}) as Record<string, unknown>;
+    const pageTitle = text(fields.pageTitle, 200);
+    const path = text(fields.path, 300);
+    const pageText = text(fields.text, MAX_PAGE_TEXT);
+
+    /*
+     * A page with nothing on it cannot be described, and the honest answer is to
+     * say so rather than to spend a request having a model invent one. This is
+     * also the commonest way somebody would press the button: on a page they
+     * have just created.
+     */
+    if (pageText.length < 40) {
+      return {
+        ok: false,
+        error: 'There is not enough on this page yet to describe. Add some words first.',
+      };
+    }
+
+    const claim = await claimRequest(site.tenantId, { userId, intent: 'seo' });
+    if (!claim.allowed) {
+      return {
+        ok: false,
+        error:
+          `This site has used all ${DAILY_LIMIT} of today's AI requests. `
+          + 'It resets through the day, so try again later.',
+      };
+    }
+
+    const settings = await getSettings(site.tenantId);
+
+    /*
+     * THE PROFILE IS INCLUDED HERE, unlike the alt text call. A search
+     * description IS about the business, and the tone of voice applies to it,
+     * so the same system prompt every other piece of copy gets is right.
+     */
+    const answer = await ask(
+      `${systemPrompt(settings)}\n\n${seoRules(TITLE_MAX, DESCRIPTION_MIN, DESCRIPTION_MAX)}`,
+      seoPrompt({ pageTitle, path, text: pageText }),
+    );
+
+    if (claim.id) {
+      await recordTokens(site.tenantId, claim.id, {
+        input: answer.inputTokens,
+        output: answer.outputTokens,
+      });
+    }
+
+    const parsed = parseSeoAnswer(answer.text);
+
+    /*
+     * CAPPED HERE TOO. The prompt asks for a length and a prompt is a request:
+     * the schema allows 70 and 200, so a model that overshoots would produce
+     * something that saves fine and then gets reported as too long by the very
+     * screen this exists to satisfy.
+     */
+    const title = parsed.title.slice(0, TITLE_MAX);
+    const description = parsed.description.slice(0, DESCRIPTION_MAX);
+
+    if (!title && !description) {
+      return {
+        ok: false,
+        error: 'The assistant came back with nothing usable. Try again.',
+        retryable: true,
+      };
+    }
+
+    return { ok: true, title, description };
+  } catch (error) {
+    if (error instanceof AiError) {
+      return { ok: false, error: error.message, retryable: error.retryable };
+    }
+    if (isSignInRequired(error)) {
+      return { ok: false, error: (error as Error).message };
+    }
+    console.error('[tg-sites] writing the search details failed', error);
     return { ok: false, error: 'Something went wrong. Try again in a moment.' };
   }
 }

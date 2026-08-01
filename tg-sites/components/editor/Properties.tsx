@@ -48,6 +48,8 @@ import { ImageField } from '../media/ImageField';
 import { FieldRenderer } from './Fields';
 import { Icon } from './Icon';
 import { columnWord, sectionNameAt } from '../../lib/content/naming';
+import { writeSeoAction } from '../../app/actions/ai';
+import { pageText } from '../../lib/seo/audit';
 
 interface Props {
   page: Page;
@@ -555,6 +557,18 @@ function PageFields({ page, onCommit }: { page: Page; onCommit: Props['onCommit'
         <p className="ed-help">Blank means this is the home page.</p>
       </div>
 
+      {/*
+        THE ASSISTANT WRITES BOTH FIELDS IN ONE COMMIT, which is why it sits
+        above them rather than a button on each. A title and a description that
+        were written separately say the same thing twice, and two commits would
+        give the undo history two steps for one action, so undoing would leave
+        half of it behind.
+
+        It reads the DRAFT in front of the client, not the published page: the
+        description they want is of what they are looking at.
+      */}
+      <SeoAssistant page={page} onWritten={(seo) => setSeo(seo, 'seo:assistant')} />
+
       <div className="ed-field">
         <label className="ed-label">Search title</label>
         <input
@@ -589,6 +603,67 @@ function PageFields({ page, onCommit }: { page: Page; onCommit: Props['onCommit'
         </label>
       </div>
     </>
+  );
+}
+
+/**
+ * Write these for me.
+ *
+ * READS THE DRAFT, NOT THE DATABASE. The page in front of the client may have
+ * unsaved changes, and the description they want is of what they are looking at
+ * rather than of what was last published. pageText walks the same tree the
+ * canvas is rendering.
+ *
+ * BOTH FIELDS IN ONE COMMIT. A title and a description written separately end
+ * up saying the same thing twice, and two commits would give the undo history
+ * two steps for one action, so one undo would leave half the change behind.
+ *
+ * IT NEVER FOCUSES ANYTHING. The properties pane redraws on every keystroke and
+ * this component redraws with it.
+ */
+function SeoAssistant({
+  page,
+  onWritten,
+}: {
+  page: Page;
+  onWritten: (seo: { title: string; description: string }) => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState('');
+
+  async function write() {
+    setBusy(true);
+    setFailed('');
+
+    const result = await writeSeoAction({
+      pageTitle: page.title,
+      path: page.slug,
+      text: pageText(page),
+    });
+
+    setBusy(false);
+    if (!result.ok) {
+      setFailed(result.error);
+      return;
+    }
+
+    onWritten({ title: result.title, description: result.description });
+  }
+
+  return (
+    <div className="ed-field">
+      <button type="button" className="ed-btn" disabled={busy} onClick={() => void write()}>
+        <Icon name="sparkle" size={14} />
+        {busy ? 'Reading the page…' : 'Write these for me'}
+      </button>
+      {failed ? (
+        <p className="ed-help" role="alert">{failed}</p>
+      ) : (
+        <p className="ed-help">
+          Written from what is on this page, to the lengths Google actually shows.
+        </p>
+      )}
+    </div>
   );
 }
 
