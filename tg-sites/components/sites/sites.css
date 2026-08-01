@@ -1057,3 +1057,102 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   word-break: break-all;
 }
+
+/* ------------------------------------------------------------------ */
+/* Start with a site, not a blank page                                 */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The front door of a new site.
+ *
+ * Built on .sv-empty rather than beside it, because it stands in the same place
+ * and says the same kind of thing: there is nothing here yet, and here is the
+ * one thing to do about it. Two classes so this can add to that one without
+ * either fighting the other on specificity.
+ */
+.sv-start__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ed-3);
+  justify-content: center;
+}
+
+/* ------------------------------------------------------------------ */
+/* The starter wizard                                                  */
+/* ------------------------------------------------------------------ */
+
+.sw-choices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-2);
+  margin: 0 0 var(--ed-5);
+  padding: 0;
+  border: 0;
+}
+
+.sw-choices legend { margin-bottom: var(--ed-2); padding: 0; }
+
+/*
+ * A choice is a real radio inside a real label.
+ *
+ * Not a clickable div with aria-pressed, which is the shape this usually takes
+ * and is worse in every way that matters: a radio group announces "1 of 2",
+ * moves on the arrow keys and submits with the form, all without a line of
+ * JavaScript. The radio is visible rather than hidden, so the state is carried
+ * by the control itself and not only by the border colour.
+ */
+.sw-choice {
+  display: flex;
+  gap: var(--ed-3);
+  align-items: flex-start;
+  padding: var(--ed-3);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  cursor: pointer;
+  line-height: 1.45;
+}
+
+.sw-choice > span { display: flex; flex-direction: column; gap: 2px; }
+
+.sw-choice[data-picked='true'] {
+  border-color: var(--ed-accent);
+  background: var(--ed-select-wash);
+}
+
+.sw-choice input { margin-top: 3px; flex: none; }
+
+.sw-choice__note { font-size: var(--ed-text-sm); color: var(--ed-ink-2); }
+
+/*
+ * What they will get, listed before they press the button.
+ *
+ * Five new pages appearing unannounced is a product doing something TO
+ * somebody. The same five, listed first, is a product doing something for them.
+ */
+.sw-summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-2);
+  margin: 0 0 var(--ed-5);
+  padding: var(--ed-3) var(--ed-4);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-well);
+  list-style: none;
+  font-size: var(--ed-text-sm);
+  line-height: 1.45;
+}
+
+.sw-summary li { display: flex; gap: var(--ed-2); align-items: flex-start; }
+.sw-summary svg { flex: none; margin-top: 3px; color: var(--ed-select); }
+
+.sw-note {
+  display: flex;
+  gap: var(--ed-2);
+  align-items: flex-start;
+  margin: var(--ed-5) 0 0;
+  font-size: var(--ed-text-sm);
+  line-height: 1.5;
+  color: var(--ed-ink-2);
+}
+
+.sw-note svg { flex: none; margin-top: 2px; color: var(--ed-select); }

@@ -25,6 +25,7 @@ import type { Membership } from '../../lib/db/users';
 import { AccountBar } from '../auth/AccountBar';
 import { Icon } from '../editor/Icon';
 import { ConfirmDialog, Modal } from '../ui/Modal';
+import { StarterWizard, type StarterProfile } from './StarterWizard';
 import './sites.css';
 
 const THEME_KEY = 'tg-sites:theme:v1';
@@ -32,6 +33,7 @@ const THEME_KEY = 'tg-sites:theme:v1';
 type Dialog =
   | { kind: 'new' }
   | { kind: 'rename'; page: PageSummary }
+  | { kind: 'starter' }
   | null;
 
 interface Props {
@@ -42,9 +44,29 @@ interface Props {
   siteName: string;
   siteUrl: string;
   pages: PageSummary[];
+  /**
+   * Whether a starter can still be offered: nothing on this site has any
+   * sections on it yet.
+   *
+   * Worked out on the SERVER, because "empty" is a question about content and
+   * this component only has a list of page names. A site with one blank home
+   * page is empty and `pages.length` says otherwise, which is exactly the case
+   * every new site is in.
+   */
+  canStart: boolean;
+  /** What is already in settings, so the wizard asks nothing twice. */
+  profile: StarterProfile;
 }
 
-export function SiteDashboard({ account, site, siteName, siteUrl, pages: initial }: Props) {
+export function SiteDashboard({
+  account,
+  site,
+  siteName,
+  siteUrl,
+  pages: initial,
+  canStart,
+  profile,
+}: Props) {
   const [pages, setPages] = useState(initial);
   const [dialog, setDialog] = useState<Dialog>(null);
   const [error, setError] = useState<string | null>(null);
@@ -226,7 +248,47 @@ export function SiteDashboard({ account, site, siteName, siteUrl, pages: initial
           </p>
         )}
 
-        {pages.length === 0 ? (
+        {/*
+          THE FRONT DOOR OF A NEW SITE, and it is offered whether or not there
+          are pages, because a site with one untouched home page is still a
+          blank site and that is what every new one looks like. It goes away the
+          moment somebody puts a section on anything.
+
+          Building a site is the primary action and starting from a blank page
+          is the quiet one beside it. That is the right way round: a client who
+          wanted to hand-build six pages would not be on this platform.
+        */}
+        {canStart && (
+          <div className="sv-empty sv-start">
+            <h2>Start with a site, not a blank page</h2>
+            <p>
+              Answer four questions and we will build the pages, the menu and the
+              footer for you. Everything arrives as a draft, so nothing goes live
+              until you say so.
+            </p>
+            <div className="sv-start__actions">
+              <button
+                type="button"
+                className="sv-btn"
+                data-variant="primary"
+                onClick={() => setDialog({ kind: 'starter' })}
+              >
+                <Icon name="sparkle" size={16} />
+                Build me a site
+              </button>
+              <button
+                type="button"
+                className="sv-btn"
+                onClick={() => setDialog({ kind: 'new' })}
+              >
+                <Icon name="plus" size={16} />
+                Start from a blank page
+              </button>
+            </div>
+          </div>
+        )}
+
+        {pages.length === 0 && !canStart ? (
           <div className="sv-empty">
             <h2>No pages yet</h2>
             <p>
@@ -243,7 +305,7 @@ export function SiteDashboard({ account, site, siteName, siteUrl, pages: initial
               Create the home page
             </button>
           </div>
-        ) : (
+        ) : pages.length === 0 ? null : (
           <>
           <p className="sv-list-label">
             {pages.length} {pages.length === 1 ? 'page' : 'pages'}
@@ -351,6 +413,10 @@ export function SiteDashboard({ account, site, siteName, siteUrl, pages: initial
             })
           }
         />
+      )}
+
+      {dialog?.kind === 'starter' && (
+        <StarterWizard profile={profile} onClose={() => setDialog(null)} />
       )}
 
       {dialog?.kind === 'rename' && (

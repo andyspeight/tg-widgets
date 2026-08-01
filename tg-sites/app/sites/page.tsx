@@ -8,6 +8,8 @@ import '../../components/sites/sites.css';
 import { SiteDashboard } from '../../components/sites/SiteDashboard';
 import { activeSite, currentUser } from '../../lib/auth/session';
 import { listPages } from '../../lib/db/pages';
+import { getSettings } from '../../lib/db/settings';
+import { siteIsEmpty } from '../../lib/db/starters';
 import { getTenant, siteUrl } from '../../lib/db/tenants';
 
 export const metadata: Metadata = {
@@ -59,10 +61,18 @@ export default async function SitesPage() {
     );
   }
 
-  const [tenant, url, pages] = await Promise.all([
+  /*
+   * Five reads in parallel rather than three, since 1 Aug 2026. The last two
+   * are for the starter wizard: whether it can still be offered, and what the
+   * client has already told us so it asks nothing twice. Both are cheap and
+   * neither depends on the others.
+   */
+  const [tenant, url, pages, canStart, settings] = await Promise.all([
     getTenant(site.tenantId),
     siteUrl(site.tenantId),
     listPages(site.tenantId),
+    siteIsEmpty(site.tenantId),
+    getSettings(site.tenantId),
   ]);
 
   return (
@@ -72,6 +82,12 @@ export default async function SitesPage() {
       siteName={tenant?.name ?? site.name}
       siteUrl={url}
       pages={pages}
+      canStart={canStart}
+      profile={{
+        company: settings.companyName,
+        town: settings.addressLocality,
+        about: settings.companyAbout,
+      }}
     />
   );
 }
