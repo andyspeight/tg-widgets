@@ -27,7 +27,9 @@ import {
   NavBlock,
   QuoteBlock,
   SliderBlock,
+  SocialBlock,
   SpacerBlock,
+  StepsBlock,
   TableBlock,
   TabsBlock,
   TextBlock,
@@ -59,6 +61,8 @@ export function BlockRenderer({
         return <ListBlock props={props} />;
       case 'icon-item':
         return <IconItemBlock props={props} />;
+      case 'steps':
+        return <StepsBlock props={props} />;
       /*
        * These two take the block's own id, which becomes the `name` grouping
        * their controls. Nothing else in this file needs it, so it is passed
@@ -84,6 +88,8 @@ export function BlockRenderer({
         return <ButtonGroupBlock props={props} />;
       case 'nav':
         return <NavBlock props={props} />;
+      case 'social':
+        return <SocialBlock props={props} />;
       case 'table':
         return <TableBlock props={props} />;
       case 'divider':

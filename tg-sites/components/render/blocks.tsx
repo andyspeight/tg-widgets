@@ -15,7 +15,9 @@ import type { CSSProperties, ReactElement } from 'react';
 import { escapeHtml, safeUrl, sanitiseHtml } from '../../lib/content/sanitise';
 import { parseTable } from '../../lib/content/table';
 import { resolveVideo } from '../../lib/content/video';
+import { socialNetwork } from '../../lib/content/social';
 import { safeWidgetId, widgetKind } from '../../lib/content/widgets';
+import { SocialIcon } from './social-icons';
 
 type Props = Record<string, unknown>;
 
@@ -999,6 +1001,147 @@ export function NavBlock({ props }: { props: Props }): ReactElement {
         </details>
       )}
     </nav>
+  );
+}
+
+/**
+ * Numbered steps, or a timeline.
+ *
+ * AN `ol`, NOT A ROW OF DIVS, and that is the reason this is a block rather
+ * than something built out of columns. A screen reader announces "list, three
+ * items, item one of three", which is the whole meaning of the thing: these
+ * happen in this order. Three cards side by side announce nothing at all.
+ *
+ * THE NUMBERS ARE A CSS COUNTER, never stored text. A client who drags step
+ * three above step two gets 1, 2, 3 with nothing to correct. Typed-in numbers
+ * would go stale the first time anybody reordered them, and the version that
+ * goes stale silently is the one that reaches a live site.
+ *
+ * A STEP WITH NOTHING IN IT IS STILL DRAWN, unlike an empty card. Its number is
+ * its position, so skipping it would renumber everything after it and a client
+ * halfway through typing their five steps would watch them shuffle.
+ */
+export function StepsBlock({ props }: { props: Props }): ReactElement {
+  const layout = oneOf(props, 'layout', ['down', 'across'] as const, 'down');
+  const marker = oneOf(props, 'marker', ['number', 'dot', 'none'] as const, 'number');
+  const connector = props.connector !== false;
+
+  const items = Array.isArray(props.items) ? props.items : [];
+
+  if (items.length === 0) {
+    return <div className="tgs-placeholder">Add the steps</div>;
+  }
+
+  return (
+    <ol
+      className="tgs-steps"
+      data-layout={layout}
+      data-marker={marker}
+      data-connector={connector ? 'true' : undefined}
+    >
+      {items.map((raw, index) => {
+        const item = raw && typeof raw === 'object' ? (raw as Props) : {};
+        const title = str(item, 'title');
+        const body = str(item, 'body');
+
+        return (
+          <li className="tgs-steps__step" key={index}>
+            {/*
+              Decorative, and deliberately so. The number is drawn by CSS into
+              this span, so its text content is empty and there is nothing for a
+              screen reader to read; the `ol` has already said which item this
+              is. Marked hidden rather than left to chance.
+            */}
+            <span className="tgs-steps__marker" aria-hidden="true" />
+            <div className="tgs-steps__body">
+              {title && <p className="tgs-steps__title">{title}</p>}
+              {/* Blank lines become paragraphs, as they do in every other
+                  plain-textarea block. Styled through .tgs-steps__body p
+                  rather than by giving each one a class, since the helper is
+                  shared and this block has no reason to change it. */}
+              {body && paragraphs(body)}
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+/**
+ * A row of links to your own accounts.
+ *
+ * WHAT IS AND IS NOT CLIENT INPUT, because it is the whole security story of
+ * this block. The NETWORK is an id looked up in a closed list, so the picture
+ * is markup we wrote; an id that is not in the list draws no picture at all
+ * rather than falling back to something generic. The ADDRESS is client input
+ * and goes through safeUrl, with mailto and tel allowed because "follow us"
+ * rows almost always end with an email or a phone number.
+ *
+ * AN ACCOUNT WITH NO ADDRESS IS NOT DRAWN. The block ships with three empty
+ * ones so it arrives looking like what it is, and a client who fills in two of
+ * them gets two icons rather than one working link and one dead circle.
+ *
+ * EVERY LINK CARRIES ITS OWN NAME. An icon-only row is eleven anchors whose
+ * text content is an SVG, which a screen reader announces as nothing at all, so
+ * each one gets an aria-label. With the names showing, the visible text IS the
+ * name and the label would be read twice, so it is dropped.
+ *
+ * rel="noreferrer" as well as noopener on the outward ones. These go to other
+ * companies and there is no reason to tell them which page somebody came from.
+ */
+export function SocialBlock({ props }: { props: Props }): ReactElement | null {
+  const style = oneOf(props, 'style', ['plain', 'circle', 'square', 'filled'] as const, 'plain');
+  const size = oneOf(props, 'size', ['s', 'm', 'l'] as const, 'm');
+  const align = oneOf(props, 'align', ['left', 'centre', 'right'] as const, 'left');
+  const showLabels = props.showLabels === true;
+
+  const items = Array.isArray(props.items) ? props.items : [];
+
+  const links = items
+    .map((raw, index) => {
+      const item = raw && typeof raw === 'object' ? (raw as Props) : {};
+      const network = socialNetwork(str(item, 'network'));
+      if (!network) return null;
+
+      // mailto and tel are refused by default and asked for here, for this
+      // block only. See lib/content/social.ts.
+      const href = safeUrl(str(item, 'href'), { allowMailto: true });
+      if (!href) return null;
+
+      const external = /^https?:/i.test(href);
+
+      return (
+        <li className="tgs-social__item" key={`${network.id}-${index}`}>
+          <a
+            className="tgs-social__link"
+            href={href}
+            aria-label={showLabels ? undefined : network.label}
+            target={external ? '_blank' : undefined}
+            rel={external ? 'noopener noreferrer' : undefined}
+          >
+            <SocialIcon network={network.id} />
+            {showLabels && <span className="tgs-social__label">{network.label}</span>}
+          </a>
+        </li>
+      );
+    })
+    .filter((link): link is ReactElement => link !== null);
+
+  if (links.length === 0) {
+    return <div className="tgs-placeholder">Add the addresses of your accounts</div>;
+  }
+
+  return (
+    <ul
+      className="tgs-social"
+      data-style={style}
+      data-size={size}
+      data-align={align}
+      data-labels={showLabels ? 'true' : undefined}
+    >
+      {links}
+    </ul>
   );
 }
 

@@ -13,6 +13,7 @@
 
 import { Fragment, type CSSProperties, type ReactElement } from 'react';
 import { safeAnchor, type Box, type Column, type Page, type Row, type Section } from '../../lib/content/schema';
+import { dividerShape, normaliseDividerHeight, safeDivider, sectionFill } from '../../lib/content/dividers';
 import { safeUrl } from '../../lib/content/sanitise';
 import { BlockRenderer } from './BlockRenderer';
 
@@ -116,6 +117,14 @@ export function PageRenderer({
             index={index}
             editable={editable}
             editingPath={editingPath}
+            /*
+              A shaped edge is the BOUNDARY between two sections, so drawing one
+              needs the colour on the other side of it. Only this component
+              knows the order, so only this component can say. Undefined at
+              either end means the page itself.
+            */
+            above={page.sections[index - 1]}
+            below={page.sections[index + 1]}
           />
           {editable && <InsertPoint index={index + 1} />}
         </Fragment>
@@ -176,7 +185,15 @@ export function SectionRenderer({
   index,
   editable = false,
   editingPath = null,
-}: { section: Section; index: number } & Editable): ReactElement {
+  above,
+  below,
+}: {
+  section: Section;
+  index: number;
+  /** The sections either side, for the shaped edges. See SectionDivider. */
+  above?: Section;
+  below?: Section;
+} & Editable): ReactElement {
   const background = safeUrl(section.backgroundImage ?? '');
   const video = safeUrl(section.backgroundVideo ?? '');
   /*
@@ -244,6 +261,29 @@ export function SectionRenderer({
       )}
 
       {(background || video) && <div className="tgs-section__scrim" aria-hidden="true" />}
+
+      {/*
+        THE SHAPED EDGES. Each one sits OUTSIDE the section's own box, drawn in
+        the section's background colour, so the colour reaches up into the
+        section above or down into the one below. That is what makes the join
+        look like one design rather than two rectangles touching.
+
+        Drawn before the content so it can never sit over the words, and marked
+        decorative because it is: it carries no meaning a reader would miss.
+      */}
+      <SectionDivider
+        edge="top"
+        shape={section.dividerTop}
+        height={section.dividerHeight}
+        fill={sectionFill(above)}
+      />
+      <SectionDivider
+        edge="bottom"
+        shape={section.dividerBottom}
+        height={section.dividerHeight}
+        fill={sectionFill(below)}
+      />
+
       <div className="tgs-section__inner">
         {section.rows.map((row, rowIndex) => (
           <RowRenderer
@@ -301,6 +341,59 @@ function boxStyle(box: Box): CSSProperties {
     // own should show the section behind it, not repaint it.
     '--tgs-bg': box.background ?? 'transparent',
   } as CSSProperties;
+}
+
+/**
+ * One shaped edge of a section.
+ *
+ * NOTHING AT ALL when the shape is 'none' or a name this build cannot draw, and
+ * that second case is the forward-compatibility story: a section saved by a
+ * newer build naming a shape added later renders a straight edge here rather
+ * than an empty box or a crash.
+ *
+ * THE FILL IS `currentColor`, and app/globals.css sets that colour per tone on
+ * this element. It has to be set rather than inherited: a dark section sets
+ * `color` to its inverted text colour, so an inherited fill would draw the
+ * divider in the text colour instead of the background one.
+ *
+ * preserveAspectRatio="none" is what lets one 1200-wide path stretch to any
+ * section width while keeping the height it was given.
+ */
+function SectionDivider({
+  edge,
+  shape,
+  height,
+  fill,
+}: {
+  edge: 'top' | 'bottom';
+  shape: string | undefined;
+  height: number | undefined;
+  /** The colour of the section on the other side of this edge. */
+  fill: string;
+}): ReactElement | null {
+  const found = dividerShape(safeDivider(shape));
+  if (!found) return null;
+
+  return (
+    <div
+      className="tgs-section__divider"
+      data-edge={edge}
+      aria-hidden="true"
+      /*
+       * THE COLOUR IS SET HERE RATHER THAN IN CSS, and it has to be. The value
+       * comes from the section NEXT DOOR, which no selector can reach: CSS has
+       * no previous-sibling combinator and, even for the next one, no way to
+       * read another element's computed background into this one. It is also
+       * why boxStyle's `--tgs-bg: transparent` cannot be used, since that is
+       * emitted on every section whether a colour was chosen or not.
+       */
+      style={{ height: `${normaliseDividerHeight(height)}px`, color: fill }}
+    >
+      <svg viewBox="0 0 1200 100" preserveAspectRatio="none" focusable="false">
+        <path d={found.path} />
+      </svg>
+    </div>
+  );
 }
 
 // ---------------------------------------------------------------------------

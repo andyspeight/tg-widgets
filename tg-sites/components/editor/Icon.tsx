@@ -29,6 +29,8 @@ export type IconName =
   | 'quote'
   | 'list'
   | 'nav'
+  | 'social'
+  | 'steps'
   | 'cards'
   | 'accordion'
   | 'tabs'
@@ -103,6 +105,13 @@ const PATHS: Record<IconName, string> = {
   // Three separated dashes on one line: a row of links. Deliberately not the
   // burger, which is `section`, and not full-width rules, which is `text`.
   nav: 'M3 12h4M10 12h4M17 12h4',
+  // Three linked circles: a row of accounts, which is what the block is. Not
+  // the share glyph, which is one node branching to two and means sending
+  // this page somewhere rather than pointing at an account.
+  social: 'M6 12a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0zM14.5 12a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0zM23 12a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z',
+  // Three markers down the left with a line through them, and a line of words
+  // beside each. The connector is what tells it apart from `list`.
+  steps: 'M6 4v16M6 5.5a1.5 1.5 0 1 0 0 .01M6 12a1.5 1.5 0 1 0 0 .01M6 18.5a1.5 1.5 0 1 0 0 .01M11 5.5h9M11 12h9M11 18.5h9',
   // Two cards, each with a picture area above a line of words. Deliberately not
   // `columns`, which is the same two boxes with nothing in them, and not
   // `gallery`, which is four squares.

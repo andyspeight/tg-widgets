@@ -30,6 +30,7 @@
 
 import { z } from 'zod';
 
+import { normaliseDividerHeight, safeDivider } from './dividers';
 import { escapeHtml } from './sanitise';
 
 // ---------------------------------------------------------------------------
@@ -402,6 +403,22 @@ export const SectionSchema = z.object({
    * "Our prices" means `our-prices` and being told off for it helps nobody.
    */
   anchor: z.unknown().transform(safeAnchor).optional(),
+  /*
+   * THE SHAPED EDGES, added 1 Aug 2026.
+   *
+   * A name from lib/content/dividers.ts, or 'none'. Reduced rather than
+   * refused, the same call the anchor above makes: a section stored by a newer
+   * build naming a shape this one has never heard of falls back to a straight
+   * edge and still renders, which is what makes the content model forward
+   * compatible.
+   *
+   * ONE HEIGHT FOR BOTH EDGES. Two would be four controls on a section that
+   * already has plenty, and a top and a bottom divider of different depths on
+   * the same section is not a design anybody has asked for.
+   */
+  dividerTop: z.unknown().transform(safeDivider).optional(),
+  dividerBottom: z.unknown().transform(safeDivider).optional(),
+  dividerHeight: z.unknown().transform(normaliseDividerHeight).optional(),
   rows: z.array(RowSchema).default([]),
 });
 

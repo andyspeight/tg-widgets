@@ -218,6 +218,7 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
                 size: 's',
               },
             },
+            { type: 'social', props: { style: 'circle', size: 's' } },
           ],
           [
             { type: 'heading', props: { html: 'Holidays', style: 'h6', level: 'h3' } },
@@ -299,6 +300,7 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
           [
             { type: 'image', props: { ratio: 'auto', fit: 'contain', radius: 'none', alt: 'Your logo', href: '/' } },
             { type: 'nav', props: { items: LINKS, collapse: false, ...CENTRED } },
+            { type: 'social', props: { align: 'centre' } },
             {
               type: 'text',
               props: {
@@ -480,6 +482,7 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
                 size: 's',
               },
             },
+            { type: 'social', props: { style: 'circle', size: 's' } },
           ],
         ],
       },

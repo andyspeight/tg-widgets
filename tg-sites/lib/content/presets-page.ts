@@ -993,6 +993,49 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
     ],
   },
 
+  {
+    id: 'features-how-it-works',
+    category: 'features',
+    label: 'How it works',
+    description: 'Numbered steps down the page, joined up. For explaining a process.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Tagline here', style: 'h6', level: 'h3', ...CENTRED } },
+            { type: 'heading', props: { html: 'How it works', style: 'h2', ...CENTRED } },
+          ],
+        ],
+      },
+      {
+        widths: [1],
+        columns: [[{ type: 'steps', props: { layout: 'down', marker: 'number', connector: true } }]],
+      },
+    ],
+    section: { width: 'narrow' },
+  },
+
+  {
+    id: 'features-three-steps-across',
+    category: 'features',
+    label: 'Three steps across',
+    description: 'The same sequence side by side. For three short ones on a wide page.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [{ type: 'heading', props: { html: 'Three steps and you are booked', style: 'h2', ...CENTRED } }],
+        ],
+      },
+      {
+        widths: [1],
+        columns: [[{ type: 'steps', props: { layout: 'across', marker: 'number', connector: true } }]],
+      },
+    ],
+    section: { tone: 'subtle' },
+  },
+
   /*
    * -------------------------------------------------------------------------
    * Call to action
@@ -2127,6 +2170,32 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
+  },
+
+  {
+    id: 'contact-follow-us',
+    category: 'contact',
+    label: 'Follow us',
+    description: 'A short line and a row of social icons. Good above a footer.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Somewhere to see what we are up to', style: 'h3', ...CENTRED } },
+            {
+              type: 'text',
+              props: {
+                html: '<p>Pictures from the trips we have booked, and the offers worth knowing about.</p>',
+                ...CENTRED,
+              },
+            },
+            { type: 'social', props: { style: 'circle', size: 'l', align: 'centre' } },
+          ],
+        ],
+      },
+    ],
+    section: { tone: 'subtle', width: 'narrow' },
   },
 
   {

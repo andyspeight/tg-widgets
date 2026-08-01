@@ -12,6 +12,12 @@
 
 import { useState, type CSSProperties, type ReactNode } from 'react';
 import type { Page, RegionName } from '../../lib/content/schema';
+import {
+  DEFAULT_DIVIDER_HEIGHT,
+  DIVIDER_OPTIONS,
+  MAX_DIVIDER_HEIGHT,
+  MIN_DIVIDER_HEIGHT,
+} from '../../lib/content/dividers';
 import { safeSlug } from '../../lib/content/collection';
 import type { ItemMeta } from '../../lib/content/collection-page';
 import {
@@ -743,6 +749,41 @@ function SectionFields({
       </p>
       </Group>
 
+      {/*
+        THE SHAPED EDGES.
+        Its own group, and shut by default, because most sections have straight
+        edges and always will. A section with a background picture is told the
+        edges do nothing rather than being offered a control that quietly has
+        no effect: the shape is drawn in a flat colour and there is no honest
+        way to extend a photograph into the section next door.
+      */}
+      <Group title="Shaped edges" defaultOpen={false}>
+      <Picker
+        label="Top edge"
+        value={section.dividerTop ?? 'none'}
+        options={DIVIDER_OPTIONS}
+        onChange={(value) => set({ dividerTop: value }, `sec:${index}:dtop`)}
+      />
+      <Picker
+        label="Bottom edge"
+        value={section.dividerBottom ?? 'none'}
+        options={DIVIDER_OPTIONS}
+        onChange={(value) => set({ dividerBottom: value }, `sec:${index}:dbot`)}
+      />
+      <Measure
+        label="How deep"
+        value={section.dividerHeight ?? DEFAULT_DIVIDER_HEIGHT}
+        min={MIN_DIVIDER_HEIGHT}
+        max={MAX_DIVIDER_HEIGHT}
+        onChange={(value) => set({ dividerHeight: value }, `sec:${index}:dh`)}
+      />
+      <p className="ed-help">
+        The shape is the colour of the section next to it, reaching across the
+        join. Set it on one side of a join or the other, not both, or you get
+        two shapes stacked.
+      </p>
+      </Group>
+
       <Group title="Link to this section" defaultOpen={false}>
       <div className="ed-field">
         <label className="ed-label">Name</label>
@@ -1140,6 +1181,45 @@ function BlockFields({
 }
 
 // ---------------------------------------------------------------------------
+
+/**
+ * A dropdown, for a choice with more options than a segmented track can hold.
+ *
+ * FOUR IS THE LINE, and it is the same line components/editor/Fields.tsx draws
+ * for a block's own select fields: four or fewer reads better as buttons, more
+ * than four in one track gives each one about fifty pixels and "Straight" does
+ * not fit in fifty pixels. The shaped edges have six each, which is what made
+ * this necessary.
+ */
+function Picker({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: ReadonlyArray<{ value: string; label: string }>;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div className="ed-field">
+      <label className="ed-label">{label}</label>
+      <select
+        className="ed-select"
+        aria-label={label}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
 
 function Segmented({
   label,

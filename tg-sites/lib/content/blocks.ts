@@ -17,8 +17,8 @@
  *
  * Add a test alongside if the block has non-trivial props.
  */
-
 import type { IconName } from '../../components/editor/Icon';
+import { SOCIAL_OPTIONS } from './social';
 import { WIDGET_KINDS } from './widgets';
 
 // ---------------------------------------------------------------------------
@@ -990,6 +990,168 @@ export const BLOCKS: readonly BlockDefinition[] = [
         key: 'collapse',
         label: 'Menu button on phones',
         help: 'Seven links across a phone do not fit. This tucks them behind a button.',
+      },
+    ],
+  },
+
+  {
+    /*
+     * NUMBERED STEPS, OR A TIMELINE. The same block either way, because it is
+     * the same thing: an ordered list where the order is the point.
+     *
+     * "How it works" and "day by day" are the two pages every travel site has
+     * and neither could be built properly. Cards can fake it and get the two
+     * things that matter wrong: a card grid is not an ordered list to anything
+     * reading the page, and nothing joins one card to the next, so three steps
+     * read as three unrelated boxes.
+     *
+     * AN `ol`, AND THE NUMBERS COME FROM CSS COUNTERS rather than from stored
+     * text. A client who drags step three above step two gets 1, 2, 3 without
+     * touching anything, which is the whole reason not to type them in.
+     */
+    type: 'steps',
+    label: 'Steps',
+    group: 'Text',
+    icon: 'steps',
+    description: 'Numbered steps or a day by day timeline, joined up in order.',
+    defaults: {
+      layout: 'down',
+      marker: 'number',
+      connector: true,
+      items: [
+        { title: 'Tell us what you are after', body: 'Roughly where, roughly when, and roughly how many of you.' },
+        { title: 'We put something together', body: 'A couple of options, priced, with the reasons we picked them.' },
+        { title: 'You say yes', body: 'A deposit holds it and we do the rest.' },
+      ],
+    },
+    summarise: (props) => {
+      const count = Array.isArray(props.items) ? props.items.length : 0;
+      return `Steps (${count})`;
+    },
+    fields: [
+      {
+        kind: 'repeater',
+        key: 'items',
+        label: 'Steps',
+        itemLabel: 'Step',
+        max: 12,
+        fields: [
+          { kind: 'text', key: 'title', label: 'Title', max: 120 },
+          { kind: 'textarea', key: 'body', label: 'What happens', rows: 3, max: 400 },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'layout',
+        label: 'Direction',
+        options: [
+          { value: 'down', label: 'Down the page' },
+          { value: 'across', label: 'Across the page' },
+        ],
+        help: 'Down suits a long list. Across suits three or four short ones.',
+      },
+      {
+        kind: 'select',
+        key: 'marker',
+        label: 'Marker',
+        options: [
+          { value: 'number', label: 'Numbers' },
+          { value: 'dot', label: 'Dots' },
+          { value: 'none', label: 'Nothing' },
+        ],
+      },
+      {
+        kind: 'toggle',
+        key: 'connector',
+        label: 'Join them up',
+        help: 'A line from one step to the next, so they read as a sequence.',
+      },
+    ],
+  },
+
+  {
+    /*
+     * A ROW OF SOCIAL LINKS, which every footer wants and nothing else here did.
+     *
+     * NOT THE SOCIAL SHARE WIDGET. That one shares the page somebody is looking
+     * at, which is a different job in the opposite direction: this points at
+     * accounts you own. A client wanting both wants both.
+     *
+     * The other three near-misses, and why none of them worked: a Button has no
+     * icon, the Icon and text block takes a single emoji and draws it beside a
+     * title, and a Menu is words. A row of recognisable marks is its own thing.
+     *
+     * THE NETWORK IS PICKED FROM A CLOSED LIST and the drawing is entirely ours.
+     * See lib/content/social.ts: if a client could supply the picture, this
+     * block would be a way to put arbitrary SVG on a page, and SVG carries
+     * script. The only client input is an address, and that goes through safeUrl
+     * exactly as every other link does.
+     */
+    type: 'social',
+    label: 'Social links',
+    group: 'Actions',
+    icon: 'social',
+    description: 'A row of icons linking to your accounts.',
+    defaults: {
+      style: 'plain',
+      size: 'm',
+      align: 'left',
+      showLabels: false,
+      items: [
+        { network: 'facebook', href: '' },
+        { network: 'instagram', href: '' },
+        { network: 'x', href: '' },
+      ],
+    },
+    summarise: (props) => {
+      const count = Array.isArray(props.items) ? props.items.length : 0;
+      return `Social links (${count})`;
+    },
+    fields: [
+      {
+        kind: 'repeater',
+        key: 'items',
+        label: 'Accounts',
+        itemLabel: 'Account',
+        max: 12,
+        fields: [
+          { kind: 'select', key: 'network', label: 'Where', options: SOCIAL_OPTIONS },
+          {
+            kind: 'url',
+            key: 'href',
+            label: 'Address',
+            placeholder: 'https://facebook.com/yourpage',
+            help: 'The full address of your page. An email or a phone number works too.',
+          },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'style',
+        label: 'Style',
+        options: [
+          { value: 'plain', label: 'Plain' },
+          { value: 'circle', label: 'In a circle' },
+          { value: 'square', label: 'In a square' },
+          { value: 'filled', label: 'Filled' },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'size',
+        label: 'Size',
+        options: [
+          { value: 's', label: 'Small' },
+          { value: 'm', label: 'Normal' },
+          { value: 'l', label: 'Large' },
+        ],
+      },
+      { kind: 'select', key: 'align', label: 'Alignment', options: ALIGN_OPTIONS },
+      {
+        kind: 'toggle',
+        key: 'showLabels',
+        label: 'Show the names',
+        help: 'Off is a row of icons. On puts the name beside each one.',
       },
     ],
   },

@@ -1494,6 +1494,319 @@
 }
 
 /* ------------------------------------------------------------------ */
+/* Shaped section edges                                                */
+/* ------------------------------------------------------------------ */
+
+/*
+ * THE DIVIDER SITS INSIDE THE SECTION AND IS DRAWN IN THE NEIGHBOUR'S COLOUR.
+ *
+ * That is the way round it has to be, and the first attempt had it the other
+ * way. Reaching OUT of its own section into the next one looked right in
+ * isolation and covered whatever was near the edge of that section: a 56px
+ * divider ate the whole 48px default padding of the section below it and sat
+ * on the heading. Drawn inside, it occupies its own section's padding, which is
+ * empty by definition, and nothing is ever hidden.
+ *
+ * The colour comes from the renderer because CSS cannot fetch it: there is no
+ * previous-sibling combinator, and no way to read another element's computed
+ * background into this one. See SectionDivider in PageRenderer.tsx.
+ *
+ * z-index 1 puts it above the section's own background and its scrim and below
+ * .tgs-section__inner, which is already z-index 2. So it can never sit over the
+ * words even if a client sets a divider deeper than their padding.
+ *
+ * pointer-events: none so it is never between a visitor and a link.
+ */
+.tgs-section__divider {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  line-height: 0;
+  pointer-events: none;
+}
+
+/*
+ * Every path in lib/content/dividers.ts is drawn filled at the BOTTOM of its
+ * box, which is what a BOTTOM edge wants: the neighbour below reaching up. The
+ * top edge is the same path flipped, rather than a second set of coordinates
+ * that could drift out of step with the first.
+ */
+.tgs-section__divider[data-edge='top']    { top: 0; transform: scaleY(-1); }
+.tgs-section__divider[data-edge='bottom'] { bottom: 0; }
+
+.tgs-section__divider svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.tgs-section__divider path { fill: currentColor; }
+
+/* ------------------------------------------------------------------ */
+/* Steps and timelines                                                 */
+/* ------------------------------------------------------------------ */
+
+/*
+ * THE NUMBERS ARE A COUNTER, so dragging step three above step two renumbers
+ * everything with nothing to correct by hand. `list-style: none` is what makes
+ * the counter necessary: it takes away the browser's own numbering, which
+ * cannot be styled into a circle.
+ */
+.tgs-steps {
+  counter-reset: tgs-step;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tgs-steps__step {
+  position: relative;
+  counter-increment: tgs-step;
+}
+
+.tgs-steps__marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--tgs-primary);
+  border-radius: 999px;
+  background: var(--tgs-bg, transparent);
+  color: var(--tgs-primary);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.tgs-steps[data-marker='number'] .tgs-steps__marker::before { content: counter(tgs-step); }
+
+/* A dot is the same circle shrunk and filled. Same size box, so the words
+   still line up with the numbered version above it on the same page. */
+.tgs-steps[data-marker='dot'] .tgs-steps__marker {
+  width: 16px;
+  height: 16px;
+  margin: 12px;
+  background: var(--tgs-primary);
+}
+
+.tgs-steps[data-marker='none'] .tgs-steps__marker { display: none; }
+
+.tgs-steps__title {
+  margin: 0 0 var(--tgs-space-xs);
+  font-size: var(--tgs-text-l);
+  font-weight: 600;
+}
+
+.tgs-steps__body p { margin: 0 0 var(--tgs-space-s); color: var(--tgs-text-muted); }
+.tgs-steps__body p:last-child { margin-bottom: 0; }
+
+/* --- Down the page ------------------------------------------------ */
+
+.tgs-steps[data-layout='down'] .tgs-steps__step {
+  display: flex;
+  gap: var(--tgs-space-m);
+  padding-bottom: var(--tgs-space-l);
+}
+
+.tgs-steps[data-layout='down'] .tgs-steps__step:last-child { padding-bottom: 0; }
+
+/*
+ * THE LINE JOINING ONE STEP TO THE NEXT, and the reason it is on the step
+ * rather than between them: a border-bottom or a separate element would put a
+ * line after the LAST one too, dangling off the end of the sequence.
+ * `:not(:last-child)` says it once.
+ */
+.tgs-steps[data-connector='true'][data-layout='down'] .tgs-steps__step:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 40px;
+  bottom: 8px;
+  width: 2px;
+  background: var(--tgs-border);
+}
+
+.tgs-steps[data-connector='true'][data-layout='down'][data-marker='dot'] .tgs-steps__step:not(:last-child)::before {
+  left: 19px;
+  top: 32px;
+}
+
+/* --- Across the page ---------------------------------------------- */
+
+.tgs-steps[data-layout='across'] {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--tgs-space-l);
+}
+
+.tgs-steps[data-layout='across'] .tgs-steps__marker { margin-bottom: var(--tgs-space-s); }
+
+/*
+ * The connector runs from the marker to the right edge of the step, so a row of
+ * four draws three lines and the last one has none. Sits behind the marker on
+ * purpose: `z-index` rather than clever widths, because the number of steps per
+ * row changes with the width and no arithmetic here can know it.
+ */
+.tgs-steps[data-connector='true'][data-layout='across'] .tgs-steps__step:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 40px;
+  top: 19px;
+  right: calc(var(--tgs-space-l) * -1);
+  height: 2px;
+  background: var(--tgs-border);
+}
+
+.tgs-steps[data-connector='true'][data-layout='across'][data-marker='dot'] .tgs-steps__step:not(:last-child)::before {
+  left: 32px;
+  top: 19px;
+}
+
+.tgs-steps__marker { position: relative; z-index: 1; }
+
+/*
+ * ACROSS BECOMES DOWN ON A PHONE, which is the same rule every row in this
+ * stylesheet follows: four steps sharing 390px is four steps nobody can read.
+ * The horizontal connector would also be pointing at nothing, so it goes and
+ * the vertical one takes over.
+ */
+@container tgs-page (max-width: 767px) {
+  .tgs-steps[data-layout='across'] { display: block; }
+
+  .tgs-steps[data-layout='across'] .tgs-steps__step {
+    display: flex;
+    gap: var(--tgs-space-m);
+    padding-bottom: var(--tgs-space-l);
+  }
+
+  .tgs-steps[data-layout='across'] .tgs-steps__step:last-child { padding-bottom: 0; }
+  .tgs-steps[data-layout='across'] .tgs-steps__marker { margin-bottom: 0; }
+
+  .tgs-steps[data-connector='true'][data-layout='across'] .tgs-steps__step:not(:last-child)::before {
+    left: 19px;
+    top: 40px;
+    right: auto;
+    bottom: 8px;
+    width: 2px;
+    height: auto;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Social links                                                        */
+/* ------------------------------------------------------------------ */
+
+/*
+ * A row of accounts. The icons take the colour of the text around them, never
+ * a brand colour: eleven fixed brand colours in a footer look like a sticker
+ * sheet, and they would fight whatever tone the section is set to.
+ */
+.tgs-social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tgs-space-s);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tgs-social[data-align='centre'] { justify-content: center; }
+.tgs-social[data-align='right']  { justify-content: flex-end; }
+
+.tgs-social__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tgs-space-s);
+  /*
+   * 44px, the minimum comfortable touch target, and it is the LINK that
+   * carries it rather than the icon. A 20px icon with 20px of padding is a
+   * 20px tap target in every browser that ignores padding on an inline
+   * element, which is why this is inline-flex with a min size on it.
+   */
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 var(--tgs-space-xs);
+  border-radius: var(--tgs-radius-sm);
+  color: inherit;
+  text-decoration: none;
+  transition: opacity 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+}
+
+.tgs-social__link:hover { opacity: 0.7; }
+
+.tgs-social__link:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.tgs-social__icon { flex: none; }
+
+/* With the names showing the row becomes a list of links, so it needs room
+   for words rather than a square target. */
+.tgs-social[data-labels='true'] .tgs-social__link {
+  padding: 0 var(--tgs-space-s);
+  justify-content: flex-start;
+}
+
+.tgs-social[data-labels='true'] { gap: var(--tgs-space-xs) var(--tgs-space-m); }
+
+/* --- Shapes ------------------------------------------------------- */
+
+.tgs-social[data-style='circle'] .tgs-social__link,
+.tgs-social[data-style='square'] .tgs-social__link {
+  border: 1px solid currentColor;
+  padding: 0;
+  width: 44px;
+}
+
+.tgs-social[data-style='circle'] .tgs-social__link { border-radius: 999px; }
+.tgs-social[data-style='square'] .tgs-social__link { border-radius: var(--tgs-radius-sm); }
+
+/*
+ * Filled uses the theme's primary and its on-brand pair, so it stays readable
+ * whatever the client picks. currentColor would give a primary-on-primary
+ * circle nobody can see.
+ */
+.tgs-social[data-style='filled'] .tgs-social__link {
+  width: 44px;
+  padding: 0;
+  border-radius: 999px;
+  background: var(--tgs-primary);
+  color: var(--tgs-on-brand);
+}
+
+/* A shape with words in it is a pill, not a circle, so the width goes back. */
+.tgs-social[data-labels='true'][data-style='circle'] .tgs-social__link,
+.tgs-social[data-labels='true'][data-style='square'] .tgs-social__link,
+.tgs-social[data-labels='true'][data-style='filled'] .tgs-social__link {
+  width: auto;
+  padding: 0 var(--tgs-space-m);
+}
+
+/* --- Sizes -------------------------------------------------------- */
+
+/*
+ * The TARGET stays 44px at every size and only the picture changes. Shrinking
+ * the tap target with the icon is how a "small" option quietly becomes a
+ * WCAG failure on a phone.
+ */
+.tgs-social[data-size='s'] .tgs-social__icon { width: 16px; height: 16px; }
+.tgs-social[data-size='l'] .tgs-social__icon { width: 26px; height: 26px; }
+
+.tgs-social[data-size='l'][data-style='circle'] .tgs-social__link,
+.tgs-social[data-size='l'][data-style='square'] .tgs-social__link,
+.tgs-social[data-size='l'][data-style='filled'] .tgs-social__link {
+  width: 52px;
+  min-height: 52px;
+}
+
+.tgs-social[data-size='l'][data-labels='true'] .tgs-social__link { width: auto; }
+
+/* ------------------------------------------------------------------ */
 /* The header and the footer                                           */
 /* ------------------------------------------------------------------ */
 

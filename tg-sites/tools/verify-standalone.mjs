@@ -463,11 +463,11 @@ await check('block picker opens from a section', async () => {
  * the picker, and a block that silently stops rendering its card is exactly what
  * this catches.
  *
- * Twenty-one because the harness runs as staff, so the staff-only Embed block is
+ * Twenty-two because the harness runs as staff, so the staff-only Embed block is
  * in there too.
  */
 await check('block picker offers the full library', async () =>
-  (await page.locator('.ed-block-card').count()) === 21);
+  (await page.locator(".ed-block-card").count()) === 23);
 
 await check('including both ways to put a widget on a page', async () => {
   const cards = (await page.locator('.ed-block-card').allInnerTexts()).join(' | ');
@@ -4128,7 +4128,7 @@ await check('the header offers the same blocks a page does', async () => {
   await page.keyboard.press('Escape');
   await page.waitForTimeout(200);
   // The whole library, because a header is sections and rows like anything else.
-  return count === 21 ? true : `${count} blocks in the header picker`;
+  return count === 23 ? true : `${count} blocks in the header picker`;
 });
 
 await check('a menu in a header saves through the region actions', async () => {
@@ -5359,6 +5359,230 @@ await page.waitForTimeout(300);
 await page.evaluate(() => window.__TG_SET_REGION__(null));
 await page.waitForTimeout(600);
 await showPanels();
+
+
+// ---------------------------------------------------------------------------
+// Social links, Steps, and shaped section edges
+//
+// Three additions from 1 Aug 2026. What Node already checks is the data: the
+// closed lists, the reductions, the field kinds that drive sanitising. What
+// only a browser can settle is below, and it is the same three things every
+// time: does it draw, is it reachable, and does it survive a phone.
+// ---------------------------------------------------------------------------
+
+await page.reload();
+await page.waitForSelector('.ed-root');
+await showPanels();
+
+await check('Social links and Steps are both in the block picker', async () => {
+  await openBlockPicker();
+  const cards = (await page.locator('.ed-block-card').allInnerTexts()).join(' | ');
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(200);
+  return /Social links/.test(cards) && /Steps/.test(cards)
+    ? true
+    : 'one of them is missing from the picker';
+});
+
+// --- Social links -----------------------------------------------------------
+
+/*
+ * A ROW OF ICON-ONLY LINKS HAS NO TEXT CONTENT AT ALL: every anchor's child is
+ * an SVG, which a screen reader announces as nothing. The name has to come from
+ * an aria-label, and this is the check that it actually does.
+ */
+await check('a social row arrives asking for the addresses', async () => {
+  await addBlock('Social links');
+  const text = await added().innerText();
+  return /addresses of your accounts/i.test(text) ? true : `it says "${text}"`;
+});
+
+await check('and draws a link once one is filled in', async () => {
+  await showPanels();
+  const first = page.locator('.ed-props input[placeholder*="facebook" i]').first();
+  await first.fill('https://facebook.com/someshop');
+  await page.waitForTimeout(700);
+
+  const state = await added().evaluate((root) => {
+    const link = root.querySelector('.tgs-social__link');
+    return link
+      ? {
+          href: link.getAttribute('href'),
+          label: link.getAttribute('aria-label'),
+          rel: link.getAttribute('rel'),
+          target: link.getAttribute('target'),
+          svgs: link.querySelectorAll('svg').length,
+        }
+      : null;
+  });
+
+  return state
+    && state.href === 'https://facebook.com/someshop'
+    && state.label === 'Facebook'
+    && /noopener/.test(state.rel ?? '')
+    && /noreferrer/.test(state.rel ?? '')
+    && state.target === '_blank'
+    && state.svgs === 1
+    ? true
+    : JSON.stringify(state);
+});
+
+/*
+ * 44px is the minimum comfortable touch target, and it is the LINK that has to
+ * carry it rather than the 20px icon inside it. A row of social icons is the
+ * classic place this gets missed.
+ */
+await check('and the tap target is big enough for a thumb', async () => {
+  const box = await added().locator('.tgs-social__link').first().boundingBox();
+  return box && box.width >= 44 && box.height >= 44
+    ? true
+    : `link is ${Math.round(box?.width ?? 0)}x${Math.round(box?.height ?? 0)}`;
+});
+
+await check('a made-up address is refused rather than rendered', async () => {
+  const first = page.locator('.ed-props input[placeholder*="facebook" i]').first();
+  await first.fill('javascript:alert(1)');
+  await first.blur();
+  await page.waitForTimeout(800);
+
+  const hrefs = await added().evaluate((root) =>
+    [...root.querySelectorAll('a')].map((a) => a.getAttribute('href')));
+
+  return hrefs.every((href) => !/^javascript:/i.test(href ?? ''))
+    ? true
+    : `rendered ${JSON.stringify(hrefs)}`;
+});
+
+// --- Steps ------------------------------------------------------------------
+
+/*
+ * THE NUMBERS ARE A CSS COUNTER, so the markup carries no digits at all and
+ * there is nothing in the DOM to read them from.
+ *
+ * AND getComputedStyle WILL NOT RESOLVE THEM EITHER: asking for the content of
+ * ::before returns the literal string "counter(tgs-step)", not "1". That is
+ * what this check did first and it failed with exactly that, three times over.
+ *
+ * So what a browser can honestly settle is that each marker DRAWS something of
+ * a sensible size, which is the part CSS could get wrong. That the something is
+ * 1, 2, 3 rather than 1, 1, 1 is carried by tests/steps-dividers.test.ts, which
+ * asserts counter-increment sits on the step and the content is the counter.
+ */
+await check('every step draws its own number', async () => {
+  await addBlock('Steps');
+  const widths = await added().evaluate((root) =>
+    [...root.querySelectorAll('.tgs-steps__marker')]
+      .map((m) => parseFloat(getComputedStyle(m, '::before').width) || 0));
+
+  return widths.length === 3 && widths.every((w) => w > 3)
+    ? true
+    : `marker widths ${JSON.stringify(widths)}`;
+});
+
+await check('and is an ordered list, so it reads as a sequence', async () => {
+  const tag = await added().locator('.tgs-steps').evaluate((el) => el.tagName);
+  return tag === 'OL' ? true : `it is a ${tag}`;
+});
+
+/*
+ * The line joins one step to the next, so the last one must not trail one off
+ * the end of the sequence.
+ */
+await check('the joining line stops at the last step', async () => {
+  const drawn = await added().evaluate((root) =>
+    [...root.querySelectorAll('.tgs-steps__step')]
+      .map((s) => getComputedStyle(s, '::before').content !== 'none'));
+
+  return JSON.stringify(drawn) === '[true,true,false]' ? true : JSON.stringify(drawn);
+});
+
+await check('steps stack on a phone rather than squeezing four across', async () => {
+  await page.getByRole('button', { name: 'Phone' }).click();
+  await page.waitForTimeout(600);
+
+  const stacked = await added().evaluate((root) => {
+    const boxes = [...root.querySelectorAll('.tgs-steps__step')].map((s) => s.getBoundingClientRect());
+    return boxes.length >= 2 && boxes[1].top >= boxes[0].bottom - 1;
+  });
+
+  await page.getByRole('button', { name: 'Desktop' }).click();
+  await page.waitForTimeout(400);
+  return stacked ? true : 'the steps are still side by side on a phone';
+});
+
+// --- Shaped section edges ---------------------------------------------------
+
+/*
+ * THE PART THAT TOOK TWO GOES. The shape is drawn INSIDE the section that owns
+ * it, in the colour of the section on the other side, so it occupies its own
+ * padding and can never cover the neighbour's content. Drawn the other way
+ * round, a 56px divider ate the whole 48px default padding of the section below
+ * it and sat on the heading.
+ */
+await check('a section can be given a shaped edge', async () => {
+  await showPanels();
+  await page.locator('.ed-canvas-frame [data-path="s0"]').click({ position: { x: 20, y: 8 } });
+  await page.waitForTimeout(400);
+
+  // The group is shut by default: most sections have straight edges and
+  // always will, so it stays out of the way until somebody wants it.
+  const head = page.locator('.ed-group__head button', { hasText: 'Shaped edges' });
+  if ((await head.count()) === 0) return 'no Shaped edges group in the pane';
+  await head.first().click();
+  await page.waitForTimeout(300);
+
+  // A dropdown rather than a segmented track: six options is more than four,
+  // which is the line Fields.tsx draws for every other select in the product.
+  await page.locator('.ed-props select[aria-label="Bottom edge"]').selectOption('curve');
+  await page.waitForTimeout(700);
+
+  const count = await page.locator(".ed-canvas-frame .tgs-section__divider[data-edge='bottom']").count();
+  return count === 1 ? true : `${count} bottom dividers`;
+});
+
+await check('and it is drawn in the colour of the section next to it', async () => {
+  const colour = await page
+    .locator(".ed-canvas-frame .tgs-section__divider[data-edge='bottom']")
+    .first()
+    .evaluate((el) => getComputedStyle(el).color);
+
+  // Anything but transparent. The first version painted every divider
+  // rgba(0,0,0,0), because boxStyle emits --tgs-bg on every section whether a
+  // colour was set or not and a rule keyed on it matched them all.
+  return colour !== 'rgba(0, 0, 0, 0)' ? true : 'the divider is transparent';
+});
+
+/*
+ * It sits above the section's background and BELOW .tgs-section__inner, so
+ * even a divider set deeper than the padding cannot end up over the words.
+ */
+await check('and it sits under the words, not over them', async () => {
+  const layered = await page.evaluate(() => {
+    const d = document.querySelector(".ed-canvas-frame .tgs-section__divider[data-edge='bottom']");
+    const inner = d?.closest('.tgs-section')?.querySelector('.tgs-section__inner');
+    if (!d || !inner) return null;
+    return {
+      divider: Number(getComputedStyle(d).zIndex),
+      inner: Number(getComputedStyle(inner).zIndex),
+    };
+  });
+
+  return layered && layered.inner > layered.divider ? true : JSON.stringify(layered);
+});
+
+await check('a shaped edge never makes the page scroll sideways', async () => {
+  await page.getByRole('button', { name: 'Phone' }).click();
+  await page.waitForTimeout(600);
+
+  const over = await page.evaluate(() => {
+    const page_ = document.querySelector('.ed-canvas-frame .tgs-page');
+    return page_ ? page_.scrollWidth > page_.clientWidth + 1 : false;
+  });
+
+  await page.getByRole('button', { name: 'Desktop' }).click();
+  await page.waitForTimeout(400);
+  return over === false ? true : 'the page scrolls sideways with a divider on it';
+});
 
 
 await browser.close();
