@@ -1,0 +1,147 @@
+/*
+ * The people screen and the join card.
+ *
+ * Built on the .sv- classes the dashboard already uses, so this is one design
+ * rather than a third. Every value is an --ed- token: there is no --ed-7 in the
+ * spacing scale and no bare --ed-r, and a var() that resolves to nothing drops
+ * the whole declaration silently. tests/db.test.ts fails the build for it.
+ */
+
+.mb-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-4);
+  margin-bottom: var(--ed-6);
+  padding: var(--ed-5);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-lg);
+  background: var(--ed-panel);
+}
+
+.mb-panel__title { margin: 0; font-size: var(--ed-text-lg); font-weight: 600; }
+
+.mb-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/*
+ * A row is a grid rather than a flex line, so the note underneath spans the
+ * whole width instead of squeezing itself beside the controls.
+ */
+.mb-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--ed-2) var(--ed-3);
+  align-items: center;
+  padding-top: var(--ed-4);
+  border-top: 1px solid var(--ed-line-soft);
+}
+
+.mb-list > .mb-row:first-child { padding-top: 0; border-top: 0; }
+
+.mb-row__who { min-width: 0; }
+.mb-row__name { margin: 0; font-weight: 600; word-break: break-word; }
+.mb-row__email {
+  margin: 2px 0 0;
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink-3);
+  word-break: break-word;
+}
+
+.mb-row__what { display: flex; gap: var(--ed-2); align-items: center; }
+
+/* Spans both columns, under everything else. */
+.mb-row__note {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: var(--ed-text-xs);
+  color: var(--ed-ink-3);
+}
+
+/* Which one is you. Quiet, because it is orientation rather than news. */
+.mb-you {
+  margin-left: var(--ed-2);
+  padding: 1px var(--ed-2);
+  border-radius: var(--ed-r-full);
+  background: var(--ed-well);
+  color: var(--ed-ink-3);
+  font-size: var(--ed-text-xs);
+  font-weight: 500;
+}
+
+.mb-role { display: block; }
+
+.mb-invite { display: flex; flex-direction: column; gap: var(--ed-4); align-items: flex-start; }
+.mb-invite .sv-field { width: 100%; max-width: 420px; }
+
+.mb-note { margin: 0; font-size: var(--ed-text-sm); color: var(--ed-ink-2); }
+
+/*
+ * The link, shown once.
+ *
+ * Framed and given room, because this is the one moment the token exists
+ * anywhere we can reach and somebody has to notice it before they navigate
+ * away.
+ */
+.mb-link {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-4);
+  align-items: flex-start;
+  padding: var(--ed-4);
+  border: 1px solid var(--ed-select);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-select-wash);
+}
+
+.mb-link__lede {
+  display: flex;
+  gap: var(--ed-2);
+  align-items: flex-start;
+  margin: 0;
+  font-size: var(--ed-text-sm);
+  line-height: 1.5;
+}
+
+.mb-link__lede svg { flex: none; margin-top: 2px; color: var(--ed-select); }
+
+.mb-link__row {
+  display: flex;
+  gap: var(--ed-2);
+  align-items: center;
+  width: 100%;
+}
+
+/* The field takes the room and the button keeps its own size. */
+.mb-link__row .tv-input { flex: 1 1 auto; min-width: 0; font-size: var(--ed-text-sm); }
+.mb-link__row .tg-btn { flex: none; }
+
+/* ------------------------------------------------------------------ */
+/* Joining                                                             */
+/* ------------------------------------------------------------------ */
+
+.jn-card {
+  max-width: 520px;
+  margin: var(--ed-8) auto;
+  padding: var(--ed-6);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-lg);
+  background: var(--ed-panel);
+}
+
+.jn-card p { line-height: 1.55; }
+.jn-lede { margin-bottom: var(--ed-5); }
+
+.jn-form { display: flex; flex-direction: column; gap: var(--ed-4); align-items: flex-start; }
+.jn-form .sv-field { width: 100%; }
+
+@media (max-width: 620px) {
+  .mb-row { grid-template-columns: minmax(0, 1fr); }
+  .mb-row__what { justify-content: flex-start; }
+  .jn-card { margin: var(--ed-4) auto; padding: var(--ed-5); }
+}

@@ -1194,6 +1194,129 @@ begin
 end $$;
 
 -- ---------------------------------------------------------------------------
+-- Invites, and the one policy that is keyed on a token rather than a tenant
+-- ---------------------------------------------------------------------------
+--
+-- site_invites is read two ways: by an owner listing their own site's invites,
+-- which is the ordinary tenant policy, and by somebody redeeming a link, who is
+-- by definition not in the tenant yet. The second is the interesting one, and it
+-- is the same shape as the sign-in policy: a transaction-local setting holding
+-- the hash, and a policy revealing precisely the row that matches it.
+--
+-- What must hold: naming one hash reveals one row and no others, and naming no
+-- hash reveals nothing at all. The second half is what stops a query that forgot
+-- to set the setting from returning every client's pending invites.
+do $$
+declare mine int; theirs int; loose int; without_setting int;
+begin
+  insert into public.site_invites (tenant_id, email, role, token_hash) values
+    ('11111111-1111-1111-1111-111111111111', 'iso-alpha@example.com', 'editor',
+     repeat('a', 64)),
+    ('22222222-2222-2222-2222-222222222222', 'iso-beta@example.com', 'owner',
+     repeat('b', 64));
+
+  set local role tg_sites_app;
+  perform set_config('app.current_tenant_id', '', true);
+  perform set_config('app.invite_token_hash', repeat('a', 64), true);
+
+  select count(*) into mine from public.site_invites where token_hash = repeat('a', 64);
+  select count(*) into theirs from public.site_invites where token_hash = repeat('b', 64);
+  -- No filter at all: the policy is the filter, and it must still be one row.
+  select count(*) into loose from public.site_invites;
+
+  perform set_config('app.invite_token_hash', '', true);
+  select count(*) into without_setting from public.site_invites;
+
+  reset role;
+  insert into checks (name, passed, detail) values
+    ('an invite link finds the one row it names', mine = 1, 'saw ' || mine),
+    ('and never another one, even with the hash in hand',
+     theirs = 0,
+     case when theirs > 0 then 'IT READ AN INVITE IT DID NOT NAME'
+          else 'the token policy hid it' end),
+    ('a query with no filter still sees only the named invite',
+     loose = 1, 'saw ' || loose),
+    -- The half that makes the rest mean anything. With nothing set,
+    -- invite_hash() is NULL and NULL = anything is NULL, so no row qualifies.
+    ('and with no token set at all it sees nothing',
+     without_setting = 0,
+     case when without_setting > 0 then 'IT READ ' || without_setting || ' INVITES'
+          else 'no token, no rows' end);
+end $$;
+
+-- An owner lists their own site's invites through the ordinary tenant policy,
+-- and cannot plant one in somebody else's site.
+do $$
+declare mine int; theirs int; leaked boolean := false;
+begin
+  set local role tg_sites_app;
+  perform set_config('app.invite_token_hash', '', true);
+  perform set_config('app.current_tenant_id', '11111111-1111-1111-1111-111111111111', true);
+
+  select count(*) into mine from public.site_invites;
+  select count(*) into theirs from public.site_invites
+    where email = 'iso-beta@example.com';
+
+  begin
+    insert into public.site_invites (tenant_id, email, role, token_hash)
+      values ('22222222-2222-2222-2222-222222222222', 'iso-planted@example.com',
+              'owner', repeat('c', 64));
+    leaked := true;
+  exception when others then leaked := false; end;
+
+  reset role;
+  insert into checks (name, passed, detail) values
+    ('an owner sees their own pending invites', mine = 1, 'saw ' || mine),
+    ('and not another client''s', theirs = 0, 'saw ' || theirs),
+    ('an invite cannot be planted in another client''s site',
+     not leaked,
+     case when leaked then 'THE ROW WAS WRITTEN' else 'WITH CHECK rejected it' end);
+end $$;
+
+-- ---------------------------------------------------------------------------
+-- Seeing a colleague, and only a colleague
+-- ---------------------------------------------------------------------------
+--
+-- auth_users_teammates was added in 0019 so the members screen is not a column
+-- of blank names. It is the first policy that lets the app role read somebody
+-- else's account row at all, so the thing to prove is where it stops: inside the
+-- tenant currently open, and nowhere else.
+do $$
+declare same_site int; other_site int; no_tenant int;
+begin
+  insert into public.tenant_users (tenant_id, user_id, role) values
+    ('11111111-1111-1111-1111-111111111111', 'iso-user-bob', 'editor')
+  on conflict do nothing;
+
+  set local role tg_sites_app;
+  perform set_config('app.current_user_id', 'iso-user-ann', true);
+  perform set_config('app.current_tenant_id', '11111111-1111-1111-1111-111111111111', true);
+
+  -- Bob is in this site, so Ann can see his row.
+  select count(*) into same_site from public.auth_users where id = 'iso-user-bob';
+
+  -- Switch to the site Ann is in and Bob is not.
+  perform set_config('app.current_tenant_id', '33333333-3333-3333-3333-333333333333', true);
+  select count(*) into other_site from public.auth_users where id = 'iso-user-bob';
+
+  -- And with no tenant at all, auth_users_self is on its own again.
+  perform set_config('app.current_tenant_id', '', true);
+  select count(*) into no_tenant from public.auth_users where id = 'iso-user-bob';
+
+  reset role;
+  insert into checks (name, passed, detail) values
+    ('a members list can read the people in this site', same_site = 1, 'saw ' || same_site),
+    ('and cannot read somebody who is not in it',
+     other_site = 0,
+     case when other_site > 0 then 'IT READ A NON-MEMBER''S ACCOUNT ROW'
+          else 'the teammate policy stopped at the tenant' end),
+    ('and reads nobody but yourself with no site open',
+     no_tenant = 0,
+     case when no_tenant > 0 then 'IT READ ANOTHER ACCOUNT WITH NO TENANT SET'
+          else 'no tenant, no teammates' end);
+end $$;
+
+-- ---------------------------------------------------------------------------
 -- Clear up, then report
 -- ---------------------------------------------------------------------------
 

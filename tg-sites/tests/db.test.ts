@@ -732,6 +732,53 @@ describe('renaming a page keeps its old address working', () => {
     expect(log).toHaveLength(0);
   });
 
+  /*
+   * THE INVITE DOOR, and the one claim about it that is not visible anywhere
+   * else: it takes a HASH, and a caller who hands it a raw token gets an
+   * exception rather than a query that quietly matches nothing.
+   *
+   * Quietly matching nothing is the dangerous version. The policy compares
+   * token_hash to the setting, so a raw token simply finds no row, every link
+   * stops working, and the symptom is "invites are broken" with nothing in any
+   * log to say why. Failing loudly at the door is the difference between a
+   * five-minute fix and an afternoon.
+   *
+   * It must also touch no database at all, which is the second half: the check
+   * happens before the connection is opened.
+   */
+  it('refuses to look an invite up by anything that is not a hash', async () => {
+    const { inviteByToken } = await import('../lib/db/users');
+
+    for (const notAHash of ['', 'a-raw-token', 'A'.repeat(64), 'abc123']) {
+      await expect(inviteByToken(notAHash), notAHash).rejects.toThrow(/hash/i);
+    }
+
+    expect(log, 'it opened a connection for a value it should have refused').toHaveLength(0);
+  });
+
+  it('looks one up by a hash, as the app role, with the token set first', async () => {
+    const { inviteByToken } = await import('../lib/db/users');
+    const hash = 'a'.repeat(64);
+
+    respond('from public.site_invites', [
+      { id: 'inv', tenant_id: ALPHA, email: 'sam@example.com', role: 'editor' },
+    ]);
+
+    expect(await inviteByToken(hash)).toEqual({
+      id: 'inv',
+      tenantId: ALPHA,
+      email: 'sam@example.com',
+      role: 'editor',
+    });
+
+    // The setting has to be the FIRST statement, or the policy has nothing to
+    // compare against when the select runs.
+    expect(log[0].sql).toBe('BEGIN');
+    expect(log[1].sql).toContain('app.invite_token_hash');
+    expect(log[1].params).toEqual([hash]);
+    expect(log.every((s) => s.role === 'app')).toBe(true);
+  });
+
   it('gives up when the page it points at is no longer reachable', async () => {
     const { resolveRedirect } = await import('../lib/db/redirects');
 

@@ -26,6 +26,7 @@ security. That is why this directory has a test suite of its own.
 | `migrations/0016_site_regions.sql` | `site_regions`: the header and footer, with a COLUMN grant rather than a row policy |
 | `migrations/0017_collection_items_touch.sql` | The `updated_at` trigger `collection_items` never had |
 | `migrations/0018_page_redirects.sql` | `page_redirects`, so renaming a page stops breaking every link to it |
+| `migrations/0019_site_invites.sql` | `site_invites`, so a site can have more than one person in it |
 | `isolation-check.sql` | 90-odd checks that try to break isolation and expect to fail |
 
 Run them in order. Each is idempotent, so re-running is safe.

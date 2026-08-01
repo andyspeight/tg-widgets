@@ -647,10 +647,41 @@ describe('call sites', () => {
    * to the identity provider that ran immediately before it. That makes a
    * second caller an authentication bypass: pass a user id, become that user.
    */
-  it('only the sign-in action starts a session', () => {
+  it('only two actions start a session, and both verify first', () => {
+    /*
+     * A SECOND CALLER JOINED ON 1 AUG 2026 and this test is what forced the
+     * decision to be made rather than made by writing a line of code.
+     *
+     * joinWithPasswordAction is the invite flow. It does not verify a password
+     * because there was nothing to verify against: it CREATES the account, and
+     * what stands in place of a credential check is the invite token, which is
+     * 256 bits from a CSPRNG, single use, expiring, and addressed to the exact
+     * email the account is created at. The id it hands to startSession comes
+     * from the insert it just made, never from its arguments.
+     *
+     * The rule this list protects is unchanged: nothing may start a session for
+     * a user id that arrived from outside.
+     */
     expect(callers('startSession', join('lib', 'auth', 'session.ts'))).toEqual([
       join('app', 'actions', 'auth.ts'),
+      join('app', 'actions', 'members.ts'),
     ]);
+  });
+
+  /*
+   * The claim underneath the list above, checked rather than described: the id
+   * given to startSession in the invite flow is the one the database returned,
+   * so no argument of that action can become a session.
+   */
+  it('the invite flow signs in the account it just created, not an argument', () => {
+    const source = readFileSync(join(ROOT, 'app', 'actions', 'members.ts'), 'utf8');
+    const join_ = source.slice(source.indexOf('export async function joinWithPasswordAction'));
+
+    expect(join_).toContain('const account = await createInvitedAccount({');
+    expect(join_).toContain('await startSession(account.id)');
+    expect(join_).not.toMatch(/startSession\((?!account\.id\))/);
+    // And the email it creates comes off the invite row, never off the form.
+    expect(join_).toContain('email: invite.email,');
   });
 
   /*

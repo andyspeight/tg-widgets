@@ -218,6 +218,17 @@ export function SiteDashboard({
             </a>
 
             {/*
+              Everybody gets this link, not only an owner. Seeing who your
+              colleagues are is not a privilege, and a viewer who cannot tell
+              whether their manager has access has to go and ask somebody. What
+              an owner gets that they do not is the buttons.
+            */}
+            <a className="sv-btn" href="/members">
+              <Icon name="user" size={16} />
+              People
+            </a>
+
+            {/*
               A plain anchor for the same reason as Theme above: these settings are
               in the head of every rendered page, so coming back wants fresh server
               output rather than a tree built before the change.
