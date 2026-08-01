@@ -19,6 +19,8 @@
     "@iconify-json/lucide": "1.2.121",
     "@vercel/blob": "^2.6.1",
     "next": "15.5.22",
+    "parse5": "^7.3.0",
+    "postcss": "^8.5.24",
     "postgres": "^3.4.7",
     "react": "19.0.0",
     "react-dom": "19.0.0",
