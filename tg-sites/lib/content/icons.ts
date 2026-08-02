@@ -244,8 +244,20 @@ function resolve(name: string): string | null {
 // Parsing, which is the part that matters
 // ---------------------------------------------------------------------------
 
-const TAG = /<([a-zA-Z]+)\b([^>]*?)\/?>/g;
+/** An opening tag or a closing one. The `/` in group 1 says which. */
+const TAG = /<(\/?)([a-zA-Z]+)\b([^>]*?)\/?>/g;
 const ATTR = /([a-zA-Z-]+)="([^"]*)"/g;
+
+/**
+ * Attributes a `<g>` sets FOR THE SHAPES INSIDE IT rather than for itself.
+ *
+ * These are the inherited SVG presentation properties. Geometry is not on the
+ * list and could not be: `cx` on a group means nothing to the circle in it.
+ */
+const INHERITED = new Set([
+  'fill', 'fill-rule', 'clip-rule',
+  'stroke', 'stroke-linecap', 'stroke-linejoin', 'stroke-width',
+]);
 
 /**
  * A string of SVG, reduced to the shapes it is allowed to contain.
@@ -256,24 +268,54 @@ const ATTR = /([a-zA-Z-]+)="([^"]*)"/g;
  * clean today, and what has to be true is that it would not matter if it were
  * not. A test that can only feed this real icons cannot show that.
  *
- * The regex only ever matches an opening tag, and the element name is then
- * checked against ICON_ELEMENTS, so a `<script>` in the data matches the
- * pattern and is thrown away on the next line. Same for every attribute. Markup
- * carrying anything outside the whitelist loses that piece rather than the
- * whole icon, which is the right way round: a shape missing from a drawing is
- * visible, a silently empty icon is not.
+ * The regex only ever matches a tag, and the element name is then checked
+ * against ICON_ELEMENTS, so a `<script>` in the data matches the pattern and is
+ * thrown away on the next line. Same for every attribute. Markup carrying
+ * anything outside the whitelist loses that piece rather than the whole icon,
+ * which is the right way round: a shape missing from a drawing is visible, a
+ * silently empty icon is not.
+ *
+ * A GROUP IS FLATTENED INTO THE SHAPES IT HOLDS, and getting that wrong was a
+ * real bug that shipped. 1,112 of the 1,817 icons are written as
+ * `<g fill="none" stroke="currentColor" stroke-width="2"><circle/><path/></g>`,
+ * with the drawing instructions on the group and only geometry on the children.
+ * This returned a FLAT list, so the renderer drew the `<g>` as an empty element
+ * and its two children as its SIBLINGS. A sibling inherits nothing, so both
+ * fell back to what SVG does when told nothing: fill black, no stroke. Every
+ * one of those icons drew as a solid black blob. Found on 2 Aug 2026 by looking
+ * at a rendered page rather than by any assertion, which is why there is now a
+ * test on the shapes themselves.
+ *
+ * FLATTENING RATHER THAN NESTING, and this is safe for a reason worth stating
+ * rather than assuming: the only thing that would make a group more than a bag
+ * of shared attributes is a `transform`, and `transform` is not in
+ * ICON_ATTRIBUTES, so it is dropped before it reaches here whatever the data
+ * says. A group can therefore only ever mean "these attributes, for everything
+ * inside", which is exactly what pushing them down expresses.
+ *
+ * The child's own attribute wins, as it does in a browser.
  */
 export function parseIconBody(body: unknown): IconShape[] {
   if (typeof body !== 'string') return [];
 
   const shapes: IconShape[] = [];
 
+  // What the open groups are handing down, innermost last.
+  const stack: Array<Record<string, string>> = [];
+
   for (const match of body.matchAll(TAG)) {
-    const element = match[1].toLowerCase();
+    const closing = match[1] === '/';
+    const element = match[2].toLowerCase();
+
+    if (closing) {
+      if (element === 'g') stack.pop();
+      continue;
+    }
+
     if (!(ICON_ELEMENTS as readonly string[]).includes(element)) continue;
 
     const attributes: Record<string, string> = {};
-    for (const attr of match[2].matchAll(ATTR)) {
+    for (const attr of match[3].matchAll(ATTR)) {
       const key = attr[1].toLowerCase();
       if (!(ICON_ATTRIBUTES as readonly string[]).includes(key)) continue;
       // A value can only ever be geometry, a keyword or currentColor. Anything
@@ -282,7 +324,29 @@ export function parseIconBody(body: unknown): IconShape[] {
       attributes[key] = attr[2];
     }
 
-    shapes.push({ element: element as IconElement, attributes });
+    if (element === 'g') {
+      /*
+       * A self-closing group holds nothing, so it hands nothing down and there
+       * is no `</g>` coming to pop it back off. `<g/>` does not appear in the
+       * set; it is here because the stack going out of step would misdraw every
+       * shape after it, which is a bad way to find out the data changed.
+       */
+      if (!/\/\s*>$/.test(match[0])) {
+        const inherited: Record<string, string> = { ...(stack[stack.length - 1] ?? {}) };
+        for (const [key, value] of Object.entries(attributes)) {
+          if (INHERITED.has(key)) inherited[key] = value;
+        }
+        stack.push(inherited);
+      }
+
+      // Never emitted. A group with its children pulled out of it draws nothing.
+      continue;
+    }
+
+    shapes.push({
+      element: element as IconElement,
+      attributes: { ...(stack[stack.length - 1] ?? {}), ...attributes },
+    });
   }
 
   return shapes;

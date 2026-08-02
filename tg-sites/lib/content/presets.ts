@@ -185,10 +185,46 @@ export interface ThumbBar {
    * catch-all case and drew one thin grey line each. Twelve categories of
    * near-identical thumbnails is a picker nobody can use, which would have
    * undone the reason the library is data in the first place.
+   *
+   * THE FOURTH ARRIVED WITH THE DESIGN PASS on 2 Aug 2026. An icon tile drew as
+   * a short strong bar, which is also what a button draws as, so the one thing
+   * on the card that says "this section has icons in it" was indistinguishable
+   * from the one thing that says "this section has a button".
    */
-  tone: 'strong' | 'soft' | 'frame';
+  tone: 'strong' | 'soft' | 'frame' | 'icon';
   /** Rounded ends, for a button. */
   pill?: boolean;
+}
+
+/**
+ * A card or a tinted panel drawn BEHIND a column's content.
+ *
+ * WHY THE THUMBNAIL HAD TO LEARN ABOUT THESE. buildRow has understood
+ * `row.columnBox` since the card presets landed, and buildPresetSection has
+ * understood `section.tone` for longer than that, but presetBars knew about
+ * neither. So a preset could gain a row of cards and a tinted background and
+ * the picture in the picker would not move a pixel. That is the same failure
+ * the note at the top of this file exists to prevent, pointing the other way:
+ * not a thumbnail promising something the preset does not build, but a preset
+ * building something the thumbnail never shows. Andy chooses from the picture,
+ * so design that the picture cannot carry is design nobody sees.
+ */
+export interface ThumbPanel {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  /** A hairline card, or a fill with no border. Follows the box's borderWidth. */
+  tone: 'card' | 'panel';
+}
+
+/** Everything the picker needs to draw one preset. */
+export interface ThumbModel {
+  /** The section's own background, so a tinted band reads as one. */
+  tone: Section['tone'];
+  /** Behind the bars, in the order they are drawn. */
+  panels: ThumbPanel[];
+  bars: ThumbBar[];
 }
 
 /** How tall each block draws, and how many lines it becomes. */
@@ -205,8 +241,25 @@ const RATIO_HEIGHT: Readonly<Record<string, number>> = {
   '16/9': 0.16, '4/3': 0.2, '1/1': 0.24, '3/4': 0.3, auto: 0.2,
 };
 
+/**
+ * The room inside a card, in thumbnail units.
+ *
+ * Larger than scale would strictly say. A card's real padding is 24px against a
+ * content width of about 1100, which is two per cent, and two per cent of a
+ * 100px picture is a hairline nobody can see. Enough to read as a card is the
+ * job here, not enough to make the content look lost.
+ */
+const CARD_PAD_X = 0.03;
+const CARD_PAD_Y = 0.05;
+
+/** Just the bars. The picker wants the panels and the tone as well: see below. */
 export function presetBars(preset: SectionPreset, gap = 0.05): ThumbBar[] {
+  return presetThumb(preset, gap).bars;
+}
+
+export function presetThumb(preset: SectionPreset, gap = 0.05): ThumbModel {
   const bars: ThumbBar[] = [];
+  const panels: ThumbPanel[] = [];
   const rowCount = preset.rows.length;
   const rowHeight = (1 - gap * (rowCount - 1)) / rowCount;
 
@@ -225,28 +278,43 @@ export function presetBars(preset: SectionPreset, gap = 0.05): ThumbBar[] {
      * multi-row presets, where otherwise the second row starts at the halfway
      * mark with a gap above it.
      */
-    const rowBars: ThumbBar[] = [];
+    const laid: Array<{ bars: ThumbBar[]; panel: ThumbPanel | null; height: number }> = [];
     let tallest = 0;
     let x = 0;
 
     row.widths.forEach((width, columnIndex) => {
+      const columnBars: ThumbBar[] = [];
       const columnWidth = (width / total) * available;
-      let y = 0;
+
+      /*
+       * A CARD IS A COLUMN WITH A BOX ON IT, which is exactly how the preset
+       * says it and how buildRow builds it. Here it costs the content some
+       * room, the same way the padding does on the page: the bars are drawn
+       * inside the panel rather than across its border.
+       */
+      const box = row.columnBox?.[columnIndex];
+      const padX = box ? Math.min(CARD_PAD_X, columnWidth / 4) : 0;
+      const padY = box ? CARD_PAD_Y : 0;
+      const inner = columnWidth - padX * 2;
+
+      let y = padY;
+      let drew = false;
 
       for (const spec of row.columns[columnIndex] ?? []) {
         const centred = spec.props?.align === 'centre';
         const right = spec.props?.align === 'right';
 
-        for (const bar of barsForBlock(spec, columnWidth)) {
-          rowBars.push({
+        for (const bar of barsForBlock(spec, inner)) {
+          columnBars.push({
             ...bar,
             // Alignment is drawn, not just stored, or a centred preset and a
             // left-aligned one would show the same picture. Right matters as
             // much as centre now the headers are in here: a menu pushed right
             // is the whole difference between two of them.
-            x: x + (centred ? (columnWidth - bar.width) / 2 : right ? columnWidth - bar.width : 0),
+            x: x + padX + (centred ? (inner - bar.width) / 2 : right ? inner - bar.width : 0),
             y,
           });
+          drew = true;
           y += bar.height + LINE_GAP;
         }
         y += BLOCK_GAP - LINE_GAP;
@@ -254,7 +322,25 @@ export function presetBars(preset: SectionPreset, gap = 0.05): ThumbBar[] {
 
       // The gap after the last block is not content, so it does not count
       // towards the height being centred.
-      tallest = Math.max(tallest, Math.max(0, y - BLOCK_GAP));
+      const height = drew ? Math.max(0, y - BLOCK_GAP) + padY : 0;
+
+      laid.push({
+        bars: columnBars,
+        // An empty card is a grey box with nothing in it, which reads as a
+        // loading state rather than as a design. Drawn only around content.
+        panel: box && drew
+          ? {
+            x,
+            y: 0,
+            width: columnWidth,
+            height,
+            tone: (box.borderWidth ?? 0) > 0 ? 'card' : 'panel',
+          }
+          : null,
+        height,
+      });
+
+      tallest = Math.max(tallest, height);
       x += columnWidth + gap;
     });
 
@@ -276,16 +362,45 @@ export function presetBars(preset: SectionPreset, gap = 0.05): ThumbBar[] {
     const scale = tallest > rowHeight ? rowHeight / tallest : 1;
     const offset = Math.max(0, (rowHeight - tallest * scale) / 2);
 
-    for (const bar of rowBars) {
-      bars.push({
-        ...bar,
-        y: top + offset + bar.y * scale,
-        height: bar.height * scale,
-      });
+    for (const column of laid) {
+      /*
+       * WHERE A SHORT COLUMN SITS AGAINST A TALL ONE BESIDE IT.
+       *
+       * Default is stretch, so a card grid draws three cards of one height and
+       * their content starting at the top of each, which is what the page does.
+       * A row that sets `align` does NOT stretch, and that is a real design
+       * rather than a corner: "Three panels, one picked out" makes the middle
+       * panel taller and centres the three against it, so the lifted one sits
+       * proud. Drawn top-aligned it looked like a mistake in the preset.
+       */
+      const shift = row.align ? alignShift(row.align, tallest, column.height) : 0;
+
+      for (const bar of column.bars) {
+        bars.push({
+          ...bar,
+          y: top + offset + (bar.y + shift) * scale,
+          height: bar.height * scale,
+        });
+      }
+
+      if (column.panel) {
+        panels.push({
+          ...column.panel,
+          y: top + offset + shift * scale,
+          height: (row.align ? column.height : tallest) * scale,
+        });
+      }
     }
   });
 
-  return bars;
+  return { tone: preset.section?.tone ?? 'light', panels, bars };
+}
+
+/** How far down a column starts when the row lines its columns up. */
+function alignShift(align: PresetRow['align'], rowHeight: number, columnHeight: number): number {
+  if (align === 'centre') return (rowHeight - columnHeight) / 2;
+  if (align === 'bottom') return rowHeight - columnHeight;
+  return 0;
 }
 
 /** The bars one block becomes, positioned later by the caller. */
@@ -390,10 +505,17 @@ function barsForBlock(
         { width: columnWidth * 0.4, height: LINE * 0.8, tone: 'strong' },
       ];
 
-    /* An icon and some words: a small square, a title, a line. */
+    /*
+     * An icon and some words: a tile, a title, a line.
+     *
+     * THE TILE IS A FIXED SIZE, not a share of the column, because on the page
+     * it is: 44 by 44 whether it sits in a quarter-width card or across a whole
+     * section. Sized against the type rather than the column, so it reads as an
+     * icon at four columns across and still does at one.
+     */
     case 'icon-item':
       return [
-        { width: columnWidth * 0.18, height: 0.05, tone: 'strong' },
+        { width: 0.055, height: 0.08, tone: 'icon' },
         { width: columnWidth * 0.7, height: LINE * 1.2, tone: 'strong' },
         { width: columnWidth * 0.9, height: LINE, tone: 'soft' },
       ];

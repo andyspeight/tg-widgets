@@ -777,14 +777,23 @@
 /* List */
 .tgs-list { margin: 0; padding-left: 1.25em; }
 .tgs-list li { margin-bottom: var(--tgs-space-s); }
+/*
+ * THE TICK IS AN SVG THE RENDERER DRAWS, not a character this stylesheet types.
+ * See the note in ListBlock. Positioned rather than inline so a point that runs
+ * to two lines keeps its second line aligned under the first, which is what the
+ * old ::before did and the only thing about it worth keeping.
+ */
 .tgs-list[data-style='tick'] { list-style: none; padding-left: 0; }
 .tgs-list[data-style='tick'] li { position: relative; padding-left: 1.75em; }
-.tgs-list[data-style='tick'] li::before {
-  content: '✓';
+.tgs-list__tick {
   position: absolute;
   left: 0;
+  /* Optically centred on the first line rather than hung from its top. */
+  top: 0.2em;
+  width: 1.05em;
+  height: 1.05em;
   color: var(--tgs-accent);
-  font-weight: 700;
+  stroke-width: 2.5;
 }
 
 /* Icon item */
@@ -824,6 +833,16 @@
   background: rgba(255, 255, 255, 0.12);
   color: var(--tgs-accent);
 }
+
+/*
+ * ON A SUBTLE BAND THE TILE FLIPS TO THE PAGE COLOUR, because the tile's own
+ * colour IS the subtle band's colour: both are --tgs-surface-alt, so a tinted
+ * section drew a tile that was exactly its background and the icons floated
+ * bare. The two coloured tones above have had a rule since they were built and
+ * this one was missed, which is the same oversight in a quieter place. Caught
+ * on 2 Aug 2026 by rendering "Three ways to reach you", which is tinted.
+ */
+.tgs-section[data-tone='subtle'] .tgs-icon-item__icon { background: var(--tgs-surface); }
 
 /*
  * A DRAWING AND A CHARACTER WANT DIFFERENT SIZES, which is why the renderer

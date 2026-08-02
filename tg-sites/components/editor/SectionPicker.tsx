@@ -23,7 +23,7 @@ import { useRef, useState } from 'react';
 import { LAYOUTS, layoutCells, type Layout } from '../../lib/content/layouts';
 import {
   categoriesFor,
-  presetBars,
+  presetThumb,
   presetsIn,
   type PresetCategory,
   type PresetScope,
@@ -80,22 +80,45 @@ export function LayoutThumb({ layout }: { layout: Layout }) {
 /**
  * A wireframe of a designed section.
  *
- * Two tones rather than one, because a wall of identical grey bars says
+ * Four bar tones rather than one, because a wall of identical grey bars says
  * "something goes here" and nothing else. Solid bars are headings and buttons,
- * pale ones are body text, which is enough for the eye to tell a centred
- * introduction from four columns of points at thumbnail size.
+ * pale ones are body text, mid ones are pictures, and a small square is an
+ * icon, which is enough for the eye to tell a centred introduction from four
+ * columns of points at thumbnail size.
+ *
+ * THE GROUND AND THE PANELS CAME WITH THE DESIGN PASS on 2 Aug 2026. A preset
+ * can say its section is tinted and its columns are cards, and both were drawn
+ * on the page and on neither of them here, so the whole Designed tab looked
+ * like white paper whatever was on it. Three things are stacked now, back to
+ * front: the section's own background, any card panels, then the content.
  */
 export function PresetThumb({ preset }: { preset: SectionPreset }) {
-  const bars = presetBars(preset);
+  const { tone, panels, bars } = presetThumb(preset);
 
   return (
     <svg
       className="ed-thumb ed-thumb--preset"
       viewBox="0 0 100 68"
+      data-section={tone}
       role="presentation"
       aria-hidden="true"
       focusable="false"
     >
+      {/* Full bleed, because a tinted section runs the width of the page. */}
+      <rect x={0} y={0} width={100} height={68} data-tone="ground" />
+
+      {panels.map((panel, index) => (
+        <rect
+          key={`panel-${index}`}
+          x={panel.x * 100}
+          y={panel.y * 68}
+          width={panel.width * 100}
+          height={panel.height * 68}
+          rx={2}
+          data-tone={panel.tone}
+        />
+      ))}
+
       {bars.map((bar, index) => (
         <rect
           key={index}
@@ -103,7 +126,7 @@ export function PresetThumb({ preset }: { preset: SectionPreset }) {
           y={bar.y * 68}
           width={bar.width * 100}
           height={bar.height * 68}
-          rx={bar.pill ? 3 : 1}
+          rx={bar.pill ? 3 : bar.tone === 'icon' ? 2 : 1}
           data-tone={bar.tone}
         />
       ))}

@@ -38,6 +38,7 @@ import {
   presetRoles,
   presetSignature,
   presetsIn,
+  presetThumb,
   PRESET_CATEGORIES,
   SECTION_PRESETS,
   type PresetBlock,
@@ -165,6 +166,73 @@ describe('every preset is built from blocks that exist', () => {
     );
 
     expect(wrong).toEqual([]);
+  });
+
+  /*
+   * A PANEL NOBODY CAN SEE, which is how this failed for a fortnight.
+   *
+   * PANEL shipped as a radius, some padding and no background, because
+   * `safeColour` took a hex and nothing else and a hex baked into a preset is a
+   * colour that stops matching the day a client themes their site. A box with
+   * no background, no border and no shadow renders as padding: the two presets
+   * carrying one drew nothing, and nothing is not an error. The fix was to let
+   * safeColour take the theme tokens it always claimed to; this is the check
+   * that says so, for every box in the library rather than those two.
+   */
+  it('gives every column box something an eye can find', () => {
+    const invisible = SECTION_PRESETS.flatMap((preset) =>
+      preset.rows.flatMap((row) =>
+        (row.columnBox ?? []).flatMap((box, index) => {
+          if (!box) return [];
+          /*
+           * A WIDTH IS NOT A BORDER. This check read `borderWidth > 0` when it
+           * was first written and passed the whole library, and CARD was
+           * drawing `border: 1px solid transparent` at the time: a ring of
+           * nothing, reserved and never painted, on all eleven carded presets.
+           * The renderer falls back to `transparent` when no colour is set, so
+           * the colour is the part that has to be there.
+           */
+          const bordered = (box.borderWidth ?? 0) > 0
+            && Boolean(box.borderColour)
+            && box.borderColour !== 'transparent';
+          const draws = Boolean(box.background)
+            || bordered
+            || (box.shadow && box.shadow !== 'none');
+          return draws ? [] : [`${preset.id}: column ${index} is padding and nothing else`];
+        }),
+      ),
+    );
+
+    expect(invisible).toEqual([]);
+  });
+
+  /*
+   * THE SAME FAILURE ONE STEP ON. A panel tinted with the site's subtle surface
+   * is exactly the colour a `subtle` section is painted, so the two together
+   * are a panel drawn in the background's own colour. It parses, it renders,
+   * and it looks like the preset forgot to card the row.
+   */
+  it('never tints a panel the colour of the section it sits on', () => {
+    const TONE_BACKGROUND: Record<string, string> = {
+      subtle: 'var(--tgs-surface-alt)',
+      dark: 'var(--tgs-surface-dark)',
+      accent: 'var(--tgs-primary)',
+    };
+
+    const lost = SECTION_PRESETS.flatMap((preset) => {
+      const behind = TONE_BACKGROUND[preset.section?.tone ?? 'light'];
+      if (!behind) return [];
+
+      return preset.rows.flatMap((row) =>
+        (row.columnBox ?? []).flatMap((box, index) =>
+          box?.background === behind && !(box.borderWidth ?? 0)
+            ? [`${preset.id}: column ${index} is the same colour as its section`]
+            : [],
+        ),
+      );
+    });
+
+    expect(lost).toEqual([]);
   });
 
   it('keeps every column box inside the limits the schema sets', () => {
@@ -497,16 +565,20 @@ describe('the thumbnail', () => {
   });
 
   /*
-   * Twelve categories of near-identical grey bars would be a picker nobody can
-   * use, which would undo the reason the library is data at all. A cheap proxy
-   * for "these look different": across the whole library, more than one tone is
-   * in use and the picture-heavy categories reach for the frame one.
+   * Eighteen categories of near-identical grey bars would be a picker nobody
+   * can use, which would undo the reason the library is data at all. A cheap
+   * proxy for "these look different": across the whole library every tone is in
+   * use, the picture-heavy categories reach for the frame one and the ones
+   * built on icons reach for the icon one.
+   *
+   * The fourth arrived on 2 Aug 2026. Before it, an icon tile drew as a short
+   * strong bar, which is also what a button draws as.
    */
-  it('uses all three tones across the library', () => {
+  it('uses all four bar tones across the library', () => {
     const tones = new Set(SECTION_PRESETS.flatMap((preset) =>
       presetBars(preset).map((bar) => bar.tone)));
 
-    expect([...tones].sort()).toEqual(['frame', 'soft', 'strong']);
+    expect([...tones].sort()).toEqual(['frame', 'icon', 'soft', 'strong']);
   });
 
   it('draws a right-aligned menu against the right edge of its column', () => {
@@ -527,6 +599,122 @@ describe('the thumbnail', () => {
     };
 
     expect(presetBars(empty)).toEqual([]);
+  });
+});
+
+/*
+ * ---------------------------------------------------------------------------
+ * The rest of the thumbnail: the ground and the cards
+ *
+ * WHAT THESE ARE FOR. buildPresetSection has always understood `section.tone`
+ * and buildRow has understood `columnBox` since the card presets landed, and
+ * presetBars knew about neither, so a preset could gain a tinted background and
+ * a row of cards and the picture in the picker would not move. Design that the
+ * picker cannot show is design nobody sees, because the picker is where it is
+ * chosen. These hold the two halves together.
+ * ---------------------------------------------------------------------------
+ */
+describe('the thumbnail ground and panels', () => {
+  it('reports the section tone the preset builds', () => {
+    for (const preset of SECTION_PRESETS) {
+      expect(presetThumb(preset).tone, preset.id)
+        .toBe(buildPresetSection(preset).tone);
+    }
+  });
+
+  it('draws a panel for every carded column, and none for a plain one', () => {
+    const carded = SECTION_PRESETS.filter((preset) =>
+      preset.rows.some((row) => row.columnBox?.some(Boolean)));
+
+    // Worth knowing this is a real sample rather than a vacuous pass.
+    expect(carded.length).toBeGreaterThan(5);
+
+    for (const preset of carded) {
+      const wanted = preset.rows.reduce(
+        (sum, row) => sum + (row.columnBox?.filter(Boolean).length ?? 0),
+        0,
+      );
+      expect(presetThumb(preset).panels.length, preset.id).toBe(wanted);
+    }
+
+    expect(presetThumb(presetById('text-intro')!).panels).toEqual([]);
+  });
+
+  it('tells a bordered card from a filled panel', () => {
+    // CARD has a borderWidth, PANEL does not. The picker draws a hairline on
+    // one and a tint on the other, so the difference has to survive to here.
+    const cards = presetThumb(presetById('pricing-three-panels')!).panels;
+    expect(cards.every((panel) => panel.tone === 'card')).toBe(true);
+
+    const panels = presetThumb(presetById('faq-with-contact')!).panels;
+    expect(panels.some((panel) => panel.tone === 'panel')).toBe(true);
+  });
+
+  it('keeps the panels inside the box and the bars inside their panel', () => {
+    for (const preset of SECTION_PRESETS) {
+      const { panels, bars } = presetThumb(preset);
+
+      for (const panel of panels) {
+        expect(panel.x, `${preset.id} panel x`).toBeGreaterThanOrEqual(0);
+        expect(panel.y, `${preset.id} panel y`).toBeGreaterThanOrEqual(0);
+        expect(panel.x + panel.width, `${preset.id} panel right`).toBeLessThanOrEqual(1.001);
+        expect(panel.y + panel.height, `${preset.id} panel bottom`).toBeLessThanOrEqual(1.001);
+      }
+
+      /*
+       * A bar drawn across a card's border is the failure this catches, and it
+       * is the one insetting the content is for. Only bars that fall within a
+       * panel's columns are checked: a heading in the row above a card grid is
+       * legitimately outside every panel.
+       */
+      for (const panel of panels) {
+        const inside = bars.filter((bar) =>
+          bar.x >= panel.x - 0.001
+          && bar.x + bar.width <= panel.x + panel.width + 0.001
+          && bar.y >= panel.y - 0.001
+          && bar.y + bar.height <= panel.y + panel.height + 0.001);
+
+        for (const bar of inside) {
+          expect(bar.x, `${preset.id} bar against the left edge of a card`)
+            .toBeGreaterThan(panel.x + 0.004);
+        }
+      }
+    }
+  });
+
+  /*
+   * STRETCH IS THE DEFAULT AND IT IS WHAT A CARD GRID WANTS: three cards of
+   * unequal wordiness still line up along the bottom, because on the page the
+   * columns stretch to their row.
+   *
+   * This started life as a test that no preset both cards a row and aligns it,
+   * written to hold an assumption the panel maths was built on. It failed on
+   * the first run: "Three panels, one picked out" does exactly that, on purpose,
+   * and the assumption was simply wrong. So the maths learned about align and
+   * the test became this pair.
+   */
+  it('draws the cards in a stretched row at one height', () => {
+    const panels = presetThumb(presetById('pricing-three-panels')!).panels;
+    const heights = new Set(panels.map((panel) => panel.height.toFixed(4)));
+
+    expect(panels.length).toBe(3);
+    expect(heights.size).toBe(1);
+  });
+
+  it('lets the panels in an aligned row keep their own heights, centred', () => {
+    const { panels } = presetThumb(presetById('pricing-one-picked-out')!);
+    expect(panels.length).toBe(3);
+
+    // The middle one carries an extra line and a bigger price, so it is taller.
+    const [left, middle, right] = panels;
+    expect(middle.height).toBeGreaterThan(left.height);
+    expect(middle.height).toBeGreaterThan(right.height);
+
+    // Centred against it rather than hanging from the top, which is what
+    // align: 'centre' does on the page and what makes the lifted one sit proud.
+    expect(left.y).toBeGreaterThan(middle.y);
+    expect((left.y + left.height / 2) - (middle.y + middle.height / 2))
+      .toBeCloseTo(0, 3);
   });
 });
 

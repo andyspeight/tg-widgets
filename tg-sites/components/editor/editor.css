@@ -1995,7 +1995,85 @@
   stroke-width: 1;
 }
 
-.ed-preset-card:hover .ed-thumb--preset rect[data-tone='strong'] { fill: var(--ed-accent-dark); }
+/*
+ * An icon tile, in the accent.
+ *
+ * THE ONE PLACE COLOUR IS SPENT IN A THUMBNAIL, and deliberately the smallest
+ * shape on it. An icon is the fastest thing to recognise at this size and the
+ * hardest to mistake for anything else, so it is what tells you at a glance
+ * which of the twelve Features designs has icons in it. Everything else stays
+ * grey: colour that appears on every shape stops meaning anything.
+ */
+.ed-thumb--preset rect[data-tone='icon'] {
+  fill: color-mix(in srgb, var(--ed-accent) 55%, var(--ed-line));
+}
+
+/*
+ * The section's own background, and the cards on top of it.
+ *
+ * WHY THESE EXIST. A preset can say `section: { tone: 'accent' }` and
+ * `columnBox: [CARD, CARD, CARD]`, and until 2 Aug 2026 both were built on the
+ * page and drawn nowhere here, so a tinted call to action and a plain one were
+ * the same picture. Shading is most of what makes a section read as a band
+ * rather than as more page, and it is exactly what somebody is choosing
+ * between when they look at this grid.
+ *
+ * LIGHT DRAWS NOTHING, because on the page it is the page: a white section on
+ * a white site has no edges and should not gain any here.
+ */
+.ed-thumb--preset rect[data-tone='ground'] { fill: none; }
+.ed-thumb--preset[data-section='subtle'] rect[data-tone='ground'] { fill: var(--ed-sunken); }
+.ed-thumb--preset[data-section='dark'] rect[data-tone='ground'] { fill: var(--ed-primary); }
+.ed-thumb--preset[data-section='accent'] rect[data-tone='ground'] {
+  /* A wash, not the accent at full strength. Colour highlights, it does not
+     shout: a thumbnail in flat teal drowns the shapes it is meant to show. */
+  fill: color-mix(in srgb, var(--ed-accent) 22%, var(--ed-panel));
+}
+
+.ed-thumb--preset rect[data-tone='card'] {
+  fill: var(--ed-panel);
+  stroke: var(--ed-line);
+  stroke-width: 1;
+}
+
+/* No border on this one. A panel is a tint, which is what PANEL means. */
+.ed-thumb--preset rect[data-tone='panel'] { fill: var(--ed-well); }
+
+/*
+ * ON A DARK OR ACCENT GROUND THE CONTENT FLIPS, the same way the real section
+ * does. Without this a dark banner draws slate-grey bars on navy and reads as
+ * an empty rectangle, which is worse than the plain version it replaced.
+ */
+.ed-thumb--preset[data-section='dark'] rect[data-tone='strong'] { fill: rgba(255, 255, 255, 0.92); }
+.ed-thumb--preset[data-section='dark'] rect[data-tone='soft'] { fill: rgba(255, 255, 255, 0.42); }
+.ed-thumb--preset[data-section='dark'] rect[data-tone='frame'] {
+  fill: rgba(255, 255, 255, 0.16);
+  stroke: rgba(255, 255, 255, 0.28);
+}
+.ed-thumb--preset[data-section='dark'] rect[data-tone='card'] {
+  fill: rgba(255, 255, 255, 0.08);
+  stroke: rgba(255, 255, 255, 0.22);
+}
+.ed-thumb--preset[data-section='dark'] rect[data-tone='panel'] { fill: rgba(255, 255, 255, 0.1); }
+.ed-thumb--preset[data-section='dark'] rect[data-tone='icon'] { fill: var(--ed-accent); }
+
+/*
+ * The accent ground is a wash rather than a solid, so the ordinary ink still
+ * clears it. Only the panels need lifting off it.
+ */
+.ed-thumb--preset[data-section='accent'] rect[data-tone='card'],
+.ed-thumb--preset[data-section='accent'] rect[data-tone='panel'] {
+  fill: color-mix(in srgb, var(--ed-panel) 75%, transparent);
+}
+
+/*
+ * Hover tints the words, and only on the grounds where grey ink is being used.
+ * A dark section already draws them near-white, and turning those teal would
+ * make the hovered card the only one that has stopped being legible.
+ */
+.ed-preset-card:hover .ed-thumb--preset:not([data-section='dark']) rect[data-tone='strong'] {
+  fill: var(--ed-accent-dark);
+}
 
 .ed-ai-stub {
   display: grid;

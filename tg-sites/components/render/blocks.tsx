@@ -234,7 +234,25 @@ export function ListBlock({ props }: { props: Props }): ReactElement {
   return (
     <Tag className="tgs-list" data-style={style}>
       {items.map((item, index) => (
-        <li key={index}>{str(item, 'text')}</li>
+        <li key={index}>
+          {/*
+            A DRAWN TICK, NOT A TYPED ONE. This was `content: '✓'` in the
+            stylesheet until 2 Aug 2026, which is the last character-as-icon in
+            the product: the note at the top of lib/content/icons.ts says the
+            practice was banned in our own interface and left in the client's
+            content, and this was the piece it missed. U+2713 is not in every
+            font stack, so on the machines that lack it a list of what is
+            included in a holiday drew a row of empty boxes down the left. It
+            also cannot take a stroke weight, so it sat lighter than every other
+            mark on the page.
+
+            Decorative, and marked so. The tick means "included", which the
+            list around it already says in words, and a screen reader announcing
+            "tick" before each of eight bullets is noise rather than meaning.
+          */}
+          {style === 'tick' && <ContentIcon name="check" className="tgs-list__tick" />}
+          {str(item, 'text')}
+        </li>
       ))}
     </Tag>
   );

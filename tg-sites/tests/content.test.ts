@@ -1133,6 +1133,15 @@ describe('box styling, shared by sections and columns', () => {
     ['rgb(1,2,3)', 'rgb(1,2,3)'],
     ['rgba(1, 2, 3, 0.5)', 'rgba(1, 2, 3, 0.5)'],
     ['transparent', 'transparent'],
+    /*
+     * THE THEME TOKENS, allowed since 2 Aug 2026. Without them the only way to
+     * tint a panel was a hex, and a hex baked into a preset is a colour that
+     * stops matching the day a client themes their site burgundy. That is why
+     * PANEL shipped with no background at all and drew nothing.
+     */
+    ['var(--tgs-surface-alt)', 'var(--tgs-surface-alt)'],
+    ['var(--tgs-accent)', 'var(--tgs-accent)'],
+    ['var( --tgs-primary )', 'var(--tgs-primary)'],
   ])('accepts the colour %s', (input, expected) => {
     expect(safeColour(input)).toBe(expected);
   });
@@ -1141,7 +1150,15 @@ describe('box styling, shared by sections and columns', () => {
     ['a url', 'url(https://evil.example/x.png)'],
     ['an escape out of the declaration', '#fff; background: url(x)'],
     ['a css expression', 'expression(alert(1))'],
-    ['a var reference', 'var(--anything)'],
+    ['a var reference to anything else', 'var(--anything)'],
+    /*
+     * NOT A COLOUR, THOUGH IT IS ONE OF OURS. The token list is written out
+     * rather than matched as `--tgs-[a-z-]+`, so a radius or a font cannot be
+     * handed to a background and left to the browser to make sense of.
+     */
+    ['one of our own tokens that is not a colour', 'var(--tgs-radius-lg)'],
+    ['a token with something after it', 'var(--tgs-accent) url(x)'],
+    ['a nested var', 'var(--tgs-accent, url(x))'],
     ['a colour name', 'rebeccapurple'],
     ['empty', ''],
     ['a number', 123],

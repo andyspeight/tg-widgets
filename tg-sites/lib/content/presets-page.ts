@@ -338,7 +338,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
-    section: { paddingY: 88 },
+    section: { paddingY: 88, tone: 'subtle' },
   },
 
   {
@@ -360,7 +360,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
-    section: { paddingY: 64 },
+    section: { paddingY: 64, tone: 'subtle' },
   },
 
   {
@@ -690,7 +690,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
-    section: { paddingY: 96, width: 'narrow' },
+    section: { paddingY: 96, width: 'narrow', tone: 'subtle' },
   },
 
   {
@@ -1388,6 +1388,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
+    section: { tone: 'subtle' },
   },
 
   {
@@ -1859,7 +1860,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
-    section: { width: 'narrow', paddingY: 80 },
+    section: { width: 'narrow', paddingY: 80, tone: 'subtle' },
   },
 
   {
@@ -2101,7 +2102,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
               props: {
                 headerRow: true,
                 firstColumnHeader: true,
-                style: 'lined',
+                style: 'striped',
                 caption: 'What is included at each level',
                 data: [
                   'What you get\tBed and breakfast\tHalf board\tAll inclusive',
@@ -2301,6 +2302,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
+    section: { tone: 'subtle' },
   },
 
   {
@@ -2406,7 +2408,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
               type: 'cards',
               props: {
                 columns: '4',
-                style: 'plain',
+                style: 'raised',
                 ratio: '1/1',
                 align: 'centre',
                 imagePosition: 'top',
@@ -2511,7 +2513,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
               type: 'cards',
               props: {
                 columns: '3',
-                style: 'plain',
+                style: 'bordered',
                 ratio: '1/1',
                 align: 'centre',
                 wholeCardLinks: false,
@@ -2609,6 +2611,12 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
       {
         widths: [3, 2],
         gap: 48,
+        /*
+         * THE FORM ON THE PAGE, THE DETAILS IN A PANEL. A gap in the array
+         * leaves that column plain, which is what the form side wants: a form
+         * inside a tinted box on a page reads as an advert for a form.
+         */
+        columnBox: [undefined, PANEL],
         columns: [
           [
             { type: 'heading', props: { html: 'Send us a message', style: 'h5', level: 'h3' } },
@@ -2622,12 +2630,18 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
           ],
           [
             { type: 'heading', props: { html: 'Or come and see us', style: 'h5', level: 'h3' } },
-            {
-              type: 'text',
-              props: {
-                html: '<p>Your address, over two or three lines.</p><p>Your phone number, and the email people should use.</p>',
-              },
-            },
+            /*
+             * AN ICON PER WAY IN, and this is the case that earns them. A pin,
+             * a phone and a clock are the three things a person scans a contact
+             * page for, and each one is recognised before the words beside it
+             * are read. That is an icon doing a job, which is the only reason
+             * to spend one: the design skill lists icon-heading-paragraph
+             * repeated across a grid as a sign of a machine having decorated
+             * something, and it is right. Every icon in this library has to
+             * name a thing that exists.
+             */
+            { type: 'icon-item', props: { icon: 'map-pin', title: 'The shop', body: 'Your address, over two or three lines.' } },
+            { type: 'icon-item', props: { icon: 'phone', title: 'By phone or email', body: 'Your number, and the address people should write to.' } },
             {
               type: 'text',
               props: {
@@ -2707,10 +2721,14 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         columns: [
           [
             { type: 'heading', props: { html: 'Where to find us', style: 'h2' } },
-            {
-              type: 'text',
-              props: { html: '<p>Your address, over two or three lines.</p><p>Parking, the nearest station, that sort of thing.</p>' },
-            },
+            /*
+             * THE HOURS WERE IN THE DESCRIPTION AND NOT IN THE SECTION until
+             * 2 Aug 2026. "The address and hours on the left" built an address
+             * and no hours, which is the sort of gap somebody notices only
+             * after they have already put it on a page.
+             */
+            { type: 'icon-item', props: { icon: 'map-pin', title: 'The address', body: 'Over two or three lines. Parking, the nearest station, that sort of thing.' } },
+            { type: 'icon-item', props: { icon: 'clock', title: 'When we are open', body: 'Add the Opening Hours widget here, or type the times out.' } },
             { type: 'button', props: { label: 'Get directions', variant: 'secondary' } },
           ],
           [
@@ -2769,28 +2787,23 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
       {
         widths: [1, 1, 1],
         gap: 32,
+        /*
+         * ICONS BUT NO CARDS, which is the difference between this and "Three
+         * ways to reach you" one entry up. That one is carded and tinted; this
+         * one is the same information laid out plainly, for a page that already
+         * has enough panels on it. Two designs of a shape, not two decorations
+         * of one.
+         */
         columns: [
           [
-            { type: 'heading', props: { html: 'Opening hours', style: 'h5', level: 'h3' } },
-            {
-              type: 'text',
-              props: { html: '<p>Add the Opening Hours widget here, or type them out.</p>', size: 's' },
-            },
+            { type: 'icon-item', props: { icon: 'clock', title: 'Opening hours', body: 'Add the Opening Hours widget here, or type them out.' } },
           ],
           [
-            { type: 'heading', props: { html: 'Talk to somebody', style: 'h5', level: 'h3' } },
-            {
-              type: 'text',
-              props: { html: '<p>Your number, and the best time to ring it.</p>' },
-            },
+            { type: 'icon-item', props: { icon: 'phone', title: 'Talk to somebody', body: 'Your number, and the best time to ring it.' } },
             { type: 'button', props: { label: 'Send an enquiry', variant: 'ghost' } },
           ],
           [
-            { type: 'heading', props: { html: 'Find us', style: 'h5', level: 'h3' } },
-            {
-              type: 'text',
-              props: { html: '<p>Your address, then the Maps widget under it.</p>' },
-            },
+            { type: 'icon-item', props: { icon: 'map-pin', title: 'Find us', body: 'Your address, then the Maps widget under it.' } },
           ],
         ],
       },
@@ -2832,7 +2845,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
-    section: { paddingY: 48 },
+    section: { paddingY: 48, tone: 'subtle' },
   },
 
   {
@@ -2947,7 +2960,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
-    section: { paddingY: 64 },
+    section: { paddingY: 64, tone: 'subtle' },
   },
 
   {
@@ -3090,6 +3103,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
+    section: { tone: 'subtle' },
   },
 
   {
@@ -3224,7 +3238,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
                 collection: '',
                 count: 3,
                 columns: '3',
-                style: 'plain',
+                style: 'raised',
                 imagePosition: 'top',
                 ratio: '16/9',
                 radius: 'md',
@@ -3235,6 +3249,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
+    section: { tone: 'subtle' },
   },
 
   {
@@ -3300,7 +3315,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
                 count: 4,
                 columns: '4',
                 gap: 's',
-                style: 'plain',
+                style: 'bordered',
                 imagePosition: 'top',
                 ratio: '4/3',
                 radius: 'sm',

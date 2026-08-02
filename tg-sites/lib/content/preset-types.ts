@@ -341,9 +341,24 @@ export const CENTRED = { align: 'centre' } as const;
  * One constant rather than repeated per preset, so a card is the same card
  * wherever it appears. A client who changes one afterwards changes only theirs,
  * which is the point of a preset being a starting arrangement.
+ *
+ * THE HAIRLINE WAS TRANSPARENT UNTIL 2 AUG 2026, which is the same failure
+ * PANEL had and from the same cause. A width with no colour renders as
+ * `border: 1px solid transparent`: a one-pixel ring of nothing, reserved and
+ * never drawn. Every carded design in the library, eleven presets of pricing
+ * panels and team cards and feature grids, drew as columns with generous
+ * padding and no edges. Nobody could have written a colour here either, because
+ * `safeColour` took hex and nothing else and a hex is a colour that stops
+ * matching the day a client themes their site. Found by rendering a page and
+ * reading `--tgs-bc: transparent` off the column.
+ *
+ * `--tgs-border` and not a fixed grey, because the tones remap it: a card on a
+ * dark band gets the border measured against navy rather than one that vanishes
+ * into it. See the tone rules at the top of app/globals.css.
  */
 export const CARD = {
   borderWidth: 1,
+  borderColour: 'var(--tgs-border)',
   radius: 12,
   padding: { top: 24, right: 24, bottom: 24, left: 24 },
 } as const;
@@ -351,12 +366,32 @@ export const CARD = {
 /** The same card with more room inside, for a pricing panel or a testimonial. */
 export const CARD_ROOMY = {
   borderWidth: 1,
+  borderColour: 'var(--tgs-border)',
   radius: 12,
   padding: { top: 32, right: 32, bottom: 32, left: 32 },
 } as const;
 
-/** A panel with no border, for a tinted section where a hairline would fight it. */
+/**
+ * A tinted panel with no border, for the times a hairline would be too much.
+ *
+ * IT WAS INVISIBLE UNTIL 2 AUG 2026 and that is worth writing down, because it
+ * failed the quiet way. A box with a radius, some padding and no background
+ * renders as padding: no border, no fill, nothing an eye can find. Two presets
+ * carried one for a fortnight and drew a panel nobody could see.
+ *
+ * The reason it had no background is the same one that made it worth fixing
+ * properly. `safeColour` would take a hex and nothing else, and a hex baked into
+ * a preset is a colour that stops matching the day a client themes their site,
+ * so a real colour was the wrong answer and no colour was the one that shipped.
+ * Now it takes theme tokens, so this is the site's own subtle surface and it
+ * moves with the theme.
+ *
+ * WHICH TONES IT SUITS. `surface-alt` is a pale tint, so this belongs on a light
+ * or subtle section. On a dark band, use CARD: the tones remap the border to
+ * something that shows, and a pale panel on navy is a different design.
+ */
 export const PANEL = {
   radius: 12,
+  background: 'var(--tgs-surface-alt)',
   padding: { top: 28, right: 28, bottom: 28, left: 28 },
 } as const;

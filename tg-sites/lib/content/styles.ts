@@ -46,8 +46,15 @@
  * would quietly admit every token invented later, including ones that are not
  * colours at all, and `var(--tgs-radius-lg)` as a text colour is a paragraph
  * that renders in whatever the browser makes of it.
+ *
+ * EXPORTED SINCE 2 AUG 2026 so `safeColour` in schema.ts can share it rather
+ * than keep a second copy. That function's own comment has always said it takes
+ * "hex, rgb/rgba and the theme token names" and it never took the token names,
+ * which is how a tinted panel became a design nobody could express: a column
+ * background could only be a frozen hex, and a frozen hex in a preset is a
+ * colour that stops matching the day a client changes their theme.
  */
-const COLOUR_TOKENS = new Set([
+export const COLOUR_TOKENS = new Set([
   'primary',
   'primary-light',
   'accent',

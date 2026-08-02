@@ -32,6 +32,7 @@ import { z } from 'zod';
 
 import { normaliseDividerHeight, safeDivider } from './dividers';
 import { escapeHtml } from './sanitise';
+import { COLOUR_TOKENS } from './styles';
 
 // ---------------------------------------------------------------------------
 // Constraints
@@ -175,8 +176,26 @@ export type Shadow = z.infer<typeof Shadow>;
  * A colour, or nothing.
  *
  * Whitelisted rather than free text, because this string goes into a CSS
- * custom property that the renderer emits. Hex, rgb/rgba and the theme token
- * names only, so nothing can smuggle a url() or a closing brace through it.
+ * custom property that the renderer emits. Hex, rgb/rgba, the three CSS
+ * keywords and the theme token names only, so nothing can smuggle a url() or a
+ * closing brace through it.
+ *
+ * THE TOKENS WERE MISSING UNTIL 2 AUG 2026, though this comment always claimed
+ * them, and the gap had a cost. A column's box could only be a frozen hex, so
+ * the one way to tint a panel was to bake a colour into the preset, which is a
+ * colour that stops matching the day a client themes their site burgundy. So
+ * the library did not tint panels: PANEL shipped with a radius, some padding
+ * and NO background, which renders as nothing at all. Two presets drew an
+ * invisible panel for a fortnight because of it.
+ *
+ * The list is the one the text toolbar already uses. One list, so what a client
+ * can pick for a phrase and what a preset can ask for cannot drift apart, and
+ * so a token added for one is a token allowed by the other.
+ *
+ * SAFE FOR THE SAME REASON THE REST OF THIS IS. `var(--tgs-accent)` is built
+ * here from a name that had to be in the set, not copied out of the input, so
+ * there is no punctuation an attacker can reach: no parenthesis to close, no
+ * semicolon to add a second declaration with.
  */
 export function safeColour(value: unknown): string | undefined {
   if (typeof value !== 'string') return undefined;
@@ -188,6 +207,9 @@ export function safeColour(value: unknown): string | undefined {
     return colour;
   }
   if (/^(transparent|inherit|currentcolor)$/.test(colour)) return colour;
+
+  const token = /^var\(\s*--tgs-([a-z-]+)\s*\)$/.exec(colour);
+  if (token && COLOUR_TOKENS.has(token[1])) return `var(--tgs-${token[1]})`;
 
   return undefined;
 }
