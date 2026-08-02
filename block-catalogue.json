@@ -1,0 +1,2137 @@
+{
+  "generatedFrom": "tg-sites/lib/content/blocks.ts",
+  "generatedBy": "tg-sites/tools/block-catalogue.mjs",
+  "note": "role, required and tokensUsed are DERIVED, not recorded in the registry. See the header of the generator for how.",
+  "blocks": [
+    {
+      "id": "heading",
+      "name": "Heading",
+      "category": "text",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A section or sub-section title.",
+      "variants": [
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "h5",
+        "h6"
+      ],
+      "props": [
+        {
+          "name": "html",
+          "type": "richtext",
+          "role": "content",
+          "required": true,
+          "default": "A new heading"
+        },
+        {
+          "name": "level",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "h2",
+            "h3",
+            "h4"
+          ],
+          "default": "h2"
+        },
+        {
+          "name": "style",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "h1",
+            "h2",
+            "h3",
+            "h4",
+            "h5",
+            "h6"
+          ],
+          "default": "h3"
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "centre",
+            "right"
+          ],
+          "default": "left"
+        }
+      ],
+      "classNames": [
+        "tgs-heading"
+      ],
+      "tokensUsed": [
+        "type.h1-font",
+        "type.h1-leading",
+        "type.h1-size",
+        "type.h1-tracking",
+        "type.h1-weight",
+        "type.h2-font",
+        "type.h2-leading",
+        "type.h2-size",
+        "type.h2-tracking",
+        "type.h2-weight",
+        "type.h3-font",
+        "type.h3-leading",
+        "type.h3-size",
+        "type.h3-tracking",
+        "type.h3-weight",
+        "type.h4-font",
+        "type.h4-leading",
+        "type.h4-size",
+        "type.h4-tracking",
+        "type.h4-weight",
+        "type.h5-font",
+        "type.h5-leading",
+        "type.h5-size",
+        "type.h5-tracking",
+        "type.h5-weight",
+        "type.h6-font",
+        "type.h6-leading",
+        "type.h6-size",
+        "type.h6-tracking",
+        "type.h6-weight"
+      ],
+      "cssRules": 7,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:92",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "text",
+      "name": "Text",
+      "category": "text",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A paragraph or a few. Bold, italics, links and lists.",
+      "variants": [],
+      "props": [
+        {
+          "name": "html",
+          "type": "richtext",
+          "role": "content",
+          "required": true,
+          "default": "<p>Write something here. Keep it plain and say the useful thing first.</p>"
+        },
+        {
+          "name": "size",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "s",
+            "m",
+            "l"
+          ],
+          "default": "m"
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "centre",
+            "right"
+          ],
+          "default": "left"
+        }
+      ],
+      "classNames": [
+        "tgs-text"
+      ],
+      "tokensUsed": [
+        "colour.accent",
+        "colour.on-dark-accent",
+        "colour.on-primary-accent",
+        "colour.primary",
+        "colour.surface-alt",
+        "radius.sm",
+        "space.l",
+        "space.m",
+        "space.s",
+        "space.xs",
+        "type.font-display",
+        "type.leading-tight",
+        "type.p-font",
+        "type.p-leading",
+        "type.p-size",
+        "type.p-tracking",
+        "type.p-weight",
+        "type.text-muted"
+      ],
+      "cssRules": 16,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:171",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "quote",
+      "name": "Quote",
+      "category": "text",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A pulled-out quotation with an attribution.",
+      "variants": [],
+      "props": [
+        {
+          "name": "text",
+          "type": "text",
+          "role": "content",
+          "required": true,
+          "default": "Something worth repeating."
+        },
+        {
+          "name": "attribution",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "role",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "classNames": [
+        "tgs-quote"
+      ],
+      "tokensUsed": [],
+      "cssRules": 1,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:210",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "list",
+      "name": "List",
+      "category": "text",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "Bulleted, numbered or ticked points.",
+      "variants": [
+        "bullet",
+        "number",
+        "tick"
+      ],
+      "props": [
+        {
+          "name": "style",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "bullet",
+            "number",
+            "tick"
+          ],
+          "default": "bullet"
+        },
+        {
+          "name": "items",
+          "type": "list",
+          "role": "content",
+          "required": true
+        },
+        {
+          "name": "items[].text",
+          "type": "text",
+          "role": "content",
+          "required": false
+        }
+      ],
+      "classNames": [
+        "tgs-list"
+      ],
+      "tokensUsed": [
+        "colour.accent",
+        "space.s"
+      ],
+      "cssRules": 5,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:229",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "icon-item",
+      "name": "Icon and text",
+      "category": "text",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "An icon with a short title and a line of copy.",
+      "variants": [],
+      "props": [
+        {
+          "name": "icon",
+          "type": "icon",
+          "role": "content",
+          "required": false,
+          "default": "sparkles"
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "role": "content",
+          "required": true,
+          "default": "A benefit"
+        },
+        {
+          "name": "body",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": "One sentence on why it matters."
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "centre",
+            "right"
+          ],
+          "default": "left"
+        }
+      ],
+      "classNames": [
+        "tgs-icon-item"
+      ],
+      "tokensUsed": [
+        "space.m"
+      ],
+      "cssRules": 3,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:243",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "accordion",
+      "name": "Accordion",
+      "category": "text",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "Headings that open to show what is under them.",
+      "variants": [
+        "plain",
+        "ruled",
+        "separated"
+      ],
+      "props": [
+        {
+          "name": "items",
+          "type": "list",
+          "role": "content",
+          "required": true
+        },
+        {
+          "name": "items[].title",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].body",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "style",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "plain",
+            "ruled",
+            "separated"
+          ],
+          "default": "separated"
+        },
+        {
+          "name": "single",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "openFirst",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": false
+        }
+      ],
+      "classNames": [
+        "tgs-acc-",
+        "tgs-accordion",
+        "tgs-placeholder"
+      ],
+      "tokensUsed": [
+        "colour.border",
+        "colour.border-strong",
+        "colour.surface-alt",
+        "radius.md",
+        "space.l",
+        "space.m",
+        "space.s",
+        "space.xs",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "cssRules": 10,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:741",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "tabs",
+      "name": "Tabs",
+      "category": "text",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A few panels of text with a row of headings to pick between them.",
+      "variants": [
+        "underline",
+        "pills",
+        "boxed"
+      ],
+      "props": [
+        {
+          "name": "items",
+          "type": "list",
+          "role": "content",
+          "required": true
+        },
+        {
+          "name": "items[].title",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].body",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "style",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "underline",
+            "pills",
+            "boxed"
+          ],
+          "default": "underline"
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "centre",
+            "right"
+          ],
+          "default": "left"
+        }
+      ],
+      "classNames": [
+        "tgs-placeholder",
+        "tgs-sr-only",
+        "tgs-tabs",
+        "tgs-tabs-"
+      ],
+      "tokensUsed": [
+        "colour.border",
+        "colour.border-strong",
+        "colour.on-primary",
+        "colour.primary",
+        "colour.surface-alt",
+        "radius.md",
+        "space.m",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "cssRules": 11,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:804",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "image",
+      "name": "Image",
+      "category": "media",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A picture, with the alt text search engines and screen readers need.",
+      "variants": [],
+      "props": [
+        {
+          "name": "src",
+          "type": "image",
+          "role": "content",
+          "required": true,
+          "default": ""
+        },
+        {
+          "name": "alt",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "ratio",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "auto",
+            "16/9",
+            "4/3",
+            "1/1",
+            "3/4"
+          ],
+          "default": "auto"
+        },
+        {
+          "name": "fit",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "cover",
+            "contain"
+          ],
+          "default": "cover"
+        },
+        {
+          "name": "radius",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "none",
+            "sm",
+            "md",
+            "lg",
+            "full"
+          ],
+          "default": "md"
+        },
+        {
+          "name": "caption",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "href",
+          "type": "url",
+          "role": "content",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "classNames": [
+        "tgs-image",
+        "tgs-placeholder"
+      ],
+      "tokensUsed": [
+        "colour.border-strong",
+        "colour.surface-alt",
+        "radius.md",
+        "space.m",
+        "space.s",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "cssRules": 5,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:308",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "video",
+      "name": "Video",
+      "category": "media",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A YouTube or Vimeo video, or a hosted file.",
+      "variants": [],
+      "props": [
+        {
+          "name": "url",
+          "type": "url",
+          "role": "content",
+          "required": true,
+          "default": ""
+        },
+        {
+          "name": "ratio",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "16/9",
+            "4/3",
+            "1/1",
+            "3/4"
+          ],
+          "default": "16/9"
+        },
+        {
+          "name": "radius",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "none",
+            "sm",
+            "md",
+            "lg",
+            "full"
+          ],
+          "default": "md"
+        },
+        {
+          "name": "caption",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "classNames": [
+        "tgs-image",
+        "tgs-placeholder",
+        "tgs-video"
+      ],
+      "tokensUsed": [
+        "colour.border-strong",
+        "colour.surface-alt",
+        "radius.md",
+        "space.m",
+        "space.s",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "cssRules": 5,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:507",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "gallery",
+      "name": "Gallery",
+      "category": "media",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A grid of images.",
+      "variants": [],
+      "props": [
+        {
+          "name": "columns",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "2",
+            "3",
+            "4"
+          ],
+          "default": "3"
+        },
+        {
+          "name": "gap",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "none",
+            "xs",
+            "s",
+            "m",
+            "l",
+            "xl"
+          ],
+          "default": "m"
+        },
+        {
+          "name": "radius",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "none",
+            "sm",
+            "md",
+            "lg",
+            "full"
+          ],
+          "default": "md"
+        },
+        {
+          "name": "images",
+          "type": "list",
+          "role": "content",
+          "required": true
+        },
+        {
+          "name": "images[].src",
+          "type": "image",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "images[].alt",
+          "type": "text",
+          "role": "content",
+          "required": false
+        }
+      ],
+      "classNames": [
+        "tgs-gallery",
+        "tgs-image",
+        "tgs-placeholder"
+      ],
+      "tokensUsed": [
+        "colour.border-strong",
+        "colour.surface-alt",
+        "radius.md",
+        "space.l",
+        "space.m",
+        "space.s",
+        "space.xl",
+        "space.xs",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "cssRules": 17,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:539",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "cards",
+      "name": "Cards",
+      "category": "media",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A grid of the same shape repeated: destinations, offers, the team.",
+      "variants": [
+        "plain",
+        "bordered",
+        "raised",
+        "tinted"
+      ],
+      "props": [
+        {
+          "name": "source",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "typed",
+            "collection"
+          ],
+          "default": "typed"
+        },
+        {
+          "name": "collection",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "count",
+          "type": "number",
+          "role": "config",
+          "required": false,
+          "default": 6
+        },
+        {
+          "name": "items",
+          "type": "list",
+          "role": "content",
+          "required": true
+        },
+        {
+          "name": "items[].src",
+          "type": "image",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].alt",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].label",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].title",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].body",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].linkLabel",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].linkHref",
+          "type": "url",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "columns",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "2",
+            "3",
+            "4"
+          ],
+          "default": "3"
+        },
+        {
+          "name": "gap",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "none",
+            "xs",
+            "s",
+            "m",
+            "l",
+            "xl"
+          ],
+          "default": "m"
+        },
+        {
+          "name": "style",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "plain",
+            "bordered",
+            "raised",
+            "tinted"
+          ],
+          "default": "bordered"
+        },
+        {
+          "name": "imagePosition",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "top",
+            "left",
+            "none"
+          ],
+          "default": "top"
+        },
+        {
+          "name": "ratio",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "16/9",
+            "4/3",
+            "1/1",
+            "3/4"
+          ],
+          "default": "4/3"
+        },
+        {
+          "name": "radius",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "none",
+            "sm",
+            "md",
+            "lg",
+            "full"
+          ],
+          "default": "md"
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "centre"
+          ],
+          "default": "left"
+        },
+        {
+          "name": "wholeCardLinks",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": true
+        }
+      ],
+      "classNames": [
+        "tgs-cards",
+        "tgs-placeholder"
+      ],
+      "tokensUsed": [
+        "colour.accent",
+        "colour.border",
+        "colour.border-strong",
+        "colour.surface",
+        "colour.surface-alt",
+        "radius.lg",
+        "radius.md",
+        "radius.sm",
+        "space.l",
+        "space.m",
+        "space.s",
+        "space.xl",
+        "space.xs",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "cssRules": 36,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:630",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "slider",
+      "name": "Slider",
+      "category": "media",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "Cards on a rail. Swipe or scroll sideways through them.",
+      "variants": [
+        "plain",
+        "bordered",
+        "raised",
+        "tinted"
+      ],
+      "props": [
+        {
+          "name": "items",
+          "type": "list",
+          "role": "content",
+          "required": true
+        },
+        {
+          "name": "items[].src",
+          "type": "image",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].alt",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].label",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].title",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].body",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].linkLabel",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].linkHref",
+          "type": "url",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "slideWidth",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "narrow",
+            "medium",
+            "wide"
+          ],
+          "default": "medium"
+        },
+        {
+          "name": "gap",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "none",
+            "xs",
+            "s",
+            "m",
+            "l",
+            "xl"
+          ],
+          "default": "m"
+        },
+        {
+          "name": "style",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "plain",
+            "bordered",
+            "raised",
+            "tinted"
+          ],
+          "default": "bordered"
+        },
+        {
+          "name": "ratio",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "16/9",
+            "4/3",
+            "1/1",
+            "3/4"
+          ],
+          "default": "4/3"
+        },
+        {
+          "name": "radius",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "none",
+            "sm",
+            "md",
+            "lg",
+            "full"
+          ],
+          "default": "md"
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "centre"
+          ],
+          "default": "left"
+        },
+        {
+          "name": "wholeCardLinks",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": true
+        }
+      ],
+      "classNames": [
+        "tgs-cards",
+        "tgs-placeholder",
+        "tgs-slider"
+      ],
+      "tokensUsed": [
+        "colour.accent",
+        "colour.border",
+        "colour.border-strong",
+        "colour.slide",
+        "colour.surface",
+        "colour.surface-alt",
+        "radius.lg",
+        "radius.md",
+        "radius.sm",
+        "space.l",
+        "space.m",
+        "space.s",
+        "space.xl",
+        "space.xs",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "cssRules": 50,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:896",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "button",
+      "name": "Button",
+      "category": "actions",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A call to action.",
+      "variants": [
+        "primary",
+        "secondary",
+        "ghost"
+      ],
+      "props": [
+        {
+          "name": "label",
+          "type": "text",
+          "role": "content",
+          "required": true,
+          "default": "Enquire"
+        },
+        {
+          "name": "href",
+          "type": "url",
+          "role": "content",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "variant",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "primary",
+            "secondary",
+            "ghost"
+          ],
+          "default": "primary"
+        },
+        {
+          "name": "size",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "s",
+            "m",
+            "l"
+          ],
+          "default": "m"
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "centre",
+            "right"
+          ],
+          "default": "left"
+        },
+        {
+          "name": "newTab",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": false
+        }
+      ],
+      "classNames": [
+        "tgs-buttons"
+      ],
+      "tokensUsed": [
+        "space.s"
+      ],
+      "cssRules": 3,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:964",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "button-group",
+      "name": "Button group",
+      "category": "actions",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "Two or more buttons side by side.",
+      "variants": [],
+      "props": [
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "centre",
+            "right"
+          ],
+          "default": "left"
+        },
+        {
+          "name": "buttons",
+          "type": "list",
+          "role": "content",
+          "required": true
+        },
+        {
+          "name": "buttons[].label",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "buttons[].href",
+          "type": "url",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "buttons[].variant",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "primary",
+            "secondary",
+            "ghost"
+          ]
+        },
+        {
+          "name": "buttons[].newTab",
+          "type": "boolean",
+          "role": "config",
+          "required": false
+        }
+      ],
+      "classNames": [
+        "tgs-buttons"
+      ],
+      "tokensUsed": [
+        "space.s"
+      ],
+      "cssRules": 3,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:968",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "nav",
+      "name": "Menu",
+      "category": "actions",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "The links across your header, or down your footer.",
+      "variants": [
+        "row",
+        "column"
+      ],
+      "props": [
+        {
+          "name": "items",
+          "type": "list",
+          "role": "content",
+          "required": true
+        },
+        {
+          "name": "items[].label",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].href",
+          "type": "url",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].newTab",
+          "type": "boolean",
+          "role": "config",
+          "required": false
+        },
+        {
+          "name": "layout",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "row",
+            "column"
+          ],
+          "default": "row"
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "centre",
+            "right"
+          ],
+          "default": "left"
+        },
+        {
+          "name": "gap",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "none",
+            "xs",
+            "s",
+            "m",
+            "l",
+            "xl"
+          ],
+          "default": "m"
+        },
+        {
+          "name": "collapse",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": true
+        }
+      ],
+      "classNames": [
+        "tgs-nav",
+        "tgs-placeholder"
+      ],
+      "tokensUsed": [
+        "colour.border-strong",
+        "colour.surface-alt",
+        "radius.md",
+        "space.l",
+        "space.m",
+        "space.s",
+        "space.xl",
+        "space.xs",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "cssRules": 13,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1022",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "steps",
+      "name": "Steps",
+      "category": "text",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "Numbered steps or a day by day timeline, joined up in order.",
+      "variants": [
+        "down",
+        "across"
+      ],
+      "props": [
+        {
+          "name": "items",
+          "type": "list",
+          "role": "content",
+          "required": true
+        },
+        {
+          "name": "items[].title",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].body",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "layout",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "down",
+            "across"
+          ],
+          "default": "down"
+        },
+        {
+          "name": "marker",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "number",
+            "dot",
+            "none"
+          ],
+          "default": "number"
+        },
+        {
+          "name": "connector",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": true
+        }
+      ],
+      "classNames": [
+        "tgs-placeholder",
+        "tgs-steps"
+      ],
+      "tokensUsed": [
+        "colour.border",
+        "colour.border-strong",
+        "colour.primary",
+        "colour.surface-alt",
+        "radius.md",
+        "space.l",
+        "space.m",
+        "space.s",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "cssRules": 18,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1086",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "stats",
+      "name": "Key numbers",
+      "category": "text",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "Big figures with a word under each: years, reviews, holidays booked.",
+      "variants": [],
+      "props": [
+        {
+          "name": "items",
+          "type": "list",
+          "role": "content",
+          "required": true
+        },
+        {
+          "name": "items[].value",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].prefix",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].suffix",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].label",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].detail",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "columns",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "2",
+            "3",
+            "4"
+          ],
+          "default": "3"
+        },
+        {
+          "name": "size",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "m",
+            "l",
+            "xl"
+          ],
+          "default": "l"
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "centre",
+            "right"
+          ],
+          "default": "centre"
+        },
+        {
+          "name": "divided",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": false
+        }
+      ],
+      "classNames": [
+        "tgs-placeholder",
+        "tgs-stats"
+      ],
+      "tokensUsed": [
+        "colour.border",
+        "colour.border-strong",
+        "colour.surface-alt",
+        "radius.md",
+        "space.l",
+        "space.m",
+        "type.h-l",
+        "type.h-xl",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "cssRules": 15,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1152",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "logos",
+      "name": "Logo strip",
+      "category": "media",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A row of badges or partner logos, all on a common height.",
+      "variants": [],
+      "props": [
+        {
+          "name": "items",
+          "type": "list",
+          "role": "content",
+          "required": true
+        },
+        {
+          "name": "items[].src",
+          "type": "image",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].alt",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].href",
+          "type": "url",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "height",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "s",
+            "m",
+            "l"
+          ],
+          "default": "m"
+        },
+        {
+          "name": "gap",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "none",
+            "xs",
+            "s",
+            "m",
+            "l",
+            "xl"
+          ],
+          "default": "l"
+        },
+        {
+          "name": "tone",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "colour",
+            "grey",
+            "grey-hover"
+          ],
+          "default": "colour"
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "centre",
+            "right"
+          ],
+          "default": "centre"
+        }
+      ],
+      "classNames": [
+        "tgs-logos",
+        "tgs-placeholder"
+      ],
+      "tokensUsed": [
+        "colour.border-strong",
+        "colour.surface-alt",
+        "radius.md",
+        "space.l",
+        "space.m",
+        "space.s",
+        "space.xl",
+        "space.xs",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "cssRules": 17,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1216",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "social",
+      "name": "Social links",
+      "category": "actions",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A row of icons linking to your accounts.",
+      "variants": [
+        "plain",
+        "circle",
+        "square",
+        "filled"
+      ],
+      "props": [
+        {
+          "name": "items",
+          "type": "list",
+          "role": "content",
+          "required": true
+        },
+        {
+          "name": "items[].network",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "facebook",
+            "instagram",
+            "x",
+            "linkedin",
+            "youtube",
+            "tiktok",
+            "pinterest",
+            "whatsapp",
+            "tripadvisor",
+            "email",
+            "phone"
+          ]
+        },
+        {
+          "name": "items[].href",
+          "type": "url",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "style",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "plain",
+            "circle",
+            "square",
+            "filled"
+          ],
+          "default": "plain"
+        },
+        {
+          "name": "size",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "s",
+            "m",
+            "l"
+          ],
+          "default": "m"
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "centre",
+            "right"
+          ],
+          "default": "left"
+        },
+        {
+          "name": "showLabels",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": false
+        }
+      ],
+      "classNames": [
+        "tgs-placeholder",
+        "tgs-social"
+      ],
+      "tokensUsed": [
+        "colour.border-strong",
+        "colour.on-brand",
+        "colour.primary",
+        "colour.surface-alt",
+        "radius.md",
+        "radius.sm",
+        "space.m",
+        "space.s",
+        "space.xs",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "cssRules": 15,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1289",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "table",
+      "name": "Table",
+      "category": "layout",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A grid of figures or facts. Paste it straight from a spreadsheet.",
+      "variants": [
+        "plain",
+        "lined",
+        "striped",
+        "boxed"
+      ],
+      "props": [
+        {
+          "name": "data",
+          "type": "text",
+          "role": "content",
+          "required": true,
+          "default": "Board basis\tSpark\tBoost\tIgnite\nRoom only\tYes\tYes\tYes\nBed and breakfast\tNo\tYes\tYes\nAll inclusive\tNo\tNo\tYes"
+        },
+        {
+          "name": "headerRow",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "firstColumnHeader",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "style",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "plain",
+            "lined",
+            "striped",
+            "boxed"
+          ],
+          "default": "lined"
+        },
+        {
+          "name": "caption",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "classNames": [
+        "tgs-placeholder",
+        "tgs-table"
+      ],
+      "tokensUsed": [
+        "colour.border",
+        "colour.border-strong",
+        "colour.surface-alt",
+        "colour.text",
+        "radius.md",
+        "space.m",
+        "space.s",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "cssRules": 9,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1357",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "divider",
+      "name": "Divider",
+      "category": "layout",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A horizontal rule.",
+      "variants": [
+        "line",
+        "dashed",
+        "dots"
+      ],
+      "props": [
+        {
+          "name": "style",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "line",
+            "dashed",
+            "dots"
+          ],
+          "default": "line"
+        },
+        {
+          "name": "spacing",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "none",
+            "xs",
+            "s",
+            "m",
+            "l",
+            "xl"
+          ],
+          "default": "m"
+        }
+      ],
+      "classNames": [
+        "tgs-divider"
+      ],
+      "tokensUsed": [
+        "colour.border",
+        "space.l",
+        "space.m",
+        "space.s",
+        "space.xl",
+        "space.xs"
+      ],
+      "cssRules": 9,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1417",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "spacer",
+      "name": "Spacer",
+      "category": "layout",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "Empty vertical space.",
+      "variants": [],
+      "props": [
+        {
+          "name": "height",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "xs",
+            "s",
+            "m",
+            "l",
+            "xl"
+          ],
+          "default": "m"
+        }
+      ],
+      "classNames": [
+        "tgs-spacer"
+      ],
+      "tokensUsed": [
+        "space.l",
+        "space.m",
+        "space.s",
+        "space.xl",
+        "space.xs"
+      ],
+      "cssRules": 5,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1423",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "widget",
+      "name": "Travelgenix widget",
+      "category": "advanced",
+      "travelSpecific": true,
+      "staffOnly": false,
+      "description": "One of your own widgets: offers, reviews, an enquiry form.",
+      "variants": [],
+      "props": [
+        {
+          "name": "widget",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "offers",
+            "offers-grid",
+            "spotlight",
+            "airport",
+            "attraction",
+            "carousel",
+            "travel-results-ai",
+            "worldmap",
+            "flighttime",
+            "weather",
+            "currency",
+            "worldclock",
+            "reviews",
+            "testimonials",
+            "logos",
+            "statscounter",
+            "team",
+            "enquiry",
+            "enquirypro",
+            "form",
+            "appointment",
+            "newsletter",
+            "contact",
+            "hours",
+            "mybooking",
+            "faq",
+            "events",
+            "maps",
+            "youtube",
+            "rss",
+            "textfx",
+            "prism",
+            "pricing",
+            "countdown",
+            "spinwheel",
+            "share",
+            "quote-pdf"
+          ],
+          "default": "hours"
+        },
+        {
+          "name": "widgetId",
+          "type": "text",
+          "role": "content",
+          "required": true,
+          "default": ""
+        }
+      ],
+      "classNames": [
+        "tgs-placeholder",
+        "tgs-widget",
+        "tgs-widget-ghost"
+      ],
+      "tokensUsed": [
+        "colour.border-strong",
+        "colour.surface-alt",
+        "radius.md",
+        "space.m",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "cssRules": 3,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:388",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "embed-widget",
+      "name": "Embedded widget",
+      "category": "advanced",
+      "travelSpecific": true,
+      "staffOnly": false,
+      "description": "Code from somewhere else, run in a sealed box that cannot reach your page.",
+      "variants": [],
+      "props": [
+        {
+          "name": "html",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "height",
+          "type": "number",
+          "role": "config",
+          "required": false,
+          "default": 420
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "role": "content",
+          "required": true,
+          "default": ""
+        }
+      ],
+      "classNames": [
+        "tgs-embed-widget",
+        "tgs-placeholder",
+        "tgs-widget-ghost"
+      ],
+      "tokensUsed": [
+        "colour.border-strong",
+        "colour.surface-alt",
+        "radius.md",
+        "space.m",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "cssRules": 4,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:464",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "embed",
+      "name": "Embed code",
+      "category": "advanced",
+      "travelSpecific": false,
+      "staffOnly": true,
+      "description": "Raw HTML that runs in the page itself. Travelgenix staff only.",
+      "variants": [],
+      "props": [
+        {
+          "name": "html",
+          "type": "text",
+          "role": "content",
+          "required": true,
+          "default": ""
+        }
+      ],
+      "classNames": [
+        "tgs-embed",
+        "tgs-placeholder"
+      ],
+      "tokensUsed": [
+        "colour.border-strong",
+        "colour.surface-alt",
+        "radius.md",
+        "space.m",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "cssRules": 2,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1432",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "imported",
+      "name": "Imported design",
+      "category": "advanced",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A design brought in from Relume, Figma or the slicer. Add one from Import.",
+      "variants": [],
+      "props": [
+        {
+          "name": "content",
+          "type": "slots",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "label",
+          "type": "text",
+          "role": "content",
+          "required": true,
+          "default": ""
+        }
+      ],
+      "classNames": [
+        "tgs-imported",
+        "tgs-placeholder"
+      ],
+      "tokensUsed": [
+        "colour.border-strong",
+        "colour.surface-alt",
+        "radius.md",
+        "space.m",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "cssRules": 3,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1479",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    }
+  ]
+}
