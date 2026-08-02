@@ -101,6 +101,10 @@
         "type.h6-tracking",
         "type.h6-weight"
       ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
       "cssRules": 7,
       "sourcePath": "tg-sites/components/render/blocks.tsx:92",
       "registryPath": "tg-sites/lib/content/blocks.ts"
@@ -169,6 +173,14 @@
         "type.p-weight",
         "type.text-muted"
       ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": [
+          ".tgs-text ul: 1.25em",
+          ".tgs-text code: 0.1em",
+          ".tgs-text code: 0.35em"
+        ]
+      },
       "cssRules": 16,
       "sourcePath": "tg-sites/components/render/blocks.tsx:171",
       "registryPath": "tg-sites/lib/content/blocks.ts"
@@ -208,6 +220,10 @@
         "tgs-quote"
       ],
       "tokensUsed": [],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
       "cssRules": 1,
       "sourcePath": "tg-sites/components/render/blocks.tsx:210",
       "registryPath": "tg-sites/lib/content/blocks.ts"
@@ -257,6 +273,13 @@
         "colour.accent",
         "space.s"
       ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": [
+          ".tgs-list: 1.25em",
+          ".tgs-list[data-style='tick'] li: 1.75em"
+        ]
+      },
       "cssRules": 5,
       "sourcePath": "tg-sites/components/render/blocks.tsx:229",
       "registryPath": "tg-sites/lib/content/blocks.ts"
@@ -310,6 +333,10 @@
       "tokensUsed": [
         "space.m"
       ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
       "cssRules": 3,
       "sourcePath": "tg-sites/components/render/blocks.tsx:243",
       "registryPath": "tg-sites/lib/content/blocks.ts"
@@ -389,6 +416,10 @@
         "type.text-muted",
         "type.text-s"
       ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
       "cssRules": 10,
       "sourcePath": "tg-sites/components/render/blocks.tsx:741",
       "registryPath": "tg-sites/lib/content/blocks.ts"
@@ -466,6 +497,10 @@
         "type.text-muted",
         "type.text-s"
       ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
       "cssRules": 11,
       "sourcePath": "tg-sites/components/render/blocks.tsx:804",
       "registryPath": "tg-sites/lib/content/blocks.ts"
@@ -560,6 +595,10 @@
         "type.text-muted",
         "type.text-s"
       ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
       "cssRules": 5,
       "sourcePath": "tg-sites/components/render/blocks.tsx:308",
       "registryPath": "tg-sites/lib/content/blocks.ts"
@@ -629,6 +668,10 @@
         "type.text-muted",
         "type.text-s"
       ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
       "cssRules": 5,
       "sourcePath": "tg-sites/components/render/blocks.tsx:507",
       "registryPath": "tg-sites/lib/content/blocks.ts"
@@ -719,6 +762,10 @@
         "type.text-muted",
         "type.text-s"
       ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
       "cssRules": 17,
       "sourcePath": "tg-sites/components/render/blocks.tsx:539",
       "registryPath": "tg-sites/lib/content/blocks.ts"
@@ -929,6 +976,15 @@
         "type.text-muted",
         "type.text-s"
       ],
+      "hardcoded": {
+        "colours": [
+          ".tgs-cards[data-style='raised']   .tgs-card: rgba(15, 23, 42, 0.06)",
+          ".tgs-cards[data-style='raised']   .tgs-card: rgba(15, 23, 42, 0.08)",
+          ".tgs-cards[data-whole='true'][data-style='raised'] .tgs-card:hover: rgba(15, 23, 42, 0.08)",
+          ".tgs-cards[data-whole='true'][data-style='raised'] .tgs-card:hover: rgba(15, 23, 42, 0.12)"
+        ],
+        "spacing": []
+      },
       "cssRules": 36,
       "sourcePath": "tg-sites/components/render/blocks.tsx:630",
       "registryPath": "tg-sites/lib/content/blocks.ts"
@@ -1104,6 +1160,15 @@
         "type.text-muted",
         "type.text-s"
       ],
+      "hardcoded": {
+        "colours": [
+          ".tgs-cards[data-style='raised']   .tgs-card: rgba(15, 23, 42, 0.06)",
+          ".tgs-cards[data-style='raised']   .tgs-card: rgba(15, 23, 42, 0.08)",
+          ".tgs-cards[data-whole='true'][data-style='raised'] .tgs-card:hover: rgba(15, 23, 42, 0.08)",
+          ".tgs-cards[data-whole='true'][data-style='raised'] .tgs-card:hover: rgba(15, 23, 42, 0.12)"
+        ],
+        "spacing": []
+      },
       "cssRules": 50,
       "sourcePath": "tg-sites/components/render/blocks.tsx:896",
       "registryPath": "tg-sites/lib/content/blocks.ts"
@@ -1185,6 +1250,10 @@
       "tokensUsed": [
         "space.s"
       ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
       "cssRules": 3,
       "sourcePath": "tg-sites/components/render/blocks.tsx:964",
       "registryPath": "tg-sites/lib/content/blocks.ts"
@@ -1252,6 +1321,10 @@
       "tokensUsed": [
         "space.s"
       ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
       "cssRules": 3,
       "sourcePath": "tg-sites/components/render/blocks.tsx:968",
       "registryPath": "tg-sites/lib/content/blocks.ts"
@@ -1354,6 +1427,10 @@
         "type.text-muted",
         "type.text-s"
       ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
       "cssRules": 13,
       "sourcePath": "tg-sites/components/render/blocks.tsx:1022",
       "registryPath": "tg-sites/lib/content/blocks.ts"
@@ -1435,6 +1512,12 @@
         "type.text-muted",
         "type.text-s"
       ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": [
+          ".tgs-steps[data-marker='dot'] .tgs-steps__marker: 12px"
+        ]
+      },
       "cssRules": 18,
       "sourcePath": "tg-sites/components/render/blocks.tsx:1086",
       "registryPath": "tg-sites/lib/content/blocks.ts"
@@ -1544,6 +1627,10 @@
         "type.text-muted",
         "type.text-s"
       ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
       "cssRules": 15,
       "sourcePath": "tg-sites/components/render/blocks.tsx:1152",
       "registryPath": "tg-sites/lib/content/blocks.ts"
@@ -1649,6 +1736,10 @@
         "type.text-muted",
         "type.text-s"
       ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
       "cssRules": 17,
       "sourcePath": "tg-sites/components/render/blocks.tsx:1216",
       "registryPath": "tg-sites/lib/content/blocks.ts"
@@ -1760,6 +1851,10 @@
         "type.text-muted",
         "type.text-s"
       ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
       "cssRules": 15,
       "sourcePath": "tg-sites/components/render/blocks.tsx:1289",
       "registryPath": "tg-sites/lib/content/blocks.ts"
@@ -1835,6 +1930,10 @@
         "type.text-muted",
         "type.text-s"
       ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
       "cssRules": 9,
       "sourcePath": "tg-sites/components/render/blocks.tsx:1357",
       "registryPath": "tg-sites/lib/content/blocks.ts"
@@ -1891,6 +1990,10 @@
         "space.xl",
         "space.xs"
       ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
       "cssRules": 9,
       "sourcePath": "tg-sites/components/render/blocks.tsx:1417",
       "registryPath": "tg-sites/lib/content/blocks.ts"
@@ -1929,6 +2032,10 @@
         "space.xl",
         "space.xs"
       ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
       "cssRules": 5,
       "sourcePath": "tg-sites/components/render/blocks.tsx:1423",
       "registryPath": "tg-sites/lib/content/blocks.ts"
@@ -2009,6 +2116,12 @@
         "type.text-muted",
         "type.text-s"
       ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": [
+          ".tgs-widget-ghost: 4px"
+        ]
+      },
       "cssRules": 3,
       "sourcePath": "tg-sites/components/render/blocks.tsx:388",
       "registryPath": "tg-sites/lib/content/blocks.ts"
@@ -2057,6 +2170,12 @@
         "type.text-muted",
         "type.text-s"
       ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": [
+          ".tgs-widget-ghost: 4px"
+        ]
+      },
       "cssRules": 4,
       "sourcePath": "tg-sites/components/render/blocks.tsx:464",
       "registryPath": "tg-sites/lib/content/blocks.ts"
@@ -2090,6 +2209,10 @@
         "type.text-muted",
         "type.text-s"
       ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
       "cssRules": 2,
       "sourcePath": "tg-sites/components/render/blocks.tsx:1432",
       "registryPath": "tg-sites/lib/content/blocks.ts"
@@ -2129,6 +2252,10 @@
         "type.text-muted",
         "type.text-s"
       ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
       "cssRules": 3,
       "sourcePath": "tg-sites/components/render/blocks.tsx:1479",
       "registryPath": "tg-sites/lib/content/blocks.ts"

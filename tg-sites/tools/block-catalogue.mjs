@@ -441,6 +441,7 @@ for (const block of BLOCKS) {
     props,
     classNames: classNames.sort(),
     tokensUsed: style.tokens,
+    hardcoded: { colours: style.colours, spacing: style.spacing },
     cssRules: style.matched,
     sourcePath: line
       ? `tg-sites/components/render/blocks.tsx:${line}`
