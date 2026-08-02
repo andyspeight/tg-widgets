@@ -409,14 +409,29 @@ export function RowRenderer({
 }: { row: Row; sectionIndex: number; index: number } & Editable): ReactElement {
   /*
    * The dragged widths become a single custom property, for example
-   * "37% 63%". CSS decides when to honour it: above the stacking breakpoint
-   * it is the grid, below it the grid is 1fr and the widths are ignored.
+   * "minmax(0, 37fr) minmax(0, 63fr)". CSS decides when to honour it: above
+   * the stacking breakpoint it is the grid, below it the grid is 1fr and the
+   * widths are ignored.
+   *
+   * FRACTIONS RATHER THAN PERCENTAGES, and the difference is a bug that shipped.
+   * This wrote "37% 63%", and a percentage in a grid template resolves against
+   * the WHOLE content box, so the gap between the columns was then added on top:
+   * every multi-column row was wider than its own container by exactly the total
+   * gap. Three columns 24px apart overhung by 48px, four by 72px, and the last
+   * column in every card grid was clipped. Nobody saw a scrollbar because
+   * `.tgs-page` sets `overflow-x: hidden`, which is a rule about a page never
+   * scrolling sideways and quietly hid this as well. A fraction divides what is
+   * LEFT after the gaps, which is what the widths meant all along.
+   *
+   * minmax(0, Nfr) rather than plain Nfr, because a bare fr track has an `auto`
+   * minimum and a long unbroken word, a wide image or a table would push the
+   * track past its share and put the overflow back.
    *
    * A custom property in the style attribute is not inline CSS in the sense
    * a CSP cares about, so this stays CSP clean with no style-src unsafe-inline.
    */
   const style = {
-    '--tgs-cols': row.columns.map((column) => `${column.width}%`).join(' '),
+    '--tgs-cols': row.columns.map((column) => `minmax(0, ${column.width}fr)`).join(' '),
     '--tgs-gap': `${row.gap}px`,
   } as CSSProperties;
 

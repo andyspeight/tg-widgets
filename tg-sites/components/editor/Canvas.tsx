@@ -383,7 +383,22 @@ export function Canvas({
     const rowElement = handle.closest<HTMLElement>('.tgs-row');
     if (!rowElement) return;
 
-    const rowWidthPx = rowElement.getBoundingClientRect().width;
+    /*
+     * THE SPACE THE COLUMNS SHARE, not the width of the row.
+     *
+     * The two differ by the gaps between them, and the widths this drag edits
+     * are shares of the former: the grid is `minmax(0, 37fr) minmax(0, 63fr)`,
+     * and a fraction divides what is LEFT after the gaps. Measuring the row
+     * instead makes every drag about five per cent too slow on a three-column
+     * row, and since the origin resets on each move that is not a one-off
+     * offset, it is the handle steadily drifting behind the pointer holding it.
+     *
+     * Summed from the columns rather than worked out from the gap, because that
+     * is the same number by definition and needs nothing parsed out of a
+     * computed style.
+     */
+    const rowWidthPx = [...rowElement.children]
+      .reduce((total, child) => total + child.getBoundingClientRect().width, 0);
     if (rowWidthPx <= 0) return;
 
     event.preventDefault();

@@ -360,11 +360,18 @@
 /* ------------------------------------------------------------------ */
 
 /*
- * --tgs-cols carries the client's dragged widths, for example "37% 63%".
- * It is the ONLY layout number in the system and it only ever applies above
- * the stacking breakpoint. Below it, one column, always. That is what makes
- * free widths safe: a client can make a desktop column as narrow as they
- * like and the phone view still reads.
+ * --tgs-cols carries the client's dragged widths as fractions, for example
+ * "minmax(0, 37fr) minmax(0, 63fr)". It is the ONLY layout number in the system
+ * and it only ever applies above the stacking breakpoint. Below it, one column,
+ * always. That is what makes free widths safe: a client can make a desktop
+ * column as narrow as they like and the phone view still reads.
+ *
+ * FRACTIONS AND NOT PERCENTAGES, which the renderer wrote until 2 Aug 2026. A
+ * percentage track resolves against the whole content box and the gap is then
+ * added on top, so every multi-column row here was wider than its container by
+ * exactly the total gap and the last column was cut off. The `overflow-x:
+ * hidden` on .tgs-page above is why it never showed as a scrollbar. See the
+ * note in PageRenderer for the whole of it.
  */
 .tgs-row {
   gap: var(--tgs-gap, 16px);

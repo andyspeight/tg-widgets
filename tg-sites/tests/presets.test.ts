@@ -759,6 +759,41 @@ describe('the canvas draws a header as a header', () => {
   });
 });
 
+/*
+ * ---------------------------------------------------------------------------
+ * The grid template
+ *
+ * A percentage grid track resolves against the whole content box and the gap is
+ * then ADDED, so a row of `33.33% 33.33% 33.33%` with a 24px gap is 48px wider
+ * than the thing containing it and its last column is cut off. That is what the
+ * renderer emitted until 2 Aug 2026, on every multi-column row on every page,
+ * and `overflow-x: hidden` on .tgs-page meant it never even showed a scrollbar.
+ *
+ * Measured in a browser to confirm it, and held here as source because the unit
+ * suite has no layout engine in it. A fraction is the fix and it is one word, so
+ * one word is what this guards.
+ * ---------------------------------------------------------------------------
+ */
+describe('a row divides the space left after its gaps', () => {
+  it('sizes its columns in fractions rather than percentages', () => {
+    const renderer = read('components', 'render', 'PageRenderer.tsx');
+    expect(renderer).toContain("`minmax(0, ${column.width}fr)`");
+    expect(renderer).not.toContain('`${column.width}%`');
+  });
+
+  /*
+   * minmax(0, Nfr) rather than a bare Nfr. A bare fraction has an `auto`
+   * minimum, so one long word or a wide image pushes its track past its share
+   * and the overflow comes straight back in a form that is harder to see.
+   */
+  it('floors every track at zero so content cannot widen it', () => {
+    const renderer = read('components', 'render', 'PageRenderer.tsx');
+    const line = renderer.split('\n').find((row) => row.includes("'--tgs-cols'"));
+    expect(line).toBeDefined();
+    expect(line).toContain('minmax(0,');
+  });
+});
+
 describe('a header bar stays a bar on a phone', () => {
   const css = read('app', 'globals.css');
 
