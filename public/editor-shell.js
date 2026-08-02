@@ -1,5 +1,5 @@
 /* ============================================================
-   Travelgenix Widget Editor — Unified Shell JS v1.2.2
+   Travelgenix Widget Editor — Unified Shell JS v1.2.3
    Source of truth: /editor-shell-spec.md
 
    Loaded by every editor via:
@@ -66,6 +66,15 @@
    widgetId the CREATE returned — so the embed modal (which reads the id off
    the URL) stayed empty until reload, and every subsequent save created a
    NEW record instead of updating the one being edited.
+
+   ── v1.2.3 (Aug 2026) ──
+   Fix: authHeaders() no longer sends a Bearer header when a cookie session
+   is authenticated. The API prefers a Bearer over the tg_session cookie, so
+   an old tg_token left in local storage silently outranked the live session
+   — and "act as client" only changes the cookie. A staff member acting as a
+   client stayed authenticated as themselves against their original client,
+   with no sign anything was wrong. Legacy token sessions have no cookie and
+   are unaffected.
    ============================================================ */
 
 (function () {
@@ -396,6 +405,16 @@
 
   function authHeaders() {
     const h = { 'Content-Type': 'application/json' };
+    // The COOKIE WINS when we have one. The API prefers a Bearer header over
+    // the tg_session cookie, so an old tg_token left in local storage silently
+    // outranks the live session — and "act as client" only ever changes the
+    // cookie. That combination meant a staff member acting as a client was
+    // still authenticated as themselves, against the client they signed in as
+    // originally, with no sign anything was wrong. (2 Aug 2026.)
+    //
+    // A legacy token session has no cookie, so it still sends its Bearer and
+    // keeps working exactly as before.
+    if (cookieAuthState === 'authenticated') return h;
     const t = getAuthToken();
     if (t) {
       h['Authorization'] = 'Bearer ' + t;
