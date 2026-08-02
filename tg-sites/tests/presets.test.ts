@@ -33,7 +33,10 @@ import {
   categoriesFor,
   categoriesFor as categories,
   presetBars,
+  presetBlocks,
   presetById,
+  presetRoles,
+  presetSignature,
   presetsIn,
   PRESET_CATEGORIES,
   SECTION_PRESETS,
@@ -309,12 +312,34 @@ describe('the categories a screen is offered', () => {
     expect(categoriesFor('footer').map((entry) => entry.id)).toEqual(['footer']);
   });
 
-  it('offers the page categories on a page, and there are ten of them', () => {
+  /*
+   * PINNED, so adding a category is a decision rather than a side effect. Went
+   * from ten to sixteen on 2 Aug 2026: hero, logos, stats, steps, blog and
+   * banner, chosen against Relume's own taxonomy.
+   *
+   * THE ORDER IS THE ORDER SOMEBODY BUILDS A PAGE, which is why hero sits second
+   * and banner sits late. Blank stays first because that is where a person who
+   * knows what they want starts.
+   */
+  it('offers the page categories on a page, in build order', () => {
     const ids = categoriesFor('page').map((entry) => entry.id);
     expect(ids).toEqual([
-      'blank', 'text', 'features', 'cta', 'gallery',
-      'testimonials', 'pricing', 'faq', 'team', 'contact',
+      'blank', 'hero', 'text', 'features', 'cta', 'gallery',
+      'testimonials', 'logos', 'stats', 'steps', 'pricing',
+      'faq', 'team', 'blog', 'banner', 'contact',
     ]);
+  });
+
+  /*
+   * Relume calls a hero a "Header Section" and we cannot, because `header`
+   * already means the site's own navbar region. Two different things, one word.
+   * This is here so a rename gets caught rather than quietly breaking the
+   * header screen.
+   */
+  it('keeps hero and header as separate categories on separate screens', () => {
+    expect(categoriesFor('page').some((entry) => entry.id === 'hero')).toBe(true);
+    expect(categoriesFor('page').some((entry) => entry.id === 'header')).toBe(false);
+    expect(categoriesFor('header').map((entry) => entry.id)).toEqual(['header']);
   });
 
   it('leads with Blank on a page, because that is where somebody starts', () => {
@@ -575,5 +600,94 @@ describe('a header bar stays a bar on a phone', () => {
     const mentions = css.match(/\.tgs-region\[data-region='header'\] \.tgs-row/g) ?? [];
     const scoped = css.match(/\.tgs-region\[data-region='header'\] \.tgs-row:has\(\.tgs-nav\)/g) ?? [];
     expect(scoped.length).toBe(mentions.length);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The mapping contract
+// ---------------------------------------------------------------------------
+
+/**
+ * What lets a design from Figma, Relume or the slicer be MAPPED onto a preset
+ * rather than carried in frozen.
+ *
+ * A matcher can read a preset's shape off its rows, because the blocks are right
+ * there. What it cannot read is INTENT: "there is an h6 and an h2" does not say
+ * which is the section's title. So roles are derived, and a preset declares one
+ * only to correct the derivation.
+ *
+ * THE DERIVATION IS THE RULE FROM starters.ts, which exists because a real bug:
+ * firstBlock(section, 'heading') wrote the company name into the h6 eyebrow and
+ * left the h2 saying "Everything in one place". Biggest heading, never first.
+ */
+describe('the mapping contract', () => {
+  it('never finds two titles in one section', () => {
+    for (const preset of SECTION_PRESETS) {
+      const titles = [...presetRoles(preset).values()].filter((role) => role === 'title');
+      expect(titles.length, `${preset.id} has ${titles.length} titles`).toBeLessThanOrEqual(1);
+    }
+  });
+
+  it('gives every block a role, so nothing is invisible to a matcher', () => {
+    for (const preset of SECTION_PRESETS) {
+      const roles = presetRoles(preset);
+      for (const block of presetBlocks(preset)) {
+        expect(roles.get(block), `${preset.id}: ${block.type} has no role`).toBeTruthy();
+      }
+    }
+  });
+
+  /*
+   * THE POINT OF THE WHOLE THING. A hero is the section a page opens with, so a
+   * design being mapped onto one has to find a title and somewhere to go next.
+   * A hero with no title is not a hero, and one with no action is a poster.
+   */
+  it('gives every hero a title', () => {
+    const heroes = presetsIn('hero');
+    expect(heroes.length).toBeGreaterThan(4);
+
+    for (const hero of heroes) {
+      const roles = [...presetRoles(hero).values()];
+      expect(roles, `${hero.id} has no title`).toContain('title');
+    }
+  });
+
+  /*
+   * The media axis is what stops a Figma hero with the photograph on the right
+   * landing in the preset that puts it on the left. Worth asserting that the
+   * library actually covers the axis rather than happening to be all one way.
+   */
+  it('covers every media position across the heroes', () => {
+    const seen = new Set(presetsIn('hero').map((preset) => presetSignature(preset).media));
+
+    expect(seen).toContain('none');
+    expect(seen).toContain('left');
+    expect(seen).toContain('right');
+    expect(seen).toContain('below');
+  });
+
+  it('covers both alignments across the heroes', () => {
+    const seen = new Set(presetsIn('hero').map((preset) => presetSignature(preset).align));
+    expect([...seen].sort()).toEqual(['centre', 'left']);
+  });
+
+  /*
+   * A GRID IS TWO COLUMNS SAYING THE SAME THING, not just two columns. Without
+   * that distinction every split hero would be reported as a repeater and a
+   * matcher would try to fill it with a list of cards.
+   */
+  it('tells a grid from a split section', () => {
+    const split = SECTION_PRESETS.find((preset) => preset.id === 'hero-split-right');
+    expect(split && presetSignature(split).repeated).toBe(false);
+    expect(split && presetSignature(split).media).toBe('right');
+
+    const mirrored = SECTION_PRESETS.find((preset) => preset.id === 'hero-split-left');
+    expect(mirrored && presetSignature(mirrored).media).toBe('left');
+  });
+
+  it('reads a category off the preset it came from', () => {
+    for (const preset of SECTION_PRESETS) {
+      expect(presetSignature(preset).category).toBe(preset.category);
+    }
   });
 });

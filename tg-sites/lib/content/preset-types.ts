@@ -28,16 +28,30 @@ import type { Column, Section } from './schema';
  * then the things a page is actually made of, then the two site-chrome ones at
  * the end where they are out of the way until you are on that screen.
  */
+/*
+ * ONE NAMING TRAP, AND IT IS RELUME'S FAULT AS MUCH AS OURS. Relume calls the
+ * big opening section of a page a "Header Section". We already use `header` for
+ * the site's own header REGION, the navbar that sits on every page. They are
+ * completely different things and the two words are the same. So ours is `hero`,
+ * which is what everybody outside Relume calls it, and `header` keeps meaning
+ * the region. Do not rename either one to match the other.
+ */
 export const PRESET_CATEGORIES = [
   { id: 'blank', label: 'Blank', scope: 'page' },
+  { id: 'hero', label: 'Hero', scope: 'page' },
   { id: 'text', label: 'Text', scope: 'page' },
   { id: 'features', label: 'Features', scope: 'page' },
   { id: 'cta', label: 'Call to action', scope: 'page' },
   { id: 'gallery', label: 'Gallery', scope: 'page' },
   { id: 'testimonials', label: 'Testimonials', scope: 'page' },
+  { id: 'logos', label: 'Logos and badges', scope: 'page' },
+  { id: 'stats', label: 'Key numbers', scope: 'page' },
+  { id: 'steps', label: 'How it works', scope: 'page' },
   { id: 'pricing', label: 'Pricing', scope: 'page' },
   { id: 'faq', label: 'FAQ', scope: 'page' },
   { id: 'team', label: 'Team', scope: 'page' },
+  { id: 'blog', label: 'Blog', scope: 'page' },
+  { id: 'banner', label: 'Banner', scope: 'page' },
   { id: 'contact', label: 'Contact', scope: 'page' },
   { id: 'header', label: 'Header', scope: 'header' },
   { id: 'footer', label: 'Footer', scope: 'footer' },
@@ -48,10 +62,52 @@ export type PresetCategory = (typeof PRESET_CATEGORIES)[number]['id'];
 /** Where a category belongs: a page, or one of the two site regions. */
 export type PresetScope = (typeof PRESET_CATEGORIES)[number]['scope'];
 
-/** A block in a preset: its type, and only what differs from its defaults. */
+/**
+ * What a block in a preset is FOR.
+ *
+ * WHY THIS EXISTS AT ALL: so a design from Figma, Relume or the slicer can be
+ * MAPPED onto one of our sections rather than carried in frozen. A matcher can
+ * already read the shape of a preset off its rows, because the blocks are right
+ * there. What it cannot read is intent. "There is an h6 and an h2 here" does not
+ * say which one is the section's title and which is the small line above it, and
+ * that is exactly the question that decides where the design's own heading goes.
+ *
+ * THIS IS NOT THEORETICAL. lib/content/starters.ts had to grow titleBlock()
+ * because firstBlock(section, 'heading') wrote the company name into the h6
+ * eyebrow and left the h2 saying "Everything in one place". Same mistake, found
+ * by reading the built page rather than by any assertion.
+ */
+export type SlotRole =
+  /** The small line above the title. Relume calls it a tagline. */
+  | 'eyebrow'
+  /** The section's own heading. Exactly one per section. */
+  | 'title'
+  /** The sentence under the title, when it is doing a different job from body. */
+  | 'subtitle'
+  /** Ordinary prose. */
+  | 'body'
+  /** The section's main picture or video. */
+  | 'media'
+  /** A button, or a group of them. */
+  | 'action'
+  /** A repeater: cards, logos, figures, questions, steps. */
+  | 'items'
+  /** Present, but not what the section is about. */
+  | 'aside';
+
+/**
+ * A block in a preset: its type, and only what differs from its defaults.
+ *
+ * `role` is OPTIONAL BY DESIGN, and the default is derived rather than blank.
+ * Annotating all eighty-odd existing presets by hand would be churn with a
+ * mistake in it somewhere; deriving means the whole library gains the contract
+ * at once, and a preset only says anything when the derivation would be wrong.
+ * See roleOf() in presets.ts for what is derived and how.
+ */
 export interface PresetBlock {
   type: string;
   props?: Record<string, unknown>;
+  role?: SlotRole;
 }
 
 export interface PresetRow {
@@ -97,6 +153,180 @@ export interface SectionPreset {
   rows: PresetRow[];
   /** Overrides on the section itself, for the few that need more room. */
   section?: { paddingY?: number; width?: Section['width']; tone?: Section['tone'] };
+}
+
+// ---------------------------------------------------------------------------
+// The mapping contract
+// ---------------------------------------------------------------------------
+
+/**
+ * What a preset looks like to something trying to map a design onto it.
+ *
+ * EVERYTHING HERE IS DERIVED FROM `rows`, not declared alongside them, and that
+ * is deliberate. presets.ts says at the top that a preset is DATA so the picker
+ * thumbnail cannot show a section it does not build; a hand-written shape could
+ * disagree with the rows the same way. So the only thing a preset ever states is
+ * a role, and only to correct the derivation. The rest is read off the blocks.
+ */
+export interface PresetSignature {
+  category: PresetCategory;
+  /**
+   * Where the main picture sits relative to the words.
+   *
+   * The axis a matcher needs most: a Figma hero with the photograph on the right
+   * should not land in the preset that puts it on the left.
+   */
+  media: 'none' | 'left' | 'right' | 'above' | 'below';
+  align: 'left' | 'centre';
+  /** The widest row. 1 is a stack, more is a grid. */
+  columns: number;
+  /** True when several columns carry the same pattern, i.e. it is a grid of items. */
+  repeated: boolean;
+  /** Every role present, de-duplicated, in reading order. */
+  roles: SlotRole[];
+}
+
+/** How big a heading is, so the biggest one can be found. */
+const HEADING_RANK: Record<string, number> = { h1: 6, h2: 5, h3: 4, h4: 3, h5: 2, h6: 1 };
+
+/** Block types that are a list of things rather than one thing. */
+const ITEM_BLOCKS = new Set([
+  'cards', 'slider', 'gallery', 'logos', 'stats', 'steps',
+  'accordion', 'tabs', 'list', 'social', 'nav', 'table',
+]);
+
+const MEDIA_BLOCKS = new Set(['image', 'video']);
+const ACTION_BLOCKS = new Set(['button', 'button-group']);
+
+function headingRank(block: PresetBlock): number {
+  const style = block.props?.style;
+  return typeof style === 'string' ? (HEADING_RANK[style] ?? 0) : 0;
+}
+
+/** Every block in a preset, flattened, in reading order. */
+export function presetBlocks(preset: SectionPreset): PresetBlock[] {
+  return preset.rows.flatMap((row) => row.columns.flat());
+}
+
+/**
+ * What each block is for.
+ *
+ * DERIVED, WITH A DECLARED ROLE ALWAYS WINNING. The rules below are the ones
+ * that are safe to guess:
+ *
+ *   title    the BIGGEST heading in the section, never the first. This is the
+ *            titleBlock() rule from starters.ts, which exists because "first
+ *            heading" put the company name in the eyebrow.
+ *   eyebrow  a smaller heading that comes BEFORE the title.
+ *   items    a block that is a list of things by its nature.
+ *   media    a picture or a video.
+ *   action   a button or a group of them.
+ *   body     anything else with words in it.
+ *
+ * A heading AFTER the title is left as body rather than guessed at, because in
+ * a grid of columns it is an item's own heading and calling it a subtitle would
+ * be worse than saying nothing.
+ */
+export function presetRoles(preset: SectionPreset): Map<PresetBlock, SlotRole> {
+  const blocks = presetBlocks(preset);
+  const roles = new Map<PresetBlock, SlotRole>();
+
+  let best: PresetBlock | null = null;
+  for (const block of blocks) {
+    if (block.type !== 'heading') continue;
+    if (!best || headingRank(block) > headingRank(best)) best = block;
+  }
+
+  let seenTitle = false;
+  for (const block of blocks) {
+    if (block.role) {
+      roles.set(block, block.role);
+      if (block.role === 'title') seenTitle = true;
+      continue;
+    }
+
+    if (block === best) {
+      roles.set(block, 'title');
+      seenTitle = true;
+      continue;
+    }
+
+    if (block.type === 'heading') {
+      roles.set(block, seenTitle ? 'body' : 'eyebrow');
+      continue;
+    }
+
+    if (ITEM_BLOCKS.has(block.type)) roles.set(block, 'items');
+    else if (MEDIA_BLOCKS.has(block.type)) roles.set(block, 'media');
+    else if (ACTION_BLOCKS.has(block.type)) roles.set(block, 'action');
+    else roles.set(block, 'body');
+  }
+
+  return roles;
+}
+
+/** Read a preset's shape, for matching a design against it. */
+export function presetSignature(preset: SectionPreset): PresetSignature {
+  const roles = presetRoles(preset);
+  const columns = Math.max(1, ...preset.rows.map((row) => row.widths.length));
+
+  /*
+   * A GRID IS TWO COLUMNS THAT SAY THE SAME THING, not just two columns. A hero
+   * with words on the left and a photograph on the right is also two columns and
+   * is not a grid, so counting alone would call every split section a repeater.
+   */
+  const repeated = preset.rows.some((row) => {
+    if (row.columns.length < 2) return false;
+    const shape = row.columns.map((column) => column.map((block) => block.type).join('+'));
+    return shape.every((entry) => entry === shape[0]);
+  });
+
+  /*
+   * Where the picture is, relative to the title.
+   *
+   * COMPARED ACROSS ROWS AS WELL AS WITHIN ONE. The first version only looked
+   * inside a row, so a hero with the words in row one and a wide photograph in
+   * row two came out as "above" when the picture is plainly below. A matcher
+   * using that would have put a Figma hero's image over its own heading.
+   */
+  const find = (role: SlotRole): { row: number; column: number; index: number } | null => {
+    for (let row = 0; row < preset.rows.length; row += 1) {
+      const columns = preset.rows[row].columns;
+      for (let column = 0; column < columns.length; column += 1) {
+        const index = columns[column].findIndex((block) => roles.get(block) === role);
+        if (index !== -1) return { row, column, index };
+      }
+    }
+    return null;
+  };
+
+  const mediaAt = find('media');
+  const titleAt = find('title');
+
+  let media: PresetSignature['media'] = 'none';
+  if (mediaAt && !titleAt) media = 'above';
+  else if (mediaAt && titleAt) {
+    if (mediaAt.row !== titleAt.row) media = mediaAt.row < titleAt.row ? 'above' : 'below';
+    else if (mediaAt.column !== titleAt.column) {
+      media = mediaAt.column < titleAt.column ? 'left' : 'right';
+    } else media = mediaAt.index < titleAt.index ? 'above' : 'below';
+  }
+
+  // How the words are set, taken from the title itself.
+  let align: PresetSignature['align'] = 'left';
+  for (const [block, role] of roles) {
+    if (role !== 'title') continue;
+    align = block.props?.align === 'centre' ? 'centre' : 'left';
+    break;
+  }
+
+  const order: SlotRole[] = [];
+  for (const block of presetBlocks(preset)) {
+    const role = roles.get(block);
+    if (role && !order.includes(role)) order.push(role);
+  }
+
+  return { category: preset.category, media, align, columns, repeated, roles: order };
 }
 
 // ---------------------------------------------------------------------------

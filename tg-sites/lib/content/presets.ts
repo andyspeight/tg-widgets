@@ -48,11 +48,16 @@ export {
   CENTRED,
   PANEL,
   PRESET_CATEGORIES,
+  presetBlocks,
+  presetRoles,
+  presetSignature,
   type PresetBlock,
   type PresetCategory,
   type PresetRow,
   type PresetScope,
+  type PresetSignature,
   type SectionPreset,
+  type SlotRole,
 } from './preset-types';
 
 /** Every designed section there is, pages and regions together. */

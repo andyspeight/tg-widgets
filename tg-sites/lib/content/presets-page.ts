@@ -41,6 +41,328 @@ import { CARD, CARD_ROOMY, CENTRED, PANEL } from './preset-types';
  * Text in the list.
  */
 export const PAGE_PRESETS: readonly SectionPreset[] = [
+  /*
+   * ---------------------------------------------------------------------------
+   * Hero
+   * ---------------------------------------------------------------------------
+   *
+   * The section a page OPENS with, and the one gap the library had until 2 Aug
+   * 2026. Relume calls these "Header Sections"; everybody else calls them heroes,
+   * and we cannot use their word because `header` already means the site's own
+   * navbar region. See the note on PRESET_CATEGORIES.
+   *
+   * WHAT MAKES A HERO DIFFERENT FROM AN OPENER IN Blank: it is the FIRST thing
+   * on the page, so its heading is the page's h1-sized statement rather than a
+   * section title, it carries more vertical room, and it nearly always offers
+   * somewhere to go next. The Blank openers stay where they are for use further
+   * down a page.
+   *
+   * THE EIGHT ARE CHOSEN BY AXIS, NOT BY TASTE, because a design being mapped
+   * onto one has to land somewhere sensible. Between them they cover every
+   * combination a matcher will meet: picture none / left / right / below /
+   * behind, words centred or left, and the two travel-specific closers that put
+   * proof directly under the promise.
+   */
+  {
+    id: 'hero-centred',
+    category: 'hero',
+    label: 'Centred, with two buttons',
+    description: 'The classic opener. Works on any page and reads well on a phone.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Small group holidays, properly planned', level: 'h2', style: 'h1', ...CENTRED } },
+            {
+              type: 'text',
+              props: {
+                html: '<p>One or two lines on who you are and what somebody gets by booking with you rather than a screen.</p>',
+                size: 'l',
+                ...CENTRED,
+              },
+            },
+            {
+              type: 'button-group',
+              props: {
+                align: 'centre',
+                buttons: [
+                  { label: 'See our holidays', href: '', variant: 'primary' },
+                  { label: 'Talk to us', href: '', variant: 'secondary' },
+                ],
+              },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { paddingY: 96 },
+  },
+
+  {
+    id: 'hero-split-right',
+    category: 'hero',
+    label: 'Words left, picture right',
+    description: 'The most used shape there is. Put your best photograph in it.',
+    rows: [
+      {
+        widths: [1, 1],
+        gap: 48,
+        align: 'centre',
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Thirty years of getting people to the right place', level: 'h2', style: 'h1' } },
+            {
+              type: 'text',
+              props: {
+                html: '<p>A sentence on what you do differently. Keep it to the thing a visitor could not get anywhere else.</p>',
+                size: 'l',
+              },
+            },
+            {
+              type: 'button-group',
+              props: {
+                buttons: [
+                  { label: 'Start planning', href: '', variant: 'primary' },
+                  { label: 'How it works', href: '', variant: 'ghost' },
+                ],
+              },
+            },
+          ],
+          [{ type: 'image', props: { alt: '', ratio: '4/3', radius: 'md' } }],
+        ],
+      },
+    ],
+    section: { paddingY: 80 },
+  },
+
+  {
+    id: 'hero-split-left',
+    category: 'hero',
+    label: 'Picture left, words right',
+    description: 'The same shape the other way round, for variety down a long site.',
+    rows: [
+      {
+        widths: [1, 1],
+        gap: 48,
+        align: 'centre',
+        columns: [
+          [{ type: 'image', props: { alt: '', ratio: '4/3', radius: 'md' } }],
+          [
+            { type: 'heading', props: { html: 'Where would you like to go?', level: 'h2', style: 'h1' } },
+            {
+              type: 'text',
+              props: {
+                html: '<p>A sentence on what you do differently. Keep it to the thing a visitor could not get anywhere else.</p>',
+                size: 'l',
+              },
+            },
+            {
+              type: 'button-group',
+              props: {
+                buttons: [{ label: 'Start planning', href: '', variant: 'primary' }],
+              },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { paddingY: 80 },
+  },
+
+  {
+    id: 'hero-image-below',
+    category: 'hero',
+    label: 'Centred words over a wide picture',
+    description: 'A strong statement with the photograph doing the work underneath.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'The Greek islands, without the guesswork', level: 'h2', style: 'h1', ...CENTRED } },
+            {
+              type: 'text',
+              props: {
+                html: '<p>One line under the title. Say who it is for.</p>',
+                size: 'l',
+                ...CENTRED,
+              },
+            },
+            {
+              type: 'button-group',
+              props: {
+                align: 'centre',
+                buttons: [{ label: 'See the collection', href: '', variant: 'primary' }],
+              },
+            },
+          ],
+        ],
+      },
+      {
+        widths: [1],
+        columns: [[{ type: 'image', props: { alt: '', ratio: '16/9', radius: 'md' } }]],
+      },
+    ],
+    section: { paddingY: 80 },
+  },
+
+  {
+    id: 'hero-background',
+    category: 'hero',
+    label: 'Words over a background photograph',
+    description: 'Set the picture on the section itself. Tall, and the most dramatic.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Somewhere worth the flight', level: 'h2', style: 'h1', ...CENTRED } },
+            {
+              type: 'text',
+              props: {
+                html: '<p>One line. On a picture, fewer words is always better.</p>',
+                size: 'l',
+                ...CENTRED,
+              },
+            },
+            {
+              type: 'button-group',
+              props: {
+                align: 'centre',
+                buttons: [{ label: 'Browse destinations', href: '', variant: 'primary' }],
+              },
+            },
+          ],
+        ],
+      },
+    ],
+    /*
+     * Dark toned and roomy, but NO backgroundImage baked in. A preset that
+     * shipped a stock photograph is one somebody has to notice and remove, and
+     * the ones that get missed end up on a live client site. The tone alone
+     * makes it obvious a picture is meant to go behind it.
+     */
+    section: { tone: 'dark', paddingY: 128, width: 'full' },
+  },
+
+  {
+    id: 'hero-with-badges',
+    category: 'hero',
+    label: 'Opener with trust badges',
+    description: 'ATOL, ABTA and the rest, right under the promise. Travel sells on trust.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Book with people you can ring', level: 'h2', style: 'h1', ...CENTRED } },
+            {
+              type: 'text',
+              props: {
+                html: '<p>One line on the reassurance somebody is looking for before they part with money.</p>',
+                size: 'l',
+                ...CENTRED,
+              },
+            },
+            {
+              type: 'button-group',
+              props: {
+                align: 'centre',
+                buttons: [{ label: 'Send an enquiry', href: '', variant: 'primary' }],
+              },
+            },
+          ],
+        ],
+      },
+      {
+        widths: [1],
+        columns: [
+          [
+            {
+              type: 'logos',
+              props: {
+                height: 's',
+                align: 'centre',
+                tone: 'grey',
+                items: [{ alt: '' }, { alt: '' }, { alt: '' }, { alt: '' }],
+              },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { paddingY: 88 },
+  },
+
+  {
+    id: 'hero-with-stats',
+    category: 'hero',
+    label: 'Opener with key numbers',
+    description: 'The promise, then the proof. Years in business, holidays booked, review score.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Independent, and proud of it', level: 'h2', style: 'h1', ...CENTRED } },
+            {
+              type: 'text',
+              props: {
+                html: '<p>One line on who you are. The numbers below say the rest.</p>',
+                size: 'l',
+                ...CENTRED,
+              },
+            },
+          ],
+        ],
+      },
+      {
+        widths: [1],
+        columns: [
+          [
+            {
+              type: 'stats',
+              props: {
+                columns: '3',
+                align: 'centre',
+                divided: true,
+                items: [
+                  { value: '30', suffix: ' years', label: 'On the same high street' },
+                  { value: '12,000', label: 'Holidays booked' },
+                  { value: '4.9', suffix: '/5', label: 'From 800 reviews' },
+                ],
+              },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { paddingY: 88 },
+  },
+
+  {
+    id: 'hero-minimal',
+    category: 'hero',
+    label: 'Just a title and a button',
+    description: 'For an inside page that needs an opening without a whole production.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Destinations', level: 'h2', style: 'h1' } },
+            {
+              type: 'text',
+              props: { html: '<p>One line saying what is on this page.</p>', size: 'l' },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { paddingY: 64 },
+  },
+
   {
     id: 'blank-opener',
     category: 'blank',
@@ -2473,5 +2795,643 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
+  },
+
+  /*
+   * ---------------------------------------------------------------------------
+   * Logos and badges
+   * ---------------------------------------------------------------------------
+   *
+   * ATOL, ABTA, IATA, the airlines and the tour operators. In travel this is not
+   * decoration: it is the thing that turns a website into somewhere a person will
+   * put four thousand pounds. Relume calls the category Logo Sections.
+   *
+   * NO LOGOS ARE SHIPPED IN THE PRESETS, only empty slots. A badge somebody has
+   * not earned is the worst thing this library could put on a live site, and the
+   * rule is already written down: A BADGE IS NEVER A PLACEHOLDER.
+   */
+  {
+    id: 'logos-row',
+    category: 'logos',
+    label: 'A line and a row of logos',
+    description: 'One line of context, then the badges. The usual arrangement.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            {
+              type: 'text',
+              props: { html: '<p>Protected by the schemes you would want us to be in.</p>', size: 's', ...CENTRED },
+            },
+            {
+              type: 'logos',
+              props: { height: 'm', align: 'centre', tone: 'grey', items: [{ alt: '' }, { alt: '' }, { alt: '' }, { alt: '' }, { alt: '' }] },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { paddingY: 48 },
+  },
+
+  {
+    id: 'logos-plain',
+    category: 'logos',
+    label: 'Just the row',
+    description: 'No words at all. Good directly under a hero.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            {
+              type: 'logos',
+              props: { height: 'm', align: 'centre', tone: 'grey', items: [{ alt: '' }, { alt: '' }, { alt: '' }, { alt: '' }, { alt: '' }, { alt: '' }] },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { paddingY: 40, tone: 'light' },
+  },
+
+  {
+    id: 'logos-titled',
+    category: 'logos',
+    label: 'Title, words and logos',
+    description: 'A proper section for a page about who you work with.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Who we book with', style: 'h2', ...CENTRED } },
+            {
+              type: 'text',
+              props: { html: '<p>A line on why these names matter to somebody booking a holiday.</p>', ...CENTRED },
+            },
+            {
+              type: 'logos',
+              props: { height: 'm', align: 'centre', tone: 'grey-hover', items: [{ alt: '' }, { alt: '' }, { alt: '' }, { alt: '' }, { alt: '' }, { alt: '' }, { alt: '' }, { alt: '' }] },
+            },
+          ],
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'logos-beside-words',
+    category: 'logos',
+    label: 'Words left, logos right',
+    description: 'When the badges need a sentence of explanation next to them.',
+    rows: [
+      {
+        widths: [1, 1],
+        gap: 48,
+        align: 'centre',
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Your money is protected', style: 'h3' } },
+            {
+              type: 'text',
+              props: { html: '<p>Two lines on what the protection actually means, in plain words rather than scheme numbers.</p>' },
+            },
+          ],
+          [
+            {
+              type: 'logos',
+              props: { height: 'm', align: 'left', tone: 'colour', items: [{ alt: '' }, { alt: '' }, { alt: '' }, { alt: '' }] },
+            },
+          ],
+        ],
+      },
+    ],
+  },
+
+  /*
+   * ---------------------------------------------------------------------------
+   * Key numbers
+   * ---------------------------------------------------------------------------
+   *
+   * Relume calls these Stats Sections. The block already knew the important rule
+   * and these follow it: A FIGURE IS TEXT, NOT A NUMBER, because 12,000 and 4.9
+   * and 24/7 and £2m are all figures and only one of them is a number.
+   */
+  {
+    id: 'stats-three',
+    category: 'stats',
+    label: 'Three numbers across',
+    description: 'The quickest way to say how long you have been doing this.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            {
+              type: 'stats',
+              props: {
+                columns: '3',
+                size: 'l',
+                align: 'centre',
+                divided: true,
+                items: [
+                  { value: '30', suffix: ' years', label: 'On the same high street' },
+                  { value: '12,000', label: 'Holidays booked' },
+                  { value: '4.9', suffix: '/5', label: 'From 800 reviews' },
+                ],
+              },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { paddingY: 64 },
+  },
+
+  {
+    id: 'stats-titled',
+    category: 'stats',
+    label: 'Title, then the numbers',
+    description: 'A heading to frame the figures, for a page about the company.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'The short version', style: 'h2', ...CENTRED } },
+            {
+              type: 'text',
+              props: { html: '<p>One line under the title, then let the figures speak.</p>', ...CENTRED },
+            },
+            {
+              type: 'stats',
+              props: {
+                columns: '4',
+                align: 'centre',
+                items: [
+                  { value: '30', suffix: ' years', label: 'In business' },
+                  { value: '60', suffix: '+', label: 'Countries' },
+                  { value: '12,000', label: 'Holidays booked' },
+                  { value: '92', suffix: '%', label: 'Book with us again' },
+                ],
+              },
+            },
+          ],
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'stats-beside-words',
+    category: 'stats',
+    label: 'Words left, numbers right',
+    description: 'The story on one side and the evidence on the other.',
+    rows: [
+      {
+        widths: [1, 1],
+        gap: 48,
+        align: 'centre',
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Small enough to care, big enough to deliver', style: 'h2' } },
+            {
+              type: 'text',
+              props: { html: '<p>Two or three lines on how the business got here and what that means for somebody booking today.</p>' },
+            },
+          ],
+          [
+            {
+              type: 'stats',
+              props: {
+                columns: '2',
+                align: 'left',
+                items: [
+                  { value: '30', suffix: ' years', label: 'In business' },
+                  { value: '12,000', label: 'Holidays booked' },
+                  { value: '4.9', suffix: '/5', label: 'Review score' },
+                  { value: '24/7', label: 'While you are away' },
+                ],
+              },
+            },
+          ],
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'stats-band',
+    category: 'stats',
+    label: 'A coloured band of figures',
+    description: 'Toned so it breaks up a long page. Good between two white sections.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            {
+              type: 'stats',
+              props: {
+                columns: '4',
+                size: 'l',
+                align: 'centre',
+                items: [
+                  { value: '30', suffix: ' years', label: 'In business' },
+                  { value: '60', suffix: '+', label: 'Countries' },
+                  { value: '12,000', label: 'Holidays booked' },
+                  { value: '4.9', suffix: '/5', label: 'Review score' },
+                ],
+              },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { tone: 'accent', paddingY: 72 },
+  },
+
+  /*
+   * ---------------------------------------------------------------------------
+   * How it works
+   * ---------------------------------------------------------------------------
+   *
+   * Relume calls these Timeline Sections. Ours is named for the job a travel
+   * agent actually needs it for: explaining what happens after somebody gets in
+   * touch, and laying out a day by day itinerary.
+   */
+  {
+    id: 'steps-three-across',
+    category: 'steps',
+    label: 'Three numbered steps across',
+    description: 'Tell us what you want, we plan it, you go. The reassurance section.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'How it works', style: 'h2', ...CENTRED } },
+            {
+              type: 'steps',
+              props: {
+                layout: 'across',
+                marker: 'number',
+                connector: true,
+                items: [
+                  { title: 'Tell us the shape of it', body: 'Where, roughly when, and what matters most. A phone call or a form.' },
+                  { title: 'We put it together', body: 'Flights, rooms, transfers and the bits nobody thinks of until they are missing.' },
+                  { title: 'You go', body: 'With one number to ring if anything needs sorting while you are away.' },
+                ],
+              },
+            },
+          ],
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'steps-down',
+    category: 'steps',
+    label: 'Steps down the page',
+    description: 'More room per step. Use when each one needs a proper explanation.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'What happens next', style: 'h2' } },
+            {
+              type: 'steps',
+              props: {
+                layout: 'down',
+                marker: 'number',
+                connector: true,
+                items: [
+                  { title: 'Your first conversation', body: 'Twenty minutes on the phone, or an enquiry form if that suits you better.' },
+                  { title: 'A first suggestion', body: 'Within two working days, with prices and a reason for each choice.' },
+                  { title: 'Changes, as many as it takes', body: 'Nobody gets it right first time and we do not expect to.' },
+                  { title: 'Booked and paid', body: 'Deposit now, balance twelve weeks before you fly.' },
+                ],
+              },
+            },
+          ],
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'steps-itinerary',
+    category: 'steps',
+    label: 'A day by day itinerary',
+    description: 'Dots rather than numbers, for a trip laid out day by day.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Your week, day by day', style: 'h2' } },
+            {
+              type: 'steps',
+              props: {
+                layout: 'down',
+                marker: 'dot',
+                connector: true,
+                items: [
+                  { title: 'Day one, arrive', body: 'Transfer to the hotel, an evening to yourselves.' },
+                  { title: 'Day two, the old town', body: 'A morning walk with a local guide, the afternoon free.' },
+                  { title: 'Day three, the coast', body: 'Out to the islands by boat, back for dinner.' },
+                  { title: 'Day four, home', body: 'A late flight, so the last morning is yours.' },
+                ],
+              },
+            },
+          ],
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'steps-beside-words',
+    category: 'steps',
+    label: 'Words left, steps right',
+    description: 'When the process needs a paragraph of context beside it.',
+    rows: [
+      {
+        widths: [1, 1],
+        gap: 48,
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Booking with a person', style: 'h2' } },
+            {
+              type: 'text',
+              props: { html: '<p>Two or three lines on why this is different from booking on a screen at midnight.</p>' },
+            },
+            {
+              type: 'button-group',
+              props: { buttons: [{ label: 'Start a conversation', href: '', variant: 'primary' }] },
+            },
+          ],
+          [
+            {
+              type: 'steps',
+              props: {
+                layout: 'down',
+                marker: 'number',
+                connector: true,
+                items: [
+                  { title: 'Tell us the shape of it', body: 'Where, when, and what matters.' },
+                  { title: 'We put it together', body: 'With a reason for every choice.' },
+                  { title: 'You go', body: 'And we are on the end of a phone.' },
+                ],
+              },
+            },
+          ],
+        ],
+      },
+    ],
+  },
+
+  /*
+   * ---------------------------------------------------------------------------
+   * Blog
+   * ---------------------------------------------------------------------------
+   *
+   * Relume calls these Blog Sections. Every one of these is the Cards block set
+   * to `collection`, so the entries come from the site's own writing rather than
+   * being typed into the section: add a post and it appears here, which is the
+   * whole reason collections exist. The collection name is left EMPTY so the
+   * client picks theirs rather than inheriting a guess.
+   */
+  {
+    id: 'blog-latest-three',
+    category: 'blog',
+    label: 'The latest three posts',
+    description: 'Pulls from your writing. Add a post and it turns up here on its own.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'From the blog', style: 'h2' } },
+            {
+              type: 'cards',
+              props: {
+                source: 'collection',
+                collection: '',
+                count: 3,
+                columns: '3',
+                style: 'plain',
+                imagePosition: 'top',
+                ratio: '16/9',
+                radius: 'md',
+                wholeCardLinks: true,
+              },
+            },
+          ],
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'blog-titled-with-link',
+    category: 'blog',
+    label: 'Title, posts and a link to all',
+    description: 'A heading, three posts, and a way through to the rest of them.',
+    rows: [
+      {
+        widths: [2, 1],
+        gap: 32,
+        align: 'centre',
+        columns: [
+          [{ type: 'heading', props: { html: 'Travel notes', style: 'h2' } }],
+          [
+            {
+              type: 'button-group',
+              props: { align: 'right', buttons: [{ label: 'All posts', href: '', variant: 'ghost' }] },
+            },
+          ],
+        ],
+      },
+      {
+        widths: [1],
+        columns: [
+          [
+            {
+              type: 'cards',
+              props: {
+                source: 'collection',
+                collection: '',
+                count: 3,
+                columns: '3',
+                style: 'bordered',
+                imagePosition: 'top',
+                ratio: '16/9',
+                radius: 'md',
+                wholeCardLinks: true,
+              },
+            },
+          ],
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'blog-four-up',
+    category: 'blog',
+    label: 'Four posts, tighter',
+    description: 'More posts, smaller cards. For a page that is mostly the blog.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Recent writing', style: 'h2', ...CENTRED } },
+            {
+              type: 'cards',
+              props: {
+                source: 'collection',
+                collection: '',
+                count: 4,
+                columns: '4',
+                gap: 's',
+                style: 'plain',
+                imagePosition: 'top',
+                ratio: '4/3',
+                radius: 'sm',
+                wholeCardLinks: true,
+              },
+            },
+          ],
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'blog-list-no-pictures',
+    category: 'blog',
+    label: 'A plain list of posts',
+    description: 'No pictures, just titles and summaries. Quick to read, quick to load.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Everything we have written', style: 'h2' } },
+            {
+              type: 'cards',
+              props: {
+                source: 'collection',
+                collection: '',
+                count: 6,
+                columns: '2',
+                style: 'plain',
+                imagePosition: 'none',
+                wholeCardLinks: true,
+              },
+            },
+          ],
+        ],
+      },
+    ],
+  },
+
+  /*
+   * ---------------------------------------------------------------------------
+   * Banner
+   * ---------------------------------------------------------------------------
+   *
+   * A thin strip that says one thing: an offer closing, a new brochure, a change
+   * to opening hours. Short by design, and toned so it reads as an announcement
+   * rather than as part of the page.
+   *
+   * NOT THE POPUP WIDGET, and worth saying because they get confused. A banner is
+   * content IN the page that a client edits like any other section. The popup is
+   * a widget that floats over every page and is configured somewhere else.
+   */
+  {
+    id: 'banner-line',
+    category: 'banner',
+    label: 'One line and a button',
+    description: 'The whole point of a banner. Resist putting a paragraph in it.',
+    rows: [
+      {
+        widths: [3, 1],
+        gap: 24,
+        align: 'centre',
+        columns: [
+          [
+            {
+              type: 'text',
+              props: { html: '<p><strong>Book by 31 August</strong> and the deposit is half price on selected holidays.</p>' },
+            },
+          ],
+          [
+            {
+              type: 'button-group',
+              props: { align: 'right', buttons: [{ label: 'See which ones', href: '', variant: 'primary' }] },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { tone: 'accent', paddingY: 24 },
+  },
+
+  {
+    id: 'banner-centred',
+    category: 'banner',
+    label: 'Centred announcement',
+    description: 'A single sentence across the page, with the link inside it.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            {
+              type: 'text',
+              props: { html: '<p>Our new winter sun brochure is out. <a href="">Ask for a copy</a>.</p>', ...CENTRED },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { tone: 'dark', paddingY: 20 },
+  },
+
+  {
+    id: 'banner-with-heading',
+    category: 'banner',
+    label: 'A heading and a line',
+    description: 'A little more room, for something that needs a moment of attention.',
+    rows: [
+      {
+        widths: [2, 1],
+        gap: 32,
+        align: 'centre',
+        columns: [
+          [
+            { type: 'heading', props: { html: 'The shop is closed on Monday', style: 'h4' } },
+            {
+              type: 'text',
+              props: { html: '<p>We are away at a trade show. Email or leave a message and we will come back to you Tuesday.</p>', size: 's' },
+            },
+          ],
+          [
+            {
+              type: 'button-group',
+              props: { align: 'right', buttons: [{ label: 'Email us', href: '', variant: 'secondary' }] },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { tone: 'accent', paddingY: 32 },
   },
 ];
