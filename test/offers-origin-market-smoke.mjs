@@ -147,6 +147,51 @@ function mergeKey(o) {
     'an unrecognised departure airport does not split into one copy per sweep');
 }
 
+// ── Two copies, one booking link ─────────────────────────────────────────────
+// Now that both sweeps key a Gatwick package identically, the copy that
+// survives also decides which nationality Travelify searches under when a
+// visitor clicks. That must not come down to job order: a British visitor
+// clicking a Gatwick holiday should not land in an Irish booking flow.
+ok(/function clickNationality\(o\)/.test(CRON), 'the cron can read the nationality off a click URL');
+ok(/function preferredCopy\(a, b\)/.test(CRON), 'and chooses between two copies with it');
+ok(/if \(!prev \|\| preferredCopy\(o, prev\)\) best\.set\(k, o\);/.test(CRON),
+  'the preference is applied while collecting the fresh sweep');
+// Fresh must still overwrite cached unconditionally — a right-nationality link
+// is not worth showing yesterday's price for.
+ok(/for \(const \[k, o\] of best\) byId\.set\(k, o\);/.test(CRON),
+  'fresh offers still overwrite cached ones outright, whatever their link says');
+
+{
+  const clickNat = (o) => { const m = /\/[A-Z]{3}\/([A-Z]{2})\/[^/]+$/.exec(String(o.url || '')); return m ? m[1] : ''; };
+  const prefer = (a, b) => {
+    const want = (a.origin ? marketOfAirport(a.origin) : a.market) || '';
+    if (!want) return true;
+    const aOk = clickNat(a) === want, bOk = clickNat(b) === want;
+    return aOk === bOk ? true : aOk;
+  };
+  // Real URLs from the live cache, 2 Aug 2026.
+  const gbLink = { id: 18629728, origin: 'BHX', type: 'Packages', url: 'https://api.travelify.io/travelofferclk/250/3/18629728/en/GBP/GB/3ae26834-da42-4aa2-bfa3-3d94cab85cf8' };
+  const ieLink = { id: 18629728, origin: 'BHX', type: 'Packages', url: 'https://api.travelify.io/travelofferclk/250/3/18629728/en/GBP/IE/4fb96638-0a5d-4ddc-94e0-9ea1f4d0a108' };
+  ok(clickNat(gbLink) === 'GB' && clickNat(ieLink) === 'IE', 'the nationality is read off a real click URL');
+  ok(prefer(gbLink, ieLink) === true, 'a Birmingham departure keeps its British booking link');
+  ok(prefer(ieLink, gbLink) === false, 'and does not lose it to the Irish one arriving later');
+
+  const dubIe = { id: 7, origin: 'DUB', type: 'Packages', url: 'https://api.travelify.io/travelofferclk/250/3/7/en/GBP/IE/aaa' };
+  const dubGb = { id: 7, origin: 'DUB', type: 'Packages', url: 'https://api.travelify.io/travelofferclk/250/3/7/en/GBP/GB/bbb' };
+  ok(prefer(dubIe, dubGb) === true && prefer(dubGb, dubIe) === false,
+    'the same rule keeps a Dublin departure on its Irish booking link');
+
+  // No opinion means the later copy wins, exactly as before.
+  const noUrl = { id: 8, origin: 'BHX', type: 'Packages' };
+  ok(prefer(noUrl, gbLink) === false, 'a copy with no readable link does not displace one that matches');
+  const otp = { id: 9, origin: 'OTP', type: 'Packages', url: 'https://api.travelify.io/travelofferclk/250/3/9/en/GBP/IE/ccc' };
+  ok(prefer(otp, otp) === true, 'an offer outside our markets has no preference, so nothing changes for it');
+  const hotel = { id: 10, type: 'Accommodation', market: 'GB', url: 'https://api.travelify.io/travelofferclk/250/2/10/en/GBP/GB/ddd' };
+  const hotelIeLink = { id: 10, type: 'Accommodation', market: 'GB', url: 'https://api.travelify.io/travelofferclk/250/2/10/en/GBP/IE/eee' };
+  ok(prefer(hotel, hotelIeLink) === true && prefer(hotelIeLink, hotel) === false,
+    'a GB-market hotel keeps the British booking link too');
+}
+
 // ── The behaviour, end to end ────────────────────────────────────────────────
 // Reproduce the gate with the real helper and the shapes the cache stores.
 function matches(offer, originTokens) {

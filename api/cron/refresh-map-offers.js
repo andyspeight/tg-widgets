@@ -384,13 +384,44 @@ function mergeOffers(existing, fresh) {
     if (o.origin) o.market = marketOfAirport(o.origin);
     byId.set(key(o), o);
   }
-  for (const o of fresh || []) if (o && o.id != null) byId.set(key(o), o);
+  // Within one run, both sweeps hand back the same Gatwick package — same key
+  // now that the market comes from the airport — but each carries the booking
+  // nationality it was fetched under in its click-through URL. Pick between
+  // them deliberately rather than letting job order decide, so a British
+  // visitor clicking a Gatwick holiday is not dropped into an Irish booking
+  // flow. Fresh still always beats cached: a right-nationality link is not
+  // worth showing yesterday's price for.
+  const best = new Map();
+  for (const o of fresh || []) {
+    if (!o || o.id == null) continue;
+    const k = key(o);
+    const prev = best.get(k);
+    if (!prev || preferredCopy(o, prev)) best.set(k, o);
+  }
+  for (const [k, o] of best) byId.set(k, o);
   return Array.from(byId.values());
 }
 /** The market an offer belongs to, read the same way everywhere: from the
  *  departure airport when it has one, from the stored tag when it does not. */
 function marketTagOf(o) {
   return (o.origin ? marketOfAirport(o.origin) : o.market) || '';
+}
+/** The nationality Travelify will search under when a visitor clicks, read off
+ *  the click URL it gave us (…/en/GBP/GB/<uuid>). '' when the shape is not
+ *  ours to read, which simply means "no opinion". */
+function clickNationality(o) {
+  const m = /\/[A-Z]{3}\/([A-Z]{2})\/[^/]+$/.exec(String(o.url || ''));
+  return m ? m[1] : '';
+}
+/** True when `a` is the better copy of an offer than `b`: the one whose
+ *  booking link matches the market it departs from. No opinion either way
+ *  means "yes", so the later copy wins as it always did. */
+function preferredCopy(a, b) {
+  const want = marketTagOf(a);
+  if (!want) return true;
+  const aOk = clickNationality(a) === want;
+  const bOk = clickNationality(b) === want;
+  return aOk === bOk ? true : aOk;
 }
 function travelDateOf(offer) { return offer.outboundDate || offer.checkinDate || null; }
 function purgeOffers(offers, now = new Date(), maxAgeHours = MAX_AGE_HOURS) {
