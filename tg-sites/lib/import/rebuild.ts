@@ -103,13 +103,6 @@ function hasWords(node: ChildNode): boolean {
   return childNodes(node).some(hasWords);
 }
 
-/** A direct text child with real words, so a wrapper can be told from a leaf. */
-function hasDirectText(node: Element): boolean {
-  return childNodes(node).some(
-    (child) => child.nodeName === '#text' && /[A-Za-z0-9]/.test((child as { value?: string }).value ?? ''),
-  );
-}
-
 // ---------------------------------------------------------------------------
 // Content, with the client's edits put back
 // ---------------------------------------------------------------------------
@@ -250,31 +243,13 @@ function containsIcon(el: Element): boolean {
   return false;
 }
 
-/**
- * How many separate pieces of text a subtree holds, counted the way cardPieces
- * splits them. Used to tell a card (a title and a body) from a single line, and
- * kept structural so isGrid can call it without the client's edits.
- */
-function wordyPieceCount(el: Element, depth: number): number {
-  let count = 0;
-  for (const node of childNodes(el)) {
-    if (node.nodeName === '#text') {
-      if (/[A-Za-z0-9]/.test((node as { value?: string }).value ?? '')) count += 1;
-      continue;
-    }
-    if (!isElement(node)) continue;
-    const tag = tagOf(node);
-    if (IGNORE.has(tag) || tag === 'svg' || tag === 'img' || isIconElement(node)) continue;
-    if (!hasWords(node)) continue;
-    const wordyChildren = elementChildren(node).filter(hasWords);
-    if (depth < 2 && wordyChildren.length >= 2 && !hasDirectText(node)) {
-      count += wordyPieceCount(node, depth + 1);
-    } else {
-      count += 1;
-    }
-  }
-  return count;
+/** Text that is not split any further: none of its child elements have words. */
+function isLeafText(el: Element): boolean {
+  return hasWords(el) && !elementChildren(el).some(hasWords);
 }
+
+/** A resolver that changes nothing, for the structural passes that ignore edits. */
+const IDENTITY = (raw: string): string => raw;
 
 function firstHeading(el: Element): Element | null {
   for (const child of elementChildren(el)) {
@@ -304,10 +279,10 @@ type Piece =
  * child that is only a wrapper around several pieces is descended into once, so
  * a title and a body nested in a shared box still come out as two.
  */
-function cardPieces(card: Element, resolve: (raw: string) => string): Piece[] {
+function contentPieces(card: Element, resolve: (raw: string) => string): Piece[] {
   const pieces: Piece[] = [];
 
-  const walk = (el: Element, depth: number): void => {
+  const walk = (el: Element): void => {
     for (const node of childNodes(el)) {
       if (node.nodeName === '#text') {
         const value = tidy(resolve((node as { value?: string }).value ?? ''));
@@ -317,11 +292,11 @@ function cardPieces(card: Element, resolve: (raw: string) => string): Piece[] {
       if (!isElement(node)) continue;
 
       const tag = tagOf(node);
-      if (IGNORE.has(tag)) continue;
       if (isIconElement(node)) {
         pieces.push({ kind: 'icon' });
         continue;
       }
+      if (IGNORE.has(tag) || tag === 'svg') continue;
       if (tag === 'img') {
         const src = resolve(attr(node, 'src') ?? '').trim();
         if (src) pieces.push({ kind: 'image', src, alt: resolve(attr(node, 'alt') ?? '') });
@@ -331,25 +306,22 @@ function cardPieces(card: Element, resolve: (raw: string) => string): Piece[] {
         pieces.push({ kind: 'button', el: node });
         continue;
       }
-      if (!hasWords(node)) {
-        // A wordless box that holds the icon, which many designs use.
-        if (containsIcon(node)) pieces.push({ kind: 'icon' });
-        continue;
-      }
-
-      // A wrapper holding several pieces is descended into once; a leaf is a
-      // single piece of text.
-      const wordyChildren = elementChildren(node).filter(hasWords);
-      if (depth < 2 && wordyChildren.length >= 2 && !hasDirectText(node)) {
-        walk(node, depth + 1);
-      } else {
+      // A run of text that is not split further is one piece; a wrapper is
+      // walked to its own leaves; a wordless box that only holds the icon
+      // contributes the icon. This is what walks through the three or four
+      // nesting boxes a real card puts between the link and its title.
+      if (isLeafText(node)) {
         const value = tidy(textOf(node, resolve));
         if (value) pieces.push({ kind: 'text', value });
+      } else if (hasWords(node)) {
+        walk(node);
+      } else if (containsIcon(node)) {
+        pieces.push({ kind: 'icon' });
       }
     }
   };
 
-  walk(card, 0);
+  walk(card);
   return pieces;
 }
 
@@ -362,7 +334,7 @@ function cardPieces(card: Element, resolve: (raw: string) => string): Piece[] {
  * line under it. The first piece of text is the title, the rest the body.
  */
 function cardToBlocks(card: Element, resolve: (raw: string) => string): ModelBlock[] {
-  const pieces = cardPieces(card, resolve);
+  const pieces = contentPieces(card, resolve);
   const texts = pieces.filter((p): p is Extract<Piece, { kind: 'text' }> => p.kind === 'text').map((p) => p.value);
   const hasGlyph = pieces.some((p) => p.kind === 'icon');
   const image = pieces.find((p): p is Extract<Piece, { kind: 'image' }> => p.kind === 'image');
@@ -493,23 +465,33 @@ function isCardish(el: Element): boolean {
   if (tagOf(el) === 'img') return true;
   if (!hasWords(el)) return false;
   if (firstHeading(el)) return true;
-  if (containsIcon(el)) return true;
-  return wordyPieceCount(el, 0) >= 2;
+  const pieces = contentPieces(el, IDENTITY);
+  if (pieces.some((piece) => piece.kind === 'icon' || piece.kind === 'image')) return true;
+  return pieces.filter((piece) => piece.kind === 'text').length >= 2;
 }
 
 /**
  * Whether a run of similar siblings is a grid worth making columns of.
  *
- * Same tag, and most of them card shaped. Read from structure, not from tags, so
- * a grid of utility-class divs or links reads the same as a grid of sections.
+ * Same tag, most of them card shaped, AND uniform in how much they hold. The
+ * uniformity is what stops the outer box that carries a heading beside the card
+ * grid from being read as a two-column grid itself: its two children are wildly
+ * different in size, where the six real cards are all alike. Read from
+ * structure, not tags, so a grid of utility-class divs or links reads the same.
  */
 function isGrid(el: Element): boolean {
   const kids = elementChildren(el).filter((kid) => !IGNORE.has(tagOf(kid)));
   if (kids.length < 2 || kids.length > 12) return false;
   const firstTag = tagOf(kids[0]);
   if (!kids.every((kid) => tagOf(kid) === firstTag)) return false;
+
   const cards = kids.filter(isCardish).length;
-  return cards >= Math.max(2, Math.ceil(kids.length * 0.6));
+  if (cards < Math.max(2, Math.ceil(kids.length * 0.6))) return false;
+
+  const counts = kids.map((kid) => contentPieces(kid, IDENTITY).length);
+  const min = Math.min(...counts);
+  const max = Math.max(...counts);
+  return max - min <= 2 || max <= min * 2;
 }
 
 /** Descend past the wrappers to the run of siblings the design laid out. */

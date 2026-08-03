@@ -203,6 +203,59 @@ describe('rebuilding an imported design', () => {
     expect(allBlocks(model).some((block) => block.type === 'heading')).toBe(true);
   });
 
+  /*
+   * THE ACTUAL LOVEHOLIDAYS SECTION, from the markup Andy captured on 3 Aug 2026.
+   *
+   * Its exact shape, and the one that beat two earlier attempts: an outer box
+   * holds a heading and a hero image AND the card grid, and each card is a link
+   * wrapping a flex box that holds an SVG icon and a text box of a bold title
+   * span over a body paragraph, the title three wrappers deep. Two things had to
+   * be right at once. The card extraction has to walk all the way to the leaves,
+   * so the title and body come apart and the icon is found. And the grid test
+   * has to be uniform, so the outer box (a heading beside six cards) is not read
+   * as a two-column grid of its own.
+   */
+  it('rebuilds the real loveholidays "why book with us" section', () => {
+    const svg = '<svg viewBox="0 0 24 24" role="img"><path d="M12 2"></path></svg>';
+    const wcard = (title: string, body: string) =>
+      `<a href="https://www.loveholidays.com/x/" class="c"><div class="flex">${svg}` +
+      `<div class="text"><span class="t">${title}</span><p class="b">${body}</p></div></div></a>`;
+    const html =
+      '<div class="outer"><div class="head"><h2>Why book with us</h2>' +
+      '<div class="hero"><img src="https://cdn.sanity.io/flamingo.svg" alt="icon"></div></div>' +
+      '<div class="grid">' +
+      wcard('Loved by millions', "Join over 19 million holidaymakers who've travelled with us") +
+      wcard('ATOL protected', 'Financial cover for every single package holiday') +
+      wcard('Super-flexible payments', 'Spread the cost of your holiday') +
+      wcard('99% of flights, 1 search', "Once you've checked loveholidays, you've checked them all") +
+      wcard('Best Price Promise', "Find a cheaper deal in 7 days - we'll beat it") +
+      wcard('Support you can count on', "Help before you travel, plus 24/7 support") +
+      '</div></div>';
+
+    const model = modelFromImport({ html, fields: [], content: {}, label: 'Why book with us' });
+    const blocks = allBlocks(model);
+
+    // The heading is there and the six points are six icon-and-text cards.
+    expect(blocks.some((block) => block.type === 'heading' && String(block.props.html).includes('Why book with us'))).toBe(true);
+    const items = blocks.filter((block) => block.type === 'icon-item');
+    expect(items.length).toBe(6);
+
+    // Each card's title and body are SEPARATE and correct, never merged.
+    const first = items.find((block) => String(block.props.title) === 'Loved by millions');
+    expect(first?.props.body).toBe("Join over 19 million holidaymakers who've travelled with us");
+    expect(items.every((block) => isIconName(block.props.icon))).toBe(true);
+    // The exact break: a title running into a body somewhere.
+    for (const block of blocks) {
+      expect(JSON.stringify(block.props)).not.toMatch(/millionsJoin|protectedFinancial|paymentsSpread/);
+    }
+
+    // The outer wrapper is NOT read as a two-column grid: the cards land in
+    // rows of three, and no row is the heading-beside-everything shape.
+    expect(model?.rows.some((row) => row.columns.length === 3)).toBe(true);
+    const built = sectionFromModel(model);
+    expect(built.ok).toBe(true);
+  });
+
   it('is null for a design with nothing we can rebuild', () => {
     expect(modelFromImport({ html: '<div><svg><path d="M0 0"></path></svg></div>', fields: [], content: {} })).toBeNull();
     expect(modelFromImport({ html: '', fields: [], content: {} })).toBeNull();
