@@ -23,10 +23,15 @@
  * no way for an import to reach the database without passing sanitisePage.
  */
 
-import { requireTenantId } from '../../lib/auth/session';
+import { currentUserId, requireSite, requireTenantId } from '../../lib/auth/session';
 import { createBlock, createSection } from '../../lib/content/factory';
 import { splitImport, type ImportCandidate } from '../../lib/import/sections';
-import { rebuildSection } from '../../lib/import/rebuild';
+import { importOutline, looksWeak, rebuildSection } from '../../lib/import/rebuild';
+import { aiIsConfigured, ask, MODEL_BUILD } from '../../lib/ai/anthropic';
+import { BUILD_MAX_TOKENS, repairUserPrompt, sectionFromModel } from '../../lib/ai/section-build';
+import { rebuildSystemPrompt, rebuildUserPrompt } from '../../lib/ai/import-rebuild';
+import { claimRequest, recordTokens } from '../../lib/db/ai';
+import { getSettings } from '../../lib/db/settings';
 import type { Section } from '../../lib/content/schema';
 
 /**
@@ -173,9 +178,80 @@ export async function rebuildImportAction(input: unknown): Promise<RebuildAction
 
   const props = input && typeof input === 'object' ? (input as Record<string, unknown>) : {};
 
+  // The deterministic rebuild first: fast, free and exact. Nearly every design
+  // gets this, and it never spends a model call.
+  let deterministic: RebuildActionResult;
   try {
-    return rebuildSection(props);
+    deterministic = rebuildSection(props);
   } catch {
-    return { ok: false, error: 'We could not rebuild this design as blocks.' };
+    deterministic = { ok: false, error: 'We could not rebuild this design as blocks.' };
+  }
+
+  // Good enough, or no model wired for this site: keep the free result.
+  if (deterministic.ok && !looksWeak(deterministic.section)) return deterministic;
+  if (!aiIsConfigured()) return deterministic;
+
+  const outline = importOutline(props);
+  if (!outline.trim()) return deterministic;
+
+  /*
+   * THE FALLBACK. Only a weak deterministic result reaches here, so the common
+   * case stays free. The model rebuilds from the client's own words, handed over
+   * as an outline, and the result goes through the same sectionFromModel a build
+   * does. Any failure, or a used-up allowance, returns the deterministic result:
+   * the model can improve a poor rebuild, it can never make one worse.
+   */
+  try {
+    const site = await requireSite();
+    const userId = await currentUserId();
+    const claim = await claimRequest(site.tenantId, { userId, intent: 'write' });
+    if (!claim.allowed) return deterministic;
+
+    const settings = await getSettings(site.tenantId);
+    const system = rebuildSystemPrompt(settings);
+    const options = { model: MODEL_BUILD, maxTokens: BUILD_MAX_TOKENS };
+
+    let inputTokens = 0;
+    let outputTokens = 0;
+    const first = await ask(system, rebuildUserPrompt(outline), options);
+    inputTokens += first.inputTokens;
+    outputTokens += first.outputTokens;
+    let built = sectionFromModel(first.text);
+
+    if (!built.ok) {
+      const second = await ask(
+        system,
+        `${rebuildUserPrompt(outline)}\n\n${repairUserPrompt(built.error)}`,
+        options,
+      );
+      inputTokens += second.inputTokens;
+      outputTokens += second.outputTokens;
+      built = sectionFromModel(second.text);
+    }
+
+    if (claim.id) {
+      await recordTokens(site.tenantId, claim.id, { input: inputTokens, output: outputTokens });
+    }
+
+    if (!built.ok) return deterministic;
+
+    // Carry the band the deterministic pass read off the CSS onto the model's
+    // rebuild, and keep the name it worked out from the heading.
+    if (deterministic.ok) {
+      const box = deterministic.section.box;
+      return {
+        ok: true,
+        section: {
+          ...built.section,
+          name: deterministic.section.name ?? built.section.name,
+          ...(box.background
+            ? { tone: deterministic.section.tone, box: { ...built.section.box, background: box.background } }
+            : {}),
+        },
+      };
+    }
+    return { ok: true, section: built.section };
+  } catch {
+    return deterministic;
   }
 }

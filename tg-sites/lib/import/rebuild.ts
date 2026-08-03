@@ -674,3 +674,102 @@ export function rebuildSection(
   }
   return { ok: true, section };
 }
+
+// ---------------------------------------------------------------------------
+// The AI fallback: an outline for the model, and a test for when to reach for it
+// ---------------------------------------------------------------------------
+
+function stripTags(value: string): string {
+  return value.replace(/<[^>]*>/g, '');
+}
+
+/**
+ * The captured content as a plain outline, for the model to lay out afresh.
+ *
+ * When a design's markup is too unusual for the deterministic pass to structure,
+ * the words are still all there; they have just landed in the wrong shape. This
+ * hands the model the content and nothing else: a heading marked with #, a list
+ * item with *, a picture and a button noted, every other run of words on its own
+ * line. The model rebuilds from this, so it is working from the client's exact
+ * words rather than from a brief, which is what keeps it from inventing.
+ */
+export function importOutline(props: Record<string, unknown>): string {
+  const html = typeof props.html === 'string' ? props.html : '';
+  if (!html.trim()) return '';
+
+  const fields = importFields(props);
+  const stored = importContent(props);
+  const resolve = makeResolver(fields, stored);
+
+  let fragment;
+  try {
+    fragment = parseFragment(html);
+  } catch {
+    return '';
+  }
+
+  const lines: string[] = [];
+  const emit = (node: ChildNode): void => {
+    if (node.nodeName === '#text') {
+      const value = tidy(resolve((node as { value?: string }).value ?? ''));
+      if (value) lines.push(value);
+      return;
+    }
+    if (!isElement(node)) return;
+
+    const tag = tagOf(node);
+    if (IGNORE.has(tag) || tag === 'svg') return;
+    if (HEADINGS.has(tag)) {
+      const value = tidy(textOf(node, resolve));
+      if (value) lines.push(`# ${value}`);
+      return;
+    }
+    if (tag === 'img') {
+      lines.push(`[image: ${tidy(resolve(attr(node, 'alt') ?? '')) || 'illustration'}]`);
+      return;
+    }
+    if (tag === 'a' && isButtonLike(node)) {
+      const label = tidy(textOf(node, resolve));
+      if (label) lines.push(`[button: ${label}]`);
+      return;
+    }
+    if (tag === 'li') {
+      const value = tidy(textOf(node, resolve));
+      if (value) lines.push(`* ${value}`);
+      return;
+    }
+    if (isLeafText(node)) {
+      const value = tidy(textOf(node, resolve));
+      if (value) lines.push(value);
+      return;
+    }
+    for (const child of childNodes(node)) emit(child);
+  };
+
+  for (const el of workingSequence(elementChildren(fragment))) emit(el);
+  return lines.filter(Boolean).join('\n').slice(0, 6000);
+}
+
+/**
+ * Whether a deterministic rebuild is poor enough to hand to the model.
+ *
+ * Deliberately conservative, so the free path keeps everything it already reads
+ * well and the model is only paid for when the deterministic pass genuinely
+ * could not structure the design. Two signals: a single block carrying a wall of
+ * run-together words, or a section that is nearly all prose with next to no
+ * structure. Nothing at all is weak too.
+ */
+export function looksWeak(section: Section): boolean {
+  const blocks = section.rows.flatMap((row) => row.columns.flatMap((column) => column.blocks));
+  if (blocks.length === 0) return true;
+
+  const texts = blocks.filter((block) => block.type === 'text');
+  const longText = texts.some(
+    (block) => stripTags(typeof block.props.html === 'string' ? block.props.html : '').length > 220,
+  );
+  if (longText) return true;
+
+  const structured = blocks.filter((block) => block.type !== 'text').length;
+  const mostlyProse = blocks.length >= 3 && texts.length / blocks.length >= 0.7;
+  return mostlyProse && structured <= 1;
+}
