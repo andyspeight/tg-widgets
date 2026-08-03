@@ -3600,8 +3600,21 @@
 }
 .ed-import__slicer h4 {
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: var(--ed-text-sm);
   color: var(--ed-ink);
+}
+.ed-import__slicer-live {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ed-ok, #0a7d33);
+  background: var(--ed-ok-soft, rgba(10, 125, 51, 0.12));
+  padding: 2px 8px;
+  border-radius: 999px;
 }
 .ed-import__slicer ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
 .ed-import__slicer li {

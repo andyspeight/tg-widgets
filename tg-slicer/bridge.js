@@ -18,11 +18,11 @@
  *
  * WHERE IT RUNS. The allowlist is the content_scripts.matches list in
  * manifest.json, and that is the only place it lives, so it cannot drift. Today
- * that is the production editor at tg-sites.vercel.app and localhost for dev. It
- * is deliberately NOT the client preview domain (*.travelgenixsites.com), which
- * serves customers' own sites and never the editor. When the editor gets a real
- * domain (the APP_HOSTNAMES one, e.g. sites.travelgenix.com), add it there and
- * re-load the extension.
+ * that is the production editor at tg-sites-shell.vercel.app (with its team and
+ * git aliases) and localhost for dev. It is deliberately NOT the client preview
+ * domain (*.travelgenixsites.com), which serves customers' own sites and never
+ * the editor. When the editor gets a real domain (the APP_HOSTNAMES one, e.g.
+ * sites.travelgenix.com), add it there and re-load the extension.
  *
  * TRUST. Nothing here is trusted by the editor beyond being a section of HTML
  * and CSS: it goes through the same import that a hand paste does, which
@@ -31,9 +31,10 @@
 (function () {
   function post(slices) {
     const list = Array.isArray(slices) ? slices : [];
-    if (list.length) {
-      window.postMessage({ source: "tgs-slicer", slices: list }, location.origin);
-    }
+    // Always say hello, even with an empty outbox, so the editor can show the
+    // handoff is connected before anything has been captured. Any waiting
+    // sections ride along on the same message.
+    window.postMessage({ source: "tgs-slicer", ready: true, slices: list }, location.origin);
   }
 
   async function flush() {

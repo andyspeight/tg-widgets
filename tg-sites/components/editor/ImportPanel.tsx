@@ -53,6 +53,7 @@ export function ImportPanel({ onAdd }: { onAdd: (sections: Section[]) => void })
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [incoming, setIncoming] = useState<IncomingSlice[]>([]);
+  const [connected, setConnected] = useState(false);
 
   /*
    * SECTIONS SENT STRAIGHT FROM THE SLICER, with no copy-paste.
@@ -67,9 +68,14 @@ export function ImportPanel({ onAdd }: { onAdd: (sections: Section[]) => void })
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
       if (event.source !== window) return;
-      const data = event.data as { source?: unknown; slices?: unknown } | null;
-      if (!data || data.source !== 'tgs-slicer' || !Array.isArray(data.slices)) return;
+      const data = event.data as { source?: unknown; ready?: unknown; slices?: unknown } | null;
+      if (!data || data.source !== 'tgs-slicer') return;
 
+      // The bridge says hello even with an empty outbox, so we can show the
+      // handoff is connected before anything has been captured.
+      if (data.ready) setConnected(true);
+
+      if (!Array.isArray(data.slices)) return;
       const clean: IncomingSlice[] = [];
       for (const raw of data.slices as unknown[]) {
         const slice = raw as Record<string, unknown>;
@@ -219,30 +225,46 @@ export function ImportPanel({ onAdd }: { onAdd: (sections: Section[]) => void })
         </div>
       </div>
 
-      {incoming.length > 0 && (
-        <div className="ed-import__slicer">
-          <h4>From the Slicer</h4>
-          <ul>
-            {incoming.map((slice) => (
-              <li key={slice.ts}>
-                <span className="ed-import__slicer-name" title={slice.title}>{slice.title}</span>
-                <button
-                  type="button"
-                  className="ed-btn"
-                  data-variant="primary"
-                  disabled={pending}
-                  onClick={() => addSlice(slice)}
-                >
-                  Add
-                </button>
-              </li>
-            ))}
-          </ul>
+      {/*
+        Always shown, so the handoff is visible whether or not a capture is
+        waiting. The badge turns on when the Slicer's bridge says hello, which
+        is the one thing that tells you at a glance the wiring is live.
+      */}
+      <div className="ed-import__slicer">
+        <h4>
+          From the Slicer
+          {connected && <span className="ed-import__slicer-live">connected</span>}
+        </h4>
+        {incoming.length > 0 ? (
+          <>
+            <ul>
+              {incoming.map((slice) => (
+                <li key={slice.ts}>
+                  <span className="ed-import__slicer-name" title={slice.title}>{slice.title}</span>
+                  <button
+                    type="button"
+                    className="ed-btn"
+                    data-variant="primary"
+                    disabled={pending}
+                    onClick={() => addSlice(slice)}
+                  >
+                    Add
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <p className="ed-import__note">
+              Captured with the Slicer on another site. Added straight in, no paste.
+            </p>
+          </>
+        ) : (
           <p className="ed-import__note">
-            Captured with the Slicer on another site. Added straight in, no paste.
+            {connected
+              ? 'Ready and waiting. Capture a section on any site, click Send to Travelgenix Sites, and it turns up here to add on one click.'
+              : 'Capture a section on another site with the Slicer, click Send to Travelgenix Sites, and it lands here with no copy-paste. Load the Slicer extension and open this editor to connect it.'}
           </p>
-        </div>
-      )}
+        )}
+      </div>
 
       <label className="ed-import__field">
         <span>HTML</span>
