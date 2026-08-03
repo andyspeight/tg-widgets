@@ -42,7 +42,18 @@ export const MAX_BUILD_INSTRUCTION = 600;
 export const BUILD_MAX_TOKENS = 4096;
 
 export type BuildResult =
-  | { ok: true; section: Section }
+  | {
+      ok: true;
+      section: Section;
+      /**
+       * Keywords for a photo to place behind the section, if the model asked for
+       * one. Resolved to a real image by the ACTION, not here: finding a photo is
+       * a network call and a client's media, neither of which belongs in a pure
+       * function. The section comes back with an empty backgroundImage; the
+       * action fills it, or leaves it image-ready if the search finds nothing.
+       */
+      backgroundQuery?: string;
+    }
   | { ok: false; error: string };
 
 // ---------------------------------------------------------------------------
@@ -74,7 +85,9 @@ How to build:
 A HERO or opener is its own thing, and the commonest thing you will be asked for. Build it like this:
 - width "full", tone "dark", and give it height: a paddingY around 112 to 144, or a minHeight around 520 to 640. A hero the height of a paragraph is not a hero.
 - ONE heading, with style "h1", centred. One short line of text under it, size "l", centred, and shorter is better. One or two buttons, centred, the first "primary" and an enquiry.
-- Do NOT set a background image. Leave it empty. The dark tone makes it plain a photograph is meant to go behind it, and the client adds their own. A stock photograph baked in is one that ends up live on a real site.`;
+- Give it a backgroundQuery: two to four plain words for the photograph that belongs behind it, in the language of a photo search, like "greek island coastline", "santorini blue domes" or "luxury beach resort". The server finds a real photograph from those words and places it, so the hero arrives with a picture, and the client swaps it if they want their own. Do NOT write a backgroundImage yourself, only the query.
+
+Any other section may take a backgroundQuery too, when a photograph behind the words genuinely helps, but most sections read better on a plain or tinted band and should have none.`;
 
 /** The output contract, spelled out so the model returns JSON and only JSON. */
 export const OUTPUT_SHAPE = `Return ONE section as JSON and NOTHING else. No prose before or after, no markdown fences. The exact shape:
@@ -85,6 +98,7 @@ export const OUTPUT_SHAPE = `Return ONE section as JSON and NOTHING else. No pro
   "width": "narrow | contained | wide | full",
   "paddingY": 96,
   "minHeight": 0,
+  "backgroundQuery": "two to four words for a photo behind this section, or omit",
   "rows": [
     { "columns": [ { "blocks": [ { "type": "heading", "props": { "html": "..." } } ] } ] }
   ]
@@ -287,5 +301,10 @@ export function sectionFromModel(answer: unknown): BuildResult {
     })),
   };
 
-  return { ok: true, section: safe };
+  const backgroundQuery =
+    typeof root.backgroundQuery === 'string' && root.backgroundQuery.trim()
+      ? root.backgroundQuery.trim().slice(0, 80)
+      : undefined;
+
+  return { ok: true, section: safe, backgroundQuery };
 }

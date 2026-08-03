@@ -141,6 +141,24 @@ describe('turning a model answer into a section', () => {
     expect(result.section.backgroundImage ?? '').toBe('');
   });
 
+  it('carries a background photo query back for the action to resolve, but sets no image itself', () => {
+    const result = sectionFromModel({
+      tone: 'dark', width: 'full', paddingY: 128,
+      backgroundQuery: '  Greek island coastline  ',
+      rows: [{ columns: [{ blocks: [{ type: 'heading', props: { html: 'Hi', style: 'h1' } }] }] }],
+    });
+    if (!result.ok) throw new Error('expected a section');
+    // The pure normaliser hands the words on; it never fetches a picture.
+    expect(result.backgroundQuery).toBe('Greek island coastline');
+    expect(result.section.backgroundImage ?? '').toBe('');
+  });
+
+  it('leaves the query undefined when the model did not ask for a photo', () => {
+    const result = sectionFromModel({ rows: [{ columns: [{ blocks: [{ type: 'text', props: { html: 'x' } }] }] }] });
+    if (!result.ok) throw new Error('expected a section');
+    expect(result.backgroundQuery).toBeUndefined();
+  });
+
   it('caps a runaway answer rather than building all of it', () => {
     const many = Array.from({ length: 30 }, () => ({ blocks: [{ type: 'text', props: { html: 'x' } }] }));
     const result = sectionFromModel({ rows: [{ columns: many }] });
@@ -173,6 +191,7 @@ describe('the prompt', () => {
     expect(system).toContain('icon-item'); // palette
     expect(system).toContain('Blue Horizon Travel'); // brand
     expect(system).toContain('Return ONE section as JSON'); // output contract
+    expect(system).toContain('backgroundQuery'); // the hero gets a real photo
   });
 
   it('never offers a withheld block in the palette text', () => {

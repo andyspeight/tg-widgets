@@ -43,6 +43,9 @@ import {
   sectionFromModel,
 } from '../../lib/ai/section-build';
 import type { Section } from '../../lib/content/schema';
+import { pexelsConfigured, searchPexels } from '../../lib/media/pexels';
+import { blobConfigured } from '../../lib/media/blob';
+import { importStockAction } from './media';
 import { toCopy, type Copy } from '../../lib/ai/copy';
 import {
   altPrompt,
@@ -485,6 +488,37 @@ export async function buildSectionAction(input: unknown): Promise<BuildResult> {
         error: 'The builder could not put that together. Try describing it a little differently.',
         retryable: true,
       };
+    }
+
+    /*
+     * A RELEVANT PHOTOGRAPH BEHIND THE HERO, if the model asked for one. The wow
+     * is in the picture, so a hero that arrives dark and empty undersells the
+     * whole feature (Andy, 3 Aug 2026). The model proposes the search words,
+     * which it is good at because it read the brief, and the picture is fetched
+     * here rather than there because finding one is a network call and a client's
+     * media, neither of which belongs in a pure function.
+     *
+     * IMPORTED INTO THE CLIENT'S OWN MEDIA, not hotlinked: it becomes theirs,
+     * served from our CDN, credited, and it shows in their library to reuse or
+     * swap. BEST EFFORT to the last: a search that finds nothing, a store that is
+     * not connected, or any error leaves the hero image-ready rather than failing
+     * the build. A good dark hero with no photo is still a good hero.
+     */
+    if (result.backgroundQuery && pexelsConfigured() && blobConfigured()) {
+      try {
+        const found = await searchPexels({ query: result.backgroundQuery, orientation: 'landscape' });
+        const photo = found.photos[0];
+        if (photo) {
+          const imported = await importStockAction(photo);
+          if (imported.ok) {
+            result.section.backgroundImage = imported.data.url;
+            // A scrim so white hero text stays readable over a bright photograph.
+            if (result.section.overlay < 30) result.section.overlay = 45;
+          }
+        }
+      } catch {
+        // Leave it image-ready. The hero is still a good hero without the photo.
+      }
     }
 
     return { ok: true, section: result.section };
