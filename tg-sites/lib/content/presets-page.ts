@@ -363,6 +363,183 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
     section: { paddingY: 64, tone: 'subtle' },
   },
 
+  /*
+   * A SECOND SET OF HEROES, added 3 Aug 2026 when Andy asked for more opening
+   * sections. The first eight cover where the picture sits; these cover what the
+   * hero DOES next: a tagline over the promise, a wall of pictures, the first
+   * three things to book, and what is in the price. Same rules as above, and the
+   * same one that matters most: no picture is baked in, every image starts empty
+   * so nobody ships a stock photo they meant to swap.
+   */
+  {
+    id: 'hero-eyebrow',
+    category: 'hero',
+    label: 'Tagline, then a big statement',
+    description: 'A small line to set the scene, then the promise in full. Left aligned.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Tailor-made travel', style: 'h6', level: 'h3' } },
+            { type: 'heading', props: { html: 'Holidays built around you, not a brochure', level: 'h2', style: 'h1' } },
+            {
+              type: 'text',
+              props: {
+                html: '<p>A sentence on what you do differently. Keep it to the thing a visitor could not get from a booking site.</p>',
+                size: 'l',
+              },
+            },
+            {
+              type: 'button-group',
+              props: {
+                buttons: [
+                  { label: 'Start planning', href: '', variant: 'primary' },
+                  { label: 'See how it works', href: '', variant: 'ghost' },
+                ],
+              },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { paddingY: 96 },
+  },
+
+  {
+    id: 'hero-split-gallery',
+    category: 'hero',
+    label: 'Words left, a wall of pictures right',
+    description: 'For when one photograph is not enough. Show a few of the places at once.',
+    rows: [
+      {
+        widths: [1, 1],
+        gap: 48,
+        align: 'centre',
+        columns: [
+          [
+            { type: 'heading', props: { html: 'A few of the places we know inside out', level: 'h2', style: 'h1' } },
+            {
+              type: 'text',
+              props: {
+                html: '<p>One or two lines on the kind of trips you plan. The pictures beside this do the rest.</p>',
+                size: 'l',
+              },
+            },
+            {
+              type: 'button-group',
+              props: {
+                buttons: [{ label: 'Browse destinations', href: '', variant: 'primary' }],
+              },
+            },
+          ],
+          [{ type: 'gallery', props: { columns: '2', gap: 's' } }],
+        ],
+      },
+    ],
+    section: { paddingY: 80 },
+  },
+
+  {
+    id: 'hero-cards-below',
+    category: 'hero',
+    label: 'Opener with three featured trips',
+    description: 'The promise, then somewhere to start. Puts your best three right up top.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Where would you like to go?', level: 'h2', style: 'h1', ...CENTRED } },
+            {
+              type: 'text',
+              props: {
+                html: '<p>Pick a starting point, or tell us what you have in mind and we will build it from there.</p>',
+                size: 'l',
+                ...CENTRED,
+              },
+            },
+            {
+              type: 'button-group',
+              props: {
+                align: 'centre',
+                buttons: [{ label: 'See every destination', href: '', variant: 'primary' }],
+              },
+            },
+          ],
+        ],
+      },
+      {
+        widths: [1],
+        columns: [
+          [
+            {
+              type: 'cards',
+              props: {
+                columns: '3',
+                style: 'bordered',
+                items: [
+                  { src: '', alt: '', label: 'Greece', title: 'Island hopping, planned properly', body: 'Seven nights across three islands, with the ferries booked for you.', linkLabel: 'See the trip', linkHref: '' },
+                  { src: '', alt: '', label: 'Italy', title: 'The Amalfi coast, slowly', body: 'A week between Positano and Ravello, with a driver for the coast road.', linkLabel: 'See the trip', linkHref: '' },
+                  { src: '', alt: '', label: 'Portugal', title: 'Lisbon and the Algarve', body: 'Three nights in the city, then four with your feet up by the sea.', linkLabel: 'See the trip', linkHref: '' },
+                ],
+              },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { paddingY: 80 },
+  },
+
+  {
+    id: 'hero-inclusions',
+    category: 'hero',
+    label: 'Statement with what is included',
+    description: 'The promise beside a plain list of what the price covers. Travel sells on this.',
+    rows: [
+      {
+        widths: [1, 1],
+        gap: 48,
+        align: 'centre',
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Everything sorted before you fly', level: 'h2', style: 'h1' } },
+            {
+              type: 'text',
+              props: {
+                html: '<p>One line on the reassurance somebody is looking for before they part with money.</p>',
+                size: 'l',
+              },
+            },
+            {
+              type: 'button-group',
+              props: {
+                buttons: [{ label: 'Get a quote', href: '', variant: 'primary' }],
+              },
+            },
+          ],
+          [
+            { type: 'heading', props: { html: 'In the price', style: 'h6', level: 'h3' } },
+            {
+              type: 'list',
+              props: {
+                style: 'tick',
+                items: [
+                  { text: 'Return flights' },
+                  { text: 'Transfers both ways' },
+                  { text: 'ATOL protected' },
+                  { text: 'Someone you can ring' },
+                ],
+              },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { paddingY: 80 },
+  },
+
   {
     id: 'blank-opener',
     category: 'blank',
