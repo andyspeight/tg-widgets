@@ -96,6 +96,41 @@ export async function checkWidgetConfig(selfOrigin, secret) {
   }
 }
 
+// The cache endpoint EVERY offer widget now reads. Cache-only since 30 Jul: a
+// visitor's browser reaches THIS and nothing else, so it is the single most
+// important read path in the product. A clean 200 with a JSON body proves the
+// function is alive and the Redis read path works.
+//
+// This is the central backstop for the per-visitor "offer cache unreachable"
+// beacon, which widget-log deliberately does NOT email — a single blocked or
+// aborted request is a client-side blip, not an outage (3 Aug 2026). With that
+// beacon silenced, a REAL reachability break in this endpoint has to be caught
+// here instead. Reachability only: an empty pool is not a fault (checkOffers
+// covers supply), and a degraded body still means the function answered — Redis
+// health is checkRedis's job.
+export async function checkCachedOffers(selfOrigin, secret) {
+  const started = Date.now();
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 10000);
+  try {
+    const res = await fetch(selfOrigin + '/api/cached-offers?type=Accommodation&maxOffers=1', {
+      headers: secret ? { 'x-tgs-internal': secret } : {},
+      signal: ctrl.signal,
+    });
+    const text = await res.text().catch(() => '');
+    let data = null;
+    try { data = text ? JSON.parse(text) : null; } catch { data = null; }
+    const latencyMs = Date.now() - started;
+    if (!res.ok) return { name: 'cached-offers', ok: false, detail: 'HTTP ' + res.status, latencyMs };
+    const ok = !!(data && data.success);
+    return { name: 'cached-offers', ok, detail: ok ? 'read ok' : 'empty/invalid body', latencyMs };
+  } catch (e) {
+    return { name: 'cached-offers', ok: false, detail: (e && e.name === 'AbortError') ? 'timed out' : (e && e.message) || 'unreachable', latencyMs: Date.now() - started };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 // Redis (Upstash) — the rate-limit + telemetry-fallback backbone. A write/read
 // roundtrip on a throwaway key.
 export async function checkRedis() {
@@ -114,10 +149,11 @@ export async function checkRedis() {
 
 // Run every probe. Network probes run in parallel; config is synchronous.
 export async function runAllProbes({ selfOrigin, secret }) {
-  const [offers, widgetConfig, redis] = await Promise.all([
+  const [offers, cachedOffers, widgetConfig, redis] = await Promise.all([
     checkOffers(selfOrigin, secret),
+    checkCachedOffers(selfOrigin, secret),
     checkWidgetConfig(selfOrigin, secret),
     checkRedis(),
   ]);
-  return [offers, widgetConfig, redis, checkConfig()];
+  return [offers, cachedOffers, widgetConfig, redis, checkConfig()];
 }

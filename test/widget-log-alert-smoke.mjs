@@ -74,10 +74,30 @@ ok(isActionableError({ event: 'error', widget: 'offers', widgetId: 'tgw_f', mess
   'config load + Safari "Load failed" is NOT alerted');
 ok(isActionableError({ event: 'error', widget: 'enquiry', widgetId: 'tgw_g', message: 'config load failed', detail: 'The user aborted a request.' }) === false,
   'config load + abort is NOT alerted');
-// Scope: only CONFIG network errors are suppressed. A live-data reachability
-// beacon (no "config") still alerts, so a real outage is not hidden.
-ok(isActionableError({ event: 'error', widget: 'offers', widgetId: 'tgw_h', message: 'offers unreachable', detail: 'Failed to fetch' }) === true,
-  'a non-config "Failed to fetch" (offers data) still alerts');
+// ── The offers CACHE "unreachable" beacon is the same client-side blip ───────
+// (3 Aug 2026) yourticketgenie's healthy homepage offers widget fired one
+// "offer cache unreachable / Load failed" — a single request that never reached
+// us — while EVERY server-side hit succeeded (100% 200s, one 51s before the
+// alert). The widget is cache-only, so its fetch throwing is a navigate-away, a
+// dropped connection, or an extension blocking a "/offers" URL, not an outage.
+// Now recorded but not emailed, exactly like the config network beacon above.
+ok(isActionableError({ event: 'error', widget: 'offers', widgetId: 'tgw_1783436471386_hv9ltx', message: 'offer cache unreachable', detail: 'Load failed' }) === false,
+  'offer cache unreachable + Safari "Load failed" (the yourticketgenie 3 Aug case) is NOT alerted');
+ok(isActionableError({ event: 'error', widget: 'offers', widgetId: 'tgw_i', message: 'offer cache unreachable', detail: 'Failed to fetch' }) === false,
+  'offer cache unreachable + Chrome "Failed to fetch" is NOT alerted');
+ok(isActionableError({ event: 'error', widget: 'offers', widgetId: 'tgw_j', message: 'offer cache unreachable', detail: 'The user aborted a request.' }) === false,
+  'offer cache unreachable + abort is NOT alerted');
+// A GENUINE cache outage is NOT silenced: it beacons as "offer cache degraded"
+// (a distinct message with a status-bearing or template detail), and a
+// platform-wide reachability break is caught by the cached-offers monitor probe.
+ok(isActionableError({ event: 'error', widget: 'offers', widgetId: 'tgw_k', message: 'offer cache degraded', detail: 'HTTP 502' }) === true,
+  'a real cache outage (offer cache degraded / HTTP 502) still alerts');
+ok(isActionableError({ event: 'error', widget: 'offers', widgetId: 'tgw_l', message: 'offer cache degraded', detail: 'cards' }) === true,
+  'a server-flagged degraded cache (offer cache degraded) still alerts');
+// The suppression is DETAIL-scoped: an "unreachable" beacon carrying a
+// status-bearing detail (not a bare network reject) still alerts.
+ok(isActionableError({ event: 'error', widget: 'offers', widgetId: 'tgw_m', message: 'offer cache unreachable', detail: 'HTTP 500 Server error' }) === true,
+  'offer cache unreachable with a status-bearing detail (not a network reject) still alerts');
 
 // ── Loads and junk are never alertable ──────────────────────────────────────
 ok(isActionableError({ event: 'load', widget: 'consent', widgetId: 'tgw_9', message: '' }) === false,
