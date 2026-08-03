@@ -31,8 +31,8 @@ import {
 } from '../../lib/content/presets';
 import type { Section } from '../../lib/content/schema';
 import { Modal } from '../ui/Modal';
-import { Icon } from './Icon';
 import { ImportPanel } from './ImportPanel';
+import { AiPanel } from './AiPanel';
 
 type Tab = 'layouts' | 'designed' | 'ai' | 'import';
 
@@ -141,6 +141,7 @@ export function SectionPicker({
   onPickLayout,
   onPickPreset,
   onPickImported,
+  onPickBuilt,
   onClose,
 }: {
   /**
@@ -156,6 +157,8 @@ export function SectionPicker({
   onPickPreset: (preset: SectionPreset) => void;
   /** A whole design, cut into sections. Plural because one paste is often many. */
   onPickImported: (sections: Section[]) => void;
+  /** One section, built by the AI from a description. */
+  onPickBuilt: (section: Section) => void;
   onClose: () => void;
 }) {
   const categories = categoriesFor(scope);
@@ -271,26 +274,7 @@ export function SectionPicker({
 
       {tab === 'import' && <ImportPanel onAdd={onPickImported} />}
 
-      {tab === 'ai' && (
-        <div className="ed-ai-stub">
-          <Icon name="sparkle" size={28} />
-          <h3>Describe the section you want</h3>
-          <p>
-            This is not built yet. When it is, you will be able to say what the
-            section is for in your own words and have it put together, then edit
-            it like any other.
-          </p>
-          {/*
-            An honest stub with nothing to type into, rather than a disabled box
-            that looks like it might work if you found the right words. Andy
-            asked for a stub, so this says what it is.
-          */}
-          <p className="ed-ai-stub__meanwhile">
-            In the meantime, Designed has ready-made sections and Layouts has
-            empty ones.
-          </p>
-        </div>
-      )}
+      {tab === 'ai' && <AiPanel onBuilt={onPickBuilt} />}
     </Modal>
   );
 }

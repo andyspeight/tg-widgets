@@ -33,7 +33,16 @@ import {
   isSignInRequired,
   requireSite,
 } from '../../lib/auth/session';
-import { aiIsConfigured, AiError, ask } from '../../lib/ai/anthropic';
+import { aiIsConfigured, AiError, ask, MODEL_BUILD } from '../../lib/ai/anthropic';
+import {
+  BUILD_MAX_TOKENS,
+  buildSystemPrompt,
+  buildUserPrompt,
+  MAX_BUILD_INSTRUCTION,
+  repairUserPrompt,
+  sectionFromModel,
+} from '../../lib/ai/section-build';
+import type { Section } from '../../lib/content/schema';
 import { toCopy, type Copy } from '../../lib/ai/copy';
 import {
   altPrompt,
@@ -235,7 +244,7 @@ export async function describeImageAction(input: unknown): Promise<AltResult> {
     const answer = await ask(
       `${HOUSE_RULES}\n\n${ALT_RULES}`,
       altPrompt(item.filename),
-      { url: item.url },
+      { image: { url: item.url } },
     );
 
     if (claim.id) {
@@ -388,5 +397,111 @@ export async function writeSeoAction(input: unknown): Promise<SeoResult> {
     }
     console.error('[tg-sites] writing the search details failed', error);
     return { ok: false, error: 'Something went wrong. Try again in a moment.' };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// The section builder
+// ---------------------------------------------------------------------------
+
+export type BuildResult =
+  | { ok: true; section: Section }
+  | { ok: false; error: string; retryable?: boolean };
+
+/**
+ * Build one section from a description, on the dearer model.
+ *
+ * THE SAME FOUR GATES as writeCopyAction, repeated not shared because a server
+ * action is a public endpoint. What is different is only what happens once they
+ * pass: a Sonnet call with a bigger ceiling, and the answer taken through
+ * sectionFromModel rather than toCopy, because this returns a Section rather than
+ * a paragraph. The Section is validated and sanitised in there, so what this
+ * hands back is as safe as a hand-built one and editable the instant it lands.
+ *
+ * ONE REPAIR, THEN STOP. A model asked for JSON occasionally returns something
+ * that will not parse. The reason is fed back for a single second attempt, which
+ * turns most near-misses into hits without turning a bad request into an
+ * unbounded bill. Both calls' tokens are counted against the one slot.
+ */
+export async function buildSectionAction(input: unknown): Promise<BuildResult> {
+  try {
+    if (!aiIsConfigured()) {
+      return { ok: false, error: 'The AI builder is not switched on for this site yet.' };
+    }
+
+    const site = await requireSite();
+    const userId = await currentUserId();
+
+    const fields = (input ?? {}) as Record<string, unknown>;
+    const instruction = text(fields.instruction, MAX_BUILD_INSTRUCTION);
+    if (!instruction) {
+      return { ok: false, error: 'Describe the section you want.' };
+    }
+
+    // The slot is taken before the model is called, and one slot covers the
+    // build and its repair: a build is one request whether it takes one call or
+    // two.
+    const claim = await claimRequest(site.tenantId, { userId, intent: 'write' });
+    if (!claim.allowed) {
+      return {
+        ok: false,
+        error:
+          `This site has used all ${DAILY_LIMIT} of today's AI requests. `
+          + 'It resets through the day, so try again later.',
+      };
+    }
+
+    const settings = await getSettings(site.tenantId);
+    const system = buildSystemPrompt(settings);
+
+    let inputTokens = 0;
+    let outputTokens = 0;
+    const build = { model: MODEL_BUILD, maxTokens: BUILD_MAX_TOKENS };
+
+    const first = await ask(system, buildUserPrompt(instruction), build);
+    inputTokens += first.inputTokens;
+    outputTokens += first.outputTokens;
+    let result = sectionFromModel(first.text);
+
+    // The one repair: hand back the request and what went wrong, ask again.
+    if (!result.ok) {
+      const second = await ask(
+        system,
+        `${buildUserPrompt(instruction)}\n\n${repairUserPrompt(result.error)}`,
+        build,
+      );
+      inputTokens += second.inputTokens;
+      outputTokens += second.outputTokens;
+      result = sectionFromModel(second.text);
+    }
+
+    if (claim.id) {
+      await recordTokens(site.tenantId, claim.id, { input: inputTokens, output: outputTokens });
+    }
+
+    if (!result.ok) {
+      return {
+        ok: false,
+        error: 'The builder could not put that together. Try describing it a little differently.',
+        retryable: true,
+      };
+    }
+
+    return { ok: true, section: result.section };
+  } catch (error) {
+    if (error instanceof AiError) {
+      return { ok: false, error: error.message, retryable: error.retryable };
+    }
+    if (isSignInRequired(error)) {
+      return { ok: false, error: (error as Error).message };
+    }
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.startsWith('This account is not a member')) {
+      return { ok: false, error: message };
+    }
+    // Generic below this line: the prompt, with the client's profile in it, has
+    // been in scope.
+    console.error('[tg-sites] the section builder failed', error);
+    return { ok: false, error: 'Something went wrong building that. Try again.' };
   }
 }

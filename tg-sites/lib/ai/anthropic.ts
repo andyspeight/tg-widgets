@@ -36,6 +36,18 @@ const ENDPOINT = 'https://api.anthropic.com/v1/messages';
 /** Pinned, not aliased. See the note above. */
 export const MODEL = 'claude-haiku-4-5-20251001';
 
+/**
+ * The model the SECTION BUILDER uses, and why it is not the one above.
+ *
+ * Writing a paragraph from a profile is a writing problem, which is what Haiku
+ * was chosen for. Building a whole section is a reasoning one: choose the right
+ * blocks, structure a layout, honour a fixed palette, and come back as valid
+ * JSON. That is worth the dearer model, and a section build is infrequent and
+ * high-value where a copy tweak is neither. Andy chose Sonnet for it on 3 Aug
+ * 2026, weighing quality against cost with the copy assistant left on Haiku.
+ */
+export const MODEL_BUILD = 'claude-sonnet-5';
+
 /** The version of the request format, required on every call. */
 const API_VERSION = '2023-06-01';
 
@@ -101,6 +113,19 @@ export interface AskImage {
 }
 
 /**
+ * The knobs a caller may turn, all optional so the copy assistant's `ask(system,
+ * user)` is unchanged. A section build passes a dearer model and a bigger ceiling
+ * because a section of JSON is longer than three paragraphs of prose.
+ */
+export interface AskOptions {
+  image?: AskImage;
+  /** Defaults to MODEL (Haiku). The builder passes MODEL_BUILD. */
+  model?: string;
+  /** Defaults to MAX_TOKENS. The builder needs more room for a section. */
+  maxTokens?: number;
+}
+
+/**
  * Ask the model, optionally about a picture.
  *
  * NO NEW MODEL FOR VISION. Haiku 4.5 is multimodal, so describing an image is
@@ -111,8 +136,10 @@ export interface AskImage {
 export async function ask(
   system: string,
   user: string,
-  image?: AskImage,
+  opts: AskOptions = {},
 ): Promise<Answer> {
+  const { image, model = MODEL, maxTokens = MAX_TOKENS } = opts;
+
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) {
     throw new AiError('The writing assistant is not switched on for this site yet.');
@@ -131,8 +158,8 @@ export async function ask(
         'anthropic-version': API_VERSION,
       },
       body: JSON.stringify({
-        model: MODEL,
-        max_tokens: MAX_TOKENS,
+        model,
+        max_tokens: maxTokens,
         /*
          * The house rules and the client profile go in `system`, and only the
          * request goes in `messages`. That is not tidiness: the system prompt is

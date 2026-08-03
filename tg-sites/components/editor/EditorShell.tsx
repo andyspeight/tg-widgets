@@ -1405,6 +1405,7 @@ export function EditorShell({
            * insertion point and quietly do nothing.
            */
           onPickImported={(sections) => insertSections(sections)}
+          onPickBuilt={(section) => insertSection(section)}
         />
       )}
 

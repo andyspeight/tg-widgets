@@ -2245,6 +2245,69 @@
 
 .ed-ai-stub__meanwhile { color: var(--ed-ink-3); }
 
+/* ------------------------------------------------------------------ */
+/* The AI tab: describe a section, have it built                      */
+/* ------------------------------------------------------------------ */
+
+.ed-ai-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-3);
+  padding: var(--ed-4);
+}
+
+.ed-ai-panel__head {
+  display: grid;
+  justify-items: center;
+  gap: var(--ed-1);
+  text-align: center;
+  color: var(--ed-accent);
+}
+.ed-ai-panel__head h3 {
+  margin: var(--ed-1) 0 0;
+  color: var(--ed-ink);
+  font-size: var(--ed-text-md);
+}
+.ed-ai-panel__head p {
+  max-width: 52ch;
+  margin: 0;
+  color: var(--ed-ink-2);
+  font-size: var(--ed-text-sm);
+  line-height: 1.6;
+}
+
+/* The openers, as quiet chips that fill the box on click. */
+.ed-ai-panel__examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ed-2);
+}
+.ed-ai-panel__example {
+  padding: 6px var(--ed-3);
+  border: 1px solid var(--ed-line);
+  border-radius: 999px;
+  background: var(--ed-panel);
+  color: var(--ed-ink-2);
+  font-size: var(--ed-text-xs);
+  cursor: pointer;
+  transition: border-color 120ms ease-out, color 120ms ease-out;
+}
+.ed-ai-panel__example:hover:not(:disabled) {
+  border-color: var(--ed-accent);
+  color: var(--ed-ink);
+}
+.ed-ai-panel__example:disabled { opacity: 0.5; cursor: default; }
+
+.ed-ai-panel__go {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-3);
+}
+.ed-ai-panel__wait {
+  color: var(--ed-ink-3);
+  font-size: var(--ed-text-xs);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ed-preset-card { transition: none; }
 }

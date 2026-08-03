@@ -90,8 +90,14 @@ function quoted(value: string): string {
   return value.replace(/<\/?(company|tone|avoid|copy|request)>/gi, '').trim();
 }
 
-/** The parts of the profile that are filled in, as quoted blocks. */
-function profileBlock(settings: SiteSettings): string {
+/**
+ * The parts of the profile that are filled in, as quoted blocks.
+ *
+ * Exported since 3 Aug 2026 so the section builder grounds itself in the SAME
+ * brand the copy assistant does, injected the same guarded way, rather than a
+ * second copy that could describe the client differently.
+ */
+export function profileBlock(settings: SiteSettings): string {
   const parts: string[] = [];
 
   const name = quoted(settings.companyName);

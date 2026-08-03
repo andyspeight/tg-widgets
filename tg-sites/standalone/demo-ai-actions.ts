@@ -156,3 +156,55 @@ void _describe;
 
 const _write = writeCopyAction satisfies typeof real.writeCopyAction;
 void _write;
+
+/*
+ * The section builder, doubled. Same reasoning as the copy double above: the
+ * real action bills Anthropic and reaches Postgres, neither of which belongs in
+ * a file served from a static host.
+ *
+ * IT RUNS THE REAL NORMALISER on a canned model answer, exactly as the copy
+ * double runs the real toCopy. So the browser check exercises the actual
+ * validate-and-sanitise path and proves what matters: a built section lands on
+ * the canvas, is selected, and is editable like any other. Typing "fail" gets
+ * the failure path without a server.
+ */
+import { sectionFromModel } from '../lib/ai/section-build';
+
+const DEMO_MODEL_SECTION = {
+  name: 'Why book with us',
+  tone: 'subtle',
+  width: 'contained',
+  rows: [
+    { columns: [{ blocks: [{ type: 'heading', props: { html: 'Why book with us', level: 'h2', align: 'centre' } }] }] },
+    {
+      columns: [
+        { blocks: [{ type: 'icon-item', props: { icon: 'map', title: 'Planned by people who have been', body: 'Every trip is shaped by someone who knows the place, so the details are right.', align: 'centre' } }] },
+        { blocks: [{ type: 'icon-item', props: { icon: 'shield', title: 'ABTA and ATOL protected', body: 'Your money and your holiday are covered, every time.', align: 'centre' } }] },
+        { blocks: [{ type: 'icon-item', props: { icon: 'phone', title: 'On the end of the phone', body: 'We are here while you travel, not just while you book.', align: 'centre' } }] },
+      ],
+    },
+    { columns: [{ blocks: [{ type: 'button-group', props: { align: 'centre', buttons: [{ label: 'Start an enquiry', variant: 'primary' }] } }] }] },
+  ],
+};
+
+export async function buildSectionAction(input: unknown) {
+  const fields = (input ?? {}) as Record<string, unknown>;
+  const instruction = typeof fields.instruction === 'string' ? fields.instruction.trim() : '';
+
+  if (!instruction) {
+    return { ok: false as const, error: 'Describe the section you want.' };
+  }
+  if (/\bfail\b/i.test(instruction)) {
+    return {
+      ok: false as const,
+      error: 'The builder could not put that together. Try describing it a little differently.',
+      retryable: true,
+    };
+  }
+
+  const result = sectionFromModel(DEMO_MODEL_SECTION);
+  if (!result.ok) {
+    return { ok: false as const, error: 'Something went wrong building that. Try again.' };
+  }
+  return { ok: true as const, section: result.section };
+}

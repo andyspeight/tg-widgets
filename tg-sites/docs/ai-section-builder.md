@@ -90,16 +90,31 @@ Haiku, with the model a per-call parameter so it is one line to change.
 4. **Advisory.** "This page has no call to action / no trust badges" → one-tap
    fixes, in the shape of the existing SEO audit engine.
 
-## Open decisions (for Andy)
+## Decisions (settled 3 Aug 2026)
 
-- **Model tier**: Sonnet 5 for the builder (better, dearer) vs stay on Haiku
-  (cheap). Recommendation: Sonnet 5 for the build, Haiku for copy.
-- **Compose result**: insert one section and let the client tweak it, vs offer a
-  few variants to choose from (more Framer-like, more tokens). Recommendation:
-  one now, variants once revise (phase 2) exists.
+- **Model**: Sonnet 5 for the builder (`MODEL_BUILD`), Haiku stays for copy.
+- **Compose result**: insert one section and let the client tweak it. Variants
+  can come later once revise (phase 2) exists.
 
 ## Status
 
-- Palette generator built and tested (`lib/ai/palette.ts`).
-- Next: the compose action (prompt + validate/repair) and the AI-tab UI, once
-  the two decisions above are settled.
+Phase 1 is built and live-pending-deploy:
+
+- `lib/ai/palette.ts` — the palette, generated from the registry (tested).
+- `lib/ai/section-build.ts` — the prompt (house voice + travel + palette +
+  brand), the JSON extractor, and the normaliser that turns a model answer into
+  a valid, sanitised, editable Section or an honest failure (tested).
+- `app/actions/ai.ts` → `buildSectionAction` — the same four gates as the copy
+  assistant, on Sonnet, with one repair attempt, both calls' tokens counted
+  against one slot.
+- `components/editor/AiPanel.tsx` — the AI tab: a description, some openers, a
+  build button. On success the section is inserted and selected, so the dialog
+  closes onto it ready to edit.
+- Verified in the standalone harness end to end (describe → build → a native
+  heading + three icon points + enquiry button lands, selected and editable),
+  and the deterministic core is unit-tested. The live Sonnet call is exercised
+  in production, since the harness has no key.
+
+Next: **phase 2, revise after build** — an AI action on the contextual toolbar
+that takes the selected section's JSON and an instruction and returns an edited
+section. The normaliser and prompt spine are already in place for it.
