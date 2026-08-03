@@ -79,6 +79,15 @@ interface Props {
   isItem?: boolean;
   itemMeta?: ItemMeta;
   onItemMeta?: (next: ItemMeta) => void;
+  /**
+   * True while the on-canvas options popover is open for this same item.
+   *
+   * The popover and this pane draw the SAME fields, and two live copies of every
+   * control on the screen at once read as broken the moment one was touched. So
+   * while the popover is up the pane steps aside and shows a short note instead:
+   * one editing surface at a time. See EditorShell's optionsOpen.
+   */
+  editingOnCanvas?: boolean;
 }
 
 /**
@@ -196,6 +205,7 @@ export function Properties({
   isItem = false,
   itemMeta,
   onItemMeta,
+  editingOnCanvas = false,
 }: Props) {
   return (
     <aside className="ed-props" aria-label="Properties">
@@ -228,18 +238,26 @@ export function Properties({
           </p>
         )}
 
-        <ItemOptions
-          page={page}
-          selected={selected}
-          isStaff={isStaff}
-          onCommit={onCommit}
-          region={region}
-          regionFlags={regionFlags}
-          onRegionFlags={onRegionFlags}
-          isItem={isItem}
-          itemMeta={itemMeta}
-          onItemMeta={onItemMeta}
-        />
+        {editingOnCanvas ? (
+          <p className="ed-empty-note">
+            You are editing this on the page. The options are open on the canvas,
+            and anything you change there shows here too. Close them to bring the
+            settings back to this panel.
+          </p>
+        ) : (
+          <ItemOptions
+            page={page}
+            selected={selected}
+            isStaff={isStaff}
+            onCommit={onCommit}
+            region={region}
+            regionFlags={regionFlags}
+            onRegionFlags={onRegionFlags}
+            isItem={isItem}
+            itemMeta={itemMeta}
+            onItemMeta={onItemMeta}
+          />
+        )}
       </div>
     </aside>
   );

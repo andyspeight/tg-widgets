@@ -13,6 +13,7 @@
 
 import type { CSSProperties, ReactElement } from 'react';
 import { escapeHtml, safeUrl, sanitiseHtml } from '../../lib/content/sanitise';
+import { safeColour } from '../../lib/content/schema';
 import { importContent, importFields } from '../../lib/content/imported';
 import { cleanImportHtml } from '../../lib/import/html';
 import { importScopeClass, scopeImportCss } from '../../lib/import/css';
@@ -211,9 +212,10 @@ export function QuoteBlock({ props }: { props: Props }): ReactElement {
   const text = str(props, 'text');
   const attribution = str(props, 'attribution');
   const role = str(props, 'role');
+  const textColour = safeColour(props.textColour);
 
   return (
-    <figure className="tgs-quote">
+    <figure className="tgs-quote" style={textColour ? { color: textColour } : undefined}>
       <blockquote className="tgs-quote__text">{text}</blockquote>
       {(attribution || role) && (
         <figcaption className="tgs-quote__by">
@@ -301,6 +303,15 @@ export function IconItemBlock({ props }: { props: Props }): ReactElement {
    */
   const drawable = isIconName(icon);
 
+  /*
+   * Optional colours, validated on the way out. Left blank they are undefined,
+   * so the icon and the words keep following the section's tone as they always
+   * did; set, they are a theme token or a hex that safeColour has already
+   * cleared, so nothing an attacker typed can reach the style attribute.
+   */
+  const iconColour = safeColour(props.iconColour);
+  const textColour = safeColour(props.textColour);
+
   return (
     <div className="tgs-icon-item" data-align={align}>
       {/* Decorative: the title carries the meaning. */}
@@ -308,10 +319,11 @@ export function IconItemBlock({ props }: { props: Props }): ReactElement {
         className="tgs-icon-item__icon"
         data-kind={drawable ? 'icon' : 'character'}
         aria-hidden="true"
+        style={iconColour ? { color: iconColour } : undefined}
       >
         {drawable ? <ContentIcon name={icon} className="tgs-icon-item__svg" /> : icon}
       </span>
-      <div>
+      <div style={textColour ? { color: textColour } : undefined}>
         {title && <p className="tgs-icon-item__title">{title}</p>}
         {body && <p className="tgs-icon-item__body">{body}</p>}
       </div>
@@ -1112,12 +1124,26 @@ export function StepsBlock({ props }: { props: Props }): ReactElement {
     return <div className="tgs-placeholder">Add the steps</div>;
   }
 
+  const textColour = safeColour(props.textColour);
+  const markerColour = safeColour(props.markerColour);
+  /*
+   * A marker is a ring with a number, or a filled dot. So the chosen colour is
+   * its text, its border AND, when it is a dot, its fill. Set on the span so it
+   * beats the class rule; left undefined the CSS keeps the brand colour it had.
+   */
+  const markerStyle = markerColour
+    ? { color: markerColour, borderColor: markerColour, background: marker === 'dot' ? markerColour : undefined }
+    : undefined;
+
   return (
     <ol
       className="tgs-steps"
       data-layout={layout}
       data-marker={marker}
       data-connector={connector ? 'true' : undefined}
+      // Cascades to the titles and text; the marker keeps its own colour above
+      // because its class rule beats an inherited one.
+      style={textColour ? { color: textColour } : undefined}
     >
       {items.map((raw, index) => {
         const item = raw && typeof raw === 'object' ? (raw as Props) : {};
@@ -1132,7 +1158,7 @@ export function StepsBlock({ props }: { props: Props }): ReactElement {
               screen reader to read; the `ol` has already said which item this
               is. Marked hidden rather than left to chance.
             */}
-            <span className="tgs-steps__marker" aria-hidden="true" />
+            <span className="tgs-steps__marker" aria-hidden="true" style={markerStyle} />
             <div className="tgs-steps__body">
               {title && <p className="tgs-steps__title">{title}</p>}
               {/* Blank lines become paragraphs, as they do in every other
@@ -1187,6 +1213,9 @@ export function StatsBlock({ props }: { props: Props }): ReactElement {
     return <div className="tgs-placeholder">Add a number or two</div>;
   }
 
+  const textColour = safeColour(props.textColour);
+  const figureColour = safeColour(props.figureColour);
+
   return (
     <ul
       className="tgs-stats"
@@ -1194,10 +1223,13 @@ export function StatsBlock({ props }: { props: Props }): ReactElement {
       data-size={size}
       data-align={align}
       data-divided={divided ? 'true' : undefined}
+      // The labels and detail follow this; the figure keeps its own colour
+      // below, whose class rule beats an inherited one.
+      style={textColour ? { color: textColour } : undefined}
     >
       {items.map((item, index) => (
         <li className="tgs-stats__item" key={index}>
-          <p className="tgs-stats__figure">
+          <p className="tgs-stats__figure" style={figureColour ? { color: figureColour } : undefined}>
             {/*
               The affixes are their own elements ONLY so they can be set
               smaller. They are read aloud as part of the figure either way,

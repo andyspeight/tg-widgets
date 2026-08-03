@@ -75,6 +75,8 @@ export function ItemToolbar({
   selectedKey,
   editing,
   newId,
+  open,
+  onOpenChange,
   onAdd,
   onCommit,
   options,
@@ -85,12 +87,18 @@ export function ItemToolbar({
   /** True when the selected block is being typed into: Edit is then redundant. */
   editing: boolean;
   newId: Reid;
+  /**
+   * Whether the options popover is open. Held by the shell, NOT here, so the
+   * right-hand pane can step aside while it is open and the screen never shows
+   * two live copies of the same fields.
+   */
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   onAdd: () => void;
   onCommit: (next: (page: Page) => Page, coalesceKey?: string) => void;
   options: OptionsProps;
 }) {
   const [anchor, setAnchor] = useState<Anchor | null>(null);
-  const [optionsOpen, setOptionsOpen] = useState(false);
   const [popPos, setPopPos] = useState<{ top: number; left: number } | null>(null);
   const popRef = useRef<HTMLDivElement>(null);
 
@@ -138,13 +146,6 @@ export function ItemToolbar({
     };
   }, [measure, page]);
 
-  // A fresh selection starts with the popover closed: the options belong to the
-  // thing that was clicked, and carrying the open state onto a different item
-  // would show one item's fields framed as another's.
-  useEffect(() => {
-    setOptionsOpen(false);
-  }, [selectedKey]);
-
   /*
    * PLACE THE POPOVER SO IT ALWAYS FITS, measured rather than guessed.
    *
@@ -156,7 +157,7 @@ export function ItemToolbar({
    * bar). A layout effect, so the clamp happens before the browser paints it.
    */
   useLayoutEffect(() => {
-    if (!optionsOpen || !anchor) {
+    if (!open || !anchor) {
       setPopPos(null);
       return;
     }
@@ -173,30 +174,25 @@ export function ItemToolbar({
       top: Math.max(top + 8, Math.min(wantedTop, bottom - height - 8)),
       left: Math.min(anchor.left, right - width - 8),
     });
-  }, [optionsOpen, anchor]);
+  }, [open, anchor]);
 
-  // Close the popover on Escape or a click outside it. The pill's own Edit
-  // button is outside the popover, so toggling stays possible.
+  /*
+   * Escape closes the popover, and that is the only thing that closes it from
+   * the keyboard or a stray click. IT USED TO CLOSE ON ANY CLICK OUTSIDE, which
+   * meant reaching for the right-hand pane or the canvas made it vanish
+   * mid-edit, reading as broken (3 Aug 2026). It closes now on Escape, its own
+   * X, or selecting another item (the shell resets it on selection). The pane
+   * shows a note rather than a second copy of the fields while it is open, so
+   * there is nothing outside to fight it for the click.
+   */
   useEffect(() => {
-    if (!optionsOpen) return;
-
+    if (!open) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setOptionsOpen(false);
+      if (event.key === 'Escape') onOpenChange(false);
     };
-    const onDown = (event: MouseEvent) => {
-      const target = event.target as Node;
-      if (popRef.current?.contains(target)) return;
-      if ((target as HTMLElement).closest?.('.ed-bar')) return;
-      setOptionsOpen(false);
-    };
-
     document.addEventListener('keydown', onKey);
-    document.addEventListener('mousedown', onDown);
-    return () => {
-      document.removeEventListener('keydown', onKey);
-      document.removeEventListener('mousedown', onDown);
-    };
-  }, [optionsOpen]);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open, onOpenChange]);
 
   if (!anchor) return null;
 
@@ -214,7 +210,7 @@ export function ItemToolbar({
 
   const run = (action: ItemAction) => {
     if (action.id === 'edit') {
-      setOptionsOpen((open) => !open);
+      onOpenChange(!open);
       return;
     }
     if (action.id === 'add') {
@@ -242,10 +238,10 @@ export function ItemToolbar({
             type="button"
             className="ed-bar__btn"
             data-danger={action.danger ? 'true' : undefined}
-            data-on={action.id === 'edit' && optionsOpen ? 'true' : undefined}
+            data-on={action.id === 'edit' && open ? 'true' : undefined}
             title={action.label}
             aria-label={action.label}
-            aria-pressed={action.id === 'edit' ? optionsOpen : undefined}
+            aria-pressed={action.id === 'edit' ? open : undefined}
             onClick={() => run(action)}
           >
             {/* Every id in item-actions maps to an editor Icon name; the cast is
@@ -256,7 +252,7 @@ export function ItemToolbar({
         ))}
       </div>
 
-      {optionsOpen && (
+      {open && (
         <div
           ref={popRef}
           className="ed-pop"
@@ -275,7 +271,7 @@ export function ItemToolbar({
               data-icon="true"
               aria-label="Close"
               title="Close"
-              onClick={() => setOptionsOpen(false)}
+              onClick={() => onOpenChange(false)}
             >
               <Icon name="close" size={16} />
             </button>

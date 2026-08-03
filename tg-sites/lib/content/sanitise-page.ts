@@ -19,6 +19,7 @@ import { importScopeClass, scopeImportCss } from '../import/css';
 import { safeUrl, sanitiseHtml, type SanitiseMode } from './sanitise';
 import { safeIconName } from './icons';
 import type { CollectionItem } from './collection';
+import { safeColour } from './schema';
 import type { Block, Page, Region, Section } from './schema';
 
 /**
@@ -115,6 +116,17 @@ function cleanValue(
      */
     case 'icon':
       return safeIconName(value);
+
+    /*
+     * A COLOUR IS CHECKED HERE TOO, not only at render, so the field and the
+     * store cannot disagree about what a colour is. safeColour returns a theme
+     * token or a hex and nothing else; anything it refuses becomes empty, which
+     * the renderer reads as "follow the section". Same belt-and-braces the
+     * imported props get: the render still cleans it, this keeps the junk from
+     * ever being what a future export or migration trusts.
+     */
+    case 'colour':
+      return safeColour(value) ?? '';
 
     default:
       // text, select, toggle and number render as text through React, which

@@ -40,6 +40,17 @@ export type Field =
    * existed keeps drawing what it drew. See lib/content/icons.ts.
    */
   | { kind: 'icon'; key: string; label: string; help?: string }
+  /*
+   * A colour, chosen from the site's own theme or as a plain hex.
+   *
+   * Stores what the text toolbar stores: a `var(--tgs-token)` from the theme or
+   * a `#hex`, both of which safeColour (lib/content/schema.ts) validates on the
+   * way out, so a block colour is never a free-text style attribute. Empty means
+   * "leave it to the theme", which is the honest default for a colour nobody has
+   * overridden. Added 3 Aug 2026 so the icon and the words in a block can be
+   * coloured, which no block field could do before.
+   */
+  | { kind: 'colour'; key: string; label: string; help?: string }
   | { kind: 'select'; key: string; label: string; options: SelectOption[]; help?: string }
   | { kind: 'toggle'; key: string; label: string; help?: string }
   | { kind: 'number'; key: string; label: string; min?: number; max?: number; step?: number; help?: string }
@@ -222,6 +233,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
       { kind: 'textarea', key: 'text', label: 'Quote', rows: 3, max: 500 },
       { kind: 'text', key: 'attribution', label: 'Who said it', max: 80 },
       { kind: 'text', key: 'role', label: 'Their role', max: 80 },
+      { kind: 'colour', key: 'textColour', label: 'Text colour', help: 'Colours the quotation. Blank follows the section.' },
     ],
   },
   {
@@ -295,6 +307,18 @@ export const BLOCKS: readonly BlockDefinition[] = [
         label: 'Alignment',
         options: ALIGN_OPTIONS,
         help: 'Centred puts the icon above the words rather than beside them.',
+      },
+      {
+        kind: 'colour',
+        key: 'iconColour',
+        label: 'Icon colour',
+        help: 'Left blank the icon follows the section, brand by default.',
+      },
+      {
+        kind: 'colour',
+        key: 'textColour',
+        label: 'Text colour',
+        help: 'Colours the title and body together. Blank follows the section.',
       },
     ],
   },
@@ -1100,6 +1124,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
         label: 'Join them up',
         help: 'A line from one step to the next, so they read as a sequence.',
       },
+      { kind: 'colour', key: 'markerColour', label: 'Marker colour', help: 'The numbers or dots. Blank uses your brand colour.' },
+      { kind: 'colour', key: 'textColour', label: 'Text colour', help: 'The step titles and text. Blank follows the section.' },
     ],
   },
 
@@ -1194,6 +1220,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
         label: 'Lines between them',
         help: 'A hairline between each one. Suits four across.',
       },
+      { kind: 'colour', key: 'figureColour', label: 'Number colour', help: 'The big figures. Blank uses your brand colour.' },
+      { kind: 'colour', key: 'textColour', label: 'Label colour', help: 'The words under each figure. Blank follows the section.' },
     ],
   },
 

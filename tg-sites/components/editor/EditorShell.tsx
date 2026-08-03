@@ -335,6 +335,17 @@ export function EditorShell({
   const [insertAt, setInsertAt] = useState<number | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
 
+  /*
+   * Whether the on-canvas options popover is open, held here rather than inside
+   * the toolbar so the right-hand pane can step aside for it. WHY IT HAS TO BE
+   * HERE: the popover and the pane draw the SAME fields, and drawing both live
+   * at once put two copies of every control on the screen, which read as flaky
+   * and duplicated the moment Andy tried one (3 Aug 2026). One editing surface
+   * at a time: while this is true the pane shows a short note and the popover is
+   * where you edit; closed, the pane is the editor as before.
+   */
+  const [optionsOpen, setOptionsOpen] = useState(false);
+
   const [saved, setSaved] = useState<SaveState>('idle');
   const [saveError, setSaveError] = useState<string | null>(null);
   const [status, setStatus] = useState<'draft' | 'published'>(initialStatus);
@@ -780,6 +791,13 @@ export function EditorShell({
   useEffect(() => {
     if (selected && resolve(page, selected) === null) setSelected(null);
   }, [page, selected]);
+
+  // The popover belongs to whatever is selected: a new selection starts with it
+  // closed, so one item's options are never framed as another's, and the pane
+  // comes back for the newly selected item until Edit is pressed again.
+  useEffect(() => {
+    setOptionsOpen(false);
+  }, [selectedKey]);
 
   const select = useCallback((path: Path | null) => {
     setSelected(path);
@@ -1249,6 +1267,7 @@ export function EditorShell({
         isItem={!!itemId}
         itemMeta={itemMeta}
         onItemMeta={setItemMeta}
+        editingOnCanvas={optionsOpen}
       />
 
       {/*
@@ -1274,6 +1293,8 @@ export function EditorShell({
           selectedKey={selectedKey}
           editing={!!editing}
           newId={newId}
+          open={optionsOpen}
+          onOpenChange={setOptionsOpen}
           onAdd={addToItem}
           onCommit={commit}
           options={{

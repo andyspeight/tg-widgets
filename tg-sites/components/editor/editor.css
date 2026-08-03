@@ -926,6 +926,64 @@
   padding: var(--ed-3);
 }
 
+/* ------------------------------------------------------------------ */
+/* Colour field: theme swatches, a hex box, and a Default that clears */
+/* ------------------------------------------------------------------ */
+
+.ed-colour {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-2);
+}
+
+.ed-colour__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ed-colour__chip {
+  position: relative;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ed-muted);
+}
+/* The 26px chip is under the 44px target, so the hit area is grown around it. */
+.ed-colour__chip::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+}
+.ed-colour__chip:hover { border-color: var(--ed-ink); }
+.ed-colour__chip:focus-visible { outline: 2px solid var(--ed-accent); outline-offset: 2px; }
+/* The chosen colour reads as chosen: a brand ring around it. */
+.ed-colour__chip[aria-pressed='true'] {
+  box-shadow: 0 0 0 2px var(--ed-panel), 0 0 0 4px var(--ed-accent);
+}
+/* Default is a plain tile with an x, set apart from the colours. */
+.ed-colour__chip[data-clear='true'] {
+  background: var(--ed-panel);
+  border-style: dashed;
+}
+
+.ed-colour__hex {
+  width: 100%;
+  max-width: 8rem;
+  font: 500 var(--ed-text-sm) / 1 var(--ed-mono, monospace);
+  padding: var(--ed-2);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-sm);
+  background: var(--ed-input-bg, var(--ed-panel));
+  color: var(--ed-ink);
+}
+
 /*
  * An empty column: the dashed area shows where the column is, and the button in
  * the middle is the only thing that adds to it.

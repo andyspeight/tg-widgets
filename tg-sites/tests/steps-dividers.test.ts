@@ -87,8 +87,11 @@ describe('the Steps block', () => {
   it('marks the number as decorative, since the list already says which item it is', () => {
     const source = read('components', 'render', 'blocks.tsx');
     const block = source.slice(source.indexOf('export function StepsBlock'));
-    expect(block.slice(0, block.indexOf('\n}\n')))
-      .toContain('<span className="tgs-steps__marker" aria-hidden="true" />');
+    // aria-hidden on the marker span is the point; the optional marker colour
+    // added a style attribute after it on 3 Aug 2026, so match the two parts
+    // rather than the whole self-closing tag.
+    const marker = block.slice(0, block.indexOf('\n}\n'));
+    expect(marker).toMatch(/<span className="tgs-steps__marker" aria-hidden="true"/);
   });
 
   /*

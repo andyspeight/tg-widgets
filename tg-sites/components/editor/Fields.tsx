@@ -16,8 +16,9 @@
  * contentEditable puts the caret back at the start on every render.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Field } from '../../lib/content/blocks';
+import { COLOUR_SWATCHES } from '../../lib/content/styles';
 import { importContent, importFields } from '../../lib/content/imported';
 import { ImageField } from '../media/ImageField';
 import { IconField } from './IconField';
@@ -123,6 +124,13 @@ export function FieldRenderer({
       return (
         <Wrapper field={field}>
           <IconField value={asString(value)} onChange={onChange} />
+        </Wrapper>
+      );
+
+    case 'colour':
+      return (
+        <Wrapper field={field}>
+          <ColourField value={asString(value)} onChange={onChange} />
         </Wrapper>
       );
 
@@ -289,6 +297,89 @@ function Wrapper({ field, children }: { field: Field; children: React.ReactNode 
       <label className="ed-label">{field.label}</label>
       {children}
       {'help' in field && field.help && <p className="ed-help">{field.help}</p>}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Colour
+// ---------------------------------------------------------------------------
+
+/**
+ * A colour, chosen the same way the text toolbar chooses one: the site's own
+ * theme swatches, a hex box for anything the theme has not got, and a Default
+ * that clears the override so the element goes back to following its section.
+ *
+ * WHAT IT STORES is a `var(--tgs-token)` or a `#hex`, never a free-text style
+ * string, and it stores empty for Default. The renderer runs safeColour over it
+ * regardless, so the field and the sanitiser cannot disagree about what is
+ * allowed: both reach the same short list of colours.
+ *
+ * THE HEX BOX KEEPS A DRAFT of its own so half-typed "#33" is not thrown away
+ * the instant it fails the pattern. Only a complete, valid hex commits; the same
+ * reasoning the number field uses for its clamp-on-blur.
+ */
+function ColourField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: unknown) => void;
+}) {
+  const isHex = /^#[0-9a-fA-F]{3}$|^#[0-9a-fA-F]{6}$/.test(value);
+  const [draft, setDraft] = useState(isHex ? value : '');
+
+  // Reflect a hex set from elsewhere (a preset, an undo) into the box.
+  useEffect(() => {
+    if (isHex) setDraft(value);
+  }, [isHex, value]);
+
+  return (
+    <div className="ed-colour">
+      <div className="ed-colour__row">
+        <button
+          type="button"
+          className="ed-colour__chip"
+          data-clear="true"
+          aria-pressed={!value}
+          title="Default, follow the section"
+          aria-label="Default colour"
+          onClick={() => onChange('')}
+        >
+          <Icon name="close" size={12} />
+        </button>
+
+        {COLOUR_SWATCHES.map((swatch) => (
+          <button
+            key={swatch.value}
+            type="button"
+            className="ed-colour__chip"
+            style={{ background: swatch.value }}
+            aria-pressed={value === swatch.value}
+            title={swatch.label}
+            aria-label={swatch.label}
+            onClick={() => onChange(swatch.value)}
+          />
+        ))}
+      </div>
+
+      <input
+        className="ed-colour__hex"
+        type="text"
+        value={draft}
+        placeholder="#336699"
+        maxLength={7}
+        aria-label="A colour of your own, as a hex code"
+        onChange={(event) => {
+          const next = event.target.value.trim();
+          setDraft(next);
+          if (next === '') {
+            onChange('');
+            return;
+          }
+          if (/^#[0-9a-fA-F]{3}$|^#[0-9a-fA-F]{6}$/.test(next)) onChange(next);
+        }}
+      />
     </div>
   );
 }
