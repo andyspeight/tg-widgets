@@ -1362,6 +1362,28 @@ describe('splitImport', () => {
     expect(candidates.map((c) => c.label)).toEqual(['Escape to Crete', 'Why book with us']);
   });
 
+  /*
+   * A COLOURED BAND IS ONE SECTION. loveholidays' "why book with us" panel is a
+   * blue box holding a heading and a card grid, and splitting it threw the blue
+   * away and left two colourless halves (3 Aug 2026). A wrapper with a real
+   * background is a section boundary now, so the band comes in whole.
+   */
+  it('keeps a coloured band whole rather than splitting it in two', () => {
+    const html =
+      '<div class="band"><h2>Why book with us</h2>' +
+      '<div class="grid"><div class="c"><h3>A</h3><p>1</p></div><div class="c"><h3>B</h3><p>2</p></div></div></div>';
+    const { candidates } = splitImport(html, '.band { background-color: rgb(3, 116, 218); }');
+    expect(candidates).toHaveLength(1);
+    expect(candidates[0].label).toBe('Why book with us');
+  });
+
+  it('still splits a plain wrapper that only has padding, not a background', () => {
+    const html =
+      '<div class="wrap"><section><h2>One</h2></section><section><h2>Two</h2></section></div>';
+    const { candidates } = splitImport(html, '.wrap { padding: 20px; background-color: rgba(0,0,0,0); }');
+    expect(candidates).toHaveLength(2);
+  });
+
   it('makes the words and the pictures editable', () => {
     const [hero] = splitImport(RELUME, RELUME_CSS).candidates;
 

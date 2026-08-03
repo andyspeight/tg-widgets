@@ -83,7 +83,7 @@ function hasWords(node: ChildNode): boolean {
  * while there is exactly one element child, and stopping at anything sectioning,
  * lands on the run of siblings the designer laid out.
  */
-function contentRoot(nodes: Element[]): Element[] {
+function contentRoot(nodes: Element[], css: string): Element[] {
   let level = nodes;
 
   // A bounded walk. A malformed document could otherwise be deep enough to
@@ -93,6 +93,10 @@ function contentRoot(nodes: Element[]): Element[] {
 
     const only = level[0];
     if (SECTIONING.has(only.tagName.toLowerCase())) return level;
+    // A coloured band IS the section. Descending into it would split it into
+    // its children and throw its background away, which is how the loveholidays
+    // "why book with us" panel came in as two colourless halves.
+    if (bandBackground(only, css)) return level;
 
     const children = elementChildren(only);
     if (!children.length) return level;
@@ -101,6 +105,37 @@ function contentRoot(nodes: Element[]): Element[] {
   }
 
   return level;
+}
+
+/**
+ * Whether an element carries a solid background of its own.
+ *
+ * Read from the design's own CSS, matched to the element's classes. A real
+ * colour makes it a designed band rather than a bare wrapper, so it is a section
+ * boundary exactly as a <section> tag is. White and transparent do not count:
+ * they are what a plain wrapper has, and stopping at them would refuse to split
+ * an ordinary page. Only `background-color` is read, so a `background:` shorthand
+ * on a button cannot be mistaken for a band.
+ */
+function bandBackground(element: Element, css: string): boolean {
+  const classAttr = (element.attrs ?? []).find((a) => a.name === 'class')?.value ?? '';
+  for (const raw of classAttr.split(/\s+/)) {
+    const cls = raw.replace(/[^a-z0-9_-]/gi, '');
+    if (!cls) continue;
+    const rule = new RegExp('\\.' + cls + '\\s*\\{([^}]*)\\}', 'i').exec(css);
+    if (!rule) continue;
+    const declared = /background-color:\s*([^;]+)/i.exec(rule[1]);
+    if (!declared) continue;
+
+    const value = declared[1].trim().toLowerCase();
+    const rgba = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([0-9.]+)\s*)?\)/.exec(value);
+    if (rgba && rgba[4] !== undefined && Number.parseFloat(rgba[4]) === 0) continue; // transparent
+    if (value === 'transparent') continue;
+    if (/^#fff(fff)?$/.test(value) || value === 'rgb(255, 255, 255)' || value === 'rgb(255,255,255)') continue;
+
+    if (rgba || /^#[0-9a-f]{3,8}$/.test(value)) return true;
+  }
+  return false;
 }
 
 /**
@@ -151,7 +186,7 @@ export function splitImport(html: string, css: string, options: SplitOptions = {
   if (!cleaned.html.trim()) return { candidates: [], removed: cleaned.removed };
 
   const fragment = parseFragment(cleaned.html);
-  const top = contentRoot(elementChildren(fragment));
+  const top = contentRoot(elementChildren(fragment), css);
 
   const usable = top.filter(hasWords);
   const chosen = (usable.length ? usable : top).slice(0, maxSections);
