@@ -706,6 +706,268 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
     section: { tone: 'dark', paddingY: 128, width: 'full' },
   },
 
+  /*
+   * A FOURTH SET, 3 Aug 2026, working through the design grid in full. Andy
+   * counted five or six layouts in each screenshot and wanted them all, filed
+   * under Hero. These are the ones the earlier sets had not built yet: a
+   * statement on a brand band, a title with the picture below, a picture with a
+   * bar beneath, a tall portrait beside the words, an editorial pair of pictures,
+   * a centred title over two, a photograph with the words raised in a card, one
+   * big title over an image, and a title with two columns of text. Pictures start
+   * empty here too, ready for the imagery pass to fill from the client's media.
+   */
+  {
+    id: 'hero-brand-statement',
+    category: 'hero',
+    label: 'A statement on a brand band',
+    description: 'The name or the promise set large on a band of your brand colour. Bold and plain.',
+    rows: [
+      {
+        widths: [1, 1],
+        gap: 48,
+        align: 'centre',
+        columns: [
+          [{ type: 'heading', props: { html: 'Brand name', level: 'h2', style: 'h1' } }],
+          [
+            {
+              type: 'text',
+              props: { html: '<p>A line or two on who you are, set beside the name. Keep it short and sure.</p>', size: 'l' },
+            },
+            {
+              type: 'button-group',
+              props: { buttons: [{ label: 'Start here', href: '', variant: 'secondary' }] },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { tone: 'accent', paddingY: 112, width: 'full' },
+  },
+
+  {
+    id: 'hero-header-image-below',
+    category: 'hero',
+    label: 'Title and line, then a wide picture',
+    description: 'The heading with a supporting line beside it, then a full-width photograph below.',
+    rows: [
+      {
+        widths: [1, 1],
+        gap: 48,
+        align: 'bottom',
+        columns: [
+          [{ type: 'heading', props: { html: 'Write the opening title here', level: 'h2', style: 'h1' } }],
+          [
+            {
+              type: 'text',
+              props: { html: '<p>A supporting line or two, then a wide picture underneath to set the scene.</p>', size: 'l' },
+            },
+            {
+              type: 'button-group',
+              props: { buttons: [{ label: 'Learn more', href: '', variant: 'primary' }] },
+            },
+          ],
+        ],
+      },
+      {
+        widths: [1],
+        columns: [[{ type: 'image', props: { alt: '', ratio: '16/9', radius: 'md' } }]],
+      },
+    ],
+    section: { paddingY: 80 },
+  },
+
+  {
+    id: 'hero-image-caption-bar',
+    category: 'hero',
+    label: 'Picture with a title bar under it',
+    description: 'A wide photograph with the title and a button on a line beneath. Clean and modern.',
+    rows: [
+      {
+        widths: [1],
+        columns: [[{ type: 'image', props: { alt: '', ratio: '16/9', radius: 'md' } }]],
+      },
+      {
+        widths: [1, 1],
+        gap: 24,
+        align: 'centre',
+        columns: [
+          [{ type: 'heading', props: { html: 'Add your title here', level: 'h2', style: 'h2' } }],
+          [
+            {
+              type: 'button-group',
+              props: { align: 'right', buttons: [{ label: 'Join now', href: '', variant: 'primary' }] },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { paddingY: 64 },
+  },
+
+  {
+    id: 'hero-tall-image',
+    category: 'hero',
+    label: 'Words left, a tall picture right',
+    description: 'A portrait photograph beside the words, for a person or one striking shot.',
+    rows: [
+      {
+        widths: [3, 2],
+        gap: 48,
+        align: 'centre',
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Write down an introduction title here', level: 'h2', style: 'h1' } },
+            {
+              type: 'text',
+              props: { html: '<p>A sentence on what you do, beside a tall portrait picture.</p>', size: 'l' },
+            },
+            {
+              type: 'button-group',
+              props: { buttons: [{ label: 'Start planning', href: '', variant: 'primary' }] },
+            },
+          ],
+          [{ type: 'image', props: { alt: '', ratio: '3/4', radius: 'md' } }],
+        ],
+      },
+    ],
+    section: { paddingY: 80 },
+  },
+
+  {
+    id: 'hero-text-two-images',
+    category: 'hero',
+    label: 'A few words, then two pictures',
+    description: 'A short intro and a button, a pair of images, and the title underneath. Editorial.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            {
+              type: 'text',
+              props: { html: '<p>A short opening line, then two pictures and the title below.</p>', size: 'l' },
+            },
+            {
+              type: 'button-group',
+              props: { buttons: [{ label: 'Learn more', href: '', variant: 'ghost' }] },
+            },
+          ],
+        ],
+      },
+      {
+        widths: [1, 1],
+        gap: 24,
+        columns: [
+          [{ type: 'image', props: { alt: '', ratio: '4/3', radius: 'md' } }],
+          [{ type: 'image', props: { alt: '', ratio: '4/3', radius: 'md' } }],
+        ],
+      },
+      {
+        widths: [1],
+        columns: [[{ type: 'heading', props: { html: 'An introduction title', level: 'h2', style: 'h1' } }]],
+      },
+    ],
+    section: { paddingY: 72 },
+  },
+
+  {
+    id: 'hero-centred-two-images',
+    category: 'hero',
+    label: 'Centred title, then two pictures',
+    description: 'A centred opening line with a button, then two images side by side below it.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Add your medium length title here', level: 'h2', style: 'h1', ...CENTRED } },
+            {
+              type: 'button-group',
+              props: { align: 'centre', buttons: [{ label: 'Learn more', href: '', variant: 'primary' }] },
+            },
+          ],
+        ],
+      },
+      {
+        widths: [1, 1],
+        gap: 24,
+        columns: [
+          [{ type: 'image', props: { alt: '', ratio: '4/3', radius: 'md' } }],
+          [{ type: 'image', props: { alt: '', ratio: '4/3', radius: 'md' } }],
+        ],
+      },
+    ],
+    section: { paddingY: 72 },
+  },
+
+  {
+    id: 'hero-card-beside-image',
+    category: 'hero',
+    label: 'Picture, with the words in a card',
+    description: 'A photograph on one side and the opening words raised in a card on the other.',
+    rows: [
+      {
+        widths: [1, 1],
+        gap: 0,
+        align: 'centre',
+        columns: [
+          [{ type: 'image', props: { alt: '', ratio: '4/3', radius: 'md' } }],
+          [
+            { type: 'heading', props: { html: 'Add your medium length title here', level: 'h2', style: 'h2' } },
+            { type: 'text', props: { html: '<p>A line or two, raised in a card beside the picture.</p>' } },
+            {
+              type: 'button-group',
+              props: { buttons: [{ label: 'Learn more', href: '', variant: 'primary' }] },
+            },
+          ],
+        ],
+        columnBox: [undefined, CARD_ROOMY],
+      },
+    ],
+    section: { paddingY: 80 },
+  },
+
+  {
+    id: 'hero-big-title',
+    category: 'hero',
+    label: 'One big title over a picture',
+    description: 'A large, plain title with a wide photograph beneath. Loud and confident.',
+    rows: [
+      {
+        widths: [1],
+        columns: [[{ type: 'heading', props: { html: 'This is a title', level: 'h2', style: 'h1' } }]],
+      },
+      {
+        widths: [1],
+        columns: [[{ type: 'image', props: { alt: '', ratio: '16/9', radius: 'md' } }]],
+      },
+    ],
+    section: { paddingY: 72 },
+  },
+
+  {
+    id: 'hero-title-two-paragraphs',
+    category: 'hero',
+    label: 'Title with two columns of text, then a picture',
+    description: 'A heading beside two short paragraphs, with a wide image below. For saying a bit more.',
+    rows: [
+      {
+        widths: [1, 1, 1],
+        gap: 32,
+        columns: [
+          [{ type: 'heading', props: { html: 'Write down an intro title', level: 'h2', style: 'h1' } }],
+          [{ type: 'text', props: { html: '<p>The first short paragraph, on one side of the title.</p>' } }],
+          [{ type: 'text', props: { html: '<p>The second, so two ideas sit side by side rather than stacked.</p>' } }],
+        ],
+      },
+      {
+        widths: [1],
+        columns: [[{ type: 'image', props: { alt: '', ratio: '16/9', radius: 'md' } }]],
+      },
+    ],
+    section: { paddingY: 80 },
+  },
+
   {
     id: 'blank-opener',
     category: 'blank',
