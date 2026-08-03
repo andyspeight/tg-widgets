@@ -977,6 +977,24 @@ function renderButton(button: Props, key: number): ReactElement | null {
   const size = oneOf(button, 'size', ['s', 'm', 'l'] as const, 'm');
   const newTab = bool(button, 'newTab');
 
+  /*
+   * Optional colours over the top of the style. `colour` fills the button and
+   * matches its edge to the fill so an outlined style does not keep a border of
+   * a different colour; `textColour` is the label. Both validated on the way
+   * out, so a button colour is never a free-text style attribute. Blank leaves
+   * the variant's own colours alone, which is the default a button has always
+   * had. Inline beats the class rules, hover included, so a coloured button
+   * simply keeps its colour rather than flicking to the theme's on hover.
+   */
+  const fill = safeColour(button.colour);
+  const textColour = safeColour(button.textColour);
+  const style: CSSProperties = {};
+  if (fill) {
+    style.background = fill;
+    style.borderColor = fill;
+  }
+  if (textColour) style.color = textColour;
+
   return (
     <a
       key={key}
@@ -984,6 +1002,7 @@ function renderButton(button: Props, key: number): ReactElement | null {
       data-variant={variant}
       data-size={size}
       href={href}
+      style={Object.keys(style).length ? style : undefined}
       {...(newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
     >
       {label}

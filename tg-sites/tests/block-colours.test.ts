@@ -27,6 +27,14 @@ function read(...parts: string[]): string {
 const fieldKinds = (type: string) =>
   (blockDefinition(type)?.fields ?? []).map((field) => `${field.key}:${field.kind}`);
 
+/** The kinds of a repeater's per-item fields, e.g. the buttons in a group. */
+const repeaterItemKinds = (type: string, key: string) => {
+  const field = (blockDefinition(type)?.fields ?? []).find((f) => f.key === key);
+  return field && field.kind === 'repeater'
+    ? field.fields.map((f) => `${f.key}:${f.kind}`)
+    : [];
+};
+
 describe('the colour-bearing blocks offer the colours', () => {
   it('gives Icon and text both an icon and a text colour', () => {
     expect(fieldKinds('icon-item')).toEqual(
@@ -47,6 +55,20 @@ describe('the colour-bearing blocks offer the colours', () => {
   it('gives the key numbers a figure colour and a label colour', () => {
     expect(fieldKinds('stats')).toEqual(
       expect.arrayContaining(['figureColour:colour', 'textColour:colour']),
+    );
+  });
+
+  it('gives a button a colour, a label colour and a size', () => {
+    expect(fieldKinds('button')).toEqual(
+      expect.arrayContaining(['colour:colour', 'textColour:colour', 'size:select']),
+    );
+  });
+
+  it('gives a button INSIDE a group the same colour and size, not just the lone one', () => {
+    // The hero uses a button group, so a per-button size and colour there is the
+    // whole point of Andy's report: the group's buttons could be neither.
+    expect(repeaterItemKinds('button-group', 'buttons')).toEqual(
+      expect.arrayContaining(['size:select', 'colour:colour', 'textColour:colour']),
     );
   });
 });
@@ -72,6 +94,20 @@ describe('a colour is validated on the way into the store', () => {
     const out = sanitiseBlock(block({ icon: 'star', iconColour: 'var(--tgs-radius-lg)' }));
     expect(out.props.iconColour).toBe('');
   });
+
+  it('validates a button colour, lone and inside a group', () => {
+    const lone = sanitiseBlock({ id: 'b', type: 'button', props: { label: 'x', colour: 'url(javascript:1)' } } as Block);
+    expect(lone.props.colour).toBe('');
+
+    const grouped = sanitiseBlock({
+      id: 'g',
+      type: 'button-group',
+      props: { buttons: [{ label: 'x', colour: 'var(--tgs-accent)' }, { label: 'y', colour: 'url(bad)' }] },
+    } as Block);
+    const buttons = grouped.props.buttons as Array<Record<string, unknown>>;
+    expect(buttons[0].colour).toBe('var(--tgs-accent)');
+    expect(buttons[1].colour).toBe('');
+  });
 });
 
 describe('the renderer puts each colour on the right element', () => {
@@ -90,6 +126,15 @@ describe('the renderer puts each colour on the right element', () => {
 
   it('fills a dot marker as well as bordering it', () => {
     expect(blocks).toMatch(/background: marker === 'dot' \? markerColour/);
+  });
+
+  it('fills a button and matches its edge, and colours its label', () => {
+    expect(blocks).toMatch(/safeColour\(button\.colour\)/);
+    expect(blocks).toMatch(/safeColour\(button\.textColour\)/);
+    // The fill sets both the background and the border, so an outlined style is
+    // not left with an edge of the wrong colour.
+    expect(blocks).toMatch(/style\.background = fill/);
+    expect(blocks).toMatch(/style\.borderColor = fill/);
   });
 });
 
