@@ -103,6 +103,30 @@ ${slice.html}
 </body></html>`;
   }
 
+  // Put the captured section in the outbox for Travelgenix Sites. No network:
+  // the bridge content script on the Sites domain reads the outbox and hands it
+  // to an open editor. Capped so it cannot grow without bound.
+  async function sendToSites(btn) {
+    if (!lastSlice) { showResult("Capture a component first.", "error"); return; }
+    const item = {
+      html: lastSlice.html,
+      css: lastSlice.css,
+      title: (location.hostname + (document.title ? " — " + document.title : "")).slice(0, 120),
+      ts: Date.now(),
+    };
+    try {
+      const { tgsOutbox } = await chrome.storage.local.get("tgsOutbox");
+      const outbox = Array.isArray(tgsOutbox) ? tgsOutbox : [];
+      outbox.push(item);
+      while (outbox.length > 20) outbox.shift();
+      await chrome.storage.local.set({ tgsOutbox: outbox });
+      flash(btn, "Sent");
+      showResult("Sent to Travelgenix Sites. Open the Import tab there to add it.", "ok");
+    } catch (e) {
+      showResult("Could not send: " + (e.message || e), "error");
+    }
+  }
+
   async function copy(text, btn) {
     try {
       await navigator.clipboard.writeText(text);
@@ -136,11 +160,13 @@ ${slice.html}
     }
     actions.innerHTML = "";
     actions.appendChild(button("Make Duda widget", "primary", emit));
-    // Copies the { html, css } bundle Travelgenix Sites reads. Paste it into the
-    // Import tab there and it splits itself into an editable section. See
-    // tg-sites/lib/import/slice.ts (readSlice) for the shape.
-    actions.appendChild(button("Copy for Travelgenix Sites", "primary", (b) =>
-      copy(JSON.stringify({ html: lastSlice.html, css: lastSlice.css }), b)));
+    // Puts the section in the outbox. The bridge content script hands it to an
+    // open Travelgenix Sites editor, where it appears in the Import tab for a
+    // one-click add, no copy-paste. See tg-slicer/bridge.js and
+    // tg-sites/components/editor/ImportPanel.tsx.
+    actions.appendChild(button("Send to Travelgenix Sites", "primary", sendToSites));
+    // Copy stays as a fallback for when the editor is not open, or for a paste
+    // into the Import box by hand.
     actions.appendChild(button("Copy HTML+CSS", "", (b) => copy(selfContainedHTML(lastSlice), b)));
     actions.appendChild(button("Copy slice JSON", "", (b) => copy(JSON.stringify(lastSlice, null, 2), b)));
     actions.appendChild(button("New", "", reset));

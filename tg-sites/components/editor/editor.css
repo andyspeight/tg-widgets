@@ -3588,6 +3588,37 @@
   color: var(--ed-ink-2);
 }
 
+/* Sections the Slicer sent, listed for a one-click add. */
+.ed-import__slicer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-2);
+  padding: var(--ed-3);
+  border: 1px solid var(--ed-accent);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-accent-soft, rgba(29, 78, 216, 0.06));
+}
+.ed-import__slicer h4 {
+  margin: 0;
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink);
+}
+.ed-import__slicer ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.ed-import__slicer li {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-3);
+  justify-content: space-between;
+}
+.ed-import__slicer-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink);
+}
+
 .ed-import__error {
   margin: 0;
   padding: 10px 12px;

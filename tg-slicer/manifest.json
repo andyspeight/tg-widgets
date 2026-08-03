@@ -1,10 +1,21 @@
 {
   "manifest_version": 3,
   "name": "TG Slicer",
-  "version": "0.3.0",
-  "description": "Point at any component on any website, capture it clean, and emit it as a Travelgenix Duda widget.",
+  "version": "0.4.0",
+  "description": "Point at any component on any website, capture it clean, then send it to Travelgenix Sites or emit it as a Duda widget.",
   "action": { "default_popup": "popup.html", "default_title": "TG Slicer" },
   "background": { "service_worker": "background.js" },
   "permissions": ["activeTab", "scripting", "storage", "clipboardWrite", "tabs"],
-  "host_permissions": ["<all_urls>"]
+  "host_permissions": ["<all_urls>"],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://tg-sites.vercel.app/*",
+        "http://localhost/*",
+        "http://127.0.0.1/*"
+      ],
+      "js": ["bridge.js"],
+      "run_at": "document_idle"
+    }
+  ]
 }

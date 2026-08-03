@@ -19,7 +19,7 @@
  * lines and turns a mystery into a decision.
  */
 
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 
 import { previewImportAction, type ImportPreview } from '../../app/actions/import';
 import { readSlice } from '../../lib/import/slice';
@@ -31,6 +31,20 @@ const PLACEHOLDER_HTML =
 const PLACEHOLDER_CSS =
   'Paste the stylesheet here, if you have one.\n\nWithout it the design keeps its structure but not its styling.';
 
+/**
+ * A section the Slicer sent, waiting in the editor to be added.
+ *
+ * `ts` is the stamp the extension put on it, and it is how a section is told
+ * apart from the others and reported back as used once it lands, so the same
+ * capture is not offered twice.
+ */
+interface IncomingSlice {
+  ts: number;
+  title: string;
+  html: string;
+  css: string;
+}
+
 export function ImportPanel({ onAdd }: { onAdd: (sections: Section[]) => void }) {
   const [html, setHtml] = useState('');
   const [css, setCss] = useState('');
@@ -38,6 +52,64 @@ export function ImportPanel({ onAdd }: { onAdd: (sections: Section[]) => void })
   const [chosen, setChosen] = useState<Set<number>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [incoming, setIncoming] = useState<IncomingSlice[]>([]);
+
+  /*
+   * SECTIONS SENT STRAIGHT FROM THE SLICER, with no copy-paste.
+   *
+   * The Slicer's bridge content script runs on this domain and hands whatever is
+   * waiting to the page with postMessage; when this panel opens it also asks the
+   * bridge to re-send, so a capture made before the tab was here still turns up.
+   * Nothing arriving this way is trusted more than a paste: it goes through the
+   * SAME previewImportAction, which sanitises it. The one check here is shape, so
+   * a stray message on the page cannot make the list throw. See tg-slicer/bridge.js.
+   */
+  useEffect(() => {
+    const onMessage = (event: MessageEvent) => {
+      if (event.source !== window) return;
+      const data = event.data as { source?: unknown; slices?: unknown } | null;
+      if (!data || data.source !== 'tgs-slicer' || !Array.isArray(data.slices)) return;
+
+      const clean: IncomingSlice[] = [];
+      for (const raw of data.slices as unknown[]) {
+        const slice = raw as Record<string, unknown>;
+        if (typeof slice.html !== 'string' || !slice.html.trim()) continue;
+        clean.push({
+          ts: typeof slice.ts === 'number' ? slice.ts : Date.now() + clean.length,
+          title: typeof slice.title === 'string' && slice.title ? slice.title : 'Captured section',
+          html: slice.html,
+          css: typeof slice.css === 'string' ? slice.css : '',
+        });
+      }
+      if (clean.length) {
+        setIncoming((current) => {
+          const seen = new Set(current.map((entry) => entry.ts));
+          return [...current, ...clean.filter((entry) => !seen.has(entry.ts))];
+        });
+      }
+    };
+
+    window.addEventListener('message', onMessage);
+    // Ask the bridge for anything already waiting.
+    window.postMessage({ source: 'tgs-sites', request: true }, window.location.origin);
+    return () => window.removeEventListener('message', onMessage);
+  }, []);
+
+  const addSlice = (slice: IncomingSlice) => {
+    setError(null);
+    startTransition(async () => {
+      const result = await previewImportAction({ html: slice.html, css: slice.css });
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      onAdd(result.data.sections.map((entry) => entry.section));
+      // Tell the bridge it is used, so it is cleared from the outbox and never
+      // offered again, then drop it from the list here.
+      window.postMessage({ source: 'tgs-sites', consumed: [slice.ts] }, window.location.origin);
+      setIncoming((current) => current.filter((entry) => entry.ts !== slice.ts));
+    });
+  };
 
   const read = () => {
     setError(null);
@@ -146,6 +218,31 @@ export function ImportPanel({ onAdd }: { onAdd: (sections: Section[]) => void })
           </p>
         </div>
       </div>
+
+      {incoming.length > 0 && (
+        <div className="ed-import__slicer">
+          <h4>From the Slicer</h4>
+          <ul>
+            {incoming.map((slice) => (
+              <li key={slice.ts}>
+                <span className="ed-import__slicer-name" title={slice.title}>{slice.title}</span>
+                <button
+                  type="button"
+                  className="ed-btn"
+                  data-variant="primary"
+                  disabled={pending}
+                  onClick={() => addSlice(slice)}
+                >
+                  Add
+                </button>
+              </li>
+            ))}
+          </ul>
+          <p className="ed-import__note">
+            Captured with the Slicer on another site. Added straight in, no paste.
+          </p>
+        </div>
+      )}
 
       <label className="ed-import__field">
         <span>HTML</span>
