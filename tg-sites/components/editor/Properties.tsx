@@ -228,45 +228,95 @@ export function Properties({
           </p>
         )}
 
-        {selected?.kind === 'page'
-          && (region ? (
-            <RegionFields
-              region={region}
-              flags={regionFlags ?? { sticky: false, overlay: false }}
-              onChange={onRegionFlags}
-            />
-          ) : isItem ? (
-            <ItemFields
-              meta={itemMeta ?? { title: '', summary: '', image: '', alt: '', date: '', slug: '' }}
-              onChange={onItemMeta}
-            />
-          ) : (
-            <PageFields page={page} onCommit={onCommit} />
-          ))}
-
-        {selected?.kind === 'section' && (
-          <SectionFields page={page} index={selected.section} onCommit={onCommit} />
-        )}
-
-        {selected?.kind === 'row' && (
-          <RowFields page={page} section={selected.section} row={selected.row} onCommit={onCommit} />
-        )}
-
-        {selected?.kind === 'column' && (
-          <ColumnFields
-            page={page}
-            section={selected.section}
-            row={selected.row}
-            column={selected.column}
-            onCommit={onCommit}
-          />
-        )}
-
-        {selected?.kind === 'block' && (
-          <BlockFields path={selected} page={page} isStaff={isStaff} onCommit={onCommit} />
-        )}
+        <ItemOptions
+          page={page}
+          selected={selected}
+          isStaff={isStaff}
+          onCommit={onCommit}
+          region={region}
+          regionFlags={regionFlags}
+          onRegionFlags={onRegionFlags}
+          isItem={isItem}
+          itemMeta={itemMeta}
+          onItemMeta={onItemMeta}
+        />
       </div>
     </aside>
+  );
+}
+
+/**
+ * The fields for whatever is selected, and nothing around them.
+ *
+ * PULLED OUT OF THE PANE ON 2 AUG 2026 so the on-canvas toolbar can show the
+ * same editors in a popover next to the item. Both surfaces render this, so a
+ * new field or a fixed one appears in both at once and the two cannot drift. It
+ * is deliberately just the body: no panel chrome, no heading, no breadcrumb,
+ * because the popover frames it differently from the pane.
+ */
+export function ItemOptions({
+  page,
+  selected,
+  isStaff,
+  onCommit,
+  region = null,
+  regionFlags,
+  onRegionFlags,
+  isItem = false,
+  itemMeta,
+  onItemMeta,
+}: {
+  page: Page;
+  selected: Path | null;
+  isStaff: boolean;
+  onCommit: Props['onCommit'];
+  region?: RegionName | null;
+  regionFlags?: Props['regionFlags'];
+  onRegionFlags?: Props['onRegionFlags'];
+  isItem?: boolean;
+  itemMeta?: Props['itemMeta'];
+  onItemMeta?: Props['onItemMeta'];
+}) {
+  return (
+    <>
+      {selected?.kind === 'page'
+        && (region ? (
+          <RegionFields
+            region={region}
+            flags={regionFlags ?? { sticky: false, overlay: false }}
+            onChange={onRegionFlags}
+          />
+        ) : isItem ? (
+          <ItemFields
+            meta={itemMeta ?? { title: '', summary: '', image: '', alt: '', date: '', slug: '' }}
+            onChange={onItemMeta}
+          />
+        ) : (
+          <PageFields page={page} onCommit={onCommit} />
+        ))}
+
+      {selected?.kind === 'section' && (
+        <SectionFields page={page} index={selected.section} onCommit={onCommit} />
+      )}
+
+      {selected?.kind === 'row' && (
+        <RowFields page={page} section={selected.section} row={selected.row} onCommit={onCommit} />
+      )}
+
+      {selected?.kind === 'column' && (
+        <ColumnFields
+          page={page}
+          section={selected.section}
+          row={selected.row}
+          column={selected.column}
+          onCommit={onCommit}
+        />
+      )}
+
+      {selected?.kind === 'block' && (
+        <BlockFields path={selected} page={page} isStaff={isStaff} onCommit={onCommit} />
+      )}
+    </>
   );
 }
 

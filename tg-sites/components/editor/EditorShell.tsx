@@ -27,11 +27,12 @@ import { pageAsRegion, REGION_TITLES } from '../../lib/content/region-page';
 import { pageAsItem, type ItemMeta } from '../../lib/content/collection-page';
 import { createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
 import { buildPresetSection } from '../../lib/content/presets';
-import { addBlock, parsePathKey, type Path, pathKey, resolve, updateBlockProps } from '../../lib/content/tree';
+import { addBlock, addColumn, parsePathKey, type Path, pathKey, resolve, updateBlockProps } from '../../lib/content/tree';
 import { Outline } from './Outline';
 import { Canvas } from './Canvas';
 import { Properties } from './Properties';
 import { BlockPicker } from './BlockPicker';
+import { ItemToolbar } from './ItemToolbar';
 import { SectionPicker } from './SectionPicker';
 import { TextToolbar } from './TextToolbar';
 import { Icon, type IconName } from './Icon';
@@ -785,6 +786,31 @@ export function EditorShell({
     if (path && path.kind !== 'page') setMobilePane('props');
   }, []);
 
+  /*
+   * The + on the contextual toolbar. Each container adds the thing it holds: a
+   * section adds a sibling section (through the same picker the seam buttons
+   * use), a row adds a column, and a column or a block adds a block through the
+   * block picker. So the + always does the obvious next thing for whatever was
+   * clicked, rather than one meaning for all four.
+   */
+  const addToItem = useCallback(() => {
+    if (!selected) return;
+    switch (selected.kind) {
+      case 'section':
+        setInsertAt(selected.section + 1);
+        return;
+      case 'row':
+        commit((current) => addColumn(current, selected.section, selected.row));
+        return;
+      case 'column':
+      case 'block':
+        setPicker({ section: selected.section, row: selected.row, column: selected.column });
+        return;
+      default:
+        return;
+    }
+  }, [selected, commit]);
+
   // ---------------------------------------------------------------------
   // Import and export
   // ---------------------------------------------------------------------
@@ -1226,7 +1252,44 @@ export function EditorShell({
       />
 
       {/*
-        THE TOOLBAR LIVES HERE NOW, not inside the properties pane's field.
+        THE CONTEXTUAL TOOLBAR, on the item you clicked.
+
+        Shown for any canvas item (section, row, column, block) that is
+        selected, and hidden while a modal is up so it does not float over a
+        picker. The page root is reached through the breadcrumb rather than by
+        clicking the canvas, so it never gets one. `editing` is passed through
+        so the pill drops its own Edit button while the words are being typed,
+        leaving the formatting toolbar to do that job.
+      */}
+      {selected
+        && selected.kind !== 'page'
+        && selectedKey
+        && insertAt === null
+        && picker === null
+        && !historyOpen && (
+        <ItemToolbar
+          key={selectedKey}
+          page={page}
+          selected={selected}
+          selectedKey={selectedKey}
+          editing={!!editing}
+          newId={newId}
+          onAdd={addToItem}
+          onCommit={commit}
+          options={{
+            isStaff,
+            region,
+            regionFlags,
+            onRegionFlags: setRegionFlags,
+            isItem: !!itemId,
+            itemMeta,
+            onItemMeta: setItemMeta,
+          }}
+        />
+      )}
+
+      {/*
+        THE FORMATTING TOOLBAR, not inside the properties pane's field.
         It formats whatever is selected on the CANVAS, which is where the words
         are. Mounted while a paragraph OR a heading is being edited, which since
         31 Jul 2026 is both of the blocks you can type into in place.

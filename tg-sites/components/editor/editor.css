@@ -822,20 +822,108 @@
 }
 
 .ed-canvas-frame [data-path] { position: relative; }
-.ed-canvas-frame [data-path].is-selected::after {
-  content: attr(data-kind);
-  position: absolute;
-  top: 0;
-  left: 0;
-  transform: translateY(-100%);
-  background: var(--ed-select);
-  color: #fff;
-  font: 600 var(--ed-text-xs) / 1.7 var(--ed-font);
-  letter-spacing: 0.04em;
+
+/*
+ * THE LABEL TAB IS THE TOOLBAR'S NOW, not a CSS ::after on the element.
+ *
+ * It used to be `content: attr(data-kind)` drawn on the selected element, which
+ * gave a tab reading "Section" or "Block". Since 2 Aug 2026 the contextual
+ * toolbar (.ed-bar) carries the label instead, so the two do not stack, and the
+ * toolbar can say "Text" or "Image" where the ::after could only say "Block".
+ * The ring below is what marks the selection now.
+ */
+
+/* ------------------------------------------------------------------ */
+/* The contextual toolbar, on the item you clicked                    */
+/* ------------------------------------------------------------------ */
+
+/*
+ * A fixed pill, placed from the selected element's rect by ItemToolbar. Above
+ * the element by default; [data-flip] drops it just below the top edge when the
+ * element is against the top of the canvas. It scrolls with the page because
+ * the component re-measures on the canvas's scroll.
+ */
+.ed-bar {
+  position: fixed;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  background: var(--ed-ink);
+  border-radius: var(--ed-r-md);
+  box-shadow: var(--ed-shadow-lg);
+  transform: translateY(calc(-100% - 6px));
+}
+.ed-bar[data-flip='true'] { transform: translateY(6px); }
+
+.ed-bar__label {
   padding: 0 var(--ed-2);
-  border-radius: var(--ed-r-sm) var(--ed-r-sm) 0 0;
-  pointer-events: none;
-  z-index: 5;
+  color: var(--ed-panel);
+  font: 600 var(--ed-text-xs) / 1 var(--ed-font);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+.ed-bar__label + .ed-bar__btn { margin-left: 2px; }
+
+.ed-bar__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: var(--ed-r-sm);
+  background: transparent;
+  color: var(--ed-panel);
+  cursor: pointer;
+  transition: background-color 120ms ease-out, color 120ms ease-out;
+}
+.ed-bar__btn:hover { background: rgba(255, 255, 255, 0.16); }
+.ed-bar__btn:focus-visible {
+  outline: 2px solid var(--ed-accent);
+  outline-offset: 1px;
+}
+/* The open Edit button, so it reads as a toggle while the popover is up. */
+.ed-bar__btn[data-on='true'] { background: var(--ed-accent); color: var(--ed-on-brand); }
+/* Delete apart from the rest, and only loud on hover. */
+.ed-bar__btn[data-danger='true']:hover { background: var(--ed-danger); color: #fff; }
+
+/*
+ * The options popover: the same fields the pane shows, next to the item.
+ *
+ * Anchored to the element's top-left and growing down, capped so a long field
+ * list scrolls inside it rather than running off the canvas. The pane still
+ * carries these too this round, so nothing is lost if the popover is in the way.
+ */
+.ed-pop {
+  position: fixed;
+  z-index: 39;
+  width: 320px;
+  max-width: calc(100vw - var(--ed-4));
+  /* Placed and clamped by ItemToolbar; the cap keeps a long field list
+     scrolling inside rather than pushing the popover past the canvas. */
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--ed-panel);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-lg);
+  box-shadow: var(--ed-shadow-xl);
+}
+
+.ed-pop__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ed-2) var(--ed-2) var(--ed-2) var(--ed-3);
+  border-bottom: 1px solid var(--ed-line);
+  font: 600 var(--ed-text-sm) / 1 var(--ed-font);
+  color: var(--ed-ink);
+}
+.ed-pop__body {
+  overflow: auto;
+  padding: var(--ed-3);
 }
 
 /*
