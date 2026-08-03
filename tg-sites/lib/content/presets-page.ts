@@ -540,6 +540,172 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
     section: { paddingY: 80 },
   },
 
+  /*
+   * A THIRD SET, 3 Aug 2026, built from the design grid Andy sent. These are the
+   * shapes in it the twelve above did not already cover: a pair of pictures over
+   * the words, the picture leading and the words underneath, a message held
+   * between two pictures, a big name over a strip of images, and words set to one
+   * side of a full photograph. The near-duplicates of what already existed were
+   * left out rather than added twice.
+   */
+  {
+    id: 'hero-two-up',
+    category: 'hero',
+    label: 'Two pictures, then the title',
+    description: 'A pair of images across the top with the opening line beneath. Bold and visual.',
+    rows: [
+      {
+        widths: [1, 1],
+        gap: 24,
+        columns: [
+          [{ type: 'image', props: { alt: '', ratio: '4/3', radius: 'md' } }],
+          [{ type: 'image', props: { alt: '', ratio: '4/3', radius: 'md' } }],
+        ],
+      },
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Two of our favourite places to start', level: 'h2', style: 'h1' } },
+            {
+              type: 'button-group',
+              props: { buttons: [{ label: 'See the collection', href: '', variant: 'primary' }] },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { paddingY: 72 },
+  },
+
+  {
+    id: 'hero-image-top',
+    category: 'hero',
+    label: 'Picture first, words underneath',
+    description: 'Lead with the photograph, then the title and a line below it. For a strong image.',
+    rows: [
+      {
+        widths: [1],
+        columns: [[{ type: 'image', props: { alt: '', ratio: '16/9', radius: 'md' } }]],
+      },
+      {
+        widths: [1, 1],
+        gap: 48,
+        align: 'centre',
+        columns: [
+          [{ type: 'heading', props: { html: 'A place worth the journey', level: 'h2', style: 'h1' } }],
+          [
+            {
+              type: 'text',
+              props: {
+                html: '<p>Two lines under the picture, on who this is for and what to do next.</p>',
+                size: 'l',
+              },
+            },
+            {
+              type: 'button-group',
+              props: { buttons: [{ label: 'Start planning', href: '', variant: 'primary' }] },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { paddingY: 80 },
+  },
+
+  {
+    id: 'hero-three-up',
+    category: 'hero',
+    label: 'A message between two pictures',
+    description: 'The opening words in the middle with a photograph either side. Balanced and calm.',
+    rows: [
+      {
+        widths: [1, 1, 1],
+        gap: 24,
+        align: 'centre',
+        columns: [
+          [{ type: 'image', props: { alt: '', ratio: '3/4', radius: 'md' } }],
+          [
+            { type: 'heading', props: { html: 'A short, clear invitation', level: 'h2', style: 'h2', ...CENTRED } },
+            {
+              type: 'text',
+              props: { html: '<p>A line or two in the middle, with a picture either side.</p>', ...CENTRED },
+            },
+            {
+              type: 'button-group',
+              props: { align: 'centre', buttons: [{ label: 'Learn more', href: '', variant: 'primary' }] },
+            },
+          ],
+          [{ type: 'image', props: { alt: '', ratio: '3/4', radius: 'md' } }],
+        ],
+        columnBox: [undefined, PANEL, undefined],
+      },
+    ],
+    section: { paddingY: 80 },
+  },
+
+  {
+    id: 'hero-brand-strip',
+    category: 'hero',
+    label: 'Big name over a strip of pictures',
+    description: 'A dark opener with the name large and centred, then a row of images below.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Brand name', level: 'h2', style: 'h1', ...CENTRED } },
+            {
+              type: 'text',
+              props: { html: '<p>One line under the name. Keep it short.</p>', size: 'l', ...CENTRED },
+            },
+          ],
+        ],
+      },
+      {
+        widths: [1],
+        columns: [[{ type: 'gallery', props: { columns: '3', gap: 's' } }]],
+      },
+    ],
+    /*
+     * Dark and full width, and NO picture baked in, the same as hero-background:
+     * the gallery below and the tone make it obvious where the images go, and a
+     * stock photo shipped in a preset is one somebody has to notice and remove.
+     */
+    section: { tone: 'dark', paddingY: 96, width: 'full' },
+  },
+
+  {
+    id: 'hero-background-left',
+    category: 'hero',
+    label: 'Words to one side of a photograph',
+    description: 'A full-bleed picture with the words set left rather than centred. Quieter, and easy to read.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Start the trip here', level: 'h2', style: 'h1' } },
+            {
+              type: 'text',
+              props: { html: '<p>One line. On a picture, fewer words is always better.</p>', size: 'l' },
+            },
+            {
+              type: 'button-group',
+              props: {
+                buttons: [
+                  { label: 'Browse destinations', href: '', variant: 'primary' },
+                  { label: 'Talk to us', href: '', variant: 'ghost' },
+                ],
+              },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { tone: 'dark', paddingY: 128, width: 'full' },
+  },
+
   {
     id: 'blank-opener',
     category: 'blank',
