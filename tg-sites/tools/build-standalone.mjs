@@ -111,6 +111,17 @@ const result = await esbuild.build({
         build.onResolve({ filter: /(^|\/)app\/actions\/collections$/ }, () => ({
           path: resolve(root, 'standalone/demo-collection-actions.ts'),
         }));
+
+        /*
+         * The import action reaches the editor through SectionPicker's Import
+         * tab, and it calls requireTenantId, which reaches Postgres. Missing
+         * this swap is what silently broke this build between the import screen
+         * landing and 2 Aug 2026. The double keeps the real cleaning and drops
+         * only the auth. See standalone/demo-import-actions.ts.
+         */
+        build.onResolve({ filter: /(^|\/)app\/actions\/import$/ }, () => ({
+          path: resolve(root, 'standalone/demo-import-actions.ts'),
+        }));
       },
     },
   ],
