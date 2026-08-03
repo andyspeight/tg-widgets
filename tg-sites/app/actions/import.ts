@@ -26,6 +26,8 @@
 import { requireTenantId } from '../../lib/auth/session';
 import { createBlock, createSection } from '../../lib/content/factory';
 import { splitImport, type ImportCandidate } from '../../lib/import/sections';
+import { modelFromImport } from '../../lib/import/rebuild';
+import { sectionFromModel } from '../../lib/ai/section-build';
 import type { Section } from '../../lib/content/schema';
 
 /**
@@ -144,4 +146,48 @@ export async function previewImportAction(input: unknown): Promise<ImportActionR
       removed: split.removed,
     },
   };
+}
+
+export type RebuildActionResult =
+  | { ok: true; section: Section }
+  | { ok: false; error: string };
+
+/**
+ * Rebuild one imported block as native blocks.
+ *
+ * The recogniser produces a model, sectionFromModel turns it into a Section as
+ * valid as a hand-built one, and that is what the editor swaps in. The client's
+ * current edits are read from the block's own props, so words already changed
+ * come across changed. Nothing is saved here: the swapped-in section is written
+ * by the ordinary page save through the ordinary sanitiser, one undo away from
+ * the frozen import it replaced.
+ *
+ * A design with nothing to rebuild is a plain refusal, not an empty section: the
+ * caller keeps the import exactly as it was.
+ */
+export async function rebuildImportAction(input: unknown): Promise<RebuildActionResult> {
+  try {
+    await requireTenantId();
+  } catch {
+    return { ok: false, error: 'Open a site first.' };
+  }
+
+  const props = input && typeof input === 'object' ? (input as Record<string, unknown>) : {};
+
+  let model;
+  try {
+    model = modelFromImport(props);
+  } catch {
+    model = null;
+  }
+  if (!model) {
+    return { ok: false, error: 'There was nothing in this design we could rebuild as blocks.' };
+  }
+
+  const built = sectionFromModel(model);
+  if (!built.ok) {
+    return { ok: false, error: 'We could not rebuild this design as blocks.' };
+  }
+
+  return { ok: true, section: built.section };
 }

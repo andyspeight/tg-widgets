@@ -10,8 +10,8 @@
  * undo step rather than one per character.
  */
 
-import { useState, type CSSProperties, type ReactNode } from 'react';
-import type { Page, RegionName } from '../../lib/content/schema';
+import { useState, useTransition, type CSSProperties, type ReactNode } from 'react';
+import type { Block, Page, RegionName } from '../../lib/content/schema';
 import {
   DEFAULT_DIVIDER_HEIGHT,
   DIVIDER_OPTIONS,
@@ -49,6 +49,7 @@ import { FieldRenderer } from './Fields';
 import { Icon } from './Icon';
 import { columnWord, sectionNameAt } from '../../lib/content/naming';
 import { writeSeoAction } from '../../app/actions/ai';
+import { rebuildImportAction } from '../../app/actions/import';
 import { pageText } from '../../lib/seo/audit';
 
 interface Props {
@@ -250,6 +251,7 @@ export function Properties({
             selected={selected}
             isStaff={isStaff}
             onCommit={onCommit}
+            onSelect={onSelect}
             region={region}
             regionFlags={regionFlags}
             onRegionFlags={onRegionFlags}
@@ -277,6 +279,7 @@ export function ItemOptions({
   selected,
   isStaff,
   onCommit,
+  onSelect,
   region = null,
   regionFlags,
   onRegionFlags,
@@ -288,6 +291,12 @@ export function ItemOptions({
   selected: Path | null;
   isStaff: boolean;
   onCommit: Props['onCommit'];
+  /**
+   * Set in the main pane, absent on the on-canvas popover which has no selection
+   * to hand back. Only the imported block's "Make editable" reads it, to show
+   * the rebuilt section once the old block path is gone.
+   */
+  onSelect?: Props['onSelect'];
   region?: RegionName | null;
   regionFlags?: Props['regionFlags'];
   onRegionFlags?: Props['onRegionFlags'];
@@ -332,7 +341,7 @@ export function ItemOptions({
       )}
 
       {selected?.kind === 'block' && (
-        <BlockFields path={selected} page={page} isStaff={isStaff} onCommit={onCommit} />
+        <BlockFields path={selected} page={page} isStaff={isStaff} onCommit={onCommit} onSelect={onSelect} />
       )}
     </>
   );
@@ -1249,16 +1258,76 @@ function ColumnFields({
 
 // ---------------------------------------------------------------------------
 
+/**
+ * The one control that turns a frozen import into native blocks.
+ *
+ * It calls the rebuild on the server, because the recogniser is parser backed
+ * and has no business in this bundle, and swaps the whole section in one commit,
+ * so the import it replaced is a single undo away. The client's current edits go
+ * with it: the action reads them from the block's own props. On a design with
+ * nothing to rebuild it says so and changes nothing, which is the honest answer
+ * rather than an empty section.
+ */
+function RebuildImportButton({
+  block,
+  section,
+  onCommit,
+  onSelect,
+}: {
+  block: Block;
+  section: number;
+  onCommit: Props['onCommit'];
+  onSelect?: Props['onSelect'];
+}) {
+  const [pending, start] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  const rebuild = () => {
+    setError(null);
+    start(async () => {
+      const result = await rebuildImportAction(block.props);
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      onCommit((current) => ({
+        ...current,
+        sections: current.sections.map((entry, index) => (index === section ? result.section : entry)),
+      }));
+      // The old block path is gone; show the rebuilt section so the pane is not
+      // left pointing at nothing. Absent on the on-canvas popover, which manages
+      // its own selection.
+      onSelect?.({ kind: 'section', section });
+    });
+  };
+
+  return (
+    <div className="ed-rebuild">
+      <button type="button" className="ed-btn" data-variant="primary" disabled={pending} onClick={rebuild}>
+        {pending ? 'Rebuilding' : 'Make editable'}
+      </button>
+      <p className="ed-help" style={{ marginTop: 8, marginBottom: 0 }}>
+        Rebuilds this design as ordinary blocks, editable with every tool. It
+        takes on your site&apos;s own look rather than the captured one, and one
+        undo puts it back.
+      </p>
+      {error && <p className="ed-import__error">{error}</p>}
+    </div>
+  );
+}
+
 function BlockFields({
   path,
   page,
   isStaff,
   onCommit,
+  onSelect,
 }: {
   path: Extract<Path, { kind: 'block' }>;
   page: Page;
   isStaff: boolean;
   onCommit: Props['onCommit'];
+  onSelect?: Props['onSelect'];
 }) {
   const block = page.sections[path.section]?.rows[path.row]?.columns[path.column]?.blocks[path.block];
   if (!block) return null;
@@ -1288,6 +1357,10 @@ function BlockFields({
       <p className="ed-help" style={{ marginTop: 0, marginBottom: 14 }}>
         <strong>{definition.label}</strong> · {definition.description}
       </p>
+
+      {block.type === 'imported' && (
+        <RebuildImportButton block={block} section={path.section} onCommit={onCommit} onSelect={onSelect} />
+      )}
 
       {definition.fields.map((field) => (
         <FieldRenderer
