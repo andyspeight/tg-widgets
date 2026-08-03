@@ -697,6 +697,31 @@ describe('sanitiseStyle', () => {
     expect(sanitiseStyle('font-size: 99rem')).toBe('');
   });
 
+  it('keeps a hand-typed pixel size inside the bound, and normalises it', () => {
+    // The size box in the toolbar produces these. Whole pixels only, from 6 to
+    // 200, and stored as our own string so a leading zero cannot survive.
+    expect(sanitiseStyle('font-size: 24px')).toBe('font-size: 24px');
+    expect(sanitiseStyle('font-size: 6px')).toBe('font-size: 6px');
+    expect(sanitiseStyle('font-size: 200px')).toBe('font-size: 200px');
+    expect(sanitiseStyle('font-size: 024px')).toBe('font-size: 24px');
+    // Case and surrounding space are the sanitiser's to normalise, as everywhere.
+    expect(sanitiseStyle('font-size: 48PX')).toBe('font-size: 48px');
+  });
+
+  it('drops a pixel size outside the bound rather than clamping it', () => {
+    // Clamping is the toolbar's job, where the number is seen to change. The
+    // sanitiser refuses, the same as it refuses an rgb() channel past 255, so a
+    // value that only a non-toolbar caller could send never lands on a page.
+    expect(sanitiseStyle('font-size: 5px')).toBe('');
+    expect(sanitiseStyle('font-size: 201px')).toBe('');
+    expect(sanitiseStyle('font-size: 9000px')).toBe('');
+    expect(sanitiseStyle('font-size: 0px')).toBe('');
+    // Not a whole number of pixels, and not a unit we emit.
+    expect(sanitiseStyle('font-size: 12.5px')).toBe('');
+    expect(sanitiseStyle('font-size: 12 px')).toBe('');
+    expect(sanitiseStyle('font-size: 40pt')).toBe('');
+  });
+
   it('keeps a font token and refuses a raw family name', () => {
     // A raw family is whatever the visitor's machine happens to have, which is
     // a different site on every screen. The library exists so it never is.

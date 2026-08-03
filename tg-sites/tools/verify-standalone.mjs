@@ -2138,6 +2138,58 @@ await check('and the size survives the sanitiser, not just the canvas', async ()
 });
 
 /*
+ * A SIZE OF YOUR OWN, in pixels, which the dropdown could not do before.
+ *
+ * Andy asked for this on 3 Aug 2026: the Size control offered a scale and the
+ * theme's own sizes, and nothing between them, so a phrase that wanted 41px had
+ * no way to say so. The dropdown now has a "Custom, in pixels" entry that opens
+ * a box, and this drives it the way a person would: pick the entry, type a
+ * number, apply it. The unit tests own whether the number survives a save; this
+ * owns whether the box is wired to the words at all.
+ */
+await check('a size of your own applies, in the pixels you typed', async () => {
+  const host = await selectPartOnCanvas();
+  if (!host) return 'no editable paragraph';
+
+  await page.locator('select[aria-label="Size"]').selectOption('__custom_px__');
+  await page.waitForTimeout(200);
+  await page.locator('.ed-tt__size-box').fill('72');
+  await page.locator('.ed-tt__btn[aria-label="Use this size"]').click();
+  await page.waitForTimeout(350);
+
+  const html = await host.innerHTML();
+  return /font-size:\s*72px/i.test(html) ? true : `html is "${html.slice(0, 160)}"`;
+});
+
+/*
+ * PAST THE TOP OF THE RANGE BECOMES THE TOP, rather than nothing.
+ *
+ * The box clamps to 6..200, the same two numbers the sanitiser refuses outside
+ * of. Clamping rather than refusing is the kinder half of that pair: type 500
+ * and the words become the largest allowed, which is a result you can see and
+ * correct, not a button that quietly did nothing. If this ever came back as no
+ * change, the clamp had been lost and the sanitiser was silently eating the value.
+ */
+await check('a size of your own past the top of the range is clamped to it', async () => {
+  // The WHOLE block, selected by a JS range rather than a drag. The check above
+  // leaves a 72px letter at the start of the paragraph, which makes it tall
+  // enough that a part-drag at a fixed y no longer lands on any text. A whole
+  // selection is geometry-free, and clamping shows either on the paragraph or a
+  // span the same, which is all this is asking.
+  const host = await selectOnCanvas();
+  if (!host) return 'no editable paragraph';
+
+  await page.locator('select[aria-label="Size"]').selectOption('__custom_px__');
+  await page.waitForTimeout(200);
+  await page.locator('.ed-tt__size-box').fill('500');
+  await page.locator('.ed-tt__btn[aria-label="Use this size"]').click();
+  await page.waitForTimeout(350);
+
+  const html = await host.innerHTML();
+  return /font-size:\s*200px/i.test(html) ? true : `html is "${html.slice(0, 160)}"`;
+});
+
+/*
  * A whole-block selection is a different shape, and the right one.
  *
  * Wrapping a whole paragraph in a span gives `<span><p>…</p></span>`, an inline

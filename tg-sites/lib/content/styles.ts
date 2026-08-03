@@ -86,7 +86,9 @@ const TEXT_STYLES = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p'] as const;
  *
  * The fixed scale stays underneath for the times a phrase genuinely needs to be
  * a bit bigger than the text around it without being a heading. It is a closed
- * list, so nobody can type `font-size: 400vw` and push the page off the screen.
+ * list, and the one thing outside it, a size typed by hand, is bounded to whole
+ * pixels in PX_SIZE_MIN..PX_SIZE_MAX by the validator below, so nobody can type
+ * `font-size: 400vw` and push the page off the screen.
  */
 export const FONT_SIZES: ReadonlyArray<{ value: string; label: string; group: string }> = [
   { value: 'var(--tgs-p-size)', label: 'Paragraph', group: 'From your theme' },
@@ -108,6 +110,23 @@ export const FONT_SIZES: ReadonlyArray<{ value: string; label: string; group: st
 
 /** The order the groups appear in, so the theme's own sizes are found first. */
 export const FONT_SIZE_GROUPS = ['From your theme', 'A fixed size'] as const;
+
+/**
+ * The bounds on a size typed by hand, in whole pixels.
+ *
+ * The dropdown offers the theme's own sizes and a short scale, which is what
+ * most people want. Andy asked on 3 Aug 2026 for a box to set any size as well:
+ * "there is no manual override, only the choices that are given on the toolbar,
+ * add the ability to set your own size, from 6px up to 200px". Six is about the
+ * smallest that stays legible; two hundred is a line that fills a hero, and past
+ * it a "size" is really a display graphic that wants an image block.
+ *
+ * The two numbers live here, next to the validator that enforces them, so the
+ * toolbar (which clamps a typed number to this range) and the sanitiser (which
+ * drops one outside it) cannot drift apart.
+ */
+export const PX_SIZE_MIN = 6;
+export const PX_SIZE_MAX = 200;
 
 const SIZE_VALUES = new Set(
   FONT_SIZES.map((size) => size.value).filter((value) => !value.startsWith('var(')),
@@ -287,6 +306,23 @@ function sizeValue(value: string): string | null {
   const token = value.match(/^var\(--tgs-([a-z0-9]+)-size\)$/);
   if (token && (TEXT_STYLES as readonly string[]).includes(token[1])) {
     return `var(--tgs-${token[1]}-size)`;
+  }
+
+  /*
+   * A size typed by hand, in whole pixels, inside the bound above.
+   *
+   * OUT OF RANGE IS DROPPED, NOT CLAMPED, the same as an rgb() channel past 255
+   * is dropped rather than pinned to 255. Clamping belongs in the toolbar, where
+   * the person watches the number they typed become the number that took, not in
+   * a sanitiser that would silently turn a saved 9000px into 200px with nobody
+   * the wiser. The digit cap keeps a pathological input short before Number sees
+   * it; the leading zeros a value like 007px carries are normalised away by
+   * going through Number.
+   */
+  const px = /^(\d{1,4})px$/.exec(value);
+  if (px) {
+    const n = Number(px[1]);
+    if (n >= PX_SIZE_MIN && n <= PX_SIZE_MAX) return `${n}px`;
   }
   return null;
 }

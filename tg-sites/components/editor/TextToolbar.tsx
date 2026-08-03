@@ -47,8 +47,19 @@ import {
   FONT_SIZE_GROUPS,
   FONT_SIZES,
   HIGHLIGHT_SWATCHES,
+  PX_SIZE_MAX,
+  PX_SIZE_MIN,
 } from '../../lib/content/styles';
 import { Icon, type IconName } from './Icon';
+
+/**
+ * The Size dropdown's own entry for "let me type a number".
+ *
+ * A sentinel value rather than a real size, so the dropdown's onChange can tell
+ * the one option that opens a box from the fourteen that set a size outright. It
+ * can never collide with a real value: those are all `var(--tgs-...)` or a rem.
+ */
+const CUSTOM_SIZE = '__custom_px__';
 
 /** Where the toolbar was left, so it stays put between blocks and sessions. */
 const POSITION_KEY = 'tg-sites:text-toolbar';
@@ -280,10 +291,14 @@ export function TextToolbar({
   const [tray, setTray] = useState<'color' | 'background-color' | null>(null);
   /** A colour typed in rather than picked. Held while it is being typed. */
   const [custom, setCustom] = useState('#');
+  /** The size box: open, and the number being typed into it. */
+  const [sizing, setSizing] = useState(false);
+  const [customSize, setCustomSize] = useState('');
   const [, setTick] = useState(0);
 
   const drag = useRef<{ dx: number; dy: number } | null>(null);
   const linkInput = useRef<HTMLInputElement>(null);
+  const sizeInput = useRef<HTMLInputElement>(null);
   const askInput = useRef<HTMLTextAreaElement>(null);
   const el = useRef<HTMLDivElement>(null);
   /** The selection to put the link on, saved before the input steals it. */
@@ -576,6 +591,37 @@ export function TextToolbar({
   }
 
   /**
+   * A size typed in by hand, in pixels.
+   *
+   * CLAMPED HERE, refused by the sanitiser. The two numbers come from the same
+   * place (PX_SIZE_MIN and PX_SIZE_MAX in styles.ts), so what the box lets
+   * through is exactly what a save will keep. Clamping rather than refusing an
+   * out-of-range number is the friendlier half of that split: type 500 and the
+   * words become 200px, the largest allowed, instead of nothing happening.
+   *
+   * The words go back first, the same dance the hex box does and for the same
+   * reason: typing in this box moved the document's selection into it, so
+   * painting now without restoring the range would paint nothing.
+   */
+  function applySize() {
+    const digits = customSize.trim();
+    if (!/^\d{1,4}$/.test(digits)) return;
+    const size = Math.min(PX_SIZE_MAX, Math.max(PX_SIZE_MIN, Number(digits)));
+
+    const range = savedRange.current;
+    if (range) {
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+    }
+
+    onStyle('font-size', `${size}px`);
+    setSizing(false);
+    setCustomSize('');
+    savedRange.current = null;
+  }
+
+  /**
    * Ask the assistant, then put what comes back where the words were.
    *
    * THE ANSWER GOES IN THROUGH THE SAME DOOR AS TYPING, which is the decision
@@ -744,7 +790,27 @@ export function TextToolbar({
         value=""
         aria-label="Size"
         onMouseDown={(event) => event.stopPropagation()}
-        onChange={(event) => event.target.value && paint('font-size', event.target.value)}
+        onChange={(event) => {
+          const value = event.target.value;
+          if (!value) return;
+          if (value === CUSTOM_SIZE) {
+            /*
+             * Open the box, and remember the selection WHILE IT IS STILL ALIVE.
+             * The other options paint straight away, so the selection is intact
+             * when onChange fires; the box below then steals it the moment it is
+             * typed into, which is why it is saved now and put back on apply.
+             * The other panels are closed so only one is ever open at a time.
+             */
+            rememberSelection();
+            setLinking(false);
+            setAsking(false);
+            setTray(null);
+            setSizing(true);
+            window.setTimeout(() => sizeInput.current?.focus(), 0);
+            return;
+          }
+          paint('font-size', value);
+        }}
       >
         <option value="">Size</option>
         {/*
@@ -762,6 +828,21 @@ export function TextToolbar({
             ))}
           </optgroup>
         ))}
+        {/*
+          A size of your own, in pixels. Last, because the named and scale sizes
+          are what keep a page consistent and this is the exception. Andy asked
+          for it on 3 Aug 2026: the dropdown was the only way to set a size and
+          he wanted to type one.
+
+          The label is kept SHORT on purpose. A select with no fixed width sizes
+          to its widest entry, so a long "Custom, in pixels" was wider than the
+          "From your theme" group above it, and it pushed the whole toolbar past
+          the width where it wraps to a second row. "px" and the 6-200 range are
+          on the box that opens, where there is room for them.
+        */}
+        <optgroup label="Your own">
+          <option value={CUSTOM_SIZE}>Custom…</option>
+        </optgroup>
       </select>
 
       <span className="ed-tt__rule" aria-hidden="true" />
@@ -790,6 +871,7 @@ export function TextToolbar({
         aria-pressed={linking}
         onClick={() => {
           rememberSelection();
+          setSizing(false);
           setLinking((open) => !open);
           // Focused after the input exists. Focus in a render path is the bug
           // this codebase has a rule about; this is a click, which is the
@@ -833,6 +915,7 @@ export function TextToolbar({
         open={tray === 'color'}
         onToggle={() => {
           rememberSelection();
+          setSizing(false);
           setTray((current) => (current === 'color' ? null : 'color'));
         }}
       />
@@ -842,6 +925,7 @@ export function TextToolbar({
         open={tray === 'background-color'}
         onToggle={() => {
           rememberSelection();
+          setSizing(false);
           setTray((current) => (current === 'background-color' ? null : 'background-color'));
         }}
       />
@@ -901,6 +985,7 @@ export function TextToolbar({
           onClick={() => {
             const selection = window.getSelection();
             rememberSelection();
+            setSizing(false);
             setSelectedText(selection ? selection.toString() : '');
             setFailure(null);
             setAsking((open) => !open);
@@ -1036,6 +1121,51 @@ export function TextToolbar({
               That is not a web address we can link to. Try one starting https://
             </p>
           )}
+        </div>
+      )}
+
+      {sizing && (
+        /*
+         * The size box opts mousedown back in for the WHOLE panel, the way the
+         * link row does, because the number field is the one thing here you have
+         * to click into. The toolbar root refuses mousedown to keep the selection
+         * alive behind it, and applySize puts that selection back before it
+         * paints, so typing in this box does not lose the words it is sizing.
+         */
+        <div className="ed-tt__size" onMouseDown={(event) => event.stopPropagation()}>
+          <input
+            ref={sizeInput}
+            className="ed-tt__url ed-tt__size-box"
+            type="number"
+            inputMode="numeric"
+            min={PX_SIZE_MIN}
+            max={PX_SIZE_MAX}
+            step={1}
+            value={customSize}
+            aria-label={`A size of your own, in pixels, from ${PX_SIZE_MIN} to ${PX_SIZE_MAX}`}
+            placeholder={`${PX_SIZE_MIN}–${PX_SIZE_MAX}`}
+            onChange={(event) => setCustomSize(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault();
+                applySize();
+              }
+              if (event.key === 'Escape') {
+                event.preventDefault();
+                setSizing(false);
+                setCustomSize('');
+              }
+            }}
+          />
+          <span className="ed-tt__size-unit" aria-hidden="true">px</span>
+          <button
+            type="button"
+            className="ed-tt__btn"
+            aria-label="Use this size"
+            onClick={applySize}
+          >
+            <Icon name="check" size={16} />
+          </button>
         </div>
       )}
 

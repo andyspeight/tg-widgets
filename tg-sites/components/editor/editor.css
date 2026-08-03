@@ -1483,6 +1483,27 @@
 .ed-tt__url:focus { outline: none; border-color: var(--ed-accent); }
 .ed-tt__url[aria-invalid='true'] { border-color: #fca5a5; }
 
+/* The size box: the same row furniture as the link panel, a narrower field
+   because a size is at most three digits, and a plain "px" beside it so the
+   number has a unit without the field having to hold one. */
+.ed-tt__size {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 4px;
+  padding-left: 4px;
+  border-left: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.ed-tt__size .ed-tt__size-box { width: 76px; }
+
+.ed-tt__size-unit {
+  color: #94a3b8;
+  font-size: var(--ed-text-sm);
+  padding-right: 2px;
+}
+
 /* The swatch tray hangs below the toolbar rather than sitting in the row. Six
    colours plus a hex box would have doubled the width of a bar that is already
    wrapping. */
