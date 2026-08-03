@@ -69,7 +69,12 @@ How to build:
 - Use ONLY the block types listed under BLOCKS. Never invent a type or a field.
 - Put the blocks in rows and columns. A row of two or three columns reads as a set of points; one wide column reads as a statement. Two to four blocks is usually a section, not twenty.
 - Fill each block's fields with real, on-brand words. Leave an image field empty; the client picks the picture. Leave a colour empty unless a colour genuinely helps.
-- Pick a section tone that suits the content: light for most, subtle for a quiet band, dark or accent for a bold statement.`;
+- Pick a section tone that suits the content: light for most, subtle for a quiet band, dark or accent for a bold statement.
+
+A HERO or opener is its own thing, and the commonest thing you will be asked for. Build it like this:
+- width "full", tone "dark", and give it height: a paddingY around 112 to 144, or a minHeight around 520 to 640. A hero the height of a paragraph is not a hero.
+- ONE heading, with style "h1", centred. One short line of text under it, size "l", centred, and shorter is better. One or two buttons, centred, the first "primary" and an enquiry.
+- Do NOT set a background image. Leave it empty. The dark tone makes it plain a photograph is meant to go behind it, and the client adds their own. A stock photograph baked in is one that ends up live on a real site.`;
 
 /** The output contract, spelled out so the model returns JSON and only JSON. */
 export const OUTPUT_SHAPE = `Return ONE section as JSON and NOTHING else. No prose before or after, no markdown fences. The exact shape:
@@ -78,12 +83,14 @@ export const OUTPUT_SHAPE = `Return ONE section as JSON and NOTHING else. No pro
   "name": "a short name for this section, for the outline only",
   "tone": "light | subtle | dark | accent",
   "width": "narrow | contained | wide | full",
+  "paddingY": 96,
+  "minHeight": 0,
   "rows": [
     { "columns": [ { "blocks": [ { "type": "heading", "props": { "html": "..." } } ] } ] }
   ]
 }
 
-Every block is { "type": <one of the BLOCKS>, "props": { ...its fields } }. A row holds one or more columns; a column holds one or more blocks. Widths are worked out for you, so do not set them.`;
+Every block is { "type": <one of the BLOCKS>, "props": { ...its fields } }. A row holds one or more columns; a column holds one or more blocks. Widths are worked out for you, so do not set them. paddingY is the space above and below in pixels; minHeight is an optional floor in pixels for a tall section such as a hero. Both are optional; leave them out for an ordinary section.`;
 
 /** The system prompt: house voice, the builder's job, the kit, then the brand. */
 export function buildSystemPrompt(settings: SiteSettings): string {
@@ -254,6 +261,10 @@ export function sectionFromModel(answer: unknown): BuildResult {
   if (typeof root.name === 'string' && root.name.trim()) section.name = root.name.trim().slice(0, 80);
   if (typeof root.tone === 'string' && TONES.has(root.tone)) section.tone = root.tone as Section['tone'];
   if (typeof root.width === 'string' && WIDTHS.has(root.width)) section.width = root.width as Section['width'];
+  // Height, so a hero can be a hero. SectionSchema clamps both, so a wild
+  // number is squared rather than trusted; the model just says roughly how tall.
+  if (typeof root.paddingY === 'number') section.paddingY = root.paddingY;
+  if (typeof root.minHeight === 'number') section.minHeight = root.minHeight;
 
   // Structure and defaults first, then content safety on every block. Both,
   // because SectionSchema squares the shape and the sanitiser cleans the values,

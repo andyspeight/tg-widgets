@@ -123,6 +123,24 @@ describe('turning a model answer into a section', () => {
     expect(sectionFromModel(null).ok).toBe(false);
   });
 
+  it('lets a hero be a hero: full width, dark, and tall', () => {
+    const result = sectionFromModel({
+      tone: 'dark', width: 'full', paddingY: 128, minHeight: 560,
+      rows: [{ columns: [{ blocks: [
+        { type: 'heading', props: { html: 'Somewhere worth the flight', style: 'h1' } },
+        { type: 'button-group', props: { buttons: [{ label: 'Start an enquiry', variant: 'primary' }] } },
+      ] }] }],
+    });
+    if (!result.ok) throw new Error('expected a section');
+    expect(result.section.tone).toBe('dark');
+    expect(result.section.width).toBe('full');
+    // The height carries through the schema's clamp rather than being ignored.
+    expect(result.section.paddingY).toBe(128);
+    expect(result.section.minHeight).toBe(560);
+    // And it does NOT bake in a stock photograph.
+    expect(result.section.backgroundImage ?? '').toBe('');
+  });
+
   it('caps a runaway answer rather than building all of it', () => {
     const many = Array.from({ length: 30 }, () => ({ blocks: [{ type: 'text', props: { html: 'x' } }] }));
     const result = sectionFromModel({ rows: [{ columns: many }] });
