@@ -18,7 +18,9 @@
  *   type          Accommodation | Flights | Packages | DynamicPackages |
  *                 PackageHolidays | BothPackages   (default Packages family)
  *   destinations  CSV of 3-letter airport IATA and/or 2-letter country codes
- *   origins       CSV of departure-airport IATA codes
+ *   origins       CSV of 3-letter departure-airport IATA codes and/or 2-letter
+ *                 market codes (GB, IE). A market means "departing that
+ *                 country", answered from the offer's departure airport
  *   boardBases    CSV of board names (matched loosely: case/punctuation-blind)
  *   budgetMin, budgetMax   per-person GBP bounds
  *   ratingMin     minimum hotel star rating
@@ -43,6 +45,7 @@ import { setCors } from './_auth.js';
 import { getJson, keys, configured } from './_redis.js';
 import { evaluatePublicRateLimit } from './_lib/rate-limit-public.js';
 import { logWidgetEvent } from './_lib/telemetry.js';
+import { marketOfAirport } from './_lib/offers/markets.js';
 
 const COUNTRY_PREFIX = 'offers:packages:';
 const SUMMARY_KEY = 'map:offers:v1';
@@ -281,7 +284,15 @@ function toRawShape(o) {
       pricing,
     };
   }
-  raw._cache = { market: o.market || 'GB', fetchedAt: o.fetchedAt || null };
+  // Report the market the same way the filter decides it: from the departure
+  // airport when there is one, from the stored tag only when there is not. A
+  // debug field that disagrees with the gate above it sends the next person
+  // down the wrong path, which is most of what made the 2 Aug 2026 tagging
+  // bug take a morning to find.
+  raw._cache = {
+    market: (o.origin ? marketOfAirport(o.origin) : (o.market || 'GB')) || null,
+    fetchedAt: o.fetchedAt || null,
+  };
   return raw;
 }
 
@@ -340,9 +351,9 @@ export default async function handler(req, res) {
     // an honest miss, never a widened filter.
     const dest = parseDestinations(q.destinations);
     // Origins accept 3-letter airport IATAs AND 2-letter country codes (the
-    // editor documents both and its presets use 'GB'). Country origins map to
-    // the sweep market: GB-market offers depart UK airports, IE-market
-    // offers depart Irish airports.
+    // editor documents both and its presets use 'GB'). A country origin means
+    // "departing that country" and is answered from the offer's departure
+    // airport, not from the market it was fetched under — see the gate below.
     const orig = csv(q.origins, /^[A-Z]{2,3}$/);
     const boardsCsv = csv(q.boardBases, /^[A-Z]/i, 12);
     // Any filter token we cannot faithfully apply → honest miss. Serving a
@@ -483,7 +494,28 @@ export default async function handler(req, res) {
           }
           if (hasOriginFilter) {
             const apOk = origins.size && o.origin && origins.has(String(o.origin).toUpperCase());
-            const mkOk = originMarkets.size && originMarkets.has(String(o.market || 'GB').toUpperCase());
+            // A 2-letter origin means "departing this country". Answer it from
+            // the DEPARTURE AIRPORT, not from the stored market tag.
+            //
+            // The tag records the customer nationality we sent Travelify to
+            // steer pricing — an artefact of how we fetched, not a property of
+            // the offer. It is also unreliable: the cron sweeps GB then IE, the
+            // merge key omits the market, so the Irish copy overwrites the
+            // British one. On 2 Aug 2026 every one of the 2,661 cached package
+            // holidays departed a UK airport and every one was tagged IE, so
+            // every `origins: ['GB']` widget matched nothing.
+            //
+            // The airport cannot be clobbered that way, so it is the answer.
+            // The tag is only consulted when there is no departure airport to
+            // read — a hotel-only offer, where the market genuinely is the
+            // customer's rather than the flight's.
+            const depMarket = o.origin ? marketOfAirport(o.origin) : null;
+            const mkOk = originMarkets.size && (depMarket
+              ? originMarkets.has(depMarket)
+              // An airport we do not recognise is NOT assumed to be British.
+              // Offers depart Bucharest and Milan too, and answering "yes" for
+              // those would widen a UK widget to the wrong departures.
+              : (!o.origin && originMarkets.has(String(o.market || 'GB').toUpperCase())));
             // A hotel-only offer has NO departure airport, so a departure-airport
             // origin filter cannot describe it — gate it on market alone (and let
             // it through when only airports were named). Without this an

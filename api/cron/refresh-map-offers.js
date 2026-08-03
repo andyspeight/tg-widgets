@@ -52,6 +52,7 @@
  */
 
 import { setJson, getJson, setString, getString, keys, del, configured } from '../_redis.js';
+import { MARKET_AIRPORTS, marketOfAirport } from '../_lib/offers/markets.js';
 
 // ── Config ────────────────────────────────────────────────────────────────
 const AIRTABLE_BASE = 'appAYzWZxvK6qlwXK';
@@ -354,17 +355,73 @@ function summariseByResort(offers) {
 
 // ── Tested sweep / merge / purge logic (unit-verified 22 May 2026) ──────────
 function mergeOffers(existing, fresh) {
-  // Key by id + origin + type: with two departure markets in one cache, the
-  // same package id can legitimately exist once per departure airport
-  // (Gatwick and Dublin are different offers with different prices), and with
-  // three offer types swept, ids from different type namespaces must never
-  // overwrite each other. Keying by id alone would make them clobber each
-  // other on every sweep.
-  const key = (o) => `${o.id}|${o.origin || ''}|${o.type || 'Packages'}`;
+  // Key by id + origin + type + market. With two departure markets in one
+  // cache the same package id can legitimately exist once per departure
+  // airport (Gatwick and Dublin are different offers with different prices),
+  // and with three offer types swept, ids from different type namespaces must
+  // never overwrite each other. Keying by id alone would make them clobber
+  // each other on every sweep.
+  //
+  // The market joined the key on 2 Aug 2026. A hotel-only offer has no
+  // departure airport, so the GB and IE sweeps produced the same key and the
+  // Irish copy — written second — overwrote the British one every time. All
+  // 3,572 cached hotels ended up tagged IE and every `origins: ['GB']` hotel
+  // widget matched nothing. They are genuinely two offers: same room, two
+  // customer nationalities, two prices and two booking links.
+  //
+  // This does NOT duplicate flighted offers, because their market is derived
+  // from the departure airport (see sweepCountry) and so is identical
+  // whichever sweep fetched them. STORE_CAPS already caps per type|market, so
+  // the space this can add was budgeted for.
+  const key = (o) => `${o.id}|${o.origin || ''}|${o.type || 'Packages'}|${marketTagOf(o)}`;
   const byId = new Map();
-  for (const o of existing || []) if (o && o.id != null) byId.set(key(o), o);
-  for (const o of fresh || []) if (o && o.id != null) byId.set(key(o), o);
+  // Heal the stored tag on the way past. Offers cached before the fix carry
+  // the sweep nationality, so without this an already-cached Gatwick package
+  // tagged IE would key differently from the fresh GB one and the widget would
+  // draw the same holiday twice until the old copy aged out.
+  for (const o of existing || []) {
+    if (!o || o.id == null) continue;
+    if (o.origin) o.market = marketOfAirport(o.origin);
+    byId.set(key(o), o);
+  }
+  // Within one run, both sweeps hand back the same Gatwick package — same key
+  // now that the market comes from the airport — but each carries the booking
+  // nationality it was fetched under in its click-through URL. Pick between
+  // them deliberately rather than letting job order decide, so a British
+  // visitor clicking a Gatwick holiday is not dropped into an Irish booking
+  // flow. Fresh still always beats cached: a right-nationality link is not
+  // worth showing yesterday's price for.
+  const best = new Map();
+  for (const o of fresh || []) {
+    if (!o || o.id == null) continue;
+    const k = key(o);
+    const prev = best.get(k);
+    if (!prev || preferredCopy(o, prev)) best.set(k, o);
+  }
+  for (const [k, o] of best) byId.set(k, o);
   return Array.from(byId.values());
+}
+/** The market an offer belongs to, read the same way everywhere: from the
+ *  departure airport when it has one, from the stored tag when it does not. */
+function marketTagOf(o) {
+  return (o.origin ? marketOfAirport(o.origin) : o.market) || '';
+}
+/** The nationality Travelify will search under when a visitor clicks, read off
+ *  the click URL it gave us (…/en/GBP/GB/<uuid>). '' when the shape is not
+ *  ours to read, which simply means "no opinion". */
+function clickNationality(o) {
+  const m = /\/[A-Z]{3}\/([A-Z]{2})\/[^/]+$/.exec(String(o.url || ''));
+  return m ? m[1] : '';
+}
+/** True when `a` is the better copy of an offer than `b`: the one whose
+ *  booking link matches the market it departs from. No opinion either way
+ *  means "yes", so the later copy wins as it always did. */
+function preferredCopy(a, b) {
+  const want = marketTagOf(a);
+  if (!want) return true;
+  const aOk = clickNationality(a) === want;
+  const bOk = clickNationality(b) === want;
+  return aOk === bOk ? true : aOk;
 }
 function travelDateOf(offer) { return offer.outboundDate || offer.checkinDate || null; }
 function purgeOffers(offers, now = new Date(), maxAgeHours = MAX_AGE_HOURS) {
@@ -558,18 +615,9 @@ const MARKETS = [
   // are embedded in the Packages we already cache, not a standalone Flights
   // product. The per-type sweep stats (SWEEP_STATS_KEY / the Cache tab) show the
   // real fetched-vs-kept per type, so the answer is measurable after one sweep.
-  {
-    id: 'GB', nationality: 'GB',
-    flightOrigins: [
-      'LHR', 'LGW', 'LTN', 'STN', 'LCY', 'SEN',           // London area
-      'MAN', 'BHX', 'EDI', 'GLA', 'BRS', 'NCL', 'LPL',     // major regionals
-      'LBA', 'EMA', 'ABZ', 'SOU', 'CWL', 'BOH', 'EXT',     // regionals
-      'NWI', 'INV', 'NQY', 'MME', 'PIK', 'HUY', 'DND',     // smaller regionals
-      'BFS', 'BHD', 'LDY',                                 // Northern Ireland
-    ],
-  },
+  { id: 'GB', nationality: 'GB', flightOrigins: MARKET_AIRPORTS.GB },
   // Irish departures for the Irish clients — every airport with scheduled service.
-  { id: 'IE', nationality: 'IE', flightOrigins: ['DUB', 'ORK', 'SNN', 'NOC', 'KIR'] },
+  { id: 'IE', nationality: 'IE', flightOrigins: MARKET_AIRPORTS.IE },
 ];
 
 // Offer types swept into the cache. The cache powers the offer-box widgets
@@ -704,7 +752,30 @@ async function sweepCountry(row) {
     const beforeCurrencyFilter = offers.length;
     offers = offers.filter(o => o.currency === 'GBP');
     dropped.nonGBP = beforeCurrencyFilter - offers.length;
-    for (const o of offers) o.market = market.id;
+    // TAG FROM THE DEPARTURE AIRPORT, not from the request that fetched it.
+    //
+    // The nationality we send Travelify steers pricing; it does not decide
+    // where a flight leaves from. Tagging by request meant the same offer got
+    // one tag from the GB sweep and another from the IE sweep, and since the
+    // merge key includes the market the two copies both survived and the
+    // widget drew the same holiday twice. The whole package cache was also
+    // ending up tagged IE, so every `origins: ['GB']` widget matched nothing
+    // (2 Aug 2026).
+    //
+    // Three cases, and each has one honest answer:
+    //   a departure we know   → that airport's market. Both sweeps agree, so
+    //                           the same offer dedupes to one copy.
+    //   a departure we do not → no market. Still stable across sweeps (so no
+    //                           duplicate), and the read side judges it by its
+    //                           airport anyway. Guessing 'GB' would put a
+    //                           Bucharest departure in a British widget.
+    //   no departure at all   → the sweep nationality, which for a hotel-only
+    //                           offer really is the market: it is the customer
+    //                           we priced for. The GB and IE copies are
+    //                           genuinely different offers and both are kept.
+    for (const o of offers) {
+      o.market = o.origin ? marketOfAirport(o.origin) : market.id;
+    }
     // fetched = what Travelify actually sent; count = what survived our rules.
     // The gap between them, split by reason, is the whole diagnosis.
     return { code, market: market.id, type: sweepType.id, origin: flightOrigin || undefined, ok: true, fetched: arr.length, count: offers.length, dropped, offers };

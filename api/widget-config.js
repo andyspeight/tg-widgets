@@ -15,7 +15,7 @@ import { logWidgetEvent } from './_lib/telemetry.js';
 // (email, plan) the rest of this endpoint depends on. Once every active
 // session has been re-issued under the new auth/signin + auth/sso flow
 // (which now embed email + plan natively), this fallback becomes a no-op.
-import { getRecord, listAllRecords } from './_lib/auth/airtable.js';
+import { getRecord, listAllRecords, findOneByField } from './_lib/auth/airtable.js';
 import { USERS, CLIENTS, CATALOGUE, CLIENT_ENTITLEMENTS, PACKAGE_CATALOGUE } from './_lib/auth/schema.js';
 import { normalisePlanValue } from './_lib/auth/plan.js';
 
@@ -271,7 +271,7 @@ function captureSessionClientId(user) {
  *
  * @returns {true | string} true if permitted, else a human-readable reason.
  */
-function canModifyWidget(record, { sessionClientId, userEmail }) {
+export function canModifyWidget(record, { sessionClientId, userEmail }) {
   const fields = record.fields || {};
   const widgetClientId = typeof fields.ClientRecordId === 'string'
     ? fields.ClientRecordId.trim()
@@ -301,9 +301,66 @@ function canModifyWidget(record, { sessionClientId, userEmail }) {
   }
 
   // Legacy path: no owning client recorded — fall back to creator email.
+  // 'email-mismatch' is not the final word: resolveLegacyOwner() below turns
+  // the widget's ClientEmail into an owning client and re-checks against the
+  // session. See the note there.
   if (emailMatches) return true;
   return 'email-mismatch';
 }
+
+/**
+ * Second chance for a legacy widget: work out which CLIENT its ClientEmail
+ * belongs to, so the session can be judged on ownership rather than on whose
+ * address happens to be stamped on the record.
+ *
+ * Why (2 Aug 2026). 65 of our 273 widgets predate the ClientRecordId field, so
+ * canModifyWidget() falls back to matching the signed-in email against the
+ * widget's ClientEmail. That address is the person who created it. A staff
+ * member acting as the client has their OWN email, so every one of those 65
+ * widgets was uneditable from an act-as session — which is exactly when we
+ * need to edit them, because acting as the client is how we do support. Andy
+ * hit it on a Cypher Travel offer box (ClientEmail rashad.ali@…, no
+ * ClientRecordId) and got "You do not have permission to edit this widget".
+ *
+ * This does NOT widen access. It asks the same ownership question the
+ * authoritative path asks — is the session signed into the client that owns
+ * this widget — just resolved through the email because the id was never
+ * stamped. A session belonging to any other client still fails, and a session
+ * with no client id at all is not eligible.
+ *
+ * @returns {string} the owning client record id, or '' when unresolvable.
+ */
+async function resolveLegacyOwner(widgetEmail) {
+  const email = String(widgetEmail || '').toLowerCase().trim();
+  if (!email) return '';
+  const cached = legacyOwnerCache.get(email);
+  if (cached !== undefined) return cached;
+
+  let owner = '';
+  try {
+    // The address is usually a USER of the client (whoever built the widget).
+    const userRec = await findOneByField(USERS.tableId, USERS.fields.email, email);
+    const linked = userRec && userRec.fields ? userRec.fields[USERS.fields.client] : null;
+    if (Array.isArray(linked) && typeof linked[0] === 'string') {
+      owner = linked[0];
+    } else {
+      // Older widgets carry the client's own login address instead.
+      const clientRec = await findOneByField(CLIENTS.tableId, CLIENTS.fields.email, email);
+      owner = clientRec && REC_ID_RE.test(clientRec.id) ? clientRec.id : '';
+    }
+  } catch (err) {
+    // A lookup failure must not become an authorisation grant. Deny and move
+    // on — the caller already has a 403 in hand.
+    console.warn('[widget-config] legacy owner lookup failed:', err && err.message);
+    return '';
+  }
+  if (!REC_ID_RE.test(owner)) owner = '';
+  legacyOwnerCache.set(email, owner);
+  return owner;
+}
+// Small per-instance memo. These rows change about never, and a warm lambda
+// saves two Airtable round trips on every save of a legacy widget.
+const legacyOwnerCache = new Map();
 
 // Allowed widget type names. Canonical casing — must match the Airtable
 // singleSelect "WidgetType" option names exactly (the field is case-sensitive).
@@ -924,7 +981,22 @@ export default async function handler(req, res) {
             sessionClientId: ownerClientIdFromSession,
             userEmail: user.email,
           });
-          if (verdict !== true) {
+          // A legacy widget (no ClientRecordId) only knows the address of
+          // whoever built it, so the email check denies anyone else at the
+          // same company — including a staff member acting as the client,
+          // which is how we do support. Resolve that address to its owning
+          // client and ask the real ownership question instead. Only this one
+          // verdict is eligible: every other denial stands.
+          let healOwner = '';
+          if (verdict === 'email-mismatch' && ownerClientIdFromSession) {
+            const legacyOwner = await resolveLegacyOwner((record.fields || {}).ClientEmail);
+            if (legacyOwner && legacyOwner === ownerClientIdFromSession) {
+              healOwner = legacyOwner;
+              console.log(`[widget-config] legacy widget=${widgetId} owned by ${legacyOwner} ` +
+                `via ClientEmail — permitting and stamping ClientRecordId`);
+            }
+          }
+          if (verdict !== true && !healOwner) {
             console.warn(`[widget-config] edit denied (${verdict}) widget=${widgetId} ` +
               `session=${ownerClientIdFromSession || 'none'} user=${user.email}`);
             return res.status(403).json({ error: 'You do not have permission to edit this widget' });
@@ -940,6 +1012,10 @@ export default async function handler(req, res) {
                 Config: configStr,
                 Name: safeName,
                 UpdatedAt: new Date().toISOString(),
+                // Stamp the owner we just proved, so this widget takes the
+                // fast authoritative path from now on and the backlog of
+                // 65 unstamped widgets drains itself as they get edited.
+                ...(healOwner ? { ClientRecordId: healOwner } : {}),
               },
             }),
           });
@@ -1157,12 +1233,20 @@ export default async function handler(req, res) {
       // Verify ownership — client-scoped, same rule as the edit path.
       // Prevents cross-account deletes; any user of the owning client may
       // delete, legacy widgets fall back to creator email. Fails closed.
-      const verdict = canModifyWidget(record, {
+      let allowed = canModifyWidget(record, {
         sessionClientId: ownerClientIdFromSession,
         userEmail: user.email,
       });
-      if (verdict !== true) {
-        console.warn(`[widget-config] delete denied (${verdict}) widget=${widgetId} ` +
+      // Same second chance as the edit path: a legacy widget's ClientEmail is
+      // the builder's address, not the owner, so resolve it to a client and
+      // ask whether this session belongs there. No stamping here — a record
+      // about to be deleted does not need healing.
+      if (allowed === 'email-mismatch' && ownerClientIdFromSession) {
+        const legacyOwner = await resolveLegacyOwner((record.fields || {}).ClientEmail);
+        if (legacyOwner && legacyOwner === ownerClientIdFromSession) allowed = true;
+      }
+      if (allowed !== true) {
+        console.warn(`[widget-config] delete denied (${allowed}) widget=${widgetId} ` +
           `session=${ownerClientIdFromSession || 'none'} user=${user.email}`);
         return res.status(403).json({ error: 'You do not have permission to delete this widget' });
       }
