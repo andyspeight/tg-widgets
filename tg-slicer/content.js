@@ -136,6 +136,11 @@ ${slice.html}
     }
     actions.innerHTML = "";
     actions.appendChild(button("Make Duda widget", "primary", emit));
+    // Copies the { html, css } bundle Travelgenix Sites reads. Paste it into the
+    // Import tab there and it splits itself into an editable section. See
+    // tg-sites/lib/import/slice.ts (readSlice) for the shape.
+    actions.appendChild(button("Copy for Travelgenix Sites", "primary", (b) =>
+      copy(JSON.stringify({ html: lastSlice.html, css: lastSlice.css }), b)));
     actions.appendChild(button("Copy HTML+CSS", "", (b) => copy(selfContainedHTML(lastSlice), b)));
     actions.appendChild(button("Copy slice JSON", "", (b) => copy(JSON.stringify(lastSlice, null, 2), b)));
     actions.appendChild(button("New", "", reset));

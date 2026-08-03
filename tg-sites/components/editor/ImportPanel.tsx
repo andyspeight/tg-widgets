@@ -22,6 +22,7 @@
 import { useState, useTransition } from 'react';
 
 import { previewImportAction, type ImportPreview } from '../../app/actions/import';
+import { readSlice } from '../../lib/import/slice';
 import type { Section } from '../../lib/content/schema';
 import { Icon } from './Icon';
 
@@ -138,8 +139,10 @@ export function ImportPanel({ onAdd }: { onAdd: (sections: Section[]) => void })
         <div>
           <h3>Paste a design</h3>
           <p>
-            From Relume, Figma, the slicer, or any site you have the code for. We
-            cut it into sections you can move, edit and delete like any other.
+            From Relume, Figma, or any site you have the code for. Captured a
+            section with the Slicer? Paste it straight into the HTML box and it
+            splits itself. We cut it into sections you can move, edit and delete
+            like any other.
           </p>
         </div>
       </div>
@@ -151,7 +154,20 @@ export function ImportPanel({ onAdd }: { onAdd: (sections: Section[]) => void })
           value={html}
           spellCheck={false}
           placeholder={PLACEHOLDER_HTML}
-          onChange={(event) => setHtml(event.target.value)}
+          /*
+            A Slicer bundle pasted here splits itself: readSlice pulls the markup
+            and the stylesheet apart into the two boxes. Anything that is not a
+            bundle (a person typing HTML) is left exactly where it was typed.
+          */
+          onChange={(event) => {
+            const slice = readSlice(event.target.value);
+            if (slice) {
+              setHtml(slice.html);
+              setCss(slice.css);
+            } else {
+              setHtml(event.target.value);
+            }
+          }}
         />
       </label>
 
