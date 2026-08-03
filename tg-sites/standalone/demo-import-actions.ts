@@ -20,8 +20,7 @@
 import { createBlock, createSection } from '../lib/content/factory';
 import type { Section } from '../lib/content/schema';
 import { splitImport, type ImportCandidate } from '../lib/import/sections';
-import { modelFromImport } from '../lib/import/rebuild';
-import { sectionFromModel } from '../lib/ai/section-build';
+import { rebuildSection } from '../lib/import/rebuild';
 
 // Kept in step with the real action. If those ceilings change, this is the
 // second place, and the paste is clamped the same way so the harness sees the
@@ -103,21 +102,9 @@ export type RebuildActionResult =
 /** The real rebuild, minus the auth it cannot have here. See the real action. */
 export async function rebuildImportAction(input: unknown): Promise<RebuildActionResult> {
   const props = input && typeof input === 'object' ? (input as Record<string, unknown>) : {};
-
-  let model;
   try {
-    model = modelFromImport(props);
+    return rebuildSection(props);
   } catch {
-    model = null;
-  }
-  if (!model) {
-    return { ok: false, error: 'There was nothing in this design we could rebuild as blocks.' };
-  }
-
-  const built = sectionFromModel(model);
-  if (!built.ok) {
     return { ok: false, error: 'We could not rebuild this design as blocks.' };
   }
-
-  return { ok: true, section: built.section };
 }

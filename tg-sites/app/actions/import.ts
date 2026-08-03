@@ -26,8 +26,7 @@
 import { requireTenantId } from '../../lib/auth/session';
 import { createBlock, createSection } from '../../lib/content/factory';
 import { splitImport, type ImportCandidate } from '../../lib/import/sections';
-import { modelFromImport } from '../../lib/import/rebuild';
-import { sectionFromModel } from '../../lib/ai/section-build';
+import { rebuildSection } from '../../lib/import/rebuild';
 import type { Section } from '../../lib/content/schema';
 
 /**
@@ -174,20 +173,9 @@ export async function rebuildImportAction(input: unknown): Promise<RebuildAction
 
   const props = input && typeof input === 'object' ? (input as Record<string, unknown>) : {};
 
-  let model;
   try {
-    model = modelFromImport(props);
+    return rebuildSection(props);
   } catch {
-    model = null;
-  }
-  if (!model) {
-    return { ok: false, error: 'There was nothing in this design we could rebuild as blocks.' };
-  }
-
-  const built = sectionFromModel(model);
-  if (!built.ok) {
     return { ok: false, error: 'We could not rebuild this design as blocks.' };
   }
-
-  return { ok: true, section: built.section };
 }

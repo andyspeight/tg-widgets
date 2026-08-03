@@ -1305,6 +1305,7 @@ export function EditorShell({
             isItem: !!itemId,
             itemMeta,
             onItemMeta: setItemMeta,
+            onSelect: select,
           }}
         />
       )}

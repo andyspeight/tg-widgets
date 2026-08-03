@@ -11,7 +11,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { modelFromImport } from '../lib/import/rebuild';
+import { modelFromImport, rebuildSection } from '../lib/import/rebuild';
 import { sectionFromModel } from '../lib/ai/section-build';
 import { isIconName } from '../lib/content/icons';
 
@@ -254,6 +254,40 @@ describe('rebuilding an imported design', () => {
     expect(model?.rows.some((row) => row.columns.length === 3)).toBe(true);
     const built = sectionFromModel(model);
     expect(built.ok).toBe(true);
+  });
+
+  /*
+   * THE FORMATTING THAT MUST NOT BE LOST. loveholidays' section is white text on
+   * a solid blue band. Rebuilt to a white section it looked stripped, which is
+   * what Andy reported. rebuildSection reads the design's own background off its
+   * CSS and carries it, with a dark tone so the text stays light.
+   */
+  describe('carrying the background through rebuildSection', () => {
+    it('carries a dark background and turns the tone dark', () => {
+      const html = '<div class="root"><h2>Why book with us</h2><p>Some copy.</p></div>';
+      const css = '.root { background-color: rgb(3, 116, 218); color: rgb(255,255,255); }';
+      const result = rebuildSection({ html, css, fields: [], content: {}, label: 'Why' });
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.section.box.background).toBe('rgb(3, 116, 218)');
+      expect(result.section.tone).toBe('dark');
+    });
+
+    it('leaves a plain white or transparent background alone', () => {
+      const white = rebuildSection({
+        html: '<div class="r"><h2>Hi</h2></div>',
+        css: '.r { background-color: rgb(255, 255, 255); }',
+        fields: [], content: {},
+      });
+      expect(white.ok && white.section.box.background).toBeFalsy();
+
+      const clear = rebuildSection({
+        html: '<div class="r"><h2>Hi</h2></div>',
+        css: '.r { background-color: rgba(0, 0, 0, 0); }',
+        fields: [], content: {},
+      });
+      expect(clear.ok && clear.section.box.background).toBeFalsy();
+    });
   });
 
   it('is null for a design with nothing we can rebuild', () => {

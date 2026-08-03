@@ -36,6 +36,8 @@ import { parseFragment, type DefaultTreeAdapterMap } from 'parse5';
 
 import { importContent, importFields } from '../content/imported';
 import { isIconName, searchIcons } from '../content/icons';
+import { sectionFromModel } from '../ai/section-build';
+import { safeColour, type Section, type Tone } from '../content/schema';
 import type { ImportField } from './tokenise';
 import { escapeText } from './html';
 
@@ -51,6 +53,10 @@ interface ModelBlock {
 export interface RebuildModel {
   name?: string;
   rows: { columns: { blocks: ModelBlock[] }[] }[];
+  /** The design's own background colour, carried onto the section's box. */
+  background?: string;
+  /** Set dark when that background is dark, so the section's text stays light. */
+  tone?: Tone;
 }
 
 const TOKEN = /\{\{tg:([a-z]\d{1,3})\}\}/g;
@@ -589,5 +595,82 @@ export function modelFromImport(props: Record<string, unknown>): RebuildModel | 
   const model: RebuildModel = { rows };
   const label = typeof props.label === 'string' ? props.label.trim() : '';
   if (label) model.name = label.slice(0, 80);
+
+  // Carry the design's own background so the rebuild is not stripped to white.
+  const css = typeof props.css === 'string' ? props.css : '';
+  const background = rootBackground(html, css);
+  if (background) {
+    model.background = background.colour;
+    if (background.dark) model.tone = 'dark';
+  }
+
   return model;
+}
+
+/**
+ * The outermost element's solid background colour, if it set one.
+ *
+ * Read from the design's own CSS, matched to the first element's classes, and
+ * put through safeColour so nothing but a real colour reaches the section. A
+ * transparent or white background is nothing to carry, so it is skipped. The
+ * luminance decides the tone: a dark band gets tone 'dark' so its text stays
+ * light, which is what the source did with a white-on-blue panel like this one.
+ */
+function rootBackground(html: string, css: string): { colour: string; dark: boolean } | undefined {
+  const opening = /<[a-z][a-z0-9]*[^>]*\bclass="([^"]+)"/i.exec(html);
+  if (!opening) return undefined;
+
+  for (const raw of opening[1].split(/\s+/)) {
+    const cls = raw.replace(/[^a-z0-9_-]/gi, '');
+    if (!cls) continue;
+    const rule = new RegExp('\\.' + cls + '\\s*\\{([^}]*)\\}', 'i').exec(css);
+    if (!rule) continue;
+    const declared = /background-color:\s*([^;]+)/i.exec(rule[1]);
+    if (!declared) continue;
+
+    const rgb = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([0-9.]+)\s*)?\)/i.exec(declared[1]);
+    if (rgb && rgb[4] !== undefined && Number.parseFloat(rgb[4]) === 0) continue; // transparent
+
+    const colour = safeColour(declared[1].trim());
+    if (!colour || colour === 'transparent') continue;
+    if (colour === '#fff' || colour === '#ffffff' || colour === 'rgb(255, 255, 255)') continue;
+
+    const dark = rgb
+      ? (0.299 * Number(rgb[1]) + 0.587 * Number(rgb[2]) + 0.114 * Number(rgb[3])) / 255 < 0.55
+      : false;
+    return { colour, dark };
+  }
+  return undefined;
+}
+
+/**
+ * The whole job: an imported block's props to a validated, editable Section.
+ *
+ * modelFromImport reads it, sectionFromModel makes it real and safe, and the
+ * design's own background is set on the section afterwards, since that is a
+ * section property sectionFromModel does not carry. Shared by the real action
+ * and the standalone double so the two cannot drift.
+ */
+export function rebuildSection(
+  props: Record<string, unknown>,
+): { ok: true; section: Section } | { ok: false; error: string } {
+  const model = modelFromImport(props);
+  if (!model) {
+    return { ok: false, error: 'There was nothing in this design we could rebuild as blocks.' };
+  }
+
+  const built = sectionFromModel(model);
+  if (!built.ok) {
+    return { ok: false, error: 'We could not rebuild this design as blocks.' };
+  }
+
+  let section = built.section;
+  if (model.background) {
+    section = {
+      ...section,
+      tone: model.tone ?? section.tone,
+      box: { ...section.box, background: model.background },
+    };
+  }
+  return { ok: true, section };
 }

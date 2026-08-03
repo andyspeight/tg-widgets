@@ -55,6 +55,12 @@ export interface OptionsProps {
   isItem: boolean;
   itemMeta?: ItemMeta;
   onItemMeta?: (next: ItemMeta) => void;
+  /**
+   * Move the selection, so the imported block's "Make editable" can point the
+   * editor at the rebuilt section. Without it the popover stays anchored to the
+   * block it just replaced, which is now gone, and cannot be closed.
+   */
+  onSelect?: (path: Path | null) => void;
 }
 
 interface Anchor {
@@ -282,6 +288,7 @@ export function ItemToolbar({
               selected={selected}
               isStaff={options.isStaff}
               onCommit={onCommit}
+              onSelect={options.onSelect}
               region={options.region}
               regionFlags={options.regionFlags}
               onRegionFlags={options.onRegionFlags}
