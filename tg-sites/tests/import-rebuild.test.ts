@@ -127,6 +127,82 @@ describe('rebuilding an imported design', () => {
     expect(heading?.props.html).not.toContain('<b>');
   });
 
+  /*
+   * THE REAL-WORLD SHAPES, and the ones that broke on the first cut.
+   *
+   * A live marketing page does not write an h3 and a p. A card is a div or a
+   * link full of utility classes, its title and body are spans styled to look
+   * like a heading, and its icon is an SVG in its own box. These pin that the
+   * rebuilder reads structure rather than tags, so the loveholidays "why book
+   * with us" section comes back as six icon-and-text cards, not one run-together
+   * paragraph. This is the exact failure from 3 Aug 2026.
+   */
+  const wcard = (icon: string, title: string, body: string) =>
+    `<a class="benefit" href="#"><span class="ic">${icon}</span>` +
+    `<span class="t">${title}</span><span class="b">${body}</span></a>`;
+
+  it('rebuilds link cards with span title and body, not one run-together blob', () => {
+    const svg = '<svg><path d="M1 1"></path></svg>';
+    const html =
+      '<section><h2>Why book with us</h2><div class="grid">' +
+      wcard(svg, 'Loved by millions', 'Join over 19 million holidaymakers') +
+      wcard(svg, 'ATOL protected', 'Financial cover for every package') +
+      wcard(svg, 'Best Price Promise', 'We will beat any cheaper deal') +
+      '</div></section>';
+    const model = modelFromImport({ html, fields: [], content: {}, label: 'Why book with us' });
+    const blocks = allBlocks(model);
+
+    // The heading is there, three icon-and-text cards are there, and crucially
+    // there is NO single text block with everything crushed together.
+    expect(blocks.filter((block) => block.type === 'icon-item').length).toBe(3);
+    const items = blocks.filter((block) => block.type === 'icon-item');
+    expect(items[0].props.title).toBe('Loved by millions');
+    expect(items[0].props.body).toBe('Join over 19 million holidaymakers');
+    // The words never run together across the two spans.
+    for (const block of blocks) {
+      const text = JSON.stringify(block.props);
+      expect(text).not.toMatch(/millionsJoin|holidaymakersATOL|packageBest/);
+    }
+  });
+
+  it('sees the icon and the words when each sits in its own wrapper box', () => {
+    const card = (t: string, b: string) =>
+      `<div class="benefit"><div class="icon"><svg><path d="M1 1"></path></svg></div>` +
+      `<div class="text"><div class="t">${t}</div><div class="b">${b}</div></div></div>`;
+    const html =
+      `<section><h2>Why</h2><div class="grid">${card('ATOL protected', 'Covered.')}${card('Best price', 'We beat it.')}${card('Real people', 'On the phone.')}</div></section>`;
+    const items = allBlocks(modelFromImport({ html, fields: [], content: {}, label: '' })).filter(
+      (block) => block.type === 'icon-item',
+    );
+    expect(items.length).toBe(3);
+    expect(items[0].props.title).toBe('ATOL protected');
+    expect(items[0].props.body).toBe('Covered.');
+  });
+
+  it('keeps a real icon image, as a picture beside the words', () => {
+    const html =
+      '<section><div class="grid">' +
+      '<div class="b"><img src="https://cdn.test/atol.svg" alt="ATOL"><h3>ATOL protected</h3><p>Covered.</p></div>' +
+      '<div class="b"><img src="https://cdn.test/trust.svg" alt="Trust"><h3>Trusted</h3><p>19 million.</p></div>' +
+      '</div></section>';
+    const blocks = allBlocks(modelFromImport({ html, fields: [], content: {}, label: '' }));
+    // The badge is preserved rather than guessed away.
+    expect(blocks.filter((block) => block.type === 'image').length).toBe(2);
+    expect(blocks.find((block) => block.type === 'image')?.props.src).toBe('https://cdn.test/atol.svg');
+    expect(blocks.some((block) => block.type === 'heading' && String(block.props.html).includes('ATOL'))).toBe(true);
+  });
+
+  it('does not turn a row of nav links into a grid of columns', () => {
+    const html =
+      '<section><nav><a href="/a">Home</a><a href="/b">Holidays</a><a href="/c">Deals</a></nav>' +
+      '<h2>Welcome</h2><p>The body.</p></section>';
+    const model = modelFromImport({ html, fields: [], content: {}, label: '' });
+    // No row of three single-word columns: the nav is not card content.
+    const threeCols = model?.rows.filter((row) => row.columns.length === 3) ?? [];
+    expect(threeCols.length).toBe(0);
+    expect(allBlocks(model).some((block) => block.type === 'heading')).toBe(true);
+  });
+
   it('is null for a design with nothing we can rebuild', () => {
     expect(modelFromImport({ html: '<div><svg><path d="M0 0"></path></svg></div>', fields: [], content: {} })).toBeNull();
     expect(modelFromImport({ html: '', fields: [], content: {} })).toBeNull();
