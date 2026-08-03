@@ -45,7 +45,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.2';
+  const VERSION = '1.0.3';
 
   // ---------- Helpers ----------
   function esc(s) {
@@ -128,7 +128,13 @@
       max-width: 100%;
       text-align: var(--tgx-align, center);
       font-family: var(--tgx-font, inherit);
-      font-size: clamp(20px, var(--tgx-size-vw, 5vw), var(--tgx-size, 64px));
+      /* Fluid between a floor and the author's chosen size. The floor is the
+         SMALLER of 20px and the chosen size, so a big headline still never
+         shrinks below 20px on a narrow screen (unchanged), but a size set below
+         20px (down to 10px) renders at exactly that size instead of being
+         floored back up to 20px. Do not hard-code 20px here — that was the
+         reason a 10pt setting still drew 20pt (Andy, 3 Aug 2026). */
+      font-size: clamp(min(20px, var(--tgx-size, 64px)), var(--tgx-size-vw, 5vw), var(--tgx-size, 64px));
       font-weight: var(--tgx-weight, 700);
       line-height: var(--tgx-leading, 1.15);
       letter-spacing: var(--tgx-tracking, -0.02em);
@@ -447,7 +453,9 @@
     /* Responsive size scaling */
     @media (max-width: 640px) {
       .tgx-stage {
-        font-size: clamp(18px, var(--tgx-size-vw-mobile, 8vw), var(--tgx-size, 64px));
+        /* Same floor logic as desktop: min(18px, chosen size) so a sub-18px
+           setting is honoured on mobile rather than floored to 18px. */
+        font-size: clamp(min(18px, var(--tgx-size, 64px)), var(--tgx-size-vw-mobile, 8vw), var(--tgx-size, 64px));
       }
     }
   `;
@@ -610,7 +618,7 @@
         `--tgx-radius: ${clamp(c.radius, 0, 48)}px`,
         `--tgx-pad-y: ${clamp(c.paddingY, 0, 200)}px`,
         `--tgx-pad-x: ${clamp(c.paddingX, 0, 200)}px`,
-        `--tgx-size: ${clamp(c.fontSize, 12, 240)}px`,
+        `--tgx-size: ${clamp(c.fontSize, 10, 240)}px`,
         `--tgx-weight: ${clamp(c.fontWeight, 100, 900)}`,
         `--tgx-tracking: ${Number(c.letterSpacing).toFixed(3)}em`,
         `--tgx-leading: ${clamp(c.lineHeight, 0.8, 2.5)}`,
