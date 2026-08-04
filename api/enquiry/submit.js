@@ -37,6 +37,7 @@ import sendAutoReply     from './_lib/routing/auto-reply.js';
 import sendWebhook       from './_lib/routing/webhook.js';
 import sendToGoogleSheets from './_lib/routing/google-sheets.js';
 import sendToAgentAirtable from './_lib/routing/airtable.js';
+import sendToLunaWork     from './_lib/routing/luna-work.js';
 
 // ---------- Config -----------------------------------------------------------
 
@@ -101,6 +102,9 @@ const FORM_FIELDS = {
   routingLunaMarketing:  'fld1HDVC7zzb5LL4d',
   routingLunaChat:       'fldrnewg30EV3xMzY',
   routingLunaWork:       'fld3RUFhBQPmFZpAW',
+  lunaWorkKey:           'fldG6LfpJb5sA1HkV',
+  lunaWorkSecret:        'fldNmeld83IwtYlxT',
+  lunaWorkEndpoint:      'fldxdR9nVUqCfzCbg',
 };
 
 // Submissions field IDs (write target)
@@ -776,7 +780,7 @@ async function fanOutRouting({ form, payload, submissionId, reference, meta }) {
     { key: 'webhook',        always: false, on: f[FORM_FIELDS.routingWebhook],        handler: sendWebhook },
     { key: 'luna-chat',      always: false, on: f[FORM_FIELDS.routingLunaChat],       loader:  () => import('./_lib/routing/luna-chat.js') },
     { key: 'luna-marketing', always: false, on: f[FORM_FIELDS.routingLunaMarketing],  loader:  () => import('./_lib/routing/luna-marketing.js') },
-    { key: 'luna-work',      always: false, on: f[FORM_FIELDS.routingLunaWork],       loader:  () => import('./_lib/routing/luna-work.js') },
+    { key: 'luna-work',      always: false, on: f[FORM_FIELDS.routingLunaWork],       handler: sendToLunaWork },
   ].filter(r => r.always || r.on);
 
   // Luna Marketing only fires if the visitor gave marketing consent
