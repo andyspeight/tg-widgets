@@ -538,3 +538,130 @@
 
 .mp-alt__ai:hover:not(:disabled) { border-color: var(--ed-accent); }
 .mp-alt__ai:disabled { opacity: 0.5; cursor: default; }
+
+/* ------------------------------------------------------------------ */
+/* The image editor: focus point and adjustments                      */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Two columns that wrap to one: the picture on the left, the tools on the
+ * right. The picture SHRINK-WRAPS its frame rather than filling a fixed box,
+ * which is the whole trick that keeps the click maths honest. The frame's
+ * rectangle is the picture's rectangle, so a click at 30% across the frame is
+ * 30% across the photograph, whatever shape the photograph is. Letterbox the
+ * picture inside a wider frame and that stops being true, and the focus point
+ * lands somewhere the person did not click.
+ */
+.ed-imgedit {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ed-5);
+  align-items: flex-start;
+}
+
+.ed-imgedit__frame {
+  position: relative;
+  display: block;
+  /* fit-content, so the frame is exactly as wide as the picture inside it and
+     no wider than the space it is given. */
+  width: fit-content;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  overflow: hidden;
+  background: var(--ed-sunken);
+  cursor: crosshair;
+  /* No baseline gap under the image, so the frame hugs it top and bottom. */
+  line-height: 0;
+  /* A drag SETS THE POINT. Without this, dragging on a touch screen scrolls the
+     dialog instead of moving the focus, and the gesture the control is built
+     around does nothing. */
+  touch-action: none;
+}
+
+.ed-imgedit__frame:focus-visible {
+  outline: 2px solid var(--ed-select);
+  outline-offset: 2px;
+}
+
+.ed-imgedit__frame img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  /* Tall pictures are held to the dialog, so a portrait cannot push the Save
+     button off the bottom of the screen. */
+  max-height: 58vh;
+  /*
+   * The clicks and the drags belong to the frame. The picture and the marker
+   * are painted over it with pointer-events off, so a press anywhere, the
+   * marker included, still lands on the frame and moves the point rather than
+   * being swallowed by whatever sat on top.
+   */
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/*
+ * The marker sits ON the focus point and is centred on it by the translate, so
+ * its middle is the point, not its top-left. Two rings, one light and one dark,
+ * so it stays visible on a pale sky and on a dark sea alike.
+ */
+.ed-imgedit__dot {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  transform: translate(-50%, -50%);
+  border: 2px solid #ffffff;
+  border-radius: var(--ed-r-full);
+  background: rgba(37, 99, 235, 0.32);
+  box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.55), 0 1px 5px rgba(15, 23, 42, 0.45);
+  pointer-events: none;
+}
+
+.ed-imgedit__tools {
+  flex: 1 1 220px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-4);
+  min-width: 0;
+}
+
+.ed-imgedit__hint {
+  margin: 0;
+  font-size: var(--ed-text-xs);
+  line-height: 1.5;
+  color: var(--ed-ink-3);
+}
+
+.ed-imgedit__slider {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-1);
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink-2);
+}
+
+.ed-imgedit__slider-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ed-2);
+  font-weight: 500;
+}
+
+.ed-imgedit__slider-val {
+  color: var(--ed-ink-3);
+  font-size: var(--ed-text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.ed-imgedit__slider input[type='range'] {
+  width: 100%;
+  accent-color: var(--ed-select);
+  cursor: pointer;
+}

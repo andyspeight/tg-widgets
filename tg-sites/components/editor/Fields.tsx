@@ -116,6 +116,24 @@ export function FieldRenderer({
             onPatch={onPatch}
             urlKey={field.key}
             altKey="alt"
+            /*
+              The focus point and the adjustments, read off the block's own props
+              and handed to the editor, but ONLY on the field that owns them. The
+              image block's src field carries `focus`; a gallery tile's or a
+              logo's does not, so those keep the plain chooser and no misleading
+              Edit button.
+            */
+            edit={
+              field.focus
+                ? {
+                    focusX: numFrom(siblings?.focusX, 50),
+                    focusY: numFrom(siblings?.focusY, 50),
+                    brightness: numFrom(siblings?.brightness, 100),
+                    contrast: numFrom(siblings?.contrast, 100),
+                    saturation: numFrom(siblings?.saturation, 100),
+                  }
+                : undefined
+            }
           />
         </Wrapper>
       );
@@ -563,4 +581,10 @@ function RichText({ html, onChange }: { html: string; onChange: (value: string) 
 
 function asString(value: unknown): string {
   return typeof value === 'string' ? value : '';
+}
+
+/** A stored number, or the fallback when the prop is missing or not one. */
+function numFrom(value: unknown, fallback: number): number {
+  const n = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(n) ? n : fallback;
 }

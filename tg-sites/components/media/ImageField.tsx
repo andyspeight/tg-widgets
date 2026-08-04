@@ -28,6 +28,7 @@ import { useState } from 'react';
 import { safeUrl } from '../../lib/content/sanitise';
 import type { MediaItem } from '../../lib/media/types';
 import { Icon } from '../editor/Icon';
+import { ImageEditor, type ImageEdit } from './ImageEditor';
 import { MediaPicker } from './MediaPicker';
 
 interface Props {
@@ -46,11 +47,24 @@ interface Props {
   altKey?: string;
   /** The prop name this control writes the URL to. Needed only with onPatch. */
   urlKey?: string;
+  /**
+   * The picture's current focus point and adjustments, when this control is
+   * standing in front of a block that HAS them (the image block does; a
+   * background or a social preview does not). Its presence, with onPatch, is
+   * what turns on the Edit button and the editor behind it. Absent, the field is
+   * exactly the chooser it always was.
+   */
+  edit?: Partial<ImageEdit>;
 }
 
-export function ImageField({ value, onChange, onPatch, altKey, urlKey }: Props) {
+export function ImageField({ value, onChange, onPatch, altKey, urlKey, edit }: Props) {
   const [picking, setPicking] = useState(false);
+  const [editing, setEditing] = useState(false);
   const [showUrl, setShowUrl] = useState(false);
+
+  // The editor needs somewhere to write its five numbers back, so it is offered
+  // only when the caller can take a patch and has told us the block carries them.
+  const canEdit = Boolean(edit && onPatch);
 
   function choose(item: MediaItem) {
     setPicking(false);
@@ -108,6 +122,11 @@ export function ImageField({ value, onChange, onPatch, altKey, urlKey }: Props) 
             <button type="button" className="tg-btn" onClick={() => setPicking(true)}>
               Replace
             </button>
+            {canEdit && (
+              <button type="button" className="tg-btn" onClick={() => setEditing(true)}>
+                Edit
+              </button>
+            )}
             <button
               type="button"
               className="tg-btn"
@@ -174,6 +193,20 @@ export function ImageField({ value, onChange, onPatch, altKey, urlKey }: Props) 
           currentUrl={value || undefined}
           onChoose={choose}
           onClose={() => setPicking(false)}
+        />
+      )}
+
+      {editing && canEdit && value && (
+        <ImageEditor
+          src={value}
+          value={edit ?? {}}
+          onSave={(next) => {
+            setEditing(false);
+            // The five numbers land in one patch, so a focus nudge and a
+            // brightness tweak taken together undo together.
+            onPatch?.({ ...next });
+          }}
+          onClose={() => setEditing(false)}
         />
       )}
     </>

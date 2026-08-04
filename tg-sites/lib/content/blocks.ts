@@ -33,7 +33,14 @@ export type Field =
   | { kind: 'textarea'; key: string; label: string; rows?: number; max?: number; help?: string }
   | { kind: 'richtext'; key: string; label: string; help?: string }
   | { kind: 'url'; key: string; label: string; placeholder?: string; help?: string }
-  | { kind: 'image'; key: string; label: string; help?: string }
+  /*
+   * `focus` turns on the image editor, the focus point and the adjustments,
+   * beside the chooser. Only the image block sets it: a gallery tile, a logo or
+   * a background is a picture too, but not one a client sets a focus point on
+   * from here, so they get the plain chooser. Set where the block that owns the
+   * five props is, so the button and the props it writes cannot drift apart.
+   */
+  | { kind: 'image'; key: string; label: string; help?: string; focus?: boolean }
   /*
    * An icon from the library. Stores a NAME, not markup, and the field also
    * accepts a typed character so that every page built before the library
@@ -465,11 +472,23 @@ export const BLOCKS: readonly BlockDefinition[] = [
      * renderer can reserve the right space before the image loads. There is no
      * field for them below and there should not be: a client typing a wrong
      * number would make the page jump rather than stop it.
+     *
+     * focusX, focusY and the three adjustments are SET IN THE IMAGE EDITOR, not
+     * by a field either. Focus is a percentage across and down, so 50/50 is the
+     * middle, and it is what the picture crops around when a shape crops it.
+     * Brightness, contrast and saturation are percentages where 100 is the
+     * photograph untouched. All five are edited by clicking and dragging in the
+     * editor rather than typed, and the renderer clamps them, so there is no
+     * field and nothing to sanitise on the way in beyond the numbers the render
+     * already pins to their range.
      */
-    defaults: { src: '', alt: '', ratio: 'auto', fit: 'cover', radius: 'md', caption: '', href: '', width: 0, height: 0 },
+    defaults: {
+      src: '', alt: '', ratio: 'auto', fit: 'cover', radius: 'md', caption: '', href: '', width: 0, height: 0,
+      focusX: 50, focusY: 50, brightness: 100, contrast: 100, saturation: 100,
+    },
     summarise: (props) => asString(props.alt) || asString(props.caption) || 'Image',
     fields: [
-      { kind: 'image', key: 'src', label: 'Image' },
+      { kind: 'image', key: 'src', label: 'Image', focus: true },
       {
         kind: 'text',
         key: 'alt',

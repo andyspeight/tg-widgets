@@ -369,6 +369,38 @@ export function ImageBlock({ props }: { props: Props }): ReactElement {
   const height = clamp(props.height, 0, 20000, 0);
   const measured = ratio === 'auto' && width > 0 && height > 0;
 
+  /*
+   * THE FOCUS POINT AND THE ADJUSTMENTS, PINNED TO THEIR RANGE HERE.
+   *
+   * These are set by clicking and dragging in the image editor, not typed, and
+   * they pass through the save untouched the same way width and height do. So
+   * the render is where they are made safe: every one is turned into a number
+   * and clamped, and the CSS is built from those numbers rather than from
+   * anything a stored string could carry, which is what keeps a hand-edited
+   * `filter` or `object-position` from ever reaching the page.
+   *
+   * Focus is a percentage across and down, so it drives object-position and
+   * decides which part of the picture stays in view when a shape crops it.
+   * A filter is emitted only when an adjustment is actually off its default, so
+   * an untouched photograph carries no filter at all.
+   */
+  const focusX = clamp(props.focusX, 0, 100, 50);
+  const focusY = clamp(props.focusY, 0, 100, 50);
+  const brightness = clamp(props.brightness, 0, 200, 100);
+  const contrast = clamp(props.contrast, 0, 200, 100);
+  const saturation = clamp(props.saturation, 0, 200, 100);
+
+  const adjustments: string[] = [];
+  if (brightness !== 100) adjustments.push(`brightness(${brightness}%)`);
+  if (contrast !== 100) adjustments.push(`contrast(${contrast}%)`);
+  if (saturation !== 100) adjustments.push(`saturate(${saturation}%)`);
+
+  const imageStyle: CSSProperties = {
+    objectFit: fit,
+    objectPosition: `${focusX}% ${focusY}%`,
+    ...(adjustments.length ? { filter: adjustments.join(' ') } : {}),
+  };
+
   const picture = (
     <div className="tgs-image__frame" data-radius={radius} style={ratioStyle(ratio)}>
       {/* Plain img rather than next/image: sources are arbitrary client URLs
@@ -381,7 +413,7 @@ export function ImageBlock({ props }: { props: Props }): ReactElement {
         decoding="async"
         width={measured ? width : undefined}
         height={measured ? height : undefined}
-        style={{ objectFit: fit }}
+        style={imageStyle}
       />
     </div>
   );

@@ -1715,6 +1715,107 @@ await check('the picker does not scroll the page sideways', async () => {
 
 
 // ---------------------------------------------------------------------------
+// The image editor: the focus point and the adjustments
+// ---------------------------------------------------------------------------
+
+/*
+ * Andy, 3 Aug 2026: "select the exact focus point of the image by clicking on
+ * it and then saving", and editing tools for each image.
+ *
+ * The picker's demo doubles hand back a 400x300 data: URI, which actually loads,
+ * so the editor frame has a real size to click inside. That lets this drive the
+ * whole gesture end to end: place a picture, click a point on it, nudge an
+ * adjustment, save, and then read the object-position and the filter that
+ * reached the rendered page. The one seam is that the page refuses a data: URI,
+ * so the last step swaps the src for an address it accepts WITHOUT touching the
+ * five numbers the editor saved, the same trick the picker checks above use.
+ */
+
+/** A placed image that really loads, so the editor frame has dimensions. */
+async function placeALoadableImage() {
+  await closeAnyDialog();
+  if ((await page.locator('.mp-choose, .mp-chosen').count()) === 0) await selectAnImageBlock();
+  await openPicker();
+  await page.locator('.mp-tile__pick').first().click();
+  await page.waitForTimeout(300);
+}
+
+// The focus point the click set, in per cent, captured so the render check can
+// assert the SAME numbers reached the page rather than a guess at them.
+let editedFocus = { x: 50, y: 50 };
+
+await check('a placed image offers an Edit tool beside Replace', async () => {
+  await placeALoadableImage();
+  const edit = await page.locator('.mp-chosen__actions button', { hasText: 'Edit' }).count();
+  return edit === 1 ? true : `${edit} Edit buttons`;
+});
+
+await check('Edit opens the image editor on the picture', async () => {
+  await page.locator('.mp-chosen__actions button', { hasText: 'Edit' }).first().click();
+  await page.waitForSelector('.ed-imgedit', { timeout: 5000 });
+  const title = await page.locator('.tg-modal__title').last().innerText();
+  return title === 'Edit image' ? true : `the dialog is titled "${title}"`;
+});
+
+await check('clicking the picture sets the focus point where you click', async () => {
+  const frame = page.locator('.ed-imgedit__frame');
+  const box = await frame.boundingBox();
+  if (!box || box.width < 20 || box.height < 20) {
+    return `the frame is ${Math.round(box?.width ?? 0)}x${Math.round(box?.height ?? 0)}`;
+  }
+  // A quarter across and three-quarters down: off-centre on both axes, so
+  // neither reading is the 50 it started at.
+  await frame.click({ position: { x: box.width * 0.25, y: box.height * 0.75 } });
+  await page.waitForTimeout(150);
+  const dot = await page.locator('.ed-imgedit__dot').evaluate((el) => ({
+    left: parseFloat(el.style.left),
+    top: parseFloat(el.style.top),
+  }));
+  editedFocus = { x: Math.round(dot.left), y: Math.round(dot.top) };
+  return Math.abs(dot.left - 25) <= 5 && Math.abs(dot.top - 75) <= 5
+    ? true
+    : `the marker sits at ${dot.left}% ${dot.top}%`;
+});
+
+await check('an adjustment previews live on the picture', async () => {
+  const range = page
+    .locator('.ed-imgedit__slider', { hasText: 'Brightness' })
+    .locator('input[type="range"]');
+  // A React-controlled range ignores a plain value set, so go through the native
+  // setter and fire the input event it listens for.
+  await range.evaluate((el) => {
+    const set = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+    set.call(el, '150');
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await page.waitForTimeout(150);
+  const filter = await page.locator('.ed-imgedit__frame img').evaluate((el) => el.style.filter);
+  return /brightness\(150%\)/.test(filter) ? true : `the filter reads "${filter}"`;
+});
+
+await check('saving writes the focus point and the adjustment onto the page', async () => {
+  await page.locator('.tg-modal__foot button', { hasText: 'Save' }).first().click();
+  await page.waitForTimeout(250);
+  if ((await page.locator('.ed-imgedit').count()) !== 0) return 'the editor stayed open';
+
+  if ((await page.locator('.mp-url .ed-input').count()) === 0) {
+    await page.locator('.mp-url__toggle').first().click();
+  }
+  await page.locator('.mp-url .ed-input').first().fill('https://images.example.test/focus.jpg');
+  await page.waitForTimeout(300);
+
+  const style =
+    (await page
+      .locator('.ed-canvas-frame .tgs-image__frame img')
+      .first()
+      .getAttribute('style')) ?? '';
+  const position = new RegExp(`object-position:\\s*${editedFocus.x}% ${editedFocus.y}%`).test(style);
+  const filter = /filter:\s*brightness\(150%\)/.test(style);
+  return position && filter ? true : `the rendered style is "${style}"`;
+});
+
+
+// ---------------------------------------------------------------------------
 // The floating text toolbar
 // ---------------------------------------------------------------------------
 
