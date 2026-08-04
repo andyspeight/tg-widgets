@@ -470,6 +470,7 @@ export function ImageBlock({ props }: { props: Props }): ReactElement {
             className="tgs-slideshow"
             data-transition={transition}
             data-count={count}
+            data-interval={interval}
             data-dots={showDots ? 'true' : undefined}
             data-arrows={showArrows ? 'true' : undefined}
             style={{ '--tgs-ss-cycle': `${count * interval}s` } as CSSProperties}

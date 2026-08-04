@@ -5,6 +5,7 @@ import '../../../components/sites/sites.css';
 import { PageRenderer } from '../../../components/render/PageRenderer';
 import { RegionRenderer } from '../../../components/render/RegionRenderer';
 import { WidgetScripts } from '../../../components/render/WidgetScripts';
+import { SlideshowScript } from '../../../components/render/SlideshowScript';
 import { FontHead } from '../../../components/render/FontHead';
 import { listFontFaces } from '../../../lib/db/fonts';
 import { getPublishedPage } from '../../../lib/db/pages';
@@ -194,6 +195,9 @@ export default async function PublishedPage({ params }: Params) {
       <RegionRenderer region={found.regions.footer} theme={theme} />
 
       <WidgetScripts
+        trees={[found.regions.header, found.page.content, found.regions.footer]}
+      />
+      <SlideshowScript
         trees={[found.regions.header, found.page.content, found.regions.footer]}
       />
     </>

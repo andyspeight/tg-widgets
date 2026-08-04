@@ -8,6 +8,7 @@ import { safeUrl } from '../../../../lib/content/sanitise';
 import { RegionRenderer } from '../../../../components/render/RegionRenderer';
 import { SiteBody, SiteHead } from '../../../../components/render/SiteHead';
 import { WidgetScripts } from '../../../../components/render/WidgetScripts';
+import { SlideshowScript } from '../../../../components/render/SlideshowScript';
 import { listFontFaces } from '../../../../lib/db/fonts';
 import { getPublishedPage } from '../../../../lib/db/pages';
 import { resolveRedirect } from '../../../../lib/db/redirects';
@@ -358,6 +359,15 @@ export default async function SitePage({ params }: Params) {
       {/* One script per distinct widget across all three, rather than each tree
           emitting its own and fetching the same file up to three times. */}
       <WidgetScripts
+        trees={[
+          found.regions.header,
+          found.page ? found.page.content : found.entry!.item,
+          found.regions.footer,
+        ]}
+      />
+
+      {/* And, once, the slideshow enhancer, if any of the three holds one. */}
+      <SlideshowScript
         trees={[
           found.regions.header,
           found.page ? found.page.content : found.entry!.item,
