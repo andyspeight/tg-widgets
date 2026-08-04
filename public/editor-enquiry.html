@@ -3050,6 +3050,7 @@
         headerTitle: 'Tell us about your dream holiday',
         headerSubtitle: "Share a few details and one of our travel specialists will come back within 24 hours.",
         submitButtonText: 'Send my enquiry',
+        replyBadge: '',
         thankYouMode: 'inline',
         thankYouMessage: "Thanks {firstName} — we're on it",
         redirectUrl: '',
@@ -3358,6 +3359,7 @@
         name: cfg.name || 'Preview',
         header: { title: cfg.headerTitle, subtitle: cfg.headerSubtitle },
         submitText: cfg.submitButtonText,
+        replyBadge: cfg.replyBadge || '',
         thankYou: { mode: cfg.thankYouMode, message: cfg.thankYouMessage, redirectUrl: cfg.redirectUrl },
         branding: {
           buttonColour: cfg.buttonColour,
@@ -5175,6 +5177,14 @@
           maxlength: 500,
           hint: 'Shown below the title. Optional.',
           onInput: (v) => { state.config.headerSubtitle = v; markDirtyAndSync(); }
+        }),
+        labelledInput({
+          label: 'Reply-time badge',
+          value: state.config.replyBadge || '',
+          placeholder: '24hr reply',
+          maxlength: 40,
+          hint: 'The small clock badge in the trust row (next to Secure and GDPR). Leave blank for the default "24hr reply". E.g. "2 business days reply".',
+          onInput: (v) => { state.config.replyBadge = v; markDirtyAndSync(); }
         })
       ]));
     }
