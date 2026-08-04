@@ -6461,6 +6461,40 @@ await check('more than one image becomes an auto-playing slideshow', async () =>
     : `slides ${info.slides}, dots ${info.dots}, count ${info.count}, anim ${info.anim}`;
 });
 
+// --- Heading shadow, and that a paragraph never takes one -------------------
+
+/*
+ * A shadow behind a heading so it clears a photograph, headings only. Probed by
+ * injecting the markup into the live document rather than driving the pane,
+ * because what has to hold is the BUNDLED stylesheet: a heading takes the
+ * shadow, and a paragraph in a shadowed Text block does not.
+ */
+await check('a heading takes a shadow, a paragraph never does', async () => {
+  const shadows = await page.evaluate(() => {
+    const host = document.createElement('div');
+    host.innerHTML =
+      '<h2 class="tgs-heading" data-style="h1" data-shadow="strong">H</h2>' +
+      '<div class="tgs-text" data-heading-shadow="strong"><h3>Heading</h3><p>Body</p></div>';
+    document.body.appendChild(host);
+    const shadowOf = (sel) => {
+      const el = host.querySelector(sel);
+      return el ? getComputedStyle(el).textShadow : 'missing';
+    };
+    const out = {
+      heading: shadowOf('.tgs-heading'),
+      innerHeading: shadowOf('.tgs-text h3'),
+      paragraph: shadowOf('.tgs-text p'),
+    };
+    host.remove();
+    return out;
+  });
+
+  const drawn = (value) => value && value !== 'none' && value !== 'missing';
+  if (!drawn(shadows.heading)) return `the heading has no shadow: ${shadows.heading}`;
+  if (!drawn(shadows.innerHeading)) return `a heading in the text block has none: ${shadows.innerHeading}`;
+  return shadows.paragraph === 'none' ? true : `the paragraph took a shadow: ${shadows.paragraph}`;
+});
+
 await browser.close();
 
 let failed = false;

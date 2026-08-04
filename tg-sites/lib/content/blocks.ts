@@ -112,6 +112,20 @@ const ALIGN_OPTIONS: SelectOption[] = [
   { value: 'right', label: 'Right' },
 ];
 
+/**
+ * A shadow behind a heading, so it stays legible over a photograph.
+ *
+ * Andy asked for this on 4 Aug 2026: headings were getting lost on images.
+ * HEADINGS ONLY, not paragraphs, which is why the Text block scopes it to its
+ * own h1-h6 rather than the whole block. Two strengths and off, a closed set,
+ * the same shape as every other select so nothing free reaches the CSS.
+ */
+const SHADOW_OPTIONS: SelectOption[] = [
+  { value: 'none', label: 'None' },
+  { value: 'soft', label: 'Soft' },
+  { value: 'strong', label: 'Strong' },
+];
+
 const SPACING_OPTIONS: SelectOption[] = [
   { value: 'none', label: 'None' },
   { value: 'xs', label: 'Extra small' },
@@ -162,7 +176,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
      * schema.ts moves them across on the way in, so nothing here has to carry a
      * fallback and no page needs rewriting in the database.
      */
-    defaults: { html: 'A new heading', level: 'h2', style: 'h3', align: 'left' },
+    defaults: { html: 'A new heading', level: 'h2', style: 'h3', align: 'left', shadow: 'none' },
     summarise: (props) =>
       firstWords(stripTags(asString(props.html)), 6) || asString(props.text) || 'Heading',
     fields: [
@@ -207,6 +221,13 @@ export const BLOCKS: readonly BlockDefinition[] = [
         help: 'How it looks, set on the Theme screen. The Level above is the tag.',
       },
       { kind: 'select', key: 'align', label: 'Alignment', options: ALIGN_OPTIONS },
+      {
+        kind: 'select',
+        key: 'shadow',
+        label: 'Shadow',
+        options: SHADOW_OPTIONS,
+        help: 'A shadow behind the heading, so it stays readable over a picture.',
+      },
     ],
   },
   {
@@ -219,6 +240,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
       html: '<p>Write something here. Keep it plain and say the useful thing first.</p>',
       align: 'left',
       size: 'm',
+      shadow: 'none',
     },
     summarise: (props) => firstWords(stripTags(asString(props.html)), 6) || 'Text',
     fields: [
@@ -234,6 +256,13 @@ export const BLOCKS: readonly BlockDefinition[] = [
         ],
       },
       { kind: 'select', key: 'align', label: 'Alignment', options: ALIGN_OPTIONS },
+      {
+        kind: 'select',
+        key: 'shadow',
+        label: 'Heading shadow',
+        options: SHADOW_OPTIONS,
+        help: 'A shadow behind any headings here, so they stay readable over a picture. Paragraphs are left alone.',
+      },
     ],
   },
   {

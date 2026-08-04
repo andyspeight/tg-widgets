@@ -146,6 +146,10 @@ export function HeadingBlock({
 
   const Tag = level;
 
+  // A shadow behind it, so it stays legible over a photograph. Off by default,
+  // so every heading written before today is untouched.
+  const shadow = oneOf(props, 'shadow', ['none', 'soft', 'strong'] as const, 'none');
+
   /*
    * A HEADING HOLDS MARKUP NOW, and the two props are both read on purpose.
    *
@@ -183,6 +187,7 @@ export function HeadingBlock({
       <Tag
         className="tgs-heading"
         data-style={style}
+        data-shadow={shadow === 'none' ? undefined : shadow}
         data-rt-host=""
         data-rt-oneline=""
         suppressHydrationWarning
@@ -194,6 +199,7 @@ export function HeadingBlock({
     <Tag
       className="tgs-heading"
       data-style={style}
+      data-shadow={shadow === 'none' ? undefined : shadow}
       dangerouslySetInnerHTML={{ __html: html || 'Heading' }}
     />
   );
@@ -221,18 +227,32 @@ export function TextBlock({
   editingHost?: boolean;
 }): ReactElement {
   const size = oneOf(props, 'size', ['s', 'm', 'l'] as const, 'm');
+  // A shadow behind ANY HEADINGS here, so they stay legible over a picture. The
+  // CSS scopes it to h1-h6, so a paragraph in the same block is left alone, which
+  // is what was asked for: headings, not body text.
+  const shadow = oneOf(props, 'shadow', ['none', 'soft', 'strong'] as const, 'none');
+  const headingShadow = shadow === 'none' ? undefined : shadow;
   // Sanitised again here even though it was sanitised on save. Stored HTML
   // is never trusted, and this is the last gate before the browser.
   const html = sanitiseHtml(props.html, 'richtext');
 
   if (editingHost) {
-    return <div className="tgs-text" data-size={size} data-rt-host="" suppressHydrationWarning />;
+    return (
+      <div
+        className="tgs-text"
+        data-size={size}
+        data-heading-shadow={headingShadow}
+        data-rt-host=""
+        suppressHydrationWarning
+      />
+    );
   }
 
   return (
     <div
       className="tgs-text"
       data-size={size}
+      data-heading-shadow={headingShadow}
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
