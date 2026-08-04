@@ -496,8 +496,13 @@ export const BLOCKS: readonly BlockDefinition[] = [
       crop: { x: 0, y: 0, w: 100, h: 100, aspect: 0 },
       corners: { tl: 0, tr: 0, br: 0, bl: 0 },
       borderWidth: 0, borderStyle: 'solid', borderColour: '',
+      slides: [], transition: 'fade', interval: 5, arrows: true, dots: true,
     },
-    summarise: (props) => asString(props.alt) || asString(props.caption) || 'Image',
+    summarise: (props) => {
+      const extra = Array.isArray(props.slides) ? props.slides.length : 0;
+      if (extra > 0) return `Slideshow (${extra + 1})`;
+      return asString(props.alt) || asString(props.caption) || 'Image';
+    },
     fields: [
       { kind: 'image', key: 'src', label: 'Image', focus: true, crop: true },
       {
@@ -538,6 +543,36 @@ export const BLOCKS: readonly BlockDefinition[] = [
       { kind: 'colour', key: 'borderColour', label: 'Border colour' },
       { kind: 'text', key: 'caption', label: 'Caption', max: 200 },
       { kind: 'url', key: 'href', label: 'Links to', placeholder: 'https://' },
+      /*
+       * ADD MORE IMAGES AND THE BLOCK BECOMES A SLIDESHOW. Andy, 4 Aug 2026.
+       * Empty, it is the single picture above with all its focus, crop and frame
+       * tools. With even one more, it auto-plays through the lot. The transition,
+       * the speed and the arrows and dots ride below, and matter only once there
+       * is more than one to move between.
+       */
+      {
+        kind: 'repeater',
+        key: 'slides',
+        label: 'More images (turns it into a slideshow)',
+        itemLabel: 'Slide',
+        max: 7,
+        fields: [
+          { kind: 'image', key: 'src', label: 'Image' },
+          { kind: 'text', key: 'alt', label: 'Alt text', max: 200 },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'transition',
+        label: 'Transition',
+        options: [
+          { value: 'fade', label: 'Fade' },
+          { value: 'slide', label: 'Slide' },
+        ],
+      },
+      { kind: 'number', key: 'interval', label: 'Seconds per slide', min: 2, max: 15, step: 1 },
+      { kind: 'toggle', key: 'arrows', label: 'Arrows to move between slides' },
+      { kind: 'toggle', key: 'dots', label: 'Dots showing which slide is up' },
     ],
   },
   {

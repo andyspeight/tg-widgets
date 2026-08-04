@@ -428,13 +428,88 @@ export function ImageBlock({ props }: { props: Props }): ReactElement {
   const borderStyle = oneOf(props, 'borderStyle', ['solid', 'dashed', 'dotted'] as const, 'solid');
   const borderColour = safeColour(str(props, 'borderColour'));
 
-  const frameStyle: CSSProperties = {
-    ...ratioStyle(ratio),
+  const frameLook: CSSProperties = {
     ...(customCorners ? { borderRadius: `${tl}px ${tr}px ${br}px ${bl}px` } : {}),
     ...(borderWidth > 0
       ? { border: `${borderWidth}px ${borderStyle} ${borderColour || 'currentColor'}` }
       : {}),
   };
+  const frameStyle: CSSProperties = { ...ratioStyle(ratio), ...frameLook };
+
+  /*
+   * MORE THAN ONE PICTURE MAKES A SLIDESHOW.
+   *
+   * The extra pictures ride on `slides`; the block's own picture is the first.
+   * It auto-plays in PURE CSS on purpose, so it runs on the published page and
+   * in the editor preview alike, where a script never would, and it pauses on
+   * hover the same way. Clickable arrows and dots are progressive enhancement,
+   * added by the slideshow script only where a script can run. The frame keeps
+   * its corners and border, and takes a real shape because absolutely stacked
+   * slides give the box no height of their own, so Original falls back to 16:9.
+   */
+  const slideSrcs = list(props, 'slides')
+    .map((slide) => ({ src: safeUrl(str(slide, 'src')), alt: str(slide, 'alt') }))
+    .filter((slide): slide is { src: string; alt: string } => !!slide.src);
+
+  if (slideSrcs.length > 0) {
+    const slides = [{ src, alt }, ...slideSrcs].slice(0, 8);
+    const count = slides.length;
+    const transition = oneOf(props, 'transition', ['fade', 'slide'] as const, 'fade');
+    const interval = clamp(props.interval, 2, 15, 5);
+    const showArrows = bool(props, 'arrows', true);
+    const showDots = bool(props, 'dots', true);
+    const viewportStyle: CSSProperties = {
+      aspectRatio: ratio === 'auto' ? '16 / 9' : ratio.replace('/', ' / '),
+      ...frameLook,
+    };
+
+    return (
+      <div className="tgs-image">
+        <figure>
+          <div
+            className="tgs-slideshow"
+            data-transition={transition}
+            data-count={count}
+            data-dots={showDots ? 'true' : undefined}
+            data-arrows={showArrows ? 'true' : undefined}
+            style={{ '--tgs-ss-cycle': `${count * interval}s` } as CSSProperties}
+            aria-roledescription="carousel"
+            aria-label={alt || 'Image slideshow'}
+          >
+            <div className="tgs-slideshow__viewport" data-radius={radius} style={viewportStyle}>
+              {slides.map((slide, index) => (
+                <div
+                  className="tgs-slideshow__slide"
+                  key={index}
+                  style={{ animationDelay: `calc(${index} * var(--tgs-ss-cycle) / ${count})` }}
+                >
+                  <img
+                    src={slide.src}
+                    alt={slide.alt}
+                    loading={index === 0 ? 'eager' : 'lazy'}
+                    decoding="async"
+                  />
+                </div>
+              ))}
+            </div>
+
+            {showDots && (
+              <div className="tgs-slideshow__dots" aria-hidden="true">
+                {slides.map((_, index) => (
+                  <span
+                    className="tgs-slideshow__dot"
+                    key={index}
+                    style={{ animationDelay: `calc(${index} * var(--tgs-ss-cycle) / ${count})` }}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+          {caption && <figcaption>{caption}</figcaption>}
+        </figure>
+      </div>
+    );
+  }
 
   /*
    * THE CROP, DRAWN WITHOUT CUTTING THE FILE.

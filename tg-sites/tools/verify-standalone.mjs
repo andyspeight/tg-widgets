@@ -6382,6 +6382,60 @@ await check('an image can be cropped to a preset shape', async () => {
     : `the frame aspect is "${info.aspect}"`;
 });
 
+// ---------------------------------------------------------------------------
+// The image slideshow
+// ---------------------------------------------------------------------------
+
+/*
+ * Andy, 4 Aug 2026: more images turn the block into a slider. Last, again,
+ * because it adds a fresh block. The images want addresses the page accepts so
+ * the slideshow actually draws (a data: URI would filter out), and the check
+ * reads the DOM it makes plus the animation-name the stylesheet binds, which is
+ * how it proves the pure-CSS auto-play is wired rather than trying to watch it
+ * move in a headless run.
+ */
+await check('more than one image becomes an auto-playing slideshow', async () => {
+  await selectAnImageBlock();
+
+  const main = page.locator('.ed-props .mp-url').first();
+  if ((await main.locator('.ed-input').count()) === 0) {
+    await main.locator('.mp-url__toggle').click();
+  }
+  await main.locator('.ed-input').first().fill('https://images.example.test/a.jpg');
+  await page.waitForTimeout(200);
+
+  const add = page.locator('.ed-props button', { hasText: 'Add slide' });
+  if ((await add.count()) === 0) return 'no Add slide button in the pane';
+  await add.first().click();
+  await page.waitForTimeout(300);
+
+  const slide = page.locator('.ed-props .ed-repeat-item').last();
+  if ((await slide.locator('.mp-url .ed-input').count()) === 0) {
+    await slide.locator('.mp-url__toggle').first().click();
+  }
+  await slide.locator('.mp-url .ed-input').first().fill('https://images.example.test/b.jpg');
+  await page.waitForTimeout(400);
+
+  const info = await page
+    .locator('.ed-canvas-frame .tgs-slideshow')
+    .first()
+    .evaluate((el) => {
+      const slides = el.querySelectorAll('.tgs-slideshow__slide');
+      const first = slides[0];
+      return {
+        count: el.getAttribute('data-count'),
+        slides: slides.length,
+        dots: el.querySelectorAll('.tgs-slideshow__dot').length,
+        anim: first ? getComputedStyle(first).animationName : 'none',
+      };
+    })
+    .catch(() => null);
+  if (!info) return 'no slideshow on the canvas';
+  return info.slides === 2 && info.dots === 2 && info.count === '2' && info.anim !== 'none'
+    ? true
+    : `slides ${info.slides}, dots ${info.dots}, count ${info.count}, anim ${info.anim}`;
+});
+
 await browser.close();
 
 let failed = false;

@@ -649,6 +649,126 @@
   position: relative;
 }
 
+/*
+ * THE IMAGE SLIDESHOW. Pure CSS on purpose, so it auto-plays on the published
+ * page and in the editor preview alike, where a script never runs. Each slide is
+ * stacked and animates on its own with a staggered delay, so the animation-name
+ * (bound below by transition and slide count) and the delay are all that change
+ * between fade and slide, two slides or eight. It pauses on hover with one rule
+ * and no script. Clickable arrows and dots are progressive enhancement layered
+ * on by the slideshow script where a script can run.
+ */
+.tgs-slideshow { position: relative; }
+
+.tgs-slideshow__viewport {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  background: var(--tgs-surface-alt);
+}
+.tgs-slideshow__viewport[data-radius='none'] { border-radius: 0; }
+.tgs-slideshow__viewport[data-radius='sm']   { border-radius: var(--tgs-radius-sm); }
+.tgs-slideshow__viewport[data-radius='md']   { border-radius: var(--tgs-radius-md); }
+.tgs-slideshow__viewport[data-radius='lg']   { border-radius: var(--tgs-radius-lg); }
+.tgs-slideshow__viewport[data-radius='full'] { border-radius: var(--tgs-radius-lg); }
+
+.tgs-slideshow__slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  animation-duration: var(--tgs-ss-cycle, 25s);
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: both;
+}
+.tgs-slideshow__slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Pause while a visitor is looking. Pure CSS, so no script is needed for it. */
+.tgs-slideshow:hover .tgs-slideshow__slide,
+.tgs-slideshow:hover .tgs-slideshow__dot { animation-play-state: paused; }
+
+.tgs-slideshow__dots {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: var(--tgs-space-s);
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  z-index: 2;
+}
+.tgs-slideshow__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.5);
+  opacity: 0.4;
+  animation-duration: var(--tgs-ss-cycle, 25s);
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: both;
+}
+
+/*
+ * Reduced motion stops the cycle and shows only the first picture, which is why
+ * the first is loaded eagerly and the rest lazily.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .tgs-slideshow__slide { animation: none; opacity: 0; }
+  .tgs-slideshow__slide:first-child { opacity: 1; }
+  .tgs-slideshow__dot { animation: none; }
+  .tgs-slideshow__dot:first-child { opacity: 1; }
+}
+
+@keyframes tgs-ss-fade-2 { 0% { opacity: 0; } 8% { opacity: 1; } 50% { opacity: 1; } 58% { opacity: 0; } 100% { opacity: 0; } }
+@keyframes tgs-ss-slide-2 { 0% { transform: translateX(100%); opacity: 0; } 8% { transform: translateX(0); opacity: 1; } 50% { transform: translateX(0); opacity: 1; } 58% { transform: translateX(-100%); opacity: 0; } 100% { transform: translateX(-100%); opacity: 0; } }
+@keyframes tgs-ss-dot-2 { 0% { opacity: 0.4; } 6% { opacity: 1; } 50% { opacity: 1; } 56% { opacity: 0.4; } 100% { opacity: 0.4; } }
+@keyframes tgs-ss-fade-3 { 0% { opacity: 0; } 8% { opacity: 1; } 33.333% { opacity: 1; } 41.333% { opacity: 0; } 100% { opacity: 0; } }
+@keyframes tgs-ss-slide-3 { 0% { transform: translateX(100%); opacity: 0; } 8% { transform: translateX(0); opacity: 1; } 33.333% { transform: translateX(0); opacity: 1; } 41.333% { transform: translateX(-100%); opacity: 0; } 100% { transform: translateX(-100%); opacity: 0; } }
+@keyframes tgs-ss-dot-3 { 0% { opacity: 0.4; } 6% { opacity: 1; } 33.333% { opacity: 1; } 39.333% { opacity: 0.4; } 100% { opacity: 0.4; } }
+@keyframes tgs-ss-fade-4 { 0% { opacity: 0; } 8% { opacity: 1; } 25% { opacity: 1; } 33% { opacity: 0; } 100% { opacity: 0; } }
+@keyframes tgs-ss-slide-4 { 0% { transform: translateX(100%); opacity: 0; } 8% { transform: translateX(0); opacity: 1; } 25% { transform: translateX(0); opacity: 1; } 33% { transform: translateX(-100%); opacity: 0; } 100% { transform: translateX(-100%); opacity: 0; } }
+@keyframes tgs-ss-dot-4 { 0% { opacity: 0.4; } 6% { opacity: 1; } 25% { opacity: 1; } 31% { opacity: 0.4; } 100% { opacity: 0.4; } }
+@keyframes tgs-ss-fade-5 { 0% { opacity: 0; } 8% { opacity: 1; } 20% { opacity: 1; } 28% { opacity: 0; } 100% { opacity: 0; } }
+@keyframes tgs-ss-slide-5 { 0% { transform: translateX(100%); opacity: 0; } 8% { transform: translateX(0); opacity: 1; } 20% { transform: translateX(0); opacity: 1; } 28% { transform: translateX(-100%); opacity: 0; } 100% { transform: translateX(-100%); opacity: 0; } }
+@keyframes tgs-ss-dot-5 { 0% { opacity: 0.4; } 6% { opacity: 1; } 20% { opacity: 1; } 26% { opacity: 0.4; } 100% { opacity: 0.4; } }
+@keyframes tgs-ss-fade-6 { 0% { opacity: 0; } 6.667% { opacity: 1; } 16.667% { opacity: 1; } 23.333% { opacity: 0; } 100% { opacity: 0; } }
+@keyframes tgs-ss-slide-6 { 0% { transform: translateX(100%); opacity: 0; } 6.667% { transform: translateX(0); opacity: 1; } 16.667% { transform: translateX(0); opacity: 1; } 23.333% { transform: translateX(-100%); opacity: 0; } 100% { transform: translateX(-100%); opacity: 0; } }
+@keyframes tgs-ss-dot-6 { 0% { opacity: 0.4; } 5% { opacity: 1; } 16.667% { opacity: 1; } 21.667% { opacity: 0.4; } 100% { opacity: 0.4; } }
+@keyframes tgs-ss-fade-7 { 0% { opacity: 0; } 5.714% { opacity: 1; } 14.286% { opacity: 1; } 20% { opacity: 0; } 100% { opacity: 0; } }
+@keyframes tgs-ss-slide-7 { 0% { transform: translateX(100%); opacity: 0; } 5.714% { transform: translateX(0); opacity: 1; } 14.286% { transform: translateX(0); opacity: 1; } 20% { transform: translateX(-100%); opacity: 0; } 100% { transform: translateX(-100%); opacity: 0; } }
+@keyframes tgs-ss-dot-7 { 0% { opacity: 0.4; } 4.286% { opacity: 1; } 14.286% { opacity: 1; } 18.571% { opacity: 0.4; } 100% { opacity: 0.4; } }
+@keyframes tgs-ss-fade-8 { 0% { opacity: 0; } 5% { opacity: 1; } 12.5% { opacity: 1; } 17.5% { opacity: 0; } 100% { opacity: 0; } }
+@keyframes tgs-ss-slide-8 { 0% { transform: translateX(100%); opacity: 0; } 5% { transform: translateX(0); opacity: 1; } 12.5% { transform: translateX(0); opacity: 1; } 17.5% { transform: translateX(-100%); opacity: 0; } 100% { transform: translateX(-100%); opacity: 0; } }
+@keyframes tgs-ss-dot-8 { 0% { opacity: 0.4; } 3.75% { opacity: 1; } 12.5% { opacity: 1; } 16.25% { opacity: 0.4; } 100% { opacity: 0.4; } }
+
+.tgs-slideshow[data-transition='fade'][data-count='2'] .tgs-slideshow__slide { animation-name: tgs-ss-fade-2; }
+.tgs-slideshow[data-transition='slide'][data-count='2'] .tgs-slideshow__slide { animation-name: tgs-ss-slide-2; }
+.tgs-slideshow[data-count='2'] .tgs-slideshow__dot { animation-name: tgs-ss-dot-2; }
+.tgs-slideshow[data-transition='fade'][data-count='3'] .tgs-slideshow__slide { animation-name: tgs-ss-fade-3; }
+.tgs-slideshow[data-transition='slide'][data-count='3'] .tgs-slideshow__slide { animation-name: tgs-ss-slide-3; }
+.tgs-slideshow[data-count='3'] .tgs-slideshow__dot { animation-name: tgs-ss-dot-3; }
+.tgs-slideshow[data-transition='fade'][data-count='4'] .tgs-slideshow__slide { animation-name: tgs-ss-fade-4; }
+.tgs-slideshow[data-transition='slide'][data-count='4'] .tgs-slideshow__slide { animation-name: tgs-ss-slide-4; }
+.tgs-slideshow[data-count='4'] .tgs-slideshow__dot { animation-name: tgs-ss-dot-4; }
+.tgs-slideshow[data-transition='fade'][data-count='5'] .tgs-slideshow__slide { animation-name: tgs-ss-fade-5; }
+.tgs-slideshow[data-transition='slide'][data-count='5'] .tgs-slideshow__slide { animation-name: tgs-ss-slide-5; }
+.tgs-slideshow[data-count='5'] .tgs-slideshow__dot { animation-name: tgs-ss-dot-5; }
+.tgs-slideshow[data-transition='fade'][data-count='6'] .tgs-slideshow__slide { animation-name: tgs-ss-fade-6; }
+.tgs-slideshow[data-transition='slide'][data-count='6'] .tgs-slideshow__slide { animation-name: tgs-ss-slide-6; }
+.tgs-slideshow[data-count='6'] .tgs-slideshow__dot { animation-name: tgs-ss-dot-6; }
+.tgs-slideshow[data-transition='fade'][data-count='7'] .tgs-slideshow__slide { animation-name: tgs-ss-fade-7; }
+.tgs-slideshow[data-transition='slide'][data-count='7'] .tgs-slideshow__slide { animation-name: tgs-ss-slide-7; }
+.tgs-slideshow[data-count='7'] .tgs-slideshow__dot { animation-name: tgs-ss-dot-7; }
+.tgs-slideshow[data-transition='fade'][data-count='8'] .tgs-slideshow__slide { animation-name: tgs-ss-fade-8; }
+.tgs-slideshow[data-transition='slide'][data-count='8'] .tgs-slideshow__slide { animation-name: tgs-ss-slide-8; }
+.tgs-slideshow[data-count='8'] .tgs-slideshow__dot { animation-name: tgs-ss-dot-8; }
+
 .tgs-image__frame { overflow: hidden; background: var(--tgs-surface-alt); }
 .tgs-image__frame[data-radius='none'] { border-radius: 0; }
 .tgs-image__frame[data-radius='sm']   { border-radius: var(--tgs-radius-sm); }
