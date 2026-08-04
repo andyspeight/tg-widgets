@@ -3126,6 +3126,48 @@ await check('and the row and the section too', async () => {
 });
 
 /*
+ * ONE CONTEXTUAL TOOLBAR, AND IT GOES WHEN YOU CLICK AWAY.
+ *
+ * The pill was keyed on the selected path, so React remounted it on every
+ * selection and, because a keyed child that changes key while it stays present
+ * among conditional siblings is the pattern React mis-reconciles, left the old
+ * one behind. They stacked up, one per item clicked, four deep on Andy's screen
+ * (3 Aug 2026), and none went away. It is one instance now, and clicking the
+ * empty canvas clears the selection and the pill with it.
+ *
+ * The height is grown for the click-away so there is canvas below the page to
+ * aim at, then put back so the checks after this see the viewport they expect.
+ */
+await check('the contextual toolbar is one, and clears on a click away', async () => {
+  const bars = () => page.locator('.ed-bar').count();
+  const saved = page.viewportSize();
+
+  await page.locator('.ed-canvas-frame h1, .ed-canvas-frame h2').first().click();
+  await page.waitForTimeout(250);
+  const afterFirst = await bars();
+
+  await page.locator('.ed-canvas-frame p').first().click();
+  await page.waitForTimeout(250);
+  const afterSecond = await bars();
+
+  await page.setViewportSize({ width: saved.width, height: 1900 });
+  await page.waitForTimeout(200);
+  const wrap = await page.locator('.ed-canvas-wrap').boundingBox();
+  const last = await page.locator('.tgs-section').last().boundingBox();
+  const y = Math.min(wrap.y + wrap.height - 8, last.y + last.height + 40);
+  await page.mouse.click(wrap.x + wrap.width / 2, y);
+  await page.waitForTimeout(250);
+  const afterAway = await bars();
+
+  await page.setViewportSize(saved);
+
+  if (afterFirst !== 1) return `a single selection drew ${afterFirst} toolbars`;
+  if (afterSecond !== 1) return `a second selection stacked to ${afterSecond}`;
+  if (afterAway !== 0) return `clicking the empty canvas left ${afterAway}`;
+  return true;
+});
+
+/*
  * Every step is a real button at a real size. The chip this replaced was 19px
  * tall, which is under half the 44px rule, and that was part of why it went
  * unnoticed.

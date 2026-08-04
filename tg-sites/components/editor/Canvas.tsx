@@ -42,7 +42,7 @@ interface Props {
   selectedKey: string | null;
   viewportWidth: string;
   viewport: Viewport;
-  onSelect: (path: Path) => void;
+  onSelect: (path: Path | null) => void;
   onCommit: (next: (current: Page) => Page, coalesceKey?: string) => void;
   onPickBlock: (target: { section: number; row: number; column: number }) => void;
   onInsertSection: (index: number) => void;
@@ -340,7 +340,19 @@ export function Canvas({
       if (link) event.preventDefault();
 
       const node = target.closest<HTMLElement>('[data-path]');
-      if (!node) return;
+      if (!node) {
+        /*
+         * A CLICK THAT LANDS ON NO ITEM IS A CLICK AWAY. Clear the selection so
+         * the contextual toolbar goes with it, which is what Andy meant by the
+         * tools not disappearing when you have finished with them (3 Aug 2026).
+         * The seam, the column adder and the resize handles have all returned
+         * above, so what is left here is the canvas around the page: the margin,
+         * the space under the last section, the gaps a section's own padding
+         * leaves. Clicking any of them now puts the toolbar away.
+         */
+        onSelect(null);
+        return;
+      }
       const path = parsePathKey(node.dataset.path);
       if (path) onSelect(path);
     },
@@ -575,7 +587,20 @@ export function Canvas({
   const stackNote = describeStacking(page, widthPx);
 
   return (
-    <div className="ed-canvas-wrap" ref={wrapRef}>
+    <div
+      className="ed-canvas-wrap"
+      ref={wrapRef}
+      /*
+       * THE CLICK HANDLER SITS ON THE WRAP, NOT THE PAGE FRAME, so that clicking
+       * the canvas AROUND the page counts. The frame hugs its content, so a
+       * click below the last section or out in the margin missed it entirely and
+       * the selection, and its toolbar, stayed put. On the wrap every click in
+       * the canvas lands here: on an item it selects, on the empty canvas it
+       * clears. onClick reads data-path with closest(), so it works the same from
+       * up here.
+       */
+      onClick={onClick}
+    >
       {/*
         A CAP, NOT A FIXED WIDTH, and this is the third answer to the same
         question rather than the first.
@@ -604,7 +629,6 @@ export function Canvas({
           ref={frameRef}
           className="ed-canvas-frame"
           style={{ maxWidth: '100%' }}
-          onClick={onClick}
           onInput={onInput}
           onPaste={onPaste}
           onPointerDown={onPointerDown}

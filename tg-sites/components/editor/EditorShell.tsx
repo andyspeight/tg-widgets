@@ -1288,7 +1288,19 @@ export function EditorShell({
         && picker === null
         && !historyOpen && (
         <ItemToolbar
-          key={selectedKey}
+          /*
+           * A STABLE key, not the selected path. Keying it on selectedKey
+           * remounted the pill on every selection, and because it is a keyed
+           * child that stays present while its key changes, among conditional
+           * siblings, React left the old instance behind rather than removing
+           * it. So the pills stacked up, one per item clicked, and none went
+           * away (Andy, 3 Aug 2026, with four of them on screen at once). One
+           * instance that updates in place is right anyway: measure() already
+           * re-runs on selectedKey and moves it, and the shell resets the
+           * popover on selection, so there is no per-item state that a remount
+           * was needed to clear.
+           */
+          key="ed-item-toolbar"
           page={page}
           selected={selected}
           selectedKey={selectedKey}
