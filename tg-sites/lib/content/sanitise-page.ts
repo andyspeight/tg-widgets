@@ -128,6 +128,22 @@ function cleanValue(
     case 'colour':
       return safeColour(value) ?? '';
 
+    /*
+     * FOUR CORNER RADII, EACH PINNED TO 0..500. The same belt-and-braces the
+     * colours get: made safe here as well as at render, so a stored corner is
+     * never anything but a bounded number a future export or migration could
+     * trust. Shape enforced too, so a corners prop that arrived as something
+     * other than an object comes back as four zeros rather than junk.
+     */
+    case 'corners': {
+      const pin = (v: unknown): number => {
+        const n = typeof v === 'number' ? v : Number(v);
+        return Number.isFinite(n) ? Math.min(500, Math.max(0, Math.round(n))) : 0;
+      };
+      const c = (value && typeof value === 'object' ? value : {}) as Record<string, unknown>;
+      return { tl: pin(c.tl), tr: pin(c.tr), br: pin(c.br), bl: pin(c.bl) };
+    }
+
     default:
       // text, select, toggle and number render as text through React, which
       // escapes them. Nothing to do.

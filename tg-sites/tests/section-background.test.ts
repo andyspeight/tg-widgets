@@ -101,6 +101,48 @@ describe('the scrim strength', () => {
 
 // ---------------------------------------------------------------------------
 
+/*
+ * THE SCRIM'S COLOUR, added 4 Aug 2026. It was a fixed navy; now it is settable,
+ * and the one thing that must stay true is that a section which never chose a
+ * colour looks exactly as it did.
+ */
+describe('the scrim colour', () => {
+  it('keeps a theme token and a hex, and drops anything that is not a colour', () => {
+    expect(parsed({ overlayColour: 'var(--tgs-primary)' }).overlayColour).toBe('var(--tgs-primary)');
+    expect(parsed({ overlayColour: '#0a1f44' }).overlayColour).toBe('#0a1f44');
+    expect(parsed({ overlayColour: 'rgb(10,20,30)' }).overlayColour).toBe('rgb(10,20,30)');
+    expect(parsed({ overlayColour: 'url(javascript:alert(1))' }).overlayColour).toBeUndefined();
+  });
+
+  /*
+   * ABSENT, NOT NAVY. The default lives in the CSS, not the data, so a section
+   * saved before today carries no colour and the scrim falls back to its own
+   * navy. Baking a colour in here would rewrite every existing hero.
+   */
+  it('is absent on a section that never chose one', () => {
+    expect(parsed({}).overlayColour).toBeUndefined();
+  });
+
+  it('reaches the page only when set, with navy as the CSS fallback', () => {
+    const renderer = source('components', 'render', 'PageRenderer.tsx');
+    // Set only when there is a colour, so an unset section leaves the var alone.
+    expect(renderer).toContain("'--tgs-scrim-colour': safeColour(section.overlayColour)");
+
+    const css = source('app', 'globals.css');
+    // The colour is mixed to the overlay strength, defaulting to the old navy.
+    expect(css).toContain('var(--tgs-scrim-colour, #0f172a)');
+    expect(css).toContain('color-mix(in srgb, var(--tgs-scrim-colour, #0f172a)');
+  });
+
+  it('is offered in the editor only once there is a scrim to colour', () => {
+    const props = source('components', 'editor', 'Properties.tsx');
+    expect(props).toContain('section.overlay > 0 && (');
+    expect(props).toMatch(/label="Overlay colour"/);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
 describe('the background video', () => {
   /*
    * THE SAME ALLOWLIST AS THE PICTURE. This string is put straight into a `src`

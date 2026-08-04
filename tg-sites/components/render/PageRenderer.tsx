@@ -12,7 +12,7 @@
  */
 
 import { Fragment, type CSSProperties, type ReactElement } from 'react';
-import { safeAnchor, type Box, type Column, type Page, type Row, type Section } from '../../lib/content/schema';
+import { safeAnchor, safeColour, type Box, type Column, type Page, type Row, type Section } from '../../lib/content/schema';
 import { dividerShape, normaliseDividerHeight, safeDivider, sectionFill } from '../../lib/content/dividers';
 import { safeUrl } from '../../lib/content/sanitise';
 import { BlockRenderer } from './BlockRenderer';
@@ -226,6 +226,11 @@ export function SectionRenderer({
         '--tgs-pad': `${section.paddingY}px`,
         '--tgs-min-h': `${section.minHeight}px`,
         '--tgs-scrim': section.overlay,
+        // Only when a colour was chosen. Left unset, the scrim CSS falls back to
+        // its own navy default, so a section that never picked one is untouched.
+        ...(safeColour(section.overlayColour)
+          ? { '--tgs-scrim-colour': safeColour(section.overlayColour) }
+          : {}),
       } as CSSProperties}
       data-shadow={section.box.shadow}
       {...pathAttr(editable, `s${index}`)}

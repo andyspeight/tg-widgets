@@ -29,7 +29,7 @@ import {
   normaliseSectionPadding,
   PADDING_PRESETS,
 } from '../../lib/content/schema';
-import { BoxPanel, Measure } from './BoxControls';
+import { BoxPanel, ColourField, Measure } from './BoxControls';
 import { blockDefinition } from '../../lib/content/blocks';
 import {
   type Path,
@@ -928,6 +928,19 @@ function SectionFields({
         0 leaves the picture alone. 60 is the setting that keeps white text
         readable over most photographs.
       </p>
+
+      {/*
+        The colour is only worth asking for once there is a scrim to colour, the
+        same rule the border colour follows. Left as None it is the dark navy the
+        scrim always was, so nobody has to set a colour to get the old look.
+      */}
+      {section.overlay > 0 && (
+        <ColourField
+          label="Overlay colour"
+          value={section.overlayColour}
+          onChange={(overlayColour) => set({ overlayColour }, `sec:${index}:overlaycol`)}
+        />
+      )}
       </Group>
 
       {/*

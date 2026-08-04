@@ -408,8 +408,36 @@ export function ImageBlock({ props }: { props: Props }): ReactElement {
    */
   const imageStyle: CSSProperties = { objectFit: fit, ...pictureAdjustStyle(props) };
 
+  /*
+   * THE FRAME'S OWN LOOK: custom corners and a border, both pinned here.
+   *
+   * Custom corners override the named Corners preset ONLY when at least one is
+   * set, so a picture on plain Rounded keeps its class and nothing inline. A
+   * border is drawn only when it has a width, and its colour goes through
+   * safeColour like every other colour, falling back to the current text colour
+   * so a width with no colour is still visible rather than invisible.
+   */
+  const corners = props.corners && typeof props.corners === 'object' ? (props.corners as Props) : {};
+  const tl = clamp(corners.tl, 0, 500, 0);
+  const tr = clamp(corners.tr, 0, 500, 0);
+  const br = clamp(corners.br, 0, 500, 0);
+  const bl = clamp(corners.bl, 0, 500, 0);
+  const customCorners = tl > 0 || tr > 0 || br > 0 || bl > 0;
+
+  const borderWidth = clamp(props.borderWidth, 0, 40, 0);
+  const borderStyle = oneOf(props, 'borderStyle', ['solid', 'dashed', 'dotted'] as const, 'solid');
+  const borderColour = safeColour(str(props, 'borderColour'));
+
+  const frameStyle: CSSProperties = {
+    ...ratioStyle(ratio),
+    ...(customCorners ? { borderRadius: `${tl}px ${tr}px ${br}px ${bl}px` } : {}),
+    ...(borderWidth > 0
+      ? { border: `${borderWidth}px ${borderStyle} ${borderColour || 'currentColor'}` }
+      : {}),
+  };
+
   const picture = (
-    <div className="tgs-image__frame" data-radius={radius} style={ratioStyle(ratio)}>
+    <div className="tgs-image__frame" data-radius={radius} style={frameStyle}>
       {/* Plain img rather than next/image: sources are arbitrary client URLs
           and the media pipeline with its own variants lands in a later
           package. */}

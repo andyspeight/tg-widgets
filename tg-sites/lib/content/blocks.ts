@@ -42,6 +42,14 @@ export type Field =
    */
   | { kind: 'image'; key: string; label: string; help?: string; focus?: boolean }
   /*
+   * Four corner radii in pixels, linked or each on its own, the way the padding
+   * box does the four sides. Its value is a { tl, tr, br, bl } object. The image
+   * block uses it to override the named Corners preset with exact per-corner
+   * rounding, which is what a client asks for when one corner is meant to be
+   * square and the rest round.
+   */
+  | { kind: 'corners'; key: string; label: string; help?: string }
+  /*
    * An icon from the library. Stores a NAME, not markup, and the field also
    * accepts a typed character so that every page built before the library
    * existed keeps drawing what it drew. See lib/content/icons.ts.
@@ -485,6 +493,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
     defaults: {
       src: '', alt: '', ratio: 'auto', fit: 'cover', radius: 'md', caption: '', href: '', width: 0, height: 0,
       focusX: 50, focusY: 50, brightness: 100, contrast: 100, saturation: 100,
+      corners: { tl: 0, tr: 0, br: 0, bl: 0 },
+      borderWidth: 0, borderStyle: 'solid', borderColour: '',
     },
     summarise: (props) => asString(props.alt) || asString(props.caption) || 'Image',
     fields: [
@@ -507,6 +517,24 @@ export const BLOCKS: readonly BlockDefinition[] = [
         ],
       },
       { kind: 'select', key: 'radius', label: 'Corners', options: RADIUS_OPTIONS },
+      {
+        kind: 'corners',
+        key: 'corners',
+        label: 'Custom corners',
+        help: 'Rounds each corner by an exact amount, overriding the preset above. Leave at 0 to keep the preset.',
+      },
+      { kind: 'number', key: 'borderWidth', label: 'Border width', min: 0, max: 40, step: 1 },
+      {
+        kind: 'select',
+        key: 'borderStyle',
+        label: 'Border style',
+        options: [
+          { value: 'solid', label: 'Solid' },
+          { value: 'dashed', label: 'Dashed' },
+          { value: 'dotted', label: 'Dotted' },
+        ],
+      },
+      { kind: 'colour', key: 'borderColour', label: 'Border colour' },
       { kind: 'text', key: 'caption', label: 'Caption', max: 200 },
       { kind: 'url', key: 'href', label: 'Links to', placeholder: 'https://' },
     ],

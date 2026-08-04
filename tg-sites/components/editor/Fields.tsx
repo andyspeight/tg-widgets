@@ -21,6 +21,7 @@ import type { Field } from '../../lib/content/blocks';
 import { COLOUR_SWATCHES } from '../../lib/content/styles';
 import { importContent, importFields } from '../../lib/content/imported';
 import { ImageField } from '../media/ImageField';
+import { CornerBox, type Corners } from './BoxControls';
 import { IconField } from './IconField';
 import { Icon } from './Icon';
 
@@ -149,6 +150,16 @@ export function FieldRenderer({
       return (
         <Wrapper field={field}>
           <ColourField value={asString(value)} onChange={onChange} />
+        </Wrapper>
+      );
+
+    case 'corners':
+      return (
+        <Wrapper field={field}>
+          <CornerBox
+            value={value && typeof value === 'object' ? (value as Partial<Corners>) : undefined}
+            onChange={onChange}
+          />
         </Wrapper>
       );
 

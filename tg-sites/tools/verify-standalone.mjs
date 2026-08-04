@@ -1589,6 +1589,43 @@ await check('an address the renderer refuses is explained, not ignored', async (
   return (await page.locator('.mp-url__warn').count()) === 0 ? true : 'the warning stuck';
 });
 
+/*
+ * THE FRAME: CUSTOM CORNERS AND A BORDER, added 4 Aug 2026. The block above has
+ * an address on it, so its frame is on the canvas to measure. An inline radius
+ * has to beat the named preset, and a border has to appear only once it has a
+ * width, both of which these read straight off the rendered frame.
+ */
+await check('an image offers a custom-corners control and a border', async () => {
+  const corners = await page.locator('.ed-props .ed-corners').count();
+  const border = await page.locator('.ed-props .ed-field', { hasText: 'Border width' }).count();
+  return corners === 1 && border >= 1 ? true : `corners ${corners}, border field ${border}`;
+});
+
+await check('a custom corner rounds the picture on the page', async () => {
+  // Linked by default, so setting one sets all four; enough to prove it reaches
+  // the frame as an inline radius that overrides the preset class.
+  const tl = page.locator('.ed-props .ed-corners input[aria-label="Corner top left"]');
+  await tl.fill('24');
+  await tl.blur();
+  await page.waitForTimeout(300);
+  const radius = await page.locator('.ed-canvas-frame .tgs-image__frame').first().evaluate((el) =>
+    getComputedStyle(el).borderTopLeftRadius);
+  return radius === '24px' ? true : `the corner is "${radius}"`;
+});
+
+await check('a border width draws a border on the page', async () => {
+  const width = page.locator('.ed-props .ed-field', { hasText: 'Border width' })
+    .locator('input[type="number"]');
+  await width.fill('6');
+  await width.blur();
+  await page.waitForTimeout(300);
+  const drawn = await page.locator('.ed-canvas-frame .tgs-image__frame').first().evaluate((el) => {
+    const s = getComputedStyle(el);
+    return { w: s.borderTopWidth, style: s.borderTopStyle };
+  });
+  return drawn.w === '6px' && drawn.style === 'solid' ? true : `border ${drawn.w} ${drawn.style}`;
+});
+
 await check('the picture that is in use is marked in the grid', async () => {
   // Put a real bank image on the block first, by picking it, so there is something
   // for the grid to recognise.
@@ -4792,6 +4829,21 @@ await check('and it is held inside 0 to 100 rather than taken as typed', async (
     getComputedStyle(el).getPropertyValue('--tgs-scrim').trim());
 
   return value === '100' ? true : `900 became "${value}"`;
+});
+
+await check('the overlay can be given a colour, not just a darkness', async () => {
+  await openSectionGroup('Background image');
+  // The colour field only exists while there is a scrim, and the overlay is at
+  // 100 from the check above, so it is here.
+  const box = page.locator('#c-overlay-colour');
+  if ((await box.count()) === 0) return 'no overlay colour field with a scrim set';
+  await box.fill('#3355aa');
+  await box.blur();
+  await page.waitForTimeout(300);
+
+  const colour = await page.locator('.ed-canvas-frame .tgs-section').first().evaluate((el) =>
+    getComputedStyle(el).getPropertyValue('--tgs-scrim-colour').trim());
+  return colour === '#3355aa' ? true : `the section says "${colour}"`;
 });
 
 /*

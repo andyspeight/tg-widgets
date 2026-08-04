@@ -248,6 +248,105 @@ export function PaddingBox({
 }
 
 // ---------------------------------------------------------------------------
+// Corners
+// ---------------------------------------------------------------------------
+
+const CORNERS = ['tl', 'tr', 'br', 'bl'] as const;
+type Corner = (typeof CORNERS)[number];
+/** Display order, so a two-column grid reads as the four corners of a box. */
+const CORNER_ORDER: readonly Corner[] = ['tl', 'tr', 'bl', 'br'];
+const CORNER_LABEL: Record<Corner, string> = {
+  tl: 'top left',
+  tr: 'top right',
+  br: 'bottom right',
+  bl: 'bottom left',
+};
+const MAX_CORNER = 500;
+
+/** A stored corner value, pinned to 0..MAX_CORNER, or 0 when it is not a number. */
+function cornerNum(value: unknown): number {
+  const n = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(n) ? Math.min(MAX_CORNER, Math.max(0, Math.round(n))) : 0;
+}
+
+export type Corners = Record<Corner, number>;
+
+/**
+ * The four corner radii, linked or each on its own, the same link-or-separate
+ * shape the padding box uses for the four sides. Pixels, because a percentage
+ * corner resolves against the box it is on and a "50%" that is a circle on a
+ * square is an oval on anything else.
+ */
+export function CornerBox({
+  value,
+  onChange,
+}: {
+  value: Partial<Corners> | undefined;
+  onChange: (value: Corners) => void;
+}) {
+  const corners: Corners = {
+    tl: cornerNum(value?.tl),
+    tr: cornerNum(value?.tr),
+    br: cornerNum(value?.br),
+    bl: cornerNum(value?.bl),
+  };
+  const uniform = CORNERS.every((c) => corners[c] === corners.tl);
+  const [linked, setLinked] = useState(uniform);
+
+  function set(corner: Corner, next: number) {
+    const clamped = cornerNum(next);
+    onChange(
+      linked
+        ? { tl: clamped, tr: clamped, br: clamped, bl: clamped }
+        : { ...corners, [corner]: clamped },
+    );
+  }
+
+  return (
+    <div className="ed-corners">
+      <div className="ed-corners__box">
+        {CORNER_ORDER.map((corner) => (
+          <span className={`ed-corners__cell ed-corners__cell--${corner}`} key={corner}>
+            <input
+              className="ed-corners__input"
+              type="number"
+              min={0}
+              max={MAX_CORNER}
+              value={corners[corner]}
+              aria-label={`Corner ${CORNER_LABEL[corner]}`}
+              onChange={(event) => set(corner, Number(event.target.value))}
+            />
+          </span>
+        ))}
+
+        <button
+          type="button"
+          className="ed-corners__link"
+          aria-pressed={linked}
+          aria-label={
+            linked
+              ? 'Corners are linked, click to set them separately'
+              : 'Corners are separate, click to link them'
+          }
+          title={linked ? 'All four corners together' : 'Each corner on its own'}
+          onClick={() => {
+            const next = !linked;
+            setLinked(next);
+            if (next) {
+              const v = corners.tl;
+              onChange({ tl: v, tr: v, br: v, bl: v });
+            }
+          }}
+        >
+          <Icon name={linked ? 'link' : 'link-off'} size={16} />
+        </button>
+      </div>
+      <small className="ed-measure__hint">All four in pixels.</small>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Colour
 // ---------------------------------------------------------------------------
 

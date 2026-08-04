@@ -437,6 +437,18 @@ export const SectionSchema = z.object({
     return Math.min(100, Math.max(0, Math.round(n)));
   }),
   /*
+   * THE COLOUR OF THAT SCRIM, added 4 Aug 2026.
+   *
+   * It was a fixed dark navy, chosen so white text over a photograph still
+   * cleared 4.5:1, and that is still the default when this is unset, so every
+   * section made before today looks exactly as it did. It is settable because a
+   * brand's own dark colour reads as more considered than a generic navy, and a
+   * pale wash under dark lettering is a design the fixed navy made impossible.
+   * A colour, or a theme token, checked by the same safeColour every other
+   * colour in the model goes through, so nothing but a colour can reach the CSS.
+   */
+  overlayColour: z.unknown().transform(safeColour).optional(),
+  /*
    * THE BACKGROUND PICTURE'S FOCUS POINT AND ADJUSTMENTS, added 4 Aug 2026.
    *
    * The same tools every other image has, on the one that needs them most: a

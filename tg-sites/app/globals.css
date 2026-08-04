@@ -319,10 +319,18 @@
 .tgs-section__scrim {
   position: absolute;
   inset: 0;
+  /*
+   * The scrim's colour mixed with transparency to the section's overlay
+   * strength. --tgs-scrim-colour defaults to the old fixed navy, so a section
+   * that never chose a colour looks exactly as it did; a section that did gets
+   * its own. The two stops keep the faint top-to-bottom fall the fixed value
+   * had. color-mix is what lets an arbitrary colour carry a percentage of
+   * opacity without the colour and the strength being wired together in advance.
+   */
   background: linear-gradient(
     180deg,
-    rgb(15 23 42 / calc(var(--tgs-scrim, 60) * 0.9%)),
-    rgb(15 23 42 / calc(var(--tgs-scrim, 60) * 1.1%))
+    color-mix(in srgb, var(--tgs-scrim-colour, #0f172a) calc(var(--tgs-scrim, 60) * 0.9%), transparent),
+    color-mix(in srgb, var(--tgs-scrim-colour, #0f172a) calc(var(--tgs-scrim, 60) * 1.1%), transparent)
   );
   z-index: 1;
 }

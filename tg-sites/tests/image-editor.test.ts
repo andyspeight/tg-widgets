@@ -214,3 +214,75 @@ describe('a gallery tile carries a focus point of its own', () => {
     expect(tiles[1].focusX).toBeUndefined();
   });
 });
+
+// ---------------------------------------------------------------------------
+// The frame: custom corners and a border
+// ---------------------------------------------------------------------------
+
+/*
+ * Andy, 4 Aug 2026: crop, an overlay colour, corner radius all and by corner,
+ * and border controls. The corners and the border are the image's own frame,
+ * tested the two ways this suite tests: the block carries them and the save
+ * bounds them for real, and the wiring that turns them into inline CSS, only
+ * when they are actually set, is read from source.
+ */
+describe('an image frame carries custom corners and a border', () => {
+  const def = blockDefinition('image');
+
+  it('offers a corners control and the three border fields', () => {
+    const kinds = (def?.fields ?? []).map((f) => `${f.key}:${f.kind}`);
+    expect(kinds).toEqual(
+      expect.arrayContaining([
+        'corners:corners',
+        'borderWidth:number',
+        'borderStyle:select',
+        'borderColour:colour',
+      ]),
+    );
+  });
+
+  it('defaults to square corners and no border, so an image is unchanged', () => {
+    expect(def?.defaults).toMatchObject({
+      corners: { tl: 0, tr: 0, br: 0, bl: 0 },
+      borderWidth: 0,
+      borderStyle: 'solid',
+      borderColour: '',
+    });
+  });
+
+  const image = (props: Record<string, unknown>): Block =>
+    ({ id: 'i1', type: 'image', props: { src: 'https://x/p.jpg', ...props } }) as Block;
+
+  it('pins each corner to 0..500 and forces the shape to four numbers', () => {
+    const out = sanitiseBlock(image({ corners: { tl: 900, tr: -20, br: 12.6, bl: 40 } }));
+    expect(out.props.corners).toEqual({ tl: 500, tr: 0, br: 13, bl: 40 });
+
+    // A corners prop that arrived as something other than an object comes back
+    // as four zeros rather than junk a render would have to defend against.
+    const bad = sanitiseBlock(image({ corners: 'lots' }));
+    expect(bad.props.corners).toEqual({ tl: 0, tr: 0, br: 0, bl: 0 });
+  });
+
+  it('keeps a border width and validates its colour on the way in', () => {
+    const out = sanitiseBlock(image({ borderWidth: 4, borderStyle: 'dashed', borderColour: '#123456' }));
+    expect(out.props).toMatchObject({ borderWidth: 4, borderStyle: 'dashed', borderColour: '#123456' });
+    // safeColour refuses anything that is not a colour, so nothing hostile lands.
+    expect(sanitiseBlock(image({ borderColour: 'url(javascript:1)' })).props.borderColour).toBe('');
+  });
+
+  it('renders corners and a border inline, and only when they are set', () => {
+    const source = read('components', 'render', 'blocks.tsx');
+    const block = source.slice(source.indexOf('export function ImageBlock'));
+    const body = block.slice(0, block.indexOf('\n}\n'));
+
+    // Custom corners override the preset ONLY when at least one is non-zero.
+    expect(body).toContain('const customCorners = tl > 0 || tr > 0 || br > 0 || bl > 0');
+    expect(body).toMatch(/customCorners\s*\?\s*\{ borderRadius: `\$\{tl\}px \$\{tr\}px \$\{br\}px \$\{bl\}px` \}/);
+    // A border only with a width, its colour through safeColour, and a visible
+    // fallback so a width with no colour is not an invisible border.
+    expect(body).toContain('safeColour(str(props, \'borderColour\'))');
+    expect(body).toMatch(/borderWidth > 0[\s\S]*?border: `\$\{borderWidth\}px \$\{borderStyle\} \$\{borderColour \|\| 'currentColor'\}`/);
+    // Built into one style put on the frame.
+    expect(body).toContain('style={frameStyle}');
+  });
+});
