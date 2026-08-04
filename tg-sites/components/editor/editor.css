@@ -3294,6 +3294,55 @@
 }
 
 /* ---------------------------------------------------------------------------
+   The left drawer.
+
+   The section picker, anchored to the left edge top to bottom rather than
+   floating in the middle, so the page stays in view beside it while you browse
+   a long list of designs. Andy asked for the pop-up to be a drawer (3 Aug
+   2026). It is the same dialog underneath, so the scrim, the focus trap and
+   Escape all come for free; only the shape changes. The attribute selectors
+   outrank the plain .tg-modal rules above, including the ones in the phone media
+   query, so the drawer keeps its shape on a small screen too, just full width.
+--------------------------------------------------------------------------- */
+.tg-scrim[data-placement='left'] {
+  place-items: stretch start;
+  padding: 0;
+}
+
+.tg-modal[data-placement='left'] {
+  width: min(520px, 100vw);
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  border-radius: 0;
+  /* It comes IN from the edge it lives on, rather than rising from below. */
+  animation: tg-slide-in-left 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes tg-slide-in-left {
+  from { opacity: 0; transform: translateX(-24px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tg-modal[data-placement='left'] { animation: none; }
+}
+
+/*
+ * The designed picker, narrower now. A slimmer category rail, and the designs
+ * drop to a single column of photographs down the side of it, which is the
+ * shape the reference has and what the tall thin drawer wants anyway.
+ */
+.tg-modal[data-placement='left'] .ed-designed {
+  grid-template-columns: 128px 1fr;
+  gap: var(--ed-3);
+}
+
+.tg-modal[data-placement='left'] .ed-preset-grid {
+  grid-template-columns: 1fr;
+}
+
+/* ---------------------------------------------------------------------------
    Version history
 
    Lives in editor.css rather than its own file because it is a dialog inside the

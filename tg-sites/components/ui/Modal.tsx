@@ -21,11 +21,25 @@ import { Icon } from '../editor/Icon';
 
 export type ModalSize = 'small' | 'large';
 
+/**
+ * Where the dialog sits.
+ *
+ * `center` is the dialog everything else in the product uses. `left` is a panel
+ * that fills the left edge top to bottom and slides in, for the one screen where
+ * a centred box is the wrong shape: the section picker, which is a long list you
+ * browse against the page still visible beside it. Andy asked for that one to be
+ * a drawer rather than a pop-up (3 Aug 2026). It is the same dialog underneath,
+ * with the same scrim, focus trap and Escape, only anchored and sized
+ * differently, so nothing about how it behaves has to be learned twice.
+ */
+export type ModalPlacement = 'center' | 'left';
+
 interface ModalProps {
   title: string;
   /** One line under the title. Optional, and usually worth it. */
   description?: string;
   size?: ModalSize;
+  placement?: ModalPlacement;
   onClose: () => void;
   children: ReactNode;
   /** The buttons. Rendered in a footer band so every dialog ends the same way. */
@@ -36,6 +50,7 @@ export function Modal({
   title,
   description,
   size = 'small',
+  placement = 'center',
   onClose,
   children,
   footer,
@@ -135,6 +150,7 @@ export function Modal({
   return (
     <div
       className="tg-scrim"
+      data-placement={placement}
       onMouseDown={(event) => {
         // mousedown, not click: a click that STARTED inside the dialog and
         // ended on the scrim (a sloppy drag off a text selection) should not
@@ -146,6 +162,7 @@ export function Modal({
         ref={dialog}
         className="tg-modal"
         data-size={size}
+        data-placement={placement}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}

@@ -252,6 +252,7 @@ export function SectionPicker({
       title="Add a section"
       description="Start from an empty shape, or from something already put together."
       size="large"
+      placement="left"
       onClose={onClose}
     >
       <div className="ed-tabs" role="tablist" aria-label="How to add a section">
