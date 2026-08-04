@@ -895,6 +895,71 @@ function SectionFields({
         </p>
       </div>
 
+      {/*
+        MORE THAN ONE PICTURE MAKES THE BACKGROUND A SLIDESHOW, added 4 Aug 2026.
+        The hero cycling through several photographs, which is what Andy asked for
+        first. Each row is the same chooser as the one above; the last, empty, is
+        how another is added. No arrows or dots are offered because the section's
+        own heading and buttons sit over the background. It plays on the canvas,
+        so the preview cycles the same as the published page.
+      */}
+      <div className="ed-field">
+        <label className="ed-label">More background images</label>
+        {(section.backgroundSlides ?? []).map((url, slideIndex) => (
+          <ImageField
+            key={`bgslide-${slideIndex}`}
+            value={url}
+            onChange={(next) => {
+              const slides = [...(section.backgroundSlides ?? [])];
+              if (next) slides[slideIndex] = next;
+              else slides.splice(slideIndex, 1);
+              set({ backgroundSlides: slides }, `sec:${index}:bgslides`);
+            }}
+          />
+        ))}
+        <ImageField
+          key="bgslide-add"
+          value=""
+          onChange={(next) => {
+            if (!next) return;
+            set(
+              { backgroundSlides: [...(section.backgroundSlides ?? []), next] },
+              `sec:${index}:bgslides`,
+            );
+          }}
+        />
+        <p className="ed-help">
+          Add another and the background cycles through them behind your heading
+          and buttons. The focus point and adjustments above are shared by them
+          all.
+        </p>
+      </div>
+
+      {(section.backgroundImage ? 1 : 0) + (section.backgroundSlides?.length ?? 0) > 1 && (
+        <>
+          <Picker
+            label="Transition"
+            value={section.backgroundTransition ?? 'fade'}
+            options={[
+              { value: 'fade', label: 'Fade' },
+              { value: 'slide', label: 'Slide' },
+            ]}
+            onChange={(value) =>
+              set({ backgroundTransition: value as typeof section.backgroundTransition }, `sec:${index}:bgtrans`)
+            }
+          />
+          <Measure
+            label="Time on each"
+            value={section.backgroundInterval ?? 5}
+            min={2}
+            max={15}
+            step={1}
+            unit="s"
+            onChange={(value) => set({ backgroundInterval: value }, `sec:${index}:bgint`)}
+          />
+        </>
+      )}
+
       <div className="ed-field">
         <label className="ed-label">Background video</label>
         <input

@@ -307,6 +307,55 @@
 }
 
 /*
+ * A BACKGROUND THAT CYCLES, added 4 Aug 2026.
+ *
+ * More than one background picture and the section fades or slides through them
+ * behind its own words and buttons. It is the image block's slideshow moved to
+ * the background: the SAME tgs-ss-fade / tgs-ss-slide keyframes, on slides that
+ * COVER the section rather than sit in an aspect-ratio box, and PURE CSS so it
+ * plays on the editor canvas where a script never runs. No arrows or dots, on
+ * purpose, since the section's heading sits over it; it pauses on hover and
+ * stops for reduced motion, both with no script. It sits at the background's own
+ * z-index, under the scrim and the content the same as a single picture does.
+ */
+.tgs-section__bgshow { position: absolute; inset: 0; overflow: hidden; z-index: 0; }
+.tgs-section__bgslide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  animation-duration: var(--tgs-ss-cycle, 25s);
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: both;
+}
+.tgs-section__bgshow:hover .tgs-section__bgslide { animation-play-state: paused; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* !important, because the per-count binder below sets animation-name at a
+     higher specificity and would otherwise keep the cycle running. */
+  .tgs-section__bgslide { animation: none !important; opacity: 0; }
+  .tgs-section__bgslide:first-child { opacity: 1; }
+}
+
+.tgs-section__bgshow[data-transition='fade'][data-count='2'] .tgs-section__bgslide { animation-name: tgs-ss-fade-2; }
+.tgs-section__bgshow[data-transition='slide'][data-count='2'] .tgs-section__bgslide { animation-name: tgs-ss-slide-2; }
+.tgs-section__bgshow[data-transition='fade'][data-count='3'] .tgs-section__bgslide { animation-name: tgs-ss-fade-3; }
+.tgs-section__bgshow[data-transition='slide'][data-count='3'] .tgs-section__bgslide { animation-name: tgs-ss-slide-3; }
+.tgs-section__bgshow[data-transition='fade'][data-count='4'] .tgs-section__bgslide { animation-name: tgs-ss-fade-4; }
+.tgs-section__bgshow[data-transition='slide'][data-count='4'] .tgs-section__bgslide { animation-name: tgs-ss-slide-4; }
+.tgs-section__bgshow[data-transition='fade'][data-count='5'] .tgs-section__bgslide { animation-name: tgs-ss-fade-5; }
+.tgs-section__bgshow[data-transition='slide'][data-count='5'] .tgs-section__bgslide { animation-name: tgs-ss-slide-5; }
+.tgs-section__bgshow[data-transition='fade'][data-count='6'] .tgs-section__bgslide { animation-name: tgs-ss-fade-6; }
+.tgs-section__bgshow[data-transition='slide'][data-count='6'] .tgs-section__bgslide { animation-name: tgs-ss-slide-6; }
+.tgs-section__bgshow[data-transition='fade'][data-count='7'] .tgs-section__bgslide { animation-name: tgs-ss-fade-7; }
+.tgs-section__bgshow[data-transition='slide'][data-count='7'] .tgs-section__bgslide { animation-name: tgs-ss-slide-7; }
+.tgs-section__bgshow[data-transition='fade'][data-count='8'] .tgs-section__bgslide { animation-name: tgs-ss-fade-8; }
+.tgs-section__bgshow[data-transition='slide'][data-count='8'] .tgs-section__bgslide { animation-name: tgs-ss-slide-8; }
+
+/*
  * A scrim so text over a photo still clears 4.5:1.
  *
  * The strength is the section's own `overlay`, 0 to 100, arriving as
@@ -719,9 +768,11 @@
  * the first is loaded eagerly and the rest lazily.
  */
 @media (prefers-reduced-motion: reduce) {
-  .tgs-slideshow:not(.is-live) .tgs-slideshow__slide { animation: none; opacity: 0; }
+  /* !important, because the per-count binder sets animation-name at a higher
+     specificity and would otherwise keep the cycle running through this. */
+  .tgs-slideshow:not(.is-live) .tgs-slideshow__slide { animation: none !important; opacity: 0; }
   .tgs-slideshow:not(.is-live) .tgs-slideshow__slide:first-child { opacity: 1; }
-  .tgs-slideshow:not(.is-live) .tgs-slideshow__dot { animation: none; }
+  .tgs-slideshow:not(.is-live) .tgs-slideshow__dot { animation: none !important; }
   .tgs-slideshow:not(.is-live) .tgs-slideshow__dot:first-child { opacity: 1; }
   /* When the script drives it, the current slide is shown outright, no move. */
   .tgs-slideshow.is-live .tgs-slideshow__slide { transition: none; }

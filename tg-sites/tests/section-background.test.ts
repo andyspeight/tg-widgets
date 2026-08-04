@@ -213,8 +213,9 @@ describe('how the video is rendered', () => {
     expect(tag).toContain('aria-hidden="true"');
     expect(tag).toContain('tabIndex={-1}');
     // The picture doubles as the poster, so there is something to look at while
-    // the file downloads.
-    expect(tag).toContain('poster={background || undefined}');
+    // the file downloads. The first background image, whether it is the single
+    // one or the first slide of a background slideshow.
+    expect(tag).toContain('poster={bgImages[0] || undefined}');
   });
 
   /*
@@ -381,5 +382,102 @@ describe('the background picture, its focus point and its look', () => {
     expect(props).toMatch(/backgroundFocusX: patch\.focusX/);
     expect(props).toMatch(/focusX: section\.backgroundFocusX \?\? 50/);
     expect(props).toMatch(/brightness: section\.backgroundBrightness \?\? 100/);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+/*
+ * MORE THAN ONE BACKGROUND PICTURE MAKES THE SECTION A SLIDESHOW, added 4 Aug
+ * 2026, which is what Andy asked for first: the hero cycling through several
+ * photographs behind its heading and buttons. It is the image block's slideshow
+ * moved to the background, so it stays PURE CSS and shows no controls. The block
+ * half runs for real here; the render and the stylesheet are read from source
+ * the same way the video is, and both were driven in a browser before shipping.
+ */
+describe('the background as a slideshow', () => {
+  it('keeps the extra pictures, and is absent when there are none', () => {
+    expect(parsed({}).backgroundSlides).toBeUndefined();
+    const section = parsed({
+      backgroundImage: 'https://cdn.example.com/a.jpg',
+      backgroundSlides: ['https://cdn.example.com/b.jpg', 'https://cdn.example.com/c.jpg'],
+    });
+    expect(section.backgroundSlides).toEqual([
+      'https://cdn.example.com/b.jpg',
+      'https://cdn.example.com/c.jpg',
+    ]);
+  });
+
+  it('holds the list to seven, so with the section picture it stays inside eight', () => {
+    const nine = Array.from({ length: 9 }, (_, i) => `https://cdn.example.com/${i}.jpg`);
+    expect(parsed({ backgroundSlides: nine }).backgroundSlides).toHaveLength(7);
+  });
+
+  it('drops anything in the list that is not a usable string', () => {
+    const section = parsed({ backgroundSlides: ['https://cdn.example.com/b.jpg', '', 42, null] });
+    expect(section.backgroundSlides).toEqual(['https://cdn.example.com/b.jpg']);
+  });
+
+  it('normalises the transition and holds the time on each between 2 and 15', () => {
+    expect(parsed({ backgroundTransition: 'slide' }).backgroundTransition).toBe('slide');
+    expect(parsed({ backgroundTransition: 'wobble' }).backgroundTransition).toBe('fade');
+    expect(parsed({}).backgroundTransition).toBeUndefined();
+    expect(parsed({ backgroundInterval: 99 }).backgroundInterval).toBe(15);
+    expect(parsed({ backgroundInterval: 1 }).backgroundInterval).toBe(2);
+    expect(parsed({ backgroundInterval: 'slow' }).backgroundInterval).toBe(5);
+    expect(parsed({}).backgroundInterval).toBeUndefined();
+  });
+
+  it('the address allowlist still runs on every background slide, at render', () => {
+    // The render safeUrls each one, the same as the single background image, so
+    // a bad address in the list becomes nothing rather than reaching a src.
+    const renderer = source('components', 'render', 'PageRenderer.tsx');
+    expect(renderer).toContain('(section.backgroundSlides ?? [])');
+    expect(renderer).toMatch(/\.map\(\(src\) => safeUrl\(src\)\)/);
+    expect(renderer).toContain('.filter((src): src is string => !!src)');
+  });
+
+  it('becomes a slideshow only with two or more pictures and no video', () => {
+    const renderer = source('components', 'render', 'PageRenderer.tsx');
+    expect(renderer).toContain('const bgShow = !video && bgImages.length > 1;');
+    expect(renderer).toContain('[background, ...bgExtra]');
+    // Capped at the eight the keyframes cover.
+    expect(renderer).toContain('.slice(0, 8)');
+  });
+
+  it('stacks the slides, staggered, and keeps the scrim over them', () => {
+    const renderer = source('components', 'render', 'PageRenderer.tsx');
+    expect(renderer).toContain('className="tgs-section__bgshow"');
+    expect(renderer).toContain('data-transition={bgTransition}');
+    expect(renderer).toContain('data-count={bgImages.length}');
+    expect(renderer).toContain('className="tgs-section__bgslide"');
+    expect(renderer).toMatch(/animationDelay: `calc\(\$\{i\} \* var\(--tgs-ss-cycle\) \/ \$\{bgImages\.length\}\)`/);
+    // The same focus point and adjustments as a single background, on each slide.
+    expect(renderer).toContain('...backgroundStyle(section)');
+    // The scrim shows whenever there is any background picture, not just one.
+    expect(renderer).toContain('{(bgImages.length > 0 || video) && <div className="tgs-section__scrim"');
+  });
+
+  it('is offered in the editor, with the transition and speed only once it is a slideshow', () => {
+    const props = source('components', 'editor', 'Properties.tsx');
+    expect(props).toContain('More background images');
+    expect(props).toContain('backgroundSlides:');
+    // The transition and time controls appear only when the section has two or
+    // more pictures, the point at which it becomes a slideshow.
+    expect(props).toContain('(section.backgroundImage ? 1 : 0) + (section.backgroundSlides?.length ?? 0) > 1');
+  });
+
+  it('the stylesheet drives it, on covering slides, and stops for reduced motion', () => {
+    const css = source('app', 'globals.css');
+    expect(css).toContain('.tgs-section__bgshow {');
+    expect(css).toContain('.tgs-section__bgslide {');
+    // Covers the section, behind the scrim.
+    expect(css).toMatch(/\.tgs-section__bgshow \{[^}]*position: absolute[^}]*z-index: 0/);
+    expect(css).toContain('.tgs-section__bgshow:hover .tgs-section__bgslide { animation-play-state: paused; }');
+    // !important, or the per-count binder's animation-name keeps it cycling.
+    expect(css).toContain('.tgs-section__bgslide { animation: none !important; opacity: 0; }');
+    expect(css).toContain('.tgs-section__bgslide:first-child { opacity: 1; }');
+    // Reuses the image block's keyframes, bound for every supported count.
+    expect(css).toContain(".tgs-section__bgshow[data-transition='slide'][data-count='8'] .tgs-section__bgslide { animation-name: tgs-ss-slide-8; }");
   });
 });

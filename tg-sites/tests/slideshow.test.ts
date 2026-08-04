@@ -122,7 +122,8 @@ describe('the stylesheet drives it, and stops for reduced motion', () => {
   });
 
   it('stops the cycle and shows the first picture under reduced motion', () => {
-    expect(css).toMatch(/prefers-reduced-motion: reduce\)[\s\S]*?\.tgs-slideshow__slide \{ animation: none/);
+    // !important, or the per-count binder's animation-name keeps it cycling.
+    expect(css).toMatch(/prefers-reduced-motion: reduce\)[\s\S]*?\.tgs-slideshow__slide \{ animation: none !important/);
     expect(css).toContain('.tgs-slideshow__slide:first-child { opacity: 1; }');
   });
 });

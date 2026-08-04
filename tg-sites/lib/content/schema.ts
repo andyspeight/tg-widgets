@@ -391,6 +391,27 @@ function backgroundPercent(max: number) {
   });
 }
 
+/**
+ * The extra background pictures, as a plain list of addresses.
+ *
+ * A background is decorative so there is no alt to carry, which is why this is a
+ * list of strings rather than the {src, alt} the image block's slides use. Kept
+ * to seven, so the section's own picture plus these stays inside the eight the
+ * slideshow keyframes cover. The render reduces and safeUrls each one the same
+ * as it does the single backgroundImage; this only keeps the shape sane.
+ */
+function toBackgroundSlides(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  const out: string[] = [];
+  for (const item of value) {
+    if (typeof item === 'string' && item.trim() !== '' && item.length <= 2048) {
+      out.push(item);
+    }
+    if (out.length >= 7) break;
+  }
+  return out;
+}
+
 export const SectionSchema = z.object({
   id: z.string().min(1),
   name: z.string().max(80).optional(),
@@ -466,6 +487,23 @@ export const SectionSchema = z.object({
   backgroundBrightness: backgroundPercent(200),
   backgroundContrast: backgroundPercent(200),
   backgroundSaturation: backgroundPercent(200),
+  /*
+   * MORE THAN ONE BACKGROUND PICTURE MAKES THE SECTION A SLIDESHOW, added 4 Aug
+   * 2026, which is what Andy asked for first: the hero cycling through several
+   * photographs behind its heading and buttons. It is the image block's
+   * slideshow moved to the background, so it stays PURE CSS and runs in the
+   * editor preview, and it shows no arrows or dots because the section's own
+   * words sit over it. The extra pictures ride on backgroundSlides; the single
+   * backgroundImage above is the first. The focus point and the adjustments are
+   * the section's, shared by every slide, since a section has one of each.
+   */
+  backgroundSlides: z.unknown().transform(toBackgroundSlides).optional(),
+  backgroundTransition: z.unknown().transform((v) => (v === 'slide' ? 'slide' : 'fade')).optional(),
+  backgroundInterval: z.unknown().transform((v) => {
+    const n = typeof v === 'number' ? v : Number(v);
+    if (!Number.isFinite(n)) return 5;
+    return Math.min(15, Math.max(2, Math.round(n)));
+  }).optional(),
   /**
    * A name a link can point at, rendered as the section's id.
    *

@@ -268,6 +268,109 @@ const currentIndex = (page) =>
   await page.close();
 }
 
+// --- The section background as a slideshow (Andy's original ask) -----------
+
+/**
+ * A section whose background is three pictures, the markup PageRenderer writes
+ * for a background slideshow: a covering stack behind the scrim and the words.
+ * Pure CSS, no script, no controls.
+ */
+function sectionBgPage() {
+  const slides = [0, 1, 2]
+    .map(
+      (i) =>
+        `<img class="tgs-section__bgslide" src="${PIXEL}" alt="" aria-hidden="true" ` +
+        `style="animation-delay: calc(${i} * var(--tgs-ss-cycle) / 3)" />`,
+    )
+    .join('');
+  return `<!doctype html><html><head><meta charset="utf-8"><style>${css}</style></head>
+<body><div class="tgs-page"><section class="tgs-section" data-tone="dark"
+    style="--tgs-pad: 80px; --tgs-min-h: 420px; --tgs-scrim: 60">
+  <div class="tgs-section__bgshow" aria-hidden="true" data-transition="fade" data-count="3"
+       style="--tgs-ss-cycle: 9s">${slides}</div>
+  <div class="tgs-section__scrim" aria-hidden="true"></div>
+  <div class="tgs-section__inner"><h1>Tailor-made Greece</h1></div>
+</section></div></body></html>`;
+}
+
+async function openSection({ reducedMotion } = {}) {
+  const page = await browser.newPage({ viewport: { width: 900, height: 700 } });
+  const errors = [];
+  page.on('console', (m) => {
+    if (m.type() === 'error') errors.push(m.text());
+  });
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.emulateMedia({ reducedMotion: reducedMotion ? 'reduce' : 'no-preference' });
+  await page.setContent(sectionBgPage(), { waitUntil: 'load' });
+  return { page, errors };
+}
+
+{
+  const { page, errors } = await openSection();
+
+  await check('the background becomes a covering, cycling stack', async () => {
+    const show = page.locator('.tgs-section__bgshow');
+    if ((await show.count()) !== 1) return 'no bgshow';
+    if ((await page.locator('.tgs-section__bgslide').count()) !== 3) return 'wrong slide count';
+    const pos = await show.evaluate((el) => getComputedStyle(el).position);
+    return pos === 'absolute' ? true : `position is ${pos}`;
+  });
+
+  await check('the slides actually animate', async () => {
+    const name = await page
+      .locator('.tgs-section__bgslide')
+      .first()
+      .evaluate((el) => getComputedStyle(el).animationName);
+    return name && name !== 'none' ? true : `animation-name is ${name}`;
+  });
+
+  await check('the scrim sits over the pictures, the words over the scrim', async () => {
+    const z = await page.evaluate(() => ({
+      show: getComputedStyle(document.querySelector('.tgs-section__bgshow')).zIndex,
+      scrim: getComputedStyle(document.querySelector('.tgs-section__scrim')).zIndex,
+      inner: getComputedStyle(document.querySelector('.tgs-section__inner')).zIndex,
+    }));
+    return z.show === '0' && z.scrim === '1' && z.inner === '2'
+      ? true
+      : `z-order ${JSON.stringify(z)}`;
+  });
+
+  await check('the background covers the section, not an aspect-ratio box', async () => {
+    const fit = await page.evaluate(() => {
+      const section = document.querySelector('.tgs-section').getBoundingClientRect();
+      const show = document.querySelector('.tgs-section__bgshow').getBoundingClientRect();
+      return Math.abs(section.height - show.height) < 2 && Math.abs(section.width - show.width) < 2;
+    });
+    return fit === true ? true : 'the stack does not fill the section';
+  });
+
+  await check('no console error on the background slideshow', async () =>
+    errors.length === 0 ? true : errors.join(' | '));
+
+  await page.close();
+}
+
+{
+  const { page } = await openSection({ reducedMotion: true });
+
+  await check('reduced motion shows one still picture, no cycle', async () => {
+    const state = await page.evaluate(() => {
+      const slides = [...document.querySelectorAll('.tgs-section__bgslide')];
+      return {
+        name: getComputedStyle(slides[0]).animationName,
+        first: getComputedStyle(slides[0]).opacity,
+        second: getComputedStyle(slides[1]).opacity,
+      };
+    });
+    if (state.name !== 'none') return `still animating: ${state.name}`;
+    return state.first === '1' && state.second === '0'
+      ? true
+      : `opacities ${state.first} / ${state.second}`;
+  });
+
+  await page.close();
+}
+
 await browser.close();
 
 let failed = false;

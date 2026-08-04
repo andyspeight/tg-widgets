@@ -197,6 +197,21 @@ export function SectionRenderer({
   const background = safeUrl(section.backgroundImage ?? '');
   const video = safeUrl(section.backgroundVideo ?? '');
   /*
+   * MORE THAN ONE BACKGROUND PICTURE CYCLES. The section's own picture is the
+   * first, the extras follow, each reduced and safeUrl'd the same way. It is a
+   * slideshow only with two or more and no video, since a video already fills
+   * the background and takes precedence. Capped at eight, the range the shared
+   * keyframes cover. PURE CSS, so it plays on the canvas where a script never
+   * runs, and it carries no controls because the section's words sit over it.
+   */
+  const bgExtra = (section.backgroundSlides ?? [])
+    .map((src) => safeUrl(src))
+    .filter((src): src is string => !!src);
+  const bgImages = [background, ...bgExtra].filter((src): src is string => !!src).slice(0, 8);
+  const bgShow = !video && bgImages.length > 1;
+  const bgTransition = section.backgroundTransition === 'slide' ? 'slide' : 'fade';
+  const bgInterval = section.backgroundInterval ?? 5;
+  /*
    * Reduced again here even though the schema already did it on the way in, the
    * same belt-and-braces every other stored string in this tree gets.
    *
@@ -247,21 +262,44 @@ export function SectionRenderer({
         The poster still shows, which is what the section will look like to
         anybody who asked for less motion anyway.
       */}
-      {background && (
+      {bgShow ? (
+        <div
+          className="tgs-section__bgshow"
+          aria-hidden="true"
+          data-transition={bgTransition}
+          data-count={bgImages.length}
+          style={{ '--tgs-ss-cycle': `${bgImages.length * bgInterval}s` } as CSSProperties}
+        >
+          {bgImages.map((src, i) => (
+            <img
+              key={i}
+              className="tgs-section__bgslide"
+              src={src}
+              alt=""
+              aria-hidden="true"
+              loading={i === 0 ? 'eager' : 'lazy'}
+              style={{
+                ...backgroundStyle(section),
+                animationDelay: `calc(${i} * var(--tgs-ss-cycle) / ${bgImages.length})`,
+              }}
+            />
+          ))}
+        </div>
+      ) : bgImages[0] ? (
         <img
           className="tgs-section__bg"
-          src={background}
+          src={bgImages[0]}
           alt=""
           aria-hidden="true"
           style={backgroundStyle(section)}
         />
-      )}
+      ) : null}
 
       {video && !editable && (
         <video
           className="tgs-section__bg tgs-section__bg--video"
           src={video}
-          poster={background || undefined}
+          poster={bgImages[0] || undefined}
           autoPlay
           muted
           loop
@@ -273,7 +311,7 @@ export function SectionRenderer({
         />
       )}
 
-      {(background || video) && <div className="tgs-section__scrim" aria-hidden="true" />}
+      {(bgImages.length > 0 || video) && <div className="tgs-section__scrim" aria-hidden="true" />}
 
       {/*
         THE SHAPED EDGES. Each one sits OUTSIDE the section's own box, drawn in
