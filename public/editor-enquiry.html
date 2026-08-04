@@ -2831,6 +2831,7 @@
       // ── Core ──
       { id: 'destination', name: 'Destination',        desc: 'Search for countries, cities, resorts', category: 'Core',        icon: ICONS.pin,      defaultLabel: 'Where are you dreaming of?', defaultRequired: true,  defaultOptions: { help: 'Add one, or multiple for a twin-centre trip.' } },
       { id: 'airport',     name: 'Departure airport',  desc: 'UK airport dropdown, grouped by region', category: 'Core',        icon: ICONS.plane,    defaultLabel: 'Departure airport',          defaultRequired: true,  defaultOptions: {} },
+      { id: 'flights',     name: 'Include flights?',   desc: 'Yes/No — reveals the airport field on Yes', category: 'Core',     icon: ICONS.plane,    defaultLabel: 'Would you like this to include flights?', defaultRequired: false, defaultOptions: {} },
       { id: 'daterange',   name: 'Travel dates',       desc: 'Depart + return with flexible toggle',   category: 'Core',        icon: ICONS.calendar, defaultLabel: 'Travel dates',               defaultRequired: true,  defaultOptions: {} },
       { id: 'travellers',  name: 'Travellers',         desc: 'Adults, children, infants + ages',       category: 'Core',        icon: ICONS.users,    defaultLabel: "Who's travelling?",          defaultRequired: true,  defaultOptions: {} },
       // ── Details ──
@@ -4389,10 +4390,31 @@
         case 'duration': {
           const wrap = document.createElement('div');
           wrap.className = 'fp-seg';
-          ['3–5 nights', '7 nights', '10 nights', '14 nights', 'Custom'].forEach((lab, i) => {
+          // Mirror what the widget actually renders: the author's options, or
+          // the built-in five as separate night counts. (The old preview showed
+          // a single "3–5 nights" pill, which did not match the live form and is
+          // what made 3 and 5 look grouped.)
+          const durLabels = (Array.isArray(field.choices) && field.choices.length)
+            ? field.choices.map(c => String((c && c.label) || (c && c.value) || '').trim()).filter(Boolean).slice(0, 12)
+            : ['3 nights', '5 nights', '7 nights', '10 nights', '14 nights'];
+          let durActive = durLabels.findIndex(l => /^7(\s*nights?)?$/i.test(l));
+          if (durActive < 0) durActive = 0;
+          durLabels.forEach((lab, i) => {
             const b = document.createElement('span');
-            b.className = 'fp-seg-btn' + (i === 1 ? ' is-active' : '');
+            b.className = 'fp-seg-btn' + (i === durActive ? ' is-active' : '');
             b.textContent = lab;
+            wrap.appendChild(b);
+          });
+          return wrap;
+        }
+        case 'flights': {
+          const wrap = document.createElement('div');
+          wrap.className = 'fp-seg';
+          const preYes = !!(field.options && field.options.default === 'yes');
+          [{ label: 'Yes', active: preYes }, { label: 'No', active: !preYes }].forEach(o => {
+            const b = document.createElement('span');
+            b.className = 'fp-seg-btn' + (o.active ? ' is-active' : '');
+            b.textContent = o.label;
             wrap.appendChild(b);
           });
           return wrap;
@@ -7732,6 +7754,18 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
               else field.choices = lines.map(l => ({ value: l, label: l }));
               saveField();
             }
+          })
+        ]);
+      }
+
+      if (field.type === 'flights') {
+        return section('Default answer', [
+          labelledSelect({
+            label: 'Which answer is pre-selected',
+            value: field.options.default === 'yes' ? 'yes' : 'no',
+            options: [{ value: 'no', label: 'No' }, { value: 'yes', label: 'Yes' }],
+            hint: 'Add a Departure airport field to this form too, and it will appear only when the visitor answers Yes.',
+            onChange: (v) => { if (v === 'yes') field.options.default = 'yes'; else delete field.options.default; saveField(); }
           })
         ]);
       }

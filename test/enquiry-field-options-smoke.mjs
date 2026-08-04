@@ -187,5 +187,52 @@ ok(/type: 'free-text'/.test(code), 'open-text submits the same free-text shape t
 ok(/field\.type === 'destination'[\s\S]*field\.options\.mode = 'text'/.test(editor), 'editor destination inspector writes options.mode');
 ok(/field\.type === 'duration'[\s\S]*field\.choices = lines\.map/.test(editor), 'editor duration inspector writes field.choices');
 
+// ── #10 "Include flights?" toggle reveals the airport field ──────────────────
+const airportField = { id: 'airport_x', type: 'airport', label: 'Departure airport', required: true, visible: true, options: {} };
+const flightsField = (opts) => ({ id: 'flights', type: 'flights', label: 'Include flights?', required: false, visible: true, options: opts || {} });
+// True when an element or any ancestor is display:none (jsdom has no layout).
+function isHidden(elm) {
+  let n = elm;
+  while (n && n.nodeType === 1) { if (n.style && n.style.display === 'none') return true; n = n.parentNode; }
+  return false;
+}
+const airportInputOf = (shadow) => shadow.querySelector('input[aria-label="Search airports"]');
+
+{
+  const shadow = await mount([flightsField(), airportField, F.name(), F.consent()]);
+  const yes = shadow.querySelector('.tg-seg-btn[data-v="yes"]');
+  const no = shadow.querySelector('.tg-seg-btn[data-v="no"]');
+  ok(yes && no, '#10 flights field renders Yes and No');
+  ok(no.classList.contains('is-active') && !yes.classList.contains('is-active'), '#10 defaults to No');
+  const ap = airportInputOf(shadow);
+  ok(ap && isHidden(ap), '#10 airport is hidden while the answer is No');
+  yes.click();
+  ok(!isHidden(ap), '#10 answering Yes reveals the airport field');
+  no.click();
+  ok(isHidden(ap), '#10 answering No again hides it');
+}
+{
+  // Pre-answered Yes: airport visible from the start.
+  const shadow = await mount([flightsField({ default: 'yes' }), airportField, F.name(), F.consent()]);
+  const yes = shadow.querySelector('.tg-seg-btn[data-v="yes"]');
+  ok(yes.classList.contains('is-active'), '#10 default: yes pre-selects Yes');
+  ok(!isHidden(airportInputOf(shadow)), '#10 default: yes shows the airport immediately');
+}
+{
+  // Airport WITHOUT a flights field: shows exactly as before (no gating).
+  const shadow = await mount([airportField, F.name(), F.consent()]);
+  ok(!isHidden(airportInputOf(shadow)), '#10 an airport field with no flights toggle is shown as always');
+}
+ok(/flights:     renderFlights/.test(code), 'flights type is registered in RENDERERS');
+ok(/function renderFlights\(instance, fieldSpec, t\)/.test(code), 'widget has a flights renderer');
+ok(/fields\.flights_included = value/.test(code), 'flights submits flights_included (the server already stores it)');
+ok(/airportInst\.validate = function \(\) \{ return on \? baseValidate/.test(code), 'a hidden airport is not validated');
+ok(/airportInst\.writeTo = function \(f\) \{ if \(on\) baseWriteTo/.test(code), 'a hidden airport is not submitted');
+ok(/id: 'flights'[\s\S]*category: 'Core'/.test(editor), 'editor palette lists the flights field');
+ok(/case 'flights':/.test(editor), 'editor canvas has a flights preview');
+// #3 follow-through: the canvas preview no longer shows a single "3–5 nights"
+// pill (which is what made 3 and 5 look grouped in the editor).
+ok(!/'3–5 nights', '7 nights', '10 nights', '14 nights', 'Custom'/.test(editor), 'the misleading grouped duration preview is gone');
+
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
