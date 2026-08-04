@@ -38,7 +38,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.1.11';
+  var WIDGET_VERSION = '1.1.12';
   var VISITOR_ID_KEY = 'tg_visitor_id_v1';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -1551,6 +1551,42 @@
     // match) get type 'free-text' and a synthesised id.
     var destinations = [];
     var shell = createFieldShell(instance, fieldSpec.label || t('label_destination'));
+
+    // Open-text mode (options.mode === 'text'): a plain box instead of the live
+    // search combobox, for agents who find the typeahead clunky. The value is
+    // submitted as ONE free-text destination — the exact shape the search field
+    // already produces for an unmatched entry — so storage, the inbox and emails
+    // are byte-for-byte the same downstream. Default mode stays 'search'.
+    if (fieldSpec.options && fieldSpec.options.mode === 'text') {
+      var textInput = el('input', {
+        class: 'tg-input', type: 'text', maxlength: '160',
+        placeholder: (fieldSpec.options && fieldSpec.options.placeholder) ? String(fieldSpec.options.placeholder).slice(0, 120) : t('dest_placeholder'),
+        'aria-label': fieldSpec.label || t('label_destination'),
+        'aria-describedby': shell.errorId,
+        oninput: function () { shell.clear(); textInput.removeAttribute('aria-invalid'); }
+      });
+      shell.fieldNode.appendChild(textInput);
+      if (fieldSpec.help !== false) {
+        shell.fieldNode.appendChild(el('div', { class: 'tg-help', text: fieldSpec.help || t('dest_help') }));
+      }
+      shell.fieldNode.appendChild(shell.errorNode);
+      return {
+        type: 'destination',
+        node: shell.fieldNode,
+        writeTo: function (fields) {
+          var v = textInput.value.trim();
+          fields.destinations = v ? [{ id: 'freetext:' + v.toLowerCase().replace(/\s+/g, '-').slice(0, 80), name: v.slice(0, 128), type: 'free-text' }] : [];
+        },
+        validate: function () {
+          if (fieldSpec.required === false) return null;
+          return textInput.value.trim() ? null : t('dest_required');
+        },
+        showError: function (msg) { shell.show(msg); textInput.setAttribute('aria-invalid', 'true'); },
+        clearError: function () { shell.clear(); textInput.removeAttribute('aria-invalid'); },
+        focus: function () { textInput.focus(); }
+      };
+    }
+
     var input = el('input', {
       class: 'tg-dest-input', type: 'text', maxlength: '128',
       // Author-set example text overrides the default (stored under options,
@@ -2143,22 +2179,52 @@
     };
   }
 
+  // Per-form duration options from field.choices (the same slot interests uses).
+  // Each entry is a label: a bare number or "N nights" becomes an N-night option
+  // (submitted as duration.nights); anything else, e.g. "3-5 nights", is a
+  // labelled option (submitted as duration.custom, which the server already
+  // accepts). Returns [{nights|null, custom|null}] or null → the built-in
+  // [3,5,7,10,14], so every untouched form is unchanged.
+  function normaliseDurationOptions(fieldSpec) {
+    var raw = fieldSpec && fieldSpec.choices;
+    if (!Array.isArray(raw) || !raw.length) return null;
+    var out = [];
+    for (var i = 0; i < raw.length && out.length < 12; i++) {
+      var item = raw[i];
+      var label = (item && typeof item === 'object') ? (item.label != null ? item.label : (item.value != null ? item.value : '')) : item;
+      label = String(label == null ? '' : label).trim().slice(0, 40);
+      if (!label) continue;
+      var m = label.match(/^(\d{1,3})(?:\s*nights?)?$/i);
+      var nights = m ? parseInt(m[1], 10) : null;
+      if (nights != null && (nights < 1 || nights > 90)) nights = null;
+      out.push(nights != null ? { nights: nights, custom: null } : { nights: null, custom: label });
+    }
+    return out.length ? out : null;
+  }
+
   function renderDuration(instance, fieldSpec, t) {
     t = t || makeT(null);
     var shell = createFieldShell(instance, fieldSpec.label || t('label_duration'));
-    var selected = 7;
-    var options = [3, 5, 7, 10, 14];
+    var options = normaliseDurationOptions(fieldSpec) ||
+      [{ nights: 3, custom: null }, { nights: 5, custom: null }, { nights: 7, custom: null }, { nights: 10, custom: null }, { nights: 14, custom: null }];
+    // Display: a night count is localised "{n} nights"; a custom option shows verbatim.
+    options = options.map(function (o) {
+      return { nights: o.nights, custom: o.custom, label: (o.nights != null ? t('duration_nights', { n: o.nights }) : o.custom) };
+    });
+    // Pre-select 7 nights when present (unchanged for the built-in set), else the first.
+    var selectedIdx = 0;
+    for (var si = 0; si < options.length; si++) { if (options[si].nights === 7) { selectedIdx = si; break; } }
     var buttons = [];
-    function setActive(n) {
-      selected = n;
-      buttons.forEach(function (b) {
-        var match = parseInt(b.getAttribute('data-n'), 10) === n;
+    function setActive(idx) {
+      selectedIdx = idx;
+      buttons.forEach(function (b, i) {
+        var match = i === idx;
         b.classList.toggle('is-active', match);
         b.setAttribute('aria-pressed', match ? 'true' : 'false');
       });
     }
-    options.forEach(function (n) {
-      var btn = el('button', { class: 'tg-pill' + (n === 7 ? ' is-active' : ''), type: 'button', 'data-n': String(n), 'aria-pressed': (n === 7 ? 'true' : 'false'), text: t('duration_nights', { n: n }), onclick: function () { setActive(n); } });
+    options.forEach(function (o, idx) {
+      var btn = el('button', { class: 'tg-pill' + (idx === selectedIdx ? ' is-active' : ''), type: 'button', 'data-idx': String(idx), 'aria-pressed': (idx === selectedIdx ? 'true' : 'false'), text: o.label, onclick: function () { setActive(idx); } });
       buttons.push(btn);
     });
     shell.fieldNode.appendChild(el('div', { class: 'tg-chips', role: 'group', 'aria-labelledby': shell.labelId, 'aria-label': t('duration_options') }, buttons));
@@ -2166,11 +2232,15 @@
     return {
       type: 'duration',
       node: shell.fieldNode,
-      writeTo: function (fields) { fields.duration = { nights: selected }; },
+      writeTo: function (fields) {
+        var o = options[selectedIdx];
+        if (!o) { fields.duration = {}; return; }
+        fields.duration = (o.nights != null) ? { nights: o.nights } : { custom: String(o.custom).slice(0, 64) };
+      },
       validate: function () { return null; },
       showError: function (msg) { shell.show(msg); },
       clearError: function () { shell.clear(); },
-      focus: function () { buttons[0].focus(); }
+      focus: function () { if (buttons[0]) buttons[0].focus(); }
     };
   }
 

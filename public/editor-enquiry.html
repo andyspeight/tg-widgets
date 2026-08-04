@@ -7689,14 +7689,49 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
       }
 
       if (field.type === 'destination') {
-        return section('Example text', [
+        return section('Destination field', [
+          toggleRow({
+            label: 'Use a plain text box',
+            sub: 'Off = live search with suggestions. On = a simple open box the visitor types into.',
+            checked: field.options.mode === 'text',
+            onChange: (v) => { if (v) field.options.mode = 'text'; else delete field.options.mode; saveField(); }
+          }),
           labelledInput({
             label: 'In-field example text',
             value: field.options.placeholder || '',
             placeholder: 'E.g. Italy, the Maldives, or just "somewhere sunny"...',
             maxlength: 120,
-            hint: 'The greyed-out prompt shown inside the search box before anyone types. Leave blank for the default.',
+            hint: 'The greyed-out prompt shown inside the field before anyone types. Leave blank for the default.',
             onInput: (v) => { field.options.placeholder = v; saveField(); }
+          })
+        ]);
+      }
+
+      if (field.type === 'duration') {
+        const DEFAULT_DURATIONS = ['3 nights', '5 nights', '7 nights', '10 nights', '14 nights'];
+        const current = (Array.isArray(field.choices) && field.choices.length)
+          ? field.choices.map(c => String((c && c.label) || (c && c.value) || '').trim()).filter(Boolean).join('\n')
+          : DEFAULT_DURATIONS.join('\n');
+        return section('Duration options', [
+          labelledTextarea({
+            label: 'Options (one per line)',
+            value: current,
+            placeholder: DEFAULT_DURATIONS.join('\n'),
+            rows: 5,
+            maxlength: 400,
+            hint: 'One choice per line. "7" or "7 nights" is treated as a night count; anything else (e.g. "3-5 nights") is sent exactly as typed. Leave as the five defaults to keep the standard set.',
+            onInput: (v) => {
+              const seen = Object.create(null);
+              const lines = String(v || '').split('\n')
+                .map(s => s.trim().slice(0, 40))
+                .filter(l => { const k = l.toLowerCase(); if (!l || seen[k]) return false; seen[k] = 1; return true; })
+                .slice(0, 12);
+              // Absence (or the exact defaults) → widget uses its built-in set, so
+              // an untouched form stays unchanged.
+              if (!lines.length || lines.join('|') === DEFAULT_DURATIONS.join('|')) delete field.choices;
+              else field.choices = lines.map(l => ({ value: l, label: l }));
+              saveField();
+            }
           })
         ]);
       }

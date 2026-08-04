@@ -124,5 +124,68 @@ ok(/fieldSpec\.options && fieldSpec\.options\.default/.test(code), 'widget board
 ok(/fieldSpec\.options && fieldSpec\.options\.phoneRequired/.test(code), 'widget contact reads options.phoneRequired');
 ok(/fieldSpec\.options && fieldSpec\.options\.placeholder/.test(code), 'widget destination reads options.placeholder');
 
+// ── #3 Editable duration options ─────────────────────────────────────────────
+// Pure parser, reimplemented from widget-enquiry.js normaliseDurationOptions.
+function normDur(choices) {
+  if (!Array.isArray(choices) || !choices.length) return null;
+  const out = [];
+  for (let i = 0; i < choices.length && out.length < 12; i++) {
+    let label = (choices[i] && typeof choices[i] === 'object') ? (choices[i].label ?? choices[i].value ?? '') : choices[i];
+    label = String(label == null ? '' : label).trim().slice(0, 40);
+    if (!label) continue;
+    const m = label.match(/^(\d{1,3})(?:\s*nights?)?$/i);
+    let nights = m ? parseInt(m[1], 10) : null;
+    if (nights != null && (nights < 1 || nights > 90)) nights = null;
+    out.push(nights != null ? { nights, custom: null } : { nights: null, custom: label });
+  }
+  return out.length ? out : null;
+}
+ok(normDur(null) === null && normDur([]) === null, 'no custom durations → null (built-in [3,5,7,10,14])');
+ok(JSON.stringify(normDur(['7'])) === JSON.stringify([{ nights: 7, custom: null }]), 'a bare number is an N-night option');
+ok(normDur(['7 nights'])[0].nights === 7, '"7 nights" parses to a night count');
+ok(normDur(['3-5 nights'])[0].custom === '3-5 nights' && normDur(['3-5 nights'])[0].nights === null, 'a range is a custom option (submitted verbatim)');
+ok(normDur(['200'])[0].nights === null && normDur(['200'])[0].custom === '200', 'an out-of-range number falls back to a custom label, never a bad nights value');
+{
+  const d = normDur(['3 nights', '5 nights']);
+  ok(d.length === 2 && d[0].nights === 3 && d[1].nights === 5, '"3-5 nights" split into two options each map to their own night count');
+}
+ok(/function normaliseDurationOptions\(fieldSpec\)/.test(code), 'widget exposes normaliseDurationOptions');
+ok(/fields\.duration = \(o\.nights != null\) \? \{ nights: o\.nights \} : \{ custom:/.test(code), 'duration submits nights for a count and custom for a range');
+
+// Real render: custom pills, and defaults untouched.
+{
+  const shadow = await mount([
+    { id: 'duration', type: 'duration', label: 'Duration', required: true, visible: true, choices: [{ value: '3 nights', label: '3 nights' }, { value: '5 nights', label: '5 nights' }, { value: '3-5 nights', label: '3-5 nights' }, { value: '10 nights', label: '10 nights' }] },
+    F.name(), F.consent(),
+  ]);
+  const pills = [...shadow.querySelectorAll('.tg-pill')].map(p => p.textContent);
+  ok(pills.length === 4, '#3 custom duration renders exactly the author options');
+  ok(pills.join('|') === '3 nights|5 nights|3-5 nights|10 nights', '#3 pills show the author labels (3 and 5 as separate options)');
+  const active = [...shadow.querySelectorAll('.tg-pill.is-active')];
+  ok(active.length === 1 && active[0].textContent === '3 nights', '#3 without 7 nights present, the first option is pre-selected');
+}
+{
+  const shadow = await mount([{ id: 'duration', type: 'duration', label: 'Duration', required: true, visible: true }, F.name(), F.consent()]);
+  const pills = [...shadow.querySelectorAll('.tg-pill')];
+  ok(pills.length === 5, 'default: still the five built-in night options');
+  const active = [...shadow.querySelectorAll('.tg-pill.is-active')];
+  ok(active.length === 1 && /7 nights/.test(active[0].textContent), 'default: 7 nights stays pre-selected (unchanged)');
+}
+
+// ── #7 Open-text destination mode ────────────────────────────────────────────
+{
+  const shadow = await mount([{ id: 'destination', type: 'destination', label: 'Where?', required: true, visible: true, options: { mode: 'text' } }, F.name(), F.consent()]);
+  ok(!shadow.querySelector('.tg-dest-input'), '#7 open-text mode does NOT render the search combobox');
+  ok(shadow.querySelector('input[aria-label="Where?"]'), '#7 open-text mode renders a plain text box');
+}
+{
+  const shadow = await mount([F.destination(), F.name(), F.consent()]);
+  ok(shadow.querySelector('.tg-dest-input'), 'default: destination is still the live search box');
+}
+ok(/fieldSpec\.options && fieldSpec\.options\.mode === 'text'/.test(code), 'widget branches destination on options.mode');
+ok(/type: 'free-text'/.test(code), 'open-text submits the same free-text shape the search field already produces');
+ok(/field\.type === 'destination'[\s\S]*field\.options\.mode = 'text'/.test(editor), 'editor destination inspector writes options.mode');
+ok(/field\.type === 'duration'[\s\S]*field\.choices = lines\.map/.test(editor), 'editor duration inspector writes field.choices');
+
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
