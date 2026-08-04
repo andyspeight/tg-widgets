@@ -38,7 +38,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.1.12';
+  var WIDGET_VERSION = '1.1.13';
   var VISITOR_ID_KEY = 'tg_visitor_id_v1';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -157,6 +157,10 @@
       label_board: 'Board basis',
       board_RO: 'Room only', board_BB: 'B&B', board_HB: 'Half board', board_FB: 'Full board', board_AI: 'All inclusive',
       board_options: 'Board basis options',
+      // Flights toggle
+      label_flights: 'Would you like this to include flights?',
+      flights_yes: 'Yes', flights_no: 'No',
+      flights_options: 'Include flights',
       // Interests field
       label_interests: 'Interests',
       interests_pickMany: '(pick as many as apply)',
@@ -2656,10 +2660,52 @@
     };
   }
 
+  // A simple Yes/No question. Submits a boolean (flights_included, which the
+  // server already stores). When a form has BOTH a flights field and an airport
+  // field, the airport field is revealed only on "Yes" — wired up after all
+  // fields are built, so this renderer just needs to announce its value.
+  function renderFlights(instance, fieldSpec, t) {
+    t = t || makeT(null);
+    var shell = createFieldShell(instance, fieldSpec.label || t('label_flights'));
+    var value = !!(fieldSpec.options && fieldSpec.options.default === 'yes');
+    var subs = [];
+    var buttons = [];
+    function setValue(v) {
+      value = v;
+      buttons.forEach(function (b) {
+        var match = (b.getAttribute('data-v') === (v ? 'yes' : 'no'));
+        b.classList.toggle('is-active', match);
+        b.setAttribute('aria-pressed', match ? 'true' : 'false');
+      });
+      subs.forEach(function (fn) { try { fn(v); } catch (e) { /* a subscriber must not break the field */ } });
+    }
+    [['yes', t('flights_yes')], ['no', t('flights_no')]].forEach(function (pair) {
+      var isYes = pair[0] === 'yes';
+      var active = (isYes === value);
+      var btn = el('button', { class: 'tg-seg-btn' + (active ? ' is-active' : ''), type: 'button', 'data-v': pair[0], 'aria-pressed': active ? 'true' : 'false', 'aria-label': pair[1], text: pair[1], onclick: function () { setValue(isYes); } });
+      buttons.push(btn);
+    });
+    shell.fieldNode.appendChild(el('div', { class: 'tg-seg', role: 'group', 'aria-labelledby': shell.labelId, 'aria-label': t('flights_options') }, buttons));
+    if (fieldSpec.help !== false && fieldSpec.help) shell.fieldNode.appendChild(el('div', { class: 'tg-help', text: fieldSpec.help }));
+    shell.fieldNode.appendChild(shell.errorNode);
+    return {
+      type: 'flights',
+      node: shell.fieldNode,
+      writeTo: function (fields) { fields.flights_included = value; },
+      validate: function () { return null; },
+      showError: function (msg) { shell.show(msg); },
+      clearError: function () { shell.clear(); },
+      focus: function () { if (buttons[0]) buttons[0].focus(); },
+      getValue: function () { return value; },
+      subscribe: function (fn) { if (typeof fn === 'function') subs.push(fn); }
+    };
+  }
+
   // Dispatch table — maps field.type string to renderer function
   var RENDERERS = {
     destination: renderDestination,
     airport:     renderAirport,
+    flights:     renderFlights,
     daterange:   renderDateRange,
     duration:    renderDuration,
     travellers:  renderTravellers,
@@ -2893,6 +2939,34 @@
       if (!fieldNodesByStep[stepId]) fieldNodesByStep[stepId] = [];
       fieldNodesByStep[stepId].push(inst.node);
     });
+
+    // Flights → airport reveal. When a form carries BOTH a Yes/No flights
+    // question and a departure-airport field, the airport only applies when the
+    // visitor says yes: it is hidden, and neither validated nor submitted, on
+    // "no". A form with only one of the two is unaffected — the airport shows
+    // exactly as before. Wired once here over the built instances, so the
+    // renderers stay independent.
+    (function wireFlightsReveal() {
+      var flightsInst = null, airportInst = null;
+      for (var i = 0; i < fields.length; i++) {
+        if (fields[i].type === 'flights' && typeof fields[i].subscribe === 'function') flightsInst = fields[i];
+        else if (fields[i].type === 'airport') airportInst = fields[i];
+      }
+      if (!flightsInst || !airportInst) return;
+      var on = false;
+      var baseValidate = airportInst.validate;
+      var baseWriteTo = airportInst.writeTo;
+      airportInst.validate = function () { return on ? baseValidate.call(airportInst) : null; };
+      airportInst.writeTo = function (f) { if (on) baseWriteTo.call(airportInst, f); };
+      function apply(yes) {
+        on = !!yes;
+        airportInst.node.style.display = on ? '' : 'none';
+        airportInst.node.setAttribute('aria-hidden', on ? 'false' : 'true');
+        if (!on && typeof airportInst.clearError === 'function') airportInst.clearError();
+      }
+      apply(flightsInst.getValue());
+      flightsInst.subscribe(apply);
+    })();
 
     // Progress indicator (multi-step only). Rendered BEFORE the first section
     // so it sits visually between the hero and the form fields.
