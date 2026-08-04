@@ -38,7 +38,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.1.10';
+  var WIDGET_VERSION = '1.1.11';
   var VISITOR_ID_KEY = 'tg_visitor_id_v1';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -175,6 +175,7 @@
       phoneAria: 'Phone number',
       email_ph: 'jane@example.com',
       phone_ph: '07700 900000',
+      phone_required: 'Please add a phone number.',
       optional: '(optional)',
       email_required: 'Email required.',
       email_invalid: 'Please enter a valid email address.',
@@ -1552,7 +1553,10 @@
     var shell = createFieldShell(instance, fieldSpec.label || t('label_destination'));
     var input = el('input', {
       class: 'tg-dest-input', type: 'text', maxlength: '128',
-      placeholder: t('dest_placeholder'),
+      // Author-set example text overrides the default (stored under options,
+      // like every other per-field option). Set as an attribute (not innerHTML),
+      // so it is inert; capped so it cannot bloat the field.
+      placeholder: (fieldSpec.options && fieldSpec.options.placeholder) ? String(fieldSpec.options.placeholder).slice(0, 120) : t('dest_placeholder'),
       autocomplete: 'off',
       'aria-label': t('dest_searchAria'),
       'aria-expanded': 'false',
@@ -2328,7 +2332,11 @@
   function renderBoard(instance, fieldSpec, t) {
     t = t || makeT(null);
     var shell = createFieldShell(instance, fieldSpec.label || t('label_board'));
-    var selected = 'RO';
+    // Author-chosen default (whitelisted to the five board codes). Absent or
+    // unrecognised → 'RO', so every form built before this option is unchanged.
+    var boardValues = BOARD_OPTIONS.map(function (o) { return o.value; });
+    var boardDefault = (fieldSpec.options && fieldSpec.options.default) || fieldSpec.default;
+    var selected = boardValues.indexOf(boardDefault) !== -1 ? boardDefault : 'RO';
     var buttons = [];
     function setActive(value) {
       selected = value;
@@ -2343,9 +2351,9 @@
       // back to the English seed. The submitted value (opt.value) is unchanged.
       var boardLabel = t('board_' + opt.value) || opt.label;
       var btn = el('button', {
-        class: 'tg-seg-btn' + (opt.value === 'RO' ? ' is-active' : ''),
+        class: 'tg-seg-btn' + (opt.value === selected ? ' is-active' : ''),
         type: 'button', 'data-value': opt.value,
-        'aria-pressed': opt.value === 'RO' ? 'true' : 'false',
+        'aria-pressed': opt.value === selected ? 'true' : 'false',
         'aria-label': boardLabel, text: boardLabel,
         onclick: function () { setActive(opt.value); }
       });
@@ -2455,12 +2463,19 @@
   function renderContact(instance, fieldSpec, t) {
     t = t || makeT(null);
     var shell = createFieldShell(instance, null);
+    // Phone is optional by default (unchanged for every existing form). A form
+    // may opt in to requiring it with options.phoneRequired:true — then the
+    // "(optional)" hint is dropped and an empty phone blocks submission.
+    var phoneRequired = (fieldSpec.options && fieldSpec.options.phoneRequired === true) || fieldSpec.phoneRequired === true;
     var emailId = 'tg-' + instance + '-email'; var phoneId = 'tg-' + instance + '-phone';
     var email = el('input', { id: emailId, class: 'tg-input', type: 'email', placeholder: t('email_ph'), 'aria-label': t('emailAddress'), autocomplete: 'email', required: true, 'aria-describedby': shell.errorId, oninput: function () { shell.clear(); email.removeAttribute('aria-invalid'); } });
-    var phone = el('input', { id: phoneId, class: 'tg-input', type: 'tel', maxlength: '32', placeholder: t('phone_ph'), 'aria-label': t('phoneAria'), autocomplete: 'tel' });
+    var phoneAttrs = { id: phoneId, class: 'tg-input', type: 'tel', maxlength: '32', placeholder: t('phone_ph'), 'aria-label': t('phoneAria'), autocomplete: 'tel', oninput: function () { shell.clear(); phone.removeAttribute('aria-invalid'); } };
+    if (phoneRequired) phoneAttrs.required = true;
+    var phone = el('input', phoneAttrs);
+    var phoneLabelChildren = phoneRequired ? [t('phone')] : [t('phone') + ' ', el('span', { class: 'tg-opt', text: t('optional') })];
     shell.fieldNode.appendChild(el('div', { class: 'tg-row' }, [
       el('div', {}, [el('label', { class: 'tg-label', for: emailId, text: t('emailAddress') }), email]),
-      el('div', {}, [el('label', { class: 'tg-label', for: phoneId }, [t('phone') + ' ', el('span', { class: 'tg-opt', text: t('optional') })]), phone])
+      el('div', {}, [el('label', { class: 'tg-label', for: phoneId }, phoneLabelChildren), phone])
     ]));
     shell.fieldNode.appendChild(shell.errorNode);
     return {
@@ -2472,11 +2487,18 @@
         var e = email.value.trim();
         if (!e) return t('email_required');
         if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) return t('email_invalid');
+        if (phoneRequired && !phone.value.trim()) return t('phone_required');
         return null;
       },
-      showError: function (msg) { shell.show(msg); email.setAttribute('aria-invalid', 'true'); },
-      clearError: function () { shell.clear(); email.removeAttribute('aria-invalid'); },
-      focus: function () { email.focus(); }
+      showError: function (msg) {
+        shell.show(msg);
+        // Point the invalid marker at the field actually at fault: phone only
+        // when the email is present and the phone is the empty required one.
+        if (phoneRequired && email.value.trim() && !phone.value.trim()) { phone.setAttribute('aria-invalid', 'true'); }
+        else { email.setAttribute('aria-invalid', 'true'); }
+      },
+      clearError: function () { shell.clear(); email.removeAttribute('aria-invalid'); phone.removeAttribute('aria-invalid'); },
+      focus: function () { (phoneRequired && email.value.trim() && !phone.value.trim() ? phone : email).focus(); }
     };
   }
 

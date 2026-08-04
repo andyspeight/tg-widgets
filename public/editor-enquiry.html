@@ -7688,6 +7688,48 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
         ]);
       }
 
+      if (field.type === 'destination') {
+        return section('Example text', [
+          labelledInput({
+            label: 'In-field example text',
+            value: field.options.placeholder || '',
+            placeholder: 'E.g. Italy, the Maldives, or just "somewhere sunny"...',
+            maxlength: 120,
+            hint: 'The greyed-out prompt shown inside the search box before anyone types. Leave blank for the default.',
+            onInput: (v) => { field.options.placeholder = v; saveField(); }
+          })
+        ]);
+      }
+
+      if (field.type === 'board') {
+        const boardOpts = [
+          { value: 'RO', label: 'Room only' }, { value: 'BB', label: 'B&B' },
+          { value: 'HB', label: 'Half board' }, { value: 'FB', label: 'Full board' },
+          { value: 'AI', label: 'All inclusive' }
+        ];
+        const current = ['RO', 'BB', 'HB', 'FB', 'AI'].includes(field.options.default) ? field.options.default : 'RO';
+        return section('Default choice', [
+          labelledSelect({
+            label: 'Pre-selected board basis',
+            value: current,
+            options: boardOpts,
+            hint: 'The option shown as chosen when the form loads. Visitors can still change it.',
+            onChange: (v) => { field.options.default = v; saveField(); }
+          })
+        ]);
+      }
+
+      if (field.type === 'contact') {
+        return section('Phone number', [
+          toggleRow({
+            label: 'Make phone number required',
+            sub: 'Off by default. When on, an enquiry cannot be sent without a phone number.',
+            checked: field.options.phoneRequired === true,
+            onChange: (v) => { field.options.phoneRequired = v; saveField(); }
+          })
+        ]);
+      }
+
       if (field.type === 'consent') {
         return section('Checkbox text', [
           labelledInput({

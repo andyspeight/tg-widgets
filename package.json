@@ -22,6 +22,7 @@
     "test:enquiry-load": "node test/enquiry-load-smoke.mjs",
     "test:enquiry-notes": "node test/enquiry-notes-smoke.mjs",
     "test:enquiry-options": "node test/enquiry-options-smoke.mjs",
+    "test:enquiry-field-options": "node test/enquiry-field-options-smoke.mjs",
     "test:enquiry-luna-comingsoon": "node test/enquiry-luna-comingsoon-smoke.mjs",
     "test:quote-pdf": "node test/quote-pdf-brand-smoke.mjs",
     "test:quote-pdf-email-guard": "node test/quote-pdf-email-guard-smoke.mjs",
