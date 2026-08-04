@@ -1236,6 +1236,33 @@ export function EditorShell({
         onSelect={select}
         onCommit={commit}
         onPickBlock={setPicker}
+        /*
+          A block dragged off the picker and dropped on the canvas. The same
+          add as the click path, but the target is where it was dropped rather
+          than where the picker was opened, and `at` places it inside the column
+          rather than always at the end. The index is worked out here, from the
+          current page, for the same reason the click path does: a state updater
+          must stay pure. Closing the picker is what clears the faded modal.
+        */
+        onDropBlock={(target, type) => {
+          setPicker(null);
+          const column =
+            page.sections[target.section]?.rows[target.row]?.columns[target.column];
+          if (!column) return;
+          const length = column.blocks.length;
+          const index =
+            target.at === undefined ? length : Math.max(0, Math.min(target.at, length));
+          commit((current) =>
+            addBlock(current, target.section, target.row, target.column, createBlock(type), target.at),
+          );
+          setSelected({
+            kind: 'block',
+            section: target.section,
+            row: target.row,
+            column: target.column,
+            block: index,
+          });
+        }}
         theme={siteTheme}
         // So the canvas draws a header as a header rather than as a page.
         region={region}

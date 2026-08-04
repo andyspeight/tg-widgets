@@ -6495,6 +6495,50 @@ await check('a heading takes a shadow, a paragraph never does', async () => {
   return shadows.paragraph === 'none' ? true : `the paragraph took a shadow: ${shadows.paragraph}`;
 });
 
+// --- Drag a block off the picker onto the canvas ----------------------------
+
+/*
+ * The first slice of dragging elements onto the canvas. Driven by dispatching
+ * the HTML5 drag sequence with one shared DataTransfer, which is the only
+ * reliable way to test native drag-and-drop: the type is written on dragstart
+ * and read on drop off the same object, exactly as a real drag carries it. The
+ * block should land in the column it was dropped on, and the picker should
+ * close. Left until last, because it adds a block to the seed page.
+ */
+await check('a block dragged from the picker is added where it is dropped', async () => {
+  await openBlockPicker();
+
+  const setup = await page.evaluate((mime) => {
+    const cards = [...document.querySelectorAll('.ed-block-card')];
+    const card = cards.find((c) => /divider/i.test(c.textContent || '')) || cards[0];
+    // A real column on the canvas (a path like s0r0c0), and its current blocks.
+    const col = [...document.querySelectorAll('.ed-canvas-frame [data-path]')].find((el) =>
+      /^s\d+r\d+c\d+$/.test(el.getAttribute('data-path') || ''),
+    );
+    if (!card || !col) return { ok: false, why: 'missing a card or a column' };
+    const path = col.getAttribute('data-path');
+    const before = document.querySelectorAll(`.ed-canvas-frame [data-path^="${path}b"]`).length;
+
+    const dt = new DataTransfer();
+    const fire = (el, type) =>
+      el.dispatchEvent(new DragEvent(type, { dataTransfer: dt, bubbles: true, cancelable: true }));
+    fire(card, 'dragstart');
+    fire(col, 'dragover');
+    fire(col, 'drop');
+    fire(card, 'dragend');
+    return { ok: true, path, before };
+  }, 'application/x-tg-block');
+
+  if (!setup.ok) return setup.why;
+  await page.waitForTimeout(400);
+
+  if ((await page.locator('.tg-modal').count()) !== 0) return 'the picker did not close after the drop';
+  const flagLeft = await page.evaluate(() => Boolean(document.body.dataset.tgDragging));
+  if (flagLeft) return 'the dragging flag was left on the body';
+  const after = await page.locator(`.ed-canvas-frame [data-path^="${setup.path}b"]`).count();
+  return after > setup.before ? true : `column ${setup.path} blocks ${setup.before} -> ${after}`;
+});
+
 await browser.close();
 
 let failed = false;

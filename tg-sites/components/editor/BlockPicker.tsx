@@ -9,6 +9,7 @@
 
 import { useRef, useState } from 'react';
 import { blocksByGroup } from '../../lib/content/blocks';
+import { BLOCK_DRAG_MIME } from '../../lib/content/tree';
 import { Icon } from './Icon';
 import { Modal } from '../ui/Modal';
 
@@ -43,7 +44,7 @@ export function BlockPicker({
   return (
     <Modal
       title="Add a block"
-      description="Text, media, buttons and layout pieces. Search if you know what you want."
+      description="Click to drop it in, or drag it onto the canvas to place it exactly."
       size="large"
       onClose={onClose}
     >
@@ -70,6 +71,23 @@ export function BlockPicker({
                     type="button"
                     className="ed-block-card"
                     onClick={() => onPick(definition.type)}
+                    /*
+                     * DRAG THE SAME CARD ONTO THE CANVAS. Click still adds it to
+                     * the column the picker was opened from; dragging lets you
+                     * drop it exactly where you want instead. The type rides on
+                     * the dataTransfer, and a flag on the body lets the modal
+                     * recede so the canvas beneath it takes the drop. Andy asked
+                     * for elements you can drag onto the canvas, 4 Aug 2026.
+                     */
+                    draggable
+                    onDragStart={(event) => {
+                      event.dataTransfer.setData(BLOCK_DRAG_MIME, definition.type);
+                      event.dataTransfer.effectAllowed = 'copy';
+                      document.body.dataset.tgDragging = 'block';
+                    }}
+                    onDragEnd={() => {
+                      delete document.body.dataset.tgDragging;
+                    }}
                   >
                     <span className="ed-block-card__icon">
                       <Icon name={definition.icon} size={18} />

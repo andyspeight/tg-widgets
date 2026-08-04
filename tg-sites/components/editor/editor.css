@@ -3254,6 +3254,26 @@
   animation: tg-fade 140ms ease-out;
 }
 
+/*
+ * DRAGGING A BLOCK OUT OF THE PICKER ONTO THE CANVAS, added 4 Aug 2026.
+ *
+ * While a block is being dragged the picker sets a flag on the body, and the
+ * modal recedes: near-invisible and click-through, so the canvas beneath it
+ * takes the drop. The card being dragged carries its own drag image, so fading
+ * its parent does not touch it. On dragend the flag goes and the modal returns.
+ */
+body[data-tg-dragging='block'] .tg-scrim {
+  opacity: 0.04;
+  pointer-events: none;
+}
+
+/* The column a dragged block would land in, in the editor's drag-over language. */
+.ed-canvas-frame .ed-drop-target {
+  outline: 2px dashed var(--ed-accent);
+  outline-offset: -2px;
+  background: rgba(0, 180, 216, 0.08);
+}
+
 .tg-modal {
   display: flex;
   flex-direction: column;

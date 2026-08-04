@@ -27,6 +27,7 @@ import {
   STACK_BREAKPOINTS,
 } from '../../lib/content/schema';
 import {
+  BLOCK_DRAG_MIME,
   type Path,
   parsePathKey,
   pathKindLabel,
@@ -45,6 +46,16 @@ interface Props {
   onSelect: (path: Path | null) => void;
   onCommit: (next: (current: Page) => Page, coalesceKey?: string) => void;
   onPickBlock: (target: { section: number; row: number; column: number }) => void;
+  /**
+   * A block dragged off the picker and dropped onto the canvas. `at` is the
+   * index within the column, so a drop onto a block lands after it rather than
+   * always at the end. Absent when the editor does not accept drops (it always
+   * does today; the option keeps the canvas usable without it).
+   */
+  onDropBlock?: (
+    target: { section: number; row: number; column: number; at?: number },
+    type: string,
+  ) => void;
   onInsertSection: (index: number) => void;
   /**
    * The block being typed into on the canvas, as a path key, or null.
@@ -101,6 +112,7 @@ export function Canvas({
   onSelect,
   onCommit,
   onPickBlock,
+  onDropBlock,
   onInsertSection,
   editingPath = null,
   theme,
@@ -111,6 +123,8 @@ export function Canvas({
   const wrapRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<DragState | null>(null);
   const heightRef = useRef<HeightDrag | null>(null);
+  /** The column highlighted under a block being dragged in, so it can be cleared. */
+  const dropElRef = useRef<HTMLElement | null>(null);
   const [badge, setBadge] = useState<{ x: number; y: number; text: string } | null>(null);
 
   // ---------------------------------------------------------------------
@@ -357,6 +371,82 @@ export function Canvas({
       if (path) onSelect(path);
     },
     [onSelect, onPickBlock, onInsertSection],
+  );
+
+  // ---------------------------------------------------------------------
+  // Drag a block off the picker onto the canvas
+  // ---------------------------------------------------------------------
+
+  /*
+   * The column under the pointer, and where in it the block would land. A drop
+   * onto a block lands AFTER that block; a drop onto a column's own space (an
+   * empty column, or the room around its blocks) appends. Read off the same
+   * data-path the click handler uses, so the two cannot disagree about what is
+   * where.
+   */
+  const dropTargetUnder = useCallback((el: HTMLElement | null) => {
+    const node = el?.closest<HTMLElement>('[data-path], [data-add]');
+    if (!node) return null;
+    const path = parsePathKey(node.dataset.path ?? node.dataset.add);
+    if (!path) return null;
+    if (path.kind === 'block') {
+      const columnEl =
+        node.closest<HTMLElement>(`[data-path="s${path.section}r${path.row}c${path.column}"]`) ?? node;
+      return { columnEl, section: path.section, row: path.row, column: path.column, at: path.block + 1 };
+    }
+    if (path.kind === 'column') {
+      return { columnEl: node, section: path.section, row: path.row, column: path.column, at: undefined };
+    }
+    return null;
+  }, []);
+
+  const clearDropTarget = useCallback(() => {
+    dropElRef.current?.classList.remove('ed-drop-target');
+    dropElRef.current = null;
+  }, []);
+
+  const onDragOver = useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      if (!onDropBlock || !event.dataTransfer.types.includes(BLOCK_DRAG_MIME)) return;
+      // preventDefault is what marks this a drop zone; without it the browser
+      // refuses the drop and shows the no-entry cursor.
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'copy';
+
+      const el = dropTargetUnder(event.target as HTMLElement)?.columnEl ?? null;
+      if (el === dropElRef.current) return;
+      clearDropTarget();
+      if (el) {
+        el.classList.add('ed-drop-target');
+        dropElRef.current = el;
+      }
+    },
+    [onDropBlock, dropTargetUnder, clearDropTarget],
+  );
+
+  const onDrop = useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      if (!onDropBlock) return;
+      const type = event.dataTransfer.getData(BLOCK_DRAG_MIME);
+      clearDropTarget();
+      if (!type) return;
+      const hit = dropTargetUnder(event.target as HTMLElement);
+      if (!hit) return;
+      event.preventDefault();
+      onDropBlock({ section: hit.section, row: hit.row, column: hit.column, at: hit.at }, type);
+    },
+    [onDropBlock, dropTargetUnder, clearDropTarget],
+  );
+
+  const onDragLeave = useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      // Only when the pointer leaves the frame for good, not on every hop from
+      // one child to the next, which fires dragleave on the element behind.
+      const to = event.relatedTarget as Node | null;
+      if (to && event.currentTarget.contains(to)) return;
+      clearDropTarget();
+    },
+    [clearDropTarget],
   );
 
   // ---------------------------------------------------------------------
@@ -636,6 +726,9 @@ export function Canvas({
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
           onKeyDown={onKeyDown}
+          onDragOver={onDragOver}
+          onDrop={onDrop}
+          onDragLeave={onDragLeave}
         >
           <PageRenderer
             page={page}

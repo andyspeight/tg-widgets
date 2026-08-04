@@ -21,6 +21,14 @@ import {
 } from './schema';
 import { createColumn } from './factory';
 
+/**
+ * The drag-and-drop type for a block dragged off the Add-block picker onto the
+ * canvas. A private MIME so a stray text or file drag can never be read as a
+ * block, and shared here so the picker that writes it and the canvas that reads
+ * it cannot drift apart.
+ */
+export const BLOCK_DRAG_MIME = 'application/x-tg-block';
+
 export type Path =
   | { kind: 'page' }
   | { kind: 'section'; section: number }
