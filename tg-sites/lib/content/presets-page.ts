@@ -238,12 +238,12 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
       },
     ],
     /*
-     * Dark toned and roomy, but NO backgroundImage baked in. A preset that
-     * shipped a stock photograph is one somebody has to notice and remove, and
-     * the ones that get missed end up on a live client site. The tone alone
-     * makes it obvious a picture is meant to go behind it.
+     * Dark toned and roomy, and a QUERY for the background rather than a frozen
+     * URL. The preview draws this photograph and the fill-on-insert fetches it
+     * into the client's own media, so nobody ships a stock file they meant to
+     * swap. The dark tone is the fallback if the photo library is not connected.
      */
-    section: { tone: 'dark', paddingY: 128, width: 'full' },
+    section: { tone: 'dark', paddingY: 128, width: 'full', backgroundQuery: 'santorini sunset sea' },
   },
 
   {
@@ -703,7 +703,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
-    section: { tone: 'dark', paddingY: 128, width: 'full' },
+    section: { tone: 'dark', paddingY: 128, width: 'full', backgroundQuery: 'coastal cliffs ocean view' },
   },
 
   /*

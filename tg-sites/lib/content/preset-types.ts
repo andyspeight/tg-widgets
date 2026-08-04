@@ -108,6 +108,21 @@ export interface PresetBlock {
   type: string;
   props?: Record<string, unknown>;
   role?: SlotRole;
+  /**
+   * A search term for the picture that goes here, for image and gallery blocks.
+   *
+   * OPTIONAL, and only used by hero presets so far. It drives two things that
+   * have to agree: the photograph the picker preview shows, and the one that is
+   * fetched into the client's own media when the hero is added. Left off, a hero
+   * image gets a fitting travel query chosen from a small palette by its
+   * position, so the previews carry photographs without every preset having to
+   * spell one out. Set it when a particular section wants a particular subject.
+   *
+   * It is a QUERY, not a URL. A frozen stock URL in a preset is the thing the
+   * "pictures start empty" rule at the top of presets-page.ts exists to prevent;
+   * a query is resolved fresh, into the client's media, credited and swappable.
+   */
+  photo?: string;
 }
 
 export interface PresetRow {
@@ -152,7 +167,18 @@ export interface SectionPreset {
   description: string;
   rows: PresetRow[];
   /** Overrides on the section itself, for the few that need more room. */
-  section?: { paddingY?: number; width?: Section['width']; tone?: Section['tone'] };
+  section?: {
+    paddingY?: number;
+    width?: Section['width'];
+    tone?: Section['tone'];
+    /**
+     * A search term for a photograph behind the whole section, for the heroes
+     * whose picture IS the background rather than a block. Same contract as a
+     * block's `photo`: a query resolved into the client's media, never a frozen
+     * URL, and it drives both the preview and the fill on insert.
+     */
+    backgroundQuery?: string;
+  };
 }
 
 // ---------------------------------------------------------------------------

@@ -25,6 +25,7 @@ import {
   categoriesFor,
   presetThumb,
   presetsIn,
+  stockPreviewUrl,
   type PresetCategory,
   type PresetScope,
   type SectionPreset,
@@ -93,7 +94,14 @@ export function LayoutThumb({ layout }: { layout: Layout }) {
  * front: the section's own background, any card panels, then the content.
  */
 export function PresetThumb({ preset }: { preset: SectionPreset }) {
-  const { tone, panels, bars } = presetThumb(preset);
+  const { tone, panels, bars, background } = presetThumb(preset);
+
+  /*
+   * A clip id unique to this preset AND this bar, because every thumbnail on the
+   * screen shares one document: `clip-3` on two presets would have the second
+   * steal the first's shape. The preset id makes it the preset's own.
+   */
+  const clip = (index: number) => `tgphoto-${preset.id}-${index}`;
 
   return (
     <svg
@@ -107,6 +115,24 @@ export function PresetThumb({ preset }: { preset: SectionPreset }) {
       {/* Full bleed, because a tinted section runs the width of the page. */}
       <rect x={0} y={0} width={100} height={68} data-tone="ground" />
 
+      {/*
+        The whole-section photograph, for an over-photo hero. Drawn over the
+        ground and under everything else, clipped by the svg viewport. A slice
+        fit fills the frame the way the real background does. If the photo
+        library is not connected the image 404s and the dark ground shows, which
+        is the section's tone and exactly the right fallback.
+      */}
+      {background && (
+        <image
+          href={stockPreviewUrl(background)}
+          x={0}
+          y={0}
+          width={100}
+          height={68}
+          preserveAspectRatio="xMidYMid slice"
+        />
+      )}
+
       {panels.map((panel, index) => (
         <rect
           key={`panel-${index}`}
@@ -119,16 +145,50 @@ export function PresetThumb({ preset }: { preset: SectionPreset }) {
         />
       ))}
 
+      {/* One clip per picture bar, so a photograph cannot bleed past its frame. */}
+      <defs>
+        {bars.map((bar, index) =>
+          bar.query ? (
+            <clipPath key={index} id={clip(index)}>
+              <rect
+                x={bar.x * 100}
+                y={bar.y * 68}
+                width={bar.width * 100}
+                height={bar.height * 68}
+                rx={1}
+              />
+            </clipPath>
+          ) : null,
+        )}
+      </defs>
+
       {bars.map((bar, index) => (
-        <rect
-          key={index}
-          x={bar.x * 100}
-          y={bar.y * 68}
-          width={bar.width * 100}
-          height={bar.height * 68}
-          rx={bar.pill ? 3 : bar.tone === 'icon' ? 2 : 1}
-          data-tone={bar.tone}
-        />
+        <g key={index}>
+          {/*
+            The grey frame first, ALWAYS, so it shows through when a picture has
+            no query or the photo fails to load. The photograph, when there is
+            one, is drawn on top and clipped to the frame.
+          */}
+          <rect
+            x={bar.x * 100}
+            y={bar.y * 68}
+            width={bar.width * 100}
+            height={bar.height * 68}
+            rx={bar.pill ? 3 : bar.tone === 'icon' ? 2 : 1}
+            data-tone={bar.tone}
+          />
+          {bar.query && (
+            <image
+              href={stockPreviewUrl(bar.query)}
+              x={bar.x * 100}
+              y={bar.y * 68}
+              width={bar.width * 100}
+              height={bar.height * 68}
+              preserveAspectRatio="xMidYMid slice"
+              clipPath={`url(#${clip(index)})`}
+            />
+          )}
+        </g>
       ))}
     </svg>
   );

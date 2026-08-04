@@ -194,6 +194,15 @@ export interface ThumbBar {
   tone: 'strong' | 'soft' | 'frame' | 'icon';
   /** Rounded ends, for a button. */
   pill?: boolean;
+  /**
+   * A search term, when this bar is a picture in a hero preset.
+   *
+   * The picker draws a photograph in the bar rather than a grey frame when this
+   * is set, from the same query the fill-on-insert uses, so the preview and the
+   * real thing agree. Absent on everything that is not a hero picture, which is
+   * why the frame tone still exists and still shows when the photo cannot load.
+   */
+  query?: string;
 }
 
 /**
@@ -225,6 +234,13 @@ export interface ThumbModel {
   /** Behind the bars, in the order they are drawn. */
   panels: ThumbPanel[];
   bars: ThumbBar[];
+  /**
+   * A search term for a photograph behind the whole thumbnail, for the heroes
+   * whose picture is the section background. The picker draws it full bleed
+   * under everything else, so a dark over-photo hero previews as a photo rather
+   * than a flat dark band.
+   */
+  background?: string;
 }
 
 /** How tall each block draws, and how many lines it becomes. */
@@ -240,6 +256,57 @@ const BLOCK_GAP = 0.045;
 const RATIO_HEIGHT: Readonly<Record<string, number>> = {
   '16/9': 0.16, '4/3': 0.2, '1/1': 0.24, '3/4': 0.3, auto: 0.2,
 };
+
+/**
+ * The travel subjects a hero picture draws from when it names none of its own.
+ *
+ * A SMALL PALETTE, ON PURPOSE. Every hero image with no `photo` of its own is
+ * handed one of these by position, so the previews carry photographs without any
+ * preset having to spell one out, and a handful of shared terms means the picker
+ * asks the photo library a few times rather than once per tile. UK-leaning
+ * European travel, because that is who these sites are for.
+ */
+export const HERO_PHOTO_QUERIES = [
+  'greek island coastline',
+  'amalfi coast italy',
+  'santorini white houses',
+  'tropical beach resort',
+  'mountain lake landscape',
+  'venice canal boats',
+  'desert canyon road trip',
+  'coastal town harbour',
+] as const;
+
+/**
+ * A stable pick from the palette.
+ *
+ * DETERMINISTIC, so the preview and the fill-on-insert land on the same subject
+ * and the hero a client adds looks like the one they chose. Seeded by the
+ * preset and the picture's position, so two images in one hero differ and the
+ * same image is the same every time rather than shuffling on each render. A plain
+ * string hash, because Math.random is neither wanted nor available here.
+ */
+export function heroPhotoQuery(presetId: string, index: number): string {
+  const seed = `${presetId}:${index}`;
+  let hash = 0;
+  for (let i = 0; i < seed.length; i += 1) {
+    hash = (hash * 31 + seed.charCodeAt(i)) | 0;
+  }
+  return HERO_PHOTO_QUERIES[Math.abs(hash) % HERO_PHOTO_QUERIES.length];
+}
+
+/**
+ * Where the picker fetches one preview photograph.
+ *
+ * Same-origin on purpose: the route talks to the photo library and hands back an
+ * image, so nothing about the third party reaches the browser and there is one
+ * URL to allow if a content security policy is ever added. When the library is
+ * not connected, the route answers 404 and the thumbnail falls back to its grey
+ * frame, which is why the previews degrade rather than break.
+ */
+export function stockPreviewUrl(query: string): string {
+  return `/api/stock-preview?q=${encodeURIComponent(query.slice(0, 80))}`;
+}
 
 /**
  * The room inside a card, in thumbnail units.
@@ -262,6 +329,12 @@ export function presetThumb(preset: SectionPreset, gap = 0.05): ThumbModel {
   const panels: ThumbPanel[] = [];
   const rowCount = preset.rows.length;
   const rowHeight = (1 - gap * (rowCount - 1)) / rowCount;
+
+  // Only heroes carry photographs in their previews, which keeps the picker's
+  // calls to the photo library to the one tab that wants them. A running count
+  // of pictures gives each image in a hero a different subject from the palette.
+  const isHero = preset.category === 'hero';
+  let imageIndex = 0;
 
   preset.rows.forEach((row, rowIndex) => {
     const total = row.widths.reduce((sum, width) => sum + width, 0);
@@ -304,9 +377,26 @@ export function presetThumb(preset: SectionPreset, gap = 0.05): ThumbModel {
         const centred = spec.props?.align === 'centre';
         const right = spec.props?.align === 'right';
 
+        /*
+         * A HERO PICTURE CARRIES ITS SEARCH TERM ONTO THE BAR, so the preview
+         * can draw a photograph in it. The block's own `photo` wins; otherwise
+         * one is taken from the palette by the picture's position. Counted per
+         * picture rather than per bar, because a gallery is several bars of one
+         * picture idea and they should share a subject.
+         */
+        const picture = spec.type === 'image' || spec.type === 'video' || spec.type === 'gallery';
+        const query =
+          isHero && picture
+            ? typeof spec.photo === 'string' && spec.photo.trim()
+              ? spec.photo.trim()
+              : heroPhotoQuery(preset.id, imageIndex)
+            : undefined;
+        if (picture) imageIndex += 1;
+
         for (const bar of barsForBlock(spec, inner)) {
           columnBars.push({
             ...bar,
+            ...(query ? { query } : {}),
             // Alignment is drawn, not just stored, or a centred preset and a
             // left-aligned one would show the same picture. Right matters as
             // much as centre now the headers are in here: a menu pushed right
@@ -393,7 +483,14 @@ export function presetThumb(preset: SectionPreset, gap = 0.05): ThumbModel {
     }
   });
 
-  return { tone: preset.section?.tone ?? 'light', panels, bars };
+  return {
+    tone: preset.section?.tone ?? 'light',
+    panels,
+    bars,
+    // The whole-section photograph, for the over-photo heroes. Only a hero's, so
+    // a tinted text section never quietly grows a background picture.
+    background: isHero ? preset.section?.backgroundQuery : undefined,
+  };
 }
 
 /** How far down a column starts when the row lines its columns up. */
