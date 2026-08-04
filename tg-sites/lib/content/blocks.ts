@@ -557,7 +557,11 @@ export const BLOCKS: readonly BlockDefinition[] = [
         itemLabel: 'Slide',
         max: 7,
         fields: [
-          { kind: 'image', key: 'src', label: 'Image' },
+          // focus, so each slide carries its own Edit button and its own focus
+          // point and adjustments, the same as the block's first picture and the
+          // gallery's tiles. No crop: a slideshow covers its frame, so a crop
+          // rectangle has nothing to act on.
+          { kind: 'image', key: 'src', label: 'Image', focus: true },
           { kind: 'text', key: 'alt', label: 'Alt text', max: 200 },
         ],
       },

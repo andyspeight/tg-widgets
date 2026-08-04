@@ -215,7 +215,7 @@ describe('how the video is rendered', () => {
     // The picture doubles as the poster, so there is something to look at while
     // the file downloads. The first background image, whether it is the single
     // one or the first slide of a background slideshow.
-    expect(tag).toContain('poster={bgImages[0] || undefined}');
+    expect(tag).toContain('poster={bgImages[0]?.src || undefined}');
   });
 
   /*
@@ -365,15 +365,19 @@ describe('the background picture, its focus point and its look', () => {
 
   it('drives object-position and a filter on the background img, under the scrim', () => {
     const renderer = source('components', 'render', 'PageRenderer.tsx');
-    // Built from clamped numbers, never a stored string.
-    expect(renderer).toContain('bgPercent(section.backgroundFocusX, 100, 50)');
-    expect(renderer).toContain('bgPercent(section.backgroundBrightness, 200, 100)');
+    // Built from clamped numbers, never a stored string. The clamp lives in the
+    // shared bgPictureStyle helper now, and the section maps its own keys in.
+    expect(renderer).toContain('bgPercent(source.focusX, 100, 50)');
+    expect(renderer).toContain('bgPercent(source.brightness, 200, 100)');
+    expect(renderer).toContain('focusX: section.backgroundFocusX');
     expect(renderer).toMatch(/objectPosition: `\$\{focusX\}% \$\{focusY\}%`/);
     // A filter only for an adjustment that is off its default.
     expect(renderer).toContain('if (brightness !== 100) adjustments.push(`brightness(${brightness}%)`)');
     // Put on the background img, which sits under the scrim, so darkening the
-    // picture never dims the words on top of it.
-    expect(renderer).toContain('style={backgroundStyle(section)}');
+    // picture never dims the words on top of it. The single background's style
+    // is backgroundStyle(section); the img reads it off the first bgImages entry.
+    expect(renderer).toContain('style: backgroundStyle(section)');
+    expect(renderer).toContain('style={bgImages[0].style}');
   });
 
   it('offers the Edit button on the background field, mapping the five numbers', () => {
@@ -396,16 +400,34 @@ describe('the background picture, its focus point and its look', () => {
  * the same way the video is, and both were driven in a browser before shipping.
  */
 describe('the background as a slideshow', () => {
-  it('keeps the extra pictures, and is absent when there are none', () => {
+  it('keeps the extra pictures as objects, and is absent when there are none', () => {
     expect(parsed({}).backgroundSlides).toBeUndefined();
     const section = parsed({
       backgroundImage: 'https://cdn.example.com/a.jpg',
       backgroundSlides: ['https://cdn.example.com/b.jpg', 'https://cdn.example.com/c.jpg'],
     });
+    // A plain address still works, read as a picture with no adjustments, so a
+    // slideshow saved as a list of addresses before today comes back unchanged.
     expect(section.backgroundSlides).toEqual([
-      'https://cdn.example.com/b.jpg',
-      'https://cdn.example.com/c.jpg',
+      { src: 'https://cdn.example.com/b.jpg' },
+      { src: 'https://cdn.example.com/c.jpg' },
     ]);
+  });
+
+  it('keeps a focus point and adjustments a client set on any slide', () => {
+    const section = parsed({
+      backgroundSlides: [{ src: 'https://cdn.example.com/b.jpg', focusX: 20, focusY: 80, brightness: 120 }],
+    });
+    expect(section.backgroundSlides).toEqual([
+      { src: 'https://cdn.example.com/b.jpg', focusX: 20, focusY: 80, brightness: 120 },
+    ]);
+  });
+
+  it('holds each slide focus point and adjustment to its range', () => {
+    const slide = parsed({
+      backgroundSlides: [{ src: 'https://cdn.example.com/b.jpg', focusX: -30, brightness: 999 }],
+    }).backgroundSlides![0];
+    expect(slide).toEqual({ src: 'https://cdn.example.com/b.jpg', focusX: 0, brightness: 200 });
   });
 
   it('holds the list to seven, so with the section picture it stays inside eight', () => {
@@ -413,9 +435,9 @@ describe('the background as a slideshow', () => {
     expect(parsed({ backgroundSlides: nine }).backgroundSlides).toHaveLength(7);
   });
 
-  it('drops anything in the list that is not a usable string', () => {
+  it('drops anything in the list that is not a usable picture', () => {
     const section = parsed({ backgroundSlides: ['https://cdn.example.com/b.jpg', '', 42, null] });
-    expect(section.backgroundSlides).toEqual(['https://cdn.example.com/b.jpg']);
+    expect(section.backgroundSlides).toEqual([{ src: 'https://cdn.example.com/b.jpg' }]);
   });
 
   it('normalises the transition and holds the time on each between 2 and 15', () => {
@@ -433,35 +455,41 @@ describe('the background as a slideshow', () => {
     // a bad address in the list becomes nothing rather than reaching a src.
     const renderer = source('components', 'render', 'PageRenderer.tsx');
     expect(renderer).toContain('(section.backgroundSlides ?? [])');
-    expect(renderer).toMatch(/\.map\(\(src\) => safeUrl\(src\)\)/);
-    expect(renderer).toContain('.filter((src): src is string => !!src)');
+    expect(renderer).toContain('src: safeUrl(slide.src)');
+    expect(renderer).toContain('.filter((slide): slide is { src: string; style: CSSProperties } => !!slide.src)');
   });
 
   it('becomes a slideshow only with two or more pictures and no video', () => {
     const renderer = source('components', 'render', 'PageRenderer.tsx');
     expect(renderer).toContain('const bgShow = !video && bgImages.length > 1;');
-    expect(renderer).toContain('[background, ...bgExtra]');
+    // The section's own picture is the first, then the extras, each with its own
+    // per-picture style.
+    expect(renderer).toContain('background ? [{ src: background, style: backgroundStyle(section) }] : []');
     // Capped at the eight the keyframes cover.
     expect(renderer).toContain('.slice(0, 8)');
   });
 
-  it('stacks the slides, staggered, and keeps the scrim over them', () => {
+  it('stacks the slides, staggered, each with its own focus, under the scrim', () => {
     const renderer = source('components', 'render', 'PageRenderer.tsx');
     expect(renderer).toContain('className="tgs-section__bgshow"');
     expect(renderer).toContain('data-transition={bgTransition}');
     expect(renderer).toContain('data-count={bgImages.length}');
     expect(renderer).toContain('className="tgs-section__bgslide"');
     expect(renderer).toMatch(/animationDelay: `calc\(\$\{i\} \* var\(--tgs-ss-cycle\) \/ \$\{bgImages\.length\}\)`/);
-    // The same focus point and adjustments as a single background, on each slide.
-    expect(renderer).toContain('...backgroundStyle(section)');
+    // Each slide paints its OWN focus and adjustments, not one shared setting.
+    expect(renderer).toContain('...image.style');
+    expect(renderer).toContain('.map((slide) => ({ src: safeUrl(slide.src), style: bgPictureStyle(slide) }))');
     // The scrim shows whenever there is any background picture, not just one.
     expect(renderer).toContain('{(bgImages.length > 0 || video) && <div className="tgs-section__scrim"');
   });
 
-  it('is offered in the editor, with the transition and speed only once it is a slideshow', () => {
+  it('is offered in the editor, each slide with its own Edit, and the transition and speed once it is a slideshow', () => {
     const props = source('components', 'editor', 'Properties.tsx');
     expect(props).toContain('More background images');
-    expect(props).toContain('backgroundSlides:');
+    // Every slide carries its own Edit, written back into that slide rather than
+    // the section, so each picture can be focused on its own.
+    expect(props).toContain('focusX: slide.focusX ?? 50');
+    expect(props).toContain('slides[slideIndex] = {');
     // The transition and time controls appear only when the section has two or
     // more pictures, the point at which it becomes a slideshow.
     expect(props).toContain('(section.backgroundImage ? 1 : 0) + (section.backgroundSlides?.length ?? 0) > 1');

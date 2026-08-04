@@ -392,21 +392,61 @@ function backgroundPercent(max: number) {
 }
 
 /**
- * The extra background pictures, as a plain list of addresses.
+ * The extra background pictures.
  *
- * A background is decorative so there is no alt to carry, which is why this is a
- * list of strings rather than the {src, alt} the image block's slides use. Kept
- * to seven, so the section's own picture plus these stays inside the eight the
- * slideshow keyframes cover. The render reduces and safeUrls each one the same
- * as it does the single backgroundImage; this only keeps the shape sane.
+ * Each carries its own address and, since 4 Aug 2026, its own focus point and
+ * adjustments, so every picture in a background slideshow can be focused and
+ * toned where it matters rather than sharing one setting: a landscape and a
+ * portrait behind the same heading want different parts kept. A background is
+ * decorative, so there is no alt to carry and no crop, which a render that
+ * covers its own shape would ignore. Kept to seven, so the section's own picture
+ * plus these stays inside the eight the slideshow keyframes cover. A plain string
+ * is still accepted and read as an address with no adjustments, so a slideshow
+ * saved as a list of addresses before today comes back unchanged.
  */
-function toBackgroundSlides(value: unknown): string[] {
+export interface BackgroundSlide {
+  src: string;
+  focusX?: number;
+  focusY?: number;
+  brightness?: number;
+  contrast?: number;
+  saturation?: number;
+}
+
+function clampPercent(value: unknown, max: number): number | undefined {
+  if (value === undefined || value === null || value === '') return undefined;
+  const n = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(n)) return undefined;
+  return Math.min(max, Math.max(0, Math.round(n)));
+}
+
+function toBackgroundSlides(value: unknown): BackgroundSlide[] {
   if (!Array.isArray(value)) return [];
-  const out: string[] = [];
+  const out: BackgroundSlide[] = [];
   for (const item of value) {
-    if (typeof item === 'string' && item.trim() !== '' && item.length <= 2048) {
-      out.push(item);
+    let src: string | undefined;
+    let extra: Record<string, unknown> = {};
+    if (typeof item === 'string') {
+      src = item;
+    } else if (item && typeof item === 'object' && typeof (item as { src?: unknown }).src === 'string') {
+      extra = item as Record<string, unknown>;
+      src = extra.src as string;
     }
+    if (!src || src.trim() === '' || src.length > 2048) continue;
+
+    const slide: BackgroundSlide = { src };
+    const focusX = clampPercent(extra.focusX, 100);
+    const focusY = clampPercent(extra.focusY, 100);
+    const brightness = clampPercent(extra.brightness, 200);
+    const contrast = clampPercent(extra.contrast, 200);
+    const saturation = clampPercent(extra.saturation, 200);
+    if (focusX !== undefined) slide.focusX = focusX;
+    if (focusY !== undefined) slide.focusY = focusY;
+    if (brightness !== undefined) slide.brightness = brightness;
+    if (contrast !== undefined) slide.contrast = contrast;
+    if (saturation !== undefined) slide.saturation = saturation;
+
+    out.push(slide);
     if (out.length >= 7) break;
   }
   return out;

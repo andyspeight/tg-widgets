@@ -205,9 +205,12 @@ export function SectionRenderer({
    * runs, and it carries no controls because the section's words sit over it.
    */
   const bgExtra = (section.backgroundSlides ?? [])
-    .map((src) => safeUrl(src))
-    .filter((src): src is string => !!src);
-  const bgImages = [background, ...bgExtra].filter((src): src is string => !!src).slice(0, 8);
+    .map((slide) => ({ src: safeUrl(slide.src), style: bgPictureStyle(slide) }))
+    .filter((slide): slide is { src: string; style: CSSProperties } => !!slide.src);
+  const bgImages = [
+    ...(background ? [{ src: background, style: backgroundStyle(section) }] : []),
+    ...bgExtra,
+  ].slice(0, 8);
   const bgShow = !video && bgImages.length > 1;
   const bgTransition = section.backgroundTransition === 'slide' ? 'slide' : 'fade';
   const bgInterval = section.backgroundInterval ?? 5;
@@ -270,16 +273,16 @@ export function SectionRenderer({
           data-count={bgImages.length}
           style={{ '--tgs-ss-cycle': `${bgImages.length * bgInterval}s` } as CSSProperties}
         >
-          {bgImages.map((src, i) => (
+          {bgImages.map((image, i) => (
             <img
               key={i}
               className="tgs-section__bgslide"
-              src={src}
+              src={image.src}
               alt=""
               aria-hidden="true"
               loading={i === 0 ? 'eager' : 'lazy'}
               style={{
-                ...backgroundStyle(section),
+                ...image.style,
                 animationDelay: `calc(${i} * var(--tgs-ss-cycle) / ${bgImages.length})`,
               }}
             />
@@ -288,10 +291,10 @@ export function SectionRenderer({
       ) : bgImages[0] ? (
         <img
           className="tgs-section__bg"
-          src={bgImages[0]}
+          src={bgImages[0].src}
           alt=""
           aria-hidden="true"
-          style={backgroundStyle(section)}
+          style={bgImages[0].style}
         />
       ) : null}
 
@@ -299,7 +302,7 @@ export function SectionRenderer({
         <video
           className="tgs-section__bg tgs-section__bg--video"
           src={video}
-          poster={bgImages[0] || undefined}
+          poster={bgImages[0]?.src || undefined}
           autoPlay
           muted
           loop
@@ -419,12 +422,24 @@ function bgPercent(value: unknown, max: number, fallback: number): number {
  * an adjustment that is actually off its default, so an untouched picture
  * carries none.
  */
-function backgroundStyle(section: Section): CSSProperties {
-  const focusX = bgPercent(section.backgroundFocusX, 100, 50);
-  const focusY = bgPercent(section.backgroundFocusY, 100, 50);
-  const brightness = bgPercent(section.backgroundBrightness, 200, 100);
-  const contrast = bgPercent(section.backgroundContrast, 200, 100);
-  const saturation = bgPercent(section.backgroundSaturation, 200, 100);
+/**
+ * The object-position and filter for a background picture, from a focus point
+ * and three adjustments. Shared by the single background and by every slide of a
+ * background slideshow, so each picture in a slideshow can be focused and toned
+ * on its own rather than sharing one setting.
+ */
+function bgPictureStyle(source: {
+  focusX?: number;
+  focusY?: number;
+  brightness?: number;
+  contrast?: number;
+  saturation?: number;
+}): CSSProperties {
+  const focusX = bgPercent(source.focusX, 100, 50);
+  const focusY = bgPercent(source.focusY, 100, 50);
+  const brightness = bgPercent(source.brightness, 200, 100);
+  const contrast = bgPercent(source.contrast, 200, 100);
+  const saturation = bgPercent(source.saturation, 200, 100);
 
   const adjustments: string[] = [];
   if (brightness !== 100) adjustments.push(`brightness(${brightness}%)`);
@@ -435,6 +450,16 @@ function backgroundStyle(section: Section): CSSProperties {
     objectPosition: `${focusX}% ${focusY}%`,
     ...(adjustments.length ? { filter: adjustments.join(' ') } : {}),
   };
+}
+
+function backgroundStyle(section: Section): CSSProperties {
+  return bgPictureStyle({
+    focusX: section.backgroundFocusX,
+    focusY: section.backgroundFocusY,
+    brightness: section.backgroundBrightness,
+    contrast: section.backgroundContrast,
+    saturation: section.backgroundSaturation,
+  });
 }
 
 /**

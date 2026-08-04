@@ -39,6 +39,10 @@ describe('more than one image turns the block into a slideshow', () => {
     if (slides && slides.kind === 'repeater') {
       expect(slides.max).toBe(7);
       expect(slides.fields.map((f) => f.key)).toEqual(['src', 'alt']);
+      // The slide picture carries focus, which is what gives each slide its own
+      // Edit button and its own focus point, the same as a gallery tile.
+      const slideSrc = slides.fields.find((f) => f.key === 'src');
+      expect(slideSrc?.kind === 'image' && slideSrc.focus).toBe(true);
     }
     const kinds = fields.map((f) => `${f.key}:${f.kind}`);
     expect(kinds).toEqual(
@@ -88,8 +92,15 @@ describe('the slideshow renders as stacked, staggered, pure-CSS slides', () => {
   it('becomes a slideshow only when there is more than one picture', () => {
     expect(body).toContain('if (slideSrcs.length > 0)');
     // The block's own picture is the first slide, capped so the count stays in
-    // the range the keyframes cover.
-    expect(body).toContain('[{ src, alt }, ...slideSrcs].slice(0, 8)');
+    // the range the keyframes cover. It keeps its own focus and adjustments.
+    expect(body).toContain('[{ src, alt, style: pictureAdjustStyle(props) }, ...slideSrcs].slice(0, 8)');
+  });
+
+  it('gives every slide its own focus point, not just the first', () => {
+    // Each extra slide's focus and adjustments travel with it, worked out the
+    // same way a gallery tile's are, and painted through the img's own style.
+    expect(body).toContain('style: pictureAdjustStyle(slide)');
+    expect(body).toContain('style={slide.style}');
   });
 
   it('stacks the slides and staggers each by its share of the cycle', () => {

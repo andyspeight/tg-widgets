@@ -905,15 +905,41 @@ function SectionFields({
       */}
       <div className="ed-field">
         <label className="ed-label">More background images</label>
-        {(section.backgroundSlides ?? []).map((url, slideIndex) => (
+        {(section.backgroundSlides ?? []).map((slide, slideIndex) => (
           <ImageField
             key={`bgslide-${slideIndex}`}
-            value={url}
+            value={slide.src}
             onChange={(next) => {
               const slides = [...(section.backgroundSlides ?? [])];
-              if (next) slides[slideIndex] = next;
+              if (next) slides[slideIndex] = { ...slides[slideIndex], src: next };
               else slides.splice(slideIndex, 1);
               set({ backgroundSlides: slides }, `sec:${index}:bgslides`);
+            }}
+            /*
+              Its own Edit button, focus point and adjustments, written back into
+              this slide rather than the section, so every picture in the
+              slideshow can be focused where it matters. No urlKey, so the picker
+              still sets the address through onChange and this patch only ever
+              carries an edit. No crop, the same as the single background.
+            */
+            onPatch={(patch) => {
+              const slides = [...(section.backgroundSlides ?? [])];
+              slides[slideIndex] = {
+                ...slides[slideIndex],
+                focusX: patch.focusX as number,
+                focusY: patch.focusY as number,
+                brightness: patch.brightness as number,
+                contrast: patch.contrast as number,
+                saturation: patch.saturation as number,
+              };
+              set({ backgroundSlides: slides }, `sec:${index}:bgslide-edit`);
+            }}
+            edit={{
+              focusX: slide.focusX ?? 50,
+              focusY: slide.focusY ?? 50,
+              brightness: slide.brightness ?? 100,
+              contrast: slide.contrast ?? 100,
+              saturation: slide.saturation ?? 100,
             }}
           />
         ))}
@@ -923,15 +949,15 @@ function SectionFields({
           onChange={(next) => {
             if (!next) return;
             set(
-              { backgroundSlides: [...(section.backgroundSlides ?? []), next] },
+              { backgroundSlides: [...(section.backgroundSlides ?? []), { src: next }] },
               `sec:${index}:bgslides`,
             );
           }}
         />
         <p className="ed-help">
           Add another and the background cycles through them behind your heading
-          and buttons. The focus point and adjustments above are shared by them
-          all.
+          and buttons. Each has its own Edit, so you can set the focus point and
+          the look of every picture.
         </p>
       </div>
 

@@ -448,11 +448,20 @@ export function ImageBlock({ props }: { props: Props }): ReactElement {
    * slides give the box no height of their own, so Original falls back to 16:9.
    */
   const slideSrcs = list(props, 'slides')
-    .map((slide) => ({ src: safeUrl(str(slide, 'src')), alt: str(slide, 'alt') }))
-    .filter((slide): slide is { src: string; alt: string } => !!slide.src);
+    // Each slide's own focus point and adjustments travel with it, the same as a
+    // gallery tile, so a slideshow of a landscape and a portrait keeps the right
+    // part of each in frame rather than centring them all.
+    .map((slide) => ({
+      src: safeUrl(str(slide, 'src')),
+      alt: str(slide, 'alt'),
+      style: pictureAdjustStyle(slide),
+    }))
+    .filter((slide): slide is { src: string; alt: string; style: CSSProperties } => !!slide.src);
 
   if (slideSrcs.length > 0) {
-    const slides = [{ src, alt }, ...slideSrcs].slice(0, 8);
+    // The block's own picture is the first slide, and it keeps its focus and
+    // adjustments too, which the earlier slideshow dropped by centring every one.
+    const slides = [{ src, alt, style: pictureAdjustStyle(props) }, ...slideSrcs].slice(0, 8);
     const count = slides.length;
     const transition = oneOf(props, 'transition', ['fade', 'slide'] as const, 'fade');
     const interval = clamp(props.interval, 2, 15, 5);
@@ -487,6 +496,7 @@ export function ImageBlock({ props }: { props: Props }): ReactElement {
                   <img
                     src={slide.src}
                     alt={slide.alt}
+                    style={slide.style}
                     loading={index === 0 ? 'eager' : 'lazy'}
                     decoding="async"
                   />
