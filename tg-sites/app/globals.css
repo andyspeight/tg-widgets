@@ -1943,6 +1943,14 @@
 .tgs-section__divider[data-edge='top']    { top: 0; transform: scaleY(-1); }
 .tgs-section__divider[data-edge='bottom'] { bottom: 0; }
 
+/*
+ * BLEND draws a gradient rather than a shape, and the renderer sets its
+ * direction per edge, so it must not take the vertical flip the SVG shapes use
+ * to serve both edges from one path. The colour arrives inline: the section next
+ * door faded to transparent, which reveals this section's own background.
+ */
+.tgs-section__divider--blend[data-edge='top'] { transform: none; }
+
 .tgs-section__divider svg {
   display: block;
   width: 100%;

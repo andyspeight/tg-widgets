@@ -13,7 +13,7 @@
 
 import { Fragment, type CSSProperties, type ReactElement } from 'react';
 import { safeAnchor, safeColour, type Box, type Column, type Page, type Row, type Section } from '../../lib/content/schema';
-import { dividerShape, normaliseDividerHeight, safeDivider, sectionFill } from '../../lib/content/dividers';
+import { BLEND_DIVIDER, dividerShape, normaliseDividerHeight, safeDivider, sectionFill } from '../../lib/content/dividers';
 import { safeUrl } from '../../lib/content/sanitise';
 import { BlockRenderer } from './BlockRenderer';
 
@@ -490,7 +490,34 @@ function SectionDivider({
   /** The colour of the section on the other side of this edge. */
   fill: string;
 }): ReactElement | null {
-  const found = dividerShape(safeDivider(shape));
+  const name = safeDivider(shape);
+  if (name === 'none') return null;
+
+  const px = normaliseDividerHeight(height);
+
+  /*
+   * BLEND IS A FADE, NOT A SHAPE. The neighbour's colour fades to transparent
+   * across the band, which lets THIS section's own background show through
+   * beneath, colour or picture, so one section looks like it emerges from the
+   * other. The direction is written per edge, so unlike the shapes it does not
+   * reuse one path flipped, and it opts out of the CSS flip in globals.css.
+   */
+  if (name === BLEND_DIVIDER) {
+    const gradient =
+      edge === 'top'
+        ? `linear-gradient(to bottom, ${fill}, transparent)`
+        : `linear-gradient(to bottom, transparent, ${fill})`;
+    return (
+      <div
+        className="tgs-section__divider tgs-section__divider--blend"
+        data-edge={edge}
+        aria-hidden="true"
+        style={{ height: `${px}px`, background: gradient }}
+      />
+    );
+  }
+
+  const found = dividerShape(name);
   if (!found) return null;
 
   return (
@@ -506,7 +533,7 @@ function SectionDivider({
        * why boxStyle's `--tgs-bg: transparent` cannot be used, since that is
        * emitted on every section whether a colour was chosen or not.
        */
-      style={{ height: `${normaliseDividerHeight(height)}px`, color: fill }}
+      style={{ height: `${px}px`, color: fill }}
     >
       <svg viewBox="0 0 1200 100" preserveAspectRatio="none" focusable="false">
         <path d={found.path} />

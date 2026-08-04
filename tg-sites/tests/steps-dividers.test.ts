@@ -189,10 +189,12 @@ describe('the divider shapes', () => {
     }
   });
 
-  it('offers a straight edge first, then every shape it can draw', () => {
+  it('offers a straight edge first, then every shape, then blend', () => {
     expect(DIVIDER_OPTIONS[0].value).toBe('none');
-    expect(DIVIDER_OPTIONS.slice(1).map((option) => option.value))
+    expect(DIVIDER_OPTIONS.slice(1, 1 + DIVIDER_SHAPES.length).map((option) => option.value))
       .toEqual(DIVIDER_SHAPES.map((shape) => shape.id));
+    // Blend is not a shape, so it sits after the shapes rather than among them.
+    expect(DIVIDER_OPTIONS[DIVIDER_OPTIONS.length - 1].value).toBe('blend');
   });
 });
 
@@ -291,6 +293,50 @@ describe('what colour a divider is drawn in', () => {
     const rule = css.slice(css.indexOf('.tgs-section__divider {'));
     expect(rule.slice(0, rule.indexOf('}'))).toContain('z-index: 1');
     expect(css).toContain('.tgs-section__inner {');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Blend, the edge that is a fade rather than a shape
+// ---------------------------------------------------------------------------
+
+/*
+ * BLEND, added 4 Aug 2026. Andy wanted an edge where the adjoining colours fade
+ * into each other so one section looks like it emerges from the next. It is not
+ * a shape, so it has no path and is drawn as a gradient; the one thing that must
+ * hold is that it is a legal stored name handled beside the shapes, and that its
+ * gradient runs the right way at each edge.
+ */
+describe('the blend divider', () => {
+  it('is a legal stored name, kept rather than reduced to a straight edge', () => {
+    expect(safeDivider('blend')).toBe('blend');
+  });
+
+  it('is offered in the picker after the shapes', () => {
+    expect(DIVIDER_OPTIONS.some((option) => option.value === 'blend')).toBe(true);
+  });
+
+  it('is drawn as a gradient, the neighbour fading to transparent, per edge', () => {
+    const renderer = read('components', 'render', 'PageRenderer.tsx');
+    // Handled beside the shapes, not through dividerShape, since it has no path.
+    expect(renderer).toContain('if (name === BLEND_DIVIDER)');
+    // Top: the neighbour above at the top of the band, fading down into this
+    // section. Bottom: the reverse. Written per edge, not one path flipped.
+    expect(renderer).toContain('`linear-gradient(to bottom, ${fill}, transparent)`');
+    expect(renderer).toContain('`linear-gradient(to bottom, transparent, ${fill})`');
+    // It reveals this section's own background, so the transparent end matters.
+    expect(renderer).toContain('tgs-section__divider--blend');
+  });
+
+  it('opts out of the flip the SVG shapes use, so its direction stays as drawn', () => {
+    const css = read('app', 'globals.css');
+    expect(css).toContain(".tgs-section__divider--blend[data-edge='top'] { transform: none; }");
+  });
+
+  it('survives a parse on either edge', () => {
+    const section = sectionWith({ dividerTop: 'blend', dividerBottom: 'blend' });
+    expect(section.dividerTop).toBe('blend');
+    expect(section.dividerBottom).toBe('blend');
   });
 });
 

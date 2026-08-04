@@ -5888,6 +5888,31 @@ await check('and it sits under the words, not over them', async () => {
   return layered && layered.inner > layered.divider ? true : JSON.stringify(layered);
 });
 
+/*
+ * BLEND is the edge that is a fade rather than a shape: the neighbour's colour
+ * to transparent, drawn as a gradient div with no path. The panel is still open
+ * on the same section, so this just switches the edge and reads what it became.
+ */
+await check('the blend edge is a gradient, not a shape', async () => {
+  await page.locator('.ed-props select[aria-label="Bottom edge"]').selectOption('blend');
+  await page.waitForTimeout(600);
+
+  const divider = page
+    .locator(".ed-canvas-frame .tgs-section__divider[data-edge='bottom']")
+    .first();
+  if ((await divider.count()) === 0) return 'no bottom divider after choosing blend';
+
+  const info = await divider.evaluate((el) => ({
+    blend: el.classList.contains('tgs-section__divider--blend'),
+    background: getComputedStyle(el).backgroundImage,
+    hasSvg: !!el.querySelector('svg'),
+  }));
+
+  if (!info.blend) return 'the divider is missing the blend class';
+  if (info.hasSvg) return 'blend still drew an SVG shape';
+  return /gradient/.test(info.background) ? true : `background is ${info.background}`;
+});
+
 await check('a shaped edge never makes the page scroll sideways', async () => {
   await page.getByRole('button', { name: 'Phone' }).click();
   await page.waitForTimeout(600);

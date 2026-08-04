@@ -63,10 +63,23 @@ export const DIVIDER_SHAPES: readonly DividerShape[] = [
   },
 ];
 
+/**
+ * BLEND is the one edge that is not a shape.
+ *
+ * Added 4 Aug 2026. Instead of a path, it fades the neighbour's colour to
+ * transparent across the band, which lets THIS section's own background show
+ * through beneath, so one section looks like it emerges from the other. It is a
+ * gradient rather than SVG, so it is drawn as a plain div in the renderer and
+ * has no path here; it is a legal stored name all the same, handled beside the
+ * shapes wherever a divider is drawn or validated.
+ */
+export const BLEND_DIVIDER = 'blend';
+
 /** The names a section may store, plus the one that means no divider at all. */
 export const DIVIDER_OPTIONS = [
   { value: 'none', label: 'Straight' },
   ...DIVIDER_SHAPES.map((shape) => ({ value: shape.id, label: shape.label })),
+  { value: BLEND_DIVIDER, label: 'Blend' },
 ];
 
 /** The shape with this id, or undefined. The only way an id is resolved. */
@@ -93,6 +106,7 @@ export function normaliseDividerHeight(value: unknown): number {
 
 /** A stored divider name, reduced to one this can draw or to 'none'. */
 export function safeDivider(value: unknown): string {
+  if (value === BLEND_DIVIDER) return BLEND_DIVIDER;
   return dividerShape(value) ? (value as string) : 'none';
 }
 
