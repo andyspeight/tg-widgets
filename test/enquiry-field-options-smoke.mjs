@@ -24,7 +24,7 @@ const code = readFileSync(new URL('../public/widget-enquiry.js', import.meta.url
 const editor = readFileSync(new URL('../public/editor-enquiry.html', import.meta.url), 'utf8');
 
 /** Mount the real widget with a single-page form built from `fields`, return the shadow root. */
-async function mount(fields) {
+async function mount(fields, extra) {
   const dom = new JSDOM('<!doctype html><html><body><div id="m"></div></body></html>',
     { runScripts: 'dangerously', url: 'https://agency.example.com/', pretendToBeVisual: true });
   const { window } = dom;
@@ -36,14 +36,14 @@ async function mount(fields) {
   await sleep(10);
   const mountEl = window.document.getElementById('m');
   // No `step` on the fields → single-page render, so every field is present at once.
-  new window.TGEnquiryWidget(mountEl, {
+  new window.TGEnquiryWidget(mountEl, Object.assign({
     formId: 't', widgetId: 'demo', name: 'Test',
     header: { title: 'T', subtitle: 'S' },
     thankYou: { mode: 'inline', message: 'x' },
     branding: { buttonColour: '#111111', accentColour: '#222222', theme: 'light' },
     security: { honeypot: true, turnstile: false },
     fieldsJSON: fields,
-  });
+  }, extra || {}));
   await sleep(40);
   const shadow = mountEl.shadowRoot;
   if (!shadow) throw new Error('widget did not attach a shadow root');
@@ -322,6 +322,29 @@ ok(/ff\.type === 'contactpref' && ff\.options && Array\.isArray\(ff\.options\.br
 ok(/function makeRichParagraph/.test(code) && /function linkifyInto/.test(code), 'widget has the safe link/paragraph helpers');
 ok(/href: url, target: '_blank', rel: 'noopener noreferrer'/.test(code), 'links are built as attributes (no innerHTML), http(s) only');
 ok(/Branch by contact preference/.test(editor) && /cf\.options\.branches/.test(editor), 'editor thank-you inspector edits the contactpref branches');
+
+// ── #1 Reply-time badge (per-form) ───────────────────────────────────────────
+{
+  const shadow = await mount([F.name(), F.consent()], { replyBadge: '2 business days reply' });
+  const trust = [...shadow.querySelectorAll('.tg-trust span')].map(s => s.textContent);
+  ok(trust.some(x => /2 business days reply/.test(x)), '#1 the reply badge shows the per-form text');
+  ok(!trust.some(x => /24hr reply/.test(x)), '#1 the default "24hr reply" is replaced');
+}
+{
+  const shadow = await mount([F.name(), F.consent()]);
+  const trust = [...shadow.querySelectorAll('.tg-trust span')].map(s => s.textContent);
+  ok(trust.some(x => /24hr reply/.test(x)), '#1 default: the badge falls back to "24hr reply"');
+}
+ok(/config\.replyBadge \|\| t\('reply24hr'\)/.test(code), 'widget prefers config.replyBadge over the built-in');
+ok(/replyBadge: \(typeof config\.replyBadge === 'string'\)/.test(code), '_normalise preserves replyBadge');
+{
+  const cfgApi = readFileSync(new URL('../api/enquiry-form-config.js', import.meta.url), 'utf8');
+  ok(/replyBadge:\s*'fld3quHF9gDUo0xS2'/.test(cfgApi), 'config API maps replyBadge to its Airtable column');
+  ok(/payload\.replyBadge !== undefined\)\s*fields\[EF\.replyBadge\] = safeStr\(payload\.replyBadge, 40\)/.test(cfgApi), 'config API saves replyBadge (bounded)');
+  ok(/replyBadge: f\[EF\.replyBadge\] \|\| ''/.test(cfgApi), 'config API reads replyBadge for the editor');
+  ok(/replyBadge: pub\.replyBadge/.test(cfgApi), 'config API surfaces replyBadge to the widget');
+  ok(/Reply-time badge/.test(editor), 'editor header inspector has a reply-badge control');
+}
 
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

@@ -117,6 +117,9 @@ const EF = {
   submitButtonText:    'fldjrfgcfK7580bft',
   thankYouMode:        'fldTy6oSMKUwYEYjQ',
   thankYouMessage:     'fldiB3PkfcsHRKEWd',
+  // Optional per-form reply-time badge text (the clock chip in the trust row).
+  // Empty → the widget's built-in "24hr reply" (localised).
+  replyBadge:          'fld3quHF9gDUo0xS2',
   // Translations JSON — Layer-2 content i18n. Per-language overlays of the
   // author content (header, submit label, thank-you, field labels/placeholders/
   // help and option labels), keyed by 2-letter language code. Produced on save
@@ -357,6 +360,7 @@ function buildEnquiryFormFields(payload, userEmail, isCreate) {
   if (payload.submitButtonText !== undefined)  fields[EF.submitButtonText] = safeStr(payload.submitButtonText, 60);
   if (payload.thankYouMode !== undefined)      fields[EF.thankYouMode] = whitelist(payload.thankYouMode, THANK_YOU_MODES, 'inline');
   if (payload.thankYouMessage !== undefined)   fields[EF.thankYouMessage] = safeStr(payload.thankYouMessage, 500);
+  if (payload.replyBadge !== undefined)        fields[EF.replyBadge] = safeStr(payload.replyBadge, 40);
   if (payload.i18n !== undefined) {
     // Layer-2 translations. Validate + whitelist, then store as a JSON string.
     // Empty object clears the field. Never write unbounded data.
@@ -462,6 +466,7 @@ function readEnquiryFormRecord(record) {
     submitButtonText: f[EF.submitButtonText] || 'Send my enquiry',
     thankYouMode: f[EF.thankYouMode] || 'inline',
     thankYouMessage: f[EF.thankYouMessage] || '',
+    replyBadge: f[EF.replyBadge] || '',
     // Layer-2 translations (parsed + re-validated above) plus the derived set of
     // languages that carry translations, for the editor's language toggles.
     i18n: i18n,
@@ -682,6 +687,7 @@ export default async function handler(req, res) {
         name: pub.name,
         header: { title: pub.headerTitle, subtitle: pub.headerSubtitle },
         submitText: pub.submitButtonText,
+        replyBadge: pub.replyBadge,
         thankYou: {
           mode: pub.thankYouMode,
           message: pub.thankYouMessage,

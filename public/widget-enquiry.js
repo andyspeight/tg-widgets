@@ -38,7 +38,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.1.15';
+  var WIDGET_VERSION = '1.1.16';
   var VISITOR_ID_KEY = 'tg_visitor_id_v1';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -2856,6 +2856,9 @@
       // viewer's language is used when the author has not set their own copy.
       header:     config.header || { title: '', subtitle: '' },
       submitText: config.submitText || '',
+      // Optional reply-time badge text (the clock chip). Empty → localised
+      // "24hr reply" at the use site, so untouched forms are unchanged.
+      replyBadge: (typeof config.replyBadge === 'string') ? config.replyBadge.slice(0, 40) : '',
       thankYou:   config.thankYou || { mode: 'inline', message: '' },
       branding:   config.branding || { buttonColour: '#1B2B5B', accentColour: '#00B4D8', theme: 'light' },
       security:   config.security || { honeypot: true, turnstile: false },
@@ -3134,7 +3137,7 @@
         el('div', { class: 'tg-trust' }, [
           el('span', {}, [svg(ICONS.check, { size: 12 }), t('secure')]),
           el('span', {}, [svg(ICONS.check, { size: 12 }), t('gdpr')]),
-          el('span', {}, [svg(ICONS.clock, { size: 12 }), t('reply24hr')])
+          el('span', {}, [svg(ICONS.clock, { size: 12 }), config.replyBadge || t('reply24hr')])
         ]),
         el('div', { class: 'tg-nav-buttons' }, [backBtn, nextBtn, submitBtn])
       ];
@@ -3143,7 +3146,7 @@
         el('div', { class: 'tg-trust' }, [
           el('span', {}, [svg(ICONS.check, { size: 12 }), t('secure')]),
           el('span', {}, [svg(ICONS.check, { size: 12 }), t('gdpr')]),
-          el('span', {}, [svg(ICONS.clock, { size: 12 }), t('reply24hr')])
+          el('span', {}, [svg(ICONS.clock, { size: 12 }), config.replyBadge || t('reply24hr')])
         ]),
         submitBtn
       ];
