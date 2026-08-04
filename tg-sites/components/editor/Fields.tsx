@@ -122,8 +122,11 @@ export function FieldRenderer({
               and handed to the editor, but ONLY on the field that owns them. The
               image block's src field carries `focus`; a gallery tile's or a
               logo's does not, so those keep the plain chooser and no misleading
-              Edit button.
+              Edit button. The crop is narrower still, on the image block alone,
+              so a section background and a gallery tile keep the focus tools
+              without a Crop tab that would have nowhere to show its result.
             */
+            canCrop={field.focus ? field.crop : undefined}
             edit={
               field.focus
                 ? {
@@ -132,6 +135,7 @@ export function FieldRenderer({
                     brightness: numFrom(siblings?.brightness, 100),
                     contrast: numFrom(siblings?.contrast, 100),
                     saturation: numFrom(siblings?.saturation, 100),
+                    ...(field.crop ? { crop: cropFrom(siblings?.crop) } : {}),
                   }
                 : undefined
             }
@@ -607,4 +611,16 @@ function asString(value: unknown): string {
 function numFrom(value: unknown, fallback: number): number {
   const n = typeof value === 'number' ? value : Number(value);
   return Number.isFinite(n) ? n : fallback;
+}
+
+/** The block's stored crop, or the whole picture when it has none. */
+function cropFrom(value: unknown): { x: number; y: number; w: number; h: number; aspect: number } {
+  const c = value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
+  return {
+    x: numFrom(c.x, 0),
+    y: numFrom(c.y, 0),
+    w: numFrom(c.w, 100),
+    h: numFrom(c.h, 100),
+    aspect: numFrom(c.aspect, 0),
+  };
 }

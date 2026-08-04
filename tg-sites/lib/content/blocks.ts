@@ -40,7 +40,7 @@ export type Field =
    * from here, so they get the plain chooser. Set where the block that owns the
    * five props is, so the button and the props it writes cannot drift apart.
    */
-  | { kind: 'image'; key: string; label: string; help?: string; focus?: boolean }
+  | { kind: 'image'; key: string; label: string; help?: string; focus?: boolean; crop?: boolean }
   /*
    * Four corner radii in pixels, linked or each on its own, the way the padding
    * box does the four sides. Its value is a { tl, tr, br, bl } object. The image
@@ -493,12 +493,13 @@ export const BLOCKS: readonly BlockDefinition[] = [
     defaults: {
       src: '', alt: '', ratio: 'auto', fit: 'cover', radius: 'md', caption: '', href: '', width: 0, height: 0,
       focusX: 50, focusY: 50, brightness: 100, contrast: 100, saturation: 100,
+      crop: { x: 0, y: 0, w: 100, h: 100, aspect: 0 },
       corners: { tl: 0, tr: 0, br: 0, bl: 0 },
       borderWidth: 0, borderStyle: 'solid', borderColour: '',
     },
     summarise: (props) => asString(props.alt) || asString(props.caption) || 'Image',
     fields: [
-      { kind: 'image', key: 'src', label: 'Image', focus: true },
+      { kind: 'image', key: 'src', label: 'Image', focus: true, crop: true },
       {
         kind: 'text',
         key: 'alt',

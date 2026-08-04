@@ -637,6 +637,18 @@
  */
 .tgs-image img[width] { height: auto; }
 
+/*
+ * A cropped image. The frame is given the crop's own shape inline, and the whole
+ * picture is scaled up and slid behind it (also inline) so only the chosen
+ * rectangle shows. The frame fills the column so the aspect-ratio has a width to
+ * work from, and clips the overflow so the rest of the picture stays hidden.
+ */
+.tgs-image__frame--crop {
+  display: block;
+  width: 100%;
+  position: relative;
+}
+
 .tgs-image__frame { overflow: hidden; background: var(--tgs-surface-alt); }
 .tgs-image__frame[data-radius='none'] { border-radius: 0; }
 .tgs-image__frame[data-radius='sm']   { border-radius: var(--tgs-radius-sm); }

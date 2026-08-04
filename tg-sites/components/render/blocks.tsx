@@ -436,7 +436,58 @@ export function ImageBlock({ props }: { props: Props }): ReactElement {
       : {}),
   };
 
-  const picture = (
+  /*
+   * THE CROP, DRAWN WITHOUT CUTTING THE FILE.
+   *
+   * The crop is four insets (a rectangle of the source, as percentages) plus the
+   * shape that rectangle makes. The frame is given that shape, and the whole
+   * picture is scaled up and slid behind it so only the chosen rectangle shows:
+   * the crop's width becomes the frame's width, and its top-left corner lands at
+   * the frame's. That the picture stays undistorted is not luck, it is what
+   * pinning the frame to the crop's own pixel aspect guarantees, which is why
+   * that number is stored rather than recomputed from a file whose dimensions
+   * the render does not have. Set by dragging in the editor, so every number is
+   * pinned here before it reaches the CSS.
+   */
+  const crop = props.crop && typeof props.crop === 'object' ? (props.crop as Props) : null;
+  const cropX = clamp(crop?.x, 0, 100, 0);
+  const cropY = clamp(crop?.y, 0, 100, 0);
+  const cropW = clamp(crop?.w, 1, 100, 100);
+  const cropH = clamp(crop?.h, 1, 100, 100);
+  /*
+   * THE ASPECT IS NOT ROUNDED. clamp() rounds to a whole number, which is right
+   * for the percentages and the pixel sizes but wrong here: a 16:9 crop's aspect
+   * is 1.78, and rounding it to 2 makes a 2:1 frame from a 16:9 crop. So it is
+   * pinned to a sane band as a real number, not put through clamp.
+   */
+  const cropAspectRaw = typeof crop?.aspect === 'number' ? crop.aspect : Number(crop?.aspect);
+  const cropAspect = Number.isFinite(cropAspectRaw)
+    ? Math.min(100, Math.max(0, cropAspectRaw))
+    : 0;
+  const cropped = cropAspect > 0 && (cropX > 0 || cropY > 0 || cropW < 100 || cropH < 100);
+
+  const picture = cropped ? (
+    <div
+      className="tgs-image__frame tgs-image__frame--crop"
+      data-radius={radius}
+      style={{ ...frameStyle, aspectRatio: `${cropAspect}`, position: 'relative' }}
+    >
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+        style={{
+          position: 'absolute',
+          width: `${10000 / cropW}%`,
+          height: `${10000 / cropH}%`,
+          left: `${(-100 * cropX) / cropW}%`,
+          top: `${(-100 * cropY) / cropH}%`,
+          ...pictureAdjustStyle(props),
+        }}
+      />
+    </div>
+  ) : (
     <div className="tgs-image__frame" data-radius={radius} style={frameStyle}>
       {/* Plain img rather than next/image: sources are arbitrary client URLs
           and the media pipeline with its own variants lands in a later

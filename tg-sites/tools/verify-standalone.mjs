@@ -6322,6 +6322,66 @@ await check('editing a tile sets its focus point on the gallery', async () => {
     : `the tile style is "${style}"`;
 });
 
+// ---------------------------------------------------------------------------
+// The crop, presets and freeform
+// ---------------------------------------------------------------------------
+
+/*
+ * THE CROP, added 4 Aug 2026, and last because it adds a fresh block: kept away
+ * from the checks above so its state cannot bleed into theirs. The editor's Crop
+ * tab, a 16:9 preset, then the crop on the page. The frame is given the crop's
+ * own shape, so the aspect-ratio the render writes is read straight off the
+ * frame rather than measured from a box a border or a column could skew.
+ */
+await check('an image can be cropped to a preset shape', async () => {
+  await selectAnImageBlock();
+  await openPicker();
+  await page.locator('.mp-tile__pick').first().click();
+  await page.waitForTimeout(300);
+
+  await page.locator('.mp-chosen__actions button', { hasText: 'Edit' }).first().click();
+  await page.waitForSelector('.ed-imgedit', { timeout: 5000 });
+  await page.locator('.ed-imgedit__tab', { hasText: 'Crop' }).click();
+  // The shape is measured off the frame, so wait for it to have a real size
+  // before a preset is chosen (the demo pictures are SVGs with no naturalWidth,
+  // so the frame's own box is what tells us it has laid out).
+  await page
+    .waitForFunction(
+      () => {
+        const f = document.querySelector('.ed-imgedit__frame--crop');
+        return !!f && f.getBoundingClientRect().width > 10 && f.getBoundingClientRect().height > 10;
+      },
+      { timeout: 5000 },
+    )
+    .catch(() => {});
+  await page.waitForTimeout(150);
+  await page.locator('.ed-crop__aspect', { hasText: '16:9' }).click();
+  await page.waitForTimeout(150);
+  if ((await page.locator('.ed-crop__box').count()) !== 1) return 'no crop box after a preset';
+
+  await page.locator('.tg-modal__foot button', { hasText: 'Save' }).first().click();
+  await page.waitForTimeout(250);
+
+  if ((await page.locator('.ed-props .mp-url .ed-input').count()) === 0) {
+    await page.locator('.ed-props .mp-url__toggle').first().click();
+  }
+  await page.locator('.ed-props .mp-url .ed-input').first().fill('https://images.example.test/crop.jpg');
+  await page.waitForTimeout(300);
+
+  const frame = page.locator('.ed-canvas-frame .tgs-image__frame--crop').first();
+  if ((await frame.count()) === 0) return 'no cropped frame on the canvas';
+  const info = await frame.evaluate((el) => ({
+    aspect: getComputedStyle(el).aspectRatio,
+    hasImg: !!el.querySelector('img'),
+  }));
+  // aspect-ratio comes back as "1.77778" or "16 / 9"; read the number it means.
+  const parts = info.aspect.split('/').map((p) => parseFloat(p));
+  const ratio = parts.length === 2 ? parts[0] / parts[1] : parts[0];
+  return info.hasImg && Math.abs(ratio - 16 / 9) < 0.06
+    ? true
+    : `the frame aspect is "${info.aspect}"`;
+});
+
 await browser.close();
 
 let failed = false;

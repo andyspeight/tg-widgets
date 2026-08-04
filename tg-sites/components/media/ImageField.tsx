@@ -60,9 +60,16 @@ interface Props {
    * Edit button to promise something the picture cannot keep.
    */
   edit?: Partial<ImageEdit>;
+  /**
+   * Whether the editor offers the Crop tab. Only the image block sets it: a
+   * section background or a gallery tile is a picture the render draws to fill
+   * its own shape, so a per-picture crop has nowhere to show and would write a
+   * prop those renders ignore.
+   */
+  canCrop?: boolean;
 }
 
-export function ImageField({ value, onChange, onPatch, altKey, urlKey, edit }: Props) {
+export function ImageField({ value, onChange, onPatch, altKey, urlKey, edit, canCrop }: Props) {
   const [picking, setPicking] = useState(false);
   const [editing, setEditing] = useState(false);
   const [showUrl, setShowUrl] = useState(false);
@@ -205,10 +212,12 @@ export function ImageField({ value, onChange, onPatch, altKey, urlKey, edit }: P
         <ImageEditor
           src={value}
           value={edit ?? {}}
+          canCrop={canCrop}
           onSave={(next) => {
             setEditing(false);
-            // The five numbers land in one patch, so a focus nudge and a
-            // brightness tweak taken together undo together.
+            // Focus, adjustments and, where it is offered, the crop land in one
+            // patch, so a focus nudge and a brightness tweak taken together undo
+            // together.
             onPatch?.({ ...next });
           }}
           onClose={() => setEditing(false)}

@@ -286,3 +286,71 @@ describe('an image frame carries custom corners and a border', () => {
     expect(body).toContain('style={frameStyle}');
   });
 });
+
+// ---------------------------------------------------------------------------
+// The crop, presets and freeform
+// ---------------------------------------------------------------------------
+
+/*
+ * Andy, 4 Aug 2026: crop, with standard presets and freeform, alongside the
+ * focus point rather than instead of it. The crop is four insets plus the shape
+ * they make, all non-destructive: the render slides the whole picture behind a
+ * frame given the crop's shape, so nothing is ever cut. Driven by dragging, so
+ * the block carries it as a passthrough and the render is the boundary that
+ * pins it.
+ */
+describe('the image block can be cropped without cutting the file', () => {
+  const def = blockDefinition('image');
+
+  it('offers the crop on the src field and starts uncropped', () => {
+    const src = (def?.fields ?? []).find((f) => f.key === 'src');
+    expect(src && src.kind === 'image' && src.crop).toBe(true);
+    expect(def?.defaults).toMatchObject({ crop: { x: 0, y: 0, w: 100, h: 100, aspect: 0 } });
+  });
+
+  it('keeps a crop through the save, because the render is the boundary', () => {
+    const out = sanitiseBlock({
+      id: 'i1',
+      type: 'image',
+      props: { src: 'https://x/p.jpg', crop: { x: 10, y: 20, w: 50, h: 40, aspect: 1.6 } },
+    } as Block);
+    expect(out.props.crop).toEqual({ x: 10, y: 20, w: 50, h: 40, aspect: 1.6 });
+  });
+
+  it('draws the crop by scaling the picture behind the frame, every number pinned', () => {
+    const source = read('components', 'render', 'blocks.tsx');
+    const block = source.slice(source.indexOf('export function ImageBlock'));
+    const body = block.slice(0, block.indexOf('\n}\n'));
+
+    // Drawn only when it actually trims the source.
+    expect(body).toContain('cropAspect > 0 && (cropX > 0 || cropY > 0 || cropW < 100 || cropH < 100)');
+    // The frame takes the crop's own shape...
+    expect(body).toMatch(/aspectRatio: `\$\{cropAspect\}`/);
+    // ...and the picture is scaled and slid so only the crop shows.
+    expect(body).toContain('width: `${10000 / cropW}%`');
+    expect(body).toContain('height: `${10000 / cropH}%`');
+    expect(body).toContain('left: `${(-100 * cropX) / cropW}%`');
+    expect(body).toContain('top: `${(-100 * cropY) / cropH}%`');
+    // Every crop number is clamped at render, the same as the focus point.
+    expect(body).toContain('clamp(crop?.w, 1, 100, 100)');
+    // But the ASPECT is NOT put through the rounding clamp: a 16:9 crop's aspect
+    // is 1.78, and rounding it to 2 would draw a 2:1 frame. It is pinned as a
+    // real number instead.
+    expect(body).not.toMatch(/clamp\(crop\?\.aspect/);
+    expect(body).toContain('Math.min(100, Math.max(0, cropAspectRaw))');
+  });
+
+  it('offers presets and freeform, and measures the shape off the frame', () => {
+    const editor = read('components', 'media', 'ImageEditor.tsx');
+    expect(editor).toContain("{ label: 'Free', ratio: null }");
+    expect(editor).toContain("{ label: '16:9', ratio: 16 / 9 }");
+    // The stored aspect is measured where the picture's real shape is known, so
+    // the render never needs the file's own dimensions.
+    expect(editor).toContain('(rect.w * b.width) / (rect.h * b.height)');
+  });
+
+  it('gives the Crop tab to the image block alone', () => {
+    const fields = read('components', 'editor', 'Fields.tsx');
+    expect(fields).toContain('canCrop={field.focus ? field.crop : undefined}');
+  });
+});

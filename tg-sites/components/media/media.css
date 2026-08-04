@@ -665,3 +665,95 @@
   accent-color: var(--ed-select);
   cursor: pointer;
 }
+
+/* --- The crop tab -------------------------------------------------------- */
+
+.ed-imgedit__tabs {
+  display: flex;
+  gap: var(--ed-1);
+  padding: var(--ed-1);
+  margin-bottom: var(--ed-4);
+  background: var(--ed-sunken);
+  border-radius: var(--ed-r-lg);
+}
+
+.ed-imgedit__tab {
+  flex: 1;
+  padding: var(--ed-2) var(--ed-3);
+  border: 0;
+  border-radius: var(--ed-r-md);
+  background: transparent;
+  color: var(--ed-ink-2);
+  font: inherit;
+  font-size: var(--ed-text-sm);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.ed-imgedit__tab:hover { color: var(--ed-ink); }
+
+.ed-imgedit__tab[aria-selected='true'] {
+  background: var(--ed-panel);
+  color: var(--ed-ink);
+  box-shadow: var(--ed-shadow-sm);
+}
+
+/* On the crop frame the picture is passive; the box over it takes the pointer. */
+.ed-imgedit__frame--crop { cursor: default; }
+
+/*
+ * The crop rectangle. The big spread shadow darkens everything OUTSIDE the box,
+ * clipped to the frame by its overflow, so the kept part reads bright against a
+ * dimmed surround without a second element to manage.
+ */
+.ed-crop__box {
+  position: absolute;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.55);
+  cursor: move;
+  touch-action: none;
+}
+
+.ed-crop__handle {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: #ffffff;
+  border: 1px solid var(--ed-select);
+  border-radius: 3px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.5);
+  touch-action: none;
+}
+
+.ed-crop__handle--nw { inset-block-start: -8px; inset-inline-start: -8px; cursor: nwse-resize; }
+.ed-crop__handle--ne { inset-block-start: -8px; inset-inline-end: -8px; cursor: nesw-resize; }
+.ed-crop__handle--sw { inset-block-end: -8px; inset-inline-start: -8px; cursor: nesw-resize; }
+.ed-crop__handle--se { inset-block-end: -8px; inset-inline-end: -8px; cursor: nwse-resize; }
+
+.ed-crop__aspects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ed-1);
+}
+
+.ed-crop__aspect {
+  padding: 4px var(--ed-3);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-full);
+  background: var(--ed-panel);
+  color: var(--ed-ink-2);
+  font: inherit;
+  font-size: var(--ed-text-xs);
+  cursor: pointer;
+}
+
+.ed-crop__aspect:hover {
+  border-color: var(--ed-select);
+  color: var(--ed-ink);
+}
+
+.ed-crop__aspect[aria-pressed='true'] {
+  border-color: var(--ed-select);
+  background: var(--ed-select-wash);
+  color: var(--ed-select);
+}
