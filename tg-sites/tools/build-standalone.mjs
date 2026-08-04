@@ -122,6 +122,16 @@ const result = await esbuild.build({
         build.onResolve({ filter: /(^|\/)app\/actions\/import$/ }, () => ({
           path: resolve(root, 'standalone/demo-import-actions.ts'),
         }));
+
+        /*
+         * The designed-section action, since the heroes learned to fetch their
+         * photographs on insert (3 Aug 2026). It reaches Pexels and the client's
+         * store, neither of which this build has, so the double hands back the
+         * image-ready section the real one falls back to anyway.
+         */
+        build.onResolve({ filter: /(^|\/)app\/actions\/designed$/ }, () => ({
+          path: resolve(root, 'standalone/demo-designed-actions.ts'),
+        }));
       },
     },
   ],

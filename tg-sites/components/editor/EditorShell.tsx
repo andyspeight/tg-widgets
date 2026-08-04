@@ -17,6 +17,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { writeCopyAction } from '../../app/actions/ai';
+import { buildDesignedSectionAction } from '../../app/actions/designed';
 import { publishPageAction, saveDraftAction } from '../../app/actions/pages';
 import { publishRegionAction, saveRegionAction } from '../../app/actions/regions';
 import { publishItemAction, saveItemAction } from '../../app/actions/collections';
@@ -1397,7 +1398,28 @@ export function EditorShell({
            * which insertSection holds once.
            */
           onPickLayout={(layout) => insertSection(createSectionFromLayout(layout))}
-          onPickPreset={(preset) => insertSection(buildPresetSection(preset))}
+          onPickPreset={async (preset) => {
+            /*
+             * A HERO WITH A PICTURE FETCHES ITS PHOTOGRAPH ON THE WAY IN, from
+             * the same query its preview drew, so the hero a client adds looks
+             * like the one they chose rather than a row of empty frames. Anything
+             * else builds in the browser, free and instant. Best effort
+             * throughout: if the fetch fails, or the library is not connected,
+             * the image-ready hero goes in exactly as picking it always did.
+             */
+            const wantsPhotos =
+              preset.category === 'hero'
+              && (Boolean(preset.section?.backgroundQuery)
+                || preset.rows.some((row) =>
+                  row.columns.some((column) => column.some((block) => block.type === 'image')),
+                ));
+            if (wantsPhotos) {
+              const result = await buildDesignedSectionAction({ presetId: preset.id });
+              insertSection(result.ok ? result.section : buildPresetSection(preset));
+            } else {
+              insertSection(buildPresetSection(preset));
+            }
+          }}
           /*
            * The third path takes MANY, because one paste is usually a whole
            * page. Going through insertSections rather than calling

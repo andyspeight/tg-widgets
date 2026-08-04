@@ -214,7 +214,7 @@ export function SectionPicker({
    */
   scope?: PresetScope;
   onPickLayout: (layout: Layout) => void;
-  onPickPreset: (preset: SectionPreset) => void;
+  onPickPreset: (preset: SectionPreset) => void | Promise<void>;
   /** A whole design, cut into sections. Plural because one paste is often many. */
   onPickImported: (sections: Section[]) => void;
   /** One section, built by the AI from a description. */
@@ -234,6 +234,15 @@ export function SectionPicker({
    */
   const [tab, setTab] = useState<Tab>(scope === 'page' ? 'layouts' : 'designed');
   const [category, setCategory] = useState<PresetCategory>(categories[0]?.id ?? 'blank');
+  /**
+   * The design being added, while its photographs are fetched.
+   *
+   * A hero with a picture takes a moment on the way in, because the section is
+   * built and its photograph pulled into the client's media before it lands.
+   * Held here so that one card can show it is working, and the rest go quiet so
+   * a second click cannot start a second insert into the same seam.
+   */
+  const [addingId, setAddingId] = useState<string | null>(null);
 
   // Escape, the scrim, the focus trap and moving focus in all belong to Modal.
   const first = useRef<HTMLButtonElement>(null);
@@ -321,11 +330,25 @@ export function SectionPicker({
                 key={preset.id}
                 type="button"
                 className="ed-preset-card"
-                onClick={() => onPickPreset(preset)}
+                // Disabled only while one is being added, so a slow photo fetch
+                // cannot be double-started. onPickPreset may be async; awaiting it
+                // keeps the working state up until the section is actually in.
+                disabled={addingId !== null}
+                aria-busy={addingId === preset.id}
+                onClick={async () => {
+                  setAddingId(preset.id);
+                  try {
+                    await onPickPreset(preset);
+                  } finally {
+                    setAddingId(null);
+                  }
+                }}
               >
                 <PresetThumb preset={preset} />
                 <span className="ed-preset-card__name">{preset.label}</span>
-                <span className="ed-preset-card__what">{preset.description}</span>
+                <span className="ed-preset-card__what">
+                  {addingId === preset.id ? 'Adding, and finding a photo…' : preset.description}
+                </span>
               </button>
             ))}
           </div>
