@@ -49,10 +49,15 @@ interface Props {
   urlKey?: string;
   /**
    * The picture's current focus point and adjustments, when this control is
-   * standing in front of a block that HAS them (the image block does; a
-   * background or a social preview does not). Its presence, with onPatch, is
-   * what turns on the Edit button and the editor behind it. Absent, the field is
-   * exactly the chooser it always was.
+   * standing in front of a picture that HAS them: the image block, a section
+   * background and a gallery tile all do, since each is drawn as an img this
+   * product controls and can crop.
+   *
+   * The social preview image does NOT, and cannot. It is an og:image, put in a
+   * meta tag and cropped by whichever site the link is shared to, so a focus
+   * point or a filter stored here would never reach it. A field with no edit, or
+   * with no onPatch to save one, is exactly the chooser it always was, with no
+   * Edit button to promise something the picture cannot keep.
    */
   edit?: Partial<ImageEdit>;
 }

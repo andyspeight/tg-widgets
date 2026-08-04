@@ -568,7 +568,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
         itemLabel: 'Image',
         max: 24,
         fields: [
-          { kind: 'image', key: 'src', label: 'Image' },
+          { kind: 'image', key: 'src', label: 'Image', focus: true },
           { kind: 'text', key: 'alt', label: 'Alt text', max: 200 },
         ],
       },

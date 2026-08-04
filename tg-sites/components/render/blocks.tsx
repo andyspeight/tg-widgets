@@ -74,6 +74,36 @@ function ratioStyle(ratio: string): CSSProperties {
   return ratio === 'auto' ? {} : { aspectRatio: ratio.replace('/', ' / ') };
 }
 
+/**
+ * The object-position and filter a stored picture carries: its focus point and
+ * its three adjustments, each pinned to range HERE.
+ *
+ * One place for the clamp, because more than one picture has these now. The
+ * image block sets them by clicking in the editor, a gallery tile the same, and
+ * both pass through the save untouched the way a picture's width and height do,
+ * so the render is where each is turned into a number and held to its bounds
+ * rather than trusting whatever a stored string might carry. Focus drives
+ * object-position; an adjustment becomes a filter, and only when it is actually
+ * off its default, so an untouched picture carries no filter at all.
+ */
+function pictureAdjustStyle(source: Props): CSSProperties {
+  const focusX = clamp(source.focusX, 0, 100, 50);
+  const focusY = clamp(source.focusY, 0, 100, 50);
+  const brightness = clamp(source.brightness, 0, 200, 100);
+  const contrast = clamp(source.contrast, 0, 200, 100);
+  const saturation = clamp(source.saturation, 0, 200, 100);
+
+  const adjustments: string[] = [];
+  if (brightness !== 100) adjustments.push(`brightness(${brightness}%)`);
+  if (contrast !== 100) adjustments.push(`contrast(${contrast}%)`);
+  if (saturation !== 100) adjustments.push(`saturate(${saturation}%)`);
+
+  return {
+    objectPosition: `${focusX}% ${focusY}%`,
+    ...(adjustments.length ? { filter: adjustments.join(' ') } : {}),
+  };
+}
+
 const ALIGNS = ['left', 'centre', 'right'] as const;
 const RADII = ['none', 'sm', 'md', 'lg', 'full'] as const;
 
@@ -370,36 +400,13 @@ export function ImageBlock({ props }: { props: Props }): ReactElement {
   const measured = ratio === 'auto' && width > 0 && height > 0;
 
   /*
-   * THE FOCUS POINT AND THE ADJUSTMENTS, PINNED TO THEIR RANGE HERE.
-   *
-   * These are set by clicking and dragging in the image editor, not typed, and
-   * they pass through the save untouched the same way width and height do. So
-   * the render is where they are made safe: every one is turned into a number
-   * and clamped, and the CSS is built from those numbers rather than from
-   * anything a stored string could carry, which is what keeps a hand-edited
-   * `filter` or `object-position` from ever reaching the page.
-   *
-   * Focus is a percentage across and down, so it drives object-position and
-   * decides which part of the picture stays in view when a shape crops it.
-   * A filter is emitted only when an adjustment is actually off its default, so
-   * an untouched photograph carries no filter at all.
+   * THE FOCUS POINT AND THE ADJUSTMENTS, PINNED TO THEIR RANGE in the shared
+   * helper. They are set by clicking and dragging in the image editor, not
+   * typed, and pass through the save untouched the same way width and height do,
+   * so the render is where they are made safe. objectFit is the block's own Fit
+   * field and rides alongside them.
    */
-  const focusX = clamp(props.focusX, 0, 100, 50);
-  const focusY = clamp(props.focusY, 0, 100, 50);
-  const brightness = clamp(props.brightness, 0, 200, 100);
-  const contrast = clamp(props.contrast, 0, 200, 100);
-  const saturation = clamp(props.saturation, 0, 200, 100);
-
-  const adjustments: string[] = [];
-  if (brightness !== 100) adjustments.push(`brightness(${brightness}%)`);
-  if (contrast !== 100) adjustments.push(`contrast(${contrast}%)`);
-  if (saturation !== 100) adjustments.push(`saturate(${saturation}%)`);
-
-  const imageStyle: CSSProperties = {
-    objectFit: fit,
-    objectPosition: `${focusX}% ${focusY}%`,
-    ...(adjustments.length ? { filter: adjustments.join(' ') } : {}),
-  };
+  const imageStyle: CSSProperties = { objectFit: fit, ...pictureAdjustStyle(props) };
 
   const picture = (
     <div className="tgs-image__frame" data-radius={radius} style={ratioStyle(ratio)}>
@@ -603,8 +610,17 @@ export function GalleryBlock({ props }: { props: Props }): ReactElement {
   const gap = str(props, 'gap', 'm');
   const radius = oneOf(props, 'radius', RADII, 'md');
   const images = list(props, 'images')
-    .map((image) => ({ src: safeUrl(str(image, 'src')), alt: str(image, 'alt') }))
-    .filter((image): image is { src: string; alt: string } => !!image.src);
+    // The tile's own focus point and adjustments travel with it, worked out
+    // through the same helper the image block uses, so a tile can be focused
+    // where it matters when the square crops a landscape or a portrait.
+    .map((image) => ({
+      src: safeUrl(str(image, 'src')),
+      alt: str(image, 'alt'),
+      style: pictureAdjustStyle(image),
+    }))
+    .filter(
+      (image): image is { src: string; alt: string; style: CSSProperties } => !!image.src,
+    );
 
   if (images.length === 0) {
     return <div className="tgs-placeholder">Add some images</div>;
@@ -614,7 +630,13 @@ export function GalleryBlock({ props }: { props: Props }): ReactElement {
     <div className="tgs-gallery" data-columns={columns} data-gap={gap}>
       {images.map((image, index) => (
         <div key={index} className="tgs-image__frame" data-radius={radius}>
-          <img src={image.src} alt={image.alt} loading="lazy" decoding="async" />
+          <img
+            src={image.src}
+            alt={image.alt}
+            loading="lazy"
+            decoding="async"
+            style={image.style}
+          />
         </div>
       ))}
     </div>

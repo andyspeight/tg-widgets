@@ -479,6 +479,15 @@ function Repeater({ field, value, onChange, ownerId }: FieldProps) {
               field={child}
               value={item[child.key]}
               ownerId={`${ownerId}:${field.key}:${index}`}
+              /*
+               * The rest of THIS item's props, so a field that reads its
+               * siblings gets the row it lives in and not the block. A gallery
+               * tile's image field is the one that needs it: its focus point and
+               * adjustments live beside it on the same item, and without this the
+               * editor would open at the default every time however the tile was
+               * already set.
+               */
+              siblings={item}
               onChange={(childValue) =>
                 update(
                   items.map((existing, i) =>

@@ -99,32 +99,40 @@ describe('the numbers a click sets survive the save', () => {
 
 describe('the render pins every number and builds the CSS from it', () => {
   const source = read('components', 'render', 'blocks.tsx');
-  const block = source.slice(source.indexOf('export function ImageBlock'));
-  const body = block.slice(0, block.indexOf('\n}\n'));
+  // The clamp and the CSS live in one shared helper now, because more than one
+  // picture carries these (the image block and a gallery tile), so the boundary
+  // that makes them safe is asserted in one place.
+  const helper = source.slice(source.indexOf('function pictureAdjustStyle'));
+  const helperBody = helper.slice(0, helper.indexOf('\n}\n'));
 
   it('clamps the focus to a percentage and the adjustments to their range', () => {
-    expect(body).toContain('clamp(props.focusX, 0, 100, 50)');
-    expect(body).toContain('clamp(props.focusY, 0, 100, 50)');
-    expect(body).toContain('clamp(props.brightness, 0, 200, 100)');
-    expect(body).toContain('clamp(props.contrast, 0, 200, 100)');
-    expect(body).toContain('clamp(props.saturation, 0, 200, 100)');
+    expect(helperBody).toContain('clamp(source.focusX, 0, 100, 50)');
+    expect(helperBody).toContain('clamp(source.focusY, 0, 100, 50)');
+    expect(helperBody).toContain('clamp(source.brightness, 0, 200, 100)');
+    expect(helperBody).toContain('clamp(source.contrast, 0, 200, 100)');
+    expect(helperBody).toContain('clamp(source.saturation, 0, 200, 100)');
   });
 
   it('drives object-position from the clamped focus, not from any stored string', () => {
-    expect(body).toMatch(/objectPosition: `\$\{focusX\}% \$\{focusY\}%`/);
+    expect(helperBody).toMatch(/objectPosition: `\$\{focusX\}% \$\{focusY\}%`/);
   });
 
   it('emits a filter only for an adjustment that is actually off its default', () => {
-    expect(body).toContain('if (brightness !== 100) adjustments.push(`brightness(${brightness}%)`)');
-    expect(body).toContain('if (contrast !== 100) adjustments.push(`contrast(${contrast}%)`)');
-    expect(body).toContain('if (saturation !== 100) adjustments.push(`saturate(${saturation}%)`)');
+    expect(helperBody).toContain('if (brightness !== 100) adjustments.push(`brightness(${brightness}%)`)');
+    expect(helperBody).toContain('if (contrast !== 100) adjustments.push(`contrast(${contrast}%)`)');
+    expect(helperBody).toContain('if (saturation !== 100) adjustments.push(`saturate(${saturation}%)`)');
     // Nothing off its default means no filter property at all, so an untouched
     // photograph carries no filter to compute.
-    expect(body).toMatch(/adjustments\.length \? \{ filter: adjustments\.join\(' '\) \} : \{\}/);
+    expect(helperBody).toMatch(/adjustments\.length \? \{ filter: adjustments\.join\(' '\) \} : \{\}/);
   });
 
-  it('puts the built style on the picture', () => {
-    expect(body).toContain('style={imageStyle}');
+  it('puts the built style on the image block and on every gallery tile', () => {
+    // The image block folds it in beside objectFit; the gallery hangs it off the
+    // tile it belongs to. Both go through the one helper above.
+    expect(source).toContain('objectFit: fit, ...pictureAdjustStyle(props)');
+    expect(source).toContain('style={imageStyle}');
+    expect(source).toContain('style: pictureAdjustStyle(image)');
+    expect(source).toContain('style={image.style}');
   });
 });
 
@@ -153,5 +161,56 @@ describe('the Edit button and the editor behind it are wired in', () => {
     expect(editor).toContain('((clientY - box.top) / box.height) * 100');
     // And nothing it holds can leave its range before it is shown or saved.
     expect(editor).toContain('function pin(');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// A gallery tile is a picture too
+// ---------------------------------------------------------------------------
+
+/*
+ * Andy, 4 Aug 2026, having got the focus point on the image block and the
+ * section background: the same on gallery tiles. A tile is cropped to a square,
+ * so which part of a landscape or a portrait it keeps is exactly the choice the
+ * focus point makes.
+ */
+describe('a gallery tile carries a focus point of its own', () => {
+  it('asks for the editor from the tile image, the way the image block does', () => {
+    const def = blockDefinition('gallery');
+    const images = (def?.fields ?? []).find((f) => f.key === 'images');
+    // The repeater's per-tile src field is the one that carries it.
+    const tileFields = images && images.kind === 'repeater' ? images.fields : [];
+    const src = tileFields.find((f) => f.key === 'src');
+    expect(src && src.kind === 'image' && src.focus).toBe(true);
+  });
+
+  /*
+   * THE REPEATER HANDS EACH FIELD ITS OWN ITEM. Without it, a tile's image field
+   * would read the block for its focus point instead of the row it lives on, so
+   * the editor would open at the default however that tile was already set, and
+   * a saved focus would never show when it was reopened.
+   */
+  it('gives a tile field the rest of its own row to read', () => {
+    const fields = read('components', 'editor', 'Fields.tsx');
+    const repeater = fields.slice(fields.indexOf('function Repeater'));
+    expect(repeater).toContain('siblings={item}');
+  });
+
+  it('keeps a tile\'s focus point and adjustments through the save', () => {
+    const block = {
+      id: 'g1',
+      type: 'gallery',
+      props: {
+        images: [
+          { src: 'https://x/a.jpg', alt: '', focusX: 30, focusY: 70, brightness: 115 },
+          { src: 'https://x/b.jpg', alt: '' },
+        ],
+      },
+    } as Block;
+    const out = sanitiseBlock(block);
+    const tiles = out.props.images as Array<Record<string, unknown>>;
+    // The first tile keeps what a click set; the second, untouched, carries none.
+    expect(tiles[0]).toMatchObject({ focusX: 30, focusY: 70, brightness: 115 });
+    expect(tiles[1].focusX).toBeUndefined();
   });
 });

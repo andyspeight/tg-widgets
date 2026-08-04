@@ -6203,6 +6203,73 @@ await check('an icon takes the colour of the text around it', async () => {
   return same === true ? true : `stroke and colour comparison came back ${same}`;
 });
 
+// ---------------------------------------------------------------------------
+// A gallery tile carries a focus point too
+// ---------------------------------------------------------------------------
+
+/*
+ * Andy, 4 Aug 2026, after the image block and the section background: the focus
+ * point on gallery tiles as well. A tile is cropped to a square, so which part
+ * of a landscape or a portrait it keeps is the whole choice the focus makes.
+ * The repeater has to hand each tile field its own row for the editor to read a
+ * saved point back, which is the wiring these two checks prove in a browser.
+ */
+await check('a gallery tile offers the focus editor once it has a picture', async () => {
+  await showPanels();
+  await addBlock('Gallery');
+  const add = page.locator('.ed-props button', { hasText: 'Add image' });
+  if ((await add.count()) === 0) return 'no Add image button in the pane';
+  await add.first().click();
+  await page.waitForTimeout(400);
+
+  // A loadable demo picture on the tile, so the editor frame has a size to click.
+  const row = page.locator('.ed-props .ed-repeat-item').last();
+  const choose = row.locator('.mp-choose');
+  if (await choose.count()) await choose.first().click();
+  else await row.locator('.mp-chosen__actions button', { hasText: 'Replace' }).first().click();
+  await page.waitForSelector('.mp-root', { timeout: 5000 });
+  await page.waitForTimeout(250);
+  await page.locator('.mp-tile__pick').first().click();
+  await page.waitForTimeout(300);
+
+  const edit = await row.locator('.mp-chosen__actions button', { hasText: 'Edit' }).count();
+  return edit === 1 ? true : `${edit} Edit buttons on the tile`;
+});
+
+await check('editing a tile sets its focus point on the gallery', async () => {
+  const row = page.locator('.ed-props .ed-repeat-item').last();
+  await row.locator('.mp-chosen__actions button', { hasText: 'Edit' }).first().click();
+  await page.waitForSelector('.ed-imgedit', { timeout: 5000 });
+
+  const frame = page.locator('.ed-imgedit__frame');
+  const box = await frame.boundingBox();
+  if (!box || box.width < 20 || box.height < 20) {
+    return `the frame is ${Math.round(box?.width ?? 0)}x${Math.round(box?.height ?? 0)}`;
+  }
+  await frame.click({ position: { x: box.width * 0.2, y: box.height * 0.8 } });
+  await page.waitForTimeout(150);
+  const dot = await page.locator('.ed-imgedit__dot').evaluate((el) => ({
+    x: Math.round(parseFloat(el.style.left)),
+    y: Math.round(parseFloat(el.style.top)),
+  }));
+  await page.locator('.tg-modal__foot button', { hasText: 'Save' }).first().click();
+  await page.waitForTimeout(250);
+
+  // The demo picture is a data: URI, which the page refuses, so give the tile an
+  // address it accepts; that sets only the src and leaves the point just saved.
+  if ((await row.locator('.mp-url .ed-input').count()) === 0) {
+    await row.locator('.mp-url__toggle').first().click();
+  }
+  await row.locator('.mp-url .ed-input').first().fill('https://images.example.test/tile.jpg');
+  await page.waitForTimeout(300);
+
+  const style =
+    (await page.locator('.ed-canvas-frame .tgs-gallery img').first().getAttribute('style')) ?? '';
+  return new RegExp(`object-position:\\s*${dot.x}% ${dot.y}%`).test(style)
+    ? true
+    : `the tile style is "${style}"`;
+});
+
 await browser.close();
 
 let failed = false;
