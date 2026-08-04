@@ -262,5 +262,66 @@ ok(/contactPreference: contactPrefStr/.test(readFileSync(new URL('../api/enquiry
 ok(/Preferred contact', t\.contactPreference/.test(readFileSync(new URL('../api/enquiry/_lib/routing/_templates/agent-email.js', import.meta.url), 'utf8')), 'the email template shows a Preferred contact row');
 ok(/id: 'contactpref'/.test(editor) && /field\.type === 'contactpref'/.test(editor) && /case 'contactpref':/.test(editor), 'editor has the contactpref palette entry, inspector and preview');
 
+// ── #8 Branched thank-you + link/paragraph formatting ────────────────────────
+async function mountWidget(fields, thankYou) {
+  const dom = new JSDOM('<!doctype html><html><body><div id="m"></div></body></html>',
+    { runScripts: 'dangerously', url: 'https://agency.example.com/', pretendToBeVisual: true });
+  const { window } = dom;
+  window.requestAnimationFrame = (cb) => window.setTimeout(() => cb(0), 0);
+  window.cancelAnimationFrame = (id) => window.clearTimeout(id);
+  if (!window.matchMedia) window.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} });
+  window.fetch = async () => ({ ok: true, status: 200, json: async () => ({ data: [] }), text: async () => '' });
+  const s = window.document.createElement('script'); s.textContent = code; window.document.body.appendChild(s);
+  await sleep(10);
+  const mountEl = window.document.getElementById('m');
+  const inst = new window.TGEnquiryWidget(mountEl, {
+    formId: 't', widgetId: 'demo', name: 'Test',
+    header: { title: 'T', subtitle: 'S' },
+    thankYou: thankYou || { mode: 'inline', message: "Thanks {firstName} — we're on it" },
+    branding: { buttonColour: '#111111', accentColour: '#222222', theme: 'light' },
+    security: { honeypot: true, turnstile: false },
+    fieldsJSON: fields,
+  });
+  await sleep(20);
+  return { inst, shadow: mountEl.shadowRoot };
+}
+const CPREF_BRANCHED = {
+  id: 'cpref', type: 'contactpref', label: 'How can we get in touch?', required: false, visible: true,
+  choices: [{ value: 'A quick call', label: 'A quick call' }, { value: 'Email', label: 'Email' }],
+  options: { branches: [{ match: 'A quick call', message: 'Great, {firstName} — grab a slot:\n\nhttps://calendly.com/george/chat\n\nSpeak soon.' }] }
+};
+{
+  const { inst, shadow } = await mountWidget([CPREF_BRANCHED, F.name(), F.consent()]);
+  inst._renderThankYou({ reference: 'TG-1' }, 'George', { contact_preference: ['A quick call'] });
+  const link = shadow.querySelector('.tg-ty a');
+  ok(link && link.getAttribute('href') === 'https://calendly.com/george/chat', '#8 caller sees the Calendly link, clickable');
+  ok(link.getAttribute('rel') === 'noopener noreferrer' && link.getAttribute('target') === '_blank', '#8 the link opens safely in a new tab');
+  ok(/Great, George/.test(shadow.querySelector('.tg-ty h2').textContent), '#8 the branch message is used and {firstName} filled in');
+  ok(shadow.querySelectorAll('.tg-ty > p').length >= 1, '#8 a multi-paragraph message renders body paragraphs, not one giant heading');
+}
+{
+  const { inst, shadow } = await mountWidget([CPREF_BRANCHED, F.name(), F.consent()]);
+  inst._renderThankYou({ reference: 'TG-2' }, 'George', { contact_preference: ['Email'] });
+  ok(!shadow.querySelector('.tg-ty a'), '#8 a non-caller does NOT see the Calendly link');
+  ok(/we're on it/.test(shadow.querySelector('.tg-ty h2').textContent), '#8 a non-caller gets the base thank-you');
+}
+{
+  // Formatting alone: a raw URL in any thank-you becomes clickable, no branches needed.
+  const { inst, shadow } = await mountWidget([F.name(), F.consent()], { mode: 'inline', message: 'Thanks {firstName}.\n\nBook here: https://example.com/book' });
+  inst._renderThankYou({ reference: 'TG-3' }, 'Sam', {});
+  const a = shadow.querySelector('.tg-ty a');
+  ok(a && a.getAttribute('href') === 'https://example.com/book', '#8 a raw URL in the thank-you is made clickable');
+}
+{
+  // A simple one-line custom message is visually unchanged (headline + fixed body, no link parsing).
+  const { inst, shadow } = await mountWidget([F.name(), F.consent()], { mode: 'inline', message: 'Thanks {firstName}, all done' });
+  inst._renderThankYou({ reference: 'TG-4' }, 'Sam', {});
+  ok(/Thanks Sam, all done/.test(shadow.querySelector('.tg-ty h2').textContent) && !shadow.querySelector('.tg-ty a'), '#8 a simple message keeps the classic thank-you unchanged');
+}
+ok(/ff\.type === 'contactpref' && ff\.options && Array\.isArray\(ff\.options\.branches\)/.test(code), 'widget reads branches from the contactpref field (rides in fieldsJSON, no config plumbing)');
+ok(/function makeRichParagraph/.test(code) && /function linkifyInto/.test(code), 'widget has the safe link/paragraph helpers');
+ok(/href: url, target: '_blank', rel: 'noopener noreferrer'/.test(code), 'links are built as attributes (no innerHTML), http(s) only');
+ok(/Branch by contact preference/.test(editor) && /cf\.options\.branches/.test(editor), 'editor thank-you inspector edits the contactpref branches');
+
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
