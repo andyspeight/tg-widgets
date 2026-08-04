@@ -121,6 +121,7 @@ export function renderDefaultAgentEmail(t) {
                 ${t.budget && t.budget !== '—' ? row('Budget', t.budget) : ''}
                 ${t.style ? row('Style', t.style) : ''}
                 ${t.interests && t.interests !== '—' ? row('Interests', t.interests) : ''}
+                ${t.contactPreference ? row('Preferred contact', t.contactPreference) : ''}
                 ${t.marketingConsent ? row('Marketing consent', t.marketingConsent) : ''}
               </table>
             </td>

@@ -100,6 +100,11 @@ function buildTokens({ form, payload, reference, submissionId, meta }) {
   const marketingStr = f.marketing_consent === true ? 'Opted in'
     : f.marketing_consent === false ? 'Not opted in' : '';
 
+  // How the customer would like to be contacted (contact-preference field).
+  const contactPrefStr = Array.isArray(f.contact_preference)
+    ? f.contact_preference.filter((x) => typeof x === 'string' && x).join(', ')
+    : '';
+
   return {
     reference,
     submissionId,
@@ -121,6 +126,7 @@ function buildTokens({ form, payload, reference, submissionId, meta }) {
     style: styleStr,
     rooms: roomsStr,
     flightsIncluded: flightsStr,
+    contactPreference: contactPrefStr,
     marketingConsent: marketingStr,
     interests: (f.interests || []).join(', ') || '—',
     notes: f.notes || '—',

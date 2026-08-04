@@ -234,5 +234,33 @@ ok(/case 'flights':/.test(editor), 'editor canvas has a flights preview');
 // pill (which is what made 3 and 5 look grouped in the editor).
 ok(!/'3–5 nights', '7 nights', '10 nights', '14 nights', 'Custom'/.test(editor), 'the misleading grouped duration preview is gone');
 
+// ── #5 Contact-preferences field ─────────────────────────────────────────────
+{
+  const shadow = await mount([
+    { id: 'cpref', type: 'contactpref', label: 'How can we get in touch?', required: true, visible: true,
+      help: 'A quick call tells me far more than a form can.',
+      choices: [{ value: 'A quick call', label: 'A quick call' }, { value: 'WhatsApp', label: 'WhatsApp' }, { value: 'Email', label: 'Email' }] },
+    F.name(), F.consent(),
+  ]);
+  const chips = [...shadow.querySelectorAll('.tg-pill')];
+  ok(chips.length === 3 && chips.map(c => c.getAttribute('data-value')).join('|') === 'A quick call|WhatsApp|Email', '#5 renders the author choices as a multi-select');
+  ok([...shadow.querySelectorAll('.tg-help')].some(h => /far more than a form/.test(h.textContent)), '#5 the description (help) is shown above the options');
+  // Multi-select: two can be active at once.
+  chips[0].click(); chips[2].click();
+  ok(chips[0].classList.contains('is-active') && chips[2].classList.contains('is-active') && !chips[1].classList.contains('is-active'), '#5 more than one option can be chosen');
+}
+{
+  // No choices set → the built-in call/WhatsApp/Email default.
+  const shadow = await mount([{ id: 'cpref', type: 'contactpref', label: 'How can we get in touch?', required: false, visible: true }, F.name(), F.consent()]);
+  const chips = [...shadow.querySelectorAll('.tg-pill')].map(c => c.getAttribute('data-value'));
+  ok(chips.join('|') === 'A quick call|WhatsApp|Email', '#5 default choices are call / WhatsApp / Email');
+}
+ok(/contactpref: renderContactPref/.test(code), 'contactpref is registered in RENDERERS');
+ok(/fields\.contact_preference = selected\.slice\(\)/.test(code), 'contactpref submits contact_preference');
+ok(/f\.contact_preference !== undefined/.test(readFileSync(new URL('../api/enquiry/submit.js', import.meta.url), 'utf8')), 'server validates contact_preference');
+ok(/contactPreference: contactPrefStr/.test(readFileSync(new URL('../api/enquiry/_lib/routing/email.js', import.meta.url), 'utf8')), 'agent email carries the contact preference');
+ok(/Preferred contact', t\.contactPreference/.test(readFileSync(new URL('../api/enquiry/_lib/routing/_templates/agent-email.js', import.meta.url), 'utf8')), 'the email template shows a Preferred contact row');
+ok(/id: 'contactpref'/.test(editor) && /field\.type === 'contactpref'/.test(editor) && /case 'contactpref':/.test(editor), 'editor has the contactpref palette entry, inspector and preview');
+
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
