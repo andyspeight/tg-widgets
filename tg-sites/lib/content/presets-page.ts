@@ -968,6 +968,145 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
     section: { paddingY: 80 },
   },
 
+  /*
+   * THE LAST OF THE GRID, 3 Aug 2026. The word card on a photograph, which the
+   * screenshots had three ways round, plus the brand over a picture, a centred
+   * opener that ends on the social links, and a picture beside a small titled
+   * block. The card-on-photo turned out to want no new feature after all: it is a
+   * full-bleed background with a light card floating in the middle column.
+   */
+  {
+    id: 'hero-card-on-photo',
+    category: 'hero',
+    label: 'A card of words on a photograph',
+    description: 'A full-bleed picture with the title raised in a card on top. The most magazine-like.',
+    rows: [
+      {
+        widths: [1, 2, 1],
+        align: 'centre',
+        columns: [
+          [],
+          [
+            { type: 'heading', props: { html: 'An intro title here', level: 'h2', style: 'h2', ...CENTRED } },
+            {
+              type: 'text',
+              props: { html: '<p>A line or two, raised in a card over the picture behind it.</p>', ...CENTRED },
+            },
+            {
+              type: 'button-group',
+              props: { align: 'centre', buttons: [{ label: 'Learn more', href: '', variant: 'primary' }] },
+            },
+          ],
+          [],
+        ],
+        // A light card, so dark words read over any photograph, lifted off the
+        // picture with a shadow. The side columns are empty spacers that centre it.
+        columnBox: [
+          undefined,
+          { radius: 14, background: 'var(--tgs-surface)', padding: { top: 32, right: 32, bottom: 32, left: 32 }, shadow: 'medium' },
+          undefined,
+        ],
+      },
+    ],
+    section: { paddingY: 112, width: 'full', backgroundQuery: 'mediterranean coast view' },
+  },
+
+  {
+    id: 'hero-brand-over-photo',
+    category: 'hero',
+    label: 'Brand name over a photograph',
+    description: 'The name centred over a full-bleed picture. Simple, and striking on the right shot.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Brand name', level: 'h2', style: 'h1', ...CENTRED } },
+            {
+              type: 'text',
+              props: { html: '<p>A line under the name, over the picture.</p>', size: 'l', ...CENTRED },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { tone: 'dark', paddingY: 128, width: 'full', backgroundQuery: 'aerial turquoise coast' },
+  },
+
+  {
+    id: 'hero-gallery-social',
+    category: 'hero',
+    label: 'Centred opener with pictures and socials',
+    description: 'A centred title and buttons, a row of pictures, then your social links beneath.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Add your medium length title here', level: 'h2', style: 'h1', ...CENTRED } },
+            {
+              type: 'text',
+              props: {
+                html: '<p>One line under the title, then a few pictures and where to follow you.</p>',
+                size: 'l',
+                ...CENTRED,
+              },
+            },
+            {
+              type: 'button-group',
+              props: {
+                align: 'centre',
+                buttons: [
+                  { label: 'See more', href: '', variant: 'primary' },
+                  { label: 'Contact us', href: '', variant: 'ghost' },
+                ],
+              },
+            },
+          ],
+        ],
+      },
+      {
+        widths: [1],
+        columns: [[{ type: 'gallery', props: { columns: '4', gap: 's' } }]],
+      },
+      {
+        widths: [1],
+        columns: [[{ type: 'social', props: { align: 'centre' } }]],
+      },
+    ],
+    section: { paddingY: 80 },
+  },
+
+  {
+    id: 'hero-image-textarea',
+    category: 'hero',
+    label: 'Picture left, title and a text block right',
+    description: 'A photograph beside the title with a small labelled block of text under it.',
+    rows: [
+      {
+        widths: [1, 1],
+        gap: 48,
+        align: 'centre',
+        columns: [
+          [{ type: 'image', props: { alt: '', ratio: '4/3', radius: 'md' } }],
+          [
+            { type: 'heading', props: { html: 'Write down an intro title', level: 'h2', style: 'h1' } },
+            { type: 'heading', props: { html: 'This is the text area', style: 'h6', level: 'h3' } },
+            {
+              type: 'text',
+              props: { html: '<p>A short block under the small heading, to the right of the picture.</p>' },
+            },
+            {
+              type: 'button-group',
+              props: { buttons: [{ label: 'Read more', href: '', variant: 'ghost' }] },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { paddingY: 80 },
+  },
+
   {
     id: 'blank-opener',
     category: 'blank',
