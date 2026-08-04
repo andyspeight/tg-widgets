@@ -5229,6 +5229,51 @@
         ]));
       }
 
+      // Branch by contact preference — a different thank-you per chosen contact
+      // method. Stored ON the contact-preference field (options.branches) inside
+      // fieldsJSON, so it needs no extra config plumbing. Shown for message
+      // modes only (a redirect has no on-page message to vary).
+      if (current !== 'redirect') {
+        const flds = parseFields(state.config.fieldsJSON);
+        const cf = flds.find(f => f.type === 'contactpref');
+        const branchKids = [];
+        if (!cf) {
+          const note = document.createElement('p');
+          note.className = 'insp-note';
+          note.textContent = 'Add a Contact preference field to show a different thank-you depending on how the visitor wants to be contacted (for example a booking link only for callers).';
+          branchKids.push(note);
+        } else {
+          if (!cf.options || typeof cf.options !== 'object') cf.options = {};
+          if (!Array.isArray(cf.options.branches)) cf.options.branches = [];
+          const opts = (Array.isArray(cf.choices) && cf.choices.length)
+            ? cf.choices.map(c => String((c && c.label) || (c && c.value) || '').trim()).filter(Boolean)
+            : ['A quick call', 'WhatsApp', 'Email'];
+          const branchMsg = (match) => { const b = cf.options.branches.find(x => x && x.match === match); return b ? b.message : ''; };
+          const setBranch = (match, msg) => {
+            cf.options.branches = cf.options.branches.filter(x => x && x.match !== match);
+            if (String(msg || '').trim()) cf.options.branches.push({ match, message: msg });
+            state.config.fieldsJSON = JSON.stringify(flds);
+            markDirtyAndSync();
+          };
+          const intro = document.createElement('p');
+          intro.className = 'insp-note';
+          intro.textContent = 'Optional. Show a different thank-you depending on the contact method they choose. Leave a box blank to use the main message above. If they pick more than one, the first with a message wins.';
+          branchKids.push(intro);
+          opts.forEach(opt => {
+            branchKids.push(labelledTextarea({
+              label: 'When they choose "' + opt + '"',
+              value: branchMsg(opt),
+              placeholder: 'Leave blank to use the main message above',
+              rows: 3,
+              maxlength: 800,
+              hintHtml: 'Any link becomes clickable. <code>{firstName}</code> works too.',
+              onInput: (v) => setBranch(opt, v)
+            }));
+          });
+        }
+        body.appendChild(section('Branch by contact preference', branchKids));
+      }
+
       // Redirect URL (only when mode=redirect)
       if (current === 'redirect') {
         body.appendChild(section('Destination', [

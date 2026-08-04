@@ -38,7 +38,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.1.14';
+  var WIDGET_VERSION = '1.1.15';
   var VISITOR_ID_KEY = 'tg_visitor_id_v1';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -1503,7 +1503,8 @@
       '.tg-ty-hero svg{width:28px;height:28px}',
       '.tg-ty h2{font-size:26px;font-weight:600;margin:0 0 6px;color:' + c.text + '}',
       '.tg-ty-ref{display:inline-block;padding:4px 12px;margin-top:12px;background:' + c.bgTile + ';border-radius:999px;font-size:12px;font-weight:500;color:' + c.textSecondary + ';font-variant-numeric:tabular-nums;letter-spacing:.04em}',
-      '.tg-ty > p{font-size:15px;color:' + c.textSecondary + ';max-width:420px;margin:12px auto 0}',
+      '.tg-ty > p{font-size:15px;color:' + c.textSecondary + ';max-width:460px;margin:12px auto 0;line-height:1.55}',
+      '.tg-ty a{color:' + primary + ';font-weight:600;text-decoration:underline;word-break:break-word}',
       '.tg-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}',
       '@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}'
     ].join('\n');
@@ -3442,7 +3443,7 @@
         return r.json().then(function (body) { return { ok: r.ok, status: r.status, body: body }; });
       }).then(function (result) {
         if (result.ok && result.body.ok) {
-          self._renderThankYou(result.body, firstNameForTy);
+          self._renderThankYou(result.body, firstNameForTy, fieldValues);
           return;
         }
         if (attemptNo === 1 && result.status === 503 && result.body && result.body.retryable) {
@@ -3516,14 +3517,41 @@
     if (firstHit && firstHit.focus) { try { firstHit.focus(); } catch (e) {} }
   };
 
-  TGEnquiryWidget.prototype._renderThankYou = function (response, firstName) {
+  // Turn plain thank-you text into safe DOM: any http(s) URL becomes a real
+  // link. Text is set via textContent and hrefs are http(s)-only (matched by the
+  // regex), so nothing here can inject markup onto the page.
+  function linkifyInto(node, text) {
+    var re = /(https?:\/\/[^\s]+)/g;
+    var last = 0, m;
+    while ((m = re.exec(text))) {
+      if (m.index > last) node.appendChild(document.createTextNode(text.slice(last, m.index)));
+      var raw = m[1];
+      var trailing = '';
+      var url = raw.replace(/[)\].,;!?]+$/, function (s) { trailing = s; return ''; });
+      node.appendChild(el('a', { href: url, target: '_blank', rel: 'noopener noreferrer', text: url }));
+      if (trailing) node.appendChild(document.createTextNode(trailing));
+      last = m.index + raw.length;
+    }
+    if (last < text.length) node.appendChild(document.createTextNode(text.slice(last)));
+  }
+  function makeRichParagraph(text) {
+    var p = el('p', {});
+    String(text).split('\n').forEach(function (line, li) {
+      if (li > 0) p.appendChild(el('br', {}));
+      linkifyInto(p, line);
+    });
+    return p;
+  }
+
+  TGEnquiryWidget.prototype._renderThankYou = function (response, firstName, submitted) {
     var t = this.t;
     var shadow = this.shadow;
+    var cfgTy = this.config.thankYou || {};
     // 'redirect' mode: the author configured a conversion/tracking page. The
     // widget used to ignore it entirely. Navigate the top page there; the
     // inline card below still renders as a fallback for blocked navigation
     // (sandboxed iframes and similar).
-    var ty = (response && response.thankYou) || this.config.thankYou || {};
+    var ty = (response && response.thankYou) || cfgTy || {};
     if (ty.mode === 'redirect' && typeof ty.redirectUrl === 'string' && /^https?:\/\//i.test(ty.redirectUrl)) {
       try { window.top.location.assign(ty.redirectUrl); }
       catch (e) { try { window.location.assign(ty.redirectUrl); } catch (e2) { /* keep inline card */ } }
@@ -3534,9 +3562,29 @@
     if (styleEl) shadow.appendChild(styleEl);
     else shadow.appendChild(el('style', { text: buildStyles(this.config.branding) }));
 
-    var message = (response.thankYou && response.thankYou.message) ||
-                  (this.config.thankYou && this.config.thankYou.message) ||
-                  t('thankYouMessage');
+    var message = (response && response.thankYou && response.thankYou.message) ||
+                  cfgTy.message || t('thankYouMessage');
+    // Branch on the contact-preference answer: the FIRST matching branch wins,
+    // so an agent can, say, show a booking link only to people who chose "a
+    // quick call" while everyone else gets a plain thank-you. The branches are
+    // stored on the contact-preference field itself (options.branches), so they
+    // ride to the widget inside fieldsJSON with no extra config plumbing. No
+    // match, or no branches, leaves the base message untouched.
+    var prefs = (submitted && Array.isArray(submitted.contact_preference)) ? submitted.contact_preference : [];
+    var branches = null;
+    var allFields = (this.config && Array.isArray(this.config.fields)) ? this.config.fields : [];
+    for (var fi = 0; fi < allFields.length; fi++) {
+      var ff = allFields[fi];
+      if (ff && ff.type === 'contactpref' && ff.options && Array.isArray(ff.options.branches)) { branches = ff.options.branches; break; }
+    }
+    if (branches && prefs.length) {
+      for (var bi = 0; bi < branches.length; bi++) {
+        var br = branches[bi];
+        if (br && typeof br.message === 'string' && br.message && br.match && prefs.indexOf(br.match) !== -1) {
+          message = br.message; break;
+        }
+      }
+    }
     // Interpolate {firstName}; when absent, also tidy a leading separator
     // (e.g. "Thanks {firstName} —" becomes "Thanks —" not "Thanks  —").
     if (firstName) {
@@ -3545,14 +3593,25 @@
       message = message.replace(/[ ,]*\{firstName\}/g, '');
     }
 
-    var card = el('div', { class: 'tg-card' }, [
-      el('div', { class: 'tg-ty', role: 'status', 'aria-live': 'polite' }, [
-        el('div', { class: 'tg-ty-hero', 'aria-hidden': 'true' }, [svg(ICONS.check, { size: 28, strokeWidth: 2.5 })]),
-        el('h2', { text: message }),
-        el('p', { text: t('thankYouBody') }),
-        el('div', { class: 'tg-ty-ref', text: t('reference', { ref: response.reference || '—' }) })
-      ])
-    ]);
+    // Rich render ONLY when the message is multi-line or carries a link — the
+    // classic single headline + fixed body is kept for simple messages and the
+    // default, so existing forms are visually unchanged. A rich message becomes
+    // a headline (first block) plus body paragraphs with the URL made clickable
+    // (previously it was crammed into one giant headline as plain text).
+    var tyKids = [el('div', { class: 'tg-ty-hero', 'aria-hidden': 'true' }, [svg(ICONS.check, { size: 28, strokeWidth: 2.5 })])];
+    var isRich = /\n/.test(message) || /https?:\/\//i.test(message);
+    if (isRich) {
+      var blocks = message.split(/\n{2,}/).map(function (s) { return s.trim(); }).filter(Boolean);
+      var headline = blocks.length ? blocks.shift() : '';
+      tyKids.push(el('h2', { text: headline }));
+      blocks.forEach(function (blk) { tyKids.push(makeRichParagraph(blk)); });
+    } else {
+      tyKids.push(el('h2', { text: message }));
+      tyKids.push(el('p', { text: t('thankYouBody') }));
+    }
+    tyKids.push(el('div', { class: 'tg-ty-ref', text: t('reference', { ref: (response && response.reference) || '—' }) }));
+
+    var card = el('div', { class: 'tg-card' }, [el('div', { class: 'tg-ty', role: 'status', 'aria-live': 'polite' }, tyKids)]);
     shadow.appendChild(card);
 
     setTimeout(function () {
