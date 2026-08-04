@@ -2843,6 +2843,7 @@
       // ── About them ──
       { id: 'name',        name: 'Name',               desc: 'First + last name inputs',               category: 'About them',  icon: ICONS.user,     defaultLabel: 'Your name',                  defaultRequired: true,  defaultOptions: {} },
       { id: 'contact',     name: 'Contact details',    desc: 'Email (required) + phone (optional)',    category: 'About them',  icon: ICONS.mail,     defaultLabel: 'How to reach you',           defaultRequired: true,  defaultOptions: {} },
+      { id: 'contactpref', name: 'Contact preference', desc: 'How can we reach you — multi-select',    category: 'About them',  icon: ICONS.phone || ICONS.mail, defaultLabel: 'How can we get in touch?', defaultRequired: false, defaultOptions: {} },
       // ── Extras ──
       { id: 'notes',       name: 'Free-text notes',    desc: 'Textarea for anything else',             category: 'Extras',      icon: ICONS.pencil,   defaultLabel: 'Anything else?',             defaultRequired: false, defaultOptions: { placeholder: 'Dietary requirements, accessibility needs, special occasions...' } },
       // ── Consent ──
@@ -4548,6 +4549,22 @@
           });
           return wrap;
         }
+        case 'contactpref': {
+          const wrap = document.createElement('div');
+          wrap.className = 'fp-chips';
+          const cpLabels = (Array.isArray(field.choices) && field.choices.length)
+            ? field.choices.map(c => String((c && c.label) || (c && c.value) || '').trim()).filter(Boolean)
+            : ['A quick call', 'WhatsApp', 'Email'];
+          cpLabels.slice(0, 12).forEach((lab, i) => {
+            const c = document.createElement('span');
+            c.className = 'fp-chip' + (i === 0 ? ' is-active' : '');
+            const tx = document.createElement('span');
+            tx.textContent = lab;
+            c.appendChild(tx);
+            wrap.appendChild(c);
+          });
+          return wrap;
+        }
         case 'name': {
           const row = document.createElement('div');
           row.className = 'fp-row';
@@ -5265,8 +5282,8 @@
           value: field.help || '',
           placeholder: 'Optional hint shown below the field',
           rows: 2,
-          maxlength: 300,
-          hint: 'Appears in small grey text under the field on the form.',
+          maxlength: 600,
+          hint: 'Appears in small grey text under the field on the form. Also used as the description on a Contact preference field.',
           onInput: (v) => { field.help = v; saveField(); }
         })
       ]));
@@ -7766,6 +7783,33 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
             options: [{ value: 'no', label: 'No' }, { value: 'yes', label: 'Yes' }],
             hint: 'Add a Departure airport field to this form too, and it will appear only when the visitor answers Yes.',
             onChange: (v) => { if (v === 'yes') field.options.default = 'yes'; else delete field.options.default; saveField(); }
+          })
+        ]);
+      }
+
+      if (field.type === 'contactpref') {
+        const DEFAULT_CONTACTPREF = ['A quick call', 'WhatsApp', 'Email'];
+        const current = (Array.isArray(field.choices) && field.choices.length)
+          ? field.choices.map(c => String((c && c.label) || (c && c.value) || '').trim()).filter(Boolean).join('\n')
+          : DEFAULT_CONTACTPREF.join('\n');
+        return section('Options', [
+          labelledTextarea({
+            label: 'Choices (one per line)',
+            value: current,
+            placeholder: DEFAULT_CONTACTPREF.join('\n'),
+            rows: 4,
+            maxlength: 300,
+            hint: 'The ways a visitor can choose to be contacted — they can pick more than one. Put your description in the Help text above.',
+            onInput: (v) => {
+              const seen = Object.create(null);
+              const lines = String(v || '').split('\n')
+                .map(s => s.trim().slice(0, 64))
+                .filter(l => { const k = l.toLowerCase(); if (!l || seen[k]) return false; seen[k] = 1; return true; })
+                .slice(0, 12);
+              if (!lines.length || lines.join('|') === DEFAULT_CONTACTPREF.join('|')) delete field.choices;
+              else field.choices = lines.map(l => ({ value: l, label: l }));
+              saveField();
+            }
           })
         ]);
       }

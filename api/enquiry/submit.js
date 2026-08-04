@@ -418,6 +418,17 @@ function validatePayload(raw) {
       });
     }
   }
+  // Contact preference (how the visitor wants to be reached) — a small
+  // multi-select. Bounded like interests; each value is an author-defined label.
+  if (f.contact_preference !== undefined) {
+    if (!Array.isArray(f.contact_preference) || f.contact_preference.length > 10) {
+      fail('fields.contact_preference', 'Invalid contact preference.');
+    } else {
+      f.contact_preference.forEach((x, i) => {
+        if (typeof x !== 'string' || x.length > 64) fail(`fields.contact_preference[${i}]`, 'Invalid contact preference.');
+      });
+    }
+  }
 
   if (Object.keys(errors).length > 0) return { ok: false, errors };
   return { ok: true, value: raw };

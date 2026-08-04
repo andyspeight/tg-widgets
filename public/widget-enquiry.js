@@ -38,7 +38,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.1.13';
+  var WIDGET_VERSION = '1.1.14';
   var VISITOR_ID_KEY = 'tg_visitor_id_v1';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -164,6 +164,9 @@
       // Interests field
       label_interests: 'Interests',
       interests_pickMany: '(pick as many as apply)',
+      // Contact preference
+      label_contactpref: 'How can we get in touch?',
+      contactpref_required: 'Please choose at least one.',
       int_beach: 'Beach', int_city: 'City', int_culture: 'Culture', int_food: 'Food & wine', int_adventure: 'Adventure', int_family: 'Family', int_wellness: 'Wellness', int_honeymoon: 'Honeymoon',
       interests_options: 'Interest options',
       // Name field
@@ -1189,6 +1192,14 @@
     { value: 'RO', label: 'Room only' }, { value: 'BB', label: 'B&B' },
     { value: 'HB', label: 'Half board' }, { value: 'FB', label: 'Full board' },
     { value: 'AI', label: 'All inclusive' }
+  ];
+
+  // Default choices for the contact-preference field. Author-editable per form
+  // (field.choices); these are only the fallback when none are set.
+  var CONTACTPREF_OPTIONS = [
+    { value: 'A quick call', label: 'A quick call' },
+    { value: 'WhatsApp', label: 'WhatsApp' },
+    { value: 'Email', label: 'Email' }
   ];
 
   var STAR_OPTIONS = [
@@ -2701,11 +2712,51 @@
     };
   }
 
+  // Contact-preference field — a multi-select (like interests) with an author
+  // description shown above the options. Submits contact_preference: [labels].
+  // The thank-you page can branch on this (see _renderThankYou).
+  function renderContactPref(instance, fieldSpec, t) {
+    t = t || makeT(null);
+    var shell = createFieldShell(instance, fieldSpec.label || t('label_contactpref'), [' ', el('span', { class: 'tg-opt', text: t('interests_pickMany') })]);
+    // The description is the field's help text, shown above the choices.
+    if (fieldSpec.help) shell.fieldNode.appendChild(el('div', { class: 'tg-help', style: { marginTop: '2px', marginBottom: '10px' }, text: fieldSpec.help }));
+    var selected = [];
+    var buttons = [];
+    var choices = sanitiseChoices(fieldSpec.choices) || CONTACTPREF_OPTIONS;
+    choices.forEach(function (opt) {
+      var btn = el('button', {
+        class: 'tg-pill', type: 'button', 'data-value': opt.value, 'aria-pressed': 'false', 'aria-label': opt.label,
+        onclick: function () {
+          var idx = selected.indexOf(opt.value);
+          if (idx >= 0) { selected.splice(idx, 1); btn.classList.remove('is-active'); btn.setAttribute('aria-pressed', 'false'); }
+          else { selected.push(opt.value); btn.classList.add('is-active'); btn.setAttribute('aria-pressed', 'true'); }
+          shell.clear();
+        }
+      }, [opt.label]);
+      buttons.push(btn);
+    });
+    shell.fieldNode.appendChild(el('div', { class: 'tg-chips', role: 'group', 'aria-labelledby': shell.labelId }, buttons));
+    shell.fieldNode.appendChild(shell.errorNode);
+    return {
+      type: 'contactpref',
+      node: shell.fieldNode,
+      writeTo: function (fields) { fields.contact_preference = selected.slice(); },
+      validate: function () {
+        if (fieldSpec.required === false) return null;
+        return selected.length ? null : t('contactpref_required');
+      },
+      showError: function (msg) { shell.show(msg); },
+      clearError: function () { shell.clear(); },
+      focus: function () { if (buttons[0]) buttons[0].focus(); }
+    };
+  }
+
   // Dispatch table — maps field.type string to renderer function
   var RENDERERS = {
     destination: renderDestination,
     airport:     renderAirport,
     flights:     renderFlights,
+    contactpref: renderContactPref,
     daterange:   renderDateRange,
     duration:    renderDuration,
     travellers:  renderTravellers,
