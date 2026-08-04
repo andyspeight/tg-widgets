@@ -371,6 +371,26 @@ export type Row = z.infer<typeof RowSchema>;
 // Sections
 // ---------------------------------------------------------------------------
 
+/**
+ * A stored percentage for a background picture's focus point or one of its
+ * adjustments, clamped to 0..max, or undefined when the section has none.
+ *
+ * OPTIONAL BY DESIGN. Most sections have no background, and a page carrying five
+ * numbers on every one of them for a feature none of them use is five numbers of
+ * waste per section. Absent reads as the default at render, so the middle and no
+ * filter, exactly as before this existed. Clamped here as well as at render, the
+ * belt to that pair of braces, since these are set by dragging in the editor and
+ * pass through the save the same way a picture's width and height do.
+ */
+function backgroundPercent(max: number) {
+  return z.unknown().transform((value): number | undefined => {
+    if (value === undefined || value === null || value === '') return undefined;
+    const n = typeof value === 'number' ? value : Number(value);
+    if (!Number.isFinite(n)) return undefined;
+    return Math.min(max, Math.max(0, Math.round(n)));
+  });
+}
+
 export const SectionSchema = z.object({
   id: z.string().min(1),
   name: z.string().max(80).optional(),
@@ -416,6 +436,24 @@ export const SectionSchema = z.object({
     if (!Number.isFinite(n)) return 60;
     return Math.min(100, Math.max(0, Math.round(n)));
   }),
+  /*
+   * THE BACKGROUND PICTURE'S FOCUS POINT AND ADJUSTMENTS, added 4 Aug 2026.
+   *
+   * The same tools every other image has, on the one that needs them most: a
+   * hero background is cropped hardest of all, wide on a desktop and tall on a
+   * phone, so which part it keeps matters. Focus is a percentage across and
+   * down, driving object-position on the background img; the three adjustments
+   * are percentages where 100 is the photograph untouched, driving a filter on
+   * that same img, which sits UNDER the scrim and the words so darkening the
+   * picture never dims the text over it. Andy asked for this on the hero
+   * background on 4 Aug 2026, having found the editor only reached a standalone
+   * image block.
+   */
+  backgroundFocusX: backgroundPercent(100),
+  backgroundFocusY: backgroundPercent(100),
+  backgroundBrightness: backgroundPercent(200),
+  backgroundContrast: backgroundPercent(200),
+  backgroundSaturation: backgroundPercent(200),
   /**
    * A name a link can point at, rendered as the section's id.
    *

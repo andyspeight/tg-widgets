@@ -242,7 +242,15 @@ export function SectionRenderer({
         The poster still shows, which is what the section will look like to
         anybody who asked for less motion anyway.
       */}
-      {background && <img className="tgs-section__bg" src={background} alt="" aria-hidden="true" />}
+      {background && (
+        <img
+          className="tgs-section__bg"
+          src={background}
+          alt=""
+          aria-hidden="true"
+          style={backgroundStyle(section)}
+        />
+      )}
 
       {video && !editable && (
         <video
@@ -341,6 +349,49 @@ function boxStyle(box: Box): CSSProperties {
     // own should show the section behind it, not repaint it.
     '--tgs-bg': box.background ?? 'transparent',
   } as CSSProperties;
+}
+
+/**
+ * A stored background percentage, pinned to 0..max here as well as in the schema.
+ *
+ * The last gate before a number reaches the CSS. The editor holds a value
+ * between a drag and a save, and a page written by a newer build could carry
+ * anything, so the render clamps it again. Missing or not a number is the
+ * default, which for the focus point is the middle and for an adjustment is the
+ * picture untouched.
+ */
+function bgPercent(value: unknown, max: number, fallback: number): number {
+  const n = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(max, Math.max(0, Math.round(n)));
+}
+
+/**
+ * The object-position and filter for a section's background picture.
+ *
+ * Focus drives object-position, so the part a client chose stays in view when
+ * the section crops the picture. The three adjustments become a filter, and
+ * because the background img sits UNDER the scrim and the content, darkening or
+ * desaturating it never touches the words on top. A filter is emitted only for
+ * an adjustment that is actually off its default, so an untouched picture
+ * carries none.
+ */
+function backgroundStyle(section: Section): CSSProperties {
+  const focusX = bgPercent(section.backgroundFocusX, 100, 50);
+  const focusY = bgPercent(section.backgroundFocusY, 100, 50);
+  const brightness = bgPercent(section.backgroundBrightness, 200, 100);
+  const contrast = bgPercent(section.backgroundContrast, 200, 100);
+  const saturation = bgPercent(section.backgroundSaturation, 200, 100);
+
+  const adjustments: string[] = [];
+  if (brightness !== 100) adjustments.push(`brightness(${brightness}%)`);
+  if (contrast !== 100) adjustments.push(`contrast(${contrast}%)`);
+  if (saturation !== 100) adjustments.push(`saturate(${saturation}%)`);
+
+  return {
+    objectPosition: `${focusX}% ${focusY}%`,
+    ...(adjustments.length ? { filter: adjustments.join(' ') } : {}),
+  };
 }
 
 /**

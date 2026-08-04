@@ -4794,6 +4794,77 @@ await check('and it is held inside 0 to 100 rather than taken as typed', async (
   return value === '100' ? true : `900 became "${value}"`;
 });
 
+/*
+ * THE FOCUS EDITOR ON THE BACKGROUND, added 4 Aug 2026. The same tool the image
+ * block has, on the field a hero actually uses. The picker's demo images are
+ * data: URIs that load, so the editor frame has a size to click inside; the page
+ * then refuses a data: URI, so the last step swaps in an address it accepts
+ * without touching the numbers the editor saved, exactly as the image block
+ * check does.
+ */
+await check('the section background offers the focus editor once a picture is set', async () => {
+  await openSectionGroup('Background image');
+  const field = page.locator('.ed-props');
+  const choose = field.locator('.mp-choose');
+  if (await choose.count()) await choose.first().click();
+  else await field.locator('.mp-chosen__actions button', { hasText: 'Replace' }).first().click();
+  await page.waitForSelector('.mp-root', { timeout: 5000 });
+  await page.waitForTimeout(250);
+  await page.locator('.mp-tile__pick').first().click();
+  await page.waitForTimeout(300);
+
+  const edit = await field.locator('.mp-chosen__actions button', { hasText: 'Edit' }).count();
+  return edit === 1 ? true : `${edit} Edit buttons on the background field`;
+});
+
+await check('editing the background sets its focus point and adjustment on the page', async () => {
+  const field = page.locator('.ed-props');
+  await field.locator('.mp-chosen__actions button', { hasText: 'Edit' }).first().click();
+  await page.waitForSelector('.ed-imgedit', { timeout: 5000 });
+
+  const frame = page.locator('.ed-imgedit__frame');
+  const box = await frame.boundingBox();
+  if (!box || box.width < 20 || box.height < 20) {
+    return `the frame is ${Math.round(box?.width ?? 0)}x${Math.round(box?.height ?? 0)}`;
+  }
+  await frame.click({ position: { x: box.width * 0.3, y: box.height * 0.7 } });
+  await page.waitForTimeout(150);
+  const dot = await page.locator('.ed-imgedit__dot').evaluate((el) => ({
+    x: Math.round(parseFloat(el.style.left)),
+    y: Math.round(parseFloat(el.style.top)),
+  }));
+
+  const range = page
+    .locator('.ed-imgedit__slider', { hasText: 'Brightness' })
+    .locator('input[type="range"]');
+  await range.evaluate((el) => {
+    const set = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+    set.call(el, '130');
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await page.waitForTimeout(100);
+
+  await page.locator('.tg-modal__foot button', { hasText: 'Save' }).first().click();
+  await page.waitForTimeout(250);
+
+  if ((await field.locator('.mp-url .ed-input').count()) === 0) {
+    await field.locator('.mp-url__toggle').first().click();
+  }
+  await field.locator('.mp-url .ed-input').first().fill('https://images.example.test/bg.jpg');
+  await page.waitForTimeout(300);
+
+  const style =
+    (await page
+      .locator('.ed-canvas-frame .tgs-section')
+      .first()
+      .locator('.tgs-section__bg')
+      .first()
+      .getAttribute('style')) ?? '';
+  const position = new RegExp(`object-position:\\s*${dot.x}% ${dot.y}%`).test(style);
+  const filter = /filter:\s*brightness\(130%\)/.test(style);
+  return position && filter ? true : `the background style is "${style}"`;
+});
+
 await check('a section can be given a name a link can point at', async () => {
   await openSectionGroup('Link to this section');
   const name = page.locator('.ed-props input[placeholder="prices"]');

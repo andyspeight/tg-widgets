@@ -147,7 +147,9 @@ describe('how the video is rendered', () => {
    * for reduced motion left a blank band where the hero should be.
    */
   it('draws the picture and the video, rather than choosing between them', () => {
-    const image = renderer.indexOf('className="tgs-section__bg" src={background}');
+    // The img's className ends in a closing quote; the video's has a space then
+    // --video, so this finds the picture alone even though both share the stem.
+    const image = renderer.indexOf('className="tgs-section__bg"');
     const video = renderer.indexOf('tgs-section__bg tgs-section__bg--video');
 
     expect(image).toBeGreaterThan(-1);
@@ -263,5 +265,79 @@ describe('the anchor', () => {
     // starting with #. It was pointless until sections had ids.
     const sanitise = source('lib', 'content', 'sanitise.ts');
     expect(sanitise).toContain('/^[/?#]/');
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+/*
+ * THE BACKGROUND PICTURE'S FOCUS POINT AND ADJUSTMENTS, added 4 Aug 2026.
+ *
+ * Andy had the image editor but found it reached only a standalone image block,
+ * not a section background, which is where a hero needs it most. Five numbers on
+ * the section carry it: a focus point that becomes object-position, and three
+ * adjustments that become a filter on the background img. The single place each
+ * can go wrong quietly is the same as every other stored number: an unclamped
+ * value reaching the CSS, or a default appearing on a section that set nothing.
+ */
+describe('the background picture, its focus point and its look', () => {
+  it('keeps a focus point and adjustments a client dragged in', () => {
+    const section = parsed({
+      backgroundImage: 'https://cdn.example.com/hero.jpg',
+      backgroundFocusX: 20,
+      backgroundFocusY: 80,
+      backgroundBrightness: 120,
+      backgroundContrast: 90,
+      backgroundSaturation: 140,
+    });
+    expect(section.backgroundFocusX).toBe(20);
+    expect(section.backgroundFocusY).toBe(80);
+    expect(section.backgroundBrightness).toBe(120);
+    expect(section.backgroundContrast).toBe(90);
+    expect(section.backgroundSaturation).toBe(140);
+  });
+
+  it('pins the focus to a percentage and the adjustments to their range', () => {
+    expect(parsed({ backgroundFocusX: -30 }).backgroundFocusX).toBe(0);
+    expect(parsed({ backgroundFocusY: 400 }).backgroundFocusY).toBe(100);
+    expect(parsed({ backgroundBrightness: 999 }).backgroundBrightness).toBe(200);
+    expect(parsed({ backgroundSaturation: 33.6 }).backgroundSaturation).toBe(34);
+  });
+
+  /*
+   * ABSENT, NOT ZERO. A section with no background carries none of these, so the
+   * stored page stays lean and the render falls back to the middle and no
+   * filter. Every section written before today has no such keys, and they must
+   * come back exactly as they were rather than sprouting a focus point.
+   */
+  it('is absent on a section that never set one, rather than a default', () => {
+    const section = parsed({});
+    expect(section.backgroundFocusX).toBeUndefined();
+    expect(section.backgroundBrightness).toBeUndefined();
+  });
+
+  it('will not take a value that is not a number', () => {
+    expect(parsed({ backgroundFocusX: 'left a bit' }).backgroundFocusX).toBeUndefined();
+  });
+
+  it('drives object-position and a filter on the background img, under the scrim', () => {
+    const renderer = source('components', 'render', 'PageRenderer.tsx');
+    // Built from clamped numbers, never a stored string.
+    expect(renderer).toContain('bgPercent(section.backgroundFocusX, 100, 50)');
+    expect(renderer).toContain('bgPercent(section.backgroundBrightness, 200, 100)');
+    expect(renderer).toMatch(/objectPosition: `\$\{focusX\}% \$\{focusY\}%`/);
+    // A filter only for an adjustment that is off its default.
+    expect(renderer).toContain('if (brightness !== 100) adjustments.push(`brightness(${brightness}%)`)');
+    // Put on the background img, which sits under the scrim, so darkening the
+    // picture never dims the words on top of it.
+    expect(renderer).toContain('style={backgroundStyle(section)}');
+  });
+
+  it('offers the Edit button on the background field, mapping the five numbers', () => {
+    const props = source('components', 'editor', 'Properties.tsx');
+    // The generic keys the editor saves are remapped onto the section's own.
+    expect(props).toMatch(/backgroundFocusX: patch\.focusX/);
+    expect(props).toMatch(/focusX: section\.backgroundFocusX \?\? 50/);
+    expect(props).toMatch(/brightness: section\.backgroundBrightness \?\? 100/);
   });
 });

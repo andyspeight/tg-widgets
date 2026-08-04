@@ -859,10 +859,39 @@ function SectionFields({
         <ImageField
           value={section.backgroundImage ?? ''}
           onChange={(url) => set({ backgroundImage: url }, `sec:${index}:bg`)}
+          /*
+            The Edit button and the focus point, on the background too. The
+            editor writes its five numbers under generic keys (focusX,
+            brightness and so on); a section keeps them under background-prefixed
+            keys, because a section has plenty that is not its background, so the
+            patch is remapped on the way in. No urlKey is passed, so the picker
+            still sets the address through onChange above and this onPatch only
+            ever carries an edit.
+          */
+          onPatch={(patch) =>
+            set(
+              {
+                backgroundFocusX: patch.focusX as number,
+                backgroundFocusY: patch.focusY as number,
+                backgroundBrightness: patch.brightness as number,
+                backgroundContrast: patch.contrast as number,
+                backgroundSaturation: patch.saturation as number,
+              },
+              `sec:${index}:bg-edit`,
+            )
+          }
+          edit={{
+            focusX: section.backgroundFocusX ?? 50,
+            focusY: section.backgroundFocusY ?? 50,
+            brightness: section.backgroundBrightness ?? 100,
+            contrast: section.backgroundContrast ?? 100,
+            saturation: section.backgroundSaturation ?? 100,
+          }}
         />
         <p className="ed-help">
           A scrim goes over it so text on top still passes contrast. How dark it
-          is, below.
+          is, below. Click Edit to set the focus point, the part kept when the
+          section crops the picture on a narrow screen.
         </p>
       </div>
 
