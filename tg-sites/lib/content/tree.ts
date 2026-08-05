@@ -14,6 +14,7 @@ import {
   MIN_COLUMN_WIDTH,
   normaliseWidths,
   type Block,
+  type Box,
   type Column,
   type Page,
   type Row,
@@ -432,6 +433,21 @@ export function updateBlockProps(
     blocks: c.blocks.map((b, i) =>
       i === block ? { ...b, props: { ...b.props, ...patch } } : b,
     ),
+  }));
+}
+
+/** Replace a block's design box. The box is a sibling of props, not a prop. */
+export function updateBlockBox(
+  page: Page,
+  section: number,
+  row: number,
+  column: number,
+  block: number,
+  box: Box,
+): Page {
+  return mapColumn(page, section, row, column, (c) => ({
+    ...c,
+    blocks: c.blocks.map((b, i) => (i === block ? { ...b, box } : b)),
   }));
 }
 

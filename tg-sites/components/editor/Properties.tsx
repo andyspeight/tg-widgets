@@ -11,7 +11,7 @@
  */
 
 import { useState, useTransition, type CSSProperties, type ReactNode } from 'react';
-import type { Block, Page, RegionName } from '../../lib/content/schema';
+import type { Block, Box, Page, RegionName } from '../../lib/content/schema';
 import {
   DEFAULT_DIVIDER_HEIGHT,
   DIVIDER_OPTIONS,
@@ -23,14 +23,17 @@ import type { ItemMeta } from '../../lib/content/collection-page';
 import {
   anchorInput,
   safeAnchor,
+  EMPTY_BOX,
+  MAX_BORDER,
   MAX_GAP,
   MAX_MIN_HEIGHT,
+  MAX_RADIUS,
   MIN_COLUMN_WIDTH,
   normaliseSectionPadding,
   PADDING_PRESETS,
 } from '../../lib/content/schema';
-import { BoxPanel, ColourField, Measure } from './BoxControls';
-import { blockDefinition } from '../../lib/content/blocks';
+import { BoxPanel, ColourField, Measure, PaddingBox } from './BoxControls';
+import { blockDefinition, type Field, type FieldGroup } from '../../lib/content/blocks';
 import {
   type Path,
   pathKey,
@@ -42,6 +45,7 @@ import {
   updateColumn,
   updateRow,
   updateSection,
+  updateBlockBox,
   updateBlockProps,
 } from '../../lib/content/tree';
 import { ImageField } from '../media/ImageField';
@@ -1449,6 +1453,43 @@ function RebuildImportButton({
   );
 }
 
+/*
+ * THE DESIGN BOX, ELEMENT BY ELEMENT. Andy is reviewing the pattern on these
+ * four before it goes to the rest (5 Aug 2026). Each says which parts of the box
+ * to offer; a block leans on its own fields for the rest, so nothing is offered
+ * twice. Image keeps its own frame border and corners, cards its own corners, so
+ * those box parts are left off here. Button styles the button itself rather than
+ * a box around it, so it takes none and shows its own colours grouped instead.
+ * A block not listed keeps its plain, ungrouped field list, exactly as before.
+ */
+const REVIEW_DESIGN: Record<
+  string,
+  { bg?: boolean; border?: boolean; radius?: boolean; padding?: boolean; shadow?: boolean }
+> = {
+  text: { bg: true, border: true, radius: true, padding: true, shadow: true },
+  image: { bg: true, padding: true, shadow: true },
+  cards: { bg: true, border: true, padding: true, shadow: true },
+  button: {},
+};
+
+/** The sections, in the order they appear. Content is first, so it is the open one. */
+const GROUP_ORDER: FieldGroup[] = ['content', 'colours', 'border', 'spacing', 'layout', 'effects'];
+const GROUP_LABELS: Record<FieldGroup, string> = {
+  content: 'Content',
+  colours: 'Colours',
+  border: 'Border',
+  spacing: 'Spacing',
+  layout: 'Layout',
+  effects: 'Effects',
+};
+
+const SHADOW_CHOICES = [
+  { value: 'none', label: 'None' },
+  { value: 'soft', label: 'Soft' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'strong', label: 'Strong' },
+];
+
 function BlockFields({
   path,
   page,
@@ -1485,52 +1526,147 @@ function BlockFields({
     );
   }
 
+  const renderField = (field: Field) => (
+    <FieldRenderer
+      key={field.key}
+      field={field}
+      value={block.props[field.key]}
+      ownerId={block.id}
+      /*
+       * The whole prop bag, for the one field kind that needs a sibling. An
+       * imported design's editable slots are decided by the design that was
+       * pasted, so the 'imported' field reads props.fields. Others ignore it.
+       */
+      siblings={block.props}
+      onChange={(value) =>
+        onCommit(
+          (current) =>
+            updateBlockProps(current, path.section, path.row, path.column, path.block, {
+              [field.key]: value,
+            }),
+          `blk:${block.id}:${field.key}`,
+        )
+      }
+      onPatch={(patch) =>
+        onCommit(
+          (current) =>
+            updateBlockProps(current, path.section, path.row, path.column, path.block, patch),
+          `blk:${block.id}:${field.key}`,
+        )
+      }
+    />
+  );
+
+  const help = (
+    <p className="ed-help" style={{ marginTop: 0, marginBottom: 14 }}>
+      <strong>{definition.label}</strong> · {definition.description}
+    </p>
+  );
+
+  const design = REVIEW_DESIGN[block.type];
+
+  // A block without a design box keeps its flat field list, exactly as before.
+  if (!design) {
+    return (
+      <>
+        {help}
+        {block.type === 'imported' && (
+          <RebuildImportButton block={block} section={path.section} onCommit={onCommit} onSelect={onSelect} />
+        )}
+        {definition.fields.map(renderField)}
+      </>
+    );
+  }
+
+  // A review block: its own fields and the chosen box parts, gathered into the
+  // pane's sections. The box is a sibling of props, so it commits through
+  // updateBlockBox rather than updateBlockProps.
+  const box = block.box ?? EMPTY_BOX;
+  const setBox = (next: Box) =>
+    onCommit(
+      (current) => updateBlockBox(current, path.section, path.row, path.column, path.block, next),
+      `blk:${block.id}:box`,
+    );
+  const patchBox = (part: Partial<Box>) => setBox({ ...box, ...part });
+
+  const groups = new Map<FieldGroup, ReactNode[]>();
+  const add = (group: FieldGroup, node: ReactNode) => {
+    const list = groups.get(group) ?? [];
+    list.push(node);
+    groups.set(group, list);
+  };
+
+  definition.fields.forEach((field) => add(field.group ?? 'content', renderField(field)));
+
+  if (design.bg) {
+    add(
+      'colours',
+      <ColourField
+        key="box-bg"
+        label="Background colour"
+        value={box.background}
+        onChange={(background) => patchBox({ background })}
+      />,
+    );
+  }
+  if (design.border) {
+    add(
+      'border',
+      <Measure
+        key="box-bw"
+        label="Border width"
+        value={box.borderWidth}
+        max={MAX_BORDER}
+        onChange={(borderWidth) => patchBox({ borderWidth })}
+      />,
+    );
+    add(
+      'border',
+      <ColourField
+        key="box-bc"
+        label="Border colour"
+        value={box.borderColour}
+        onChange={(borderColour) => patchBox({ borderColour })}
+      />,
+    );
+  }
+  if (design.radius) {
+    add(
+      'border',
+      <Measure
+        key="box-r"
+        label="Corner radius"
+        value={box.radius}
+        max={MAX_RADIUS}
+        onChange={(radius) => patchBox({ radius })}
+      />,
+    );
+  }
+  if (design.padding) {
+    add('spacing', <PaddingBox key="box-p" padding={box.padding} onChange={(padding) => patchBox({ padding })} />);
+  }
+  if (design.shadow) {
+    add(
+      'effects',
+      <Picker
+        key="box-s"
+        label="Shadow"
+        value={box.shadow}
+        options={SHADOW_CHOICES}
+        onChange={(shadow) => patchBox({ shadow: shadow as Box['shadow'] })}
+      />,
+    );
+  }
+
+  const ordered = GROUP_ORDER.filter((group) => groups.get(group)?.length);
+
   return (
     <>
-      <p className="ed-help" style={{ marginTop: 0, marginBottom: 14 }}>
-        <strong>{definition.label}</strong> · {definition.description}
-      </p>
-
-      {block.type === 'imported' && (
-        <RebuildImportButton block={block} section={path.section} onCommit={onCommit} onSelect={onSelect} />
-      )}
-
-      {definition.fields.map((field) => (
-        <FieldRenderer
-          key={field.key}
-          field={field}
-          value={block.props[field.key]}
-          ownerId={block.id}
-          /*
-           * The whole prop bag, for the one field kind that needs a sibling.
-           * An imported design's editable slots are decided by the design that
-           * was pasted, so the 'imported' field has to read props.fields to know
-           * what to draw. Every other kind ignores this.
-           */
-          siblings={block.props}
-          onChange={(value) =>
-            onCommit(
-              (current) =>
-                updateBlockProps(current, path.section, path.row, path.column, path.block, {
-                  [field.key]: value,
-                }),
-              `blk:${block.id}:${field.key}`,
-            )
-          }
-          /*
-           * The same commit, with more than one prop in it. updateBlockProps already
-           * takes a patch, so this is the shape it wanted anyway. Used by the image
-           * field to set the picture and its description together, which keeps undo
-           * to one step for what a person did in one action.
-           */
-          onPatch={(patch) =>
-            onCommit(
-              (current) =>
-                updateBlockProps(current, path.section, path.row, path.column, path.block, patch),
-              `blk:${block.id}:${field.key}`,
-            )
-          }
-        />
+      {help}
+      {ordered.map((group, index) => (
+        <Group key={group} title={GROUP_LABELS[group]} defaultOpen={index === 0}>
+          {groups.get(group)}
+        </Group>
       ))}
     </>
   );

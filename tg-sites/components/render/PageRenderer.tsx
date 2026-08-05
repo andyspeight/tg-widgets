@@ -12,7 +12,17 @@
  */
 
 import { Fragment, type CSSProperties, type ReactElement } from 'react';
-import { safeAnchor, safeColour, type Box, type Column, type Page, type Row, type Section } from '../../lib/content/schema';
+import {
+  boxIsEmpty,
+  EMPTY_BOX,
+  safeAnchor,
+  safeColour,
+  type Box,
+  type Column,
+  type Page,
+  type Row,
+  type Section,
+} from '../../lib/content/schema';
 import { BLEND_DIVIDER, dividerShape, normaliseDividerHeight, safeDivider, sectionFill } from '../../lib/content/dividers';
 import { safeUrl } from '../../lib/content/sanitise';
 import { BlockRenderer } from './BlockRenderer';
@@ -637,20 +647,37 @@ export function ColumnRenderer({
       style={boxStyle(column.box)}
       {...pathAttr(editable, path)}
     >
-      {column.blocks.map((block, blockIndex) => (
-        <div
-          key={block.id}
-          className="tgs-block"
-          data-align={typeof block.props?.align === 'string' ? block.props.align : undefined}
-          {...pathAttr(editable, `${path}b${blockIndex}`)}
-        >
-          <BlockRenderer
-            block={block}
-            editable={editable}
-            editingHost={editable && editingPath === `${path}b${blockIndex}`}
-          />
-        </div>
-      ))}
+      {column.blocks.map((block, blockIndex) => {
+        // The block's own design box, applied to its container the same way a
+        // column applies its box. Guarded, because a block created in memory in
+        // this session has no box until the page is next parsed, and defaulting
+        // to empty renders as nothing. text colour is a plain wrapper colour so
+        // it cascades into whatever the block draws.
+        const box = block.box ?? EMPTY_BOX;
+        const boxed = !boxIsEmpty(box);
+        const textColour = safeColour((block.props as Record<string, unknown>)?.textColour);
+        const style: CSSProperties = {
+          ...(boxed ? boxStyle(box) : {}),
+          ...(textColour ? { color: textColour } : {}),
+        };
+        return (
+          <div
+            key={block.id}
+            className="tgs-block"
+            data-align={typeof block.props?.align === 'string' ? block.props.align : undefined}
+            data-boxed={boxed ? '' : undefined}
+            data-shadow={boxed ? box.shadow : undefined}
+            style={boxed || textColour ? style : undefined}
+            {...pathAttr(editable, `${path}b${blockIndex}`)}
+          >
+            <BlockRenderer
+              block={block}
+              editable={editable}
+              editingHost={editable && editingPath === `${path}b${blockIndex}`}
+            />
+          </div>
+        );
+      })}
 
       {/*
        * AN EMPTY COLUMN IS A COLUMN, NOT A BUTTON.

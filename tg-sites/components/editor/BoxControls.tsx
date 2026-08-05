@@ -425,7 +425,7 @@ export function BoxPanel({
 }: {
   box: Box;
   onChange: (box: Box) => void;
-  what: 'section' | 'column';
+  what: 'section' | 'column' | 'block';
 }) {
   const patch = (next: Partial<Box>) => onChange({ ...box, ...next });
 

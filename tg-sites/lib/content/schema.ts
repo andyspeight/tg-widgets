@@ -304,6 +304,17 @@ export const BlockSchema = z.object({
   id: z.string().min(1),
   type: z.string().min(1),
   props: z.record(z.unknown()).default({}),
+  /*
+   * The block's own design box: background, padding, border, radius and shadow,
+   * on the block's container. The same box sections and columns already carry,
+   * so the editor, the renderer and the sanitiser all treat it the one way.
+   *
+   * Optional, not defaulted, unlike a column's: a block is built in a dozen
+   * places (seed, tests, the factory, an import) and a missing box means "no box"
+   * just as an empty one does. The renderer reads `block.box ?? EMPTY_BOX`, so an
+   * absent box renders as nothing, exactly as before blocks had one (5 Aug 2026).
+   */
+  box: BoxSchema.optional(),
 });
 
 export type Block = z.infer<typeof BlockSchema>;

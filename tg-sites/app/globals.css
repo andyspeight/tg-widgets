@@ -297,6 +297,27 @@
 .tgs-section[data-shadow='medium'], .tgs-col[data-shadow='medium'] { box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12); }
 .tgs-section[data-shadow='strong'], .tgs-col[data-shadow='strong'] { box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18); }
 
+/*
+ * A BLOCK'S OWN BOX, added 5 Aug 2026.
+ *
+ * The same custom properties a column reads, on an individual block, but only
+ * when it has a box: `data-boxed` gates it so a plain block stays plain markup
+ * with no padding, border or background of its own. Background goes through the
+ * same linear-gradient trick as the column, so a token or hex paints the block
+ * without inheriting into its children.
+ */
+.tgs-block[data-boxed] {
+  padding: var(--tgs-pt, 0px) var(--tgs-pr, 0px) var(--tgs-pb, 0px) var(--tgs-pl, 0px);
+  border-radius: var(--tgs-radius, 0px);
+  border: var(--tgs-bw, 0px) solid var(--tgs-bc, transparent);
+}
+.tgs-block[data-boxed][style*='--tgs-bg'] {
+  background-image: linear-gradient(var(--tgs-bg, transparent), var(--tgs-bg, transparent));
+}
+.tgs-block[data-boxed][data-shadow='soft']   { box-shadow: 0 1px 3px rgba(15, 23, 42, 0.10); }
+.tgs-block[data-boxed][data-shadow='medium'] { box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12); }
+.tgs-block[data-boxed][data-shadow='strong'] { box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18); }
+
 .tgs-section__bg {
   position: absolute;
   inset: 0;

@@ -36,7 +36,7 @@ export function newId(prefix: string): string {
 }
 
 export function createBlock(type: string): Block {
-  return { id: newId('blk'), type, props: defaultPropsFor(type) };
+  return { id: newId('blk'), type, props: defaultPropsFor(type), box: EMPTY_BOX };
 }
 
 export function createColumn(width: number, blocks: Block[] = []): Column {

@@ -28,7 +28,17 @@ import { WIDGET_KINDS } from './widgets';
 
 export type SelectOption = { value: string; label: string };
 
-export type Field =
+/**
+ * Which collapsible section of the properties pane a field belongs to.
+ *
+ * The pane groups a block's settings the way the section pane already groups a
+ * section's, Content first and open and the rest shut. A field with no group is
+ * Content, so a block nobody has grouped yet is one open Content section, which
+ * is what it always was. Added 5 Aug 2026.
+ */
+export type FieldGroup = 'content' | 'colours' | 'border' | 'spacing' | 'layout' | 'effects';
+
+export type Field = { group?: FieldGroup } & (
   | { kind: 'text'; key: string; label: string; placeholder?: string; max?: number; help?: string }
   | { kind: 'textarea'; key: string; label: string; rows?: number; max?: number; help?: string }
   | { kind: 'richtext'; key: string; label: string; help?: string }
@@ -79,7 +89,8 @@ export type Field =
    * this says "draw the slots this block has" and the pane reads them off
    * props.fields. See lib/content/imported.ts.
    */
-  | { kind: 'imported'; key: string; label: string; help?: string };
+  | { kind: 'imported'; key: string; label: string; help?: string }
+);
 
 export type BlockGroup = 'Text' | 'Media' | 'Actions' | 'Layout' | 'Advanced';
 
@@ -255,12 +266,20 @@ export const BLOCKS: readonly BlockDefinition[] = [
           { value: 'l', label: 'Large' },
         ],
       },
-      { kind: 'select', key: 'align', label: 'Alignment', options: ALIGN_OPTIONS },
+      {
+        kind: 'colour',
+        key: 'textColour',
+        label: 'Text colour',
+        group: 'colours',
+        help: 'The colour of the words in this block. Leave blank to follow the theme.',
+      },
+      { kind: 'select', key: 'align', label: 'Alignment', options: ALIGN_OPTIONS, group: 'layout' },
       {
         kind: 'select',
         key: 'shadow',
         label: 'Heading shadow',
         options: SHADOW_OPTIONS,
+        group: 'effects',
         help: 'A shadow behind any headings here, so they stay readable over a picture. Paragraphs are left alone.',
       },
     ],
@@ -551,25 +570,27 @@ export const BLOCKS: readonly BlockDefinition[] = [
           { value: 'contain', label: 'Fit inside (no crop)' },
         ],
       },
-      { kind: 'select', key: 'radius', label: 'Corners', options: RADIUS_OPTIONS },
+      { kind: 'select', key: 'radius', label: 'Corners', options: RADIUS_OPTIONS, group: 'border' },
       {
         kind: 'corners',
         key: 'corners',
         label: 'Custom corners',
+        group: 'border',
         help: 'Rounds each corner by an exact amount, overriding the preset above. Leave at 0 to keep the preset.',
       },
-      { kind: 'number', key: 'borderWidth', label: 'Border width', min: 0, max: 40, step: 1 },
+      { kind: 'number', key: 'borderWidth', label: 'Border width', min: 0, max: 40, step: 1, group: 'border' },
       {
         kind: 'select',
         key: 'borderStyle',
         label: 'Border style',
+        group: 'border',
         options: [
           { value: 'solid', label: 'Solid' },
           { value: 'dashed', label: 'Dashed' },
           { value: 'dotted', label: 'Dotted' },
         ],
       },
-      { kind: 'colour', key: 'borderColour', label: 'Border colour' },
+      { kind: 'colour', key: 'borderColour', label: 'Border colour', group: 'border' },
       { kind: 'text', key: 'caption', label: 'Caption', max: 200 },
       { kind: 'url', key: 'href', label: 'Links to', placeholder: 'https://' },
       /*
@@ -853,11 +874,12 @@ export const BLOCKS: readonly BlockDefinition[] = [
         // this block exists to prevent.
         options: RATIO_OPTIONS.filter((option) => option.value !== 'auto'),
       },
-      { kind: 'select', key: 'radius', label: 'Corners', options: RADIUS_OPTIONS },
+      { kind: 'select', key: 'radius', label: 'Corners', options: RADIUS_OPTIONS, group: 'border' },
       {
         kind: 'select',
         key: 'align',
         label: 'Alignment',
+        group: 'layout',
         options: ALIGN_OPTIONS.filter((option) => option.value !== 'right'),
       },
       {
@@ -1051,9 +1073,9 @@ export const BLOCKS: readonly BlockDefinition[] = [
           { value: 'l', label: 'Large' },
         ],
       },
-      { kind: 'colour', key: 'colour', label: 'Button colour', help: 'Fills the button. Blank uses the style above.' },
-      { kind: 'colour', key: 'textColour', label: 'Label colour', help: 'The words on it. Blank follows the style.' },
-      { kind: 'select', key: 'align', label: 'Alignment', options: ALIGN_OPTIONS },
+      { kind: 'colour', key: 'colour', label: 'Button colour', group: 'colours', help: 'Fills the button. Blank uses the style above.' },
+      { kind: 'colour', key: 'textColour', label: 'Label colour', group: 'colours', help: 'The words on it. Blank follows the style.' },
+      { kind: 'select', key: 'align', label: 'Alignment', options: ALIGN_OPTIONS, group: 'layout' },
       { kind: 'toggle', key: 'newTab', label: 'Open in a new tab' },
     ],
   },

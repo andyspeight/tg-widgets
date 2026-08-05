@@ -1078,6 +1078,25 @@ async function openBlockPicker() {
   await page.waitForSelector('.tg-modal', { timeout: 5000 });
 }
 
+/*
+ * Open a collapsible section of the properties pane by its title, if it is not
+ * already open. Blocks group their settings into sections now, all but the first
+ * shut, so a control that used to be in a flat list may sit behind a closed
+ * section (an image's border, say). Toggling only when shut keeps it from being
+ * clicked closed again.
+ */
+async function openPaneGroup(title) {
+  await page.evaluate((wanted) => {
+    for (const group of document.querySelectorAll('.ed-props .ed-group')) {
+      const button = group.querySelector('.ed-group__head button');
+      if (button && button.textContent.includes(wanted) && group.getAttribute('data-open') !== 'true') {
+        button.click();
+      }
+    }
+  }, title);
+  await page.waitForTimeout(150);
+}
+
 await check('Escape closes a dialog', async () => {
   await openBlockPicker();
   await page.keyboard.press('Escape');
@@ -1596,12 +1615,16 @@ await check('an address the renderer refuses is explained, not ignored', async (
  * width, both of which these read straight off the rendered frame.
  */
 await check('an image offers a custom-corners control and a border', async () => {
+  // The image's border and corners live in the Border section now, shut by
+  // default like every section but the first, so open it before looking.
+  await openPaneGroup('Border');
   const corners = await page.locator('.ed-props .ed-corners').count();
   const border = await page.locator('.ed-props .ed-field', { hasText: 'Border width' }).count();
   return corners === 1 && border >= 1 ? true : `corners ${corners}, border field ${border}`;
 });
 
 await check('a custom corner rounds the picture on the page', async () => {
+  await openPaneGroup('Border');
   // Linked by default, so setting one sets all four; enough to prove it reaches
   // the frame as an inline radius that overrides the preset class.
   const tl = page.locator('.ed-props .ed-corners input[aria-label="Corner top left"]');
@@ -1614,6 +1637,7 @@ await check('a custom corner rounds the picture on the page', async () => {
 });
 
 await check('a border width draws a border on the page', async () => {
+  await openPaneGroup('Border');
   const width = page.locator('.ed-props .ed-field', { hasText: 'Border width' })
     .locator('input[type="number"]');
   await width.fill('6');
@@ -2442,6 +2466,9 @@ await check('alignment drives the block, and the properties pane agrees', async 
   await page.locator('.ed-tt__btn[aria-label="Align centre"]').click();
   await page.waitForTimeout(350);
 
+  // Alignment sits in the Layout section now, shut by default, so open it before
+  // asking whether the pane agrees with the toolbar.
+  await openPaneGroup('Layout');
   const pane = await page
     .locator('.ed-segmented button', { hasText: 'Centre' })
     .first()
@@ -6614,6 +6641,44 @@ await check('clicking a palette element adds it to the selected column', async (
   await page.waitForTimeout(300);
   const after = await page.locator(`.ed-canvas-frame [data-path^="${path}b"]`).count();
   return after > before ? true : `clicked-add in ${path}: ${before} -> ${after}`;
+});
+
+// --- A design box on an element, in a sectioned pane ------------------------
+
+/*
+ * Andy: every element needs a full design suite, and the right-hand pane must be
+ * sections with all but the first collapsed. The review batch gives text, image,
+ * cards and button a box. Selecting a text element should show grouped sections
+ * with one open, and setting a shadow should draw the box on the canvas.
+ */
+await check('an element pane is grouped into sections, only the first open', async () => {
+  const selected = await page.evaluate(() => {
+    const host = document.querySelector('.ed-canvas-frame .tgs-text')?.closest('[data-path]');
+    if (!host) return false;
+    host.click();
+    return true;
+  });
+  if (!selected) return 'no text element on the canvas to select';
+  await page.waitForTimeout(250);
+  const groups = await page.locator('.ed-props .ed-group').count();
+  const open = await page.locator('.ed-props .ed-group[data-open="true"]').count();
+  if (groups < 2) return `expected several sections, saw ${groups}`;
+  return open === 1 ? true : `expected exactly one open section, saw ${open}`;
+});
+
+await check('setting a shadow on an element draws its box on the canvas', async () => {
+  await page.evaluate(() => {
+    document.querySelector('.ed-canvas-frame .tgs-text')?.closest('[data-path]')?.click();
+  });
+  await page.waitForTimeout(200);
+  await page.locator('.ed-props .ed-group__head button', { hasText: 'Effects' }).click();
+  await page.waitForTimeout(150);
+  await page.locator('select[aria-label="Shadow"]').selectOption('strong');
+  await page.waitForTimeout(300);
+  const boxed = await page
+    .locator('.ed-canvas-frame .tgs-block[data-boxed][data-shadow="strong"]')
+    .count();
+  return boxed > 0 ? true : 'the element did not gain a box after a shadow was set';
 });
 
 await browser.close();
