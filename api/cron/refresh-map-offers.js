@@ -816,7 +816,11 @@ async function sweepCountry(row) {
     }
     // fetched = what Travelify actually sent; count = what survived our rules.
     // The gap between them, split by reason, is the whole diagnosis.
-    return { code, market: market.id, type: sweepType.id, origin: flightOrigin || undefined, ok: true, fetched: arr.length, count: offers.length, dropped, offers };
+    // Kept Irish EUR — the whole point of the euro sweep. By the keep-rule above
+    // every kept EUR offer is Irish-market, so this is the visible "we captured
+    // it" number that balances the non-Irish EUR we drop.
+    const keptEUR = offers.reduce((n, o) => n + (o.currency === 'EUR' ? 1 : 0), 0);
+    return { code, market: market.id, type: sweepType.id, origin: flightOrigin || undefined, ok: true, fetched: arr.length, count: offers.length, keptEUR, dropped, offers };
   });
   const freshOffers = codeResults.flatMap(r => r.offers);
   const anyOk = codeResults.some(r => r.ok);
@@ -859,7 +863,7 @@ async function sweepCountry(row) {
     cc, name: f.Name || '',
     ok: anyOk,
     uniqueByType,
-    codeResults: codeResults.map(({ code, market, type, origin, ok, error, fetched, count, dropped }) => ({ code, market, type, origin, ok, error, fetched, count, dropped })),
+    codeResults: codeResults.map(({ code, market, type, origin, ok, error, fetched, count, keptEUR, dropped }) => ({ code, market, type, origin, ok, error, fetched, count, keptEUR, dropped })),
     freshOffers,
   };
 }
@@ -871,7 +875,7 @@ async function sweepCountry(row) {
 function aggregateSweepStats(perCountry) {
   const perType = {};
   const bucket = (type) => perType[type] || (perType[type] = {
-    requests: 0, failed: 0, fetched: 0, kept: 0, unique: 0,
+    requests: 0, failed: 0, fetched: 0, kept: 0, keptEUR: 0, unique: 0,
     dropped: { noPrice: 0, noDest: 0, duration: 0, durNoNights: 0, durOutOfRange: 0, nonGBP: 0 },
   });
   for (const p of perCountry || []) {
@@ -882,6 +886,7 @@ function aggregateSweepStats(perCountry) {
       if (!r.ok) { t.failed++; continue; }
       t.fetched += r.fetched || 0;
       t.kept += r.count || 0;
+      t.keptEUR += r.keptEUR || 0;
       const d = r.dropped || {};
       t.dropped.noPrice += d.noPrice || 0;
       t.dropped.noDest += d.noDest || 0;

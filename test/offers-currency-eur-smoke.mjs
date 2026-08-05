@@ -143,5 +143,24 @@ ok(/o\.currency === 'EUR'/.test(CRON) && /=== 'IE'/.test(CRON),
 ok(/\(o\.currency \|\| 'GBP'\) === 'GBP'/.test(CRON), 'the world-map summary is filtered to GBP only');
 ok(/money\(o\.price, o\.currency/.test(CACHED), 'cached-offers formats each price in its own currency');
 
+// ── Cron: sweep stats surface kept Irish EUR (dashboard visibility) ───────────
+{
+  const aggregateSweepStats = new Function(
+    extractFn(CRON, 'function aggregateSweepStats(perCountry)') + '\nreturn aggregateSweepStats;')();
+  const stats = aggregateSweepStats([{ codeResults: [
+    { type: 'Packages', ok: true, fetched: 100, count: 40, keptEUR: 12, dropped: { nonGBP: 60 } },
+    { type: 'Packages', ok: true, fetched: 50, count: 30, keptEUR: 0, dropped: { nonGBP: 20 } },
+  ], uniqueByType: { Packages: 55 } }]);
+  ok(stats.Packages.keptEUR === 12, 'aggregateSweepStats sums kept Irish EUR for the dashboard');
+  ok(stats.Packages.dropped.nonGBP === 80, 'and still totals the dropped non-Irish EUR separately');
+}
+
+// ── Dashboard: shows the win, and the drop reads as a duplicate not a loss ─────
+{
+  const ADMIN = readFileSync(new URL('../public/admin-worldmap.html', import.meta.url), 'utf8');
+  ok(/s\.keptEUR/.test(ADMIN) && /Irish €/.test(ADMIN), 'the dashboard shows kept Irish euros');
+  ok(/non-Irish EUR \(already held in £\)/.test(ADMIN), 'the drop label reads as a duplicate, not missed euros');
+}
+
 console.log(`\n${passed} passed, ${failed} failed`);
 if (failed) process.exit(1);

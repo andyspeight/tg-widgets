@@ -963,7 +963,11 @@
   function lastSweepLine() {
     const ls = CACHE && CACHE.lastSweep;
     if (!ls || !ls.perType) return '';
-    const REASONS = { noPrice: 'no price', noDest: 'no destination', duration: 'stay length', nonGBP: 'non-GBP' };
+    // "nonGBP" is the currency keep-rule's drop count. It is NOT missed Irish
+    // euros: a euro offer is dropped only when it departs a British airport, i.e.
+    // a package we already hold in sterling from the GB sweep. Label it so it
+    // reads as a duplicate, not a loss. Irish euros kept are shown separately.
+    const REASONS = { noPrice: 'no price', noDest: 'no destination', duration: 'stay length', nonGBP: 'non-Irish EUR (already held in £)' };
     const part = (typeKey, label) => {
       const s = ls.perType[typeKey];
       if (!s || !s.requests) return '';
@@ -977,7 +981,10 @@
       // when the run recorded it and dedupe actually collapsed something.
       const uniquePart = (Number.isFinite(s.unique) && s.unique > 0 && s.unique < s.kept)
         ? ` → <b style="color:var(--text)">${s.unique.toLocaleString('en-GB')}</b> unique` : '';
-      return `<span style="white-space:nowrap" title="Fetched = returned across every request (each destination is asked twice, once per market). Unique = distinct offers after the two markets' copies merge — this is what lands in the store.">${esc(label)} <b style="color:var(--text)">${(s.fetched || 0).toLocaleString('en-GB')}</b> fetched → <b style="color:var(--text)">${(s.kept || 0).toLocaleString('en-GB')}</b> kept${uniquePart}${gap}</span>`;
+      // Irish euro offers captured this sweep — the win the euro sweep exists for.
+      const eurPart = (Number.isFinite(s.keptEUR) && s.keptEUR > 0)
+        ? ` <span style="color:#15803D" title="Irish euro offers captured and kept this sweep (not dropped). This is the euro inventory the Irish market sweep was added to catch.">incl. ${s.keptEUR.toLocaleString('en-GB')} Irish €</span>` : '';
+      return `<span style="white-space:nowrap" title="Fetched = returned across every request (each destination is asked per market and currency). Unique = distinct offers after the copies merge — this is what lands in the store.">${esc(label)} <b style="color:var(--text)">${(s.fetched || 0).toLocaleString('en-GB')}</b> fetched → <b style="color:var(--text)">${(s.kept || 0).toLocaleString('en-GB')}</b> kept${uniquePart}${eurPart}${gap}</span>`;
     };
     const parts = [part('Packages', 'Packages'), part('Accommodation', 'Hotels'), part('Flights', 'Flights')].filter(Boolean);
     if (!parts.length) return '';
