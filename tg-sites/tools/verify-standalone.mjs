@@ -6539,6 +6539,24 @@ await check('a block dragged from the picker is added where it is dropped', asyn
   return after > setup.before ? true : `column ${setup.path} blocks ${setup.before} -> ${after}`;
 });
 
+/*
+ * Closing the picker must clear the drag flag. A real drop unmounts the dragged
+ * card before its dragend fires, so the picker's own unmount is what has to
+ * clear the flag; left set, the scrim-fade CSS makes the next open of the
+ * picker invisible (Andy hit exactly that, 5 Aug 2026). The synthetic drag
+ * above fires dragend in order and so cannot catch this, hence a direct probe.
+ */
+await check('closing the picker clears a leftover drag flag', async () => {
+  await openBlockPicker();
+  await page.evaluate(() => {
+    document.body.dataset.tgDragging = 'block';
+  });
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(200);
+  const stuck = await page.evaluate(() => Boolean(document.body.dataset.tgDragging));
+  return stuck ? 'the drag flag was left set after the picker closed' : true;
+});
+
 await browser.close();
 
 let failed = false;

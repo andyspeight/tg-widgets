@@ -45,6 +45,17 @@ describe('a block can be dragged off the picker', () => {
     expect(picker).toMatch(/setTimeout\(\(\) => \{\s*document\.body\.dataset\.tgDragging = 'block';\s*\}, 0\)/);
     expect(picker).toContain('clearTimeout(fadeTimer.current)');
   });
+
+  it('clears the drag flag when the picker unmounts, not only on dragend', () => {
+    // A drop closes the picker, unmounting the card before its dragend fires. If
+    // the flag is only cleared on dragend it sticks on, and the scrim-fade CSS
+    // then makes every later open of the picker invisible. The unmount cleanup
+    // is what stops that.
+    const picker = read('components', 'editor', 'BlockPicker.tsx');
+    expect(picker).toMatch(
+      /useEffect\(\s*\(\) => \(\) => \{[\s\S]*?delete document\.body\.dataset\.tgDragging;[\s\S]*?\},\s*\[\],?\s*\)/,
+    );
+  });
 });
 
 describe('the canvas takes the drop', () => {

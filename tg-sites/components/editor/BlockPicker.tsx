@@ -7,7 +7,7 @@
  * category, staff-only blocks hidden unless the user is staff.
  */
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { blocksByGroup } from '../../lib/content/blocks';
 import { BLOCK_DRAG_MIME } from '../../lib/content/tree';
 import { Icon } from './Icon';
@@ -27,6 +27,22 @@ export function BlockPicker({
   // Holds the pending "fade the modal" timer so dragend can cancel it. The fade
   // must not run synchronously inside dragstart — see the note on the card.
   const fadeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  /*
+   * Clear the drag flag when the picker closes, for ANY reason. A successful
+   * drop adds the block and closes the picker, which unmounts the dragged card
+   * BEFORE its dragend can fire, so dragend alone cannot be trusted to clear the
+   * flag. Left set, the flag keeps the scrim-fade CSS in force, so the next time
+   * the picker opens it is faded to nothing and looks like it appears then
+   * instantly hides (Andy hit exactly this, 5 Aug 2026).
+   */
+  useEffect(
+    () => () => {
+      clearTimeout(fadeTimer.current);
+      delete document.body.dataset.tgDragging;
+    },
+    [],
+  );
 
   // Escape, the scrim and the focus trap all belong to Modal. Modal also
   // moves focus to the first control, which here is the search box.
