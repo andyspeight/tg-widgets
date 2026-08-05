@@ -86,8 +86,11 @@ describe('the shell adds the dropped block where it landed', () => {
   const shell = read('components', 'editor', 'EditorShell.tsx');
 
   it('adds at the drop target and index, then closes the picker', () => {
-    const call = shell.slice(shell.indexOf('onDropBlock={'));
-    const body = call.slice(0, call.indexOf('theme={siteTheme}'));
+    // The logic lives in addBlockAt now, shared by the canvas drop and the
+    // palette; the canvas just passes onDropBlock={addBlockAt}.
+    expect(shell).toContain('onDropBlock={addBlockAt}');
+    const fn = shell.slice(shell.indexOf('const addBlockAt = useCallback('));
+    const body = fn.slice(0, fn.indexOf('[page, commit],'));
     expect(body).toContain('setPicker(null)');
     expect(body).toContain('addBlock(current, target.section, target.row, target.column, createBlock(type), target.at)');
     // The new block is selected, so the pane opens on it as if you had added it.

@@ -50,6 +50,7 @@ import {
   layoutWords,
   sectionName,
 } from '../../lib/content/naming';
+import { ElementsPalette } from './ElementsPalette';
 import { Icon } from './Icon';
 import { Menu } from './Menu';
 import { LayoutThumb } from './SectionPicker';
@@ -66,6 +67,10 @@ interface Props {
   onPickBlock: (target: { section: number; row: number; column: number }) => void;
   onAddSection: () => void;
   newId: Reid;
+  /** Staff see staff-only blocks in the elements palette, as in the + picker. */
+  isStaff: boolean;
+  /** Click-to-add from the elements palette. The shell decides where it lands. */
+  onAddElement: (type: string) => void;
 }
 
 type DragItem =
@@ -74,10 +79,22 @@ type DragItem =
 
 // ---------------------------------------------------------------------------
 
-export function Outline({ page, selectedKey, onSelect, onCommit, onPickBlock, onAddSection, newId }: Props) {
+export function Outline({
+  page,
+  selectedKey,
+  onSelect,
+  onCommit,
+  onPickBlock,
+  onAddSection,
+  newId,
+  isStaff,
+  onAddElement,
+}: Props) {
   const [open, setOpen] = useState<Set<string>>(() => new Set());
   const [drag, setDrag] = useState<DragItem | null>(null);
   const [over, setOver] = useState<string | null>(null);
+  /** Which face of the left pane: the page tree, or the elements to drag from. */
+  const [tab, setTab] = useState<'outline' | 'elements'>('outline');
 
   /*
    * Selecting something on the canvas has to reveal it here, otherwise the
@@ -126,6 +143,31 @@ export function Outline({ page, selectedKey, onSelect, onCommit, onPickBlock, on
 
   return (
     <aside className="ed-outline" aria-label="Page outline">
+      <div className="ed-lefttabs" role="tablist" aria-label="Left panel">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === 'outline'}
+          className="ed-lefttab"
+          onClick={() => setTab('outline')}
+        >
+          Outline
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === 'elements'}
+          className="ed-lefttab"
+          onClick={() => setTab('elements')}
+        >
+          Elements
+        </button>
+      </div>
+
+      {tab === 'elements' ? (
+        <ElementsPalette isStaff={isStaff} onAdd={onAddElement} />
+      ) : (
+        <>
       <div className="ed-panel-head">
         <span className="ed-panel-title">Page</span>
         <span className="ed-panel-sub">
@@ -262,6 +304,8 @@ export function Outline({ page, selectedKey, onSelect, onCommit, onPickBlock, on
           Add a section
         </button>
       </div>
+        </>
+      )}
     </aside>
   );
 }

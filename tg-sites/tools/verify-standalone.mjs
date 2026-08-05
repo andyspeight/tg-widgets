@@ -6557,6 +6557,60 @@ await check('closing the picker clears a leftover drag flag', async () => {
   return stuck ? 'the drag flag was left set after the picker closed' : true;
 });
 
+// --- The persistent elements palette in the left pane -----------------------
+
+/*
+ * The Elementor-style panel you drag elements from. It shares the canvas drop
+ * path with the + picker, so the same synthetic drag proves it. Switching the
+ * left pane to Elements is all that is new. Left near the end, since it changes
+ * the page and the left pane.
+ */
+await check('an element dragged from the left palette lands on the canvas', async () => {
+  await page.locator('.ed-lefttab', { hasText: 'Elements' }).click();
+  await page.waitForSelector('.ed-palette-card', { timeout: 3000 });
+
+  const setup = await page.evaluate((mime) => {
+    const card = document.querySelector('.ed-palette-card');
+    const col = [...document.querySelectorAll('.ed-canvas-frame [data-path]')].find((el) =>
+      /^s\d+r\d+c\d+$/.test(el.getAttribute('data-path') || ''),
+    );
+    if (!card || !col) return { ok: false, why: 'missing a palette card or a column' };
+    const path = col.getAttribute('data-path');
+    const before = document.querySelectorAll(`.ed-canvas-frame [data-path^="${path}b"]`).length;
+    const dt = new DataTransfer();
+    const fire = (el, type) =>
+      el.dispatchEvent(new DragEvent(type, { dataTransfer: dt, bubbles: true, cancelable: true }));
+    fire(card, 'dragstart');
+    fire(col, 'dragover');
+    fire(col, 'drop');
+    fire(card, 'dragend');
+    return { ok: true, path, before };
+  }, 'application/x-tg-block');
+
+  if (!setup.ok) return setup.why;
+  await page.waitForTimeout(300);
+  const after = await page.locator(`.ed-canvas-frame [data-path^="${setup.path}b"]`).count();
+  return after > setup.before ? true : `column ${setup.path} blocks ${setup.before} -> ${after}`;
+});
+
+await check('clicking a palette element adds it to the selected column', async () => {
+  const path = await page.evaluate(() => {
+    const col = [...document.querySelectorAll('.ed-canvas-frame [data-path]')].find((el) =>
+      /^s\d+r\d+c\d+$/.test(el.getAttribute('data-path') || ''),
+    );
+    if (!col) return null;
+    col.click();
+    return col.getAttribute('data-path');
+  });
+  if (!path) return 'no column to select';
+  await page.waitForTimeout(150);
+  const before = await page.locator(`.ed-canvas-frame [data-path^="${path}b"]`).count();
+  await page.locator('.ed-palette-card').first().click();
+  await page.waitForTimeout(300);
+  const after = await page.locator(`.ed-canvas-frame [data-path^="${path}b"]`).count();
+  return after > before ? true : `clicked-add in ${path}: ${before} -> ${after}`;
+});
+
 await browser.close();
 
 let failed = false;

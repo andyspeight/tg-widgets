@@ -920,6 +920,56 @@ export function EditorShell({
     return unpublished ? 'Publish changes' : 'Published';
   }, [publishing, status, unpublished]);
 
+  // Add a block at an explicit place. Shared by the canvas drop and the elements
+  // palette, so a dropped block and a clicked one land the one same way.
+  const addBlockAt = useCallback(
+    (target: { section: number; row: number; column: number; at?: number }, type: string) => {
+      setPicker(null);
+      const column = page.sections[target.section]?.rows[target.row]?.columns[target.column];
+      if (!column) return;
+      const length = column.blocks.length;
+      const index = target.at === undefined ? length : Math.max(0, Math.min(target.at, length));
+      commit((current) =>
+        addBlock(current, target.section, target.row, target.column, createBlock(type), target.at),
+      );
+      setSelected({
+        kind: 'block',
+        section: target.section,
+        row: target.row,
+        column: target.column,
+        block: index,
+      });
+    },
+    [page, commit],
+  );
+
+  // Click-to-add from the elements palette. Lands in the selected column (after
+  // the selected block, if one is selected), else the last column on the page.
+  // An empty page has nowhere to put it, so it waits for a section.
+  const addElement = useCallback(
+    (type: string) => {
+      if (selected && (selected.kind === 'column' || selected.kind === 'block')) {
+        addBlockAt(
+          {
+            section: selected.section,
+            row: selected.row,
+            column: selected.column,
+            at: selected.kind === 'block' ? selected.block + 1 : undefined,
+          },
+          type,
+        );
+        return;
+      }
+      const si = page.sections.length - 1;
+      const sec = si >= 0 ? page.sections[si] : undefined;
+      const ri = (sec?.rows.length ?? 0) - 1;
+      const row = ri >= 0 ? sec?.rows[ri] : undefined;
+      const ci = (row?.columns.length ?? 0) - 1;
+      if (sec && row && ci >= 0) addBlockAt({ section: si, row: ri, column: ci }, type);
+    },
+    [selected, page, addBlockAt],
+  );
+
   // ---------------------------------------------------------------------
 
   return (
@@ -1223,6 +1273,8 @@ export function EditorShell({
         onCommit={commit}
         onPickBlock={setPicker}
         newId={newId}
+        isStaff={isStaff}
+        onAddElement={addElement}
       />
 
       <Canvas
@@ -1237,32 +1289,12 @@ export function EditorShell({
         onCommit={commit}
         onPickBlock={setPicker}
         /*
-          A block dragged off the picker and dropped on the canvas. The same
-          add as the click path, but the target is where it was dropped rather
-          than where the picker was opened, and `at` places it inside the column
-          rather than always at the end. The index is worked out here, from the
-          current page, for the same reason the click path does: a state updater
-          must stay pure. Closing the picker is what clears the faded modal.
+          A block dropped on the canvas, from the + picker or the elements
+          palette. Same add as the click path, but the target is where it was
+          dropped and `at` places it inside the column rather than at the end.
+          Shared with the palette's click-to-add through addBlockAt.
         */
-        onDropBlock={(target, type) => {
-          setPicker(null);
-          const column =
-            page.sections[target.section]?.rows[target.row]?.columns[target.column];
-          if (!column) return;
-          const length = column.blocks.length;
-          const index =
-            target.at === undefined ? length : Math.max(0, Math.min(target.at, length));
-          commit((current) =>
-            addBlock(current, target.section, target.row, target.column, createBlock(type), target.at),
-          );
-          setSelected({
-            kind: 'block',
-            section: target.section,
-            row: target.row,
-            column: target.column,
-            block: index,
-          });
-        }}
+        onDropBlock={addBlockAt}
         theme={siteTheme}
         // So the canvas draws a header as a header rather than as a page.
         region={region}
