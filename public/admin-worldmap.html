@@ -363,6 +363,18 @@
     </div>
   </div>
 
+  <!-- Rebuild progress — shown only while an auto-continuing full rebuild runs -->
+  <div id="rebuild-progress" style="display:none; margin:14px 0 0; padding:12px 16px; background:var(--card); border:1px solid var(--border); border-radius:12px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:8px;">
+      <span id="rebuild-progress-label" style="font-size:13px; font-weight:600; color:var(--text);">Rebuilding destinations…</span>
+      <button class="btn btn--sm" id="btn-rebuild-stop" type="button">Stop</button>
+    </div>
+    <div style="height:8px; background:var(--border); border-radius:99px; overflow:hidden;">
+      <div id="rebuild-progress-bar" style="height:100%; width:0%; background:var(--teal); border-radius:99px; transition:width .35s ease;"></div>
+    </div>
+    <p style="margin:8px 0 0; font-size:12px; color:var(--muted);">The cache also refreshes on its own every few minutes, so you can stop or close this any time and it will carry on in the background.</p>
+  </div>
+
   <!-- Status bar -->
   <div class="statusbar" id="statusbar">
     <div class="stat"><span class="stat-label">Destinations</span><span class="stat-value" id="s-count">—</span></div>
@@ -990,10 +1002,26 @@
     if (!parts.length) return '';
     const scope = ls.mode === 'full' ? 'full sweep' : ls.mode && ls.mode.startsWith('country:') ? `re-poll ${esc(ls.mode.slice(8))}` : 'rotating sweep';
     const partialNote = ls.partial
-      ? ` — hit the time limit at ${ls.sweptCountries || 0} of ${ls.targetCountries || '?'}; the next run continues from there`
+      ? ` — one batch of a rolling refresh; the next run continues automatically`
+      : '';
+    // Coverage: how much of the whole destination list is currently fresh. This
+    // is the real "are we there yet" number — it climbs toward 100% on its own as
+    // the scheduled sweep works through the list, so a manual rebuild is a
+    // hurry-along, not something to babysit.
+    const now = Date.now();
+    const cs = (CACHE && CACHE.countries) || [];
+    const totalDest = (typeof DEST !== 'undefined' && DEST && DEST.length) ? DEST.length : cs.length;
+    const freshHr = cs.filter(c => c.refreshedAt && (now - new Date(c.refreshedAt).getTime()) < 3600000).length;
+    const pct = totalDest ? Math.round(100 * freshHr / totalDest) : 0;
+    const coverage = totalDest
+      ? `<div style="margin-top:6px; display:flex; align-items:center; gap:10px;">
+           <span>Coverage: <b style="color:var(--text)">${freshHr}</b> of ${totalDest} destinations refreshed in the last hour</span>
+           <span style="flex:0 0 120px; height:6px; background:var(--border); border-radius:99px; overflow:hidden;"><span style="display:block; height:100%; width:${pct}%; background:var(--teal); border-radius:99px;"></span></span>
+           <span style="color:var(--muted-2)">${pct}%</span>
+         </div>`
       : '';
     return `<div style="padding:8px 18px; font-size:12px; color:var(--muted); border-bottom:1px solid var(--border); background:#FBFCFE" title="Fetched = offers Travelify returned for our requests. Kept = offers that passed our storage rules. The difference, split by reason, shows why a type is thin.">
-      Last sweep <b style="color:var(--text)">${esc(timeAgo(ls.at))}</b> (${scope}, ${ls.sweptCountries || 0} ${ls.sweptCountries === 1 ? 'country' : 'countries'}${partialNote}): ${parts.join(' · ')}
+      Last sweep <b style="color:var(--text)">${esc(timeAgo(ls.at))}</b> (${scope}, ${ls.sweptCountries || 0} ${ls.sweptCountries === 1 ? 'country' : 'countries'}${partialNote}): ${parts.join(' · ')}${coverage}
     </div>`;
   }
 
@@ -1628,6 +1656,58 @@
     }
   }
 
+  // Auto-continuing full rebuild. The cron sweeps ~11 countries per call (its
+  // time budget) and reports how many it did, the total, and whether more
+  // remain. Rather than make the operator press "Rebuild all" over and over —
+  // and lose track when the scheduled sweep overwrites the "continue" message —
+  // we drive the continuation here and show one honest progress bar to 100%.
+  let rebuildAbort = false;
+  async function rebuildAllChained(btn) {
+    const prog = $('rebuild-progress'), bar = $('rebuild-progress-bar'), label = $('rebuild-progress-label');
+    const original = btn ? btn.innerHTML : null;
+    rebuildAbort = false;
+    if (btn) { btn.disabled = true; btn.innerHTML = `<svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.2-8.5"/></svg> Rebuilding…`; }
+    prog.style.display = ''; bar.style.width = '0%'; label.textContent = 'Rebuilding destinations…';
+    let covered = 0, total = 0, rounds = 0;
+    const MAX_ROUNDS = 12; // safety net: 12 x ~11 countries is well over any real list
+    try {
+      while (!rebuildAbort && rounds < MAX_ROUNDS) {
+        rounds++;
+        const r = await fetch(API_REBUILD, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ scope: 'all' }) });
+        const d = await r.json().catch(() => ({}));
+        if (r.status === 401 || r.status === 403) { toast('Admin access required', 'err'); break; }
+        if (!r.ok && !d.pending) throw new Error(d.error || ('HTTP ' + r.status));
+        if (d.pending) { // the request stopped waiting but the sweep runs on server-side
+          label.textContent = 'Sweep still running on the server — waiting…';
+          await new Promise(res => setTimeout(res, 5000));
+          continue;
+        }
+        const cron = d.result || {};
+        total = cron.totalCountries || total || 0;
+        covered += (cron.processedCountries || 0);
+        const pct = total ? Math.min(100, Math.round(100 * covered / total)) : 0;
+        bar.style.width = pct + '%';
+        label.textContent = total ? `Rebuilding destinations — ${Math.min(covered, total)} of ${total}` : 'Rebuilding destinations…';
+        // Done when a run finished inside its time budget (nothing left), we have
+        // covered a whole loop, or a run processed nothing.
+        if (!cron.partial || (total && covered >= total) || !cron.processedCountries) break;
+      }
+      if (rebuildAbort) {
+        toast('Stopped — the cache keeps refreshing on its own', 'ok');
+      } else {
+        bar.style.width = '100%';
+        label.textContent = total ? `Refreshed ${total} destinations` : 'Rebuild complete';
+        toast('Rebuild complete', 'ok');
+      }
+    } catch (e) {
+      toast(e.message, 'err');
+    } finally {
+      if (btn) { btn.disabled = false; btn.innerHTML = original; }
+      setTimeout(() => { prog.style.display = 'none'; }, rebuildAbort ? 400 : 2500);
+      (activeTab === 'cache' || activeTab === 'suppliers') ? loadCache() : load();
+    }
+  }
+
   // ── tabs ─────────────────────────────────────────────────────
   function setTab(tab) {
     activeTab = tab;
@@ -1744,9 +1824,10 @@
   });
   $('btn-add').addEventListener('click', () => openModal(null));
   $('btn-rebuild-all').addEventListener('click', (e) => {
-    if (!confirm('Re-poll every destination? This can take a couple of minutes.')) return;
-    rebuild({ scope: 'all' }, e.currentTarget);
+    if (!confirm('Re-poll every destination? This runs to completion on its own and shows a progress bar — you do not need to press it again.')) return;
+    rebuildAllChained(e.currentTarget);
   });
+  $('btn-rebuild-stop').addEventListener('click', () => { rebuildAbort = true; });
   $('btn-rebuild-empty').addEventListener('click', (e) => rebuildEmpties(e.currentTarget));
   $('search').addEventListener('input', (e) => { filter = e.target.value; renderTable(); });
 
