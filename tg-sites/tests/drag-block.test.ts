@@ -69,16 +69,19 @@ describe('the canvas takes the drop', () => {
     expect(canvas).toContain('onDrop={onDrop}');
   });
 
-  it('drops onto a column, after a block or appended to the column', () => {
-    // A block drop lands after that block; a column drop appends.
-    expect(canvas).toContain('at: path.block + 1');
-    expect(canvas).toMatch(/kind === 'column'[\s\S]*?at: undefined/);
-    expect(canvas).toContain('onDropBlock({ section: hit.section, row: hit.row, column: hit.column, at: hit.at }, type)');
+  it('computes a precise insertion index from the pointer position', () => {
+    // Before the first block whose middle is below the pointer, else appended.
+    expect(canvas).toContain('event.clientY < r.top + r.height / 2');
+    expect(canvas).toContain('let index = blockEls.length');
+    // The drop inserts at that index, not always after the hovered block.
+    expect(canvas).toContain('at: target.index');
   });
 
-  it('highlights the column under the drag and clears it after', () => {
-    expect(canvas).toContain("el.classList.add('ed-drop-target')");
-    expect(canvas).toContain("dropElRef.current?.classList.remove('ed-drop-target')");
+  it('shows a floating drop zone at the insertion point, and hides it after', () => {
+    // A filled zone positioned imperatively, not a whole-column highlight.
+    expect(canvas).toContain('slot.style.display');
+    expect(canvas).toContain("dropSlotRef.current.style.display = 'none'");
+    expect(canvas).toContain('<div ref={dropSlotRef} className="ed-drop-slot"');
   });
 });
 
@@ -106,8 +109,10 @@ describe('the stylesheet recedes the modal and marks the drop', () => {
     expect(css).toContain('pointer-events: none');
   });
 
-  it('marks the target column in the editor drag-over colour', () => {
-    expect(css).toContain('.ed-canvas-frame .ed-drop-target');
-    expect(css).toContain('outline: 2px dashed var(--ed-accent)');
+  it('draws a filled drop zone, hidden until a drag is over a column', () => {
+    expect(css).toContain('.ed-drop-slot');
+    expect(css).toContain('border: 2px solid var(--ed-accent)');
+    // position: fixed so the canvas can place it from viewport rects.
+    expect(css).toMatch(/\.ed-drop-slot \{[\s\S]*?position: fixed/);
   });
 });

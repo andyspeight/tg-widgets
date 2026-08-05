@@ -6524,12 +6524,17 @@ await check('a block dragged from the picker is added where it is dropped', asyn
       el.dispatchEvent(new DragEvent(type, { dataTransfer: dt, bubbles: true, cancelable: true }));
     fire(card, 'dragstart');
     fire(col, 'dragover');
+    // The precise drop zone should be showing now, and gone after the drop.
+    const zoneShown = document.querySelector('.ed-drop-slot')?.style.display === 'block';
     fire(col, 'drop');
     fire(card, 'dragend');
-    return { ok: true, path, before };
+    const zoneAfter = document.querySelector('.ed-drop-slot')?.style.display;
+    return { ok: true, path, before, zoneShown, zoneAfter };
   }, 'application/x-tg-block');
 
   if (!setup.ok) return setup.why;
+  if (!setup.zoneShown) return 'no drop zone appeared while dragging over the column';
+  if (setup.zoneAfter !== 'none') return 'the drop zone was not hidden after the drop';
   await page.waitForTimeout(400);
 
   if ((await page.locator('.tg-modal').count()) !== 0) return 'the picker did not close after the drop';

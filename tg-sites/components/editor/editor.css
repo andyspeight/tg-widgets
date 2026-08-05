@@ -3355,11 +3355,21 @@ body[data-tg-dragging='block'] .tg-scrim {
   pointer-events: none;
 }
 
-/* The column a dragged block would land in, in the editor's drag-over language. */
-.ed-canvas-frame .ed-drop-target {
-  outline: 2px dashed var(--ed-accent);
-  outline-offset: -2px;
-  background: rgba(0, 180, 216, 0.08);
+/*
+ * Where a dragged block will land: a filled zone at the precise insertion point
+ * between two blocks, not a hairline and not the whole column. Positioned
+ * imperatively by the canvas (position: fixed), hidden until a drag is over a
+ * column. Andy asked for a precise drop area rather than a line (5 Aug 2026).
+ */
+.ed-drop-slot {
+  display: none;
+  position: fixed;
+  z-index: 50;
+  pointer-events: none;
+  border-radius: var(--ed-r-sm);
+  background: rgba(0, 180, 216, 0.18);
+  border: 2px solid var(--ed-accent);
+  box-shadow: 0 0 0 4px rgba(0, 180, 216, 0.12);
 }
 
 .tg-modal {

@@ -123,8 +123,10 @@ export function Canvas({
   const wrapRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<DragState | null>(null);
   const heightRef = useRef<HeightDrag | null>(null);
-  /** The column highlighted under a block being dragged in, so it can be cleared. */
-  const dropElRef = useRef<HTMLElement | null>(null);
+  /** The floating drop zone shown where a dragged block would land. */
+  const dropSlotRef = useRef<HTMLDivElement | null>(null);
+  /** Where that drop would insert: the column, and the index within it. */
+  const dropRef = useRef<{ section: number; row: number; column: number; index: number } | null>(null);
   const [badge, setBadge] = useState<{ x: number; y: number; text: string } | null>(null);
 
   // ---------------------------------------------------------------------
@@ -378,31 +380,26 @@ export function Canvas({
   // ---------------------------------------------------------------------
 
   /*
-   * The column under the pointer, and where in it the block would land. A drop
-   * onto a block lands AFTER that block; a drop onto a column's own space (an
-   * empty column, or the room around its blocks) appends. Read off the same
-   * data-path the click handler uses, so the two cannot disagree about what is
+   * The column under the pointer. Where in it the block lands is worked out
+   * separately, from where the pointer sits against each block, so the zone
+   * falls between the right two blocks rather than always after one. Read off
+   * the same data-path the click handler uses, so the two agree about what is
    * where.
    */
-  const dropTargetUnder = useCallback((el: HTMLElement | null) => {
+  const columnUnder = useCallback((el: HTMLElement | null) => {
     const node = el?.closest<HTMLElement>('[data-path], [data-add]');
     if (!node) return null;
     const path = parsePathKey(node.dataset.path ?? node.dataset.add);
-    if (!path) return null;
-    if (path.kind === 'block') {
-      const columnEl =
-        node.closest<HTMLElement>(`[data-path="s${path.section}r${path.row}c${path.column}"]`) ?? node;
-      return { columnEl, section: path.section, row: path.row, column: path.column, at: path.block + 1 };
-    }
-    if (path.kind === 'column') {
-      return { columnEl: node, section: path.section, row: path.row, column: path.column, at: undefined };
-    }
-    return null;
+    if (!path || (path.kind !== 'block' && path.kind !== 'column')) return null;
+    const key = `s${path.section}r${path.row}c${path.column}`;
+    const columnEl = node.closest<HTMLElement>(`[data-path="${key}"]`) ?? (path.kind === 'column' ? node : null);
+    if (!columnEl) return null;
+    return { columnEl, section: path.section, row: path.row, column: path.column, key };
   }, []);
 
-  const clearDropTarget = useCallback(() => {
-    dropElRef.current?.classList.remove('ed-drop-target');
-    dropElRef.current = null;
+  const hideDropSlot = useCallback(() => {
+    if (dropSlotRef.current) dropSlotRef.current.style.display = 'none';
+    dropRef.current = null;
   }, []);
 
   const onDragOver = useCallback(
@@ -413,29 +410,68 @@ export function Canvas({
       event.preventDefault();
       event.dataTransfer.dropEffect = 'copy';
 
-      const el = dropTargetUnder(event.target as HTMLElement)?.columnEl ?? null;
-      if (el === dropElRef.current) return;
-      clearDropTarget();
-      if (el) {
-        el.classList.add('ed-drop-target');
-        dropElRef.current = el;
+      const hit = columnUnder(event.target as HTMLElement);
+      const slot = dropSlotRef.current;
+      if (!hit || !slot) {
+        hideDropSlot();
+        return;
       }
+
+      // The column's own blocks, in order. Exactly one level deep: a block's own
+      // innards carry longer paths and must not be counted as its siblings.
+      const isBlock = new RegExp(`^${hit.key}b\\d+$`);
+      const blockEls = Array.from(hit.columnEl.querySelectorAll<HTMLElement>('[data-path]')).filter((b) =>
+        isBlock.test(b.dataset.path ?? ''),
+      );
+
+      // Land before the first block whose middle is below the pointer, else last.
+      let index = blockEls.length;
+      for (let i = 0; i < blockEls.length; i += 1) {
+        const r = blockEls[i].getBoundingClientRect();
+        if (event.clientY < r.top + r.height / 2) {
+          index = i;
+          break;
+        }
+      }
+
+      // The line the zone straddles, in viewport space (the slot is position:
+      // fixed): the top of the block it lands before, the bottom of the last
+      // block, or the middle of an empty column.
+      const colRect = hit.columnEl.getBoundingClientRect();
+      let y: number;
+      if (blockEls.length === 0) y = colRect.top + Math.min(colRect.height / 2, 28);
+      else if (index < blockEls.length) y = blockEls[index].getBoundingClientRect().top;
+      else y = blockEls[blockEls.length - 1].getBoundingClientRect().bottom;
+
+      const inset = 6;
+      const height = 22;
+      // Style set imperatively, and there is deliberately no style prop on the
+      // node, so a re-render mid-drag (an autosave, say) cannot reset it.
+      slot.style.display = 'block';
+      slot.style.left = `${colRect.left + inset}px`;
+      slot.style.width = `${Math.max(0, colRect.width - inset * 2)}px`;
+      slot.style.top = `${y - height / 2}px`;
+      slot.style.height = `${height}px`;
+
+      dropRef.current = { section: hit.section, row: hit.row, column: hit.column, index };
     },
-    [onDropBlock, dropTargetUnder, clearDropTarget],
+    [onDropBlock, columnUnder, hideDropSlot],
   );
 
   const onDrop = useCallback(
     (event: React.DragEvent<HTMLDivElement>) => {
       if (!onDropBlock) return;
       const type = event.dataTransfer.getData(BLOCK_DRAG_MIME);
-      clearDropTarget();
-      if (!type) return;
-      const hit = dropTargetUnder(event.target as HTMLElement);
-      if (!hit) return;
+      const target = dropRef.current;
+      hideDropSlot();
+      if (!type || !target) return;
       event.preventDefault();
-      onDropBlock({ section: hit.section, row: hit.row, column: hit.column, at: hit.at }, type);
+      onDropBlock(
+        { section: target.section, row: target.row, column: target.column, at: target.index },
+        type,
+      );
     },
-    [onDropBlock, dropTargetUnder, clearDropTarget],
+    [onDropBlock, hideDropSlot],
   );
 
   const onDragLeave = useCallback(
@@ -444,9 +480,9 @@ export function Canvas({
       // one child to the next, which fires dragleave on the element behind.
       const to = event.relatedTarget as Node | null;
       if (to && event.currentTarget.contains(to)) return;
-      clearDropTarget();
+      hideDropSlot();
     },
-    [clearDropTarget],
+    [hideDropSlot],
   );
 
   // ---------------------------------------------------------------------
@@ -748,6 +784,14 @@ export function Canvas({
 
         {stackNote && <p className="ed-stack-note">{stackNote}</p>}
       </div>
+
+      {/*
+        Where a dragged block would land. One element, always mounted, moved and
+        shown imperatively in onDragOver (position: fixed, so viewport rects go
+        straight on). No style prop, so a re-render mid-drag cannot reset it, and
+        pointer-events: none, so it never eats the drop it is pointing at.
+      */}
+      <div ref={dropSlotRef} className="ed-drop-slot" aria-hidden="true" />
 
       {badge && (
         <div className="ed-width-badge" style={{ left: badge.x, top: badge.y }}>
