@@ -4584,6 +4584,8 @@ await check('four across becomes fewer on a tablet', async () => {
   // 750px and answers to the PHONE rules. Reading `wide` before folding is how
   // the first run of this reported "1 across, then 1".
   await showPanels();
+  // "Across" is in the Layout section now, shut by default; open it first.
+  await openPaneGroup('Layout');
   await page.locator('[role="group"][aria-label="Across"] button', { hasText: 'Four' }).click();
   await page.waitForTimeout(400);
 
@@ -6030,6 +6032,8 @@ const lastRowField = (label) =>
  */
 await check('four numbers become two rows of two on a phone, not four rows of one', async () => {
   await showPanels();
+  // "Across" is in the Layout section now, shut by default; open it first.
+  await openPaneGroup('Layout');
 
   // Three options, so this is a segmented row rather than a dropdown: the line
   // Fields.tsx draws at four.
@@ -6138,6 +6142,8 @@ await check('and the height setting really moves it', async () => {
    * Small is 28px at every width, so it is the one setting that proves the
    * control moves the height wherever this check happens to run.
    */
+  // "Height" is in the Layout section now, shut by default; open it first.
+  await openPaneGroup('Layout');
   await page.getByRole('group', { name: 'Height' }).getByRole('button', { name: 'Small' }).click();
   await page.waitForTimeout(700);
 

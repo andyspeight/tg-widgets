@@ -91,6 +91,13 @@ describe('the review elements gained the right controls, grouped', () => {
     expect(button?.fields.find((f) => f.key === 'textColour')?.group).toBe('colours');
     expect(button?.fields.find((f) => f.key === 'align')?.group).toBe('layout');
   });
+
+  it('the fan-out gave heading and list a text colour', () => {
+    for (const type of ['heading', 'list']) {
+      const tc = blockDefinition(type)?.fields.find((f) => f.key === 'textColour');
+      expect(tc?.kind).toBe('colour');
+    }
+  });
 });
 
 describe('the pane groups a review block and the renderer draws the box', () => {
@@ -98,17 +105,31 @@ describe('the pane groups a review block and the renderer draws the box', () => 
   const renderer = source('components', 'render', 'PageRenderer.tsx');
   const css = source('app', 'globals.css');
 
-  it('curates which box parts each review element offers', () => {
+  it('curates which box parts each element offers', () => {
     // Image and cards keep their own border/radius, so the box does not repeat
-    // it; button styles itself and takes no box.
-    expect(props).toContain('const REVIEW_DESIGN');
+    // it; button styles itself and takes no box; text and the containers take all.
+    expect(props).toContain('const BLOCK_DESIGN');
     expect(props).toMatch(/image: \{ bg: true, padding: true, shadow: true \}/);
     expect(props).toMatch(/button: \{\}/);
+    expect(props).toContain('heading: FULL_BOX');
+  });
+
+  it('reads a field section off its key, border before colour', () => {
+    // The whole fan-out rides on this: a block need not annotate its fields.
+    expect(props).toContain('function inferGroup');
+    expect(props).toMatch(/key\.startsWith\('border'\)\) return 'border'/);
+    // Border is tested before the colour catch-all, or borderColour lands wrong.
+    const borderAt = props.indexOf("startsWith('border')");
+    const colourAt = props.indexOf('/colou?r/i.test(key)');
+    expect(borderAt).toBeGreaterThan(-1);
+    expect(borderAt).toBeLessThan(colourAt);
   });
 
   it('renders each present group as a section with only the first open', () => {
     expect(props).toContain('<Group key={group} title={GROUP_LABELS[group]} defaultOpen={index === 0}>');
-    expect(props).toContain("updateBlockBox(current, path.section, path.row, path.column, path.block, next)");
+    expect(props).toContain('updateBlockBox(current, path.section, path.row, path.column, path.block, {');
+    // Every element groups now: there is no flat-list escape hatch left.
+    expect(props).not.toContain('definition.fields.map(renderField)');
   });
 
   it('the renderer applies the box to the block wrapper, guarded and gated', () => {

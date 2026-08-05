@@ -193,6 +193,12 @@ export const BLOCKS: readonly BlockDefinition[] = [
     fields: [
       { kind: 'richtext', key: 'html', label: 'Text' },
       {
+        kind: 'colour',
+        key: 'textColour',
+        label: 'Text colour',
+        help: 'The colour of the heading. Leave blank to follow the theme.',
+      },
+      {
         kind: 'select',
         key: 'level',
         label: 'Level',
@@ -323,6 +329,12 @@ export const BLOCKS: readonly BlockDefinition[] = [
           { value: 'number', label: 'Numbers' },
           { value: 'tick', label: 'Ticks' },
         ],
+      },
+      {
+        kind: 'colour',
+        key: 'textColour',
+        label: 'Text colour',
+        help: 'The colour of the points. Leave blank to follow the theme.',
       },
       {
         kind: 'repeater',

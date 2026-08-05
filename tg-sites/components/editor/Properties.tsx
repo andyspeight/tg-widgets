@@ -1453,24 +1453,70 @@ function RebuildImportButton({
   );
 }
 
+type BoxParts = { bg?: boolean; border?: boolean; radius?: boolean; padding?: boolean; shadow?: boolean };
+
 /*
- * THE DESIGN BOX, ELEMENT BY ELEMENT. Andy is reviewing the pattern on these
- * four before it goes to the rest (5 Aug 2026). Each says which parts of the box
- * to offer; a block leans on its own fields for the rest, so nothing is offered
- * twice. Image keeps its own frame border and corners, cards its own corners, so
- * those box parts are left off here. Button styles the button itself rather than
- * a box around it, so it takes none and shows its own colours grouped instead.
- * A block not listed keeps its plain, ungrouped field list, exactly as before.
+ * THE DESIGN BOX, ELEMENT BY ELEMENT. Which parts of the box each element offers,
+ * curated so nothing is offered twice: an element that already has its own frame
+ * border or corners (image, cards, video, gallery, slider) keeps them and takes
+ * only the box parts it lacks. An element that styles itself rather than a box
+ * around it, or is pure spacing, takes none (button, button-group, divider,
+ * spacer, imported); it still gets grouped sections for its own settings.
+ * Everything text-like or container-like takes the full box. Andy approved the
+ * pattern on text/image/cards/button, then it went to the rest (5 Aug 2026).
  */
-const REVIEW_DESIGN: Record<
-  string,
-  { bg?: boolean; border?: boolean; radius?: boolean; padding?: boolean; shadow?: boolean }
-> = {
-  text: { bg: true, border: true, radius: true, padding: true, shadow: true },
+const FULL_BOX: BoxParts = { bg: true, border: true, radius: true, padding: true, shadow: true };
+const BLOCK_DESIGN: Record<string, BoxParts> = {
+  // Text and container elements: the whole box.
+  text: FULL_BOX,
+  heading: FULL_BOX,
+  quote: FULL_BOX,
+  list: FULL_BOX,
+  'icon-item': FULL_BOX,
+  accordion: FULL_BOX,
+  tabs: FULL_BOX,
+  steps: FULL_BOX,
+  stats: FULL_BOX,
+  table: FULL_BOX,
+  nav: FULL_BOX,
+  social: FULL_BOX,
+  logos: FULL_BOX,
+  widget: FULL_BOX,
+  'embed-widget': FULL_BOX,
+  embed: FULL_BOX,
+  // Media that already rounds its own frame: everything but the radius.
   image: { bg: true, padding: true, shadow: true },
+  video: { bg: true, padding: true, shadow: true },
+  gallery: { bg: true, border: true, padding: true, shadow: true },
+  slider: { bg: true, border: true, padding: true, shadow: true },
   cards: { bg: true, border: true, padding: true, shadow: true },
+  // Styles itself, or is pure spacing: no box, just grouped settings.
   button: {},
+  'button-group': {},
+  divider: {},
+  spacer: {},
+  imported: {},
 };
+
+/**
+ * Which section a field belongs to. An explicit group on the field wins; failing
+ * that it is read off the field's key, so a colour goes to Colours and an
+ * alignment to Layout without every block having to say so. Border is checked
+ * before colour, or a borderColour would land in Colours rather than with the
+ * border it belongs to.
+ */
+function inferGroup(field: Field): FieldGroup {
+  if (field.group) return field.group;
+  const key = field.key;
+  if (key === 'align' || key === 'gap' || key === 'spacing' || key === 'height' || key === 'columns') {
+    return 'layout';
+  }
+  if (key === 'radius' || key === 'corners' || key.startsWith('border')) return 'border';
+  if (key === 'shadow') return 'effects';
+  if (key === 'padding') return 'spacing';
+  if (/colou?r/i.test(key)) return 'colours';
+  return 'content';
+}
 
 /** The sections, in the order they appear. Content is first, so it is the open one. */
 const GROUP_ORDER: FieldGroup[] = ['content', 'colours', 'border', 'spacing', 'layout', 'effects'];
@@ -1563,32 +1609,11 @@ function BlockFields({
     </p>
   );
 
-  const design = REVIEW_DESIGN[block.type];
+  const design = BLOCK_DESIGN[block.type];
 
-  // A block without a design box keeps its flat field list, exactly as before.
-  if (!design) {
-    return (
-      <>
-        {help}
-        {block.type === 'imported' && (
-          <RebuildImportButton block={block} section={path.section} onCommit={onCommit} onSelect={onSelect} />
-        )}
-        {definition.fields.map(renderField)}
-      </>
-    );
-  }
-
-  // A review block: its own fields and the chosen box parts, gathered into the
-  // pane's sections. The box is a sibling of props, so it commits through
-  // updateBlockBox rather than updateBlockProps.
-  const box = block.box ?? EMPTY_BOX;
-  const setBox = (next: Box) =>
-    onCommit(
-      (current) => updateBlockBox(current, path.section, path.row, path.column, path.block, next),
-      `blk:${block.id}:box`,
-    );
-  const patchBox = (part: Partial<Box>) => setBox({ ...box, ...part });
-
+  // Every element is grouped into sections now, Content first and open. A field's
+  // section is read off its key unless it names one, and the box parts this
+  // element takes drop into the same sections as its own fields.
   const groups = new Map<FieldGroup, ReactNode[]>();
   const add = (group: FieldGroup, node: ReactNode) => {
     const list = groups.get(group) ?? [];
@@ -1596,9 +1621,20 @@ function BlockFields({
     groups.set(group, list);
   };
 
-  definition.fields.forEach((field) => add(field.group ?? 'content', renderField(field)));
+  definition.fields.forEach((field) => add(inferGroup(field), renderField(field)));
 
-  if (design.bg) {
+  // The box is a sibling of props, so it commits through updateBlockBox. Only an
+  // element that takes box parts adds any of these; the rest are grouped fields
+  // alone. Computed unconditionally, since patchBox is referenced either way.
+  const box = block.box ?? EMPTY_BOX;
+  const patchBox = (part: Partial<Box>) =>
+    onCommit(
+      (current) =>
+        updateBlockBox(current, path.section, path.row, path.column, path.block, { ...box, ...part }),
+      `blk:${block.id}:box`,
+    );
+
+  if (design?.bg) {
     add(
       'colours',
       <ColourField
@@ -1609,7 +1645,7 @@ function BlockFields({
       />,
     );
   }
-  if (design.border) {
+  if (design?.border) {
     add(
       'border',
       <Measure
@@ -1630,7 +1666,7 @@ function BlockFields({
       />,
     );
   }
-  if (design.radius) {
+  if (design?.radius) {
     add(
       'border',
       <Measure
@@ -1642,10 +1678,10 @@ function BlockFields({
       />,
     );
   }
-  if (design.padding) {
+  if (design?.padding) {
     add('spacing', <PaddingBox key="box-p" padding={box.padding} onChange={(padding) => patchBox({ padding })} />);
   }
-  if (design.shadow) {
+  if (design?.shadow) {
     add(
       'effects',
       <Picker
@@ -1663,6 +1699,9 @@ function BlockFields({
   return (
     <>
       {help}
+      {block.type === 'imported' && (
+        <RebuildImportButton block={block} section={path.section} onCommit={onCommit} onSelect={onSelect} />
+      )}
       {ordered.map((group, index) => (
         <Group key={group} title={GROUP_LABELS[group]} defaultOpen={index === 0}>
           {groups.get(group)}
