@@ -28,9 +28,9 @@ import { pageAsRegion, REGION_TITLES } from '../../lib/content/region-page';
 import { pageAsItem, type ItemMeta } from '../../lib/content/collection-page';
 import { createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
 import { buildPresetSection } from '../../lib/content/presets';
-import { addBlock, addColumn, parsePathKey, type Path, pathKey, resolve, updateBlockProps } from '../../lib/content/tree';
+import { addBlock, addColumn, addInnerBlock, containerColumns, parsePathKey, type Path, pathKey, resolve, updateBlockProps } from '../../lib/content/tree';
 import { Outline } from './Outline';
-import { Canvas } from './Canvas';
+import { Canvas, type DropTarget } from './Canvas';
 import { Properties } from './Properties';
 import { BlockPicker } from './BlockPicker';
 import { ItemToolbar } from './ItemToolbar';
@@ -66,6 +66,15 @@ const COALESCE_MS = 700;
  * tab still gets a save away, helped by the warning on unload below.
  */
 const SAVE_DEBOUNCE_MS = 900;
+
+/**
+ * The one block a container's inner column may not hold: another container.
+ *
+ * A module constant so the picker prop is a stable reference, and named so the
+ * one-level-deep rule is greppable. See the container block in
+ * lib/content/blocks.ts and the matching refusal in addBlockAt.
+ */
+const CONTAINER_ONLY: readonly string[] = ['container'];
 
 /**
  * Wrap what is selected in a span carrying one CSS declaration.
@@ -331,7 +340,12 @@ export function EditorShell({
   });
   const [selected, setSelected] = useState<Path | null>(null);
   const [viewport, setViewport] = useState<Viewport>('desktop');
-  const [picker, setPicker] = useState<{ section: number; row: number; column: number } | null>(null);
+  /**
+   * Where the block picker will add. An ordinary column names section, row and
+   * column; a container's inner column also names its `block` and `inner`, and
+   * the pick routes to addInnerBlock. See DropTarget.
+   */
+  const [picker, setPicker] = useState<DropTarget | null>(null);
   /** Where a new section would go. null means the picker is closed. */
   const [insertAt, setInsertAt] = useState<number | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -923,8 +937,45 @@ export function EditorShell({
   // Add a block at an explicit place. Shared by the canvas drop and the elements
   // palette, so a dropped block and a clicked one land the one same way.
   const addBlockAt = useCallback(
-    (target: { section: number; row: number; column: number; at?: number }, type: string) => {
+    (target: DropTarget, type: string) => {
       setPicker(null);
+
+      /*
+       * A CONTAINER'S INNER COLUMN. Routed to addInnerBlock, and a container is
+       * never nested in a container: the model is one level deep and the picker
+       * hides it there, but a drag comes from a palette that cannot know its
+       * target, so the refusal lives here too. The container is selected
+       * afterwards rather than the new inner block, because selecting inner nodes
+       * to style or edit them arrives in a later slice.
+       */
+      if (target.inner !== undefined && target.block !== undefined) {
+        if (type === 'container') return;
+        const container =
+          page.sections[target.section]?.rows[target.row]?.columns[target.column]?.blocks[target.block];
+        const inner = container ? containerColumns(container)[target.inner] : undefined;
+        if (!inner) return;
+        commit((current) =>
+          addInnerBlock(
+            current,
+            target.section,
+            target.row,
+            target.column,
+            target.block!,
+            target.inner!,
+            createBlock(type),
+            target.at,
+          ),
+        );
+        setSelected({
+          kind: 'block',
+          section: target.section,
+          row: target.row,
+          column: target.column,
+          block: target.block,
+        });
+        return;
+      }
+
       const column = page.sections[target.section]?.rows[target.row]?.columns[target.column];
       if (!column) return;
       const length = column.blocks.length;
@@ -1506,22 +1557,20 @@ export function EditorShell({
       {picker && (
         <BlockPicker
           isStaff={isStaff}
+          /*
+            No container inside a container. When the picker was opened from a
+            container's inner column it hides the container element, the same
+            refusal the drop makes: the model nests exactly one level.
+          */
+          exclude={picker.inner !== undefined ? CONTAINER_ONLY : undefined}
           onClose={() => setPicker(null)}
-          onPick={(type) => {
-            const target = picker;
-            setPicker(null);
-
-            // Computed here rather than inside the updater: a state updater
-            // must be pure, and React calls it twice in development. The new
-            // block always lands last in the column, so the index is known
-            // without reading the result back.
-            const index = page.sections[target.section]?.rows[target.row]?.columns[target.column]
-              ?.blocks.length;
-            if (index === undefined) return;
-
-            commit((current) => addBlock(current, target.section, target.row, target.column, createBlock(type)));
-            setSelected({ kind: 'block', ...target, block: index });
-          }}
+          /*
+            Straight through addBlockAt, which the drop and the palette also use,
+            so a picked block, a dropped one and a clicked one all land and select
+            the one same way, inner column included. With no `at`, it lands at the
+            end of whichever column, which is where the + always added.
+          */
+          onPick={(type) => addBlockAt(picker, type)}
         />
       )}
     </div>

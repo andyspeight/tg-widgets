@@ -37,6 +37,25 @@ import {
 import { PageRenderer } from '../render/PageRenderer';
 import type { Viewport } from './EditorShell';
 
+/**
+ * Where a block is added or dropped.
+ *
+ * An ordinary column names its section, row and column. A CONTAINER's inner
+ * column names those three (the container's own place) plus `block`, the
+ * container within that column, and `inner`, the column within the container.
+ * `at` is the index within whichever column, so a drop lands where the pointer
+ * is rather than always at the end. The shell reads `inner` being present as
+ * "this goes inside a container" and routes to addInnerBlock.
+ */
+export interface DropTarget {
+  section: number;
+  row: number;
+  column: number;
+  block?: number;
+  inner?: number;
+  at?: number;
+}
+
 interface Props {
   page: Page;
   selected: Path | null;
@@ -45,17 +64,17 @@ interface Props {
   viewport: Viewport;
   onSelect: (path: Path | null) => void;
   onCommit: (next: (current: Page) => Page, coalesceKey?: string) => void;
-  onPickBlock: (target: { section: number; row: number; column: number }) => void;
+  onPickBlock: (target: DropTarget) => void;
   /**
    * A block dragged off the picker and dropped onto the canvas. `at` is the
    * index within the column, so a drop onto a block lands after it rather than
    * always at the end. Absent when the editor does not accept drops (it always
    * does today; the option keeps the canvas usable without it).
+   *
+   * `block` and `inner` are present when the drop lands in a CONTAINER's inner
+   * column, and absent for an ordinary column. See DropTarget.
    */
-  onDropBlock?: (
-    target: { section: number; row: number; column: number; at?: number },
-    type: string,
-  ) => void;
+  onDropBlock?: (target: DropTarget, type: string) => void;
   onInsertSection: (index: number) => void;
   /**
    * The block being typed into on the canvas, as a path key, or null.
@@ -125,8 +144,8 @@ export function Canvas({
   const heightRef = useRef<HeightDrag | null>(null);
   /** The floating drop zone shown where a dragged block would land. */
   const dropSlotRef = useRef<HTMLDivElement | null>(null);
-  /** Where that drop would insert: the column, and the index within it. */
-  const dropRef = useRef<{ section: number; row: number; column: number; index: number } | null>(null);
+  /** Where that drop would insert: the (possibly inner) column, and the index within it. */
+  const dropRef = useRef<{ target: DropTarget; index: number } | null>(null);
   const [badge, setBadge] = useState<{ x: number; y: number; text: string } | null>(null);
 
   // ---------------------------------------------------------------------
@@ -338,12 +357,21 @@ export function Canvas({
         return;
       }
 
-      // The empty-column placeholder opens the block picker instead.
+      // The empty-column placeholder opens the block picker instead. An empty
+      // inner column of a container does the same, targeting that inner column.
       const adder = target.closest<HTMLElement>('[data-add]');
       if (adder) {
         const path = parsePathKey(adder.dataset.add);
         if (path?.kind === 'column') {
           onPickBlock({ section: path.section, row: path.row, column: path.column });
+        } else if (path?.kind === 'inner-column') {
+          onPickBlock({
+            section: path.section,
+            row: path.row,
+            column: path.column,
+            block: path.block,
+            inner: path.inner,
+          });
         }
         return;
       }
@@ -370,7 +398,20 @@ export function Canvas({
         return;
       }
       const path = parsePathKey(node.dataset.path);
-      if (path) onSelect(path);
+      if (!path) return;
+      /*
+       * A CLICK INSIDE A CONTAINER SELECTS THE CONTAINER, for now. The inner
+       * column and its blocks carry their own data-path so a drop can find them,
+       * but selecting one to style it, and editing its text in place, arrive with
+       * the rest of the inner editing in a later slice. Until then a click on
+       * inner content lands on the container that holds it, which has a working
+       * pane and toolbar, rather than on a node nothing is wired to yet.
+       */
+      if (path.kind === 'inner-column' || path.kind === 'inner-block') {
+        onSelect({ kind: 'block', section: path.section, row: path.row, column: path.column, block: path.block });
+        return;
+      }
+      onSelect(path);
     },
     [onSelect, onPickBlock, onInsertSection],
   );
@@ -385,16 +426,43 @@ export function Canvas({
    * falls between the right two blocks rather than always after one. Read off
    * the same data-path the click handler uses, so the two agree about what is
    * where.
+   *
+   * A CONTAINER'S INNER COLUMN is the second case. An inner column and its inner
+   * blocks carry longer paths (…b0k0 and …b0k0i0), so the pointer over one
+   * resolves to that inner column, and `sep` says its direct blocks are keyed
+   * with `i` rather than `b` so onDragOver counts the right children. Over a
+   * container's own frame but not one of its columns, the path is the container
+   * BLOCK, which falls to the ordinary case and drops it beside the container.
    */
   const columnUnder = useCallback((el: HTMLElement | null) => {
     const node = el?.closest<HTMLElement>('[data-path], [data-add]');
     if (!node) return null;
     const path = parsePathKey(node.dataset.path ?? node.dataset.add);
-    if (!path || (path.kind !== 'block' && path.kind !== 'column')) return null;
-    const key = `s${path.section}r${path.row}c${path.column}`;
-    const columnEl = node.closest<HTMLElement>(`[data-path="${key}"]`) ?? (path.kind === 'column' ? node : null);
-    if (!columnEl) return null;
-    return { columnEl, section: path.section, row: path.row, column: path.column, key };
+    if (!path) return null;
+
+    if (path.kind === 'inner-column' || path.kind === 'inner-block') {
+      const key = `s${path.section}r${path.row}c${path.column}b${path.block}k${path.inner}`;
+      const columnEl = node.closest<HTMLElement>(`[data-path="${CSS.escape(key)}"]`);
+      if (!columnEl) return null;
+      const target: DropTarget = {
+        section: path.section,
+        row: path.row,
+        column: path.column,
+        block: path.block,
+        inner: path.inner,
+      };
+      return { columnEl, target, key, sep: 'i' as const };
+    }
+
+    if (path.kind === 'block' || path.kind === 'column') {
+      const key = `s${path.section}r${path.row}c${path.column}`;
+      const columnEl = node.closest<HTMLElement>(`[data-path="${CSS.escape(key)}"]`) ?? (path.kind === 'column' ? node : null);
+      if (!columnEl) return null;
+      const target: DropTarget = { section: path.section, row: path.row, column: path.column };
+      return { columnEl, target, key, sep: 'b' as const };
+    }
+
+    return null;
   }, []);
 
   const hideDropSlot = useCallback(() => {
@@ -418,8 +486,11 @@ export function Canvas({
       }
 
       // The column's own blocks, in order. Exactly one level deep: a block's own
-      // innards carry longer paths and must not be counted as its siblings.
-      const isBlock = new RegExp(`^${hit.key}b\\d+$`);
+      // innards carry longer paths and must not be counted as its siblings. The
+      // separator is `b` for an ordinary column and `i` for a container's inner
+      // column, so a container counts as ONE block of its outer column while its
+      // own inner blocks are what an inner drop lands among.
+      const isBlock = new RegExp(`^${hit.key}${hit.sep}\\d+$`);
       const blockEls = Array.from(hit.columnEl.querySelectorAll<HTMLElement>('[data-path]')).filter((b) =>
         isBlock.test(b.dataset.path ?? ''),
       );
@@ -453,7 +524,7 @@ export function Canvas({
       slot.style.top = `${y - height / 2}px`;
       slot.style.height = `${height}px`;
 
-      dropRef.current = { section: hit.section, row: hit.row, column: hit.column, index };
+      dropRef.current = { target: hit.target, index };
     },
     [onDropBlock, columnUnder, hideDropSlot],
   );
@@ -462,14 +533,11 @@ export function Canvas({
     (event: React.DragEvent<HTMLDivElement>) => {
       if (!onDropBlock) return;
       const type = event.dataTransfer.getData(BLOCK_DRAG_MIME);
-      const target = dropRef.current;
+      const drop = dropRef.current;
       hideDropSlot();
-      if (!type || !target) return;
+      if (!type || !drop) return;
       event.preventDefault();
-      onDropBlock(
-        { section: target.section, row: target.row, column: target.column, at: target.index },
-        type,
-      );
+      onDropBlock({ ...drop.target, at: drop.index }, type);
     },
     [onDropBlock, hideDropSlot],
   );

@@ -76,8 +76,10 @@ export function itemLabel(path: Path, blockLabel?: string): string {
     case 'row':
       return 'Row';
     case 'column':
+    case 'inner-column':
       return 'Column';
     case 'block':
+    case 'inner-block':
       return blockLabel || 'Block';
   }
 }
@@ -96,6 +98,11 @@ export function itemActions(page: Page, path: Path): ItemAction[] {
     // The page root is reached through the breadcrumb, never by clicking the
     // canvas, so it has no on-canvas toolbar.
     case 'page':
+      return [];
+    // A container's inner column and its inner blocks have no on-canvas toolbar
+    // yet; that arrives with the rest of their editing in a later slice.
+    case 'inner-column':
+    case 'inner-block':
       return [];
   }
 }

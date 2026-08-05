@@ -1634,6 +1634,42 @@ export const BLOCKS: readonly BlockDefinition[] = [
 
   // --- Layout -----------------------------------------------------------
   {
+    /*
+     * A CONTAINER: COLUMNS INSIDE A COLUMN, ONE LEVEL DEEP.
+     *
+     * The content model is otherwise flat, a block being a leaf, and this is the
+     * one deliberate exception, added 5 Aug 2026 for the side-by-side layouts a
+     * single column cannot hold: an icon beside a paragraph, two small cards in
+     * one column of a wider row, a label next to its value. Its columns live in
+     * props.columns as ordinary Columns, so they carry the same widths, boxes and
+     * blocks a section's columns do, and the renderer draws them with the very
+     * same row and column CSS.
+     *
+     * BOUNDED ON PURPOSE. A container's inner blocks are leaves: there is no
+     * container inside a container, which the picker and the drop both refuse.
+     * That keeps the address a fixed grammar (see the note in lib/content/tree.ts)
+     * rather than an unbounded nesting every tool in the editor would have to
+     * learn.
+     *
+     * NO CONTENT FIELDS. What a container holds is set on the canvas, by dropping
+     * blocks into its columns, so the pane carries only its own design box:
+     * background, border, corners and spacing, exactly as a column does.
+     */
+    type: 'container',
+    label: 'Inner container',
+    group: 'Layout',
+    icon: 'columns',
+    description: 'Columns inside a column, for content side by side.',
+    // The two starter columns are seeded by the factory with fresh ids, not
+    // here: a literal here would hand every container the same column ids.
+    defaults: { columns: [] },
+    summarise: (props) => {
+      const count = Array.isArray(props.columns) ? props.columns.length : 0;
+      return `Inner container (${count} column${count === 1 ? '' : 's'})`;
+    },
+    fields: [],
+  },
+  {
     type: 'divider',
     label: 'Divider',
     group: 'Layout',

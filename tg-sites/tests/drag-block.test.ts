@@ -73,8 +73,10 @@ describe('the canvas takes the drop', () => {
     // Before the first block whose middle is below the pointer, else appended.
     expect(canvas).toContain('event.clientY < r.top + r.height / 2');
     expect(canvas).toContain('let index = blockEls.length');
-    // The drop inserts at that index, not always after the hovered block.
-    expect(canvas).toContain('at: target.index');
+    // The drop inserts at that index, not always after the hovered block. The
+    // target it lands in (an ordinary column, or a container's inner column)
+    // rides alongside the index in the same descriptor.
+    expect(canvas).toContain('at: drop.index');
   });
 
   it('shows a floating drop zone at the insertion point, and hides it after', () => {

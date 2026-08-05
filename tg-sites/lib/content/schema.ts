@@ -945,6 +945,17 @@ export function preNormalise(input: unknown): unknown {
 function upgradeBlock(block: unknown): unknown {
   if (!block || typeof block !== 'object') return block;
   const b = block as Record<string, unknown>;
+
+  /*
+   * A CONTAINER'S INNER COLUMNS GET THE SAME REPAIR A ROW'S DO. Its columns live
+   * in props.columns and never reach the row loop above, so their widths would
+   * not be normalised and a heading dropped inside one would not be upgraded. So
+   * this reaches in: widths made to sum to 100, each inner block upgraded in
+   * turn. Inner blocks are leaves (no container in a container), so a single
+   * descent is the whole of it.
+   */
+  if (b.type === 'container') return upgradeContainer(b);
+
   if (b.type !== 'heading') return block;
 
   const props = (b.props && typeof b.props === 'object' ? b.props : {}) as Record<string, unknown>;
@@ -955,4 +966,34 @@ function upgradeBlock(block: unknown): unknown {
   if (typeof text !== 'string' || !text) return block;
 
   return { ...b, props: { ...props, html: escapeHtml(text) } };
+}
+
+function upgradeContainer(b: Record<string, unknown>): unknown {
+  const props = (b.props && typeof b.props === 'object' ? b.props : {}) as Record<string, unknown>;
+  const columns = props.columns;
+  if (!Array.isArray(columns) || columns.length === 0) return b;
+
+  const widths = normaliseWidths(
+    columns.map((column) =>
+      column && typeof column === 'object'
+        ? Number((column as Record<string, unknown>).width)
+        : Number.NaN,
+    ),
+  );
+
+  return {
+    ...b,
+    props: {
+      ...props,
+      columns: columns.map((column, index) => {
+        if (!column || typeof column !== 'object') return column;
+        const c = column as Record<string, unknown>;
+        return {
+          ...c,
+          width: widths[index],
+          blocks: Array.isArray(c.blocks) ? c.blocks.map(upgradeBlock) : c.blocks,
+        };
+      }),
+    },
+  };
 }

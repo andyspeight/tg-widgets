@@ -458,16 +458,17 @@ await check('block picker opens from a section', async () => {
 /*
  * The count MOVES DELIBERATELY. 13 until the two widget blocks landed on 31 Jul
  * 2026, 15 when the menu joined them, 16 when Cards did, 18 with Accordion and
- * Tabs, 19 with the Slider, 20 with the Table. A hardcoded number is the point
- * rather than a maintenance cost: adding a block should make somebody look at
- * the picker, and a block that silently stops rendering its card is exactly what
- * this catches.
+ * Tabs, 19 with the Slider, 20 with the Table, 27 once the social, steps, stats,
+ * logos and imported blocks and then the inner container had all joined (5 Aug
+ * 2026). A hardcoded number is the point rather than a maintenance cost: adding
+ * a block should make somebody look at the picker, and a block that silently
+ * stops rendering its card is exactly what this catches.
  *
- * Twenty-two because the harness runs as staff, so the staff-only Embed block is
- * in there too.
+ * The harness runs as staff, so the staff-only Embed block is counted here too:
+ * 27 is the whole library, one fewer than that for a client.
  */
 await check('block picker offers the full library', async () =>
-  (await page.locator(".ed-block-card").count()) === 25);
+  (await page.locator(".ed-block-card").count()) === 27);
 
 await check('including both ways to put a widget on a page', async () => {
   const cards = (await page.locator('.ed-block-card').allInnerTexts()).join(' | ');
@@ -4148,6 +4149,52 @@ await check('it shows what it is instead, so the layout is still readable', asyn
 
 
 // ---------------------------------------------------------------------------
+// The inner container
+//
+// A CLAIM ONLY A BROWSER CAN SETTLE: that a container draws its two inner
+// columns as real, empty drop targets, that a block added through an inner
+// column's + lands INSIDE that column rather than the outer one, and that the
+// picker refuses to offer a container inside a container. The tree maths is in
+// tests/inner-container.test.ts; this is the wiring, end to end. Native HTML5
+// drag is not scriptable in Playwright, so the click-to-add path stands in for
+// the drag, which shares addBlockAt with it.
+// ---------------------------------------------------------------------------
+
+await page.reload();
+await page.waitForSelector('.ed-root');
+await showPanels();
+
+await check('an inner container draws its two inner columns', async () => {
+  await addBlock('Inner container');
+  const here = added();
+  if ((await here.count()) !== 1) return `${await here.count()} blocks selected after adding`;
+  const cols = await here.locator('.tgs-inner-row > .tgs-col').count();
+  return cols === 2 ? true : `${cols} inner columns drawn`;
+});
+
+await check('each inner column is an empty drop target with a +', async () => {
+  const adders = await added().locator('.tgs-inner-row .ed-empty-col__add').count();
+  return adders === 2 ? true : `${adders} add buttons across the inner columns`;
+});
+
+await check('the inner + refuses a container inside a container', async () => {
+  await added().locator('.tgs-inner-row .ed-empty-col__add').first().click();
+  await page.waitForSelector('.tg-modal', { timeout: 5000 });
+  const offered = await page.locator('.ed-block-card', { hasText: 'Inner container' }).count();
+  return offered === 0 ? true : 'the picker offered a container inside a container';
+});
+
+await check('and picking a block there lands it inside the inner column', async () => {
+  // Quote, because its name is unambiguous in the card list. The block lands at
+  // an …k0i0 path: the first inner column's first block.
+  await page.locator('.ed-block-card', { hasText: 'Quote' }).first().click();
+  await page.waitForTimeout(400);
+  const inner = await page.locator('.ed-canvas-frame [data-path$="k0i0"]').count();
+  return inner > 0 ? true : 'no block landed at an inner-column path';
+});
+
+
+// ---------------------------------------------------------------------------
 // The menu, the header and the footer
 //
 // TWO CLAIMS THAT ONLY A BROWSER CAN SETTLE.
@@ -4387,7 +4434,8 @@ await check('the header offers the same blocks a page does', async () => {
   await page.keyboard.press('Escape');
   await page.waitForTimeout(200);
   // The whole library, because a header is sections and rows like anything else.
-  return count === 25 ? true : `${count} blocks in the header picker`;
+  // The same 27 the page picker offers a staff user, container included.
+  return count === 27 ? true : `${count} blocks in the header picker`;
 });
 
 await check('a menu in a header saves through the region actions', async () => {

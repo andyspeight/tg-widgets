@@ -17,6 +17,7 @@ import {
   EMPTY_BOX,
   safeAnchor,
   safeColour,
+  type Block,
   type Box,
   type Column,
   type Page,
@@ -26,6 +27,20 @@ import {
 import { BLEND_DIVIDER, dividerShape, normaliseDividerHeight, safeDivider, sectionFill } from '../../lib/content/dividers';
 import { safeUrl } from '../../lib/content/sanitise';
 import { BlockRenderer } from './BlockRenderer';
+
+/**
+ * A container block's own columns.
+ *
+ * Inlined here rather than imported from lib/content/tree, on purpose. This
+ * file is a server component on the published side and is kept free of the
+ * tree/registry modules so none of that follows it into the page bundle. The
+ * lookup is one property read, so a copy costs nothing and the isolation is
+ * worth keeping.
+ */
+function innerColumnsOf(block: Block): Column[] {
+  const columns = (block.props as { columns?: unknown }).columns;
+  return Array.isArray(columns) ? (columns as Column[]) : [];
+}
 
 interface Editable {
   editable?: boolean;
@@ -616,6 +631,135 @@ export function RowRenderer({
 }
 
 // ---------------------------------------------------------------------------
+// A block on the canvas, and a container's inner columns
+// ---------------------------------------------------------------------------
+
+/**
+ * One block's wrapper: its design box, its alignment, its data-path, and then
+ * either the block's own drawing or, for a container, its inner columns. Shared
+ * by an ordinary column and by a container's inner columns, so a block looks and
+ * addresses the same wherever it sits. `keyPath` is the block's full data-path,
+ * e.g. `s0r0c0b1` at the top level or `s0r0c0b1k0i2` inside a container.
+ */
+function blockHost(
+  block: Block,
+  keyPath: string,
+  editable: boolean,
+  editingPath: string | null,
+): ReactElement {
+  const box = block.box ?? EMPTY_BOX;
+  const boxed = !boxIsEmpty(box);
+  const textColour = safeColour((block.props as Record<string, unknown>)?.textColour);
+  const style: CSSProperties = {
+    ...(boxed ? boxStyle(box) : {}),
+    ...(textColour ? { color: textColour } : {}),
+  };
+  return (
+    <div
+      key={block.id}
+      className="tgs-block"
+      data-align={typeof block.props?.align === 'string' ? block.props.align : undefined}
+      data-boxed={boxed ? '' : undefined}
+      data-shadow={boxed ? box.shadow : undefined}
+      style={boxed || textColour ? style : undefined}
+      {...pathAttr(editable, keyPath)}
+    >
+      {block.type === 'container' ? (
+        <InnerColumns
+          columns={innerColumnsOf(block)}
+          keyPath={keyPath}
+          editable={editable}
+          editingPath={editingPath}
+        />
+      ) : (
+        <BlockRenderer
+          block={block}
+          editable={editable}
+          editingHost={editable && editingPath === keyPath}
+        />
+      )}
+    </div>
+  );
+}
+
+/**
+ * A container's own columns. The same row/column markup a section uses, so the
+ * widths, the gap and the stacking come from the same CSS, only the data-path
+ * carries the container's prefix so a click or a drop lands on the inner node.
+ */
+function InnerColumns({
+  columns,
+  keyPath,
+  editable = false,
+  editingPath = null,
+}: { columns: Column[]; keyPath: string } & Editable): ReactElement {
+  /*
+   * DEFENSIVE ABOUT THE COLUMN SHAPE, because an inner column is the one column
+   * in the model the schema never validates: it lives in a block's loose props
+   * bag, so a width, a box or a blocks array could arrive missing from a
+   * hand-authored tree in a way a section's column never could. The save path
+   * repairs and sanitises them, so this only guards the gap before a first save,
+   * but a published page must never throw over a stray container.
+   */
+  const width = (column: Column, count: number): number =>
+    typeof column.width === 'number' && Number.isFinite(column.width) ? column.width : 100 / Math.max(1, count);
+
+  const style = {
+    '--tgs-cols': columns.map((column) => `minmax(0, ${width(column, columns.length)}fr)`).join(' '),
+    '--tgs-gap': '16px',
+  } as CSSProperties;
+
+  return (
+    <div className="tgs-row tgs-inner-row" style={style} data-stack="mobile">
+      {columns.map((column, inner) => {
+        const colPath = `${keyPath}k${inner}`;
+        const box = column.box ?? EMPTY_BOX;
+        const blocks = Array.isArray(column.blocks) ? column.blocks : [];
+        return (
+          <div
+            key={column.id ?? `col-${inner}`}
+            className="tgs-col"
+            data-align={column.align}
+            data-shadow={box.shadow}
+            style={boxStyle(box)}
+            {...pathAttr(editable, colPath)}
+          >
+            {blocks.map((block, innerBlock) =>
+              blockHost(block, `${colPath}i${innerBlock}`, editable, editingPath),
+            )}
+
+            {editable && blocks.length === 0 && (
+              <div className="ed-empty-col">
+                <button
+                  type="button"
+                  className="ed-empty-col__add"
+                  data-add={colPath}
+                  aria-label="Add content to this column"
+                  title="Add content"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="14"
+                    height="14"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                </button>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Column
 // ---------------------------------------------------------------------------
 
@@ -647,37 +791,9 @@ export function ColumnRenderer({
       style={boxStyle(column.box)}
       {...pathAttr(editable, path)}
     >
-      {column.blocks.map((block, blockIndex) => {
-        // The block's own design box, applied to its container the same way a
-        // column applies its box. Guarded, because a block created in memory in
-        // this session has no box until the page is next parsed, and defaulting
-        // to empty renders as nothing. text colour is a plain wrapper colour so
-        // it cascades into whatever the block draws.
-        const box = block.box ?? EMPTY_BOX;
-        const boxed = !boxIsEmpty(box);
-        const textColour = safeColour((block.props as Record<string, unknown>)?.textColour);
-        const style: CSSProperties = {
-          ...(boxed ? boxStyle(box) : {}),
-          ...(textColour ? { color: textColour } : {}),
-        };
-        return (
-          <div
-            key={block.id}
-            className="tgs-block"
-            data-align={typeof block.props?.align === 'string' ? block.props.align : undefined}
-            data-boxed={boxed ? '' : undefined}
-            data-shadow={boxed ? box.shadow : undefined}
-            style={boxed || textColour ? style : undefined}
-            {...pathAttr(editable, `${path}b${blockIndex}`)}
-          >
-            <BlockRenderer
-              block={block}
-              editable={editable}
-              editingHost={editable && editingPath === `${path}b${blockIndex}`}
-            />
-          </div>
-        );
-      })}
+      {column.blocks.map((block, blockIndex) =>
+        blockHost(block, `${path}b${blockIndex}`, editable, editingPath),
+      )}
 
       {/*
        * AN EMPTY COLUMN IS A COLUMN, NOT A BUTTON.

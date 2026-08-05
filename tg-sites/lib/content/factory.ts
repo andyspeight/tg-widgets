@@ -36,7 +36,18 @@ export function newId(prefix: string): string {
 }
 
 export function createBlock(type: string): Block {
-  return { id: newId('blk'), type, props: defaultPropsFor(type), box: EMPTY_BOX };
+  const block: Block = { id: newId('blk'), type, props: defaultPropsFor(type), box: EMPTY_BOX };
+  /*
+   * A CONTAINER STARTS WITH TWO EQUAL COLUMNS, minted here rather than in the
+   * registry defaults. Every other block's defaults are plain JSON the registry
+   * can clone, but a container's columns each carry an id, and an id baked into
+   * the defaults would be the same on every container ever added. So the two are
+   * built fresh, the same way createRow builds a row's columns.
+   */
+  if (type === 'container') {
+    block.props = { ...block.props, columns: [createColumn(50), createColumn(50)] };
+  }
+  return block;
 }
 
 export function createColumn(width: number, blocks: Block[] = []): Column {

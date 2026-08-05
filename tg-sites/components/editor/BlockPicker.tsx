@@ -17,10 +17,17 @@ export function BlockPicker({
   isStaff,
   onPick,
   onClose,
+  exclude,
 }: {
   isStaff: boolean;
   onPick: (type: string) => void;
   onClose: () => void;
+  /**
+   * Block types to leave out, whatever the search says. Used when the picker
+   * was opened from a container's inner column, which may not hold another
+   * container: the model nests exactly one level. Absent means offer them all.
+   */
+  exclude?: readonly string[];
 }) {
   const [query, setQuery] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
@@ -53,9 +60,10 @@ export function BlockPicker({
       ...group,
       blocks: group.blocks.filter(
         (definition) =>
-          !needle ||
-          definition.label.toLowerCase().includes(needle) ||
-          definition.description.toLowerCase().includes(needle),
+          !exclude?.includes(definition.type) &&
+          (!needle ||
+            definition.label.toLowerCase().includes(needle) ||
+            definition.description.toLowerCase().includes(needle)),
       ),
     }))
     .filter((group) => group.blocks.length > 0);

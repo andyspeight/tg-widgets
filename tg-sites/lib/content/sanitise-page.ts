@@ -225,7 +225,53 @@ export function sanitiseBlock(block: Block): Block {
     return { ...block, props: cleanImportedProps(block.id, block.props) };
   }
 
+  if (block.type === 'container') {
+    return sanitiseContainer(block);
+  }
+
   return { ...block, props: cleanProps(block.type, definition.fields, block.props) };
+}
+
+/**
+ * A container, on the way into the database.
+ *
+ * WHY IT NEEDS ITS OWN PATH. Every other block's content is its own props, which
+ * cleanProps handles. A container's real content is the BLOCKS inside its
+ * columns, and those live in props.columns where the field-driven pass never
+ * looks. Without this a text block dropped into a container would carry whatever
+ * markup it arrived with straight past the sanitiser, which is the exact hole
+ * this whole file exists to close. So each inner block goes through sanitiseBlock
+ * the same as a block in an ordinary column does.
+ *
+ * The inner column's own box is validated here too: it reaches the renderer as
+ * CSS custom properties and, unlike a real column, never passes through the
+ * schema's colour allowlist, so its two colour strings are run through safeColour
+ * on the way in.
+ */
+function sanitiseContainer(block: Block): Block {
+  const definition = blockDefinition('container');
+  const props = definition ? cleanProps('container', definition.fields, block.props) : { ...block.props };
+  const columns = props.columns;
+  if (!Array.isArray(columns)) return { ...block, props };
+
+  return {
+    ...block,
+    props: {
+      ...props,
+      columns: columns.map((column) => {
+        if (!column || typeof column !== 'object') return column;
+        const col = column as Record<string, unknown>;
+        const box = col.box && typeof col.box === 'object' ? (col.box as Record<string, unknown>) : undefined;
+        return {
+          ...col,
+          box: box
+            ? { ...box, background: safeColour(box.background), borderColour: safeColour(box.borderColour) }
+            : box,
+          blocks: Array.isArray(col.blocks) ? col.blocks.map(sanitiseBlock) : col.blocks,
+        };
+      }),
+    },
+  };
 }
 
 function sanitiseSection(section: Section): Section {

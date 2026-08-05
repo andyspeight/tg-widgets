@@ -30,12 +30,31 @@ import { createColumn } from './factory';
  */
 export const BLOCK_DRAG_MIME = 'application/x-tg-block';
 
+/*
+ * ONE LEVEL OF NESTING, added 5 Aug 2026 for the container element. A container
+ * is a block that holds its own columns, each holding its own blocks. Those two
+ * live below `block` in the address as `k` (the container's inner column) and
+ * `i` (a block inside that column). Bounded on purpose: a container's inner
+ * blocks are leaves, so there is no `k`/`i` after an `i`, and the picker will
+ * not offer a container inside a container. That keeps the address a fixed
+ * grammar rather than an unbounded recursion the whole editor would have to learn.
+ */
 export type Path =
   | { kind: 'page' }
   | { kind: 'section'; section: number }
   | { kind: 'row'; section: number; row: number }
   | { kind: 'column'; section: number; row: number; column: number }
-  | { kind: 'block'; section: number; row: number; column: number; block: number };
+  | { kind: 'block'; section: number; row: number; column: number; block: number }
+  | { kind: 'inner-column'; section: number; row: number; column: number; block: number; inner: number }
+  | {
+      kind: 'inner-block';
+      section: number;
+      row: number;
+      column: number;
+      block: number;
+      inner: number;
+      innerBlock: number;
+    };
 
 export function pathKey(path: Path): string {
   switch (path.kind) {
@@ -49,6 +68,10 @@ export function pathKey(path: Path): string {
       return `s${path.section}r${path.row}c${path.column}`;
     case 'block':
       return `s${path.section}r${path.row}c${path.column}b${path.block}`;
+    case 'inner-column':
+      return `s${path.section}r${path.row}c${path.column}b${path.block}k${path.inner}`;
+    case 'inner-block':
+      return `s${path.section}r${path.row}c${path.column}b${path.block}k${path.inner}i${path.innerBlock}`;
   }
 }
 
@@ -66,10 +89,10 @@ export function parsePathKey(key: string | null | undefined): Path | null {
   if (!key) return null;
   if (key === 'page') return { kind: 'page' };
 
-  const match = key.match(/^s(\d+)(?:r(\d+)(?:c(\d+)(?:b(\d+))?)?)?$/);
+  const match = key.match(/^s(\d+)(?:r(\d+)(?:c(\d+)(?:b(\d+)(?:k(\d+)(?:i(\d+))?)?)?)?)?$/);
   if (!match) return null;
 
-  const [, s, r, c, b] = match;
+  const [, s, r, c, b, k, i] = match;
   const section = Number(s);
 
   if (r === undefined) return { kind: 'section', section };
@@ -79,7 +102,13 @@ export function parsePathKey(key: string | null | undefined): Path | null {
   const column = Number(c);
 
   if (b === undefined) return { kind: 'column', section, row, column };
-  return { kind: 'block', section, row, column, block: Number(b) };
+  const block = Number(b);
+
+  if (k === undefined) return { kind: 'block', section, row, column, block };
+  const inner = Number(k);
+
+  if (i === undefined) return { kind: 'inner-column', section, row, column, block, inner };
+  return { kind: 'inner-block', section, row, column, block, inner, innerBlock: Number(i) };
 }
 
 /** Human label for a path kind, shown on the selection badge in the canvas. */
@@ -94,6 +123,10 @@ export function pathKindLabel(path: Path): string {
     case 'column':
       return 'Column';
     case 'block':
+      return 'Block';
+    case 'inner-column':
+      return 'Column';
+    case 'inner-block':
       return 'Block';
   }
 }
@@ -143,6 +176,15 @@ export function resolve(page: Page, path: Path | null): unknown {
       return getColumn(page, path.section, path.row, path.column);
     case 'block':
       return getBlock(page, path.section, path.row, path.column, path.block);
+    case 'inner-column': {
+      const container = getBlock(page, path.section, path.row, path.column, path.block);
+      return (container ? containerColumns(container)[path.inner] : null) ?? null;
+    }
+    case 'inner-block': {
+      const container = getBlock(page, path.section, path.row, path.column, path.block);
+      const inner = container ? containerColumns(container)[path.inner] : null;
+      return inner?.blocks[path.innerBlock] ?? null;
+    }
   }
 }
 
@@ -451,6 +493,129 @@ export function updateBlockBox(
   }));
 }
 
+// ---------------------------------------------------------------------------
+// The container element: a block that holds its own columns, one level deep.
+// Its columns are ordinary Columns kept in props.columns, so they carry the same
+// widths, boxes and validation as a section's columns. These helpers reach into
+// that inner tree; everything else in this file stays flat.
+// ---------------------------------------------------------------------------
+
+/** A container's own columns, or an empty list for anything that is not one. */
+export function containerColumns(block: Block): Column[] {
+  const columns = (block.props as { columns?: unknown }).columns;
+  return Array.isArray(columns) ? (columns as Column[]) : [];
+}
+
+/** Map the columns of one container block, writing them back into its props. */
+function mapContainerColumns(
+  page: Page,
+  section: number,
+  row: number,
+  column: number,
+  block: number,
+  fn: (columns: Column[]) => Column[],
+): Page {
+  return mapColumn(page, section, row, column, (c) => ({
+    ...c,
+    blocks: c.blocks.map((b, i) =>
+      i === block ? { ...b, props: { ...b.props, columns: fn(containerColumns(b)) } } : b,
+    ),
+  }));
+}
+
+/** Map the blocks of one inner column within a container. */
+function mapInnerColumn(
+  page: Page,
+  section: number,
+  row: number,
+  column: number,
+  block: number,
+  inner: number,
+  fn: (blocks: Block[]) => Block[],
+): Page {
+  return mapContainerColumns(page, section, row, column, block, (columns) =>
+    columns.map((col, index) => (index === inner ? { ...col, blocks: fn(col.blocks) } : col)),
+  );
+}
+
+/** Replace a container's whole set of columns (used by width resize and add/remove). */
+export function updateContainerColumns(
+  page: Page,
+  section: number,
+  row: number,
+  column: number,
+  block: number,
+  columns: Column[],
+): Page {
+  return mapContainerColumns(page, section, row, column, block, () => columns);
+}
+
+/** Add a block into one of a container's inner columns, at `at` or the end. */
+export function addInnerBlock(
+  page: Page,
+  section: number,
+  row: number,
+  column: number,
+  block: number,
+  inner: number,
+  newBlock: Block,
+  at?: number,
+): Page {
+  return mapInnerColumn(page, section, row, column, block, inner, (blocks) => {
+    const index = at ?? blocks.length;
+    const next = [...blocks];
+    next.splice(clamp(index, 0, next.length), 0, newBlock);
+    return next;
+  });
+}
+
+/** Remove a block from a container's inner column. */
+export function removeInnerBlock(
+  page: Page,
+  section: number,
+  row: number,
+  column: number,
+  block: number,
+  inner: number,
+  innerBlock: number,
+): Page {
+  return mapInnerColumn(page, section, row, column, block, inner, (blocks) =>
+    blocks.filter((_, i) => i !== innerBlock),
+  );
+}
+
+/** Patch the props of a block inside a container's inner column. */
+export function updateInnerBlockProps(
+  page: Page,
+  section: number,
+  row: number,
+  column: number,
+  block: number,
+  inner: number,
+  innerBlock: number,
+  patch: Record<string, unknown>,
+): Page {
+  return mapInnerColumn(page, section, row, column, block, inner, (blocks) =>
+    blocks.map((b, i) => (i === innerBlock ? { ...b, props: { ...b.props, ...patch } } : b)),
+  );
+}
+
+/** Replace the design box of a block inside a container's inner column. */
+export function updateInnerBlockBox(
+  page: Page,
+  section: number,
+  row: number,
+  column: number,
+  block: number,
+  inner: number,
+  innerBlock: number,
+  box: Box,
+): Page {
+  return mapInnerColumn(page, section, row, column, block, inner, (blocks) =>
+    blocks.map((b, i) => (i === innerBlock ? { ...b, box } : b)),
+  );
+}
+
 export function moveBlockWithinColumn(
   page: Page,
   section: number,
@@ -498,14 +663,7 @@ export function duplicateBlock(
 ): Page {
   const existing = getBlock(page, section, row, column, block);
   if (!existing) return page;
-  return addBlock(
-    page,
-    section,
-    row,
-    column,
-    { ...existing, id: reid('blk'), props: { ...existing.props } },
-    block + 1,
-  );
+  return addBlock(page, section, row, column, reidBlock(existing, reid), block + 1);
 }
 
 // ---------------------------------------------------------------------------
@@ -533,12 +691,41 @@ function reidRow(row: Row, reid: Reid): Row {
     columns: row.columns.map((column) => ({
       ...column,
       id: reid('col'),
-      blocks: column.blocks.map((block) => ({
-        ...block,
-        id: reid('blk'),
-        props: { ...block.props },
-      })),
+      blocks: column.blocks.map((block) => reidBlock(block, reid)),
     })),
+  };
+}
+
+/**
+ * A fresh copy of a block with a new id, deep enough for a container.
+ *
+ * An ordinary block only needs its own id changed and a shallow props copy, the
+ * same as the outline's copy always did. A CONTAINER also holds its own columns
+ * and their blocks in props.columns, and each of those carries an id too: left
+ * shared, a duplicated container and its original would point React at two
+ * copies of the same inner ids. So the container's inner columns and their
+ * blocks are reid'd as well. Inner blocks are leaves (no container inside a
+ * container), so one level down is the whole of it.
+ */
+function reidBlock(block: Block, reid: Reid): Block {
+  const base: Block = { ...block, id: reid('blk'), props: { ...block.props } };
+  const columns = containerColumns(block);
+  if (columns.length === 0) return base;
+
+  return {
+    ...base,
+    props: {
+      ...base.props,
+      columns: columns.map((column) => ({
+        ...column,
+        id: reid('col'),
+        blocks: column.blocks.map((inner) => ({
+          ...inner,
+          id: reid('blk'),
+          props: { ...inner.props },
+        })),
+      })),
+    },
   };
 }
 

@@ -47,6 +47,7 @@ import {
   updateSection,
   updateBlockBox,
   updateBlockProps,
+  containerColumns,
 } from '../../lib/content/tree';
 import { ImageField } from '../media/ImageField';
 import { FieldRenderer } from './Fields';
@@ -419,6 +420,18 @@ function headingFor(
       const block =
         page.sections[path.section]?.rows[path.row]?.columns[path.column]?.blocks[path.block];
       return blockDefinition(block?.type ?? '')?.label ?? 'Content';
+    }
+    case 'inner-column': {
+      const container =
+        page.sections[path.section]?.rows[path.row]?.columns[path.column]?.blocks[path.block];
+      const columns = container ? containerColumns(container) : [];
+      return columnWord(path.inner, columns.length || 1);
+    }
+    case 'inner-block': {
+      const container =
+        page.sections[path.section]?.rows[path.row]?.columns[path.column]?.blocks[path.block];
+      const inner = container ? containerColumns(container)[path.inner]?.blocks[path.innerBlock] : undefined;
+      return blockDefinition(inner?.type ?? '')?.label ?? 'Content';
     }
   }
 }
@@ -1484,6 +1497,8 @@ const BLOCK_DESIGN: Record<string, BoxParts> = {
   widget: FULL_BOX,
   'embed-widget': FULL_BOX,
   embed: FULL_BOX,
+  // A container is styled like a column: the whole box around its inner columns.
+  container: FULL_BOX,
   // Media that already rounds its own frame: everything but the radius.
   image: { bg: true, padding: true, shadow: true },
   video: { bg: true, padding: true, shadow: true },
