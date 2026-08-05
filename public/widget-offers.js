@@ -1,5 +1,5 @@
 /**
- * Travelgenix Travel Offers Widget v1.16.0
+ * Travelgenix Travel Offers Widget v1.16.1
  * Self-contained, embeddable widget served ENTIRELY from the Travelgenix offer
  * cache. A visitor's browser never triggers a Travelify search; the only live
  * search left is the one Travelify runs when a visitor clicks an offer.
@@ -20,6 +20,14 @@
  *   - BothPackages:   send packageType:'Any' (omitting returns DynamicPackages only)
  *
  * Changelog:
+ *   v1.16.1 (5 Aug 2026) — Deeplink carries resort lat/lng:
+ *     • Non-flight deeplinks now send lat/lng alongside loc/ctry so Travelify can
+ *       pin the search on the exact point instead of resolving the location name.
+ *       A name lookup fails for places absent from its gazetteer (e.g. "North
+ *       Jakarta") and errored the whole link. Additive: loc/ctry stay for the
+ *       name-match fallback, coords ride from acc.destination.latitude/longitude,
+ *       flights are untouched (they anchor on IATA codes), and a missing
+ *       coordinate emits no lat=/lng= at all.
  *   v1.15.2 (Jul 2026) — Airport-named hotel deeplink resolves:
  *     • A hotel-only offer whose location NAME is an airport ("Miami
  *       International Airport") dead-ended the deeplink with "Unable to match
@@ -204,7 +212,7 @@
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
   const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
-  const VERSION = '1.16.0';
+  const VERSION = '1.16.1';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // Telemetry: report a one-time load heartbeat and any failure to
@@ -892,6 +900,19 @@
         }
         const ctry = (acc.destination && acc.destination.countryCode) || (fl && fl.destination && fl.destination.countryCode);
         if (ctry) p.set('ctry', ctry);
+        // Pass the resort coordinates so Travelify can pin the search on the exact
+        // point rather than resolve `loc` by name — a name lookup fails for places
+        // absent from its gazetteer ("North Jakarta") and errored the whole link.
+        // Additive: `loc`/`ctry` stay for the name-match fallback. Skipped when
+        // either coordinate is missing, so no empty lat=/lng= is ever emitted.
+        // (The pinned path above already sends lat/lng via setPropertyAnchor.)
+        const dest = acc.destination;
+        const aLat = dest ? Number(dest.latitude) : NaN;
+        const aLng = dest ? Number(dest.longitude) : NaN;
+        if (Number.isFinite(aLat) && Number.isFinite(aLng)) {
+          p.set('lat', String(aLat));
+          p.set('lng', String(aLng));
+        }
       }
     }
     const start = String((fl && fl.outboundDate) || (acc && acc.checkinDate) || '');
