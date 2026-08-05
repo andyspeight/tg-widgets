@@ -35,6 +35,16 @@ describe('a block can be dragged off the picker', () => {
     expect(picker).toContain("document.body.dataset.tgDragging = 'block'");
     expect(picker).toContain('delete document.body.dataset.tgDragging');
   });
+
+  it('defers the modal fade a tick so it does not cancel the drag', () => {
+    // Mutating the drag source's own container (the scrim turns
+    // pointer-events:none) inside dragstart makes Chrome cancel the drag before
+    // it begins. The fade must run on the next tick, and dragend must cancel a
+    // fade that never got to fire. This is the whole bug; lock it out.
+    const picker = read('components', 'editor', 'BlockPicker.tsx');
+    expect(picker).toMatch(/setTimeout\(\(\) => \{\s*document\.body\.dataset\.tgDragging = 'block';\s*\}, 0\)/);
+    expect(picker).toContain('clearTimeout(fadeTimer.current)');
+  });
 });
 
 describe('the canvas takes the drop', () => {

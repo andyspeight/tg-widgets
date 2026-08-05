@@ -24,6 +24,9 @@ export function BlockPicker({
 }) {
   const [query, setQuery] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
+  // Holds the pending "fade the modal" timer so dragend can cancel it. The fade
+  // must not run synchronously inside dragstart — see the note on the card.
+  const fadeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   // Escape, the scrim and the focus trap all belong to Modal. Modal also
   // moves focus to the first control, which here is the search box.
@@ -83,9 +86,22 @@ export function BlockPicker({
                     onDragStart={(event) => {
                       event.dataTransfer.setData(BLOCK_DRAG_MIME, definition.type);
                       event.dataTransfer.effectAllowed = 'copy';
-                      document.body.dataset.tgDragging = 'block';
+                      /*
+                       * Fade the modal on the NEXT tick, not here. The flag turns
+                       * the scrim pointer-events:none, and the card being dragged
+                       * lives inside that scrim: mutating the drag source's own
+                       * container inside dragstart makes Chrome cancel the drag
+                       * before it begins, which is exactly why clicking a card
+                       * added it but dragging did nothing (found 5 Aug 2026, after
+                       * the synthetic test passed but a real mouse drag did not).
+                       * Deferring a tick lets the drag commit first.
+                       */
+                      fadeTimer.current = setTimeout(() => {
+                        document.body.dataset.tgDragging = 'block';
+                      }, 0);
                     }}
                     onDragEnd={() => {
+                      clearTimeout(fadeTimer.current);
                       delete document.body.dataset.tgDragging;
                     }}
                   >
