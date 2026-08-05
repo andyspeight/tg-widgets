@@ -191,6 +191,14 @@ function parseDestinations(v, cap = 60) {
 
 /** GBP display string in the shape Travelify uses (whole pounds). */
 const gbp = (n) => (Number.isFinite(n) ? '£' + Math.round(n).toLocaleString('en-GB') : null);
+// Format a price in its OWN currency. Most offers are GBP; Irish offers are EUR.
+// The widget re-reads the currency off the pricing block and converts with live
+// FX, but the formatted string carries the honest symbol so anything that shows
+// it raw is right too. Unknown codes fall back to a prefixed code.
+const CUR_SYMBOL = { GBP: '£', EUR: '€', USD: '$' };
+const money = (n, cur) => (Number.isFinite(n)
+  ? (CUR_SYMBOL[cur] || (cur ? cur + ' ' : '£')) + Math.round(n).toLocaleString('en-GB')
+  : null);
 
 /**
  * Rebuild the raw Travelify offer shape from a cached normalised offer —
@@ -207,8 +215,8 @@ function toRawShape(o) {
     updated: o.updated || null,
   };
   if (o.packageType) raw.packageType = o.packageType;
-  if (Number.isFinite(o.price)) raw.formattedPrice = gbp(o.price);
-  if (Number.isFinite(o.pricePP)) raw.formattedPPPrice = gbp(o.pricePP);
+  if (Number.isFinite(o.price)) raw.formattedPrice = money(o.price, o.currency || 'GBP');
+  if (Number.isFinite(o.pricePP)) raw.formattedPPPrice = money(o.pricePP, o.currency || 'GBP');
   // Party size — drives the "Based on N adults sharing" caption and the
   // per-person derivations.
   if (Number.isFinite(o.adults)) raw.adults = o.adults;

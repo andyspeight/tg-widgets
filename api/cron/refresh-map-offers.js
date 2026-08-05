@@ -119,7 +119,15 @@ function capStoredOffers(offers, factor = 1) {
     if (!groups.has(k)) groups.set(k, []);
     groups.get(k).push(o);
   }
-  const pp = (o) => (Number.isFinite(o.pricePP) ? o.pricePP : (Number.isFinite(o.price) ? o.price : Infinity));
+  // Order by a GBP-equivalent so a EUR group is not cut unfairly by its larger
+  // raw numbers. This fixed rate is for INTERNAL ordering only — the widget
+  // converts with live FX at display time. EUR groups are Irish-market and small
+  // next to the caps, so this rarely bites; it just keeps the cut honest.
+  const EUR_TO_GBP = 0.86;
+  const pp = (o) => {
+    const v = Number.isFinite(o.pricePP) ? o.pricePP : (Number.isFinite(o.price) ? o.price : Infinity);
+    return o.currency === 'EUR' && Number.isFinite(v) ? v * EUR_TO_GBP : v;
+  };
   const out = [];
   for (const [k, arr] of groups) {
     const type = k.split('|')[0];
@@ -417,7 +425,14 @@ function clickNationality(o) {
  *  booking link matches the market it departs from. No opinion either way
  *  means "yes", so the later copy wins as it always did. */
 function preferredCopy(a, b) {
-  const want = marketTagOf(a);
+  const want = marketTagOf(a) || marketTagOf(b);
+  // Prefer the copy priced in the market's native currency. The two IE requests
+  // (GBP and EUR) can both return the same Irish offer under the same merge key;
+  // an Irish customer should see the EUR price we now capture, not the GBP one.
+  // For GB (native GBP) both copies are GBP, so this is a no-op there.
+  const native = nativeCurrencyFor(want);
+  const aNative = a.currency === native, bNative = b.currency === native;
+  if (aNative !== bNative) return aNative;
   if (!want) return true;
   const aOk = clickNationality(a) === want;
   const bOk = clickNationality(b) === want;
@@ -615,10 +630,23 @@ const MARKETS = [
   // are embedded in the Packages we already cache, not a standalone Flights
   // product. The per-type sweep stats (SWEEP_STATS_KEY / the Cache tab) show the
   // real fetched-vs-kept per type, so the answer is measurable after one sweep.
-  { id: 'GB', nationality: 'GB', flightOrigins: MARKET_AIRPORTS.GB },
+  //
+  // currencies: which pricing currencies to request for this market. GB is GBP
+  // only. IE asks BOTH GBP and EUR because the great majority of Irish offers
+  // price in EUR, and asking GBP alone (the old behaviour) dropped them all —
+  // an Irish flight search returns only EUR, so the GBP-only cache held zero
+  // Irish flights. EUR offers are kept ONLY when they belong to the Irish market
+  // (see the keep rule in sweepCountry), so a EUR price can never land on a
+  // British-market offer. (5 Aug 2026.)
+  { id: 'GB', nationality: 'GB', currencies: ['GBP'], flightOrigins: MARKET_AIRPORTS.GB },
   // Irish departures for the Irish clients — every airport with scheduled service.
-  { id: 'IE', nationality: 'IE', flightOrigins: MARKET_AIRPORTS.IE },
+  { id: 'IE', nationality: 'IE', currencies: ['GBP', 'EUR'], flightOrigins: MARKET_AIRPORTS.IE },
 ];
+
+// The currency an offer of a given market is NATURALLY priced in: Irish offers
+// in EUR, everything else GBP. Used to prefer the native copy when the same
+// offer comes back in two currencies from the two IE requests.
+function nativeCurrencyFor(market) { return market === 'IE' ? 'EUR' : 'GBP'; }
 
 // Offer types swept into the cache. The cache powers the offer-box widgets
 // (locked decision 2 Jul 2026: offer boxes read the cache, not live
@@ -631,7 +659,7 @@ const SWEEP_TYPES = [
   { id: 'Flights', payloadType: 'Flights' },
 ];
 
-function buildPayload(row, destinationCode, market = MARKETS[0], sweepType = SWEEP_TYPES[0], flightOrigin = null) {
+function buildPayload(row, destinationCode, market = MARKETS[0], sweepType = SWEEP_TYPES[0], flightOrigin = null, currency = 'GBP') {
   const f = row.fields || {};
   return {
     appId: f.AppId || DEMO_APP_ID,
@@ -642,7 +670,7 @@ function buildPayload(row, destinationCode, market = MARKETS[0], sweepType = SWE
     // `origins` array form was ignored by the feed (see MARKETS.flightOrigins).
     ...(sweepType.id === 'Flights' && flightOrigin ? { origin: flightOrigin } : {}),
     deduping: 'None',
-    currency: 'GBP', language: 'en', nationality: market.nationality,
+    currency: currency, language: 'en', nationality: market.nationality,
     maxOffers: f.MaxOffers || 250,
     // DatesMin/DatesMax are the DEPARTURE ADVANCE WINDOW in days from today
     // (NOT trip duration). 1–700 = "anything departing between tomorrow and ~23
@@ -729,28 +757,38 @@ async function sweepCountry(row) {
     return { cc: cc || '(none)', name: f.Name || '', ok: false, error: 'no country code', codeResults: [], freshOffers: [] };
   }
   const jobs = [];
-  for (const code of codes) for (const market of MARKETS) for (const sweepType of SWEEP_TYPES) {
+  for (const code of codes) for (const market of MARKETS) for (const cur of (market.currencies || ['GBP'])) for (const sweepType of SWEEP_TYPES) {
     // Flight sweeps fan out to one request per departure airport (the only
     // request shape the feed returns flight-only offers for), toward every
     // swept destination — including pairs Travelify holds nothing for today,
     // so inventory they add later is picked up without a code change.
     if (sweepType.id === 'Flights') {
-      for (const flightOrigin of (market.flightOrigins || [])) jobs.push({ code, market, sweepType, flightOrigin });
+      for (const flightOrigin of (market.flightOrigins || [])) jobs.push({ code, market, cur, sweepType, flightOrigin });
       continue;
     }
-    jobs.push({ code, market, sweepType });
+    jobs.push({ code, market, cur, sweepType });
   }
-  const codeResults = await pooled(jobs, async ({ code, market, sweepType, flightOrigin }) => {
-    const raw = await callOffersProxy(buildPayload(row, code, market, sweepType, flightOrigin));
-    if (!raw.ok) return { code, market: market.id, type: sweepType.id, origin: flightOrigin || undefined, ok: false, error: raw.error || `HTTP ${raw.status}`, count: 0, fetched: 0, dropped: null, offers: [] };
+  const codeResults = await pooled(jobs, async ({ code, market, cur, sweepType, flightOrigin }) => {
+    const raw = await callOffersProxy(buildPayload(row, code, market, sweepType, flightOrigin, cur));
+    if (!raw.ok) return { code, market: market.id, cur, type: sweepType.id, origin: flightOrigin || undefined, ok: false, error: raw.error || `HTTP ${raw.status}`, count: 0, fetched: 0, dropped: null, offers: [] };
     const arr = raw.data && Array.isArray(raw.data.data) ? raw.data.data : [];
     const dropped = { noPrice: 0, noDest: 0, duration: 0, durNoNights: 0, durOutOfRange: 0, nonGBP: 0 };
     // The country fallback applies to the non-map types only: the world map's
     // Packages product keeps its exact geo requirements, while hotel-only and
     // flight-only offers inherit the swept country when the supplier omits it.
     let offers = normaliseOffers(arr, sweepType.id, dropped, sweepType.id === 'Packages' ? null : cc);
+    // Currency keep-rule. GBP is kept for any market (the cache's base currency).
+    // EUR is kept ONLY for the Irish market — an Irish departure, or a hotel-only
+    // offer priced for an IE customer — so Irish offers enter the cache in their
+    // real currency while a EUR price can never attach to a British-market offer
+    // (a GB-departing flight returned under the IE/EUR request is dropped here).
+    // The market is derived the same way as the tag applied just below.
     const beforeCurrencyFilter = offers.length;
-    offers = offers.filter(o => o.currency === 'GBP');
+    offers = offers.filter((o) => {
+      if (o.currency === 'GBP') return true;
+      if (o.currency === 'EUR') return (o.origin ? marketOfAirport(o.origin) : market.id) === 'IE';
+      return false;
+    });
     dropped.nonGBP = beforeCurrencyFilter - offers.length;
     // TAG FROM THE DEPARTURE AIRPORT, not from the request that fetched it.
     //
@@ -882,8 +920,11 @@ async function rebuildSummary(rows) {
       // The world map is a PACKAGE-deals product: its pins, prices and resort
       // cards must not blend hotel-only or flight-only offers now that the
       // cache stores all types for the offer boxes. Summaries are built from
-      // the Packages subset only.
-      const packageOffers = stored.offers.filter(o => (o.type || 'Packages') === 'Packages');
+      // the Packages subset only. GBP only too: the map's "from £X" pins are a
+      // single-currency label, so Irish EUR packages (which the offer boxes read
+      // straight from the per-country keys) are kept out of the map summary
+      // rather than mislabelled with a £ sign. (5 Aug 2026.)
+      const packageOffers = stored.offers.filter(o => (o.type || 'Packages') === 'Packages' && (o.currency || 'GBP') === 'GBP');
       all = all.concat(packageOffers);
       // Write a compact per-country resort summary (ALL resorts, cheapest +
       // coords + count each) so the widget can pin every resort, not just the
