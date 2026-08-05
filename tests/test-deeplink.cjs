@@ -252,6 +252,81 @@ eq(qp(buildDeeplink({ type: 'Packages', airport: 'AGP', countryCode: 'ES', outbo
 // ── World Map: no AppID → empty string ────────────────────────────────────
 eq(buildDeeplink({ type: 'Packages', airport: 'MLE' }, ''), '', 'map: empty when no AppID');
 
+// ═══ Deeplink lat/lng (5 Aug 2026) ════════════════════════════════════════
+// Non-flight deeplinks carry the resort coordinates so Travelify can pin the
+// search on the exact point instead of resolving `loc` by name (which fails for
+// places absent from its gazetteer, e.g. "North Jakarta"). Additive: loc/ctry
+// stay. Flights never carry lat/lng. Missing coords emit no lat=/lng=.
+
+// Offers: accommodation whose NAME does not resolve → lat/lng added (the North
+// Jakarta acceptance case from the task), with loc/ctry preserved.
+{
+  const o = { type: 'Accommodation', adults: 2, accommodation: { destination: { name: 'North Jakarta', countryCode: 'ID', latitude: -6.1358859, longitude: 106.8419005 }, nights: 2, boardBasis: 'RoomOnly', rating: 4 } };
+  const q = qp(offersDeeplink(o));
+  eq(q.get('loc'), 'North Jakarta', 'offers/latlng loc kept');
+  eq(q.get('ctry'), 'ID', 'offers/latlng ctry kept');
+  eq(q.get('lat'), '-6.1358859', 'offers/latlng lat (full precision, sign preserved)');
+  eq(q.get('lng'), '106.8419005', 'offers/latlng lng');
+}
+
+// Offers: a PACKAGE carries the accommodation coordinates too (non-flight branch).
+{
+  const o = { type: 'Packages', packageType: 'DynamicPackages', adults: 2,
+    flight: { origin: { iataCode: 'BHX' }, sid: 27, destination: { iataCode: 'MLE', countryCode: 'MV' }, outboundDate: '2026-10-01' },
+    accommodation: { sid: 45, destination: { name: 'South Male Atoll', countryCode: 'MV', latitude: 3.9, longitude: 73.4 }, nights: 7 } };
+  const q = qp(offersDeeplink(o));
+  eq(q.get('lat'), '3.9', 'offers/latlng-pkg lat from accommodation');
+  eq(q.get('lng'), '73.4', 'offers/latlng-pkg lng from accommodation');
+}
+
+// Offers: no coordinates → no lat/lng emitted (never empty values).
+{
+  const url = offersDeeplink({ type: 'Accommodation', adults: 2, accommodation: { destination: { name: 'Barcelona', countryCode: 'ES' }, nights: 5, boardBasis: 'RoomOnly' } });
+  const q = qp(url);
+  eq(q.get('lat'), null, 'offers/latlng-none no lat when coords absent');
+  eq(q.get('lng'), null, 'offers/latlng-none no lng when coords absent');
+  assert(!/[?&]lat=/.test(url) && !/[?&]lng=/.test(url), 'offers/latlng-none: no empty lat=/lng=');
+}
+
+// Offers: FLIGHTS never carry lat/lng (they anchor on IATA codes).
+{
+  const o = { type: 'Flights', adults: 2, flight: { origin: { iataCode: 'LON' }, destination: { iataCode: 'AGP', countryCode: 'ES', latitude: 36.7, longitude: -4.5 }, outboundDate: '2026-08-01' } };
+  const q = qp(offersDeeplink(o));
+  eq(q.get('lat'), null, 'offers/latlng-flt no lat on flights');
+  eq(q.get('lng'), null, 'offers/latlng-flt no lng on flights');
+}
+
+// Map: resort coordinates ride on the non-flight deeplink.
+{
+  const o = { type: 'Accommodation', adults: 2, airport: 'MLE', countryCode: 'MV', resort: 'Raa Atoll', resortLat: 5.6019, resortLng: 72.9975, nights: 7, checkinDate: '2026-10-01' };
+  const q = qp(buildDeeplink(o, '370'));
+  eq(q.get('loc'), 'MLE', 'map/latlng loc kept (airport anchor)');
+  eq(q.get('lat'), '5.6019', 'map/latlng lat from resortLat');
+  eq(q.get('lng'), '72.9975', 'map/latlng lng from resortLng');
+}
+
+// Map: falls back to o.lat/o.lng when resortLat/resortLng are absent.
+{
+  const o = { type: 'Accommodation', adults: 2, countryCode: 'ES', resort: 'Barcelona', lat: 41.3874, lng: 2.1686, nights: 5 };
+  const q = qp(buildDeeplink(o, '370'));
+  eq(q.get('lat'), '41.3874', 'map/latlng lat falls back to o.lat');
+  eq(q.get('lng'), '2.1686', 'map/latlng lng falls back to o.lng');
+}
+
+// Map: no coordinates → no lat/lng emitted.
+{
+  const url = buildDeeplink({ type: 'Accommodation', adults: 2, countryCode: 'ES', resort: 'Barcelona', nights: 5 }, '370');
+  assert(!/[?&]lat=/.test(url) && !/[?&]lng=/.test(url), 'map/latlng-none: no empty lat=/lng=');
+}
+
+// Map: FLIGHTS never carry lat/lng even if the offer happens to hold coords.
+{
+  const o = { type: 'Flights', adults: 2, origin: 'LON', airport: 'AGP', countryCode: 'ES', lat: 36.7, lng: -4.5, outboundDate: '2026-08-01' };
+  const q = qp(buildDeeplink(o, '370'));
+  eq(q.get('lat'), null, 'map/latlng-flt no lat on flights');
+  eq(q.get('lng'), null, 'map/latlng-flt no lng on flights');
+}
+
 // ═══ Property pinning (per-widget opt-in, 22 Jul 2026) ═════════════════════
 // Recipe verified against Travelify's own generator: loc="<hotel>, <city>"
 // + loct=Property + lat/lng + rad=1 + refn=TTI:<code>. Off by default.

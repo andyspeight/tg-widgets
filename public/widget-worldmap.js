@@ -1,5 +1,5 @@
 /**
- * Travelgenix World Map Widget v3.3.0
+ * Travelgenix World Map Widget v3.13.2
  * Real-map version using Leaflet + MapTiler Streets tiles.
  *
  * Usage:
@@ -56,11 +56,19 @@
  * a site whose header had a lower z-index the map covered the header logo, text
  * and colour. .tgwm-map-wrap now isolates its own stacking; the fullscreen
  * overlay is a sibling and still escapes above the page when opened.
+ *
+ * v3.13.2: deeplinks carry resort lat/lng. The non-flight deeplink now sends
+ * lat/lng alongside loc/ctry so Travelify can pin the search on the exact point
+ * rather than resolve the location by name — a name lookup fails for places
+ * absent from its gazetteer and errored the whole link. Additive: loc/ctry stay
+ * for the name-match fallback, coords ride from o.resortLat/resortLng (falling
+ * back to o.lat/o.lng), flights are untouched, and a missing coordinate emits no
+ * lat=/lng= at all. (The pinned path already sent lat/lng via setPropertyAnchor.)
  */
 (function () {
   'use strict';
 
-  const VERSION = '3.13.1';
+  const VERSION = '3.13.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -438,6 +446,18 @@
         if (o.airport) { p.set('loc', o.airport); p.set('loct', 'Airport'); }
         else if (o.resort) { p.set('loc', o.resort); }
         if (o.countryCode) p.set('ctry', o.countryCode);
+        // Pass the resort coordinates so Travelify can pin the search on the exact
+        // point rather than resolve `loc` by name — a name lookup fails for places
+        // absent from its gazetteer and errored the whole link. Additive: `loc`/
+        // `ctry` stay for the name-match fallback. Skipped when either coordinate
+        // is missing, so no empty lat=/lng= is ever emitted. (The pinned path
+        // above already sends lat/lng via setPropertyAnchor.)
+        const mLat = Number(typeof o.resortLat === 'number' ? o.resortLat : o.lat);
+        const mLng = Number(typeof o.resortLng === 'number' ? o.resortLng : o.lng);
+        if (Number.isFinite(mLat) && Number.isFinite(mLng)) {
+          p.set('lat', String(mLat));
+          p.set('lng', String(mLng));
+        }
       }
     }
     const start = String(o.outboundDate || o.checkinDate || '');
