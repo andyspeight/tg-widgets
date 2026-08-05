@@ -1,5 +1,5 @@
 /**
- * Travelgenix Travel Offers Widget v1.16.1
+ * Travelgenix Travel Offers Widget v1.17.0
  * Self-contained, embeddable widget served ENTIRELY from the Travelgenix offer
  * cache. A visitor's browser never triggers a Travelify search; the only live
  * search left is the one Travelify runs when a visitor clicks an offer.
@@ -20,6 +20,18 @@
  *   - BothPackages:   send packageType:'Any' (omitting returns DynamicPackages only)
  *
  * Changelog:
+ *   v1.17.0 (5 Aug 2026) — Offers carry their own currency (Irish offers in EUR):
+ *     • The cache is no longer GBP-only. The Irish market is now swept in EUR as
+ *       well as GBP (an Irish flight search returns only EUR, so the old GBP-only
+ *       ask captured zero Irish flights). Each offer carries its native currency.
+ *     • The widget converts from each offer's OWN currency to the viewer's display
+ *       currency, instead of assuming every cached price is GBP. getNumericPrice
+ *       normalises to GBP so sorting and price filters stay comparable across
+ *       currencies; computeDisplayPrice and the strike-through was-prices convert
+ *       from the offer's native currency. FX for a EUR offer loads on demand, with
+ *       the static fallback table covering the first paint.
+ *     • The click-through deeplink already carried each offer's currency, so an
+ *       Irish EUR offer opens a EUR search — no teaser/booking mismatch.
  *   v1.16.1 (5 Aug 2026) — Deeplink carries resort lat/lng:
  *     • Non-flight deeplinks now send lat/lng alongside loc/ctry so Travelify can
  *       pin the search on the exact point instead of resolving the location name.
@@ -208,11 +220,11 @@
   // blank widget, not a slower path. The calm empty state and the `degraded`
   // beacon are the whole safety net, so do not weaken either.
   const CACHED_OFFERS_URL = API_BASE.replace('/widget-config', '/cached-offers');
-  // Our own FX proxy (ECB/Frankfurter). The cache is GBP; we convert at display
+  // Our own FX proxy (ECB/Frankfurter). Each offer normalises to GBP, then we convert at display
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
   const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
-  const VERSION = '1.16.1';
+  const VERSION = '1.17.0';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // Telemetry: report a one-time load heartbeat and any failure to
@@ -727,16 +739,20 @@
     return map[k] ? t(map[k]) : formatEnum(s);
   }
 
+  // Numeric price NORMALISED TO GBP, so it is comparable across currencies
+  // (sorting, price filters, dedupe cheapest-pick). Display formatting converts
+  // GBP → the viewer's currency separately in computeDisplayPrice.
   function getNumericPrice(o) {
+    const cur = offerCurrency(o);
     const candidates = [
       o.accommodation && o.accommodation.pricing && o.accommodation.pricing.price,
       o.flight && o.flight.pricing && o.flight.pricing.price,
       o.pricing && o.pricing.price,
     ];
-    for (const c of candidates) if (typeof c === 'number') return c;
+    for (const c of candidates) if (typeof c === 'number') return toGbp(c, cur);
     const formatted = o.formattedPPPrice || o.formattedPrice || '';
     const match = String(formatted).replace(/,/g, '').match(/(\d+(?:\.\d+)?)/);
-    return match ? parseFloat(match[1]) : Infinity;
+    return match ? toGbp(parseFloat(match[1]), cur) : Infinity;
   }
 
   // Pull the currency symbol out of a formatted price string like "£476" or "€1,200"
@@ -754,10 +770,12 @@
     return (sym || '£') + rounded.toLocaleString('en-GB');
   }
 
-  // ── Currency conversion (display only — the offer cache stays GBP) ──────
-  // Cached prices are GBP. We convert at render time to the viewer's chosen
-  // currency using rates from our own /api/fx-rates (ECB), and fall back to a
-  // built-in table if that feed is ever unreachable so a price always shows.
+  // ── Currency conversion ────────────────────────────────────────────────
+  // Each offer carries its OWN currency (mostly GBP; Irish offers are EUR). We
+  // normalise every price to GBP with toGbp(), then convert at render time to
+  // the viewer's chosen currency using rates from our own /api/fx-rates (ECB),
+  // falling back to a built-in table if that feed is ever unreachable so a price
+  // always shows.
   // ACTIVE_CUR is set at the top of each render pass; rendering is synchronous
   // so multiple widget instances on a page never interleave.
   const FX_FALLBACK = { GBP: 1, EUR: 1.17, USD: 1.27, AUD: 1.92, CAD: 1.72, NZD: 2.08,
@@ -1051,6 +1069,24 @@
     const rate = (ACTIVE_CUR.rates && ACTIVE_CUR.rates[code] > 0) ? ACTIVE_CUR.rates[code] : (FX_FALLBACK[code] || 1);
     return fmtCur(gbpAmount * rate, code);
   }
+  // The currency an offer is priced in. The cache is mostly GBP; Irish offers
+  // come through in EUR. Read off the pricing block the cache carries verbatim.
+  function offerCurrency(o) {
+    return (o && ((o.accommodation && o.accommodation.pricing && o.accommodation.pricing.currency)
+      || (o.flight && o.flight.pricing && o.flight.pricing.currency)
+      || (o.pricing && o.pricing.currency))) || 'GBP';
+  }
+  // Normalise a native-currency amount to GBP using loaded rates (units per 1
+  // GBP), so money() — which converts GBP into the display currency — always
+  // receives a true GBP figure whatever the offer is priced in. Same maths the
+  // world map uses. Falls back to the static FX table until live rates arrive.
+  function toGbp(amount, cur) {
+    if (!isFinite(amount)) return amount;
+    const c = cur || 'GBP';
+    if (c === 'GBP') return amount;
+    const rate = (ACTIVE_CUR.rates && ACTIVE_CUR.rates[c] > 0) ? ACTIVE_CUR.rates[c] : (FX_FALLBACK[c] || 1);
+    return amount / rate;
+  }
   // Fetch GBP→codes rates from our FX proxy, filling any gaps from the fallback.
   function loadFxRates(codes) {
     const want = [...new Set(codes.filter((c) => c && c !== 'GBP'))];
@@ -1086,12 +1122,25 @@
     const sub = (k) => (t ? t(k) : ({ total: 'total', perPerson: 'per person', perNight: 'per night', perPersonPerNight: 'per person, per night' })[k] || k);
     const totalStr = o.formattedPrice || '';
     const ppStr = o.formattedPPPrice || '';
-    const numeric = getNumericPrice(o);
+    const cur = offerCurrency(o);
+    // Native numeric (in the offer's own currency) — used only when neither
+    // formatted string is present.
+    const nativeNumeric = (function () {
+      const cands = [
+        o.accommodation && o.accommodation.pricing && o.accommodation.pricing.price,
+        o.flight && o.flight.pricing && o.flight.pricing.price,
+        o.pricing && o.pricing.price,
+      ];
+      for (const c of cands) if (typeof c === 'number') return c;
+      const s = String(o.formattedPPPrice || o.formattedPrice || '').replace(/,/g, '').match(/(\d+(?:\.\d+)?)/);
+      return s ? parseFloat(s[1]) : NaN;
+    })();
     const pax = paxCount(o);
     const nights = nightsCount(o);
-    // Work entirely in GBP numbers, then money() converts to the active currency.
-    // formattedPPPrice is per person; multiply by pax to derive total.
-    // formattedPrice is total; if ppStr missing, divide by pax for per-person.
+    // Extract the prices in the offer's OWN currency, derive the per-person /
+    // total split, THEN convert to GBP so money() can take it on to the display
+    // currency. formattedPPPrice is per person; formattedPrice is total.
+    // (Irish offers are priced in EUR; everything else GBP.)
     let total = null, perPerson = null;
     if (totalStr) {
       const m = totalStr.replace(/,/g, '').match(/(\d+(?:\.\d+)?)/);
@@ -1101,13 +1150,16 @@
       const m = ppStr.replace(/,/g, '').match(/(\d+(?:\.\d+)?)/);
       if (m) perPerson = parseFloat(m[1]);
     }
-    // Fallbacks
+    // Fallbacks (still in native currency)
     if (total == null && perPerson != null) total = perPerson * pax;
     if (perPerson == null && total != null) perPerson = total / pax;
-    if (total == null && perPerson == null && isFinite(numeric)) {
-      total = numeric;
-      perPerson = numeric / pax;
+    if (total == null && perPerson == null && isFinite(nativeNumeric)) {
+      total = nativeNumeric;
+      perPerson = nativeNumeric / pax;
     }
+    // Native -> GBP once, so every money() branch below is fed a GBP figure.
+    total = total != null ? toGbp(total, cur) : null;
+    perPerson = perPerson != null ? toGbp(perPerson, cur) : null;
 
     const m = (mode || 'auto').toLowerCase();
 
@@ -5748,11 +5800,32 @@
       const need = this.cfg.showCurrencySwitcher ? CURRENCY_ORDER.slice() : [this.cur.code];
       if (need.length === 1 && need[0] === 'GBP') return;   // nothing to convert
       loadFxRates(need).then((rates) => {
-        this.cur.rates = rates;
+        this.cur.rates = Object.assign({ GBP: 1 }, this.cur.rates, rates);
         setActiveCur(this.cur);
         this._renderCurBar();
         if (this.rawOffers && this.rawOffers.length) this._renderOffers();
       });
+    }
+
+    // Ensure FX rates for every currency the offers are PRICED IN are loaded, so
+    // toGbp() can normalise a EUR (Irish) offer to GBP before display. The
+    // display-currency rates load in _loadCurrency; this covers the offers' OWN
+    // currencies, which are only known once they arrive. Until the fetch lands,
+    // toGbp falls back to the static table, so nothing blocks the first paint.
+    _ensureNativeRates() {
+      const need = [];
+      for (const o of (this.rawOffers || [])) {
+        const c = offerCurrency(o);
+        if (c && c !== 'GBP' && !(this.cur.rates && this.cur.rates[c] > 0) && need.indexOf(c) < 0) need.push(c);
+      }
+      if (!need.length || this._nativeRatesPending) return;
+      this._nativeRatesPending = true;
+      loadFxRates(need).then((rates) => {
+        this.cur.rates = Object.assign({ GBP: 1 }, this.cur.rates, rates);
+        setActiveCur(this.cur);
+        this._nativeRatesPending = false;
+        this._renderOffers();
+      }).catch(() => { this._nativeRatesPending = false; });
     }
 
     // The currency switcher sits above the offers as its own element so a
@@ -6565,6 +6638,7 @@
 
     _renderOffers() {
       setActiveCur(this.cur);
+      this._ensureNativeRates(); // load FX for any EUR (Irish) offers so prices convert right
       setActiveAppId(this.cfg.appId);
       setPropertyPin(this.cfg.propertyDeeplinks === true);
       // Departure-board template doesn't dedupe (it's a fares list, not a
@@ -7037,7 +7111,7 @@
         html += (amenHtml);
       }
 
-      const wasPrice = (pricing.priceChanged && pricing.priceBeforeChange) ? money(pricing.priceBeforeChange) : null;
+      const wasPrice = (pricing.priceChanged && pricing.priceBeforeChange) ? money(toGbp(pricing.priceBeforeChange, pricing.currency)) : null;
       html += this._renderPriceFooter(o, wasPrice);
       html += '</div>';
       return html;
@@ -7115,7 +7189,7 @@
           + '</div>');
       }
 
-      const wasPrice = priceChanged ? money(pricing.priceBeforeChange) : null;
+      const wasPrice = priceChanged ? money(toGbp(pricing.priceBeforeChange, pricing.currency)) : null;
       html += this._renderPriceFooter(o, wasPrice);
       html += '</div>';
       return html;
@@ -7149,7 +7223,7 @@
       const isDynamic = pkgType === 'DynamicPackages';
 
       const priceChanged = (flightPricing.priceChanged && flightPricing.priceBeforeChange);
-      const wasPrice = priceChanged ? money(flightPricing.priceBeforeChange) : null;
+      const wasPrice = priceChanged ? money(toGbp(flightPricing.priceBeforeChange, flightPricing.currency)) : null;
       const isLeadIn = (accPricing.isLeadIn === true) || (flightPricing.isLeadIn === true);
 
       const badgeText = isHoliday ? this.t('packageHoliday') : (isDynamic ? this.t('flightHotel') : this.t('package'));
@@ -7314,7 +7388,7 @@
       const img = safeImgUrl((acc.image && acc.image.url) || '');
       const amenities = Array.isArray(acc.amenities) ? acc.amenities : [];
       const isLeadIn = pricing.isLeadIn === true;
-      const wasPrice = (pricing.priceChanged && pricing.priceBeforeChange) ? money(pricing.priceBeforeChange) : null;
+      const wasPrice = (pricing.priceChanged && pricing.priceBeforeChange) ? money(toGbp(pricing.priceBeforeChange, pricing.currency)) : null;
 
       let html = '<article class="tgo-list-row">';
       html += '<div class="tgo-list-img" ' + cssBgUrl(img) + '>';
@@ -7377,7 +7451,7 @@
       const stopsLabel = isDirect ? this.t('direct') : this.t(stops === 1 ? 'stop' : 'stops', { n: stops });
       const tripType = f.returnDate ? this.t('returnLabel') : this.t('oneWay');
       const isLeadIn = pricing.isLeadIn === true;
-      const wasPrice = (pricing.priceChanged && pricing.priceBeforeChange) ? money(pricing.priceBeforeChange) : null;
+      const wasPrice = (pricing.priceChanged && pricing.priceBeforeChange) ? money(toGbp(pricing.priceBeforeChange, pricing.currency)) : null;
 
       let html = '<article class="tgo-list-row">';
       html += '<div class="tgo-list-img" ' + cssBgUrl(img) + '>';
@@ -7436,7 +7510,7 @@
       const isHoliday = pkgType === 'PackageHolidays';
       const isLeadIn = (accPricing.isLeadIn === true) || (flightPricing.isLeadIn === true);
       const wasPrice = (flightPricing.priceChanged && flightPricing.priceBeforeChange)
-        ? money(flightPricing.priceBeforeChange) : null;
+        ? money(toGbp(flightPricing.priceBeforeChange, flightPricing.currency)) : null;
 
       let html = '<article class="tgo-list-row">';
       html += '<div class="tgo-list-img" ' + cssBgUrl(img) + '>';
@@ -7707,9 +7781,9 @@
       const accPricing = acc.pricing || {};
       const flightPricing = f.pricing || {};
       const wasPrice = (accPricing.priceChanged && accPricing.priceBeforeChange)
-        ? money(accPricing.priceBeforeChange)
+        ? money(toGbp(accPricing.priceBeforeChange, accPricing.currency))
         : (flightPricing.priceChanged && flightPricing.priceBeforeChange)
-          ? money(flightPricing.priceBeforeChange)
+          ? money(toGbp(flightPricing.priceBeforeChange, flightPricing.currency))
           : null;
 
       let html = '<article class="tgo-mag-hero" ' + cssBgUrl(img) + '>';
@@ -8125,10 +8199,10 @@
       const accP = acc.pricing || {};
       const flP = f.pricing || {};
       if (accP.priceChanged && accP.priceBeforeChange) {
-        return money(accP.priceBeforeChange);
+        return money(toGbp(accP.priceBeforeChange, accP.currency));
       }
       if (flP.priceChanged && flP.priceBeforeChange) {
-        return money(flP.priceBeforeChange);
+        return money(toGbp(flP.priceBeforeChange, flP.currency));
       }
       return null;
     }
@@ -9203,7 +9277,7 @@
       // Price
       const display = computeDisplayPrice(o, this.cfg.priceDisplay || 'auto', this.t);
       const wasPrice = (pricing.priceChanged && pricing.priceBeforeChange)
-        ? money(pricing.priceBeforeChange) : null;
+        ? money(toGbp(pricing.priceBeforeChange, pricing.currency)) : null;
 
       // Barcode "number" — synthetic, derived from carrier + flight + date
       const barcodeNum = (carrier.code || 'XX') + (f.flightNumber || '0000') + '·' + (date || '').replace(/\s/g, '');
