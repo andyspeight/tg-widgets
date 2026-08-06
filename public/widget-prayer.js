@@ -59,6 +59,10 @@
 
   const API_BASE = resolveApiBase();
   const ALADHAN_BASE = 'https://api.aladhan.com/v1';
+  // Open-Meteo geocoding — free, no key, CORS-enabled, worldwide. Powers the
+  // type-to-search box: it resolves a typed city to coordinates, which we feed
+  // straight to Aladhan (coords mode), so search works for any destination.
+  const GEO_BASE = 'https://geocoding-api.open-meteo.com/v1/search';
   const VERSION = '1.0.0';
   const STORE_PREFIX = 'tgpt_';           // storage keys are prefixed + JSON-encoded
   const FETCH_TIMEOUT = 9000;
@@ -95,6 +99,8 @@
     maghrib: '<path d="M12 10V2"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m16 6-4 4-4-4"/><path d="M16 18a4 4 0 0 0-8 0"/>',
     isha:    '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
     pin:     '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',
+    search:  '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+    near:    '<circle cx="12" cy="12" r="3"/><path d="M12 2v3"/><path d="M12 19v3"/><path d="M2 12h3"/><path d="M19 12h3"/>',
     clock:   '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
     moon:    '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
     alert:   '<path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
@@ -499,6 +505,31 @@
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
     }
 
+    /* ─── TYPE-TO-SEARCH COMBOBOX ────────────────────── */
+    .tgpt-loc--search { flex: 1; margin-right: 12px; min-width: 0; }
+    .tgpt-search {
+      font: inherit; font-size: 13px; font-weight: 600; color: var(--tgpt-text);
+      background: transparent; border: 0; outline: none; padding: 2px 0; width: 100%; min-width: 0;
+    }
+    .tgpt-search::placeholder { color: var(--tgpt-muted); font-weight: 500; }
+    .tgpt-search-panel {
+      border-top: 1px solid var(--tgpt-border-soft);
+      max-height: 244px; overflow-y: auto; padding: 6px;
+    }
+    .tgpt-search-opt {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 10px; border-radius: var(--tgpt-radius-xs); cursor: pointer;
+    }
+    .tgpt-search-opt:hover, .tgpt-search-opt[data-active="true"] { background: var(--tgpt-surface); }
+    .tgpt-search-opt-ic { color: var(--tgpt-accent); flex: 0 0 auto; display: flex; }
+    .tgpt-search-opt-main { min-width: 0; }
+    .tgpt-search-opt-name {
+      font-size: 13px; font-weight: 600; color: var(--tgpt-text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .tgpt-search-opt-sub { font-size: 11px; color: var(--tgpt-muted); }
+    .tgpt-search-empty { padding: 12px 10px; text-align: center; font-size: 12px; color: var(--tgpt-muted); }
+
     /* ─── CARD LAYOUT WIDTH ──────────────────────────── */
     .tgpt-root[data-layout="card"] .tgpt-card { max-width: 380px; }
 
@@ -596,6 +627,11 @@
       this._resolvedLoc = null;// { mode, lat, lng, city, country } actually used
       this._places = [];       // resolved switchable locations
       this._selKey = '0';      // current selection: '__geo__' or a place index
+      this._searchInput = null;
+      this._searchPanel = null;
+      this._searchAbort = null;
+      this._searchDebounce = null;
+      this._searchBlurTimer = null;
       this._timer = null;
       this._timeout = null;
       this._abort = null;
@@ -625,6 +661,7 @@
         },
         locations: null,                // [{mode,city,country,lat,lng,label}, ...] — the visitor-switchable list
         showLocationPicker: true,       // show the on-widget dropdown when there is more than one option
+        locationSearch: false,          // let the visitor type to search any city worldwide (card layout)
         useVisitorLocation: false,      // add a "Near me" option and start from the visitor's own location
         method: 3,                      // 3 = Muslim World League
         school: 0,                      // 0 = Shafi
@@ -814,6 +851,149 @@
       this._loadTimings();
     }
 
+    /* ----- Type-to-search combobox ----- */
+    _bindSearch() {
+      const input = this.root.querySelector('.tgpt-search');
+      const panel = this.root.querySelector('[data-search-panel]');
+      if (!input || !panel) return;
+      this._searchInput = input;
+      this._searchPanel = panel;
+
+      // Select-all so a keystroke replaces the pre-filled city, and show the
+      // full quick list (Near me + configured places), not one filtered by it.
+      input.addEventListener('focus', () => { try { input.select(); } catch (e) { /* noop */ } this._openSearch(''); });
+      input.addEventListener('input', () => this._onSearchType(input.value));
+      input.addEventListener('keydown', (e) => this._onSearchKey(e));
+      // Close shortly after blur, but let a click on a result land first.
+      input.addEventListener('blur', () => {
+        if (this._searchBlurTimer) clearTimeout(this._searchBlurTimer);
+        this._searchBlurTimer = setTimeout(() => this._closeSearch(), 180);
+      });
+      // Keep the input focused when the visitor presses on a result, so blur
+      // does not close the panel before the click registers.
+      panel.addEventListener('mousedown', (e) => { e.preventDefault(); });
+    }
+
+    _openSearch(q) {
+      if (!this._searchPanel) return;
+      this._searchPanel.hidden = false;
+      this._renderSearchOptions((q || '').trim());
+    }
+
+    _closeSearch() {
+      if (this._searchDebounce) { clearTimeout(this._searchDebounce); this._searchDebounce = null; }
+      if (this._searchAbort) { try { this._searchAbort.abort(); } catch (e) { /* noop */ } this._searchAbort = null; }
+      if (this._searchPanel) { this._searchPanel.hidden = true; this._searchPanel.innerHTML = ''; }
+      // Restore the input to the current location name.
+      if (this._searchInput) this._searchInput.value = this._locName();
+    }
+
+    _onSearchType(raw) {
+      const q = (raw || '').trim();
+      if (this._searchDebounce) { clearTimeout(this._searchDebounce); this._searchDebounce = null; }
+      if (q.length < 2) { this._renderSearchOptions(q); return; }
+      this._renderSearchStatus('Searching…');
+      this._searchDebounce = setTimeout(() => this._geocode(q), 250);
+    }
+
+    _onSearchKey(e) {
+      if (e.key === 'Escape') { e.preventDefault(); this._closeSearch(); try { this._searchInput.blur(); } catch (er) { /* noop */ } return; }
+      if (e.key === 'Enter') {
+        const first = this._searchPanel && this._searchPanel.querySelector('.tgpt-search-opt');
+        if (first) { e.preventDefault(); first.click(); }
+      }
+    }
+
+    _renderSearchStatus(text) {
+      if (!this._searchPanel) return;
+      this._searchPanel.hidden = false;
+      this._searchPanel.innerHTML = '<div class="tgpt-search-empty">' + esc(text) + '</div>';
+    }
+
+    // The base list shown before/while typing: "Near me" + the agent's places,
+    // filtered by the current query.
+    _renderSearchOptions(q) {
+      if (!this._searchPanel) return;
+      const query = (q || '').toLowerCase();
+      const rows = [];
+      if (this.c.useVisitorLocation && (!query || 'near me'.indexOf(query) !== -1)) {
+        rows.push(this._searchOptHtml('near', 'Near me', 'Use my current location', 'geo'));
+      }
+      this._places.forEach((p, i) => {
+        const hay = (p.name + ' ' + (p.city || '') + ' ' + (p.country || '')).toLowerCase();
+        if (!query || hay.indexOf(query) !== -1) {
+          rows.push(this._searchOptHtml('pin', p.name, p.country || '', 'place:' + i));
+        }
+      });
+      this._searchPanel.hidden = false;
+      this._searchPanel.innerHTML = rows.length ? rows.join('') :
+        '<div class="tgpt-search-empty">Type a city name to search</div>';
+      this._wireSearchRows();
+    }
+
+    async _geocode(q) {
+      if (!this._searchPanel) return;
+      if (this._searchAbort) { try { this._searchAbort.abort(); } catch (e) { /* noop */ } }
+      const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      this._searchAbort = ctrl;
+      const timer = ctrl ? setTimeout(() => { try { ctrl.abort(); } catch (e) { /* noop */ } }, 6000) : null;
+      try {
+        const url = GEO_BASE + '?name=' + encodeURIComponent(q) + '&count=6&language=en&format=json';
+        const res = await fetch(url, ctrl ? { credentials: 'omit', signal: ctrl.signal } : { credentials: 'omit' });
+        if (timer) clearTimeout(timer);
+        const json = await res.json();
+        const results = (json && Array.isArray(json.results)) ? json.results : [];
+        // A dropped-in later query may have superseded this one.
+        if (this._searchInput && this._searchInput.value.trim().toLowerCase() !== q.toLowerCase()) return;
+        if (!results.length) { this._renderSearchStatus('No matches for "' + q + '"'); return; }
+        const rows = results.map(r => {
+          const lat = Number(r.latitude), lng = Number(r.longitude);
+          if (!Number.isFinite(lat) || !Number.isFinite(lng)) return '';
+          const sub = [r.admin1, r.country].filter(Boolean).join(', ');
+          return this._searchOptHtml('pin', r.name || q, sub, 'coords:' + lat + ',' + lng, r.name || q);
+        }).filter(Boolean).join('');
+        this._searchPanel.hidden = false;
+        this._searchPanel.innerHTML = rows || '<div class="tgpt-search-empty">No matches for "' + esc(q) + '"</div>';
+        this._wireSearchRows();
+      } catch (err) {
+        if (timer) clearTimeout(timer);
+        if (err && err.name === 'AbortError') return;
+        this._renderSearchStatus('Search is unavailable just now');
+      }
+    }
+
+    _searchOptHtml(ic, name, sub, action, coordName) {
+      return '<div class="tgpt-search-opt" role="option" data-action="' + esc(action) + '"' +
+        (coordName ? ' data-name="' + esc(coordName) + '"' : '') + '>' +
+        '<span class="tgpt-search-opt-ic">' + icon(ic, 15) + '</span>' +
+        '<span class="tgpt-search-opt-main">' +
+          '<span class="tgpt-search-opt-name">' + esc(name) + '</span>' +
+          (sub ? '<span class="tgpt-search-opt-sub">' + esc(sub) + '</span>' : '') +
+        '</span>' +
+      '</div>';
+    }
+
+    _wireSearchRows() {
+      if (!this._searchPanel) return;
+      this._searchPanel.querySelectorAll('.tgpt-search-opt').forEach(row => {
+        row.addEventListener('click', () => {
+          const action = row.getAttribute('data-action') || '';
+          this._closeSearch();
+          if (action === 'geo') { this._geoResolve(() => {}); return; }
+          if (action.indexOf('place:') === 0) { this._setPlace(action.slice(6)); this._loadTimings(); return; }
+          if (action.indexOf('coords:') === 0) {
+            const parts = action.slice(7).split(',');
+            const lat = Number(parts[0]), lng = Number(parts[1]);
+            if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+            const name = row.getAttribute('data-name') || '';
+            this._selKey = 'search';
+            this._resolvedLoc = { mode: 'coords', lat: lat, lng: lng, label: name, name: name || 'Prayer times' };
+            this._loadTimings();
+          }
+        });
+      });
+    }
+
     _cacheKey(dateKey) {
       const loc = this._resolvedLoc || {};
       const who = loc.mode === 'coords'
@@ -996,6 +1176,7 @@
       this.root.innerHTML = html;
       const sel = this.root.querySelector('.tgpt-picker');
       if (sel) sel.addEventListener('change', (e) => this._onPick(e.target.value));
+      if (this.c.locationSearch) this._bindSearch();
       this._updateDynamic();
     }
 
@@ -1036,16 +1217,30 @@
         '</div>';
 
       const hero = this.c.showCountdown ? this._heroHtml() : '';
-      const locInner = this._pickerActive()
-        ? this._pickerHtml()
-        : '<span class="tgpt-loc-name">' + esc(this._locName()) + '</span>';
+
+      let locSpan, panel = '';
+      if (this.c.locationSearch) {
+        // Type-to-search combobox: the input shows the current place, and a
+        // results panel drops in below the header (in flow, so the card's
+        // rounded corners never clip it).
+        locSpan = '<span class="tgpt-loc tgpt-loc--search">' + icon('search', 14) +
+          '<input class="tgpt-search" type="text" autocomplete="off" spellcheck="false" ' +
+          'aria-label="Search a city" placeholder="Search a city" value="' + esc(this._locName()) + '"></span>';
+        panel = '<div class="tgpt-search-panel" data-search-panel hidden></div>';
+      } else {
+        const inner = this._pickerActive()
+          ? this._pickerHtml()
+          : '<span class="tgpt-loc-name">' + esc(this._locName()) + '</span>';
+        locSpan = '<span class="tgpt-loc">' + icon('pin', 14) + inner + '</span>';
+      }
 
       return (
         '<div class="tgpt-card">' +
           '<div class="tgpt-head">' +
-            '<span class="tgpt-loc">' + icon('pin', 14) + locInner + '</span>' +
+            locSpan +
             datesHtml +
           '</div>' +
+          panel +
           hero +
           '<div class="tgpt-list">' + rowsHtml + '</div>' +
           this._footer() +
@@ -1210,6 +1405,9 @@
     destroy() {
       this._stopClock();
       if (this._abort) { try { this._abort.abort(); } catch (e) { /* noop */ } }
+      if (this._searchAbort) { try { this._searchAbort.abort(); } catch (e) { /* noop */ } }
+      if (this._searchDebounce) { clearTimeout(this._searchDebounce); this._searchDebounce = null; }
+      if (this._searchBlurTimer) { clearTimeout(this._searchBlurTimer); this._searchBlurTimer = null; }
       try { while (this.shadow.firstChild) this.shadow.removeChild(this.shadow.firstChild); } catch (e) { /* noop */ }
       try { this.el.removeAttribute('data-tg-initialised'); } catch (e) { /* noop */ }
       this.el.__tgPrayer = null;

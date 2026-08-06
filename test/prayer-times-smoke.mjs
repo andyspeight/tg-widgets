@@ -306,6 +306,44 @@ async function run() {
     w.destroy();
   }
 
+  // ── 6e. Type-to-search combobox (Open-Meteo geocoding) ────────────────
+  console.log('Type-to-search combobox');
+  {
+    const { win } = makeDom();
+    const urls = [];
+    win.fetch = (url) => {
+      urls.push(url);
+      if (url.indexOf('geocoding-api.open-meteo.com') !== -1) {
+        return Promise.resolve({ ok: true, json: async () => ({ results: [
+          { name: 'Kuala Lumpur', latitude: 3.1412, longitude: 101.6865, country: 'Malaysia', admin1: 'Kuala Lumpur' },
+          { name: 'Kuala Terengganu', latitude: 5.3302, longitude: 103.1408, country: 'Malaysia', admin1: 'Terengganu' },
+        ] }) });
+      }
+      return Promise.resolve({ ok: true, json: async () => ({ code: 200, status: 'OK', data: aladhanData() }) });
+    };
+    freezeClock(win, 14, 0, 0, 2026, 7, 6);
+    const { el, w } = await mount(win, {
+      layout: 'card',
+      locationSearch: true,
+      locations: [{ mode: 'city', city: 'London', country: 'United Kingdom', label: 'London' }],
+    });
+    const input = el.shadowRoot.querySelector('.tgpt-search');
+    ok('renders a search input', !!input);
+    // Type a query → triggers geocoding.
+    input.value = 'Kuala';
+    input.dispatchEvent(new win.Event('input'));
+    await delay(320); // past the 250ms debounce
+    ok('queried the geocoder', urls.some(u => u.indexOf('geocoding-api.open-meteo.com') !== -1 && u.indexOf('name=Kuala') !== -1));
+    const opts = el.shadowRoot.querySelectorAll('.tgpt-search-opt');
+    ok('shows geocoding results', opts.length === 2);
+    ok('result shows city + region/country', /Kuala Lumpur/.test(el.shadowRoot.innerHTML) && /Malaysia/.test(el.shadowRoot.innerHTML));
+    // Select the first result → prayer times fetched by coordinates.
+    opts[0].click();
+    await delay(20);
+    ok('selecting a result fetches by coordinates', urls.some(u => u.indexOf('/timings/') !== -1 && u.indexOf('latitude=3.1412') !== -1));
+    w.destroy();
+  }
+
   // ── 7. HTML escaping of the location label ────────────────────────────
   console.log('Security — label escaping');
   {

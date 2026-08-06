@@ -250,6 +250,13 @@
             </div>
             <div class="pt-row">
               <div>
+                <div class="pt-row-label">Let visitors search any city</div>
+                <div class="pt-row-help">Turns the location control into a search box. Visitors type any city in the world and it finds it as they type. Card layout only.</div>
+              </div>
+              <button type="button" class="pt-toggle" id="togSearch" role="switch" aria-checked="false"></button>
+            </div>
+            <div class="pt-row">
+              <div>
                 <div class="pt-row-label">Start from the visitor's location</div>
                 <div class="pt-row-help">Asks the browser for permission and shows their local times first. Falls back to the first location below if they decline.</div>
               </div>
@@ -495,6 +502,7 @@
       location: { mode: 'city', city: 'London', country: 'United Kingdom', lat: null, lng: null, label: '' },
       locations: [{ mode: 'city', city: 'London', country: 'United Kingdom', lat: null, lng: null, label: '' }],
       showLocationPicker: true,
+      locationSearch: false,
       useVisitorLocation: false,
       method: 3,
       school: 0,
@@ -596,6 +604,7 @@
     setSeg('segLayout', 'data-layout', C.layout);
 
     setToggle('togPicker', C.showLocationPicker);
+    setToggle('togSearch', C.locationSearch);
     setToggle('togVisitor', C.useVisitorLocation);
     renderLocList();
 
@@ -646,6 +655,7 @@
 
     // toggles
     toggleClick('togPicker', on => { C.showLocationPicker = on; change(); });
+    toggleClick('togSearch', on => { C.locationSearch = on; change(); });
     toggleClick('togVisitor', on => { C.useVisitorLocation = on; change(); });
     toggleClick('togSunrise', on => { C.showSunrise = on; change(); });
     toggleClick('togCountdown', on => { C.showCountdown = on; change(); });
