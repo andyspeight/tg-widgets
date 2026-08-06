@@ -473,6 +473,21 @@ const WIDGETS = [
     access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'prayer',
+    name: 'Prayer Times',
+    airtableType: 'Prayer Times',
+    description: 'Daily Islamic prayer times for any location, always current. Live next-prayer countdown, Hijri and Gregorian dates, and the five daily prayers with sunrise. Card or full-width strip. Built for Umrah, Hajj and halal-friendly travel. Powered by Aladhan, no key needed.',
+    category: 'Content',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>'},
+    color: '#13614C',
+    editorUrl: '/editor-prayer',
+    demoUrl: '/demo-prayer',
+    widgetTag: 'prayer',
+    scriptFile: 'widget-prayer.js',
+    access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'currency',
     name: 'Currency Converter',
     airtableType: 'Currency Converter',  // matches Airtable WidgetType singleSelect option
@@ -2279,6 +2294,24 @@ function loadMiniPreview(w) {
           season: ['off','off','shoulder','shoulder','best','best','best','best','best','shoulder','off','off'],
         },
       },
+    });
+  }
+
+  if (w.id === 'prayer' && window.TGPrayerWidget) {
+    new window.TGPrayerWidget(el, {
+      theme: 'light',
+      brandColor: w.color,
+      accentColor: '#C39A3B',
+      radius: 12,
+      layout: 'card',
+      location: { mode: 'city', city: 'Makkah', country: 'Saudi Arabia', label: 'Makkah' },
+      method: 4,
+      latitudeAdjustment: 0,
+      hourFormat: '12',
+      showSunrise: false,
+      showHijri: true,
+      showCountdown: true,
+      attribution: false,
     });
   }
 
@@ -4181,6 +4214,7 @@ bootstrapCookieAuth().then((ok) => {
 <script src="/widget-spotlight.js"></script>
 <script src="/widget-airport.js"></script>
 <script src="/widget-weather.js"></script>
+<script src="/widget-prayer.js"></script>
 <script src="/widget-maps.js"></script>
 <script src="/widget-youtube.js"></script>
 <script src="/widget-rss.js"></script>
