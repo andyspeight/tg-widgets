@@ -155,7 +155,16 @@
     }
 
     function renderAll() {
-      mount('cardWidget', baseConfig({ layout: 'card' }));
+      // Card shows a visitor location switcher across the holy cities.
+      mount('cardWidget', baseConfig({
+        layout: 'card',
+        showLocationPicker: true,
+        locations: [
+          { mode: 'city', city: 'Makkah', country: 'Saudi Arabia', label: 'Makkah' },
+          { mode: 'city', city: 'Madinah', country: 'Saudi Arabia', label: 'Madinah' },
+          { mode: 'city', city: 'Jeddah', country: 'Saudi Arabia', label: 'Jeddah' },
+        ],
+      }));
       mount('stripWidget', baseConfig({ layout: 'strip' }));
     }
 

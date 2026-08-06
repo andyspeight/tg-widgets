@@ -482,6 +482,23 @@
       outline: 2px solid var(--tgpt-accent); outline-offset: 3px; border-radius: 4px;
     }
 
+    /* ─── LOCATION PICKER ────────────────────────────── */
+    .tgpt-picker {
+      font: inherit; font-size: 13px; font-weight: 600; color: var(--tgpt-text);
+      background: transparent; border: 0; border-radius: 6px;
+      margin: -2px 0; padding: 2px 22px 2px 2px; cursor: pointer;
+      max-width: 220px;
+      appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 2px center;
+    }
+    .tgpt-picker:focus-visible { outline: 2px solid var(--tgpt-accent); outline-offset: 2px; }
+    .tgpt-picker option { color: #0F1F1A; font-weight: 500; }
+    .tgpt-strip-lead .tgpt-picker {
+      color: #fff;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    }
+
     /* ─── CARD LAYOUT WIDTH ──────────────────────────── */
     .tgpt-root[data-layout="card"] .tgpt-card { max-width: 380px; }
 
@@ -577,6 +594,8 @@
       this._stale = false;     // rendering a cached day after a failed refresh
       this._geoTried = false;  // geolocation prompted once per instance
       this._resolvedLoc = null;// { mode, lat, lng, city, country } actually used
+      this._places = [];       // resolved switchable locations
+      this._selKey = '0';      // current selection: '__geo__' or a place index
       this._timer = null;
       this._timeout = null;
       this._abort = null;
@@ -596,7 +615,7 @@
         radius: 16,
         fontFamily: '',
         layout: 'card',                 // 'card' | 'strip'
-        location: {
+        location: {                     // legacy single location (migrated into `locations`)
           mode: 'city',                 // 'city' | 'coords'
           city: 'London',
           country: 'United Kingdom',
@@ -604,7 +623,9 @@
           lng: null,
           label: '',
         },
-        useVisitorLocation: false,
+        locations: null,                // [{mode,city,country,lat,lng,label}, ...] — the visitor-switchable list
+        showLocationPicker: true,       // show the on-widget dropdown when there is more than one option
+        useVisitorLocation: false,      // add a "Near me" option and start from the visitor's own location
         method: 3,                      // 3 = Muslim World League
         school: 0,                      // 0 = Shafi
         latitudeAdjustment: 3,          // 3 = Angle Based (best for UK/high latitudes)
@@ -618,6 +639,14 @@
       const merged = Object.assign({}, base, (c && typeof c === 'object') ? c : {});
       merged.location = Object.assign({}, base.location, (c && c.location) || {});
       merged.tune = Object.assign({}, base.tune, (c && c.tune) || {});
+      // Location list. Back-compat: an older config carries a single `location`,
+      // so fold it into a one-item list when no explicit list is given.
+      let list = Array.isArray(merged.locations) && merged.locations.length ? merged.locations : [merged.location];
+      merged.locations = list
+        .filter(l => l && typeof l === 'object')
+        .map(l => Object.assign({ mode: 'city', city: '', country: '', lat: null, lng: null, label: '' }, l));
+      if (!merged.locations.length) merged.locations = [Object.assign({}, base.location)];
+      merged.showLocationPicker = merged.showLocationPicker !== false;
       // Normalise + clamp the values that reach the network.
       merged.method = VALID_METHODS.indexOf(parseInt(merged.method, 10)) !== -1 ? parseInt(merged.method, 10) : 3;
       merged.school = VALID_SCHOOLS.indexOf(parseInt(merged.school, 10)) !== -1 ? parseInt(merged.school, 10) : 0;
@@ -668,10 +697,10 @@
     // Signature of everything that changes the actual times — reload only when
     // one of these changes, so colour/format/layout tweaks never hit the API.
     _dataSig() {
-      const l = this.c.location || {};
       return JSON.stringify({
         v: this.c.useVisitorLocation ? 'geo' : 'fixed',
-        mode: l.mode, city: l.city, country: l.country, lat: l.lat, lng: l.lng,
+        picker: this.c.showLocationPicker,
+        locs: (this.c.locations || []).map(l => [l.mode, l.city, l.country, l.lat, l.lng, l.label]),
         method: this.c.method, school: this.c.school, latAdj: this.c.latitudeAdjustment,
         tune: this.c.tune,
       });
@@ -679,59 +708,110 @@
 
     _boot() {
       this._sig = this._dataSig();
+      this._resolvePlaces();
 
       if (this.c.useVisitorLocation) {
-        // Already have the visitor's coords from an earlier prompt — reuse them
-        // (a later config change must not clobber them with the fixed fallback).
+        // Reuse coords already granted this session — a later config change must
+        // not clobber them with a configured place.
         if (this._geoTried && this._resolvedLoc && this._resolvedLoc.mode === 'coords') {
+          this._selKey = '__geo__';
           this._loadTimings();
           return;
         }
-        if (!this._geoTried && typeof navigator !== 'undefined' && navigator.geolocation) {
-          this._geoTried = true;
-          let settled = false;
-          const fallback = () => { if (settled) return; settled = true; this._resolveFixed(); this._loadTimings(); };
-          // Guard the permission prompt so an ignored dialog still resolves.
-          const geoTimer = setTimeout(fallback, 8000);
-          navigator.geolocation.getCurrentPosition(
-            (pos) => {
-              if (settled) return; settled = true; clearTimeout(geoTimer);
-              this._resolvedLoc = {
-                mode: 'coords',
-                lat: pos.coords.latitude, lng: pos.coords.longitude,
-                label: this.c.location.label || 'Your location',
-              };
-              this._loadTimings();
-            },
-            () => { clearTimeout(geoTimer); fallback(); },
-            { timeout: 7000, maximumAge: 3600000 }
-          );
+        if (!this._geoTried) {
+          // Start from the visitor's own location; fall back to the first
+          // configured place if they decline or the browser can't provide it.
+          this._geoResolve(() => { this._setPlace(0); this._loadTimings(); });
           return;
         }
-        // Geolocation denied earlier or unsupported — fall back to the fixed location.
-        this._resolveFixed();
+        // Prompted before and denied — start from the first configured place.
+        this._setPlace(0);
         this._loadTimings();
         return;
       }
 
-      this._resolveFixed();
+      this._setPlace(0);
       this._loadTimings();
     }
 
-    _resolveFixed() {
-      const l = this.c.location || {};
+    // Turn the config's location list into resolved, validated places.
+    _resolvePlaces() {
+      const list = (this.c.locations && this.c.locations.length) ? this.c.locations : [this.c.location];
+      this._places = list.map(l => this._resolveOne(l)).filter(p => p.valid);
+      if (!this._places.length) {
+        const fb = this._resolveOne(this.c.location);
+        this._places = fb.valid ? [fb] : [this._resolveOne({ mode: 'city', city: 'London', country: 'United Kingdom' })];
+      }
+    }
+
+    _resolveOne(l) {
+      l = l || {};
       const lat = (l.lat != null && l.lat !== '') ? Number(l.lat) : null;
       const lng = (l.lng != null && l.lng !== '') ? Number(l.lng) : null;
+      const label = (l.label || '').toString().trim();
       if (l.mode === 'coords' && Number.isFinite(lat) && Number.isFinite(lng)) {
-        this._resolvedLoc = { mode: 'coords', lat: lat, lng: lng, label: l.label || '' };
-      } else {
-        this._resolvedLoc = {
-          mode: 'city',
-          city: (l.city || '').toString().trim(),
-          country: (l.country || '').toString().trim(),
-          label: l.label || '',
-        };
+        return { mode: 'coords', lat: lat, lng: lng, label: label, name: label || 'Prayer times', valid: true };
       }
+      const city = (l.city || '').toString().trim();
+      const country = (l.country || '').toString().trim();
+      return { mode: 'city', city: city, country: country, label: label, name: label || city || 'Prayer times', valid: !!city };
+    }
+
+    // Select a configured place by index and make it the active location.
+    _setPlace(idx) {
+      const i = Math.max(0, Math.min(this._places.length - 1, parseInt(idx, 10) || 0));
+      this._selKey = String(i);
+      this._resolvedLoc = this._places[i];
+    }
+
+    // Prompt the browser for the visitor's location. On success it becomes the
+    // active location; on failure/denial `onFail` runs. Guarded so an ignored
+    // permission dialog still resolves.
+    _geoResolve(onFail) {
+      if (typeof navigator === 'undefined' || !navigator.geolocation) { this._geoTried = true; onFail(); return; }
+      let settled = false;
+      const timer = setTimeout(() => { if (!settled) { settled = true; this._geoTried = true; onFail(); } }, 8000);
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          if (settled) return; settled = true; clearTimeout(timer);
+          this._geoTried = true;
+          this._selKey = '__geo__';
+          this._resolvedLoc = { mode: 'coords', lat: pos.coords.latitude, lng: pos.coords.longitude, label: '', name: 'Your location' };
+          this._loadTimings();
+        },
+        () => { if (settled) return; settled = true; clearTimeout(timer); this._geoTried = true; onFail(); },
+        { timeout: 7000, maximumAge: 3600000 }
+      );
+    }
+
+    // The dropdown's options: a "Near me" entry (when visitor location is on)
+    // followed by each configured place.
+    _pickerOptions() {
+      const opts = [];
+      if (this.c.useVisitorLocation) opts.push({ key: '__geo__', label: 'Near me' });
+      this._places.forEach((p, i) => opts.push({ key: String(i), label: p.name }));
+      return opts;
+    }
+
+    _pickerActive() {
+      return this.c.showLocationPicker && this._pickerOptions().length > 1;
+    }
+
+    _pickerHtml() {
+      const opts = this._pickerOptions();
+      return '<select class="tgpt-picker" aria-label="Choose location">' +
+        opts.map(o => '<option value="' + esc(o.key) + '"' + (o.key === this._selKey ? ' selected' : '') + '>' + esc(o.label) + '</option>').join('') +
+        '</select>';
+    }
+
+    // Visitor changed the location dropdown.
+    _onPick(key) {
+      if (key === '__geo__') {
+        this._geoResolve(() => { this._setPlace(0); this._loadTimings(); });
+        return;
+      }
+      this._setPlace(key);
+      this._loadTimings();
     }
 
     _cacheKey(dateKey) {
@@ -914,6 +994,8 @@
       if (!this._model) return this._renderHidden();
       const html = this.c.layout === 'strip' ? this._renderStrip() : this._renderCard();
       this.root.innerHTML = html;
+      const sel = this.root.querySelector('.tgpt-picker');
+      if (sel) sel.addEventListener('change', (e) => this._onPick(e.target.value));
       this._updateDynamic();
     }
 
@@ -930,9 +1012,7 @@
 
     _locName() {
       const loc = this._resolvedLoc || {};
-      if (loc.label) return loc.label;
-      if (loc.mode === 'coords') return 'Prayer times';
-      return loc.city || 'Prayer times';
+      return loc.label || loc.name || (loc.mode === 'coords' ? 'Prayer times' : (loc.city || 'Prayer times'));
     }
 
     _renderCard() {
@@ -956,11 +1036,14 @@
         '</div>';
 
       const hero = this.c.showCountdown ? this._heroHtml() : '';
+      const locInner = this._pickerActive()
+        ? this._pickerHtml()
+        : '<span class="tgpt-loc-name">' + esc(this._locName()) + '</span>';
 
       return (
         '<div class="tgpt-card">' +
           '<div class="tgpt-head">' +
-            '<span class="tgpt-loc">' + icon('pin', 14) + '<span class="tgpt-loc-name">' + esc(this._locName()) + '</span></span>' +
+            '<span class="tgpt-loc">' + icon('pin', 14) + locInner + '</span>' +
             datesHtml +
           '</div>' +
           hero +
@@ -1003,12 +1086,13 @@
       }).join('');
 
       const dateLine = (this.c.showHijri ? esc(this._model.hijri.text) + ' · ' : '') + esc(this._model.greg.text);
+      const locInner = this._pickerActive() ? this._pickerHtml() : esc(this._locName());
 
       return (
         '<div class="tgpt-card">' +
           '<div class="tgpt-strip">' +
             '<div class="tgpt-strip-lead">' +
-              '<span class="tgpt-strip-lead-loc">' + icon('pin', 14) + esc(this._locName()) + '</span>' +
+              '<span class="tgpt-strip-lead-loc">' + icon('pin', 14) + locInner + '</span>' +
               '<span class="tgpt-strip-lead-date">' + dateLine + '</span>' +
               (this.c.showCountdown ? '<span class="tgpt-strip-lead-next" data-hero-count></span>' : '') +
             '</div>' +
