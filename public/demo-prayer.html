@@ -63,12 +63,6 @@
 
     .strip-showcase { max-width: 1160px; margin: 0 auto; padding: 8px 32px 8px; }
 
-    .search-showcase { max-width: 1160px; margin: 0 auto; padding: 12px 32px 20px; display: flex; flex-direction: column; align-items: center; text-align: center; }
-    .search-showcase h2 { margin: 0 0 6px; font-size: 22px; font-weight: 800; letter-spacing: -0.01em; }
-    .search-showcase p { margin: 0 0 18px; font-size: 14px; color: #4B5D57; max-width: 520px; }
-    body[data-theme="dark"] .search-showcase p { color: #B9C7C1; }
-    .search-showcase > div { width: 100%; max-width: 380px; }
-
     footer { border-top: 1px solid #E4EAE7; padding: 24px 32px; text-align: center; font-size: 12px; color: #8A9A94; }
     body[data-theme="dark"] footer { border-top-color: #263530; }
     footer a { color: inherit; }
@@ -102,12 +96,6 @@
     <p>Small groups, five-star stays a short walk from the Haram, and a team who have made the journey themselves. Prayer times on this page update live, wherever your travellers are reading from.</p>
   </section>
 
-  <section class="search-showcase">
-    <h2>Prayer times, wherever you are</h2>
-    <p>This one starts from the visitor's own location and lets them type to search any city in the world.</p>
-    <div id="searchWidget"></div>
-  </section>
-
   <main>
     <article>
       <h2>Your 10-night Umrah</h2>
@@ -128,6 +116,8 @@
     <aside>
       <h3>Prayer times · Makkah</h3>
       <div id="cardWidget"></div>
+      <h3 style="margin-top:8px">Travelling elsewhere?</h3>
+      <div id="searchWidget"></div>
     </aside>
   </main>
 
