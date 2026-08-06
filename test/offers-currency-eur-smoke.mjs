@@ -143,6 +143,27 @@ ok(/o\.currency === 'EUR'/.test(CRON) && /=== 'IE'/.test(CRON),
 ok(/\(o\.currency \|\| 'GBP'\) === 'GBP'/.test(CRON), 'the world-map summary is filtered to GBP only');
 ok(/money\(o\.price, o\.currency/.test(CACHED), 'cached-offers formats each price in its own currency');
 
+// ── Cron: price parser handles European (euro) number format, no more £1 ──────
+// Travelify formats EUR prices European-style (dot = thousands, comma = decimal).
+// The old parser turned "€1.234,56" into 1, which is where the £1 offers came from.
+{
+  const parseMoney = new Function(extractFn(CRON, 'function parseMoney(str)') + '\nreturn parseMoney;')();
+  // English format still works.
+  ok(parseMoney('£1,234') === 1234, 'English thousands parse (£1,234)');
+  ok(parseMoney('£1,234.56') === 1235, 'English decimal parse (£1,234.56)');
+  ok(parseMoney('£1,234,567.89') === 1234568, 'English multi-thousands parse');
+  ok(parseMoney('£999.00') === 999, 'English sub-thousand decimal parse');
+  // European format — the cases that used to collapse to £1.
+  ok(parseMoney('€1.234,56') === 1235, 'European "€1.234,56" is 1235, not 1');
+  ok(parseMoney('€1.234') === 1234, 'European thousands "€1.234" is 1234, not 1');
+  ok(parseMoney('€12.345') === 12345, 'European "€12.345" is 12345, not 12');
+  ok(parseMoney('€1.234.567,89') === 1234568, 'European multi-thousands is 1234568, not 1');
+  ok(parseMoney('€999,00') === 999, 'European decimal "€999,00" is 999, not 99900');
+  // Degenerate inputs.
+  ok(parseMoney('') === null && parseMoney(null) === null, 'empty/invalid → null');
+  ok(parseMoney('€0,00') === null, 'zero → null (no free offers)');
+}
+
 // ── Cron: sweep stats surface kept Irish EUR (dashboard visibility) ───────────
 {
   const aggregateSweepStats = new Function(
