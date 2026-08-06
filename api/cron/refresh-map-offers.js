@@ -79,11 +79,16 @@ const MAX_AGE_HOURS = 70;          // purge offers older than this (was 4 days /
 // and the deal cards both stay clean. (Per-country override territory later.)
 const MIN_NIGHTS = 2;
 const MAX_NIGHTS = 28;
-// No bookable holiday, hotel or flight offer costs under a fiver. A stored total
-// below this is a garbage price — most often the old European-number-format parse
-// bug that turned "€1.234,56" into 1 — so drop it rather than show a £1 deal. Also
-// stops such an offer sorting to the top of a cheapest-first list. (Aug 2026.)
-const MIN_STORE_PRICE = 5;
+// Garbage-price floor, per TYPE and on the TOTAL price (never the per-person or
+// per-night figure the widget shows). A genuinely cheap hotel can legitimately
+// read a low price-per-person-per-night, but its TOTAL is still sensible, so a
+// total-based floor keeps it. What we drop is a TOTAL of a few pounds, which is
+// garbage for any type — the old European-number-format parse bug, or a bad
+// source price. A flight+hotel holiday is never that cheap, so packages carry a
+// higher floor; hotels and flights sit just below the cheapest a real one could
+// plausibly be, so nothing genuine is lost. (Aug 2026.)
+const MIN_STORE_PRICE_BY_TYPE = { Packages: 50, Accommodation: 10, Flights: 10 };
+function minStorePrice(o) { return MIN_STORE_PRICE_BY_TYPE[o && o.type] || 10; }
 
 const SUMMARY_KEY = 'map:offers:v1';
 // Sampled composition history for the admin trend line (spot supplier drop-offs
@@ -485,10 +490,11 @@ function purgeOffers(offers, now = new Date(), maxAgeHours = MAX_AGE_HOURS) {
     // stored before the nights filter existed, so the fix takes effect on the
     // next sweep rather than over MAX_AGE_HOURS.
     if (!passesDurationRule(o)) return false;
-    // Drop garbage sub-£5 prices (the European-format parse bug's £1 offers, and
-    // any future mispriced one). Applies on store AND on the maintenance pass, so
-    // already-cached £1 offers clear on the next run without a full resweep.
-    if (Number.isFinite(o.price) && o.price < MIN_STORE_PRICE) return false;
+    // Drop garbage single/low-digit prices (the European-format parse bug's £1-£3
+    // offers, and any future mispriced one), by type, on the TOTAL. Applies on
+    // store AND on the maintenance pass, so already-cached ones clear on the next
+    // run without a full resweep.
+    if (Number.isFinite(o.price) && o.price < minStorePrice(o)) return false;
     const td = travelDateOf(o);
     if (td) { const t = Date.parse(td); if (Number.isFinite(t) && t < nowMs) return false; }
     if (o.fetchedAt) { const f = Date.parse(o.fetchedAt); if (Number.isFinite(f) && (nowMs - f) > maxAgeMs) return false; }

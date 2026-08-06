@@ -164,23 +164,37 @@ ok(/money\(o\.price, o\.currency/.test(CACHED), 'cached-offers formats each pric
   ok(parseMoney('€0,00') === null, 'zero → null (no free offers)');
 }
 
-// ── Cron: the price floor drops garbage sub-£5 (£1) offers on store + purge ────
+// ── Cron: the type-aware price floor drops garbage (£1-£3) offers on store+purge ─
 {
   const purge = new Function(
-    'const MAX_AGE_HOURS = 70; const MIN_STORE_PRICE = 5;\n' +
+    'const MAX_AGE_HOURS = 70;\n' +
+    'const MIN_STORE_PRICE_BY_TYPE = { Packages: 50, Accommodation: 10, Flights: 10 };\n' +
+    'function minStorePrice(o){ return MIN_STORE_PRICE_BY_TYPE[o && o.type] || 10; }\n' +
     'function passesDurationRule(){ return true; }\n' +
     'function travelDateOf(o){ return o.outboundDate || o.checkinDate || null; }\n' +
     extractFn(CRON, 'function purgeOffers(offers, now = new Date(), maxAgeHours = MAX_AGE_HOURS)') +
     '\nreturn purgeOffers;')();
   const now = new Date('2026-08-10T00:00:00Z');
+  const D = { outboundDate: '2026-09-01', fetchedAt: '2026-08-10T00:00:00Z' };
   const kept = purge([
-    { id: 'a', price: 1, outboundDate: '2026-09-01', fetchedAt: '2026-08-10T00:00:00Z' },
-    { id: 'b', price: 4, outboundDate: '2026-09-01', fetchedAt: '2026-08-10T00:00:00Z' },
-    { id: 'c', price: 5, outboundDate: '2026-09-01', fetchedAt: '2026-08-10T00:00:00Z' },
-    { id: 'd', price: 1299, outboundDate: '2026-09-01', fetchedAt: '2026-08-10T00:00:00Z' },
+    { id: 'a', type: 'Packages', price: 1, ...D },        // £1 package → drop
+    { id: 'b', type: 'Packages', price: 9, ...D },        // £9 total = ~£3pp → drop
+    { id: 'c', type: 'Packages', price: 1299, ...D },     // real package → keep
+    { id: 'd', type: 'Flights', price: 8, ...D },         // £8 flight → drop
+    { id: 'e', type: 'Flights', price: 45, ...D },        // real flight → keep
+    { id: 'f', type: 'Accommodation', price: 8, ...D },   // £8 hotel TOTAL → drop
+    { id: 'g', type: 'Accommodation', price: 60, ...D },  // real hotel → keep
   ], now);
-  ok(kept.map(o => o.id).join(',') === 'c,d', 'purgeOffers drops sub-£5 (£1) garbage, keeps real prices');
+  ok(kept.map(o => o.id).join(',') === 'c,e,g', 'the type-aware floor drops single-digit-TOTAL garbage, keeps real prices');
+  // A £7 total package (~£3 per person) is garbage and dropped.
+  ok(!purge([{ id: 'x', type: 'Packages', price: 7, ...D }], now).length, 'a £7 total package is dropped');
+  // A genuinely cheap hotel whose TOTAL is fine (a low pppn is legitimate) is KEPT,
+  // even though it would display a low per-person-per-night figure.
+  ok(purge([{ id: 'y', type: 'Accommodation', price: 42, ...D }], now).length === 1,
+    'a £42-total hotel (a real low-pppn stay) is kept, not judged on its displayed pppn');
 }
+// Source guard: the floor values are what we think they are.
+ok(/Packages: 50, Accommodation: 10, Flights: 10/.test(CRON), 'per-type garbage-price floors are set');
 
 // ── Cron: sweep stats surface kept Irish EUR (dashboard visibility) ───────────
 {
