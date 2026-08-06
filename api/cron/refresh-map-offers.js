@@ -79,6 +79,11 @@ const MAX_AGE_HOURS = 70;          // purge offers older than this (was 4 days /
 // and the deal cards both stay clean. (Per-country override territory later.)
 const MIN_NIGHTS = 2;
 const MAX_NIGHTS = 28;
+// No bookable holiday, hotel or flight offer costs under a fiver. A stored total
+// below this is a garbage price — most often the old European-number-format parse
+// bug that turned "€1.234,56" into 1 — so drop it rather than show a £1 deal. Also
+// stops such an offer sorting to the top of a cheapest-first list. (Aug 2026.)
+const MIN_STORE_PRICE = 5;
 
 const SUMMARY_KEY = 'map:offers:v1';
 // Sampled composition history for the admin trend line (spot supplier drop-offs
@@ -176,10 +181,42 @@ function packageKindOf(o) {
 
 // ── Tested offer parser (unit-verified 22 May 2026) ─────────────────────────
 function num(v) { const n = Number(v); return Number.isFinite(n) ? n : null; }
+// Parse a whole-pound(/euro) amount out of a formatted price string, in EITHER
+// English (1,234.56) or European (1.234,56) number format. Travelify formats EUR
+// (Irish) prices European-style, with a DOT as the thousands separator; the old
+// "strip everything but digits and dots" parser turned "€1.234,56" into "1.234"
+// and rounded it to 1, which is where the £1 offers came from once we started
+// sweeping euros. Decide the decimal separator from the string itself. (Aug 2026.)
+function parseMoney(str) {
+  if (typeof str !== 'string') return null;
+  const s0 = str.replace(/[^0-9.,]/g, '');
+  if (!s0) return null;
+  const lastDot = s0.lastIndexOf('.'), lastComma = s0.lastIndexOf(',');
+  let s;
+  if (lastDot >= 0 && lastComma >= 0) {
+    // Both separators present: the LAST one is the decimal point, the other is
+    // the thousands separator. 1.234,56 -> 1234.56 ; 1,234.56 -> 1234.56
+    s = lastComma > lastDot ? s0.replace(/\./g, '').replace(',', '.') : s0.replace(/,/g, '');
+  } else if (lastComma >= 0) {
+    // Only commas: thousands when there is more than one, or a single one with
+    // exactly 3 trailing digits (1,234); otherwise a European decimal (999,00).
+    const many = (s0.match(/,/g) || []).length > 1;
+    s = (many || s0.length - lastComma - 1 === 3) ? s0.replace(/,/g, '') : s0.replace(',', '.');
+  } else if (lastDot >= 0) {
+    // Only dots: thousands when there is more than one, or a single one with
+    // exactly 3 trailing digits (1.234); otherwise an English decimal (999.00).
+    const many = (s0.match(/\./g) || []).length > 1;
+    s = (many || s0.length - lastDot - 1 === 3) ? s0.replace(/\./g, '') : s0;
+  } else {
+    s = s0;
+  }
+  const n = parseFloat(s);
+  return Number.isFinite(n) && n > 0 ? Math.round(n) : null;
+}
 function parsePrice(offer) {
   if (typeof offer.formattedPrice === 'string') {
-    const n = parseFloat(offer.formattedPrice.replace(/[^0-9.]/g, ''));
-    if (Number.isFinite(n) && n > 0) return Math.round(n);
+    const n = parseMoney(offer.formattedPrice);
+    if (n != null) return n;
   }
   const fp = offer.flight && offer.flight.pricing ? Number(offer.flight.pricing.price) : 0;
   const ap = offer.accommodation && offer.accommodation.pricing ? Number(offer.accommodation.pricing.price) : 0;
@@ -188,8 +225,8 @@ function parsePrice(offer) {
 }
 function parsePPPrice(offer) {
   if (typeof offer.formattedPPPrice === 'string') {
-    const n = parseFloat(offer.formattedPPPrice.replace(/[^0-9.]/g, ''));
-    if (Number.isFinite(n) && n > 0) return Math.round(n);
+    const n = parseMoney(offer.formattedPPPrice);
+    if (n != null) return n;
   }
   return null;
 }
@@ -448,6 +485,10 @@ function purgeOffers(offers, now = new Date(), maxAgeHours = MAX_AGE_HOURS) {
     // stored before the nights filter existed, so the fix takes effect on the
     // next sweep rather than over MAX_AGE_HOURS.
     if (!passesDurationRule(o)) return false;
+    // Drop garbage sub-£5 prices (the European-format parse bug's £1 offers, and
+    // any future mispriced one). Applies on store AND on the maintenance pass, so
+    // already-cached £1 offers clear on the next run without a full resweep.
+    if (Number.isFinite(o.price) && o.price < MIN_STORE_PRICE) return false;
     const td = travelDateOf(o);
     if (td) { const t = Date.parse(td); if (Number.isFinite(t) && t < nowMs) return false; }
     if (o.fetchedAt) { const f = Date.parse(o.fetchedAt); if (Number.isFinite(f) && (nowMs - f) > maxAgeMs) return false; }
