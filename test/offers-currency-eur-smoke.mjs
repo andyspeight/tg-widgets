@@ -164,6 +164,24 @@ ok(/money\(o\.price, o\.currency/.test(CACHED), 'cached-offers formats each pric
   ok(parseMoney('€0,00') === null, 'zero → null (no free offers)');
 }
 
+// ── Cron: the price floor drops garbage sub-£5 (£1) offers on store + purge ────
+{
+  const purge = new Function(
+    'const MAX_AGE_HOURS = 70; const MIN_STORE_PRICE = 5;\n' +
+    'function passesDurationRule(){ return true; }\n' +
+    'function travelDateOf(o){ return o.outboundDate || o.checkinDate || null; }\n' +
+    extractFn(CRON, 'function purgeOffers(offers, now = new Date(), maxAgeHours = MAX_AGE_HOURS)') +
+    '\nreturn purgeOffers;')();
+  const now = new Date('2026-08-10T00:00:00Z');
+  const kept = purge([
+    { id: 'a', price: 1, outboundDate: '2026-09-01', fetchedAt: '2026-08-10T00:00:00Z' },
+    { id: 'b', price: 4, outboundDate: '2026-09-01', fetchedAt: '2026-08-10T00:00:00Z' },
+    { id: 'c', price: 5, outboundDate: '2026-09-01', fetchedAt: '2026-08-10T00:00:00Z' },
+    { id: 'd', price: 1299, outboundDate: '2026-09-01', fetchedAt: '2026-08-10T00:00:00Z' },
+  ], now);
+  ok(kept.map(o => o.id).join(',') === 'c,d', 'purgeOffers drops sub-£5 (£1) garbage, keeps real prices');
+}
+
 // ── Cron: sweep stats surface kept Irish EUR (dashboard visibility) ───────────
 {
   const aggregateSweepStats = new Function(
