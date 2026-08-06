@@ -28,11 +28,12 @@ import {
 } from '../../lib/content/schema';
 import {
   BLOCK_DRAG_MIME,
+  blockAtPath,
   type Path,
   parsePathKey,
   pathKindLabel,
   resizeColumnBoundary,
-  updateBlockProps,
+  updateBlockPropsAtPath,
 } from '../../lib/content/tree';
 import { PageRenderer } from '../render/PageRenderer';
 import type { Viewport } from './EditorShell';
@@ -202,10 +203,11 @@ export function Canvas({
   const editingValue = useMemo(() => {
     if (!editingPath) return null;
     const path = parsePathKey(editingPath);
-    if (path?.kind !== 'block') return null;
+    // A block in a column, or a block inside a container: both are typed into in
+    // place, so both are read back here through the one path-aware lookup.
+    if (path?.kind !== 'block' && path?.kind !== 'inner-block') return null;
 
-    const block = page.sections[path.section]?.rows[path.row]?.columns[path.column]
-      ?.blocks[path.block];
+    const block = blockAtPath(page, path);
     if (!block) return null;
 
     const html = block.props?.html;
@@ -302,7 +304,7 @@ export function Canvas({
       if (!host || !editingPath) return;
 
       const path = parsePathKey(editingPath);
-      if (path?.kind !== 'block') return;
+      if (path?.kind !== 'block' && path?.kind !== 'inner-block') return;
 
       /*
        * ALWAYS innerHTML NOW. There used to be a data-rt-plain branch here that
@@ -313,14 +315,13 @@ export function Canvas({
        *
        * A heading is still one line: that is data-rt-oneline and the Enter
        * handler below, which is the half of the old attribute that survived.
+       *
+       * updateBlockPropsAtPath, not the fixed-depth version, so the same commit
+       * reaches a block in a column or one inside a container.
        */
       const patch = { html: host.innerHTML };
 
-      onCommit(
-        (current) =>
-          updateBlockProps(current, path.section, path.row, path.column, path.block, patch),
-        `rt:${editingPath}`,
-      );
+      onCommit((current) => updateBlockPropsAtPath(current, path, patch), `rt:${editingPath}`);
     },
     [editingPath, onCommit],
   );
@@ -398,20 +399,9 @@ export function Canvas({
         return;
       }
       const path = parsePathKey(node.dataset.path);
-      if (!path) return;
-      /*
-       * A CLICK INSIDE A CONTAINER SELECTS THE CONTAINER, for now. The inner
-       * column and its blocks carry their own data-path so a drop can find them,
-       * but selecting one to style it, and editing its text in place, arrive with
-       * the rest of the inner editing in a later slice. Until then a click on
-       * inner content lands on the container that holds it, which has a working
-       * pane and toolbar, rather than on a node nothing is wired to yet.
-       */
-      if (path.kind === 'inner-column' || path.kind === 'inner-block') {
-        onSelect({ kind: 'block', section: path.section, row: path.row, column: path.column, block: path.block });
-        return;
-      }
-      onSelect(path);
+      // Inner columns and inner blocks select themselves, the same as any other
+      // node: their panes, toolbars and inline editing are all wired now.
+      if (path) onSelect(path);
     },
     [onSelect, onPickBlock, onInsertSection],
   );

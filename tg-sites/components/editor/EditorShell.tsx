@@ -28,7 +28,7 @@ import { pageAsRegion, REGION_TITLES } from '../../lib/content/region-page';
 import { pageAsItem, type ItemMeta } from '../../lib/content/collection-page';
 import { createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
 import { buildPresetSection } from '../../lib/content/presets';
-import { addBlock, addColumn, addInnerBlock, containerColumns, parsePathKey, type Path, pathKey, resolve, updateBlockProps } from '../../lib/content/tree';
+import { addBlock, addColumn, addInnerBlock, blockAtPath, containerColumns, parsePathKey, type Path, pathKey, resolve, updateBlockPropsAtPath } from '../../lib/content/tree';
 import { Outline } from './Outline';
 import { Canvas, type DropTarget } from './Canvas';
 import { Properties } from './Properties';
@@ -448,9 +448,11 @@ export function EditorShell({
    * inline commands in a heading and hides the ones that would nest a block.
    */
   const editing = useMemo(() => {
-    if (selected?.kind !== 'block') return null;
-    const block = page.sections[selected.section]?.rows[selected.row]
-      ?.columns[selected.column]?.blocks[selected.block];
+    // A paragraph or a heading, in a column OR inside a container: both are typed
+    // into where they sit, so both raise the formatting toolbar and become the
+    // editing host. blockAtPath resolves either.
+    if (selected?.kind !== 'block' && selected?.kind !== 'inner-block') return null;
+    const block = blockAtPath(page, selected);
     if (block?.type !== 'text' && block?.type !== 'heading') return null;
 
     const align = typeof block.props?.align === 'string' ? block.props.align : 'left';
@@ -724,12 +726,8 @@ export function EditorShell({
       const html = act(host);
 
       const path = parsePathKey(pathKeyValue);
-      if (path?.kind !== 'block') return;
-      commit(
-        (current) =>
-          updateBlockProps(current, path.section, path.row, path.column, path.block, { html }),
-        `rt:${pathKeyValue}`,
-      );
+      if (path?.kind !== 'block' && path?.kind !== 'inner-block') return;
+      commit((current) => updateBlockPropsAtPath(current, path, { html }), `rt:${pathKeyValue}`);
     },
     [commit],
   );
@@ -838,6 +836,18 @@ export function EditorShell({
       case 'column':
       case 'block':
         setPicker({ section: selected.section, row: selected.row, column: selected.column });
+        return;
+      // A container's inner column, or a block inside one: the + adds into that
+      // inner column, the same picker with the inner address on the target.
+      case 'inner-column':
+      case 'inner-block':
+        setPicker({
+          section: selected.section,
+          row: selected.row,
+          column: selected.column,
+          block: selected.block,
+          inner: selected.inner,
+        });
         return;
       default:
         return;
@@ -954,6 +964,8 @@ export function EditorShell({
           page.sections[target.section]?.rows[target.row]?.columns[target.column]?.blocks[target.block];
         const inner = container ? containerColumns(container)[target.inner] : undefined;
         if (!inner) return;
+        const length = inner.blocks.length;
+        const index = target.at === undefined ? length : Math.max(0, Math.min(target.at, length));
         commit((current) =>
           addInnerBlock(
             current,
@@ -966,12 +978,16 @@ export function EditorShell({
             target.at,
           ),
         );
+        // Select the new inner block, so its pane opens and a text or heading
+        // drops straight into typing, exactly as adding a block to a column does.
         setSelected({
-          kind: 'block',
+          kind: 'inner-block',
           section: target.section,
           row: target.row,
           column: target.column,
           block: target.block,
+          inner: target.inner,
+          innerBlock: index,
         });
         return;
       }
@@ -1477,12 +1493,8 @@ export function EditorShell({
           align={editing.align}
           onAlign={(value) => {
             const path = parsePathKey(editing.path);
-            if (path?.kind !== 'block') return;
-            commit((current) =>
-              updateBlockProps(current, path.section, path.row, path.column, path.block, {
-                align: value,
-              }),
-            );
+            if (path?.kind !== 'block' && path?.kind !== 'inner-block') return;
+            commit((current) => updateBlockPropsAtPath(current, path, { align: value }));
           }}
         />
       )}

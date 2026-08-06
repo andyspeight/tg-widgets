@@ -616,6 +616,100 @@ export function updateInnerBlockBox(
   );
 }
 
+/** Patch one inner column of a container (its align, flow or box, not its blocks). */
+export function updateInnerColumn(
+  page: Page,
+  section: number,
+  row: number,
+  column: number,
+  block: number,
+  inner: number,
+  patch: Partial<Column>,
+): Page {
+  return mapContainerColumns(page, section, row, column, block, (columns) =>
+    columns.map((col, i) => (i === inner ? { ...col, ...patch } : col)),
+  );
+}
+
+/** Reorder a block within one inner column. */
+export function moveInnerBlockWithinColumn(
+  page: Page,
+  section: number,
+  row: number,
+  column: number,
+  block: number,
+  inner: number,
+  from: number,
+  to: number,
+): Page {
+  return mapInnerColumn(page, section, row, column, block, inner, (blocks) =>
+    moveInArray(blocks, from, to),
+  );
+}
+
+/** Copy an inner block, landing the copy immediately after the original. */
+export function duplicateInnerBlock(
+  page: Page,
+  section: number,
+  row: number,
+  column: number,
+  block: number,
+  inner: number,
+  innerBlock: number,
+  reid: Reid,
+): Page {
+  return mapInnerColumn(page, section, row, column, block, inner, (blocks) => {
+    const existing = blocks[innerBlock];
+    if (!existing) return blocks;
+    const next = [...blocks];
+    next.splice(innerBlock + 1, 0, reidBlock(existing, reid));
+    return next;
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Block-or-inner-block, addressed by path. The editor's inline editing and its
+// text toolbar act on "the selected block" without caring whether it sits in an
+// ordinary column or a container's inner one, so these dispatch on the path kind
+// and keep that branch out of the components.
+// ---------------------------------------------------------------------------
+
+type AnyBlockPath = Extract<Path, { kind: 'block' | 'inner-block' }>;
+
+/** The block a block-or-inner-block path points at, or null if stale. */
+export function blockAtPath(page: Page, path: AnyBlockPath): Block | null {
+  if (path.kind === 'block') {
+    return getBlock(page, path.section, path.row, path.column, path.block);
+  }
+  const container = getBlock(page, path.section, path.row, path.column, path.block);
+  const col = container ? containerColumns(container)[path.inner] : null;
+  return col?.blocks[path.innerBlock] ?? null;
+}
+
+/** Patch the props of whichever block a block-or-inner-block path points at. */
+export function updateBlockPropsAtPath(
+  page: Page,
+  path: AnyBlockPath,
+  patch: Record<string, unknown>,
+): Page {
+  if (path.kind === 'block') {
+    return updateBlockProps(page, path.section, path.row, path.column, path.block, patch);
+  }
+  return updateInnerBlockProps(
+    page, path.section, path.row, path.column, path.block, path.inner, path.innerBlock, patch,
+  );
+}
+
+/** Replace the design box of whichever block a block-or-inner-block path points at. */
+export function updateBlockBoxAtPath(page: Page, path: AnyBlockPath, box: Box): Page {
+  if (path.kind === 'block') {
+    return updateBlockBox(page, path.section, path.row, path.column, path.block, box);
+  }
+  return updateInnerBlockBox(
+    page, path.section, path.row, path.column, path.block, path.inner, path.innerBlock, box,
+  );
+}
+
 export function moveBlockWithinColumn(
   page: Page,
   section: number,

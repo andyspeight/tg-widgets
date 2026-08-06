@@ -25,15 +25,20 @@
 
 import type { Page } from './schema';
 import {
+  containerColumns,
   duplicateBlock,
+  duplicateInnerBlock,
   duplicateRow,
   duplicateSection,
+  getBlock,
   moveBlockWithinColumn,
   moveColumn,
+  moveInnerBlockWithinColumn,
   moveRow,
   moveSection,
   removeBlock,
   removeColumn,
+  removeInnerBlock,
   removeRow,
   removeSection,
   type Path,
@@ -99,11 +104,10 @@ export function itemActions(page: Page, path: Path): ItemAction[] {
     // canvas, so it has no on-canvas toolbar.
     case 'page':
       return [];
-    // A container's inner column and its inner blocks have no on-canvas toolbar
-    // yet; that arrives with the rest of their editing in a later slice.
     case 'inner-column':
+      return innerColumnActions();
     case 'inner-block':
-      return [];
+      return innerBlockActions(page, path);
   }
 }
 
@@ -180,5 +184,40 @@ function blockActions(page: Page, s: number, r: number, c: number, b: number): I
   // A block can be the last one removed; the column falls back to its empty
   // state with the + in the middle.
   actions.push({ id: 'delete', label: 'Delete', icon: 'trash', danger: true, run: (p) => removeBlock(p, s, r, c, b) });
+  return actions;
+}
+
+/**
+ * A container's inner column: Edit its style, or Add a block to it.
+ *
+ * NO MOVE, DUPLICATE OR DELETE, on purpose. Reordering the two inner columns,
+ * adding a third and removing one are column management, and that arrives with
+ * the inner resize in a later slice. Edit and Add are what "select and style"
+ * needs: the pane opens on the column, and the + drops content into it.
+ */
+function innerColumnActions(): ItemAction[] {
+  return [EDIT, ADD];
+}
+
+/**
+ * A block inside a container's inner column. The same set an ordinary block has,
+ * routed through the inner-tree helpers, so a card in a container reorders,
+ * duplicates and deletes exactly as one in a section column does.
+ */
+function innerBlockActions(page: Page, path: Extract<Path, { kind: 'inner-block' }>): ItemAction[] {
+  const { section: s, row: r, column: c, block, inner, innerBlock: i } = path;
+  const container = getBlock(page, s, r, c, block);
+  const blocks = container ? containerColumns(container)[inner]?.blocks : undefined;
+  if (!blocks?.[i]) return [];
+  const last = blocks.length - 1;
+
+  const actions: ItemAction[] = [
+    EDIT,
+    ADD,
+    { id: 'duplicate', label: 'Duplicate', icon: 'copy', run: (p, reid) => duplicateInnerBlock(p, s, r, c, block, inner, i, reid) },
+  ];
+  if (i > 0) actions.push({ id: 'up', label: 'Move up', icon: 'arrow-up', run: (p) => moveInnerBlockWithinColumn(p, s, r, c, block, inner, i, i - 1) });
+  if (i < last) actions.push({ id: 'down', label: 'Move down', icon: 'arrow-down', run: (p) => moveInnerBlockWithinColumn(p, s, r, c, block, inner, i, i + 1) });
+  actions.push({ id: 'delete', label: 'Delete', icon: 'trash', danger: true, run: (p) => removeInnerBlock(p, s, r, c, block, inner, i) });
   return actions;
 }

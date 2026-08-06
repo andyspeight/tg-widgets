@@ -127,7 +127,9 @@ describe('the pane groups a review block and the renderer draws the box', () => 
 
   it('renders each present group as a section with only the first open', () => {
     expect(props).toContain('<Group key={group} title={GROUP_LABELS[group]} defaultOpen={index === 0}>');
-    expect(props).toContain('updateBlockBox(current, path.section, path.row, path.column, path.block, {');
+    // The box commits through the path-dispatch helper now, so the one pane
+    // serves a block in a column and a block inside a container alike.
+    expect(props).toContain('updateBlockBoxAtPath(current, path, { ...box, ...part })');
     // Every element groups now: there is no flat-list escape hatch left.
     expect(props).not.toContain('definition.fields.map(renderField)');
   });

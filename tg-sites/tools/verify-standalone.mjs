@@ -4193,6 +4193,46 @@ await check('and picking a block there lands it inside the inner column', async 
   return inner > 0 ? true : 'no block landed at an inner-column path';
 });
 
+// --- slice 2: the inner nodes are first-class ------------------------------
+
+await check('the block added inside a container selects itself, not the container', async () => {
+  // addBlockAt selects the new inner block, so its pane opens as it would for a
+  // block added to any column.
+  const sel = await page.locator('.ed-canvas-frame [data-path$="k0i0"].is-selected').count();
+  return sel === 1 ? true : `${sel} inner blocks selected`;
+});
+
+await check('its contextual toolbar names it by what it is', async () => {
+  const label = await page.locator('.ed-bar__label').first().innerText();
+  return /quote/i.test(label) ? true : `the toolbar says "${label}"`;
+});
+
+await check('and deleting it through that toolbar empties the inner column', async () => {
+  await page.locator('.ed-bar__btn[aria-label="Delete"]').first().click();
+  await page.waitForTimeout(300);
+  const still = await page.locator('.ed-canvas-frame [data-path$="k0i0"]').count();
+  return still === 0 ? true : 'the inner block is still there';
+});
+
+await check('a text block inside a container is typed into in place', async () => {
+  // A fresh container, a Text into its first inner column, and the block that
+  // lands is taken over as the editing host, contentEditable, exactly as a text
+  // block in an ordinary column is.
+  await page.reload();
+  await page.waitForSelector('.ed-root');
+  await showPanels();
+  await addBlock('Inner container');
+  await added().locator('.tgs-inner-row .ed-empty-col__add').first().click();
+  await page.waitForSelector('.tg-modal', { timeout: 5000 });
+  await page.locator('.ed-block-card', { hasText: 'Text' }).first().click();
+  await page.waitForTimeout(500);
+  const editable = await page
+    .locator('.ed-canvas-frame [data-path$="k0i0"] [data-rt-host]')
+    .first()
+    .getAttribute('contenteditable');
+  return editable === 'true' ? true : `contenteditable is ${editable}`;
+});
+
 
 // ---------------------------------------------------------------------------
 // The menu, the header and the footer

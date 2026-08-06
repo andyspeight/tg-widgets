@@ -42,7 +42,7 @@ import { blockDefinition } from '../../lib/content/blocks';
 import type { ItemMeta } from '../../lib/content/collection-page';
 import { itemActions, itemLabel, type ItemAction } from '../../lib/content/item-actions';
 import type { Page, RegionName } from '../../lib/content/schema';
-import { getBlock, type Path, type Reid } from '../../lib/content/tree';
+import { blockAtPath, type Path, type Reid } from '../../lib/content/tree';
 import { Icon, type IconName } from './Icon';
 import { ItemOptions } from './Properties';
 
@@ -203,10 +203,8 @@ export function ItemToolbar({
   if (!anchor) return null;
 
   const blockLabel =
-    selected.kind === 'block'
-      ? blockDefinition(
-          getBlock(page, selected.section, selected.row, selected.column, selected.block)?.type ?? '',
-        )?.label
+    selected.kind === 'block' || selected.kind === 'inner-block'
+      ? blockDefinition(blockAtPath(page, selected)?.type ?? '')?.label
       : undefined;
   const label = itemLabel(selected, blockLabel);
 

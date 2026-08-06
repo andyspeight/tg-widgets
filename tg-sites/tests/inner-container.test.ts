@@ -16,21 +16,28 @@ import { describe, expect, it } from 'vitest';
 
 import { createBlock, createPage } from '../lib/content/factory';
 import { blockDefinition, blocksByGroup, isKnownBlock } from '../lib/content/blocks';
+import { itemActions, itemLabel } from '../lib/content/item-actions';
 import { EMPTY_BOX, parsePage, type Box } from '../lib/content/schema';
 import { sanitisePage } from '../lib/content/sanitise-page';
 import {
   addBlock,
   addInnerBlock,
+  blockAtPath,
   containerColumns,
   duplicateBlock,
+  duplicateInnerBlock,
   duplicateRow,
+  moveInnerBlockWithinColumn,
   parsePathKey,
   pathKey,
   removeInnerBlock,
   resolve,
+  updateBlockBoxAtPath,
+  updateBlockPropsAtPath,
   updateContainerColumns,
   updateInnerBlockBox,
   updateInnerBlockProps,
+  updateInnerColumn,
   type Path,
   type Reid,
 } from '../lib/content/tree';
@@ -314,5 +321,104 @@ describe('sanitising descends into a container (the security property)', () => {
     const cleaned = sanitisePage(page);
     const box = containerColumns(cleaned.sections[0].rows[0].columns[0].blocks[0])[0].box;
     expect(box.background).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Slice 2: selecting, styling and editing inner nodes
+// ---------------------------------------------------------------------------
+
+describe('the inner-tree editing helpers reach one node', () => {
+  it('updateInnerColumn patches one inner column and leaves the other', () => {
+    let page = pageWithContainer();
+    page = updateInnerColumn(page, 0, 0, 0, 0, 0, { align: 'centre', flow: 'row' });
+    const cols = innerCols(page);
+    expect(cols[0].align).toBe('centre');
+    expect(cols[0].flow).toBe('row');
+    expect(cols[1].align).toBe('top');
+    expect(cols[1].flow).toBe('stacked');
+  });
+
+  it('moveInnerBlockWithinColumn reorders the blocks of one inner column', () => {
+    let page = pageWithContainer();
+    page = addInnerBlock(page, 0, 0, 0, 0, 0, createBlock('text'));
+    page = addInnerBlock(page, 0, 0, 0, 0, 0, createBlock('button'));
+    page = moveInnerBlockWithinColumn(page, 0, 0, 0, 0, 0, 0, 1);
+    expect(innerCols(page)[0].blocks.map((b) => b.type)).toEqual(['button', 'text']);
+  });
+
+  it('duplicateInnerBlock lands a fresh-id copy right after the original', () => {
+    let page = pageWithContainer();
+    page = addInnerBlock(page, 0, 0, 0, 0, 0, createBlock('text'));
+    page = duplicateInnerBlock(page, 0, 0, 0, 0, 0, 0, reider());
+    const blocks = innerCols(page)[0].blocks;
+    expect(blocks.map((b) => b.type)).toEqual(['text', 'text']);
+    expect(blocks[0].id).not.toBe(blocks[1].id);
+  });
+});
+
+describe('the path-dispatch helpers reach a block either place', () => {
+  it('read, patch props and patch box of an inner block', () => {
+    let page = pageWithContainer();
+    page = addInnerBlock(page, 0, 0, 0, 0, 0, createBlock('text'));
+    const path: Path = { kind: 'inner-block', section: 0, row: 0, column: 0, block: 0, inner: 0, innerBlock: 0 };
+
+    expect(blockAtPath(page, path)?.type).toBe('text');
+
+    page = updateBlockPropsAtPath(page, path, { html: '<p>hi</p>' });
+    expect((blockAtPath(page, path)!.props as { html?: string }).html).toBe('<p>hi</p>');
+
+    page = updateBlockBoxAtPath(page, path, { ...EMPTY_BOX, radius: 12 });
+    expect(blockAtPath(page, path)!.box?.radius).toBe(12);
+  });
+
+  it('still reach an ordinary block, so one code path serves both', () => {
+    let page = createPage();
+    page = addBlock(page, 0, 0, 0, createBlock('text'));
+    const path: Path = { kind: 'block', section: 0, row: 0, column: 0, block: 0 };
+    page = updateBlockPropsAtPath(page, path, { html: '<p>x</p>' });
+    expect((blockAtPath(page, path)!.props as { html?: string }).html).toBe('<p>x</p>');
+  });
+});
+
+describe('the on-canvas toolbar for inner nodes', () => {
+  const innerColPath: Path = { kind: 'inner-column', section: 0, row: 0, column: 0, block: 0, inner: 0 };
+  const innerBlockPath = (i: number): Path => ({
+    kind: 'inner-block', section: 0, row: 0, column: 0, block: 0, inner: 0, innerBlock: i,
+  });
+
+  it('gives an inner column just Edit and Add', () => {
+    const page = pageWithContainer();
+    expect(itemActions(page, innerColPath).map((a) => a.id)).toEqual(['edit', 'add']);
+  });
+
+  it('gives an inner block the full set, with the ends guarded', () => {
+    let page = pageWithContainer();
+    page = addInnerBlock(page, 0, 0, 0, 0, 0, createBlock('text'));
+    page = addInnerBlock(page, 0, 0, 0, 0, 0, createBlock('button'));
+    page = addInnerBlock(page, 0, 0, 0, 0, 0, createBlock('quote'));
+    const ids = (i: number) => itemActions(page, innerBlockPath(i)).map((a) => a.id);
+    expect(ids(0)).toEqual(['edit', 'add', 'duplicate', 'down', 'delete']);
+    expect(ids(1)).toEqual(['edit', 'add', 'duplicate', 'up', 'down', 'delete']);
+    expect(ids(2)).toEqual(['edit', 'add', 'duplicate', 'up', 'delete']);
+  });
+
+  it('its duplicate and delete run against the inner column', () => {
+    let page = pageWithContainer();
+    page = addInnerBlock(page, 0, 0, 0, 0, 0, createBlock('text'));
+    page = addInnerBlock(page, 0, 0, 0, 0, 0, createBlock('button'));
+
+    const dupe = itemActions(page, innerBlockPath(0)).find((a) => a.id === 'duplicate')!;
+    page = dupe.run!(page, reider());
+    expect(innerCols(page)[0].blocks.map((b) => b.type)).toEqual(['text', 'text', 'button']);
+
+    const del = itemActions(page, innerBlockPath(0)).find((a) => a.id === 'delete')!;
+    page = del.run!(page, reider());
+    expect(innerCols(page)[0].blocks.map((b) => b.type)).toEqual(['text', 'button']);
+  });
+
+  it('labels an inner column Column and an inner block by its kind', () => {
+    expect(itemLabel(innerColPath)).toBe('Column');
+    expect(itemLabel(innerBlockPath(0), 'Quote')).toBe('Quote');
   });
 });

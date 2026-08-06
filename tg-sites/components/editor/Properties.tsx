@@ -38,6 +38,7 @@ import {
   type Path,
   pathKey,
   addColumn,
+  blockAtPath,
   evenColumns,
   moveColumn,
   removeColumn,
@@ -45,8 +46,9 @@ import {
   updateColumn,
   updateRow,
   updateSection,
-  updateBlockBox,
-  updateBlockProps,
+  updateBlockBoxAtPath,
+  updateBlockPropsAtPath,
+  updateInnerColumn,
   containerColumns,
 } from '../../lib/content/tree';
 import { ImageField } from '../media/ImageField';
@@ -156,7 +158,7 @@ function Breadcrumb({
   );
 }
 
-/** Page, section, row, column, block: whichever of those the selection has. */
+/** Page, section, row, column, block, and a container's inner column and block. */
 function ancestors(path: Path): Path[] {
   const trail: Path[] = [];
   if (path.kind === 'page') return [path];
@@ -169,6 +171,21 @@ function ancestors(path: Path): Path[] {
 
   trail.push({ kind: 'column', section: path.section, row: path.row, column: path.column });
   if (path.kind === 'column') return trail;
+
+  // The block, or the container that holds an inner node: either way this level
+  // is a block at (section, row, column, block).
+  trail.push({ kind: 'block', section: path.section, row: path.row, column: path.column, block: path.block });
+  if (path.kind === 'block') return trail;
+
+  trail.push({
+    kind: 'inner-column',
+    section: path.section,
+    row: path.row,
+    column: path.column,
+    block: path.block,
+    inner: path.inner,
+  });
+  if (path.kind === 'inner-column') return trail;
 
   trail.push(path);
   return trail;
@@ -192,6 +209,14 @@ function crumbLabel(path: Path, page: Page, region: RegionName | null): string {
       const block = page.sections[path.section]?.rows[path.row]?.columns[path.column]
         ?.blocks[path.block];
       return block ? (blockDefinition(block.type)?.label ?? 'Block') : 'Block';
+    }
+    case 'inner-column':
+      return `Column ${path.inner + 1}`;
+    case 'inner-block': {
+      const container = page.sections[path.section]?.rows[path.row]?.columns[path.column]
+        ?.blocks[path.block];
+      const inner = container ? containerColumns(container)[path.inner]?.blocks[path.innerBlock] : undefined;
+      return inner ? (blockDefinition(inner.type)?.label ?? 'Block') : 'Block';
     }
     default:
       return 'Item';
@@ -345,7 +370,13 @@ export function ItemOptions({
         />
       )}
 
-      {selected?.kind === 'block' && (
+      {selected?.kind === 'inner-column' && (
+        <InnerColumnFields path={selected} page={page} onCommit={onCommit} />
+      )}
+
+      {/* A block and a block inside a container share the one pane: BlockFields
+          reads and commits through the path, so it works either place. */}
+      {(selected?.kind === 'block' || selected?.kind === 'inner-block') && (
         <BlockFields path={selected} page={page} isStaff={isStaff} onCommit={onCommit} onSelect={onSelect} />
       )}
     </>
@@ -1409,6 +1440,71 @@ function ColumnFields({
 // ---------------------------------------------------------------------------
 
 /**
+ * A column inside a container.
+ *
+ * The same three controls a section column has that make sense one level down:
+ * how the blocks inside it sit, how they align, and the design box. What it does
+ * NOT have yet is width and order, because dragging the inner columns wider or
+ * swapping them arrives with the inner resize in a later slice; until then the
+ * two share the width evenly. Commits through updateInnerColumn, which writes
+ * back into the container's props.columns.
+ */
+function InnerColumnFields({
+  path,
+  page,
+  onCommit,
+}: {
+  path: Extract<Path, { kind: 'inner-column' }>;
+  page: Page;
+  onCommit: Props['onCommit'];
+}) {
+  const container = page.sections[path.section]?.rows[path.row]?.columns[path.column]?.blocks[path.block];
+  const node = container ? containerColumns(container)[path.inner] : undefined;
+  if (!node) return null;
+
+  const base = `ic:${path.section}:${path.row}:${path.column}:${path.block}:${path.inner}`;
+  const set = (patch: Parameters<typeof updateInnerColumn>[6], key: string) =>
+    onCommit(
+      (current) =>
+        updateInnerColumn(current, path.section, path.row, path.column, path.block, path.inner, patch),
+      key,
+    );
+
+  return (
+    <>
+      <p className="ed-help" style={{ marginTop: 0, marginBottom: 14 }}>
+        A column inside a container. Drop a block into it, and style it here.
+      </p>
+
+      <Segmented
+        label="How the content sits"
+        value={node.flow}
+        options={[
+          { value: 'stacked', label: 'Stacked' },
+          { value: 'row', label: 'Side by side' },
+        ]}
+        onChange={(value) => set({ flow: value as typeof node.flow }, `${base}:flow`)}
+      />
+
+      <Segmented
+        label="Vertical alignment"
+        value={node.align}
+        options={[
+          { value: 'top', label: 'Top' },
+          { value: 'centre', label: 'Middle' },
+          { value: 'bottom', label: 'Bottom' },
+        ]}
+        onChange={(value) => set({ align: value as typeof node.align }, `${base}:align`)}
+      />
+
+      <BoxPanel what="column" box={node.box} onChange={(box) => set({ box }, `${base}:box`)} />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+
+/**
  * The one control that turns a frozen import into native blocks.
  *
  * It calls the rebuild on the server, because the recogniser is parser backed
@@ -1558,13 +1654,19 @@ function BlockFields({
   onCommit,
   onSelect,
 }: {
-  path: Extract<Path, { kind: 'block' }>;
+  /*
+   * A block in an ordinary column, OR a block inside a container's inner column.
+   * The two share this whole pane: the reads and the commits go through the
+   * path-dispatch helpers, so a card in a container styles exactly as one in a
+   * section column, and the design-suite grouping below is written once.
+   */
+  path: Extract<Path, { kind: 'block' | 'inner-block' }>;
   page: Page;
   isStaff: boolean;
   onCommit: Props['onCommit'];
   onSelect?: Props['onSelect'];
 }) {
-  const block = page.sections[path.section]?.rows[path.row]?.columns[path.column]?.blocks[path.block];
+  const block = blockAtPath(page, path);
   if (!block) return null;
 
   const definition = blockDefinition(block.type);
@@ -1601,19 +1703,12 @@ function BlockFields({
       siblings={block.props}
       onChange={(value) =>
         onCommit(
-          (current) =>
-            updateBlockProps(current, path.section, path.row, path.column, path.block, {
-              [field.key]: value,
-            }),
+          (current) => updateBlockPropsAtPath(current, path, { [field.key]: value }),
           `blk:${block.id}:${field.key}`,
         )
       }
       onPatch={(patch) =>
-        onCommit(
-          (current) =>
-            updateBlockProps(current, path.section, path.row, path.column, path.block, patch),
-          `blk:${block.id}:${field.key}`,
-        )
+        onCommit((current) => updateBlockPropsAtPath(current, path, patch), `blk:${block.id}:${field.key}`)
       }
     />
   );
@@ -1644,8 +1739,7 @@ function BlockFields({
   const box = block.box ?? EMPTY_BOX;
   const patchBox = (part: Partial<Box>) =>
     onCommit(
-      (current) =>
-        updateBlockBox(current, path.section, path.row, path.column, path.block, { ...box, ...part }),
+      (current) => updateBlockBoxAtPath(current, path, { ...box, ...part }),
       `blk:${block.id}:box`,
     );
 
@@ -1714,7 +1808,9 @@ function BlockFields({
   return (
     <>
       {help}
-      {block.type === 'imported' && (
+      {/* Rebuilding an import swaps the whole SECTION it sits in, which only
+          makes sense for a top-level block, never one nested in a container. */}
+      {block.type === 'imported' && path.kind === 'block' && (
         <RebuildImportButton block={block} section={path.section} onCommit={onCommit} onSelect={onSelect} />
       )}
       {ordered.map((group, index) => (
