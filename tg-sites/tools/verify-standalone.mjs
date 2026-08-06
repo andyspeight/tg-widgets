@@ -4233,6 +4233,37 @@ await check('a text block inside a container is typed into in place', async () =
   return editable === 'true' ? true : `contenteditable is ${editable}`;
 });
 
+// --- slice 3: resize, manage columns, and the outline ----------------------
+
+await check('a container shows a resize handle between its inner columns', async () => {
+  await page.reload();
+  await page.waitForSelector('.ed-root');
+  await showPanels();
+  await addBlock('Inner container');
+  // Two columns, one boundary, one handle (the last column has none).
+  const handles = await added().locator('.tgs-inner-row > .tgs-col .ed-resize').count();
+  return handles === 1 ? true : `${handles} inner resize handles`;
+});
+
+await check('the pane adds a third inner column and can even them', async () => {
+  // The container is selected, so its pane carries the inner-column control.
+  await page.locator('.ed-props button', { hasText: '+ Column' }).first().click();
+  await page.waitForTimeout(300);
+  const cols = await added().locator('.tgs-inner-row > .tgs-col').count();
+  return cols === 3 ? true : `${cols} inner columns after adding`;
+});
+
+await check('the outline lists a container’s inner blocks', async () => {
+  // Drop a block into the container, then find it nested in the outline. The
+  // section auto-opens because selecting the inner block reveals it.
+  await added().locator('.tgs-inner-row .ed-empty-col__add').first().click();
+  await page.waitForSelector('.tg-modal', { timeout: 5000 });
+  await page.locator('.ed-block-card', { hasText: 'Quote' }).first().click();
+  await page.waitForTimeout(400);
+  const nested = await page.locator('.ed-outline .ed-subitem').count();
+  return nested > 0 ? true : 'no nested inner block in the outline';
+});
+
 
 // ---------------------------------------------------------------------------
 // The menu, the header and the footer

@@ -17,20 +17,25 @@ import { describe, expect, it } from 'vitest';
 import { createBlock, createPage } from '../lib/content/factory';
 import { blockDefinition, blocksByGroup, isKnownBlock } from '../lib/content/blocks';
 import { itemActions, itemLabel } from '../lib/content/item-actions';
-import { EMPTY_BOX, parsePage, type Box } from '../lib/content/schema';
+import { EMPTY_BOX, MIN_COLUMN_WIDTH, parsePage, type Box } from '../lib/content/schema';
 import { sanitisePage } from '../lib/content/sanitise-page';
 import {
   addBlock,
   addInnerBlock,
+  addInnerColumn,
   blockAtPath,
   containerColumns,
   duplicateBlock,
   duplicateInnerBlock,
   duplicateRow,
+  evenInnerColumns,
   moveInnerBlockWithinColumn,
+  moveInnerColumn,
   parsePathKey,
   pathKey,
   removeInnerBlock,
+  removeInnerColumn,
+  resizeInnerColumnBoundary,
   resolve,
   updateBlockBoxAtPath,
   updateBlockPropsAtPath,
@@ -420,5 +425,90 @@ describe('the on-canvas toolbar for inner nodes', () => {
   it('labels an inner column Column and an inner block by its kind', () => {
     expect(itemLabel(innerColPath)).toBe('Column');
     expect(itemLabel(innerBlockPath(0), 'Quote')).toBe('Quote');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Slice 3: resizing and managing the inner columns, gap and stacking
+// ---------------------------------------------------------------------------
+
+describe('resizing a container’s inner columns', () => {
+  it('moves the boundary and keeps the widths summing to 100', () => {
+    let page = pageWithContainer();
+    page = resizeInnerColumnBoundary(page, 0, 0, 0, 0, 0, 20);
+    const cols = innerCols(page);
+    expect(cols[0].width).toBeGreaterThan(50);
+    expect(Math.abs(cols[0].width + cols[1].width - 100)).toBeLessThanOrEqual(0.01);
+  });
+
+  it('never lets a column cross the minimum, however hard it is dragged', () => {
+    let page = pageWithContainer();
+    page = resizeInnerColumnBoundary(page, 0, 0, 0, 0, 0, 999);
+    const cols = innerCols(page);
+    expect(cols[1].width).toBeGreaterThanOrEqual(MIN_COLUMN_WIDTH);
+    expect(cols[0].width).toBeLessThanOrEqual(100 - MIN_COLUMN_WIDTH);
+  });
+});
+
+describe('adding, removing, moving and evening inner columns', () => {
+  it('adds a column, taking its share from the rest', () => {
+    let page = pageWithContainer();
+    page = addInnerColumn(page, 0, 0, 0, 0);
+    const cols = innerCols(page);
+    expect(cols).toHaveLength(3);
+    expect(Math.abs(cols.reduce((sum, c) => sum + c.width, 0) - 100)).toBeLessThanOrEqual(0.01);
+  });
+
+  it('caps the inner columns at six', () => {
+    let page = pageWithContainer();
+    for (let i = 0; i < 10; i += 1) page = addInnerColumn(page, 0, 0, 0, 0);
+    expect(innerCols(page)).toHaveLength(6);
+  });
+
+  it('removes a column, rescuing its blocks into the neighbour', () => {
+    let page = pageWithContainer();
+    page = addInnerBlock(page, 0, 0, 0, 0, 1, createBlock('text'));
+    page = removeInnerColumn(page, 0, 0, 0, 0, 1);
+    const cols = innerCols(page);
+    expect(cols).toHaveLength(1);
+    expect(cols[0].blocks.map((b) => b.type)).toEqual(['text']);
+    expect(Math.abs(cols[0].width - 100)).toBeLessThanOrEqual(0.01);
+  });
+
+  it('keeps at least one inner column', () => {
+    let page = pageWithContainer();
+    page = removeInnerColumn(page, 0, 0, 0, 0, 0);
+    page = removeInnerColumn(page, 0, 0, 0, 0, 0);
+    expect(innerCols(page).length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('moves a column, its width travelling with it', () => {
+    let page = pageWithContainer();
+    page = resizeInnerColumnBoundary(page, 0, 0, 0, 0, 0, 20);
+    const before = innerCols(page).map((c) => Math.round(c.width));
+    page = moveInnerColumn(page, 0, 0, 0, 0, 0, 1);
+    const after = innerCols(page).map((c) => Math.round(c.width));
+    expect(after).toEqual([before[1], before[0]]);
+  });
+
+  it('evens the columns back to equal widths', () => {
+    let page = pageWithContainer();
+    page = addInnerColumn(page, 0, 0, 0, 0);
+    page = resizeInnerColumnBoundary(page, 0, 0, 0, 0, 0, 15);
+    page = evenInnerColumns(page, 0, 0, 0, 0);
+    const cols = innerCols(page);
+    // Each within a rounding step of an equal share. normaliseWidths parks the
+    // residue on one column, so 33.33/33.33/33.34 is "even", the same as a row's.
+    const share = 100 / cols.length;
+    expect(cols.every((c) => Math.abs(c.width - share) <= 0.02)).toBe(true);
+    expect(Math.abs(cols.reduce((sum, c) => sum + c.width, 0) - 100)).toBeLessThanOrEqual(0.01);
+  });
+});
+
+describe('a container carries its own gap and stacking', () => {
+  it('starts at 16px and phone-stack', () => {
+    const props = createBlock('container').props as { gap?: unknown; stack?: unknown };
+    expect(props.gap).toBe(16);
+    expect(props.stack).toBe('mobile');
   });
 });

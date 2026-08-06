@@ -42,6 +42,24 @@ function innerColumnsOf(block: Block): Column[] {
   return Array.isArray(columns) ? (columns as Column[]) : [];
 }
 
+/**
+ * A container's own gap and stacking, clamped here because props is a loose bag
+ * the schema never validates: a value written by a newer build, or a hand-edited
+ * tree, must reduce to something legal rather than reach the CSS raw. Defaults
+ * are the 16px and phone-stack the container drew with before they were settable.
+ */
+function innerGap(block: Block): number {
+  const raw = (block.props as { gap?: unknown }).gap;
+  const n = typeof raw === 'number' ? raw : Number(raw);
+  if (!Number.isFinite(n)) return 16;
+  return Math.min(96, Math.max(0, Math.round(n)));
+}
+
+function innerStack(block: Block): 'always' | 'tablet' | 'mobile' {
+  const raw = (block.props as { stack?: unknown }).stack;
+  return raw === 'always' || raw === 'tablet' ? raw : 'mobile';
+}
+
 interface Editable {
   editable?: boolean;
   /**
@@ -667,6 +685,8 @@ function blockHost(
       {block.type === 'container' ? (
         <InnerColumns
           columns={innerColumnsOf(block)}
+          gap={innerGap(block)}
+          stack={innerStack(block)}
           keyPath={keyPath}
           editable={editable}
           editingPath={editingPath}
@@ -689,10 +709,17 @@ function blockHost(
  */
 function InnerColumns({
   columns,
+  gap,
+  stack,
   keyPath,
   editable = false,
   editingPath = null,
-}: { columns: Column[]; keyPath: string } & Editable): ReactElement {
+}: {
+  columns: Column[];
+  gap: number;
+  stack: 'always' | 'tablet' | 'mobile';
+  keyPath: string;
+} & Editable): ReactElement {
   /*
    * DEFENSIVE ABOUT THE COLUMN SHAPE, because an inner column is the one column
    * in the model the schema never validates: it lives in a block's loose props
@@ -706,11 +733,11 @@ function InnerColumns({
 
   const style = {
     '--tgs-cols': columns.map((column) => `minmax(0, ${width(column, columns.length)}fr)`).join(' '),
-    '--tgs-gap': '16px',
+    '--tgs-gap': `${gap}px`,
   } as CSSProperties;
 
   return (
-    <div className="tgs-row tgs-inner-row" style={style} data-stack="mobile">
+    <div className="tgs-row tgs-inner-row" style={style} data-stack={stack}>
       {columns.map((column, inner) => {
         const colPath = `${keyPath}k${inner}`;
         const box = column.box ?? EMPTY_BOX;
@@ -751,6 +778,24 @@ function InnerColumns({
                   </svg>
                 </button>
               </div>
+            )}
+
+            {/*
+             * Drag the edge to resize the inner columns, the same handle a
+             * section column has. The data-resize key names the CONTAINER
+             * (a block path) rather than a row, which is how Canvas tells an
+             * inner resize from an ordinary one. Sits at the end of every inner
+             * column but the last, over the gap.
+             */}
+            {editable && inner < columns.length - 1 && (
+              <div
+                className="ed-resize"
+                data-resize={`${keyPath}:${inner}`}
+                role="separator"
+                aria-orientation="vertical"
+                aria-label={`Resize inner column ${inner + 1}`}
+                tabIndex={0}
+              />
             )}
           </div>
         );

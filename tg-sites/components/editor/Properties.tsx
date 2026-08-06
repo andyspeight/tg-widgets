@@ -38,11 +38,15 @@ import {
   type Path,
   pathKey,
   addColumn,
+  addInnerColumn,
   blockAtPath,
   evenColumns,
+  evenInnerColumns,
   moveColumn,
   removeColumn,
+  removeInnerColumn,
   resizeColumnBoundary,
+  resizeInnerColumnBoundary,
   updateColumn,
   updateRow,
   updateSection,
@@ -1647,6 +1651,91 @@ const SHADOW_CHOICES = [
   { value: 'strong', label: 'Strong' },
 ];
 
+/**
+ * A container's inner columns: the width sliders and the add, remove and even
+ * buttons, the same set a row has one level up. Modelled on RowFields, committing
+ * through the inner-column helpers. The width also drags on the canvas; this is
+ * the keyboard-and-precise way, and where a column is added or removed.
+ */
+function ContainerColumnsControl({
+  block,
+  path,
+  onCommit,
+}: {
+  block: Block;
+  path: Extract<Path, { kind: 'block' }>;
+  onCommit: Props['onCommit'];
+}) {
+  const columns = containerColumns(block);
+  if (!columns.length) return null;
+  const { section: s, row: r, column: c, block: b } = path;
+
+  return (
+    <div className="ed-field">
+      <label className="ed-label">Inner columns</label>
+      <div className="ed-widths">
+        {columns.map((col, index) => (
+          <div className="ed-width-row" key={col.id}>
+            <span>Column {index + 1}</span>
+            <input
+              type="range"
+              min={MIN_COLUMN_WIDTH}
+              max={100 - MIN_COLUMN_WIDTH * (columns.length - 1)}
+              step={1}
+              value={Math.round(col.width)}
+              disabled={columns.length === 1}
+              aria-label={`Inner column ${index + 1} width`}
+              onChange={(event) => {
+                const delta = Number(event.target.value) - col.width;
+                // The slider drives the boundary to its right, or the one to its
+                // left for the last column, so the widths still sum to 100.
+                const boundary = index === columns.length - 1 ? index - 1 : index;
+                const signed = index === columns.length - 1 ? -delta : delta;
+                onCommit((current) => resizeInnerColumnBoundary(current, s, r, c, b, boundary, signed), `ic:${b}:width`);
+              }}
+            />
+            <output>{Math.round(col.width)}%</output>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+        <button
+          type="button"
+          className="ed-btn"
+          style={{ flex: 1 }}
+          disabled={columns.length >= 6}
+          onClick={() => onCommit((current) => addInnerColumn(current, s, r, c, b))}
+        >
+          + Column
+        </button>
+        <button
+          type="button"
+          className="ed-btn"
+          style={{ flex: 1 }}
+          disabled={columns.length <= 1}
+          onClick={() => onCommit((current) => removeInnerColumn(current, s, r, c, b, columns.length - 1))}
+        >
+          − Column
+        </button>
+        <button
+          type="button"
+          className="ed-btn"
+          style={{ flex: 1 }}
+          disabled={columns.length <= 1}
+          onClick={() => onCommit((current) => evenInnerColumns(current, s, r, c, b))}
+        >
+          Even
+        </button>
+      </div>
+      <p className="ed-help">
+        Removing a column moves its blocks into the one beside it. You can also
+        drag the edges in the preview.
+      </p>
+    </div>
+  );
+}
+
 function BlockFields({
   path,
   page,
@@ -1812,6 +1901,11 @@ function BlockFields({
           makes sense for a top-level block, never one nested in a container. */}
       {block.type === 'imported' && path.kind === 'block' && (
         <RebuildImportButton block={block} section={path.section} onCommit={onCommit} onSelect={onSelect} />
+      )}
+      {/* The container's own columns: widths, add, remove, even. A container is
+          only ever a top-level block, so the path is a 'block' one here. */}
+      {block.type === 'container' && path.kind === 'block' && (
+        <ContainerColumnsControl block={block} path={path} onCommit={onCommit} />
       )}
       {ordered.map((group, index) => (
         <Group key={group} title={GROUP_LABELS[group]} defaultOpen={index === 0}>

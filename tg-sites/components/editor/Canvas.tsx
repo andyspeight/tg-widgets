@@ -29,10 +29,12 @@ import {
 import {
   BLOCK_DRAG_MIME,
   blockAtPath,
+  containerColumns,
   type Path,
   parsePathKey,
   pathKindLabel,
   resizeColumnBoundary,
+  resizeInnerColumnBoundary,
   updateBlockPropsAtPath,
 } from '../../lib/content/tree';
 import { PageRenderer } from '../render/PageRenderer';
@@ -121,6 +123,13 @@ interface DragState {
   rowWidthPx: number;
   startX: number;
   handle: HTMLElement;
+  /**
+   * Present when the drag resizes a CONTAINER's inner columns rather than a
+   * row's. It names the container (its outer column and block index), so the
+   * move commits through resizeInnerColumnBoundary and the badge reads the inner
+   * columns' widths.
+   */
+  inner?: { column: number; block: number };
 }
 
 export function Canvas({
@@ -574,7 +583,23 @@ export function Canvas({
 
     const [rowKey, indexPart] = spec.split(':');
     const path = parsePathKey(rowKey);
-    if (path?.kind !== 'row') return;
+    if (!path) return;
+    // A row's columns name a row; a container's inner columns name the container
+    // block. Both split the same and are measured the same; only the commit
+    // differs. Anything else on a resize handle is not ours.
+    let inner: { column: number; block: number } | undefined;
+    let section: number;
+    let dragRow: number;
+    if (path.kind === 'row') {
+      section = path.section;
+      dragRow = path.row;
+    } else if (path.kind === 'block') {
+      section = path.section;
+      dragRow = path.row;
+      inner = { column: path.column, block: path.block };
+    } else {
+      return;
+    }
 
     const rowElement = handle.closest<HTMLElement>('.tgs-row');
     if (!rowElement) return;
@@ -602,12 +627,13 @@ export function Canvas({
     handle.classList.add('is-dragging');
 
     dragRef.current = {
-      section: path.section,
-      row: path.row,
+      section,
+      row: dragRow,
       index: Number(indexPart),
       rowWidthPx,
       startX: event.clientX,
       handle,
+      ...(inner ? { inner } : {}),
     };
   }, [page]);
 
@@ -648,15 +674,28 @@ export function Canvas({
       // pointer to drift away from the handle once a column hits its floor.
       drag.startX = event.clientX;
 
+      const inner = drag.inner;
       onCommit(
-        (current) => resizeColumnBoundary(current, drag.section, drag.row, drag.index, deltaPercent),
+        (current) =>
+          inner
+            ? resizeInnerColumnBoundary(current, drag.section, drag.row, inner.column, inner.block, drag.index, deltaPercent)
+            : resizeColumnBoundary(current, drag.section, drag.row, drag.index, deltaPercent),
         // One undo step for the whole drag rather than one per pixel.
-        `resize:${drag.section}:${drag.row}:${drag.index}`,
+        inner
+          ? `iresize:${drag.section}:${drag.row}:${inner.column}:${inner.block}:${drag.index}`
+          : `resize:${drag.section}:${drag.row}:${drag.index}`,
       );
 
       // Reads from the page one render behind the commit above. At pointer
       // rates that is imperceptible, and it self-corrects on the next move.
-      const columns = page.sections[drag.section]?.rows[drag.row]?.columns;
+      const containerBlock = inner
+        ? page.sections[drag.section]?.rows[drag.row]?.columns[inner.column]?.blocks[inner.block]
+        : undefined;
+      const columns = inner
+        ? containerBlock
+          ? containerColumns(containerBlock)
+          : undefined
+        : page.sections[drag.section]?.rows[drag.row]?.columns;
       const text = columns
         ? `${Math.round(columns[drag.index]?.width ?? 0)}% / ${Math.round(columns[drag.index + 1]?.width ?? 0)}%`
         : '';
@@ -746,12 +785,17 @@ export function Canvas({
 
       const [rowKey, indexPart] = handle.dataset.resize.split(':');
       const path = parsePathKey(rowKey);
-      if (path?.kind !== 'row') return;
+      // A row's columns, or a container's inner ones. Same keys, same step, the
+      // commit apart.
+      if (path?.kind !== 'row' && path?.kind !== 'block') return;
 
       event.preventDefault();
+      const index = Number(indexPart);
       const step = (event.shiftKey ? 10 : 2) * (event.key === 'ArrowLeft' ? -1 : 1);
       onCommit((current) =>
-        resizeColumnBoundary(current, path.section, path.row, Number(indexPart), step),
+        path.kind === 'block'
+          ? resizeInnerColumnBoundary(current, path.section, path.row, path.column, path.block, index, step)
+          : resizeColumnBoundary(current, path.section, path.row, index, step),
       );
     },
     [onCommit],

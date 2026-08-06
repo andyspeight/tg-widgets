@@ -11,6 +11,7 @@
  */
 
 import {
+  MAX_COLUMNS_PER_ROW,
   MIN_COLUMN_WIDTH,
   normaliseWidths,
   type Block,
@@ -403,24 +404,31 @@ export function resizeColumnBoundary(
   index: number,
   deltaPercent: number,
 ): Page {
-  return mapRow(page, section, row, (r) => {
-    const left = r.columns[index];
-    const right = r.columns[index + 1];
-    if (!left || !right) return r;
+  return mapRow(page, section, row, (r) => ({ ...r, columns: resizeColumns(r.columns, index, deltaPercent) }));
+}
 
-    const pair = left.width + right.width;
-    const nextLeft = clamp(left.width + deltaPercent, MIN_COLUMN_WIDTH, pair - MIN_COLUMN_WIDTH);
-    const nextRight = pair - nextLeft;
+/**
+ * Move the boundary between columns `index` and `index+1`, clamped and
+ * renormalised. Pure on a Column[], so a row and a container's inner columns
+ * share the one piece of arithmetic rather than two copies that drift.
+ */
+function resizeColumns(columns: Column[], index: number, deltaPercent: number): Column[] {
+  const left = columns[index];
+  const right = columns[index + 1];
+  if (!left || !right) return columns;
 
-    const columns = r.columns.map((column, i) => {
-      if (i === index) return { ...column, width: round2(nextLeft) };
-      if (i === index + 1) return { ...column, width: round2(nextRight) };
-      return column;
-    });
+  const pair = left.width + right.width;
+  const nextLeft = clamp(left.width + deltaPercent, MIN_COLUMN_WIDTH, pair - MIN_COLUMN_WIDTH);
+  const nextRight = pair - nextLeft;
 
-    const widths = normaliseWidths(columns.map((column) => column.width));
-    return { ...r, columns: columns.map((c, i) => ({ ...c, width: widths[i] })) };
+  const next = columns.map((column, i) => {
+    if (i === index) return { ...column, width: round2(nextLeft) };
+    if (i === index + 1) return { ...column, width: round2(nextRight) };
+    return column;
   });
+
+  const widths = normaliseWidths(next.map((column) => column.width));
+  return next.map((c, i) => ({ ...c, width: widths[i] }));
 }
 
 /** Reset a row to equal column widths. */
@@ -629,6 +637,102 @@ export function updateInnerColumn(
   return mapContainerColumns(page, section, row, column, block, (columns) =>
     columns.map((col, i) => (i === inner ? { ...col, ...patch } : col)),
   );
+}
+
+/**
+ * Resize the boundary between a container's inner columns `index` and `index+1`.
+ * The inner twin of resizeColumnBoundary, sharing its arithmetic.
+ */
+export function resizeInnerColumnBoundary(
+  page: Page,
+  section: number,
+  row: number,
+  column: number,
+  block: number,
+  index: number,
+  deltaPercent: number,
+): Page {
+  return mapContainerColumns(page, section, row, column, block, (columns) =>
+    resizeColumns(columns, index, deltaPercent),
+  );
+}
+
+/** Add a column to a container, taking its width proportionally from the rest. */
+export function addInnerColumn(
+  page: Page,
+  section: number,
+  row: number,
+  column: number,
+  block: number,
+): Page {
+  return mapContainerColumns(page, section, row, column, block, (columns) => {
+    if (columns.length >= MAX_COLUMNS_PER_ROW) return columns;
+    const share = 100 / (columns.length + 1);
+    const widths = normaliseWidths([
+      ...columns.map((col) => col.width * (1 - share / 100)),
+      share,
+    ]);
+    const next = [...columns, createColumn(share)];
+    return next.map((col, index) => ({ ...col, width: widths[index] }));
+  });
+}
+
+/**
+ * Remove a container's inner column, moving its blocks into the neighbour rather
+ * than dropping them, the same rescue removeColumn does for a section column.
+ */
+export function removeInnerColumn(
+  page: Page,
+  section: number,
+  row: number,
+  column: number,
+  block: number,
+  inner: number,
+): Page {
+  return mapContainerColumns(page, section, row, column, block, (columns) => {
+    if (columns.length <= 1) return columns;
+    const doomed = columns[inner];
+    if (!doomed) return columns;
+
+    const survivors = columns.filter((_, i) => i !== inner);
+    const rescueIndex = inner === 0 ? 0 : inner - 1;
+    const rescued = survivors.map((col, i) =>
+      i === rescueIndex ? { ...col, blocks: [...col.blocks, ...doomed.blocks] } : col,
+    );
+
+    const widths = normaliseWidths(rescued.map((col) => col.width));
+    return rescued.map((col, i) => ({ ...col, width: widths[i] }));
+  });
+}
+
+/** Move a container's inner column, its width travelling with it (as moveColumn does). */
+export function moveInnerColumn(
+  page: Page,
+  section: number,
+  row: number,
+  column: number,
+  block: number,
+  from: number,
+  to: number,
+): Page {
+  return mapContainerColumns(page, section, row, column, block, (columns) => {
+    if (to < 0 || to >= columns.length) return columns;
+    return moveInArray(columns, from, to);
+  });
+}
+
+/** Reset a container's inner columns to equal widths. */
+export function evenInnerColumns(
+  page: Page,
+  section: number,
+  row: number,
+  column: number,
+  block: number,
+): Page {
+  return mapContainerColumns(page, section, row, column, block, (columns) => {
+    const widths = normaliseWidths(columns.map(() => 1));
+    return columns.map((col, i) => ({ ...col, width: widths[i] }));
+  });
 }
 
 /** Reorder a block within one inner column. */

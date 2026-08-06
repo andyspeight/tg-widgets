@@ -26,13 +26,14 @@
  *     fixes the fact that hover does not exist on a tablet.
  */
 
-import { useEffect, useState } from 'react';
-import type { Page, Row } from '../../lib/content/schema';
+import { Fragment, useEffect, useState } from 'react';
+import type { Block, Page, Row } from '../../lib/content/schema';
 import { blockLabel, createRow } from '../../lib/content/factory';
 import {
   type Path,
   type Reid,
   addRow,
+  containerColumns,
   duplicateBlock,
   duplicateSection,
   moveBlockWithinColumn,
@@ -389,8 +390,8 @@ function Band({
             const definition = blockDefinition(block.type);
 
             return (
+              <Fragment key={block.id}>
               <div
-                key={block.id}
                 className={`ed-item${over === key ? ' is-dragover' : ''}`}
                 data-selected={selectedKey === pathKey(path)}
                 onDragOver={(event) => {
@@ -471,6 +472,21 @@ function Band({
                   ]}
                 />
               </div>
+
+              {/* A container opens up: its inner columns and blocks are listed
+                  under it, each one selectable so the outline reaches them. */}
+              {block.type === 'container' && (
+                <ContainerBranch
+                  block={block}
+                  section={sectionIndex}
+                  row={rowIndex}
+                  column={columnIndex}
+                  blockIndex={blockIndex}
+                  selectedKey={selectedKey}
+                  onSelect={onSelect}
+                />
+              )}
+              </Fragment>
             );
           })}
 
@@ -495,6 +511,78 @@ function Band({
           Remove this row
         </button>
       )}
+    </div>
+  );
+}
+
+/**
+ * A container, opened up in the outline.
+ *
+ * The one block whose content is more content, so it is the one block the
+ * outline descends into: its inner columns become "Left"/"Right" labels the same
+ * as a row's do, and its inner blocks become nested, selectable rows. Select-only
+ * on purpose. Reordering and the menus stay on the canvas toolbar, which the
+ * inner nodes already have; the outline's job here is to make them reachable and
+ * to show what is where.
+ */
+function ContainerBranch({
+  block,
+  section,
+  row,
+  column,
+  blockIndex,
+  selectedKey,
+  onSelect,
+}: {
+  block: Block;
+  section: number;
+  row: number;
+  column: number;
+  blockIndex: number;
+  selectedKey: string | null;
+  onSelect: (path: Path) => void;
+}) {
+  const columns = containerColumns(block);
+  if (!columns.length) return null;
+  const multi = columns.length > 1;
+
+  return (
+    <div className="ed-subtree">
+      {columns.map((col, inner) => (
+        <div className="ed-subcol" key={col.id}>
+          {multi && (
+            <button
+              type="button"
+              className="ed-side-btn ed-subcol-label"
+              aria-pressed={
+                selectedKey === pathKey({ kind: 'inner-column', section, row, column, block: blockIndex, inner })
+              }
+              onClick={() =>
+                onSelect({ kind: 'inner-column', section, row, column, block: blockIndex, inner })
+              }
+            >
+              {columnWord(inner, columns.length)}
+            </button>
+          )}
+
+          {col.blocks.map((inblock, innerBlock) => {
+            const definition = blockDefinition(inblock.type);
+            const path: Path = { kind: 'inner-block', section, row, column, block: blockIndex, inner, innerBlock };
+            return (
+              <button
+                key={inblock.id}
+                type="button"
+                className="ed-subitem"
+                data-selected={selectedKey === pathKey(path)}
+                onClick={() => onSelect(path)}
+              >
+                <Icon name={definition?.icon ?? 'text'} size={14} className="ed-item-icon" />
+                <span className="ed-item-label">{blockLabel(inblock)}</span>
+              </button>
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 }

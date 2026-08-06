@@ -1661,13 +1661,37 @@ export const BLOCKS: readonly BlockDefinition[] = [
     icon: 'columns',
     description: 'Columns inside a column, for content side by side.',
     // The two starter columns are seeded by the factory with fresh ids, not
-    // here: a literal here would hand every container the same column ids.
-    defaults: { columns: [] },
+    // here: a literal here would hand every container the same column ids. gap
+    // and stack are the container's own layout, read by the renderer.
+    defaults: { columns: [], gap: 16, stack: 'mobile' },
     summarise: (props) => {
       const count = Array.isArray(props.columns) ? props.columns.length : 0;
       return `Inner container (${count} column${count === 1 ? '' : 's'})`;
     },
-    fields: [],
+    fields: [
+      {
+        kind: 'number',
+        key: 'gap',
+        label: 'Space between columns',
+        min: 0,
+        max: 96,
+        step: 2,
+        group: 'layout',
+        help: 'The gap between the inner columns, in pixels.',
+      },
+      {
+        kind: 'select',
+        key: 'stack',
+        label: 'Stack into one column',
+        group: 'layout',
+        options: [
+          { value: 'mobile', label: 'On phones' },
+          { value: 'tablet', label: 'On tablets too' },
+          { value: 'always', label: 'Always' },
+        ],
+        help: 'When the inner columns fall one above the other. Always suits a label beside its value.',
+      },
+    ],
   },
   {
     type: 'divider',

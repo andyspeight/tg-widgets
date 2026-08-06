@@ -694,6 +694,41 @@
   color: var(--ed-ink-3);
 }
 
+/* A container's inner columns and blocks, nested under its outline row. Reuses
+   the item tokens so a nested block reads as the same kind of thing, one step
+   in. */
+.ed-subtree {
+  margin: 2px 0 4px 22px;
+  padding-left: 8px;
+  border-left: 1px solid var(--ed-line-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ed-subcol { display: flex; flex-direction: column; gap: 2px; }
+.ed-subcol-label { align-self: flex-start; margin: 2px 0; }
+.ed-subitem {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-2);
+  width: 100%;
+  min-height: 34px;
+  padding: 0 var(--ed-2);
+  border: 1px solid transparent;
+  border-radius: var(--ed-r-md);
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.ed-subitem:hover { border-color: var(--ed-line); }
+.ed-subitem[data-selected='true'] {
+  border-color: var(--ed-select);
+  background: var(--ed-select-wash);
+}
+.ed-subitem[data-selected='true'] .ed-item-icon { color: var(--ed-select); }
+
 .ed-add {
   display: flex;
   align-items: center;
