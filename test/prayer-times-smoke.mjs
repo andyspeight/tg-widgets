@@ -233,6 +233,79 @@ async function run() {
     w.destroy();
   }
 
+  // ── 6c. Visitor location picker (multiple locations) ─────────────────
+  console.log('Location picker — visitor can switch');
+  {
+    const { win } = makeDom();
+    const urls = [];
+    win.fetch = (url) => { urls.push(url); return Promise.resolve({ ok: true, json: async () => ({ code: 200, status: 'OK', data: aladhanData() }) }); };
+    freezeClock(win, 14, 0, 0, 2026, 7, 6);
+    const { el, w } = await mount(win, {
+      locations: [
+        { mode: 'city', city: 'Makkah', country: 'Saudi Arabia', label: 'Makkah' },
+        { mode: 'city', city: 'Madinah', country: 'Saudi Arabia', label: 'Madinah' },
+        { mode: 'city', city: 'London', country: 'United Kingdom', label: 'London' },
+      ],
+    });
+    const sel = el.shadowRoot.querySelector('.tgpt-picker');
+    ok('a picker dropdown is rendered', !!sel);
+    ok('picker has all three locations', sel && sel.querySelectorAll('option').length === 3);
+    ok('first location is selected and fetched', urls[0] && urls[0].includes('city=Makkah'));
+    // Visitor switches to Madinah.
+    sel.value = '1';
+    sel.dispatchEvent(new win.Event('change'));
+    await delay(20);
+    ok('switching the picker fetches the new city', urls.some(u => u.includes('city=Madinah')));
+    w.destroy();
+  }
+  {
+    // Single location + no visitor location → no picker.
+    const { win } = makeDom();
+    win.fetch = () => Promise.resolve({ ok: true, json: async () => ({ code: 200, status: 'OK', data: aladhanData() }) });
+    freezeClock(win, 14, 0, 0, 2026, 7, 6);
+    const { el, w } = await mount(win, { location: { mode: 'city', city: 'London', country: 'United Kingdom' } });
+    ok('no picker when there is only one option', !el.shadowRoot.querySelector('.tgpt-picker'));
+    w.destroy();
+  }
+
+  // ── 6d. Browser location as the default ───────────────────────────────
+  console.log('Visitor location default + fallback');
+  {
+    const { win } = makeDom();
+    const urls = [];
+    win.fetch = (url) => { urls.push(url); return Promise.resolve({ ok: true, json: async () => ({ code: 200, status: 'OK', data: aladhanData() }) }); };
+    freezeClock(win, 14, 0, 0, 2026, 7, 6);
+    // Grant geolocation.
+    Object.defineProperty(win.navigator, 'geolocation', {
+      configurable: true,
+      value: { getCurrentPosition: (okCb) => okCb({ coords: { latitude: 21.42, longitude: 39.83 } }) },
+    });
+    const { el, w } = await mount(win, {
+      useVisitorLocation: true,
+      locations: [{ mode: 'city', city: 'London', country: 'United Kingdom', label: 'London' }],
+    });
+    ok('defaults to the browser location (coords fetch)', urls[0] && urls[0].includes('latitude=21.42'));
+    ok('picker offers a "Near me" option', /Near me/.test(el.shadowRoot.innerHTML));
+    w.destroy();
+  }
+  {
+    // Geolocation denied → falls back to the first configured place.
+    const { win } = makeDom();
+    const urls = [];
+    win.fetch = (url) => { urls.push(url); return Promise.resolve({ ok: true, json: async () => ({ code: 200, status: 'OK', data: aladhanData() }) }); };
+    freezeClock(win, 14, 0, 0, 2026, 7, 6);
+    Object.defineProperty(win.navigator, 'geolocation', {
+      configurable: true,
+      value: { getCurrentPosition: (okCb, errCb) => errCb({ code: 1, message: 'denied' }) },
+    });
+    const { w } = await mount(win, {
+      useVisitorLocation: true,
+      locations: [{ mode: 'city', city: 'Makkah', country: 'Saudi Arabia', label: 'Makkah' }],
+    });
+    ok('falls back to the configured place on deny', urls.some(u => u.includes('city=Makkah')) && !urls.some(u => u.includes('latitude=')));
+    w.destroy();
+  }
+
   // ── 7. HTML escaping of the location label ────────────────────────────
   console.log('Security — label escaping');
   {

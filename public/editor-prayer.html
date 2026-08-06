@@ -77,6 +77,17 @@
       display: inline-flex; align-items: center; gap: 6px; transition: all .15s ease; }
     .pt-btn:hover { background: var(--tgse-hover); border-color: var(--tgse-border-strong); }
 
+    /* location list rows */
+    .pt-loc-row { border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md); padding: 10px; margin-bottom: 8px; background: var(--tgse-panel); }
+    .pt-loc-head { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+    .pt-loc-head .pt-input { flex: 1; }
+    .pt-loc-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .pt-loc-ico { width: 34px; height: 36px; flex: 0 0 34px; border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-sm);
+      background: var(--tgse-panel); color: var(--tgse-ink-3); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+    .pt-loc-ico:hover { background: var(--tgse-hover); color: var(--tgse-ink); }
+    .pt-loc-ico.pt-loc-del:hover { color: var(--tgse-danger); border-color: var(--tgse-danger); }
+    .pt-loc-ico:disabled { opacity: .4; cursor: not-allowed; }
+
     .pt-tune-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
     .pt-tune-cell { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
     .pt-tune-cell label { font-size: 12px; color: var(--tgse-ink-2); font-weight: 500; }
@@ -230,57 +241,29 @@
             <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="tgse-section-body">
-            <div class="tgse-field">
-              <label class="tgse-field-label">How to set the location</label>
-              <div class="pt-seg" role="group" aria-label="Location mode" id="segLocMode">
-                <button type="button" data-mode="city" aria-pressed="true">City &amp; country</button>
-                <button type="button" data-mode="coords" aria-pressed="false">Coordinates</button>
-              </div>
-            </div>
-
-            <div id="cityFields">
-              <div class="tgse-field">
-                <label class="tgse-field-label">City</label>
-                <input class="pt-input" id="city" placeholder="e.g. Makkah" maxlength="80" autocomplete="off">
-              </div>
-              <div class="tgse-field">
-                <label class="tgse-field-label">Country</label>
-                <input class="pt-input" id="country" placeholder="e.g. Saudi Arabia" maxlength="80" autocomplete="off">
-              </div>
-            </div>
-
-            <div id="coordsFields" hidden>
-              <div class="tgse-field-row">
-                <div class="tgse-field" style="flex:1">
-                  <label class="tgse-field-label">Latitude</label>
-                  <input class="pt-input" id="lat" placeholder="21.4225" inputmode="decimal">
-                </div>
-                <div class="tgse-field" style="flex:1">
-                  <label class="tgse-field-label">Longitude</label>
-                  <input class="pt-input" id="lng" placeholder="39.8262" inputmode="decimal">
-                </div>
-              </div>
-            </div>
-
-            <div class="tgse-field">
-              <label class="tgse-field-label">Display label (optional)</label>
-              <input class="pt-input" id="locLabel" placeholder="Overrides the shown name, e.g. Makkah al-Mukarramah" maxlength="80">
-            </div>
-
-            <div class="tgse-field">
-              <button type="button" class="pt-btn" id="btnTest">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                Test lookup
-              </button>
-              <div class="pt-help">Checks the location against Aladhan and shows today's Fajr time.</div>
-            </div>
-
             <div class="pt-row">
               <div>
-                <div class="pt-row-label">Use the visitor's location</div>
-                <div class="pt-row-help">Asks the visitor's browser for permission. Falls back to the location above if they decline.</div>
+                <div class="pt-row-label">Let visitors switch location</div>
+                <div class="pt-row-help">Adds a dropdown on the widget so visitors can pick from your locations below.</div>
+              </div>
+              <button type="button" class="pt-toggle" id="togPicker" role="switch" aria-checked="true"></button>
+            </div>
+            <div class="pt-row">
+              <div>
+                <div class="pt-row-label">Start from the visitor's location</div>
+                <div class="pt-row-help">Asks the browser for permission and shows their local times first. Falls back to the first location below if they decline.</div>
               </div>
               <button type="button" class="pt-toggle" id="togVisitor" role="switch" aria-checked="false"></button>
+            </div>
+
+            <div class="tgse-field" style="margin-top:14px">
+              <label class="tgse-field-label">Locations</label>
+              <div id="locList"></div>
+              <button type="button" class="pt-btn" id="btnAddLoc" style="width:100%;justify-content:center;margin-top:2px">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add location
+              </button>
+              <div class="pt-help">The first location is the default (unless "start from the visitor's location" is on). The check button tests a location against Aladhan.</div>
             </div>
           </div>
         </div>
@@ -510,6 +493,8 @@
       fontFamily: '',
       layout: 'card',
       location: { mode: 'city', city: 'London', country: 'United Kingdom', lat: null, lng: null, label: '' },
+      locations: [{ mode: 'city', city: 'London', country: 'United Kingdom', lat: null, lng: null, label: '' }],
+      showLocationPicker: true,
       useVisitorLocation: false,
       method: 3,
       school: 0,
@@ -586,6 +571,7 @@
       b.addEventListener('click', () => {
         C = Object.assign(C, clone(t.patch));
         C.location = Object.assign(C.location, t.patch.location);
+        C.locations = [clone(t.patch.location)];
         closeTemplates(); hydrate(); change();
       });
       grid.appendChild(b);
@@ -609,15 +595,9 @@
     $('radius').value = C.radius; $('radiusVal').textContent = C.radius + 'px';
     setSeg('segLayout', 'data-layout', C.layout);
 
-    setSeg('segLocMode', 'data-mode', C.location.mode);
-    $('cityFields').hidden = C.location.mode !== 'city';
-    $('coordsFields').hidden = C.location.mode !== 'coords';
-    $('city').value = C.location.city || '';
-    $('country').value = C.location.country || '';
-    $('lat').value = C.location.lat != null ? C.location.lat : '';
-    $('lng').value = C.location.lng != null ? C.location.lng : '';
-    $('locLabel').value = C.location.label || '';
+    setToggle('togPicker', C.showLocationPicker);
     setToggle('togVisitor', C.useVisitorLocation);
+    renderLocList();
 
     $('method').value = String(C.method);
     setSeg('segSchool', 'data-school', C.school);
@@ -646,21 +626,11 @@
 
     // segmented groups
     segClick('segLayout', 'data-layout', v => { C.layout = v; change(); });
-    segClick('segLocMode', 'data-mode', v => {
-      C.location.mode = v;
-      $('cityFields').hidden = v !== 'city';
-      $('coordsFields').hidden = v !== 'coords';
-      change(400);
-    });
     segClick('segSchool', 'data-school', v => { C.school = parseInt(v, 10); change(); });
     segClick('segFormat', 'data-fmt', v => { C.hourFormat = v; change(); });
 
-    // location text (debounced — each keystroke could otherwise refetch)
-    $('city').addEventListener('input', e => { C.location.city = e.target.value; change(500); });
-    $('country').addEventListener('input', e => { C.location.country = e.target.value; change(500); });
-    $('lat').addEventListener('input', e => { C.location.lat = e.target.value === '' ? null : parseFloat(e.target.value); change(500); });
-    $('lng').addEventListener('input', e => { C.location.lng = e.target.value === '' ? null : parseFloat(e.target.value); change(500); });
-    $('locLabel').addEventListener('input', e => { C.location.label = e.target.value; change(300); });
+    // location list
+    $('btnAddLoc').addEventListener('click', addLoc);
 
     // method + latAdj
     $('method').addEventListener('change', e => { C.method = parseInt(e.target.value, 10); change(); });
@@ -675,14 +645,12 @@
     });
 
     // toggles
+    toggleClick('togPicker', on => { C.showLocationPicker = on; change(); });
     toggleClick('togVisitor', on => { C.useVisitorLocation = on; change(); });
     toggleClick('togSunrise', on => { C.showSunrise = on; change(); });
     toggleClick('togCountdown', on => { C.showCountdown = on; change(); });
     toggleClick('togHijri', on => { C.showHijri = on; change(); });
     toggleClick('togAttr', on => { C.attribution = on; change(); });
-
-    // test lookup
-    $('btnTest').addEventListener('click', testLookup);
 
     // templates modal close
     $('tplClose').addEventListener('click', closeTemplates);
@@ -709,32 +677,73 @@
     });
   }
 
-  /* ---------- test lookup (direct Aladhan call, same as the widget) ---------- */
-  async function testLookup() {
-    const btn = $('btnTest');
-    btn.disabled = true;
+  /* ---------- location list ---------- */
+  function escA(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  function renderLocList() {
+    const wrap = $('locList');
+    if (!Array.isArray(C.locations) || !C.locations.length) {
+      C.locations = [{ mode: 'city', city: '', country: '', lat: null, lng: null, label: '' }];
+    }
+    wrap.innerHTML = '';
+    C.locations.forEach((loc, i) => {
+      const row = document.createElement('div');
+      row.className = 'pt-loc-row';
+      row.innerHTML =
+        '<div class="pt-loc-head">' +
+          '<input class="pt-input pt-loc-label" placeholder="Label (optional)" maxlength="60" value="' + escA(loc.label || '') + '">' +
+          '<button type="button" class="pt-loc-ico pt-loc-test" title="Test this location">' +
+            '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
+          '</button>' +
+          '<button type="button" class="pt-loc-ico pt-loc-del" title="Remove"' + (C.locations.length <= 1 ? ' disabled' : '') + '>' +
+            '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>' +
+          '</button>' +
+        '</div>' +
+        '<div class="pt-loc-fields">' +
+          '<input class="pt-input pt-loc-city" placeholder="City" maxlength="80" autocomplete="off" value="' + escA(loc.city || '') + '">' +
+          '<input class="pt-input pt-loc-country" placeholder="Country" maxlength="80" autocomplete="off" value="' + escA(loc.country || '') + '">' +
+        '</div>';
+      row.querySelector('.pt-loc-label').addEventListener('input', e => { C.locations[i].label = e.target.value; change(400); });
+      row.querySelector('.pt-loc-city').addEventListener('input', e => { C.locations[i].city = e.target.value; change(500); });
+      row.querySelector('.pt-loc-country').addEventListener('input', e => { C.locations[i].country = e.target.value; change(500); });
+      const testBtn = row.querySelector('.pt-loc-test');
+      testBtn.addEventListener('click', () => testLoc(i, testBtn));
+      const del = row.querySelector('.pt-loc-del');
+      if (!del.disabled) del.addEventListener('click', () => removeLoc(i));
+      wrap.appendChild(row);
+    });
+  }
+
+  function addLoc() {
+    C.locations.push({ mode: 'city', city: '', country: '', lat: null, lng: null, label: '' });
+    renderLocList(); change();
+  }
+  function removeLoc(i) {
+    C.locations.splice(i, 1);
+    if (!C.locations.length) C.locations = [{ mode: 'city', city: '', country: '', lat: null, lng: null, label: '' }];
+    renderLocList(); change();
+  }
+
+  /* ---------- per-location test (direct Aladhan call, same as the widget) ---------- */
+  async function testLoc(i, btn) {
+    const loc = C.locations[i] || {};
+    if (!loc.city) { tgse.toast('Enter a city first', 'err'); return; }
+    if (btn) btn.disabled = true;
     try {
       const d = new Date();
       const path = String(d.getDate()).padStart(2, '0') + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + d.getFullYear();
-      let url;
-      if (C.location.mode === 'coords') {
-        if (!Number.isFinite(parseFloat(C.location.lat)) || !Number.isFinite(parseFloat(C.location.lng))) { tgse.toast('Enter a latitude and longitude first', 'err'); return; }
-        url = 'https://api.aladhan.com/v1/timings/' + path + '?latitude=' + encodeURIComponent(C.location.lat) + '&longitude=' + encodeURIComponent(C.location.lng) + '&method=' + C.method + '&school=' + C.school;
-      } else {
-        if (!C.location.city) { tgse.toast('Enter a city first', 'err'); return; }
-        url = 'https://api.aladhan.com/v1/timingsByCity/' + path + '?city=' + encodeURIComponent(C.location.city) + '&country=' + encodeURIComponent(C.location.country || '') + '&method=' + C.method + '&school=' + C.school;
-      }
+      const url = 'https://api.aladhan.com/v1/timingsByCity/' + path + '?city=' + encodeURIComponent(loc.city) + '&country=' + encodeURIComponent(loc.country || '') + '&method=' + C.method + '&school=' + C.school;
       const res = await fetch(url, { credentials: 'omit' });
       const json = await res.json();
       if (json && json.code === 200 && json.data && json.data.timings && json.data.timings.Fajr) {
-        tgse.toast('Found — Fajr today is ' + json.data.timings.Fajr, 'ok');
+        tgse.toast(loc.city + ' found — Fajr today is ' + json.data.timings.Fajr, 'ok');
       } else {
-        tgse.toast('No prayer times for that location. Check the spelling.', 'err');
+        tgse.toast('No prayer times for "' + loc.city + '". Check the spelling.', 'err');
       }
     } catch (e) {
       tgse.toast('Lookup failed — please try again', 'err');
     } finally {
-      btn.disabled = false;
+      if (btn) btn.disabled = false;
     }
   }
 
@@ -746,8 +755,12 @@
       .then(r => r.ok ? r.json() : null)
       .then(d => {
         if (d && d.config) C = Object.assign(defaultConfig(), d.config);
-        if (d && d.config && d.config.location) C.location = Object.assign(defaultConfig().location, d.config.location);
         if (d && d.config && d.config.tune) C.tune = Object.assign(defaultConfig().tune, d.config.tune);
+        // Location list — migrate a legacy single-location config into the list.
+        if (!Array.isArray(C.locations) || !C.locations.length) {
+          const base = (d && d.config && d.config.location) ? d.config.location : defaultConfig().location;
+          C.locations = [Object.assign({ mode: 'city', city: '', country: '', lat: null, lng: null, label: '' }, base)];
+        }
         if (d && d.name) $('name-input').value = d.name;
         hydrate(); render();
       })
