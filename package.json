@@ -74,6 +74,7 @@
     "test:form-design": "node test/form-design-smoke.mjs",
     "test:form-editor": "node test/form-editor-smoke.mjs",
     "test:form-logic": "node test/form-logic-smoke.mjs",
+    "test:prayer": "node test/prayer-times-smoke.mjs",
     "test:testimonials-reveal": "node test/testimonials-reveal-smoke.mjs",
     "test:loader-export": "node test/loader-export-smoke.mjs"
   },
