@@ -24,9 +24,27 @@
   .note-card { border:1px dashed var(--tgse-border-strong); border-radius:var(--tgse-radius-md); padding:12px 13px; font-size:12.5px; color:var(--tgse-ink-2); background:var(--tgse-panel-2); line-height:1.5; }
   .note-card strong { color:var(--tgse-ink); }
 
+  /* Per-editor buttons (not the shell chrome .tgse-btn) */
+  .btn { font:inherit; font-size:13px; font-weight:600; border-radius:var(--tgse-radius-sm); border:1px solid var(--tgse-border); background:var(--tgse-panel); color:var(--tgse-ink); padding:8px 12px; cursor:pointer; }
+  .btn-secondary { background:var(--tgse-panel-2); }
+  .btn-secondary:hover { background:var(--tgse-hover); }
+  .btn-sm { padding:6px 10px; font-size:12px; }
+
+  /* Itinerary repeatable rows */
+  .itin-row { border:1px solid var(--tgse-border); border-radius:var(--tgse-radius-md); padding:10px; margin-bottom:10px; background:var(--tgse-panel-2); }
+  .itin-row .input { margin-bottom:6px; }
+  .itin-row .itin-del { float:right; border:0; background:transparent; color:var(--tgse-ink-3); cursor:pointer; font-size:12px; padding:2px 4px; }
+  .itin-row .itin-del:hover { color:var(--tgse-danger); }
+
   /* Preview stage — a calm fake page behind the booking card */
+  .pv-switch { display:flex; gap:4px; padding:8px 12px; background:var(--tgse-panel); border-bottom:1px solid var(--tgse-border); }
+  .pv-switch button { font:inherit; font-size:12px; font-weight:600; border:1px solid var(--tgse-border); background:var(--tgse-panel); color:var(--tgse-ink-2); padding:5px 12px; border-radius:999px; cursor:pointer; }
+  .pv-switch button.is-on { background:var(--tgse-brand); border-color:var(--tgse-brand); color:#fff; }
   .stage { min-height:100%; padding:40px 24px 64px; background:linear-gradient(180deg, #F8FAFC 0%, #EEF2F7 100%); }
+  .stage.stage--page { padding:0; background:#fff; }
   .tgse-frame[data-vp="mobile"] .stage { padding:20px 10px 40px; }
+  .tgse-frame[data-vp="mobile"] .stage.stage--page { padding:0; }
+  [hidden] { display:none !important; }
 </style>
 </head>
 <body>
@@ -75,6 +93,7 @@
 
     <nav class="tgse-tabs" role="tablist">
       <button data-tab="content" role="tab" aria-selected="true">Trip</button>
+      <button data-tab="page" role="tab" aria-selected="false">Tour page</button>
       <button data-tab="design" role="tab" aria-selected="false">Design</button>
       <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
     </nav>
@@ -166,6 +185,112 @@
               <input type="date" class="input" id="trip-balance-due">
               <div class="hint">Travellers pay the deposit to book, then settle the rest by this date.</div>
             </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== TOUR PAGE TAB ===== -->
+      <div class="tgse-panel" data-tab="page">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <span class="tgse-section-label">Overview</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="page-overview">Full description</label>
+              <textarea class="textarea" id="page-overview" maxlength="6000" placeholder="Tell the full story of the trip. This shows near the top of the tour page."></textarea>
+              <div class="hint">Falls back to the short trip description if left empty.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <span class="tgse-section-label">Highlights</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="page-highlights">Highlights</label>
+              <textarea class="textarea" id="page-highlights" maxlength="2600" placeholder="One highlight per line, e.g.&#10;Twice-daily yoga with sea views&#10;Caldera sunset boat trip"></textarea>
+              <div class="hint">One per line, up to 12.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <span class="tgse-section-label">What’s included</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="page-included">Included</label>
+              <textarea class="textarea" id="page-included" maxlength="6000" placeholder="One item per line"></textarea>
+              <div class="hint">One per line.</div>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="page-excluded">Not included</label>
+              <textarea class="textarea" id="page-excluded" maxlength="6000" placeholder="One item per line"></textarea>
+              <div class="hint">One per line.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            <span class="tgse-section-label">Itinerary</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div id="itin-rows"></div>
+            <button type="button" class="btn btn-secondary btn-sm" id="itin-add">+ Add a day</button>
+            <div class="hint">Each day shows as a step on the tour page. Leave empty to hide the itinerary.</div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            <span class="tgse-section-label">Gallery</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="page-gallery">Image URLs</label>
+              <textarea class="textarea" id="page-gallery" maxlength="6000" placeholder="One image URL per line (https://…)"></textarea>
+              <div class="hint">One URL per line, up to 12.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span class="tgse-section-label">Enquiry form</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="page-enq-heading">Form heading</label>
+              <input type="text" class="input" id="page-enq-heading" maxlength="120" placeholder="Enquire about this trip">
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="page-enq-intro">Intro line</label>
+              <textarea class="textarea" id="page-enq-intro" maxlength="400" placeholder="Leave your details and we will be in touch."></textarea>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="page-enq-button">Button label</label>
+              <input type="text" class="input" id="page-enq-button" maxlength="40" placeholder="Send enquiry">
+            </div>
+            <div class="note-card">Enquiries land in your Travelgenix inbox and email, the same as your other lead widgets. Taking a deposit online arrives with the payments update.</div>
           </div>
         </div>
 
@@ -299,7 +424,14 @@
 
     <div class="tgse-canvas">
       <div class="tgse-frame" data-vp="desktop" id="pv-frame">
-        <div class="stage"><div data-tg-widget="trips" id="widget-mount"></div></div>
+        <div class="pv-switch" role="group" aria-label="Preview mode">
+          <button type="button" data-pv="card" class="is-on">Booking card</button>
+          <button type="button" data-pv="page">Full tour page</button>
+        </div>
+        <div class="stage" id="pv-stage">
+          <div id="mount-card"></div>
+          <div id="mount-page" hidden></div>
+        </div>
       </div>
     </div>
   </section>
@@ -308,6 +440,7 @@
 
 <script src="/editor-shell.js"></script>
 <script src="/widget-trips.js"></script>
+<script src="/widget-trips-page.js"></script>
 
 <script>
   /* Group Trips editor — per-editor logic on the unified shell. */
@@ -329,6 +462,23 @@
       balanceDueDate: '2027-03-10',
       spotsHeldMinutes: 30,
     },
+    // Rich content for the full tour page (widget-trips-page.js).
+    details: {
+      overview: 'Seven nights on the caldera rim, with twice-daily yoga, sunrise hikes and long slow dinners under the stars. Small group, all levels welcome, led by our own teachers.',
+      highlights: ['Twice-daily yoga with sea views', 'Caldera sunset boat trip', 'Village food tour in Oia', 'Small group, all levels welcome'],
+      included: ['7 nights en-suite accommodation', 'Daily breakfast and four dinners', 'All yoga sessions and equipment', 'Airport transfers on group days'],
+      excluded: ['Flights to Santorini', 'Travel insurance', 'Lunches and three evening meals'],
+      itinerary: [
+        { title: 'Day 1 — Arrival and welcome', text: 'Group transfer from the airport, settle in, evening welcome dinner overlooking the caldera.' },
+        { title: 'Day 2 — Finding your feet', text: 'Morning flow, free afternoon to explore Fira, gentle restorative session at sunset.' },
+      ],
+      gallery: [],
+    },
+    enquiry: {
+      heading: 'Enquire about this trip',
+      intro: 'Leave your details and we will be in touch about availability and any questions.',
+      buttonText: 'Send enquiry',
+    },
     payments: {
       // Written by the Stripe Connect flow (GT-4), never typed by hand. The
       // booking API reads it server-side from the saved config only.
@@ -344,7 +494,11 @@
     emails: { fromName: '', replyTo: '', footer: '' },
   };
 
-  let widgetInst = null;
+  // Two live preview instances — the compact card and the full tour page.
+  // Each owns its own host element so attachShadow only ever fires once per host.
+  let cardInst = null;
+  let pageInst = null;
+  let previewMode = 'card';
 
   const shell = tgse.init({
     widgetType: 'Group Trips',
@@ -376,18 +530,36 @@
   }
 
   // ── Preview ────────────────────────────────────────────────
+  // Only the active preview is (re)built, so editing while on the card never
+  // pays for a full-page re-render. Switching rebuilds the newly-shown one
+  // from current C. Mount hosts carry no data-tg-widget attribute, so neither
+  // widget's auto-init claims them — we construct both by hand.
   function render() {
-    const mount = document.getElementById('widget-mount');
-    // The mount carries data-tg-widget, so the widget's auto-init may have
-    // claimed it (empty config) before this runs. Adopt that instance rather
-    // than constructing a second one — attachShadow can only happen once.
-    if (!widgetInst) widgetInst = mount._tgWidget || null;
-    if (widgetInst) {
-      widgetInst.update(C);
-      return;
+    if (previewMode === 'page') {
+      const host = document.getElementById('mount-page');
+      if (pageInst) pageInst.update(C);
+      else pageInst = new window.TGTripsPageWidget(host, C);
+    } else {
+      const host = document.getElementById('mount-card');
+      if (cardInst) cardInst.update(C);
+      else cardInst = new window.TGTripsWidget(host, C);
     }
-    widgetInst = new window.TGTripsWidget(mount, C);
   }
+
+  function setPreviewMode(mode) {
+    previewMode = (mode === 'page') ? 'page' : 'card';
+    document.getElementById('mount-card').hidden = previewMode !== 'card';
+    document.getElementById('mount-page').hidden = previewMode !== 'page';
+    document.getElementById('pv-stage').classList.toggle('stage--page', previewMode === 'page');
+    document.querySelectorAll('.pv-switch button').forEach(b => {
+      b.classList.toggle('is-on', b.getAttribute('data-pv') === previewMode);
+    });
+    render();
+  }
+
+  document.querySelectorAll('.pv-switch button').forEach(b => {
+    b.addEventListener('click', () => setPreviewMode(b.getAttribute('data-pv')));
+  });
 
   // ── Money helpers: inputs show major units, config stores pence ──
   const SYMS = { gbp: '£', eur: '€', usd: '$' };
@@ -467,6 +639,50 @@
     shell.markDirty(); render();
   });
 
+  // ── Tour page content wiring ──────────────────────────────
+  function linesToList(s) { return String(s || '').split('\n').map(x => x.trim()).filter(Boolean); }
+  function listToLines(a) { return Array.isArray(a) ? a.join('\n') : ''; }
+
+  // Direct text fields
+  $('page-overview').addEventListener('input', () => { C.details.overview = $('page-overview').value; shell.markDirty(); render(); });
+  $('page-enq-heading').addEventListener('input', () => { C.enquiry.heading = $('page-enq-heading').value; shell.markDirty(); render(); });
+  $('page-enq-intro').addEventListener('input', () => { C.enquiry.intro = $('page-enq-intro').value; shell.markDirty(); render(); });
+  $('page-enq-button').addEventListener('input', () => { C.enquiry.buttonText = $('page-enq-button').value; shell.markDirty(); render(); });
+
+  // Line-per-item list fields
+  $('page-highlights').addEventListener('input', () => { C.details.highlights = linesToList($('page-highlights').value); shell.markDirty(); render(); });
+  $('page-included').addEventListener('input', () => { C.details.included = linesToList($('page-included').value); shell.markDirty(); render(); });
+  $('page-excluded').addEventListener('input', () => { C.details.excluded = linesToList($('page-excluded').value); shell.markDirty(); render(); });
+  $('page-gallery').addEventListener('input', () => { C.details.gallery = linesToList($('page-gallery').value); shell.markDirty(); render(); });
+
+  // Itinerary — repeatable rows, built via DOM (no innerHTML with user text).
+  function readItinFromDom() {
+    const rows = Array.from(document.querySelectorAll('#itin-rows .itin-row'));
+    C.details.itinerary = rows.map(r => ({
+      title: r.querySelector('[data-k="title"]').value.trim(),
+      text: r.querySelector('[data-k="text"]').value.trim(),
+    })).filter(it => it.title || it.text);
+  }
+  function makeItinRow(it) {
+    const row = document.createElement('div'); row.className = 'itin-row';
+    const del = document.createElement('button'); del.type = 'button'; del.className = 'itin-del'; del.textContent = 'Remove';
+    const title = document.createElement('input'); title.className = 'input'; title.setAttribute('data-k', 'title'); title.maxLength = 160; title.placeholder = 'Day title'; title.value = (it && it.title) || '';
+    const text = document.createElement('textarea'); text.className = 'textarea'; text.setAttribute('data-k', 'text'); text.maxLength = 1200; text.placeholder = 'What happens this day'; text.value = (it && it.text) || '';
+    const onIn = () => { readItinFromDom(); shell.markDirty(); render(); };
+    del.addEventListener('click', () => { row.remove(); onIn(); });
+    title.addEventListener('input', onIn); text.addEventListener('input', onIn);
+    row.appendChild(del); row.appendChild(title); row.appendChild(text);
+    return row;
+  }
+  function buildItinRows() {
+    const box = document.getElementById('itin-rows'); box.innerHTML = '';
+    (C.details.itinerary || []).forEach(it => box.appendChild(makeItinRow(it)));
+  }
+  $('itin-add').addEventListener('click', () => {
+    document.getElementById('itin-rows').appendChild(makeItinRow({ title: '', text: '' }));
+    shell.markDirty();
+  });
+
   // ── State → UI (after a config load) ──────────────────────
   function syncUIFromState() {
     $('trip-title').value = C.trip.title || '';
@@ -486,6 +702,31 @@
     $('radius-range').value = C.design.radius;
     $('radius-val').textContent = C.design.radius + 'px';
     syncCurrencySymbols();
+
+    // Tour page content
+    const dt = C.details || {};
+    $('page-overview').value = dt.overview || '';
+    $('page-highlights').value = listToLines(dt.highlights);
+    $('page-included').value = listToLines(dt.included);
+    $('page-excluded').value = listToLines(dt.excluded);
+    $('page-gallery').value = listToLines(dt.gallery);
+    const eq = C.enquiry || {};
+    $('page-enq-heading').value = eq.heading || '';
+    $('page-enq-intro').value = eq.intro || '';
+    $('page-enq-button').value = eq.buttonText || '';
+    buildItinRows();
+  }
+
+  // A saved trip should show ITS content only. Clear the starter-template
+  // details/enquiry before overlaying a loaded config, so an older trip with
+  // no details block doesn't inherit the Santorini sample content.
+  function resetContentForLoad() {
+    C.details = { overview: '', highlights: [], included: [], excluded: [], itinerary: [], gallery: [] };
+    C.enquiry = {
+      heading: 'Enquire about this trip',
+      intro: 'Leave your details and we will be in touch about availability and any questions.',
+      buttonText: 'Send enquiry',
+    };
   }
 
   function loadFromUrl() {
@@ -495,7 +736,7 @@
     fetch('/api/widget-config?id=' + encodeURIComponent(wId))
       .then(r => r.ok ? r.json() : null)
       .then(d => {
-        if (d && d.config) C = deepMerge(C, d.config);
+        if (d && d.config) { resetContentForLoad(); C = deepMerge(C, d.config); }
         if (d && d.name) document.getElementById('name-input').value = d.name;
         syncUIFromState(); render();
       })

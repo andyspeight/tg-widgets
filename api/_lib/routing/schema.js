@@ -27,6 +27,9 @@ export const KNOWN_WIDGETS = [
   'quiz',
   'calculator',
   'booking-confirmation',
+  // Group Trips enquiry — a traveller asking about a group trip. Party size
+  // maps to travel.adults; the trip title + free-text message ride in custom.
+  'trips',
 ];
 
 export const KNOWN_DESTINATIONS = [

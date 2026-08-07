@@ -351,6 +351,10 @@
       "destination": "/demo-trips.html"
     },
     {
+      "source": "/demo-trips-page",
+      "destination": "/demo-trips-page.html"
+    },
+    {
       "source": "/demo-newsletter",
       "destination": "/demo-newsletter.html"
     },
@@ -1362,6 +1366,23 @@
     },
     {
       "source": "/widget-trips.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-trips-page.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",

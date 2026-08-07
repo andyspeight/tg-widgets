@@ -210,8 +210,10 @@ async function newPage() {
     localStorage.setItem('tg_user', JSON.stringify({ email: 'smoke@test.local', plan: 'Bespoke' }));
   });
   await page.goto(`${BASE}/editor-trips.html`, { waitUntil: 'load', timeout: 20000 });
+  // The card preview mounts in #mount-card (the editor now also has a full-page
+  // preview in #mount-page behind a Card/Page switch).
   await page.waitForFunction(() => {
-    const m = document.getElementById('widget-mount');
+    const m = document.getElementById('mount-card');
     return !!(m && m.shadowRoot && m.shadowRoot.querySelector('[data-role="title"]'));
   }, { timeout: 8000 }).catch(() => {});
 
@@ -219,17 +221,39 @@ async function newPage() {
     url: location.pathname,
     sidebar: !!document.querySelector('.tgse-sidebar'),
     saveBtn: !!document.getElementById('btn-save'),
-    previewTitle: document.getElementById('widget-mount')?.shadowRoot?.querySelector('[data-role="title"]')?.textContent || '',
-    previewPrice: document.getElementById('widget-mount')?.shadowRoot?.querySelector('[data-role="price"]')?.textContent || '',
+    previewTitle: document.getElementById('mount-card')?.shadowRoot?.querySelector('[data-role="title"]')?.textContent || '',
+    previewPrice: document.getElementById('mount-card')?.shadowRoot?.querySelector('[data-role="price"]')?.textContent || '',
     titleField: document.getElementById('trip-title')?.value || '',
     priceField: document.getElementById('trip-price')?.value || '',
+    hasPageTab: !!document.querySelector('.tgse-tabs button[data-tab="page"]'),
+    hasPvSwitch: document.querySelectorAll('.pv-switch button').length === 2,
   }));
   ok(ed.url === '/editor-trips.html', 'editor: signed-in boot stays on the editor');
   ok(ed.sidebar && ed.saveBtn, 'editor: shell chrome rendered');
-  ok(ed.previewTitle === 'Santorini Yoga Retreat 2027', `editor: live preview renders the starter trip (got "${ed.previewTitle}")`);
+  ok(ed.previewTitle === 'Santorini Yoga Retreat 2027', `editor: card preview renders the starter trip (got "${ed.previewTitle}")`);
   ok(ed.previewPrice === '£1,899', `editor: preview price from pence storage (got "${ed.previewPrice}")`);
   ok(ed.titleField === 'Santorini Yoga Retreat 2027', 'editor: sidebar fields synced from config');
   ok(ed.priceField === '1899', `editor: price input shows major units (got "${ed.priceField}")`);
+  ok(ed.hasPageTab, 'editor: Tour page tab present');
+  ok(ed.hasPvSwitch, 'editor: card/page preview switch present');
+
+  // Switching to the full-page preview mounts the page widget with its enquiry form.
+  await page.click('.pv-switch button[data-pv="page"]');
+  await page.waitForFunction(() => {
+    const m = document.getElementById('mount-page');
+    return !!(m && !m.hidden && m.shadowRoot && m.shadowRoot.querySelector('[data-role="form"]'));
+  }, { timeout: 6000 }).catch(() => {});
+  const pagePrev = await page.evaluate(() => {
+    const sr = document.getElementById('mount-page')?.shadowRoot;
+    return {
+      title: sr?.querySelector('[data-role="title"]')?.textContent || '',
+      hasForm: !!sr?.querySelector('[data-role="form"]'),
+      cardHidden: !!document.getElementById('mount-card')?.hidden,
+    };
+  });
+  ok(pagePrev.title === 'Santorini Yoga Retreat 2027', `editor: page preview renders the trip (got "${pagePrev.title}")`);
+  ok(pagePrev.hasForm, 'editor: page preview includes the enquiry form');
+  ok(pagePrev.cardHidden, 'editor: switching to page hides the card preview');
   ok(errors.length === 0, 'editor: no script errors (' + errors.join(' | ') + ')');
   await page.close();
 }
