@@ -41,6 +41,10 @@ const FIELD_CAPS = {
   country: 80, region: 80, resort: 100, property: 120,
   stars: 40, board: 60, nights: 20, datemode: 60, period: 120,
   origin: 80, airline: 80, flighttype: 40,
+  // Type-specific structured fields.
+  destination: 80, departurePort: 80, station: 80,
+  shipName: 120, cruiseLine: 80, cabinType: 40, cabinClass: 40,
+  railClass: 40, operator: 120, railOperator: 80, groupSize: 60,
   price: 20, was: 20, basis: 40, deposit: 20,
   badge: 40, badgeAmount: 20, urgency: 120, bookby: 60, avail: 120,
   mapAddress: 200, mapLat: 20, mapLng: 20, mapStyle: 20,
@@ -67,7 +71,8 @@ const SECTIONS = {
 function cleanContext(raw) {
   const ctx = {};
   if (!raw || typeof raw !== 'object') return ctx;
-  const KEYS = { title: 120, type: 80, style: 80, country: 80, region: 80, resort: 100, property: 120, stars: 40, board: 60, nights: 20, period: 120, origin: 80, airline: 80, flighttype: 40 };
+  const KEYS = { title: 120, type: 80, style: 80, country: 80, region: 80, resort: 100, property: 120, stars: 40, board: 60, nights: 20, period: 120, origin: 80, airline: 80, flighttype: 40,
+    destination: 80, departurePort: 80, station: 80, shipName: 120, cruiseLine: 80, cabinType: 40, cabinClass: 40, railClass: 40, operator: 120, railOperator: 80, groupSize: 60 };
   for (const k of Object.keys(KEYS)) {
     if (typeof raw[k] === 'string') { const v = cleanStr(raw[k]).slice(0, KEYS[k]); if (v) ctx[k] = v; }
   }

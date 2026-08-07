@@ -95,6 +95,11 @@
   const DATE_MODES = ['Selected dates in a period', 'Fixed departure date', 'Flexible / call for dates'];
   const FLIGHT_TYPES = ['Direct', 'Connecting', 'Not included'];
   const PRICE_BASES = ['per person', 'per couple', 'per night', 'total holiday price'];
+  // Type-specific option lists, used by the per-type field layouts below.
+  const CRUISE_CABINS = ['Inside', 'Ocean view', 'Balcony', 'Suite'];
+  const CRUISE_FLIGHTS = ['Flights included', 'Cruise only', 'Fly-cruise'];
+  const FLIGHT_CLASSES = ['Economy', 'Premium economy', 'Business', 'First'];
+  const RAIL_CLASSES = ['Standard', 'First class', 'Sleeper', 'Observation car'];
   const BADGES = ['Save', 'Last minute', 'Exclusive', 'Best seller', 'Selling fast', 'Free child place', 'No badge'];
   const PROTECTIONS = ['ATOL protected', 'ABTA member', 'Both', 'Neither'];
   const DEFAULT_INCLUDES = [
@@ -134,6 +139,105 @@
     _default:               ['description', 'hotelDesc', 'resortDesc', 'countryDesc']
   };
   function contentKeysFor(type) { return TYPE_CONTENT[type] || TYPE_CONTENT._default; }
+
+  // ── Type-aware structured fields ──────────────────────────────────────────
+  // The two field sections between "The basics" and "Price" change with the
+  // offer type, so a cruise asks for the ship, the cabin and the ports and a
+  // flight-only asks for the route and cabin class, not a hotel and a board
+  // basis. Each type maps to exactly two sections (a "where" block and a core
+  // block) so the numbering (2 and 3) stays put. A key not in FIELDS below, or
+  // a type not in TYPE_FORM, falls back sensibly.
+  //
+  // FIELDS: the base spec for each field key. kind: 'text' | 'select' | 'num'
+  // (number with a unit suffix) | 'money'. list is the option set for selects,
+  // suffix the unit for 'num'. Layout entries may override label/ph/list.
+  const FIELDS = {
+    country:      { label: 'Country',              kind: 'text',   ph: 'Mexico' },
+    region:       { label: 'Region / area',        kind: 'text',   ph: 'Riviera Maya' },
+    resort:       { label: 'Resort / city',        kind: 'text',   ph: 'Costa Mujeres, Cancun' },
+    destination:  { label: 'Destination',          kind: 'text',   ph: 'Cancun (CUN)' },
+    origin:       { label: 'Departure airport(s)', kind: 'text',   ph: 'London Gatwick, Manchester' },
+    departurePort:{ label: 'Departure port',       kind: 'text',   ph: 'Southampton' },
+    station:      { label: 'Departure station',    kind: 'text',   ph: 'London St Pancras' },
+    property:     { label: 'Property name',         kind: 'text',   ph: 'Riu Palace Costa Mujeres' },
+    shipName:     { label: 'Ship',                  kind: 'text',   ph: 'Wonder of the Seas' },
+    cruiseLine:   { label: 'Cruise line',           kind: 'text',   ph: 'Royal Caribbean' },
+    operator:     { label: 'Tour operator',         kind: 'text',   ph: 'Riviera Travel' },
+    railOperator: { label: 'Rail operator',         kind: 'text',   ph: 'Eurostar, Belmond' },
+    stars:        { label: 'Star rating',           kind: 'select', list: STAR_RATINGS },
+    board:        { label: 'Board basis',           kind: 'select', list: BOARD_BASES },
+    cabinType:    { label: 'Cabin',                 kind: 'select', list: CRUISE_CABINS },
+    cabinClass:   { label: 'Cabin class',           kind: 'select', list: FLIGHT_CLASSES },
+    railClass:    { label: 'Class',                 kind: 'select', list: RAIL_CLASSES },
+    nights:       { label: 'Duration',              kind: 'num',    ph: '7', suffix: 'nights' },
+    days:         { label: 'Duration',              kind: 'num',    ph: '1', suffix: 'days' },
+    groupSize:    { label: 'Group size',            kind: 'text',   ph: 'Max 24 guests' },
+    datemode:     { label: 'Travel dates',          kind: 'select', list: DATE_MODES },
+    period:       { label: 'Travel period',         kind: 'text',   ph: 'Sep 2026 to Apr 2027' },
+    airline:      { label: 'Airline',               kind: 'text',   ph: 'TUI Airways' },
+    flighttype:   { label: 'Flights',               kind: 'select', list: FLIGHT_TYPES }
+  };
+
+  // Each type → [ whereSection, coreSection ]. A section is
+  // { h: heading, hint, keys: [ 'key' | { key, label?, ph?, list? } ] }.
+  const TYPE_FORM = {
+    'Package holiday (flight + hotel)': [
+      { h: 'Where & from where', hint: 'Destination plus the departure points this price is valid from.', keys: ['country', 'region', 'resort', 'origin'] },
+      { h: 'Stay & travel', hint: 'The property, the flights and how long the holiday is.', keys: ['property', 'stars', 'board', 'nights', 'datemode', 'period', 'airline', 'flighttype'] }
+    ],
+    'Hotel / accommodation only': [
+      { h: 'Where', hint: 'The destination for this stay.', keys: ['country', 'region', 'resort'] },
+      { h: 'The stay', hint: 'The property, the board and how long the stay is.', keys: ['property', 'stars', 'board', 'nights', 'datemode', 'period'] }
+    ],
+    'Flight only': [
+      { h: 'Route', hint: 'Where the flights go from and to.', keys: ['origin', { key: 'destination', label: 'Destination airport(s)', ph: 'Cancun (CUN)' }] },
+      { h: 'The flights', hint: 'The airline, the type of flight and the cabin.', keys: ['airline', { key: 'flighttype', label: 'Flight type' }, 'cabinClass', 'datemode', 'period'] }
+    ],
+    'City break': [
+      { h: 'Where & from where', hint: 'The city plus the departure points this price is valid from.', keys: ['country', { key: 'resort', label: 'City', ph: 'Rome' }, 'origin'] },
+      { h: 'Stay & travel', hint: 'The hotel, the flights and how many nights.', keys: ['property', 'stars', 'board', 'nights', 'datemode', 'period', 'airline', 'flighttype'] }
+    ],
+    'Cruise': [
+      { h: 'Sailing & from where', hint: 'The sailing area and where it leaves from.', keys: [{ key: 'region', label: 'Sailing area', ph: 'Western Mediterranean' }, 'departurePort', { key: 'origin', label: 'Flights from', ph: 'London Heathrow' }] },
+      { h: 'The ship & voyage', hint: 'The ship, the cabin and how long you are at sea.', keys: ['cruiseLine', 'shipName', 'cabinType', { key: 'nights', label: 'Nights at sea' }, 'datemode', 'period', { key: 'flighttype', label: 'Flights', list: CRUISE_FLIGHTS }] }
+    ],
+    'Escorted tour': [
+      { h: 'Where & from where', hint: 'The countries the tour covers and the departure points.', keys: [{ key: 'country', label: 'Countries', ph: 'Italy' }, { key: 'region', label: 'Route / area', ph: 'Rome, Florence, Venice' }, 'origin'] },
+      { h: 'The tour', hint: 'Who runs it, how long it is and the flights.', keys: ['operator', { key: 'nights', label: 'Duration', suffix: 'days' }, 'groupSize', 'datemode', 'period', 'airline', 'flighttype'] }
+    ],
+    'Multi-centre': [
+      { h: 'Where & from where', hint: 'The centres this holiday combines and the departure points.', keys: [{ key: 'country', label: 'Countries', ph: 'Thailand' }, { key: 'region', label: 'Centres', ph: 'Bangkok, Phuket' }, 'origin'] },
+      { h: 'Stay & travel', hint: 'The stay, the flights and how long in total.', keys: ['property', 'stars', 'board', { key: 'nights', label: 'Total nights' }, 'datemode', 'period', 'airline', 'flighttype'] }
+    ],
+    'Ski holiday': [
+      { h: 'Where & from where', hint: 'The ski resort and the departure points.', keys: ['country', { key: 'region', label: 'Ski area', ph: 'Three Valleys' }, { key: 'resort', label: 'Ski resort', ph: 'Meribel' }, 'origin'] },
+      { h: 'Stay & travel', hint: 'The property, the board, the flights and how long.', keys: ['property', 'stars', 'board', 'nights', 'datemode', 'period', 'airline', 'flighttype'] }
+    ],
+    'Rail holiday': [
+      { h: 'Where & from where', hint: 'The route and where it starts.', keys: [{ key: 'country', label: 'Countries', ph: 'Switzerland' }, { key: 'region', label: 'Route', ph: 'Glacier Express' }, 'station'] },
+      { h: 'The journey', hint: 'The operator, the class and how long it is.', keys: ['railOperator', 'railClass', { key: 'nights', label: 'Duration' }, 'datemode', 'period'] }
+    ],
+    'Excursion / day trip': [
+      { h: 'Where', hint: 'Where the trip takes place.', keys: ['country', 'region', { key: 'resort', label: 'Location', ph: 'Pompeii' }] },
+      { h: 'The trip', hint: 'How long it lasts and when it runs.', keys: [{ key: 'days', label: 'Duration' }, { key: 'datemode', label: 'Dates' }, 'period'] }
+    ]
+  };
+  function formSectionsFor(type) { return TYPE_FORM[type] || TYPE_FORM['Package holiday (flight + hotel)']; }
+  // Resolve a layout entry (string key or override object) to a full spec.
+  function fieldSpec(entry) {
+    const key = typeof entry === 'string' ? entry : entry.key;
+    const base = FIELDS[key] || { label: key, kind: 'text', ph: '' };
+    const spec = { key: key, label: base.label, kind: base.kind, ph: base.ph, list: base.list, suffix: base.suffix };
+    if (entry && typeof entry === 'object') {
+      if (entry.label != null) spec.label = entry.label;
+      if (entry.ph != null) spec.ph = entry.ph;
+      if (entry.list != null) spec.list = entry.list;
+      if (entry.suffix != null) spec.suffix = entry.suffix;
+    }
+    return spec;
+  }
+  // Every structured key that can appear in the form, for prefill/preserve.
+  const ALL_FIELD_KEYS = Object.keys(FIELDS);
 
   // ── Audience languages (content layer, Layer 2) ───────────────────────────
   // English is always the source. The agent toggles the languages their
@@ -541,10 +645,16 @@
     _prefillOffer(offer) {
       if (!offer) return;
       const fields = (offer.fields && typeof offer.fields === 'object') ? offer.fields : offer;
+      // Fill the static fields (and the type select) that are already in the DOM.
       this.root.querySelectorAll('[data-key]').forEach((el) => {
         const v = fields[el.dataset.key];
         if (v != null && v !== '') el.value = v;
       });
+      // Structured fields (sections 2 & 3) are drawn by _renderFields from this
+      // store; the type select above now holds the offer's type, so the right
+      // set is drawn next with these values in place.
+      this._fieldVals = {};
+      ALL_FIELD_KEYS.forEach((k) => { if (fields[k] != null && fields[k] !== '') this._fieldVals[k] = fields[k]; });
       // Long-text sections live in a store; _renderContent draws the right set.
       this._contentVals = {};
       Object.keys(CONTENT_SECTIONS).forEach((k) => { if (fields[k] != null && fields[k] !== '') this._contentVals[k] = fields[k]; });
@@ -611,26 +721,12 @@
         + field('teaser', 'Card teaser', input('teaser', 'One line shown on the card'), '(shown on the card)', true)
         + '</div></div>';
 
-      if (cfg.showDestination) {
-        html += '<div class="ob-fs"><h4>2 · Where &amp; from where</h4><p class="hint">Destination plus the departure points this price is valid from.</p><div class="ob-grid">'
-          + field('country', 'Country', input('country', 'Mexico'))
-          + field('region', 'Region / area', input('region', 'Riviera Maya'))
-          + field('resort', 'Resort / city', input('resort', 'Costa Mujeres, Cancun'))
-          + field('origin', 'Departure airport(s)', input('origin', 'London Gatwick, Manchester'))
-          + '</div></div>';
-      }
-
-      if (cfg.showStayTravel) {
-        html += '<div class="ob-fs"><h4>3 · Stay &amp; travel</h4><p class="hint">The property, the flights and how long the holiday is.</p><div class="ob-grid">'
-          + field('property', 'Property name', input('property', 'Riu Palace Costa Mujeres'))
-          + field('stars', 'Star rating', select('stars', STAR_RATINGS, STAR_RATINGS[0]))
-          + field('board', 'Board basis', select('board', BOARD_BASES, BOARD_BASES[0]))
-          + field('nights', 'Duration', '<div class="ob-prefix">' + input('nights', '7', 'number') + '<span class="ob-suffix">nights</span></div>')
-          + field('datemode', 'Travel dates', select('datemode', DATE_MODES, DATE_MODES[0]))
-          + field('period', 'Travel period', input('period', 'Sep 2026 to Apr 2027'))
-          + field('airline', 'Airline', input('airline', 'TUI Airways'))
-          + field('flighttype', 'Flights', select('flighttype', FLIGHT_TYPES, FLIGHT_TYPES[0]))
-          + '</div></div>';
+      // Sections 2 and 3 are drawn by _renderFields() and swap with the offer
+      // type, so a cruise asks for the ship and the ports and a flight-only for
+      // the route and cabin class. (showDestination / showStayTravel still gate
+      // whether the block appears at all, for anyone who turned it off.)
+      if (cfg.showDestination || cfg.showStayTravel) {
+        html += '<div class="ob-fields" data-fields></div>';
       }
 
       if (cfg.showPrice) {
@@ -730,11 +826,13 @@
       this.shadow.appendChild(this.root);
       if (!Array.isArray(this._includes)) this._includes = [];
       if (!this._contentVals || typeof this._contentVals !== 'object') this._contentVals = {};
+      if (!this._fieldVals || typeof this._fieldVals !== 'object') this._fieldVals = {};
 
       this._prefill();
       this._bind();
       this._renderLanguages();
       if (this.cfg.offer) this._prefillOffer(this.cfg.offer);
+      this._renderFields();   // type-aware structured fields (sections 2 & 3)
       this._renderContent();  // type-aware long-text sections
       this._renderPills();    // free-text includes
       this._renderThumbs();
@@ -763,9 +861,9 @@
       root.querySelectorAll('.ob-chip-suggest').forEach((b) =>
         b.addEventListener('click', () => this._addPill(b.dataset.suggest)));
 
-      // Content sections swap to suit the chosen offer type
+      // Structured fields and content sections swap to suit the chosen type.
       const typeSel = root.querySelector('[data-key="type"]');
-      if (typeSel) typeSel.addEventListener('change', () => this._renderContent());
+      if (typeSel) typeSel.addEventListener('change', () => { this._renderFields(); this._renderContent(); });
 
       // Clear validation as the user types
       root.querySelectorAll('[data-key]').forEach((el) =>
@@ -776,11 +874,67 @@
         // A cleared form has no source content, so its translations no longer
         // apply — drop them too rather than leaving orphaned overlays.
         this._images = []; this._i18n = {}; this._i18nMeta = {}; this._audienceLanguages = [];
-        this._includes = []; this._contentVals = {};
+        this._includes = []; this._contentVals = {}; this._fieldVals = {};
         this._render();
       });
 
       this._bindPhotos();
+    }
+
+    // ── Structured fields (type-aware) ───────────────────────────────────────
+    // Draws sections 2 and 3 for the current offer type. Values are preserved
+    // across a type switch in this._fieldVals, so shared fields (country, dates,
+    // price is elsewhere) survive and hidden ones return if you switch back.
+    _renderFields() {
+      const wrap = this.root && this.root.querySelector('[data-fields]');
+      if (!wrap) return;
+      const cfg = this.cfg;
+      const sym = currencySymbol(cfg.currency);
+      // Keep anything typed before swapping the visible set.
+      wrap.querySelectorAll('[data-key]').forEach((el) => { this._fieldVals[el.dataset.key] = el.value; });
+      const typeSel = this.root.querySelector('[data-key="type"]');
+      const type = typeSel ? typeSel.value : (cfg.offerTypes && cfg.offerTypes[0]) || '';
+
+      const control = (spec) => {
+        const val = this._fieldVals[spec.key];
+        if (spec.kind === 'select') {
+          const list = spec.list || [];
+          const sel = (val != null && list.indexOf(val) !== -1) ? val : list[0];
+          return '<select data-key="' + spec.key + '">' + options(list, sel) + '</select>';
+        }
+        const v = (val != null) ? ' value="' + esc(val) + '"' : '';
+        if (spec.kind === 'num') {
+          return '<div class="ob-prefix"><input type="number" data-key="' + spec.key + '" placeholder="' + esc(spec.ph || '') + '"' + v + ' />'
+            + '<span class="ob-suffix">' + esc(spec.suffix || '') + '</span></div>';
+        }
+        if (spec.kind === 'money') {
+          return '<div class="ob-prefix"><span class="sym">' + sym + '</span><input type="number" data-key="' + spec.key + '" placeholder="' + esc(spec.ph || '') + '"' + v + ' /></div>';
+        }
+        return '<input type="text" data-key="' + spec.key + '" placeholder="' + esc(spec.ph || '') + '"' + v + ' />';
+      };
+      const fieldHtml = (spec) =>
+        '<div class="ob-field" data-field="' + spec.key + '"><label>' + esc(spec.label) + '</label>'
+        + control(spec) + '<span class="ob-err">Required</span></div>';
+
+      const sections = formSectionsFor(type);
+      const showWhere = cfg.showDestination, showCore = cfg.showStayTravel;
+      const wanted = [showWhere, showCore];
+      wrap.innerHTML = sections.map((sec, i) => {
+        if (!wanted[i]) return '';
+        const n = i + 2; // sections 2 and 3
+        const body = sec.keys.map((entry) => fieldHtml(fieldSpec(entry))).join('');
+        return '<div class="ob-fs"><h4>' + n + ' · ' + esc(sec.h) + '</h4><p class="hint">' + esc(sec.hint) + '</p><div class="ob-grid">' + body + '</div></div>';
+      }).join('');
+
+      // Keep the field-value store in step as the user types, and clear the
+      // "Required" flag on input (mirrors the static fields' behaviour).
+      wrap.querySelectorAll('[data-key]').forEach((el) => {
+        el.addEventListener('input', () => {
+          this._fieldVals[el.dataset.key] = el.value;
+          const f = el.closest('.ob-field'); if (f) f.classList.remove('invalid');
+        });
+        el.addEventListener('change', () => { this._fieldVals[el.dataset.key] = el.value; });
+      });
     }
 
     // ── Content sections (type-aware, per-section AI) ────────────────────────
@@ -838,13 +992,16 @@
       if (!ta) return;
       const setStatus = (cls, msg) => { if (status) { status.className = 'ob-write-status show ' + cls; status.textContent = msg; } };
       const ctx = {};
-      ['title', 'type', 'style', 'country', 'region', 'resort', 'property', 'stars', 'board', 'nights', 'period', 'origin', 'airline', 'flighttype'].forEach((k) => {
+      // Static basics plus every structured field the current type can carry, so
+      // a cruise ship write-up has the ship and the ports and a flight the route.
+      ['title', 'type', 'style'].concat(ALL_FIELD_KEYS).forEach((k) => {
         const el = this.root.querySelector('[data-key="' + k + '"]');
-        const v = el ? (el.value || '').trim() : '';
+        let v = el ? (el.value || '').trim() : '';
+        if (!v && this._fieldVals && this._fieldVals[k]) v = String(this._fieldVals[k]).trim();
         if (v) ctx[k] = v;
       });
-      if (!ctx.title && !ctx.resort && !ctx.country && !ctx.property) {
-        setStatus('err', 'Fill in a few details first — a title, hotel or destination — so the AI has something to work with.');
+      if (!ctx.title && !ctx.resort && !ctx.country && !ctx.property && !ctx.shipName && !ctx.destination && !ctx.region) {
+        setStatus('err', 'Fill in a few details first — a title, hotel, ship or destination — so the AI has something to work with.');
         return;
       }
       btn.disabled = true;
