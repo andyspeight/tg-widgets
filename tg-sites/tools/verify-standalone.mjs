@@ -3895,6 +3895,31 @@ await check('and the sizes line up in their own column', async () => {
   return spread <= 1 ? true : `their right edges vary by ${spread}px`;
 });
 
+/*
+ * A SOLID PANEL, NOT SEE-THROUGH WORDS.
+ *
+ * The menu's background, border and shadow are theme variables that live on
+ * .ed-root. When the panel was first lifted out of the outline's scroll box it
+ * was painted into the bare body, outside that scope, so every one of them
+ * resolved to nothing and the items floated as plain text over the page (Andy,
+ * 7 Aug 2026). The geometry checks above passed straight through it, because
+ * text and positions were fine and only the surface was gone. So this reads the
+ * surface: an opaque background and a real shadow, which only hold while the
+ * panel is painted somewhere the tokens reach.
+ */
+await check('an open menu has a solid panel behind it, not see-through', async () => {
+  await page.getByRole('button', { name: 'More actions' }).click();
+  await page.waitForTimeout(250);
+  const look = await page.locator('.ed-menu').first().evaluate((el) => {
+    const s = getComputedStyle(el);
+    return { bg: s.backgroundColor, shadow: s.boxShadow };
+  });
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(150);
+  if (/rgba\(0, 0, 0, 0\)|transparent/.test(look.bg)) return `the panel background is ${look.bg}`;
+  return look.shadow && look.shadow !== 'none' ? true : 'the panel has no shadow';
+});
+
 await check('and the chosen widths are remembered', async () => {
   await page.locator('.ed-vw__num').fill('1440');
   await page.locator('.ed-vw__num').blur();

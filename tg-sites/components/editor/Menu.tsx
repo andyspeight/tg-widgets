@@ -7,16 +7,23 @@
  * trigger meets the 44px target, and it closes on Escape or an outside click.
  * Shared by the outline and the top bar so both behave the same.
  *
- * WHY THE PANEL IS PORTALLED TO THE BODY
+ * WHY THE PANEL IS PORTALLED OUT OF THE OUTLINE
  * The outline is a scroll pane (overflow-y: auto), and an absolutely-positioned
  * panel inside it is clipped by that scroll box: opening the menu on a section
- * showed only the top half of it (Andy, 7 Aug 2026). A panel painted into the
- * body escapes every ancestor's overflow, so it is drawn in full wherever the
- * trigger sits. It is then placed by measurement the same way ItemToolbar places
- * its popover: fixed to the viewport, right edge under the trigger's right edge,
- * clamped so it never runs off an edge and lifting above the trigger when there
- * is no room below. A layout effect does the placing, so it never paints in the
- * wrong spot first.
+ * showed only the top half of it (Andy, 7 Aug 2026). The panel is lifted out of
+ * that scroll box so it draws in full wherever the trigger sits, and placed by
+ * measurement the same way ItemToolbar places its popover: fixed to the
+ * viewport, right edge under the trigger's right edge, clamped so it never runs
+ * off an edge and lifting above the trigger when there is no room below. A
+ * layout effect does the placing, so it never paints in the wrong spot first.
+ *
+ * IT IS PORTALLED TO .ed-root, NOT THE BODY. The editor's colours live in
+ * variables on .ed-root (--ed-panel, --ed-line, the shadow), so a panel in the
+ * bare body loses its background, border and shadow and reads as floating text
+ * over the page (Andy, 7 Aug 2026, again). .ed-root fills the viewport and
+ * carries no transform, so a fixed panel inside it is still placed against the
+ * viewport, keeps the tokens and the current theme, and still escapes the
+ * outline's overflow because it no longer sits inside it.
  */
 
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
@@ -116,8 +123,8 @@ export function Menu({
 
     function onDown(event: MouseEvent) {
       const target = event.target as Node;
-      // The panel now lives in the body, outside wrap, so it needs its own check
-      // or a click on the menu itself would count as an outside click.
+      // The panel is portalled out of wrap, so it needs its own check or a click
+      // on the menu itself would count as an outside click.
       if (wrap.current?.contains(target)) return;
       if (panel.current?.contains(target)) return;
       setOpen(false);
@@ -133,6 +140,17 @@ export function Menu({
       document.removeEventListener('keydown', onKey);
     };
   }, [open]);
+
+  /*
+   * WHERE THE PANEL IS PAINTED. The nearest editor root, so it keeps the colour
+   * variables and the theme; the bare body would strip its background and border
+   * (see the header note). Always found for the outline and top-bar menus, which
+   * both live under .ed-root; the body is a last resort that should not be hit.
+   */
+  const host =
+    typeof document === 'undefined'
+      ? null
+      : wrap.current?.closest('.ed-root, .sv-root') ?? document.body;
 
   return (
     <div className="ed-menu-wrap" ref={wrap}>
@@ -151,7 +169,7 @@ export function Menu({
         {children}
       </button>
 
-      {open &&
+      {open && host &&
         createPortal(
           <div
             ref={panel}
@@ -196,7 +214,7 @@ export function Menu({
               );
             })}
           </div>,
-          document.body,
+          host,
         )}
     </div>
   );
