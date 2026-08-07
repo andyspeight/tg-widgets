@@ -42,6 +42,7 @@ export type IconName =
   | 'image'
   | 'video'
   | 'gallery'
+  | 'map'
   | 'button'
   | 'buttons'
   | 'divider'
@@ -139,6 +140,9 @@ const PATHS: Record<IconName, string> = {
   image: 'M3 5h18v14H3zM8.5 10.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM21 15l-5-5L5 19',
   video: 'M3 6h12v12H3zM15 10l6-3v10l-6-3z',
   gallery: 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z',
+  // A folded map, panels and fold lines. Not the pin, which would read as a
+  // single location marker rather than the map the block draws.
+  map: 'M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15M15 6v15',
   button: 'M3 8h18v8H3zM8 12h8',
   buttons: 'M2 8h9v8H2zM13 8h9v8h-9z',
   divider: 'M3 12h18',

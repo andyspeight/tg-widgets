@@ -668,6 +668,50 @@ export const BLOCKS: readonly BlockDefinition[] = [
     ],
   },
   {
+    /*
+     * A MAP FROM AN ADDRESS, no key and no pasted embed code.
+     *
+     * Every agency shows where it is, and the honest way to let a client do so is
+     * to ask for the one thing they know, their address, and generate the rest.
+     * The embed is built in lib/content/map.ts from a fixed host, so nothing the
+     * client types becomes a URL or an origin: the same arrangement the widget
+     * blocks and the analytics id use. No API key, so there is nothing to set up,
+     * leak or bill.
+     */
+    type: 'map',
+    label: 'Map',
+    group: 'Media',
+    icon: 'map',
+    description: 'An office or destination map, from just an address.',
+    defaults: { address: '', zoom: 14, height: 360, radius: 'md', caption: '' },
+    summarise: (props) => {
+      const address = asString(props.address).trim();
+      return address ? `Map: ${firstWords(address, 5)}` : 'Map';
+    },
+    fields: [
+      {
+        kind: 'text',
+        key: 'address',
+        label: 'Address or place',
+        max: 200,
+        help: 'What you would type into Google Maps: a full address, a postcode, or a place name.',
+      },
+      {
+        kind: 'number',
+        key: 'zoom',
+        label: 'Zoom',
+        min: 1,
+        max: 20,
+        step: 1,
+        group: 'layout',
+        help: 'Higher is closer in. 14 shows the street, lower shows the whole town.',
+      },
+      { kind: 'number', key: 'height', label: 'Height', min: 120, max: 1200, step: 20, group: 'layout' },
+      { kind: 'select', key: 'radius', label: 'Corners', options: RADIUS_OPTIONS, group: 'border' },
+      { kind: 'text', key: 'caption', label: 'Caption', max: 200 },
+    ],
+  },
+  {
     type: 'gallery',
     label: 'Gallery',
     group: 'Media',

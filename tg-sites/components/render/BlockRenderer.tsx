@@ -26,6 +26,7 @@ import {
   ImportedBlock,
   ListBlock,
   LogosBlock,
+  MapBlock,
   NavBlock,
   QuoteBlock,
   SliderBlock,
@@ -83,6 +84,13 @@ export function BlockRenderer({
         return <VideoBlock props={props} />;
       case 'gallery':
         return <GalleryBlock props={props} />;
+      /*
+       * `editing` is true exactly when this is the editor canvas, which is what
+       * tells the map to draw a placeholder rather than load a frame that would
+       * reload on every keystroke. Same as the widget and embed-widget blocks.
+       */
+      case 'map':
+        return <MapBlock props={props} editing={editable} />;
       case 'logos':
         return <LogosBlock props={props} />;
       case 'cards':

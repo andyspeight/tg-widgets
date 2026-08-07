@@ -1602,6 +1602,7 @@ const BLOCK_DESIGN: Record<string, BoxParts> = {
   // Media that already rounds its own frame: everything but the radius.
   image: { bg: true, padding: true, shadow: true },
   video: { bg: true, padding: true, shadow: true },
+  map: { bg: true, padding: true, shadow: true },
   gallery: { bg: true, border: true, padding: true, shadow: true },
   slider: { bg: true, border: true, padding: true, shadow: true },
   cards: { bg: true, border: true, padding: true, shadow: true },

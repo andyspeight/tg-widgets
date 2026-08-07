@@ -459,16 +459,17 @@ await check('block picker opens from a section', async () => {
  * The count MOVES DELIBERATELY. 13 until the two widget blocks landed on 31 Jul
  * 2026, 15 when the menu joined them, 16 when Cards did, 18 with Accordion and
  * Tabs, 19 with the Slider, 20 with the Table, 27 once the social, steps, stats,
- * logos and imported blocks and then the inner container had all joined (5 Aug
- * 2026). A hardcoded number is the point rather than a maintenance cost: adding
- * a block should make somebody look at the picker, and a block that silently
- * stops rendering its card is exactly what this catches.
+ * logos and imported blocks and then the inner container had all joined, 28 when
+ * the Location map landed (7 Aug 2026). A hardcoded number is the point rather
+ * than a maintenance cost: adding a block should make somebody look at the
+ * picker, and a block that silently stops rendering its card is exactly what
+ * this catches.
  *
  * The harness runs as staff, so the staff-only Embed block is counted here too:
- * 27 is the whole library, one fewer than that for a client.
+ * 28 is the whole library, one fewer than that for a client.
  */
 await check('block picker offers the full library', async () =>
-  (await page.locator(".ed-block-card").count()) === 27);
+  (await page.locator(".ed-block-card").count()) === 28);
 
 await check('including both ways to put a widget on a page', async () => {
   const cards = (await page.locator('.ed-block-card').allInnerTexts()).join(' | ');
@@ -4266,6 +4267,45 @@ await check('the outline lists a container’s inner blocks', async () => {
 
 
 // ---------------------------------------------------------------------------
+// The location map
+//
+// The claim a browser settles: that a map draws from an address alone, and that
+// the editor draws a PLACEHOLDER rather than loading a Google frame on every
+// keystroke. The URL safety is in tests/map.test.ts; this is the editor wiring.
+// ---------------------------------------------------------------------------
+
+await page.reload();
+await page.waitForSelector('.ed-root');
+await showPanels();
+
+await check('a map starts by asking for an address', async () => {
+  await addBlock('Map');
+  const here = added();
+  if ((await here.count()) !== 1) return `${await here.count()} blocks selected after adding`;
+  const text = await here.locator('.tgs-placeholder').first().innerText().catch(() => '');
+  return /address/i.test(text) ? true : `it says "${text}"`;
+});
+
+await check('an address draws the placeholder, not a live frame in the editor', async () => {
+  await page.locator('.ed-props input.ed-input').first().fill('10 Downing Street, London');
+  await page.waitForTimeout(500);
+  const ghost = await added().locator('.tgs-map-ghost').count();
+  const addr = await added().locator('.tgs-map-ghost__addr').innerText().catch(() => '');
+  const frames = await added().locator('iframe').count();
+  if (frames !== 0) return `${frames} iframes loaded in the editor`;
+  return ghost === 1 && /downing street/i.test(addr) ? true : `ghost ${ghost}, addr "${addr}"`;
+});
+
+await check('and the editor pulls in no map frame from Google', async () => {
+  const frames = await page.evaluate(() =>
+    [...document.querySelectorAll('iframe[src]')]
+      .map((f) => f.getAttribute('src'))
+      .filter((s) => /google\.[^/]*\/maps/.test(s ?? '')));
+  return frames.length === 0 ? true : JSON.stringify(frames);
+});
+
+
+// ---------------------------------------------------------------------------
 // The menu, the header and the footer
 //
 // TWO CLAIMS THAT ONLY A BROWSER CAN SETTLE.
@@ -4505,8 +4545,8 @@ await check('the header offers the same blocks a page does', async () => {
   await page.keyboard.press('Escape');
   await page.waitForTimeout(200);
   // The whole library, because a header is sections and rows like anything else.
-  // The same 27 the page picker offers a staff user, container included.
-  return count === 27 ? true : `${count} blocks in the header picker`;
+  // The same 28 the page picker offers a staff user, map and container included.
+  return count === 28 ? true : `${count} blocks in the header picker`;
 });
 
 await check('a menu in a header saves through the region actions', async () => {

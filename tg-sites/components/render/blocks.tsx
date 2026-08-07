@@ -20,6 +20,7 @@ import { importScopeClass, scopeImportCss } from '../../lib/import/css';
 import { applyImportContent } from '../../lib/import/tokenise';
 import { parseTable } from '../../lib/content/table';
 import { resolveVideo } from '../../lib/content/video';
+import { mapEmbedSrc } from '../../lib/content/map';
 import { socialNetwork } from '../../lib/content/social';
 import { safeWidgetId, widgetKind } from '../../lib/content/widgets';
 import { SocialIcon } from './social-icons';
@@ -782,6 +783,80 @@ export function VideoBlock({ props }: { props: Props }): ReactElement {
             />
           ) : (
             <video src={video.src} controls preload="metadata" />
+          )}
+        </div>
+        {caption && <figcaption className="tgs-image">{caption}</figcaption>}
+      </figure>
+    </div>
+  );
+}
+
+/**
+ * A location map, from an address alone.
+ *
+ * The client never touches a URL or a key: they type a place, and mapEmbedSrc
+ * turns it into a sealed, host-fixed embed. See lib/content/map.ts for why that
+ * is safe. The frame is off the canvas while editing, the same call the embedded
+ * widget and the video make: the editor re-renders on every keystroke and
+ * reloading a map on each one is a distraction and a needless request, so the
+ * address shows in a placeholder and the real map draws on the published page.
+ */
+export function MapBlock({
+  props,
+  editing = false,
+}: {
+  props: Props;
+  editing?: boolean;
+}): ReactElement {
+  const address = str(props, 'address').trim();
+  const height = clamp(props.height, 120, 1200, 360);
+  const radius = oneOf(props, 'radius', RADII, 'md');
+  const caption = str(props, 'caption');
+
+  if (!address) {
+    return <div className="tgs-placeholder">Add an address to show a map</div>;
+  }
+
+  const title = caption || `Map of ${address}`;
+
+  if (editing) {
+    return (
+      <div className="tgs-map-ghost" style={{ minHeight: height }}>
+        <span className="tgs-map-ghost__pin" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            width="22"
+            height="22"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+        </span>
+        <span className="tgs-map-ghost__addr">{address}</span>
+        <span className="tgs-map-ghost__note">Your map appears here on the published site</span>
+      </div>
+    );
+  }
+
+  const src = mapEmbedSrc(address, props.zoom);
+
+  return (
+    <div className="tgs-map">
+      <figure style={{ margin: 0 }}>
+        <div className="tgs-map__frame" data-radius={radius} style={{ height }}>
+          {src && (
+            <iframe
+              src={src}
+              title={title}
+              loading="lazy"
+              referrerPolicy="no-referrer"
+              allowFullScreen
+            />
           )}
         </div>
         {caption && <figcaption className="tgs-image">{caption}</figcaption>}
