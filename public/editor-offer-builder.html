@@ -151,6 +151,20 @@
     .sheet-chip.ended { background: #F1F5F9; color: #64748B; }
     .sheet-hint { font-size: 12px; color: var(--muted); margin: 10px 2px 0; }
     body[data-theme="dark"] table.sheet th { background: #111827; }
+
+    /* Full preview modal — 70% of the screen, card + full offer page */
+    .modal.modal--wide { width: 70vw; max-width: 1280px; min-width: 0; height: 86vh; display: flex; flex-direction: column; }
+    @media (max-width: 900px) { .modal.modal--wide { width: 94vw; height: 90vh; } }
+    .modal--wide .modal-body { flex: 1; overflow: auto; padding: 0; background: var(--panel-2); }
+    .pv-note { font-size: 12px; color: var(--muted); font-weight: 500; }
+    .pv-section { padding: 20px 24px; }
+    .pv-section + .pv-section { border-top: 1px solid var(--border); }
+    .pv-section-h { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--sub); margin: 0 0 14px; display: flex; align-items: center; gap: 8px; }
+    .pv-section-h span.pv-sub { font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--muted); }
+    .pv-card-stage { display: flex; justify-content: center; }
+    .pv-card-stage > div { width: 100%; max-width: 380px; }
+    .pv-page-stage { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+    .pv-open-full { margin-top: 10px; width: 100%; }
   </style>
 </head>
 <body>
@@ -205,7 +219,12 @@
               <div class="field" id="colsField"><label class="field-label">Grid columns</label>
                 <select id="cfgColumns"><option value="auto">Auto-fit</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
               </div>
-              <div class="preview-card-wrap"><div class="field-label">Preview</div><div id="cardPreview"></div></div>
+              <div class="preview-card-wrap"><div class="field-label">Preview</div><div id="cardPreview"></div>
+                <button type="button" class="btn pv-open-full" id="btn-open-preview">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                  Full preview
+                </button>
+              </div>
             </div>
           </div>
 
@@ -273,6 +292,10 @@
       <div class="tgse-toolbar">
         <span class="tgse-status"><span class="tgse-status-dot"></span> Special Offers</span>
         <span class="tgse-spacer"></span>
+        <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-preview" title="Full preview">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          Preview
+        </button>
         <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle preview theme">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
           Theme
@@ -376,7 +399,31 @@
     </div>
   </div>
 
+  <!-- Full preview modal (70% of the screen): the card + the full offer page -->
+  <div class="modal-backdrop" id="previewModal" hidden>
+    <div class="modal modal--wide">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title">Full preview</div>
+          <div class="pv-note" id="pvNote">How your design looks. Sample offer shown.</div>
+        </div>
+        <button class="modal-close" data-close aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="pv-section">
+          <h3 class="pv-section-h">In your offers grid <span class="pv-sub">— the card visitors click</span></h3>
+          <div class="pv-card-stage" id="pvCard"></div>
+        </div>
+        <div class="pv-section">
+          <h3 class="pv-section-h">The offer's own page <span class="pv-sub">— where the card links to</span></h3>
+          <div class="pv-page-stage" id="pvPage"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="/widget-offer-card.js"></script>
+  <script src="/widget-offer-page.js"></script>
   <script src="/widget-offer-builder.js"></script>
   <script src="/offer-import.js"></script>
   <script src="/editor-shell.js"></script>
@@ -401,6 +448,7 @@
       view: 'sheet',   // 'sheet' | 'cards'
       full: {},        // id -> full offer (lazy-loaded when a sheet row is edited)
       edits: {},       // id -> { fieldKey: value } pending autosave
+      previewOffer: null, // the offer shown in the full-preview modal (null → SAMPLE)
       config: {
         cardLayout: 'vertical', columns: 'auto', template: 'classic',
         theme: 'light', accentColor: '#00B4D8', brandColor: '#1B2B5B', radius: 14,
@@ -420,7 +468,7 @@
       catch (e) { return ''; }
     }
 
-    const SAMPLE = { currency:'GBP', fields:{ title:'7 nights all inclusive in Cancun', teaser:'Beachfront five star on the white sands of Costa Mujeres.', type:'Package holiday (flight + hotel)', style:'All inclusive', country:'Mexico', resort:'Costa Mujeres', stars:'5 star', board:'All inclusive', nights:'7', price:'899', was:'1299', basis:'per person', badge:'Save', badgeAmount:'400', urgency:'Only 4 left' }, tags:['Family friendly','Beachfront'] };
+    const SAMPLE = { currency:'GBP', fields:{ title:'7 nights all inclusive in Cancun', teaser:'Beachfront five star on the white sands of Costa Mujeres.', type:'Package holiday (flight + hotel)', style:'All inclusive', country:'Mexico', region:'Riviera Maya', resort:'Costa Mujeres', property:'Riu Palace Costa Mujeres', stars:'5 star', board:'All inclusive', nights:'7', period:'Sep 2026 to Apr 2027', origin:'London Gatwick', airline:'TUI Airways', flighttype:'Direct', price:'899', was:'1299', basis:'per person', deposit:'60', badge:'Save', badgeAmount:'400', urgency:'Only 4 left at this price', bookby:'31 July 2026', description:'Wake up to the white sands of Costa Mujeres at this five star on the quiet northern tip of Cancun, a short transfer from the airport. All meals and drinks are included, there are five pools and a spa, and the reef is a short boat ride away. A warm, easy week in the sun for couples and families alike.' }, tags:['Family friendly','Beachfront','Adults area'], includes:['Return flights from London','Private airport transfers','All meals and drinks','Kids club and evening entertainment'] };
 
     /* ---- Tabs ---- */
     function setTab(name) {
@@ -445,7 +493,46 @@
         accentColor: state.config.accentColor, radius: state.config.radius,
         currency: state.config.currency, ctaText: 'View deal', offer: SAMPLE
       });
+      refreshPreviewIfOpen();
     }
+
+    /* ---- Full preview modal: the card + the full offer page ---- */
+    let pvCardW = null, pvPageW = null, pvRefreshT = null;
+    function renderPreview() {
+      const c = state.config;
+      const offer = state.previewOffer || SAMPLE;
+      const cardMount = $('pvCard');
+      if (pvCardW && pvCardW.destroy) { try { pvCardW.destroy(); } catch (e) { /* noop */ } }
+      cardMount.innerHTML = '';
+      const cdiv = document.createElement('div'); cardMount.appendChild(cdiv);
+      pvCardW = new window.TGOfferCardWidget(cdiv, {
+        layout: c.cardLayout, theme: c.theme, accentColor: c.accentColor, brandColor: c.brandColor,
+        radius: c.radius, currency: c.currency, ctaText: 'View deal', offer: offer
+      });
+      const pageMount = $('pvPage');
+      if (pvPageW && pvPageW.destroy) { try { pvPageW.destroy(); } catch (e) { /* noop */ } }
+      pageMount.innerHTML = '';
+      const pdiv = document.createElement('div'); pageMount.appendChild(pdiv);
+      pvPageW = new window.TGOfferPageWidget(pdiv, {
+        template: c.template, theme: c.theme, accentColor: c.accentColor, brandColor: c.brandColor,
+        currency: c.currency, agencyName: state.name || 'Your agency',
+        enquiryEmail: c.enquiryEmail, enquiryPhone: c.enquiryPhone, protection: c.protection,
+        offer: offer
+      });
+    }
+    function refreshPreviewIfOpen() {
+      if ($('previewModal').hidden) return;
+      clearTimeout(pvRefreshT);
+      pvRefreshT = setTimeout(renderPreview, 250);
+    }
+    function openPreview() {
+      const real = state.previewOffer && state.previewOffer !== SAMPLE;
+      $('pvNote').textContent = real ? 'Previewing this offer with your current design.' : 'How your design looks. A sample offer is shown.';
+      openModal('previewModal');
+      renderPreview();
+    }
+    $('btn-preview').addEventListener('click', openPreview);
+    $('btn-open-preview').addEventListener('click', openPreview);
 
     /* ---- Offer scheduling status ---- */
     function statusOf(o) {
@@ -870,6 +957,8 @@
     let builder = null;
     function openForm(offer) {
       $('formTitle').textContent = offer ? 'Edit offer' : 'New offer';
+      // Preview this offer (when editing) or the sample (when creating).
+      state.previewOffer = (offer && offer.fields && Object.keys(offer.fields).length) ? offer : null;
       $('listView').hidden = true; $('formView').hidden = false;
       const mount = $('builderMount'); mount.innerHTML = '';
       const div = document.createElement('div'); mount.appendChild(div);
@@ -887,7 +976,7 @@
       });
       div.addEventListener('tg-offer-saved', function () { setTimeout(closeForm, 1200); });
     }
-    function closeForm() { $('formView').hidden = true; $('listView').hidden = false; loadOffers(); }
+    function closeForm() { state.previewOffer = null; $('formView').hidden = true; $('listView').hidden = false; loadOffers(); }
     $('btn-new').addEventListener('click', () => openForm(null));
     $('btn-back-list').addEventListener('click', closeForm);
 
