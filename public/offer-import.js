@@ -15,8 +15,11 @@
   'use strict';
 
   // header = the spreadsheet column label; key = the offer field;
-  // kind: 'field' → offer.fields[key]; 'list' → offer[key] (array); 'currency'.
+  // kind: 'field' → offer.fields[key]; 'list' → offer[key] (array); 'currency';
+  // 'id' → the internal offer id (used only to UPDATE an existing offer).
+  // optional columns are not required for a file to count as "our template".
   const COLUMNS = [
+    { header: 'Offer ID', key: '__id', kind: 'id', optional: true },
     { header: 'Title', key: 'title', kind: 'field', required: true },
     { header: 'Teaser', key: 'teaser', kind: 'field' },
     { header: 'Offer type', key: 'type', kind: 'field' },
@@ -148,6 +151,9 @@
       COLUMNS.forEach(function (col) {
         let v = row[col.header];
         v = v == null ? '' : String(v).trim();
+        // Offer ID marks a row that should UPDATE an existing offer rather than
+        // create a new one. Left blank (the default in the template) → new offer.
+        if (col.kind === 'id') { if (v) offer.id = v; return; }
         if (col.kind === 'currency') { if (v) offer.currency = v; return; }
         if (col.kind === 'list') {
           offer[col.key] = v ? v.split('|').map(function (x) { return x.trim(); }).filter(Boolean) : [];
@@ -166,7 +172,49 @@
     });
   }
 
+  // Does an uploaded file look like our template? Every non-optional column
+  // must be present in the header row. Extra columns are tolerated (ignored);
+  // missing ones are reported so we can steer the client back to the template.
+  function headerCheck(text) {
+    const rows = parseRows(text);
+    const have = (rows[0] || []).map(function (h) { return String(h).trim().toLowerCase(); });
+    const missing = COLUMNS
+      .filter(function (c) { return !c.optional && have.indexOf(c.header.toLowerCase()) === -1; })
+      .map(function (c) { return c.header; });
+    return { ok: have.length > 0 && missing.length === 0, missing: missing };
+  }
+
+  // Export saved offers (array of { id, offer }) back to a CSV in the SAME
+  // template shape, with the Offer ID filled in. A client can download this,
+  // edit it offline and re-upload to update those offers (matched on Offer ID)
+  // instead of creating duplicates.
+  function offersToCsv(offers) {
+    const headers = COLUMNS.map(function (c) { return c.header; });
+    const lines = [headers.map(csvCell).join(',')];
+    (offers || []).forEach(function (rec) {
+      const o = (rec && rec.offer) || {};
+      const f = (o.fields && typeof o.fields === 'object') ? o.fields : {};
+      const cells = COLUMNS.map(function (col) {
+        if (col.kind === 'id') return csvCell((rec && rec.id) || '');
+        if (col.kind === 'currency') return csvCell(o.currency || '');
+        if (col.kind === 'list') return csvCell(Array.isArray(o[col.key]) ? o[col.key].join(' | ') : '');
+        return csvCell(f[col.key] != null ? f[col.key] : '');
+      });
+      lines.push(cells.join(','));
+    });
+    return lines.join('\r\n') + '\r\n';
+  }
+
   if (typeof window !== 'undefined') {
-    window.TGOfferImport = { COLUMNS: COLUMNS, templateCsv: templateCsv, parseCsv: parseCsv, rowsToOffers: rowsToOffers };
+    window.TGOfferImport = {
+      COLUMNS: COLUMNS, templateCsv: templateCsv, parseCsv: parseCsv,
+      rowsToOffers: rowsToOffers, headerCheck: headerCheck, offersToCsv: offersToCsv
+    };
+  }
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+      COLUMNS: COLUMNS, templateCsv: templateCsv, parseCsv: parseCsv,
+      rowsToOffers: rowsToOffers, headerCheck: headerCheck, offersToCsv: offersToCsv
+    };
   }
 })();

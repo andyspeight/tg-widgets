@@ -119,6 +119,38 @@
     .modal-title { font-weight: 700; font-size: 15px; }
     .modal-close { background: none; border: 0; cursor: pointer; color: var(--muted); }
     .modal-body { padding: 18px; }
+
+    /* View toggle (Sheet / Cards) */
+    .view-toggle { display: inline-flex; padding: 3px; background: var(--hover); border-radius: 8px; gap: 2px; }
+    .view-toggle button { border: 0; background: transparent; padding: 5px 11px; font-size: 12px; font-weight: 600; color: var(--sub); border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
+    .view-toggle button[aria-pressed="true"] { background: var(--panel); color: var(--ink); box-shadow: var(--shadow-xs); }
+
+    /* Spreadsheet (sheet) view */
+    .sheet-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--panel); box-shadow: var(--shadow-xs); }
+    table.sheet { border-collapse: collapse; width: 100%; font-size: 13px; }
+    table.sheet th { position: sticky; top: 0; background: var(--panel-2); text-align: left; font-size: 11px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; color: var(--sub); padding: 9px 8px; border-bottom: 1px solid var(--border); white-space: nowrap; z-index: 1; }
+    table.sheet td { border-bottom: 1px solid var(--border); padding: 0; vertical-align: middle; }
+    table.sheet tr:last-child td { border-bottom: 0; }
+    table.sheet tr.is-new td { background: var(--panel-2); }
+    table.sheet input.cell { width: 100%; min-width: 88px; border: 0; background: transparent; padding: 9px 8px; font: inherit; font-size: 13px; color: var(--ink); outline: none; }
+    table.sheet td.num input.cell { text-align: right; min-width: 66px; }
+    table.sheet td.wide input.cell { min-width: 160px; }
+    table.sheet input.cell:focus { background: var(--accent-soft); box-shadow: inset 0 0 0 2px var(--accent); border-radius: 4px; }
+    table.sheet td.sticky-col { position: sticky; left: 0; background: var(--panel); }
+    table.sheet th.sticky-col { position: sticky; left: 0; z-index: 2; }
+    table.sheet tr.is-new td.sticky-col { background: var(--panel-2); }
+    .sheet-status { display: inline-flex; align-items: center; justify-content: center; width: 20px; }
+    .sheet-status[data-s="saving"]::after { content: ""; width: 11px; height: 11px; border: 2px solid var(--border-strong); border-top-color: var(--accent); border-radius: 50%; animation: sheet-spin .7s linear infinite; }
+    .sheet-status[data-s="saved"]::after { content: "✓"; color: var(--success); font-weight: 800; font-size: 13px; }
+    .sheet-status[data-s="error"]::after { content: "!"; color: var(--danger); font-weight: 800; }
+    @keyframes sheet-spin { to { transform: rotate(360deg); } }
+    table.sheet td.actions { padding: 0 8px; white-space: nowrap; text-align: right; }
+    .sheet-chip { display: inline-block; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .3px; padding: 2px 6px; border-radius: 999px; }
+    .sheet-chip.live { background: #DCFCE7; color: #15803D; }
+    .sheet-chip.upcoming { background: var(--accent-soft); color: #0E7490; }
+    .sheet-chip.ended { background: #F1F5F9; color: #64748B; }
+    .sheet-hint { font-size: 12px; color: var(--muted); margin: 10px 2px 0; }
+    body[data-theme="dark"] table.sheet th { background: #111827; }
   </style>
 </head>
 <body>
@@ -258,7 +290,21 @@
             <div class="ws-top">
               <h1 id="wsTitle">My offers</h1>
               <span class="ws-count" id="offerCount">0</span>
+              <div class="view-toggle" id="viewToggle" role="group" aria-label="View">
+                <button type="button" data-view="sheet" aria-pressed="true" title="Spreadsheet view">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+                  Sheet
+                </button>
+                <button type="button" data-view="cards" aria-pressed="false" title="Card view">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/></svg>
+                  Cards
+                </button>
+              </div>
               <span class="ws-spacer"></span>
+              <button class="btn" id="btn-download" title="Download your offers as a spreadsheet">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download
+              </button>
               <button class="btn" id="btn-trash" title="Recently deleted">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                 Recently deleted
@@ -313,7 +359,7 @@
         <button class="modal-close" data-close aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
       </div>
       <div class="modal-body">
-        <div style="font-size:13px;color:var(--sub);margin-bottom:14px;">Download the template, fill in one row per offer (Title is required), then upload the CSV. You can export a CSV from Excel, Numbers or Google Sheets. Up to 200 offers at a time.</div>
+        <div style="font-size:13px;color:var(--sub);margin-bottom:14px;">Download the template, fill in one row per offer (Title is required), then upload the CSV. You can export a CSV from Excel, Numbers or Google Sheets. Up to 200 offers at a time. Leave the <b>Offer ID</b> column blank for new offers. To change offers you already have, use <b>Download</b> first, edit that file, then upload it back and it updates them instead of making duplicates.</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
           <button class="btn" id="btn-template">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -352,6 +398,9 @@
       selected: new Set(),
       trashMode: false,
       retentionDays: 30,
+      view: 'sheet',   // 'sheet' | 'cards'
+      full: {},        // id -> full offer (lazy-loaded when a sheet row is edited)
+      edits: {},       // id -> { fieldKey: value } pending autosave
       config: {
         cardLayout: 'vertical', columns: 'auto', template: 'classic',
         theme: 'light', accentColor: '#00B4D8', brandColor: '#1B2B5B', radius: 14,
@@ -434,12 +483,15 @@
       $('wsTitle').textContent = state.trashMode ? 'Recently deleted' : 'My offers';
       $('btn-new').hidden = state.trashMode;
       $('btn-import').hidden = state.trashMode;
+      $('btn-download').hidden = state.trashMode;
+      $('viewToggle').hidden = state.trashMode;
       const tb = $('btn-trash');
       tb.classList.toggle('primary', state.trashMode);
       tb.lastChild.textContent = state.trashMode ? ' Back to offers' : ' Recently deleted';
     }
     function loadOffers() {
       state.trashMode = false; setTopbar();
+      state.full = {}; state.edits = {}; // fresh data — drop any cached full offers / pending edits
       setState('<div class="state"><p>Loading your offers…</p></div>');
       fetch(OFFERS_API, { credentials: 'include' })
         .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
@@ -462,7 +514,14 @@
       const ago = ageDays === 0 ? 'today' : (ageDays === 1 ? '1 day ago' : ageDays + ' days ago');
       return 'Deleted ' + ago + ' · <span class="offer-purge-note">removed for good in ' + leftDays + ' day' + (leftDays === 1 ? '' : 's') + '</span>';
     }
+    // Dispatch: the spreadsheet view for live offers, cards for browsing and the bin.
     function renderOffers() {
+      $('offerCount').textContent = state.offers.length;
+      if (!state.trashMode && state.view === 'sheet') { renderSheet(); return; }
+      renderCards();
+    }
+
+    function renderCards() {
       state.selected.clear(); // a fresh list always starts unselected
       $('offerCount').textContent = state.offers.length;
       const trash = state.trashMode;
@@ -516,6 +575,179 @@
       setState(banner + toolbar + '<div class="offers-list">' + rows + '</div>');
       updateSelUI();
     }
+
+    /* ================= SPREADSHEET (SHEET) VIEW ================= */
+    // The columns edited inline. Everything else (photos, description, page
+    // design) stays one click away in the full editor via the Open button.
+    const SHEET_COLS = [
+      { key: 'title',    label: 'Title',       cls: 'sticky-col wide' },
+      { key: 'type',     label: 'Type',        cls: 'wide' },
+      { key: 'country',  label: 'Country',     cls: '' },
+      { key: 'resort',   label: 'Resort',      cls: '' },
+      { key: 'nights',   label: 'Nights',      cls: 'num' },
+      { key: 'board',    label: 'Board',       cls: '' },
+      { key: 'period',   label: 'Travel dates',cls: 'wide' },
+      { key: 'price',    label: 'Price',       cls: 'num' },
+      { key: 'was',      label: 'Was',         cls: 'num' },
+      { key: 'showFrom', label: 'Show from',   cls: '' },
+      { key: 'showUntil',label: 'Show until',  cls: '' }
+    ];
+
+    function sheetChip(o) {
+      const st = statusOf(o);
+      if (!st) return '';
+      const label = st === 'live' ? 'Live' : st === 'upcoming' ? 'Soon' : 'Ended';
+      return '<span class="sheet-chip ' + st + '">' + label + '</span>';
+    }
+
+    function renderSheet() {
+      const head = '<tr><th class="sticky-col" style="width:26px"></th>'
+        + SHEET_COLS.map(function (c) { return '<th class="' + (c.cls.indexOf('sticky-col') >= 0 ? 'sticky-col' : '') + '">' + esc(c.label) + '</th>'; }).join('')
+        + '<th>Status</th><th></th></tr>';
+
+      const rows = state.offers.map(function (o) {
+        const cells = SHEET_COLS.map(function (c) {
+          const v = esc(o[c.key] != null ? o[c.key] : '');
+          return '<td class="' + c.cls + '"><input class="cell" data-id="' + esc(o.id) + '" data-key="' + c.key + '" value="' + v + '"></td>';
+        }).join('');
+        return '<tr data-row="' + esc(o.id) + '">'
+          + '<td class="sticky-col"><span class="sheet-status" data-status="' + esc(o.id) + '"></span></td>'
+          + cells
+          + '<td data-chip="' + esc(o.id) + '">' + sheetChip(o) + '</td>'
+          + '<td class="actions"><button class="btn sm" data-open="' + esc(o.id) + '">Open</button></td>'
+          + '</tr>';
+      }).join('');
+
+      const newRow = '<tr class="is-new" data-newrow="1"><td class="sticky-col"></td>'
+        + SHEET_COLS.map(function (c) {
+            return '<td class="' + c.cls + '"><input class="cell" data-newkey="' + c.key + '" value="" placeholder="' + (c.key === 'title' ? 'Add an offer…' : '') + '"></td>';
+          }).join('')
+        + '<td></td><td class="actions"></td></tr>';
+
+      const empty = state.offers.length ? '' :
+        '<div class="sheet-hint">No offers yet. Type in the row above to add your first one, or use <b>Import</b> to upload a spreadsheet.</div>';
+
+      setState('<div class="sheet-wrap"><table class="sheet"><thead>' + head + '</thead><tbody>' + rows + newRow + '</tbody></table></div>'
+        + '<div class="sheet-hint">Edit any cell and it saves on its own. Click <b>Open</b> for photos, description and page design. Type in the bottom row to add a new offer.</div>'
+        + empty);
+      wireSheet();
+    }
+
+    function wireSheet() {
+      const tb = $('offersList');
+      tb.querySelectorAll('input.cell[data-id]').forEach(function (inp) {
+        inp.addEventListener('input', function () { queueEdit(inp.dataset.id, inp.dataset.key, inp.value); });
+      });
+      tb.querySelectorAll('[data-open]').forEach(function (b) {
+        b.addEventListener('click', function () { openById(b.getAttribute('data-open')); });
+      });
+      tb.querySelectorAll('[data-newrow] input.cell').forEach(function (inp) {
+        inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); tryCreateNewRow(); } });
+      });
+      const newRow = tb.querySelector('[data-newrow]');
+      if (newRow) newRow.addEventListener('focusout', function () {
+        setTimeout(function () { if (!newRow.contains(document.activeElement)) tryCreateNewRow(); }, 60);
+      });
+    }
+
+    const saveTimers = {};
+    function markRowStatus(id, s) {
+      const el = $('offersList').querySelector('.sheet-status[data-status="' + id + '"]');
+      if (el) el.setAttribute('data-s', s);
+    }
+    function queueEdit(id, key, value) {
+      (state.edits[id] = state.edits[id] || {})[key] = value;
+      markRowStatus(id, 'saving');
+      clearTimeout(saveTimers[id]);
+      saveTimers[id] = setTimeout(function () { saveRow(id); }, 700);
+    }
+    async function ensureFull(id) {
+      if (state.full[id]) return state.full[id];
+      const r = await fetch(OFFERS_API + '?id=' + encodeURIComponent(id), { credentials: 'include' });
+      if (!r.ok) throw new Error(String(r.status));
+      const d = await r.json();
+      const offer = (d && d.offer && typeof d.offer === 'object') ? d.offer : { fields: {} };
+      if (!offer.fields || typeof offer.fields !== 'object') offer.fields = {};
+      state.full[id] = offer;
+      return offer;
+    }
+    async function saveRow(id) {
+      // Claim the pending edits up front. Any edit that arrives while this save
+      // is in flight starts a fresh batch with its own timer, so it is never
+      // dropped when we clear this one.
+      const editing = state.edits[id];
+      if (!editing) return;
+      delete state.edits[id];
+      try {
+        const full = await ensureFull(id);
+        Object.keys(editing).forEach(function (k) {
+          const v = editing[k];
+          if (v === '' || v == null) delete full.fields[k]; else full.fields[k] = String(v);
+        });
+        const r = await fetch(OFFERS_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ id: id, offer: full }) });
+        if (!r.ok) throw new Error(String(r.status));
+        // keep the in-memory summary + status chip in sync
+        const o = state.offers.find(function (x) { return x.id === id; });
+        if (o) { Object.keys(editing).forEach(function (k) { o[k] = editing[k]; }); const chip = $('offersList').querySelector('[data-chip="' + id + '"]'); if (chip) chip.innerHTML = sheetChip(o); }
+        markRowStatus(id, 'saved');
+      } catch (e) {
+        // Put the unsaved edits back (under any newer edits) so they retry.
+        state.edits[id] = Object.assign({}, editing, state.edits[id] || {});
+        markRowStatus(id, 'error');
+      }
+    }
+
+    function openById(id) {
+      fetch(OFFERS_API + '?id=' + encodeURIComponent(id), { credentials: 'include' })
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function (d) { openForm(Object.assign({ id: id }, d.offer)); })
+        .catch(function () { alert('Could not open the offer. Please try again.'); });
+    }
+
+    let creatingNew = false;
+    async function tryCreateNewRow() {
+      if (creatingNew) return;
+      const tb = $('offersList');
+      const row = tb && tb.querySelector('[data-newrow]');
+      if (!row) return;
+      const fields = {};
+      row.querySelectorAll('input.cell[data-newkey]').forEach(function (inp) {
+        const v = inp.value.trim(); if (v) fields[inp.dataset.newkey] = v;
+      });
+      if (!fields.title) return; // need at least a title to create
+      creatingNew = true;
+      try {
+        const r = await fetch(OFFERS_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ offer: { fields: fields, currency: state.config.currency } }) });
+        if (!r.ok) throw new Error(String(r.status));
+        await r.json();
+        loadOffers(); // re-render with the new offer + a fresh blank row
+      } catch (e) {
+        alert('Could not add the offer. Please try again.');
+      } finally {
+        creatingNew = false;
+      }
+    }
+
+    /* ---- View toggle (Sheet / Cards) ---- */
+    function setView(v) {
+      state.view = (v === 'cards') ? 'cards' : 'sheet';
+      try { localStorage.setItem('tg_offers_view', state.view); } catch (e) { /* noop */ }
+      document.querySelectorAll('#viewToggle button').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.view === state.view ? 'true' : 'false'); });
+      if (!state.trashMode) renderOffers();
+    }
+    $('viewToggle').addEventListener('click', function (e) {
+      const b = e.target.closest('button[data-view]'); if (b) setView(b.dataset.view);
+    });
+
+    /* ---- Download my offers (spreadsheet with Offer ID for re-upload) ---- */
+    $('btn-download').addEventListener('click', function () {
+      const btn = $('btn-download'); btn.disabled = true;
+      fetch(OFFERS_API + '?export=1', { credentials: 'include' })
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function (d) { download('my-offers.csv', window.TGOfferImport.offersToCsv((d && d.offers) || [])); })
+        .catch(function () { alert('Could not download your offers. Please try again.'); })
+        .finally(function () { btn.disabled = false; });
+    });
 
     /* ---- Multi-select + bulk delete ---- */
     function updateSelUI() {
@@ -738,6 +970,18 @@
       $('btn-do-import').disabled = true;
     }
     function handleCsv(text) {
+      // Template-only: reject anything that is not our sheet, so a client can't
+      // upload a random spreadsheet and get half-empty offers.
+      const chk = window.TGOfferImport.headerCheck(text);
+      if (!chk.ok) {
+        importReady = [];
+        $('importSummary').innerHTML = '<b style="color:var(--danger)">This does not match the template.</b> Please download the template, fill it in and upload that file.'
+          + (chk.missing && chk.missing.length ? '<br>Missing columns: ' + esc(chk.missing.join(', ')) : '');
+        $('importIssues').innerHTML = '';
+        $('btn-do-import').disabled = true;
+        $('btn-do-import').textContent = 'Import offers';
+        return;
+      }
       const rows = window.TGOfferImport.parseCsv(text);
       const mapped = window.TGOfferImport.rowsToOffers(rows);
       importReady = mapped.filter(m => !m.errors.length).map(m => m.offer);
@@ -767,7 +1011,11 @@
             if (!ok) throw new Error((j && j.error) || 'Import failed');
             $('importModal').hidden = true;
             loadOffers();
-            alert('Imported ' + j.saved + ' offer' + (j.saved === 1 ? '' : 's') + (j.skipped ? ' (' + j.skipped + ' skipped)' : '') + '.');
+            const parts = [];
+            if (j.saved) parts.push(j.saved + ' new offer' + (j.saved === 1 ? '' : 's') + ' added');
+            if (j.updated) parts.push(j.updated + ' updated');
+            if (j.skipped) parts.push(j.skipped + ' skipped');
+            alert(parts.length ? (parts.join(', ') + '.') : 'Nothing to import.');
           })
           .catch(err => { btn.disabled = false; btn.textContent = 'Import offers'; $('importSummary').textContent = 'Import failed: ' + (err.message || err); });
       });
@@ -776,6 +1024,8 @@
     /* ---- Boot ---- */
     function boot() {
       $('editor').hidden = false;
+      try { const v = localStorage.getItem('tg_offers_view'); if (v === 'cards' || v === 'sheet') state.view = v; } catch (e) { /* noop */ }
+      document.querySelectorAll('#viewToggle button').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.view === state.view ? 'true' : 'false'); });
       hydrateUI(); wireInputs(); wireImport(); setTab('design'); renderCardPreview(); loadOffers();
       // Guided setup tour. Auto-opens on first login; a persistent "Show me how"
       // launcher stays in the corner for later. Start on the workspace, so point

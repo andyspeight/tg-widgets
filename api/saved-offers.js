@@ -202,6 +202,18 @@ function summarise(rec) {
     currency: (rec.offer && rec.offer.currency) || '',
     showFrom: f.showFrom || '',
     showUntil: f.showUntil || '',
+    // Extra columns the spreadsheet (sheet) view edits inline. Kept light — the
+    // full offer (images, description, etc.) is fetched only when a row is opened
+    // or edited. Existing readers ignore the extra keys.
+    type: f.type || '',
+    country: f.country || '',
+    resort: f.resort || '',
+    nights: f.nights || '',
+    board: f.board || '',
+    period: f.period || '',
+    was: f.was || '',
+    badge: f.badge || '',
+    urgency: f.urgency || '',
     updatedAt: rec.updatedAt || 0
   };
 }
@@ -312,6 +324,22 @@ export default async function handler(req, res) {
     const ck = clientKeyOf(user);
     if (!ck) return res.status(403).json({ error: 'No client on this session.' });
 
+    // ── Export: the owner's live offers, in FULL, for the spreadsheet download ──
+    // Used by "Download my offers" so the client can edit offline and re-upload
+    // to update (matched on the Offer ID column) rather than duplicate.
+    if (req.method === 'GET' && req.query && req.query.export) {
+      if (!applyRateLimit(res, 'offers:export:' + ck, RATE_LIMITS.widgetRead)) return;
+      if (!configured()) return res.status(200).json({ offers: [] });
+      const ids = await zrangebyscore('offers:idx:' + ck, '-inf', '+inf');
+      const recent = (ids || []).reverse().slice(0, MAX_LIST);
+      const offers = [];
+      for (const id of recent) {
+        const rec = await getJson('offer:' + id);
+        if (rec && rec.offer && !rec.deletedAt) offers.push({ id: id, offer: rec.offer });
+      }
+      return res.status(200).json({ offers: offers });
+    }
+
     // ── Recently deleted bin (lazy-purges entries older than 30 days) ──
     if (req.method === 'GET' && req.query && req.query.trash) {
       if (!applyRateLimit(res, 'offers:trash:' + ck, RATE_LIMITS.widgetRead)) return;
@@ -365,21 +393,42 @@ export default async function handler(req, res) {
       }
 
       // ── Bulk import: { offers: [ ... ] } (spreadsheet upload) ──
+      // A row with a valid Offer ID this client owns UPDATES that offer; a blank
+      // id CREATES a fresh one. An id that is unknown or owned by someone else is
+      // skipped — never overwritten, never created under the given id — so a
+      // tampered or stale id can't touch another client's offer.
       if (Array.isArray(body.offers)) {
         const MAX_BULK = 200;
         const batch = body.offers.slice(0, MAX_BULK);
         const now = Date.now();
         const ids = [];
-        let skipped = 0;
+        let updated = 0, skipped = 0;
         for (let i = 0; i < batch.length; i++) {
           const cleaned = cleanOffer(batch[i]);
           if (!cleaned || !cleaned.fields || !Object.keys(cleaned.fields).length || JSON.stringify(cleaned).length > MAX_OFFER_BYTES) { skipped++; continue; }
-          // Import only ever CREATES offers — a fresh, guaranteed-unused id per
-          // row — so it can never overwrite an existing offer. Any id on the
-          // incoming row is ignored by design.
+          const ts = now + i; // distinct scores keep import order in the index
+
+          const wantId = (batch[i] && typeof batch[i].id === 'string') ? batch[i].id.trim() : '';
+          if (wantId) {
+            if (!ID_RE.test(wantId)) { skipped++; continue; }
+            const existing = await getJson('offer:' + wantId);
+            if (!existing || (existing.ownerKey !== ck && !isStaff(user))) { skipped++; continue; }
+            const ok = await setJson('offer:' + wantId, {
+              id: wantId, offer: cleaned,
+              ownerKey: existing.ownerKey || ck,
+              ownerEmail: existing.ownerEmail || user.email || '',
+              clientId: existing.clientId || user.clientId || '',
+              createdAt: existing.createdAt || ts, updatedAt: ts
+            });
+            if (!ok) { skipped++; continue; }
+            await zrem('offers:trash:' + (existing.ownerKey || ck), wantId); // re-uploading revives a binned offer
+            await zadd('offers:idx:' + ck, ts, wantId);
+            updated++;
+            continue;
+          }
+
           const id = await reserveNewId();
           if (!id) { skipped++; continue; }
-          const ts = now + i; // distinct scores keep import order in the index
           const ok = await setJson('offer:' + id, {
             id: id, offer: cleaned, ownerKey: ck, ownerEmail: user.email || '',
             clientId: user.clientId || '', createdAt: ts, updatedAt: ts
@@ -388,7 +437,7 @@ export default async function handler(req, res) {
           await zadd('offers:idx:' + ck, ts, id);
           ids.push(id);
         }
-        return res.status(200).json({ saved: ids.length, skipped: skipped, ids: ids });
+        return res.status(200).json({ saved: ids.length, updated: updated, skipped: skipped, ids: ids });
       }
 
       const offer = cleanOffer(body.offer);
