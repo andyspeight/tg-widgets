@@ -42,6 +42,7 @@
   }
   const API_BASE = resolveApiBase();
   const ENQUIRY_URL = API_BASE.replace(/\/widget-config(\/)?$/, '/trip-enquiry');
+  const AVAIL_URL = API_BASE.replace(/\/widget-config(\/)?$/, '/trip-availability');
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   function esc(s) {
@@ -213,6 +214,9 @@
     .tgtp-facts-row:first-of-type { margin-top: 16px; }
     .tgtp-facts-row svg { color: var(--tgtp-brand); flex-shrink: 0; }
     .tgtp-facts-row b { font-weight: 600; }
+    .tgtp-avail { margin-top: 12px; font-size: 14px; font-weight: 700; color: var(--tgtp-sub); }
+    .tgtp-avail.is-low { color: var(--tgtp-brand); }
+    .tgtp-avail.is-sold { display: inline-block; color: #fff; background: var(--tgtp-muted); padding: 4px 12px; border-radius: 999px; font-size: 13px; }
     .tgtp-deposit-note { margin-top: 14px; font-size: 13px; color: var(--tgtp-sub); background: var(--tgtp-bg); border: 1px dashed var(--tgtp-border); border-radius: 10px; padding: 10px 12px; }
     .tgtp-cta { display: block; width: 100%; margin-top: 16px; background: var(--tgtp-brand); color: #fff; border: 0; border-radius: 12px; padding: 14px 18px; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer; text-align: center; transition: background 0.15s ease; }
     .tgtp-cta:hover { background: var(--tgtp-brand-hover); }
@@ -407,7 +411,9 @@
         : '';
 
       return '<aside class="tgtp-aside"><div class="tgtp-facts">'
-        + priceBlock + rows + depositNote
+        + priceBlock + rows
+        + '<div class="tgtp-avail" data-role="avail" hidden></div>'
+        + depositNote
         + '<button type="button" class="tgtp-cta" data-role="enquire-cta">Enquire about this trip</button>'
         + '</div></aside>';
     }
@@ -495,6 +501,34 @@
       }
 
       if (form) form.addEventListener('submit', (ev) => { ev.preventDefault(); this._submit(form); });
+
+      this._loadAvailability();
+    }
+
+    // Live "places left" in the facts panel. Only for a real, saved embed (no
+    // widget id in preview/demo). Calm: shows nothing unless a usable count
+    // comes back, and never blocks the page.
+    _loadAvailability() {
+      if (!this.widgetId) return;
+      const node = this.root && this.root.querySelector('[data-role="avail"]');
+      if (!node) return;
+      const token = (this._availToken = (this._availToken || 0) + 1);
+      fetch(AVAIL_URL + '?widgetId=' + encodeURIComponent(this.widgetId))
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then((d) => {
+          if (token !== this._availToken) return;
+          if (!d || !d.ok || !d.available) return;
+          if (d.soldOut) {
+            node.textContent = 'Sold out';
+            node.className = 'tgtp-avail is-sold';
+            node.hidden = false;
+          } else if (typeof d.remaining === 'number' && d.remaining > 0) {
+            node.textContent = (d.remaining <= 5 ? 'Only ' : '') + d.remaining + (d.remaining === 1 ? ' place left' : ' places left');
+            node.className = 'tgtp-avail' + (d.remaining <= 5 ? ' is-low' : '');
+            node.hidden = false;
+          }
+        })
+        .catch(function () { /* stay silent on a hiccup */ });
     }
 
     async _submit(form) {

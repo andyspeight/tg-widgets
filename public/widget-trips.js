@@ -48,6 +48,7 @@
     return '/api/widget-config';
   }
   const API_BASE = resolveApiBase();
+  const AVAIL_URL = API_BASE.replace(/\/widget-config(\/)?$/, '/trip-availability');
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   function esc(s) {
@@ -207,6 +208,11 @@
     }
     .tgtr-deposit strong { color: var(--tgtr-text); font-weight: 600; }
 
+    /* Live availability line (filled in after render, hidden until known) */
+    .tgtr-avail { margin-top: 10px; font-size: 13px; font-weight: 600; color: var(--tgtr-sub); }
+    .tgtr-avail.is-low { color: var(--tgtr-brand); }
+    .tgtr-avail.is-sold { display: inline-block; color: #fff; background: var(--tgtr-muted); padding: 3px 11px; border-radius: 999px; font-size: 12px; letter-spacing: 0.02em; }
+
     /* Honest closed state: the trip has departed */
     .tgtr-closed {
       margin-top: 16px; padding: 12px 14px; border-radius: 10px;
@@ -230,6 +236,10 @@
       container._tgInitialised = true;
       container._tgWidget = this;   // host pages can reach update() after auto-init
       this.cfg = this._defaults(config);
+      // The public widget id — used to look up live availability. From
+      // data-tg-id (real embed) or config._widgetId (loader). Absent in
+      // inline/demo/editor-preview mode, where availability simply isn't shown.
+      this.widgetId = this.cfg._widgetId || container.getAttribute('data-tg-id') || '';
       this.shadow = container.attachShadow({ mode: 'open' });
       this._render();
     }
@@ -339,11 +349,43 @@
           + '<h2 class="tgtr-title" data-role="title">' + esc(t.title) + '</h2>'
           + (t.description ? '<p class="tgtr-desc" data-role="description">' + esc(t.description) + '</p>' : '')
           + pricing
+          + (departed ? '' : '<div class="tgtr-avail" data-role="avail" hidden></div>')
         + '</div>'
         + '</section>';
 
       this.shadow.innerHTML = '<style>' + STYLES + '</style>';
       this.shadow.appendChild(this.root);
+
+      // Live "places left" — only for a real, saved embed (never in a preview,
+      // which has no widget id). Patched in after render; the card never waits
+      // on it, and a failure stays silent.
+      this._loadAvailability(departed);
+    }
+
+    // Fetch counts-only availability and patch the "places left" node. Calm by
+    // design: shows nothing unless the endpoint returns a usable count, so the
+    // card is never wrong and never blank on a hiccup.
+    _loadAvailability(departed) {
+      if (departed || !this.widgetId) return;
+      const node = this.root && this.root.querySelector('[data-role="avail"]');
+      if (!node) return;
+      const token = (this._availToken = (this._availToken || 0) + 1);
+      fetch(AVAIL_URL + '?widgetId=' + encodeURIComponent(this.widgetId))
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then((d) => {
+          if (token !== this._availToken) return;   // superseded by a newer render
+          if (!d || !d.ok || !d.available) return;   // calm: show nothing
+          if (d.soldOut) {
+            node.textContent = 'Sold out';
+            node.className = 'tgtr-avail is-sold';
+            node.hidden = false;
+          } else if (typeof d.remaining === 'number' && d.remaining > 0) {
+            node.textContent = (d.remaining <= 5 ? 'Only ' : '') + d.remaining + (d.remaining === 1 ? ' place left' : ' places left');
+            node.className = 'tgtr-avail' + (d.remaining <= 5 ? ' is-low' : '');
+            node.hidden = false;
+          }
+        })
+        .catch(function () { /* network hiccup — stay silent, never block the card */ });
     }
 
     // Public: apply new config and re-render in place. Called by the editor

@@ -64,6 +64,19 @@ export function limitsFor(event) {
         { name: 'm', max: envInt('RL_POPUP_PER_MIN', 20), seconds: 60 },
         { name: 'h', max: envInt('RL_POPUP_PER_HR', 200), seconds: 3600 },
       ];
+    // Group Trips enquiry — a public lead write, kept tight like popup-lead.
+    case 'trip-enquiry':
+      return [
+        { name: 'm', max: envInt('RL_TRIP_ENQUIRY_PER_MIN', 10), seconds: 60 },
+        { name: 'h', max: envInt('RL_TRIP_ENQUIRY_PER_HR', 80), seconds: 3600 },
+      ];
+    // Group Trips availability — a public read, CDN-cached 60s, so origin hits
+    // are already rare. A generous read limit guards the origin all the same.
+    case 'trip-availability':
+      return [
+        { name: 'm', max: envInt('RL_TRIP_AVAIL_PER_MIN', 60), seconds: 60 },
+        { name: 'h', max: envInt('RL_TRIP_AVAIL_PER_HR', 1200), seconds: 3600 },
+      ];
     default:
       return null;
   }
@@ -168,8 +181,11 @@ export async function evaluatePublicRateLimit(req, res, { event, widgetId } = {}
   }
 
   // Our own editor/preview never counts against the public limit (read paths).
-  // popup-lead is a write and keeps its full protection regardless.
-  if (event !== 'popup-lead' && isTrustedPreviewRequest(req)) {
+  // Lead WRITES (popup-lead, trip-enquiry) keep full protection regardless —
+  // the preview signal is host-supplied and must never relax an abuse limit on
+  // a write path.
+  const NO_PREVIEW_RELAX = event === 'popup-lead' || event === 'trip-enquiry';
+  if (!NO_PREVIEW_RELAX && isTrustedPreviewRequest(req)) {
     return { allowed: true, ip, widgetId: wid, preview: true };
   }
 

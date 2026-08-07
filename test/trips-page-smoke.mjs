@@ -30,7 +30,7 @@ function serve(dir, port) {
   return new Promise((res) => {
     const s = http.createServer((req, rsp) => {
       const p = decodeURIComponent(req.url.split('?')[0]);
-      if (p.startsWith('/api/')) { rsp.statusCode = 404; rsp.setHeader('Content-Type', 'application/json'); return rsp.end('{"error":"not here"}'); }
+      if (p.startsWith('/api/')) { rsp.statusCode = 404; rsp.setHeader('Content-Type', 'application/json'); rsp.setHeader('Access-Control-Allow-Origin', '*'); return rsp.end('{"error":"not here"}'); }
       const fp = path.join(dir, p === '/' ? 'index.html' : p);
       if (!fp.startsWith(dir) || !fs.existsSync(fp) || !fs.statSync(fp).isFile()) { rsp.statusCode = 404; return rsp.end('nf'); }
       rsp.setHeader('Content-Type', MIME[path.extname(fp)] || 'application/octet-stream');
@@ -292,6 +292,48 @@ const statusText = (page) => page.evaluate(() => {
   ok(s.pageItinerary === 7, `suite: full page shows the itinerary (got ${s.pageItinerary} days)`);
   ok(s.pageForm, 'suite: full page includes the enquiry form');
   ok(errors.length === 0, 'suite: no script errors (' + errors.join(' | ') + ')');
+  await page.close();
+}
+
+// ── 9. Full page shows live availability in the facts panel ──────────────────
+{
+  const { page, errors } = await newPage();
+  let availResp = { ok: true, available: true, capacity: 16, remaining: 2, soldOut: false };
+  await page.route('**/api/trip-availability**', (r) =>
+    r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(availResp) }));
+
+  const cfg = JSON.stringify({
+    trip: { title: 'Availability Page', startDate: '2027-05-10', location: 'Testville', currency: 'gbp', pricePence: 150000, capacity: 16 },
+    details: { overview: 'A trip.' },
+  }).replace(/'/g, '&#39;');
+  const mount = async () => {
+    await page.setContent(
+      `<!doctype html><html><body><div id="t" data-tg-widget="trips-page" data-tg-id="tgw_avail_page" data-tg-config='${cfg}'></div>` +
+      `<script src="${BASE}/widget-trips-page.js"></script></body></html>`, { waitUntil: 'load' });
+    await page.waitForFunction(() => {
+      const el = document.getElementById('t');
+      return !!(el && el.shadowRoot && el.shadowRoot.querySelector('[data-role="form"]'));
+    }, { timeout: 6000 });
+    await page.waitForTimeout(200);
+  };
+  const avail = () => page.evaluate(() => {
+    const n = document.getElementById('t')?.shadowRoot?.querySelector('[data-role="avail"]');
+    return { text: n?.textContent || '', hidden: n ? !!n.hidden : true };
+  });
+
+  await mount();
+  let s = await avail();
+  ok(!s.hidden && /Only 2 places left/.test(s.text), `page avail: "Only 2 places left" (got "${s.text}")`);
+
+  availResp = { ok: true, available: true, capacity: 16, remaining: 0, soldOut: true };
+  await mount(); s = await avail();
+  ok(!s.hidden && /Sold out/.test(s.text), `page avail: "Sold out" (got "${s.text}")`);
+
+  availResp = { ok: true, available: false };
+  await mount(); s = await avail();
+  ok(s.hidden, 'page avail: hidden when availability is unknown');
+
+  ok(errors.length === 0, 'page avail: no script errors (' + errors.join(' | ') + ')');
   await page.close();
 }
 

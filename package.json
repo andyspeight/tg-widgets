@@ -83,6 +83,7 @@
     "test:trips": "node test/trips-widget-smoke.mjs",
     "test:trips-page": "node test/trips-page-smoke.mjs",
     "test:trips-enquiry": "node test/trips-enquiry-schema-smoke.mjs",
+    "test:trips-capacity": "node test/trips-capacity-smoke.mjs",
     "test:loader-export": "node test/loader-export-smoke.mjs"
   },
   "dependencies": {

@@ -36,7 +36,7 @@ function serve(dir, port) {
   return new Promise((res) => {
     const s = http.createServer((req, rsp) => {
       const p = decodeURIComponent(req.url.split('?')[0]);
-      if (p.startsWith('/api/')) { rsp.statusCode = 404; rsp.setHeader('Content-Type', 'application/json'); return rsp.end('{"error":"not here"}'); }
+      if (p.startsWith('/api/')) { rsp.statusCode = 404; rsp.setHeader('Content-Type', 'application/json'); rsp.setHeader('Access-Control-Allow-Origin', '*'); return rsp.end('{"error":"not here"}'); }
       const fp = path.join(dir, p === '/' ? 'index.html' : p);
       if (!fp.startsWith(dir) || !fs.existsSync(fp) || !fs.statSync(fp).isFile()) { rsp.statusCode = 404; return rsp.end('nf'); }
       rsp.setHeader('Content-Type', MIME[path.extname(fp)] || 'application/octet-stream');
@@ -274,6 +274,54 @@ async function newPage() {
   ok(pagePrev.hasForm, 'editor: page preview includes the enquiry form');
   ok(pagePrev.cardHidden, 'editor: switching to page hides the card preview');
   ok(errors.length === 0, 'editor: no script errors (' + errors.join(' | ') + ')');
+  await page.close();
+}
+
+// ── 6. Card shows live availability (places left / sold out / hidden) ────────
+// A real, saved embed (has a widget id) fetches counts and shows them. The
+// endpoint is stubbed so each state is deterministic.
+{
+  const { page, errors } = await newPage();
+  let availResp = { ok: true, available: true, capacity: 16, remaining: 3, soldOut: false };
+  await page.route('**/api/trip-availability**', (r) =>
+    r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(availResp) }));
+
+  const cfg = JSON.stringify({ trip: {
+    title: 'Availability Trip', startDate: '2027-05-10', location: 'Testville',
+    currency: 'gbp', pricePence: 100000, capacity: 16,
+  } }).replace(/'/g, '&#39;');
+  const mount = async () => {
+    await page.setContent(
+      `<!doctype html><html><body><div id="c" data-tg-widget="trips" data-tg-id="tgw_avail_1" data-tg-config='${cfg}'></div>` +
+      `<script src="${BASE}/widget-trips.js"></script></body></html>`, { waitUntil: 'load' });
+    await page.waitForFunction(() => {
+      const el = document.getElementById('c');
+      return !!(el && el.shadowRoot && el.shadowRoot.querySelector('[data-role="title"]'));
+    }, { timeout: 6000 });
+    await page.waitForTimeout(200); // let the availability fetch resolve + patch
+  };
+  const avail = () => page.evaluate(() => {
+    const n = document.getElementById('c')?.shadowRoot?.querySelector('[data-role="avail"]');
+    return { text: n?.textContent || '', hidden: n ? !!n.hidden : true };
+  });
+
+  await mount();
+  let s = await avail();
+  ok(!s.hidden && /Only 3 places left/.test(s.text), `card avail: "Only 3 places left" (got "${s.text}", hidden=${s.hidden})`);
+
+  availResp = { ok: true, available: true, capacity: 16, remaining: 12, soldOut: false };
+  await mount(); s = await avail();
+  ok(!s.hidden && /12 places left/.test(s.text) && !/Only/.test(s.text), `card avail: "12 places left" (got "${s.text}")`);
+
+  availResp = { ok: true, available: true, capacity: 16, remaining: 0, soldOut: true };
+  await mount(); s = await avail();
+  ok(!s.hidden && /Sold out/.test(s.text), `card avail: "Sold out" (got "${s.text}")`);
+
+  availResp = { ok: true, available: false };
+  await mount(); s = await avail();
+  ok(s.hidden, 'card avail: stays hidden when availability is unknown');
+
+  ok(errors.length === 0, 'card avail: no script errors (' + errors.join(' | ') + ')');
   await page.close();
 }
 
