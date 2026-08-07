@@ -1578,8 +1578,13 @@ describe('the widget blocks', () => {
     const field = blockDefinition('widget')?.fields.find((f) => f.key === 'widget');
     expect(field?.kind).toBe('select');
     if (field?.kind !== 'select') return;
-    expect(field.options.length).toBe(WIDGET_KINDS.length);
-    for (const option of field.options) {
+    // A leading blank "Choose a widget…" option, then one per widget kind. The
+    // blank is the empty default that replaced the silent Opening Hours one; it
+    // is not a widget, so it is the one option without a script.
+    const real = field.options.filter((option) => option.value !== '');
+    expect(field.options.length).toBe(WIDGET_KINDS.length + 1);
+    expect(real.length).toBe(WIDGET_KINDS.length);
+    for (const option of real) {
       expect(widgetScriptUrl(option.value)).not.toBeNull();
     }
   });

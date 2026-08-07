@@ -4081,72 +4081,65 @@ async function addBlock(name) {
  */
 const added = () => page.locator('.ed-canvas-frame [data-path].is-selected');
 
-await check('a Travelgenix widget can be put on a page', async () => {
+await check('a Travelgenix widget starts by asking which widget', async () => {
   await addBlock('Travelgenix widget');
   const here = added();
   if ((await here.count()) !== 1) return `${await here.count()} blocks selected after adding`;
-  const inside = await here.locator('.tgs-widget-ghost, .tgs-placeholder').count();
-  return inside > 0 ? true : 'the new block drew nothing';
+  // No default kind now, so it says "Choose a widget" rather than silently
+  // building an Opening Hours one, which is the bug this replaces.
+  const text = await here.locator('.tgs-placeholder').first().innerText().catch(() => '');
+  return /choose a widget/i.test(text) ? true : `it says "${text}"`;
 });
 
-await check('and asks for the ID rather than rendering an empty box', async () => {
-  // Fresh, so it has no id yet and says so rather than drawing nothing.
-  const text = await added().locator('.tgs-placeholder').first().innerText();
-  return /tgw_/.test(text) ? true : `it says "${text}"`;
-});
-
-await check('a valid ID turns it into a labelled placeholder, not a live widget', async () => {
-  const field = page.locator('.ed-props input.ed-input').last();
-  await field.fill('tgw_verify123');
+await check('picking a widget and an ID renders it live in a frame', async () => {
+  await page.locator('.ed-props select').first().selectOption('hours');
+  await page.locator('.ed-props input.ed-input').last().fill('tgw_verify123');
   await page.waitForTimeout(500);
-
-  const ghost = page.locator('.tgs-widget-ghost');
-  if (!(await ghost.count())) return 'no placeholder appeared';
-  const text = await ghost.last().innerText();
-  return /tgw_verify123/.test(text) ? true : `the placeholder says "${text}"`;
+  const frame = added().locator('.tgs-widget-frame iframe');
+  if ((await frame.count()) !== 1) return `${await frame.count()} widget frames on the canvas`;
+  const doc = (await frame.getAttribute('srcdoc')) ?? '';
+  if (!/data-tg-widget="hours"/.test(doc)) return 'the chosen widget is not in the frame';
+  if (!/tgw_verify123/.test(doc)) return 'the id is not in the frame';
+  return /widget-hours\.js/.test(doc) ? true : 'the widget script is not in the frame';
 });
 
 /*
- * THE ONE THAT MATTERS. A widget script loading in the editor is the failure
- * this design exists to avoid, and it is invisible: the page would look right.
+ * THE ONE THAT MATTERS, INVERTED. The widget is live on the canvas now, but it
+ * runs in ITS OWN document. So the editor page itself must still load no widget
+ * script and draw no widget container: that isolation is the whole reason a
+ * widget can be live on the canvas without thrashing the editor on every redraw.
  */
-await check('and the editor loads no widget script at all', async () => {
-  const scripts = await page.evaluate(() =>
-    [...document.querySelectorAll('script[src]')]
+await check("and the widget's script stays in the frame, off the editor page", async () => {
+  const leaked = await page.evaluate(() => ({
+    scripts: [...document.querySelectorAll('script[src]')]
       .map((s) => s.getAttribute('src'))
-      .filter((src) => /travelify|widget-/.test(src ?? '')));
-  return scripts.length === 0 ? true : JSON.stringify(scripts);
-});
-
-await check('nor draws the container the script would fill', async () => {
-  const containers = await page.locator('[data-tg-widget]').count();
-  return containers === 0 ? true : `${containers} live widget containers on the canvas`;
+      .filter((src) => /travelify|widget-/.test(src ?? '')),
+    containers: document.querySelectorAll('[data-tg-widget]').length,
+  }));
+  if (leaked.scripts.length) return `the editor page loaded ${JSON.stringify(leaked.scripts)}`;
+  return leaked.containers === 0 ? true : `${leaked.containers} live containers on the editor page`;
 });
 
 await check("somebody else's widget can be put on a page too", async () => {
   await addBlock('Embedded widget');
-  const added = await page.locator('.ed-canvas-frame .tgs-placeholder').count();
-  return added > 0 ? true : 'nothing was added';
+  const text = await added().locator('.tgs-placeholder').first().innerText().catch(() => '');
+  return /paste the code/i.test(text) ? true : `it says "${text}"`;
 });
 
 /*
- * And their code does not run while you edit either. A sealed frame would be
- * safe, but it would still reload on every keystroke and report an editing
- * session to their analytics as if it were a visitor.
+ * It renders live on the canvas now, but SEALED. The code runs in a sandboxed
+ * frame at an opaque origin, so it can draw in its own box and nothing more:
+ * reaching for the editor's window throws, and the flag it tries to set on the
+ * parent never appears.
  */
-await check('and their code does not run on the canvas either', async () => {
+await check('and a sealed embed renders on the canvas without reaching the editor', async () => {
   const field = page.locator('.ed-props textarea').last();
-  await field.fill('<script>window.__TG_EMBED_RAN__ = true;</script><p>hello</p>');
+  await field.fill('<script>try{window.parent.__TG_EMBED_RAN__=true}catch(e){}</script><p>hello</p>');
   await page.waitForTimeout(600);
-
-  const frames = await page.locator('.ed-canvas-frame iframe').count();
-  const ran = await page.evaluate(() => Boolean(window.__TG_EMBED_RAN__));
-  return frames === 0 && !ran ? true : `${frames} frames, script ran ${ran}`;
-});
-
-await check('it shows what it is instead, so the layout is still readable', async () => {
-  const ghost = await page.locator('.tgs-widget-ghost').last().innerText();
-  return /published page/i.test(ghost) ? true : `it says "${ghost}"`;
+  const frames = await added().locator('.tgs-embed-widget iframe').count();
+  const reached = await page.evaluate(() => Boolean(window.__TG_EMBED_RAN__));
+  if (frames < 1) return 'the sealed widget did not render on the canvas';
+  return !reached ? true : 'the sealed code reached the editor window';
 });
 
 

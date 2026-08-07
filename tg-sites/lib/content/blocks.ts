@@ -2032,7 +2032,10 @@ export const BLOCKS: readonly BlockDefinition[] = [
     group: 'Advanced',
     icon: 'sparkle',
     description: 'One of your own widgets: offers, reviews, an enquiry form.',
-    defaults: { widget: 'hours', widgetId: '' },
+    // No default kind: it used to open on Opening Hours, so entering an ID
+    // without touching the dropdown silently built an Opening Hours widget. Blank
+    // shows "Choose a widget" until one is picked (or detected from the ID).
+    defaults: { widget: '', widgetId: '' },
     summarise: (props) =>
       WIDGET_KINDS.find((kind) => kind.tag === props.widget)?.label ?? 'Widget',
     fields: [
@@ -2040,7 +2043,10 @@ export const BLOCKS: readonly BlockDefinition[] = [
         kind: 'select',
         key: 'widget',
         label: 'Which widget',
-        options: WIDGET_KINDS.map((kind) => ({ value: kind.tag, label: kind.label })),
+        options: [
+          { value: '', label: 'Choose a widget…' },
+          ...WIDGET_KINDS.map((kind) => ({ value: kind.tag, label: kind.label })),
+        ],
         help: 'The ones that sit in a column. Site-wide widgets like the cookie banner are not here.',
       },
       {

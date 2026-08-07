@@ -22,7 +22,7 @@ import { parseTable } from '../../lib/content/table';
 import { resolveVideo } from '../../lib/content/video';
 import { mapEmbedSrc } from '../../lib/content/map';
 import { socialNetwork } from '../../lib/content/social';
-import { safeWidgetId, widgetKind } from '../../lib/content/widgets';
+import { safeWidgetId, widgetKind, WIDGET_ORIGIN, type WidgetKind } from '../../lib/content/widgets';
 import { SocialIcon } from './social-icons';
 import { ContentIcon } from './content-icon';
 import { isIconName } from '../../lib/content/icons';
@@ -669,16 +669,45 @@ export function WidgetBlock({
   }
 
   if (editing) {
+    /*
+     * THE REAL WIDGET ON THE CANVAS, in a frame of its own. Andy asked to see it
+     * while building rather than a placeholder. The frame is the isolation the
+     * ghost note used to promise in words: the widget's script runs in its own
+     * document, so the editor's per-keystroke redraw cannot reach it and it
+     * cannot reach the editor. React keeps the same iframe while the tag and id
+     * are unchanged, so it loads ONCE, not on every keystroke, which is the whole
+     * reason it was a placeholder before. Changing the widget or the id gives a
+     * fresh document, which is right: it is a different widget.
+     */
     return (
-      <div className="tgs-widget-ghost">
-        <span className="tgs-widget-ghost__name">{kind.label}</span>
-        <span className="tgs-widget-ghost__id">{id}</span>
-        <span className="tgs-widget-ghost__note">Shown for real on the published page</span>
+      <div className="tgs-widget-frame">
+        <iframe title={kind.label} srcDoc={widgetPreviewDoc(kind, id)} loading="lazy" />
       </div>
     );
   }
 
   return <div className="tgs-widget" data-tg-widget={kind.tag} data-tg-id={id} />;
+}
+
+/**
+ * The self-contained document a widget preview iframe carries.
+ *
+ * The container plus the one script the embed contract calls for, exactly as the
+ * published page emits, but sealed in an iframe so it is the editor's preview
+ * rather than a script on the editor itself. Everything in it is built here from
+ * the closed list (the tag and the script name) and a validated id, so nothing
+ * is client-controlled markup. The widget fetches its own config from
+ * WIDGET_ORIGIN, which answers cross-origin, so the preview shows the real thing.
+ */
+function widgetPreviewDoc(kind: WidgetKind, id: string): string {
+  const src = `${WIDGET_ORIGIN}/${kind.script}`;
+  return (
+    '<!doctype html><meta charset="utf-8">' +
+    '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+    '<style>html,body{margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif}</style>' +
+    `<div data-tg-widget="${kind.tag}" data-tg-id="${id}"></div>` +
+    `<script src="${src}" defer><\/script>`
+  );
 }
 
 /**
@@ -718,9 +747,10 @@ const SANDBOX = [
 
 export function EmbedWidgetBlock({
   props,
-  editing = false,
 }: {
   props: Props;
+  /** Kept for the shared block-render signature; the sealed box renders the same
+   *  on the canvas and the page, so it is no longer read. */
   editing?: boolean;
 }): ReactElement {
   const html = typeof props.html === 'string' ? props.html : '';
@@ -732,20 +762,13 @@ export function EmbedWidgetBlock({
   }
 
   /*
-   * NOT RUN ON THE CANVAS. It is sealed, so it could be run safely, and it is
-   * still the wrong thing: the canvas re-renders on every keystroke and each one
-   * would reload the frame and re-run somebody else's script, which is slow and
-   * makes their analytics count an editing session as traffic.
+   * RUN ON THE CANVAS TOO, sealed as ever. Andy asked to see it while building.
+   * It was a placeholder before out of a fear the canvas would reload it on every
+   * keystroke, but it does not: React keeps the same iframe while the code and
+   * the height are unchanged, so it loads once, and only re-runs when the code
+   * itself is edited, which is exactly when you want to see the change. The
+   * `editing` flag is no longer read, because the sealed box is safe either way.
    */
-  if (editing) {
-    return (
-      <div className="tgs-widget-ghost" style={{ minHeight: height }}>
-        <span className="tgs-widget-ghost__name">{title}</span>
-        <span className="tgs-widget-ghost__note">Shown for real on the published page</span>
-      </div>
-    );
-  }
-
   return (
     <div className="tgs-embed-widget" style={{ height }}>
       <iframe

@@ -1023,37 +1023,23 @@
    client cannot see to change. Width only, so it cannot escape its column. */
 .tgs-widget { max-width: 100%; }
 
-/* What the EDITOR shows instead of running the widget. Named a ghost rather
-   than a placeholder because it is not an empty state: the block is correctly
-   filled in, this is just not where it runs. See WidgetBlock for why. */
-.tgs-widget-ghost {
-  display: grid;
-  place-items: center;
-  align-content: center;
-  gap: 4px;
-  min-height: 120px;
-  padding: var(--tgs-space-m);
-  border: 1px dashed var(--tgs-border-strong);
+/* The editor's live preview of a Travelgenix widget: the real widget in a frame
+   of its own. A fixed, generous height, because sizing to the widget would need
+   script the published page must not ship; the published page has no frame and
+   the widget sizes itself, and Preview shows the true height. See WidgetBlock. */
+.tgs-widget-frame {
+  max-width: 100%;
+  height: 460px;
+  overflow: hidden;
+  border: 1px solid var(--tgs-border);
   border-radius: var(--tgs-radius-md);
-  background: var(--tgs-surface-alt);
-  text-align: center;
+  background: var(--tgs-surface);
 }
-
-.tgs-widget-ghost__name {
-  color: var(--tgs-text);
-  font-size: var(--tgs-text-s);
-  font-weight: 600;
-}
-
-.tgs-widget-ghost__id {
-  color: var(--tgs-text-muted);
-  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
-  font-size: var(--tgs-text-s);
-}
-
-.tgs-widget-ghost__note {
-  color: var(--tgs-text-muted);
-  font-size: var(--tgs-text-s);
+.tgs-widget-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
 }
 
 /* Somebody else's widget, in its sealed box. The height comes from the block,
