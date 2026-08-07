@@ -796,10 +796,15 @@ export function VideoBlock({ props }: { props: Props }): ReactElement {
  *
  * The client never touches a URL or a key: they type a place, and mapEmbedSrc
  * turns it into a sealed, host-fixed embed. See lib/content/map.ts for why that
- * is safe. The frame is off the canvas while editing, the same call the embedded
- * widget and the video make: the editor re-renders on every keystroke and
- * reloading a map on each one is a distraction and a needless request, so the
- * address shows in a placeholder and the real map draws on the published page.
+ * is safe.
+ *
+ * THE MAP DRAWS ON THE CANVAS TOO, not only when published, because a client
+ * asked to see it while building. What keeps that from reloading Google on every
+ * keystroke is the field, not this: the address is committed when a match is
+ * picked or the box is left, never per letter (see PlaceField in
+ * components/editor/Fields.tsx), so the frame's src changes rarely. On the canvas
+ * the frame is inert, `pointer-events: none`, so a click selects the block rather
+ * than panning the map; published, it is live and full-screenable.
  */
 export function MapBlock({
   props,
@@ -818,44 +823,25 @@ export function MapBlock({
   }
 
   const title = caption || `Map of ${address}`;
-
-  if (editing) {
-    return (
-      <div className="tgs-map-ghost" style={{ minHeight: height }}>
-        <span className="tgs-map-ghost__pin" aria-hidden="true">
-          <svg
-            viewBox="0 0 24 24"
-            width="22"
-            height="22"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z" />
-            <circle cx="12" cy="10" r="3" />
-          </svg>
-        </span>
-        <span className="tgs-map-ghost__addr">{address}</span>
-        <span className="tgs-map-ghost__note">Your map appears here on the published site</span>
-      </div>
-    );
-  }
-
   const src = mapEmbedSrc(address, props.zoom);
 
   return (
     <div className="tgs-map">
       <figure style={{ margin: 0 }}>
-        <div className="tgs-map__frame" data-radius={radius} style={{ height }}>
+        <div
+          className="tgs-map__frame"
+          data-radius={radius}
+          // Inert on the canvas so a click selects the block; see the CSS.
+          data-static={editing ? 'true' : undefined}
+          style={{ height }}
+        >
           {src && (
             <iframe
               src={src}
               title={title}
               loading="lazy"
               referrerPolicy="no-referrer"
-              allowFullScreen
+              allowFullScreen={!editing}
             />
           )}
         </div>

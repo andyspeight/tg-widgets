@@ -18,6 +18,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { Field } from '../../lib/content/blocks';
+import type { PlaceMatch } from '../../lib/content/geocode';
 import { COLOUR_SWATCHES } from '../../lib/content/styles';
 import { importContent, importFields } from '../../lib/content/imported';
 import { ImageField } from '../media/ImageField';
@@ -72,6 +73,21 @@ export function FieldRenderer({
             maxLength={'max' in field ? field.max : undefined}
             placeholder={'placeholder' in field ? field.placeholder : undefined}
             onChange={(event) => onChange(event.target.value)}
+          />
+        </Wrapper>
+      );
+
+    case 'place':
+      return (
+        <Wrapper field={field}>
+          <PlaceField
+            /* Remounts when a different block is selected, so the box shows that
+               block's address rather than the last one's. */
+            key={`${ownerId}:${field.key}`}
+            value={asString(value)}
+            max={'max' in field ? field.max : undefined}
+            placeholder={'placeholder' in field ? field.placeholder : undefined}
+            onChange={onChange}
           />
         </Wrapper>
       );
@@ -600,6 +616,131 @@ function RichText({ html, onChange }: { html: string; onChange: (value: string) 
         document.execCommand('insertText', false, text);
       }}
     />
+  );
+}
+
+/**
+ * The address field for the map: type, see the matches, pick one.
+ *
+ * It keeps what is being typed in local state and writes to the block only when
+ * a match is picked, or on blur, or on Enter, NEVER on every keystroke. That is
+ * the whole trick that lets the map be live on the canvas: the frame draws from
+ * the committed address, so committing per letter would reload it on every one,
+ * the very thing the block used to dodge by drawing a placeholder instead.
+ *
+ * Suggestions come from our own /api/place-search (see lib/content/geocode.ts),
+ * debounced, and fail quiet: no answer just means no menu, and the address can
+ * always be typed in full. Nothing here focuses or scrolls on render (see the
+ * file header); a match is taken on mousedown so the pick beats the input blur.
+ */
+function PlaceField({
+  value,
+  max,
+  placeholder,
+  onChange,
+}: {
+  value: string;
+  max?: number;
+  placeholder?: string;
+  onChange: (value: string) => void;
+}) {
+  const [query, setQuery] = useState(value);
+  const [matches, setMatches] = useState<PlaceMatch[]>([]);
+  const [open, setOpen] = useState(false);
+  // The value we know the block holds, so a change made elsewhere (an undo) can
+  // be told from one we just made, and only the former resets the box.
+  const committed = useRef(value);
+
+  useEffect(() => {
+    if (value !== committed.current) {
+      committed.current = value;
+      setQuery(value);
+      setMatches([]);
+      setOpen(false);
+    }
+  }, [value]);
+
+  useEffect(() => {
+    const q = query.trim();
+    // Too short to search, or the box already holds the committed address: no menu.
+    if (q.length < 3 || q === committed.current.trim()) {
+      setMatches([]);
+      setOpen(false);
+      return;
+    }
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      fetch(`/api/place-search?q=${encodeURIComponent(q)}`, { signal: controller.signal })
+        .then((response) => (response.ok ? response.json() : { matches: [] }))
+        .then((data) => {
+          const found: PlaceMatch[] = Array.isArray(data?.matches) ? data.matches : [];
+          setMatches(found);
+          setOpen(found.length > 0);
+        })
+        .catch(() => {
+          // Aborted, offline, or a shape we did not expect: the field carries on.
+        });
+    }, 300);
+    return () => {
+      controller.abort();
+      clearTimeout(timer);
+    };
+  }, [query]);
+
+  const commit = (next: string) => {
+    committed.current = next;
+    setQuery(next);
+    setMatches([]);
+    setOpen(false);
+    if (next !== value) onChange(next);
+  };
+
+  return (
+    <div className="ed-place">
+      <input
+        className="ed-input"
+        type="text"
+        value={query}
+        maxLength={max}
+        placeholder={placeholder}
+        autoComplete="off"
+        role="combobox"
+        aria-expanded={open}
+        aria-autocomplete="list"
+        onChange={(event) => setQuery(event.target.value)}
+        // Read the live value, not the closed-over query, so a commit is never a
+        // render behind what is in the box.
+        onBlur={(event) => commit(event.currentTarget.value)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            commit(event.currentTarget.value);
+          } else if (event.key === 'Escape') {
+            setOpen(false);
+          }
+        }}
+      />
+      {open && matches.length > 0 && (
+        <ul className="ed-place__menu" role="listbox">
+          {matches.map((match, index) => (
+            <li key={`${match.label}:${index}`} role="option" aria-selected={false}>
+              <button
+                type="button"
+                className="ed-place__opt"
+                // mousedown, not click: it lands before the input's blur, so the
+                // pick wins rather than blur committing the half-typed text.
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                  commit(match.label);
+                }}
+              >
+                {match.label}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 

@@ -40,6 +40,15 @@ export type FieldGroup = 'content' | 'colours' | 'border' | 'spacing' | 'layout'
 
 export type Field = { group?: FieldGroup } & (
   | { kind: 'text'; key: string; label: string; placeholder?: string; max?: number; help?: string }
+  /*
+   * An address, with matches as you type. Stores the same plain string a text
+   * field would; the difference is the control, which searches an open geocoder
+   * (see lib/content/geocode.ts) and offers a short menu so a client can see the
+   * product found their place. Picking a match, or just typing an address in
+   * full, is what sets the value, so the map still reads one address string and
+   * nothing about coordinates leaks into the content. Only the map uses it.
+   */
+  | { kind: 'place'; key: string; label: string; placeholder?: string; max?: number; help?: string }
   | { kind: 'textarea'; key: string; label: string; rows?: number; max?: number; help?: string }
   | { kind: 'richtext'; key: string; label: string; help?: string }
   | { kind: 'url'; key: string; label: string; placeholder?: string; help?: string }
@@ -690,11 +699,12 @@ export const BLOCKS: readonly BlockDefinition[] = [
     },
     fields: [
       {
-        kind: 'text',
+        kind: 'place',
         key: 'address',
         label: 'Address or place',
         max: 200,
-        help: 'What you would type into Google Maps: a full address, a postcode, or a place name.',
+        placeholder: 'Start typing an address',
+        help: 'Type your address and pick it from the list, or type it in full. The map appears as soon as you choose.',
       },
       {
         kind: 'number',

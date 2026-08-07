@@ -62,6 +62,10 @@ function describeField(field: Field): PaletteField {
   switch (field.kind) {
     case 'text':
       return { ...base, accepts: `short plain text${'max' in field && field.max ? `, up to ${field.max} characters` : ''}` };
+    case 'place':
+      // Never guess an address: a map of the wrong place is worse than none, and
+      // only the client knows where they are. They pick it from the search.
+      return { ...base, accepts: 'leave empty; the client types their own address' };
     case 'textarea':
       return { ...base, accepts: `plain text, a few sentences${field.max ? `, up to ${field.max} characters` : ''}. Blank lines start new paragraphs` };
     case 'richtext':

@@ -4269,9 +4269,12 @@ await check('the outline lists a container’s inner blocks', async () => {
 // ---------------------------------------------------------------------------
 // The location map
 //
-// The claim a browser settles: that a map draws from an address alone, and that
-// the editor draws a PLACEHOLDER rather than loading a Google frame on every
-// keystroke. The URL safety is in tests/map.test.ts; this is the editor wiring.
+// The claim a browser settles: that a map draws from an address on the CANVAS,
+// not only when published (Andy asked to see it while building, 7 Aug 2026), and
+// that the canvas frame is inert so a click still selects the block. The address
+// commits on Enter, blur or a picked match, never per keystroke, which is what
+// keeps the frame from reloading on every letter. The URL safety is in
+// tests/map.test.ts, the search parsing in tests/geocode.test.ts.
 // ---------------------------------------------------------------------------
 
 await page.reload();
@@ -4286,22 +4289,25 @@ await check('a map starts by asking for an address', async () => {
   return /address/i.test(text) ? true : `it says "${text}"`;
 });
 
-await check('an address draws the placeholder, not a live frame in the editor', async () => {
-  await page.locator('.ed-props input.ed-input').first().fill('10 Downing Street, London');
-  await page.waitForTimeout(500);
-  const ghost = await added().locator('.tgs-map-ghost').count();
-  const addr = await added().locator('.tgs-map-ghost__addr').innerText().catch(() => '');
-  const frames = await added().locator('iframe').count();
-  if (frames !== 0) return `${frames} iframes loaded in the editor`;
-  return ghost === 1 && /downing street/i.test(addr) ? true : `ghost ${ghost}, addr "${addr}"`;
+await check('an address draws a real map frame on the canvas', async () => {
+  const input = page.locator('.ed-props .ed-place input.ed-input').first();
+  await input.fill('10 Downing Street, London');
+  // Enter commits the address; the field does not commit on every keystroke.
+  await input.press('Enter');
+  await page.waitForTimeout(600);
+  const frame = added().locator('.tgs-map__frame iframe');
+  if ((await frame.count()) !== 1) return `${await frame.count()} map frames on the canvas`;
+  const src = (await frame.getAttribute('src')) ?? '';
+  if (!/google\.[^/]*\/maps/.test(src)) return `the frame is not a Google map: "${src}"`;
+  return /downing/i.test(src) ? true : `the address is not in the frame src: "${src}"`;
 });
 
-await check('and the editor pulls in no map frame from Google', async () => {
-  const frames = await page.evaluate(() =>
-    [...document.querySelectorAll('iframe[src]')]
-      .map((f) => f.getAttribute('src'))
-      .filter((s) => /google\.[^/]*\/maps/.test(s ?? '')));
-  return frames.length === 0 ? true : JSON.stringify(frames);
+await check('and that canvas frame is inert, so a click still selects the block', async () => {
+  const events = await added()
+    .locator('.tgs-map__frame iframe')
+    .first()
+    .evaluate((el) => getComputedStyle(el).pointerEvents);
+  return events === 'none' ? true : `pointer-events is "${events}"`;
 });
 
 

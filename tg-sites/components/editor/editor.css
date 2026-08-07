@@ -1328,6 +1328,49 @@
   font-size: var(--ed-text-sm);
 }
 
+/*
+ * The address field's search menu (the map). The input is a plain .ed-input; the
+ * menu hangs beneath it, over the fields below, and closes on pick or blur. See
+ * PlaceField in components/editor/Fields.tsx.
+ */
+.ed-place { position: relative; }
+.ed-place__menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: var(--ed-1);
+  list-style: none;
+  max-height: 260px;
+  overflow-y: auto;
+  background: var(--ed-panel);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  box-shadow: var(--ed-shadow-lg);
+}
+.ed-place__opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: var(--ed-2) var(--ed-3);
+  border: 0;
+  border-radius: var(--ed-r-sm);
+  background: transparent;
+  color: var(--ed-ink);
+  font: inherit;
+  font-size: var(--ed-text-sm);
+  line-height: 1.4;
+  cursor: pointer;
+}
+.ed-place__opt:hover,
+.ed-place__opt:focus-visible {
+  background: var(--ed-select-wash);
+  color: var(--ed-select);
+  outline: none;
+}
+
 .ed-toggle {
   display: flex;
   align-items: center;

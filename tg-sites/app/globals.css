@@ -1102,24 +1102,10 @@
   height: 100%;
   border: 0;
 }
-
-/* The map's stand-in on the editor canvas, the same idea as the widget ghost:
-   the address shows here, the live map draws on the published page. */
-.tgs-map-ghost {
-  display: grid;
-  place-items: center;
-  align-content: center;
-  gap: 6px;
-  min-height: 120px;
-  padding: var(--tgs-space-m);
-  border: 1px dashed var(--tgs-border-strong);
-  border-radius: var(--tgs-radius-md);
-  background: var(--tgs-surface-alt);
-  text-align: center;
-}
-.tgs-map-ghost__pin { color: var(--tgs-primary); display: inline-flex; }
-.tgs-map-ghost__addr { color: var(--tgs-text); font-size: var(--tgs-text-s); font-weight: 600; }
-.tgs-map-ghost__note { color: var(--tgs-text-muted); font-size: var(--tgs-text-s); }
+/* On the editor canvas the map is a preview, not a thing to drive: a click
+   should select the block, not pan Google's map, and a drag should not be
+   swallowed by the frame. See MapBlock's `editing` branch. */
+.tgs-map__frame[data-static='true'] iframe { pointer-events: none; }
 
 /* Buttons */
 .tgs-buttons { display: flex; flex-wrap: wrap; gap: var(--tgs-space-s); }
