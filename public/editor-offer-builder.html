@@ -151,6 +151,24 @@
     .sheet-chip.ended { background: #F1F5F9; color: #64748B; }
     .sheet-hint { font-size: 12px; color: var(--muted); margin: 10px 2px 0; }
     body[data-theme="dark"] table.sheet th { background: #111827; }
+    /* Frozen left columns: status dot, Type (dropdown), Title. */
+    table.sheet .f-status { position: sticky; left: 0; width: 26px; min-width: 26px; background: var(--panel); }
+    table.sheet .f-type { position: sticky; left: 26px; width: 160px; min-width: 160px; max-width: 160px; background: var(--panel); }
+    table.sheet .f-title { position: sticky; left: 186px; min-width: 170px; background: var(--panel); box-shadow: 1px 0 0 var(--border); }
+    table.sheet th.f-status, table.sheet th.f-type, table.sheet th.f-title { z-index: 3; }
+    table.sheet td.f-status, table.sheet td.f-type, table.sheet td.f-title { z-index: 1; }
+    table.sheet tr.is-new .f-status, table.sheet tr.is-new .f-type, table.sheet tr.is-new .f-title { background: var(--panel-2); }
+    /* Offer-type dropdown, styled to sit flush in the cell. */
+    table.sheet select.cell-select { width: 100%; border: 0; background: transparent; padding: 9px 22px 9px 8px; font: inherit; font-size: 13px; color: var(--ink); outline: none; -webkit-appearance: none; -moz-appearance: none; appearance: none; cursor: pointer; text-overflow: ellipsis; }
+    table.sheet select.cell-select:focus { background: var(--accent-soft); box-shadow: inset 0 0 0 2px var(--accent); border-radius: 4px; }
+    table.sheet td.f-type { position: relative; }
+    table.sheet td.f-type::after { content: "\25BE"; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 10px; color: var(--muted); pointer-events: none; }
+    /* A field that does not apply to this row's offer type. */
+    table.sheet td.na { background: var(--panel-2); }
+    table.sheet td.na span { display: block; padding: 9px 8px; color: var(--muted); text-align: center; opacity: .5; }
+    body[data-theme="dark"] table.sheet .f-status,
+    body[data-theme="dark"] table.sheet .f-type,
+    body[data-theme="dark"] table.sheet .f-title { background: var(--panel); }
 
     /* Full preview modal — 70% of the screen, card + full offer page */
     .modal.modal--wide { width: 70vw; max-width: 1280px; min-width: 0; height: 86vh; display: flex; flex-direction: column; }
@@ -446,6 +464,7 @@
       trashMode: false,
       retentionDays: 30,
       view: 'sheet',   // 'sheet' | 'cards'
+      newType: '',     // offer type chosen in the blank "add an offer" row
       full: {},        // id -> full offer (lazy-loaded when a sheet row is edited)
       edits: {},       // id -> { fieldKey: value } pending autosave
       previewOffer: null, // the offer shown in the full-preview modal (null → SAMPLE)
@@ -666,19 +685,47 @@
     /* ================= SPREADSHEET (SHEET) VIEW ================= */
     // The columns edited inline. Everything else (photos, description, page
     // design) stays one click away in the full editor via the Open button.
-    const SHEET_COLS = [
-      { key: 'title',    label: 'Title',       cls: 'sticky-col wide' },
-      { key: 'type',     label: 'Type',        cls: 'wide' },
-      { key: 'country',  label: 'Country',     cls: '' },
-      { key: 'resort',   label: 'Resort',      cls: '' },
-      { key: 'nights',   label: 'Nights',      cls: 'num' },
-      { key: 'board',    label: 'Board',       cls: '' },
-      { key: 'period',   label: 'Travel dates',cls: 'wide' },
-      { key: 'price',    label: 'Price',       cls: 'num' },
-      { key: 'was',      label: 'Was',         cls: 'num' },
-      { key: 'showFrom', label: 'Show from',   cls: '' },
-      { key: 'showUntil',label: 'Show until',  cls: '' }
+    // Type is the first column (a dropdown) and Title the second; both are
+    // frozen. Country sits before the type-specific block, the rest after.
+    const SHEET_UNIV_BEFORE = [{ key: 'country', label: 'Country', cls: '' }];
+    const SHEET_UNIV_AFTER = [
+      { key: 'period',    label: 'Travel dates', cls: 'wide' },
+      { key: 'price',     label: 'Price',        cls: 'num' },
+      { key: 'was',       label: 'Was',          cls: 'num' },
+      { key: 'showFrom',  label: 'Show from',    cls: '' },
+      { key: 'showUntil', label: 'Show until',   cls: '' }
     ];
+    const SHEET_NUMERIC = { nights: 1, price: 1, was: 1 };
+
+    // Field metadata comes from the offer-builder widget so the Sheet and the
+    // full form agree on which fields each type uses. A small fallback keeps the
+    // grid working if the widget script has not loaded yet.
+    function offerMeta() {
+      return (window.TGOfferBuilderWidget && window.TGOfferBuilderWidget.offerMeta) || {
+        types: ['Package holiday (flight + hotel)'],
+        sheetColsFor: function () { return ['resort', 'nights', 'board']; },
+        sheetColOrder: ['resort', 'board', 'nights'],
+        sheetColLabels: { resort: 'Resort', board: 'Board', nights: 'Nights' }
+      };
+    }
+    function defaultType() { return offerMeta().types[0] || ''; }
+    // The union of type-specific columns needed by the offers in the list, plus
+    // the type chosen in the blank add row, in the master column order.
+    function sheetTypeCols() {
+      const meta = offerMeta();
+      const seen = {};
+      state.offers.forEach(function (o) { seen[o.type || ''] = true; });
+      seen[state.newType || defaultType()] = true;
+      const need = {};
+      Object.keys(seen).forEach(function (t) { meta.sheetColsFor(t).forEach(function (k) { need[k] = true; }); });
+      return (meta.sheetColOrder || []).filter(function (k) { return need[k]; });
+    }
+    function typeAppliesTo(key, type) { return offerMeta().sheetColsFor(type).indexOf(key) !== -1; }
+    function typeOptions(sel) {
+      return offerMeta().types.map(function (t) {
+        return '<option value="' + esc(t) + '"' + (t === sel ? ' selected' : '') + '>' + esc(t) + '</option>';
+      }).join('');
+    }
 
     function sheetChip(o) {
       const st = statusOf(o);
@@ -687,35 +734,63 @@
       return '<span class="sheet-chip ' + st + '">' + label + '</span>';
     }
 
+    // A greyed cell for a field that does not apply to this row's offer type.
+    function naCell() { return '<td class="na"><span>–</span></td>'; }
+    function cellFor(id, key, val, cls) {
+      return '<td' + (cls ? ' class="' + cls + '"' : '') + '><input class="cell" data-id="' + esc(id) + '" data-key="' + key + '" value="' + esc(val != null ? val : '') + '"></td>';
+    }
+    function newCellFor(key, cls, ph) {
+      return '<td' + (cls ? ' class="' + cls + '"' : '') + '><input class="cell" data-newkey="' + key + '" value=""' + (ph ? ' placeholder="' + esc(ph) + '"' : '') + '></td>';
+    }
+
     function renderSheet() {
-      const head = '<tr><th class="sticky-col" style="width:26px"></th>'
-        + SHEET_COLS.map(function (c) { return '<th class="' + (c.cls.indexOf('sticky-col') >= 0 ? 'sticky-col' : '') + '">' + esc(c.label) + '</th>'; }).join('')
+      if (!state.newType) state.newType = defaultType();
+      const typeCols = sheetTypeCols();
+      const labels = offerMeta().sheetColLabels || {};
+
+      const head = '<tr>'
+        + '<th class="f-status"></th>'
+        + '<th class="f-type">Type</th>'
+        + '<th class="f-title">Title</th>'
+        + SHEET_UNIV_BEFORE.map(function (c) { return '<th' + (c.cls ? ' class="' + c.cls + '"' : '') + '>' + esc(c.label) + '</th>'; }).join('')
+        + typeCols.map(function (k) { return '<th' + (SHEET_NUMERIC[k] ? ' class="num"' : '') + '>' + esc(labels[k] || k) + '</th>'; }).join('')
+        + SHEET_UNIV_AFTER.map(function (c) { return '<th' + (c.cls ? ' class="' + c.cls + '"' : '') + '>' + esc(c.label) + '</th>'; }).join('')
         + '<th>Status</th><th></th></tr>';
 
       const rows = state.offers.map(function (o) {
-        const cells = SHEET_COLS.map(function (c) {
-          const v = esc(o[c.key] != null ? o[c.key] : '');
-          return '<td class="' + c.cls + '"><input class="cell" data-id="' + esc(o.id) + '" data-key="' + c.key + '" value="' + v + '"></td>';
+        const t = o.type || '';
+        const mid = typeCols.map(function (k) {
+          return typeAppliesTo(k, t) ? cellFor(o.id, k, o[k], SHEET_NUMERIC[k] ? 'num' : '') : naCell();
         }).join('');
         return '<tr data-row="' + esc(o.id) + '">'
-          + '<td class="sticky-col"><span class="sheet-status" data-status="' + esc(o.id) + '"></span></td>'
-          + cells
+          + '<td class="f-status"><span class="sheet-status" data-status="' + esc(o.id) + '"></span></td>'
+          + '<td class="f-type"><select class="cell cell-select" data-id="' + esc(o.id) + '" data-key="type">' + typeOptions(t) + '</select></td>'
+          + '<td class="f-title"><input class="cell" data-id="' + esc(o.id) + '" data-key="title" value="' + esc(o.title || '') + '"></td>'
+          + SHEET_UNIV_BEFORE.map(function (c) { return cellFor(o.id, c.key, o[c.key], c.cls); }).join('')
+          + mid
+          + SHEET_UNIV_AFTER.map(function (c) { return cellFor(o.id, c.key, o[c.key], c.cls); }).join('')
           + '<td data-chip="' + esc(o.id) + '">' + sheetChip(o) + '</td>'
           + '<td class="actions"><button class="btn sm" data-open="' + esc(o.id) + '">Open</button></td>'
           + '</tr>';
       }).join('');
 
-      const newRow = '<tr class="is-new" data-newrow="1"><td class="sticky-col"></td>'
-        + SHEET_COLS.map(function (c) {
-            return '<td class="' + c.cls + '"><input class="cell" data-newkey="' + c.key + '" value="" placeholder="' + (c.key === 'title' ? 'Add an offer…' : '') + '"></td>';
-          }).join('')
+      const newMid = typeCols.map(function (k) {
+        return typeAppliesTo(k, state.newType) ? newCellFor(k, SHEET_NUMERIC[k] ? 'num' : '') : naCell();
+      }).join('');
+      const newRow = '<tr class="is-new" data-newrow="1">'
+        + '<td class="f-status"></td>'
+        + '<td class="f-type"><select class="cell cell-select" data-newkey="type">' + typeOptions(state.newType) + '</select></td>'
+        + '<td class="f-title"><input class="cell" data-newkey="title" value="" placeholder="Add an offer…"></td>'
+        + SHEET_UNIV_BEFORE.map(function (c) { return newCellFor(c.key, c.cls); }).join('')
+        + newMid
+        + SHEET_UNIV_AFTER.map(function (c) { return newCellFor(c.key, c.cls); }).join('')
         + '<td></td><td class="actions"></td></tr>';
 
       const empty = state.offers.length ? '' :
-        '<div class="sheet-hint">No offers yet. Type in the row above to add your first one, or use <b>Import</b> to upload a spreadsheet.</div>';
+        '<div class="sheet-hint">No offers yet. Pick a type and type in the row above to add your first one, or use <b>Import</b> to upload a spreadsheet.</div>';
 
       setState('<div class="sheet-wrap"><table class="sheet"><thead>' + head + '</thead><tbody>' + rows + newRow + '</tbody></table></div>'
-        + '<div class="sheet-hint">Edit any cell and it saves on its own. Click <b>Open</b> for photos, description and page design. Type in the bottom row to add a new offer.</div>'
+        + '<div class="sheet-hint">Pick the offer type and the columns change to suit it. Edit any cell and it saves on its own. Click <b>Open</b> for photos, description and page design.</div>'
         + empty);
       wireSheet();
     }
@@ -725,8 +800,25 @@
       tb.querySelectorAll('input.cell[data-id]').forEach(function (inp) {
         inp.addEventListener('input', function () { queueEdit(inp.dataset.id, inp.dataset.key, inp.value); });
       });
+      // Changing a row's type saves it and re-draws so the columns follow suit.
+      tb.querySelectorAll('select.cell-select[data-id]').forEach(function (sel) {
+        sel.addEventListener('change', function () {
+          const o = state.offers.find(function (x) { return x.id === sel.dataset.id; });
+          if (o) o.type = sel.value; // optimistic, so the columns adapt at once
+          queueEdit(sel.dataset.id, 'type', sel.value);
+          renderSheet();
+        });
+      });
       tb.querySelectorAll('[data-open]').forEach(function (b) {
         b.addEventListener('click', function () { openById(b.getAttribute('data-open')); });
+      });
+      // The blank add row: changing its type re-draws its columns.
+      const newTypeSel = tb.querySelector('[data-newrow] select[data-newkey="type"]');
+      if (newTypeSel) newTypeSel.addEventListener('change', function () {
+        state.newType = newTypeSel.value;
+        renderSheet();
+        const ti = $('offersList').querySelector('[data-newrow] input[data-newkey="title"]');
+        if (ti) ti.focus();
       });
       tb.querySelectorAll('[data-newrow] input.cell').forEach(function (inp) {
         inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); tryCreateNewRow(); } });
@@ -798,8 +890,8 @@
       const row = tb && tb.querySelector('[data-newrow]');
       if (!row) return;
       const fields = {};
-      row.querySelectorAll('input.cell[data-newkey]').forEach(function (inp) {
-        const v = inp.value.trim(); if (v) fields[inp.dataset.newkey] = v;
+      row.querySelectorAll('[data-newkey]').forEach(function (inp) {
+        const v = (inp.value || '').trim(); if (v) fields[inp.dataset.newkey] = v;
       });
       if (!fields.title) return; // need at least a title to create
       creatingNew = true;

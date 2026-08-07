@@ -214,6 +214,16 @@ function summarise(rec) {
     was: f.was || '',
     badge: f.badge || '',
     urgency: f.urgency || '',
+    // Type-specific columns the sheet shows inline for cruises, flights, rail
+    // and tours. Still light — the full offer is fetched on open or edit.
+    shipName: f.shipName || '',
+    cruiseLine: f.cruiseLine || '',
+    cabinType: f.cabinType || '',
+    cabinClass: f.cabinClass || '',
+    destination: f.destination || '',
+    operator: f.operator || '',
+    railOperator: f.railOperator || '',
+    railClass: f.railClass || '',
     updatedAt: rec.updatedAt || 0
   };
 }
