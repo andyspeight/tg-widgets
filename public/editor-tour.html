@@ -55,6 +55,10 @@
   .sec-body { display: none; padding: 4px 16px 18px; }
   .sec.is-open .sec-body { display: block; }
   .sec-hint { font-size: 12px; color: var(--tgse-muted); margin: 0 0 14px; }
+  .sec-note { display: flex; gap: 11px; padding: 13px 14px; border-radius: var(--tgse-radius-sm); background: var(--tgse-brand-tint); border: 1px solid var(--tgse-border); font-size: 12.5px; line-height: 1.55; color: var(--tgse-ink); margin-bottom: 12px; }
+  .sec-note:last-child { margin-bottom: 0; }
+  .sec-note svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--tgse-brand); margin-top: 1px; }
+  .sec-note strong { font-weight: 700; }
 
   /* Fields */
   .fld { margin-bottom: 14px; }
@@ -450,6 +454,21 @@
         field('Font', selectIn((window.tgse && tgse.FONTS ? tgse.FONTS : ['DM Sans', 'Inter']).map(f => ({ v: f, t: f })), () => d.fontFamily, v => d.fontFamily = v)),
         field('Theme', selectIn([{ v: 'light', t: 'Light' }, { v: 'dark', t: 'Dark' }], () => d.theme, v => d.theme = v)),
         field('Corner radius', numIn(() => d.radius, v => d.radius = v, 0, 32))
+      ));
+    }));
+
+    // Settings — how bookings and enquiries are handled (roadmap + orientation,
+    // no dead controls: the deposit and prices live under Tour basics, and the
+    // real payment controls arrive with the Stripe phase).
+    root.append(section('Settings', 'How bookings and enquiries are handled.', false, (b) => {
+      const note = (html) => mk('div', { class: 'sec-note', html });
+      b.append(note(
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>'
+        + '<div><strong>Payments and deposits are on their way.</strong> You will connect your own Stripe account here and take deposits straight from the tour page. Travelgenix never holds your travellers\' money. For now the deposit and prices you set under Tour basics are shown to travellers but not charged, so the page gathers enquiries.</div>'
+      ));
+      b.append(note(
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>'
+        + '<div><strong>Enquiries reach your Travelgenix leads.</strong> Every enquiry from this page lands in your leads inbox with the traveller\'s details and message. Change the wording of the form under Enquiry form above.</div>'
       ));
     }));
   }

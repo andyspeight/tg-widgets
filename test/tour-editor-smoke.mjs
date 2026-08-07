@@ -87,6 +87,15 @@ async function newPage() {
   ok(boot.sections >= 8, `editor: builder sections rendered (got ${boot.sections})`);
   ok(boot.saveBtn && boot.nameInput && boot.toggle === 2, 'editor: toolbar (save, name, view toggle) present');
 
+  // Settings panel present (house pattern from the Group Trips editor): a
+  // "Settings" section carrying the payments/enquiries callouts, no dead controls.
+  const settings = await page.evaluate(() => {
+    const sec = [...document.querySelectorAll('#tb-build .sec')].find(s => s.querySelector('h2')?.textContent === 'Settings');
+    return { present: !!sec, notes: sec ? sec.querySelectorAll('.sec-note').length : 0 };
+  });
+  ok(settings.present, 'editor: Settings panel rendered');
+  ok(settings.notes >= 2, `editor: Settings panel carries the payments + enquiries notes (got ${settings.notes})`);
+
   // Preview shows the starter tour
   await page.click('.tb-toggle button[data-view="preview"]');
   await page.waitForFunction(() => {
