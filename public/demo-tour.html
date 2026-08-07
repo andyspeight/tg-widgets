@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Escorted Tour Demo · Travelgenix</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #FFFFFF; color: #0F172A; -webkit-font-smoothing: antialiased; }
+    body[data-theme="dark"] { background: #0B1222; color: #F8FAFC; }
+    .site-header { background: #fff; border-bottom: 1px solid #E2E8F0; padding: 14px 28px; display: flex; align-items: center; gap: 18px; position: sticky; top: 0; z-index: 20; }
+    body[data-theme="dark"] .site-header { background: #121A2F; border-bottom-color: #1E293B; }
+    .brand { font-weight: 700; font-size: 17px; }
+    .brand-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #1B2B5B; margin-right: 9px; vertical-align: 1px; }
+    .nav-links { display: flex; gap: 18px; font-size: 13px; color: #475569; }
+    body[data-theme="dark"] .nav-links { color: #CBD5E1; }
+    .nav-links a { color: inherit; text-decoration: none; }
+    .header-spacer { flex: 1; }
+    .controls { display: inline-flex; gap: 6px; padding: 3px; background: #F1F5F9; border-radius: 999px; }
+    body[data-theme="dark"] .controls { background: #1E293B; }
+    .controls button { border: 0; background: transparent; font: inherit; font-size: 12px; font-weight: 600; color: #475569; padding: 6px 12px; border-radius: 999px; cursor: pointer; }
+    .controls button[aria-pressed="true"] { background: #fff; color: #0F172A; box-shadow: 0 1px 2px rgba(15,23,42,0.08); }
+    body[data-theme="dark"] .controls button[aria-pressed="true"] { background: #0F172A; color: #F8FAFC; }
+    .page { padding: 24px 0 64px; }
+    .note { max-width: 1000px; margin: 14px auto 0; padding: 0 20px; font-size: 12px; color: #94A3B8; }
+    footer { border-top: 1px solid #E2E8F0; padding: 22px 28px; text-align: center; font-size: 12px; color: #64748B; }
+    body[data-theme="dark"] footer { border-top-color: #1E293B; }
+    footer a { color: #1B2B5B; }
+    body[data-theme="dark"] footer a { color: #93B4FF; }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="brand"><span class="brand-dot"></span>Aurora Travel Co</div>
+    <nav class="nav-links">
+      <a href="#">Escorted tours</a>
+      <a href="#">Safaris</a>
+      <a href="#">About</a>
+      <a href="#">Contact</a>
+    </nav>
+    <div class="header-spacer"></div>
+    <div class="controls" role="group" aria-label="Theme">
+      <button type="button" data-theme-btn="light" aria-pressed="true">Light</button>
+      <button type="button" data-theme-btn="dark" aria-pressed="false">Dark</button>
+    </div>
+  </header>
+
+  <p class="note">Escorted Tour demo, seeded from a real 11-day Kenya safari itinerary. Enquiry form runs in preview mode. Travelgenix house style — the source brochure's own design is not copied.</p>
+
+  <div class="page"><div id="mount"></div></div>
+
+  <footer>
+    Escorted Tour widget demo · <a href="/demo-trips">See the simpler Group Trips</a> · Deposit booking arrives with the Stripe build
+  </footer>
+
+  <script src="/widget-tour.js" defer></script>
+  <script>
+    // One fully-seeded escorted tour. Content mapped from the client's Kenya
+    // itinerary; images are house-style placeholders.
+    const TOUR = {
+      tour: {
+        title: 'Kenya Johari na Bahari Safari',
+        subtitle: 'Eleven days from the plains of the Masai Mara to the white sand of the Kenyan coast — big cats, the Great Rift Valley and the Indian Ocean, all in one journey.',
+        location: 'Kenya',
+        heroImage: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?w=1800&q=80',
+        currency: 'gbp',
+        startDate: '2026-10-24',
+        endDate: '2026-11-03',
+        durationText: '11 days / 10 nights',
+        capacity: 7,
+        pricePerPersonPence: 349500,
+        singleSupplementPence: 45000,
+        depositPence: 50000,
+        balanceDueDate: '2026-08-24',
+        priceNote: 'Per person sharing. International flights as per system fares. Optional activities and the balloon safari are extra.'
+      },
+      glance: [
+        { day: 'Day 1', date: '24 Oct 26', destination: 'Nairobi', accommodation: 'Nairobi Serena Hotel' },
+        { day: 'Day 2', date: '25 Oct 26', destination: 'Ol Pejeta', accommodation: 'Sweetwaters Serena Camp' },
+        { day: 'Day 3', date: '26 Oct 26', destination: 'Ol Pejeta', accommodation: 'Sweetwaters Serena Camp' },
+        { day: 'Day 4', date: '27 Oct 26', destination: 'Rift Valley', accommodation: 'Lake Elmenteita Serena Camp' },
+        { day: 'Day 5', date: '28 Oct 26', destination: 'Masai Mara', accommodation: 'Mara Serena Safari Lodge' },
+        { day: 'Day 6', date: '29 Oct 26', destination: 'Masai Mara', accommodation: 'Mara Serena Safari Lodge' },
+        { day: 'Day 7', date: '30 Oct 26', destination: 'Masai Mara', accommodation: 'Mara Serena Safari Lodge' },
+        { day: 'Day 8', date: '31 Oct 26', destination: 'Mombasa', accommodation: 'Bamburi Beach Hotel' },
+        { day: 'Day 9', date: '01 Nov 26', destination: 'Mombasa', accommodation: 'Bamburi Beach Hotel' },
+        { day: 'Day 10', date: '02 Nov 26', destination: 'Mombasa', accommodation: 'Bamburi Beach Hotel' },
+        { day: 'Day 11', date: '03 Nov 26', destination: 'Homebound', accommodation: 'Homebound from Mombasa' }
+      ],
+      highlights: [
+        'A selection of snacks in your vehicle',
+        'Night game drive in Ol Pejeta',
+        'Sundowner at the Lake Elmenteita viewpoint',
+        'Hippo pool bush breakfast in the Masai Mara',
+        'Three giraffe species, two zebra and two ostrich including the rare Somali ostrich',
+        'Magical sunrises and sunsets over the Mara',
+        'Absolute relaxation on the Mombasa coast'
+      ],
+      days: [
+        {
+          label: 'Day 1', date: '24 Oct 26', title: 'Welcome to Kenya and Nairobi',
+          body: 'On arrival at Jomo Kenyatta International Airport you are met and fast-tracked through immigration, then transferred to the Nairobi Serena Hotel for dinner and your first night.',
+          facts: [
+            { label: 'Accommodation', value: 'Nairobi Serena Hotel' },
+            { label: 'Meals', value: 'Breakfast and dinner' },
+            { label: 'Driving time', value: '20 mins from the airport' }
+          ],
+          images: ['https://images.unsplash.com/photo-1504457047772-27faf1c00561?w=800&q=80']
+        },
+        {
+          label: 'Day 2', date: '25 Oct 26', title: 'Nairobi to Ol Pejeta',
+          body: 'Depart through the lush Kenyan highlands to Ol Pejeta Conservancy, with a stop at the Equator. After lunch and a short siesta, your first game drive brings lion, leopard, elephant, buffalo, black and white rhino, Grevy and Burchell’s zebra and reticulated giraffe.',
+          facts: [
+            { label: 'Accommodation', value: 'Sweetwaters Serena Camp' },
+            { label: 'Meals', value: 'Breakfast, lunch and dinner' },
+            { label: 'Driving time', value: '4 hours from Nairobi' },
+            { label: 'Altitude', value: '6,200 ft / 2,000 m' }
+          ],
+          images: [
+            'https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?w=800&q=80',
+            'https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=800&q=80'
+          ],
+          optionalActivities: [
+            { name: 'The Last Northern White Rhino visit', pricePence: 10000 },
+            { name: 'Ngare Ndare Forest and Canopy Walk', pricePence: 9000 },
+            { name: 'Solio Rhino Sanctuary', pricePence: 7000 }
+          ]
+        },
+        {
+          label: 'Day 3', date: '26 Oct 26', title: 'Ol Pejeta Conservancy',
+          body: 'An early morning game drive before breakfast, then the Chimpanzee Sanctuary to meet Baraka the blind black rhino. After a relaxed lunch and siesta, an evening game drive is followed by dinner and a night game drive in search of nocturnal animals such as bat-eared fox and zorilla.',
+          facts: [
+            { label: 'Accommodation', value: 'Sweetwaters Serena Camp' },
+            { label: 'Meals', value: 'Breakfast, lunch and dinner' }
+          ]
+        },
+        {
+          label: 'Day 4', date: '27 Oct 26', title: 'Ol Pejeta to the Great Rift Valley',
+          body: 'Depart for Lake Elmenteita, enjoying magnificent views of the Great Rift Valley escarpment en route. An evening game drive brings flamingo and Rothschild giraffe, with a sundowner at the viewpoint.',
+          facts: [
+            { label: 'Accommodation', value: 'Lake Elmenteita Serena Camp' },
+            { label: 'Meals', value: 'Breakfast, lunch and dinner' },
+            { label: 'Driving time', value: '4 hours from Ol Pejeta' },
+            { label: 'Altitude', value: '5,500 ft / 1,670 m' }
+          ]
+        },
+        {
+          label: 'Day 5', date: '28 Oct 26', title: 'The Great Rift Valley to the Masai Mara',
+          body: 'Depart for the Masai Mara National Reserve, a land of breathtaking vistas and endless plains. Arrive in time for lunch with an en-route game drive, then an afternoon drive before dinner.',
+          facts: [
+            { label: 'Accommodation', value: 'Mara Serena Safari Lodge' },
+            { label: 'Meals', value: 'Breakfast, lunch and dinner' },
+            { label: 'Driving time', value: '5 hours from Lake Elmenteita' },
+            { label: 'Altitude', value: '4,900 – 7,500 ft' }
+          ]
+        },
+        {
+          label: 'Day 6 & 7', date: '29 – 30 Oct 26', title: 'The Masai Mara',
+          body: 'Full days in the Mara with morning and afternoon game drives, and a hippo pool breakfast on one of the two days. The reserve is a paradise of elephant, buffalo, giraffe, lion and cheetah alongside the migratory wildebeest and zebra, with leopard frequently encountered and over 450 bird species.',
+          facts: [
+            { label: 'Accommodation', value: 'Mara Serena Safari Lodge' },
+            { label: 'Meals', value: 'All meals' }
+          ],
+          images: ['https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80']
+        },
+        {
+          label: 'Day 8', date: '31 Oct 26', title: 'Masai Mara to Mombasa',
+          body: 'After breakfast, transfer to the airstrip for your flight to Mombasa via Nairobi. On arrival you are transferred to the Bamburi Beach Hotel, with the evening at leisure.',
+          facts: [
+            { label: 'Accommodation', value: 'Bamburi Beach Hotel' },
+            { label: 'Meals', value: 'Breakfast and dinner' },
+            { label: 'Flight', value: 'Mara – Nairobi – Mombasa' }
+          ]
+        },
+        {
+          label: 'Day 9 & 10', date: '01 – 02 Nov 26', title: 'Mombasa at leisure',
+          body: 'Two full days at leisure on the coast — time for the beach and optional activities such as jet-skiing, boat rides, snorkelling or scuba diving.',
+          facts: [
+            { label: 'Accommodation', value: 'Bamburi Beach Hotel' },
+            { label: 'Meals', value: 'All inclusive' }
+          ]
+        },
+        {
+          label: 'Day 11', date: '03 Nov 26', title: 'Homebound',
+          body: 'After a hearty breakfast you are transferred to Moi International Airport for your flight home. Thank you for travelling with us.',
+          facts: [{ label: 'Meals', value: 'Breakfast' }]
+        }
+      ],
+      extras: [
+        { name: 'Balloon safari over the Mara plains', pricePence: 42000, recommended: true, note: 'Glide over the plains at sunrise for a bird’s-eye view of the Mara — often the highlight of the whole safari.' },
+        { name: 'Mombasa water sports (jet-ski, snorkel or scuba)', pricePence: 0, note: 'Arranged locally at the beach; prices vary by activity.' }
+      ],
+      included: [
+        'Arrival meet and assist and all airport transfers',
+        'Full board on safari, half board in Nairobi and all inclusive in Mombasa',
+        '4x4 safari Landcruiser with pop-up roof and a window seat for every person',
+        'Services of an English-speaking safari driver guide',
+        'Domestic flight Masai Mara – Nairobi – Mombasa – Nairobi',
+        'All activities listed in the itinerary',
+        'All park entrance fees and conservation fees',
+        'Night game drive in Ol Pejeta and sundowner at Lake Elmenteita',
+        'Hippo pool breakfast in the Masai Mara',
+        'Complimentary drinking water and snack hamper in all vehicles',
+        'Safari cap, water bottle and tote bag for everyone'
+      ],
+      excluded: [
+        'Items of a personal nature such as drinks, tips, laundry and telephones',
+        'Extra meals and bottled water during meals',
+        'Personal travel and trip cancellation insurance',
+        'International flights (quoted as per system fares)'
+      ],
+      sections: [
+        {
+          type: 'columns', heading: 'What to pack',
+          columns: [
+            { heading: 'Clothing and footwear', items: ['Cool cotton clothes for the day', 'A hooded fleece', 'Cap or hat', 'Long trousers for the evening', 'Comfortable shoes or boots and flip flops', 'Swimwear', 'A jacket or windcheater for early mornings', 'Soft bags only (internal flights allow 15 kg maximum)'] },
+            { heading: 'Other items', items: ['Your medication and prescriptions', 'Valid passport and eTA', 'Moisturiser and sunglasses', 'Cameras and spare batteries', 'Binoculars (a must for good viewing)', 'Smartphone or tablet (wifi at most lodges)', 'A card for check-in and books to read', 'Insurance details and insect repellent'] }
+          ]
+        },
+        {
+          type: 'text', heading: 'Visa, travel and baggage',
+          body: 'Kenya is visa free but you must complete a mandatory electronic travel authorisation (eTA) at www.etakenya.go.ke before you travel.\n\nBaggage must be packed in soft suitcases or duffel bags only, to a maximum of 15 kg per person plus 7 kg of hand baggage on safari. Guests arriving after 2pm spend their first night in Nairobi.'
+        },
+        {
+          type: 'feature', heading: 'Your safari vehicle',
+          body: 'Our safari vehicles are designed to give you comfort and space to enjoy the wildlife. Every guest has a window seat under a pop-up roof. Baggage space is strictly limited, so please pack light. The vehicles are open at the top and not air conditioned — with the roof up, air conditioning is not needed.',
+          image: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?w=900&q=80'
+        },
+        {
+          type: 'text', heading: 'Good to know',
+          body: 'Complimentary drinking water is not served during meals in Kenya and can be bought at the bar in most lodges and camps; two complimentary bottles are provided in the rooms. The Landcruiser seats a maximum of seven guests, one window seat each.'
+        }
+      ],
+      gallery: [
+        'https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=800&q=80',
+        'https://images.unsplash.com/photo-1534177616072-ef7dc120449d?w=800&q=80',
+        'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=800&q=80',
+        'https://images.unsplash.com/photo-1523805009345-7448845a9e53?w=800&q=80'
+      ],
+      enquiry: {
+        heading: 'Enquire about the Kenya safari',
+        intro: 'Leave your details and we will be in touch about dates, availability, room options and any questions.',
+        buttonText: 'Send enquiry'
+      },
+      design: { brandColor: '#1B2B5B', accentColor: '#C2410C', theme: 'light', radius: 16, fontFamily: 'DM Sans' }
+    };
+
+    let inst = null;
+    document.addEventListener('DOMContentLoaded', () => {
+      inst = new window.TGTourWidget(document.getElementById('mount'), TOUR);
+    });
+    document.querySelectorAll('[data-theme-btn]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const theme = btn.getAttribute('data-theme-btn');
+        document.body.setAttribute('data-theme', theme === 'dark' ? 'dark' : 'light');
+        document.querySelectorAll('[data-theme-btn]').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+        if (inst) inst.update({ design: { theme } });
+      });
+    });
+  </script>
+
+</body>
+</html>

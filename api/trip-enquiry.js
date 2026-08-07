@@ -100,14 +100,18 @@ async function resolveWidget(widgetId) {
     }
     const fields = record.fields || {};
 
-    // Trip title/location from the saved config, server-side.
+    // Trip title/location from the saved config, server-side. Group Trips keep
+    // these under `trip`, the richer Escorted Tour under `tour` — accept either.
     let tripTitle = '';
     let tripLocation = '';
     try {
       const cfg = JSON.parse(fields['Config'] || '{}');
       const trip = (cfg && typeof cfg.trip === 'object') ? cfg.trip : {};
-      if (typeof trip.title === 'string') tripTitle = trip.title.slice(0, 200);
-      if (typeof trip.location === 'string') tripLocation = trip.location.slice(0, 120);
+      const tour = (cfg && typeof cfg.tour === 'object') ? cfg.tour : {};
+      const title = trip.title || tour.title;
+      const location = trip.location || tour.location;
+      if (typeof title === 'string') tripTitle = title.slice(0, 200);
+      if (typeof location === 'string') tripLocation = location.slice(0, 120);
     } catch { /* config unparseable — leave blank, the lead still stands */ }
 
     const widget = {

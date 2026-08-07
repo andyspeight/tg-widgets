@@ -51,7 +51,9 @@ async function resolveCapacity(widgetId) {
     let capacity = 0;
     try {
       const cfg = JSON.parse(rec.fields['Config'] || '{}');
-      capacity = Math.max(0, parseInt(cfg?.trip?.capacity, 10) || 0);
+      // Group Trips store capacity under `trip`, Escorted Tour under `tour`.
+      const cap = cfg?.trip?.capacity ?? cfg?.tour?.capacity;
+      capacity = Math.max(0, parseInt(cap, 10) || 0);
     } catch { /* unparseable config -> capacity 0 -> widget hides the count */ }
     return { found: true, capacity };
   } catch (err) {
