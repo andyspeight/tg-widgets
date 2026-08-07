@@ -177,7 +177,7 @@
       inset: 0;
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: var(--tgx-rot-justify, center);
       overflow: hidden;
     }
     .tgx-rot-word {
@@ -610,6 +610,14 @@
       const c = this.c;
 
       // Build CSS variable overrides
+      const alignVal = ['left', 'center', 'right'].includes(c.align) ? c.align : 'center';
+      // The rotating word sits absolutely inside a box sized to the longest word.
+      // Its horizontal place follows the overall alignment, so a left-aligned
+      // widget puts every word on the left edge (not floating in the centre of
+      // the box) and lines up with left-aligned text above it. (Andy, Aug 2026.)
+      const rotJustify = { left: 'flex-start', center: 'center', right: 'flex-end' }[alignVal];
+      // Letter spacing (em). Clamped so an odd value can never break the layout.
+      const tracking = Number.isFinite(Number(c.letterSpacing)) ? clamp(Number(c.letterSpacing), -0.2, 1) : -0.02;
       const rootStyle = [
         `--tgx-brand: ${safeColor(c.brand, '#0891B2')}`,
         `--tgx-accent: ${safeColor(c.accent, '#6366F1')}`,
@@ -620,9 +628,10 @@
         `--tgx-pad-x: ${clamp(c.paddingX, 0, 200)}px`,
         `--tgx-size: ${clamp(c.fontSize, 10, 240)}px`,
         `--tgx-weight: ${clamp(c.fontWeight, 100, 900)}`,
-        `--tgx-tracking: ${Number(c.letterSpacing).toFixed(3)}em`,
+        `--tgx-tracking: ${tracking.toFixed(3)}em`,
         `--tgx-leading: ${clamp(c.lineHeight, 0.8, 2.5)}`,
-        `--tgx-align: ${['left','center','right'].includes(c.align) ? c.align : 'center'}`,
+        `--tgx-align: ${alignVal}`,
+        `--tgx-rot-justify: ${rotJustify}`,
         `--tgx-font: ${(function () { const f = safeFontStack(c.fontFamily, ''); return f ? `'${f.replace(/'/g, '')}', Inter, sans-serif` : 'Inter, sans-serif'; })()}`
       ].join('; ');
 

@@ -78,6 +78,7 @@
     "test:offer-sheet": "node test/offer-sheet-smoke.mjs",
     "test:offer-fields": "node test/offer-fields-smoke.mjs",
     "test:offer-sheet-render": "node test/offer-sheet-render-smoke.mjs",
+    "test:textfx": "node test/textfx-rotating-align-smoke.mjs",
     "test:testimonials-reveal": "node test/testimonials-reveal-smoke.mjs",
     "test:trips": "node test/trips-widget-smoke.mjs",
     "test:loader-export": "node test/loader-export-smoke.mjs"
