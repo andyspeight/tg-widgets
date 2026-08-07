@@ -782,12 +782,15 @@
 
 /* Sized to its longest row, never narrower than 184px and never wider than the
    window. A fixed width made "Small laptop · 1024px" wrap to two lines, which
-   is what Andy saw. */
+   is what Andy saw.
+
+   Positioned by the component, not here: it is painted into the body and placed
+   fixed to the viewport (see Menu.tsx), so top/left/right come from the inline
+   style. This rule is only what it looks like. Above the canvas toolbars (40)
+   and the width badge (50), below a modal (100). */
 .ed-menu {
-  position: absolute;
-  top: calc(100% + var(--ed-1));
-  right: 0;
-  z-index: 20;
+  position: fixed;
+  z-index: 70;
   width: max-content;
   min-width: 184px;
   max-width: min(320px, calc(100vw - 32px));

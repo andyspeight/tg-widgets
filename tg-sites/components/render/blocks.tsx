@@ -646,12 +646,14 @@ export function WidgetBlock({
 }: {
   props: Props;
   /**
-   * Draw the placeholder rather than the real container.
+   * Draw the widget in its own frame rather than the bare container.
    *
-   * True on the editor canvas. The canvas re-renders on every keystroke, and a
-   * widget script re-initialising each time would thrash the page and hammer the
-   * config API. The editor's job is the layout; Preview is where the widget is
-   * checked. Same reasoning as the render-must-not-grab-the-page rule.
+   * True on the editor canvas. It used to be a placeholder, because the canvas
+   * re-renders on every keystroke and a widget script re-initialising each time
+   * would thrash the page and hammer the config API. The frame solves that
+   * instead of dodging it: the widget's script runs in its own document, which
+   * React keeps across re-renders while the tag and id are unchanged, so it loads
+   * once. Same reasoning as the render-must-not-grab-the-page rule.
    */
   editing?: boolean;
 }): ReactElement {
@@ -698,6 +700,13 @@ export function WidgetBlock({
  * the closed list (the tag and the script name) and a validated id, so nothing
  * is client-controlled markup. The widget fetches its own config from
  * WIDGET_ORIGIN, which answers cross-origin, so the preview shows the real thing.
+ *
+ * IT SIZES ITS OWN FRAME. A short frame would cut a tall widget off, and the
+ * editor cannot measure across into the iframe without shipping script the
+ * published page must not carry. So the measuring is done from INSIDE, here: the
+ * preview is same-origin (no sandbox), so it can set its own iframe's height to
+ * its content and keep it in step as the widget loads and grows. None of this
+ * reaches the published page, which renders the plain container and no script.
  */
 function widgetPreviewDoc(kind: WidgetKind, id: string): string {
   const src = `${WIDGET_ORIGIN}/${kind.script}`;
@@ -706,7 +715,11 @@ function widgetPreviewDoc(kind: WidgetKind, id: string): string {
     '<meta name="viewport" content="width=device-width,initial-scale=1">' +
     '<style>html,body{margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif}</style>' +
     `<div data-tg-widget="${kind.tag}" data-tg-id="${id}"></div>` +
-    `<script src="${src}" defer><\/script>`
+    `<script src="${src}" defer><\/script>` +
+    '<script>(function(){function f(){try{var e=window.frameElement;' +
+    'if(e)e.style.height=document.documentElement.scrollHeight+"px"}catch(_){}}' +
+    'if(window.ResizeObserver){new ResizeObserver(f).observe(document.documentElement)}' +
+    'addEventListener("load",f);setTimeout(f,1500)})();<\/script>'
   );
 }
 

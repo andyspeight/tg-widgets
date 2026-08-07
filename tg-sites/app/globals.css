@@ -1024,12 +1024,12 @@
 .tgs-widget { max-width: 100%; }
 
 /* The editor's live preview of a Travelgenix widget: the real widget in a frame
-   of its own. A fixed, generous height, because sizing to the widget would need
-   script the published page must not ship; the published page has no frame and
-   the widget sizes itself, and Preview shows the true height. See WidgetBlock. */
+   of its own. No fixed height on the frame; it grows with the iframe, which
+   sizes itself to the widget from inside its own document (see widgetPreviewDoc),
+   so a tall widget is not cut off. That resize script lives in the preview
+   iframe, never on the published page, which has no frame and no script. */
 .tgs-widget-frame {
   max-width: 100%;
-  height: 460px;
   overflow: hidden;
   border: 1px solid var(--tgs-border);
   border-radius: var(--tgs-radius-md);
@@ -1038,7 +1038,7 @@
 .tgs-widget-frame iframe {
   display: block;
   width: 100%;
-  height: 100%;
+  height: 200px; /* a starting height; the preview script fits it to the widget */
   border: 0;
 }
 

@@ -6,9 +6,21 @@
  * Replaces rows of unlabelled icon buttons. Every action carries a word, the
  * trigger meets the 44px target, and it closes on Escape or an outside click.
  * Shared by the outline and the top bar so both behave the same.
+ *
+ * WHY THE PANEL IS PORTALLED TO THE BODY
+ * The outline is a scroll pane (overflow-y: auto), and an absolutely-positioned
+ * panel inside it is clipped by that scroll box: opening the menu on a section
+ * showed only the top half of it (Andy, 7 Aug 2026). A panel painted into the
+ * body escapes every ancestor's overflow, so it is drawn in full wherever the
+ * trigger sits. It is then placed by measurement the same way ItemToolbar places
+ * its popover: fixed to the viewport, right edge under the trigger's right edge,
+ * clamped so it never runs off an edge and lifting above the trigger when there
+ * is no room below. A layout effect does the placing, so it never paints in the
+ * wrong spot first.
  */
 
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { Icon, type IconName } from './Icon';
 
 export type MenuItem =
@@ -48,12 +60,67 @@ export function Menu({
 }) {
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+
+  /*
+   * PLACE THE PANEL BY MEASUREMENT, the same idea as ItemToolbar's popover.
+   *
+   * The trigger's box gives the anchor; the panel's own box gives the size to
+   * clamp. Right edge under the trigger's right edge (the old right: 0), a hair
+   * below it, then held inside the window on every side. If it would run off the
+   * bottom it lifts to sit above the trigger instead, and failing that it is
+   * pinned to the top so the first items are always reachable. A layout effect,
+   * so the clamp happens before the browser paints.
+   */
+  useLayoutEffect(() => {
+    if (!open) {
+      setPos(null);
+      return;
+    }
+    function place() {
+      const trigger = wrap.current?.firstElementChild as HTMLElement | null;
+      const menu = panel.current;
+      if (!trigger || !menu) return;
+      const t = trigger.getBoundingClientRect();
+      const m = menu.getBoundingClientRect();
+      const gap = 4;
+      const margin = 8;
+
+      let left = t.right - m.width;
+      left = Math.max(margin, Math.min(left, window.innerWidth - m.width - margin));
+
+      let top = t.bottom + gap;
+      if (top + m.height > window.innerHeight - margin) {
+        const above = t.top - gap - m.height;
+        top = above >= margin ? above : Math.max(margin, window.innerHeight - m.height - margin);
+      }
+      setPos({ top, left });
+    }
+    place();
+    /*
+     * Reposition while it is open: a scroll in the outline (capture, so a scroll
+     * in any ancestor counts) or a window resize would otherwise leave the panel
+     * behind, floating away from its trigger.
+     */
+    window.addEventListener('resize', place);
+    window.addEventListener('scroll', place, true);
+    return () => {
+      window.removeEventListener('resize', place);
+      window.removeEventListener('scroll', place, true);
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
 
     function onDown(event: MouseEvent) {
-      if (!wrap.current?.contains(event.target as Node)) setOpen(false);
+      const target = event.target as Node;
+      // The panel now lives in the body, outside wrap, so it needs its own check
+      // or a click on the menu itself would count as an outside click.
+      if (wrap.current?.contains(target)) return;
+      if (panel.current?.contains(target)) return;
+      setOpen(false);
     }
     function onKey(event: KeyboardEvent) {
       if (event.key === 'Escape') setOpen(false);
@@ -84,39 +151,53 @@ export function Menu({
         {children}
       </button>
 
-      {open && (
-        <div className="ed-menu" role="menu">
-          {items.map((item, index) => {
-            if ('separator' in item && item.separator) return <hr key={index} />;
-            if ('heading' in item) {
-              return (
-                <p key={index} className="ed-menu__heading">
-                  {item.heading}
-                </p>
-              );
+      {open &&
+        createPortal(
+          <div
+            ref={panel}
+            className="ed-menu"
+            role="menu"
+            // Fixed to the viewport and placed by the layout effect. Hidden for
+            // the one frame before it is measured, so it is never seen in the
+            // wrong spot; right/top come from the inline style, not the sheet.
+            style={
+              pos
+                ? { position: 'fixed', top: pos.top, left: pos.left, right: 'auto' }
+                : { position: 'fixed', top: 0, left: 0, right: 'auto', visibility: 'hidden' }
             }
-            const isChoice = item.checked !== undefined;
-            return (
-              <button
-                key={index}
-                type="button"
-                role={isChoice ? 'menuitemradio' : 'menuitem'}
-                aria-checked={isChoice ? item.checked : undefined}
-                disabled={item.disabled}
-                data-variant={item.danger ? 'danger' : undefined}
-                onClick={() => {
-                  setOpen(false);
-                  item.onClick();
-                }}
-              >
-                <Icon name={isChoice ? (item.checked ? 'check' : 'blank') : item.icon} size={16} />
-                <span className="ed-menu__label">{item.label}</span>
-                {item.hint && <span className="ed-menu__hint">{item.hint}</span>}
-              </button>
-            );
-          })}
-        </div>
-      )}
+          >
+            {items.map((item, index) => {
+              if ('separator' in item && item.separator) return <hr key={index} />;
+              if ('heading' in item) {
+                return (
+                  <p key={index} className="ed-menu__heading">
+                    {item.heading}
+                  </p>
+                );
+              }
+              const isChoice = item.checked !== undefined;
+              return (
+                <button
+                  key={index}
+                  type="button"
+                  role={isChoice ? 'menuitemradio' : 'menuitem'}
+                  aria-checked={isChoice ? item.checked : undefined}
+                  disabled={item.disabled}
+                  data-variant={item.danger ? 'danger' : undefined}
+                  onClick={() => {
+                    setOpen(false);
+                    item.onClick();
+                  }}
+                >
+                  <Icon name={isChoice ? (item.checked ? 'check' : 'blank') : item.icon} size={16} />
+                  <span className="ed-menu__label">{item.label}</span>
+                  {item.hint && <span className="ed-menu__hint">{item.hint}</span>}
+                </button>
+              );
+            })}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
