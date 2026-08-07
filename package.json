@@ -76,6 +76,7 @@
     "test:form-logic": "node test/form-logic-smoke.mjs",
     "test:prayer": "node test/prayer-times-smoke.mjs",
     "test:offer-sheet": "node test/offer-sheet-smoke.mjs",
+    "test:offer-fields": "node test/offer-fields-smoke.mjs",
     "test:testimonials-reveal": "node test/testimonials-reveal-smoke.mjs",
     "test:loader-export": "node test/loader-export-smoke.mjs"
   },

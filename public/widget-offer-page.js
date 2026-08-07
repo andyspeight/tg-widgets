@@ -414,7 +414,10 @@
     phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
     arrow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>',
     chevDown: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
-    x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>'
+    x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+    ship: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20a2.4 2.4 0 0 0 2 1 2.4 2.4 0 0 0 2-1 2.4 2.4 0 0 1 2-1 2.4 2.4 0 0 1 2 1 2.4 2.4 0 0 0 2 1 2.4 2.4 0 0 0 2-1 2.4 2.4 0 0 1 2-1 2.4 2.4 0 0 1 2 1 2.4 2.4 0 0 0 2 1 2.4 2.4 0 0 0 2-1"/><path d="M4 18 3 12h18l-1 6"/><path d="M12 3v9M8 7h8"/></svg>',
+    train: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 11h16M12 3v8M8 19l-2 2M16 19l2 2"/><circle cx="8.5" cy="14.5" r="0.5"/><circle cx="15.5" cy="14.5" r="0.5"/></svg>',
+    cabin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="0.5"/></svg>'
   };
 
   // ── Styles ───────────────────────────────────────────────────────────────
@@ -829,12 +832,25 @@
         itinerary: this._f('itinerary'),
         highlights: this._f('highlights'),
         skiArea: this._f('skiArea'),
+        type: this._f('type'),
         nights: this._f('nights'),
         board: this._f('board'),
         flighttype: this._f('flighttype'),
         airline: this._f('airline'),
         period: this._f('period'),
         property: this._f('property'),
+        // Type-specific structured fields (cruise, flight-only, rail, tour…).
+        shipName: this._f('shipName'),
+        cruiseLine: this._f('cruiseLine'),
+        cabinType: this._f('cabinType'),
+        cabinClass: this._f('cabinClass'),
+        destination: this._f('destination'),
+        departurePort: this._f('departurePort'),
+        station: this._f('station'),
+        operator: this._f('operator'),
+        railOperator: this._f('railOperator'),
+        railClass: this._f('railClass'),
+        groupSize: this._f('groupSize'),
         price: money(sym, priceN), priceN: priceN,
         was: money(sym, wasN),
         save: money(sym, save), savePct: savePct,
@@ -870,12 +886,37 @@
 
     _facts(d) {
       const t = this.t;
+      const type = d.type || '';
       const items = [];
-      if (d.nights) items.push([I.moon, t('duration'), esc(d.nights) + ' ' + esc(t('nights'))]);
-      if (d.board) items.push([I.plate, t('board'), esc(d.board)]);
-      if (d.flighttype && d.flighttype !== 'Not included') items.push([I.plane, t('flights'), esc(d.flighttype)]);
+      // Duration, shown for every type that has it (label follows the type).
+      if (d.nights) {
+        const unit = /Cruise/i.test(type) ? 'nights at sea'
+          : (/Escorted tour|Rail|Excursion|day trip/i.test(type) ? 'days' : esc(t('nights')));
+        items.push([/Cruise/i.test(type) ? I.ship : I.moon, t('duration'), esc(d.nights) + ' ' + unit]);
+      }
+      // Type-specific middle facts.
+      if (/Cruise/i.test(type)) {
+        if (d.cruiseLine) items.push([I.ship, 'Cruise line', esc(d.cruiseLine)]);
+        if (d.cabinType) items.push([I.cabin, 'Cabin', esc(d.cabinType)]);
+        if (d.departurePort) items.push([I.pin, 'Departs', esc(d.departurePort)]);
+      } else if (/Flight only/i.test(type)) {
+        if (d.cabinClass) items.push([I.cabin, 'Cabin class', esc(d.cabinClass)]);
+        if (d.flighttype && d.flighttype !== 'Not included') items.push([I.plane, t('flights'), esc(d.flighttype)]);
+        if (d.airline) items.push([I.plane, t('airline'), esc(d.airline)]);
+      } else if (/Rail/i.test(type)) {
+        if (d.railClass) items.push([I.train, 'Class', esc(d.railClass)]);
+        if (d.railOperator) items.push([I.train, 'Operator', esc(d.railOperator)]);
+      } else if (/Escorted tour/i.test(type)) {
+        if (d.operator) items.push([I.pin, 'Operator', esc(d.operator)]);
+        if (d.groupSize) items.push([I.hotel, 'Group', esc(d.groupSize)]);
+        if (d.flighttype && d.flighttype !== 'Not included') items.push([I.plane, t('flights'), esc(d.flighttype)]);
+      } else {
+        // Hotels, packages, city breaks, ski, multi-centre.
+        if (d.board) items.push([I.plate, t('board'), esc(d.board)]);
+        if (d.flighttype && d.flighttype !== 'Not included') items.push([I.plane, t('flights'), esc(d.flighttype)]);
+      }
       if (d.period) items.push([I.calendar, t('travel'), esc(d.period)]);
-      if (d.stars) items.push([I.hotel, t('hotel'), d.stars + ' ' + esc(t('star'))]);
+      if (d.stars && !/Cruise|Flight only|Rail|Excursion|day trip/i.test(type)) items.push([I.hotel, t('hotel'), d.stars + ' ' + esc(t('star'))]);
       // Pad to 5 if we can, but never show empties
       return items.slice(0, 5).map(function (f) {
         return '<div class="tgop-fact"><div class="tgop-fact-ic">' + f[0] + '</div>'
@@ -885,12 +926,24 @@
 
     _detailTable(d) {
       const t = this.t;
+      const type = d.type || '';
+      const isCruise = /Cruise/i.test(type);
+      const isFlight = /Flight only/i.test(type);
+      const isRail = /Rail/i.test(type);
       const rows = [
-        [t('resort'), [d.property, this._f('resort')].filter(Boolean).join(', ')],
-        [t('destination'), d.loc],
-        [t('departsFrom'), this._f('origin')],
-        [t('airline'), [d.airline, d.flighttype].filter(Boolean).join(', ')],
-        [t('boardBasis'), d.board],
+        // Named thing: hotel for stays, ship for cruises, train for rail.
+        [isCruise ? 'Ship' : (isRail ? 'Train' : t('resort')),
+          isCruise ? [d.cruiseLine, d.shipName].filter(Boolean).join(' · ')
+            : (isRail ? d.railOperator : [d.property, this._f('resort')].filter(Boolean).join(', '))],
+        ['Cabin', isCruise ? d.cabinType : (isFlight ? d.cabinClass : '')],
+        ['Class', isRail ? d.railClass : ''],
+        ['Tour operator', /Escorted tour/i.test(type) ? d.operator : ''],
+        ['Group size', d.groupSize],
+        [t('destination'), isFlight ? [this._f('origin'), d.destination].filter(Boolean).join(' to ') : d.loc],
+        [isCruise ? 'Departs from' : (isRail ? 'From' : t('departsFrom')),
+          isCruise ? d.departurePort : (isRail ? d.station : (isFlight ? '' : this._f('origin')))],
+        [t('airline'), (isCruise || isRail) ? '' : [d.airline, isFlight ? '' : d.flighttype].filter(Boolean).join(', ')],
+        [t('boardBasis'), (isCruise || isFlight || isRail) ? '' : d.board],
         [t('travelPeriod'), d.period],
         [t('bookByLabel'), d.bookby],
         [t('offerReference'), d.reference]
@@ -997,7 +1050,7 @@
       const fContent =
           proseSection('About ' + (d.property || 'the hotel'), d.hotelDesc)
         + proseSection('About ' + (d.resort || 'the resort'), d.resortDesc)
-        + proseSection('About the ship', d.shipDesc)
+        + proseSection('About ' + (d.shipName || 'the ship'), d.shipDesc)
         + proseSection('Itinerary', d.itinerary)
         + proseSection('Highlights', d.highlights)
         + proseSection('The resort & ski area', d.skiArea)

@@ -83,7 +83,7 @@ console.log('rowsToOffers');
 console.log('offersToCsv export');
 {
   const saved = [
-    { id: 'off_xyz789', offer: { currency: 'GBP', fields: { title: 'Cancun escape', price: '899', board: 'All inclusive', nights: '7', hotelDesc: 'A five star right on the beach with five pools.', countryDesc: 'Warm all year, driest Nov to Apr.' }, images: ['https://a/1.jpg', 'https://a/2.jpg'], tags: ['Beachfront'] } }
+    { id: 'off_xyz789', offer: { currency: 'GBP', fields: { title: 'Cancun escape', price: '899', board: 'All inclusive', nights: '7', hotelDesc: 'A five star right on the beach with five pools.', countryDesc: 'Warm all year, driest Nov to Apr.', shipName: 'Wonder of the Seas', cruiseLine: 'Royal Caribbean', cabinType: 'Balcony' }, images: ['https://a/1.jpg', 'https://a/2.jpg'], tags: ['Beachfront'] } }
   ];
   const csv = TG.offersToCsv(saved);
   ok('export includes the Offer ID', csv.indexOf('off_xyz789') !== -1);
@@ -98,6 +98,9 @@ console.log('offersToCsv export');
   ok('round-trip keeps the images', Array.isArray(back[0].offer.images) && back[0].offer.images.length === 2);
   ok('round-trip keeps the hotel description', back[0].offer.fields.hotelDesc === 'A five star right on the beach with five pools.');
   ok('round-trip keeps the country description', back[0].offer.fields.countryDesc === 'Warm all year, driest Nov to Apr.');
+  ok('round-trip keeps the ship', back[0].offer.fields.shipName === 'Wonder of the Seas');
+  ok('round-trip keeps the cruise line', back[0].offer.fields.cruiseLine === 'Royal Caribbean');
+  ok('round-trip keeps the cabin', back[0].offer.fields.cabinType === 'Balcony');
 }
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed');
