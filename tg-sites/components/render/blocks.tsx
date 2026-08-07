@@ -929,8 +929,21 @@ export function TestimonialsBlock({ props }: { props: Props }): ReactElement {
     return <div className="tgs-placeholder">Add a testimonial</div>;
   }
 
+  /*
+   * TEXT AND CARD COLOUR, both through safeColour so neither is ever a free-text
+   * style. The text colour is set on the block and inherited by every card's
+   * words; the card colour rides a CSS variable the card background reads, so one
+   * control paints all the cards. Blank leaves each following the section and the
+   * site surface, exactly as a colour field does everywhere else.
+   */
+  const textColour = safeColour(props.textColour);
+  const cardColour = safeColour(props.cardColour);
+  const style: CSSProperties = {};
+  if (textColour) style.color = textColour;
+  if (cardColour) (style as Record<string, string>)['--tgs-tsl-card'] = cardColour;
+
   return (
-    <div className="tgs-tsl">
+    <div className="tgs-tsl" style={Object.keys(style).length ? style : undefined}>
       <div className="tgs-tsl__track">
         {items.map((item, index) => {
           const quote = str(item, 'quote');
@@ -972,13 +985,14 @@ export function AudioBlock({ props }: { props: Props }): ReactElement {
   const src = safeUrl(str(props, 'src'));
   const title = str(props, 'title');
   const caption = str(props, 'caption');
+  const textColour = safeColour(props.textColour);
 
   if (!src) {
     return <div className="tgs-placeholder">Add a link to your audio</div>;
   }
 
   return (
-    <div className="tgs-audio">
+    <div className="tgs-audio" style={textColour ? { color: textColour } : undefined}>
       {title && <div className="tgs-audio__title">{title}</div>}
       <audio className="tgs-audio__player" controls preload="none" src={src}>
         Your browser cannot play this audio.

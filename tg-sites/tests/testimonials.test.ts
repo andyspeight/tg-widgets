@@ -47,4 +47,12 @@ describe('the testimonial slider is a registered block', () => {
     const rating = repeater && repeater.kind === 'repeater' ? repeater.fields.find((field) => field.key === 'rating') : undefined;
     if (rating && rating.kind === 'number') expect(rating.max).toBe(5);
   });
+
+  it('lets the words and the cards be recoloured', () => {
+    const def = blockDefinition('testimonials');
+    const text = def?.fields.find((field) => field.key === 'textColour');
+    const card = def?.fields.find((field) => field.key === 'cardColour');
+    expect(text?.kind).toBe('colour');
+    expect(card?.kind).toBe('colour');
+  });
 });

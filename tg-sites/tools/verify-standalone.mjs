@@ -4390,6 +4390,16 @@ await check('a testimonial slider arrives with example reviews on a rail', async
   return stars === 5 ? true : `${stars} filled stars on the first card`;
 });
 
+await check('the testimonial slider offers a text colour and a card colour', async () => {
+  // The gap Andy hit: a text-bearing block with no way to recolour the words or
+  // the cards. Both are colour fields now, in the Colours section.
+  await openPaneGroup('Colours');
+  const labels = (await page.locator('.ed-props .ed-label').allInnerTexts()).map((label) => label.trim().toLowerCase());
+  return labels.includes('text colour') && labels.includes('card colour')
+    ? true
+    : `Colours offers: ${labels.join(', ')}`;
+});
+
 await check('the testimonials sit on a scrolling rail, not stacked', async () => {
   const overflow = await added().locator('.tgs-tsl__track').first().evaluate((el) => getComputedStyle(el).overflowX);
   if (!/auto|scroll/.test(overflow)) return `overflow-x is "${overflow}"`;

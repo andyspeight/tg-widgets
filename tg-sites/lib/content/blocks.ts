@@ -1242,6 +1242,18 @@ export const BLOCKS: readonly BlockDefinition[] = [
           { kind: 'text', key: 'alt', label: 'Photo alt text', max: 200 },
         ],
       },
+      {
+        kind: 'colour',
+        key: 'textColour',
+        label: 'Text colour',
+        help: 'The quote, name and detail on every card. Blank follows the section.',
+      },
+      {
+        kind: 'colour',
+        key: 'cardColour',
+        label: 'Card colour',
+        help: 'The background of each card. Blank uses the site surface.',
+      },
     ],
   },
   {
@@ -1274,6 +1286,12 @@ export const BLOCKS: readonly BlockDefinition[] = [
       },
       { kind: 'text', key: 'title', label: 'Title', max: 120, help: 'An optional line above the player.' },
       { kind: 'text', key: 'caption', label: 'Caption', max: 200 },
+      {
+        kind: 'colour',
+        key: 'textColour',
+        label: 'Text colour',
+        help: 'The title and caption. Blank follows the section.',
+      },
     ],
   },
 

@@ -1188,7 +1188,11 @@
 .tgs-ba__badge--after { right: var(--tgs-space-s); }
 
 /* Testimonials on a rail: the same pure-CSS scroll-snap the slider uses, no
-   script. Each card is the site's own surface and type. See TestimonialsBlock. */
+   script. The block sets its own text colour (inherited by every card's words)
+   and a --tgs-tsl-card variable the card background reads, both from colour
+   fields. Blank leaves the section's text colour and the site surface. See
+   TestimonialsBlock. */
+.tgs-tsl { color: var(--tgs-text); }
 .tgs-tsl__track {
   display: flex;
   gap: var(--tgs-space-m);
@@ -1205,7 +1209,7 @@
   flex-direction: column;
   gap: var(--tgs-space-s);
   padding: var(--tgs-space-l);
-  background: var(--tgs-surface);
+  background: var(--tgs-tsl-card, var(--tgs-surface));
   border: 1px solid var(--tgs-border);
   border-radius: var(--tgs-radius-lg);
 }
@@ -1216,7 +1220,7 @@
   margin: 0;
   font-size: var(--tgs-text-l);
   line-height: 1.5;
-  color: var(--tgs-text);
+  color: inherit;
 }
 .tgs-tsl__by {
   display: flex;
@@ -1232,14 +1236,18 @@
   flex: 0 0 auto;
 }
 .tgs-tsl__meta { display: flex; flex-direction: column; min-width: 0; }
-.tgs-tsl__name { font-weight: 600; color: var(--tgs-text); }
-.tgs-tsl__detail { font-size: var(--tgs-text-s); color: var(--tgs-text-muted); }
+.tgs-tsl__name { font-weight: 600; color: inherit; }
+/* Muted by opacity, not a fixed grey, so it stays legible against whatever text
+   colour is set, a dark card included. */
+.tgs-tsl__detail { font-size: var(--tgs-text-s); color: inherit; opacity: 0.72; }
 
-/* Audio: the browser's own player, drawn by the browser. See AudioBlock. */
-.tgs-audio { display: flex; flex-direction: column; gap: var(--tgs-space-s); }
+/* Audio: the browser's own player, drawn by the browser. The title and caption
+   inherit the block's text colour, so the colour field paints both. See
+   AudioBlock. */
+.tgs-audio { display: flex; flex-direction: column; gap: var(--tgs-space-s); color: var(--tgs-text); }
 .tgs-audio__player { width: 100%; }
-.tgs-audio__title { font-weight: 600; color: var(--tgs-text); }
-.tgs-audio__caption { font-size: var(--tgs-text-s); color: var(--tgs-text-muted); }
+.tgs-audio__title { font-weight: 600; color: inherit; }
+.tgs-audio__caption { font-size: var(--tgs-text-s); color: inherit; opacity: 0.72; }
 
 /* Buttons */
 .tgs-buttons { display: flex; flex-wrap: wrap; gap: var(--tgs-space-s); }

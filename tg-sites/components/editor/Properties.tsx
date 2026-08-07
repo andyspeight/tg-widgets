@@ -1608,7 +1608,10 @@ const BLOCK_DESIGN: Record<string, BoxParts> = {
   gallery: { bg: true, border: true, padding: true, shadow: true },
   slider: { bg: true, border: true, padding: true, shadow: true },
   cards: { bg: true, border: true, padding: true, shadow: true },
-  testimonials: { bg: true, border: true, padding: true, shadow: true },
+  // No block-level bg: the card colour is a field of its own, so a second
+  // "Background colour" here would be the band behind the rail and just confuse
+  // which one paints the cards. Border, padding and shadow frame the whole rail.
+  testimonials: { border: true, padding: true, shadow: true },
   // Styles itself, or is pure spacing: no box, just grouped settings.
   button: {},
   'button-group': {},
