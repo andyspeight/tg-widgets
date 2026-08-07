@@ -70,6 +70,7 @@ export const WIDGET_KINDS: readonly WidgetKind[] = [
   { tag: 'attraction', label: 'Attraction Spotlight', script: 'widget-attraction.js', group: 'Travel' },
   { tag: 'carousel', label: 'Destination Carousel', script: 'widget-carousel.js', group: 'Travel' },
   { tag: 'travel-results-ai', label: 'Travel Results AI', script: 'widget-travel-results-ai.js', group: 'Travel' },
+  { tag: 'trips', label: 'Group Trips', script: 'widget-trips.js', group: 'Travel' },
   { tag: 'worldmap', label: 'World Map', script: 'widget-worldmap.js', group: 'Travel' },
   { tag: 'flighttime', label: 'Flight Time and Distance', script: 'widget-flighttime.js', group: 'Travel' },
   { tag: 'weather', label: 'Weather', script: 'widget-weather.js', group: 'Travel' },
