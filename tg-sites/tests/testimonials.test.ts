@@ -54,5 +54,8 @@ describe('the testimonial slider is a registered block', () => {
     const card = def?.fields.find((field) => field.key === 'cardColour');
     expect(text?.kind).toBe('colour');
     expect(card?.kind).toBe('colour');
+    // Both blank by default, so an untouched slider follows the section.
+    expect(def?.defaults).toHaveProperty('textColour', '');
+    expect(def?.defaults).toHaveProperty('cardColour', '');
   });
 });

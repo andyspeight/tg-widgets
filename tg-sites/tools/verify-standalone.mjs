@@ -4448,6 +4448,27 @@ await check('a link becomes a native player that does not preload', async () => 
 
 
 // ---------------------------------------------------------------------------
+// Text colour on the content blocks (the fan-out)
+//
+// Andy's rule that any text element can be recoloured, carried to the blocks
+// that were missing it. The field wiring is in tests/text-colour.test.ts; a
+// browser settles that the control actually reaches the pane. Cards stands in
+// for the four (cards, accordion, tabs, table) since they share the wiring.
+// ---------------------------------------------------------------------------
+
+await page.reload();
+await page.waitForSelector('.ed-root');
+await showPanels();
+
+await check('a cards block offers a text colour', async () => {
+  await addBlock('Cards');
+  await openPaneGroup('Colours');
+  const labels = (await page.locator('.ed-props .ed-label').allInnerTexts()).map((label) => label.trim().toLowerCase());
+  return labels.includes('text colour') ? true : `Colours offers: ${labels.join(', ')}`;
+});
+
+
+// ---------------------------------------------------------------------------
 // The menu, the header and the footer
 //
 // TWO CLAIMS THAT ONLY A BROWSER CAN SETTLE.

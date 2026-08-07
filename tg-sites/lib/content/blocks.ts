@@ -432,6 +432,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
       style: 'separated',
       single: true,
       openFirst: false,
+      textColour: '',
       items: [
         { title: "What's included", body: 'Flights, transfers and seven nights bed and breakfast.' },
         { title: "What's not", body: 'Travel insurance, and anything you buy while you are there.' },
@@ -471,6 +472,12 @@ export const BLOCKS: readonly BlockDefinition[] = [
         help: 'Opening one closes the last. Older browsers let both stay open, which is no worse.',
       },
       { kind: 'toggle', key: 'openFirst', label: 'Open the first one to start' },
+      {
+        kind: 'colour',
+        key: 'textColour',
+        label: 'Text colour',
+        help: 'The headings and the text inside. Blank follows the section.',
+      },
     ],
   },
   {
@@ -497,6 +504,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     defaults: {
       style: 'underline',
       align: 'left',
+      textColour: '',
       items: [
         { title: 'Overview', body: 'A week in the Cyclades, at a pace you set yourself.' },
         { title: 'Day by day', body: 'Two nights on Paros, three on Naxos, two back in Athens.' },
@@ -533,6 +541,12 @@ export const BLOCKS: readonly BlockDefinition[] = [
         ],
       },
       { kind: 'select', key: 'align', label: 'Headings', options: ALIGN_OPTIONS },
+      {
+        kind: 'colour',
+        key: 'textColour',
+        label: 'Text colour',
+        help: 'The text inside the panels. Blank follows the section.',
+      },
     ],
   },
 
@@ -865,6 +879,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
       radius: 'md',
       align: 'left',
       wholeCardLinks: true,
+      textColour: '',
       items: [
         {
           src: '',
@@ -1018,6 +1033,12 @@ export const BLOCKS: readonly BlockDefinition[] = [
         key: 'wholeCardLinks',
         label: 'The whole card is clickable',
         help: 'Still one link, so a keyboard tabs through the cards once each.',
+      },
+      {
+        kind: 'colour',
+        key: 'textColour',
+        label: 'Text colour',
+        help: 'The titles and body text. The small label and the link keep your brand colour.',
       },
     ],
   },
@@ -1181,6 +1202,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
     icon: 'testimonial',
     description: 'What your clients said, on a rail: a rating, a quote, a name and a photo.',
     defaults: {
+      textColour: '',
+      cardColour: '',
       items: [
         {
           quote: 'They thought of everything. We just turned up and had the best two weeks of our lives.',
@@ -1271,7 +1294,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     group: 'Media',
     icon: 'audio',
     description: 'A sound clip in the browser player, from a link.',
-    defaults: { src: '', title: '', caption: '' },
+    defaults: { src: '', title: '', caption: '', textColour: '' },
     summarise: (props) => {
       const title = asString(props.title).trim();
       return title ? `Audio: ${firstWords(title, 5)}` : 'Audio';
@@ -1829,6 +1852,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
       firstColumnHeader: true,
       style: 'lined',
       caption: '',
+      textColour: '',
       data: [
         'Board basis\tSpark\tBoost\tIgnite',
         'Room only\tYes\tYes\tYes',
@@ -1877,6 +1901,12 @@ export const BLOCKS: readonly BlockDefinition[] = [
         label: 'Caption',
         max: 200,
         help: 'Read out before the table by a screen reader, and shown under it.',
+      },
+      {
+        kind: 'colour',
+        key: 'textColour',
+        label: 'Text colour',
+        help: 'The headings and the cells. Blank follows the section.',
       },
     ],
   },

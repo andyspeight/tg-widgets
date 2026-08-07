@@ -1133,6 +1133,7 @@ export function CardsBlock({
   const radius = oneOf(props, 'radius', RADII, 'md');
   const align = oneOf(props, 'align', ['left', 'centre'] as const, 'left');
   const whole = bool(props, 'wholeCardLinks', true);
+  const textColour = safeColour(props.textColour);
 
   const cards = items
     .map((card, index) =>
@@ -1177,6 +1178,7 @@ export function CardsBlock({
       data-radius={radius}
       data-align={align}
       data-whole={whole ? 'true' : undefined}
+      style={textColour ? { color: textColour } : undefined}
     >
       {cards}
     </div>
@@ -1238,6 +1240,7 @@ export function AccordionBlock({
   const style = oneOf(props, 'style', ['plain', 'ruled', 'separated'] as const, 'separated');
   const single = bool(props, 'single', true);
   const openFirst = bool(props, 'openFirst', false);
+  const textColour = safeColour(props.textColour);
 
   const rows = items.filter((item) => str(item, 'title') || str(item, 'body'));
 
@@ -1246,7 +1249,7 @@ export function AccordionBlock({
   }
 
   return (
-    <div className="tgs-accordion" data-style={style}>
+    <div className="tgs-accordion" data-style={style} style={textColour ? { color: textColour } : undefined}>
       {rows.map((item, index) => (
         <details
           key={index}
@@ -1291,6 +1294,7 @@ export function TabsBlock({
 }): ReactElement {
   const style = oneOf(props, 'style', ['underline', 'pills', 'boxed'] as const, 'underline');
   const align = oneOf(props, 'align', ALIGNS, 'left');
+  const textColour = safeColour(props.textColour);
 
   const items = list(props, 'items')
     .filter((item) => str(item, 'title'))
@@ -1303,7 +1307,7 @@ export function TabsBlock({
   const name = `tgs-tabs-${blockId}`;
 
   return (
-    <div className="tgs-tabs" data-style={style} data-align={align}>
+    <div className="tgs-tabs" data-style={style} data-align={align} style={textColour ? { color: textColour } : undefined}>
       {/*
         THE RADIOS COME FIRST AND ARE SIBLINGS OF THE PANELS, which is the whole
         reason the markup is ordered like this rather than tab-then-panel. The
@@ -1887,6 +1891,7 @@ export function TableBlock({ props }: { props: Props }): ReactElement {
 
   const head = headerRow ? rows[0] : null;
   const body = headerRow ? rows.slice(1) : rows;
+  const textColour = safeColour(props.textColour);
 
   return (
     <div
@@ -1895,7 +1900,7 @@ export function TableBlock({ props }: { props: Props }): ReactElement {
       aria-label={caption || 'Table. Scroll sideways to see all of it.'}
       tabIndex={0}
     >
-      <table className="tgs-table" data-style={style}>
+      <table className="tgs-table" data-style={style} style={textColour ? { color: textColour } : undefined}>
         {caption && <caption className="tgs-table__caption">{caption}</caption>}
 
         {head && (

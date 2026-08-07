@@ -1498,7 +1498,7 @@
 .tgs-accordion__mark { flex: none; transition: transform 0.15s ease; }
 .tgs-accordion__item[open] .tgs-accordion__mark { transform: rotate(180deg); }
 
-.tgs-accordion__body { padding-bottom: var(--tgs-space-m); color: var(--tgs-text-muted); }
+.tgs-accordion__body { padding-bottom: var(--tgs-space-m); color: inherit; opacity: 0.72; }
 .tgs-accordion__body p { margin: 0 0 var(--tgs-space-s); }
 .tgs-accordion__body p:last-child { margin-bottom: 0; }
 .tgs-accordion[data-style='separated'] .tgs-accordion__body { padding-inline: var(--tgs-space-l); }
@@ -1744,7 +1744,10 @@
   letter-spacing: var(--tgs-h4-tracking);
   text-wrap: balance;
 }
-.tgs-card__text { margin: 0; color: var(--tgs-text-muted); }
+/* Inherit + opacity, not a fixed grey: at the default text colour this renders
+   the same muted tone as before, but it now follows a set Text colour and stays
+   legible on a dark card. The label and link keep their brand accents above. */
+.tgs-card__text { margin: 0; color: inherit; opacity: 0.72; }
 .tgs-card__link {
   /* Pushed to the bottom of the body, so a row of cards lines its links up
      however different the text above them is. */
@@ -1928,8 +1931,10 @@
   text-align: left;
   vertical-align: top;
 }
-.tgs-table th { font-weight: 600; color: var(--tgs-text); }
-.tgs-table td { color: var(--tgs-text-muted); }
+/* Both inherit the table's text colour now; the cells keep their softer tone
+   through opacity, which matches the old muted grey at the default colour. */
+.tgs-table th { font-weight: 600; color: inherit; }
+.tgs-table td { color: inherit; opacity: 0.72; }
 
 .tgs-table thead th {
   border-bottom: 2px solid var(--tgs-border-strong);
