@@ -262,20 +262,22 @@ const statusText = (page) => page.evaluate(() => {
   await page.close();
 }
 
-// ── 8. Combined suite demo — card AND full page from one seeded config ───────
+// ── 8. Proper demo page — card AND full page from one seeded config ──────────
+// /demo-trips is the canonical demo the dashboard links to: card on top, full
+// tour page beneath, both built from a single shared config.
 {
   const { page, errors } = await newPage();
-  await page.goto(`${BASE}/demo-trips-suite.html`, { waitUntil: 'load', timeout: 20000 });
+  await page.goto(`${BASE}/demo-trips.html`, { waitUntil: 'load', timeout: 20000 });
   await page.waitForFunction(() => {
-    const c = document.getElementById('mount-card');
-    const p = document.getElementById('mount-page');
+    const c = document.getElementById('demo-card');
+    const p = document.getElementById('demo-page');
     return !!(c && c.shadowRoot && c.shadowRoot.querySelector('[data-role="title"]')
       && p && p.shadowRoot && p.shadowRoot.querySelector('[data-role="form"]'));
   }, { timeout: 8000 }).catch(() => {});
 
   const s = await page.evaluate(() => {
-    const card = document.getElementById('mount-card')?.shadowRoot;
-    const pg = document.getElementById('mount-page')?.shadowRoot;
+    const card = document.getElementById('demo-card')?.shadowRoot;
+    const pg = document.getElementById('demo-page')?.shadowRoot;
     return {
       cardTitle: card?.querySelector('[data-role="title"]')?.textContent || '',
       cardPrice: card?.querySelector('[data-role="price"]')?.textContent || '',

@@ -73,17 +73,37 @@ async function newPage() {
   return { page, errors };
 }
 
-// ── 1 + 2. Demo page renders from inline config ──────────────────────────────
+// ── 1 + 2. Card widget renders from inline config (live + departed) ──────────
+// Self-contained (setContent), so the card's behaviour is proven independently
+// of whatever the demo page happens to look like.
 {
   const { page, errors } = await newPage();
-  await page.goto(`${BASE}/demo-trips.html`, { waitUntil: 'load', timeout: 20000 });
+  const live = JSON.stringify({ trip: {
+    title: 'Santorini Yoga Retreat 2027',
+    heroImage: 'https://images.unsplash.com/photo-1503152394-c571994fd383?w=1600&q=80',
+    description: 'Seven nights of morning flows, caldera sunsets and long slow dinners.',
+    startDate: '2027-05-10', endDate: '2027-05-17', location: 'Santorini, Greece',
+    capacity: 16, currency: 'gbp', pricePence: 189900, depositPence: 30000, balanceDueDate: '2027-03-10',
+  } }).replace(/'/g, '&#39;');
+  const pastCfg = JSON.stringify({ trip: {
+    title: 'Algarve Golf Week 2025', description: 'Five rounds across three courses.',
+    startDate: '2025-10-06', endDate: '2025-10-13', location: 'Vilamoura, Portugal',
+    capacity: 12, currency: 'gbp', pricePence: 129900, depositPence: 25000,
+  } }).replace(/'/g, '&#39;');
+  await page.setContent(
+    `<!doctype html><html><body>` +
+    `<div id="live" data-tg-widget="trips" data-tg-config='${live}'></div>` +
+    `<div id="past" data-tg-widget="trips" data-tg-config='${pastCfg}'></div>` +
+    `<script src="${BASE}/widget-trips.js"></script></body></html>`,
+    { waitUntil: 'load' }
+  );
   await page.waitForFunction(() => {
-    const el = document.getElementById('demo-main');
+    const el = document.getElementById('live');
     return !!(el && el.shadowRoot && el.shadowRoot.querySelector('[data-role="title"]'));
   }, { timeout: 8000 }).catch(() => {});
 
   const main = await page.evaluate(() => {
-    const sr = document.getElementById('demo-main')?.shadowRoot;
+    const sr = document.getElementById('live')?.shadowRoot;
     if (!sr) return null;
     const txt = (sel) => sr.querySelector(sel)?.textContent || '';
     return {
@@ -99,24 +119,23 @@ async function newPage() {
     };
   });
 
-  ok(!!main, 'demo: main widget mounted a shadow root');
+  ok(!!main, 'card: live widget mounted a shadow root');
   if (main) {
-    ok(main.title === 'Santorini Yoga Retreat 2027', `demo: title from inline config (got "${main.title}")`);
-    ok(/caldera sunsets/.test(main.desc), 'demo: description rendered');
-    ok(main.dates.includes('10–17 May 2027'), `demo: date range formatted (got "${main.dates}")`);
-    ok(main.location.includes('Santorini, Greece'), 'demo: location rendered');
-    ok(main.capacity.includes('Group of 16'), 'demo: capacity rendered');
-    ok(main.price === '£1,899', `demo: price from pricePence (got "${main.price}")`);
+    ok(main.title === 'Santorini Yoga Retreat 2027', `card: title from inline config (got "${main.title}")`);
+    ok(/caldera sunsets/.test(main.desc), 'card: description rendered');
+    ok(main.dates.includes('10–17 May 2027'), `card: date range formatted (got "${main.dates}")`);
+    ok(main.location.includes('Santorini, Greece'), 'card: location rendered');
+    ok(main.capacity.includes('Group of 16'), 'card: capacity rendered');
+    ok(main.price === '£1,899', `card: price from pricePence (got "${main.price}")`);
     ok(/£300 deposit/.test(main.deposit) && /£1,599/.test(main.deposit) && /10 Mar 2027/.test(main.deposit),
-      `demo: deposit line shows deposit, balance and due date (got "${main.deposit}")`);
-    ok(main.heroSrc.startsWith('https://images.unsplash.com/'), 'demo: hero image src from config');
-    ok(!main.departed, 'demo: a future trip does not show the departed state');
+      `card: deposit line shows deposit, balance and due date (got "${main.deposit}")`);
+    ok(main.heroSrc.startsWith('https://images.unsplash.com/'), 'card: hero image src from config');
+    ok(!main.departed, 'card: a future trip does not show the departed state');
   }
 
   // Departed example: honest closed state, no price strip.
   const past = await page.evaluate(() => {
-    const els = document.querySelectorAll('[data-tg-widget="trips"]');
-    const sr = els[1]?.shadowRoot;
+    const sr = document.getElementById('past')?.shadowRoot;
     if (!sr) return null;
     return {
       title: sr.querySelector('[data-role="title"]')?.textContent || '',
@@ -124,14 +143,14 @@ async function newPage() {
       hasPrice: !!sr.querySelector('[data-role="price"]'),
     };
   });
-  ok(!!past, 'demo: departed example mounted');
+  ok(!!past, 'card: departed example mounted');
   if (past) {
-    ok(past.title === 'Algarve Golf Week 2025', 'demo: departed example renders its title');
-    ok(past.departed, 'demo: past end date renders the departed state');
-    ok(!past.hasPrice, 'demo: departed trip shows no price strip');
+    ok(past.title === 'Algarve Golf Week 2025', 'card: departed example renders its title');
+    ok(past.departed, 'card: past end date renders the departed state');
+    ok(!past.hasPrice, 'card: departed trip shows no price strip');
   }
 
-  ok(errors.length === 0, 'demo: no script errors (' + errors.join(' | ') + ')');
+  ok(errors.length === 0, 'card: no script errors (' + errors.join(' | ') + ')');
   await page.close();
 }
 

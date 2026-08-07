@@ -355,10 +355,6 @@
       "destination": "/demo-trips-page.html"
     },
     {
-      "source": "/demo-trips-suite",
-      "destination": "/demo-trips-suite.html"
-    },
-    {
       "source": "/demo-newsletter",
       "destination": "/demo-newsletter.html"
     },
