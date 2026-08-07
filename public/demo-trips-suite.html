@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Group Trips — Card + Tour Page · Travelgenix</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F1F5F9; color: #0F172A; -webkit-font-smoothing: antialiased; }
+    body[data-theme="dark"] { background: #0B1222; color: #F8FAFC; }
+
+    .site-header { background: #fff; border-bottom: 1px solid #E2E8F0; padding: 14px 28px; display: flex; align-items: center; gap: 18px; position: sticky; top: 0; z-index: 20; }
+    body[data-theme="dark"] .site-header { background: #121A2F; border-bottom-color: #1E293B; }
+    .brand { font-weight: 700; font-size: 17px; }
+    .brand-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #EA580C; margin-right: 9px; vertical-align: 1px; }
+    .nav-links { display: flex; gap: 18px; font-size: 13px; color: #475569; }
+    body[data-theme="dark"] .nav-links { color: #CBD5E1; }
+    .nav-links a { color: inherit; text-decoration: none; }
+    .header-spacer { flex: 1; }
+    .controls { display: inline-flex; gap: 6px; padding: 3px; background: #F1F5F9; border-radius: 999px; }
+    body[data-theme="dark"] .controls { background: #1E293B; }
+    .controls button { border: 0; background: transparent; font: inherit; font-size: 12px; font-weight: 600; color: #475569; padding: 6px 12px; border-radius: 999px; cursor: pointer; }
+    .controls button[aria-pressed="true"] { background: #fff; color: #0F172A; box-shadow: 0 1px 2px rgba(15,23,42,0.08); }
+    body[data-theme="dark"] .controls button[aria-pressed="true"] { background: #0F172A; color: #F8FAFC; }
+
+    .section-label { max-width: 1080px; margin: 0 auto; padding: 40px 20px 0; }
+    .section-label .kicker { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #EA580C; }
+    .section-label h2 { margin: 6px 0 2px; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+    .section-label p { margin: 0; font-size: 14px; color: #64748B; }
+    body[data-theme="dark"] .section-label p { color: #94A3B8; }
+
+    /* The card sits in a calm band, the way it would on a real page section */
+    .card-band { padding: 24px 20px 8px; }
+    .card-stage { max-width: 720px; margin: 0 auto; }
+
+    /* The full page renders edge to edge in its own white surface */
+    .page-surface { background: #FFFFFF; margin-top: 8px; border-top: 1px solid #E2E8F0; }
+    body[data-theme="dark"] .page-surface { background: #0F172A; border-top-color: #1E293B; }
+
+    footer { border-top: 1px solid #E2E8F0; padding: 22px 28px; text-align: center; font-size: 12px; color: #64748B; }
+    body[data-theme="dark"] footer { border-top-color: #1E293B; }
+    footer a { color: #EA580C; }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="brand"><span class="brand-dot"></span>Aurora Travel Co</div>
+    <nav class="nav-links">
+      <a href="#">Group trips</a>
+      <a href="#">Tailor-made</a>
+      <a href="#">About</a>
+      <a href="#">Contact</a>
+    </nav>
+    <div class="header-spacer"></div>
+    <div class="controls" role="group" aria-label="Theme">
+      <button type="button" data-theme-btn="light" aria-pressed="true">Light</button>
+      <button type="button" data-theme-btn="dark" aria-pressed="false">Dark</button>
+    </div>
+  </header>
+
+  <!-- One tour, two presentations, seeded from a single config below. -->
+
+  <div class="section-label">
+    <div class="kicker">Compact booking card</div>
+    <h2>Drop it into any page</h2>
+    <p>The at-a-glance card — hero, dates, price and deposit — for a sidebar, a grid or an offers section.</p>
+  </div>
+  <div class="card-band">
+    <div class="card-stage"><div id="mount-card"></div></div>
+  </div>
+
+  <div class="section-label">
+    <div class="kicker">Full tour page</div>
+    <h2>The whole story, on its own page</h2>
+    <p>The same trip as a complete landing page — overview, highlights, what’s included, day by day, gallery and an enquiry form. (The form runs in preview mode on this demo.)</p>
+  </div>
+  <div class="page-surface"><div id="mount-page"></div></div>
+
+  <footer>
+    Group Trips — one config, two widgets · <a href="/editor-trips">Open the editor</a> · Online deposit booking arrives with the Stripe build
+  </footer>
+
+  <script src="/widget-trips.js" defer></script>
+  <script src="/widget-trips-page.js" defer></script>
+  <script>
+    // ── Seed: one fully-populated tour, shared by both widgets ──────────────
+    // The card reads trip.* + design.*; the full page reads everything. Editing
+    // this single object updates both presentations below.
+    const TOUR = {
+      trip: {
+        title: 'Santorini Yoga Retreat 2027',
+        heroImage: 'https://images.unsplash.com/photo-1503152394-c571994fd383?w=1800&q=80',
+        description: 'Seven nights of morning flows, caldera sunsets and long slow dinners. Small group, all levels welcome, led by our own teachers.',
+        startDate: '2027-05-10',
+        endDate: '2027-05-17',
+        location: 'Santorini, Greece',
+        capacity: 16,
+        currency: 'gbp',
+        pricePence: 189900,
+        depositPence: 30000,
+        balanceDueDate: '2027-03-10'
+      },
+      details: {
+        overview: 'Seven nights on the caldera rim, with twice-daily yoga, sunrise hikes and long slow dinners under the stars. Small group, all levels welcome, led by our own teachers. Rooms are en-suite with sea views, and there is plenty of free time to explore the villages, swim, or simply rest.',
+        highlights: [
+          'Twice-daily yoga with sea views',
+          'Caldera sunset boat trip',
+          'Village food tour in Oia',
+          'Small group, all levels welcome',
+          'En-suite rooms with balconies',
+          'Free time to explore or rest'
+        ],
+        included: [
+          '7 nights en-suite accommodation',
+          'Daily breakfast and four dinners',
+          'All yoga sessions and equipment',
+          'Airport transfers on group days',
+          'Sunset boat trip',
+          'Local guide throughout'
+        ],
+        excluded: [
+          'Flights to Santorini',
+          'Travel insurance',
+          'Lunches and three evening meals',
+          'Optional spa treatments'
+        ],
+        itinerary: [
+          { title: 'Day 1 — Arrival and welcome', text: 'Group transfer from the airport, settle in, evening welcome dinner overlooking the caldera.' },
+          { title: 'Day 2 — Finding your feet', text: 'Morning flow, free afternoon to explore Fira, gentle restorative session at sunset.' },
+          { title: 'Day 3 — Oia and the north', text: 'Village food tour in Oia, optional walk along the caldera path, evening yin practice.' },
+          { title: 'Day 4 — On the water', text: 'Sunset catamaran trip with swimming stops and dinner on board.' },
+          { title: 'Day 5 — Rest and restore', text: 'Longer morning practice, spa afternoon (optional), quiet evening.' },
+          { title: 'Day 6 — Beaches and black sand', text: 'Trip to Perissa, free time on the beach, closing circle at sunset.' },
+          { title: 'Day 7 — Departure', text: 'Final morning practice and breakfast before group transfers to the airport.' }
+        ],
+        gallery: [
+          'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80',
+          'https://images.unsplash.com/photo-1533105079780-92b9be482077?w=800&q=80',
+          'https://images.unsplash.com/photo-1512495039889-52a3b799c9bc?w=800&q=80'
+        ]
+      },
+      enquiry: {
+        heading: 'Enquire about the Santorini retreat',
+        intro: 'Leave your details and we will be in touch about availability, rooms and any questions.',
+        buttonText: 'Send enquiry'
+      },
+      design: { brandColor: '#EA580C', theme: 'light', radius: 16, fontFamily: 'DM Sans' }
+    };
+
+    let cardInst = null, pageInst = null;
+
+    // Deferred scripts finish before DOMContentLoaded, so both widget classes
+    // exist here. Our mounts carry no data-tg-widget attribute, so neither
+    // script's auto-init claims them — we construct both from the one TOUR.
+    document.addEventListener('DOMContentLoaded', () => {
+      cardInst = new window.TGTripsWidget(document.getElementById('mount-card'), TOUR);
+      pageInst = new window.TGTripsPageWidget(document.getElementById('mount-page'), TOUR);
+    });
+
+    // Theme toggle re-skins both through their public update() API.
+    document.querySelectorAll('[data-theme-btn]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const theme = btn.getAttribute('data-theme-btn');
+        document.body.setAttribute('data-theme', theme === 'dark' ? 'dark' : 'light');
+        document.querySelectorAll('[data-theme-btn]').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+        if (cardInst) cardInst.update({ design: { theme } });
+        if (pageInst) pageInst.update({ design: { theme } });
+      });
+    });
+  </script>
+
+</body>
+</html>

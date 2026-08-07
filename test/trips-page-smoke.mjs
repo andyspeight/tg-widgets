@@ -262,6 +262,37 @@ const statusText = (page) => page.evaluate(() => {
   await page.close();
 }
 
+// ── 8. Combined suite demo — card AND full page from one seeded config ───────
+{
+  const { page, errors } = await newPage();
+  await page.goto(`${BASE}/demo-trips-suite.html`, { waitUntil: 'load', timeout: 20000 });
+  await page.waitForFunction(() => {
+    const c = document.getElementById('mount-card');
+    const p = document.getElementById('mount-page');
+    return !!(c && c.shadowRoot && c.shadowRoot.querySelector('[data-role="title"]')
+      && p && p.shadowRoot && p.shadowRoot.querySelector('[data-role="form"]'));
+  }, { timeout: 8000 }).catch(() => {});
+
+  const s = await page.evaluate(() => {
+    const card = document.getElementById('mount-card')?.shadowRoot;
+    const pg = document.getElementById('mount-page')?.shadowRoot;
+    return {
+      cardTitle: card?.querySelector('[data-role="title"]')?.textContent || '',
+      cardPrice: card?.querySelector('[data-role="price"]')?.textContent || '',
+      pageTitle: pg?.querySelector('[data-role="title"]')?.textContent || '',
+      pageItinerary: pg?.querySelectorAll('.tgtp-itin li').length || 0,
+      pageForm: !!pg?.querySelector('[data-role="form"]'),
+    };
+  });
+  ok(s.cardTitle === 'Santorini Yoga Retreat 2027', `suite: card renders the tour (got "${s.cardTitle}")`);
+  ok(s.cardPrice === '£1,899', `suite: card shows the price (got "${s.cardPrice}")`);
+  ok(s.pageTitle === 'Santorini Yoga Retreat 2027', 'suite: full page renders the same tour');
+  ok(s.pageItinerary === 7, `suite: full page shows the itinerary (got ${s.pageItinerary} days)`);
+  ok(s.pageForm, 'suite: full page includes the enquiry form');
+  ok(errors.length === 0, 'suite: no script errors (' + errors.join(' | ') + ')');
+  await page.close();
+}
+
 await browser.close();
 server.close();
 
