@@ -239,6 +239,34 @@
   // Every structured key that can appear in the form, for prefill/preserve.
   const ALL_FIELD_KEYS = Object.keys(FIELDS);
 
+  // The lean, type-specific columns the dashboard "Sheet" (quick loader) shows
+  // inline per row — the differentiators, not every field. The Sheet also shows
+  // Type, Title, Country, Travel dates, Price, Was, Show from/until for all
+  // types. Exposed via window.TGOfferBuilderWidget.offerMeta so the editor keeps
+  // a single source of truth for the type -> field mapping.
+  const SHEET_TYPE_COLS = {
+    'Package holiday (flight + hotel)': ['resort', 'nights', 'board'],
+    'Hotel / accommodation only':      ['resort', 'nights', 'board'],
+    'Flight only':                     ['destination', 'cabinClass'],
+    'City break':                      ['resort', 'nights', 'board'],
+    'Cruise':                          ['cruiseLine', 'shipName', 'cabinType', 'nights'],
+    'Escorted tour':                   ['operator', 'nights'],
+    'Multi-centre':                    ['resort', 'nights', 'board'],
+    'Ski holiday':                     ['resort', 'nights', 'board'],
+    'Rail holiday':                    ['railOperator', 'railClass', 'nights'],
+    'Excursion / day trip':            ['resort'],
+    _default:                          ['resort', 'nights', 'board']
+  };
+  // A stable master order for the union of type-specific sheet columns, plus
+  // short labels for the header (the full form labels are longer).
+  const SHEET_COL_ORDER = ['resort', 'board', 'nights', 'destination', 'cabinClass', 'cruiseLine', 'shipName', 'cabinType', 'operator', 'railOperator', 'railClass'];
+  const SHEET_COL_LABELS = {
+    resort: 'Resort', board: 'Board', nights: 'Nights', destination: 'Destination',
+    cabinClass: 'Cabin class', cruiseLine: 'Cruise line', shipName: 'Ship',
+    cabinType: 'Cabin', operator: 'Operator', railOperator: 'Rail operator', railClass: 'Class'
+  };
+  function sheetColsFor(type) { return SHEET_TYPE_COLS[type] || SHEET_TYPE_COLS._default; }
+
   // ── Audience languages (content layer, Layer 2) ───────────────────────────
   // English is always the source. The agent toggles the languages their
   // customers read, then "Translate" sends the offer's author content to
@@ -1543,6 +1571,15 @@
   if (typeof window !== 'undefined') {
     window.TGOfferBuilderWidget = TGOfferBuilderWidget;
     window.TGOfferBuilderWidget.version = VERSION;
+    // Single source of truth for the type -> field mapping, reused by the
+    // dashboard Sheet (quick loader) so its columns match this form.
+    window.TGOfferBuilderWidget.offerMeta = {
+      types: OFFER_TYPES.slice(),
+      sheetColsFor: sheetColsFor,
+      sheetColOrder: SHEET_COL_ORDER.slice(),
+      sheetColLabels: Object.assign({}, SHEET_COL_LABELS),
+      numericKeys: ['nights']
+    };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
     else init();
   }

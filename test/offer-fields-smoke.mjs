@@ -121,5 +121,18 @@ console.log('Collected offer keeps only the visible type fields');
   ok('_collect does not invent a board basis', !offer.fields.board);
 }
 
+console.log('offerMeta contract (drives the dashboard Sheet columns)');
+{
+  const meta = window.TGOfferBuilderWidget.offerMeta;
+  ok('exposes the offer types', Array.isArray(meta.types) && meta.types.indexOf('Cruise') !== -1);
+  ok('sheetColsFor(Cruise) has the ship and cabin', meta.sheetColsFor('Cruise').indexOf('shipName') !== -1 && meta.sheetColsFor('Cruise').indexOf('cabinType') !== -1);
+  ok('sheetColsFor(Cruise) drops board', meta.sheetColsFor('Cruise').indexOf('board') === -1);
+  ok('sheetColsFor(Hotel) has resort and board', meta.sheetColsFor('Hotel / accommodation only').indexOf('board') !== -1);
+  ok('sheetColsFor(Flight only) has cabin class', meta.sheetColsFor('Flight only').indexOf('cabinClass') !== -1);
+  ok('unknown type falls back to the default set', meta.sheetColsFor('Something new').indexOf('resort') !== -1);
+  ok('has a master column order', Array.isArray(meta.sheetColOrder) && meta.sheetColOrder.indexOf('cruiseLine') !== -1);
+  ok('has a label for the ship column', meta.sheetColLabels && meta.sheetColLabels.shipName === 'Ship');
+}
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed');
 if (failed) process.exit(1);
