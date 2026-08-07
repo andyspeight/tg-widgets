@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Group Trips Editor — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<style>
+  /* Per-editor styles only — shell tokens live in editor-shell.css. */
+  .input, .select, .textarea { width:100%; padding:8px 10px; font:inherit; font-size:13px; border:1px solid var(--tgse-border); border-radius:var(--tgse-radius-sm); background:var(--tgse-panel); color:var(--tgse-ink); transition:border-color 160ms ease, box-shadow 160ms ease; }
+  .input:focus, .select:focus, .textarea:focus { outline:none; border-color:var(--tgse-brand); box-shadow:0 0 0 3px var(--tgse-brand-tint); }
+  .textarea { resize:vertical; min-height:88px; line-height:1.5; }
+  .colour-row { display:flex; align-items:center; gap:8px; }
+  .colour-swatch-wrap { position:relative; width:36px; height:36px; border-radius:var(--tgse-radius-sm); border:1px solid var(--tgse-border); overflow:hidden; flex-shrink:0; }
+  .colour-swatch-wrap input[type="color"] { position:absolute; inset:-2px; width:calc(100% + 4px); height:calc(100% + 4px); border:0; padding:0; background:transparent; cursor:pointer; }
+  .money-row { display:flex; align-items:center; gap:0; }
+  .money-sym { padding:8px 10px; border:1px solid var(--tgse-border); border-right:0; border-radius:var(--tgse-radius-sm) 0 0 var(--tgse-radius-sm); background:var(--tgse-panel-2); color:var(--tgse-ink-3); font-size:13px; }
+  .money-row .input { border-radius:0 var(--tgse-radius-sm) var(--tgse-radius-sm) 0; }
+  .range-row { display:flex; align-items:center; gap:10px; }
+  .range-row input[type="range"] { flex:1; accent-color: var(--tgse-brand); }
+  .range-val { min-width:38px; text-align:right; font-size:12px; color:var(--tgse-ink-3); font-variant-numeric:tabular-nums; }
+  .hint { font-size:11.5px; color:var(--tgse-muted); margin-top:5px; line-height:1.45; }
+  .note-card { border:1px dashed var(--tgse-border-strong); border-radius:var(--tgse-radius-md); padding:12px 13px; font-size:12.5px; color:var(--tgse-ink-2); background:var(--tgse-panel-2); line-height:1.5; }
+  .note-card strong { color:var(--tgse-ink); }
+
+  /* Preview stage — a calm fake page behind the booking card */
+  .stage { min-height:100%; padding:40px 24px 64px; background:linear-gradient(180deg, #F8FAFC 0%, #EEF2F7 100%); }
+  .tgse-frame[data-vp="mobile"] .stage { padding:20px 10px 40px; }
+</style>
+</head>
+<body>
+
+<div class="tgse-app">
+
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Group Trips</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates
+        <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+        AI builder
+        <span class="tgse-kbd">A</span>
+      </button>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled widget" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="content" role="tab" aria-selected="true">Trip</button>
+      <button data-tab="design" role="tab" aria-selected="false">Design</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+
+      <!-- ===== TRIP (CONTENT) TAB ===== -->
+      <div class="tgse-panel is-active" data-tab="content">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span class="tgse-section-label">Trip details</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="trip-title">Trip title</label>
+              <input type="text" class="input" id="trip-title" maxlength="120" placeholder="e.g. Santorini Yoga Retreat 2027">
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="trip-location">Location</label>
+              <input type="text" class="input" id="trip-location" maxlength="120" placeholder="e.g. Santorini, Greece">
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="trip-image">Hero image URL</label>
+              <input type="url" class="input" id="trip-image" maxlength="500" placeholder="https://…">
+              <div class="hint">A wide photo works best. Leave empty for a colour placeholder.</div>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="trip-desc">Description</label>
+              <textarea class="textarea" id="trip-desc" maxlength="2000" placeholder="What makes this trip special?"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <span class="tgse-section-label">Dates &amp; group size</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field-row">
+              <div class="tgse-field">
+                <label class="tgse-field-label" for="trip-start">Starts</label>
+                <input type="date" class="input" id="trip-start">
+              </div>
+              <div class="tgse-field">
+                <label class="tgse-field-label" for="trip-end">Ends</label>
+                <input type="date" class="input" id="trip-end">
+              </div>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="trip-capacity">Places on the trip</label>
+              <input type="number" class="input" id="trip-capacity" min="1" max="500" step="1">
+              <div class="hint">Total places available. Live availability arrives with bookings.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M15.5 9a3.5 3.5 0 0 0-7 0c0 2 1.5 2.7 3.5 3 2 .3 3.5 1 3.5 3a3.5 3.5 0 0 1-7 0"/></svg>
+            <span class="tgse-section-label">Pricing</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="trip-currency">Currency</label>
+              <select class="select" id="trip-currency">
+                <option value="gbp">GBP — £</option>
+                <option value="eur">EUR — €</option>
+                <option value="usd">USD — $</option>
+              </select>
+            </div>
+            <div class="tgse-field-row">
+              <div class="tgse-field">
+                <label class="tgse-field-label" for="trip-price">Price per person</label>
+                <div class="money-row"><span class="money-sym" data-role="sym">£</span><input type="text" class="input" id="trip-price" inputmode="decimal" placeholder="1899"></div>
+              </div>
+              <div class="tgse-field">
+                <label class="tgse-field-label" for="trip-deposit">Deposit</label>
+                <div class="money-row"><span class="money-sym" data-role="sym">£</span><input type="text" class="input" id="trip-deposit" inputmode="decimal" placeholder="300"></div>
+              </div>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="trip-balance-due">Balance due by</label>
+              <input type="date" class="input" id="trip-balance-due">
+              <div class="hint">Travellers pay the deposit to book, then settle the rest by this date.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== DESIGN TAB ===== -->
+      <div class="tgse-panel" data-tab="design">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+            <span class="tgse-section-label">Colours</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="brand-hex">Brand colour</label>
+              <div class="colour-row">
+                <div class="colour-swatch-wrap"><input type="color" id="brand-col" value="#EA580C"></div>
+                <input class="input colour-hex" id="brand-hex" value="#EA580C" maxlength="9">
+              </div>
+              <div class="hint">Used for icons, highlights and, later, the booking button.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Typography</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label">Font family</label>
+              <div id="fontPickerMount"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            <span class="tgse-section-label">Shape &amp; spacing</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="radius-range">Corner radius</label>
+              <div class="range-row">
+                <input type="range" id="radius-range" min="0" max="32" step="1" value="16">
+                <span class="range-val" id="radius-val">16px</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== SETTINGS TAB ===== -->
+      <div class="tgse-panel" data-tab="settings">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>
+            <span class="tgse-section-label">Payments</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="note-card">
+              <strong>Stripe Connect is on its way.</strong> You will connect your own
+              Stripe account here, and deposits go straight to you. Travelgenix never
+              holds your travellers' money.
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span class="tgse-section-label">Booking holds</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="trip-hold">Hold a place for (minutes)</label>
+              <input type="number" class="input" id="trip-hold" min="5" max="1440" step="5">
+              <div class="hint">How long an unpaid booking keeps its place before it is released.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </aside>
+
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop" aria-label="Desktop view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+        </button>
+        <button data-vp="tablet" title="Tablet" aria-label="Tablet view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+        <button data-vp="mobile" title="Mobile" aria-label="Mobile view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+      </div>
+
+      <div class="tgse-divider"></div>
+
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle widget theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        Theme
+      </button>
+      <button class="tgse-btn tgse-btn--sm" id="btn-design-mode" title="Toggle design mode (D)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/></svg>
+        Design mode
+        <span class="tgse-kbd">D</span>
+      </button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Get embed code
+      </button>
+    </div>
+
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame">
+        <div class="stage"><div data-tg-widget="trips" id="widget-mount"></div></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script src="/editor-shell.js"></script>
+<script src="/widget-trips.js"></script>
+
+<script>
+  /* Group Trips editor — per-editor logic on the unified shell. */
+
+  // Default config. Shape matches widget-trips.js _defaults exactly; the
+  // starter trip gives a fresh editor a live, honest preview.
+  let C = {
+    trip: {
+      title: 'Santorini Yoga Retreat 2027',
+      heroImage: 'https://images.unsplash.com/photo-1503152394-c571994fd383?w=1600&q=80',
+      description: 'Seven nights of morning flows, caldera sunsets and long slow dinners. Small group, all levels welcome, led by our own teachers.',
+      startDate: '2027-05-10',
+      endDate: '2027-05-17',
+      location: 'Santorini, Greece',
+      capacity: 16,
+      currency: 'gbp',
+      pricePence: 189900,
+      depositPence: 30000,
+      balanceDueDate: '2027-03-10',
+      spotsHeldMinutes: 30,
+    },
+    payments: {
+      // Written by the Stripe Connect flow (GT-4), never typed by hand. The
+      // booking API reads it server-side from the saved config only.
+      stripeAccountId: '',
+      applicationFeePence: 0,
+    },
+    design: {
+      brandColor: '#EA580C',
+      theme: 'light',
+      radius: 16,
+      fontFamily: 'DM Sans',
+    },
+    emails: { fromName: '', replyTo: '', footer: '' },
+  };
+
+  let widgetInst = null;
+
+  const shell = tgse.init({
+    widgetType: 'Group Trips',
+    widgetTag: 'trips',
+    scriptFile: 'widget-trips.js',
+
+    getConfig: () => C,
+    setConfig: (c) => { C = deepMerge(C, c); syncUIFromState(); render(); },
+
+    fontPickerEl: '#fontPickerMount',
+    onFontChange: (f) => { C.design.fontFamily = f; shell.markDirty(); render(); },
+
+    onAIBuild: () => tgse.toast('AI builder coming soon for Group Trips', 'ok'),
+    onTemplates: () => tgse.toast('Templates coming soon for Group Trips', 'ok'),
+    onThemeToggle: (isDark) => { C.design.theme = isDark ? 'dark' : 'light'; render(); },
+    onDesignMode: () => {},
+    onLoginSuccess: () => loadFromUrl(),
+  });
+
+  function deepMerge(base, over) {
+    const out = Object.assign({}, base);
+    for (const k of Object.keys(over || {})) {
+      const v = over[k];
+      out[k] = (v && typeof v === 'object' && !Array.isArray(v) && base[k] && typeof base[k] === 'object')
+        ? Object.assign({}, base[k], v)
+        : v;
+    }
+    return out;
+  }
+
+  // ── Preview ────────────────────────────────────────────────
+  function render() {
+    const mount = document.getElementById('widget-mount');
+    // The mount carries data-tg-widget, so the widget's auto-init may have
+    // claimed it (empty config) before this runs. Adopt that instance rather
+    // than constructing a second one — attachShadow can only happen once.
+    if (!widgetInst) widgetInst = mount._tgWidget || null;
+    if (widgetInst) {
+      widgetInst.update(C);
+      return;
+    }
+    widgetInst = new window.TGTripsWidget(mount, C);
+  }
+
+  // ── Money helpers: inputs show major units, config stores pence ──
+  const SYMS = { gbp: '£', eur: '€', usd: '$' };
+  function penceToMajor(p) {
+    const n = Number(p);
+    if (!isFinite(n) || n <= 0) return '';
+    return (Math.round(n) % 100 === 0) ? String(n / 100) : (n / 100).toFixed(2);
+  }
+  function majorToPence(v) {
+    const n = parseFloat(String(v).replace(/[^0-9.]/g, ''));
+    if (!isFinite(n) || n < 0) return 0;
+    return Math.min(10000000 * 100, Math.round(n * 100)); // clamp at 10 million
+  }
+  function syncCurrencySymbols() {
+    const sym = SYMS[C.trip.currency] || '£';
+    document.querySelectorAll('.money-sym').forEach(el => { el.textContent = sym; });
+  }
+
+  // ── Sidebar wiring ────────────────────────────────────────
+  const $ = (id) => document.getElementById(id);
+
+  function bindText(id, apply) {
+    $(id).addEventListener('input', () => { apply($(id).value); shell.markDirty(); render(); });
+  }
+
+  bindText('trip-title',    v => { C.trip.title = v.trim(); });
+  bindText('trip-location', v => { C.trip.location = v.trim(); });
+  bindText('trip-image',    v => { C.trip.heroImage = v.trim(); });
+  bindText('trip-desc',     v => { C.trip.description = v; });
+  bindText('trip-start',    v => { C.trip.startDate = v; });
+  bindText('trip-end',      v => { C.trip.endDate = v; });
+  bindText('trip-balance-due', v => { C.trip.balanceDueDate = v; });
+
+  $('trip-capacity').addEventListener('input', () => {
+    C.trip.capacity = Math.max(1, Math.min(500, parseInt($('trip-capacity').value, 10) || 1));
+    shell.markDirty(); render();
+  });
+  $('trip-capacity').addEventListener('blur', () => { $('trip-capacity').value = C.trip.capacity; });
+
+  $('trip-hold').addEventListener('input', () => {
+    C.trip.spotsHeldMinutes = Math.max(5, Math.min(1440, parseInt($('trip-hold').value, 10) || 30));
+    shell.markDirty();
+  });
+  $('trip-hold').addEventListener('blur', () => { $('trip-hold').value = C.trip.spotsHeldMinutes; });
+
+  $('trip-currency').addEventListener('change', () => {
+    C.trip.currency = $('trip-currency').value;
+    syncCurrencySymbols(); shell.markDirty(); render();
+  });
+
+  // Price inputs: parse as the agent types, snap the field to the stored
+  // value on blur so a typo like "1,899.999" settles to what will be charged.
+  $('trip-price').addEventListener('input', () => { C.trip.pricePence = majorToPence($('trip-price').value); shell.markDirty(); render(); });
+  $('trip-price').addEventListener('blur', () => { $('trip-price').value = penceToMajor(C.trip.pricePence); });
+  $('trip-deposit').addEventListener('input', () => { C.trip.depositPence = majorToPence($('trip-deposit').value); shell.markDirty(); render(); });
+  $('trip-deposit').addEventListener('blur', () => {
+    // A deposit above the trip price makes no sense — clamp it down.
+    if (C.trip.depositPence > C.trip.pricePence) C.trip.depositPence = C.trip.pricePence;
+    $('trip-deposit').value = penceToMajor(C.trip.depositPence);
+    render();
+  });
+
+  // Brand colour: swatch and hex stay in step, hex whitelisted before use.
+  function applyBrand(v) {
+    if (!/^#[0-9a-fA-F]{3,8}$/.test(v.trim())) return;
+    C.design.brandColor = v.trim();
+    $('brand-col').value = v.trim().length === 7 ? v.trim() : '#EA580C';
+    $('brand-hex').value = v.trim();
+    shell.markDirty(); render();
+  }
+  $('brand-col').addEventListener('input', () => applyBrand($('brand-col').value));
+  $('brand-hex').addEventListener('change', () => applyBrand($('brand-hex').value));
+
+  $('radius-range').addEventListener('input', () => {
+    C.design.radius = parseInt($('radius-range').value, 10) || 0;
+    $('radius-val').textContent = C.design.radius + 'px';
+    shell.markDirty(); render();
+  });
+
+  // ── State → UI (after a config load) ──────────────────────
+  function syncUIFromState() {
+    $('trip-title').value = C.trip.title || '';
+    $('trip-location').value = C.trip.location || '';
+    $('trip-image').value = C.trip.heroImage || '';
+    $('trip-desc').value = C.trip.description || '';
+    $('trip-start').value = C.trip.startDate || '';
+    $('trip-end').value = C.trip.endDate || '';
+    $('trip-balance-due').value = C.trip.balanceDueDate || '';
+    $('trip-capacity').value = C.trip.capacity || 16;
+    $('trip-hold').value = C.trip.spotsHeldMinutes || 30;
+    $('trip-currency').value = C.trip.currency || 'gbp';
+    $('trip-price').value = penceToMajor(C.trip.pricePence);
+    $('trip-deposit').value = penceToMajor(C.trip.depositPence);
+    $('brand-hex').value = C.design.brandColor || '#EA580C';
+    if (/^#[0-9a-fA-F]{6}$/.test(C.design.brandColor || '')) $('brand-col').value = C.design.brandColor;
+    $('radius-range').value = C.design.radius;
+    $('radius-val').textContent = C.design.radius + 'px';
+    syncCurrencySymbols();
+  }
+
+  function loadFromUrl() {
+    const params = new URLSearchParams(location.search);
+    const wId = params.get('id');
+    if (!wId) { syncUIFromState(); render(); return; }
+    fetch('/api/widget-config?id=' + encodeURIComponent(wId))
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d && d.config) C = deepMerge(C, d.config);
+        if (d && d.name) document.getElementById('name-input').value = d.name;
+        syncUIFromState(); render();
+      })
+      .catch(() => { tgse.toast('Failed to load widget', 'err'); syncUIFromState(); render(); });
+  }
+
+  // Boot — wait for shell auth to resolve; never call isLoggedIn() synchronously
+  // at load (async cookie SSO check — a sync call here causes a blank-page race).
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(() => {
+        if (tgse.isLoggedIn()) loadFromUrl();
+        else { syncUIFromState(); render(); }
+        // Not logged in: the shell has shown its login overlay; the preview
+        // still renders behind it, and onLoginSuccess re-loads real data.
+      });
+    } else {
+      if (tgse.isLoggedIn()) loadFromUrl(); else { syncUIFromState(); render(); }
+    }
+  });
+
+  document.getElementById('name-input')?.addEventListener('input', () => shell.markDirty());
+</script>
+
+</body>
+</html>

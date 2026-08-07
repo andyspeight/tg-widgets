@@ -419,6 +419,7 @@ const ALLOWED_WIDGET_TYPES = [
   'Cookie Consent',
   'Smart Section',
   'Email Signature',
+  'Group Trips',
 ];
 
 // Per-plan widget count limits, keyed by widgetType.
@@ -477,6 +478,9 @@ const PLAN_WIDGET_LIMITS = {
   // Self-serve signature builder. Premium-only positioning (locked 8 Jul 2026),
   // same tiering as Smart Section: no teaser on Spark or Boost.
   'Email Signature':       { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  // Group booking engine with Stripe deposits. Tiering locked 26 Jul 2026:
+  // one trip on Boost as the taster, unlimited from Ignite.
+  'Group Trips':           { Spark: 0, Boost: 1, Ignite: -1, Bespoke: -1 },
 };
 
 // Canonical plan names recognised by PLAN_WIDGET_LIMITS lookups.

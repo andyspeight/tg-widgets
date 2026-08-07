@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Group Trips Demo · Travelgenix</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F8FAFC; color: #0F172A; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    body[data-theme="dark"] { background: #0B1222; color: #F8FAFC; }
+
+    .site-header { background: #fff; border-bottom: 1px solid #E2E8F0; padding: 16px 32px; display: flex; align-items: center; gap: 20px; }
+    body[data-theme="dark"] .site-header { background: #121A2F; border-bottom-color: #1E293B; }
+    .brand { font-weight: 700; font-size: 18px; letter-spacing: -0.01em; }
+    .brand-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #EA580C; margin-right: 10px; vertical-align: 2px; }
+    .nav-links { display: flex; gap: 20px; font-size: 13px; color: #475569; }
+    body[data-theme="dark"] .nav-links { color: #CBD5E1; }
+    .nav-links a { color: inherit; text-decoration: none; }
+    .header-spacer { flex: 1; }
+    .controls { display: inline-flex; gap: 6px; padding: 3px; background: #F1F5F9; border-radius: 999px; }
+    body[data-theme="dark"] .controls { background: #1E293B; }
+    .controls button { border: 0; background: transparent; font: inherit; font-size: 12px; font-weight: 600; color: #475569; padding: 6px 12px; border-radius: 999px; cursor: pointer; transition: background 150ms ease, color 150ms ease; min-height: 28px; }
+    body[data-theme="dark"] .controls button { color: #CBD5E1; }
+    .controls button[aria-pressed="true"] { background: #fff; color: #0F172A; box-shadow: 0 1px 2px rgba(15,23,42,0.08); }
+    body[data-theme="dark"] .controls button[aria-pressed="true"] { background: #0F172A; color: #F8FAFC; }
+
+    .hero { max-width: 900px; margin: 0 auto; padding: 48px 32px 12px; text-align: center; }
+    .hero h1 { margin: 0 0 8px; font-size: 34px; font-weight: 700; letter-spacing: -0.02em; }
+    .hero p { margin: 0 auto; font-size: 16px; color: #475569; max-width: 620px; }
+    body[data-theme="dark"] .hero p { color: #CBD5E1; }
+
+    .band { max-width: 900px; margin: 24px auto 40px; padding: 0 32px; }
+    .section-label { max-width: 900px; margin: 40px auto 14px; padding: 0 32px; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #64748B; }
+
+    footer { border-top: 1px solid #E2E8F0; padding: 24px 32px; text-align: center; font-size: 12px; color: #64748B; margin-top: 40px; }
+    body[data-theme="dark"] footer { border-top-color: #1E293B; }
+    footer a { color: #EA580C; }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="brand"><span class="brand-dot"></span>Aurora Travel Co</div>
+    <nav class="nav-links">
+      <a href="#">Group trips</a>
+      <a href="#">Tailor-made</a>
+      <a href="#">About</a>
+      <a href="#">Contact</a>
+    </nav>
+    <div class="header-spacer"></div>
+    <div class="controls" role="group" aria-label="Theme">
+      <button type="button" data-theme-btn="light" aria-pressed="true">Light</button>
+      <button type="button" data-theme-btn="dark" aria-pressed="false">Dark</button>
+    </div>
+  </header>
+
+  <div class="hero">
+    <h1>Join our next group trip</h1>
+    <p>Pay a small deposit today to hold your place. The balance is due closer to departure, and your money goes straight to us, your travel agent.</p>
+  </div>
+
+  <div class="band">
+    <!-- The widget: one container div + the script tag at the bottom of the page. -->
+    <div data-tg-widget="trips" id="demo-main" data-tg-config='{
+      "trip": {
+        "title": "Santorini Yoga Retreat 2027",
+        "heroImage": "https://images.unsplash.com/photo-1503152394-c571994fd383?w=1600&q=80",
+        "description": "Seven nights of morning flows, caldera sunsets and long slow dinners. Small group, all levels welcome, led by our own teachers.",
+        "startDate": "2027-05-10",
+        "endDate": "2027-05-17",
+        "location": "Santorini, Greece",
+        "capacity": 16,
+        "currency": "gbp",
+        "pricePence": 189900,
+        "depositPence": 30000,
+        "balanceDueDate": "2027-03-10"
+      },
+      "design": { "brandColor": "#EA580C", "theme": "light", "radius": 16, "fontFamily": "DM Sans" }
+    }'></div>
+  </div>
+
+  <div class="section-label">How a past trip renders</div>
+  <div class="band">
+    <div data-tg-widget="trips" data-tg-config='{
+      "trip": {
+        "title": "Algarve Golf Week 2025",
+        "description": "Five rounds across three championship courses with our resident pro.",
+        "startDate": "2025-10-06",
+        "endDate": "2025-10-13",
+        "location": "Vilamoura, Portugal",
+        "capacity": 12,
+        "currency": "gbp",
+        "pricePence": 129900,
+        "depositPence": 25000
+      },
+      "design": { "brandColor": "#0D9488", "theme": "light", "radius": 16, "fontFamily": "DM Sans" }
+    }'></div>
+  </div>
+
+  <footer>
+    Group Trips widget demo · <a href="/editor-trips">Open the editor</a> · Deposits and checkout arrive in the next build phase
+  </footer>
+
+  <script src="/widget-trips.js" defer></script>
+  <script>
+    // Demo chrome only: theme buttons flip the fake page and re-skin the
+    // widgets through the public update() API (the widget stores its instance
+    // on the host element as _tgWidget).
+    document.querySelectorAll('[data-theme-btn]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const theme = btn.getAttribute('data-theme-btn');
+        document.body.setAttribute('data-theme', theme === 'dark' ? 'dark' : 'light');
+        document.querySelectorAll('[data-theme-btn]').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+        document.querySelectorAll('[data-tg-widget="trips"]').forEach((el) => {
+          if (el._tgWidget) el._tgWidget.update({ design: { theme } });
+        });
+      });
+    });
+  </script>
+
+</body>
+</html>

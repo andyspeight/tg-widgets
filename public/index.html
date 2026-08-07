@@ -893,6 +893,21 @@ const WIDGETS = [
     access: { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'trips',
+    name: 'Group Trips',
+    airtableType: 'Group Trips',
+    description: 'Sell places on a group trip straight from your website. Travellers pick their spot, pay a deposit through Stripe Checkout and settle the balance later by secure payment link. The money lands in your own Stripe account, never ours. Built for yoga retreats, golf tours, school trips and escorted tours.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
+    color: '#EA580C',
+    editorUrl: '/editor-trips',
+    demoUrl: '/demo-trips',
+    widgetTag: 'trips',
+    scriptFile: 'widget-trips.js',
+    access: { Spark: 0, Boost: 1, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'smartsection',
     name: 'Smart Section',
     airtableType: 'Smart Section',
@@ -1907,6 +1922,20 @@ function loadMiniPreview(w) {
       ],
       cta:{enabled:false},
       seo:{enableSchema:false}
+    });
+  }
+
+  if (w.id === 'trips' && window.TGTripsWidget) {
+    new window.TGTripsWidget(el, {
+      trip: {
+        title: 'Santorini Yoga Retreat 2027',
+        heroImage: 'https://images.unsplash.com/photo-1503152394-c571994fd383?w=800&q=80',
+        description: 'Seven nights of morning flows, caldera sunsets and long slow dinners.',
+        startDate: '2027-05-10', endDate: '2027-05-17',
+        location: 'Santorini, Greece', capacity: 16,
+        currency: 'gbp', pricePence: 189900, depositPence: 30000, balanceDueDate: '2027-03-10',
+      },
+      design: { brandColor: w.color, theme: 'light', radius: 14, fontFamily: 'DM Sans' },
     });
   }
 
@@ -4230,6 +4259,7 @@ bootstrapCookieAuth().then((ok) => {
 <script src="/widget-share.js"></script>
 <script src="/widget-whatsapp.js"></script>
 <script src="/widget-hours.js"></script>
+<script src="/widget-trips.js"></script>
 <script src="/widget-newsletter.js"></script>
 <script src="/widget-contact.js"></script>
 <script src="/widget-team.js"></script>

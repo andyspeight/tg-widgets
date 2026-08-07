@@ -347,6 +347,10 @@
       "destination": "/demo-smartsection.html"
     },
     {
+      "source": "/demo-trips",
+      "destination": "/demo-trips.html"
+    },
+    {
       "source": "/demo-newsletter",
       "destination": "/demo-newsletter.html"
     },
@@ -541,6 +545,10 @@
     {
       "source": "/editor-smartsection",
       "destination": "/editor-smartsection.html"
+    },
+    {
+      "source": "/editor-trips",
+      "destination": "/editor-trips.html"
     },
     {
       "source": "/editor-newsletter",
@@ -1337,6 +1345,23 @@
     },
     {
       "source": "/widget-smartsection.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-trips.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
