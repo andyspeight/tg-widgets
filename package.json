@@ -85,6 +85,7 @@
     "test:trips-enquiry": "node test/trips-enquiry-schema-smoke.mjs",
     "test:trips-capacity": "node test/trips-capacity-smoke.mjs",
     "test:tour": "node test/tour-page-smoke.mjs",
+    "test:tour-editor": "node test/tour-editor-smoke.mjs",
     "test:loader-export": "node test/loader-export-smoke.mjs"
   },
   "dependencies": {

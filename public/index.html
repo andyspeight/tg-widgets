@@ -908,6 +908,21 @@ const WIDGETS = [
     access: { Spark: 0, Boost: 1, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'tour',
+    name: 'Escorted Tour',
+    airtableType: 'Escorted Tour',
+    description: 'Sell a full multi-day escorted tour from a single rich page. Build the itinerary day by day with photos, an at-a-glance table, what is included, priced optional activities and extras, practical sections like packing and visa, and a built-in enquiry form. Made for safaris, coach tours and guided group journeys.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/>'},
+    color: '#1B2B5B',
+    editorUrl: '/editor-tour',
+    demoUrl: '/demo-tour',
+    widgetTag: 'tour',
+    scriptFile: 'widget-tour.js',
+    access: { Spark: 0, Boost: 1, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'smartsection',
     name: 'Smart Section',
     airtableType: 'Smart Section',
@@ -1923,6 +1938,43 @@ function loadMiniPreview(w) {
       cta:{enabled:false},
       seo:{enableSchema:false}
     });
+  }
+
+  if (w.id === 'tour') {
+    // Static mockup — the full tour page is far too tall for a tile.
+    container.innerHTML = `
+      <div style="width:700px;height:340px;background:#fff;border-radius:16px;overflow:hidden;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:flex;flex-direction:column;border:1px solid #E2E8F0;">
+        <div style="position:relative;height:150px;background:linear-gradient(135deg,#1B2B5B,#C2410C);">
+          <div style="position:absolute;inset:0;background:linear-gradient(0deg,rgba(7,12,24,0.65),rgba(7,12,24,0.05) 70%);"></div>
+          <div style="position:absolute;left:22px;bottom:16px;color:#fff;">
+            <div style="font-size:22px;font-weight:800;letter-spacing:-0.4px;text-shadow:0 2px 12px rgba(0,0,0,0.4);">Kenya Safari &middot; 11 days</div>
+            <div style="margin-top:8px;display:inline-flex;gap:6px;align-items:baseline;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.28);padding:6px 12px;border-radius:999px;font-size:12px;">from <b style="font-size:15px;">£3,495</b> per person</div>
+          </div>
+        </div>
+        <div style="flex:1;padding:16px 22px;display:grid;grid-template-columns:1.6fr 1fr;gap:16px;">
+          <div>
+            <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#C2410C;">Day by day</div>
+            <div style="margin-top:8px;display:flex;gap:8px;align-items:flex-start;">
+              <span style="font-size:9px;font-weight:800;letter-spacing:0.06em;color:#fff;background:#1B2B5B;padding:3px 7px;border-radius:5px;">DAY 2</span>
+              <div>
+                <div style="font-size:13px;font-weight:700;color:#0F172A;">Nairobi to Ol Pejeta</div>
+                <div style="font-size:11px;color:#64748B;line-height:1.5;margin-top:2px;">First game drive in the conservancy: lion, elephant, black and white rhino and reticulated giraffe.</div>
+              </div>
+            </div>
+            <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#F8FAFC;border-radius:10px;padding:10px;">
+              <div><div style="font-size:8px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#94A3B8;">Accommodation</div><div style="font-size:11px;font-weight:600;color:#0F172A;margin-top:1px;">Sweetwaters Camp</div></div>
+              <div><div style="font-size:8px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#94A3B8;">Altitude</div><div style="font-size:11px;font-weight:600;color:#0F172A;margin-top:1px;">2,000 m</div></div>
+            </div>
+          </div>
+          <div style="border:1px solid #E2E8F0;border-radius:12px;padding:12px;">
+            <div style="font-size:11px;font-weight:700;color:#0F172A;">Optional extras</div>
+            <div style="margin-top:8px;display:flex;justify-content:space-between;font-size:11px;color:#475569;"><span>Balloon safari</span><b style="color:#0F172A;">£420 pp</b></div>
+            <div style="margin-top:6px;display:flex;justify-content:space-between;font-size:11px;color:#475569;"><span>Canopy walk</span><b style="color:#0F172A;">£90 pp</b></div>
+            <div style="margin-top:12px;background:#C2410C;color:#fff;text-align:center;font-size:12px;font-weight:700;padding:9px;border-radius:9px;">Enquire now</div>
+          </div>
+        </div>
+      </div>`;
+    return;
   }
 
   if (w.id === 'trips' && window.TGTripsWidget) {
@@ -4260,6 +4312,7 @@ bootstrapCookieAuth().then((ok) => {
 <script src="/widget-whatsapp.js"></script>
 <script src="/widget-hours.js"></script>
 <script src="/widget-trips.js"></script>
+<script src="/widget-tour.js"></script>
 <script src="/widget-newsletter.js"></script>
 <script src="/widget-contact.js"></script>
 <script src="/widget-team.js"></script>

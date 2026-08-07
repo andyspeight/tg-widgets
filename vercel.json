@@ -559,6 +559,10 @@
       "destination": "/editor-trips.html"
     },
     {
+      "source": "/editor-tour",
+      "destination": "/editor-tour.html"
+    },
+    {
       "source": "/editor-newsletter",
       "destination": "/editor-newsletter.html"
     },

@@ -420,6 +420,7 @@ const ALLOWED_WIDGET_TYPES = [
   'Smart Section',
   'Email Signature',
   'Group Trips',
+  'Escorted Tour',
 ];
 
 // Per-plan widget count limits, keyed by widgetType.
@@ -481,6 +482,9 @@ const PLAN_WIDGET_LIMITS = {
   // Group booking engine with Stripe deposits. Tiering locked 26 Jul 2026:
   // one trip on Boost as the taster, unlimited from Ignite.
   'Group Trips':           { Spark: 0, Boost: 1, Ignite: -1, Bespoke: -1 },
+  // Rich multi-day escorted tour (separate, premium sibling of Group Trips).
+  // Same tiering as Group Trips: one on Boost, unlimited from Ignite.
+  'Escorted Tour':         { Spark: 0, Boost: 1, Ignite: -1, Bespoke: -1 },
 };
 
 // Canonical plan names recognised by PLAN_WIDGET_LIMITS lookups.

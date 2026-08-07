@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tour Builder — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Shell CSS for the design tokens (--tgse-*), login overlay, toasts, modal. -->
+<link rel="stylesheet" href="/editor-shell.css">
+<style>
+  /* ── Full-width Tour Builder (bespoke layout; tgse drives auth + save) ── */
+  body { margin: 0; background: var(--tgse-bg-page); color: var(--tgse-ink); font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .tb-app { display: flex; flex-direction: column; min-height: 100vh; }
+
+  /* Toolbar */
+  .tb-bar { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 12px; padding: 10px 18px; background: var(--tgse-panel); border-bottom: 1px solid var(--tgse-border); }
+  .tb-back { display: inline-flex; align-items: center; gap: 6px; color: var(--tgse-ink-3); text-decoration: none; font-size: 13px; font-weight: 600; }
+  .tb-back svg { width: 18px; height: 18px; }
+  .tb-id { display: flex; align-items: center; gap: 10px; }
+  .tb-id-tile { width: 34px; height: 34px; border-radius: 8px; background: var(--tgse-brand); color: #fff; display: grid; place-items: center; }
+  .tb-id-tile svg { width: 18px; height: 18px; }
+  .tb-id-name { font-size: 13px; font-weight: 700; }
+  .tb-id-sub { font-size: 11px; color: var(--tgse-ink-3); }
+  #name-input { padding: 8px 11px; font: inherit; font-size: 14px; border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-sm); background: var(--tgse-panel); color: var(--tgse-ink); min-width: 240px; }
+  .tb-spacer { flex: 1; }
+  .tb-toggle { display: inline-flex; padding: 3px; background: var(--tgse-panel-3); border-radius: 999px; }
+  .tb-toggle button { border: 0; background: transparent; font: inherit; font-size: 13px; font-weight: 600; color: var(--tgse-ink-3); padding: 6px 16px; border-radius: 999px; cursor: pointer; }
+  .tb-toggle button.is-on { background: var(--tgse-panel); color: var(--tgse-ink); box-shadow: var(--tgse-shadow-sm); }
+  .tb-btn { font: inherit; font-size: 13px; font-weight: 600; border: 1px solid var(--tgse-border); background: var(--tgse-panel); color: var(--tgse-ink); padding: 8px 14px; border-radius: var(--tgse-radius-sm); cursor: pointer; display: inline-flex; align-items: center; gap: 7px; }
+  .tb-btn svg { width: 16px; height: 16px; }
+  .tb-btn--primary { background: var(--tgse-brand); border-color: var(--tgse-brand); color: #fff; }
+  .tb-btn--primary.is-dirty { background: var(--tgse-warning); border-color: var(--tgse-warning); }
+
+  /* Views */
+  .tb-body { flex: 1; }
+  .tb-build { max-width: 920px; margin: 0 auto; padding: 26px 20px 80px; }
+  .tb-preview { display: none; background: var(--tgse-panel-2); }
+  .tb-app[data-view="preview"] .tb-build { display: none; }
+  .tb-app[data-view="preview"] .tb-preview { display: block; }
+  .tb-preview-inner { background: #fff; min-height: calc(100vh - 56px); }
+
+  /* Sections (accordions) */
+  .sec { border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md); margin-bottom: 14px; background: var(--tgse-panel); overflow: hidden; }
+  .sec-head { display: flex; align-items: center; gap: 10px; padding: 14px 16px; cursor: pointer; user-select: none; }
+  .sec-head h2 { margin: 0; font-size: 15px; font-weight: 700; }
+  .sec-head .chev { margin-left: auto; transition: transform 0.15s ease; color: var(--tgse-ink-3); }
+  .sec.is-open .chev { transform: rotate(180deg); }
+  .sec-body { display: none; padding: 4px 16px 18px; }
+  .sec.is-open .sec-body { display: block; }
+  .sec-hint { font-size: 12px; color: var(--tgse-muted); margin: 0 0 14px; }
+
+  /* Fields */
+  .fld { margin-bottom: 14px; }
+  .fld > label { display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 6px; }
+  .fld .hint { font-size: 11px; color: var(--tgse-muted); margin-top: 5px; }
+  .in, .ta, .sel { width: 100%; padding: 9px 11px; font: inherit; font-size: 13px; border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-sm); background: var(--tgse-panel); color: var(--tgse-ink); }
+  .in:focus, .ta:focus, .sel:focus { outline: none; border-color: var(--tgse-brand); box-shadow: 0 0 0 3px var(--tgse-brand-tint); }
+  .ta { resize: vertical; min-height: 70px; line-height: 1.5; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  @media (max-width: 640px) { .row2, .row3 { grid-template-columns: 1fr; } }
+  .money { display: flex; align-items: stretch; }
+  .money-sym { padding: 9px 11px; border: 1px solid var(--tgse-border); border-right: 0; border-radius: var(--tgse-radius-sm) 0 0 var(--tgse-radius-sm); background: var(--tgse-panel-2); color: var(--tgse-ink-3); font-size: 13px; }
+  .money .in { border-radius: 0 var(--tgse-radius-sm) var(--tgse-radius-sm) 0; }
+  .colour { display: flex; align-items: center; gap: 8px; }
+  .colour-sw { position: relative; width: 34px; height: 34px; border-radius: var(--tgse-radius-sm); border: 1px solid var(--tgse-border); overflow: hidden; flex-shrink: 0; }
+  .colour-sw input { position: absolute; inset: -2px; width: calc(100% + 4px); height: calc(100% + 4px); border: 0; padding: 0; background: transparent; cursor: pointer; }
+  .sw { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
+  .sw input { width: 16px; height: 16px; }
+
+  /* Repeatable rows */
+  .rep-row { border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md); padding: 12px; margin-bottom: 10px; background: var(--tgse-panel-2); position: relative; }
+  .rep-del { position: absolute; top: 8px; right: 8px; border: 0; background: transparent; color: var(--tgse-ink-3); cursor: pointer; font-size: 12px; padding: 3px 6px; border-radius: 6px; }
+  .rep-del:hover { color: var(--tgse-danger); background: var(--tgse-hover); }
+  .rep-title { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--tgse-ink-3); margin: 0 0 10px; }
+  .add-btn { font: inherit; font-size: 12.5px; font-weight: 600; color: var(--tgse-brand); background: var(--tgse-brand-tint); border: 1px dashed var(--tgse-brand); border-radius: var(--tgse-radius-sm); padding: 8px 12px; cursor: pointer; }
+  .sub { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--tgse-border); }
+  .sub-label { font-size: 11px; font-weight: 700; color: var(--tgse-ink-3); margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<div class="tb-app" data-view="build" id="tb-app">
+
+  <!-- Toolbar -->
+  <div class="tb-bar">
+    <a href="/" class="tb-back" id="btn-back">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </a>
+    <div class="tb-id">
+      <span class="tb-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></svg>
+      </span>
+      <div>
+        <div class="tb-id-name">Tour Builder</div>
+        <div class="tb-id-sub">Escorted Tour</div>
+      </div>
+    </div>
+    <input type="text" id="name-input" placeholder="Untitled tour" maxlength="120">
+    <div class="tb-spacer"></div>
+    <div class="tb-toggle" role="group" aria-label="View">
+      <button type="button" data-view="build" class="is-on">Build</button>
+      <button type="button" data-view="preview">Preview</button>
+    </div>
+    <button type="button" class="tb-btn" id="btn-embed" title="Get embed code">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      Embed
+    </button>
+    <button type="button" class="tb-btn tb-btn--primary" id="btn-save" title="Save (⌘S)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      <span id="save-label">Save</span>
+    </button>
+  </div>
+
+  <div class="tb-body">
+    <div class="tb-build" id="tb-build"><!-- sections injected here --></div>
+    <div class="tb-preview">
+      <!-- No data-tg-widget here: the editor constructs the preview by hand, so
+           widget-tour.js auto-init never claims this mount (attachShadow once). -->
+      <div class="tb-preview-inner"><div id="tour-mount"></div></div>
+    </div>
+  </div>
+
+</div>
+
+<script src="/editor-shell.js"></script>
+<script src="/widget-tour.js"></script>
+<script>
+/* ============================================================================
+   Tour Builder — bespoke full-width editor. tgse (the unified shell engine)
+   handles auth, login, the save flow, the embed modal and Cmd+S; this file
+   owns a wide, purpose-built editing surface for the rich escorted-tour config.
+   ========================================================================== */
+(function () {
+  'use strict';
+
+  // ── Default starter tour (a short 2-day sample, enough to preview) ──
+  function starter() {
+    return {
+      tour: {
+        title: 'Your escorted tour', subtitle: 'A short line that sells the trip.',
+        location: '', heroImage: '', currency: 'gbp',
+        startDate: '', endDate: '', durationText: '',
+        capacity: 0, pricePerPersonPence: 0, singleSupplementPence: 0,
+        depositPence: 0, balanceDueDate: '', priceNote: '',
+      },
+      glance: [],
+      highlights: [],
+      days: [
+        { label: 'Day 1', date: '', title: 'Arrival', body: 'Describe the first day.', facts: [{ label: 'Accommodation', value: '' }], images: [], optionalActivities: [] },
+      ],
+      extras: [],
+      included: [], excluded: [],
+      sections: [],
+      gallery: [],
+      enquiry: { heading: 'Enquire about this tour', intro: 'Leave your details and we will be in touch about dates and availability.', buttonText: 'Send enquiry', successMessage: 'Thank you. Your enquiry is on its way and we will get back to you shortly.' },
+      design: { brandColor: '#1B2B5B', accentColor: '#C2410C', theme: 'light', radius: 16, fontFamily: 'DM Sans' },
+    };
+  }
+
+  let C = starter();
+  let tourInst = null;
+  let previewTimer = null;
+
+  const $ = (id) => document.getElementById(id);
+  const SYMS = { gbp: '£', eur: '€', usd: '$' };
+
+  // ── Tiny DOM builder ──
+  function mk(tag, props) {
+    const e = document.createElement(tag);
+    if (props) for (const k in props) {
+      const v = props[k];
+      if (k === 'class') e.className = v;
+      else if (k === 'html') e.innerHTML = v;
+      else if (k === 'text') e.textContent = v;
+      else if (k === 'value') e.value = v;
+      else if (k.slice(0, 2) === 'on' && typeof v === 'function') e.addEventListener(k.slice(2).toLowerCase(), v);
+      else if (v != null) e.setAttribute(k, v);
+    }
+    for (let i = 2; i < arguments.length; i++) {
+      const kid = arguments[i]; if (kid == null) continue;
+      (Array.isArray(kid) ? kid : [kid]).forEach(x => { if (x != null) e.append(x.nodeType ? x : document.createTextNode(x)); });
+    }
+    return e;
+  }
+
+  // ── Money: inputs are major units, config stores pence ──
+  function penceToMajor(p) { const n = Number(p); if (!isFinite(n) || n <= 0) return ''; return (Math.round(n) % 100 === 0) ? String(n / 100) : (n / 100).toFixed(2); }
+  function majorToPence(v) { const n = parseFloat(String(v).replace(/[^0-9.]/g, '')); if (!isFinite(n) || n < 0) return 0; return Math.min(100000000, Math.round(n * 100)); }
+
+  function dirty() { if (window.tgse) tgse.markDirty(); schedulePreview(); }
+  function schedulePreview() {
+    if (previewTimer) clearTimeout(previewTimer);
+    previewTimer = setTimeout(renderPreview, 180);
+  }
+  function renderPreview() {
+    const mount = $('tour-mount');
+    if (!mount) return;
+    // Adopt an auto-init instance if one ever claimed the mount (belt-and-braces
+    // — the mount has no data-tg-widget, so normally this is null).
+    if (!tourInst) tourInst = mount._tgWidget || null;
+    if (tourInst) { tourInst.update(C); return; }
+    tourInst = new window.TGTourWidget(mount, C);
+  }
+
+  // ── Field factories ──
+  function field(labelText, control, hint) {
+    return mk('div', { class: 'fld' }, labelText ? mk('label', { text: labelText }) : null, control, hint ? mk('div', { class: 'hint', text: hint }) : null);
+  }
+  function textIn(get, set, ph, ml) {
+    return mk('input', { class: 'in', type: 'text', value: get() || '', placeholder: ph || '', maxlength: ml || 300, oninput: (e) => { set(e.target.value); dirty(); } });
+  }
+  function textArea(get, set, ph, ml) {
+    return mk('textarea', { class: 'ta', placeholder: ph || '', maxlength: ml || 6000, oninput: (e) => { set(e.target.value); dirty(); } }, get() || '');
+  }
+  function dateIn(get, set) {
+    return mk('input', { class: 'in', type: 'date', value: get() || '', oninput: (e) => { set(e.target.value); dirty(); } });
+  }
+  function numIn(get, set, min, max) {
+    return mk('input', { class: 'in', type: 'number', min: min, max: max, value: get() || '', oninput: (e) => { let n = parseInt(e.target.value, 10); if (isNaN(n)) n = 0; n = Math.max(min, Math.min(max, n)); set(n); dirty(); } });
+  }
+  function moneyIn(getPence, setPence) {
+    const inp = mk('input', { class: 'in', type: 'text', inputmode: 'decimal', value: penceToMajor(getPence()), placeholder: '0' });
+    inp.addEventListener('input', () => { setPence(majorToPence(inp.value)); dirty(); });
+    inp.addEventListener('blur', () => { inp.value = penceToMajor(getPence()); });
+    inp._sym = mk('span', { class: 'money-sym', 'data-sym': '1', text: SYMS[C.tour.currency] || '£' });
+    return mk('div', { class: 'money' }, inp._sym, inp);
+  }
+  function listArea(getArr, setArr, ph) {
+    const ta = mk('textarea', { class: 'ta', placeholder: ph || 'One per line' }, (getArr() || []).join('\n'));
+    ta.addEventListener('input', () => { setArr(ta.value.split('\n').map(s => s.trim()).filter(Boolean)); dirty(); });
+    return ta;
+  }
+  function colourIn(get, set) {
+    const hex = mk('input', { class: 'in', type: 'text', maxlength: 9, value: get() || '' });
+    const sw = mk('input', { type: 'color', value: /^#[0-9a-fA-F]{6}$/.test(get() || '') ? get() : '#1B2B5B' });
+    const apply = (v) => { if (!/^#[0-9a-fA-F]{3,8}$/.test(v.trim())) return; set(v.trim()); hex.value = v.trim(); if (/^#[0-9a-fA-F]{6}$/.test(v.trim())) sw.value = v.trim(); dirty(); };
+    hex.addEventListener('change', () => apply(hex.value));
+    sw.addEventListener('input', () => apply(sw.value));
+    return mk('div', { class: 'colour' }, mk('span', { class: 'colour-sw' }, sw), hex);
+  }
+  function selectIn(opts, get, set) {
+    const sel = mk('select', { class: 'sel', onchange: (e) => { set(e.target.value); dirty(); } });
+    opts.forEach(o => { const op = mk('option', { value: o.v }, o.t); if (o.v === get()) op.selected = true; sel.append(op); });
+    return sel;
+  }
+  function switchIn(labelText, get, set) {
+    const cb = mk('input', { type: 'checkbox', onchange: (e) => { set(e.target.checked); dirty(); } });
+    cb.checked = !!get();
+    return mk('label', { class: 'sw' }, cb, labelText);
+  }
+
+  // ── Generic repeater ──
+  // host: container; arr: the live array in C; factory: () => new item;
+  // rowFn: (item) => DOM node for its fields (no remove button — added here).
+  function repeater(host, arr, factory, rowFn, addLabel, rowTitle) {
+    const list = mk('div');
+    const renderRow = (item) => {
+      const body = rowFn(item);
+      const del = mk('button', { class: 'rep-del', type: 'button', text: 'Remove', onclick: () => {
+        const i = arr.indexOf(item); if (i >= 0) arr.splice(i, 1);
+        row.remove(); dirty();
+      } });
+      const row = mk('div', { class: 'rep-row' }, del, rowTitle ? mk('div', { class: 'rep-title', text: rowTitle }) : null, body);
+      return row;
+    };
+    (arr || []).forEach(it => list.append(renderRow(it)));
+    const add = mk('button', { class: 'add-btn', type: 'button', text: addLabel, onclick: () => {
+      const it = factory(); arr.push(it); list.append(renderRow(it)); dirty();
+    } });
+    host.append(list, add);
+  }
+
+  // ── Section shell ──
+  function section(title, hint, open, buildBody) {
+    const body = mk('div', { class: 'sec-body' });
+    if (hint) body.append(mk('p', { class: 'sec-hint', text: hint }));
+    buildBody(body);
+    const head = mk('div', { class: 'sec-head' },
+      mk('h2', { text: title }),
+      mk('span', { class: 'chev', html: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>' })
+    );
+    const sec = mk('div', { class: 'sec' + (open ? ' is-open' : '') }, head, body);
+    head.addEventListener('click', () => sec.classList.toggle('is-open'));
+    return sec;
+  }
+
+  // ── Build the whole form from C (called at boot + after load) ──
+  function buildForm() {
+    const root = $('tb-build');
+    root.innerHTML = '';
+    const t = C.tour;
+
+    // Tour basics
+    root.append(section('Tour basics', 'The essentials shown in the hero and price bar.', true, (b) => {
+      b.append(field('Tour title', textIn(() => t.title, v => t.title = v, 'e.g. Kenya Johari na Bahari Safari', 200)));
+      b.append(field('Subtitle', textArea(() => t.subtitle, v => t.subtitle = v, 'A short selling line', 400)));
+      b.append(mk('div', { class: 'row2' },
+        field('Location', textIn(() => t.location, v => t.location = v, 'e.g. Kenya', 120)),
+        field('Hero image URL', textIn(() => t.heroImage, v => t.heroImage = v, 'https://…', 500))
+      ));
+      b.append(mk('div', { class: 'row3' },
+        field('Starts', dateIn(() => t.startDate, v => t.startDate = v)),
+        field('Ends', dateIn(() => t.endDate, v => t.endDate = v)),
+        field('Duration text', textIn(() => t.durationText, v => t.durationText = v, 'e.g. 11 days / 10 nights', 60))
+      ));
+      b.append(mk('div', { class: 'row3' },
+        field('Currency', selectIn([{ v: 'gbp', t: 'GBP £' }, { v: 'eur', t: 'EUR €' }, { v: 'usd', t: 'USD $' }], () => t.currency, v => { t.currency = v; syncSyms(); })),
+        field('Places available', numIn(() => t.capacity, v => t.capacity = v, 0, 500)),
+        field('Price per person', moneyIn(() => t.pricePerPersonPence, v => t.pricePerPersonPence = v))
+      ));
+      b.append(mk('div', { class: 'row3' },
+        field('Single supplement', moneyIn(() => t.singleSupplementPence, v => t.singleSupplementPence = v)),
+        field('Deposit', moneyIn(() => t.depositPence, v => t.depositPence = v)),
+        field('Balance due by', dateIn(() => t.balanceDueDate, v => t.balanceDueDate = v))
+      ));
+      b.append(field('Price note', textIn(() => t.priceNote, v => t.priceNote = v, 'e.g. Flights as per system fares', 300)));
+    }));
+
+    // At a glance
+    root.append(section('Itinerary at a glance', 'The summary table at the top of the page.', false, (b) => {
+      repeater(b, C.glance, () => ({ day: '', date: '', destination: '', accommodation: '' }), (it) =>
+        mk('div', { class: 'row2' },
+          field('Day', textIn(() => it.day, v => it.day = v, 'Day 1', 40)),
+          field('Date', textIn(() => it.date, v => it.date = v, '24 Oct 26', 40)),
+          field('Destination', textIn(() => it.destination, v => it.destination = v, 'Nairobi', 120)),
+          field('Accommodation', textIn(() => it.accommodation, v => it.accommodation = v, 'Serena Hotel', 160))
+        ), '+ Add a row');
+    }));
+
+    // Highlights
+    root.append(section('Highlights', 'One per line.', false, (b) => {
+      b.append(field('', listArea(() => C.highlights, v => C.highlights = v, 'One highlight per line')));
+    }));
+
+    // Day by day
+    root.append(section('Day by day', 'The rich itinerary. Each day can carry its own facts, photos and priced optional activities.', true, (b) => {
+      repeater(b, C.days, () => ({ label: 'Day', date: '', title: '', body: '', facts: [], images: [], optionalActivities: [] }), (d) => {
+        const wrap = mk('div');
+        wrap.append(mk('div', { class: 'row3' },
+          field('Label', textIn(() => d.label, v => d.label = v, 'Day 2', 40)),
+          field('Date', textIn(() => d.date, v => d.date = v, '25 Oct 26', 40)),
+          field('Title', textIn(() => d.title, v => d.title = v, 'Nairobi to Ol Pejeta', 200))
+        ));
+        wrap.append(field('Description', textArea(() => d.body, v => d.body = v, 'What happens this day', 4000)));
+        // Facts (repeatable label/value)
+        const facts = mk('div', { class: 'sub' }, mk('div', { class: 'sub-label', text: 'Facts (accommodation, meals, driving time, altitude…)' }));
+        repeater(facts, d.facts, () => ({ label: '', value: '' }), (f) =>
+          mk('div', { class: 'row2' },
+            field('Label', textIn(() => f.label, v => f.label = v, 'Accommodation', 60)),
+            field('Value', textIn(() => f.value, v => f.value = v, 'Sweetwaters Serena Camp', 200))
+          ), '+ Add a fact');
+        wrap.append(facts);
+        // Images
+        const imgs = mk('div', { class: 'sub' }, mk('div', { class: 'sub-label', text: 'Photos (one URL per line)' }));
+        imgs.append(listArea(() => d.images, v => d.images = v, 'https://…'));
+        wrap.append(imgs);
+        // Optional activities
+        const opts = mk('div', { class: 'sub' }, mk('div', { class: 'sub-label', text: 'Optional activities (priced per person)' }));
+        repeater(opts, d.optionalActivities, () => ({ name: '', pricePence: 0 }), (a) =>
+          mk('div', { class: 'row2' },
+            field('Activity', textIn(() => a.name, v => a.name = v, 'Canopy walk', 200)),
+            field('Price pp', moneyIn(() => a.pricePence, v => a.pricePence = v))
+          ), '+ Add an activity');
+        wrap.append(opts);
+        return wrap;
+      }, '+ Add a day', 'Day');
+    }));
+
+    // Extras
+    root.append(section('Optional extras', 'Tour-wide add-ons with a per-person price (shown but not charged yet).', false, (b) => {
+      repeater(b, C.extras, () => ({ name: '', pricePence: 0, note: '', recommended: false }), (x) => {
+        const w = mk('div');
+        w.append(mk('div', { class: 'row2' },
+          field('Name', textIn(() => x.name, v => x.name = v, 'Balloon safari', 200)),
+          field('Price pp', moneyIn(() => x.pricePence, v => x.pricePence = v))
+        ));
+        w.append(field('Note', textIn(() => x.note, v => x.note = v, 'A short line', 300)));
+        w.append(field('', switchIn('Mark as recommended', () => x.recommended, v => x.recommended = v)));
+        return w;
+      }, '+ Add an extra');
+    }));
+
+    // Includes / excludes
+    root.append(section('Included and not included', 'One item per line.', false, (b) => {
+      b.append(mk('div', { class: 'row2' },
+        field('What’s included', listArea(() => C.included, v => C.included = v, 'One per line')),
+        field('Not included', listArea(() => C.excluded, v => C.excluded = v, 'One per line'))
+      ));
+    }));
+
+    // Flexible sections
+    root.append(section('Practical sections', 'Footnotes, visa and baggage, a packing list, the vehicle — anything else. Pick a layout per section.', false, (b) => {
+      repeater(b, C.sections, () => ({ type: 'text', heading: '', body: '', items: [], columns: [], image: '' }), (s) => {
+        const w = mk('div');
+        w.append(mk('div', { class: 'row2' },
+          field('Heading', textIn(() => s.heading, v => s.heading = v, 'What to pack', 160)),
+          field('Layout', selectIn([{ v: 'text', t: 'Text' }, { v: 'checklist', t: 'Checklist' }, { v: 'columns', t: 'Two columns' }, { v: 'feature', t: 'Feature (text + image)' }], () => s.type, v => { s.type = v; }))
+        ));
+        // Body (text/feature)
+        w.append(field('Body text', textArea(() => s.body, v => s.body = v, 'Used by Text and Feature layouts', 6000)));
+        // Items (checklist)
+        w.append(field('List items', listArea(() => s.items, v => s.items = v, 'Used by the Checklist layout — one per line')));
+        // Image (feature)
+        w.append(field('Image URL', textIn(() => s.image, v => s.image = v, 'Used by the Feature layout', 500)));
+        // Columns (columns)
+        const cols = mk('div', { class: 'sub' }, mk('div', { class: 'sub-label', text: 'Columns (for the Two columns layout)' }));
+        repeater(cols, s.columns, () => ({ heading: '', items: [] }), (col) => {
+          const cw = mk('div');
+          cw.append(field('Column heading', textIn(() => col.heading, v => col.heading = v, 'Clothing and footwear', 120)));
+          cw.append(field('Items', listArea(() => col.items, v => col.items = v, 'One per line')));
+          return cw;
+        }, '+ Add a column');
+        w.append(cols);
+        return w;
+      }, '+ Add a section');
+    }));
+
+    // Gallery
+    root.append(section('Gallery', 'One image URL per line.', false, (b) => {
+      b.append(field('', listArea(() => C.gallery, v => C.gallery = v, 'https://…')));
+    }));
+
+    // Enquiry
+    root.append(section('Enquiry form', 'The wording of the built-in enquiry form.', false, (b) => {
+      const e = C.enquiry;
+      b.append(field('Heading', textIn(() => e.heading, v => e.heading = v, 'Enquire about this tour', 120)));
+      b.append(field('Intro', textArea(() => e.intro, v => e.intro = v, '', 400)));
+      b.append(mk('div', { class: 'row2' },
+        field('Button label', textIn(() => e.buttonText, v => e.buttonText = v, 'Send enquiry', 40)),
+        field('Success message', textIn(() => e.successMessage, v => e.successMessage = v, '', 300))
+      ));
+    }));
+
+    // Design
+    root.append(section('Design', 'Brand the page to match the agency site.', false, (b) => {
+      const d = C.design;
+      b.append(mk('div', { class: 'row2' },
+        field('Brand colour', colourIn(() => d.brandColor, v => d.brandColor = v)),
+        field('Accent colour', colourIn(() => d.accentColor, v => d.accentColor = v))
+      ));
+      b.append(mk('div', { class: 'row3' },
+        field('Font', selectIn((window.tgse && tgse.FONTS ? tgse.FONTS : ['DM Sans', 'Inter']).map(f => ({ v: f, t: f })), () => d.fontFamily, v => d.fontFamily = v)),
+        field('Theme', selectIn([{ v: 'light', t: 'Light' }, { v: 'dark', t: 'Dark' }], () => d.theme, v => d.theme = v)),
+        field('Corner radius', numIn(() => d.radius, v => d.radius = v, 0, 32))
+      ));
+    }));
+  }
+
+  function syncSyms() {
+    document.querySelectorAll('[data-sym]').forEach(el => { el.textContent = SYMS[C.tour.currency] || '£'; });
+  }
+
+  // ── Deep merge for loaded config ──
+  function deepMerge(base, over) {
+    const out = Array.isArray(base) ? base.slice() : Object.assign({}, base);
+    for (const k of Object.keys(over || {})) {
+      const v = over[k];
+      if (v && typeof v === 'object' && !Array.isArray(v) && base[k] && typeof base[k] === 'object' && !Array.isArray(base[k])) out[k] = deepMerge(base[k], v);
+      else out[k] = v;
+    }
+    return out;
+  }
+
+  // ── tgse (auth + save engine) ──
+  const shell = tgse.init({
+    widgetType: 'Escorted Tour',
+    widgetTag: 'tour',
+    scriptFile: 'widget-tour.js',
+    getConfig: () => C,
+    setConfig: (c) => { C = deepMerge(starter(), c); buildForm(); renderPreview(); },
+    onLoginSuccess: () => loadFromUrl(),
+  });
+
+  // ── View toggle ──
+  document.querySelectorAll('.tb-toggle button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const view = btn.getAttribute('data-view');
+      $('tb-app').setAttribute('data-view', view);
+      document.querySelectorAll('.tb-toggle button').forEach(b => b.classList.toggle('is-on', b === btn));
+      if (view === 'preview') renderPreview();
+    });
+  });
+
+  $('name-input').addEventListener('input', () => tgse.markDirty());
+
+  // ── Load existing tour by ?id ──
+  function loadFromUrl() {
+    const wId = new URLSearchParams(location.search).get('id');
+    if (!wId) { buildForm(); renderPreview(); return; }
+    fetch('/api/widget-config?id=' + encodeURIComponent(wId))
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d && d.config) C = deepMerge(starter(), d.config);
+        if (d && d.name) $('name-input').value = d.name;
+        buildForm(); renderPreview();
+      })
+      .catch(() => { tgse.toast('Failed to load tour', 'err'); buildForm(); renderPreview(); });
+  }
+
+  // ── Boot — wait for auth to resolve (never sync isLoggedIn at load) ──
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.tgse && typeof tgse.onReady === 'function') {
+      tgse.onReady(() => { if (tgse.isLoggedIn()) loadFromUrl(); else { buildForm(); renderPreview(); } });
+    } else if (tgse.isLoggedIn()) { loadFromUrl(); } else { buildForm(); renderPreview(); }
+  });
+
+})();
+</script>
+
+</body>
+</html>
