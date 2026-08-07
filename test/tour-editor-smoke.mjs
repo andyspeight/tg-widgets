@@ -97,7 +97,7 @@ async function newPage() {
   ok(previewTitle === 'Your escorted tour', `editor: preview renders the starter tour (got "${previewTitle}")`);
 
   // Edit the title, back to preview, confirm it flows through
-  await page.click('.tb-toggle button[data-view="build"]');
+  await page.click('.tb-toggle button[data-view="editor"]');
   await page.fill('input[placeholder*="Kenya Johari"]', 'Serengeti Grand Safari');
   await page.waitForTimeout(300);
   await page.click('.tb-toggle button[data-view="preview"]');
@@ -108,7 +108,7 @@ async function newPage() {
   // Count days in preview (starter has 1), add a day, confirm 2
   const daysBefore = await page.evaluate(() => document.getElementById('tour-mount')?.shadowRoot?.querySelectorAll('[data-role="day"]').length || 0);
   ok(daysBefore === 1, `editor: starter has one day (got ${daysBefore})`);
-  await page.click('.tb-toggle button[data-view="build"]');
+  await page.click('.tb-toggle button[data-view="editor"]');
   await page.click('text=+ Add a day');
   await page.waitForTimeout(150);
   await page.click('.tb-toggle button[data-view="preview"]');

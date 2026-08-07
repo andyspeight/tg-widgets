@@ -73,6 +73,7 @@ async function newPage() {
     return {
       title: txt('[data-role="title"]'),
       price: txt('[data-role="price"]'),
+      heroChips: sr.querySelectorAll('.tgto-hero-chips .tgto-chip').length,
       glanceRows: sr.querySelectorAll('[data-role="glance"] tbody tr').length,
       glanceHeadCols: sr.querySelectorAll('[data-role="glance"] thead th').length,
       highlights: sr.querySelectorAll('.tgto-highlights li').length,
@@ -97,6 +98,7 @@ async function newPage() {
   if (d) {
     ok(d.title === 'Kenya Johari na Bahari Safari', `tour: hero title (got "${d.title}")`);
     ok(d.price === '£3,495', `tour: price-from chip (got "${d.price}")`);
+    ok(d.heroChips >= 4, `tour: hero renders dates/duration/location/price as chips (got ${d.heroChips})`);
     ok(d.glanceHeadCols === 4 && d.glanceRows === 11, `tour: at-a-glance table 4 cols x 11 rows (got ${d.glanceHeadCols}x${d.glanceRows})`);
     ok(d.highlights === 7, `tour: 7 highlights (got ${d.highlights})`);
     ok(d.days === 9, `tour: 9 day blocks incl grouped days (got ${d.days})`);
@@ -110,6 +112,51 @@ async function newPage() {
     ok(d.hasForm, 'tour: enquiry form present');
   }
   ok(errors.length === 0, 'tour: no script errors (' + errors.join(' | ') + ')');
+  await page.close();
+}
+
+// ── 1b. Day-by-day is collapsible (all closed, click to open) ────────────────
+{
+  const { page, errors } = await newPage();
+  await page.goto(`${BASE}/demo-tour.html`, { waitUntil: 'load', timeout: 20000 });
+  await page.waitForFunction(() => {
+    const el = document.getElementById('mount');
+    return !!(el && el.shadowRoot && el.shadowRoot.querySelector('[data-role="day"]'));
+  }, { timeout: 8000 }).catch(() => {});
+
+  const collapsed = await page.evaluate(() => {
+    const sr = document.getElementById('mount').shadowRoot;
+    const days = [...sr.querySelectorAll('[data-role="day"]')];
+    const firstBody = days[0].querySelector('.tgto-day-body');
+    return {
+      total: days.length,
+      open: days.filter(d => d.classList.contains('is-open')).length,
+      headsCollapsed: sr.querySelectorAll('.tgto-day-head[aria-expanded="false"]').length,
+      isButton: days[0].querySelector('.tgto-day-head')?.tagName === 'BUTTON',
+      firstBodyDisplay: firstBody ? getComputedStyle(firstBody).display : 'none',
+    };
+  });
+  ok(collapsed.total === 9 && collapsed.open === 0, `collapse: all ${collapsed.total} days start collapsed (open=${collapsed.open})`);
+  ok(collapsed.headsCollapsed === 9 && collapsed.isButton, 'collapse: day heads are buttons with aria-expanded=false');
+  ok(collapsed.firstBodyDisplay === 'none', 'collapse: day bodies are hidden by default');
+
+  // Open the first day
+  await page.evaluate(() => document.getElementById('mount').shadowRoot.querySelector('.tgto-day-head').click());
+  await page.waitForTimeout(100);
+  const opened = await page.evaluate(() => {
+    const sr = document.getElementById('mount').shadowRoot;
+    const first = sr.querySelector('[data-role="day"]');
+    const body = first.querySelector('.tgto-day-body');
+    return {
+      open: first.classList.contains('is-open'),
+      expanded: first.querySelector('.tgto-day-head').getAttribute('aria-expanded'),
+      bodyDisplay: body ? getComputedStyle(body).display : 'none',
+      othersStillClosed: [...sr.querySelectorAll('[data-role="day"]')].slice(1).every(d => !d.classList.contains('is-open')),
+    };
+  });
+  ok(opened.open && opened.expanded === 'true' && opened.bodyDisplay !== 'none', 'collapse: clicking a day opens it (aria-expanded true, body shown)');
+  ok(opened.othersStillClosed, 'collapse: opening one day leaves the others closed');
+  ok(errors.length === 0, 'collapse: no script errors (' + errors.join(' | ') + ')');
   await page.close();
 }
 

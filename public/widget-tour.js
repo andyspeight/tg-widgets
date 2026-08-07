@@ -157,10 +157,11 @@
     .tgto-hero-in { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 26px; color: #fff; }
     .tgto-hero-title { font-size: clamp(24px, 4.6vw, 42px); font-weight: 800; line-height: 1.1; letter-spacing: -0.6px; margin: 0 0 10px; text-shadow: 0 2px 18px rgba(0,0,0,0.35); }
     .tgto-hero-sub { font-size: clamp(15px, 2vw, 18px); margin: 0 0 12px; max-width: 60ch; color: rgba(255,255,255,0.94); }
-    .tgto-hero-meta { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 15px; }
-    .tgto-hero-meta span { display: inline-flex; align-items: center; gap: 7px; }
-    .tgto-fromchip { display: inline-flex; align-items: baseline; gap: 6px; margin-top: 14px; background: rgba(255,255,255,0.16); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.25); padding: 8px 14px; border-radius: 999px; font-size: 14px; }
-    .tgto-fromchip b { font-size: 20px; font-weight: 800; }
+    .tgto-hero-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .tgto-chip { display: inline-flex; align-items: center; gap: 7px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.30); backdrop-filter: blur(6px); padding: 7px 13px; border-radius: 999px; font-size: 14px; font-weight: 500; color: #fff; line-height: 1; }
+    .tgto-chip svg { opacity: 0.9; flex-shrink: 0; }
+    .tgto-chip--price { background: #fff; border-color: #fff; color: var(--tgto-brand); font-weight: 600; }
+    .tgto-chip--price b { font-weight: 800; }
 
     /* At a glance table */
     .tgto-glance-wrap { overflow-x: auto; border: 1px solid var(--tgto-border); border-radius: var(--tgto-radius); }
@@ -176,13 +177,20 @@
     .tgto-highlights li { position: relative; padding-left: 26px; font-size: 15.5px; }
     .tgto-highlights li svg { position: absolute; left: 0; top: 3px; color: var(--tgto-accent); }
 
-    /* Day-by-day */
-    .tgto-day { border: 1px solid var(--tgto-border); border-radius: var(--tgto-radius); overflow: hidden; margin-bottom: 20px; background: var(--tgto-bg); box-shadow: var(--tgto-shadow); }
-    .tgto-day-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; padding: 16px 20px; background: var(--tgto-alt); border-bottom: 1px solid var(--tgto-border); }
-    .tgto-day-label { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #fff; background: var(--tgto-brand); padding: 4px 10px; border-radius: 6px; }
-    .tgto-day-title { font-size: 18px; font-weight: 700; margin: 0; }
-    .tgto-day-date { margin-left: auto; font-size: 13px; color: var(--tgto-muted); }
-    .tgto-day-body { padding: 18px 20px; }
+    /* Day-by-day (collapsible — all closed by default) */
+    .tgto-day { border: 1px solid var(--tgto-border); border-radius: var(--tgto-radius); overflow: hidden; margin-bottom: 12px; background: var(--tgto-bg); box-shadow: var(--tgto-shadow); }
+    .tgto-day-head { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 15px 18px; background: var(--tgto-alt); border: 0; border-bottom: 1px solid transparent; cursor: pointer; font: inherit; color: inherit; }
+    .tgto-day.is-open .tgto-day-head { border-bottom-color: var(--tgto-border); }
+    .tgto-day-head:hover { filter: brightness(0.97); }
+    .tgto-day-head:focus-visible { outline: 2px solid var(--tgto-accent); outline-offset: -2px; }
+    .tgto-day-label { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #fff; background: var(--tgto-brand); padding: 4px 10px; border-radius: 6px; flex-shrink: 0; }
+    .tgto-day-title { font-size: 16.5px; font-weight: 700; }
+    .tgto-day-date { margin-left: auto; font-size: 13px; color: var(--tgto-muted); white-space: nowrap; }
+    .tgto-day-chev { margin-left: auto; color: var(--tgto-muted); flex-shrink: 0; transition: transform 0.18s ease; }
+    .tgto-day-date + .tgto-day-chev { margin-left: 10px; }
+    .tgto-day.is-open .tgto-day-chev { transform: rotate(180deg); }
+    .tgto-day-body { padding: 18px 20px; display: none; }
+    .tgto-day.is-open .tgto-day-body { display: block; }
     .tgto-day-body > .tgto-p:last-child { margin-bottom: 0; }
     .tgto-day-imgs { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; margin-bottom: 16px; }
     .tgto-day-imgs img { width: 100%; height: 200px; object-fit: cover; border-radius: 10px; display: block; background: var(--tgto-alt); }
@@ -381,18 +389,21 @@
       const dates = fmtRange(start, end);
       const price = money(sym, t.pricePerPersonPence);
       const img = t.heroImage ? '<img src="' + esc(t.heroImage) + '" alt="" loading="lazy">' : '<div class="tgto-hero-ph"></div>';
-      const meta = [
-        dates ? '<span data-role="dates">' + IC.cal + esc(dates) + '</span>' : '',
-        t.durationText ? '<span>' + IC.clock + esc(t.durationText) + '</span>' : '',
-        t.location ? '<span data-role="location">' + IC.pin + esc(t.location) + '</span>' : '',
+      // Dates, duration and location render as consistent frosted chips beside
+      // an inverted price chip, so the hero reads as one designed cluster.
+      const chip = (icon, text, role) => '<span class="tgto-chip"' + (role ? ' data-role="' + role + '"' : '') + '>' + icon + esc(text) + '</span>';
+      const chips = [
+        dates ? chip(IC.cal, dates, 'dates') : '',
+        t.durationText ? chip(IC.clock, t.durationText) : '',
+        t.location ? chip(IC.pin, t.location, 'location') : '',
+        price ? '<span class="tgto-chip tgto-chip--price">from <b data-role="price">' + esc(price) + '</b> pp</span>' : '',
       ].join('');
-      const chip = price ? '<div class="tgto-fromchip">from <b data-role="price">' + esc(price) + '</b> per person</div>' : '';
       return '<div class="tgto-hero">' + img
         + '<div class="tgto-hero-in">'
         + '<h1 class="tgto-hero-title" data-role="title">' + esc(t.title) + '</h1>'
         + (t.subtitle ? '<p class="tgto-hero-sub">' + esc(t.subtitle) + '</p>' : '')
-        + (meta ? '<div class="tgto-hero-meta">' + meta + '</div>' : '')
-        + chip + '</div></div>';
+        + (chips ? '<div class="tgto-hero-chips">' + chips + '</div>' : '')
+        + '</div></div>';
     }
 
     _glance(rows) {
@@ -427,12 +438,15 @@
               }).join('')
             + '</div>'
           : '';
+        // The head is a real <button> (native keyboard + focus) that toggles the
+        // body. All days start collapsed; the chevron rotates when open.
         return '<div class="tgto-day" data-role="day">'
-          + '<div class="tgto-day-head">'
+          + '<button type="button" class="tgto-day-head" aria-expanded="false">'
             + (d.label ? '<span class="tgto-day-label">' + esc(d.label) + '</span>' : '')
-            + (d.title ? '<h3 class="tgto-day-title">' + esc(d.title) + '</h3>' : '')
+            + (d.title ? '<span class="tgto-day-title">' + esc(d.title) + '</span>' : '')
             + (d.date ? '<span class="tgto-day-date">' + esc(d.date) + '</span>' : '')
-          + '</div>'
+            + '<svg class="tgto-day-chev" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>'
+          + '</button>'
           + '<div class="tgto-day-body">' + imgs
             + (d.body ? '<p class="tgto-p">' + esc(d.body) + '</p>' : '')
             + facts + opts
@@ -589,6 +603,16 @@
         });
       }
       if (form) form.addEventListener('submit', (ev) => { ev.preventDefault(); this._submit(form); });
+
+      // Collapsible days — click (or Enter/Space via native button) to toggle.
+      this.root.querySelectorAll('.tgto-day-head').forEach((head) => {
+        head.addEventListener('click', () => {
+          const day = head.closest('.tgto-day');
+          const open = day.classList.toggle('is-open');
+          head.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+      });
+
       this._loadAvailability();
     }
 

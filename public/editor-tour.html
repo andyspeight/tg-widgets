@@ -31,13 +31,20 @@
   .tb-btn--primary { background: var(--tgse-brand); border-color: var(--tgse-brand); color: #fff; }
   .tb-btn--primary.is-dirty { background: var(--tgse-warning); border-color: var(--tgse-warning); }
 
-  /* Views */
-  .tb-body { flex: 1; }
-  .tb-build { max-width: 920px; margin: 0 auto; padding: 26px 20px 80px; }
-  .tb-preview { display: none; background: var(--tgse-panel-2); }
+  /* Views — split by default: controls left, live preview right (always shown) */
+  .tb-body { flex: 1; display: flex; align-items: flex-start; }
+  .tb-build { flex: 1 1 auto; min-width: 0; padding: 24px 30px 90px; }
+  .tb-preview { flex: 0 0 480px; align-self: stretch; background: var(--tgse-panel-2); }
+  .tb-preview-inner { position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto; background: #fff; border-left: 1px solid var(--tgse-border); }
+  /* Full-preview mode hides the form and lets the tour fill the width */
   .tb-app[data-view="preview"] .tb-build { display: none; }
-  .tb-app[data-view="preview"] .tb-preview { display: block; }
-  .tb-preview-inner { background: #fff; min-height: calc(100vh - 56px); }
+  .tb-app[data-view="preview"] .tb-preview { flex-basis: 100%; }
+  .tb-app[data-view="preview"] .tb-preview-inner { border-left: 0; }
+  /* Narrow screens: the side preview would be too tight, so hide it in split
+     mode and let the user pop the full preview instead. */
+  @media (max-width: 1040px) {
+    .tb-app[data-view="editor"] .tb-preview { display: none; }
+  }
 
   /* Sections (accordions) */
   .sec { border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md); margin-bottom: 14px; background: var(--tgse-panel); overflow: hidden; }
@@ -80,7 +87,7 @@
 </head>
 <body>
 
-<div class="tb-app" data-view="build" id="tb-app">
+<div class="tb-app" data-view="editor" id="tb-app">
 
   <!-- Toolbar -->
   <div class="tb-bar">
@@ -99,8 +106,8 @@
     <input type="text" id="name-input" placeholder="Untitled tour" maxlength="120">
     <div class="tb-spacer"></div>
     <div class="tb-toggle" role="group" aria-label="View">
-      <button type="button" data-view="build" class="is-on">Build</button>
-      <button type="button" data-view="preview">Preview</button>
+      <button type="button" data-view="editor" class="is-on">Editor</button>
+      <button type="button" data-view="preview">Full preview</button>
     </div>
     <button type="button" class="tb-btn" id="btn-embed" title="Get embed code">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
@@ -478,7 +485,7 @@
       const view = btn.getAttribute('data-view');
       $('tb-app').setAttribute('data-view', view);
       document.querySelectorAll('.tb-toggle button').forEach(b => b.classList.toggle('is-on', b === btn));
-      if (view === 'preview') renderPreview();
+      renderPreview();
     });
   });
 
