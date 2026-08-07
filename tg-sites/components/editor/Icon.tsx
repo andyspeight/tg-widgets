@@ -43,6 +43,9 @@ export type IconName =
   | 'video'
   | 'gallery'
   | 'map'
+  | 'compare'
+  | 'testimonial'
+  | 'audio'
   | 'button'
   | 'buttons'
   | 'divider'
@@ -143,6 +146,15 @@ const PATHS: Record<IconName, string> = {
   // A folded map, panels and fold lines. Not the pin, which would read as a
   // single location marker rather than the map the block draws.
   map: 'M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15M15 6v15',
+  // A framed pane split down the middle with arrows pushing out from the seam:
+  // two pictures and a divider you drag. Not `columns`, whose halves are empty.
+  compare: 'M4 5h16v14H4zM12 3v18M8.5 10l-2 2 2 2M15.5 10l2 2-2 2',
+  // A speech bubble with a small face and two lines: someone quoted. Not `quote`,
+  // which is the bare marks, and not `social`, which is linked accounts.
+  testimonial: 'M4 5h16v10H8l-4 4V5zM9.8 9.2a1.3 1.3 0 1 0 2.6 0 1.3 1.3 0 0 0-2.6 0M14 9h3M14 12h3',
+  // Five bars of a waveform, tall in the middle: a sound clip. Not `stats`, whose
+  // bars sit on a baseline and mean a chart.
+  audio: 'M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2',
   button: 'M3 8h18v8H3zM8 12h8',
   buttons: 'M2 8h9v8H2zM13 8h9v8h-9z',
   divider: 'M3 12h18',

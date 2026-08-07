@@ -851,6 +851,143 @@ export function MapBlock({
   );
 }
 
+/**
+ * Before and after: two pictures and a divider you drag.
+ *
+ * PURE CSS, NO SCRIPT, the same rule the slider and the tabs keep. The after
+ * picture is the base layer; the before picture sits over it in a box the
+ * browser lets you resize, so dragging that box's edge uncovers the after
+ * picture beneath. The before picture is pinned to the left and sized to the
+ * WHOLE frame with `100cqw` (the frame is a container), so shrinking its box
+ * clips it from the right rather than squashing it, and the two line up. The
+ * fixed shape keeps their heights equal so the seam is clean.
+ *
+ * Both sources go through safeUrl. With neither picture it asks for them; with
+ * one, it shows the one it has, so the block is never a blank rectangle.
+ */
+export function BeforeAfterBlock({ props }: { props: Props }): ReactElement {
+  const before = safeUrl(str(props, 'before'));
+  const after = safeUrl(str(props, 'after'));
+  const beforeAlt = str(props, 'beforeAlt');
+  const afterAlt = str(props, 'afterAlt');
+  const beforeLabel = str(props, 'beforeLabel');
+  const afterLabel = str(props, 'afterLabel');
+  const ratio = str(props, 'ratio', '16/9');
+  const start = clamp(props.start, 0, 100, 50);
+
+  if (!before && !after) {
+    return <div className="tgs-placeholder">Choose a before and an after image</div>;
+  }
+
+  return (
+    <div className="tgs-ba" style={ratioStyle(ratio)}>
+      {/* Base layer: the AFTER picture fills the frame. */}
+      {after ? (
+        <img className="tgs-ba__img" src={after} alt={afterAlt} loading="lazy" />
+      ) : (
+        <div className="tgs-ba__missing">Add the after image</div>
+      )}
+      {after && afterLabel && <span className="tgs-ba__badge tgs-ba__badge--after">{afterLabel}</span>}
+
+      {/* Overlay: the BEFORE picture, in a box you drag to reveal the after. */}
+      {before && (
+        <div className="tgs-ba__reveal" style={{ width: `${start}%` }}>
+          <img className="tgs-ba__img tgs-ba__img--before" src={before} alt={beforeAlt} loading="lazy" />
+          {beforeLabel && <span className="tgs-ba__badge tgs-ba__badge--before">{beforeLabel}</span>}
+          <span className="tgs-ba__handle" aria-hidden="true" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Five stars, the first `rating` of them filled. Drawn, not typed, so it reads
+ *  the same in every font, and labelled for a screen reader. */
+function Stars({ rating }: { rating: number }): ReactElement {
+  return (
+    <div className="tgs-tsl__stars" role="img" aria-label={`${rating} out of 5`}>
+      {[1, 2, 3, 4, 5].map((n) => (
+        <svg key={n} className="tgs-tsl__star" data-on={n <= rating ? 'true' : undefined} viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+          <path d="M12 3l2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.6 9.1l5.8-.8z" />
+        </svg>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Testimonials on a rail: what your clients said, in the site's own type.
+ *
+ * PURE CSS, NO SCRIPT, the same scroll-snap rail the slider uses. Each card is a
+ * rating, a quote, a name, a line of detail and a photo; the rating is clamped
+ * here and the photo goes through safeUrl. An empty rating draws no stars, an
+ * empty photo draws none, so a half-filled testimonial still reads cleanly.
+ */
+export function TestimonialsBlock({ props }: { props: Props }): ReactElement {
+  const items = list(props, 'items');
+  if (!items.length) {
+    return <div className="tgs-placeholder">Add a testimonial</div>;
+  }
+
+  return (
+    <div className="tgs-tsl">
+      <div className="tgs-tsl__track">
+        {items.map((item, index) => {
+          const quote = str(item, 'quote');
+          const name = str(item, 'name');
+          const detail = str(item, 'detail');
+          const rating = clamp(item.rating, 0, 5, 0);
+          const photo = safeUrl(str(item, 'photo'));
+          const alt = str(item, 'alt');
+          return (
+            <figure className="tgs-tsl__card" key={index}>
+              {rating > 0 && <Stars rating={rating} />}
+              {quote && <blockquote className="tgs-tsl__quote">{quote}</blockquote>}
+              {(name || detail || photo) && (
+                <figcaption className="tgs-tsl__by">
+                  {photo && <img className="tgs-tsl__photo" src={photo} alt={alt} loading="lazy" />}
+                  <span className="tgs-tsl__meta">
+                    {name && <span className="tgs-tsl__name">{name}</span>}
+                    {detail && <span className="tgs-tsl__detail">{detail}</span>}
+                  </span>
+                </figcaption>
+              )}
+            </figure>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * A sound clip in the browser's own player.
+ *
+ * NATIVE <audio controls>, NO SCRIPT: the browser draws the player and runs it.
+ * The source is a link through safeUrl, and preload is off, so nothing is
+ * fetched until play, which keeps the editor's per-keystroke redraw and a
+ * visitor's page load from pulling the file down for no reason.
+ */
+export function AudioBlock({ props }: { props: Props }): ReactElement {
+  const src = safeUrl(str(props, 'src'));
+  const title = str(props, 'title');
+  const caption = str(props, 'caption');
+
+  if (!src) {
+    return <div className="tgs-placeholder">Add a link to your audio</div>;
+  }
+
+  return (
+    <div className="tgs-audio">
+      {title && <div className="tgs-audio__title">{title}</div>}
+      <audio className="tgs-audio__player" controls preload="none" src={src}>
+        Your browser cannot play this audio.
+      </audio>
+      {caption && <div className="tgs-audio__caption">{caption}</div>}
+    </div>
+  );
+}
+
 export function GalleryBlock({ props }: { props: Props }): ReactElement {
   const columns = oneOf(props, 'columns', ['2', '3', '4'] as const, '3');
   const gap = str(props, 'gap', 'm');

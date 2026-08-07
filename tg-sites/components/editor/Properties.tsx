@@ -1603,9 +1603,12 @@ const BLOCK_DESIGN: Record<string, BoxParts> = {
   image: { bg: true, padding: true, shadow: true },
   video: { bg: true, padding: true, shadow: true },
   map: { bg: true, padding: true, shadow: true },
+  'before-after': { bg: true, padding: true, shadow: true },
+  audio: { bg: true, padding: true, shadow: true },
   gallery: { bg: true, border: true, padding: true, shadow: true },
   slider: { bg: true, border: true, padding: true, shadow: true },
   cards: { bg: true, border: true, padding: true, shadow: true },
+  testimonials: { bg: true, border: true, padding: true, shadow: true },
   // Styles itself, or is pure spacing: no box, just grouped settings.
   button: {},
   'button-group': {},

@@ -13,6 +13,8 @@ import type { Block } from '../../lib/content/schema';
 import { isKnownBlock } from '../../lib/content/blocks';
 import {
   AccordionBlock,
+  AudioBlock,
+  BeforeAfterBlock,
   ButtonBlock,
   ButtonGroupBlock,
   CardsBlock,
@@ -36,6 +38,7 @@ import {
   StepsBlock,
   TableBlock,
   TabsBlock,
+  TestimonialsBlock,
   TextBlock,
   VideoBlock,
   WidgetBlock,
@@ -84,6 +87,12 @@ export function BlockRenderer({
         return <VideoBlock props={props} />;
       case 'gallery':
         return <GalleryBlock props={props} />;
+      case 'before-after':
+        return <BeforeAfterBlock props={props} />;
+      case 'testimonials':
+        return <TestimonialsBlock props={props} />;
+      case 'audio':
+        return <AudioBlock props={props} />;
       /*
        * `editing` is true exactly when this is the editor canvas, which is what
        * tells the map to draw a placeholder rather than load a frame that would

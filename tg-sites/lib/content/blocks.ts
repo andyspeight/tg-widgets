@@ -722,6 +722,71 @@ export const BLOCKS: readonly BlockDefinition[] = [
     ],
   },
   {
+    /*
+     * TWO PICTURES AND A DIVIDER YOU DRAG. One season against another, a room
+     * before and after, the same view either side of a change.
+     *
+     * The reveal is pure CSS, no client script, the same rule the slider and the
+     * tabs keep: the top picture sits in a box the browser lets you resize, and
+     * dragging its edge uncovers the one beneath. Both pictures go through the
+     * image field and safeUrl like every other picture, and the shape is fixed so
+     * the two line up rather than argue over the height.
+     */
+    type: 'before-after',
+    label: 'Before & After',
+    group: 'Media',
+    icon: 'compare',
+    description: 'Two photos with a divider you drag to compare them.',
+    defaults: {
+      before: '',
+      beforeAlt: '',
+      after: '',
+      afterAlt: '',
+      beforeLabel: 'Before',
+      afterLabel: 'After',
+      start: 50,
+      ratio: '16/9',
+    },
+    summarise: () => 'Before & After',
+    fields: [
+      { kind: 'image', key: 'before', label: 'Before image' },
+      {
+        kind: 'text',
+        key: 'beforeAlt',
+        label: 'Before alt text',
+        max: 200,
+        help: 'What the before photo shows, for search engines and screen readers.',
+      },
+      { kind: 'image', key: 'after', label: 'After image' },
+      { kind: 'text', key: 'afterAlt', label: 'After alt text', max: 200, help: 'What the after photo shows.' },
+      {
+        kind: 'text',
+        key: 'beforeLabel',
+        label: 'Before badge',
+        max: 40,
+        help: 'The label on the before photo. Leave empty for no badge.',
+      },
+      { kind: 'text', key: 'afterLabel', label: 'After badge', max: 40 },
+      {
+        kind: 'number',
+        key: 'start',
+        label: 'Start position',
+        min: 0,
+        max: 100,
+        step: 5,
+        group: 'layout',
+        help: 'How much of the before photo shows before anyone drags it. 50 is halfway.',
+      },
+      {
+        kind: 'select',
+        key: 'ratio',
+        label: 'Shape',
+        options: RATIO_OPTIONS.filter((option) => option.value !== 'auto'),
+        group: 'layout',
+      },
+    ],
+  },
+  {
     type: 'gallery',
     label: 'Gallery',
     group: 'Media',
@@ -1097,6 +1162,118 @@ export const BLOCKS: readonly BlockDefinition[] = [
         label: 'The whole card is clickable',
         help: 'Still one link, so a keyboard tabs through the slides once each.',
       },
+    ],
+  },
+  {
+    /*
+     * WHAT YOUR CLIENTS SAID, ON A RAIL. The native version of the widget, so
+     * the cards are the site's own type and colours and a client edits them in
+     * place rather than in a second tool.
+     *
+     * The rail is the same pure-CSS scroll-snap the slider uses, no script. Each
+     * card carries a rating, a quote, a name, a line of detail and a photo, and
+     * the photo goes through the image field and safeUrl like every other. It
+     * arrives with three example testimonials so the block is never a blank rail.
+     */
+    type: 'testimonials',
+    label: 'Testimonial slider',
+    group: 'Media',
+    icon: 'testimonial',
+    description: 'What your clients said, on a rail: a rating, a quote, a name and a photo.',
+    defaults: {
+      items: [
+        {
+          quote: 'They thought of everything. We just turned up and had the best two weeks of our lives.',
+          name: 'Sarah and Tom',
+          detail: 'Honeymoon in the Maldives',
+          rating: 5,
+          photo: '',
+          alt: '',
+        },
+        {
+          quote: 'First time abroad with three children and it was genuinely easy. Every question answered the same day.',
+          name: 'The Whitfields',
+          detail: 'Family trip to Florida',
+          rating: 5,
+          photo: '',
+          alt: '',
+        },
+        {
+          quote: 'The itinerary was spot on and nothing was left to chance. I would not book any other way now.',
+          name: 'James P',
+          detail: 'Safari in Kenya',
+          rating: 5,
+          photo: '',
+          alt: '',
+        },
+      ],
+    },
+    summarise: (props) => {
+      const count = Array.isArray(props.items) ? props.items.length : 0;
+      return `Testimonials (${count})`;
+    },
+    fields: [
+      {
+        kind: 'repeater',
+        key: 'items',
+        label: 'Testimonials',
+        itemLabel: 'Testimonial',
+        max: 24,
+        fields: [
+          { kind: 'textarea', key: 'quote', label: 'What they said', rows: 3, max: 400 },
+          { kind: 'text', key: 'name', label: 'Their name', max: 80 },
+          {
+            kind: 'text',
+            key: 'detail',
+            label: 'Where or what for',
+            max: 120,
+            help: 'The line under their name. A trip, a place, a date.',
+          },
+          {
+            kind: 'number',
+            key: 'rating',
+            label: 'Stars',
+            min: 0,
+            max: 5,
+            step: 1,
+            help: 'Out of five. Set it to 0 for no stars.',
+          },
+          { kind: 'image', key: 'photo', label: 'Photo' },
+          { kind: 'text', key: 'alt', label: 'Photo alt text', max: 200 },
+        ],
+      },
+    ],
+  },
+  {
+    /*
+     * A SOUND CLIP IN THE BROWSER'S OWN PLAYER. A welcome message, a podcast
+     * cut, a pronunciation. The player is the native <audio controls>, so there
+     * is no script and nothing to style into working: the browser draws it.
+     *
+     * The source is a link, run through safeUrl like every other, and it does
+     * not preload, so neither the editor redrawing on a keystroke nor a visitor
+     * loading the page fetches the file until they press play.
+     */
+    type: 'audio',
+    label: 'Audio',
+    group: 'Media',
+    icon: 'audio',
+    description: 'A sound clip in the browser player, from a link.',
+    defaults: { src: '', title: '', caption: '' },
+    summarise: (props) => {
+      const title = asString(props.title).trim();
+      return title ? `Audio: ${firstWords(title, 5)}` : 'Audio';
+    },
+    fields: [
+      {
+        kind: 'url',
+        key: 'src',
+        label: 'Link to your audio',
+        placeholder: 'https://.../welcome.mp3',
+        help: 'A direct link to an MP3 or similar. Paste the address of the file itself, not a page it sits on.',
+      },
+      { kind: 'text', key: 'title', label: 'Title', max: 120, help: 'An optional line above the player.' },
+      { kind: 'text', key: 'caption', label: 'Caption', max: 200 },
     ],
   },
 

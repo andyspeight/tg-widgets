@@ -460,16 +460,17 @@ await check('block picker opens from a section', async () => {
  * 2026, 15 when the menu joined them, 16 when Cards did, 18 with Accordion and
  * Tabs, 19 with the Slider, 20 with the Table, 27 once the social, steps, stats,
  * logos and imported blocks and then the inner container had all joined, 28 when
- * the Location map landed (7 Aug 2026). A hardcoded number is the point rather
- * than a maintenance cost: adding a block should make somebody look at the
- * picker, and a block that silently stops rendering its card is exactly what
+ * the Location map landed, then 31 when Before & After, the Testimonial slider
+ * and Audio joined it together (7 Aug 2026). A hardcoded number is the point
+ * rather than a maintenance cost: adding a block should make somebody look at
+ * the picker, and a block that silently stops rendering its card is exactly what
  * this catches.
  *
  * The harness runs as staff, so the staff-only Embed block is counted here too:
- * 28 is the whole library, one fewer than that for a client.
+ * 31 is the whole library, one fewer than that for a client.
  */
 await check('block picker offers the full library', async () =>
-  (await page.locator(".ed-block-card").count()) === 28);
+  (await page.locator(".ed-block-card").count()) === 31);
 
 await check('including both ways to put a widget on a page', async () => {
   const cards = (await page.locator('.ed-block-card').allInnerTexts()).join(' | ');
@@ -4312,6 +4313,131 @@ await check('and that canvas frame is inert, so a click still selects the block'
 
 
 // ---------------------------------------------------------------------------
+// Before and after
+//
+// A pure-CSS reveal: the after picture is the base, the before sits over it in a
+// resizable box, and the before image is sized to the whole frame so it clips
+// rather than squashes. The URL safety rides on the image field (proven above);
+// what a browser settles here is that both pictures land, the box opens at the
+// start position, and the before image really is frame-wide inside its box.
+// ---------------------------------------------------------------------------
+
+await page.reload();
+await page.waitForSelector('.ed-root');
+await showPanels();
+
+await check('before and after starts by asking for both photos', async () => {
+  await addBlock('Before & After');
+  const text = await added().locator('.tgs-placeholder').first().innerText().catch(() => '');
+  return /before and an after/i.test(text) ? true : `it says "${text}"`;
+});
+
+await check('both photos land, the before revealing over the after at the halfway start', async () => {
+  // Two image fields, before then after. Each hides its web-address box behind a
+  // toggle, so open every toggle in the pane, then fill the first two boxes.
+  const toggles = page.locator('.ed-props .mp-url__toggle');
+  const toggleCount = await toggles.count();
+  for (let i = 0; i < toggleCount; i += 1) await toggles.nth(i).click();
+  const boxes = page.locator('.ed-props .mp-url .ed-input');
+  await boxes.nth(0).fill('https://images.example.test/before.jpg');
+  await boxes.nth(1).fill('https://images.example.test/after.jpg');
+  await page.waitForTimeout(400);
+
+  const imgs = added().locator('.tgs-ba .tgs-ba__img');
+  if ((await imgs.count()) !== 2) return `${await imgs.count()} images on the canvas`;
+  if ((await added().locator('.tgs-ba__reveal .tgs-ba__img--before').count()) !== 1) {
+    return 'the before picture is not in the reveal box';
+  }
+
+  // The reveal opens at the halfway start: about half the frame wide.
+  const ratio = await added().locator('.tgs-ba').first().evaluate((frame) => {
+    const reveal = frame.querySelector('.tgs-ba__reveal');
+    return reveal.getBoundingClientRect().width / frame.getBoundingClientRect().width;
+  });
+  return Math.abs(ratio - 0.5) < 0.08 ? true : `the reveal is ${(ratio * 100).toFixed(0)}% wide`;
+});
+
+await check('the before image is sized to the whole frame, not the narrow box', async () => {
+  // 100cqw: the before picture is as wide as the frame though its box is half
+  // that, which is what stops it squashing. So it is wider than the box clipping it.
+  const info = await added().locator('.tgs-ba').first().evaluate((frame) => {
+    const box = frame.querySelector('.tgs-ba__reveal');
+    const img = frame.querySelector('.tgs-ba__img--before');
+    return { box: box.getBoundingClientRect().width, img: img.getBoundingClientRect().width };
+  });
+  return info.img > info.box * 1.5 ? true : `image ${Math.round(info.img)}px vs box ${Math.round(info.box)}px`;
+});
+
+
+// ---------------------------------------------------------------------------
+// The testimonial slider
+//
+// A pure-CSS scroll-snap rail, the same the slider uses, and stars that are
+// drawn rather than typed. A browser settles two things: the block arrives with
+// example reviews and a full five stars, and the cards sit on a scrolling rail
+// rather than stacking. The registry is pinned in tests/testimonials.test.ts.
+// ---------------------------------------------------------------------------
+
+await page.reload();
+await page.waitForSelector('.ed-root');
+await showPanels();
+
+await check('a testimonial slider arrives with example reviews on a rail', async () => {
+  await addBlock('Testimonial slider');
+  const count = await added().locator('.tgs-tsl__card').count();
+  if (count !== 3) return `${count} testimonial cards`;
+  const stars = await added().locator('.tgs-tsl__card').first().locator('.tgs-tsl__star[data-on="true"]').count();
+  return stars === 5 ? true : `${stars} filled stars on the first card`;
+});
+
+await check('the testimonials sit on a scrolling rail, not stacked', async () => {
+  const overflow = await added().locator('.tgs-tsl__track').first().evaluate((el) => getComputedStyle(el).overflowX);
+  if (!/auto|scroll/.test(overflow)) return `overflow-x is "${overflow}"`;
+  // The first two cards share a row and run left to right.
+  const laid = await added().locator('.tgs-tsl__card').evaluateAll((cards) => {
+    const a = cards[0].getBoundingClientRect();
+    const b = cards[1].getBoundingClientRect();
+    return { sameRow: Math.abs(a.top - b.top) < 2, inOrder: b.left > a.left };
+  });
+  return laid.sameRow && laid.inOrder ? true : `sameRow ${laid.sameRow}, inOrder ${laid.inOrder}`;
+});
+
+
+// ---------------------------------------------------------------------------
+// Audio
+//
+// The browser's own <audio controls>, no script. A browser settles that a link
+// becomes a native player and that it does not preload, so neither the editor
+// redrawing nor a visitor loading the page fetches the file until play.
+// ---------------------------------------------------------------------------
+
+await page.reload();
+await page.waitForSelector('.ed-root');
+await showPanels();
+
+await check('audio starts by asking for a link', async () => {
+  await addBlock('Audio');
+  const text = await added().locator('.tgs-placeholder').first().innerText().catch(() => '');
+  return /link to your audio/i.test(text) ? true : `it says "${text}"`;
+});
+
+await check('a link becomes a native player that does not preload', async () => {
+  await page.locator('.ed-props input.ed-input').first().fill('https://audio.example.test/welcome.mp3');
+  await page.waitForTimeout(300);
+  const player = added().locator('audio.tgs-audio__player');
+  if ((await player.count()) !== 1) return `${await player.count()} players on the canvas`;
+  const info = await player.first().evaluate((el) => ({
+    controls: el.hasAttribute('controls'),
+    preload: el.getAttribute('preload'),
+    src: el.getAttribute('src') || '',
+  }));
+  if (!info.controls) return 'the player has no controls';
+  if (info.preload !== 'none') return `preload is "${info.preload}"`;
+  return /welcome\.mp3/.test(info.src) ? true : `src is "${info.src}"`;
+});
+
+
+// ---------------------------------------------------------------------------
 // The menu, the header and the footer
 //
 // TWO CLAIMS THAT ONLY A BROWSER CAN SETTLE.
@@ -4551,8 +4677,8 @@ await check('the header offers the same blocks a page does', async () => {
   await page.keyboard.press('Escape');
   await page.waitForTimeout(200);
   // The whole library, because a header is sections and rows like anything else.
-  // The same 28 the page picker offers a staff user, map and container included.
-  return count === 28 ? true : `${count} blocks in the header picker`;
+  // The same 31 the page picker offers a staff user, the three new media included.
+  return count === 31 ? true : `${count} blocks in the header picker`;
 });
 
 await check('a menu in a header saves through the region actions', async () => {
