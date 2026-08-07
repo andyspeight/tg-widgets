@@ -820,6 +820,15 @@
         loc: [this._f('resort'), this._f('region'), this._f('country')].filter(Boolean).join(', '),
         teaser: this._f('teaser'),
         description: this._f('description') || this._f('teaser'),
+        resort: this._f('resort'),
+        country: this._f('country'),
+        hotelDesc: this._f('hotelDesc'),
+        resortDesc: this._f('resortDesc'),
+        countryDesc: this._f('countryDesc'),
+        shipDesc: this._f('shipDesc'),
+        itinerary: this._f('itinerary'),
+        highlights: this._f('highlights'),
+        skiArea: this._f('skiArea'),
         nights: this._f('nights'),
         board: this._f('board'),
         flighttype: this._f('flighttype'),
@@ -975,6 +984,25 @@
           + tags + '</div>'
         : '';
 
+      // Extra long-text sections (hotel, resort, country, ship, itinerary,
+      // highlights, ski area). Each renders only when it has content, with a
+      // heading that borrows the place name where it helps. Type-aware: a
+      // cruise fills shipDesc + itinerary, a hotel fills hotelDesc + resortDesc.
+      const proseSection = function (heading, text) {
+        const paras = String(text || '').split(/\n+/).filter(Boolean)
+          .map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('');
+        if (!paras) return '';
+        return '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">' + esc(heading) + '</h2><div class="tgop-prose">' + paras + '</div></div>';
+      };
+      const fContent =
+          proseSection('About ' + (d.property || 'the hotel'), d.hotelDesc)
+        + proseSection('About ' + (d.resort || 'the resort'), d.resortDesc)
+        + proseSection('About the ship', d.shipDesc)
+        + proseSection('Itinerary', d.itinerary)
+        + proseSection('Highlights', d.highlights)
+        + proseSection('The resort & ski area', d.skiArea)
+        + proseSection('About ' + (d.country || 'the destination'), d.countryDesc);
+
       const fIncludes = d.includes.length
         ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">' + esc(t('whatsIncluded')) + '</h2><ul class="tgop-incl">'
           + d.includes.map(function (x) { return '<li><span class="tick">' + I.check + '</span>' + esc(x) + '</li>'; }).join('')
@@ -1069,13 +1097,13 @@
         + '<button type="button" class="tgop-lb-btn next" data-lb-next aria-label="' + esc(t('nextPhoto')) + '">' + I.chevDown + '</button></div>';
 
       // Main column content order (shared by classic + immersive)
-      const mainCol = fAbout + fIncludes + fVideo + fGallery + fMap + fDetail;
+      const mainCol = fAbout + fContent + fIncludes + fVideo + fGallery + fMap + fDetail;
 
       // ── Assemble by template ──
       let html;
       if (cfg.template === 'editorial') {
         html = fBar + fHero + fFacts
-          + '<div class="tgop-wrap tgop-editorial">' + fAbout + fIncludes + fGallery + fVideo + fMap + fDetail + '</div>'
+          + '<div class="tgop-wrap tgop-editorial">' + fAbout + fContent + fIncludes + fGallery + fVideo + fMap + fDetail + '</div>'
           + '<div class="tgop-enqband"><div class="tgop-wrap tgop-enqband-inner">'
             + '<div class="tgop-enqband-copy"><h2 class="tgop-h2">' + esc(t('likeTheLook')) + '</h2><p>' + esc(t('enqBandCopy')) + '</p></div>'
             + '<div class="tgop-enqband-card">' + this._bookCard(d) + '</div>'

@@ -106,6 +106,35 @@
     'Early bird', 'Spa', 'Kids club', 'Swim-up rooms'
   ];
 
+  // ── Long-text content sections ────────────────────────────────────────────
+  // Which appear depends on the offer type (TYPE_CONTENT below), so a cruise
+  // talks about the ship and its ports and a hotel about the hotel and resort.
+  // Each is optional; a blank one simply won't appear on the offer page. The
+  // `description` key is the existing overview field, kept for back-compat.
+  const CONTENT_SECTIONS = {
+    description: { label: 'Overview',              hint: 'The headline write-up near the top of the offer page.', ph: 'A warm, plain paragraph or two on why this deal is worth booking.' },
+    hotelDesc:   { label: 'About the hotel',       hint: 'The property itself: rooms, pools, restaurants, the feel of the place.', ph: 'Describe the hotel and what makes it special...' },
+    resortDesc:  { label: 'About the resort',      hint: 'The resort or area around the hotel: beaches, the town, what is nearby.', ph: 'Describe the resort or area...' },
+    countryDesc: { label: 'About the country',     hint: 'A short guide to the destination: climate, culture, why go.', ph: 'Describe the destination...' },
+    shipDesc:    { label: 'About the ship',        hint: 'The cruise ship: cabins, dining, bars, pools, entertainment.', ph: 'Describe the ship...' },
+    itinerary:   { label: 'Itinerary / ports of call', hint: 'Where it goes, port by port or day by day.', ph: 'List the ports or the day-by-day plan...' },
+    highlights:  { label: 'Highlights',            hint: 'The stand-out moments and included excursions.', ph: 'The highlights of the trip...' },
+    skiArea:     { label: 'The resort & ski area', hint: 'The slopes, the lifts, ski school and après.', ph: 'Describe the ski resort and the area...' }
+  };
+  // Offer type → the content sections shown, in order. Anything not listed uses _default.
+  const TYPE_CONTENT = {
+    'Cruise':               ['description', 'shipDesc', 'itinerary', 'countryDesc'],
+    'Escorted tour':        ['description', 'itinerary', 'highlights', 'countryDesc'],
+    'Multi-centre':         ['description', 'itinerary', 'countryDesc'],
+    'Rail holiday':         ['description', 'itinerary', 'countryDesc'],
+    'Ski holiday':          ['description', 'skiArea', 'hotelDesc', 'countryDesc'],
+    'Flight only':          ['description'],
+    'Excursion / day trip': ['description', 'highlights'],
+    'City break':           ['description', 'hotelDesc', 'resortDesc', 'countryDesc'],
+    _default:               ['description', 'hotelDesc', 'resortDesc', 'countryDesc']
+  };
+  function contentKeysFor(type) { return TYPE_CONTENT[type] || TYPE_CONTENT._default; }
+
   // ── Audience languages (content layer, Layer 2) ───────────────────────────
   // English is always the source. The agent toggles the languages their
   // customers read, then "Translate" sends the offer's author content to
@@ -303,6 +332,43 @@
     .ob-incl label.on { background: var(--tgo-success-soft); border-color: var(--tgo-success); }
     .ob-incl input { width: auto; }
 
+    /* Free-text include pills */
+    .ob-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; min-height: 4px; }
+    .ob-pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 8px 6px 12px; border-radius: 999px;
+      background: var(--tgo-success-soft); border: 1px solid var(--tgo-success); color: var(--tgo-ink); font-size: 13.5px; font-weight: 500; }
+    .ob-pill button { border: 0; background: rgba(0,0,0,0.06); color: inherit; width: 18px; height: 18px; border-radius: 50%;
+      cursor: pointer; font-size: 14px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
+    .ob-pill button:hover { background: rgba(0,0,0,0.14); }
+    .ob-pill-empty { font-size: 13px; color: var(--tgo-muted); }
+    .ob-pill-add { display: flex; gap: 8px; margin-bottom: 12px; }
+    .ob-pill-input { flex: 1; padding: 10px 12px; border: 1px solid var(--tgo-border); border-radius: 9px; font: inherit; font-size: 14px;
+      background: var(--tgo-card); color: var(--tgo-ink); }
+    .ob-pill-input:focus { outline: 2px solid var(--tgo-accent); border-color: var(--tgo-accent); }
+    .ob-pill-suggest { display: flex; flex-wrap: wrap; gap: 7px; }
+    .ob-chip-suggest { border: 1px dashed var(--tgo-border); background: var(--tgo-card-alt); color: var(--tgo-sub); border-radius: 999px;
+      padding: 5px 11px; font: inherit; font-size: 12.5px; cursor: pointer; }
+    .ob-chip-suggest:hover { border-color: var(--tgo-accent); color: var(--tgo-accent-hover); }
+
+    /* Type-aware long-text content sections */
+    .ob-content { display: flex; flex-direction: column; gap: 20px; }
+    .ob-content-sec { border: 1px solid var(--tgo-border); border-radius: 12px; padding: 14px 14px 16px; background: var(--tgo-card-alt); }
+    .ob-content-sec.ai { border-color: var(--tgo-ai); }
+    .ob-content-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px; }
+    .ob-content-head label { font-size: 14px; font-weight: 700; color: var(--tgo-ink); }
+    .ob-content-hint { font-size: 12.5px; color: var(--tgo-muted); margin: 0 0 10px; line-height: 1.5; }
+    .ob-content-sec textarea { width: 100%; padding: 11px 12px; border: 1px solid var(--tgo-border); border-radius: 9px; font: inherit;
+      font-size: 14px; line-height: 1.6; background: var(--tgo-card); color: var(--tgo-ink); resize: vertical; min-height: 90px; }
+    .ob-content-sec textarea:focus { outline: 2px solid var(--tgo-accent); border-color: var(--tgo-accent); }
+    .ob-ai-write { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--tgo-ai); background: var(--tgo-ai-soft, rgba(124,58,237,0.08));
+      color: var(--tgo-ai); border-radius: 8px; padding: 6px 11px; font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .ob-ai-write:hover { background: var(--tgo-ai); color: #fff; }
+    .ob-ai-write:disabled { opacity: 0.6; cursor: default; }
+    .ob-write-status { font-size: 12px; margin-top: 8px; display: none; }
+    .ob-write-status.show { display: block; }
+    .ob-write-status.busy { color: var(--tgo-muted); }
+    .ob-write-status.ok { color: var(--tgo-success); }
+    .ob-write-status.err { color: var(--tgo-danger, #DC2626); }
+
     /* Photos */
     .ob-upload {
       border: 2px dashed var(--tgo-border); border-radius: 10px; padding: 22px 20px; text-align: center;
@@ -479,10 +545,11 @@
         const v = fields[el.dataset.key];
         if (v != null && v !== '') el.value = v;
       });
-      const inc = Array.isArray(offer.includes) ? offer.includes : [];
-      this.root.querySelectorAll('.ob-incl input').forEach((i) => {
-        if (inc.indexOf(i.dataset.incl) !== -1) { i.checked = true; i.closest('label').classList.add('on'); }
-      });
+      // Long-text sections live in a store; _renderContent draws the right set.
+      this._contentVals = {};
+      Object.keys(CONTENT_SECTIONS).forEach((k) => { if (fields[k] != null && fields[k] !== '') this._contentVals[k] = fields[k]; });
+      // Includes are free-text pills now.
+      this._includes = Array.isArray(offer.includes) ? offer.includes.slice() : [];
       const tags = Array.isArray(offer.tags) ? offer.tags : [];
       this.root.querySelectorAll('.ob-toggle').forEach((c) => {
         if (tags.indexOf(c.dataset.tag) !== -1) c.classList.add('on');
@@ -515,16 +582,10 @@
       }
       if (cfg.radius) this.root.style.setProperty('--tgo-radius', cfg.radius + 'px');
 
-      const aiBox = cfg.aiEnabled ? `
-        <div class="ob-ai">
-          <div class="ob-ai-head"><span class="ob-ai-spark">✨</span><h3>Describe your offer, we will fill in the rest</h3></div>
-          <p class="ob-ai-sub">Type it the way you would say it to a customer. AI works out the destination, board basis, price basis, highlights and a polished description, then fills the form for you to check.</p>
-          <div class="ob-ai-row">
-            <textarea class="ob-ai-input" rows="2" placeholder="${esc(cfg.aiPlaceholder)}"></textarea>
-            <button type="button" class="ob-ai-go">✨ Generate</button>
-          </div>
-          <div class="ob-ai-status"></div>
-        </div>` : '';
+      // The whole-offer "describe it in a sentence" draft has been replaced by a
+      // "Write with AI" button on each long section (see _writeSection), so the
+      // big box is gone.
+      const aiBox = '';
 
       function field(key, label, control, opt, wide) {
         return '<div class="ob-field' + (wide ? ' wide' : '') + '" data-field="' + key + '">'
@@ -582,10 +643,11 @@
       }
 
       if (cfg.showIncludes) {
-        html += '<div class="ob-fs"><h4>5 · What\'s included</h4><p class="hint">Tick what the price covers.</p><div class="ob-incl">'
-          + cfg.includeOptions.map(function (i) {
-              return '<label><input type="checkbox" data-incl="' + esc(i) + '" /> ' + esc(i) + '</label>';
-            }).join('')
+        html += '<div class="ob-fs"><h4>5 · What\'s included</h4><p class="hint">Type what the price covers and press Enter. Tap a suggestion to add it. Add anything you like.</p>'
+          + '<div class="ob-pills" data-pills></div>'
+          + '<div class="ob-pill-add"><input type="text" class="ob-pill-input" placeholder="e.g. Return flights, free room upgrade, kids stay free" /><button type="button" class="ob-btn ob-pill-go">Add</button></div>'
+          + '<div class="ob-pill-suggest">'
+          + cfg.includeOptions.map(function (i) { return '<button type="button" class="ob-chip-suggest" data-suggest="' + esc(i) + '">+ ' + esc(i) + '</button>'; }).join('')
           + '</div></div>';
       }
 
@@ -634,8 +696,8 @@
       }
 
       if (cfg.showDescription) {
-        html += '<div class="ob-fs"><h4>10 · Full description</h4><p class="hint">The longer write-up for the offer page. AI drafts it in your brand voice, then you edit.</p>'
-          + '<div class="ob-field wide" data-field="description"><textarea data-key="description" rows="5" placeholder="A few warm, plain paragraphs about the resort, the location and why this deal is worth booking."></textarea></div></div>';
+        html += '<div class="ob-fs"><h4>10 · Words for the offer page</h4><p class="hint">The write-ups shown on the offer page. They change with the offer type so the right things are covered — a cruise is about the ship and its ports, a hotel about the hotel and the resort. Leave any blank and it simply won\'t show. Use <b>Write with AI</b>, then edit.</p>'
+          + '<div class="ob-content" data-content></div></div>';
       }
 
       if (cfg.showEnquiry) {
@@ -666,10 +728,15 @@
       // Pre-fill enquiry routing defaults from config
       this.shadow.innerHTML = '<style>' + STYLES + '</style>';
       this.shadow.appendChild(this.root);
+      if (!Array.isArray(this._includes)) this._includes = [];
+      if (!this._contentVals || typeof this._contentVals !== 'object') this._contentVals = {};
+
       this._prefill();
       this._bind();
       this._renderLanguages();
       if (this.cfg.offer) this._prefillOffer(this.cfg.offer);
+      this._renderContent();  // type-aware long-text sections
+      this._renderPills();    // free-text includes
       this._renderThumbs();
     }
 
@@ -686,25 +753,129 @@
       // Tag chips
       root.querySelectorAll('.ob-toggle').forEach((c) =>
         c.addEventListener('click', () => c.classList.toggle('on')));
-      // Includes
-      root.querySelectorAll('.ob-incl input').forEach((i) =>
-        i.addEventListener('change', () => i.closest('label').classList.toggle('on', i.checked)));
+
+      // Includes — free-text pills plus one-tap suggestions
+      const pillInput = root.querySelector('.ob-pill-input');
+      const pillGo = root.querySelector('.ob-pill-go');
+      const addFromInput = () => { if (pillInput) { this._addPill(pillInput.value); pillInput.value = ''; pillInput.focus(); } };
+      if (pillInput) pillInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addFromInput(); } });
+      if (pillGo) pillGo.addEventListener('click', addFromInput);
+      root.querySelectorAll('.ob-chip-suggest').forEach((b) =>
+        b.addEventListener('click', () => this._addPill(b.dataset.suggest)));
+
+      // Content sections swap to suit the chosen offer type
+      const typeSel = root.querySelector('[data-key="type"]');
+      if (typeSel) typeSel.addEventListener('change', () => this._renderContent());
+
       // Clear validation as the user types
       root.querySelectorAll('[data-key]').forEach((el) =>
         el.addEventListener('input', () => { const f = el.closest('.ob-field'); if (f) f.classList.remove('invalid'); }));
-
-      const aiGo = root.querySelector('.ob-ai-go');
-      if (aiGo) aiGo.addEventListener('click', () => this._runAI());
 
       root.querySelector('.ob-submit').addEventListener('click', () => this._submit());
       root.querySelector('.ob-reset').addEventListener('click', () => {
         // A cleared form has no source content, so its translations no longer
         // apply — drop them too rather than leaving orphaned overlays.
         this._images = []; this._i18n = {}; this._i18nMeta = {}; this._audienceLanguages = [];
+        this._includes = []; this._contentVals = {};
         this._render();
       });
 
       this._bindPhotos();
+    }
+
+    // ── Content sections (type-aware, per-section AI) ────────────────────────
+    _renderContent() {
+      const wrap = this.root && this.root.querySelector('[data-content]');
+      if (!wrap) return;
+      // Preserve anything typed before swapping the visible set.
+      wrap.querySelectorAll('textarea[data-key]').forEach((ta) => { this._contentVals[ta.dataset.key] = ta.value; });
+      const typeSel = this.root.querySelector('[data-key="type"]');
+      const type = typeSel ? typeSel.value : '';
+      const ai = this.cfg.aiEnabled && (this.cfg.aiEndpoint || this.cfg.aiMock);
+      wrap.innerHTML = contentKeysFor(type).map((k) => {
+        const s = CONTENT_SECTIONS[k];
+        if (!s) return '';
+        const val = this._contentVals[k] || '';
+        return '<div class="ob-content-sec" data-field="' + k + '">'
+          + '<div class="ob-content-head"><label>' + esc(s.label) + '</label>'
+          + (ai ? '<button type="button" class="ob-ai-write" data-write="' + k + '"><span class="spark">✨</span> Write with AI</button>' : '')
+          + '</div>'
+          + '<p class="ob-content-hint">' + esc(s.hint) + '</p>'
+          + '<textarea data-key="' + k + '" rows="4" placeholder="' + esc(s.ph) + '">' + esc(val) + '</textarea>'
+          + '<div class="ob-write-status"></div></div>';
+      }).join('');
+      wrap.querySelectorAll('textarea[data-key]').forEach((ta) => {
+        ta.addEventListener('input', () => { this._contentVals[ta.dataset.key] = ta.value; });
+      });
+      wrap.querySelectorAll('.ob-ai-write').forEach((b) => {
+        b.addEventListener('click', () => this._writeSection(b.dataset.write, b));
+      });
+    }
+
+    _renderPills() {
+      const wrap = this.root && this.root.querySelector('[data-pills]');
+      if (!wrap) return;
+      const list = this._includes || [];
+      wrap.innerHTML = list.length
+        ? list.map((v, i) => '<span class="ob-pill">' + esc(v) + '<button type="button" data-rm="' + i + '" aria-label="Remove">×</button></span>').join('')
+        : '<span class="ob-pill-empty">Nothing added yet.</span>';
+      wrap.querySelectorAll('[data-rm]').forEach((b) => {
+        b.addEventListener('click', () => { this._includes.splice(parseInt(b.dataset.rm, 10), 1); this._renderPills(); });
+      });
+    }
+    _addPill(v) {
+      v = (v || '').trim();
+      if (!v) return;
+      if (!this._includes) this._includes = [];
+      if (this._includes.indexOf(v) === -1) this._includes.push(v.slice(0, 80));
+      this._renderPills();
+    }
+
+    async _writeSection(key, btn) {
+      const sec = this.root.querySelector('.ob-content-sec[data-field="' + key + '"]');
+      const ta = sec && sec.querySelector('textarea[data-key="' + key + '"]');
+      const status = sec && sec.querySelector('.ob-write-status');
+      if (!ta) return;
+      const setStatus = (cls, msg) => { if (status) { status.className = 'ob-write-status show ' + cls; status.textContent = msg; } };
+      const ctx = {};
+      ['title', 'type', 'style', 'country', 'region', 'resort', 'property', 'stars', 'board', 'nights', 'period', 'origin', 'airline', 'flighttype'].forEach((k) => {
+        const el = this.root.querySelector('[data-key="' + k + '"]');
+        const v = el ? (el.value || '').trim() : '';
+        if (v) ctx[k] = v;
+      });
+      if (!ctx.title && !ctx.resort && !ctx.country && !ctx.property) {
+        setStatus('err', 'Fill in a few details first — a title, hotel or destination — so the AI has something to work with.');
+        return;
+      }
+      btn.disabled = true;
+      setStatus('busy', 'Writing…');
+      try {
+        let text;
+        if (this.cfg.aiMock) {
+          await new Promise((r) => setTimeout(r, 500));
+          text = 'A warm, plain sample paragraph for the "' + (CONTENT_SECTIONS[key] ? CONTENT_SECTIONS[key].label : key) + '" section. Edit me to suit the offer.';
+        } else {
+          if (!this.cfg.aiEndpoint) throw new Error('No aiEndpoint');
+          const r = await fetch(this.cfg.aiEndpoint, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ section: key, context: ctx, widgetId: this.cfg._widgetId })
+          });
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          const j = await r.json();
+          text = (j && j.text) || '';
+        }
+        if (!text) throw new Error('empty');
+        ta.value = text;
+        this._contentVals[key] = text;
+        sec.classList.add('ai');
+        setStatus('ok', 'Drafted in your brand voice. Edit it to suit.');
+      } catch (err) {
+        setStatus('err', 'AI write is not available right now. You can type it yourself.');
+        // eslint-disable-next-line no-console
+        console.warn('[TGOfferBuilder] section write failed:', err && err.message);
+      } finally {
+        btn.disabled = false;
+      }
     }
 
     // ── Photos ───────────────────────────────────────────────────────────────
@@ -906,8 +1077,7 @@
         const v = get(k);
         if (v) fields[k] = v;
       });
-      const includes = [];
-      root.querySelectorAll('.ob-incl input:checked').forEach((i) => includes.push(i.dataset.incl));
+      const includes = (this._includes || []).slice();
       const tags = [];
       root.querySelectorAll('.ob-toggle.on').forEach((c) => tags.push(c.dataset.tag));
       const out = {};
@@ -1054,7 +1224,7 @@
         const v = (el.value || '').trim();
         if (v) offer.fields[el.dataset.key] = v;
       });
-      root.querySelectorAll('.ob-incl input:checked').forEach((i) => offer.includes.push(i.dataset.incl));
+      offer.includes = (this._includes || []).slice();
       root.querySelectorAll('.ob-toggle.on').forEach((c) => offer.tags.push(c.dataset.tag));
       const imgs = (this._images || []).map(safePhotoUrl).filter(Boolean);
       if (imgs.length) offer.images = imgs;

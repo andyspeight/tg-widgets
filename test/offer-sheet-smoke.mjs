@@ -83,11 +83,12 @@ console.log('rowsToOffers');
 console.log('offersToCsv export');
 {
   const saved = [
-    { id: 'off_xyz789', offer: { currency: 'GBP', fields: { title: 'Cancun escape', price: '899', board: 'All inclusive', nights: '7' }, images: ['https://a/1.jpg', 'https://a/2.jpg'], tags: ['Beachfront'] } }
+    { id: 'off_xyz789', offer: { currency: 'GBP', fields: { title: 'Cancun escape', price: '899', board: 'All inclusive', nights: '7', hotelDesc: 'A five star right on the beach with five pools.', countryDesc: 'Warm all year, driest Nov to Apr.' }, images: ['https://a/1.jpg', 'https://a/2.jpg'], tags: ['Beachfront'] } }
   ];
   const csv = TG.offersToCsv(saved);
   ok('export includes the Offer ID', csv.indexOf('off_xyz789') !== -1);
   ok('export includes the title', csv.indexOf('Cancun escape') !== -1);
+  ok('export includes long content fields', csv.indexOf('five pools') !== -1);
 
   // Round-trip: export → parse → map → same id + fields, ready to re-upload as an update.
   const back = TG.rowsToOffers(TG.parseCsv(csv));
@@ -95,6 +96,8 @@ console.log('offersToCsv export');
   ok('round-trip keeps the id (update path)', back[0].offer.id === 'off_xyz789');
   ok('round-trip keeps the price', back[0].offer.fields.price === '899');
   ok('round-trip keeps the images', Array.isArray(back[0].offer.images) && back[0].offer.images.length === 2);
+  ok('round-trip keeps the hotel description', back[0].offer.fields.hotelDesc === 'A five star right on the beach with five pools.');
+  ok('round-trip keeps the country description', back[0].offer.fields.countryDesc === 'Warm all year, driest Nov to Apr.');
 }
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed');
