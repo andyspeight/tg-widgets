@@ -54,6 +54,17 @@ import { setCors, applyRateLimit, RATE_LIMITS, requireAuth } from './_auth.js';
 
 const AIRTABLE_API = 'https://api.airtable.com/v0';
 
+// Caching. Destination content is editorial and changes rarely, but the live
+// path used to be a 4-6 call Airtable waterfall on every cache miss, so a
+// low-traffic client site (not hit within the old 1h window) made a visitor
+// wait 1-3s. The public answer is now cached hard at the edge: fresh for an
+// hour, then served stale INSTANTLY for a week while it revalidates in the
+// background, so a visitor effectively never waits for Airtable. An author's
+// edit still appears within the hour (sooner once revalidation runs). The
+// editor preview is auth-gated and must always be live, so it is never cached.
+const PUBLIC_CACHE = 'public, max-age=300, s-maxage=3600, stale-while-revalidate=604800';
+const PREVIEW_CACHE = 'private, no-store';
+
 // The Widgets base (where we store widget configs) -- reuses existing AIRTABLE_KEY
 const WIDGETS_TABLE_NAME = 'Widgets';
 
@@ -692,7 +703,7 @@ export default async function handler(req, res) {
       const slugCacheKey = `slug:${slug}:${lookupOrder.join(',')}`;
       const slugCached = memGet(slugCacheKey);
       if (slugCached) {
-        res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600');
+        res.setHeader('Cache-Control', PUBLIC_CACHE);
         res.setHeader('X-Cache', 'HIT');
         return res.status(200).json(slugCached);
       }
@@ -710,7 +721,7 @@ export default async function handler(req, res) {
         // can silently hide rather than show an error state.
         const empty = { found: false };
         memSet(slugCacheKey, empty);
-        res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600');
+        res.setHeader('Cache-Control', PUBLIC_CACHE);
         res.setHeader('X-Cache', 'MISS');
         return res.status(200).json(empty);
       }
@@ -729,7 +740,7 @@ export default async function handler(req, res) {
       }
       const payload = { found: true, ...shapePayload(resolved.level, resolved.fields, inherited, paired, resolved.recordId) };
       memSet(slugCacheKey, payload);
-      res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600');
+      res.setHeader('Cache-Control', PUBLIC_CACHE);
       res.setHeader('X-Cache', 'MISS');
       return res.status(200).json(payload);
     }
@@ -748,7 +759,7 @@ export default async function handler(req, res) {
     const cacheKey = `${level}:${recordId}`;
     const cached = memGet(cacheKey);
     if (cached) {
-      res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600');
+      res.setHeader('Cache-Control', isDirect ? PREVIEW_CACHE : PUBLIC_CACHE);
       res.setHeader('X-Cache', 'HIT');
       return res.status(200).json(cached);
     }
@@ -782,7 +793,7 @@ export default async function handler(req, res) {
     const payload = shapePayload(level, fields, inherited, paired, recordId);
     memSet(cacheKey, payload);
 
-    res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600');
+    res.setHeader('Cache-Control', isDirect ? PREVIEW_CACHE : PUBLIC_CACHE);
     res.setHeader('X-Cache', 'MISS');
     return res.status(200).json(payload);
 

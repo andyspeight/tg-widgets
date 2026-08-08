@@ -248,11 +248,19 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Provide id or recordId' });
   }
 
+  // Editorial content, so the public widget path (id=) is cached hard at the
+  // edge (fresh 1h, then served stale for a week while revalidating) and the
+  // direct recordId path (editor preview / demo) is kept short so an author's
+  // edit shows promptly.
+  const PUBLIC_CACHE = 'public, max-age=300, s-maxage=3600, stale-while-revalidate=604800';
+  const PREVIEW_CACHE = 'public, max-age=300, stale-while-revalidate=3600';
+  const cacheHeader = directRecord ? PREVIEW_CACHE : PUBLIC_CACHE;
+
   // Fetch + shape (cached).
   const cacheKey = `attr:${recordId}`;
   const cached = memGet(cacheKey);
   if (cached) {
-    res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600');
+    res.setHeader('Cache-Control', cacheHeader);
     res.setHeader('X-Cache', 'HIT');
     return res.status(200).json(cached);
   }
@@ -267,7 +275,7 @@ export default async function handler(req, res) {
 
   const payload = { found: true, attraction: shapePayload(fields) };
   memSet(cacheKey, payload);
-  res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600');
+  res.setHeader('Cache-Control', cacheHeader);
   res.setHeader('X-Cache', 'MISS');
   return res.status(200).json(payload);
 }

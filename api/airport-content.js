@@ -460,8 +460,14 @@ export default async function handler(req, res) {
     return res.status(429).json({ error: 'Rate limit exceeded' });
   }
 
-  // CDN cache
-  res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=1800');
+  // CDN cache. Editorial airport content changes rarely and the live widget
+  // path (widgetId) used to make a visitor wait on an Airtable lookup, so it is
+  // now cached hard at the edge: fresh 1h, then served stale for a week while it
+  // revalidates. The direct iata/recordId modes are the editor preview and demo
+  // page, kept short so an author's edit shows promptly.
+  const PUBLIC_CACHE = 'public, max-age=300, s-maxage=3600, stale-while-revalidate=604800';
+  const PREVIEW_CACHE = 'public, s-maxage=300, stale-while-revalidate=1800';
+  res.setHeader('Cache-Control', PREVIEW_CACHE);
 
   try {
     const widgetId = typeof req.query.widgetId === 'string' ? req.query.widgetId : '';
@@ -474,6 +480,7 @@ export default async function handler(req, res) {
       // Accept the public WidgetID (tgw_...) the live widget sends, or a rec id.
       // Bounded charset keeps it safe for the sanitised filterByFormula lookup.
       if (!/^[\w-]{1,100}$/.test(widgetId)) return res.status(400).json({ error: 'Bad widgetId' });
+      res.setHeader('Cache-Control', PUBLIC_CACHE); // live widget path → long edge cache
       airportRec = await findAirportFromWidget(widgetId);
     } else if (recordId) {
       if (!isRecordId(recordId)) return res.status(400).json({ error: 'Bad recordId' });
