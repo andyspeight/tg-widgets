@@ -345,6 +345,14 @@
                 <span class="range-val" id="radius-val">16px</span>
               </div>
             </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="card-layout">Card width</label>
+              <select class="input" id="card-layout">
+                <option value="standard">Standard — one wide card</option>
+                <option value="compact">Compact — thinner, two fit side by side</option>
+              </select>
+              <div class="hint">Compact makes the card narrower so two sit next to each other on a page. They stack on mobile.</div>
+            </div>
           </div>
         </div>
 
@@ -490,6 +498,7 @@
       theme: 'light',
       radius: 16,
       fontFamily: 'DM Sans',
+      layout: 'standard',
     },
     emails: { fromName: '', replyTo: '', footer: '' },
   };
@@ -633,6 +642,10 @@
   $('brand-col').addEventListener('input', () => applyBrand($('brand-col').value));
   $('brand-hex').addEventListener('change', () => applyBrand($('brand-hex').value));
 
+  $('card-layout').addEventListener('change', () => {
+    C.design.layout = $('card-layout').value === 'compact' ? 'compact' : 'standard';
+    shell.markDirty(); render();
+  });
   $('radius-range').addEventListener('input', () => {
     C.design.radius = parseInt($('radius-range').value, 10) || 0;
     $('radius-val').textContent = C.design.radius + 'px';
@@ -701,6 +714,7 @@
     if (/^#[0-9a-fA-F]{6}$/.test(C.design.brandColor || '')) $('brand-col').value = C.design.brandColor;
     $('radius-range').value = C.design.radius;
     $('radius-val').textContent = C.design.radius + 'px';
+    $('card-layout').value = C.design.layout === 'compact' ? 'compact' : 'standard';
     syncCurrencySymbols();
 
     // Tour page content

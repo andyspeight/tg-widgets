@@ -20,7 +20,8 @@
  *             capacity, currency, pricePence, depositPence, balanceDueDate,
  *             spotsHeldMinutes },
  *     payments: { stripeAccountId, applicationFeePence },   // server-side use
- *     design: { brandColor, accentColor, theme, radius, fontFamily },
+ *     design: { brandColor, accentColor, theme, radius, fontFamily,
+ *               layout },   // layout: 'standard' (default) | 'compact' (two-up)
  *     emails: { fromName, replyTo, footer }                 // server-side use
  *   }
  * ========================================================================== */
@@ -172,6 +173,27 @@
       overflow: hidden; box-shadow: var(--tgtr-shadow);
     }
 
+    /* Compact layout — a thinner card built to sit two-up. The host itself
+       becomes a fixed-width inline-block (shrinking to full width on a narrow
+       screen), so two adjacent embeds flow side by side on a normal page and
+       stack on a phone with no CSS on the host page. The internals tighten to
+       suit the narrower column. */
+    :host([data-tg-layout="compact"]) {
+      display: inline-block; vertical-align: top;
+      width: 420px; max-width: 100%; margin: 0 16px 20px 0;
+    }
+    .tgtr-root[data-layout="compact"] .tgtr-card { max-width: none; margin: 0; }
+    .tgtr-root[data-layout="compact"] .tgtr-hero { aspect-ratio: 16 / 10; }
+    .tgtr-root[data-layout="compact"] .tgtr-body { padding: 16px 18px 18px; }
+    .tgtr-root[data-layout="compact"] .tgtr-meta { font-size: 12.5px; gap: 4px 12px; margin-bottom: 6px; }
+    .tgtr-root[data-layout="compact"] .tgtr-title { font-size: clamp(18px, 3.2vw, 21px); margin-bottom: 7px; }
+    .tgtr-root[data-layout="compact"] .tgtr-desc {
+      font-size: 14px; display: -webkit-box; -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden;
+    }
+    .tgtr-root[data-layout="compact"] .tgtr-pricing { margin-top: 14px; padding-top: 14px; }
+    .tgtr-root[data-layout="compact"] .tgtr-price { font-size: 22px; }
+
     /* Hero image */
     .tgtr-hero { position: relative; aspect-ratio: 16 / 9; background: var(--tgtr-alt); }
     .tgtr-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -268,6 +290,7 @@
           theme: design.theme === 'dark' ? 'dark' : 'light',
           radius: typeof design.radius === 'number' ? Math.max(0, Math.min(32, design.radius)) : 16,
           fontFamily: safeFontName(design.fontFamily, 'DM Sans'),
+          layout: design.layout === 'compact' ? 'compact' : 'standard',
         },
         _widgetId: typeof c._widgetId === 'string' ? c._widgetId : '',
       };
@@ -333,6 +356,12 @@
       this.root = document.createElement('div');
       this.root.className = 'tgtr-root';
       this.root.setAttribute('data-theme', d.theme);
+      this.root.setAttribute('data-layout', d.layout);
+      // The host flows two-up only in compact mode. Drive it from an attribute
+      // on the container so the :host() rule can size it, and clear it otherwise
+      // so switching back in the editor preview restores the full-width card.
+      if (d.layout === 'compact') this.el.setAttribute('data-tg-layout', 'compact');
+      else this.el.removeAttribute('data-tg-layout');
       // Colours and radius go through CSSOM only — never string-built styles.
       if (d.brandColor) {
         this.root.style.setProperty('--tgtr-brand', d.brandColor);

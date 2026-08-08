@@ -37,6 +37,8 @@
     /* The card sits in a calm band, the way it would in a real page section */
     .card-band { padding: 24px 20px 8px; }
     .card-stage { max-width: 720px; margin: 0 auto; }
+    /* Wider stage for the two-up compact row (two ~420px cards side by side) */
+    .card-stage--wide { max-width: 900px; }
 
     /* The full page renders edge to edge in its own white surface */
     .page-surface { background: #FFFFFF; margin-top: 8px; border-top: 1px solid #E2E8F0; }
@@ -67,12 +69,21 @@
   <!-- One tour, two presentations, seeded from a single config below. -->
 
   <div class="section-label">
-    <div class="kicker">Compact booking card</div>
+    <div class="kicker">Booking card</div>
     <h2>Drop it into any page</h2>
     <p>The at-a-glance card — hero, dates, price and deposit — for a sidebar, a grid or an offers section.</p>
   </div>
   <div class="card-band">
     <div class="card-stage"><div id="demo-card"></div></div>
+  </div>
+
+  <div class="section-label">
+    <div class="kicker">Compact — two across</div>
+    <h2>Two trips, side by side</h2>
+    <p>The same card in compact mode. Drop two on a page and they sit next to each other, then stack on a phone. No layout code needed.</p>
+  </div>
+  <div class="card-band">
+    <div class="card-stage card-stage--wide"><div id="demo-compact-a"></div><div id="demo-compact-b"></div></div>
   </div>
 
   <div class="section-label">
@@ -153,14 +164,38 @@
       design: { brandColor: '#EA580C', theme: 'light', radius: 16, fontFamily: 'DM Sans' }
     };
 
-    let cardInst = null, pageInst = null;
+    // A second trip so the two-up row shows two distinct cards. Reuses a
+    // repo-proven image id (no unverifiable URLs on the demo).
+    const TRIP_B = {
+      trip: {
+        title: 'Amalfi Coast Walking Week 2027',
+        heroImage: 'https://images.unsplash.com/photo-1533105079780-92b9be482077?w=1200&q=80',
+        description: 'Six days on the cliff paths from Positano to Ravello, with long lunches, lemon groves and a boat day to Capri.',
+        startDate: '2027-09-12',
+        endDate: '2027-09-18',
+        location: 'Amalfi Coast, Italy',
+        capacity: 14,
+        currency: 'gbp',
+        pricePence: 164900,
+        depositPence: 30000,
+        balanceDueDate: '2027-07-01'
+      },
+      design: { brandColor: '#EA580C', theme: 'light', radius: 16, fontFamily: 'DM Sans' }
+    };
+
+    let cardInst = null, pageInst = null, compactA = null, compactB = null;
 
     // Deferred scripts finish before DOMContentLoaded, so both widget classes
     // exist here. Our mounts carry no data-tg-widget attribute, so neither
-    // script's auto-init claims them — we construct both from the one TOUR.
+    // script's auto-init claims them — we construct them from the configs.
     document.addEventListener('DOMContentLoaded', () => {
       cardInst = new window.TGTripsWidget(document.getElementById('demo-card'), TOUR);
       pageInst = new window.TGTripsPageWidget(document.getElementById('demo-page'), TOUR);
+      // Two-up: the same widget, design.layout 'compact', two distinct trips.
+      compactA = new window.TGTripsWidget(document.getElementById('demo-compact-a'),
+        { trip: TOUR.trip, design: Object.assign({}, TOUR.design, { layout: 'compact' }) });
+      compactB = new window.TGTripsWidget(document.getElementById('demo-compact-b'),
+        { trip: TRIP_B.trip, design: Object.assign({}, TRIP_B.design, { layout: 'compact' }) });
     });
 
     // Theme toggle re-skins both through their public update() API.
@@ -171,6 +206,8 @@
         document.querySelectorAll('[data-theme-btn]').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
         if (cardInst) cardInst.update({ design: { theme } });
         if (pageInst) pageInst.update({ design: { theme } });
+        if (compactA) compactA.update({ design: { theme } });
+        if (compactB) compactB.update({ design: { theme } });
       });
     });
   </script>

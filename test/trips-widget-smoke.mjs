@@ -325,6 +325,57 @@ async function newPage() {
   await page.close();
 }
 
+// ── 7. Compact layout flows two-up; standard stacks (proves the test bites) ──
+// design.layout:'compact' makes the host a fixed-width inline-block, so two
+// adjacent embeds sit on the same row on a wide page. The standard pair, block
+// level, stacks — if compact behaved the same, this contrast would fail.
+{
+  const { page, errors } = await newPage();
+  const mk = (title, layout) => JSON.stringify({
+    trip: { title, startDate: '2027-05-10', location: 'Testville', currency: 'gbp', pricePence: 100000 },
+    design: { layout },
+  }).replace(/'/g, '&#39;');
+  await page.setContent(
+    `<!doctype html><html><body style="margin:0">` +
+    `<div id="wc" style="width:1000px">` +
+      `<div id="ca" data-tg-widget="trips" data-tg-config='${mk('Compact A', 'compact')}'></div>` +
+      `<div id="cb" data-tg-widget="trips" data-tg-config='${mk('Compact B', 'compact')}'></div>` +
+    `</div>` +
+    `<div id="ws" style="width:1000px">` +
+      `<div id="sa" data-tg-widget="trips" data-tg-config='${mk('Standard A', 'standard')}'></div>` +
+      `<div id="sb" data-tg-widget="trips" data-tg-config='${mk('Standard B', 'standard')}'></div>` +
+    `</div>` +
+    `<script src="${BASE}/widget-trips.js"></script></body></html>`,
+    { waitUntil: 'load' }
+  );
+  await page.waitForFunction(() => {
+    const el = document.getElementById('cb');
+    return !!(el && el.shadowRoot && el.shadowRoot.querySelector('[data-role="title"]'));
+  }, { timeout: 8000 }).catch(() => {});
+
+  const geo = await page.evaluate(() => {
+    const box = (id) => { const e = document.getElementById(id); const r = e.getBoundingClientRect(); return { top: Math.round(r.top), left: Math.round(r.left), w: Math.round(r.width) }; };
+    const cardW = (id) => { const c = document.getElementById(id)?.shadowRoot?.querySelector('.tgtr-card'); return c ? Math.round(c.getBoundingClientRect().width) : 0; };
+    return {
+      ca: box('ca'), cb: box('cb'), sa: box('sa'), sb: box('sb'),
+      caLayout: document.getElementById('ca')?.getAttribute('data-tg-layout') || '',
+      saLayout: document.getElementById('sa')?.getAttribute('data-tg-layout') || '(none)',
+      caCardW: cardW('ca'), saCardW: cardW('sa'),
+    };
+  });
+
+  ok(geo.caLayout === 'compact', 'compact: host carries data-tg-layout=compact');
+  ok(geo.saLayout === '(none)', 'standard: host has no layout attribute (default path)');
+  ok(geo.ca.top === geo.cb.top && geo.cb.left > geo.ca.left,
+    `compact: two cards share a row (a.top=${geo.ca.top} b.top=${geo.cb.top}, a.left=${geo.ca.left} b.left=${geo.cb.left})`);
+  ok(geo.sb.top > geo.sa.top,
+    `standard: two cards stack (a.top=${geo.sa.top} b.top=${geo.sb.top}) — contrast proves compact did the work`);
+  ok(geo.caCardW > 0 && geo.caCardW < 480 && geo.saCardW > 600,
+    `compact: card is visibly thinner than standard (compact=${geo.caCardW}px, standard=${geo.saCardW}px)`);
+  ok(errors.length === 0, 'compact: no script errors (' + errors.join(' | ') + ')');
+  await page.close();
+}
+
 await browser.close();
 server.close();
 
