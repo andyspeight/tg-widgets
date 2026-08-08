@@ -21,6 +21,10 @@ import { fileURLToPath } from 'node:url';
 import { getJson } from './_redis.js';
 
 const REDIS_KEY = 'map:offers:v1';
+// Hotels mode (?mode=hotels) reads the parallel accommodation summary the cron
+// builds. Hotels have no seed/skeleton fallback (those are package-specific),
+// so an empty hotel cache returns the calm empty state, never a live search.
+const HOTELS_KEY = 'map:hotels:v1';
 
 // Resolve the seed path relative to this file (avoids cwd surprises on Vercel).
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -73,9 +77,11 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') { res.status(204).end(); return; }
   if (req.method !== 'GET') { res.status(405).json({ error: 'method not allowed' }); return; }
 
+  const hotels = String((req.query && req.query.mode) || '') === 'hotels';
+
   // Tier 1: Redis
   try {
-    const fromRedis = await getJson(REDIS_KEY);
+    const fromRedis = await getJson(hotels ? HOTELS_KEY : REDIS_KEY);
     // New country-sweep shape writes `countries` (+ `airports`); the legacy
     // shape used `destinations`. Accept either so a payload in either form is served.
     const hasNewShape = fromRedis && Array.isArray(fromRedis.countries) && fromRedis.countries.length > 0;
@@ -97,6 +103,13 @@ export default async function handler(req, res) {
   // Fallbacks below must NEVER be edge-cached — otherwise an empty map can
   // stick around after Redis fills. Tell the edge not to store them.
   res.setHeader('Cache-Control', 'no-store, must-revalidate');
+
+  // Hotels mode has no package seed/skeleton to fall back to — return the calm
+  // empty state (the widget shows its empty message), never a live search.
+  if (hotels) {
+    res.status(200).json({ version: 1, generatedAt: '1970-01-01T00:00:00Z', source: 'empty', currency: 'GBP', countries: [], airports: [], stats: { totalOffers: 0, countriesCovered: 0, airportsCovered: 0 } });
+    return;
+  }
 
   // Tier 2: bundled seed
   const seed = loadSeed();

@@ -27,6 +27,8 @@
 import { getJson } from './_redis.js';
 
 const resortsKey = (cc) => `map:resorts:${cc}`;
+// Hotels mode (?mode=hotels) reads the parallel accommodation resort summary.
+const hotelResortsKey = (cc) => `map:hotels-resorts:${cc}`;
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -36,6 +38,7 @@ export default async function handler(req, res) {
 
   const q = req.query || {};
   const country = q.country ? String(q.country).trim().toUpperCase() : '';
+  const hotels = String(q.mode || '') === 'hotels';
 
   if (!country) {
     res.setHeader('Cache-Control', 'no-store');
@@ -44,7 +47,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const stored = await getJson(resortsKey(country));
+    const stored = await getJson(hotels ? hotelResortsKey(country) : resortsKey(country));
     const resorts = stored && Array.isArray(stored.resorts) ? stored.resorts : [];
 
     if (resorts.length === 0) {
