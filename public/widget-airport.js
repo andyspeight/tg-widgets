@@ -84,6 +84,22 @@
     } catch (e) { /* fall through */ }
     return '/api/airport-content';
   })();
+
+  // Start a content fetch early (in parallel with the config fetch) so the two
+  // requests don't wait on each other. Returns a Promise<Response> that carries
+  // its own timeout, and the load method consumes it instead of starting a
+  // fresh request. (Spotlight-family speed, step 3.)
+  function startContent(url) {
+    var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 9000) : null;
+    var p = fetch(url, ctrl ? { credentials: 'omit', signal: ctrl.signal } : { credentials: 'omit' });
+    if (timer) p.then(function () { clearTimeout(timer); }, function () { clearTimeout(timer); });
+    // Mark handled so an unconsumed prefetch (e.g. if the config fetch fails
+    // and the load never runs) can't raise an unhandled rejection. The consumer
+    // still sees the result/throw via its own await.
+    p.catch(function () {});
+    return p;
+  }
   const VERSION = '1.2.1';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -1054,13 +1070,13 @@
 
     _loadAirport() {
       const url = CONTENT_API + '?widgetId=' + encodeURIComponent(this.c.widgetId);
-      // Timeout-guard the content fetch — a hung upstream aborts and falls
-      // through to the error notice instead of leaving the loading shell
-      // spinning forever (23 Jul 2026 audit).
-      const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
-      const timer = ctrl ? setTimeout(() => ctrl.abort(), 9000) : null;
-      fetch(url, ctrl ? { credentials: 'omit', signal: ctrl.signal } : { credentials: 'omit' })
-        .then(r => {
+      // Reuse the content request the init kicked off in parallel with the
+      // config fetch, if there is one. It carries its own timeout. Consume it
+      // once, then fall back to a fresh (timeout-guarded) fetch on any re-load.
+      const prefetched = this.c && this.c.__contentResponse;
+      if (this.c) this.c.__contentResponse = null;
+      const p = prefetched || startContent(url);
+      p.then(r => {
           if (r.status === 404) { this._renderNotFound(); return null; }
           if (!r.ok) throw new Error('HTTP ' + r.status);
           return r.json();
@@ -1071,8 +1087,7 @@
           this._airport = this._withOverrides(d.airport || null);
           this._renderContent();
         })
-        .catch(() => this._renderError())
-        .finally(() => { if (timer) clearTimeout(timer); });
+        .catch(() => this._renderError());
     }
 
     _renderShell() {
@@ -1584,14 +1599,18 @@
         // /api/widget-config first, then the widget fetches its airport content.
         // Previously airport ignored the saved config entirely on data-tg-id
         // embeds, so the client's branding never showed on their site.
+        // The airport content only needs the widget id, so fire it now, in
+        // parallel with the config, rather than after it (step 3).
+        const contentP = startContent(CONTENT_API + '?widgetId=' + encodeURIComponent(wid));
         fetch(API_BASE + '?id=' + encodeURIComponent(wid), { credentials: 'omit' })
           .then(r => (r.ok ? r.json() : null))
           .then(data => {
             const c = (data && (data.config || data)) || {};
             c.widgetId = wid;
+            c.__contentResponse = contentP;
             new TGAirportWidget(el, c);
           })
-          .catch(() => { new TGAirportWidget(el, { widgetId: wid }); });
+          .catch(() => { new TGAirportWidget(el, { widgetId: wid, __contentResponse: contentP }); });
         return;
       }
       // No id and no inline config — nothing to render.

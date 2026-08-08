@@ -95,6 +95,21 @@
     } catch (e) { /* fall through */ }
     return '/api/destination-content';
   })();
+
+  // Start a fixed-destination content fetch early (in parallel with the config
+  // fetch) so the two requests don't wait on each other. The load method
+  // consumes it in fixed mode; in auto-detect mode the destination isn't known
+  // until the config arrives, so the load method aborts this prefetch and does
+  // its own slug lookup. Carries its own timeout. (Spotlight-family speed, step 3.)
+  function startContent(url) {
+    var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 9000) : null;
+    var p = fetch(url, ctrl ? { credentials: 'omit', signal: ctrl.signal } : { credentials: 'omit' });
+    if (timer) p.then(function () { clearTimeout(timer); }, function () { clearTimeout(timer); });
+    p.catch(function () {}); // handled so an unconsumed/aborted prefetch can't raise an unhandled rejection
+    p.__abort = function () { if (timer) clearTimeout(timer); if (ctrl) { try { ctrl.abort(); } catch (e) { /* noop */ } } };
+    return p;
+  }
   const VERSION = '1.4.1';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -1419,6 +1434,10 @@
       // Timeout-guard the content fetch — a hung upstream aborts and falls
       // through to the error notice instead of leaving the loading skeleton
       // spinning forever (23 Jul 2026 audit).
+      // A fixed-destination content request may already be in flight from init
+      // (fired in parallel with the config). Grab it once.
+      const prefetched = this.c && this.c.__contentResponse;
+      if (this.c) this.c.__contentResponse = null;
       const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
       const timer = ctrl ? setTimeout(() => ctrl.abort(), 9000) : null;
       try {
@@ -1426,6 +1445,8 @@
         // API to resolve it. The server returns { found: false } when no
         // record matches, which we honour by silently hiding the widget.
         if (this.c.autoDetect && this.c.autoDetect.enabled) {
+          // The prefetch was for the fixed destination, not this slug, so drop it.
+          if (prefetched && prefetched.__abort) prefetched.__abort();
           const slug = extractSlug(this.c.autoDetect);
           if (!slug) {
             // No slug extractable from this page — hide.
@@ -1457,9 +1478,10 @@
           return;
         }
 
-        // Fixed-destination mode: resolve via the saved widget config.
+        // Fixed-destination mode: resolve via the saved widget config. Reuse the
+        // prefetch the init started in parallel with the config, if present.
         const url = CONTENT_API + '?id=' + encodeURIComponent(this.c.widgetId);
-        const res = await fetch(url, ctrl ? { credentials: 'omit', signal: ctrl.signal } : { credentials: 'omit' });
+        const res = await (prefetched || fetch(url, ctrl ? { credentials: 'omit', signal: ctrl.signal } : { credentials: 'omit' }));
         if (!res.ok) {
           if (res.status === 404) return this._renderNotFound();
           throw new Error('Content fetch failed (' + res.status + ')');
@@ -2090,15 +2112,19 @@
         const id = el.getAttribute('data-tg-id');
         if (id) {
           // Fetch the widget config from /api/widget-config then hand that
-          // config (plus the widgetId) to the widget. The widget will then
-          // fetch the live destination content separately.
+          // config (plus the widgetId) to the widget. The fixed-destination
+          // content only needs the id, so fire it now, in parallel with the
+          // config, rather than after it. In auto-detect mode the widget aborts
+          // this prefetch and does its own slug lookup instead (step 3).
+          const contentP = startContent(CONTENT_API + '?id=' + encodeURIComponent(id));
           const res = await fetch(API_BASE + '?id=' + encodeURIComponent(id), {
             credentials: 'omit'
           });
-          if (!res.ok) throw new Error('Widget config fetch failed (' + res.status + ')');
+          if (!res.ok) { if (contentP.__abort) contentP.__abort(); throw new Error('Widget config fetch failed (' + res.status + ')'); }
           const data = await res.json();
           const cfg = data && (data.config || data);
           cfg.widgetId = id;
+          cfg.__contentResponse = contentP;
           const w = new TGSpotlightWidget(el, cfg);
           el.__tgSpotlight = w;
           continue;

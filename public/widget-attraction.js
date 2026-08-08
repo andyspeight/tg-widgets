@@ -37,6 +37,18 @@
   const CONTENT_API = (typeof window !== 'undefined' && window.__TG_ATTRACTION_API__) || resolveBase('/api/attraction-content');
   const VERSION = '1.2.1';
 
+  // Start a content fetch early (in parallel with the config fetch) so the two
+  // requests don't wait on each other; the load method consumes it. Carries its
+  // own timeout. (Spotlight-family speed, step 3.)
+  function startContent(url) {
+    var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 9000) : null;
+    var p = fetch(url, ctrl ? { credentials: 'omit', signal: ctrl.signal } : { credentials: 'omit' });
+    if (timer) p.then(function () { clearTimeout(timer); }, function () { clearTimeout(timer); });
+    p.catch(function () {}); // handled so an unconsumed prefetch can't raise an unhandled rejection
+    return p;
+  }
+
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (fact/section labels, badges, CTA button, empty/error
   // states and aria-labels). The attraction name, description, fact VALUES,
@@ -428,13 +440,18 @@
       // Timeout-guard the content fetch — a hung upstream (dead proxy, captive
       // portal) aborts and falls through to the error notice instead of leaving
       // the loading skeleton shimmering forever (23 Jul 2026 audit).
-      const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      const qs = this.c.recordId
+        ? '?recordId=' + encodeURIComponent(this.c.recordId)
+        : '?id=' + encodeURIComponent(this.c.widgetId);
+      // Reuse the content request the init fired in parallel with the config
+      // fetch (it carries its own timeout). Consume once, then fall back to a
+      // fresh timeout-guarded fetch on any re-load.
+      const prefetched = this.c && this.c.__contentResponse;
+      if (this.c) this.c.__contentResponse = null;
+      const ctrl = (!prefetched && typeof AbortController !== 'undefined') ? new AbortController() : null;
       const timer = ctrl ? setTimeout(() => ctrl.abort(), 9000) : null;
       try {
-        const qs = this.c.recordId
-          ? '?recordId=' + encodeURIComponent(this.c.recordId)
-          : '?id=' + encodeURIComponent(this.c.widgetId);
-        const res = await fetch(CONTENT_API + qs, ctrl ? { credentials: 'omit', signal: ctrl.signal } : { credentials: 'omit' });
+        const res = await (prefetched || fetch(CONTENT_API + qs, ctrl ? { credentials: 'omit', signal: ctrl.signal } : { credentials: 'omit' }));
         if (!res.ok) { if (res.status === 404) return this._renderNotFound(); throw new Error('fetch ' + res.status); }
         const data = await res.json();
         if (!data || data.found === false || !data.attraction) return this._renderNotFound();
@@ -827,14 +844,18 @@
           // (fired by the MutationObserver mid-fetch) skips this element instead
           // of building a second widget on it. The constructor re-sets it.
           el.setAttribute('data-tg-initialised', 'true');
+          // The content only needs the widget id, so fire it now, in parallel
+          // with the config fetch, rather than after it (step 3).
+          const contentP = startContent(CONTENT_API + '?id=' + encodeURIComponent(id));
           fetch(CONFIG_API + '?id=' + encodeURIComponent(id), { credentials: 'omit' })
             .then(r => (r.ok ? r.json() : null))
             .then(data => {
               const cfg = (data && (data.config || data)) || {};
               cfg.widgetId = id;
+              cfg.__contentResponse = contentP;
               el.__tgAttraction = new TGAttractionWidget(el, cfg);
             })
-            .catch(() => { el.__tgAttraction = new TGAttractionWidget(el, { widgetId: id }); });
+            .catch(() => { el.__tgAttraction = new TGAttractionWidget(el, { widgetId: id, __contentResponse: contentP }); });
           return;
         }
         const rec = el.getAttribute('data-tg-record');
