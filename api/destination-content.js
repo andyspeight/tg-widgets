@@ -726,18 +726,15 @@ export default async function handler(req, res) {
         return res.status(200).json(empty);
       }
 
-      let inherited = { values: {}, sources: {} };
-      try {
-        inherited = await inheritCountryFacts(resolved.level, resolved.fields, AIRTABLE_DESTINATION_CONTENT_PAT);
-      } catch (err) {
-        console.error('[destination-content] inheritance error:', err?.message || err);
-      }
-      let paired = [];
-      try {
-        paired = await resolvePaired(resolved.level, resolved.fields, AIRTABLE_DESTINATION_CONTENT_PAT);
-      } catch (err) {
-        console.error('[destination-content] paired error:', err?.message || err);
-      }
+      // Country-fact inheritance and paired-destination lookup are independent
+      // of each other, so run them at the same time instead of one after the
+      // other. Each keeps its own fallback so one failing does not sink the other.
+      const [inherited, paired] = await Promise.all([
+        inheritCountryFacts(resolved.level, resolved.fields, AIRTABLE_DESTINATION_CONTENT_PAT)
+          .catch((err) => { console.error('[destination-content] inheritance error:', err?.message || err); return { values: {}, sources: {} }; }),
+        resolvePaired(resolved.level, resolved.fields, AIRTABLE_DESTINATION_CONTENT_PAT)
+          .catch((err) => { console.error('[destination-content] paired error:', err?.message || err); return []; }),
+      ]);
       const payload = { found: true, ...shapePayload(resolved.level, resolved.fields, inherited, paired, resolved.recordId) };
       memSet(slugCacheKey, payload);
       res.setHeader('Cache-Control', PUBLIC_CACHE);
@@ -776,19 +773,14 @@ export default async function handler(req, res) {
     }
     if (!fields) return res.status(404).json({ error: 'Destination not found' });
 
-    let inherited = { values: {}, sources: {} };
-    try {
-      inherited = await inheritCountryFacts(level, fields, AIRTABLE_DESTINATION_CONTENT_PAT);
-    } catch (err) {
-      console.error('[destination-content] inheritance error:', err?.message || err);
-    }
-
-    let paired = [];
-    try {
-      paired = await resolvePaired(level, fields, AIRTABLE_DESTINATION_CONTENT_PAT);
-    } catch (err) {
-      console.error('[destination-content] paired error:', err?.message || err);
-    }
+    // Independent lookups, run together rather than one after the other. Each
+    // keeps its own fallback so one failing does not sink the other.
+    const [inherited, paired] = await Promise.all([
+      inheritCountryFacts(level, fields, AIRTABLE_DESTINATION_CONTENT_PAT)
+        .catch((err) => { console.error('[destination-content] inheritance error:', err?.message || err); return { values: {}, sources: {} }; }),
+      resolvePaired(level, fields, AIRTABLE_DESTINATION_CONTENT_PAT)
+        .catch((err) => { console.error('[destination-content] paired error:', err?.message || err); return []; }),
+    ]);
 
     const payload = shapePayload(level, fields, inherited, paired, recordId);
     memSet(cacheKey, payload);
