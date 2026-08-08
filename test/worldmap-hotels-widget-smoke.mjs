@@ -130,5 +130,16 @@ ok(/if \(this\._isHotels\(\) && boardGroup && nightsGroup/.test(widget), 'board 
   ok(vm && (+vm[1] > 3 || (+vm[1] === 3 && +vm[2] >= 14)), 'widget version at or beyond 3.14');
 }
 
+// ── Editor: the Holidays/Hotels toggle writes config and hides departures ─────
+const editor = readFileSync(new URL('../public/editor-worldmap.html', import.meta.url), 'utf8');
+ok(/dataMode: 'holidays'/.test(editor), 'editor default config carries dataMode holidays');
+ok(/id="f-datamode"/.test(editor) && /value="hotels"/.test(editor), 'editor exposes a Holidays/Hotels selector');
+ok(/C\.dataMode = e\.target\.value === 'hotels' \? 'hotels' : 'holidays'/.test(editor), 'selector writes cfg.dataMode');
+ok(/document\.getElementById\('f-datamode'\)\.value = C\.dataMode/.test(editor), 'selector restored on load (syncControls)');
+ok(/id="sec-departures"/.test(editor), 'departure section is addressable for hiding');
+ok(/function applyModeVisibility\(\)/.test(editor) && /dep\.hidden = hotels/.test(editor), 'departures section hidden in hotels mode');
+// widgetType must stay exactly 'World Map' — hotels is a config mode, not a new type.
+ok(/widgetType: 'World Map'/.test(editor), "widgetType stays 'World Map' (mode is config, not a new widget type)");
+
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
