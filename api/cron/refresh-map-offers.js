@@ -91,6 +91,11 @@ const MIN_STORE_PRICE_BY_TYPE = { Packages: 50, Accommodation: 10, Flights: 10 }
 function minStorePrice(o) { return MIN_STORE_PRICE_BY_TYPE[o && o.type] || 10; }
 
 const SUMMARY_KEY = 'map:offers:v1';
+// Hotels ("Accommodation") mode of the World Map reads a parallel summary built
+// from the same cache's accommodation subset, so holidays and hotels are two
+// views of one map without blending. Country pins only — hotel offers have no
+// flight gateway, so there is no airport tier.
+const HOTELS_SUMMARY_KEY = 'map:hotels:v1';
 // Sampled composition history for the admin trend line (spot supplier drop-offs
 // / inventory drift). Appended on summary rebuild, gated to ~30m so manual
 // re-polls don't spam it, capped to the last HISTORY_MAX points.
@@ -111,6 +116,7 @@ const countryKey = (cc) => `offers:packages:${cc}`;
 // product and neither key can outgrow Upstash's per-request write ceiling.
 const extraKey = (cc) => `offers:extra:${cc}`;
 const resortsKey = (cc) => `map:resorts:${cc}`;
+const hotelResortsKey = (cc) => `map:hotels-resorts:${cc}`;
 
 // Per-country, per-market storage caps (cheapest kept). A country key is one
 // Redis value written in one REST call, so it must stay comfortably inside
@@ -966,6 +972,7 @@ async function rebuildSummary(rows) {
   }
 
   let all = [];
+  let allHotels = [];
   for (const cc of allCountryCodes) {
     const stored = await getJson(countryKey(cc));
     if (stored && Array.isArray(stored.offers)) {
@@ -984,6 +991,17 @@ async function rebuildSummary(rows) {
       const resorts = summariseByResort(packageOffers);
       await setJson(resortsKey(cc), { resorts, refreshedAt: new Date().toISOString() });
     }
+    // Hotels ("Accommodation") live in the extra key. Build a parallel GBP-only
+    // hotel summary and per-country resort summary so the World Map's Hotels
+    // mode has its own pins and resort cards, without touching the package
+    // summary above. Flight-only offers in the extra key are ignored here.
+    const extra = await getJson(extraKey(cc));
+    if (extra && Array.isArray(extra.offers)) {
+      const hotelOffers = extra.offers.filter(o => o && o.type === 'Accommodation' && (o.currency || 'GBP') === 'GBP');
+      allHotels = allHotels.concat(hotelOffers);
+      const hotelResorts = summariseByResort(hotelOffers);
+      await setJson(hotelResortsKey(cc), { resorts: hotelResorts, refreshedAt: new Date().toISOString() });
+    }
   }
   const countries = summariseByCountry(all, regionByCC);
   const airports = summariseByAirport(all, regionByCC);
@@ -1001,6 +1019,21 @@ async function rebuildSummary(rows) {
   };
   const ok = await setJson(SUMMARY_KEY, payload);
   if (ok) await setString(LASTRUN_KEY, payload.generatedAt);
+
+  // Hotels summary — country pins only (hotel offers carry no flight gateway,
+  // so there is no airport tier). Same shape as the package summary so the
+  // widget reuses its country-pin renderer in Hotels mode. Written separately
+  // and never blended with the package summary above.
+  const hotelCountries = summariseByCountry(allHotels, regionByCC);
+  await setJson(HOTELS_SUMMARY_KEY, {
+    version: 1,
+    generatedAt: new Date().toISOString(),
+    source: 'redis',
+    currency: 'GBP',
+    countries: hotelCountries,
+    airports: [],
+    stats: { totalOffers: allHotels.length, countriesCovered: hotelCountries.length, airportsCovered: 0 },
+  });
 
   // Sample a composition point for the admin trend line. Best-effort — a
   // history hiccup must never fail the summary write. Gated to ~30m so frequent

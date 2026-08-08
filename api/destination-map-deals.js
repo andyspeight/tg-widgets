@@ -36,6 +36,9 @@
 import { getJson } from './_redis.js';
 
 const countryKey = (cc) => `offers:packages:${cc}`;
+// Hotels mode (?mode=hotels) reads the accommodation cache and returns hotel
+// cards instead of package deals. Same offer shape, no flight leg.
+const extraKey = (cc) => `offers:extra:${cc}`;
 
 // Map an airport IATA to its country code via the stored offers themselves
 // (every offer carries countryCode), so we don't need a separate lookup table.
@@ -69,6 +72,7 @@ export default async function handler(req, res) {
   if (req.method !== 'GET') { res.status(405).json({ error: 'method not allowed' }); return; }
 
   const q = req.query || {};
+  const hotels = String(q.mode || '') === 'hotels';
   const airport = q.airport ? String(q.airport).trim().toUpperCase() : '';
   let country = q.country ? String(q.country).trim().toUpperCase() : '';
 
@@ -81,7 +85,8 @@ export default async function handler(req, res) {
   try {
     // Resolve the country code we need to load. If only an airport was given,
     // find its country from the summary's airports[] (cheap, already in Redis).
-    if (!country && airport) {
+    // Hotels have no flight gateway, so airport resolution is packages-only.
+    if (!country && airport && !hotels) {
       const summary = await getJson(SUMMARY_KEY);
       const ap = summary && Array.isArray(summary.airports)
         ? summary.airports.find(a => a.airport === airport) : null;
@@ -94,16 +99,19 @@ export default async function handler(req, res) {
       return;
     }
 
-    const stored = await getJson(countryKey(country));
+    // Hotels mode reads the accommodation cache; holidays read the packages key.
+    const stored = await getJson(hotels ? extraKey(country) : countryKey(country));
     let offers = stored && Array.isArray(stored.offers) ? stored.offers.slice() : [];
 
-    // The map's deal cards are package deals. The country keys now also hold
-    // Accommodation and Flights offers (swept for the offer-box widgets), so
-    // scope to Packages before anything else.
-    offers = offers.filter(o => (o.type || 'Packages') === 'Packages');
+    // Scope to this mode's type. The country/extra keys hold multiple types
+    // (swept for the offer-box widgets); keep only Accommodation (hotels) or
+    // Packages (holidays).
+    offers = hotels
+      ? offers.filter(o => o.type === 'Accommodation')
+      : offers.filter(o => (o.type || 'Packages') === 'Packages');
 
-    // Scope to the airport if one was given.
-    if (airport) offers = offers.filter(o => o.airport === airport);
+    // Scope to the airport if one was given (packages only — hotels have none).
+    if (airport && !hotels) offers = offers.filter(o => o.airport === airport);
 
     // Per-client operator whitelist, applied BEFORE the cheapest-N cut so an
     // enabled operator's packages surface instead of being squeezed out of the
@@ -114,7 +122,7 @@ export default async function handler(req, res) {
     // pre-filter that only ever tightens the cheapest-N to what the client sees.
     const pkgSuppliers = String(q.pkgSuppliers || '')
       .split(',').map(s => parseInt(s, 10)).filter(Number.isFinite).slice(0, 200);
-    if (pkgSuppliers.length) {
+    if (pkgSuppliers.length && !hotels) {
       offers = offers.filter(o => {
         if (isDynamicPackage(o)) return true;
         const sid = Number.isFinite(o.flightSid) ? o.flightSid
@@ -128,9 +136,11 @@ export default async function handler(req, res) {
     // ── Facets (what filter values are actually available for this pin) ──
     const boardSet = new Map(); // normalised → display
     const ratingSet = new Set();
+    const nightsSet = new Set();
     for (const o of offers) {
       if (o.boardBasis) boardSet.set(normaliseBoard(o.boardBasis), o.boardBasis);
       if (Number.isFinite(o.rating)) ratingSet.add(o.rating);
+      if (Number.isFinite(o.nights)) nightsSet.add(o.nights);
     }
 
     // ── Filters ──
@@ -138,11 +148,13 @@ export default async function handler(req, res) {
     const minRating = q.minRating ? parseFloat(q.minRating) : null;
     const maxPrice = q.maxPrice ? parseFloat(q.maxPrice) : null;
     const directOnly = q.direct === '1' || q.direct === 'true';
+    const nights = q.nights ? parseInt(q.nights, 10) : null;
 
     if (board) offers = offers.filter(o => normaliseBoard(o.boardBasis) === board);
     if (Number.isFinite(minRating)) offers = offers.filter(o => Number.isFinite(o.rating) && o.rating >= minRating);
     if (Number.isFinite(maxPrice)) offers = offers.filter(o => Number.isFinite(o.pricePP ?? o.price) && (o.pricePP ?? o.price) <= maxPrice);
-    if (directOnly) offers = offers.filter(o => o.direct);
+    if (directOnly && !hotels) offers = offers.filter(o => o.direct);
+    if (Number.isFinite(nights)) offers = offers.filter(o => o.nights === nights);
 
     // ── Sort ──
     const sort = String(q.sort || 'price');
@@ -172,6 +184,7 @@ export default async function handler(req, res) {
       // Facets for the filter UI — only what's actually available behind this pin.
       boardBases: Array.from(boardSet.values()).sort(),
       ratings: Array.from(ratingSet).sort((a, b) => b - a),
+      nightsOptions: Array.from(nightsSet).sort((a, b) => a - b),
       offers: sliced,
     });
   } catch (err) {
