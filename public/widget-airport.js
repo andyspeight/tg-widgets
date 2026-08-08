@@ -100,6 +100,24 @@
     p.catch(function () {});
     return p;
   }
+
+  // The hero is a CSS background image, which the browser only discovers late
+  // (after the shadow's styles are parsed). A preload link in the document head
+  // starts fetching it high-priority straight away, so the hero paints sooner.
+  // The URL is already validated by the caller. (Spotlight-family speed, step 4.)
+  function preloadImage(url) {
+    try {
+      if (!url || typeof document === 'undefined' || !document.head) return;
+      var links = document.head.querySelectorAll('link[rel="preload"][as="image"]');
+      for (var i = 0; i < links.length; i++) { if (links[i].getAttribute('href') === url) return; }
+      var l = document.createElement('link');
+      l.setAttribute('rel', 'preload');
+      l.setAttribute('as', 'image');
+      l.setAttribute('href', url);
+      l.setAttribute('fetchpriority', 'high');
+      document.head.appendChild(l);
+    } catch (e) { /* noop */ }
+  }
   const VERSION = '1.2.1';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -1160,6 +1178,7 @@
       // any URL with characters that could close url()/the attribute or add CSS
       // declarations (e.g. 'https://a.png);position:fixed;inset:0;...').
       if (heroImg && !/^https?:\/\/[^\s"'()<>;\\]+$/i.test(heroImg)) heroImg = '';
+      if (heroImg) preloadImage(heroImg); // fetch the background hero early
       const eyebrow = [d.cityServed, d.country, d.type].filter(Boolean).map(esc).join(' &middot; ');
       const tagline = esc((d.tagline || '').slice(0, 240));
       const style = heroImg ? ' style="--tga-hero-img:url(' + esc(heroImg) + ')"' : '';

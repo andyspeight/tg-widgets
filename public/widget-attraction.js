@@ -49,6 +49,23 @@
     return p;
   }
 
+  // The hero is a CSS background image, discovered late by the browser. A
+  // preload link fetches it high-priority straight away so the hero paints
+  // sooner. The URL is already validated by the caller. (Step 4.)
+  function preloadImage(url) {
+    try {
+      if (!url || typeof document === 'undefined' || !document.head) return;
+      var links = document.head.querySelectorAll('link[rel="preload"][as="image"]');
+      for (var i = 0; i < links.length; i++) { if (links[i].getAttribute('href') === url) return; }
+      var l = document.createElement('link');
+      l.setAttribute('rel', 'preload');
+      l.setAttribute('as', 'image');
+      l.setAttribute('href', url);
+      l.setAttribute('fetchpriority', 'high');
+      document.head.appendChild(l);
+    } catch (e) { /* noop */ }
+  }
+
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (fact/section labels, badges, CTA button, empty/error
   // states and aria-labels). The attraction name, description, fact VALUES,
@@ -550,6 +567,7 @@
       // any URL with characters that could close url()/the attribute or add CSS
       // declarations (e.g. 'https://a.png);position:fixed;inset:0;...').
       if (heroImg && !/^https?:\/\/[^\s"'()<>;\\]+$/i.test(heroImg)) heroImg = '';
+      if (heroImg) preloadImage(heroImg); // fetch the background hero early
       const eyebrow = [d.location, d.country, d.type].filter(Boolean).map(esc).join(' &middot; ');
       const badges = [];
       if (d.operator) badges.push('<span class="tgx-badge">' + esc(d.operator) + '</span>');
