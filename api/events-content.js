@@ -297,9 +297,16 @@ export default async function handler(req, res) {
     m: monthsAhead,
   });
 
+  // Curated events change rarely, so the public widget path (id=) is cached hard
+  // at the edge (fresh 1h, then served stale for a week while revalidating) and
+  // the editor preview is kept short so a filter change shows promptly.
+  const PUBLIC_CACHE = 'public, max-age=300, s-maxage=3600, stale-while-revalidate=604800';
+  const PREVIEW_CACHE = 'public, max-age=300, stale-while-revalidate=3600';
+  const cacheHeader = isPreview ? PREVIEW_CACHE : PUBLIC_CACHE;
+
   const cached = memGet(cacheKey);
   if (cached) {
-    res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600');
+    res.setHeader('Cache-Control', cacheHeader);
     res.setHeader('X-Cache', 'HIT');
     return res.status(200).json(cached);
   }
@@ -314,7 +321,7 @@ export default async function handler(req, res) {
       },
     };
     memSet(cacheKey, payload);
-    res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600');
+    res.setHeader('Cache-Control', cacheHeader);
     res.setHeader('X-Cache', 'MISS');
     return res.status(200).json(payload);
   } catch (err) {
