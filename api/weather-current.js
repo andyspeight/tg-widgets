@@ -60,9 +60,13 @@ const ipHits = new Map();                    // ip -> [timestamps]
 
 // Edge cache duration (Vercel / Cloudflare).
 // Weather changes but not that fast — 15 min is the sweet spot for
-// "looks live" without hammering Open-Meteo.
-const CACHE_SECONDS = 900;                   // 15 minutes
-const STALE_WHILE_REVALIDATE = 1800;         // 30 minutes
+// "looks live" without hammering Open-Meteo. The stale window is much longer
+// so a quiet client site (no visitor within the fresh window) still serves an
+// instant, slightly-older reading and refreshes it in the background, rather
+// than making that visitor wait on Open-Meteo. A few hours stale at worst, and
+// only until the next visitor triggers the background refresh.
+const CACHE_SECONDS = 900;                   // 15 minutes fresh
+const STALE_WHILE_REVALIDATE = 14400;        // then serve stale up to 4 hours while revalidating
 
 // Upstream
 const OPEN_METEO_URL = 'https://api.open-meteo.com/v1/forecast';
@@ -305,8 +309,8 @@ module.exports = async function handler(req, res) {
     return fail(res, 502, 'Upstream response missing current weather block');
   }
 
-  // Edge cache: 15 min fresh, 30 min stale-while-revalidate.
-  // The widget will still feel live because clients visit on different schedules.
+  // Edge cache: 15 min fresh, then served stale for up to 4 hours while it
+  // revalidates in the background, so a quiet site never waits on Open-Meteo.
   res.setHeader(
     'Cache-Control',
     `public, s-maxage=${CACHE_SECONDS}, stale-while-revalidate=${STALE_WHILE_REVALIDATE}`
