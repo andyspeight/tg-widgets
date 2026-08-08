@@ -75,6 +75,18 @@
   })();
   const VERSION = '1.0.4';
 
+  // Start a content fetch early (in parallel with the config fetch) so the two
+  // requests don't wait on each other; _fetchCurated consumes it. Carries its
+  // own timeout. (Spotlight-family speed, step 3.)
+  function startContent(url) {
+    var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 9000) : null;
+    var p = fetch(url, ctrl ? { credentials: 'omit', signal: ctrl.signal } : { credentials: 'omit' });
+    if (timer) p.then(function () { clearTimeout(timer); }, function () { clearTimeout(timer); });
+    p.catch(function () {}); // handled so an unconsumed prefetch can't raise an unhandled rejection
+    return p;
+  }
+
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (month + weekday names, view-switcher and filter
   // labels, nav controls, empty/loading states, modal controls). Event titles,
@@ -1268,7 +1280,11 @@
 
       try {
         const url = EVENTS_API + '?id=' + encodeURIComponent(this.cfg.widgetId);
-        const r = await fetch(url);
+        // Reuse the feed request the init fired in parallel with the config
+        // fetch, if any. Consume once, then fall back to a fresh fetch.
+        const prefetched = this.cfg && this.cfg.__contentResponse;
+        if (this.cfg) this.cfg.__contentResponse = null;
+        const r = await (prefetched || fetch(url));
         if (!r.ok) {
           let detail = '';
           try { const j = await r.json(); detail = j.hint || j.error || ''; } catch {}
@@ -1890,11 +1906,15 @@
       // editor can still pick it up on its own render pass.
       if (!id) continue;
       try {
+        // The curated feed only needs the widget id (the server reads the saved
+        // filters), so fire it now, in parallel with the config fetch (step 3).
+        const contentP = startContent(EVENTS_API + '?id=' + encodeURIComponent(id));
         const r = await fetch(API_BASE + '?id=' + encodeURIComponent(id));
         if (!r.ok) throw new Error('config-fetch-' + r.status);
         const j = await r.json();
         const cfg = (j && j.config) ? j.config : {};
         cfg.widgetId = id;
+        cfg.__contentResponse = contentP;
         new TGEventsWidget(el, cfg);
         el.setAttribute('data-tg-rendered', '1');
       } catch (err) {

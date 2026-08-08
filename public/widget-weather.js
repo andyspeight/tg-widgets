@@ -88,6 +88,21 @@
   })();
   const VERSION = '1.0.4';
 
+  // Start a content fetch early (in parallel with the config fetch) so the two
+  // requests don't wait on each other; the load method consumes it. Carries its
+  // own timeout. (Spotlight-family speed, step 3.)
+  function startContent(url) {
+    var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 9000) : null;
+    var p = fetch(url, ctrl ? { credentials: 'omit', signal: ctrl.signal } : { credentials: 'omit' });
+    if (timer) p.then(function () { clearTimeout(timer); }, function () { clearTimeout(timer); });
+    // Mark handled so an unconsumed prefetch (e.g. if the config fetch fails
+    // and the load never runs) can't raise an unhandled rejection. The consumer
+    // still sees the result/throw via its own await.
+    p.catch(function () {});
+    return p;
+  }
+
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only: month names, climate-band reason labels, the
   // season callout phrasing, the legend, the level eyebrow, and the empty /
@@ -1031,14 +1046,22 @@
     }
 
     async _loadDestination() {
-      // Guard the fetch with a timeout so a stalled request (weak mobile link,
-      // hung proxy, captive portal) aborts and falls through to the error
-      // notice rather than leaving the loading skeleton shimmering forever.
-      const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
-      const timer = ctrl ? setTimeout(() => ctrl.abort(), 9000) : null;
       try {
         const url = CONTENT_API + '?id=' + encodeURIComponent(this.c.widgetId);
-        const res = await fetch(url, ctrl ? { credentials: 'omit', signal: ctrl.signal } : { credentials: 'omit' });
+        // Reuse the content request the init fired in parallel with the config
+        // fetch, if any (it carries its own timeout). Consume once, then fall
+        // back to a fresh timeout-guarded fetch on any re-load.
+        const prefetched = this.c && this.c.__contentResponse;
+        if (this.c) this.c.__contentResponse = null;
+        let res;
+        if (prefetched) {
+          res = await prefetched;
+        } else {
+          const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+          const timer = ctrl ? setTimeout(() => ctrl.abort(), 9000) : null;
+          try { res = await fetch(url, ctrl ? { credentials: 'omit', signal: ctrl.signal } : { credentials: 'omit' }); }
+          finally { if (timer) clearTimeout(timer); }
+        }
         if (!res.ok) {
           if (res.status === 404) return this._renderNotFound();
           throw new Error('Content fetch failed (' + res.status + ')');
@@ -1048,8 +1071,6 @@
       } catch (err) {
         console.error('[TG Weather] Failed to load destination:', err);
         this._renderError();
-      } finally {
-        if (timer) clearTimeout(timer);
       }
     }
 
@@ -1375,6 +1396,9 @@
 
         const id = el.getAttribute('data-tg-id');
         if (id) {
+          // The content only needs the widget id, so fire it now, in parallel
+          // with the config fetch, rather than after it (step 3).
+          const contentP = startContent(CONTENT_API + '?id=' + encodeURIComponent(id));
           // Timeout-guard the config fetch — a stalled request aborts and
           // falls through to the catch fallback instead of hanging silently.
           const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
@@ -1386,6 +1410,7 @@
           const data = await res.json();
           const cfg = data && (data.config || data);
           cfg.widgetId = id;
+          cfg.__contentResponse = contentP;
           const w = new TGWeatherWidget(el, cfg);
           el.__tgWeather = w;
           continue;
