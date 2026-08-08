@@ -1556,7 +1556,7 @@
         '<section class="tgs-section tgs-section-hero" aria-labelledby="tgs-hero-title">' +
           '<div class="tgs-hero">' +
             (imgUrl
-              ? '<img class="tgs-hero-img" src="' + esc(imgUrl) + '" alt="' + esc(altText) + '" data-fb-hero="1" loading="eager" />'
+              ? '<img class="tgs-hero-img" src="' + esc(imgUrl) + '" alt="' + esc(altText) + '" data-fb-hero="1" loading="eager" fetchpriority="high" decoding="async" />'
               : '<div class="tgs-hero-img" style="background:linear-gradient(135deg,var(--tgs-brand),var(--tgs-accent));"></div>') +
             '<div class="tgs-hero-scrim" aria-hidden="true"></div>' +
             '<div class="tgs-hero-content">' +
