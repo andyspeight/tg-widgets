@@ -1,5 +1,5 @@
 /**
- * Travelgenix World Map Widget v3.13.2
+ * Travelgenix World Map Widget v3.14.0
  * Real-map version using Leaflet + MapTiler Streets tiles.
  *
  * Usage:
@@ -68,7 +68,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.13.2';
+  const VERSION = '3.14.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -85,8 +85,9 @@
       noDestinations: 'No destinations available right now. Please try again later.',
       latestDeals: 'Latest deals', tapDestination: 'Tap any destination on the map to see its deals.',
       pickDestination: 'Pick a destination to see live deals — tap a price on the map.',
-      rating: 'Rating', maxBudget: 'Max budget',
+      rating: 'Rating', maxBudget: 'Max budget', board: 'Board', nights: 'Nights',
       filterByRating: 'Filter by star rating', filterByBudget: 'Filter by maximum budget', filterByRegion: 'Filter the map by region',
+      filterByBoard: 'Filter by board basis', filterByNights: 'Filter by number of nights', nightsLabel: '{n} nights',
       from: 'from', perPerson: 'per person', tapToView: 'tap to view', worldwide: 'Worldwide', any: 'Any',
       findingDeals: 'Finding the best deals…', findingResortDeals: 'Finding {resort} deals…',
       noDealsFiltered: 'No deals match your filters',
@@ -2401,6 +2402,12 @@ svg.leaflet-image-layer.leaflet-interactive path {
     // so a visitor can change it themselves (mirrors the Travel Offers widget).
     displayCurrency: 'GBP',
     showCurrencySwitcher: false,
+    // Data mode: 'holidays' (flight + hotel packages, the default) or 'hotels'
+    // (accommodation-only). Hotels is the same map reading the parallel hotel
+    // cache; it swaps the visitor filters to board/rating/budget/nights and
+    // drops the flight-shaped controls (departures, direct, supplier) which
+    // don't apply to a hotel-only stay.
+    dataMode: 'holidays',
   };
 
   // ── Widget class
@@ -2446,9 +2453,12 @@ svg.leaflet-image-layer.leaflet-interactive path {
       this._resortToken = 0;
       this._activeResortAirportName = null;
       this._resortDealsToken = 0;
-      // Filter state (in-country): max budget pp + min star rating.
+      // Filter state (in-country): max budget pp + min star rating, plus board
+      // basis and nights in hotels mode. null = Any on each.
       this._filterMaxPrice = null;  // null = Any
       this._filterMinRating = null; // null = Any
+      this._filterBoard = null;     // hotels mode only
+      this._filterNights = null;    // hotels mode only
       // Region selector state (world map). null = Worldwide (cluster view).
       this._activeRegion = null;
       this._render();
@@ -2502,9 +2512,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
       return Object.assign({}, offers, { countries: filtered });
     }
 
+    // Hotels mode reads the parallel accommodation cache; append ?mode=hotels.
+    _isHotels() { return this.cfg.dataMode === 'hotels'; }
+
     async _loadOffers() {
       // Bounded + one retry: a transient blip shouldn't break the whole map.
-      const res = await fetchWithRetry(OFFERS_URL, { credentials: 'omit' });
+      const url = OFFERS_URL + (this._isHotels() ? '?mode=hotels' : '');
+      const res = await fetchWithRetry(url, { credentials: 'omit' });
       if (!res.ok) throw new Error('offers HTTP ' + res.status);
       return await res.json();
     }
@@ -2731,6 +2745,14 @@ svg.leaflet-image-layer.leaflet-interactive path {
                 <div class="tgwm-filter-group" data-ov-filter-budget>
                   <span class="tgwm-filter-label">${esc(t('maxBudget'))}</span>
                   <div class="tgwm-seg" role="group" aria-label="${esc(t('filterByBudget'))}" data-ov-budget-seg></div>
+                </div>
+                <div class="tgwm-filter-group" data-ov-filter-board hidden>
+                  <span class="tgwm-filter-label">${esc(t('board'))}</span>
+                  <div class="tgwm-seg" role="group" aria-label="${esc(t('filterByBoard'))}" data-ov-board-seg></div>
+                </div>
+                <div class="tgwm-filter-group" data-ov-filter-nights hidden>
+                  <span class="tgwm-filter-label">${esc(t('nights'))}</span>
+                  <div class="tgwm-seg" role="group" aria-label="${esc(t('filterByNights'))}" data-ov-nights-seg></div>
                 </div>
               </div>
             </div>
@@ -3055,7 +3077,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       }
       if (!cc) return;
       const token = (this._resortToken = (this._resortToken || 0) + 1);
-      fetch(RESORTS_URL + '?country=' + encodeURIComponent(cc), { credentials: 'omit' })
+      fetch(RESORTS_URL + '?country=' + encodeURIComponent(cc) + (this._isHotels() ? '&mode=hotels' : ''), { credentials: 'omit' })
         .then(r => r.ok ? r.json() : Promise.reject(new Error('resorts HTTP ' + r.status)))
         .then(data => {
           if (token !== this._resortToken) return;          // superseded
@@ -3077,6 +3099,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
      *  spider-web. Safe to call repeatedly — clears previous routes first. */
     _drawDepartureRoutes(country, offers) {
       const L = window.L;
+      // Hotel-only offers have no departure airport, so there are no routes to
+      // draw in hotels mode.
+      if (this._isHotels()) { this._clearDepartureRoutes(); return; }
       if (!L || !this.ovMap || !country) return;
       if (typeof country.lat !== 'number' || typeof country.lng !== 'number') return;
       this._clearDepartureRoutes();
@@ -3161,7 +3186,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
      *    detail (rating/price) needed to filter accurately. The summary only
      *    holds each resort's cheapest price, so it can't honour a rating filter. */
     _resortPinSource() {
-      const filtering = (this._filterMaxPrice != null || this._filterMinRating != null);
+      const filtering = this._isFiltering();
       if (!filtering && Array.isArray(this._resortSummary) && this._resortSummary.length) {
         return this._resortSummary;
       }
@@ -3522,6 +3547,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
       // Clear filters + their controls, and un-dim any world pins.
       this._filterMaxPrice = null;
       this._filterMinRating = null;
+      this._filterBoard = null;
+      this._filterNights = null;
       const filterWrap = this.overlayEl.querySelector('[data-ov-filters]');
       if (filterWrap) filterWrap.hidden = true;
       this._applyWorldPriceFilter();
@@ -3615,20 +3642,24 @@ svg.leaflet-image-layer.leaflet-interactive path {
       // BEFORE its cheapest-N cut — otherwise an enabled operator's offers can
       // be squeezed out of the fetched slice by non-enabled ones. mapSupplierAllows
       // below still runs (defensive, and covers a stale/unfiltered response).
+      // Supplier + departure gating is package-shaped (a hotel-only stay has no
+      // operator package or departure airport), so it is skipped in hotels mode.
+      const hotels = this._isHotels();
       const sf = this.cfg.supplierFilter;
-      const sfParam = (sf && Array.isArray(sf.packages) && sf.packages.length)
+      const sfParam = (!hotels && sf && Array.isArray(sf.packages) && sf.packages.length)
         ? '&pkgSuppliers=' + encodeURIComponent(sf.packages.join(','))
         : '';
 
-      fetch(DEALS_URL + '?country=' + encodeURIComponent(cc) + sfParam, { credentials: 'omit' })
+      fetch(DEALS_URL + '?country=' + encodeURIComponent(cc) + sfParam + (hotels ? '&mode=hotels' : ''), { credentials: 'omit' })
         .then(r => r.ok ? r.json() : Promise.reject(new Error('deals HTTP ' + r.status)))
         .then(data => {
           if (token !== this._dealsToken) return; // superseded
           // Filter ONCE at arrival — cache, cards, resort pins, routes and the
-          // price/rating controls all see the same policy-filtered list.
+          // price/rating controls all see the same policy-filtered list. In
+          // hotels mode the supplier/departure gates don't apply.
           const offers = ((data && Array.isArray(data.offers)) ? data.offers : [])
-            .filter(o => mapSupplierAllows(o, this.cfg.supplierFilter))
-            .filter(o => !this._depAllow || this._depAllow.has(originCountry(o.origin)));
+            .filter(o => hotels || mapSupplierAllows(o, this.cfg.supplierFilter))
+            .filter(o => hotels || !this._depAllow || this._depAllow.has(originCountry(o.origin)));
           if (!offers.length) { this._renderDealsEmpty(scroll, metaEl, name); return; }
           const total = data.total || offers.length;
           // Cache for resort filtering + zoom re-entry.
@@ -3637,6 +3668,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
           // New country → reset filters, rebuild the controls from its prices.
           this._filterMaxPrice = null;
           this._filterMinRating = null;
+          this._filterBoard = null;
+          this._filterNights = null;
           this._buildFilterControls(offers);
           this._renderCards(offers, total, name);
           this._loadResortPins(cc, true);
@@ -3654,12 +3687,23 @@ svg.leaflet-image-layer.leaflet-interactive path {
       if (!Array.isArray(offers)) return [];
       const maxP = this._filterMaxPrice;
       const minR = this._filterMinRating;
+      const board = this._filterBoard;   // normalised board string, hotels mode
+      const nights = this._filterNights; // number, hotels mode
+      const nb = s => String(s || '').toLowerCase().replace(/[^a-z]/g, '');
       return offers.filter(o => {
         const pp = o.pricePP || o.price || Infinity;
         if (maxP != null && pp > maxP) return false;
         if (minR != null && (typeof o.rating !== 'number' || o.rating < minR)) return false;
+        if (board != null && nb(o.boardBasis) !== board) return false;
+        if (nights != null && o.nights !== nights) return false;
         return true;
       });
+    }
+
+    /** Any in-country filter active? (budget/rating always, board/nights in hotels.) */
+    _isFiltering() {
+      return this._filterMaxPrice != null || this._filterMinRating != null
+        || this._filterBoard != null || this._filterNights != null;
     }
 
     /** Build the rating + budget segmented controls for the loaded country.
@@ -3712,6 +3756,42 @@ svg.leaflet-image-layer.leaflet-interactive path {
           this._filterMaxPrice = opt.val;
           this._onFilterChange();
         }));
+      }
+
+      // Hotels mode adds board basis + nights. These groups stay hidden in
+      // holidays mode (a package's board/nights aren't the primary filters).
+      const boardGroup = this.overlayEl.querySelector('[data-ov-filter-board]');
+      const nightsGroup = this.overlayEl.querySelector('[data-ov-filter-nights]');
+      const boardSeg = this.overlayEl.querySelector('[data-ov-board-seg]');
+      const nightsSeg = this.overlayEl.querySelector('[data-ov-nights-seg]');
+      if (this._isHotels() && boardGroup && nightsGroup && boardSeg && nightsSeg) {
+        const nb = s => String(s || '').toLowerCase().replace(/[^a-z]/g, '');
+        // Board: Any + each distinct board basis present, cheapest-relevant order.
+        const boards = [];
+        const seenB = new Set();
+        for (const o of offers) {
+          const key = nb(o.boardBasis);
+          if (key && !seenB.has(key)) { seenB.add(key); boards.push({ label: o.boardBasis, val: key }); }
+        }
+        boards.sort((a, b) => a.label.localeCompare(b.label));
+        boardSeg.innerHTML = '';
+        boardSeg.appendChild(this._segButton(this.t('any'), this._filterBoard == null, false, () => { this._filterBoard = null; this._onFilterChange(); }));
+        for (const b of boards) {
+          boardSeg.appendChild(this._segButton(b.label, this._filterBoard === b.val, false, () => { this._filterBoard = b.val; this._onFilterChange(); }));
+        }
+        boardGroup.hidden = boards.length === 0;
+
+        // Nights: Any + each distinct night count present, ascending.
+        const nightsVals = Array.from(new Set(offers.map(o => o.nights).filter(n => Number.isFinite(n)))).sort((a, b) => a - b);
+        nightsSeg.innerHTML = '';
+        nightsSeg.appendChild(this._segButton(this.t('any'), this._filterNights == null, false, () => { this._filterNights = null; this._onFilterChange(); }));
+        for (const n of nightsVals) {
+          nightsSeg.appendChild(this._segButton(String(n), this._filterNights === n, false, () => { this._filterNights = n; this._onFilterChange(); }));
+        }
+        nightsGroup.hidden = nightsVals.length === 0;
+      } else {
+        if (boardGroup) boardGroup.hidden = true;
+        if (nightsGroup) nightsGroup.hidden = true;
       }
 
       wrap.hidden = false;
@@ -3780,7 +3860,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
       // Zero matches (usually from an over-tight filter) → friendly empty state.
       if (!offers.length) {
-        const filtered = (this._filterMaxPrice != null || this._filterMinRating != null);
+        const filtered = this._isFiltering();
         if (metaEl) metaEl.textContent = filtered ? this.t('noDealsFiltered') : '';
         scroll.innerHTML = `
           <div class="tgwm-ov-cards-state">
@@ -3796,7 +3876,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
         (a.pricePP || a.price || Infinity) - (b.pricePP || b.price || Infinity)
       ).slice(0, MAX_DEAL_CARDS);
 
-      const filterActive = (this._filterMaxPrice != null || this._filterMinRating != null);
+      const filterActive = this._isFiltering();
       if (metaEl) {
         if (resortName) {
           metaEl.innerHTML = esc(this.t('dealsInResort', { n: sorted.length, resort: resortName })) +
@@ -3837,9 +3917,15 @@ svg.leaflet-image-layer.leaflet-interactive path {
         return;
       }
 
-      // Not in the cached slice → fetch this resort's deals by its airport.
-      if (!airport) {
-        // No airport to fetch with; show an honest empty rather than a wrong one.
+      // Not in the cached slice → fetch this resort's fuller set. Holidays drill
+      // by the resort's gateway airport; hotels have no gateway, so drill by the
+      // country's accommodation set (limit 200) and narrow to the resort.
+      const hotels = this._isHotels();
+      const drillUrl = hotels
+        ? (DEALS_URL + '?country=' + encodeURIComponent((this._dealsCache && this._dealsCache.cc) || '') + '&mode=hotels&limit=200')
+        : (airport ? (DEALS_URL + '?airport=' + encodeURIComponent(airport) + '&limit=200') : '');
+      if (!drillUrl) {
+        // No way to fetch more; show an honest empty rather than a wrong one.
         this._renderCards([], 0, country, resort);
         return;
       }
@@ -3851,26 +3937,18 @@ svg.leaflet-image-layer.leaflet-interactive path {
       if (scroll) scroll.innerHTML = this._skeletonsHtml(3);
 
       const token = (this._resortDealsToken = (this._resortDealsToken || 0) + 1);
-      // Request the airport's full set (endpoint max 200), not the cheapest 60 —
-      // we're narrowing to ONE resort, and dearer resorts (e.g. Imerovigli on
-      // Santorini) sit outside the cheapest 60 for a busy gateway like JTR.
-      fetch(DEALS_URL + '?airport=' + encodeURIComponent(airport) + '&limit=200', { credentials: 'omit' })
+      fetch(drillUrl, { credentials: 'omit' })
         .then(r => r.ok ? r.json() : Promise.reject(new Error('deals HTTP ' + r.status)))
         .then(data => {
           if (token !== this._resortDealsToken) return;   // superseded by another click
           if (this._activeResort !== resort) return;        // user moved on
-          // Same policy filters as the country-level load: this path fetches
-          // fresh from the airport endpoint, so the supplier and departure
-          // filters must be re-applied here or excluded offers reappear in
-          // the resort drill-down.
+          // Same policy filters as the country-level load. Supplier and
+          // departure gating are packages-only, so skipped in hotels mode.
           const offers = ((data && Array.isArray(data.offers)) ? data.offers : [])
-            .filter(o => mapSupplierAllows(o, this.cfg.supplierFilter))
-            .filter(o => !this._depAllow || this._depAllow.has(originCountry(o.origin)));
-          // The airport may serve several resorts — narrow to this one, then
-          // honour any active in-country filters.
-          let mine = offers.filter(o => o.resort === resort);
-          if (this._filterMaxPrice != null) mine = mine.filter(o => (o.pricePP || o.price || Infinity) <= this._filterMaxPrice);
-          if (this._filterMinRating != null) mine = mine.filter(o => typeof o.rating === 'number' && o.rating >= this._filterMinRating);
+            .filter(o => hotels || mapSupplierAllows(o, this.cfg.supplierFilter))
+            .filter(o => hotels || !this._depAllow || this._depAllow.has(originCountry(o.origin)));
+          // Narrow to this resort, then honour any active in-country filters.
+          const mine = this._applyFilters(offers.filter(o => o.resort === resort));
           this._renderCards(mine, mine.length, country, resort);
         })
         .catch(() => {

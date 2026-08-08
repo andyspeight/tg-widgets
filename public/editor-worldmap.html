@@ -165,6 +165,25 @@
       <!-- ===== CONTENT TAB ===== -->
       <div class="tgse-panel is-active" data-tab="content">
 
+        <!-- What the map shows: holidays (flight + hotel) or hotels only -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01M9 12v.01M9 15v.01M9 18v.01"/></svg>
+            <span class="tgse-section-label">What the map shows</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgwm-field">
+              <label class="tgwm-field-label" for="f-datamode">Deal type</label>
+              <select class="tgwm-input" id="f-datamode">
+                <option value="holidays">Holidays (flight + hotel)</option>
+                <option value="hotels">Hotels only</option>
+              </select>
+            </div>
+            <div class="tgwm-field-hint">Holidays show flight and hotel packages, filtered by departure point. Hotels show accommodation only, filtered by board basis and length of stay instead. Same map, either way.</div>
+          </div>
+        </div>
+
         <!-- Heading + intro -->
         <div class="tgse-section is-open">
           <div class="tgse-section-head">
@@ -203,8 +222,8 @@
           </div>
         </div>
 
-        <!-- Departure points -->
-        <div class="tgse-section is-open">
+        <!-- Departure points (holidays only — hotels have no departure gateway) -->
+        <div class="tgse-section is-open" id="sec-departures">
           <div class="tgse-section-head">
             <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
             <span class="tgse-section-label">Departure points</span>
@@ -383,6 +402,7 @@
     theme: 'light',
     title: 'Where will you go next?',
     subtitle: 'Browse our latest offers from around the world',
+    dataMode: 'holidays', // 'holidays' (flight + hotel) or 'hotels' (accommodation only)
     accent: '',          // '' = widget's built-in teal
     primary: '',         // '' = widget's built-in navy
     countries: [],       // [] = show all available
@@ -490,9 +510,19 @@
   }
 
   // ── Sync sidebar controls from C (after load / setConfig) ───
+  // Departure points are a flight-shaped filter, so hide that whole section
+  // when the map is set to show hotels (accommodation has no departure gateway).
+  function applyModeVisibility() {
+    const hotels = C.dataMode === 'hotels';
+    const dep = document.getElementById('sec-departures');
+    if (dep) dep.hidden = hotels;
+  }
+
   function syncControls() {
     document.getElementById('f-title').value = C.title || '';
     document.getElementById('f-subtitle').value = C.subtitle || '';
+    document.getElementById('f-datamode').value = C.dataMode === 'hotels' ? 'hotels' : 'holidays';
+    applyModeVisibility();
     document.getElementById('f-departures').value = C.departureCountries || '';
     document.getElementById('f-property-links').checked = C.propertyDeeplinks === true;
     document.getElementById('f-fullscreen').checked = C.showFullscreenButton !== false;
@@ -606,6 +636,7 @@
     // Title / intro
     document.getElementById('f-title').addEventListener('input', (e) => { C.title = e.target.value; shell.markDirty(); render(); });
     document.getElementById('f-subtitle').addEventListener('input', (e) => { C.subtitle = e.target.value; shell.markDirty(); render(); });
+    document.getElementById('f-datamode').addEventListener('change', (e) => { C.dataMode = e.target.value === 'hotels' ? 'hotels' : 'holidays'; applyModeVisibility(); shell.markDirty(); render(); });
     document.getElementById('f-departures').addEventListener('input', (e) => { C.departureCountries = e.target.value; shell.markDirty(); render(); });
     document.getElementById('f-property-links').addEventListener('change', (e) => { C.propertyDeeplinks = e.target.checked; shell.markDirty(); render(); });
     document.getElementById('f-fullscreen').addEventListener('change', (e) => { C.showFullscreenButton = e.target.checked; shell.markDirty(); render(); });
