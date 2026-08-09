@@ -358,6 +358,10 @@
           depositPence: Math.max(0, parseInt(tour.depositPence, 10) || 0),
           balanceDueDate: str(tour.balanceDueDate, 20),
           priceNote: str(tour.priceNote, 300),
+          // Read by the compact tour card (widget-tour-card.js) so a grid of
+          // cards can link through to this tour's full page. The page itself
+          // ignores it; kept here so it round-trips through save.
+          pageUrl: safeUrl(tour.pageUrl),
         },
         glance,
         highlights: cleanList(c.highlights, 16, 200),

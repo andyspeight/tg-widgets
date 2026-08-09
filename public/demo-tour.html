@@ -28,6 +28,15 @@
     body[data-theme="dark"] .controls button[aria-pressed="true"] { background: #0F172A; color: #F8FAFC; }
     .page { padding: 24px 0 64px; }
     .note { max-width: 1000px; margin: 14px auto 0; padding: 0 20px; font-size: 12px; color: #94A3B8; }
+    .section-label { max-width: 1000px; margin: 0 auto; padding: 32px 20px 0; }
+    .section-label .kicker { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #C2410C; }
+    .section-label h2 { margin: 6px 0 2px; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+    .section-label p { margin: 0; font-size: 14px; color: #64748B; }
+    body[data-theme="dark"] .section-label p { color: #94A3B8; }
+    .card-band { padding: 18px 20px 8px; }
+    .card-stage { max-width: 1000px; margin: 0 auto; }
+    .page-surface { background: #fff; margin-top: 10px; border-top: 1px solid #E2E8F0; }
+    body[data-theme="dark"] .page-surface { background: #0F172A; border-top-color: #1E293B; }
     footer { border-top: 1px solid #E2E8F0; padding: 22px 28px; text-align: center; font-size: 12px; color: #64748B; }
     body[data-theme="dark"] footer { border-top-color: #1E293B; }
     footer a { color: #1B2B5B; }
@@ -51,15 +60,29 @@
     </div>
   </header>
 
+  <div class="section-label">
+    <div class="kicker">Compact tour cards</div>
+    <h2>Two tours, side by side</h2>
+    <p>The small card view — hero, dates and price — links through to the full page. Drop two on a page and they sit next to each other, then stack on mobile.</p>
+  </div>
+  <div class="card-band">
+    <div class="card-stage"><div id="card-a"></div><div id="card-b"></div></div>
+  </div>
+
+  <div class="section-label">
+    <div class="kicker">Full tour page</div>
+    <h2>The whole story, on its own page</h2>
+  </div>
   <p class="note">Escorted Tour demo, seeded from a real 11-day Kenya safari itinerary. Enquiry form runs in preview mode. Travelgenix house style — the source brochure's own design is not copied.</p>
 
-  <div class="page"><div id="mount"></div></div>
+  <div class="page-surface"><div class="page" id="full"><div id="mount"></div></div></div>
 
   <footer>
     Escorted Tour widget demo · <a href="/demo-trips">See the simpler Group Trips</a> · Deposit booking arrives with the Stripe build
   </footer>
 
   <script src="/widget-tour.js" defer></script>
+  <script src="/widget-tour-card.js" defer></script>
   <script>
     // One fully-seeded escorted tour. Content mapped from the client's Kenya
     // itinerary; images are house-style placeholders.
@@ -251,9 +274,33 @@
       design: { brandColor: '#1B2B5B', accentColor: '#C2410C', theme: 'light', radius: 16, fontFamily: 'DM Sans' }
     };
 
-    let inst = null;
+    // A second tour so the two-up card row shows two distinct tours. Reuses
+    // repo-proven images; links (like Kenya's) point at the full page below.
+    const TOUR_B = {
+      tour: {
+        title: 'Cape Town and the Winelands',
+        subtitle: 'Seven days from Table Mountain to the vineyards of Stellenbosch and Franschhoek, with a Cape Peninsula drive and long lazy lunches by the sea.',
+        location: 'South Africa',
+        heroImage: 'https://images.unsplash.com/photo-1534177616072-ef7dc120449d?w=1200&q=80',
+        currency: 'gbp',
+        startDate: '2027-02-08',
+        endDate: '2027-02-14',
+        durationText: '7 days / 6 nights',
+        capacity: 12,
+        pricePerPersonPence: 289500,
+        pageUrl: '#full'
+      },
+      design: { brandColor: '#1B2B5B', accentColor: '#C2410C', theme: 'light', radius: 16, fontFamily: 'DM Sans' }
+    };
+
+    let inst = null, cardA = null, cardB = null;
     document.addEventListener('DOMContentLoaded', () => {
       inst = new window.TGTourWidget(document.getElementById('mount'), TOUR);
+      // Two compact cards: Kenya (from the full tour) and Cape Town, each linking
+      // to the full page. The card reads tour.* + design.*, so the same record drives both.
+      cardA = new window.TGTourCardWidget(document.getElementById('card-a'),
+        { tour: Object.assign({}, TOUR.tour, { pageUrl: '#full' }), design: TOUR.design });
+      cardB = new window.TGTourCardWidget(document.getElementById('card-b'), TOUR_B);
     });
     document.querySelectorAll('[data-theme-btn]').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -261,6 +308,8 @@
         document.body.setAttribute('data-theme', theme === 'dark' ? 'dark' : 'light');
         document.querySelectorAll('[data-theme-btn]').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
         if (inst) inst.update({ design: { theme } });
+        if (cardA) cardA.update({ design: { theme } });
+        if (cardB) cardB.update({ design: { theme } });
       });
     });
   </script>
