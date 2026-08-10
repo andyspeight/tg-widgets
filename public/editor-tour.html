@@ -121,6 +121,11 @@
       <button type="button" data-view="editor" class="is-on">Editor</button>
       <button type="button" data-view="preview">Full preview</button>
     </div>
+    <button type="button" class="tb-btn" id="btn-import" title="Fill the builder from a PDF brochure">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6"/><polyline points="9 15 12 12 15 15"/></svg>
+      <span id="import-label">Import PDF</span>
+    </button>
+    <input type="file" id="import-file" accept="application/pdf,.pdf" hidden>
     <button type="button" class="tb-btn" id="btn-embed" title="Get embed code">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
       Embed
@@ -577,6 +582,75 @@
     return out;
   }
 
+  // ── Import from PDF ──────────────────────────────────────────────────────
+  // Read the brochure's text in the browser (pdf.js, loaded on demand from a
+  // CDN — editor pages may, widgets never), post the TEXT (not the file) to the
+  // AI import path, then fill the builder for review. The AI output is clamped
+  // by the tour widget's _defaults() on preview and sanitised again on save.
+  let _pdfjs = null;
+  function pdfjsLib() {
+    if (_pdfjs) return Promise.resolve(_pdfjs);
+    return import('https://esm.sh/pdfjs-dist@4/build/pdf.min.mjs').then((m) => {
+      try { m.GlobalWorkerOptions.workerSrc = 'https://esm.sh/pdfjs-dist@4/build/pdf.worker.min.mjs'; } catch (e) { /* main-thread fallback */ }
+      _pdfjs = m; return m;
+    });
+  }
+  async function extractPdfText(file) {
+    const mod = await pdfjsLib();
+    const buf = await file.arrayBuffer();
+    const pdf = await mod.getDocument({ data: new Uint8Array(buf) }).promise;
+    const pages = Math.min(pdf.numPages || 0, 80);
+    const out = [];
+    for (let i = 1; i <= pages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      out.push((content.items || []).map((it) => (it && it.str) || '').join(' '));
+    }
+    try { await pdf.destroy(); } catch (e) { /* ignore */ }
+    return out.join('\n\n').replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+  }
+  function setImport(busy, label) {
+    const btn = $('btn-import'), lbl = $('import-label');
+    if (btn) btn.disabled = !!busy;
+    if (lbl) lbl.textContent = busy ? (label || 'Working…') : 'Import PDF';
+  }
+  let _importing = false;
+  async function importFromPdf(file) {
+    if (_importing || !file) return;
+    if (file.type !== 'application/pdf' && !/\.pdf$/i.test(file.name || '')) { toast('Please choose a PDF file', 'err'); return; }
+    if (file.size > 20 * 1024 * 1024) { toast('That PDF is over 20MB — please try a smaller file', 'err'); return; }
+    // Confirm before wiping real existing content (never on a fresh starter).
+    const hasContent = (C.tour && C.tour.title && C.tour.title !== 'Your escorted tour') || (Array.isArray(C.days) && C.days.length > 1);
+    if (hasContent && !window.confirm('Import will fill the builder from this PDF and replace the current tour. Continue?')) return;
+
+    _importing = true; setImport(true, 'Reading PDF…');
+    let text = '';
+    try { text = await extractPdfText(file); }
+    catch (e) { _importing = false; setImport(false); toast('Could not read that PDF. If it is scanned images the text cannot be read — paste it into the fields instead.', 'err'); return; }
+    if (!text || text.length < 200) { _importing = false; setImport(false); toast('That PDF had almost no readable text — it may be scanned images.', 'err'); return; }
+
+    setImport(true, 'Understanding the itinerary…');
+    let data = {};
+    try {
+      const res = await fetch('/api/widget-ai', {
+        method: 'POST',
+        headers: Object.assign({ 'Content-Type': 'application/json' }, (window.tgse && tgse.authHeaders) ? tgse.authHeaders() : {}),
+        body: JSON.stringify({ action: 'import-tour', text }),
+      });
+      if (res.status === 401) { _importing = false; setImport(false); toast('Please sign in again to import.', 'err'); return; }
+      data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || ('Import failed (HTTP ' + res.status + ')'));
+    } catch (e) { _importing = false; setImport(false); toast((e && e.message) || 'Import failed. Please try again.', 'err'); return; }
+
+    const imported = data.config;
+    if (!imported || !imported.tour || !imported.tour.title) { _importing = false; setImport(false); toast('The import did not find a tour in that PDF.', 'err'); return; }
+    C = deepMerge(starter(), imported);
+    if (imported.tour.title) $('name-input').value = String(imported.tour.title).slice(0, 120);
+    buildForm(); renderPreview(); if (window.tgse) tgse.markDirty();
+    _importing = false; setImport(false);
+    toast('Imported. Review the details, add prices and photos, then Save.', 'ok');
+  }
+
   // ── tgse (auth + save engine) ──
   const shell = tgse.init({
     widgetType: 'Escorted Tour',
@@ -596,6 +670,17 @@
       renderPreview();
     });
   });
+
+  // ── Import from PDF ──
+  const impBtn = $('btn-import'), impFile = $('import-file');
+  if (impBtn && impFile) {
+    impBtn.addEventListener('click', () => { if (!impBtn.disabled) impFile.click(); });
+    impFile.addEventListener('change', () => {
+      const f = impFile.files && impFile.files[0];
+      impFile.value = '';
+      if (f) importFromPdf(f);
+    });
+  }
 
   $('name-input').addEventListener('input', () => tgse.markDirty());
 

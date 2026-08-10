@@ -163,6 +163,105 @@ async function newPage() {
   await page.close();
 }
 
+// ── 7. Import from PDF: extract text → AI-structure → fill the builder ────────
+// The browser reads the PDF locally (pdf.js from the CDN) and POSTs the plain
+// text to /api/widget-ai; the endpoint returns a structured tour config which
+// fills every field and the live preview. It must NEVER auto-save — the copy
+// says "Review… then Save". Both the CDN module and the AI endpoint are stubbed
+// so the test is hermetic.
+{
+  const { page, errors } = await newPage();
+  await page.addInitScript(() => {
+    localStorage.setItem('tg_token', 'smoke-token');
+    localStorage.setItem('tg_user', JSON.stringify({ email: 'smoke@test.local', plan: 'Bespoke' }));
+  });
+
+  // Long readable text so extractPdfText clears its 200-char "scanned images" floor.
+  const PDF_TEXT = 'Kilimanjaro Grand Trek. ' + 'Ten unforgettable days on the roof of Africa, from Arusha to Uhuru Peak, with Serengeti game drives to follow. '.repeat(6);
+
+  // Fake pdf.js module served for the esm.sh import. getDocument yields one page
+  // whose text is PDF_TEXT; GlobalWorkerOptions exists so the workerSrc set is a no-op.
+  const FAKE_PDFJS =
+    'export const GlobalWorkerOptions = {};' +
+    'export function getDocument(){' +
+    '  return { promise: Promise.resolve({' +
+    '    numPages: 1,' +
+    '    getPage(){ return Promise.resolve({ getTextContent(){ return Promise.resolve({ items: [{ str: ' + JSON.stringify(PDF_TEXT) + ' }] }); } }); },' +
+    '    destroy(){ return Promise.resolve(); }' +
+    '  }) };' +
+    '}';
+  await page.route('https://esm.sh/**', (r) => r.fulfill({ status: 200, contentType: 'text/javascript', body: FAKE_PDFJS }));
+
+  // Mock the AI structuring endpoint exactly as api/widget-ai answers: { config }.
+  const IMPORTED = {
+    tour: { title: 'Imported Kilimanjaro Trek', subtitle: 'Ten days on the roof of Africa', summary: 'A faithful summary drawn from the brochure text, ready for review before saving.' },
+    glance: [{ day: 'Day 1', date: '', destination: 'Arusha', accommodation: 'Mountain Lodge' }],
+    highlights: ['Summit Uhuru Peak at dawn', 'Serengeti game drives'],
+    days: [
+      { label: 'Day 1', title: 'Arrive in Arusha', body: 'Welcome to Tanzania and transfer to your lodge.' },
+      { label: 'Day 2', title: 'Trek to base camp', body: 'The ascent through rainforest begins.' },
+      { label: 'Day 3', title: 'Summit day', body: 'Reach Uhuru Peak at sunrise.' },
+    ],
+    included: ['All meals on trek', 'Park and rescue fees'],
+    excluded: ['International flights', 'Travel insurance'],
+  };
+  let aiCalls = 0, aiAction = '', savePosts = 0;
+  await page.route('**/api/widget-ai', async (r) => {
+    aiCalls++;
+    try { aiAction = (r.request().postDataJSON() || {}).action || ''; } catch (e) { /* ignore */ }
+    await r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ config: IMPORTED }) });
+  });
+  // Watch for any save — import populates for review and must not POST a save.
+  page.on('request', (req) => { if (req.method() === 'POST' && /\/api\/widget-config(\?|$)/.test(req.url())) savePosts++; });
+
+  await page.goto(`${BASE}/editor-tour.html`, { waitUntil: 'load', timeout: 20000 });
+  await page.waitForFunction(() => document.querySelectorAll('#tb-build .sec').length >= 8, { timeout: 8000 }).catch(() => {});
+
+  ok(await page.evaluate(() => !!document.getElementById('btn-import') && !!document.getElementById('import-file')),
+    'import: toolbar exposes the Import PDF control');
+
+  // Feed a PDF. The starter tour is pristine, so no replace-confirm dialog fires.
+  await page.locator('#import-file').setInputFiles({
+    name: 'brochure.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 pretend bytes for the smoke test'),
+  });
+  await page.waitForFunction(() => document.getElementById('name-input')?.value === 'Imported Kilimanjaro Trek', { timeout: 8000 }).catch(() => {});
+
+  ok(aiCalls === 1, `import: one AI structuring call fired (got ${aiCalls})`);
+  ok(aiAction === 'import-tour', `import: request carries action "import-tour" (got "${aiAction}")`);
+
+  const nameVal = await page.evaluate(() => document.getElementById('name-input')?.value || '');
+  ok(nameVal === 'Imported Kilimanjaro Trek', `import: tour title fills the name field (got "${nameVal}")`);
+
+  // Builder fields populate from the imported config.
+  const filled = await page.evaluate(() => {
+    const vals = [...document.querySelectorAll('#tb-build input, #tb-build textarea')].map(el => el.value);
+    return {
+      hasTitle: vals.includes('Imported Kilimanjaro Trek'),
+      hasDayTitle: vals.includes('Summit day'),
+      hasHighlight: vals.some(v => /Uhuru Peak at dawn/.test(v)),
+    };
+  });
+  ok(filled.hasTitle, 'import: tour title fills the builder');
+  ok(filled.hasDayTitle, 'import: itinerary day titles fill the builder');
+  ok(filled.hasHighlight, 'import: highlights fill the builder');
+
+  // Live preview reflects the imported tour.
+  await page.click('.tb-toggle button[data-view="preview"]');
+  await page.waitForFunction(() => document.getElementById('tour-mount')?.shadowRoot?.querySelector('[data-role="title"]')?.textContent === 'Imported Kilimanjaro Trek', { timeout: 6000 }).catch(() => {});
+  const pv = await page.evaluate(() => ({
+    title: document.getElementById('tour-mount')?.shadowRoot?.querySelector('[data-role="title"]')?.textContent || '',
+    days: document.getElementById('tour-mount')?.shadowRoot?.querySelectorAll('[data-role="day"]').length || 0,
+  }));
+  ok(pv.title === 'Imported Kilimanjaro Trek', `import: preview shows the imported title (got "${pv.title}")`);
+  ok(pv.days === 3, `import: preview shows the imported itinerary (got ${pv.days} days)`);
+
+  // The whole point: populate for review, never auto-save.
+  ok(savePosts === 0, `import: import does not auto-save (saw ${savePosts} save POSTs)`);
+
+  ok(errors.length === 0, 'import: no script errors (' + errors.join(' | ') + ')');
+  await page.close();
+}
+
 await browser.close();
 server.close();
 
