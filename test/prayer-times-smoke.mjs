@@ -343,6 +343,40 @@ async function run() {
     ok('selecting a result fetches by coordinates', urls.some(u => u.indexOf('/timings/') !== -1 && u.indexOf('latitude=3.1412') !== -1));
     w.destroy();
   }
+  {
+    // Same combobox on the horizontal (strip) layout — previously the strip
+    // ignored locationSearch and a visitor could not type a destination.
+    const { win } = makeDom();
+    const urls = [];
+    win.fetch = (url) => {
+      urls.push(url);
+      if (url.indexOf('geocoding-api.open-meteo.com') !== -1) {
+        return Promise.resolve({ ok: true, json: async () => ({ results: [
+          { name: 'Dubai', latitude: 25.0772, longitude: 55.3093, country: 'United Arab Emirates', admin1: 'Dubai' },
+        ] }) });
+      }
+      return Promise.resolve({ ok: true, json: async () => ({ code: 200, status: 'OK', data: aladhanData() }) });
+    };
+    freezeClock(win, 14, 0, 0, 2026, 7, 6);
+    const { el, w } = await mount(win, {
+      layout: 'strip',
+      locationSearch: true,
+      locations: [{ mode: 'city', city: 'London', country: 'United Kingdom', label: 'London' }],
+    });
+    ok('strip renders a search input in the lead bar', !!el.shadowRoot.querySelector('.tgpt-strip-lead-loc--search .tgpt-search'));
+    ok('strip has the results panel', !!el.shadowRoot.querySelector('[data-search-panel]'));
+    const input = el.shadowRoot.querySelector('.tgpt-search');
+    input.value = 'Dubai';
+    input.dispatchEvent(new win.Event('input'));
+    await delay(320);
+    ok('strip search queries the geocoder', urls.some(u => u.indexOf('geocoding-api.open-meteo.com') !== -1 && u.indexOf('name=Dubai') !== -1));
+    const opt = el.shadowRoot.querySelector('.tgpt-search-opt');
+    ok('strip shows a geocoding result', !!opt);
+    opt.click();
+    await delay(20);
+    ok('strip selection fetches by coordinates', urls.some(u => u.indexOf('/timings/') !== -1 && u.indexOf('latitude=25.0772') !== -1));
+    w.destroy();
+  }
 
   // ── 7. HTML escaping of the location label ────────────────────────────
   console.log('Security — label escaping');
