@@ -170,7 +170,7 @@
 
     _defaults(c) {
       c = c || {};
-      const layouts = ['vertical', 'horizontal', 'banner', 'split'];
+      const layouts = ['vertical', 'horizontal', 'banner', 'split', 'cruise'];
       return {
         client: c.client || '',
         layout: layouts.indexOf(c.layout) !== -1 ? c.layout : 'vertical',

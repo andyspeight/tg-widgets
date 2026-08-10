@@ -27,7 +27,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.1.3';
+  const VERSION = '0.2.0';
 
   // Resolve the API base off THIS script's origin. The widget is hosted on
   // widgets.travelify.io and embedded on customer sites, so a relative
@@ -55,7 +55,7 @@
   // prices, dates, board/type labels, ATOL/ABTA wording — is author content and
   // is never translated here. English is the source + fallback.
   const MESSAGES = {
-    en: { viewDeal: 'View deal', save: 'Save', nights: 'nights', untitled: 'Untitled offer' },
+    en: { viewDeal: 'View deal', save: 'Save', nights: 'nights', untitled: 'Untitled offer', from: 'From', viewHolidayDetails: 'View holiday details' },
     fr: { viewDeal: "Voir l'offre", save: 'Économisez', nights: 'nuits', untitled: 'Offre sans titre' },
     de: { viewDeal: 'Angebot ansehen', save: 'Sparen', nights: 'Nächte', untitled: 'Angebot ohne Titel' },
     es: { viewDeal: 'Ver oferta', save: 'Ahorra', nights: 'noches', untitled: 'Oferta sin título' },
@@ -163,6 +163,19 @@
   }
 
   const PIN = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+
+  // Icons for the cruise card: ribbon glyphs + the rotating feature-row markers.
+  const ICO = {
+    ship: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2c1.3 0 1.9.5 2.5 1"/><path d="M19.38 20A11.6 11.6 0 0 0 21 14l-9-4-9 4c0 2.9.94 5.34 2.81 7.76"/><path d="M12 10V4"/><path d="M12 2v2"/><path d="M6 10V7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v3"/></svg>',
+    anchor: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></svg>',
+    clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+    map: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>',
+    calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+    star: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+    gem: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg>',
+    chev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>'
+  };
+  const FEAT_ICONS = [ICO.ship, ICO.clock, ICO.anchor, ICO.map, ICO.calendar];
 
   // ── Scoped styles (shadow DOM, --tgo-* tokens shared with widget-offers) ──
   const STYLES = `
@@ -348,6 +361,37 @@
       .tgoc-card--split .tgoc-img { width: 100%; aspect-ratio: 16 / 10; min-height: 0; }
       .tgoc-card--split .tgoc-sbody { padding: 22px; }
     }
+
+    /* ── Cruise layout — client-branded: ribbon flags, icon feature rows, details link ── */
+    .tgoc-card--cruise { flex-direction: column; }
+    .tgoc-card--cruise .tgoc-c-img { position: relative; width: 100%; aspect-ratio: 16 / 11; }
+    .tgoc-ribbons { position: absolute; top: 14px; left: 0; display: flex; flex-direction: column; gap: 9px; align-items: flex-start; z-index: 2; }
+    .tgoc-ribbon {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 7px 20px 7px 15px; color: #fff;
+      font-size: 12px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; line-height: 1;
+      clip-path: polygon(0 0, 100% 0, calc(100% - 9px) 50%, 100% 100%, 0 100%);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.22);
+    }
+    .tgoc-ribbon svg { width: 14px; height: 14px; }
+    .tgoc-ribbon--featured { background: var(--tgo-accent, #E11D2A); }
+    .tgoc-ribbon--type { background: #1E88C7; }
+    .tgoc-ribbon--luxury { background: linear-gradient(180deg, #CBA43C, #B6891D); }
+    .tgoc-cbody { padding: 22px 22px 6px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
+    .tgoc-c-title { margin: 0; font-size: clamp(19px, 2vw, 22px); font-weight: 800; line-height: 1.22; letter-spacing: -0.3px; }
+    .tgoc-c-price { margin: 0; font-size: 16px; font-weight: 800; }
+    .tgoc-c-feats { list-style: none; margin: 2px 0 0; padding: 0; display: flex; flex-direction: column; gap: 11px; }
+    .tgoc-c-feat { display: flex; gap: 11px; align-items: flex-start; font-size: 14px; color: var(--tgo-sub); line-height: 1.45; }
+    .tgoc-c-feat svg { width: 17px; height: 17px; flex: 0 0 17px; margin-top: 1px; color: var(--tgo-muted, #94A3B8); }
+    .tgoc-c-cta {
+      margin-top: auto; padding: 16px 22px; border-top: 1px solid var(--tgo-border);
+      display: flex; align-items: center; gap: 7px;
+      font-size: 13px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--tgo-accent, #E11D2A);
+    }
+    .tgoc-c-cta svg { width: 15px; height: 15px; }
+    .tgoc-card--cruise:hover .tgoc-c-cta { gap: 11px; }
+    .tgoc-c-cta.tgoc-cta--disabled { color: var(--tgo-muted); }
   `;
 
   // ── Widget class ──────────────────────────────────────────────────────────
@@ -363,7 +407,7 @@
 
     _defaults(c) {
       c = c || {};
-      const layouts = ['vertical', 'horizontal', 'banner', 'split'];
+      const layouts = ['vertical', 'horizontal', 'banner', 'split', 'cruise'];
       return {
         layout: layouts.indexOf(c.layout) !== -1 ? c.layout : 'vertical',
         imageSide: c.imageSide === 'right' ? 'right' : 'left',  // split + banner text alignment
@@ -600,6 +644,58 @@
         + '</div>';
     }
 
+    // Cruise: the client-branded layout — stacked ribbon flags (promo / type /
+    // style), a "N Nights From £X per person" headline, up to three icon feature
+    // rows drawn from the includes, and a "View holiday details" link. Uses only
+    // existing offer fields, so any offer can wear it; it just suits cruises.
+    _cruiseCard(d) {
+      // Ribbons, top to bottom: promo badge (brand), the type (e.g. Cruise), the
+      // style (e.g. Luxury). Each only shows when its field is set.
+      const type = shortType(this._f('type'));
+      const style = this._f('style');
+      const ribbons = [];
+      if (d.badgeText) ribbons.push('<span class="tgoc-ribbon tgoc-ribbon--featured">' + ICO.star + esc(d.badgeText) + '</span>');
+      if (type) ribbons.push('<span class="tgoc-ribbon tgoc-ribbon--type">' + ICO.ship + esc(type) + '</span>');
+      if (style) ribbons.push('<span class="tgoc-ribbon tgoc-ribbon--luxury">' + ICO.gem + esc(style) + '</span>');
+      const ribbonWrap = ribbons.length ? '<div class="tgoc-ribbons">' + ribbons.join('') + '</div>' : '';
+
+      const cssUrl = safeCssUrl(d.image);
+      const bg = cssUrl ? ' style="background-image:url(\'' + cssUrl + '\')"' : '';
+      const ph = cssUrl ? '' : '<div class="tgoc-img-ph">' + esc(d.loc || d.title) + '</div>';
+      const img = '<div class="tgoc-img tgoc-c-img"' + bg + '>' + ph + ribbonWrap + '</div>';
+
+      // "14 Nights From £2299 per person" — nights + price + basis, all optional.
+      const nights = this._f('nights');
+      const basis = this._f('basis');
+      const nw = this.t('nights');
+      const nightsCap = nw ? nw.charAt(0).toUpperCase() + nw.slice(1) : nw;
+      const priceStr = d.price || 'POA';
+      const headParts = [];
+      if (nights) headParts.push(esc(nights) + ' ' + esc(nightsCap));
+      headParts.push(esc(this.t('from')) + ' ' + esc(priceStr));
+      const headline = '<p class="tgoc-c-price">' + headParts.join(' ') + (basis ? ' ' + esc(basis) : '') + '</p>';
+
+      // Up to three feature rows from the includes, each with a rotating icon.
+      const feats = (d.includes || []).slice(0, 3);
+      const featList = feats.length
+        ? '<ul class="tgoc-c-feats">' + feats.map(function (f, i) {
+            return '<li class="tgoc-c-feat">' + FEAT_ICONS[i % FEAT_ICONS.length] + '<span>' + esc(f) + '</span></li>';
+          }).join('') + '</ul>'
+        : '';
+
+      const ctaLabel = this.cfg.ctaText || this.t('viewHolidayDetails');
+      const ctaCls = 'tgoc-c-cta' + (this._linkHref ? '' : ' tgoc-cta--disabled');
+      const cta = '<span class="' + ctaCls + '"' + (this._linkHref ? '' : ' role="button" aria-disabled="true"') + '>'
+        + esc(ctaLabel) + ICO.chev + '</span>';
+
+      return img
+        + '<div class="tgoc-cbody">'
+          + '<h3 class="tgoc-c-title">' + esc(d.title) + '</h3>'
+          + headline + featList
+        + '</div>'
+        + cta;
+    }
+
     _render() {
       const cfg = this.cfg;
 
@@ -634,7 +730,9 @@
       this._linkHref = this._href();
 
       let inner;
-      if (cfg.layout === 'banner') {
+      if (cfg.layout === 'cruise') {
+        inner = this._cruiseCard(d);
+      } else if (cfg.layout === 'banner') {
         inner = this._bannerCard(d);
       } else if (cfg.layout === 'split') {
         inner = this._splitCard(d);
