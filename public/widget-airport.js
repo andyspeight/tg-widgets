@@ -1,5 +1,5 @@
 /**
- * Travelgenix Airport Spotlight Widget v1.1.0
+ * Travelgenix Airport Spotlight Widget v1.3.0
  * Self-contained, embeddable airport information showcase.
  * Zero hard dependencies (Leaflet loaded on-demand for the map only,
  * with SRI-pinned hashes from unpkg).
@@ -118,7 +118,7 @@
       document.head.appendChild(l);
     } catch (e) { /* noop */ }
   }
-  const VERSION = '1.2.1';
+  const VERSION = '1.3.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (section/fact labels, tab labels, CTA buttons, map
@@ -574,6 +574,12 @@
   line-height: 1.55;
   max-width: 1100px;
   margin: 0 auto;
+  /* Respond to the WIDGET's own width, not the browser window. Embedded on a
+     customer page the widget often sits in a column far narrower than the
+     viewport, so viewport media queries never fired and fixed grids (the facts
+     row, the tab cards) overflowed. All layout breakpoints below are @container. */
+  container-type: inline-size;
+  container-name: tga;
   border-radius: var(--tga-radius);
   overflow: hidden;
   box-shadow: var(--tga-shadow-lg);
@@ -708,13 +714,12 @@
 
 .tga-facts {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  /* auto-fit so the facts row reflows to the container width instead of forcing
+     4 columns that overflow a narrow embed. */
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   background: var(--tga-card);
   border-bottom: 1px solid var(--tga-border);
 }
-.tga-facts[data-count="1"] { grid-template-columns: 1fr; }
-.tga-facts[data-count="2"] { grid-template-columns: repeat(2, 1fr); }
-.tga-facts[data-count="3"] { grid-template-columns: repeat(3, 1fr); }
 .tga-fact {
   padding: 24px 28px;
   border-right: 1px solid var(--tga-border);
@@ -864,7 +869,7 @@
 .tga-tab-panel { display: none; }
 .tga-tab-panel.is-active { display: block; }
 
-.tga-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.tga-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
 .tga-card {
   padding: 24px;
   background: var(--tga-card);
@@ -968,26 +973,23 @@
 .tga-empty { padding: 56px; text-align: center; color: var(--tga-sub); }
 .tga-empty p { margin: 0; font-size: 15px; }
 
-@media (max-width: 880px) {
+@container tga (max-width: 880px) {
   .tga-hero { padding: 40px 28px 36px; }
   .tga-name { font-size: 40px; }
   .tga-iata { min-width: 78px; height: 52px; font-size: 26px; }
   .tga-section { padding: 36px 28px; }
   .tga-cta { padding: 28px; }
   .tga-serves { padding: 16px 28px; flex-direction: column; align-items: flex-start; gap: 12px; }
-  .tga-facts { grid-template-columns: repeat(2, 1fr); }
   .tga-fact { border-right: 1px solid var(--tga-border); border-bottom: 1px solid var(--tga-border); }
   .tga-fact:nth-child(2n) { border-right: none; }
   .tga-fact:nth-last-child(-n+2) { border-bottom: none; }
-  .tga-cards { grid-template-columns: 1fr; }
   .tga-locate { grid-template-columns: 1fr; }
   .tga-map { height: 280px; }
 }
-@media (max-width: 560px) {
+@container tga (max-width: 560px) {
   .tga-name { font-size: 32px; }
   .tga-tagline { font-size: 16px; }
   .tga-section-h2 { font-size: 22px; }
-  .tga-facts { grid-template-columns: 1fr; }
   .tga-fact { border-right: none; }
   .tga-fact:last-child { border-bottom: none; }
   .tga-cta { flex-direction: column; align-items: stretch; }
