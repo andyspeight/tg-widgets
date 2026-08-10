@@ -29,7 +29,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.1.3';
+  const VERSION = '0.2.0';
 
   // Resolve the API base off THIS script's origin. The widget is hosted on
   // widgets.travelify.io and embedded on customer sites, so a relative
@@ -60,6 +60,7 @@
   const MESSAGES = {
     en: {
       defaultTitle: 'Your next great escape',
+      backToOffers: 'Back to offers',
       save: 'Save', youSave: 'You save', from: 'From', poa: 'POA',
       perPerson: 'per person', basedOnLead: 'based on the lead price',
       deposit: 'Secure it today with a {amount} deposit',
@@ -461,6 +462,34 @@
     .tgop-bar-spacer { flex: 1; }
     .tgop-bar-price { font-weight: 800; font-size: 18px; white-space: nowrap; }
     .tgop-bar-price small { font-weight: 500; font-size: 12px; color: var(--tgo-sub); }
+
+    /* Back-to-offers (browser Back). Floating frosted pill over the hero, with an
+       icon-only twin in the sticky bar so a back control is always to hand. */
+    .tgop-back {
+      position: fixed; top: 16px; left: 16px; z-index: 61;
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 15px 9px 12px;
+      font: inherit; font-size: 14px; font-weight: 600; color: var(--tgo-ink);
+      background: color-mix(in srgb, var(--tgo-surface) 84%, transparent);
+      backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px);
+      border: 1px solid var(--tgo-border); border-radius: 999px;
+      box-shadow: var(--tgo-shadow); cursor: pointer;
+      transition: opacity 0.25s ease, transform 0.25s ease, background 0.15s ease;
+    }
+    .tgop-back:hover { background: var(--tgo-surface); }
+    .tgop-back:focus-visible { outline: 2px solid var(--tgo-accent); outline-offset: 2px; }
+    .tgop-back svg { width: 17px; height: 17px; }
+    /* Hidden once the sticky bar (with its own back button) slides in. */
+    .tgop-back.hide { opacity: 0; transform: translateY(-8px); pointer-events: none; }
+    .tgop-bar-back {
+      flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+      width: 34px; height: 34px; padding: 0; color: var(--tgo-ink);
+      background: transparent; border: 1px solid var(--tgo-border); border-radius: 50%; cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .tgop-bar-back:hover { background: var(--tgo-alt); }
+    .tgop-bar-back:focus-visible { outline: 2px solid var(--tgo-accent); outline-offset: 2px; }
+    .tgop-bar-back svg { width: 17px; height: 17px; }
 
     /* ── Hero ── */
     .tgop-hero { position: relative; height: min(88vh, 760px); min-height: 520px; overflow: hidden; }
@@ -1011,6 +1040,18 @@
       const t = this.t;
       const d = this._derive();
 
+      // "Back to offers" — a browser Back control. Only shown when there IS
+      // somewhere to go back to (same-tab navigation from the offers grid gives
+      // history.length > 1); a directly-opened or new-tab link has none, so we
+      // hide it rather than show a dead button. A floating pill sits over the
+      // hero; once scrolled past, the sticky bar carries an icon-only twin so a
+      // back affordance is always to hand.
+      const canBack = typeof window !== 'undefined' && window.history && window.history.length > 1;
+      const backSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>';
+      const fBack = canBack
+        ? '<button type="button" class="tgop-back" data-back>' + backSvg + '<span>' + esc(t('backToOffers')) + '</span></button>'
+        : '';
+
       const root = document.createElement('div');
       root.className = 'tgop';
       root.setAttribute('data-theme', cfg.theme);
@@ -1085,6 +1126,7 @@
         : '';
 
       const fBar = '<div class="tgop-bar" data-bar><div class="tgop-bar-inner">'
+        + (canBack ? '<button type="button" class="tgop-bar-back" data-back aria-label="' + esc(t('backToOffers')) + '">' + backSvg + '</button>' : '')
         + '<span class="tgop-bar-title">' + esc(d.title) + '</span><span class="tgop-bar-spacer"></span>'
         + (d.price ? '<span class="tgop-bar-price">' + d.price + ' <small>' + esc(d.basis || '') + '</small></span>' : '')
         + '<button type="button" class="tgop-btn accent sm" data-enquire>' + esc(t('enquireNow')) + '</button>'
@@ -1179,7 +1221,7 @@
       }
 
       root.setAttribute('data-template', cfg.template);
-      root.innerHTML = html;
+      root.innerHTML = fBack + html;
 
       this.shadow.innerHTML = '<style>' + STYLES + '</style>';
       this.shadow.appendChild(root);
@@ -1190,12 +1232,23 @@
     _bind(d) {
       const root = this.root;
 
-      // Sticky bar: show once hero is mostly scrolled past
+      // Back to offers → browser Back. Both the floating pill and the sticky-bar
+      // twin share [data-back]. Guarded so it never no-ops the visitor off-site.
+      root.querySelectorAll('[data-back]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          if (typeof window !== 'undefined' && window.history && window.history.length > 1) window.history.back();
+        });
+      });
+
+      // Sticky bar: show once hero is mostly scrolled past. The floating back pill
+      // hides as the bar (which carries its own back button) slides in.
       const hero = root.querySelector('.tgop-hero');
       const bar = root.querySelector('[data-bar]');
+      const backFloat = root.querySelector('.tgop-back');
       const onScroll = function () {
         const past = hero.getBoundingClientRect().bottom < 80;
         bar.classList.toggle('show', past);
+        if (backFloat) backFloat.classList.toggle('hide', past);
       };
       window.addEventListener('scroll', onScroll, { passive: true });
       this._onScroll = onScroll;
