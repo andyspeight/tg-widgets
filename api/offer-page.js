@@ -28,7 +28,7 @@
 import { configured, getJson } from './_redis.js';
 
 const ID_RE = /^[A-Za-z0-9_-]{6,40}$/;
-const TEMPLATES = ['classic', 'editorial', 'immersive'];
+const TEMPLATES = ['classic', 'editorial', 'immersive', 'cruise'];
 const CURRENCY = { GBP: '£', EUR: '€', USD: '$', AUD: '$', CAD: '$' };
 
 const escHtml = (s) => String(s == null ? '' : s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));

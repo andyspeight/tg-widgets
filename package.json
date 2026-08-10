@@ -81,6 +81,8 @@
     "test:offer-fields": "node test/offer-fields-smoke.mjs",
     "test:offer-sheet-render": "node test/offer-sheet-render-smoke.mjs",
     "test:offer-page-back": "node test/offer-page-back-button-smoke.mjs",
+    "test:offer-cruise-card": "node test/offer-cruise-card-smoke.mjs",
+    "test:offer-cruise-page": "node test/offer-cruise-page-smoke.mjs",
     "test:textfx": "node test/textfx-rotating-align-smoke.mjs",
     "test:spotlight-cache": "node test/spotlight-cache-headers-smoke.mjs",
     "test:spotlight-parallel": "node test/spotlight-parallel-smoke.mjs",

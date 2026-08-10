@@ -29,7 +29,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.2.0';
+  const VERSION = '0.3.0';
 
   // Resolve the API base off THIS script's origin. The widget is hosted on
   // widgets.travelify.io and embedded on customer sites, so a relative
@@ -72,6 +72,10 @@
       aboutHoliday: 'About this holiday', whatsIncluded: "What's included",
       photos: 'Photos', takeALook: 'Take a look', whereYoullBe: "Where you'll be",
       theDetail: 'The detail',
+      // Cruise template
+      offerDetails: 'Offer details', quoteReference: 'Quote reference', callUsOn: 'Call us on {phone}',
+      travellingIn: 'Travelling {period}', basedOn: 'Based on', makeEnquiry: 'Make an enquiry',
+      theItinerary: 'Itinerary', highlightsH: 'Highlights',
       enquireNow: 'Enquire now', enquireAbout: 'Enquire about this offer',
       sendEnquiry: 'Send my enquiry',
       fullName: 'Full name', addName: 'Please add your name',
@@ -645,6 +649,9 @@
     .tgop-btn.sm { padding: 9px 16px; font-size: 14px; }
     .tgop-btn.accent { background: var(--tgo-accent); color: #fff; }
     .tgop-btn.accent:hover { background: var(--tgo-accent-hover); }
+    /* Light-surface secondary (e.g. the cruise quote box) — visible on white. */
+    .tgop-btn.outline { background: transparent; color: var(--tgo-ink); border: 1px solid var(--tgo-border); }
+    .tgop-btn.outline:hover { background: var(--tgo-alt); }
 
     /* Footer trust */
     .tgop-foot { background: var(--tgo-alt); border-top: 1px solid var(--tgo-border); }
@@ -711,6 +718,44 @@
       .tgop-enqband-inner { grid-template-columns: 1fr; gap: 24px; }
     }
 
+    /* ── Cruise template ── */
+    .tgop-cruise-top { display: grid; grid-template-columns: minmax(0,1fr) 360px; gap: 40px; align-items: start; padding-top: 48px; padding-bottom: 8px; }
+    .tgop-cruise-main { min-width: 0; }
+    .tgop-cruise-main .tgop-section { margin-top: 0; margin-bottom: 32px; }
+    .tgop[data-template="cruise"] .tgop-incl { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .tgop-cruise-aside { position: sticky; top: 84px; }
+    .tgop-quote { background: var(--tgo-surface); border: 1px solid var(--tgo-border); border-radius: var(--tgo-radius); box-shadow: var(--tgo-shadow); padding: 22px; }
+    .tgop-quote-when { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; color: var(--tgo-sub); background: var(--tgo-alt); border-radius: 999px; padding: 6px 12px; margin-bottom: 14px; }
+    .tgop-quote-when svg { width: 15px; height: 15px; }
+    .tgop-quote-price { display: flex; flex-direction: column; gap: 3px; padding-bottom: 16px; border-bottom: 1px solid var(--tgo-border); margin-bottom: 16px; }
+    .tgop-quote-from { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--tgo-sub); }
+    .tgop-quote-amt { font-size: 34px; font-weight: 800; line-height: 1; }
+    .tgop-quote-amt small { font-size: 15px; font-weight: 600; color: var(--tgo-sub); }
+    .tgop-quote-h { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--tgo-sub); margin-bottom: 8px; }
+    .tgop-quote-details { list-style: none; margin: 0 0 16px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+    .tgop-quote-details li { display: flex; justify-content: space-between; gap: 14px; font-size: 14px; }
+    .tgop-quote-details li span:first-child { color: var(--tgo-sub); }
+    .tgop-quote-details li span:last-child { font-weight: 600; text-align: right; }
+    .tgop-quote-ref { font-size: 13px; color: var(--tgo-sub); background: var(--tgo-alt); border-radius: 10px; padding: 10px 12px; margin-bottom: 6px; display: flex; flex-direction: column; gap: 2px; }
+    .tgop-quote-ref b { font-size: 16px; color: var(--tgo-ink); letter-spacing: 0.02em; }
+    .tgop-btn.block { display: flex; width: 100%; justify-content: center; margin-top: 10px; }
+    .tgop-stories { display: flex; flex-direction: column; gap: 46px; padding-top: 44px; padding-bottom: 12px; }
+    .tgop-story { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+    .tgop-story--flip .tgop-story-img { order: 2; }
+    .tgop-story--solo { grid-template-columns: 1fr; max-width: 760px; }
+    .tgop-story-img { border-radius: var(--tgo-radius); background-size: cover; background-position: center; min-height: 300px; box-shadow: var(--tgo-shadow); }
+    .tgop-story-body h2 { margin-top: 0; }
+    .tgop-enq-section { max-width: 720px; padding-top: 44px; padding-bottom: 20px; }
+    .tgop-enq-card { background: var(--tgo-surface); border: 1px solid var(--tgo-border); border-radius: var(--tgo-radius); box-shadow: var(--tgo-shadow); padding: 22px; }
+    @media (max-width: 900px) {
+      .tgop-cruise-top { grid-template-columns: 1fr; gap: 16px; }
+      .tgop-cruise-aside { position: static; }
+      .tgop-story, .tgop-story--flip { grid-template-columns: 1fr; gap: 18px; }
+      .tgop-story--flip .tgop-story-img { order: 0; }
+      .tgop-story-img { min-height: 220px; }
+      .tgop[data-template="cruise"] .tgop-incl { grid-template-columns: 1fr; }
+    }
+
     /* Reveal on scroll — gated by [data-anim] so content is visible if JS or
        IntersectionObserver is unavailable (progressive enhancement). */
     .tgop[data-anim="1"] .tgop-reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.7s cubic-bezier(.2,.7,.2,1), transform 0.7s cubic-bezier(.2,.7,.2,1); }
@@ -756,7 +801,7 @@
     _defaults(c) {
       c = c || {};
       const o = c.offer && typeof c.offer === 'object' ? c.offer : {};
-      const templates = ['classic', 'editorial', 'immersive'];
+      const templates = ['classic', 'editorial', 'immersive', 'cruise'];
       return {
         template: templates.indexOf(c.template) !== -1 ? c.template : 'classic',
         theme: c.theme === 'dark' ? 'dark' : 'light',
@@ -982,26 +1027,16 @@
       }).join('');
     }
 
-    _bookCard(d) {
+    // The enquiry form — extracted so both the standard book card and the cruise
+    // quote box mount the same lead-capture form (one target for data-enquire).
+    _enquiryForm(d) {
       const t = this.t;
-      const was = d.was ? '<span class="tgop-was">' + esc(d.was) + '</span>' : '';
-      const save = d.save ? '<div><span class="tgop-save">' + esc(t('youSave')) + ' ' + esc(d.save) + (d.savePct ? ' · ' + d.savePct + '%' : '') + '</span></div>' : '';
-      const basis = d.basis ? '<div class="tgop-basis">' + esc(d.basis) + (d.nights ? ' · ' + esc(t('basedOnLead')) : '') + '</div>' : '';
-      const deposit = d.deposit ? '<div class="tgop-deposit">' + I.shield + '<span>' + esc(t('deposit', { amount: d.deposit })) + '</span></div>' : '';
-      const countdown = '<div class="tgop-countdown" data-countdown hidden></div>';
       const trustBits = [];
       if (d.atol) trustBits.push('ATOL protected');
       if (d.abta) trustBits.push('ABTA member');
       const trust = '<p class="tgop-trust">' + esc(t('trustLine'))
         + (trustBits.length ? '<br>🔒 <b>' + esc(trustBits.join(' · ')) + '</b>' : '') + '</p>';
-
-      return '<div class="tgop-book">'
-        + '<div class="tgop-book-top">'
-          + '<div class="tgop-book-from">' + esc(t('from')) + '</div>'
-          + '<div class="tgop-price-row"><div class="tgop-price">' + (d.price || esc(t('poa'))) + '</div>' + was + '</div>'
-          + save + basis + deposit + countdown
-        + '</div>'
-        + '<form class="tgop-form" novalidate>'
+      return '<form class="tgop-form" novalidate>'
           + '<div class="tgop-form-h">' + esc(t('enquireAbout')) + '</div>'
           + '<div class="tgop-field" data-req="name"><input class="tgop-input" name="name" placeholder="' + esc(t('fullName')) + '" autocomplete="name"><span class="tgop-field-err">' + esc(t('addName')) + '</span></div>'
           + '<div class="tgop-form-row">'
@@ -1016,8 +1051,73 @@
           + '<input class="tgop-hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">'
           + '<button type="submit" class="tgop-submit">' + esc(t('sendEnquiry')) + '</button>'
           + trust
-        + '</form>'
+        + '</form>';
+    }
+
+    _bookCard(d) {
+      const t = this.t;
+      const was = d.was ? '<span class="tgop-was">' + esc(d.was) + '</span>' : '';
+      const save = d.save ? '<div><span class="tgop-save">' + esc(t('youSave')) + ' ' + esc(d.save) + (d.savePct ? ' · ' + d.savePct + '%' : '') + '</span></div>' : '';
+      const basis = d.basis ? '<div class="tgop-basis">' + esc(d.basis) + (d.nights ? ' · ' + esc(t('basedOnLead')) : '') + '</div>' : '';
+      const deposit = d.deposit ? '<div class="tgop-deposit">' + I.shield + '<span>' + esc(t('deposit', { amount: d.deposit })) + '</span></div>' : '';
+      const countdown = '<div class="tgop-countdown" data-countdown hidden></div>';
+
+      return '<div class="tgop-book">'
+        + '<div class="tgop-book-top">'
+          + '<div class="tgop-book-from">' + esc(t('from')) + '</div>'
+          + '<div class="tgop-price-row"><div class="tgop-price">' + (d.price || esc(t('poa'))) + '</div>' + was + '</div>'
+          + save + basis + deposit + countdown
+        + '</div>'
+        + this._enquiryForm(d)
       + '</div>';
+    }
+
+    // Cruise quote/call panel — the sticky right-column box on the cruise page:
+    // price, offer details, quote reference and a "Call us" button, then the
+    // shared enquiry form. Phone-led to match the client design, but still
+    // captures leads. Reuses the offer's own reference + phone fields.
+    _cruiseBook(d) {
+      const t = this.t;
+      const details = [];
+      if (d.nights) details.push('<li><span>' + esc(t('duration')) + '</span><span>' + esc(d.nights) + ' ' + esc(t('nights')) + '</span></li>');
+      if (d.period) details.push('<li><span>' + esc(t('travelPeriod')) + '</span><span>' + esc(d.period) + '</span></li>');
+      if (d.basis) details.push('<li><span>' + esc(t('basedOn')) + '</span><span>' + esc(d.basis) + '</span></li>');
+      const phone = d.enquiryPhone ? String(d.enquiryPhone).replace(/\s/g, '') : '';
+      const nightsFrom = (d.nights ? esc(d.nights) + ' ' + esc(t('nights')) + ' · ' : '') + esc(t('from'));
+      return '<div class="tgop-quote">'
+        + (d.period ? '<div class="tgop-quote-when">' + I.calendar + esc(t('travellingIn', { period: d.period })) + '</div>' : '')
+        + '<div class="tgop-quote-price"><span class="tgop-quote-from">' + nightsFrom + '</span>'
+          + '<span class="tgop-quote-amt">' + (d.price || esc(t('poa'))) + (d.basis ? ' <small>' + esc(d.basisShort || 'pp') + '</small>' : '') + '</span></div>'
+        + (details.length ? '<div class="tgop-quote-h">' + esc(t('offerDetails')) + '</div><ul class="tgop-quote-details">' + details.join('') + '</ul>' : '')
+        + (d.reference ? '<div class="tgop-quote-ref">' + esc(t('quoteReference')) + '<b>' + esc(d.reference) + '</b></div>' : '')
+        + (phone ? '<a class="tgop-btn accent block" href="tel:' + esc(phone) + '">' + I.phone + ' ' + esc(t('callUsOn', { phone: d.enquiryPhone })) + '</a>' : '')
+        + '<button type="button" class="tgop-btn outline block" data-enquire>' + esc(t('enquireNow')) + '</button>'
+      + '</div>';
+    }
+
+    // Alternating image + text story blocks (cruise page). Each non-empty prose
+    // block is paired with a gallery image, sides alternating for rhythm; a block
+    // with no image renders full-width prose. Falls back to nothing when empty.
+    _cruiseStory(d) {
+      const blocks = [
+        { h: 'About ' + (d.shipName || 'the ship'), text: d.shipDesc },
+        { h: this.t('theItinerary') || 'Itinerary', text: d.itinerary },
+        { h: this.t('highlightsH') || 'Highlights', text: d.highlights },
+        { h: 'About ' + (d.country || d.destination || 'the destination'), text: d.countryDesc }
+      ].filter(function (b) { return b.text && String(b.text).trim(); });
+      if (!blocks.length) return '';
+      const imgs = d.images.slice(1); // hero is images[0]
+      const html = blocks.map(function (b, i) {
+        const paras = String(b.text).split(/\n+/).filter(Boolean).map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('');
+        const img = imgs[i % (imgs.length || 1)];
+        const side = i % 2 === 0 ? '' : ' tgop-story--flip';
+        const media = img ? '<div class="tgop-story-img" style="background-image:url(' + esc(img) + ')"></div>' : '';
+        return '<div class="tgop-story tgop-reveal' + side + (img ? '' : ' tgop-story--solo') + '">'
+          + media
+          + '<div class="tgop-story-body"><h2 class="tgop-h2">' + esc(b.h) + '</h2><div class="tgop-prose">' + paras + '</div></div>'
+        + '</div>';
+      }).join('');
+      return '<div class="tgop-wrap tgop-stories">' + html + '</div>';
     }
 
     _render() {
@@ -1211,6 +1311,22 @@
             + '<aside class="tgop-aside">' + this._bookCard(d) + '</aside>'
           + '</div></div>'
           + fCta + fFooter + fLightbox;
+      } else if (cfg.template === 'cruise') {
+        // Cruise: hero → What's Included beside a sticky quote/call box →
+        // alternating image+text story blocks → gallery/video/map → enquiry
+        // form → CTA. Reuses the shared fragments; the aside and stories are
+        // cruise-specific. The enquiry form is mounted once (data-enquire targets it).
+        const fEnq = '<div class="tgop-wrap tgop-enq-section tgop-reveal">'
+          + '<h2 class="tgop-h2">' + esc(t('makeEnquiry')) + '</h2>'
+          + '<div class="tgop-enq-card">' + this._enquiryForm(d) + '</div></div>';
+        html = fBar + fHero + fFacts
+          + '<div class="tgop-wrap tgop-cruise-top">'
+            + '<div class="tgop-cruise-main">' + fAbout + fIncludes + fDetail + '</div>'
+            + '<aside class="tgop-cruise-aside">' + this._cruiseBook(d) + '</aside>'
+          + '</div>'
+          + this._cruiseStory(d)
+          + fGallery + fVideo + fMap
+          + fEnq + fCta + fFooter + fLightbox;
       } else { // classic
         html = fBar + fHero + fFacts
           + '<div class="tgop-wrap"><div class="tgop-body">'
