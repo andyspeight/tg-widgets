@@ -125,6 +125,40 @@ async function newPage() {
   const daysAfter = await page.evaluate(() => document.getElementById('tour-mount')?.shadowRoot?.querySelectorAll('[data-role="day"]').length || 0);
   ok(daysAfter === 2, `editor: adding a day grows the itinerary (got ${daysAfter})`);
 
+  // ── Image upload: a file uploads to Blob and its URL lands in the field ────
+  await page.click('.tb-toggle button[data-view="editor"]');
+  // Stub the Blob client CDN import so the upload is hermetic (no network).
+  await page.route('https://esm.sh/**', (r) => r.fulfill({
+    status: 200, contentType: 'text/javascript',
+    body: 'export function upload(path, file, opts){ return Promise.resolve({ url: "https://blob.example/" + encodeURIComponent(path) }); }',
+  }));
+  const controls = await page.evaluate(() => ({
+    files: document.querySelectorAll('#tb-build input[type=file]').length,
+    ups: document.querySelectorAll('#tb-build .up-btn').length,
+  }));
+  ok(controls.files >= 3 && controls.ups >= 3, `editor: image fields expose upload controls (files=${controls.files}, buttons=${controls.ups})`);
+
+  // Upload into the hero image field (first image field, in Tour basics).
+  await page.locator('#tb-build input[type=file]').first().setInputFiles({
+    name: 'hero.jpg', mimeType: 'image/jpeg', buffer: Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10]),
+  });
+  await page.waitForFunction(() => {
+    const f = document.querySelector('#tb-build input[type=file]');
+    const inp = f && f.parentElement.querySelector('.img-row .in');
+    return inp && /^https:\/\/blob\.example\//.test(inp.value);
+  }, { timeout: 6000 }).catch(() => {});
+  const heroUrl = await page.evaluate(() => {
+    const f = document.querySelector('#tb-build input[type=file]');
+    const inp = f && f.parentElement.querySelector('.img-row .in');
+    return inp ? inp.value : '';
+  });
+  ok(/^https:\/\/blob\.example\/offer-photos%2Ftour-/.test(heroUrl),
+    `editor: uploading a file stores the returned Blob URL in the field (got "${heroUrl}")`);
+  // And it flows into the live preview.
+  await page.waitForFunction(() => !!document.getElementById('tour-mount')?.shadowRoot?.querySelector('img[src^="https://blob.example/"]'), { timeout: 4000 }).catch(() => {});
+  const heroInPreview = await page.evaluate(() => !!document.getElementById('tour-mount')?.shadowRoot?.querySelector('img[src^="https://blob.example/"]'));
+  ok(heroInPreview, 'editor: uploaded image flows into the live preview');
+
   ok(errors.length === 0, 'editor: no script errors (' + errors.join(' | ') + ')');
   await page.close();
 }

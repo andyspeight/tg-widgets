@@ -85,6 +85,14 @@
   .rep-del:hover { color: var(--tgse-danger); background: var(--tgse-hover); }
   .rep-title { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--tgse-ink-3); margin: 0 0 10px; }
   .add-btn { font: inherit; font-size: 12.5px; font-weight: 600; color: var(--tgse-brand); background: var(--tgse-brand-tint); border: 1px dashed var(--tgse-brand); border-radius: var(--tgse-radius-sm); padding: 8px 12px; cursor: pointer; }
+
+  /* Image field: URL input + Upload button (uploads to Vercel Blob, stores the URL) */
+  .img-row { display: flex; gap: 8px; align-items: stretch; }
+  .img-row .in { flex: 1 1 auto; min-width: 0; }
+  .up-btn { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: 12.5px; font-weight: 600; color: var(--tgse-brand); background: var(--tgse-brand-tint); border: 1px solid var(--tgse-brand); border-radius: var(--tgse-radius-sm); padding: 8px 12px; cursor: pointer; white-space: nowrap; }
+  .up-btn:hover { background: var(--tgse-brand); color: #fff; }
+  .up-btn:disabled { opacity: .6; cursor: default; }
+  .up-btn svg { width: 15px; height: 15px; }
   .sub { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--tgse-border); }
   .sub-label { font-size: 11px; font-weight: 700; color: var(--tgse-ink-3); margin-bottom: 8px; }
 </style>
@@ -242,6 +250,81 @@
     ta.addEventListener('input', () => { setArr(ta.value.split('\n').map(s => s.trim()).filter(Boolean)); dirty(); });
     return ta;
   }
+
+  // ── Image upload ───────────────────────────────────────────────────────────
+  // Reuses the suite's existing /api/upload-photo token flow (the one the offers
+  // builder uses): the file streams straight to Vercel Blob and we store ONLY
+  // the returned https URL in the config — never base64 — so the widget stays
+  // CSP-clean and the saved config stays small. The Blob client is imported from
+  // a CDN on first use (editor pages allow that; widgets never do).
+  const UPLOAD_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>';
+  let _blobMod = null;
+  function blobClient() {
+    if (_blobMod) return Promise.resolve(_blobMod);
+    return import('https://esm.sh/@vercel/blob@0.27.0/client').then((m) => (_blobMod = m));
+  }
+  const IMG_TYPES = /^image\/(jpeg|jpg|png|webp|gif|avif)$/i;
+  function validImage(f) {
+    if (!f || !IMG_TYPES.test(f.type)) { toast('Choose a JPG, PNG, WebP or GIF image', 'err'); return false; }
+    if (f.size > 8 * 1024 * 1024) { toast('That image is over 8MB — please pick a smaller file', 'err'); return false; }
+    return true;
+  }
+  function toast(msg, kind) { if (window.tgse && tgse.toast) tgse.toast(msg, kind); }
+  async function uploadImage(file) {
+    const mod = await blobClient();
+    const clean = String(file.name || 'image').replace(/[^a-zA-Z0-9._-]/g, '-').slice(-64);
+    const blob = await mod.upload('offer-photos/tour-' + Date.now() + '-' + clean, file, {
+      access: 'public', contentType: file.type, handleUploadUrl: '/api/upload-photo',
+    });
+    return blob && blob.url;
+  }
+  function upButton(label) {
+    const lbl = mk('span', { text: label });
+    return { btn: mk('button', { type: 'button', class: 'up-btn' }, mk('span', { html: UPLOAD_ICON }), lbl), lbl };
+  }
+
+  // Single image: a URL input + an Upload button. An uploaded file fills the URL.
+  function imageIn(get, set, ph) {
+    const url = textIn(get, set, ph || 'https://… or upload', 500);
+    const file = mk('input', { type: 'file', accept: 'image/jpeg,image/png,image/webp,image/gif', hidden: 'hidden' });
+    const { btn, lbl } = upButton('Upload');
+    btn.addEventListener('click', () => file.click());
+    file.addEventListener('change', async () => {
+      const f = file.files && file.files[0]; file.value = '';
+      if (!f || !validImage(f)) return;
+      btn.disabled = true; lbl.textContent = 'Uploading…';
+      try {
+        const u = await uploadImage(f);
+        if (!u) throw new Error('no url');
+        set(u); url.value = u; dirty(); toast('Image uploaded', 'ok');
+      } catch (e) { toast('Upload failed — you can paste a URL instead', 'err'); }
+      btn.disabled = false; lbl.textContent = 'Upload';
+    });
+    return mk('div', {}, mk('div', { class: 'img-row' }, url, btn), file);
+  }
+
+  // Image list: the newline textarea PLUS an Upload button that appends uploads.
+  function imageListIn(getArr, setArr, ph) {
+    const ta = listArea(getArr, setArr, ph);
+    const file = mk('input', { type: 'file', accept: 'image/jpeg,image/png,image/webp,image/gif', multiple: 'multiple', hidden: 'hidden' });
+    const { btn, lbl } = upButton('Upload photos');
+    btn.addEventListener('click', () => file.click());
+    file.addEventListener('change', async () => {
+      const files = Array.prototype.slice.call(file.files || []); file.value = '';
+      if (!files.length) return;
+      btn.disabled = true; lbl.textContent = 'Uploading…';
+      let added = 0;
+      for (const f of files) {
+        if (!validImage(f)) continue;
+        try { const u = await uploadImage(f); if (u) { const arr = (getArr() || []).slice(); arr.push(u); setArr(arr); added++; } } catch (e) { /* skip one, keep going */ }
+      }
+      ta.value = (getArr() || []).join('\n');
+      dirty();
+      btn.disabled = false; lbl.textContent = 'Upload photos';
+      toast(added ? (added + ' photo' + (added > 1 ? 's' : '') + ' uploaded') : 'Upload failed — you can paste URLs instead', added ? 'ok' : 'err');
+    });
+    return mk('div', {}, mk('div', { class: 'img-row', style: 'margin-bottom:8px' }, btn), ta, file);
+  }
   function colourIn(get, set) {
     const hex = mk('input', { class: 'in', type: 'text', maxlength: 9, value: get() || '' });
     const sw = mk('input', { type: 'color', value: /^#[0-9a-fA-F]{6}$/.test(get() || '') ? get() : '#1B2B5B' });
@@ -308,7 +391,7 @@
       b.append(field('Subtitle', textArea(() => t.subtitle, v => t.subtitle = v, 'A short selling line', 400)));
       b.append(mk('div', { class: 'row2' },
         field('Location', textIn(() => t.location, v => t.location = v, 'e.g. Kenya', 120)),
-        field('Hero image URL', textIn(() => t.heroImage, v => t.heroImage = v, 'https://…', 500))
+        field('Hero image', imageIn(() => t.heroImage, v => t.heroImage = v, 'https://… or upload'))
       ));
       b.append(mk('div', { class: 'row3' },
         field('Starts', dateIn(() => t.startDate, v => t.startDate = v)),
@@ -363,8 +446,8 @@
           ), '+ Add a fact');
         wrap.append(facts);
         // Images
-        const imgs = mk('div', { class: 'sub' }, mk('div', { class: 'sub-label', text: 'Photos (one URL per line)' }));
-        imgs.append(listArea(() => d.images, v => d.images = v, 'https://…'));
+        const imgs = mk('div', { class: 'sub' }, mk('div', { class: 'sub-label', text: 'Photos (upload, or one URL per line)' }));
+        imgs.append(imageListIn(() => d.images, v => d.images = v, 'https://…'));
         wrap.append(imgs);
         // Optional activities
         const opts = mk('div', { class: 'sub' }, mk('div', { class: 'sub-label', text: 'Optional activities (priced per person)' }));
@@ -413,7 +496,7 @@
         // Items (checklist)
         w.append(field('List items', listArea(() => s.items, v => s.items = v, 'Used by the Checklist layout — one per line')));
         // Image (feature)
-        w.append(field('Image URL', textIn(() => s.image, v => s.image = v, 'Used by the Feature layout', 500)));
+        w.append(field('Image', imageIn(() => s.image, v => s.image = v, 'Used by the Feature layout — upload or paste a URL')));
         // Columns (columns)
         const cols = mk('div', { class: 'sub' }, mk('div', { class: 'sub-label', text: 'Columns (for the Two columns layout)' }));
         repeater(cols, s.columns, () => ({ heading: '', items: [] }), (col) => {
@@ -428,8 +511,8 @@
     }));
 
     // Gallery
-    root.append(section('Gallery', 'One image URL per line.', false, (b) => {
-      b.append(field('', listArea(() => C.gallery, v => C.gallery = v, 'https://…')));
+    root.append(section('Gallery', 'Upload photos, or paste one image URL per line.', false, (b) => {
+      b.append(field('', imageListIn(() => C.gallery, v => C.gallery = v, 'https://…')));
     }));
 
     // Enquiry
