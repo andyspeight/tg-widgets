@@ -1,5 +1,5 @@
 /**
- * Travelgenix World Map Widget v3.14.0
+ * Travelgenix World Map Widget v3.15.0
  * Real-map version using Leaflet + MapTiler Streets tiles.
  *
  * Usage:
@@ -68,7 +68,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.14.0';
+  const VERSION = '3.15.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -103,6 +103,14 @@
       boardRoomOnly: 'Room only', boardSelfCatering: 'Self catering', boardBedAndBreakfast: 'B&B',
       boardHalfBoard: 'Half board', boardFullBoard: 'Full board', boardAllInclusive: 'All inclusive',
       boardAllInclusivePlus: 'All inclusive+',
+      travellers: 'Travellers', editTravellers: 'Set the party for these deals',
+      adults: 'Adults', childrenLabel: 'Children', infants: 'Infants',
+      adultsHelp: '16+ years', childrenHelp: '2 to 15 years', infantsHelp: 'Under 2',
+      childAges: 'Child ages', childAgesHint: 'Add each child’s age so we can price the trip correctly.',
+      childNum: 'Child {n}', childAgeAria: 'Age of child {n}', years: '{n} yrs',
+      apply: 'Apply', cancel: 'Cancel', decrease: 'Decrease {label}', increase: 'Increase {label}',
+      adultN: '{n} adult', adultsN: '{n} adults', childN: '{n} child', childrenN: '{n} children',
+      infantN: '{n} infant', infantsN: '{n} infants',
     },
     fr: {
       title: 'Où irez-vous ensuite ?', subtitle: 'Parcourez nos dernières offres du monde entier',
@@ -490,6 +498,35 @@
     // Travelify ignores it (it never pinned the property). Precise property
     // pinning would use loct=Property, kept out until verified live.
     return TVLLNK_BASE + '/deeplink/' + encodeURIComponent(id) + '?' + p.toString();
+  }
+
+  // Rewrite a deeplink with the visitor's chosen party. adt/chd/inf are SET
+  // (replacing the adults-only default buildDeeplink emits); chdage is APPENDED
+  // once per child — the Travelify spec requires exactly one age per child
+  // (chd=2&chdage=4&chdage=5), and any pre-existing chdage is cleared first.
+  // childAges is truncated to the child count defensively. Falls back to a plain
+  // query append when url isn't a parseable URL. No children → chd=0, no chdage.
+  function applyPartyToDeeplink(url, pax) {
+    if (!url) return url;
+    const children = Math.max(0, (pax && pax.children) || 0);
+    const ages = ((pax && pax.childAges) || []).slice(0, children);
+    const adt = Math.max(1, (pax && pax.adults) || 2);
+    const inf = Math.max(0, (pax && pax.infants) || 0);
+    const base = (typeof location !== 'undefined' && location.href) ? location.href : undefined;
+    try {
+      const u = new URL(url, base);
+      u.searchParams.set('adt', adt);
+      u.searchParams.set('chd', children);
+      u.searchParams.set('inf', inf);
+      u.searchParams.delete('chdage');
+      for (const age of ages) u.searchParams.append('chdage', age);
+      return u.toString();
+    } catch (e) {
+      const sep = String(url).indexOf('?') >= 0 ? '&' : '?';
+      let q = 'adt=' + adt + '&chd=' + children + '&inf=' + inf;
+      for (const age of ages) q += '&chdage=' + age;
+      return url + sep + q;
+    }
   }
 
   // ── Deeplink token transport (x-access-token via POST body) ───────────────
@@ -1815,6 +1852,77 @@ svg.leaflet-image-layer.leaflet-interactive path {
       background: rgba(255,255,255,.92); color: #0f172a; cursor: pointer; max-width: 96px;
     }
 
+    /* Travellers button (fullscreen header) + party modal */
+    .tgwm-ov-pax {
+      flex: 0 0 auto; display: inline-flex; align-items: center; gap: 7px;
+      margin-right: 10px; padding: 7px 12px; font: inherit; font-size: 13px; font-weight: 600;
+      border: 1px solid rgba(128,128,128,.35); border-radius: 999px;
+      background: rgba(255,255,255,.92); color: #0f172a; cursor: pointer;
+      transition: background .12s ease, border-color .12s ease;
+    }
+    .tgwm-ov-pax:hover { background: #fff; border-color: rgba(128,128,128,.55); }
+    .tgwm-ov-pax:focus-visible { outline: 2px solid var(--tgwm-cta-bg, #1B2B5B); outline-offset: 2px; }
+    .tgwm-ov-pax svg { flex: 0 0 auto; opacity: .8; }
+    .tgwm-pax-layer {
+      position: absolute; inset: 0; z-index: 30;
+      display: flex; align-items: center; justify-content: center; padding: 16px;
+    }
+    .tgwm-pax-clickaway { position: absolute; inset: 0; background: rgba(15,23,42,.45); }
+    .tgwm-pax-dialog {
+      position: relative; z-index: 1; width: 100%; max-width: 340px;
+      max-height: calc(100% - 32px); overflow-y: auto;
+      background: #fff; color: #0f172a; border-radius: 16px;
+      padding: 18px; box-shadow: 0 20px 50px rgba(15,23,42,.35);
+    }
+    .tgwm-pax-title { margin: 0 0 10px; font-size: 16px; font-weight: 800; }
+    .tgwm-pax-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 9px 0; border-top: 1px solid #E2E8F0;
+    }
+    .tgwm-pax-row:first-of-type { border-top: 0; }
+    .tgwm-pax-row-label { font-size: 13px; font-weight: 700; }
+    .tgwm-pax-row-help { font-size: 10px; color: #64748B; display: block; margin-top: 1px; }
+    .tgwm-pax-stepper {
+      display: inline-flex; align-items: center;
+      border: 1px solid #E2E8F0; border-radius: 8px; overflow: hidden; background: #fff;
+    }
+    .tgwm-pax-stepper button {
+      width: 30px; height: 30px; background: transparent; border: 0; padding: 0;
+      font-size: 17px; font-weight: 700; color: inherit; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .tgwm-pax-stepper button:hover:not(:disabled) { background: #F1F5F9; }
+    .tgwm-pax-stepper button:disabled { color: #CBD5E1; cursor: not-allowed; }
+    .tgwm-pax-val {
+      min-width: 30px; text-align: center; font-size: 13px; font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+    .tgwm-pax-ages:empty { display: none; }
+    .tgwm-pax-ages { padding: 9px 0 2px; border-top: 1px solid #E2E8F0; }
+    .tgwm-pax-ages-head { font-size: 13px; font-weight: 700; }
+    .tgwm-pax-ages-hint { font-size: 10px; color: #64748B; margin: 1px 0 8px; }
+    .tgwm-pax-ages-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px;
+    }
+    .tgwm-pax-age { display: flex; flex-direction: column; gap: 3px; }
+    .tgwm-pax-age-label { font-size: 10px; font-weight: 700; color: #64748B; }
+    .tgwm-pax-age-select {
+      width: 100%; height: 30px; padding: 0 6px;
+      border: 1px solid #E2E8F0; border-radius: 8px; background: #fff; color: inherit;
+      font: inherit; font-size: 13px; font-weight: 600;
+    }
+    .tgwm-pax-actions { display: flex; gap: 8px; margin-top: 14px; }
+    .tgwm-pax-btn {
+      flex: 1 1 0; padding: 10px 12px; font: inherit; font-size: 13px; font-weight: 700;
+      border: 1px solid #E2E8F0; border-radius: 10px; background: #fff; color: #0f172a; cursor: pointer;
+    }
+    .tgwm-pax-btn:hover { background: #F8FAFC; }
+    .tgwm-pax-btn--primary {
+      border-color: transparent; background: var(--tgwm-cta-bg, #1B2B5B); color: #fff;
+    }
+    .tgwm-pax-btn--primary:hover { filter: brightness(1.06); background: var(--tgwm-cta-bg, #1B2B5B); }
+    @media (prefers-reduced-motion: reduce) { .tgwm-ov-pax { transition: none; } }
+
     /* Content area — pieces 2-4 (map + deal cards + filters) mount in here.
        For piece 1 it just holds the empty/placeholder state. */
     .tgwm-overlay-body {
@@ -2459,6 +2567,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
       this._filterMinRating = null; // null = Any
       this._filterBoard = null;     // hotels mode only
       this._filterNights = null;    // hotels mode only
+      // Party for booking deeplinks (fullscreen overlay). Set once via the
+      // Travellers control and applied to every deal card's deeplink. The
+      // Travelify spec needs an age per child (chdage), so childAges holds one
+      // age per child. Default: a couple, no children.
+      this._pax = { adults: 2, children: 0, infants: 0, childAges: [] };
       // Region selector state (world map). null = Worldwide (cluster view).
       this._activeRegion = null;
       this._render();
@@ -2721,6 +2834,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
             <h2 class="tgwm-overlay-title">${esc(c.title || t('title'))}</h2>
             <p class="tgwm-overlay-sub">${esc(c.subtitle || t('subtitle'))}</p>
           </div>
+          <button class="tgwm-ov-pax" data-ov-pax type="button" aria-label="${esc(t('editTravellers'))}">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span data-ov-pax-label>${esc(this._paxSummary())}</span>
+          </button>
           ${c.showCurrencySwitcher ? `<label class="tgwm-ov-cur" aria-label="Display currency">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
             <select data-ov-cur>${CURRENCY_ORDER.map((cc) => `<option value="${cc}"${cc === (this.cur.code || 'GBP') ? ' selected' : ''}>${cc}</option>`).join('')}</select>
@@ -2789,6 +2906,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
       // Close affordances: button, backdrop click.
       wrap.querySelector('[data-ov-close]').addEventListener('click', () => this._closeOverlay());
       wrap.querySelector('[data-ov-backdrop]').addEventListener('click', () => this._closeOverlay());
+
+      // Travellers: set the party once; it applies to every deal card's deeplink.
+      const paxBtn = wrap.querySelector('[data-ov-pax]');
+      if (paxBtn) paxBtn.addEventListener('click', () => this._openPaxPopover(paxBtn));
 
       // Currency switcher (fullscreen overlay only, opt-in via showCurrencySwitcher).
       // Repaint the open country's cards + resort pins in the new currency. Off by
@@ -3999,7 +4120,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
     /** Build one deal card. Whole card is an anchor to the Travelify deeplink. */
     _cardHtml(o) {
-      const href = safeUrl(buildDeeplink(o, this.cfg.appId, { propertyPin: this.cfg.propertyDeeplinks === true }) || o.url);
+      // Build the adults-only base once, then bake the visitor's chosen party
+      // (adt/chd/inf + one chdage per child) into the href. The base is stored on
+      // the anchor so a later party change just re-applies it — no re-render.
+      const base = buildDeeplink(o, this.cfg.appId, { propertyPin: this.cfg.propertyDeeplinks === true }) || o.url || '';
+      const href = safeUrl(applyPartyToDeeplink(base, this._pax));
       const img = safeUrl(o.image);
       const t = this.t;
       const pp = formatPrice(o.pricePP || o.price, o.currency);
@@ -4020,7 +4145,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
         : '';
 
       return `
-        <a class="tgwm-card" href="${esc(href)}" target="_blank" rel="noopener noreferrer">
+        <a class="tgwm-card" href="${esc(href)}" data-tgwm-dl="${esc(base)}" target="_blank" rel="noopener noreferrer">
           <div class="tgwm-card-img">
             ${imgHtml}
             ${directBadge}
@@ -4052,6 +4177,156 @@ svg.leaflet-image-layer.leaflet-interactive path {
       };
       const path = ICONS[icon] || '';
       return `<span class="tgwm-card-fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>${label}</span>`;
+    }
+
+    // ── Travellers (party for the fullscreen deal deeplinks) ────────────────
+    /** Short party summary for the Travellers button, e.g. "2 adults · 1 child". */
+    _paxSummary() {
+      const t = this.t, px = this._pax || { adults: 2, children: 0, infants: 0 };
+      const a = Math.max(1, px.adults || 1);
+      const bits = [t(a === 1 ? 'adultN' : 'adultsN', { n: a })];
+      if (px.children > 0) bits.push(t(px.children === 1 ? 'childN' : 'childrenN', { n: px.children }));
+      if (px.infants > 0) bits.push(t(px.infants === 1 ? 'infantN' : 'infantsN', { n: px.infants }));
+      return bits.join(' · ');
+    }
+
+    /** Refresh the Travellers button label from the current party. */
+    _syncPaxButton() {
+      if (!this.overlayEl) return;
+      const lbl = this.overlayEl.querySelector('[data-ov-pax-label]');
+      if (lbl) lbl.textContent = this._paxSummary();
+    }
+
+    /** Re-apply the current party to every rendered deal card's deeplink, from
+     *  the adults-only base stored on each anchor. No re-render needed. */
+    _updateCardHrefs() {
+      if (!this.overlayEl) return;
+      this.overlayEl.querySelectorAll('.tgwm-card[data-tgwm-dl]').forEach((a) => {
+        const base = a.getAttribute('data-tgwm-dl');
+        if (base) a.setAttribute('href', safeUrl(applyPartyToDeeplink(base, this._pax)));
+      });
+    }
+
+    _paxStepperRow(kind, label, help, value) {
+      const t = this.t;
+      return '<div class="tgwm-pax-row">'
+        + '<div><div class="tgwm-pax-row-label">' + esc(label) + '</div>'
+        + '<small class="tgwm-pax-row-help">' + esc(help) + '</small></div>'
+        + '<div class="tgwm-pax-stepper">'
+        + '<button type="button" data-pax-btn="' + kind + ':minus" aria-label="' + esc(t('decrease', { label: label })) + '">−</button>'
+        + '<span class="tgwm-pax-val" data-pax-val="' + kind + '">' + value + '</span>'
+        + '<button type="button" data-pax-btn="' + kind + ':plus" aria-label="' + esc(t('increase', { label: label })) + '">+</button>'
+        + '</div></div>';
+    }
+
+    /** Centered Travellers modal inside the fullscreen overlay. Adults/children/
+     *  infants steppers plus one age select per child (2 to 15). On Apply it
+     *  commits the party, then updates every card's deeplink and the button. */
+    _openPaxPopover(triggerEl) {
+      if (!this.overlayEl) return;
+      const t = this.t;
+      const existing = this.overlayEl.querySelector('.tgwm-pax-layer');
+      if (existing) existing.remove();
+
+      const CHILD_AGE_MIN = 2, CHILD_AGE_MAX = 15, CHILD_AGE_DEFAULT = 8;
+      const limits = { adults: [1, 9], children: [0, 8], infants: [0, 4] };
+      // Working copy — only committed to this._pax on Apply.
+      const src = this._pax || { adults: 2, children: 0, infants: 0, childAges: [] };
+      const state = {
+        adults: Math.max(1, src.adults || 2),
+        children: Math.max(0, src.children || 0),
+        infants: Math.max(0, src.infants || 0),
+        childAges: (src.childAges || []).slice(),
+      };
+
+      const layer = document.createElement('div');
+      layer.className = 'tgwm-pax-layer';
+      layer.innerHTML =
+        '<div class="tgwm-pax-clickaway" data-pax-cancel></div>'
+        + '<div class="tgwm-pax-dialog" role="dialog" aria-modal="true" aria-label="' + esc(t('travellers')) + '">'
+        + '<h3 class="tgwm-pax-title">' + esc(t('travellers')) + '</h3>'
+        + this._paxStepperRow('adults', t('adults'), t('adultsHelp'), state.adults)
+        + this._paxStepperRow('children', t('childrenLabel'), t('childrenHelp'), state.children)
+        + '<div class="tgwm-pax-ages" data-pax-ages></div>'
+        + this._paxStepperRow('infants', t('infants'), t('infantsHelp'), state.infants)
+        + '<div class="tgwm-pax-actions">'
+        + '<button type="button" class="tgwm-pax-btn" data-pax-cancel>' + esc(t('cancel')) + '</button>'
+        + '<button type="button" class="tgwm-pax-btn tgwm-pax-btn--primary" data-pax-apply>' + esc(t('apply')) + '</button>'
+        + '</div></div>';
+      this.overlayEl.appendChild(layer);
+
+      const agesWrap = layer.querySelector('[data-pax-ages]');
+      const renderAges = () => {
+        const n = state.children;
+        while (state.childAges.length < n) state.childAges.push(CHILD_AGE_DEFAULT);
+        state.childAges.length = n;
+        if (!agesWrap) return;
+        if (n === 0) { agesWrap.innerHTML = ''; return; }
+        let h = '<div class="tgwm-pax-ages-head">' + esc(t('childAges')) + '</div>'
+          + '<div class="tgwm-pax-ages-hint">' + esc(t('childAgesHint')) + '</div>'
+          + '<div class="tgwm-pax-ages-grid">';
+        for (let i = 0; i < n; i++) {
+          h += '<label class="tgwm-pax-age"><span class="tgwm-pax-age-label">' + esc(t('childNum', { n: i + 1 })) + '</span>'
+            + '<select class="tgwm-pax-age-select" data-pax-age="' + i + '" aria-label="' + esc(t('childAgeAria', { n: i + 1 })) + '">';
+          for (let a = CHILD_AGE_MIN; a <= CHILD_AGE_MAX; a++) {
+            h += '<option value="' + a + '"' + (state.childAges[i] === a ? ' selected' : '') + '>' + esc(t('years', { n: a })) + '</option>';
+          }
+          h += '</select></label>';
+        }
+        agesWrap.innerHTML = h + '</div>';
+      };
+
+      const syncSteppers = () => {
+        layer.querySelectorAll('[data-pax-val]').forEach((el) => {
+          el.textContent = state[el.getAttribute('data-pax-val')];
+        });
+        layer.querySelectorAll('[data-pax-btn]').forEach((b) => {
+          const [k, dir] = b.getAttribute('data-pax-btn').split(':');
+          b.disabled = dir === 'minus' ? state[k] <= limits[k][0] : state[k] >= limits[k][1];
+        });
+      };
+
+      const close = () => {
+        document.removeEventListener('keydown', onKeydown);
+        layer.remove();
+        if (triggerEl && triggerEl.focus) { try { triggerEl.focus(); } catch (e) { /* noop */ } }
+      };
+      const onKeydown = (ev) => { if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); close(); } };
+      document.addEventListener('keydown', onKeydown);
+
+      layer.addEventListener('click', (ev) => {
+        const step = ev.target.closest ? ev.target.closest('[data-pax-btn]') : null;
+        if (step) {
+          const [kind, dir] = step.getAttribute('data-pax-btn').split(':');
+          const [min, max] = limits[kind];
+          state[kind] = Math.max(min, Math.min(max, state[kind] + (dir === 'minus' ? -1 : 1)));
+          syncSteppers();
+          if (kind === 'children') renderAges();
+          return;
+        }
+        if (ev.target.closest && ev.target.closest('[data-pax-apply]')) {
+          this._pax = {
+            adults: state.adults, children: state.children, infants: state.infants,
+            childAges: state.childAges.slice(0, state.children),
+          };
+          this._updateCardHrefs();
+          this._syncPaxButton();
+          close();
+          return;
+        }
+        if (ev.target.closest && ev.target.closest('[data-pax-cancel]')) { close(); }
+      });
+
+      layer.addEventListener('change', (ev) => {
+        const sel = ev.target.closest ? ev.target.closest('[data-pax-age]') : null;
+        if (!sel) return;
+        const i = parseInt(sel.getAttribute('data-pax-age'), 10);
+        const v = parseInt(sel.value, 10);
+        if (Number.isFinite(i) && Number.isFinite(v)) state.childAges[i] = v;
+      });
+
+      renderAges();
+      syncSteppers();
     }
 
     _hideLoading() {

@@ -88,6 +88,7 @@
     "test:weather-cache": "node test/weather-cache-smoke.mjs",
     "test:worldmap-hotels": "node test/worldmap-hotels-mode-smoke.mjs",
     "test:worldmap-hotels-widget": "node test/worldmap-hotels-widget-smoke.mjs",
+    "test:worldmap-pax": "node test/worldmap-pax-deeplink-smoke.mjs",
     "test:testimonials-reveal": "node test/testimonials-reveal-smoke.mjs",
     "test:trips": "node test/trips-widget-smoke.mjs",
     "test:trips-page": "node test/trips-page-smoke.mjs",
