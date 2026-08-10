@@ -4167,6 +4167,47 @@ await check('and a sealed embed renders on the canvas without reaching the edito
   return !reached ? true : 'the sealed code reached the editor window';
 });
 
+/*
+ * A FIELD LABEL NAMES AND FOCUSES ITS CONTROL.
+ *
+ * The properties pane drew a bare <label> beside each field, tied to nothing, so
+ * a click focused nothing and a screen reader read the box as unlabelled
+ * (Fields.tsx, the Wrapper). Every field renderer is associated now: a single box
+ * by htmlFor, so the label focuses it; a grouped control (a colour, an image
+ * chooser) by role=group and aria-labelledby on the field, so it names itself.
+ * The image block carries one of each in its content, the alt box and the picker.
+ */
+await check('a properties field label names and focuses its control', async () => {
+  await addBlock('Image');
+  await page.waitForTimeout(200);
+
+  // The single box: its label points at exactly one real control, and clicking
+  // the label moves focus there.
+  const label = page.locator('.ed-props label.ed-label[for]').first();
+  if ((await label.count()) === 0) return 'no field label is tied to a control';
+  const forId = await label.getAttribute('for');
+  const control = page.locator(`.ed-props [id="${forId}"]`);
+  if ((await control.count()) !== 1) return `the label points at "${forId}", not one control`;
+  const tag = await control.evaluate((el) => el.tagName.toLowerCase());
+  if (!['input', 'select', 'textarea'].includes(tag)) return `the label points at a <${tag}>`;
+  await label.click();
+  if (!(await control.evaluate((el) => el === document.activeElement)))
+    return 'clicking the label did not focus its control';
+
+  // The grouped control: the image field is a group that names itself by its own
+  // label. Found VIA THAT LABEL, not via any [role=group], so the slides
+  // repeater's own group cannot stand in for it and let this pass while the image
+  // field's group is gone. The probe caught exactly that when this read the first
+  // group it could find.
+  const glabel = page.locator('.ed-props label.ed-label', { hasText: /^Image$/ }).first();
+  if ((await glabel.count()) === 0) return 'the image field label is not in the pane';
+  const gfield = glabel.locator('..');
+  if ((await gfield.getAttribute('role')) !== 'group') return 'the image field is not a labelled group';
+  const labelId = await glabel.getAttribute('id');
+  const by = await gfield.getAttribute('aria-labelledby');
+  return labelId && by === labelId ? true : `the group names "${by}", the label is "${labelId}"`;
+});
+
 
 // ---------------------------------------------------------------------------
 // The inner container

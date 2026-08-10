@@ -85,6 +85,13 @@ const MUTATIONS = [
   }, []);`,
   },
   {
+    check: 'a properties field label names and focuses its control',
+    why: 'Draw the field as a bare div again, so a grouped control loses the label that named it.',
+    file: 'components/editor/Fields.tsx',
+    from: `    <div className="ed-field" role={group ? 'group' : undefined} aria-labelledby={group ? labelId : undefined}>`,
+    to: '    <div className="ed-field">',
+  },
+  {
     check: 'and typing in the pane still reaches the canvas',
     why: 'Drop the canvas catch-up effect, so the canvas ignores pane edits.',
     file: 'components/editor/Canvas.tsx',

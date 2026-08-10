@@ -16,7 +16,7 @@
  * contentEditable puts the caret back at the start on every render.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import type { Field } from '../../lib/content/blocks';
 import type { PlaceMatch } from '../../lib/content/geocode';
 import { COLOUR_SWATCHES } from '../../lib/content/styles';
@@ -60,12 +60,18 @@ export function FieldRenderer({
   onPatch,
   siblings,
 }: FieldProps) {
+  // One id per field instance. Used as the control's id for a single box (so the
+  // label focuses it), or as the label's own id for a grouped control (so the
+  // group names itself by it). See Wrapper.
+  const id = useId();
+
   switch (field.kind) {
     case 'text':
     case 'url':
       return (
-        <Wrapper field={field}>
+        <Wrapper field={field} htmlFor={id}>
           <input
+            id={id}
             className="ed-input"
             type={field.kind === 'url' ? 'text' : 'text'}
             inputMode={field.kind === 'url' ? 'url' : undefined}
@@ -79,11 +85,12 @@ export function FieldRenderer({
 
     case 'place':
       return (
-        <Wrapper field={field}>
+        <Wrapper field={field} htmlFor={id}>
           <PlaceField
             /* Remounts when a different block is selected, so the box shows that
                block's address rather than the last one's. */
             key={`${ownerId}:${field.key}`}
+            id={id}
             value={asString(value)}
             max={'max' in field ? field.max : undefined}
             placeholder={'placeholder' in field ? field.placeholder : undefined}
@@ -94,8 +101,9 @@ export function FieldRenderer({
 
     case 'textarea':
       return (
-        <Wrapper field={field}>
+        <Wrapper field={field} htmlFor={id}>
           <textarea
+            id={id}
             className="ed-textarea"
             data-mono={field.key === 'html' ? 'true' : undefined}
             rows={field.rows ?? 4}
@@ -108,14 +116,14 @@ export function FieldRenderer({
 
     case 'richtext':
       return (
-        <Wrapper field={field}>
+        <Wrapper field={field} labelId={id} group>
           <RichText key={`${ownerId}:${field.key}`} html={asString(value)} onChange={onChange} />
         </Wrapper>
       );
 
     case 'image':
       return (
-        <Wrapper field={field}>
+        <Wrapper field={field} labelId={id} group>
           {/*
             onPatch and the two key names are passed through so that choosing a
             picture which already has a description fills the alt field beside it,
@@ -161,21 +169,21 @@ export function FieldRenderer({
 
     case 'icon':
       return (
-        <Wrapper field={field}>
+        <Wrapper field={field} labelId={id} group>
           <IconField value={asString(value)} onChange={onChange} />
         </Wrapper>
       );
 
     case 'colour':
       return (
-        <Wrapper field={field}>
+        <Wrapper field={field} labelId={id} group>
           <ColourField value={asString(value)} onChange={onChange} />
         </Wrapper>
       );
 
     case 'corners':
       return (
-        <Wrapper field={field}>
+        <Wrapper field={field} labelId={id} group>
           <CornerBox
             value={value && typeof value === 'object' ? (value as Partial<Corners>) : undefined}
             onChange={onChange}
@@ -188,6 +196,10 @@ export function FieldRenderer({
       // Four or fewer reads better as segmented buttons than a dropdown.
       if (field.options.length <= 4) {
         return (
+          // The segmented group names ITSELF with aria-label, not the visible
+          // label above it. That was already a real accessible name, so this is
+          // not the bare-label case, and it is the name the browser suite finds a
+          // segmented control by. Do not swap it for aria-labelledby.
           <Wrapper field={field}>
             <div className="ed-segmented" role="group" aria-label={field.label}>
               {field.options.map((option) => (
@@ -205,8 +217,9 @@ export function FieldRenderer({
         );
       }
       return (
-        <Wrapper field={field}>
+        <Wrapper field={field} htmlFor={id}>
           <select
+            id={id}
             className="ed-select"
             value={current}
             onChange={(event) => onChange(event.target.value)}
@@ -238,8 +251,9 @@ export function FieldRenderer({
 
     case 'number':
       return (
-        <Wrapper field={field}>
+        <Wrapper field={field} htmlFor={id}>
           <input
+            id={id}
             className="ed-input"
             type="number"
             min={field.min}
@@ -340,10 +354,41 @@ export function FieldRenderer({
 // Wrapper
 // ---------------------------------------------------------------------------
 
-function Wrapper({ field, children }: { field: Field; children: React.ReactNode }) {
+/**
+ * The label, the control and the help line, tied together for a screen reader.
+ *
+ * A bare `<label>` with the control as a sibling names nothing and does not
+ * focus anything on click, which is what every field here used to be. So:
+ *
+ *  - A single native control (a text box, a number, a dropdown) gets `htmlFor`,
+ *    which both names it and focuses it when the label is clicked.
+ *  - A control that is really a GROUP (colour swatches, the corner grid, the
+ *    icon picker, an image chooser, the rich text box) cannot hang off one
+ *    `htmlFor`, so the `.ed-field` itself becomes the labelled group: `role`
+ *    plus `aria-labelledby` pointing at the label. Nothing inside has to change,
+ *    and each inner control keeps its own name.
+ */
+function Wrapper({
+  field,
+  htmlFor,
+  labelId,
+  group,
+  children,
+}: {
+  field: Field;
+  /** Set for a single native control, so the label focuses and names it. */
+  htmlFor?: string;
+  /** The label's own id, so a grouped control can name itself by it. */
+  labelId?: string;
+  /** Make the whole field a labelled group (for a control that is not one box). */
+  group?: boolean;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="ed-field">
-      <label className="ed-label">{field.label}</label>
+    <div className="ed-field" role={group ? 'group' : undefined} aria-labelledby={group ? labelId : undefined}>
+      <label className="ed-label" htmlFor={htmlFor} id={labelId}>
+        {field.label}
+      </label>
       {children}
       {'help' in field && field.help && <p className="ed-help">{field.help}</p>}
     </div>
@@ -438,6 +483,7 @@ function ColourField({
 // ---------------------------------------------------------------------------
 
 function Repeater({ field, value, onChange, ownerId }: FieldProps) {
+  const groupId = useId();
   if (field.kind !== 'repeater') return null;
 
   const items: Record<string, unknown>[] = Array.isArray(value)
@@ -465,8 +511,8 @@ function Repeater({ field, value, onChange, ownerId }: FieldProps) {
   const atMax = typeof field.max === 'number' && items.length >= field.max;
 
   return (
-    <div className="ed-field">
-      <label className="ed-label">{field.label}</label>
+    <div className="ed-field" role="group" aria-labelledby={groupId}>
+      <label className="ed-label" id={groupId}>{field.label}</label>
 
       {items.map((item, index) => (
         <div className="ed-repeat-item" key={index}>
@@ -634,11 +680,13 @@ function RichText({ html, onChange }: { html: string; onChange: (value: string) 
  * file header); a match is taken on mousedown so the pick beats the input blur.
  */
 function PlaceField({
+  id,
   value,
   max,
   placeholder,
   onChange,
 }: {
+  id?: string;
   value: string;
   max?: number;
   placeholder?: string;
@@ -698,6 +746,7 @@ function PlaceField({
   return (
     <div className="ed-place">
       <input
+        id={id}
         className="ed-input"
         type="text"
         value={query}
