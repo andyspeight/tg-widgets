@@ -269,7 +269,9 @@
           holder.appendChild(cell);
           new window.TGOfferCardWidget(cell, {
             lang: this.t.lang,   // forward the resolved viewer language so the card overlays offer.i18n for the same language
-            layout: cfg.layout,
+            // Cruise is one design: a cruise page template implies cruise cards,
+            // so the two never drift apart even on a hand-written embed.
+            layout: cfg.template === 'cruise' ? 'cruise' : cfg.layout,
             theme: cfg.theme,
             accentColor: cfg.accentColor,
             brandColor: cfg.brandColor,
