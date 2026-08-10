@@ -1118,7 +1118,14 @@
         renderCardPreview(); dirty();
       }));
       const sel = { cfgColumns:'columns', cfgCurrency:'currency', cfgProtection:'protection' };
-      Object.entries(sel).forEach(([id,k]) => $(id).addEventListener('change', e => { state.config[k]=e.target.value; renderCardPreview(); dirty(); }));
+      Object.entries(sel).forEach(([id,k]) => $(id).addEventListener('change', e => {
+        state.config[k]=e.target.value;
+        // If an offer is open, flip its prices to the new currency at once — the
+        // form is a separate widget, so it would otherwise stay on the old symbol
+        // until reopened (the £→€ change not showing).
+        if (k === 'currency' && builder && !$('formView').hidden) builder.update({ currency: e.target.value });
+        renderCardPreview(); dirty();
+      }));
       // Page template — coupled to the card style for the Cruise design.
       $('cfgTemplate').addEventListener('change', e => {
         state.config.template = e.target.value;

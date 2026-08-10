@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.1.2';
+  const VERSION = '0.2.0';
 
   // Resolve the API base off THIS script's origin so a remote-config embed on a
   // customer domain does not fetch the customer's own '/api/...' (404 → blank).
@@ -56,6 +56,21 @@
       const v = typeof o === 'string' ? o : o.value;
       return '<option' + (v === selected ? ' selected' : '') + '>' + esc(v) + '</option>';
     }).join('');
+  }
+
+  // Reject a promise if it has not settled within ms, so a stalled network
+  // request can never leave the UI hanging. Used to bound the photo upload:
+  // the Blob client is fetched from a CDN and the upload talks to Blob storage,
+  // and either can stall silently on a locked-down corporate network — which is
+  // exactly what left the Photos step stuck on "Uploading…" (Andy, Aug 2026).
+  function withTimeout(promise, ms, label) {
+    return new Promise(function (resolve, reject) {
+      const t = setTimeout(function () { reject(new Error((label || 'operation') + ' timed out')); }, ms);
+      Promise.resolve(promise).then(
+        function (v) { clearTimeout(t); resolve(v); },
+        function (e) { clearTimeout(t); reject(e); }
+      );
+    });
   }
 
   // Lazy-load the Vercel Blob client SDK (ESM from CDN — widgets have no
@@ -706,6 +721,20 @@
       this._renderLanguages();
     }
 
+    // Live-apply a small config change without rebuilding the form, so edits in
+    // progress are kept. The editor calls this when the currency setting changes
+    // while an offer is open, so its prices flip to the new symbol straight away
+    // (the form is a separate widget instance, so it would otherwise stay stale
+    // until reopened — which is why a £→€ change did not show). (Andy, Aug 2026.)
+    update(patch) {
+      if (!patch || typeof patch !== 'object') return;
+      Object.assign(this.cfg, patch);
+      if ('currency' in patch && this.root) {
+        const sym = currencySymbol(this.cfg.currency);
+        this.root.querySelectorAll('.ob-prefix .sym').forEach(function (el) { el.textContent = sym; });
+      }
+    }
+
     _render() {
       const cfg = this.cfg;
       const sym = currencySymbol(cfg.currency);
@@ -1127,23 +1156,29 @@
       }
       if (drop) { drop.classList.remove('busy'); drop.innerHTML = original; }
       if (!added && !this.root.querySelector('.ob-photo-err.show')) {
-        this._photoError('Could not upload those photos. If you are signed out, sign in and try again, or paste an image URL.');
+        this._photoError('Could not upload those photos. Make sure you are signed in, or your network may be blocking the uploader — paste an image URL instead.');
       }
     }
 
     async _uploadOne(file) {
+      // Bound every step so the upload can never hang: the CDN fetch of the Blob
+      // client (15s) and the upload itself (60s, also abortable). On any failure
+      // or stall this resolves to '' so _uploadFiles resets the "Uploading…"
+      // state and shows the paste-a-URL fallback, instead of sitting forever.
+      const ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+      const killer = setTimeout(function () { if (ctrl) { try { ctrl.abort(); } catch (e) { /* noop */ } } }, 60000);
       try {
-        const mod = await getBlobClient();
+        const mod = await withTimeout(getBlobClient(), 15000, 'photo library');
         const pathname = 'offer-photos/' + Date.now() + '-' + safeFileName(file.name);
-        const blob = await mod.upload(pathname, file, {
-          access: 'public',
-          contentType: file.type,
-          handleUploadUrl: this.cfg.uploadEndpoint
-        });
+        const opts = { access: 'public', contentType: file.type, handleUploadUrl: this.cfg.uploadEndpoint };
+        if (ctrl) opts.abortSignal = ctrl.signal;
+        const blob = await withTimeout(mod.upload(pathname, file, opts), 60000, 'photo upload');
         return safePhotoUrl(blob && blob.url);
       } catch (err) {
         console.warn('[TGOfferBuilder] photo upload failed:', err && err.message);
         return '';
+      } finally {
+        clearTimeout(killer);
       }
     }
 
