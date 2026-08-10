@@ -817,7 +817,16 @@ export default async function handler(req, res) {
             const creds = await lookupClientCredentialsByEmail(clientEmail);
             if (creds) {
               config.appId = creds.appId;
-              if (widgetType === 'Travel Offers') config.apiKey = creds.apiKey;
+              if (widgetType === 'Travel Offers') {
+                config.apiKey = creds.apiKey;
+                // The owning client's own agency name (trading name, else account
+                // name). A Dynamic Package is assembled and sold by the agent —
+                // our client — under THEIR ATOL, and carries no operator name in
+                // the offer data, so the widget labels DP cards with this. Public,
+                // non-secret: it is the agency's own trading name shown on its own
+                // site. '' when unresolved (widget then shows no agent name).
+                config.agencyName = creds.tradingName || creds.clientName || '';
+              }
               // Attach the client's supplier visibility so the widget can hide
               // offers from suppliers they haven't switched on in Control. Only
               // present when the client has actually restricted their suppliers.

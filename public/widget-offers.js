@@ -1,5 +1,5 @@
 /**
- * Travelgenix Travel Offers Widget v1.17.0
+ * Travelgenix Travel Offers Widget v1.18.0
  * Self-contained, embeddable widget served ENTIRELY from the Travelgenix offer
  * cache. A visitor's browser never triggers a Travelify search; the only live
  * search left is the one Travelify runs when a visitor clicks an offer.
@@ -20,6 +20,16 @@
  *   - BothPackages:   send packageType:'Any' (omitting returns DynamicPackages only)
  *
  * Changelog:
+ *   v1.18.0 (10 Aug 2026) — ATOL badge + seller name on every package & DP card:
+ *     • The ATOL badge now shows on ALL package and dynamic-package cards, not just
+ *       Package Holidays whose operator message happened to mention ATOL. Every
+ *       flight-inclusive package is ATOL protected, so the badge is unconditional
+ *       (grid operator strip, list tags, magazine kicker).
+ *     • Package Holidays show the tour operator name (e.g. Tui). Dynamic Packages
+ *       show the selling AGENT — our client's own agency name — because a DP is
+ *       assembled and sold by the agent under their ATOL and carries no operator
+ *       name in the offer data. The agency name is injected server-side into the
+ *       widget config (cfg.agencyName) from the owning client's account.
  *   v1.17.0 (5 Aug 2026) — Offers carry their own currency (Irish offers in EUR):
  *     • The cache is no longer GBP-only. The Irish market is now swept in EUR as
  *       well as GBP (an Irish flight search returns only EUR, so the old GBP-only
@@ -224,7 +234,7 @@
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
   const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
-  const VERSION = '1.17.0';
+  const VERSION = '1.18.0';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // Telemetry: report a one-time load heartbeat and any failure to
@@ -336,7 +346,7 @@
       returns: 'Returns {date}', checkin: 'Check-in', checkinDate: 'Check-in {date}',
       outbound: 'Outbound', returnLabel: 'Return', oneWay: 'One-way', travelling: 'Travelling',
       travellers: 'Travellers', stayDetails: 'Stay details', schedule: 'Schedule',
-      amenities: 'Amenities', operator: 'Operator', refundability: 'Refundability',
+      amenities: 'Amenities', operator: 'Operator', agent: 'Agent', refundability: 'Refundability',
       duration: 'Duration', date: 'Date', depart: 'Depart', arrive: 'Arrive', fare: 'Fare',
       direct: 'Direct', directCaps: 'DIRECT', stop: '{n} stop', stops: '{n} stops',
       stopCaps: '1 STOP', stopsCaps: '{n} STOPS',
@@ -1201,10 +1211,6 @@
 
   function getPackageType(o) {
     return o.packageType || null;
-  }
-
-  function isAtolMessage(msg) {
-    return !!msg && /atol|abta/i.test(String(msg));
   }
 
   // ── Inline SVG icon set (Lucide-flavoured) ────────────────────────
@@ -2292,6 +2298,9 @@
       padding: 2px 6px; border-radius: 4px;
       letter-spacing: 0.5px;
     }
+    /* No seller name to sit beside (operator toggle off, or a DP with no agency
+       name resolved) — left-align the ATOL badge instead of floating it right. */
+    .tgo-operator-atol.solo { margin-left: 0; }
 
     /* Footer */
     .tgo-card-footer {
@@ -5887,6 +5896,11 @@
         // null unless the client has restricted their suppliers in Control.
         supplierFilter: (c.supplierFilter && typeof c.supplierFilter === 'object') ? c.supplierFilter : null,
 
+        // The owning client's own agency name (injected by /api/widget-config).
+        // Shown as the selling agent on Dynamic Package cards — a DP is assembled
+        // and sold by the agent under their own ATOL and carries no operator name.
+        agencyName: typeof c.agencyName === 'string' ? c.agencyName : '',
+
         type: c.type || 'Accommodation',
         origins: Array.isArray(c.origins) ? c.origins : [],
         destinations: Array.isArray(c.destinations) ? c.destinations : [],
@@ -7195,6 +7209,28 @@
       return html;
     }
 
+    // Who is selling this package, and under whose ATOL. A Package Holiday is a
+    // single tour operator's product (Tui) sold under the operator's ATOL, so we
+    // show the operator name. A Dynamic Package is a flight + hotel assembled and
+    // sold by the AGENT — our client — under the agent's own ATOL; it carries no
+    // operator name in the offer data, so we label it with the client's agency
+    // name (cfg.agencyName, injected server-side). An untyped package falls back
+    // to whichever name we have. Every flight-inclusive package is ATOL protected,
+    // so `atol` is always true here — the badge shows on all package & DP cards.
+    _packageSeller(o) {
+      const acc = o.accommodation || {};
+      const operatorName = (acc.operator && acc.operator.name) ? String(acc.operator.name) : '';
+      const agencyName = String(this.cfg.agencyName || '').trim();
+      const pkgType = getPackageType(o);
+      const isHoliday = pkgType === 'PackageHolidays';
+      const isDynamic = pkgType === 'DynamicPackages';
+      let name, role;
+      if (isHoliday) { name = operatorName; role = 'operator'; }
+      else if (isDynamic) { name = agencyName; role = 'agent'; }
+      else { name = operatorName || agencyName; role = operatorName ? 'operator' : 'agent'; }
+      return { name: name || '', role, label: this.t(role), isHoliday, isDynamic, atol: true };
+    }
+
     _renderPackage(o) {
       // CRITICAL: data is at o.flight and o.accommodation (top level), NOT nested in o.package.
       const acc = o.accommodation || {};
@@ -7210,12 +7246,6 @@
       const isDirect = f.direct === true;
       const stops = (f.stops != null) ? f.stops : null;
       const stopsLabel = isDirect ? this.t('direct') : (stops === 1 ? this.t('stop', { n: 1 }) : (stops > 0 ? this.t('stops', { n: stops }) : ''));
-
-      // PackageHoliday operator lives at acc.operator
-      const operator = acc.operator || null;
-      const operatorName = operator ? operator.name : '';
-      const operatorMessage = operator ? operator.message : '';
-      const atol = isAtolMessage(operatorMessage);
 
       // Determine packageType from top-level field
       const pkgType = getPackageType(o);
@@ -7244,14 +7274,21 @@
       if (trip) html += (trip);
       html += '</div>';
 
-      // Operator strip — PackageHoliday only
-      if (this.cfg.show.packageOperator && isHoliday && operatorName) {
-        let opHtml = '<div class="tgo-package-operator">'
-          + '<span class="tgo-operator-label">' + esc(this.t('operator')) + '</span>'
-          + '<span class="tgo-operator-name">' + esc(operatorName) + '</span>';
-        if (atol) opHtml += '<span class="tgo-operator-atol">ATOL</span>';
+      // Operator / agent strip — every package & DP card. Shows the seller name
+      // (operator for a Package Holiday, our client's agency for a Dynamic
+      // Package) when the operator toggle is on, and ALWAYS shows the ATOL badge:
+      // every flight-inclusive package is ATOL protected.
+      {
+        const seller = this._packageSeller(o);
+        const showName = this.cfg.show.packageOperator && !!seller.name;
+        let opHtml = '<div class="tgo-package-operator">';
+        if (showName) {
+          opHtml += '<span class="tgo-operator-label">' + esc(seller.label) + '</span>'
+                  + '<span class="tgo-operator-name">' + esc(seller.name) + '</span>';
+        }
+        opHtml += '<span class="tgo-operator-atol' + (showName ? '' : ' solo') + '">ATOL</span>';
         opHtml += '</div>';
-        html += (opHtml);
+        html += opHtml;
       }
 
       // Body
@@ -7503,9 +7540,7 @@
       const img = safeImgUrl((acc.image && acc.image.url) || (f.image && f.image.url) || '');
       const fromCode = (f.origin && f.origin.iataCode) || '';
       const toCode = (f.destination && f.destination.iataCode) || '';
-      const operator = acc.operator || null;
-      const operatorName = operator ? operator.name : '';
-      const atol = isAtolMessage(operator ? operator.message : '');
+      const seller = this._packageSeller(o);
       const pkgType = getPackageType(o);
       const isHoliday = pkgType === 'PackageHolidays';
       const isLeadIn = (accPricing.isLeadIn === true) || (flightPricing.isLeadIn === true);
@@ -7514,8 +7549,8 @@
 
       let html = '<article class="tgo-list-row">';
       html += '<div class="tgo-list-img" ' + cssBgUrl(img) + '>';
-      if (operatorName && this.cfg.show.packageOperator) {
-        html += '<span class="tgo-list-img-badge">' + esc(operatorName) + '</span>';
+      if (seller.name && this.cfg.show.packageOperator) {
+        html += '<span class="tgo-list-img-badge">' + esc(seller.name) + '</span>';
       } else if (this.cfg.show.leadInPill && isLeadIn) {
         html += '<span class="tgo-list-img-badge lead-in">' + esc(this.t('leadInPrice')) + '</span>';
       }
@@ -7553,7 +7588,8 @@
 
       if (this.cfg.listShowAmenities) {
         const tags = [];
-        if (atol && isHoliday) tags.push('ATOL');
+        // Every flight-inclusive package (holiday or dynamic) is ATOL protected.
+        tags.push('ATOL');
         if (isHoliday) tags.push(this.t('package'));
         else tags.push(this.t('flightHotel'));
         if (tags.length) {
@@ -7759,13 +7795,14 @@
         headline = (f.carrier && f.carrier.name) ? this.t('flightToDest', { carrier: f.carrier.name, dest: (fd.name || fd.iataCode || '') }) : this.t('featuredFlight');
         summary = '';
       } else if (isPkg) {
-        const pkgType = getPackageType(o);
-        const isHoliday = pkgType === 'PackageHolidays';
+        const seller = this._packageSeller(o);
         const bits = [];
         if (dest.name) bits.push(dest.name);
         if (acc.nights) bits.push(nightsPhrase(acc.nights, this.t));
         if (acc.boardBasis) bits.push(boardBasisLabel(acc.boardBasis, this.t));
-        if (isHoliday && acc.operator && acc.operator.name) bits.push(this.t('withOperator', { name: acc.operator.name }));
+        if (seller.name) bits.push(this.t('withOperator', { name: seller.name }));
+        // Every package & DP is ATOL protected — surface it in the kicker.
+        bits.push('ATOL');
         kicker = bits.join(' · ');
         headline = acc.name || this.t('featuredPackage');
         summary = acc.summary || '';
@@ -7833,10 +7870,11 @@
         || ''
       );
 
-      // Optional overlay tag — uses operator name on packages, "Direct" on flights, etc.
+      // Optional overlay tag — the seller name on packages (operator for a
+      // holiday, our agency for a dynamic package), "Direct" on flights, etc.
       let overlay = '';
-      if (isPkg && acc.operator && acc.operator.name) {
-        overlay = acc.operator.name;
+      if (isPkg) {
+        overlay = this._packageSeller(o).name;
       } else if (isFlight && f.direct) {
         overlay = this.t('direct');
       } else if (isAcc && acc.rating >= 5) {
@@ -7870,6 +7908,8 @@
         if (dest.name) bits.push(dest.name);
         if (acc.nights) bits.push(nightsPhrase(acc.nights, this.t));
         if (acc.boardBasis) bits.push(boardBasisLabel(acc.boardBasis, this.t));
+        // Every package & DP is ATOL protected — surface it in the kicker.
+        bits.push('ATOL');
         kicker = bits.join(' · ');
         headline = acc.name || this.t('featuredPackage');
         summary = acc.summary || '';

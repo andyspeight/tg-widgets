@@ -340,7 +340,7 @@ export function setCors(res) {
 //   - lookupClientCredentialsByAppId — used by offers.js which receives the
 //     App ID directly from the widget payload (no widget record lookup).
 //
-// Both return { appId, apiKey, clientName, recordId } or null. Callers log
+// Both return { appId, apiKey, clientName, tradingName, recordId } or null. Callers log
 // and degrade gracefully. Callers should NEVER log apiKey — only a masked
 // preview (first 4 / last 4) for diagnostics.
 
@@ -362,6 +362,10 @@ const TG_USER_FIELDS = {
 const TG_CLIENT_FIELDS = {
   email:            'fldVRiIAlrTjxnNHP',
   clientName:       'fldx9CiWtSm5lX7MF',
+  // Public-facing trading name (added 6 May 2026 for the admin console). Preferred
+  // over clientName when shown to visitors, since it is the name the agency trades
+  // under. Falls back to clientName when unset.
+  tradingName:      'fldDbFv039Bip6W8u',
   status:           'fldgz6ScqvHQy2jdH',
   travelifyAppId:   'fldE9dL05t0x0S88w',
   apiKey:           'fld9X1nvAgy0sHQ4B',
@@ -415,6 +419,7 @@ function packCredentials(rec) {
     appId,
     apiKey,
     clientName: String(rec.fields?.[TG_CLIENT_FIELDS.clientName] || '').trim(),
+    tradingName: String(rec.fields?.[TG_CLIENT_FIELDS.tradingName] || '').trim(),
     recordId: rec.id,
   };
 }
@@ -429,7 +434,7 @@ function packCredentials(rec) {
 // "find a client for this email" can resolve to the wrong account. Keying off
 // the owning client's record ID removes that ambiguity entirely.
 //
-// Returns { appId, apiKey, clientName, recordId } or null. Validates the ID
+// Returns { appId, apiKey, clientName, tradingName, recordId } or null. Validates the ID
 // shape before calling Airtable (fail closed on anything that isn't a recXXX).
 export async function lookupClientCredentialsByRecordId(recordId) {
   if (!recordId || typeof recordId !== 'string') return null;
