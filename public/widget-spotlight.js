@@ -110,7 +110,7 @@
     p.__abort = function () { if (timer) clearTimeout(timer); if (ctrl) { try { ctrl.abort(); } catch (e) { /* noop */ } } };
     return p;
   }
-  const VERSION = '1.4.1';
+  const VERSION = '1.5.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (section default headings, fact/planning labels,
@@ -613,6 +613,12 @@
       line-height: 1.55;
       max-width: 1440px;
       margin: 0 auto;
+      /* Respond to the WIDGET's own width, not the browser window. Embedded on a
+         customer page the widget often sits in a column far narrower than the
+         viewport, so viewport media queries never fired and fixed grids (the
+         "At a glance" facts row) overflowed. All breakpoints below are @container. */
+      container-type: inline-size;
+      container-name: tgs;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
@@ -860,7 +866,9 @@
     /* ─── QUICK FACTS ─────────────────────────────────── */
     .tgs-facts {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      /* auto-fit so the row reflows to the container width instead of forcing a
+         fixed 5 columns that overflow a narrow embed. */
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 16px;
     }
     .tgs-fact {
@@ -939,7 +947,7 @@
     /* ─── HIGHLIGHTS GRID ─────────────────────────────── */
     .tgs-highlights {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 20px;
     }
     .tgs-highlight {
@@ -1197,13 +1205,13 @@
       border-radius: 4px;
     }
 
-    /* ─── RESPONSIVE ─────────────────────────────────── */
-    @media (max-width: 1023px) {
+    /* ─── RESPONSIVE (container-relative — tracks .tgs-root width) ───
+       Grid column counts are handled by auto-fit above, so they reflow at every
+       width; these breakpoints only adjust padding, type scale and stacking. */
+    @container tgs (max-width: 1023px) {
       .tgs-hero-content { padding: 32px; }
-      .tgs-highlights { grid-template-columns: repeat(2, 1fr); }
-      .tgs-facts { grid-template-columns: repeat(3, 1fr); }
     }
-    @media (max-width: 767px) {
+    @container tgs (max-width: 767px) {
       .tgs-hero { aspect-ratio: 4 / 3; }
       .tgs-hero-content { padding: 24px 20px; }
       .tgs-section { margin: 36px 0; }
@@ -1216,8 +1224,6 @@
       .tgs-climate-chart { height: 140px; }
       .tgs-climate-temp { font-size: 9px; }
       .tgs-climate-unit { padding: 5px 10px; min-width: 34px; font-size: 11px; }
-      .tgs-highlights { grid-template-columns: 1fr; }
-      .tgs-facts { grid-template-columns: repeat(2, 1fr); }
       .tgs-fact { padding: 16px; gap: 12px; }
       .tgs-fact-icon { width: 36px; height: 36px; flex-basis: 36px; border-radius: 8px; }
       .tgs-cta { padding: 28px; flex-direction: column; align-items: stretch; text-align: center; }
@@ -1225,9 +1231,8 @@
       .tgs-event { grid-template-columns: 1fr; gap: 10px; }
       .tgs-event-month { justify-self: start; }
     }
-    @media (max-width: 380px) {
+    @container tgs (max-width: 380px) {
       .tgs-hero-content { padding: 20px 16px; }
-      .tgs-facts { grid-template-columns: 1fr; }
       .tgs-climate-chart { gap: 3px; height: 120px; }
       .tgs-climate-months, .tgs-climate-rain { gap: 3px; }
       .tgs-climate-temp { font-size: 8px; }
