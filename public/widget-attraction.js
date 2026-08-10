@@ -1,5 +1,5 @@
 /**
- * Travelgenix Attraction Spotlight Widget v1.1.0
+ * Travelgenix Attraction Spotlight Widget v1.3.0
  * Self-contained, embeddable showcase for a theme park, resort complex,
  * water park, aquarium or cultural attraction.
  *
@@ -35,7 +35,7 @@
   }
   const CONFIG_API  = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || resolveBase('/api/widget-config');
   const CONTENT_API = (typeof window !== 'undefined' && window.__TG_ATTRACTION_API__) || resolveBase('/api/attraction-content');
-  const VERSION = '1.2.1';
+  const VERSION = '1.3.0';
 
   // Start a content fetch early (in parallel with the config fetch) so the two
   // requests don't wait on each other; the load method consumes it. Carries its
@@ -740,6 +740,11 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: var(--tgx-text); background: var(--tgx-bg); display: block; line-height: 1.55;
     max-width: 1000px; margin: 0 auto; padding: 0 0 12px;
+    /* Respond to the WIDGET's own width, not the browser window. Embedded on a
+       customer page the widget often sits in a column far narrower than the
+       viewport, so viewport media queries never fired and fixed grids overflowed.
+       All layout breakpoints below are @container. */
+    container-type: inline-size; container-name: tgx;
     -webkit-font-smoothing: antialiased;
   }
   .tgx-root[data-theme="dark"] {
@@ -777,8 +782,7 @@
   .tgx-prose p { margin:0 0 12px; } .tgx-prose p:last-child { margin:0; }
 
   /* Facts */
-  .tgx-facts { display:grid; grid-template-columns: repeat(4, 1fr); gap:14px; margin: 22px 0; padding: 0 var(--tgx-pad); }
-  .tgx-facts[data-count="1"]{grid-template-columns:1fr} .tgx-facts[data-count="2"]{grid-template-columns:repeat(2,1fr)} .tgx-facts[data-count="3"]{grid-template-columns:repeat(3,1fr)}
+  .tgx-facts { display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:14px; margin: 22px 0; padding: 0 var(--tgx-pad); }
   .tgx-fact { display:flex; gap:14px; align-items:flex-start; padding:16px; background: var(--tgx-card); border:1px solid var(--tgx-border); border-radius: var(--tgx-radius-sm); }
   .tgx-fact-icon { width:38px; height:38px; flex:0 0 38px; border-radius:10px; background: var(--tgx-accent-soft); color: var(--tgx-accent); display:flex; align-items:center; justify-content:center; }
   .tgx-fact-label { font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--tgx-muted); margin-bottom:3px; }
@@ -790,7 +794,7 @@
   .tgx-tag svg { color: var(--tgx-accent); flex-shrink:0; }
 
   /* Cards */
-  .tgx-cards { display:grid; grid-template-columns: repeat(2, 1fr); gap:16px; }
+  .tgx-cards { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:16px; }
   .tgx-card { background: var(--tgx-card); border:1px solid var(--tgx-border); border-radius: var(--tgx-radius); padding:20px 22px; }
   .tgx-card-head { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
   .tgx-card-icon { width:34px; height:34px; flex:0 0 34px; border-radius:9px; background: var(--tgx-accent-soft); color: var(--tgx-accent); display:flex; align-items:center; justify-content:center; }
@@ -831,14 +835,15 @@
   .tgx-notice-title { margin:0 0 6px; font-size:19px; color: var(--tgx-text); }
   .tgx-notice-body { margin:0; font-size:14px; color: var(--tgx-sub); }
 
-  @media (max-width: 760px) {
-    .tgx-root { --tgx-pad: 20px; }
+  @container tgx (max-width: 760px) {
+    /* --tgx-pad lives on .tgx-root, which is the query container and cannot
+       respond to its own container query, so tighten the gutter on the
+       descendants that consume it instead. Grid column counts now reflow via
+       auto-fit, so no grid overrides are needed here. */
+    .tgx-hero, .tgx-section, .tgx-facts, .tgx-cta { --tgx-pad: 20px; }
     .tgx-hero { padding:30px var(--tgx-pad); } .tgx-name { font-size:27px; }
-    .tgx-facts, .tgx-facts[data-count] { grid-template-columns: repeat(2, 1fr); }
-    .tgx-cards { grid-template-columns: 1fr; }
     .tgx-cta { padding:26px var(--tgx-pad); }
   }
-  @media (max-width: 420px) { .tgx-facts, .tgx-facts[data-count] { grid-template-columns: 1fr; } }
   @media (prefers-reduced-motion: reduce) { .tgx-skel { animation: none; } }
   `;
 

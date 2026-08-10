@@ -86,6 +86,7 @@
     "test:spotlight-prefetch": "node test/spotlight-prefetch-smoke.mjs",
     "test:spotlight-image": "node test/spotlight-image-smoke.mjs",
     "test:weather-cache": "node test/weather-cache-smoke.mjs",
+    "test:responsive": "node test/content-widgets-responsive-smoke.mjs",
     "test:worldmap-hotels": "node test/worldmap-hotels-mode-smoke.mjs",
     "test:worldmap-hotels-widget": "node test/worldmap-hotels-widget-smoke.mjs",
     "test:worldmap-pax": "node test/worldmap-pax-deeplink-smoke.mjs",

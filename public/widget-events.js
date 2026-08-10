@@ -1,5 +1,5 @@
 /**
- * Travelgenix Event Calendar Widget v1.0.0
+ * Travelgenix Event Calendar Widget v1.1.0
  * Self-contained, embeddable widget
  * Zero dependencies — works on any website via a single script tag
  *
@@ -73,7 +73,7 @@
     } catch (e) { /* fall through */ }
     return '/api/events-content';
   })();
-  const VERSION = '1.0.4';
+  const VERSION = '1.1.0';
 
   // Start a content fetch early (in parallel with the config fetch) so the two
   // requests don't wait on each other; _fetchCurated consumes it. Carries its
@@ -473,6 +473,16 @@
       border-radius: var(--tge-radius);
       border: 1px solid var(--tge-border);
       overflow: hidden;
+      /* Respond to the WIDGET's own width, not the browser window. Embedded on a
+         customer page the widget often sits in a column far narrower than the
+         viewport, so the old viewport media queries never fired and the layout
+         didn't adapt. All layout breakpoints below are @container. Note: this is
+         the shell, not .tge-root — the fixed-position modal is a sibling of the
+         shell (a child of .tge-root), so making the shell a query container
+         (which also makes it a containing block for fixed descendants) leaves the
+         modal viewport-anchored. */
+      container-type: inline-size;
+      container-name: tge;
     }
 
     /* Custom focus ring — replaces ugly browser default outline. */
@@ -1127,7 +1137,8 @@
     .tge-daylist-arr { width: 16px; height: 16px; color: var(--tge-sub); flex: none; }
 
     /* ---------- Responsive ---------- */
-    @media (max-width: 640px) {
+    /* Container query — reacts to the widget's OWN width (see .tge-shell). */
+    @container tge (max-width: 640px) {
       .tge-header { padding: 16px; flex-direction: column; align-items: stretch; }
       .tge-filters { padding: 12px 16px; }
       .tge-list-item { grid-template-columns: 56px 1fr auto; gap: 12px; padding: 12px 16px; }
@@ -1139,6 +1150,11 @@
       .tge-month-nav { padding: 10px 12px; }
       .tge-month-title { font-size: 15px; }
       .tge-cards { padding: 16px; gap: 12px; }
+    }
+
+    /* The modal is a full-viewport overlay sitting OUTSIDE the .tge-shell query
+       container, so its heading scales to the viewport, not the widget width. */
+    @media (max-width: 640px) {
       .tge-modal-name { font-size: 18px; }
     }
 

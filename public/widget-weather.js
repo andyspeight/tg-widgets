@@ -1,5 +1,5 @@
 /**
- * Travelgenix Weather Widget v1.0.0
+ * Travelgenix Weather Widget v1.1.0
  * Self-contained, embeddable destination weather widget.
  * Zero dependencies. Shadow DOM isolation. Works on any website via a single script tag.
  *
@@ -86,7 +86,7 @@
     } catch (e) { /* fall through */ }
     return '/api/destination-content';
   })();
-  const VERSION = '1.0.4';
+  const VERSION = '1.1.0';
 
   // Start a content fetch early (in parallel with the config fetch) so the two
   // requests don't wait on each other; the load method consumes it. Carries its
@@ -417,6 +417,12 @@
       color: var(--tgw-text);
       background: var(--tgw-bg);
       line-height: 1.5;
+      /* Respond to the WIDGET's own width, not the browser window. Embedded on a
+         customer page the widget often sits in a column far narrower than the
+         viewport, so viewport media queries never fired and the wide-layout
+         split overflowed. All breakpoints below are @container. */
+      container-type: inline-size;
+      container-name: tgw;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
@@ -821,11 +827,11 @@
     /* ─── RESPONSIVE ─────────────────────────────────── */
     /* Wide → stacked below 720px (narrow article sidebars, mobile).
        Standard/compact already work down to 320px; just tighten paddings. */
-    @media (max-width: 720px) {
+    @container tgw (max-width: 720px) {
       .tgw-root[data-layout="wide"] .tgw-wide-split { grid-template-columns: 1fr; }
       .tgw-root[data-layout="wide"] .tgw-wide-left { border-right: 0; border-bottom: 1px solid var(--tgw-border); }
     }
-    @media (max-width: 480px) {
+    @container tgw (max-width: 480px) {
       .tgw-header { padding: 16px 16px 8px; }
       .tgw-title { font-size: 18px; }
       .tgw-callout { margin: 10px 16px; padding: 12px; }
