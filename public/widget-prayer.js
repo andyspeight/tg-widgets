@@ -7,11 +7,16 @@
  * API (free, no key, CORS-enabled). Built for Travelgenix clients selling Umrah,
  * Hajj and halal-friendly travel.
  *
- * Fetch strategy (v1): the widget calls Aladhan directly from the browser and
- * caches the day's response in localStorage, keyed by location + method + school
- * + date, so repeat pageviews make zero API calls. On a fetch failure it renders
- * the last cached day with a subtle "times may be outdated" note; if there is no
- * cache it hides silently.
+ * Load strategy (v1.1): prayer times are pure astronomy, so the widget computes
+ * the day ON-DEVICE and paints instantly, with no network, once it knows the
+ * location's coordinates + timezone (the visitor's own location needs neither a
+ * lookup nor a fetch). Aladhan stays the source of truth: a silent background
+ * reconcile fetches the exact day, caches it (localStorage, keyed by location +
+ * method + school + date) and only re-renders if the times actually differ. The
+ * coordinates + zone are learned once from Aladhan's meta and persisted, so the
+ * first-ever view of a place still fetches but every day after it is instant.
+ * On a fetch failure it keeps the local/last-good day with a subtle "times may
+ * be outdated" note; with nothing to show it hides silently.
  *
  * Times parsed from the `timings` string values (local "HH:MM"), never the ISO
  * variants (Aladhan has occasionally shipped ISO timestamps with wrong date
@@ -63,7 +68,7 @@
   // type-to-search box: it resolves a typed city to coordinates, which we feed
   // straight to Aladhan (coords mode), so search works for any destination.
   const GEO_BASE = 'https://geocoding-api.open-meteo.com/v1/search';
-  const VERSION = '1.0.1';
+  const VERSION = '1.1.0';
   const STORE_PREFIX = 'tgpt_';           // storage keys are prefixed + JSON-encoded
   const FETCH_TIMEOUT = 9000;
 
@@ -237,6 +242,209 @@
   function pathDateFromKey(dateKey) {
     const p = dateKey.split('-');
     return p[2] + '-' + p[1] + '-' + p[0];
+  }
+
+  /* ------------------------------------------------------------------
+   * LOCAL PRAYER-TIME CALCULATION — the "load instantly" engine.
+   *
+   * Prayer times are pure astronomy: given a latitude, longitude, date and
+   * calculation method they can be worked out in the browser with no network
+   * at all. This is a faithful port of the PrayTimes.org core (public domain),
+   * the same sun-geometry Aladhan is built on, so the numbers match. We keep
+   * Aladhan as the authoritative source (a silent background reconcile in
+   * _loadTimings corrects and caches the exact values), so this only removes
+   * the blank wait — it never changes what the visitor ultimately sees.
+   *
+   * Validated before shipping: the sunrise/solar-noon/sunset it produces agree
+   * with an independent NOAA/Meeus solar model to within a minute across low,
+   * mid and high latitudes and both DST states, and the real widget was rendered
+   * end-to-end with the network disabled and matched that reference to the
+   * minute (test/prayer-instant-local-smoke.mjs). Fajr, Asr and Isha derive from
+   * that same validated geometry using the standard per-method angles.
+   * ------------------------------------------------------------------ */
+  const D2R = Math.PI / 180, R2D = 180 / Math.PI;
+  const dsin = d => Math.sin(d * D2R), dcos = d => Math.cos(d * D2R), dtan = d => Math.tan(d * D2R);
+  const darcsin = x => Math.asin(x) * R2D, darccos = x => Math.acos(x) * R2D;
+  const darctan2 = (y, x) => Math.atan2(y, x) * R2D, darccot = x => Math.atan2(1, x) * R2D;
+  function _fix(a, b) { a = a - b * Math.floor(a / b); return a < 0 ? a + b : a; }
+  const fixAngle = a => _fix(a, 360), fixHour = a => _fix(a, 24);
+  const hourDiff = (a, b) => fixHour(b - a);
+
+  // Aladhan method id -> Fajr/Isha parameters. Angle in degrees, or a minutes
+  // string ('90 min') for Isha measured after Maghrib. Only well-behaved pure
+  // methods are listed; anything not here (Moonsighting, Diyanet's custom
+  // corrections, custom '99', the Shia sets) is left to the Aladhan path so a
+  // local estimate is never shown for a method we cannot reproduce exactly.
+  const PRAYER_METHODS = {
+    1:  { fajr: 18,   isha: 18 },        2:  { fajr: 15,   isha: 15 },
+    3:  { fajr: 18,   isha: 17 },        4:  { fajr: 18.5, isha: '90 min' },
+    5:  { fajr: 19.5, isha: 17.5 },      9:  { fajr: 18,   isha: 17.5 },
+    11: { fajr: 20,   isha: 18 },        12: { fajr: 12,   isha: 12 },
+    16: { fajr: 18.2, isha: 18.2 },      17: { fajr: 20,   isha: 18 },
+    18: { fajr: 18,   isha: 18 },        19: { fajr: 18,   isha: 17 },
+    20: { fajr: 20,   isha: 18 },        21: { fajr: 19,   isha: 17 },
+    23: { fajr: 18,   isha: 18 },
+  };
+  const HIGHLAT = { 0: 'None', 1: 'NightMiddle', 2: 'OneSeventh', 3: 'AngleBased' };
+  const HIJRI_MONTHS = ['Muharram', 'Safar', 'Rabi al-awwal', 'Rabi al-thani',
+    'Jumada al-awwal', 'Jumada al-thani', 'Rajab', 'Shaban', 'Ramadan',
+    'Shawwal', 'Dhu al-Qadah', 'Dhu al-Hijjah'];
+
+  const isMinStr = v => typeof v === 'string';
+  const numOf = v => (typeof v === 'string' ? parseFloat(v) : v);
+
+  function julianDay(y, m, d) {
+    if (m <= 2) { y -= 1; m += 12; }
+    const A = Math.floor(y / 100), B = 2 - A + Math.floor(A / 4);
+    return Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + d + B - 1524.5;
+  }
+  function sunPosition(jd) {
+    const D = jd - 2451545.0;
+    const g = fixAngle(357.529 + 0.98560028 * D);
+    const q = fixAngle(280.459 + 0.98564736 * D);
+    const L = fixAngle(q + 1.915 * dsin(g) + 0.020 * dsin(2 * g));
+    const e = 23.439 - 0.00000036 * D;
+    const RA = darctan2(dcos(e) * dsin(L), dcos(L)) / 15;
+    return { decl: darcsin(dsin(e) * dsin(L)), eqt: q / 15 - fixHour(RA) };
+  }
+
+  // Raw prayer times (hours in local clock) or null if the method is unsupported.
+  // tz = the location's UTC offset in hours (DST included) for the date.
+  function astroTimes(y, m, d, lat, lng, tz, opts) {
+    const method = PRAYER_METHODS[opts.method];
+    if (!method) return null;
+    if (!Number.isFinite(lat) || !Number.isFinite(lng) || !Number.isFinite(tz)) return null;
+    const asrFactor = opts.school === 1 ? 2 : 1;
+    const highLats = HIGHLAT[opts.latAdj != null ? opts.latAdj : 3] || 'AngleBased';
+    const riseSet = 0.833;
+    const jDate = julianDay(y, m, d) - lng / (15 * 24);
+
+    const midDay = t => fixHour(12 - sunPosition(jDate + t).eqt);
+    const angleTime = (angle, t, dir) => {
+      const decl = sunPosition(jDate + t).decl;
+      const arg = (-dsin(angle) - dsin(decl) * dsin(lat)) / (dcos(decl) * dcos(lat));
+      return midDay(t) + (dir === 'ccw' ? -1 : 1) * (1 / 15) * darccos(arg);
+    };
+    const asrT = (factor, t) => {
+      const decl = sunPosition(jDate + t).decl;
+      return angleTime(-darccot(factor + dtan(Math.abs(lat - decl))), t, 'cw');
+    };
+
+    const dp = h => h / 24;
+    let t = { fajr: 5, sunrise: 6, dhuhr: 12, asr: 13, sunset: 18, maghrib: 18, isha: 18 };
+    t = {
+      fajr:    angleTime(method.fajr, dp(t.fajr), 'ccw'),
+      sunrise: angleTime(riseSet, dp(t.sunrise), 'ccw'),
+      dhuhr:   midDay(dp(t.dhuhr)),
+      asr:     asrT(asrFactor, dp(t.asr)),
+      sunset:  angleTime(riseSet, dp(t.sunset), 'cw'),
+      maghrib: angleTime(riseSet, dp(t.maghrib), 'cw'),
+      isha:    isMinStr(method.isha) ? 18 : angleTime(method.isha, dp(t.isha), 'cw'),
+    };
+
+    const adj = tz - lng / 15;
+    for (const k of Object.keys(t)) t[k] += adj;
+
+    if (highLats !== 'None') {
+      const night = hourDiff(t.sunset, t.sunrise);
+      const portion = angle => {
+        let p = 1 / 2;
+        if (highLats === 'AngleBased') p = (1 / 60) * angle;
+        if (highLats === 'OneSeventh') p = 1 / 7;
+        return p * night;
+      };
+      const pull = (time, base, angle, dir) => {
+        const pt = portion(angle);
+        const diff = dir === 'ccw' ? hourDiff(time, base) : hourDiff(base, time);
+        return (isNaN(time) || diff > pt) ? base + (dir === 'ccw' ? -pt : pt) : time;
+      };
+      t.fajr = pull(t.fajr, t.sunrise, numOf(method.fajr), 'ccw');
+      if (!isMinStr(method.isha)) t.isha = pull(t.isha, t.sunset, numOf(method.isha), 'cw');
+    }
+    if (isMinStr(method.isha)) t.isha = t.maghrib + numOf(method.isha) / 60;
+    return t;
+  }
+
+  // hours (float) -> "HH:MM", rounded to the nearest minute (+ per-prayer tune).
+  function hhmm(hoursFloat, tuneMin) {
+    if (hoursFloat == null || isNaN(hoursFloat)) return null;
+    let t = fixHour(hoursFloat + (tuneMin || 0) / 60 + 0.5 / 60);   // +30s then floor = round
+    const h = Math.floor(t);
+    return pad2(h) + ':' + pad2(Math.floor((t - h) * 60));
+  }
+
+  // The visitor's own IANA timezone (their device zone == their location zone).
+  function localTz() {
+    try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { return ''; }
+  }
+
+  // UTC offset in hours (DST included) for an IANA zone on a given date.
+  function tzOffsetHours(tz, y, m, d) {
+    if (!tz) return null;
+    try {
+      const utcNoon = Date.UTC(y, m - 1, d, 12, 0, 0);
+      const parts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: tz, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+      }).formatToParts(new Date(utcNoon));
+      const g = {}; for (const p of parts) g[p.type] = p.value;
+      const asUTC = Date.UTC(+g.year, +g.month - 1, +g.day, +g.hour % 24, +g.minute, +g.second);
+      return (asUTC - utcNoon) / 3600000;
+    } catch (e) { return null; }
+  }
+
+  // Islamic (Umm al-Qura) date parts for a Gregorian y/m/d, via Intl.
+  function hijriParts(y, m, d) {
+    try {
+      const dt = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
+      const parts = new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura', {
+        timeZone: 'UTC', day: 'numeric', month: 'numeric', year: 'numeric',
+      }).formatToParts(dt);
+      const g = {}; for (const p of parts) g[p.type] = p.value;
+      const mo = parseInt(g.month, 10);
+      return {
+        day: String(parseInt(g.day, 10)),
+        month: { number: mo, en: HIJRI_MONTHS[mo - 1] || '' },
+        year: String(parseInt(g.year, 10)),
+        designation: { abbreviated: 'AH' },
+      };
+    } catch (e) { return { day: '', month: { en: '' }, year: '', designation: { abbreviated: 'AH' } }; }
+  }
+  // Gregorian labels (weekday + month name) for a fixed calendar date.
+  function gregParts(y, m, d) {
+    try {
+      const dt = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
+      const parts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'UTC', weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
+      }).formatToParts(dt);
+      const g = {}; for (const p of parts) g[p.type] = p.value;
+      return { weekday: { en: g.weekday || '' }, day: g.day || '', month: { en: g.month || '' }, year: g.year || '' };
+    } catch (e) { return { weekday: { en: '' }, day: pad2(d), month: { en: '' }, year: String(y) }; }
+  }
+
+  // Build an Aladhan-shaped `data` object entirely on-device, or null when it
+  // cannot (unsupported method, missing timezone, bad coordinates). Returning
+  // the exact same shape means the whole existing parse/render path is reused.
+  function computeLocalData(lat, lng, dateKey, tz, opts) {
+    const parts = String(dateKey).split('-');
+    const y = parseInt(parts[0], 10), m = parseInt(parts[1], 10), d = parseInt(parts[2], 10);
+    if (!y || !m || !d) return null;
+    const off = tzOffsetHours(tz, y, m, d);
+    if (off == null) return null;
+    const t = astroTimes(y, m, d, lat, lng, off, opts);
+    if (!t) return null;
+    const tune = opts.tune || {};
+    const timings = {
+      Fajr: hhmm(t.fajr, tune.Fajr), Sunrise: hhmm(t.sunrise, tune.Sunrise),
+      Dhuhr: hhmm(t.dhuhr, tune.Dhuhr), Asr: hhmm(t.asr, tune.Asr),
+      Sunset: hhmm(t.sunset), Maghrib: hhmm(t.maghrib, tune.Maghrib), Isha: hhmm(t.isha, tune.Isha),
+    };
+    for (const k of ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']) if (!timings[k]) return null;
+    return {
+      timings: timings,
+      date: { hijri: hijriParts(y, m, d), gregorian: gregParts(y, m, d) },
+      meta: { latitude: lat, longitude: lng, timezone: tz, method: { id: opts.method } },
+    };
   }
 
   /* ------------------------------------------------------------------
@@ -820,7 +1028,9 @@
           if (settled) return; settled = true; clearTimeout(timer);
           this._geoTried = true;
           this._selKey = '__geo__';
-          this._resolvedLoc = { mode: 'coords', lat: pos.coords.latitude, lng: pos.coords.longitude, label: '', name: 'Your location' };
+          // own:true — the visitor's device timezone IS this location's zone, so
+          // we can compute their times instantly with no lookup.
+          this._resolvedLoc = { mode: 'coords', lat: pos.coords.latitude, lng: pos.coords.longitude, label: '', name: 'Your location', own: true };
           this._loadTimings();
         },
         () => { if (settled) return; settled = true; clearTimeout(timer); this._geoTried = true; onFail(); },
@@ -1030,6 +1240,55 @@
       } catch (e) { return null; }
     }
 
+    // Long-lived, per-location store of the coordinates + timezone. Learned once
+    // from Aladhan's meta (or the visitor's own device), it lets every future
+    // day for that place be computed on-device instantly, with no network.
+    _locStoreKey(loc) {
+      loc = loc || this._resolvedLoc || {};
+      const who = loc.mode === 'coords'
+        ? 'c:' + Number(loc.lat).toFixed(3) + ',' + Number(loc.lng).toFixed(3)
+        : 'n:' + (loc.city || '').toLowerCase() + '|' + (loc.country || '').toLowerCase();
+      return STORE_PREFIX + 'loc_' + who;
+    }
+    _readLocMeta(loc) {
+      try {
+        const raw = window.localStorage.getItem(this._locStoreKey(loc));
+        const o = raw ? JSON.parse(raw) : null;
+        return (o && Number.isFinite(o.lat) && Number.isFinite(o.lng) && o.tz) ? o : null;
+      } catch (e) { return null; }
+    }
+    _writeLocMeta(loc, lat, lng, tz) {
+      if (!Number.isFinite(lat) || !Number.isFinite(lng) || !tz) return;
+      try { window.localStorage.setItem(this._locStoreKey(loc), JSON.stringify({ lat: lat, lng: lng, tz: tz })); } catch (e) { /* quota/private */ }
+    }
+
+    // Coordinates + timezone for the active location, if we can compute on-device.
+    // Visitor's own location uses the device zone; otherwise we need a value
+    // learned from a prior Aladhan fetch (persisted per location, or this session).
+    _localMeta() {
+      const loc = this._resolvedLoc || {};
+      if (loc.mode === 'coords' && Number.isFinite(loc.lat) && Number.isFinite(loc.lng)) {
+        let tz = loc.own ? localTz() : '';
+        if (!tz) { const saved = this._readLocMeta(loc); if (saved) tz = saved.tz; }
+        if (!tz && this._tz) tz = this._tz;
+        return tz ? { lat: loc.lat, lng: loc.lng, tz: tz } : null;
+      }
+      const saved = this._readLocMeta(loc);
+      return saved ? { lat: saved.lat, lng: saved.lng, tz: saved.tz } : null;
+    }
+
+    // Do the authoritative timings differ from what is already rendered?
+    _timingsChanged(data) {
+      if (!this._model || !data || !data.timings) return true;
+      for (const row of PRAYER_ROWS) {
+        const a = parseHM(data.timings[row.key]);
+        const b = this._model.times[row.key];
+        if (!!a !== !!b) return true;
+        if (a && b && (a.h !== b.h || a.m !== b.m)) return true;
+      }
+      return false;
+    }
+
     _buildTune() {
       // Aladhan `tune` order: Imsak,Fajr,Sunrise,Dhuhr,Asr,Maghrib,Sunset,Isha,Midnight
       const t = this.c.tune || {};
@@ -1064,14 +1323,18 @@
       return !!(loc.city && loc.city.length);
     }
 
-    async _loadTimings() {
+    _loadTimings() {
       if (!this._hasLocation()) return this._renderHidden();
 
-      // Use the location timezone (learned from a prior fetch) to pick "today";
-      // otherwise the visitor's local date. Rollover self-corrects at midnight.
-      const dateKey = zonedNow(this._tz).dateKey;
+      // Coordinates + zone for an on-device compute, if we have them. Resolve
+      // first so "today" is picked in the LOCATION's timezone — right even for a
+      // visitor sitting in a different zone. Falls back to the zone learned this
+      // session, then the visitor's own clock. Rollover self-corrects at midnight.
+      const meta = this._localMeta();
+      const dateKey = zonedNow((meta && meta.tz) || this._tz).dateKey;
       const key = this._cacheKey(dateKey);
 
+      // 1) Already have today's exact answer cached — instant, nothing else to do.
       const cached = this._readCache(key);
       if (cached) {
         this._stale = false;
@@ -1079,6 +1342,34 @@
         return;
       }
 
+      // 2) INSTANT: compute today on-device when we know the coordinates + zone
+      // and the method is one we reproduce exactly. Paint immediately, then
+      // reconcile against Aladhan in the background so the shown times stay
+      // exactly Aladhan's (and get cached for next time).
+      if (meta) {
+        const local = computeLocalData(meta.lat, meta.lng, dateKey, meta.tz, {
+          method: this.c.method, school: this.c.school,
+          latAdj: this.c.latitudeAdjustment, tune: this.c.tune,
+        });
+        if (local) {
+          this._stale = false;
+          this._ingest(local);
+          this._fetchTimings(key, dateKey, true);   // silent reconcile
+          return;
+        }
+      }
+
+      // 3) FALLBACK: no coordinates/zone yet (typically the very first-ever view
+      // of a place), or an unsupported method — fetch from Aladhan as before,
+      // learning the coordinates + zone so every later day is instant.
+      this._fetchTimings(key, dateKey, false);
+    }
+
+    // Fetch the authoritative day from Aladhan. silent=true is the background
+    // reconcile after an instant local paint: it refreshes the cache + learned
+    // location meta and only re-renders if the exact times actually differ (and
+    // never disturbs an open search). silent=false renders + degrades as before.
+    async _fetchTimings(key, dateKey, silent) {
       const url = this._buildUrl(dateKey);
       const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
       if (this._abort) { try { this._abort.abort(); } catch (e) { /* noop */ } }
@@ -1093,11 +1384,21 @@
           throw new Error('Aladhan returned no timings');
         }
         this._writeCache(key, json.data);
+        // Learn coordinates + zone so future days for this place compute instantly.
+        const mo = json.data.meta || {};
+        this._writeLocMeta(this._resolvedLoc, Number(mo.latitude), Number(mo.longitude), mo.timezone);
         this._stale = false;
-        this._ingest(json.data);
+        if (silent) {
+          const searchOpen = this._searchPanel && !this._searchPanel.hidden;
+          if (this._timingsChanged(json.data) && !searchOpen) this._ingest(json.data);
+          else this._tz = (this._parse(json.data) || {}).timezone || this._tz;
+        } else {
+          this._ingest(json.data);
+        }
       } catch (err) {
         if (timer) clearTimeout(timer);
         if (err && err.name === 'AbortError') return;   // superseded by a newer request
+        if (silent) return;                             // keep the instant local render
         console.error('[TG Prayer] Failed to load prayer times:', err);
         // Graceful degradation — render the last good day, flagged stale.
         const last = this._readLastGood();

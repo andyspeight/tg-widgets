@@ -378,6 +378,49 @@ async function run() {
     w.destroy();
   }
 
+  // ── 6f. Instant on-device computation (no blocking network) ───────────
+  console.log('Instant local computation');
+  {
+    const { win } = makeDom();
+    // Seed only coords + timezone, exactly as a prior Aladhan fetch would have.
+    win.localStorage.setItem('tgpt_loc_c:51.507,-0.128', JSON.stringify({ lat: 51.5074, lng: -0.1278, tz: 'Europe/London' }));
+    const urls = [];
+    win.fetch = (url) => { urls.push(url); return Promise.resolve({ ok: true, json: async () => ({ code: 200, status: 'OK', data: aladhanData() }) }); };
+    // No freezeClock — local compute uses Intl against the real Date, so we
+    // assert structure + today's Europe/London date, not fixed values.
+    const el = win.document.createElement('div');
+    win.document.body.appendChild(el);
+    const w = new win.TGPrayerWidget(el, {
+      layout: 'card', method: 3, school: 0, latitudeAdjustment: 3,
+      locations: [{ mode: 'coords', lat: 51.5074, lng: -0.1278, label: 'London' }],
+    });
+    // Synchronous: painted on construction, before any fetch resolved.
+    ok('renders instantly on construction (model present, no await)', !!w._model);
+    ok('not flagged stale', w._stale === false);
+    const rows0 = el.shadowRoot.querySelectorAll('.tgpt-row');
+    ok('shows five prayer rows immediately', rows0.length === 5);
+    ok('times are HH:MM', Array.prototype.every.call(rows0, r => /^\d{2}:\d{2}$/.test(r.querySelector('.tgpt-row-time').textContent.trim())));
+    const expectDate = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(new Date());
+    ok('header shows today in the location timezone', el.shadowRoot.querySelector('.tgpt-greg').textContent.trim() === expectDate);
+    await delay(30);
+    ok('a background reconcile hit Aladhan by coordinates', urls.some(u => u.indexOf('/timings/') !== -1 && u.indexOf('latitude=51.5074') !== -1));
+    w.destroy();
+  }
+  {
+    // Hard offline: coords+tz seeded, every fetch rejects → still renders locally.
+    const { win } = makeDom();
+    win.localStorage.setItem('tgpt_loc_c:21.423,39.826', JSON.stringify({ lat: 21.4225, lng: 39.8262, tz: 'Asia/Riyadh' }));
+    let calls = 0;
+    win.fetch = () => { calls++; return Promise.reject(new Error('offline')); };
+    const el = win.document.createElement('div');
+    win.document.body.appendChild(el);
+    const w = new win.TGPrayerWidget(el, { method: 4, school: 0, latitudeAdjustment: 3, locations: [{ mode: 'coords', lat: 21.4225, lng: 39.8262, label: 'Makkah' }] });
+    ok('renders with no working network (local compute)', !!w._model && el.shadowRoot.querySelectorAll('.tgpt-row').length === 5);
+    await delay(20);
+    ok('reconcile attempted, and its failure left the local render intact', calls >= 1 && !!w._model);
+    w.destroy();
+  }
+
   // ── 7. HTML escaping of the location label ────────────────────────────
   console.log('Security — label escaping');
   {
