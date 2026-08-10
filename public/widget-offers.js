@@ -1,5 +1,5 @@
 /**
- * Travelgenix Travel Offers Widget v1.18.0
+ * Travelgenix Travel Offers Widget v1.19.0
  * Self-contained, embeddable widget served ENTIRELY from the Travelgenix offer
  * cache. A visitor's browser never triggers a Travelify search; the only live
  * search left is the one Travelify runs when a visitor clicks an offer.
@@ -20,6 +20,13 @@
  *   - BothPackages:   send packageType:'Any' (omitting returns DynamicPackages only)
  *
  * Changelog:
+ *   v1.19.0 (10 Aug 2026) — Child ages in the pax popover (valid family deeplinks):
+ *     • The "Travellers" popover now asks for each child's age when a visitor adds
+ *       children. Picking N children shows N age selectors (2 to 15).
+ *     • The deeplink now sends chd + one chdage per child, as the Travelify spec
+ *       requires (chd=2&chdage=4&chdage=5). Previously the popover set chd with no
+ *       chdage at all — an invalid search that returned wrong or no results. The
+ *       card default link stays adults-only (no ages known until the visitor picks).
  *   v1.18.0 (10 Aug 2026) — ATOL badge + seller name on every package & DP card:
  *     • The ATOL badge now shows on ALL package and dynamic-package cards, not just
  *       Package Holidays whose operator message happened to mention ATOL. Every
@@ -234,7 +241,7 @@
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
   const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
-  const VERSION = '1.18.0';
+  const VERSION = '1.19.0';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // Telemetry: report a one-time load heartbeat and any failure to
@@ -374,6 +381,8 @@
       adultsLabel: 'Adults', childrenLabel: 'Children', infantsLabel: 'Infants',
       adultsHelp: '16+ years', childrenHelp: '2 to 15 years', infantsHelp: 'Under 2',
       decrease: 'Decrease {label}', increase: 'Increase {label}',
+      childAges: 'Child ages', childAgesHint: 'Add each child’s age so we can price the trip correctly.',
+      childNum: 'Child {n}', childAgeAria: 'Age of child {n}', years: '{n} yrs',
       // Carousel / aria
       previousOffers: 'Previous offers', moreOffersAria: 'More offers', travelOffers: 'Travel offers',
       carouselPages: 'Carousel pages', pageOf: 'Page {n} of {total}', previousOffer: 'Previous offer',
@@ -1026,6 +1035,35 @@
       }
     }, true);
   }
+
+  // Rewrite a deeplink with a visitor's chosen party. adt/chd/inf are SET (they
+  // replace the deeplink's defaults). chdage is APPENDED once per child — the
+  // Travelify spec requires exactly one age per child (chd=2&chdage=4&chdage=5),
+  // and any pre-existing chdage is cleared first so a re-open never leaves stale
+  // ages. childAges is truncated to the child count defensively. Falls back to a
+  // plain query append when url isn't a parseable URL.
+  function applyPaxToDeeplink(url, state) {
+    const children = Math.max(0, (state && state.children) || 0);
+    const ages = ((state && state.childAges) || []).slice(0, children);
+    const adt = (state && state.adults) || 0;
+    const inf = (state && state.infants) || 0;
+    const base = (typeof location !== 'undefined' && location.href) ? location.href : undefined;
+    try {
+      const u = new URL(url, base);
+      u.searchParams.set('adt', adt);
+      u.searchParams.set('chd', children);
+      u.searchParams.set('inf', inf);
+      u.searchParams.delete('chdage');
+      for (const age of ages) u.searchParams.append('chdage', age);
+      return u.toString();
+    } catch (e) {
+      const sep = String(url).indexOf('?') >= 0 ? '&' : '?';
+      let q = 'adt=' + adt + '&chd=' + children + '&inf=' + inf;
+      for (const age of ages) q += '&chdage=' + age;
+      return url + sep + q;
+    }
+  }
+
   // Per-client supplier visibility. supplierFilter (three integer lists of
   // allowed Travelify supplier ids) is injected into the widget config by
   // /api/widget-config only when the client has restricted their suppliers in
@@ -2442,6 +2480,26 @@
       padding: 0 4px;
       color: inherit;
     }
+    /* Child ages — one select per child, shown only when children > 0. */
+    .tgo-pax-ages:empty { display: none; }
+    .tgo-pax-ages {
+      padding: 8px 0 2px; border-top: 1px solid #E2E8F0;
+    }
+    .tgo-pax-ages-head { font-size: 13px; font-weight: 600; color: inherit; }
+    .tgo-pax-ages-hint { font-size: 10px; color: #64748B; margin: 1px 0 8px; }
+    .tgo-pax-ages-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+      gap: 8px;
+    }
+    .tgo-pax-age { display: flex; flex-direction: column; gap: 3px; }
+    .tgo-pax-age-label { font-size: 10px; font-weight: 600; color: #64748B; }
+    .tgo-pax-age-select {
+      width: 100%; height: 30px; padding: 0 6px;
+      border: 1px solid #E2E8F0; border-radius: 8px;
+      background: #FFFFFF; color: inherit;
+      font-size: 13px; font-weight: 600;
+    }
+    .tgo-pax-age-select:focus-visible { outline: 2px solid var(--tgo-accent, #00B4D8); outline-offset: 1px; }
     .tgo-popover-actions {
       display: flex; gap: 8px; justify-content: flex-end;
       margin-top: 10px; padding-top: 10px;
@@ -6143,6 +6201,7 @@
         + '<p class="tgo-popover-sub">' + esc(this.t('paxIntro')) + '</p>'
         + this._paxRow('adults', this.t('adultsLabel'), this.t('adultsHelp'), adults, 1, 9)
         + this._paxRow('children', this.t('childrenLabel'), this.t('childrenHelp'), children, 0, 8)
+        + '<div class="tgo-pax-ages" data-tgo-child-ages></div>'
         + this._paxRow('infants', this.t('infantsLabel'), this.t('infantsHelp'), infants, 0, 4)
         + '<div class="tgo-popover-actions">'
         + '<button type="button" class="tgo-popover-btn" data-tgo-popover-cancel>' + esc(this.t('cancel')) + '</button>'
@@ -6233,8 +6292,40 @@
       window.addEventListener('resize', repositionOnScroll);
 
       // ── Stepper state ───────────────────────────────────────────
-      const state = { adults, children, infants };
+      // The Travelify spec requires an age for EVERY child (chdage repeated once
+      // per child). childAges tracks one age per child; it is resized whenever
+      // the child count changes, keeping ages already chosen.
+      const CHILD_AGE_MIN = 2, CHILD_AGE_MAX = 15, CHILD_AGE_DEFAULT = 8;
+      const state = {
+        adults, children, infants,
+        childAges: Array.from({ length: children }, () => CHILD_AGE_DEFAULT),
+      };
       const limits = { adults: [1, 9], children: [0, 8], infants: [0, 4] };
+
+      const agesWrap = layer.querySelector('[data-tgo-child-ages]');
+      // Draw one age <select> per child, matching state.children. Called on open
+      // and whenever the child count changes.
+      const renderChildAges = () => {
+        const n = state.children;
+        while (state.childAges.length < n) state.childAges.push(CHILD_AGE_DEFAULT);
+        state.childAges.length = n;
+        if (!agesWrap) return;
+        if (n === 0) { agesWrap.innerHTML = ''; return; }
+        let h = '<div class="tgo-pax-ages-head">' + esc(this.t('childAges')) + '</div>'
+          + '<div class="tgo-pax-ages-hint">' + esc(this.t('childAgesHint')) + '</div>'
+          + '<div class="tgo-pax-ages-grid">';
+        for (let i = 0; i < n; i++) {
+          h += '<label class="tgo-pax-age">'
+            + '<span class="tgo-pax-age-label">' + esc(this.t('childNum', { n: i + 1 })) + '</span>'
+            + '<select class="tgo-pax-age-select" data-tgo-child-age="' + i + '" aria-label="' + esc(this.t('childAgeAria', { n: i + 1 })) + '">';
+          for (let a = CHILD_AGE_MIN; a <= CHILD_AGE_MAX; a++) {
+            h += '<option value="' + a + '"' + (state.childAges[i] === a ? ' selected' : '') + '>' + esc(this.t('years', { n: a })) + '</option>';
+          }
+          h += '</select></label>';
+        }
+        h += '</div>';
+        agesWrap.innerHTML = h;
+      };
 
       const update = (kind, delta) => {
         const [min, max] = limits[kind];
@@ -6246,6 +6337,9 @@
           if (dir === 'minus') b.disabled = state[k] <= limits[k][0];
           else b.disabled = state[k] >= limits[k][1];
         });
+        // A change in the child count adds/removes the age selectors and shifts
+        // the popover height, so re-render the ages and re-clamp its position.
+        if (kind === 'children') { renderChildAges(); positionPopover(); }
       };
 
       const close = () => {
@@ -6272,21 +6366,10 @@
           return;
         }
         if (ev.target.matches('[data-tgo-popover-confirm]')) {
-          // Set (not append) the pax params so the visitor's choice replaces
-          // the deeplink's default adt rather than duplicating it. Falls back to
-          // a plain append if url isn't a full URL.
-          let newUrl;
-          try {
-            const u = new URL(url, location.href);
-            u.searchParams.set('adt', state.adults);
-            u.searchParams.set('chd', state.children);
-            u.searchParams.set('inf', state.infants);
-            newUrl = u.toString();
-          } catch (e) {
-            const sep = url.indexOf('?') >= 0 ? '&' : '?';
-            newUrl = url + sep + 'adt=' + state.adults + '&chd=' + state.children + '&inf=' + state.infants;
-          }
-          const dest = safeUrl(newUrl);
+          // Rewrite the deeplink with the chosen party — adt/chd/inf plus one
+          // chdage per child (see applyPaxToDeeplink). Previously this set chd
+          // with no chdage, an invalid child search per the Travelify spec.
+          const dest = safeUrl(applyPaxToDeeplink(url, state));
           if (!postDeeplinkWithToken(dest, true)) {
             window.open(dest, '_blank', 'noopener,noreferrer');
           }
@@ -6298,8 +6381,17 @@
         }
       });
 
+      // Child-age <select> changes (not clicks) update the ages array.
+      layer.addEventListener('change', (ev) => {
+        const sel = ev.target.closest ? ev.target.closest('[data-tgo-child-age]') : null;
+        if (!sel) return;
+        const i = parseInt(sel.getAttribute('data-tgo-child-age'), 10);
+        const v = parseInt(sel.value, 10);
+        if (Number.isFinite(i) && Number.isFinite(v)) state.childAges[i] = v;
+      });
+
       update('adults', 0);
-      update('children', 0);
+      update('children', 0);   // also renders the initial child-age selectors
       update('infants', 0);
     }
 
