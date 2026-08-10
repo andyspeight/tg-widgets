@@ -29,6 +29,16 @@ import { pageAsItem, type ItemMeta } from '../../lib/content/collection-page';
 import { createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
 import { buildPresetSection } from '../../lib/content/presets';
 import { addBlock, addColumn, addInnerBlock, blockAtPath, containerColumns, parsePathKey, type Path, pathKey, resolve, updateBlockPropsAtPath } from '../../lib/content/tree';
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragMoveEvent,
+} from '@dnd-kit/core';
+import { blockDefinition } from '../../lib/content/blocks';
+import { usePaletteDrop } from './usePaletteDrop';
 import { Outline } from './Outline';
 import { Canvas, type DropTarget } from './Canvas';
 import { Properties } from './Properties';
@@ -1039,7 +1049,62 @@ export function EditorShell({
 
   // ---------------------------------------------------------------------
 
+  // --- Dragging a new block from the palette onto the canvas (dnd-kit) --------
+  // The context wraps both the drag source (the elements palette, in the left
+  // pane) and the drop target (the canvas). A move past 5px starts a drag, so a
+  // plain click on a palette card still adds the block. PointerSensor gives touch
+  // for nothing, which the old native-HTML5 drag could not do.
+  const paletteDrop = usePaletteDrop(addBlockAt);
+  const [dragType, setDragType] = useState<string | null>(null);
+  const dndSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+  );
+
   return (
+    <DndContext
+      sensors={dndSensors}
+      /*
+       * autoScroll off, on purpose. dnd-kit would otherwise nudge the canvas
+       * while you hover near its edge and fire extra move events as it goes; our
+       * drop point is resolved from document.elementFromPoint, so a scroll under
+       * the pointer can slide the target column out from under the resolved point
+       * and land the release on nothing. The native drag this replaces never
+       * auto-scrolled either, so off is parity, not a loss. Drag-to-reach below
+       * the fold is a deliberate later slice, resolved against the scroll rather
+       * than fighting it.
+       */
+      autoScroll={false}
+      onDragStart={(event) => {
+        const type = event.active.data.current?.paletteType as string | undefined;
+        if (!type) return;
+        setDragType(type);
+        paletteDrop.start(type);
+        // Fade the + picker's modal scrim while a drag is live, so the canvas
+        // beneath takes the drop. Harmless when the drag came from the always-on
+        // elements palette, which has no modal over the canvas to fade. dnd-kit
+        // starts the drag on the pointer, off the React tree, so setting this
+        // here cannot cancel the drag the way native HTML5 drag did (5 Aug 2026).
+        document.body.dataset.tgDragging = 'block';
+      }}
+      onDragMove={(event: DragMoveEvent) => {
+        if (!dragType) return;
+        // dnd-kit hands us the pointer as the pointerdown plus how far it moved;
+        // the drop hook asks the document what is under that point.
+        const from = event.activatorEvent as PointerEvent;
+        if (from == null || typeof from.clientX !== 'number') return;
+        paletteDrop.update(from.clientX + event.delta.x, from.clientY + event.delta.y);
+      }}
+      onDragEnd={() => {
+        if (dragType) paletteDrop.end();
+        setDragType(null);
+        delete document.body.dataset.tgDragging;
+      }}
+      onDragCancel={() => {
+        paletteDrop.hide();
+        setDragType(null);
+        delete document.body.dataset.tgDragging;
+      }}
+    >
     <div
       className="ed-root"
       data-pane={mobilePane}
@@ -1355,13 +1420,6 @@ export function EditorShell({
         onSelect={select}
         onCommit={commit}
         onPickBlock={setPicker}
-        /*
-          A block dropped on the canvas, from the + picker or the elements
-          palette. Same add as the click path, but the target is where it was
-          dropped and `at` places it inside the column rather than at the end.
-          Shared with the palette's click-to-add through addBlockAt.
-        */
-        onDropBlock={addBlockAt}
         theme={siteTheme}
         // So the canvas draws a header as a header rather than as a page.
         region={region}
@@ -1585,6 +1643,40 @@ export function EditorShell({
           onPick={(type) => addBlockAt(picker, type)}
         />
       )}
+
+      {/* The line a palette drag drops on. Fixed to the viewport and moved
+          imperatively (usePaletteDrop), so a re-render mid-drag never resets it. */}
+      <div ref={paletteDrop.slotRef} className="ed-drop-slot" aria-hidden="true" />
+    </div>
+
+    {/* pointerEvents:none is load-bearing, not cosmetic. dnd-kit positions this
+        overlay under the pointer with only position:fixed; touch-action:none, so
+        left solid it would be what document.elementFromPoint returns and the drop
+        hook would never see the column beneath it. None lets the point fall
+        through the ghost to the canvas, which is the whole way the drop resolves. */}
+    <DragOverlay dropAnimation={null} style={{ pointerEvents: 'none' }}>
+      {dragType ? <PaletteGhost type={dragType} /> : null}
+    </DragOverlay>
+    </DndContext>
+  );
+}
+
+/**
+ * The card that follows the pointer while a new element is dragged.
+ *
+ * dnd-kit draws it in a portal above everything, so it is a plain, light copy of
+ * the palette card, no drag machinery of its own. The real card stays put in the
+ * palette; this is the thing in flight.
+ */
+function PaletteGhost({ type }: { type: string }) {
+  const def = blockDefinition(type);
+  if (!def) return null;
+  return (
+    <div className="ed-palette-card ed-palette-card--ghost">
+      <span className="ed-palette-card__icon">
+        <Icon name={def.icon} size={18} />
+      </span>
+      <span className="ed-palette-card__label">{def.label}</span>
     </div>
   );
 }

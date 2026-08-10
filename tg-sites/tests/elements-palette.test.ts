@@ -21,9 +21,12 @@ function read(...parts: string[]): string {
 describe('the palette drags without the modal-fade fragility', () => {
   const palette = read('components', 'editor', 'ElementsPalette.tsx');
 
-  it('makes every card draggable and writes the shared block type', () => {
-    expect(palette).toContain('draggable');
-    expect(palette).toContain('event.dataTransfer.setData(BLOCK_DRAG_MIME, definition.type)');
+  it('makes every card a dnd-kit draggable carrying the block type', () => {
+    // dnd-kit rather than native HTML5 drag now, so the same source works by
+    // touch and keyboard. The type rides on the draggable's data, which the
+    // shell reads back on drop.
+    expect(palette).toContain('useDraggable');
+    expect(palette).toContain('data: { paletteType: definition.type }');
   });
 
   it('never touches the body drag flag, since there is no modal to fade', () => {
@@ -55,8 +58,11 @@ describe('the left pane switches between the outline and the palette', () => {
 describe('the shell adds a dropped and a clicked element the one same way', () => {
   const shell = read('components', 'editor', 'EditorShell.tsx');
 
-  it('shares addBlockAt between the canvas drop and the palette', () => {
-    expect(shell).toContain('onDropBlock={addBlockAt}');
+  it('drives the canvas drop through usePaletteDrop, off the same addBlockAt', () => {
+    // The drop lands a block exactly as the picker and the click do: one
+    // addBlockAt, reached now through the dnd-kit drop hook rather than a native
+    // onDrop on the canvas.
+    expect(shell).toContain('usePaletteDrop(addBlockAt)');
     expect(shell).toContain('const addBlockAt = useCallback(');
   });
 

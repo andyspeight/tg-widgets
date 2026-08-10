@@ -6912,104 +6912,151 @@ await check('a heading takes a shadow, a paragraph never does', async () => {
 // --- Drag a block off the picker onto the canvas ----------------------------
 
 /*
- * The first slice of dragging elements onto the canvas. Driven by dispatching
- * the HTML5 drag sequence with one shared DataTransfer, which is the only
- * reliable way to test native drag-and-drop: the type is written on dragstart
- * and read on drop off the same object, exactly as a real drag carries it. The
- * block should land in the column it was dropped on, and the picker should
- * close. Left until last, because it adds a block to the seed page.
+ * Drive a dnd-kit drag with a real pointer. dnd-kit ignores native HTML5 drag
+ * events and listens on pointerdown/move/up, so the synthetic DragEvent the old
+ * native version was tested with never starts it. We press on the source, nudge
+ * past the 5px activation distance so the drag begins, then step to the target so
+ * onDragMove fires and the drop hook tracks the pointer. `mid` runs while the
+ * button is still down, for the reads that must catch the live drag (the floating
+ * slot, the body flag) before the drop clears them.
+ */
+const dndPointerDrag = async (from, to, mid) => {
+  await page.mouse.move(from.x, from.y);
+  await page.mouse.down();
+  await page.mouse.move(from.x + 8, from.y + 8, { steps: 3 });
+  await page.mouse.move(to.x, to.y, { steps: 14 });
+  await page.mouse.move(to.x, to.y); // a settling move so the last point sticks
+  const read = mid ? await mid() : undefined;
+  await page.mouse.up();
+  return read;
+};
+
+/* The source card and a target canvas column, each as a viewport point the
+ * pointer can travel between, plus the column path and its current block count.
+ * Computed in the page so the coordinates are the ones the pointer will use.
+ *
+ * A pointer drag can only aim at a point that is on screen, unlike the old
+ * synthetic drag which fired straight at the element wherever it sat. Blocks
+ * added by earlier checks can leave the column taller than the viewport or
+ * scrolled off it, so bring it into view and aim at the middle of its VISIBLE
+ * band, which is inside both the column and the screen. The source card lives in
+ * a fixed pane or modal, so scrolling the canvas never moves it. */
+const planDragToColumn = (cardSel) =>
+  page.evaluate((sel) => {
+    const cards = [...document.querySelectorAll(sel)];
+    const card = cards.find((c) => /divider/i.test(c.textContent || '')) || cards[0];
+    const col = [...document.querySelectorAll('.ed-canvas-frame [data-path]')].find((el) =>
+      /^s\d+r\d+c\d+$/.test(el.getAttribute('data-path') || ''),
+    );
+    if (!card || !col) return null;
+    // Both ends must be on screen for a pointer drag. The source card can be
+    // below the fold of a tall palette list or modal, and the column below the
+    // fold of the canvas; each lives in its own scroll container, so scroll both.
+    card.scrollIntoView({ block: 'center', inline: 'nearest' });
+    col.scrollIntoView({ block: 'center', inline: 'nearest' });
+    const path = col.getAttribute('data-path');
+    const c = card.getBoundingClientRect();
+    const r = col.getBoundingClientRect();
+    const top = Math.max(r.top, 8);
+    const bottom = Math.min(r.bottom, window.innerHeight - 8);
+    return {
+      path,
+      before: document.querySelectorAll(`.ed-canvas-frame [data-path^="${path}b"]`).length,
+      from: { x: Math.round(c.left + c.width / 2), y: Math.round(c.top + c.height / 2) },
+      to: {
+        x: Math.round(Math.min(Math.max(r.left + r.width / 2, 8), window.innerWidth - 8)),
+        y: Math.round((top + bottom) / 2),
+      },
+    };
+  }, cardSel);
+
+/*
+ * A new block dragged from the + picker lands where it is dropped, not where the
+ * picker was opened. A real pointer drag now, so this also proves the ghost is
+ * click-through: were it not, elementFromPoint would return the ghost and the
+ * slot would never show. Left near last, it adds a block to the seed page.
  */
 await check('a block dragged from the picker is added where it is dropped', async () => {
   await openBlockPicker();
 
-  const setup = await page.evaluate((mime) => {
-    const cards = [...document.querySelectorAll('.ed-block-card')];
-    const card = cards.find((c) => /divider/i.test(c.textContent || '')) || cards[0];
-    // A real column on the canvas (a path like s0r0c0), and its current blocks.
-    const col = [...document.querySelectorAll('.ed-canvas-frame [data-path]')].find((el) =>
-      /^s\d+r\d+c\d+$/.test(el.getAttribute('data-path') || ''),
-    );
-    if (!card || !col) return { ok: false, why: 'missing a card or a column' };
-    const path = col.getAttribute('data-path');
-    const before = document.querySelectorAll(`.ed-canvas-frame [data-path^="${path}b"]`).length;
+  const plan = await planDragToColumn('.ed-block-card');
+  if (!plan) return 'missing a card or a column';
 
-    const dt = new DataTransfer();
-    const fire = (el, type) =>
-      el.dispatchEvent(new DragEvent(type, { dataTransfer: dt, bubbles: true, cancelable: true }));
-    fire(card, 'dragstart');
-    fire(col, 'dragover');
-    // The precise drop zone should be showing now, and gone after the drop.
-    const zoneShown = document.querySelector('.ed-drop-slot')?.style.display === 'block';
-    fire(col, 'drop');
-    fire(card, 'dragend');
-    const zoneAfter = document.querySelector('.ed-drop-slot')?.style.display;
-    return { ok: true, path, before, zoneShown, zoneAfter };
-  }, 'application/x-tg-block');
+  const live = await dndPointerDrag(plan.from, plan.to, () =>
+    page.evaluate(() => ({
+      zoneShown: document.querySelector('.ed-drop-slot')?.style.display === 'block',
+      flagSet: document.body.dataset.tgDragging === 'block',
+    })),
+  );
+  if (!live.zoneShown) return 'no drop zone appeared while dragging over the column';
+  if (!live.flagSet) return 'the modal-fade flag was not set during the drag';
 
-  if (!setup.ok) return setup.why;
-  if (!setup.zoneShown) return 'no drop zone appeared while dragging over the column';
-  if (setup.zoneAfter !== 'none') return 'the drop zone was not hidden after the drop';
   await page.waitForTimeout(400);
-
   if ((await page.locator('.tg-modal').count()) !== 0) return 'the picker did not close after the drop';
+  const zoneAfter = await page.evaluate(() => document.querySelector('.ed-drop-slot')?.style.display);
+  if (zoneAfter !== 'none') return 'the drop zone was not hidden after the drop';
   const flagLeft = await page.evaluate(() => Boolean(document.body.dataset.tgDragging));
   if (flagLeft) return 'the dragging flag was left on the body';
-  const after = await page.locator(`.ed-canvas-frame [data-path^="${setup.path}b"]`).count();
-  return after > setup.before ? true : `column ${setup.path} blocks ${setup.before} -> ${after}`;
+  const after = await page.locator(`.ed-canvas-frame [data-path^="${plan.path}b"]`).count();
+  return after > plan.before ? true : `column ${plan.path} blocks ${plan.before} -> ${after}`;
 });
 
 /*
- * Closing the picker must clear the drag flag. A real drop unmounts the dragged
- * card before its dragend fires, so the picker's own unmount is what has to
- * clear the flag; left set, the scrim-fade CSS makes the next open of the
- * picker invisible (Andy hit exactly that, 5 Aug 2026). The synthetic drag
- * above fires dragend in order and so cannot catch this, hence a direct probe.
+ * Escape mid-drag cancels it: dnd-kit fires onDragCancel, which clears the
+ * modal-fade flag and adds nothing. Driven from the always-on palette, NOT the +
+ * picker: a modal has its own Escape-to-close that races the drag's cancel (the
+ * modal shuts, the drag finishes on release and drops a block), so the picker is
+ * the wrong place to test the gesture. The palette has no modal, so Escape means
+ * only cancel. This is the flag's whole safety story now the drag lives in one
+ * DndContext up in the shell: end and cancel are the two ways a drag stops, and
+ * both clear the flag, so it can never stick and hide the next open of the picker
+ * (the 5 Aug 2026 bug). The flag is checked the instant Escape lands, before the
+ * release, so it proves the cancel cleared it and not the release.
  */
-await check('closing the picker clears a leftover drag flag', async () => {
-  await openBlockPicker();
-  await page.evaluate(() => {
-    document.body.dataset.tgDragging = 'block';
-  });
+await check('escape mid-drag cancels it and clears the flag', async () => {
+  await page.locator('.ed-lefttab', { hasText: 'Elements' }).click();
+  await page.waitForSelector('.ed-palette-card', { timeout: 3000 });
+
+  const plan = await planDragToColumn('.ed-palette-card');
+  if (!plan) return 'missing a palette card or a column';
+
+  await page.mouse.move(plan.from.x, plan.from.y);
+  await page.mouse.down();
+  await page.mouse.move(plan.from.x + 8, plan.from.y + 8, { steps: 3 });
+  await page.mouse.move(plan.to.x, plan.to.y, { steps: 10 });
   await page.keyboard.press('Escape');
-  await page.waitForTimeout(200);
-  const stuck = await page.evaluate(() => Boolean(document.body.dataset.tgDragging));
-  return stuck ? 'the drag flag was left set after the picker closed' : true;
+  const flagOnCancel = await page.evaluate(() => Boolean(document.body.dataset.tgDragging));
+  await page.mouse.up();
+  await page.waitForTimeout(250);
+
+  if (flagOnCancel) return 'the drag flag was still set the instant Escape landed';
+  const flagLeft = await page.evaluate(() => Boolean(document.body.dataset.tgDragging));
+  if (flagLeft) return 'the drag flag was left set after a cancel';
+  const after = await page.locator(`.ed-canvas-frame [data-path^="${plan.path}b"]`).count();
+  return after === plan.before ? true : `a cancelled drag still added: ${plan.before} -> ${after}`;
 });
 
 // --- The persistent elements palette in the left pane -----------------------
 
 /*
- * The Elementor-style panel you drag elements from. It shares the canvas drop
- * path with the + picker, so the same synthetic drag proves it. Switching the
- * left pane to Elements is all that is new. Left near the end, since it changes
- * the page and the left pane.
+ * The Elementor-style panel you drag elements from. It shares the one DndContext
+ * and the same drop hook with the + picker, so the same pointer drag proves it.
+ * Switching the left pane to Elements is all that is new. Left near the end,
+ * since it changes the page and the left pane.
  */
 await check('an element dragged from the left palette lands on the canvas', async () => {
   await page.locator('.ed-lefttab', { hasText: 'Elements' }).click();
   await page.waitForSelector('.ed-palette-card', { timeout: 3000 });
 
-  const setup = await page.evaluate((mime) => {
-    const card = document.querySelector('.ed-palette-card');
-    const col = [...document.querySelectorAll('.ed-canvas-frame [data-path]')].find((el) =>
-      /^s\d+r\d+c\d+$/.test(el.getAttribute('data-path') || ''),
-    );
-    if (!card || !col) return { ok: false, why: 'missing a palette card or a column' };
-    const path = col.getAttribute('data-path');
-    const before = document.querySelectorAll(`.ed-canvas-frame [data-path^="${path}b"]`).length;
-    const dt = new DataTransfer();
-    const fire = (el, type) =>
-      el.dispatchEvent(new DragEvent(type, { dataTransfer: dt, bubbles: true, cancelable: true }));
-    fire(card, 'dragstart');
-    fire(col, 'dragover');
-    fire(col, 'drop');
-    fire(card, 'dragend');
-    return { ok: true, path, before };
-  }, 'application/x-tg-block');
+  // Same pointer drag as the picker, the same one DndContext behind it: the
+  // side panel is just a second source, with no modal over the canvas to fade.
+  const plan = await planDragToColumn('.ed-palette-card');
+  if (!plan) return 'missing a palette card or a column';
 
-  if (!setup.ok) return setup.why;
+  await dndPointerDrag(plan.from, plan.to);
   await page.waitForTimeout(300);
-  const after = await page.locator(`.ed-canvas-frame [data-path^="${setup.path}b"]`).count();
-  return after > setup.before ? true : `column ${setup.path} blocks ${setup.before} -> ${after}`;
+  const after = await page.locator(`.ed-canvas-frame [data-path^="${plan.path}b"]`).count();
+  return after > plan.before ? true : `column ${plan.path} blocks ${plan.before} -> ${after}`;
 });
 
 await check('clicking a palette element adds it to the selected column', async () => {

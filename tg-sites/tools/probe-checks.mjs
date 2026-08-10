@@ -469,6 +469,55 @@ const MUTATIONS = [
   width: 340px;`,
   },
 
+  // --- dragging a new block onto the canvas (dnd-kit) ----------------------
+
+  {
+    tag: 'dnd',
+    check: 'an element dragged from the left palette lands on the canvas',
+    /*
+     * The drag ghost follows the pointer, so if it takes pointer events it is
+     * what document.elementFromPoint returns and the drop hook never sees the
+     * column beneath it. pointerEvents:none on the overlay is what lets the point
+     * fall through to the canvas; without it nothing ever lands.
+     */
+    why: 'Let the drag ghost take pointer events, so it hides the canvas from the drop.',
+    file: 'components/editor/EditorShell.tsx',
+    from: `<DragOverlay dropAnimation={null} style={{ pointerEvents: 'none' }}>`,
+    to: `<DragOverlay dropAnimation={null}>`,
+  },
+  {
+    tag: 'dnd',
+    check: 'a block dragged from the picker is added where it is dropped',
+    /*
+     * The + picker is a modal over the canvas. The scrim recedes only while the
+     * body carries data-tg-dragging='block'; set any other value and the CSS no
+     * longer matches, the scrim stays solid, and a drag from a picker card cannot
+     * reach the canvas under it. The palette has no modal, so only this check
+     * feels it.
+     */
+    why: 'Set the wrong drag flag, so the picker scrim never fades and the drop cannot reach the canvas.',
+    file: 'components/editor/EditorShell.tsx',
+    from: `        document.body.dataset.tgDragging = 'block';`,
+    to: `        document.body.dataset.tgDragging = 'off';`,
+  },
+  {
+    tag: 'dnd',
+    check: 'escape mid-drag cancels it and clears the flag',
+    /*
+     * A cancel must clear the flag, or it sticks on and the scrim-fade CSS makes
+     * the next open of the picker invisible (the 5 Aug 2026 bug). Drop the clear
+     * from the cancel handler only, leaving the end handler's, so a released drag
+     * still tidies up but a cancelled one leaves the flag set.
+     */
+    why: 'Leave the drag flag set on cancel, the sticking bug from 5 Aug 2026.',
+    file: 'components/editor/EditorShell.tsx',
+    from: `        paletteDrop.hide();
+        setDragType(null);
+        delete document.body.dataset.tgDragging;`,
+    to: `        paletteDrop.hide();
+        setDragType(null);`,
+  },
+
   // --- contact details, on the settings screen -----------------------------
 
   {

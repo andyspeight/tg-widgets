@@ -27,7 +27,6 @@ import {
   STACK_BREAKPOINTS,
 } from '../../lib/content/schema';
 import {
-  BLOCK_DRAG_MIME,
   blockAtPath,
   containerColumns,
   type Path,
@@ -68,16 +67,6 @@ interface Props {
   onSelect: (path: Path | null) => void;
   onCommit: (next: (current: Page) => Page, coalesceKey?: string) => void;
   onPickBlock: (target: DropTarget) => void;
-  /**
-   * A block dragged off the picker and dropped onto the canvas. `at` is the
-   * index within the column, so a drop onto a block lands after it rather than
-   * always at the end. Absent when the editor does not accept drops (it always
-   * does today; the option keeps the canvas usable without it).
-   *
-   * `block` and `inner` are present when the drop lands in a CONTAINER's inner
-   * column, and absent for an ordinary column. See DropTarget.
-   */
-  onDropBlock?: (target: DropTarget, type: string) => void;
   onInsertSection: (index: number) => void;
   /**
    * The block being typed into on the canvas, as a path key, or null.
@@ -141,7 +130,6 @@ export function Canvas({
   onSelect,
   onCommit,
   onPickBlock,
-  onDropBlock,
   onInsertSection,
   editingPath = null,
   theme,
@@ -152,10 +140,6 @@ export function Canvas({
   const wrapRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<DragState | null>(null);
   const heightRef = useRef<HeightDrag | null>(null);
-  /** The floating drop zone shown where a dragged block would land. */
-  const dropSlotRef = useRef<HTMLDivElement | null>(null);
-  /** Where that drop would insert: the (possibly inner) column, and the index within it. */
-  const dropRef = useRef<{ target: DropTarget; index: number } | null>(null);
   const [badge, setBadge] = useState<{ x: number; y: number; text: string } | null>(null);
 
   // ---------------------------------------------------------------------
@@ -413,143 +397,6 @@ export function Canvas({
       if (path) onSelect(path);
     },
     [onSelect, onPickBlock, onInsertSection],
-  );
-
-  // ---------------------------------------------------------------------
-  // Drag a block off the picker onto the canvas
-  // ---------------------------------------------------------------------
-
-  /*
-   * The column under the pointer. Where in it the block lands is worked out
-   * separately, from where the pointer sits against each block, so the zone
-   * falls between the right two blocks rather than always after one. Read off
-   * the same data-path the click handler uses, so the two agree about what is
-   * where.
-   *
-   * A CONTAINER'S INNER COLUMN is the second case. An inner column and its inner
-   * blocks carry longer paths (…b0k0 and …b0k0i0), so the pointer over one
-   * resolves to that inner column, and `sep` says its direct blocks are keyed
-   * with `i` rather than `b` so onDragOver counts the right children. Over a
-   * container's own frame but not one of its columns, the path is the container
-   * BLOCK, which falls to the ordinary case and drops it beside the container.
-   */
-  const columnUnder = useCallback((el: HTMLElement | null) => {
-    const node = el?.closest<HTMLElement>('[data-path], [data-add]');
-    if (!node) return null;
-    const path = parsePathKey(node.dataset.path ?? node.dataset.add);
-    if (!path) return null;
-
-    if (path.kind === 'inner-column' || path.kind === 'inner-block') {
-      const key = `s${path.section}r${path.row}c${path.column}b${path.block}k${path.inner}`;
-      const columnEl = node.closest<HTMLElement>(`[data-path="${CSS.escape(key)}"]`);
-      if (!columnEl) return null;
-      const target: DropTarget = {
-        section: path.section,
-        row: path.row,
-        column: path.column,
-        block: path.block,
-        inner: path.inner,
-      };
-      return { columnEl, target, key, sep: 'i' as const };
-    }
-
-    if (path.kind === 'block' || path.kind === 'column') {
-      const key = `s${path.section}r${path.row}c${path.column}`;
-      const columnEl = node.closest<HTMLElement>(`[data-path="${CSS.escape(key)}"]`) ?? (path.kind === 'column' ? node : null);
-      if (!columnEl) return null;
-      const target: DropTarget = { section: path.section, row: path.row, column: path.column };
-      return { columnEl, target, key, sep: 'b' as const };
-    }
-
-    return null;
-  }, []);
-
-  const hideDropSlot = useCallback(() => {
-    if (dropSlotRef.current) dropSlotRef.current.style.display = 'none';
-    dropRef.current = null;
-  }, []);
-
-  const onDragOver = useCallback(
-    (event: React.DragEvent<HTMLDivElement>) => {
-      if (!onDropBlock || !event.dataTransfer.types.includes(BLOCK_DRAG_MIME)) return;
-      // preventDefault is what marks this a drop zone; without it the browser
-      // refuses the drop and shows the no-entry cursor.
-      event.preventDefault();
-      event.dataTransfer.dropEffect = 'copy';
-
-      const hit = columnUnder(event.target as HTMLElement);
-      const slot = dropSlotRef.current;
-      if (!hit || !slot) {
-        hideDropSlot();
-        return;
-      }
-
-      // The column's own blocks, in order. Exactly one level deep: a block's own
-      // innards carry longer paths and must not be counted as its siblings. The
-      // separator is `b` for an ordinary column and `i` for a container's inner
-      // column, so a container counts as ONE block of its outer column while its
-      // own inner blocks are what an inner drop lands among.
-      const isBlock = new RegExp(`^${hit.key}${hit.sep}\\d+$`);
-      const blockEls = Array.from(hit.columnEl.querySelectorAll<HTMLElement>('[data-path]')).filter((b) =>
-        isBlock.test(b.dataset.path ?? ''),
-      );
-
-      // Land before the first block whose middle is below the pointer, else last.
-      let index = blockEls.length;
-      for (let i = 0; i < blockEls.length; i += 1) {
-        const r = blockEls[i].getBoundingClientRect();
-        if (event.clientY < r.top + r.height / 2) {
-          index = i;
-          break;
-        }
-      }
-
-      // The line the zone straddles, in viewport space (the slot is position:
-      // fixed): the top of the block it lands before, the bottom of the last
-      // block, or the middle of an empty column.
-      const colRect = hit.columnEl.getBoundingClientRect();
-      let y: number;
-      if (blockEls.length === 0) y = colRect.top + Math.min(colRect.height / 2, 28);
-      else if (index < blockEls.length) y = blockEls[index].getBoundingClientRect().top;
-      else y = blockEls[blockEls.length - 1].getBoundingClientRect().bottom;
-
-      const inset = 6;
-      const height = 22;
-      // Style set imperatively, and there is deliberately no style prop on the
-      // node, so a re-render mid-drag (an autosave, say) cannot reset it.
-      slot.style.display = 'block';
-      slot.style.left = `${colRect.left + inset}px`;
-      slot.style.width = `${Math.max(0, colRect.width - inset * 2)}px`;
-      slot.style.top = `${y - height / 2}px`;
-      slot.style.height = `${height}px`;
-
-      dropRef.current = { target: hit.target, index };
-    },
-    [onDropBlock, columnUnder, hideDropSlot],
-  );
-
-  const onDrop = useCallback(
-    (event: React.DragEvent<HTMLDivElement>) => {
-      if (!onDropBlock) return;
-      const type = event.dataTransfer.getData(BLOCK_DRAG_MIME);
-      const drop = dropRef.current;
-      hideDropSlot();
-      if (!type || !drop) return;
-      event.preventDefault();
-      onDropBlock({ ...drop.target, at: drop.index }, type);
-    },
-    [onDropBlock, hideDropSlot],
-  );
-
-  const onDragLeave = useCallback(
-    (event: React.DragEvent<HTMLDivElement>) => {
-      // Only when the pointer leaves the frame for good, not on every hop from
-      // one child to the next, which fires dragleave on the element behind.
-      const to = event.relatedTarget as Node | null;
-      if (to && event.currentTarget.contains(to)) return;
-      hideDropSlot();
-    },
-    [hideDropSlot],
   );
 
   // ---------------------------------------------------------------------
@@ -864,9 +711,6 @@ export function Canvas({
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
           onKeyDown={onKeyDown}
-          onDragOver={onDragOver}
-          onDrop={onDrop}
-          onDragLeave={onDragLeave}
         >
           <PageRenderer
             page={page}
@@ -886,14 +730,6 @@ export function Canvas({
 
         {stackNote && <p className="ed-stack-note">{stackNote}</p>}
       </div>
-
-      {/*
-        Where a dragged block would land. One element, always mounted, moved and
-        shown imperatively in onDragOver (position: fixed, so viewport rects go
-        straight on). No style prop, so a re-render mid-drag cannot reset it, and
-        pointer-events: none, so it never eats the drop it is pointing at.
-      */}
-      <div ref={dropSlotRef} className="ed-drop-slot" aria-hidden="true" />
 
       {badge && (
         <div className="ed-width-badge" style={{ left: badge.x, top: badge.y }}>

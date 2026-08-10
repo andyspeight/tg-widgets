@@ -7,9 +7,9 @@
  * category, staff-only blocks hidden unless the user is staff.
  */
 
-import { useEffect, useRef, useState } from 'react';
-import { blocksByGroup } from '../../lib/content/blocks';
-import { BLOCK_DRAG_MIME } from '../../lib/content/tree';
+import { useRef, useState } from 'react';
+import { useDraggable } from '@dnd-kit/core';
+import { blocksByGroup, type BlockDefinition } from '../../lib/content/blocks';
 import { Icon } from './Icon';
 import { Modal } from '../ui/Modal';
 
@@ -31,28 +31,15 @@ export function BlockPicker({
 }) {
   const [query, setQuery] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
-  // Holds the pending "fade the modal" timer so dragend can cancel it. The fade
-  // must not run synchronously inside dragstart — see the note on the card.
-  const fadeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-
-  /*
-   * Clear the drag flag when the picker closes, for ANY reason. A successful
-   * drop adds the block and closes the picker, which unmounts the dragged card
-   * BEFORE its dragend can fire, so dragend alone cannot be trusted to clear the
-   * flag. Left set, the flag keeps the scrim-fade CSS in force, so the next time
-   * the picker opens it is faded to nothing and looks like it appears then
-   * instantly hides (Andy hit exactly this, 5 Aug 2026).
-   */
-  useEffect(
-    () => () => {
-      clearTimeout(fadeTimer.current);
-      delete document.body.dataset.tgDragging;
-    },
-    [],
-  );
 
   // Escape, the scrim and the focus trap all belong to Modal. Modal also
   // moves focus to the first control, which here is the search box.
+  //
+  // Dragging a card onto the canvas is a dnd-kit draggable now (see BlockCard),
+  // the same source the elements palette uses. The DndContext up in EditorShell
+  // fades this modal's scrim while a drag is live, so there is no per-card flag
+  // to set here and nothing to leave stuck on unmount — the old native-drag
+  // fade-on-a-timer fragility is gone with it (5 Aug 2026).
 
   const needle = query.trim().toLowerCase();
   const groups = blocksByGroup(isStaff)
@@ -93,54 +80,55 @@ export function BlockPicker({
               <p className="ed-group-title">{group.group}</p>
               <div className="ed-block-grid">
                 {group.blocks.map((definition) => (
-                  <button
-                    key={definition.type}
-                    type="button"
-                    className="ed-block-card"
-                    onClick={() => onPick(definition.type)}
-                    /*
-                     * DRAG THE SAME CARD ONTO THE CANVAS. Click still adds it to
-                     * the column the picker was opened from; dragging lets you
-                     * drop it exactly where you want instead. The type rides on
-                     * the dataTransfer, and a flag on the body lets the modal
-                     * recede so the canvas beneath it takes the drop. Andy asked
-                     * for elements you can drag onto the canvas, 4 Aug 2026.
-                     */
-                    draggable
-                    onDragStart={(event) => {
-                      event.dataTransfer.setData(BLOCK_DRAG_MIME, definition.type);
-                      event.dataTransfer.effectAllowed = 'copy';
-                      /*
-                       * Fade the modal on the NEXT tick, not here. The flag turns
-                       * the scrim pointer-events:none, and the card being dragged
-                       * lives inside that scrim: mutating the drag source's own
-                       * container inside dragstart makes Chrome cancel the drag
-                       * before it begins, which is exactly why clicking a card
-                       * added it but dragging did nothing (found 5 Aug 2026, after
-                       * the synthetic test passed but a real mouse drag did not).
-                       * Deferring a tick lets the drag commit first.
-                       */
-                      fadeTimer.current = setTimeout(() => {
-                        document.body.dataset.tgDragging = 'block';
-                      }, 0);
-                    }}
-                    onDragEnd={() => {
-                      clearTimeout(fadeTimer.current);
-                      delete document.body.dataset.tgDragging;
-                    }}
-                  >
-                    <span className="ed-block-card__icon">
-                      <Icon name={definition.icon} size={18} />
-                    </span>
-                    <span>
-                      <strong>{definition.label}</strong>
-                      <small>{definition.description}</small>
-                    </span>
-                  </button>
+                  <BlockCard key={definition.type} definition={definition} onPick={onPick} />
                 ))}
               </div>
             </div>
           ))}
     </Modal>
+  );
+}
+
+/**
+ * One draggable block card in the + picker.
+ *
+ * The same dnd-kit draggable the elements palette uses, so it works by touch and
+ * keyboard as well as mouse. Click still adds the block to the column the picker
+ * was opened from; dragging drops it exactly where you let go. The type rides on
+ * the draggable's data, which the DndContext up in EditorShell reads back on
+ * drop; that same context fades this modal's scrim while a drag is live so the
+ * canvas beneath takes it. This replaces the old native-HTML5 drag, whose
+ * modal-fade had to be deferred a tick or Chrome cancelled the drag (5 Aug
+ * 2026) — dnd-kit carries none of that fragility.
+ */
+function BlockCard({
+  definition,
+  onPick,
+}: {
+  definition: BlockDefinition;
+  onPick: (type: string) => void;
+}) {
+  const { setNodeRef, listeners, attributes } = useDraggable({
+    id: `picker:${definition.type}`,
+    data: { paletteType: definition.type },
+  });
+
+  return (
+    <button
+      ref={setNodeRef}
+      type="button"
+      className="ed-block-card"
+      onClick={() => onPick(definition.type)}
+      {...attributes}
+      {...listeners}
+    >
+      <span className="ed-block-card__icon">
+        <Icon name={definition.icon} size={18} />
+      </span>
+      <span>
+        <strong>{definition.label}</strong>
+        <small>{definition.description}</small>
+      </span>
+    </button>
   );
 }

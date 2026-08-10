@@ -23,14 +23,6 @@ import {
 } from './schema';
 import { createColumn } from './factory';
 
-/**
- * The drag-and-drop type for a block dragged off the Add-block picker onto the
- * canvas. A private MIME so a stray text or file drag can never be read as a
- * block, and shared here so the picker that writes it and the canvas that reads
- * it cannot drift apart.
- */
-export const BLOCK_DRAG_MIME = 'application/x-tg-block';
-
 /*
  * ONE LEVEL OF NESTING, added 5 Aug 2026 for the container element. A container
  * is a block that holds its own columns, each holding its own blocks. Those two

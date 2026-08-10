@@ -17,9 +17,9 @@
  */
 
 import { useState } from 'react';
+import { useDraggable } from '@dnd-kit/core';
 
-import { blocksByGroup } from '../../lib/content/blocks';
-import { BLOCK_DRAG_MIME } from '../../lib/content/tree';
+import { blocksByGroup, type BlockDefinition } from '../../lib/content/blocks';
 import { Icon } from './Icon';
 
 export function ElementsPalette({
@@ -66,30 +66,52 @@ export function ElementsPalette({
             <p className="ed-group-title">{group.group}</p>
             <div className="ed-palette-grid">
               {group.blocks.map((definition) => (
-                <button
-                  key={definition.type}
-                  type="button"
-                  className="ed-palette-card"
-                  title={definition.description}
-                  draggable
-                  onDragStart={(event) => {
-                    // Beside the canvas, not over it: no flag, no fade. Just say
-                    // what is being dragged and let the canvas take the drop.
-                    event.dataTransfer.setData(BLOCK_DRAG_MIME, definition.type);
-                    event.dataTransfer.effectAllowed = 'copy';
-                  }}
-                  onClick={() => onAdd(definition.type)}
-                >
-                  <span className="ed-palette-card__icon">
-                    <Icon name={definition.icon} size={18} />
-                  </span>
-                  <span className="ed-palette-card__label">{definition.label}</span>
-                </button>
+                <PaletteCard key={definition.type} definition={definition} onAdd={onAdd} />
               ))}
             </div>
           </div>
         ))}
       </div>
     </div>
+  );
+}
+
+/**
+ * One draggable element card.
+ *
+ * Its own component because useDraggable is a hook, one per card. dnd-kit starts
+ * a drag only once the pointer has passed the DndContext's activation distance,
+ * so a plain click still adds the block. The card itself does not move; the drag
+ * ghost is drawn by the DragOverlay up in EditorShell. Touch works for free,
+ * which the old native-HTML5 drag never did, and the same hook carries the
+ * keyboard and screen-reader wiring the accessibility pass builds on.
+ */
+function PaletteCard({
+  definition,
+  onAdd,
+}: {
+  definition: BlockDefinition;
+  onAdd: (type: string) => void;
+}) {
+  const { setNodeRef, listeners, attributes } = useDraggable({
+    id: `palette:${definition.type}`,
+    data: { paletteType: definition.type },
+  });
+
+  return (
+    <button
+      ref={setNodeRef}
+      type="button"
+      className="ed-palette-card"
+      title={definition.description}
+      onClick={() => onAdd(definition.type)}
+      {...attributes}
+      {...listeners}
+    >
+      <span className="ed-palette-card__icon">
+        <Icon name={definition.icon} size={18} />
+      </span>
+      <span className="ed-palette-card__label">{definition.label}</span>
+    </button>
   );
 }
