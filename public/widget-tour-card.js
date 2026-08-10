@@ -42,6 +42,31 @@
   }
   const API_BASE = resolveApiBase();
   const AVAIL_URL = API_BASE.replace(/\/widget-config(\/)?$/, '/trip-availability');
+  // The full-tour script, on the SAME origin as this one. The card opens the
+  // full tour in an overlay and loads this on demand (once, shared across every
+  // card on the page) so the site owner only ever embeds the card.
+  const TOUR_SCRIPT = API_BASE.replace(/\/api\/widget-config(\/)?$/, '') + '/widget-tour.js';
+  let tourScriptPromise = null;
+  function loadTourScript() {
+    if (typeof window !== 'undefined' && window.TGTourWidget) return Promise.resolve();
+    if (tourScriptPromise) return tourScriptPromise;
+    tourScriptPromise = new Promise(function (resolve, reject) {
+      const done = () => (window.TGTourWidget ? resolve() : reject(new Error('tour script loaded but no widget')));
+      const existing = Array.prototype.find.call(document.scripts || [], (s) => /\/widget-tour\.js(\?|$|#)/.test(s.src || ''));
+      if (existing) {
+        if (window.TGTourWidget) return resolve();
+        existing.addEventListener('load', done);
+        existing.addEventListener('error', reject);
+        return;
+      }
+      const s = document.createElement('script');
+      s.src = TOUR_SCRIPT; s.defer = true;
+      s.addEventListener('load', done);
+      s.addEventListener('error', reject);
+      document.head.appendChild(s);
+    });
+    return tourScriptPromise;
+  }
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   function esc(s) {
@@ -146,9 +171,10 @@
       border: 1px solid var(--tgtc-border); border-radius: var(--tgtc-radius);
       overflow: hidden; box-shadow: var(--tgtc-shadow);
     }
-    a.tgtc-card { cursor: pointer; transition: box-shadow .16s ease, transform .16s ease; }
-    a.tgtc-card:hover { box-shadow: 0 8px 24px rgba(15,23,42,0.13); transform: translateY(-2px); }
-    a.tgtc-card:focus-visible { outline: 3px solid var(--tgtc-accent); outline-offset: 2px; }
+    a.tgtc-card, button.tgtc-card { cursor: pointer; transition: box-shadow .16s ease, transform .16s ease; }
+    button.tgtc-card { width: 100%; text-align: left; font: inherit; -webkit-appearance: none; appearance: none; }
+    a.tgtc-card:hover, button.tgtc-card:hover { box-shadow: 0 8px 24px rgba(15,23,42,0.13); transform: translateY(-2px); }
+    a.tgtc-card:focus-visible, button.tgtc-card:focus-visible { outline: 3px solid var(--tgtc-accent); outline-offset: 2px; }
 
     .tgtc-hero { position: relative; aspect-ratio: 16 / 10; background: var(--tgtc-alt); }
     .tgtc-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -198,8 +224,36 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      a.tgtc-card { transition: none; }
-      a.tgtc-card:hover { transform: none; }
+      a.tgtc-card, button.tgtc-card { transition: none; }
+      a.tgtc-card:hover, button.tgtc-card:hover { transform: none; }
+    }
+  `;
+
+  // ── Overlay styles (its own shadow host on <body>) ────────────────────────
+  // The full tour renders inside .ov-mount (its own isolated Shadow DOM), so
+  // these only style the dialog chrome around it.
+  const OVERLAY_STYLES = `
+    .ov { position: fixed; inset: 0; z-index: 2147483000; }
+    .ov[hidden] { display: none; }
+    .ov-backdrop { position: absolute; inset: 0; background: rgba(15,23,42,0.55); }
+    .ov-panel {
+      position: relative; width: min(940px, 94vw); max-height: 92vh; margin: 4vh auto;
+      overflow-y: auto; -webkit-overflow-scrolling: touch; background: #fff;
+      border-radius: 16px; box-shadow: 0 24px 70px rgba(0,0,0,0.40);
+    }
+    .ov-close {
+      position: sticky; top: 12px; float: right; margin: 12px 12px -52px 0; z-index: 5;
+      width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center;
+      border: 0; border-radius: 999px; background: rgba(255,255,255,0.92); color: #0F172A;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2); cursor: pointer;
+    }
+    .ov-close:hover { background: #fff; }
+    .ov-close:focus-visible { outline: 3px solid #C2410C; outline-offset: 2px; }
+    .ov-mount { display: block; }
+    @media (max-width: 640px) { .ov-panel { width: 100vw; max-height: 100vh; margin: 0; border-radius: 0; } }
+    @media (prefers-reduced-motion: no-preference) {
+      .ov-panel { animation: tgtc-ov-in .18s ease both; }
+      @keyframes tgtc-ov-in { from { transform: translateY(14px); opacity: .5 } to { transform: none; opacity: 1 } }
     }
   `;
 
@@ -211,6 +265,11 @@
       container._tgWidget = this;
       this.cfg = this._defaults(config);
       this.widgetId = this.cfg._widgetId || container.getAttribute('data-tg-id') || '';
+      // Keep the WHOLE config (days, sections, gallery…) so the click-to-open
+      // overlay can render the full tour from the same record. The card face
+      // only uses the summary fields; the rest rides along for the overlay.
+      this._raw = (config && typeof config === 'object') ? config : {};
+      if (this.widgetId && !this._raw._widgetId) this._raw._widgetId = this.widgetId;
       this.shadow = container.attachShadow({ mode: 'open' });
       this._render();
     }
@@ -290,10 +349,8 @@
             + '<span class="tgtc-price" data-role="price">' + esc(price) + '</span>'
             + '<span class="tgtc-pp">pp</span>'
           : '';
-        const cta = t.pageUrl ? '<span class="tgtc-cta">View tour' + IC.arrow + '</span>' : '';
-        foot = (priceBlock || cta)
-          ? '<div class="tgtc-foot">' + priceBlock + cta + '</div>'
-          : '';
+        const cta = '<span class="tgtc-cta">View tour' + IC.arrow + '</span>';
+        foot = '<div class="tgtc-foot">' + priceBlock + cta + '</div>';
       }
 
       this.root = document.createElement('div');
@@ -304,12 +361,15 @@
       this.root.style.setProperty('--tgtc-radius', d.radius + 'px');
       this.root.style.setProperty('--tgtc-font', fontStack(d.fontFamily));
 
-      // The card is a link when a full-page URL is set, otherwise a plain
-      // container. The href is whitelisted (http/https/relative) by safeUrl.
-      const tag = t.pageUrl ? 'a' : 'section';
+      // Default: a button that opens the full tour in an overlay, so the site
+      // owner embeds ONLY the card and nothing else. When a pageUrl is set it
+      // becomes an <a> to that page instead — the explicit override. The href
+      // is whitelisted (http/https/relative) by safeUrl.
+      const overlayMode = !t.pageUrl;
+      const tag = t.pageUrl ? 'a' : 'button';
       const attrs = t.pageUrl
         ? ' href="' + esc(t.pageUrl) + '" aria-label="' + esc(t.title) + '"'
-        : ' aria-label="' + esc(t.title) + '"';
+        : ' type="button" aria-label="' + esc('View the ' + t.title + ' tour') + '"';
 
       this.root.innerHTML =
         '<' + tag + ' class="tgtc-card"' + attrs + '>'
@@ -326,7 +386,75 @@
       this.shadow.innerHTML = '<style>' + STYLES + '</style>';
       this.shadow.appendChild(this.root);
 
+      // Overlay mode: the card is a button that opens the full tour on click.
+      if (overlayMode) {
+        const card = this.root.querySelector('.tgtc-card');
+        if (card) card.addEventListener('click', () => this._openOverlay());
+      }
+
       this._loadAvailability(departed);
+    }
+
+    // ── Click-to-open overlay ──────────────────────────────────────────────
+    // A real user action, so moving focus + locking scroll here is allowed
+    // (never on render). Loads the full-tour script on demand the first time.
+    _openOverlay() {
+      const card = this.root && this.root.querySelector('.tgtc-card');
+      const go = () => { if (card) card.removeAttribute('aria-busy'); this._buildOverlay(); this._showOverlay(); };
+      if (typeof window !== 'undefined' && window.TGTourWidget) return go();
+      if (card) card.setAttribute('aria-busy', 'true');
+      loadTourScript().then(go).catch(() => { if (card) card.removeAttribute('aria-busy'); });
+    }
+
+    _buildOverlay() {
+      if (this._ov || typeof window === 'undefined' || !window.TGTourWidget) return;
+      const host = document.createElement('div');
+      host.setAttribute('data-tg-tour-overlay', '');
+      const sh = host.attachShadow({ mode: 'open' });
+      sh.innerHTML = '<style>' + OVERLAY_STYLES + '</style>'
+        + '<div class="ov" role="dialog" aria-modal="true" aria-label="' + esc(this.cfg.tour.title) + '" hidden>'
+        +   '<div class="ov-backdrop" data-close></div>'
+        +   '<div class="ov-panel">'
+        +     '<button class="ov-close" type="button" data-close aria-label="Close">'
+        +       '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
+        +     '</button>'
+        +     '<div class="ov-mount"></div>'
+        +   '</div>'
+        + '</div>';
+      document.body.appendChild(host);
+      const ov = sh.querySelector('.ov');
+      // Mount the full tour once, from the whole config (no data-tg-widget on
+      // the mount, so the tour script's auto-init never double-claims it).
+      try { new window.TGTourWidget(sh.querySelector('.ov-mount'), this._raw); } catch (e) { /* leave empty */ }
+      sh.querySelectorAll('[data-close]').forEach((el) => el.addEventListener('click', () => this._closeOverlay()));
+      this._onKey = (e) => { if (e.key === 'Escape') this._closeOverlay(); };
+      this._ov = { host, ov, closeBtn: sh.querySelector('.ov-close') };
+    }
+
+    _showOverlay() {
+      if (!this._ov) return;
+      this._prevFocus = document.activeElement;
+      this._ov.ov.hidden = false;
+      this._prevBodyOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      document.addEventListener('keydown', this._onKey, true);
+      try { this._ov.closeBtn.focus(); } catch (e) { /* ignore */ }
+    }
+
+    _closeOverlay() {
+      if (!this._ov) return;
+      this._ov.ov.hidden = true;
+      document.body.style.overflow = this._prevBodyOverflow || '';
+      document.removeEventListener('keydown', this._onKey, true);
+      try { if (this._prevFocus && this._prevFocus.focus) this._prevFocus.focus(); } catch (e) { /* ignore */ }
+    }
+
+    _teardownOverlay() {
+      if (!this._ov) return;
+      try { document.removeEventListener('keydown', this._onKey, true); } catch (e) { /* ignore */ }
+      try { document.body.style.overflow = this._prevBodyOverflow || ''; } catch (e) { /* ignore */ }
+      try { this._ov.host.remove(); } catch (e) { /* ignore */ }
+      this._ov = null;
     }
 
     _loadAvailability(departed) {
@@ -352,6 +480,12 @@
     // Public: apply new config and re-render in place. Side-effect-free for the
     // host page (no focus, no scroll), per the suite render rule.
     update(config) {
+      // Keep the full config in step so a rebuilt overlay reflects edits.
+      this._raw = Object.assign({}, this._raw, config, {
+        tour: Object.assign({}, this._raw.tour, config && config.tour),
+        design: Object.assign({}, this._raw.design, config && config.design),
+      });
+      this._teardownOverlay();
       this.cfg = this._defaults(Object.assign({}, {
         tour: Object.assign({}, this.cfg.tour, config && config.tour),
         design: Object.assign({}, this.cfg.design, config && config.design),
@@ -361,6 +495,7 @@
     }
 
     destroy() {
+      this._teardownOverlay();
       this.shadow.innerHTML = '';
       this.el.removeAttribute('data-tg-hidden');
     }

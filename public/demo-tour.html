@@ -63,7 +63,7 @@
   <div class="section-label">
     <div class="kicker">Compact tour cards</div>
     <h2>Two tours, side by side</h2>
-    <p>The small card view — hero, dates and price — links through to the full page. Drop two on a page and they sit next to each other, then stack on mobile.</p>
+    <p>The small card view — hero, dates and price. Click a card and the full tour opens right here in a pop-over, so you only ever place the card. Drop two side by side and they stack on mobile.</p>
   </div>
   <div class="card-band">
     <div class="card-stage"><div id="card-a"></div><div id="card-b"></div></div>
@@ -287,8 +287,7 @@
         endDate: '2027-02-14',
         durationText: '7 days / 6 nights',
         capacity: 12,
-        pricePerPersonPence: 289500,
-        pageUrl: '#full'
+        pricePerPersonPence: 289500
       },
       design: { brandColor: '#1B2B5B', accentColor: '#C2410C', theme: 'light', radius: 16, fontFamily: 'DM Sans' }
     };
@@ -296,10 +295,10 @@
     let inst = null, cardA = null, cardB = null;
     document.addEventListener('DOMContentLoaded', () => {
       inst = new window.TGTourWidget(document.getElementById('mount'), TOUR);
-      // Two compact cards: Kenya (from the full tour) and Cape Town, each linking
-      // to the full page. The card reads tour.* + design.*, so the same record drives both.
-      cardA = new window.TGTourCardWidget(document.getElementById('card-a'),
-        { tour: Object.assign({}, TOUR.tour, { pageUrl: '#full' }), design: TOUR.design });
+      // Each card carries the WHOLE tour config, so clicking it opens the full
+      // tour in a pop-over — the site owner places only the card. Kenya is fully
+      // seeded; Cape Town is a basic example.
+      cardA = new window.TGTourCardWidget(document.getElementById('card-a'), TOUR);
       cardB = new window.TGTourCardWidget(document.getElementById('card-b'), TOUR_B);
     });
     document.querySelectorAll('[data-theme-btn]').forEach((btn) => {

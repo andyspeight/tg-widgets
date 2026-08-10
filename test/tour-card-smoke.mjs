@@ -122,8 +122,8 @@ const cfgAttr = (o) => JSON.stringify(o).replace(/'/g, '&#39;');
       dates: !!sr.querySelector('[data-role="dates"]'),
     };
   });
-  ok(plainCard.tag === 'section', 'card: unlinked card is a plain section, not an anchor');
-  ok(!plainCard.hasCta, 'card: no "View tour" cue without a link');
+  ok(plainCard.tag === 'button', 'card: with no pageUrl the card is a button (opens the overlay)');
+  ok(plainCard.hasCta, 'card: shows the "View tour" cue');
   ok(plainCard.duration.includes('9 days / 8 nights') && !plainCard.dates, 'card: falls back to duration text when there are no dates');
   ok(errors.length === 0, 'card: no script errors (' + errors.join(' | ') + ')');
   await page.close();
@@ -173,13 +173,81 @@ const cfgAttr = (o) => JSON.stringify(o).replace(/'/g, '&#39;');
       titleText: sr?.querySelector('[data-role="title"]')?.textContent || '',
       imgInTitle: !!sr?.querySelector('[data-role="title"] img'),
       tag: sr?.querySelector('.tgtc-card')?.tagName.toLowerCase() || '',
+      href: sr?.querySelector('.tgtc-card')?.getAttribute('href') || '',
     };
   });
   ok(!xss.fired, 'xss: onerror payload never executed');
   ok(xss.titleText.includes('<img src=x'), 'xss: hostile title renders as literal text');
   ok(!xss.imgInTitle, 'xss: no element created from config text');
-  ok(xss.tag === 'section', 'xss: javascript: URL is rejected, card is not a link');
+  ok(xss.tag === 'button' && !xss.href, 'xss: javascript: URL is rejected, card is a button not a link');
   ok(errors.length === 0, 'xss: no script errors (' + errors.join(' | ') + ')');
+  await page.close();
+}
+
+// ── 4b. Click-to-open overlay: card alone opens the full tour ────────────────
+// Only the CARD script is on the page. Clicking loads widget-tour.js on demand
+// and mounts the full tour (from the whole config) in a dialog over the page.
+{
+  const { page, errors } = await newPage();
+  const full = cfgAttr({
+    tour: { title: 'Kenya Safari', subtitle: 'Eleven days.', location: 'Kenya', durationText: '11 days', currency: 'gbp', pricePerPersonPence: 349500 },
+    days: [
+      { label: 'Day 1', title: 'Arrival', body: 'Land in Nairobi.' },
+      { label: 'Day 2', title: 'Safari', body: 'Game drives.' },
+    ],
+    highlights: ['Big cats', 'Great Rift Valley'],
+    enquiry: { heading: 'Enquire' },
+    design: { brandColor: '#1B2B5B', accentColor: '#C2410C' },
+  });
+  await page.setContent(
+    `<!doctype html><html><body style="margin:0"><div id="c" data-tg-widget="tour-card" data-tg-config='${full}'></div>` +
+    `<script src="${BASE}/widget-tour-card.js"></script></body></html>`, { waitUntil: 'load' });
+  await page.waitForFunction(() => document.getElementById('c')?.shadowRoot?.querySelector('.tgtc-card'), { timeout: 8000 });
+
+  // Nothing open yet, and the full-tour script is NOT loaded until we click.
+  const before = await page.evaluate(() => ({
+    tourScript: !!window.TGTourWidget,
+    overlay: !!document.querySelector('[data-tg-tour-overlay]'),
+  }));
+  ok(!before.tourScript, 'overlay: full-tour script not loaded until the card is clicked');
+  ok(!before.overlay, 'overlay: no overlay before click');
+
+  // Click the card face.
+  await page.evaluate(() => document.getElementById('c').shadowRoot.querySelector('.tgtc-card').click());
+  await page.waitForFunction(() => {
+    const h = document.querySelector('[data-tg-tour-overlay]');
+    const m = h?.shadowRoot?.querySelector('.ov-mount');
+    return !!(m && m.shadowRoot && m.shadowRoot.querySelector('[data-role="title"]'));
+  }, { timeout: 8000 }).catch(() => {});
+
+  const opened = await page.evaluate(() => {
+    const h = document.querySelector('[data-tg-tour-overlay]');
+    const ov = h?.shadowRoot?.querySelector('.ov');
+    const tourSr = h?.shadowRoot?.querySelector('.ov-mount')?.shadowRoot;
+    return {
+      loaded: !!window.TGTourWidget,
+      visible: ov ? !ov.hidden : false,
+      title: tourSr?.querySelector('[data-role="title"]')?.textContent || '',
+      days: tourSr ? tourSr.querySelectorAll('[data-role="day"]').length : 0,
+      scrollLocked: document.body.style.overflow === 'hidden',
+    };
+  });
+  ok(opened.loaded, 'overlay: clicking loaded the full-tour script on demand');
+  ok(opened.visible, 'overlay: dialog is shown after click');
+  ok(opened.title === 'Kenya Safari', `overlay: full tour rendered inside (title "${opened.title}")`);
+  ok(opened.days === 2, `overlay: full itinerary rendered from the whole config (got ${opened.days} days)`);
+  ok(opened.scrollLocked, 'overlay: background scroll is locked while open');
+
+  // Escape closes it and restores scroll.
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(100);
+  const closed = await page.evaluate(() => {
+    const ov = document.querySelector('[data-tg-tour-overlay]')?.shadowRoot?.querySelector('.ov');
+    return { hidden: ov ? !!ov.hidden : true, scrollFree: document.body.style.overflow !== 'hidden' };
+  });
+  ok(closed.hidden, 'overlay: Escape closes the dialog');
+  ok(closed.scrollFree, 'overlay: background scroll restored on close');
+  ok(errors.length === 0, 'overlay: no script errors (' + errors.join(' | ') + ')');
   await page.close();
 }
 

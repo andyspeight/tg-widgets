@@ -472,10 +472,10 @@
       ));
       b.append(note(
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>'
-        + '<div><strong>Show tours two-up with the compact card.</strong> As well as this full page, each tour has a small card (hero, dates and price). Drop two cards on a page and they sit side by side, then stack on mobile. Paste the address of this tour\'s page below so the cards can link straight to it.</div>'
+        + '<div><strong>Show tours two-up with the compact card.</strong> Each tour has a small card (hero, dates and price). Click a card and the full tour opens in a pop-over on the same page, so you only ever place the card. Two cards sit side by side and stack on mobile.</div>'
       ));
-      b.append(field('Link to the full tour page', textIn(() => t.pageUrl, v => t.pageUrl = v, 'https://your-site.com/tours/your-tour', 500),
-        'Where you have embedded this tour page. The compact cards link here.'));
+      b.append(field('Full tour page link (optional)', textIn(() => t.pageUrl, v => t.pageUrl = v, 'https://your-site.com/tours/your-tour', 500),
+        'Leave blank to open the tour in a pop-over. Set it only if you would rather send visitors to a separate page you have built.'));
     }));
   }
 
