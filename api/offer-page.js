@@ -208,7 +208,11 @@ export default async function handler(req, res) {
     template,
     theme: q.theme === 'dark' ? 'dark' : 'light',
     accentColor: typeof q.accent === 'string' ? q.accent.slice(0, 32) : '',
-    agencyName: typeof q.agency === 'string' ? q.agency.slice(0, 80) : ''
+    agencyName: typeof q.agency === 'string' ? q.agency.slice(0, 80) : '',
+    // The client's public feed key — lets the page fetch a few of their other
+    // offers for the "More deals" strip (cruise template). Public, non-secret
+    // (the grid embed already carries it). Restricted to safe key characters.
+    client: typeof q.client === 'string' ? q.client.replace(/[^A-Za-z0-9:_@.\-]/g, '').slice(0, 64) : ''
   };
 
   let offer = null;

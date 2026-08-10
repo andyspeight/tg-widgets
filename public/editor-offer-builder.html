@@ -233,7 +233,9 @@
                 <button type="button" class="layout-opt" data-layout="horizontal"><span class="mini"></span>Horizontal</button>
                 <button type="button" class="layout-opt" data-layout="banner"><span class="mini"></span>Banner</button>
                 <button type="button" class="layout-opt" data-layout="split"><span class="mini"></span>Split</button>
+                <button type="button" class="layout-opt" data-layout="cruise"><span class="mini"></span>Cruise</button>
               </div>
+              <div class="field-help" id="cruiseHelp" hidden>Cruise style also sets the offer page to the matching Cruise design.</div>
               <div class="field" id="colsField"><label class="field-label">Grid columns</label>
                 <select id="cfgColumns"><option value="auto">Auto-fit</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
               </div>
@@ -252,7 +254,7 @@
             </button>
             <div class="section-body">
               <div class="field"><label class="field-label">Page template</label>
-                <select id="cfgTemplate"><option value="classic">Classic</option><option value="editorial">Editorial</option><option value="immersive">Immersive</option></select>
+                <select id="cfgTemplate"><option value="classic">Classic</option><option value="editorial">Editorial</option><option value="immersive">Immersive</option><option value="cruise">Cruise</option></select>
               </div>
             </div>
           </div>
@@ -1088,18 +1090,41 @@
       $('cfgEnquiryPhone').value = c.enquiryPhone;
       $('cfgOfferBase').value = c.offerBaseUrl || '';
       $('cfgProtection').value = c.protection;
+      { const h = $('cruiseHelp'); if (h) h.hidden = c.cardLayout !== 'cruise'; }
     }
     function dirty(){ if (window.tgse && window.tgse.setSaveState) window.tgse.setSaveState('dirty'); }
+    // Keep the Cruise card style and Cruise page template in step — choosing
+    // Cruise on either control sets the other, so it reads as one design choice.
+    function syncCruise(source) {
+      const c = state.config;
+      if (source === 'layout' && c.cardLayout === 'cruise') {
+        c.template = 'cruise'; $('cfgTemplate').value = 'cruise';
+      } else if (source === 'template' && c.template === 'cruise') {
+        c.cardLayout = 'cruise';
+        document.querySelectorAll('#layoutGrid .layout-opt').forEach(x => x.setAttribute('aria-pressed', x.dataset.layout === 'cruise' ? 'true' : 'false'));
+        $('colsField').hidden = true;
+      }
+      const h = $('cruiseHelp'); if (h) h.hidden = c.cardLayout !== 'cruise';
+    }
     function wireInputs() {
       $('name-input').addEventListener('input', e => { state.name = e.target.value; dirty(); });
       document.querySelectorAll('#layoutGrid .layout-opt').forEach(b => b.addEventListener('click', () => {
         state.config.cardLayout = b.dataset.layout;
         document.querySelectorAll('#layoutGrid .layout-opt').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
         $('colsField').hidden = state.config.cardLayout !== 'vertical';
+        // Cruise is one cohesive design: the cruise card goes with the cruise
+        // offer page, so picking the Cruise card style sets the page template too.
+        syncCruise('layout');
         renderCardPreview(); dirty();
       }));
-      const sel = { cfgColumns:'columns', cfgTemplate:'template', cfgCurrency:'currency', cfgProtection:'protection' };
+      const sel = { cfgColumns:'columns', cfgCurrency:'currency', cfgProtection:'protection' };
       Object.entries(sel).forEach(([id,k]) => $(id).addEventListener('change', e => { state.config[k]=e.target.value; renderCardPreview(); dirty(); }));
+      // Page template — coupled to the card style for the Cruise design.
+      $('cfgTemplate').addEventListener('change', e => {
+        state.config.template = e.target.value;
+        syncCruise('template');
+        renderCardPreview(); dirty();
+      });
       const col = { cfgAccent:'accentColor', cfgBrand:'brandColor' };
       Object.entries(col).forEach(([id,k]) => $(id).addEventListener('input', e => { state.config[k]=e.target.value; renderCardPreview(); dirty(); }));
       $('cfgRadius').addEventListener('input', e => { const n=parseInt(e.target.value,10); state.config.radius=isNaN(n)?14:Math.max(0,Math.min(40,n)); renderCardPreview(); dirty(); });

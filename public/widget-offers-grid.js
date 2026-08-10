@@ -203,6 +203,9 @@
       if (this.cfg.template && this.cfg.template !== 'classic') q.push('template=' + encodeURIComponent(this.cfg.template));
       if (this.cfg.theme === 'dark') q.push('theme=dark');
       if (this.cfg.accentColor) q.push('accent=' + encodeURIComponent(this.cfg.accentColor));
+      // Carry the feed key so the offer page can show a few of the client's other
+      // offers (the cruise template's "More deals" strip). Public feed key.
+      if (this.cfg.client) q.push('client=' + encodeURIComponent(this.cfg.client));
       return q.length ? base + '?' + q.join('&') : base;
     }
 
@@ -269,7 +272,9 @@
           holder.appendChild(cell);
           new window.TGOfferCardWidget(cell, {
             lang: this.t.lang,   // forward the resolved viewer language so the card overlays offer.i18n for the same language
-            layout: cfg.layout,
+            // Cruise is one design: a cruise page template implies cruise cards,
+            // so the two never drift apart even on a hand-written embed.
+            layout: cfg.template === 'cruise' ? 'cruise' : cfg.layout,
             theme: cfg.theme,
             accentColor: cfg.accentColor,
             brandColor: cfg.brandColor,
