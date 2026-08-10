@@ -45,7 +45,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.3';
+  const VERSION = '1.0.4';
 
   // ---------- Helpers ----------
   function esc(s) {
@@ -184,9 +184,16 @@
       position: absolute;
       white-space: nowrap;
       color: var(--tgx-rot-color, var(--tgx-accent));
+      /* Hidden by DEFAULT so a rotating word is only ever visible once it is
+         the active one. Belt-and-braces alongside the per-anim rules below and
+         the JS cleanup in _renderRotating: guarantees a word can never paint
+         without .is-active even for a future animation value that forgets its
+         own opacity:0 rule. */
+      opacity: 0;
       transition: transform 480ms cubic-bezier(0.22, 1, 0.36, 1), opacity 320ms ease;
       will-change: transform, opacity;
     }
+    .tgx-rot-word.is-active { opacity: 1; }
     /* Slide */
     .tgx-rot-track[data-anim="slide"] .tgx-rot-word { transform: translateY(110%); opacity: 0; }
     .tgx-rot-track[data-anim="slide"] .tgx-rot-word.is-active { transform: translateY(0); opacity: 1; }
@@ -794,14 +801,22 @@
       let idx = 0;
 
       const renderWord = (i) => {
-        // Remove leaving words after transition completes
+        // Transition out EVERY current word, then remove it after the CSS
+        // transition. Do NOT gate this on `.is-active`: a backgrounded tab
+        // (or a page whose tab isn't foreground at load) pauses
+        // requestAnimationFrame, so the frame that adds `.is-active` may
+        // never fire while the setTimeout-driven cycle keeps appending
+        // words. If cleanup were gated on `.is-active`, those never-activated
+        // words would pile up in the track and, the moment the tab refocuses
+        // and the queued frames flush, every one of them would activate at
+        // once and stack on top of each other. That was the "first load
+        // stacks all the words" bug (Andy, Aug 2026). Cleaning up regardless
+        // of activation state keeps the track to a single visible word.
         const existing = Array.from(track.querySelectorAll('.tgx-rot-word'));
         existing.forEach(w => {
-          if (w.classList.contains('is-active')) {
-            w.classList.remove('is-active');
-            w.classList.add('is-leaving');
-            setTimeout(() => { if (w.parentNode) w.parentNode.removeChild(w); }, 600);
-          }
+          w.classList.remove('is-active');
+          w.classList.add('is-leaving');
+          setTimeout(() => { if (w.parentNode) w.parentNode.removeChild(w); }, 600);
         });
 
         const word = document.createElement('span');

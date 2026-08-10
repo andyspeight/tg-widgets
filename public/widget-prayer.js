@@ -63,7 +63,7 @@
   // type-to-search box: it resolves a typed city to coordinates, which we feed
   // straight to Aladhan (coords mode), so search works for any destination.
   const GEO_BASE = 'https://geocoding-api.open-meteo.com/v1/search';
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
   const STORE_PREFIX = 'tgpt_';           // storage keys are prefixed + JSON-encoded
   const FETCH_TIMEOUT = 9000;
 
@@ -552,6 +552,13 @@
       font-size: 13px; font-weight: 700;
     }
     .tgpt-strip-lead-loc svg { color: var(--tgpt-accent); }
+    /* Type-to-search on the strip: the lead bar is the dark brand colour, so
+       the input + placeholder need white ink (the card's search input is dark
+       text on white). The results panel below the strip keeps the card styles. */
+    .tgpt-strip-lead-loc--search { display: flex; width: 100%; min-width: 0; }
+    .tgpt-strip-lead-loc--search svg { flex: 0 0 auto; }
+    .tgpt-strip-lead-loc--search .tgpt-search { color: #fff; }
+    .tgpt-strip-lead-loc--search .tgpt-search::placeholder { color: rgba(255,255,255,0.72); }
     .tgpt-strip-lead-date { font-size: 11px; color: rgba(255,255,255,0.78); }
     .tgpt-strip-lead-next {
       margin-top: 4px; font-size: 12px; font-weight: 600; color: #fff;
@@ -1281,18 +1288,39 @@
       }).join('');
 
       const dateLine = (this.c.showHijri ? esc(this._model.hijri.text) + ' · ' : '') + esc(this._model.greg.text);
-      const locInner = this._pickerActive() ? this._pickerHtml() : esc(this._locName());
+
+      // Location control on the lead bar. When type-to-search is on we render
+      // the same combobox the card uses (esc()'d input + results panel) so a
+      // visitor can type a destination on the horizontal layout too — the
+      // strip previously ignored locationSearch and only ever offered the
+      // quick-pick dropdown. _bindSearch() is layout-agnostic and wires it up.
+      // (Andy, 10 Aug 2026.)
+      let leadLoc, panel = '';
+      if (this.c.locationSearch) {
+        leadLoc =
+          '<span class="tgpt-strip-lead-loc tgpt-strip-lead-loc--search">' + icon('search', 14) +
+            '<input class="tgpt-search" type="text" autocomplete="off" spellcheck="false" ' +
+            'aria-label="Search a city" placeholder="Search a city" value="' + esc(this._locName()) + '">' +
+          '</span>';
+        // Results drop in below the whole strip, full width and in flow, so
+        // the card's rounded corners (overflow:hidden) never clip them.
+        panel = '<div class="tgpt-search-panel" data-search-panel hidden></div>';
+      } else {
+        const locInner = this._pickerActive() ? this._pickerHtml() : esc(this._locName());
+        leadLoc = '<span class="tgpt-strip-lead-loc">' + icon('pin', 14) + locInner + '</span>';
+      }
 
       return (
         '<div class="tgpt-card">' +
           '<div class="tgpt-strip">' +
             '<div class="tgpt-strip-lead">' +
-              '<span class="tgpt-strip-lead-loc">' + icon('pin', 14) + locInner + '</span>' +
+              leadLoc +
               '<span class="tgpt-strip-lead-date">' + dateLine + '</span>' +
               (this.c.showCountdown ? '<span class="tgpt-strip-lead-next" data-hero-count></span>' : '') +
             '</div>' +
             '<div class="tgpt-strip-cells" data-cols="' + cols + '">' + cellsHtml + '</div>' +
           '</div>' +
+          panel +
           this._footer() +
         '</div>'
       );
