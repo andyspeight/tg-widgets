@@ -29,7 +29,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.4.0';
+  const VERSION = '0.4.1';
 
   // Resolve the API base off THIS script's origin. The widget is hosted on
   // widgets.travelify.io and embedded on customer sites, so a relative
@@ -428,6 +428,7 @@
     x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
     ship: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20a2.4 2.4 0 0 0 2 1 2.4 2.4 0 0 0 2-1 2.4 2.4 0 0 1 2-1 2.4 2.4 0 0 1 2 1 2.4 2.4 0 0 0 2 1 2.4 2.4 0 0 0 2-1 2.4 2.4 0 0 1 2-1 2.4 2.4 0 0 1 2 1 2.4 2.4 0 0 0 2 1 2.4 2.4 0 0 0 2-1"/><path d="M4 18 3 12h18l-1 6"/><path d="M12 3v9M8 7h8"/></svg>',
     train: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 11h16M12 3v8M8 19l-2 2M16 19l2 2"/><circle cx="8.5" cy="14.5" r="0.5"/><circle cx="15.5" cy="14.5" r="0.5"/></svg>',
+    anchor: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></svg>',
     cabin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="0.5"/></svg>'
   };
 
@@ -1317,7 +1318,9 @@
           + (d.eyebrow ? '<div class="tgop-eyebrow">' + esc(d.eyebrow) + '</div>' : '')
           + '<h1 class="tgop-h1">' + esc(d.title) + '</h1>'
           + '<div class="tgop-hero-meta">'
-            + (d.loc ? '<span class="tgop-hero-loc">' + I.pin + esc(d.loc) + '</span>' : '') + starsStr
+            + (d.loc ? '<span class="tgop-hero-loc">' + I.pin + esc(d.loc) + '</span>' : '')
+            + (d.shipName ? '<span class="tgop-hero-loc tgop-hero-ship">' + I.anchor + esc(d.shipName) + '</span>' : '')
+            + starsStr
           + '</div>'
         + '</div></div>'
         + '<div class="tgop-scroll-cue">' + I.chevDown + '</div>'
@@ -1331,7 +1334,9 @@
           + (d.eyebrow ? '<div class="tgop-eyebrow alt">' + esc(d.eyebrow) + '</div>' : '')
           + '<h1 class="tgop-h1 alt">' + esc(d.title) + '</h1>'
           + '<div class="tgop-hero-meta alt">'
-            + (d.loc ? '<span class="tgop-hero-loc">' + I.pin + esc(d.loc) + '</span>' : '') + starsStr
+            + (d.loc ? '<span class="tgop-hero-loc">' + I.pin + esc(d.loc) + '</span>' : '')
+            + (d.shipName ? '<span class="tgop-hero-loc tgop-hero-ship">' + I.anchor + esc(d.shipName) + '</span>' : '')
+            + starsStr
           + '</div>'
           + (d.teaser ? '<p class="tgop-hsplit-teaser">' + esc(d.teaser) + '</p>' : '')
           + '<div class="tgop-hsplit-buy">'

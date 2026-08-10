@@ -27,7 +27,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.2.0';
+  const VERSION = '0.2.1';
 
   // Resolve the API base off THIS script's origin. The widget is hosted on
   // widgets.travelify.io and embedded on customer sites, so a relative
@@ -379,6 +379,9 @@
     .tgoc-ribbon--luxury { background: linear-gradient(180deg, #CBA43C, #B6891D); }
     .tgoc-cbody { padding: 22px 22px 6px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
     .tgoc-c-title { margin: 0; font-size: clamp(19px, 2vw, 22px); font-weight: 800; line-height: 1.22; letter-spacing: -0.3px; }
+    .tgoc-c-ship { margin: -8px 0 0; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--tgo-accent); min-width: 0; }
+    .tgoc-c-ship svg { width: 15px; height: 15px; flex: 0 0 15px; }
+    .tgoc-c-ship span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .tgoc-c-price { margin: 0; font-size: 16px; font-weight: 800; }
     .tgoc-c-feats { list-style: none; margin: 2px 0 0; padding: 0; display: flex; flex-direction: column; gap: 11px; }
     .tgoc-c-feat { display: flex; gap: 11px; align-items: flex-start; font-size: 14px; color: var(--tgo-sub); line-height: 1.45; }
@@ -683,6 +686,11 @@
           }).join('') + '</ul>'
         : '';
 
+      // Ship name with an anchor (e.g. ⚓ Celebrity Infinity) — cruise offers
+      // carry a shipName field, so it sits under the title when present.
+      const ship = this._f('shipName');
+      const shipLine = ship ? '<p class="tgoc-c-ship">' + ICO.anchor + '<span>' + esc(ship) + '</span></p>' : '';
+
       const ctaLabel = this.cfg.ctaText || this.t('viewHolidayDetails');
       const ctaCls = 'tgoc-c-cta' + (this._linkHref ? '' : ' tgoc-cta--disabled');
       const cta = '<span class="' + ctaCls + '"' + (this._linkHref ? '' : ' role="button" aria-disabled="true"') + '>'
@@ -691,6 +699,7 @@
       return img
         + '<div class="tgoc-cbody">'
           + '<h3 class="tgoc-c-title">' + esc(d.title) + '</h3>'
+          + shipLine
           + headline + featList
         + '</div>'
         + cta;

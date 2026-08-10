@@ -106,6 +106,7 @@
     "test:tour-card": "node test/tour-card-smoke.mjs",
     "test:loader-export": "node test/loader-export-smoke.mjs",
     "test:offer-cruise-editor": "node test/offer-cruise-editor-smoke.mjs",
+    "test:offer-cruise-ship": "node test/offer-cruise-ship-and-keys-smoke.mjs",
     "test:offer-cruise-more": "node test/offer-cruise-more-deals-smoke.mjs"
   },
   "dependencies": {
