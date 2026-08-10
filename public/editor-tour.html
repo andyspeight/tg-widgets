@@ -652,10 +652,15 @@
   }
 
   // ── tgse (auth + save engine) ──
+  // widgetTag / scriptFile only feed the shell's embed snippet. The client
+  // embeds the CARD (widget-tour-card.js), which opens the full tour in an
+  // overlay on click — so the client places one thing, not two. The preview
+  // above still renders the full tour directly via window.TGTourWidget, and
+  // the saved record stays widgetType 'Escorted Tour'; both read the same id.
   const shell = tgse.init({
     widgetType: 'Escorted Tour',
-    widgetTag: 'tour',
-    scriptFile: 'widget-tour.js',
+    widgetTag: 'tour-card',
+    scriptFile: 'widget-tour-card.js',
     getConfig: () => C,
     setConfig: (c) => { C = deepMerge(starter(), c); buildForm(); renderPreview(); },
     onLoginSuccess: () => loadFromUrl(),

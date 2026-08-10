@@ -262,6 +262,31 @@ async function newPage() {
   await page.close();
 }
 
+// ── 8. Embed code hands out the CARD, not the full tour ──────────────────────
+// The client should place ONE thing: the tour-card, which opens the full tour
+// in an overlay on click. This guards the embed pointing at widget-tour.js by
+// mistake (which would drop the whole full tour onto the page instead).
+{
+  const { page, errors } = await newPage();
+  await page.addInitScript(() => {
+    localStorage.setItem('tg_token', 'smoke-token');
+    localStorage.setItem('tg_user', JSON.stringify({ email: 'smoke@test.local', plan: 'Bespoke' }));
+  });
+  // An id in the URL is what unlocks the embed modal (it embeds that id).
+  await page.goto(`${BASE}/editor-tour.html?id=tgw_smoke_card`, { waitUntil: 'load', timeout: 20000 });
+  await page.waitForFunction(() => document.querySelectorAll('#tb-build .sec').length >= 8, { timeout: 8000 }).catch(() => {});
+  await page.click('#btn-embed');
+  await page.waitForSelector('#tgse-embed-code', { timeout: 4000 }).catch(() => {});
+  const embed = await page.evaluate(() => document.getElementById('tgse-embed-code')?.textContent || '');
+  ok(/data-tg-widget="tour-card"/.test(embed), `embed: uses the card tag (got ${JSON.stringify(embed)})`);
+  ok(/\/widget-tour-card\.js/.test(embed), 'embed: loads widget-tour-card.js');
+  ok(embed.includes('tgw_smoke_card'), 'embed: carries the saved widget id');
+  ok(!/data-tg-widget="tour"[\s>]/.test(embed), 'embed: does NOT hand out the full-tour widget');
+  ok(!/\/widget-tour\.js/.test(embed), 'embed: does NOT load the full-tour script');
+  ok(errors.length === 0, 'embed: no script errors (' + errors.join(' | ') + ')');
+  await page.close();
+}
+
 await browser.close();
 server.close();
 
