@@ -78,6 +78,7 @@
     "test:form-logic": "node test/form-logic-smoke.mjs",
     "test:prayer": "node test/prayer-times-smoke.mjs",
     "test:prayer-strip-search": "node test/prayer-strip-search-smoke.mjs",
+    "test:prayer-instant": "node test/prayer-instant-local-smoke.mjs",
     "test:offer-sheet": "node test/offer-sheet-smoke.mjs",
     "test:offer-fields": "node test/offer-fields-smoke.mjs",
     "test:offer-sheet-render": "node test/offer-sheet-render-smoke.mjs",
