@@ -29,7 +29,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.3.0';
+  const VERSION = '0.4.0';
 
   // Resolve the API base off THIS script's origin. The widget is hosted on
   // widgets.travelify.io and embedded on customer sites, so a relative
@@ -76,6 +76,7 @@
       offerDetails: 'Offer details', quoteReference: 'Quote reference', callUsOn: 'Call us on {phone}',
       travellingIn: 'Travelling {period}', basedOn: 'Based on', makeEnquiry: 'Make an enquiry',
       theItinerary: 'Itinerary', highlightsH: 'Highlights',
+      moreDeals: 'More great holiday deals', viewHolidayDetails: 'View holiday details',
       enquireNow: 'Enquire now', enquireAbout: 'Enquire about this offer',
       sendEnquiry: 'Send my enquiry',
       fullName: 'Full name', addName: 'Please add your name',
@@ -362,6 +363,11 @@
     return '';
   }
   function isEmail(s) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(s || '').trim()); }
+  // Cosmetic slug (mirrors the server) so a "More deals" card links to the tidy
+  // /offer/<slug>-<id> path; lookups use the id, so the slug is decorative.
+  function slugify(s) {
+    return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+  }
 
   // Parse a video URL into something embeddable (YouTube, Vimeo or a direct file).
   function parseVideo(url) {
@@ -747,6 +753,18 @@
     .tgop-story-body h2 { margin-top: 0; }
     .tgop-enq-section { max-width: 720px; padding-top: 44px; padding-bottom: 20px; }
     .tgop-enq-card { background: var(--tgo-surface); border: 1px solid var(--tgo-border); border-radius: var(--tgo-radius); box-shadow: var(--tgo-shadow); padding: 22px; }
+    /* More deals strip */
+    .tgop-more { padding-top: 44px; padding-bottom: 24px; }
+    .tgop-more-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 22px; }
+    .tgop-more-card { display: flex; flex-direction: column; background: var(--tgo-surface); border: 1px solid var(--tgo-border); border-radius: var(--tgo-radius); overflow: hidden; text-decoration: none; color: inherit; box-shadow: var(--tgo-shadow); transition: transform 0.18s ease, box-shadow 0.18s ease; }
+    .tgop-more-card:hover { transform: translateY(-3px); box-shadow: var(--tgo-shadow-lg, 0 18px 40px rgba(15,23,42,0.14)); }
+    .tgop-more-img { aspect-ratio: 16 / 10; background-size: cover; background-position: center; background-color: var(--tgo-alt); }
+    .tgop-more-img.ph { background: linear-gradient(135deg, var(--tgo-brand), var(--tgo-accent)); }
+    .tgop-more-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+    .tgop-more-title { margin: 0; font-size: 17px; font-weight: 800; line-height: 1.25; }
+    .tgop-more-price { margin: 0; font-size: 15px; font-weight: 700; }
+    .tgop-more-cta { margin-top: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--tgo-accent); }
+    .tgop-more-cta svg { width: 14px; height: 14px; }
     @media (max-width: 900px) {
       .tgop-cruise-top { grid-template-columns: 1fr; gap: 16px; }
       .tgop-cruise-aside { position: static; }
@@ -811,6 +829,7 @@
         currency: c.currency || '',
         agencyName: c.agencyName || '',
         offerId: c.offerId || '',                    // stored offer id, for routing the enquiry
+        client: typeof c.client === 'string' ? c.client : '',  // feed key for the "More deals" strip
         enquiryEndpoint: c.enquiryEndpoint || (SCRIPT_BASE + 'api/offer-enquiry'),
         offer: o
       };
@@ -1120,6 +1139,64 @@
       return '<div class="tgop-wrap tgop-stories">' + html + '</div>';
     }
 
+    // Query string carried onto a "More deals" card's /offer link so the sibling
+    // page keeps the same design, brand and feed key.
+    _offerQuery() {
+      const c = this.cfg, p = [];
+      if (c.template && c.template !== 'classic') p.push('template=' + encodeURIComponent(c.template));
+      if (c.theme === 'dark') p.push('theme=dark');
+      if (c.accentColor) p.push('accent=' + encodeURIComponent(c.accentColor));
+      if (c.agencyName) p.push('agency=' + encodeURIComponent(c.agencyName));
+      if (c.client) p.push('client=' + encodeURIComponent(c.client));
+      return p.length ? '?' + p.join('&') : '';
+    }
+
+    // One compact related-offer card for the "More deals" strip.
+    _moreCard(o) {
+      const f = (o && o.fields) || o || {};
+      const id = o.id || f.id || '';
+      const title = f.title || o.title || '';
+      if (!id || !title) return '';
+      const sym = currencySymbol(o.currency || 'GBP');
+      const img = safeUrl((Array.isArray(o.images) && o.images[0]) || f.image || o.image || '');
+      const price = money(sym, f.price);
+      const nights = f.nights;
+      const priceLine = (nights ? esc(nights) + ' ' + esc(this.t('nights')) + ' · ' : '')
+        + esc(this.t('from')) + ' ' + (price || esc(this.t('poa')));
+      const href = SCRIPT_BASE + 'offer/' + (slugify(title) ? slugify(title) + '-' : '') + encodeURIComponent(id) + this._offerQuery();
+      const bg = img ? ' style="background-image:url(' + esc(img) + ')"' : '';
+      return '<a class="tgop-more-card" href="' + esc(safeUrl(href) || '#') + '">'
+        + '<div class="tgop-more-img' + (img ? '' : ' ph') + '"' + bg + '></div>'
+        + '<div class="tgop-more-body">'
+          + '<h3 class="tgop-more-title">' + esc(title) + '</h3>'
+          + '<p class="tgop-more-price">' + priceLine + '</p>'
+          + '<span class="tgop-more-cta">' + esc(this.t('viewHolidayDetails')) + ' ' + I.arrow + '</span>'
+        + '</div></a>';
+    }
+
+    // Fetch a few of the client's OTHER offers into the "More deals" grid. Never
+    // blocks the page: on any error, an empty feed, or no siblings, the whole
+    // section removes itself.
+    _loadMoreDeals() {
+      if (!this.cfg.client || !this.root) return;
+      const wrap = this.root.querySelector('[data-more]');
+      const grid = this.root.querySelector('[data-more-grid]');
+      if (!wrap || !grid) return;
+      const feed = API_BASE.replace('/api/widget-config', '/api/saved-offers') + '?client=' + encodeURIComponent(this.cfg.client);
+      const self = this;
+      fetch(feed, { credentials: 'omit' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (data) {
+          const offers = (data && Array.isArray(data.offers)) ? data.offers : [];
+          const curId = self.cfg.offerId || '';
+          const others = offers.filter(function (o) { return (o.id || (o.fields && o.fields.id)) !== curId; }).slice(0, 4);
+          const cards = others.map(function (o) { return self._moreCard(o); }).filter(Boolean).join('');
+          if (!cards) { wrap.remove(); return; }
+          grid.innerHTML = cards;
+        })
+        .catch(function () { try { wrap.remove(); } catch (e) {} });
+    }
+
     _render() {
       this._timers.forEach(clearInterval); this._timers = [];
       if (this._io) { try { this._io.disconnect(); } catch (e) {} this._io = null; }
@@ -1319,6 +1396,11 @@
         const fEnq = '<div class="tgop-wrap tgop-enq-section tgop-reveal">'
           + '<h2 class="tgop-h2">' + esc(t('makeEnquiry')) + '</h2>'
           + '<div class="tgop-enq-card">' + this._enquiryForm(d) + '</div></div>';
+        // "More deals" — filled asynchronously in _bind from the client feed;
+        // the container is only emitted when we have a feed key to fetch with.
+        const fMore = cfg.client
+          ? '<div class="tgop-wrap tgop-more tgop-reveal" data-more><h2 class="tgop-h2">' + esc(t('moreDeals')) + '</h2><div class="tgop-more-grid" data-more-grid></div></div>'
+          : '';
         html = fBar + fHero + fFacts
           + '<div class="tgop-wrap tgop-cruise-top">'
             + '<div class="tgop-cruise-main">' + fAbout + fIncludes + fDetail + '</div>'
@@ -1326,7 +1408,7 @@
           + '</div>'
           + this._cruiseStory(d)
           + fGallery + fVideo + fMap
-          + fEnq + fCta + fFooter + fLightbox;
+          + fMore + fEnq + fCta + fFooter + fLightbox;
       } else { // classic
         html = fBar + fHero + fFacts
           + '<div class="tgop-wrap"><div class="tgop-body">'
@@ -1347,6 +1429,10 @@
 
     _bind(d) {
       const root = this.root;
+
+      // "More deals" strip (cruise template) — fetch the client's other offers.
+      // No-ops unless a feed key + container are present, and never blocks render.
+      this._loadMoreDeals();
 
       // Back to offers → browser Back. Both the floating pill and the sticky-bar
       // twin share [data-back]. Guarded so it never no-ops the visitor off-site.
