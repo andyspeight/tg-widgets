@@ -92,7 +92,10 @@
   function currencySymbol(code) { return CURRENCIES[String(code || 'gbp').toLowerCase()] || '£'; }
   function money(sym, pence) {
     const n = Number(pence);
-    if (!isFinite(n) || n < 0) return '';
+    // 0 means "not priced yet" (blank in the source), not "free" — so it shows
+    // nothing rather than "£0", which lets the price bar and zero-priced extras
+    // hide cleanly until a real figure is entered.
+    if (!isFinite(n) || n <= 0) return '';
     const major = n / 100;
     const whole = Math.round(major) === major;
     return sym + major.toLocaleString('en-GB', { minimumFractionDigits: whole ? 0 : 2, maximumFractionDigits: 2 });

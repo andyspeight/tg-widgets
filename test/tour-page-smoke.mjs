@@ -295,6 +295,37 @@ const statusOf = (page) => page.evaluate(() => {
   await page.close();
 }
 
+// ── Zero price: the price bar hides and no "£0" shows anywhere ───────────────
+{
+  const { page, errors } = await newPage();
+  const cfg = JSON.stringify({
+    tour: { title: 'No Price Tour', location: 'Tanzania', durationText: '11 days', currency: 'gbp', pricePerPersonPence: 0 },
+    days: [{ label: 'Day 1', title: 'Arrive', body: 'A day.' }],
+    extras: [{ name: 'Optional balloon safari', pricePence: 0, note: 'Price on request.' }],
+    enquiry: { heading: 'Enquire' },
+  }).replace(/'/g, '&#39;');
+  await page.setContent(
+    `<!doctype html><html><body><div id="z" data-tg-widget="tour" data-tg-config='${cfg}'></div>` +
+    `<script src="${BASE}/widget-tour.js"></script></body></html>`, { waitUntil: 'load' });
+  await page.waitForFunction(() => document.getElementById('z')?.shadowRoot?.querySelector('[data-role="title"]'), { timeout: 8000 }).catch(() => {});
+  const z = await page.evaluate(() => {
+    const sr = document.getElementById('z').shadowRoot;
+    return {
+      priceBar: !!sr.querySelector('[data-role="pricebar"]'),
+      hasZero: /£0/.test(sr.textContent || ''),
+      extraName: !!Array.from(sr.querySelectorAll('.tgto-extra-name')).find(e => /balloon/i.test(e.textContent)),
+      extraPrice: !!sr.querySelector('[data-role="extras"] .tgto-extra-price'),
+      hasForm: !!sr.querySelector('[data-role="enquiry"]'),
+    };
+  });
+  ok(!z.priceBar, 'zero price: the price bar is hidden when no price is set');
+  ok(!z.hasZero, 'zero price: no "£0" is shown anywhere');
+  ok(z.extraName && !z.extraPrice, 'zero price: a zero-priced extra shows its name and note but no "£0 pp"');
+  ok(z.hasForm, 'zero price: the enquiry form still renders');
+  ok(errors.length === 0, 'zero price: no script errors (' + errors.join(' | ') + ')');
+  await page.close();
+}
+
 await browser.close();
 server.close();
 

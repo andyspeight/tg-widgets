@@ -114,7 +114,9 @@
   function currencySymbol(code) { return CURRENCIES[String(code || 'gbp').toLowerCase()] || '£'; }
   function money(sym, pence) {
     const n = Number(pence);
-    if (!isFinite(n) || n < 0) return '';
+    // 0 = "not priced yet" (blank in the source), not "free" — hide it so the
+    // card shows no "from £0 pp" until a real figure exists.
+    if (!isFinite(n) || n <= 0) return '';
     const major = n / 100;
     const whole = Math.round(major) === major;
     return sym + major.toLocaleString('en-GB', {
