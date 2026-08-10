@@ -33,6 +33,7 @@
     "test:offers-resilience": "node test/offers-resilience-smoke.mjs",
     "test:offers-cache-namematch": "node test/offers-cache-namematch-smoke.mjs",
     "test:offers-cache-only": "node test/offers-cache-only-smoke.mjs",
+    "test:offers-atol": "node test/offers-atol-seller-smoke.mjs",
     "test:offers-currency-eur": "node test/offers-currency-eur-smoke.mjs",
     "test:admin-worldmap-rebuild": "node test/admin-worldmap-rebuild-smoke.mjs",
     "test:offers-origin-market": "node test/offers-origin-market-smoke.mjs",
