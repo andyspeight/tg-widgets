@@ -1007,10 +1007,27 @@
   // KEYBOARD SHORTCUTS
   // ============================================================
 
+  // Is the keystroke going into an editable control? Walk the event's composed
+  // path (not just e.target) so a field inside a widget's Shadow DOM counts too:
+  // events crossing a shadow boundary are retargeted, so at document level
+  // e.target is the shadow HOST, not the input, and a plain closest() check saw
+  // "not a field" — which let the single-key shortcuts below preventDefault real
+  // typing. That is exactly why letters like d/t and digits 1-3 would not type in
+  // the offer builder, whose edit form is itself a Shadow DOM widget. (Andy, Aug 2026.)
+  function typingInEditable(e) {
+    const editable = (el) => el && el.nodeType === 1 && (
+      el.isContentEditable ||
+      (el.matches && el.matches('input,textarea,select,[contenteditable=""],[contenteditable="true"]'))
+    );
+    const path = (typeof e.composedPath === 'function') ? e.composedPath() : [];
+    if (path.some(editable)) return true;
+    return !!(e.target && e.target.closest && e.target.closest('input,textarea,select,[contenteditable="true"]'));
+  }
+
   function wireKeyboard() {
     document.addEventListener('keydown', (e) => {
       const mod = e.metaKey || e.ctrlKey;
-      const inField = !!e.target.closest('input,textarea,select,[contenteditable="true"]');
+      const inField = typingInEditable(e);
 
       // Save: Cmd/Ctrl + S — works everywhere
       if (mod && (e.key === 's' || e.key === 'S')) {
