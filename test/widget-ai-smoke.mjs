@@ -104,6 +104,21 @@ global.fetch = async (url, opts = {}) => {
         ratingMin: 5, budgetMax: 600, maxOffers: 9999, sort: 'price:asc',
         evilField: 'DROP ME',
       };
+    } else if (/data extractor for the Travelgenix Widget Suite/.test(sys)) {
+      // Import from PDF: return a tour, deliberately carrying image fields and a
+      // junk top-level key to prove the server strips images and keeps only
+      // known keys.
+      obj = {
+        tour: { title: 'Serengeti Grand Safari', subtitle: 'Ten days across Tanzania.', location: 'Tanzania', currency: 'gbp', durationText: '10 days / 9 nights', pricePerPersonPence: 349500, heroImage: 'https://evil.example/hero.jpg' },
+        glance: [{ day: 'Day 1', date: '', destination: 'Arusha', accommodation: 'Serena' }],
+        highlights: ['Ngorongoro Crater'],
+        days: [{ label: 'Day 1', title: 'Arrival', body: 'Land in Arusha.', facts: [{ label: 'Meals', value: 'Dinner' }], images: ['https://evil.example/day.jpg'] }],
+        included: ['Game drives'], excluded: ['International flights'],
+        sections: [{ type: 'feature', heading: 'Vehicle', body: '4x4 Landcruiser.', image: 'https://evil.example/car.jpg' }],
+        gallery: ['https://evil.example/g.jpg'],
+        enquiry: { heading: 'Enquire', intro: 'Ask us.', buttonText: 'Send enquiry' },
+        evilTopLevel: 'DROP ME',
+      };
     } else {
       obj = {
         questions: [
@@ -413,6 +428,47 @@ const reviewsEd = readFileSync(new URL('../public/editor-reviews.html', import.m
 ok(!/widget-ai/.test(reviewsEd), 'Reviews editor no longer references the AI endpoint at all');
 const testiEd = readFileSync(new URL('../public/editor-testimonials.html', import.meta.url), 'utf8');
 ok(!/const API_AI\s*=|onAIBuild\s*:/.test(testiEd), 'Testimonials editor no longer wires AI generation');
+
+// ── Import from PDF (Escorted Tour): brochure text → structured tour config ──
+// The Tour Builder extracts a PDF's text in the browser and posts it here as
+// { action:'import-tour', text }. The endpoint structures it into a tour config,
+// strips any AI-sourced images, keeps only known keys, and spends one AI credit.
+{
+  const doc = 'ITINERARY AT A GLANCE\nDay 1 Arusha, Arusha Serena Hotel\n' + 'A ten day Tanzania safari across the Serengeti and Ngorongoro. '.repeat(8);
+  let r = mockRes();
+  const patchesBefore = state.patches.length;
+  await handler(request({ action: 'import-tour', text: doc }), r);
+  ok(r.statusCode === 200 && r.body?.config?.tour?.title === 'Serengeti Grand Safari', 'import-tour returns a structured tour { config }');
+  const c = r.body?.config || {};
+  ok(!('heroImage' in (c.tour || {})) && !c.gallery && !(c.days?.[0] || {}).images && !(c.sections?.[0] || {}).image,
+    'import strips every AI-sourced image field (photos are uploaded, never AI URLs)');
+  ok(!('evilTopLevel' in c), 'import keeps only known top-level keys, dropping anything else');
+  ok(Array.isArray(c.days) && c.days.length === 1 && c.included?.length === 1 && c.glance?.length === 1,
+    'the itinerary content (days, includes, at-a-glance) is preserved');
+  const sent = state.anthropicBodies.at(-1);
+  ok(sent?.max_tokens >= 8000, 'import raises the token ceiling so a full multi-day itinerary cannot truncate');
+  ok(/<document>/.test(sent?.messages?.[0]?.content || '') && /UNTRUSTED DATA/.test(sent?.system || ''),
+    'the PDF text is passed as untrusted document data, with the injection defence in the system role');
+  ok(state.patches.length === patchesBefore + 1, 'an import spends exactly one daily AI credit');
+}
+
+// A near-empty (scanned/image-only) PDF is rejected before any model cost.
+{
+  const callsBefore = state.anthropicBodies.length;
+  let r = mockRes();
+  await handler(request({ action: 'import-tour', text: 'tiny' }), r);
+  ok(r.statusCode === 400 && r.body?.code === 'pdf_too_thin', 'a near-empty (scanned) PDF → 400 pdf_too_thin');
+  ok(state.anthropicBodies.length === callsBefore, 'a thin PDF never reaches the model (£0)');
+}
+
+// A document that is not a tour surfaces the model's refusal as a clean 422.
+{
+  state.aiScript = [{ text: '{"error":"This does not look like a tour itinerary."}', stopReason: 'end_turn' }];
+  let r = mockRes();
+  await handler(request({ action: 'import-tour', text: 'B'.repeat(300) }), r);
+  ok(r.statusCode === 422 && r.body?.code === 'ai_declined', 'a non-tour document → 422 ai_declined, not a mystery 502');
+  state.aiScript = null;
+}
 
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
