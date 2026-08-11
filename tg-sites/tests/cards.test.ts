@@ -221,7 +221,9 @@ describe('the card stylesheet', () => {
     const frame = /\.tgs-card__frame \{([^}]*)\}/.exec(css)?.[1] ?? '';
     expect(frame).toContain('overflow: hidden');
 
-    const img = /\.tgs-card__frame img \{([^}]*)\}/.exec(css)?.[1] ?? '';
+    // Anchored to the line start so it lands on the base rule, not a nested
+    // selector that ends in the same words (e.g. the hover-zoom motion rule).
+    const img = /\n\.tgs-card__frame img \{([^}]*)\}/.exec(css)?.[1] ?? '';
     expect(img).toContain('object-fit: cover');
     // The guard against the open bug where an image renders wider than the
     // thing holding it (task #61). A card must not be able to join in.

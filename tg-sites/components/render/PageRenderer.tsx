@@ -346,6 +346,11 @@ export function SectionRenderer({
        * `editable` gate as the reveal above. The lift itself is pure CSS in globals.css.
        */
       data-hover-lift={section.hoverLift && !editable ? '' : undefined}
+      /*
+       * Card pictures zoom a touch under the pointer, the frame clipping them. Same
+       * `editable` gate as the lift above; the zoom itself is pure CSS in globals.css.
+       */
+      data-hover-zoom={section.hoverZoom && !editable ? '' : undefined}
       style={{
         ...boxStyle(section.box),
         '--tgs-pad': `${section.paddingY}px`,

@@ -1006,6 +1006,22 @@ function SectionFields({
             movement.
           </p>
         </div>
+        <div className="ed-field">
+          <label className="ed-toggle">
+            <input
+              type="checkbox"
+              checked={section.hoverZoom === true}
+              onChange={(event) =>
+                set({ hoverZoom: event.target.checked || undefined }, `sec:${index}:hoverZoom`)
+              }
+            />
+            <span>Image zoom</span>
+          </label>
+          <p className="ed-help" style={{ marginTop: 6 }}>
+            Card pictures in this section zoom in gently as a visitor points at each card, the
+            frame holding its edges. It eases off for anyone who prefers less motion.
+          </p>
+        </div>
       </Group>
 
       <Group title="Style" defaultOpen={false}>

@@ -737,6 +737,32 @@ const MUTATIONS = [
     from: `  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.14);`,
     to: `  box-shadow: none;`,
   },
+  {
+    tag: 'hover-zoom',
+    check: 'an image-zoom section scales a card picture under the pointer',
+    /*
+     * The toggle stores the flag but the section never carries data-hover-zoom, so the
+     * CSS matches nothing and a card's picture sits still under the pointer. Alive only
+     * in the pane, dead on the page.
+     */
+    why: 'Never emit data-hover-zoom, so no picture zooms.',
+    file: 'components/render/PageRenderer.tsx',
+    from: `      data-hover-zoom={section.hoverZoom && !editable ? '' : undefined}`,
+    to: `      data-hover-zoom={undefined}`,
+  },
+  {
+    tag: 'hover-zoom-css',
+    check: 'an image-zoom section scales a card picture under the pointer',
+    /*
+     * The attribute is there but the hover scale is gone, so a zoom section's picture
+     * never leans in. The transition still stands, so nothing errors; the movement is
+     * just quietly missing.
+     */
+    why: 'Drop the hover scale, so the picture never zooms.',
+    file: 'app/globals.css',
+    from: `    transform: scale(1.06);`,
+    to: `    transform: none;`,
+  },
 
   // --- contact details, on the settings screen -----------------------------
 

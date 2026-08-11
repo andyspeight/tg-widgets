@@ -558,3 +558,46 @@ describe('hover lift raises a sections cards and buttons under the pointer', () 
     expect(props).toContain('set({ hoverLift: event.target.checked || undefined }');
   });
 });
+
+// ---------------------------------------------------------------------------
+
+describe('image zoom on hover leans a sections card pictures in under the pointer', () => {
+  const render = read('components', 'render', 'PageRenderer.tsx');
+  const css = read('app', 'globals.css');
+  const props = read('components', 'editor', 'Properties.tsx');
+  const schema = read('lib', 'content', 'schema.ts');
+
+  it('carries an optional image-zoom flag, so no stored page changes shape', () => {
+    expect(schema).toContain('hoverZoom: z.boolean().optional()');
+    const parsed = parsePage({
+      version: 1,
+      id: 'p',
+      slug: 'image-zoom',
+      title: 'Image zoom',
+      sections: [
+        { id: 'a', tone: 'light', width: 'contained', hoverZoom: true, rows: [] },
+        { id: 'b', tone: 'light', width: 'contained', rows: [] },
+      ],
+    });
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(parsed.page.sections[0].hoverZoom).toBe(true);
+    expect(parsed.page.sections[1].hoverZoom).toBeUndefined();
+  });
+
+  it('emits data-hover-zoom on the published section but never while editing', () => {
+    expect(render).toContain("data-hover-zoom={section.hoverZoom && !editable ? '' : undefined}");
+  });
+
+  it('scales a card picture on hover, held behind reduced motion', () => {
+    expect(css).toContain('.tgs-section[data-hover-zoom] .tgs-card__frame img');
+    expect(css).toContain('.tgs-section[data-hover-zoom] .tgs-card:hover .tgs-card__frame img');
+    expect(css).toContain('transform: scale(1.06)');
+    expect(css).toContain('prefers-reduced-motion: no-preference');
+  });
+
+  it('offers an Image zoom toggle on the section', () => {
+    expect(props).toContain('Image zoom');
+    expect(props).toContain('set({ hoverZoom: event.target.checked || undefined }');
+  });
+});

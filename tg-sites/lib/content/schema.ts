@@ -549,6 +549,13 @@ export const SectionSchema = z.object({
    * globals.css, with the small rise held back under prefers-reduced-motion.
    */
   hoverLift: z.boolean().optional(),
+  /**
+   * Zoom a section's card pictures a touch as a visitor points at each card, the
+   * frame clipping the picture so the grid holds still. Off by default and optional,
+   * so no stored section changes shape. Pure CSS in globals.css, behind
+   * prefers-reduced-motion since a zoom is movement.
+   */
+  hoverZoom: z.boolean().optional(),
   /** The same shape a column has. See BoxSchema. */
   box: BoxSchema.default(EMPTY_BOX),
   /** Media id or absolute URL. Rendered behind the content with a scrim. */

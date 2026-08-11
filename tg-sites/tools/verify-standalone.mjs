@@ -7814,6 +7814,91 @@ await check('a hover-lift section raises its button under the pointer', async ()
   return true;
 });
 
+/*
+ * Image zoom on hover (Andy, 11 Aug 2026). A section marked Image zoom eases its card
+ * pictures up in scale under the pointer, the frame clipping them. Behind reduced
+ * motion, since a zoom is movement. This drops in a zoom section with a card, previews
+ * it, points at the card and checks the picture scales where motion is allowed.
+ */
+await check('an image-zoom section scales a card picture under the pointer', async () => {
+  await closeAnyDialog();
+  await page.evaluate(() =>
+    window.__TG_SET_PAGE__({
+      id: 'hz',
+      slug: 'image-zoom',
+      title: 'Image zoom',
+      version: 1,
+      sections: [
+        {
+          id: 's',
+          width: 'contained',
+          tone: 'light',
+          hoverZoom: true,
+          rows: [
+            {
+              id: 'r',
+              gap: 16,
+              columns: [
+                {
+                  id: 'c',
+                  width: 100,
+                  blocks: [
+                    {
+                      id: 'b',
+                      type: 'cards',
+                      props: {
+                        imagePosition: 'top',
+                        items: [{ title: 'Santorini', src: 'https://example.com/a.jpg', alt: 'a' }],
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }),
+  );
+  await page.waitForTimeout(400);
+
+  await page.getByRole('button', { name: 'Preview', exact: true }).click();
+  await page.waitForTimeout(300);
+
+  const present = await page.evaluate(
+    () => !!document.querySelector('.ed-canvas-frame .tgs-section[data-hover-zoom]'),
+  );
+  const img = page.locator('.ed-canvas-frame .tgs-card__frame img').first();
+  const count = await img.count();
+  // Read the resting scale with the pointer parked away from the card.
+  await page.mouse.move(5, 5);
+  const before = count ? await img.evaluate((el) => getComputedStyle(el).transform) : null;
+  if (count) await page.locator('.ed-canvas-frame .tgs-card').first().hover();
+  await page.waitForTimeout(300);
+  const after = count
+    ? await img.evaluate((el) => ({
+        transform: getComputedStyle(el).transform,
+        motionOk: matchMedia('(prefers-reduced-motion: no-preference)').matches,
+      }))
+    : null;
+
+  const exit = page.getByRole('button', { name: 'Exit preview', exact: true });
+  if (await exit.count()) {
+    await exit.click();
+    await page.waitForTimeout(200);
+  }
+  await page.evaluate(() => window.__TG_SET_PAGE__(null));
+  await page.waitForTimeout(200);
+  await showPanels();
+
+  if (!present) return 'the section did not carry data-hover-zoom in preview';
+  if (!count) return 'no card image rendered in preview';
+  if (after.motionOk && (after.transform === before || after.transform === 'none' || after.transform === '')) {
+    return `the picture did not zoom on hover: ${before} then ${after.transform}`;
+  }
+  return true;
+});
+
 // --- Preview mode: the site as it will publish, full canvas -----------------
 
 /*

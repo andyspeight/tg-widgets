@@ -661,6 +661,21 @@
   }
 }
 
+/*
+ * IMAGE ZOOM ON HOVER (Andy, 11 Aug 2026). In a section marked data-hover-zoom a
+ * card's picture eases up in scale as a visitor points at the card, the frame clipping
+ * it so its neighbours hold their place. Pure CSS, and behind prefers-reduced-motion
+ * since a zoom is movement. Pairs with hover-lift: the card lifts, the picture leans in.
+ */
+.tgs-section[data-hover-zoom] .tgs-card__frame img {
+  transition: transform 0.45s ease;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-section[data-hover-zoom] .tgs-card:hover .tgs-card__frame img {
+    transform: scale(1.06);
+  }
+}
+
 @container tgs-page (max-width: 1023px) {
   .tgs-row[data-stack='tablet'] { grid-template-columns: 1fr; }
   .tgs-row[data-stack='tablet'][data-reverse='true'] { direction: rtl; }
