@@ -928,6 +928,49 @@
 .ed-bar__btn[data-danger='true']:hover { background: var(--ed-danger); color: #fff; }
 
 /*
+ * The grip you drag to move the block. Same size as a button but a grab cursor,
+ * and touch-action:none so a touch drag is not stolen by the page scrolling.
+ */
+.ed-bar__grip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: var(--ed-r-sm);
+  background: transparent;
+  color: var(--ed-panel);
+  cursor: grab;
+  touch-action: none;
+}
+.ed-bar__grip:hover { background: rgba(255, 255, 255, 0.16); }
+.ed-bar__grip:active { cursor: grabbing; }
+.ed-bar__grip:focus-visible { outline: 2px solid var(--ed-accent); outline-offset: 1px; }
+
+/* While any canvas drag is live the toolbar must not sit between the pointer and
+   the column the drop resolves against, so it goes click-through. */
+body[data-tg-dragging] .ed-bar { pointer-events: none; }
+
+/*
+ * The chip that follows the pointer while a placed block is moved. A small solid
+ * pill naming what is in flight, not a copy of the block. Inside .ed-root, so the
+ * --ed-* tokens it paints with resolve (see the DragOverlay note in EditorShell).
+ */
+.ed-move-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ed-2);
+  padding: 6px 10px;
+  background: var(--ed-ink);
+  color: var(--ed-panel);
+  border-radius: var(--ed-r-md);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+  font: 600 var(--ed-text-xs) / 1 var(--ed-font);
+  white-space: nowrap;
+}
+
+/*
  * The options popover: the same fields the pane shows, next to the item.
  *
  * Anchored to the element's top-left and growing down, capped so a long field

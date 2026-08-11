@@ -1,13 +1,19 @@
 'use client';
 
 /**
- * Placing a NEW block on the canvas by drag, the drop half.
+ * Resolving where a canvas drag lands, and drawing the drop line.
+ *
+ * Serves BOTH a new block dragged off the palette and a placed block dragged to
+ * move it. The resolution is identical either way, so the hook stays ignorant of
+ * intent: it hands the shell one onDrop with the resolved target and index, and
+ * the shell decides add-or-move from which drag is live.
  *
  * WHY THIS LIVES IN A HOOK, NOT IN THE CANVAS
  * The drag is driven by dnd-kit now, whose DndContext has to wrap BOTH the drag
- * source (the elements palette, in the left pane) and the drop target (the
- * canvas). That context lives up in EditorShell, so the drop maths has to be
- * reachable from there rather than buried in the canvas's own event handlers. It
+ * sources (the elements palette in the left pane, and the grip on a placed
+ * block's toolbar) and the drop target (the canvas). That context lives up in
+ * EditorShell, so the drop maths has to be reachable from there rather than
+ * buried in the canvas's own event handlers. It
  * is pure DOM work, `document.elementFromPoint` and a few rectangles, so it does
  * not care which component calls it: give it a viewport point and it finds the
  * column, the index between the blocks, and draws the line.
@@ -31,8 +37,8 @@ type Hit = { columnEl: HTMLElement; target: DropTarget; key: string; sep: 'b' | 
 export interface PaletteDrop {
   /** Attach to the imperatively-positioned drop-slot element. */
   slotRef: React.RefObject<HTMLDivElement | null>;
-  /** A drag of a new block began; remember what kind. */
-  start: (type: string) => void;
+  /** A canvas drag began; forget any target the last one left. */
+  start: () => void;
   /** The pointer moved to this viewport point; redraw the slot. */
   update: (clientX: number, clientY: number) => void;
   /** The drag ended; place the block if it was over a valid spot. */
@@ -42,11 +48,10 @@ export interface PaletteDrop {
 }
 
 export function usePaletteDrop(
-  onDropBlock: (target: DropTarget, type: string) => void,
+  onDrop: (target: DropTarget) => void,
 ): PaletteDrop {
   const slotRef = useRef<HTMLDivElement | null>(null);
   const dropRef = useRef<{ target: DropTarget; index: number } | null>(null);
-  const typeRef = useRef<string | null>(null);
 
   /*
    * The column under a point, and whether its direct blocks are keyed with `b`
@@ -139,17 +144,17 @@ export function usePaletteDrop(
     [columnUnder, hide],
   );
 
-  const start = useCallback((type: string) => {
-    typeRef.current = type;
+  const start = useCallback(() => {
+    // A fresh drag: drop any target the last one left, so an immediate release
+    // that resolves nothing can never land on a stale column.
+    dropRef.current = null;
   }, []);
 
   const end = useCallback(() => {
     const drop = dropRef.current;
-    const type = typeRef.current;
-    typeRef.current = null;
     hide();
-    if (type && drop) onDropBlock({ ...drop.target, at: drop.index }, type);
-  }, [hide, onDropBlock]);
+    if (drop) onDrop({ ...drop.target, at: drop.index });
+  }, [hide, onDrop]);
 
   return { slotRef, start, update, end, hide };
 }

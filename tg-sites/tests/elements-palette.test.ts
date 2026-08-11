@@ -60,9 +60,11 @@ describe('the shell adds a dropped and a clicked element the one same way', () =
 
   it('drives the canvas drop through usePaletteDrop, off the same addBlockAt', () => {
     // The drop lands a block exactly as the picker and the click do: one
-    // addBlockAt, reached now through the dnd-kit drop hook rather than a native
+    // addBlockAt, reached now through the dnd-kit drop hook (via the shared
+    // dropOnCanvas dispatcher, which also carries the move) rather than a native
     // onDrop on the canvas.
-    expect(shell).toContain('usePaletteDrop(addBlockAt)');
+    expect(shell).toContain('usePaletteDrop(dropOnCanvas)');
+    expect(shell).toContain("if (drag.kind === 'add') addBlockAt(target, drag.type)");
     expect(shell).toContain('const addBlockAt = useCallback(');
   });
 

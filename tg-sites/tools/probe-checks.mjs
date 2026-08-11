@@ -512,10 +512,29 @@ const MUTATIONS = [
     why: 'Leave the drag flag set on cancel, the sticking bug from 5 Aug 2026.',
     file: 'components/editor/EditorShell.tsx',
     from: `        paletteDrop.hide();
-        setDragType(null);
+        activeDragRef.current = null;
+        setActiveDrag(null);
         delete document.body.dataset.tgDragging;`,
     to: `        paletteDrop.hide();
-        setDragType(null);`,
+        activeDragRef.current = null;
+        setActiveDrag(null);`,
+  },
+
+  {
+    tag: 'dnd',
+    check: 'a placed block is moved by dragging its toolbar grip',
+    /*
+     * The grip drag resolves a target through the same hook as adding; the shell
+     * then dispatches to moveBlockTo. Cut the move arm of that dispatch and the
+     * drag still resolves and still ends, but the block never moves, so it stays
+     * selected where it started rather than landing lower down its column.
+     */
+    why: 'Drop the move dispatch, so the grip drag resolves a target but never moves the block.',
+    file: 'components/editor/EditorShell.tsx',
+    from: `      if (drag.kind === 'add') addBlockAt(target, drag.type);
+      else moveBlockAt(drag.from, target);`,
+    to: `      if (drag.kind === 'add') addBlockAt(target, drag.type);
+      else return;`,
   },
 
   // --- contact details, on the settings screen -----------------------------

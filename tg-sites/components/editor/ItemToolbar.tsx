@@ -37,6 +37,7 @@ import {
   useState,
   type CSSProperties,
 } from 'react';
+import { useDraggable } from '@dnd-kit/core';
 
 import { blockDefinition } from '../../lib/content/blocks';
 import type { ItemMeta } from '../../lib/content/collection-page';
@@ -200,13 +201,31 @@ export function ItemToolbar({
     return () => document.removeEventListener('keydown', onKey);
   }, [open, onOpenChange]);
 
-  if (!anchor) return null;
-
   const blockLabel =
     selected.kind === 'block' || selected.kind === 'inner-block'
       ? blockDefinition(blockAtPath(page, selected)?.type ?? '')?.label
       : undefined;
   const label = itemLabel(selected, blockLabel);
+
+  /*
+   * The grip you drag to MOVE a placed block. A top-level block only: moveBlockTo
+   * works in column coordinates, so a block inside a container keeps its toolbar
+   * up/down for now and gets no grip. useDraggable runs every render (hooks rule),
+   * disabled when there is nothing to move; the block's coordinates and its name
+   * ride on the drag's data for the shell to read on drop. The grip lives here,
+   * not on the block itself, so it never fights inline text editing or a click.
+   */
+  const moveFrom =
+    selected.kind === 'block'
+      ? { section: selected.section, row: selected.row, column: selected.column, block: selected.block }
+      : null;
+  const moveDrag = useDraggable({
+    id: `move:${selectedKey}`,
+    data: moveFrom ? { moveFrom, moveLabel: label } : undefined,
+    disabled: !moveFrom,
+  });
+
+  if (!anchor) return null;
 
   let actions = itemActions(page, selected);
   if (editing) actions = actions.filter((action) => action.id !== 'edit');
@@ -235,6 +254,25 @@ export function ItemToolbar({
         role="toolbar"
         aria-label={`${label} actions`}
       >
+        {/* No grip while you are TYPING in the block. A text or heading block
+            drops you into editing on select, and its formatting toolbar sits over
+            this pill there, so the grip would be both covered and, where it did
+            surface, a pointer meant to select the words would start a move and
+            clear the selection instead. Those blocks reorder from the outline or
+            the toolbar's up/down; every other block gets the grip. */}
+        {moveFrom && !editing && (
+          <button
+            type="button"
+            ref={moveDrag.setNodeRef}
+            className="ed-bar__grip"
+            title="Drag to move"
+            aria-label={`Drag to move ${label}`}
+            {...moveDrag.attributes}
+            {...moveDrag.listeners}
+          >
+            <Icon name="grip" size={16} />
+          </button>
+        )}
         <span className="ed-bar__label">{label}</span>
         {actions.map((action) => (
           <button

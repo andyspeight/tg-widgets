@@ -7077,6 +7077,90 @@ await check('clicking a palette element adds it to the selected column', async (
   return after > before ? true : `clicked-add in ${path}: ${before} -> ${after}`;
 });
 
+// --- Move a placed block by dragging its toolbar grip -----------------------
+
+/*
+ * Andy, 10 Aug 2026: drag a block you have already placed to move it. The grip on
+ * the block's toolbar is a dnd-kit draggable through the SAME one context and the
+ * same drop line as adding; only the op differs (moveBlockTo, not addBlock).
+ *
+ * A NON-TEXT block on purpose. A text or heading block drops into editing on
+ * select and its formatting toolbar covers this grip, so the grip is for the
+ * other block types; we add a divider (which lands selected at the end of the
+ * column) and drag its grip UP, and the shell reselects the moved block by its
+ * id, so the selection's own path is where it ended up, lower than it started.
+ * Left near the end, since it reshuffles the seed page.
+ */
+await check('a placed block is moved by dragging its toolbar grip', async () => {
+  await page.locator('.ed-lefttab', { hasText: 'Elements' }).click();
+  await page.waitForSelector('.ed-palette-card', { timeout: 3000 });
+  const colPath = await page.evaluate(() => {
+    const col = [...document.querySelectorAll('.ed-canvas-frame [data-path]')].find((el) =>
+      /^s\d+r\d+c\d+$/.test(el.getAttribute('data-path') || ''),
+    );
+    if (!col) return null;
+    col.click();
+    return col.getAttribute('data-path');
+  });
+  if (!colPath) return 'no column to add to';
+  await page.waitForTimeout(150);
+
+  // Add a divider (non-text), which lands at the column's end and is selected.
+  const cards = page.locator('.ed-palette-card');
+  const count = await cards.count();
+  let added = false;
+  for (let i = 0; i < count; i += 1) {
+    if (/divider/i.test((await cards.nth(i).textContent()) || '')) {
+      await cards.nth(i).click();
+      added = true;
+      break;
+    }
+  }
+  if (!added) return 'no divider card in the palette';
+  await page.waitForTimeout(300);
+
+  const before = await page.evaluate(
+    () => document.querySelector('.ed-canvas-frame [data-path].is-selected')?.getAttribute('data-path') ?? null,
+  );
+  const oldIndex = before ? Number((before.match(/b(\d+)$/) || [])[1] ?? -1) : -1;
+  if (oldIndex < 1) return `the new divider is not low enough to move up: ${before}`;
+
+  // Bring it on screen and pick a drop point above it, over the column and below
+  // the top bar, so the drop lands it at a lower index.
+  const plan = await page.evaluate((sel) => {
+    const div = document.querySelector(`.ed-canvas-frame [data-path="${CSS.escape(sel)}"]`);
+    const col = [...document.querySelectorAll('.ed-canvas-frame [data-path]')].find(
+      (el) => el.getAttribute('data-path') === sel.replace(/b\d+$/, ''),
+    );
+    const wrap = document.querySelector('.ed-canvas-wrap');
+    if (!div || !col || !wrap) return null;
+    div.scrollIntoView({ block: 'center' });
+    const r = div.getBoundingClientRect();
+    const cr = col.getBoundingClientRect();
+    const w = wrap.getBoundingClientRect();
+    return {
+      x: Math.round(Math.min(Math.max(cr.left + cr.width / 2, 8), window.innerWidth - 8)),
+      y: Math.round(Math.max(w.top + 20, Math.min(r.top - 120, w.bottom - 12))),
+    };
+  }, before);
+  if (!plan) return 'could not place the drop point';
+  await page.waitForTimeout(200);
+
+  if ((await page.locator('.ed-bar__grip').count()) === 0) return 'no move grip on the divider';
+  const g = await page.locator('.ed-bar__grip').first().boundingBox();
+  if (!g) return 'the grip has no box';
+
+  await dndPointerDrag({ x: Math.round(g.x + g.width / 2), y: Math.round(g.y + g.height / 2) }, plan);
+  await page.waitForTimeout(300);
+
+  const after = await page.evaluate(
+    () => document.querySelector('.ed-canvas-frame [data-path].is-selected')?.getAttribute('data-path') ?? null,
+  );
+  if (!after) return 'nothing stayed selected after the move';
+  const newIndex = Number((after.match(/b(\d+)$/) || [])[1] ?? -1);
+  return newIndex >= 0 && newIndex < oldIndex ? true : `the divider did not move up: ${before} -> ${after}`;
+});
+
 // --- A design box on an element, in a sectioned pane ------------------------
 
 /*

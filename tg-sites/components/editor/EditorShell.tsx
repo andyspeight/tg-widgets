@@ -28,7 +28,7 @@ import { pageAsRegion, REGION_TITLES } from '../../lib/content/region-page';
 import { pageAsItem, type ItemMeta } from '../../lib/content/collection-page';
 import { createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
 import { buildPresetSection } from '../../lib/content/presets';
-import { addBlock, addColumn, addInnerBlock, blockAtPath, containerColumns, parsePathKey, type Path, pathKey, resolve, updateBlockPropsAtPath } from '../../lib/content/tree';
+import { addBlock, addColumn, addInnerBlock, blockAtPath, containerColumns, moveBlockTo, parsePathKey, type Path, pathKey, resolve, updateBlockPropsAtPath } from '../../lib/content/tree';
 import {
   DndContext,
   DragOverlay,
@@ -1049,13 +1049,68 @@ export function EditorShell({
 
   // ---------------------------------------------------------------------
 
-  // --- Dragging a new block from the palette onto the canvas (dnd-kit) --------
-  // The context wraps both the drag source (the elements palette, in the left
-  // pane) and the drop target (the canvas). A move past 5px starts a drag, so a
-  // plain click on a palette card still adds the block. PointerSensor gives touch
-  // for nothing, which the old native-HTML5 drag could not do.
-  const paletteDrop = usePaletteDrop(addBlockAt);
-  const [dragType, setDragType] = useState<string | null>(null);
+  // --- One canvas drag context (dnd-kit): add from the palette, OR move a placed
+  //     block. It wraps both the drag sources (the elements palette in the left
+  //     pane, and the grip on a placed block's toolbar) and the drop target (the
+  //     canvas). A move past 5px starts a drag, so a plain click still selects or
+  //     adds. PointerSensor gives touch for nothing, which native drag could not.
+
+  /*
+   * A placed block dragged to a new spot. The SAME drop resolution as adding, so
+   * the landing arrives as the same target descriptor; only the op differs.
+   * TOP-LEVEL BLOCKS ONLY in this slice: moveBlockTo speaks column coordinates,
+   * and a container's inner column has no cross-container move yet, so a drop onto
+   * one is refused and the block stays put. Reselect by the block's own id, found
+   * in the moved tree, so the toolbar follows it to wherever moveBlockTo actually
+   * put it rather than to an index we second-guessed.
+   */
+  const moveBlockAt = useCallback(
+    (from: { section: number; row: number; column: number; block: number }, target: DropTarget) => {
+      if (target.inner !== undefined) return;
+      const moving =
+        page.sections[from.section]?.rows[from.row]?.columns[from.column]?.blocks[from.block];
+      if (!moving) return;
+      const next = moveBlockTo(page, from, {
+        section: target.section,
+        row: target.row,
+        column: target.column,
+        index: target.at,
+      });
+      commit(() => next);
+      const destColumn = next.sections[target.section]?.rows[target.row]?.columns[target.column];
+      const block = destColumn?.blocks.findIndex((candidate) => candidate.id === moving.id) ?? -1;
+      if (block >= 0) {
+        setSelected({ kind: 'block', section: target.section, row: target.row, column: target.column, block });
+      }
+    },
+    [page, commit],
+  );
+
+  // What is being dragged right now: a new block to add, or a placed block to
+  // move. Held in state for the ghost the overlay draws, and mirrored in a ref so
+  // the one drop callback reads it without going stale between renders.
+  type ActiveDrag =
+    | { kind: 'add'; type: string }
+    | {
+        kind: 'move';
+        from: { section: number; row: number; column: number; block: number };
+        label: string;
+      };
+  const [activeDrag, setActiveDrag] = useState<ActiveDrag | null>(null);
+  const activeDragRef = useRef<ActiveDrag | null>(null);
+
+  // Where a canvas drop lands, dispatched by whichever drag is live.
+  const dropOnCanvas = useCallback(
+    (target: DropTarget) => {
+      const drag = activeDragRef.current;
+      if (!drag) return;
+      if (drag.kind === 'add') addBlockAt(target, drag.type);
+      else moveBlockAt(drag.from, target);
+    },
+    [addBlockAt, moveBlockAt],
+  );
+
+  const paletteDrop = usePaletteDrop(dropOnCanvas);
   const dndSensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
   );
@@ -1075,19 +1130,32 @@ export function EditorShell({
        */
       autoScroll={false}
       onDragStart={(event) => {
-        const type = event.active.data.current?.paletteType as string | undefined;
-        if (!type) return;
-        setDragType(type);
-        paletteDrop.start(type);
+        // One discriminator per source: a palette card carries paletteType, the
+        // toolbar grip carries moveFrom. Anything else is not our drag.
+        const data = event.active.data.current;
+        let drag: ActiveDrag | null = null;
+        if (typeof data?.paletteType === 'string') {
+          drag = { kind: 'add', type: data.paletteType };
+        } else if (data?.moveFrom) {
+          drag = {
+            kind: 'move',
+            from: data.moveFrom as { section: number; row: number; column: number; block: number },
+            label: (data.moveLabel as string) ?? 'Block',
+          };
+        }
+        if (!drag) return;
+        activeDragRef.current = drag;
+        setActiveDrag(drag);
+        paletteDrop.start();
         // Fade the + picker's modal scrim while a drag is live, so the canvas
-        // beneath takes the drop. Harmless when the drag came from the always-on
-        // elements palette, which has no modal over the canvas to fade. dnd-kit
-        // starts the drag on the pointer, off the React tree, so setting this
-        // here cannot cancel the drag the way native HTML5 drag did (5 Aug 2026).
+        // beneath takes the drop. Harmless for the palette and the move grip,
+        // which have no modal over the canvas. dnd-kit starts the drag on the
+        // pointer, off the React tree, so setting this here cannot cancel the drag
+        // the way native HTML5 drag did (5 Aug 2026).
         document.body.dataset.tgDragging = 'block';
       }}
       onDragMove={(event: DragMoveEvent) => {
-        if (!dragType) return;
+        if (!activeDragRef.current) return;
         // dnd-kit hands us the pointer as the pointerdown plus how far it moved;
         // the drop hook asks the document what is under that point.
         const from = event.activatorEvent as PointerEvent;
@@ -1095,13 +1163,15 @@ export function EditorShell({
         paletteDrop.update(from.clientX + event.delta.x, from.clientY + event.delta.y);
       }}
       onDragEnd={() => {
-        if (dragType) paletteDrop.end();
-        setDragType(null);
+        if (activeDragRef.current) paletteDrop.end();
+        activeDragRef.current = null;
+        setActiveDrag(null);
         delete document.body.dataset.tgDragging;
       }}
       onDragCancel={() => {
         paletteDrop.hide();
-        setDragType(null);
+        activeDragRef.current = null;
+        setActiveDrag(null);
         delete document.body.dataset.tgDragging;
       }}
     >
@@ -1660,7 +1730,11 @@ export function EditorShell({
           never see the column beneath it. None lets the point fall through to the
           canvas, which is how the drop resolves. */}
       <DragOverlay dropAnimation={null} style={{ pointerEvents: 'none' }}>
-        {dragType ? <PaletteGhost type={dragType} /> : null}
+        {activeDrag?.kind === 'add' ? (
+          <PaletteGhost type={activeDrag.type} />
+        ) : activeDrag?.kind === 'move' ? (
+          <MoveGhost label={activeDrag.label} />
+        ) : null}
       </DragOverlay>
     </div>
     </DndContext>
@@ -1683,6 +1757,23 @@ function PaletteGhost({ type }: { type: string }) {
         <Icon name={def.icon} size={18} />
       </span>
       <span className="ed-palette-card__label">{def.label}</span>
+    </div>
+  );
+}
+
+/**
+ * The chip that follows the pointer while a PLACED block is being moved. A small
+ * pill naming what is in flight, not a copy of the whole block: where it will
+ * land is the drop line's job, so the ghost only has to say what you have hold
+ * of. Drawn inside .ed-root (see the DragOverlay note) so its --ed-* tokens
+ * resolve, and pointer-events:none so it never sits between the pointer and the
+ * column the drop resolves against.
+ */
+function MoveGhost({ label }: { label: string }) {
+  return (
+    <div className="ed-move-ghost">
+      <Icon name="grip" size={14} />
+      <span>{label}</span>
     </div>
   );
 }

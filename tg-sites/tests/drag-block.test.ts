@@ -78,9 +78,9 @@ describe('the drop maths finds the column, the gap and draws the slot', () => {
   });
 
   it('places at the target and index on drop, through the shell', () => {
-    // end() hands the shell the same descriptor the click does: the resolved
-    // target plus the gap index, so both land a block the one same way.
-    expect(hook).toContain('onDropBlock({ ...drop.target, at: drop.index }, type)');
+    // end() hands the shell the resolved target plus the gap index and nothing
+    // else: the hook is ignorant of intent, so the shell decides add-or-move.
+    expect(hook).toContain('onDrop({ ...drop.target, at: drop.index })');
   });
 });
 
@@ -96,7 +96,9 @@ describe('the shell owns the one drag context and the drop', () => {
   });
 
   it('drives the drop hook off the pointer plus how far it moved', () => {
-    expect(shell).toContain('usePaletteDrop(addBlockAt)');
+    // The hook now takes one intent-agnostic drop callback; the shell dispatches
+    // add-or-move inside it (covered in move-block.test.ts).
+    expect(shell).toContain('usePaletteDrop(dropOnCanvas)');
     expect(shell).toContain('paletteDrop.update(from.clientX + event.delta.x');
     expect(shell).toContain('ref={paletteDrop.slotRef}');
     expect(shell).toContain('<DragOverlay');
