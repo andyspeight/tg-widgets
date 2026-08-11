@@ -3517,6 +3517,21 @@ body[data-tg-dragging='block'] .tg-scrim {
   box-shadow: 0 0 0 4px rgba(0, 180, 216, 0.12);
 }
 
+/*
+ * The boundary line a SECTION drag drops on: a solid accent bar spanning the
+ * section, on the edge between two sections, positioned imperatively by
+ * useSectionDrop. A line, not a filled slot, because a section gap is an edge.
+ */
+.ed-section-drop-slot {
+  display: none;
+  position: fixed;
+  z-index: 50;
+  pointer-events: none;
+  border-radius: 2px;
+  background: var(--ed-accent);
+  box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.18);
+}
+
 .tg-modal {
   display: flex;
   flex-direction: column;

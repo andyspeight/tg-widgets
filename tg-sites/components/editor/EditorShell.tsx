@@ -28,7 +28,7 @@ import { pageAsRegion, REGION_TITLES } from '../../lib/content/region-page';
 import { pageAsItem, type ItemMeta } from '../../lib/content/collection-page';
 import { createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
 import { buildPresetSection } from '../../lib/content/presets';
-import { addBlock, addColumn, addInnerBlock, blockAtPath, containerColumns, moveBlockTo, parsePathKey, type Path, pathKey, resolve, updateBlockPropsAtPath } from '../../lib/content/tree';
+import { addBlock, addColumn, addInnerBlock, blockAtPath, containerColumns, moveBlockTo, moveSection, parsePathKey, type Path, pathKey, resolve, updateBlockPropsAtPath } from '../../lib/content/tree';
 import {
   DndContext,
   DragOverlay,
@@ -39,6 +39,7 @@ import {
 } from '@dnd-kit/core';
 import { blockDefinition } from '../../lib/content/blocks';
 import { usePaletteDrop } from './usePaletteDrop';
+import { useSectionDrop } from './useSectionDrop';
 import { Outline } from './Outline';
 import { Canvas, type DropTarget } from './Canvas';
 import { Properties } from './Properties';
@@ -1086,31 +1087,62 @@ export function EditorShell({
     [page, commit],
   );
 
-  // What is being dragged right now: a new block to add, or a placed block to
-  // move. Held in state for the ghost the overlay draws, and mirrored in a ref so
-  // the one drop callback reads it without going stale between renders.
+  /*
+   * A whole SECTION dragged to a new position. moveSection counts positions
+   * AFTER the dragged section is lifted out, so a gap past the section's own
+   * index shifts down by one; the resolver speaks in plain current-array gaps, so
+   * that adjustment lives here. Reselect by the section's id in the moved tree,
+   * so its toolbar and handle follow it to where it landed.
+   */
+  const moveSectionAt = useCallback(
+    (from: number, gap: number) => {
+      const moving = page.sections[from];
+      if (!moving) return;
+      const to = gap > from ? gap - 1 : gap;
+      const next = moveSection(page, from, to);
+      commit(() => next);
+      const section = next.sections.findIndex((candidate) => candidate.id === moving.id);
+      if (section >= 0) setSelected({ kind: 'section', section });
+    },
+    [page, commit],
+  );
+
+  // What is being dragged right now: a new block to add, a placed block to move,
+  // or a whole section to reorder. Held in state for the ghost the overlay draws,
+  // and mirrored in a ref so the drop callbacks read it without going stale.
   type ActiveDrag =
     | { kind: 'add'; type: string }
     | {
         kind: 'move';
         from: { section: number; row: number; column: number; block: number };
         label: string;
-      };
+      }
+    | { kind: 'move-section'; from: number; label: string };
   const [activeDrag, setActiveDrag] = useState<ActiveDrag | null>(null);
   const activeDragRef = useRef<ActiveDrag | null>(null);
 
-  // Where a canvas drop lands, dispatched by whichever drag is live.
+  // Where a block drop lands (add a new block, or move a placed one).
   const dropOnCanvas = useCallback(
     (target: DropTarget) => {
       const drag = activeDragRef.current;
       if (!drag) return;
       if (drag.kind === 'add') addBlockAt(target, drag.type);
-      else moveBlockAt(drag.from, target);
+      else if (drag.kind === 'move') moveBlockAt(drag.from, target);
     },
     [addBlockAt, moveBlockAt],
   );
 
+  // Where a section drop lands, at a gap between sections.
+  const dropSectionOnCanvas = useCallback(
+    (gap: number) => {
+      const drag = activeDragRef.current;
+      if (drag?.kind === 'move-section') moveSectionAt(drag.from, gap);
+    },
+    [moveSectionAt],
+  );
+
   const paletteDrop = usePaletteDrop(dropOnCanvas);
+  const sectionDrop = useSectionDrop(dropSectionOnCanvas);
   const dndSensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
   );
@@ -1130,8 +1162,8 @@ export function EditorShell({
        */
       autoScroll={false}
       onDragStart={(event) => {
-        // One discriminator per source: a palette card carries paletteType, the
-        // toolbar grip carries moveFrom. Anything else is not our drag.
+        // One discriminator per source: a palette card carries paletteType, a
+        // block handle carries moveFrom, a section handle carries moveSection.
         const data = event.active.data.current;
         let drag: ActiveDrag | null = null;
         if (typeof data?.paletteType === 'string') {
@@ -1142,34 +1174,44 @@ export function EditorShell({
             from: data.moveFrom as { section: number; row: number; column: number; block: number },
             label: (data.moveLabel as string) ?? 'Block',
           };
+        } else if (typeof data?.moveSection === 'number') {
+          drag = { kind: 'move-section', from: data.moveSection, label: (data.moveLabel as string) ?? 'Section' };
         }
         if (!drag) return;
         activeDragRef.current = drag;
         setActiveDrag(drag);
-        paletteDrop.start();
+        if (drag.kind === 'move-section') sectionDrop.start();
+        else paletteDrop.start();
         // Fade the + picker's modal scrim while a drag is live, so the canvas
-        // beneath takes the drop. Harmless for the palette and the move grip,
-        // which have no modal over the canvas. dnd-kit starts the drag on the
-        // pointer, off the React tree, so setting this here cannot cancel the drag
-        // the way native HTML5 drag did (5 Aug 2026).
+        // beneath takes the drop. Harmless for the palette and the handles, which
+        // have no modal over the canvas. dnd-kit starts the drag on the pointer,
+        // off the React tree, so setting this here cannot cancel the drag the way
+        // native HTML5 drag did (5 Aug 2026).
         document.body.dataset.tgDragging = 'block';
       }}
       onDragMove={(event: DragMoveEvent) => {
-        if (!activeDragRef.current) return;
+        const drag = activeDragRef.current;
+        if (!drag) return;
         // dnd-kit hands us the pointer as the pointerdown plus how far it moved;
         // the drop hook asks the document what is under that point.
         const from = event.activatorEvent as PointerEvent;
         if (from == null || typeof from.clientX !== 'number') return;
-        paletteDrop.update(from.clientX + event.delta.x, from.clientY + event.delta.y);
+        const x = from.clientX + event.delta.x;
+        const y = from.clientY + event.delta.y;
+        if (drag.kind === 'move-section') sectionDrop.update(x, y);
+        else paletteDrop.update(x, y);
       }}
       onDragEnd={() => {
-        if (activeDragRef.current) paletteDrop.end();
+        const drag = activeDragRef.current;
+        if (drag?.kind === 'move-section') sectionDrop.end();
+        else if (drag) paletteDrop.end();
         activeDragRef.current = null;
         setActiveDrag(null);
         delete document.body.dataset.tgDragging;
       }}
       onDragCancel={() => {
         paletteDrop.hide();
+        sectionDrop.hide();
         activeDragRef.current = null;
         setActiveDrag(null);
         delete document.body.dataset.tgDragging;
@@ -1717,6 +1759,8 @@ export function EditorShell({
       {/* The line a palette drag drops on. Fixed to the viewport and moved
           imperatively (usePaletteDrop), so a re-render mid-drag never resets it. */}
       <div ref={paletteDrop.slotRef} className="ed-drop-slot" aria-hidden="true" />
+      {/* The boundary line a section drag drops on, moved the same way. */}
+      <div ref={sectionDrop.slotRef} className="ed-section-drop-slot" aria-hidden="true" />
 
       {/* Inside .ed-root ON PURPOSE. The overlay is position:fixed, so where it
           sits in the DOM does not move it, but the --ed-* tokens the ghost paints
@@ -1732,7 +1776,7 @@ export function EditorShell({
       <DragOverlay dropAnimation={null} style={{ pointerEvents: 'none' }}>
         {activeDrag?.kind === 'add' ? (
           <PaletteGhost type={activeDrag.type} />
-        ) : activeDrag?.kind === 'move' ? (
+        ) : activeDrag?.kind === 'move' || activeDrag?.kind === 'move-section' ? (
           <MoveGhost label={activeDrag.label} />
         ) : null}
       </DragOverlay>

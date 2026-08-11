@@ -7136,6 +7136,84 @@ await check('a placed block is moved by dragging its gutter handle', async () =>
   return index > 0 ? true : `the text block did not move down its column: selected ${landed}`;
 });
 
+// --- Move a whole section by dragging its handle ----------------------------
+
+/*
+ * Andy, 10 Aug 2026: sections must reorder by dragging too. The SAME gutter
+ * handle serves a selected section; a sibling resolver (useSectionDrop) finds the
+ * gap between sections and the shell runs moveSection. Select the first section,
+ * drag its handle down onto the lower half of the next one, and the shell
+ * reselects it by id, so its own path is where it ended up, below the s0 it
+ * started at.
+ *
+ * The seed is taller than the viewport, so the next section's lower half sits
+ * below the fold on first load, and a drop clamped to the screen edge lands in
+ * its UPPER half instead, where the gap resolves BEFORE it and the move is a
+ * no-op (s0 -> s0, the 11 Aug 2026 false failure). So scroll the canvas to bring
+ * the next section fully into view first, WHILE leaving a sliver of s0 at the top
+ * that keeps its handle pinned there, then drop below the next section's middle.
+ */
+await check('a section is moved by dragging its handle', async () => {
+  const ok = await page.evaluate(() => {
+    const sections = [...document.querySelectorAll('.ed-canvas-frame [data-path]')].filter((el) =>
+      /^s\d+$/.test(el.getAttribute('data-path') || ''),
+    );
+    if (sections.length < 2) return false;
+    const first = sections.find((s) => s.getAttribute('data-path') === 's0') ?? sections[0];
+    first.scrollIntoView({ block: 'start' });
+    first.click(); // select the section
+    return true;
+  });
+  if (!ok) return 'need two sections to reorder';
+  await page.waitForTimeout(250);
+
+  const before = await page.evaluate(
+    () => document.querySelector('.ed-canvas-frame [data-path].is-selected')?.getAttribute('data-path') ?? null,
+  );
+  if (!/^s\d+$/.test(before || '')) return `the section did not select: ${before}`;
+  const oldIndex = Number((before.match(/^s(\d+)$/) || [])[1] ?? -1);
+
+  // Bring the next section's lower half onto the screen, keeping s0's sliver up
+  // top so its handle stays pinned there. Then aim below the next section's
+  // middle, so the gap resolves AFTER it and the move is never a no-op.
+  const plan = await page.evaluate(() => {
+    const wrap = document.querySelector('.ed-canvas-wrap');
+    const next = document.querySelector('.ed-canvas-frame [data-path="s1"]');
+    if (!wrap || !next) return null;
+    const w = wrap.getBoundingClientRect();
+    // s1's top ~180px below the canvas top: enough of s1 shows for its lower half
+    // to clear the fold, and s0's bottom sliver still overlaps the top edge.
+    wrap.scrollTop += next.getBoundingClientRect().top - (w.top + 180);
+    const r = next.getBoundingClientRect();
+    const middle = r.top + r.height / 2;
+    const y = Math.min(r.top + r.height * 0.7, window.innerHeight - 12);
+    return {
+      belowMiddle: y > middle,
+      drop: {
+        x: Math.round(Math.min(Math.max(r.left + r.width / 2, 8), window.innerWidth - 8)),
+        y: Math.round(y),
+      },
+    };
+  });
+  if (!plan) return 'no next section to drop onto';
+  if (!plan.belowMiddle) return 'could not aim the drop below the next section';
+  await page.waitForTimeout(250);
+
+  if ((await page.locator('.ed-drag-handle').count()) === 0) return 'no move handle on the section';
+  const g = await page.locator('.ed-drag-handle').first().boundingBox();
+  if (!g) return 'the handle has no box';
+
+  await dndPointerDrag({ x: Math.round(g.x + g.width / 2), y: Math.round(g.y + g.height / 2) }, plan.drop);
+  await page.waitForTimeout(300);
+
+  const after = await page.evaluate(
+    () => document.querySelector('.ed-canvas-frame [data-path].is-selected')?.getAttribute('data-path') ?? null,
+  );
+  if (!/^s\d+$/.test(after || '')) return `nothing section-shaped stayed selected: ${after}`;
+  const newIndex = Number((after.match(/^s(\d+)$/) || [])[1] ?? -1);
+  return newIndex > oldIndex ? true : `the section did not move down: ${before} -> ${after}`;
+});
+
 // --- A design box on an element, in a sectioned pane ------------------------
 
 /*

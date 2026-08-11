@@ -99,7 +99,8 @@ describe('the shell owns the one drag context and the drop', () => {
     // The hook now takes one intent-agnostic drop callback; the shell dispatches
     // add-or-move inside it (covered in move-block.test.ts).
     expect(shell).toContain('usePaletteDrop(dropOnCanvas)');
-    expect(shell).toContain('paletteDrop.update(from.clientX + event.delta.x');
+    expect(shell).toContain('const x = from.clientX + event.delta.x');
+    expect(shell).toContain('else paletteDrop.update(x, y)');
     expect(shell).toContain('ref={paletteDrop.slotRef}');
     expect(shell).toContain('<DragOverlay');
   });

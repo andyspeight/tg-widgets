@@ -22,20 +22,21 @@ function read(...parts: string[]): string {
 describe('a placed block is dragged by a handle in the gutter', () => {
   const toolbar = read('components', 'editor', 'ItemToolbar.tsx');
 
-  it('makes the handle a dnd-kit draggable carrying the block’s coordinates', () => {
+  it('makes the handle a dnd-kit draggable carrying the item’s address', () => {
     // The same source shape the palette uses, so it flows through the one context.
-    // moveFrom is the top-level block address; moveLabel names it for the ghost.
+    // moveData carries the block's coordinates (or a section's index) and a label.
     expect(toolbar).toContain('useDraggable');
-    expect(toolbar).toContain('data: moveFrom ? { moveFrom, moveLabel: label } : undefined');
+    expect(toolbar).toContain('data: moveData');
+    expect(toolbar).toContain('{ moveFrom, moveLabel: label }');
     expect(toolbar).toContain('className="ed-drag-handle"');
   });
 
-  it('offers the handle for a top-level block only, never a container’s inner block', () => {
+  it('offers the handle for a top-level block, never a container’s inner block', () => {
     // moveBlockTo speaks column coordinates; an inner block has no cross-container
     // mover yet, so it keeps its toolbar up/down and gets no handle. The draggable
     // is disabled rather than skipped, so the hook order never changes.
     expect(toolbar).toMatch(/const moveFrom =\s*\n?\s*selected\.kind === 'block'/);
-    expect(toolbar).toContain('disabled: !moveFrom');
+    expect(toolbar).toContain('disabled: !moveData');
   });
 
   it('sits in the gutter to the item’s left, so it clears the words and toolbars', () => {
@@ -65,7 +66,7 @@ describe('the shell tells a move from an add, and runs the right op', () => {
     const fn = shell.slice(shell.indexOf('const dropOnCanvas = useCallback('));
     const body = fn.slice(0, fn.indexOf('[addBlockAt, moveBlockAt],'));
     expect(body).toContain("if (drag.kind === 'add') addBlockAt(target, drag.type)");
-    expect(body).toContain('else moveBlockAt(drag.from, target)');
+    expect(body).toContain("else if (drag.kind === 'move') moveBlockAt(drag.from, target)");
   });
 
   it('moves through the tested tree op and refuses a container inner column', () => {

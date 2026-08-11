@@ -529,12 +529,26 @@ const MUTATIONS = [
      * the drag still resolves and still ends, but the block never moves, so it
      * stays selected where it started rather than landing lower down its column.
      */
-    why: 'Drop the move dispatch, so the grip drag resolves a target but never moves the block.',
+    why: 'Drop the move dispatch, so the handle drag resolves a target but never moves the block.',
     file: 'components/editor/EditorShell.tsx',
     from: `      if (drag.kind === 'add') addBlockAt(target, drag.type);
-      else moveBlockAt(drag.from, target);`,
+      else if (drag.kind === 'move') moveBlockAt(drag.from, target);`,
     to: `      if (drag.kind === 'add') addBlockAt(target, drag.type);
-      else return;`,
+      else if (drag.kind === 'move') return;`,
+  },
+  {
+    tag: 'dnd',
+    check: 'a section is moved by dragging its handle',
+    /*
+     * The section handle resolves a gap through useSectionDrop; the shell then
+     * dispatches to moveSection. Cut that dispatch and the section drag still
+     * resolves a gap and still ends, but the section never moves, so it stays
+     * selected where it started rather than at the gap it was dropped on.
+     */
+    why: 'Drop the section move dispatch, so the handle drag resolves a gap but never moves the section.',
+    file: 'components/editor/EditorShell.tsx',
+    from: `      if (drag?.kind === 'move-section') moveSectionAt(drag.from, gap);`,
+    to: `      if (drag?.kind === 'move-section') return;`,
   },
 
   // --- contact details, on the settings screen -----------------------------

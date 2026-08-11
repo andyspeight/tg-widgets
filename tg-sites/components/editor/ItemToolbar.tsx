@@ -221,21 +221,27 @@ export function ItemToolbar({
   const label = itemLabel(selected, blockLabel);
 
   /*
-   * The grip you drag to MOVE a placed block. A top-level block only: moveBlockTo
-   * works in column coordinates, so a block inside a container keeps its toolbar
-   * up/down for now and gets no grip. useDraggable runs every render (hooks rule),
-   * disabled when there is nothing to move; the block's coordinates and its name
-   * ride on the drag's data for the shell to read on drop. The grip lives here,
-   * not on the block itself, so it never fights inline text editing or a click.
+   * The handle you drag to MOVE the selected item: a top-level block (moveFrom is
+   * its column coordinates) or a whole SECTION (moveSection is its index). A block
+   * inside a container has no cross-container mover yet, so it keeps its toolbar
+   * up/down and gets no handle. useDraggable runs every render (hooks rule),
+   * disabled when there is nothing to move; the item's address and its name ride
+   * on the drag's data for the shell to read on drop, and the shell tells a block
+   * move from a section move by which key is present.
    */
   const moveFrom =
     selected.kind === 'block'
       ? { section: selected.section, row: selected.row, column: selected.column, block: selected.block }
       : null;
+  const moveData = moveFrom
+    ? { moveFrom, moveLabel: label }
+    : selected.kind === 'section'
+      ? { moveSection: selected.section, moveLabel: label }
+      : undefined;
   const moveDrag = useDraggable({
     id: `move:${selectedKey}`,
-    data: moveFrom ? { moveFrom, moveLabel: label } : undefined,
-    disabled: !moveFrom,
+    data: moveData,
+    disabled: !moveData,
   });
 
   if (!anchor) return null;
@@ -289,11 +295,11 @@ export function ItemToolbar({
       </div>
 
       {/* The drag handle, in the gutter to the item's LEFT. A gutter handle, not
-          a grip in the pill, so it serves a text or heading block too: it never
-          sits under the formatting toolbar or over the words you are selecting.
-          It rides the same one dnd-kit context as the palette and the drop line;
-          the block's coordinates ride on its data for the shell to move. */}
-      {moveFrom && (
+          a grip in the pill, so it serves a text or heading block, and a whole
+          section, too: it never sits under the formatting toolbar or over the
+          words you are selecting. It rides the same one dnd-kit context as the
+          palette and the drop lines; the item's address rides on its data. */}
+      {moveData && (
         <button
           type="button"
           ref={moveDrag.setNodeRef}
