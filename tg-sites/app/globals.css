@@ -508,6 +508,33 @@
 .tgs-block { --tgs-fs: initial; --tgs-fs-tablet: initial; --tgs-fs-phone: initial; }
 .tgs-block { --tgs-lh: initial; --tgs-lh-tablet: initial; --tgs-lh-phone: initial; }
 
+/*
+ * AUTO-RESIZE, the fluid option (Andy, 11 Aug 2026: "an option so it auto-resizes
+ * based on screen size"). A block marked data-fluid swaps its font-size for a
+ * clamp that grows and shrinks with the screen instead of holding one value. It
+ * WRAPS the whole size chain, so the size a block is set to (or its per-screen
+ * override, or its own natural size) is the CEILING, two thirds of it is the
+ * floor, and a container-relative middle scales between them. cqi reads the
+ * .tgs-page container, the same width the per-screen queries key off, so "screen
+ * size" means the same thing it does everywhere else on the page.
+ *
+ * Bigger text starts coming down at a wider screen than small text does, which is
+ * the property you want: a hero has to shrink on a phone, body copy barely moves.
+ * A size past the crossover (roughly 100px on a desktop-width canvas) sits a
+ * little under its set value even on desktop, the one rough edge of a single
+ * container-relative middle, and fine for a display size that large. It does not
+ * reach the words wrapped in their own fixed-size spans, which is why a heading
+ * built from the old size buttons still needs those cleared first.
+ */
+.tgs-block[data-fluid] .tgs-heading,
+.tgs-block[data-fluid] .tgs-text {
+  font-size: clamp(
+    calc(var(--tgs-fs-r, var(--tgs-fs, var(--tgs-fs-base))) * 0.62),
+    9cqi,
+    var(--tgs-fs-r, var(--tgs-fs, var(--tgs-fs-base)))
+  );
+}
+
 @container tgs-page (max-width: 1023px) {
   .tgs-row[data-stack='tablet'] { grid-template-columns: 1fr; }
   .tgs-row[data-stack='tablet'][data-reverse='true'] { direction: rtl; }

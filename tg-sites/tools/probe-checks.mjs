@@ -645,6 +645,20 @@ const MUTATIONS = [
     from: `  { property: 'lineHeight', varBase: '--tgs-lh', toCss: (value: unknown) => normaliseLineHeight(value) ?? null },`,
     to: `  { property: 'lineHeight', varBase: '--tgs-lh', toCss: () => null },`,
   },
+  {
+    tag: 'breakpoints',
+    check: 'auto-resize brings a heading down on a phone, not on desktop',
+    /*
+     * The flag is the whole mechanism: without data-fluid the clamp rule matches
+     * nothing, so the block keeps one fixed size and the phone never comes down.
+     * The toggle still stores the flag, which is the shape of bug that looks wired
+     * but does nothing.
+     */
+    why: 'Never mark a block data-fluid, so the auto-resize clamp is stored but never applies.',
+    file: 'components/render/PageRenderer.tsx',
+    from: `      data-fluid={fluid ? '' : undefined}`,
+    to: `      data-fluid={undefined}`,
+  },
 
   // --- contact details, on the settings screen -----------------------------
 

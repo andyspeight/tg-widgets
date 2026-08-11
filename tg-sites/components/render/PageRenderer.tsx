@@ -742,9 +742,14 @@ function blockHost(
   const styled =
     boxed ||
     Boolean(textColour) ||
-    Boolean(baseSize) ||
     Boolean(baseLineHeight) ||
+    Boolean(baseSize) ||
     Object.keys(sizeVars).length > 0;
+  // Auto-resize: the text elements only. A block marked data-fluid swaps its
+  // font-size for a clamp that scales with the screen (globals.css). It reads no
+  // value from here, only the flag, so it composes with a size or a per-screen
+  // override rather than replacing them.
+  const fluid = (block.type === 'text' || block.type === 'heading') && props?.fluid === true;
   return (
     <div
       key={block.id}
@@ -752,6 +757,7 @@ function blockHost(
       data-align={typeof block.props?.align === 'string' ? block.props.align : undefined}
       data-boxed={boxed ? '' : undefined}
       data-shadow={boxed ? box.shadow : undefined}
+      data-fluid={fluid ? '' : undefined}
       style={styled ? style : undefined}
       {...pathAttr(editable, keyPath)}
     >

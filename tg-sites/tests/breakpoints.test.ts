@@ -335,3 +335,57 @@ describe('a block-level line spacing survives the save path', () => {
     expect(block.responsive?.phone?.lineHeight).toBe('3');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Auto-resize: fluid text that scales with the screen.
+//
+// Andy, 11 Aug 2026: "an option so that it auto-resizes based on screen size."
+// Not a per-screen value but a single flag: the block is marked data-fluid and a
+// static rule swaps its font-size for a clamp that reads the .tgs-page container,
+// wrapping the size chain so the set size is the ceiling and the middle scales.
+// ---------------------------------------------------------------------------
+
+describe('a block can be marked to auto-resize with the screen', () => {
+  const render = read('components', 'render', 'PageRenderer.tsx');
+  const css = read('app', 'globals.css');
+  const props = read('components', 'editor', 'Properties.tsx');
+
+  it('marks the text block data-fluid when the flag is set, and only text or heading', () => {
+    expect(render).toContain("(block.type === 'text' || block.type === 'heading') && props?.fluid === true");
+    expect(render).toContain("data-fluid={fluid ? '' : undefined}");
+  });
+
+  it('swaps the font-size for a clamp that wraps the size chain, scaling with the container', () => {
+    expect(css).toContain('.tgs-block[data-fluid] .tgs-heading');
+    expect(css).toContain('.tgs-block[data-fluid] .tgs-text');
+    // The ceiling is the same chain a fixed size reads, so a manual or per-screen
+    // size stays the ceiling; a container unit (cqi) is the scaling middle.
+    expect(css).toMatch(/font-size:\s*clamp\([\s\S]*?var\(--tgs-fs-r, var\(--tgs-fs, var\(--tgs-fs-base\)\)\)[\s\S]*?9cqi/);
+  });
+
+  it('offers an auto-resize toggle in the block pane that writes the flag', () => {
+    expect(props).toContain('<FluidField');
+    expect(props).toContain('updateBlockPropsAtPath(c, path, { fluid: value || undefined })');
+  });
+});
+
+describe('the auto-resize flag survives the save path', () => {
+  const path = { kind: 'block' as const, section: 0, row: 0, column: 0, block: 0 };
+
+  function fluidBlockPage() {
+    let page = createPage();
+    page = addBlock(page, 0, 0, 0, createBlock('heading'));
+    page = updateBlockPropsAtPath(page, path, { fluid: true });
+    return page;
+  }
+
+  it('keeps the flag through parsePage and sanitisePage', () => {
+    const parsed = parsePage(JSON.parse(JSON.stringify(fluidBlockPage())));
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(parsed.page.sections[0].rows[0].columns[0].blocks[0].props.fluid).toBe(true);
+
+    const cleaned = sanitisePage(fluidBlockPage()).sections[0].rows[0].columns[0].blocks[0];
+    expect(cleaned.props.fluid).toBe(true);
+  });
+});

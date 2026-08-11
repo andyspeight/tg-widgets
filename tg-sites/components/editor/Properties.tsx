@@ -1875,6 +1875,21 @@ function LineSpacingField({
   );
 }
 
+function FluidField({ value, onChange }: { value: boolean; onChange: (value: boolean) => void }) {
+  return (
+    <div className="ed-field">
+      <label className="ed-toggle">
+        <input type="checkbox" checked={value} onChange={(event) => onChange(event.target.checked)} />
+        <span>Auto-resize with the screen</span>
+      </label>
+      <p className="ed-help" style={{ marginTop: 6 }}>
+        Scales this text down on smaller screens, between its set size and about two thirds of
+        it, so a headline stays in proportion without a size for each screen.
+      </p>
+    </div>
+  );
+}
+
 function BlockFields({
   path,
   page,
@@ -2037,6 +2052,23 @@ function BlockFields({
       >
         <LineSpacingField tier={tier} value={currentLh} onChange={setLineHeight} />
       </ScreenScope>,
+    );
+
+    // AUTO-RESIZE. Not per-screen: it IS the responsive behaviour, one toggle that
+    // makes the text scale with the screen rather than holding a fixed size. Stored
+    // as a plain flag; undefined when off so it does not linger on the block.
+    add(
+      'content',
+      <FluidField
+        key="fluid"
+        value={block.props.fluid === true}
+        onChange={(value) =>
+          onCommit(
+            (c) => updateBlockPropsAtPath(c, path, { fluid: value || undefined }),
+            `blk:${block.id}:fluid`,
+          )
+        }
+      />,
     );
   }
 

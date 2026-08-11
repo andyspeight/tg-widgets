@@ -7440,6 +7440,57 @@ await check('a block line spacing set on Phone tightens phone, not desktop', asy
     : `the desktop line height changed under a phone edit: ${info.deskLh} -> ${deskAgain}`;
 });
 
+/*
+ * Andy, 11 Aug 2026, bug three: an auto-resize option so text scales with the
+ * screen rather than holding one size. A block marked data-fluid swaps its
+ * font-size for a clamp keyed on the .tgs-page container (globals.css), so a
+ * heading comes down on a phone without a size for each screen. Add a heading,
+ * give it a large size, turn auto-resize on, and prove the phone size drops below
+ * the desktop one while the desktop size holds.
+ */
+await check('auto-resize brings a heading down on a phone, not on desktop', async () => {
+  await addBlock('Heading');
+  const host = added();
+  if ((await host.count()) !== 1) return `${await host.count()} blocks selected after adding`;
+  const path = await host.evaluate((el) => el.getAttribute('data-path'));
+
+  // A large desktop size, so the fluid clamp has room to come down on a phone.
+  const sizeSelect = page.locator('.ed-props select[id^="ed-text-size"]').first();
+  if ((await sizeSelect.count()) === 0) return 'the text size control was not found';
+  await sizeSelect.selectOption('var(--tgs-h1-size)');
+  await page.waitForTimeout(150);
+
+  // Turn auto-resize on.
+  const toggle = page.getByRole('checkbox', { name: /Auto-resize/ });
+  if ((await toggle.count()) === 0) return 'the auto-resize toggle was not offered';
+  await toggle.check();
+  await page.waitForTimeout(150);
+
+  const measure = (p) =>
+    page.evaluate((dataPath) => {
+      const el = document.querySelector(`.ed-canvas-frame [data-path="${dataPath}"]`);
+      const text = el.matches('.tgs-heading, .tgs-text') ? el : el.querySelector('.tgs-heading, .tgs-text');
+      return { fluid: el.hasAttribute('data-fluid'), px: parseFloat(getComputedStyle(text).fontSize) };
+    }, p);
+
+  const desk = await measure(path);
+  if (!desk.fluid) return 'the block was not marked data-fluid';
+
+  await page.getByRole('button', { name: 'Phone', exact: true }).click();
+  await page.waitForTimeout(200);
+  const phone = await measure(path);
+
+  // Back to Desktop: the size returns to its ceiling, unchanged by the phone width.
+  await page.getByRole('button', { name: 'Desktop', exact: true }).click();
+  await page.waitForTimeout(200);
+  const deskAgain = await measure(path);
+  await showPanels();
+
+  if (!(phone.px < desk.px - 3)) return `phone did not shrink: phone ${phone.px}, desktop ${desk.px}`;
+  if (Math.abs(deskAgain.px - desk.px) > 1) return `desktop changed under the phone view: ${desk.px} -> ${deskAgain.px}`;
+  return true;
+});
+
 // --- Preview mode: the site as it will publish, full canvas -----------------
 
 /*
