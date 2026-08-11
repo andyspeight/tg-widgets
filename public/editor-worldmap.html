@@ -71,6 +71,15 @@
   .tgwm-region-pill[data-state="some"] { border-color: var(--tgse-accent, #00B4D8); color: var(--tgse-accent, #00B4D8); }
   .tgwm-region-count { font-size: 10px; opacity: .8; font-weight: 600; }
 
+  /* Star-rating "show these" pills — same look as the region pills, on/off. */
+  .tgwm-rating-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tgwm-rating-pill {
+    font: inherit; font-size: 12px; font-weight: 700; cursor: pointer;
+    padding: 5px 12px; border-radius: 999px; border: 1px solid var(--tgse-border);
+    background: var(--tgse-surface); color: var(--tgse-text); transition: all .14s;
+  }
+  .tgwm-rating-pill[data-on="1"] { background: var(--tgse-accent, #00B4D8); border-color: var(--tgse-accent, #00B4D8); color: #fff; }
+
   .tgwm-country-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; }
   .tgwm-country {
     display: flex; align-items: center; gap: 7px; padding: 5px 7px; border-radius: 7px;
@@ -181,6 +190,19 @@
               </select>
             </div>
             <div class="tgwm-field-hint">Holidays show flight and hotel packages, filtered by departure point. Hotels show accommodation only, filtered by board basis and length of stay instead. Same map, either way.</div>
+          </div>
+        </div>
+
+        <!-- Star ratings shown (accommodation) -->
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <span class="tgse-section-label">Star ratings</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgwm-rating-pills" id="rating-pills"></div>
+            <div class="tgwm-field-hint">Tick the accommodation star ratings to show on the map. Tick none to show every rating. A deal with no star rating always shows.</div>
           </div>
         </div>
 
@@ -406,6 +428,7 @@
     accent: '',          // '' = widget's built-in teal
     primary: '',         // '' = widget's built-in navy
     countries: [],       // [] = show all available
+    showRatings: [],     // [] = show all star ratings; else whole stars to show e.g. [4,5]
     showFullscreenButton: true,
     displayCurrency: 'GBP',
     showCurrencySwitcher: false,
@@ -538,7 +561,40 @@
     document.getElementById('col-primary-hex').value = pri.toUpperCase();
 
     renderCuration();
+    renderRatings();
     updateContrastWarn();
+  }
+
+  // ── Star-rating "show these" pills ──────────────────────────
+  // Same explicit-ticked-set semantics as country curation: empty stored
+  // (C.showRatings) means "show all", so the UI presents every star ticked.
+  // On save, all-ticked stores [] (= all); unticking the last one falls back to
+  // all (a map with no ratings shows nothing). A whole-star set, 2 to 5.
+  const STAR_OPTIONS = [2, 3, 4, 5];
+  function currentChosenRatings() {
+    const arr = (C.showRatings || []).map(Number).filter(n => STAR_OPTIONS.indexOf(n) !== -1);
+    return arr.length ? new Set(arr) : new Set(STAR_OPTIONS);
+  }
+  function renderRatings() {
+    const wrap = document.getElementById('rating-pills');
+    if (!wrap) return;
+    const chosen = currentChosenRatings();
+    wrap.innerHTML = STAR_OPTIONS.map(n =>
+      `<button type="button" class="tgwm-rating-pill" data-star="${n}" data-on="${chosen.has(n) ? '1' : '0'}" aria-pressed="${chosen.has(n) ? 'true' : 'false'}">${n} &#9733;</button>`
+    ).join('');
+  }
+  function commitRatings(set) {
+    if (set.size === 0) {
+      C.showRatings = [];
+      tgse.toast('Showing all star ratings — a map needs at least one', 'ok');
+    } else if (set.size === STAR_OPTIONS.length) {
+      C.showRatings = []; // all ticked → store as "all"
+    } else {
+      C.showRatings = [...set].sort((a, b) => a - b);
+    }
+    shell.markDirty();
+    renderRatings();
+    render();
   }
 
   // ── Curation UI ─────────────────────────────────────────────
@@ -642,6 +698,17 @@
     document.getElementById('f-fullscreen').addEventListener('change', (e) => { C.showFullscreenButton = e.target.checked; shell.markDirty(); render(); });
     document.getElementById('f-currency').addEventListener('change', (e) => { C.displayCurrency = e.target.value; shell.markDirty(); render(); });
     document.getElementById('f-currency-switcher').addEventListener('change', (e) => { C.showCurrencySwitcher = e.target.checked; shell.markDirty(); render(); });
+
+    // Star-rating pills — toggle a whole star in/out of the shown set. Delegated
+    // on the stable container so it survives the pills being re-rendered.
+    document.getElementById('rating-pills').addEventListener('click', (e) => {
+      const pill = e.target.closest('.tgwm-rating-pill');
+      if (!pill) return;
+      const n = Number(pill.getAttribute('data-star'));
+      const set = currentChosenRatings();
+      if (set.has(n)) set.delete(n); else set.add(n);
+      commitRatings(set);
+    });
 
     // Colours — picker ↔ hex sync
     function bindColour(pickerId, hexId, key) {

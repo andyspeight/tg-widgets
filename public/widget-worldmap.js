@@ -68,7 +68,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.15.0';
+  const VERSION = '3.16.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -2465,6 +2465,18 @@ svg.leaflet-image-layer.leaflet-interactive path {
        Applied to the host <html> element via JS (class added/removed there). */
   `;
 
+  // Normalise a client showRatings config to unique whole stars 1-5, so a
+  // malformed value can never hide every offer or match a nonsense band.
+  function normShowRatings(v) {
+    if (!Array.isArray(v)) return [];
+    const out = [];
+    for (const x of v) {
+      const n = Math.round(Number(x));
+      if (Number.isFinite(n) && n >= 1 && n <= 5 && out.indexOf(n) === -1) out.push(n);
+    }
+    return out.sort((a, b) => a - b);
+  }
+
   const DEFAULTS = {
     theme: 'light',
     // Author-configurable copy. Left empty so the localised default is used
@@ -2516,6 +2528,12 @@ svg.leaflet-image-layer.leaflet-interactive path {
     // drops the flight-shaped controls (departures, direct, supplier) which
     // don't apply to a hotel-only stay.
     dataMode: 'holidays',
+    // Accommodation star ratings to SHOW (client-set, array of whole stars e.g.
+    // [4,5]). Empty/absent = show every rating (current behaviour). Applied to
+    // the deal cards for whatever accommodation the map shows (packages in
+    // holidays mode, hotels in hotels mode). An offer with no numeric rating
+    // (e.g. a flight-only deal) is never hidden by it.
+    showRatings: [],
   };
 
   // ── Widget class
@@ -2526,6 +2544,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       this.host = container;
       this.widgetId = (config && config.widgetId) || (container.getAttribute && container.getAttribute('data-tg-id')) || '';
       this.cfg = Object.assign({}, DEFAULTS, config || {});
+      this.cfg.showRatings = normShowRatings(this.cfg.showRatings);
       // Display currency state. Prices are cached GBP, converted at render time;
       // rates load in _init (fallback table used until they arrive).
       this.cur = { code: (this.cfg.displayCurrency || 'GBP'), rates: { GBP: 1 } };
@@ -3780,7 +3799,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
           // hotels mode the supplier/departure gates don't apply.
           const offers = ((data && Array.isArray(data.offers)) ? data.offers : [])
             .filter(o => hotels || mapSupplierAllows(o, this.cfg.supplierFilter))
-            .filter(o => hotels || !this._depAllow || this._depAllow.has(originCountry(o.origin)));
+            .filter(o => hotels || !this._depAllow || this._depAllow.has(originCountry(o.origin)))
+            .filter(o => this._ratingShown(o));
           if (!offers.length) { this._renderDealsEmpty(scroll, metaEl, name); return; }
           const total = data.total || offers.length;
           // Cache for resort filtering + zoom re-entry.
@@ -3801,6 +3821,17 @@ svg.leaflet-image-layer.leaflet-interactive path {
           console.warn('[tgwm v3] deals fetch failed:', err.message);
           this._renderDealsError(scroll, metaEl);
         });
+    }
+
+    /** Config star-rating filter: does the client's showRatings allow this offer?
+     *  Empty/absent list = show all. An offer with no numeric rating (flight-only)
+     *  is exempt so it is never hidden. A fractional rating (e.g. 4.5) matches on
+     *  its nearest whole star. */
+    _ratingShown(o) {
+      const allow = this.cfg.showRatings;
+      if (!Array.isArray(allow) || !allow.length) return true;
+      if (!o || typeof o.rating !== 'number' || !isFinite(o.rating)) return true;
+      return allow.indexOf(Math.round(o.rating)) !== -1;
     }
 
     /** Return the offers passing the active in-country filters (budget + rating). */
@@ -4067,7 +4098,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
           // departure gating are packages-only, so skipped in hotels mode.
           const offers = ((data && Array.isArray(data.offers)) ? data.offers : [])
             .filter(o => hotels || mapSupplierAllows(o, this.cfg.supplierFilter))
-            .filter(o => hotels || !this._depAllow || this._depAllow.has(originCountry(o.origin)));
+            .filter(o => hotels || !this._depAllow || this._depAllow.has(originCountry(o.origin)))
+            .filter(o => this._ratingShown(o));
           // Narrow to this resort, then honour any active in-country filters.
           const mine = this._applyFilters(offers.filter(o => o.resort === resort));
           this._renderCards(mine, mine.length, country, resort);
@@ -4486,6 +4518,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
     update(newConfig) {
       this.cfg = Object.assign({}, this.cfg, newConfig || {});
+      this.cfg.showRatings = normShowRatings(this.cfg.showRatings);
       this.t = makeT(this.cfg);
       // _render() wipes shadow.innerHTML, which orphans the overlay node.
       // Reset its state so a fresh one is built on next open. Also undo any
