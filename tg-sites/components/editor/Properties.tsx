@@ -32,7 +32,15 @@ import {
   normaliseSectionPadding,
   PADDING_PRESETS,
 } from '../../lib/content/schema';
-import { BoxPanel, ColourField, Measure, PaddingBox } from './BoxControls';
+import {
+  resolveAt,
+  isOverridden,
+  withOverride,
+  clearOverride,
+  TIER_LABEL,
+  type Tier,
+} from '../../lib/content/responsive';
+import { BoxPanel, ColourField, Measure, PaddingBox, ScreenScope } from './BoxControls';
 import { blockDefinition, type Field, type FieldGroup } from '../../lib/content/blocks';
 import {
   type Path,
@@ -100,6 +108,8 @@ interface Props {
    * one editing surface at a time. See EditorShell's optionsOpen.
    */
   editingOnCanvas?: boolean;
+  /** The screen size the device switcher is on, threaded to per-screen controls. */
+  viewport?: Tier;
 }
 
 /**
@@ -241,6 +251,7 @@ export function Properties({
   itemMeta,
   onItemMeta,
   editingOnCanvas = false,
+  viewport = 'desktop',
 }: Props) {
   return (
     <aside className="ed-props" aria-label="Properties">
@@ -292,6 +303,7 @@ export function Properties({
             isItem={isItem}
             itemMeta={itemMeta}
             onItemMeta={onItemMeta}
+            tier={viewport}
           />
         )}
       </div>
@@ -320,11 +332,18 @@ export function ItemOptions({
   isItem = false,
   itemMeta,
   onItemMeta,
+  tier = 'desktop',
 }: {
   page: Page;
   selected: Path | null;
   isStaff: boolean;
   onCommit: Props['onCommit'];
+  /**
+   * The screen size the device switcher is on, so a per-screen control edits the
+   * right size. Defaults to desktop, which is the base, so a caller that has no
+   * device switcher (or has not wired it yet) simply edits the base as before.
+   */
+  tier?: Tier;
   /**
    * Set in the main pane, absent on the on-canvas popover which has no selection
    * to hand back. Only the imported block's "Make editable" reads it, to show
@@ -357,7 +376,7 @@ export function ItemOptions({
         ))}
 
       {selected?.kind === 'section' && (
-        <SectionFields page={page} index={selected.section} onCommit={onCommit} />
+        <SectionFields page={page} index={selected.section} onCommit={onCommit} tier={tier} />
       )}
 
       {selected?.kind === 'row' && (
@@ -802,10 +821,13 @@ function SectionFields({
   page,
   index,
   onCommit,
+  tier,
 }: {
   page: Page;
   index: number;
   onCommit: Props['onCommit'];
+  /** The screen size the device switcher is on: which size a per-screen control edits. */
+  tier: Tier;
 }) {
   const section = page.sections[index];
   if (!section) return null;
@@ -862,21 +884,43 @@ function SectionFields({
       </Group>
 
       <Group title="Spacing and size">
-      <Segmented
-        label="Space above and below"
-        value={String(section.paddingY)}
-        options={PADDING_PRESETS.map((preset) => ({
-          value: String(preset.value),
-          label: preset.label,
-        }))}
-        onChange={(value) =>
-          set({ paddingY: normaliseSectionPadding(Number(value)) }, `sec:${index}:pad`)
-        }
-      />
+      {/*
+        SPACE ABOVE AND BELOW, PER SCREEN. On desktop this sets the base, as it
+        always did. On tablet or phone (the device switcher up top) it sets that
+        size's own value, and the scope note underneath says so and offers a reset
+        back to inheriting. The value shown is what the CURRENT size will actually
+        take, resolved through the desktop-first fallback.
+      */}
+      <ScreenScope
+        tier={tier}
+        overridden={isOverridden(section.responsive, 'paddingY', tier)}
+        onReset={() => {
+          if (tier === 'desktop') return;
+          set(
+            { responsive: clearOverride(section.responsive, 'paddingY', tier) },
+            `sec:${index}:pad:${tier}:reset`,
+          );
+        }}
+      >
+        <Segmented
+          label="Space above and below"
+          value={String(resolveAt(section.paddingY, section.responsive, 'paddingY', tier))}
+          options={PADDING_PRESETS.map((preset) => ({
+            value: String(preset.value),
+            label: preset.label,
+          }))}
+          onChange={(value) => {
+            const next = normaliseSectionPadding(Number(value));
+            if (tier === 'desktop') set({ paddingY: next }, `sec:${index}:pad`);
+            else set({ responsive: withOverride(section.responsive, 'paddingY', tier, next) }, `sec:${index}:pad:${tier}`);
+          }}
+        />
+      </ScreenScope>
 
       <p className="ed-hint">
-        {section.paddingY}px above and below. Drag the handle at the foot of the
-        section to fine tune it.
+        {resolveAt(section.paddingY, section.responsive, 'paddingY', tier)}px above and below
+        {tier !== 'desktop' ? ` on ${TIER_LABEL[tier].toLowerCase()}` : ''}. Drag the handle at
+        the foot of the section to fine tune it.
       </p>
 
       <Measure

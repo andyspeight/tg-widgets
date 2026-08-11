@@ -9,7 +9,7 @@
  * today. The schema does the same thing with BoxSchema.
  */
 
-import { useState, type CSSProperties } from 'react';
+import { useState, type CSSProperties, type ReactNode } from 'react';
 
 import {
   boxIsEmpty,
@@ -22,6 +22,7 @@ import {
   type Box,
   type Padding,
 } from '../../lib/content/schema';
+import { INHERITS_FROM, TIER_LABEL, type OverrideTier, type Tier } from '../../lib/content/responsive';
 import { Icon } from './Icon';
 
 type Side = keyof Padding;
@@ -491,5 +492,61 @@ export function BoxPanel({
         Clear this {what}&apos;s styling
       </button>
     </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Per-screen scope: wraps a control so it edits the current screen size
+// ---------------------------------------------------------------------------
+
+/**
+ * A control set per screen, wrapped so it says which screen it is editing.
+ *
+ * The device switcher in the top bar chooses the tier. On DESKTOP this is a
+ * pass-through, because desktop is the base and every size starts from it; there
+ * is nothing to caption. On tablet or phone it captions the control underneath:
+ * whether the value is this size's own override or inherited from the size up,
+ * and a way to clear an override so the size inherits again.
+ *
+ * Reused by every per-screen control, so they read and reset the same way. The
+ * control inside does not know about screens: it is handed the resolved value for
+ * the current tier and an onChange that writes the base or the override, which is
+ * the SectionFields (and later the block) code's job.
+ */
+export function ScreenScope({
+  tier,
+  overridden,
+  onReset,
+  children,
+}: {
+  tier: Tier;
+  /** True when THIS size holds its own value rather than inheriting one. */
+  overridden: boolean;
+  /** Clear this size's override, so it inherits again. */
+  onReset: () => void;
+  children: ReactNode;
+}) {
+  if (tier === 'desktop') return <>{children}</>;
+
+  const from = TIER_LABEL[INHERITS_FROM[tier as OverrideTier]];
+  return (
+    <div className="ed-screen-scope" data-overridden={overridden ? 'true' : undefined}>
+      {children}
+      <p className="ed-screen-scope__note">
+        <Icon name={tier} size={13} />
+        {overridden ? (
+          <>
+            <span>Set for {TIER_LABEL[tier]} only.</span>
+            <button type="button" className="ed-linkbtn" onClick={onReset}>
+              Reset to inherit
+            </button>
+          </>
+        ) : (
+          <span>
+            Following {from}. Change it to set {TIER_LABEL[tier]} on its own.
+          </span>
+        )}
+      </p>
+    </div>
   );
 }

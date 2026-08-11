@@ -2849,6 +2849,45 @@ body[data-tg-dragging] .ed-drag-handle { pointer-events: none; }
   line-height: 1.45;
 }
 
+/*
+ * PER-SCREEN SCOPE. Wraps a control the device switcher makes size-specific and
+ * captions it, so you always know which screen you are shaping. Only on tablet
+ * and phone: desktop is the base and needs no caption (see ScreenScope).
+ */
+.ed-screen-scope {
+  border-left: 2px solid var(--ed-accent);
+  padding-left: var(--ed-3);
+  margin-bottom: var(--ed-4);
+}
+.ed-screen-scope[data-overridden='true'] {
+  border-left-color: var(--ed-accent);
+}
+.ed-screen-scope__note {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-2);
+  flex-wrap: wrap;
+  margin: var(--ed-2) 0 0;
+  font-size: var(--ed-text-xs);
+  color: var(--ed-ink-3);
+  line-height: 1.4;
+}
+.ed-screen-scope__note svg {
+  flex: none;
+  color: var(--ed-accent);
+}
+/* A text-styled button, for the inline "Reset to inherit" action. */
+.ed-linkbtn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ed-accent);
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.ed-linkbtn:hover { color: var(--ed-ink); }
+
 /* ------------------------------------------------------------------ */
 /* Spacing, size and style controls                                    */
 /* ------------------------------------------------------------------ */

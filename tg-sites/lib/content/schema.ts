@@ -463,9 +463,38 @@ function toBackgroundSlides(value: unknown): BackgroundSlide[] {
   return out;
 }
 
+/**
+ * One screen size's style overrides. See lib/content/responsive.ts.
+ *
+ * Each property is validated EXACTLY as its base field is, so an override cannot
+ * say anything the base could not. Unknown keys pass through rather than being
+ * stripped, the same forward-compatibility an unknown block type gets: a size
+ * override a newer build added survives a save by an older one instead of being
+ * destroyed by it, and sits inert until a build that renders it comes along.
+ *
+ * The set of KNOWN properties grows as per-breakpoint controls are added. Today:
+ * paddingY, a section's vertical spacing.
+ */
+const OverridesSchema = z
+  .object({
+    paddingY: z.unknown().transform(normaliseSectionPadding).optional(),
+  })
+  .passthrough();
+
+/**
+ * The map an element carries when a size overrides the base. Additive: absent on
+ * everything saved before it, so no stored page changes shape.
+ */
+export const ResponsiveSchema = z.object({
+  tablet: OverridesSchema.optional(),
+  phone: OverridesSchema.optional(),
+});
+
 export const SectionSchema = z.object({
   id: z.string().min(1),
   name: z.string().max(80).optional(),
+  /** Per-screen overrides of the fields that support it. See ResponsiveSchema. */
+  responsive: ResponsiveSchema.optional(),
   tone: Tone.default('light'),
   width: SectionWidth.default('contained'),
   /**

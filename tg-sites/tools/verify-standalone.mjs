@@ -7252,6 +7252,76 @@ await check('setting a shadow on an element draws its box on the canvas', async 
   return boxed > 0 ? true : 'the element did not gain a box after a shadow was set';
 });
 
+// --- Per-screen styling: spacing set on one screen, not the others ----------
+
+/*
+ * Andy, 11 Aug 2026: styling per breakpoint, so a page looks right on each
+ * screen size. The engine is desktop-base plus tablet/phone overrides, rendered
+ * as inline custom properties that static container queries fold in (see
+ * lib/content/responsive.ts). This drives the first control on it, a section's
+ * vertical spacing: select a section, switch the device to Phone, set the
+ * spacing, and prove the phone value is stored and applied while the desktop base
+ * is untouched. Left near the end, since it changes the seed and the viewport.
+ */
+await check('a section spacing set on Phone changes phone, not desktop', async () => {
+  const info = await page.evaluate(() => {
+    const sec = [...document.querySelectorAll('.ed-canvas-frame [data-path]')].find((el) =>
+      /^s\d+$/.test(el.getAttribute('data-path') || ''),
+    );
+    if (!sec) return null;
+    sec.scrollIntoView({ block: 'center' });
+    sec.click();
+    const m = (sec.getAttribute('style') || '').match(/--tgs-pad:\s*(\d+)px/);
+    return { path: sec.getAttribute('data-path'), base: m ? Number(m[1]) : null };
+  });
+  if (!info || info.base == null) return 'no section with a base padding to work from';
+  await page.waitForTimeout(200);
+
+  // The device switcher to Phone: the pane's spacing control now edits the phone
+  // size, and the canvas becomes a phone-width container.
+  await page.getByRole('button', { name: 'Phone', exact: true }).click();
+  await page.waitForTimeout(200);
+
+  // A preset clearly different from the base, clicked in the now-scoped control.
+  const want = info.base >= 32 ? { label: 'None', value: 0 } : { label: 'XL', value: 64 };
+  const preset = page
+    .locator('.ed-props .ed-screen-scope button', { hasText: new RegExp(`^${want.label}$`) });
+  if ((await preset.count()) === 0) return 'the spacing control was not scoped to the screen';
+  await preset.first().click();
+  await page.waitForTimeout(200);
+
+  const after = await page.evaluate((path) => {
+    const sec = document.querySelector(`.ed-canvas-frame [data-path="${path}"]`);
+    const style = sec?.getAttribute('style') || '';
+    const phone = style.match(/--tgs-pad-phone:\s*(\d+)px/);
+    const base = style.match(/--tgs-pad:\s*(\d+)px/);
+    return {
+      phone: phone ? Number(phone[1]) : null,
+      base: base ? Number(base[1]) : null,
+      padTop: parseFloat(getComputedStyle(sec).paddingTop),
+    };
+  }, info.path);
+  if (after.phone !== want.value) return `the phone override was not stored: ${after.phone}`;
+  if (after.base !== info.base) return `the desktop base changed under a phone edit: ${info.base} -> ${after.base}`;
+
+  // The padding follows the override at phone width and the base at desktop.
+  const phonePad = after.padTop;
+  await page.getByRole('button', { name: 'Desktop', exact: true }).click();
+  await page.waitForTimeout(200);
+  const desktopPad = await page.evaluate((path) => {
+    const sec = document.querySelector(`.ed-canvas-frame [data-path="${path}"]`);
+    return parseFloat(getComputedStyle(sec).paddingTop);
+  }, info.path);
+  // Selecting Desktop deliberately folds the side panels away when the canvas
+  // cannot otherwise reach a tablet's width (EditorShell.chooseViewport, a
+  // shortcut Andy asked for). Reopen them so this check leaves the editor as it
+  // found it, the panels-shown state the next check inherits.
+  await showPanels();
+  return Math.abs(desktopPad - phonePad) > 8
+    ? true
+    : `padding did not change per screen: phone ${phonePad}, desktop ${desktopPad}`;
+});
+
 // --- Preview mode: the site as it will publish, full canvas -----------------
 
 /*

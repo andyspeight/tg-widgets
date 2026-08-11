@@ -246,8 +246,15 @@
    * box.padding is the fine control on top. Adding them means neither
    * silently wins, and setting one never wipes out the other.
    */
-  padding-top: calc(var(--tgs-pad, 48px) + var(--tgs-pt, 0px));
-  padding-bottom: calc(var(--tgs-pad, 48px) + var(--tgs-pb, 0px));
+  /*
+   * --tgs-pad-r is the per-screen override (see lib/content/responsive.ts). It is
+   * unset until a tablet or phone override is generated for this section, at which
+   * point the container query sets it and the padding follows, falling back to the
+   * base --tgs-pad the rest of the time. So the base stays an inline style and the
+   * override never needs !important to beat it.
+   */
+  padding-top: calc(var(--tgs-pad-r, var(--tgs-pad, 48px)) + var(--tgs-pt, 0px));
+  padding-bottom: calc(var(--tgs-pad-r, var(--tgs-pad, 48px)) + var(--tgs-pb, 0px));
   padding-left: var(--tgs-pl, 0px);
   padding-right: var(--tgs-pr, 0px);
   min-height: var(--tgs-min-h, 0px);
@@ -484,10 +491,29 @@
   .tgs-row[data-stack='tablet'] { grid-template-columns: 1fr; }
   .tgs-row[data-stack='tablet'][data-reverse='true'] { direction: rtl; }
   .tgs-row[data-stack='tablet'][data-reverse='true'] > * { direction: ltr; }
+
+  /*
+   * PER-SCREEN SPACING (see lib/content/responsive.ts). A section that overrides
+   * its vertical spacing carries the value as an inline custom property, one per
+   * size (--tgs-pad-tablet, --tgs-pad-phone). These static rules fold whichever
+   * applies at this width into --tgs-pad-r, which the padding above reads, with a
+   * fallback chain that does the inheriting: a size that set nothing keeps the
+   * next size up. So the override needs no generated stylesheet and no !important,
+   * and it stays as CSP-clean as the theme, which is inline for the same reason.
+   */
+  .tgs-section { --tgs-pad-r: var(--tgs-pad-tablet, var(--tgs-pad, 48px)); }
 }
 
 @container tgs-page (max-width: 767px) {
   .tgs-row { grid-template-columns: 1fr; }
+
+  /*
+   * The phone half of per-screen spacing. It comes AFTER the tablet rule above,
+   * so at a phone width (which matches both) this one wins, and its fallback
+   * chain reads the phone override, then the tablet one, then the base.
+   */
+  .tgs-section { --tgs-pad-r: var(--tgs-pad-phone, var(--tgs-pad-tablet, var(--tgs-pad, 48px))); }
+
   /*
    * A COLUMN FLEX CONTAINER TURNS EVERY VERTICAL ALIGNMENT INTO A HORIZONTAL
    * ONE, and that is the bug these two rules exist to close.

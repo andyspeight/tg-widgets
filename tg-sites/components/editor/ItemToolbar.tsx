@@ -44,6 +44,7 @@ import type { ItemMeta } from '../../lib/content/collection-page';
 import { itemActions, itemLabel, type ItemAction } from '../../lib/content/item-actions';
 import type { Page, RegionName } from '../../lib/content/schema';
 import { blockAtPath, type Path, type Reid } from '../../lib/content/tree';
+import type { Tier } from '../../lib/content/responsive';
 import { Icon, type IconName } from './Icon';
 import { ItemOptions } from './Properties';
 
@@ -62,6 +63,8 @@ export interface OptionsProps {
    * block it just replaced, which is now gone, and cannot be closed.
    */
   onSelect?: (path: Path | null) => void;
+  /** The screen size the device switcher is on, for per-screen controls. */
+  tier?: Tier;
 }
 
 interface Anchor {
@@ -351,6 +354,7 @@ export function ItemToolbar({
               isItem={options.isItem}
               itemMeta={options.itemMeta}
               onItemMeta={options.onItemMeta}
+              tier={options.tier}
             />
           </div>
         </div>

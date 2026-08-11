@@ -36,6 +36,7 @@ import {
   resizeInnerColumnBoundary,
   updateBlockPropsAtPath,
 } from '../../lib/content/tree';
+import { resolveAt, withOverride } from '../../lib/content/responsive';
 import { PageRenderer } from '../render/PageRenderer';
 import type { Viewport } from './EditorShell';
 
@@ -433,6 +434,34 @@ export function Canvas({
   // Column resize
   // ---------------------------------------------------------------------
 
+  /*
+   * Commit a section's vertical padding for the CURRENT screen size. On desktop
+   * it sets the base, as the drag always did; on tablet or phone (the device
+   * switcher) it sets that size's override, so dragging the section's foot at a
+   * phone width tunes the phone spacing and leaves the desktop alone. The pane's
+   * spacing control writes the same way, so the two agree.
+   */
+  const commitPad = useCallback(
+    (sectionIndex: number, value: number) => {
+      onCommit((current) => {
+        const section = current.sections[sectionIndex];
+        if (!section) return current;
+        const sections = [...current.sections];
+        if (viewport === 'desktop') {
+          if (section.paddingY === value) return current;
+          sections[sectionIndex] = { ...section, paddingY: value };
+        } else {
+          sections[sectionIndex] = {
+            ...section,
+            responsive: withOverride(section.responsive, 'paddingY', viewport, value),
+          };
+        }
+        return { ...current, sections };
+      }, `pad:${sectionIndex}:${viewport}`);
+    },
+    [onCommit, viewport],
+  );
+
   const onPointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
     const grip = (event.target as HTMLElement).closest<HTMLElement>('.ed-vresize');
     if (grip?.dataset.vresize) {
@@ -443,10 +472,13 @@ export function Canvas({
       grip.setPointerCapture(event.pointerId);
       grip.classList.add('is-dragging');
 
+      const target = page.sections[path.section];
       heightRef.current = {
         section: path.section,
         startY: event.clientY,
-        startPadding: page.sections[path.section]?.paddingY ?? DEFAULT_SECTION_PADDING,
+        // The value the CURRENT screen actually takes, so the drag starts from
+        // what is on the canvas rather than always from the desktop base.
+        startPadding: resolveAt(target?.paddingY ?? DEFAULT_SECTION_PADDING, target?.responsive, 'paddingY', viewport),
         handle: grip,
       };
       return;
@@ -524,16 +556,9 @@ export function Canvas({
         const delta = (event.clientY - height.startY) / 2;
         const next = normaliseSectionPadding(height.startPadding + delta);
 
-        onCommit(
-          (current) => {
-            if (current.sections[height.section]?.paddingY === next) return current;
-            const sections = [...current.sections];
-            sections[height.section] = { ...sections[height.section], paddingY: next };
-            return { ...current, sections };
-          },
-          // One undo step for the whole drag, as with the width drag.
-          `pad:${height.section}`,
-        );
+        // Writes the base or the current screen's override, one undo step for the
+        // whole drag (commitPad coalesces on section and tier).
+        commitPad(height.section, next);
 
         setBadge({ x: event.clientX, y: event.clientY, text: `${next}px` });
         return;
@@ -579,7 +604,7 @@ export function Canvas({
 
       setBadge({ x: event.clientX, y: event.clientY, text });
     },
-    [onCommit, page],
+    [onCommit, page, commitPad],
   );
 
   const endDrag = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
@@ -644,15 +669,12 @@ export function Canvas({
         const step = (event.shiftKey ? 5 : 1) * SECTION_PADDING_STEP;
         const delta = event.key === 'ArrowUp' ? -step : step;
 
-        onCommit((current) => {
-          const section = current.sections[path.section];
-          if (!section) return current;
-          const next = normaliseSectionPadding(section.paddingY + delta);
-          if (next === section.paddingY) return current;
-          const sections = [...current.sections];
-          sections[path.section] = { ...section, paddingY: next };
-          return { ...current, sections };
-        }, `pad:${path.section}`);
+        // From the value the CURRENT screen shows, and written back to the same
+        // level, so the keyboard nudges the size you are looking at.
+        const section = page.sections[path.section];
+        if (!section) return;
+        const from = resolveAt(section.paddingY, section.responsive, 'paddingY', viewport);
+        commitPad(path.section, normaliseSectionPadding(from + delta));
         return;
       }
 
@@ -675,7 +697,7 @@ export function Canvas({
           : resizeColumnBoundary(current, path.section, path.row, index, step),
       );
     },
-    [onCommit],
+    [onCommit, commitPad, page, viewport],
   );
 
   // ---------------------------------------------------------------------

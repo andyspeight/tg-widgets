@@ -26,6 +26,7 @@ import {
 } from '../../lib/content/schema';
 import { BLEND_DIVIDER, dividerShape, normaliseDividerHeight, safeDivider, sectionFill } from '../../lib/content/dividers';
 import { safeUrl } from '../../lib/content/sanitise';
+import { responsiveVars } from '../../lib/content/responsive';
 import { BlockRenderer } from './BlockRenderer';
 
 /**
@@ -83,6 +84,18 @@ interface Editable {
 function pathAttr(editable: boolean, key: string): { 'data-path'?: string } {
   return editable ? { 'data-path': key } : {};
 }
+
+/**
+ * The section styles that can be set per screen, each mapped to the base custom
+ * property whose per-size twins an override sets (see lib/content/responsive.ts).
+ * The renderer spreads these onto the section's inline style, and the static
+ * container queries in globals.css fold them into the value the section reads.
+ *
+ * Slice one, 11 Aug 2026: vertical spacing. The set grows as controls are added.
+ */
+const SECTION_RESPONSIVE = [
+  { property: 'paddingY', varBase: '--tgs-pad', toCss: (value: unknown) => `${value as number}px` },
+] as const;
 
 // ---------------------------------------------------------------------------
 // Page
@@ -292,6 +305,10 @@ export function SectionRenderer({
         ...(safeColour(section.overlayColour)
           ? { '--tgs-scrim-colour': safeColour(section.overlayColour) }
           : {}),
+        // The per-screen spacing values, as inline custom properties. Absent
+        // unless a size overrides the base, so a section that never touched them
+        // is byte-for-byte what it was before this shipped.
+        ...responsiveVars(section.responsive, SECTION_RESPONSIVE),
       } as CSSProperties}
       data-shadow={section.box.shadow}
       {...pathAttr(editable, `s${index}`)}

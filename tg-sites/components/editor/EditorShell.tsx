@@ -1619,6 +1619,7 @@ export function EditorShell({
         onSelect={select}
         onCommit={commit}
         onBack={() => setMobilePane('canvas')}
+        viewport={viewport}
         region={region}
         regionFlags={regionFlags}
         onRegionFlags={setRegionFlags}
@@ -1676,6 +1677,7 @@ export function EditorShell({
             itemMeta,
             onItemMeta: setItemMeta,
             onSelect: select,
+            tier: viewport,
           }}
         />
       )}

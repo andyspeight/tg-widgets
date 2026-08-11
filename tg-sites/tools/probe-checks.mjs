@@ -565,6 +565,21 @@ const MUTATIONS = [
     from: `editable={!preview}`,
     to: `editable={true}`,
   },
+  {
+    tag: 'breakpoints',
+    check: 'a section spacing set on Phone changes phone, not desktop',
+    /*
+     * The per-screen values ride onto the section as inline custom properties
+     * (--tgs-pad-phone and its twins); the static container queries in globals.css
+     * fold them in. Drop the spread that emits them and the override is still
+     * stored, but it never reaches the DOM, so the phone value is missing and the
+     * check sees no per-screen change.
+     */
+    why: 'Stop the section emitting its per-screen custom properties, so an override never renders.',
+    file: 'components/render/PageRenderer.tsx',
+    from: `        ...responsiveVars(section.responsive, SECTION_RESPONSIVE),`,
+    to: `        /* probe: per-screen vars not emitted */`,
+  },
 
   // --- contact details, on the settings screen -----------------------------
 
