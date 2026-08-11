@@ -1658,6 +1658,12 @@ export const BLOCKS: readonly BlockDefinition[] = [
       },
       { kind: 'colour', key: 'figureColour', label: 'Number colour', help: 'The big figures. Blank uses your brand colour.' },
       { kind: 'colour', key: 'textColour', label: 'Label colour', help: 'The words under each figure. Blank follows the section.' },
+      {
+        kind: 'toggle',
+        key: 'countUp',
+        label: 'Count up on scroll',
+        help: 'Plain whole numbers tick up from zero as the block scrolls in. A comma, a decimal or 24/7 stays as written, and it eases off for reduced motion.',
+      },
     ],
   },
 

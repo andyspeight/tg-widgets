@@ -601,3 +601,36 @@ describe('image zoom on hover leans a sections card pictures in under the pointe
     expect(props).toContain('set({ hoverZoom: event.target.checked || undefined }');
   });
 });
+
+// ---------------------------------------------------------------------------
+
+describe('count up on scroll ticks a key-numbers figure from zero', () => {
+  const render = read('components', 'render', 'blocks.tsx');
+  const css = read('app', 'globals.css');
+  const blocks = read('lib', 'content', 'blocks.ts');
+
+  it('offers a Count up toggle on the key-numbers block', () => {
+    expect(blocks).toContain("key: 'countUp'");
+    expect(blocks).toContain('Count up on scroll');
+  });
+
+  it('counts only a plain whole number, leaving commas and decimals as written', () => {
+    expect(render).toContain('/^\\d{1,9}$/.test(value)');
+  });
+
+  it('wraps a counting figure so the real number stands where unsupported', () => {
+    expect(render).toContain('className="tgs-stats__value"');
+    expect(render).toContain('data-count=""');
+    expect(render).toContain("'--tgs-count-to': String(item.count)");
+    expect(render).toContain('className="tgs-stats__num"');
+  });
+
+  it('animates a registered integer through a counter on a scroll timeline', () => {
+    expect(css).toContain('@property --tgs-count');
+    expect(css).toContain("syntax: '<integer>'");
+    expect(css).toContain('@keyframes tgs-count-up');
+    expect(css).toContain('content: counter(tgs-count)');
+    expect(css).toContain('animation-timeline: view()');
+    expect(css).toContain('prefers-reduced-motion: no-preference');
+  });
+});

@@ -2725,6 +2725,43 @@
   opacity: 0.75;
 }
 
+/*
+ * COUNT UP ON SCROLL (Andy, 11 Aug 2026). A Key numbers block with Count up on ticks
+ * each plain whole number from zero to its value as the block scrolls into view. The
+ * real number is the .tgs-stats__num text and always stands; only where scroll
+ * timelines exist, and motion is welcome, is it swapped for a registered integer shown
+ * through a counter and animated on a view() timeline. So an older browser, or a
+ * visitor who asked for less motion, simply reads the number in place. The reserved
+ * width (min-width in ch, inline) plus the figure's tabular-nums stops the digits
+ * shifting their neighbours as the count grows.
+ */
+.tgs-stats__value {
+  display: inline-block;
+  text-align: center;
+}
+@property --tgs-count {
+  syntax: '<integer>';
+  inherits: false;
+  initial-value: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .tgs-stats__value[data-count] .tgs-stats__num { display: none; }
+    .tgs-stats__value[data-count] {
+      counter-reset: tgs-count var(--tgs-count);
+      animation: tgs-count-up linear both;
+      animation-timeline: view();
+      animation-range: entry 8% cover 26%;
+    }
+    .tgs-stats__value[data-count]::after { content: counter(tgs-count); }
+  }
+}
+@keyframes tgs-count-up {
+  to {
+    --tgs-count: var(--tgs-count-to);
+  }
+}
+
 .tgs-stats__label {
   margin: 0;
   font-weight: 600;

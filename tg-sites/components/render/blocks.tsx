@@ -1717,15 +1717,24 @@ export function StatsBlock({ props }: { props: Props }): ReactElement {
   const size = oneOf(props, 'size', ['m', 'l', 'xl'] as const, 'l');
   const align = oneOf(props, 'align', ['left', 'centre', 'right'] as const, 'centre');
   const divided = bool(props, 'divided');
+  const countUp = bool(props, 'countUp');
 
   const items = list(props, 'items')
-    .map((item) => ({
-      value: str(item, 'value'),
-      prefix: str(item, 'prefix'),
-      suffix: str(item, 'suffix'),
-      label: str(item, 'label'),
-      detail: str(item, 'detail'),
-    }))
+    .map((item) => {
+      const value = str(item, 'value');
+      // Count only a plain whole number of up to nine digits, so a comma, a
+      // decimal or 24/7 is left exactly as written rather than mangled.
+      const counts = countUp && /^\d{1,9}$/.test(value);
+      return {
+        value,
+        count: counts ? Number(value) : null,
+        digits: value.length,
+        prefix: str(item, 'prefix'),
+        suffix: str(item, 'suffix'),
+        label: str(item, 'label'),
+        detail: str(item, 'detail'),
+      };
+    })
     .filter((item) => item.value !== '' || item.label !== '');
 
   if (items.length === 0) {
@@ -1755,7 +1764,17 @@ export function StatsBlock({ props }: { props: Props }): ReactElement {
               which is right: "£2m" and "4.9 out of 5" are single facts.
             */}
             {item.prefix && <span className="tgs-stats__affix">{item.prefix}</span>}
-            {item.value}
+            {item.count !== null ? (
+              <span
+                className="tgs-stats__value"
+                data-count=""
+                style={{ '--tgs-count-to': String(item.count), minWidth: `${item.digits}ch` } as CSSProperties}
+              >
+                <span className="tgs-stats__num">{item.value}</span>
+              </span>
+            ) : (
+              item.value
+            )}
             {item.suffix && <span className="tgs-stats__affix">{item.suffix}</span>}
           </p>
           {item.label && <p className="tgs-stats__label">{item.label}</p>}

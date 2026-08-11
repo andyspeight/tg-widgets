@@ -7899,6 +7899,105 @@ await check('an image-zoom section scales a card picture under the pointer', asy
   return true;
 });
 
+/*
+ * Count up on scroll (Andy, 11 Aug 2026). A Key numbers block with Count up on ticks
+ * its plain whole numbers from zero as the block scrolls in. Only the integer counts,
+ * so a decimal beside it stays as written. This previews a block with one of each,
+ * scrolls it in, and checks exactly one figure is wired to count and, where scroll
+ * timelines run, that the counter has replaced the plain number with a figure.
+ */
+await check('a count-up key-numbers figure ticks to its value on the page', async () => {
+  await closeAnyDialog();
+  await page.evaluate(() =>
+    window.__TG_SET_PAGE__({
+      id: 'cu',
+      slug: 'count-up',
+      title: 'Count up',
+      version: 1,
+      sections: [
+        {
+          id: 's',
+          width: 'contained',
+          tone: 'light',
+          rows: [
+            {
+              id: 'r',
+              gap: 16,
+              columns: [
+                {
+                  id: 'c',
+                  width: 100,
+                  blocks: [
+                    {
+                      id: 'b',
+                      type: 'stats',
+                      props: {
+                        countUp: true,
+                        items: [
+                          { value: '200', suffix: '+', label: 'Destinations' },
+                          { value: '4.9', suffix: '/5', label: 'Reviews' },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }),
+  );
+  await page.waitForTimeout(400);
+
+  await page.getByRole('button', { name: 'Preview', exact: true }).click();
+  await page.waitForTimeout(300);
+
+  // Scroll the figure through its range, then read on a later frame so the view()
+  // timeline has settled at its end state.
+  await page.evaluate(() => {
+    const first = document.querySelector('.ed-canvas-frame .tgs-stats__value[data-count]');
+    if (first) first.scrollIntoView({ block: 'center' });
+  });
+  await page.waitForTimeout(400);
+
+  const info = await page.evaluate(() => {
+    const scope = document.querySelector('.ed-canvas-frame') || document;
+    const values = scope.querySelectorAll('.tgs-stats__value[data-count]');
+    const first = values[0];
+    const supported = CSS.supports('animation-timeline', 'view()');
+    if (!first) return { count: values.length, supported };
+    const num = first.querySelector('.tgs-stats__num');
+    return {
+      count: values.length,
+      supported,
+      anim: getComputedStyle(first).animationName,
+      numHidden: num ? getComputedStyle(num).display === 'none' : null,
+      after: getComputedStyle(first, '::after').content,
+    };
+  });
+
+  const exit = page.getByRole('button', { name: 'Exit preview', exact: true });
+  if (await exit.count()) {
+    await exit.click();
+    await page.waitForTimeout(200);
+  }
+  await page.evaluate(() => window.__TG_SET_PAGE__(null));
+  await page.waitForTimeout(200);
+  await showPanels();
+
+  // Only the plain integer is wired to count; the decimal 4.9 is left as text.
+  if (info.count !== 1) return `${info.count} figures marked to count, expected 1`;
+  if (info.supported) {
+    if (info.anim !== 'tgs-count-up') return `the count animation was not applied: ${info.anim}`;
+    if (!info.numHidden) return 'the plain number was not hidden behind the counter';
+    if (!info.after || info.after === 'none' || info.after === 'normal') {
+      return `the counter produced no figure: ${info.after}`;
+    }
+  }
+  return true;
+});
+
 // --- Preview mode: the site as it will publish, full canvas -----------------
 
 /*

@@ -763,6 +763,31 @@ const MUTATIONS = [
     from: `    transform: scale(1.06);`,
     to: `    transform: none;`,
   },
+  {
+    tag: 'count-up',
+    check: 'a count-up key-numbers figure ticks to its value on the page',
+    /*
+     * The toggle stores the flag, but the figure is never wrapped, so nothing carries
+     * the counter and every number just stands. Alive in the pane, dead on the page.
+     */
+    why: 'Never wrap the figure, so it can never be counted.',
+    file: 'components/render/blocks.tsx',
+    from: `{item.count !== null ? (`,
+    to: `{false ? (`,
+  },
+  {
+    tag: 'count-up-css',
+    check: 'a count-up key-numbers figure ticks to its value on the page',
+    /*
+     * The figure is wrapped and the real number hidden, but the counter that was meant
+     * to replace it produces nothing, so a counting figure shows blank. Worse than not
+     * animating: the number vanishes where it was supposed to come alive.
+     */
+    why: 'Drop the counter, so the animated figure shows nothing.',
+    file: 'app/globals.css',
+    from: `    .tgs-stats__value[data-count]::after { content: counter(tgs-count); }`,
+    to: `    .tgs-stats__value[data-count]::after { content: none; }`,
+  },
 
   // --- contact details, on the settings screen -----------------------------
 
