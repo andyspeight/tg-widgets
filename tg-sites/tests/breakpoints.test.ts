@@ -416,3 +416,45 @@ describe('clear text sizing detects and offers to remove fixed sizes on the word
     // browser by verify-standalone rather than here: these suites run without one.
   });
 });
+
+// ---------------------------------------------------------------------------
+// Reveal on scroll: a section's content rises into view as it is scrolled to.
+// ---------------------------------------------------------------------------
+
+describe('reveal on scroll animates a sections content in, degrading gracefully', () => {
+  const render = read('components', 'render', 'PageRenderer.tsx');
+  const css = read('app', 'globals.css');
+  const props = read('components', 'editor', 'Properties.tsx');
+  const schema = read('lib', 'content', 'schema.ts');
+
+  it('carries an optional reveal flag on a section, so no stored page changes shape', () => {
+    expect(schema).toContain('reveal: z.boolean().optional()');
+    const parsed = parsePage({
+      version: 1,
+      id: 'p',
+      slug: 'reveal-page',
+      title: 'Reveal',
+      sections: [{ id: 's', tone: 'light', width: 'contained', reveal: true, rows: [] }],
+    });
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(parsed.page.sections[0].reveal).toBe(true);
+  });
+
+  it('emits data-reveal on the published section but never while editing', () => {
+    expect(render).toContain("data-reveal={section.reveal && !editable ? '' : undefined}");
+  });
+
+  it('animates each block on a scroll timeline, guarded so it falls back to visible', () => {
+    expect(css).toContain('@supports (animation-timeline: view())');
+    expect(css).toContain('prefers-reduced-motion: no-preference');
+    expect(css).toContain('.tgs-section[data-reveal] .tgs-block');
+    expect(css).toContain('animation-timeline: view()');
+    expect(css).toContain('@keyframes tgs-reveal-in');
+  });
+
+  it('offers a Reveal on scroll toggle on the section', () => {
+    expect(props).toContain('Reveal on scroll');
+    expect(props).toContain('set({ reveal: event.target.checked || undefined }');
+  });
+});

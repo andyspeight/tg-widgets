@@ -672,6 +672,19 @@ const MUTATIONS = [
     from: `    el.style.removeProperty('font-size');`,
     to: `    /* probe: font-size left in place */`,
   },
+  {
+    tag: 'reveal',
+    check: 'a reveal section animates in on the page but stays still while editing',
+    /*
+     * The flag is stored and the toggle looks wired, but without data-reveal on the
+     * section the CSS matches nothing and no block ever animates. The invisible kind
+     * of dead: the editor looks identical, and only the published page is flat.
+     */
+    why: 'Never emit data-reveal, so the toggle stores the flag but nothing animates.',
+    file: 'components/render/PageRenderer.tsx',
+    from: `      data-reveal={section.reveal && !editable ? '' : undefined}`,
+    to: `      data-reveal={undefined}`,
+  },
 
   // --- contact details, on the settings screen -----------------------------
 

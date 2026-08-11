@@ -329,6 +329,13 @@ export function SectionRenderer({
       {...(anchor ? { id: anchor } : {})}
       data-tone={section.tone}
       data-width={section.width}
+      /*
+       * The reveal is OFF while editing and on for the published page and the
+       * preview. A block that fades out below the fold is right for a visitor and
+       * wrong for someone editing it, who would watch content vanish as they
+       * scrolled the canvas. `editable` is the editor canvas, so this gates on it.
+       */
+      data-reveal={section.reveal && !editable ? '' : undefined}
       style={{
         ...boxStyle(section.box),
         '--tgs-pad': `${section.paddingY}px`,

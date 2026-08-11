@@ -7583,6 +7583,84 @@ await check('clear text sizing strips the fixed sizes off a heading', async () =
   return true;
 });
 
+/*
+ * Andy, 11 Aug 2026, the fun one: content that rises into view as you scroll a
+ * published page. A section marked Reveal on scroll carries data-reveal and
+ * globals.css animates its blocks in on a view() timeline. It is OFF while editing,
+ * so nothing hides under you, and ON in preview and on the page. This drops in a
+ * reveal section, checks editing leaves it still, and that preview turns it on.
+ */
+await check('a reveal section animates in on the page but stays still while editing', async () => {
+  await closeAnyDialog();
+  await page.evaluate(() =>
+    window.__TG_SET_PAGE__({
+      id: 'rv',
+      slug: 'reveal',
+      title: 'Reveal',
+      version: 1,
+      sections: [
+        {
+          id: 's',
+          width: 'contained',
+          tone: 'light',
+          reveal: true,
+          rows: [
+            {
+              id: 'r',
+              gap: 16,
+              columns: [
+                {
+                  id: 'c',
+                  width: 100,
+                  blocks: [{ id: 'h', type: 'heading', props: { level: 2, style: 'h2', html: 'Rises into view' } }],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }),
+  );
+  await page.waitForTimeout(500);
+  await showPanels();
+
+  // While editing the reveal is held off, so a block never fades out under you.
+  const whileEditing = await page.evaluate(
+    () => !!document.querySelector('.ed-canvas-frame .tgs-section[data-reveal]'),
+  );
+
+  // Preview shows the published DOM: the section carries data-reveal, and on a
+  // browser with scroll timelines its blocks take the reveal animation.
+  await page.getByRole('button', { name: 'Preview', exact: true }).click();
+  await page.waitForTimeout(300);
+  const inPreview = await page.evaluate(() => {
+    const section = document.querySelector('.ed-canvas-frame .tgs-section[data-reveal]');
+    if (!section) return { reveal: false };
+    const block = section.querySelector('.tgs-block');
+    return {
+      reveal: true,
+      supported: CSS.supports('animation-timeline', 'view()'),
+      anim: block ? getComputedStyle(block).animationName : null,
+    };
+  });
+
+  const exit = page.getByRole('button', { name: 'Exit preview', exact: true });
+  if (await exit.count()) {
+    await exit.click();
+    await page.waitForTimeout(200);
+  }
+  await page.evaluate(() => window.__TG_SET_PAGE__(null));
+  await page.waitForTimeout(200);
+  await showPanels();
+
+  if (whileEditing) return 'the reveal was live while editing, which would hide blocks as the canvas scrolls';
+  if (!inPreview.reveal) return 'the section did not carry data-reveal in preview';
+  if (inPreview.supported && inPreview.anim !== 'tgs-reveal-in') {
+    return `the reveal animation was not applied where supported: ${inPreview.anim}`;
+  }
+  return true;
+});
+
 // --- Preview mode: the site as it will publish, full canvas -----------------
 
 /*

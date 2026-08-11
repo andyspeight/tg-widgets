@@ -526,6 +526,15 @@ export const SectionSchema = z.object({
   paddingY: z.unknown().transform(normaliseSectionPadding),
   /** Floor on the section's height, so a short section can still be tall. */
   minHeight: z.unknown().transform((v) => px(v, MAX_MIN_HEIGHT)),
+  /**
+   * Animate the section's blocks up into view as it scrolls onto the screen.
+   *
+   * Off by default and optional, so no stored section changes shape. The render
+   * side is pure CSS scroll-driven animation (globals.css): a browser without
+   * animation-timeline, or a visitor who asked for less motion, simply sees the
+   * content in place rather than a page that never finishes arriving.
+   */
+  reveal: z.boolean().optional(),
   /** The same shape a column has. See BoxSchema. */
   box: BoxSchema.default(EMPTY_BOX),
   /** Media id or absolute URL. Rendered behind the content with a scrim. */

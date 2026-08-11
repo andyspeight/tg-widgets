@@ -535,6 +535,41 @@
   );
 }
 
+/*
+ * REVEAL ON SCROLL (Andy, 11 Aug 2026). A section marked data-reveal animates its
+ * blocks up into view as the section scrolls onto the screen. PURE CSS scroll-driven
+ * animation, no script on the page, so it stays as CSP-clean as the slideshow and
+ * the dividers.
+ *
+ * PROGRESSIVE ENHANCEMENT BOTH WAYS. The animation sits inside @supports for
+ * animation-timeline AND @media (prefers-reduced-motion: no-preference), so a
+ * browser without scroll timelines, and a visitor who asked for less motion, both
+ * get the content in its final state, fully visible, rather than a page stuck faded
+ * out. Each block carries its own view() timeline, so they arrive in a natural
+ * cascade as each one enters the viewport rather than all together. `both` holds the
+ * hidden state before a block is reached and the shown state after it has passed.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .tgs-section[data-reveal] .tgs-block {
+      animation: tgs-reveal-in linear both;
+      animation-timeline: view();
+      animation-range: entry 12% entry 62%;
+    }
+  }
+}
+
+@keyframes tgs-reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @container tgs-page (max-width: 1023px) {
   .tgs-row[data-stack='tablet'] { grid-template-columns: 1fr; }
   .tgs-row[data-stack='tablet'][data-reverse='true'] { direction: rtl; }

@@ -945,6 +945,26 @@ function SectionFields({
 
       </Group>
 
+      <Group title="Motion" defaultOpen={false}>
+        <div className="ed-field">
+          <label className="ed-toggle">
+            <input
+              type="checkbox"
+              checked={section.reveal === true}
+              onChange={(event) =>
+                set({ reveal: event.target.checked || undefined }, `sec:${index}:reveal`)
+              }
+            />
+            <span>Reveal on scroll</span>
+          </label>
+          <p className="ed-help" style={{ marginTop: 6 }}>
+            The section&apos;s content rises gently into view as a visitor scrolls to it. It
+            turns itself off on browsers that cannot do it and for anyone who prefers less
+            motion, so it never gets in the way.
+          </p>
+        </div>
+      </Group>
+
       <Group title="Style" defaultOpen={false}>
         <BoxPanel
           what="section"
