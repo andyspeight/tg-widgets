@@ -634,3 +634,57 @@ describe('count up on scroll ticks a key-numbers figure from zero', () => {
     expect(css).toContain('prefers-reduced-motion: no-preference');
   });
 });
+
+// ---------------------------------------------------------------------------
+
+describe('parallax drifts a sections background picture as the page scrolls', () => {
+  const render = read('components', 'render', 'PageRenderer.tsx');
+  const css = read('app', 'globals.css');
+  const props = read('components', 'editor', 'Properties.tsx');
+  const schema = read('lib', 'content', 'schema.ts');
+
+  it('carries an optional parallax flag, so no stored page changes shape', () => {
+    expect(schema).toContain('parallax: z.boolean().optional()');
+    const parsed = parsePage({
+      version: 1,
+      id: 'p',
+      slug: 'parallax',
+      title: 'Parallax',
+      sections: [
+        {
+          id: 'a',
+          tone: 'dark',
+          width: 'contained',
+          parallax: true,
+          backgroundImage: 'https://example.com/a.jpg',
+          rows: [],
+        },
+        { id: 'b', tone: 'light', width: 'contained', rows: [] },
+      ],
+    });
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(parsed.page.sections[0].parallax).toBe(true);
+    expect(parsed.page.sections[1].parallax).toBeUndefined();
+  });
+
+  it('emits data-parallax only for a still background, never a slideshow, a video or editing', () => {
+    expect(render).toContain('data-parallax={');
+    expect(render).toContain(
+      'section.parallax && Boolean(background) && !bgShow && !video && !editable',
+    );
+  });
+
+  it('grows the background and slides it on a scroll timeline, clipping the overspill', () => {
+    expect(css).toContain('.tgs-section[data-parallax] { overflow: hidden; }');
+    expect(css).toContain('.tgs-section[data-parallax] .tgs-section__bg');
+    expect(css).toContain('@keyframes tgs-parallax');
+    expect(css).toContain('animation-timeline: view()');
+    expect(css).toContain('prefers-reduced-motion: no-preference');
+  });
+
+  it('offers a Parallax background toggle on the section', () => {
+    expect(props).toContain('Parallax background');
+    expect(props).toContain('set({ parallax: event.target.checked || undefined }');
+  });
+});

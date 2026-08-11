@@ -1022,6 +1022,23 @@ function SectionFields({
             frame holding its edges. It eases off for anyone who prefers less motion.
           </p>
         </div>
+        <div className="ed-field">
+          <label className="ed-toggle">
+            <input
+              type="checkbox"
+              checked={section.parallax === true}
+              onChange={(event) =>
+                set({ parallax: event.target.checked || undefined }, `sec:${index}:parallax`)
+              }
+            />
+            <span>Parallax background</span>
+          </label>
+          <p className="ed-help" style={{ marginTop: 6 }}>
+            This section&apos;s background picture drifts a little slower than the words as a
+            visitor scrolls, for a sense of depth. It needs a still background picture, and it
+            eases off for anyone who prefers less motion.
+          </p>
+        </div>
       </Group>
 
       <Group title="Style" defaultOpen={false}>

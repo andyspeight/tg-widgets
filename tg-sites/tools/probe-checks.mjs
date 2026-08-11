@@ -788,6 +788,32 @@ const MUTATIONS = [
     from: `    .tgs-stats__value[data-count]::after { content: counter(tgs-count); }`,
     to: `    .tgs-stats__value[data-count]::after { content: none; }`,
   },
+  {
+    tag: 'parallax',
+    check: 'a parallax section grows and drifts its background on the page',
+    /*
+     * The toggle stores the flag, but the section never carries data-parallax, so the
+     * CSS matches nothing and the background sits flat. Alive in the pane, dead on the
+     * page: the exact shape the other motion probes guard against.
+     */
+    why: 'Never emit data-parallax, so no background ever drifts.',
+    file: 'components/render/PageRenderer.tsx',
+    from: `section.parallax && Boolean(background) && !bgShow && !video && !editable ? '' : undefined`,
+    to: `false ? '' : undefined`,
+  },
+  {
+    tag: 'parallax-css',
+    check: 'a parallax section grows and drifts its background on the page',
+    /*
+     * The attribute is there and the picture is grown, but the drift is gone, so the
+     * background is merely oversized and still. The depth the toggle promised never
+     * happens, and only a browser test catches a missing animation like this.
+     */
+    why: 'Drop the drift animation, so the grown background just sits there.',
+    file: 'app/globals.css',
+    from: `      animation: tgs-parallax linear both;`,
+    to: `      animation: none;`,
+  },
 
   // --- contact details, on the settings screen -----------------------------
 

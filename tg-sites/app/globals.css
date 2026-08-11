@@ -676,6 +676,38 @@
   }
 }
 
+/*
+ * PARALLAX BACKGROUND (Andy, 11 Aug 2026). A section marked data-parallax drifts its
+ * single background picture slower than the content as the section crosses the screen,
+ * for a sense of depth. The picture is grown a little and slid on a view() timeline, so
+ * it always covers even at the ends of the drift, and the section clips the overspill.
+ * Only for a still background picture, never the cycling one or a video, which the
+ * render decides. Pure CSS, inside @supports and prefers-reduced-motion, so an older
+ * browser or a visitor who wants less motion simply gets the picture sitting still and
+ * full-bleed. The section's shape dividers sit inside the box, so the clip leaves them
+ * untouched.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .tgs-section[data-parallax] { overflow: hidden; }
+    .tgs-section[data-parallax] .tgs-section__bg {
+      top: -10%;
+      bottom: auto;
+      height: 120%;
+      animation: tgs-parallax linear both;
+      animation-timeline: view();
+    }
+  }
+}
+@keyframes tgs-parallax {
+  from {
+    transform: translateY(-8%);
+  }
+  to {
+    transform: translateY(8%);
+  }
+}
+
 @container tgs-page (max-width: 1023px) {
   .tgs-row[data-stack='tablet'] { grid-template-columns: 1fr; }
   .tgs-row[data-stack='tablet'][data-reverse='true'] { direction: rtl; }

@@ -7998,6 +7998,83 @@ await check('a count-up key-numbers figure ticks to its value on the page', asyn
   return true;
 });
 
+/*
+ * Parallax background (Andy, 11 Aug 2026). A section marked Parallax drifts its still
+ * background picture slower than the content as it scrolls, for depth. The picture is
+ * grown and slid on a view() timeline, the section clipping the overspill. This drops
+ * in a parallax section with a still background, previews it, and checks the section
+ * carries data-parallax and, where scroll timelines run, that the background took the
+ * drift animation and was grown taller than the section to allow it.
+ */
+await check('a parallax section grows and drifts its background on the page', async () => {
+  await closeAnyDialog();
+  await page.evaluate(() =>
+    window.__TG_SET_PAGE__({
+      id: 'px',
+      slug: 'parallax',
+      title: 'Parallax',
+      version: 1,
+      sections: [
+        {
+          id: 's',
+          width: 'contained',
+          tone: 'dark',
+          parallax: true,
+          backgroundImage: 'https://example.com/hero.jpg',
+          minHeight: 400,
+          rows: [
+            {
+              id: 'r',
+              gap: 16,
+              columns: [
+                {
+                  id: 'c',
+                  width: 100,
+                  blocks: [{ id: 'h', type: 'heading', props: { level: 2, style: 'h2', html: 'Depth' } }],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }),
+  );
+  await page.waitForTimeout(400);
+
+  await page.getByRole('button', { name: 'Preview', exact: true }).click();
+  await page.waitForTimeout(300);
+
+  const info = await page.evaluate(() => {
+    const section = document.querySelector('.ed-canvas-frame .tgs-section[data-parallax]');
+    if (!section) return { present: false };
+    const bg = section.querySelector('.tgs-section__bg');
+    return {
+      present: true,
+      supported: CSS.supports('animation-timeline', 'view()'),
+      anim: bg ? getComputedStyle(bg).animationName : null,
+      taller: bg
+        ? bg.getBoundingClientRect().height > section.getBoundingClientRect().height + 1
+        : null,
+    };
+  });
+
+  const exit = page.getByRole('button', { name: 'Exit preview', exact: true });
+  if (await exit.count()) {
+    await exit.click();
+    await page.waitForTimeout(200);
+  }
+  await page.evaluate(() => window.__TG_SET_PAGE__(null));
+  await page.waitForTimeout(200);
+  await showPanels();
+
+  if (!info.present) return 'the section did not carry data-parallax in preview';
+  if (info.supported) {
+    if (info.anim !== 'tgs-parallax') return `the parallax animation was not applied: ${info.anim}`;
+    if (!info.taller) return 'the background was not grown to allow the drift';
+  }
+  return true;
+});
+
 // --- Preview mode: the site as it will publish, full canvas -----------------
 
 /*

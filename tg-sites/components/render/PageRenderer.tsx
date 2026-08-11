@@ -351,6 +351,14 @@ export function SectionRenderer({
        * `editable` gate as the lift above; the zoom itself is pure CSS in globals.css.
        */
       data-hover-zoom={section.hoverZoom && !editable ? '' : undefined}
+      /*
+       * Parallax drifts a still background picture on scroll. Only when there is one
+       * still picture (not the cycling background, not a video) and not while editing,
+       * so it never fights the canvas. The drift itself is pure CSS in globals.css.
+       */
+      data-parallax={
+        section.parallax && Boolean(background) && !bgShow && !video && !editable ? '' : undefined
+      }
       style={{
         ...boxStyle(section.box),
         '--tgs-pad': `${section.paddingY}px`,

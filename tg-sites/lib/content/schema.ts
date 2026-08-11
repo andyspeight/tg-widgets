@@ -556,6 +556,13 @@ export const SectionSchema = z.object({
    * prefers-reduced-motion since a zoom is movement.
    */
   hoverZoom: z.boolean().optional(),
+  /**
+   * Drift this section's single background picture slower than the content as it
+   * scrolls, for depth. Off by default and optional, so no stored section changes
+   * shape. Pure CSS in globals.css, and the render only turns it on for a still
+   * background picture, never the cycling one or a video.
+   */
+  parallax: z.boolean().optional(),
   /** The same shape a column has. See BoxSchema. */
   box: BoxSchema.default(EMPTY_BOX),
   /** Media id or absolute URL. Rendered behind the content with a scrim. */
