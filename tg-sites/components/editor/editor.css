@@ -2059,6 +2059,20 @@
 .ed-palette-card__label { font-weight: 600; line-height: 1.3; }
 @media (prefers-reduced-motion: reduce) { .ed-palette-card { transition: none; } }
 
+/*
+ * The card in flight while you drag an element onto the canvas. dnd-kit draws it
+ * under the pointer over the page being edited, so it needs a solid background
+ * and a lift or the icon and label read against whatever is behind them (Andy,
+ * 10 Aug 2026). It sits inside .ed-root so these --ed-* tokens resolve; see the
+ * DragOverlay note in EditorShell for why that placement matters.
+ */
+.ed-palette-card--ghost {
+  background: var(--ed-panel);
+  border-color: var(--ed-accent);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+  opacity: 1;
+}
+
 .ed-empty-note {
   padding: var(--ed-8) var(--ed-4);
   text-align: center;

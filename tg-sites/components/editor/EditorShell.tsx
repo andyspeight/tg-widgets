@@ -1647,16 +1647,22 @@ export function EditorShell({
       {/* The line a palette drag drops on. Fixed to the viewport and moved
           imperatively (usePaletteDrop), so a re-render mid-drag never resets it. */}
       <div ref={paletteDrop.slotRef} className="ed-drop-slot" aria-hidden="true" />
-    </div>
 
-    {/* pointerEvents:none is load-bearing, not cosmetic. dnd-kit positions this
-        overlay under the pointer with only position:fixed; touch-action:none, so
-        left solid it would be what document.elementFromPoint returns and the drop
-        hook would never see the column beneath it. None lets the point fall
-        through the ghost to the canvas, which is the whole way the drop resolves. */}
-    <DragOverlay dropAnimation={null} style={{ pointerEvents: 'none' }}>
-      {dragType ? <PaletteGhost type={dragType} /> : null}
-    </DragOverlay>
+      {/* Inside .ed-root ON PURPOSE. The overlay is position:fixed, so where it
+          sits in the DOM does not move it, but the --ed-* tokens the ghost paints
+          with (its panel background, its ink) live on .ed-root and nowhere else.
+          Drawn outside it the ghost lost its background and the icon and label
+          floated bare over the page (Andy, 10 Aug 2026); inside, they resolve and
+          the ghost keeps a solid card behind it.
+          pointerEvents:none is load-bearing too: dnd-kit puts this under the
+          pointer with only position:fixed and touch-action:none, so left solid it
+          would be what document.elementFromPoint returns and the drop hook would
+          never see the column beneath it. None lets the point fall through to the
+          canvas, which is how the drop resolves. */}
+      <DragOverlay dropAnimation={null} style={{ pointerEvents: 'none' }}>
+        {dragType ? <PaletteGhost type={dragType} /> : null}
+      </DragOverlay>
+    </div>
     </DndContext>
   );
 }
