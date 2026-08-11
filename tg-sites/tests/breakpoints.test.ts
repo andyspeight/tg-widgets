@@ -18,7 +18,12 @@ import { createBlock, createPage } from '../lib/content/factory';
 import { parsePage } from '../lib/content/schema';
 import { sanitisePage } from '../lib/content/sanitise-page';
 import { withOverride } from '../lib/content/responsive';
-import { LINE_HEIGHT_MAX, LINE_HEIGHT_MIN, normaliseLineHeight } from '../lib/content/styles';
+import {
+  hasInlineTextSizing,
+  LINE_HEIGHT_MAX,
+  LINE_HEIGHT_MIN,
+  normaliseLineHeight,
+} from '../lib/content/styles';
 import { addBlock, updateBlockPropsAtPath, updateBlockResponsiveAtPath } from '../lib/content/tree';
 
 function read(...parts: string[]): string {
@@ -387,5 +392,27 @@ describe('the auto-resize flag survives the save path', () => {
 
     const cleaned = sanitisePage(fluidBlockPage()).sections[0].rows[0].columns[0].blocks[0];
     expect(cleaned.props.fluid).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Clear text sizing: the one-click clean for a heading built from size spans.
+// ---------------------------------------------------------------------------
+
+describe('clear text sizing detects and offers to remove fixed sizes on the words', () => {
+  it('spots inline font sizing, so the control only appears when there is something to clear', () => {
+    expect(hasInlineTextSizing('<span style="font-size: 100px">big</span>')).toBe(true);
+    expect(hasInlineTextSizing('<span style="color: red">red</span>')).toBe(false);
+    expect(hasInlineTextSizing('plain words')).toBe(false);
+    expect(hasInlineTextSizing(undefined)).toBe(false);
+  });
+
+  it('offers a Clear text sizing button that rewrites the block html, gated on there being sizing', () => {
+    const props = read('components', 'editor', 'Properties.tsx');
+    expect(props).toContain('hasInlineTextSizing(block.props.html)');
+    expect(props).toContain('Clear text sizing');
+    expect(props).toContain('html: clearTextSizing(');
+    // The strip itself runs against a real DOM, so its behaviour is proved in the
+    // browser by verify-standalone rather than here: these suites run without one.
   });
 });

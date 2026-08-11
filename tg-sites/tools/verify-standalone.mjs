@@ -7491,6 +7491,98 @@ await check('auto-resize brings a heading down on a phone, not on desktop', asyn
   return true;
 });
 
+/*
+ * Andy, 11 Aug 2026: a one-click clean for a heading whose words are wrapped in a
+ * stack of leftover size spans (his hero, eleven deep), which override the size and
+ * auto-resize controls and hold the line open. Clear text sizing strips the
+ * font-size off every span so the block's own size takes over. SEED_PAGE has no such
+ * heading, so this drops one in with nested 120px and 100px spans and clears it.
+ */
+await check('clear text sizing strips the fixed sizes off a heading', async () => {
+  await closeAnyDialog();
+  await page.evaluate(() =>
+    window.__TG_SET_PAGE__({
+      id: 'clr',
+      slug: 'clear',
+      title: 'Clear',
+      version: 1,
+      sections: [
+        {
+          id: 's',
+          width: 'contained',
+          tone: 'light',
+          rows: [
+            {
+              id: 'r',
+              gap: 16,
+              columns: [
+                {
+                  id: 'c',
+                  width: 100,
+                  blocks: [
+                    {
+                      id: 'h',
+                      type: 'heading',
+                      props: {
+                        level: 2,
+                        style: 'h2',
+                        html: '<span style="font-size: 120px"><span style="font-size: 100px">Oversized heading</span></span>',
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }),
+  );
+  await page.waitForTimeout(500);
+  await page.getByRole('button', { name: 'Desktop' }).click();
+  await page.waitForTimeout(150);
+  await showPanels();
+
+  // The words render oversized to begin with, from the inline spans.
+  const before = await page.evaluate(() => {
+    const sized = document.querySelector('.ed-canvas-frame .tgs-heading [style*="font-size"]');
+    return sized ? parseFloat(getComputedStyle(sized).fontSize) : null;
+  });
+  if (before == null || before < 90) {
+    await page.evaluate(() => window.__TG_SET_PAGE__(null));
+    return `the oversized heading did not render: ${before}`;
+  }
+
+  // Select the heading, then clear its sizing from the pane.
+  await page.locator('.ed-canvas-frame .tgs-heading').first().click();
+  await page.waitForTimeout(200);
+  const clearBtn = page.getByRole('button', { name: 'Clear text sizing' });
+  if ((await clearBtn.count()) === 0) {
+    await page.evaluate(() => window.__TG_SET_PAGE__(null));
+    return 'the clear control was not offered';
+  }
+  await clearBtn.click();
+  await page.waitForTimeout(250);
+
+  const after = await page.evaluate(() => {
+    const heading = document.querySelector('.ed-canvas-frame .tgs-heading');
+    return {
+      sized: heading.querySelectorAll('[style*="font-size"]').length,
+      text: (heading.textContent || '').trim(),
+      px: parseFloat(getComputedStyle(heading).fontSize),
+    };
+  });
+
+  await page.evaluate(() => window.__TG_SET_PAGE__(null));
+  await page.waitForTimeout(250);
+  await showPanels();
+
+  if (after.sized > 0) return `a fixed size survived the clear: ${after.sized} left`;
+  if (after.text !== 'Oversized heading') return `the words were lost: ${JSON.stringify(after.text)}`;
+  if (!(after.px < before - 30)) return `the heading did not return to its own size: ${before} -> ${after.px}`;
+  return true;
+});
+
 // --- Preview mode: the site as it will publish, full canvas -----------------
 
 /*

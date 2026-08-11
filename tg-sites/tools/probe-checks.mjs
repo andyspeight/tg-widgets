@@ -659,6 +659,19 @@ const MUTATIONS = [
     from: `      data-fluid={fluid ? '' : undefined}`,
     to: `      data-fluid={undefined}`,
   },
+  {
+    tag: 'breakpoints',
+    check: 'clear text sizing strips the fixed sizes off a heading',
+    /*
+     * The clean rewrites the html either way, so the button looks wired; leaving
+     * the font-size in place is the version where it rewrites and clears nothing,
+     * and the oversized spans survive.
+     */
+    why: 'Leave the font-size on, so the clean rewrites the html but strips nothing.',
+    file: 'lib/content/styles.ts',
+    from: `    el.style.removeProperty('font-size');`,
+    to: `    /* probe: font-size left in place */`,
+  },
 
   // --- contact details, on the settings screen -----------------------------
 

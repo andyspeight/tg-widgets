@@ -42,8 +42,10 @@ import {
   type Tier,
 } from '../../lib/content/responsive';
 import {
+  clearTextSizing,
   FONT_SIZES,
   FONT_SIZE_GROUPS,
+  hasInlineTextSizing,
   LINE_HEIGHTS,
   normaliseLineHeight,
   normaliseTextSize,
@@ -2070,6 +2072,37 @@ function BlockFields({
         }
       />,
     );
+
+    // CLEAR TEXT SIZING. Only when there is something to clear, so a clean heading
+    // never shows it. Strips the fixed sizes off the words (a heading built from
+    // the old size buttons can be eleven spans deep), which is what lets the size
+    // and auto-resize controls above take effect on the whole block again.
+    if (hasInlineTextSizing(block.props.html)) {
+      add(
+        'content',
+        <div className="ed-field" key="clear-sizing">
+          <button
+            type="button"
+            className="ed-btn"
+            onClick={() =>
+              onCommit(
+                (c) =>
+                  updateBlockPropsAtPath(c, path, {
+                    html: clearTextSizing(typeof block.props.html === 'string' ? block.props.html : ''),
+                  }),
+                `blk:${block.id}:clearsize`,
+              )
+            }
+          >
+            Clear text sizing
+          </button>
+          <p className="ed-help" style={{ marginTop: 6 }}>
+            Removes fixed sizes set on individual words, so the size and auto-resize
+            controls take effect on the whole block.
+          </p>
+        </div>,
+      );
+    }
   }
 
   // The box is a sibling of props, so it commits through updateBlockBox. Only an

@@ -397,6 +397,45 @@ export const LINE_HEIGHTS: ReadonlyArray<{ value: string; label: string }> = [
 ];
 
 /**
+ * Strip the fixed font sizes off the words in a block's HTML, unwrapping any span
+ * that then held nothing else.
+ *
+ * The one-click clean for a heading whose words are wrapped in a stack of size
+ * spans (the hero that started this, eleven deep, with 100px and 120px still on
+ * the outer ones). Those spans override the block's own size, its per-screen
+ * override and the auto-resize option, and each reserves its own line box. Taking
+ * the font-size off every one of them hands control of the whole block back to the
+ * size controls. A span that carried only a size is left with no attributes and is
+ * unwrapped, so the markup comes back as clean as it went in wrong; a span that
+ * also carried a colour keeps the colour, and bold, links and lists are untouched.
+ *
+ * Browser and jsdom only, by design: it is a click in the editor, never a step on
+ * the server, so it parses with the DOM rather than a regex over markup. The result
+ * goes back through the sanitiser on the next save like any other edit.
+ */
+export function clearTextSizing(html: string): string {
+  if (typeof html !== 'string' || html === '') return '';
+  const root = document.createElement('div');
+  root.innerHTML = html;
+  root.querySelectorAll('[style]').forEach((node) => {
+    const el = node as HTMLElement;
+    el.style.removeProperty('font-size');
+    if (!el.getAttribute('style')) el.removeAttribute('style');
+  });
+  // Unwrap any span now left with no attributes at all, so a stack of size-only
+  // spans collapses to the words rather than lingering as empty wrappers.
+  root.querySelectorAll('span').forEach((span) => {
+    if (span.attributes.length === 0) span.replaceWith(...Array.from(span.childNodes));
+  });
+  return root.innerHTML;
+}
+
+/** True when a block's HTML carries a fixed font size on any of its words. */
+export function hasInlineTextSizing(html: unknown): boolean {
+  return typeof html === 'string' && /font-size\s*:/i.test(html);
+}
+
+/**
  * Weight. Only the two that mean something in running text.
  *
  * Browsers emit `font-weight: bold` for a bold command when they are asked to
