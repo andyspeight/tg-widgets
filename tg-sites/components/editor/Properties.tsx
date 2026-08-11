@@ -41,7 +41,13 @@ import {
   TIER_LABEL,
   type Tier,
 } from '../../lib/content/responsive';
-import { FONT_SIZES, FONT_SIZE_GROUPS, normaliseTextSize } from '../../lib/content/styles';
+import {
+  FONT_SIZES,
+  FONT_SIZE_GROUPS,
+  LINE_HEIGHTS,
+  normaliseLineHeight,
+  normaliseTextSize,
+} from '../../lib/content/styles';
 import { BoxPanel, ColourField, Measure, PaddingBox, ScreenScope } from './BoxControls';
 import { blockDefinition, type Field, type FieldGroup } from '../../lib/content/blocks';
 import {
@@ -1835,6 +1841,40 @@ function TextSizeField({
   );
 }
 
+function LineSpacingField({
+  tier,
+  value,
+  onChange,
+}: {
+  tier: Tier;
+  value: string | undefined;
+  onChange: (value: string | undefined) => void;
+}) {
+  const id = `ed-line-spacing-${tier}`;
+  const autoLabel =
+    tier === 'desktop' ? 'Auto (the block style)' : `Same as ${TIER_LABEL[INHERITS_FROM[tier]]}`;
+  return (
+    <div className="ed-field">
+      <label className="ed-label" htmlFor={id}>
+        Line spacing
+      </label>
+      <select
+        id={id}
+        className="ed-select"
+        value={value ?? ''}
+        onChange={(event) => onChange(event.target.value || undefined)}
+      >
+        <option value="">{autoLabel}</option>
+        {LINE_HEIGHTS.map((choice) => (
+          <option key={choice.value} value={choice.value}>
+            {choice.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 function BlockFields({
   path,
   page,
@@ -1961,6 +2001,41 @@ function BlockFields({
         }}
       >
         <TextSizeField tier={tier} value={current} onChange={setSize} />
+      </ScreenScope>,
+    );
+
+    // LINE SPACING, PER SCREEN. Sits beside the size and works the same way: on
+    // desktop it sets the block's own base line spacing, on tablet or phone that
+    // screen's override. Unitless, so tightening it pulls a heading whose words
+    // are wrapped in a stack of oversized size spans back to the height of the
+    // text you see, which is the trapped-space bug it exists to fix.
+    const baseLh = normaliseLineHeight(block.props.lineHeight);
+    const currentLh = resolveAt<string | undefined>(baseLh, block.responsive, 'lineHeight', tier);
+    const setLineHeight = (value: string | undefined) => {
+      if (tier === 'desktop') {
+        onCommit((c) => updateBlockPropsAtPath(c, path, { lineHeight: value }), `blk:${block.id}:lineHeight`);
+      } else {
+        const next = value
+          ? withOverride(block.responsive, 'lineHeight', tier, value)
+          : clearOverride(block.responsive, 'lineHeight', tier);
+        onCommit((c) => updateBlockResponsiveAtPath(c, path, next), `blk:${block.id}:lineHeight:${tier}`);
+      }
+    };
+    add(
+      'content',
+      <ScreenScope
+        key="line-spacing"
+        tier={tier}
+        overridden={isOverridden(block.responsive, 'lineHeight', tier)}
+        onReset={() => {
+          if (tier === 'desktop') return;
+          onCommit(
+            (c) => updateBlockResponsiveAtPath(c, path, clearOverride(block.responsive, 'lineHeight', tier)),
+            `blk:${block.id}:lineHeight:${tier}:reset`,
+          );
+        }}
+      >
+        <LineSpacingField tier={tier} value={currentLh} onChange={setLineHeight} />
       </ScreenScope>,
     );
   }

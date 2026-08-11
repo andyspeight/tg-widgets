@@ -7385,6 +7385,61 @@ await check('a block text size set on Phone shrinks phone, not desktop', async (
     : `the desktop size changed under a phone edit: ${info.deskPx} -> ${deskAgain}`;
 });
 
+/*
+ * Andy, 11 Aug 2026, bug two: changing a font size left the line spacing holding
+ * room for the bigger text. Line spacing per screen, on the same engine as the
+ * size above: the block carries --tgs-lh-phone and the container queries fold it
+ * into --tgs-lh-r, which .tgs-heading reads. Unitless, so it also flows into the
+ * spans a heading is wrapped in. Add a heading, switch to Phone, tighten the
+ * spacing, and prove the phone line-height drops while the desktop one holds.
+ */
+await check('a block line spacing set on Phone tightens phone, not desktop', async () => {
+  await addBlock('Heading');
+  const host = added();
+  if ((await host.count()) !== 1) return `${await host.count()} blocks selected after adding`;
+  const info = await host.evaluate((el) => {
+    const text = el.matches('.tgs-heading, .tgs-text') ? el : el.querySelector('.tgs-heading, .tgs-text');
+    return { path: el.getAttribute('data-path'), deskLh: text ? parseFloat(getComputedStyle(text).lineHeight) : null };
+  });
+  if (!info || !Number.isFinite(info.deskLh)) return 'the heading did not render its text';
+
+  // The device switcher to Phone: the Line spacing control now edits the phone value.
+  await page.getByRole('button', { name: 'Phone', exact: true }).click();
+  await page.waitForTimeout(200);
+
+  // The line-spacing select is the block pane's second per-screen scope, so target
+  // it by id rather than by order to keep it apart from the text-size one beside it.
+  const select = page.locator('.ed-props select[id^="ed-line-spacing"]').first();
+  if ((await select.count()) === 0) return 'the line spacing control was not scoped to the screen';
+  await select.selectOption('0.8'); // Very tight, well below any heading's own leading.
+  await page.waitForTimeout(200);
+
+  const after = await page.evaluate((path) => {
+    const el = document.querySelector(`.ed-canvas-frame [data-path="${path}"]`);
+    const text = el.matches('.tgs-heading, .tgs-text') ? el : el.querySelector('.tgs-heading, .tgs-text');
+    const style = el.getAttribute('style') || '';
+    const m = style.match(/--tgs-lh-phone:\s*([^;]+)/);
+    return { phoneVar: m ? m[1].trim() : null, phoneLh: parseFloat(getComputedStyle(text).lineHeight) };
+  }, info.path);
+  if (after.phoneVar !== '0.8') return `the phone override was not stored: ${after.phoneVar}`;
+  if (!(after.phoneLh < info.deskLh - 2)) {
+    return `phone line height did not tighten: phone ${after.phoneLh}, desktop ${info.deskLh}`;
+  }
+
+  // Back to Desktop: the block's own line spacing returns, untouched by the phone edit.
+  await page.getByRole('button', { name: 'Desktop', exact: true }).click();
+  await page.waitForTimeout(200);
+  const deskAgain = await page.evaluate((path) => {
+    const el = document.querySelector(`.ed-canvas-frame [data-path="${path}"]`);
+    const text = el.matches('.tgs-heading, .tgs-text') ? el : el.querySelector('.tgs-heading, .tgs-text');
+    return parseFloat(getComputedStyle(text).lineHeight);
+  }, info.path);
+  await showPanels();
+  return Math.abs(deskAgain - info.deskLh) < 0.5
+    ? true
+    : `the desktop line height changed under a phone edit: ${info.deskLh} -> ${deskAgain}`;
+});
+
 // --- Preview mode: the site as it will publish, full canvas -----------------
 
 /*

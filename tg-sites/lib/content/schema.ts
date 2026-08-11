@@ -32,7 +32,7 @@ import { z } from 'zod';
 
 import { normaliseDividerHeight, safeDivider } from './dividers';
 import { escapeHtml } from './sanitise';
-import { COLOUR_TOKENS, normaliseTextSize } from './styles';
+import { COLOUR_TOKENS, normaliseLineHeight, normaliseTextSize } from './styles';
 
 // ---------------------------------------------------------------------------
 // Constraints
@@ -306,12 +306,14 @@ export const STACK_BREAKPOINTS: Record<StackBelow, number> = {
  * that means nothing for the element it sits on (a section has no fontSize, a
  * block no paddingY) simply never appears there. The set of KNOWN properties
  * grows as per-breakpoint controls are added. Today: paddingY, a section's
- * vertical spacing, and fontSize, a block's text size.
+ * vertical spacing, and fontSize and lineHeight, a block's text size and line
+ * spacing.
  */
 const OverridesSchema = z
   .object({
     paddingY: z.unknown().transform(normaliseSectionPadding).optional(),
     fontSize: z.unknown().transform(normaliseTextSize).optional(),
+    lineHeight: z.unknown().transform(normaliseLineHeight).optional(),
   })
   .passthrough();
 
@@ -337,8 +339,8 @@ export const BlockSchema = z.object({
   props: z.record(z.unknown()).default({}),
   /**
    * Per-screen overrides of the block's own style, a sibling of box the same way
-   * a section's is. Today: fontSize, the block's text size at tablet and phone.
-   * See ResponsiveSchema.
+   * a section's is. Today: fontSize and lineHeight, the block's text size and
+   * line spacing at tablet and phone. See ResponsiveSchema.
    */
   responsive: ResponsiveSchema.optional(),
   /*

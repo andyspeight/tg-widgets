@@ -631,6 +631,20 @@ const MUTATIONS = [
     from: `    ...sizeVars,`,
     to: `    /* probe: per-screen size vars not emitted */`,
   },
+  {
+    tag: 'breakpoints',
+    check: 'a block line spacing set on Phone tightens phone, not desktop',
+    /*
+     * The line-spacing half of the same mechanism, keyed on its own map entry so
+     * it breaks line spacing alone and the size check stays green. With toCss
+     * always null the --tgs-lh-phone twin never emits, so the phone override is
+     * stored but never renders and the heading keeps its desktop line height.
+     */
+    why: 'Stop the block emitting its per-screen line-spacing twins, so a phone override never renders.',
+    file: 'components/render/PageRenderer.tsx',
+    from: `  { property: 'lineHeight', varBase: '--tgs-lh', toCss: (value: unknown) => normaliseLineHeight(value) ?? null },`,
+    to: `  { property: 'lineHeight', varBase: '--tgs-lh', toCss: () => null },`,
+  },
 
   // --- contact details, on the settings screen -----------------------------
 

@@ -18,6 +18,7 @@ import { createBlock, createPage } from '../lib/content/factory';
 import { parsePage } from '../lib/content/schema';
 import { sanitisePage } from '../lib/content/sanitise-page';
 import { withOverride } from '../lib/content/responsive';
+import { LINE_HEIGHT_MAX, LINE_HEIGHT_MIN, normaliseLineHeight } from '../lib/content/styles';
 import { addBlock, updateBlockPropsAtPath, updateBlockResponsiveAtPath } from '../lib/content/tree';
 
 function read(...parts: string[]): string {
@@ -198,5 +199,139 @@ describe('a block-level text size survives the save path', () => {
     if (!result.ok) return;
     const block = result.page.sections[0].rows[0].columns[0].blocks[0];
     expect(block.responsive?.phone?.fontSize).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Slice three: line spacing per screen, on the same engine.
+//
+// Andy, 11 Aug 2026: changing a font size left the line spacing holding room for
+// the original bigger text. The cause is a heading whose words are wrapped in a
+// stack of oversized size spans; a unitless line-height set on the block flows
+// into them and scales each line box by the size it actually is, so tightening
+// one value pulls the trapped space back. This is that control, on the same
+// per-screen mechanism as the size above.
+// ---------------------------------------------------------------------------
+
+describe('the line-spacing validator holds a value to a sane unitless band', () => {
+  it('accepts a number or a numeric string, and returns a short unitless string', () => {
+    expect(normaliseLineHeight(1.5)).toBe('1.5');
+    expect(normaliseLineHeight('1.3')).toBe('1.3');
+    // Two decimals, no trailing zeros, so it round-trips to the pane's own option.
+    expect(normaliseLineHeight(1)).toBe('1');
+    expect(normaliseLineHeight('1.150')).toBe('1.15');
+  });
+
+  it('clamps to the band at both ends rather than dropping, unlike a pixel size', () => {
+    expect(normaliseLineHeight(0.2)).toBe(String(LINE_HEIGHT_MIN));
+    expect(normaliseLineHeight(9)).toBe(String(LINE_HEIGHT_MAX));
+  });
+
+  it('rejects anything that is not a finite number, so a stray value drops cleanly', () => {
+    expect(normaliseLineHeight('loose')).toBeUndefined();
+    expect(normaliseLineHeight('')).toBeUndefined();
+    expect(normaliseLineHeight(null)).toBeUndefined();
+    expect(normaliseLineHeight(Number.NaN)).toBeUndefined();
+    expect(normaliseLineHeight(Infinity)).toBeUndefined();
+  });
+});
+
+describe('a block carries per-screen line spacing, additively', () => {
+  const schema = read('lib', 'content', 'schema.ts');
+
+  it('adds lineHeight to the shared overrides, validated as a line-spacing value', () => {
+    expect(schema).toMatch(/lineHeight:\s*z\.unknown\(\)\.transform\(normaliseLineHeight\)\.optional\(\)/);
+  });
+});
+
+describe('the renderer emits a block its per-screen line-spacing vars', () => {
+  const render = read('components', 'render', 'PageRenderer.tsx');
+
+  it('maps lineHeight to --tgs-lh and spreads the twins onto the block', () => {
+    expect(render).toMatch(/property:\s*'lineHeight',\s*varBase:\s*'--tgs-lh'/);
+    // The twins for size and spacing both ride the one BLOCK_RESPONSIVE spread.
+    expect(render).toContain('responsiveVars(block.responsive, BLOCK_RESPONSIVE)');
+  });
+
+  it('carries the desktop base as an inline --tgs-lh alongside the twins', () => {
+    expect(render).toContain("{ '--tgs-lh': baseLineHeight }");
+  });
+});
+
+describe('the text elements read the line-spacing chain, folded by container queries', () => {
+  const css = read('app', 'globals.css');
+
+  it('.tgs-heading and .tgs-text read the override, then the base, then their own leading', () => {
+    expect(css).toContain('line-height: var(--tgs-lh-r, var(--tgs-lh, var(--tgs-lh-base)))');
+  });
+
+  it('sets --tgs-lh-base per heading level and on the paragraph, so the chain has a floor', () => {
+    expect(css).toContain('--tgs-lh-base: var(--tgs-h1-leading)');
+    expect(css).toContain('--tgs-lh-base: var(--tgs-p-leading)');
+  });
+
+  it('resets the spacing vars on every block, so they do not bleed into a nested one', () => {
+    expect(css).toContain('.tgs-block { --tgs-lh: initial; --tgs-lh-tablet: initial; --tgs-lh-phone: initial; }');
+  });
+
+  it('folds the tablet twin at the tablet width, phone then tablet at the phone width', () => {
+    expect(css).toMatch(/@container tgs-page \(max-width: 1023px\)[\s\S]*?--tgs-lh-r: var\(--tgs-lh-tablet/);
+    expect(css).toMatch(
+      /@container tgs-page \(max-width: 767px\)[\s\S]*?--tgs-lh-r: var\(--tgs-lh-phone, var\(--tgs-lh-tablet/,
+    );
+  });
+});
+
+describe('the block pane edits the line spacing for the current screen', () => {
+  const props = read('components', 'editor', 'Properties.tsx');
+
+  it('scopes a Line spacing control to the tier, base on desktop, override otherwise', () => {
+    expect(props).toContain('<LineSpacingField');
+    expect(props).toContain("resolveAt<string | undefined>(baseLh, block.responsive, 'lineHeight', tier)");
+    expect(props).toContain("withOverride(block.responsive, 'lineHeight', tier, value)");
+    expect(props).toContain("clearOverride(block.responsive, 'lineHeight', tier)");
+    // Desktop writes the block's own base prop, not an override.
+    expect(props).toContain('updateBlockPropsAtPath(c, path, { lineHeight: value })');
+  });
+});
+
+describe('a block-level line spacing survives the save path', () => {
+  const path = { kind: 'block' as const, section: 0, row: 0, column: 0, block: 0 };
+
+  function textBlockPage() {
+    let page = createPage();
+    page = addBlock(page, 0, 0, 0, createBlock('text'));
+    page = updateBlockPropsAtPath(page, path, { lineHeight: '1.3' });
+    page = updateBlockResponsiveAtPath(page, path, withOverride(undefined, 'lineHeight', 'phone', '0.9'));
+    return page;
+  }
+
+  it('keeps the desktop base and the phone override through parsePage', () => {
+    const result = parsePage(JSON.parse(JSON.stringify(textBlockPage())));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const block = result.page.sections[0].rows[0].columns[0].blocks[0];
+    expect(block.props.lineHeight).toBe('1.3');
+    expect(block.responsive?.phone?.lineHeight).toBe('0.9');
+  });
+
+  it('and through sanitisePage, which cleans props but keeps the base and the map', () => {
+    const block = sanitisePage(textBlockPage()).sections[0].rows[0].columns[0].blocks[0];
+    expect(block.props.lineHeight).toBe('1.3');
+    expect(block.responsive?.phone?.lineHeight).toBe('0.9');
+  });
+
+  it('clamps an out-of-band value to the band rather than dropping it, unlike a size', () => {
+    let page = createPage();
+    page = addBlock(page, 0, 0, 0, createBlock('text'));
+    // 5 is past the loosest the band allows, so it clamps to the ceiling. A size
+    // out of range is dropped; a line height is pulled to the nearest edge, since
+    // a number is always meaningful spacing where a stray pixel size is not.
+    page = updateBlockResponsiveAtPath(page, path, withOverride(undefined, 'lineHeight', 'phone', 5));
+    const result = parsePage(JSON.parse(JSON.stringify(page)));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const block = result.page.sections[0].rows[0].columns[0].blocks[0];
+    expect(block.responsive?.phone?.lineHeight).toBe('3');
   });
 });

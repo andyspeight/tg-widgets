@@ -26,7 +26,7 @@ import {
 } from '../../lib/content/schema';
 import { BLEND_DIVIDER, dividerShape, normaliseDividerHeight, safeDivider, sectionFill } from '../../lib/content/dividers';
 import { safeUrl } from '../../lib/content/sanitise';
-import { normaliseTextSize } from '../../lib/content/styles';
+import { normaliseLineHeight, normaliseTextSize } from '../../lib/content/styles';
 import { responsiveVars } from '../../lib/content/responsive';
 import { BlockRenderer } from './BlockRenderer';
 
@@ -125,6 +125,7 @@ const SECTION_RESPONSIVE = [
  */
 const BLOCK_RESPONSIVE = [
   { property: 'fontSize', varBase: '--tgs-fs', toCss: (value: unknown) => normaliseTextSize(value) ?? null },
+  { property: 'lineHeight', varBase: '--tgs-lh', toCss: (value: unknown) => normaliseLineHeight(value) ?? null },
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -723,18 +724,27 @@ function blockHost(
   const boxed = !boxIsEmpty(box);
   const props = block.props as Record<string, unknown>;
   const textColour = safeColour(props?.textColour);
-  // Text size: the block's own base (desktop), plus its per-screen twins. Both
-  // are inline custom properties the text element reads ahead of its natural
-  // size; absent when unset, so a plain block renders exactly as before.
+  // Text size and line spacing: the block's own base (desktop), plus its
+  // per-screen twins. Each is an inline custom property the text element reads
+  // ahead of its natural value; absent when unset, so a plain block renders
+  // exactly as before. The twins for BOTH come from sizeVars, since
+  // BLOCK_RESPONSIVE now maps fontSize and lineHeight together.
   const baseSize = normaliseTextSize(props?.fontSize);
+  const baseLineHeight = normaliseLineHeight(props?.lineHeight);
   const sizeVars = responsiveVars(block.responsive, BLOCK_RESPONSIVE);
   const style: CSSProperties = {
     ...(boxed ? boxStyle(box) : {}),
     ...(textColour ? { color: textColour } : {}),
     ...(baseSize ? { '--tgs-fs': baseSize } : {}),
+    ...(baseLineHeight ? { '--tgs-lh': baseLineHeight } : {}),
     ...sizeVars,
   };
-  const styled = boxed || Boolean(textColour) || Boolean(baseSize) || Object.keys(sizeVars).length > 0;
+  const styled =
+    boxed ||
+    Boolean(textColour) ||
+    Boolean(baseSize) ||
+    Boolean(baseLineHeight) ||
+    Object.keys(sizeVars).length > 0;
   return (
     <div
       key={block.id}

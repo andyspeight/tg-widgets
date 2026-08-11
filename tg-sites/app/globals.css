@@ -488,17 +488,25 @@
 .tgs-col[data-flow='row'] > .tgs-block { flex: 0 1 auto; }
 
 /*
- * PER-SCREEN TEXT SIZE, the block half of the size vars.
+ * PER-SCREEN TEXT SIZE AND LINE SPACING, the block half of the size vars.
  *
  * A block carries its size as inline custom properties: --tgs-fs (a desktop base)
- * and --tgs-fs-tablet/--tgs-fs-phone (the overrides). They must NOT inherit past
- * the block that set them, or a text size set on a container would shrink every
- * block nested inside it. Resetting them to `initial` on every .tgs-block stops
- * that: the inline value still wins for the block it is set on, and a block with
- * none set starts clean rather than inheriting a parent's. --tgs-fs-r needs no
- * reset, since the container queries below set it on each .tgs-block in the band.
+ * and --tgs-fs-tablet/--tgs-fs-phone (the overrides), and its line spacing the
+ * same way in --tgs-lh and its twins. They must NOT inherit past the block that
+ * set them, or a size or spacing set on a container would change every block
+ * nested inside it. Resetting them to `initial` on every .tgs-block stops that:
+ * the inline value still wins for the block it is set on, and a block with none
+ * set starts clean rather than inheriting a parent's. --tgs-fs-r/--tgs-lh-r need
+ * no reset, since the container queries below set them on each .tgs-block in the
+ * band.
+ *
+ * Line spacing is UNITLESS on purpose (see normaliseLineHeight): --tgs-lh flows
+ * on into the spans the copy is wrapped in and each re-multiplies it by its own
+ * font size, so tightening it pulls a heading built from a stack of oversized
+ * size spans back to the height of the text you see.
  */
 .tgs-block { --tgs-fs: initial; --tgs-fs-tablet: initial; --tgs-fs-phone: initial; }
+.tgs-block { --tgs-lh: initial; --tgs-lh-tablet: initial; --tgs-lh-phone: initial; }
 
 @container tgs-page (max-width: 1023px) {
   .tgs-row[data-stack='tablet'] { grid-template-columns: 1fr; }
@@ -520,9 +528,11 @@
    * PER-SCREEN TEXT SIZE, tablet. A block's tablet override, else its desktop
    * base, folds into --tgs-fs-r, which .tgs-text/.tgs-heading read ahead of their
    * own size. With neither set the chain is guaranteed-invalid, so the element
-   * falls back to its natural size and nothing changes.
+   * falls back to its natural size and nothing changes. Line spacing folds the
+   * same way into --tgs-lh-r.
    */
   .tgs-block { --tgs-fs-r: var(--tgs-fs-tablet, var(--tgs-fs)); }
+  .tgs-block { --tgs-lh-r: var(--tgs-lh-tablet, var(--tgs-lh)); }
 }
 
 @container tgs-page (max-width: 767px) {
@@ -538,9 +548,10 @@
   /*
    * The phone half of per-screen text size. After the tablet rule, so at a phone
    * width it wins, and its chain reads the phone override, then the tablet one,
-   * then the desktop base.
+   * then the desktop base. Line spacing folds the same way into --tgs-lh-r.
    */
   .tgs-block { --tgs-fs-r: var(--tgs-fs-phone, var(--tgs-fs-tablet, var(--tgs-fs))); }
+  .tgs-block { --tgs-lh-r: var(--tgs-lh-phone, var(--tgs-lh-tablet, var(--tgs-lh))); }
 
   /*
    * A COLUMN FLEX CONTAINER TURNS EVERY VERTICAL ALIGNMENT INTO A HORIZONTAL
@@ -646,55 +657,64 @@
    */
   --tgs-fs-base: var(--tgs-h2-size);
   font-size: var(--tgs-fs-r, var(--tgs-fs, var(--tgs-fs-base)));
-  line-height: var(--tgs-h2-leading);
+  /*
+   * LINE SPACING, PER SCREEN, the same chain and reasoning as the size above.
+   * --tgs-lh-base is this heading's own leading, which its data-style sets;
+   * --tgs-lh is a block-level base the editor may set on desktop; --tgs-lh-r is
+   * the tablet or phone override the container queries fold in. Unitless, so it
+   * flows into the wrapped spans and scales each line box by its own size.
+   */
+  --tgs-lh-base: var(--tgs-h2-leading);
+  line-height: var(--tgs-lh-r, var(--tgs-lh, var(--tgs-lh-base)));
   letter-spacing: var(--tgs-h2-tracking);
 }
 
 /*
- * Each data-style sets --tgs-fs-base (its own size) rather than font-size direct,
- * so the one font-size chain on .tgs-heading above stays in charge and a per-screen
- * override can win over it. font-family, weight, leading and tracking are unchanged.
+ * Each data-style sets --tgs-fs-base (its own size) and --tgs-lh-base (its own
+ * leading) rather than font-size or line-height direct, so the one chain each on
+ * .tgs-heading above stays in charge and a per-screen override can win over it.
+ * font-family, weight and tracking are unchanged.
  */
 .tgs-heading[data-style='h1'] {
   font-family: var(--tgs-h1-font);
   font-weight: var(--tgs-h1-weight);
   --tgs-fs-base: var(--tgs-h1-size);
-  line-height: var(--tgs-h1-leading);
+  --tgs-lh-base: var(--tgs-h1-leading);
   letter-spacing: var(--tgs-h1-tracking);
 }
 .tgs-heading[data-style='h2'] {
   font-family: var(--tgs-h2-font);
   font-weight: var(--tgs-h2-weight);
   --tgs-fs-base: var(--tgs-h2-size);
-  line-height: var(--tgs-h2-leading);
+  --tgs-lh-base: var(--tgs-h2-leading);
   letter-spacing: var(--tgs-h2-tracking);
 }
 .tgs-heading[data-style='h3'] {
   font-family: var(--tgs-h3-font);
   font-weight: var(--tgs-h3-weight);
   --tgs-fs-base: var(--tgs-h3-size);
-  line-height: var(--tgs-h3-leading);
+  --tgs-lh-base: var(--tgs-h3-leading);
   letter-spacing: var(--tgs-h3-tracking);
 }
 .tgs-heading[data-style='h4'] {
   font-family: var(--tgs-h4-font);
   font-weight: var(--tgs-h4-weight);
   --tgs-fs-base: var(--tgs-h4-size);
-  line-height: var(--tgs-h4-leading);
+  --tgs-lh-base: var(--tgs-h4-leading);
   letter-spacing: var(--tgs-h4-tracking);
 }
 .tgs-heading[data-style='h5'] {
   font-family: var(--tgs-h5-font);
   font-weight: var(--tgs-h5-weight);
   --tgs-fs-base: var(--tgs-h5-size);
-  line-height: var(--tgs-h5-leading);
+  --tgs-lh-base: var(--tgs-h5-leading);
   letter-spacing: var(--tgs-h5-tracking);
 }
 .tgs-heading[data-style='h6'] {
   font-family: var(--tgs-h6-font);
   font-weight: var(--tgs-h6-weight);
   --tgs-fs-base: var(--tgs-h6-size);
-  line-height: var(--tgs-h6-leading);
+  --tgs-lh-base: var(--tgs-h6-leading);
   letter-spacing: var(--tgs-h6-tracking);
 }
 
@@ -728,10 +748,12 @@
   max-width: 75ch;
   font-family: var(--tgs-p-font);
   font-weight: var(--tgs-p-weight);
-  /* Text size, per screen: the same chain as .tgs-heading above. See there. */
+  /* Text size and line spacing, per screen: the same chains as .tgs-heading
+     above. See there. */
   --tgs-fs-base: var(--tgs-p-size);
   font-size: var(--tgs-fs-r, var(--tgs-fs, var(--tgs-fs-base)));
-  line-height: var(--tgs-p-leading);
+  --tgs-lh-base: var(--tgs-p-leading);
+  line-height: var(--tgs-lh-r, var(--tgs-lh, var(--tgs-lh-base)));
   letter-spacing: var(--tgs-p-tracking);
 }
 .tgs-block[data-align='centre'] .tgs-text { margin-inline: auto; }

@@ -345,6 +345,58 @@ export function normaliseTextSize(value: unknown): string | undefined {
 }
 
 /**
+ * The band a line-spacing value is held to, as a UNITLESS multiple.
+ *
+ * Below about 0.8 the lines of a wrapped heading collide; past 3 it is not
+ * spacing any more, it is a paragraph gap a spacer block wants. The two numbers
+ * live here, next to the validator, so the block pane and the sanitiser cannot
+ * drift, the same arrangement the pixel-size bounds have above.
+ */
+export const LINE_HEIGHT_MIN = 0.8;
+export const LINE_HEIGHT_MAX = 3;
+
+/**
+ * A block's line spacing, validated the way its size is.
+ *
+ * UNITLESS on purpose. Set on the block it inherits into every span the copy is
+ * wrapped in, and a unitless line-height is re-multiplied by each span's OWN font
+ * size, so it scales every line box to the size that span actually is. That is
+ * what lets a heading whose words sit inside a stack of leftover size spans (the
+ * hero that started this, wrapped eleven deep with 100px and 120px still on the
+ * outer spans) be pulled back to the height of the text you see, by tightening
+ * one value rather than unpicking the spans by hand.
+ *
+ * Takes a number or a numeric string, clamps it to the band, and returns a short
+ * unitless string. Anything that is not a finite number returns undefined, so a
+ * stray value drops out of an optional field and a spread cleanly, exactly as a
+ * size does, and the element keeps its own natural leading.
+ */
+export function normaliseLineHeight(value: unknown): string | undefined {
+  const n =
+    typeof value === 'number'
+      ? value
+      : typeof value === 'string' && value.trim() !== ''
+        ? Number(value)
+        : NaN;
+  if (!Number.isFinite(n)) return undefined;
+  const clamped = Math.min(LINE_HEIGHT_MAX, Math.max(LINE_HEIGHT_MIN, n));
+  // Two decimals with no trailing zeros, so 1.5 stores as "1.5" not "1.50" and a
+  // stored value round-trips to the same option the block pane offers.
+  return String(Math.round(clamped * 100) / 100);
+}
+
+/** The line-spacing choices the block pane offers, tight to loose. Unitless. */
+export const LINE_HEIGHTS: ReadonlyArray<{ value: string; label: string }> = [
+  { value: '0.8', label: 'Very tight' },
+  { value: '0.9', label: 'Tight' },
+  { value: '1', label: 'Snug' },
+  { value: '1.15', label: 'Normal' },
+  { value: '1.3', label: 'Relaxed' },
+  { value: '1.5', label: 'Loose' },
+  { value: '1.8', label: 'Very loose' },
+];
+
+/**
  * Weight. Only the two that mean something in running text.
  *
  * Browsers emit `font-weight: bold` for a bold command when they are asked to
