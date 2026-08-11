@@ -93,6 +93,7 @@
     "test:spotlight-image": "node test/spotlight-image-smoke.mjs",
     "test:weather-cache": "node test/weather-cache-smoke.mjs",
     "test:weather-dest-cache": "node test/weather-destination-cache-smoke.mjs",
+    "test:maps-wrap": "node test/maps-address-wrap-smoke.mjs",
     "test:responsive": "node test/content-widgets-responsive-smoke.mjs",
     "test:worldmap-hotels": "node test/worldmap-hotels-mode-smoke.mjs",
     "test:worldmap-hotels-widget": "node test/worldmap-hotels-widget-smoke.mjs",
