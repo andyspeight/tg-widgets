@@ -50,7 +50,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.1';
+  const VERSION = '1.0.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (control aria-labels, empty/error states, the
@@ -326,9 +326,14 @@
 .tgm-list-item:focus-visible { outline:2px solid var(--tgm-accent); outline-offset:-2px; }
 .tgm-li-dot { flex:0 0 auto; width:14px; height:18px; margin-top:2px; }
 .tgm-li-dot svg { width:14px; height:18px; }
-.tgm-li-body { min-width:0; }
-.tgm-li-title { font-size:14px; font-weight:600; line-height:1.35; }
-.tgm-li-sub { font-size:12px; color:var(--tgm-sub); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tgm-li-body { flex:1; min-width:0; }
+/* Title + address are their own lines and wrap. They were inline spans, so a
+   long address ran on one line (its ellipsis/overflow were inert on an inline
+   box) and overflowed the column, spilling toward the map with no spacing.
+   Block + overflow-wrap makes a long address wrap to the next line instead.
+   (Andy, Aug 2026.) */
+.tgm-li-title { display:block; font-size:14px; font-weight:600; line-height:1.35; overflow-wrap:break-word; }
+.tgm-li-sub { display:block; font-size:12px; color:var(--tgm-sub); margin-top:2px; line-height:1.4; overflow-wrap:break-word; word-break:break-word; }
 
 .tgm-stage { position:relative; min-width:0; }
 .tgm-map { width:100%; height:var(--tgm-h,460px); background:var(--tgm-surface-2); }
