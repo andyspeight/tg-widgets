@@ -344,6 +344,25 @@ function normaliseOffers(rawArray, sweepTypeId = 'Packages', drops = null, fallb
   }
   return out;
 }
+// Cheapest per-person price per WHOLE star for one destination, so a
+// rating-filtered map can (a) hide a place with no matching stars and (b) price
+// its pin for the shown ratings only. Additive: `ratings` + `ppByRating` are new
+// summary fields; every existing field is untouched, and a destination with no
+// rated offers carries neither (older widgets ignore them either way).
+function accRating(byRating, o) {
+  const r = num(o.rating);
+  if (r == null || !isFinite(r)) return;
+  const star = Math.round(r);
+  if (star < 1 || star > 5) return;
+  const pp = Number.isFinite(o.pricePP) ? o.pricePP : (Number.isFinite(o.price) ? o.price : null);
+  if (pp == null) return;
+  if (byRating[star] == null || pp < byRating[star]) byRating[star] = pp;
+}
+function ratingFields(byRating) {
+  const ratings = Object.keys(byRating).map(Number).sort((a, b) => a - b);
+  return ratings.length ? { ratings, ppByRating: byRating } : {};
+}
+
 function summariseByAirport(offers, regionByCC = {}) {
   const m = new Map();
   for (const o of offers) {
@@ -360,14 +379,15 @@ function summariseByCountry(offers, regionByCC = {}) {
   const m = new Map();
   for (const o of offers) {
     if (!o.countryCode) continue;
-    const c = m.get(o.countryCode);
-    if (!c) m.set(o.countryCode, { countryCode: o.countryCode, lat: o.lat, lng: o.lng, fromPrice: o.price, fromPricePP: o.pricePP, currency: o.currency, offerCount: 1, _airports: new Set([o.airport]), cheapestOfferId: o.id });
+    let c = m.get(o.countryCode);
+    if (!c) { c = { countryCode: o.countryCode, lat: o.lat, lng: o.lng, fromPrice: o.price, fromPricePP: o.pricePP, currency: o.currency, offerCount: 1, _airports: new Set([o.airport]), cheapestOfferId: o.id, _byRating: {} }; m.set(o.countryCode, c); }
     else { c.offerCount += 1; c._airports.add(o.airport); if (o.price < c.fromPrice) { c.fromPrice = o.price; c.fromPricePP = o.pricePP; c.lat = o.lat; c.lng = o.lng; c.cheapestOfferId = o.id; } }
+    accRating(c._byRating, o);
   }
   // Stamp the region (from the MapSearches rows) onto each country so the widget
   // can offer region filtering. Unknown codes fall back to 'Other'.
   return Array.from(m.values())
-    .map(c => { const { _airports, ...rest } = c; return { ...rest, airportCount: _airports.size, region: regionByCC[c.countryCode] || 'Other' }; })
+    .map(c => { const { _airports, _byRating, ...rest } = c; return { ...rest, airportCount: _airports.size, region: regionByCC[c.countryCode] || 'Other', ...ratingFields(_byRating) }; })
     .sort((a, b) => a.fromPrice - b.fromPrice);
 }
 
@@ -382,9 +402,9 @@ function summariseByResort(offers) {
     const lat = num(o.resortLat), lng = num(o.resortLng);
     if (!r || lat == null || lng == null) continue;
     const pp = Number.isFinite(o.pricePP) ? o.pricePP : (Number.isFinite(o.price) ? o.price : null);
-    const ex = m.get(r);
+    let ex = m.get(r);
     if (!ex) {
-      m.set(r, {
+      ex = {
         resort: r, lat, lng, fromPrice: o.price, fromPricePP: o.pricePP, currency: o.currency,
         offerCount: 1, cheapestOfferId: o.id,
         // airport = the gateway for this resort's cheapest offer. The widget
@@ -393,7 +413,9 @@ function summariseByResort(offers) {
         // every gateway seen (a resort may be served by more than one).
         airport: o.airport || null, airportName: o.airportName || null,
         _airports: new Set(o.airport ? [o.airport] : []),
-      });
+        _byRating: {},
+      };
+      m.set(r, ex);
     } else {
       ex.offerCount += 1;
       if (o.airport) ex._airports.add(o.airport);
@@ -403,9 +425,10 @@ function summariseByResort(offers) {
         ex.cheapestOfferId = o.id; ex.airport = o.airport || ex.airport; ex.airportName = o.airportName || ex.airportName;
       }
     }
+    accRating(ex._byRating, o);
   }
   return Array.from(m.values())
-    .map(r => { const { _airports, ...rest } = r; return { ...rest, airports: Array.from(_airports) }; })
+    .map(r => { const { _airports, _byRating, ...rest } = r; return { ...rest, airports: Array.from(_airports), ...ratingFields(_byRating) }; })
     .sort((a, b) => (a.fromPricePP || a.fromPrice || Infinity) - (b.fromPricePP || b.fromPrice || Infinity));
 }
 
