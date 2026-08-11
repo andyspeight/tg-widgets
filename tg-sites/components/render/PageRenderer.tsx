@@ -26,6 +26,7 @@ import {
 } from '../../lib/content/schema';
 import { BLEND_DIVIDER, dividerShape, normaliseDividerHeight, safeDivider, sectionFill } from '../../lib/content/dividers';
 import { safeUrl } from '../../lib/content/sanitise';
+import { normaliseTextSize } from '../../lib/content/styles';
 import { responsiveVars } from '../../lib/content/responsive';
 import { BlockRenderer } from './BlockRenderer';
 
@@ -95,6 +96,17 @@ function pathAttr(editable: boolean, key: string): { 'data-path'?: string } {
  */
 const SECTION_RESPONSIVE = [
   { property: 'paddingY', varBase: '--tgs-pad', toCss: (value: unknown) => `${value as number}px` },
+] as const;
+
+/**
+ * The same, for a block: its text size at tablet and phone. The value is a size
+ * string from the toolbar's own list (see normaliseTextSize), so an override
+ * cannot say anything an inline size could not; a stray one drops rather than
+ * rendering broken. The twins fold into --tgs-fs-r, which .tgs-text/.tgs-heading
+ * read ahead of their own size (globals.css).
+ */
+const BLOCK_RESPONSIVE = [
+  { property: 'fontSize', varBase: '--tgs-fs', toCss: (value: unknown) => normaliseTextSize(value) ?? null },
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -684,11 +696,20 @@ function blockHost(
 ): ReactElement {
   const box = block.box ?? EMPTY_BOX;
   const boxed = !boxIsEmpty(box);
-  const textColour = safeColour((block.props as Record<string, unknown>)?.textColour);
+  const props = block.props as Record<string, unknown>;
+  const textColour = safeColour(props?.textColour);
+  // Text size: the block's own base (desktop), plus its per-screen twins. Both
+  // are inline custom properties the text element reads ahead of its natural
+  // size; absent when unset, so a plain block renders exactly as before.
+  const baseSize = normaliseTextSize(props?.fontSize);
+  const sizeVars = responsiveVars(block.responsive, BLOCK_RESPONSIVE);
   const style: CSSProperties = {
     ...(boxed ? boxStyle(box) : {}),
     ...(textColour ? { color: textColour } : {}),
+    ...(baseSize ? { '--tgs-fs': baseSize } : {}),
+    ...sizeVars,
   };
+  const styled = boxed || Boolean(textColour) || Boolean(baseSize) || Object.keys(sizeVars).length > 0;
   return (
     <div
       key={block.id}
@@ -696,7 +717,7 @@ function blockHost(
       data-align={typeof block.props?.align === 'string' ? block.props.align : undefined}
       data-boxed={boxed ? '' : undefined}
       data-shadow={boxed ? box.shadow : undefined}
-      style={boxed || textColour ? style : undefined}
+      style={styled ? style : undefined}
       {...pathAttr(editable, keyPath)}
     >
       {block.type === 'container' ? (

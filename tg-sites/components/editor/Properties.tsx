@@ -37,9 +37,11 @@ import {
   isOverridden,
   withOverride,
   clearOverride,
+  INHERITS_FROM,
   TIER_LABEL,
   type Tier,
 } from '../../lib/content/responsive';
+import { FONT_SIZES, FONT_SIZE_GROUPS, normaliseTextSize } from '../../lib/content/styles';
 import { BoxPanel, ColourField, Measure, PaddingBox, ScreenScope } from './BoxControls';
 import { blockDefinition, type Field, type FieldGroup } from '../../lib/content/blocks';
 import {
@@ -60,6 +62,7 @@ import {
   updateSection,
   updateBlockBoxAtPath,
   updateBlockPropsAtPath,
+  updateBlockResponsiveAtPath,
   updateInnerColumn,
   containerColumns,
 } from '../../lib/content/tree';
@@ -400,7 +403,7 @@ export function ItemOptions({
       {/* A block and a block inside a container share the one pane: BlockFields
           reads and commits through the path, so it works either place. */}
       {(selected?.kind === 'block' || selected?.kind === 'inner-block') && (
-        <BlockFields path={selected} page={page} isStaff={isStaff} onCommit={onCommit} onSelect={onSelect} />
+        <BlockFields path={selected} page={page} isStaff={isStaff} onCommit={onCommit} onSelect={onSelect} tier={tier} />
       )}
     </>
   );
@@ -1787,12 +1790,58 @@ function ContainerColumnsControl({
   );
 }
 
+/**
+ * The Text size dropdown, per screen. Offers the site's own sizes and the fixed
+ * scale, the very list the toolbar offers a phrase, plus one empty option: on
+ * desktop it means "no size of my own, use the block's style", and on a smaller
+ * screen "the same size as the screen above". The caller sets the base on desktop
+ * and the override otherwise, so this is only the picker.
+ */
+function TextSizeField({
+  tier,
+  value,
+  onChange,
+}: {
+  tier: Tier;
+  value: string | undefined;
+  onChange: (value: string | undefined) => void;
+}) {
+  const id = `ed-text-size-${tier}`;
+  const autoLabel =
+    tier === 'desktop' ? 'Auto (the block style)' : `Same as ${TIER_LABEL[INHERITS_FROM[tier]]}`;
+  return (
+    <div className="ed-field">
+      <label className="ed-label" htmlFor={id}>
+        Text size
+      </label>
+      <select
+        id={id}
+        className="ed-select"
+        value={value ?? ''}
+        onChange={(event) => onChange(event.target.value || undefined)}
+      >
+        <option value="">{autoLabel}</option>
+        {FONT_SIZE_GROUPS.map((group) => (
+          <optgroup key={group} label={group}>
+            {FONT_SIZES.filter((size) => size.group === group).map((size) => (
+              <option key={size.value} value={size.value}>
+                {size.label}
+              </option>
+            ))}
+          </optgroup>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 function BlockFields({
   path,
   page,
   isStaff,
   onCommit,
   onSelect,
+  tier = 'desktop',
 }: {
   /*
    * A block in an ordinary column, OR a block inside a container's inner column.
@@ -1805,6 +1854,8 @@ function BlockFields({
   isStaff: boolean;
   onCommit: Props['onCommit'];
   onSelect?: Props['onSelect'];
+  /** The screen the device switcher is on, so Text size edits that size. */
+  tier?: Tier;
 }) {
   const block = blockAtPath(page, path);
   if (!block) return null;
@@ -1872,6 +1923,47 @@ function BlockFields({
   };
 
   definition.fields.forEach((field) => add(inferGroup(field), renderField(field)));
+
+  // TEXT SIZE, PER SCREEN. Only the blocks whose text the size chain governs, the
+  // Text and Heading blocks (.tgs-text / .tgs-heading), offer it. On desktop it
+  // sets the block's own base size; on tablet or phone it sets that screen's
+  // override, so a headline can be dialled down on a phone without touching
+  // desktop. The value shown is what the CURRENT screen will actually take,
+  // resolved through the desktop-first fallback, and a scope note underneath says
+  // which screen and offers a reset to inherit.
+  if (block.type === 'text' || block.type === 'heading') {
+    const base = normaliseTextSize(block.props.fontSize);
+    const current = resolveAt<string | undefined>(base, block.responsive, 'fontSize', tier);
+    const setSize = (value: string | undefined) => {
+      if (tier === 'desktop') {
+        onCommit((c) => updateBlockPropsAtPath(c, path, { fontSize: value }), `blk:${block.id}:fontSize`);
+      } else {
+        const next = value
+          ? withOverride(block.responsive, 'fontSize', tier, value)
+          : clearOverride(block.responsive, 'fontSize', tier);
+        onCommit((c) => updateBlockResponsiveAtPath(c, path, next), `blk:${block.id}:fontSize:${tier}`);
+      }
+    };
+    add(
+      // With the block's own size control (style / size), which infers to Content,
+      // the open group. Its own group would be shut by default and unfindable.
+      'content',
+      <ScreenScope
+        key="text-size"
+        tier={tier}
+        overridden={isOverridden(block.responsive, 'fontSize', tier)}
+        onReset={() => {
+          if (tier === 'desktop') return;
+          onCommit(
+            (c) => updateBlockResponsiveAtPath(c, path, clearOverride(block.responsive, 'fontSize', tier)),
+            `blk:${block.id}:fontSize:${tier}:reset`,
+          );
+        }}
+      >
+        <TextSizeField tier={tier} value={current} onChange={setSize} />
+      </ScreenScope>,
+    );
+  }
 
   // The box is a sibling of props, so it commits through updateBlockBox. Only an
   // element that takes box parts adds any of these; the rest are grouped fields

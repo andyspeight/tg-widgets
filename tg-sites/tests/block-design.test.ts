@@ -138,7 +138,10 @@ describe('the pane groups a review block and the renderer draws the box', () => 
     expect(renderer).toContain('const box = block.box ?? EMPTY_BOX');
     expect(renderer).toContain('const boxed = !boxIsEmpty(box)');
     expect(renderer).toContain("data-boxed={boxed ? '' : undefined}");
-    expect(renderer).toContain('style={boxed || textColour ? style : undefined}');
+    // The gate now also covers a per-screen text size, so a block with only a
+    // size override still gets its inline custom properties.
+    expect(renderer).toContain('style={styled ? style : undefined}');
+    expect(renderer).toContain('boxed || Boolean(textColour) || Boolean(baseSize)');
   });
 
   it('the stylesheet only styles a block that has a box', () => {

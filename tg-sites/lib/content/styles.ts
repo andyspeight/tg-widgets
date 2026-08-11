@@ -328,6 +328,23 @@ function sizeValue(value: string): string | null {
 }
 
 /**
+ * A whole block's text size, validated the same way an inline one is.
+ *
+ * The per-screen text-size control stores a block's size, base and per-screen
+ * overrides, from the very list the toolbar offers a phrase (FONT_SIZES, a theme
+ * token, or a hand-typed pixel size in range). Sharing `sizeValue` is the point:
+ * what a phrase may be set to inline and what a whole block may be set to per
+ * screen cannot drift. Anything off the list is dropped, not coerced, and a
+ * non-string is nothing, so a stray value renders as the block's own size rather
+ * than as broken CSS. Returns undefined rather than null so it drops cleanly out
+ * of an optional schema field and an object spread.
+ */
+export function normaliseTextSize(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  return sizeValue(value) ?? undefined;
+}
+
+/**
  * Weight. Only the two that mean something in running text.
  *
  * Browsers emit `font-weight: bold` for a bold command when they are asked to

@@ -580,6 +580,19 @@ const MUTATIONS = [
     from: `        ...responsiveVars(section.responsive, SECTION_RESPONSIVE),`,
     to: `        /* probe: per-screen vars not emitted */`,
   },
+  {
+    tag: 'breakpoints',
+    check: 'a block text size set on Phone shrinks phone, not desktop',
+    /*
+     * The block half of the same mechanism: sizeVars holds --tgs-fs-phone and its
+     * twins. Drop the spread that puts them on the block wrapper and the phone size
+     * is stored but never rendered, so the heading keeps its desktop size on a phone.
+     */
+    why: 'Stop the block emitting its per-screen size vars, so a size override never renders.',
+    file: 'components/render/PageRenderer.tsx',
+    from: `    ...sizeVars,`,
+    to: `    /* probe: per-screen size vars not emitted */`,
+  },
 
   // --- contact details, on the settings screen -----------------------------
 

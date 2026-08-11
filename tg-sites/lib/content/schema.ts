@@ -32,7 +32,7 @@ import { z } from 'zod';
 
 import { normaliseDividerHeight, safeDivider } from './dividers';
 import { escapeHtml } from './sanitise';
-import { COLOUR_TOKENS } from './styles';
+import { COLOUR_TOKENS, normaliseTextSize } from './styles';
 
 // ---------------------------------------------------------------------------
 // Constraints
@@ -294,6 +294,37 @@ export const STACK_BREAKPOINTS: Record<StackBelow, number> = {
 // ---------------------------------------------------------------------------
 
 /**
+ * One screen size's style overrides. See lib/content/responsive.ts.
+ *
+ * Each property is validated EXACTLY as its base field is, so an override cannot
+ * say anything the base could not. Unknown keys pass through rather than being
+ * stripped, the same forward-compatibility an unknown block type gets: an override
+ * a newer build added survives a save by an older one instead of being destroyed
+ * by it, and sits inert until a build that renders it comes along.
+ *
+ * Shared by a section and a block, because both carry a `responsive` map. A key
+ * that means nothing for the element it sits on (a section has no fontSize, a
+ * block no paddingY) simply never appears there. The set of KNOWN properties
+ * grows as per-breakpoint controls are added. Today: paddingY, a section's
+ * vertical spacing, and fontSize, a block's text size.
+ */
+const OverridesSchema = z
+  .object({
+    paddingY: z.unknown().transform(normaliseSectionPadding).optional(),
+    fontSize: z.unknown().transform(normaliseTextSize).optional(),
+  })
+  .passthrough();
+
+/**
+ * The map an element carries when a size overrides the base. Additive: absent on
+ * everything saved before it, so no stored page changes shape.
+ */
+export const ResponsiveSchema = z.object({
+  tablet: OverridesSchema.optional(),
+  phone: OverridesSchema.optional(),
+});
+
+/**
  * Block props are validated per block type by the registry, not here.
  * Keeping this loose at the tree level means an unknown block type round
  * trips through a save instead of being destroyed by it, which is what
@@ -304,6 +335,12 @@ export const BlockSchema = z.object({
   id: z.string().min(1),
   type: z.string().min(1),
   props: z.record(z.unknown()).default({}),
+  /**
+   * Per-screen overrides of the block's own style, a sibling of box the same way
+   * a section's is. Today: fontSize, the block's text size at tablet and phone.
+   * See ResponsiveSchema.
+   */
+  responsive: ResponsiveSchema.optional(),
   /*
    * The block's own design box: background, padding, border, radius and shadow,
    * on the block's container. The same box sections and columns already carry,
@@ -463,32 +500,10 @@ function toBackgroundSlides(value: unknown): BackgroundSlide[] {
   return out;
 }
 
-/**
- * One screen size's style overrides. See lib/content/responsive.ts.
- *
- * Each property is validated EXACTLY as its base field is, so an override cannot
- * say anything the base could not. Unknown keys pass through rather than being
- * stripped, the same forward-compatibility an unknown block type gets: a size
- * override a newer build added survives a save by an older one instead of being
- * destroyed by it, and sits inert until a build that renders it comes along.
- *
- * The set of KNOWN properties grows as per-breakpoint controls are added. Today:
- * paddingY, a section's vertical spacing.
+/*
+ * OverridesSchema and ResponsiveSchema are defined above, before BlockSchema,
+ * because a block carries `responsive` as well as a section does.
  */
-const OverridesSchema = z
-  .object({
-    paddingY: z.unknown().transform(normaliseSectionPadding).optional(),
-  })
-  .passthrough();
-
-/**
- * The map an element carries when a size overrides the base. Additive: absent on
- * everything saved before it, so no stored page changes shape.
- */
-export const ResponsiveSchema = z.object({
-  tablet: OverridesSchema.optional(),
-  phone: OverridesSchema.optional(),
-});
 
 export const SectionSchema = z.object({
   id: z.string().min(1),

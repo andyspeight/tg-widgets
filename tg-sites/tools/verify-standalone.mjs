@@ -7322,6 +7322,69 @@ await check('a section spacing set on Phone changes phone, not desktop', async (
     : `padding did not change per screen: phone ${phonePad}, desktop ${desktopPad}`;
 });
 
+// --- Per-screen text size: a block's size set on one screen, not the others --
+
+/*
+ * Andy, 11 Aug 2026, slice two of styling per breakpoint: text size per screen,
+ * so a headline that fits on desktop can be dialled down on a phone. The same
+ * engine as the spacing above, one level down: the block carries its per-screen
+ * size as an inline custom property (--tgs-fs-phone) and the static container
+ * queries fold it into --tgs-fs-r, which .tgs-heading reads ahead of its own size.
+ * Add a heading, switch the device to Phone, pick a small size, and prove the
+ * phone value renders while the block's desktop size is untouched.
+ */
+await page.reload();
+await page.waitForSelector('.ed-root');
+await showPanels();
+
+await check('a block text size set on Phone shrinks phone, not desktop', async () => {
+  await addBlock('Heading');
+  const host = added();
+  if ((await host.count()) !== 1) return `${await host.count()} blocks selected after adding`;
+  const info = await host.evaluate((el) => {
+    const text = el.matches('.tgs-heading, .tgs-text') ? el : el.querySelector('.tgs-heading, .tgs-text');
+    return { path: el.getAttribute('data-path'), deskPx: text ? parseFloat(getComputedStyle(text).fontSize) : null };
+  });
+  if (!info || info.deskPx == null) return 'the heading did not render its text';
+
+  // The device switcher to Phone: the Text size control now edits the phone size.
+  await page.getByRole('button', { name: 'Phone', exact: true }).click();
+  await page.waitForTimeout(200);
+
+  // The Text size dropdown lives in the block pane's per-screen scope; the spacing
+  // control is a section one and not shown here, so this select is unambiguous.
+  const select = page.locator('.ed-props .ed-screen-scope select').first();
+  if ((await select.count()) === 0) return 'the text size control was not scoped to the screen';
+  await select.selectOption('0.75rem'); // Tiny, far below any heading's own size.
+  await page.waitForTimeout(200);
+
+  const after = await page.evaluate((path) => {
+    const el = document.querySelector(`.ed-canvas-frame [data-path="${path}"]`);
+    const text = el.matches('.tgs-heading, .tgs-text') ? el : el.querySelector('.tgs-heading, .tgs-text');
+    const style = el.getAttribute('style') || '';
+    const m = style.match(/--tgs-fs-phone:\s*([^;]+)/);
+    return { phoneVar: m ? m[1].trim() : null, phonePx: parseFloat(getComputedStyle(text).fontSize) };
+  }, info.path);
+  if (after.phoneVar !== '0.75rem') return `the phone override was not stored: ${after.phoneVar}`;
+  if (!(after.phonePx < info.deskPx - 2)) {
+    return `phone text did not shrink: phone ${after.phonePx}, desktop ${info.deskPx}`;
+  }
+
+  // Back to Desktop: the block's own size returns, untouched by the phone edit.
+  await page.getByRole('button', { name: 'Desktop', exact: true }).click();
+  await page.waitForTimeout(200);
+  const deskAgain = await page.evaluate((path) => {
+    const el = document.querySelector(`.ed-canvas-frame [data-path="${path}"]`);
+    const text = el.matches('.tgs-heading, .tgs-text') ? el : el.querySelector('.tgs-heading, .tgs-text');
+    return parseFloat(getComputedStyle(text).fontSize);
+  }, info.path);
+  // Selecting Desktop folds the panels (see the spacing check); reopen them.
+  await showPanels();
+  return Math.abs(deskAgain - info.deskPx) < 0.5
+    ? true
+    : `the desktop size changed under a phone edit: ${info.deskPx} -> ${deskAgain}`;
+});
+
 // --- Preview mode: the site as it will publish, full canvas -----------------
 
 /*

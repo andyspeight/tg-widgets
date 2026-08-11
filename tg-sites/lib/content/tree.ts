@@ -493,6 +493,20 @@ export function updateBlockBox(
   }));
 }
 
+export function updateBlockResponsive(
+  page: Page,
+  section: number,
+  row: number,
+  column: number,
+  block: number,
+  responsive: Block['responsive'],
+): Page {
+  return mapColumn(page, section, row, column, (c) => ({
+    ...c,
+    blocks: c.blocks.map((b, i) => (i === block ? { ...b, responsive } : b)),
+  }));
+}
+
 // ---------------------------------------------------------------------------
 // The container element: a block that holds its own columns, one level deep.
 // Its columns are ordinary Columns kept in props.columns, so they carry the same
@@ -613,6 +627,22 @@ export function updateInnerBlockBox(
 ): Page {
   return mapInnerColumn(page, section, row, column, block, inner, (blocks) =>
     blocks.map((b, i) => (i === innerBlock ? { ...b, box } : b)),
+  );
+}
+
+/** Replace the per-screen overrides of a block inside a container's inner column. */
+export function updateInnerBlockResponsive(
+  page: Page,
+  section: number,
+  row: number,
+  column: number,
+  block: number,
+  inner: number,
+  innerBlock: number,
+  responsive: Block['responsive'],
+): Page {
+  return mapInnerColumn(page, section, row, column, block, inner, (blocks) =>
+    blocks.map((b, i) => (i === innerBlock ? { ...b, responsive } : b)),
   );
 }
 
@@ -803,6 +833,20 @@ export function updateBlockBoxAtPath(page: Page, path: AnyBlockPath, box: Box): 
   }
   return updateInnerBlockBox(
     page, path.section, path.row, path.column, path.block, path.inner, path.innerBlock, box,
+  );
+}
+
+/** Replace the per-screen overrides of whichever block a block-or-inner-block path points at. */
+export function updateBlockResponsiveAtPath(
+  page: Page,
+  path: AnyBlockPath,
+  responsive: Block['responsive'],
+): Page {
+  if (path.kind === 'block') {
+    return updateBlockResponsive(page, path.section, path.row, path.column, path.block, responsive);
+  }
+  return updateInnerBlockResponsive(
+    page, path.section, path.row, path.column, path.block, path.inner, path.innerBlock, responsive,
   );
 }
 

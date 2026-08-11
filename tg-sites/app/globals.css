@@ -487,6 +487,19 @@
 
 .tgs-col[data-flow='row'] > .tgs-block { flex: 0 1 auto; }
 
+/*
+ * PER-SCREEN TEXT SIZE, the block half of the size vars.
+ *
+ * A block carries its size as inline custom properties: --tgs-fs (a desktop base)
+ * and --tgs-fs-tablet/--tgs-fs-phone (the overrides). They must NOT inherit past
+ * the block that set them, or a text size set on a container would shrink every
+ * block nested inside it. Resetting them to `initial` on every .tgs-block stops
+ * that: the inline value still wins for the block it is set on, and a block with
+ * none set starts clean rather than inheriting a parent's. --tgs-fs-r needs no
+ * reset, since the container queries below set it on each .tgs-block in the band.
+ */
+.tgs-block { --tgs-fs: initial; --tgs-fs-tablet: initial; --tgs-fs-phone: initial; }
+
 @container tgs-page (max-width: 1023px) {
   .tgs-row[data-stack='tablet'] { grid-template-columns: 1fr; }
   .tgs-row[data-stack='tablet'][data-reverse='true'] { direction: rtl; }
@@ -502,6 +515,14 @@
    * and it stays as CSP-clean as the theme, which is inline for the same reason.
    */
   .tgs-section { --tgs-pad-r: var(--tgs-pad-tablet, var(--tgs-pad, 48px)); }
+
+  /*
+   * PER-SCREEN TEXT SIZE, tablet. A block's tablet override, else its desktop
+   * base, folds into --tgs-fs-r, which .tgs-text/.tgs-heading read ahead of their
+   * own size. With neither set the chain is guaranteed-invalid, so the element
+   * falls back to its natural size and nothing changes.
+   */
+  .tgs-block { --tgs-fs-r: var(--tgs-fs-tablet, var(--tgs-fs)); }
 }
 
 @container tgs-page (max-width: 767px) {
@@ -513,6 +534,13 @@
    * chain reads the phone override, then the tablet one, then the base.
    */
   .tgs-section { --tgs-pad-r: var(--tgs-pad-phone, var(--tgs-pad-tablet, var(--tgs-pad, 48px))); }
+
+  /*
+   * The phone half of per-screen text size. After the tablet rule, so at a phone
+   * width it wins, and its chain reads the phone override, then the tablet one,
+   * then the desktop base.
+   */
+  .tgs-block { --tgs-fs-r: var(--tgs-fs-phone, var(--tgs-fs-tablet, var(--tgs-fs))); }
 
   /*
    * A COLUMN FLEX CONTAINER TURNS EVERY VERTICAL ALIGNMENT INTO A HORIZONTAL
@@ -608,50 +636,64 @@
   text-wrap: balance;
   font-family: var(--tgs-h2-font);
   font-weight: var(--tgs-h2-weight);
-  font-size: var(--tgs-h2-size);
+  /*
+   * TEXT SIZE, PER SCREEN (see lib/content/responsive.ts). --tgs-fs-base is this
+   * heading's own size, which its data-style sets below. --tgs-fs is a block-level
+   * base the editor may set on desktop, and --tgs-fs-r is the tablet or phone
+   * override the container queries fold in. Read in that order, a phone can shrink
+   * a headline while desktop keeps it, and a block with none of them set renders
+   * at its own size exactly as before.
+   */
+  --tgs-fs-base: var(--tgs-h2-size);
+  font-size: var(--tgs-fs-r, var(--tgs-fs, var(--tgs-fs-base)));
   line-height: var(--tgs-h2-leading);
   letter-spacing: var(--tgs-h2-tracking);
 }
 
+/*
+ * Each data-style sets --tgs-fs-base (its own size) rather than font-size direct,
+ * so the one font-size chain on .tgs-heading above stays in charge and a per-screen
+ * override can win over it. font-family, weight, leading and tracking are unchanged.
+ */
 .tgs-heading[data-style='h1'] {
   font-family: var(--tgs-h1-font);
   font-weight: var(--tgs-h1-weight);
-  font-size: var(--tgs-h1-size);
+  --tgs-fs-base: var(--tgs-h1-size);
   line-height: var(--tgs-h1-leading);
   letter-spacing: var(--tgs-h1-tracking);
 }
 .tgs-heading[data-style='h2'] {
   font-family: var(--tgs-h2-font);
   font-weight: var(--tgs-h2-weight);
-  font-size: var(--tgs-h2-size);
+  --tgs-fs-base: var(--tgs-h2-size);
   line-height: var(--tgs-h2-leading);
   letter-spacing: var(--tgs-h2-tracking);
 }
 .tgs-heading[data-style='h3'] {
   font-family: var(--tgs-h3-font);
   font-weight: var(--tgs-h3-weight);
-  font-size: var(--tgs-h3-size);
+  --tgs-fs-base: var(--tgs-h3-size);
   line-height: var(--tgs-h3-leading);
   letter-spacing: var(--tgs-h3-tracking);
 }
 .tgs-heading[data-style='h4'] {
   font-family: var(--tgs-h4-font);
   font-weight: var(--tgs-h4-weight);
-  font-size: var(--tgs-h4-size);
+  --tgs-fs-base: var(--tgs-h4-size);
   line-height: var(--tgs-h4-leading);
   letter-spacing: var(--tgs-h4-tracking);
 }
 .tgs-heading[data-style='h5'] {
   font-family: var(--tgs-h5-font);
   font-weight: var(--tgs-h5-weight);
-  font-size: var(--tgs-h5-size);
+  --tgs-fs-base: var(--tgs-h5-size);
   line-height: var(--tgs-h5-leading);
   letter-spacing: var(--tgs-h5-tracking);
 }
 .tgs-heading[data-style='h6'] {
   font-family: var(--tgs-h6-font);
   font-weight: var(--tgs-h6-weight);
-  font-size: var(--tgs-h6-size);
+  --tgs-fs-base: var(--tgs-h6-size);
   line-height: var(--tgs-h6-leading);
   letter-spacing: var(--tgs-h6-tracking);
 }
@@ -686,14 +728,16 @@
   max-width: 75ch;
   font-family: var(--tgs-p-font);
   font-weight: var(--tgs-p-weight);
-  font-size: var(--tgs-p-size);
+  /* Text size, per screen: the same chain as .tgs-heading above. See there. */
+  --tgs-fs-base: var(--tgs-p-size);
+  font-size: var(--tgs-fs-r, var(--tgs-fs, var(--tgs-fs-base)));
   line-height: var(--tgs-p-leading);
   letter-spacing: var(--tgs-p-tracking);
 }
 .tgs-block[data-align='centre'] .tgs-text { margin-inline: auto; }
 .tgs-block[data-align='right']  .tgs-text { margin-inline: 0 0 0 auto; }
-.tgs-text[data-size='s'] { font-size: calc(var(--tgs-p-size) * 0.88); }
-.tgs-text[data-size='l'] { font-size: calc(var(--tgs-p-size) * 1.18); }
+.tgs-text[data-size='s'] { --tgs-fs-base: calc(var(--tgs-p-size) * 0.88); }
+.tgs-text[data-size='l'] { --tgs-fs-base: calc(var(--tgs-p-size) * 1.18); }
 .tgs-text > :first-child { margin-top: 0; }
 .tgs-text > :last-child  { margin-bottom: 0; }
 .tgs-text p { margin: 0 0 var(--tgs-space-m); }
