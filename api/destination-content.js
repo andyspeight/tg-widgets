@@ -64,6 +64,16 @@ const AIRTABLE_API = 'https://api.airtable.com/v0';
 // editor preview is auth-gated and must always be live, so it is never cached.
 const PUBLIC_CACHE = 'public, max-age=300, s-maxage=3600, stale-while-revalidate=604800';
 const PREVIEW_CACHE = 'private, no-store';
+// A widget's FIXED destination is resolved from its (mutable) config, but the
+// response is keyed by widget id in the URL. So this response must NOT inherit
+// the long content cache above: when a client changes the widget's destination
+// (e.g. Paris → France) the old destination's climate would keep serving for up
+// to a week, reading as "my change never saved" and forcing a brand-new widget.
+// Mirror the widget-config endpoint: revalidate within a minute. The per-
+// destination content stays shielded from Airtable by the in-memory cache keyed
+// on level:recordId, so this only shortens the edge TTL, not the data source.
+// (Andy, Aug 2026 — the 28 Jul widget-config fix missed this sibling endpoint.)
+const WIDGET_CACHE = 's-maxage=60, max-age=0, stale-while-revalidate=60';
 
 // The Widgets base (where we store widget configs) -- reuses existing AIRTABLE_KEY
 const WIDGETS_TABLE_NAME = 'Widgets';
@@ -756,7 +766,7 @@ export default async function handler(req, res) {
     const cacheKey = `${level}:${recordId}`;
     const cached = memGet(cacheKey);
     if (cached) {
-      res.setHeader('Cache-Control', isDirect ? PREVIEW_CACHE : PUBLIC_CACHE);
+      res.setHeader('Cache-Control', isDirect ? PREVIEW_CACHE : WIDGET_CACHE);
       res.setHeader('X-Cache', 'HIT');
       return res.status(200).json(cached);
     }
@@ -785,7 +795,7 @@ export default async function handler(req, res) {
     const payload = shapePayload(level, fields, inherited, paired, recordId);
     memSet(cacheKey, payload);
 
-    res.setHeader('Cache-Control', isDirect ? PREVIEW_CACHE : PUBLIC_CACHE);
+    res.setHeader('Cache-Control', isDirect ? PREVIEW_CACHE : WIDGET_CACHE);
     res.setHeader('X-Cache', 'MISS');
     return res.status(200).json(payload);
 
