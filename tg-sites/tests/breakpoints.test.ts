@@ -688,3 +688,24 @@ describe('parallax drifts a sections background picture as the page scrolls', ()
     expect(props).toContain('set({ parallax: event.target.checked || undefined }');
   });
 });
+
+// ---------------------------------------------------------------------------
+
+describe('a card link underline sweeps in on hover rather than snapping', () => {
+  const css = read('app', 'globals.css');
+
+  it('draws the underline as a gradient so its width can animate', () => {
+    expect(css).toContain('.tgs-card__link:hover { background-size: 100% 2px; }');
+    expect(css).toContain('background-image: linear-gradient(currentColor, currentColor)');
+    expect(css).toContain('background-size: 0% 2px');
+  });
+
+  it('makes the sweep the motion, holding it back under reduced motion', () => {
+    expect(css).toContain('transition: background-size 0.3s ease');
+    expect(css).toContain('prefers-reduced-motion: no-preference');
+  });
+
+  it('no longer snaps a plain underline on', () => {
+    expect(css).not.toContain('.tgs-card__link:hover { text-decoration: underline; }');
+  });
+});

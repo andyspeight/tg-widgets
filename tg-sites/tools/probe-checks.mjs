@@ -814,6 +814,19 @@ const MUTATIONS = [
     from: `      animation: tgs-parallax linear both;`,
     to: `      animation: none;`,
   },
+  {
+    tag: 'link-underline',
+    check: 'a card link underline sweeps in under the pointer',
+    /*
+     * The gradient underline is there but hover leaves it at nothing, so a card link
+     * never underlines at all. The sweep and the underline are the same rule, so
+     * breaking the hover loses both, and only a browser hover test notices.
+     */
+    why: 'Hold the underline at nothing on hover, so it never appears.',
+    file: 'app/globals.css',
+    from: `.tgs-card__link:hover { background-size: 100% 2px; }`,
+    to: `.tgs-card__link:hover { background-size: 0% 2px; }`,
+  },
 
   // --- contact details, on the settings screen -----------------------------
 

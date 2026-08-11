@@ -2034,9 +2034,25 @@
   font-weight: 600;
   color: var(--tgs-primary);
   text-decoration: none;
+  /*
+   * The underline is a gradient standing in for text-decoration, so its width can
+   * animate: it sweeps in from the left on hover rather than snapping on whole. A
+   * plain text-decoration cannot be grown like this.
+   */
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 2px;
 }
 .tgs-cards[data-align='centre'] .tgs-card__link { align-self: center; }
-.tgs-card__link:hover { text-decoration: underline; }
+.tgs-card__link:hover { background-size: 100% 2px; }
+/*
+ * The sweep is the motion; without it the underline still appears on hover, just at
+ * full width straight away, which is what a visitor who asked for less motion gets.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-card__link { transition: background-size 0.3s ease; }
+}
 
 /*
  * THE WHOLE CARD IS CLICKABLE, WITH ONE LINK.

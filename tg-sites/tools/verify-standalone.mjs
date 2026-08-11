@@ -8075,6 +8075,89 @@ await check('a parallax section grows and drifts its background on the page', as
   return true;
 });
 
+/*
+ * Card link underline (Andy, 11 Aug 2026). A card's link underlines on hover, and now
+ * the line sweeps in from the left rather than snapping on whole, drawn as a gradient
+ * so its width can animate. Held behind reduced motion. This previews a card with a
+ * link and checks the underline grows under the pointer.
+ */
+await check('a card link underline sweeps in under the pointer', async () => {
+  await closeAnyDialog();
+  await page.evaluate(() =>
+    window.__TG_SET_PAGE__({
+      id: 'lu',
+      slug: 'link-underline',
+      title: 'Link underline',
+      version: 1,
+      sections: [
+        {
+          id: 's',
+          width: 'contained',
+          tone: 'light',
+          rows: [
+            {
+              id: 'r',
+              gap: 16,
+              columns: [
+                {
+                  id: 'c',
+                  width: 100,
+                  blocks: [
+                    {
+                      id: 'b',
+                      type: 'cards',
+                      props: {
+                        imagePosition: 'none',
+                        items: [
+                          {
+                            title: 'Santorini',
+                            body: 'White walls and blue domes.',
+                            linkHref: 'https://example.com',
+                            linkLabel: 'Explore',
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }),
+  );
+  await page.waitForTimeout(400);
+
+  await page.getByRole('button', { name: 'Preview', exact: true }).click();
+  await page.waitForTimeout(300);
+
+  const link = page.locator('.ed-canvas-frame .tgs-card__link').first();
+  const count = await link.count();
+  // Read the resting underline with the pointer parked away from the link.
+  await page.mouse.move(5, 5);
+  const before = count ? await link.evaluate((el) => getComputedStyle(el).backgroundSize) : null;
+  if (count) await link.hover();
+  await page.waitForTimeout(400);
+  const after = count ? await link.evaluate((el) => getComputedStyle(el).backgroundSize) : null;
+
+  const exit = page.getByRole('button', { name: 'Exit preview', exact: true });
+  if (await exit.count()) {
+    await exit.click();
+    await page.waitForTimeout(200);
+  }
+  await page.evaluate(() => window.__TG_SET_PAGE__(null));
+  await page.waitForTimeout(200);
+  await showPanels();
+
+  if (!count) return 'no card link rendered in preview';
+  const width = (value) => parseFloat(String(value)) || 0;
+  if (!(width(after) > width(before))) {
+    return `the underline did not grow on hover: ${before} then ${after}`;
+  }
+  return true;
+});
+
 // --- Preview mode: the site as it will publish, full canvas -----------------
 
 /*
