@@ -68,7 +68,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.16.0';
+  const VERSION = '3.17.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -2610,7 +2610,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
         ]);
         this.cur.rates = rates || { GBP: 1 };
         setActiveCur(this.cur);
-        this.data = this._applyCountryAllowList(offers);
+        this.data = this._applyRatingGate(this._applyCountryAllowList(offers));
         this._renderMap(L);
         this._hideLoading();
         tgReport('load', this.widgetId, 'ok');
@@ -2642,6 +2642,38 @@ svg.leaflet-image-layer.leaflet-interactive path {
       const filtered = offers.countries.filter(c => set.has(String(c.countryCode || '').toUpperCase()));
       // Return a shallow copy so we never mutate the fetched object.
       return Object.assign({}, offers, { countries: filtered });
+    }
+
+    /** Filter + re-price a list of pin rows (countries or resorts) by the client's
+     *  showRatings. A row carrying the summary's per-star data (`ratings` +
+     *  `ppByRating`) is dropped when none of its stars are shown, and otherwise
+     *  re-priced to the cheapest per-person price among the shown stars. A row
+     *  with no `ratings` (an older cache, before the summary carried it) passes
+     *  through untouched, so pins never vanish while the cache catches up — the
+     *  deal-card filter still applies underneath. Empty showRatings = no gate. */
+    _gateByRating(rows) {
+      const allow = this.cfg.showRatings;
+      if (!Array.isArray(allow) || !allow.length || !Array.isArray(rows)) return rows;
+      const set = new Set(allow);
+      const out = [];
+      for (const c of rows) {
+        if (!Array.isArray(c.ratings) || !c.ratings.length) { out.push(c); continue; }
+        const match = c.ratings.filter(r => set.has(r));
+        if (!match.length) continue; // none of this place's stars are shown → drop the pin
+        const by = c.ppByRating || {};
+        let pp = Infinity;
+        for (const r of match) { const v = Number(by[r]); if (Number.isFinite(v) && v < pp) pp = v; }
+        out.push(Number.isFinite(pp) ? Object.assign({}, c, { fromPricePP: pp }) : c);
+      }
+      return out;
+    }
+
+    /** Apply the rating gate to the country summary, once, so every downstream
+     *  pin consumer sees the same rating-filtered, re-priced list. */
+    _applyRatingGate(offers) {
+      if (!offers || !Array.isArray(offers.countries)) return offers;
+      const gated = this._gateByRating(offers.countries);
+      return gated === offers.countries ? offers : Object.assign({}, offers, { countries: gated });
     }
 
     // Hotels mode reads the parallel accommodation cache; append ?mode=hotels.
@@ -3222,7 +3254,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
         .then(data => {
           if (token !== this._resortToken) return;          // superseded
           if (this._pinMode !== 'resort') return;            // left resort mode
-          const resorts = (data && Array.isArray(data.resorts)) ? data.resorts : [];
+          // Same rating gate as the country pins — drop resorts whose stars the
+          // client hides, and re-price the rest to the cheapest shown star.
+          const resorts = this._gateByRating((data && Array.isArray(data.resorts)) ? data.resorts : []);
           if (!resorts.length) return;                       // keep the deals-derived pins
           this._resortSummary = resorts;
           // Rebuild from the full list. Don't re-fit here — the initial fit
