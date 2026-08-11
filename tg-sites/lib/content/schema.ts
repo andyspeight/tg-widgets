@@ -543,6 +543,12 @@ export const SectionSchema = z.object({
    * defaults a missing style to rise regardless.
    */
   revealStyle: z.unknown().transform(normaliseRevealStyle).optional(),
+  /**
+   * Lift a section's cards and buttons a touch as a visitor points at them. Off by
+   * default and optional, so no stored section changes shape. Pure CSS hover in
+   * globals.css, with the small rise held back under prefers-reduced-motion.
+   */
+  hoverLift: z.boolean().optional(),
   /** The same shape a column has. See BoxSchema. */
   box: BoxSchema.default(EMPTY_BOX),
   /** Media id or absolute URL. Rendered behind the content with a scrim. */

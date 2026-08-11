@@ -635,6 +635,32 @@
   }
 }
 
+/*
+ * HOVER LIFT (Andy, 11 Aug 2026). A section marked data-hover-lift lifts its cards
+ * and buttons a touch, with a softer deeper shadow, as a visitor points at them, so
+ * the tappable things on a page answer to the pointer. Opt-in per section and off
+ * while editing, like the reveal, so it never fights selecting them on the canvas.
+ *
+ * The shadow deepens for everyone; the small rise is held back for anyone who asked
+ * for less motion, so the feedback stays without the movement. Cards already carry a
+ * transform and shadow transition; buttons get one here, scoped so a plain button is
+ * left alone.
+ */
+.tgs-section[data-hover-lift] .tgs-button {
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease,
+    box-shadow 0.15s ease, transform 0.15s ease;
+}
+.tgs-section[data-hover-lift] .tgs-card:hover,
+.tgs-section[data-hover-lift] .tgs-button:hover {
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.14);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-section[data-hover-lift] .tgs-card:hover,
+  .tgs-section[data-hover-lift] .tgs-button:hover {
+    transform: translateY(-4px);
+  }
+}
+
 @container tgs-page (max-width: 1023px) {
   .tgs-row[data-stack='tablet'] { grid-template-columns: 1fr; }
   .tgs-row[data-stack='tablet'][data-reverse='true'] { direction: rtl; }

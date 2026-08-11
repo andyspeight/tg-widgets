@@ -711,6 +711,32 @@ const MUTATIONS = [
     from: `    .tgs-section[data-reveal='blur'] .tgs-block { animation-name: tgs-reveal-blur; }`,
     to: `    .tgs-section[data-reveal='blur'] .tgs-block { animation-name: tgs-reveal-rise; }`,
   },
+  {
+    tag: 'hover-lift',
+    check: 'a hover-lift section raises its button under the pointer',
+    /*
+     * The toggle stores the flag but the section never carries data-hover-lift, so
+     * the CSS matches nothing and cards and buttons sit flat under the pointer. Dead
+     * in the one place it is meant to be alive: the published page.
+     */
+    why: 'Never emit data-hover-lift, so nothing lifts.',
+    file: 'components/render/PageRenderer.tsx',
+    from: `      data-hover-lift={section.hoverLift && !editable ? '' : undefined}`,
+    to: `      data-hover-lift={undefined}`,
+  },
+  {
+    tag: 'hover-lift-css',
+    check: 'a hover-lift section raises its button under the pointer',
+    /*
+     * The attribute is there but the hover shadow is gone, so a lifted button never
+     * deepens under the pointer. The rise may still fire, but the feedback everyone
+     * was meant to get, reduced motion included, is lost.
+     */
+    why: 'Drop the hover shadow, so the lift loses its depth.',
+    file: 'app/globals.css',
+    from: `  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.14);`,
+    to: `  box-shadow: none;`,
+  },
 
   // --- contact details, on the settings screen -----------------------------
 

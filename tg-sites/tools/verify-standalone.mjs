@@ -7733,6 +7733,87 @@ await check('a chosen reveal style rides data-reveal and runs its own keyframe',
   return true;
 });
 
+/*
+ * Hover lift (Andy, 11 Aug 2026). A section marked Hover lift raises its cards and
+ * buttons a touch under the pointer. The shadow deepens for everyone; the small rise
+ * sits behind prefers-reduced-motion. This drops in a lifted section with a button,
+ * previews it, points at the button and checks the shadow deepened and, where motion
+ * is allowed, that it moved.
+ */
+await check('a hover-lift section raises its button under the pointer', async () => {
+  await closeAnyDialog();
+  await page.evaluate(() =>
+    window.__TG_SET_PAGE__({
+      id: 'hl',
+      slug: 'hover-lift',
+      title: 'Hover lift',
+      version: 1,
+      sections: [
+        {
+          id: 's',
+          width: 'contained',
+          tone: 'light',
+          hoverLift: true,
+          rows: [
+            {
+              id: 'r',
+              gap: 16,
+              columns: [
+                {
+                  id: 'c',
+                  width: 100,
+                  blocks: [{ id: 'b', type: 'button', props: { label: 'Enquire', href: '/contact', variant: 'primary' } }],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }),
+  );
+  await page.waitForTimeout(400);
+
+  await page.getByRole('button', { name: 'Preview', exact: true }).click();
+  await page.waitForTimeout(300);
+
+  const present = await page.evaluate(
+    () => !!document.querySelector('.ed-canvas-frame .tgs-section[data-hover-lift]'),
+  );
+  const btn = page.locator('.ed-canvas-frame .tgs-button').first();
+  const count = await btn.count();
+  // Read the resting shadow with the pointer parked away from the button.
+  await page.mouse.move(5, 5);
+  const before = count ? await btn.evaluate((el) => getComputedStyle(el).boxShadow) : null;
+  if (count) await btn.hover();
+  await page.waitForTimeout(250);
+  const after = count
+    ? await btn.evaluate((el) => ({
+        shadow: getComputedStyle(el).boxShadow,
+        transform: getComputedStyle(el).transform,
+        motionOk: matchMedia('(prefers-reduced-motion: no-preference)').matches,
+      }))
+    : null;
+
+  const exit = page.getByRole('button', { name: 'Exit preview', exact: true });
+  if (await exit.count()) {
+    await exit.click();
+    await page.waitForTimeout(200);
+  }
+  await page.evaluate(() => window.__TG_SET_PAGE__(null));
+  await page.waitForTimeout(200);
+  await showPanels();
+
+  if (!present) return 'the section did not carry data-hover-lift in preview';
+  if (!count) return 'no button rendered in preview';
+  if (after.shadow === before || after.shadow === 'none') {
+    return `the shadow did not deepen on hover: ${before} then ${after.shadow}`;
+  }
+  if (after.motionOk && (after.transform === 'none' || after.transform === '')) {
+    return 'the button did not lift on hover where motion is allowed';
+  }
+  return true;
+});
+
 // --- Preview mode: the site as it will publish, full canvas -----------------
 
 /*

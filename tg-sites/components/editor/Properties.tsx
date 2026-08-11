@@ -989,6 +989,23 @@ function SectionFields({
             </select>
           </div>
         )}
+        <div className="ed-field">
+          <label className="ed-toggle">
+            <input
+              type="checkbox"
+              checked={section.hoverLift === true}
+              onChange={(event) =>
+                set({ hoverLift: event.target.checked || undefined }, `sec:${index}:hoverLift`)
+              }
+            />
+            <span>Hover lift</span>
+          </label>
+          <p className="ed-help" style={{ marginTop: 6 }}>
+            Cards and buttons in this section lift a touch as a visitor points at them. It
+            eases off for anyone who prefers less motion, keeping a gentle shadow without the
+            movement.
+          </p>
+        </div>
       </Group>
 
       <Group title="Style" defaultOpen={false}>

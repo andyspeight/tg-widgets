@@ -513,3 +513,48 @@ describe('reveal on scroll animates a sections content in, degrading gracefully'
     expect(props).toContain('REVEAL_STYLES.map');
   });
 });
+
+// ---------------------------------------------------------------------------
+
+describe('hover lift raises a sections cards and buttons under the pointer', () => {
+  const render = read('components', 'render', 'PageRenderer.tsx');
+  const css = read('app', 'globals.css');
+  const props = read('components', 'editor', 'Properties.tsx');
+  const schema = read('lib', 'content', 'schema.ts');
+
+  it('carries an optional hover-lift flag, so no stored page changes shape', () => {
+    expect(schema).toContain('hoverLift: z.boolean().optional()');
+    const parsed = parsePage({
+      version: 1,
+      id: 'p',
+      slug: 'hover-lift',
+      title: 'Hover lift',
+      sections: [
+        { id: 'a', tone: 'light', width: 'contained', hoverLift: true, rows: [] },
+        { id: 'b', tone: 'light', width: 'contained', rows: [] },
+      ],
+    });
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(parsed.page.sections[0].hoverLift).toBe(true);
+    expect(parsed.page.sections[1].hoverLift).toBeUndefined();
+  });
+
+  it('emits data-hover-lift on the published section but never while editing', () => {
+    expect(render).toContain("data-hover-lift={section.hoverLift && !editable ? '' : undefined}");
+  });
+
+  it('lifts cards and buttons on hover, holding the movement back under reduced motion', () => {
+    // The shadow deepens for everyone; only the translate sits behind the guard.
+    expect(css).toContain('.tgs-section[data-hover-lift] .tgs-card:hover');
+    expect(css).toContain('.tgs-section[data-hover-lift] .tgs-button:hover');
+    expect(css).toContain('box-shadow: 0 10px 30px rgba(15, 23, 42, 0.14)');
+    expect(css).toContain('prefers-reduced-motion: no-preference');
+    expect(css).toContain('transform: translateY(-4px)');
+  });
+
+  it('offers a Hover lift toggle on the section', () => {
+    expect(props).toContain('Hover lift');
+    expect(props).toContain('set({ hoverLift: event.target.checked || undefined }');
+  });
+});

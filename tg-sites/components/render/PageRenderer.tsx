@@ -340,6 +340,12 @@ export function SectionRenderer({
        * style on the attribute. globals.css keys each keyframe off it.
        */
       data-reveal={section.reveal && !editable ? normaliseRevealStyle(section.revealStyle) : undefined}
+      /*
+       * Cards and buttons lift under the pointer on the published page and in preview,
+       * not while editing, where the small movement would fight selecting them. Same
+       * `editable` gate as the reveal above. The lift itself is pure CSS in globals.css.
+       */
+      data-hover-lift={section.hoverLift && !editable ? '' : undefined}
       style={{
         ...boxStyle(section.box),
         '--tgs-pad': `${section.paddingY}px`,
