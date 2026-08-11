@@ -857,7 +857,18 @@ export function EditorShell({
     setHistoryOpen(false);
     setPreview(true);
   }, []);
-  const exitPreview = useCallback(() => setPreview(false), []);
+  const exitPreview = useCallback(() => {
+    setPreview(false);
+    /*
+     * Bring the side panels back on the way out. A large Desktop width folds them
+     * to make room (chooseViewport), and leaving preview to a workspace with no
+     * tools is what read as "preview ate my sidebars" (Andy, 11 Aug 2026). Exiting
+     * preview is an explicit "back to editing", so it is the right moment to
+     * reopen them; a width that cannot hold both then honestly shows the narrower
+     * canvas rather than silently hiding the panels again.
+     */
+    setPanels({ outline: true, props: true });
+  }, []);
 
   useEffect(() => {
     if (!preview) return;

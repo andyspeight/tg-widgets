@@ -583,6 +583,27 @@ const MUTATIONS = [
     to: `editable={true}`,
   },
   {
+    tag: 'preview',
+    check: 'preview fills the canvas even with the panels folded',
+    /*
+     * The folded rule is more specific than the preview one, so without the guard
+     * it keeps the columns at `0 1fr 0` while the preview areas collapse to a single
+     * `canvas` column. The canvas maps to the 0px track and the screen goes blank.
+     */
+    why: 'Let the both-folded rule apply in preview, so the canvas maps to a 0px track and goes blank.',
+    file: 'components/editor/editor.css',
+    from: `  .ed-root[data-outline='folded'][data-props='folded']:not([data-preview='true']) {`,
+    to: `  .ed-root[data-outline='folded'][data-props='folded'] {`,
+  },
+  {
+    tag: 'preview',
+    check: 'leaving preview brings the side panels back',
+    why: 'Drop the panel reopen from exitPreview, so a folded workspace stays toolless after preview.',
+    file: 'components/editor/EditorShell.tsx',
+    from: `    setPanels({ outline: true, props: true });`,
+    to: '',
+  },
+  {
     tag: 'breakpoints',
     check: 'a section spacing set on Phone changes phone, not desktop',
     /*

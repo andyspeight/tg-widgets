@@ -185,13 +185,21 @@
  * already shows one pane at a time and these attributes must not fight it.
  */
 @media (min-width: 1181px) {
-  .ed-root[data-outline='folded'] {
+  /*
+   * NOT WHILE PREVIEWING. Preview collapses the grid to a single `canvas` column
+   * (see the data-preview rule below), but a folded column rule is more specific
+   * than the preview one, so without this guard the folded three-track columns
+   * (0 1fr 0) win while the areas become one column: the canvas maps to the 0px
+   * track and the preview goes blank. Folding is an editing convenience, so it
+   * simply does not apply in preview. (The blank-preview bug, 11 Aug 2026.)
+   */
+  .ed-root[data-outline='folded']:not([data-preview='true']) {
     grid-template-columns: 0 1fr 320px;
   }
-  .ed-root[data-props='folded'] {
+  .ed-root[data-props='folded']:not([data-preview='true']) {
     grid-template-columns: 320px 1fr 0;
   }
-  .ed-root[data-outline='folded'][data-props='folded'] {
+  .ed-root[data-outline='folded'][data-props='folded']:not([data-preview='true']) {
     grid-template-columns: 0 1fr 0;
   }
   .ed-root[data-outline='folded'] .ed-outline,

@@ -7428,6 +7428,86 @@ await check('preview shows the published page full width, then restores editing'
   return true;
 });
 
+// --- Preview with the panels folded -----------------------------------------
+
+/*
+ * Andy, 11 Aug 2026: with both side panels folded, pressing Preview showed a
+ * blank screen. The panels fold by narrowing their grid track to 0 (the media
+ * block up top), and that folded rule is more specific than the preview one, so
+ * in preview the columns stayed `0 1fr 0` while the areas collapsed to a single
+ * `canvas` column: the canvas (.ed-canvas-wrap holds grid-area: canvas) mapped
+ * to the 0px track and vanished. The guard is that folding does not apply in
+ * preview.
+ */
+await check('preview fills the canvas even with the panels folded', async () => {
+  await closeAnyDialog();
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await foldPanels();
+  await page.waitForTimeout(200);
+
+  const preview = page.getByRole('button', { name: 'Preview', exact: true });
+  if ((await preview.count()) === 0) {
+    await showPanels();
+    return 'no Preview button';
+  }
+  await preview.click();
+  await page.waitForTimeout(300);
+
+  // The canvas column is the whole width now, not a 0px sliver, and a section
+  // shows in it. Before the fix .ed-canvas-wrap measured 0 and the screen was blank.
+  const canvas = await page.locator('.ed-canvas-wrap').boundingBox().catch(() => null);
+  const sectionShown = await page
+    .locator('.ed-canvas-frame .tgs-section')
+    .first()
+    .isVisible()
+    .catch(() => false);
+
+  const exit = page.getByRole('button', { name: 'Exit preview', exact: true });
+  if (await exit.count()) {
+    await exit.click();
+    await page.waitForTimeout(200);
+  }
+  await showPanels();
+
+  if (!canvas || canvas.width < 800) return `the canvas collapsed in a folded preview: ${JSON.stringify(canvas)}`;
+  if (!sectionShown) return 'no section showed in a folded preview';
+  return true;
+});
+
+/*
+ * The other half of the same report: leaving preview left the workspace with no
+ * side panels at all. A wide Desktop folds them to make room, and exiting preview
+ * to a toolless canvas read as the panels being eaten. Exit is an explicit "back
+ * to editing", so it reopens them; a width that cannot hold both then shows a
+ * narrower canvas rather than silently hiding them again.
+ */
+await check('leaving preview brings the side panels back', async () => {
+  await closeAnyDialog();
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await foldPanels();
+  await page.waitForTimeout(200);
+
+  const foldedOutline = !(await page.locator('.ed-outline').isVisible().catch(() => true));
+  const foldedProps = !(await page.locator('.ed-props').isVisible().catch(() => true));
+  if (!foldedOutline || !foldedProps) {
+    await showPanels();
+    return 'the panels were not folded to begin with';
+  }
+
+  const preview = page.getByRole('button', { name: 'Preview', exact: true });
+  await preview.click();
+  await page.waitForTimeout(250);
+  const exit = page.getByRole('button', { name: 'Exit preview', exact: true });
+  await exit.click();
+  await page.waitForTimeout(300);
+
+  const outlineBack = await page.locator('.ed-outline').isVisible();
+  const propsBack = await page.locator('.ed-props').isVisible();
+  if (!outlineBack) return 'the page panel did not come back after leaving preview';
+  if (!propsBack) return 'the settings panel did not come back after leaving preview';
+  return true;
+});
+
 // --- Preview keeps a widget on screen ---------------------------------------
 
 /*
