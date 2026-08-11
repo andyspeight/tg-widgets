@@ -72,6 +72,24 @@ interface Editable {
    * editor owns its contents: see TextBlock's editingHost.
    */
   editingPath?: string | null;
+  /**
+   * This tree is the editor's canvas, whether it is editing OR previewing.
+   *
+   * NOT the same as `editable`, which the Preview button turns off so the canvas
+   * renders the exact published DOM. One block needs the difference. A widget off
+   * the canvas draws a bare container that components/render/WidgetScripts.tsx
+   * fills, but the editor never renders that script (it would hammer the widget
+   * config API on every keystroke), so on the canvas that container would stay
+   * empty. The canvas hosts the widget in its own sealed iframe instead, and it
+   * has to keep doing so in preview, where `editable` is false but still no script
+   * has appeared. So this stays true the whole time the editor is on screen, and
+   * is false on the published page and the server preview route, which do render
+   * the script. See WidgetBlock.
+   *
+   * (Andy, 11 Aug 2026: the Contact page's enquiry widget vanished the moment he
+   * pressed Preview, because `editable` alone flipped it to the empty container.)
+   */
+  editorCanvas?: boolean;
 }
 
 /**
@@ -117,6 +135,7 @@ export function PageRenderer({
   page,
   editable = false,
   editingPath = null,
+  editorCanvas = false,
   emptyNote = 'This page is empty. Add a section to get started.',
   theme,
   region = null,
@@ -185,6 +204,7 @@ export function PageRenderer({
             index={index}
             editable={editable}
             editingPath={editingPath}
+            editorCanvas={editorCanvas}
             /*
               A shaped edge is the BOUNDARY between two sections, so drawing one
               needs the colour on the other side of it. Only this component
@@ -253,6 +273,7 @@ export function SectionRenderer({
   index,
   editable = false,
   editingPath = null,
+  editorCanvas = false,
   above,
   below,
 }: {
@@ -419,6 +440,7 @@ export function SectionRenderer({
             index={rowIndex}
             editable={editable}
             editingPath={editingPath}
+            editorCanvas={editorCanvas}
           />
         ))}
         {editable && section.rows.length === 0 && (
@@ -624,6 +646,7 @@ export function RowRenderer({
   index,
   editable = false,
   editingPath = null,
+  editorCanvas = false,
 }: { row: Row; sectionIndex: number; index: number } & Editable): ReactElement {
   /*
    * The dragged widths become a single custom property, for example
@@ -671,6 +694,7 @@ export function RowRenderer({
           isLast={columnIndex === row.columns.length - 1}
           editable={editable}
           editingPath={editingPath}
+          editorCanvas={editorCanvas}
         />
       ))}
     </div>
@@ -693,6 +717,7 @@ function blockHost(
   keyPath: string,
   editable: boolean,
   editingPath: string | null,
+  editorCanvas: boolean,
 ): ReactElement {
   const box = block.box ?? EMPTY_BOX;
   const boxed = !boxIsEmpty(box);
@@ -728,12 +753,14 @@ function blockHost(
           keyPath={keyPath}
           editable={editable}
           editingPath={editingPath}
+          editorCanvas={editorCanvas}
         />
       ) : (
         <BlockRenderer
           block={block}
           editable={editable}
           editingHost={editable && editingPath === keyPath}
+          editorCanvas={editorCanvas}
         />
       )}
     </div>
@@ -752,6 +779,7 @@ function InnerColumns({
   keyPath,
   editable = false,
   editingPath = null,
+  editorCanvas = false,
 }: {
   columns: Column[];
   gap: number;
@@ -790,7 +818,7 @@ function InnerColumns({
             {...pathAttr(editable, colPath)}
           >
             {blocks.map((block, innerBlock) =>
-              blockHost(block, `${colPath}i${innerBlock}`, editable, editingPath),
+              blockHost(block, `${colPath}i${innerBlock}`, editable, editingPath, editorCanvas),
             )}
 
             {editable && blocks.length === 0 && (
@@ -854,6 +882,7 @@ export function ColumnRenderer({
   isLast,
   editable = false,
   editingPath = null,
+  editorCanvas = false,
 }: {
   column: Column;
   sectionIndex: number;
@@ -875,7 +904,7 @@ export function ColumnRenderer({
       {...pathAttr(editable, path)}
     >
       {column.blocks.map((block, blockIndex) =>
-        blockHost(block, `${path}b${blockIndex}`, editable, editingPath),
+        blockHost(block, `${path}b${blockIndex}`, editable, editingPath, editorCanvas),
       )}
 
       {/*

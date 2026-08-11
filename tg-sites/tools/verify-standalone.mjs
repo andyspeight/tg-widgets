@@ -7428,6 +7428,99 @@ await check('preview shows the published page full width, then restores editing'
   return true;
 });
 
+// --- Preview keeps a widget on screen ---------------------------------------
+
+/*
+ * Andy, 11 Aug 2026: the Contact page's third section was an enquiry widget, and
+ * pressing Preview blanked it. A widget draws differently in the two places it
+ * lives, its own iframe on the canvas because the editor loads no widget scripts,
+ * and a bare container on the published page that WidgetScripts fills. Preview
+ * turns `editable` off, and keyed on that alone the widget flipped to the bare
+ * container the editor never fills, so the section went empty. It has to keep its
+ * own frame straight through preview. SEED_PAGE carries no widget, so this drops
+ * one in through the harness handle and takes it out again after.
+ */
+await check('a widget keeps its frame when the page is previewed', async () => {
+  await closeAnyDialog();
+  await page.evaluate(() =>
+    window.__TG_SET_PAGE__({
+      id: 'wtest',
+      slug: 'widget-preview',
+      title: 'Widget preview',
+      version: 1,
+      sections: [
+        {
+          id: 'sec_w',
+          width: 'contained',
+          tone: 'light',
+          rows: [
+            {
+              id: 'row_w',
+              gap: 16,
+              columns: [
+                {
+                  id: 'col_w',
+                  width: 100,
+                  blocks: [
+                    {
+                      id: 'blk_w',
+                      type: 'widget',
+                      props: { widget: 'enquiry', widgetId: 'tgw_previewtest_enquiry01' },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }),
+  );
+  await page.waitForTimeout(600);
+  await page.getByRole('button', { name: 'Desktop' }).click();
+  await page.waitForTimeout(200);
+  await showPanels();
+
+  // On the canvas to begin with, the widget hosts itself in a frame.
+  const framedEditing = await page.locator('.ed-canvas-frame .tgs-widget-frame iframe').count();
+  if (framedEditing === 0) {
+    await page.evaluate(() => window.__TG_SET_PAGE__(null));
+    return 'the widget had no frame on the canvas to begin with';
+  }
+
+  const preview = page.getByRole('button', { name: 'Preview', exact: true });
+  if ((await preview.count()) === 0) {
+    await page.evaluate(() => window.__TG_SET_PAGE__(null));
+    return 'no Preview button';
+  }
+  await preview.click();
+  await page.waitForTimeout(350);
+
+  // The whole point: STILL a frame, never the bare container the editor cannot
+  // fill. Before the fix, preview drew `.tgs-widget` and the section went blank.
+  const framedPreview = await page.locator('.ed-canvas-frame .tgs-widget-frame iframe').count();
+  const barePreview = await page.locator('.ed-canvas-frame .tgs-widget').count();
+  const box = await page
+    .locator('.ed-canvas-frame .tgs-widget-frame')
+    .first()
+    .boundingBox()
+    .catch(() => null);
+
+  // Out of preview, and back to the seed for whatever runs next.
+  const exit = page.getByRole('button', { name: 'Exit preview', exact: true });
+  if (await exit.count()) {
+    await exit.click();
+    await page.waitForTimeout(200);
+  }
+  await page.evaluate(() => window.__TG_SET_PAGE__(null));
+  await page.waitForTimeout(300);
+
+  if (framedPreview === 0) return 'the widget lost its frame in preview: the blank-section bug';
+  if (barePreview > 0) return 'preview drew the bare .tgs-widget container the editor never fills';
+  if (!box || box.width < 200) return `the widget frame collapsed in preview: ${JSON.stringify(box)}`;
+  return true;
+});
+
 await browser.close();
 
 let failed = false;

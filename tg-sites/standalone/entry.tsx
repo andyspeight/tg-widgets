@@ -15,7 +15,7 @@ import { createRoot } from 'react-dom/client';
 
 import { EditorShell } from '../components/editor/EditorShell';
 import { SEED_PAGE } from '../lib/content/seed';
-import { emptyRegion, REGIONS, type RegionName } from '../lib/content/schema';
+import { emptyRegion, parsePage, REGIONS, type Page, type RegionName } from '../lib/content/schema';
 import { regionAsPage } from '../lib/content/region-page';
 import { parseTheme, type Theme } from '../lib/theme/schema';
 import { themeTokens } from '../lib/theme/tokens';
@@ -49,6 +49,17 @@ function App() {
    * /editor?region=header instead.
    */
   const [region, setRegion] = useState<RegionName | null>(null);
+  /**
+   * A page the harness drops in to exercise something SEED_PAGE does not carry.
+   *
+   * The widget block is the one that needs it: it draws its own iframe on the
+   * canvas and a bare container on the published page, so the only way to verify
+   * that preview keeps showing a widget is to put a real widget on the canvas
+   * first. Null is the seed. A handle rather than a control, for the same reason
+   * the theme and the region are: this file is also the review copy, and a page
+   * switcher across the top would make the product look like it has one.
+   */
+  const [testPage, setTestPage] = useState<Page | null>(null);
 
   const handles = window as unknown as Record<string, unknown>;
   handles.__TG_SET_THEME__ = (input: unknown) => {
@@ -61,6 +72,15 @@ function App() {
         : null,
     );
   };
+  /*
+   * Parsed the same way a saved page is, so the harness can hand over a loose
+   * object and get back a real Page with its defaults filled. Anything that will
+   * not parse, null included, restores the seed.
+   */
+  handles.__TG_SET_PAGE__ = (input: unknown) => {
+    const parsed = input == null ? null : parsePage(input);
+    setTestPage(parsed && parsed.ok ? parsed.page : null);
+  };
 
   return (
     <EditorShell
@@ -70,14 +90,14 @@ function App() {
        * a parent that could reset it mid-edit would be a way to lose work. So
        * changing what is being edited is a new editor, and the key says so.
        */
-      key={region ?? 'page'}
+      key={region ?? (testPage ? 'testpage' : 'page')}
       isStaff
       // So version history can mark the entries this person published.
       currentUserId="demo-user"
       region={region}
       initialRegionFlags={{ sticky: false, overlay: false }}
       pageId={region ? `region-${region}` : 'demo'}
-      initialPage={region ? regionAsPage(emptyRegion(region)) : SEED_PAGE}
+      initialPage={region ? regionAsPage(emptyRegion(region)) : (testPage ?? SEED_PAGE)}
       initialStatus="draft"
       initialHasUnpublishedChanges
       siteTheme={themeTokens(theme).style}

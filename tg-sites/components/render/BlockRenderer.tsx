@@ -48,11 +48,18 @@ export function BlockRenderer({
   block,
   editable = false,
   editingHost = false,
+  editorCanvas = false,
 }: {
   block: Block;
   editable?: boolean;
   /** This block is being typed into on the canvas. See TextBlock. */
   editingHost?: boolean;
+  /**
+   * This tree is the editor canvas, editing OR previewing. Only the widget block
+   * reads it, to keep hosting itself in an iframe once Preview turns `editable`
+   * off. See the Editable interface in PageRenderer and WidgetBlock.
+   */
+  editorCanvas?: boolean;
 }): ReactElement | null {
   const props = block.props ?? {};
 
@@ -131,15 +138,20 @@ export function BlockRenderer({
       case 'imported':
         return <ImportedBlock props={props} blockId={block.id} />;
       /*
-       * `editable` is what tells these two to draw a placeholder rather than the
-       * real thing. It is already true exactly when this tree is the editor's
-       * canvas, so nothing new had to be threaded down for it: see the note on
-       * WidgetBlock for why the canvas must not run widget scripts.
+       * `editorCanvas`, NOT `editable`, tells the widget to host itself in an
+       * iframe. The two agree while editing but split in preview: `editable` goes
+       * false so the canvas renders the published DOM, yet the bare container the
+       * published page uses needs components/render/WidgetScripts.tsx to fill it,
+       * and the editor never renders that. `editorCanvas` stays true across the
+       * whole canvas, so the widget keeps its own iframe through preview instead
+       * of collapsing to an empty box. See the note on WidgetBlock. (The
+       * embed-widget block no longer reads the flag: its sealed frame is the same
+       * on the canvas and the page.)
        */
       case 'widget':
-        return <WidgetBlock props={props} editing={editable} />;
+        return <WidgetBlock props={props} editing={editorCanvas} />;
       case 'embed-widget':
-        return <EmbedWidgetBlock props={props} editing={editable} />;
+        return <EmbedWidgetBlock props={props} editing={editorCanvas} />;
       default:
         return null;
     }

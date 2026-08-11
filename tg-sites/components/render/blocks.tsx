@@ -648,12 +648,21 @@ export function WidgetBlock({
   /**
    * Draw the widget in its own frame rather than the bare container.
    *
-   * True on the editor canvas. It used to be a placeholder, because the canvas
-   * re-renders on every keystroke and a widget script re-initialising each time
-   * would thrash the page and hammer the config API. The frame solves that
+   * True the whole time this is on the EDITOR CANVAS, editing or previewing, fed
+   * by `editorCanvas` (not `editable`). It used to be a placeholder, because the
+   * canvas re-renders on every keystroke and a widget script re-initialising each
+   * time would thrash the page and hammer the config API. The frame solves that
    * instead of dodging it: the widget's script runs in its own document, which
    * React keeps across re-renders while the tag and id are unchanged, so it loads
    * once. Same reasoning as the render-must-not-grab-the-page rule.
+   *
+   * It has to stay true in preview too. Preview turns `editable` off so the canvas
+   * shows the published DOM, but the bare container that the published page draws
+   * is filled by WidgetScripts, which the editor never renders. Keyed off
+   * `editable`, the widget would flip to that empty container and the section
+   * would go blank. Keyed off `editorCanvas`, the same iframe stays mounted (tag
+   * and id unchanged) and the widget carries straight through into preview.
+   * (Andy, 11 Aug 2026: the Contact page's enquiry widget disappeared on Preview.)
    */
   editing?: boolean;
 }): ReactElement {

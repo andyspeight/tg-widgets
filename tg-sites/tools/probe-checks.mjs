@@ -315,6 +315,23 @@ const MUTATIONS = [
     label: 'Embedded widget',
     group: 'Nowhere',`,
   },
+  {
+    tag: 'widget',
+    check: 'a widget keeps its frame when the page is previewed',
+    /*
+     * Andy's bug, 11 Aug 2026: key the widget on `editable` again. Preview turns
+     * `editable` off to render the published DOM, so the widget flips to the bare
+     * container the published page fills with a script, but the editor renders no
+     * script, so the container stays empty and the section goes blank. The whole
+     * fix is that the widget reads `editorCanvas`, which stays true across preview.
+     */
+    why: 'Key the widget on `editable`, so Preview drops it to the container the editor never fills.',
+    file: 'components/render/BlockRenderer.tsx',
+    from: `      case 'widget':
+        return <WidgetBlock props={props} editing={editorCanvas} />;`,
+    to: `      case 'widget':
+        return <WidgetBlock props={props} editing={editable} />;`,
+  },
 
   // --- a heading holds markup ----------------------------------------------
 

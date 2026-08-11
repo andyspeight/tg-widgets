@@ -777,6 +777,15 @@ export function Canvas({
             page={page}
             editable={!preview}
             editingPath={preview ? null : editingPath}
+            /*
+              This is the editor canvas, so a widget hosts itself in its own frame
+              rather than the bare container the published page fills with a
+              script. TRUE IN PREVIEW TOO, unlike `editable`: the editor never
+              renders that script, so a widget keyed on `editable` alone went blank
+              the moment Preview was pressed. See the Editable interface in
+              PageRenderer. (Andy, 11 Aug 2026: the Contact page's enquiry widget.)
+            */
+            editorCanvas
             emptyNote={preview ? undefined : emptyNote}
             theme={theme}
             /*
