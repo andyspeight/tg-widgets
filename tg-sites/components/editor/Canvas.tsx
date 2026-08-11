@@ -88,6 +88,17 @@ interface Props {
   emptyNote?: string;
   /** Which region is being edited, when it is one rather than a page. */
   region?: 'header' | 'footer' | null;
+  /**
+   * Show the page as it will be published, not as it is edited.
+   *
+   * In preview the render is editable=false, so it is the exact published DOM:
+   * no data-path, no insert points, no empty-column adders, and a background
+   * video plays where the editor only shows its poster. None of the editing
+   * interactions are wired (select, resize, type in place), and a link is left
+   * to behave rather than being swallowed. The shell hides the side panels at
+   * the same time, so this is the whole canvas.
+   */
+  preview?: boolean;
 }
 
 /**
@@ -135,6 +146,7 @@ export function Canvas({
   theme,
   emptyNote,
   region = null,
+  preview = false,
 }: Props) {
   const frameRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -398,6 +410,24 @@ export function Canvas({
     },
     [onSelect, onPickBlock, onInsertSection],
   );
+
+  /*
+   * The only click handling PREVIEW keeps: let a link behave.
+   *
+   * Editing swallows every link so following one cannot navigate away from the
+   * editor. Preview is the opposite promise, so an in-page anchor is left to
+   * scroll and any other link opens in a new tab, which keeps the browsing live
+   * without losing the editor and the edits that have not saved yet. Nothing
+   * here selects: preview has no selection.
+   */
+  const onPreviewClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    const link = (event.target as HTMLElement).closest<HTMLAnchorElement>('a[href]');
+    if (!link) return;
+    const href = link.getAttribute('href') ?? '';
+    if (href === '' || href.startsWith('#')) return;
+    event.preventDefault();
+    window.open(link.href, '_blank', 'noopener,noreferrer');
+  }, []);
 
   // ---------------------------------------------------------------------
   // Column resize
@@ -673,8 +703,11 @@ export function Canvas({
        * the canvas lands here: on an item it selects, on the empty canvas it
        * clears. onClick reads data-path with closest(), so it works the same from
        * up here.
+       *
+       * In preview the editor click is swapped for the one that only lets links
+       * behave: no select, no clear, no resize.
        */
-      onClick={onClick}
+      onClick={preview ? onPreviewClick : onClick}
     >
       {/*
         A CAP, NOT A FIXED WIDTH, and this is the third answer to the same
@@ -704,19 +737,25 @@ export function Canvas({
           ref={frameRef}
           className="ed-canvas-frame"
           style={{ maxWidth: '100%' }}
-          onInput={onInput}
-          onPaste={onPaste}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={endDrag}
-          onPointerCancel={endDrag}
-          onKeyDown={onKeyDown}
+          /*
+            None of the editing interactions are wired in preview: no typing in
+            place, no column or height drag, no resize keys. The render below is
+            editable=false, so there are no handles or hosts for them to find
+            anyway, but leaving them off is what makes preview a preview.
+          */
+          onInput={preview ? undefined : onInput}
+          onPaste={preview ? undefined : onPaste}
+          onPointerDown={preview ? undefined : onPointerDown}
+          onPointerMove={preview ? undefined : onPointerMove}
+          onPointerUp={preview ? undefined : endDrag}
+          onPointerCancel={preview ? undefined : endDrag}
+          onKeyDown={preview ? undefined : onKeyDown}
         >
           <PageRenderer
             page={page}
-            editable
-            editingPath={editingPath}
-            emptyNote={emptyNote}
+            editable={!preview}
+            editingPath={preview ? null : editingPath}
+            emptyNote={preview ? undefined : emptyNote}
             theme={theme}
             /*
               So a header draws as a header here, not as a page. See the note on
@@ -728,7 +767,7 @@ export function Canvas({
           />
         </div>
 
-        {stackNote && <p className="ed-stack-note">{stackNote}</p>}
+        {!preview && stackNote && <p className="ed-stack-note">{stackNote}</p>}
       </div>
 
       {badge && (

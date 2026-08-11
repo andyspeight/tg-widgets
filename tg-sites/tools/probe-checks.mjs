@@ -550,6 +550,21 @@ const MUTATIONS = [
     from: `      if (drag?.kind === 'move-section') moveSectionAt(drag.from, gap);`,
     to: `      if (drag?.kind === 'move-section') return;`,
   },
+  {
+    tag: 'preview',
+    check: 'preview shows the published page full width, then restores editing',
+    /*
+     * Preview is editable=false on the canvas: that is the one lever that turns
+     * the editing DOM into the published one. Force it back to always-editable
+     * and the panels still hide, but the canvas keeps its data-path hooks, so the
+     * check sees editing hooks on a canvas that should be showing the published
+     * page.
+     */
+    why: 'Render the canvas editable in preview too, so the published-DOM tell never appears.',
+    file: 'components/editor/Canvas.tsx',
+    from: `editable={!preview}`,
+    to: `editable={true}`,
+  },
 
   // --- contact details, on the settings screen -----------------------------
 

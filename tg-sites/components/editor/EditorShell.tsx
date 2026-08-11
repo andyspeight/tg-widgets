@@ -406,6 +406,18 @@ export function EditorShell({
    * how somebody likes to work, not something about the page.
    */
   const [panels, setPanels] = useState({ outline: true, props: true });
+  /**
+   * Preview mode: the canvas becomes the whole screen and shows the page as it
+   * will publish, not as it is edited.
+   *
+   * Andy, 11 Aug 2026: a Preview button so you can see the site exactly as it
+   * will be when published and interact with it as if it were live, with the
+   * side panels out of the way. The panels are hidden by data-preview on the
+   * root (see editor.css); the canvas renders editable=false and drops its
+   * editing handlers (see Canvas). It is a view of the SAME in-memory draft, so
+   * it reflects the current work including edits not yet saved.
+   */
+  const [preview, setPreview] = useState(false);
   /** What each preview is drawn at, in pixels. See VIEWPORTS_KEY. */
   const [widths, setWidths] = useState<Record<Viewport, number>>(VIEWPORT_DEFAULT);
   /**
@@ -829,6 +841,34 @@ export function EditorShell({
   }, []);
 
   /*
+   * PREVIEW MODE ON AND OFF.
+   *
+   * Entering clears everything that floats over the canvas: the selection and
+   * its contextual toolbar, any open options popover, the block picker, the
+   * section inserter and the history panel. None of them belong over a preview,
+   * and the toolbars go the moment nothing is selected. Escape leaves preview,
+   * the same key that dismisses the popovers it stands in for.
+   */
+  const enterPreview = useCallback(() => {
+    setSelected(null);
+    setOptionsOpen(false);
+    setPicker(null);
+    setInsertAt(null);
+    setHistoryOpen(false);
+    setPreview(true);
+  }, []);
+  const exitPreview = useCallback(() => setPreview(false), []);
+
+  useEffect(() => {
+    if (!preview) return;
+    function onKey(event: KeyboardEvent) {
+      if (event.key === 'Escape') setPreview(false);
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [preview]);
+
+  /*
    * The + on the contextual toolbar. Each container adds the thing it holds: a
    * section adds a sibling section (through the same picker the seam buttons
    * use), a row adds a column, and a column or a block adds a block through the
@@ -1223,6 +1263,7 @@ export function EditorShell({
       data-theme={theme}
       data-outline={panels.outline ? undefined : 'folded'}
       data-props={panels.props ? undefined : 'folded'}
+      data-preview={preview ? 'true' : undefined}
     >
       <header className="ed-topbar">
         {/*
@@ -1300,7 +1341,7 @@ export function EditorShell({
           Desktop was showing the phone layout. Folding a panel gives that width
           back.
         */}
-        <div className="ed-seg ed-desktop-only" role="group" aria-label="Panels">
+        <div className="ed-seg ed-desktop-only ed-editing-only" role="group" aria-label="Panels">
           <button
             type="button"
             className="ed-btn"
@@ -1410,7 +1451,7 @@ export function EditorShell({
 
         <button
           type="button"
-          className="ed-btn"
+          className="ed-btn ed-editing-only"
           data-icon="true"
           onClick={undo}
           disabled={history.past.length === 0}
@@ -1421,7 +1462,7 @@ export function EditorShell({
         </button>
         <button
           type="button"
-          className="ed-btn"
+          className="ed-btn ed-editing-only"
           data-icon="true"
           onClick={redo}
           disabled={history.future.length === 0}
@@ -1432,13 +1473,32 @@ export function EditorShell({
         </button>
 
         {/*
+          PREVIEW. Andy, 11 Aug 2026: a button to see the site exactly as it
+          will publish and interact with it as if it were live, with the side
+          panels out of the way so the canvas is the whole screen. It stays
+          visible in preview because it is the way back out, so it is NOT in the
+          editing-only group that steps aside. Escape leaves preview too.
+        */}
+        <button
+          type="button"
+          className="ed-btn"
+          data-on={preview ? 'true' : undefined}
+          aria-pressed={preview}
+          onClick={preview ? exitPreview : enterPreview}
+          title={preview ? 'Back to editing (Esc)' : 'See the site as it will be published'}
+        >
+          <Icon name="eye" size={16} />
+          {preview ? 'Exit preview' : 'Preview'}
+        </button>
+
+        {/*
           Disabled once published with nothing new to say, rather than hidden.
           A button that vanishes leaves an agent wondering where it went; one
           that reads "Published" and sits still answers the question.
         */}
         <button
           type="button"
-          className="ed-btn"
+          className="ed-btn ed-editing-only"
           data-variant="primary"
           onClick={publish}
           disabled={publishing || (status === 'published' && !unpublished)}
@@ -1529,6 +1589,7 @@ export function EditorShell({
         selected={selected}
         viewportWidth={`${widths[viewport]}px`}
         viewport={viewport}
+        preview={preview}
         onSelect={select}
         onCommit={commit}
         onPickBlock={setPicker}

@@ -230,6 +230,35 @@
   .ed-root:not([data-pane='outline']) .ed-outline { display: none; }
 }
 
+/*
+ * PREVIEW MODE.
+ *
+ * Andy, 11 Aug 2026: a Preview button that shows the site as it will publish,
+ * full width, with the side panels out of the way so the canvas is the whole
+ * screen. The canvas itself renders editable=false in this mode (see Canvas),
+ * so what shows is the published DOM: no data-path, no insert points, a
+ * background video playing, every native control live.
+ *
+ * The attribute is on the root, so the single override collapses the grid to
+ * one column and drops both panels whatever their fold state or the breakpoint.
+ * The higher specificity of the attribute selector wins over the plain
+ * .ed-root rules above without an !important. The editing-only top-bar controls
+ * step aside with the panels, leaving the device switcher and the way back out.
+ */
+.ed-root[data-preview='true'] {
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    'top'
+    'canvas';
+}
+.ed-root[data-preview='true'] .ed-outline,
+.ed-root[data-preview='true'] .ed-props {
+  display: none;
+}
+.ed-root[data-preview='true'] .ed-editing-only {
+  display: none;
+}
+
 /* ------------------------------------------------------------------ */
 /* Buttons                                                             */
 /* ------------------------------------------------------------------ */
@@ -255,6 +284,13 @@
 .ed-btn:hover:not(:disabled) { background: var(--ed-well); border-color: var(--ed-ink-3); }
 .ed-btn:active:not(:disabled) { transform: scale(0.98); }
 .ed-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+/* An on/pressed toggle, e.g. Preview while it is the active mode. */
+.ed-btn[data-on='true'] {
+  background: var(--ed-accent);
+  border-color: var(--ed-accent);
+  color: var(--ed-on-brand);
+}
+.ed-btn[data-on='true']:hover:not(:disabled) { background: var(--ed-accent); }
 
 .ed-btn[data-variant='primary'] {
   background: var(--ed-primary);

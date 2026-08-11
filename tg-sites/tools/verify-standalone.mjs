@@ -7252,6 +7252,49 @@ await check('setting a shadow on an element draws its box on the canvas', async 
   return boxed > 0 ? true : 'the element did not gain a box after a shadow was set';
 });
 
+// --- Preview mode: the site as it will publish, full canvas -----------------
+
+/*
+ * Andy, 11 Aug 2026: a Preview button that shows the site as it will publish,
+ * full width, with the side panels gone. Preview renders the canvas
+ * editable=false, so the reliable tell is the published DOM: the editing hooks
+ * (data-path) vanish and both side panels hide, and both come back on exit.
+ * Interacting "as if live" needs no script here, since almost every control is
+ * native (a details accordion, radio tabs, links), and editable=false is what
+ * stops the editor swallowing them. Left last, since it changes the whole
+ * layout.
+ */
+await check('preview shows the published page full width, then restores editing', async () => {
+  // Editing to begin with: the canvas carries data-path hooks and both panels
+  // are on screen.
+  const before = await page.locator('.ed-canvas-frame [data-path]').count();
+  if (before === 0) return 'no editing hooks to begin with';
+  if (!(await page.locator('.ed-props').isVisible())) return 'the settings panel was not there to begin with';
+
+  const preview = page.getByRole('button', { name: 'Preview', exact: true });
+  if ((await preview.count()) === 0) return 'no Preview button';
+  await preview.click();
+  await page.waitForTimeout(250);
+
+  // Both side panels are gone.
+  if (await page.locator('.ed-outline').isVisible()) return 'the page panel was still visible in preview';
+  if (await page.locator('.ed-props').isVisible()) return 'the settings panel was still visible in preview';
+  // The canvas is the published DOM now: no editing hooks left on it.
+  const during = await page.locator('.ed-canvas-frame [data-path]').count();
+  if (during !== 0) return `preview still had ${during} editing hooks on the canvas`;
+
+  // The way back out, and editing returns with it.
+  const exit = page.getByRole('button', { name: 'Exit preview', exact: true });
+  if ((await exit.count()) === 0) return 'no way back out of preview';
+  await exit.click();
+  await page.waitForTimeout(250);
+
+  const after = await page.locator('.ed-canvas-frame [data-path]').count();
+  if (after === 0) return 'editing did not come back after exit';
+  if (!(await page.locator('.ed-props').isVisible())) return 'the settings panel did not return after exit';
+  return true;
+});
+
 await browser.close();
 
 let failed = false;

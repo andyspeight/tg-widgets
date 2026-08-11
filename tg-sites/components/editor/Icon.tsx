@@ -84,6 +84,7 @@ export type IconName =
   | 'search'
   | 'warning'
   | 'edit'
+  | 'eye'
   | 'link'
   | 'link-off'
   | 'blank'
@@ -156,6 +157,9 @@ const PATHS: Record<IconName, string> = {
   // bars sit on a baseline and mean a chart.
   audio: 'M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2',
   button: 'M3 8h18v8H3zM8 12h8',
+  // An eye: the whole-site preview. The almond and a pupil, drawn in arcs like
+  // the social and testimonial marks so it sits at the same weight.
+  eye: 'M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7zM14.5 12a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z',
   buttons: 'M2 8h9v8H2zM13 8h9v8h-9z',
   divider: 'M3 12h18',
   spacer: 'M12 4v16M8 7l4-3 4 3M8 17l4 3 4-3',
