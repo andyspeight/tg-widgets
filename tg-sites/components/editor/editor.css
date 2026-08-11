@@ -928,29 +928,36 @@
 .ed-bar__btn[data-danger='true']:hover { background: var(--ed-danger); color: #fff; }
 
 /*
- * The grip you drag to move the block. Same size as a button but a grab cursor,
- * and touch-action:none so a touch drag is not stolen by the page scrolling.
+ * The drag handle for moving a block. A standalone fixed button in the gutter to
+ * the item's LEFT (placed by ItemToolbar), not a grip in the pill, so it clears
+ * a text block's formatting toolbar above and the words you select. A dark pill
+ * to read against the white canvas; touch-action:none so a touch drag is not
+ * stolen by the page scrolling.
  */
-.ed-bar__grip {
+.ed-drag-handle {
+  position: fixed;
+  z-index: 45;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border: 0;
   border-radius: var(--ed-r-sm);
-  background: transparent;
+  background: var(--ed-ink);
   color: var(--ed-panel);
+  box-shadow: var(--ed-shadow-lg);
   cursor: grab;
   touch-action: none;
 }
-.ed-bar__grip:hover { background: rgba(255, 255, 255, 0.16); }
-.ed-bar__grip:active { cursor: grabbing; }
-.ed-bar__grip:focus-visible { outline: 2px solid var(--ed-accent); outline-offset: 1px; }
+.ed-drag-handle:hover { background: var(--ed-accent); color: var(--ed-on-brand); }
+.ed-drag-handle:active { cursor: grabbing; }
+.ed-drag-handle:focus-visible { outline: 2px solid var(--ed-accent); outline-offset: 1px; }
 
-/* While any canvas drag is live the toolbar must not sit between the pointer and
-   the column the drop resolves against, so it goes click-through. */
-body[data-tg-dragging] .ed-bar { pointer-events: none; }
+/* While any canvas drag is live, neither the toolbar nor the handle may sit
+   between the pointer and the column the drop resolves against. */
+body[data-tg-dragging] .ed-bar,
+body[data-tg-dragging] .ed-drag-handle { pointer-events: none; }
 
 /*
  * The chip that follows the pointer while a placed block is moved. A small solid

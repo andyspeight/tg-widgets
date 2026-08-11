@@ -69,12 +69,18 @@ interface Anchor {
   left: number;
   /** True when the pill had no room above the element and sits below instead. */
   flip: boolean;
+  /** Viewport position of the drag handle, in the gutter to the item's left. */
+  handleX: number;
+  handleY: number;
 }
 
 /** Rough pill width, for keeping it off the right edge before it has rendered. */
 const PILL_WIDTH = 280;
 /** Rough pill height, for deciding whether it fits above the element. */
 const PILL_HEIGHT = 38;
+/** The drag handle's size and the gap it keeps from the item's left edge. */
+const HANDLE_SIZE = 24;
+const HANDLE_GAP = 6;
 
 export function ItemToolbar({
   page,
@@ -136,7 +142,14 @@ export function ItemToolbar({
     const flip = r.top - PILL_HEIGHT < w.top + 4;
     // Keep the whole pill inside the canvas, left and right.
     const left = Math.min(Math.max(w.left + 4, r.left), Math.max(w.left + 4, w.right - PILL_WIDTH));
-    setAnchor({ top: r.top, left, flip });
+
+    // The drag handle sits in the gutter to the LEFT of the item, clear of its
+    // content, so it never covers the words you are selecting or the formatting
+    // toolbar above them. Clamped inside the canvas for a full-width item whose
+    // own left edge is hard against the frame, and kept in view vertically.
+    const handleX = Math.max(w.left + 2, r.left - HANDLE_SIZE - HANDLE_GAP);
+    const handleY = Math.max(w.top + 4, Math.min(r.top + 6, w.bottom - HANDLE_SIZE - 4));
+    setAnchor({ top: r.top, left, flip, handleX, handleY });
   }, [selectedKey]);
 
   // Re-measure on the things that move the element: scrolling the canvas,
@@ -254,25 +267,6 @@ export function ItemToolbar({
         role="toolbar"
         aria-label={`${label} actions`}
       >
-        {/* No grip while you are TYPING in the block. A text or heading block
-            drops you into editing on select, and its formatting toolbar sits over
-            this pill there, so the grip would be both covered and, where it did
-            surface, a pointer meant to select the words would start a move and
-            clear the selection instead. Those blocks reorder from the outline or
-            the toolbar's up/down; every other block gets the grip. */}
-        {moveFrom && !editing && (
-          <button
-            type="button"
-            ref={moveDrag.setNodeRef}
-            className="ed-bar__grip"
-            title="Drag to move"
-            aria-label={`Drag to move ${label}`}
-            {...moveDrag.attributes}
-            {...moveDrag.listeners}
-          >
-            <Icon name="grip" size={16} />
-          </button>
-        )}
         <span className="ed-bar__label">{label}</span>
         {actions.map((action) => (
           <button
@@ -293,6 +287,26 @@ export function ItemToolbar({
           </button>
         ))}
       </div>
+
+      {/* The drag handle, in the gutter to the item's LEFT. A gutter handle, not
+          a grip in the pill, so it serves a text or heading block too: it never
+          sits under the formatting toolbar or over the words you are selecting.
+          It rides the same one dnd-kit context as the palette and the drop line;
+          the block's coordinates ride on its data for the shell to move. */}
+      {moveFrom && (
+        <button
+          type="button"
+          ref={moveDrag.setNodeRef}
+          className="ed-drag-handle"
+          style={{ top: anchor.handleY, left: anchor.handleX }}
+          title="Drag to move"
+          aria-label={`Drag to move ${label}`}
+          {...moveDrag.attributes}
+          {...moveDrag.listeners}
+        >
+          <Icon name="grip" size={16} />
+        </button>
+      )}
 
       {open && (
         <div

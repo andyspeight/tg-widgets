@@ -19,28 +19,32 @@ function read(...parts: string[]): string {
   return readFileSync(join(__dirname, '..', ...parts), 'utf8');
 }
 
-describe('a placed block is dragged by a grip on its toolbar', () => {
+describe('a placed block is dragged by a handle in the gutter', () => {
   const toolbar = read('components', 'editor', 'ItemToolbar.tsx');
 
-  it('makes the grip a dnd-kit draggable carrying the block’s coordinates', () => {
+  it('makes the handle a dnd-kit draggable carrying the block’s coordinates', () => {
     // The same source shape the palette uses, so it flows through the one context.
     // moveFrom is the top-level block address; moveLabel names it for the ghost.
     expect(toolbar).toContain('useDraggable');
     expect(toolbar).toContain('data: moveFrom ? { moveFrom, moveLabel: label } : undefined');
-    expect(toolbar).toContain('className="ed-bar__grip"');
+    expect(toolbar).toContain('className="ed-drag-handle"');
   });
 
-  it('offers the grip for a top-level block only, never a container’s inner block', () => {
+  it('offers the handle for a top-level block only, never a container’s inner block', () => {
     // moveBlockTo speaks column coordinates; an inner block has no cross-container
-    // mover yet, so it keeps its toolbar up/down and gets no grip. The draggable
+    // mover yet, so it keeps its toolbar up/down and gets no handle. The draggable
     // is disabled rather than skipped, so the hook order never changes.
     expect(toolbar).toMatch(/const moveFrom =\s*\n?\s*selected\.kind === 'block'/);
     expect(toolbar).toContain('disabled: !moveFrom');
   });
 
-  it('drags from the toolbar, not the block, so it never fights text editing', () => {
-    // The whole reason the grip lives on the toolbar overlay: a draggable on the
-    // block body would swallow the pointer that selects it or edits its text.
+  it('sits in the gutter to the item’s left, so it clears the words and toolbars', () => {
+    // The whole reason it is a gutter handle, not a grip in the pill: a text or
+    // heading block's formatting toolbar covers the pill and a pointer over the
+    // words would start a move. Left of the content, it clears both.
+    expect(toolbar).toContain('const handleX = Math.max(w.left + 2, r.left - HANDLE_SIZE - HANDLE_GAP)');
+    expect(toolbar).toContain('left: anchor.handleX');
+    // A handle on the toolbar overlay, never a native-draggable on the block body.
     expect(toolbar).not.toContain('draggable');
   });
 });
@@ -92,8 +96,8 @@ describe('the move reuses the add’s ghost and drop line, with its own chip', (
     expect(shell).toContain('ref={paletteDrop.slotRef}');
   });
 
-  it('keeps the toolbar out of the drop point while any canvas drag is live', () => {
+  it('keeps the toolbar and handle out of the drop point while a drag is live', () => {
     const css = read('components', 'editor', 'editor.css');
-    expect(css).toContain('body[data-tg-dragging] .ed-bar { pointer-events: none; }');
+    expect(css).toContain('body[data-tg-dragging] .ed-drag-handle { pointer-events: none; }');
   });
 });
