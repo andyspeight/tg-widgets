@@ -442,7 +442,9 @@ describe('reveal on scroll animates a sections content in, degrading gracefully'
   });
 
   it('emits data-reveal on the published section but never while editing', () => {
-    expect(render).toContain("data-reveal={section.reveal && !editable ? '' : undefined}");
+    expect(render).toContain(
+      'data-reveal={section.reveal && !editable ? normaliseRevealStyle(section.revealStyle) : undefined}',
+    );
   });
 
   it('animates each block on a scroll timeline, guarded so it falls back to visible', () => {
@@ -450,11 +452,64 @@ describe('reveal on scroll animates a sections content in, degrading gracefully'
     expect(css).toContain('prefers-reduced-motion: no-preference');
     expect(css).toContain('.tgs-section[data-reveal] .tgs-block');
     expect(css).toContain('animation-timeline: view()');
-    expect(css).toContain('@keyframes tgs-reveal-in');
+    expect(css).toContain('@keyframes tgs-reveal-rise');
   });
 
   it('offers a Reveal on scroll toggle on the section', () => {
     expect(props).toContain('Reveal on scroll');
     expect(props).toContain('set({ reveal: event.target.checked || undefined }');
+  });
+
+  it('stores an optional reveal style, normalised to the closed list', () => {
+    expect(schema).toContain('revealStyle: z.unknown().transform(normaliseRevealStyle).optional()');
+    // A stored style survives, junk is pulled back to the rise default, and a
+    // section that never set one keeps its shape: the key stays absent.
+    const parsed = parsePage({
+      version: 1,
+      id: 'p',
+      slug: 'reveal-style',
+      title: 'Reveal',
+      sections: [
+        { id: 'a', tone: 'light', width: 'contained', reveal: true, revealStyle: 'fade', rows: [] },
+        { id: 'b', tone: 'light', width: 'contained', reveal: true, revealStyle: 'nonsense', rows: [] },
+        { id: 'c', tone: 'light', width: 'contained', reveal: true, rows: [] },
+      ],
+    });
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(parsed.page.sections[0].revealStyle).toBe('fade');
+    expect(parsed.page.sections[1].revealStyle).toBe('rise');
+    expect(parsed.page.sections[2].revealStyle).toBeUndefined();
+  });
+
+  it('renders the chosen style into data-reveal, defaulting to rise', () => {
+    expect(render).toContain('normaliseRevealStyle(section.revealStyle)');
+  });
+
+  it('gives each style but the rise default its own keyframe', () => {
+    for (const name of [
+      'tgs-reveal-rise',
+      'tgs-reveal-fade',
+      'tgs-reveal-slide-left',
+      'tgs-reveal-slide-right',
+      'tgs-reveal-zoom',
+      'tgs-reveal-blur',
+    ]) {
+      expect(css).toContain(`@keyframes ${name}`);
+    }
+    // The variants swap animation-name and share the base rule's specificity, so
+    // they must sit after it for source order to resolve in their favour.
+    expect(css).toContain(
+      ".tgs-section[data-reveal='fade'] .tgs-block { animation-name: tgs-reveal-fade; }",
+    );
+    expect(css).toContain(
+      ".tgs-section[data-reveal='blur'] .tgs-block { animation-name: tgs-reveal-blur; }",
+    );
+  });
+
+  it('offers a Reveal style dropdown when reveal is on', () => {
+    expect(props).toContain('Reveal style');
+    expect(props).toContain('revealStyle: normaliseRevealStyle(event.target.value)');
+    expect(props).toContain('REVEAL_STYLES.map');
   });
 });

@@ -7655,8 +7655,80 @@ await check('a reveal section animates in on the page but stays still while edit
 
   if (whileEditing) return 'the reveal was live while editing, which would hide blocks as the canvas scrolls';
   if (!inPreview.reveal) return 'the section did not carry data-reveal in preview';
-  if (inPreview.supported && inPreview.anim !== 'tgs-reveal-in') {
+  if (inPreview.supported && inPreview.anim !== 'tgs-reveal-rise') {
     return `the reveal animation was not applied where supported: ${inPreview.anim}`;
+  }
+  return true;
+});
+
+/*
+ * The reveal styles (Andy, 11 Aug 2026). A reveal can arrive six ways: rise, fade,
+ * slide from either side, zoom, blur. The style rides on data-reveal, schema-checked
+ * against a closed list, and globals.css keys a keyframe off each. This settles that a
+ * chosen style reaches the attribute and, where scroll timelines run, its own keyframe
+ * is the one that plays.
+ */
+await check('a chosen reveal style rides data-reveal and runs its own keyframe', async () => {
+  await closeAnyDialog();
+  await page.evaluate(() =>
+    window.__TG_SET_PAGE__({
+      id: 'rvs',
+      slug: 'reveal-style',
+      title: 'Reveal style',
+      version: 1,
+      sections: [
+        {
+          id: 's',
+          width: 'contained',
+          tone: 'light',
+          reveal: true,
+          revealStyle: 'blur',
+          rows: [
+            {
+              id: 'r',
+              gap: 16,
+              columns: [
+                {
+                  id: 'c',
+                  width: 100,
+                  blocks: [{ id: 'h', type: 'heading', props: { level: 2, style: 'h2', html: 'Arrives with a blur' } }],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }),
+  );
+  await page.waitForTimeout(500);
+
+  await page.getByRole('button', { name: 'Preview', exact: true }).click();
+  await page.waitForTimeout(300);
+  const info = await page.evaluate(() => {
+    const section = document.querySelector('.ed-canvas-frame .tgs-section[data-reveal]');
+    if (!section) return { found: false };
+    const block = section.querySelector('.tgs-block');
+    return {
+      found: true,
+      value: section.getAttribute('data-reveal'),
+      supported: CSS.supports('animation-timeline', 'view()'),
+      anim: block ? getComputedStyle(block).animationName : null,
+    };
+  });
+
+  const exit = page.getByRole('button', { name: 'Exit preview', exact: true });
+  if (await exit.count()) {
+    await exit.click();
+    await page.waitForTimeout(200);
+  }
+  await page.evaluate(() => window.__TG_SET_PAGE__(null));
+  await page.waitForTimeout(200);
+  await showPanels();
+
+  if (!info.found) return 'the section did not carry data-reveal in preview';
+  if (info.value !== 'blur') return `data-reveal was "${info.value}", not the chosen blur`;
+  if (info.supported && info.anim !== 'tgs-reveal-blur') {
+    return `the blur keyframe did not run where supported: ${info.anim}`;
   }
   return true;
 });

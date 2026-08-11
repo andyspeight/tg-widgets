@@ -436,6 +436,30 @@ export function hasInlineTextSizing(html: unknown): boolean {
 }
 
 /**
+ * The ways a section's content can arrive when Reveal on scroll is on.
+ *
+ * Each value is the tail of a keyframes name in globals.css and the value the
+ * render puts in data-reveal, so the set here, the CSS and the pane cannot drift.
+ * A closed list, which is what keeps data-reveal safe: the attribute can only ever
+ * be one of these, never anything a client typed.
+ */
+export const REVEAL_STYLES = [
+  { value: 'rise', label: 'Rise up' },
+  { value: 'fade', label: 'Fade in' },
+  { value: 'slide-left', label: 'Slide from the left' },
+  { value: 'slide-right', label: 'Slide from the right' },
+  { value: 'zoom', label: 'Zoom in' },
+  { value: 'blur', label: 'Blur in' },
+] as const;
+
+export type RevealStyle = (typeof REVEAL_STYLES)[number]['value'];
+
+/** A stored reveal style, or the rise default for anything off the list. */
+export function normaliseRevealStyle(value: unknown): RevealStyle {
+  return REVEAL_STYLES.some((style) => style.value === value) ? (value as RevealStyle) : 'rise';
+}
+
+/**
  * Weight. Only the two that mean something in running text.
  *
  * Browsers emit `font-weight: bold` for a bold command when they are asked to

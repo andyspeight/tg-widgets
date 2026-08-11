@@ -682,8 +682,34 @@ const MUTATIONS = [
      */
     why: 'Never emit data-reveal, so the toggle stores the flag but nothing animates.',
     file: 'components/render/PageRenderer.tsx',
-    from: `      data-reveal={section.reveal && !editable ? '' : undefined}`,
+    from: `      data-reveal={section.reveal && !editable ? normaliseRevealStyle(section.revealStyle) : undefined}`,
     to: `      data-reveal={undefined}`,
+  },
+  {
+    tag: 'reveal-style',
+    check: 'a chosen reveal style rides data-reveal and runs its own keyframe',
+    /*
+     * The flag and the attribute are there, but the chosen style is thrown away:
+     * data-reveal always lands empty, so every reveal is the rise default and the
+     * pane's Fade, Slide, Zoom and Blur do nothing on the page.
+     */
+    why: 'Drop the chosen style, so every reveal falls back to rise.',
+    file: 'components/render/PageRenderer.tsx',
+    from: `      data-reveal={section.reveal && !editable ? normaliseRevealStyle(section.revealStyle) : undefined}`,
+    to: `      data-reveal={section.reveal && !editable ? '' : undefined}`,
+  },
+  {
+    tag: 'reveal-style-css',
+    check: 'a chosen reveal style rides data-reveal and runs its own keyframe',
+    /*
+     * The style reaches the attribute but the blur variant is wired to the rise
+     * keyframe, so a section set to Blur quietly rises instead. The exact drift the
+     * closed-list comment in styles.ts warns about, caught here on the page.
+     */
+    why: 'Point the blur variant at the rise keyframe, so Blur never blurs.',
+    file: 'app/globals.css',
+    from: `    .tgs-section[data-reveal='blur'] .tgs-block { animation-name: tgs-reveal-blur; }`,
+    to: `    .tgs-section[data-reveal='blur'] .tgs-block { animation-name: tgs-reveal-rise; }`,
   },
 
   // --- contact details, on the settings screen -----------------------------

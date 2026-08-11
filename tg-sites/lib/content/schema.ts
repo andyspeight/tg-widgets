@@ -32,7 +32,7 @@ import { z } from 'zod';
 
 import { normaliseDividerHeight, safeDivider } from './dividers';
 import { escapeHtml } from './sanitise';
-import { COLOUR_TOKENS, normaliseLineHeight, normaliseTextSize } from './styles';
+import { COLOUR_TOKENS, normaliseLineHeight, normaliseRevealStyle, normaliseTextSize } from './styles';
 
 // ---------------------------------------------------------------------------
 // Constraints
@@ -535,6 +535,14 @@ export const SectionSchema = z.object({
    * content in place rather than a page that never finishes arriving.
    */
   reveal: z.boolean().optional(),
+  /**
+   * Which arrival the reveal uses: rise, fade, slide from either side, zoom or
+   * blur. Normalised to the closed REVEAL_STYLES list, so the value the render
+   * puts in data-reveal can only ever be one of them and anything unknown falls
+   * back to rise. Absent leaves a stored section unchanged, and the render
+   * defaults a missing style to rise regardless.
+   */
+  revealStyle: z.unknown().transform(normaliseRevealStyle).optional(),
   /** The same shape a column has. See BoxSchema. */
   box: BoxSchema.default(EMPTY_BOX),
   /** Media id or absolute URL. Rendered behind the content with a scrim. */

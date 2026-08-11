@@ -537,9 +537,10 @@
 
 /*
  * REVEAL ON SCROLL (Andy, 11 Aug 2026). A section marked data-reveal animates its
- * blocks up into view as the section scrolls onto the screen. PURE CSS scroll-driven
- * animation, no script on the page, so it stays as CSP-clean as the slideshow and
- * the dividers.
+ * blocks into view as the section scrolls onto the screen. data-reveal also carries
+ * the arrival style (rise, fade, slide from either side, zoom, blur), schema-checked
+ * against the closed REVEAL_STYLES list. PURE CSS scroll-driven animation, no script
+ * on the page, so it stays as CSP-clean as the slideshow and the dividers.
  *
  * PROGRESSIVE ENHANCEMENT BOTH WAYS. The animation sits inside @supports for
  * animation-timeline AND @media (prefers-reduced-motion: no-preference), so a
@@ -552,14 +553,25 @@
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
     .tgs-section[data-reveal] .tgs-block {
-      animation: tgs-reveal-in linear both;
+      animation: tgs-reveal-rise linear both;
       animation-timeline: view();
       animation-range: entry 12% entry 62%;
     }
+
+    /*
+     * The arrival style. data-reveal carries the style name (schema-normalised to
+     * REVEAL_STYLES), and each value but the rise default swaps the keyframe. Same
+     * specificity as the rule above, so source order decides: these must stay after it.
+     */
+    .tgs-section[data-reveal='fade'] .tgs-block { animation-name: tgs-reveal-fade; }
+    .tgs-section[data-reveal='slide-left'] .tgs-block { animation-name: tgs-reveal-slide-left; }
+    .tgs-section[data-reveal='slide-right'] .tgs-block { animation-name: tgs-reveal-slide-right; }
+    .tgs-section[data-reveal='zoom'] .tgs-block { animation-name: tgs-reveal-zoom; }
+    .tgs-section[data-reveal='blur'] .tgs-block { animation-name: tgs-reveal-blur; }
   }
 }
 
-@keyframes tgs-reveal-in {
+@keyframes tgs-reveal-rise {
   from {
     opacity: 0;
     transform: translateY(26px);
@@ -567,6 +579,59 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+@keyframes tgs-reveal-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes tgs-reveal-slide-left {
+  from {
+    opacity: 0;
+    transform: translateX(-44px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes tgs-reveal-slide-right {
+  from {
+    opacity: 0;
+    transform: translateX(44px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes tgs-reveal-zoom {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes tgs-reveal-blur {
+  from {
+    opacity: 0;
+    filter: blur(12px);
+  }
+  to {
+    opacity: 1;
+    filter: none;
   }
 }
 

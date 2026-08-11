@@ -26,7 +26,7 @@ import {
 } from '../../lib/content/schema';
 import { BLEND_DIVIDER, dividerShape, normaliseDividerHeight, safeDivider, sectionFill } from '../../lib/content/dividers';
 import { safeUrl } from '../../lib/content/sanitise';
-import { normaliseLineHeight, normaliseTextSize } from '../../lib/content/styles';
+import { normaliseLineHeight, normaliseRevealStyle, normaliseTextSize } from '../../lib/content/styles';
 import { responsiveVars } from '../../lib/content/responsive';
 import { BlockRenderer } from './BlockRenderer';
 
@@ -334,8 +334,12 @@ export function SectionRenderer({
        * preview. A block that fades out below the fold is right for a visitor and
        * wrong for someone editing it, who would watch content vanish as they
        * scrolled the canvas. `editable` is the editor canvas, so this gates on it.
+       *
+       * The value is the arrival style (rise, fade, slide, zoom, blur), normalised
+       * to the closed list so a stored string can never put anything but a known
+       * style on the attribute. globals.css keys each keyframe off it.
        */
-      data-reveal={section.reveal && !editable ? '' : undefined}
+      data-reveal={section.reveal && !editable ? normaliseRevealStyle(section.revealStyle) : undefined}
       style={{
         ...boxStyle(section.box),
         '--tgs-pad': `${section.paddingY}px`,

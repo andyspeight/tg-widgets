@@ -48,7 +48,9 @@ import {
   hasInlineTextSizing,
   LINE_HEIGHTS,
   normaliseLineHeight,
+  normaliseRevealStyle,
   normaliseTextSize,
+  REVEAL_STYLES,
 } from '../../lib/content/styles';
 import { BoxPanel, ColourField, Measure, PaddingBox, ScreenScope } from './BoxControls';
 import { blockDefinition, type Field, type FieldGroup } from '../../lib/content/blocks';
@@ -958,11 +960,35 @@ function SectionFields({
             <span>Reveal on scroll</span>
           </label>
           <p className="ed-help" style={{ marginTop: 6 }}>
-            The section&apos;s content rises gently into view as a visitor scrolls to it. It
-            turns itself off on browsers that cannot do it and for anyone who prefers less
-            motion, so it never gets in the way.
+            The section&apos;s content arrives into view as a visitor scrolls to it. It turns
+            itself off on browsers that cannot do it and for anyone who prefers less motion, so
+            it never gets in the way.
           </p>
         </div>
+        {section.reveal === true && (
+          <div className="ed-field">
+            <label className="ed-label" htmlFor={`ed-reveal-style-${index}`}>
+              Reveal style
+            </label>
+            <select
+              id={`ed-reveal-style-${index}`}
+              className="ed-select"
+              value={normaliseRevealStyle(section.revealStyle)}
+              onChange={(event) =>
+                set(
+                  { revealStyle: normaliseRevealStyle(event.target.value) },
+                  `sec:${index}:revealStyle`,
+                )
+              }
+            >
+              {REVEAL_STYLES.map((style) => (
+                <option key={style.value} value={style.value}>
+                  {style.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </Group>
 
       <Group title="Style" defaultOpen={false}>
