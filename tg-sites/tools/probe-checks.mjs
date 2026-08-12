@@ -883,15 +883,28 @@ const MUTATIONS = [
     tag: 'chrome',
     check: 'the header and footer are drawn around the page, and clean in preview',
     /*
-     * The header band is still drawn, but with no content handed to it, so it
-     * falls back to the empty placeholder and the page is edited with no real
-     * header above it. It compiles and a band is still there, which is the kind
-     * of half-wiring only a browser looking for the region on the canvas catches.
+     * The band still draws, and with its content, but no longer AS a region, so
+     * the header renders like a plain page with none of the header treatment. It
+     * compiles and looks nearly right, which is the kind of thing only a browser
+     * looking for the .tgs-region marker on the canvas catches.
      */
-    why: 'Hand the header band nothing, so the page has no real header around it.',
+    why: 'Draw the chrome as a plain page, so a header stops being a header.',
     file: 'components/editor/Canvas.tsx',
-    from: `        <ChromeBand page={chromeHeader} region="header" theme={theme} preview={preview} />`,
-    to: `        <ChromeBand page={null} region="header" theme={theme} preview={preview} />`,
+    from: `          <PageRenderer page={page!} editable={false} editorCanvas theme={theme} region={region} />`,
+    to: `          <PageRenderer page={page!} editable={false} editorCanvas theme={theme} region={null} />`,
+  },
+  {
+    tag: 'chrome',
+    check: 'clicking the header on the canvas edits it in place, and the page brings it back',
+    /*
+     * The bands still draw, but none of them is wired to hand editing over, so a
+     * click does nothing and the header can never be edited in place. It looks
+     * identical until you click, which is exactly what this check does.
+     */
+    why: 'Drop the activate wiring, so clicking a band never edits it.',
+    file: 'components/editor/Canvas.tsx',
+    from: `        onActivate={onActivateRegion ? () => onActivateRegion(pos) : undefined}`,
+    to: `        onActivate={undefined}`,
   },
 
   // --- contact details, on the settings screen -----------------------------

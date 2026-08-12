@@ -13,7 +13,7 @@
 import { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 
-import { EditorShell } from '../components/editor/EditorShell';
+import { EditorShell, type ChromeRegion } from '../components/editor/EditorShell';
 import type { PageLink } from '../components/editor/PagesPanel';
 import { SEED_PAGE } from '../lib/content/seed';
 import { emptyRegion, parsePage, REGIONS, type Page, type RegionName } from '../lib/content/schema';
@@ -87,8 +87,8 @@ function App() {
    * the build look like somebody else's site. A handle rather than a control,
    * for the same reason the theme, the region and the test page are.
    */
-  const [chromeHeader, setChromeHeader] = useState<Page | null>(null);
-  const [chromeFooter, setChromeFooter] = useState<Page | null>(null);
+  const [chromeHeader, setChromeHeader] = useState<ChromeRegion | null>(null);
+  const [chromeFooter, setChromeFooter] = useState<ChromeRegion | null>(null);
 
   const handles = window as unknown as Record<string, unknown>;
   handles.__TG_SET_THEME__ = (input: unknown) => {
@@ -117,10 +117,13 @@ function App() {
    * side. Anything that is not an object clears both.
    */
   handles.__TG_SET_CHROME__ = (input: unknown) => {
-    const one = (value: unknown): Page | null => {
+    const one = (value: unknown): ChromeRegion | null => {
       if (value == null) return null;
       const parsed = parsePage(value);
-      return parsed.ok ? parsed.page : null;
+      if (!parsed.ok) return null;
+      // The harness passes a page; the rest is the default a fresh region has, so
+      // a test that only cares about the content does not have to spell it out.
+      return { content: parsed.page, sticky: false, overlay: false, published: false, unpublished: true };
     };
     const obj = input && typeof input === 'object' ? (input as Record<string, unknown>) : {};
     setChromeHeader(one(obj.header));
@@ -131,11 +134,14 @@ function App() {
     <EditorShell
       /*
        * Remounted rather than re-rendered when the mode changes. The shell takes
-       * its page as an INITIAL value and owns it from then on, which is right:
-       * a parent that could reset it mid-edit would be a way to lose work. So
-       * changing what is being edited is a new editor, and the key says so.
+       * its page AND its chrome as INITIAL values and owns them from then on,
+       * which is right: a parent that could reset them mid-edit would be a way to
+       * lose work. So changing what is being edited, or dropping in a header and
+       * footer to edit, is a new editor, and the key says so. The real app hands
+       * the chrome over at mount, so only this review file needs the chrome in the
+       * key; there it arrives through a handle after the page is already up.
        */
-      key={region ?? (testPage ? 'testpage' : 'page')}
+      key={`${region ?? 'page'}:${testPage ? 'tp' : 'seed'}:${chromeHeader ? 'h' : ''}${chromeFooter ? 'f' : ''}`}
       isStaff
       // So version history can mark the entries this person published.
       currentUserId="demo-user"

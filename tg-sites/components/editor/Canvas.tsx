@@ -101,16 +101,18 @@ interface Props {
    */
   preview?: boolean;
   /**
-   * The site's header and footer, drawn around the page.
-   *
-   * Display-only in this slice: rendered as the region each is, with editing off,
-   * so you see the page inside the chrome that wraps every page of the site. A
-   * click on the chrome falls through to the wrap and clears the selection like
-   * any empty part of the canvas, because none of it carries a data-path. Null
-   * when there is nothing to show, or when the thing being edited IS a region.
+   * The two trees you are NOT editing, drawn as chrome bands around the one you
+   * are. The header always draws on top, the footer at the bottom, and the page
+   * in the middle whichever is active, so clicking between them never makes the
+   * layout jump. The band for the active tree is null: the canvas draws that one
+   * as the editable frame instead. Click a band and onActivateRegion hands editing
+   * to it. All null on an item, or on the header/footer screen reached directly.
    */
   chromeHeader?: Page | null;
+  chromePage?: Page | null;
   chromeFooter?: Page | null;
+  /** Hand editing to the header, the page or the footer, from a click on its band. */
+  onActivateRegion?: (tree: 'page' | 'header' | 'footer') => void;
 }
 
 /**
@@ -160,7 +162,9 @@ export function Canvas({
   region = null,
   preview = false,
   chromeHeader = null,
+  chromePage = null,
   chromeFooter = null,
+  onActivateRegion,
 }: Props) {
   const frameRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -726,6 +730,77 @@ export function Canvas({
 
   const stackNote = describeStacking(page, widthPx);
 
+  /*
+   * THE THREE BANDS, in fixed order: header on top, page in the middle, footer at
+   * the bottom. The active one, `region ?? 'page'`, is drawn as the editable frame
+   * where you are working; the other two are chrome you can click into. A tree
+   * with no content in this context (the footer on the header screen reached
+   * directly, say) is simply absent, which is the difference between `null` and an
+   * empty Page: a real but empty region still draws its placeholder to add into.
+   */
+  const active: 'page' | 'header' | 'footer' = region ?? 'page';
+
+  const framed = (
+    <>
+      <div
+        ref={frameRef}
+        className="ed-canvas-frame"
+        style={{ maxWidth: '100%' }}
+        /*
+          None of the editing interactions are wired in preview: no typing in
+          place, no column or height drag, no resize keys. The render below is
+          editable=false, so there are no handles or hosts for them to find
+          anyway, but leaving them off is what makes preview a preview.
+        */
+        onInput={preview ? undefined : onInput}
+        onPaste={preview ? undefined : onPaste}
+        onPointerDown={preview ? undefined : onPointerDown}
+        onPointerMove={preview ? undefined : onPointerMove}
+        onPointerUp={preview ? undefined : endDrag}
+        onPointerCancel={preview ? undefined : endDrag}
+        onKeyDown={preview ? undefined : onKeyDown}
+      >
+        <PageRenderer
+          page={page}
+          editable={!preview}
+          editingPath={preview ? null : editingPath}
+          /*
+            This is the editor canvas, so a widget hosts itself in its own frame
+            rather than the bare container the published page fills with a script.
+            TRUE IN PREVIEW TOO, unlike `editable`: the editor never renders that
+            script, so a widget keyed on `editable` alone went blank the moment
+            Preview was pressed. See the Editable interface in PageRenderer.
+          */
+          editorCanvas
+          emptyNote={preview ? undefined : emptyNote}
+          theme={theme}
+          /*
+            So a header draws as a header here, not as a page. Without it every
+            rule keyed on .tgs-region missed the canvas and the preview quietly
+            showed something the published site does not.
+          */
+          region={region}
+        />
+      </div>
+      {!preview && stackNote && <p className="ed-stack-note">{stackNote}</p>}
+    </>
+  );
+
+  const bandAt = (pos: 'page' | 'header' | 'footer') => {
+    if (pos === active) return framed;
+    const content = pos === 'header' ? chromeHeader : pos === 'footer' ? chromeFooter : chromePage;
+    if (!content) return null;
+    return (
+      <ChromeBand
+        page={content}
+        tree={pos}
+        theme={theme}
+        preview={preview}
+        onActivate={onActivateRegion ? () => onActivateRegion(pos) : undefined}
+      />
+    );
+  };
+
   return (
     <div
       className="ed-canvas-wrap"
@@ -768,52 +843,9 @@ export function Canvas({
         pretending.
       */}
       <div style={{ width: '100%', maxWidth: viewportWidth }}>
-        <ChromeBand page={chromeHeader} region="header" theme={theme} preview={preview} />
-        <div
-          ref={frameRef}
-          className="ed-canvas-frame"
-          style={{ maxWidth: '100%' }}
-          /*
-            None of the editing interactions are wired in preview: no typing in
-            place, no column or height drag, no resize keys. The render below is
-            editable=false, so there are no handles or hosts for them to find
-            anyway, but leaving them off is what makes preview a preview.
-          */
-          onInput={preview ? undefined : onInput}
-          onPaste={preview ? undefined : onPaste}
-          onPointerDown={preview ? undefined : onPointerDown}
-          onPointerMove={preview ? undefined : onPointerMove}
-          onPointerUp={preview ? undefined : endDrag}
-          onPointerCancel={preview ? undefined : endDrag}
-          onKeyDown={preview ? undefined : onKeyDown}
-        >
-          <PageRenderer
-            page={page}
-            editable={!preview}
-            editingPath={preview ? null : editingPath}
-            /*
-              This is the editor canvas, so a widget hosts itself in its own frame
-              rather than the bare container the published page fills with a
-              script. TRUE IN PREVIEW TOO, unlike `editable`: the editor never
-              renders that script, so a widget keyed on `editable` alone went blank
-              the moment Preview was pressed. See the Editable interface in
-              PageRenderer. (Andy, 11 Aug 2026: the Contact page's enquiry widget.)
-            */
-            editorCanvas
-            emptyNote={preview ? undefined : emptyNote}
-            theme={theme}
-            /*
-              So a header draws as a header here, not as a page. See the note on
-              PageRenderer's own `region` prop: without it every rule keyed on
-              .tgs-region missed the canvas, and the preview quietly showed
-              something the published site does not.
-            */
-            region={region}
-          />
-        </div>
-
-        {!preview && stackNote && <p className="ed-stack-note">{stackNote}</p>}
-        <ChromeBand page={chromeFooter} region="footer" theme={theme} preview={preview} />
+        {bandAt('header')}
+        {bandAt('page')}
+        {bandAt('footer')}
       </div>
 
       {badge && (
@@ -826,53 +858,80 @@ export function Canvas({
 }
 
 /**
- * The site's header or footer, drawn around the page on the canvas.
+ * One of the two trees you are NOT editing, drawn as a band around the one you
+ * are: the header above the page, the footer below, or the page itself when a
+ * region is what you are editing.
  *
- * Editing is off here: it renders the region exactly as the published site
- * will, so the page is seen inside the chrome that wraps every page of the
- * site. This is the whole of the first slice, and the reason it is only a
- * render: the header and the footer are context while you edit a page, so they
- * are drawn, not wired. A later slice makes clicking one edit it in place.
- *
- * While editing, a tag names the band and says it is shared, the body is inert
- * (pointer-events off in the CSS) so a click lands on the canvas wrap and clears
- * the selection like any empty part of the canvas, and a link in the header
- * cannot navigate the editor away. In preview the tag goes and the chrome
- * behaves, because preview is the site as it will publish, chrome and all.
+ * It renders the tree exactly as the published site will, editing off, so you
+ * see the thing you are editing in the site it lives in. Since slice 2 the band
+ * is a way IN: click it and onActivate hands editing to that tree. So while
+ * editing, the whole band is a button (the inner render stays inert, pointer
+ * events off in the CSS, so a link in the header cannot fire and every click is
+ * the same "edit this" instead), and its tag says so. In preview there is no
+ * onActivate, the tag goes and the chrome behaves, because preview is the site
+ * as it will publish, chrome and all.
  */
 function ChromeBand({
   page,
-  region,
+  tree,
   theme,
   preview,
+  onActivate,
 }: {
   page: Page | null;
-  region: 'header' | 'footer';
+  tree: 'page' | 'header' | 'footer';
   theme?: CSSProperties;
   preview: boolean;
+  onActivate?: () => void;
 }) {
   const empty = !page || page.sections.length === 0;
+  const label = tree === 'header' ? 'Header' : tree === 'footer' ? 'Footer' : 'Page';
+  const region = tree === 'page' ? null : tree;
 
   // In preview an empty region is simply absent, exactly as on the published
   // page. The labelled placeholder is an editing aid, so it has no place here.
   if (empty && preview) return null;
 
+  // A click anywhere on the band edits that tree. Keyboard parity comes with it,
+  // since the band is a button in all but name while editing.
+  const activates = !preview && !!onActivate;
+
   return (
-    <div className={`ed-chrome ed-chrome--${region}`} data-region={region}>
+    <div
+      className={`ed-chrome ed-chrome--${tree}`}
+      data-region={region ?? undefined}
+      data-clickable={activates ? '' : undefined}
+      role={activates ? 'button' : undefined}
+      tabIndex={activates ? 0 : undefined}
+      aria-label={activates ? `Edit the ${label.toLowerCase()}` : undefined}
+      onClick={activates ? onActivate : undefined}
+      onKeyDown={
+        activates
+          ? (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              onActivate?.();
+            }
+          }
+          : undefined
+      }
+    >
       {!preview && (
         <span className="ed-chrome__tag">
-          {region === 'header' ? 'Header' : 'Footer'}
-          <span className="ed-chrome__tag-note">on every page</span>
+          {label}
+          <span className="ed-chrome__tag-note">{activates ? 'click to edit' : 'on every page'}</span>
         </span>
       )}
       {empty ? (
         <p className="ed-chrome__empty">
-          Your {region} is empty. It will show on every page once you add one.
+          Your {label.toLowerCase()} is empty.{' '}
+          {activates ? 'Click to add one.' : 'It will show on every page once you add one.'}
         </p>
       ) : (
         <div
           className="ed-chrome__body"
-          // Interactive only in preview; inert while editing (see the note above).
+          // Interactive only in preview; inert while editing so the band's own
+          // click is what fires (see the note above).
           data-preview={preview ? '' : undefined}
           // A decorative copy while editing, so a screen reader skips it and meets
           // the page once. In preview it is the real thing, so it is not hidden.

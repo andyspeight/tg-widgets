@@ -4923,6 +4923,107 @@ await check('the header and footer are drawn around the page, and clean in previ
   }
 });
 
+/*
+ * SLICE 2: EDIT THE HEADER AND FOOTER IN PLACE (Andy, 12 Aug 2026).
+ *
+ * The bands are not just drawn now, they are the way in. Clicking the header on
+ * the canvas hands editing to it: the top bar names it, its band becomes the
+ * editable frame carrying data-path, and the page turns into a band of its own
+ * you click to come back. This drives that whole loop and asserts each end of it,
+ * because a switch that saved the wrong tree or never came back is exactly the
+ * kind of thing that reads fine until you try it.
+ */
+await check('clicking the header on the canvas edits it in place, and the page brings it back', async () => {
+  await closeAnyDialog();
+  await page.evaluate(() => window.__TG_SET_REGION__(null));
+  await page.waitForTimeout(300);
+
+  const band = (region, words) => ({
+    id: region[0],
+    slug: '',
+    title: region,
+    version: 1,
+    sections: [
+      {
+        id: `${region[0]}s`,
+        width: 'contained',
+        tone: 'light',
+        rows: [
+          {
+            id: `${region[0]}r`,
+            gap: 16,
+            columns: [
+              {
+                id: `${region[0]}c`,
+                width: 100,
+                blocks: [{ id: `${region[0]}b`, type: 'heading', props: { level: 2, style: 'h2', html: words } }],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+
+  try {
+    await page.evaluate((c) => window.__TG_SET_CHROME__(c), {
+      header: band('header', 'MY SITE HEADER'),
+      footer: band('footer', 'MY SITE FOOTER'),
+    });
+    await page.waitForTimeout(400);
+    await showPanels();
+
+    // Editing the page to begin with: a title box, and the header is a clickable band.
+    if ((await page.locator('.ed-title-input').count()) !== 1) return 'the page did not start with a title box';
+    const headerBand = page.locator('.ed-chrome[data-region="header"]');
+    if (!(await headerBand.count())) return 'no header band on the canvas';
+    const clickable = await headerBand.first().evaluate((el) => el.hasAttribute('data-clickable'));
+    if (!clickable) return 'the header band is not marked clickable while editing';
+
+    // Click it: now editing the header.
+    await headerBand.first().click();
+    await page.waitForTimeout(500);
+
+    const title = await page.locator('.ed-title-fixed').innerText().catch(() => '');
+    if (title !== 'Header') return `after clicking the header the top bar said "${title}"`;
+
+    // The header is the editable frame now: its content, and data-path on it.
+    const frameText = (await page.locator('.ed-canvas-frame').innerText()) || '';
+    if (!frameText.includes('MY SITE HEADER')) return `the header frame read "${frameText}"`;
+    if (!(await page.locator('.ed-canvas-frame [data-path]').count())) {
+      return 'the header frame is not editable, it carries no data-path';
+    }
+    // The page has become a band you can click to return.
+    const pageBand = page.locator('.ed-chrome--page');
+    if (!(await pageBand.count())) return 'the page did not become a band while editing the header';
+    // And the footer is still a band below.
+    if (!(await page.locator('.ed-chrome[data-region="footer"]').count())) {
+      return 'the footer band went missing while editing the header';
+    }
+
+    // Click the page band: back to editing the page, header a band again.
+    await pageBand.first().click();
+    await page.waitForTimeout(500);
+    if ((await page.locator('.ed-title-input').count()) !== 1) {
+      return 'clicking the page band did not return to editing the page';
+    }
+    const back = page.locator('.ed-chrome[data-region="header"]');
+    if (!(await back.count())) return 'the header band did not come back after returning to the page';
+    // The header's content survived the round trip, which is the thing that would
+    // hurt: a switch that dropped what you had is the bug this whole path risks.
+    const backText = (await back.innerText()) || '';
+    if (!backText.includes('MY SITE HEADER')) {
+      return `the header lost its content on the round trip: "${backText}"`;
+    }
+
+    return true;
+  } finally {
+    await page.evaluate(() => window.__TG_SET_CHROME__(null));
+    await page.waitForTimeout(200);
+    await showPanels();
+  }
+});
+
 
 // ---------------------------------------------------------------------------
 // Cards

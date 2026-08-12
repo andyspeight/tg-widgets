@@ -196,8 +196,20 @@ export default async function EditorPage({
         initialPage={page.content}
         initialStatus={page.status}
         initialHasUnpublishedChanges={page.hasUnpublishedChanges}
-        chromeHeader={regionAsPage(headerRecord.region)}
-        chromeFooter={regionAsPage(footerRecord.region)}
+        chromeHeader={{
+          content: regionAsPage(headerRecord.region),
+          sticky: headerRecord.region.sticky,
+          overlay: headerRecord.region.overlay,
+          published: headerRecord.publishedAt != null,
+          unpublished: headerRecord.hasUnpublishedChanges,
+        }}
+        chromeFooter={{
+          content: regionAsPage(footerRecord.region),
+          sticky: footerRecord.region.sticky,
+          overlay: footerRecord.region.overlay,
+          published: footerRecord.publishedAt != null,
+          unpublished: footerRecord.hasUnpublishedChanges,
+        }}
       />
     </>
   );

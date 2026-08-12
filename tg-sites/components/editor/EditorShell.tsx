@@ -274,6 +274,33 @@ interface History {
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
+/**
+ * Which of the three trees is being edited right now.
+ *
+ * A page has a header above it and a footer below it, and since 12 Aug 2026 you
+ * edit all three on the one canvas: click the header or the footer and it becomes
+ * the thing you are editing, with the page shown around it. 'page' is the middle
+ * one and where editing starts.
+ */
+export type Tree = 'page' | RegionName;
+
+/**
+ * The site's header or footer, as everything the shell needs to draw it AND to
+ * edit it in place.
+ *
+ * Slice 1 only drew them, so a Page was enough. Editing one in place means the
+ * shell also has to know how it is saved and published: its two settings, and
+ * whether it is already live with newer changes waiting. Read from the region
+ * record in the same breath as the page. See app/editor/page.tsx.
+ */
+export interface ChromeRegion {
+  content: Page;
+  sticky: boolean;
+  overlay: boolean;
+  published: boolean;
+  unpublished: boolean;
+}
+
 interface EditorProps {
   isStaff?: boolean;
   pageId: string;
@@ -341,22 +368,21 @@ interface EditorProps {
   itemId?: string | null;
   initialItemMeta?: ItemMeta;
   /**
-   * The site's header and footer, to show around the page on the canvas.
+   * The site's header and footer, to show around the page on the canvas and,
+   * since slice 2, to edit in place.
    *
-   * WHY THEY SIT HERE AS PLAIN PROPS, not in the undo history or the save path.
-   * When you are editing a page, the header and the footer are context: they are
-   * what wraps every page, so seeing them is the difference between editing a
-   * page and editing a page in the site it lives in. Slice 1 shows them and
-   * nothing more, so they are display-only, handed straight to the canvas as the
-   * region each is. The next slice makes them editable in place, which is when
-   * they earn a place in the shell's state; until then they are furniture drawn
-   * around the thing being edited.
+   * When you are editing a page, the header and the footer are what wraps every
+   * page, so seeing them is the difference between editing a page and editing a
+   * page in the site it lives in. Click one and it becomes the thing you are
+   * editing, saved to the region rather than the page, with the page shown around
+   * it. So the shell holds all three trees and swaps which one is live.
    *
-   * Only set when editing a page. A region screen is already editing one of
-   * these, and drawing a header around a header is a hall of mirrors.
+   * Only set when editing a page. A region screen (?region=) is already editing
+   * one of these on its own, and drawing a header around a header is a hall of
+   * mirrors.
    */
-  chromeHeader?: Page | null;
-  chromeFooter?: Page | null;
+  chromeHeader?: ChromeRegion | null;
+  chromeFooter?: ChromeRegion | null;
 }
 
 export function EditorShell({
@@ -368,7 +394,7 @@ export function EditorShell({
   siteTheme,
   currentUserId = null,
   pages = [],
-  region = null,
+  region: initialRegion = null,
   initialRegionFlags,
   itemId = null,
   initialItemMeta,
@@ -380,6 +406,40 @@ export function EditorShell({
     present: initialPage,
     future: [],
   });
+
+  /**
+   * Which of the three trees is being edited: the page, the header or the footer.
+   *
+   * On a page it starts on the page and switches when you click the chrome. On a
+   * region screen (?region=) or an item there is only ever the one tree, so this
+   * is fixed and the switch below is never reachable. `region` is derived from it
+   * so every save, publish and title that keyed on the old region prop still does.
+   */
+  const [activeTree, setActiveTree] = useState<Tree>(initialRegion ?? 'page');
+  const region = activeTree === 'page' ? null : activeTree;
+
+  /**
+   * The two trees you are NOT editing, as content for the chrome bands and as the
+   * stash a switch restores from. The active tree's slot is left null: its live
+   * copy is history.present, and it is filled back in when you switch away.
+   */
+  const [otherContent, setOtherContent] = useState<Record<Tree, Page | null>>(() => ({
+    page: null,
+    header: chromeHeader?.content ?? null,
+    footer: chromeFooter?.content ?? null,
+  }));
+  /** The same two trees' status and unpublished flag, swapped in on a switch. */
+  const [otherMeta, setOtherMeta] = useState<Record<Tree, { status: 'draft' | 'published'; unpublished: boolean }>>(
+    () => ({
+      page: { status: initialStatus, unpublished: initialHasUnpublishedChanges },
+      header: chromeHeader
+        ? { status: chromeHeader.published ? 'published' : 'draft', unpublished: chromeHeader.unpublished }
+        : { status: 'draft', unpublished: false },
+      footer: chromeFooter
+        ? { status: chromeFooter.published ? 'published' : 'draft', unpublished: chromeFooter.unpublished }
+        : { status: 'draft', unpublished: false },
+    }),
+  );
   const [selected, setSelected] = useState<Path | null>(null);
   const [viewport, setViewport] = useState<Viewport>('desktop');
   /**
@@ -415,7 +475,10 @@ export function EditorShell({
    * step carrying a copy of them for the sake of a checkbox.
    */
   const [regionFlags, setRegionFlags] = useState(
-    initialRegionFlags ?? { sticky: false, overlay: false },
+    initialRegionFlags
+      ?? (chromeHeader
+        ? { sticky: chromeHeader.sticky, overlay: chromeHeader.overlay }
+        : { sticky: false, overlay: false }),
   );
   /**
    * A post's summary, picture and address, which have nowhere to live in a Page.
@@ -666,6 +729,15 @@ export function EditorShell({
   const saveSeq = useRef(0);
   /** Skips the save that a fresh mount would otherwise fire immediately. */
   const mounted = useRef(false);
+  /**
+   * Skips the save that switching trees would otherwise fire.
+   *
+   * Loading a tree replaces history.present, which the autosave effect cannot
+   * tell from a real edit. Left alone it would write the target's own content
+   * straight back and mark it as having unpublished changes it does not have. The
+   * switch has already flushed the tree it left, so this one save is pure noise.
+   */
+  const suppressNextSave = useRef(false);
 
   /**
    * One save, wherever this editor's content actually lives.
@@ -688,6 +760,10 @@ export function EditorShell({
   useEffect(() => {
     if (!mounted.current) {
       mounted.current = true;
+      return;
+    }
+    if (suppressNextSave.current) {
+      suppressNextSave.current = false;
       return;
     }
 
@@ -745,6 +821,52 @@ export function EditorShell({
     }
     setPublishing(false);
   }, [itemId, page, pageId, persist, region, regionFlags, itemMeta]);
+
+  /**
+   * Switch which tree is being edited: click the header or the footer on the
+   * canvas and it becomes the thing you are editing, with the page shown around
+   * it. Clicking the page brings it back.
+   *
+   * The order matters and is the whole reason this is not a plain setState. The
+   * tree you are leaving is FLUSHED to its own store first, synchronously, so a
+   * switch can never drop the keystroke the debounce had not saved yet. Only then
+   * is its content stashed and the target's swapped in: content into the history,
+   * status and unpublished into their own state, so the top bar, the publish
+   * button and "unsaved" all speak for the tree now on screen. The header's two
+   * settings are not swapped, because they are the header's wherever you are.
+   */
+  const activateTree = useCallback(
+    async (target: Tree) => {
+      if (target === activeTree) return;
+      const targetContent = otherContent[target];
+      if (!targetContent) return;
+
+      // Flush the tree being left through its own save path (region is still its
+      // region here) before anything changes underneath it.
+      await persist(page, regionFlags, itemMeta);
+
+      const leaving = activeTree;
+      const leavingContent = page;
+      const leavingMeta = { status, unpublished };
+
+      suppressNextSave.current = true;
+      setOtherContent((current) => ({ ...current, [leaving]: leavingContent, [target]: null }));
+      setOtherMeta((current) => ({ ...current, [leaving]: leavingMeta }));
+      setHistory({ past: [], present: targetContent, future: [] });
+      setStatus(otherMeta[target].status);
+      setUnpublished(otherMeta[target].unpublished);
+      setActiveTree(target);
+
+      // The selection, the pickers and the on-canvas editors all belonged to the
+      // tree you left, so drop them rather than let them point into the new one.
+      setSelected(null);
+      setInsertAt(null);
+      setPicker(null);
+      setOptionsOpen(false);
+      setSaved('saved');
+    },
+    [activeTree, otherContent, otherMeta, page, persist, regionFlags, itemMeta, status, unpublished],
+  );
 
   // ---------------------------------------------------------------------
   // Commits
@@ -1689,12 +1811,16 @@ export function EditorShell({
         // So the canvas draws a header as a header rather than as a page.
         region={region}
         /*
-          The site's chrome, drawn around the page so you edit a page in the site
-          it lives in. Only when editing a page: a region screen is already one of
-          these, and an item's chrome comes later. See the chrome props above.
+          The two trees you are NOT editing, drawn as chrome bands around the one
+          you are, each in its fixed place: the header on top, the page in the
+          middle, the footer at the bottom. The active tree's band is null, since
+          the canvas draws that one as the editable frame instead. Clicking a band
+          hands editing to it. See activateTree.
         */
-        chromeHeader={region || itemId ? null : chromeHeader}
-        chromeFooter={region || itemId ? null : chromeFooter}
+        chromeHeader={activeTree === 'header' ? null : otherContent.header}
+        chromePage={activeTree === 'page' ? null : otherContent.page}
+        chromeFooter={activeTree === 'footer' ? null : otherContent.footer}
+        onActivateRegion={activateTree}
         /*
           "This page is empty" is the wrong sentence on the header screen, and
           it is the sentence somebody meets FIRST, since a client who has never

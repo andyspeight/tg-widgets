@@ -1188,6 +1188,21 @@
 }
 .ed-chrome--header { margin-bottom: var(--ed-2); }
 .ed-chrome--footer { margin-top: var(--ed-2); }
+/* The page band only appears when a region is what you are editing: space it from both. */
+.ed-chrome--page { margin: var(--ed-2) 0; }
+
+/*
+ * Since slice 2 a band is a way in: click it to edit that tree. So it reads as
+ * pressable, with the same select ring the canvas uses for the thing you picked,
+ * on hover and on keyboard focus.
+ */
+.ed-chrome[data-clickable] { cursor: pointer; }
+.ed-chrome[data-clickable]:hover,
+.ed-chrome[data-clickable]:focus-visible {
+  outline: 2px solid var(--ed-select);
+  outline-offset: -2px;
+}
+.ed-chrome[data-clickable]:focus-visible { box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.12); }
 
 /*
  * The tag that names the band while editing. A small brand-coloured flag in the
