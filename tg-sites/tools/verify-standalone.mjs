@@ -7670,6 +7670,73 @@ await check('a reveal section animates in on the page but stays still while edit
 });
 
 /*
+ * The reveal actually PLAYS in preview (Andy, 12 Aug 2026). The check above proves the
+ * animation is attached; this proves it MOVES. That distinction is the whole bug: an
+ * overflow: hidden ancestor (.tgs-page, then the editor's own .ed-canvas-frame) made a
+ * scroll container that froze the view() timeline, so the reveal was attached and dead.
+ * This drops a reveal section below a tall spacer, previews it, scrolls the real canvas
+ * to it and proves the block goes from hidden to shown. It is the test the reveal never
+ * had, and it fails the moment an ancestor freezes the timeline again.
+ */
+await check('a reveal fades in as the preview is scrolled to it, not frozen', async () => {
+  await closeAnyDialog();
+  await page.evaluate(() =>
+    window.__TG_SET_PAGE__({
+      id: 'rvm',
+      slug: 'reveal-motion',
+      title: 'Reveal motion',
+      version: 1,
+      sections: [
+        { id: 'sp', width: 'contained', tone: 'light', minHeight: 1400, rows: [{ id: 'r0', gap: 16, columns: [{ id: 'c0', width: 100, blocks: [{ id: 'b0', type: 'heading', props: { level: 2, style: 'h2', html: 'Tall spacer' } }] }] }] },
+        { id: 's', width: 'contained', tone: 'light', reveal: true, rows: [{ id: 'r', gap: 16, columns: [{ id: 'c', width: 100, blocks: [{ id: 'h', type: 'heading', props: { level: 2, style: 'h2', html: 'Reveal me' } }] }] }] },
+      ],
+    }),
+  );
+  await page.waitForTimeout(500);
+  await page.getByRole('button', { name: 'Preview', exact: true }).click();
+  await page.waitForTimeout(400);
+
+  const supported = await page.evaluate(() => CSS.supports('animation-timeline', 'view()'));
+  // Start at the top, section below the fold: it should be held hidden.
+  await page.evaluate(() => {
+    const wrap = document.querySelector('.ed-canvas-wrap');
+    if (wrap) wrap.scrollTo(0, 0);
+  });
+  await page.waitForTimeout(250);
+  const before = await page.evaluate(() => {
+    const block = document.querySelector('.tgs-section[data-reveal] .tgs-block');
+    return block ? parseFloat(getComputedStyle(block).opacity) : null;
+  });
+  // Scroll the real canvas so the reveal section reaches the middle of the frame.
+  await page.evaluate(() => {
+    const wrap = document.querySelector('.ed-canvas-wrap');
+    const sec = document.querySelector('.tgs-section[data-reveal]');
+    if (wrap && sec) wrap.scrollTo(0, sec.offsetTop - wrap.clientHeight * 0.4);
+  });
+  await page.waitForTimeout(400);
+  const after = await page.evaluate(() => {
+    const block = document.querySelector('.tgs-section[data-reveal] .tgs-block');
+    return block ? parseFloat(getComputedStyle(block).opacity) : null;
+  });
+
+  const exit = page.getByRole('button', { name: 'Exit preview', exact: true });
+  if (await exit.count()) {
+    await exit.click();
+    await page.waitForTimeout(200);
+  }
+  await page.evaluate(() => window.__TG_SET_PAGE__(null));
+  await page.waitForTimeout(200);
+  await showPanels();
+
+  // Nothing to prove where scroll timelines are unavailable; it degrades to shown.
+  if (!supported) return true;
+  if (before === null || after === null) return 'the reveal block was not found in preview';
+  if (before >= 0.5) return `the reveal was already showing below the fold (opacity ${before}), so it is not held back`;
+  if (after <= 0.7) return `the reveal did not play as the preview scrolled to it (opacity ${before} -> ${after}), a scroll-container ancestor is freezing it`;
+  return true;
+});
+
+/*
  * The reveal styles (Andy, 11 Aug 2026). A reveal can arrive six ways: rise, fade,
  * slide from either side, zoom, blur. The style rides on data-reveal, schema-checked
  * against a closed list, and globals.css keys a keyframe off each. This settles that a

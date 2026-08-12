@@ -1152,6 +1152,18 @@
   overflow: hidden;
 }
 
+/*
+ * In PREVIEW only, clip not hidden. hidden makes this frame a scroll container, and a
+ * reveal's animation-timeline: view() binds to the nearest scroll-container ancestor.
+ * The frame does not itself scroll (the .ed-canvas-wrap around it does), so a previewed
+ * reveal froze at fully-in-view and nothing moved, even after .tgs-page was fixed. clip
+ * clips to the rounded corners exactly as hidden did but is not a scroll container, so
+ * view() reaches the wrap that really scrolls and the reveal plays. Scoped to preview
+ * because the reveal never runs while editing, and editing relies on the frame being a
+ * scroll container as it was. (Andy, 12 Aug 2026.)
+ */
+.ed-root[data-preview='true'] .ed-canvas-frame { overflow: clip; }
+
 .ed-canvas-frame [data-path] { position: relative; }
 
 /*

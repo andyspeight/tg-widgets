@@ -562,6 +562,15 @@ describe('reveal on scroll animates a sections content in, degrading gracefully'
     expect(css).toContain('overflow-x: clip');
     expect(css).not.toMatch(/\.tgs-page\s*\{[^}]*overflow-x:\s*hidden/);
   });
+
+  it('clips the editor canvas frame in preview, so previewed reveals are not frozen', () => {
+    // The same trap one level up, only in PREVIEW: the editor's .ed-canvas-frame is a
+    // scroll container (overflow: hidden) that froze a previewed reveal even after
+    // .tgs-page was fixed. Scoped to preview with clip, because editing keeps the frame
+    // as it was. Proven live in the standalone preview-motion check.
+    const editorCss = read('components', 'editor', 'editor.css');
+    expect(editorCss).toContain(".ed-root[data-preview='true'] .ed-canvas-frame { overflow: clip; }");
+  });
 });
 
 // ---------------------------------------------------------------------------
