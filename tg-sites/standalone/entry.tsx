@@ -14,12 +14,32 @@ import { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { EditorShell } from '../components/editor/EditorShell';
+import type { PageLink } from '../components/editor/PagesPanel';
 import { SEED_PAGE } from '../lib/content/seed';
 import { emptyRegion, parsePage, REGIONS, type Page, type RegionName } from '../lib/content/schema';
 import { regionAsPage } from '../lib/content/region-page';
 import { parseTheme, type Theme } from '../lib/theme/schema';
 import { themeTokens } from '../lib/theme/tokens';
 import '../app/globals.css';
+
+/**
+ * A small stand-in page list for the rail's Pages panel.
+ *
+ * The real app hands EditorShell the tenant's own pages; this static file has
+ * no database, so it carries a plausible few instead. `demo` is the id the
+ * seed page is mounted under below, so the panel marks it the current one, and
+ * the set exercises what the panel draws: a draft badge, a child row and a list
+ * long enough to search. A handle is not needed here, unlike the theme and the
+ * page, because a list of page names is exactly what the review copy should
+ * show and reveals nothing a test would want to vary.
+ */
+const DEMO_PAGES: readonly PageLink[] = [
+  { id: 'demo', title: 'Home', slug: '', status: 'published', parentId: null },
+  { id: 'p-about', title: 'About us', slug: 'about', status: 'published', parentId: null },
+  { id: 'p-tours', title: 'Tours', slug: 'tours', status: 'published', parentId: null },
+  { id: 'p-italy', title: 'Italy in autumn', slug: 'tours/italy', status: 'published', parentId: 'p-tours' },
+  { id: 'p-contact', title: 'Contact', slug: 'contact', status: 'draft', parentId: null },
+];
 
 /**
  * The site theme, and a way for the verification harness to change it.
@@ -96,6 +116,7 @@ function App() {
       currentUserId="demo-user"
       region={region}
       initialRegionFlags={{ sticky: false, overlay: false }}
+      pages={DEMO_PAGES}
       pageId={region ? `region-${region}` : 'demo'}
       initialPage={region ? regionAsPage(emptyRegion(region)) : (testPage ?? SEED_PAGE)}
       initialStatus="draft"

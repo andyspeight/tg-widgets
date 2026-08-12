@@ -4,39 +4,28 @@
  * The slim left rail (Andy, 12 Aug 2026).
  *
  * A permanent thin column of icons on the far left of the editor. Two of them
- * open a panel in place: Layers is the page structure (the outline pane), and
- * Add opens the section picker. The rest are the site's other rooms, which live
- * as their own screens today, so for now their icon takes you there; each can
- * become an in-editor panel later without the rail changing shape.
+ * open a panel in the one expanding column beside the rail: Layers is the page
+ * structure (the outline), and Pages is the list of the site's pages. Add opens
+ * the section picker. The rest are the site's other rooms, which live as their
+ * own screens today, so for now their icon takes you there; each can become an
+ * in-editor panel later without the rail changing shape.
  *
- * WHY A COMPONENT AND NOT MARKUP IN THE SHELL. The shell is already long, and
- * the rail is a self-contained piece with its own icon set. It reads the two
- * bits of state it needs (is the Layers panel open, how to open Add) as props
- * and owns nothing else.
+ * One panel at a time: `active` is whichever of Layers or Pages is open, or null
+ * when the column is closed and only the slim rail shows. Clicking the open
+ * icon again closes it; onToggle owns that in the shell.
  *
- * DESKTOP ONLY. Below 1181px the shell already shows one pane at a time from
- * the top bar, and a rail would cost width on exactly the screens that have
- * least of it (the reason the panels fold to nothing rather than to a rail).
- * So the rail is `ed-editing-only` (gone in preview) and hidden by CSS under
- * 1181px. Inline SVGs rather than the shared Icon set: these eight are the
- * rail's own vocabulary and live nowhere else.
+ * DESKTOP ONLY. Below 1181px the shell shows one pane at a time from the top bar,
+ * and a rail would cost width on exactly the screens with least of it. So the rail
+ * is `ed-editing-only` (gone in preview) and hidden by CSS under 1181px. Inline
+ * SVGs rather than the shared Icon set: these are the rail's own vocabulary.
  */
 
 import type { ReactNode } from 'react';
 
+type Panel = 'layers' | 'pages';
+
 /** One item that navigates to an existing screen. */
 const LINKS: ReadonlyArray<{ href: string; label: string; title: string; icon: ReactNode }> = [
-  {
-    href: '/sites',
-    label: 'Pages',
-    title: 'Pages',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round">
-        <path d="M8 3h8l4 4v11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />
-        <path d="M4 7v13a2 2 0 0 0 2 2h10" opacity=".55" />
-      </svg>
-    ),
-  },
   {
     href: '/theme',
     label: 'Theme',
@@ -87,12 +76,12 @@ const LINKS: ReadonlyArray<{ href: string; label: string; title: string; icon: R
 ];
 
 export function Rail({
-  layersOpen,
-  onLayers,
+  active,
+  onToggle,
   onAdd,
 }: {
-  layersOpen: boolean;
-  onLayers: () => void;
+  active: Panel | null;
+  onToggle: (panel: Panel) => void;
   onAdd: () => void;
 }) {
   return (
@@ -115,9 +104,25 @@ export function Rail({
       <button
         type="button"
         className="ed-rail__btn"
-        title={layersOpen ? 'Hide the page structure' : 'Show the page structure'}
-        aria-pressed={layersOpen}
-        onClick={onLayers}
+        title="The site's pages"
+        aria-pressed={active === 'pages'}
+        onClick={() => onToggle('pages')}
+      >
+        <span className="ed-rail__ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round">
+            <path d="M8 3h8l4 4v11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />
+            <path d="M4 7v13a2 2 0 0 0 2 2h10" opacity=".55" />
+          </svg>
+        </span>
+        <span className="ed-rail__lbl">Pages</span>
+      </button>
+
+      <button
+        type="button"
+        className="ed-rail__btn"
+        title={active === 'layers' ? 'Hide the page structure' : 'Show the page structure'}
+        aria-pressed={active === 'layers'}
+        onClick={() => onToggle('layers')}
       >
         <span className="ed-rail__ic">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round">

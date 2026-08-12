@@ -8206,6 +8206,63 @@ await check('the slim rail folds and unfolds the page structure', async () => {
   return true;
 });
 
+await check('the rail Pages icon opens the page list and Layers returns to the outline', async () => {
+  await showPanels();
+  await page.waitForTimeout(120);
+
+  const pages = page.locator('.ed-rail__btn').filter({ hasText: 'Pages' }).first();
+  const layers = page.locator('.ed-rail__btn').filter({ hasText: 'Layers' }).first();
+
+  // Open the page list. The panel and the outline share the .ed-outline column,
+  // so the tell is what fills it: .ed-pages for the list, .ed-sec cards for the
+  // outline. One should be there and the other gone.
+  await pages.click();
+  await page.waitForTimeout(200);
+  const pagesShown = await page.locator('.ed-pages').isVisible();
+  const outlineGone = (await page.locator('.ed-sec').count()) === 0;
+
+  const rowCount = await page.locator('.ed-pages__row').count();
+  const current = page.locator('.ed-pages__row[data-current]');
+  const currentCount = await current.count();
+  const currentText = currentCount ? ((await current.first().innerText()) || '') : '';
+  // A row is a real navigation to the page, id encoded into the query string.
+  const currentHref = currentCount ? (await current.first().getAttribute('href')) : null;
+  const draftBadges = await page.locator('.ed-pages__badge').count();
+  const childRows = await page.locator('.ed-pages__row[data-child]').count();
+
+  // The search narrows the list. "italy" is one page by name and the same page
+  // by address, so it lands on a single row.
+  const search = page.locator('input[aria-label="Search pages"]');
+  await search.fill('italy');
+  await page.waitForTimeout(150);
+  const filtered = await page.locator('.ed-pages__row').count();
+  await search.fill('');
+  await page.waitForTimeout(120);
+  const restored = await page.locator('.ed-pages__row').count();
+
+  // Back to the outline, so the column is what the later checks expect.
+  await layers.click();
+  await page.waitForTimeout(200);
+  const outlineBack = (await page.locator('.ed-sec').count()) > 0;
+  const pagesGone = (await page.locator('.ed-pages').count()) === 0;
+
+  if (!pagesShown) return 'clicking Pages did not open the page list';
+  if (!outlineGone) return 'the outline cards were still there behind the page list';
+  if (rowCount !== 5) return `expected 5 page rows, saw ${rowCount}`;
+  if (currentCount !== 1) return `expected one current page, saw ${currentCount}`;
+  if (!currentText.includes('Home')) return `the current page was not Home, it read "${currentText}"`;
+  if (!currentHref || !currentHref.includes('/editor?page=demo')) {
+    return `the current row did not link to its page, href was "${currentHref}"`;
+  }
+  if (childRows !== 1) return `expected one indented child page, saw ${childRows}`;
+  if (draftBadges !== 1) return `expected one draft badge, saw ${draftBadges}`;
+  if (filtered !== 1) return `search for "italy" showed ${filtered} rows, expected 1`;
+  if (restored !== 5) return `clearing the search left ${restored} rows, expected 5`;
+  if (!outlineBack) return 'clicking Layers did not bring the outline back';
+  if (!pagesGone) return 'the page list stayed after switching back to the outline';
+  return true;
+});
+
 // --- Preview mode: the site as it will publish, full canvas -----------------
 
 /*

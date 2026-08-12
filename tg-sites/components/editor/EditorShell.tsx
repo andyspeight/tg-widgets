@@ -42,6 +42,7 @@ import { usePaletteDrop } from './usePaletteDrop';
 import { useSectionDrop } from './useSectionDrop';
 import { Outline } from './Outline';
 import { Rail } from './Rail';
+import { PagesPanel, type PageLink } from './PagesPanel';
 import { Canvas, type DropTarget } from './Canvas';
 import { Properties } from './Properties';
 import { BlockPicker } from './BlockPicker';
@@ -301,6 +302,15 @@ interface EditorProps {
    */
   currentUserId?: string | null;
   /**
+   * The site's other pages, for the rail's Pages panel to list.
+   *
+   * Optional so the standalone build and the region and item screens still
+   * work without it: an absent list is an empty one, and the panel says so.
+   * Just the little each row needs (see PageLink); the content stays in the
+   * database until you open a page.
+   */
+  pages?: readonly PageLink[];
+  /**
    * Editing the site's header or footer rather than a page.
    *
    * WHAT THIS CHANGES, AND WHAT IT DELIBERATELY DOES NOT
@@ -340,6 +350,7 @@ export function EditorShell({
   initialHasUnpublishedChanges,
   siteTheme,
   currentUserId = null,
+  pages = [],
   region = null,
   initialRegionFlags,
   itemId = null,
@@ -407,6 +418,13 @@ export function EditorShell({
    * how somebody likes to work, not something about the page.
    */
   const [panels, setPanels] = useState({ outline: true, props: true });
+  /**
+   * Which panel the rail's expanding column is showing: the outline (Layers) or
+   * the site's pages. Whether that column is OPEN is still panels.outline, the
+   * same fold the top bar owns; this only says which of the two fills it when it
+   * is open. Held here, not in the rail, because the shell draws the column.
+   */
+  const [railPanel, setRailPanel] = useState<'layers' | 'pages'>('layers');
   /**
    * Preview mode: the canvas becomes the whole screen and shows the page as it
    * will publish, not as it is edited.
@@ -1582,28 +1600,43 @@ export function EditorShell({
       </header>
 
       {/*
-        The slim left rail. Its Layers icon opens and closes the outline panel
-        beside it (the same panels.outline the top bar folds), and Add opens the
-        section picker exactly as the outline's own Add does. Desktop and editing
-        only; the CSS gives it a column and hides it in preview and under 1181px.
+        The slim left rail. Layers and Pages each open the one expanding column
+        beside it (the same panels.outline the top bar folds) and choose what
+        fills it: the outline, or the site's pages. Clicking the open one again
+        folds the column. Add opens the section picker exactly as the outline's
+        own Add does. Desktop and editing only; the CSS gives it a column and
+        hides it in preview and under 1181px.
       */}
       <Rail
-        layersOpen={panels.outline}
-        onLayers={() => setPanels((current) => ({ ...current, outline: !current.outline }))}
+        active={panels.outline ? railPanel : null}
+        onToggle={(panel) => {
+          if (panels.outline && railPanel === panel) {
+            // The open panel's own icon: fold the column away.
+            setPanels((current) => ({ ...current, outline: false }));
+          } else {
+            // A closed column, or the other panel: show this one and open up.
+            setRailPanel(panel);
+            setPanels((current) => ({ ...current, outline: true }));
+          }
+        }}
         onAdd={() => setInsertAt(page.sections.length)}
       />
 
-      <Outline
-        onAddSection={() => setInsertAt(page.sections.length)}
-        page={page}
-        selectedKey={selectedKey}
-        onSelect={select}
-        onCommit={commit}
-        onPickBlock={setPicker}
-        newId={newId}
-        isStaff={isStaff}
-        onAddElement={addElement}
-      />
+      {railPanel === 'pages' ? (
+        <PagesPanel pages={pages} currentId={pageId} />
+      ) : (
+        <Outline
+          onAddSection={() => setInsertAt(page.sections.length)}
+          page={page}
+          selectedKey={selectedKey}
+          onSelect={select}
+          onCommit={commit}
+          onPickBlock={setPicker}
+          newId={newId}
+          isStaff={isStaff}
+          onAddElement={addElement}
+        />
+      )}
 
       <Canvas
         onInsertSection={setInsertAt}

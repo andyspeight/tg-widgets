@@ -835,10 +835,23 @@ const MUTATIONS = [
      * so clicking it never folds the outline. The panel it is meant to drive sits
      * unmoved, which only a click in a browser reveals.
      */
-    why: 'Make the Layers icon do nothing, so the rail cannot fold the outline.',
+    why: 'Make the Layers icon never fold, so the rail cannot close the outline.',
     file: 'components/editor/EditorShell.tsx',
-    from: `        onLayers={() => setPanels((current) => ({ ...current, outline: !current.outline }))}`,
-    to: `        onLayers={() => undefined}`,
+    from: `            setPanels((current) => ({ ...current, outline: false }));`,
+    to: `            setPanels((current) => ({ ...current, outline: true }));`,
+  },
+  {
+    tag: 'pages',
+    check: 'the rail Pages icon opens the page list and Layers returns to the outline',
+    /*
+     * Every row still draws, but each one links to /editor with no page on it,
+     * which is the send-you-back-to-the-pages-screen behaviour Andy asked to end.
+     * Only a browser reading the row's href catches that the destination is wrong.
+     */
+    why: 'Drop the page id off every row, the send-you-back behaviour this replaced.',
+    file: 'components/editor/PagesPanel.tsx',
+    from: `              href={\`/editor?page=\${encodeURIComponent(page.id)}\`}`,
+    to: `              href="/editor"`,
   },
 
   // --- contact details, on the settings screen -----------------------------

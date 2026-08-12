@@ -272,11 +272,12 @@
 /* ------------------------------------------------------------------ */
 
 /*
- * A permanent thin column of icons on the far left. Layers opens and closes the
- * outline panel beside it, Add opens the section picker, and the rest go to the
- * site's other screens for now. It carries `ed-editing-only`, so preview drops
- * it with the panels, and it hides under 1181px where the shell already shows
- * one pane at a time and width is scarce.
+ * A permanent thin column of icons on the far left. Layers and Pages each open
+ * the one panel beside it and choose what fills it, the outline or the site's
+ * pages; Add opens the section picker, and the rest go to the site's other
+ * screens for now. It carries `ed-editing-only`, so preview drops it with the
+ * panels, and it hides under 1181px where the shell already shows one pane at a
+ * time and width is scarce.
  */
 .ed-rail {
   grid-area: rail;
@@ -573,6 +574,130 @@
 }
 
 .ed-panel-body { padding: var(--ed-3); }
+
+/* ------------------------------------------------------------------ */
+/* Pages panel: the site's pages, in the outline's column (12 Aug 2026) */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The rail's Pages icon opens this in the same column the outline uses, so a
+ * client can step from one page to the next without leaving the editor. It
+ * borrows .ed-outline for the column, its border and its scroll, and adds a
+ * head, a search and the list. Each row is a full-navigation anchor to
+ * /editor?page=<id>; the current one is marked and does not act as a link to
+ * itself.
+ */
+
+/* Head and search ride above the scrolling list, so search is always to hand. */
+.ed-pages__top {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--ed-panel);
+  border-bottom: 1px solid var(--ed-line-soft);
+}
+
+.ed-pages__head {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-2);
+  padding: var(--ed-4) var(--ed-4) var(--ed-2);
+}
+
+.ed-pages__title {
+  font-size: var(--ed-text-md);
+  font-weight: 600;
+  color: var(--ed-ink);
+}
+
+/* How many pages there are, quiet beside the title. */
+.ed-pages__count {
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--ed-well);
+  color: var(--ed-ink-3);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.ed-pages__search { padding: 0 var(--ed-3) var(--ed-3); }
+
+.ed-pages__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--ed-2) var(--ed-3) var(--ed-3);
+}
+
+.ed-pages__empty {
+  padding: var(--ed-4) var(--ed-3);
+  color: var(--ed-ink-3);
+  font-size: var(--ed-text-sm);
+}
+
+.ed-pages__row {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  justify-content: center;
+  min-height: 44px;
+  padding: var(--ed-2) var(--ed-3);
+  border-radius: var(--ed-r-md);
+  color: var(--ed-ink);
+  text-decoration: none;
+}
+.ed-pages__row:hover { background: var(--ed-well); }
+.ed-pages__row:focus-visible { outline: 2px solid var(--ed-select); outline-offset: -2px; }
+
+/* A child page sits under its parent, so it is nudged in. */
+.ed-pages__row[data-child] { margin-left: var(--ed-4); }
+
+/* Where you are. Marked, and not pretending to be a link to itself. */
+.ed-pages__row[data-current] {
+  background: var(--ed-select-wash);
+  cursor: default;
+}
+.ed-pages__row[data-current] .ed-pages__name {
+  color: var(--ed-select);
+  font-weight: 600;
+}
+
+.ed-pages__name {
+  font-size: var(--ed-text-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ed-pages__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-2);
+  min-width: 0;
+}
+
+.ed-pages__slug {
+  color: var(--ed-ink-3);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* A page not yet published. */
+.ed-pages__badge {
+  flex: none;
+  padding: 0 6px;
+  border-radius: var(--ed-r-sm);
+  background: var(--ed-well);
+  color: var(--ed-ink-2);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
 
 /* ------------------------------------------------------------------ */
 /* Breadcrumb: the way up out of a block                               */

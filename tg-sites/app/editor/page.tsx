@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 
 import { EditorShell } from '../../components/editor/EditorShell';
 import { activeSite, currentUserId } from '../../lib/auth/session';
-import { getPage } from '../../lib/db/pages';
+import { getPage, listPages } from '../../lib/db/pages';
 import { getRegion } from '../../lib/db/regions';
 import { getItem } from '../../lib/db/collections';
 import { itemAsPage, itemMeta } from '../../lib/content/collection-page';
@@ -78,14 +78,16 @@ export default async function EditorPage({
   const site = await activeSite();
   if (!site) redirect('/sites');
 
-  // Theme and fonts in parallel with the content, whichever kind it is: the
-  // canvas has to show the site in the client's own colours, or the preview is
-  // a preview of a different site.
-  const [theme, faces] = await Promise.all([
+  // Theme, fonts and the site's page list in parallel with the content,
+  // whichever kind it is: the canvas has to show the site in the client's own
+  // colours, or the preview is a preview of a different site, and the rail's
+  // Pages panel needs the list to let you jump between pages without leaving.
+  const [theme, faces, sitePages] = await Promise.all([
     getTheme(site.tenantId),
     // The app role, not the renderer: the editor is behind sign-in and reads its
     // own tenant's library through the connection it already has.
     listFontFaces(site.tenantId, 'app'),
+    listPages(site.tenantId),
   ]);
 
   const head = (
@@ -101,6 +103,15 @@ export default async function EditorPage({
     // Cosmetic only: version history marks the entries this person published.
     // Nothing is gated on it.
     currentUserId: userId,
+    // Just the little each row needs; the summaries carry dates and more, which
+    // the panel does not show. See PageLink.
+    pages: sitePages.map((summary) => ({
+      id: summary.id,
+      title: summary.title,
+      slug: summary.slug,
+      status: summary.status,
+      parentId: summary.parentId,
+    })),
   };
 
   if (region) {
