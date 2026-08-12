@@ -341,6 +341,13 @@ export function SectionRenderer({
        */
       data-reveal={section.reveal && !editable ? normaliseRevealStyle(section.revealStyle) : undefined}
       /*
+       * Stagger rides alongside reveal: it means nothing without it, so it is only
+       * emitted when reveal is on. It turns the reveal from block-by-block into
+       * item-by-item, the columns or the cards arriving one after another. Same
+       * `editable` gate, and the cascade itself is pure CSS in globals.css.
+       */
+      data-reveal-stagger={section.reveal && section.revealStagger && !editable ? '' : undefined}
+      /*
        * Cards and buttons lift under the pointer on the published page and in preview,
        * not while editing, where the small movement would fight selecting them. Same
        * `editable` gate as the reveal above. The lift itself is pure CSS in globals.css.

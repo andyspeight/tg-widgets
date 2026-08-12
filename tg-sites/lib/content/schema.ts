@@ -544,6 +544,14 @@ export const SectionSchema = z.object({
    */
   revealStyle: z.unknown().transform(normaliseRevealStyle).optional(),
   /**
+   * Reveal the section's items one after another rather than the whole block at
+   * once: the columns of a row, or the cards, tiles or logos of a grid, each
+   * arriving a little later than the one before. Off by default and optional, so
+   * no stored section changes shape, and it only means anything when reveal is on.
+   * Pure CSS in globals.css, behind the same two guards as the reveal it extends.
+   */
+  revealStagger: z.boolean().optional(),
+  /**
    * Lift a section's cards and buttons a touch as a visitor points at them. Off by
    * default and optional, so no stored section changes shape. Pure CSS hover in
    * globals.css, with the small rise held back under prefers-reduced-motion.

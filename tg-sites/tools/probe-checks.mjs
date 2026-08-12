@@ -686,6 +686,19 @@ const MUTATIONS = [
     to: `      data-reveal={undefined}`,
   },
   {
+    tag: 'reveal-stagger',
+    check: 'a staggered reveal cascades a row of columns, the blocks stepping aside',
+    /*
+     * The flag is stored and the toggle looks wired, but without data-reveal-stagger on the
+     * section the cascade CSS matches nothing: the reveal still runs block by block, never
+     * item by item. Invisible in the editor, and on the page the columns arrive together.
+     */
+    why: 'Never emit data-reveal-stagger, so the toggle stores the flag but nothing cascades.',
+    file: 'components/render/PageRenderer.tsx',
+    from: `      data-reveal-stagger={section.reveal && section.revealStagger && !editable ? '' : undefined}`,
+    to: `      data-reveal-stagger={undefined}`,
+  },
+  {
     tag: 'reveal-style',
     check: 'a chosen reveal style rides data-reveal and runs its own keyframe',
     /*

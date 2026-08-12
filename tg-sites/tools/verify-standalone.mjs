@@ -7742,6 +7742,94 @@ await check('a chosen reveal style rides data-reveal and runs its own keyframe',
 });
 
 /*
+ * Staggered reveal (Andy, 12 Aug 2026). data-reveal-stagger, with data-reveal, makes a
+ * section's items arrive one after another: here a row of three columns. Off while editing,
+ * like the reveal it rides on. In preview, where scroll timelines run, the columns take a
+ * reveal keyframe with a later range on each, and the block wrappers step aside so only the
+ * columns move. A three-column section proves the column path; a card grid is the other path.
+ */
+await check('a staggered reveal cascades a row of columns, the blocks stepping aside', async () => {
+  await closeAnyDialog();
+  await page.evaluate(() =>
+    window.__TG_SET_PAGE__({
+      id: 'stg',
+      slug: 'stagger',
+      title: 'Stagger',
+      version: 1,
+      sections: [
+        {
+          id: 's',
+          width: 'contained',
+          tone: 'light',
+          reveal: true,
+          revealStagger: true,
+          rows: [
+            {
+              id: 'r',
+              gap: 16,
+              columns: [
+                { id: 'c1', width: 34, blocks: [{ id: 'h1', type: 'heading', props: { level: 3, style: 'h3', html: 'One' } }] },
+                { id: 'c2', width: 33, blocks: [{ id: 'h2', type: 'heading', props: { level: 3, style: 'h3', html: 'Two' } }] },
+                { id: 'c3', width: 33, blocks: [{ id: 'h3', type: 'heading', props: { level: 3, style: 'h3', html: 'Three' } }] },
+              ],
+            },
+          ],
+        },
+      ],
+    }),
+  );
+  await page.waitForTimeout(500);
+  await showPanels();
+
+  const whileEditing = await page.evaluate(
+    () => !!document.querySelector('.ed-canvas-frame .tgs-section[data-reveal-stagger]'),
+  );
+
+  await page.getByRole('button', { name: 'Preview', exact: true }).click();
+  await page.waitForTimeout(300);
+  const info = await page.evaluate(() => {
+    const section = document.querySelector('.ed-canvas-frame .tgs-section[data-reveal-stagger]');
+    if (!section) return { present: false };
+    const cols = [...section.querySelectorAll('.tgs-row > .tgs-col')];
+    const block = section.querySelector('.tgs-col .tgs-block');
+    return {
+      present: true,
+      supported: CSS.supports('animation-timeline', 'view()'),
+      count: cols.length,
+      colAnim: cols[0] ? getComputedStyle(cols[0]).animationName : null,
+      range1: cols[0] ? getComputedStyle(cols[0]).animationRangeStart : null,
+      range3: cols[2] ? getComputedStyle(cols[2]).animationRangeStart : null,
+      blockAnim: block ? getComputedStyle(block).animationName : null,
+    };
+  });
+
+  const exit = page.getByRole('button', { name: 'Exit preview', exact: true });
+  if (await exit.count()) {
+    await exit.click();
+    await page.waitForTimeout(200);
+  }
+  await page.evaluate(() => window.__TG_SET_PAGE__(null));
+  await page.waitForTimeout(200);
+  await showPanels();
+
+  if (whileEditing) return 'the stagger was live while editing, which would hide items as the canvas scrolls';
+  if (!info.present) return 'the section did not carry data-reveal-stagger in preview';
+  if (info.count !== 3) return `expected 3 columns, saw ${info.count}`;
+  if (info.supported) {
+    if (!(info.colAnim || '').startsWith('tgs-reveal')) {
+      return `the columns did not take a reveal keyframe: ${info.colAnim}`;
+    }
+    if (info.range1 === info.range3) {
+      return `the columns share a range, so they do not cascade: ${info.range1}`;
+    }
+    if (info.blockAnim !== 'none') {
+      return `the block wrappers did not step aside under stagger: ${info.blockAnim}`;
+    }
+  }
+  return true;
+});
+
+/*
  * Hover lift (Andy, 11 Aug 2026). A section marked Hover lift raises its cards and
  * buttons a touch under the pointer. The shadow deepens for everyone; the small rise
  * sits behind prefers-reduced-motion. This drops in a lifted section with a button,

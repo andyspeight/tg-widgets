@@ -571,6 +571,46 @@
   }
 }
 
+/*
+ * STAGGERED REVEAL (Andy, 12 Aug 2026). data-reveal-stagger, alongside data-reveal, makes a
+ * section's ITEMS arrive one after another rather than the whole block at once: the columns of
+ * a row, or the cards, gallery tiles or logos of a grid. Each item keeps its own view() timeline
+ * and a later item starts a little further into the scroll, which is the cascade. The block
+ * wrappers step aside so nothing double-animates, and a column that HOLDS a grid steps aside too
+ * (the :not(:has()) below), letting the grid's own items be the ones that cascade rather than the
+ * column and its cards both moving. Same two guards as the reveal it builds on, so where scroll
+ * timelines or :has are missing, and for anyone who asked for less motion, it degrades to static.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    /* Under stagger the items animate, not the block wrappers, so nothing doubles up. */
+    .tgs-section[data-reveal][data-reveal-stagger] .tgs-block { animation: none; }
+
+    .tgs-section[data-reveal][data-reveal-stagger] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) {
+      animation: tgs-reveal-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 6% entry 56%;
+    }
+
+    /* The cascade: each later item begins its reveal a little further into the scroll. */
+    .tgs-section[data-reveal][data-reveal-stagger] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item):nth-child(2) { animation-range: entry 14% entry 64%; }
+    .tgs-section[data-reveal][data-reveal-stagger] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item):nth-child(3) { animation-range: entry 22% entry 72%; }
+    .tgs-section[data-reveal][data-reveal-stagger] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item):nth-child(4) { animation-range: entry 30% entry 80%; }
+    .tgs-section[data-reveal][data-reveal-stagger] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item):nth-child(5) { animation-range: entry 38% entry 88%; }
+    .tgs-section[data-reveal][data-reveal-stagger] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item):nth-child(n+6) { animation-range: entry 46% entry 96%; }
+
+    /*
+     * The chosen arrival style rides through to the items too. Same specificity as the base
+     * item rule above, so source order decides: these must stay after it, as with the reveal.
+     */
+    .tgs-section[data-reveal='fade'][data-reveal-stagger] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) { animation-name: tgs-reveal-fade; }
+    .tgs-section[data-reveal='slide-left'][data-reveal-stagger] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) { animation-name: tgs-reveal-slide-left; }
+    .tgs-section[data-reveal='slide-right'][data-reveal-stagger] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) { animation-name: tgs-reveal-slide-right; }
+    .tgs-section[data-reveal='zoom'][data-reveal-stagger] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) { animation-name: tgs-reveal-zoom; }
+    .tgs-section[data-reveal='blur'][data-reveal-stagger] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) { animation-name: tgs-reveal-blur; }
+  }
+}
+
 @keyframes tgs-reveal-rise {
   from {
     opacity: 0;

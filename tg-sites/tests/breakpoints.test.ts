@@ -512,6 +512,46 @@ describe('reveal on scroll animates a sections content in, degrading gracefully'
     expect(props).toContain('revealStyle: normaliseRevealStyle(event.target.value)');
     expect(props).toContain('REVEAL_STYLES.map');
   });
+
+  it('carries an optional stagger flag, kept even without reveal, but meaningless then', () => {
+    expect(schema).toContain('revealStagger: z.boolean().optional()');
+    const parsed = parsePage({
+      version: 1,
+      id: 'p',
+      slug: 'stagger',
+      title: 'Stagger',
+      sections: [
+        { id: 'a', tone: 'light', width: 'contained', reveal: true, revealStagger: true, rows: [] },
+        { id: 'b', tone: 'light', width: 'contained', reveal: true, rows: [] },
+      ],
+    });
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(parsed.page.sections[0].revealStagger).toBe(true);
+    expect(parsed.page.sections[1].revealStagger).toBeUndefined();
+  });
+
+  it('emits data-reveal-stagger only alongside reveal, and never while editing', () => {
+    expect(render).toContain(
+      "data-reveal-stagger={section.reveal && section.revealStagger && !editable ? '' : undefined}",
+    );
+  });
+
+  it('cascades the items on their own timelines, a grid-holding column stepping aside', () => {
+    expect(css).toContain(
+      '.tgs-section[data-reveal][data-reveal-stagger] .tgs-block { animation: none; }',
+    );
+    // A column that holds a grid is excluded, so the grid's items cascade, not the column.
+    expect(css).toContain('.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos))');
+    expect(css).toContain('.tgs-cards > .tgs-card');
+    // The cascade is the per-item range offset, later items reaching further in.
+    expect(css).toContain(':nth-child(2) { animation-range: entry 14% entry 64%; }');
+  });
+
+  it('offers a Stagger toggle when reveal is on', () => {
+    expect(props).toContain('Stagger the items');
+    expect(props).toContain('revealStagger: event.target.checked || undefined');
+  });
 });
 
 // ---------------------------------------------------------------------------

@@ -989,6 +989,28 @@ function SectionFields({
             </select>
           </div>
         )}
+        {section.reveal === true && (
+          <div className="ed-field">
+            <label className="ed-toggle">
+              <input
+                type="checkbox"
+                checked={section.revealStagger === true}
+                onChange={(event) =>
+                  set(
+                    { revealStagger: event.target.checked || undefined },
+                    `sec:${index}:revealStagger`,
+                  )
+                }
+              />
+              <span>Stagger the items</span>
+            </label>
+            <p className="ed-help" style={{ marginTop: 6 }}>
+              The section&apos;s columns, or its cards, tiles or logos, arrive one after another
+              rather than together. It rides on the reveal above, so it turns off with it and eases
+              off for anyone who prefers less motion.
+            </p>
+          </div>
+        )}
         <div className="ed-field">
           <label className="ed-toggle">
             <input
