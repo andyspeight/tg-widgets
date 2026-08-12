@@ -187,8 +187,19 @@
   line-height: var(--tgs-p-leading);
   color: var(--tgs-text);
   background: var(--tgs-surface);
-  /* A rendered page must never scroll sideways. Non-negotiable. */
-  overflow-x: hidden;
+  /*
+   * A rendered page must never scroll sideways. Non-negotiable. CLIP, not hidden:
+   * both stop the sideways scroll, but `hidden` makes this box a SCROLL CONTAINER
+   * (with one axis hidden the other computes to auto), and a scroll container
+   * captures the `animation-timeline: view()` of every reveal, stagger, parallax and
+   * count-up inside it. Bound to this box, which never itself scrolls, those
+   * timelines freeze at fully-in-view and the animations sit at their end state and
+   * never play. That is exactly why the scroll animations did nothing on the real
+   * site while the harness, which only checks the animation is attached, stayed green.
+   * `clip` clips the overflow without becoming a scroll container, so the timelines
+   * resolve to the viewport and run. (Andy, 12 Aug 2026.)
+   */
+  overflow-x: clip;
 }
 
 /* ------------------------------------------------------------------ */
@@ -729,7 +740,9 @@
  */
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
-    .tgs-section[data-parallax] { overflow: hidden; }
+    /* clip, not hidden, so the section clips the drifting picture without becoming a
+       scroll container that would freeze its own view() timeline. See .tgs-page. */
+    .tgs-section[data-parallax] { overflow: clip; }
     .tgs-section[data-parallax] .tgs-section__bg {
       top: -10%;
       bottom: auto;

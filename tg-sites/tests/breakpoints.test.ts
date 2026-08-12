@@ -552,6 +552,16 @@ describe('reveal on scroll animates a sections content in, degrading gracefully'
     expect(props).toContain('Stagger the items');
     expect(props).toContain('revealStagger: event.target.checked || undefined');
   });
+
+  it('keeps the page wrapper on overflow-x: clip so the scroll timelines are not frozen', () => {
+    // hidden makes .tgs-page a scroll container, and a view() timeline binds to the
+    // nearest scroll-container ancestor. Bound to a wrapper that never scrolls, every
+    // reveal froze at fully-in-view and nothing moved on the real site. clip stops the
+    // sideways scroll without becoming a scroll container. Do NOT revert this to hidden.
+    // Motion is proven for real in tools/verify-motion.mjs; this only guards the value.
+    expect(css).toContain('overflow-x: clip');
+    expect(css).not.toMatch(/\.tgs-page\s*\{[^}]*overflow-x:\s*hidden/);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -716,7 +726,9 @@ describe('parallax drifts a sections background picture as the page scrolls', ()
   });
 
   it('grows the background and slides it on a scroll timeline, clipping the overspill', () => {
-    expect(css).toContain('.tgs-section[data-parallax] { overflow: hidden; }');
+    // clip, not hidden: hidden would make the section a scroll container and freeze its
+    // own parallax view() timeline, the same bug that stopped the reveals (12 Aug 2026).
+    expect(css).toContain('.tgs-section[data-parallax] { overflow: clip; }');
     expect(css).toContain('.tgs-section[data-parallax] .tgs-section__bg');
     expect(css).toContain('@keyframes tgs-parallax');
     expect(css).toContain('animation-timeline: view()');
