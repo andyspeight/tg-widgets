@@ -1167,6 +1167,73 @@
 .ed-canvas-frame [data-path] { position: relative; }
 
 /*
+ * THE HEADER AND FOOTER ON THE CANVAS (Andy, 12 Aug 2026).
+ *
+ * A band above the page and one below it, each the site's real header or footer,
+ * so a page is edited inside the chrome that wraps every page. Same white paper
+ * and navy-tinted shadow as the page frame so the three read as one site, with a
+ * small gap and a corner tag so it stays clear the chrome is shared across the
+ * whole site and is not part of this one page.
+ */
+.ed-chrome {
+  width: 100%;
+  position: relative;
+  background: #fff;
+  border-radius: var(--ed-r-lg);
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(27, 43, 91, 0.06), 0 24px 48px -20px rgba(27, 43, 91, 0.16);
+}
+.ed-root[data-theme='dark'] .ed-chrome {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 24px 48px -20px rgba(0, 0, 0, 0.65);
+}
+.ed-chrome--header { margin-bottom: var(--ed-2); }
+.ed-chrome--footer { margin-top: var(--ed-2); }
+
+/*
+ * The tag that names the band while editing. A small brand-coloured flag in the
+ * top-left corner, inert to clicks so it never gets between the pointer and the
+ * canvas underneath it.
+ */
+.ed-chrome__tag {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 3px 10px;
+  border-bottom-right-radius: var(--ed-r-md);
+  background: var(--ed-select);
+  color: var(--ed-on-brand);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  pointer-events: none;
+}
+.ed-chrome__tag-note { font-weight: 400; font-size: 10px; opacity: 0.85; }
+
+/*
+ * Inert while editing, so a click on the chrome clears the selection like any
+ * empty part of the canvas and a link in the header cannot navigate the editor
+ * away. Live in preview, which is the site exactly as it will publish.
+ */
+.ed-chrome__body { display: block; pointer-events: none; }
+.ed-chrome__body[data-preview] { pointer-events: auto; }
+
+/* An empty header or footer, said plainly. An editing aid, so it never shows in preview. */
+.ed-chrome__empty {
+  margin: 0;
+  padding: var(--ed-5);
+  text-align: center;
+  font-size: 13px;
+  color: var(--ed-ink-2);
+  border: 1px dashed var(--ed-line);
+  border-radius: var(--ed-r-lg);
+  background: var(--ed-panel);
+}
+
+/*
  * THE LABEL TAB IS THE TOOLBAR'S NOW, not a CSS ::after on the element.
  *
  * It used to be `content: attr(data-kind)` drawn on the selected element, which

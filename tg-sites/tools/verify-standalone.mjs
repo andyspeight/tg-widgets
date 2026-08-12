@@ -4820,6 +4820,109 @@ await check('going back to a page brings the title box back', async () => {
   return boxes === 1 && fixed === 0 ? true : `${boxes} boxes, ${fixed} labels`;
 });
 
+/*
+ * THE HEADER AND FOOTER ON THE CANVAS (Andy, 12 Aug 2026), slice 1.
+ *
+ * When you edit a page, the site's header is drawn above it and the footer
+ * below, so a page is edited inside the chrome that wraps every page of the
+ * site. The first slice shows them and no more, so the claim is: they are THERE,
+ * above and below the page, rendered as real regions, inert while editing so a
+ * click does not select them; and pressing Preview shows them as the published
+ * site with the editing tag gone. The chrome is injected through a harness
+ * handle, the same way the test page is. Cleared in a finally, or the two extra
+ * sections it adds would throw off every later check that counts them.
+ */
+await check('the header and footer are drawn around the page, and clean in preview', async () => {
+  await closeAnyDialog();
+  await page.evaluate(() => window.__TG_SET_REGION__(null));
+  await page.waitForTimeout(300);
+
+  const band = (region, words) => ({
+    id: region[0],
+    slug: '',
+    title: region,
+    version: 1,
+    sections: [
+      {
+        id: `${region[0]}s`,
+        width: 'contained',
+        tone: 'light',
+        rows: [
+          {
+            id: `${region[0]}r`,
+            gap: 16,
+            columns: [
+              {
+                id: `${region[0]}c`,
+                width: 100,
+                blocks: [{ id: `${region[0]}b`, type: 'heading', props: { level: 2, style: 'h2', html: words } }],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+  const chrome = { header: band('header', 'MY SITE HEADER'), footer: band('footer', 'MY SITE FOOTER') };
+
+  try {
+    await page.evaluate((c) => window.__TG_SET_CHROME__(c), chrome);
+    await page.waitForTimeout(400);
+    await showPanels();
+
+    const headerBand = page.locator('.ed-chrome[data-region="header"]');
+    const footerBand = page.locator('.ed-chrome[data-region="footer"]');
+    if ((await headerBand.count()) !== 1) return 'no header band on the canvas';
+    if ((await footerBand.count()) !== 1) return 'no footer band on the canvas';
+
+    // Rendered as a region, the published site's own marker, not a bare page.
+    if (!(await headerBand.locator('.tgs-region[data-region="header"]').count())) {
+      return 'the header band did not render as a header region';
+    }
+
+    // The real content shows in each.
+    const headerText = (await headerBand.innerText()) || '';
+    const footerText = (await footerBand.innerText()) || '';
+    if (!headerText.includes('MY SITE HEADER')) return `the header band read "${headerText}"`;
+    if (!footerText.includes('MY SITE FOOTER')) return `the footer band read "${footerText}"`;
+
+    // A tag names each band while editing.
+    const tags = await page.locator('.ed-chrome__tag').allInnerTexts();
+    if (!tags.some((t) => t.includes('Header'))) return 'the header band had no tag';
+    if (!tags.some((t) => t.includes('Footer'))) return 'the footer band had no tag';
+
+    // Above and below the page, measured rather than assumed.
+    const hy = (await headerBand.boundingBox())?.y ?? 0;
+    const fy = (await footerBand.boundingBox())?.y ?? 0;
+    const py = (await page.locator('.ed-canvas-frame').boundingBox())?.y ?? 0;
+    if (!(hy < py)) return `the header sat at ${hy}, not above the page at ${py}`;
+    if (!(fy > py)) return `the footer sat at ${fy}, not below the page at ${py}`;
+
+    // Inert while editing: no data-path in the chrome, so a click cannot select it.
+    const selectable = await headerBand.locator('[data-path]').count();
+    if (selectable) return `the header band held ${selectable} selectable elements while editing`;
+
+    // Preview shows the chrome as the published site, with the editing tag gone.
+    await page.getByRole('button', { name: 'Preview', exact: true }).click();
+    await page.waitForTimeout(300);
+    const tagInPreview = await page.locator('.ed-chrome__tag').count();
+    const headerInPreview = await page.locator('.ed-chrome[data-region="header"]').count();
+    const exit = page.getByRole('button', { name: 'Exit preview', exact: true });
+    if (await exit.count()) {
+      await exit.click();
+      await page.waitForTimeout(200);
+    }
+    if (tagInPreview !== 0) return 'the editing tag stayed on the chrome in preview';
+    if (headerInPreview !== 1) return 'the header chrome vanished in preview';
+
+    return true;
+  } finally {
+    await page.evaluate(() => window.__TG_SET_CHROME__(null));
+    await page.waitForTimeout(200);
+    await showPanels();
+  }
+});
+
 
 // ---------------------------------------------------------------------------
 // Cards

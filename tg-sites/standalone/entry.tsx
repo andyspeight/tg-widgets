@@ -80,6 +80,15 @@ function App() {
    * switcher across the top would make the product look like it has one.
    */
   const [testPage, setTestPage] = useState<Page | null>(null);
+  /**
+   * The header and footer the harness drops in to exercise the chrome drawn
+   * around the page on the canvas. Null is no chrome, which is the review copy's
+   * default: opening this file to find a stranger's header and footer would make
+   * the build look like somebody else's site. A handle rather than a control,
+   * for the same reason the theme, the region and the test page are.
+   */
+  const [chromeHeader, setChromeHeader] = useState<Page | null>(null);
+  const [chromeFooter, setChromeFooter] = useState<Page | null>(null);
 
   const handles = window as unknown as Record<string, unknown>;
   handles.__TG_SET_THEME__ = (input: unknown) => {
@@ -101,6 +110,22 @@ function App() {
     const parsed = input == null ? null : parsePage(input);
     setTestPage(parsed && parsed.ok ? parsed.page : null);
   };
+  /*
+   * The header and footer to draw around the page, each parsed the same way a
+   * saved page is so the harness can hand over loose objects. Takes
+   * { header, footer }; either missing or unparseable becomes no chrome on that
+   * side. Anything that is not an object clears both.
+   */
+  handles.__TG_SET_CHROME__ = (input: unknown) => {
+    const one = (value: unknown): Page | null => {
+      if (value == null) return null;
+      const parsed = parsePage(value);
+      return parsed.ok ? parsed.page : null;
+    };
+    const obj = input && typeof input === 'object' ? (input as Record<string, unknown>) : {};
+    setChromeHeader(one(obj.header));
+    setChromeFooter(one(obj.footer));
+  };
 
   return (
     <EditorShell
@@ -121,6 +146,10 @@ function App() {
       initialPage={region ? regionAsPage(emptyRegion(region)) : (testPage ?? SEED_PAGE)}
       initialStatus="draft"
       initialHasUnpublishedChanges
+      // The chrome drawn around the page. The shell itself leaves it off while a
+      // region or an item is the thing being edited, so these can pass straight.
+      chromeHeader={chromeHeader}
+      chromeFooter={chromeFooter}
       siteTheme={themeTokens(theme).style}
       /*
         There is no openAccess prop any more. It carried a notice saying that

@@ -100,6 +100,17 @@ interface Props {
    * the same time, so this is the whole canvas.
    */
   preview?: boolean;
+  /**
+   * The site's header and footer, drawn around the page.
+   *
+   * Display-only in this slice: rendered as the region each is, with editing off,
+   * so you see the page inside the chrome that wraps every page of the site. A
+   * click on the chrome falls through to the wrap and clears the selection like
+   * any empty part of the canvas, because none of it carries a data-path. Null
+   * when there is nothing to show, or when the thing being edited IS a region.
+   */
+  chromeHeader?: Page | null;
+  chromeFooter?: Page | null;
 }
 
 /**
@@ -148,6 +159,8 @@ export function Canvas({
   emptyNote,
   region = null,
   preview = false,
+  chromeHeader = null,
+  chromeFooter = null,
 }: Props) {
   const frameRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -755,6 +768,7 @@ export function Canvas({
         pretending.
       */}
       <div style={{ width: '100%', maxWidth: viewportWidth }}>
+        <ChromeBand page={chromeHeader} region="header" theme={theme} preview={preview} />
         <div
           ref={frameRef}
           className="ed-canvas-frame"
@@ -799,11 +813,72 @@ export function Canvas({
         </div>
 
         {!preview && stackNote && <p className="ed-stack-note">{stackNote}</p>}
+        <ChromeBand page={chromeFooter} region="footer" theme={theme} preview={preview} />
       </div>
 
       {badge && (
         <div className="ed-width-badge" style={{ left: badge.x, top: badge.y }}>
           {badge.text || 'Drag to resize'}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * The site's header or footer, drawn around the page on the canvas.
+ *
+ * Editing is off here: it renders the region exactly as the published site
+ * will, so the page is seen inside the chrome that wraps every page of the
+ * site. This is the whole of the first slice, and the reason it is only a
+ * render: the header and the footer are context while you edit a page, so they
+ * are drawn, not wired. A later slice makes clicking one edit it in place.
+ *
+ * While editing, a tag names the band and says it is shared, the body is inert
+ * (pointer-events off in the CSS) so a click lands on the canvas wrap and clears
+ * the selection like any empty part of the canvas, and a link in the header
+ * cannot navigate the editor away. In preview the tag goes and the chrome
+ * behaves, because preview is the site as it will publish, chrome and all.
+ */
+function ChromeBand({
+  page,
+  region,
+  theme,
+  preview,
+}: {
+  page: Page | null;
+  region: 'header' | 'footer';
+  theme?: CSSProperties;
+  preview: boolean;
+}) {
+  const empty = !page || page.sections.length === 0;
+
+  // In preview an empty region is simply absent, exactly as on the published
+  // page. The labelled placeholder is an editing aid, so it has no place here.
+  if (empty && preview) return null;
+
+  return (
+    <div className={`ed-chrome ed-chrome--${region}`} data-region={region}>
+      {!preview && (
+        <span className="ed-chrome__tag">
+          {region === 'header' ? 'Header' : 'Footer'}
+          <span className="ed-chrome__tag-note">on every page</span>
+        </span>
+      )}
+      {empty ? (
+        <p className="ed-chrome__empty">
+          Your {region} is empty. It will show on every page once you add one.
+        </p>
+      ) : (
+        <div
+          className="ed-chrome__body"
+          // Interactive only in preview; inert while editing (see the note above).
+          data-preview={preview ? '' : undefined}
+          // A decorative copy while editing, so a screen reader skips it and meets
+          // the page once. In preview it is the real thing, so it is not hidden.
+          aria-hidden={preview ? undefined : true}
+        >
+          <PageRenderer page={page!} editable={false} editorCanvas theme={theme} region={region} />
         </div>
       )}
     </div>

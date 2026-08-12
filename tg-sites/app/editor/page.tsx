@@ -171,7 +171,17 @@ export default async function EditorPage({
   // Not found and not yours give the same answer here, deliberately. RLS
   // makes another tenant's page indistinguishable from one that does not
   // exist, so a guessed id confirms nothing.
-  const page = await getPage(site.tenantId, pageId!);
+  //
+  // The header and footer come along too, so the canvas can draw the page inside
+  // the chrome that wraps every page of the site. Read alongside the page rather
+  // than after it, since none of the three waits on another. They are the site's
+  // furniture here, shown not edited, so only their sections are wanted; the
+  // region editor at ?region= is still where they are changed.
+  const [page, headerRecord, footerRecord] = await Promise.all([
+    getPage(site.tenantId, pageId!),
+    getRegion(site.tenantId, 'header'),
+    getRegion(site.tenantId, 'footer'),
+  ]);
   if (!page) redirect('/sites');
 
   return (
@@ -186,6 +196,8 @@ export default async function EditorPage({
         initialPage={page.content}
         initialStatus={page.status}
         initialHasUnpublishedChanges={page.hasUnpublishedChanges}
+        chromeHeader={regionAsPage(headerRecord.region)}
+        chromeFooter={regionAsPage(footerRecord.region)}
       />
     </>
   );

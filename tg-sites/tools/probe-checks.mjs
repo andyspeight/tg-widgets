@@ -879,6 +879,20 @@ const MUTATIONS = [
     from: `              onClick={() => setAdding(true)}`,
     to: `              onClick={() => undefined}`,
   },
+  {
+    tag: 'chrome',
+    check: 'the header and footer are drawn around the page, and clean in preview',
+    /*
+     * The header band is still drawn, but with no content handed to it, so it
+     * falls back to the empty placeholder and the page is edited with no real
+     * header above it. It compiles and a band is still there, which is the kind
+     * of half-wiring only a browser looking for the region on the canvas catches.
+     */
+    why: 'Hand the header band nothing, so the page has no real header around it.',
+    file: 'components/editor/Canvas.tsx',
+    from: `        <ChromeBand page={chromeHeader} region="header" theme={theme} preview={preview} />`,
+    to: `        <ChromeBand page={null} region="header" theme={theme} preview={preview} />`,
+  },
 
   // --- contact details, on the settings screen -----------------------------
 

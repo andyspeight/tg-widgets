@@ -340,6 +340,23 @@ interface EditorProps {
    */
   itemId?: string | null;
   initialItemMeta?: ItemMeta;
+  /**
+   * The site's header and footer, to show around the page on the canvas.
+   *
+   * WHY THEY SIT HERE AS PLAIN PROPS, not in the undo history or the save path.
+   * When you are editing a page, the header and the footer are context: they are
+   * what wraps every page, so seeing them is the difference between editing a
+   * page and editing a page in the site it lives in. Slice 1 shows them and
+   * nothing more, so they are display-only, handed straight to the canvas as the
+   * region each is. The next slice makes them editable in place, which is when
+   * they earn a place in the shell's state; until then they are furniture drawn
+   * around the thing being edited.
+   *
+   * Only set when editing a page. A region screen is already editing one of
+   * these, and drawing a header around a header is a hall of mirrors.
+   */
+  chromeHeader?: Page | null;
+  chromeFooter?: Page | null;
 }
 
 export function EditorShell({
@@ -355,6 +372,8 @@ export function EditorShell({
   initialRegionFlags,
   itemId = null,
   initialItemMeta,
+  chromeHeader = null,
+  chromeFooter = null,
 }: EditorProps) {
   const [history, setHistory] = useState<History>({
     past: [],
@@ -1669,6 +1688,13 @@ export function EditorShell({
         theme={siteTheme}
         // So the canvas draws a header as a header rather than as a page.
         region={region}
+        /*
+          The site's chrome, drawn around the page so you edit a page in the site
+          it lives in. Only when editing a page: a region screen is already one of
+          these, and an item's chrome comes later. See the chrome props above.
+        */
+        chromeHeader={region || itemId ? null : chromeHeader}
+        chromeFooter={region || itemId ? null : chromeFooter}
         /*
           "This page is empty" is the wrong sentence on the header screen, and
           it is the sentence somebody meets FIRST, since a client who has never
