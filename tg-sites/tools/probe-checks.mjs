@@ -906,6 +906,20 @@ const MUTATIONS = [
     from: `        onActivate={onActivateRegion ? () => onActivateRegion(pos) : undefined}`,
     to: `        onActivate={undefined}`,
   },
+  {
+    tag: 'region-split',
+    check: 'a header keeps its bare shapes on Layouts and its designs on Designed',
+    /*
+     * The region layouts come back empty, so the Layouts tab loses the bare
+     * shapes and only the Designed tab has anything. It compiles and the Designed
+     * tab still looks right, so the half that went missing is only visible to a
+     * browser that clicks over to Layouts and finds it bare.
+     */
+    why: 'Empty the region layouts, so the Layouts tab loses the bare shapes.',
+    file: 'lib/content/presets.ts',
+    from: `  return REGION_LAYOUTS.filter((preset) => preset.category === scope);`,
+    to: `  return [];`,
+  },
 
   // --- contact details, on the settings screen -----------------------------
 

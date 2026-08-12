@@ -31,7 +31,7 @@ import {
   type SectionPreset,
 } from './preset-types';
 import { PAGE_PRESETS } from './presets-page';
-import { REGION_PRESETS } from './presets-region';
+import { REGION_LAYOUTS, REGION_PRESETS } from './presets-region';
 import {
   DEFAULT_GAP,
   DEFAULT_SECTION_PADDING,
@@ -69,6 +69,20 @@ export function presetById(id: string): SectionPreset | undefined {
 
 export function presetsIn(category: PresetCategory): SectionPreset[] {
   return SECTION_PRESETS.filter((preset) => preset.category === category);
+}
+
+/**
+ * The bare region shapes, for the Layouts tab when a header or footer is what is
+ * being edited.
+ *
+ * A page's Layouts tab offers empty column arrangements; a region's offers these
+ * instead, because an empty two-column row is not what somebody came to the
+ * header screen for, and a logo beside a menu is a layout more than it is a
+ * design. The designed headers and footers are on the Designed tab, in
+ * REGION_PRESETS, and reached through categoriesFor like every other category.
+ */
+export function regionLayoutsFor(scope: PresetScope): SectionPreset[] {
+  return REGION_LAYOUTS.filter((preset) => preset.category === scope);
 }
 
 /**

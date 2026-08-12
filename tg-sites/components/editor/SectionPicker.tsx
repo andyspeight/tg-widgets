@@ -25,6 +25,7 @@ import {
   categoriesFor,
   presetThumb,
   presetsIn,
+  regionLayoutsFor,
   stockPreviewUrl,
   type PresetCategory,
   type PresetScope,
@@ -270,7 +271,7 @@ export function SectionPicker({
         ))}
       </div>
 
-      {tab === 'layouts' && (
+      {tab === 'layouts' && scope === 'page' && (
         <>
           <div className="ed-layout-grid">
             {LAYOUTS.map((layout, index) => (
@@ -291,6 +292,50 @@ export function SectionPicker({
             Every layout stacks into one column on a phone, whichever you pick.
             Drag the edge between two columns in the preview to make one wider
             than the other.
+          </p>
+        </>
+      )}
+
+      {/*
+        A REGION'S LAYOUTS ARE ITS OWN SHAPES, not the page's empty columns (Andy,
+        12 Aug 2026). An empty two-column row is not what somebody came to the
+        header screen for, so a header gets logo-and-menu shapes and a footer gets
+        column shapes, pre-filled and ready to change. Drawn from the same preset
+        thumbnail as the designed ones next door, and added the same way, because
+        they are presets too: the only difference is that these are bare and those
+        are dressed. The finished looks are on the Designed tab.
+      */}
+      {tab === 'layouts' && scope !== 'page' && (
+        <>
+          <div className="ed-preset-grid">
+            {regionLayoutsFor(scope).map((preset) => (
+              <button
+                key={preset.id}
+                type="button"
+                className="ed-preset-card"
+                disabled={addingId !== null}
+                aria-busy={addingId === preset.id}
+                onClick={async () => {
+                  setAddingId(preset.id);
+                  try {
+                    await onPickPreset(preset);
+                  } finally {
+                    setAddingId(null);
+                  }
+                }}
+              >
+                <PresetThumb preset={preset} />
+                <span className="ed-preset-card__name">{preset.label}</span>
+                <span className="ed-preset-card__what">
+                  {addingId === preset.id ? 'Adding…' : preset.description}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <p className="ed-modal__note">
+            A bare shape to fill in with your own. For a finished look instead, try
+            the Designed tab.
           </p>
         </>
       )}

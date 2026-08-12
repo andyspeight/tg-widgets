@@ -350,8 +350,8 @@ export const STARTERS: readonly Starter[] = [
       'Contact, with your address, hours and phone number',
       'A header with a menu of all five, and a footer',
     ],
-    header: 'header-logo-menu-button',
-    footer: 'footer-four-columns',
+    header: 'header-cta-bar',
+    footer: 'footer-tinted-four',
     pages: [
       {
         title: 'Home',
@@ -495,8 +495,8 @@ export const STARTERS: readonly Starter[] = [
       'A header and a simple footer',
       'You can add more pages whenever you like',
     ],
-    header: 'header-with-phone',
-    footer: 'footer-simple-centred',
+    header: 'header-phone-cta',
+    footer: 'footer-centred-social',
     pages: [
       {
         title: 'Home',

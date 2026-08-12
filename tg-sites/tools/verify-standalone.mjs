@@ -4762,7 +4762,9 @@ await check('a section can be added to a header like any other', async () => {
   await page.waitForTimeout(400);
   await page.locator('.ed-tab', { hasText: 'Layouts' }).click();
   await page.waitForTimeout(300);
-  await page.locator('.ed-layout-card').first().click();
+  // A region's Layouts tab is its own shapes (preset cards), not the page's empty
+  // columns, since 12 Aug 2026. Picking one drops in a bare header to fill.
+  await page.locator('.ed-preset-card').first().click();
   await page.waitForTimeout(500);
   return (await page.locator('.ed-canvas-frame .tgs-section').count()) === 1
     ? true
@@ -6170,12 +6172,53 @@ await check('the header screen offers headers, and opens on them', async () => {
 });
 
 /*
+ * SLICE 3: THE SHAPES ARE LAYOUTS, THE DESIGNS ARE DESIGNS (Andy, 12 Aug 2026).
+ * Andy's read was that a logo beside a menu is a layout, not a design. So the
+ * bare shapes moved to the Layouts tab and the Designed tab keeps the ones with
+ * a tone, a rule or a call to action. This proves the split held and that
+ * neither leaked into the other, and that a region's Layouts are its own shapes
+ * rather than the page's empty columns.
+ */
+await check('a header keeps its bare shapes on Layouts and its designs on Designed', async () => {
+  // The picker is still open on Designed from the check above.
+  const designed = await page.locator('.ed-preset-card__name').allInnerTexts();
+  if (!designed.some((name) => name.includes('Bar with a button'))) {
+    return `Designed did not carry the designs: ${JSON.stringify(designed)}`;
+  }
+  if (designed.some((name) => name === 'Logo left, menu right')) {
+    return 'a bare layout leaked into the Designed tab';
+  }
+
+  await page.locator('.ed-tab', { hasText: 'Layouts' }).click();
+  await page.waitForTimeout(300);
+  const layouts = await page.locator('.ed-preset-card__name').allInnerTexts();
+  if (!layouts.some((name) => name === 'Logo left, menu right')) {
+    return `Layouts did not carry the bare shapes: ${JSON.stringify(layouts)}`;
+  }
+  if (layouts.some((name) => name.includes('Bar with a button'))) {
+    return 'a design leaked into the Layouts tab';
+  }
+  // The region's own shapes, not the page's empty columns.
+  const columnCards = await page.locator('.ed-layout-card').count();
+  if (columnCards !== 0) return `the header Layouts tab still showed ${columnCards} empty-column cards`;
+
+  // Leave it on Designed, where the next check starts.
+  await page.locator('.ed-tab', { hasText: 'Designed' }).click();
+  await page.waitForTimeout(200);
+  return true;
+});
+
+/*
  * The canvas renders a header through the same PageRenderer a page uses, so
  * until 1 Aug 2026 it drew a bare .tgs-page and every rule keyed on a region
  * missed it. The footer's hairline was invisible in the editor from the day it
  * shipped, which is how a preview quietly stops being a preview.
  */
 await check('and the canvas marks itself as a header, so header styling applies', async () => {
+  // The bare logo-and-menu shape is a region layout now, on the Layouts tab. The
+  // two-column checks below want exactly that shape, so add it from there.
+  await page.locator('.ed-tab', { hasText: 'Layouts' }).click();
+  await page.waitForTimeout(300);
   await page.locator('.ed-preset-card', { hasText: 'Logo left, menu right' }).first().click();
   await page.waitForTimeout(800);
 
@@ -6268,7 +6311,7 @@ await check('the footer screen offers footers', async () => {
  * would hide the links somebody scrolled all the way down to find.
  */
 await check('a footer keeps its links visible on a phone rather than hiding them', async () => {
-  await page.locator('.ed-preset-card', { hasText: 'Four columns' }).first().click();
+  await page.locator('.ed-preset-card', { hasText: 'Four columns and a legal line' }).first().click();
   await page.waitForTimeout(800);
   await foldPanels();
 

@@ -40,12 +40,13 @@ import {
   presetsIn,
   presetThumb,
   PRESET_CATEGORIES,
+  regionLayoutsFor,
   SECTION_PRESETS,
   type PresetBlock,
   type SectionPreset,
 } from '../lib/content/presets';
 import { PAGE_PRESETS } from '../lib/content/presets-page';
-import { REGION_PRESETS } from '../lib/content/presets-region';
+import { REGION_LAYOUTS, REGION_PRESETS } from '../lib/content/presets-region';
 
 /** Every block spec in every preset, with enough context to name the culprit. */
 function everyBlock(): Array<{ preset: SectionPreset; spec: PresetBlock }> {
@@ -313,7 +314,7 @@ describe('the library', () => {
   });
 
   it('finds one by its id, and nothing by a made-up one', () => {
-    expect(presetById('header-logo-menu')?.label).toBe('Logo left, menu right');
+    expect(presetById('header-cta-bar')?.label).toBe('Bar with a button');
     expect(presetById('nothing-like-this')).toBeUndefined();
   });
 
@@ -448,7 +449,7 @@ describe('the header presets', () => {
   });
 
   it('and that alignment reaches the columns, which is where it lives', () => {
-    const built = buildPresetSection(presetById('header-logo-menu')!);
+    const built = buildPresetSection(presetById('header-cta-bar')!);
     for (const column of built.rows[0].columns) {
       expect(column.align).toBe('centre');
     }
@@ -529,6 +530,48 @@ describe('the footer presets', () => {
 });
 
 // ---------------------------------------------------------------------------
+// The region layouts: the bare shapes on the Layouts tab
+// ---------------------------------------------------------------------------
+
+describe('the region layouts', () => {
+  it('offers header shapes on the header, footer shapes on the footer, none on a page', () => {
+    expect(regionLayoutsFor('header').length).toBeGreaterThan(0);
+    expect(regionLayoutsFor('footer').length).toBeGreaterThan(0);
+    expect(regionLayoutsFor('header').every((preset) => preset.category === 'header')).toBe(true);
+    expect(regionLayoutsFor('footer').every((preset) => preset.category === 'footer')).toBe(true);
+    expect(regionLayoutsFor('page')).toEqual([]);
+  });
+
+  /*
+   * A layout is on the Layouts tab and a designed preset is on the Designed tab,
+   * and the whole point of the split is that a shape shows on one, not both. So
+   * they must not share an id and a layout must never turn up in the designed
+   * listing, or a client would meet the same thing twice with two different
+   * promises about it.
+   */
+  it('is kept out of the designed listing, which is for the dressed ones', () => {
+    const designed = new Set(SECTION_PRESETS.map((preset) => preset.id));
+    const clash = REGION_LAYOUTS.filter((preset) => designed.has(preset.id)).map((preset) => preset.id);
+    expect(clash).toEqual([]);
+  });
+
+  it('builds a real section, the same as any preset', () => {
+    for (const layout of REGION_LAYOUTS) {
+      expect(buildPresetSection(layout).rows.length, layout.id).toBeGreaterThan(0);
+    }
+  });
+
+  it('gives every header layout a menu, since that is what a header is for', () => {
+    const without = regionLayoutsFor('header')
+      .filter((preset) => !preset.rows.some((row) =>
+        row.columns.some((column) => column.some((spec) => spec.type === 'nav'))))
+      .map((preset) => preset.id);
+
+    expect(without).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // The thumbnail
 // ---------------------------------------------------------------------------
 
@@ -583,8 +626,10 @@ describe('the thumbnail', () => {
 
   it('draws a right-aligned menu against the right edge of its column', () => {
     // The whole difference between "Logo left, menu right" and a preset that
-    // puts them both on the left is where the second bar sits.
-    const bars = presetBars(presetById('header-logo-menu')!);
+    // puts them both on the left is where the second bar sits. The logo-and-menu
+    // shape is a layout now, so it is drawn the same way from there.
+    const logoMenu = REGION_LAYOUTS.find((preset) => preset.id === 'layout-header-logo-menu')!;
+    const bars = presetBars(logoMenu);
     const rightmost = Math.max(...bars.map((bar) => bar.x + bar.width));
     expect(rightmost).toBeGreaterThan(0.98);
   });
