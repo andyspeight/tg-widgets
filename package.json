@@ -64,6 +64,7 @@
     "test:worldmap-header-stacking": "node test/worldmap-header-stacking-smoke.mjs",
     "test:widget-list-scope": "node test/widget-list-scope-smoke.mjs",
     "test:widget-actas-legacy": "node test/widget-actas-legacy-owner-smoke.mjs",
+    "test:widget-copy-actas": "node test/widget-copy-actas-scope-smoke.mjs",
     "test:staff-led-setup": "node test/staff-led-setup-smoke.mjs",
     "test:widget-ai": "node test/widget-ai-smoke.mjs",
     "test:ai-prompt-coach": "node test/ai-prompt-coach-smoke.mjs",
