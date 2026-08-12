@@ -41,6 +41,7 @@ import { blockDefinition } from '../../lib/content/blocks';
 import { usePaletteDrop } from './usePaletteDrop';
 import { useSectionDrop } from './useSectionDrop';
 import { Outline } from './Outline';
+import { Rail } from './Rail';
 import { Canvas, type DropTarget } from './Canvas';
 import { Properties } from './Properties';
 import { BlockPicker } from './BlockPicker';
@@ -1579,6 +1580,18 @@ export function EditorShell({
           }}
         />
       </header>
+
+      {/*
+        The slim left rail. Its Layers icon opens and closes the outline panel
+        beside it (the same panels.outline the top bar folds), and Add opens the
+        section picker exactly as the outline's own Add does. Desktop and editing
+        only; the CSS gives it a column and hides it in preview and under 1181px.
+      */}
+      <Rail
+        layersOpen={panels.outline}
+        onLayers={() => setPanels((current) => ({ ...current, outline: !current.outline }))}
+        onAdd={() => setInsertAt(page.sections.length)}
+      />
 
       <Outline
         onAddSection={() => setInsertAt(page.sections.length)}

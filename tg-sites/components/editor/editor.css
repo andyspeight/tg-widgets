@@ -156,11 +156,11 @@
   position: fixed;
   inset: 0;
   display: grid;
-  grid-template-columns: 320px 1fr 320px;
+  grid-template-columns: 72px 320px 1fr 320px;
   grid-template-rows: 60px 1fr;
   grid-template-areas:
-    'top top top'
-    'outline canvas props';
+    'top top top top'
+    'rail outline canvas props';
   font-family: var(--ed-font);
   font-size: var(--ed-text-base);
   line-height: 1.5;
@@ -194,13 +194,13 @@
    * simply does not apply in preview. (The blank-preview bug, 11 Aug 2026.)
    */
   .ed-root[data-outline='folded']:not([data-preview='true']) {
-    grid-template-columns: 0 1fr 320px;
+    grid-template-columns: 72px 0 1fr 320px;
   }
   .ed-root[data-props='folded']:not([data-preview='true']) {
-    grid-template-columns: 320px 1fr 0;
+    grid-template-columns: 72px 320px 1fr 0;
   }
   .ed-root[data-outline='folded'][data-props='folded']:not([data-preview='true']) {
-    grid-template-columns: 0 1fr 0;
+    grid-template-columns: 72px 0 1fr 0;
   }
   .ed-root[data-outline='folded'] .ed-outline,
   .ed-root[data-props='folded'] .ed-props {
@@ -266,6 +266,89 @@
 .ed-root[data-preview='true'] .ed-editing-only {
   display: none;
 }
+
+/* ------------------------------------------------------------------ */
+/* The slim left rail (Andy, 12 Aug 2026)                              */
+/* ------------------------------------------------------------------ */
+
+/*
+ * A permanent thin column of icons on the far left. Layers opens and closes the
+ * outline panel beside it, Add opens the section picker, and the rest go to the
+ * site's other screens for now. It carries `ed-editing-only`, so preview drops
+ * it with the panels, and it hides under 1181px where the shell already shows
+ * one pane at a time and width is scarce.
+ */
+.ed-rail {
+  grid-area: rail;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  padding: var(--ed-2) 0;
+  background: var(--ed-panel);
+  border-right: 1px solid var(--ed-line);
+  overflow-y: auto;
+  z-index: 3;
+}
+@media (max-width: 1180px) {
+  .ed-rail { display: none; }
+}
+
+.ed-rail__spacer { flex: 1; }
+
+.ed-rail__btn {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: var(--ed-ink-2);
+  text-decoration: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: var(--ed-2) 2px 7px;
+  position: relative;
+}
+.ed-rail__ic {
+  width: 40px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--ed-r-md);
+  transition: background-color 150ms ease-out, color 150ms ease-out;
+}
+.ed-rail__ic svg { width: 21px; height: 21px; }
+.ed-rail__lbl {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ed-ink-3);
+  transition: color 150ms ease-out;
+}
+.ed-rail__btn:hover .ed-rail__ic { background: var(--ed-well); color: var(--ed-ink); }
+.ed-rail__btn:focus-visible { outline: none; }
+.ed-rail__btn:focus-visible .ed-rail__ic { outline: 2px solid var(--ed-select); outline-offset: 2px; }
+
+/* The icon whose panel is open. */
+.ed-rail__btn[aria-pressed='true'] .ed-rail__ic { background: var(--ed-select-wash); color: var(--ed-select); }
+.ed-rail__btn[aria-pressed='true'] .ed-rail__lbl { color: var(--ed-select); }
+.ed-rail__btn[aria-pressed='true']::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: var(--ed-2);
+  bottom: var(--ed-2);
+  width: 3px;
+  background: var(--ed-select);
+  border-radius: 0 3px 3px 0;
+}
+
+/* Add reads as an action, echoing the filled Add button in the reference. */
+.ed-rail__btn--add .ed-rail__ic { background: var(--ed-primary); color: var(--ed-on-brand); }
+.ed-rail__btn--add:hover .ed-rail__ic { background: var(--ed-primary-light); color: var(--ed-on-brand); }
 
 /* ------------------------------------------------------------------ */
 /* Buttons                                                             */

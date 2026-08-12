@@ -3484,7 +3484,15 @@ await check('the content in a column can sit side by side', async () => {
   if (after.display !== 'flex' || after.wrap !== 'wrap') {
     return `the column is ${after.display} / ${after.wrap}`;
   }
-  return after.width < before * 0.75
+  /*
+   * The flex/wrap assertion above is the real proof that side by side is on; this is
+   * a sanity check that the blocks genuinely narrowed. The threshold sits at 0.85
+   * rather than 0.75 because the slim left rail (Andy, 12 Aug 2026) took 72px of
+   * canvas: with less room a wrapped block, held near its content width, sits
+   * relatively wider than the stacked one, so the ratio rises a touch. A block that
+   * never went side by side stays near its full width and still fails this.
+   */
+  return after.width < before * 0.85
     ? true
     : `the first block was ${before}px and is now ${after.width}px`;
 });
@@ -8155,6 +8163,46 @@ await check('a card link underline sweeps in under the pointer', async () => {
   if (!(width(after) > width(before))) {
     return `the underline did not grow on hover: ${before} then ${after}`;
   }
+  return true;
+});
+
+/*
+ * The slim left rail (Andy, 12 Aug 2026). A thin column of icons on the far left of
+ * the editor. Its Layers icon opens and closes the page-structure panel beside it,
+ * which is the whole mechanism, and it steps out of the way in preview. This checks
+ * the rail is there, that Layers folds and unfolds the outline, and that previewing
+ * takes the rail away with the panels.
+ */
+await check('the slim rail folds and unfolds the page structure', async () => {
+  await showPanels();
+  await page.waitForTimeout(120);
+
+  const railPresent = await page.locator('.ed-rail').count();
+  const layers = page.locator('.ed-rail__btn').filter({ hasText: 'Layers' }).first();
+  const openStart = await page.locator('.ed-outline').isVisible();
+  await layers.click();
+  await page.waitForTimeout(200);
+  const afterFold = await page.locator('.ed-outline').isVisible();
+  await layers.click();
+  await page.waitForTimeout(200);
+  const afterUnfold = await page.locator('.ed-outline').isVisible();
+
+  // The rail is editing chrome, so preview should take it away.
+  await page.getByRole('button', { name: 'Preview', exact: true }).click();
+  await page.waitForTimeout(250);
+  const railInPreview = await page.locator('.ed-rail').isVisible();
+  const exit = page.getByRole('button', { name: 'Exit preview', exact: true });
+  if (await exit.count()) {
+    await exit.click();
+    await page.waitForTimeout(200);
+  }
+  await showPanels();
+
+  if (!railPresent) return 'the slim rail is not present';
+  if (!openStart) return 'the outline was not open to begin';
+  if (afterFold) return 'clicking Layers did not fold the outline';
+  if (!afterUnfold) return 'clicking Layers again did not unfold the outline';
+  if (railInPreview) return 'the rail stayed on screen in preview';
   return true;
 });
 

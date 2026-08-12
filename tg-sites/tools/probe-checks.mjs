@@ -827,6 +827,19 @@ const MUTATIONS = [
     from: `.tgs-card__link:hover { background-size: 100% 2px; }`,
     to: `.tgs-card__link:hover { background-size: 0% 2px; }`,
   },
+  {
+    tag: 'rail',
+    check: 'the slim rail folds and unfolds the page structure',
+    /*
+     * The rail is drawn and its Layers icon looks live, but it is wired to nothing,
+     * so clicking it never folds the outline. The panel it is meant to drive sits
+     * unmoved, which only a click in a browser reveals.
+     */
+    why: 'Make the Layers icon do nothing, so the rail cannot fold the outline.',
+    file: 'components/editor/EditorShell.tsx',
+    from: `        onLayers={() => setPanels((current) => ({ ...current, outline: !current.outline }))}`,
+    to: `        onLayers={() => undefined}`,
+  },
 
   // --- contact details, on the settings screen -----------------------------
 
