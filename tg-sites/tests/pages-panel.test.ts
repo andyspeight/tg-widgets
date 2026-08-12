@@ -108,3 +108,27 @@ describe('each row is a plain, safe link to the page', () => {
     expect(panelSource).toContain("data-child={page.parentId ? '' : undefined}");
   });
 });
+
+describe('the Add page composer', () => {
+  it('shows the button only when a create handler is given', () => {
+    // No handler, no button, so the region and item screens do not offer to add
+    // a page from a place that has no list of its own to add to.
+    expect(panelSource).toContain('onCreatePage &&');
+  });
+
+  it('refuses an empty name rather than making an Untitled that clashes', () => {
+    expect(panelSource).toContain("setError('Give the page a name.')");
+  });
+
+  it('creates with the trimmed name', () => {
+    expect(panelSource).toContain('const title = newTitle.trim();');
+    expect(panelSource).toContain('await onCreatePage(title)');
+  });
+
+  it('focuses the box only when the composer opens, not on every render', () => {
+    // Keyed on `adding`, so typing in the search does not pull the caret back
+    // here. A render-time focus would steal the cursor, which the house rules ban.
+    expect(panelSource).toContain('if (adding) nameRef.current?.focus();');
+    expect(panelSource).toMatch(/\}, \[adding\]\);/);
+  });
+});

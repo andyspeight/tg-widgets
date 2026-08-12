@@ -853,6 +853,19 @@ const MUTATIONS = [
     from: `              href={\`/editor?page=\${encodeURIComponent(page.id)}\`}`,
     to: `              href="/editor"`,
   },
+  {
+    tag: 'addpage',
+    check: 'the Pages panel offers Add page, and it asks for a name',
+    /*
+     * The Add page button is drawn and looks live, but it is wired to nothing, so
+     * the composer never opens and a page can never be added. Only a click in a
+     * browser reveals that the button does nothing.
+     */
+    why: 'Make the Add page button do nothing, so the composer never opens.',
+    file: 'components/editor/PagesPanel.tsx',
+    from: `              onClick={() => setAdding(true)}`,
+    to: `              onClick={() => undefined}`,
+  },
 
   // --- contact details, on the settings screen -----------------------------
 

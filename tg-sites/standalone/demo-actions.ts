@@ -30,6 +30,35 @@ const state: PageSummary = {
   updatedAt: new Date(),
 };
 
+/**
+ * Create a page. In-memory, so the review copy can add one and see it.
+ *
+ * The real one inserts a row and lets the database enforce a unique slug; here
+ * there is one page and no table, so a new one is just a fresh summary. Enough
+ * for the harness to prove the Add page composer calls through and gets an id
+ * back. It navigates on success in the real app, which a static file cannot do,
+ * so the browser check stops at the composer and does not complete a create.
+ */
+export async function createPageAction(input: {
+  title: string;
+  slug?: string;
+  parentId?: string | null;
+}): Promise<ActionResult<PageWithContent>> {
+  const title = String(input.title ?? '').trim() || 'Untitled page';
+  const made: PageWithContent = {
+    id: 'demo-new',
+    parentId: input.parentId ?? null,
+    slug: (input.slug ?? title).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
+    title,
+    status: 'draft',
+    hasUnpublishedChanges: true,
+    publishedAt: null,
+    updatedAt: new Date(),
+    content: fixture({ version: 1, id: 'demo-new', slug: '', title, sections: [] }),
+  };
+  return { ok: true, data: made };
+}
+
 /** A save that validates for real, so a broken tree still fails here. */
 export async function saveDraftAction(
   _pageId: string,
@@ -128,10 +157,12 @@ export async function restorePublishAction(
 // action gains an argument or changes its return type, this stops building.
 import type * as real from '../app/actions/pages';
 
+const _createMatches = createPageAction satisfies typeof real.createPageAction;
 const _saveMatches = saveDraftAction satisfies typeof real.saveDraftAction;
 const _publishMatches = publishPageAction satisfies typeof real.publishPageAction;
 const _listMatches = listPublishesAction satisfies typeof real.listPublishesAction;
 const _restoreMatches = restorePublishAction satisfies typeof real.restorePublishAction;
+void _createMatches;
 void _saveMatches;
 void _publishMatches;
 void _listMatches;

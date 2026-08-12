@@ -18,7 +18,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { writeCopyAction } from '../../app/actions/ai';
 import { buildDesignedSectionAction } from '../../app/actions/designed';
-import { publishPageAction, saveDraftAction } from '../../app/actions/pages';
+import { createPageAction, publishPageAction, saveDraftAction } from '../../app/actions/pages';
 import { publishRegionAction, saveRegionAction } from '../../app/actions/regions';
 import { publishItemAction, saveItemAction } from '../../app/actions/collections';
 import { PublishHistory } from './PublishHistory';
@@ -425,6 +425,22 @@ export function EditorShell({
    * is open. Held here, not in the rail, because the shell draws the column.
    */
   const [railPanel, setRailPanel] = useState<'layers' | 'pages'>('layers');
+
+  /**
+   * Make a new page and open it, for the rail's Pages panel.
+   *
+   * A new page is created through the same action the dashboard uses, then the
+   * editor navigates to it, the same full navigation the panel's own rows make,
+   * so the new page loads fresh with its own draft and the list picks it up.
+   * Returns an error to show in the composer, or null on success, by which point
+   * the browser is already leaving.
+   */
+  const createPage = useCallback(async (title: string): Promise<string | null> => {
+    const result = await createPageAction({ title });
+    if (!result.ok) return result.error;
+    window.location.assign(`/editor?page=${encodeURIComponent(result.data.id)}`);
+    return null;
+  }, []);
   /**
    * Preview mode: the canvas becomes the whole screen and shows the page as it
    * will publish, not as it is edited.
@@ -1623,7 +1639,7 @@ export function EditorShell({
       />
 
       {railPanel === 'pages' ? (
-        <PagesPanel pages={pages} currentId={pageId} />
+        <PagesPanel pages={pages} currentId={pageId} onCreatePage={createPage} />
       ) : (
         <Outline
           onAddSection={() => setInsertAt(page.sections.length)}

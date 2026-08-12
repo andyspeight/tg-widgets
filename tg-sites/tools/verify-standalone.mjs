@@ -8263,6 +8263,51 @@ await check('the rail Pages icon opens the page list and Layers returns to the o
   return true;
 });
 
+await check('the Pages panel offers Add page, and it asks for a name', async () => {
+  await showPanels();
+  await page.waitForTimeout(120);
+  await page.locator('.ed-rail__btn').filter({ hasText: 'Pages' }).first().click();
+  await page.waitForTimeout(200);
+
+  const addButton = page.locator('.ed-pages__add');
+  const hasAdd = await addButton.count();
+  if (hasAdd) await addButton.click();
+  await page.waitForTimeout(150);
+
+  // The composer takes the button's place.
+  const nameBox = page.locator('input[aria-label="New page name"]');
+  const composerOpened = await nameBox.isVisible();
+
+  /*
+   * Submitting an empty name must be refused, not make an "Untitled" that clashes
+   * with the next one. We stop here rather than complete a create, because a real
+   * create navigates to the new page, which a static harness file cannot follow.
+   */
+  await page.locator('.ed-pages__new button[type="submit"]').click();
+  await page.waitForTimeout(150);
+  const refused = await page.locator('.ed-pages__error').count();
+  const stillOpen = await nameBox.isVisible();
+
+  // A name typed and then cancelled leaves the panel as it was.
+  await nameBox.fill('Trips');
+  await page.locator('.ed-pages__new button', { hasText: 'Cancel' }).click();
+  await page.waitForTimeout(150);
+  const backToButton = await page.locator('.ed-pages__add').isVisible();
+  const composerGone = (await page.locator('input[aria-label="New page name"]').count()) === 0;
+
+  // Leave the column on the outline for the checks that follow.
+  await page.locator('.ed-rail__btn').filter({ hasText: 'Layers' }).first().click();
+  await page.waitForTimeout(150);
+
+  if (!hasAdd) return 'the Pages panel had no Add page button';
+  if (!composerOpened) return 'clicking Add page did not open the name composer';
+  if (!refused) return 'an empty name was not refused';
+  if (!stillOpen) return 'the composer closed on an empty name instead of asking again';
+  if (!backToButton) return 'Cancel did not restore the Add page button';
+  if (!composerGone) return 'the composer stayed open after Cancel';
+  return true;
+});
+
 // --- Preview mode: the site as it will publish, full canvas -----------------
 
 /*
