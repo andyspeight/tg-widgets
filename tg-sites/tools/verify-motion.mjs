@@ -34,7 +34,7 @@ function html(overflow) {
         .tgs-section[data-reveal] .tgs-block {
           animation: tgs-reveal-rise linear both;
           animation-timeline: view();
-          animation-range: entry 12% entry 62%;
+          animation-range: entry 25% cover 25%;
         }
       }
     }
@@ -66,10 +66,10 @@ async function probe(overflow) {
     () => parseFloat(getComputedStyle(document.querySelector('.tgs-block')).opacity),
   );
 
-  // Scroll the section up into the middle of the viewport, well past its entry range.
+  // Scroll the section fully up, well past the end of its range wherever it is tuned to.
   await page.evaluate(() => {
     const section = document.querySelector('.tgs-section');
-    window.scrollTo(0, section.offsetTop - window.innerHeight * 0.3);
+    window.scrollTo(0, section.offsetTop + window.innerHeight * 0.2);
   });
   await page.waitForTimeout(200);
   const scrolledTo = await page.evaluate(

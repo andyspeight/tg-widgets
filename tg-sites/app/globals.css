@@ -566,7 +566,14 @@
     .tgs-section[data-reveal] .tgs-block {
       animation: tgs-reveal-rise linear both;
       animation-timeline: view();
-      animation-range: entry 12% entry 62%;
+      /*
+       * Play it as the block rises into comfortable view, not the instant it peeks
+       * over the bottom edge. It starts a quarter of the way through entering and
+       * finishes a quarter of the way into covering, near the middle of the screen, so
+       * the movement is on screen while you watch it. An earlier entry 12% entry 62%
+       * finished low down, before the section was really in view (Andy, 12 Aug 2026).
+       */
+      animation-range: entry 25% cover 25%;
     }
 
     /*
@@ -600,15 +607,15 @@
     .tgs-section[data-reveal][data-reveal-stagger] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) {
       animation: tgs-reveal-rise linear both;
       animation-timeline: view();
-      animation-range: entry 6% entry 56%;
+      animation-range: entry 15% cover 25%;
     }
 
     /* The cascade: each later item begins its reveal a little further into the scroll. */
-    .tgs-section[data-reveal][data-reveal-stagger] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item):nth-child(2) { animation-range: entry 14% entry 64%; }
-    .tgs-section[data-reveal][data-reveal-stagger] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item):nth-child(3) { animation-range: entry 22% entry 72%; }
-    .tgs-section[data-reveal][data-reveal-stagger] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item):nth-child(4) { animation-range: entry 30% entry 80%; }
-    .tgs-section[data-reveal][data-reveal-stagger] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item):nth-child(5) { animation-range: entry 38% entry 88%; }
-    .tgs-section[data-reveal][data-reveal-stagger] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item):nth-child(n+6) { animation-range: entry 46% entry 96%; }
+    .tgs-section[data-reveal][data-reveal-stagger] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item):nth-child(2) { animation-range: entry 27% cover 25%; }
+    .tgs-section[data-reveal][data-reveal-stagger] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item):nth-child(3) { animation-range: entry 39% cover 25%; }
+    .tgs-section[data-reveal][data-reveal-stagger] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item):nth-child(4) { animation-range: entry 51% cover 25%; }
+    .tgs-section[data-reveal][data-reveal-stagger] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item):nth-child(5) { animation-range: entry 63% cover 25%; }
+    .tgs-section[data-reveal][data-reveal-stagger] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item):nth-child(n+6) { animation-range: entry 75% cover 25%; }
 
     /*
      * The chosen arrival style rides through to the items too. Same specificity as the base

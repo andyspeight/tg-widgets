@@ -545,7 +545,7 @@ describe('reveal on scroll animates a sections content in, degrading gracefully'
     expect(css).toContain('.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos))');
     expect(css).toContain('.tgs-cards > .tgs-card');
     // The cascade is the per-item range offset, later items reaching further in.
-    expect(css).toContain(':nth-child(2) { animation-range: entry 14% entry 64%; }');
+    expect(css).toContain(':nth-child(2) { animation-range: entry 27% cover 25%; }');
   });
 
   it('offers a Stagger toggle when reveal is on', () => {

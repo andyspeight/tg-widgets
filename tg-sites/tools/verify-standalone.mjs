@@ -7689,6 +7689,7 @@ await check('a reveal fades in as the preview is scrolled to it, not frozen', as
       sections: [
         { id: 'sp', width: 'contained', tone: 'light', minHeight: 1400, rows: [{ id: 'r0', gap: 16, columns: [{ id: 'c0', width: 100, blocks: [{ id: 'b0', type: 'heading', props: { level: 2, style: 'h2', html: 'Tall spacer' } }] }] }] },
         { id: 's', width: 'contained', tone: 'light', reveal: true, rows: [{ id: 'r', gap: 16, columns: [{ id: 'c', width: 100, blocks: [{ id: 'h', type: 'heading', props: { level: 2, style: 'h2', html: 'Reveal me' } }] }] }] },
+        { id: 'tail', width: 'contained', tone: 'light', minHeight: 1400, rows: [{ id: 'r2', gap: 16, columns: [{ id: 'c2', width: 100, blocks: [{ id: 'b2', type: 'heading', props: { level: 2, style: 'h2', html: 'Tall tail, so the reveal can scroll fully up' } }] }] }] },
       ],
     }),
   );
@@ -7707,11 +7708,13 @@ await check('a reveal fades in as the preview is scrolled to it, not frozen', as
     const block = document.querySelector('.tgs-section[data-reveal] .tgs-block');
     return block ? parseFloat(getComputedStyle(block).opacity) : null;
   });
-  // Scroll the real canvas so the reveal section reaches the middle of the frame.
+  // Scroll the real canvas so the reveal section is fully up into view, well past the
+  // end of its range, wherever that range is tuned to. The point here is that it PLAYS,
+  // not the exact timing feel, so scroll generously and let `both` hold the shown state.
   await page.evaluate(() => {
     const wrap = document.querySelector('.ed-canvas-wrap');
     const sec = document.querySelector('.tgs-section[data-reveal]');
-    if (wrap && sec) wrap.scrollTo(0, sec.offsetTop - wrap.clientHeight * 0.4);
+    if (wrap && sec) wrap.scrollTo(0, sec.offsetTop + wrap.clientHeight * 0.2);
   });
   await page.waitForTimeout(400);
   const after = await page.evaluate(() => {
