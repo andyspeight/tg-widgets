@@ -25,13 +25,15 @@
  * to the right endpoint.
  */
 
-import { requireAuth, setCors, applyRateLimit, RATE_LIMITS } from './_auth.js';
+import { requireAuth, sanitiseForFormula, setCors, applyRateLimit, RATE_LIMITS } from './_auth.js';
 import { getRecord } from './_lib/auth/airtable.js';
-import { USERS } from './_lib/auth/schema.js';
+import { USERS, CLIENTS } from './_lib/auth/schema.js';
+import { isStaffEmail } from './_lib/auth/staff.js';
 import { normalisePlanValue, resolveClientPlan } from './_lib/auth/plan.js';
 
 const AIRTABLE_API = 'https://api.airtable.com/v0';
 const TABLE_NAME = 'Widgets';
+const REC_ID_RE = /^rec[A-Za-z0-9]{14}$/;
 
 const PLAN_ALIASES = {
   'spark': 'Spark', 'spark plan': 'Spark',
@@ -107,11 +109,68 @@ async function throwAirtableError(opName, resp) {
   throw new Error(opName + (body ? ` — ${resp.status} ${body}` : ` — ${resp.status}`));
 }
 
-async function countWidgetsOfType(headers, baseId, email, widgetType) {
-  const safeEmail = email.replace(/'/g, "\\'");
+/**
+ * Ownership scope for a copy request, as an Airtable formula fragment (no
+ * WidgetID / WidgetType filter). The AUTHORITATIVE owner is the ACTIVE CLIENT
+ * — the client the caller is working in (ClientRecordId === session clientId) —
+ * NOT the caller's own email. A staff member acting as a client (via
+ * /api/auth/switch-client) has their own address as user.email while the
+ * client's widgets carry the CLIENT's ClientEmail, so an email-scoped lookup
+ * found nothing and every copy 404'd with "Widget not found" (Jess, 12 Aug
+ * 2026). This mirrors widget-list's buildScopeFormula so the invariant holds:
+ * anything the caller can SEE in their list, they can copy.
+ *
+ * Pure + exported for tests. activeClientId is validated here before it is
+ * interpolated, so a malformed id can never reach the formula.
+ */
+export function buildOwnerClause({ activeClientId, activeClientEmail, userEmailLower }) {
+  if (typeof activeClientId === 'string' && REC_ID_RE.test(activeClientId)) {
+    const clauses = [`{ClientRecordId}='${activeClientId}'`];
+    // Legacy widgets (blank ClientRecordId) matched by the active client's login
+    // email — but only when that email can identify one client. A client account
+    // set up under a Travelgenix staff address (it happens) would otherwise match
+    // the staff member's own ownerless widgets. Mirrors widget-list's guard.
+    if (activeClientEmail && !isStaffEmail(activeClientEmail)) {
+      clauses.push(`AND({ClientRecordId}='', LOWER({ClientEmail})='${sanitiseForFormula(String(activeClientEmail).toLowerCase())}')`);
+    }
+    return clauses.length === 1 ? clauses[0] : `OR(${clauses.join(', ')})`;
+  }
+  // No usable client context (e.g. a legacy Bearer token): scope by the caller's
+  // own email — the original pre-ClientRecordId behaviour.
+  return `LOWER({ClientEmail})='${sanitiseForFormula(String(userEmailLower || '').toLowerCase())}'`;
+}
+
+/**
+ * Resolve the active client's identity (email + name) and the ownership clause
+ * for this session. The copy inherits the source's owner, so email/name are
+ * used only as fallbacks when the source record lacks them.
+ */
+async function resolveOwnerScope(user, headers, baseId) {
+  const activeClientId = (typeof user.clientId === 'string' && REC_ID_RE.test(user.clientId)) ? user.clientId : null;
+  let activeClientEmail = '';
+  let activeClientName = '';
+  if (activeClientId) {
+    try {
+      const c = await getRecord(CLIENTS.tableId, activeClientId);
+      const e = c?.fields?.[CLIENTS.fields.email];
+      activeClientEmail = typeof e === 'string' ? e.toLowerCase().trim() : '';
+      activeClientName = c?.fields?.[CLIENTS.fields.clientName] || '';
+    } catch (err) {
+      console.warn('[widget-copy] resolve active client failed:', err.message);
+    }
+  }
+  const ownerClause = buildOwnerClause({
+    activeClientId,
+    activeClientEmail,
+    userEmailLower: user.email,
+  });
+  return { activeClientId, activeClientEmail, activeClientName, ownerClause };
+}
+
+async function countWidgetsOfType(headers, baseId, ownerClause, widgetType) {
   const safeType = widgetType.replace(/'/g, "\\'");
   const formula = encodeURIComponent(
-    `AND({ClientEmail}='${safeEmail}', {WidgetType}='${safeType}')`
+    `AND(${ownerClause}, {WidgetType}='${safeType}')`
   );
   const url = `${AIRTABLE_API}/${baseId}/${TABLE_NAME}?filterByFormula=${formula}&fields%5B%5D=WidgetID&pageSize=100`;
   const resp = await fetch(url, { headers });
@@ -161,10 +220,15 @@ export default async function handler(req, res) {
     }
     const headers = { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' };
 
+    // Scope the source lookup to the ACTIVE CLIENT (the client the caller is
+    // working in), not the caller's own email — so a staff act-as session finds
+    // the client's widgets. Mirrors widget-list's authoritative ownership rule.
+    const { activeClientId, activeClientEmail, activeClientName, ownerClause } =
+      await resolveOwnerScope(user, headers, baseId);
+
     const safeWidgetId = widgetId.replace(/'/g, "\\'");
-    const safeEmail = user.email.replace(/'/g, "\\'");
     const lookupFormula = encodeURIComponent(
-      `AND({WidgetID}='${safeWidgetId}', {ClientEmail}='${safeEmail}')`
+      `AND({WidgetID}='${safeWidgetId}', ${ownerClause})`
     );
     const lookupUrl = `${AIRTABLE_API}/${baseId}/${TABLE_NAME}?filterByFormula=${lookupFormula}&maxRecords=1`;
     const lookupResp = await fetch(lookupUrl, { headers });
@@ -172,10 +236,11 @@ export default async function handler(req, res) {
     const lookupData = await lookupResp.json();
     const source = (lookupData.records || [])[0];
     if (!source) {
-      // Either widgetId doesn't exist or it doesn't belong to this user.
+      // Either widgetId doesn't exist or it isn't owned by the active client.
       // We don't distinguish — same response either way to avoid leaking
-      // the existence of other users' widgets.
-      console.warn('[widget-copy] source not found or not owned', { widgetId, email: user.email });
+      // the existence of other clients' widgets.
+      console.warn('[widget-copy] source not found or not owned by active client',
+        { widgetId, activeClientId, email: user.email });
       return res.status(404).json({ error: 'Widget not found' });
     }
 
@@ -198,7 +263,7 @@ export default async function handler(req, res) {
     const limits = userPlan ? PLAN_WIDGET_LIMITS[sourceType] : null;
     const planLimit = limits ? limits[userPlan] : null;
     if (planLimit !== null && planLimit !== -1 && planLimit !== undefined) {
-      const currentCount = await countWidgetsOfType(headers, baseId, user.email, sourceType);
+      const currentCount = await countWidgetsOfType(headers, baseId, ownerClause, sourceType);
       if (currentCount >= planLimit) {
         return res.status(403).json({
           error: `You've reached your plan's limit of ${planLimit} ${sourceType} widget${planLimit === 1 ? '' : 's'}. Upgrade to copy more.`
@@ -223,12 +288,15 @@ export default async function handler(req, res) {
     // "copied widget doesn't show" bug. A copy belongs to the same client as
     // its source, so carry the source's ClientRecordId; fall back to the
     // session's client if the source predates the field.
-    const REC = /^rec[A-Za-z0-9]{14}$/;
     const srcOwner = typeof sourceFields.ClientRecordId === 'string' ? sourceFields.ClientRecordId : '';
-    const copyClientRecordId = REC.test(srcOwner)
-      ? srcOwner
-      : (typeof user.clientId === 'string' && REC.test(user.clientId) ? user.clientId : '');
+    const copyClientRecordId = REC_ID_RE.test(srcOwner) ? srcOwner : (activeClientId || '');
 
+    // Owner identity is INHERITED FROM THE SOURCE, not from the caller. A staff
+    // member acting as a client would otherwise stamp their own address here and
+    // the copy would carry the wrong ClientEmail (and, before the lookup fix,
+    // the endpoint 404'd before ever reaching this point). The copy belongs to
+    // the same client as its source; the active client is only a fallback for a
+    // source that predates these fields.
     const copyFields = {
       WidgetID: newWidgetId,
       Name: derivedName,
@@ -239,8 +307,8 @@ export default async function handler(req, res) {
       Config: sourceFields.Config || '{}',
       Status: 'Active', // Generic widgets have no Draft concept; Active is the only value used.
       WidgetType: sourceType,
-      ClientName: user.clientName || sourceFields.ClientName || '',
-      ClientEmail: user.email,
+      ClientName: sourceFields.ClientName || activeClientName || user.clientName || '',
+      ClientEmail: sourceFields.ClientEmail || activeClientEmail || user.email,
       CreatedAt: new Date().toISOString(),
       UpdatedAt: new Date().toISOString(),
     };
@@ -273,3 +341,6 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Service temporarily unavailable' });
   }
 }
+
+// Test surface — pure ownership-scope logic, no network.
+export const _test = { buildOwnerClause };

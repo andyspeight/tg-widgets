@@ -29,11 +29,12 @@
 
 import { requireAuth, setCors, applyRateLimit, RATE_LIMITS } from './_auth.js';
 import { getRecord } from './_lib/auth/airtable.js';
-import { USERS } from './_lib/auth/schema.js';
+import { USERS, CLIENTS } from './_lib/auth/schema.js';
 import { nextFormSequential } from './enquiry-form-config.js';
 
 const AIRTABLE_API = 'https://api.airtable.com/v0';
 const WIDGETS_TABLE = 'Widgets';
+const REC_ID_RE = /^rec[A-Za-z0-9]{14}$/;
 const ENQUIRY_FORMS_TABLE = 'tblpw4TCmQfJHZIlF'; // ID — name has spaces
 
 // Field IDs in the Enquiry Forms table. MUST match enquiry-form-config.js EF.
@@ -185,13 +186,46 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: 'Form not found' });
     }
 
-    // Ownership check
+    // Resolve the ACTIVE CLIENT (the client this session is working in). Acting
+    // as a client rebases the session's clientId while the caller's own email
+    // stays their staff address, so ownership must be judged against the active
+    // client, not the caller — otherwise every staff act-as copy 403'd. Mirrors
+    // the widget-copy fix (Jess, 12 Aug 2026).
+    const activeClientId = (typeof user.clientId === 'string' && REC_ID_RE.test(user.clientId)) ? user.clientId : null;
+    let activeClientEmail = '';
+    let activeClientName = '';
+    if (activeClientId) {
+      try {
+        const c = await getRecord(CLIENTS.tableId, activeClientId);
+        const e = c?.fields?.[CLIENTS.fields.email];
+        activeClientEmail = typeof e === 'string' ? e.toLowerCase().trim() : '';
+        activeClientName = c?.fields?.[CLIENTS.fields.clientName] || '';
+      } catch (err) {
+        console.warn('[enquiry-form-copy] resolve active client failed:', err.message);
+      }
+    }
+
+    // The form's ownerEmail is the CLIENT's login address. The AUTHORITATIVE
+    // owner is the pointer record's ClientRecordId (the same key widget-list
+    // scopes by); we also inherit it onto the copy so it appears in the list.
+    const sourcePointer = await fetchPointerByWidgetId(widgetId, headers, baseId);
+    const pointerOwner = (sourcePointer && typeof sourcePointer.fields.ClientRecordId === 'string')
+      ? sourcePointer.fields.ClientRecordId : '';
+
+    // Ownership check — allow when the caller's own email owns the form (normal
+    // session) OR the active client owns it (staff acting as that client), by
+    // authoritative ClientRecordId or by the client's login email.
     const ownerEmail = (sourceEf.fields[EF.ownerEmail] || '').toLowerCase().trim();
-    const userEmail = (user.email || '').toLowerCase().trim();
-    if (!ownerEmail || ownerEmail !== userEmail) {
-      console.warn('[enquiry-form-copy] 403: ownership mismatch', {
+    const callerEmail = (user.email || '').toLowerCase().trim();
+    const ownedByCaller = !!ownerEmail && ownerEmail === callerEmail;
+    const ownedByActiveClient =
+      (!!activeClientId && REC_ID_RE.test(pointerOwner) && pointerOwner === activeClientId) ||
+      (!!activeClientEmail && !!ownerEmail && ownerEmail === activeClientEmail);
+    if (!ownedByCaller && !ownedByActiveClient) {
+      console.warn('[enquiry-form-copy] 403: not owned by caller or active client', {
         ownerEmail: ownerEmail || '(empty)',
-        userEmail: userEmail || '(empty)',
+        callerEmail: callerEmail || '(empty)',
+        activeClientId: activeClientId || '(none)',
         widgetId
       });
       return res.status(403).json({ error: 'You do not have permission to copy this form' });
@@ -216,7 +250,9 @@ export default async function handler(req, res) {
     newEfFields[EF.widgetId] = newWidgetId;
     newEfFields[EF.status] = 'Draft';
     newEfFields[EF.submissionCount] = 0;
-    newEfFields[EF.ownerEmail] = user.email;
+    // Owner is INHERITED FROM THE SOURCE, not the caller — a staff act-as
+    // session must not stamp its own address as the new form's owner.
+    newEfFields[EF.ownerEmail] = sourceEf.fields[EF.ownerEmail] || activeClientEmail || user.email;
     const nextSeq = await nextFormSequential(headers, baseId);
     if (nextSeq !== null) newEfFields[EF.sequential] = nextSeq;
 
@@ -249,28 +285,31 @@ export default async function handler(req, res) {
       submissionCount: 0,
     });
 
-    // For the pointer Name, use the same derivedName (without bothering
-    // to fetch the source pointer record — its name should match the EF's
-    // formName anyway).
+    // The pointer Name uses the same derivedName (it should match the EF's
+    // formName). Stamp the pointer with the SOURCE/active-client owner, and carry
+    // ClientRecordId so the copy appears in the client's scoped widget list
+    // (widget-list scopes by {ClientRecordId}). Without it, an act-as copy is
+    // created but never shows — the same "copied widget doesn't show" trap the
+    // generic widget-copy path already guards against.
+    const copyClientRecordId = REC_ID_RE.test(pointerOwner) ? pointerOwner : (activeClientId || '');
+    const pointerFields = {
+      WidgetID: newWidgetId,
+      Name: derivedName,
+      Config: pointerConfig,
+      Status: 'Active', // Widgets table Status — generic widgets have one option.
+      WidgetType: 'Enquiry Form',
+      ClientName: (sourcePointer && sourcePointer.fields.ClientName) || activeClientName || user.clientName || '',
+      ClientEmail: sourceEf.fields[EF.ownerEmail] || activeClientEmail || user.email,
+      CreatedAt: new Date().toISOString(),
+      UpdatedAt: new Date().toISOString(),
+    };
+    if (copyClientRecordId) pointerFields.ClientRecordId = copyClientRecordId;
+
     const pointerCreateUrl = `${AIRTABLE_API}/${baseId}/${WIDGETS_TABLE}`;
     const pointerCreateResp = await fetch(pointerCreateUrl, {
       method: 'POST',
       headers,
-      body: JSON.stringify({
-        records: [{
-          fields: {
-            WidgetID: newWidgetId,
-            Name: derivedName,
-            Config: pointerConfig,
-            Status: 'Active', // Widgets table Status — generic widgets have one option.
-            WidgetType: 'Enquiry Form',
-            ClientName: user.clientName || '',
-            ClientEmail: user.email,
-            CreatedAt: new Date().toISOString(),
-            UpdatedAt: new Date().toISOString(),
-          },
-        }],
-      }),
+      body: JSON.stringify({ records: [{ fields: pointerFields }] }),
     });
 
     // 6. Rollback EF if pointer create fails — same pattern as the create path
