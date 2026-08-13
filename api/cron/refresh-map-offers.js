@@ -124,18 +124,16 @@ const hotelResortsKey = (cc) => `map:hotels-resorts:${cc}`;
 // country accumulates. Cheapest-first matches how every consumer sorts.
 const STORE_CAPS = { Packages: 800, Accommodation: 500, Flights: 400 };
 
-// How many offers to FETCH per hotel request (packages/flights keep the lean
-// 250 default). Hotels are swept whole-country and cheapest-first, so a 250-deep
-// request is all cheap-city rooms (Las Vegas, Orlando) and the dearer cities
-// (New York, San Francisco) never come back to be stored or pinned. We fetch a
-// much wider band for Accommodation so those dearer cities land in the response,
-// where the per-city storage cap (diverseCheapest) can spread them. This is
-// deliberately ABOVE the Accommodation store cap (500): at or below the cap
-// every fetched offer is simply kept, so we'd store the cheapest-500 nationally
-// (still Vegas) rather than a per-city spread — the spread only engages when the
-// fetch overflows the cap. Key SIZE is unaffected: it is bounded by STORE_CAPS,
-// not by how many we fetch. (Andy, Aug 2026.)
-const ACCOMMODATION_MAX_OFFERS = 1000;
+// DEAD END, recorded so it is not retried: fetching a WIDER band per hotel
+// request (maxOffers 1000, to reach the dearer cities buried below the cheapest
+// slice) made EVERY Accommodation request FAIL — a 1,000-room search does not
+// come back inside the 10s per-request timeout, so the sweep stored zero hotels
+// and the fail-safe kept the stale cache, which read as "no change, still 464".
+// Packages and flights in the SAME run were fine at 250. Hotels therefore stay
+// at the 250 default; spreading them beyond the cheapest cities has to come from
+// several SMALL per-city requests (Andy's "location names"), never one large slow
+// one. (Andy, Aug 2026 — verified in the map-cron sweep logs: 12/12 hotel
+// requests failed across four countries the moment the band went to 1,000.)
 
 /** Which place an offer belongs to, for spreading the cap across a country.
  *  Prefer the named resort/city; fall back to the arrival airport, then a
@@ -802,11 +800,6 @@ const SWEEP_TYPES = [
 
 function buildPayload(row, destinationCode, market = MARKETS[0], sweepType = SWEEP_TYPES[0], flightOrigin = null, currency = 'GBP') {
   const f = row.fields || {};
-  const baseMax = f.MaxOffers || 250;
-  // Hotels fetch a wider price band than the flighted products so the dearer
-  // cities reach the cache and the per-city spread can pin them (see
-  // ACCOMMODATION_MAX_OFFERS). A per-row MaxOffers override still wins if larger.
-  const maxOffers = sweepType.id === 'Accommodation' ? Math.max(baseMax, ACCOMMODATION_MAX_OFFERS) : baseMax;
   return {
     appId: f.AppId || DEMO_APP_ID,
     type: sweepType.payloadType,
@@ -817,7 +810,9 @@ function buildPayload(row, destinationCode, market = MARKETS[0], sweepType = SWE
     ...(sweepType.id === 'Flights' && flightOrigin ? { origin: flightOrigin } : {}),
     deduping: 'None',
     currency: currency, language: 'en', nationality: market.nationality,
-    maxOffers,
+    // One request size for every type. Hotels must NOT ask for more (a big
+    // hotel search times out — see the ACCOMMODATION dead-end note above).
+    maxOffers: f.MaxOffers || 250,
     // DatesMin/DatesMax are the DEPARTURE ADVANCE WINDOW in days from today
     // (NOT trip duration). 1–700 = "anything departing between tomorrow and ~23
     // months out". The old 7/14 default restricted us to next-week departures,

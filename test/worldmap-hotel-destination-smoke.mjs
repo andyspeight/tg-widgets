@@ -59,40 +59,38 @@ console.log('Sweep wiring');
   ok('the country-code guard still short-circuits an unusable row', /if \(!cc\) \{[\s\S]*?no country code/.test(CRON));
 }
 
-// ── Hotels fetch a WIDER band than the flighted products ──
-// A whole-country hotel search is cheapest-first, so a 250-deep request is all
-// cheap-city rooms; the dearer cities only reach the cache if we fetch past the
-// store cap and let the per-city spread keep them.
+// ── Every type fetches the SAME request size (the wide-band dead end) ──
+// A wider hotel band (maxOffers 1000) timed out every Accommodation request and
+// stored zero hotels, so hotels are back on the lean default. This guards the
+// revert: no per-type maxOffers inflation, and the dead end is documented so it
+// is not retried.
 const bpm = CRON.match(/function buildPayload\(row, destinationCode[\s\S]*?\n\}/);
 ok('buildPayload is defined', !!bpm);
-const capM = CRON.match(/const ACCOMMODATION_MAX_OFFERS = (\d+)/);
-ok('ACCOMMODATION_MAX_OFFERS is defined', !!capM);
-const ACC_MAX = capM ? Number(capM[1]) : 0;
 // Explicit market + sweepType args are passed so the MARKETS/SWEEP_TYPES default
-// params never evaluate — the only free references left are the two we inject.
+// params never evaluate — buildPayload's only free reference then is DEMO_APP_ID.
 const buildPayload = bpm
-  ? new Function('DEMO_APP_ID', 'ACCOMMODATION_MAX_OFFERS', bpm[0] + '\nreturn buildPayload;')('250', ACC_MAX)
+  ? new Function('DEMO_APP_ID', bpm[0] + '\nreturn buildPayload;')('250')
   : () => { throw new Error('not loaded'); };
 const GB = { id: 'GB', nationality: 'GB' };
 
-console.log('Accommodation fetches a wider price band so dearer cities come back');
+console.log('Hotels use the same lean request size as packages/flights (no wide band)');
 {
   const acc = buildPayload({ fields: {} }, 'US', GB, { id: 'Accommodation', payloadType: 'Accommodation' }, null, 'GBP');
   const pkg = buildPayload({ fields: {} }, 'US', GB, { id: 'Packages', payloadType: 'Packages', packageType: 'Any' }, null, 'GBP');
   const fly = buildPayload({ fields: {} }, 'US', GB, { id: 'Flights', payloadType: 'Flights' }, 'LGW', 'GBP');
-  ok('the store cap for Accommodation is 500 in the source', /Accommodation: 500/.test(CRON));
-  ok('the hotel fetch overflows the 500 store cap so diverseCheapest engages', acc.maxOffers > 500);
-  ok('hotels fetch the wide band', acc.maxOffers === ACC_MAX && ACC_MAX === 1000);
-  ok('packages keep the lean 250 default', pkg.maxOffers === 250);
-  ok('flights keep the lean 250 default', fly.maxOffers === 250);
+  ok('hotels fetch the lean 250 default (a wider band timed out)', acc.maxOffers === 250);
+  ok('packages fetch the lean 250 default', pkg.maxOffers === 250);
+  ok('flights fetch the lean 250 default', fly.maxOffers === 250);
+  ok('the wide-band constant is gone (not merely lowered)', !/ACCOMMODATION_MAX_OFFERS/.test(CRON));
+  ok('the dead end is recorded so it is not retried', /DEAD END/.test(CRON) && /10s per-request timeout/.test(CRON));
 }
 
-console.log('A per-row MaxOffers override still wins when larger');
+console.log('A per-row MaxOffers override still applies to every type equally');
 {
-  const accHi = buildPayload({ fields: { MaxOffers: 1500 } }, 'US', GB, { id: 'Accommodation', payloadType: 'Accommodation' }, null, 'GBP');
-  const accLo = buildPayload({ fields: { MaxOffers: 300 } }, 'US', GB, { id: 'Accommodation', payloadType: 'Accommodation' }, null, 'GBP');
-  ok('a bigger per-row MaxOffers is respected for hotels', accHi.maxOffers === 1500);
-  ok('a smaller per-row MaxOffers is floored to the wide band for hotels', accLo.maxOffers === ACC_MAX);
+  const accHi = buildPayload({ fields: { MaxOffers: 300 } }, 'US', GB, { id: 'Accommodation', payloadType: 'Accommodation' }, null, 'GBP');
+  const pkgHi = buildPayload({ fields: { MaxOffers: 300 } }, 'US', GB, { id: 'Packages', payloadType: 'Packages', packageType: 'Any' }, null, 'GBP');
+  ok('a per-row MaxOffers override is honoured for hotels', accHi.maxOffers === 300);
+  ok('a per-row MaxOffers override is honoured for packages', pkgHi.maxOffers === 300);
 }
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed');
