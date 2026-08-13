@@ -968,6 +968,25 @@ function SectionFields({
         onChange={(value) => set({ pullUp: value > 0 ? value : undefined }, `sec:${index}:pullup`)}
       />
 
+      {/*
+        HIDE THE WHOLE SECTION on the screen the device switcher is on, the same
+        control a block has, on the same hideOn list. It stays on the canvas while
+        editing so it can be selected again; it drops off the live layout and the
+        preview at that screen's width.
+      */}
+      <HideOnField
+        tier={tier}
+        noun="section"
+        hidden={(section.hideOn ?? []).includes(tier)}
+        onChange={(hidden) => {
+          const screens = new Set(section.hideOn ?? []);
+          if (hidden) screens.add(tier);
+          else screens.delete(tier);
+          const next = [...screens];
+          set({ hideOn: next.length ? next : undefined }, `sec:${index}:hideOn:${tier}`);
+        }}
+      />
+
       </Group>
 
       <Group title="Motion" defaultOpen={false}>
@@ -2042,10 +2061,13 @@ function HideOnField({
   tier,
   hidden,
   onChange,
+  noun = 'block',
 }: {
   tier: Tier;
   hidden: boolean;
   onChange: (hidden: boolean) => void;
+  /** What is being hidden, for the help line: a block by default, or a section. */
+  noun?: string;
 }) {
   const screen = tier === 'desktop' ? 'desktop' : tier === 'tablet' ? 'tablet' : 'phone';
   const where = tier === 'desktop' ? 'on desktop' : `on ${screen}s`;
@@ -2056,7 +2078,7 @@ function HideOnField({
         <span>Hide {where}</span>
       </label>
       <p className="ed-help" style={{ marginTop: 6 }}>
-        Takes this block off the {screen} layout on the live site. It stays on the other screens, and
+        Takes this {noun} off the {screen} layout on the live site. It stays on the other screens, and
         stays here on the canvas so you can bring it back.
       </p>
     </div>

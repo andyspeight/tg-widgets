@@ -8098,6 +8098,80 @@ await check('a block hidden on phone is gone in preview at a phone width, shown 
 });
 
 /*
+ * The same, one level up: a WHOLE SECTION hidden on phone. Same list and the same
+ * container queries as a block, only the selector differs (.tgs-section). Two
+ * sections, one hidden on phone; in preview at a phone width it is gone and its
+ * neighbour stays, and at a desktop width it is back.
+ */
+await check('a section hidden on phone is gone in preview at a phone width, shown on desktop', async () => {
+  await closeAnyDialog();
+  const saved = page.viewportSize();
+  await page.evaluate(() =>
+    window.__TG_SET_PAGE__({
+      id: 'sechide',
+      slug: 'sechide',
+      title: 'Section hide',
+      version: 1,
+      sections: [
+        {
+          id: 'keep',
+          width: 'contained',
+          tone: 'light',
+          rows: [{ id: 'rk', gap: 16, columns: [{ id: 'ck', width: 100, blocks: [{ id: 'bk', type: 'heading', props: { level: 2, style: 'h2', html: 'Always here section' } }] }] }],
+        },
+        {
+          id: 'gone',
+          width: 'contained',
+          tone: 'dark',
+          hideOn: ['phone'],
+          rows: [{ id: 'rg', gap: 16, columns: [{ id: 'cg', width: 100, blocks: [{ id: 'bg', type: 'heading', props: { level: 2, style: 'h2', html: 'Phone hides this whole strip' } }] }] }],
+        },
+      ],
+    }),
+  );
+  await page.waitForTimeout(300);
+  await page.getByRole('button', { name: 'Preview', exact: true }).click();
+  await page.waitForTimeout(300);
+
+  const measure = () =>
+    page.evaluate(() => {
+      const gone = document.querySelector('.tgs-section[data-hide-phone]');
+      const keepHeading = [...document.querySelectorAll('.tgs-heading')].find((h) =>
+        (h.textContent || '').includes('Always here section'),
+      );
+      const keep = keepHeading ? keepHeading.closest('.tgs-section') : null;
+      return {
+        gone: gone ? getComputedStyle(gone).display : null,
+        keep: keep ? getComputedStyle(keep).display : null,
+      };
+    });
+
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.waitForTimeout(250);
+  const desk = await measure();
+
+  await page.setViewportSize({ width: 500, height: 900 });
+  await page.waitForTimeout(250);
+  const phone = await measure();
+
+  const exit = page.getByRole('button', { name: 'Exit preview', exact: true });
+  if (await exit.count()) {
+    await exit.click();
+    await page.waitForTimeout(200);
+  }
+  await page.setViewportSize(saved);
+  await page.evaluate(() => window.__TG_SET_PAGE__(null));
+  await page.waitForTimeout(200);
+  await showPanels();
+
+  if (desk.gone === null || phone.gone === null) return 'the hidden section was not found in preview';
+  if (desk.gone === 'none') return `the section was hidden on desktop too: ${desk.gone}`;
+  if (phone.gone !== 'none') return `the section was not hidden on a phone: display ${phone.gone}`;
+  if (phone.keep === 'none') return 'the neighbour section was hidden too, so the hide is not scoped';
+  return true;
+});
+
+/*
  * Andy, 11 Aug 2026: a one-click clean for a heading whose words are wrapped in a
  * stack of leftover size spans (his hero, eleven deep), which override the size and
  * auto-resize controls and hold the line open. Clear text sizing strips the

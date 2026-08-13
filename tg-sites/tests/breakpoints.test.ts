@@ -547,14 +547,16 @@ describe('container queries take a hidden block out of the layout, one screen ea
   const css = read('app', 'globals.css');
 
   it('hides on each screen at its own non-overlapping width', () => {
+    // The block selector shares its rule with the section one, so it is followed by
+    // the section selector before the declaration; match up to display: none.
     expect(css).toMatch(
-      /@container tgs-page \(min-width: 1024px\)[\s\S]*?\.tgs-block\[data-hide-desktop\] \{ display: none; \}/,
+      /@container tgs-page \(min-width: 1024px\)[\s\S]*?\.tgs-block\[data-hide-desktop\][\s\S]*?display: none;/,
     );
     expect(css).toMatch(
-      /@container tgs-page \(min-width: 768px\) and \(max-width: 1023px\)[\s\S]*?\.tgs-block\[data-hide-tablet\] \{ display: none; \}/,
+      /@container tgs-page \(min-width: 768px\) and \(max-width: 1023px\)[\s\S]*?\.tgs-block\[data-hide-tablet\][\s\S]*?display: none;/,
     );
     expect(css).toMatch(
-      /@container tgs-page \(max-width: 767px\)[\s\S]*?\.tgs-block\[data-hide-phone\] \{ display: none; \}/,
+      /@container tgs-page \(max-width: 767px\)[\s\S]*?\.tgs-block\[data-hide-phone\][\s\S]*?display: none;/,
     );
   });
 });
@@ -588,6 +590,72 @@ describe('a block hidden on a screen survives the save path', () => {
 
     const cleaned = sanitisePage(hiddenBlockPage()).sections[0].rows[0].columns[0].blocks[0];
     expect(cleaned.hideOn).toEqual(['phone', 'desktop']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Show / hide WHOLE SECTIONS, on the same list and the same queries as a block.
+// Andy, 13 Aug 2026, after the block version shipped: extend it to sections so a
+// decorative band or a whole strip can be dropped on a phone. The section carries
+// the same hideOn list, the render emits data-hide-* on the section under the same
+// !editable gate, and the three container queries gain the .tgs-section selector.
+// ---------------------------------------------------------------------------
+
+describe('a section carries the screens it is hidden on, additively', () => {
+  const schema = read('lib', 'content', 'schema.ts');
+
+  it('adds hideOn to the section, the same list a block has', () => {
+    // Two occurrences now, the block and the section, both on HideOnSchema.
+    expect(schema.match(/hideOn: HideOnSchema/g)?.length).toBe(2);
+  });
+
+  it('keeps a section hideOn through parsePage, absent on a section that set none', () => {
+    const parsed = parsePage({
+      version: 1,
+      id: 'p',
+      slug: 'sec-hide',
+      title: 'Hide',
+      sections: [
+        { id: 'a', tone: 'light', width: 'contained', hideOn: ['phone', 'desktop'], rows: [] },
+        { id: 'b', tone: 'light', width: 'contained', rows: [] },
+      ],
+    });
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(parsed.page.sections[0].hideOn).toEqual(['phone', 'desktop']);
+    expect(parsed.page.sections[1].hideOn).toBeUndefined();
+  });
+});
+
+describe('the renderer hides a whole section on its screens, published only', () => {
+  const render = read('components', 'render', 'PageRenderer.tsx');
+
+  it('emits data-hide-<screen> on the section from its list, but never while editing', () => {
+    expect(render).toContain(
+      "data-hide-desktop={!editable && section.hideOn?.includes('desktop') ? '' : undefined}",
+    );
+    expect(render).toContain(
+      "data-hide-phone={!editable && section.hideOn?.includes('phone') ? '' : undefined}",
+    );
+  });
+});
+
+describe('the hide container queries take a section out too, on the same rule as a block', () => {
+  const css = read('app', 'globals.css');
+
+  it('matches .tgs-section alongside .tgs-block at each width', () => {
+    expect(css).toContain('.tgs-section[data-hide-desktop] { display: none; }');
+    expect(css).toContain('.tgs-section[data-hide-tablet] { display: none; }');
+    expect(css).toContain('.tgs-section[data-hide-phone] { display: none; }');
+  });
+});
+
+describe('the section pane hides a whole section on the current screen', () => {
+  const props = read('components', 'editor', 'Properties.tsx');
+
+  it('offers a tier-aware Hide toggle on the section that edits its hideOn list', () => {
+    expect(props).toContain('noun="section"');
+    expect(props).toContain('set({ hideOn: next.length ? next : undefined }, `sec:${index}:hideOn:${tier}`)');
   });
 });
 

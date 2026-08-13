@@ -715,10 +715,38 @@ const MUTATIONS = [
      * The CSS half: the attribute renders but nothing acts on it. Neuter the phone
      * hide rule and the block stays in the layout at a phone width.
      */
-    why: 'Neuter the phone hide rule, so the attribute renders but the block never leaves the layout.',
+    why: 'Neuter the block phone hide rule, so the attribute renders but the block never leaves the layout.',
     file: 'app/globals.css',
-    from: `  .tgs-block[data-hide-phone] { display: none; }`,
-    to: `  .tgs-block[data-hide-phone] { display: revert; }`,
+    from: `  .tgs-block[data-hide-phone],
+  .tgs-section[data-hide-phone] { display: none; }`,
+    to: `  .tgs-block[data-hide-phone] { display: revert; }
+  .tgs-section[data-hide-phone] { display: none; }`,
+  },
+  {
+    tag: 'breakpoints',
+    check: 'a section hidden on phone is gone in preview at a phone width, shown on desktop',
+    /*
+     * The section half of show/hide, keyed on section.hideOn so it breaks the
+     * section alone and the block check stays green. Drop the section phone
+     * attribute and the section is stored as hidden but never disappears.
+     */
+    why: 'Never emit the section hide attribute, so a hidden section is stored but never disappears.',
+    file: 'components/render/PageRenderer.tsx',
+    from: `      data-hide-phone={!editable && section.hideOn?.includes('phone') ? '' : undefined}`,
+    to: `      data-hide-phone={undefined}`,
+  },
+  {
+    tag: 'breakpoints',
+    check: 'a section hidden on phone is gone in preview at a phone width, shown on desktop',
+    /*
+     * The CSS half for a section: drop the .tgs-section selector from the phone hide
+     * rule, leaving the block one, so the attribute renders but the section stays.
+     */
+    why: 'Drop the section from the phone hide rule, so the attribute renders but the section never leaves the layout.',
+    file: 'app/globals.css',
+    from: `  .tgs-block[data-hide-phone],
+  .tgs-section[data-hide-phone] { display: none; }`,
+    to: `  .tgs-block[data-hide-phone] { display: none; }`,
   },
   {
     tag: 'breakpoints',

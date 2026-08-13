@@ -375,6 +375,16 @@ export function SectionRenderer({
        * own band rather than over the page; it shows on the published site.
        */
       data-pull-up={section.pullUp ? '' : undefined}
+      /*
+       * Hidden on some screens, the whole section. Same list and same container
+       * queries as a block's, and the same `editable` gate as the reveal and hover
+       * above: while editing the section stays on the canvas so it can be selected
+       * and brought back, and it drops off the layout only on the published page and
+       * in preview.
+       */
+      data-hide-desktop={!editable && section.hideOn?.includes('desktop') ? '' : undefined}
+      data-hide-tablet={!editable && section.hideOn?.includes('tablet') ? '' : undefined}
+      data-hide-phone={!editable && section.hideOn?.includes('phone') ? '' : undefined}
       style={{
         ...boxStyle(section.box),
         '--tgs-pad': `${section.paddingY}px`,

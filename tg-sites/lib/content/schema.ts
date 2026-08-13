@@ -564,6 +564,13 @@ export const SectionSchema = z.object({
   name: z.string().max(80).optional(),
   /** Per-screen overrides of the fields that support it. See ResponsiveSchema. */
   responsive: ResponsiveSchema.optional(),
+  /**
+   * The screens this whole section is hidden on, if any. The same list a block
+   * carries, on the same three container queries, so a decorative band or a whole
+   * strip can be dropped on a phone. Additive: absent on every section saved before
+   * it. See HideOnSchema.
+   */
+  hideOn: HideOnSchema,
   tone: Tone.default('light'),
   width: SectionWidth.default('contained'),
   /**
