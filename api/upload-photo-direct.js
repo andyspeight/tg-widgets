@@ -56,8 +56,15 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    console.error('[upload-photo-direct] BLOB_READ_WRITE_TOKEN not set');
+  // Offer photos are PUBLIC (shown on offer cards + pages). The project's default
+  // BLOB_READ_WRITE_TOKEN points at a PRIVATE store that rejects access:'public'
+  // writes ("Cannot use public access on a private store"), so — exactly like the
+  // logo uploads — write via the dedicated public-store token when present. This
+  // was the real cause of every "photo upload failed": the private store, not a
+  // network block.
+  const blobToken = process.env.TG_Blob_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
+  if (!blobToken) {
+    console.error('[upload-photo-direct] No Blob read-write token set');
     return res.status(500).json({ error: 'Storage not configured' });
   }
 
@@ -101,7 +108,7 @@ export default async function handler(req, res) {
       access: 'public',
       contentType,
       addRandomSuffix: true,
-      token: process.env.BLOB_READ_WRITE_TOKEN,
+      token: blobToken,
     });
     return res.status(200).json({ url: blob && blob.url });
   } catch (err) {
