@@ -740,6 +740,24 @@ export function Canvas({
    */
   const active: 'page' | 'header' | 'footer' = region ?? 'page';
 
+  /*
+   * THE HEADER SEE-THROUGH, PREVIEWED (Andy, 13 Aug 2026).
+   *
+   * On the published page a first section that pulls up tucks under a see-through
+   * header, the two being adjacent siblings. Here they are separate bands with a
+   * gap, and the frame clips, so pulling the first section up just lost its top
+   * under a solid header. So when the page's first section pulls up and there is a
+   * header above it, the wrap says so: the CSS then drops the header band's card
+   * and gap, makes it see-through and lifts it, and slides the whole page frame up
+   * under it by the same amount. Editing the page only, since that is where the
+   * section is set and where the header sits above; the header's own pull-up while
+   * you edit the header itself is not the case anyone is looking at.
+   */
+  const headerPull =
+    active === 'page' && chromeHeader && chromeHeader.sections.length > 0
+      ? page.sections[0]?.pullUp ?? 0
+      : 0;
+
   const framed = (
     <>
       <div
@@ -842,7 +860,16 @@ export function Canvas({
         enough room, the preview says what it is actually showing rather than
         pretending.
       */}
-      <div style={{ width: '100%', maxWidth: viewportWidth }}>
+      <div
+        style={{
+          width: '100%',
+          maxWidth: viewportWidth,
+          ...(headerPull > 0 ? { '--ed-tuck': `${headerPull}px` } : {}),
+        }}
+        // The page's first section pulls up under the header: preview the
+        // see-through here, the way it publishes. See the note by headerPull.
+        data-tuck-header={headerPull > 0 ? '' : undefined}
+      >
         {bandAt('header')}
         {bandAt('page')}
         {bandAt('footer')}

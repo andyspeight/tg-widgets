@@ -6394,6 +6394,87 @@ await check('a section pulled up tucks under the one above it on the canvas', as
   return true;
 });
 
+/*
+ * THE HEADER SEE-THROUGH, PREVIEWED (Andy, 13 Aug 2026). The first section pulling
+ * up under the header is the one overlap the canvas could not show, because the
+ * editor draws the header as its own band above the page rather than over it. This
+ * drops in a header and a page whose first section pulls up, and proves the editor
+ * now previews the tuck: the wrap says so, the header band and its region go
+ * see-through and the band lifts, and the first section really climbs into it. The
+ * region background is asserted apart because a white .tgs-region wrapper hiding
+ * the picture was the exact bug this preview shipped with and was fixed.
+ */
+await check('the editor previews a first section tucking under a see-through header', async () => {
+  await closeAnyDialog();
+  // The page must be the active tree, so the header draws as a band above it
+  // rather than as the frame; a prior check may have left a region editable.
+  await page.evaluate(() => window.__TG_SET_REGION__(null));
+  await page.waitForTimeout(300);
+  await page.evaluate(() =>
+    window.__TG_SET_CHROME__({
+      header: {
+        id: 'h', slug: '', title: 'Header', version: 1,
+        sections: [
+          { id: 'hs', width: 'full', tone: 'dark', rows: [{ id: 'hr', gap: 16, columns: [{ id: 'hc', width: 100, blocks: [{ id: 'hb', type: 'heading', props: { level: 2, style: 'h3', html: 'BRAND — Menu' } }] }] }] },
+        ],
+      },
+      footer: null,
+    }),
+  );
+  await page.evaluate(() =>
+    window.__TG_SET_PAGE__({
+      id: 'ovh', slug: 'overlap-header', title: 'Overlap header', version: 1,
+      sections: [
+        { id: 'hero', width: 'full', tone: 'dark', pullUp: 120, minHeight: 360, rows: [{ id: 'r1', gap: 16, columns: [{ id: 'c1', width: 100, blocks: [{ id: 'b1', type: 'heading', props: { level: 2, style: 'h1', html: 'Where will you go' } }] }] }] },
+        { id: 'below', width: 'contained', tone: 'light', minHeight: 200, rows: [{ id: 'r2', gap: 16, columns: [{ id: 'c2', width: 100, blocks: [{ id: 'b2', type: 'heading', props: { level: 2, style: 'h2', html: 'Below' } }] }] }] },
+      ],
+    }),
+  );
+  await page.waitForTimeout(600);
+  await showPanels();
+
+  const geom = await page.evaluate(() => {
+    const band = document.querySelector('.ed-chrome--header');
+    const region = document.querySelector('.ed-chrome--header .tgs-region');
+    const hero = document.querySelector('.ed-canvas-frame .tgs-section');
+    const diag = {
+      chromes: document.querySelectorAll('.ed-chrome').length,
+      frames: document.querySelectorAll('.ed-canvas-frame').length,
+      framedSections: document.querySelectorAll('.ed-canvas-frame .tgs-section').length,
+      tucked: !!document.querySelector('.ed-canvas-wrap [data-tuck-header]'),
+    };
+    if (!band || !hero) return { ...diag, band: !!band, hero: !!hero };
+    const b = band.getBoundingClientRect();
+    const h = hero.getBoundingClientRect();
+    const cs = getComputedStyle(band);
+    return {
+      ...diag,
+      band: true,
+      hero: true,
+      bandBg: cs.backgroundColor,
+      regionBg: region ? getComputedStyle(region).backgroundColor : 'none',
+      bandZ: cs.zIndex,
+      overlap: b.bottom - h.top,
+    };
+  });
+
+  await page.evaluate(() => {
+    window.__TG_SET_PAGE__(null);
+    window.__TG_SET_CHROME__(null);
+  });
+  await page.waitForTimeout(200);
+  await showPanels();
+
+  const clear = (c) => /rgba\(0, 0, 0, 0\)|transparent/.test(c);
+  if (!geom.band || !geom.hero) return `band ${geom.band} hero ${geom.hero} (chromes ${geom.chromes}, frames ${geom.frames}, framedSections ${geom.framedSections}, tucked ${geom.tucked})`;
+  if (!geom.tucked) return 'the wrap did not carry data-tuck-header';
+  if (!clear(geom.bandBg)) return `the header band did not go see-through: ${geom.bandBg}`;
+  if (!clear(geom.regionBg)) return `the header region kept its white background: ${geom.regionBg}`;
+  if (Number(geom.bandZ) < 2) return `the header did not lift over the page: z ${geom.bandZ}`;
+  if (geom.overlap < 80) return `the hero did not climb under the header: overlap ${Math.round(geom.overlap)}px`;
+  return true;
+});
+
 
 // ---------------------------------------------------------------------------
 // Social links, Steps, and shaped section edges

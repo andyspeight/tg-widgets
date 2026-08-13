@@ -1026,6 +1026,17 @@ const MUTATIONS = [
     to: `.tgs-section[data-pull-up] {
   margin-top: 0;`,
   },
+  {
+    tag: 'overlap',
+    check: 'the editor previews a first section tucking under a see-through header',
+    why: 'Leave the header region opaque, the white .tgs-page wrapper that hid the picture behind a solid header.',
+    file: 'components/editor/editor.css',
+    from: `[data-tuck-header] .ed-chrome--header,
+[data-tuck-header] .ed-chrome--header .tgs-region,
+[data-tuck-header] .ed-chrome--header .tgs-section {`,
+    to: `[data-tuck-header] .ed-chrome--header,
+[data-tuck-header] .ed-chrome--header .tgs-section {`,
+  },
 ];
 
 /*

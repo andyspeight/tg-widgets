@@ -1249,6 +1249,41 @@
 }
 
 /*
+ * THE HEADER SEE-THROUGH, PREVIEWED (Andy, 13 Aug 2026).
+ *
+ * When the page's first section pulls up under the header, the wrap carries
+ * data-tuck-header. On the published page the header and that section are
+ * adjacent siblings, so the section tucks under a see-through header with a plain
+ * negative margin. Here they are separate bands with a gap, and the page frame
+ * clips, so the section's pull-up was just lost under a solid header.
+ *
+ * So do the same as the site does, minus the clip. Strip the header band back to
+ * see-through and lift it over the page, close the gap, and let the page frame
+ * stop clipping. The first section already carries its own negative margin from
+ * the pull-up, so with nothing clipping it, it rises up under the transparent
+ * header exactly as it will on the page. The frame is not moved: the header stays
+ * where it is at the top, the section comes up to meet it.
+ */
+[data-tuck-header] .ed-chrome--header {
+  margin-bottom: 0;
+  box-shadow: none;
+  border-radius: 0;
+  overflow: visible;
+  position: relative;
+  z-index: 3;
+}
+[data-tuck-header] .ed-chrome--header,
+[data-tuck-header] .ed-chrome--header .tgs-region,
+[data-tuck-header] .ed-chrome--header .tgs-section {
+  background: transparent;
+}
+[data-tuck-header] .ed-canvas-frame {
+  overflow: visible;
+  position: relative;
+  z-index: 1;
+}
+
+/*
  * THE LABEL TAB IS THE TOOLBAR'S NOW, not a CSS ::after on the element.
  *
  * It used to be `content: attr(data-kind)` drawn on the selected element, which
