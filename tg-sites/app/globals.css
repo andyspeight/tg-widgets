@@ -3075,7 +3075,16 @@
   z-index: 3;
   background: transparent;
 }
-.tgs-region[data-region='header'][data-overlapped='true'] .tgs-section { background: transparent; }
+/*
+ * The section AND its columns go see-through, not just the region. A header laid
+ * out as a logo column and a menu column can carry a fill on those columns, and
+ * left opaque they read as white boxes over the picture even though the header
+ * itself is clear. The editor's own preview clears the same columns, so the two
+ * match. (Andy, 13 Aug 2026: "the background behind the navigation, even though it
+ * is showing as transparent in the editor".)
+ */
+.tgs-region[data-region='header'][data-overlapped='true'] .tgs-section,
+.tgs-region[data-region='header'][data-overlapped='true'] .tgs-col { background: transparent; }
 
 /*
  * A footer is the end of the page, so it gets a hairline above it. Otherwise a

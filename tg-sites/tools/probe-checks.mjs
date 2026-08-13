@@ -38,6 +38,12 @@ const SUITES = {
     build: 'node tools/build-theme-harness.mjs',
     verify: 'node tools/verify-settings.mjs',
   },
+  // The published-page CSS, checked against the real globals.css with no bundle to
+  // build: the verifier reads app/globals.css beside it, so the mutation is seen.
+  css: {
+    build: 'true',
+    verify: 'node tools/verify-overlap-css.mjs',
+  },
 };
 
 const MUTATIONS = [
@@ -1053,6 +1059,16 @@ const MUTATIONS = [
     to: `[data-tuck-header='header'] .ed-canvas-frame .tgs-col {
   background: transparent;
 }`,
+  },
+  {
+    suite: 'css',
+    tag: 'overlap',
+    check: 'the published header see-through',
+    why: 'Clear only the section on the PUBLISHED header, not its columns, the white-box-over-the-picture bug Andy hit on the live site.',
+    file: 'app/globals.css',
+    from: `.tgs-region[data-region='header'][data-overlapped='true'] .tgs-section,
+.tgs-region[data-region='header'][data-overlapped='true'] .tgs-col { background: transparent; }`,
+    to: `.tgs-region[data-region='header'][data-overlapped='true'] .tgs-section { background: transparent; }`,
   },
 ];
 
