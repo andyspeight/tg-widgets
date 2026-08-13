@@ -1251,20 +1251,23 @@
 /*
  * THE HEADER SEE-THROUGH, PREVIEWED (Andy, 13 Aug 2026).
  *
- * When the page's first section pulls up under the header, the wrap carries
- * data-tuck-header. On the published page the header and that section are
- * adjacent siblings, so the section tucks under a see-through header with a plain
- * negative margin. Here they are separate bands with a gap, and the page frame
- * clips, so the section's pull-up was just lost under a solid header.
+ * On the published page a first section that pulls up tucks under a see-through
+ * header, the two being adjacent siblings. Here they are separate bands with a gap
+ * and the frame clips, so the section's pull-up was lost under a solid header. So
+ * do the same the site does, minus the clip: strip the header back to see-through
+ * and lift it, close the gap, and let the page stop clipping so the section's own
+ * negative margin rises up into it.
  *
- * So do the same as the site does, minus the clip. Strip the header band back to
- * see-through and lift it over the page, close the gap, and let the page frame
- * stop clipping. The first section already carries its own negative margin from
- * the pull-up, so with nothing clipping it, it rises up under the transparent
- * header exactly as it will on the page. The frame is not moved: the header stays
- * where it is at the top, the section comes up to meet it.
+ * It has to hold whichever tree you are editing, so data-tuck-header carries which
+ * one is the frame. Editing the PAGE, the header is a band above (.ed-chrome
+ * --header) and the page is the frame. Editing the HEADER, the header is the frame
+ * (.ed-canvas-frame) and the page a band below (.ed-chrome--page). Mirror images,
+ * spelled apart. The header's region, section and columns go see-through too, or
+ * the picture shows around a white logo box or a white menu bar.
  */
-[data-tuck-header] .ed-chrome--header {
+
+/* Editing the PAGE: the header is the band, the page is the frame. */
+[data-tuck-header='page'] .ed-chrome--header {
   margin-bottom: 0;
   box-shadow: none;
   border-radius: 0;
@@ -1272,12 +1275,34 @@
   position: relative;
   z-index: 3;
 }
-[data-tuck-header] .ed-chrome--header,
-[data-tuck-header] .ed-chrome--header .tgs-region,
-[data-tuck-header] .ed-chrome--header .tgs-section {
+[data-tuck-header='page'] .ed-chrome--header,
+[data-tuck-header='page'] .ed-chrome--header .tgs-region,
+[data-tuck-header='page'] .ed-chrome--header .tgs-section,
+[data-tuck-header='page'] .ed-chrome--header .tgs-col {
   background: transparent;
 }
-[data-tuck-header] .ed-canvas-frame {
+[data-tuck-header='page'] .ed-canvas-frame {
+  overflow: visible;
+  position: relative;
+  z-index: 1;
+}
+
+/* Editing the HEADER: the header is the frame, the page is the band below it. */
+[data-tuck-header='header'] .ed-canvas-frame {
+  box-shadow: none;
+  border-radius: 0;
+  overflow: visible;
+  position: relative;
+  z-index: 3;
+}
+[data-tuck-header='header'] .ed-canvas-frame,
+[data-tuck-header='header'] .ed-canvas-frame .tgs-region,
+[data-tuck-header='header'] .ed-canvas-frame .tgs-section,
+[data-tuck-header='header'] .ed-canvas-frame .tgs-col {
+  background: transparent;
+}
+[data-tuck-header='header'] .ed-chrome--page {
+  margin-top: 0;
   overflow: visible;
   position: relative;
   z-index: 1;

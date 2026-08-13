@@ -6475,6 +6475,82 @@ await check('the editor previews a first section tucking under a see-through hea
   return true;
 });
 
+/*
+ * AND IT STAYS SEE-THROUGH WHILE YOU EDIT THE HEADER ITSELF (Andy, 13 Aug 2026).
+ * Clicking into the header made it the frame and dropped the see-through, so it
+ * flipped back to a solid bar the moment you touched it, right when you are trying
+ * to place a logo against the picture. Now editing the header keeps the tuck: the
+ * header frame goes see-through and lifts, and the page's first section, now in a
+ * band below, climbs up into it. This clicks into the header and proves it holds.
+ */
+await check('and it stays see-through while the header itself is edited', async () => {
+  await closeAnyDialog();
+  await page.evaluate(() => window.__TG_SET_REGION__(null));
+  await page.waitForTimeout(200);
+  await page.evaluate(() =>
+    window.__TG_SET_CHROME__({
+      header: {
+        id: 'h2', slug: '', title: 'Header', version: 1,
+        sections: [
+          { id: 'hs2', width: 'full', tone: 'light', rows: [{ id: 'hr2', gap: 16, columns: [{ id: 'hc2', width: 100, blocks: [{ id: 'hb2', type: 'heading', props: { level: 2, style: 'h3', html: 'BRAND — Menu' } }] }] }] },
+        ],
+      },
+      footer: null,
+    }),
+  );
+  await page.evaluate(() =>
+    window.__TG_SET_PAGE__({
+      id: 'ovh2', slug: 'overlap-header-2', title: 'Overlap header 2', version: 1,
+      sections: [
+        { id: 'hero2', width: 'full', tone: 'dark', pullUp: 120, minHeight: 360, rows: [{ id: 'r1', gap: 16, columns: [{ id: 'c1', width: 100, blocks: [{ id: 'b1', type: 'heading', props: { level: 2, style: 'h1', html: 'Where will you go' } }] }] }] },
+        { id: 'below2', width: 'contained', tone: 'light', minHeight: 200, rows: [{ id: 'r2', gap: 16, columns: [{ id: 'c2', width: 100, blocks: [{ id: 'b2', type: 'heading', props: { level: 2, style: 'h2', html: 'Below' } }] }] }] },
+      ],
+    }),
+  );
+  await page.waitForTimeout(600);
+  await showPanels();
+
+  // Click into the header to edit it. Dispatched, since a see-through band is
+  // awkward for a real pointer click to land on.
+  await page.evaluate(() => document.querySelector('.ed-chrome[data-region="header"]')?.click());
+  await page.waitForTimeout(800);
+
+  const geom = await page.evaluate(() => {
+    const wrap = document.querySelector('.ed-canvas-wrap [data-tuck-header]');
+    const frame = document.querySelector('.ed-canvas-frame');
+    const region = document.querySelector('.ed-canvas-frame .tgs-region');
+    const hero = document.querySelector('.ed-chrome--page .tgs-section');
+    if (!frame || !hero) return { frame: !!frame, hero: !!hero, tuck: wrap?.getAttribute('data-tuck-header') ?? 'none' };
+    const cs = getComputedStyle(frame);
+    return {
+      tuck: wrap?.getAttribute('data-tuck-header') ?? 'none',
+      frame: true,
+      hero: true,
+      frameBg: cs.backgroundColor,
+      regionBg: region ? getComputedStyle(region).backgroundColor : 'none',
+      frameZ: cs.zIndex,
+      overlap: frame.getBoundingClientRect().bottom - hero.getBoundingClientRect().top,
+    };
+  });
+
+  await page.evaluate(() => {
+    window.__TG_SET_REGION__(null);
+    window.__TG_SET_PAGE__(null);
+    window.__TG_SET_CHROME__(null);
+  });
+  await page.waitForTimeout(200);
+  await showPanels();
+
+  const clear = (c) => /rgba\(0, 0, 0, 0\)|transparent/.test(c);
+  if (!geom.frame || !geom.hero) return `editing the header did not open (frame ${geom.frame}, hero ${geom.hero}, tuck ${geom.tuck})`;
+  if (geom.tuck !== 'header') return `the tuck did not switch to the header: ${geom.tuck}`;
+  if (!clear(geom.frameBg)) return `the header frame did not go see-through: ${geom.frameBg}`;
+  if (!clear(geom.regionBg)) return `the header region kept its background: ${geom.regionBg}`;
+  if (Number(geom.frameZ) < 2) return `the header did not lift over the page: z ${geom.frameZ}`;
+  if (geom.overlap < 80) return `the hero did not climb under the header while editing it: overlap ${Math.round(geom.overlap)}px`;
+  return true;
+});
+
 
 // ---------------------------------------------------------------------------
 // Social links, Steps, and shaped section edges

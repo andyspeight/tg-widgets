@@ -747,15 +747,21 @@ export function Canvas({
    * header, the two being adjacent siblings. Here they are separate bands with a
    * gap, and the frame clips, so pulling the first section up just lost its top
    * under a solid header. So when the page's first section pulls up and there is a
-   * header above it, the wrap says so: the CSS then drops the header band's card
-   * and gap, makes it see-through and lifts it, and slides the whole page frame up
-   * under it by the same amount. Editing the page only, since that is where the
-   * section is set and where the header sits above; the header's own pull-up while
-   * you edit the header itself is not the case anyone is looking at.
+   * header, the wrap says so and the CSS makes the header go see-through and lifts
+   * it, and the page's first section rises up into it.
+   *
+   * It has to hold whichever you are editing. When you edit the PAGE the header is
+   * a band above it; when you edit the HEADER the header is the frame and the page
+   * a band below. Same effect, roles swapped, so data-tuck-header carries which
+   * one is the frame and the CSS spells the two out apart. The page tree and the
+   * header tree each live in `page` when active and in the chrome slot otherwise.
    */
+  const pageTree = active === 'page' ? page : chromePage;
+  const headerTree = active === 'header' ? page : chromeHeader;
+  const headerPresent = Boolean(headerTree && headerTree.sections.length > 0);
   const headerPull =
-    active === 'page' && chromeHeader && chromeHeader.sections.length > 0
-      ? page.sections[0]?.pullUp ?? 0
+    (active === 'page' || active === 'header') && headerPresent
+      ? pageTree?.sections?.[0]?.pullUp ?? 0
       : 0;
 
   const framed = (
@@ -867,8 +873,9 @@ export function Canvas({
           ...(headerPull > 0 ? { '--ed-tuck': `${headerPull}px` } : {}),
         }}
         // The page's first section pulls up under the header: preview the
-        // see-through here, the way it publishes. See the note by headerPull.
-        data-tuck-header={headerPull > 0 ? '' : undefined}
+        // see-through here, the way it publishes. The value is which tree is the
+        // frame, so the CSS knows the arrangement. See the note by headerPull.
+        data-tuck-header={headerPull > 0 ? active : undefined}
       >
         {bandAt('header')}
         {bandAt('page')}

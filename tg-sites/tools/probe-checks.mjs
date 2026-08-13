@@ -1031,11 +1031,28 @@ const MUTATIONS = [
     check: 'the editor previews a first section tucking under a see-through header',
     why: 'Leave the header region opaque, the white .tgs-page wrapper that hid the picture behind a solid header.',
     file: 'components/editor/editor.css',
-    from: `[data-tuck-header] .ed-chrome--header,
-[data-tuck-header] .ed-chrome--header .tgs-region,
-[data-tuck-header] .ed-chrome--header .tgs-section {`,
-    to: `[data-tuck-header] .ed-chrome--header,
-[data-tuck-header] .ed-chrome--header .tgs-section {`,
+    from: `[data-tuck-header='page'] .ed-chrome--header,
+[data-tuck-header='page'] .ed-chrome--header .tgs-region,
+[data-tuck-header='page'] .ed-chrome--header .tgs-section,
+[data-tuck-header='page'] .ed-chrome--header .tgs-col {`,
+    to: `[data-tuck-header='page'] .ed-chrome--header,
+[data-tuck-header='page'] .ed-chrome--header .tgs-section,
+[data-tuck-header='page'] .ed-chrome--header .tgs-col {`,
+  },
+  {
+    tag: 'overlap',
+    check: 'and it stays see-through while the header itself is edited',
+    why: 'Leave the header opaque while it is the frame, the flip back to a solid header the moment you edit it.',
+    file: 'components/editor/editor.css',
+    from: `[data-tuck-header='header'] .ed-canvas-frame,
+[data-tuck-header='header'] .ed-canvas-frame .tgs-region,
+[data-tuck-header='header'] .ed-canvas-frame .tgs-section,
+[data-tuck-header='header'] .ed-canvas-frame .tgs-col {
+  background: transparent;
+}`,
+    to: `[data-tuck-header='header'] .ed-canvas-frame .tgs-col {
+  background: transparent;
+}`,
   },
 ];
 
