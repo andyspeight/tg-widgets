@@ -86,6 +86,7 @@
     "test:offer-sheet-render": "node test/offer-sheet-render-smoke.mjs",
     "test:offer-page-back": "node test/offer-page-back-button-smoke.mjs",
     "test:offer-cruise-card": "node test/offer-cruise-card-smoke.mjs",
+    "test:offer-custom-badge": "node test/offer-custom-badge-smoke.mjs",
     "test:offer-cruise-page": "node test/offer-cruise-page-smoke.mjs",
     "test:textfx": "node test/textfx-rotating-align-smoke.mjs",
     "test:textfx-nostack": "node test/textfx-rotating-nostack-smoke.mjs",

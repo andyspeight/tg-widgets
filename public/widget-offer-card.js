@@ -27,7 +27,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.2.1';
+  const VERSION = '0.2.2';
 
   // Resolve the API base off THIS script's origin. The widget is hosted on
   // widgets.travelify.io and embedded on customer sites, so a relative
@@ -520,12 +520,18 @@
       const nights = this._f('nights');
       const priceSub = [this._f('basis'), nights ? nights + ' ' + this.t('nights') : ''].filter(Boolean).join(' · ');
 
-      // Promo badge — 'Save' uses the amount, others show their own label.
+      // Promo badge — 'Save' uses the amount, 'Custom text' uses the free-text
+      // field (for things like "€90 onboard spend per cabin"), others show their
+      // own label. A Custom badge with no text shows nothing.
       const badge = this._f('badge');
       let badgeText = '';
       if (badge && badge !== 'No badge') {
-        const amt = money(sym, this._f('badgeAmount'));
-        badgeText = (badge === 'Save' && amt) ? this.t('save') + ' ' + amt : badge;
+        if (badge === 'Custom text') {
+          badgeText = this._f('badgeText') || '';
+        } else {
+          const amt = money(sym, this._f('badgeAmount'));
+          badgeText = (badge === 'Save' && amt) ? this.t('save') + ' ' + amt : badge;
+        }
       }
 
       const tags = Array.isArray(o.tags) ? o.tags.slice(0, 3) : [];

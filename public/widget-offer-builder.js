@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.3.2';
+  const VERSION = '0.3.3';
 
   // Resolve the API base off THIS script's origin so a remote-config embed on a
   // customer domain does not fetch the customer's own '/api/...' (404 → blank).
@@ -115,7 +115,7 @@
   const CRUISE_FLIGHTS = ['Flights included', 'Cruise only', 'Fly-cruise'];
   const FLIGHT_CLASSES = ['Economy', 'Premium economy', 'Business', 'First'];
   const RAIL_CLASSES = ['Standard', 'First class', 'Sleeper', 'Observation car'];
-  const BADGES = ['Save', 'Last minute', 'Exclusive', 'Best seller', 'Selling fast', 'Free child place', 'No badge'];
+  const BADGES = ['Save', 'Last minute', 'Exclusive', 'Best seller', 'Selling fast', 'Free child place', 'Custom text', 'No badge'];
   const PROTECTIONS = ['ATOL protected', 'ABTA member', 'Both', 'Neither'];
   const DEFAULT_INCLUDES = [
     'Return flights', 'Airport transfers', '23kg luggage', '20kg baggage',
@@ -819,6 +819,7 @@
           + '</div></div><div class="ob-grid">'
           + field('badge', 'Promo badge', select('badge', BADGES, BADGES[0]))
           + field('badgeAmount', 'Badge amount', money('badgeAmount', '400'), '(for "Save")')
+          + field('badgeText', 'Custom badge text', input('badgeText', 'e.g. €90 onboard spend per cabin'), '(for "Custom text")', true)
           + field('urgency', 'Urgency pill', input('urgency', 'Only 4 left at this price'), '(green flash)')
           + '</div></div>';
       }
