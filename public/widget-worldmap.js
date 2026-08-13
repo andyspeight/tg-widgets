@@ -68,7 +68,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.17.0';
+  const VERSION = '3.18.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -4430,13 +4430,18 @@ svg.leaflet-image-layer.leaflet-interactive path {
       }).sort((a, b) => b._score - a._score);
 
       // Collision check at world-zoom projection. Two pins overlap visually if
-      // close in BOTH lat and lng. The longitude box was far too wide (35°
-      // ≈ Lisbon→Moscow), which culled every European/Med country behind Spain.
-      // Tightened so neighbours like Portugal, Italy, Greece survive while the
-      // view stays tidy.
-      const MIN_LAT = 9;
-      const MIN_LNG = 13;
-      const max = this.cfg.maxPins || 12;
+      // close in BOTH lat and lng.
+      //
+      // A client who curated a country list (cfg.countries) has explicitly
+      // chosen the places they want on the map, so respect that: show as many of
+      // their countries as stay legible with only a light de-overlap, and no
+      // tight 12-pin ceiling. The wider spacing + ~12 cap is for the un-curated
+      // whole-world default, where dozens of countries would otherwise pile up at
+      // world zoom. Fullscreen shows every country either way.
+      const curated = Array.isArray(this.cfg.countries) && this.cfg.countries.length > 0;
+      const MIN_LAT = curated ? 5 : 9;
+      const MIN_LNG = curated ? 7 : 13;
+      const max = this.cfg.maxPins || (curated ? Math.max(countries.length, 12) : 12);
       const accepted = [];
       for (const c of scored) {
         if (accepted.length >= max) break;
