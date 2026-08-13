@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.2.0';
+  const VERSION = '0.3.0';
 
   // Resolve the API base off THIS script's origin so a remote-config embed on a
   // customer domain does not fetch the customer's own '/api/...' (404 → blank).
@@ -643,6 +643,13 @@
         // streams files straight to Vercel Blob via this token route. Without it
         // only URL-paste is offered (so the unauthenticated demo still works).
         uploadEndpoint: c.uploadEndpoint || '',
+        // Same-origin server upload — contacts nothing but our own origin, so it
+        // works on locked-down agency networks that block the CDN (esm.sh) or
+        // Blob storage the token route needs. Primary path for photos up to ~4MB;
+        // the token route above is the fallback for larger files. Derived from
+        // uploadEndpoint when not given so existing editors get it for free.
+        directUploadEndpoint: c.directUploadEndpoint
+          || (c.uploadEndpoint ? String(c.uploadEndpoint).replace(/upload-photo\b/, 'upload-photo-direct') : ''),
 
         // Currency
         currency: c.currency || 'GBP',
@@ -1148,6 +1155,7 @@
       const original = drop ? drop.innerHTML : '';
       if (drop) { drop.classList.add('busy'); drop.textContent = 'Uploading…'; }
       this._photoError('');
+      this._uploadAuthFailed = false;
       let added = 0;
       for (const f of imgs) {
         if (f.size > 8 * 1024 * 1024) { this._photoError(safeFileName(f.name) + ' is over 8MB. Please use a smaller image.'); continue; }
@@ -1156,15 +1164,63 @@
       }
       if (drop) { drop.classList.remove('busy'); drop.innerHTML = original; }
       if (!added && !this.root.querySelector('.ob-photo-err.show')) {
-        this._photoError('Could not upload those photos. Make sure you are signed in, or your network may be blocking the uploader — paste an image URL instead.');
+        this._photoError(this._uploadAuthFailed
+          ? 'Your session has expired. Please sign in again, then re-add the photos.'
+          : 'Could not upload those photos. Please try again, or paste an image URL instead.');
       }
     }
 
     async _uploadOne(file) {
-      // Bound every step so the upload can never hang: the CDN fetch of the Blob
-      // client (15s) and the upload itself (60s, also abortable). On any failure
-      // or stall this resolves to '' so _uploadFiles resets the "Uploading…"
-      // state and shows the paste-a-URL fallback, instead of sitting forever.
+      // Prefer the same-origin server upload: it contacts nothing but our own
+      // origin, so it works on locked-down agency networks that block the CDN
+      // (esm.sh) or Blob storage the client route needs — the exact failure
+      // Tullys Travel hit (Aug 2026). Files too big for a serverless request
+      // body (~4MB) fall through to the client route, which streams direct to
+      // Blob and carries the 8MB ceiling.
+      const DIRECT_MAX = 4 * 1024 * 1024;
+      if (this.cfg.directUploadEndpoint && file.size <= DIRECT_MAX) {
+        const url = await this._uploadDirect(file);
+        if (url) return url;
+        if (this._uploadAuthFailed) return ''; // a 401 won't be fixed by the CDN route
+      }
+      if (!this.cfg.uploadEndpoint) return '';
+      return this._uploadViaClient(file);
+    }
+
+    // Same-origin: POST the raw bytes to our own server, which streams them to
+    // Blob. No third-party host is contacted, so a corporate firewall can't
+    // silently block it. 60s abortable cap so a stall can't hang the UI.
+    async _uploadDirect(file) {
+      const ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+      const killer = setTimeout(function () { if (ctrl) { try { ctrl.abort(); } catch (e) { /* noop */ } } }, 60000);
+      try {
+        const res = await fetch(this.cfg.directUploadEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': file.type || 'application/octet-stream',
+            'x-filename': encodeURIComponent(safeFileName(file.name)),
+          },
+          credentials: 'include',
+          body: file,
+          signal: ctrl ? ctrl.signal : undefined,
+        });
+        if (res.status === 401) { this._uploadAuthFailed = true; return ''; }
+        if (!res.ok) return '';
+        const data = await res.json().catch(function () { return {}; });
+        return safePhotoUrl(data && data.url);
+      } catch (err) {
+        console.warn('[TGOfferBuilder] direct photo upload failed:', err && err.message);
+        return '';
+      } finally {
+        clearTimeout(killer);
+      }
+    }
+
+    // Fallback for large files: Vercel Blob CLIENT upload — loads the SDK from a
+    // CDN and uploads direct to Blob, bypassing the 4.5MB request-body cap. Both
+    // the CDN fetch (15s) and the upload (60s) are bounded so a locked-down
+    // network stalls into the paste-a-URL fallback rather than hanging forever.
+    async _uploadViaClient(file) {
       const ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
       const killer = setTimeout(function () { if (ctrl) { try { ctrl.abort(); } catch (e) { /* noop */ } } }, 60000);
       try {
