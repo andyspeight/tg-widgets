@@ -102,6 +102,7 @@
     "test:worldmap-pax": "node test/worldmap-pax-deeplink-smoke.mjs",
     "test:worldmap-stars": "node test/worldmap-star-filter-smoke.mjs",
     "test:worldmap-pins": "node test/worldmap-pins-rating-smoke.mjs",
+    "test:worldmap-curated-spread": "node test/worldmap-curated-spread-smoke.mjs",
     "test:testimonials-reveal": "node test/testimonials-reveal-smoke.mjs",
     "test:trips": "node test/trips-widget-smoke.mjs",
     "test:trips-page": "node test/trips-page-smoke.mjs",
