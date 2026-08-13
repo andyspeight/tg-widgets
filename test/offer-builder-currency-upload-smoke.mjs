@@ -53,5 +53,13 @@ console.log('Version bumped');
   ok('builder version >= 0.2.0', vm && (+vm[1] > 0 || (+vm[1] === 0 && +vm[2] >= 2)));
 }
 
+console.log('Default "what\'s included" quick-add suggestions');
+{
+  // Standard one-tap chips so agents don't retype common inclusions (Andy, Aug 2026).
+  ok('20kg baggage is a default suggestion', /'20kg baggage'/.test(b));
+  ok('Full board is a default suggestion', /'Full board'/.test(b));
+  ok('7 night cruise is a default suggestion', /'7 night cruise'/.test(b));
+}
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed');
 process.exit(failed ? 1 : 0);
