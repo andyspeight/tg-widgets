@@ -68,7 +68,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '3.18.0';
+  const VERSION = '3.19.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (map controls, legend, popup/card chrome, filter and
@@ -4441,7 +4441,12 @@ svg.leaflet-image-layer.leaflet-interactive path {
       const curated = Array.isArray(this.cfg.countries) && this.cfg.countries.length > 0;
       const MIN_LAT = curated ? 5 : 9;
       const MIN_LNG = curated ? 7 : 13;
-      const max = this.cfg.maxPins || (curated ? Math.max(countries.length, 12) : 12);
+      // A curated map shows the countries the client chose, so its count follows
+      // the data — NOT the default maxPins (10), which is meant for the crowded
+      // whole-world view. Reading this.cfg.maxPins first was the bug: maxPins
+      // defaults to 10, so `this.cfg.maxPins || …` short-circuited and held a
+      // curated map to ~10 pins even after the wider spacing let more through.
+      const max = curated ? countries.length : (this.cfg.maxPins || 12);
       const accepted = [];
       for (const c of scored) {
         if (accepted.length >= max) break;
