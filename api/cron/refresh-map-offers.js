@@ -860,6 +860,24 @@ function destinationCodesFor(row) {
   return cc ? [cc] : [];
 }
 
+/** Destination code(s) to query for a given PRODUCT.
+ *
+ *  Packages and flights fly TO a gateway airport, so they use the row's
+ *  AirportCodes. Accommodation (hotel-only) is location-based and NOT tied to a
+ *  departure airport: asking hotels by airport returned only that airport's own
+ *  city — LAS gave the whole of Las Vegas, JFK/MCO/MIA gave nothing — so the US
+ *  hotel cache came back Las-Vegas-only. Hotels are swept by the COUNTRY code so
+ *  the feed returns rooms across the whole country (New York, Orlando, …), then
+ *  the per-city storage cap keeps the spread. (Andy, Aug 2026.)  */
+function destinationCodesForType(row, sweepType) {
+  const f = row.fields || {};
+  const cc = (f.CountryCode || '').trim();
+  if (sweepType && sweepType.id === 'Accommodation') return cc ? [cc] : [];
+  const airports = (f.AirportCodes || '').split(',').map(s => s.trim()).filter(Boolean);
+  if (airports.length) return airports;
+  return cc ? [cc] : [];
+}
+
 /** Run a list of async thunks with bounded concurrency. */
 async function pooled(items, worker, concurrency = REQUEST_CONCURRENCY) {
   const results = [];
@@ -880,21 +898,27 @@ async function pooled(items, worker, concurrency = REQUEST_CONCURRENCY) {
 async function sweepCountry(row) {
   const f = row.fields || {};
   const cc = (f.CountryCode || '').trim();
-  const codes = destinationCodesFor(row);
-  if (!cc || codes.length === 0) {
-    return { cc: cc || '(none)', name: f.Name || '', ok: false, error: 'no country code', codeResults: [], freshOffers: [] };
+  if (!cc) {
+    return { cc: '(none)', name: f.Name || '', ok: false, error: 'no country code', codeResults: [], freshOffers: [] };
   }
+  // Destination codes are resolved PER PRODUCT: packages/flights fan out over the
+  // gateway airports, hotels are searched by the country code (see
+  // destinationCodesForType). Guard against a row with airports but no swept type
+  // producing zero jobs.
   const jobs = [];
-  for (const code of codes) for (const market of MARKETS) for (const cur of (market.currencies || ['GBP'])) for (const sweepType of SWEEP_TYPES) {
-    // Flight sweeps fan out to one request per departure airport (the only
-    // request shape the feed returns flight-only offers for), toward every
-    // swept destination — including pairs Travelify holds nothing for today,
-    // so inventory they add later is picked up without a code change.
-    if (sweepType.id === 'Flights') {
-      for (const flightOrigin of (market.flightOrigins || [])) jobs.push({ code, market, cur, sweepType, flightOrigin });
-      continue;
+  for (const market of MARKETS) for (const cur of (market.currencies || ['GBP'])) for (const sweepType of SWEEP_TYPES) {
+    const codes = destinationCodesForType(row, sweepType);
+    for (const code of codes) {
+      // Flight sweeps fan out to one request per departure airport (the only
+      // request shape the feed returns flight-only offers for), toward every
+      // swept destination — including pairs Travelify holds nothing for today,
+      // so inventory they add later is picked up without a code change.
+      if (sweepType.id === 'Flights') {
+        for (const flightOrigin of (market.flightOrigins || [])) jobs.push({ code, market, cur, sweepType, flightOrigin });
+        continue;
+      }
+      jobs.push({ code, market, cur, sweepType });
     }
-    jobs.push({ code, market, cur, sweepType });
   }
   const codeResults = await pooled(jobs, async ({ code, market, cur, sweepType, flightOrigin }) => {
     const raw = await callOffersProxy(buildPayload(row, code, market, sweepType, flightOrigin, cur));
