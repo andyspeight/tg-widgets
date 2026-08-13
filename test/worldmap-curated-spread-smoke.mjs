@@ -66,18 +66,20 @@ console.log('A curated map surfaces far more of the chosen countries');
   ok('the cheapest country is still present', curated.some(c => c.countryCode === 'SA'));
 }
 
-console.log('An explicit maxPins still wins, curated or not');
+console.log('The count cap: curated shows all, un-curated respects maxPins');
 {
-  ok('curated map honours maxPins', select({ countries: CODES, maxPins: 3 }, SET).length === 3);
-  ok('un-curated map honours maxPins', select({ countries: [], maxPins: 4 }, SET).length === 4);
+  // The bug: maxPins defaults to 10, so a curated map was silently held to ~10.
+  // A curated map now follows its country list, not the default cap.
+  ok('a curated map is NOT capped by the default maxPins (10)', select({ countries: CODES, maxPins: 10 }, SET).length > 10);
+  ok('un-curated map still respects maxPins', select({ countries: [], maxPins: 4 }, SET).length === 4);
 }
 
 console.log('Wiring');
 {
   ok('curation is detected from cfg.countries', /const curated = Array\.isArray\(this\.cfg\.countries\) && this\.cfg\.countries\.length > 0;/.test(SRC));
   ok('curated maps use a lighter de-overlap (5°/7°)', /const MIN_LAT = curated \? 5 : 9;/.test(SRC) && /const MIN_LNG = curated \? 7 : 13;/.test(SRC));
-  ok('curated cap fits all chosen countries, default stays 12',
-    /const max = this\.cfg\.maxPins \|\| \(curated \? Math\.max\(countries\.length, 12\) : 12\);/.test(SRC));
+  ok('curated count follows the data, not the default maxPins (the fixed bug)',
+    /const max = curated \? countries\.length : \(this\.cfg\.maxPins \|\| 12\);/.test(SRC));
   const vm = SRC.match(/VERSION = '(\d+)\.(\d+)\.(\d+)'/);
   ok('widget version >= 3.18.0', vm && (+vm[1] > 3 || (+vm[1] === 3 && +vm[2] >= 18)));
 }
