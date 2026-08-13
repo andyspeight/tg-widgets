@@ -8,17 +8,20 @@
  * both of those external hosts, and the upload silently fails.
  *
  * This route removes every external dependency the browser touches: the browser
- * POSTs the raw image bytes to THIS same-origin endpoint, and the SERVER streams
- * them to Blob with put(). Nothing but our own origin is contacted, so it works
- * through firewalls that block third-party CDNs and storage domains.
+ * sends the image to THIS same-origin endpoint and the SERVER streams it to
+ * Blob. Nothing but our own origin is contacted, so it works through firewalls
+ * that block third-party CDNs and storage domains.
  *
- * Trade-off: a Vercel function request body is capped at 4.5MB, so this path
- * handles photos up to ~4MB. The builder sends larger files down the client
- * route (upload-photo.js) as a fallback, so the 8MB ceiling still holds when the
- * network allows it.
+ * Transport: the image rides as base64 inside a normal JSON body. That uses the
+ * exact body handling every other endpoint here relies on (req.body, parsed) —
+ * NOT a raw request stream. An earlier raw-stream version hung forever on
+ * "Uploading…" because `bodyParser:false` is a Next.js flag these plain Vercel
+ * functions do not honour, so the stream was already consumed and the read never
+ * resolved. base64 inflates by ~33%, and a Vercel request body is capped at
+ * 4.5MB, so this path carries images up to ~3.3MB; the builder sends larger
+ * files down the client route (upload-photo.js) as a fallback.
  *
- * Request:  POST raw image bytes; Content-Type is the image mime; optional
- *           `x-filename` header for a friendly stored name.
+ * Request:  POST { filename, contentType, dataBase64 }
  * Response: { url } — the public Blob URL.
  *
  * Auth: same-origin tg_session cookie, verified by requireAuth. Requires
@@ -28,11 +31,9 @@
 import { requireAuth } from './_lib/auth/middleware.js';
 import { setCors, applyRateLimit, RATE_LIMITS } from './_auth.js';
 
-// The function reads the raw request body itself, so Vercel's JSON/body parser
-// must be off or it would consume the stream before we can.
-export const config = { api: { bodyParser: false } };
-
-const MAX_PHOTO_BYTES = 4.5 * 1024 * 1024; // Vercel request-body ceiling
+// Decoded image ceiling. base64 of this stays comfortably under Vercel's 4.5MB
+// request-body limit, so the browser's JSON post is never rejected upstream.
+const MAX_PHOTO_BYTES = 3.3 * 1024 * 1024;
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
 
 /** True for a mime we accept. Exact match against the allow-list, case-folded. */
@@ -50,25 +51,6 @@ export function sanitiseUploadName(name) {
   return base || 'photo';
 }
 
-/** Read the request stream into a Buffer, rejecting once it exceeds `limit`. */
-function readRawBody(req, limit) {
-  return new Promise((resolve, reject) => {
-    const chunks = [];
-    let size = 0;
-    req.on('data', (chunk) => {
-      size += chunk.length;
-      if (size > limit) {
-        reject(new Error('too large'));
-        try { req.destroy(); } catch { /* noop */ }
-        return;
-      }
-      chunks.push(chunk);
-    });
-    req.on('end', () => resolve(Buffer.concat(chunks)));
-    req.on('error', reject);
-  });
-}
-
 export default async function handler(req, res) {
   setCors(res);
   if (req.method === 'OPTIONS') return res.status(204).end();
@@ -79,37 +61,39 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Storage not configured' });
   }
 
-  // Auth reads the cookie/header only — it never touches the body stream, so it
-  // is safe to run before we read the raw bytes.
   const ctx = await requireAuth(req, res);
   if (!ctx) return; // middleware wrote the 401
 
   const key = (ctx.email || '').toLowerCase().trim() || ctx.userRecordId || ctx.clientRecordId || 'unknown';
   if (!applyRateLimit(res, `uploadphoto:${key}`, RATE_LIMITS.widgetWrite)) return;
 
-  const contentType = String(req.headers['content-type'] || '').toLowerCase().split(';')[0].trim();
+  let body;
+  try {
+    body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+  } catch {
+    return res.status(400).json({ error: 'Invalid request body' });
+  }
+
+  const contentType = String(body.contentType || '').toLowerCase().split(';')[0].trim();
   if (!isAllowedImageType(contentType)) {
     return res.status(400).json({ error: 'Only JPG, PNG, WebP, GIF or AVIF images are allowed' });
   }
 
+  const dataBase64 = typeof body.dataBase64 === 'string' ? body.dataBase64 : '';
+  if (!dataBase64) return res.status(400).json({ error: 'No image data' });
+
   let buf;
   try {
-    buf = await readRawBody(req, MAX_PHOTO_BYTES);
-  } catch (err) {
-    if (err && err.message === 'too large') {
-      return res.status(413).json({ error: 'Image is over 4MB for direct upload' });
-    }
-    console.error('[upload-photo-direct] body read failed:', err && err.message);
-    return res.status(400).json({ error: 'Could not read the image' });
-  }
-  if (!buf || !buf.length) return res.status(400).json({ error: 'Empty upload' });
-
-  let name = 'photo';
-  try {
-    name = sanitiseUploadName(decodeURIComponent(String(req.headers['x-filename'] || 'photo')));
+    buf = Buffer.from(dataBase64, 'base64');
   } catch {
-    name = sanitiseUploadName(String(req.headers['x-filename'] || 'photo'));
+    return res.status(400).json({ error: 'Could not decode the image' });
   }
+  if (!buf.length) return res.status(400).json({ error: 'Empty image' });
+  if (buf.length > MAX_PHOTO_BYTES) {
+    return res.status(413).json({ error: 'Image is too large for direct upload' });
+  }
+
+  const name = sanitiseUploadName(body.filename);
 
   try {
     const { put } = await import('@vercel/blob');
