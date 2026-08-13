@@ -37,6 +37,7 @@
     "test:offers-child-ages": "node test/offers-child-ages-smoke.mjs",
     "test:offers-currency-eur": "node test/offers-currency-eur-smoke.mjs",
     "test:admin-worldmap-rebuild": "node test/admin-worldmap-rebuild-smoke.mjs",
+    "test:worldmap-diverse-cap": "node test/worldmap-diverse-cap-smoke.mjs",
     "test:offers-origin-market": "node test/offers-origin-market-smoke.mjs",
     "test:offers-deeplink-hotel": "node test/offers-deeplink-hotel-smoke.mjs",
     "test:offers-preview-exemption": "node test/offers-preview-exemption-smoke.mjs",

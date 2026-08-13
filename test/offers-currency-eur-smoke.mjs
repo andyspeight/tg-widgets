@@ -124,6 +124,8 @@ const gbpOffer = { adults: 2, formattedPrice: '£400', formattedPPPrice: '£200'
 {
   const capStoredOffers = new Function(
     'const STORE_CAPS = { Packages: 800, Accommodation: 500, Flights: 400 };\n' +
+    extractFn(CRON, 'function geoBucketKey(o)') + '\n' +
+    extractFn(CRON, 'function diverseCheapest(arr, cap, pp)') + '\n' +
     extractFn(CRON, 'function capStoredOffers(offers, factor = 1)') + '\nreturn capStoredOffers;')();
   // Same IE group. EUR 500 → ~£430 equivalent, cheaper than the GBP 450. With a
   // cap of 1 the cheaper (EUR) offer must be the one kept.

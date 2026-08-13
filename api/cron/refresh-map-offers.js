@@ -124,8 +124,61 @@ const hotelResortsKey = (cc) => `map:hotels-resorts:${cc}`;
 // country accumulates. Cheapest-first matches how every consumer sorts.
 const STORE_CAPS = { Packages: 800, Accommodation: 500, Flights: 400 };
 
-/** Cap a merged offer list: within each type|market group keep only the
- *  cheapest STORE_CAPS[type] offers (per person). `factor` scales every
+/** Which place an offer belongs to, for spreading the cap across a country.
+ *  Prefer the named resort/city; fall back to the arrival airport, then a
+ *  coarse ~11km lat/lng cell, then the country. Without this, a country with
+ *  one very cheap city (Las Vegas in the USA) fills its whole cap with that
+ *  city's rooms — sorted cheapest-first — and the pricier rest of the country
+ *  (New York, San Francisco, Miami) is cut before it can pin. */
+function geoBucketKey(o) {
+  if (o.resort) return 'r:' + String(o.resort).trim().toLowerCase();
+  if (o.airport) return 'a:' + o.airport;
+  const la = Number.isFinite(o.resortLat) ? o.resortLat : (Number.isFinite(o.lat) ? o.lat : null);
+  const ln = Number.isFinite(o.resortLng) ? o.resortLng : (Number.isFinite(o.lng) ? o.lng : null);
+  if (la != null && ln != null) return 'g:' + la.toFixed(1) + ',' + ln.toFixed(1);
+  return 'c:' + (o.countryCode || '?');
+}
+
+/** Pick up to `cap` offers from one type|market list, spread across places so a
+ *  single cheap city cannot crowd out the rest of a country. Buckets by place
+ *  (each cheapest-first), then fills the cap by taking the cheapest unused offer
+ *  from every bucket in rotation: round 1 is the cheapest room in each city,
+ *  round 2 the second cheapest, and so on. Cheaper cities still lead overall (a
+ *  partial final round favours them), but every place gets a pin before any
+ *  place gets thirds. The single cheapest offer — the one the country's "from"
+ *  price uses — is always kept (it leads round 1 of the cheapest bucket). */
+function diverseCheapest(arr, cap, pp) {
+  const sortByPrice = (a, b) => pp(a) - pp(b);
+  if (arr.length <= cap) return arr.slice().sort(sortByPrice);
+  const buckets = new Map();
+  for (const o of arr) {
+    const k = geoBucketKey(o);
+    let b = buckets.get(k);
+    if (!b) { b = []; buckets.set(k, b); }
+    b.push(o);
+  }
+  for (const b of buckets.values()) b.sort(sortByPrice);
+  const bucketList = Array.from(buckets.values());
+  const cursor = new Map(bucketList.map(b => [b, 0]));
+  const picked = [];
+  while (picked.length < cap) {
+    const avail = bucketList.filter(b => cursor.get(b) < b.length);
+    if (!avail.length) break;
+    // Cheaper cities first, so the partial final round tops up from them.
+    avail.sort((a, b) => pp(a[cursor.get(a)]) - pp(b[cursor.get(b)]));
+    for (const b of avail) {
+      if (picked.length >= cap) break;
+      picked.push(b[cursor.get(b)]);
+      cursor.set(b, cursor.get(b) + 1);
+    }
+  }
+  picked.sort(sortByPrice);
+  return picked;
+}
+
+/** Cap a merged offer list: within each type|market group keep only
+ *  STORE_CAPS[type] offers, spread across places (diverseCheapest) so coverage
+ *  follows the map, not just the single cheapest city. `factor` scales every
  *  group's cap down proportionally — the oversized-write retry uses it so
  *  degradation stays fair across types and markets. */
 function capStoredOffers(offers, factor = 1) {
@@ -148,8 +201,7 @@ function capStoredOffers(offers, factor = 1) {
   for (const [k, arr] of groups) {
     const type = k.split('|')[0];
     const cap = Math.max(1, Math.ceil((STORE_CAPS[type] || STORE_CAPS.Packages) * factor));
-    arr.sort((a, b) => pp(a) - pp(b));
-    out.push(...arr.slice(0, cap));
+    out.push(...diverseCheapest(arr, cap, pp));
   }
   return out;
 }
