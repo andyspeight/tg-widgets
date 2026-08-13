@@ -1318,6 +1318,51 @@ export default async function handler(req, res) {
       });
     }
 
+    // ── HOTEL DESTINATION PROBE (read-only, TEMPORARY) ───────────────────
+    // Diagnostic for the "US hotels only show Vegas" question. Fires an
+    // Accommodation search for ONE country in several DESTINATION forms
+    // (country code, city name, airport code) and reports how many hotels and
+    // which cities each form returns. It writes NOTHING — never touches Redis,
+    // only reads Travelify through our own proxy — so it is safe against
+    // production. The whole point is to learn, before we build anything, whether
+    // Travelify's hotel search can target a city by NAME (Andy's "location
+    // names") or only by the country/airport codes we already know work.
+    // Triggered from the admin via /api/admin/map-rebuild { diag: { cc, dests, max } }.
+    if (q.hotelprobe === '1' || q.hotelprobe === 'true') {
+      const cc = (q.cc ? String(q.cc) : 'US').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2) || 'US';
+      const row = rows.find(r => ((r.fields || {}).CountryCode || '').trim().toUpperCase() === cc)
+        || { fields: { CountryCode: cc } };
+      const market = MARKETS[0]; // GB / GBP — the cache's base-currency market
+      const acc = { id: 'Accommodation', payloadType: 'Accommodation' };
+      // Candidate destination forms. The default set asks whether US cities
+      // beyond the cheap gateways are reachable by name; override with ?dests=.
+      const DEFAULT_DESTS = ['US', 'New York', 'New York City', 'NYC', 'San Francisco', 'Miami', 'Orlando', 'LAS', 'JFK'];
+      const candidates = (q.dests ? String(q.dests).split(',').map(s => s.trim()).filter(Boolean) : DEFAULT_DESTS).slice(0, 12);
+      const maxOffers = Math.min(Math.max(parseInt(q.max, 10) || 100, 10), 250);
+      const results = await pooled(candidates, async (dest) => {
+        const payload = buildPayload(row, dest, market, acc, null, 'GBP');
+        payload.maxOffers = maxOffers;
+        const raw = await callOffersProxy(payload, 18000, 0); // read-only, no retry
+        if (!raw.ok) {
+          console.log(`[map-cron] hotelprobe ${cc} "${dest}": FAILED ${raw.error || raw.status}`);
+          return { dest, ok: false, error: raw.error || `HTTP ${raw.status}` };
+        }
+        const arr = (raw.data && Array.isArray(raw.data.data)) ? raw.data.data : [];
+        const tally = {};
+        let sampleDestination = null;
+        for (const o of arr) {
+          const d = (o.accommodation && o.accommodation.destination) || {};
+          const name = d.name || '(unnamed)';
+          tally[name] = (tally[name] || 0) + 1;
+          if (!sampleDestination) sampleDestination = d;
+        }
+        const topCities = Object.entries(tally).sort((a, b) => b[1] - a[1]).slice(0, 12).map(([name, n]) => ({ name, n }));
+        console.log(`[map-cron] hotelprobe ${cc} "${dest}": ok offers=${arr.length} cities=[${topCities.map(c => `${c.name} x${c.n}`).join(', ')}]`);
+        return { dest, ok: true, offers: arr.length, distinctCities: Object.keys(tally).length, topCities, sampleDestination };
+      }, 5);
+      return res.status(200).json({ ok: true, hotelprobe: true, country: cc, market: market.id, maxOffers, results });
+    }
+
     if (!configured()) {
       return res.status(500).json({ ok: false, error: 'Redis not configured' });
     }
