@@ -667,6 +667,19 @@ const MUTATIONS = [
   },
   {
     tag: 'breakpoints',
+    check: 'a new heading starts on auto-resize, ready for a phone',
+    /*
+     * The default that makes a new heading mobile-safe without the client knowing to
+     * ask. Drop fluid: true off the heading defaults and a new heading holds one size
+     * on a phone, the exact thing the default exists to prevent.
+     */
+    why: 'Drop the fluid default off a new heading, so it holds one size on a phone until a client finds the toggle.',
+    file: 'lib/content/blocks.ts',
+    from: `    defaults: { html: 'A new heading', level: 'h2', style: 'h3', align: 'left', shadow: 'none', fluid: true },`,
+    to: `    defaults: { html: 'A new heading', level: 'h2', style: 'h3', align: 'left', shadow: 'none' },`,
+  },
+  {
+    tag: 'breakpoints',
     check: 'a block alignment set on Phone centres phone, not desktop',
     /*
      * Alignment per screen rides a data attribute, not a folded scalar. Drop the

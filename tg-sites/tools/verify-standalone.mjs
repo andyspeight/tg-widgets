@@ -7904,6 +7904,22 @@ await check('a block line spacing set on Phone tightens phone, not desktop', asy
 });
 
 /*
+ * Andy, 13 Aug 2026: a client should not have to know to turn auto-resize on for a
+ * hero heading to fit a phone, so a NEW heading starts on it. The block default
+ * carries fluid: true, so the toggle is already ticked the moment a heading is
+ * added. (The clamp caps at the set size, so desktop is unchanged; the check above
+ * proves the shrink, this one proves it is on by default.)
+ */
+await check('a new heading starts on auto-resize, ready for a phone', async () => {
+  await addBlock('Heading');
+  const host = added();
+  if ((await host.count()) !== 1) return `${await host.count()} blocks selected after adding`;
+  const toggle = page.getByRole('checkbox', { name: /Auto-resize/ });
+  if ((await toggle.count()) === 0) return 'the auto-resize toggle was not offered on a new heading';
+  return (await toggle.isChecked()) ? true : 'a new heading did not start on auto-resize';
+});
+
+/*
  * Andy, 11 Aug 2026, bug three: an auto-resize option so text scales with the
  * screen rather than holding one size. A block marked data-fluid swaps its
  * font-size for a clamp keyed on the .tgs-page container (globals.css), so a

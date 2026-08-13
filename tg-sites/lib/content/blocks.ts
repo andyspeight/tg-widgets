@@ -196,7 +196,15 @@ export const BLOCKS: readonly BlockDefinition[] = [
      * schema.ts moves them across on the way in, so nothing here has to carry a
      * fallback and no page needs rewriting in the database.
      */
-    defaults: { html: 'A new heading', level: 'h2', style: 'h3', align: 'left', shadow: 'none' },
+    /*
+     * fluid: true, so a NEW heading auto-resizes with the screen from the off. Andy,
+     * 13 Aug 2026: a client should not have to know to toggle it for a hero heading
+     * to fit a phone. The clamp caps at the set size, so desktop is unchanged and
+     * only smaller screens scale down, and the toggle is still there to switch it
+     * off. Only the block default, so it reaches a heading a client adds, not the
+     * headings already stored in a page.
+     */
+    defaults: { html: 'A new heading', level: 'h2', style: 'h3', align: 'left', shadow: 'none', fluid: true },
     summarise: (props) =>
       firstWords(stripTags(asString(props.html)), 6) || asString(props.text) || 'Heading',
     fields: [

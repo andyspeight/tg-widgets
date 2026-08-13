@@ -909,6 +909,13 @@ describe('factory', () => {
     expect(createBlock('button').props.variant).toBe('primary');
   });
 
+  it('starts a new heading on auto-resize, so it fits a phone without a client toggling it', () => {
+    expect(createBlock('heading').props.fluid).toBe(true);
+    // Only headings: a paragraph wraps and does not need it, so text stays off by
+    // default and the change is scoped to the block that overflows on a phone.
+    expect(createBlock('text').props.fluid).toBeUndefined();
+  });
+
   it('does not share default objects between two blocks', () => {
     const a = createBlock('list');
     const b = createBlock('list');
