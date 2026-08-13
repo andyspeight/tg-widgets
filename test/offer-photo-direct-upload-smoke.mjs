@@ -66,10 +66,13 @@ console.log('sanitiseUploadName keeps a short, path-free name');
 
 console.log('Endpoint wiring');
 {
-  ok('the body parser is disabled so we can read raw bytes', /export const config = \{ api: \{ bodyParser: false \} \};/.test(API));
-  ok('auth is required before the body is read', API.indexOf('requireAuth(req, res)') < API.indexOf('readRawBody(req, MAX_PHOTO_BYTES)'));
-  ok('the request-body size is capped at ~4.5MB', /MAX_PHOTO_BYTES = 4\.5 \* 1024 \* 1024/.test(API) && /readRawBody\(req, MAX_PHOTO_BYTES\)/.test(API));
-  ok('an oversized body returns 413, not a hang', /413/.test(API) && /req\.destroy\(\)/.test(API));
+  ok('uses reliable JSON body parsing, not a raw stream (which hung on Vercel)',
+    /typeof req\.body === 'string' \? JSON\.parse\(req\.body\)/.test(API)
+    && !/bodyParser: false/.test(API) && !/readRawBody/.test(API));
+  ok('the image rides as base64 in the JSON body', /body\.dataBase64/.test(API) && /Buffer\.from\(dataBase64, 'base64'\)/.test(API));
+  ok('auth is required before the body is decoded', API.indexOf('requireAuth(req, res)') < API.indexOf('body.dataBase64'));
+  ok('the decoded size is capped (under Vercel\'s 4.5MB body limit)',
+    /MAX_PHOTO_BYTES = 3\.3 \* 1024 \* 1024/.test(API) && /buf\.length > MAX_PHOTO_BYTES/.test(API) && /413/.test(API));
   ok('content-type is validated against the allow-list', /if \(!isAllowedImageType\(contentType\)\)/.test(API));
   ok('uploads are scoped to the offer-photos/ prefix', /put\('offer-photos\/' \+ name/.test(API));
   ok('a random suffix prevents overwrites', /addRandomSuffix: true/.test(API));
@@ -80,19 +83,25 @@ console.log('Widget wiring');
 {
   ok('config derives the direct endpoint from uploadEndpoint',
     /directUploadEndpoint: c\.directUploadEndpoint[\s\S]*?replace\(\/upload-photo\\b\/, 'upload-photo-direct'\)/.test(WIDGET));
-  ok('the same-origin route is tried first for files up to ~4MB',
-    /DIRECT_MAX = 4 \* 1024 \* 1024/.test(WIDGET) && /file\.size <= DIRECT_MAX/.test(WIDGET) && /this\._uploadDirect\(file\)/.test(WIDGET));
+  ok('the same-origin route is tried first for files up to ~3MB',
+    /DIRECT_MAX = 3 \* 1024 \* 1024/.test(WIDGET) && /usable\.size <= DIRECT_MAX/.test(WIDGET) && /this\._uploadDirect\(usable\)/.test(WIDGET));
   ok('a 401 on the direct route is not retried on the CDN route',
     /if \(this\._uploadAuthFailed\) return '';/.test(WIDGET) && /res\.status === 401.*_uploadAuthFailed = true/.test(WIDGET));
-  ok('the direct upload posts raw bytes same-origin with the cookie',
-    /_uploadDirect\(file\)[\s\S]*?credentials: 'include'[\s\S]*?body: file/.test(WIDGET));
+  ok('the direct upload posts base64 JSON same-origin with the cookie',
+    /_uploadDirect\(file\)[\s\S]*?credentials: 'include'[\s\S]*?dataBase64: dataBase64/.test(WIDGET));
+  ok('the file is read to base64 via FileReader (no external dependency)',
+    /_fileToBase64\(file\)/.test(WIDGET) && /readAsDataURL\(file\)/.test(WIDGET));
+  ok('oversized photos are downscaled so they fit the reliable path',
+    /_shrinkIfLarge\(file\)/.test(WIDGET) && /canvas\.toBlob\(/.test(WIDGET));
+  ok('the downscale falls back to the original on any failure (can only help)',
+    /done\(file\)/.test(WIDGET) && /blob\.size >= file\.size\) \{ done\(file\)/.test(WIDGET));
   ok('large files fall back to the CDN client route (8MB ceiling kept)',
     /_uploadViaClient\(file\)[\s\S]*?getBlobClient\(\)/.test(WIDGET));
   ok('the final error tells the truth (auth vs generic), no false "signed in" guess',
     /_uploadAuthFailed\s*\?\s*'Your session has expired/.test(WIDGET) && !/or your network may be blocking the uploader/.test(WIDGET));
   ok('the auth flag resets at the start of each upload batch', /this\._uploadAuthFailed = false;/.test(WIDGET));
   const vm = WIDGET.match(/VERSION = '(\d+)\.(\d+)\.(\d+)'/);
-  ok('widget version >= 0.3.0', vm && (+vm[1] > 0 || (+vm[1] === 0 && +vm[2] >= 3)));
+  ok('widget version >= 0.3.1', vm && (+vm[1] > 0 || (+vm[1] === 0 && (+vm[2] > 3 || (+vm[2] === 3 && +vm[3] >= 1)))));
 }
 
 console.log('Editor wiring');

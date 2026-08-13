@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.3.0';
+  const VERSION = '0.3.1';
 
   // Resolve the API base off THIS script's origin so a remote-config embed on a
   // customer domain does not fetch the customer's own '/api/...' (404 → blank).
@@ -1171,37 +1171,81 @@
     }
 
     async _uploadOne(file) {
-      // Prefer the same-origin server upload: it contacts nothing but our own
-      // origin, so it works on locked-down agency networks that block the CDN
-      // (esm.sh) or Blob storage the client route needs — the exact failure
-      // Tullys Travel hit (Aug 2026). Files too big for a serverless request
-      // body (~4MB) fall through to the client route, which streams direct to
-      // Blob and carries the 8MB ceiling.
-      const DIRECT_MAX = 4 * 1024 * 1024;
-      if (this.cfg.directUploadEndpoint && file.size <= DIRECT_MAX) {
-        const url = await this._uploadDirect(file);
+      // Big camera/phone photos are downscaled first so they fit the reliable
+      // same-origin path (below), which contacts nothing but our own origin and
+      // so works on locked-down agency networks that block the CDN (esm.sh) or
+      // Blob storage the client route needs — the exact failure Tullys Travel hit
+      // (Aug 2026). The shrink falls back to the original on any error, so it can
+      // only help. Anything still too big for a serverless body falls through to
+      // the client route, which streams direct to Blob and carries the 8MB cap.
+      const usable = await this._shrinkIfLarge(file);
+      const DIRECT_MAX = 3 * 1024 * 1024; // base64 of this stays under Vercel's 4.5MB body cap
+      if (this.cfg.directUploadEndpoint && usable.size <= DIRECT_MAX) {
+        const url = await this._uploadDirect(usable);
         if (url) return url;
         if (this._uploadAuthFailed) return ''; // a 401 won't be fixed by the CDN route
       }
       if (!this.cfg.uploadEndpoint) return '';
-      return this._uploadViaClient(file);
+      return this._uploadViaClient(usable);
     }
 
-    // Same-origin: POST the raw bytes to our own server, which streams them to
-    // Blob. No third-party host is contacted, so a corporate firewall can't
-    // silently block it. 60s abortable cap so a stall can't hang the UI.
+    // Downscale a photo that is too big for the same-origin path to a sane max
+    // dimension and re-encode as WebP (keeps transparency, compresses well). Only
+    // touches oversized files; returns the ORIGINAL on any failure or when the
+    // browser can't do it, so an upload is never blocked by shrinking.
+    _shrinkIfLarge(file) {
+      const SHRINK_OVER = 3 * 1024 * 1024;
+      return new Promise(function (resolve) {
+        try {
+          if (!file || file.size <= SHRINK_OVER || !/^image\//.test(file.type)) { resolve(file); return; }
+          if (typeof document === 'undefined' || !document.createElement || typeof URL === 'undefined' || !URL.createObjectURL) { resolve(file); return; }
+          const url = URL.createObjectURL(file);
+          const img = new Image();
+          const done = function (out) { try { URL.revokeObjectURL(url); } catch (e) { /* noop */ } resolve(out || file); };
+          img.onerror = function () { done(file); };
+          img.onload = function () {
+            try {
+              const MAX = 2000;
+              const w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+              if (!w || !h) { done(file); return; }
+              const scale = Math.min(1, MAX / Math.max(w, h));
+              const cw = Math.max(1, Math.round(w * scale)), ch = Math.max(1, Math.round(h * scale));
+              const canvas = document.createElement('canvas');
+              canvas.width = cw; canvas.height = ch;
+              const ctx = canvas.getContext('2d');
+              if (!ctx) { done(file); return; }
+              ctx.drawImage(img, 0, 0, cw, ch);
+              canvas.toBlob(function (blob) {
+                if (!blob || !blob.size || blob.size >= file.size) { done(file); return; }
+                done(blob);
+              }, 'image/webp', 0.85);
+            } catch (e) { done(file); }
+          };
+          img.src = url;
+        } catch (e) { resolve(file); }
+      });
+    }
+
+    // Same-origin: send the image (base64 in a JSON body) to our own server,
+    // which streams it to Blob. JSON is the body shape every endpoint here parses
+    // reliably — a raw request stream is NOT, and hung forever on these plain
+    // Vercel functions. No third-party host is contacted, so a corporate firewall
+    // can't silently block it. 30s abortable cap so a stall can't hang the UI.
     async _uploadDirect(file) {
       const ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
-      const killer = setTimeout(function () { if (ctrl) { try { ctrl.abort(); } catch (e) { /* noop */ } } }, 60000);
+      const killer = setTimeout(function () { if (ctrl) { try { ctrl.abort(); } catch (e) { /* noop */ } } }, 30000);
       try {
+        const dataBase64 = await this._fileToBase64(file);
+        if (!dataBase64) return '';
         const res = await fetch(this.cfg.directUploadEndpoint, {
           method: 'POST',
-          headers: {
-            'Content-Type': file.type || 'application/octet-stream',
-            'x-filename': encodeURIComponent(safeFileName(file.name)),
-          },
+          headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
-          body: file,
+          body: JSON.stringify({
+            filename: safeFileName(file.name),
+            contentType: file.type || 'application/octet-stream',
+            dataBase64: dataBase64,
+          }),
           signal: ctrl ? ctrl.signal : undefined,
         });
         if (res.status === 401) { this._uploadAuthFailed = true; return ''; }
@@ -1214,6 +1258,23 @@
       } finally {
         clearTimeout(killer);
       }
+    }
+
+    // Read a File into a bare base64 string (no data: prefix). Resolves '' on any
+    // error so the caller falls through cleanly rather than rejecting.
+    _fileToBase64(file) {
+      return new Promise(function (resolve) {
+        try {
+          const fr = new FileReader();
+          fr.onload = function () {
+            const s = String(fr.result || '');
+            const i = s.indexOf(',');
+            resolve(i >= 0 ? s.slice(i + 1) : '');
+          };
+          fr.onerror = function () { resolve(''); };
+          fr.readAsDataURL(file);
+        } catch (e) { resolve(''); }
+      });
     }
 
     // Fallback for large files: Vercel Blob CLIENT upload — loads the SDK from a
