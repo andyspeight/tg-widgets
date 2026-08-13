@@ -631,6 +631,15 @@ export const SectionSchema = z.object({
    */
   parallax: z.boolean().optional(),
   /**
+   * Drift and zoom this section's single background picture slowly on its own, the
+   * documentary trick that gives a still photo life. Off by default and optional, so
+   * no stored section changes shape. Pure CSS in globals.css, behind
+   * prefers-reduced-motion. An alternative to parallax, not a companion: both move the
+   * one background, so the editor keeps the two mutually exclusive and the render only
+   * turns Ken Burns on when parallax is not, and only for a still background picture.
+   */
+  kenBurns: z.boolean().optional(),
+  /**
    * Slide this section up under the section or the header above it, by this many
    * pixels, so the two overlap. The look every travel site opens with is the
    * first case: the hero pulls up under the header so its picture runs behind it,

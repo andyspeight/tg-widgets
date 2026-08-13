@@ -768,6 +768,33 @@
   }
 }
 
+/*
+ * KEN BURNS BACKGROUND (Andy, 13 Aug 2026). A section marked data-ken-burns drifts
+ * and zooms its single background picture slowly on its own, the documentary trick
+ * that gives a still photo life. Unlike the parallax above it is NOT tied to the
+ * scroll: a long time-based animation eases back and forth (alternate) so it never
+ * jumps or resets with a jolt. The picture is always scaled up a little, so the pan
+ * never shows an edge, and the section clips the overspill. Only for a still
+ * background picture, which the render decides, and behind prefers-reduced-motion so
+ * a visitor who wants less motion gets the picture sitting still and full-bleed. The
+ * render never sets this alongside data-parallax, since both move the one picture.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-section[data-ken-burns] { overflow: clip; }
+  .tgs-section[data-ken-burns] .tgs-section__bg {
+    animation: tgs-ken-burns 24s ease-in-out infinite alternate;
+    transform-origin: center;
+  }
+}
+@keyframes tgs-ken-burns {
+  from {
+    transform: scale(1.05);
+  }
+  to {
+    transform: scale(1.16) translate(-2%, -1.5%);
+  }
+}
+
 @container tgs-page (max-width: 1023px) {
   .tgs-row[data-stack='tablet'] { grid-template-columns: 1fr; }
   .tgs-row[data-stack='tablet'][data-reverse='true'] { direction: rtl; }

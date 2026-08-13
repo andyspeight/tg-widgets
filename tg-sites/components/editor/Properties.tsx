@@ -1092,7 +1092,10 @@ function SectionFields({
               type="checkbox"
               checked={section.parallax === true}
               onChange={(event) =>
-                set({ parallax: event.target.checked || undefined }, `sec:${index}:parallax`)
+                set(
+                  event.target.checked ? { parallax: true, kenBurns: undefined } : { parallax: undefined },
+                  `sec:${index}:parallax`,
+                )
               }
             />
             <span>Parallax background</span>
@@ -1101,6 +1104,32 @@ function SectionFields({
             This section&apos;s background picture drifts a little slower than the words as a
             visitor scrolls, for a sense of depth. It needs a still background picture, and it
             eases off for anyone who prefers less motion.
+          </p>
+        </div>
+        {/*
+          Ken Burns is the other background motion, and the two move the one picture,
+          so turning either on clears the other. A slow, self-running drift and zoom
+          rather than the scroll-linked parallax.
+        */}
+        <div className="ed-field">
+          <label className="ed-toggle">
+            <input
+              type="checkbox"
+              checked={section.kenBurns === true}
+              onChange={(event) =>
+                set(
+                  event.target.checked ? { kenBurns: true, parallax: undefined } : { kenBurns: undefined },
+                  `sec:${index}:kenBurns`,
+                )
+              }
+            />
+            <span>Slow zoom (Ken Burns)</span>
+          </label>
+          <p className="ed-help" style={{ marginTop: 6 }}>
+            This section&apos;s background picture drifts and zooms slowly on its own, the way a
+            still photo comes alive in a documentary. It needs a still background picture, works
+            instead of parallax rather than with it, and eases off for anyone who prefers less
+            motion.
           </p>
         </div>
       </Group>

@@ -930,6 +930,32 @@ const MUTATIONS = [
     to: `      animation: none;`,
   },
   {
+    tag: 'kenburns',
+    check: 'Ken Burns drifts a section background in preview, still while editing',
+    /*
+     * The toggle stores the flag but the section never carries data-ken-burns, so the
+     * background sits flat. Alive in the pane, dead on the page, the shape every motion
+     * probe here guards against.
+     */
+    why: 'Never emit data-ken-burns, so the background never drifts.',
+    file: 'components/render/PageRenderer.tsx',
+    from: `section.kenBurns && Boolean(background) && !bgShow && !video && !section.parallax && !editable`,
+    to: `false && Boolean(background) && !bgShow && !video && !section.parallax && !editable`,
+  },
+  {
+    tag: 'kenburns-css',
+    check: 'Ken Burns drifts a section background in preview, still while editing',
+    /*
+     * The attribute is there but the animation is gone, so the background is scaled up
+     * and still. Only a browser test that samples the transform over time catches a
+     * missing time-based animation like this.
+     */
+    why: 'Drop the Ken Burns animation, so the background is scaled up but never moves.',
+    file: 'app/globals.css',
+    from: `    animation: tgs-ken-burns 24s ease-in-out infinite alternate;`,
+    to: `    animation: none;`,
+  },
+  {
     tag: 'link-underline',
     check: 'a card link underline sweeps in under the pointer',
     /*

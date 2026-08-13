@@ -367,6 +367,19 @@ export function SectionRenderer({
         section.parallax && Boolean(background) && !bgShow && !video && !editable ? '' : undefined
       }
       /*
+       * Ken Burns: the same still background picture drifts and zooms slowly on its
+       * own, a time-based animation rather than the scroll-linked parallax. Only one
+       * background motion at a time, so never alongside parallax, and otherwise the
+       * same guards as parallax (a still picture, not the cycling one or a video) and
+       * the same `editable` gate, so the canvas stays still. The motion itself is CSS
+       * in globals.css.
+       */
+      data-ken-burns={
+        section.kenBurns && Boolean(background) && !bgShow && !video && !section.parallax && !editable
+          ? ''
+          : undefined
+      }
+      /*
        * Slide this section up under the one above it. Structural, not decorative,
        * so it is NOT gated on `editable` the way the reveal and the hover are: an
        * overlap you set is part of the layout, and a preview that did not show it

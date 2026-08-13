@@ -1062,9 +1062,73 @@ describe('parallax drifts a sections background picture as the page scrolls', ()
     expect(css).toContain('prefers-reduced-motion: no-preference');
   });
 
-  it('offers a Parallax background toggle on the section', () => {
+  it('offers a Parallax background toggle on the section, clearing Ken Burns when set', () => {
     expect(props).toContain('Parallax background');
-    expect(props).toContain('set({ parallax: event.target.checked || undefined }');
+    // The two background motions are mutually exclusive: turning parallax on clears
+    // Ken Burns, since both move the one background picture.
+    expect(props).toContain('{ parallax: true, kenBurns: undefined }');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Ken Burns: a section's background photo drifts and zooms slowly on its own.
+// Andy, 13 Aug 2026, the fun list. Unlike parallax it is time-based, not tied to
+// the scroll, and the two are mutually exclusive since both move the one picture.
+// ---------------------------------------------------------------------------
+
+describe('Ken Burns drifts and zooms a sections background picture on its own', () => {
+  const render = read('components', 'render', 'PageRenderer.tsx');
+  const css = read('app', 'globals.css');
+  const props = read('components', 'editor', 'Properties.tsx');
+  const schema = read('lib', 'content', 'schema.ts');
+
+  it('carries an optional kenBurns flag, so no stored page changes shape', () => {
+    expect(schema).toContain('kenBurns: z.boolean().optional()');
+    const parsed = parsePage({
+      version: 1,
+      id: 'p',
+      slug: 'ken-burns',
+      title: 'Ken Burns',
+      sections: [
+        {
+          id: 'a',
+          tone: 'dark',
+          width: 'contained',
+          kenBurns: true,
+          backgroundImage: 'https://example.com/a.jpg',
+          rows: [],
+        },
+        { id: 'b', tone: 'light', width: 'contained', rows: [] },
+      ],
+    });
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(parsed.page.sections[0].kenBurns).toBe(true);
+    expect(parsed.page.sections[1].kenBurns).toBeUndefined();
+  });
+
+  it('emits data-ken-burns only for a still background, never alongside parallax, a slideshow, a video or editing', () => {
+    expect(render).toContain('data-ken-burns={');
+    expect(render).toContain(
+      'section.kenBurns && Boolean(background) && !bgShow && !video && !section.parallax && !editable',
+    );
+  });
+
+  it('runs a slow time-based drift and zoom, clipping the overspill, behind reduced motion', () => {
+    // Time-based, NOT a view() timeline, so it plays on its own rather than on scroll.
+    expect(css).toContain('.tgs-section[data-ken-burns] { overflow: clip; }');
+    expect(css).toContain('.tgs-section[data-ken-burns] .tgs-section__bg');
+    expect(css).toContain('animation: tgs-ken-burns');
+    expect(css).toContain('infinite alternate');
+    expect(css).toContain('@keyframes tgs-ken-burns');
+    expect(css).toContain('prefers-reduced-motion: no-preference');
+    // A pure scroll timeline would be the wrong mechanism for a self-running drift.
+    expect(css).toMatch(/@keyframes tgs-ken-burns[\s\S]*?scale\(1\.16\)/);
+  });
+
+  it('offers a Ken Burns toggle on the section, clearing parallax when set', () => {
+    expect(props).toContain('Slow zoom (Ken Burns)');
+    expect(props).toContain('{ kenBurns: true, parallax: undefined }');
   });
 });
 

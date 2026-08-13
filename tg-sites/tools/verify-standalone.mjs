@@ -8930,6 +8930,89 @@ await check('a parallax section grows and drifts its background on the page', as
 });
 
 /*
+ * Ken Burns (Andy, 13 Aug 2026, the fun list). A section marked data-ken-burns drifts
+ * and zooms its still background slowly on its own, a time-based animation rather than
+ * the scroll-linked parallax. This drops one in, checks it is STILL while editing (no
+ * attribute on the canvas), then previews it and proves the background carries the
+ * animation AND that its transform actually changes over time, since an animation-name
+ * alone once passed while nothing moved (the lesson verify-motion.mjs exists for).
+ */
+await check('Ken Burns drifts a section background in preview, still while editing', async () => {
+  await closeAnyDialog();
+  await page.evaluate(() =>
+    window.__TG_SET_PAGE__({
+      id: 'kb',
+      slug: 'ken-burns',
+      title: 'Ken Burns',
+      version: 1,
+      sections: [
+        {
+          id: 's',
+          width: 'contained',
+          tone: 'dark',
+          kenBurns: true,
+          backgroundImage: 'https://example.com/hero.jpg',
+          minHeight: 400,
+          rows: [
+            {
+              id: 'r',
+              gap: 16,
+              columns: [
+                {
+                  id: 'c',
+                  width: 100,
+                  blocks: [{ id: 'h', type: 'heading', props: { level: 2, style: 'h2', html: 'Alive' } }],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }),
+  );
+  await page.waitForTimeout(400);
+
+  // While editing: no data-ken-burns, the background sits still on the canvas.
+  const editing = await page.evaluate(() =>
+    Boolean(document.querySelector('.ed-canvas-frame .tgs-section[data-ken-burns]')),
+  );
+  if (editing) return 'the background drifts while editing; it should be still on the canvas';
+
+  await page.getByRole('button', { name: 'Preview', exact: true }).click();
+  await page.waitForTimeout(300);
+
+  const sample = () =>
+    page.evaluate(() => {
+      const section = document.querySelector('.tgs-section[data-ken-burns]');
+      if (!section) return { present: false };
+      const bg = section.querySelector('.tgs-section__bg');
+      return {
+        present: true,
+        anim: bg ? getComputedStyle(bg).animationName : null,
+        t: bg ? getComputedStyle(bg).transform : null,
+      };
+    });
+
+  const a = await sample();
+  await page.waitForTimeout(800);
+  const b = await sample();
+
+  const exit = page.getByRole('button', { name: 'Exit preview', exact: true });
+  if (await exit.count()) {
+    await exit.click();
+    await page.waitForTimeout(200);
+  }
+  await page.evaluate(() => window.__TG_SET_PAGE__(null));
+  await page.waitForTimeout(200);
+  await showPanels();
+
+  if (!a.present) return 'the section did not carry data-ken-burns in preview';
+  if (a.anim !== 'tgs-ken-burns') return `the Ken Burns animation was not applied: ${a.anim}`;
+  if (a.t === b.t) return 'the Ken Burns transform did not change over time, so nothing moved';
+  return true;
+});
+
+/*
  * Card link underline (Andy, 11 Aug 2026). A card's link underlines on hover, and now
  * the line sweeps in from the left rather than snapping on whole, drawn as a gradient
  * so its width can animate. Held behind reduced motion. This previews a card with a
