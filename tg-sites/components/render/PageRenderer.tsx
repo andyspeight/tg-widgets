@@ -366,11 +366,21 @@ export function SectionRenderer({
       data-parallax={
         section.parallax && Boolean(background) && !bgShow && !video && !editable ? '' : undefined
       }
+      /*
+       * Slide this section up under the one above it. Structural, not decorative,
+       * so it is NOT gated on `editable` the way the reveal and the hover are: an
+       * overlap you set is part of the layout, and a preview that did not show it
+       * would be lying about where the section sits. The header case is the one
+       * exception the canvas cannot show, since the editor draws the header as its
+       * own band rather than over the page; it shows on the published site.
+       */
+      data-pull-up={section.pullUp ? '' : undefined}
       style={{
         ...boxStyle(section.box),
         '--tgs-pad': `${section.paddingY}px`,
         '--tgs-min-h': `${section.minHeight}px`,
         '--tgs-scrim': section.overlay,
+        ...(section.pullUp ? { '--tgs-pull-up': `${section.pullUp}px` } : {}),
         // Only when a colour was chosen. Left unset, the scrim CSS falls back to
         // its own navy default, so a section that never picked one is untouched.
         ...(safeColour(section.overlayColour)

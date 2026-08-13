@@ -1107,8 +1107,8 @@ describe('an entry on a live site', () => {
 
   it('renders the header and footer round an entry as well as a page', () => {
     const body = route.slice(route.indexOf('export default async function SitePage'));
-    expect(body).toContain('<RegionRenderer region={found.regions.header}');
-    expect(body).toContain('<RegionRenderer region={found.regions.footer}');
+    expect(body).toContain('region={found.regions.header}');
+    expect(body).toContain('region={found.regions.footer}');
   });
 });
 

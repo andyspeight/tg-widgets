@@ -152,6 +152,8 @@ export const MAX_PADDING = 240;
 export const MAX_RADIUS = 64;
 export const MAX_BORDER = 16;
 export const MAX_MIN_HEIGHT = 1200;
+/** How far a section may be pulled up under the one above it. A tall header's worth. */
+export const MAX_PULL_UP = 400;
 
 /** A length in pixels, clamped and rounded. Never throws, never NaN. */
 export function px(value: unknown, max: number, fallback = 0): number {
@@ -571,6 +573,19 @@ export const SectionSchema = z.object({
    * background picture, never the cycling one or a video.
    */
   parallax: z.boolean().optional(),
+  /**
+   * Slide this section up under the section or the header above it, by this many
+   * pixels, so the two overlap. The look every travel site opens with is the
+   * first case: the hero pulls up under the header so its picture runs behind it,
+   * and it is just as good for a band of cards straddling the seam between two
+   * sections. Off by default and absent when zero, so no stored section changes
+   * shape. Structural rather than decorative, so unlike the reveal it shows on the
+   * canvas too. Clamped to a tall header's worth. See globals.css.
+   */
+  pullUp: z.unknown().transform((v) => {
+    const n = px(v, MAX_PULL_UP);
+    return n > 0 ? n : undefined;
+  }).optional(),
   /** The same shape a column has. See BoxSchema. */
   box: BoxSchema.default(EMPTY_BOX),
   /** Media id or absolute URL. Rendered behind the content with a scrim. */

@@ -1013,6 +1013,19 @@ const MUTATIONS = [
                 value={settings.toneOfVoice}`,
     to: `                value={settings.toneOfVoice}`,
   },
+
+  // --- section overlap ----------------------------------------------------
+
+  {
+    tag: 'overlap',
+    check: 'a section pulled up tucks under the one above it on the canvas',
+    why: 'Drop the negative margin, so a pulled-up section sits flush instead of climbing under the one above.',
+    file: 'app/globals.css',
+    from: `.tgs-section[data-pull-up] {
+  margin-top: calc(-1 * var(--tgs-pull-up, 0px));`,
+    to: `.tgs-section[data-pull-up] {
+  margin-top: 0;`,
+  },
 ];
 
 /*

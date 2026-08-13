@@ -3044,6 +3044,40 @@
 .tgs-region[data-overlay='true'] .tgs-section { background: transparent; }
 
 /*
+ * OVERLAP: slide a section up under the section above it (Andy, 12 Aug 2026).
+ *
+ * The look every travel site opens with, the hero running up behind the header,
+ * and just as good for a band of cards straddling the seam between two sections.
+ * The section pulls up by the amount it is given; the section directly above it
+ * is lifted onto its own layer so it draws OVER the overlap, so the pulled-up one
+ * tucks UNDER it, which is the way round it was asked for. `:has(+ ...)` lifts the
+ * section above without it needing to know anything about the one below.
+ */
+.tgs-section[data-pull-up] {
+  margin-top: calc(-1 * var(--tgs-pull-up, 0px));
+  position: relative;
+}
+.tgs-section:has(+ .tgs-section[data-pull-up]) {
+  position: relative;
+  z-index: 1;
+}
+
+/*
+ * The header is the first case, and the hardest: the header, the page and the
+ * footer are siblings with no wrapper, so there is nothing to hang a `:has()` on
+ * to reach across from a pulled-up first section to the header above it. So the
+ * header carries its own layer, above the page, and a first section that pulls up
+ * tucks under it. The see-through that lets the picture show through is set in the
+ * render, on the header, when the page's first section pulls up: data-overlapped.
+ */
+.tgs-region[data-region='header'] { z-index: 2; }
+.tgs-region[data-region='header'][data-overlapped='true'] {
+  z-index: 3;
+  background: transparent;
+}
+.tgs-region[data-region='header'][data-overlapped='true'] .tgs-section { background: transparent; }
+
+/*
  * A footer is the end of the page, so it gets a hairline above it. Otherwise a
  * white footer under a white page reads as the page having simply stopped.
  *

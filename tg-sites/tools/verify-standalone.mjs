@@ -6343,6 +6343,57 @@ await page.evaluate(() => window.__TG_SET_REGION__(null));
 await page.waitForTimeout(600);
 await showPanels();
 
+/*
+ * SECTION OVERLAP (Andy, 12 Aug 2026). A section can be pulled up so it tucks
+ * under the one above it, for the common design where the hero picture sits
+ * behind the header. The pull is a negative top margin driven by --tgs-pull-up,
+ * and it shows on the canvas as well as on the page, so the editor previews the
+ * overlap truthfully. This drops two sections in, the lower one pulled up 100px,
+ * and proves the lower one really climbs under the upper one on the canvas: the
+ * marker attribute is there, the margin went negative, and the boxes overlap.
+ */
+await check('a section pulled up tucks under the one above it on the canvas', async () => {
+  await closeAnyDialog();
+  await page.evaluate(() =>
+    window.__TG_SET_PAGE__({
+      id: 'ov',
+      slug: 'overlap',
+      title: 'Overlap',
+      version: 1,
+      sections: [
+        { id: 'top', width: 'contained', tone: 'light', minHeight: 300, rows: [{ id: 'r0', gap: 16, columns: [{ id: 'c0', width: 100, blocks: [{ id: 'b0', type: 'heading', props: { level: 2, style: 'h2', html: 'Picture' } }] }] }] },
+        { id: 'low', width: 'contained', tone: 'light', pullUp: 100, minHeight: 300, rows: [{ id: 'r1', gap: 16, columns: [{ id: 'c1', width: 100, blocks: [{ id: 'b1', type: 'heading', props: { level: 2, style: 'h2', html: 'Sits under it' } }] }] }] },
+      ],
+    }),
+  );
+  await page.waitForTimeout(500);
+  await showPanels();
+
+  const geom = await page.evaluate(() => {
+    const secs = [...document.querySelectorAll('.ed-canvas-frame .tgs-section')];
+    if (secs.length < 2) return { count: secs.length };
+    const low = secs[1];
+    const a = secs[0].getBoundingClientRect();
+    const b = low.getBoundingClientRect();
+    return {
+      count: secs.length,
+      overlap: a.bottom - b.top,
+      marked: low.hasAttribute('data-pull-up'),
+      marginTop: getComputedStyle(low).marginTop,
+    };
+  });
+
+  await page.evaluate(() => window.__TG_SET_PAGE__(null));
+  await page.waitForTimeout(200);
+  await showPanels();
+
+  if (geom.count < 2) return `expected two sections on the canvas, saw ${geom.count}`;
+  if (!geom.marked) return 'the pulled-up section is not marked data-pull-up on the canvas';
+  if (!/^-/.test(geom.marginTop)) return `the pull-up did not become a negative margin: ${geom.marginTop}`;
+  if (geom.overlap < 80) return `the lower section did not climb under the upper one: overlap ${Math.round(geom.overlap)}px`;
+  return true;
+});
+
 
 // ---------------------------------------------------------------------------
 // Social links, Steps, and shaped section edges

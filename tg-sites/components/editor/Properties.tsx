@@ -27,6 +27,7 @@ import {
   MAX_BORDER,
   MAX_GAP,
   MAX_MIN_HEIGHT,
+  MAX_PULL_UP,
   MAX_RADIUS,
   MIN_COLUMN_WIDTH,
   normaliseSectionPadding,
@@ -943,6 +944,15 @@ function SectionFields({
         step={10}
         hint="A floor, not a fixed height. A section with more content in it still grows."
         onChange={(minHeight) => set({ minHeight }, `sec:${index}:minh`)}
+      />
+
+      <Measure
+        label="Overlap the section above"
+        value={section.pullUp ?? 0}
+        max={MAX_PULL_UP}
+        step={4}
+        hint="Slide this section up so it tucks under the one above it. The first section on a page slides up under the header, so a hero picture runs behind the logo and the menu, and the header goes see-through to let it show."
+        onChange={(value) => set({ pullUp: value > 0 ? value : undefined }, `sec:${index}:pullup`)}
       />
 
       </Group>

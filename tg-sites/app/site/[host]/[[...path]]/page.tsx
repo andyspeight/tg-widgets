@@ -334,7 +334,18 @@ export default async function SitePage({ params }: Params) {
         Each renders nothing at all when the client has never published one, so
         a site without a footer has no empty `<footer>` claiming a landmark.
       */}
-      <RegionRenderer region={found.regions.header} theme={theme} />
+      <RegionRenderer
+        region={found.regions.header}
+        theme={theme}
+        /*
+          The header goes see-through when the page opens with a section pulled up
+          under it, so the picture runs behind the logo and the menu. Decided here
+          because only this component can see both: the header and the page are
+          siblings, so no rule on one can reach the other. An entry has no sections
+          of its own to pull up, so it is a page-only question.
+        */
+        overlapped={Boolean(found.page && (found.page.content.sections[0]?.pullUp ?? 0) > 0)}
+      />
 
       {/*
         THE TRAIL, AND THE REASON IT IS HERE RATHER THAN A BLOCK A CLIENT ADDS.

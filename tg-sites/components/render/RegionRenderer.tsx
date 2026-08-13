@@ -34,10 +34,18 @@ import { SectionRenderer } from './PageRenderer';
 export function RegionRenderer({
   region,
   theme,
+  overlapped,
 }: {
   region: Region | null;
   /** The tenant's theme as custom properties, as PageRenderer takes it. */
   theme?: CSSProperties;
+  /**
+   * The page's first section pulls up under this header, so the header goes
+   * see-through and lets the picture show through. Decided by the caller, since
+   * only it can see both the header and the page: the two are siblings with no
+   * wrapper, so no CSS `:has()` can reach from one to the other. Header only.
+   */
+  overlapped?: boolean;
 }): ReactElement | null {
   if (!region || region.sections.length === 0) return null;
 
@@ -56,6 +64,7 @@ export function RegionRenderer({
        */
       data-sticky={region.sticky ? 'true' : undefined}
       data-overlay={region.overlay ? 'true' : undefined}
+      data-overlapped={overlapped && region.region === 'header' ? 'true' : undefined}
     >
       {region.sections.map((section, index) => (
         <Fragment key={section.id}>

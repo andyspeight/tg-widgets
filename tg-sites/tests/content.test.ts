@@ -27,6 +27,7 @@ import {
   LEGACY_GAP,
   MAX_GAP,
   MAX_PADDING,
+  MAX_PULL_UP,
   normaliseGap,
   px,
   safeColour,
@@ -412,6 +413,30 @@ describe('parsePage', () => {
       const types = result.page.sections[0].rows[0].columns[0].blocks.map((b) => b.type);
       expect(types).toContain('something-from-the-future');
     }
+  });
+
+  /*
+   * The section overlap: a real amount is kept and clamped, and anything at or
+   * below zero is dropped so a section that never used it is byte-for-byte what
+   * it was before the field existed.
+   */
+  it('takes a section overlap, clamps it, and drops a zero', () => {
+    const base = JSON.parse(JSON.stringify(SEED_PAGE));
+    const pullUp = (value: unknown): unknown => {
+      const page = JSON.parse(JSON.stringify(base));
+      page.sections[0].pullUp = value;
+      const result = parsePage(page);
+      expect(result.ok).toBe(true);
+      return result.ok ? result.page.sections[0].pullUp : 'parse failed';
+    };
+
+    expect(pullUp(80)).toBe(80);
+    expect(pullUp(10_000)).toBe(MAX_PULL_UP);
+    expect(pullUp(-40)).toBeUndefined();
+    expect(pullUp(0)).toBeUndefined();
+
+    const clean = parsePage(base);
+    expect(clean.ok && clean.page.sections[0].pullUp).toBeUndefined();
   });
 });
 

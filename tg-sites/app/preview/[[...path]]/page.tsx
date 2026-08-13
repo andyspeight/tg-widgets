@@ -188,7 +188,13 @@ export default async function PublishedPage({ params }: Params) {
           carrying the theme itself. See the note on the public route: a wrapper
           would put an overflow ancestor between a sticky header and the
           document, which is what stops sticky sticking. */}
-      <RegionRenderer region={found.regions.header} theme={theme} />
+      <RegionRenderer
+        region={found.regions.header}
+        theme={theme}
+        // See-through when the page opens with a section pulled up under it, so
+        // the preview shows the picture behind the header the way the site will.
+        overlapped={(found.page.content.sections[0]?.pullUp ?? 0) > 0}
+      />
 
       <PageRenderer page={found.page.content} theme={theme} />
 
