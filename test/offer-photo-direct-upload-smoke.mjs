@@ -77,6 +77,9 @@ console.log('Endpoint wiring');
   ok('uploads are scoped to the offer-photos/ prefix', /put\('offer-photos\/' \+ name/.test(API));
   ok('a random suffix prevents overwrites', /addRandomSuffix: true/.test(API));
   ok('storage errors are handled, not thrown', /put failed/.test(API) && /502/.test(API));
+  ok('writes to the PUBLIC store (the private default rejects public offer photos)',
+    /const blobToken = process\.env\.TG_Blob_READ_WRITE_TOKEN \|\| process\.env\.BLOB_READ_WRITE_TOKEN;/.test(API)
+    && /token: blobToken/.test(API));
 }
 
 console.log('Widget wiring');

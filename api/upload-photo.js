@@ -36,8 +36,12 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    console.error('[upload-photo] BLOB_READ_WRITE_TOKEN not set');
+  // Offer photos are PUBLIC. The default BLOB_READ_WRITE_TOKEN is a PRIVATE store
+  // that rejects access:'public' writes, so mint the client token against the
+  // dedicated public store (same token the logo uploads use) when present.
+  const blobToken = process.env.TG_Blob_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
+  if (!blobToken) {
+    console.error('[upload-photo] No Blob read-write token set');
     return res.status(500).json({ error: 'Storage not configured' });
   }
 
@@ -64,6 +68,7 @@ export default async function handler(req, res) {
     const jsonResponse = await handleUpload({
       body,
       request: req,
+      token: blobToken, // mint the client token against the public store
       onBeforeGenerateToken: async (pathname) => {
         // Authorise: images only, under the offer-photos/ prefix, within the cap.
         // These are public images (shown on offer cards and pages), uploads are
