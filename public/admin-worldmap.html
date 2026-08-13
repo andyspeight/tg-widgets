@@ -141,6 +141,9 @@
     text-transform: uppercase; letter-spacing: .05em;
   }
   .breakdown-empty { color: var(--muted); font-size: 13px; padding: 4px 0; }
+  .resort-spread { margin: 2px 0 12px; font-size: 12px; color: var(--muted); line-height: 2.1; }
+  .rs-chip { display: inline-block; background: #EEF6F9; border: 1px solid var(--border); border-radius: 999px; padding: 1px 9px; margin: 0 5px 5px 0; color: var(--text); white-space: nowrap; }
+  .rs-chip b { color: #0891B2; font-weight: 700; }
   .breakdown table { background: transparent; }
   .breakdown thead th {
     background: transparent; padding: 6px 10px; font-size: 10px;
@@ -1221,8 +1224,15 @@
     const scopeNote = (d.appliedType || (d.appliedOrigins && d.appliedOrigins.length))
       ? ` (${d.count.toLocaleString('en-GB')} of ${(d.totalStored || d.count).toLocaleString('en-GB')} stored)`
       : '';
+    // Per-city spread over the WHOLE filtered set — the cheapest-first list below
+    // fills with one cheap city (e.g. Las Vegas), so this is how you actually see
+    // that New York, Orlando and the rest are stored too.
+    const resortSpread = (Array.isArray(d.resortBreakdown) && d.resortBreakdown.length)
+      ? `<div class="resort-spread"><b>${d.resortBreakdown.length}${d.resortBreakdown.length >= 80 ? '+' : ''}</b> ${d.resortBreakdown.length === 1 ? 'city / resort' : 'cities / resorts'} in this cache: ${d.resortBreakdown.map(r => `<span class="rs-chip">${esc(r.resort)} <b>${r.count.toLocaleString('en-GB')}</b></span>`).join('')}</div>`
+      : '';
     host.innerHTML = `
       <h4>Cached offers${typeNote}${filterNote} · showing ${d.offers.length.toLocaleString('en-GB')} of ${d.count.toLocaleString('en-GB')}, cheapest first${scopeNote} · refreshed ${timeAgo(d.refreshedAt)}</h4>
+      ${resortSpread}
       <table style="width:100%; border-collapse:collapse;">
         <thead><tr>
           <th style="text-align:left">Hotel</th><th style="text-align:left">Type</th><th style="text-align:left">Resort</th>

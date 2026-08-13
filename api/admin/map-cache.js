@@ -362,6 +362,22 @@ export default async function handler(req, res) {
       else if (kindParam) pool = pool.filter((o) => o && (o.type || 'Packages') === 'Packages' && packageKind(o) === kindParam);
       if (originSet) pool = pool.filter((o) => o && originSet.has(String(o.origin || '').toUpperCase()));
       const sorted = pool.slice().sort(byCheapest);
+      // Per-resort (city) spread over the WHOLE filtered pool, so the admin can
+      // see coverage at a glance. A cheapest-first page otherwise fills up with
+      // one cheap city (Las Vegas in the USA) and hides the dozens of others that
+      // are actually stored, making a well-spread cache look one-city deep.
+      const byResort = new Map();
+      for (const o of pool) {
+        const r = (o && o.resort) ? String(o.resort) : '—';
+        const e = byResort.get(r) || { resort: r, count: 0, fromPP: null };
+        e.count += 1;
+        const pp = Number.isFinite(o.pricePP) ? o.pricePP : (Number.isFinite(o.price) ? o.price : null);
+        if (pp != null && (e.fromPP == null || pp < e.fromPP)) e.fromPP = pp;
+        byResort.set(r, e);
+      }
+      const resortBreakdown = Array.from(byResort.values())
+        .sort((a, b) => b.count - a.count || (a.fromPP || Infinity) - (b.fromPP || Infinity))
+        .slice(0, 80);
       return res.status(200).json({
         ok: true,
         country: cc,
@@ -373,6 +389,7 @@ export default async function handler(req, res) {
         count: sorted.length,
         offset,
         limit,
+        resortBreakdown,
         offers: sorted.slice(offset, offset + limit),
       });
     }
