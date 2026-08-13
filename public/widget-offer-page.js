@@ -29,7 +29,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.4.1';
+  const VERSION = '0.4.2';
 
   // Resolve the API base off THIS script's origin. The widget is hosted on
   // widgets.travelify.io and embedded on customer sites, so a relative
@@ -950,7 +950,7 @@
         save: money(sym, save), savePct: savePct,
         basis: this._f('basis'),
         deposit: money(sym, this._f('deposit')),
-        badge: this._f('badge'), badgeAmount: this._f('badgeAmount'),
+        badge: this._f('badge'), badgeAmount: this._f('badgeAmount'), badgeText: this._f('badgeText'),
         urgency: this._f('urgency'),
         bookby: this._f('bookby'),
         avail: this._f('avail'),
@@ -972,6 +972,7 @@
       const glass = onLight ? 'glass light' : 'glass';
       const out = [];
       if (d.save) out.push('<span class="tgop-badge save">' + esc(this.t('save')) + ' ' + esc(d.save) + (d.savePct ? ' (' + d.savePct + '%)' : '') + '</span>');
+      else if (d.badge === 'Custom text') { if (d.badgeText) out.push('<span class="tgop-badge save">' + esc(d.badgeText) + '</span>'); }
       else if (d.badge && d.badge !== 'No badge') out.push('<span class="tgop-badge save">' + esc(d.badge) + '</span>');
       if (d.atol) out.push('<span class="tgop-badge ' + glass + '">' + I.shield + ' ATOL protected</span>');
       else if (d.abta) out.push('<span class="tgop-badge ' + glass + '">' + I.shield + ' ABTA member</span>');
