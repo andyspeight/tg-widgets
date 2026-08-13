@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.3.1';
+  const VERSION = '0.3.2';
 
   // Resolve the API base off THIS script's origin so a remote-config embed on a
   // customer domain does not fetch the customer's own '/api/...' (404 → blank).
@@ -118,8 +118,9 @@
   const BADGES = ['Save', 'Last minute', 'Exclusive', 'Best seller', 'Selling fast', 'Free child place', 'No badge'];
   const PROTECTIONS = ['ATOL protected', 'ABTA member', 'Both', 'Neither'];
   const DEFAULT_INCLUDES = [
-    'Return flights', 'Airport transfers', '23kg luggage', 'All meals & drinks',
-    'ABTA / ATOL protection', 'Rep service', 'Kids stay free', 'Free cancellation'
+    'Return flights', 'Airport transfers', '23kg luggage', '20kg baggage',
+    'All meals & drinks', 'Full board', 'ABTA / ATOL protection', 'Rep service',
+    'Kids stay free', 'Free cancellation', '7 night cruise'
   ];
   const DEFAULT_TAGS = [
     'Family friendly', 'Adults only', 'Beachfront', 'Honeymoon', 'Last minute',
