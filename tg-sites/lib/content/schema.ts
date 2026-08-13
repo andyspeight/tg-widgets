@@ -255,6 +255,19 @@ export const VerticalAlign = z.enum(['top', 'centre', 'bottom']);
 export const TextAlign = z.enum(['left', 'centre', 'right']);
 
 /**
+ * Any input, coerced to a legal block alignment, or undefined to inherit.
+ *
+ * The same three values TextAlign holds, validated the forgiving way a per-screen
+ * override is: an unknown value drops to undefined rather than throwing, so a
+ * screen that inherits reads as no override at all. Left, centre and right, spelt
+ * the product's way (centre, not center), which is what the renderer's data-align
+ * matches on.
+ */
+export function normaliseAlign(value: unknown): 'left' | 'centre' | 'right' | undefined {
+  return value === 'left' || value === 'centre' || value === 'right' ? value : undefined;
+}
+
+/**
  * Where a row's columns collapse to a single stacked column.
  *
  * There is deliberately no 'never'. See the header note: a row that refuses to
@@ -308,14 +321,15 @@ export const STACK_BREAKPOINTS: Record<StackBelow, number> = {
  * that means nothing for the element it sits on (a section has no fontSize, a
  * block no paddingY) simply never appears there. The set of KNOWN properties
  * grows as per-breakpoint controls are added. Today: paddingY, a section's
- * vertical spacing, and fontSize and lineHeight, a block's text size and line
- * spacing.
+ * vertical spacing, and fontSize, lineHeight and align, a block's text size, line
+ * spacing and alignment.
  */
 const OverridesSchema = z
   .object({
     paddingY: z.unknown().transform(normaliseSectionPadding).optional(),
     fontSize: z.unknown().transform(normaliseTextSize).optional(),
     lineHeight: z.unknown().transform(normaliseLineHeight).optional(),
+    align: z.unknown().transform(normaliseAlign).optional(),
   })
   .passthrough();
 
@@ -342,7 +356,8 @@ export const BlockSchema = z.object({
   /**
    * Per-screen overrides of the block's own style, a sibling of box the same way
    * a section's is. Today: fontSize and lineHeight, the block's text size and
-   * line spacing at tablet and phone. See ResponsiveSchema.
+   * line spacing, and align, its alignment, at tablet and phone. See
+   * ResponsiveSchema.
    */
   responsive: ResponsiveSchema.optional(),
   /*

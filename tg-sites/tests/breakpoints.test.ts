@@ -342,6 +342,152 @@ describe('a block-level line spacing survives the save path', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Alignment per screen, on the same engine.
+//
+// Unlike spacing and size, alignment is not a scalar folded through one custom
+// property: it is an enum that drives three things at once, the block's own
+// text-align, a max-width paragraph's margin, and a button row's justify. So it
+// cannot ride the --tgs-*-r chain. The block carries the override screen as a data
+// attribute (data-align-tablet / data-align-phone) and container queries placed
+// AFTER the base rules re-state all three, source order winning at equal
+// specificity. The editor gives a text or heading block one tier-aware Alignment
+// control in place of the registry's base-only field.
+// ---------------------------------------------------------------------------
+
+describe('the alignment validator holds a value to the three legal alignments', () => {
+  it('accepts left, centre and right, and drops anything else to undefined', async () => {
+    const { normaliseAlign } = await import('../lib/content/schema');
+    expect(normaliseAlign('left')).toBe('left');
+    expect(normaliseAlign('centre')).toBe('centre');
+    expect(normaliseAlign('right')).toBe('right');
+    // American spelling, a stray value, and non-strings all inherit rather than
+    // rendering a broken attribute.
+    expect(normaliseAlign('center')).toBeUndefined();
+    expect(normaliseAlign('middle')).toBeUndefined();
+    expect(normaliseAlign(2)).toBeUndefined();
+    expect(normaliseAlign(undefined)).toBeUndefined();
+  });
+});
+
+describe('a block carries per-screen alignment, additively', () => {
+  const schema = read('lib', 'content', 'schema.ts');
+
+  it('adds align to the shared overrides, validated as a legal alignment', () => {
+    expect(schema).toMatch(/align:\s*z\.unknown\(\)\.transform\(normaliseAlign\)\.optional\(\)/);
+  });
+});
+
+describe('the renderer emits a block its per-screen alignment as data attributes', () => {
+  const render = read('components', 'render', 'PageRenderer.tsx');
+
+  it('carries the tablet and phone override screen as data-align-tablet / -phone', () => {
+    expect(render).toContain('data-align-tablet={');
+    expect(render).toContain('block.responsive?.tablet?.align');
+    expect(render).toContain('data-align-phone={');
+    expect(render).toContain('block.responsive?.phone?.align');
+  });
+
+  it('keeps the desktop base as the plain data-align, unchanged', () => {
+    expect(render).toContain(
+      "data-align={typeof block.props?.align === 'string' ? block.props.align : undefined}",
+    );
+  });
+});
+
+describe('container queries re-state the alignment at the width each screen owns', () => {
+  const css = read('app', 'globals.css');
+
+  it('leaves the base .tgs-block[data-align] rules untouched, so an ordinary block is unchanged', () => {
+    expect(css).toContain(".tgs-block[data-align='centre'] { text-align: center; }");
+    expect(css).toContain(".tgs-block[data-align='centre'] .tgs-text { margin-inline: auto; }");
+    expect(css).toContain(".tgs-block[data-align='centre'] .tgs-buttons { justify-content: center; }");
+  });
+
+  it('re-states all three of an override, left included, so an override to left undoes the base', () => {
+    for (const screen of ['tablet', 'phone']) {
+      expect(css).toContain(`.tgs-block[data-align-${screen}='left']   { text-align: left; }`);
+      expect(css).toContain(`.tgs-block[data-align-${screen}='centre'] { text-align: center; }`);
+      expect(css).toContain(`.tgs-block[data-align-${screen}='right']  { text-align: right; }`);
+      expect(css).toContain(`.tgs-block[data-align-${screen}='left']   .tgs-text { margin-inline: 0; }`);
+      expect(css).toContain(`.tgs-block[data-align-${screen}='left']   .tgs-buttons { justify-content: flex-start; }`);
+    }
+  });
+
+  it('places the override rules AFTER the base, so source order wins at equal specificity', () => {
+    // The base buttons rule is the last .tgs-block[data-align] rule; the tablet
+    // override must come after it, or the base would win the cascade.
+    expect(css).toMatch(
+      /\.tgs-block\[data-align='right'\]\s+\.tgs-buttons \{ justify-content: flex-end; \}[\s\S]*?@container tgs-page \(max-width: 1023px\)[\s\S]*?\[data-align-tablet='centre'\]/,
+    );
+  });
+
+  it('places the phone block after the tablet block, so a phone width takes phone', () => {
+    expect(css).toMatch(
+      /\[data-align-tablet='centre'\][\s\S]*?@container tgs-page \(max-width: 767px\)[\s\S]*?\[data-align-phone='centre'\]/,
+    );
+  });
+});
+
+describe('the block pane edits the alignment for the current screen', () => {
+  const props = read('components', 'editor', 'Properties.tsx');
+
+  it('scopes an Alignment control to the tier, base on desktop, override otherwise', () => {
+    expect(props).toContain('<Segmented label="Alignment"');
+    expect(props).toContain("resolveAt<string>(alignBase, block.responsive, 'align', tier)");
+    expect(props).toContain("withOverride(block.responsive, 'align', tier, value)");
+    expect(props).toContain("clearOverride(block.responsive, 'align', tier)");
+    // Desktop writes the block's own base prop, not an override.
+    expect(props).toContain('updateBlockPropsAtPath(c, path, { align: value })');
+  });
+
+  it('drops the registry base-only align field for text and heading, so there is one control', () => {
+    expect(props).toContain(
+      "field.key === 'align' && (block.type === 'text' || block.type === 'heading')",
+    );
+  });
+});
+
+describe('a block-level alignment survives the save path', () => {
+  const path = { kind: 'block' as const, section: 0, row: 0, column: 0, block: 0 };
+
+  function alignBlockPage() {
+    let page = createPage();
+    page = addBlock(page, 0, 0, 0, createBlock('text'));
+    page = updateBlockPropsAtPath(page, path, { align: 'centre' });
+    page = updateBlockResponsiveAtPath(page, path, withOverride(undefined, 'align', 'phone', 'left'));
+    return page;
+  }
+
+  it('keeps the desktop base and the phone override through parsePage', () => {
+    const result = parsePage(JSON.parse(JSON.stringify(alignBlockPage())));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const block = result.page.sections[0].rows[0].columns[0].blocks[0];
+    expect(block.props.align).toBe('centre');
+    expect(block.responsive?.phone?.align).toBe('left');
+  });
+
+  it('and through sanitisePage, which cleans props but keeps the base and the map', () => {
+    const block = sanitisePage(alignBlockPage()).sections[0].rows[0].columns[0].blocks[0];
+    expect(block.props.align).toBe('centre');
+    expect(block.responsive?.phone?.align).toBe('left');
+  });
+
+  it('drops an override that is not a legal alignment rather than storing it', () => {
+    let page = createPage();
+    page = addBlock(page, 0, 0, 0, createBlock('text'));
+    // 'middle' is not one of the three, so the schema drops it, the same as a
+    // stray text size is dropped rather than kept.
+    page = updateBlockResponsiveAtPath(page, path, withOverride(undefined, 'align', 'phone', 'middle'));
+    const result = parsePage(JSON.parse(JSON.stringify(page)));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const block = result.page.sections[0].rows[0].columns[0].blocks[0];
+    expect(block.responsive?.phone?.align).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Auto-resize: fluid text that scales with the screen.
 //
 // Andy, 11 Aug 2026: "an option so that it auto-resizes based on screen size."

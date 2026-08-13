@@ -667,6 +667,36 @@ const MUTATIONS = [
   },
   {
     tag: 'breakpoints',
+    check: 'a block alignment set on Phone centres phone, not desktop',
+    /*
+     * Alignment per screen rides a data attribute, not a folded scalar. Drop the
+     * phone attribute and the override is still stored but never reaches the DOM,
+     * so the container query has nothing to match and the phone stays left. The
+     * shape of bug that looks wired but changes nothing on the page.
+     */
+    why: 'Never emit the per-screen alignment attribute, so a phone override is stored but never renders.',
+    file: 'components/render/PageRenderer.tsx',
+    from: `      data-align-phone={
+        typeof block.responsive?.phone?.align === 'string' ? block.responsive.phone.align : undefined
+      }`,
+    to: `      data-align-phone={undefined}`,
+  },
+  {
+    tag: 'breakpoints',
+    check: 'a block alignment set on Phone centres phone, not desktop',
+    /*
+     * The CSS half, and the one that matters most for alignment: the override rule
+     * only wins because it sits AFTER the base at equal specificity. Neuter the
+     * phone centre rule and the attribute renders but nothing acts on it, which is
+     * exactly what a broken cascade order would look like.
+     */
+    why: 'Neuter the phone centre alignment rule, so the attribute renders but the container query does nothing.',
+    file: 'app/globals.css',
+    from: `  .tgs-block[data-align-phone='centre'] { text-align: center; }`,
+    to: `  .tgs-block[data-align-phone='centre'] { text-align: left; }`,
+  },
+  {
+    tag: 'breakpoints',
     check: 'clear text sizing strips the fixed sizes off a heading',
     /*
      * The clean rewrites the html either way, so the button looks wired; leaving

@@ -85,6 +85,18 @@ import { writeSeoAction } from '../../app/actions/ai';
 import { rebuildImportAction } from '../../app/actions/import';
 import { pageText } from '../../lib/seo/audit';
 
+/**
+ * The three alignments, for the tier-aware Alignment control on a text or heading
+ * block. The same values and labels the registry's ALIGN_OPTIONS carries, kept
+ * here because that one is a private const of the block library and this control
+ * replaces it for these two block types.
+ */
+const ALIGN_CHOICES: Array<{ value: string; label: string }> = [
+  { value: 'left', label: 'Left' },
+  { value: 'centre', label: 'Centre' },
+  { value: 'right', label: 'Right' },
+];
+
 interface Props {
   page: Page;
   selected: Path | null;
@@ -2107,7 +2119,14 @@ function BlockFields({
     groups.set(group, list);
   };
 
-  definition.fields.forEach((field) => add(inferGroup(field), renderField(field)));
+  definition.fields.forEach((field) => {
+    // Text and heading get ONE tier-aware Alignment control below (the block's own
+    // field on desktop, an override per screen), so drop the registry's base-only
+    // align field for them rather than showing two alignment controls that could
+    // disagree. Every other block keeps its field, unchanged.
+    if (field.key === 'align' && (block.type === 'text' || block.type === 'heading')) return;
+    add(inferGroup(field), renderField(field));
+  });
 
   // TEXT SIZE, PER SCREEN. Only the blocks whose text the size chain governs, the
   // Text and Heading blocks (.tgs-text / .tgs-heading), offer it. On desktop it
@@ -2181,6 +2200,43 @@ function BlockFields({
         }}
       >
         <LineSpacingField tier={tier} value={currentLh} onChange={setLineHeight} />
+      </ScreenScope>,
+    );
+
+    // ALIGNMENT, PER SCREEN. The block's own field on desktop, an override on
+    // tablet or phone, so a paragraph can centre on a phone while it stays left on
+    // desktop. This is the ONE alignment control for these blocks: the registry's
+    // base-only one is dropped above, so the two never disagree. Left, centre and
+    // right drive the block's text-align, a paragraph's margin and a button row's
+    // justify together, the same three the base does. It sits in Layout, where the
+    // base field sat, not with the size controls in Content.
+    const alignBase = typeof block.props.align === 'string' ? block.props.align : 'left';
+    const alignNow = resolveAt<string>(alignBase, block.responsive, 'align', tier);
+    const setAlign = (value: string) => {
+      if (tier === 'desktop') {
+        onCommit((c) => updateBlockPropsAtPath(c, path, { align: value }), `blk:${block.id}:align`);
+      } else {
+        onCommit(
+          (c) => updateBlockResponsiveAtPath(c, path, withOverride(block.responsive, 'align', tier, value)),
+          `blk:${block.id}:align:${tier}`,
+        );
+      }
+    };
+    add(
+      'layout',
+      <ScreenScope
+        key="align"
+        tier={tier}
+        overridden={isOverridden(block.responsive, 'align', tier)}
+        onReset={() => {
+          if (tier === 'desktop') return;
+          onCommit(
+            (c) => updateBlockResponsiveAtPath(c, path, clearOverride(block.responsive, 'align', tier)),
+            `blk:${block.id}:align:${tier}:reset`,
+          );
+        }}
+      >
+        <Segmented label="Alignment" value={alignNow} options={ALIGN_CHOICES} onChange={setAlign} />
       </ScreenScope>,
     );
 

@@ -1592,6 +1592,47 @@
 .tgs-block[data-align='centre'] .tgs-buttons { justify-content: center; }
 .tgs-block[data-align='right']  .tgs-buttons { justify-content: flex-end; }
 
+/*
+ * PER-SCREEN ALIGNMENT (see lib/content/responsive.ts). Spacing and text size
+ * fold a scalar through one custom property; alignment cannot, because it drives
+ * three things at once: the block's own text-align, a max-width paragraph's
+ * margin, and a button row's justify. So the block carries the override screen as
+ * a data attribute (data-align-tablet / data-align-phone) and these rules re-state
+ * all three at the width that screen owns.
+ *
+ * WHY DOWN HERE, away from the other per-screen rules: the base
+ * .tgs-block[data-align] rules sit ABOVE, and an override must win over the base
+ * at the SAME specificity (one class, one attribute), which at equal specificity
+ * is source order. So these come after the base rules. The phone block comes after
+ * the tablet block, so a phone width, which matches both queries, takes phone; and
+ * a screen that set nothing leaves the screen above it still matching, which is how
+ * phone inherits tablet with no fallback chain to write. Every value is re-stated,
+ * left included, because at this width the base centre or right rule is still live
+ * and an override to left has to undo it.
+ */
+@container tgs-page (max-width: 1023px) {
+  .tgs-block[data-align-tablet='left']   { text-align: left; }
+  .tgs-block[data-align-tablet='centre'] { text-align: center; }
+  .tgs-block[data-align-tablet='right']  { text-align: right; }
+  .tgs-block[data-align-tablet='left']   .tgs-text { margin-inline: 0; }
+  .tgs-block[data-align-tablet='centre'] .tgs-text { margin-inline: auto; }
+  .tgs-block[data-align-tablet='right']  .tgs-text { margin-inline: 0 0 0 auto; }
+  .tgs-block[data-align-tablet='left']   .tgs-buttons { justify-content: flex-start; }
+  .tgs-block[data-align-tablet='centre'] .tgs-buttons { justify-content: center; }
+  .tgs-block[data-align-tablet='right']  .tgs-buttons { justify-content: flex-end; }
+}
+@container tgs-page (max-width: 767px) {
+  .tgs-block[data-align-phone='left']   { text-align: left; }
+  .tgs-block[data-align-phone='centre'] { text-align: center; }
+  .tgs-block[data-align-phone='right']  { text-align: right; }
+  .tgs-block[data-align-phone='left']   .tgs-text { margin-inline: 0; }
+  .tgs-block[data-align-phone='centre'] .tgs-text { margin-inline: auto; }
+  .tgs-block[data-align-phone='right']  .tgs-text { margin-inline: 0 0 0 auto; }
+  .tgs-block[data-align-phone='left']   .tgs-buttons { justify-content: flex-start; }
+  .tgs-block[data-align-phone='centre'] .tgs-buttons { justify-content: center; }
+  .tgs-block[data-align-phone='right']  .tgs-buttons { justify-content: flex-end; }
+}
+
 .tgs-button {
   display: inline-flex;
   align-items: center;

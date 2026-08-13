@@ -802,6 +802,20 @@ function blockHost(
       key={block.id}
       className="tgs-block"
       data-align={typeof block.props?.align === 'string' ? block.props.align : undefined}
+      /*
+       * Alignment per screen. Not a scalar folded through a custom property like
+       * size and spacing are, because alignment drives three things at once (the
+       * block's text-align, a paragraph's margin, a button row's justify), so it
+       * cannot ride the --tgs-*-r chain. Instead the override screen rides its own
+       * data attribute and the container queries in globals.css re-state it. Absent
+       * when unset, so a block that never overrode reads exactly as before.
+       */
+      data-align-tablet={
+        typeof block.responsive?.tablet?.align === 'string' ? block.responsive.tablet.align : undefined
+      }
+      data-align-phone={
+        typeof block.responsive?.phone?.align === 'string' ? block.responsive.phone.align : undefined
+      }
       data-boxed={boxed ? '' : undefined}
       data-shadow={boxed ? box.shadow : undefined}
       data-fluid={fluid ? '' : undefined}

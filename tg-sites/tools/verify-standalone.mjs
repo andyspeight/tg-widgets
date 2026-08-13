@@ -7955,6 +7955,64 @@ await check('auto-resize brings a heading down on a phone, not on desktop', asyn
 });
 
 /*
+ * Alignment per screen, slice three. A heading is left by default; set it to
+ * centre on Phone and only the phone width should centre, the desktop staying
+ * left. Alignment is not a folded scalar like the size above: the block carries
+ * data-align-phone and a container query re-states its text-align, so this proves
+ * the attribute is stored AND that it lands at the phone width but not on desktop.
+ * The control is the one tier-aware Alignment segment in the block pane, in Layout.
+ */
+await check('a block alignment set on Phone centres phone, not desktop', async () => {
+  await addBlock('Heading');
+  const host = added();
+  if ((await host.count()) !== 1) return `${await host.count()} blocks selected after adding`;
+  const info = await host.evaluate((el) => {
+    const block = el.matches('.tgs-block') ? el : el.closest('.tgs-block');
+    return {
+      path: block ? block.getAttribute('data-path') : null,
+      deskAlign: block ? getComputedStyle(block).textAlign : null,
+    };
+  });
+  if (!info || !info.path) return 'the heading did not render a block';
+  if (info.deskAlign === 'center') return `the heading was already centred on desktop: ${info.deskAlign}`;
+
+  // Device switcher to Phone: the Alignment control now edits the phone screen, and
+  // the canvas narrows so the container query fires. The control sits in Layout,
+  // shut by default, so open it first.
+  await page.getByRole('button', { name: 'Phone', exact: true }).click();
+  await page.waitForTimeout(200);
+  await openPaneGroup('Layout');
+
+  // The per-screen Alignment is the only segmented inside a screen scope; on Phone
+  // that scope is present. Its Centre button drives the override.
+  const centre = page.locator('.ed-props .ed-screen-scope .ed-segmented button', { hasText: 'Centre' }).first();
+  if ((await centre.count()) === 0) return 'the alignment control was not scoped to the screen';
+  await centre.click();
+  await page.waitForTimeout(200);
+
+  const after = await page.evaluate((path) => {
+    const block = document.querySelector(`.ed-canvas-frame [data-path="${path}"]`);
+    return {
+      attr: block ? block.getAttribute('data-align-phone') : null,
+      align: block ? getComputedStyle(block).textAlign : null,
+    };
+  }, info.path);
+  if (after.attr !== 'centre') return `the phone override was not stored: ${after.attr}`;
+  if (after.align !== 'center') return `phone did not centre: ${after.align}`;
+
+  // Back to Desktop: the block's own alignment returns, untouched by the phone edit.
+  await page.getByRole('button', { name: 'Desktop', exact: true }).click();
+  await page.waitForTimeout(200);
+  const deskAgain = await page.evaluate((path) => {
+    const block = document.querySelector(`.ed-canvas-frame [data-path="${path}"]`);
+    return block ? getComputedStyle(block).textAlign : null;
+  }, info.path);
+  // Selecting Desktop folds the panels (see the size checks); reopen them.
+  await showPanels();
+  return deskAgain !== 'center' ? true : `the desktop alignment changed under a phone edit: ${deskAgain}`;
+});
+
+/*
  * Andy, 11 Aug 2026: a one-click clean for a heading whose words are wrapped in a
  * stack of leftover size spans (his hero, eleven deep), which override the size and
  * auto-resize controls and hold the line open. Clear text sizing strips the
