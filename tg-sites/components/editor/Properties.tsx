@@ -74,6 +74,7 @@ import {
   updateBlockBoxAtPath,
   updateBlockPropsAtPath,
   updateBlockResponsiveAtPath,
+  updateBlockHideOnAtPath,
   updateInnerColumn,
   containerColumns,
 } from '../../lib/content/tree';
@@ -2032,6 +2033,36 @@ function FluidField({ value, onChange }: { value: boolean; onChange: (value: boo
   );
 }
 
+/**
+ * Hide this block on the screen the device switcher is on. One toggle, worded for
+ * the current screen, so it always speaks about the screen being edited. The block
+ * stays on the canvas here; it disappears on the live site and in preview.
+ */
+function HideOnField({
+  tier,
+  hidden,
+  onChange,
+}: {
+  tier: Tier;
+  hidden: boolean;
+  onChange: (hidden: boolean) => void;
+}) {
+  const screen = tier === 'desktop' ? 'desktop' : tier === 'tablet' ? 'tablet' : 'phone';
+  const where = tier === 'desktop' ? 'on desktop' : `on ${screen}s`;
+  return (
+    <div className="ed-field">
+      <label className="ed-toggle">
+        <input type="checkbox" checked={hidden} onChange={(event) => onChange(event.target.checked)} />
+        <span>Hide {where}</span>
+      </label>
+      <p className="ed-help" style={{ marginTop: 6 }}>
+        Takes this block off the {screen} layout on the live site. It stays on the other screens, and
+        stays here on the canvas so you can bring it back.
+      </p>
+    </div>
+  );
+}
+
 function BlockFields({
   path,
   page,
@@ -2358,6 +2389,25 @@ function BlockFields({
       />,
     );
   }
+
+  // SHOW / HIDE PER SCREEN. One toggle, for every block, that hides it on the
+  // screen the device switcher is on. Not a style override but a list of the
+  // screens the block is hidden on, all three treated alike, so a block hides on
+  // desktop as easily as on a phone. It stays on the canvas while editing (the
+  // attribute is published-only) so it can always be selected again; the help says
+  // where it goes.
+  const hideOn = block.hideOn ?? [];
+  const setHidden = (hidden: boolean) => {
+    const screens = new Set(hideOn);
+    if (hidden) screens.add(tier);
+    else screens.delete(tier);
+    const next = [...screens];
+    onCommit(
+      (c) => updateBlockHideOnAtPath(c, path, next.length ? next : undefined),
+      `blk:${block.id}:hideOn:${tier}`,
+    );
+  };
+  add('layout', <HideOnField key="hide-on" tier={tier} hidden={hideOn.includes(tier)} onChange={setHidden} />);
 
   const ordered = GROUP_ORDER.filter((group) => groups.get(group)?.length);
 

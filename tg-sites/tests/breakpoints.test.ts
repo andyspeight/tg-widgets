@@ -24,7 +24,12 @@ import {
   LINE_HEIGHT_MIN,
   normaliseLineHeight,
 } from '../lib/content/styles';
-import { addBlock, updateBlockPropsAtPath, updateBlockResponsiveAtPath } from '../lib/content/tree';
+import {
+  addBlock,
+  updateBlockPropsAtPath,
+  updateBlockResponsiveAtPath,
+  updateBlockHideOnAtPath,
+} from '../lib/content/tree';
 
 function read(...parts: string[]): string {
   return readFileSync(join(__dirname, '..', ...parts), 'utf8');
@@ -484,6 +489,105 @@ describe('a block-level alignment survives the save path', () => {
     if (!result.ok) return;
     const block = result.page.sections[0].rows[0].columns[0].blocks[0];
     expect(block.responsive?.phone?.align).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Show / hide per screen, slice four.
+//
+// Not a style override on the responsive map but a list of the screens a block is
+// hidden on, all three treated alike (desktop included, which the responsive map
+// cannot carry). Each screen is an independent, non-overlapping container query, so
+// there is no cascade order and no inheritance. The attribute is emitted only on the
+// published page and in preview, never while editing, so a hidden block stays
+// selectable on the canvas.
+// ---------------------------------------------------------------------------
+
+describe('the hide-on validator keeps a clean list of legal screens', () => {
+  it('drops unknown screens, collapses duplicates, and empties to nothing', async () => {
+    const { HideOnSchema } = await import('../lib/content/schema');
+    const parse = (v: unknown) => HideOnSchema.parse(v);
+    expect(parse(['phone', 'desktop'])).toEqual(['phone', 'desktop']);
+    expect(parse(['phone', 'phone', 'tablet'])).toEqual(['phone', 'tablet']);
+    expect(parse(['phone', 'nonsense', 2])).toEqual(['phone']);
+    // Empty, a non-array, and absent all become nothing, so a block that hides
+    // nowhere keeps its shape rather than gaining a key.
+    expect(parse([])).toBeUndefined();
+    expect(parse('phone')).toBeUndefined();
+    expect(parse(undefined)).toBeUndefined();
+  });
+});
+
+describe('a block carries the screens it is hidden on, additively', () => {
+  const schema = read('lib', 'content', 'schema.ts');
+
+  it('adds an optional hideOn list, separate from the responsive map', () => {
+    expect(schema).toContain('export const HideOnSchema');
+    expect(schema).toContain('hideOn: HideOnSchema');
+  });
+});
+
+describe('the renderer hides a block on its screens, published only', () => {
+  const render = read('components', 'render', 'PageRenderer.tsx');
+
+  it('emits data-hide-<screen> from the list, but never while editing', () => {
+    expect(render).toContain(
+      "data-hide-desktop={!editable && block.hideOn?.includes('desktop') ? '' : undefined}",
+    );
+    expect(render).toContain(
+      "data-hide-tablet={!editable && block.hideOn?.includes('tablet') ? '' : undefined}",
+    );
+    expect(render).toContain(
+      "data-hide-phone={!editable && block.hideOn?.includes('phone') ? '' : undefined}",
+    );
+  });
+});
+
+describe('container queries take a hidden block out of the layout, one screen each', () => {
+  const css = read('app', 'globals.css');
+
+  it('hides on each screen at its own non-overlapping width', () => {
+    expect(css).toMatch(
+      /@container tgs-page \(min-width: 1024px\)[\s\S]*?\.tgs-block\[data-hide-desktop\] \{ display: none; \}/,
+    );
+    expect(css).toMatch(
+      /@container tgs-page \(min-width: 768px\) and \(max-width: 1023px\)[\s\S]*?\.tgs-block\[data-hide-tablet\] \{ display: none; \}/,
+    );
+    expect(css).toMatch(
+      /@container tgs-page \(max-width: 767px\)[\s\S]*?\.tgs-block\[data-hide-phone\] \{ display: none; \}/,
+    );
+  });
+});
+
+describe('the block pane hides a block on the current screen', () => {
+  const props = read('components', 'editor', 'Properties.tsx');
+
+  it('offers a tier-aware Hide toggle that edits the hideOn list', () => {
+    expect(props).toContain('<HideOnField');
+    expect(props).toContain('hideOn.includes(tier)');
+    expect(props).toContain('updateBlockHideOnAtPath(c, path, next.length ? next : undefined)');
+  });
+});
+
+describe('a block hidden on a screen survives the save path', () => {
+  const path = { kind: 'block' as const, section: 0, row: 0, column: 0, block: 0 };
+
+  function hiddenBlockPage() {
+    let page = createPage();
+    page = addBlock(page, 0, 0, 0, createBlock('text'));
+    page = updateBlockHideOnAtPath(page, path, ['phone', 'desktop']);
+    return page;
+  }
+
+  it('keeps the list through parsePage and sanitisePage', () => {
+    const result = parsePage(JSON.parse(JSON.stringify(hiddenBlockPage())));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const block = result.page.sections[0].rows[0].columns[0].blocks[0];
+    expect(block.hideOn).toEqual(['phone', 'desktop']);
+
+    const cleaned = sanitisePage(hiddenBlockPage()).sections[0].rows[0].columns[0].blocks[0];
+    expect(cleaned.hideOn).toEqual(['phone', 'desktop']);
   });
 });
 

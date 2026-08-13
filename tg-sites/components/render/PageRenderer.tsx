@@ -816,6 +816,15 @@ function blockHost(
       data-align-phone={
         typeof block.responsive?.phone?.align === 'string' ? block.responsive.phone.align : undefined
       }
+      /*
+       * Hidden on some screens. Emitted only on the published page and in preview
+       * (!editable), never while editing: a block you hid on this very screen has to
+       * stay on the canvas so you can still select it and change your mind. The
+       * container queries in globals.css do the hiding, one screen each.
+       */
+      data-hide-desktop={!editable && block.hideOn?.includes('desktop') ? '' : undefined}
+      data-hide-tablet={!editable && block.hideOn?.includes('tablet') ? '' : undefined}
+      data-hide-phone={!editable && block.hideOn?.includes('phone') ? '' : undefined}
       data-boxed={boxed ? '' : undefined}
       data-shadow={boxed ? box.shadow : undefined}
       data-fluid={fluid ? '' : undefined}

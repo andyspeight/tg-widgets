@@ -343,6 +343,34 @@ export const ResponsiveSchema = z.object({
 });
 
 /**
+ * The screens a block is hidden on, as a list of the screens it disappears from.
+ *
+ * A list, not the responsive map, and deliberately so. Membership is the whole
+ * meaning: a screen in the list hides the block there and nowhere else, so there
+ * is no false to linger and no desktop-first inheritance to reason about. All
+ * three screens are equal here, DESKTOP included, which is the case the responsive
+ * map cannot carry: that map has only tablet and phone, because it models desktop
+ * as the base every override inherits from, and hiding on desktop is a real ask
+ * (a phone-only call button, say). Kept clean on the way in: unknown entries drop,
+ * duplicates collapse, and an empty list becomes nothing so a block that hides
+ * nowhere keeps its shape. See PageRenderer's data-hide-* and globals.css.
+ */
+export const HideOnSchema = z
+  .unknown()
+  .transform((value) => {
+    const seen = new Set<string>();
+    const out: Array<'desktop' | 'tablet' | 'phone'> = [];
+    for (const entry of Array.isArray(value) ? value : []) {
+      if ((entry === 'desktop' || entry === 'tablet' || entry === 'phone') && !seen.has(entry)) {
+        seen.add(entry);
+        out.push(entry);
+      }
+    }
+    return out.length ? out : undefined;
+  })
+  .optional();
+
+/**
  * Block props are validated per block type by the registry, not here.
  * Keeping this loose at the tree level means an unknown block type round
  * trips through a save instead of being destroyed by it, which is what
@@ -360,6 +388,13 @@ export const BlockSchema = z.object({
    * ResponsiveSchema.
    */
   responsive: ResponsiveSchema.optional(),
+  /**
+   * The screens this block is hidden on, if any. Separate from responsive because
+   * hiding is not a style that inherits desktop-first, and it covers all three
+   * screens where the style overrides cover only two. See HideOnSchema. Additive:
+   * absent on every block saved before it, so no stored page changes shape.
+   */
+  hideOn: HideOnSchema,
   /*
    * The block's own design box: background, padding, border, radius and shadow,
    * on the block's container. The same box sections and columns already carry,

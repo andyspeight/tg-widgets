@@ -8013,6 +8013,91 @@ await check('a block alignment set on Phone centres phone, not desktop', async (
 });
 
 /*
+ * Show / hide per screen, slice four. A block hidden on phone carries data-hide-phone
+ * and a container query removes it at a phone width. It is emitted only when not
+ * editing, so this proves it in PREVIEW: at a phone width the hidden block is gone
+ * while its neighbour stays, and at a desktop width it is back. Driven in preview and
+ * by resizing the viewport, the way the reveal-in-preview check is.
+ */
+await check('a block hidden on phone is gone in preview at a phone width, shown on desktop', async () => {
+  await closeAnyDialog();
+  const saved = page.viewportSize();
+  await page.evaluate(() =>
+    window.__TG_SET_PAGE__({
+      id: 'hide',
+      slug: 'hide',
+      title: 'Hide',
+      version: 1,
+      sections: [
+        {
+          id: 's',
+          width: 'contained',
+          tone: 'light',
+          rows: [
+            {
+              id: 'r',
+              gap: 16,
+              columns: [
+                {
+                  id: 'c',
+                  width: 100,
+                  blocks: [
+                    { id: 'keep', type: 'heading', props: { level: 2, style: 'h2', html: 'Always here' } },
+                    { id: 'gone', type: 'heading', props: { level: 2, style: 'h2', html: 'Phone hides me' }, hideOn: ['phone'] },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }),
+  );
+  await page.waitForTimeout(300);
+  await page.getByRole('button', { name: 'Preview', exact: true }).click();
+  await page.waitForTimeout(300);
+
+  const measure = () =>
+    page.evaluate(() => {
+      const gone = document.querySelector('.tgs-block[data-hide-phone]');
+      const keepHeading = [...document.querySelectorAll('.tgs-heading')].find((h) =>
+        (h.textContent || '').includes('Always here'),
+      );
+      const keep = keepHeading ? keepHeading.closest('.tgs-block') : null;
+      return {
+        gone: gone ? getComputedStyle(gone).display : null,
+        keep: keep ? getComputedStyle(keep).display : null,
+      };
+    });
+
+  // Desktop first: the hidden block is only hidden on a phone, so here it shows.
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.waitForTimeout(250);
+  const desk = await measure();
+
+  // A phone width: the container query fires and the block leaves the layout.
+  await page.setViewportSize({ width: 500, height: 900 });
+  await page.waitForTimeout(250);
+  const phone = await measure();
+
+  const exit = page.getByRole('button', { name: 'Exit preview', exact: true });
+  if (await exit.count()) {
+    await exit.click();
+    await page.waitForTimeout(200);
+  }
+  await page.setViewportSize(saved);
+  await page.evaluate(() => window.__TG_SET_PAGE__(null));
+  await page.waitForTimeout(200);
+  await showPanels();
+
+  if (desk.gone === null || phone.gone === null) return 'the hidden block was not found in preview';
+  if (desk.gone === 'none') return `the block was hidden on desktop too: ${desk.gone}`;
+  if (phone.gone !== 'none') return `the block was not hidden on a phone: display ${phone.gone}`;
+  if (phone.keep === 'none') return 'the neighbour was hidden too, so the hide is not scoped to the one block';
+  return true;
+});
+
+/*
  * Andy, 11 Aug 2026: a one-click clean for a heading whose words are wrapped in a
  * stack of leftover size spans (his hero, eleven deep), which override the size and
  * auto-resize controls and hold the line open. Clear text sizing strips the

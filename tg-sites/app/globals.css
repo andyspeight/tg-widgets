@@ -1633,6 +1633,27 @@
   .tgs-block[data-align-phone='right']  .tgs-buttons { justify-content: flex-end; }
 }
 
+/*
+ * SHOW / HIDE PER SCREEN (see lib/content/schema.ts, HideOnSchema). A block hidden
+ * on a screen carries data-hide-<screen>, and one container query per screen takes
+ * it out of the layout at that screen's width. The three ranges DO NOT OVERLAP, so
+ * each screen is independent: there is no cascade order to keep and no inheritance,
+ * unlike the style folds above. Hiding on a phone says nothing about a tablet.
+ * Desktop is a min-width, the top of the range rather than a max like the folds,
+ * and the boundaries are the stacking thresholds, 768 and 1024 (STACK_BREAKPOINTS).
+ * Only the published page and preview carry the attribute (PageRenderer gates it on
+ * !editable), so a hidden block stays visible and selectable while editing.
+ */
+@container tgs-page (min-width: 1024px) {
+  .tgs-block[data-hide-desktop] { display: none; }
+}
+@container tgs-page (min-width: 768px) and (max-width: 1023px) {
+  .tgs-block[data-hide-tablet] { display: none; }
+}
+@container tgs-page (max-width: 767px) {
+  .tgs-block[data-hide-phone] { display: none; }
+}
+
 .tgs-button {
   display: inline-flex;
   align-items: center;

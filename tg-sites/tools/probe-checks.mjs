@@ -697,6 +697,31 @@ const MUTATIONS = [
   },
   {
     tag: 'breakpoints',
+    check: 'a block hidden on phone is gone in preview at a phone width, shown on desktop',
+    /*
+     * Show / hide rides a data attribute, published-only. Drop the phone attribute
+     * and the block is stored as hidden but never disappears, the shape of bug that
+     * looks wired but changes nothing on the live page.
+     */
+    why: 'Never emit the per-screen hide attribute, so a hidden block is stored but never disappears.',
+    file: 'components/render/PageRenderer.tsx',
+    from: `      data-hide-phone={!editable && block.hideOn?.includes('phone') ? '' : undefined}`,
+    to: `      data-hide-phone={undefined}`,
+  },
+  {
+    tag: 'breakpoints',
+    check: 'a block hidden on phone is gone in preview at a phone width, shown on desktop',
+    /*
+     * The CSS half: the attribute renders but nothing acts on it. Neuter the phone
+     * hide rule and the block stays in the layout at a phone width.
+     */
+    why: 'Neuter the phone hide rule, so the attribute renders but the block never leaves the layout.',
+    file: 'app/globals.css',
+    from: `  .tgs-block[data-hide-phone] { display: none; }`,
+    to: `  .tgs-block[data-hide-phone] { display: revert; }`,
+  },
+  {
+    tag: 'breakpoints',
     check: 'clear text sizing strips the fixed sizes off a heading',
     /*
      * The clean rewrites the html either way, so the button looks wired; leaving

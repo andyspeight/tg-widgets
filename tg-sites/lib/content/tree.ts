@@ -507,6 +507,21 @@ export function updateBlockResponsive(
   }));
 }
 
+/** Replace the screens a block is hidden on. A sibling of responsive, not a prop. */
+export function updateBlockHideOn(
+  page: Page,
+  section: number,
+  row: number,
+  column: number,
+  block: number,
+  hideOn: Block['hideOn'],
+): Page {
+  return mapColumn(page, section, row, column, (c) => ({
+    ...c,
+    blocks: c.blocks.map((b, i) => (i === block ? { ...b, hideOn } : b)),
+  }));
+}
+
 // ---------------------------------------------------------------------------
 // The container element: a block that holds its own columns, one level deep.
 // Its columns are ordinary Columns kept in props.columns, so they carry the same
@@ -643,6 +658,21 @@ export function updateInnerBlockResponsive(
 ): Page {
   return mapInnerColumn(page, section, row, column, block, inner, (blocks) =>
     blocks.map((b, i) => (i === innerBlock ? { ...b, responsive } : b)),
+  );
+}
+
+export function updateInnerBlockHideOn(
+  page: Page,
+  section: number,
+  row: number,
+  column: number,
+  block: number,
+  inner: number,
+  innerBlock: number,
+  hideOn: Block['hideOn'],
+): Page {
+  return mapInnerColumn(page, section, row, column, block, inner, (blocks) =>
+    blocks.map((b, i) => (i === innerBlock ? { ...b, hideOn } : b)),
   );
 }
 
@@ -847,6 +877,20 @@ export function updateBlockResponsiveAtPath(
   }
   return updateInnerBlockResponsive(
     page, path.section, path.row, path.column, path.block, path.inner, path.innerBlock, responsive,
+  );
+}
+
+/** Replace the hidden-screens list of whichever block a block-or-inner-block path points at. */
+export function updateBlockHideOnAtPath(
+  page: Page,
+  path: AnyBlockPath,
+  hideOn: Block['hideOn'],
+): Page {
+  if (path.kind === 'block') {
+    return updateBlockHideOn(page, path.section, path.row, path.column, path.block, hideOn);
+  }
+  return updateInnerBlockHideOn(
+    page, path.section, path.row, path.column, path.block, path.inner, path.innerBlock, hideOn,
   );
 }
 
