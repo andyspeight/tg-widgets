@@ -216,17 +216,35 @@ export default async function handler(req, res) {
   const formula = buildScopeFormula({ activeClientId, activeClientEmail, emailShared, userEmailLower, selfScope });
 
   try {
-    const url = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}`
-      + `?filterByFormula=${encodeURIComponent(formula)}`
-      + `&sort%5B0%5D%5Bfield%5D=UpdatedAt&sort%5B0%5D%5Bdirection%5D=desc&maxRecords=50`;
+    // Page through ALL of this owner's widgets. Airtable returns at most 100 per
+    // request; the old single request capped at maxRecords=50 silently truncated
+    // any account with more than 50 widgets to its 50 most-recently-updated. A
+    // heavy account (a destination build with 60+ widgets) then saw its OLDEST
+    // widgets vanish from the dashboard's per-type lists, and creating a new one
+    // pushed another below the 50-line — which read as deletion even though every
+    // widget was safe in Airtable. (Jess / Better Lifestyle, 14 Aug 2026.)
+    // MAX_WIDGETS is a safety ceiling so a pathological account can't page forever.
+    const MAX_WIDGETS = 1000;
+    const baseUrl = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}`;
+    const records = [];
+    let offset;
+    do {
+      const params = new URLSearchParams();
+      params.set('filterByFormula', formula);
+      params.append('sort[0][field]', 'UpdatedAt');
+      params.append('sort[0][direction]', 'desc');
+      params.set('pageSize', '100');
+      if (offset) params.set('offset', offset);
+      const resp = await fetch(`${baseUrl}?${params.toString()}`, {
+        headers: { 'Authorization': `Bearer ${AIRTABLE_KEY}` },
+      });
+      if (!resp.ok) throw new Error(`Upstream error`);
+      const data = await resp.json();
+      records.push(...(data.records || []));
+      offset = data.offset;
+    } while (offset && records.length < MAX_WIDGETS);
 
-    const resp = await fetch(url, {
-      headers: { 'Authorization': `Bearer ${AIRTABLE_KEY}` },
-    });
-    if (!resp.ok) throw new Error(`Upstream error`);
-    const data = await resp.json();
-
-    const widgets = (data.records || []).map(r => ({
+    const widgets = records.map(r => ({
       widgetId: r.fields.WidgetID || '',
       name: r.fields.Name || 'Untitled',
       type: r.fields.WidgetType || 'Unknown',
