@@ -9132,6 +9132,80 @@ await check('an animated gradient fills a heading in preview, plain while editin
 });
 
 /*
+ * The two chosen gradient colours (Andy, 14 Aug 2026). A gradient heading given
+ * its own two colours fills with THOSE rather than the brand pair, and the first
+ * repeats at both ends so the slide still tiles. This sets a heading with a red
+ * and a blue, previews, and reads the computed gradient back to prove both are in
+ * it, which a fallback to the brand colours would fail.
+ */
+await check('a gradient heading uses the two colours the client chose', async () => {
+  await closeAnyDialog();
+  await page.evaluate(() =>
+    window.__TG_SET_PAGE__({
+      id: 'grad2',
+      slug: 'gradient-two',
+      title: 'Gradient two',
+      version: 1,
+      sections: [
+        {
+          id: 's',
+          width: 'contained',
+          tone: 'light',
+          rows: [
+            {
+              id: 'r',
+              gap: 16,
+              columns: [
+                {
+                  id: 'c',
+                  width: 100,
+                  blocks: [
+                    {
+                      id: 'h',
+                      type: 'heading',
+                      props: {
+                        level: 'h1',
+                        style: 'h1',
+                        html: 'Two',
+                        gradient: true,
+                        gradientFrom: '#ff0000',
+                        gradientTo: '#0000ff',
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }),
+  );
+  await page.waitForTimeout(300);
+  await page.getByRole('button', { name: 'Preview', exact: true }).click();
+  await page.waitForTimeout(300);
+
+  const image = await page.evaluate(() => {
+    const h = document.querySelector('.tgs-block[data-gradient] .tgs-heading');
+    return h ? getComputedStyle(h).backgroundImage : '';
+  });
+
+  const exit = page.getByRole('button', { name: 'Exit preview', exact: true });
+  if (await exit.count()) {
+    await exit.click();
+    await page.waitForTimeout(200);
+  }
+  await page.evaluate(() => window.__TG_SET_PAGE__(null));
+  await page.waitForTimeout(200);
+  await showPanels();
+
+  // Both chosen colours are in the gradient, so the brand fallbacks were not used.
+  return image.includes('rgb(255, 0, 0)') && image.includes('rgb(0, 0, 255)')
+    ? true
+    : `the gradient reads ${image}`;
+});
+
+/*
  * Card link underline (Andy, 11 Aug 2026). A card's link underlines on hover, and now
  * the line sweeps in from the left rather than snapping on whole, drawn as a gradient
  * so its width can animate. Held behind reduced motion. This previews a card with a

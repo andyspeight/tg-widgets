@@ -802,11 +802,23 @@ function blockHost(
   const baseSize = normaliseTextSize(props?.fontSize);
   const baseLineHeight = normaliseLineHeight(props?.lineHeight);
   const sizeVars = responsiveVars(block.responsive, BLOCK_RESPONSIVE);
+  // Animated gradient heading: the letters filled with a moving gradient
+  // (globals.css, background-clip: text). Heading only, and only on the published
+  // page and in preview (data-gradient below), so the heading edits as ordinary
+  // solid text on the canvas rather than transparent-filled where a caret would be
+  // hard to see. The two colours are the client's own choice; each is validated,
+  // and when blank the CSS falls back to a brand colour, so an existing gradient
+  // heading with no colours set looks exactly as it did.
+  const gradient = block.type === 'heading' && props?.gradient === true;
+  const gradFrom = gradient ? safeColour(props?.gradientFrom) : undefined;
+  const gradTo = gradient ? safeColour(props?.gradientTo) : undefined;
   const style: CSSProperties = {
     ...(boxed ? boxStyle(box) : {}),
     ...(textColour ? { color: textColour } : {}),
     ...(baseSize ? { '--tgs-fs': baseSize } : {}),
     ...(baseLineHeight ? { '--tgs-lh': baseLineHeight } : {}),
+    ...(gradFrom ? { '--tgs-grad-a': gradFrom } : {}),
+    ...(gradTo ? { '--tgs-grad-b': gradTo } : {}),
     ...sizeVars,
   };
   const styled =
@@ -814,17 +826,14 @@ function blockHost(
     Boolean(textColour) ||
     Boolean(baseLineHeight) ||
     Boolean(baseSize) ||
+    Boolean(gradFrom) ||
+    Boolean(gradTo) ||
     Object.keys(sizeVars).length > 0;
   // Auto-resize: the text elements only. A block marked data-fluid swaps its
   // font-size for a clamp that scales with the screen (globals.css). It reads no
   // value from here, only the flag, so it composes with a size or a per-screen
   // override rather than replacing them.
   const fluid = (block.type === 'text' || block.type === 'heading') && props?.fluid === true;
-  // Animated gradient heading: the letters filled with the brand colours as a moving
-  // gradient (globals.css, background-clip: text). Heading only, and only on the
-  // published page and in preview, so the heading edits as ordinary solid text on the
-  // canvas rather than transparent-filled where a caret would be hard to see.
-  const gradient = block.type === 'heading' && props?.gradient === true;
   return (
     <div
       key={block.id}

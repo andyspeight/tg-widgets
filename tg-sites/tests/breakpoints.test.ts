@@ -1177,6 +1177,44 @@ describe('an animated gradient fills a heading with the brand colours', () => {
     expect(css).toContain('@keyframes tgs-gradient-text');
     expect(css).toContain('prefers-reduced-motion: no-preference');
   });
+
+  it('lets the client set the two gradient colours, each falling back to a brand colour', () => {
+    // Two colour fields beside the toggle, in the effects group.
+    expect(blocks).toContain("key: 'gradientFrom'");
+    expect(blocks).toContain("key: 'gradientTo'");
+    expect(blocks).toContain("group: 'effects'");
+
+    // The CSS reads them with a brand colour as the fallback, so a gradient
+    // heading with no colours set is unchanged, and the first colour repeats at
+    // both ends so at 200% width the slide still tiles seamlessly.
+    expect(css).toContain('var(--tgs-grad-a, var(--tgs-accent))');
+    expect(css).toContain('var(--tgs-grad-b, var(--tgs-primary))');
+
+    // The render validates each colour and emits it only as a custom property,
+    // so nothing unvalidated can reach the gradient.
+    expect(render).toContain('safeColour(props?.gradientFrom)');
+    expect(render).toContain('safeColour(props?.gradientTo)');
+    expect(render).toContain("'--tgs-grad-a': gradFrom");
+    expect(render).toContain("'--tgs-grad-b': gradTo");
+  });
+
+  it('keeps the two chosen colours through parse and sanitise', () => {
+    const path = { kind: 'block' as const, section: 0, row: 0, column: 0, block: 0 };
+    let page = createPage();
+    page = addBlock(page, 0, 0, 0, createBlock('heading'));
+    page = updateBlockPropsAtPath(page, path, {
+      gradient: true,
+      gradientFrom: '#112233',
+      gradientTo: '#445566',
+    });
+    const parsed = parsePage(JSON.parse(JSON.stringify(page)));
+    expect(parsed.ok).toBe(true);
+    const cleaned = sanitisePage(page).sections[0].rows[0].columns[0].blocks[0];
+    // If the sanitiser dropped these, a client would set a colour, save, and find
+    // it gone, which is the exact failure the gradient flag test guards against.
+    expect(cleaned.props.gradientFrom).toBe('#112233');
+    expect(cleaned.props.gradientTo).toBe('#445566');
+  });
 });
 
 describe('a card link underline sweeps in on hover rather than snapping', () => {

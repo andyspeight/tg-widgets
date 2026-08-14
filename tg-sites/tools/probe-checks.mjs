@@ -1271,6 +1271,19 @@ const MUTATIONS = [
   display: inline-flex;
 }`,
   },
+  {
+    tag: 'gradient2',
+    check: 'a gradient heading uses the two colours the client chose',
+    why: 'Ignore the chosen colours and hardcode the brand pair, as it was before the two-colour control.',
+    file: 'app/globals.css',
+    from: `  background-image: linear-gradient(
+    90deg,
+    var(--tgs-grad-a, var(--tgs-accent)),
+    var(--tgs-grad-b, var(--tgs-primary)),
+    var(--tgs-grad-a, var(--tgs-accent))
+  );`,
+    to: `  background-image: linear-gradient(90deg, var(--tgs-accent), var(--tgs-primary), var(--tgs-accent));`,
+  },
 ];
 
 /*
