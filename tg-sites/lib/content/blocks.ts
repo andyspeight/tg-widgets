@@ -20,6 +20,7 @@
 import type { IconName } from '../../components/editor/Icon';
 import { summariseImported } from './imported';
 import { SOCIAL_OPTIONS } from './social';
+import { FONT_CHOICES, FONT_SIZES } from './styles';
 import { WIDGET_KINDS } from './widgets';
 
 // ---------------------------------------------------------------------------
@@ -1499,6 +1500,40 @@ export const BLOCKS: readonly BlockDefinition[] = [
         label: 'Menu button on phones',
         help: 'Seven links across a phone do not fit. This tucks them behind a button.',
       },
+      /*
+       * The type of the links, so a header menu can match the brand rather than
+       * inheriting the body font (Andy, 14 Aug 2026: you could not set a font on
+       * the links before). Font and size are drawn from the same whitelists the
+       * text toolbar uses, the site's own two fonts and the theme's sizes plus a
+       * short fixed scale, so nothing off-brand or unsafe can reach the page.
+       * Each defaults to following the header.
+       */
+      {
+        kind: 'select',
+        key: 'linkFont',
+        label: 'Link font',
+        options: [{ value: '', label: 'Site default' }, ...FONT_CHOICES.map((f) => ({ value: f.value, label: f.label }))],
+        help: 'The typeface for the links. Site default follows your theme.',
+      },
+      {
+        kind: 'select',
+        key: 'linkSize',
+        label: 'Link size',
+        options: [{ value: '', label: 'Default' }, ...FONT_SIZES.map((s) => ({ value: s.value, label: s.label }))],
+      },
+      {
+        kind: 'select',
+        key: 'linkWeight',
+        label: 'Link weight',
+        options: [
+          { value: '', label: 'Default' },
+          { value: '400', label: 'Regular' },
+          { value: '500', label: 'Medium' },
+          { value: '600', label: 'Semibold' },
+          { value: '700', label: 'Bold' },
+        ],
+      },
+      { kind: 'colour', key: 'linkColour', label: 'Link colour', help: 'The colour of the links. Blank follows the header.' },
     ],
   },
 

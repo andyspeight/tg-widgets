@@ -321,6 +321,42 @@ describe('the menu block', () => {
   it('collapses to a menu button by default, because a phone is the common case', () => {
     expect(defaultPropsFor('nav').collapse).toBe(true);
   });
+
+  it('offers font controls for the links, drawn from the site whitelists', () => {
+    const definition = blockDefinition('nav')!;
+    const keys = definition.fields.map((field) => field.key);
+    expect(keys).toEqual(expect.arrayContaining(['linkFont', 'linkSize', 'linkWeight', 'linkColour']));
+
+    const font = definition.fields.find((field) => field.key === 'linkFont') as
+      | { kind: string; options: Array<{ value: string }> }
+      | undefined;
+    expect(font?.kind).toBe('select');
+    const fontValues = font!.options.map((option) => option.value);
+    // The two site fonts and a "follow the theme" default, and nothing else, so a
+    // family the site has not loaded cannot be chosen and render differently on
+    // every visitor's machine.
+    expect(fontValues).toContain('');
+    expect(fontValues).toContain('var(--tgs-font-body)');
+    expect(fontValues).toContain('var(--tgs-font-display)');
+
+    expect(definition.fields.find((field) => field.key === 'linkColour')?.kind).toBe('colour');
+  });
+
+  it('validates the links type against the whitelist before it reaches the page', () => {
+    // The renderer cannot be imported into this suite (its JSX is not transformed
+    // here, the same reason every render test in this repo reads the source), so
+    // the guarantee is asserted on the source: each value is checked against the
+    // sets built from the same whitelists the fields offer, the colour goes
+    // through safeColour, and the result is emitted only as custom properties, so
+    // nothing off-list can reach font-family, font-size, font-weight or color.
+    const nav = source('components', 'render', 'blocks.tsx');
+    expect(nav).toContain('const NAV_FONT_VALUES = new Set(FONT_CHOICES.map((choice) => choice.value))');
+    expect(nav).toContain('const NAV_SIZE_VALUES = new Set(FONT_SIZES.map((size) => size.value))');
+    expect(nav).toContain("NAV_WEIGHTS.has(str(props, 'linkWeight'))");
+    expect(nav).toContain('safeColour(props.linkColour)');
+    expect(nav).toContain("'--tgs-nav-font': linkFont");
+    expect(nav).toContain("'--tgs-nav-colour': linkColour");
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -704,6 +740,15 @@ describe('the stylesheet', () => {
 
   it('drops the browser marker so the burger is not a triangle beside a burger', () => {
     expect(css).toContain('.tgs-nav__burger::-webkit-details-marker { display: none; }');
+  });
+
+  it('lets a menu set its links font, size, weight and colour, each falling back to the header', () => {
+    // The block sets these as custom properties; the fallback is what the links
+    // inherited before, so a menu that sets nothing renders exactly as it did.
+    expect(css).toContain('color: var(--tgs-nav-colour, inherit)');
+    expect(css).toContain('font-family: var(--tgs-nav-font, inherit)');
+    expect(css).toContain('font-size: var(--tgs-nav-size, inherit)');
+    expect(css).toContain('font-weight: var(--tgs-nav-weight, 500)');
   });
 });
 

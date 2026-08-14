@@ -14,6 +14,7 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { escapeHtml, safeUrl, sanitiseHtml } from '../../lib/content/sanitise';
 import { safeColour } from '../../lib/content/schema';
+import { FONT_CHOICES, FONT_SIZES } from '../../lib/content/styles';
 import { importContent, importFields } from '../../lib/content/imported';
 import { cleanImportHtml } from '../../lib/import/html';
 import { importScopeClass, scopeImportCss } from '../../lib/import/css';
@@ -1568,6 +1569,15 @@ function navLinks(items: Props[], keyPrefix: string): ReactElement[] {
     .filter((item): item is ReactElement => item !== null);
 }
 
+/*
+ * The link type a Menu block may set, kept as the exact values the fields
+ * offer, so what can reach font-family, font-size and font-weight cannot drift
+ * from what is offered. Colour goes through safeColour like every other colour.
+ */
+const NAV_FONT_VALUES = new Set(FONT_CHOICES.map((choice) => choice.value));
+const NAV_SIZE_VALUES = new Set(FONT_SIZES.map((size) => size.value));
+const NAV_WEIGHTS = new Set(['400', '500', '600', '700']);
+
 export function NavBlock({ props }: { props: Props }): ReactElement {
   const items = list(props, 'items');
   const layout = oneOf(props, 'layout', ['row', 'column'] as const, 'row');
@@ -1577,12 +1587,33 @@ export function NavBlock({ props }: { props: Props }): ReactElement {
   // a phone and this block exists mostly to be a header.
   const collapse = bool(props, 'collapse', true);
 
+  // The links' own type, each following the header unless the block sets it.
+  // Every value is checked against the whitelist the field offered, so only the
+  // site's fonts, the theme's sizes and a safe weight or colour reach the page.
+  const linkFont = NAV_FONT_VALUES.has(str(props, 'linkFont')) ? str(props, 'linkFont') : '';
+  const linkSize = NAV_SIZE_VALUES.has(str(props, 'linkSize')) ? str(props, 'linkSize') : '';
+  const linkWeight = NAV_WEIGHTS.has(str(props, 'linkWeight')) ? str(props, 'linkWeight') : '';
+  const linkColour = safeColour(props.linkColour);
+  const navStyle = {
+    ...(linkFont ? { '--tgs-nav-font': linkFont } : {}),
+    ...(linkSize ? { '--tgs-nav-size': linkSize } : {}),
+    ...(linkWeight ? { '--tgs-nav-weight': linkWeight } : {}),
+    ...(linkColour ? { '--tgs-nav-colour': linkColour } : {}),
+  } as CSSProperties;
+  const hasNavStyle = Object.keys(navStyle).length > 0;
+
   if (items.length === 0) {
     return <div className="tgs-placeholder">Add some links</div>;
   }
 
   return (
-    <nav className="tgs-nav" data-layout={layout} data-align={align} data-gap={gap}>
+    <nav
+      className="tgs-nav"
+      data-layout={layout}
+      data-align={align}
+      data-gap={gap}
+      style={hasNavStyle ? navStyle : undefined}
+    >
       <ul className="tgs-nav__list" data-collapse={collapse ? 'true' : undefined}>
         {navLinks(items, 'wide')}
       </ul>

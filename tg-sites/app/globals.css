@@ -2538,8 +2538,17 @@
   /* Half of a 44px target from the padding, the rest from the line box, so a
      row of links is still tappable without being a row of buttons. */
   padding: var(--tgs-space-s) 0;
-  color: inherit;
-  font-weight: 500;
+  /*
+   * Each of these follows the header by default and a Menu block can override
+   * any of them: its own font, size, weight and colour (Andy, 14 Aug 2026, you
+   * could not set a font on the links before). The custom properties come from
+   * the block when set, and fall back to the inherited look when not, so a menu
+   * that sets nothing renders exactly as it did.
+   */
+  color: var(--tgs-nav-colour, inherit);
+  font-family: var(--tgs-nav-font, inherit);
+  font-size: var(--tgs-nav-size, inherit);
+  font-weight: var(--tgs-nav-weight, 500);
   text-decoration: none;
 }
 .tgs-nav__link:hover { color: var(--tgs-primary); text-decoration: underline; }
