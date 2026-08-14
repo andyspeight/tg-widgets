@@ -208,6 +208,12 @@ a{text-decoration:none;color:inherit}
 .type-modal-close{width:32px;height:32px;border-radius:8px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--sb);transition:all .15s}
 .type-modal-close:hover{background:var(--bg);color:var(--ink)}
 .type-modal-close svg{width:18px;height:18px}
+.type-modal-search{display:flex;align-items:center;gap:8px;margin:16px 20px 0;padding:9px 12px;border:1px solid var(--bd);border-radius:10px;background:var(--sf)}
+.type-modal-search:focus-within{border-color:var(--br)}
+.type-modal-search svg{width:16px;height:16px;flex-shrink:0;color:var(--mt)}
+.type-modal-search input{flex:1;min-width:0;border:none;background:transparent;font-size:13px;font-family:var(--ft);color:var(--ink);outline:none}
+.type-modal-search input::placeholder{color:var(--mt)}
+.type-modal-nomatch{font-size:13px;color:var(--mt);text-align:center;padding:24px 8px}
 .type-modal-list{overflow-y:auto;padding:16px 20px;flex:1}
 .type-modal-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--bd);border-radius:10px;margin-bottom:8px;background:var(--sf);transition:all .15s}
 .type-modal-item:hover{border-color:#D1D5DB}
@@ -1217,7 +1223,7 @@ function openTypeModal(airtableType) {
   const isEnquiryForm = reg.id === 'enquiry';
 
   const items = sorted.map(w => `
-    <div class="type-modal-item">
+    <div class="type-modal-item" data-search="${esc(((w.name || 'Untitled') + ' ' + (w.widgetId || '')).toLowerCase())}">
       <div class="type-modal-item-body">
         <div class="type-modal-item-name">${esc(w.name || 'Untitled')}</div>
         <div class="type-modal-item-meta">
@@ -1257,7 +1263,11 @@ function openTypeModal(airtableType) {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <div class="type-modal-list">${items}</div>
+    ${n > 8 ? `<div class="type-modal-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+      <input type="search" id="typeModalSearch" placeholder="Search ${esc(reg.name)} widgets…" oninput="filterTypeModal(this.value)" autocomplete="off" aria-label="Search ${esc(reg.name)} widgets">
+    </div>` : ''}
+    <div class="type-modal-list">${items}<div class="type-modal-nomatch" id="typeModalNoMatch" hidden>No widgets match your search.</div></div>
     <div class="type-modal-foot">
       ${isEnquiryForm ? `<a class="type-modal-create type-modal-create-secondary" href="/inbox-enquiry">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
@@ -1276,6 +1286,24 @@ function openTypeModal(airtableType) {
 function closeTypeModal() {
   document.getElementById('typeModal').classList.remove('open');
   document.body.classList.remove('modal-open');
+}
+
+// Live-filter the open type modal's list by name or widget id. Toggles each
+// item's visibility in place (no re-render) and surfaces a "no matches" line so
+// a big list — a destination build can run to dozens per type — stays findable.
+function filterTypeModal(q) {
+  const list = document.querySelector('#typeModalInner .type-modal-list');
+  if (!list) return;
+  const query = (q || '').trim().toLowerCase();
+  let shown = 0;
+  list.querySelectorAll('.type-modal-item').forEach(el => {
+    const hay = el.getAttribute('data-search') || '';
+    const match = !query || hay.indexOf(query) !== -1;
+    el.style.display = match ? '' : 'none';
+    if (match) shown++;
+  });
+  const nomatch = document.getElementById('typeModalNoMatch');
+  if (nomatch) nomatch.hidden = shown !== 0;
 }
 
 // Close type modal on ESC
