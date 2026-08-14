@@ -1217,6 +1217,48 @@ const MUTATIONS = [
 .tgs-region[data-region='header'][data-overlapped='true'] .tgs-col { background: transparent; }`,
     to: `.tgs-region[data-region='header'][data-overlapped='true'] .tgs-section { background: transparent; }`,
   },
+  {
+    tag: 'canvas-calm',
+    check: 'the add-block plus is hidden until you click into the column',
+    why: 'Force the plus to display:grid by default, the always-on state that made the canvas busy (Andy, 14 Aug 2026).',
+    file: 'components/editor/editor.css',
+    from: `.ed-col-append {
+  display: none;
+}`,
+    to: `.ed-col-append {
+  display: grid;
+}`,
+  },
+  {
+    tag: 'canvas-calm',
+    check: 'a column with content can still be added to, once selected',
+    why: 'Neuter the selected reveal, so the plus never comes back even once you click into the column.',
+    file: 'components/editor/editor.css',
+    from: `.tgs-col.is-selected > .ed-col-append,
+.tgs-col:has(.is-selected) > .ed-col-append {
+  display: grid;
+}`,
+    to: `.tgs-col.is-selected > .ed-col-append,
+.tgs-col:has(.is-selected) > .ed-col-append {
+  display: none;
+}`,
+  },
+  {
+    tag: 'canvas-calm',
+    check: 'a block the pointer only crosses does not outline',
+    why: 'Put the passing-over hover outline back, the flicker Andy asked to remove.',
+    file: 'components/editor/editor.css',
+    from: `/*
+ * NO PASSING-OVER OUTLINE. A 1px ring used to light up on every element the
+ * pointer crossed, which read as flicker and busyness (Andy, 14 Aug 2026). The
+ * selection ring above is the only outline now: it marks what you actually
+ * clicked, and nothing lights up just because the mouse went by.
+ */`,
+    to: `.ed-canvas-frame [data-path]:hover {
+  outline: 1px solid rgba(29, 78, 216, 0.28);
+  outline-offset: -1px;
+}`,
+  },
 ];
 
 /*

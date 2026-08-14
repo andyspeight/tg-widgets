@@ -3570,15 +3570,24 @@ await page.waitForTimeout(300);
  * column". Exactly right: the plus only existed while the column was empty, and
  * a block fills its column, so every click landed on the block.
  */
-await check('a column with content can still be added to', async () => {
+await check('a column with content can still be added to, once selected', async () => {
   const column = page.locator('.tgs-col').filter({ hasText: 'Talk to someone' }).first();
   if ((await column.count()) === 0) return 'no column with content on the canvas';
 
-  await column.hover();
+  /*
+   * The plus shows once you have clicked INTO the column, not on hover (Andy,
+   * 14 Aug 2026). Select a non-text block in it, the buttons, which selects the
+   * column's content without entering text editing, so the plus is not tucked
+   * away as it is while typing.
+   */
+  const trigger = column.locator('.tgs-buttons').first();
+  if ((await trigger.count()) === 0) return 'no non-text block to select the column by';
+  await trigger.click();
   await page.waitForTimeout(300);
 
-  const append = column.locator('.ed-col-append');
-  if ((await append.count()) !== 1) return `${await append.count()} append buttons`;
+  const append = column.locator('.ed-col-append').first();
+  const visible = await append.evaluate((el) => getComputedStyle(el).display !== 'none');
+  if (!visible) return 'the plus stayed hidden on a selected column';
 
   await append.click();
   await page.waitForTimeout(400);
@@ -3588,41 +3597,48 @@ await check('a column with content can still be added to', async () => {
   return dialog === 1 ? true : 'the block picker did not open';
 });
 
-await check('and can still be selected, so it can be styled', async () => {
-  const column = page.locator('.tgs-col').filter({ hasText: 'Talk to someone' }).first();
-  await column.hover();
-  await page.waitForTimeout(300);
-
-  // The chip carries no data-add, so the click falls through to the column's
-  // own data-path. That is the whole trick, and it is why it is a span.
-  await column.locator('.ed-col-chip').click();
-  await page.waitForTimeout(400);
-
-  const labels = await page.evaluate(() =>
-    [...document.querySelectorAll('.ed-props .ed-label')].map((l) => l.textContent?.trim()));
-
-  return labels.includes('Vertical alignment') && labels.includes('Padding (inner spacing)')
-    ? true
-    : `the pane shows ${JSON.stringify(labels.slice(0, 6))}`;
+await check('the Column tag is gone, leaving just the plus', async () => {
+  // Andy, 14 Aug 2026: the "Column" label beside the plus was noise, the ring
+  // says what you are in. A filled column is still selected and styled from the
+  // outline, proved by "a section and a column offer the same style controls".
+  const chips = await page.locator('.ed-col-chip').count();
+  return chips === 0 ? true : `${chips} column chips still rendered`;
 });
 
-await check('neither is on screen until the column is hovered', async () => {
+await check('the add-block plus is hidden until you click into the column', async () => {
   /*
-   * The pointer has to be moved AWAY first. Written without this and it failed
-   * reporting opacity 1, because the check before it had just hovered the
-   * column and left the mouse there.
+   * Move the pointer away: hover must no longer reveal anything (it used to, and
+   * worse, the plus was in fact always on, because the base rule forced
+   * display:grid over the hide). At most the one column currently selected shows
+   * its plus; nothing shows just from the mouse being near.
    */
   await page.mouse.move(5, 5);
   await page.waitForTimeout(300);
 
-  // display:none, not opacity:0. An invisible button is still tabbable and
-  // still fails the 44px check as unreachable; a display:none one has no box.
-  const shown = await page.locator('.ed-col-chip').evaluateAll((els) =>
+  const shown = await page.locator('.ed-col-append').evaluateAll((els) =>
     els.filter((el) => getComputedStyle(el).display !== 'none').length);
 
-  // One column still counts: whichever holds the current selection shows its
-  // chip on purpose, so a tablet with no hover can still reach it.
-  return shown <= 1 ? true : `${shown} chips on screen with nothing hovered`;
+  return shown <= 1 ? true : `${shown} plus buttons on screen with nothing hovered`;
+});
+
+await check('a block the pointer only crosses does not outline', async () => {
+  // Andy, 14 Aug 2026: the 1px ring that lit up on every element the pointer
+  // crossed read as flicker. Only the selection ring outlines now.
+  await page.mouse.move(5, 5);
+  await page.waitForTimeout(150);
+  const block = page.locator('.ed-canvas-frame .tgs-block').filter({ hasText: 'Greece, planned properly' }).first();
+  if ((await block.count()) === 0) return 'no probe block on the canvas';
+  await block.hover();
+  await page.waitForTimeout(150);
+  const seen = await block.evaluate((el) => ({
+    style: getComputedStyle(el).outlineStyle,
+    width: getComputedStyle(el).outlineWidth,
+    selected: el.classList.contains('is-selected'),
+  }));
+  if (seen.selected) return 'the probe block was selected, so a ring is expected';
+  return seen.style === 'none' || seen.width === '0px'
+    ? true
+    : `a hovered block still outlines: ${JSON.stringify(seen)}`;
 });
 
 await check('an empty column offers a plus rather than a whole clickable area', async () => {

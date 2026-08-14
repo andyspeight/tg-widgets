@@ -1565,14 +1565,19 @@ body[data-tg-dragging] .ed-drag-handle { pointer-events: none; }
   padding: 0;
   border: 0;
   border-radius: var(--ed-r-full);
-  background: #94a3b8;
-  color: #fff;
+  /* Lighter and quieter, so the plus invites rather than competes. It firms up
+     to the brand colour on hover (Andy, 14 Aug 2026: the pluses were too heavy). */
+  background: #e2e8f0;
+  color: #64748b;
+  box-shadow: inset 0 0 0 1px rgba(100, 116, 139, 0.18);
   cursor: pointer;
-  transition: background-color 150ms ease-out, transform 150ms ease-out;
+  transition: background-color 150ms ease-out, transform 150ms ease-out, color 150ms ease-out;
 }
 
 .ed-empty-col__add:hover {
   background: #00b4d8;
+  color: #fff;
+  box-shadow: none;
   transform: scale(1.15);
 }
 
@@ -1605,12 +1610,13 @@ body[data-tg-dragging] .ed-drag-handle { pointer-events: none; }
 }
 
 /*
- * A column that HAS content still needs to be a column.
+ * A column that HAS content still needs a way to add another block.
  *
- * Both of these appear on hover only. The canvas has to stay pixel-accurate to
- * what gets published, so anything permanently visible here would make the
- * preview a lie, which is the same reasoning the Add Section strip already
- * follows. Absolutely positioned for the same reason: neither takes up layout.
+ * The plus is absolutely positioned so it takes up no layout: the canvas stays
+ * pixel-accurate to what publishes. There is no "Column" label beside it any
+ * more (dropped 14 Aug 2026, Andy): the selection ring already says what you are
+ * in, so the label was noise, and a column is still selected from the outline's
+ * side label or by clicking its own spacing.
  */
 .tgs-col { position: relative; }
 
@@ -1623,52 +1629,43 @@ body[data-tg-dragging] .ed-drag-handle { pointer-events: none; }
  * invisible on screen. display:none gives it no box at all, which is honest and
  * which the check skips.
  *
- * Shown on hover, and ALSO when something inside the column is selected. Hover
- * does not exist on a touch screen, so hover alone would put these out of reach
- * on a tablet, which is a viewport this editor already supports.
+ * SHOWN ONLY ONCE YOU HAVE CLICKED INTO THE COLUMN, not on hover (Andy, 14 Aug
+ * 2026: a plus sitting under every column made the canvas busy, and it was in
+ * fact always on, since the base rule below forced display:grid over this). A
+ * tap selects on a touch screen the same as a click, so tying the plus to
+ * selection rather than hover keeps it reachable on a tablet, which hover never
+ * was.
  */
-.ed-col-chip,
 .ed-col-append {
   display: none;
 }
 
-.tgs-col:hover > .ed-col-chip,
-.tgs-col:focus-within > .ed-col-chip,
-.tgs-col:has(.is-selected) > .ed-col-chip {
-  display: block;
-}
-
-.tgs-col:hover > .ed-col-append,
-.tgs-col:focus-within > .ed-col-append,
+.tgs-col.is-selected > .ed-col-append,
 .tgs-col:has(.is-selected) > .ed-col-append {
   display: grid;
 }
 
-/* No data-add on the chip, deliberately: the click falls through to the
-   column's own data-path, which is how every other selection here works. */
-.ed-col-chip {
-  position: absolute;
-  top: 0;
-  left: 0;
-  transform: translateY(-100%);
-  padding: 0 var(--ed-2);
-  border-radius: var(--ed-r-sm) var(--ed-r-sm) 0 0;
-  background: var(--ed-ink-3);
-  color: #fff;
-  font: 600 var(--ed-text-xs) / 1.7 var(--ed-font);
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  z-index: 4;
+/*
+ * Out of the way while you are actually typing in the column. The block being
+ * edited is a focused contentEditable and the plus sits on the column's bottom
+ * edge, right where the last line of text is, so it would otherwise sit under
+ * the words. It returns the moment focus leaves. More specific than the show
+ * rule above, so it wins wherever both match.
+ */
+.tgs-col:has([contenteditable='true']:focus) > .ed-col-append {
+  display: none;
 }
 
-.tgs-col:hover > .ed-col-chip { background: var(--ed-select); }
-
-/* Centred on the column's bottom edge, which is where the next block goes. */
+/*
+ * Centred on the column's bottom edge, which is where the next block goes.
+ * Display is left to the rules above (none by default, grid when selected), so
+ * this only carries the look: light and quiet, firming to the brand colour on
+ * hover (Andy, 14 Aug 2026: the pluses were too heavy).
+ */
 .ed-col-append {
   position: absolute;
   bottom: 0;
   left: 50%;
-  display: grid;
   place-items: center;
   width: 24px;
   height: 24px;
@@ -1676,13 +1673,14 @@ body[data-tg-dragging] .ed-drag-handle { pointer-events: none; }
   border: 0;
   border-radius: var(--ed-r-full);
   transform: translate(-50%, 50%);
-  background: #94a3b8;
-  color: #fff;
+  background: #e2e8f0;
+  color: #64748b;
+  box-shadow: inset 0 0 0 1px rgba(100, 116, 139, 0.18);
   cursor: pointer;
   z-index: 4;
 }
 
-.ed-col-append:hover { background: #00b4d8; }
+.ed-col-append:hover { background: #00b4d8; color: #fff; box-shadow: none; }
 
 /*
  * A 44px tap area around a 24px disc, weighted upwards.
@@ -1706,16 +1704,12 @@ body[data-tg-dragging] .ed-drag-handle { pointer-events: none; }
   inset: -20px -12px -4px;
 }
 
-.ed-col-append:focus-visible,
-.ed-col-chip:focus-visible {
-  opacity: 1;
-  pointer-events: auto;
+.ed-col-append:focus-visible {
   outline: 2px solid #00b4d8;
   outline-offset: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ed-col-chip,
   .ed-col-append { transition: none; }
 }
 
@@ -3823,10 +3817,12 @@ body[data-tg-dragging] .ed-drag-handle { pointer-events: none; }
   box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.12);
 }
 
-.ed-canvas-frame [data-path]:hover {
-  outline: 1px solid rgba(29, 78, 216, 0.28);
-  outline-offset: -1px;
-}
+/*
+ * NO PASSING-OVER OUTLINE. A 1px ring used to light up on every element the
+ * pointer crossed, which read as flicker and busyness (Andy, 14 Aug 2026). The
+ * selection ring above is the only outline now: it marks what you actually
+ * clicked, and nothing lights up just because the mouse went by.
+ */
 
 /*
  * Selection is a ring outside the element, not a border on it.
