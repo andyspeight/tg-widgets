@@ -48,21 +48,10 @@ export default async function handler(req, res) {
   const b = req.body || {};
   const country = b.country ? String(b.country).toUpperCase().trim() : null;
   const scope = String(b.scope || '').toLowerCase();
-  const diag = b.diag && typeof b.diag === 'object' ? b.diag : null;
 
   // Build the cron query string.
   let qs = '';
-  if (diag) {
-    // Read-only hotel destination probe (writes nothing). Forwarded to the
-    // cron's ?hotelprobe branch so the operator can test what Travelify's hotel
-    // search returns for different destination forms, without holding CRON_SECRET.
-    const params = new URLSearchParams({ hotelprobe: '1' });
-    if (diag.cc) params.set('cc', String(diag.cc).toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2));
-    if (diag.dests) params.set('dests', String(diag.dests).slice(0, 400));
-    if (diag.max) params.set('max', String(parseInt(diag.max, 10) || 100));
-    qs = '?' + params.toString();
-  }
-  else if (country && /^[A-Z]{2}$/.test(country)) qs = `?country=${country}`;
+  if (country && /^[A-Z]{2}$/.test(country)) qs = `?country=${country}`;
   else if (scope === 'all') qs = '?full=1';
   // scope 'summary' (or anything else) → no params → normal run.
 
@@ -84,7 +73,7 @@ export default async function handler(req, res) {
     if (!cronResp.ok) {
       return res.status(502).json({ error: `Cron returned ${cronResp.status}`, detail: payload });
     }
-    return res.status(200).json({ ok: true, scope: diag ? 'diag:hotelprobe' : (country ? `country:${country}` : (scope || 'summary')), result: payload });
+    return res.status(200).json({ ok: true, scope: country ? `country:${country}` : (scope || 'summary'), result: payload });
   } catch (e) {
     clearTimeout(timeout);
     if (e.name === 'AbortError') {
