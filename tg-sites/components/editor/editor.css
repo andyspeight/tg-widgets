@@ -665,6 +665,53 @@
   font-size: var(--ed-text-sm);
 }
 
+/* Start from: a blank page or one of the designed pages. Compact cards in the
+   composer, the picked one ringed the way selection reads everywhere else. */
+.ed-pages__templates {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-1);
+}
+.ed-pages__template {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--ed-2);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-well);
+  cursor: pointer;
+}
+.ed-pages__template:hover { border-color: var(--ed-ink-3); }
+.ed-pages__template[data-selected] {
+  border-color: var(--ed-select);
+  background: var(--ed-select-wash);
+}
+/* The native radio drives the choice and the focus ring; kept for the keyboard
+   and the screen reader, drawn off where it does not fight the card. */
+.ed-pages__template input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+}
+.ed-pages__template:focus-within {
+  outline: 2px solid var(--ed-select);
+  outline-offset: 2px;
+}
+.ed-pages__template-label {
+  font-size: var(--ed-text-sm);
+  font-weight: 600;
+  color: var(--ed-ink);
+}
+.ed-pages__template-desc {
+  font-size: var(--ed-text-xs);
+  line-height: 1.4;
+  color: var(--ed-ink-2);
+}
+
 .ed-pages__list {
   display: flex;
   flex-direction: column;

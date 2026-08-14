@@ -517,8 +517,8 @@ export function EditorShell({
    * Returns an error to show in the composer, or null on success, by which point
    * the browser is already leaving.
    */
-  const createPage = useCallback(async (title: string): Promise<string | null> => {
-    const result = await createPageAction({ title });
+  const createPage = useCallback(async (title: string, template: string): Promise<string | null> => {
+    const result = await createPageAction({ title, template });
     if (!result.ok) return result.error;
     window.location.assign(`/editor?page=${encodeURIComponent(result.data.id)}`);
     return null;

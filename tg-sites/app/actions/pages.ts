@@ -36,6 +36,7 @@ import {
   type PublishRecord,
 } from '../../lib/db/pages';
 import { slugify } from '../../lib/content/slug';
+import { pageTemplateSections } from '../../lib/content/page-templates';
 import { currentUserId, requireTenantId } from '../../lib/auth/session';
 
 export type ActionResult<T = undefined> =
@@ -103,12 +104,20 @@ export async function createPageAction(input: {
   title: string;
   slug?: string;
   parentId?: string | null;
+  template?: string;
 }): Promise<ActionResult<PageWithContent>> {
+  // The template id is the only thing here that becomes page content, and it is
+  // looked up against the closed registry: an unknown or missing id builds the
+  // blank page (pageTemplateSections returns null), so nothing a caller sends
+  // reaches the page except by naming a template we built.
+  const sections = pageTemplateSections(String(input.template ?? '')) ?? undefined;
+
   const result = await attempt(async () =>
     createPage(await requireTenantId(), {
       title: String(input.title ?? '').slice(0, 200),
       slug: slugify(input.slug ?? input.title ?? ''),
       parentId: input.parentId ?? null,
+      sections,
     }),
   );
 

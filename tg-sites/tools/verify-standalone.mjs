@@ -9530,6 +9530,58 @@ await check('the Pages panel offers Add page, and it asks for a name', async () 
   return true;
 });
 
+/*
+ * PAGE TEMPLATES (Andy, 14 Aug 2026). The composer offers a blank page or one of
+ * the designed pages to start from. This proves the chooser renders the real
+ * PAGE_TEMPLATES set as a radio group, opens on Blank, and moves the choice when
+ * a designed page is picked. It stops before submit, since a real create
+ * navigates away and a static file cannot follow.
+ */
+await check('the Add page composer offers a ready-made page to start from', async () => {
+  await showPanels();
+  await page.waitForTimeout(120);
+  await page.locator('.ed-rail__btn').filter({ hasText: 'Pages' }).first().click();
+  await page.waitForTimeout(200);
+
+  await page.locator('.ed-pages__add').click();
+  await page.waitForTimeout(150);
+
+  // A real radio group, so it announces itself and moves on the arrow keys.
+  const groupThere = await page.locator('.ed-pages__templates[role="radiogroup"]').count();
+  const radioCount = await page.locator('.ed-pages__template input[type="radio"]').count();
+
+  // The choices, in order, are the set Andy confirmed, blank first.
+  const labels = (await page.locator('.ed-pages__template-label').allInnerTexts()).map((t) => t.trim());
+
+  // Blank leads and is the default: the composer builds nothing until a designed
+  // page is picked.
+  const blankFirst = await page.locator('.ed-pages__template input[value="blank"]').isChecked();
+
+  // Pick Home by its card. Clicking the label drives the radio; the card should
+  // ring and the choice should move off Blank onto Home.
+  await page.locator('.ed-pages__template:has(input[value="home"])').click();
+  await page.waitForTimeout(120);
+  const homeChecked = await page.locator('.ed-pages__template input[value="home"]').isChecked();
+  const blankAfter = await page.locator('.ed-pages__template input[value="blank"]').isChecked();
+  const homeRinged = await page.locator('.ed-pages__template:has(input[value="home"])[data-selected]').count();
+
+  // Cancel out, then back to the outline for the checks that follow.
+  await page.locator('.ed-pages__new button', { hasText: 'Cancel' }).click();
+  await page.waitForTimeout(120);
+  await page.locator('.ed-rail__btn').filter({ hasText: 'Layers' }).first().click();
+  await page.waitForTimeout(150);
+
+  const expected = ['Blank page', 'Home', 'About us', 'Holidays', 'Contact'];
+  if (!groupThere) return 'the composer had no template chooser';
+  if (radioCount !== 5) return `expected 5 template choices, saw ${radioCount}`;
+  if (labels.join('|') !== expected.join('|')) return `the choices read "${labels.join(', ')}"`;
+  if (!blankFirst) return 'Blank was not the default choice';
+  if (!homeChecked) return 'picking Home did not select it';
+  if (blankAfter) return 'Blank stayed selected after Home was picked';
+  if (!homeRinged) return 'the picked card was not ringed';
+  return true;
+});
+
 // --- Preview mode: the site as it will publish, full canvas -----------------
 
 /*

@@ -1292,6 +1292,22 @@ const MUTATIONS = [
     from: `  if (scroll && !editing && items.length >= 2) {`,
     to: `  if (false && scroll && !editing && items.length >= 2) {`,
   },
+  {
+    tag: 'page-templates',
+    check: 'the Add page composer offers a ready-made page to start from',
+    why: 'Offer only Blank, dropping the designed pages, so the composer builds nothing but empty pages again.',
+    file: 'components/editor/PagesPanel.tsx',
+    from: `{PAGE_TEMPLATES.map((option) => (`,
+    to: `{PAGE_TEMPLATES.slice(0, 1).map((option) => (`,
+  },
+  {
+    tag: 'page-templates',
+    check: 'the Add page composer offers a ready-made page to start from',
+    why: 'Stick the choice on Blank so picking a designed page never takes, the way it would if the radio were unwired.',
+    file: 'components/editor/PagesPanel.tsx',
+    from: `                      onChange={() => setTemplate(option.id)}`,
+    to: `                      onChange={() => setTemplate('blank')}`,
+  },
 ];
 
 /*

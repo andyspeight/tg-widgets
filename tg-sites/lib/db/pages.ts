@@ -391,6 +391,13 @@ export interface NewPage {
   title: string;
   slug?: string;
   parentId?: string | null;
+  /**
+   * The sections to start the page with, from a chosen page template. Built
+   * server side from the closed template registry (the browser sends only a
+   * template id), so these are ours, not a caller's markup. Absent or empty
+   * gives the blank page this function has always made.
+   */
+  sections?: Page['sections'];
 }
 
 /**
@@ -409,7 +416,16 @@ export async function createPage(
   const slug = (input.slug ?? '').trim();
 
   return withTenant(tenantId, async (tx) => {
-    const content = sanitisePage(blankPage(title, slug));
+    const base = blankPage(title, slug);
+    // A template's sections are ours and already schema-shaped, but they still
+    // go through parse and sanitise like every write, and a set that somehow
+    // fails the schema falls back to the blank page rather than refusing the
+    // create. The blank path is byte-for-byte what it always was.
+    let content = sanitisePage(base);
+    if (input.sections && input.sections.length > 0) {
+      const parsed = parsePage({ ...base, sections: input.sections });
+      if (parsed.ok) content = sanitisePage(parsed.page);
+    }
 
     const rows = await tx`
       insert into public.pages (tenant_id, parent_id, slug, title, draft_content)

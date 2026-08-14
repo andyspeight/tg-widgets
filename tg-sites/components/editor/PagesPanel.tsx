@@ -27,6 +27,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent, ReactElement } from 'react';
 
 import { filterPages, type PageLink } from '../../lib/editor/page-list';
+import { PAGE_TEMPLATES } from '../../lib/content/page-templates';
 
 // Re-exported so the shell and the standalone entry can keep importing the type
 // from the component they hand it to. The type and the search behind it live in
@@ -41,11 +42,13 @@ export function PagesPanel({
   pages: readonly PageLink[];
   currentId: string | null;
   /**
-   * Make a page with this name and open it. Resolves with an error to show in
-   * the composer, or null on success, by which point the editor is navigating
-   * to the new page. Optional so a caller without it simply shows no button.
+   * Make a page with this name from the chosen template and open it. Resolves
+   * with an error to show in the composer, or null on success, by which point
+   * the editor is navigating to the new page. The template is an id from
+   * PAGE_TEMPLATES; 'blank' is an empty page. Optional so a caller without it
+   * simply shows no button.
    */
-  onCreatePage?: (title: string) => Promise<string | null>;
+  onCreatePage?: (title: string, template: string) => Promise<string | null>;
 }): ReactElement {
   const [query, setQuery] = useState('');
 
@@ -54,6 +57,8 @@ export function PagesPanel({
   /** The Add page composer: closed, or open with a name being typed. */
   const [adding, setAdding] = useState(false);
   const [newTitle, setNewTitle] = useState('');
+  /** Which starter to build the new page from. 'blank' is an empty page. */
+  const [template, setTemplate] = useState('blank');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const nameRef = useRef<HTMLInputElement>(null);
@@ -68,6 +73,7 @@ export function PagesPanel({
   function closeComposer() {
     setAdding(false);
     setNewTitle('');
+    setTemplate('blank');
     setError(null);
   }
 
@@ -81,7 +87,7 @@ export function PagesPanel({
     }
     setBusy(true);
     setError(null);
-    const failure = await onCreatePage(title);
+    const failure = await onCreatePage(title, template);
     setBusy(false);
     // Success navigates away, so there is nothing to close. A failure stays put
     // with the reason, the commonest being an address already in use.
@@ -116,6 +122,30 @@ export function PagesPanel({
                   if (event.key === 'Escape') closeComposer();
                 }}
               />
+              {/*
+                Start from a blank page or one of the designed pages. A ready-made
+                page comes filled with placeholder copy and pictures to swap; the
+                choice only picks the sections, the name above is what it is called.
+              */}
+              <div className="ed-pages__templates" role="radiogroup" aria-label="Start from">
+                {PAGE_TEMPLATES.map((option) => (
+                  <label
+                    key={option.id}
+                    className="ed-pages__template"
+                    data-selected={template === option.id ? '' : undefined}
+                  >
+                    <input
+                      type="radio"
+                      name="page-template"
+                      value={option.id}
+                      checked={template === option.id}
+                      onChange={() => setTemplate(option.id)}
+                    />
+                    <span className="ed-pages__template-label">{option.label}</span>
+                    <span className="ed-pages__template-desc">{option.description}</span>
+                  </label>
+                ))}
+              </div>
               {error && (
                 <p className="ed-pages__error" role="alert">
                   {error}
