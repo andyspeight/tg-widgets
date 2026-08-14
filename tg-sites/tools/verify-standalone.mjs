@@ -3641,6 +3641,26 @@ await check('a block the pointer only crosses does not outline', async () => {
     : `a hovered block still outlines: ${JSON.stringify(seen)}`;
 });
 
+await check('a between-section Add pill is quiet until you go to that gap', async () => {
+  await page.mouse.move(5, 5);
+  await page.waitForTimeout(200);
+  /*
+   * The second insert sits between the first two sections. The first insert, at
+   * the very top, stays put as the standing way in; this one hides until a
+   * section either side of it is hovered or selected (Andy, 14 Aug 2026). A
+   * block, not a section, is selected here, so nothing reveals it yet.
+   */
+  const pill = page.locator('.ed-canvas-frame .ed-insert').nth(1).locator('.ed-insert__btn');
+  if ((await pill.count()) === 0) return 'no between-section insert on the canvas';
+  const before = await pill.evaluate((el) => getComputedStyle(el).display !== 'none');
+
+  await page.locator('.ed-canvas-frame .tgs-section').first().hover();
+  await page.waitForTimeout(200);
+  const after = await pill.evaluate((el) => getComputedStyle(el).display !== 'none');
+
+  return !before && after ? true : `hidden-before=${!before}, shown-after=${after}`;
+});
+
 await check('an empty column offers a plus rather than a whole clickable area', async () => {
   await page.locator('[data-insert]').first().click();
   await page.waitForTimeout(400);

@@ -2625,6 +2625,35 @@ body[data-tg-dragging] .ed-drag-handle { pointer-events: none; }
   opacity: 1;
   transform: translate(-50%, -50%) scale(1.04);
 }
+
+/*
+ * QUIET UNTIL YOU GO TO A GAP (Andy, 14 Aug 2026: an "Add Section" pill on
+ * every seam, all on at once, made the canvas busy). The pills BETWEEN sections
+ * hide, and appear when you hover or select a section on either side of them, so
+ * they turn up where you are working and nowhere else. The FIRST one, at the
+ * very top, stays put as the standing way in to adding a section, and it is the
+ * only one on an empty page, so there is always somewhere to start.
+ */
+.ed-insert:not(:first-child) .ed-insert__btn {
+  display: none;
+}
+.tgs-section:hover + .ed-insert .ed-insert__btn,
+.ed-insert:has(+ .tgs-section:hover) .ed-insert__btn,
+.tgs-section.is-selected + .ed-insert .ed-insert__btn,
+.ed-insert:has(+ .tgs-section.is-selected) .ed-insert__btn,
+.ed-insert:hover .ed-insert__btn {
+  display: inline-flex;
+}
+/*
+ * A touch screen has no hover, so the reveal above would strand the between-gap
+ * pills out of reach. Keep them all visible there, as they were.
+ */
+@media (hover: none) {
+  .ed-insert:not(:first-child) .ed-insert__btn {
+    display: inline-flex;
+  }
+}
+
 .ed-insert__plus { display: inline-flex; }
 @media (prefers-reduced-motion: reduce) {
   .ed-insert__btn { transition: none; }

@@ -1259,6 +1259,18 @@ const MUTATIONS = [
   outline-offset: -1px;
 }`,
   },
+  {
+    tag: 'canvas-calm',
+    check: 'a between-section Add pill is quiet until you go to that gap',
+    why: 'Show every between-section Add pill again, the busy every-seam state Andy asked to quieten.',
+    file: 'components/editor/editor.css',
+    from: `.ed-insert:not(:first-child) .ed-insert__btn {
+  display: none;
+}`,
+    to: `.ed-insert:not(:first-child) .ed-insert__btn {
+  display: inline-flex;
+}`,
+  },
 ];
 
 /*
