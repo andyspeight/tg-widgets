@@ -1217,6 +1217,44 @@ describe('an animated gradient fills a heading with the brand colours', () => {
   });
 });
 
+describe('an auto-scrolling logo strip that pauses on hover', () => {
+  const render = read('components', 'render', 'blocks.tsx');
+  const routing = read('components', 'render', 'BlockRenderer.tsx');
+  const blocks = read('lib', 'content', 'blocks.ts');
+  const css = read('app', 'globals.css');
+
+  it('offers a Scroll toggle on the logo strip block', () => {
+    expect(blocks).toContain("key: 'scroll'");
+    expect(blocks).toContain('Scroll the logos');
+  });
+
+  it('scrolls only on the published page and in preview, never while editing', () => {
+    // The logo strip is told whether it is editing, and only builds the moving
+    // track when it is not, so the editing canvas keeps the plain strip.
+    expect(routing).toContain('<LogosBlock props={props} editing={editable} />');
+    expect(render).toContain('if (scroll && !editing && items.length >= 2)');
+  });
+
+  it('renders the strip twice inside a clipped track so the loop has no seam', () => {
+    expect(render).toContain('tgs-logos-marquee');
+    expect(render).toContain('tgs-logos--track');
+    // The second copy is aria-hidden so a screen reader meets the logos once.
+    expect(render).toContain('renderItem(item, index + items.length, true)');
+  });
+
+  it('slides on its own, pauses on hover, and holds still under reduced motion', () => {
+    expect(css).toContain('.tgs-logos-marquee { overflow: hidden; }');
+    expect(css).toContain('@keyframes tgs-logos-scroll');
+    expect(css).toContain('translateX(-50%)');
+    expect(css).toContain('.tgs-logos--track { animation: tgs-logos-scroll 40s linear infinite; }');
+    expect(css).toContain('.tgs-logos-marquee:hover .tgs-logos--track { animation-play-state: paused; }');
+    // The trailing margin, not a flex gap, is what makes the two copies tile.
+    expect(css).toContain('.tgs-logos--track .tgs-logos__item { margin-inline-end: var(--tgs-space-xl); }');
+    // Under reduced motion it wraps to a plain strip and drops the second copy.
+    expect(css).toContain(".tgs-logos--track > [aria-hidden='true'] { display: none; }");
+  });
+});
+
 describe('a card link underline sweeps in on hover rather than snapping', () => {
   const css = read('app', 'globals.css');
 

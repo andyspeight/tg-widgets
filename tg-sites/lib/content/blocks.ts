@@ -1803,6 +1803,12 @@ export const BLOCKS: readonly BlockDefinition[] = [
         help: 'Grey keeps a row of clashing brand colours quiet.',
       },
       { kind: 'select', key: 'align', label: 'Alignment', options: ALIGN_OPTIONS },
+      {
+        kind: 'toggle',
+        key: 'scroll',
+        label: 'Scroll the logos',
+        help: 'The row glides along on its own on the live site and pauses when someone hovers it. It holds still for anyone who prefers less motion. Good for more logos than fit in a row.',
+      },
     ],
   },
 

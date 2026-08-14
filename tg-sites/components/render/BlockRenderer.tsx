@@ -108,7 +108,7 @@ export function BlockRenderer({
       case 'map':
         return <MapBlock props={props} editing={editable} />;
       case 'logos':
-        return <LogosBlock props={props} />;
+        return <LogosBlock props={props} editing={editable} />;
       case 'cards':
         return <CardsBlock props={props} editing={editable} />;
       case 'slider':

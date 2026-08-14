@@ -3097,6 +3097,35 @@
 .tgs-logos__item a { display: flex; border-radius: var(--tgs-radius-sm); }
 
 /*
+ * SCROLLING LOGO STRIP (Andy, 14 Aug 2026, the fun list). The whole strip is
+ * rendered twice inside this clipped track, each item carrying a trailing margin
+ * rather than a flex gap so the two copies tile exactly: at translateX(-50%) the
+ * second copy sits where the first did and the loop has no seam. It pauses on
+ * hover, and under reduced motion it holds still and wraps to a plain strip so
+ * every logo stays reachable. Only the published page and preview build the track
+ * (the render gates it on !editable), so the editing canvas keeps the plain strip.
+ */
+.tgs-logos-marquee { overflow: hidden; }
+.tgs-logos--track {
+  flex-wrap: nowrap;
+  width: max-content;
+  gap: 0;
+  justify-content: flex-start;
+}
+.tgs-logos--track .tgs-logos__item { margin-inline-end: var(--tgs-space-xl); }
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-logos--track { animation: tgs-logos-scroll 40s linear infinite; }
+  .tgs-logos-marquee:hover .tgs-logos--track { animation-play-state: paused; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tgs-logos--track { flex-wrap: wrap; width: auto; }
+  .tgs-logos--track > [aria-hidden='true'] { display: none; }
+}
+@keyframes tgs-logos-scroll {
+  to { transform: translateX(-50%); }
+}
+
+/*
  * `contain` and a max width, together. The height is what every logo shares;
  * `contain` keeps each one's own ratio inside it, so nothing is ever cropped.
  * The max width is the guard against the one logo that is a long wordmark,

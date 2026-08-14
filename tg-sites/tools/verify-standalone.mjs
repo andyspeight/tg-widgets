@@ -9206,6 +9206,106 @@ await check('a gradient heading uses the two colours the client chose', async ()
 });
 
 /*
+ * The auto-scrolling logo strip (Andy, 14 Aug 2026, the last of the fun list). A
+ * logo strip with Scroll on glides along on its own and pauses on hover, on the
+ * published page and in preview only. This drops one in, checks it is a PLAIN
+ * strip on the editing canvas (no moving track), then previews it and proves the
+ * track's transform moves over time and freezes under a hover.
+ */
+await check('the logo strip scrolls in preview, pauses on hover, and is still while editing', async () => {
+  await closeAnyDialog();
+  await page.evaluate(() =>
+    window.__TG_SET_PAGE__({
+      id: 'logos',
+      slug: 'logos',
+      title: 'Logos',
+      version: 1,
+      sections: [
+        {
+          id: 's',
+          width: 'contained',
+          tone: 'light',
+          rows: [
+            {
+              id: 'r',
+              gap: 16,
+              columns: [
+                {
+                  id: 'c',
+                  width: 100,
+                  blocks: [
+                    {
+                      id: 'lg',
+                      type: 'logos',
+                      props: {
+                        scroll: true,
+                        items: [
+                          { src: 'https://example.com/a.png', alt: 'A' },
+                          { src: 'https://example.com/b.png', alt: 'B' },
+                          { src: 'https://example.com/c.png', alt: 'C' },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }),
+  );
+  await page.waitForTimeout(300);
+
+  // While editing: a plain strip, no moving track.
+  const trackWhileEditing = await page.evaluate(() =>
+    Boolean(document.querySelector('.ed-canvas-frame .tgs-logos--track')),
+  );
+  if (trackWhileEditing) return 'the strip is scrolling while editing; it should be a plain strip';
+  const plain = await page.evaluate(() =>
+    Boolean(document.querySelector('.ed-canvas-frame .tgs-logos')),
+  );
+  if (!plain) return 'the plain logo strip did not render on the canvas';
+
+  await page.getByRole('button', { name: 'Preview', exact: true }).click();
+  await page.waitForTimeout(300);
+
+  const readTrack = () =>
+    page.evaluate(() => {
+      const track = document.querySelector('.tgs-logos-marquee .tgs-logos--track');
+      if (!track) return { present: false };
+      const cs = getComputedStyle(track);
+      return { present: true, transform: cs.transform, anim: cs.animationName };
+    });
+
+  const first = await readTrack();
+  await page.waitForTimeout(700);
+  const second = await readTrack();
+
+  // Hover the strip and confirm it freezes.
+  await page.locator('.tgs-logos-marquee').first().hover();
+  await page.waitForTimeout(50);
+  const paused1 = await readTrack();
+  await page.waitForTimeout(500);
+  const paused2 = await readTrack();
+
+  const exit = page.getByRole('button', { name: 'Exit preview', exact: true });
+  if (await exit.count()) {
+    await exit.click();
+    await page.waitForTimeout(200);
+  }
+  await page.evaluate(() => window.__TG_SET_PAGE__(null));
+  await page.waitForTimeout(200);
+  await showPanels();
+
+  if (!first.present) return 'the moving track did not render in preview';
+  if (first.anim !== 'tgs-logos-scroll') return `the scroll animation was not applied: ${first.anim}`;
+  if (first.transform === second.transform) return 'the strip did not move over time';
+  if (paused1.transform !== paused2.transform) return 'the strip did not pause on hover';
+  return true;
+});
+
+/*
  * Card link underline (Andy, 11 Aug 2026). A card's link underlines on hover, and now
  * the line sweeps in from the left rather than snapping on whole, drawn as a gradient
  * so its width can animate. Held behind reduced motion. This previews a card with a

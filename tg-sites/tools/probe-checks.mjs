@@ -1284,6 +1284,14 @@ const MUTATIONS = [
   );`,
     to: `  background-image: linear-gradient(90deg, var(--tgs-accent), var(--tgs-primary), var(--tgs-accent));`,
   },
+  {
+    tag: 'logos-scroll',
+    check: 'the logo strip scrolls in preview, pauses on hover, and is still while editing',
+    why: 'Never build the moving track, so a logo strip with Scroll on stays a plain strip that does not move.',
+    file: 'components/render/blocks.tsx',
+    from: `  if (scroll && !editing && items.length >= 2) {`,
+    to: `  if (false && scroll && !editing && items.length >= 2) {`,
+  },
 ];
 
 /*

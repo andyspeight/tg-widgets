@@ -1832,11 +1832,12 @@ export function StatsBlock({ props }: { props: Props }): ReactElement {
  * editor says so on the field rather than letting it happen quietly. Same
  * shape of rule as the Social block dropping an entry with no address.
  */
-export function LogosBlock({ props }: { props: Props }): ReactElement {
+export function LogosBlock({ props, editing = false }: { props: Props; editing?: boolean }): ReactElement {
   const height = oneOf(props, 'height', ['s', 'm', 'l'] as const, 'm');
   const gap = str(props, 'gap', 'l');
   const tone = oneOf(props, 'tone', ['colour', 'grey', 'grey-hover'] as const, 'colour');
   const align = oneOf(props, 'align', ['left', 'centre', 'right'] as const, 'centre');
+  const scroll = bool(props, 'scroll', false);
 
   const items = list(props, 'items')
     .map((item) => ({
@@ -1850,35 +1851,62 @@ export function LogosBlock({ props }: { props: Props }): ReactElement {
     return <div className="tgs-placeholder">Add your badges and partner logos</div>;
   }
 
+  const renderItem = (
+    item: { src: string; alt: string; href: string },
+    index: number,
+    hidden: boolean,
+  ): ReactElement => {
+    const logo = (
+      <img
+        className="tgs-logos__img"
+        src={item.src}
+        alt={item.alt}
+        loading="lazy"
+        decoding="async"
+      />
+    );
+    // Both, not either. See the note above: a link needs a name, and the
+    // alt text is the only name a logo has.
+    const linked = item.href !== '' && item.alt !== '';
+    const external = /^https?:/i.test(item.href);
+
+    return (
+      <li className="tgs-logos__item" key={index} aria-hidden={hidden || undefined}>
+        {linked ? (
+          <a href={item.href} rel={external ? 'noopener noreferrer' : undefined}>
+            {logo}
+          </a>
+        ) : (
+          logo
+        )}
+      </li>
+    );
+  };
+
+  /*
+   * SCROLLING (Andy, 14 Aug 2026, the fun list). The row glides along on its own
+   * and pauses on hover, for more logos than fit. Only on the published page and
+   * in preview, never while editing, so the editing canvas stays still like the
+   * other motion effects. The strip is rendered TWICE inside one clipped track,
+   * the second copy aria-hidden, and each item carries a trailing margin (not a
+   * flex gap) so the two copies tile exactly: at translateX(-50%) the second copy
+   * sits where the first did and the loop has no seam. Held still, and shown as a
+   * plain wrapped strip, under prefers-reduced-motion (globals.css).
+   */
+  if (scroll && !editing && items.length >= 2) {
+    return (
+      <div className="tgs-logos-marquee">
+        <ul className="tgs-logos tgs-logos--track" data-height={height} data-tone={tone}>
+          {items.map((item, index) => renderItem(item, index, false))}
+          {items.map((item, index) => renderItem(item, index + items.length, true))}
+        </ul>
+      </div>
+    );
+  }
+
   return (
     <ul className="tgs-logos" data-height={height} data-gap={gap} data-tone={tone} data-align={align}>
-      {items.map((item, index) => {
-        const logo = (
-          <img
-            className="tgs-logos__img"
-            src={item.src}
-            alt={item.alt}
-            loading="lazy"
-            decoding="async"
-          />
-        );
-        // Both, not either. See the note above: a link needs a name, and the
-        // alt text is the only name a logo has.
-        const linked = item.href !== '' && item.alt !== '';
-        const external = /^https?:/i.test(item.href);
-
-        return (
-          <li className="tgs-logos__item" key={index}>
-            {linked ? (
-              <a href={item.href} rel={external ? 'noopener noreferrer' : undefined}>
-                {logo}
-              </a>
-            ) : (
-              logo
-            )}
-          </li>
-        );
-      })}
+      {items.map((item, index) => renderItem(item, index, false))}
     </ul>
   );
 }
