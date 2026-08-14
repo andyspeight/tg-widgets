@@ -52,6 +52,9 @@ global.fetch = async (url) => {
   }
   if (u.includes('/Widgets?')) {
     state.lastListUrl = u;
+    // When a test queues pages, serve them in order so the handler's offset loop
+    // is exercised; otherwise the default single empty page (existing cases).
+    if (state.widgetPages && state.widgetPages.length) return json(state.widgetPages.shift());
     return json({ records: [] });
   }
   throw new Error('unmocked fetch: ' + u);
@@ -142,6 +145,26 @@ state.users.recLONE0000000001 = { email: 'solo@example.com', clients: [] };
 {
   const { formula } = await listAs({ email: 'solo@example.com', recordId: 'recLONE0000000001' });
   ok(formula === `LOWER({ClientEmail})='solo@example.com'`, 'no client context: own-email scope (legacy tokens unregressed)');
+}
+
+// ── Pagination: an account with MORE than one page returns ALL its widgets ────
+// Better Lifestyle had 66 widgets; the old maxRecords=50 single request dropped
+// the 16 oldest, so a whole widget type showed short and looked like deletion.
+// The handler now pages until Airtable stops handing back an offset.
+{
+  const mkRecs = (n, prefix) => Array.from({ length: n }, (_, i) => ({
+    id: 'rec' + prefix + String(i).padStart(12, '0'),
+    fields: { WidgetID: 'tgw_' + prefix + '_' + i, Name: prefix + i, WidgetType: 'Weather', Status: 'Active' },
+  }));
+  state.widgetPages = [
+    { records: mkRecs(100, 'p1'), offset: 'offPAGE2' }, // full first page + more
+    { records: mkRecs(23, 'p2') },                       // last page, no offset
+  ];
+  const { res } = await listAs({ email: 'solo@example.com', recordId: 'recLONE0000000001' });
+  ok(res.statusCode === 200, 'pagination: list succeeds across pages');
+  ok(Array.isArray(res.body) && res.body.length === 123,
+    'pagination: returns EVERY widget across pages (123), not a truncated 50');
+  state.widgetPages = null;
 }
 
 // ── Auth still required ──────────────────────────────────────────────────────
