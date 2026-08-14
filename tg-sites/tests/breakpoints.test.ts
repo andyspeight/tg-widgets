@@ -1134,6 +1134,51 @@ describe('Ken Burns drifts and zooms a sections background picture on its own', 
 
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Animated gradient heading (Andy, 13 Aug 2026, the fun list). A heading's letters
+// are filled with the brand colours as a gradient that slides slowly along the text.
+// ---------------------------------------------------------------------------
+
+describe('an animated gradient fills a heading with the brand colours', () => {
+  const render = read('components', 'render', 'PageRenderer.tsx');
+  const css = read('app', 'globals.css');
+  const blocks = read('lib', 'content', 'blocks.ts');
+  const props = read('components', 'editor', 'Properties.tsx');
+
+  it('offers an Animated gradient toggle on the heading block, grouped with the shadow effect', () => {
+    expect(blocks).toContain("key: 'gradient'");
+    expect(blocks).toContain('Animated gradient');
+    expect(props).toContain("if (key === 'shadow' || key === 'gradient') return 'effects'");
+  });
+
+  it('keeps the flag through parse and sanitise, now that gradient is a registered field', () => {
+    const path = { kind: 'block' as const, section: 0, row: 0, column: 0, block: 0 };
+    let page = createPage();
+    page = addBlock(page, 0, 0, 0, createBlock('heading'));
+    page = updateBlockPropsAtPath(page, path, { gradient: true });
+    const parsed = parsePage(JSON.parse(JSON.stringify(page)));
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(parsed.page.sections[0].rows[0].columns[0].blocks[0].props.gradient).toBe(true);
+    const cleaned = sanitisePage(page).sections[0].rows[0].columns[0].blocks[0];
+    expect(cleaned.props.gradient).toBe(true);
+  });
+
+  it('emits data-gradient only for a heading, and never while editing', () => {
+    expect(render).toContain("const gradient = block.type === 'heading' && props?.gradient === true");
+    expect(render).toContain("data-gradient={gradient && !editable ? '' : undefined}");
+  });
+
+  it('fills the letters with a moving brand gradient, held still under reduced motion', () => {
+    expect(css).toContain('.tgs-block[data-gradient] .tgs-heading');
+    expect(css).toContain('background-clip: text');
+    expect(css).toContain('var(--tgs-accent)');
+    expect(css).toContain('var(--tgs-primary)');
+    expect(css).toContain('@keyframes tgs-gradient-text');
+    expect(css).toContain('prefers-reduced-motion: no-preference');
+  });
+});
+
 describe('a card link underline sweeps in on hover rather than snapping', () => {
   const css = read('app', 'globals.css');
 

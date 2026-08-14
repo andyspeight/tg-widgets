@@ -9013,6 +9013,89 @@ await check('Ken Burns drifts a section background in preview, still while editi
 });
 
 /*
+ * Animated gradient heading (Andy, 13 Aug 2026, the fun list). A heading marked
+ * data-gradient has its letters filled with a brand gradient that slides along the
+ * text. This drops one in, checks it edits as ordinary solid text on the canvas (no
+ * data-gradient), then previews it and proves the heading is clipping a gradient to
+ * its text AND that the gradient actually slides, since a static background-clip would
+ * pass an attribute check while nothing flowed.
+ */
+await check('an animated gradient fills a heading in preview, plain while editing', async () => {
+  await closeAnyDialog();
+  await page.evaluate(() =>
+    window.__TG_SET_PAGE__({
+      id: 'grad',
+      slug: 'gradient',
+      title: 'Gradient',
+      version: 1,
+      sections: [
+        {
+          id: 's',
+          width: 'contained',
+          tone: 'light',
+          rows: [
+            {
+              id: 'r',
+              gap: 16,
+              columns: [
+                {
+                  id: 'c',
+                  width: 100,
+                  blocks: [{ id: 'h', type: 'heading', props: { level: 'h1', style: 'h1', html: 'Shimmer', gradient: true } }],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }),
+  );
+  await page.waitForTimeout(300);
+
+  // While editing: no data-gradient, so the heading is ordinary solid text.
+  const editing = await page.evaluate(() =>
+    Boolean(document.querySelector('.ed-canvas-frame .tgs-block[data-gradient]')),
+  );
+  if (editing) return 'the heading is gradient-filled while editing; it should be plain solid text';
+
+  await page.getByRole('button', { name: 'Preview', exact: true }).click();
+  await page.waitForTimeout(300);
+
+  const sample = () =>
+    page.evaluate(() => {
+      const block = document.querySelector('.tgs-block[data-gradient]');
+      if (!block) return { present: false };
+      const h = block.querySelector('.tgs-heading');
+      const cs = h ? getComputedStyle(h) : null;
+      return {
+        present: true,
+        clip: cs ? cs.backgroundClip || cs.webkitBackgroundClip || '' : '',
+        anim: cs ? cs.animationName : null,
+        pos: cs ? cs.backgroundPositionX || cs.backgroundPosition : null,
+      };
+    });
+
+  const a = await sample();
+  await page.waitForTimeout(800);
+  const b = await sample();
+
+  const exit = page.getByRole('button', { name: 'Exit preview', exact: true });
+  if (await exit.count()) {
+    await exit.click();
+    await page.waitForTimeout(200);
+  }
+  await page.evaluate(() => window.__TG_SET_PAGE__(null));
+  await page.waitForTimeout(200);
+  await showPanels();
+
+  if (!a.present) return 'the heading did not carry data-gradient in preview';
+  if (!a.clip.includes('text')) return `the gradient is not clipped to the text: ${a.clip}`;
+  if (a.anim !== 'tgs-gradient-text') return `the gradient slide was not applied: ${a.anim}`;
+  if (a.pos === b.pos) return 'the gradient did not slide over time, so nothing flowed';
+  return true;
+});
+
+/*
  * Card link underline (Andy, 11 Aug 2026). A card's link underlines on hover, and now
  * the line sweeps in from the left rather than snapping on whole, drawn as a gradient
  * so its width can animate. Held behind reduced motion. This previews a card with a

@@ -1878,7 +1878,7 @@ function inferGroup(field: Field): FieldGroup {
     return 'layout';
   }
   if (key === 'radius' || key === 'corners' || key.startsWith('border')) return 'border';
-  if (key === 'shadow') return 'effects';
+  if (key === 'shadow' || key === 'gradient') return 'effects';
   if (key === 'padding') return 'spacing';
   if (/colou?r/i.test(key)) return 'colours';
   return 'content';

@@ -820,6 +820,11 @@ function blockHost(
   // value from here, only the flag, so it composes with a size or a per-screen
   // override rather than replacing them.
   const fluid = (block.type === 'text' || block.type === 'heading') && props?.fluid === true;
+  // Animated gradient heading: the letters filled with the brand colours as a moving
+  // gradient (globals.css, background-clip: text). Heading only, and only on the
+  // published page and in preview, so the heading edits as ordinary solid text on the
+  // canvas rather than transparent-filled where a caret would be hard to see.
+  const gradient = block.type === 'heading' && props?.gradient === true;
   return (
     <div
       key={block.id}
@@ -851,6 +856,7 @@ function blockHost(
       data-boxed={boxed ? '' : undefined}
       data-shadow={boxed ? box.shadow : undefined}
       data-fluid={fluid ? '' : undefined}
+      data-gradient={gradient && !editable ? '' : undefined}
       style={styled ? style : undefined}
       {...pathAttr(editable, keyPath)}
     >

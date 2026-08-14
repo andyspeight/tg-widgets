@@ -262,6 +262,12 @@ export const BLOCKS: readonly BlockDefinition[] = [
         options: SHADOW_OPTIONS,
         help: 'A shadow behind the heading, so it stays readable over a picture.',
       },
+      {
+        kind: 'toggle',
+        key: 'gradient',
+        label: 'Animated gradient',
+        help: 'Fills the heading with a slow, shifting gradient of your brand colours on the live site. It eases off for anyone who prefers less motion.',
+      },
     ],
   },
   {

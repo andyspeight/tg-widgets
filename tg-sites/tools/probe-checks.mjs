@@ -956,6 +956,31 @@ const MUTATIONS = [
     to: `    animation: none;`,
   },
   {
+    tag: 'gradient',
+    check: 'an animated gradient fills a heading in preview, plain while editing',
+    /*
+     * The toggle stores the flag but the heading never carries data-gradient, so the
+     * letters stay a flat colour. Wired in the pane, dead on the page.
+     */
+    why: 'Never emit data-gradient, so the heading never fills with the gradient.',
+    file: 'components/render/PageRenderer.tsx',
+    from: `      data-gradient={gradient && !editable ? '' : undefined}`,
+    to: `      data-gradient={undefined}`,
+  },
+  {
+    tag: 'gradient-css',
+    check: 'an animated gradient fills a heading in preview, plain while editing',
+    /*
+     * The gradient is clipped to the text but the slide is gone, so the colours sit
+     * still. Only a browser test that samples the background position over time catches
+     * a missing time-based animation like this.
+     */
+    why: 'Drop the gradient slide, so the fill is there but the colours never flow.',
+    file: 'app/globals.css',
+    from: `    animation: tgs-gradient-text 8s linear infinite;`,
+    to: `    animation: none;`,
+  },
+  {
     tag: 'link-underline',
     check: 'a card link underline sweeps in under the pointer',
     /*

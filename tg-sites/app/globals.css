@@ -547,6 +547,37 @@
 }
 
 /*
+ * ANIMATED GRADIENT HEADING (Andy, 13 Aug 2026, the fun list). A heading marked
+ * data-gradient has its letters filled with the site's brand colours as a gradient,
+ * which slides slowly along the text so the colours flow. background-clip: text is
+ * what paints the gradient into the glyphs; the text itself is transparent (the
+ * -webkit-text-fill-color keeps Safari honest). The slide sits behind
+ * prefers-reduced-motion, so a visitor who wants less movement gets the gradient
+ * standing still rather than none at all. The render gates data-gradient on !editable,
+ * so a heading edits as ordinary solid text on the canvas, where a transparent fill
+ * would hide the caret. The two brand ends of the gradient match, so at 200% width it
+ * tiles and the slide loops seamlessly.
+ */
+.tgs-block[data-gradient] .tgs-heading {
+  background-image: linear-gradient(90deg, var(--tgs-accent), var(--tgs-primary), var(--tgs-accent));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-block[data-gradient] .tgs-heading {
+    animation: tgs-gradient-text 8s linear infinite;
+  }
+}
+@keyframes tgs-gradient-text {
+  to {
+    background-position: 200% center;
+  }
+}
+
+/*
  * REVEAL ON SCROLL (Andy, 11 Aug 2026). A section marked data-reveal animates its
  * blocks into view as the section scrolls onto the screen. data-reveal also carries
  * the arrival style (rise, fade, slide from either side, zoom, blur), schema-checked
