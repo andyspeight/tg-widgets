@@ -15,13 +15,21 @@
  */
 
 import { setCors, requireMethod, jsonOk } from '../_lib/auth/http.js';
-import { requireAuth, loadClientForCtx } from '../_lib/auth/middleware.js';
-import { getRecord, listAllRecords } from '../_lib/auth/airtable.js';
+import { requireAuth } from '../_lib/auth/middleware.js';
+import { getRecord } from '../_lib/auth/airtable.js';
+import { cachedListAll } from '../_lib/auth/tableCache.js';
 import {
   USERS, CLIENTS, PACKAGES, PRODUCTS, CATALOGUE, CLIENT_ENTITLEMENTS, PACKAGE_CATALOGUE,
 } from '../_lib/auth/schema.js';
 import { isStaffEmail } from '../_lib/auth/staff.js';
 import { resolveEntitlements } from '../_lib/auth/entitlements.js';
+
+// How long the warm lambda may reuse a whole-table Control read before checking
+// Airtable again. The catalogue, products and package rules are the same for
+// everyone and barely change; client entitlements only need to be fresh within a
+// minute. This is what keeps the sign-in check off Airtable on the hot path.
+const CONTROL_TTL_MS = 5 * 60 * 1000;
+const ENTITLEMENTS_TTL_MS = 60 * 1000;
 
 export default async function handler(req, res) {
   if (setCors(req, res)) return;
@@ -39,8 +47,18 @@ export default async function handler(req, res) {
     'sessionRec', ctx.sessionRecordId || '(no rec)',
     'role', ctx.role);
 
-  // Base client info (existing behaviour)
-  const client = await loadClientForCtx(ctx);
+  // Base client info. One read of the client record here, reused below for the
+  // created date and package instead of loading the same record a second time.
+  const clientRec = ctx.clientRecordId
+    ? await getRecord(CLIENTS.tableId, ctx.clientRecordId).catch(() => null)
+    : null;
+  const client = clientRec ? {
+    recordId: clientRec.id,
+    email: clientRec.fields[CLIENTS.fields.email] || '',
+    clientName: clientRec.fields[CLIENTS.fields.clientName] || '',
+    plan: clientRec.fields[CLIENTS.fields.plan] || '',
+    status: clientRec.fields[CLIENTS.fields.status] || '',
+  } : null;
 
   // Extras for the home page — best-effort. Failures here don't break the
   // primary contract; existing callers still get a valid response shape.
@@ -72,9 +90,8 @@ export default async function handler(req, res) {
     }
   } catch {}
 
-  if (client && client.recordId) {
+  if (clientRec) {
     try {
-      const clientRec = await getRecord(CLIENTS.tableId, client.recordId);
       clientCreatedAt = clientRec.fields[CLIENTS.fields.createdAt] || null;
       const pkgLinks = clientRec.fields[CLIENTS.fields.package] || [];
       if (pkgLinks.length > 0) {
@@ -89,10 +106,10 @@ export default async function handler(req, res) {
       // resolve them in one pure pass (see _lib/auth/entitlements.js). Keeping
       // the computation pure lets us smoke test it against real record shapes.
       const [catalogue, products, entitlements, packageCatalogue] = await Promise.all([
-        listAllRecords(CATALOGUE.tableId),
-        listAllRecords(PRODUCTS.tableId),
-        listAllRecords(CLIENT_ENTITLEMENTS.tableId),
-        listAllRecords(PACKAGE_CATALOGUE.tableId),
+        cachedListAll(CATALOGUE.tableId, CONTROL_TTL_MS),
+        cachedListAll(PRODUCTS.tableId, CONTROL_TTL_MS),
+        cachedListAll(CLIENT_ENTITLEMENTS.tableId, ENTITLEMENTS_TTL_MS),
+        cachedListAll(PACKAGE_CATALOGUE.tableId, CONTROL_TTL_MS),
       ]);
 
       // Staff in their OWN account see everything; staff acting AS a client (the
