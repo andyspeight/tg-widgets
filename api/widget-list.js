@@ -118,7 +118,21 @@ async function activeEmailIsShared(activeClientId, activeClientEmail, linkedClie
 //   emailShared       true when that email is also a login for another account the
 //                     user belongs to (so it can't identify one client)
 //   userEmailLower    the logged-in user's own email, lowercased
-function buildScopeFormula({ activeClientId, activeClientEmail, emailShared, userEmailLower }) {
+function buildScopeFormula({ activeClientId, activeClientEmail, emailShared, userEmailLower, selfScope }) {
+  // Self scope (the personal scheduler companion, ?scope=self): the CALLER'S OWN
+  // widgets only, matched on their own login email, regardless of which client
+  // the shared dashboard session is currently working in. This is what lets a
+  // staff member still see their own booking pages while acting inside a client
+  // account. userEmailLower is derived server-side from the authenticated
+  // session, NEVER from the query, so this can only ever return the caller's
+  // own-email widgets — it grants no cross-client visibility and it never touches
+  // the strict default path the dashboard uses. Does NOT reintroduce the
+  // Worldchoice leak: that was a CLIENT's dashboard showing staff widgets; this
+  // is the staff member's own private view showing their own widgets.
+  if (selfScope && userEmailLower) {
+    return `LOWER({ClientEmail})='${sanitiseForFormula(userEmailLower)}'`;
+  }
+
   const LEGACY = `{ClientRecordId}=''`;
   const clauses = new Set();
 
@@ -170,13 +184,18 @@ export default async function handler(req, res) {
   if (!applyRateLimit(res, `list:${user.email}`, RATE_LIMITS.widgetRead)) return;
 
   const userEmailLower = user.email.toLowerCase();
+  // The personal scheduler companion requests ?scope=self to get the caller's
+  // OWN widgets regardless of the active client (see buildScopeFormula). Every
+  // other caller (the dashboard) omits it and keeps the strict per-client scope.
+  const selfScope = !!(req.query && req.query.scope === 'self');
   const activeClientId =
     (typeof user.clientId === 'string' && REC_ID_RE.test(user.clientId))
       ? user.clientId
       : null;
 
   // Resolve the async inputs, then build the formula with the pure helper below.
-  const activeClientEmail = activeClientId ? await resolveActiveClientEmail(activeClientId) : '';
+  // Skipped for scope=self — it needs neither, and this saves the Airtable reads.
+  const activeClientEmail = (!selfScope && activeClientId) ? await resolveActiveClientEmail(activeClientId) : '';
   // The email fallback is dropped whenever the active client's email cannot
   // identify exactly one client. Two ways that happens:
   //   1. STAFF EMAIL: the client account was set up under a Travelgenix staff
@@ -189,12 +208,12 @@ export default async function handler(req, res) {
   //      client's users belong to one account.
   //   2. SHARED EMAIL: the same login email owns several accounts the user
   //      belongs to (the existing guard).
-  const emailShared = activeClientId
+  const emailShared = (!selfScope && activeClientId)
     ? (isStaffEmail(activeClientEmail)
         || await activeEmailIsShared(activeClientId, activeClientEmail, linkedClientIds))
     : false;
 
-  const formula = buildScopeFormula({ activeClientId, activeClientEmail, emailShared, userEmailLower });
+  const formula = buildScopeFormula({ activeClientId, activeClientEmail, emailShared, userEmailLower, selfScope });
 
   try {
     const url = `${AIRTABLE_API}/${AIRTABLE_BASE_ID}/${TABLE_NAME}`

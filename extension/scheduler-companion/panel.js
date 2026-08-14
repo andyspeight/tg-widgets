@@ -288,6 +288,26 @@ async function load() {
     return;
   }
 
+  // This is a PERSONAL tool, so it must also show the signed-in user's OWN
+  // schedulers even while they work inside a client account — the shared
+  // dashboard session scopes /api/widget-list to the active client, which
+  // otherwise hides a staff member's own booking pages. ?scope=self returns the
+  // caller's own-email widgets regardless of active client. Additive and
+  // fail-soft: it can only ADD the user's schedulers back, and a failure here
+  // never removes what the primary list already found.
+  let mine = [];
+  try {
+    const rm = await fetch(API + '/api/widget-list?scope=self', { credentials: 'include' });
+    if (rm.ok) mine = await rm.json();
+  } catch (e) { /* keep the primary list */ }
+
+  const merged = Array.isArray(widgets) ? widgets.slice() : [];
+  const seen = new Set(merged.map((w) => w && w.widgetId));
+  for (const w of (Array.isArray(mine) ? mine : [])) {
+    if (w && w.widgetId && !seen.has(w.widgetId)) { seen.add(w.widgetId); merged.push(w); }
+  }
+  widgets = merged;
+
   loadIdentity();  // non-blocking
   loadActingAs();  // non-blocking staff safety net
 

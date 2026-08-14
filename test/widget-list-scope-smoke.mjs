@@ -69,12 +69,13 @@ function mockRes() {
     end() { return this; },
   };
 }
-async function listAs({ email, recordId, clientId }) {
+async function listAs({ email, recordId, clientId, query }) {
   const token = createToken({ email, recordId, clientId });
   const res = mockRes();
   state.lastListUrl = '';
   await handler({
     method: 'GET',
+    query: query || {},
     headers: { authorization: `Bearer ${token}`, origin: 'https://widgets.travelify.io' },
     socket: { remoteAddress: '10.0.0.1' },
   }, res);
@@ -112,6 +113,28 @@ state.clients[SECOND] = 'george@freefromtravel.com'; // same email as OTHERCLIEN
   const { formula } = await listAs({ email: 'owner@twobrands.example', recordId: 'recMULTI000000001', clientId: SECOND });
   ok(formula.includes(`{ClientRecordId}='${SECOND}'`) && !formula.includes('ClientEmail'),
     'shared email across two owned accounts: fallback dropped, id-only scope');
+}
+
+// ── scope=self: the personal scheduler companion sees the CALLER'S OWN widgets ─
+// A staff member working INSIDE a client account (activeClientId = the client)
+// still needs their own booking pages in the Gmail companion. ?scope=self scopes
+// by their own login email and ignores the active client entirely, so their
+// scheduler stops vanishing when they act as a client. This must NOT reintroduce
+// the Worldchoice leak: it is the staff member's own private view of their own
+// widgets, never a client dashboard showing staff widgets.
+state.users.recANDY0000000001 = { email: 'andy.speight@agendas.group', clients: [WORLDCHOICE] };
+{
+  const { res, formula } = await listAs({ email: 'andy.speight@agendas.group', recordId: 'recANDY0000000001', clientId: WORLDCHOICE, query: { scope: 'self' } });
+  ok(res.statusCode === 200, 'scope=self: list succeeds');
+  ok(formula === `LOWER({ClientEmail})='andy.speight@agendas.group'`, 'scope=self: scoped to the caller OWN email only');
+  ok(!formula.includes(WORLDCHOICE) && !formula.includes('ClientRecordId'),
+    'scope=self: the active client id / record scoping is absent — purely own widgets');
+}
+{
+  // Same session WITHOUT scope=self stays strictly client-scoped — no regression.
+  const { formula } = await listAs({ email: 'andy.speight@agendas.group', recordId: 'recANDY0000000001', clientId: WORLDCHOICE });
+  ok(formula.includes(`{ClientRecordId}='${WORLDCHOICE}'`) && !formula.includes('agendas.group'),
+    'default scope unchanged: staff-email account still id-only, own email absent');
 }
 
 // ── No client context: old tokens scope purely by own email ──────────────────
