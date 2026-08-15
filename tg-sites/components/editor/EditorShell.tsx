@@ -523,10 +523,10 @@ export function EditorShell({
    * the same. The AI call is the slow one, which the composer's busy state covers.
    */
   const createPage = useCallback(
-    async (title: string, template: string, brief?: string): Promise<string | null> => {
+    async (title: string, template: string, brief?: string, imageId?: string): Promise<string | null> => {
       const result =
         template === 'ai'
-          ? await createAiPageAction({ title, brief })
+          ? await createAiPageAction({ title, brief, imageId })
           : await createPageAction({ title, template });
       if (!result.ok) return result.error;
       window.location.assign(`/editor?page=${encodeURIComponent(result.data.id)}`);

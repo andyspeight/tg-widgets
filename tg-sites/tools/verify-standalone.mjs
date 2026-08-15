@@ -9603,6 +9603,8 @@ await check('the AI start reveals a brief box and needs one filled in', async ()
   await page.locator('.ed-pages__template:has(input[value="ai"])').click();
   await page.waitForTimeout(150);
   const briefShown = await page.locator('textarea[aria-label="Describe your page"]').isVisible();
+  // The optional picture control (slice 2), shown only for the AI start.
+  const imageAdd = await page.locator('.ed-pages__image-add').isVisible();
   const buildLabel = ((await page.locator('.ed-pages__new button[type="submit"]').innerText()) || '').trim();
 
   // A name but no brief is refused, client side, without spending anything.
@@ -9620,6 +9622,7 @@ await check('the AI start reveals a brief box and needs one filled in', async ()
 
   if (beforePick !== 0) return 'the brief box showed before AI was chosen';
   if (!briefShown) return 'choosing AI did not reveal the brief box';
+  if (!imageAdd) return 'choosing AI did not offer a picture to build from';
   if (buildLabel !== 'Build page') return `the button read "${buildLabel}", not Build page`;
   if (!/what the page is for/i.test(refused)) return `an empty brief was not refused, error was "${refused}"`;
   if (!stillOpen) return 'the composer closed on an empty brief instead of asking';

@@ -1324,6 +1324,14 @@ const MUTATIONS = [
     from: `                  {template === 'ai' ? (busy ? 'Building' : 'Build page') : busy ? 'Adding' : 'Add page'}`,
     to: `                  {busy ? 'Adding' : 'Add page'}`,
   },
+  {
+    tag: 'ai-image',
+    check: 'the AI start reveals a brief box and needs one filled in',
+    why: 'Hide the picture control, so the AI start cannot be given an image to read and feature. Inline display:none, since the class sets display:flex and would beat the hidden attribute.',
+    file: 'components/editor/PagesPanel.tsx',
+    from: `                  <div className="ed-pages__image">`,
+    to: `                  <div className="ed-pages__image" style={{ display: 'none' }}>`,
+  },
 ];
 
 /*

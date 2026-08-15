@@ -32,6 +32,8 @@ import { REGION_PRESETS } from '../lib/content/presets-region';
 import { parsePage, type Block, type Section } from '../lib/content/schema';
 import { sanitisePage } from '../lib/content/sanitise-page';
 import {
+  buildPageUserPrompt,
+  featurePageImage,
   MAX_PLAN_SECTIONS,
   pageCatalogue,
   planFromModel,
@@ -237,6 +239,65 @@ describe('the sections a plan builds', () => {
 });
 
 // ---------------------------------------------------------------------------
+// The uploaded picture (slice 2)
+// ---------------------------------------------------------------------------
+
+const BLOB = 'https://store123.public.blob.vercel-storage.com/sites/t/media/hero-abc123.jpg';
+
+describe('featuring an uploaded picture', () => {
+  const plan = [
+    { preset: HERO, heading: 'An opener' },
+    { preset: CTA, heading: 'Talk to us' },
+  ];
+
+  it('places the picture behind the opening section and darkens it', () => {
+    const sections = featurePageImage(sectionsFromPlan(plan), BLOB);
+    expect(sections[0].backgroundImage).toBe(BLOB);
+    expect(sections[0].tone).toBe('dark');
+    expect(Number(sections[0].overlay)).toBeGreaterThanOrEqual(45);
+  });
+
+  it('touches only the first section', () => {
+    const featured = featurePageImage(sectionsFromPlan(plan), BLOB);
+    expect(featured[1].backgroundImage ?? '').not.toBe(BLOB);
+  });
+
+  it('does nothing with no sections or no url', () => {
+    expect(featurePageImage([], BLOB)).toEqual([]);
+    const built = sectionsFromPlan(plan);
+    expect(featurePageImage(built, '')).toBe(built);
+  });
+
+  it('leaves a page the schema accepts and the sanitiser keeps, picture and all', () => {
+    const sections = featurePageImage(sectionsFromPlan(plan), BLOB);
+    const parsed = seed(sections);
+    expect(parsed.ok, parsed.ok ? '' : parsed.errors.join('; ')).toBe(true);
+    if (!parsed.ok) return;
+    expect(sanitisePage(parsed.page)).toEqual(parsed.page);
+    // The blob URL survives sanitising, so the picture is actually on the page.
+    expect(JSON.stringify(sanitisePage(parsed.page))).toContain(BLOB);
+  });
+});
+
+describe('the brief prompt with a picture', () => {
+  it('tells the model to read the photo and open with a hero', () => {
+    const withImage = buildPageUserPrompt('A page about Crete', true);
+    expect(withImage).toMatch(/photograph has been provided/i);
+    expect(withImage).toMatch(/behind the opening section/i);
+  });
+
+  it('says nothing about a photo when there is none', () => {
+    const plain = buildPageUserPrompt('A page about Crete', false);
+    expect(plain).not.toMatch(/photograph/i);
+    expect(plain).toContain('A page about Crete');
+  });
+
+  it('works from the picture alone when the brief is empty', () => {
+    expect(buildPageUserPrompt('', true)).toMatch(/photograph/i);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // The action around it, read as source
 // ---------------------------------------------------------------------------
 
@@ -266,6 +327,14 @@ describe('the page builder action', () => {
     expect(action).toContain('planFromModel(');
     expect(action).toContain('sectionsFromPlan(');
     expect(action).toContain('createPage(');
+  });
+
+  it('resolves the picture against the tenant bank and only sends an https url', () => {
+    // The browser sends a media id; the URL is looked up here, tenant-scoped, and
+    // only an https one is handed to the model, the same rule the alt text uses.
+    expect(action).toContain('getMediaItem(site.tenantId, imageId)');
+    expect(action).toContain('/^https:\\/\\//i.test(item.url)');
+    expect(action).toContain('featurePageImage(');
   });
 
   it('never names the model endpoint or key where an error could echo it', () => {

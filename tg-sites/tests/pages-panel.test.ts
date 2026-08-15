@@ -120,9 +120,13 @@ describe('the Add page composer', () => {
     expect(panelSource).toContain("setError('Give the page a name.')");
   });
 
-  it('creates with the trimmed name, the chosen template, and the brief for AI', () => {
+  it('creates with the trimmed name, the chosen template, and the brief and picture for AI', () => {
     expect(panelSource).toContain('const title = newTitle.trim();');
-    expect(panelSource).toContain('await onCreatePage(title, template, wantsAi ? said : undefined)');
+    // Robust to further arguments: the call passes title then template, then the
+    // AI brief and the picture id.
+    expect(panelSource).toMatch(/onCreatePage\(\s*title,\s*template,/);
+    expect(panelSource).toContain('wantsAi ? said : undefined');
+    expect(panelSource).toContain('wantsAi ? imageId ?? undefined : undefined');
   });
 
   it('offers a template to start from, a radio group defaulting to blank', () => {
@@ -134,13 +138,16 @@ describe('the Add page composer', () => {
     expect(panelSource).toContain('role="radiogroup"');
   });
 
-  it('offers describing the page with AI, which needs a brief', () => {
-    // The one start that is not a ready-made page: a radio in the same group, and
-    // a brief box that only shows for it and is required before a build.
+  it('offers describing the page with AI, which needs a brief or a picture', () => {
+    // The one start that is not a ready-made page: a radio in the same group, a
+    // brief box that only shows for it, and an optional picture through the same
+    // media picker the image blocks use. A build needs one of the two.
     expect(panelSource).toContain('value="ai"');
     expect(panelSource).toContain("template === 'ai'");
     expect(panelSource).toContain('aria-label="Describe your page"');
-    expect(panelSource).toContain("setError('Say what the page is for.')");
+    expect(panelSource).toContain('<MediaPicker');
+    expect(panelSource).toContain('ed-pages__image-add');
+    expect(panelSource).toContain("setError('Say what the page is for, or add a picture.')");
   });
 
   it('focuses the box only when the composer opens, not on every render', () => {

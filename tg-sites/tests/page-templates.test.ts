@@ -283,7 +283,7 @@ describe('the id is the only thing that crosses from the browser', () => {
    * template's id string; the page objects live server side.
    */
   it('has the composer send a template id string', () => {
-    expect(panel).toContain('onCreatePage(title, template, wantsAi ? said : undefined)');
+    expect(panel).toMatch(/onCreatePage\(\s*title,\s*template,/);
     expect(panel).toContain("useState('blank')");
   });
 });

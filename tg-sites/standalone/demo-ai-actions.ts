@@ -247,8 +247,10 @@ export async function createAiPageAction(input: unknown): Promise<real.AiPageRes
   const fields = (input ?? {}) as Record<string, unknown>;
   const title = typeof fields.title === 'string' ? fields.title.trim() : '';
   const brief = typeof fields.brief === 'string' ? fields.brief.trim() : '';
+  const imageId = typeof fields.imageId === 'string' ? fields.imageId.trim() : '';
 
-  if (!brief) return { ok: false, error: 'Say what the page is for.' };
+  // The same refusal the real action makes: a brief, a picture, or both.
+  if (!brief && !imageId) return { ok: false, error: 'Say what the page is for, or add a picture.' };
   if (/\bfail\b/i.test(brief)) {
     return {
       ok: false,

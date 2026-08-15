@@ -116,10 +116,32 @@ export function buildPageSystemPrompt(settings: SiteSettings): string {
   ].join('\n\n');
 }
 
-/** The brief the person typed, capped and stripped of our own prompt tags. */
-export function buildPageUserPrompt(brief: string): string {
+/**
+ * The brief the person typed, capped and stripped of our own prompt tags.
+ *
+ * When a picture is attached (slice 2), the model is told to read it and to open
+ * with a hero so the photo has somewhere to sit. The brief becomes optional then:
+ * an image on its own is a brief a model can work from.
+ */
+export function buildPageUserPrompt(brief: string, hasImage = false): string {
   const clean = brief.replace(/<\/?(company|tone|avoid|copy|request)>/gi, '').trim().slice(0, MAX_PAGE_BRIEF);
-  return `Design this page:\n\n<request>\n${clean}\n</request>`;
+  const parts: string[] = [];
+
+  if (hasImage) {
+    parts.push(
+      'A photograph has been provided with this request. Read it: let what it shows and its mood guide the KIND of page you design and the words you write. The photo will be placed behind the opening section, so open the page with a hero or a bold opener that reads well as a full-width band behind a picture.',
+    );
+  }
+
+  if (clean) {
+    parts.push(`Design this page:\n\n<request>\n${clean}\n</request>`);
+  } else if (hasImage) {
+    parts.push('Design a page that suits the photograph provided.');
+  } else {
+    parts.push('Design a page.');
+  }
+
+  return parts.join('\n\n');
 }
 
 /** The follow-up when the first answer would not parse. One repair, then stop. */
@@ -198,4 +220,24 @@ export function planFromModel(answer: unknown): PlanResult {
  */
 export function sectionsFromPlan(plan: StarterSection[]): Section[] {
   return buildStarterPage({ title: '', slug: '', description: '', sections: plan }, BLANK_FACTS).sections;
+}
+
+/**
+ * Place an uploaded photograph behind the opening section (slice 2).
+ *
+ * The image is the client's own, resolved to a blob URL by the ACTION, since
+ * finding it is a tenant query that does not belong in a pure function. Here it
+ * is only placed: on the first section, as its background, with the tone turned
+ * dark and a scrim raised to at least 45 so whatever text the section carries
+ * stays readable over a photo. The prompt asks the model to open with a hero when
+ * an image is given, so the first section is usually the right home for it, and
+ * darkening it makes it read as one even when the model opens with something
+ * plainer. The URL is validated once more by createPage's sanitiser, like every
+ * other stored URL.
+ */
+export function featurePageImage(sections: Section[], url: string): Section[] {
+  if (sections.length === 0 || !url) return sections;
+  const [first, ...rest] = sections;
+  const overlay = typeof first.overlay === 'number' && first.overlay >= 45 ? first.overlay : 45;
+  return [{ ...first, backgroundImage: url, tone: 'dark' as Section['tone'], overlay }, ...rest];
 }

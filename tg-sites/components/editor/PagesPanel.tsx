@@ -28,6 +28,8 @@ import type { FormEvent, ReactElement } from 'react';
 
 import { filterPages, type PageLink } from '../../lib/editor/page-list';
 import { PAGE_TEMPLATES } from '../../lib/content/page-templates';
+import { MediaPicker } from '../media/MediaPicker';
+import type { MediaItem } from '../../lib/media/types';
 
 // Re-exported so the shell and the standalone entry can keep importing the type
 // from the component they hand it to. The type and the search behind it live in
@@ -45,11 +47,17 @@ export function PagesPanel({
    * Make a page with this name from the chosen template and open it. Resolves
    * with an error to show in the composer, or null on success, by which point
    * the editor is navigating to the new page. The template is an id from
-   * PAGE_TEMPLATES; 'blank' is an empty page; 'ai' means build it from the brief,
-   * which is the only template that reads the third argument. Optional so a
-   * caller without it simply shows no button.
+   * PAGE_TEMPLATES; 'blank' is an empty page; 'ai' means build it from the brief
+   * and an optional picture, the only template that reads the third and fourth
+   * arguments. The picture is a media id, resolved to the tenant's own image
+   * server side. Optional so a caller without it simply shows no button.
    */
-  onCreatePage?: (title: string, template: string, brief?: string) => Promise<string | null>;
+  onCreatePage?: (
+    title: string,
+    template: string,
+    brief?: string,
+    imageId?: string,
+  ) => Promise<string | null>;
 }): ReactElement {
   const [query, setQuery] = useState('');
 
@@ -62,6 +70,11 @@ export function PagesPanel({
   const [template, setTemplate] = useState('blank');
   /** The AI brief, read only when 'ai' is the chosen start. */
   const [brief, setBrief] = useState('');
+  /** An optional picture for the AI start: its media id, and its URL for the thumbnail. */
+  const [imageId, setImageId] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  /** Whether the media picker is open over the composer. */
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const nameRef = useRef<HTMLInputElement>(null);
@@ -78,6 +91,9 @@ export function PagesPanel({
     setNewTitle('');
     setTemplate('blank');
     setBrief('');
+    setImageId(null);
+    setImageUrl(null);
+    setPickerOpen(false);
     setError(null);
   }
 
@@ -89,16 +105,22 @@ export function PagesPanel({
       setError('Give the page a name.');
       return;
     }
-    // The AI start needs a brief to work from; the ready-made pages do not.
+    // The AI start needs something to work from, a brief or a picture; the
+    // ready-made pages need neither.
     const wantsAi = template === 'ai';
     const said = brief.trim();
-    if (wantsAi && !said) {
-      setError('Say what the page is for.');
+    if (wantsAi && !said && !imageId) {
+      setError('Say what the page is for, or add a picture.');
       return;
     }
     setBusy(true);
     setError(null);
-    const failure = await onCreatePage(title, template, wantsAi ? said : undefined);
+    const failure = await onCreatePage(
+      title,
+      template,
+      wantsAi ? said : undefined,
+      wantsAi ? imageId ?? undefined : undefined,
+    );
     setBusy(false);
     // Success navigates away, so there is nothing to close. A failure stays put
     // with the reason, the commonest being an address already in use, or the
@@ -181,23 +203,69 @@ export function PagesPanel({
                 ))}
               </div>
               {/*
-                The brief, shown only for the AI start. A real user action opened
-                the composer and chose this, so the box is theirs to click into;
-                nothing focuses it on render, which would steal the caret.
+                Shown only for the AI start: a brief, and an optional picture. A
+                real user action opened the composer and chose this, so the box is
+                theirs to click into; nothing focuses it on render, which would
+                steal the caret.
               */}
               {template === 'ai' && (
-                <label className="ed-pages__brief">
-                  <span className="ed-pages__brief-label">Describe your page</span>
-                  <textarea
-                    className="ed-input ed-pages__brief-box"
-                    value={brief}
-                    placeholder="For example: a page about our walking holidays in the Dolomites, who they suit and how to get in touch."
-                    aria-label="Describe your page"
-                    maxLength={800}
-                    rows={4}
-                    onChange={(event) => setBrief(event.target.value)}
-                  />
-                </label>
+                <div className="ed-pages__ai">
+                  <label className="ed-pages__brief">
+                    <span className="ed-pages__brief-label">Describe your page</span>
+                    <textarea
+                      className="ed-input ed-pages__brief-box"
+                      value={brief}
+                      placeholder="For example: a page about our walking holidays in the Dolomites, who they suit and how to get in touch."
+                      aria-label="Describe your page"
+                      maxLength={800}
+                      rows={4}
+                      onChange={(event) => setBrief(event.target.value)}
+                    />
+                  </label>
+                  {/*
+                    The picture is chosen through the same media picker the image
+                    blocks use, so it can be uploaded, taken from the bank or found
+                    in stock, and it is handed on as a media id the server resolves
+                    to this site's own image. The assistant reads it and puts it
+                    behind the opening section.
+                  */}
+                  <div className="ed-pages__image">
+                    {imageUrl ? (
+                      <div className="ed-pages__image-chosen">
+                        <img className="ed-pages__image-thumb" src={imageUrl} alt="" />
+                        <button type="button" className="ed-btn" onClick={() => setPickerOpen(true)}>
+                          Change
+                        </button>
+                        <button
+                          type="button"
+                          className="ed-btn"
+                          onClick={() => {
+                            setImageId(null);
+                            setImageUrl(null);
+                          }}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        className="ed-pages__image-add"
+                        onClick={() => setPickerOpen(true)}
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <rect x="3" y="4" width="18" height="14" rx="2" />
+                          <path d="M3 15l5-4 4 3 3-2 6 5" />
+                          <circle cx="9" cy="9" r="1.4" />
+                        </svg>
+                        Add a picture
+                      </button>
+                    )}
+                    <span className="ed-pages__image-hint">
+                      Optional. The assistant reads it and puts it on the page.
+                    </span>
+                  </div>
+                </div>
               )}
               {error && (
                 <p className="ed-pages__error" role="alert">
@@ -267,6 +335,24 @@ export function PagesPanel({
           ))
         )}
       </div>
+
+      {/*
+        The picture chooser, the same one the image blocks use, opened over the
+        composer. A Modal, so it portals to the body and sits above the rail; it
+        renders outside the form, so choosing an image cannot submit it. onChoose
+        keeps the id (for the server) and the URL (for the thumbnail).
+      */}
+      {pickerOpen && (
+        <MediaPicker
+          onChoose={(item: MediaItem) => {
+            setImageId(item.id);
+            setImageUrl(item.url);
+            setPickerOpen(false);
+          }}
+          onClose={() => setPickerOpen(false)}
+          currentUrl={imageUrl ?? undefined}
+        />
+      )}
     </aside>
   );
 }

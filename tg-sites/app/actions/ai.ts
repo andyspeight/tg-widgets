@@ -70,6 +70,7 @@ import { slugify } from '../../lib/content/slug';
 import {
   buildPageSystemPrompt,
   buildPageUserPrompt,
+  featurePageImage,
   MAX_PAGE_BRIEF,
   PAGE_BUILD_MAX_TOKENS,
   planFromModel,
@@ -594,8 +595,24 @@ export async function createAiPageAction(input: unknown): Promise<AiPageResult> 
     const fields = (input ?? {}) as Record<string, unknown>;
     const title = text(fields.title, 200);
     const brief = text(fields.brief, MAX_PAGE_BRIEF);
-    if (!brief) {
-      return { ok: false, error: 'Say what the page is for.' };
+    const imageId = text(fields.imageId, 100);
+
+    /*
+     * The picture is optional, and it is the client's own: resolved against their
+     * bank here so a guessed id gets nobody else's, and used only if it is a URL
+     * the model can fetch. The model follows a URL, not a data URI, exactly as the
+     * alt text call does, so a demo bank's data: URIs fall through to a text-only
+     * build rather than timing out.
+     */
+    let imageUrl: string | undefined;
+    if (imageId) {
+      const item = await getMediaItem(site.tenantId, imageId);
+      if (item && /^https:\/\//i.test(item.url)) imageUrl = item.url;
+    }
+
+    // Something to work from: a brief, a picture, or both.
+    if (!brief && !imageUrl) {
+      return { ok: false, error: 'Say what the page is for, or add a picture.' };
     }
 
     // The slot is taken before the model is called, and one slot covers the build
@@ -612,23 +629,24 @@ export async function createAiPageAction(input: unknown): Promise<AiPageResult> 
 
     const settings = await getSettings(site.tenantId);
     const system = buildPageSystemPrompt(settings);
-    const build = { model: MODEL_BUILD, maxTokens: PAGE_BUILD_MAX_TOKENS };
+    // The picture rides along on both attempts, so the model sees it whether the
+    // first answer parsed or the repair did.
+    const build = imageUrl
+      ? { model: MODEL_BUILD, maxTokens: PAGE_BUILD_MAX_TOKENS, image: { url: imageUrl } }
+      : { model: MODEL_BUILD, maxTokens: PAGE_BUILD_MAX_TOKENS };
+    const userPrompt = buildPageUserPrompt(brief, Boolean(imageUrl));
 
     let inputTokens = 0;
     let outputTokens = 0;
 
-    const firstAnswer = await ask(system, buildPageUserPrompt(brief), build);
+    const firstAnswer = await ask(system, userPrompt, build);
     inputTokens += firstAnswer.inputTokens;
     outputTokens += firstAnswer.outputTokens;
     let plan = planFromModel(firstAnswer.text);
 
     // The one repair: hand back the request and what went wrong, ask again.
     if (!plan.ok) {
-      const second = await ask(
-        system,
-        `${buildPageUserPrompt(brief)}\n\n${repairPagePrompt(plan.error)}`,
-        build,
-      );
+      const second = await ask(system, `${userPrompt}\n\n${repairPagePrompt(plan.error)}`, build);
       inputTokens += second.inputTokens;
       outputTokens += second.outputTokens;
       plan = planFromModel(second.text);
@@ -646,7 +664,10 @@ export async function createAiPageAction(input: unknown): Promise<AiPageResult> 
       };
     }
 
-    const sections = sectionsFromPlan(plan.plan);
+    let sections = sectionsFromPlan(plan.plan);
+    // Feature the uploaded picture behind the opening section, so it is used and
+    // not only read.
+    if (imageUrl) sections = featurePageImage(sections, imageUrl);
 
     const page = await createPage(site.tenantId, {
       title: title || 'New page',
