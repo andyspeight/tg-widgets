@@ -28,9 +28,11 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { buildPresetSection, presetById } from '../lib/content/presets';
 import { createPage as blankPage } from '../lib/content/factory';
-import { parsePage, type Section } from '../lib/content/schema';
+import { parsePage, type Block, type Section } from '../lib/content/schema';
 import { sanitisePage } from '../lib/content/sanitise-page';
+import { titleBlock } from '../lib/content/starters';
 import {
   PAGE_TEMPLATES,
   pageTemplateById,
@@ -43,6 +45,17 @@ function read(...parts: string[]): string {
 
 /** Every template that builds a page, i.e. not Blank. */
 const DESIGNED = PAGE_TEMPLATES.filter((template) => template.page);
+
+/** Every block in a set of sections, flattened. */
+function blocks(sections: readonly Section[]): Block[] {
+  const found: Block[] = [];
+  for (const section of sections) {
+    for (const row of section.rows) {
+      for (const column of row.columns) found.push(...column.blocks);
+    }
+  }
+  return found;
+}
 
 /** Wrap a set of sections in a blank page the way createPage does before it saves. */
 function seed(sections: Section[]) {
@@ -153,6 +166,94 @@ describe('the sections a template seeds', () => {
     const b = pageTemplateSections('home');
     expect(a?.[0]?.id).toBeTruthy();
     expect(a?.[0]?.id).not.toBe(b?.[0]?.id);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The extra pages are assembled like a starter, not restated
+//
+// The site pages (Home, About us, Holidays, FAQ, Contact) are the agency
+// starter's, already held to these checks by starters.test.ts. The extra pages
+// (Services, Meet the team, Reviews) are our own, so the SAME drift and
+// placement guarantees are held over them here: a heading written where no
+// heading exists, or a body where no paragraph exists, is copy nobody ever sees.
+// ---------------------------------------------------------------------------
+
+describe('a template page names sections, it does not restate them', () => {
+  it('names only presets that exist', () => {
+    const missing: string[] = [];
+    for (const template of DESIGNED) {
+      for (const spec of template.page!.sections) {
+        if (!presetById(spec.preset)) missing.push(`${template.id}: ${spec.preset}`);
+      }
+    }
+    expect(missing, 'these presets have been renamed or removed').toEqual([]);
+  });
+
+  it('only sets a heading on a section that has a title to put it in', () => {
+    const nowhere: string[] = [];
+    for (const template of DESIGNED) {
+      for (const spec of template.page!.sections) {
+        if (!spec.heading) continue;
+        const preset = presetById(spec.preset);
+        if (!preset) continue;
+        if (!titleBlock(buildPresetSection(preset))) nowhere.push(`${template.id}: ${spec.preset}`);
+      }
+    }
+    expect(nowhere, 'these headings are written and then never seen').toEqual([]);
+  });
+
+  it('only sets a body on a section that has a paragraph', () => {
+    const nowhere: string[] = [];
+    for (const template of DESIGNED) {
+      for (const spec of template.page!.sections) {
+        if (!spec.body) continue;
+        const preset = presetById(spec.preset);
+        if (!preset) continue;
+        const has = blocks([buildPresetSection(preset)]).some((block) => block.type === 'text');
+        if (!has) nowhere.push(`${template.id}: ${spec.preset}`);
+      }
+    }
+    expect(nowhere, 'these paragraphs are written and then never seen').toEqual([]);
+  });
+
+  it('never overrides a heading with the words the preset already used', () => {
+    const pointless: string[] = [];
+    for (const template of DESIGNED) {
+      for (const spec of template.page!.sections) {
+        if (!spec.heading) continue;
+        const preset = presetById(spec.preset);
+        if (!preset) continue;
+        const original = titleBlock(buildPresetSection(preset));
+        if (original && String(original.props.html) === spec.heading) {
+          pointless.push(`${template.id}: ${spec.preset}`);
+        }
+      }
+    }
+    expect(pointless, 'these say what the preset already said').toEqual([]);
+  });
+
+  /*
+   * EVERY TOKEN CARRIES ITS OWN FALLBACK. A {{company}} with no fallback resolves
+   * to an empty string, so the "no {{" check above passes while a hole is left in
+   * a heading on a client's page. This is the check that catches that.
+   */
+  it('names a fallback for every token in its copy', () => {
+    const naked: string[] = [];
+    for (const template of DESIGNED) {
+      const page = template.page!;
+      const strings = [page.title, page.description];
+      for (const spec of page.sections) {
+        if (spec.heading) strings.push(spec.heading);
+        if (spec.body) strings.push(spec.body);
+      }
+      for (const text of strings) {
+        for (const match of text.matchAll(/\{\{([a-z]+)(\|[^}]*)?\}\}/g)) {
+          if (!match[2]) naked.push(`${template.id}: ${match[1]} in "${text.slice(0, 40)}"`);
+        }
+      }
+    }
+    expect(naked, 'these would leave a hole on a site with an empty profile').toEqual([]);
   });
 });
 

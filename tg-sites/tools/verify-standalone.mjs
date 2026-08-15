@@ -9571,9 +9571,9 @@ await check('the Add page composer offers a ready-made page to start from', asyn
   await page.locator('.ed-rail__btn').filter({ hasText: 'Layers' }).first().click();
   await page.waitForTimeout(150);
 
-  const expected = ['Blank page', 'Home', 'About us', 'Holidays', 'Contact'];
+  const expected = ['Blank page', 'Home', 'About us', 'Services', 'Holidays', 'Reviews', 'Meet the team', 'FAQ', 'Contact'];
   if (!groupThere) return 'the composer had no template chooser';
-  if (radioCount !== 5) return `expected 5 template choices, saw ${radioCount}`;
+  if (radioCount !== expected.length) return `expected ${expected.length} template choices, saw ${radioCount}`;
   if (labels.join('|') !== expected.join('|')) return `the choices read "${labels.join(', ')}"`;
   if (!blankFirst) return 'Blank was not the default choice';
   if (!homeChecked) return 'picking Home did not select it';

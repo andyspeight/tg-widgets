@@ -120,9 +120,18 @@ describe('the Add page composer', () => {
     expect(panelSource).toContain("setError('Give the page a name.')");
   });
 
-  it('creates with the trimmed name', () => {
+  it('creates with the trimmed name and the chosen template', () => {
     expect(panelSource).toContain('const title = newTitle.trim();');
-    expect(panelSource).toContain('await onCreatePage(title)');
+    expect(panelSource).toContain('await onCreatePage(title, template)');
+  });
+
+  it('offers a template to start from, a radio group defaulting to blank', () => {
+    // The picker in front of Add page: a real radio group so it announces itself
+    // and moves on the arrow keys, opening on Blank so it builds nothing until a
+    // designed page is chosen.
+    expect(panelSource).toContain("useState('blank')");
+    expect(panelSource).toContain('PAGE_TEMPLATES.map');
+    expect(panelSource).toContain('role="radiogroup"');
   });
 
   it('focuses the box only when the composer opens, not on every render', () => {
