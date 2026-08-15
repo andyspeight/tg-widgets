@@ -1308,6 +1308,22 @@ const MUTATIONS = [
     from: `                      onChange={() => setTemplate(option.id)}`,
     to: `                      onChange={() => setTemplate('blank')}`,
   },
+  {
+    tag: 'ai-page',
+    check: 'the AI start reveals a brief box and needs one filled in',
+    why: 'Never render the brief box, so the AI start has nowhere to type what the page is for.',
+    file: 'components/editor/PagesPanel.tsx',
+    from: `              {template === 'ai' && (`,
+    to: `              {false && (`,
+  },
+  {
+    tag: 'ai-page',
+    check: 'the AI start reveals a brief box and needs one filled in',
+    why: 'Leave the button reading Add page for the AI start, as it did before the builder, so the slow paid action is unlabelled.',
+    file: 'components/editor/PagesPanel.tsx',
+    from: `                  {template === 'ai' ? (busy ? 'Building' : 'Build page') : busy ? 'Adding' : 'Add page'}`,
+    to: `                  {busy ? 'Adding' : 'Add page'}`,
+  },
 ];
 
 /*

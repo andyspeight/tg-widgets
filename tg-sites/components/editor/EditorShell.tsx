@@ -16,7 +16,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import { writeCopyAction } from '../../app/actions/ai';
+import { createAiPageAction, writeCopyAction } from '../../app/actions/ai';
 import { buildDesignedSectionAction } from '../../app/actions/designed';
 import { createPageAction, publishPageAction, saveDraftAction } from '../../app/actions/pages';
 import { publishRegionAction, saveRegionAction } from '../../app/actions/regions';
@@ -516,13 +516,24 @@ export function EditorShell({
    * so the new page loads fresh with its own draft and the list picks it up.
    * Returns an error to show in the composer, or null on success, by which point
    * the browser is already leaving.
+   *
+   * The 'ai' template is the one that does not name a ready-made page: it carries
+   * a brief, and a separate action has the model design the page before creating
+   * it. Both actions return the same {ok, data:{id}} shape, so the navigation is
+   * the same. The AI call is the slow one, which the composer's busy state covers.
    */
-  const createPage = useCallback(async (title: string, template: string): Promise<string | null> => {
-    const result = await createPageAction({ title, template });
-    if (!result.ok) return result.error;
-    window.location.assign(`/editor?page=${encodeURIComponent(result.data.id)}`);
-    return null;
-  }, []);
+  const createPage = useCallback(
+    async (title: string, template: string, brief?: string): Promise<string | null> => {
+      const result =
+        template === 'ai'
+          ? await createAiPageAction({ title, brief })
+          : await createPageAction({ title, template });
+      if (!result.ok) return result.error;
+      window.location.assign(`/editor?page=${encodeURIComponent(result.data.id)}`);
+      return null;
+    },
+    [],
+  );
   /**
    * Preview mode: the canvas becomes the whole screen and shows the page as it
    * will publish, not as it is edited.

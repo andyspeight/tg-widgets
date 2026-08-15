@@ -65,8 +65,20 @@ import {
 } from '../../lib/ai/prompt';
 import { claimRequest, DAILY_LIMIT, recordTokens } from '../../lib/db/ai';
 import { getMediaItem } from '../../lib/db/media';
+import { createPage, type PageWithContent } from '../../lib/db/pages';
+import { slugify } from '../../lib/content/slug';
+import {
+  buildPageSystemPrompt,
+  buildPageUserPrompt,
+  MAX_PAGE_BRIEF,
+  PAGE_BUILD_MAX_TOKENS,
+  planFromModel,
+  repairPagePrompt,
+  sectionsFromPlan,
+} from '../../lib/ai/page-build';
 import { DESCRIPTION_MAX, DESCRIPTION_MIN, TITLE_MAX } from '../../lib/seo/audit';
 import { getSettings } from '../../lib/db/settings';
+import { revalidatePath } from 'next/cache';
 
 export type AiResult =
   | { ok: true; data: Copy }
@@ -537,5 +549,132 @@ export async function buildSectionAction(input: unknown): Promise<BuildResult> {
     // been in scope.
     console.error('[tg-sites] the section builder failed', error);
     return { ok: false, error: 'Something went wrong building that. Try again.' };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// The page builder
+// ---------------------------------------------------------------------------
+
+export type AiPageResult =
+  | { ok: true; data: PageWithContent }
+  | { ok: false; error: string; retryable?: boolean };
+
+/**
+ * Build a whole page from a description, and create it.
+ *
+ * THE SAME FOUR GATES as the other AI actions, repeated not shared because a
+ * server action is a public endpoint. It spends one slot (intent 'write', the
+ * same as the section builder: a build is one request whether it takes one call
+ * or its one repair).
+ *
+ * IT DOES CREATE THE PAGE, unlike the copy and section actions, and that is the
+ * one real difference. Those hand something back for the editor to place; a page
+ * is the unit being added, so the safe move is to build the sections and create
+ * the page in one server round trip. The sections are OURS, chosen from the
+ * closed preset catalogue and built by buildStarterPage, and they still go
+ * through createPage's parse and sanitise like every other write. Nothing the
+ * model produced ever crosses back through the browser to be trusted a second
+ * time.
+ *
+ * THE MODEL PICKS SECTIONS, IT DOES NOT WRITE MARKUP. planFromModel keeps only
+ * catalogue ids and escapes every heading and body to plain text, so a page that
+ * fails to parse falls to an honest error rather than to anything reaching the
+ * database.
+ */
+export async function createAiPageAction(input: unknown): Promise<AiPageResult> {
+  try {
+    if (!aiIsConfigured()) {
+      return { ok: false, error: 'The AI builder is not switched on for this site yet.' };
+    }
+
+    const site = await requireSite();
+    const userId = await currentUserId();
+
+    const fields = (input ?? {}) as Record<string, unknown>;
+    const title = text(fields.title, 200);
+    const brief = text(fields.brief, MAX_PAGE_BRIEF);
+    if (!brief) {
+      return { ok: false, error: 'Say what the page is for.' };
+    }
+
+    // The slot is taken before the model is called, and one slot covers the build
+    // and its repair.
+    const claim = await claimRequest(site.tenantId, { userId, intent: 'write' });
+    if (!claim.allowed) {
+      return {
+        ok: false,
+        error:
+          `This site has used all ${DAILY_LIMIT} of today's AI requests. `
+          + 'It resets through the day, so try again later.',
+      };
+    }
+
+    const settings = await getSettings(site.tenantId);
+    const system = buildPageSystemPrompt(settings);
+    const build = { model: MODEL_BUILD, maxTokens: PAGE_BUILD_MAX_TOKENS };
+
+    let inputTokens = 0;
+    let outputTokens = 0;
+
+    const firstAnswer = await ask(system, buildPageUserPrompt(brief), build);
+    inputTokens += firstAnswer.inputTokens;
+    outputTokens += firstAnswer.outputTokens;
+    let plan = planFromModel(firstAnswer.text);
+
+    // The one repair: hand back the request and what went wrong, ask again.
+    if (!plan.ok) {
+      const second = await ask(
+        system,
+        `${buildPageUserPrompt(brief)}\n\n${repairPagePrompt(plan.error)}`,
+        build,
+      );
+      inputTokens += second.inputTokens;
+      outputTokens += second.outputTokens;
+      plan = planFromModel(second.text);
+    }
+
+    if (claim.id) {
+      await recordTokens(site.tenantId, claim.id, { input: inputTokens, output: outputTokens });
+    }
+
+    if (!plan.ok) {
+      return {
+        ok: false,
+        error: 'The builder could not put that page together. Try describing it a little differently.',
+        retryable: true,
+      };
+    }
+
+    const sections = sectionsFromPlan(plan.plan);
+
+    const page = await createPage(site.tenantId, {
+      title: title || 'New page',
+      slug: slugify(title || 'new page'),
+      sections,
+    });
+
+    revalidatePath('/sites');
+    return { ok: true, data: page };
+  } catch (error) {
+    if (error instanceof AiError) {
+      return { ok: false, error: error.message, retryable: error.retryable };
+    }
+    if (isSignInRequired(error)) {
+      return { ok: false, error: (error as Error).message };
+    }
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.startsWith('This account is not a member')) {
+      return { ok: false, error: message };
+    }
+    // The one create error worth naming: two pages cannot share an address, and
+    // the client chose the name.
+    if (message.includes('23505') || message.includes('duplicate key')) {
+      return { ok: false, error: 'A page already has that address. Give this one a different name.' };
+    }
+    // Generic below this line: the prompt, with the client's profile in it, has
+    // been in scope.
+    console.error('[tg-sites] the page builder failed', error);
+    return { ok: false, error: 'Something went wrong building that page. Try again.' };
   }
 }

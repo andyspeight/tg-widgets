@@ -711,6 +711,27 @@
   line-height: 1.4;
   color: var(--ed-ink-2);
 }
+/* The AI start reads a touch apart from the ready-made pages, a thin accent
+   hairline, since it does something different (and slower). Selection still wins. */
+.ed-pages__template--ai { border-color: var(--ed-accent); }
+.ed-pages__template--ai[data-selected] { border-color: var(--ed-select); }
+
+/* The brief box, shown only for the AI start. */
+.ed-pages__brief {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-1);
+}
+.ed-pages__brief-label {
+  font-size: var(--ed-text-sm);
+  font-weight: 600;
+  color: var(--ed-ink);
+}
+.ed-pages__brief-box {
+  min-height: 84px;
+  resize: vertical;
+  line-height: 1.45;
+}
 
 .ed-pages__list {
   display: flex;

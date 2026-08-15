@@ -208,3 +208,76 @@ export async function buildSectionAction(input: unknown) {
   }
   return { ok: true as const, section: result.section };
 }
+
+const _build = buildSectionAction satisfies typeof real.buildSectionAction;
+void _build;
+
+/*
+ * The page builder, doubled. Same reasoning again: the real action bills
+ * Anthropic and reaches Postgres. This runs the REAL planFromModel and
+ * sectionsFromPlan on a canned plan, so the engine under test is the real one,
+ * and it returns a page of the shape the editor navigates to. The browser check
+ * stops at the composer rather than completing a build, because a real create
+ * navigates and a static file cannot follow, so this stands in for the answer.
+ */
+import { planFromModel, sectionsFromPlan } from '../lib/ai/page-build';
+import { parsePage, type Page } from '../lib/content/schema';
+
+const DEMO_PAGE_PLAN = JSON.stringify([
+  {
+    preset: 'blank-opener',
+    heading: 'Walking holidays in the Dolomites',
+    body: 'Guided and self-guided trips through the high meadows, planned around how far you like to walk.',
+  },
+  { preset: 'features-three-icons', heading: 'Why walk with us' },
+  {
+    preset: 'cta-centred',
+    heading: 'Tell us where you fancy',
+    body: 'One line and we will come back with something worth reading.',
+  },
+]);
+
+function demoPage(input: unknown): Page {
+  const parsed = parsePage(input);
+  if (!parsed.ok) throw new Error(`demo AI page fixture is malformed: ${parsed.errors.join('; ')}`);
+  return parsed.page;
+}
+
+export async function createAiPageAction(input: unknown): Promise<real.AiPageResult> {
+  const fields = (input ?? {}) as Record<string, unknown>;
+  const title = typeof fields.title === 'string' ? fields.title.trim() : '';
+  const brief = typeof fields.brief === 'string' ? fields.brief.trim() : '';
+
+  if (!brief) return { ok: false, error: 'Say what the page is for.' };
+  if (/\bfail\b/i.test(brief)) {
+    return {
+      ok: false,
+      error: 'The builder could not put that page together. Try describing it a little differently.',
+      retryable: true,
+    };
+  }
+
+  const plan = planFromModel(DEMO_PAGE_PLAN);
+  if (!plan.ok) return { ok: false, error: 'Something went wrong building that page. Try again.' };
+
+  const name = title || 'New page';
+  const content = demoPage({ version: 1, id: 'demo-ai', slug: 'ai-page', title: name, sections: sectionsFromPlan(plan.plan) });
+
+  return {
+    ok: true,
+    data: {
+      id: 'demo-ai',
+      parentId: null,
+      slug: 'ai-page',
+      title: name,
+      status: 'draft',
+      hasUnpublishedChanges: true,
+      publishedAt: null,
+      updatedAt: new Date(),
+      content,
+    },
+  };
+}
+
+const _page = createAiPageAction satisfies typeof real.createAiPageAction;
+void _page;

@@ -9571,7 +9571,7 @@ await check('the Add page composer offers a ready-made page to start from', asyn
   await page.locator('.ed-rail__btn').filter({ hasText: 'Layers' }).first().click();
   await page.waitForTimeout(150);
 
-  const expected = ['Blank page', 'Home', 'About us', 'Services', 'Holidays', 'Reviews', 'Meet the team', 'FAQ', 'Contact'];
+  const expected = ['Describe it with AI', 'Blank page', 'Home', 'About us', 'Services', 'Holidays', 'Reviews', 'Meet the team', 'FAQ', 'Contact'];
   if (!groupThere) return 'the composer had no template chooser';
   if (radioCount !== expected.length) return `expected ${expected.length} template choices, saw ${radioCount}`;
   if (labels.join('|') !== expected.join('|')) return `the choices read "${labels.join(', ')}"`;
@@ -9579,6 +9579,50 @@ await check('the Add page composer offers a ready-made page to start from', asyn
   if (!homeChecked) return 'picking Home did not select it';
   if (blankAfter) return 'Blank stayed selected after Home was picked';
   if (!homeRinged) return 'the picked card was not ringed';
+  return true;
+});
+
+/*
+ * AI PAGE BUILDER, slice 1 (Andy, 15 Aug 2026). The AI start is a choice in the
+ * same group; choosing it reveals a brief box, and a build needs a brief. This
+ * proves the reveal, the button changing to Build, and the empty-brief refusal.
+ * It stops before a real build, since that navigates to the new page and a static
+ * file cannot follow.
+ */
+await check('the AI start reveals a brief box and needs one filled in', async () => {
+  await showPanels();
+  await page.waitForTimeout(120);
+  await page.locator('.ed-rail__btn').filter({ hasText: 'Pages' }).first().click();
+  await page.waitForTimeout(200);
+  await page.locator('.ed-pages__add').click();
+  await page.waitForTimeout(150);
+
+  // No brief box until AI is the chosen start.
+  const beforePick = await page.locator('textarea[aria-label="Describe your page"]').count();
+
+  await page.locator('.ed-pages__template:has(input[value="ai"])').click();
+  await page.waitForTimeout(150);
+  const briefShown = await page.locator('textarea[aria-label="Describe your page"]').isVisible();
+  const buildLabel = ((await page.locator('.ed-pages__new button[type="submit"]').innerText()) || '').trim();
+
+  // A name but no brief is refused, client side, without spending anything.
+  await page.locator('input[aria-label="New page name"]').fill('Walking holidays');
+  await page.locator('.ed-pages__new button[type="submit"]').click();
+  await page.waitForTimeout(150);
+  const refused = (await page.locator('.ed-pages__error').innerText().catch(() => '')) || '';
+  const stillOpen = await page.locator('textarea[aria-label="Describe your page"]').isVisible();
+
+  // Cancel out, then back to the outline for the checks that follow.
+  await page.locator('.ed-pages__new button', { hasText: 'Cancel' }).click();
+  await page.waitForTimeout(120);
+  await page.locator('.ed-rail__btn').filter({ hasText: 'Layers' }).first().click();
+  await page.waitForTimeout(150);
+
+  if (beforePick !== 0) return 'the brief box showed before AI was chosen';
+  if (!briefShown) return 'choosing AI did not reveal the brief box';
+  if (buildLabel !== 'Build page') return `the button read "${buildLabel}", not Build page`;
+  if (!/what the page is for/i.test(refused)) return `an empty brief was not refused, error was "${refused}"`;
+  if (!stillOpen) return 'the composer closed on an empty brief instead of asking';
   return true;
 });
 

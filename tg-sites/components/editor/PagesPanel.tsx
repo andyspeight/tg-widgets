@@ -45,10 +45,11 @@ export function PagesPanel({
    * Make a page with this name from the chosen template and open it. Resolves
    * with an error to show in the composer, or null on success, by which point
    * the editor is navigating to the new page. The template is an id from
-   * PAGE_TEMPLATES; 'blank' is an empty page. Optional so a caller without it
-   * simply shows no button.
+   * PAGE_TEMPLATES; 'blank' is an empty page; 'ai' means build it from the brief,
+   * which is the only template that reads the third argument. Optional so a
+   * caller without it simply shows no button.
    */
-  onCreatePage?: (title: string, template: string) => Promise<string | null>;
+  onCreatePage?: (title: string, template: string, brief?: string) => Promise<string | null>;
 }): ReactElement {
   const [query, setQuery] = useState('');
 
@@ -57,8 +58,10 @@ export function PagesPanel({
   /** The Add page composer: closed, or open with a name being typed. */
   const [adding, setAdding] = useState(false);
   const [newTitle, setNewTitle] = useState('');
-  /** Which starter to build the new page from. 'blank' is an empty page. */
+  /** Which starter to build the new page from. 'blank' is an empty page, 'ai' the brief. */
   const [template, setTemplate] = useState('blank');
+  /** The AI brief, read only when 'ai' is the chosen start. */
+  const [brief, setBrief] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const nameRef = useRef<HTMLInputElement>(null);
@@ -74,6 +77,7 @@ export function PagesPanel({
     setAdding(false);
     setNewTitle('');
     setTemplate('blank');
+    setBrief('');
     setError(null);
   }
 
@@ -85,12 +89,20 @@ export function PagesPanel({
       setError('Give the page a name.');
       return;
     }
+    // The AI start needs a brief to work from; the ready-made pages do not.
+    const wantsAi = template === 'ai';
+    const said = brief.trim();
+    if (wantsAi && !said) {
+      setError('Say what the page is for.');
+      return;
+    }
     setBusy(true);
     setError(null);
-    const failure = await onCreatePage(title, template);
+    const failure = await onCreatePage(title, template, wantsAi ? said : undefined);
     setBusy(false);
     // Success navigates away, so there is nothing to close. A failure stays put
-    // with the reason, the commonest being an address already in use.
+    // with the reason, the commonest being an address already in use, or the
+    // assistant not managing the page.
     if (failure) setError(failure);
   }
 
@@ -128,6 +140,28 @@ export function PagesPanel({
                 choice only picks the sections, the name above is what it is called.
               */}
               <div className="ed-pages__templates" role="radiogroup" aria-label="Start from">
+                {/*
+                  The one start that is not a ready-made page: describe it and the
+                  assistant designs it from the same sections. First in the group as
+                  the headline choice, though Blank stays the default so simply
+                  opening the composer spends nothing.
+                */}
+                <label
+                  className="ed-pages__template ed-pages__template--ai"
+                  data-selected={template === 'ai' ? '' : undefined}
+                >
+                  <input
+                    type="radio"
+                    name="page-template"
+                    value="ai"
+                    checked={template === 'ai'}
+                    onChange={() => setTemplate('ai')}
+                  />
+                  <span className="ed-pages__template-label">Describe it with AI</span>
+                  <span className="ed-pages__template-desc">
+                    Tell us what the page is for and the assistant drafts it from your designed sections, ready to edit.
+                  </span>
+                </label>
                 {PAGE_TEMPLATES.map((option) => (
                   <label
                     key={option.id}
@@ -146,6 +180,25 @@ export function PagesPanel({
                   </label>
                 ))}
               </div>
+              {/*
+                The brief, shown only for the AI start. A real user action opened
+                the composer and chose this, so the box is theirs to click into;
+                nothing focuses it on render, which would steal the caret.
+              */}
+              {template === 'ai' && (
+                <label className="ed-pages__brief">
+                  <span className="ed-pages__brief-label">Describe your page</span>
+                  <textarea
+                    className="ed-input ed-pages__brief-box"
+                    value={brief}
+                    placeholder="For example: a page about our walking holidays in the Dolomites, who they suit and how to get in touch."
+                    aria-label="Describe your page"
+                    maxLength={800}
+                    rows={4}
+                    onChange={(event) => setBrief(event.target.value)}
+                  />
+                </label>
+              )}
               {error && (
                 <p className="ed-pages__error" role="alert">
                   {error}
@@ -156,7 +209,7 @@ export function PagesPanel({
                   Cancel
                 </button>
                 <button type="submit" className="ed-btn" data-variant="primary" disabled={busy}>
-                  {busy ? 'Adding' : 'Add page'}
+                  {template === 'ai' ? (busy ? 'Building' : 'Build page') : busy ? 'Adding' : 'Add page'}
                 </button>
               </div>
             </form>

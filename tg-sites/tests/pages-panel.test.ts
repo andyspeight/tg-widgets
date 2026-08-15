@@ -120,9 +120,9 @@ describe('the Add page composer', () => {
     expect(panelSource).toContain("setError('Give the page a name.')");
   });
 
-  it('creates with the trimmed name and the chosen template', () => {
+  it('creates with the trimmed name, the chosen template, and the brief for AI', () => {
     expect(panelSource).toContain('const title = newTitle.trim();');
-    expect(panelSource).toContain('await onCreatePage(title, template)');
+    expect(panelSource).toContain('await onCreatePage(title, template, wantsAi ? said : undefined)');
   });
 
   it('offers a template to start from, a radio group defaulting to blank', () => {
@@ -132,6 +132,15 @@ describe('the Add page composer', () => {
     expect(panelSource).toContain("useState('blank')");
     expect(panelSource).toContain('PAGE_TEMPLATES.map');
     expect(panelSource).toContain('role="radiogroup"');
+  });
+
+  it('offers describing the page with AI, which needs a brief', () => {
+    // The one start that is not a ready-made page: a radio in the same group, and
+    // a brief box that only shows for it and is required before a build.
+    expect(panelSource).toContain('value="ai"');
+    expect(panelSource).toContain("template === 'ai'");
+    expect(panelSource).toContain('aria-label="Describe your page"');
+    expect(panelSource).toContain("setError('Say what the page is for.')");
   });
 
   it('focuses the box only when the composer opens, not on every render', () => {
