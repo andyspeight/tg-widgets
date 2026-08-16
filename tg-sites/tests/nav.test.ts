@@ -96,17 +96,29 @@ describe('navFolders', () => {
     expect(navFolders(pages).has('plans')).toBe(false);
   });
 
-  it('does not open a dropdown two levels down, matching the one-level sidebar', () => {
-    // A grandchild under a child. The child is not top level, so it is never a
-    // folder, and the grandchild is simply not offered.
+  it('nests a dropdown to any depth, matching the multi-tier sidebar', () => {
+    // A grandchild under a child. Italy is a folder in its own right, so it opens
+    // a flyout of Rome; Tours carries the whole branch.
     const pages: NavPage[] = [
       { id: 'tours', title: 'Tours', slug: 'tours', parentId: null, published: true },
       { id: 'italy', title: 'Italy', slug: 'italy', parentId: 'tours', published: true },
       { id: 'rome', title: 'Rome', slug: 'rome', parentId: 'italy', published: true },
     ];
     const folders = navFolders(pages);
-    expect(folders.get('tours')?.map((c) => c.label)).toEqual(['Italy']);
-    expect(folders.has('tours/italy')).toBe(false);
+    expect(folders.get('tours')).toEqual([
+      { label: 'Italy', href: '/tours/italy', children: [{ label: 'Rome', href: '/tours/italy/rome' }] },
+    ]);
+    // Italy is keyed by its own address too, so a link straight to it also opens.
+    expect(folders.get('tours/italy')).toEqual([{ label: 'Rome', href: '/tours/italy/rome' }]);
+  });
+
+  it('leaves a leaf child without a children key, so a plain link stays plain', () => {
+    // Only a page that actually holds others carries a nested flyout.
+    const folders = navFolders(PAGES);
+    expect(folders.get('tours')).toEqual([
+      { label: 'Italy in autumn', href: '/tours/italy' },
+      { label: 'France by rail', href: '/tours/france' },
+    ]);
   });
 
   it('draws nothing from a draft folder, whose children have no address', () => {
@@ -192,6 +204,14 @@ describe('the menu renders a folder as a dropdown', () => {
     expect(blocks).toContain('tgs-nav__sublink');
   });
 
+  it('recurses, so a page inside a folder that holds pages opens its own flyout', () => {
+    // The submenu is drawn by a function that calls itself for a sub-item that
+    // carries its own children, marking it a folder with a side chevron.
+    expect(blocks).toContain('navSubmenu(grandchildren');
+    expect(blocks).toContain('tgs-nav__subitem--folder');
+    expect(blocks).toContain('tgs-nav__subchev');
+  });
+
   it('keeps the folder link a real link, so the parent page is still reachable', () => {
     // The chevron and submenu are added, but the <a href> to the folder stays.
     expect(blocks).toContain('className="tgs-nav__link"');
@@ -207,6 +227,15 @@ describe('the menu renders a folder as a dropdown', () => {
     expect(css).toContain('.tgs-nav__item--folder:hover > .tgs-nav__submenu');
     expect(css).toContain('.tgs-nav__item--folder:focus-within > .tgs-nav__submenu');
     expect(css).toMatch(/:focus-within > \.tgs-nav__submenu[\s\S]*?visibility: visible/);
+  });
+
+  it('opens a nested flyout to the side, revealed the same way', () => {
+    const css = source('app', 'globals.css');
+    // A sub-folder's flyout opens off the side (left: 100%) and reveals on hover
+    // and keyboard focus, so a deep menu fans out rather than marching downward.
+    expect(css).toContain('.tgs-nav__subitem--folder > .tgs-nav__submenu');
+    expect(css).toContain('left: 100%');
+    expect(css).toContain('.tgs-nav__subitem--folder:focus-within > .tgs-nav__submenu');
   });
 });
 

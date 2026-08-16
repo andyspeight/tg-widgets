@@ -2687,6 +2687,40 @@
 .tgs-nav__list--stacked .tgs-nav__sublink { color: inherit; }
 .tgs-nav__list--stacked .tgs-nav__chev { display: none; }
 
+/*
+ * MULTI-TIER: a page inside a folder that itself holds pages (Andy, 16 Aug 2026).
+ * Its sublink gains a chevron and its own flyout, which opens to the SIDE rather
+ * than below, so the tiers fan out instead of marching down the page. Same reveal
+ * as the first level, on hover and on keyboard focus, no script.
+ */
+.tgs-nav__subitem { position: relative; }
+.tgs-nav__subitem--folder > .tgs-nav__sublink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--tgs-space-s);
+}
+.tgs-nav__subchev { flex: none; }
+
+.tgs-nav__subitem--folder > .tgs-nav__submenu {
+  top: -1px;
+  left: 100%;
+}
+.tgs-nav__subitem--folder:hover > .tgs-nav__submenu,
+.tgs-nav__subitem--folder:focus-within > .tgs-nav__submenu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition: opacity 0.14s ease, transform 0.14s ease;
+}
+
+/* Inside the phone menu there is no hover, so every tier is shown, each indented
+   one step more than the last. */
+.tgs-nav__list--stacked .tgs-nav__subitem--folder > .tgs-nav__submenu {
+  padding: var(--tgs-space-xs) 0 var(--tgs-space-xs) var(--tgs-space-m);
+}
+.tgs-nav__list--stacked .tgs-nav__subchev { display: none; }
+
 @container tgs-page (max-width: 767px) {
   /* Below the phone breakpoint the plain row gives way to the button, but only
      for a menu whose owner asked for one. */

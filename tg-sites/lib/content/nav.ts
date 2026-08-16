@@ -42,10 +42,16 @@ export interface NavPage {
   published: boolean;
 }
 
-/** A dropdown link: the label and address of one page inside a folder. */
+/**
+ * A dropdown link: the label and address of one page inside a folder, and the
+ * pages inside IT, if any. The nesting is the multi-tier change: a dropdown item
+ * that is itself a folder carries its own children, which the Menu draws as a
+ * flyout off the side.
+ */
 export interface NavChild {
   label: string;
   href: string;
+  children?: NavChild[];
 }
 
 /**
@@ -65,12 +71,16 @@ export function navItemPath(href: unknown): string | null {
 }
 
 /**
- * Every top-level page that holds others, keyed by its own address.
+ * Every page that holds others, keyed by its own address, each with the pages
+ * inside it nested to any depth.
  *
- * ONE LEVEL, matching the sidebar: a page is a folder only when it is top level
- * AND has children, so a child of a child never opens a second dropdown. A folder
- * or a child with no live address (its parent is a draft) is left out, because a
- * dropdown link to a page that 404s is worse than no dropdown.
+ * MULTI-TIER, matching the sidebar (Andy, 16 Aug 2026): a dropdown item that is
+ * itself a folder carries its own children, so a menu link to a folder opens the
+ * whole branch beneath it. A page with no live address (its parent is a draft) is
+ * left out at every level, because a dropdown link to a page that 404s is worse
+ * than no dropdown. A shared depth is not needed; livePaths already dropped
+ * anything past the address limit, so the recursion is naturally bounded, and a
+ * seen set ends it on a cycle in the data.
  */
 export function navFolders(pages: readonly NavPage[]): Map<string, NavChild[]> {
   const nodes: PageNode[] = pages.map((page) => ({
@@ -80,35 +90,34 @@ export function navFolders(pages: readonly NavPage[]): Map<string, NavChild[]> {
     published: page.published,
   }));
   const paths = livePaths(nodes);
-  const byId = new Map(pages.map((page) => [page.id, page]));
 
-  // Children grouped under the top-level parent they belong to. A page whose
-  // parent is missing or is itself a child is not part of a one-level folder.
   const childrenOf = new Map<string, NavPage[]>();
   for (const page of pages) {
     if (!page.parentId) continue;
-    const parent = byId.get(page.parentId);
-    if (!parent || parent.parentId != null) continue;
     const kids = childrenOf.get(page.parentId) ?? [];
     kids.push(page);
     childrenOf.set(page.parentId, kids);
   }
 
+  // The pages inside one, and inside those, and so on. Only pages with a live
+  // address; the seen set means a cycle ends the walk rather than looping.
+  const treeOf = (parentId: string, seen: ReadonlySet<string>): NavChild[] =>
+    (childrenOf.get(parentId) ?? []).flatMap((kid) => {
+      const path = paths.get(kid.id);
+      if (path === undefined || seen.has(kid.id)) return [];
+      const grandchildren = treeOf(kid.id, new Set(seen).add(kid.id));
+      const child: NavChild = { label: kid.title || 'Untitled', href: `/${path}` };
+      if (grandchildren.length > 0) child.children = grandchildren;
+      return [child];
+    });
+
   const folders = new Map<string, NavChild[]>();
-  for (const [parentId, kids] of childrenOf) {
-    const parentPath = paths.get(parentId);
+  for (const page of pages) {
+    const path = paths.get(page.id);
     // undefined, not falsy: '' is the home page, a real address.
-    if (parentPath === undefined) continue;
-
-    const children = kids
-      .map((kid): NavChild | null => {
-        const kidPath = paths.get(kid.id);
-        if (kidPath === undefined) return null;
-        return { label: kid.title || 'Untitled', href: `/${kidPath}` };
-      })
-      .filter((child): child is NavChild => child !== null);
-
-    if (children.length > 0) folders.set(parentPath, children);
+    if (path === undefined) continue;
+    const children = treeOf(page.id, new Set([page.id]));
+    if (children.length > 0) folders.set(path, children);
   }
 
   return folders;

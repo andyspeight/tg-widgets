@@ -1599,31 +1599,70 @@ function navLinks(items: Props[], keyPrefix: string): ReactElement[] {
        * inside it are a nested list the browser reveals on hover and on keyboard
        * focus, through CSS alone. No JavaScript, same as the phone menu: a
        * dropdown is the last place to start shipping a bundle, and :focus-within
-       * makes it reachable by keyboard without one.
+       * makes it reachable by keyboard without one. The submenu recurses, so a
+       * page inside a folder that itself holds pages opens a flyout of its own.
        */
-      const subLinks = children
-        .map((child, childIndex) => {
-          const childLabel = str(child, 'label');
-          if (!childLabel) return null;
-          const childHref = safeUrl(str(child, 'href')) || '#';
-          return (
-            <li key={`${keyPrefix}${index}s${childIndex}`} className="tgs-nav__subitem">
-              <a className="tgs-nav__sublink" href={childHref}>
-                {childLabel}
-              </a>
-            </li>
-          );
-        })
-        .filter((child): child is ReactElement => child !== null);
-
       return (
         <li key={`${keyPrefix}${index}`} className="tgs-nav__item tgs-nav__item--folder">
           {link}
-          <ul className="tgs-nav__submenu">{subLinks}</ul>
+          {navSubmenu(children, `${keyPrefix}${index}s`)}
         </li>
       );
     })
     .filter((item): item is ReactElement => item !== null);
+}
+
+/**
+ * The pages inside a folder, as a nested list, and the pages inside those.
+ *
+ * Recursive, which is the whole multi-tier change: a submenu item that carries
+ * its own children is a folder in its own right, so it gets a chevron and a
+ * flyout of the pages beneath it. Every level is a plain nested `ul`/`li` of
+ * links, revealed by CSS on hover and focus, so no depth needs new markup and
+ * nothing here has to know how deep it has gone.
+ */
+function navSubmenu(children: Props[], keyPrefix: string): ReactElement {
+  return (
+    <ul className="tgs-nav__submenu">
+      {children
+        .map((child, index) => {
+          const label = str(child, 'label');
+          if (!label) return null;
+          const href = safeUrl(str(child, 'href')) || '#';
+          const grandchildren = list(child, 'children');
+          return (
+            <li
+              key={`${keyPrefix}${index}`}
+              className={
+                grandchildren.length > 0 ? 'tgs-nav__subitem tgs-nav__subitem--folder' : 'tgs-nav__subitem'
+              }
+            >
+              <a className="tgs-nav__sublink" href={href}>
+                {label}
+                {grandchildren.length > 0 && (
+                  <svg
+                    className="tgs-nav__subchev"
+                    viewBox="0 0 24 24"
+                    width="12"
+                    height="12"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M9 6l6 6-6 6" />
+                  </svg>
+                )}
+              </a>
+              {grandchildren.length > 0 && navSubmenu(grandchildren, `${keyPrefix}${index}s`)}
+            </li>
+          );
+        })
+        .filter((child): child is ReactElement => child !== null)}
+    </ul>
+  );
 }
 
 /*

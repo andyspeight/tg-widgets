@@ -9472,16 +9472,18 @@ await check('the rail Pages icon opens the page list and Layers returns to the o
 
   if (!pagesShown) return 'clicking Pages did not open the page list';
   if (!outlineGone) return 'the outline cards were still there behind the page list';
-  if (rowCount !== 5) return `expected 5 page rows, saw ${rowCount}`;
+  // Six demo pages: Home, About, Tours, Italy (inside Tours), Rome (inside Italy)
+  // and Contact. Two of them are filed inside another, so two are indented.
+  if (rowCount !== 6) return `expected 6 page rows, saw ${rowCount}`;
   if (currentCount !== 1) return `expected one current page, saw ${currentCount}`;
   if (!currentText.includes('Home')) return `the current page was not Home, it read "${currentText}"`;
   if (!currentHref || !currentHref.includes('/editor?page=demo')) {
     return `the current row did not link to its page, href was "${currentHref}"`;
   }
-  if (childRows !== 1) return `expected one indented child page, saw ${childRows}`;
+  if (childRows !== 2) return `expected two indented pages, saw ${childRows}`;
   if (draftBadges !== 1) return `expected one draft badge, saw ${draftBadges}`;
   if (filtered !== 1) return `search for "italy" showed ${filtered} rows, expected 1`;
-  if (restored !== 5) return `clearing the search left ${restored} rows, expected 5`;
+  if (restored !== 6) return `clearing the search left ${restored} rows, expected 6`;
   if (!outlineBack) return 'clicking Layers did not bring the outline back';
   if (!pagesGone) return 'the page list stayed after switching back to the outline';
   return true;
@@ -9645,7 +9647,7 @@ await check('a page is dragged into a folder, and the folder fills', async () =>
   await page.locator('.ed-rail__btn').filter({ hasText: 'Pages' }).first().click();
   await page.waitForTimeout(200);
 
-  // Tours already holds Italy, so one filed page to begin with.
+  // Tours holds Italy and Italy holds Rome, so two pages are filed to begin with.
   const childrenBefore = await page.locator('.ed-pages__node[data-child]').count();
 
   // Lift About us by its grip; aim for the middle of the Tours row.
@@ -9665,7 +9667,7 @@ await check('a page is dragged into a folder, and the folder fills', async () =>
   );
   await page.waitForTimeout(250);
 
-  // Two filed pages now, and the second is About us, nudged in under Tours.
+  // Three filed pages now, About us joining Italy and Rome, nudged in under Tours.
   const childrenAfter = await page.locator('.ed-pages__node[data-child]').count();
   const aboutFiled = await page
     .locator('.ed-pages__node[data-child]', { has: page.locator('a[href="/editor?page=p-about"]') })
@@ -9675,8 +9677,8 @@ await check('a page is dragged into a folder, and the folder fills', async () =>
   await page.locator('.ed-rail__btn').filter({ hasText: 'Layers' }).first().click();
   await page.waitForTimeout(150);
 
-  if (childrenBefore !== 1) return `expected one filed page to begin with, saw ${childrenBefore}`;
-  if (childrenAfter !== 2) return `dragging did not file the page: ${childrenAfter} filed, expected 2`;
+  if (childrenBefore !== 2) return `expected two filed pages to begin with, saw ${childrenBefore}`;
+  if (childrenAfter !== 3) return `dragging did not file the page: ${childrenAfter} filed, expected 3`;
   if (aboutFiled !== 1) return 'About us did not land inside the folder';
   return true;
 });
@@ -9772,7 +9774,12 @@ await check('a Menu link to a folder becomes a dropdown of the pages inside it',
    */
   const wide = '.ed-chrome--header .tgs-nav__list:not(.tgs-nav__list--stacked)';
   const folderItems = await page.locator(`${wide} .tgs-nav__item--folder`).count();
-  const subLinks = page.locator(`${wide} .tgs-nav__sublink`);
+  // The DIRECT pages in Tours' dropdown. Scoped to the immediate list, because
+  // Italy now holds Rome in a nested flyout, and an unscoped .tgs-nav__sublink
+  // would count that too. The nested flyout has its own check below.
+  const subLinks = page.locator(
+    `${wide} .tgs-nav__item--folder > .tgs-nav__submenu > .tgs-nav__subitem > .tgs-nav__sublink`,
+  );
   const subCount = await subLinks.count();
   const subHref = subCount ? await subLinks.first().getAttribute('href') : null;
   const subText = subCount ? ((await subLinks.first().textContent()) || '').trim() : '';
@@ -9792,6 +9799,57 @@ await check('a Menu link to a folder becomes a dropdown of the pages inside it',
   if (subText !== 'Italy in autumn') return `the dropdown page read "${subText}"`;
   if (subHref !== '/tours/italy') return `the dropdown link was "${subHref}", not /tours/italy`;
   if (folderHref !== '/tours') return `the folder link no longer points at the folder, it was "${folderHref}"`;
+  return true;
+});
+
+/*
+ * MULTI-TIER NAV (Andy, 16 Aug 2026). A page inside a dropdown that itself holds
+ * pages opens a flyout of its own. Tours holds Italy, Italy holds Rome, so the
+ * Tours menu link opens a dropdown whose Italy item is a sub-folder, and Italy's
+ * flyout lists Rome at its full three-segment address. Read from the DOM without
+ * revealing it, as the one-level check explains; the reveal is a CSS rule asserted
+ * in tests/nav.test.ts.
+ */
+await check('a dropdown item that holds pages opens a nested flyout', async () => {
+  await closeAnyDialog();
+  await page.evaluate(() => window.__TG_SET_REGION__(null));
+  await page.waitForTimeout(200);
+  await page.evaluate(() =>
+    window.__TG_SET_CHROME__({
+      header: {
+        id: 'h', slug: '', title: 'Header', version: 1,
+        sections: [
+          { id: 'hs', width: 'full', tone: 'light', rows: [{ id: 'hr', gap: 16, columns: [{ id: 'hc', width: 100, blocks: [
+            { id: 'nb', type: 'nav', props: { layout: 'row', collapse: true, items: [
+              { label: 'Tours', href: '/tours', newTab: false },
+            ] } },
+          ] }] }] },
+        ],
+      },
+      footer: null,
+    }),
+  );
+  await page.waitForTimeout(500);
+
+  const wide = '.ed-chrome--header .tgs-nav__list:not(.tgs-nav__list--stacked)';
+  // Italy is a sub-folder (a dropdown item that itself holds pages).
+  const italyFolders = await page.locator(`${wide} .tgs-nav__subitem--folder`).count();
+  // Rome sits inside Italy's nested flyout, at its full three-segment address.
+  const rome = page.locator(
+    `${wide} .tgs-nav__subitem--folder > .tgs-nav__submenu > .tgs-nav__subitem > .tgs-nav__sublink`,
+  );
+  const romeCount = await rome.count();
+  const romeHref = romeCount ? await rome.first().getAttribute('href') : null;
+  const romeText = romeCount ? ((await rome.first().textContent()) || '').trim() : '';
+
+  await page.evaluate(() => window.__TG_SET_CHROME__(null));
+  await page.waitForTimeout(150);
+  await showPanels();
+
+  if (italyFolders !== 1) return `expected Italy to be a sub-folder, saw ${italyFolders}`;
+  if (romeCount !== 1) return `expected one page in the nested flyout, saw ${romeCount}`;
+  if (romeText !== 'Rome in a weekend') return `the nested page read "${romeText}"`;
+  if (romeHref !== '/tours/italy/rome') return `the nested link was "${romeHref}", not /tours/italy/rome`;
   return true;
 });
 

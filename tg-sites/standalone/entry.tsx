@@ -38,6 +38,9 @@ const DEMO_PAGES: readonly PageLink[] = [
   { id: 'p-about', title: 'About us', slug: 'about', status: 'published', parentId: null },
   { id: 'p-tours', title: 'Tours', slug: 'tours', status: 'published', parentId: null },
   { id: 'p-italy', title: 'Italy in autumn', slug: 'italy', status: 'published', parentId: 'p-tours' },
+  // A third tier, so the panel draws nesting deeper than one and the Menu draws a
+  // flyout off a dropdown: Tours holds Italy, and Italy holds Rome.
+  { id: 'p-rome', title: 'Rome in a weekend', slug: 'rome', status: 'published', parentId: 'p-italy' },
   { id: 'p-contact', title: 'Contact', slug: 'contact', status: 'draft', parentId: null },
 ];
 

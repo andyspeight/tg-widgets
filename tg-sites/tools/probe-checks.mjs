@@ -1379,6 +1379,20 @@ const MUTATIONS = [
             Boolean(onMovePage) && dragging !== node.page.id && !draggedDescendants.has(node.page.id) && node.depth === 0
           }`,
   },
+  {
+    tag: 'multi-tier-nav',
+    check: 'a dropdown item that holds pages opens a nested flyout',
+    /*
+     * The nesting dropped: a dropdown item never carries the pages inside IT, so
+     * the menu goes back to one level of dropdown. Each item still appears, so the
+     * first tier looks right; only the flyout off a sub-folder is gone, which is
+     * exactly what a browser reading the nested list catches.
+     */
+    why: 'Never attach a folder-item its own children, so the menu falls back to one level of dropdown.',
+    file: 'lib/content/nav.ts',
+    from: `      if (grandchildren.length > 0) child.children = grandchildren;`,
+    to: `      void grandchildren;`,
+  },
 ];
 
 /*
