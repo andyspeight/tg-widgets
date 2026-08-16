@@ -868,8 +868,12 @@
  * inner wrap is the part that lifts. A page filed inside another is nudged in, so
  * which folder it sits in reads at a glance.
  */
-.ed-pages__node { border-radius: var(--ed-r-md); }
-.ed-pages__node[data-child] { margin-left: var(--ed-4); }
+/* Stepped in by its depth, one rule for every level: depth 0 is flush, each level
+   below adds an indent. --tree-depth is set inline per row (see PagesPanel). */
+.ed-pages__node {
+  border-radius: var(--ed-r-md);
+  margin-inline-start: calc(var(--tree-depth, 0) * var(--ed-4));
+}
 
 /* The folder a page is about to drop into, lit while the pointer is over it. */
 .ed-pages__node[data-over] {

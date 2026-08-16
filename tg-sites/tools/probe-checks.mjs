@@ -1361,6 +1361,24 @@ const MUTATIONS = [
             return { ...(item as Record<string, unknown>), children };`,
     to: `            return item;`,
   },
+  {
+    tag: 'multi-tier',
+    check: 'a page can be nested more than one level deep',
+    /*
+     * The one-level cap, put back where only a top-level row takes a drop. A page
+     * can still be filed into a folder, but never into a page that is itself
+     * filed away, so the third tier the sidebar is meant to allow cannot be built.
+     * The exact regression this check exists to catch.
+     */
+    why: 'Let only top-level rows take a drop, so a page can never nest more than one deep.',
+    file: 'components/editor/PagesPanel.tsx',
+    from: `          droppable={
+            Boolean(onMovePage) && dragging !== node.page.id && !draggedDescendants.has(node.page.id)
+          }`,
+    to: `          droppable={
+            Boolean(onMovePage) && dragging !== node.page.id && !draggedDescendants.has(node.page.id) && node.depth === 0
+          }`,
+  },
 ];
 
 /*

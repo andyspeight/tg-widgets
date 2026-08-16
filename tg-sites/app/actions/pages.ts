@@ -77,9 +77,16 @@ function explain(error: unknown): string {
   if (message.startsWith('Your session has ended')) return message;
   if (message.startsWith('Refusing to save')) return message;
   if (message.includes('own parent')) return 'A page cannot sit inside itself.';
-  // The one-level folder rules, worth showing as written on the rare race that
-  // reaches the server past the drag UI.
-  if (message.startsWith('A folder') || message.startsWith('That folder')) return message;
+  // The folder move rules, worth showing as written on the rare race that reaches
+  // the server past the drag UI: a page filed into its own branch, or nested so
+  // deep the address runs out.
+  if (
+    message.startsWith('A page cannot go inside') ||
+    message.startsWith('That would nest') ||
+    message.startsWith('That page is not here')
+  ) {
+    return message;
+  }
 
   console.error('[tg-sites] action failed', error);
   return 'Something went wrong saving that. Nothing was changed.';

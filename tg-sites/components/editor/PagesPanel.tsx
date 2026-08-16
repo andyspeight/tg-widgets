@@ -24,7 +24,7 @@
  */
 
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
-import type { FormEvent, ReactElement } from 'react';
+import type { CSSProperties, FormEvent, ReactElement } from 'react';
 import {
   DndContext,
   PointerSensor,
@@ -36,7 +36,7 @@ import {
   type DragStartEvent,
 } from '@dnd-kit/core';
 
-import { buildPageTree, filterPages, type PageLink } from '../../lib/editor/page-list';
+import { buildPageTree, descendantIds, filterPages, type PageLink, type PageNode } from '../../lib/editor/page-list';
 import { PAGE_TEMPLATES } from '../../lib/content/page-templates';
 import { MediaPicker } from '../media/MediaPicker';
 import type { MediaItem } from '../../lib/media/types';
@@ -129,12 +129,12 @@ export function PagesPanel({
     // Dropped where it already is, or onto itself: nothing to do.
     if (target === activeId || (page.parentId ?? null) === target) return;
 
-    // One level: a folder (a page with children) can only return to the top,
-    // never into another folder. The server enforces this too; here it keeps the
-    // row from making a move the server would only reject.
-    const isFolder = list.some((candidate) => candidate.parentId === activeId);
-    if (isFolder && target !== null) {
-      setMoveError('A folder cannot go inside another folder.');
+    // A page cannot be filed inside one of its own pages: that would cut a branch
+    // off and loop it back on itself. The server enforces this too, and the depth
+    // limit with it (a page nested past the address limit); here the common one is
+    // caught before the round trip and the rest reverts with the server's reason.
+    if (target && descendantIds(list, activeId).has(target)) {
+      setMoveError('A page cannot go inside one of its own pages.');
       return;
     }
 
@@ -147,6 +147,44 @@ export function PagesPanel({
       setList(before);
       setMoveError(failure);
     }
+  };
+
+  /*
+   * The pages beneath the one being dragged. A row cannot be a drop target for its
+   * own ancestor: dropping a page into one of its own is the move that would loop
+   * the tree, so those rows stop taking drops while it is in flight.
+   */
+  const draggedDescendants = useMemo(
+    () => (dragging ? descendantIds(list, dragging) : new Set<string>()),
+    [dragging, list],
+  );
+
+  /*
+   * One branch of the tree, drawn to any depth. A page, then the pages inside it
+   * when it is open, each of those the same way. The recursion is the whole
+   * multi-tier change: a child is no longer a leaf, it is a branch in its own
+   * right, so it can hold pages and be a drop target like any other.
+   */
+  const renderNode = (node: PageNode): ReactElement => {
+    const hasChildren = node.children.length > 0;
+    const open = !collapsed.has(node.page.id);
+    return (
+      <Fragment key={node.page.id}>
+        <PageRow
+          page={node.page}
+          currentId={currentId}
+          depth={node.depth}
+          draggable={Boolean(onMovePage)}
+          droppable={
+            Boolean(onMovePage) && dragging !== node.page.id && !draggedDescendants.has(node.page.id)
+          }
+          hasChildren={hasChildren}
+          open={open}
+          onToggle={() => toggleFolder(node.page.id)}
+        />
+        {hasChildren && open && node.children.map(renderNode)}
+      </Fragment>
+    );
   };
 
   /** The Add page composer: closed, or open with a name being typed. */
@@ -424,35 +462,7 @@ export function PagesPanel({
         <DndContext sensors={dragSensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
           <div className="ed-pages__list" data-dragging={dragging ? '' : undefined}>
             <RootDropZone active={dragging != null} />
-            {tree.map((node) => {
-              const hasChildren = node.children.length > 0;
-              const open = !collapsed.has(node.page.id);
-              return (
-                <Fragment key={node.page.id}>
-                  <PageRow
-                    page={node.page}
-                    currentId={currentId}
-                    draggable={Boolean(onMovePage)}
-                    droppable={Boolean(onMovePage) && dragging !== node.page.id}
-                    hasChildren={hasChildren}
-                    open={open}
-                    onToggle={() => toggleFolder(node.page.id)}
-                  />
-                  {hasChildren &&
-                    open &&
-                    node.children.map((child) => (
-                      <PageRow
-                        key={child.id}
-                        page={child}
-                        currentId={currentId}
-                        draggable={Boolean(onMovePage)}
-                        droppable={false}
-                        isChild
-                      />
-                    ))}
-                </Fragment>
-              );
-            })}
+            {tree.map(renderNode)}
           </div>
         </DndContext>
       )}
@@ -547,29 +557,30 @@ function RootDropZone({ active }: { active: boolean }): ReactElement | null {
  * the page. The transform is built by hand rather than pulled from
  * @dnd-kit/utilities, which this repo does not carry.
  *
- * `droppable` is off for the row being dragged (a page cannot file into itself)
- * and for every child (folders are one level deep, so a child is never a folder).
- * `hasChildren` swaps the fold chevron in for the spacer that otherwise keeps the
- * names lined up.
+ * `droppable` is off for the row being dragged and for every page beneath it (a
+ * page cannot file into itself or its own branch); every other row takes a drop,
+ * which is what lets the tree nest to any depth. `depth` steps the row in so its
+ * place in the tree reads at a glance. `hasChildren` swaps the fold chevron in for
+ * the spacer that otherwise keeps the names lined up.
  */
 function PageRow({
   page,
   currentId,
+  depth,
   droppable,
   draggable,
   hasChildren,
   open,
   onToggle,
-  isChild,
 }: {
   page: PageLink;
   currentId: string | null;
+  depth: number;
   droppable: boolean;
   draggable: boolean;
   hasChildren?: boolean;
   open?: boolean;
   onToggle?: () => void;
-  isChild?: boolean;
 }): ReactElement {
   const drag = useDraggable({
     id: `page-${page.id}`,
@@ -594,8 +605,11 @@ function PageRow({
     <div
       ref={drop.setNodeRef}
       className="ed-pages__node"
-      data-child={isChild ? '' : undefined}
+      // A marker for a filed page, and the depth it steps in by. The indent is a
+      // custom property so one CSS rule covers every level (see editor.css).
+      data-child={depth > 0 ? '' : undefined}
       data-over={drop.isOver ? '' : undefined}
+      style={{ '--tree-depth': depth } as CSSProperties}
     >
       <div
         ref={drag.setNodeRef}

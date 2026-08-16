@@ -501,24 +501,68 @@ export async function updatePageMeta(
     const movingParent = 'parentId' in changes;
 
     /*
-     * FOLDERS ARE ONE LEVEL DEEP (Andy, 15 Aug 2026). Filing a page into a folder
-     * is only allowed when the folder is itself top level, and a page that is
-     * itself a folder cannot be filed away. Together these keep the nav's
-     * dropdowns one deep and make a parent cycle impossible. Checked here in the
-     * transaction, not only in the drag UI, because a server action is a public
-     * endpoint and the UI's rules are a courtesy to the person dragging.
+     * A PAGE NESTS TO ANY DEPTH, BUT NOT INTO ITS OWN BRANCH AND NOT PAST THE
+     * ADDRESS LIMIT (Andy, 16 Aug 2026, multi-tier folders). Two moves would break
+     * the tree: filing a page inside one of its own pages loops a branch back on
+     * itself, and nesting past MAX_PATH_DEPTH segments leaves the deepest page with
+     * no address at all (see livePaths). Both are checked here in the transaction,
+     * not only in the drag UI, because a server action is a public endpoint and the
+     * UI's rules are a courtesy to the person dragging. One read of the id/parent
+     * graph answers both; a site is tens of pages, so the walk is cheap.
      */
     if (changes.parentId) {
-      const parent = (await tx`
-        select parent_id from public.pages where id = ${changes.parentId}::uuid
-      `) as Array<Record<string, unknown>>;
-      if (!parent.length) throw new Error('That folder is not here.');
-      if (parent[0].parent_id != null) throw new Error('A folder only goes one level deep.');
+      const graph = (await tx`select id, parent_id from public.pages`) as Array<Record<string, unknown>>;
+      const parentOf = new Map<string, string | null>();
+      const childrenOf = new Map<string, string[]>();
+      for (const row of graph) {
+        const id = String(row.id);
+        const parent = row.parent_id ? String(row.parent_id) : null;
+        parentOf.set(id, parent);
+        if (parent) {
+          const kids = childrenOf.get(parent) ?? [];
+          kids.push(id);
+          childrenOf.set(parent, kids);
+        }
+      }
 
-      const child = await tx`
-        select 1 from public.pages where parent_id = ${pageId}::uuid limit 1
-      `;
-      if (child.length) throw new Error('A folder cannot go inside another folder.');
+      if (!parentOf.has(changes.parentId)) throw new Error('That page is not here.');
+
+      // The new parent may not be the page itself (caught above) or any page
+      // beneath it: a walk down from the page collects its whole branch.
+      const subtree = new Set<string>();
+      const down = [pageId];
+      while (down.length > 0) {
+        const id = down.pop() as string;
+        for (const kid of childrenOf.get(id) ?? []) {
+          if (!subtree.has(kid)) {
+            subtree.add(kid);
+            down.push(kid);
+          }
+        }
+      }
+      if (subtree.has(changes.parentId)) {
+        throw new Error('A page cannot go inside one of its own pages.');
+      }
+
+      // The deepest page in the moved branch must still have an address. A page's
+      // depth is its number of ancestors; livePaths drops anything whose path runs
+      // past MAX_PATH_DEPTH segments, so the new parent's depth plus one plus the
+      // branch's own height must stay under that.
+      let parentDepth = 0;
+      for (let cur: string | null = changes.parentId, hops = 0; cur && hops <= MAX_PATH_DEPTH; hops += 1) {
+        cur = parentOf.get(cur) ?? null;
+        if (cur) parentDepth += 1;
+      }
+      let height = 0;
+      const measure: Array<[string, number]> = [[pageId, 0]];
+      while (measure.length > 0) {
+        const [id, depth] = measure.pop() as [string, number];
+        if (depth > height) height = depth;
+        for (const kid of childrenOf.get(id) ?? []) measure.push([kid, depth + 1]);
+      }
+      if (parentDepth + 1 + height >= MAX_PATH_DEPTH) {
+        throw new Error('That would nest the pages too deep to have an address.');
+      }
     }
 
     // A title-only change moves no addresses, so it reads no tree and writes no

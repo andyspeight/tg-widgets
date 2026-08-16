@@ -27,7 +27,7 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { buildPageTree, filterPages, type PageLink } from '../lib/editor/page-list';
+import { buildPageTree, descendantIds, filterPages, type PageLink } from '../lib/editor/page-list';
 
 function source(...parts: string[]): string {
   return readFileSync(join(__dirname, '..', ...parts), 'utf8');
@@ -87,8 +87,13 @@ describe('filterPages', () => {
 
 // ---------------------------------------------------------------------------
 
+// A cheap recursive collector of ids, so a test can read the whole tree.
+function idsInTree(nodes: ReturnType<typeof buildPageTree>): string[] {
+  return nodes.flatMap((node) => [node.page.id, ...idsInTree(node.children)]);
+}
+
 describe('buildPageTree', () => {
-  it('files a child under its parent and keeps the parent at the top', () => {
+  it('files a child under its parent and keeps the parent at the top, at depth 0', () => {
     const tree = buildPageTree(PAGES);
     // Four top-level pages: Home, About, Tours, Contact. Italy is filed inside.
     expect(tree.map((node) => node.page.id)).toEqual([
@@ -97,11 +102,13 @@ describe('buildPageTree', () => {
       'p-tours',
       'p-contact',
     ]);
+    expect(tree.every((node) => node.depth === 0)).toBe(true);
     const tours = tree.find((node) => node.page.id === 'p-tours');
-    expect(tours?.children.map((child) => child.id)).toEqual(['p-italy']);
+    expect(tours?.children.map((child) => child.page.id)).toEqual(['p-italy']);
+    expect(tours?.children[0].depth).toBe(1);
   });
 
-  it('leaves a page with no children as an empty folder, not a missing one', () => {
+  it('leaves a page with no children as an empty branch, not a missing one', () => {
     const home = buildPageTree(PAGES).find((node) => node.page.id === 'p-home');
     expect(home?.children).toEqual([]);
   });
@@ -114,32 +121,45 @@ describe('buildPageTree', () => {
     ];
     const tree = buildPageTree(orphan);
     expect(tree.map((node) => node.page.id)).toEqual(['p-x']);
+    expect(tree[0].depth).toBe(0);
   });
 
-  it('surfaces a page nested two deep at the top, never hidden below the fold', () => {
-    // A second level the move guard forbids, but if the data ever holds one this
-    // must not swallow it: a page under a child is lifted to the top rather than
-    // drawn two levels down where the one-level panel would never show it.
-    const deep = [
-      ...PAGES,
-      { id: 'p-deep', title: 'Deep', slug: 'tours/italy/deep', status: 'draft', parentId: 'p-italy' } as PageLink,
+  it('nests to any depth, each level one deeper than the last', () => {
+    // The multi-tier change: a grandchild is drawn beneath its parent, not lifted.
+    const deep: PageLink[] = [
+      { id: 'a', title: 'A', slug: 'a', status: 'published', parentId: null },
+      { id: 'b', title: 'B', slug: 'b', status: 'published', parentId: 'a' },
+      { id: 'c', title: 'C', slug: 'c', status: 'published', parentId: 'b' },
+      { id: 'd', title: 'D', slug: 'd', status: 'published', parentId: 'c' },
     ];
     const tree = buildPageTree(deep);
-    expect(tree.some((node) => node.page.id === 'p-deep')).toBe(true);
-    // And it is not drawn as a child of Italy, which is itself a child.
-    const tours = tree.find((node) => node.page.id === 'p-tours');
-    expect(tours?.children.map((child) => child.id)).toEqual(['p-italy']);
+    expect(tree.map((node) => node.page.id)).toEqual(['a']);
+    const b = tree[0].children[0];
+    const c = b.children[0];
+    const d = c.children[0];
+    expect([tree[0].depth, b.depth, c.depth, d.depth]).toEqual([0, 1, 2, 3]);
+    expect(d.page.id).toBe('d');
   });
 
-  it('preserves the incoming order on both tiers', () => {
-    const two = [
+  it('ends on a cycle rather than looping, and surfaces the pages caught in it', () => {
+    // A <-> B, neither top level. Cannot happen through the UI, but a page you
+    // cannot see is worse than one drawn in the wrong place, so both are surfaced.
+    const cycle: PageLink[] = [
+      { id: 'a', title: 'A', slug: 'a', status: 'draft', parentId: 'b' },
+      { id: 'b', title: 'B', slug: 'b', status: 'draft', parentId: 'a' },
+    ];
+    expect(new Set(idsInTree(buildPageTree(cycle)))).toEqual(new Set(['a', 'b']));
+  });
+
+  it('preserves the incoming order at every level', () => {
+    const two: PageLink[] = [
       { id: 'a', title: 'A', slug: 'a', status: 'draft', parentId: null },
       { id: 'b', title: 'B', slug: 'b', status: 'draft', parentId: 'a' },
       { id: 'c', title: 'C', slug: 'c', status: 'draft', parentId: 'a' },
-    ] as PageLink[];
+    ];
     const tree = buildPageTree(two);
     expect(tree.map((node) => node.page.id)).toEqual(['a']);
-    expect(tree[0].children.map((child) => child.id)).toEqual(['b', 'c']);
+    expect(tree[0].children.map((child) => child.page.id)).toEqual(['b', 'c']);
   });
 
   it('does not mutate the list it was given', () => {
@@ -150,6 +170,29 @@ describe('buildPageTree', () => {
 
   it('comes back empty for an empty list, rather than throwing', () => {
     expect(buildPageTree([])).toEqual([]);
+  });
+});
+
+describe('descendantIds', () => {
+  it('collects every page beneath one, at any depth, excluding itself', () => {
+    const pages: PageLink[] = [
+      { id: 'a', title: 'A', slug: 'a', status: 'draft', parentId: null },
+      { id: 'b', title: 'B', slug: 'b', status: 'draft', parentId: 'a' },
+      { id: 'c', title: 'C', slug: 'c', status: 'draft', parentId: 'b' },
+      { id: 'x', title: 'X', slug: 'x', status: 'draft', parentId: null },
+    ];
+    // This is what stops a page being dropped into its own branch.
+    expect(descendantIds(pages, 'a')).toEqual(new Set(['b', 'c']));
+    expect(descendantIds(pages, 'c')).toEqual(new Set());
+    expect(descendantIds(pages, 'x')).toEqual(new Set());
+  });
+
+  it('ends on a cycle rather than looping for ever', () => {
+    const pages: PageLink[] = [
+      { id: 'a', title: 'A', slug: 'a', status: 'draft', parentId: 'b' },
+      { id: 'b', title: 'B', slug: 'b', status: 'draft', parentId: 'a' },
+    ];
+    expect(descendantIds(pages, 'a')).toEqual(new Set(['b', 'a']));
   });
 });
 
@@ -172,10 +215,11 @@ describe('each row is a plain, safe link to the page', () => {
     expect(panelSource).toContain("page.status === 'draft'");
   });
 
-  it('indents a child under its parent', () => {
-    // Indentation moved off the anchor and onto the row's node when the tree
-    // learned to fold, so a child is nudged in whether or not it is a folder.
-    expect(panelSource).toContain("data-child={isChild ? '' : undefined}");
+  it('steps a filed page in by its depth, one rule for every level', () => {
+    // Indentation is driven by the node's depth, not a one-level flag, so a page
+    // nested three deep steps in three times.
+    expect(panelSource).toContain("data-child={depth > 0 ? '' : undefined}");
+    expect(panelSource).toContain("'--tree-depth': depth");
   });
 });
 
@@ -211,8 +255,9 @@ describe('the draggable folder tree', () => {
     expect(panelSource).toContain('<PageAnchor');
   });
 
-  it('refuses to file a folder inside another folder, one level only', () => {
-    expect(panelSource).toContain("setMoveError('A folder cannot go inside another folder.')");
+  it('refuses to file a page inside its own branch, so the tree cannot loop', () => {
+    expect(panelSource).toContain('descendantIds(list, activeId).has(target)');
+    expect(panelSource).toContain("setMoveError('A page cannot go inside one of its own pages.')");
   });
 
   it('moves the row at once and puts it back if the server refuses', () => {

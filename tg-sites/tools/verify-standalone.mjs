@@ -9682,6 +9682,53 @@ await check('a page is dragged into a folder, and the folder fills', async () =>
 });
 
 /*
+ * MULTI-TIER FOLDERS (Andy, 16 Aug 2026). A page nests more than one level deep:
+ * drop it onto a page that is already filed inside another and it lands a level
+ * deeper again. About us onto Italy in autumn (which sits inside Tours) files About
+ * at depth 2. Its node steps in by that depth, and Italy gains a fold control, so
+ * the third tier the sidebar now allows reads in the browser.
+ */
+await check('a page can be nested more than one level deep', async () => {
+  await showPanels();
+  await page.waitForTimeout(120);
+  await page.locator('.ed-rail__btn').filter({ hasText: 'Pages' }).first().click();
+  await page.waitForTimeout(200);
+
+  const node = (id) =>
+    page.locator('.ed-pages__node', { has: page.locator(`a[href="/editor?page=${id}"]`) });
+  const depthOf = (id) =>
+    node(id).first().evaluate((el) => el.style.getPropertyValue('--tree-depth').trim());
+
+  // Italy sits inside Tours (depth 1) to begin with; About is top level (depth 0).
+  const italyDepthBefore = await depthOf('p-italy');
+  const aboutDepthBefore = await depthOf('p-about');
+
+  const grip = await node('p-about').locator('.ed-pages__grip').boundingBox();
+  const target = await node('p-italy').boundingBox();
+  if (!grip || !target) return 'could not find the About grip or the Italy row';
+
+  await dndPointerDrag(
+    { x: Math.round(grip.x + grip.width / 2), y: Math.round(grip.y + grip.height / 2) },
+    { x: Math.round(target.x + target.width / 2), y: Math.round(target.y + target.height / 2) },
+  );
+  await page.waitForTimeout(250);
+
+  // About is now two deep, filed under Italy which is filed under Tours, and Italy
+  // has become a folder with a fold control of its own.
+  const aboutDepthAfter = await depthOf('p-about');
+  const italyFolder = await node('p-italy').locator('.ed-pages__folder-toggle').count();
+
+  await page.locator('.ed-rail__btn').filter({ hasText: 'Layers' }).first().click();
+  await page.waitForTimeout(150);
+
+  if (italyDepthBefore !== '1') return `Italy did not start one deep, it read "${italyDepthBefore}"`;
+  if (aboutDepthBefore !== '0') return `About did not start at the top, it read "${aboutDepthBefore}"`;
+  if (aboutDepthAfter !== '2') return `About did not nest two deep, it read "${aboutDepthAfter}"`;
+  if (italyFolder !== 1) return 'Italy did not become a folder with a fold control';
+  return true;
+});
+
+/*
  * FOLDERS FILL DROPDOWNS, slice 2 (Andy, 15 Aug 2026). A Menu link that points at
  * a folder becomes a dropdown of the pages inside it. Set a header holding a Menu
  * whose middle link is /tours; Tours holds Italy in autumn in the demo pages, so
