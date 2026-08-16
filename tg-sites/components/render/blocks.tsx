@@ -1553,16 +1553,73 @@ function navLinks(items: Props[], keyPrefix: string): ReactElement[] {
 
       const href = safeUrl(str(item, 'href')) || '#';
       const newTab = bool(item, 'newTab');
+      /*
+       * The pages inside a folder, injected by fillNavFolders (lib/content/nav.ts)
+       * before this ever renders. A plain link has none; a link that points at a
+       * folder carries the pages filed inside it, and becomes a dropdown.
+       */
+      const children = list(item, 'children');
+
+      const link = (
+        <a
+          className="tgs-nav__link"
+          href={href}
+          {...(newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+        >
+          {label}
+          {children.length > 0 && (
+            <svg
+              className="tgs-nav__chev"
+              viewBox="0 0 24 24"
+              width="14"
+              height="14"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          )}
+        </a>
+      );
+
+      if (children.length === 0) {
+        return (
+          <li key={`${keyPrefix}${index}`} className="tgs-nav__item">
+            {link}
+          </li>
+        );
+      }
+
+      /*
+       * A folder. The parent stays a real link to the folder page; the pages
+       * inside it are a nested list the browser reveals on hover and on keyboard
+       * focus, through CSS alone. No JavaScript, same as the phone menu: a
+       * dropdown is the last place to start shipping a bundle, and :focus-within
+       * makes it reachable by keyboard without one.
+       */
+      const subLinks = children
+        .map((child, childIndex) => {
+          const childLabel = str(child, 'label');
+          if (!childLabel) return null;
+          const childHref = safeUrl(str(child, 'href')) || '#';
+          return (
+            <li key={`${keyPrefix}${index}s${childIndex}`} className="tgs-nav__subitem">
+              <a className="tgs-nav__sublink" href={childHref}>
+                {childLabel}
+              </a>
+            </li>
+          );
+        })
+        .filter((child): child is ReactElement => child !== null);
 
       return (
-        <li key={`${keyPrefix}${index}`} className="tgs-nav__item">
-          <a
-            className="tgs-nav__link"
-            href={href}
-            {...(newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-          >
-            {label}
-          </a>
+        <li key={`${keyPrefix}${index}`} className="tgs-nav__item tgs-nav__item--folder">
+          {link}
+          <ul className="tgs-nav__submenu">{subLinks}</ul>
         </li>
       );
     })

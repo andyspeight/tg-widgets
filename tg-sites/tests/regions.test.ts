@@ -648,9 +648,13 @@ describe('the header and footer on a published page', () => {
      */
     it(`${label} renders the header, the page and the footer as siblings`, () => {
       const text = source(...route);
-      const header = text.indexOf('region={found.regions.header}');
+      // The header and footer are drawn through fillNavRegion, which fills a Menu
+      // link that points at a folder with the pages inside it. That wrapper is
+      // unique to the RegionRenderer calls, unlike the bare regions.footer which
+      // also appears earlier in the JSON-LD social scan.
+      const header = text.indexOf('fillNavRegion(found.regions.header');
       const page = text.indexOf('<PageRenderer');
-      const footer = text.indexOf('region={found.regions.footer}');
+      const footer = text.indexOf('fillNavRegion(found.regions.footer');
 
       expect(header, 'no header on this route').toBeGreaterThan(-1);
       expect(footer, 'no footer on this route').toBeGreaterThan(-1);

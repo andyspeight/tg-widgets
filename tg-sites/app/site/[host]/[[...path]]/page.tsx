@@ -9,8 +9,9 @@ import { RegionRenderer } from '../../../../components/render/RegionRenderer';
 import { SiteBody, SiteHead } from '../../../../components/render/SiteHead';
 import { WidgetScripts } from '../../../../components/render/WidgetScripts';
 import { SlideshowScript } from '../../../../components/render/SlideshowScript';
+import { fillNavFolders, fillNavRegion } from '../../../../lib/content/nav';
 import { listFontFaces } from '../../../../lib/db/fonts';
-import { getPublishedPage } from '../../../../lib/db/pages';
+import { getPublishedPage, listPublishedNavPages } from '../../../../lib/db/pages';
 import { resolveRedirect } from '../../../../lib/db/redirects';
 import { getPublishedRegions } from '../../../../lib/db/regions';
 import { getPublishedItem, listPublished } from '../../../../lib/db/collections';
@@ -65,12 +66,18 @@ async function load(host: string, path: string[] | undefined) {
    * eu-west-2 before a byte of HTML. The header and the footer are one read
    * between them rather than two, for the same reason.
    */
-  const [page, theme, faces, settings, regions] = await Promise.all([
+  const [page, theme, faces, settings, regions, navPages] = await Promise.all([
     getPublishedPage(tenantId, (path ?? []).join('/')),
     getPublicTheme(tenantId),
     listFontFaces(tenantId),
     getPublicSettings(tenantId),
     getPublishedRegions(tenantId),
+    /*
+     * The site's published pages, so a Menu link that points at a folder can be
+     * filled with the pages inside it. One more read on the request a visitor
+     * waits on, so it rides the same Promise.all rather than adding a round trip.
+     */
+    listPublishedNavPages(tenantId),
   ]);
 
   const segments = (path ?? []).filter(Boolean);
@@ -96,6 +103,7 @@ async function load(host: string, path: string[] | undefined) {
       faces,
       settings,
       regions,
+      navPages,
       tenantId,
     };
   }
@@ -132,6 +140,7 @@ async function load(host: string, path: string[] | undefined) {
     faces,
     settings,
     regions,
+    navPages,
     tenantId,
   };
 }
@@ -335,7 +344,10 @@ export default async function SitePage({ params }: Params) {
         a site without a footer has no empty `<footer>` claiming a landmark.
       */}
       <RegionRenderer
-        region={found.regions.header}
+        /* A Menu link that points at a folder is filled with the pages inside it
+           here, the same place the Cards block's collection is filled: the block
+           stays a plain component that never reads the page list. */
+        region={fillNavRegion(found.regions.header, found.navPages)}
         theme={theme}
         /*
           The header goes see-through when the page opens with a section pulled up
@@ -360,12 +372,12 @@ export default async function SitePage({ params }: Params) {
       <Breadcrumb path={currentPath} pageTitle={pageTitle} />
 
       {found.page ? (
-        <PageRenderer page={found.page.content} theme={theme} />
+        <PageRenderer page={fillNavFolders(found.page.content, found.navPages)} theme={theme} />
       ) : (
         <EntryRenderer entry={found.entry!} theme={theme} />
       )}
 
-      <RegionRenderer region={found.regions.footer} theme={theme} />
+      <RegionRenderer region={fillNavRegion(found.regions.footer, found.navPages)} theme={theme} />
 
       {/* One script per distinct widget across all three, rather than each tree
           emitting its own and fetching the same file up to three times. */}

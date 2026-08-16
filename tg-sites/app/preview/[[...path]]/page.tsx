@@ -8,10 +8,11 @@ import { WidgetScripts } from '../../../components/render/WidgetScripts';
 import { SlideshowScript } from '../../../components/render/SlideshowScript';
 import { FontHead } from '../../../components/render/FontHead';
 import { listFontFaces } from '../../../lib/db/fonts';
-import { getPublishedPage } from '../../../lib/db/pages';
+import { getPublishedPage, listPublishedNavPages } from '../../../lib/db/pages';
 import { getPublishedRegions } from '../../../lib/db/regions';
 import { listPublished } from '../../../lib/db/collections';
 import { fillPageListings, itemAsCard, listingsIn } from '../../../lib/content/listings';
+import { fillNavFolders, fillNavRegion } from '../../../lib/content/nav';
 import { getPublicTheme } from '../../../lib/db/theme';
 import { familiesFromFiles } from '../../../lib/theme/fonts';
 import { themeTokens } from '../../../lib/theme/tokens';
@@ -62,11 +63,13 @@ async function load(path: string[] | undefined) {
    * theme cannot be read for a tenant the request is not scoped to, and neither
    * call can write anything.
    */
-  const [page, theme, faces, regions] = await Promise.all([
+  const [page, theme, faces, regions, navPages] = await Promise.all([
     getPublishedPage(site.tenantId, (path ?? []).join('/')),
     getPublicTheme(site.tenantId),
     listFontFaces(site.tenantId),
     getPublishedRegions(site.tenantId),
+    // The published pages, so a Menu link to a folder fills with the pages inside.
+    listPublishedNavPages(site.tenantId),
   ]);
 
   if (!page) return null;
@@ -104,6 +107,7 @@ async function load(path: string[] | undefined) {
     theme,
     faces,
     regions,
+    navPages,
     slug: site.slug,
   };
 }
@@ -189,16 +193,16 @@ export default async function PublishedPage({ params }: Params) {
           would put an overflow ancestor between a sticky header and the
           document, which is what stops sticky sticking. */}
       <RegionRenderer
-        region={found.regions.header}
+        region={fillNavRegion(found.regions.header, found.navPages)}
         theme={theme}
         // See-through when the page opens with a section pulled up under it, so
         // the preview shows the picture behind the header the way the site will.
         overlapped={(found.page.content.sections[0]?.pullUp ?? 0) > 0}
       />
 
-      <PageRenderer page={found.page.content} theme={theme} />
+      <PageRenderer page={fillNavFolders(found.page.content, found.navPages)} theme={theme} />
 
-      <RegionRenderer region={found.regions.footer} theme={theme} />
+      <RegionRenderer region={fillNavRegion(found.regions.footer, found.navPages)} theme={theme} />
 
       <WidgetScripts
         trees={[found.regions.header, found.page.content, found.regions.footer]}

@@ -1346,6 +1346,21 @@ const MUTATIONS = [
     from: `    setList(list.map((candidate) => (candidate.id === activeId ? { ...candidate, parentId: target } : candidate)));`,
     to: `    setList(list);`,
   },
+  {
+    tag: 'nav-folders',
+    check: 'a Menu link to a folder becomes a dropdown of the pages inside it',
+    /*
+     * The folder is resolved and the item matched, but the pages inside it are
+     * never attached, so the Menu draws a plain link and no dropdown. The shape of
+     * bug that looks wired end to end and changes nothing on the page: only a
+     * browser reading the rendered dropdown catches it.
+     */
+    why: 'Match the folder but never attach its children, so a folder link stays a plain link.',
+    file: 'lib/content/nav.ts',
+    from: `            itemTouched = true;
+            return { ...(item as Record<string, unknown>), children };`,
+    to: `            return item;`,
+  },
 ];
 
 /*

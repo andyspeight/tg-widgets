@@ -16,6 +16,7 @@
  */
 
 import { createPage as blankPage } from '../content/factory';
+import type { NavPage } from '../content/nav';
 import { livePaths, MAX_PATH_DEPTH, type PageNode } from '../content/paths';
 import { sanitisePage } from '../content/sanitise-page';
 import { parsePage, type Page } from '../content/schema';
@@ -311,6 +312,33 @@ export async function listPublishedPaths(tenantId: string): Promise<PublishedPat
     }
 
     return paths;
+  });
+}
+
+/**
+ * Every published page as the menu needs it, to fill a folder's dropdown.
+ *
+ * SAME READ-ONLY ROLE AND SAME NARROWING as listPublishedPaths, and for the same
+ * reason: a dropdown must never link to a page a visitor cannot reach. The query
+ * takes only pages with published content, so `published: true` for every row and
+ * a child under a draft parent is simply absent, exactly as it is from the site.
+ * The title is the link's words; the address is composed by fillNavFolders from
+ * the same livePaths the sitemap uses, so a dropdown link and the sitemap agree.
+ */
+export async function listPublishedNavPages(tenantId: string): Promise<NavPage[]> {
+  return withPublicTenant(tenantId, async (tx) => {
+    const rows = await tx`
+      select id, parent_id, slug, title
+      from public.pages
+      where published_content is not null
+    `;
+    return (rows as Array<Record<string, unknown>>).map((row) => ({
+      id: String(row.id),
+      title: String(row.title ?? ''),
+      slug: String(row.slug ?? ''),
+      parentId: row.parent_id ? String(row.parent_id) : null,
+      published: true,
+    }));
   });
 }
 

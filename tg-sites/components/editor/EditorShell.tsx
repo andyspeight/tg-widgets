@@ -27,6 +27,7 @@ import {
 import { publishRegionAction, saveRegionAction } from '../../app/actions/regions';
 import { publishItemAction, saveItemAction } from '../../app/actions/collections';
 import { PublishHistory } from './PublishHistory';
+import type { NavPage } from '../../lib/content/nav';
 import type { Page, RegionName, Section } from '../../lib/content/schema';
 import { parsePage } from '../../lib/content/schema';
 import { pageAsRegion, REGION_TITLES } from '../../lib/content/region-page';
@@ -512,6 +513,25 @@ export function EditorShell({
    * is open. Held here, not in the rail, because the shell draws the column.
    */
   const [railPanel, setRailPanel] = useState<'layers' | 'pages'>('layers');
+
+  /*
+   * The pages as the Menu block needs them, so a link that points at a folder
+   * shows the pages inside it on the canvas, the same dropdown the published site
+   * draws. Published true for all, because the editor should show a folder still
+   * in draft; the live site passes the real status instead. The Canvas fills the
+   * tree at the render boundary, so the tree the editor saves never carries them.
+   */
+  const navPages = useMemo<NavPage[]>(
+    () =>
+      pages.map((entry) => ({
+        id: entry.id,
+        title: entry.title,
+        slug: entry.slug,
+        parentId: entry.parentId,
+        published: true,
+      })),
+    [pages],
+  );
 
   /**
    * Make a new page and open it, for the rail's Pages panel.
@@ -1859,6 +1879,8 @@ export function EditorShell({
         chromePage={activeTree === 'page' ? null : otherContent.page}
         chromeFooter={activeTree === 'footer' ? null : otherContent.footer}
         onActivateRegion={activateTree}
+        // So a Menu link to a folder shows its dropdown on the canvas too.
+        navPages={navPages}
         /*
           "This page is empty" is the wrong sentence on the header screen, and
           it is the sentence somebody meets FIRST, since a client who has never

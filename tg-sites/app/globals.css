@@ -2600,6 +2600,93 @@
 }
 .tgs-nav__list--stacked .tgs-nav__link { display: block; padding: var(--tgs-space-s) 0; }
 
+/*
+ * FOLDERS FILL DROPDOWNS, WITH NO JAVASCRIPT (Andy, 15 Aug 2026).
+ *
+ * A Menu link that points at a folder keeps being a real link to that page, and
+ * gains a dropdown of the pages inside it. The browser reveals the dropdown on
+ * hover AND on keyboard focus, through :focus-within, so it is reachable with a
+ * mouse, a finger and the Tab key without a line of script, the same principle
+ * as the phone menu above. The dropdown is its own surface, so its links take the
+ * surface's text colour rather than the header's, which would vanish on a header
+ * that set white link text.
+ */
+.tgs-nav__item { position: relative; }
+
+.tgs-nav__item--folder > .tgs-nav__link { display: inline-flex; align-items: center; gap: 4px; }
+.tgs-nav__chev { flex: none; transition: transform 0.15s ease; }
+
+.tgs-nav__submenu {
+  list-style: none;
+  margin: 0;
+  padding: var(--tgs-space-xs);
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 30;
+  min-width: 12rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--tgs-surface);
+  color: var(--tgs-text);
+  border: 1px solid var(--tgs-border);
+  border-radius: var(--tgs-radius-sm);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.16);
+  /* Present in the DOM but hidden and skipped by a screen reader until the item
+     is hovered or holds focus. The delayed visibility lets it fade rather than
+     blink out. */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity 0.14s ease, transform 0.14s ease, visibility 0s linear 0.14s;
+}
+
+.tgs-nav__item--folder:hover > .tgs-nav__submenu,
+.tgs-nav__item--folder:focus-within > .tgs-nav__submenu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition: opacity 0.14s ease, transform 0.14s ease;
+}
+.tgs-nav__item--folder:hover > .tgs-nav__link .tgs-nav__chev,
+.tgs-nav__item--folder:focus-within > .tgs-nav__link .tgs-nav__chev {
+  transform: rotate(180deg);
+}
+
+.tgs-nav__sublink {
+  display: block;
+  padding: var(--tgs-space-s);
+  border-radius: var(--tgs-radius-sm);
+  color: var(--tgs-text);
+  font-family: var(--tgs-nav-font, inherit);
+  font-size: var(--tgs-nav-size, inherit);
+  font-weight: var(--tgs-nav-weight, 500);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.tgs-nav__sublink:hover { background: var(--tgs-bg); color: var(--tgs-primary); }
+
+/*
+ * Inside the phone menu there is no hover to open a dropdown, so the pages inside
+ * a folder are simply shown, indented under their folder. A nested list, always
+ * open, which is the right shape for a touch menu.
+ */
+.tgs-nav__list--stacked .tgs-nav__submenu {
+  position: static;
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  min-width: 0;
+  padding: var(--tgs-space-xs) 0 var(--tgs-space-xs) var(--tgs-space-m);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  transition: none;
+}
+.tgs-nav__list--stacked .tgs-nav__sublink { color: inherit; }
+.tgs-nav__list--stacked .tgs-nav__chev { display: none; }
+
 @container tgs-page (max-width: 767px) {
   /* Below the phone breakpoint the plain row gives way to the button, but only
      for a menu whose owner asked for one. */

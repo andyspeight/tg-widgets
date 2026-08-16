@@ -9681,6 +9681,73 @@ await check('a page is dragged into a folder, and the folder fills', async () =>
   return true;
 });
 
+/*
+ * FOLDERS FILL DROPDOWNS, slice 2 (Andy, 15 Aug 2026). A Menu link that points at
+ * a folder becomes a dropdown of the pages inside it. Set a header holding a Menu
+ * whose middle link is /tours; Tours holds Italy in autumn in the demo pages, so
+ * that one link gains a submenu and the plain links do not. Panels folded so the
+ * canvas is wide enough to show the row rather than the phone burger, which is
+ * also where the hover dropdown lives. Scoped to the wide list, because the links
+ * are in the markup twice (see NavBlock) and the stacked copy would double every
+ * count.
+ */
+await check('a Menu link to a folder becomes a dropdown of the pages inside it', async () => {
+  await closeAnyDialog();
+  await page.evaluate(() => window.__TG_SET_REGION__(null));
+  await page.waitForTimeout(200);
+  await page.evaluate(() =>
+    window.__TG_SET_CHROME__({
+      header: {
+        id: 'h', slug: '', title: 'Header', version: 1,
+        sections: [
+          { id: 'hs', width: 'full', tone: 'light', rows: [{ id: 'hr', gap: 16, columns: [{ id: 'hc', width: 100, blocks: [
+            { id: 'nb', type: 'nav', props: { layout: 'row', collapse: true, items: [
+              { label: 'Home', href: '/', newTab: false },
+              { label: 'Tours', href: '/tours', newTab: false },
+              { label: 'About us', href: '/about', newTab: false },
+            ] } },
+          ] }] }] },
+        ],
+      },
+      footer: null,
+    }),
+  );
+  await page.waitForTimeout(500);
+
+  /*
+   * Scoped to the wide list. The links are in the markup twice (wide row and the
+   * stacked phone copy, see NavBlock), and both are in the DOM whatever the width,
+   * so an unscoped count would double. The wide row is what a desktop visitor sees.
+   * The submenu is hidden until hover, which the render leaves in the DOM, so its
+   * link is read here without revealing it: whether it reveals is a pure-CSS rule
+   * asserted in tests/nav.test.ts, and the editor's chrome band is pointer-inert
+   * while editing so a hover here would not fire it anyway.
+   */
+  const wide = '.ed-chrome--header .tgs-nav__list:not(.tgs-nav__list--stacked)';
+  const folderItems = await page.locator(`${wide} .tgs-nav__item--folder`).count();
+  const subLinks = page.locator(`${wide} .tgs-nav__sublink`);
+  const subCount = await subLinks.count();
+  const subHref = subCount ? await subLinks.first().getAttribute('href') : null;
+  const subText = subCount ? ((await subLinks.first().textContent()) || '').trim() : '';
+  // The folder link is still a real link to the folder page itself.
+  const folderHref = await page
+    .locator(`${wide} .tgs-nav__item--folder > .tgs-nav__link`)
+    .first()
+    .getAttribute('href')
+    .catch(() => null);
+
+  await page.evaluate(() => window.__TG_SET_CHROME__(null));
+  await page.waitForTimeout(150);
+  await showPanels();
+
+  if (folderItems !== 1) return `expected one folder menu item, saw ${folderItems}`;
+  if (subCount !== 1) return `expected one page in the dropdown, saw ${subCount}`;
+  if (subText !== 'Italy in autumn') return `the dropdown page read "${subText}"`;
+  if (subHref !== '/tours/italy') return `the dropdown link was "${subHref}", not /tours/italy`;
+  if (folderHref !== '/tours') return `the folder link no longer points at the folder, it was "${folderHref}"`;
+  return true;
+});
+
 // --- Preview mode: the site as it will publish, full canvas -----------------
 
 /*

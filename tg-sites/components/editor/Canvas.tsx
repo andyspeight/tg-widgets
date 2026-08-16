@@ -38,6 +38,7 @@ import {
 } from '../../lib/content/tree';
 import { resolveAt, withOverride } from '../../lib/content/responsive';
 import { PageRenderer } from '../render/PageRenderer';
+import { fillNavFolders, type NavPage } from '../../lib/content/nav';
 import type { Viewport } from './EditorShell';
 
 /**
@@ -113,6 +114,14 @@ interface Props {
   chromeFooter?: Page | null;
   /** Hand editing to the header, the page or the footer, from a click on its band. */
   onActivateRegion?: (tree: 'page' | 'header' | 'footer') => void;
+  /**
+   * The site's pages, so a Menu link that points at a folder shows the pages
+   * inside it right here on the canvas, the same dropdown the published site will.
+   * Filled at the render boundary only (see fillNavFolders), so the tree the
+   * editor saves never carries the injected children. Published true for all, so a
+   * folder still being built shows its drafts in the preview.
+   */
+  navPages?: readonly NavPage[];
 }
 
 /**
@@ -165,6 +174,7 @@ export function Canvas({
   chromePage = null,
   chromeFooter = null,
   onActivateRegion,
+  navPages = [],
 }: Props) {
   const frameRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -785,7 +795,10 @@ export function Canvas({
         onKeyDown={preview ? undefined : onKeyDown}
       >
         <PageRenderer
-          page={page}
+          /* Menu folder links filled for the preview, at the render boundary so
+             the tree the editor holds and saves is untouched. Non-structural, so
+             it changes no data-path the editing handlers resolve against. */
+          page={fillNavFolders(page, navPages)}
           editable={!preview}
           editingPath={preview ? null : editingPath}
           /*
@@ -816,7 +829,8 @@ export function Canvas({
     if (!content) return null;
     return (
       <ChromeBand
-        page={content}
+        // Its Menu folders filled for the band, the same as the framed tree.
+        page={fillNavFolders(content, navPages)}
         tree={pos}
         theme={theme}
         preview={preview}

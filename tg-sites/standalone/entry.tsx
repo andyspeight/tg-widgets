@@ -37,7 +37,7 @@ const DEMO_PAGES: readonly PageLink[] = [
   { id: 'demo', title: 'Home', slug: '', status: 'published', parentId: null },
   { id: 'p-about', title: 'About us', slug: 'about', status: 'published', parentId: null },
   { id: 'p-tours', title: 'Tours', slug: 'tours', status: 'published', parentId: null },
-  { id: 'p-italy', title: 'Italy in autumn', slug: 'tours/italy', status: 'published', parentId: 'p-tours' },
+  { id: 'p-italy', title: 'Italy in autumn', slug: 'italy', status: 'published', parentId: 'p-tours' },
   { id: 'p-contact', title: 'Contact', slug: 'contact', status: 'draft', parentId: null },
 ];
 
