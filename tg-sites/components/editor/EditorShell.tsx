@@ -494,7 +494,7 @@ export function EditorShell({
    * for the sake of a date field would be a poor trade.
    */
   const [itemMeta, setItemMeta] = useState<ItemMeta>(
-    initialItemMeta ?? { title: '', summary: '', image: '', alt: '', date: '', tags: [], slug: '' },
+    initialItemMeta ?? { title: '', summary: '', image: '', alt: '', author: '', date: '', tags: [], slug: '' },
   );
   const [unpublished, setUnpublished] = useState(initialHasUnpublishedChanges);
   const [publishing, setPublishing] = useState(false);

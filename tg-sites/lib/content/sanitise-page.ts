@@ -315,8 +315,8 @@ export function sanitiseRegion(region: Region): Region {
  * Its body is sections, so that half is sanitiseSection again. The two strings
  * of its own that reach the browser as attributes rather than as text, the
  * picture and nothing else, go through the same allowlist a section background
- * does. Title, summary, alt and the tags are rendered as text by React and need
- * nothing here; the tags were cleaned by safeTags on the way through parseItem.
+ * does. Title, summary, alt, author and the tags are rendered as text by React
+ * and need nothing here; the tags were cleaned by safeTags through parseItem.
  */
 export function sanitiseItem(item: CollectionItem): CollectionItem {
   return {

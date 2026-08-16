@@ -21,6 +21,7 @@
  */
 
 import type { CollectionItem } from './collection';
+import { readingTime } from './reading-time';
 import type { Page, Section } from './schema';
 
 /** What a listing block asks for. */
@@ -103,6 +104,11 @@ export function itemAsCard(
     // already goes to the post, and a tag link fighting that cover is worse than
     // a label. Finding posts by a tag is the archive's job.
     tags: item.tags,
+    // The byline and the reading time, so the card carries the same at-a-glance
+    // signals the post does. Reading time is worked out from the body here, never
+    // stored: see lib/content/reading-time.ts.
+    author: item.author,
+    readingMinutes: readingTime(item.sections),
     linkLabel: 'Read more',
     linkHref: `/${collectionKey}/${slug}`,
   };

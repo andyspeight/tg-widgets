@@ -110,6 +110,8 @@ export const CollectionItemSchema = z.object({
   /** Media id or absolute URL. The picture on the card and at the top. */
   image: z.string().max(2048).default(''),
   alt: z.string().max(200).default(''),
+  /** The post's byline, optional. A person's name, shown on the post and card. */
+  author: z.string().max(120).default(''),
   date: z.unknown().transform(safeDate),
   /** The post's tags, a short list of display labels. Cleaned the same way
    *  wherever they arrive from: the editor, an import, or an older stored row
@@ -126,7 +128,7 @@ export type CollectionItemParseResult =
   | { ok: false; errors: string[] };
 
 export function emptyItem(): CollectionItem {
-  return { version: 1, title: '', summary: '', image: '', alt: '', date: '', tags: [], sections: [] };
+  return { version: 1, title: '', summary: '', image: '', alt: '', author: '', date: '', tags: [], sections: [] };
 }
 
 /**

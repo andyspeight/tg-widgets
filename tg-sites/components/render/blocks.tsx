@@ -1126,6 +1126,14 @@ function renderCard(
   const tags = Array.isArray(rawTags)
     ? rawTags.filter((tag): tag is string => typeof tag === 'string' && tag.length > 0)
     : [];
+  // The byline and the reading time, joined into one line, each part only when
+  // it is there: "By Jane Doe" · "4 min read". Both are rendered as text.
+  const author = str(card, 'author');
+  const rawMinutes = (card as Record<string, unknown>).readingMinutes;
+  const readingMinutes = typeof rawMinutes === 'number' && rawMinutes > 0 ? rawMinutes : 0;
+  const meta = [author, readingMinutes > 0 ? `${readingMinutes} min read` : '']
+    .filter(Boolean)
+    .join(' · ');
 
   // A card with nothing to say is not drawn at all rather than drawn empty. An
   // agent who added one and has not filled it in yet still sees it in the
@@ -1149,6 +1157,7 @@ function renderCard(
       <div className="tgs-card__body">
         {label && <p className="tgs-card__label">{label}</p>}
         {title && <h3 className="tgs-card__title">{title}</h3>}
+        {meta && <p className="tgs-card__meta">{meta}</p>}
         {body && <p className="tgs-card__text">{body}</p>}
 
         {tags.length > 0 && (

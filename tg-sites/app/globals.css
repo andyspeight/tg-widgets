@@ -2218,6 +2218,13 @@
   letter-spacing: var(--tgs-h4-tracking);
   text-wrap: balance;
 }
+
+/* The byline and reading time on a card, one quiet line under the title. */
+.tgs-card__meta {
+  margin: 0;
+  font-size: var(--tgs-text-s);
+  color: var(--tgs-text-muted);
+}
 /* Inherit + opacity, not a fixed grey: at the default text colour this renders
    the same muted tone as before, but it now follows a set Text colour and stays
    legible on a dark card. The label and link keep their brand accents above. */
@@ -2371,6 +2378,13 @@
   line-height: var(--tgs-h1-leading);
   letter-spacing: var(--tgs-h1-tracking);
   text-wrap: balance;
+}
+
+/* The byline and reading time under the title, one quiet line. */
+.tgs-entry__byline {
+  margin: var(--tgs-space-s) 0 0;
+  font-size: var(--tgs-text-s);
+  color: var(--tgs-text-muted);
 }
 
 .tgs-entry__summary {

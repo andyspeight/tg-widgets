@@ -36,6 +36,7 @@ import {
   type CollectionItem,
 } from '../lib/content/collection';
 import { itemAsPage, itemMeta, pageAsItem } from '../lib/content/collection-page';
+import { readingTime } from '../lib/content/reading-time';
 import {
   fillListings,
   fillPageListings,
@@ -228,6 +229,36 @@ describe('tagArchivePath', () => {
   });
 });
 
+describe('readingTime', () => {
+  const words = (count: number) => Array.from({ length: count }, (_, i) => `word${i}`).join(' ');
+  const body = (html: string) => [section([{ id: 'b1', type: 'text', props: { html } }])];
+
+  it('is zero for an empty body, which the render takes as "show nothing"', () => {
+    expect(readingTime([])).toBe(0);
+  });
+
+  it('is never below one when there are words, however few', () => {
+    expect(readingTime(body(`<p>${words(10)}</p>`))).toBe(1);
+  });
+
+  it('is words over 200 a minute, rounded up', () => {
+    // 450 words is 2.25 minutes, which rounds to 3.
+    expect(readingTime(body(`<p>${words(450)}</p>`))).toBe(3);
+  });
+
+  it('strips the markup before counting, so a bold word is still one word', () => {
+    expect(readingTime(body('<p><strong>Crete</strong> is <em>lovely</em></p>'))).toBe(1);
+  });
+
+  it('counts the words inside a repeater, not only the block props', () => {
+    const cards = section([
+      { id: 'b1', type: 'cards', props: { items: [{ title: words(300) }, { title: words(300) }] } },
+    ]);
+    // 600 words across the two card titles is exactly three minutes.
+    expect(readingTime([cards])).toBe(3);
+  });
+});
+
 // ---------------------------------------------------------------------------
 // Parsing an item
 // ---------------------------------------------------------------------------
@@ -244,6 +275,7 @@ describe('parseItem', () => {
       summary: '',
       image: '',
       alt: '',
+      author: '',
       date: '',
       tags: [],
       sections: [],
@@ -267,6 +299,13 @@ describe('parseItem', () => {
     const parsed = parseItem({ title: 'Crete' });
     expect(parsed.ok).toBe(true);
     if (parsed.ok) expect(parsed.item.tags).toEqual([]);
+  });
+
+  it('carries the author through, and defaults it to nothing', () => {
+    const withAuthor = parseItem({ title: 'Crete', author: 'Jane Doe' });
+    expect(withAuthor.ok && withAuthor.item.author).toBe('Jane Doe');
+    const without = parseItem({ title: 'Crete' });
+    expect(without.ok && without.item.author).toBe('');
   });
 
   /*
@@ -317,6 +356,7 @@ describe('parseItem', () => {
       summary: '',
       image: '',
       alt: '',
+      author: '',
       date: '',
       tags: [],
       sections: [],
@@ -363,6 +403,7 @@ describe('an item as the editor sees it', () => {
       summary: 'A week of it',
       image: 'media-1',
       alt: 'A beach',
+      author: '',
       date: '2026-08-03',
       tags: [],
       slug: 'ten-things-in-crete',
@@ -397,6 +438,14 @@ describe('an item as the editor sees it', () => {
     expect(back.tags).toEqual(['Crete', 'Beaches']);
   });
 
+  it('carries the author out to the meta and back, beside the tags', () => {
+    const original = item({ author: 'Jane Doe' });
+    expect(itemMeta(original, 'x').author).toBe('Jane Doe');
+    expect(pageAsItem(itemAsPage(original, 'item-1', 'x'), itemMeta(original, 'x')).author).toBe(
+      'Jane Doe',
+    );
+  });
+
   it('round-trips an item through the editor without changing it', () => {
     const original = item({
       summary: 'A week of it',
@@ -427,7 +476,7 @@ describe('an item as the editor sees it', () => {
     expect(back.seo).toBeUndefined();
     expect(back.slug).toBeUndefined();
     expect(Object.keys(back).sort()).toEqual(
-      ['alt', 'date', 'image', 'sections', 'summary', 'tags', 'title', 'version'],
+      ['alt', 'author', 'date', 'image', 'sections', 'summary', 'tags', 'title', 'version'],
     );
   });
 });
@@ -561,6 +610,18 @@ describe('an item as a card', () => {
 
   it('carries an empty tag list when the post has none', () => {
     expect(itemAsCard(item(), 'blog', 'x').tags).toEqual([]);
+  });
+
+  it('carries the author for the card byline', () => {
+    expect(itemAsCard(item({ author: 'Jane Doe' }), 'blog', 'x').author).toBe('Jane Doe');
+  });
+
+  it('works out the card reading time from the body', () => {
+    const withBody = item({
+      sections: [section([{ id: 'b1', type: 'text', props: { html: `<p>${'word '.repeat(450)}</p>` } }])],
+    });
+    // 450 words is 2.25 minutes, rounded up to 3.
+    expect(itemAsCard(withBody, 'blog', 'x').readingMinutes).toBe(3);
   });
 });
 
@@ -1243,6 +1304,12 @@ describe('an entry on a live site', () => {
     expect(route).toContain('item.tags.map((tag)');
   });
 
+  it('shows a byline of author and reading time under the title', () => {
+    expect(route).toContain('className="tgs-entry__byline"');
+    // Worked out from the body, not read from a stored field.
+    expect(route).toContain('readingTime(item.sections)');
+  });
+
   /*
    * new Date('2026-08-03') is UTC midnight, which formats as the 2nd anywhere
    * west of Greenwich. The date on an article is a date, so it is built from
@@ -1297,6 +1364,12 @@ describe('the listing blocks on a page', () => {
     // Only strings reach the page, so a stray tags prop on a manual card cannot
     // put an object through React.
     expect(blocks).toContain("typeof tag === 'string'");
+  });
+
+  it('draws the byline and reading time on a card', () => {
+    const blocks = read('components', 'render', 'blocks.tsx');
+    expect(blocks).toContain('className="tgs-card__meta"');
+    expect(blocks).toContain('min read');
   });
 });
 
@@ -1381,6 +1454,12 @@ describe('the stylesheet', () => {
       expect(css).toContain(rule);
     }
   });
+
+  it('styles the byline on a post and the meta line on a card', () => {
+    for (const rule of ['.tgs-entry__byline', '.tgs-card__meta']) {
+      expect(css).toContain(rule);
+    }
+  });
 });
 
 describe('the tags field in the post editor', () => {
@@ -1394,6 +1473,11 @@ describe('the tags field in the post editor', () => {
   it('draws a removable chip per tag', () => {
     expect(props).toContain('className="ed-tags__chip"');
     expect(props).toContain('className="ed-tags__x"');
+  });
+
+  it('offers an author field beside the date', () => {
+    expect(props).toContain('>Author<');
+    expect(props).toContain('set({ author: event.target.value })');
   });
 });
 

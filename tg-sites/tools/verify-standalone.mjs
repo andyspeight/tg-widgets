@@ -10128,6 +10128,27 @@ await check('a post carrying tags saves clean', async () => {
   return state === 'saved' && failure === 0 ? true : `save state "${state}", failures ${failure}`;
 });
 
+await check('a blog post offers an author byline that takes a name and persists', async () => {
+  // The root is still selected from the tags check, so the post's own fields are
+  // in the pane. The Author field is the one whose label is exactly "Author".
+  const pane = await page.locator('.ed-props').innerText();
+  if (!/Author/.test(pane)) return `the pane did not offer an author field: "${pane.slice(0, 160)}"`;
+
+  const field = page.locator('.ed-field').filter({ has: page.getByText('Author', { exact: true }) });
+  const input = field.locator('input.ed-input');
+  await input.fill('Jane Doe');
+  await page.waitForTimeout(200);
+  // A controlled input: if the edit did not reach the meta, React re-renders it
+  // back to empty, so holding the name is proof the byline is wired through.
+  if ((await input.inputValue()) !== 'Jane Doe') return 'the author box did not hold the name';
+
+  // The meta changed, so the shell autosaves through the real parseItem.
+  await page.waitForTimeout(1600);
+  const state = await page.locator('.ed-save').getAttribute('data-state');
+  const failure = await page.locator('.ed-savefail').count();
+  return state === 'saved' && failure === 0 ? true : `save state "${state}", failures ${failure}`;
+});
+
 // Back to the page for anything that runs after.
 await page.evaluate(() => window.__TG_SET_ITEM__(null));
 await page.waitForTimeout(300);

@@ -1407,6 +1407,20 @@ const MUTATIONS = [
     from: `    onChange(safeTags([...tags, raw]));`,
     to: `    void raw;`,
   },
+  {
+    tag: 'blog-author',
+    check: 'a blog post offers an author byline that takes a name and persists',
+    /*
+     * The author edit is swallowed: typing a name into the byline box changes
+     * nothing on the meta, so the controlled input snaps back to empty. The field
+     * still renders, so it looks wired; only a browser that types and reads the
+     * box back catches that the name never took.
+     */
+    why: 'Drop the author edit, so the byline box never holds what is typed into it.',
+    file: 'components/editor/Properties.tsx',
+    from: `          onChange={(event) => set({ author: event.target.value })}`,
+    to: `          onChange={(event) => void event}`,
+  },
 ];
 
 /*

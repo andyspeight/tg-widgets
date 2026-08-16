@@ -17,6 +17,7 @@ import { getPublishedRegions } from '../../../../lib/db/regions';
 import { getPublishedItem, listPublished, listPublishedByTag, MAX_LISTING_ITEMS } from '../../../../lib/db/collections';
 import { fillPageListings, itemAsCard, listingsIn } from '../../../../lib/content/listings';
 import { tagArchivePath } from '../../../../lib/content/collection';
+import { readingTime } from '../../../../lib/content/reading-time';
 import { CardsBlock } from '../../../../components/render/blocks';
 import { getPublicSettings } from '../../../../lib/db/settings';
 import { getPublicTheme } from '../../../../lib/db/theme';
@@ -489,6 +490,12 @@ function EntryRenderer({
 }) {
   const { item } = entry;
   const image = safeUrl(item.image);
+  // "By Jane Doe · 4 min read", each part only when it is there. Reading time is
+  // worked out from the body, never stored: see lib/content/reading-time.ts.
+  const minutes = readingTime(item.sections);
+  const byline = [item.author, minutes > 0 ? `${minutes} min read` : '']
+    .filter(Boolean)
+    .join(' · ');
 
   return (
     <article className="tgs-page tgs-entry" style={theme}>
@@ -499,6 +506,7 @@ function EntryRenderer({
           </p>
         )}
         <h1 className="tgs-entry__title">{item.title}</h1>
+        {byline && <p className="tgs-entry__byline">{byline}</p>}
         {item.summary && <p className="tgs-entry__summary">{item.summary}</p>}
         {item.tags.length > 0 && (
           <ul className="tgs-entry__tags">

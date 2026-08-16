@@ -395,7 +395,7 @@ export function ItemOptions({
           />
         ) : isItem ? (
           <ItemFields
-            meta={itemMeta ?? { title: '', summary: '', image: '', alt: '', date: '', tags: [], slug: '' }}
+            meta={itemMeta ?? { title: '', summary: '', image: '', alt: '', author: '', date: '', tags: [], slug: '' }}
             onChange={onItemMeta}
           />
         ) : (
@@ -653,6 +653,18 @@ function ItemFields({
           onChange={(event) => set({ date: event.target.value })}
         />
         <p className="ed-help">Shown on the card in a listing. Not when it was published.</p>
+      </div>
+
+      <div className="ed-field">
+        <label className="ed-label">Author</label>
+        <input
+          className="ed-input"
+          maxLength={120}
+          value={meta.author}
+          placeholder="Jane Doe"
+          onChange={(event) => set({ author: event.target.value })}
+        />
+        <p className="ed-help">The byline, shown on the post and the card. Leave it blank for none.</p>
       </div>
 
       <div className="ed-field">

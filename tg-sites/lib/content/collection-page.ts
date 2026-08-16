@@ -24,6 +24,8 @@ export interface ItemMeta {
   summary: string;
   image: string;
   alt: string;
+  /** The post's byline, edited beside the date. */
+  author: string;
   date: string;
   /** The post's tags, edited beside the summary and the date. */
   tags: string[];
@@ -37,6 +39,7 @@ export function itemMeta(item: CollectionItem, slug: string): ItemMeta {
     summary: item.summary,
     image: item.image,
     alt: item.alt,
+    author: item.author,
     date: item.date,
     tags: item.tags,
     slug,
@@ -77,6 +80,7 @@ export function pageAsItem(page: Page, meta: ItemMeta): CollectionItem {
     summary: meta.summary,
     image: meta.image,
     alt: meta.alt,
+    author: meta.author,
     date: meta.date,
     tags: meta.tags,
     sections: page.sections,
