@@ -708,15 +708,18 @@ describe('one widget script, however many trees it appears in', () => {
 
       expect(trees).toContain('found.regions.header');
       expect(trees).toContain('found.regions.footer');
-      // Whatever is between the two, the page's own content is in it.
-      expect(trees).toContain('found.page');
+      // Whatever is between the two, the content tree is in it: the public site
+      // resolves page, entry or tag archive into a single `contentTree` first;
+      // the preview, which has no archive, still passes the page inline.
+      expect(trees).toMatch(/found\.page|contentTree/);
     });
   }
 
   it('the public site hands over an entry body as readily as a page', () => {
     const text = source('app', 'site', '[host]', '[[...path]]', 'page.tsx').replace(/\s+/g, ' ');
-    const call = text.slice(text.indexOf('<WidgetScripts'));
-    expect(call.slice(0, call.indexOf('/>'))).toContain('found.entry!.item');
+    // The content tree the scripts are handed resolves to the entry's own body
+    // when it is an entry, the same way it resolves to the page's content.
+    expect(text).toContain('found.entry ? found.entry.item');
   });
 });
 

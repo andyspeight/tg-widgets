@@ -14,8 +14,10 @@ import { listFontFaces } from '../../../../lib/db/fonts';
 import { getPublishedPage, listPublishedNavPages } from '../../../../lib/db/pages';
 import { resolveRedirect } from '../../../../lib/db/redirects';
 import { getPublishedRegions } from '../../../../lib/db/regions';
-import { getPublishedItem, listPublished } from '../../../../lib/db/collections';
+import { getPublishedItem, listPublished, listPublishedByTag, MAX_LISTING_ITEMS } from '../../../../lib/db/collections';
 import { fillPageListings, itemAsCard, listingsIn } from '../../../../lib/content/listings';
+import { tagArchivePath } from '../../../../lib/content/collection';
+import { CardsBlock } from '../../../../components/render/blocks';
 import { getPublicSettings } from '../../../../lib/db/settings';
 import { getPublicTheme } from '../../../../lib/db/theme';
 import { resolveTenantByHostname } from '../../../../lib/db/tenants';
@@ -92,6 +94,33 @@ async function load(host: string, path: string[] | undefined) {
    * name. Two segments exactly, because an entry has no children.
    */
   if (!page) {
+    /*
+     * A TAG ARCHIVE: /{collectionKey}/tag/{tagSlug}, every post carrying the tag.
+     * Three segments, the middle the literal "tag", and looked up only after the
+     * pages have said no, exactly as an entry is. A collection with no such tag,
+     * or nothing carrying it, is a 404 the same as any other guessed address.
+     */
+    if (segments.length === 3 && segments[1] === 'tag') {
+      const tagged = await listPublishedByTag(tenantId, segments[0], segments[2], MAX_LISTING_ITEMS);
+      if (!tagged) return null;
+
+      return {
+        page: null,
+        entry: null,
+        archive: {
+          collectionKey: segments[0],
+          tag: tagged.label,
+          cards: tagged.items.map((row) => itemAsCard(row.item, segments[0], row.slug)),
+        },
+        theme,
+        faces,
+        settings,
+        regions,
+        navPages,
+        tenantId,
+      };
+    }
+
     if (segments.length !== 2) return null;
     const entry = await getPublishedItem(tenantId, segments[0], segments[1]);
     if (!entry) return null;
@@ -99,6 +128,7 @@ async function load(host: string, path: string[] | undefined) {
     return {
       page: null,
       entry: { ...entry, collectionKey: segments[0], slug: segments[1] },
+      archive: null,
       theme,
       faces,
       settings,
@@ -136,6 +166,7 @@ async function load(host: string, path: string[] | undefined) {
   return {
     page: { ...page, content: fillPageListings(page.content, listings) },
     entry: null,
+    archive: null,
     theme,
     faces,
     settings,
@@ -151,6 +182,21 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   try {
     const found = await load(host, path);
     if (!found) return { title: 'Not found', robots: { index: false, follow: false } };
+
+    /*
+     * A TAG ARCHIVE is noindex: it is a way to find posts, not a page to rank,
+     * and letting a thin filter view compete with the posts it lists is the
+     * duplicate-content mistake the sitemap already avoids by leaving archives
+     * out. follow stays on, so an engine still walks through to the posts.
+     */
+    if (found.archive) {
+      const canonical = `https://${decodeURIComponent(host)}/${(path ?? []).join('/')}`.replace(/\/$/, '');
+      return {
+        title: `Posts tagged ${found.archive.tag}`,
+        robots: { index: false, follow: true },
+        alternates: { canonical },
+      };
+    }
 
     /*
      * An entry has no SEO of its own, on purpose: its summary IS the search
@@ -258,7 +304,17 @@ export default async function SitePage({ params }: Params) {
    */
   const origin = `https://${slug}`;
   const currentPath = (path ?? []).join('/');
-  const pageTitle = found.page ? found.page.title : found.entry!.item.title;
+  const pageTitle = found.page
+    ? found.page.title
+    : found.entry
+      ? found.entry.item.title
+      : `Posts tagged ${found.archive!.tag}`;
+  // The one tree a page or an entry carries and an archive does not: an archive
+  // is a grid of OTHER posts, so it has no sections of its own. Null-safe
+  // everywhere it is used below (a null region is already passed the same way),
+  // so the archive drops out of the social-profile scan, the widget scripts and
+  // the slideshow enhancer without any of them having to know it exists.
+  const contentTree = found.page ? found.page.content : found.entry ? found.entry.item : null;
 
   const nodes = pageJsonLd({
     origin,
@@ -284,7 +340,7 @@ export default async function SitePage({ params }: Params) {
      */
     sameAs: profileLinks([
       found.regions.header,
-      found.page ? found.page.content : found.entry!.item,
+      contentTree,
       found.regions.footer,
     ]),
   });
@@ -369,12 +425,16 @@ export default async function SitePage({ params }: Params) {
         Between the header and the content, which is where a trail belongs, and
         it draws nothing on the home page.
       */}
-      <Breadcrumb path={currentPath} pageTitle={pageTitle} />
+      {/* Not on a tag archive: that is a filter view, not a place in the site's
+          own tree, so there is no trail to draw to it. */}
+      {!found.archive && <Breadcrumb path={currentPath} pageTitle={pageTitle} />}
 
       {found.page ? (
         <PageRenderer page={fillNavFolders(found.page.content, found.navPages)} theme={theme} />
+      ) : found.entry ? (
+        <EntryRenderer entry={found.entry} theme={theme} />
       ) : (
-        <EntryRenderer entry={found.entry!} theme={theme} />
+        <ArchiveRenderer archive={found.archive!} theme={theme} />
       )}
 
       <RegionRenderer region={fillNavRegion(found.regions.footer, found.navPages)} theme={theme} />
@@ -384,7 +444,7 @@ export default async function SitePage({ params }: Params) {
       <WidgetScripts
         trees={[
           found.regions.header,
-          found.page ? found.page.content : found.entry!.item,
+          contentTree,
           found.regions.footer,
         ]}
       />
@@ -393,7 +453,7 @@ export default async function SitePage({ params }: Params) {
       <SlideshowScript
         trees={[
           found.regions.header,
-          found.page ? found.page.content : found.entry!.item,
+          contentTree,
           found.regions.footer,
         ]}
       />
@@ -420,7 +480,11 @@ function EntryRenderer({
   entry,
   theme,
 }: {
-  entry: { item: import('../../../../lib/content/collection').CollectionItem };
+  entry: {
+    item: import('../../../../lib/content/collection').CollectionItem;
+    /** The collection the post is in, so its tags can link to their archives. */
+    collectionKey: string;
+  };
   theme: React.CSSProperties;
 }) {
   const { item } = entry;
@@ -439,8 +503,13 @@ function EntryRenderer({
         {item.tags.length > 0 && (
           <ul className="tgs-entry__tags">
             {item.tags.map((tag) => (
-              <li key={tag} className="tgs-entry__tag">
-                {tag}
+              <li key={tag}>
+                {/* A link to the tag's archive: every post that shares it. The
+                    pill styling moves onto the anchor so it still reads as a
+                    pill, and gains a hover now that it goes somewhere. */}
+                <a className="tgs-entry__tag" href={tagArchivePath(entry.collectionKey, tag)}>
+                  {tag}
+                </a>
               </li>
             ))}
           </ul>
@@ -456,6 +525,33 @@ function EntryRenderer({
         <SectionRenderer key={section.id} section={section} index={index} />
       ))}
     </article>
+  );
+}
+
+/**
+ * A tag's archive: every post carrying that tag, as a grid of cards.
+ *
+ * A SYSTEM PAGE, not one a client composed, so it is drawn here rather than out
+ * of blocks: a heading naming the tag, then the same CardsBlock a listing uses,
+ * handed the posts already resolved to cards. The cards carry their own tags, so
+ * the grid reads exactly like any blog listing. noindex is set in the metadata,
+ * because a tag archive is a way to FIND posts, not a page to rank in their place.
+ */
+function ArchiveRenderer({
+  archive,
+  theme,
+}: {
+  archive: { tag: string; cards: Array<Record<string, unknown>> };
+  theme: React.CSSProperties;
+}) {
+  return (
+    <main className="tgs-page tgs-archive" style={theme}>
+      <header className="tgs-archive__head">
+        <p className="tgs-archive__eyebrow">Tagged</p>
+        <h1 className="tgs-archive__title">{archive.tag}</h1>
+      </header>
+      <CardsBlock props={{ items: archive.cards, columns: '3', gap: 'l' }} />
+    </main>
   );
 }
 

@@ -89,6 +89,19 @@ export function safeTags(value: unknown): string[] {
   return out;
 }
 
+/**
+ * The address of a tag's archive: every post in a collection carrying that tag.
+ *
+ * Built from the same safeSlug an item address uses, so the link on a post and
+ * the page the route resolves agree on where the archive lives. The literal
+ * "tag" in the middle is what tells the route this is an archive rather than a
+ * two-segment post address, and it is a segment no post slug can be (safeSlug
+ * keeps it, but a collection's own key sitting before it is what disambiguates).
+ */
+export function tagArchivePath(collectionKey: string, tag: string): string {
+  return `/${collectionKey}/tag/${safeSlug(tag)}`;
+}
+
 export const CollectionItemSchema = z.object({
   version: z.literal(1),
   title: z.string().max(200).default(''),

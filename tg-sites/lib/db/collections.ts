@@ -373,6 +373,59 @@ export async function listPublished(
 }
 
 /**
+ * Published items in a collection carrying a given tag, newest first.
+ *
+ * FILTERED IN JS, NOT IN SQL, and that is the tag being a display label. The URL
+ * carries the tag's slug, but the stored tag is the words a client typed, so
+ * "Family holidays" lives under /family-holidays. A jsonb match would ask for
+ * the exact spelling and miss it. So the rows come back and safeSlug decides
+ * each, and the first match's own spelling becomes the label, so the archive is
+ * titled the way the client wrote the tag rather than the way a URL spells it.
+ *
+ * NULL WHEN NOTHING CARRIES THE TAG, which the route turns into a 404: an empty
+ * archive is worse than no archive, and a guessed tag confirms nothing. The
+ * read-only role and the renderer policy keep a draft out, exactly as
+ * listPublished next door, so this needs no status filter either.
+ */
+export async function listPublishedByTag(
+  tenantId: string,
+  collectionKey: string,
+  tagSlug: string,
+  limit: number,
+): Promise<{ label: string; items: PublishedItem[] } | null> {
+  const capped = Math.min(MAX_LISTING_ITEMS, Math.max(1, Math.floor(limit) || 1));
+
+  return withPublicTenant(tenantId, async (tx) => {
+    const rows = await tx`
+      select i.slug, i.data, i.published_at
+      from public.collection_items i
+      join public.collections c on c.id = i.collection_id
+      where c.key = ${collectionKey}
+      order by i.published_at desc nulls last, i.id desc
+    `;
+
+    let label = '';
+    const items: PublishedItem[] = [];
+    for (const raw of rows) {
+      const row = raw as Record<string, unknown>;
+      const item = hydrate(row.data, `${collectionKey}/${String(row.slug)}`);
+      const match = item.tags.find((tag) => safeSlug(tag) === tagSlug);
+      if (!match) continue;
+      // The client's own spelling, from the first post that carries it.
+      if (!label) label = match;
+      items.push({
+        slug: String(row.slug),
+        item,
+        publishedAt: row.published_at ? new Date(row.published_at as string) : null,
+      });
+      if (items.length >= capped) break;
+    }
+
+    return label ? { label, items } : null;
+  });
+}
+
+/**
  * One published item, by its collection key and its own address.
  *
  * What a visitor's request resolves to. Null when there is no such collection,

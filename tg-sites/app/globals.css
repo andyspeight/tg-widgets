@@ -2381,9 +2381,8 @@
   text-wrap: pretty;
 }
 
-/* The post's tags, a wrap of quiet pills under the summary. Plain labels here,
-   not links: filtering by a tag is a later slice, and a pill that looks like a
-   link but does nothing is worse than one that plainly does not. */
+/* The post's tags under the summary, a wrap of quiet pills. Each links to the
+   tag's archive, so the pill styling sits on the anchor and it gains a hover. */
 .tgs-entry__tags {
   display: flex;
   flex-wrap: wrap;
@@ -2394,6 +2393,7 @@
 }
 
 .tgs-entry__tag {
+  display: inline-block;
   padding: 0.25em 0.75em;
   border: 1px solid var(--tgs-border);
   border-radius: 999px;
@@ -2401,6 +2401,14 @@
   color: var(--tgs-text-muted);
   font-size: var(--tgs-text-s);
   line-height: 1.4;
+  text-decoration: none;
+}
+.tgs-entry__tag:hover {
+  border-color: var(--tgs-primary);
+  color: var(--tgs-primary);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-entry__tag { transition: border-color 0.2s ease, color 0.2s ease; }
 }
 
 .tgs-entry__image {
@@ -2419,6 +2427,42 @@
 
 @container tgs-page (max-width: 767px) {
   .tgs-entry__head { padding: var(--tgs-space-l) var(--tgs-space-m) var(--tgs-space-m); }
+}
+
+/* ------------------------------------------------------------------ */
+/* Tag archive                                                         */
+/* ------------------------------------------------------------------ */
+
+/*
+ * A tag archive: a heading naming the tag, then the same card grid a blog
+ * listing draws. Contained width, so the grid has the room a single article
+ * does not. See ArchiveRenderer in app/site/[host]/[[...path]]/page.tsx.
+ */
+.tgs-archive {
+  max-width: var(--tgs-width-contained);
+  margin: 0 auto;
+  padding: var(--tgs-space-xl) var(--tgs-space-l);
+}
+
+.tgs-archive__head { margin-bottom: var(--tgs-space-l); }
+
+.tgs-archive__eyebrow {
+  margin: 0 0 var(--tgs-space-xs);
+  font-size: var(--tgs-text-s);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--tgs-text-muted);
+}
+
+.tgs-archive__title {
+  margin: 0;
+  font-family: var(--tgs-h1-font);
+  font-weight: var(--tgs-h1-weight);
+  font-size: var(--tgs-h1-size);
+  line-height: var(--tgs-h1-leading);
+  letter-spacing: var(--tgs-h1-tracking);
+  text-wrap: balance;
 }
 
 /* ------------------------------------------------------------------ */

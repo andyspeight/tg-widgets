@@ -196,7 +196,9 @@ describe('the script is emitted once per document, never in the editor', () => {
       const trees = call.slice(0, call.indexOf('/>'));
       expect(trees).toContain('found.regions.header');
       expect(trees).toContain('found.regions.footer');
-      expect(trees).toContain('found.page');
+      // The public site resolves page, entry or archive into one `contentTree`;
+      // the preview, which has no archive, still passes the page inline.
+      expect(trees).toMatch(/found\.page|contentTree/);
     });
   }
 });

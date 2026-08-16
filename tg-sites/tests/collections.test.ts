@@ -32,6 +32,7 @@ import {
   safeDate,
   safeSlug,
   safeTags,
+  tagArchivePath,
   type CollectionItem,
 } from '../lib/content/collection';
 import { itemAsPage, itemMeta, pageAsItem } from '../lib/content/collection-page';
@@ -211,6 +212,19 @@ describe('safeTags', () => {
     for (const value of [null, undefined, 'Crete', 42, {}]) {
       expect(safeTags(value)).toEqual([]);
     }
+  });
+});
+
+describe('tagArchivePath', () => {
+  it('is the collection key, then tag, then the tag reduced to a slug', () => {
+    expect(tagArchivePath('blog', 'Crete')).toBe('/blog/tag/crete');
+    expect(tagArchivePath('blog', 'Family holidays')).toBe('/blog/tag/family-holidays');
+  });
+
+  it('agrees with the address a listing filter resolves, so the link never 404s', () => {
+    // Whatever spelling a post uses, the link and the archive slug come from the
+    // same safeSlug, so a tag and its archive can never disagree.
+    expect(tagArchivePath('guides', 'Sun, Sea & Sand')).toBe('/guides/tag/sun-sea-sand');
   });
 });
 
@@ -867,6 +881,61 @@ describe('reading published entries', () => {
   });
 });
 
+describe('reading a tag archive', () => {
+  const post = (title: string, tags: string[]) => ({
+    slug: safeSlug(title),
+    data: { version: 1, title, tags },
+    published_at: '2026-08-03T09:00:00Z',
+  });
+
+  it('keeps only the posts carrying the tag, matched by its slug', async () => {
+    const { listPublishedByTag } = await import('../lib/db/collections');
+
+    respond('from public.collection_items', [
+      post('Crete in autumn', ['Crete', 'Autumn']),
+      post('A week in Rhodes', ['Rhodes']),
+      // A different spelling of the same tag still matches, because the slug is
+      // what the URL carries.
+      post('Family time in Crete', ['Family holidays', 'crete']),
+    ]);
+
+    const archive = await listPublishedByTag(ALPHA, 'blog', 'crete', 20);
+    expect(archive?.items.map((row) => row.item.title)).toEqual([
+      'Crete in autumn',
+      'Family time in Crete',
+    ]);
+  });
+
+  it('titles the archive with the client spelling, from the first match', async () => {
+    const { listPublishedByTag } = await import('../lib/db/collections');
+
+    respond('from public.collection_items', [
+      post('Crete in autumn', ['Crete']),
+      post('More Crete', ['crete']),
+    ]);
+
+    expect((await listPublishedByTag(ALPHA, 'blog', 'crete', 20))?.label).toBe('Crete');
+  });
+
+  it('is null when nothing carries the tag, which the route turns into a 404', async () => {
+    const { listPublishedByTag } = await import('../lib/db/collections');
+
+    respond('from public.collection_items', [post('A week in Rhodes', ['Rhodes'])]);
+    expect(await listPublishedByTag(ALPHA, 'blog', 'crete', 20)).toBeNull();
+  });
+
+  it('reads as the renderer role and never filters on status itself', async () => {
+    const { listPublishedByTag } = await import('../lib/db/collections');
+
+    respond('from public.collection_items', [post('Crete', ['Crete'])]);
+    await listPublishedByTag(ALPHA, 'blog', 'crete', 20);
+
+    const read = itemQuery();
+    expect(read.role).toBe('renderer');
+    expect(read.sql).not.toContain('status');
+  });
+});
+
 describe('writing entries', () => {
   it('sanitises before the bytes reach the database, not after', async () => {
     const { saveItem } = await import('../lib/db/collections');
@@ -1325,5 +1394,38 @@ describe('the tags field in the post editor', () => {
   it('draws a removable chip per tag', () => {
     expect(props).toContain('className="ed-tags__chip"');
     expect(props).toContain('className="ed-tags__x"');
+  });
+});
+
+describe('the tag archive', () => {
+  const route = read('app', 'site', '[host]', '[[...path]]', 'page.tsx');
+  const css = read('app', 'globals.css');
+
+  it('resolves /collection/tag/slug, and only after the pages have said no', () => {
+    // Inside the `if (!page)` block, so a real page at that address always wins.
+    expect(route).toContain("segments.length === 3 && segments[1] === 'tag'");
+    expect(route).toContain('listPublishedByTag(');
+  });
+
+  it('is noindex with follow left on, a way to find posts not a page to rank', () => {
+    const branch = route.slice(route.indexOf('if (found.archive)'), route.indexOf('if (found.archive)') + 400);
+    expect(branch).toContain('index: false');
+    expect(branch).toContain('follow: true');
+  });
+
+  it('draws the posts as a card grid under a heading naming the tag', () => {
+    expect(route).toContain('<ArchiveRenderer');
+    expect(route).toContain('className="tgs-archive__title"');
+    expect(route).toContain('<CardsBlock props={{ items: archive.cards');
+  });
+
+  it('makes a post tag a link to its archive', () => {
+    expect(route).toContain('tagArchivePath(entry.collectionKey, tag)');
+  });
+
+  it('is styled, and the post tag pills gained a hover now they go somewhere', () => {
+    expect(css).toContain('.tgs-archive');
+    expect(css).toContain('.tgs-archive__title');
+    expect(css).toContain('.tgs-entry__tag:hover');
   });
 });
