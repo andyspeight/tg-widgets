@@ -20,7 +20,7 @@
 
 import type { ActionResult } from '../app/actions/pages';
 import type { Collection, ItemSummary, ItemWithContent } from '../lib/db/collections';
-import { emptyItem, parseItem, safeSlug, type CollectionItem } from '../lib/content/collection';
+import { emptyItem, parseItem, safeFutureTimestamp, safeSlug, type CollectionItem } from '../lib/content/collection';
 import { sanitiseItem } from '../lib/content/sanitise-page';
 
 interface Row {
@@ -43,6 +43,7 @@ function summaryOf(id: string, slug: string, status: 'draft' | 'published'): Ite
     title: rows.get(id)?.item.title ?? '',
     status,
     hasUnpublishedChanges: status !== 'published',
+    scheduled: false,
     publishedAt: status === 'published' ? new Date() : (existing?.publishedAt ?? null),
     updatedAt: new Date(),
   };
@@ -123,11 +124,34 @@ export async function publishItemAction(itemId: string): Promise<ActionResult<It
   return { ok: true, data: summary };
 }
 
+export async function scheduleItemAction(
+  itemId: string,
+  publishAt: string,
+): Promise<ActionResult<ItemSummary | null>> {
+  // The same validation the real action makes, so the harness sees the same
+  // refusal for a past time that the browser would get from the server.
+  const when = safeFutureTimestamp(publishAt);
+  if (!when) return { ok: false, error: 'Pick a time in the future to schedule it for.' };
+
+  const row = rows.get(itemId);
+  if (!row) return { ok: true, data: null };
+
+  const summary = {
+    ...row.summary,
+    status: 'published' as const,
+    hasUnpublishedChanges: false,
+    scheduled: true,
+    publishedAt: new Date(when),
+  };
+  rows.set(itemId, { ...row, summary });
+  return { ok: true, data: summary };
+}
+
 export async function unpublishItemAction(itemId: string): Promise<ActionResult<ItemSummary | null>> {
   const row = rows.get(itemId);
   if (!row) return { ok: true, data: null };
 
-  const summary = { ...row.summary, status: 'draft' as const, hasUnpublishedChanges: true };
+  const summary = { ...row.summary, status: 'draft' as const, hasUnpublishedChanges: true, scheduled: false };
   rows.set(itemId, { ...row, summary });
   return { ok: true, data: summary };
 }
@@ -148,6 +172,7 @@ const _dropCollection = deleteCollectionAction satisfies typeof real.deleteColle
 const _newItem = createItemAction satisfies typeof real.createItemAction;
 const _save = saveItemAction satisfies typeof real.saveItemAction;
 const _publish = publishItemAction satisfies typeof real.publishItemAction;
+const _schedule = scheduleItemAction satisfies typeof real.scheduleItemAction;
 const _unpublish = unpublishItemAction satisfies typeof real.unpublishItemAction;
 const _dropItem = deleteItemAction satisfies typeof real.deleteItemAction;
 void _list;
@@ -158,5 +183,6 @@ void _dropCollection;
 void _newItem;
 void _save;
 void _publish;
+void _schedule;
 void _unpublish;
 void _dropItem;

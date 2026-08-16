@@ -23,7 +23,7 @@
  * and should never grow one: the absence is the point.
  */
 
-import { parseItem, safeSlug, type CollectionItem } from '../content/collection';
+import { parseItem, safeFutureTimestamp, safeSlug, type CollectionItem } from '../content/collection';
 import { sanitiseItem } from '../content/sanitise-page';
 import { withPublicTenant, withTenant, type Tx } from './withTenant';
 
@@ -44,6 +44,9 @@ export interface ItemSummary {
   status: 'draft' | 'published';
   /** True when the draft has moved on since the last publish. */
   hasUnpublishedChanges: boolean;
+  /** Published, but its go-live time is still in the future, so the public
+   *  cannot see it yet (migration 0020). The editor and this screen can. */
+  scheduled: boolean;
   publishedAt: Date | null;
   updatedAt: Date;
 }
@@ -88,6 +91,7 @@ function toSummary(row: Record<string, unknown>): ItemSummary {
     title: String(row.title ?? ''),
     status: row.status as 'draft' | 'published',
     hasUnpublishedChanges: Boolean(row.has_unpublished_changes),
+    scheduled: Boolean(row.scheduled),
     publishedAt: row.published_at ? new Date(row.published_at as string) : null,
     updatedAt: new Date(row.updated_at as string),
   };
@@ -101,12 +105,17 @@ function toSummary(row: Record<string, unknown>): ItemSummary {
  * also the h1 and the tab name and the thing the whole dashboard lists. An
  * item's title is one of six fields in a fixed shape, and adding a seventh
  * column to keep a copy of it would be a migration for a projection.
+ *
+ * `scheduled` is the same computation the renderer policy makes (migration
+ * 0020): published, but with a go-live time still ahead, so the public cannot
+ * see it yet. Computed here so the writing screen can, and can say so.
  */
 function summary(tx: Tx) {
   return tx`
     id, collection_id, slug, status, published_at, updated_at,
     data->>'title' as title,
-    (published_at is null or updated_at > published_at) as has_unpublished_changes
+    (published_at is null or updated_at > published_at) as has_unpublished_changes,
+    (status = 'published' and published_at is not null and published_at > now()) as scheduled
   `;
 }
 
@@ -294,6 +303,43 @@ export async function publishItem(
     const rows = await tx`
       update public.collection_items
       set status = 'published', published_at = now()
+      where id = ${itemId}::uuid
+      returning ${summary(tx)}
+    `;
+    return rows.length ? toSummary(rows[0] as Record<string, unknown>) : null;
+  });
+}
+
+/**
+ * Schedule a post to go live at a future moment.
+ *
+ * THE SAME ROW CHANGE AS publishItem, with one difference: published_at is set
+ * to the chosen instant rather than now(). status becomes 'published' either
+ * way, because a scheduled post IS published as far as the row is concerned.
+ * What keeps it hidden is the renderer policy from migration 0020, which will
+ * not show a published row whose published_at is still ahead. When that moment
+ * passes the post appears on its own, with no cron and no second write: the very
+ * next public read taken after the instant simply sees it.
+ *
+ * The time is checked here rather than trusted. safeFutureTimestamp refuses
+ * anything that will not parse or is not in the future, because scheduling for a
+ * moment already gone is a publish, and the caller has publishItem for that. A
+ * refusal throws so the screen can say why, rather than silently publishing now.
+ */
+export async function scheduleItem(
+  tenantId: string,
+  itemId: string,
+  publishAt: unknown,
+): Promise<ItemSummary | null> {
+  const when = safeFutureTimestamp(publishAt);
+  if (!when) {
+    throw new Error('Pick a time in the future to schedule it for.');
+  }
+
+  return withTenant(tenantId, async (tx) => {
+    const rows = await tx`
+      update public.collection_items
+      set status = 'published', published_at = ${when}::timestamptz
       where id = ${itemId}::uuid
       returning ${summary(tx)}
     `;

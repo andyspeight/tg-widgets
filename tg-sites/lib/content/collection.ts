@@ -58,6 +58,24 @@ export function safeDate(value: unknown): string {
 }
 
 /**
+ * A scheduled go-live time: a valid instant, strictly in the future.
+ *
+ * NOT safeDate, and the opposite job. safeDate refuses new Date on purpose,
+ * because a date-only string parsed as an instant slides by a day west of
+ * Greenwich. This is a full timestamp the browser has already resolved to UTC
+ * (the schedule dialog calls toISOString before it sends), compared as an
+ * instant against now. Anything that will not parse, or is not in the future, is
+ * null: scheduling a post for a moment already gone is a publish, not a schedule,
+ * and the caller has a separate publish for that.
+ */
+export function safeFutureTimestamp(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const ms = Date.parse(value);
+  if (!Number.isFinite(ms) || ms <= Date.now()) return null;
+  return new Date(ms).toISOString();
+}
+
+/**
  * A post's tags, as a clean list of short display labels.
  *
  * NOT SLUGS. A tag is a word a client types and a reader sees ("Crete", "Family

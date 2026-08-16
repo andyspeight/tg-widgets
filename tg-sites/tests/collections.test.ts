@@ -30,6 +30,7 @@ import {
   emptyItem,
   parseItem,
   safeDate,
+  safeFutureTimestamp,
   safeSlug,
   safeTags,
   tagArchivePath,
@@ -170,6 +171,49 @@ describe('safeDate', () => {
   it('answers with nothing for anything that is not a string', () => {
     for (const value of [null, undefined, 20260803, new Date(), {}]) {
       expect(safeDate(value)).toBe('');
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The scheduled go-live time
+// ---------------------------------------------------------------------------
+
+describe('safeFutureTimestamp', () => {
+  it('keeps an instant that is still ahead, as a normalised ISO string', () => {
+    const soon = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+    expect(safeFutureTimestamp(soon)).toBe(soon);
+  });
+
+  /*
+   * The opposite of safeDate, on purpose. This is a full instant the browser has
+   * already resolved to UTC, so it goes through Date and comes back canonical: a
+   * +00:00 offset returns as its Z form, which is the same moment written the one
+   * way the column will hold it.
+   */
+  it('resolves an offset to UTC, so the stored instant is unambiguous', () => {
+    const ahead = new Date(Date.now() + 2 * 60 * 60 * 1000);
+    const asOffset = ahead.toISOString().replace('Z', '+00:00');
+    expect(safeFutureTimestamp(asOffset)).toBe(ahead.toISOString());
+  });
+
+  it('refuses a moment already gone, because that is a publish not a schedule', () => {
+    const past = new Date(Date.now() - 60 * 1000).toISOString();
+    expect(safeFutureTimestamp(past)).toBeNull();
+  });
+
+  it('refuses now itself, so the gate is strictly in the future', () => {
+    expect(safeFutureTimestamp(new Date(Date.now() - 1).toISOString())).toBeNull();
+  });
+
+  it('refuses anything that will not parse', () => {
+    expect(safeFutureTimestamp('next Friday')).toBeNull();
+    expect(safeFutureTimestamp('')).toBeNull();
+  });
+
+  it('answers with null for anything that is not a string', () => {
+    for (const value of [null, undefined, 20260803, new Date(), {}]) {
+      expect(safeFutureTimestamp(value)).toBeNull();
     }
   });
 });
@@ -1119,6 +1163,41 @@ describe('writing entries', () => {
   });
 
   /*
+   * Scheduling is a publish with the moment set ahead instead of to now(). The
+   * row goes to 'published' so the renderer policy is the only thing hiding it,
+   * and published_at carries the chosen instant, which is what that policy then
+   * compares against.
+   */
+  it('schedules by publishing with the moment set ahead, not now()', async () => {
+    const { scheduleItem } = await import('../lib/db/collections');
+    const when = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+    respond('update public.collection_items', [
+      {
+        id: 'i1', collection_id: 'c1', slug: 'x', status: 'published',
+        published_at: when, updated_at: '2026-08-03T09:00:00Z', scheduled: true,
+      },
+    ]);
+
+    const summary = await scheduleItem(ALPHA, 'i1', when);
+
+    const write = log.find((s) => s.sql.includes('update public.collection_items'))!;
+    expect(write.sql).toContain("status = 'published'");
+    expect(write.sql).toContain('published_at = ');
+    expect(write.sql).not.toContain('published_at = now()');
+    expect(write.params).toContain(when);
+    expect(summary?.scheduled).toBe(true);
+  });
+
+  it('refuses a time in the past and writes nothing when it does', async () => {
+    const { scheduleItem } = await import('../lib/db/collections');
+    const past = new Date(Date.now() - 60 * 1000).toISOString();
+
+    await expect(scheduleItem(ALPHA, 'i1', past)).rejects.toThrow(/future/);
+    expect(log.some((s) => s.sql.includes('update public.collection_items'))).toBe(false);
+  });
+
+  /*
    * Unpublishing leaves published_at alone on purpose. It is the record of when
    * the button was last pressed, and the listing orders by it. Clearing it would
    * send a re-published post to the bottom of the blog.
@@ -1511,5 +1590,73 @@ describe('the tag archive', () => {
     expect(css).toContain('.tgs-archive');
     expect(css).toContain('.tgs-archive__title');
     expect(css).toContain('.tgs-entry__tag:hover');
+  });
+});
+
+describe('scheduling a post to go live later', () => {
+  const sql = readFileSync(
+    join(__dirname, '..', 'db', 'migrations', '0020_schedule_publishing.sql'),
+    'utf8',
+  );
+
+  /*
+   * The gate lives in the renderer policy, not a WHERE clause, exactly as the
+   * draft gate does. A scheduled post is a published row whose published_at is
+   * still ahead of now, and this policy is the one place that fact keeps it out
+   * of every public read at once: the listing, the single post, the tag archive
+   * and the sitemap. Tightening only, so no post already out can disappear.
+   */
+  it('tightens the renderer policy so a future published_at stays hidden', () => {
+    const policy = sql.slice(sql.indexOf('create policy collection_items_renderer'));
+    expect(policy).toContain('to tg_sites_renderer');
+    expect(policy).toContain("status = 'published'");
+    expect(policy).toContain('published_at is not null');
+    expect(policy).toContain('published_at <= now()');
+  });
+
+  it('drops the old policy first, so it can be run twice', () => {
+    expect(sql).toContain('drop policy if exists collection_items_renderer');
+  });
+
+  /*
+   * The writing screen has to show a scheduled post as scheduled, so the summary
+   * projection computes the same thing the policy does, flipped: published, with
+   * published_at still ahead. If these two drift a post could read as Live on the
+   * screen while the public still cannot see it, or the other way about.
+   */
+  it('is the same question the summary projection answers', () => {
+    const layer = read('lib', 'db', 'collections.ts');
+    expect(layer).toContain(
+      "(status = 'published' and published_at is not null and published_at > now()) as scheduled",
+    );
+  });
+});
+
+describe('the schedule control on the writing screen', () => {
+  const dash = read('components', 'collections', 'CollectionsDashboard.tsx');
+
+  it('offers Schedule on a draft, routed through the future-checked action', () => {
+    expect(dash).toContain("setDialog({ kind: 'schedule', item })");
+    expect(dash).toContain('scheduleItemAction(item.id, whenIso)');
+  });
+
+  /*
+   * datetime-local hands back a naive wall-clock time. toISOString resolves it in
+   * the browser's own zone to the UTC instant the server stores and the policy
+   * compares against, so nine o'clock means nine where the client is.
+   */
+  it('sends the picked wall-clock time as a UTC instant', () => {
+    expect(dash).toContain('type="datetime-local"');
+    expect(dash).toContain('new Date(when).toISOString()');
+  });
+
+  it('shows a scheduled post as scheduled, not plainly live', () => {
+    expect(dash).toContain('item.scheduled');
+    expect(dash).toContain('data-state="scheduled"');
+  });
+
+  it('has a pill colour for the scheduled state, apart from live and changed', () => {
+    const css = read('components', 'sites', 'sites.css');
+    expect(css).toContain("data-state='scheduled'");
   });
 });

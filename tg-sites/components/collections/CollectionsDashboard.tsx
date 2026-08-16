@@ -26,6 +26,7 @@ import {
   deleteCollectionAction,
   deleteItemAction,
   publishItemAction,
+  scheduleItemAction,
   unpublishItemAction,
 } from '../../app/actions/collections';
 import { safeSlug } from '../../lib/content/collection';
@@ -41,6 +42,7 @@ const THEME_KEY = 'tg-sites:theme:v1';
 type Dialog =
   | { kind: 'new-collection' }
   | { kind: 'new-item' }
+  | { kind: 'schedule'; item: ItemSummary }
   | null;
 
 interface Props {
@@ -70,6 +72,14 @@ export function CollectionsDashboard({
   const [error, setError] = useState<string | null>(null);
   const [busy, startTransition] = useTransition();
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('light');
+
+  // A scheduled post's go-live time is shown in the reader's own timezone, which
+  // the server does not know, so formatting it on the server and again in the
+  // browser would print two different strings and trip hydration. This flips true
+  // once, after mount, so the first paint stays timezone-free and the time fills
+  // in on the client where local time is real.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const open = collections.find((entry) => entry.id === openId) ?? null;
   const host = siteUrl.replace(/^https?:\/\//, '');
@@ -111,6 +121,27 @@ export function CollectionsDashboard({
         else if (result.data) patch(item.id, result.data);
       });
     },
+    [patch],
+  );
+
+  // The dialog awaits this and shows the message inline, the same shape the new
+  // collection and new entry dialogs use, so a time in the past lands under the
+  // field rather than in the page banner.
+  const schedule = useCallback(
+    (item: ItemSummary, whenIso: string): Promise<string | null> =>
+      new Promise((done) => {
+        setError(null);
+        startTransition(async () => {
+          const result = await scheduleItemAction(item.id, whenIso);
+          if (!result.ok) {
+            done(result.error);
+            return;
+          }
+          if (result.data) patch(item.id, result.data);
+          setDialog(null);
+          done(null);
+        });
+      }),
     [patch],
   );
 
@@ -300,7 +331,7 @@ export function CollectionsDashboard({
                             <span className="sv-path">
                               /{open.key}/{item.slug}
                             </span>
-                            <StatusPill item={item} />
+                            <StatusPill item={item} mounted={mounted} />
                           </span>
                         </div>
 
@@ -318,6 +349,21 @@ export function CollectionsDashboard({
                         >
                           {item.status === 'published' ? 'Unpublish' : 'Publish'}
                         </button>
+
+                        {item.status !== 'published' && (
+                          <button
+                            type="button"
+                            className="sv-btn"
+                            data-variant="quiet"
+                            disabled={busy}
+                            onClick={() => {
+                              setError(null);
+                              setDialog({ kind: 'schedule', item });
+                            }}
+                          >
+                            Schedule
+                          </button>
+                        )}
 
                         <button
                           type="button"
@@ -419,15 +465,51 @@ export function CollectionsDashboard({
           }
         />
       )}
+
+      {dialog?.kind === 'schedule' && (
+        <ScheduleDialog
+          item={dialog.item}
+          onClose={() => setDialog(null)}
+          onSubmit={(whenIso) => schedule(dialog.item, whenIso)}
+        />
+      )}
     </div>
   );
 }
 
 // ---------------------------------------------------------------------------
 
-/** The same three states a page has, and for the same reason. */
-function StatusPill({ item }: { item: ItemSummary }) {
+/** A scheduled post's go-live time, in the reader's own timezone. */
+function formatWhen(when: Date): string {
+  return when.toLocaleString(undefined, {
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+/**
+ * The states a post can be in, and for the same reason a page has three.
+ *
+ * Scheduled comes FIRST among the published states, because a scheduled post has
+ * status 'published' on the row (that is what makes it go live on its own), so
+ * without this it would read as plain Live. `mounted` gates only the time, not
+ * the word: the pill says Scheduled on the server, and fills in the local time
+ * once the browser, which is the only thing that knows the reader's timezone, has
+ * taken over.
+ */
+function StatusPill({ item, mounted }: { item: ItemSummary; mounted: boolean }) {
   if (item.status !== 'published') return <span className="sv-pill">Draft</span>;
+
+  if (item.scheduled) {
+    const when = mounted && item.publishedAt ? ` for ${formatWhen(item.publishedAt)}` : '';
+    return (
+      <span className="sv-pill" data-state="scheduled">
+        Scheduled{when}
+      </span>
+    );
+  }
 
   if (item.hasUnpublishedChanges) {
     return (
@@ -664,6 +746,105 @@ function ItemDialog({
             </code>
           </span>
         </p>
+
+        <button type="submit" className="tg-visually-hidden" tabIndex={-1} aria-hidden="true" />
+      </form>
+    </Modal>
+  );
+}
+
+// ---------------------------------------------------------------------------
+
+/**
+ * Pick a moment for a draft to go live on its own.
+ *
+ * datetime-local IS THE POINT, and its naivety is the reason. The control hands
+ * back the wall-clock time the client typed with no zone attached, which is
+ * exactly what a person means by "nine on Friday": nine where they are. new Date
+ * reads it in the browser's zone and toISOString resolves it to the UTC instant
+ * the server stores and the renderer policy compares against, so a client in
+ * Perth and one in Preston each get the moment they meant.
+ *
+ * The past is refused here as well as in the database, so the message lands
+ * under the field rather than the page banner, and because scheduling for a
+ * moment already gone is a publish and Publish is one button away.
+ */
+function ScheduleDialog({
+  item,
+  onClose,
+  onSubmit,
+}: {
+  item: ItemSummary;
+  onClose: () => void;
+  onSubmit: (whenIso: string) => Promise<string | null>;
+}) {
+  const [when, setWhen] = useState('');
+  const [message, setMessage] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  async function submit() {
+    if (!when) {
+      setMessage('Pick a date and time.');
+      return;
+    }
+    const ms = new Date(when).getTime();
+    if (!Number.isFinite(ms)) {
+      setMessage('That is not a time I can read.');
+      return;
+    }
+    if (ms <= Date.now()) {
+      setMessage('Pick a time in the future. To go live now, use Publish.');
+      return;
+    }
+    setSaving(true);
+    setMessage(await onSubmit(new Date(when).toISOString()));
+    setSaving(false);
+  }
+
+  return (
+    <Modal
+      title={`Schedule "${item.title || 'this entry'}"`}
+      description="It stays hidden until the moment you pick, then goes live on its own."
+      onClose={onClose}
+      footer={
+        <>
+          <button type="button" className="tg-btn" onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="tg-btn"
+            data-variant="primary"
+            disabled={saving}
+            onClick={submit}
+          >
+            {saving ? 'Working' : 'Schedule'}
+          </button>
+        </>
+      }
+    >
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          void submit();
+        }}
+      >
+        {message && (
+          <p className="sv-msg" role="alert">
+            {message}
+          </p>
+        )}
+
+        <div className="sv-field">
+          <label htmlFor="schedule-when">Go live at</label>
+          <input
+            id="schedule-when"
+            type="datetime-local"
+            value={when}
+            onChange={(event) => setWhen(event.target.value)}
+          />
+          <small>Your local time. It appears the moment this passes, with nothing more to do.</small>
+        </div>
 
         <button type="submit" className="tg-visually-hidden" tabIndex={-1} aria-hidden="true" />
       </form>

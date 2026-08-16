@@ -23,6 +23,7 @@ import {
   listItems,
   publishItem,
   saveItem,
+  scheduleItem,
   unpublishItem,
   type Collection,
   type ItemSummary,
@@ -54,6 +55,7 @@ function explain(error: unknown): string {
   if (message.startsWith('This account is not a member')) return message;
   if (message.startsWith('Your session has ended')) return message;
   if (message.startsWith('Refusing to save')) return message;
+  if (message.startsWith('Pick a time in the future')) return message;
 
   console.error('[tg-sites] collection action failed', error);
   return 'Something went wrong saving that. Nothing was changed.';
@@ -147,6 +149,29 @@ export async function saveItemAction(
  */
 export async function publishItemAction(itemId: string): Promise<ActionResult<ItemSummary | null>> {
   const result = await attempt(async () => publishItem(await requireTenantId(), itemId));
+  if (result.ok) {
+    revalidatePath('/collections');
+    revalidatePath('/preview', 'layout');
+  }
+  return result;
+}
+
+/**
+ * Schedule.
+ *
+ * The same revalidation publishing does, and for the same reason: a scheduled
+ * post is published, so every listing that draws from its collection may change.
+ * The renderer policy keeps it hidden until its moment, so nothing public shows
+ * yet, but the writing screen's own view of it must update now. `publishAt` is a
+ * string off the browser and is validated in the database layer, not trusted.
+ */
+export async function scheduleItemAction(
+  itemId: string,
+  publishAt: string,
+): Promise<ActionResult<ItemSummary | null>> {
+  const result = await attempt(async () =>
+    scheduleItem(await requireTenantId(), itemId, String(publishAt ?? '')),
+  );
   if (result.ok) {
     revalidatePath('/collections');
     revalidatePath('/preview', 'layout');
