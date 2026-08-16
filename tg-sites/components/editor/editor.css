@@ -806,9 +806,6 @@
 .ed-pages__row:hover { background: var(--ed-well); }
 .ed-pages__row:focus-visible { outline: 2px solid var(--ed-select); outline-offset: -2px; }
 
-/* A child page sits under its parent, so it is nudged in. */
-.ed-pages__row[data-child] { margin-left: var(--ed-4); }
-
 /* Where you are. Marked, and not pretending to be a link to itself. */
 .ed-pages__row[data-current] {
   background: var(--ed-select-wash);
@@ -852,6 +849,135 @@
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.02em;
+}
+
+/* ------------------------------------------------------------------ */
+/* Folders: the draggable tree, its grips and its drop targets         */
+/* ------------------------------------------------------------------ */
+
+/* A reason a move was refused or undone, above the list where it happened. */
+.ed-pages__move-error {
+  margin: 0;
+  padding: var(--ed-2) var(--ed-4);
+  color: var(--ed-danger);
+  font-size: var(--ed-text-sm);
+}
+
+/*
+ * A row and the folder it may drop into. The outer node is the drop target; the
+ * inner wrap is the part that lifts. A page filed inside another is nudged in, so
+ * which folder it sits in reads at a glance.
+ */
+.ed-pages__node { border-radius: var(--ed-r-md); }
+.ed-pages__node[data-child] { margin-left: var(--ed-4); }
+
+/* The folder a page is about to drop into, lit while the pointer is over it. */
+.ed-pages__node[data-over] {
+  background: var(--ed-select-wash);
+  box-shadow: inset 0 0 0 1.5px var(--ed-select);
+}
+
+.ed-pages__row-wrap {
+  display: flex;
+  align-items: stretch;
+  border-radius: var(--ed-r-md);
+}
+/* The anchor fills the rest of the row once the grip and fold control are laid. */
+.ed-pages__row-wrap .ed-pages__row { flex: 1; min-width: 0; }
+
+/* The lifted row: raised a touch and opaque, so it reads as picked up and does
+   not smear the target showing beneath it. */
+.ed-pages__row-wrap[data-dragging] {
+  position: relative;
+  z-index: 2;
+  background: var(--ed-panel);
+  box-shadow: var(--ed-shadow-md);
+  cursor: grabbing;
+}
+
+/* The handle a row is lifted by. Faint at rest so a long list stays calm, full
+   under the pointer. touch-action off so a drag on it drags rather than scrolls. */
+.ed-pages__grip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ed-ink-3);
+  opacity: 0.4;
+  cursor: grab;
+  touch-action: none;
+}
+.ed-pages__row-wrap:hover .ed-pages__grip { opacity: 1; }
+.ed-pages__grip:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--ed-select);
+  outline-offset: -2px;
+  border-radius: var(--ed-r-sm);
+}
+.ed-pages__grip svg { width: 16px; height: 16px; }
+
+/* The fold control, and the spacer that keeps names lined up where there is none. */
+.ed-pages__folder-toggle,
+.ed-pages__folder-spacer {
+  flex: none;
+  width: 20px;
+}
+.ed-pages__folder-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ed-ink-3);
+  cursor: pointer;
+}
+.ed-pages__folder-toggle:hover { color: var(--ed-ink); }
+.ed-pages__folder-toggle:focus-visible {
+  outline: 2px solid var(--ed-select);
+  outline-offset: -2px;
+  border-radius: var(--ed-r-sm);
+}
+.ed-pages__folder-toggle svg { width: 14px; height: 14px; transition: transform 0.12s ease; }
+.ed-pages__folder-toggle[data-open] svg { transform: rotate(90deg); }
+
+/* A page that holds others wears a small folder mark before its name, so a folder
+   reads as one in the flat search view too, where there is no chevron. The mark is
+   a mask filled with the name's own colour, so it follows light, dark and current. */
+.ed-pages__row[data-folder] .ed-pages__name::before {
+  content: '';
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  margin-right: 6px;
+  vertical-align: -1px;
+  background-color: currentColor;
+  opacity: 0.55;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* The strip that pulls a page out to the top level, shown only mid-drag. */
+.ed-pages__root-drop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  margin-bottom: 2px;
+  border: 1.5px dashed var(--ed-line);
+  border-radius: var(--ed-r-md);
+  color: var(--ed-ink-3);
+  font-size: var(--ed-text-sm);
+}
+.ed-pages__root-drop[data-over] {
+  border-color: var(--ed-select);
+  border-style: solid;
+  background: var(--ed-select-wash);
+  color: var(--ed-select);
 }
 
 /* ------------------------------------------------------------------ */

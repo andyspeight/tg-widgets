@@ -59,6 +59,22 @@ export async function createPageAction(input: {
   return { ok: true, data: made };
 }
 
+/**
+ * Move a page into a folder, or back out to the top level. In-memory, so the
+ * review copy can drag a row and have it stay.
+ *
+ * The panel moves the row on screen itself and only asks this to make it stick,
+ * so there is nothing to persist here: it reports success and the drag holds.
+ * The real one re-parents the row and writes redirects; a static file has no
+ * table and no links to keep, so a plausible summary is all the panel needs back.
+ */
+export async function movePageAction(
+  pageId: string,
+  parentId: string | null,
+): Promise<ActionResult<PageSummary | null>> {
+  return { ok: true, data: { ...state, id: pageId, parentId } };
+}
+
 /** A save that validates for real, so a broken tree still fails here. */
 export async function saveDraftAction(
   _pageId: string,
@@ -158,11 +174,13 @@ export async function restorePublishAction(
 import type * as real from '../app/actions/pages';
 
 const _createMatches = createPageAction satisfies typeof real.createPageAction;
+const _moveMatches = movePageAction satisfies typeof real.movePageAction;
 const _saveMatches = saveDraftAction satisfies typeof real.saveDraftAction;
 const _publishMatches = publishPageAction satisfies typeof real.publishPageAction;
 const _listMatches = listPublishesAction satisfies typeof real.listPublishesAction;
 const _restoreMatches = restorePublishAction satisfies typeof real.restorePublishAction;
 void _createMatches;
+void _moveMatches;
 void _saveMatches;
 void _publishMatches;
 void _listMatches;

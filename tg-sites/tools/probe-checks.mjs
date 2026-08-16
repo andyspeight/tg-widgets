@@ -1332,6 +1332,20 @@ const MUTATIONS = [
     from: `                  <div className="ed-pages__image">`,
     to: `                  <div className="ed-pages__image" style={{ display: 'none' }}>`,
   },
+  {
+    tag: 'folders',
+    check: 'a page is dragged into a folder, and the folder fills',
+    /*
+     * The panel resolves the drop and even tells the server, but never moves the
+     * row in its own list, so the dragged page snaps back and the folder never
+     * fills. The shape of bug that looks wired end to end and changes nothing on
+     * screen, which only a browser that drags and re-counts the rows catches.
+     */
+    why: 'Drop the optimistic move, so a dragged page is filed on the server but never on screen.',
+    file: 'components/editor/PagesPanel.tsx',
+    from: `    setList(list.map((candidate) => (candidate.id === activeId ? { ...candidate, parentId: target } : candidate)));`,
+    to: `    setList(list);`,
+  },
 ];
 
 /*

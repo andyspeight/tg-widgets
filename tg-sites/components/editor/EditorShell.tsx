@@ -18,7 +18,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { createAiPageAction, writeCopyAction } from '../../app/actions/ai';
 import { buildDesignedSectionAction } from '../../app/actions/designed';
-import { createPageAction, publishPageAction, saveDraftAction } from '../../app/actions/pages';
+import {
+  createPageAction,
+  movePageAction,
+  publishPageAction,
+  saveDraftAction,
+} from '../../app/actions/pages';
 import { publishRegionAction, saveRegionAction } from '../../app/actions/regions';
 import { publishItemAction, saveItemAction } from '../../app/actions/collections';
 import { PublishHistory } from './PublishHistory';
@@ -531,6 +536,23 @@ export function EditorShell({
       if (!result.ok) return result.error;
       window.location.assign(`/editor?page=${encodeURIComponent(result.data.id)}`);
       return null;
+    },
+    [],
+  );
+
+  /**
+   * File a page into a folder, or back out to the top level, for the Pages panel.
+   *
+   * The panel has already moved the row on screen by the time this runs, so this
+   * only tells the server and reports back: null on success, a message to show and
+   * undo on failure. `parentId` is a page id to file inside, or null for the top
+   * level. Nothing navigates, unlike creating a page: the list the panel holds is
+   * the one that changed, and the current page is wherever it already was.
+   */
+  const movePage = useCallback(
+    async (movedId: string, parentId: string | null): Promise<string | null> => {
+      const result = await movePageAction(movedId, parentId);
+      return result.ok ? null : result.error;
     },
     [],
   );
@@ -1791,7 +1813,12 @@ export function EditorShell({
       />
 
       {railPanel === 'pages' ? (
-        <PagesPanel pages={pages} currentId={pageId} onCreatePage={createPage} />
+        <PagesPanel
+          pages={pages}
+          currentId={pageId}
+          onCreatePage={createPage}
+          onMovePage={movePage}
+        />
       ) : (
         <Outline
           onAddSection={() => setInsertAt(page.sections.length)}

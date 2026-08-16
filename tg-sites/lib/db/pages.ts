@@ -472,6 +472,27 @@ export async function updatePageMeta(
   return withTenant(tenantId, async (tx) => {
     const movingParent = 'parentId' in changes;
 
+    /*
+     * FOLDERS ARE ONE LEVEL DEEP (Andy, 15 Aug 2026). Filing a page into a folder
+     * is only allowed when the folder is itself top level, and a page that is
+     * itself a folder cannot be filed away. Together these keep the nav's
+     * dropdowns one deep and make a parent cycle impossible. Checked here in the
+     * transaction, not only in the drag UI, because a server action is a public
+     * endpoint and the UI's rules are a courtesy to the person dragging.
+     */
+    if (changes.parentId) {
+      const parent = (await tx`
+        select parent_id from public.pages where id = ${changes.parentId}::uuid
+      `) as Array<Record<string, unknown>>;
+      if (!parent.length) throw new Error('That folder is not here.');
+      if (parent[0].parent_id != null) throw new Error('A folder only goes one level deep.');
+
+      const child = await tx`
+        select 1 from public.pages where parent_id = ${pageId}::uuid limit 1
+      `;
+      if (child.length) throw new Error('A folder cannot go inside another folder.');
+    }
+
     // A title-only change moves no addresses, so it reads no tree and writes no
     // redirects. Renaming to fix a typo in a page's name is the common edit and
     // it should stay one statement.

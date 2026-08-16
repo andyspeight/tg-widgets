@@ -27,7 +27,7 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { filterPages, type PageLink } from '../lib/editor/page-list';
+import { buildPageTree, filterPages, type PageLink } from '../lib/editor/page-list';
 
 function source(...parts: string[]): string {
   return readFileSync(join(__dirname, '..', ...parts), 'utf8');
@@ -85,6 +85,74 @@ describe('filterPages', () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+
+describe('buildPageTree', () => {
+  it('files a child under its parent and keeps the parent at the top', () => {
+    const tree = buildPageTree(PAGES);
+    // Four top-level pages: Home, About, Tours, Contact. Italy is filed inside.
+    expect(tree.map((node) => node.page.id)).toEqual([
+      'p-home',
+      'p-about',
+      'p-tours',
+      'p-contact',
+    ]);
+    const tours = tree.find((node) => node.page.id === 'p-tours');
+    expect(tours?.children.map((child) => child.id)).toEqual(['p-italy']);
+  });
+
+  it('leaves a page with no children as an empty folder, not a missing one', () => {
+    const home = buildPageTree(PAGES).find((node) => node.page.id === 'p-home');
+    expect(home?.children).toEqual([]);
+  });
+
+  it('surfaces a child whose parent is missing at the top level', () => {
+    // The parent was deleted from under it (on delete set null is the real rule,
+    // but a stale id could linger); it must still show, at the top, not vanish.
+    const orphan: PageLink[] = [
+      { id: 'p-x', title: 'Orphan', slug: 'x', status: 'draft', parentId: 'gone' },
+    ];
+    const tree = buildPageTree(orphan);
+    expect(tree.map((node) => node.page.id)).toEqual(['p-x']);
+  });
+
+  it('surfaces a page nested two deep at the top, never hidden below the fold', () => {
+    // A second level the move guard forbids, but if the data ever holds one this
+    // must not swallow it: a page under a child is lifted to the top rather than
+    // drawn two levels down where the one-level panel would never show it.
+    const deep = [
+      ...PAGES,
+      { id: 'p-deep', title: 'Deep', slug: 'tours/italy/deep', status: 'draft', parentId: 'p-italy' } as PageLink,
+    ];
+    const tree = buildPageTree(deep);
+    expect(tree.some((node) => node.page.id === 'p-deep')).toBe(true);
+    // And it is not drawn as a child of Italy, which is itself a child.
+    const tours = tree.find((node) => node.page.id === 'p-tours');
+    expect(tours?.children.map((child) => child.id)).toEqual(['p-italy']);
+  });
+
+  it('preserves the incoming order on both tiers', () => {
+    const two = [
+      { id: 'a', title: 'A', slug: 'a', status: 'draft', parentId: null },
+      { id: 'b', title: 'B', slug: 'b', status: 'draft', parentId: 'a' },
+      { id: 'c', title: 'C', slug: 'c', status: 'draft', parentId: 'a' },
+    ] as PageLink[];
+    const tree = buildPageTree(two);
+    expect(tree.map((node) => node.page.id)).toEqual(['a']);
+    expect(tree[0].children.map((child) => child.id)).toEqual(['b', 'c']);
+  });
+
+  it('does not mutate the list it was given', () => {
+    const before = PAGES.map((page) => page.id);
+    buildPageTree(PAGES);
+    expect(PAGES.map((page) => page.id)).toEqual(before);
+  });
+
+  it('comes back empty for an empty list, rather than throwing', () => {
+    expect(buildPageTree([])).toEqual([]);
+  });
+});
+
 describe('each row is a plain, safe link to the page', () => {
   it('navigates to /editor?page= with the id encoded', () => {
     expect(panelSource).toContain('href={`/editor?page=${encodeURIComponent(page.id)}`}');
@@ -105,7 +173,58 @@ describe('each row is a plain, safe link to the page', () => {
   });
 
   it('indents a child under its parent', () => {
-    expect(panelSource).toContain("data-child={page.parentId ? '' : undefined}");
+    // Indentation moved off the anchor and onto the row's node when the tree
+    // learned to fold, so a child is nudged in whether or not it is a folder.
+    expect(panelSource).toContain("data-child={isChild ? '' : undefined}");
+  });
+});
+
+describe('the draggable folder tree', () => {
+  it('drags in its own DndContext, isolated from the canvas drag', () => {
+    // The shell has one DndContext for the canvas; the panel gets its own so a
+    // page drag and a block drag never read each other's data. Same activation
+    // distance, so a plain click still opens the page.
+    expect(panelSource).toContain('<DndContext');
+    expect(panelSource).toContain('activationConstraint: { distance: 5 }');
+  });
+
+  it('lifts a row by its grip, so a click on the row still navigates', () => {
+    // The drag listeners ride the grip alone, not the whole row, or every click
+    // would start a drag and the anchor would never fire.
+    expect(panelSource).toContain('{...drag.listeners}');
+    expect(panelSource).toContain('{...drag.attributes}');
+    expect(panelSource).toContain('className="ed-pages__grip"');
+  });
+
+  it('builds the drag transform by hand, not from @dnd-kit/utilities', () => {
+    // That sub-package is not a dependency; importing it would break the build.
+    // The translate is written out so the one dep this repo does carry is enough.
+    // (The name may appear in a comment; what must not appear is the import.)
+    expect(panelSource).not.toMatch(/from ['"]@dnd-kit\/utilities['"]/);
+    expect(panelSource).toContain('translate(');
+  });
+
+  it('turns drag off while searching, on the browse view only', () => {
+    // A hit deep in a folder shows in the flat search list, and filing into a
+    // half-hidden structure is a trap, so search renders plain anchors.
+    expect(panelSource).toContain('searching ?');
+    expect(panelSource).toContain('<PageAnchor');
+  });
+
+  it('refuses to file a folder inside another folder, one level only', () => {
+    expect(panelSource).toContain("setMoveError('A folder cannot go inside another folder.')");
+  });
+
+  it('moves the row at once and puts it back if the server refuses', () => {
+    // Optimistic: the list changes before the await, and reverts to the snapshot
+    // taken before it on a failure, with the reason shown.
+    expect(panelSource).toContain('const before = list;');
+    expect(panelSource).toContain('await onMovePage(');
+    expect(panelSource).toContain('setList(before);');
+  });
+
+  it('shows a top-level drop strip only while a drag is in flight', () => {
+    expect(panelSource).toContain('<RootDropZone active={dragging != null} />');
   });
 });
 

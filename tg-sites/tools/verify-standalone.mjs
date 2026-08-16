@@ -9450,7 +9450,9 @@ await check('the rail Pages icon opens the page list and Layers returns to the o
   // A row is a real navigation to the page, id encoded into the query string.
   const currentHref = currentCount ? (await current.first().getAttribute('href')) : null;
   const draftBadges = await page.locator('.ed-pages__badge').count();
-  const childRows = await page.locator('.ed-pages__row[data-child]').count();
+  // Indentation moved onto the row's node when the list learned to fold, so a
+  // filed page is nudged in by its node, not the anchor.
+  const childRows = await page.locator('.ed-pages__node[data-child]').count();
 
   // The search narrows the list. "italy" is one page by name and the same page
   // by address, so it lands on a single row.
@@ -9626,6 +9628,56 @@ await check('the AI start reveals a brief box and needs one filled in', async ()
   if (buildLabel !== 'Build page') return `the button read "${buildLabel}", not Build page`;
   if (!/what the page is for/i.test(refused)) return `an empty brief was not refused, error was "${refused}"`;
   if (!stillOpen) return 'the composer closed on an empty brief instead of asking';
+  return true;
+});
+
+/*
+ * FOLDERS, slice 1 (Andy, 15 Aug 2026). A page is filed into a folder by dragging
+ * it there, and a folder is just a page that holds others. This drives a real
+ * pointer drag: lift About us by its grip, drop it on Tours (already a folder,
+ * holding Italy), and prove it lands inside. A grip drag, not a whole-row drag, so
+ * a plain click on a row still opens the page. The panel moves the row itself and
+ * the demo action makes it stick, so the browser shows the filed page at once.
+ */
+await check('a page is dragged into a folder, and the folder fills', async () => {
+  await showPanels();
+  await page.waitForTimeout(120);
+  await page.locator('.ed-rail__btn').filter({ hasText: 'Pages' }).first().click();
+  await page.waitForTimeout(200);
+
+  // Tours already holds Italy, so one filed page to begin with.
+  const childrenBefore = await page.locator('.ed-pages__node[data-child]').count();
+
+  // Lift About us by its grip; aim for the middle of the Tours row.
+  const aboutNode = page.locator('.ed-pages__node', {
+    has: page.locator('a[href="/editor?page=p-about"]'),
+  });
+  const toursNode = page.locator('.ed-pages__node', {
+    has: page.locator('a[href="/editor?page=p-tours"]'),
+  });
+  const grip = await aboutNode.locator('.ed-pages__grip').boundingBox();
+  const target = await toursNode.boundingBox();
+  if (!grip || !target) return 'could not find the About grip or the Tours row';
+
+  await dndPointerDrag(
+    { x: Math.round(grip.x + grip.width / 2), y: Math.round(grip.y + grip.height / 2) },
+    { x: Math.round(target.x + target.width / 2), y: Math.round(target.y + target.height / 2) },
+  );
+  await page.waitForTimeout(250);
+
+  // Two filed pages now, and the second is About us, nudged in under Tours.
+  const childrenAfter = await page.locator('.ed-pages__node[data-child]').count();
+  const aboutFiled = await page
+    .locator('.ed-pages__node[data-child]', { has: page.locator('a[href="/editor?page=p-about"]') })
+    .count();
+
+  // Back to the outline for the checks that follow.
+  await page.locator('.ed-rail__btn').filter({ hasText: 'Layers' }).first().click();
+  await page.waitForTimeout(150);
+
+  if (childrenBefore !== 1) return `expected one filed page to begin with, saw ${childrenBefore}`;
+  if (childrenAfter !== 2) return `dragging did not file the page: ${childrenAfter} filed, expected 2`;
+  if (aboutFiled !== 1) return 'About us did not land inside the folder';
   return true;
 });
 

@@ -23,10 +23,20 @@
  * grabbing the page.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent, ReactElement } from 'react';
+import {
+  DndContext,
+  PointerSensor,
+  useDraggable,
+  useDroppable,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from '@dnd-kit/core';
 
-import { filterPages, type PageLink } from '../../lib/editor/page-list';
+import { buildPageTree, filterPages, type PageLink } from '../../lib/editor/page-list';
 import { PAGE_TEMPLATES } from '../../lib/content/page-templates';
 import { MediaPicker } from '../media/MediaPicker';
 import type { MediaItem } from '../../lib/media/types';
@@ -40,6 +50,7 @@ export function PagesPanel({
   pages,
   currentId,
   onCreatePage,
+  onMovePage,
 }: {
   pages: readonly PageLink[];
   currentId: string | null;
@@ -58,10 +69,85 @@ export function PagesPanel({
     brief?: string,
     imageId?: string,
   ) => Promise<string | null>;
+  /**
+   * File a page into a folder, or back out to the top level. Called after the
+   * panel has already moved the row optimistically; resolves with an error to
+   * show and undo, or null on success. A folder is just a page, so parentId is
+   * a page id to file inside, or null for the top level. Optional so a caller
+   * without it shows a read-only tree.
+   */
+  onMovePage?: (pageId: string, parentId: string | null) => Promise<string | null>;
 }): ReactElement {
   const [query, setQuery] = useState('');
 
-  const shown = useMemo(() => filterPages(pages, query), [pages, query]);
+  /*
+   * A LOCAL COPY OF THE PAGES, so a drag can move a row the instant it lands
+   * rather than waiting on the server and a reload. Seeded from the prop and
+   * resynced only when the prop itself changes, which in-session it does not:
+   * switching page is a full navigation that remounts this with fresh pages.
+   */
+  const [list, setList] = useState<PageLink[]>(() => [...pages]);
+  useEffect(() => {
+    setList([...pages]);
+  }, [pages]);
+
+  const searching = query.trim() !== '';
+  const filtered = useMemo(() => filterPages(list, query), [list, query]);
+  const tree = useMemo(() => buildPageTree(list), [list]);
+
+  /** Folders the client has collapsed. Empty means all open. */
+  const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
+  const toggleFolder = (id: string) =>
+    setCollapsed((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  /** The page being dragged, so the top-level drop strip shows only then. */
+  const [dragging, setDragging] = useState<string | null>(null);
+  /** A reason a move was refused or failed, shown under the list. */
+  const [moveError, setMoveError] = useState<string | null>(null);
+
+  const dragSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
+  const onDragStart = (event: DragStartEvent) => {
+    const id = (event.active.data.current as { pageId?: string } | undefined)?.pageId ?? null;
+    setDragging(id);
+  };
+
+  const onDragEnd = async (event: DragEndEvent) => {
+    setDragging(null);
+    const activeId = (event.active.data.current as { pageId?: string } | undefined)?.pageId;
+    const over = event.over?.data.current as { pageId?: string; root?: boolean } | undefined;
+    if (!activeId || !over || !onMovePage) return;
+
+    const target = over.root ? null : over.pageId ?? null;
+    const page = list.find((candidate) => candidate.id === activeId);
+    if (!page) return;
+    // Dropped where it already is, or onto itself: nothing to do.
+    if (target === activeId || (page.parentId ?? null) === target) return;
+
+    // One level: a folder (a page with children) can only return to the top,
+    // never into another folder. The server enforces this too; here it keeps the
+    // row from making a move the server would only reject.
+    const isFolder = list.some((candidate) => candidate.parentId === activeId);
+    if (isFolder && target !== null) {
+      setMoveError('A folder cannot go inside another folder.');
+      return;
+    }
+
+    const before = list;
+    setList(list.map((candidate) => (candidate.id === activeId ? { ...candidate, parentId: target } : candidate)));
+    setMoveError(null);
+
+    const failure = await onMovePage(activeId, target);
+    if (failure) {
+      setList(before);
+      setMoveError(failure);
+    }
+  };
 
   /** The Add page composer: closed, or open with a name being typed. */
   const [adding, setAdding] = useState(false);
@@ -306,35 +392,70 @@ export function PagesPanel({
         </div>
       </div>
 
-      <div className="ed-pages__list">
-        {shown.length === 0 ? (
-          <p className="ed-pages__empty">
-            {pages.length === 0 ? 'No pages yet.' : 'Nothing matches that.'}
-          </p>
-        ) : (
-          shown.map((page) => (
-            /*
-             * A plain anchor, not next/link, for the two reasons the brand link
-             * gives: leaving the current page should re-fetch fresh, and next/link
-             * would drag Next's runtime into the standalone bundle that has none.
-             */
-            <a
-              key={page.id}
-              className="ed-pages__row"
-              href={`/editor?page=${encodeURIComponent(page.id)}`}
-              data-current={page.id === currentId ? '' : undefined}
-              data-child={page.parentId ? '' : undefined}
-              aria-current={page.id === currentId ? 'page' : undefined}
-            >
-              <span className="ed-pages__name">{page.title || 'Untitled'}</span>
-              <span className="ed-pages__meta">
-                <span className="ed-pages__slug">/{page.slug}</span>
-                {page.status === 'draft' && <span className="ed-pages__badge">Draft</span>}
-              </span>
-            </a>
-          ))
-        )}
-      </div>
+      {moveError && (
+        <p className="ed-pages__move-error" role="alert">
+          {moveError}
+        </p>
+      )}
+
+      {searching ? (
+        // While searching the tree folds to a flat list of matches: a hit deep in
+        // a folder should show, and dragging in a filtered view would file into a
+        // half-hidden structure. Drag is off here, on the browse view only.
+        <div className="ed-pages__list">
+          {filtered.length === 0 ? (
+            <p className="ed-pages__empty">Nothing matches that.</p>
+          ) : (
+            filtered.map((page) => (
+              <PageAnchor
+                key={page.id}
+                page={page}
+                currentId={currentId}
+                isFolder={list.some((candidate) => candidate.parentId === page.id)}
+              />
+            ))
+          )}
+        </div>
+      ) : list.length === 0 ? (
+        <div className="ed-pages__list">
+          <p className="ed-pages__empty">No pages yet.</p>
+        </div>
+      ) : (
+        <DndContext sensors={dragSensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
+          <div className="ed-pages__list" data-dragging={dragging ? '' : undefined}>
+            <RootDropZone active={dragging != null} />
+            {tree.map((node) => {
+              const hasChildren = node.children.length > 0;
+              const open = !collapsed.has(node.page.id);
+              return (
+                <Fragment key={node.page.id}>
+                  <PageRow
+                    page={node.page}
+                    currentId={currentId}
+                    draggable={Boolean(onMovePage)}
+                    droppable={Boolean(onMovePage) && dragging !== node.page.id}
+                    hasChildren={hasChildren}
+                    open={open}
+                    onToggle={() => toggleFolder(node.page.id)}
+                  />
+                  {hasChildren &&
+                    open &&
+                    node.children.map((child) => (
+                      <PageRow
+                        key={child.id}
+                        page={child}
+                        currentId={currentId}
+                        draggable={Boolean(onMovePage)}
+                        droppable={false}
+                        isChild
+                      />
+                    ))}
+                </Fragment>
+              );
+            })}
+          </div>
+        </DndContext>
+      )}
 
       {/*
         The picture chooser, the same one the image blocks use, opened over the
@@ -354,5 +475,178 @@ export function PagesPanel({
         />
       )}
     </aside>
+  );
+}
+
+/**
+ * One page as a link. The clickable part of every row, shared by the flat search
+ * results and the draggable tree, so a page reads and behaves the same wherever
+ * it shows.
+ *
+ * A plain anchor, not next/link, for the two reasons the brand link gives:
+ * leaving the current page should re-fetch fresh, and next/link would drag Next's
+ * runtime into the standalone bundle that has none. `isFolder` only adds the
+ * folder mark, so a page holding others is legible at a glance.
+ */
+function PageAnchor({
+  page,
+  currentId,
+  isFolder,
+}: {
+  page: PageLink;
+  currentId: string | null;
+  isFolder?: boolean;
+}): ReactElement {
+  return (
+    <a
+      className="ed-pages__row"
+      href={`/editor?page=${encodeURIComponent(page.id)}`}
+      data-current={page.id === currentId ? '' : undefined}
+      data-folder={isFolder ? '' : undefined}
+      aria-current={page.id === currentId ? 'page' : undefined}
+    >
+      <span className="ed-pages__name">{page.title || 'Untitled'}</span>
+      <span className="ed-pages__meta">
+        <span className="ed-pages__slug">/{page.slug}</span>
+        {page.status === 'draft' && <span className="ed-pages__badge">Draft</span>}
+      </span>
+    </a>
+  );
+}
+
+/**
+ * The strip at the top of the list that pulls a page back out to the top level.
+ *
+ * Shown only while a drag is in flight (`active`), because a target you can only
+ * hit mid-drag has no business taking up room the rest of the time. Dropping a
+ * page here files it under no parent; dropping a page that is already top level
+ * simply lands where it started and nothing moves.
+ */
+function RootDropZone({ active }: { active: boolean }): ReactElement | null {
+  const { setNodeRef, isOver } = useDroppable({ id: 'pages-root', data: { root: true } });
+  if (!active) return null;
+  return (
+    <div
+      ref={setNodeRef}
+      className="ed-pages__root-drop"
+      data-over={isOver ? '' : undefined}
+    >
+      Move to the top level
+    </div>
+  );
+}
+
+/**
+ * One row in the draggable tree: a grip to lift it by, a fold control if it holds
+ * pages, and the page itself.
+ *
+ * TWO OVERLAID JOBS, kept apart so neither fights the other. The outer node is
+ * the drop target (drop a page here to file it inside this one); the inner wrap
+ * is the thing that lifts and follows the pointer. The grip alone carries the
+ * drag listeners, so the row is dragged on purpose and a plain click still opens
+ * the page. The transform is built by hand rather than pulled from
+ * @dnd-kit/utilities, which this repo does not carry.
+ *
+ * `droppable` is off for the row being dragged (a page cannot file into itself)
+ * and for every child (folders are one level deep, so a child is never a folder).
+ * `hasChildren` swaps the fold chevron in for the spacer that otherwise keeps the
+ * names lined up.
+ */
+function PageRow({
+  page,
+  currentId,
+  droppable,
+  draggable,
+  hasChildren,
+  open,
+  onToggle,
+  isChild,
+}: {
+  page: PageLink;
+  currentId: string | null;
+  droppable: boolean;
+  draggable: boolean;
+  hasChildren?: boolean;
+  open?: boolean;
+  onToggle?: () => void;
+  isChild?: boolean;
+}): ReactElement {
+  const drag = useDraggable({
+    id: `page-${page.id}`,
+    data: { pageId: page.id },
+    disabled: !draggable,
+  });
+  const drop = useDroppable({
+    id: `into-${page.id}`,
+    data: { pageId: page.id },
+    disabled: !droppable,
+  });
+
+  const style = drag.transform
+    ? {
+        transform: `translate(${Math.round(drag.transform.x)}px, ${Math.round(
+          drag.transform.y,
+        )}px)`,
+      }
+    : undefined;
+
+  return (
+    <div
+      ref={drop.setNodeRef}
+      className="ed-pages__node"
+      data-child={isChild ? '' : undefined}
+      data-over={drop.isOver ? '' : undefined}
+    >
+      <div
+        ref={drag.setNodeRef}
+        className="ed-pages__row-wrap"
+        style={style}
+        data-dragging={drag.isDragging ? '' : undefined}
+      >
+        {draggable && (
+          <button
+            type="button"
+            className="ed-pages__grip"
+            aria-label={`Move ${page.title || 'Untitled'}`}
+            {...drag.listeners}
+            {...drag.attributes}
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <circle cx="9" cy="6" r="1.5" />
+              <circle cx="15" cy="6" r="1.5" />
+              <circle cx="9" cy="12" r="1.5" />
+              <circle cx="15" cy="12" r="1.5" />
+              <circle cx="9" cy="18" r="1.5" />
+              <circle cx="15" cy="18" r="1.5" />
+            </svg>
+          </button>
+        )}
+        {hasChildren ? (
+          <button
+            type="button"
+            className="ed-pages__folder-toggle"
+            aria-expanded={open}
+            aria-label={open ? 'Collapse folder' : 'Expand folder'}
+            data-open={open ? '' : undefined}
+            onClick={onToggle}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M9 6l6 6-6 6" />
+            </svg>
+          </button>
+        ) : (
+          <span className="ed-pages__folder-spacer" aria-hidden="true" />
+        )}
+        <PageAnchor page={page} currentId={currentId} isFolder={hasChildren} />
+      </div>
+    </div>
   );
 }

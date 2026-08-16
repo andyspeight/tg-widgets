@@ -77,6 +77,9 @@ function explain(error: unknown): string {
   if (message.startsWith('Your session has ended')) return message;
   if (message.startsWith('Refusing to save')) return message;
   if (message.includes('own parent')) return 'A page cannot sit inside itself.';
+  // The one-level folder rules, worth showing as written on the rare race that
+  // reaches the server past the drag UI.
+  if (message.startsWith('A folder') || message.startsWith('That folder')) return message;
 
   console.error('[tg-sites] action failed', error);
   return 'Something went wrong saving that. Nothing was changed.';
@@ -138,6 +141,27 @@ export async function renamePageAction(
     }),
   );
 
+  if (result.ok) revalidatePath('/sites');
+  return result;
+}
+
+/**
+ * File a page into a folder, or back out to the top level.
+ *
+ * A folder is just a page, so a move is a re-parent: updatePageMeta swaps the
+ * parent id and, because the address changes, writes the redirects that keep the
+ * old links working, all in one transaction. It also enforces the one-level rule
+ * (a folder must be top level, a folder cannot be filed away), so a caller
+ * reaching past the drag UI cannot build a second level. `parentId` null means
+ * the top level; a page id means file it inside that page.
+ */
+export async function movePageAction(
+  pageId: string,
+  parentId: string | null,
+): Promise<ActionResult<PageSummary | null>> {
+  const result = await attempt(async () =>
+    updatePageMeta(await requireTenantId(), pageId, { parentId }),
+  );
   if (result.ok) revalidatePath('/sites');
   return result;
 }
