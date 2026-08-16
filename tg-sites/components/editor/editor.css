@@ -2067,6 +2067,69 @@ body[data-tg-dragging] .ed-drag-handle { pointer-events: none; }
 }
 
 /*
+ * The tags input: a bordered box that reads like an .ed-input but holds a chip
+ * per tag and a box to add the next. It lights the same way an input does when
+ * anything inside it has focus, so it looks like one field rather than several.
+ * See TagsField in components/editor/Properties.tsx.
+ */
+.ed-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ed-1);
+  min-height: 44px;
+  padding: var(--ed-1) var(--ed-2);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+}
+.ed-tags:focus-within {
+  border-color: var(--ed-accent);
+  box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.15);
+}
+
+.ed-tags__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ed-1);
+  padding: 2px 2px 2px var(--ed-2);
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink);
+  background: var(--ed-bg);
+  border: 1px solid var(--ed-line);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.ed-tags__x {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  color: var(--ed-ink-2);
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.ed-tags__x:hover { color: var(--ed-ink); background: var(--ed-line); }
+
+.ed-tags__input {
+  flex: 1 1 8ch;
+  min-width: 8ch;
+  min-height: 32px;
+  font: inherit;
+  font-size: var(--ed-text-base);
+  color: var(--ed-ink);
+  background: transparent;
+  border: 0;
+  outline: none;
+  padding: 0 var(--ed-1);
+}
+
+/*
  * The address field's search menu (the map). The input is a plain .ed-input; the
  * menu hangs beneath it, over the fields below, and closes on pick or blur. See
  * PlaceField in components/editor/Fields.tsx.

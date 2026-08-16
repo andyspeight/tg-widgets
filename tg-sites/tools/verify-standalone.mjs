@@ -10069,6 +10069,69 @@ await check('a widget keeps its frame when the page is previewed', async () => {
   return true;
 });
 
+// --- A blog post: tags on it (Andy, 16 Aug 2026) ---------------------------
+//
+// The review copy edits a page by default; a post carries fields a page does
+// not, a summary and a date and now tags, and they only show when the editor is
+// on a collection item. __TG_SET_ITEM__ points it at one with an empty body, so
+// the canvas root is easy to click, the same trick the header checks use.
+
+await check('the editor can be pointed at a blog post', async () => {
+  await closeAnyDialog();
+  await page.evaluate(() =>
+    window.__TG_SET_ITEM__({
+      id: 'demo-item-tags',
+      title: 'Ten things to know about Crete',
+      slug: 'crete',
+      summary: 'A short guide to the island.',
+      sections: [],
+    }),
+  );
+  await page.waitForTimeout(600);
+  await showPanels();
+  // A post keeps its title box, unlike a region, and it holds the post title.
+  const title = await page.locator('.ed-title-input').inputValue().catch(() => '');
+  return /Crete/.test(title) ? true : `the title box says "${title}"`;
+});
+
+await check('a blog post offers a tags field a page does not', async () => {
+  // The empty canvas IS the page root, so clicking it selects that and the pane
+  // shows the item's own fields.
+  await page.locator('.ed-canvas-frame [data-path="page"]').click({ position: { x: 20, y: 20 } });
+  await page.waitForTimeout(400);
+  const pane = await page.locator('.ed-props').innerText();
+  return /Tags/.test(pane) && /Group posts by topic/.test(pane)
+    ? true
+    : `the pane did not offer a tags field: "${pane.slice(0, 160)}"`;
+});
+
+await check('a tag typed into a post becomes a chip, and a comma files another', async () => {
+  const input = page.locator('.ed-tags__input');
+  await input.click();
+  await input.type('Crete');
+  await page.keyboard.press('Enter');
+  await input.type('Beaches,'); // the comma commits it
+  await page.waitForTimeout(200);
+  const chips = await page.locator('.ed-tags__chip').allInnerTexts();
+  const joined = chips.map((chip) => chip.trim()).join(' | ');
+  if (chips.length !== 2) return `expected two chips, saw ${chips.length} (${joined})`;
+  return /Crete/.test(joined) && /Beaches/.test(joined) ? true : `the chips read "${joined}"`;
+});
+
+await check('a post carrying tags saves clean', async () => {
+  // Adding the chips changed the meta, which the shell autosaves. The double
+  // validates through the real parseItem and sanitiseItem, so "saved" means the
+  // item it was handed, tags and all, was a shape the database would have taken.
+  await page.waitForTimeout(1600);
+  const state = await page.locator('.ed-save').getAttribute('data-state');
+  const failure = await page.locator('.ed-savefail').count();
+  return state === 'saved' && failure === 0 ? true : `save state "${state}", failures ${failure}`;
+});
+
+// Back to the page for anything that runs after.
+await page.evaluate(() => window.__TG_SET_ITEM__(null));
+await page.waitForTimeout(300);
+
 await browser.close();
 
 let failed = false;

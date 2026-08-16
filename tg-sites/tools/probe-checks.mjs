@@ -1393,6 +1393,20 @@ const MUTATIONS = [
     from: `      if (grandchildren.length > 0) child.children = grandchildren;`,
     to: `      void grandchildren;`,
   },
+  {
+    tag: 'blog-tags',
+    check: 'a tag typed into a post becomes a chip, and a comma files another',
+    /*
+     * The committed tag is swallowed: pressing Enter clears the box but adds
+     * nothing, so a tag typed and confirmed never becomes a chip. The comma path
+     * still files its one, so the field looks alive, which is exactly the shape
+     * of bug only a browser typing a tag and counting the chips catches.
+     */
+    why: 'Swallow the committed tag, so pressing Enter adds nothing and only the comma-filed one lands.',
+    file: 'components/editor/Properties.tsx',
+    from: `    onChange(safeTags([...tags, raw]));`,
+    to: `    void raw;`,
+  },
 ];
 
 /*

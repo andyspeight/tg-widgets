@@ -31,6 +31,7 @@ import {
   parseItem,
   safeDate,
   safeSlug,
+  safeTags,
   type CollectionItem,
 } from '../lib/content/collection';
 import { itemAsPage, itemMeta, pageAsItem } from '../lib/content/collection-page';
@@ -172,6 +173,48 @@ describe('safeDate', () => {
 });
 
 // ---------------------------------------------------------------------------
+// The tags
+// ---------------------------------------------------------------------------
+
+describe('safeTags', () => {
+  it('keeps a plain list of labels, their spelling and spaces intact', () => {
+    expect(safeTags(['Crete', 'Family holidays'])).toEqual(['Crete', 'Family holidays']);
+  });
+
+  it('trims each label and collapses the whitespace inside it', () => {
+    expect(safeTags(['  Crete  ', 'Family   holidays'])).toEqual(['Crete', 'Family holidays']);
+  });
+
+  it('drops the blanks rather than filing an empty tag', () => {
+    expect(safeTags(['Crete', '', '   ', 'Rhodes'])).toEqual(['Crete', 'Rhodes']);
+  });
+
+  it('is a set, deduped without regard to case, keeping the first spelling', () => {
+    expect(safeTags(['Crete', 'crete', 'CRETE', 'Rhodes'])).toEqual(['Crete', 'Rhodes']);
+  });
+
+  it('caps each label, so a paragraph pasted in becomes a label not an essay', () => {
+    const [only] = safeTags(['a'.repeat(200)]);
+    expect(only).toHaveLength(40);
+  });
+
+  it('caps the count, so a post cannot carry a filing cabinet', () => {
+    const many = Array.from({ length: 30 }, (_, index) => `tag ${index}`);
+    expect(safeTags(many)).toHaveLength(12);
+  });
+
+  it('skips anything in the list that is not a string', () => {
+    expect(safeTags(['Crete', 42, null, {}, 'Rhodes'] as unknown[])).toEqual(['Crete', 'Rhodes']);
+  });
+
+  it('answers with an empty list for anything that is not an array', () => {
+    for (const value of [null, undefined, 'Crete', 42, {}]) {
+      expect(safeTags(value)).toEqual([]);
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Parsing an item
 // ---------------------------------------------------------------------------
 
@@ -188,6 +231,7 @@ describe('parseItem', () => {
       image: '',
       alt: '',
       date: '',
+      tags: [],
       sections: [],
     });
   });
@@ -196,6 +240,19 @@ describe('parseItem', () => {
     const parsed = parseItem({ title: 'Crete', date: 'sometime in August' });
     expect(parsed.ok).toBe(true);
     if (parsed.ok) expect(parsed.item.date).toBe('');
+  });
+
+  it('cleans the tags on the way in, the same as everywhere else they arrive', () => {
+    const parsed = parseItem({ title: 'Crete', tags: ['  Crete  ', 'crete', 'Beaches'] });
+    expect(parsed.ok).toBe(true);
+    // Trimmed, then deduped without regard to case, so the second Crete is gone.
+    if (parsed.ok) expect(parsed.item.tags).toEqual(['Crete', 'Beaches']);
+  });
+
+  it('makes tags an empty list when a stored row has none', () => {
+    const parsed = parseItem({ title: 'Crete' });
+    expect(parsed.ok).toBe(true);
+    if (parsed.ok) expect(parsed.item.tags).toEqual([]);
   });
 
   /*
@@ -247,6 +304,7 @@ describe('parseItem', () => {
       image: '',
       alt: '',
       date: '',
+      tags: [],
       sections: [],
     });
   });
@@ -292,6 +350,7 @@ describe('an item as the editor sees it', () => {
       image: 'media-1',
       alt: 'A beach',
       date: '2026-08-03',
+      tags: [],
       slug: 'ten-things-in-crete',
     });
   });
@@ -313,6 +372,15 @@ describe('an item as the editor sees it', () => {
     expect(back.summary).toBe('A week of it');
     expect(back.image).toBe('media-1');
     expect(back.date).toBe('2026-08-03');
+  });
+
+  it('carries the tags out to the meta and back, since a page cannot hold them', () => {
+    const original = item({ tags: ['Crete', 'Beaches'] });
+    const meta = itemMeta(original, 'x');
+    expect(meta.tags).toEqual(['Crete', 'Beaches']);
+
+    const back = pageAsItem(itemAsPage(original, 'item-1', 'x'), meta);
+    expect(back.tags).toEqual(['Crete', 'Beaches']);
   });
 
   it('round-trips an item through the editor without changing it', () => {
@@ -345,7 +413,7 @@ describe('an item as the editor sees it', () => {
     expect(back.seo).toBeUndefined();
     expect(back.slug).toBeUndefined();
     expect(Object.keys(back).sort()).toEqual(
-      ['alt', 'date', 'image', 'sections', 'summary', 'title', 'version'],
+      ['alt', 'date', 'image', 'sections', 'summary', 'tags', 'title', 'version'],
     );
   });
 });
@@ -1090,6 +1158,11 @@ describe('an entry on a live site', () => {
     expect(route).toContain('<time dateTime={item.date}>');
   });
 
+  it('lists the tags under the title as plain labels', () => {
+    expect(route).toContain('className="tgs-entry__tags"');
+    expect(route).toContain('item.tags.map((tag)');
+  });
+
   /*
    * new Date('2026-08-03') is UTC midnight, which formats as the 2nd anywhere
    * west of Greenwich. The date on an article is a date, so it is built from
@@ -1209,8 +1282,22 @@ describe('the stylesheet', () => {
   const css = read('app', 'globals.css');
 
   it('styles an entry, which is not a page', () => {
-    for (const rule of ['.tgs-entry__title', '.tgs-entry__date', '.tgs-entry__summary', '.tgs-entry__image']) {
+    for (const rule of ['.tgs-entry__title', '.tgs-entry__date', '.tgs-entry__summary', '.tgs-entry__image', '.tgs-entry__tag']) {
       expect(css).toContain(rule);
     }
+  });
+});
+
+describe('the tags field in the post editor', () => {
+  const props = read('components', 'editor', 'Properties.tsx');
+
+  it('is wired into the post fields, sharing the schema helper', () => {
+    expect(props).toContain('<TagsField tags={meta.tags}');
+    expect(props).toContain('safeTags([...tags');
+  });
+
+  it('draws a removable chip per tag', () => {
+    expect(props).toContain('className="ed-tags__chip"');
+    expect(props).toContain('className="ed-tags__x"');
   });
 });

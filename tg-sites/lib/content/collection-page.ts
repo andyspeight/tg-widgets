@@ -25,6 +25,8 @@ export interface ItemMeta {
   image: string;
   alt: string;
   date: string;
+  /** The post's tags, edited beside the summary and the date. */
+  tags: string[];
   /** The address, which is a column on the row rather than part of the JSON. */
   slug: string;
 }
@@ -36,6 +38,7 @@ export function itemMeta(item: CollectionItem, slug: string): ItemMeta {
     image: item.image,
     alt: item.alt,
     date: item.date,
+    tags: item.tags,
     slug,
   };
 }
@@ -75,6 +78,7 @@ export function pageAsItem(page: Page, meta: ItemMeta): CollectionItem {
     image: meta.image,
     alt: meta.alt,
     date: meta.date,
+    tags: meta.tags,
     sections: page.sections,
   };
 }

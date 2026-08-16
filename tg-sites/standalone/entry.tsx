@@ -17,6 +17,8 @@ import { EditorShell, type ChromeRegion } from '../components/editor/EditorShell
 import type { PageLink } from '../components/editor/PagesPanel';
 import { SEED_PAGE } from '../lib/content/seed';
 import { emptyRegion, parsePage, REGIONS, type Page, type RegionName } from '../lib/content/schema';
+import { parseItem, safeSlug, type CollectionItem } from '../lib/content/collection';
+import { itemAsPage, itemMeta } from '../lib/content/collection-page';
 import { regionAsPage } from '../lib/content/region-page';
 import { parseTheme, type Theme } from '../lib/theme/schema';
 import { themeTokens } from '../lib/theme/tokens';
@@ -92,6 +94,14 @@ function App() {
    */
   const [chromeHeader, setChromeHeader] = useState<ChromeRegion | null>(null);
   const [chromeFooter, setChromeFooter] = useState<ChromeRegion | null>(null);
+  /**
+   * A blog post the harness drops in to exercise the post editor, which the seed
+   * page cannot reach: its own fields (the summary, the date, the tags) only show
+   * when the editor is on a collection item, not a page. Null is the page, the
+   * review copy's default. A handle rather than a control, for the same reason
+   * the theme, the region, the test page and the chrome are.
+   */
+  const [testItem, setTestItem] = useState<{ id: string; slug: string; item: CollectionItem } | null>(null);
 
   const handles = window as unknown as Record<string, unknown>;
   handles.__TG_SET_THEME__ = (input: unknown) => {
@@ -132,6 +142,52 @@ function App() {
     setChromeHeader(one(obj.header));
     setChromeFooter(one(obj.footer));
   };
+  /*
+   * A blog post to edit, parsed the same way a saved item is so the harness can
+   * hand over a loose object. Its id and slug are read from the raw input rather
+   * than the parsed item, since parseItem keeps neither. Null, or anything that
+   * will not parse, returns to the page.
+   */
+  handles.__TG_SET_ITEM__ = (input: unknown) => {
+    if (input == null) {
+      setTestItem(null);
+      return;
+    }
+    const parsed = parseItem(input);
+    if (!parsed.ok) {
+      setTestItem(null);
+      return;
+    }
+    const obj = input as Record<string, unknown>;
+    const id = typeof obj.id === 'string' && obj.id ? obj.id : 'demo-item';
+    const slug = typeof obj.slug === 'string' && obj.slug ? safeSlug(obj.slug) : safeSlug(parsed.item.title);
+    setTestItem({ id, slug, item: parsed.item });
+  };
+
+  // A blog post wins when the harness has set one. Its own fields (the summary,
+  // the date, the tags) only show when the editor is on a collection item, and
+  // the shell routes the save and publish to the item actions off the itemId
+  // alone. No chrome here, the same as the region editor: the post is the thing
+  // being edited, not the site furniture around it.
+  if (testItem) {
+    return (
+      <EditorShell
+        key={`item:${testItem.id}`}
+        isStaff
+        currentUserId="demo-user"
+        region={null}
+        initialRegionFlags={{ sticky: false, overlay: false }}
+        pages={DEMO_PAGES}
+        itemId={testItem.id}
+        pageId={testItem.id}
+        initialItemMeta={itemMeta(testItem.item, testItem.slug)}
+        initialPage={itemAsPage(testItem.item, testItem.id, testItem.slug)}
+        initialStatus="draft"
+        initialHasUnpublishedChanges
+        siteTheme={themeTokens(theme).style}
+      />
+    );
+  }
 
   return (
     <EditorShell

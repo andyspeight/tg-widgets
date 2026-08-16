@@ -2361,6 +2361,28 @@
   text-wrap: pretty;
 }
 
+/* The post's tags, a wrap of quiet pills under the summary. Plain labels here,
+   not links: filtering by a tag is a later slice, and a pill that looks like a
+   link but does nothing is worse than one that plainly does not. */
+.tgs-entry__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tgs-space-xs);
+  margin: var(--tgs-space-m) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tgs-entry__tag {
+  padding: 0.25em 0.75em;
+  border: 1px solid var(--tgs-border);
+  border-radius: 999px;
+  background: var(--tgs-surface-alt);
+  color: var(--tgs-text-muted);
+  font-size: var(--tgs-text-s);
+  line-height: 1.4;
+}
+
 .tgs-entry__image {
   margin-top: var(--tgs-space-l);
   overflow: hidden;

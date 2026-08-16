@@ -18,7 +18,7 @@ import {
   MAX_DIVIDER_HEIGHT,
   MIN_DIVIDER_HEIGHT,
 } from '../../lib/content/dividers';
-import { safeSlug } from '../../lib/content/collection';
+import { safeSlug, safeTags } from '../../lib/content/collection';
 import type { ItemMeta } from '../../lib/content/collection-page';
 import {
   anchorInput,
@@ -395,7 +395,7 @@ export function ItemOptions({
           />
         ) : isItem ? (
           <ItemFields
-            meta={itemMeta ?? { title: '', summary: '', image: '', alt: '', date: '', slug: '' }}
+            meta={itemMeta ?? { title: '', summary: '', image: '', alt: '', date: '', tags: [], slug: '' }}
             onChange={onItemMeta}
           />
         ) : (
@@ -670,6 +670,8 @@ function ItemFields({
         </p>
       </div>
 
+      <TagsField tags={meta.tags} onChange={(tags) => set({ tags })} />
+
       <div className="ed-field">
         <label className="ed-label">Picture</label>
         <ImageField value={meta.image} onChange={(url) => set({ image: url })} />
@@ -687,6 +689,81 @@ function ItemFields({
         <p className="ed-help">Describe the picture for anyone who cannot see it.</p>
       </div>
     </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+
+/**
+ * The tags on a post, edited as removable chips.
+ *
+ * A chip each, and an input to add the next. safeTags runs on every addition so
+ * the pane can never hold a tag the save would refuse: a blank, a duplicate, one
+ * past the length cap, or a thirteenth. Enter or a comma commits what has been
+ * typed, so pasting "Crete, Rhodes, Kos" files three at once; Backspace on an
+ * empty box removes the last chip, the usual shorthand. It shares the schema's
+ * own helper, so what shows here and what is stored can never disagree.
+ */
+function TagsField({ tags, onChange }: { tags: string[]; onChange: (next: string[]) => void }) {
+  const [draft, setDraft] = useState('');
+
+  const commit = (raw: string) => {
+    onChange(safeTags([...tags, raw]));
+    setDraft('');
+  };
+
+  const removeAt = (index: number) => onChange(tags.filter((_, i) => i !== index));
+
+  return (
+    <div className="ed-field">
+      <label className="ed-label">Tags</label>
+      <div className="ed-tags">
+        {tags.map((tag, index) => (
+          <span key={`${tag}-${index}`} className="ed-tags__chip">
+            {tag}
+            <button
+              type="button"
+              className="ed-tags__x"
+              aria-label={`Remove ${tag}`}
+              onClick={() => removeAt(index)}
+            >
+              <Icon name="close" size={12} />
+            </button>
+          </span>
+        ))}
+        <input
+          className="ed-tags__input"
+          value={draft}
+          placeholder={tags.length ? 'Add another' : 'Crete, Family holidays'}
+          onChange={(event) => {
+            const value = event.target.value;
+            // A comma means "that tag is done", so a paste of several at once
+            // files each and leaves whatever trails the last comma in the box.
+            if (value.includes(',')) {
+              const parts = value.split(',');
+              const trailing = parts.pop() ?? '';
+              const additions = parts.map((part) => part.trim()).filter(Boolean);
+              if (additions.length > 0) onChange(safeTags([...tags, ...additions]));
+              setDraft(trailing);
+            } else {
+              setDraft(value);
+            }
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              event.preventDefault();
+              if (draft.trim()) commit(draft);
+            } else if (event.key === 'Backspace' && !draft && tags.length > 0) {
+              removeAt(tags.length - 1);
+            }
+          }}
+          // A tag half-typed and then clicked away from is still meant, so it is
+          // committed on blur rather than quietly lost.
+          onBlur={() => { if (draft.trim()) commit(draft); }}
+        />
+      </div>
+      <p className="ed-help">Group posts by topic. Press Enter or comma after each one.</p>
+    </div>
   );
 }
 

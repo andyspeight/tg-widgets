@@ -436,6 +436,15 @@ function EntryRenderer({
         )}
         <h1 className="tgs-entry__title">{item.title}</h1>
         {item.summary && <p className="tgs-entry__summary">{item.summary}</p>}
+        {item.tags.length > 0 && (
+          <ul className="tgs-entry__tags">
+            {item.tags.map((tag) => (
+              <li key={tag} className="tgs-entry__tag">
+                {tag}
+              </li>
+            ))}
+          </ul>
+        )}
         {image && (
           <div className="tgs-entry__image">
             <img src={image} alt={item.alt} decoding="async" />

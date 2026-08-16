@@ -57,6 +57,38 @@ export function safeDate(value: unknown): string {
   return `${year}-${month}-${day}`;
 }
 
+/**
+ * A post's tags, as a clean list of short display labels.
+ *
+ * NOT SLUGS. A tag is a word a client types and a reader sees ("Crete", "Family
+ * holidays"), rendered as text, so it keeps its spelling and its spaces. The
+ * address a tag filter will use is derived from the label where that lands, the
+ * same way a page's path is derived from its title, so nothing stored here has
+ * to be undone the day filtering arrives.
+ *
+ * Deduped case-insensitively, keeping the first spelling, so "Crete" and "crete"
+ * are one tag not two. Capped in length and in count, because a tag is a label
+ * not a paragraph, and a post with forty of them is a mistake rather than a
+ * filing system. Anything that is not an array of strings becomes an empty list.
+ */
+export function safeTags(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const raw of value) {
+    if (typeof raw !== 'string') continue;
+    const label = raw.replace(/\s+/g, ' ').trim().slice(0, 40);
+    if (!label) continue;
+    const key = label.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(label);
+    if (out.length >= 12) break;
+  }
+  return out;
+}
+
 export const CollectionItemSchema = z.object({
   version: z.literal(1),
   title: z.string().max(200).default(''),
@@ -66,6 +98,10 @@ export const CollectionItemSchema = z.object({
   image: z.string().max(2048).default(''),
   alt: z.string().max(200).default(''),
   date: z.unknown().transform(safeDate),
+  /** The post's tags, a short list of display labels. Cleaned the same way
+   *  wherever they arrive from: the editor, an import, or an older stored row
+   *  that has none. */
+  tags: z.unknown().transform(safeTags),
   /** The article itself, in the same sections a page is made of. */
   sections: z.array(SectionSchema).default([]),
 });
@@ -77,7 +113,7 @@ export type CollectionItemParseResult =
   | { ok: false; errors: string[] };
 
 export function emptyItem(): CollectionItem {
-  return { version: 1, title: '', summary: '', image: '', alt: '', date: '', sections: [] };
+  return { version: 1, title: '', summary: '', image: '', alt: '', date: '', tags: [], sections: [] };
 }
 
 /**
