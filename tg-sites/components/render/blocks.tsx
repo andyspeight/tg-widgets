@@ -1119,6 +1119,13 @@ function renderCard(
   const src = safeUrl(str(card, 'src'));
   const href = safeUrl(str(card, 'linkHref'));
   const linkLabel = str(card, 'linkLabel');
+  // The post's tags, on a collection-filled card (see itemAsCard). Plain labels
+  // rendered as text by React, and only strings survive, so a manual card with a
+  // stray tags prop cannot put anything but words on the page.
+  const rawTags = (card as Record<string, unknown>).tags;
+  const tags = Array.isArray(rawTags)
+    ? rawTags.filter((tag): tag is string => typeof tag === 'string' && tag.length > 0)
+    : [];
 
   // A card with nothing to say is not drawn at all rather than drawn empty. An
   // agent who added one and has not filled it in yet still sees it in the
@@ -1143,6 +1150,16 @@ function renderCard(
         {label && <p className="tgs-card__label">{label}</p>}
         {title && <h3 className="tgs-card__title">{title}</h3>}
         {body && <p className="tgs-card__text">{body}</p>}
+
+        {tags.length > 0 && (
+          <ul className="tgs-card__tags">
+            {tags.map((tag, tagIndex) => (
+              <li key={tagIndex} className="tgs-card__tag">
+                {tag}
+              </li>
+            ))}
+          </ul>
+        )}
 
         {href && linkLabel && (
           <a className="tgs-card__link" href={href}>

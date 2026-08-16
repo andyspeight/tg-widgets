@@ -537,6 +537,17 @@ describe('an item as a card', () => {
   it('has no label at all when the entry carries no date', () => {
     expect(itemAsCard(item(), 'blog', 'x').label).toBe('');
   });
+
+  it('carries the post tags for the card to show', () => {
+    expect(itemAsCard(item({ tags: ['Crete', 'Beaches'] }), 'blog', 'x').tags).toEqual([
+      'Crete',
+      'Beaches',
+    ]);
+  });
+
+  it('carries an empty tag list when the post has none', () => {
+    expect(itemAsCard(item(), 'blog', 'x').tags).toEqual([]);
+  });
 });
 
 describe('filling the listings in', () => {
@@ -1209,6 +1220,15 @@ describe('the listing blocks on a page', () => {
     expect(blocks).not.toContain('lib/db/');
     expect(blocks).not.toContain('listPublished');
   });
+
+  it('draws the post tags on a card, filtered to plain strings', () => {
+    const blocks = read('components', 'render', 'blocks.tsx');
+    expect(blocks).toContain('className="tgs-card__tags"');
+    expect(blocks).toContain('className="tgs-card__tag"');
+    // Only strings reach the page, so a stray tags prop on a manual card cannot
+    // put an object through React.
+    expect(blocks).toContain("typeof tag === 'string'");
+  });
 });
 
 describe('the editor', () => {
@@ -1283,6 +1303,12 @@ describe('the stylesheet', () => {
 
   it('styles an entry, which is not a page', () => {
     for (const rule of ['.tgs-entry__title', '.tgs-entry__date', '.tgs-entry__summary', '.tgs-entry__image', '.tgs-entry__tag']) {
+      expect(css).toContain(rule);
+    }
+  });
+
+  it('styles the tags on a blog card', () => {
+    for (const rule of ['.tgs-card__tags', '.tgs-card__tag']) {
       expect(css).toContain(rule);
     }
   });

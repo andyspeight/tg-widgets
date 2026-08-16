@@ -98,6 +98,11 @@ export function itemAsCard(
     label: item.date,
     title: item.title,
     body: item.summary,
+    // The post's tags, shown on the card as plain labels so a reader scanning
+    // the listing sees what each post is about. Plain, not links: the whole card
+    // already goes to the post, and a tag link fighting that cover is worse than
+    // a label. Finding posts by a tag is the archive's job.
+    tags: item.tags,
     linkLabel: 'Read more',
     linkHref: `/${collectionKey}/${slug}`,
   };

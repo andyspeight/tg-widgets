@@ -2222,6 +2222,26 @@
    the same muted tone as before, but it now follows a set Text colour and stays
    legible on a dark card. The label and link keep their brand accents above. */
 .tgs-card__text { margin: 0; color: inherit; opacity: 0.72; }
+
+/* The post's tags on a blog card, the same quiet pills the article uses, a size
+   down. Plain labels: the whole card already links to the post, so a tag here is
+   there to be read, not clicked (see itemAsCard). */
+.tgs-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tgs-space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tgs-card__tag {
+  padding: 0.15em 0.6em;
+  border: 1px solid var(--tgs-border);
+  border-radius: 999px;
+  font-size: var(--tgs-text-s);
+  color: var(--tgs-text-muted);
+}
+
 .tgs-card__link {
   /* Pushed to the bottom of the body, so a row of cards lines its links up
      however different the text above them is. */
