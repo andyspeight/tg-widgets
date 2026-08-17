@@ -57,6 +57,11 @@ export interface RebuildModel {
   background?: string;
   /** Set dark when that background is dark, so the section's text stays light. */
   tone?: Tone;
+  /**
+   * Stand the section on the site's animated gradient band. Set when the source
+   * hero was a canvas or WebGL gradient, which captures blank. See modelFromImport.
+   */
+  gradient?: boolean;
 }
 
 const TOKEN = /\{\{tg:([a-z]\d{1,3})\}\}/g;
@@ -731,6 +736,15 @@ export function modelFromImport(props: Record<string, unknown>): RebuildModel | 
     } else {
       model.background = background.colour;
     }
+  } else if (/<canvas[\s>]/i.test(html)) {
+    // A canvas or WebGL hero paints its background in JavaScript, so it captures
+    // blank and sets no background-colour we can read. Rather than rebuild the
+    // heading and buttons onto bare white, stand the section on the site's own
+    // animated gradient band, which is what such a hero almost always is: light
+    // words over a slow, moving gradient. Pure CSS, editable, and it re-themes
+    // with the site. See globals.css .tgs-section[data-gradient].
+    model.gradient = true;
+    model.tone = 'dark';
   }
 
   return model;
@@ -794,12 +808,12 @@ export function rebuildSection(
   }
 
   let section = built.section;
+  if (model.tone) section = { ...section, tone: model.tone };
   if (model.background) {
-    section = {
-      ...section,
-      tone: model.tone ?? section.tone,
-      box: { ...section.box, background: model.background },
-    };
+    section = { ...section, box: { ...section.box, background: model.background } };
+  }
+  if (model.gradient) {
+    section = { ...section, gradient: true };
   }
   return { ok: true, section };
 }

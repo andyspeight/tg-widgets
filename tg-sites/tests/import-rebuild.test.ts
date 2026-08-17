@@ -350,6 +350,38 @@ describe('rebuilding an imported design', () => {
     });
   });
 
+  /*
+   * THE CANVAS STAND-IN. A hero painted by a canvas or WebGL shader captures
+   * blank and sets no background-colour, so a rebuild would strip it to white
+   * words on nothing. Instead the section stands on the site's own animated
+   * gradient band (data-gradient, pure CSS), dark toned so the words stay light,
+   * and the heading and buttons still rebuild as editable blocks over it.
+   */
+  it('stands a canvas or WebGL hero in as an animated gradient band', () => {
+    const html =
+      '<section class="hero"><canvas class="bg" width="1440" height="600"></canvas>' +
+      '<div class="over"><h1>See the world differently</h1>' +
+      '<a class="btn" href="/enquire">Start an enquiry</a></div></section>';
+    const result = rebuildSection({
+      html,
+      css: '.hero { position: relative; }',
+      fields: [],
+      content: {},
+      label: 'Hero',
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // Not stripped to white: it stands in the site's animated gradient band.
+    expect(result.section.gradient).toBe(true);
+    expect(result.section.tone).toBe('dark');
+    // The heading and button still come across as editable blocks over it.
+    const types = result.section.rows.flatMap((row) =>
+      row.columns.flatMap((column) => column.blocks.map((block) => block.type)),
+    );
+    expect(types).toContain('heading');
+    expect(types).toContain('button');
+  });
+
   it('is null for a design with nothing we can rebuild', () => {
     expect(modelFromImport({ html: '<div><svg><path d="M0 0"></path></svg></div>', fields: [], content: {} })).toBeNull();
     expect(modelFromImport({ html: '', fields: [], content: {} })).toBeNull();

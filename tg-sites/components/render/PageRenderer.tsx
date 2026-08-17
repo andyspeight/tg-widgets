@@ -328,6 +328,7 @@ export function SectionRenderer({
        */
       {...(anchor ? { id: anchor } : {})}
       data-tone={section.tone}
+      data-gradient={section.gradient ? '' : undefined}
       data-width={section.width}
       /*
        * The reveal is OFF while editing and on for the published page and the
@@ -409,6 +410,10 @@ export function SectionRenderer({
         ...(safeColour(section.overlayColour)
           ? { '--tgs-scrim-colour': safeColour(section.overlayColour) }
           : {}),
+        // The two ends of the animated gradient band, when the client set them.
+        // Absent otherwise, so globals.css falls back to the theme accent and brand.
+        ...(safeColour(section.gradientFrom) ? { '--tgs-sgrad-a': safeColour(section.gradientFrom) } : {}),
+        ...(safeColour(section.gradientTo) ? { '--tgs-sgrad-b': safeColour(section.gradientTo) } : {}),
         // The per-screen spacing values, as inline custom properties. Absent
         // unless a size overrides the base, so a section that never touched them
         // is byte-for-byte what it was before this shipped.

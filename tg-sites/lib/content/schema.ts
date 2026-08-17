@@ -640,6 +640,21 @@ export const SectionSchema = z.object({
    */
   kenBurns: z.boolean().optional(),
   /**
+   * An animated gradient behind the section, in place of a solid tone or picture.
+   *
+   * The stand-in a rebuild reaches for when the source hero was a canvas or WebGL
+   * gradient it could not lift as CSS. Off by default and optional, so no stored
+   * section changes shape. Pure CSS in globals.css (a slow slide held back under
+   * prefers-reduced-motion), the two ends default to the theme's accent and brand
+   * so a band with no colours set is still on-brand, and the client recolours them.
+   * Usually paired with a dark tone so the words stay light.
+   */
+  gradient: z.boolean().optional(),
+  /** The first gradient colour. Blank follows the theme accent. */
+  gradientFrom: z.unknown().transform(safeColour).optional(),
+  /** The second gradient colour. Blank follows the theme brand. */
+  gradientTo: z.unknown().transform(safeColour).optional(),
+  /**
    * Slide this section up under the section or the header above it, by this many
    * pixels, so the two overlap. The look every travel site opens with is the
    * first case: the hero pulls up under the header so its picture runs behind it,

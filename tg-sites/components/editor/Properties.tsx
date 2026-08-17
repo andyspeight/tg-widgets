@@ -1179,6 +1179,37 @@ function SectionFields({
           <label className="ed-toggle">
             <input
               type="checkbox"
+              checked={section.gradient === true}
+              onChange={(event) =>
+                set({ gradient: event.target.checked || undefined }, `sec:${index}:gradient`)
+              }
+            />
+            <span>Animated gradient background</span>
+          </label>
+          <p className="ed-help" style={{ marginTop: 6 }}>
+            A slow, moving gradient behind the whole section, in your brand colours by
+            default. It eases off for anyone who prefers less motion. Best with a dark
+            tone so the words stay light.
+          </p>
+          {section.gradient === true && (
+            <div style={{ marginTop: 8 }}>
+              <ColourField
+                label="Gradient colour one"
+                value={section.gradientFrom}
+                onChange={(colour) => set({ gradientFrom: colour }, `sec:${index}:gradientFrom`)}
+              />
+              <ColourField
+                label="Gradient colour two"
+                value={section.gradientTo}
+                onChange={(colour) => set({ gradientTo: colour }, `sec:${index}:gradientTo`)}
+              />
+            </div>
+          )}
+        </div>
+        <div className="ed-field">
+          <label className="ed-toggle">
+            <input
+              type="checkbox"
               checked={section.parallax === true}
               onChange={(event) =>
                 set(
