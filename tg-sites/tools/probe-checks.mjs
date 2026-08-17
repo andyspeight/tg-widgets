@@ -1053,8 +1053,8 @@ const MUTATIONS = [
      */
     why: 'Drop the page id off every row, the send-you-back behaviour this replaced.',
     file: 'components/editor/PagesPanel.tsx',
-    from: `              href={\`/editor?page=\${encodeURIComponent(page.id)}\`}`,
-    to: `              href="/editor"`,
+    from: `href={\`/editor?page=\${encodeURIComponent(page.id)}\`}`,
+    to: `href="/editor"`,
   },
   {
     tag: 'addpage',
