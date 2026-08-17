@@ -113,6 +113,27 @@ export async function listMedia(
 }
 
 /**
+ * Every image a site has, oldest first, for copying the whole bank at once.
+ *
+ * Unpaged, unlike listMedia, and that is the point: a duplicate copies all of a
+ * site's pictures or none of them, and a caller that had to page could copy a
+ * library out from under itself as rows shifted between pages. A duplicate is a
+ * rare, staff-run action, so reading the bank into memory once is the right
+ * trade where the paged picker would be wrong.
+ */
+export async function listAllMedia(tenantId: string): Promise<MediaItem[]> {
+  return withTenant(tenantId, async (tx) => {
+    const rows = await tx`
+      select id, url, storage_key, filename, mime, bytes,
+             width, height, alt, source, credit, created_at
+      from public.media
+      order by created_at, id
+    `;
+    return rows.map((row) => toItem(row as Record<string, unknown>));
+  });
+}
+
+/**
  * One image, for the renderer.
  *
  * Read through the READ-ONLY role, because the caller is painting a published

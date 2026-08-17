@@ -18,6 +18,11 @@ import { join } from 'node:path';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+// The blob store is unreachable from here and irrelevant to the SQL these tests
+// assert on, so copyIntoStore is a stand-in a test configures per case. Only
+// lib/db/duplicate.ts reaches it; nothing else here imports the module.
+import { copyIntoStore } from '../lib/media/blob';
+
 // ---------------------------------------------------------------------------
 // A fake driver
 // ---------------------------------------------------------------------------
@@ -104,6 +109,11 @@ vi.mock('../lib/db/client', () => ({
     }
   },
 }));
+
+// duplicate.ts is the only db module that touches the blob store, to copy an
+// image into a new tenant's own object. The store is unreachable here, so the
+// copy is a stand-in each test configures.
+vi.mock('../lib/media/blob', () => ({ copyIntoStore: vi.fn() }));
 
 const ALPHA = '11111111-1111-1111-1111-111111111111';
 const BETA = '22222222-2222-2222-2222-222222222222';
@@ -1069,6 +1079,131 @@ describe('createTenant', () => {
     expect(action).toContain('createTenant');
     // The owner is the signed-in user's id, never something the caller passes.
     expect(action).toContain('user.id');
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+describe('copyMediaToTenant', () => {
+  const SOURCE = ALPHA;
+  const DEST = BETA;
+
+  const sourceRow = (n: number) => ({
+    id: `id-${n}`,
+    url: `https://old.example/pic-${n}.jpg`,
+    storage_key: `sites/${SOURCE}/media/pic-${n}.jpg`,
+    filename: `pic-${n}.jpg`,
+    mime: 'image/jpeg',
+    bytes: 1000 + n,
+    width: 800,
+    height: 600,
+    alt: `picture ${n}`,
+    source: 'upload',
+    credit: {},
+    created_at: new Date('2026-08-01T00:00:00Z'),
+  });
+
+  // A minimal valid row for insertMedia's RETURNING to map. The copy ignores the
+  // value, but toItem must not choke on an empty result.
+  const insertedRow = {
+    id: 'x', url: 'u', storage_key: 'k', filename: 'f', mime: 'image/jpeg',
+    bytes: 1, width: null, height: null, alt: '', source: 'upload', credit: {},
+    created_at: new Date('2026-08-01T00:00:00Z'),
+  };
+
+  it('files each copy under the destination prefix and maps old url to new', async () => {
+    const { copyMediaToTenant } = await import('../lib/db/duplicate');
+    vi.mocked(copyIntoStore).mockReset();
+    vi.mocked(copyIntoStore).mockImplementation(async (_sourceUrl: string, pathname: string) => ({
+      url: `${pathname}#stored`,
+      pathname: `${pathname}--abc`,
+      size: 4242,
+      contentType: 'image/jpeg' as const,
+    }));
+
+    respond('from public.media', [sourceRow(1), sourceRow(2)]);
+    respond('into public.media', [insertedRow]);
+    respond('into public.media', [insertedRow]);
+
+    const map = await copyMediaToTenant(SOURCE, DEST);
+
+    // THE ISOLATION PROPERTY: every copy is filed under the DESTINATION's own
+    // prefix, never the source's, and is read from the source's own url.
+    const calls = vi.mocked(copyIntoStore).mock.calls;
+    expect(calls).toHaveLength(2);
+    for (const [, pathname] of calls) {
+      expect(pathname.startsWith(`sites/${DEST}/media/`)).toBe(true);
+    }
+    expect(calls[0][0]).toBe('https://old.example/pic-1.jpg');
+
+    // The map points each source url at the new stored url the content slices
+    // will repoint to.
+    expect(map.get('https://old.example/pic-1.jpg')).toBe(`sites/${DEST}/media/pic-1.jpg#stored`);
+    expect(map.size).toBe(2);
+
+    // Two transactions, not three: the source read, then ONE destination write in
+    // which both inserts run (insertMedia reuses the open scope). The tenant is
+    // set to the source first, the destination second.
+    const app = log.filter((s) => s.role === 'app');
+    expect(app.filter((s) => s.sql === 'BEGIN')).toHaveLength(2);
+
+    const configs = app.filter((s) => s.sql.includes('set_config'));
+    expect(configs[0].params[0]).toBe(SOURCE);
+    expect(configs[1].params[0]).toBe(DEST);
+
+    const destScoped = app.findIndex((s) => s.sql.includes('set_config') && s.params[0] === DEST);
+    const inserts = app
+      .map((s, i) => (s.sql.includes('into public.media') ? i : -1))
+      .filter((i) => i >= 0);
+    expect(inserts).toHaveLength(2);
+    expect(inserts.every((i) => i > destScoped)).toBe(true);
+  });
+
+  it('does nothing and returns an empty map when the source has no images', async () => {
+    const { copyMediaToTenant } = await import('../lib/db/duplicate');
+    vi.mocked(copyIntoStore).mockReset();
+    respond('from public.media', []);
+
+    const map = await copyMediaToTenant(SOURCE, DEST);
+
+    expect(map.size).toBe(0);
+    expect(vi.mocked(copyIntoStore)).not.toHaveBeenCalled();
+    // Only the source read opened a transaction; no destination write.
+    expect(log.filter((s) => s.role === 'app' && s.sql === 'BEGIN')).toHaveLength(1);
+  });
+
+  it('takes the type and size from the store, the rest from the source row', async () => {
+    const { copiedMediaRow } = await import('../lib/db/duplicate');
+    const item = {
+      id: 'i',
+      url: 'https://old/x.png',
+      storageKey: 'old/key',
+      filename: 'hero.png',
+      mime: 'image/png',
+      bytes: 111,
+      width: 1200,
+      height: 800,
+      alt: 'a hero',
+      source: 'pexels' as const,
+      credit: { photographer: 'Sam' },
+      createdAt: new Date('2026-08-01T00:00:00Z'),
+    };
+    const stored = { url: 'https://new/y.png', pathname: 'new/key', size: 222, contentType: 'image/png' as const };
+
+    expect(copiedMediaRow(item, stored)).toEqual({
+      storageKey: 'new/key',
+      url: 'https://new/y.png',
+      filename: 'hero.png',
+      // Type and byte count are the stored object's facts, not the source row's.
+      mime: 'image/png',
+      bytes: 222,
+      // Dimensions, alt and credit are metadata the store never knew.
+      width: 1200,
+      height: 800,
+      alt: 'a hero',
+      source: 'pexels',
+      credit: { photographer: 'Sam' },
+    });
   });
 });
 
