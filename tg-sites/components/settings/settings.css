@@ -298,3 +298,94 @@
   gap: var(--ed-2);
   margin-top: var(--ed-3);
 }
+
+/* ------------------------------------------------------------------ */
+/* Activity                                                           */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The timeline. An ordered list because it IS ordered, newest first, and a
+ * screen reader should hear that. Rows are separated by a hairline rather than
+ * boxed, so a long history reads as a log rather than as a stack of cards.
+ */
+.st-activity {
+  list-style: none;
+  margin: var(--ed-2) 0 0;
+  padding: 0;
+}
+
+.st-activity__row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--ed-3);
+  align-items: start;
+  padding: var(--ed-3) 0;
+}
+
+.st-activity__row + .st-activity__row {
+  border-top: 1px solid var(--ed-line-soft);
+}
+
+/*
+ * The kind of event, as a small coloured chip. The three colours are the
+ * product's own status palette (see the pills in sites.css): a new page reads
+ * blue, a published one green, a deleted one red. Literal hex rather than a
+ * token because there is no green or red --ed- token and the settings screen is
+ * pinned to the light theme, so one value is right in every case here.
+ */
+.st-activity__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--ed-r-md);
+  background: var(--ed-well);
+  color: var(--ed-ink-3);
+}
+
+.st-activity__icon[data-kind='create'] { background: #dbeafe; color: #1d4ed8; }
+.st-activity__icon[data-kind='publish'] { background: #dcfce7; color: #15803d; }
+.st-activity__icon[data-kind='delete'] { background: #fee2e2; color: #b91c1c; }
+
+/* min-width 0 so a long page name wraps inside the grid rather than pushing the
+   column wider than the panel. */
+.st-activity__body {
+  min-width: 0;
+}
+
+.st-activity__summary {
+  margin: 0;
+  color: var(--ed-ink);
+  font-size: var(--ed-text-sm);
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.st-activity__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-2);
+  margin: var(--ed-1) 0 0;
+  color: var(--ed-ink-3);
+  font-size: var(--ed-text-xs);
+}
+
+.st-activity__who {
+  font-weight: 600;
+  color: var(--ed-ink-2);
+}
+
+/* The stand-in for a member who has since left. Quieter and italic, so it reads
+   as an absence rather than as somebody's name. */
+.st-activity__who--none {
+  font-weight: 500;
+  font-style: italic;
+  color: var(--ed-ink-3);
+}
+
+/* The times line up when they are the same length, which most "N hours ago" are. */
+.st-activity__meta time {
+  font-variant-numeric: tabular-nums;
+}

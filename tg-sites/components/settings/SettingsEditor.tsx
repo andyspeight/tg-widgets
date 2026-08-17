@@ -35,10 +35,19 @@ import {
 } from '../../lib/settings/schema';
 import { Icon } from '../editor/Icon';
 import { ImageField } from '../media/ImageField';
+import { ActivityPanel } from './ActivityPanel';
 import { DomainsPanel } from './DomainsPanel';
 import './settings.css';
 
-type Tab = 'company' | 'contact' | 'analytics' | 'branding' | 'language' | 'domains' | 'code';
+type Tab =
+  | 'company'
+  | 'contact'
+  | 'analytics'
+  | 'branding'
+  | 'language'
+  | 'activity'
+  | 'domains'
+  | 'code';
 
 interface Props {
   siteName: string;
@@ -109,6 +118,11 @@ export function SettingsEditor({ siteName, initial, canEditCode }: Props) {
     { id: 'analytics', label: 'Analytics' },
     { id: 'branding', label: 'Icons and sharing' },
     { id: 'language', label: 'Language' },
+    // Activity is for everybody: seeing what happened to a site you belong to is
+    // not a privilege, the same reasoning as the members screen, and the action
+    // it reads is scoped to the caller's own tenant. It sits before the gated
+    // pair so the owner-only tabs stay together at the end.
+    { id: 'activity', label: 'Activity' },
     // Domains and custom code share the same gate, owner or staff, so they appear
     // together and only for the same people. The gate itself is in the actions.
     ...(canEditCode ? [{ id: 'domains' as Tab, label: 'Domains' }] : []),
@@ -555,23 +569,29 @@ export function SettingsEditor({ siteName, initial, canEditCode }: Props) {
           </section>
         )}
 
+        {tab === 'activity' && <ActivityPanel />}
+
         {tab === 'domains' && canEditCode && <DomainsPanel />}
 
         {tab === 'code' && canEditCode && <CustomCodePanel onError={setMessage} />}
       </div>
 
       {/*
-        The global save bar is hidden on the custom code tab, and that is a fix
-        rather than a preference.
+        The global save bar is hidden on the custom code and activity tabs, and on
+        both it is a fix rather than a preference.
 
-        That panel loads and saves its own values through its own gated actions, so
+        Custom code loads and saves its own values through its own gated actions, so
         it has its own button. With both on screen, somebody editing Head HTML and
         pressing "Save settings" at the bottom would get a success state and no
         change: the bottom bar saves the other settings and has never heard of the
         code ones. Two save buttons where one silently ignores what you just typed
         is worse than one button in the right place.
+
+        Activity has nothing to save at all: it is a read-only timeline. A "Save
+        settings" bar under it would offer to commit changes that were never made,
+        which reads as a screen that does not understand itself.
       */}
-      {tab !== 'code' && (
+      {tab !== 'code' && tab !== 'activity' && (
       <div className="tv-bar" data-dirty={dirty ? 'true' : undefined}>
         <span className="tv-bar__state">{dirty ? 'Not saved yet' : 'Saved'}</span>
         <button
