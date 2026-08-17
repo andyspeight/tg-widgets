@@ -128,6 +128,33 @@ ${slice.html}
     }
   }
 
+  // Keep the captured section in the extension's own library, a persistent bank
+  // separate from the send outbox, so a good section can be re-sent to any site
+  // later. Local to this browser, capped so it cannot grow without bound. The
+  // library page (library.html) browses, re-sends and clears it.
+  async function saveToLibrary(btn) {
+    if (!lastSlice) { showResult("Capture a component first.", "error"); return; }
+    const item = {
+      id: "s" + Date.now() + Math.random().toString(36).slice(2, 7),
+      title: (document.title || location.hostname).slice(0, 120),
+      source: location.href.slice(0, 300),
+      html: lastSlice.html,
+      css: lastSlice.css,
+      savedAt: Date.now(),
+    };
+    try {
+      const { tgsLibrary } = await chrome.storage.local.get("tgsLibrary");
+      const lib = Array.isArray(tgsLibrary) ? tgsLibrary : [];
+      lib.unshift(item);
+      while (lib.length > 100) lib.pop();
+      await chrome.storage.local.set({ tgsLibrary: lib });
+      flash(btn, "Saved");
+      showResult("Saved to your library. Open it from the TG Slicer popup.", "ok");
+    } catch (e) {
+      showResult("Could not save: " + (e.message || e), "error");
+    }
+  }
+
   async function copy(text, btn) {
     try {
       await navigator.clipboard.writeText(text);
@@ -165,6 +192,8 @@ ${slice.html}
     // one-click add, no copy-paste. See tg-slicer/bridge.js and
     // tg-sites/components/editor/ImportPanel.tsx.
     actions.appendChild(button("Send to Travelgenix Sites", "primary", sendToSites));
+    // A persistent bank of captures, browsed from the popup's My library page.
+    actions.appendChild(button("Save to library", "", saveToLibrary));
     // Copy stays as a fallback for when the editor is not open, or for a paste
     // into the Import box by hand.
     actions.appendChild(button("Copy HTML+CSS", "", (b) => copy(selfContainedHTML(lastSlice), b)));

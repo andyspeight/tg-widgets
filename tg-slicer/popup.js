@@ -10,3 +10,8 @@ $("activate").addEventListener("click", () => {
     else { $("err").textContent = (resp && resp.error) || "Could not start on this page."; }
   });
 });
+
+$("library").addEventListener("click", () => {
+  chrome.tabs.create({ url: chrome.runtime.getURL("library.html") });
+  window.close();
+});

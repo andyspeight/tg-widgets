@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "TG Slicer",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Point at any component on any website, capture it clean, then send it to Travelgenix Sites.",
   "action": { "default_popup": "popup.html", "default_title": "TG Slicer" },
   "background": { "service_worker": "background.js" },

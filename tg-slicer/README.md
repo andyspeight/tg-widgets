@@ -16,7 +16,10 @@ turns up in the editor's Import tab for a one-click add.
 3. Hit **Send to Travelgenix Sites**. The section goes into the extension's
    outbox. With a Sites editor open it appears in the **Import** tab straight
    away, and adds with one click. No copy-paste, no network.
-4. **Copy HTML+CSS** and **Copy slice JSON** stay on the bar as fallbacks, for a
+4. Or hit **Save to library** to keep the section in your own bank. Open **My
+   library** from the popup to browse what you have saved and re-send any of it
+   later. The library is local to your browser.
+5. **Copy HTML+CSS** and **Copy slice JSON** stay on the bar as fallbacks, for a
    hand paste or when the editor is not open.
 
 Once in the editor the CMS import turns the capture into content: native blocks
@@ -48,5 +51,6 @@ folder. That is it. There is no endpoint or secret to set.
 | `content.js` | Selector overlay, capture bar, Send to Travelgenix Sites |
 | `bridge.js` | Runs on the Sites editor domains, carries a capture to the Import tab |
 | `overlay.css` | Scoped overlay styles |
-| `popup.html` / `popup.js` | The Start button |
+| `popup.html` / `popup.js` | Start slicing, and open the library |
+| `library.html` / `library.js` | Your saved-section library: browse, re-send, delete |
 | `SITES-HANDOFF.md` | How the capture reaches the Sites editor |

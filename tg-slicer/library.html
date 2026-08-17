@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TG Slicer — Library</title>
+<style>
+  :root { --navy:#1B2B5B; --teal:#00B4D8; --ink:#0f1830; --sub:#64748b; --border:#E2E8F0; --panel:#fff; --bg:#f1f5f9; }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:24px; font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; color:var(--ink); background:var(--bg); }
+  header { display:flex; align-items:center; gap:12px; max-width:1120px; margin:0 auto 20px; }
+  h1 { font-size:18px; margin:0; color:var(--navy); }
+  .count { color:var(--sub); font-size:13px; }
+  .spacer { flex:1; }
+  .btn { border:1px solid var(--border); background:var(--panel); color:var(--ink); border-radius:8px; padding:8px 12px; font:600 13px/1 system-ui,sans-serif; cursor:pointer; }
+  .btn:hover { background:#f8fafc; }
+  .btn-primary { background:var(--teal); color:#042b34; border-color:var(--teal); }
+  .btn-primary:hover { background:#48CAE4; }
+  .btn-danger { color:#b91c1c; }
+  .grid { max-width:1120px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; }
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; }
+  .preview { height:190px; overflow:hidden; background:#fff; border-bottom:1px solid var(--border); }
+  .preview iframe { border:0; width:1280px; height:812px; transform:scale(0.234); transform-origin:top left; pointer-events:none; }
+  .meta { padding:12px 14px 4px; display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .title { font-weight:700; color:var(--navy); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .src { color:var(--sub); font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .when { color:#94a3b8; font-size:11.5px; }
+  .row { display:flex; gap:8px; padding:10px 14px 14px; }
+  .row .btn { flex:1; }
+  .empty { max-width:640px; margin:64px auto; text-align:center; color:var(--sub); }
+  .empty b { color:var(--ink); }
+  .flash { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--navy); color:#fff; padding:10px 16px; border-radius:8px; opacity:0; transition:opacity .2s; pointer-events:none; }
+  .flash.show { opacity:1; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>TG Slicer library</h1>
+    <span class="count" id="count"></span>
+    <span class="spacer"></span>
+    <button class="btn btn-danger" id="clear" hidden>Clear all</button>
+  </header>
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty" hidden>
+    <p>No saved sections yet.</p>
+    <p>Slice a section on any site, then hit <b>Save to library</b>. It lands here to re-send whenever you want.</p>
+  </div>
+  <div class="flash" id="flash"></div>
+  <script src="library.js"></script>
+</body>
+</html>
