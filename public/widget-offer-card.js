@@ -27,7 +27,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.2.3';
+  const VERSION = '0.2.4';
 
   // Resolve the API base off THIS script's origin. The widget is hosted on
   // widgets.travelify.io and embedded on customer sites, so a relative
@@ -203,6 +203,11 @@
       border-radius: var(--tgo-radius); overflow: hidden; box-shadow: var(--tgo-shadow);
       transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
       text-decoration: none; color: inherit; cursor: pointer; display: flex;
+      /* Fill the grid cell so a row of cards is equal height (the cell stretches;
+         this makes the card fill it, and the flex body + margin-top:auto footer
+         then align every card's price row). Standalone (no definite parent
+         height) this resolves to auto, so a lone card is unaffected. */
+      height: 100%;
     }
     .tgoc-card:hover { transform: translateY(-2px); box-shadow: var(--tgo-shadow-hover); border-color: var(--tgo-accent); }
     @media (prefers-reduced-motion: reduce) { .tgoc-card { transition: none; } .tgoc-card:hover { transform: none; } }
@@ -513,7 +518,11 @@
 
     _derive() {
       const o = this.lo || this.cfg.offer || {};
-      const sym = currencySymbol(this.cfg.currency || o.currency || 'GBP');
+      // The offer's OWN saved currency wins: the price number was entered in it,
+      // so relabelling a €239 offer as £239 (from a widget-level currency) would
+      // misstate the price — we never convert. The widget/card currency is only a
+      // fallback for an offer that saved none. (Andy, Aug 2026.)
+      const sym = currencySymbol(o.currency || this.cfg.currency || 'GBP');
       const stars = parseStars(this._f('stars'));
       const eyebrow = [this._f('style'), shortType(this._f('type'))].filter(Boolean).join(' · ');
       const loc = [this._f('resort'), this._f('country')].filter(Boolean).join(', ') || this._f('region');

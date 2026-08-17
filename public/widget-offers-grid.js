@@ -19,7 +19,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.1.5';
+  const VERSION = '0.1.6';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the empty-state line and the default card CTA). The
@@ -284,7 +284,7 @@
             accentColor: cfg.accentColor,
             brandColor: cfg.brandColor,
             radius: cfg.radius,
-            currency: cfg.currency || (offer && offer.currency) || 'GBP',
+            currency: (offer && offer.currency) || cfg.currency || 'GBP',
             ctaText: cfg.ctaText,
             offerPage: pageBase,
             offerId: id,

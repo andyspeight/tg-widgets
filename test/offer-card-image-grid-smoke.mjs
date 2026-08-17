@@ -38,6 +38,21 @@ console.log('The grid centres a short row instead of packing it left');
   ok('the track cap matches the card max-width (380px)', /minmax\(300px, 380px\)/.test(GRID));
 }
 
+console.log("Each offer shows its OWN saved currency, not the widget's");
+{
+  ok('the card resolves the symbol from the offer currency first',
+    /currencySymbol\(o\.currency \|\| this\.cfg\.currency \|\| 'GBP'\)/.test(CARD));
+  ok('the grid passes the offer currency to the card first',
+    /currency: \(offer && offer\.currency\) \|\| cfg\.currency \|\| 'GBP'/.test(GRID));
+  ok('EUR maps to the euro symbol', /EUR: '€'/.test(CARD));
+}
+
+console.log('Cards fill the grid cell so a row is equal height');
+{
+  ok('the card is set to height:100% to fill its stretched cell', /\.tgoc-card \{[\s\S]*?height: 100%;[\s\S]*?\}/.test(CARD));
+  ok('the vertical footer still pins to the bottom (margin-top:auto)', /\.tgoc-card--vertical \.tgoc-foot \{[\s\S]*?margin-top: auto;/.test(CARD));
+}
+
 console.log('Explicit column modes are unchanged (no regression)');
 {
   ok('cols-2 still fills the width', /\.tgog-items\.grid\.cols-2 \{ grid-template-columns: repeat\(2, 1fr\); \}/.test(GRID));
