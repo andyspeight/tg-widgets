@@ -49,12 +49,20 @@ console.log("Each offer shows its OWN saved currency, not the widget's");
 
 console.log('Cards fill the grid cell so a row is equal height (flex, not %height)');
 {
-  ok('the host is a flex column so the card can grow to fill it',
+  // The card is double-wrapped: the grid stretches the cell (grid host), then
+  // the shadow wraps the card in a .tgoc-root div, so the full chain is
+  // host -> .tgoc-root -> .tgoc-card. EVERY link must grow, or the shorter
+  // cards stay their natural height. The earlier host-only + card-only fixes
+  // missed the middle .tgoc-root link, which is why they did nothing.
+  ok('the host is a flex column so its content can grow to fill the stretched cell',
     /:host \{ all: initial; display: flex; flex-direction: column; \}/.test(CARD));
-  ok('the card grows to fill the stretched cell (flex-grow, reliable through the host)',
+  ok('the .tgoc-root middle link grows AND is a flex column (the missing link in the chain)',
+    /\.tgoc-root \{[^}]*display: flex; flex-direction: column; flex: 1 0 auto;[^}]*\}/.test(CARD));
+  ok('the card grows to fill the stretched .tgoc-root (flex-grow, reliable through the chain)',
     /\.tgoc-card \{[\s\S]*?flex: 1 0 auto;[\s\S]*?\}/.test(CARD));
   ok('the fragile percentage-height approach is gone', !/\.tgoc-card \{[\s\S]*?height: 100%;[\s\S]*?\}/.test(CARD));
   ok('the vertical footer still pins to the bottom (margin-top:auto)', /\.tgoc-card--vertical \.tgoc-foot \{[\s\S]*?margin-top: auto;/.test(CARD));
+  ok('the cruise CTA pins to the bottom so cruise cards align too (margin-top:auto)', /\.tgoc-c-cta \{[\s\S]*?margin-top: auto;/.test(CARD));
 }
 
 console.log('Explicit column modes are unchanged (no regression)');

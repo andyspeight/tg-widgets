@@ -27,7 +27,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.2.5';
+  const VERSION = '0.2.6';
 
   // Resolve the API base off THIS script's origin. The widget is hosted on
   // widgets.travelify.io and embedded on customer sites, so a relative
@@ -194,6 +194,13 @@
       --tgo-shadow-hover: 0 8px 24px rgba(15,23,42,0.08);
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       color: var(--tgo-text); line-height: 1.5; width: 100%; max-width: 100%;
+      /* Complete the equal-height chain. The shadow wraps the card in this
+         .tgoc-root div, so host -> .tgoc-root -> .tgoc-card. Stretching only the
+         host and the card left this middle link content-height, so the card's
+         flex-grow had no flex parent to grow within — which is why the earlier
+         host-only fixes did nothing. Grow this to fill the (stretched) host AND
+         make it a flex column so the card can grow inside it. */
+      display: flex; flex-direction: column; flex: 1 0 auto;
     }
     .tgoc-root[data-theme="dark"] {
       --tgo-card: #1E293B; --tgo-card-alt: #0F172A; --tgo-text: #F1F5F9;
