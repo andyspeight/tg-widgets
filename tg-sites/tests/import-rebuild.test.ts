@@ -312,19 +312,24 @@ describe('rebuilding an imported design', () => {
   });
 
   /*
-   * THE FORMATTING THAT MUST NOT BE LOST. loveholidays' section is white text on
-   * a solid blue band. Rebuilt to a white section it looked stripped, which is
-   * what Andy reported. rebuildSection reads the design's own background off its
-   * CSS and carries it, with a dark tone so the text stays light.
+   * RE-THEMING THE BAND. loveholidays' section is white text on a solid blue
+   * band. Rebuilt to a white section it looked stripped, which is what Andy
+   * reported; carrying the source's exact blue fixed the stripping but shipped a
+   * competitor's colour on a client's page. Now a dark source band re-themes to
+   * the SITE's own dark-band token, so it is still a band (not stripped) and it
+   * takes the site's brand rather than the captured pixels. The tone stays dark
+   * so the text is light. A white or transparent background is still nothing to
+   * carry.
    */
-  describe('carrying the background through rebuildSection', () => {
-    it('carries a dark background and turns the tone dark', () => {
+  describe('re-theming a coloured band through rebuildSection', () => {
+    it('maps a dark source band to the site dark-band token, tone dark', () => {
       const html = '<div class="root"><h2>Why book with us</h2><p>Some copy.</p></div>';
       const css = '.root { background-color: rgb(3, 116, 218); color: rgb(255,255,255); }';
       const result = rebuildSection({ html, css, fields: [], content: {}, label: 'Why' });
       expect(result.ok).toBe(true);
       if (!result.ok) return;
-      expect(result.section.box.background).toBe('rgb(3, 116, 218)');
+      // The band re-themes to the site's own dark band, not the source's blue.
+      expect(result.section.box.background).toBe('var(--tgs-surface-dark)');
       expect(result.section.tone).toBe('dark');
     });
 

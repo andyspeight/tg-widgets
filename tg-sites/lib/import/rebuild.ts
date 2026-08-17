@@ -714,12 +714,23 @@ export function modelFromImport(props: Record<string, unknown>): RebuildModel | 
   const label = typeof props.label === 'string' ? props.label.trim() : '';
   if (label) model.name = label.slice(0, 80);
 
-  // Carry the design's own background so the rebuild is not stripped to white.
+  // Re-theme the design's own band to the site's own tokens, so a rebuild takes
+  // the site's brand rather than the captured pixels, which is the whole point
+  // of rebuilding (see the file header). A dark band becomes the site's own
+  // dark-band token: it re-themes with the site, where a frozen hex would ship
+  // the source's exact colour on a client's page. It is still a band, so the
+  // section is not stripped to white, which is the fault that carrying the
+  // colour first fixed. A light tint is left as captured for now; the dark brand
+  // band is the case that matters and the one a rebuild strips without this.
   const css = typeof props.css === 'string' ? props.css : '';
   const background = rootBackground(html, css);
   if (background) {
-    model.background = background.colour;
-    if (background.dark) model.tone = 'dark';
+    if (background.dark) {
+      model.background = 'var(--tgs-surface-dark)';
+      model.tone = 'dark';
+    } else {
+      model.background = background.colour;
+    }
   }
 
   return model;
