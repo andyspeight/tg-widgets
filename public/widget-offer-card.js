@@ -1,11 +1,19 @@
 /* ============================================================================
  * widget-offer-card.js  ·  Travelgenix Widget Suite
- * Special Offer Card — the display card for a hand-built offer (v0.1.0)
+ * Special Offer Card — the display card for a hand-built offer
  *
  * Renders one offer (the object the Special Offer Builder form emits) as a
- * card, in one of two layouts:
+ * card, in one of five layouts:
  *   - vertical   : image on top, body, price + CTA footer (grid-friendly)
  *   - horizontal : image left, body middle, price + CTA rail right (list/banner)
+ *   - banner     : full-bleed image with the offer overlaid
+ *   - split      : editorial 50/50 with a big price
+ *   - cruise     : client-branded ribbons, icon feature rows, details link
+ *
+ * In a grid the card fills its (stretched) cell so a row is equal height:
+ * the flex-grow chain runs host -> .tgoc-root -> .tgoc-card, every link a
+ * growing flex column, with the body growing and the footer/CTA pinned to the
+ * bottom (margin-top:auto). See the VERSION constant below for the version.
  *
  * It is layout only. Clicking the card (or its CTA) goes to ctaHref, which will
  * be the public offer page once that is built. Matches the house card anatomy
