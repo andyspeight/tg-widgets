@@ -1209,6 +1209,134 @@ describe('copyMediaToTenant', () => {
 
 // ---------------------------------------------------------------------------
 
+describe('rewriteUrls', () => {
+  it('swaps a whole-string url and one embedded in a longer string', async () => {
+    const { rewriteUrls } = await import('../lib/db/duplicate');
+    const map = new Map([['https://old/a.jpg', 'https://new/a.jpg']]);
+    expect(rewriteUrls('https://old/a.jpg', map)).toBe('https://new/a.jpg');
+    // A CSS background: the url is inside a longer string and still has to move.
+    expect(rewriteUrls('url(https://old/a.jpg) center', map)).toBe('url(https://new/a.jpg) center');
+  });
+
+  it('walks arrays and nested objects, leaving non-urls and non-strings alone', async () => {
+    const { rewriteUrls } = await import('../lib/db/duplicate');
+    const map = new Map([['https://old/a.jpg', 'https://new/a.jpg']]);
+    expect(
+      rewriteUrls(
+        {
+          title: 'Hello',
+          count: 3,
+          flag: true,
+          empty: null,
+          gallery: ['https://old/a.jpg', 'https://old/b.jpg'],
+          section: { bg: 'https://old/a.jpg', note: 'no link here' },
+        },
+        map,
+      ),
+    ).toEqual({
+      title: 'Hello',
+      count: 3,
+      flag: true,
+      empty: null,
+      // b.jpg is not in the map, so it is left as it was.
+      gallery: ['https://new/a.jpg', 'https://old/b.jpg'],
+      section: { bg: 'https://new/a.jpg', note: 'no link here' },
+    });
+  });
+
+  it('replaces the longer url first, so a shorter prefix cannot corrupt it', async () => {
+    const { rewriteUrls } = await import('../lib/db/duplicate');
+    // The first key is a prefix of the real url. Shortest-first would fire it
+    // inside the real url and leave WRONG behind; longest-first does not.
+    const map = new Map([
+      ['https://old/a', 'WRONG'],
+      ['https://old/a.jpg', 'https://new/a.jpg'],
+    ]);
+    expect(rewriteUrls('https://old/a.jpg', map)).toBe('https://new/a.jpg');
+  });
+
+  it('returns the very same value when the map is empty', async () => {
+    const { rewriteUrls } = await import('../lib/db/duplicate');
+    const value = { a: 'https://old/a.jpg' };
+    expect(rewriteUrls(value, new Map())).toBe(value);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+describe('listPagesWithContent', () => {
+  it('returns pages parents-before-children for a nested tree', async () => {
+    const { listPagesWithContent } = await import('../lib/db/pages');
+    // Deliberately out of order: a grandchild, then its parent, then the root.
+    respond('draft_content from public.pages', [
+      { id: 'GC', parent_id: 'C', slug: 'deep', title: 'Deep', seo: {}, draft_content: null },
+      { id: 'C', parent_id: 'ROOT', slug: 'child', title: 'Child', seo: {}, draft_content: null },
+      { id: 'ROOT', parent_id: null, slug: '', title: 'Home', seo: {}, draft_content: null },
+    ]);
+
+    const order = (await listPagesWithContent(ALPHA)).map((page) => page.id);
+    expect(order.indexOf('ROOT')).toBeLessThan(order.indexOf('C'));
+    expect(order.indexOf('C')).toBeLessThan(order.indexOf('GC'));
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+describe('copyContentToTenant', () => {
+  const OLD = 'https://old.example/hero.jpg';
+  const NEW = 'https://new.example/hero.jpg';
+
+  it('remaps the tree, reuses the blank home, rewrites urls, in one destination transaction', async () => {
+    const { copyContentToTenant } = await import('../lib/db/duplicate');
+
+    // Source: a home carrying a mapped og image, and an about page beneath it.
+    respond('draft_content from public.pages', [
+      { id: 'SRC_HOME', parent_id: null, slug: '', title: 'Home', seo: { ogImage: OLD, noindex: false }, draft_content: null },
+      { id: 'SRC_ABOUT', parent_id: 'SRC_HOME', slug: 'about', title: 'About', seo: { noindex: false }, draft_content: null },
+    ]);
+    // The destination already has a blank home (createTenant made it): the source
+    // home upserts onto it rather than colliding.
+    respond('where parent_id is null and slug', [{ id: 'DEST_HOME' }]);
+    respond('update public.pages set', [{ id: 'DEST_HOME' }]);
+    // The about page matches nothing, so it inserts.
+    respond('insert into public.pages', [{ id: 'DEST_ABOUT' }]);
+
+    const result = await copyContentToTenant(ALPHA, BETA, new Map([[OLD, NEW]]), 'user-1');
+    expect(result.pages).toBe(2);
+
+    // The home took the UPDATE path and carries the rewritten og image (seo is the
+    // second set value: title, seo, draft_content, updated_by).
+    const update = log.find((s) => s.sql.includes('update public.pages set'));
+    expect((update?.params[1] as { __json: { ogImage?: string } }).__json.ogImage).toBe(NEW);
+
+    // Exactly one page INSERT, the about page, and its parent_id is the id minted
+    // for the home, NOT the source home id.
+    const inserts = log.filter((s) => s.sql.includes('insert into public.pages'));
+    expect(inserts).toHaveLength(1);
+    expect(inserts[0].params[1]).toBe('DEST_HOME');
+    expect(inserts[0].params[1]).not.toBe('SRC_HOME');
+
+    // ONE destination transaction: theme and the two settings reuse it rather than
+    // open their own, so the tenant is set for the destination exactly once.
+    const destSets = log.filter(
+      (s) => s.role === 'app' && s.sql.includes('set_config') && s.params[0] === BETA,
+    );
+    expect(destSets).toHaveLength(1);
+
+    // Header and footer both written, and the theme and client settings saved.
+    expect(log.filter((s) => s.sql.includes('insert into public.site_regions'))).toHaveLength(2);
+    expect(log.some((s) => s.sql.includes('set theme'))).toBe(true);
+    expect(log.some((s) => s.sql.includes('set settings'))).toBe(true);
+
+    // The head and body custom code is DELIBERATELY not copied: raw injected HTML
+    // is the wrong thing to carry into a different client, and its column keeps
+    // its single gated writer. See the settings guard in settings.test.ts.
+    expect(log.some((s) => s.sql.includes('staff_settings'))).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
 describe('the connection string guard', () => {
   it.each([
     ['postgresql://postgres:pw@host:5432/postgres', 'postgres'],

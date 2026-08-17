@@ -54,6 +54,16 @@ export interface PageWithContent extends PageSummary {
   content: Page;
 }
 
+/** One page's draft, stripped to what copying a whole site needs. */
+export interface PageContent {
+  id: string;
+  parentId: string | null;
+  slug: string;
+  title: string;
+  seo: Record<string, unknown>;
+  content: Page;
+}
+
 // ---------------------------------------------------------------------------
 // Mapping
 // ---------------------------------------------------------------------------
@@ -190,6 +200,68 @@ export async function getPage(
     const row = rows[0] as Record<string, unknown>;
     return { ...toSummary(row), content: hydrate(row, row.draft_content) };
   });
+}
+
+/**
+ * Every page with its draft content, PARENTS STRICTLY BEFORE CHILDREN.
+ *
+ * For duplicating a site. The copy walks these in order and remaps each
+ * parent_id to the id it just minted for the page above, so the order has to be
+ * a real topological one, not listPages's "top level, then the rest": a three
+ * level tree would otherwise offer a grandchild before its parent had an id.
+ *
+ * The DRAFT only, on purpose. A clone is a draft the staff rebrand before it
+ * goes anywhere, so the published column is left behind rather than copied.
+ */
+export async function listPagesWithContent(tenantId: string): Promise<PageContent[]> {
+  return withTenant(tenantId, async (tx) => {
+    const rows = await tx`
+      select id, parent_id, slug, title, seo, draft_content from public.pages
+    `;
+
+    const pages = rows.map((raw) => {
+      const row = raw as Record<string, unknown>;
+      return {
+        id: String(row.id),
+        parentId: row.parent_id ? String(row.parent_id) : null,
+        slug: String(row.slug ?? ''),
+        title: String(row.title),
+        seo: asObject(row.seo) ?? {},
+        content: hydrate(row, row.draft_content),
+      };
+    });
+
+    return orderParentsFirst(pages);
+  });
+}
+
+/**
+ * Depth first from the roots, so every page lands after its parent.
+ *
+ * A parent_id pointing at a page this read did not return, which a scoped read
+ * has no way to produce, is treated as a root rather than dropped: a copy that
+ * quietly lost a page would be worse than one with a page reparented to the top.
+ */
+function orderParentsFirst<T extends { id: string; parentId: string | null }>(pages: T[]): T[] {
+  const ids = new Set(pages.map((page) => page.id));
+  const childrenOf = new Map<string | null, T[]>();
+
+  for (const page of pages) {
+    const key = page.parentId && ids.has(page.parentId) ? page.parentId : null;
+    const bucket = childrenOf.get(key);
+    if (bucket) bucket.push(page);
+    else childrenOf.set(key, [page]);
+  }
+
+  const ordered: T[] = [];
+  const walk = (parent: string | null) => {
+    for (const page of childrenOf.get(parent) ?? []) {
+      ordered.push(page);
+      walk(page.id);
+    }
+  };
+  walk(null);
+  return ordered;
 }
 
 /**
