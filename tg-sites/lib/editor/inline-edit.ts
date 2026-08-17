@@ -50,6 +50,13 @@ export function inlineEditableFields(blockType: string): InlineEditField[] {
         { field: 'title', rich: false, oneLine: true },
         { field: 'body', rich: false, oneLine: true },
       ];
+    case 'list':
+      // A list is the one variable-length case: its editable fields are its
+      // items, not a fixed set of props. This single plain oneLine entry is what
+      // the shell reads to know the block is typed into in place and raises no
+      // toolbar; the per-item hosts the render draws carry the real target,
+      // data-rt-field="items.N.text", which Canvas seeds and commits by index.
+      return [{ field: 'items', rich: false, oneLine: true }];
     default:
       return [];
   }

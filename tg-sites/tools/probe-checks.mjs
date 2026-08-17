@@ -176,6 +176,20 @@ const MUTATIONS = [
     to: `data-rt-field="title"`,
   },
   {
+    check: 'a list is typed into where each of its points sits',
+    why: 'Stop offering the list as an editable host, so no point becomes editable.',
+    file: 'lib/editor/inline-edit.ts',
+    from: `      return [{ field: 'items', rich: false, oneLine: true }];`,
+    to: `      return [];`,
+  },
+  {
+    check: 'each list point reaches its own item, not its neighbours',
+    why: 'Commit every list item to slot zero, so typing the second point lands on the first.',
+    file: 'components/editor/Canvas.tsx',
+    from: `        const index = Number(item[1]);`,
+    to: `        const index = 0;`,
+  },
+  {
     check: 'one click makes the words themselves editable',
     why: 'Never mark the host contentEditable.',
     file: 'components/editor/Canvas.tsx',

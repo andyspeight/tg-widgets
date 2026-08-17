@@ -169,9 +169,27 @@ interface DragState {
  * icon item's title host reads `title`, its body host reads `body`, off the same
  * props, each knowing which by its own marker.
  */
+/**
+ * The value behind a host's field, including a list item named by its index.
+ *
+ * Most hosts name a plain prop: html, text, title. A list host names one of its
+ * items instead, data-rt-field="items.N.text", which is not a key on props but a
+ * path into the items array. Resolving both here is what lets seedForHost and the
+ * commit read and write the exact same field the exact same way.
+ */
+function readField(props: Record<string, unknown> | undefined, field: string): unknown {
+  const item = field.match(/^items\.(\d+)\.text$/);
+  if (item) {
+    const items = props?.items;
+    const entry = Array.isArray(items) ? items[Number(item[1])] : undefined;
+    return entry && typeof entry === 'object' ? (entry as Record<string, unknown>).text : undefined;
+  }
+  return props?.[field];
+}
+
 function seedForHost(host: HTMLElement, props: Record<string, unknown> | undefined): string {
   const field = host.dataset.rtField ?? 'html';
-  const raw = props?.[field];
+  const raw = readField(props, field);
   if (host.hasAttribute('data-rt-plain')) {
     return escapeHtml(typeof raw === 'string' ? raw : '');
   }
@@ -387,6 +405,29 @@ export function Canvas({
        */
       const field = host.dataset.rtField ?? 'html';
       const value = host.hasAttribute('data-rt-plain') ? host.textContent ?? '' : host.innerHTML;
+
+      /*
+       * A LIST ITEM WRITES INTO ITS OWN SLOT. The field names the item by index,
+       * items.N.text, which is a path into the array rather than a prop to merge.
+       * The array is read fresh from the page each keystroke and only slot N is
+       * rewritten, so the other items and any properties they carry are kept, and
+       * the undo key carries the index so typing one item is its own step.
+       */
+      const item = field.match(/^items\.(\d+)\.text$/);
+      if (item) {
+        const index = Number(item[1]);
+        onCommit((current) => {
+          const existing = blockAtPath(current, path)?.props?.items;
+          const items = Array.isArray(existing) ? [...existing] : [];
+          const entry = items[index];
+          items[index] = {
+            ...(entry && typeof entry === 'object' ? (entry as Record<string, unknown>) : {}),
+            text: value,
+          };
+          return updateBlockPropsAtPath(current, path, { items });
+        }, `rt:${editingPath}:${index}`);
+        return;
+      }
 
       onCommit(
         (current) => updateBlockPropsAtPath(current, path, { [field]: value }),

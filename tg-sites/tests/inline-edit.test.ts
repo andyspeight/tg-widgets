@@ -33,8 +33,17 @@ describe('which blocks are inline-editable', () => {
     ]);
   });
 
+  it('makes a list one plain oneLine field, its items, so it gets no toolbar', () => {
+    // One nominal entry, because a list has a variable number of items: the shell
+    // reads its length to know the block is editable and its plainness to raise no
+    // toolbar. The per-item target lives on the hosts the render draws, not here.
+    expect(inlineEditableFields('list')).toEqual([
+      { field: 'items', rich: false, oneLine: true },
+    ]);
+  });
+
   it('leaves every other block to the properties pane', () => {
-    for (const type of ['image', 'list', 'cards', 'button', 'table', 'map']) {
+    for (const type of ['image', 'cards', 'button', 'table', 'map']) {
       expect(inlineEditableFields(type)).toEqual([]);
     }
   });
@@ -51,6 +60,7 @@ describe('the toolbar keys on the one rich field a block has', () => {
     // because a rich field is only ever a block's sole field.
     expect(richInlineField('quote')).toBeNull();
     expect(richInlineField('icon-item')).toBeNull();
+    expect(richInlineField('list')).toBeNull();
     expect(richInlineField('image')).toBeNull();
   });
 });
@@ -78,5 +88,14 @@ describe('the block render agrees with the inline-edit map', () => {
     // the wrong prop or arrive as markup.
     expect(blocks).toContain('data-rt-field="title"');
     expect(blocks).toContain('data-rt-field="body"');
+  });
+
+  it('marks each list item host with its own indexed field, as a plain one-liner', () => {
+    // The list host names the item by index, items.N.text, so Canvas seeds and
+    // commits each item on its own. Plain and oneLine, because a list item is a
+    // single plain string. If this drifts, a keystroke lands on the wrong item or
+    // is read as markup.
+    expect(blocks).toContain('data-rt-field={`items.${index}.text`}');
+    expect(blocks).toContain('data-rt-oneline=""');
   });
 });

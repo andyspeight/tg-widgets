@@ -3318,6 +3318,78 @@ await check('an icon item raises no formatting toolbar, because its fields are p
   return bars === 0 ? true : `${bars} toolbars over a plain icon item`;
 });
 
+// ---------------------------------------------------------------------------
+// A list is typed into where it sits: every point, each its own plain item
+// ---------------------------------------------------------------------------
+
+/*
+ * The list is the first block whose editable fields are VARIABLE in number, one
+ * per item rather than a fixed set. Each point draws its own plain host marked
+ * data-rt-field="items.N.text", so Canvas seeds it from that item and commits a
+ * keystroke back to it alone. The checks: every point becomes an editable host;
+ * typing a point reaches its OWN item in the page STATE and not a neighbour, read
+ * back off the canvas once the list is deselected and redraws itself from state;
+ * and no toolbar appears, because a list point is plain.
+ */
+await check('a list is typed into where each of its points sits', async () => {
+  await page.reload();
+  await page.waitForSelector('.ed-root');
+  await showPanels();
+  await addBlock('List');
+
+  const hosts = added().locator('[data-rt-host]');
+  const count = await hosts.count();
+  // Three, the default List's three points, each its own host.
+  if (count !== 3) return `expected three item hosts, found ${count}`;
+  const editable = await hosts.evaluateAll((els) =>
+    els.every((el) => el.getAttribute('contenteditable') === 'true'));
+  return editable ? true : 'a point did not become editable';
+});
+
+await check('each list point reaches its own item, not its neighbours', async () => {
+  // A distinct marker into the first point and the second, the caret at the end
+  // of each so it appends rather than replaces.
+  const typeInto = async (index, mark) => {
+    await page.evaluate((i) => {
+      const el = document.querySelectorAll('.is-selected [data-rt-host]')[i];
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      range.collapse(false);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      el.focus();
+    }, index);
+    await page.keyboard.type(mark, { delay: 30 });
+    await page.waitForTimeout(250);
+  };
+  await typeInto(0, ' ONEX');
+  await typeInto(1, ' TWOX');
+
+  // Click the canvas margin to deselect: the list leaves editing and redraws its
+  // points from STATE, so a keystroke committed to the wrong item shows up here,
+  // in the wrong <li>. Reading the host's own DOM would not, the no-children
+  // trick keeps whatever was typed into it whichever item it reached.
+  await page.locator('.ed-canvas-frame').click({ position: { x: 8, y: 8 } });
+  await page.waitForTimeout(300);
+
+  const points = (await page.locator('.tgs-list li').allInnerTexts()).map((t) => t.trim());
+  const one = points[0] ?? '';
+  const two = points[1] ?? '';
+  return one.endsWith('ONEX') && two.endsWith('TWOX') && !one.includes('TWOX')
+    ? true
+    : `point one "${one.slice(-24)}", point two "${two.slice(-24)}"`;
+});
+
+await check('a list raises no formatting toolbar, because its points are plain', async () => {
+  await page.reload();
+  await page.waitForSelector('.ed-root');
+  await showPanels();
+  await addBlock('List');
+  const bars = await page.locator('.ed-tt').count();
+  return bars === 0 ? true : `${bars} toolbars over a plain list`;
+});
+
 /*
  * Enter inside a heading does nothing. Left to the browser it inserts a div or a
  * br, and reading textContent back out welds the two lines into one word with no
@@ -4293,7 +4365,15 @@ await showPanels();
 /** Add a block by its name in the picker, into the first section. */
 async function addBlock(name) {
   await openBlockPicker();
-  await page.locator('.ed-block-card', { hasText: name }).first().click();
+  // Match the card by its LABEL exactly, not by text anywhere in it. A card
+  // carries a <strong> label and a <small> description, and hasText spanned both:
+  // asking for 'List' matched the Text card first, whose description ends "and
+  // lists", and added a paragraph instead. getByText exact pins the label.
+  await page
+    .locator('.ed-block-card')
+    .filter({ has: page.getByText(name, { exact: true }) })
+    .first()
+    .click();
   await page.waitForTimeout(500);
 }
 

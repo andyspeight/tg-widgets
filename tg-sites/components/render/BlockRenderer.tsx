@@ -72,7 +72,7 @@ export function BlockRenderer({
       case 'quote':
         return <QuoteBlock props={props} editingHost={editingHost} />;
       case 'list':
-        return <ListBlock props={props} />;
+        return <ListBlock props={props} editingHost={editingHost} />;
       case 'icon-item':
         return <IconItemBlock props={props} editingHost={editingHost} />;
       case 'steps':

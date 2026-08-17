@@ -306,7 +306,24 @@ export function QuoteBlock({
   );
 }
 
-export function ListBlock({ props }: { props: Props }): ReactElement {
+export function ListBlock({
+  props,
+  editingHost = false,
+}: {
+  props: Props;
+  /**
+   * Render each item's words as an empty host for the editor to type into.
+   *
+   * The same no-children trick the other plain blocks use, one host per item.
+   * Each carries its index in the field, data-rt-field="items.N.text", which is
+   * how Canvas seeds it from props.items[N].text and commits a keystroke back to
+   * that one item without disturbing the rest. The tick stays outside the host,
+   * so it is a drawn mark and never becomes editable. An empty list has no items
+   * and so no hosts: items are added and removed in the properties pane, the same
+   * as a quote's byline.
+   */
+  editingHost?: boolean;
+}): ReactElement {
   const style = oneOf(props, 'style', ['bullet', 'number', 'tick'] as const, 'bullet');
   const items = list(props, 'items');
   const Tag = style === 'number' ? 'ol' : 'ul';
@@ -331,7 +348,18 @@ export function ListBlock({ props }: { props: Props }): ReactElement {
             "tick" before each of eight bullets is noise rather than meaning.
           */}
           {style === 'tick' && <ContentIcon name="check" className="tgs-list__tick" />}
-          {str(item, 'text')}
+          {editingHost ? (
+            <span
+              className="tgs-list__text"
+              data-rt-host=""
+              data-rt-field={`items.${index}.text`}
+              data-rt-plain=""
+              data-rt-oneline=""
+              suppressHydrationWarning
+            />
+          ) : (
+            str(item, 'text')
+          )}
         </li>
       ))}
     </Tag>
