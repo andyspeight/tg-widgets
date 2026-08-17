@@ -1383,6 +1383,58 @@ describe('copyFontsToTenant', () => {
 
 // ---------------------------------------------------------------------------
 
+describe('duplicateSite', () => {
+  // A real uuid, because withTenant refuses to scope to anything that is not one.
+  const CLONE = '33333333-3333-3333-3333-333333333333';
+
+  it('creates the clone first, then copies from the source into it', async () => {
+    const { duplicateSite } = await import('../lib/db/duplicate');
+
+    // createTenant's insert returns the clone. Everything the copies read from
+    // the source is empty, so this exercises the ORDER and the scoping, not the
+    // individual copies (those are covered above).
+    respond('insert into public.tenants', [
+      { id: CLONE, slug: 'sunvil-copy', name: 'Sunvil copy', plan: 'Spark', status: 'active', theme: {}, settings: {} },
+    ]);
+
+    const clone = await duplicateSite(ALPHA, 'owner-1', 'Sunvil copy');
+    expect(clone.slug).toBe('sunvil-copy');
+
+    // The clone is made before anything is copied into it: its scope is only ever
+    // set AFTER the tenants insert that created it.
+    const tenantInsert = log.findIndex((s) => s.sql.includes('insert into public.tenants'));
+    const cloneScoped = log.findIndex((s) => s.sql.includes('set_config') && s.params[0] === CLONE);
+    expect(tenantInsert).toBeGreaterThanOrEqual(0);
+    expect(cloneScoped).toBeGreaterThan(tenantInsert);
+
+    // And the source is read under the source's own scope for the copies.
+    expect(log.some((s) => s.sql.includes('set_config') && s.params[0] === ALPHA)).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+describe('the duplicate-site action', () => {
+  it('gates on staff and takes the source from the session, not the caller', () => {
+    const source = readFileSync(join(__dirname, '..', 'app/actions/sites.ts'), 'utf8');
+    const start = source.indexOf('export async function duplicateSiteAction');
+    expect(start).toBeGreaterThanOrEqual(0);
+    const next = source.indexOf('\nfunction explain', start);
+    const body = source.slice(start, next === -1 ? undefined : next);
+
+    // The same staff gate as createSite.
+    expect(body).toContain('requireStaff');
+    // The source is the active site, resolved from the session, never an id the
+    // caller passes in the request body.
+    expect(body).toContain('requireTenantId');
+    expect(body).toContain('duplicateSite');
+    // The owner is the session user.
+    expect(body).toContain('user.id');
+  });
+});
+
+// ---------------------------------------------------------------------------
+
 describe('the connection string guard', () => {
   it.each([
     ['postgresql://postgres:pw@host:5432/postgres', 'postgres'],

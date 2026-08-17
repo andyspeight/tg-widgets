@@ -27,6 +27,7 @@ import { insertMedia, listAllMedia, type NewMedia } from './media';
 import { listPagesWithContent } from './pages';
 import { getRegion } from './regions';
 import { getSettings, saveSettings } from './settings';
+import { createTenant, type Tenant } from './tenants';
 import { getTheme, saveTheme } from './theme';
 import { withTenant, type Tx } from './withTenant';
 
@@ -330,4 +331,44 @@ export async function copyFontsToTenant(
     }
     return { fonts: fonts.length, files };
   });
+}
+
+// ---------------------------------------------------------------------------
+// The whole thing
+// ---------------------------------------------------------------------------
+
+/**
+ * Duplicate a whole site: make the clone, then fill it from the source.
+ *
+ * THE ONE ORDER THAT WORKS, and it is enforced by the code rather than a comment.
+ * createTenant first, because everything else writes into the tenant it makes.
+ * Then the media, because its copy returns the old-to-new url map the content
+ * copy needs to repoint every image: urlMap is a const the content call takes, so
+ * the media copy cannot be moved after it without TypeScript noticing. Then the
+ * content, then the fonts.
+ *
+ * A CLONE IS A DRAFT, which is what makes a failure safe. createTenant leaves the
+ * published columns null and every copy writes drafts, so a duplicate that dies
+ * between steps (a blob store hiccup, say) is an unpublished site on no domain,
+ * something staff can delete, never something a visitor can reach. That is why
+ * there is no grand rollback spanning the four transactions: the failure mode is
+ * already harmless, and a half-copied draft is more use to staff than nothing.
+ *
+ * The blog and the other collections are NOT copied, by decision: they are the
+ * first client's writing, with no place in the next client's site. Nor is the
+ * head and body custom code, the custom domain, or the site's history. See the
+ * copiers for each.
+ */
+export async function duplicateSite(
+  sourceTenantId: string,
+  ownerId: string,
+  name: string,
+): Promise<Tenant> {
+  const clone = await createTenant({ name }, ownerId);
+
+  const urlMap = await copyMediaToTenant(sourceTenantId, clone.id);
+  await copyContentToTenant(sourceTenantId, clone.id, urlMap, ownerId);
+  await copyFontsToTenant(sourceTenantId, clone.id);
+
+  return clone;
 }

@@ -20,7 +20,7 @@
 import { useState, useTransition } from 'react';
 
 import { chooseSiteAction, signOutAction } from '../../app/actions/auth';
-import { createSiteAction } from '../../app/actions/sites';
+import { createSiteAction, duplicateSiteAction } from '../../app/actions/sites';
 import type { Membership } from '../../lib/db/users';
 import { Icon } from '../editor/Icon';
 import { Modal } from '../ui/Modal';
@@ -38,6 +38,8 @@ interface Props {
 export function AccountBar({ email, name, currentSlug, available, canCreateSite = false }: Props) {
   const [busy, startTransition] = useTransition();
   const [creating, setCreating] = useState(false);
+  const [duplicating, setDuplicating] = useState(false);
+  const currentName = available.find((site) => site.slug === currentSlug)?.name ?? '';
 
   function switchTo(slug: string) {
     if (slug === currentSlug) return;
@@ -80,16 +82,28 @@ export function AccountBar({ email, name, currentSlug, available, canCreateSite 
       )}
 
       {canCreateSite && (
-        <button
-          type="button"
-          className="tg-btn"
-          data-variant="ghost"
-          disabled={busy}
-          onClick={() => setCreating(true)}
-        >
-          <Icon name="plus" size={16} />
-          New site
-        </button>
+        <>
+          <button
+            type="button"
+            className="tg-btn"
+            data-variant="ghost"
+            disabled={busy}
+            onClick={() => setCreating(true)}
+          >
+            <Icon name="plus" size={16} />
+            New site
+          </button>
+          <button
+            type="button"
+            className="tg-btn"
+            data-variant="ghost"
+            disabled={busy}
+            onClick={() => setDuplicating(true)}
+          >
+            <Icon name="copy" size={16} />
+            Duplicate site
+          </button>
+        </>
       )}
 
       <span className="sv-bar__spacer" />
@@ -113,6 +127,9 @@ export function AccountBar({ email, name, currentSlug, available, canCreateSite 
       </button>
 
       {creating && <NewSiteDialog onClose={() => setCreating(false)} />}
+      {duplicating && (
+        <DuplicateSiteDialog currentName={currentName} onClose={() => setDuplicating(false)} />
+      )}
     </div>
   );
 }
@@ -198,6 +215,100 @@ function NewSiteDialog({ onClose }: { onClose: () => void }) {
 
         {/* Submit on Enter without a second visible button, last so the Modal
             focuses the name field rather than this. */}
+        <button type="submit" className="tg-visually-hidden" tabIndex={-1} aria-hidden="true" />
+      </form>
+    </Modal>
+  );
+}
+
+// ---------------------------------------------------------------------------
+
+/**
+ * Copy the current site onto a new one, name it, and land on the copy.
+ *
+ * The name is pre-filled with "<source> copy" because the common case is making
+ * the next client's site from the last one and renaming it in a moment; a staff
+ * member overtypes it with the real client's name. The description says plainly
+ * what travels and what does not, so nobody is surprised the blog did not come
+ * across.
+ *
+ * SLOW ON PURPOSE, and the button says so. The copy re-uploads every image, so on
+ * a large site it runs for several seconds; the submit shows "Copying" and the
+ * form locks rather than looking hung. On success the whole page reloads onto the
+ * copy, which the action has already made the active site.
+ */
+function DuplicateSiteDialog({ currentName, onClose }: { currentName: string; onClose: () => void }) {
+  const [name, setName] = useState(currentName ? `${currentName} copy` : 'Site copy');
+  const [message, setMessage] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  async function submit() {
+    const clean = name.trim();
+    if (!clean) {
+      setMessage('Give the copy a name.');
+      return;
+    }
+    setSaving(true);
+    setMessage(null);
+    const result = await duplicateSiteAction({ name: clean });
+    if (!result.ok) {
+      setMessage(result.error);
+      setSaving(false);
+      return;
+    }
+    window.location.assign('/sites');
+  }
+
+  return (
+    <Modal
+      title="Duplicate site"
+      description={`Makes a full copy of ${currentName || 'this site'} as a new draft: its pages, images, header, footer, theme and fonts. The blog and any custom code are left out. Rebrand it, then publish when it is ready.`}
+      onClose={onClose}
+      footer={
+        <>
+          <button type="button" className="tg-btn" onClick={onClose} disabled={saving}>
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="tg-btn"
+            data-variant="primary"
+            disabled={saving}
+            onClick={submit}
+          >
+            {saving ? 'Copying' : 'Duplicate'}
+          </button>
+        </>
+      }
+    >
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          void submit();
+        }}
+      >
+        {message && (
+          <p className="sv-msg" role="alert">
+            {message}
+          </p>
+        )}
+
+        {saving && (
+          <p className="sv-msg">Copying every page and image. This can take a moment for a large site.</p>
+        )}
+
+        <div className="sv-field">
+          <label htmlFor="dup-name">New site name</label>
+          <input
+            id="dup-name"
+            value={name}
+            disabled={saving}
+            placeholder="Sunvil Travel"
+            onChange={(event) => setName(event.target.value)}
+          />
+          <small>Usually the next client's name. You can change it in Settings later.</small>
+        </div>
+
         <button type="submit" className="tg-visually-hidden" tabIndex={-1} aria-hidden="true" />
       </form>
     </Modal>
