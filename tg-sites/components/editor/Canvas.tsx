@@ -155,6 +155,31 @@ interface DragState {
   inner?: { column: number; block: number };
 }
 
+/*
+ * The words to seed a host with, read from the block's own props.
+ *
+ * The host says which prop it is (data-rt-field, defaulting to html) and whether
+ * it is plain (data-rt-plain). A plain field stores text and is shown escaped, so
+ * a < in a quote is a character and not the start of a tag. A rich field stores
+ * html and is shown as it is, with the one fallback the html field carries: a
+ * heading or paragraph saved before the field existed kept its words in `text`,
+ * so an empty html reads them from there.
+ *
+ * One function for every host, because a block can now have more than one: an
+ * icon item's title host reads `title`, its body host reads `body`, off the same
+ * props, each knowing which by its own marker.
+ */
+function seedForHost(host: HTMLElement, props: Record<string, unknown> | undefined): string {
+  const field = host.dataset.rtField ?? 'html';
+  const raw = props?.[field];
+  if (host.hasAttribute('data-rt-plain')) {
+    return escapeHtml(typeof raw === 'string' ? raw : '');
+  }
+  if (typeof raw === 'string' && raw) return raw;
+  const text = props?.text;
+  return typeof text === 'string' ? escapeHtml(text) : '';
+}
+
 export function Canvas({
   page,
   selected,
@@ -233,7 +258,7 @@ export function Canvas({
    * fallback, clicking an old heading would show an empty box and typing one
    * letter would replace the whole thing.
    */
-  const editingValue = useMemo(() => {
+  const editingBlockProps = useMemo(() => {
     if (!editingPath) return null;
     const path = parsePathKey(editingPath);
     // A block in a column, or a block inside a container: both are typed into in
@@ -241,70 +266,76 @@ export function Canvas({
     if (path?.kind !== 'block' && path?.kind !== 'inner-block') return null;
 
     const block = blockAtPath(page, path);
-    if (!block) return null;
-
-    const html = block.props?.html;
-    if (typeof html === 'string' && html) return { value: html };
-
-    const text = block.props?.text;
-    return { value: typeof text === 'string' ? escapeHtml(text) : '' };
+    // The props, not a single value, because a block can have more than one host
+    // now and each reads its own field off these. An empty object rather than
+    // null for a propless block, so its hosts still seed (to nothing) and go live.
+    return block ? block.props ?? {} : null;
   }, [editingPath, page]);
 
-  const findHost = useCallback(() => {
+  const findHosts = useCallback(() => {
     const frame = frameRef.current;
-    if (!frame || !editingPath) return null;
-    return frame.querySelector<HTMLElement>(
-      `[data-path="${CSS.escape(editingPath)}"] [data-rt-host]`,
+    if (!frame || !editingPath) return [] as HTMLElement[];
+    return Array.from(
+      frame.querySelectorAll<HTMLElement>(
+        `[data-path="${CSS.escape(editingPath)}"] [data-rt-host]`,
+      ),
     );
   }, [editingPath]);
 
-  // Take the element over, seed it, and put the caret in it. Once per block.
+  // Take the element (or elements) over, seed each, and put the caret in the
+  // first. Once per block. A block with two fields, an icon item, seeds them
+  // both, so its title and body are both live and the caret starts in the title.
   useEffect(() => {
-    const host = findHost();
-    if (!host || !editingValue) return;
+    const hosts = findHosts();
+    if (!hosts.length || !editingBlockProps) return;
 
-    host.innerHTML = editingValue.value;
-
-    host.contentEditable = 'true';
-    host.spellcheck = true;
+    for (const host of hosts) {
+      host.innerHTML = seedForHost(host, editingBlockProps);
+      host.contentEditable = 'true';
+      host.spellcheck = true;
+    }
 
     /*
      * Focused because somebody just clicked this block, which is a real user
      * action and a genuine step change: the exception the no-focus-on-render
      * rule names. Keyed on editingPath, so it happens once per block and not on
-     * the re-render that every keystroke causes.
+     * the re-render that every keystroke causes. The first host takes the caret;
+     * where a block has two, clicking the other field moves it, both being live.
      */
-    host.focus();
+    hosts[0]?.focus();
 
     return () => {
-      host.contentEditable = 'false';
+      for (const host of hosts) host.contentEditable = 'false';
     };
-    // Deliberately not depending on editingValue: re-seeding from state while
+    // Deliberately not depending on editingBlockProps: re-seeding from state while
     // somebody is typing is the caret fight by another route. Catching up is the
     // next effect's job, and it knows when it is safe.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editingPath, findHost]);
+  }, [editingPath, findHosts]);
 
   /*
    * CATCH UP WITH AN EDIT THAT CAME FROM SOMEWHERE ELSE.
    *
-   * The properties pane edits the same words. Without this the canvas kept
+   * The properties pane edits the same words, and one field of a two-field block
+   * can change while the other is being typed. Without this the canvas kept
    * showing the content as it was when it was taken over, so typing in the pane
    * changed the page and the canvas silently disagreed with it, and the next
    * keystroke on the canvas committed the stale version over the top.
    *
-   * Only when this element is NOT the one being typed into. That condition is
-   * the whole thing: writing into a focused contentEditable is exactly the caret
-   * fight the no-children trick exists to avoid. The pane field has the same
-   * rule in the other direction, which is what makes the two safe together.
+   * Skipping the one being typed into is the whole thing: writing into a focused
+   * contentEditable is exactly the caret fight the no-children trick exists to
+   * avoid. The pane field has the same rule in the other direction, which is what
+   * makes the two safe together. The block's OTHER hosts still catch up.
    */
   useEffect(() => {
-    const host = findHost();
-    if (!host || !editingValue) return;
-    if (document.activeElement === host) return;
-
-    if (host.innerHTML !== editingValue.value) host.innerHTML = editingValue.value;
-  }, [editingValue, findHost]);
+    const hosts = findHosts();
+    if (!hosts.length || !editingBlockProps) return;
+    for (const host of hosts) {
+      if (document.activeElement === host) continue;
+      const seed = seedForHost(host, editingBlockProps);
+      if (host.innerHTML !== seed) host.innerHTML = seed;
+    }
+  }, [editingBlockProps, findHosts]);
 
   /*
    * Paste as plain text, on both kinds of host.

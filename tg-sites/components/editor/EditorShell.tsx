@@ -35,7 +35,7 @@ import { pageAsItem, type ItemMeta } from '../../lib/content/collection-page';
 import { createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
 import { buildPresetSection } from '../../lib/content/presets';
 import { addBlock, addColumn, addInnerBlock, blockAtPath, containerColumns, moveBlockTo, moveSection, parsePathKey, type Path, pathKey, resolve, updateBlockPropsAtPath } from '../../lib/content/tree';
-import { inlineEditableField } from '../../lib/editor/inline-edit';
+import { inlineEditableFields, richInlineField } from '../../lib/editor/inline-edit';
 import {
   DndContext,
   DragOverlay,
@@ -644,16 +644,18 @@ export function EditorShell({
   const editing = useMemo(() => {
     // Whatever block can be typed into where it sits, in a column OR inside a
     // container: blockAtPath resolves either, and lib/editor/inline-edit decides
-    // which blocks those are and how. `rich` is what tells a paragraph or a
-    // heading (formatting toolbar, HTML) from a quote (plain text, no toolbar).
+    // which blocks those are and how. A block is in edit mode if it has ANY
+    // inline field (an icon item has two); `rich` is the single rich field, if
+    // any, which tells a paragraph or a heading (formatting toolbar, HTML) from
+    // a quote or an icon item (plain text, no toolbar).
     if (selected?.kind !== 'block' && selected?.kind !== 'inner-block') return null;
     const block = blockAtPath(page, selected);
     if (!block) return null;
-    const field = inlineEditableField(block.type);
-    if (!field) return null;
+    if (inlineEditableFields(block.type).length === 0) return null;
+    const rich = richInlineField(block.type);
 
     const align = typeof block.props?.align === 'string' ? block.props.align : 'left';
-    return { path: pathKey(selected), oneLine: field.oneLine, rich: field.rich, align };
+    return { path: pathKey(selected), oneLine: rich?.oneLine ?? false, rich: Boolean(rich), align };
   }, [selected, page]);
 
   const editingPath = editing?.path ?? null;

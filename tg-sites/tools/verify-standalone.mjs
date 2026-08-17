@@ -3213,6 +3213,70 @@ await check('a quote raises no formatting toolbar, because it is plain', async (
   return bars === 0 ? true : `${bars} toolbars over a plain quote`;
 });
 
+// ---------------------------------------------------------------------------
+// An icon item is typed into where it sits: BOTH its fields, each as plain text
+// ---------------------------------------------------------------------------
+
+/*
+ * The icon item is the first block with TWO fields typed into in place: its
+ * title and its body, each its own plain host. The checks: both become editable
+ * hosts at once; typing each reaches its OWN field in the page STATE, read back
+ * off the pane which is state-bound, not off the DOM the no-children trick keeps
+ * either way; and no toolbar appears, because both fields are plain. The icon
+ * stays in the pane, picked from the library rather than typed.
+ */
+await check('an icon item is typed into where its title and its body sit', async () => {
+  await page.reload();
+  await page.waitForSelector('.ed-root');
+  await showPanels();
+  await addBlock('Icon and text');
+
+  const hosts = added().locator('[data-rt-host]');
+  const count = await hosts.count();
+  if (count !== 2) return `expected two hosts, found ${count}`;
+  const first = await hosts.nth(0).getAttribute('contenteditable');
+  const second = await hosts.nth(1).getAttribute('contenteditable');
+  return first === 'true' && second === 'true'
+    ? true
+    : `contenteditable is ${first} and ${second}`;
+});
+
+await check('an icon item title and body reach their own fields, not each other', async () => {
+  // A distinct marker into each host, the title first then the body, placing the
+  // caret at the end of whichever one before typing so it appends.
+  const typeInto = async (index, mark) => {
+    await page.evaluate((i) => {
+      const el = document.querySelectorAll('.is-selected [data-rt-host]')[i];
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      range.collapse(false);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      el.focus();
+    }, index);
+    await page.keyboard.type(mark, { delay: 30 });
+    await page.waitForTimeout(250);
+  };
+  await typeInto(0, ' TITLEX');
+  await typeInto(1, ' BODYX');
+
+  // The pane is state, not the DOM: the title its labelled box, the body its own.
+  // A commit to the wrong field would cross these, so the title must carry its
+  // own marker and NOT the body's.
+  const props = page.locator('.ed-props');
+  const title = (await props.getByLabel('Title', { exact: true }).inputValue()).trim();
+  const body = (await props.getByLabel('Body', { exact: true }).inputValue()).trim();
+  return title.endsWith('TITLEX') && body.endsWith('BODYX') && !title.includes('BODYX')
+    ? true
+    : `title "${title.slice(-24)}", body "${body.slice(-24)}"`;
+});
+
+await check('an icon item raises no formatting toolbar, because its fields are plain', async () => {
+  const bars = await page.locator('.ed-tt').count();
+  return bars === 0 ? true : `${bars} toolbars over a plain icon item`;
+});
+
 /*
  * Enter inside a heading does nothing. Left to the browser it inserts a div or a
  * br, and reading textContent back out welds the two lines into one word with no
@@ -4200,7 +4264,14 @@ async function addBlock(name) {
  * selects it, so the selection is the reliable handle, and it also means the
  * check above cannot pass on placeholders that were already there.
  */
-const added = () => page.locator('.ed-canvas-frame [data-path].is-selected');
+// A function, not a const arrow, so it is hoisted and reachable from the checks
+// that run BEFORE this line as well as after. The inline-editing checks near the
+// top (a quote, an icon item) call it, and a const would sit in the temporal
+// dead zone for them: "Cannot access 'added' before initialization". addBlock
+// above is a function for the same reason.
+function added() {
+  return page.locator('.ed-canvas-frame [data-path].is-selected');
+}
 
 await check('a Travelgenix widget starts by asking which widget', async () => {
   await addBlock('Travelgenix widget');

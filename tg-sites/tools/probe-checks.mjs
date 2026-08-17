@@ -130,18 +130,18 @@ const MUTATIONS = [
     why: 'Stop offering headings as editable hosts.',
     file: 'lib/editor/inline-edit.ts',
     from: `    case 'heading':
-      return { field: 'html', rich: true, oneLine: true };`,
+      return [{ field: 'html', rich: true, oneLine: true }];`,
     to: `    case 'heading':
-      return null;`,
+      return [];`,
   },
   {
     check: 'a quote becomes editable where its words sit',
     why: 'Stop offering a quote as an editable host.',
     file: 'lib/editor/inline-edit.ts',
     from: `    case 'quote':
-      return { field: 'text', rich: false, oneLine: false };`,
+      return [{ field: 'text', rich: false, oneLine: false }];`,
     to: `    case 'quote':
-      return null;`,
+      return [];`,
   },
   {
     check: 'typing a quote reaches the page state as plain text',
@@ -149,6 +149,25 @@ const MUTATIONS = [
     file: 'components/editor/Canvas.tsx',
     from: `      const field = host.dataset.rtField ?? 'html';`,
     to: `      const field = 'html';`,
+  },
+  {
+    check: 'an icon item is typed into where its title and its body sit',
+    why: 'Stop offering the icon item as an editable host.',
+    file: 'lib/editor/inline-edit.ts',
+    from: `    case 'icon-item':
+      return [
+        { field: 'title', rich: false, oneLine: true },
+        { field: 'body', rich: false, oneLine: true },
+      ];`,
+    to: `    case 'icon-item':
+      return [];`,
+  },
+  {
+    check: 'an icon item title and body reach their own fields, not each other',
+    why: 'Point the body host at the title field, so the two fields cross and body writes title.',
+    file: 'components/render/blocks.tsx',
+    from: `data-rt-field="body"`,
+    to: `data-rt-field="title"`,
   },
   {
     check: 'one click makes the words themselves editable',

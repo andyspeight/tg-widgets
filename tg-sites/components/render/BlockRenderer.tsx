@@ -74,7 +74,7 @@ export function BlockRenderer({
       case 'list':
         return <ListBlock props={props} />;
       case 'icon-item':
-        return <IconItemBlock props={props} />;
+        return <IconItemBlock props={props} editingHost={editingHost} />;
       case 'steps':
         return <StepsBlock props={props} />;
       case 'stats':

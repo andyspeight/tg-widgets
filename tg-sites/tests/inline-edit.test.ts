@@ -1,12 +1,12 @@
 /**
- * Which blocks are typed into on the canvas.
+ * Which blocks are typed into on the canvas, and in which fields.
  *
  * The contentEditable interaction itself is exercised only in the browser harness
  * (tools/verify-standalone.mjs), because it needs a real caret and a real
  * selection. What a plain-Node test CAN hold honest is the map that decides which
  * blocks are editable and how, and that each editable block's render marks its
- * host with the field the map names. Those two drifting apart is how an edit ends
- * up committed to the wrong prop.
+ * host(s) with the field(s) the map names. Those two drifting apart is how an
+ * edit ends up committed to the wrong prop.
  */
 
 import { readFileSync } from 'node:fs';
@@ -14,22 +14,44 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { inlineEditableField } from '../lib/editor/inline-edit';
+import { inlineEditableFields, richInlineField } from '../lib/editor/inline-edit';
 
 describe('which blocks are inline-editable', () => {
-  it('makes a paragraph and a heading rich html fields', () => {
-    expect(inlineEditableField('text')).toEqual({ field: 'html', rich: true, oneLine: false });
-    expect(inlineEditableField('heading')).toEqual({ field: 'html', rich: true, oneLine: true });
+  it('makes a paragraph and a heading single rich html fields', () => {
+    expect(inlineEditableFields('text')).toEqual([{ field: 'html', rich: true, oneLine: false }]);
+    expect(inlineEditableFields('heading')).toEqual([{ field: 'html', rich: true, oneLine: true }]);
   });
 
-  it('makes a quote a plain text field, so it gets no formatting toolbar', () => {
-    expect(inlineEditableField('quote')).toEqual({ field: 'text', rich: false, oneLine: false });
+  it('makes a quote a single plain text field, so it gets no formatting toolbar', () => {
+    expect(inlineEditableFields('quote')).toEqual([{ field: 'text', rich: false, oneLine: false }]);
+  });
+
+  it('makes an icon item two plain fields, its title and its body', () => {
+    expect(inlineEditableFields('icon-item')).toEqual([
+      { field: 'title', rich: false, oneLine: true },
+      { field: 'body', rich: false, oneLine: true },
+    ]);
   });
 
   it('leaves every other block to the properties pane', () => {
-    for (const type of ['image', 'list', 'icon-item', 'cards', 'button', 'table', 'map']) {
-      expect(inlineEditableField(type)).toBeNull();
+    for (const type of ['image', 'list', 'cards', 'button', 'table', 'map']) {
+      expect(inlineEditableFields(type)).toEqual([]);
     }
+  });
+});
+
+describe('the toolbar keys on the one rich field a block has', () => {
+  it('is the paragraph and the heading, their sole field', () => {
+    expect(richInlineField('text')).toEqual({ field: 'html', rich: true, oneLine: false });
+    expect(richInlineField('heading')).toEqual({ field: 'html', rich: true, oneLine: true });
+  });
+
+  it('is nothing for a plain block, single or multi field', () => {
+    // A quote is one plain field, an icon item is two: neither raises the toolbar,
+    // because a rich field is only ever a block's sole field.
+    expect(richInlineField('quote')).toBeNull();
+    expect(richInlineField('icon-item')).toBeNull();
+    expect(richInlineField('image')).toBeNull();
   });
 });
 
@@ -40,12 +62,21 @@ describe('the block render agrees with the inline-edit map', () => {
   );
 
   it('marks the quote host with the field the map declares, as plain', () => {
-    const field = inlineEditableField('quote');
-    expect(field?.field).toBe('text');
-    expect(field?.rich).toBe(false);
+    const [field] = inlineEditableFields('quote');
+    expect(field.field).toBe('text');
+    expect(field.rich).toBe(false);
     // The QuoteBlock editing shell must carry the same field and be marked plain,
     // or Canvas would commit the quote's words to the wrong prop, or as markup.
     expect(blocks).toContain('data-rt-field="text"');
     expect(blocks).toContain('data-rt-plain=""');
+  });
+
+  it('marks the icon item with both fields the map declares, each plain', () => {
+    const fields = inlineEditableFields('icon-item').map((f) => f.field);
+    expect(fields).toEqual(['title', 'body']);
+    // Two hosts, one per field, both plain, or the title and body would land in
+    // the wrong prop or arrive as markup.
+    expect(blocks).toContain('data-rt-field="title"');
+    expect(blocks).toContain('data-rt-field="body"');
   });
 });

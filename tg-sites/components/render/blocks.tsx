@@ -338,7 +338,22 @@ export function ListBlock({ props }: { props: Props }): ReactElement {
   );
 }
 
-export function IconItemBlock({ props }: { props: Props }): ReactElement {
+export function IconItemBlock({
+  props,
+  editingHost = false,
+}: {
+  props: Props;
+  /**
+   * Type the icon item's words in place: its title, then its body, each its own
+   * plain host. The same no-children trick as the quote, twice, because an icon
+   * item has two fields where a quote has one. Both are marked data-rt-plain, so
+   * the editor reads them back as text, and both render even when empty so there
+   * is somewhere to click into a title or a body that has not been written yet.
+   * The icon stays in the properties pane: it is picked from the library, not
+   * typed. Only ever true in the editor.
+   */
+  editingHost?: boolean;
+}): ReactElement {
   // Matches the block's own default. A star CHARACTER here would mean a
   // block saved with no icon prop at all drew the one thing this replaced.
   const icon = str(props, 'icon', 'sparkles');
@@ -402,8 +417,31 @@ export function IconItemBlock({ props }: { props: Props }): ReactElement {
         {drawable ? <ContentIcon name={icon} className="tgs-icon-item__svg" /> : icon}
       </span>
       <div style={textColour ? { color: textColour } : undefined}>
-        {title && <p className="tgs-icon-item__title">{title}</p>}
-        {body && <p className="tgs-icon-item__body">{body}</p>}
+        {editingHost ? (
+          <>
+            <p
+              className="tgs-icon-item__title"
+              data-rt-host=""
+              data-rt-field="title"
+              data-rt-plain=""
+              data-rt-oneline=""
+              suppressHydrationWarning
+            />
+            <p
+              className="tgs-icon-item__body"
+              data-rt-host=""
+              data-rt-field="body"
+              data-rt-plain=""
+              data-rt-oneline=""
+              suppressHydrationWarning
+            />
+          </>
+        ) : (
+          <>
+            {title && <p className="tgs-icon-item__title">{title}</p>}
+            {body && <p className="tgs-icon-item__body">{body}</p>}
+          </>
+        )}
       </div>
     </div>
   );
