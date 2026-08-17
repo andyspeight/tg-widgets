@@ -64,13 +64,22 @@ const MUTATIONS = [
     why: 'Let React render children into the host, so it fights the caret.',
     file: 'components/render/blocks.tsx',
     from: `  if (editingHost) {
-    return <div className="tgs-text" data-size={size} data-rt-host="" suppressHydrationWarning />;
+    return (
+      <div
+        className="tgs-text"
+        data-size={size}
+        data-heading-shadow={headingShadow}
+        data-rt-host=""
+        suppressHydrationWarning
+      />
+    );
   }`,
     to: `  if (editingHost) {
     return (
       <div
         className="tgs-text"
         data-size={size}
+        data-heading-shadow={headingShadow}
         data-rt-host=""
         suppressHydrationWarning
         dangerouslySetInnerHTML={{ __html: html }}
@@ -101,11 +110,8 @@ const MUTATIONS = [
     check: 'and typing in the pane still reaches the canvas',
     why: 'Drop the canvas catch-up effect, so the canvas ignores pane edits.',
     file: 'components/editor/Canvas.tsx',
-    from: `    if (!host || !editingValue) return;
-    if (document.activeElement === host) return;`,
-    to: `    if (!host || !editingValue) return;
-    if (document.activeElement === host) return;
-    if (1) return;`,
+    from: `      if (host.innerHTML !== seed) host.innerHTML = seed;`,
+    to: `      if (false && host.innerHTML !== seed) host.innerHTML = seed;`,
   },
   {
     check: 'Enter in a heading is refused rather than silently mangled',
@@ -173,9 +179,9 @@ const MUTATIONS = [
     check: 'one click makes the words themselves editable',
     why: 'Never mark the host contentEditable.',
     file: 'components/editor/Canvas.tsx',
-    from: `    host.contentEditable = 'true';
-    host.spellcheck = true;`,
-    to: `    host.spellcheck = true;`,
+    from: `      host.contentEditable = 'true';
+      host.spellcheck = true;`,
+    to: `      host.spellcheck = true;`,
   },
 
   // --- colour, size, font and alignment -----------------------------------
@@ -290,43 +296,39 @@ const MUTATIONS = [
 
   {
     tag: 'widget',
-    check: 'and the editor loads no widget script at all',
+    check: "and the widget's script stays in the frame, off the editor page",
     /*
-     * The failure this block's design exists to prevent, and the one that is
-     * invisible: the canvas would look exactly the same. Emitting the scripts
-     * regardless of `editable` is the obvious way to write PageRenderer, and it
-     * would re-run every widget on every keystroke.
+     * The isolation that lets the widget run live on the canvas. The editor draws
+     * the sealed frame, never the bare container, so no widget script loads on the
+     * editor page itself. Falling through to the published container leaks it
+     * there, which only a browser reading the editor page catches. (The old ghost
+     * placeholder this replaced went when the widget started rendering live on the
+     * canvas, 11 Aug 2026.)
      */
-    why: 'Emit the widget scripts in the editor too, which re-runs them on every keystroke.',
-    file: 'components/render/PageRenderer.tsx',
-    from: `      {!editable
-        && widgetScriptsFor(widgetTagsIn(page)).map((src) => (`,
-    to: `      {true
-        && widgetScriptsFor(widgetTagsIn(page)).map((src) => (`,
+    why: 'Render the bare widget container on the canvas, leaking it onto the editor page.',
+    file: 'components/render/blocks.tsx',
+    from: `  if (editing) {
+    /*
+     * THE REAL WIDGET ON THE CANVAS`,
+    to: `  if (editing && false) {
+    /*
+     * THE REAL WIDGET ON THE CANVAS`,
   },
   {
     tag: 'widget',
-    check: 'nor draws the container the script would fill',
-    why: 'Draw the real container on the canvas rather than the labelled placeholder.',
+    check: 'picking a widget and an ID renders it live in a frame',
+    why: 'Leave the preview frame empty, so the widget it should show is not in it.',
     file: 'components/render/blocks.tsx',
-    from: `  if (editing) {
-    return (
-      <div className="tgs-widget-ghost">`,
-    to: `  if (false) {
-    return (
-      <div className="tgs-widget-ghost">`,
+    from: `        <iframe title={kind.label} srcDoc={widgetPreviewDoc(kind, id)} loading="lazy" />`,
+    to: `        <iframe title={kind.label} srcDoc="" loading="lazy" />`,
   },
   {
     tag: 'widget',
-    check: 'and their code does not run on the canvas either',
-    why: "Run somebody else's embed on the canvas, so it reloads on every keystroke.",
+    check: 'and a sealed embed renders on the canvas without reaching the editor',
+    why: 'Add allow-same-origin to the embed sandbox, so its script reaches the editor window.',
     file: 'components/render/blocks.tsx',
-    from: `  if (editing) {
-    return (
-      <div className="tgs-widget-ghost" style={{ minHeight: height }}>`,
-    to: `  if (false) {
-    return (
-      <div className="tgs-widget-ghost" style={{ minHeight: height }}>`,
+    from: `        sandbox={SANDBOX}`,
+    to: `        sandbox="allow-scripts allow-same-origin"`,
   },
   {
     tag: 'widget',
@@ -458,25 +460,35 @@ const MUTATIONS = [
      */
     why: 'Set innerHTML, which puts words on the canvas that the page state never hears about.',
     file: 'components/editor/TextToolbar.tsx',
-    from: `    onExec('insertHTML', result.data.html);`,
-    to: `    const rtHost = document.querySelector('[data-rt-host]');
-    if (rtHost) rtHost.innerHTML += result.data.html;`,
+    from: `    else onExec('insertHTML', result.data.html);`,
+    to: `    else {
+      const rtHost = document.querySelector('[data-rt-host]');
+      if (rtHost) rtHost.innerHTML += result.data.html;
+    }`,
   },
-  {
-    tag: 'assistant',
-    check: 'making it shorter replaces the words rather than adding to them',
-    why: 'Skip putting the selection back, so the copy lands after the words instead of over them.',
-    file: 'components/editor/TextToolbar.tsx',
-    from: `    const range = savedRange.current;
-    if (range) {
-      const selection = window.getSelection();
-      selection?.removeAllRanges();
-      selection?.addRange(range);
-    }
-
-    onExec('insertHTML', result.data.html);`,
-    to: `    onExec('insertHTML', result.data.html);`,
-  },
+  /*
+   * NO MUTATION-PROBE (yet) FOR 'making it shorter replaces the words'.
+   *
+   * The check itself is sound and still runs in verify-standalone: it selects a
+   * run, asks for a shorter version, and asserts the highlighted words are GONE,
+   * not appended to. What resists is a clean SOURCE MUTATION that makes it fail
+   * on demand, and two evidenced attempts showed why rather than guessed:
+   *
+   *  - Removing the savedRange restoration in askFor changed nothing the check
+   *    could see. The ask panel does not autofocus (the render-must-not-grab-the-
+   *    page rule), so the selection never collapses in the harness and the
+   *    restoration is defensive-but-unexercised: the words were still selected, so
+   *    the insert still replaced them.
+   *  - Collapsing the selection to its end before the insert still replaced them:
+   *    the shorter copy is a block <p>, and execCommand('insertHTML') of a block
+   *    at a collapsed caret inside a paragraph merges rather than appends.
+   *
+   * So the replace-not-append behaviour is bound to browser execCommand mechanics
+   * that resist a one-line from/to. Left unprobed and SAID so, rather than shipped
+   * as a probe that passes without catching, which the top of this file calls
+   * worse than no probe. A future pass with a bespoke DOM-level mutation (or the
+   * check reworked to observe the caret) can close it.
+   */
   {
     tag: 'assistant',
     check: 'a refusal is shown in the panel rather than swallowed',
@@ -572,10 +584,12 @@ const MUTATIONS = [
     why: 'Leave the drag flag set on cancel, the sticking bug from 5 Aug 2026.',
     file: 'components/editor/EditorShell.tsx',
     from: `        paletteDrop.hide();
+        sectionDrop.hide();
         activeDragRef.current = null;
         setActiveDrag(null);
         delete document.body.dataset.tgDragging;`,
     to: `        paletteDrop.hide();
+        sectionDrop.hide();
         activeDragRef.current = null;
         setActiveDrag(null);`,
   },
