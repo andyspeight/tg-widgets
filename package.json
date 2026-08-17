@@ -120,7 +120,8 @@
     "test:offer-photo-direct": "node test/offer-photo-direct-upload-smoke.mjs",
     "test:offer-cruise-more": "node test/offer-cruise-more-deals-smoke.mjs",
     "test:worldmap-hotel-dest": "node test/worldmap-hotel-destination-smoke.mjs",
-    "test:dashboard-search": "node test/dashboard-widget-search-smoke.mjs"
+    "test:dashboard-search": "node test/dashboard-widget-search-smoke.mjs",
+    "test:offers-grid-embed": "node test/offers-grid-embed-smoke.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",

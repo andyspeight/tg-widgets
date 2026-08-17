@@ -19,7 +19,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.1.3';
+  const VERSION = '0.1.4';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the empty-state line and the default card CTA). The
@@ -296,10 +296,33 @@
     for (const el of containers) {
       if (el._tgInitialised || el.shadowRoot) continue;
       el._tgInitialised = true;
-      let config = {};
+
+      // Inline config wins and skips the network (preview/demo, and hand-written
+      // embeds that already carry their own `client` feed key).
       const inline = el.getAttribute('data-tg-config');
-      if (inline) { try { config = JSON.parse(inline); } catch (e) { console.error('[TGOffersGrid] Invalid inline config:', e); continue; } }
-      new TGOffersGridWidget(el, config);
+      if (inline) {
+        let config = {};
+        try { config = JSON.parse(inline); } catch (e) { console.error('[TGOffersGrid] Invalid inline config:', e); continue; }
+        new TGOffersGridWidget(el, config);
+        continue;
+      }
+
+      // Standard embed: fetch this widget's saved config by id. The API injects
+      // the `client` feed key for Special Offers, which the grid needs to load
+      // the client's offers. Without this, the data-tg-id embed the dashboard
+      // generates mounted with an EMPTY config and bailed straight to the
+      // "no offers" state — the config was never fetched at all.
+      const id = el.getAttribute('data-tg-id');
+      if (id) {
+        fetch(resolveApiBase() + 'api/widget-config?id=' + encodeURIComponent(id))
+          .then((r) => (r.ok ? r.json() : null))
+          .then((d) => { new TGOffersGridWidget(el, (d && (d.config || d)) || {}); })
+          .catch(() => { new TGOffersGridWidget(el, {}); });
+        continue;
+      }
+
+      // Neither inline config nor an id — nothing to render from.
+      new TGOffersGridWidget(el, {});
     }
   }
 
