@@ -28,12 +28,14 @@ import { isStaffEmail } from '../../lib/auth/staff';
 import {
   addDomain,
   forgetHostname,
+  getTenant,
   listDomains,
   recordDomainProvisioning,
   removeDomain,
   setPrimaryDomain,
   type SiteDomain,
 } from '../../lib/db/tenants';
+import { previewHostname } from '../../lib/domains/preview';
 import {
   attachDomain,
   detachDomain,
@@ -85,11 +87,26 @@ async function syncWithVercel(tenantId: string, hostname: string): Promise<SiteD
   });
 }
 
-/** So the screen can draw the current list without a second round trip. */
-export async function listDomainsAction(): Promise<DomainResult<SiteDomain[]>> {
+/** Everything the domains screen draws in one read. */
+export interface DomainsView {
+  domains: SiteDomain[];
+  /** Whether hosting is switched on. False means the token is not set yet, so the
+   *  screen can say a domain will finish connecting later rather than offer a
+   *  Check that cannot work. */
+  hostingConnected: boolean;
+  /** The free address the site always answers on, shown as the fallback. */
+  previewUrl: string;
+}
+
+export async function listDomainsAction(): Promise<DomainResult<DomainsView>> {
   try {
     const { tenantId } = await requireDomainAccess();
-    return { ok: true, data: await listDomains(tenantId) };
+    const [domains, tenant] = await Promise.all([listDomains(tenantId), getTenant(tenantId)]);
+    const previewUrl = tenant ? `https://${previewHostname(tenant.slug) ?? tenant.slug}` : '';
+    return {
+      ok: true,
+      data: { domains, hostingConnected: vercelConfigured(), previewUrl },
+    };
   } catch (error) {
     return { ok: false, error: explain(error, 'Could not read the domains.') };
   }

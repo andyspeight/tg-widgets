@@ -35,9 +35,10 @@ import {
 } from '../../lib/settings/schema';
 import { Icon } from '../editor/Icon';
 import { ImageField } from '../media/ImageField';
+import { DomainsPanel } from './DomainsPanel';
 import './settings.css';
 
-type Tab = 'company' | 'contact' | 'analytics' | 'branding' | 'language' | 'code';
+type Tab = 'company' | 'contact' | 'analytics' | 'branding' | 'language' | 'domains' | 'code';
 
 interface Props {
   siteName: string;
@@ -108,6 +109,9 @@ export function SettingsEditor({ siteName, initial, canEditCode }: Props) {
     { id: 'analytics', label: 'Analytics' },
     { id: 'branding', label: 'Icons and sharing' },
     { id: 'language', label: 'Language' },
+    // Domains and custom code share the same gate, owner or staff, so they appear
+    // together and only for the same people. The gate itself is in the actions.
+    ...(canEditCode ? [{ id: 'domains' as Tab, label: 'Domains' }] : []),
     ...(canEditCode ? [{ id: 'code' as Tab, label: 'Custom code' }] : []),
   ];
 
@@ -550,6 +554,8 @@ export function SettingsEditor({ siteName, initial, canEditCode }: Props) {
             </p>
           </section>
         )}
+
+        {tab === 'domains' && canEditCode && <DomainsPanel />}
 
         {tab === 'code' && canEditCode && <CustomCodePanel onError={setMessage} />}
       </div>

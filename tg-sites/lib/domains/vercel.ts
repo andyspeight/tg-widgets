@@ -36,11 +36,8 @@ import 'server-only';
 const DEFAULT_PROJECT_ID = 'prj_xuFAM7ItJaBZM0S9hlPQQy2VBPUs';
 const DEFAULT_TEAM_ID = 'team_60GtIq862EeN5iuKz2mbafeR';
 
-/** The fixed targets Vercel gives every custom domain. Exported for the screen
- *  that tells a client which record to set. An apex points with an A record, a
- *  subdomain with a CNAME. */
-export const VERCEL_A_RECORD = '76.76.21.21';
-export const VERCEL_CNAME_TARGET = 'cname.vercel-dns.com';
+// The DNS targets a client points at live in lib/domains/dns.ts, which is pure
+// and client-safe so the screen can show them without importing this server file.
 
 export function vercelToken(): string | undefined {
   return process.env.VERCEL_API_TOKEN;

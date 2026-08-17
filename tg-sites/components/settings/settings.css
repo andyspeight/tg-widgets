@@ -192,3 +192,109 @@
   font-size: var(--ed-text-xs);
   color: var(--ed-ink-3);
 }
+
+/* ------------------------------------------------------------------ */
+/* Domains                                                            */
+/* ------------------------------------------------------------------ */
+
+/* The add row: a field that takes the width and a button that does not. */
+.st-domain-add {
+  display: flex;
+  gap: var(--ed-3);
+  margin: var(--ed-4) 0 var(--ed-5);
+}
+
+.st-domain-add .tv-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.st-domains {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-3);
+}
+
+/* One domain, as a card so its status, records and actions read as one thing. */
+.st-domain {
+  padding: var(--ed-4);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-lg);
+  background: var(--ed-panel);
+}
+
+.st-domain__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ed-3);
+}
+
+.st-domain__name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ed-2);
+  font-weight: 600;
+  color: var(--ed-ink);
+  word-break: break-all;
+}
+
+/* A quiet chip on the canonical domain, so which one leads is visible at a glance. */
+.st-domain__main {
+  padding: 1px var(--ed-2);
+  border-radius: var(--ed-r-full);
+  background: var(--ed-well);
+  color: var(--ed-ink-3);
+  font-size: var(--ed-text-xs);
+  font-weight: 600;
+}
+
+/* The records to set, shown only while a domain is not yet live. */
+.st-dns {
+  margin-top: var(--ed-3);
+  padding-top: var(--ed-3);
+  border-top: 1px solid var(--ed-line);
+}
+
+/* The table scrolls inside itself on a narrow screen rather than pushing the
+   panel sideways: a TXT value is long and unbreakable. */
+.st-dns__scroll {
+  overflow-x: auto;
+}
+
+.st-dns__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--ed-text-sm);
+}
+
+.st-dns__table th {
+  text-align: left;
+  padding: var(--ed-1) var(--ed-3) var(--ed-1) 0;
+  color: var(--ed-ink-3);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.st-dns__table td {
+  padding: var(--ed-1) var(--ed-3) var(--ed-1) 0;
+  color: var(--ed-ink);
+  vertical-align: top;
+}
+
+.st-dns__table code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink);
+  word-break: break-all;
+}
+
+.st-domain__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ed-2);
+  margin-top: var(--ed-3);
+}

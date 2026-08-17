@@ -18,6 +18,13 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import {
+  isApexDomain,
+  pointingRecord,
+  VERCEL_A_RECORD,
+  VERCEL_CNAME_TARGET,
+} from '../lib/domains/dns';
+
 // ---------------------------------------------------------------------------
 // The fake database client (same shape as tests/db.test.ts and collections)
 // ---------------------------------------------------------------------------
@@ -367,5 +374,84 @@ describe('the Vercel boundary file', () => {
   it('never touches the database, so it cannot cross tenants', () => {
     expect(src).not.toContain('withTenant');
     expect(src).not.toContain("from '../db");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The DNS record a client is told to set
+// ---------------------------------------------------------------------------
+
+describe('the pointing record', () => {
+  it('treats a two-label domain as an apex, pointed with an A record', () => {
+    expect(isApexDomain('demotravel.com')).toBe(true);
+    expect(pointingRecord('demotravel.com')).toEqual({ type: 'A', host: '@', value: VERCEL_A_RECORD });
+  });
+
+  it('treats a co.uk domain as an apex too, which is the market case', () => {
+    // The one that a naive two-labels rule gets wrong, and a CNAME on a zone apex
+    // is invalid DNS, so this is the assertion that earns the suffix list.
+    expect(isApexDomain('demotravel.co.uk')).toBe(true);
+    expect(pointingRecord('demotravel.co.uk')).toEqual({ type: 'A', host: '@', value: VERCEL_A_RECORD });
+  });
+
+  it('points a www subdomain with a CNAME on its own label', () => {
+    expect(isApexDomain('www.demotravel.com')).toBe(false);
+    expect(pointingRecord('www.demotravel.com')).toEqual({
+      type: 'CNAME',
+      host: 'www',
+      value: VERCEL_CNAME_TARGET,
+    });
+  });
+
+  it('points a deeper subdomain, including one under co.uk, with a CNAME', () => {
+    expect(isApexDomain('book.demotravel.co.uk')).toBe(false);
+    expect(pointingRecord('book.demotravel.co.uk')).toEqual({
+      type: 'CNAME',
+      host: 'book',
+      value: VERCEL_CNAME_TARGET,
+    });
+  });
+
+  it('ignores case and a trailing dot', () => {
+    expect(pointingRecord('WWW.DemoTravel.com.')).toEqual({
+      type: 'CNAME',
+      host: 'www',
+      value: VERCEL_CNAME_TARGET,
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The screen, read from source
+// ---------------------------------------------------------------------------
+
+describe('the domains screen', () => {
+  const panel = read('components', 'settings', 'DomainsPanel.tsx');
+  const editor = read('components', 'settings', 'SettingsEditor.tsx');
+
+  it('is drawn in settings only for owner or staff, the same gate as custom code', () => {
+    expect(editor).toContain("tab === 'domains' && canEditCode && <DomainsPanel");
+    expect(editor).toContain("id: 'domains' as Tab");
+  });
+
+  it('drives every change through the domain actions rather than its own fetch', () => {
+    for (const action of [
+      'addDomainAction',
+      'refreshDomainAction',
+      'removeDomainAction',
+      'setPrimaryDomainAction',
+      'listDomainsAction',
+    ]) {
+      expect(panel).toContain(action);
+    }
+    expect(panel).not.toContain('fetch(');
+  });
+
+  it('shows the pointing record from the shared helper, so co.uk is right', () => {
+    expect(panel).toContain('pointingRecord(domain.hostname)');
+  });
+
+  it('says plainly when hosting is not connected yet, rather than a dead Check', () => {
+    expect(panel).toContain('being switched on');
   });
 });
