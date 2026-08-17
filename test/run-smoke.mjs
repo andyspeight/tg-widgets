@@ -29,21 +29,21 @@ function serve(dir, port) {
   });
 }
 
+// Capture-fidelity harness. The slicer's job is now capture-and-hand-off: it
+// sends the raw { html, css } to Travelgenix Sites, which rebuilds it into
+// blocks. So this tests the one thing still the slicer's, capture.js, by
+// reconstructing the captured slice on its own and screenshotting it against the
+// original. No emit step, that moved into the CMS import.
 const captureJs = fs.readFileSync(path.join(__dirname, "..", EXT, "capture.js"), "utf8");
-const emitJs = fs.readFileSync(path.join(__dirname, "..", EXT, "emit-local.js"), "utf8");
 const ids = fs.readdirSync(DIR).filter((f) => new RegExp(`^${PREFIX}\\d+\\.html$`).test(f))
   .map((f) => f.replace(".html","")).sort((a,b)=>parseInt(a.slice(1))-parseInt(b.slice(1)));
 
-function fillDefaults(sheet) {
-  let html = sheet.html;
-  for (const i of sheet.contentInputs || []) {
-    if (!i.variable) continue;
-    const v = i.default == null ? "" : String(i.default);
-    html = html.split("{{{"+i.variable+"}}}").join(v).split("{{"+i.variable+"}}").join(v);
-  }
+// Reconstruct a captured slice as a standalone document, the same way the
+// extension's Copy HTML+CSS does and the Sites import receives it.
+function rebuild(slice) {
   return `<!doctype html><html><head><meta charset="utf-8"><style>
-    *{box-sizing:border-box} html,body{margin:0;background:#fff;font-family:system-ui,sans-serif;--color_1:#1B2B5B;--color_2:#00B4D8}
-    ${sheet.cssDesktop||""}\n${sheet.cssMobile||""}</style></head><body>${html}</body></html>`;
+    *{box-sizing:border-box} html,body{margin:0;background:#fff;font-family:system-ui,sans-serif}
+    ${slice.css || ""}</style></head><body>${slice.html || ""}</body></html>`;
 }
 
 const server = await serve(DIR, 8000);
@@ -65,24 +65,20 @@ for (const id of ids) {
     const origEl = await page.$("#target");
     await origEl.screenshot({ path: `${OUT}/${id}-original.png` });
     await page.addScriptTag({ content: captureJs });
-    await page.addScriptTag({ content: emitJs });
-    const result = await page.evaluate(async () => {
-      const slice = await window.TGSCapture.capture(document.querySelector("#target"));
-      const sheet = window.TGSEmit.buildSheet(slice);
-      return { css: slice.css, html: sheet.html, cssDesktop: sheet.cssDesktop, cssMobile: sheet.cssMobile, contentInputs: sheet.contentInputs };
+    const slice = await page.evaluate(async () => {
+      const s = await window.TGSCapture.capture(document.querySelector("#target"));
+      return { css: s.css, html: s.html };
     });
-    fs.writeFileSync(`${OUT}/${id}-slice.css`, result.css);
-    fs.writeFileSync(`${OUT}/${id}-desktop.css`, result.cssDesktop || "");
-    fs.writeFileSync(`${OUT}/${id}-widget.html`, result.html);
+    fs.writeFileSync(`${OUT}/${id}-slice.css`, slice.css);
+    fs.writeFileSync(`${OUT}/${id}-slice.html`, slice.html);
     const rp = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-    await rp.setContent(fillDefaults(result), { waitUntil: "load" });
+    await rp.setContent(rebuild(slice), { waitUntil: "load" });
     await rp.waitForTimeout(300);
     const rebuiltEl = await rp.$("body > *");
     await (rebuiltEl || rp).screenshot({ path: `${OUT}/${id}-rebuilt.png` });
     await rp.close(); await page.close();
-    const css = result.css, html = result.html;
+    const css = slice.css, html = slice.html;
     report.push({ id, label,
-      inputs: result.contentInputs.length,
       phantomBorder: /border-(top|right|bottom|left)-style:\s*solid/.test(css) && !/border-(top|right|bottom|left)-width:\s*[1-9]/.test(css),
       hasGradient: /linear-gradient|radial-gradient/.test(css),
       hasBgImage: /background-image:[^;]*url\(/.test(css),
@@ -90,7 +86,7 @@ for (const id of ids) {
       spriteRemaining: /<use[\s>]/.test(html),
       svgInlined: /<svg/.test(html),
       errors: errors.slice(0,3) });
-    log(`${id} done (${result.contentInputs.length} inputs)`);
+    log(`${id} done`);
   } catch (e) { report.push({ id, error: String(e&&e.message||e) }); log(`${id} FAILED: ${e}`); }
 }
 await browser.close(); server.close();

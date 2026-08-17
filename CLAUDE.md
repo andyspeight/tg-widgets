@@ -17,7 +17,7 @@ Owner: Andy Speight, CEO, Travelgenix.
   (`tgse-rules.js`: `evaluate` for visitor rules, `armTrigger` for event
   triggers — Smart Section uses it; Popup delegates to it when present).
 - `api/` — Vercel serverless functions (widget config CRUD, auth, leads,
-  email, the optional TG Slicer AI-emit endpoint).
+  email).
 - `tg-slicer/` — the TG Slicer Chrome extension (see its handover below).
 - `test/` — the TG Slicer Playwright harness and fixtures.
 - `tests/` — plain-Node widget test suites (`.cjs`, because this repo is

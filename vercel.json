@@ -55,9 +55,6 @@
     "api/enquiry-translate.js": {
       "maxDuration": 60
     },
-    "api/slice-emit.js": {
-      "maxDuration": 300
-    },
     "api/brain/run-gate.js": {
       "maxDuration": 300
     },

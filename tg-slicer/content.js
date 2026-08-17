@@ -1,6 +1,7 @@
-/* TG Slicer — in-page selector and result bar (v0.2.1)
- * The network call is delegated to the background worker (MV3 cross-origin rules).
- * This script never holds the secret or touches the endpoint directly.
+/* TG Slicer — in-page selector and result bar
+ * Captures a section on any page and sends it to Travelgenix Sites via the
+ * outbox (see bridge.js). No network here and no secret: the capture is handed
+ * to the Sites editor's Import tab, which turns it into editable blocks.
  */
 (function () {
   if (window.__tgsActive) {
@@ -159,7 +160,6 @@ ${slice.html}
       return;
     }
     actions.innerHTML = "";
-    actions.appendChild(button("Make Duda widget", "primary", emit));
     // Puts the section in the outbox. The bridge content script hands it to an
     // open Travelgenix Sites editor, where it appears in the Import tab for a
     // one-click add, no copy-paste. See tg-slicer/bridge.js and
@@ -177,28 +177,6 @@ ${slice.html}
     if (!hintEl.dataset.orig) hintEl.dataset.orig = hintEl.innerHTML;
     const colour = kind === "error" ? "#ffb4b4" : "#cfe9f5";
     hintEl.innerHTML = '<span style="color:' + colour + '">' + msg + '</span>';
-  }
-
-  // Build the Duda widget locally and open the review tab. No network, no model,
-  // so it's instant and can't time out, truncate or drift from the source.
-  function emit(btn) {
-    btn.dataset.label = "Make Duda widget";
-    if (!lastSlice) { showResult("Capture a component first.", "error"); return; }
-    let sheet;
-    try {
-      sheet = globalThis.TGSEmit.buildSheet(lastSlice);
-    } catch (e) {
-      showResult("Could not build the widget: " + (e.message || e), "error");
-      return;
-    }
-    btn.textContent = "Opening\u2026";
-    chrome.runtime.sendMessage({ type: "TGS_OPEN_REVIEW", sheet: sheet, slice: lastSlice })
-      .then((r) => {
-        btn.textContent = btn.dataset.label;
-        if (r && r.ok) showResult("Done. Opening the review tab\u2026", "ok");
-        else showResult((r && r.error) || "Could not open the review tab.", "error");
-      })
-      .catch(() => { btn.textContent = btn.dataset.label; showResult("Could not open the review tab.", "error"); });
   }
 
   function reset() {

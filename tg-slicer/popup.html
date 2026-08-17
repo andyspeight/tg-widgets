@@ -19,35 +19,18 @@
     cursor: pointer; transition: background .15s ease;
   }
   button.go:hover { background: #48CAE4; }
-  label { display: block; font-size: 11px; font-weight: 700; color: var(--navy);
-          text-transform: uppercase; letter-spacing: 0.04em; margin: 16px 0 6px; }
-  input {
-    width: 100%; padding: 9px 10px; border: 1px solid #E2E8F0; border-radius: 8px;
-    font: 12.5px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace; color: #0f1830;
-  }
-  input:focus { outline: 2px solid var(--teal); outline-offset: 1px; border-color: var(--teal); }
-  .saved { font-size: 11.5px; color: #10B981; margin-top: 6px; min-height: 14px; }
   .err { color: #EF4444; font-size: 12px; margin-top: 10px; min-height: 14px; }
-  .hint { font-size: 11.5px; color: #94a3b8; margin-top: 4px; }
-  .divider { height:1px; background:#EEF2F7; margin:18px 0 2px; }
+  .hint { font-size: 11.5px; color: #94a3b8; margin-top: 12px; }
 </style>
 </head>
 <body>
   <h1>TG Slicer</h1>
-  <p class="sub">Point at any component, capture it, make a Duda widget.</p>
+  <p class="sub">Point at any component, capture it, send it to Travelgenix Sites.</p>
 
   <button class="go" id="activate">Start slicing this page</button>
   <div class="err" id="err"></div>
 
-  <div class="divider"></div>
-
-  <label for="endpoint">Stage 2 endpoint</label>
-  <input id="endpoint" placeholder="https://tg-widgets.vercel.app/api/slice-emit" autocomplete="off" spellcheck="false">
-
-  <label for="secret">Shared secret</label>
-  <input id="secret" type="password" placeholder="x-tgs-secret value" autocomplete="off" spellcheck="false">
-  <div class="saved" id="saved"></div>
-  <div class="hint">Both are stored locally in your browser and sent only to your own endpoint. Leave blank to use capture-and-copy only.</div>
+  <div class="hint">Capture a section, then hit Send to Travelgenix Sites. It turns up in the editor's Import tab for a one-click add.</div>
 
   <script src="popup.js"></script>
 </body>

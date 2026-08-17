@@ -1,239 +1,192 @@
-# TG Slicer — project handover for Claude Code
+# TG Slicer — project handover
 
-This file is the single source of truth for finishing TG Slicer. Read it fully
-before doing anything. It is written for a fresh Claude Code session that has no
-prior context.
+Single source of truth for TG Slicer. Read it fully before touching the
+extension. Written for a fresh Claude Code session with no prior context.
+
+**Reframed August 2026.** The output target moved from Duda to Travelgenix Sites,
+our own CMS. The Duda emit path (the build-sheet emitter, the in-extension review
+tab and the `api/slice-emit.js` endpoint) has been retired. See "What changed" at
+the foot of this file.
 
 ## What TG Slicer is
 
 A Chrome extension (Manifest V3) that captures any section off any live website
-and turns it into a faithful, editable **Duda Custom Widget**. It is an internal
-Travelgenix accelerator, not a public product and not a slicer.dev competitor.
+and hands it to **Travelgenix Sites**, our own CMS, where it becomes an editable,
+on-brand section. It is an internal Travelgenix accelerator, not a public product
+and not a slicer.dev competitor.
 
-Primary purpose: a **TravelTech Show demo** (24 to 25 June 2026, ExCeL London,
-stand N60). The demo beat is: "what site do you love?" then slice one strong
-section off it and turn it into an editable Duda section live, on the spot, with
-no developer. The message is "we can match your vision and you own it."
+Slicer captures faithfully; the CMS turns the capture into content. The slicer's
+whole job is now capture-and-hand-off. The "make it editable and on-brand" half
+lives in the CMS import, which is the right home for it: native blocks, the
+site's own theme tokens, and no drift on the client's words.
 
-Owner: Andy Speight, CEO, Travelgenix. Repo: `andyspeight/tg-widgets`
-(https://tg-widgets.vercel.app). Airtable project record: base
+Owner: Andy Speight, CEO, Travelgenix. Repo: `andyspeight/tg-widgets` (the
+extension is `tg-slicer/`; the CMS is `tg-sites/`, deployed as its own Vercel
+project, editor at `tg-sites-shell.vercel.app`). Airtable project record: base
 `appj9tksreHOwkhYg`, table `tblpyhPNhiQg3XkkT`, record `recnbueCv8al70eCb`.
 
-## Current status: v0.3.0, engine essentially DONE
+## The loop: capture → Send to Sites → Import → blocks
 
-The capture and rebuild engine is complete and heavily tested. Across 23 local
-fixtures run through the real engine in headless Chromium, every one reproduces
-faithfully with zero page errors. The remaining work is validation on real sites
-plus Duda integration plus demo rehearsal. It is NOT more engine code.
+1. **capture.js** (content-script world). `globalThis.TGSCapture.capture(rootElement)`
+   returns `{ html, css, meta }`. It walks the selected subtree, snapshots
+   meaningful computed styles (diffed against UA defaults read from a sandbox
+   iframe), pulls @keyframes, absolutises asset URLs, and scopes everything to
+   generated `.tgs-N` classes. `capture()` is **async** (it fetches external SVG
+   sprites). It deliberately does NOT capture hover/focus states or @media rules;
+   the CMS rebuilds responsive behaviour to the site's tokens.
 
-Do not rebuild anything from scratch. Always iterate on the existing files.
+2. **content.js** — the overlay, element locking (↑ parent, ↓ child, C to
+   capture), and after a capture the action bar: **Send to Travelgenix Sites**
+   (primary), plus **Copy HTML+CSS** and **Copy slice JSON** as fallbacks. Send
+   writes the raw `{ html, css, title, ts }` to `chrome.storage.local` under
+   `tgsOutbox`. No network, no secret.
 
-## The architecture (three stages, no AI in the default path)
+3. **bridge.js** — a permanent content script that runs ONLY on the Sites editor
+   domains (the `content_scripts.matches` allowlist in `manifest.json`; today
+   `tg-sites-shell.vercel.app` and its aliases, plus localhost). It reads the
+   outbox and hands each section to the open editor with `window.postMessage`.
+   The editor's Import tab lists them, adds on one click, and posts back which
+   were used so they clear from the outbox and are never offered twice.
 
-The faithful copy already exists at capture time, so there is no AI rewrite step
-in the default path. That was a deliberate pivot away from an earlier AI-emit
-approach that was slow and flaky (it failed three ways: MV3 CORS, JSON
-truncation, Vercel timeout). The local emitter cannot time out, truncate or drift.
+4. **The CMS import** (`tg-sites/lib/import/`, `tg-sites/lib/ai/import-rebuild.ts`,
+   `tg-sites/components/editor/ImportPanel.tsx`) turns a capture into content
+   three ways, in order: the deterministic recogniser rebuilds it as **native
+   blocks**; an AI fallback lays out unusual markup as blocks using the exact
+   captured words and inventing nothing; anything else lands as a frozen but
+   editable **imported section**, so an import is never rejected. This half is
+   owned and tested on the CMS side (`tg-sites/tests/import*.test.ts`).
 
-1. **capture.js** (runs in the content-script world). Exposes
-   `globalThis.TGSCapture.capture(rootElement)` which returns `{ html, css, meta }`.
-   It walks the selected subtree, snapshots meaningful computed styles (diffed
-   against UA defaults read from a sandbox iframe), pulls @keyframes, absolutises
-   asset URLs, and scopes everything to generated `.tgs-N` classes. `capture()`
-   is **async** (it fetches external SVG sprites). It deliberately does NOT
-   capture hover/focus states or @media rules (those are rebuilt in Duda).
+`background.js` (MV3 service worker) only injects `capture.js` + `content.js` on
+demand now. `popup.html/js` is just the Start button. `overlay.css` styles the
+overlay.
 
-2. **emit-local.js** (the default path). Exposes
-   `globalThis.TGSEmit.buildSheet(slice)`. Parses the captured HTML, exposes each
-   text node as a Text/Large Text input and each `<img>` as an Image input (the
-   original content is the default), tokenising at text-node level with
-   `{{textN}}` / `{{imageN}}` so inline structure stays intact. Emits the Duda
-   build-sheet object the review UI renders. No network, no model.
-
-3. **review.html / review.css / review.js** (inside the extension). Reads the
-   build sheet from `chrome.storage.local`, shows an approximate preview, the
-   input tables, the code, "Copy full build sheet", "Open full preview" (a
-   full-width client-side render in a new tab) and "Download HTML".
-
-Build-sheet shape returned by `buildSheet`:
-`{ widgetName, classPrefix, description, contentInputs[], designInputs[], html,
-cssDesktop, cssMobile, notes[], acceptanceTest[] }`. `cssDesktop` is the slice
-CSS plus any animated-background CSS appended by the emitter.
-
-Other files: `background.js` (MV3 service worker, routes any network call so the
-secret never enters the page), `content.js` (overlay, element locking, the
-"Capture" and "Make Duda widget" buttons; its `doCapture` awaits the async
-capture), `popup.html/js`, `overlay.css`, `manifest.json`.
-
-There is also an **optional, non-default** AI emit endpoint `api/slice-emit.js`
-in the tg-widgets repo (maxDuration 300 in `vercel.json`, MAX_TOKENS 32000). It
-is live at `https://widgets.travelify.io/api/slice-emit` (alias
-`https://tg-widgets.vercel.app/api/slice-emit`). It is deployed and harmless and
-is the basis for a future optional "AI smarten up" button. The default local
-path needs no endpoint and no redeploy. The full endpoint, shared-secret and env
-var reference is in `tg-slicer/AI-EMIT-ENDPOINT.md`.
-
-## What the engine handles (all proven by fixtures)
+## What the capture engine handles (proven by fixtures)
 
 - Framework reset borders (Tailwind-style `border:0 solid`). Phantom borders are
   suppressed so they do not reappear as visible boxes. Genuine borders are kept.
 - External SVG sprite icons (`<use href="sprite.svg#id">`). Fetched same-origin
-  at capture time and inlined so the icon travels with the widget.
+  at capture time and inlined so the icon travels with the section.
 - CSS gradients (linear and radial), background images, box-shadows, glass and
   translucent borders, inline SVG, rounded avatars and object-fit, transforms
   (scale), absolute positioning (badges), nested grids, multiple button styles,
   form inputs (placeholder kept), big display type, dense footers.
-- Link decoration (`text-decoration: none` is preserved, links do not revert to
-  underline; genuinely underlined links stay underlined).
+- Link decoration (`text-decoration: none` preserved; genuinely underlined links
+  stay underlined).
 - Ancestor backgrounds: if a sliced section is transparent and its colour comes
   from a parent or the page, capture walks up and adopts the nearest real
-  background so the widget keeps its colour.
+  background so the section keeps its colour.
 - Inter-element whitespace around inline tokens (e.g. `<b>£240</b> night` keeps
   the space).
-- **Moving backgrounds (v0.3.0):**
-  - CSS-animated backgrounds (animated gradients, marquees, spins) already carry
-    through because @keyframes and the animation property are captured.
-  - A readable 2D `<canvas>` gets a real still frame via `toDataURL` (guarded
-    against the tainted-canvas error), used as the background image.
-  - A WebGL `<canvas>` (e.g. Stripe's gradient) reads back blank, so the emitter
-    stands in an editable pure-CSS animated gradient seeded from the canvas's own
-    `--gradient-color-*` variables, exposed as editable Color design inputs. No
-    JavaScript is injected (CSP-safe per the security rules).
+- CSS-animated backgrounds (animated gradients, marquees, spins) carry through,
+  because @keyframes and the animation property are captured.
+- A readable 2D `<canvas>` gets a real still frame via `toDataURL`, guarded
+  against the tainted-canvas error, used as the background image.
 
-## Honest, permanent limits (do not try to "fix" these, explain them instead)
+## Honest, permanent limits (explain these, do not try to "fix" them)
 
 - Anything painted by JavaScript (a WebGL shader, a JS counter) cannot be lifted
-  as CSS. The animated-gradient stand-in is the answer for canvas heroes.
+  as CSS. A WebGL hero (e.g. a Stripe-style gradient) captures blank. The old
+  Duda emitter used to stand in a pure-CSS gradient for it; that stand-in lived
+  in the retired `emit-local.js` and is gone. If we want it back it belongs in
+  the CMS import, seeded from the canvas's `--gradient-color-*` variables.
 - Cross-origin SVG sprites on a different domain may not inline (same-origin do).
   Possible future improvement: route the sprite fetch via the background worker.
-- Repeated items (cards) are exposed individually, not yet grouped into one
-  `{{#each}}` list.
-- Hover and responsive states are not captured. They are rebuilt in Duda.
+- Repeated items (cards) are captured as they stand. Grouping them into one
+  editable list is the CMS import's job, not the slicer's.
+- Hover and responsive states are not captured. The CMS rebuilds them.
 
-## THE one open gate, and the definition of done
+## Definition of done (the loop, not a Duda build)
 
-The engine is validated against fixtures. The only thing fixtures cannot
-replicate is the mess of real live sites (deep wrappers, late web fonts, lazy
-images, odd third-party markup). So the gate is a real-site validation pass that
-only Andy can do (it needs real Chrome on real sites).
+The capture engine is validated against 23 local fixtures. The living gate now is
+the handoff working on real sites:
 
-**Definition of done for the show:**
-1. v0.3.0 loaded in Chrome.
-2. Real-site validation passed: slice the Hays "Book with confidence" band plus
-   two or three real travel sites plus one site with a moving/canvas hero, open
-   the full preview, confirm fidelity. Fix only real faults found, do not polish
-   speculatively.
-3. One widget built into Duda Widget Builder end-to-end and confirmed editable
-   (run the build sheet's `acceptanceTest`).
-4. The demo flow rehearsed end to end.
+1. Extension loaded in Chrome (Load unpacked `tg-slicer/`).
+2. Slice a real site, hit **Send to Travelgenix Sites**, and confirm it turns up
+   in the editor's Import tab and adds as an editable section.
+3. Capture fidelity holds on messy real pages (deep wrappers, late fonts, lazy
+   images). Fix only real faults, do not polish speculatively.
+4. The bridge's domain allowlist is current. When the editor gets its real domain
+   (e.g. `sites.travelgenix.com`), add it to `content_scripts.matches` in
+   `manifest.json` and reload the extension.
 
-Everything else is post-show. Resist the urge to keep tuning the engine.
+## How to run, test and build
 
-## Remaining roadmap (ordered)
+**Capture-fidelity harness.** `test/run-smoke.mjs` launches headless Chromium
+(Playwright), serves the fixtures from an in-process server (same-origin so
+sprite fetch works), and for each fixture screenshots the original, runs the REAL
+`capture.js`, reconstructs the captured slice on its own and screenshots it, then
+writes automated signals to `test/smoke/report-<set>.json`. It no longer runs an
+emit step; that moved into the CMS import.
 
-Required for the show:
-1. Real-site validation pass (Andy, ~20 min). The gate.
-2. Decide the Duda path: manual paste of the build sheet into Duda Widget Builder
-   (fastest, good enough for the demo) versus Duda Partner API automation
-   (programmatic widget creation, more work, post-show is fine).
-3. Build one widget into Duda end-to-end and run the acceptance test.
-4. Rehearse the demo.
-
-Optional, post-show, in rough priority:
-- Group repeated items into one editable list.
-- Map the new `Color` and `Toggle` design inputs to real Duda widget controls.
-- A richer minigl-style mesh gradient as a toggle (would add small first-party JS
-  to the widget; the pure-CSS gradient is the safe default).
-- Record-and-loop video background for exact canvas motion (hosted asset).
-- Hover and interaction capture.
-- Cross-origin sprite fetch via the background worker.
-
-## How to run, test, build and deploy
-
-**Test harness (the thing that stopped the going-in-circles).** `run-smoke.mjs`
-launches headless Chromium (Playwright), serves the fixtures from an in-process
-server (same-origin so sprite fetch works), and for each fixture screenshots the
-original, runs the REAL `capture.js` plus `emit-local.js`, rebuilds the widget
-and screenshots it, then writes automated signals to `smoke/report-<set>.json`.
-
-Setup and run:
 ```
-npm install playwright
-npx playwright install chromium
-node run-smoke.mjs <extension-folder> <fixture-prefix>   # e.g. node run-smoke.mjs tg-slicer f
+npm install --prefix test          # Playwright, isolated from the Vercel deploy
+test/node_modules/.bin/playwright install chromium
+node test/run-smoke.mjs tg-slicer f     # sets: f (5 core), g (10), h (5), i (3 moving-bg)
 ```
-Fixture sets: `f` (5 core), `g` (10 leading-site styles), `h` (5 big sections),
-`i` (3 moving-background). It auto-discovers `f*/g*/h*/i*.html` in `fixtures/`.
-Launch flags `--no-sandbox --disable-dev-shm-usage` are required when running as
-root. Do NOT background a server with `&` from inside a tool call, it hangs the
-call. The harness runs its own server in-process for this reason.
+Launch flags `--no-sandbox --disable-dev-shm-usage` are set for running as root.
+`TGS_CHROMIUM=/path/to/chrome` points the harness at a pre-installed browser when
+the Playwright CDN is blocked (unset on a normal machine). Do NOT background a
+server with `&` from a tool call; the harness runs its own in-process.
 
-When you add a new capability, add a fixture that exercises it and re-run the
-whole suite. Regressions show up immediately. This is how the engine got solid.
-
-**Build the extension.** It is plain unpacked MV3, no build step. Zip the
-extension folder only, excluding `node_modules` and `package*.json` (a leaked
-`node_modules` has bitten the package twice):
-```
-cd <extension-folder> && rm -rf node_modules package*.json
-zip -q -r ../tg-slicer-extension.zip . -x "*.DS_Store"
-```
-Load via `chrome://extensions` (Developer mode, Load unpacked or Reload). Bump
-`manifest.json` version on each ship.
-
-**Deploy (only relevant to the optional endpoint, not the default path).** Andy's
-convention has been the GitHub web UI (no local CLI). In Claude Code you can and
-should commit directly to `andyspeight/tg-widgets` instead, which removes the
-upload friction. The extension source should be committed into the repo (it has
-been living outside it). Env vars live in Vercel Settings (TGS_SHARED_SECRET,
-ANTHROPIC_API_KEY set; optional TGS_MODEL, TGS_MAX_TOKENS default 32000,
-TGS_ALLOWED_ORIGIN, UPSTASH_*). The default local emit path needs none of this.
+**Build the extension.** Plain unpacked MV3, no build step. Load `tg-slicer/` via
+`chrome://extensions` (Developer mode, Load unpacked or Reload). Bump
+`manifest.json` version on each ship. The `tg-slicer/` folder has no
+`node_modules` or `package*.json`, so there is nothing to exclude when zipping.
 
 ## Conventions and working style (important)
 
 - Andy has memory challenges and relies on the assistant as an external brain.
   Restate context, anchor with dates, keep the project record current.
-- Before substantive work, consult the relevant SKILL.md files and open the reply
-  with "Skills consulted: X, Y, Z". Relevant here: tg-widget-suite,
-  travelgenix-security, travelgenix-debug, travelgenix-design, travelgenix-taste,
-  project-handover, airtable-operations.
+- Before substantive work, consult the relevant skills and open the reply with
+  "Skills consulted: ...". Relevant here: tg-widget-suite, travelgenix-security,
+  travelgenix-debug, project-handover, airtable-operations.
 - Never rebuild from scratch, always upgrade existing code. If unsure, ask.
-- Prefer complete replacement files over patches. Deliver each file individually,
-  never a zip for files that go into GitHub via the web uploader (it cannot
-  create nested folders). In Claude Code, commit directly instead.
 - Diagnose before patching. Evidence before hypothesis. Hard-stop after two
-  failed fixes and rethink (this is the travelgenix-debug rule, and it is why the
-  harness exists).
-- Security: widgets must be CSP-clean (no inline scripts or handlers), validate
+  failed fixes and rethink (the travelgenix-debug rule, and why the harness
+  exists).
+- Security: capture output is CSP-clean (no inline scripts or handlers), validate
   anything read off the page before rendering it, guard `toDataURL` against the
-  tainted-canvas error. The animated background is pure CSS by design.
+  tainted-canvas error. The capture ships no JavaScript into the CMS; the render
+  tree there is no-JS by design too.
 - Brand voice for any copy: warm, plain, UK English, no em dashes, no Oxford
   comma, no AI cliche.
-- Keep the Airtable record `recnbueCv8al70eCb` updated at each milestone
-  (Current Focus, Next Steps, Files Touched, Decisions, Open Questions).
+- Keep the Airtable record `recnbueCv8al70eCb` updated at each milestone.
 
 ## Locked decisions (do not relitigate)
 
-- Output is an editable Duda Custom Widget. High-fidelity reproduction of the
-  source (real colours, type, spacing, layout, shadows, images), not a restyle.
+- Output is an editable section in Travelgenix Sites, reached by handing the raw
+  capture to the CMS import. High-fidelity capture of the source (real colours,
+  type, spacing, layout, shadows, images), not a restyle.
+- The slicer captures; it does not emit or rebuild. Turning a capture into blocks
+  is the CMS's job (deterministic recogniser, AI fallback, imported-section
+  catch-all).
+- No AI and no network in the slicer's default path. The capture is deterministic.
 - Legitimate use: sites the user, client or prospect owns, or a well-known
   reference site used as a live throwaway demo. Do not build a permanent
   published clone of a third-party site.
-- Default path is the deterministic local emitter, not AI. The AI endpoint is an
-  optional extra, not the default.
-- The animated-gradient stand-in for WebGL canvases is pure CSS and editable, no
-  foreign JS shipped into client widgets.
 
-## File manifest (what is in this bundle and where it goes)
+## File manifest (current layout in the repo)
 
-- `tg-slicer/` — the v0.3.0 extension source, 13 files. Commit into the repo
-  (suggested path `tg-slicer/` at the repo root, or wherever the team prefers).
-- `test/run-smoke.mjs` — the Playwright harness.
-- `test/fixtures/` — f1-5, g1-10, h1-5, i1-3 plus sprite.svg and the generated
-  images. Same-origin assets so the harness can fetch sprites.
-- `CLAUDE.md` — this file. Put it at the repo root so Claude Code auto-loads it.
-- `proof/` — the before/after contact sheets for reference (not needed to build).
+- `tg-slicer/` — the extension: `manifest.json`, `background.js`, `content.js`,
+  `bridge.js`, `capture.js`, `overlay.css`, `popup.html/js`, plus `README.md`,
+  `QUICK-START.md` and `SITES-HANDOFF.md`.
+- `test/run-smoke.mjs` + `test/fixtures/` — the capture-fidelity harness and its
+  23 fixtures (f1-5, g1-10, h1-5, i1-3) plus sprite.svg and images.
+- `tg-sites/` — the CMS (its own Vercel project). The import that receives a
+  capture lives in `tg-sites/lib/import/`, `tg-sites/lib/ai/import-rebuild.ts` and
+  `tg-sites/components/editor/ImportPanel.tsx`.
 
-First thing to do in Claude Code: read this file, then run the harness once
-(`node test/run-smoke.mjs tg-slicer i`) to confirm the environment works and the
-moving-background cases pass, then help Andy through the real-site validation.
+## What changed (August 2026, Duda retirement)
+
+- Removed: `tg-slicer/emit-local.js` (build-sheet emitter), `tg-slicer/review.*`
+  (the in-extension review tab), `api/slice-emit.js` and its `vercel.json`
+  function entry, the "Make Duda widget" button and the popup's endpoint/secret
+  fields. Orphaned Vercel env vars to delete: `TGS_SHARED_SECRET`, `TGS_MODEL`,
+  `TGS_MAX_TOKENS`, `TGS_ALLOWED_ORIGIN`. Keep `ANTHROPIC_API_KEY` (shared by
+  many other endpoints).
+- Consequence: the WebGL-canvas gradient stand-in went with `emit-local.js` (see
+  limits above).
+- Still to reframe separately: `api/screenshot-to-code.js` is a sibling
+  accelerator whose planned "Stage 2" pointed at the retired `slice-emit`
+  pipeline. It does not import it, so nothing is broken, but its roadmap should be
+  re-pointed at the CMS import when someone picks it up.
