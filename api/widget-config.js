@@ -845,6 +845,17 @@ export default async function handler(req, res) {
           }
         }
 
+        // Special Offers grid: the hand-built offers feed is public and keyed by
+        // the owning client's id. The grid stores its styling in its own config
+        // but NOT that id, so a data-tg-id embed had no client to fetch offers
+        // for and showed "no offers". Inject the owner's id as `client` here,
+        // exactly as the Travelify creds are injected above — it is the same
+        // public feed key the grid would otherwise carry in a hand-written embed.
+        if (widgetType === 'Special Offers') {
+          const ownerId = String(widgetRecord.fields.ClientRecordId || '').trim();
+          if (ownerId) config.client = ownerId;
+        }
+
         // Build the base response. Returns { config, name } so the editor can
         // restore the widget name on load. Pre-existing clients reading the
         // response as the config object directly are still supported via the
