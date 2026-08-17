@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation';
 import '../../components/sites/sites.css';
 import { SiteDashboard } from '../../components/sites/SiteDashboard';
 import { activeSite, currentUser } from '../../lib/auth/session';
+import { isStaffEmail } from '../../lib/auth/staff';
 import { listPages } from '../../lib/db/pages';
 import { getSettings } from '../../lib/db/settings';
 import { siteIsEmpty } from '../../lib/db/starters';
@@ -83,6 +84,9 @@ export default async function SitesPage() {
       siteUrl={url}
       pages={pages}
       canStart={canStart}
+      // Making a site is a staff job, the same gate as custom code and domains.
+      // The action checks it too; this only decides whether the button is drawn.
+      canCreateSite={isStaffEmail(user.email)}
       profile={{
         company: settings.companyName,
         town: settings.addressLocality,

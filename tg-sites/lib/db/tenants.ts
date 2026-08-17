@@ -2,6 +2,9 @@
  * Tenants, and the hostname lookup that has to happen before one is known.
  */
 
+import { randomUUID } from 'node:crypto';
+
+import { slugify } from '../content/slug';
 import { isPreviewHostname, PREVIEW_DOT_SUFFIX } from '../domains/preview';
 import { db, type DbRole } from './client';
 import { withTenant, type Tx } from './withTenant';
@@ -418,4 +421,105 @@ export async function roleOf(
     `;
     return rows.length ? (rows[0].role as 'owner' | 'editor' | 'viewer') : null;
   });
+}
+
+// ---------------------------------------------------------------------------
+// Making a site
+// ---------------------------------------------------------------------------
+
+/** How many numbered slug variants to try before giving up. */
+const MAX_TENANT_SLUG_ATTEMPTS = 25;
+
+/**
+ * The slug to try on the nth attempt, derived from a name.
+ *
+ * Pure, so the sequence (base, base-2, base-3, …) is tested without a database.
+ * A tenant slug must be two to sixty-three characters of the page-slug alphabet,
+ * so the base is trimmed to leave room for a numbered suffix, re-trimmed of any
+ * trailing hyphen the cut left, and falls back to 'site' when a name reduces to
+ * nothing usable (empty, or a single character, or all punctuation).
+ */
+export function tenantSlugCandidate(source: string, attempt: number): string {
+  const cleaned = slugify(source).slice(0, 59).replace(/-+$/, '');
+  const base = cleaned.length >= 2 ? cleaned : 'site';
+  return attempt === 0 ? base : `${base}-${attempt + 1}`;
+}
+
+/**
+ * Whether an error is the tenants unique-slug violation, and nothing else.
+ *
+ * The only unique constraint createTenant can trip is the slug: the id and the
+ * membership both carry a fresh uuid. So a 23505 here means "that address is
+ * taken", which is a retry, not a failure. Matches on the driver's code and the
+ * message, the same pair app/actions/pages.ts reads.
+ */
+export function isSlugTaken(error: unknown): boolean {
+  if ((error as { code?: unknown } | null)?.code === '23505') return true;
+  const message = error instanceof Error ? error.message : String(error);
+  return message.includes('23505') || message.includes('duplicate key');
+}
+
+/**
+ * Create a brand new, empty site owned by one person.
+ *
+ * THE ONLY WAY TO MAKE A SITE FROM INSIDE THE APP. Until now a tenant was a row
+ * pasted in by hand (db/make-user.mjs, db/seed-demo.sql) and there was no
+ * createTenant at all; duplicating a site is built on this.
+ *
+ * THE RLS-LEGAL INSERT, which is the subtle part. The tenants policy is
+ * `id = current_tenant()` for the app role, so the only way that role may write
+ * a tenants row is to know its id first and open the transaction already scoped
+ * to it. So the id is generated here, withTenant sets current_tenant to it, and
+ * the insert names that same id: the with-check then passes. The owner
+ * membership and the first blank home page go in the SAME transaction, so a site
+ * is never half made, no owner or no page.
+ *
+ * THE SLUG IS MADE UNIQUE BY TRYING. Tenant slugs are globally unique and RLS
+ * hides every other tenant's row, so there is no free list to read and pick
+ * from. A candidate is inserted and a duplicate is caught and retried with a
+ * numbered suffix, which is race-safe where a read-then-write would not be.
+ */
+export async function createTenant(
+  input: { name: string; slug?: string },
+  ownerId: string,
+): Promise<Tenant> {
+  const name = input.name.trim().slice(0, 200) || 'New site';
+
+  for (let attempt = 0; attempt < MAX_TENANT_SLUG_ATTEMPTS; attempt++) {
+    const slug = tenantSlugCandidate(input.slug || input.name, attempt);
+    const id = randomUUID();
+
+    try {
+      return await withTenant(id, async (tx) => {
+        const rows = await tx`
+          insert into public.tenants (id, slug, name)
+          values (${id}::uuid, ${slug}, ${name})
+          returning id, slug, name, plan, status, theme, settings
+        `;
+
+        await tx`
+          insert into public.tenant_users (tenant_id, user_id, role)
+          values (${id}::uuid, ${ownerId}, 'owner')
+        `;
+
+        // A site opens to a page, and the rest of the product assumes a home
+        // page exists: the starter upserts onto it, the editor opens it. So a
+        // new site gets one blank draft at the empty slug rather than an empty
+        // shell with nothing to click.
+        await tx`
+          insert into public.pages (tenant_id, slug, title)
+          values (${id}::uuid, '', 'Home')
+        `;
+
+        return toTenant(rows[0] as Record<string, unknown>);
+      });
+    } catch (error) {
+      if (isSlugTaken(error) && attempt < MAX_TENANT_SLUG_ATTEMPTS - 1) continue;
+      throw error;
+    }
+  }
+
+  // Unreachable in practice: twenty-five numbered variants of one name all being
+  // taken is a sign something is very wrong, and a throw beats a silent null.
+  throw new Error('Could not find a free address for the new site.');
 }

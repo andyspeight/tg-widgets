@@ -976,6 +976,104 @@ describe('hostname handling', () => {
 
 // ---------------------------------------------------------------------------
 
+describe('createTenant', () => {
+  it('makes the tenant, its owner and a home page in one transaction, tenant set first', async () => {
+    const { createTenant } = await import('../lib/db/tenants');
+    respond('insert into public.tenants', [
+      { id: 'aaaa', slug: 'sunvil-travel', name: 'Sunvil Travel', plan: 'spark', status: 'active', theme: {}, settings: {} },
+    ]);
+
+    const tenant = await createTenant({ name: 'Sunvil Travel' }, 'local:andy@x.co');
+    expect(tenant).toEqual({
+      id: 'aaaa',
+      slug: 'sunvil-travel',
+      name: 'Sunvil Travel',
+      plan: 'spark',
+      status: 'active',
+      theme: {},
+      settings: {},
+    });
+
+    // Exactly one transaction: a site is made whole, owner and page and all, or
+    // not at all.
+    expect(maxConcurrentTransactions).toBe(1);
+    const app = log.filter((s) => s.role === 'app');
+    expect(app.filter((s) => s.sql === 'BEGIN')).toHaveLength(1);
+
+    const at = (fragment: string) => app.findIndex((s) => s.sql.includes(fragment));
+    const setTenant = at('set_config');
+    const tenants = at('insert into public.tenants');
+    const members = at('insert into public.tenant_users');
+    const page = at('insert into public.pages');
+
+    // The tenant is scoped before any write, then the three writes go in order.
+    expect(setTenant).toBeGreaterThanOrEqual(0);
+    expect(setTenant).toBeLessThan(tenants);
+    expect(tenants).toBeLessThan(members);
+    expect(members).toBeLessThan(page);
+
+    // The RLS-legal trick, asserted: the id the transaction is scoped to is the
+    // same id the tenants row is written with, which is what the policy's
+    // with-check compares. Get that wrong and the insert is refused.
+    const scopedId = app[setTenant].params[0];
+    expect(app[tenants].params[0]).toBe(scopedId);
+    expect(scopedId).toMatch(/^[0-9a-f-]{36}$/);
+
+    // The membership names that person as the owner; the page is the empty-slug
+    // home page titled Home.
+    expect(app[members].params).toContain('local:andy@x.co');
+    expect(app[members].sql).toContain("'owner'");
+    expect(app[page].sql).toContain("'Home'");
+  });
+
+  it('derives a slug from the name and numbers the retries', async () => {
+    const { tenantSlugCandidate } = await import('../lib/db/tenants');
+    expect(tenantSlugCandidate('Sunvil Travel', 0)).toBe('sunvil-travel');
+    expect(tenantSlugCandidate('Sunvil Travel', 1)).toBe('sunvil-travel-2');
+    expect(tenantSlugCandidate('Sunvil Travel', 2)).toBe('sunvil-travel-3');
+  });
+
+  it('falls back to a usable slug when a name reduces to nothing', async () => {
+    const { tenantSlugCandidate } = await import('../lib/db/tenants');
+    // Empty, whitespace, punctuation only, and a single character are all below
+    // the tenant slug's two-character minimum.
+    for (const nothing of ['', '   ', '!', 'A']) {
+      expect(tenantSlugCandidate(nothing, 0)).toBe('site');
+    }
+    expect(tenantSlugCandidate('A', 1)).toBe('site-2');
+  });
+
+  it('keeps a long name inside the sixty-three character limit, suffix and all', async () => {
+    const { tenantSlugCandidate } = await import('../lib/db/tenants');
+    const base = tenantSlugCandidate('x'.repeat(200), 0);
+    const suffixed = tenantSlugCandidate('x'.repeat(200), 9);
+    expect(base.length).toBeLessThanOrEqual(63);
+    // No trailing hyphen for the numbered suffix to double up against.
+    expect(base.endsWith('-')).toBe(false);
+    expect(suffixed.length).toBeLessThanOrEqual(63);
+    expect(suffixed.endsWith('-10')).toBe(true);
+  });
+
+  it('retries only on a taken slug, not on any other failure', async () => {
+    const { isSlugTaken } = await import('../lib/db/tenants');
+    expect(isSlugTaken({ code: '23505' })).toBe(true);
+    expect(isSlugTaken(new Error('duplicate key value violates unique constraint "tenants_slug_key"'))).toBe(true);
+    expect(isSlugTaken(new Error('SQLSTATE 23505'))).toBe(true);
+    expect(isSlugTaken(new Error('connection refused'))).toBe(false);
+    expect(isSlugTaken(null)).toBe(false);
+  });
+
+  it('the action gates on staff and takes the owner from the session, not the caller', () => {
+    const action = readFileSync(join(__dirname, '..', 'app/actions/sites.ts'), 'utf8');
+    expect(action).toContain('isStaffEmail');
+    expect(action).toContain('createTenant');
+    // The owner is the signed-in user's id, never something the caller passes.
+    expect(action).toContain('user.id');
+  });
+});
+
+// ---------------------------------------------------------------------------
+
 describe('the connection string guard', () => {
   it.each([
     ['postgresql://postgres:pw@host:5432/postgres', 'postgres'],

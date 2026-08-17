@@ -56,6 +56,8 @@ interface Props {
   canStart: boolean;
   /** What is already in settings, so the wizard asks nothing twice. */
   profile: StarterProfile;
+  /** Whether this person may make a new site: Travelgenix staff. */
+  canCreateSite: boolean;
 }
 
 export function SiteDashboard({
@@ -66,6 +68,7 @@ export function SiteDashboard({
   pages: initial,
   canStart,
   profile,
+  canCreateSite,
 }: Props) {
   const [pages, setPages] = useState(initial);
   const [dialog, setDialog] = useState<Dialog>(null);
@@ -138,6 +141,7 @@ export function SiteDashboard({
         name={account.name}
         currentSlug={site.slug}
         available={site.available}
+        canCreateSite={canCreateSite}
       />
 
       <div className="sv-wrap">
