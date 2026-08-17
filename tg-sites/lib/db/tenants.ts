@@ -2,7 +2,7 @@
  * Tenants, and the hostname lookup that has to happen before one is known.
  */
 
-import { PREVIEW_DOT_SUFFIX } from '../domains/preview';
+import { isPreviewHostname, PREVIEW_DOT_SUFFIX } from '../domains/preview';
 import { db, type DbRole } from './client';
 import { withTenant, type Tx } from './withTenant';
 
@@ -179,21 +179,204 @@ export async function getTenant(tenantId: string): Promise<Tenant | null> {
   });
 }
 
+/** A DNS challenge the provider handed back, to show the client verbatim. */
+export interface DomainVerificationRecord {
+  type: string;
+  domain: string;
+  value: string;
+  reason?: string;
+}
+
+/**
+ * A row of the domains table, as a screen wants it.
+ *
+ * Wider than the three fields the dashboards read (hostname, primary, status),
+ * because the domains screen also needs to tell a preview row from a custom one,
+ * name the provider, and show the pending challenge. The extra fields are
+ * additive, so siteUrl and the dashboards that only read the first three are
+ * untouched.
+ */
+export interface SiteDomain {
+  hostname: string;
+  isPrimary: boolean;
+  sslStatus: 'pending' | 'active' | 'failed' | 'deleted';
+  kind: 'preview' | 'custom';
+  provider: string | null;
+  verification: DomainVerificationRecord[];
+  verifiedAt: string | null;
+}
+
+/** jsonb verification, defended against the double-encoded string case. */
+function asVerification(value: unknown): DomainVerificationRecord[] {
+  const array = Array.isArray(value)
+    ? value
+    : typeof value === 'string'
+      ? (() => {
+          try {
+            const parsed = JSON.parse(value);
+            return Array.isArray(parsed) ? parsed : [];
+          } catch {
+            return [];
+          }
+        })()
+      : [];
+
+  return array.filter(
+    (item): item is DomainVerificationRecord =>
+      !!item &&
+      typeof item === 'object' &&
+      typeof (item as { type?: unknown }).type === 'string' &&
+      typeof (item as { value?: unknown }).value === 'string',
+  );
+}
+
+function toDomain(row: Record<string, unknown>): SiteDomain {
+  return {
+    hostname: String(row.hostname),
+    isPrimary: Boolean(row.is_primary),
+    sslStatus: String(row.ssl_status) as SiteDomain['sslStatus'],
+    kind: row.kind === 'preview' ? 'preview' : 'custom',
+    provider: row.provider ? String(row.provider) : null,
+    verification: asVerification(row.verification),
+    verifiedAt: row.verified_at ? new Date(row.verified_at as string).toISOString() : null,
+  };
+}
+
+/** The columns every domain read wants, in one place so the three writers agree. */
+function domainColumns(tx: Tx) {
+  return tx`hostname, is_primary, ssl_status, kind, provider, verification, verified_at`;
+}
+
 /** The tenant's own domains, primary first. */
-export async function listDomains(
-  tenantId: string,
-): Promise<Array<{ hostname: string; isPrimary: boolean; sslStatus: string }>> {
+export async function listDomains(tenantId: string): Promise<SiteDomain[]> {
   return withTenant(tenantId, async (tx) => {
     const rows = await tx`
-      select hostname, is_primary, ssl_status
+      select ${domainColumns(tx)}
       from public.domains
       order by is_primary desc, hostname
     `;
-    return rows.map((row) => ({
-      hostname: String(row.hostname),
-      isPrimary: Boolean(row.is_primary),
-      sslStatus: String(row.ssl_status),
-    }));
+    return rows.map((row) => toDomain(row as Record<string, unknown>));
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Writing a domain
+// ---------------------------------------------------------------------------
+
+/**
+ * Add a custom domain to a site, as pending.
+ *
+ * Inserts the row and nothing more. Attaching it to the certificate provider and
+ * recording what they said is recordDomainProvisioning's job, called by the
+ * action once Vercel has answered, so this stays a pure database write a test can
+ * drive with no network. kind is 'custom', never 'preview': a preview row is ours
+ * to make and this is the path a client reaches.
+ *
+ * Refuses a hostname under our own preview domain before the database does, so
+ * the client gets a sentence rather than a raw constraint name. The unique index
+ * on hostname does the rest: a domain already claimed, by this tenant or any
+ * other, comes back as a thrown duplicate the action turns into a friendly line.
+ */
+export async function addDomain(tenantId: string, rawHostname: unknown): Promise<SiteDomain> {
+  const hostname = normaliseHostname(rawHostname);
+  if (!hostname) throw new Error('That does not look like a web address.');
+  if (isPreviewHostname(hostname)) {
+    throw new Error('That address is part of our own preview domain. Add a domain you own.');
+  }
+
+  return withTenant(tenantId, async (tx) => {
+    const rows = await tx`
+      insert into public.domains (tenant_id, hostname, kind)
+      values (${tenantId}::uuid, ${hostname}, 'custom')
+      returning ${domainColumns(tx)}
+    `;
+    return toDomain(rows[0] as Record<string, unknown>);
+  });
+}
+
+/**
+ * Record what the provider said after attaching a domain.
+ *
+ * One update, so a half-recorded row cannot exist: the provider, its id if it
+ * gave one, the challenge to show, and the status all move together. verified_at
+ * is stamped the first time a domain goes active and never cleared by a later
+ * refresh, so it stays the honest answer to "since when has this been live".
+ * Scoped to a custom row within the tenant, so a client only ever updates their
+ * own, and never a preview row.
+ */
+export async function recordDomainProvisioning(
+  tenantId: string,
+  hostname: string,
+  fields: {
+    provider?: string | null;
+    providerId?: string | null;
+    verification?: unknown;
+    sslStatus: 'pending' | 'active' | 'failed' | 'deleted';
+  },
+): Promise<SiteDomain | null> {
+  const host = normaliseHostname(hostname);
+  if (!host) return null;
+
+  return withTenant(tenantId, async (tx) => {
+    const rows = await tx`
+      update public.domains set
+        provider = ${fields.provider ?? 'vercel'},
+        provider_id = coalesce(${fields.providerId ?? null}, provider_id),
+        verification = ${tx.json((fields.verification ?? []) as never)},
+        ssl_status = ${fields.sslStatus},
+        verified_at = case
+          when ${fields.sslStatus} = 'active' then coalesce(verified_at, now())
+          else verified_at
+        end
+      where hostname = ${host} and kind = 'custom'
+      returning ${domainColumns(tx)}
+    `;
+    return rows.length ? toDomain(rows[0] as Record<string, unknown>) : null;
+  });
+}
+
+/**
+ * Remove a custom domain from a site.
+ *
+ * Custom only. A preview row is ours and a client deleting theirs would lose the
+ * address their site answers on before DNS is pointed. Detaching it from the
+ * provider is the action's job; this is the row. Returns whether a row went, so
+ * the caller knows a domain was really theirs to remove.
+ */
+export async function removeDomain(tenantId: string, hostname: string): Promise<boolean> {
+  const host = normaliseHostname(hostname);
+  if (!host) return false;
+
+  return withTenant(tenantId, async (tx) => {
+    const rows = await tx`
+      delete from public.domains
+      where hostname = ${host} and kind = 'custom'
+      returning hostname
+    `;
+    return rows.length > 0;
+  });
+}
+
+/**
+ * Make one domain the canonical address for the site.
+ *
+ * Two statements in one transaction because the partial unique index allows only
+ * one primary per tenant: the old primary has to be cleared before the new one is
+ * set, or the index refuses the second row mid-statement. Whether a domain is
+ * ready to be canonical is the action's judgement; this just moves the flag.
+ */
+export async function setPrimaryDomain(tenantId: string, hostname: string): Promise<boolean> {
+  const host = normaliseHostname(hostname);
+  if (!host) return false;
+
+  return withTenant(tenantId, async (tx) => {
+    await tx`update public.domains set is_primary = false where is_primary`;
+    const rows = await tx`
+      update public.domains set is_primary = true
+      where hostname = ${host}
+      returning hostname
+    `;
+    return rows.length > 0;
   });
 }
 
