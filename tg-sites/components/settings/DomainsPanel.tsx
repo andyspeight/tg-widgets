@@ -28,7 +28,7 @@ import {
   type DomainsView,
 } from '../../app/actions/domains';
 import type { SiteDomain } from '../../lib/db/tenants';
-import { pointingRecord } from '../../lib/domains/dns';
+import { partnerHostname, pointingRecord } from '../../lib/domains/dns';
 import { Icon } from '../editor/Icon';
 
 export function DomainsPanel() {
@@ -76,18 +76,18 @@ export function DomainsPanel() {
     );
   }
 
-  function add() {
-    const hostname = adding.trim();
-    if (!hostname) return;
+  function submitAdd(hostname: string, fromInput: boolean) {
+    const clean = hostname.trim();
+    if (!clean) return;
     setMessage(null);
     startTransition(async () => {
-      const result = await addDomainAction(hostname);
+      const result = await addDomainAction(clean);
       if (!result.ok) {
         setMessage(result.error);
         return;
       }
       replace(result.data);
-      setAdding('');
+      if (fromInput) setAdding('');
     });
   }
 
@@ -165,7 +165,7 @@ export function DomainsPanel() {
           onKeyDown={(event) => {
             if (event.key === 'Enter') {
               event.preventDefault();
-              add();
+              submitAdd(adding, true);
             }
           }}
         />
@@ -174,7 +174,7 @@ export function DomainsPanel() {
           className="tg-btn"
           data-variant="primary"
           disabled={busy || !adding.trim()}
-          onClick={add}
+          onClick={() => submitAdd(adding, true)}
         >
           <Icon name="plus" size={16} />
           Add domain
@@ -188,17 +188,25 @@ export function DomainsPanel() {
         </p>
       ) : (
         <ul className="st-domains">
-          {custom.map((domain) => (
-            <DomainRow
-              key={domain.hostname}
-              domain={domain}
-              hostingConnected={hostingConnected}
-              busy={busy}
-              onCheck={check}
-              onRemove={remove}
-              onPrimary={makePrimary}
-            />
-          ))}
+          {custom.map((domain) => {
+            // Offer the www or apex partner, but only when it is not already added.
+            const partner = partnerHostname(domain.hostname);
+            const partnerToAdd =
+              partner && !custom.some((d) => d.hostname === partner) ? partner : null;
+            return (
+              <DomainRow
+                key={domain.hostname}
+                domain={domain}
+                partnerToAdd={partnerToAdd}
+                hostingConnected={hostingConnected}
+                busy={busy}
+                onCheck={check}
+                onRemove={remove}
+                onPrimary={makePrimary}
+                onAddPartner={(hostname) => submitAdd(hostname, false)}
+              />
+            );
+          })}
         </ul>
       )}
     </section>
@@ -231,18 +239,22 @@ function StatusPill({ status }: { status: SiteDomain['sslStatus'] }) {
 
 function DomainRow({
   domain,
+  partnerToAdd,
   hostingConnected,
   busy,
   onCheck,
   onRemove,
   onPrimary,
+  onAddPartner,
 }: {
   domain: SiteDomain;
+  partnerToAdd: string | null;
   hostingConnected: boolean;
   busy: boolean;
   onCheck: (hostname: string) => void;
   onRemove: (hostname: string) => void;
   onPrimary: (hostname: string) => void;
+  onAddPartner: (hostname: string) => void;
 }) {
   const record = pointingRecord(domain.hostname);
   const live = domain.sslStatus === 'active';
@@ -316,6 +328,11 @@ function DomainRow({
         {live && !domain.isPrimary && (
           <button type="button" className="tg-btn" disabled={busy} onClick={() => onPrimary(domain.hostname)}>
             Make main
+          </button>
+        )}
+        {partnerToAdd && (
+          <button type="button" className="tg-btn" disabled={busy} onClick={() => onAddPartner(partnerToAdd)}>
+            Also add {partnerToAdd}
           </button>
         )}
         <button

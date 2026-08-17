@@ -20,6 +20,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   isApexDomain,
+  partnerHostname,
   pointingRecord,
   VERCEL_A_RECORD,
   VERCEL_CNAME_TARGET,
@@ -234,6 +235,18 @@ describe('adding a custom domain', () => {
     expect(domain.sslStatus).toBe('pending');
   });
 
+  it('makes the first custom domain the canonical one, computed under RLS', async () => {
+    const { addDomain } = await import('../lib/db/tenants');
+    respond('insert into public.domains', [domainRow({ is_primary: true })]);
+
+    await addDomain(ALPHA, 'demotravel.co.uk');
+
+    const write = log.find((s) => s.sql.includes('insert into public.domains'))!;
+    // The insert asks the database whether this tenant already has a primary, so a
+    // site's first domain leads and later ones come in secondary.
+    expect(write.sql).toContain('not exists (select 1 from public.domains where is_primary)');
+  });
+
   it('lowercases and refuses one of our own preview hostnames before the database', async () => {
     const { addDomain } = await import('../lib/db/tenants');
     await expect(addDomain(ALPHA, 'Foo.travelgenixsites.com')).rejects.toThrow(/preview domain/);
@@ -421,6 +434,20 @@ describe('the pointing record', () => {
   });
 });
 
+describe('the apex and www partner', () => {
+  it('offers www for an apex, and the apex for a www, including under co.uk', () => {
+    expect(partnerHostname('demotravel.com')).toBe('www.demotravel.com');
+    expect(partnerHostname('www.demotravel.com')).toBe('demotravel.com');
+    expect(partnerHostname('demotravel.co.uk')).toBe('www.demotravel.co.uk');
+    expect(partnerHostname('www.demotravel.co.uk')).toBe('demotravel.co.uk');
+  });
+
+  it('offers nothing for a deeper subdomain, rather than guessing', () => {
+    expect(partnerHostname('book.demotravel.com')).toBeNull();
+    expect(partnerHostname('www.book.demotravel.com')).toBeNull();
+  });
+});
+
 // ---------------------------------------------------------------------------
 // The screen, read from source
 // ---------------------------------------------------------------------------
@@ -453,5 +480,21 @@ describe('the domains screen', () => {
 
   it('says plainly when hosting is not connected yet, rather than a dead Check', () => {
     expect(panel).toContain('being switched on');
+  });
+
+  it('offers the apex-or-www partner in one press, when it is not already added', () => {
+    expect(panel).toContain('partnerHostname(domain.hostname)');
+    expect(panel).toContain('Also add');
+  });
+});
+
+describe('the live isolation check', () => {
+  const sql = read('db', 'isolation-check.sql');
+
+  it('proves the new domain write path cannot cross a tenant', () => {
+    // A migration was not needed for the write path, but the table went from
+    // read-only to written, so the live proof grows a check for it.
+    expect(sql).toContain('a domain for another tenant is refused');
+    expect(sql).toContain("the app role cannot read another tenant''s domains");
   });
 });

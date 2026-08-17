@@ -286,8 +286,16 @@ export async function addDomain(tenantId: string, rawHostname: unknown): Promise
 
   return withTenant(tenantId, async (tx) => {
     const rows = await tx`
-      insert into public.domains (tenant_id, hostname, kind)
-      values (${tenantId}::uuid, ${hostname}, 'custom')
+      insert into public.domains (tenant_id, hostname, kind, is_primary)
+      values (
+        ${tenantId}::uuid, ${hostname}, 'custom',
+        -- The first custom domain a site adds becomes its canonical one, so a
+        -- site with a domain always has an answer to "which URL is the real one",
+        -- which every canonical tag reads through siteUrl. The subquery sees only
+        -- this tenant's rows under RLS, so it is "no primary of MINE yet". Later
+        -- domains come in secondary, and Make main moves the flag.
+        not exists (select 1 from public.domains where is_primary)
+      )
       returning ${domainColumns(tx)}
     `;
     return toDomain(rows[0] as Record<string, unknown>);

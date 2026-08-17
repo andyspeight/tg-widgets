@@ -264,6 +264,41 @@ begin
 end $$;
 
 -- ---------------------------------------------------------------------------
+-- Domains: the write path that arrived with custom domains
+-- ---------------------------------------------------------------------------
+
+-- addDomain in lib/db/tenants.ts inserts a domains row with tenant_id set to the
+-- session's tenant, and every other domain write is scoped by withTenant. The
+-- WITH CHECK policy is what stops a confused or hostile caller planting a row
+-- against another tenant, exactly as it does for pages, so this holds the domains
+-- table to the same promise. Added when the domain write path shipped, because a
+-- table only read from until then is now written to.
+do $$
+declare refused boolean := false; cross_tenant int;
+begin
+  -- Role set outside the exception block. See trap 1.
+  set local role tg_sites_app;
+  perform set_config('app.current_tenant_id', '11111111-1111-1111-1111-111111111111', true);
+
+  begin
+    insert into public.domains (tenant_id, hostname, kind)
+      values ('22222222-2222-2222-2222-222222222222', 'planted-domain.example', 'custom');
+  exception when others then refused := true;
+  end;
+
+  -- And a plain read of another tenant's domains, which the app role must not see.
+  select count(*) into cross_tenant from public.domains
+    where tenant_id = '22222222-2222-2222-2222-222222222222';
+
+  reset role;
+  insert into checks (name, passed, detail) values
+    ('a domain for another tenant is refused', refused,
+     case when refused then 'WITH CHECK rejected it' else 'THE ROW WAS WRITTEN' end),
+    ('the app role cannot read another tenant''s domains', cross_tenant = 0,
+     'leaked ' || cross_tenant);
+end $$;
+
+-- ---------------------------------------------------------------------------
 -- The public renderer
 -- ---------------------------------------------------------------------------
 

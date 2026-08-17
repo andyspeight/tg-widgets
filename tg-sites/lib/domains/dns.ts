@@ -69,3 +69,26 @@ export function pointingRecord(hostname: string): DnsRecord {
   }
   return { type: 'CNAME', host: clean.split('.')[0], value: VERCEL_CNAME_TARGET };
 }
+
+/**
+ * The other half of an apex-and-www pair, or null when there is no obvious one.
+ *
+ * A client who owns theiragency.co.uk almost always wants www.theiragency.co.uk to
+ * answer too, and the reverse, so this names the partner and the screen offers to
+ * add it in one press. Only apex to www and back: a deeper subdomain like
+ * book.theiragency.com has no single obvious partner, so it returns null and no
+ * offer is made rather than guessing wrong.
+ */
+export function partnerHostname(hostname: string): string | null {
+  const clean = hostname.toLowerCase().trim().replace(/\.$/, '');
+  if (isApexDomain(clean)) return `www.${clean}`;
+
+  const labels = clean.split('.');
+  if (labels[0] === 'www') {
+    const apex = labels.slice(1).join('.');
+    // Only when what remains is itself the apex, so www.book.x.com does not claim
+    // book.x.com, which is a subdomain and not this domain's apex partner.
+    return isApexDomain(apex) ? apex : null;
+  }
+  return null;
+}
