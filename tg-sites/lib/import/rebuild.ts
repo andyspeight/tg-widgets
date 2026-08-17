@@ -388,6 +388,110 @@ function cardToBlocks(card: Element, resolve: (raw: string) => string): ModelBlo
 }
 
 // ---------------------------------------------------------------------------
+// Image cards: a uniform grid of linked picture tiles becomes one Cards block
+// ---------------------------------------------------------------------------
+
+/**
+ * The first run of words at the leaves of an element.
+ *
+ * Used for a link's label, so "<span>View deals</span> View deals" gives the
+ * span's words once rather than the doubled text the trailing node would add.
+ */
+function firstLeafText(el: Element, resolve: (raw: string) => string): string {
+  for (const node of childNodes(el)) {
+    if (node.nodeName === '#text') {
+      const value = tidy(resolve((node as { value?: string }).value ?? ''));
+      if (value) return value;
+    } else if (isElement(node)) {
+      const tag = tagOf(node);
+      if (IGNORE.has(tag) || tag === 'svg') continue;
+      const deeper = firstLeafText(node, resolve);
+      if (deeper) return deeper;
+    }
+  }
+  return '';
+}
+
+/**
+ * A card's own link: the first real destination, and the words on it.
+ *
+ * A picture card is usually one big link, sometimes with a "View deals" link
+ * inside it as well. The href is the first that goes somewhere (a bare "#" is
+ * not a destination); the label is the first link's own words, read from its
+ * leaves so a doubled span does not repeat.
+ */
+function cardLink(card: Element, resolve: (raw: string) => string): { href: string; label: string } {
+  let href = '';
+  let label = '';
+  const walk = (el: Element): void => {
+    for (const child of elementChildren(el)) {
+      const tag = tagOf(child);
+      if (IGNORE.has(tag) || tag === 'svg') continue;
+      if (tag === 'a') {
+        const candidate = resolve(attr(child, 'href') ?? '').trim();
+        if (!href && candidate && candidate !== '#') href = candidate;
+        if (!label) label = firstLeafText(child, resolve);
+      }
+      walk(child);
+    }
+  };
+  walk(card);
+  return { href, label };
+}
+
+interface CardItem {
+  src: string;
+  alt: string;
+  label: string;
+  title: string;
+  body: string;
+  linkLabel: string;
+  linkHref: string;
+}
+
+/**
+ * One card as a Cards-block item, or null if it is not a linked picture card.
+ *
+ * The pattern this is for is a destination, an offer or a post: a picture, a
+ * title, maybe a line under it, and a link through to the thing. It needs the
+ * picture AND the link, so a linkless badge grid (a trust mark over two words)
+ * stays as its own blocks rather than being forced into a Cards list. The link's
+ * own words are lifted out of the title and body, so "View deals" is the button,
+ * not the heading.
+ */
+function cardItem(card: Element, resolve: (raw: string) => string): CardItem | null {
+  const pieces = contentPieces(card, resolve);
+  const image = pieces.find((piece): piece is Extract<Piece, { kind: 'image' }> => piece.kind === 'image');
+  if (!image) return null;
+
+  const link = cardLink(card, resolve);
+  if (!link.href) return null;
+
+  const linkLabel = link.label;
+  const texts = pieces
+    .filter((piece): piece is Extract<Piece, { kind: 'text' }> => piece.kind === 'text')
+    .map((piece) => piece.value)
+    .filter((value) => !linkLabel || value.toLowerCase() !== linkLabel.toLowerCase());
+  if (!texts.length) return null;
+
+  return {
+    src: image.src,
+    alt: tidy(image.alt),
+    label: '',
+    title: texts[0].slice(0, 120),
+    body: texts.slice(1).join(' ').slice(0, 400),
+    linkLabel: linkLabel.slice(0, 60),
+    linkHref: link.href,
+  };
+}
+
+/** A row of image cards as one editable Cards block, columns from the count. */
+function cardsBlock(items: CardItem[]): ModelBlock {
+  const columns = String(Math.min(4, Math.max(2, perRow(items.length))));
+  return { type: 'cards', props: { source: 'typed', columns, items } };
+}
+
+// ---------------------------------------------------------------------------
 // Walking a subtree into blocks (the non-grid path)
 // ---------------------------------------------------------------------------
 
@@ -563,8 +667,22 @@ export function modelFromImport(props: Record<string, unknown>): RebuildModel | 
 
     if (isGrid(el)) {
       flushStack();
-      const columns = elementChildren(el)
-        .filter((kid) => !IGNORE.has(tagOf(kid)))
+      const cards = elementChildren(el).filter((kid) => !IGNORE.has(tagOf(kid)));
+
+      // A uniform grid of linked picture cards becomes ONE editable Cards block,
+      // a list with an Add button, rather than a column of loose image and
+      // heading blocks per card that a client would have to keep in step by
+      // hand. Every card has to be a picture-and-link tile for this; an icon
+      // grid or a linkless badge row falls through to the per-card blocks below.
+      const items = cards
+        .map((card) => cardItem(card, resolve))
+        .filter((item): item is CardItem => item !== null);
+      if (items.length >= 2 && items.length === cards.length) {
+        rows.push({ columns: [{ blocks: [cardsBlock(items)] }] });
+        continue;
+      }
+
+      const columns = cards
         .map((card) => ({ blocks: cardToBlocks(card, resolve) }))
         .filter((column) => column.blocks.length > 0);
       if (columns.length) {

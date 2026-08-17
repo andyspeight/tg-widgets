@@ -192,6 +192,61 @@ describe('rebuilding an imported design', () => {
     expect(blocks.some((block) => block.type === 'heading' && String(block.props.html).includes('ATOL'))).toBe(true);
   });
 
+  /*
+   * THE REPEATED-TILE FIX. A grid of destination or offer cards, a picture, a
+   * title and a link through, used to come back as a column of loose image and
+   * heading blocks per card: accurate, but horrible to change, since a seventh
+   * card meant building a seventh column by hand. It now becomes ONE Cards
+   * block, a single editable list with an Add button, which is the block that
+   * pattern is for. Gated on a picture AND a link, so a linkless badge row is
+   * left alone (the test below).
+   */
+  it('turns a grid of linked picture cards into one editable Cards block', () => {
+    const card = (img: string, title: string, href: string) =>
+      `<div class="c"><a class="cover" href="${href}"></a>` +
+      `<picture><img src="${img}" alt="${title}"></picture>` +
+      `<div class="body"><h3>${title}</h3>` +
+      `<a class="cta" href="${href}"><span>View deals</span></a></div></div>`;
+    const html =
+      '<section><div class="grid">' +
+      card('https://cdn.test/palma.jpg', 'Palma de Mallorca', '/majorca/palma') +
+      card('https://cdn.test/tenerife.jpg', 'Tenerife', '/canaries/tenerife') +
+      card('https://cdn.test/benidorm.jpg', 'Benidorm', '/spain/benidorm') +
+      card('https://cdn.test/dalaman.jpg', 'Dalaman', '/turkey/dalaman') +
+      '</div></section>';
+    const model = modelFromImport({ html, fields: [], content: {}, label: 'Popular destinations' });
+    const blocks = allBlocks(model);
+
+    // One Cards block, not four columns of image + heading.
+    const cards = blocks.filter((block) => block.type === 'cards');
+    expect(cards.length).toBe(1);
+    expect(blocks.filter((block) => block.type === 'image').length).toBe(0);
+
+    const items = cards[0].props.items as Array<Record<string, string>>;
+    expect(items.length).toBe(4);
+    expect(items[0].title).toBe('Palma de Mallorca');
+    expect(items[0].src).toBe('https://cdn.test/palma.jpg');
+    expect(items[0].linkHref).toBe('/majorca/palma');
+    expect(items[0].linkLabel).toBe('View deals');
+    // The link's words are not left crushed into the title or the body.
+    expect(items[0].title).not.toContain('View deals');
+    expect(String(items[0].body)).not.toContain('View deals');
+
+    // And the model is one sectionFromModel turns into a real, editable Section.
+    expect(sectionFromModel(model).ok).toBe(true);
+  });
+
+  it('leaves a linkless badge grid as its own blocks, not a Cards list', () => {
+    const html =
+      '<section><div class="grid">' +
+      '<div class="b"><img src="https://cdn.test/atol.svg" alt="ATOL"><h3>ATOL protected</h3><p>Covered.</p></div>' +
+      '<div class="b"><img src="https://cdn.test/trust.svg" alt="Trust"><h3>Trusted</h3><p>19 million.</p></div>' +
+      '</div></section>';
+    const blocks = allBlocks(modelFromImport({ html, fields: [], content: {}, label: '' }));
+    expect(blocks.some((block) => block.type === 'cards')).toBe(false);
+    expect(blocks.filter((block) => block.type === 'image').length).toBe(2);
+  });
+
   it('does not turn a row of nav links into a grid of columns', () => {
     const html =
       '<section><nav><a href="/a">Home</a><a href="/b">Holidays</a><a href="/c">Deals</a></nav>' +
