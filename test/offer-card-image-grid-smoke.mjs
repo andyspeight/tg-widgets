@@ -47,9 +47,13 @@ console.log("Each offer shows its OWN saved currency, not the widget's");
   ok('EUR maps to the euro symbol', /EUR: '€'/.test(CARD));
 }
 
-console.log('Cards fill the grid cell so a row is equal height');
+console.log('Cards fill the grid cell so a row is equal height (flex, not %height)');
 {
-  ok('the card is set to height:100% to fill its stretched cell', /\.tgoc-card \{[\s\S]*?height: 100%;[\s\S]*?\}/.test(CARD));
+  ok('the host is a flex column so the card can grow to fill it',
+    /:host \{ all: initial; display: flex; flex-direction: column; \}/.test(CARD));
+  ok('the card grows to fill the stretched cell (flex-grow, reliable through the host)',
+    /\.tgoc-card \{[\s\S]*?flex: 1 0 auto;[\s\S]*?\}/.test(CARD));
+  ok('the fragile percentage-height approach is gone', !/\.tgoc-card \{[\s\S]*?height: 100%;[\s\S]*?\}/.test(CARD));
   ok('the vertical footer still pins to the bottom (margin-top:auto)', /\.tgoc-card--vertical \.tgoc-foot \{[\s\S]*?margin-top: auto;/.test(CARD));
 }
 

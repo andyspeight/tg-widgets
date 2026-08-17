@@ -27,7 +27,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.2.4';
+  const VERSION = '0.2.5';
 
   // Resolve the API base off THIS script's origin. The widget is hosted on
   // widgets.travelify.io and embedded on customer sites, so a relative
@@ -179,7 +179,11 @@
 
   // ── Scoped styles (shadow DOM, --tgo-* tokens shared with widget-offers) ──
   const STYLES = `
-    :host { all: initial; display: block; }
+    /* Flex column so the card can stretch to fill a stretched grid cell via
+       flex-grow (reliable), rather than a percentage height through the shadow
+       host (which does not resolve consistently). Standalone the host height is
+       auto, so the card stays its natural size. */
+    :host { all: initial; display: flex; flex-direction: column; }
     * { box-sizing: border-box; }
     .tgoc-root {
       --tgo-brand: #1B2B5B; --tgo-accent: #00B4D8; --tgo-accent-hover: #0096B7;
@@ -203,11 +207,12 @@
       border-radius: var(--tgo-radius); overflow: hidden; box-shadow: var(--tgo-shadow);
       transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
       text-decoration: none; color: inherit; cursor: pointer; display: flex;
-      /* Fill the grid cell so a row of cards is equal height (the cell stretches;
-         this makes the card fill it, and the flex body + margin-top:auto footer
-         then align every card's price row). Standalone (no definite parent
-         height) this resolves to auto, so a lone card is unaffected. */
-      height: 100%;
+      /* Grow to fill the flex-column host (which stretches to the grid row
+         height), so a row of cards is equal height and the flex body +
+         margin-top:auto footer align every card's price row along the bottom.
+         Standalone the host is auto-height, so flex-grow has no free space to
+         fill and the card stays its natural height. */
+      flex: 1 0 auto;
     }
     .tgoc-card:hover { transform: translateY(-2px); box-shadow: var(--tgo-shadow-hover); border-color: var(--tgo-accent); }
     @media (prefers-reduced-motion: reduce) { .tgoc-card { transition: none; } .tgoc-card:hover { transform: none; } }
