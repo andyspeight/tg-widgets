@@ -27,7 +27,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.2.2';
+  const VERSION = '0.2.3';
 
   // Resolve the API base off THIS script's origin. The widget is hosted on
   // widgets.travelify.io and embedded on customer sites, so a relative
@@ -551,7 +551,12 @@
         priceSub: priceSub,
         badgeText: badgeText,
         urgency: this._f('urgency'),
-        image: safeUrl(this._f('image') || o.image)
+        // The builder stores photos in offer.images[] (first = the cover); only
+        // older/flat offers used a single fields.image. Read both so a card
+        // always finds its cover — without the images[] fallback, every
+        // builder-made offer dropped to the gradient placeholder. The offer page
+        // already reads images[] the same way.
+        image: safeUrl(this._f('image') || o.image || (Array.isArray(o.images) ? o.images[0] : ''))
       };
     }
 

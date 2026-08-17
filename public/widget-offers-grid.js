@@ -19,7 +19,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.1.4';
+  const VERSION = '0.1.5';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the empty-state line and the default card CTA). The
@@ -121,7 +121,12 @@
 
     /* Vertical cards → responsive grid. Other layouts → full-width stack. */
     .tgog-items { display: grid; gap: 20px; }
-    .tgog-items.grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+    /* auto-fit (not auto-fill) collapses the empty phantom columns that left a
+       short row of cards packed to the left on a wide page; the 380px cap
+       matches the card's own max-width so tracks never stretch past a card, and
+       justify-content centres the row as a group. Explicit cols-N below still
+       fill the width. */
+    .tgog-items.grid { grid-template-columns: repeat(auto-fit, minmax(300px, 380px)); justify-content: center; }
     .tgog-items.grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
     .tgog-items.grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
     .tgog-items.grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
