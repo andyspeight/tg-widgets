@@ -340,21 +340,27 @@ export function Canvas({
       if (path?.kind !== 'block' && path?.kind !== 'inner-block') return;
 
       /*
-       * ALWAYS innerHTML NOW. There used to be a data-rt-plain branch here that
-       * read textContent into `text` for headings, because a heading stored a
-       * plain string. A heading stores markup since 31 Jul 2026 (see
-       * HeadingBlock), so both kinds of host read back the same way and the
-       * formatting toolbar works in both.
+       * THE HOST SAYS WHICH FIELD IT IS, AND WHETHER IT IS PLAIN. A paragraph and
+       * a heading carry no marker, which means the original behaviour: the `html`
+       * field, read as the markup they store. A quote marks its host
+       * data-rt-field="text" data-rt-plain, so this one delegated handler reads
+       * its words back as text and writes them to `text`. The data-rt-plain branch
+       * that once lived here for headings is back and generalised: it is the fields
+       * whose schema is a plain string, not headings, that want it.
        *
-       * A heading is still one line: that is data-rt-oneline and the Enter
-       * handler below, which is the half of the old attribute that survived.
+       * A heading is still one line: that is data-rt-oneline and the Enter handler
+       * below, which is the half of the old attribute that always survived.
        *
        * updateBlockPropsAtPath, not the fixed-depth version, so the same commit
        * reaches a block in a column or one inside a container.
        */
-      const patch = { html: host.innerHTML };
+      const field = host.dataset.rtField ?? 'html';
+      const value = host.hasAttribute('data-rt-plain') ? host.textContent ?? '' : host.innerHTML;
 
-      onCommit((current) => updateBlockPropsAtPath(current, path, patch), `rt:${editingPath}`);
+      onCommit(
+        (current) => updateBlockPropsAtPath(current, path, { [field]: value }),
+        `rt:${editingPath}`,
+      );
     },
     [editingPath, onCommit],
   );

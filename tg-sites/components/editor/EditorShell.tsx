@@ -35,6 +35,7 @@ import { pageAsItem, type ItemMeta } from '../../lib/content/collection-page';
 import { createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
 import { buildPresetSection } from '../../lib/content/presets';
 import { addBlock, addColumn, addInnerBlock, blockAtPath, containerColumns, moveBlockTo, moveSection, parsePathKey, type Path, pathKey, resolve, updateBlockPropsAtPath } from '../../lib/content/tree';
+import { inlineEditableField } from '../../lib/editor/inline-edit';
 import {
   DndContext,
   DragOverlay,
@@ -641,15 +642,18 @@ export function EditorShell({
    * inline commands in a heading and hides the ones that would nest a block.
    */
   const editing = useMemo(() => {
-    // A paragraph or a heading, in a column OR inside a container: both are typed
-    // into where they sit, so both raise the formatting toolbar and become the
-    // editing host. blockAtPath resolves either.
+    // Whatever block can be typed into where it sits, in a column OR inside a
+    // container: blockAtPath resolves either, and lib/editor/inline-edit decides
+    // which blocks those are and how. `rich` is what tells a paragraph or a
+    // heading (formatting toolbar, HTML) from a quote (plain text, no toolbar).
     if (selected?.kind !== 'block' && selected?.kind !== 'inner-block') return null;
     const block = blockAtPath(page, selected);
-    if (block?.type !== 'text' && block?.type !== 'heading') return null;
+    if (!block) return null;
+    const field = inlineEditableField(block.type);
+    if (!field) return null;
 
     const align = typeof block.props?.align === 'string' ? block.props.align : 'left';
-    return { path: pathKey(selected), oneLine: block.type === 'heading', align };
+    return { path: pathKey(selected), oneLine: field.oneLine, rich: field.rich, align };
   }, [selected, page]);
 
   const editingPath = editing?.path ?? null;
@@ -1970,10 +1974,11 @@ export function EditorShell({
       {/*
         THE FORMATTING TOOLBAR, not inside the properties pane's field.
         It formats whatever is selected on the CANVAS, which is where the words
-        are. Mounted while a paragraph OR a heading is being edited, which since
-        31 Jul 2026 is both of the blocks you can type into in place.
+        are. Mounted only for a RICH field, a paragraph or a heading: a plain
+        field like a quote is typed into in place too but stores text not markup,
+        so a formatting toolbar over it would offer commands that vanish on save.
       */}
-      {editing && (
+      {editing?.rich && (
         <TextToolbar
           key={editing.path}
           anchor={null}

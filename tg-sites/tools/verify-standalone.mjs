@@ -3161,6 +3161,58 @@ await check('and what it produced is inline, so the heading stays whole', async 
     : `the heading now contains ${JSON.stringify(html.slice(0, 80))}`;
 });
 
+// ---------------------------------------------------------------------------
+// A quote is typed into where it sits, and as plain text
+// ---------------------------------------------------------------------------
+
+/*
+ * The quote had the same gap paragraphs and headings had: its words were on the
+ * canvas but edited in the pane. It is a PLAIN field, though, so it becomes
+ * editable in place and raises NO formatting toolbar. The quote's text was always
+ * a plain string, and a Bold on a plain field would show and then vanish on save.
+ * The checks: the words become editable, what is typed reaches the page STATE (in
+ * the `text` field, which the pane's textarea reads back, not the DOM the
+ * no-children trick would keep either way), and no toolbar appears.
+ */
+await check('a quote becomes editable where its words sit', async () => {
+  await page.reload();
+  await page.waitForSelector('.ed-root');
+  await showPanels();
+  await addBlock('Quote');
+
+  const host = added().locator('[data-rt-host]').first();
+  if (!(await host.count())) return 'the quote did not become an editing host';
+  const on = await host.getAttribute('contenteditable');
+  return on === 'true' ? true : `contenteditable is ${on}`;
+});
+
+await check('typing a quote reaches the page state as plain text', async () => {
+  await page.evaluate(() => {
+    const el = document.querySelector('.is-selected [data-rt-host]');
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    range.collapse(false);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  });
+  await page.keyboard.type(' MENDED', { delay: 30 });
+  await page.waitForTimeout(350);
+
+  const canvas = (await added().locator('.tgs-quote__text').innerText()).trim();
+  // The pane textarea is bound to the `text` prop, so it is state, not the DOM.
+  // A commit to the wrong field would leave this showing the quote's default.
+  const inState = (await page.locator('.ed-props textarea').first().inputValue()).trim();
+  return canvas.endsWith('MENDED') && inState.endsWith('MENDED')
+    ? true
+    : `canvas "${canvas.slice(-24)}", state "${inState.slice(-24)}"`;
+});
+
+await check('a quote raises no formatting toolbar, because it is plain', async () => {
+  const bars = await page.locator('.ed-tt').count();
+  return bars === 0 ? true : `${bars} toolbars over a plain quote`;
+});
+
 /*
  * Enter inside a heading does nothing. Left to the browser it inserts a div or a
  * br, and reading textContent back out welds the two lines into one word with no

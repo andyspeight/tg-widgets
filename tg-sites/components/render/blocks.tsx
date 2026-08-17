@@ -260,7 +260,23 @@ export function TextBlock({
   );
 }
 
-export function QuoteBlock({ props }: { props: Props }): ReactElement {
+export function QuoteBlock({
+  props,
+  editingHost = false,
+}: {
+  props: Props;
+  /**
+   * Render the quote's words as an empty shell for the editor to type into.
+   *
+   * The same no-children trick as TextBlock, and it is plain text not markup:
+   * the quote's `text` was always a plain string, so the host is marked
+   * data-rt-plain and the editor reads it back as text, not HTML. The byline
+   * below stays as it is: it is optional and only renders when it has content,
+   * so there is nothing to click into when it is empty, and it is edited in the
+   * properties pane where an empty field still has a labelled box.
+   */
+  editingHost?: boolean;
+}): ReactElement {
   const text = str(props, 'text');
   const attribution = str(props, 'attribution');
   const role = str(props, 'role');
@@ -268,7 +284,17 @@ export function QuoteBlock({ props }: { props: Props }): ReactElement {
 
   return (
     <figure className="tgs-quote" style={textColour ? { color: textColour } : undefined}>
-      <blockquote className="tgs-quote__text">{text}</blockquote>
+      {editingHost ? (
+        <blockquote
+          className="tgs-quote__text"
+          data-rt-host=""
+          data-rt-field="text"
+          data-rt-plain=""
+          suppressHydrationWarning
+        />
+      ) : (
+        <blockquote className="tgs-quote__text">{text}</blockquote>
+      )}
       {(attribution || role) && (
         <figcaption className="tgs-quote__by">
           {attribution && <strong>{attribution}</strong>}

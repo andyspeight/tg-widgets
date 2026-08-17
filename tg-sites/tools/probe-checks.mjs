@@ -128,9 +128,27 @@ const MUTATIONS = [
   {
     check: 'a heading is typed in place as well',
     why: 'Stop offering headings as editable hosts.',
-    file: 'components/editor/EditorShell.tsx',
-    from: `    if (block?.type !== 'text' && block?.type !== 'heading') return null;`,
-    to: `    if (block?.type !== 'text') return null;`,
+    file: 'lib/editor/inline-edit.ts',
+    from: `    case 'heading':
+      return { field: 'html', rich: true, oneLine: true };`,
+    to: `    case 'heading':
+      return null;`,
+  },
+  {
+    check: 'a quote becomes editable where its words sit',
+    why: 'Stop offering a quote as an editable host.',
+    file: 'lib/editor/inline-edit.ts',
+    from: `    case 'quote':
+      return { field: 'text', rich: false, oneLine: false };`,
+    to: `    case 'quote':
+      return null;`,
+  },
+  {
+    check: 'typing a quote reaches the page state as plain text',
+    why: 'Commit every host to the html field, so a plain field is written to the wrong place.',
+    file: 'components/editor/Canvas.tsx',
+    from: `      const field = host.dataset.rtField ?? 'html';`,
+    to: `      const field = 'html';`,
   },
   {
     check: 'one click makes the words themselves editable',
@@ -346,9 +364,9 @@ const MUTATIONS = [
     check: 'a heading gets the formatting toolbar too',
     why: 'Put the paragraphs-only gate back, which is the bug Andy reported.',
     file: 'components/editor/EditorShell.tsx',
-    from: `      {editing && (
+    from: `      {editing?.rich && (
         <TextToolbar`,
-    to: `      {editing && !editing.oneLine && (
+    to: `      {editing?.rich && !editing.oneLine && (
         <TextToolbar`,
   },
   {
