@@ -551,6 +551,107 @@ describe('page queries', () => {
 // ---------------------------------------------------------------------------
 
 /**
+ * The activity log is written from inside the change it records.
+ *
+ * The claim is an ORDERING one, like the publish audit above: recordActivity
+ * calls withTenant again, which reuses the mutation's open transaction rather
+ * than opening a second, so the line lands in the same atomic unit and rolls
+ * back with the change if it fails. One BEGIN, not two, is how that shows.
+ */
+describe('the activity log', () => {
+  const SUMMARY_ROW = {
+    id: 'aaaa', parent_id: null, slug: '', title: 'Home',
+    status: 'published', published_at: '2026-08-17T00:00:00Z',
+    updated_at: '2026-08-17T00:00:00Z', has_unpublished_changes: false,
+  };
+
+  const inside = () =>
+    log.slice(
+      log.findIndex((s) => s.sql === 'BEGIN'),
+      log.findIndex((s) => s.sql === 'COMMIT'),
+    );
+
+  it('writes the publish line in the publish transaction, joining not reopening', async () => {
+    const { publishPage } = await import('../lib/db/pages');
+    respond('published_content = draft_content', [SUMMARY_ROW]);
+
+    await publishPage(ALPHA, 'aaaa', 'user-1');
+
+    const line = inside().find((s) => s.sql.includes('insert into public.site_activity'));
+    expect(line, 'the publish was not logged inside its transaction').toBeTruthy();
+    expect(log.filter((s) => s.sql === 'BEGIN')).toHaveLength(1);
+    // Actor, tag and the human line, built from the row's own title.
+    expect(line!.params).toEqual(
+      expect.arrayContaining(['user-1', 'page.publish', 'Published the Home page']),
+    );
+  });
+
+  it('writes the create line, named from the new page', async () => {
+    const { createPage } = await import('../lib/db/pages');
+    respond('insert into public.pages', [{
+      ...SUMMARY_ROW, status: 'draft', published_at: null, has_unpublished_changes: true,
+      seo: {}, draft_content: { version: 1, id: 'aaaa', title: 'Home', slug: '', sections: [] },
+    }]);
+
+    await createPage(ALPHA, { title: 'Home', slug: '' }, 'user-1');
+
+    const line = inside().find((s) => s.sql.includes('insert into public.site_activity'));
+    expect(line?.params).toEqual(
+      expect.arrayContaining(['user-1', 'page.create', 'Created the Home page']),
+    );
+    expect(log.filter((s) => s.sql === 'BEGIN')).toHaveLength(1);
+  });
+
+  it('reads the title before the delete, then logs it', async () => {
+    const { deletePage } = await import('../lib/db/pages');
+    respond('delete from public.pages', [{ id: 'aaaa', title: 'About' }]);
+
+    await deletePage(ALPHA, 'aaaa', 'user-1');
+
+    // The name is read on the way out, because afterwards there is nothing left
+    // to work it out from.
+    const del = log.find((s) => s.sql.includes('delete from public.pages'))!;
+    expect(del.sql).toContain('returning id, title');
+    const line = inside().find((s) => s.sql.includes('insert into public.site_activity'));
+    expect(line?.params).toEqual(
+      expect.arrayContaining(['user-1', 'page.delete', 'Deleted the About page']),
+    );
+  });
+
+  it('logs nothing for a delete that matched no page', async () => {
+    const { deletePage } = await import('../lib/db/pages');
+    // No canned answer, so the delete matches nothing: wrong tenant, or gone.
+    expect(await deletePage(ALPHA, 'aaaa', 'user-1')).toBe(false);
+    expect(log.some((s) => s.sql.includes('insert into public.site_activity'))).toBe(false);
+  });
+
+  it('reads the log newest first and capped, through the app role', async () => {
+    const { listActivity } = await import('../lib/db/activity');
+    respond('from public.site_activity', [
+      { id: 'e2', actor_id: 'user-1', action: 'page.publish', summary: 'Published the Home page', created_at: '2026-08-17T10:00:00Z' },
+      { id: 'e1', actor_id: null, action: 'page.create', summary: 'Created the Home page', created_at: '2026-08-17T09:00:00Z' },
+    ]);
+
+    const rows = await listActivity(ALPHA, 5000);
+
+    const select = log.find((s) => s.sql.includes('from public.site_activity'))!;
+    expect(select.role).toBe('app');
+    expect(select.sql).toContain('order by created_at desc, id desc');
+    // The limit is capped rather than trusted: 5000 becomes 200, so a caller
+    // cannot ask for the whole table.
+    expect(select.params).toContain(200);
+
+    expect(rows[0].action).toBe('page.publish');
+    expect(rows[0].actorId).toBe('user-1');
+    // A null actor stays null rather than becoming an empty string.
+    expect(rows[1].actorId).toBeNull();
+    expect(rows[0].createdAt).toBeInstanceOf(Date);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+/**
  * Renaming a page without breaking the links to it.
  *
  * THE STATEMENTS ARE THE CLAIM HERE, which is why this is in the fake-driver

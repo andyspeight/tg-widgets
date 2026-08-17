@@ -123,12 +123,16 @@ export async function createPageAction(input: {
   const sections = pageTemplateSections(String(input.template ?? '')) ?? undefined;
 
   const result = await attempt(async () =>
-    createPage(await requireTenantId(), {
-      title: String(input.title ?? '').slice(0, 200),
-      slug: slugify(input.slug ?? input.title ?? ''),
-      parentId: input.parentId ?? null,
-      sections,
-    }),
+    createPage(
+      await requireTenantId(),
+      {
+        title: String(input.title ?? '').slice(0, 200),
+        slug: slugify(input.slug ?? input.title ?? ''),
+        parentId: input.parentId ?? null,
+        sections,
+      },
+      (await currentUserId()) ?? undefined,
+    ),
   );
 
   if (result.ok) revalidatePath('/sites');
@@ -174,7 +178,9 @@ export async function movePageAction(
 }
 
 export async function deletePageAction(pageId: string): Promise<ActionResult<boolean>> {
-  const result = await attempt(async () => deletePage(await requireTenantId(), pageId));
+  const result = await attempt(async () =>
+    deletePage(await requireTenantId(), pageId, (await currentUserId()) ?? undefined),
+  );
   if (result.ok) revalidatePath('/sites');
   return result;
 }

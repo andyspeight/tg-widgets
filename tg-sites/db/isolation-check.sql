@@ -121,6 +121,13 @@ insert into public.ai_usage (tenant_id, user_id, intent) values
   ('11111111-1111-1111-1111-111111111111', 'iso-user-ann', 'write'),
   ('22222222-2222-2222-2222-222222222222', 'iso-user-bob', 'write');
 
+-- One activity line each, up here with the other fixtures for the same reason as
+-- the meter above: the "nothing set returns nothing" block needs rows it could
+-- leak.
+insert into public.site_activity (tenant_id, actor_id, action, summary) values
+  ('11111111-1111-1111-1111-111111111111', 'iso-user-ann', 'page.publish', 'Published the Home page'),
+  ('22222222-2222-2222-2222-222222222222', 'iso-user-bob', 'page.publish', 'Published the Home page');
+
 create temp table if not exists checks (
   ord    serial,
   name   text,
@@ -894,6 +901,57 @@ begin
   insert into checks (name, passed, detail) values
     ('what a call cost can still be written down', wrote and got = 900,
      case when wrote then 'recorded ' || got else 'THE UPDATE WAS REFUSED' end);
+end $$;
+
+-- ---------------------------------------------------------------------------
+-- The activity log
+-- ---------------------------------------------------------------------------
+--
+-- Append-only, and scoped like everything else. What must hold: a tenant reads
+-- its own history and none of another's; it cannot write a line against another
+-- site; and once written a line cannot be changed or removed, because there is
+-- no update or delete grant. The last two are what make it a log rather than a
+-- story its subject can rewrite.
+--
+-- The fixtures are up at the top with the rest.
+do $$
+declare
+  own int; other int;
+  planted boolean := true; changed boolean := true; removed boolean := true;
+begin
+  set local role tg_sites_app;
+  perform set_config('app.current_tenant_id', '11111111-1111-1111-1111-111111111111', true);
+
+  select count(*) into own   from public.site_activity;
+  select count(*) into other from public.site_activity
+    where tenant_id = '22222222-2222-2222-2222-222222222222';
+
+  -- Writing history onto another site. The WITH CHECK half refuses it.
+  begin
+    insert into public.site_activity (tenant_id, actor_id, action, summary)
+    values ('22222222-2222-2222-2222-222222222222', 'iso-user-ann', 'page.delete', 'Deleted the Home page');
+  exception when others then planted := false; end;
+
+  -- Rewriting a line. There is deliberately no UPDATE grant.
+  begin
+    update public.site_activity set summary = 'Nothing happened here';
+  exception when others then changed := false; end;
+
+  -- Erasing a line. There is deliberately no DELETE grant.
+  begin
+    delete from public.site_activity;
+  exception when others then removed := false; end;
+
+  reset role;
+  insert into checks (name, passed, detail) values
+    ('a tenant sees its own activity', own = 1, 'saw ' || own || ' of 1'),
+    ('and none of another tenants activity', other = 0, 'leaked ' || other),
+    ('a tenant cannot write history onto another site',
+     not planted, case when planted then 'IT PLANTED ONE' else 'the policy refused it' end),
+    ('the log cannot be rewritten',
+     not changed, case when changed then 'A LINE WAS CHANGED' else 'no UPDATE grant' end),
+    ('nor a line erased from it',
+     not removed, case when removed then 'A LINE WAS DELETED' else 'no DELETE grant' end);
 end $$;
 
 -- ---------------------------------------------------------------------------

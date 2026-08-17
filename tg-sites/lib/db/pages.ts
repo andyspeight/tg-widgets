@@ -20,6 +20,7 @@ import type { NavPage } from '../content/nav';
 import { livePaths, MAX_PATH_DEPTH, type PageNode } from '../content/paths';
 import { sanitisePage } from '../content/sanitise-page';
 import { parsePage, type Page } from '../content/schema';
+import { pageActivitySummary, recordActivity } from './activity';
 import { addressesBefore, recordMove } from './redirects';
 import { withPublicTenant, withTenant, type Tx } from './withTenant';
 
@@ -439,6 +440,7 @@ export interface NewPage {
 export async function createPage(
   tenantId: string,
   input: NewPage,
+  userId?: string,
 ): Promise<PageWithContent> {
   const title = input.title.trim() || 'Untitled page';
   const slug = (input.slug ?? '').trim();
@@ -468,6 +470,11 @@ export async function createPage(
     `;
 
     const row = rows[0] as Record<string, unknown>;
+    await recordActivity(tenantId, {
+      actorId: userId,
+      action: 'page.create',
+      summary: pageActivitySummary('page.create', title),
+    });
     return { ...toSummary(row), content: hydrate(row, row.draft_content) };
   });
 }
@@ -687,7 +694,13 @@ export async function publishPage(
         )
     `;
 
-    return toSummary(rows[0] as Record<string, unknown>);
+    const published = toSummary(rows[0] as Record<string, unknown>);
+    await recordActivity(tenantId, {
+      actorId: userId,
+      action: 'page.publish',
+      summary: pageActivitySummary('page.publish', published.title),
+    });
+    return published;
   });
 }
 
@@ -720,12 +733,27 @@ export async function unpublishPage(
  * site because someone tidied up a landing page would be unforgivable, and an
  * orphaned page is recoverable in a way a deleted one is not.
  */
-export async function deletePage(tenantId: string, pageId: string): Promise<boolean> {
+export async function deletePage(
+  tenantId: string,
+  pageId: string,
+  userId?: string,
+): Promise<boolean> {
   return withTenant(tenantId, async (tx) => {
+    // The title is read back on the way out, because after the delete there is
+    // nothing left to name the log line from.
     const rows = await tx`
-      delete from public.pages where id = ${pageId}::uuid returning id
+      delete from public.pages where id = ${pageId}::uuid returning id, title
     `;
-    return rows.length > 0;
+    if (!rows.length) return false;
+    await recordActivity(tenantId, {
+      actorId: userId,
+      action: 'page.delete',
+      summary: pageActivitySummary(
+        'page.delete',
+        String((rows[0] as Record<string, unknown>).title ?? ''),
+      ),
+    });
+    return true;
   });
 }
 
