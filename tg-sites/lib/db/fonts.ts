@@ -53,6 +53,30 @@ export interface FontFaceRow {
   unicodeRange: string | null;
 }
 
+/**
+ * A whole family with its files and their bytes, for copying a library.
+ *
+ * The one read that DOES pull bytes, because copying a site has to move the
+ * actual font, not a reference to it. Everything a face carries is kept: the
+ * style and subset and unicode range that saveFontFamily flattens or infers, so
+ * a copy is faithful where a re-import would not be.
+ */
+export interface FontForCopy {
+  family: string;
+  slug: string;
+  source: 'google' | 'upload';
+  fallback: FontFamily['fallback'];
+  files: Array<{
+    weight: number;
+    style: 'normal' | 'italic';
+    format: FontFormat;
+    subset: string | null;
+    unicodeRange: string | null;
+    bytes: Buffer;
+    byteSize: number;
+  }>;
+}
+
 // ---------------------------------------------------------------------------
 // Reading
 // ---------------------------------------------------------------------------
@@ -87,6 +111,58 @@ export async function listFonts(tenantId: string): Promise<FontFamily[]> {
       weights: (row.weights as number[]).map(Number),
       bytes: Number(row.bytes),
     }));
+  });
+}
+
+/**
+ * Every family with its files and bytes, for duplicating a site.
+ *
+ * PULLS THE BYTES, unlike listFonts, because the caller is copying the library
+ * into another tenant and a reference would leave the copy pointing at files it
+ * does not own. That is the whole cost of it, so it is its own function rather
+ * than a flag on the list: a duplicate is rare and reads everything once, where
+ * the theme screen must never drag megabytes of woff2 through to show six names.
+ *
+ * A query per family for its files. A tenant has a handful of families, so the
+ * round trips do not matter, and the alternative is stitching bytes back apart
+ * from one big join in JavaScript.
+ */
+export async function listFontsForCopy(tenantId: string): Promise<FontForCopy[]> {
+  return withTenant(tenantId, async (tx) => {
+    const families = await tx`
+      select id, family, slug, source, fallback from public.fonts order by slug
+    `;
+
+    const out: FontForCopy[] = [];
+    for (const raw of families) {
+      const row = raw as Record<string, unknown>;
+      const files = await tx`
+        select weight, style, format, subset, unicode_range, bytes, byte_size
+        from public.font_files where font_id = ${String(row.id)}::uuid
+        order by weight, style
+      `;
+
+      out.push({
+        family: String(row.family),
+        slug: String(row.slug),
+        source: row.source === 'upload' ? 'upload' : 'google',
+        fallback: String(row.fallback) as FontFamily['fallback'],
+        files: files.map((fileRaw) => {
+          const file = fileRaw as Record<string, unknown>;
+          return {
+            weight: Number(file.weight),
+            style: file.style === 'italic' ? 'italic' : 'normal',
+            format: file.format as FontFormat,
+            subset: file.subset == null ? null : String(file.subset),
+            unicodeRange: file.unicode_range == null ? null : String(file.unicode_range),
+            bytes: file.bytes as Buffer,
+            byteSize: Number(file.byte_size),
+          };
+        }),
+      });
+    }
+
+    return out;
   });
 }
 
@@ -231,6 +307,48 @@ export async function saveFontFamily(
       weights: [...new Set(imported.files.map((f) => f.weight))].sort((a, b) => a - b),
       bytes: total,
     };
+  });
+}
+
+/**
+ * Write a family and its files verbatim, for a site duplicate.
+ *
+ * SEPARATE FROM saveFontFamily on purpose. That one takes a freshly imported
+ * family and writes every face as style 'normal', which is right for an import
+ * but would flatten an italic on a copy. This takes a face exactly as it was
+ * read and puts it back byte for byte, style and subset and unicode range
+ * intact, so the clone's library is the source's and not a lossy re-import.
+ *
+ * Upsert on the slug and clear the old files first, the same shape saveFontFamily
+ * uses, so a copy that runs twice ends up with one family and its files rather
+ * than a duplicate. Meant to be called inside the destination's transaction: by
+ * id it reuses that scope, so the whole library copy is one atomic write.
+ */
+export async function insertCopiedFont(tenantId: string, font: FontForCopy): Promise<void> {
+  await withTenant(tenantId, async (tx) => {
+    const [row] = await tx`
+      insert into public.fonts (tenant_id, family, slug, source, fallback)
+      values (${tenantId}, ${font.family}, ${font.slug}, ${font.source}, ${font.fallback})
+      on conflict (tenant_id, slug) do update set
+        family = excluded.family,
+        source = excluded.source,
+        fallback = excluded.fallback
+      returning id
+    `;
+    const fontId = String(row.id);
+
+    await tx`delete from public.font_files where font_id = ${fontId}`;
+
+    for (const file of font.files) {
+      await tx`
+        insert into public.font_files
+          (tenant_id, font_id, weight, style, format, subset, unicode_range, bytes, byte_size)
+        values (
+          ${tenantId}, ${fontId}, ${file.weight}, ${file.style}, ${file.format},
+          ${file.subset}, ${file.unicodeRange}, ${file.bytes}, ${file.byteSize}
+        )
+      `;
+    }
   });
 }
 

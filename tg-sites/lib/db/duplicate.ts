@@ -22,6 +22,7 @@ import { parsePage, parseRegion, type Page, type Region } from '../content/schem
 import { copyIntoStore } from '../media/blob';
 import { isAllowedMime, MAX_UPLOAD_BYTES, storagePathFor, type MediaMime } from '../media/limits';
 import type { MediaItem } from '../media/types';
+import { insertCopiedFont, listFontsForCopy } from './fonts';
 import { insertMedia, listAllMedia, type NewMedia } from './media';
 import { listPagesWithContent } from './pages';
 import { getRegion } from './regions';
@@ -287,5 +288,46 @@ export async function copyContentToTenant(
     await saveSettings(destTenantId, rw(settings));
 
     return { pages: pages.length };
+  });
+}
+
+// ---------------------------------------------------------------------------
+// The fonts
+// ---------------------------------------------------------------------------
+
+/** What the font copy did, for the orchestrator to report. */
+export interface FontCopyResult {
+  fonts: number;
+  files: number;
+}
+
+/**
+ * Copy a site's whole font library into another site.
+ *
+ * FONTS ARE DESIGN, SO THEY TRAVEL WITH A CLONE, where the blog and the other
+ * collections do NOT: those are the first client's own writing and have no place
+ * in the next client's site. Slice 3 copied the theme, which names its typefaces
+ * by slug, so those faces have to exist in the clone or a styled heading falls
+ * back to a system font. No urls are involved: a font is bytes and metadata, not
+ * a reference, so there is nothing for the media map to rewrite.
+ *
+ * Read the source in its own scope, hold it, then write the destination in ONE
+ * transaction: insertCopiedFont is called by id, so it reuses this scope and the
+ * whole library commits together or not at all. An empty library does no work.
+ */
+export async function copyFontsToTenant(
+  sourceTenantId: string,
+  destTenantId: string,
+): Promise<FontCopyResult> {
+  const fonts = await listFontsForCopy(sourceTenantId);
+  if (fonts.length === 0) return { fonts: 0, files: 0 };
+
+  return withTenant(destTenantId, async () => {
+    let files = 0;
+    for (const font of fonts) {
+      await insertCopiedFont(destTenantId, font);
+      files += font.files.length;
+    }
+    return { fonts: fonts.length, files };
   });
 }

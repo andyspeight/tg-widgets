@@ -1337,6 +1337,52 @@ describe('copyContentToTenant', () => {
 
 // ---------------------------------------------------------------------------
 
+describe('copyFontsToTenant', () => {
+  it('copies each family and its files verbatim in one destination transaction', async () => {
+    const { copyFontsToTenant } = await import('../lib/db/duplicate');
+
+    // Source: one uploaded family with a normal face and an italic face.
+    respond('from public.fonts order by slug', [
+      { id: 'F1', family: 'Brand Sans', slug: 'brand-sans', source: 'upload', fallback: 'sans' },
+    ]);
+    respond('from public.font_files where font_id', [
+      { weight: 400, style: 'normal', format: 'woff2', subset: null, unicode_range: null, bytes: Buffer.from('regular'), byte_size: 7 },
+      { weight: 400, style: 'italic', format: 'woff2', subset: 'latin', unicode_range: 'U+0-FF', bytes: Buffer.from('italic'), byte_size: 6 },
+    ]);
+    respond('insert into public.fonts', [{ id: 'DEST_F1' }]);
+
+    expect(await copyFontsToTenant(ALPHA, BETA)).toEqual({ fonts: 1, files: 2 });
+
+    // Both faces written under the new font id, with the italic PRESERVED rather
+    // than flattened to normal the way a re-import would.
+    // params: tenant, font_id, weight, style, format, subset, unicode_range, bytes, byte_size
+    const fileInserts = log.filter((s) => s.sql.includes('insert into public.font_files'));
+    expect(fileInserts).toHaveLength(2);
+    expect(fileInserts.every((s) => s.params[1] === 'DEST_F1')).toBe(true);
+    expect(fileInserts.map((s) => s.params[3])).toEqual(['normal', 'italic']);
+    // The bytes travel as the Buffer they were read as, not a reference.
+    expect(Buffer.isBuffer(fileInserts[1].params[7])).toBe(true);
+
+    // ONE destination transaction: insertCopiedFont reused the scope rather than
+    // open its own, so the tenant is set for the destination exactly once.
+    const destSets = log.filter(
+      (s) => s.role === 'app' && s.sql.includes('set_config') && s.params[0] === BETA,
+    );
+    expect(destSets).toHaveLength(1);
+  });
+
+  it('does nothing when the source has no fonts', async () => {
+    const { copyFontsToTenant } = await import('../lib/db/duplicate');
+    respond('from public.fonts order by slug', []);
+
+    expect(await copyFontsToTenant(ALPHA, BETA)).toEqual({ fonts: 0, files: 0 });
+    // Only the source read opened a transaction; no destination write.
+    expect(log.filter((s) => s.role === 'app' && s.sql === 'BEGIN')).toHaveLength(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
 describe('the connection string guard', () => {
   it.each([
     ['postgresql://postgres:pw@host:5432/postgres', 'postgres'],
