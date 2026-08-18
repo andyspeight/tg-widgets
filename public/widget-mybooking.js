@@ -182,7 +182,7 @@
   const API_PAY = (typeof window !== 'undefined' && window.__TG_PAY_API__) || (API_BASE + '/api/pay-balance');
   const API_AMEND = (typeof window !== 'undefined' && window.__TG_AMEND_API__) || (API_BASE + '/api/amend-order');
   const AMEND_MAX = 1000; // matches the server cap in /api/amend-order
-  const VERSION = '1.11.0';
+  const VERSION = '1.11.1';
 
   // ── Payment deep link ──
   // The balance reminder email links to the client's booking page with
@@ -3944,8 +3944,16 @@
                 || (u?.roomType && u.roomType.toLowerCase() !== 'unknown' ? u.roomType : null);
               if (!roomLabel) return '';
               const boardLabel = fmtBoard(rate?.board);
-              const guestsBit = (u?.sleepsAdults != null)
-                ? `${u.sleepsAdults} ${esc(u.sleepsAdults === 1 ? c.t('guest') : c.t('guests'))}`
+              // Guest count is the room's WHOLE party: adults + children. It used
+              // to show sleepsAdults alone, so a 2-adult 2-child room read "2
+              // guests" and dropped the children (YTG75824, Aug 2026). Both counts
+              // come from the room's own occupancy (units[].sleepsAdults /
+              // sleepsChildren), so a multi-room booking still totals per room.
+              const roomGuests = (u?.sleepsAdults != null || u?.sleepsChildren != null)
+                ? (u.sleepsAdults || 0) + (u.sleepsChildren || 0)
+                : null;
+              const guestsBit = (roomGuests != null)
+                ? `${roomGuests} ${esc(roomGuests === 1 ? c.t('guest') : c.t('guests'))}`
                 : '';
               const subParts = [boardLabel, guestsBit].filter(Boolean);
               return `
