@@ -1435,6 +1435,107 @@ describe('the duplicate-site action', () => {
 
 // ---------------------------------------------------------------------------
 
+describe('comments', () => {
+  const commentRow = (over: Record<string, unknown> = {}) => ({
+    id: 'c1',
+    page_id: 'p1',
+    parent_id: null,
+    author_id: 'u1',
+    body: 'Make this bigger',
+    anchor: null,
+    resolved_at: null,
+    resolved_by: null,
+    created_at: new Date('2026-08-18T00:00:00Z'),
+    ...over,
+  });
+
+  it('leaves a comment through an insert-select over pages, so it fails closed', async () => {
+    const { createComment } = await import('../lib/db/comments');
+    respond('insert into public.site_comments', [commentRow()]);
+
+    const ok = await createComment(ALPHA, { pageId: 'p1', authorId: 'u1', body: 'Make this bigger' });
+    expect(ok?.body).toBe('Make this bigger');
+
+    // THE SECURITY PROPERTY: it is INSERT ... SELECT FROM pages, not VALUES, so a
+    // page id belonging to another tenant selects nothing and writes nothing.
+    const insert = log.find((s) => s.sql.includes('insert into public.site_comments'));
+    expect(insert?.sql).toContain('from public.pages');
+    expect(insert?.sql).not.toContain('values');
+  });
+
+  it('returns null when the page is not this tenant, the select finding nothing', async () => {
+    const { createComment } = await import('../lib/db/comments');
+    // No respond, so the insert-select matches no page and returns nothing.
+    expect(await createComment(ALPHA, { pageId: 'p1', authorId: 'u1', body: 'hi' })).toBeNull();
+  });
+
+  it('replies only to a root, through the same guard', async () => {
+    const { addReply } = await import('../lib/db/comments');
+    respond('insert into public.site_comments', [commentRow({ id: 'r1', parent_id: 'c1' })]);
+
+    const reply = await addReply(ALPHA, { parentId: 'c1', authorId: 'u2', body: 'On it' });
+    expect(reply?.parentId).toBe('c1');
+
+    const insert = log.find((s) => s.sql.includes('insert into public.site_comments'));
+    // Selects the parent from site_comments and requires it to be a root, which
+    // is what keeps threads one level deep.
+    expect(insert?.sql).toContain('from public.site_comments c');
+    expect(insert?.sql).toContain('parent_id is null');
+  });
+
+  it('groups a page into threads, each root with its replies oldest first', async () => {
+    const { listPageComments } = await import('../lib/db/comments');
+    respond('from public.site_comments', [
+      commentRow({ id: 'c1', parent_id: null, body: 'root A' }),
+      commentRow({ id: 'r1', parent_id: 'c1', body: 'reply to A' }),
+      commentRow({ id: 'c2', parent_id: null, body: 'root B' }),
+    ]);
+
+    const threads = await listPageComments(ALPHA, 'p1');
+    expect(threads.map((t) => t.comment.id)).toEqual(['c1', 'c2']);
+    expect(threads[0].replies.map((r) => r.id)).toEqual(['r1']);
+    expect(threads[1].replies).toEqual([]);
+  });
+
+  it('resolves and reopens roots only', async () => {
+    const { resolveComment, reopenComment } = await import('../lib/db/comments');
+
+    respond('update public.site_comments', [
+      commentRow({ resolved_at: new Date('2026-08-18T01:00:00Z'), resolved_by: 'u2' }),
+    ]);
+    const resolved = await resolveComment(ALPHA, 'c1', 'u2');
+    expect(resolved?.resolvedBy).toBe('u2');
+    expect(log.find((s) => s.sql.includes('update public.site_comments'))?.sql).toContain(
+      'parent_id is null',
+    );
+
+    respond('update public.site_comments', [commentRow({ resolved_at: null, resolved_by: null })]);
+    expect((await reopenComment(ALPHA, 'c1'))?.resolvedAt).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+describe('cleanCommentBody', () => {
+  const chr = (code: number) => String.fromCharCode(code);
+
+  it('drops control characters, keeps prose whitespace, trims and caps', async () => {
+    const { cleanCommentBody, MAX_COMMENT_LENGTH } = await import('../lib/db/comments');
+
+    // Tab (9), newline (10) and carriage return (13) survive; NUL and bell do not.
+    const prose = 'a' + chr(9) + 'b' + chr(10) + 'c';
+    expect(cleanCommentBody(prose)).toBe(prose);
+    expect(cleanCommentBody('a' + chr(0) + chr(7) + 'b')).toBe('ab');
+
+    expect(cleanCommentBody('  hi  ')).toBe('hi');
+    expect(cleanCommentBody('   ')).toBeNull();
+    expect(cleanCommentBody(42)).toBeNull();
+    expect(cleanCommentBody('x'.repeat(MAX_COMMENT_LENGTH + 100))?.length).toBe(MAX_COMMENT_LENGTH);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
 describe('the connection string guard', () => {
   it.each([
     ['postgresql://postgres:pw@host:5432/postgres', 'postgres'],

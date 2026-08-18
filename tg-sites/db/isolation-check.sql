@@ -128,6 +128,17 @@ insert into public.site_activity (tenant_id, actor_id, action, summary) values
   ('11111111-1111-1111-1111-111111111111', 'iso-user-ann', 'page.publish', 'Published the Home page'),
   ('22222222-2222-2222-2222-222222222222', 'iso-user-bob', 'page.publish', 'Published the Home page');
 
+-- One comment thread each, on that tenant's own page, so the "own only" read has
+-- real rows and the resolve has one to touch. Alpha owns a root and its reply,
+-- Beta owns a root: two against one, so a leak of Beta's would change the count.
+insert into public.site_comments (id, tenant_id, page_id, parent_id, author_id, body) values
+  ('cccccccc-0000-0000-0000-00000000c001', '11111111-1111-1111-1111-111111111111',
+   'aaaaaaaa-0000-0000-0000-00000000a001', null, 'iso-user-ann', 'Make the hero bigger'),
+  ('cccccccc-0000-0000-0000-00000000c002', '11111111-1111-1111-1111-111111111111',
+   'aaaaaaaa-0000-0000-0000-00000000a001', 'cccccccc-0000-0000-0000-00000000c001', 'iso-user-ann', 'Will do'),
+  ('cccccccc-0000-0000-0000-00000000c003', '22222222-2222-2222-2222-222222222222',
+   'bbbbbbbb-0000-0000-0000-00000000b001', null, 'iso-user-bob', 'Change the colour');
+
 create temp table if not exists checks (
   ord    serial,
   name   text,
@@ -952,6 +963,62 @@ begin
      not changed, case when changed then 'A LINE WAS CHANGED' else 'no UPDATE grant' end),
     ('nor a line erased from it',
      not removed, case when removed then 'A LINE WAS DELETED' else 'no DELETE grant' end);
+end $$;
+
+-- ---------------------------------------------------------------------------
+-- Comments
+-- ---------------------------------------------------------------------------
+--
+-- Scoped like everything else, but NOT append-only: a thread is replied to and
+-- resolved, so update is granted where the activity log's is not. What must
+-- hold: a tenant reads its own comments and none of another's; it cannot leave a
+-- comment on another site; it CAN resolve one of its own; and it still cannot
+-- delete, because a review record should not vanish by default. The query layer
+-- adds the page-ownership fail-closed (a comment cannot be planted on a page you
+-- cannot see) on top of this, proven separately in tests/db.test.ts.
+--
+-- Fixtures are up at the top with the rest.
+do $$
+declare
+  own int; other int;
+  planted boolean := true; resolved_ok boolean := false; removed boolean := true;
+begin
+  set local role tg_sites_app;
+  perform set_config('app.current_tenant_id', '11111111-1111-1111-1111-111111111111', true);
+
+  select count(*) into own   from public.site_comments;
+  select count(*) into other from public.site_comments
+    where tenant_id = '22222222-2222-2222-2222-222222222222';
+
+  -- Commenting on another site. The WITH CHECK half refuses it.
+  begin
+    insert into public.site_comments (tenant_id, page_id, author_id, body)
+    values ('22222222-2222-2222-2222-222222222222',
+            'bbbbbbbb-0000-0000-0000-00000000b001', 'iso-user-ann', 'sneaky');
+  exception when others then planted := false; end;
+
+  -- Resolving its own thread. Update IS granted here, unlike the log.
+  begin
+    update public.site_comments set resolved_at = now(), resolved_by = 'iso-user-ann'
+      where id = 'cccccccc-0000-0000-0000-00000000c001';
+    resolved_ok := true;
+  exception when others then resolved_ok := false; end;
+
+  -- Erasing one. There is deliberately no DELETE grant.
+  begin
+    delete from public.site_comments;
+  exception when others then removed := false; end;
+
+  reset role;
+  insert into checks (name, passed, detail) values
+    ('a tenant sees its own comments', own = 2, 'saw ' || own || ' of 2'),
+    ('and none of another tenants comments', other = 0, 'leaked ' || other),
+    ('a tenant cannot comment on another site',
+     not planted, case when planted then 'IT PLANTED ONE' else 'the policy refused it' end),
+    ('a tenant can resolve its own thread',
+     resolved_ok, case when resolved_ok then 'update granted' else 'IT COULD NOT RESOLVE' end),
+    ('a comment cannot be deleted',
+     not removed, case when removed then 'A COMMENT WAS DELETED' else 'no DELETE grant' end);
 end $$;
 
 -- ---------------------------------------------------------------------------
