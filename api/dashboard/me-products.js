@@ -64,7 +64,11 @@ const PRODUCT_URLS = {
   [PRODUCTS.slugs.LUNA_QA]:        'https://qa.travelify.io/',
   [PRODUCTS.slugs.TOOL_HUB]:       '/admin/',
   [PRODUCTS.slugs.CONTRACT_LOADER]: 'https://contracts.travelify.io',
-  [PRODUCTS.slugs.LUNA_TRAVEL]:    'https://lunatravel.travelify.io',
+  // Opens the agency portal, where an agent brands their app and sends
+  // travellers access. Arriving from Control they are signed in automatically
+  // (the tg_session is exchanged for an agency session). The root domain is the
+  // traveller app, so it must not be the launch target for an agent.
+  [PRODUCTS.slugs.LUNA_TRAVEL]:    'https://lunatravel.travelify.io/agency',
   // In-build products (status "coming soon" in Control). These are TEMPORARY
   // preview deployments so staff can test them, and WILL change on go-live.
   // When each ships, flip it to "active" in Control and swap the URL here for
