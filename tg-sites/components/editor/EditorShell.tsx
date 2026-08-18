@@ -49,6 +49,7 @@ import { usePaletteDrop } from './usePaletteDrop';
 import { useSectionDrop } from './useSectionDrop';
 import { Outline } from './Outline';
 import { Rail } from './Rail';
+import { CommentsPanel } from './CommentsPanel';
 import { PagesPanel, type PageLink } from './PagesPanel';
 import { Canvas, type DropTarget } from './Canvas';
 import { Properties } from './Properties';
@@ -513,7 +514,7 @@ export function EditorShell({
    * same fold the top bar owns; this only says which of the two fills it when it
    * is open. Held here, not in the rail, because the shell draws the column.
    */
-  const [railPanel, setRailPanel] = useState<'layers' | 'pages'>('layers');
+  const [railPanel, setRailPanel] = useState<'layers' | 'pages' | 'comments'>('layers');
 
   /*
    * The pages as the Menu block needs them, so a link that points at a folder
@@ -1845,6 +1846,8 @@ export function EditorShell({
           onCreatePage={createPage}
           onMovePage={movePage}
         />
+      ) : railPanel === 'comments' ? (
+        <CommentsPanel pageId={pageId} />
       ) : (
         <Outline
           onAddSection={() => setInsertAt(page.sections.length)}

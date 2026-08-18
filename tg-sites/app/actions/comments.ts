@@ -16,6 +16,7 @@
  * cache bust would be a round trip for nothing.
  */
 
+import { resolveThreads, type ResolvedThread } from '../../lib/comments/resolve';
 import { currentUserId, requireTenantId } from '../../lib/auth/session';
 import {
   addReply,
@@ -25,8 +26,8 @@ import {
   reopenComment,
   resolveComment,
   type Comment,
-  type CommentThread,
 } from '../../lib/db/comments';
+import { listMembers } from '../../lib/db/members';
 
 export type CommentResult<T> = { ok: true; data: T } | { ok: false; error: string };
 
@@ -133,14 +134,21 @@ export async function reopenCommentAction(input: {
 
 export async function listPageCommentsAction(input: {
   pageId: unknown;
-}): Promise<CommentResult<CommentThread[]>> {
+}): Promise<CommentResult<ResolvedThread[]>> {
   try {
     const tenantId = await requireTenantId();
 
     const pageId = String(input?.pageId ?? '');
     if (!UUID.test(pageId)) return { ok: true, data: [] };
 
-    return { ok: true, data: await listPageComments(tenantId, pageId) };
+    // The author is resolved to a name here, on the server, the same way the
+    // activity log does it: the row stores an opaque id, and the members list,
+    // read under the same tenant scope, turns it into a name a person knows.
+    const [threads, members] = await Promise.all([
+      listPageComments(tenantId, pageId),
+      listMembers(tenantId),
+    ]);
+    return { ok: true, data: resolveThreads(threads, members) };
   } catch (error) {
     return { ok: false, error: explain(error) };
   }

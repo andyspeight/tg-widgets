@@ -22,7 +22,7 @@
 
 import type { ReactNode } from 'react';
 
-type Panel = 'layers' | 'pages';
+type Panel = 'layers' | 'pages' | 'comments';
 
 /** One item that navigates to an existing screen. */
 const LINKS: ReadonlyArray<{ href: string; label: string; title: string; icon: ReactNode }> = [
@@ -131,6 +131,21 @@ export function Rail({
           </svg>
         </span>
         <span className="ed-rail__lbl">Layers</span>
+      </button>
+
+      <button
+        type="button"
+        className="ed-rail__btn"
+        title="Comments on this page"
+        aria-pressed={active === 'comments'}
+        onClick={() => onToggle('comments')}
+      >
+        <span className="ed-rail__ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" strokeLinecap="round">
+            <path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.5 9.5 9.5 0 0 1-4-.9L3 20l1-4.5A8.4 8.4 0 0 1 3.5 11 8.5 8.5 0 0 1 12 3a8.4 8.4 0 0 1 8.5 8.5z" />
+          </svg>
+        </span>
+        <span className="ed-rail__lbl">Comments</span>
       </button>
 
       {LINKS.map((link) => (

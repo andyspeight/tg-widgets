@@ -132,6 +132,16 @@ const result = await esbuild.build({
         build.onResolve({ filter: /(^|\/)app\/actions\/designed$/ }, () => ({
           path: resolve(root, 'standalone/demo-designed-actions.ts'),
         }));
+
+        /*
+         * The comment actions, since the review-comments panel landed in the rail
+         * (18 Aug 2026). The real ones reach Postgres and read the site's members
+         * to name each author; the double keeps a seeded thread in memory so the
+         * panel can be opened, read, replied to and resolved in the review copy.
+         */
+        build.onResolve({ filter: /(^|\/)app\/actions\/comments$/ }, () => ({
+          path: resolve(root, 'standalone/demo-comment-actions.ts'),
+        }));
       },
     },
   ],

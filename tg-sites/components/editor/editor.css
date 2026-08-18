@@ -4968,3 +4968,189 @@ body[data-tg-dragging='block'] .tg-scrim {
   flex-direction: column;
   gap: 12px;
 }
+
+/* ---------------------------------------------------------------------------
+ * The Comments panel (Andy, 18 Aug 2026)
+ *
+ * The rail's Comments icon opens this in the same column the outline and pages
+ * list use. It borrows .ed-outline for the column, its border and its scroll,
+ * and adds a head, a box to leave a comment, and the threads. A thread is a
+ * card; its replies are indented under it; a resolved one is dimmed and sinks
+ * below the open ones (the ordering is in the component). The body keeps its
+ * whitespace and never renders as markup, because a comment is free input.
+ * ------------------------------------------------------------------------- */
+
+.ed-comments {
+  display: flex;
+  flex-direction: column;
+}
+
+.ed-comments__head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--ed-2);
+  padding: var(--ed-4) var(--ed-4) var(--ed-2);
+  background: var(--ed-panel);
+  border-bottom: 1px solid var(--ed-line-soft);
+}
+
+.ed-comments__title {
+  font-size: var(--ed-text-md);
+  font-weight: 600;
+  color: var(--ed-ink);
+}
+
+.ed-comments__count {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--ed-well);
+  color: var(--ed-ink-3);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ed-comments__new {
+  padding: var(--ed-3) var(--ed-4);
+  border-bottom: 1px solid var(--ed-line-soft);
+}
+
+.ed-comments__field {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-bg);
+  color: var(--ed-ink);
+  font-family: var(--ed-font);
+  font-size: var(--ed-text-base);
+  line-height: 1.45;
+  resize: vertical;
+}
+
+.ed-comments__field:focus-visible {
+  outline: 2px solid var(--ed-select);
+  outline-offset: 1px;
+  border-color: var(--ed-select);
+}
+
+.ed-comments__new-foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.ed-comments__note,
+.ed-comments__error {
+  margin: 0;
+  padding: var(--ed-4);
+  color: var(--ed-ink-3);
+  font-size: var(--ed-text-base);
+  line-height: 1.5;
+}
+
+.ed-comments__error {
+  color: var(--ed-danger, #b42318);
+}
+
+.ed-comments__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+}
+
+.ed-comments__thread {
+  padding: var(--ed-3) var(--ed-4);
+  border-bottom: 1px solid var(--ed-line-soft);
+}
+
+.ed-comments__thread[data-resolved='true'] {
+  opacity: 0.62;
+}
+
+.ed-comments__replies {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0 0 0 var(--ed-3);
+  border-left: 2px solid var(--ed-line);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ed-comments__bubble {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ed-comments__meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 12px;
+  color: var(--ed-ink-3);
+}
+
+.ed-comments__who {
+  font-weight: 600;
+  color: var(--ed-ink-2);
+}
+
+.ed-comments__dot {
+  color: var(--ed-ink-3);
+}
+
+.ed-comments__body {
+  margin: 0;
+  color: var(--ed-ink);
+  font-size: var(--ed-text-base);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ed-comments__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-3);
+  margin-top: 10px;
+}
+
+.ed-comments__act {
+  padding: 3px 4px;
+  border: none;
+  background: none;
+  color: var(--ed-ink-2);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--ed-r-sm, 6px);
+}
+
+.ed-comments__act:hover { color: var(--ed-ink); }
+.ed-comments__act:focus-visible { outline: 2px solid var(--ed-select); outline-offset: 1px; }
+.ed-comments__act--resolve { color: var(--ed-select); }
+.ed-comments__act[disabled] { opacity: 0.5; cursor: default; }
+
+.ed-comments__done {
+  color: var(--ed-ink-3);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ed-comments__reply {
+  margin-top: 10px;
+}
+
+.ed-comments__reply-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--ed-2);
+  margin-top: 8px;
+}
