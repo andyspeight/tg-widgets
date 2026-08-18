@@ -122,7 +122,8 @@
     "test:worldmap-hotel-dest": "node test/worldmap-hotel-destination-smoke.mjs",
     "test:dashboard-search": "node test/dashboard-widget-search-smoke.mjs",
     "test:offers-grid-embed": "node test/offers-grid-embed-smoke.mjs",
-    "test:offer-card-image-grid": "node test/offer-card-image-grid-smoke.mjs"
+    "test:offer-card-image-grid": "node test/offer-card-image-grid-smoke.mjs",
+    "test:mybooking-room-guests": "node test/mybooking-room-guests-smoke.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",
