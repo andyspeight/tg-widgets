@@ -1580,7 +1580,7 @@ function renderCatalogue() {
     const isEntitled = isStaff() || !isGated || !entitlementsLoaded || entitledWidgetCodes.has(code);
     const isLocked = signedIn && !isEntitled && !previewSoon;
     const isRequested = !!code && requestedCodes.has(code);
-    const minTier = getMinTier(w);
+    const minTier = getRequiredTier(w, code);
     // Card greys-out only for the genuinely-unbuilt state, not preview-soon
     // (preview-soon keeps a full-colour live preview, just with a flash).
     const soonCls = isUnbuilt ? ' soon' : '';
@@ -1821,6 +1821,28 @@ function getMinTier(widget) {
   return 'Ignite';
 }
 
+/* The plan a locked widget actually needs — shown on the card lock text, the
+   Request access modal AND the request email. It MUST come from the same
+   catalogue feed that draws the on-card plan pills (/api/widget-packages), so
+   every surface agrees. The hardcoded registry `access` map had drifted below
+   the catalogue and understated the tier (a Boost client was told an Ignite
+   widget was "included from Spark", and access got granted on the strength of
+   it — Andy, 18 Aug 2026), so the catalogue is the single source of truth here.
+   Falls back to the access-map tier only when the packages feed hasn't loaded. */
+function getRequiredTier(widget, code) {
+  const order = ['Spark', 'Boost', 'Ignite', 'Bespoke'];
+  const pkgs = code && Array.isArray(packagesByCode[code]) ? packagesByCode[code] : null;
+  if (pkgs && pkgs.length) {
+    let best = null;
+    for (const t of pkgs) {
+      const i = order.indexOf(t);
+      if (i !== -1 && (best === null || i < order.indexOf(best))) best = t;
+    }
+    if (best) return best;
+  }
+  return getMinTier(widget);
+}
+
 /* Bridge a registry widget to its Control catalogue product code, which is the
    key entitlements are granted against. Almost always `widget-<id>`, with a
    few exceptions. Keep in sync
@@ -1846,7 +1868,7 @@ function requestUpgrade(widgetId) {
   if (!w) return;
   const code = catalogueCodeFor(w);
   if (!code) return;
-  openUpgradeModal(w, code, getMinTier(w));
+  openUpgradeModal(w, code, getRequiredTier(w, code));
 }
 
 function closeUpgradeModal() {
