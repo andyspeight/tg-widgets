@@ -830,7 +830,45 @@ export function duplicateInnerBlock(
 // and keep that branch out of the components.
 // ---------------------------------------------------------------------------
 
-type AnyBlockPath = Extract<Path, { kind: 'block' | 'inner-block' }>;
+export type AnyBlockPath = Extract<Path, { kind: 'block' | 'inner-block' }>;
+
+/**
+ * The path to the block carrying this id, or null if none does.
+ *
+ * The reverse of blockAtPath, for a comment pinned to an element. The pin stores
+ * the block's stable id, which survives every edit and is re-minted on a
+ * duplicate (see duplicateBlock's reid), so it is unique and this returns at most
+ * one match. Inner containers are walked too, so a pin on a nested block resolves
+ * the same as one on a top-level block. A deleted block's id simply finds
+ * nothing, which the caller shows as a pin whose element is gone.
+ */
+export function locateBlockById(page: Page, id: string): AnyBlockPath | null {
+  const { sections } = page;
+  for (let s = 0; s < sections.length; s++) {
+    const { rows } = sections[s];
+    for (let r = 0; r < rows.length; r++) {
+      const { columns } = rows[r];
+      for (let c = 0; c < columns.length; c++) {
+        const { blocks } = columns[c];
+        for (let b = 0; b < blocks.length; b++) {
+          const block = blocks[b];
+          if (block.id === id) return { kind: 'block', section: s, row: r, column: c, block: b };
+
+          const inners = containerColumns(block);
+          for (let inner = 0; inner < inners.length; inner++) {
+            const innerBlocks = inners[inner].blocks;
+            for (let ib = 0; ib < innerBlocks.length; ib++) {
+              if (innerBlocks[ib].id === id) {
+                return { kind: 'inner-block', section: s, row: r, column: c, block: b, inner, innerBlock: ib };
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return null;
+}
 
 /** The block a block-or-inner-block path points at, or null if stale. */
 export function blockAtPath(page: Page, path: AnyBlockPath): Block | null {

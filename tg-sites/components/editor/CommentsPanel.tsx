@@ -32,7 +32,20 @@ import {
 import { relativeTime, absoluteDate } from '../../lib/activity/log';
 import type { ResolvedThread } from '../../lib/comments/resolve';
 
-export function CommentsPanel({ pageId }: { pageId: string }) {
+export function CommentsPanel({
+  pageId,
+  anchor = null,
+  resolveAnchorLabel,
+  onJump,
+}: {
+  pageId: string;
+  /** The selected element a new comment can pin to, or null for page-level. */
+  anchor?: { id: string; label: string } | null;
+  /** A pinned thread's element id turned into a label, or null if it is gone. */
+  resolveAnchorLabel?: (blockId: string) => string | null;
+  /** Select the element a pinned thread is about. */
+  onJump?: (blockId: string) => void;
+}) {
   const [threads, setThreads] = useState<ResolvedThread[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
@@ -76,8 +89,9 @@ export function CommentsPanel({ pageId }: { pageId: string }) {
       </div>
 
       <NewComment
-        onSubmit={async (body) => {
-          const result = await leaveCommentAction({ pageId, body });
+        anchor={anchor}
+        onSubmit={async (body, anchorId) => {
+          const result = await leaveCommentAction({ pageId, body, anchor: anchorId });
           if (result.ok) load();
           else setError(result.error);
         }}
@@ -99,7 +113,14 @@ export function CommentsPanel({ pageId }: { pageId: string }) {
       ) : (
         <ol className="ed-comments__list">
           {ordered.map((thread) => (
-            <Thread key={thread.id} thread={thread} onChanged={load} onError={setError} />
+            <Thread
+              key={thread.id}
+              thread={thread}
+              onChanged={load}
+              onError={setError}
+              resolveAnchorLabel={resolveAnchorLabel}
+              onJump={onJump}
+            />
           ))}
         </ol>
       )}
@@ -109,16 +130,38 @@ export function CommentsPanel({ pageId }: { pageId: string }) {
 
 // ---------------------------------------------------------------------------
 
-/** The box for a new page-level comment. Clears itself once one is posted. */
-function NewComment({ onSubmit }: { onSubmit: (body: string) => Promise<void> }) {
+/**
+ * The box for a new comment. Clears itself once one is posted.
+ *
+ * When an element is selected on the canvas the comment PINS to it by default,
+ * so the natural gesture (click the photo, type, post) attaches the note to that
+ * photo. Unticking pins it to the page instead. With nothing selected it is a
+ * page-level comment, and the control just says so.
+ */
+function NewComment({
+  anchor,
+  onSubmit,
+}: {
+  anchor: { id: string; label: string } | null;
+  onSubmit: (body: string, anchorId?: string) => Promise<void>;
+}) {
   const [body, setBody] = useState('');
   const [saving, setSaving] = useState(false);
+  const [pin, setPin] = useState(true);
+
+  // A new selection defaults back to pinning it, so selecting an element then
+  // typing pins to that element rather than to whatever was selected before.
+  useEffect(() => {
+    setPin(true);
+  }, [anchor?.id]);
+
+  const pinned = pin && anchor !== null;
 
   async function submit() {
     const clean = body.trim();
     if (!clean || saving) return;
     setSaving(true);
-    await onSubmit(clean);
+    await onSubmit(clean, pinned ? anchor!.id : undefined);
     setSaving(false);
     setBody('');
   }
@@ -135,11 +178,24 @@ function NewComment({ onSubmit }: { onSubmit: (body: string) => Promise<void> })
         className="ed-comments__field"
         value={body}
         rows={2}
-        placeholder="Leave a comment for the Travelgenix team…"
+        placeholder={pinned ? `Comment on ${anchor!.label}…` : 'Leave a comment for the Travelgenix team…'}
         disabled={saving}
         onChange={(event) => setBody(event.target.value)}
       />
       <div className="ed-comments__new-foot">
+        {anchor ? (
+          <label className="ed-comments__pin">
+            <input
+              type="checkbox"
+              checked={pin}
+              disabled={saving}
+              onChange={(event) => setPin(event.target.checked)}
+            />
+            Pin to {anchor.label}
+          </label>
+        ) : (
+          <span className="ed-comments__pin ed-comments__pin--none">On this page</span>
+        )}
         <button type="submit" className="tg-btn" data-variant="primary" disabled={saving || !body.trim()}>
           {saving ? 'Posting' : 'Comment'}
         </button>
@@ -154,10 +210,14 @@ function Thread({
   thread,
   onChanged,
   onError,
+  resolveAnchorLabel,
+  onJump,
 }: {
   thread: ResolvedThread;
   onChanged: () => void;
   onError: (message: string) => void;
+  resolveAnchorLabel?: (blockId: string) => string | null;
+  onJump?: (blockId: string) => void;
 }) {
   const [replying, setReplying] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -171,8 +231,28 @@ function Thread({
     else if (result.error) onError(result.error);
   }
 
+  // A pinned thread names its element and jumps to it. A pin whose element was
+  // since deleted resolves to null and reads as removed, and does not jump.
+  const pinLabel = thread.anchor ? resolveAnchorLabel?.(thread.anchor) ?? null : null;
+
   return (
     <li className="ed-comments__thread" data-resolved={thread.resolved ? 'true' : 'false'}>
+      {thread.anchor && (
+        <button
+          type="button"
+          className="ed-comments__pinchip"
+          disabled={!onJump || pinLabel === null}
+          onClick={() => onJump?.(thread.anchor!)}
+          title={pinLabel ? 'Go to this element' : 'This element has been removed'}
+        >
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z" />
+            <circle cx="12" cy="10" r="2.2" />
+          </svg>
+          {pinLabel ?? 'Removed element'}
+        </button>
+      )}
+
       <Bubble author={thread.author} at={thread.createdAt} body={thread.body} />
 
       {thread.replies.length > 0 && (

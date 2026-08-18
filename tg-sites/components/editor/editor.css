@@ -5038,9 +5038,55 @@ body[data-tg-dragging='block'] .tg-scrim {
 
 .ed-comments__new-foot {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ed-2);
   margin-top: 8px;
 }
+
+/* The pin control: which element this comment attaches to, beside the button. */
+.ed-comments__pin {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--ed-ink-2);
+  font-size: 12px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ed-comments__pin input { accent-color: var(--ed-select); }
+.ed-comments__pin--none { color: var(--ed-ink-3); font-weight: 500; }
+
+/* A thread's pin: the element it is about, a chip that jumps to it. */
+.ed-comments__pinchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  margin-bottom: 6px;
+  padding: 2px 8px 2px 6px;
+  border: 1px solid var(--ed-line);
+  border-radius: 999px;
+  background: var(--ed-well);
+  color: var(--ed-ink-2);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ed-comments__pinchip svg { flex: none; color: var(--ed-select); }
+.ed-comments__pinchip:hover { border-color: var(--ed-select); color: var(--ed-ink); }
+.ed-comments__pinchip:focus-visible { outline: 2px solid var(--ed-select); outline-offset: 1px; }
+.ed-comments__pinchip[disabled] { cursor: default; opacity: 0.7; }
+.ed-comments__pinchip[disabled] svg { color: var(--ed-ink-3); }
 
 .ed-comments__note,
 .ed-comments__error {

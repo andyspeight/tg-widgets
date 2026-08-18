@@ -115,7 +115,7 @@ export async function leaveCommentAction(input: {
     parentId: null,
     author: 'You',
     body,
-    anchor: null,
+    anchor: typeof input?.anchor === 'string' ? input.anchor : null,
     resolvedAt: null,
     resolvedBy: null,
     createdAt: new Date(),

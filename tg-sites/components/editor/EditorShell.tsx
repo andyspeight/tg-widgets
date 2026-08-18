@@ -32,9 +32,9 @@ import type { Page, RegionName, Section } from '../../lib/content/schema';
 import { parsePage } from '../../lib/content/schema';
 import { pageAsRegion, REGION_TITLES } from '../../lib/content/region-page';
 import { pageAsItem, type ItemMeta } from '../../lib/content/collection-page';
-import { createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
+import { blockLabel, createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
 import { buildPresetSection } from '../../lib/content/presets';
-import { addBlock, addColumn, addInnerBlock, blockAtPath, containerColumns, moveBlockTo, moveSection, parsePathKey, type Path, pathKey, resolve, updateBlockPropsAtPath } from '../../lib/content/tree';
+import { addBlock, addColumn, addInnerBlock, blockAtPath, containerColumns, locateBlockById, moveBlockTo, moveSection, parsePathKey, type Path, pathKey, resolve, updateBlockPropsAtPath } from '../../lib/content/tree';
 import { inlineEditableFields, richInlineField } from '../../lib/editor/inline-edit';
 import {
   DndContext,
@@ -661,6 +661,18 @@ export function EditorShell({
 
   const editingPath = editing?.path ?? null;
 
+  /*
+   * The element a new comment would pin to: whatever block is selected, by its
+   * stable id, with a readable label. Null when nothing, or a section or column,
+   * is selected, in which case a comment is left on the page as a whole. The
+   * Comments panel offers this as "pin to the selected element".
+   */
+  const commentAnchor = useMemo(() => {
+    if (selected?.kind !== 'block' && selected?.kind !== 'inner-block') return null;
+    const block = blockAtPath(page, selected);
+    return block ? { id: block.id, label: blockLabel(block) } : null;
+  }, [selected, page]);
+
   /** Identifies the last edit, so rapid edits to one field coalesce. */
   const lastEdit = useRef<{ key: string; at: number } | null>(null);
 
@@ -1075,6 +1087,31 @@ export function EditorShell({
     setSelected(path);
     if (path && path.kind !== 'page') setMobilePane('props');
   }, []);
+
+  /*
+   * Naming and finding a pinned comment's element. The pin stores a block id;
+   * resolveAnchorLabel turns it into a label for the panel, and jumpToAnchor
+   * finds where that block sits now and selects it, so a reviewer can click a
+   * pinned thread and land on the element it is about. A pin whose block has
+   * since been deleted resolves to null and does not jump.
+   */
+  const resolveAnchorLabel = useCallback(
+    (blockId: string): string | null => {
+      const path = locateBlockById(page, blockId);
+      if (!path) return null;
+      const block = blockAtPath(page, path);
+      return block ? blockLabel(block) : null;
+    },
+    [page],
+  );
+
+  const jumpToAnchor = useCallback(
+    (blockId: string) => {
+      const path = locateBlockById(page, blockId);
+      if (path) select(path);
+    },
+    [page, select],
+  );
 
   /*
    * PREVIEW MODE ON AND OFF.
@@ -1847,7 +1884,12 @@ export function EditorShell({
           onMovePage={movePage}
         />
       ) : railPanel === 'comments' ? (
-        <CommentsPanel pageId={pageId} />
+        <CommentsPanel
+          pageId={pageId}
+          anchor={commentAnchor}
+          resolveAnchorLabel={resolveAnchorLabel}
+          onJump={jumpToAnchor}
+        />
       ) : (
         <Outline
           onAddSection={() => setInsertAt(page.sections.length)}
