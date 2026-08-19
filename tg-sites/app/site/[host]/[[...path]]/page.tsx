@@ -11,7 +11,9 @@ import { WidgetScripts } from '../../../../components/render/WidgetScripts';
 import { SlideshowScript } from '../../../../components/render/SlideshowScript';
 import { fillNavFolders, fillNavRegion } from '../../../../lib/content/nav';
 import { listFontFaces } from '../../../../lib/db/fonts';
-import { getPublishedPage, listPublishedNavPages } from '../../../../lib/db/pages';
+import { getPublishedPage, listPublishedForSearch, listPublishedNavPages } from '../../../../lib/db/pages';
+import { searchDocs } from '../../../../lib/content/search';
+import { SearchResults } from '../../../../components/render/SearchResults';
 import { resolveRedirect } from '../../../../lib/db/redirects';
 import { getPublishedRegions } from '../../../../lib/db/regions';
 import { getPublishedItem, listPublished, listPublishedByTag, MAX_LISTING_ITEMS } from '../../../../lib/db/collections';
@@ -55,7 +57,21 @@ import { themeTokens } from '../../../../lib/theme/tokens';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ host: string; path?: string[] }> };
+type Params = {
+  params: Promise<{ host: string; path?: string[] }>;
+  /*
+   * The query string, for /search. Every other address ignores it, but a page
+   * component that reads searchParams at all must declare it, and Next hands it
+   * in the same awaited shape as params.
+   */
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+/** Whether this address is the search results page rather than a real page. */
+function isSearchPath(path: string[] | undefined): boolean {
+  const segments = (path ?? []).filter(Boolean);
+  return segments.length === 1 && segments[0] === 'search';
+}
 
 async function load(host: string, path: string[] | undefined) {
   const tenantId = await resolveTenantByHostname(decodeURIComponent(host));
@@ -182,7 +198,17 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
   try {
     const found = await load(host, path);
-    if (!found) return { title: 'Not found', robots: { index: false, follow: false } };
+    if (!found) {
+      /*
+       * The search results page, when no real page sits at /search. noindex,
+       * for the same reason a tag archive is: a results view is a way to find
+       * pages, not a page to rank, and letting it compete with the pages it
+       * lists is the duplicate-content mistake. follow stays on, so an engine
+       * still walks through to the pages.
+       */
+      if (isSearchPath(path)) return { title: 'Search', robots: { index: false, follow: true } };
+      return { title: 'Not found', robots: { index: false, follow: false } };
+    }
 
     /*
      * A TAG ARCHIVE is noindex: it is a way to find posts, not a page to rank,
@@ -282,11 +308,25 @@ async function gone(host: string, path: string[] | undefined): Promise<never> {
   notFound();
 }
 
-export default async function SitePage({ params }: Params) {
+export default async function SitePage({ params, searchParams }: Params) {
   const { host, path } = await params;
 
   const found = await load(host, path);
-  if (!found) return gone(host, path);
+  if (!found) {
+    /*
+     * /search, but only when no real page lives there, so load has already had
+     * its say and a client's own "search" page wins. The query rides in ?q= (a
+     * GET form, see the Search block), and an empty or missing one renders the
+     * page with its prompt rather than a 404.
+     */
+    if (isSearchPath(path)) {
+      const query = await searchParams;
+      const q = typeof query.q === 'string' ? query.q : Array.isArray(query.q) ? query.q[0] ?? '' : '';
+      const data = await loadSearch(host, q);
+      if (data) return renderSearchPage(host, data);
+    }
+    return gone(host, path);
+  }
 
   const slug = decodeURIComponent(host);
   const theme = themeTokens(found.theme, familiesFromFiles(found.faces)).style;
@@ -581,4 +621,55 @@ function formatDate(value: string): string {
   const name = MONTHS[Number(month) - 1];
   if (!name) return value;
   return `${Number(day)} ${name} ${year}`;
+}
+
+/**
+ * The search results page's own load, run ONLY when no real page lives at
+ * /search, so a client who makes a page called "search" keeps it. It reads the
+ * same shell a page reads (theme, fonts, header, footer, settings) plus every
+ * published page reduced to searchable text, and ranks them in memory. See
+ * lib/content/search.ts and listPublishedForSearch.
+ *
+ * Below the page render on purpose: the page is the primary render, and its
+ * widget and slideshow scans are the ones the tests read as "the public site".
+ */
+async function loadSearch(host: string, query: string) {
+  const tenantId = await resolveTenantByHostname(decodeURIComponent(host));
+  if (!tenantId) return null;
+
+  const [theme, faces, settings, regions, navPages, docs] = await Promise.all([
+    getPublicTheme(tenantId),
+    listFontFaces(tenantId),
+    getPublicSettings(tenantId),
+    getPublishedRegions(tenantId),
+    listPublishedNavPages(tenantId),
+    listPublishedForSearch(tenantId),
+  ]);
+
+  return { theme, faces, settings, regions, navPages, query, hits: searchDocs(docs, query) };
+}
+
+function renderSearchPage(host: string, data: NonNullable<Awaited<ReturnType<typeof loadSearch>>>) {
+  const slug = decodeURIComponent(host);
+  const theme = themeTokens(data.theme, familiesFromFiles(data.faces)).style;
+
+  return (
+    <>
+      <SiteHead settings={data.settings} />
+      <FontHead tenantSlug={slug} files={data.faces} typography={data.theme.typography} />
+
+      {/* The header and footer are siblings of the results, each carrying the
+          theme itself, exactly as they are around a page. */}
+      <RegionRenderer region={fillNavRegion(data.regions.header, data.navPages)} theme={theme} />
+      <SearchResults query={data.query} hits={data.hits} theme={theme} />
+      <RegionRenderer region={fillNavRegion(data.regions.footer, data.navPages)} theme={theme} />
+
+      {/* The header and footer may still hold a widget or a slideshow, so the
+          two enhancers scan them here as they do on a page. A search results
+          page has no page-content tree of its own, so it is these two only. */}
+      <WidgetScripts trees={[data.regions.header, data.regions.footer]} />
+      <SlideshowScript trees={[data.regions.header, data.regions.footer]} />
+      <SiteBody settings={data.settings} />
+    </>
+  );
 }

@@ -19,7 +19,9 @@ import { createPage as blankPage } from '../content/factory';
 import type { NavPage } from '../content/nav';
 import { livePaths, MAX_PATH_DEPTH, type PageNode } from '../content/paths';
 import { sanitisePage } from '../content/sanitise-page';
+import type { SearchDoc } from '../content/search';
 import { parsePage, type Page } from '../content/schema';
+import { pageText } from '../seo/audit';
 import { pageActivitySummary, recordActivity } from './activity';
 import { addressesBefore, recordMove } from './redirects';
 import { withPublicTenant, withTenant, type Tx } from './withTenant';
@@ -385,6 +387,55 @@ export async function listPublishedPaths(tenantId: string): Promise<PublishedPat
     }
 
     return paths;
+  });
+}
+
+/**
+ * Every published page reduced to what the site's own search reads.
+ *
+ * SAME READ-ONLY ROLE, SAME NARROWING, SAME PATH WALK as listPublishedPaths,
+ * for the same reasons: search must never surface a page a visitor cannot
+ * reach, and a site is tens of pages so one read and the paths built in JS
+ * beats a recursive query. The one addition is the text, pulled from the
+ * published content by the same pageText the writing assistant uses, so search
+ * reads exactly the words a reader sees rather than the JSON around them.
+ *
+ * A NOINDEXED PAGE IS LEFT OUT, the same page the sitemap leaves out: a client
+ * who asked for a page to stay out of every index means the site's own search
+ * too, not only Google's.
+ */
+export async function listPublishedForSearch(tenantId: string): Promise<SearchDoc[]> {
+  return withPublicTenant(tenantId, async (tx) => {
+    const rows = await tx`
+      select id, parent_id, slug, title, seo, published_content
+      from public.pages
+      where published_content is not null
+    `;
+
+    const byId = new Map<string, Record<string, unknown>>();
+    for (const raw of rows) byId.set(String((raw as Record<string, unknown>).id), raw as Record<string, unknown>);
+
+    const nodes: PageNode[] = [...byId.values()].map((row) => ({
+      id: String(row.id),
+      parentId: row.parent_id ? String(row.parent_id) : null,
+      slug: String(row.slug ?? ''),
+      published: true,
+    }));
+
+    const docs: SearchDoc[] = [];
+    for (const [id, path] of livePaths(nodes)) {
+      const row = byId.get(id);
+      if (!row) continue;
+      const seo = asObject(row.seo) ?? {};
+      if (seo.noindex === true) continue;
+      docs.push({
+        path,
+        title: String(row.title ?? ''),
+        text: pageText(hydrate(row, row.published_content), 8000),
+      });
+    }
+
+    return docs;
   });
 }
 

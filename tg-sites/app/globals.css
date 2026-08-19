@@ -1774,6 +1774,71 @@
 .tgs-search__glass { display: block; }
 
 /*
+ * THE SEARCH RESULTS PAGE. Plain and readable, drawn from the palette so it
+ * belongs to the client's site rather than sitting outside it. The box at the
+ * top is the same idea as the block, sized up for a page of its own.
+ */
+.tgs-search-page__inner { max-width: 760px; padding-top: var(--tgs-space-xl); padding-bottom: var(--tgs-space-xl); }
+.tgs-search-page__form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: var(--tgs-space-l);
+}
+.tgs-search-page__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 12px 18px;
+  border: 1px solid var(--tgs-border-strong, rgba(0, 0, 0, 0.24));
+  border-radius: 999px;
+  background: var(--tgs-surface, #fff);
+  color: var(--tgs-text, #14181f);
+  font: inherit;
+}
+.tgs-search-page__input::placeholder { color: var(--tgs-text-muted, #5b6472); opacity: 1; }
+.tgs-search-page__input:focus-visible {
+  outline: 2px solid var(--tgs-primary, #1f3a8a);
+  outline-offset: 2px;
+}
+.tgs-search-page__submit {
+  flex: none;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  background: var(--tgs-primary, #1f3a8a);
+  color: var(--tgs-on-primary, #fff);
+  font: inherit;
+  font-weight: 600;
+  transition: filter 0.15s ease;
+}
+.tgs-search-page__submit:hover { filter: brightness(1.08); }
+
+.tgs-search-page__note,
+.tgs-search-page__count { color: var(--tgs-text-muted, #5b6472); }
+.tgs-search-page__count { margin-bottom: var(--tgs-space-m); }
+
+.tgs-search-page__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--tgs-space-l); }
+.tgs-search-page__link {
+  display: inline-block;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--tgs-primary, #1f3a8a);
+  text-decoration: none;
+}
+.tgs-search-page__link:hover { text-decoration: underline; }
+.tgs-search-page__snippet {
+  margin: 6px 0 0;
+  color: var(--tgs-text, #14181f);
+  line-height: 1.6;
+}
+.tgs-search-page__snippet mark {
+  background: color-mix(in srgb, var(--tgs-primary, #1f3a8a) 18%, transparent);
+  color: inherit;
+  border-radius: 3px;
+  padding: 0 1px;
+}
+
+/*
  * PER-SCREEN ALIGNMENT (see lib/content/responsive.ts). Spacing and text size
  * fold a scalar through one custom property; alignment cannot, because it drives
  * three things at once: the block's own text-align, a max-width paragraph's
