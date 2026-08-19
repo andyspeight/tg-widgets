@@ -16,12 +16,15 @@
  * cache bust would be a round trip for nothing.
  */
 
+import { headers } from 'next/headers';
+
 import {
   resolveSiteComments,
   resolveThreads,
   type ResolvedThread,
   type SiteComment,
 } from '../../lib/comments/resolve';
+import { notifyNewComment } from '../../lib/comments/notify';
 import { currentUserId, requireTenantId } from '../../lib/auth/session';
 import {
   addReply,
@@ -75,9 +78,36 @@ export async function leaveCommentAction(input: {
     const comment = await createComment(tenantId, { pageId, authorId: userId, body, anchor });
     if (!comment) return { ok: false, error: 'That page is not part of this site.' };
 
+    // Tell the Travelgenix team, best effort. notifyNewComment sends only when a
+    // client (not staff) left it and there is staff to tell, and never throws, so
+    // a comment is saved whether or not an email leaves.
+    await notifyNewComment(tenantId, {
+      pageId,
+      authorId: userId,
+      body,
+      threadId: comment.id,
+      origin: await requestOrigin(),
+    });
+
     return { ok: true, data: comment };
   } catch (error) {
     return { ok: false, error: explain(error) };
+  }
+}
+
+/**
+ * The app's own origin, from the request, for a link in a notification email.
+ * Best effort: no host means the email simply carries no link.
+ */
+async function requestOrigin(): Promise<string | null> {
+  try {
+    const head = await headers();
+    const host = head.get('x-forwarded-host') || head.get('host');
+    if (!host) return null;
+    const proto = head.get('x-forwarded-proto') || 'https';
+    return `${proto}://${host}`;
+  } catch {
+    return null;
   }
 }
 
