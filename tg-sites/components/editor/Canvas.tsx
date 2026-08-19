@@ -122,6 +122,15 @@ interface Props {
    * folder still being built shows its drafts in the preview.
    */
   navPages?: readonly NavPage[];
+  /**
+   * Blocks that carry an open comment, so the canvas can pin a marker on each.
+   * `path` is the block's data-path (already resolved from the stable anchor id),
+   * `threadId` the thread to open, `count` how many threads sit on that block.
+   * Empty, or absent, draws nothing.
+   */
+  commentPins?: readonly { path: string; threadId: string; count: number }[];
+  /** Open the Comments panel on a thread, from a click on its canvas pin. */
+  onOpenComment?: (threadId: string) => void;
 }
 
 /**
@@ -218,6 +227,8 @@ export function Canvas({
   chromeFooter = null,
   onActivateRegion,
   navPages = [],
+  commentPins = [],
+  onOpenComment,
 }: Props) {
   const frameRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -248,6 +259,50 @@ export function Canvas({
     node.classList.add('is-selected');
     node.setAttribute('data-kind', pathKindLabel(selected));
   }, [selectedKey, selected, page]);
+
+  // ---------------------------------------------------------------------
+  // Comment pins
+  // ---------------------------------------------------------------------
+
+  // Where each open comment's pin sits, in the frame's own coordinates. The pins
+  // are rendered as a React overlay (below) rather than injected into the
+  // renderer's DOM, so React never reconciles them away, and, being their own
+  // layer, they sit OVER a block without touching its contentEditable. Positions
+  // are measured from the block rects and recomputed when the page, the pins or
+  // the viewport change, and when the frame resizes. Because the overlay lives
+  // inside the frame, which does not itself scroll, these coordinates stay right
+  // under scroll with no scroll listener.
+  const [pinPos, setPinPos] = useState<
+    { threadId: string; count: number; left: number; top: number }[]
+  >([]);
+
+  useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame || preview || commentPins.length === 0) {
+      setPinPos([]);
+      return;
+    }
+    const measure = () => {
+      const frameRect = frame.getBoundingClientRect();
+      const next: { threadId: string; count: number; left: number; top: number }[] = [];
+      for (const pin of commentPins) {
+        const node = frame.querySelector<HTMLElement>(`[data-path="${CSS.escape(pin.path)}"]`);
+        if (!node) continue;
+        const r = node.getBoundingClientRect();
+        next.push({
+          threadId: pin.threadId,
+          count: pin.count,
+          left: r.right - frameRect.left,
+          top: r.top - frameRect.top,
+        });
+      }
+      setPinPos(next);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(frame);
+    return () => ro.disconnect();
+  }, [page, commentPins, preview, viewport, viewportWidth]);
 
   // ---------------------------------------------------------------------
   // Editing the words where they are
@@ -896,6 +951,36 @@ export function Canvas({
           */
           region={region}
         />
+        {/*
+          Comment pins, over the page but inside the frame so they scroll with it.
+          A React overlay rather than DOM injected onto the blocks, so the renderer
+          never reconciles them away. pointer-events pass through except on a pin.
+        */}
+        {!preview && pinPos.length > 0 && (
+          <div className="ed-comment-pin-layer">
+            {pinPos.map((pin) => (
+              <button
+                key={pin.threadId}
+                type="button"
+                className="ed-comment-pin"
+                style={{ left: pin.left, top: pin.top }}
+                aria-label={
+                  pin.count > 1 ? `${pin.count} comments on this element` : 'A comment on this element'
+                }
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onOpenComment?.(pin.threadId);
+                }}
+              >
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z" />
+                  <circle cx="12" cy="10" r="2.2" />
+                </svg>
+                {pin.count > 1 && <span className="ed-comment-pin__n">{pin.count}</span>}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
       {!preview && stackNote && <p className="ed-stack-note">{stackNote}</p>}
     </>

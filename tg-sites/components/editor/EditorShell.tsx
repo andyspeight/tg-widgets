@@ -26,7 +26,7 @@ import {
 } from '../../app/actions/pages';
 import { publishRegionAction, saveRegionAction } from '../../app/actions/regions';
 import { publishItemAction, saveItemAction } from '../../app/actions/collections';
-import { openCommentCountAction } from '../../app/actions/comments';
+import { listPageCommentsAction, openCommentCountAction } from '../../app/actions/comments';
 import { PublishHistory } from './PublishHistory';
 import type { NavPage } from '../../lib/content/nav';
 import type { Page, RegionName, Section } from '../../lib/content/schema';
@@ -537,15 +537,31 @@ export function EditorShell({
    * region and item screens never ask.
    */
   const [openComments, setOpenComments] = useState(0);
-  const refreshCommentCount = useCallback(() => {
+  // The open threads pinned to an element on THIS page, so the canvas can mark
+  // each with a pin. Just the id and the block it is about; the panel holds the
+  // rest.
+  const [pageAnchors, setPageAnchors] = useState<{ threadId: string; blockId: string }[]>([]);
+  const refreshComments = useCallback(() => {
     if (region || itemId) return;
     void openCommentCountAction().then((result) => {
       if (result.ok) setOpenComments(result.data);
     });
-  }, [region, itemId]);
+    void listPageCommentsAction({ pageId }).then((result) => {
+      if (!result.ok) return;
+      setPageAnchors(
+        result.data
+          .filter((thread) => !thread.resolved && thread.anchor)
+          .map((thread) => ({ threadId: thread.id, blockId: thread.anchor as string })),
+      );
+    });
+  }, [region, itemId, pageId]);
   useEffect(() => {
-    refreshCommentCount();
-  }, [refreshCommentCount]);
+    refreshComments();
+  }, [refreshComments]);
+
+  // A thread to reveal in the panel, from the address (?comment=) or a click on a
+  // canvas pin. Seeded from the URL so a cross-page jump lands on it.
+  const [focusThread, setFocusThread] = useState<string | null>(focusComment);
 
   /*
    * The pages as the Menu block needs them, so a link that points at a folder
@@ -1143,6 +1159,34 @@ export function EditorShell({
     },
     [page, select],
   );
+
+  /*
+   * The blocks on this page that carry an open comment, as canvas pins. Each
+   * anchor's stable block id is resolved to its current data-path here, where the
+   * page tree is in hand, and grouped so a block with two threads shows one pin
+   * with a count. A pin whose block has since been deleted resolves to nothing
+   * and simply does not appear.
+   */
+  const commentPins = useMemo(() => {
+    if (region || itemId) return [] as { path: string; threadId: string; count: number }[];
+    const byPath = new Map<string, { path: string; threadId: string; count: number }>();
+    for (const anchor of pageAnchors) {
+      const at = locateBlockById(page, anchor.blockId);
+      if (!at) continue;
+      const key = pathKey(at);
+      const existing = byPath.get(key);
+      if (existing) existing.count += 1;
+      else byPath.set(key, { path: key, threadId: anchor.threadId, count: 1 });
+    }
+    return [...byPath.values()];
+  }, [page, pageAnchors, region, itemId]);
+
+  // A canvas pin opens the Comments panel on its thread.
+  const openCommentThread = useCallback((threadId: string) => {
+    setRailPanel('comments');
+    setPanels((current) => ({ ...current, outline: true }));
+    setFocusThread(threadId);
+  }, []);
 
   /*
    * PREVIEW MODE ON AND OFF.
@@ -1921,8 +1965,8 @@ export function EditorShell({
           anchor={commentAnchor}
           resolveAnchorLabel={resolveAnchorLabel}
           onJump={jumpToAnchor}
-          focusCommentId={focusComment}
-          onCountChange={refreshCommentCount}
+          focusCommentId={focusThread}
+          onCountChange={refreshComments}
         />
       ) : (
         <Outline
@@ -1966,6 +2010,10 @@ export function EditorShell({
         onActivateRegion={activateTree}
         // So a Menu link to a folder shows its dropdown on the canvas too.
         navPages={navPages}
+        // A pin on every block that carries an open comment; clicking it opens
+        // the Comments panel on that thread.
+        commentPins={commentPins}
+        onOpenComment={openCommentThread}
         /*
           "This page is empty" is the wrong sentence on the header screen, and
           it is the sentence somebody meets FIRST, since a client who has never

@@ -1390,6 +1390,7 @@
 }
 
 .ed-canvas-frame {
+  position: relative;
   width: 100%;
   background: #fff;
   border-radius: var(--ed-r-lg);
@@ -5337,6 +5338,50 @@ body[data-tg-dragging='block'] .tg-scrim {
   align-items: center;
   gap: 3px;
   color: var(--ed-select);
+}
+
+/* The overlay that carries the comment pins: covers the frame, lets clicks fall
+   through to the page, and only the pins themselves take a click. */
+.ed-comment-pin-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+
+/* A pin on a canvas block that carries an open comment. Its left/top are set to
+   the block's top-right corner (in frame coordinates) and the transform tucks it
+   just inside that corner. The editor's select colour and a white ring mark it as
+   tool UI over whatever the client content is. */
+.ed-comment-pin {
+  position: absolute;
+  transform: translate(calc(-100% - 6px), 6px);
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 5px;
+  border: 1.5px solid #fff;
+  border-radius: 999px;
+  background: var(--ed-select);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  opacity: 0.9;
+  transition: opacity 120ms ease-out, transform 120ms ease-out;
+}
+
+.ed-comment-pin:hover { opacity: 1; transform: translate(calc(-100% - 6px), 6px) scale(1.08); }
+.ed-comment-pin:focus-visible { outline: 2px solid var(--ed-select); outline-offset: 2px; }
+.ed-comment-pin svg { flex: none; }
+.ed-comment-pin__n { font-size: 11px; font-weight: 700; line-height: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ed-comment-pin { transition: none; }
+  .ed-comment-pin:hover { transform: translate(calc(-100% - 6px), 6px); }
 }
 
 /* The open-count badge on the rail's Comments icon. */

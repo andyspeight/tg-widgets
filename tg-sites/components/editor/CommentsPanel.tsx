@@ -87,6 +87,12 @@ export function CommentsPanel({
     load();
   }, [load]);
 
+  // A focus target (a canvas pin, or a cross-page landing) is a specific thread
+  // on this page, so show the per-page view rather than the whole-site list.
+  useEffect(() => {
+    if (focusCommentId) setScope('page');
+  }, [focusCommentId]);
+
   // Landing on a thread from the whole-site list: once this page's threads are
   // in, scroll to it, mark it for a beat, and jump to the element it pins to.
   // Kept to once per id with a ref so a later reload does not yank the view back.
