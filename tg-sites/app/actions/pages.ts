@@ -37,6 +37,7 @@ import {
 } from '../../lib/db/pages';
 import { slugify } from '../../lib/content/slug';
 import { pageTemplateSections } from '../../lib/content/page-templates';
+import { importDesignedFonts } from '../../lib/content/designed-fonts';
 import { currentUserId, requireTenantId } from '../../lib/auth/session';
 
 export type ActionResult<T = undefined> =
@@ -135,7 +136,16 @@ export async function createPageAction(input: {
     ),
   );
 
-  if (result.ok) revalidatePath('/sites');
+  if (result.ok) {
+    revalidatePath('/sites');
+    // A designed template carries its own typefaces; load them into this site so
+    // the design's type is exact. Best effort, after the page is written, so a
+    // font that will not import never fails adding the page.
+    const template = String(input.template ?? '');
+    if (template.startsWith('design-')) {
+      await importDesignedFonts(await requireTenantId(), template.slice('design-'.length));
+    }
+  }
   return result;
 }
 

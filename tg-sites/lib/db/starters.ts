@@ -29,6 +29,7 @@ import {
   type StarterFacts,
 } from '../content/starters';
 import { withTenant, type Tx } from './withTenant';
+import { importDesignedFonts } from '../content/designed-fonts';
 
 /** What happened, for the screen to say. */
 export interface StarterResult {
@@ -142,7 +143,7 @@ export async function applyStarter(
   const header = readyRegion(buildStarterRegion(starter.header, 'header', starter.pages, facts));
   const footer = readyRegion(buildStarterRegion(starter.footer, 'footer', starter.pages, facts));
 
-  return withTenant(tenantId, async (tx) => {
+  const result = await withTenant(tenantId, async (tx) => {
     if (!(await isEmpty(tx))) return null;
 
     let homePageId: string | null = null;
@@ -202,4 +203,18 @@ export async function applyStarter(
 
     return { pages: pages.length, homePageId };
   });
+
+  /*
+   * A DESIGNED STARTER CARRIES ITS OWN TYPEFACES. Its home is a frozen concept
+   * whose CSS names fonts like "Bodoni Moda"; loading them into this site's
+   * library is what makes the type exact rather than a fallback. Done AFTER the
+   * transaction, best effort: a font fetch is slow and external, and must never
+   * hold a write lock or roll a whole site back over a typeface. Only when a site
+   * was actually built (result is not null).
+   */
+  if (result && starterId.startsWith('design-')) {
+    await importDesignedFonts(tenantId, starterId.slice('design-'.length));
+  }
+
+  return result;
 }
