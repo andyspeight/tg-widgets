@@ -2699,6 +2699,22 @@
 .tgs-section[data-tone='accent'] .tgs-nav__link:hover { color: inherit; }
 
 /*
+ * The small icon that can lead a menu link, for the icon-led headers. Sized to
+ * the words beside it (1em from ContentIcon), nudged onto their baseline, and a
+ * hair of space before the label. A folder link is already inline-flex with a
+ * gap for its chevron, so there the flex gap does the spacing and the margin is
+ * dropped rather than doubled.
+ */
+.tgs-nav__icon {
+  flex: none;
+  width: 1em;
+  height: 1em;
+  margin-inline-end: 0.45em;
+  vertical-align: -0.12em;
+}
+.tgs-nav__item--folder > .tgs-nav__link .tgs-nav__icon { margin-inline-end: 0; }
+
+/*
  * THE PHONE MENU, WITH NO JAVASCRIPT.
  *
  * A `details` and a `summary`, which the browser opens, closes, focuses and

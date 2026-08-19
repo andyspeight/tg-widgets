@@ -1678,12 +1678,23 @@ function navLinks(items: Props[], keyPrefix: string): ReactElement[] {
        */
       const children = list(item, 'children');
 
+      /*
+       * The optional icon beside the word, for the icon-led menus in the header
+       * kit. Same guard as the icon block (isIconName, not truthiness): a name
+       * draws its glyph, anything else is left off entirely rather than rendered
+       * as a broken box. A menu is words first, so an unknown icon is silence,
+       * not an empty square.
+       */
+      const icon = str(item, 'icon');
+      const drawable = isIconName(icon);
+
       const link = (
         <a
           className="tgs-nav__link"
           href={href}
           {...(newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
         >
+          {drawable && <ContentIcon name={icon} className="tgs-nav__icon" />}
           {label}
           {children.length > 0 && (
             <svg

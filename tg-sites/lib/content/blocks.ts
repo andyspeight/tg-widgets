@@ -1493,6 +1493,12 @@ export const BLOCKS: readonly BlockDefinition[] = [
         fields: [
           { kind: 'text', key: 'label', label: 'Label', max: 60 },
           { kind: 'url', key: 'href', label: 'Links to', placeholder: '/about or https://' },
+          {
+            kind: 'icon',
+            key: 'icon',
+            label: 'Icon',
+            help: 'Optional. A small icon beside the link, for the icon-led menus. Leave blank for words only.',
+          },
           { kind: 'toggle', key: 'newTab', label: 'New tab' },
         ],
       },
