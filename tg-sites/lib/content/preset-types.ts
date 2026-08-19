@@ -109,14 +109,17 @@ export interface PresetBlock {
   props?: Record<string, unknown>;
   role?: SlotRole;
   /**
-   * A search term for the picture that goes here, for image and gallery blocks.
+   * A search term for the picture that goes here, for image and cards blocks.
    *
-   * OPTIONAL, and only used by hero presets so far. It drives two things that
-   * have to agree: the photograph the picker preview shows, and the one that is
-   * fetched into the client's own media when the hero is added. Left off, a hero
-   * image gets a fitting travel query chosen from a small palette by its
-   * position, so the previews carry photographs without every preset having to
-   * spell one out. Set it when a particular section wants a particular subject.
+   * OPTIONAL. It drives two things that have to agree: the photograph the
+   * picker preview shows, and the one that is fetched into the client's own
+   * media when the section is added (see lib/content/photo-plan.ts). On a hero,
+   * an image left without one gets a fitting travel query chosen from a small
+   * palette by its position; everywhere else the query is explicit or the frame
+   * stays empty, which is what keeps stock faces out of the team and
+   * testimonial presets. On a CARDS block the term is a suffix: each card
+   * searches as its own label plus these words, so the pictures match the
+   * places the sample copy names.
    *
    * It is a QUERY, not a URL. A frozen stock URL in a preset is the thing the
    * "pictures start empty" rule at the top of presets-page.ts exists to prevent;

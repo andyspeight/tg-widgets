@@ -522,7 +522,9 @@ describe('what actually reaches the database', () => {
 
   it('builds and validates everything before it opens a connection', () => {
     const apply = source.slice(source.indexOf('export async function applyStarter'));
-    const validated = apply.indexOf('ready(await buildStarterPage');
+    // Built, photographed, THEN validated: ready() runs on the filled page, so
+    // the fetched URLs pass through the same sanitiser a hand-picked one does.
+    const validated = apply.indexOf('ready(built)');
     // Checked for presence FIRST. Without this, deleting the ready() call makes
     // indexOf return -1, and -1 is less than everything, so the ordering
     // assertion below would pass with the validation gone.

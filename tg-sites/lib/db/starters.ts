@@ -30,6 +30,7 @@ import {
 } from '../content/starters';
 import { withTenant, type Tx } from './withTenant';
 import { importDesignedFonts } from '../content/designed-fonts';
+import { fillPagePhotos, type PhotoCache } from '../media/photo-fill';
 
 /** What happened, for the screen to say. */
 export interface StarterResult {
@@ -132,12 +133,21 @@ export async function applyStarter(
    * parsed and sanitised in memory first, so a starter that cannot build is a
    * throw with the connection still idle rather than a rollback halfway through
    * writing somebody's site.
+   *
+   * The photographs are fetched here too, for the same reason: two external
+   * calls per picture have no business inside a write transaction. One cache
+   * across the five pages, so the sections they share (every page ends on a
+   * call to action) share their pictures instead of importing five copies.
+   * The fill never throws; with no photo key the site is simply built with
+   * its frames empty, exactly as it was before photographs existed.
    */
+  const photoCache: PhotoCache = new Map();
   const pages = await Promise.all(
-    starter.pages.map(async (page) => ({
-      spec: page,
-      content: ready(await buildStarterPage(page, facts)),
-    })),
+    starter.pages.map(async (page) => {
+      const built = await buildStarterPage(page, facts);
+      await fillPagePhotos(tenantId, page, built.sections, photoCache);
+      return { spec: page, content: ready(built) };
+    }),
   );
 
   const header = readyRegion(buildStarterRegion(starter.header, 'header', starter.pages, facts));

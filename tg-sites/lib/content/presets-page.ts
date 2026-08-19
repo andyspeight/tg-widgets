@@ -24,6 +24,16 @@
  * "Choose an image" placeholder, which is a prompt. A stock photograph baked
  * into a preset is a picture somebody has to notice and remove, and the ones
  * that get missed end up on a live client site.
+ *
+ * A `photo` QUERY IS THE ONE SANCTIONED EXCEPTION, and it is not a baked
+ * picture: it is a search term resolved fresh at insert, into the client's own
+ * media, credited and swappable (see PresetBlock.photo and lib/content/
+ * photo-plan.ts). Heroes carried them first; the picture-led feature and CTA
+ * presets carry them now, so a page built from a template arrives photographed
+ * rather than as a wall of grey frames. Queries stay on scenery and travel
+ * things, never on people: a stock face presenting as the client's team or
+ * customers would be inventing a fact, so the team and testimonial presets keep
+ * their empty frames.
  */
 
 import type { SectionPreset } from './preset-types';
@@ -244,6 +254,41 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
      * swap. The dark tone is the fallback if the photo library is not connected.
      */
     section: { tone: 'dark', paddingY: 128, width: 'full', backgroundQuery: 'santorini sunset sea' },
+  },
+
+  {
+    /*
+     * THE INSIDE-PAGE OPENER. Every page template starts with one of these, and
+     * it is the difference between an About page that looks designed and a wall
+     * of white with words on it. Shorter than the home heroes on purpose: an
+     * inside page's banner introduces, it does not sell, so there is no button
+     * and the page below is the content. The template overrides the photograph
+     * per page (an About banner and a Holidays banner should not share a
+     * picture): see StarterSection.photo in lib/content/starters.ts.
+     */
+    id: 'hero-page-banner',
+    category: 'hero',
+    label: 'Page banner',
+    description: 'A short photographed opener for an inside page: the title and one line, no button.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'About us', level: 'h2', style: 'h1', ...CENTRED } },
+            {
+              type: 'text',
+              props: {
+                html: '<p>One line under the title. What this page is, in plain words.</p>',
+                size: 'l',
+                ...CENTRED,
+              },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { tone: 'dark', paddingY: 88, width: 'full', backgroundQuery: 'scenic coast road aerial' },
   },
 
   {
@@ -475,6 +520,13 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
           [
             {
               type: 'cards',
+              /*
+               * A SUFFIX, not a whole query: each card searches as its own label
+               * plus these words (Greece coast landscape...), so the photographs
+               * match the places the sample copy names. See cardQueries in
+               * lib/content/photo-plan.ts.
+               */
+              photo: 'coast landscape',
               props: {
                 columns: '3',
                 style: 'bordered',
@@ -1909,7 +1961,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         gap: 48,
         align: 'centre',
         columns: [
-          [{ type: 'image', props: { ratio: '4/3', radius: 'lg' } }],
+          [{ type: 'image', photo: 'travel agent desk brochures planning', props: { ratio: '4/3', radius: 'lg' } }],
           [
             { type: 'heading', props: { html: 'Tagline here', style: 'h6', level: 'h3' } },
             { type: 'heading', props: { html: 'Everything in one place', style: 'h2' } },
@@ -1965,6 +2017,8 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
           [
             {
               type: 'cards',
+              // Same suffix contract as hero-cards-below: label + these words.
+              photo: 'coast landscape',
               props: {
                 columns: '3',
                 style: 'bordered',
@@ -2002,7 +2056,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
             },
             { type: 'button', props: { label: 'Learn more', variant: 'ghost' } },
           ],
-          [{ type: 'image', props: { ratio: '4/3', radius: 'lg' } }],
+          [{ type: 'image', photo: 'greek island harbour boats', props: { ratio: '4/3', radius: 'lg' } }],
         ],
       },
       {
@@ -2010,7 +2064,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         gap: 48,
         align: 'centre',
         columns: [
-          [{ type: 'image', props: { ratio: '4/3', radius: 'lg' } }],
+          [{ type: 'image', photo: 'old town street europe evening', props: { ratio: '4/3', radius: 'lg' } }],
           [
             { type: 'heading', props: { html: 'The second thing', style: 'h3' } },
             {
@@ -2345,7 +2399,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         gap: 48,
         align: 'centre',
         columns: [
-          [{ type: 'image', props: { ratio: '4/3', radius: 'lg' } }],
+          [{ type: 'image', photo: 'travel planning map notebook coffee', props: { ratio: '4/3', radius: 'lg' } }],
           [
             { type: 'heading', props: { html: 'Let us plan it for you', style: 'h2' } },
             {

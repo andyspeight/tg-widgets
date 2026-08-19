@@ -31,11 +31,10 @@ import {
   listMedia,
   setMediaAlt,
 } from '../../lib/db/media';
-import { blobConfigured, copyIntoStore, describeBlob, removeBlob } from '../../lib/media/blob';
+import { blobConfigured, describeBlob, removeBlob } from '../../lib/media/blob';
 import {
   assertPathnameForTenant,
   cleanFilename,
-  filenameStem,
   MAX_UPLOAD_BYTES,
   MEDIA_MIME,
   pixelDimension,
@@ -43,12 +42,12 @@ import {
   tenantPrefix,
 } from '../../lib/media/limits';
 import {
-  importableUrl,
   ORIENTATIONS,
   pexelsConfigured,
   searchPexels,
   type Orientation,
 } from '../../lib/media/pexels';
+import { importStockPhoto } from '../../lib/media/stock';
 import type { MediaItem, StockPhoto } from '../../lib/media/types';
 
 export type MediaResult<T> = { ok: true; data: T } | { ok: false; error: string };
@@ -290,43 +289,11 @@ export async function importStockAction(photo: StockPhoto): Promise<MediaResult<
       };
     }
 
-    // Throws unless the URL is on the provider's image host.
-    const source = importableUrl(photo);
-
-    const description = text(photo?.description, 300);
-    const stem = filenameStem(description || `pexels-${String(photo?.id ?? 'photo')}`);
-    const stored = await copyIntoStore(
-      source,
-      `${tenantPrefix(tenantId)}${stem}.jpg`,
-      MAX_UPLOAD_BYTES,
-    );
-
-    const item = await insertMedia(tenantId, {
-      storageKey: stored.pathname,
-      url: stored.url,
-      filename: `${stem}.${MEDIA_MIME[stored.contentType]}`,
-      mime: stored.contentType,
-      bytes: stored.size,
-      width: pixelDimension(photo?.width),
-      height: pixelDimension(photo?.height),
-      /*
-       * The provider's own description becomes the starting alt text.
-       *
-       * It is a real description of the picture, written by somebody who looked
-       * at it, and it is very much better than the empty string a person in a
-       * hurry leaves behind. Editable afterwards, because "Brown Rocks During
-       * Golden Hour" is accurate and says nothing about why the picture is on
-       * this page.
-       */
-      alt: description,
-      source: 'pexels',
-      credit: {
-        photographer: photo?.credit?.photographer,
-        photographerUrl: photo?.credit?.photographerUrl,
-        providerUrl: photo?.credit?.providerUrl,
-        providerId: photo?.credit?.providerId,
-      },
-    });
+    // The import itself lives in lib/media/stock.ts, shared with the photo
+    // fill that runs during a starter or template build. This action is the
+    // session-facing door: it resolves the tenant and turns a throw into a
+    // sentence.
+    const item = await importStockPhoto(tenantId, photo);
 
     revalidatePath('/', 'layout');
     return { ok: true, data: item };

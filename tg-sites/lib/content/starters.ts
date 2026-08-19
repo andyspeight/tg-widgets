@@ -42,7 +42,7 @@ import { DESIGNED_HOME_META, type DesignedHomeMeta } from './designed-homes-meta
 // The shape of a starter
 // ---------------------------------------------------------------------------
 
-/** One section: which preset, and what to say at the top of it. */
+/** One section: which preset, what to say at the top of it, and how it sits. */
 export interface StarterSection {
   /** An id from lib/content/presets.ts. Checked by the tests. */
   preset: string;
@@ -57,6 +57,25 @@ export interface StarterSection {
   heading?: string;
   /** Written into the section's first text block, if it has one. */
   body?: string;
+  /**
+   * The band this section sits on, when the preset's own is not right HERE.
+   *
+   * This is what gives a template page its rhythm. A preset ships the tone that
+   * suits it alone; a page is a sequence, and two tinted sections that read
+   * fine apart read as one long grey slab together. The page is the one place
+   * the sequence is visible, so the page gets to say. (Andy, 19 Aug 2026:
+   * template pages must be proper styled pages, not a wall of white.)
+   */
+  tone?: Section['tone'];
+  /**
+   * A search term for a photograph behind this section, overriding the
+   * preset's own backgroundQuery. The page banners need it: every template
+   * page opens with the same hero-page-banner preset, and an About banner and
+   * a Holidays banner should not share a picture. Same contract as every
+   * photo query: resolved fresh at build into the client's own media, never a
+   * frozen URL, and best effort (see lib/content/photo-plan.ts).
+   */
+  photo?: string;
 }
 
 export interface StarterPage {
@@ -217,6 +236,9 @@ function buildSection(spec: StarterSection, facts: StarterFacts): Section | null
     if (text) text.props.html = `<p>${fill(spec.body, facts)}</p>`;
   }
 
+  // The page's say over the band this section sits on. See StarterSection.tone.
+  if (spec.tone) section.tone = spec.tone;
+
   return section;
 }
 
@@ -336,6 +358,14 @@ const FAQ_PAGE: StarterPage = {
     + 'Money protection, changes, and what happens after you book.',
   sections: [
     {
+      preset: 'hero-page-banner',
+      photo: 'airport departures board traveller',
+      heading: 'Questions, answered plainly',
+      body: 'The things people ask before they book.',
+    },
+    {
+      // Still the FIRST accordion on the page: the banner carries none, so the
+      // structured data keeps reading these questions. See faqLd.
       preset: 'faq-title-beside',
       heading: 'Questions we are asked most',
       body:
@@ -343,6 +373,11 @@ const FAQ_PAGE: StarterPage = {
         + 'They are the ones worth answering, and we hand them to AI assistants '
         + 'as ready-made answers.',
     },
+    // The question everybody has and nobody asks, answered on its own band.
+    { preset: 'features-badges', body: 'Your ATOL, ABTA or trust account details.' },
+    // Proof between the answers and the ask, on the plain page so the tinted
+    // badge strip above it reads as its own band.
+    { preset: 'testimonials-one-big', tone: 'light' },
     /*
      * A CALL TO ACTION, NOT A SECOND ACCORDION, and the reason is structural
      * rather than editorial. faqLd reads the FIRST accordion on a page and only
@@ -351,7 +386,7 @@ const FAQ_PAGE: StarterPage = {
      * would ever be handed, which is the opposite of what this page is for.
      */
     {
-      preset: 'cta-split',
+      preset: 'cta-centred',
       heading: 'Still not sure?',
       body: 'Ring us and ask. It is usually quicker than reading.',
     },
@@ -367,6 +402,12 @@ const CONTACT_PAGE: StarterPage = {
     + 'just someone who knows the places you are asking about.',
   sections: [
     {
+      preset: 'hero-page-banner',
+      photo: 'writing postcards coffee table map',
+      heading: 'Talk to {{company|us}}',
+      body: 'No obligation and no hard sell. Just a conversation.',
+    },
+    {
       preset: 'contact-form-beside-details',
       body:
         'Tell us roughly where you fancy and when, and we will come back to you '
@@ -381,7 +422,14 @@ const CONTACT_PAGE: StarterPage = {
      *
      * And no heading override: "Where to find us" is already the right words.
      */
-    { preset: 'contact-map-beside' },
+    { preset: 'contact-map-beside', tone: 'subtle' },
+    /*
+     * Quick answers on the way to the phone. The FIRST accordion on THIS page,
+     * so it becomes the contact page's own FAQPage node, which is valid: the
+     * one-per-page rule (see faqLd) is per page, not per site.
+     */
+    { preset: 'faq-simple', heading: 'Quick answers before you ring' },
+    { preset: 'features-badges', body: 'Your ATOL, ABTA or trust account details.' },
   ],
 };
 
@@ -412,7 +460,15 @@ const BASE_STARTERS: readonly Starter[] = [
           + 'Talk to {{company|us}} about your next trip.',
         sections: [
           {
-            preset: 'blank-opener',
+            /*
+             * A REAL HERO, photograph and all, not a white section with words.
+             * The photo query rides the same fill as every template picture, so
+             * a wizard-built site opens on a picture from the first second.
+             * (Andy, 19 Aug 2026: template pages must look designed, and the
+             * home page most of all.)
+             */
+            preset: 'hero-background',
+            photo: 'tropical beach turquoise aerial',
             heading: 'Holidays worth the time off',
             body:
               '{{about|Say in two sentences what you arrange and who for. '
@@ -470,22 +526,30 @@ const BASE_STARTERS: readonly Starter[] = [
           + 'Tailor-made holidays from {{company|us}}, planned by someone who has been.',
         sections: [
           {
-            preset: 'text-intro',
+            preset: 'hero-page-banner',
+            photo: 'greek islands whitewashed village sea',
             heading: 'Where we can take you',
+            body: 'Trips planned by somebody who has actually been.',
+          },
+          {
+            preset: 'text-intro',
+            heading: 'The kind of trips we plan',
             body:
               'A paragraph on the range. If you specialise, say so here rather '
               + 'than pretending to cover everywhere.',
           },
           {
             preset: 'features-cards-with-pictures',
+            tone: 'subtle',
             heading: 'Places we know well',
             body: 'Three destinations, with a picture and a line each.',
           },
           // "How it works" over a numbered list of steps is already what this
           // preset says, and there is no paragraph in it to write into.
           { preset: 'features-how-it-works' },
+          { preset: 'testimonials-three', heading: 'From people just back' },
           {
-            preset: 'cta-split',
+            preset: 'cta-with-picture',
             heading: 'Not seeing what you want?',
             body: 'Most of what we arrange is not on this page. Ask.',
           },
@@ -503,8 +567,14 @@ const BASE_STARTERS: readonly Starter[] = [
           + 'beats booking it through a website. Based in {{town|the UK}}.',
         sections: [
           {
-            preset: 'blank-about',
+            preset: 'hero-page-banner',
+            photo: 'winding coastal road aerial',
             heading: 'About {{company|us}}',
+            body: 'The people behind the trips, and how we work.',
+          },
+          {
+            preset: 'blank-about',
+            heading: 'Who we are',
             /*
              * NOT the profile again. The home page opener already carries it
              * word for word, and the same paragraph on two pages of one site is
@@ -516,16 +586,19 @@ const BASE_STARTERS: readonly Starter[] = [
               + 'you look after. The short version is already on the home page, '
               + 'so this is the place to say more than you can there.',
           },
+          // On its own light band between the tinted about strip and the team,
+          // so the page alternates rather than running three tints together.
+          { preset: 'features-by-the-numbers', tone: 'light' },
           {
             preset: 'team-grid',
             body:
               'Faces and first names. This is the page that turns a website into '
               + 'somebody worth ringing.',
           },
-          // The preset already titles itself "A few numbers" and holds no
-          // paragraph, so there is nothing here worth saying differently.
-          { preset: 'features-by-the-numbers' },
-          { preset: 'cta-statement', heading: 'Come and say hello' },
+          // One voice about the PEOPLE, which is what this page is for. The
+          // quotes about the trips live on the home page.
+          { preset: 'testimonials-one-big' },
+          { preset: 'cta-dark-panel', heading: 'Come and say hello' },
         ],
       },
       FAQ_PAGE,
@@ -557,7 +630,10 @@ const BASE_STARTERS: readonly Starter[] = [
           + 'Talk to {{company|us}} about your next trip.',
         sections: [
           {
-            preset: 'blank-opener',
+            // The same photographed opener the full site gets. A one-page site
+            // has one chance to look designed, and it is this section.
+            preset: 'hero-background',
+            photo: 'tropical beach turquoise aerial',
             heading: 'Holidays worth the time off',
             body:
               '{{about|Say in two sentences what you arrange and who for. '

@@ -36,7 +36,8 @@ import {
   type PublishRecord,
 } from '../../lib/db/pages';
 import { slugify } from '../../lib/content/slug';
-import { pageTemplateSections } from '../../lib/content/page-templates';
+import { pageTemplateSections, pageTemplateSpec } from '../../lib/content/page-templates';
+import { fillPagePhotos } from '../../lib/media/photo-fill';
 import { importDesignedFonts } from '../../lib/content/designed-fonts';
 import { parsePage } from '../../lib/content/schema';
 import { sanitisePage } from '../../lib/content/sanitise-page';
@@ -138,11 +139,26 @@ export async function createPageAction(input: {
   // looked up against the closed registry: an unknown or missing id builds the
   // blank page (pageTemplateSections returns null), so nothing a caller sends
   // reaches the page except by naming a template we built.
-  const sections = (await pageTemplateSections(String(input.template ?? ''))) ?? undefined;
+  const templateId = String(input.template ?? '');
+  const sections = (await pageTemplateSections(templateId)) ?? undefined;
 
-  const result = await attempt(async () =>
-    createPage(
-      await requireCapability('pages'),
+  const result = await attempt(async () => {
+    const tenantId = await requireCapability('pages');
+
+    /*
+     * The template's photographs, fetched into this client's media before the
+     * page is written, so an About page arrives with its banner picture rather
+     * than a grey frame. Best effort inside the fill itself (it never throws):
+     * with no photo key or no store the page is simply added unphotographed,
+     * exactly as it always was.
+     */
+    if (sections) {
+      const spec = pageTemplateSpec(templateId);
+      if (spec) await fillPagePhotos(tenantId, spec, sections);
+    }
+
+    return createPage(
+      tenantId,
       {
         title: String(input.title ?? '').slice(0, 200),
         slug: slugify(input.slug ?? input.title ?? ''),
@@ -150,8 +166,8 @@ export async function createPageAction(input: {
         sections,
       },
       (await currentUserId()) ?? undefined,
-    ),
-  );
+    );
+  });
 
   if (result.ok) {
     revalidatePath('/sites');
