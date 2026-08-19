@@ -36,6 +36,7 @@
 import { buildPresetSection, presetById } from './presets';
 import { newId } from './factory';
 import { emptyRegion, type Block, type Page, type Region, type RegionName, type Section } from './schema';
+import { DESIGNED_HOMES, designedHomeStarterPage } from './designed-homes';
 
 // ---------------------------------------------------------------------------
 // The shape of a starter
@@ -67,6 +68,19 @@ export interface StarterPage {
   /** Whether this page goes in the menu, and what it is called there. */
   menu?: string;
   sections: StarterSection[];
+  /**
+   * A pre-built page, in place of naming presets above.
+   *
+   * When set, buildStarterPage returns these sections rather than mapping
+   * `sections`, and `sections` stays empty. It is the one hook a designed home
+   * (lib/content/designed-homes.ts) needs to ride the SAME two doors a
+   * preset-named page rides: the add-a-page picker and the starter wizard both
+   * build every page through buildStarterPage, so neither learned a new shape.
+   * A build page names no preset, so the drift tests, which walk `sections`,
+   * simply find nothing to check, and the safety tests still parse and sanitise
+   * what it returns exactly as they do a named page.
+   */
+  build?: (facts: StarterFacts) => Section[];
 }
 
 export interface Starter {
@@ -218,9 +232,11 @@ export function buildStarterPage(page: StarterPage, facts: StarterFacts): Page {
       description: fill(page.description, facts),
       noindex: false,
     },
-    sections: page.sections
-      .map((spec) => buildSection(spec, facts))
-      .filter((section): section is Section => section !== null),
+    sections: page.build
+      ? page.build(facts)
+      : page.sections
+          .map((spec) => buildSection(spec, facts))
+          .filter((section): section is Section => section !== null),
   };
 }
 
@@ -335,7 +351,7 @@ const CONTACT_PAGE: StarterPage = {
   ],
 };
 
-export const STARTERS: readonly Starter[] = [
+const BASE_STARTERS: readonly Starter[] = [
   {
     id: 'agency',
     label: 'A full site',
@@ -544,6 +560,32 @@ export const STARTERS: readonly Starter[] = [
     ],
   },
 ];
+
+/**
+ * The ten designed homepages, each offered as a whole-site starter.
+ *
+ * A "start from a look" choice at site creation: the concept's home page, then
+ * the four supporting pages the travel starter already builds (Holidays, About
+ * us, FAQ, Contact), so a client who picks a look still gets a coherent five
+ * page site and a menu across all of them. The home is a build page, so its
+ * finished sample sections come straight from designed-homes.ts; the rest are
+ * the agency starter's, reused by reference so improving one improves both.
+ */
+const DESIGNED_STARTERS: readonly Starter[] = DESIGNED_HOMES.map((home) => ({
+  id: `design-${home.id}`,
+  label: home.label,
+  description: home.description,
+  summary: [
+    `A home page in the ${home.label} style, with finished words and pictures to make your own`,
+    'Holidays, About us, FAQ and Contact to match, from our travel starter',
+    'A header with a menu of all five, and a footer',
+  ],
+  header: 'header-cta-bar',
+  footer: 'footer-tinted-four',
+  pages: [designedHomeStarterPage(home), ...BASE_STARTERS[0].pages.filter((page) => page.slug !== '')],
+}));
+
+export const STARTERS: readonly Starter[] = [...BASE_STARTERS, ...DESIGNED_STARTERS];
 
 export function starterById(id: string): Starter | undefined {
   return STARTERS.find((starter) => starter.id === id);

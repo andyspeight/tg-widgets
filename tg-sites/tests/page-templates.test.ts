@@ -80,13 +80,16 @@ describe('the list of templates', () => {
    * THE ONE THIS FILE EXISTS FOR. agencyPage() throws at module load on a slug
    * the starter no longer has, so merely importing the module above already
    * proves every designed template resolves. This states it as a claim: a
-   * designed template carries a real page with sections in it.
+   * designed template carries a real page that produces sections, either by
+   * naming presets (the site pages) or by a build hook (the designed homes).
    */
-  it('names starter pages that exist, each with sections', () => {
+  it('names starter pages that exist, each producing sections', () => {
     expect(DESIGNED.length).toBeGreaterThan(0);
     for (const template of DESIGNED) {
       expect(template.page, template.id).toBeTruthy();
-      expect(template.page!.sections.length, template.id).toBeGreaterThan(0);
+      const page = template.page!;
+      const produces = page.sections.length > 0 || typeof page.build === 'function';
+      expect(produces, `${template.id} names no preset and has no build hook`).toBe(true);
     }
   });
 

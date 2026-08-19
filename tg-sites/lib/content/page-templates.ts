@@ -37,6 +37,7 @@ import {
   type StarterFacts,
   type StarterPage,
 } from './starters';
+import { DESIGNED_HOMES, designedHomeStarterPage } from './designed-homes';
 
 const AGENCY = STARTERS.find((starter) => starter.id === 'agency');
 
@@ -159,6 +160,22 @@ export interface PageTemplate {
  * the team, the questions), then Contact at the end. More pages are a data edit
  * here: name a slug the agency starter builds, or add a StarterPage above.
  */
+/**
+ * The ten designed homepages as add-a-page templates.
+ *
+ * The same designed homes the starter wizard offers as whole sites, offered
+ * here as a single page a client can add to a site they have already started.
+ * Each is a build page, so picking one seeds the concept's finished home
+ * sections; the id is looked up server side against this closed list exactly as
+ * every other template is.
+ */
+const DESIGNED_TEMPLATES: readonly PageTemplate[] = DESIGNED_HOMES.map((home) => ({
+  id: `design-${home.id}`,
+  label: home.label,
+  description: home.description,
+  page: designedHomeStarterPage(home),
+}));
+
 export const PAGE_TEMPLATES: readonly PageTemplate[] = [
   {
     id: 'blank',
@@ -214,6 +231,7 @@ export const PAGE_TEMPLATES: readonly PageTemplate[] = [
     description: 'A short enquiry prompt beside your details, and a map of where to find you.',
     page: agencyPage('contact'),
   },
+  ...DESIGNED_TEMPLATES,
 ];
 
 export function pageTemplateById(id: string): PageTemplate | undefined {
