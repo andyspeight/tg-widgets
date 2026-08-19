@@ -34,10 +34,11 @@ import type { Section } from './schema';
 import {
   STARTERS,
   buildStarterPage,
+  designedHomeStarterPage,
   type StarterFacts,
   type StarterPage,
 } from './starters';
-import { DESIGNED_HOMES, designedHomeStarterPage } from './designed-homes';
+import { DESIGNED_HOME_META } from './designed-homes-meta';
 
 const AGENCY = STARTERS.find((starter) => starter.id === 'agency');
 
@@ -169,11 +170,11 @@ export interface PageTemplate {
  * sections; the id is looked up server side against this closed list exactly as
  * every other template is.
  */
-const DESIGNED_TEMPLATES: readonly PageTemplate[] = DESIGNED_HOMES.map((home) => ({
-  id: `design-${home.id}`,
-  label: home.label,
-  description: home.description,
-  page: designedHomeStarterPage(home),
+const DESIGNED_TEMPLATES: readonly PageTemplate[] = DESIGNED_HOME_META.map((meta) => ({
+  id: `design-${meta.id}`,
+  label: meta.label,
+  description: meta.description,
+  page: designedHomeStarterPage(meta),
 }));
 
 export const PAGE_TEMPLATES: readonly PageTemplate[] = [
@@ -250,8 +251,8 @@ const BLANK_FACTS: StarterFacts = { company: '', town: '', about: '' };
  * nothing a caller sends becomes page content except by naming a template we
  * built.
  */
-export function pageTemplateSections(id: string): Section[] | null {
+export async function pageTemplateSections(id: string): Promise<Section[] | null> {
   const template = pageTemplateById(id);
   if (!template || !template.page) return null;
-  return buildStarterPage(template.page, BLANK_FACTS).sections;
+  return (await buildStarterPage(template.page, BLANK_FACTS)).sections;
 }

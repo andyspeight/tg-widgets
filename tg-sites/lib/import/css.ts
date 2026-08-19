@@ -341,7 +341,12 @@ function handleAtRule(rule: AtRule, ctx: Context, insideRule: boolean, insideKey
       rule.remove();
       return;
     }
-    const renamed = `${original}-${ctx.suffix}`;
+    // Idempotent: scoping an already-scoped stylesheet must not append the
+    // suffix a second time. Without this, re-cleaning on every save (and the
+    // renderer re-cleaning on every render) would grow `fade` into
+    // `fade-tgi-x-tgi-x-tgi-x`, and a frozen imported design could never be a
+    // sanitiser fixpoint.
+    const renamed = original.endsWith(`-${ctx.suffix}`) ? original : `${original}-${ctx.suffix}`;
     ctx.keyframes.set(original, renamed);
     rule.params = renamed;
     processContainer(rule, ctx, insideRule, true);

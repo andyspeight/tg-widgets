@@ -120,13 +120,13 @@ describe('the sections a template seeds', () => {
    * reads to take its old blank path untouched. An unknown id folding to Blank
    * is what stops a stale or hostile pick from blocking a create.
    */
-  it('is null for a blank page', () => {
-    expect(pageTemplateSections('blank')).toBeNull();
+  it('is null for a blank page', async () => {
+    expect(await pageTemplateSections('blank')).toBeNull();
   });
 
-  it('is null for an id it does not recognise', () => {
-    expect(pageTemplateSections('no-such-template')).toBeNull();
-    expect(pageTemplateSections('')).toBeNull();
+  it('is null for an id it does not recognise', async () => {
+    expect(await pageTemplateSections('no-such-template')).toBeNull();
+    expect(await pageTemplateSections('')).toBeNull();
   });
 
   /*
@@ -135,9 +135,9 @@ describe('the sections a template seeds', () => {
    * with an EMPTY profile, since that is the state of the brand new site doing
    * the adding.
    */
-  it('seeds a page the schema accepts and the sanitiser leaves alone', () => {
+  it('seeds a page the schema accepts and the sanitiser leaves alone', async () => {
     for (const template of DESIGNED) {
-      const sections = pageTemplateSections(template.id);
+      const sections = await pageTemplateSections(template.id);
       expect(sections, template.id).toBeTruthy();
 
       const parsed = seed(sections!);
@@ -153,10 +153,13 @@ describe('the sections a template seeds', () => {
    * travel agent's own new page is the most embarrassing thing this can do, and
    * an empty profile is exactly when it would happen.
    */
-  it('leaves no {{token}} behind on an empty profile', () => {
+  it('leaves no starter {{token}} behind on an empty profile', async () => {
     for (const template of DESIGNED) {
-      const sections = pageTemplateSections(template.id);
-      expect(JSON.stringify(sections), template.id).not.toContain('{{');
+      const sections = await pageTemplateSections(template.id);
+      // A frozen designed home carries {{tg:...}} import slots on purpose; strip
+      // them, then no starter token ({{company}} and friends) should remain.
+      const json = JSON.stringify(sections).replace(/\{\{tg:[^}]*\}\}/g, '');
+      expect(json, template.id).not.toMatch(/\{\{\s*(company|town|about)\b/);
     }
   });
 
@@ -164,9 +167,9 @@ describe('the sections a template seeds', () => {
    * A FRESH TREE EACH TIME. Two pages seeded from one template must not share a
    * section id, or the editor would edit the wrong one.
    */
-  it('mints new ids on every build', () => {
-    const a = pageTemplateSections('home');
-    const b = pageTemplateSections('home');
+  it('mints new ids on every build', async () => {
+    const a = await pageTemplateSections('home');
+    const b = await pageTemplateSections('home');
     expect(a?.[0]?.id).toBeTruthy();
     expect(a?.[0]?.id).not.toBe(b?.[0]?.id);
   });

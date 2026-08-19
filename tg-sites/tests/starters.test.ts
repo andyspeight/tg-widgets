@@ -302,17 +302,22 @@ describe('filling in the blanks', () => {
    * literally, in a heading, on a travel agent's own website. Checked against
    * an EMPTY profile, which is the state a brand new site is in.
    */
-  it('never leaves a token on a page, even with nothing filled in', () => {
+  it('never leaves a token on a page, even with nothing filled in', async () => {
     for (const starter of STARTERS) {
       for (const spec of starter.pages) {
-        const page = buildStarterPage(spec, EMPTY);
+        const page = await buildStarterPage(spec, EMPTY);
         /*
          * The OPENER only. A closing }} appears all over the JSON as two nested
          * objects ending together, so looking for it finds every page and
          * proves nothing. A leftover token always starts with {{ and fill()
          * replaces a whole match, so it can never drop half of one.
+         *
+         * A frozen designed home carries {{tg:...}} import slots, which are meant
+         * to be there. They are stripped first, then nothing token-shaped should
+         * be left.
          */
-        expect(JSON.stringify(page), `${starter.id}/${spec.slug}`).not.toContain('{{');
+        const json = JSON.stringify(page).replace(/\{\{tg:[^}]*\}\}/g, '');
+        expect(json, `${starter.id}/${spec.slug}`).not.toContain('{{');
       }
     }
   });
@@ -331,10 +336,10 @@ describe('filling in the blanks', () => {
 describe('building a page', () => {
   const home = STARTERS[0].pages[0];
 
-  it('produces a page the schema accepts and the sanitiser does not change', () => {
+  it('produces a page the schema accepts and the sanitiser does not change', async () => {
     for (const starter of STARTERS) {
       for (const spec of starter.pages) {
-        const built = buildStarterPage(spec, FILLED);
+        const built = await buildStarterPage(spec, FILLED);
 
         const parsed = parsePage(built);
         expect(parsed.ok, `${starter.id}/${spec.slug}: ${parsed.ok ? '' : parsed.errors.join('; ')}`)
@@ -353,8 +358,8 @@ describe('building a page', () => {
     }
   });
 
-  it('writes the heading it was given into the section title', () => {
-    const page = buildStarterPage(home, FILLED);
+  it('writes the heading it was given into the section title', async () => {
+    const page = await buildStarterPage(home, FILLED);
     const headings = blocks(page.sections).filter((block) => block.type === 'heading');
     expect(headings[0].props.html).toBe('Holidays worth the time off');
   });
@@ -369,8 +374,8 @@ describe('building a page', () => {
    * deliberate. This is the behavioural check, not a claim about the data: it
    * fails the moment titleBlock goes back to being firstBlock.
    */
-  it('goes into the title, not into the tagline sitting above it', () => {
-    const built = buildStarterPage(
+  it('goes into the title, not into the tagline sitting above it', async () => {
+    const built = await buildStarterPage(
       {
         title: 'X',
         slug: 'x',
@@ -390,8 +395,8 @@ describe('building a page', () => {
    * And the other half: a section with only column labels in it has nowhere to
    * put a title, so nothing is written rather than a label being overwritten.
    */
-  it('writes nothing when a section has no title heading at all', () => {
-    const built = buildStarterPage(
+  it('writes nothing when a section has no title heading at all', async () => {
+    const built = await buildStarterPage(
       {
         title: 'X',
         slug: 'x',
@@ -405,8 +410,8 @@ describe('building a page', () => {
     expect(JSON.stringify(built)).toContain('Opening hours');
   });
 
-  it('wraps the body in a paragraph, since a text block holds markup', () => {
-    const page = buildStarterPage(home, FILLED);
+  it('wraps the body in a paragraph, since a text block holds markup', async () => {
+    const page = await buildStarterPage(home, FILLED);
     const text = blocks(page.sections).find((block) => block.type === 'text');
     expect(String(text?.props.html)).toMatch(/^<p>/);
   });
@@ -415,17 +420,17 @@ describe('building a page', () => {
    * Every id fresh, or two sections of the same site would share one and the
    * editor would edit the wrong one.
    */
-  it('mints new ids every time it builds', () => {
-    const a = buildStarterPage(home, FILLED);
-    const b = buildStarterPage(home, FILLED);
+  it('mints new ids every time it builds', async () => {
+    const a = await buildStarterPage(home, FILLED);
+    const b = await buildStarterPage(home, FILLED);
     expect(a.id).not.toBe(b.id);
     expect(a.sections[0].id).not.toBe(b.sections[0].id);
   });
 
-  it('leaves the search title empty, so it falls back to the page name', () => {
+  it('leaves the search title empty, so it falls back to the page name', async () => {
     // Writing one here would put the same words in two places from the start,
     // and the SEO assistant is what improves on it.
-    expect(buildStarterPage(home, FILLED).seo?.title).toBe('');
+    expect((await buildStarterPage(home, FILLED)).seo?.title).toBe('');
   });
 });
 
@@ -517,7 +522,7 @@ describe('what actually reaches the database', () => {
 
   it('builds and validates everything before it opens a connection', () => {
     const apply = source.slice(source.indexOf('export async function applyStarter'));
-    const validated = apply.indexOf('ready(buildStarterPage');
+    const validated = apply.indexOf('ready(await buildStarterPage');
     // Checked for presence FIRST. Without this, deleting the ready() call makes
     // indexOf return -1, and -1 is less than everything, so the ordering
     // assertion below would pass with the validation gone.

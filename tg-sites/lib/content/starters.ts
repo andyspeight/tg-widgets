@@ -36,7 +36,7 @@
 import { buildPresetSection, presetById } from './presets';
 import { newId } from './factory';
 import { emptyRegion, type Block, type Page, type Region, type RegionName, type Section } from './schema';
-import { DESIGNED_HOMES, designedHomeStarterPage } from './designed-homes';
+import { DESIGNED_HOME_META, type DesignedHomeMeta } from './designed-homes-meta';
 
 // ---------------------------------------------------------------------------
 // The shape of a starter
@@ -79,8 +79,11 @@ export interface StarterPage {
    * A build page names no preset, so the drift tests, which walk `sections`,
    * simply find nothing to check, and the safety tests still parse and sanitise
    * what it returns exactly as they do a named page.
+   *
+   * It may be async, because a designed home reaches its frozen markup by a
+   * dynamic import, which keeps that markup out of the editor's browser bundle.
    */
-  build?: (facts: StarterFacts) => Section[];
+  build?: (facts: StarterFacts) => Section[] | Promise<Section[]>;
 }
 
 export interface Starter {
@@ -217,8 +220,20 @@ function buildSection(spec: StarterSection, facts: StarterFacts): Section | null
   return section;
 }
 
-/** A whole page, ready to be saved as a draft. */
-export function buildStarterPage(page: StarterPage, facts: StarterFacts): Page {
+/**
+ * A whole page, ready to be saved as a draft.
+ *
+ * Async because a build page may reach its sections through a dynamic import
+ * (see StarterPage.build). A preset-named page resolves synchronously inside the
+ * await and costs nothing.
+ */
+export async function buildStarterPage(page: StarterPage, facts: StarterFacts): Promise<Page> {
+  const sections = page.build
+    ? await page.build(facts)
+    : page.sections
+        .map((spec) => buildSection(spec, facts))
+        .filter((section): section is Section => section !== null);
+
   return {
     version: 1,
     id: newId('pg'),
@@ -232,11 +247,30 @@ export function buildStarterPage(page: StarterPage, facts: StarterFacts): Page {
       description: fill(page.description, facts),
       noindex: false,
     },
-    sections: page.build
-      ? page.build(facts)
-      : page.sections
-          .map((spec) => buildSection(spec, facts))
-          .filter((section): section is Section => section !== null),
+    sections,
+  };
+}
+
+/**
+ * A designed home as a StarterPage, for the two doors that build one.
+ *
+ * Always the home page: the empty slug, in the menu as "Home". Its sections come
+ * from the build hook, which reaches the frozen markup by a DYNAMIC import so the
+ * markup stays a server chunk and never enters the editor's browser bundle. The
+ * search description is the home's own blurb, which reads with an empty profile
+ * because it carries no token.
+ */
+export function designedHomeStarterPage(meta: DesignedHomeMeta): StarterPage {
+  return {
+    title: 'Home',
+    slug: '',
+    menu: 'Home',
+    description: meta.blurb,
+    sections: [],
+    build: async () => {
+      const { designedHomeSections } = await import('./designed-homes');
+      return designedHomeSections(meta.id);
+    },
   };
 }
 
@@ -571,18 +605,18 @@ const BASE_STARTERS: readonly Starter[] = [
  * finished sample sections come straight from designed-homes.ts; the rest are
  * the agency starter's, reused by reference so improving one improves both.
  */
-const DESIGNED_STARTERS: readonly Starter[] = DESIGNED_HOMES.map((home) => ({
-  id: `design-${home.id}`,
-  label: home.label,
-  description: home.description,
+const DESIGNED_STARTERS: readonly Starter[] = DESIGNED_HOME_META.map((meta) => ({
+  id: `design-${meta.id}`,
+  label: meta.label,
+  description: meta.description,
   summary: [
-    `A home page in the ${home.label} style, with finished words and pictures to make your own`,
+    `A home page in the ${meta.label} style, pixel for pixel, with words and pictures to make your own`,
     'Holidays, About us, FAQ and Contact to match, from our travel starter',
     'A header with a menu of all five, and a footer',
   ],
   header: 'header-cta-bar',
   footer: 'footer-tinted-four',
-  pages: [designedHomeStarterPage(home), ...BASE_STARTERS[0].pages.filter((page) => page.slug !== '')],
+  pages: [designedHomeStarterPage(meta), ...BASE_STARTERS[0].pages.filter((page) => page.slug !== '')],
 }));
 
 export const STARTERS: readonly Starter[] = [...BASE_STARTERS, ...DESIGNED_STARTERS];

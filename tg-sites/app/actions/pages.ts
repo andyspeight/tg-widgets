@@ -120,7 +120,7 @@ export async function createPageAction(input: {
   // looked up against the closed registry: an unknown or missing id builds the
   // blank page (pageTemplateSections returns null), so nothing a caller sends
   // reaches the page except by naming a template we built.
-  const sections = pageTemplateSections(String(input.template ?? '')) ?? undefined;
+  const sections = (await pageTemplateSections(String(input.template ?? ''))) ?? undefined;
 
   const result = await attempt(async () =>
     createPage(

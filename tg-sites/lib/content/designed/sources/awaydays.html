@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Away Days Travel — Big trips, silly prices. Ibiza from £249.</title>
+<meta name="description" content="Cheap group holidays for 18–30s. Ibiza, Zante, Magaluf, Amsterdam and Croatia festivals. £49 deposit, pay the rest monthly. ATOL protected.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAFAF5;
+    --ink:#17161B;
+    --cobalt:#2F45E0;
+    --pink:#FF5E7A;
+    --acid:#FFD84D;
+    --rule:2px solid var(--ink);
+    --display:"Bricolage Grotesque", sans-serif;
+    --body:"Figtree", sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:var(--body);
+    background:var(--paper);
+    color:var(--ink);
+    font-size:16px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  img{display:block;max-width:100%;}
+  a{color:inherit;}
+  :focus-visible{outline:3px solid var(--cobalt);outline-offset:3px;}
+  ::selection{background:var(--acid);}
+
+  /* ---------- nav ---------- */
+  .nav{
+    background:var(--ink);
+    color:var(--paper);
+    display:flex;
+    align-items:center;
+    gap:28px;
+    padding:0 clamp(16px,4vw,48px);
+    height:64px;
+    position:sticky;
+    top:0;
+    z-index:50;
+    border-bottom:var(--rule);
+  }
+  .nav__logo{
+    font-family:var(--display);
+    font-weight:800;
+    font-size:22px;
+    letter-spacing:-0.01em;
+    text-decoration:none;
+    display:flex;
+    align-items:baseline;
+    gap:6px;
+  }
+  .nav__logo em{font-style:normal;color:var(--acid);}
+  .nav__links{display:flex;gap:4px;list-style:none;margin-right:auto;}
+  .nav__links a{
+    text-decoration:none;
+    font-weight:600;
+    font-size:14.5px;
+    padding:10px 12px;
+    display:inline-block;
+  }
+  .nav__links a:hover{background:var(--cobalt);}
+  .nav__phone{
+    font-size:13.5px;
+    font-weight:600;
+    text-decoration:none;
+    color:var(--paper);
+    opacity:.85;
+    white-space:nowrap;
+  }
+  .nav__phone:hover{opacity:1;text-decoration:underline;}
+  .btn{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:15px;
+    text-decoration:none;
+    background:var(--acid);
+    color:var(--ink);
+    border:2px solid var(--ink);
+    padding:11px 20px;
+    display:inline-block;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:transform .15s ease-out, background .15s ease-out;
+  }
+  .btn:hover{transform:translate(-2px,-2px);box-shadow:4px 4px 0 var(--pink);}
+  .btn:active{transform:translate(0,0);box-shadow:none;}
+  .btn--pink{background:var(--pink);}
+  .btn--pink:hover{box-shadow:4px 4px 0 var(--acid);}
+  .btn--big{font-size:17px;padding:14px 26px;}
+
+  /* ---------- hero collage ---------- */
+  .hero{
+    padding:clamp(28px,4.5vw,60px) clamp(16px,4vw,48px) clamp(12px,2vw,24px);
+    display:grid;
+    grid-template-columns:minmax(300px,5fr) 7fr;
+    gap:clamp(24px,4vw,64px);
+    align-items:center;
+    overflow:hidden;
+  }
+  .hero__kicker{
+    display:inline-block;
+    font-family:var(--display);
+    font-weight:700;
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    background:var(--acid);
+    border:2px solid var(--ink);
+    padding:5px 10px;
+    margin-bottom:18px;
+    transform:rotate(-1.2deg);
+  }
+  h1{
+    font-family:var(--display);
+    font-weight:800;
+    font-size:clamp(44px,6vw,86px);
+    line-height:.95;
+    letter-spacing:-0.03em;
+    max-width:12ch;
+  }
+  h1 .u{
+    box-shadow:inset 0 -0.28em 0 var(--acid);
+  }
+  .hero__sub{
+    max-width:340px;
+    font-size:16.5px;
+    font-weight:500;
+    padding-left:16px;
+    border-left:4px solid var(--pink);
+    margin-top:20px;
+  }
+  .hero__sub strong{font-weight:700;}
+  .hero__cta{
+    margin-top:26px;
+    display:flex;
+    align-items:center;
+    gap:18px;
+    flex-wrap:wrap;
+  }
+  .hero__trust{
+    font-size:13.5px;
+    font-weight:600;
+    color:#3d3c44;
+  }
+
+  .collage{
+    position:relative;
+    height:clamp(360px,34vw,520px);
+  }
+  .collage__block{
+    position:absolute;
+    border:var(--rule);
+  }
+  .collage__block--cobalt{
+    background:var(--cobalt);
+    width:46%;
+    height:58%;
+    right:2%;
+    top:0;
+    transform:rotate(2deg);
+  }
+  .collage__block--acid{
+    background:var(--acid);
+    width:34%;
+    height:34%;
+    left:0;
+    bottom:2%;
+    transform:rotate(-3deg);
+  }
+  .cut{
+    position:absolute;
+    border:3px solid var(--ink);
+    background:var(--paper);
+    box-shadow:8px 8px 0 var(--ink);
+    overflow:visible;
+  }
+  .cut img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    filter:saturate(1.15) contrast(1.05);
+  }
+  .cut--main{
+    width:58%;
+    height:78%;
+    left:6%;
+    top:4%;
+    transform:rotate(-1.6deg);
+    z-index:2;
+  }
+  .cut--fest{
+    width:44%;
+    height:56%;
+    right:0;
+    bottom:0;
+    transform:rotate(2.4deg);
+    z-index:3;
+  }
+  .cut--mates{
+    width:27%;
+    height:46%;
+    right:2%;
+    top:0;
+    transform:rotate(4deg);
+    z-index:1;
+  }
+  .sticker{
+    position:absolute;
+    font-family:var(--display);
+    font-weight:800;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    padding:6px 10px;
+    border:2px solid var(--ink);
+    transform:rotate(4deg);
+    z-index:4;
+    line-height:1.15;
+  }
+  .sticker--pink{background:var(--pink);}
+  .sticker--acid{background:var(--acid);transform:rotate(-4deg);}
+  .sticker--cobalt{background:var(--cobalt);color:#fff;}
+  .sticker--price{
+    font-size:clamp(14px,1.4vw,19px);
+    padding:9px 14px;
+    box-shadow:4px 4px 0 var(--ink);
+  }
+  .sticker--price b{
+    display:block;
+    font-size:1.7em;
+    letter-spacing:-0.02em;
+  }
+  .cut--main .sticker{left:-14px;bottom:10%;transform:rotate(-5deg);}
+  .cut--fest .sticker{left:-14px;top:-16px;transform:rotate(3deg);}
+  .cut--mates .sticker{left:-12px;top:12px;}
+
+  /* ---------- deal board ---------- */
+  .board-head{
+    padding:clamp(28px,4vw,48px) clamp(16px,4vw,48px) 18px;
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:18px;
+    flex-wrap:wrap;
+  }
+  .board-head h2{max-width:none;}
+  .board-head p{font-weight:600;font-size:14.5px;color:#3d3c44;}
+  .board{
+    margin:0 clamp(16px,4vw,48px);
+    border:var(--rule);
+    display:grid;
+    grid-template-columns:repeat(12,1fr);
+    background:var(--paper);
+  }
+  .deal{
+    border-right:var(--rule);
+    border-bottom:var(--rule);
+    position:relative;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    text-decoration:none;
+    transition:background .15s ease-out;
+    background:var(--paper);
+  }
+  .deal:hover{background:#fff;}
+  .deal:hover .deal__go{background:var(--ink);color:var(--acid);}
+  .deal:hover .deal__img{filter:saturate(1.3) contrast(1.08);}
+  .d-7{grid-column:span 7;}
+  .d-5{grid-column:span 5;}
+  .d-4{grid-column:span 4;}
+  .d-3{grid-column:span 3;}
+  .deal__media{
+    display:block;
+    position:relative;
+    border-bottom:var(--rule);
+  }
+  .deal__img{
+    aspect-ratio:16/10;
+    object-fit:cover;
+    width:100%;
+    height:auto;
+    filter:saturate(1.15) contrast(1.05);
+    transition:filter .15s ease-out;
+  }
+  .d-7 .deal__img{aspect-ratio:16/8.5;}
+  .d-3 .deal__img{aspect-ratio:4/3;}
+  .deal__media .sticker{top:12px;right:12px;}
+  .deal__body{
+    padding:16px 18px 20px;
+    display:flex;
+    width:100%;
+    flex-direction:column;
+    gap:8px;
+    flex:1;
+  }
+  .deal__place{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:clamp(20px,2vw,26px);
+    letter-spacing:-0.01em;
+  }
+  .deal__price{
+    font-family:var(--display);
+    font-weight:800;
+    font-size:clamp(46px,4.6vw,66px);
+    line-height:.9;
+    letter-spacing:-0.03em;
+    color:var(--cobalt);
+  }
+  .deal__price sup{font-size:.38em;font-weight:700;vertical-align:.9em;letter-spacing:0;}
+  .deal__meta{
+    font-size:14px;
+    font-weight:500;
+    color:#3d3c44;
+  }
+  .deal__go{
+    margin-top:auto;
+    align-self:flex-start;
+    font-family:var(--display);
+    font-weight:700;
+    font-size:14px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    border:2px solid var(--ink);
+    padding:8px 14px;
+    transition:background .15s ease-out,color .15s ease-out;
+  }
+  .deal--promo{
+    background:var(--acid);
+    padding:20px 18px;
+    gap:12px;
+    justify-content:flex-end;
+  }
+  .deal--promo:hover{background:var(--acid);}
+  .promo__big{
+    font-family:var(--display);
+    font-weight:800;
+    font-size:clamp(30px,2.6vw,40px);
+    letter-spacing:-0.02em;
+    line-height:1;
+    max-width:9ch;
+  }
+  .promo__sub{
+    font-size:14.5px;
+    font-weight:600;
+    max-width:26ch;
+  }
+  .board__note{
+    grid-column:1/-1;
+    padding:12px 18px;
+    font-size:14px;
+    font-weight:600;
+    display:flex;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+    background:var(--ink);
+    color:var(--paper);
+  }
+  .board__note a{color:var(--acid);font-weight:700;}
+
+  /* ---------- deposit strip ---------- */
+  .deposit{
+    background:var(--cobalt);
+    color:#fff;
+    border-top:var(--rule);
+    border-bottom:var(--rule);
+    margin-top:clamp(40px,6vw,72px);
+    padding:clamp(28px,4vw,44px) clamp(16px,4vw,48px);
+    display:grid;
+    grid-template-columns:auto 1fr 1fr 1fr;
+    gap:0;
+    align-items:center;
+  }
+  .deposit__big{
+    font-family:var(--display);
+    font-weight:800;
+    font-size:clamp(48px,6vw,84px);
+    line-height:.9;
+    letter-spacing:-0.03em;
+    padding-right:clamp(20px,3vw,44px);
+  }
+  .deposit__big small{display:block;font-size:.3em;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-top:8px;}
+  .deposit__item{
+    border-left:2px solid rgba(255,255,255,.45);
+    padding:6px clamp(16px,2.5vw,32px);
+    font-size:15.5px;
+  }
+  .deposit__item strong{
+    display:block;
+    font-family:var(--display);
+    font-weight:700;
+    font-size:18px;
+    margin-bottom:4px;
+  }
+
+  /* ---------- skint bands ---------- */
+  .section-head{
+    padding:clamp(40px,6vw,72px) clamp(16px,4vw,48px) 20px;
+    display:flex;
+    align-items:baseline;
+    gap:18px;
+    flex-wrap:wrap;
+  }
+  h2{
+    font-family:var(--display);
+    font-weight:800;
+    font-size:clamp(28px,4vw,46px);
+    letter-spacing:-0.02em;
+    line-height:1;
+  }
+  .section-head p{font-weight:500;color:#3d3c44;font-size:15.5px;}
+  .bands{margin:0 clamp(16px,4vw,48px);border-top:var(--rule);}
+  .band{
+    display:grid;
+    grid-template-columns:minmax(180px,320px) 1fr auto;
+    gap:clamp(16px,3vw,40px);
+    align-items:center;
+    padding:22px 0;
+    border-bottom:var(--rule);
+    text-decoration:none;
+    transition:background .15s ease-out;
+  }
+  .band:hover{background:#fff;}
+  .band:hover .band__label{color:var(--cobalt);}
+  .band__label{
+    font-family:var(--display);
+    font-weight:800;
+    font-size:clamp(24px,3vw,38px);
+    letter-spacing:-0.02em;
+    line-height:.95;
+    transition:color .15s ease-out;
+  }
+  .band__label small{display:block;font-size:13px;font-weight:600;font-family:var(--body);letter-spacing:.03em;text-transform:uppercase;color:#3d3c44;margin-top:6px;}
+  .band__places{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{
+    border:2px solid var(--ink);
+    font-weight:600;
+    font-size:13.5px;
+    padding:5px 11px;
+    background:var(--paper);
+  }
+  .band:hover .chip:nth-child(odd){background:var(--acid);}
+  .band__arrow{
+    font-family:var(--display);
+    font-weight:800;
+    font-size:26px;
+    padding:0 6px;
+  }
+
+  /* ---------- UGC strip ---------- */
+  .ugc-wrap{
+    background:var(--ink);
+    color:var(--paper);
+    border-top:var(--rule);
+    margin-top:clamp(40px,6vw,72px);
+    padding-bottom:clamp(36px,5vw,56px);
+  }
+  .ugc-wrap .section-head{color:var(--paper);}
+  .ugc-wrap .section-head p{color:#b9b8c0;}
+  .ugc-row{
+    display:flex;
+    gap:18px;
+    overflow-x:auto;
+    padding:8px clamp(16px,4vw,48px) 18px;
+    scrollbar-width:thin;
+    scrollbar-color:var(--acid) transparent;
+  }
+  .polaroid{
+    flex:0 0 auto;
+    width:min(240px,64vw);
+    background:var(--paper);
+    color:var(--ink);
+    padding:8px 8px 12px;
+    border:var(--rule);
+  }
+  .polaroid:nth-child(odd){transform:rotate(-1.6deg);}
+  .polaroid:nth-child(even){transform:rotate(1.4deg);}
+  .polaroid img{aspect-ratio:1/1.1;object-fit:cover;width:100%;height:auto;filter:saturate(1.2) contrast(1.06);}
+  .polaroid figcaption{font-weight:600;font-size:13px;margin-top:8px;display:flex;justify-content:space-between;gap:8px;}
+  .polaroid figcaption span:last-child{color:#6b6a73;font-weight:500;}
+
+  /* ---------- reviews ---------- */
+  .reviews{margin:0 clamp(16px,4vw,48px);border-top:var(--rule);}
+  .review{
+    padding:26px 0;
+    border-bottom:var(--rule);
+    display:grid;
+    grid-template-columns:auto 1fr auto;
+    gap:clamp(16px,3vw,36px);
+    align-items:baseline;
+  }
+  .review__mark{
+    font-family:var(--display);
+    font-weight:800;
+    font-size:52px;
+    line-height:.6;
+    color:var(--pink);
+  }
+  .review blockquote{
+    font-family:var(--display);
+    font-weight:600;
+    font-size:clamp(18px,2.2vw,25px);
+    letter-spacing:-0.01em;
+    line-height:1.25;
+    max-width:64ch;
+  }
+  .review cite{
+    font-style:normal;
+    font-family:var(--body);
+    font-weight:600;
+    font-size:14px;
+    white-space:nowrap;
+    color:#3d3c44;
+  }
+  .reviews__score{
+    padding:18px 0 0;
+    font-weight:600;
+    font-size:14.5px;
+  }
+  .reviews__score b{
+    font-family:var(--display);
+    font-weight:800;
+    font-size:18px;
+    background:var(--acid);
+    padding:2px 8px;
+    border:2px solid var(--ink);
+    margin-right:8px;
+  }
+
+  /* ---------- festival banner ---------- */
+  .fest{
+    margin:clamp(40px,6vw,72px) clamp(16px,4vw,48px) 0;
+    border:var(--rule);
+    display:grid;
+    grid-template-columns:1.3fr 1fr;
+    min-height:340px;
+  }
+  .fest__img{
+    background-size:cover;
+    background-position:center;
+    border-right:var(--rule);
+    min-height:240px;
+  }
+  .fest__body{
+    padding:clamp(24px,3.5vw,44px);
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    justify-content:center;
+    background:var(--pink);
+  }
+  .fest__body h2{max-width:14ch;}
+  .fest__body p{font-weight:500;max-width:44ch;}
+  .fest__price{
+    font-family:var(--display);
+    font-weight:800;
+    font-size:clamp(38px,4vw,56px);
+    letter-spacing:-0.03em;
+    line-height:1;
+  }
+  .fest__price sup{font-size:.4em;vertical-align:.8em;}
+
+  /* ---------- footer ---------- */
+  footer{
+    background:var(--ink);
+    color:var(--paper);
+    margin-top:clamp(48px,7vw,88px);
+    border-top:var(--rule);
+    padding:clamp(36px,5vw,64px) clamp(16px,4vw,48px) 28px;
+  }
+  .foot-grid{
+    display:grid;
+    grid-template-columns:2fr 1fr 1fr 1.2fr;
+    gap:clamp(24px,4vw,56px);
+    padding-bottom:36px;
+    border-bottom:1px solid #3d3c44;
+  }
+  .foot-grid h3{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:14px;
+    text-transform:uppercase;
+    letter-spacing:.07em;
+    color:var(--acid);
+    margin-bottom:14px;
+  }
+  .foot-logo{
+    font-family:var(--display);
+    font-weight:800;
+    font-size:30px;
+    letter-spacing:-0.01em;
+  }
+  .foot-logo em{font-style:normal;color:var(--acid);}
+  .foot-grid p{font-size:14.5px;color:#b9b8c0;max-width:34ch;margin-top:10px;}
+  .foot-grid ul{list-style:none;}
+  .foot-grid li{margin-bottom:9px;}
+  .foot-grid a{text-decoration:none;font-size:14.5px;font-weight:500;color:#dddce2;}
+  .foot-grid a:hover{color:var(--acid);text-decoration:underline;}
+  .foot-contact{font-size:14.5px;color:#dddce2;}
+  .foot-contact strong{display:block;font-size:20px;font-family:var(--display);font-weight:700;color:#fff;margin:4px 0 6px;}
+  .foot-legal{
+    padding-top:22px;
+    display:flex;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+    font-size:12.5px;
+    color:#8a8992;
+  }
+  .foot-legal b{color:#dddce2;}
+
+  /* ---------- reveal ---------- */
+  .rv{opacity:0;transform:translateY(14px);transition:opacity .4s ease-out,transform .4s ease-out;}
+  .rv.in{opacity:1;transform:none;}
+  .cut.rv{transform:translateY(14px) rotate(0deg);}
+  .cut--main.rv.in{transform:rotate(-1.6deg);}
+  .cut--fest.rv.in{transform:rotate(2.4deg);}
+  .cut--mates.rv.in{transform:rotate(4deg);}
+
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    .rv{opacity:1;transform:none;transition:none;}
+    .cut--main.rv{transform:rotate(-1.6deg);}
+    .cut--fest.rv{transform:rotate(2.4deg);}
+    .cut--mates.rv{transform:rotate(4deg);}
+    .btn:hover{transform:none;}
+    *{transition-duration:0.01ms !important;}
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width:1080px){
+    .hero{grid-template-columns:1fr;gap:32px;}
+    .collage{height:clamp(320px,52vw,440px);max-width:640px;}
+    .board{grid-template-columns:repeat(6,1fr);}
+    .d-7,.d-5,.d-4,.d-3{grid-column:span 3;}
+    .d-7 .deal__img,.d-3 .deal__img{aspect-ratio:16/10;}
+    .deposit{grid-template-columns:1fr 1fr;row-gap:20px;}
+    .deposit__big{grid-column:1/-1;padding:0 0 8px;}
+    .fest{grid-template-columns:1fr;}
+    .fest__img{border-right:none;border-bottom:var(--rule);}
+  }
+  @media (max-width:860px){
+    .nav__links{display:none;}
+    .nav__phone{margin-left:auto;}
+    .review{grid-template-columns:auto 1fr;}
+    .review cite{grid-column:2;white-space:normal;}
+  }
+  @media (max-width:640px){
+    .nav{gap:12px;}
+    .nav .btn{padding:11px 13px;font-size:14px;}
+    .hero{padding-top:20px;}
+    .collage{height:auto;max-width:none;}
+    .collage__block--cobalt{height:46%;}
+    .cut--main{
+      position:relative;
+      width:88%;
+      height:auto;
+      left:0;
+      top:0;
+      aspect-ratio:4/3;
+    }
+    .cut--fest{
+      position:relative;
+      width:74%;
+      height:auto;
+      aspect-ratio:16/10;
+      margin:-12% 0 0 auto;
+      right:0;
+    }
+    .cut--mates{display:none;}
+    .cut{box-shadow:6px 6px 0 var(--ink);}
+    .board{grid-template-columns:1fr;}
+    .d-7,.d-5,.d-4,.d-3{grid-column:span 1;}
+    .deal{border-right:none;}
+    .deposit{grid-template-columns:1fr;}
+    .deposit__item{border-left:none;border-top:2px solid rgba(255,255,255,.45);padding:14px 0 4px;}
+    .band{grid-template-columns:1fr auto;}
+    .band__places{grid-column:1/-1;}
+    .foot-grid{grid-template-columns:1fr 1fr;}
+  }
+  @media (max-width:380px){
+    .nav__phone{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<!-- nav -->
+<nav class="nav" aria-label="Main">
+  <a class="nav__logo" href="#"><span>AWAY<em>DAYS</em></span></a>
+  <ul class="nav__links">
+    <li><a href="#deals">Deals</a></li>
+    <li><a href="#bands">Destinations</a></li>
+    <li><a href="#festivals">Festivals</a></li>
+    <li><a href="#reviews">Reviews</a></li>
+  </ul>
+  <a class="nav__phone" href="tel:01614960842">0161 496 0842</a>
+  <a class="btn" href="#deals">Grab a deal</a>
+</nav>
+
+<!-- hero collage -->
+<header class="hero">
+  <div class="hero__copy">
+    <p class="hero__kicker">Summer '26 on sale · new deals every Friday</p>
+    <h1>Skint but <span class="u">going anyway.</span></h1>
+    <p class="hero__sub"><strong>Group holidays for 18–30s</strong> that cost less than your festival wristband. Flights, bed, and your mates. Sorted.</p>
+    <div class="hero__cta">
+      <a class="btn btn--big" href="#deals">Grab a deal</a>
+      <span class="hero__trust">£49 deposit · pay monthly, interest free · ATOL protected</span>
+    </div>
+  </div>
+  <div class="collage" role="group" aria-label="This summer's trips">
+    <div class="collage__block collage__block--cobalt" aria-hidden="true"></div>
+    <div class="collage__block collage__block--acid" aria-hidden="true"></div>
+    <figure class="cut cut--main rv">
+      <img src="https://images.unsplash.com/photo-1540541338287-41700207dee6?w=900&h=700&fit=crop&q=80&auto=format" alt="Hillside beach club with an infinity pool, sun loungers and palm trees above the sea" width="900" height="700" loading="eager" fetchpriority="high">
+      <span class="sticker sticker--pink sticker--price">Ibiza <b>£249</b></span>
+    </figure>
+    <figure class="cut cut--fest rv">
+      <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&h=560&fit=crop&q=80&auto=format" alt="Festival crowd under falling confetti and multicoloured stage lights" width="800" height="560" loading="eager">
+      <span class="sticker sticker--cobalt sticker--price">Croatia + wristband <b>£329</b></span>
+    </figure>
+    <figure class="cut cut--mates rv">
+      <img src="https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=480&h=640&fit=crop&q=80&auto=format" alt="Three friends with their hands in the air at sunset" width="480" height="640" loading="eager">
+      <span class="sticker sticker--acid">£49 locks it in</span>
+    </figure>
+  </div>
+</header>
+
+<!-- deal board -->
+<main>
+<div class="board-head" id="deals">
+  <h2>This week's damage.</h2>
+  <p>Cheapest live dates. Everything includes flights.</p>
+</div>
+<section class="board" aria-label="This week's deals">
+  <a class="deal d-7 rv" href="#">
+    <span class="deal__media">
+      <img class="deal__img" src="https://images.unsplash.com/photo-1522098543979-ffc7f79a56c4?w=1100&h=584&fit=crop&q=80&auto=format" alt="Two friends messing about on the beach at sunset" width="1100" height="584" loading="eager">
+      <span class="sticker sticker--pink">Selling fast</span>
+    </span>
+    <span class="deal__body">
+      <span class="deal__place">Ibiza, San Antonio</span>
+      <span class="deal__price"><sup>from</sup> £249<sup>pp</sup></span>
+      <span class="deal__meta">4 nights · flights + apartment · June–Sept · sunset strip, 3 mins</span>
+      <span class="deal__go">Grab it</span>
+    </span>
+  </a>
+  <a class="deal d-5 rv" href="#">
+    <span class="deal__media">
+      <img class="deal__img" src="https://images.unsplash.com/photo-1519046904884-53103b34b206?w=900&h=563&fit=crop&q=80&auto=format" alt="White sand beach with a straw parasol and palm trees" width="900" height="563" loading="lazy">
+      <span class="sticker sticker--acid">Group fave</span>
+    </span>
+    <span class="deal__body">
+      <span class="deal__place">Zante, Laganas</span>
+      <span class="deal__price"><sup>from</sup> £212<sup>pp</sup></span>
+      <span class="deal__meta">7 nights · flights + hotel · strip-front · free breakfast (needed)</span>
+      <span class="deal__go">Grab it</span>
+    </span>
+  </a>
+  <a class="deal d-4 rv" href="#">
+    <span class="deal__media">
+      <img class="deal__img" src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=500&fit=crop&q=80&auto=format" alt="Packed club crowd dancing under pink stage lights" width="800" height="500" loading="lazy">
+    </span>
+    <span class="deal__body">
+      <span class="deal__place">Magaluf</span>
+      <span class="deal__price"><sup>from</sup> £179<sup>pp</sup></span>
+      <span class="deal__meta">4 nights · flights + hotel · 2 mins from BCM</span>
+      <span class="deal__go">Grab it</span>
+    </span>
+  </a>
+  <a class="deal d-3 rv" href="#">
+    <span class="deal__media">
+      <img class="deal__img" src="https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=700&h=525&fit=crop&q=80&auto=format" alt="Amsterdam canal lined with boats and tall canal houses" width="700" height="525" loading="lazy">
+    </span>
+    <span class="deal__body">
+      <span class="deal__place">Amsterdam</span>
+      <span class="deal__price"><sup>from</sup> £119<sup>pp</sup></span>
+      <span class="deal__meta">2 nights · flights + hostel · city centre</span>
+      <span class="deal__go">Grab it</span>
+    </span>
+  </a>
+  <a class="deal d-5 rv" href="#" id="festival-deal">
+    <span class="deal__media">
+      <img class="deal__img" src="https://images.unsplash.com/photo-1506157786151-b8491531f063?w=900&h=563&fit=crop&q=80&auto=format" alt="Festival crowd with hands up in front of a huge lit stage" width="900" height="563" loading="lazy">
+      <span class="sticker sticker--cobalt">Wristband incl.</span>
+    </span>
+    <span class="deal__body">
+      <span class="deal__place">Croatia, festival week</span>
+      <span class="deal__price"><sup>from</sup> £329<sup>pp</sup></span>
+      <span class="deal__meta">5 nights · flights + apartment + festival ticket · Split, July</span>
+      <span class="deal__go">Grab it</span>
+    </span>
+  </a>
+  <a class="deal d-5 rv" href="#">
+    <span class="deal__media">
+      <img class="deal__img" src="https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=800&h=500&fit=crop&q=80&auto=format" alt="Looking down a dense city street between skyscrapers at dusk" width="800" height="500" loading="lazy">
+      <span class="sticker sticker--acid">Payday job</span>
+    </span>
+    <span class="deal__body">
+      <span class="deal__place">New York</span>
+      <span class="deal__price"><sup>from</sup> £486<sup>pp</sup></span>
+      <span class="deal__meta">3 nights · flights + hostel · Manhattan · Jan–Mar</span>
+      <span class="deal__go">Grab it</span>
+    </span>
+  </a>
+  <a class="deal d-3 rv" href="#">
+    <span class="deal__media">
+      <img class="deal__img" src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=700&h=525&fit=crop&q=80&auto=format" alt="Golden beach shoreline at sunset with waves rolling in" width="700" height="525" loading="lazy">
+    </span>
+    <span class="deal__body">
+      <span class="deal__place">Albufeira</span>
+      <span class="deal__price"><sup>from</sup> £159<sup>pp</sup></span>
+      <span class="deal__meta">4 nights · flights + hotel · old town strip</span>
+      <span class="deal__go">Grab it</span>
+    </span>
+  </a>
+  <a class="deal deal--promo d-4 rv" href="#">
+    <span class="promo__big">84 deals live right now</span>
+    <span class="promo__sub">Ibiza to New York. Every one bookable with a £49 deposit.</span>
+    <span class="deal__go">See the lot</span>
+  </a>
+  <p class="board__note"><span>Prices per person, two sharing, this week's cheapest dates. They move — that's how cheap works.</span> <a href="#">See all 84 deals →</a></p>
+</section>
+
+<!-- deposit strip -->
+<section class="deposit" aria-label="Payment plans">
+  <p class="deposit__big">£49<small>locks it in</small></p>
+  <div class="deposit__item"><strong>Pay monthly</strong>Split what's left into interest-free chunks. Clear it 6 weeks before you fly.</div>
+  <div class="deposit__item"><strong>Split with mates</strong>Everyone pays their own share. Nobody chases Dan for £200 again.</div>
+  <div class="deposit__item"><strong>ATOL protected</strong>If anything collapses, it's not your problem. Your money's covered.</div>
+</section>
+
+<!-- skint bands -->
+<div class="section-head" id="bands">
+  <h2>How skint are we talking?</h2>
+  <p>Pick your damage. Everything includes flights.</p>
+</div>
+<section class="bands" aria-label="Deals by budget">
+  <a class="band rv" href="#">
+    <span class="band__label">Under £150<small>proper skint</small></span>
+    <span class="band__places"><span class="chip">Amsterdam</span><span class="chip">Prague</span><span class="chip">Budapest</span><span class="chip">Kraków</span><span class="chip">Benidorm</span></span>
+    <span class="band__arrow" aria-hidden="true">→</span>
+  </a>
+  <a class="band rv" href="#">
+    <span class="band__label">Under £300<small>student loan just dropped</small></span>
+    <span class="band__places"><span class="chip">Ibiza</span><span class="chip">Zante</span><span class="chip">Magaluf</span><span class="chip">Malia</span><span class="chip">Sunny Beach</span><span class="chip">Albufeira</span></span>
+    <span class="band__arrow" aria-hidden="true">→</span>
+  </a>
+  <a class="band rv" href="#">
+    <span class="band__label">£300 and up<small>been saving since January</small></span>
+    <span class="band__places"><span class="chip">Croatia festivals</span><span class="chip">New York</span><span class="chip">Marrakech</span><span class="chip">Turkey all-inclusive</span></span>
+    <span class="band__arrow" aria-hidden="true">→</span>
+  </a>
+</section>
+
+<!-- festival banner -->
+<section class="fest" id="festivals">
+  <div class="fest__img" style="background-image:url('https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1100&h=700&fit=crop&q=80&auto=format')" role="img" aria-label="Festival crowd silhouetted against warm orange stage lights"></div>
+  <div class="fest__body">
+    <h2>Festival week, handled.</h2>
+    <p>Flights, apartment, wristband, boat party — one booking, one group link, everyone pays their own bit. You just turn up.</p>
+    <p class="fest__price"><sup>from</sup> £329</p>
+    <div><a class="btn" href="#festival-deal">See festival packages</a></div>
+  </div>
+</section>
+
+<!-- UGC strip -->
+<section class="ugc-wrap" aria-label="Photos from our travellers">
+  <div class="section-head">
+    <h2>Shot on phones, obviously.</h2>
+    <p>Tag @awaydaystravel and we'll stick you on here.</p>
+  </div>
+  <div class="ugc-row">
+    <figure class="polaroid rv">
+      <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=480&h=528&fit=crop&q=75&auto=format" alt="Group of friends sat in a row with arms around each other" width="480" height="528" loading="lazy">
+      <figcaption><span>@mollz.x</span><span>Zante '25</span></figcaption>
+    </figure>
+    <figure class="polaroid rv">
+      <img src="https://images.unsplash.com/photo-1506869640319-fe1a24fd76dc?w=480&h=528&fit=crop&q=75&auto=format" alt="Friends silhouetted against the sunset with their hands in the air" width="480" height="528" loading="lazy">
+      <figcaption><span>@jakegoesaway</span><span>Ibiza '25</span></figcaption>
+    </figure>
+    <figure class="polaroid rv">
+      <img src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=480&h=528&fit=crop&q=75&auto=format" alt="Filming a gig on a phone through pink smoke and stage lights" width="480" height="528" loading="lazy">
+      <figcaption><span>@t.osman01</span><span>Croatia '25</span></figcaption>
+    </figure>
+    <figure class="polaroid rv">
+      <img src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=480&h=528&fit=crop&q=75&auto=format" alt="Confetti falling over a packed gig crowd" width="480" height="528" loading="lazy">
+      <figcaption><span>@sophshaw</span><span>Amsterdam '24</span></figcaption>
+    </figure>
+    <figure class="polaroid rv">
+      <img src="https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=480&h=528&fit=crop&q=75&auto=format" alt="Hands making a heart shape at a concert" width="480" height="528" loading="lazy">
+      <figcaption><span>@liviaaa.k</span><span>Malia '25</span></figcaption>
+    </figure>
+    <figure class="polaroid rv">
+      <img src="https://images.unsplash.com/photo-1496843916299-590492c751f4?w=480&h=528&fit=crop&q=75&auto=format" alt="Pineapples wearing sunglasses and party hats with balloons" width="480" height="528" loading="lazy">
+      <figcaption><span>@bensendsit</span><span>pre-drinks</span></figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- reviews -->
+<div class="section-head" id="reviews">
+  <h2>Word gets around.</h2>
+  <p class="reviews__score"><b>4.6/5</b> from 3,214 reviews</p>
+</div>
+<section class="reviews" aria-label="Traveller reviews">
+  <article class="review rv">
+    <span class="review__mark" aria-hidden="true">“</span>
+    <blockquote>Booked for 11 of us with the split-pay thing. Nobody had to front the money, nobody fell out. Genuinely a miracle.</blockquote>
+    <cite>Ellie, Leeds Beckett</cite>
+  </article>
+  <article class="review rv">
+    <span class="review__mark" aria-hidden="true">“</span>
+    <blockquote>£212 for a week in Zante. I've spent more on a night out in Clapham.</blockquote>
+    <cite>Callum, Swansea</cite>
+  </article>
+  <article class="review rv">
+    <span class="review__mark" aria-hidden="true">“</span>
+    <blockquote>Flight got moved and I panicked. WhatsApped them at half nine, actual human replied in four minutes, new transfer sorted.</blockquote>
+    <cite>Priya, Nottingham Trent</cite>
+  </article>
+</section>
+</main>
+
+<!-- footer -->
+<footer>
+  <div class="foot-grid">
+    <div>
+      <p class="foot-logo">AWAY<em>DAYS</em></p>
+      <p>Cheap group trips for 18–30s, run by people who still go on them. Manchester born, abroad most weekends.</p>
+    </div>
+    <div>
+      <h3>Trips</h3>
+      <ul>
+        <li><a href="#deals">This week's deals</a></li>
+        <li><a href="#bands">By budget</a></li>
+        <li><a href="#festivals">Festival packages</a></li>
+        <li><a href="#">Group bookings (10+)</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3>Boring bits</h3>
+      <ul>
+        <li><a href="#">Payment plans</a></li>
+        <li><a href="#">ATOL &amp; your protection</a></li>
+        <li><a href="#">Booking terms</a></li>
+        <li><a href="#">Privacy</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3>Talk to us</h3>
+      <p class="foot-contact">Call or WhatsApp, 9am–9pm, 7 days
+        <strong><a href="tel:01614960842" style="color:inherit;text-decoration:none;">0161 496 0842</a></strong>
+        hello@awaydaystravel.co.uk<br>
+        @awaydaystravel everywhere
+      </p>
+    </div>
+  </div>
+  <div class="foot-legal">
+    <span><b>Away Days Travel Ltd</b> · Est. 2019 · 4th Floor, Dale House, Dale St, Manchester M1</span>
+    <span>Flight-inclusive packages protected under <b>ATOL 11648</b></span>
+  </div>
+</footer>
+
+<script>
+  (function(){
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var els = document.querySelectorAll('.rv');
+    if (reduced || !('IntersectionObserver' in window)) {
+      els.forEach(function(el){ el.classList.add('in'); });
+      return;
+    }
+    var seen = 0;
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting) {
+          var delay = (seen++ % 6) * 55;
+          e.target.style.transitionDelay = delay + 'ms';
+          e.target.classList.add('in');
+          io.unobserve(e.target);
+        }
+      });
+    }, {threshold: 0.12});
+    els.forEach(function(el){ io.observe(el); });
+  })();
+</script>
+</body>
+</html>

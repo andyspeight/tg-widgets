@@ -132,10 +132,12 @@ export async function applyStarter(
    * throw with the connection still idle rather than a rollback halfway through
    * writing somebody's site.
    */
-  const pages = starter.pages.map((page) => ({
-    spec: page,
-    content: ready(buildStarterPage(page, facts)),
-  }));
+  const pages = await Promise.all(
+    starter.pages.map(async (page) => ({
+      spec: page,
+      content: ready(await buildStarterPage(page, facts)),
+    })),
+  );
 
   const header = readyRegion(buildStarterRegion(starter.header, 'header', starter.pages, facts));
   const footer = readyRegion(buildStarterRegion(starter.footer, 'footer', starter.pages, facts));

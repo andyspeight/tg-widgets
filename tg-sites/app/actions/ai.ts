@@ -664,7 +664,7 @@ export async function createAiPageAction(input: unknown): Promise<AiPageResult> 
       };
     }
 
-    let sections = sectionsFromPlan(plan.plan);
+    let sections = await sectionsFromPlan(plan.plan);
     // Feature the uploaded picture behind the opening section, so it is used and
     // not only read.
     if (imageUrl) sections = featurePageImage(sections, imageUrl);

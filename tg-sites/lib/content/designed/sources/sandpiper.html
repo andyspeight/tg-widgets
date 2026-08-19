@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sandpiper Holidays — Happy children, rested parents</title>
+<meta name="description" content="Family holiday specialists since 2012. Kids clubs checked, transfers kept short, naps protected. ABTA &amp; ATOL protected. 98% of families would book again.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sage:#DFE8E2;
+    --sage-soft:#EBF1EC;
+    --pine:#17453A;
+    --pine-deep:#0E332B;
+    --pine-mid:#2E6355;
+    --ink:#152420;
+    --ink-soft:#47605A;
+    --white:#FFFFFF;
+    --apricot:#E8A15D;
+    --apricot-deep:#8C5A22;
+    --line:rgba(21,36,32,.12);
+    --r-s:12px;
+    --r-m:20px;
+    --r-l:28px;
+    --r-pill:999px;
+    --shadow:0 14px 34px -16px rgba(14,51,43,.28);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.6;
+    color:var(--ink);background:var(--sage);
+    -webkit-font-smoothing:antialiased;overflow-x:clip;
+  }
+  h1,h2,h3{font-family:'Lora',Georgia,serif;font-weight:600;color:var(--pine);letter-spacing:-.01em}
+  img{display:block;max-width:100%}
+  a{color:inherit}
+  ::selection{background:var(--apricot);color:var(--ink)}
+  :focus-visible{outline:3px solid var(--pine-mid);outline-offset:3px;border-radius:6px}
+  .wrap{max-width:1360px;margin:0 auto;padding:0 clamp(18px,3.4vw,44px)}
+  .icon{width:20px;height:20px;stroke:currentColor;stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .pill-dark{
+    display:inline-flex;align-items:center;gap:9px;text-decoration:none;
+    background:var(--pine);color:#F2F7F3;font-weight:600;font-size:15px;
+    padding:13px 26px;border-radius:var(--r-pill);min-height:48px;
+    transition:background .2s ease-out,transform .2s ease-out;
+  }
+  .pill-dark:hover{background:var(--pine-deep);transform:translateY(-2px)}
+  .pill-dark:active{transform:scale(.97)}
+  .ph{filter:saturate(1.05) contrast(1.02) brightness(1.01)}
+
+  /* ---------------- NAV ---------------- */
+  .nav{
+    display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:18px;
+    padding:22px 0 10px;
+  }
+  .logo{display:flex;align-items:center;gap:10px;text-decoration:none;justify-self:start}
+  .logo-mark{width:38px;height:38px;flex:none}
+  .logo b{font-family:'Lora',serif;font-weight:600;font-size:19px;color:var(--pine);line-height:1.1;display:block}
+  .logo small{display:block;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+  .pills{
+    display:flex;gap:2px;background:var(--white);border:1px solid var(--line);
+    border-radius:var(--r-pill);padding:5px;justify-self:center;
+  }
+  .pills a{
+    text-decoration:none;font-size:14.5px;font-weight:600;padding:10px 20px;
+    border-radius:var(--r-pill);color:var(--ink);white-space:nowrap;
+    transition:background .2s ease-out,color .2s ease-out;
+  }
+  .pills a:hover{background:var(--sage-soft)}
+  .pills a.active{background:var(--pine);color:#F2F7F3}
+  .nav-right{display:flex;align-items:center;gap:20px;justify-self:end}
+  .nav-right .quiet{font-size:15px;font-weight:600;text-decoration:none;padding:10px 2px}
+  .nav-right .quiet:hover{color:var(--pine-mid);text-decoration:underline}
+  .menu-toggle{
+    display:none;background:var(--white);border:1px solid var(--line);border-radius:var(--r-pill);
+    width:48px;height:48px;cursor:pointer;color:var(--ink);align-items:center;justify-content:center;
+  }
+  .mobile-menu{display:none;background:var(--white);border:1px solid var(--line);border-radius:var(--r-m);margin-top:10px;padding:8px 18px}
+  .mobile-menu a{display:block;padding:13px 4px;font-weight:600;text-decoration:none;border-bottom:1px solid var(--line)}
+  .mobile-menu a:last-child{border-bottom:none}
+  .mobile-menu.open{display:block}
+
+  /* ---------------- HERO ---------------- */
+  .hero{padding:26px 0 30px}
+  .hero-top{margin-bottom:20px}
+  .hero h1{
+    font-size:clamp(32px,3.9vw,52px);line-height:1.13;font-weight:600;max-width:16ch;
+  }
+  .hero-side{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:14px;align-items:stretch}
+  .side-photo{border-radius:var(--r-m);overflow:hidden;box-shadow:var(--shadow)}
+  .side-photo img{width:100%;height:100%;min-height:150px;object-fit:cover}
+  .stat-card{
+    background:var(--white);border-radius:var(--r-m);padding:20px;box-shadow:var(--shadow);
+    display:flex;flex-direction:column;justify-content:center;gap:4px;
+  }
+  .stat-card b{font-family:'Lora',serif;font-size:clamp(30px,2.6vw,40px);color:var(--pine);line-height:1}
+  .stat-card span{font-size:13.5px;color:var(--ink-soft);font-weight:500;line-height:1.4}
+
+  .hero-photo{position:relative}
+  .hero-photo > img{
+    width:100%;aspect-ratio:16/6.6;object-fit:cover;object-position:center 42%;
+    border-radius:var(--r-l);
+  }
+  /* --- notches carved out of the photo (reference mask) --- */
+  .notch{position:absolute;background:var(--sage)}
+  .fillet{position:absolute;width:26px;height:26px;pointer-events:none}
+  /* bottom-left notch: caption + CTA */
+  .notch-bl{
+    left:0;bottom:0;border-top-right-radius:var(--r-l);
+    padding:18px 26px 0 0;display:flex;align-items:center;gap:16px;flex-wrap:nowrap;
+    max-width:62%;
+  }
+  .notch-bl .tag2{font-size:14.5px;font-weight:600;max-width:26ch;line-height:1.4}
+  .notch-bl .fillet-top{left:0;top:-26px;background:radial-gradient(circle at 100% 0, transparent 26px, var(--sage) 26.5px)}
+  .notch-bl .fillet-side{right:-26px;bottom:0;background:radial-gradient(circle at 100% 0, transparent 26px, var(--sage) 26.5px)}
+  /* top-right notch: photo tile + stat card */
+  .notch-tr{
+    top:0;right:0;border-bottom-left-radius:var(--r-l);
+    padding:0 0 16px 16px;width:min(460px,58%);
+  }
+  .notch-tr .fillet-side{left:-26px;top:0;background:radial-gradient(circle at 0 100%, transparent 26px, var(--sage) 26.5px)}
+  .notch-tr .fillet-bottom{right:0;bottom:-26px;background:radial-gradient(circle at 0 100%, transparent 26px, var(--sage) 26.5px)}
+  .notch-tr .side-photo img{min-height:0;height:100%}
+  /* bottom-right notch: proof card stack */
+  .notch-br{
+    right:0;bottom:0;border-top-left-radius:var(--r-l);
+    padding:16px 0 0 16px;width:min(300px,64vw);
+  }
+  .notch-br .stack{display:flex;flex-direction:column;gap:12px;align-items:stretch}
+  .notch-br .fillet-top{right:0;top:-26px;background:radial-gradient(circle at 0 0, transparent 26px, var(--sage) 26.5px)}
+  .notch-br .fillet-side{left:-26px;bottom:0;background:radial-gradient(circle at 0 0, transparent 26px, var(--sage) 26.5px)}
+  .chip-kids{align-self:flex-start}
+  .chip{
+    background:var(--white);border-radius:var(--r-m);box-shadow:var(--shadow);
+    padding:16px 18px;
+  }
+  .chip b{font-family:'Lora',serif;font-size:24px;color:var(--pine);display:block;line-height:1.1}
+  .chip span{font-size:12.5px;color:var(--ink-soft);font-weight:500;line-height:1.35;display:block;margin-top:3px;max-width:16ch}
+  .chip-years{position:absolute;left:-14px;top:14%;max-width:180px}
+  .pine-card{
+    background:var(--pine);color:#F2F7F3;border-radius:var(--r-m);padding:18px 20px;
+    box-shadow:var(--shadow);
+  }
+  .pine-card p{font-family:'Lora',serif;font-size:16.5px;line-height:1.45}
+  .review-chip{
+    background:var(--white);border-radius:var(--r-pill);box-shadow:var(--shadow);
+    display:flex;align-items:center;gap:10px;padding:9px 16px 9px 9px;
+  }
+  .review-chip .faces{display:flex}
+  .review-chip .faces img{width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid var(--white);margin-left:-9px}
+  .review-chip .faces img:first-child{margin-left:0}
+  .review-chip div b{font-size:13px;display:block;line-height:1.2}
+  .review-chip div span{font-size:11.5px;color:var(--ink-soft)}
+  .stars{color:var(--apricot);letter-spacing:1px;font-size:11px}
+
+  /* ---------------- TRUST STRIP ---------------- */
+  .trust{padding:14px 0 8px}
+  .trust-inner{
+    display:flex;align-items:center;justify-content:center;gap:clamp(18px,4vw,54px);
+    flex-wrap:wrap;font-size:13.5px;font-weight:600;color:var(--ink-soft);
+  }
+  .trust-inner span{display:flex;align-items:center;gap:8px}
+  .trust-inner .icon{width:17px;height:17px;color:var(--pine-mid)}
+
+  /* ---------------- SECTIONS SHARED ---------------- */
+  section{padding:clamp(56px,7vw,96px) 0}
+  .kicker{font-size:12.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--apricot-deep)}
+  .sec-head{max-width:56ch;margin-bottom:clamp(30px,4vw,48px)}
+  .sec-head h2{font-size:clamp(27px,3vw,40px);margin-top:12px}
+  .sec-head p{color:var(--ink-soft);margin-top:12px;font-size:16px}
+
+  /* dates */
+  .dates-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .date-card{
+    background:var(--white);border-radius:var(--r-m);padding:22px;text-decoration:none;
+    display:flex;flex-direction:column;gap:4px;border:2px solid transparent;
+    transition:transform .2s ease-out,border-color .2s ease-out,box-shadow .2s ease-out;
+  }
+  .date-card:hover{transform:translateY(-4px);border-color:var(--pine-mid);box-shadow:var(--shadow)}
+  .date-card .when{font-weight:700;font-size:16.5px}
+  .date-card .span{font-size:13px;color:var(--ink-soft)}
+  .date-card .from{margin-top:12px;font-size:13.5px;color:var(--ink-soft)}
+  .date-card .from b{font-family:'Lora',serif;font-size:23px;color:var(--pine);display:block;line-height:1.15}
+
+  /* ages */
+  .ages{background:var(--white);border-radius:var(--r-l);}
+  .ages-inner{padding:clamp(36px,5vw,64px) clamp(22px,4vw,56px);display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(26px,4vw,64px);align-items:center}
+  .ages-photo{border-radius:var(--r-m);overflow:hidden}
+  .ages-photo img{width:100%;aspect-ratio:4/4.4;object-fit:cover}
+  .age-list{list-style:none;display:grid;gap:0}
+  .age-list li{display:grid;grid-template-columns:52px 1fr auto;gap:18px;align-items:center;padding:18px 0;border-bottom:1px solid var(--line)}
+  .age-list li:last-child{border-bottom:none}
+  .age-ico{width:52px;height:52px;border-radius:50%;background:var(--sage);display:flex;align-items:center;justify-content:center;color:var(--pine)}
+  .age-list h3{font-size:18px;font-family:'DM Sans',sans-serif;font-weight:700;color:var(--ink)}
+  .age-list h3 span{color:var(--apricot-deep);margin-left:8px;font-size:14px}
+  .age-list p{font-size:14px;color:var(--ink-soft)}
+  .age-go{
+    width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;
+    color:var(--ink);text-decoration:none;transition:background .2s ease-out,color .2s ease-out,transform .2s ease-out;
+  }
+  .age-go:hover{background:var(--pine);color:#F2F7F3;transform:translateX(3px)}
+
+  /* team */
+  .team-inner{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:clamp(26px,4vw,72px);align-items:center}
+  .team h2{font-size:clamp(27px,3vw,40px);margin:12px 0 16px}
+  .team blockquote{
+    font-family:'Lora',serif;font-style:italic;font-size:18px;color:var(--ink-soft);
+    border-left:3px solid var(--apricot);padding-left:18px;margin:0 0 22px;max-width:48ch;
+  }
+  .promises{list-style:none;display:grid;gap:12px;margin-bottom:26px}
+  .promises li{display:flex;gap:12px;align-items:flex-start;font-weight:500;font-size:15.5px}
+  .promises .icon{color:var(--pine-mid);margin-top:3px;width:19px;height:19px}
+  .team-photo{position:relative}
+  .team-photo img{border-radius:var(--r-l);aspect-ratio:4/4.5;object-fit:cover;width:100%}
+  .team-photo .chip{position:absolute;left:-14px;bottom:24px;max-width:230px}
+  .team-photo .chip b{font-family:'DM Sans',sans-serif;font-size:15.5px;color:var(--ink)}
+  .team-photo .chip span{max-width:none}
+  .call-row{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .call-row .phone{font-family:'Lora',serif;font-weight:600;font-size:22px;color:var(--pine);text-decoration:none;display:flex;align-items:center;gap:9px}
+  .call-row .phone:hover{text-decoration:underline}
+  .call-row small{color:var(--ink-soft);font-weight:600}
+
+  /* enquire band */
+  .band{background:var(--pine);border-radius:var(--r-l);color:#F2F7F3}
+  .band-inner{padding:clamp(36px,5vw,64px) clamp(22px,4vw,56px);display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(26px,4vw,64px);align-items:center}
+  .band h2{color:#F2F7F3;font-size:clamp(26px,3vw,38px);margin:10px 0 12px}
+  .band p{color:rgba(242,247,243,.82);max-width:44ch}
+  .band .kicker{color:var(--apricot)}
+  .band form{display:grid;gap:14px}
+  .band .f label{display:block;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--apricot);margin-bottom:6px}
+  .band .f input{
+    width:100%;border:0;border-radius:var(--r-s);background:rgba(242,247,243,.12);
+    border:1px solid rgba(242,247,243,.25);color:#F2F7F3;font-family:'DM Sans',sans-serif;
+    font-size:15.5px;padding:13px 14px;min-height:48px;
+  }
+  .band .f input::placeholder{color:rgba(242,247,243,.55)}
+  .band .f input:focus{outline:none;border-color:var(--apricot);background:rgba(242,247,243,.16)}
+  .band .pill-light{
+    display:inline-flex;align-items:center;justify-content:center;gap:9px;text-decoration:none;border:0;cursor:pointer;
+    background:var(--apricot);color:var(--ink);font-weight:700;font-size:15.5px;font-family:'DM Sans',sans-serif;
+    padding:14px 26px;border-radius:var(--r-pill);min-height:50px;justify-self:start;
+    transition:transform .2s ease-out,background .2s ease-out;
+  }
+  .band .pill-light:hover{background:#F0B274;transform:translateY(-2px)}
+  .band small{font-size:13px;color:rgba(242,247,243,.6)}
+
+  /* footer */
+  footer{padding:clamp(40px,5vw,60px) 0 26px;font-size:14.5px}
+  .foot-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr 1.2fr;gap:36px;padding-bottom:34px;border-bottom:1px solid var(--line)}
+  footer h3{font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;color:var(--ink);margin-bottom:14px}
+  footer ul{list-style:none;display:grid;gap:8px}
+  footer li a{color:var(--ink-soft);text-decoration:none}
+  footer li a:hover{color:var(--pine);text-decoration:underline}
+  .foot-brand p{margin-top:14px;max-width:32ch;color:var(--ink-soft)}
+  .badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+  .badge{
+    background:var(--white);border-radius:var(--r-pill);padding:8px 15px;font-weight:700;font-size:12.5px;
+    display:flex;align-items:center;gap:7px;
+  }
+  .badge .icon{width:15px;height:15px;color:var(--pine-mid)}
+  .legal{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:22px;font-size:12.5px;color:var(--ink-soft)}
+
+  /* reveal */
+  .rv{opacity:0;transform:translateY(16px);transition:opacity .5s ease-out,transform .5s ease-out}
+  .rv.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important}
+    .rv{opacity:1;transform:none}
+    html{scroll-behavior:auto}
+  }
+
+  /* ---------------- RESPONSIVE ---------------- */
+  @media (max-width:1120px){
+    .hero-photo > img{aspect-ratio:16/9}
+  }
+  @media (max-width:980px){
+    .nav{grid-template-columns:auto 1fr auto}
+    .pills{display:none}
+    .menu-toggle{display:flex;order:3}
+    .nav-right .quiet{display:none}
+    .hero-top{grid-template-columns:1fr}
+    .hero-side{max-width:520px}
+    .chip-years{position:static;max-width:none;margin-bottom:12px;display:inline-block}
+    .hero-photo > img{aspect-ratio:4/3;object-position:center}
+    .notch{position:static;padding:0;border-radius:0;max-width:none;width:auto}
+    .notch-tr{margin-bottom:14px}
+    .notch-tr .side-photo img{min-height:150px}
+    .fillet{display:none}
+    .notch-bl{margin-top:14px;flex-wrap:wrap}
+    .notch-bl .tag2{background:var(--white);border-radius:var(--r-m);padding:12px 16px;max-width:none}
+    .notch-br{margin-top:14px}
+    .notch-br .stack{flex-direction:row;flex-wrap:wrap}
+    .notch-br .stack > *{flex:1 1 220px}
+    .dates-grid{grid-template-columns:1fr 1fr}
+    .ages-inner,.team-inner,.band-inner{grid-template-columns:1fr}
+    .team-photo .chip{position:static;margin-top:12px;max-width:none}
+    .foot-grid{grid-template-columns:1fr 1fr}
+  }
+  @media (max-width:560px){
+    .dates-grid{grid-template-columns:1fr}
+    .hero h1{font-size:31px}
+    .foot-grid{grid-template-columns:1fr}
+    .hero-side{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <!-- NAV -->
+  <nav class="nav" aria-label="Primary">
+    <a class="logo" href="#top" aria-label="Sandpiper Holidays home">
+      <svg class="logo-mark" viewBox="0 0 40 40" aria-hidden="true">
+        <circle cx="20" cy="20" r="19" fill="#17453A"/>
+        <path d="M9 25c4-1 6-5 11-5 4 0 5 2 9 2-1 3-5 6-10 6s-8-1-10-3z" fill="#DFE8E2"/>
+        <path d="M24 17c1.5-2.5 4-3 6-2-1 .5-1.5 1.5-1.8 2.6" fill="none" stroke="#E8A15D" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="27.5" cy="13.5" r="2.6" fill="#E8A15D"/>
+      </svg>
+      <span><b>Sandpiper</b><small>Family Holidays</small></span>
+    </a>
+    <div class="pills">
+      <a href="#dates">Holiday dates</a>
+      <a href="#ages">By age group</a>
+      <a href="#team">Our team</a>
+    </div>
+    <div class="nav-right">
+      <a class="quiet" href="tel:01912480622">0191 248 0622</a>
+      <a class="pill-dark" href="#enquire">Get a quote</a>
+      <button class="menu-toggle" aria-expanded="false" aria-controls="mobileMenu" aria-label="Open menu">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </nav>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#dates">Holiday dates</a>
+    <a href="#ages">By age group</a>
+    <a href="#team">Our team</a>
+    <a href="tel:01912480622">Call 0191 248 0622</a>
+  </div>
+
+  <!-- HERO -->
+  <header class="hero" id="top">
+    <div class="hero-top">
+      <h1 class="rv in">Happy Children,<br>Rested Parents,<br>Holidays That Work.</h1>
+    </div>
+
+    <figure class="hero-photo rv in">
+      <img class="ph" src="https://images.unsplash.com/photo-1511895426328-dc8714191300?w=1600&h=740&fit=crop&q=80&auto=format" width="1600" height="740" alt="Three generations of a family holding hands on the beach at sunset">
+      <div class="notch notch-tr">
+        <span class="fillet fillet-side" aria-hidden="true"></span>
+        <span class="fillet fillet-bottom" aria-hidden="true"></span>
+        <div class="hero-side">
+          <div class="side-photo">
+            <img class="ph" src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=440&h=340&fit=crop&q=75&auto=format" width="440" height="340" alt="A calm resort pool lined with villas and palm trees">
+          </div>
+          <div class="stat-card">
+            <b>98%</b>
+            <span>of families say they'd book with us again</span>
+          </div>
+        </div>
+      </div>
+      <div class="chip chip-years">
+        <b>13+</b>
+        <span>years of family holidays, checked in person</span>
+      </div>
+      <div class="notch notch-bl">
+        <span class="fillet fillet-top" aria-hidden="true"></span>
+        <span class="fillet fillet-side" aria-hidden="true"></span>
+        <p class="tag2">Expert help you can trust, for family time that counts.</p>
+        <a class="pill-dark" href="#enquire">Start planning</a>
+      </div>
+      <div class="notch notch-br">
+        <span class="fillet fillet-top" aria-hidden="true"></span>
+        <span class="fillet fillet-side" aria-hidden="true"></span>
+        <div class="stack">
+          <div class="chip chip-kids">
+            <b>40k+</b>
+            <span>little travellers flown since 2012</span>
+          </div>
+          <div class="pine-card">
+            <p>Kids clubs checked. Transfers kept short. Naps protected, always.</p>
+          </div>
+          <div class="review-chip">
+            <div class="faces" aria-hidden="true">
+              <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=64&h=64&fit=crop&q=60&auto=format&crop=faces" alt="">
+              <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=64&h=64&fit=crop&q=60&auto=format&crop=faces" alt="">
+              <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=64&h=64&fit=crop&q=60&auto=format&crop=faces" alt="">
+            </div>
+            <div>
+              <b>Rated 4.8/5</b>
+              <span class="stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+              <span> by 2,146 parents</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </figure>
+  </header>
+
+  <!-- trust strip -->
+  <div class="trust" aria-label="Protection and reassurance">
+    <div class="trust-inner">
+      <span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/></svg>ATOL 11529</span>
+      <span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>ABTA P7418</span>
+      <span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 3"/></svg>Transfers under 90 minutes</span>
+      <span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20l9-15 9 15z M12 5v4"/></svg>No 6am flights unless you ask</span>
+    </div>
+  </div>
+
+  <!-- DATES -->
+  <section id="dates" aria-labelledby="datesTitle">
+    <div class="sec-head rv">
+      <p class="kicker">School holidays, already priced</p>
+      <h2 id="datesTitle">Pick the dates you're stuck with. We've done the maths.</h2>
+      <p>Every price is the total for 2 adults and 2 children from your local airport &mdash; flights, transfers and luggage included.</p>
+    </div>
+    <div class="dates-grid">
+      <a class="date-card rv" href="#enquire">
+        <span class="when">Easter</span>
+        <span class="span">27 Mar &ndash; 11 Apr 2027</span>
+        <span class="from">7 nights, family of 4<b>&pound;1,721</b></span>
+      </a>
+      <a class="date-card rv" href="#enquire">
+        <span class="when">May half term</span>
+        <span class="span">29 May &ndash; 6 Jun 2027</span>
+        <span class="from">7 nights, family of 4<b>&pound;1,908</b></span>
+      </a>
+      <a class="date-card rv" href="#enquire">
+        <span class="when">Summer holidays</span>
+        <span class="span">16 Jul &ndash; 31 Aug 2027</span>
+        <span class="from">7 nights, family of 4<b>&pound;2,293</b></span>
+      </a>
+      <a class="date-card rv" href="#enquire">
+        <span class="when">October half term</span>
+        <span class="span">23 Oct &ndash; 31 Oct 2027</span>
+        <span class="from">7 nights, family of 4<b>&pound;1,486</b></span>
+      </a>
+    </div>
+  </section>
+
+  <!-- AGES -->
+  <section aria-labelledby="agesTitle" style="padding-top:0">
+    <div class="ages" id="ages">
+      <div class="ages-inner">
+        <div class="ages-photo rv">
+          <img class="ph" src="https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?w=800&h=880&fit=crop&q=78&auto=format" width="800" height="880" alt="Children doing cartwheels and handstands on holiday">
+        </div>
+        <div>
+          <div class="sec-head rv" style="margin-bottom:20px">
+            <p class="kicker">Holidays by age group</p>
+            <h2 id="agesTitle">A trip that fits the ages you've actually got</h2>
+          </div>
+          <ul class="age-list">
+            <li class="rv">
+              <span class="age-ico"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M6 21c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg></span>
+              <div>
+                <h3>Babies &amp; tots <span>0&ndash;3</span></h3>
+                <p>Cots confirmed before booking, quiet pools, pram-friendly resorts, short transfers.</p>
+              </div>
+              <a class="age-go" href="#enquire" aria-label="Holidays for ages 0 to 3"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            </li>
+            <li class="rv">
+              <span class="age-ico"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 4.9L19 9l-3.5 3.6.8 5.4-4.3-2.5-4.3 2.5.8-5.4L5 9l4.8-1.1z"/></svg></span>
+              <div>
+                <h3>Little ones <span>4&ndash;7</span></h3>
+                <p>Kids clubs that really take 4-year-olds, splash zones, early teas, evening shows.</p>
+              </div>
+              <a class="age-go" href="#enquire" aria-label="Holidays for ages 4 to 7"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            </li>
+            <li class="rv">
+              <span class="age-ico"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17c3-6 6-9 8-9s5 3 8 9M9 8l3-4 3 4"/></svg></span>
+              <div>
+                <h3>Big kids <span>8&ndash;12</span></h3>
+                <p>Waterparks, sports academies, all-inclusive so the fourth ice cream isn't a debate.</p>
+              </div>
+              <a class="age-go" href="#enquire" aria-label="Holidays for ages 8 to 12"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            </li>
+            <li class="rv">
+              <span class="age-ico"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/></svg></span>
+              <div>
+                <h3>Teens <span>13+</span></h3>
+                <p>Proper wifi, teen zones away from the toddler disco, watersports worth leaving the room for.</p>
+              </div>
+              <a class="age-go" href="#enquire" aria-label="Holidays for teenagers"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAM -->
+  <section class="team" id="team" aria-labelledby="teamTitle" style="padding-top:0">
+    <div class="team-inner">
+      <div>
+        <p class="kicker rv">Real people, real opinions</p>
+        <h2 id="teamTitle" class="rv">You'll speak to someone who's done the flight with a toddler</h2>
+        <blockquote class="rv">&ldquo;If the kids club is really a cupboard with a telly, I'll tell you &mdash; and find you somewhere better. I book the same hotels for my own three.&rdquo;</blockquote>
+        <ul class="promises">
+          <li class="rv"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>Kids club ages re-checked with the hotel the week you travel</li>
+          <li class="rv"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>One total price &mdash; flights, luggage, transfers and seats together</li>
+          <li class="rv"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>Same-day answers during school holiday booking season</li>
+        </ul>
+        <p class="call-row rv">
+          <a class="phone" href="tel:01912480622">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a12 12 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>
+            0191 248 0622
+          </a>
+          <small>Mon&ndash;Sat 9am&ndash;7pm &middot; Sun 10am&ndash;4pm</small>
+        </p>
+      </div>
+      <div class="team-photo rv">
+        <img class="ph" src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=720&h=810&fit=crop&q=78&auto=format&crop=faces" width="720" height="810" alt="Joanne from the Sandpiper team smiling at her desk">
+        <div class="chip">
+          <b>Joanne Kerr</b>
+          <span>Senior travel adviser &middot; mum of three &middot; 12 years at Sandpiper</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENQUIRE -->
+  <section id="enquire" aria-labelledby="enqTitle" style="padding-top:0">
+    <div class="band">
+      <div class="band-inner">
+        <div>
+          <p class="kicker rv">Tell us the ages. We'll do the rest.</p>
+          <h2 id="enqTitle" class="rv">Send us your dates and your children's ages &mdash; we'll come back today with three holidays that work.</h2>
+          <p class="rv">No call centre, no hold music. A named adviser replies the same working day.</p>
+        </div>
+        <form class="rv" action="#" method="post" novalidate>
+          <div class="f">
+            <label for="e-name">Your name</label>
+            <input id="e-name" name="name" type="text" autocomplete="name" placeholder="Name">
+          </div>
+          <div class="f">
+            <label for="e-contact">Email or phone</label>
+            <input id="e-contact" name="contact" type="text" autocomplete="email" placeholder="However suits you">
+          </div>
+          <div class="f">
+            <label for="e-ages">Dates &amp; ages</label>
+            <input id="e-ages" name="ages" type="text" placeholder="e.g. summer holidays, kids are 4 and 9">
+          </div>
+          <button class="pill-light" type="submit">Get my three options</button>
+          <small>One reply from one adviser. No newsletters unless you ask.</small>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a class="logo" href="#top" aria-label="Sandpiper Holidays home">
+          <svg class="logo-mark" viewBox="0 0 40 40" aria-hidden="true">
+            <circle cx="20" cy="20" r="19" fill="#17453A"/>
+            <path d="M9 25c4-1 6-5 11-5 4 0 5 2 9 2-1 3-5 6-10 6s-8-1-10-3z" fill="#DFE8E2"/>
+            <path d="M24 17c1.5-2.5 4-3 6-2-1 .5-1.5 1.5-1.8 2.6" fill="none" stroke="#E8A15D" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="27.5" cy="13.5" r="2.6" fill="#E8A15D"/>
+          </svg>
+          <span><b>Sandpiper</b><small>Family Holidays</small></span>
+        </a>
+        <p>Independent family holiday specialists, booking from our Newcastle office since 2012.</p>
+        <div class="badges">
+          <span class="badge"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/></svg>ATOL 11529</span>
+          <span class="badge"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>ABTA P7418</span>
+        </div>
+      </div>
+      <nav aria-label="Holidays">
+        <h3>Holidays</h3>
+        <ul>
+          <li><a href="#dates">School holiday dates</a></li>
+          <li><a href="#ages">By age group</a></li>
+          <li><a href="#enquire">Free child places</a></li>
+          <li><a href="#enquire">All-inclusive resorts</a></li>
+          <li><a href="#enquire">Winter sun with kids</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Help">
+        <h3>Help &amp; advice</h3>
+        <ul>
+          <li><a href="#enquire">How our pricing works</a></li>
+          <li><a href="#enquire">Passports for children</a></li>
+          <li><a href="#enquire">Flying with a baby</a></li>
+          <li><a href="#enquire">Payment plans</a></li>
+          <li><a href="#enquire">Manage my booking</a></li>
+        </ul>
+      </nav>
+      <div>
+        <h3>Talk to us</h3>
+        <ul>
+          <li><a href="tel:01912480622">0191 248 0622</a></li>
+          <li><a href="mailto:hello@sandpiperholidays.co.uk">hello@sandpiperholidays.co.uk</a></li>
+          <li><a href="#top">31 Grainger Street, Newcastle NE1 5JE</a></li>
+          <li><a href="#top">Mon&ndash;Sat 9&ndash;7 &middot; Sun 10&ndash;4</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="legal">
+      <span>&copy; 2026 Sandpiper Holidays Ltd. Registered in England No. 08127 443.</span>
+      <span>Many of the flight-inclusive holidays on this website are financially protected by the ATOL scheme.</span>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var toggle=document.querySelector('.menu-toggle');
+  var menu=document.getElementById('mobileMenu');
+  toggle.addEventListener('click',function(){
+    var open=menu.classList.toggle('open');
+    toggle.setAttribute('aria-expanded',open?'true':'false');
+    toggle.setAttribute('aria-label',open?'Close menu':'Open menu');
+  });
+  menu.addEventListener('click',function(e){
+    if(e.target.closest('a')){menu.classList.remove('open');toggle.setAttribute('aria-expanded','false');}
+  });
+  var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var els=document.querySelectorAll('.rv');
+  if(reduced||!('IntersectionObserver' in window)){
+    els.forEach(function(el){el.classList.add('in');});
+  }else{
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}
+      });
+    },{threshold:.12,rootMargin:'0px 0px -40px 0px'});
+    els.forEach(function(el){io.observe(el);});
+  }
+})();
+</script>
+</body>
+</html>
