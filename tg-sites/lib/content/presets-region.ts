@@ -67,8 +67,8 @@ const FOOTER_MENU = { layout: 'column', collapse: false } as const;
 // heading the client types their own name into, or swaps for a logo image.
 // ---------------------------------------------------------------------------
 
-/** The padding inside every floating bar. */
-const BAR_PAD = { top: 14, right: 26, bottom: 14, left: 26 } as const;
+/** The padding inside every floating bar. Slim, so the pill stays a bar. */
+const BAR_PAD = { top: 11, right: 26, bottom: 11, left: 26 } as const;
 
 /** One column, its blocks in a row, centred: the floating-pill row shape. */
 const BAR_ROW: Pick<PresetRow, 'widths' | 'columnFlow' | 'align'> = {
@@ -86,9 +86,17 @@ function wordmark(text: string, colour: string): PresetBlock {
   };
 }
 
-/** A bar menu in a baked link colour. Icons optional, for the icon-led bars. */
-function barNav(colour: string, items: ReadonlyArray<Record<string, unknown>> = LINKS): PresetBlock {
-  return { type: 'nav', props: { items, layout: 'row', collapse: true, gap: 'm', linkColour: colour } };
+/** A bar menu in a baked link colour. Icons optional, for the icon-led bars,
+ *  and small capitals for the formal and technical ones. */
+function barNav(
+  colour: string,
+  items: ReadonlyArray<Record<string, unknown>> = LINKS,
+  upper = false,
+): PresetBlock {
+  return {
+    type: 'nav',
+    props: { items, layout: 'row', collapse: true, gap: 'm', linkColour: colour, uppercase: upper },
+  };
 }
 
 /** The travel links with an icon each, for the icon-led bars. */
@@ -261,7 +269,7 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
         columnBox: [{ background: '#0b0f0b', radius: 28, padding: BAR_PAD, borderWidth: 1, borderColour: '#20301f' }],
         columns: [[
           wordmark('◈ NEXORA', '#eef3ee'),
-          barNav('#9aa79a'),
+          barNav('#9aa79a', LINKS, true),
           { type: 'button', props: { label: 'Get started', href: '/contact', variant: 'secondary', outline: true, colour: '#a3e635', textColour: '#a3e635' } },
         ]],
       },
@@ -281,6 +289,115 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
           wordmark('▲ ASTRIX', '#eafcff'),
           barNav('#7fdfe6', ICON_LINKS),
           { type: 'button', props: { label: 'Get started  ↗', href: '/contact', variant: 'secondary', outline: true, colour: '#2dd4bf', textColour: '#2dd4bf' } },
+        ]],
+      },
+    ],
+    section: { paddingY: 20, width: 'wide' },
+  },
+  {
+    id: 'header-soluna',
+    category: 'header',
+    label: 'Soluna',
+    description: 'A warm cream bar with the search out in the open. Soft and welcoming, for a shop or a stay.',
+    rows: [
+      {
+        ...BAR_ROW,
+        columnBox: [{ background: '#f6f2ea', radius: 36, padding: BAR_PAD, borderWidth: 1, borderColour: '#e7e0d0' }],
+        columns: [[
+          wordmark('❋ SOLUNA', '#2b2820'),
+          barNav('#565043'),
+          { type: 'search', props: { display: 'box', placeholder: 'Search' } },
+        ]],
+      },
+    ],
+    section: { paddingY: 20, width: 'wide' },
+  },
+  {
+    id: 'header-velora',
+    category: 'header',
+    label: 'Velora',
+    description: 'A dark bar with a gold wordmark and a solid gold button. Quiet luxury, for a villa or a private tour.',
+    rows: [
+      {
+        ...BAR_ROW,
+        columnBox: [{ background: '#151109', radius: 30, padding: BAR_PAD, shadow: 'medium' }],
+        columns: [[
+          wordmark('✦ VELORA', '#dcc389'),
+          barNav('#b6ac98', LINKS, true),
+          { type: 'button', props: { label: 'Start a project  →', href: '/contact', variant: 'primary', colour: '#e6d6a8', textColour: '#221a0b' } },
+        ]],
+      },
+    ],
+    section: { paddingY: 20, width: 'wide' },
+  },
+  {
+    id: 'header-aurea',
+    category: 'header',
+    label: 'Aurea',
+    description: 'The same gold luxe in a cooler dark, with the button drawn as a fine gold outline. Understated and sure of itself.',
+    rows: [
+      {
+        ...BAR_ROW,
+        columnBox: [{ background: '#100f16', radius: 30, padding: BAR_PAD, shadow: 'medium' }],
+        columns: [[
+          wordmark('◈ AUREA', '#e3c77a'),
+          barNav('#a9a2b0', LINKS, true),
+          { type: 'button', props: { label: 'Start a project  →', href: '/contact', variant: 'secondary', outline: true, colour: '#e3c77a', textColour: '#e3c77a' } },
+        ]],
+      },
+    ],
+    section: { paddingY: 20, width: 'wide' },
+  },
+  {
+    id: 'header-elevate',
+    category: 'header',
+    label: 'Elevate',
+    description: 'A black bar with a bright lime button and the search to hand. Sharp and modern, for a studio or an agency.',
+    rows: [
+      {
+        ...BAR_ROW,
+        columnBox: [{ background: '#0a0a0a', radius: 30, padding: BAR_PAD }],
+        columns: [[
+          wordmark('ELEVATE', '#f6f6f6'),
+          barNav('#e9e9e9', LINKS, true),
+          { type: 'search', props: { display: 'icon', placeholder: 'Search', colour: '#e9e9e9' } },
+          { type: 'button', props: { label: 'Get started', href: '/contact', variant: 'primary', colour: '#c8f647', textColour: '#141400' } },
+        ]],
+      },
+    ],
+    section: { paddingY: 20, width: 'wide' },
+  },
+  {
+    id: 'header-verdant',
+    category: 'header',
+    label: 'Verdant',
+    description: 'A deep forest bar with cream links and a fine outlined button. Grounded and natural, for the outdoors.',
+    rows: [
+      {
+        ...BAR_ROW,
+        columnBox: [{ background: '#122217', radius: 30, padding: BAR_PAD, borderWidth: 1, borderColour: '#1e3626' }],
+        columns: [[
+          wordmark('🌿 VERDANT', '#e9eed8'),
+          barNav('#c3cdb4'),
+          { type: 'button', props: { label: 'Enquire', href: '/contact', variant: 'secondary', outline: true, colour: '#cfe0a8', textColour: '#e9eed8' } },
+        ]],
+      },
+    ],
+    section: { paddingY: 20, width: 'wide' },
+  },
+  {
+    id: 'header-prisma',
+    category: 'header',
+    label: 'Prisma',
+    description: 'A clean white bar with one bold purple button. Bright and confident, for a portfolio or a launch.',
+    rows: [
+      {
+        ...BAR_ROW,
+        columnBox: [{ background: '#ffffff', radius: 30, padding: BAR_PAD, borderWidth: 1, borderColour: '#e6e6ef', shadow: 'soft' }],
+        columns: [[
+          wordmark('◇ PRISMA', '#191826'),
+          barNav('#3f3d54', LINKS, true),
+          { type: 'button', props: { label: 'Hire me  ↗', href: '/contact', variant: 'primary', colour: '#7c3aed', textColour: '#ffffff' } },
         ]],
       },
     ],

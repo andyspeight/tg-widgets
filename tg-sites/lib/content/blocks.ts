@@ -1481,6 +1481,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
         help: 'The magnifier on its own links to the search page, for a tidy header.',
       },
       { kind: 'select', key: 'align', label: 'Alignment', options: ALIGN_OPTIONS, group: 'layout' },
+      { kind: 'colour', key: 'colour', label: 'Colour', group: 'colours', help: 'The magnifier tint, so it shows on a dark bar. Blank follows the header.' },
     ],
   },
 
@@ -1508,6 +1509,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
       align: 'left',
       gap: 'm',
       collapse: true,
+      uppercase: false,
       items: [
         { label: 'Home', href: '/', newTab: false },
         { label: 'Holidays', href: '/holidays', newTab: false },
@@ -1590,6 +1592,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
         ],
       },
       { kind: 'colour', key: 'linkColour', label: 'Link colour', help: 'The colour of the links. Blank follows the header.' },
+      { kind: 'toggle', key: 'uppercase', label: 'Uppercase links', help: 'Small capitals with a little letter-spacing, for the more formal headers.' },
     ],
   },
 

@@ -2859,6 +2859,14 @@
 }
 .tgs-nav__item--folder > .tgs-nav__link .tgs-nav__icon { margin-inline-end: 0; }
 
+/* Small capitals for the formal and technical bars, the casing done here so the
+   links keep their real words. A little tracking, because uppercase without it
+   reads tight. */
+.tgs-nav[data-uppercase] .tgs-nav__link {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
 /*
  * THE PHONE MENU, WITH NO JAVASCRIPT.
  *

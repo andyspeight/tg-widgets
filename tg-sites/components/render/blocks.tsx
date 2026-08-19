@@ -1687,6 +1687,12 @@ export function SearchBlock({
   // sets text-align on the parent; an inline-flex search follows it, so there is
   // nothing to set here. Same as every other inline block.
 
+  // The magnifier and the box tint, so the icon shows on a dark bar where the
+  // inherited text would be dark. The glass strokes currentColor, so setting the
+  // container's colour is enough for the icon; the box keeps its own fill.
+  const colour = safeColour(props.colour);
+  const tint = colour ? ({ color: colour } as CSSProperties) : undefined;
+
   const glass = (
     <svg
       className="tgs-search__glass"
@@ -1707,7 +1713,7 @@ export function SearchBlock({
 
   if (display === 'icon') {
     return (
-      <div className="tgs-search" data-display="icon">
+      <div className="tgs-search" data-display="icon" style={tint}>
         <a className="tgs-search__link" href="/search" aria-label={placeholder}>
           {glass}
         </a>
@@ -1738,7 +1744,7 @@ export function SearchBlock({
 
   if (editing) {
     return (
-      <div className="tgs-search" data-display="box">
+      <div className="tgs-search" data-display="box" style={tint}>
         {field}
       </div>
     );
@@ -1751,6 +1757,7 @@ export function SearchBlock({
       role="search"
       method="get"
       action="/search"
+      style={tint}
     >
       {field}
     </form>
@@ -1930,6 +1937,9 @@ export function NavBlock({ props }: { props: Props }): ReactElement {
   // Default true, because a menu that does not collapse is the wrong default on
   // a phone and this block exists mostly to be a header.
   const collapse = bool(props, 'collapse', true);
+  // Small capitals for the formal and technical bars. A presentation choice, so
+  // the labels stay their real words and CSS does the casing.
+  const uppercase = bool(props, 'uppercase');
 
   // The links' own type, each following the header unless the block sets it.
   // Every value is checked against the whitelist the field offered, so only the
@@ -1956,6 +1966,7 @@ export function NavBlock({ props }: { props: Props }): ReactElement {
       data-layout={layout}
       data-align={align}
       data-gap={gap}
+      data-uppercase={uppercase ? 'true' : undefined}
       style={hasNavStyle ? navStyle : undefined}
     >
       <ul className="tgs-nav__list" data-collapse={collapse ? 'true' : undefined}>
