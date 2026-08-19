@@ -1639,6 +1639,108 @@ export function ButtonGroupBlock({ props }: { props: Props }): ReactElement {
 }
 
 /**
+ * SEARCH, WITH NO JAVASCRIPT.
+ *
+ * A plain GET form pointed at /search. The browser navigates on submit, the
+ * server builds the results, and there is no bundle behind any of it, the same
+ * principle the menu keeps. On a client's own hostname middleware carries the
+ * ?q= through to the site route, where /search is a real address answered by
+ * the search branch. See middleware.ts and the site route.
+ *
+ * TWO SHAPES. A box, for the headers that show a search field, and just the
+ * magnifier, for the ones that show only an icon. The icon is a LINK to the
+ * search page rather than a submit with an empty query behind it, so it needs
+ * no script and always has somewhere to go: the page it lands on carries the
+ * box.
+ *
+ * ON THE CANVAS it is a div, not a form, and the field is read only, so typing a
+ * query into a preview cannot navigate the editor away. Same `editing` flag the
+ * map and the logos read.
+ */
+export function SearchBlock({
+  props,
+  editing = false,
+}: {
+  props: Props;
+  editing?: boolean;
+}): ReactElement {
+  const placeholder = str(props, 'placeholder') || 'Search';
+  const display = oneOf(props, 'display', ['box', 'icon'] as const, 'box');
+  // Alignment rides on the block wrapper's data-align (see PageRenderer), which
+  // sets text-align on the parent; an inline-flex search follows it, so there is
+  // nothing to set here. Same as every other inline block.
+
+  const glass = (
+    <svg
+      className="tgs-search__glass"
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="11" cy="11" r="7" />
+      <path d="M20 20l-3.5-3.5" />
+    </svg>
+  );
+
+  if (display === 'icon') {
+    return (
+      <div className="tgs-search" data-display="icon">
+        <a className="tgs-search__link" href="/search" aria-label={placeholder}>
+          {glass}
+        </a>
+      </div>
+    );
+  }
+
+  const field = (
+    <>
+      <input
+        className="tgs-search__input"
+        type="search"
+        name="q"
+        placeholder={placeholder}
+        aria-label={placeholder}
+        {...(editing ? { readOnly: true, tabIndex: -1 } : {})}
+      />
+      <button
+        className="tgs-search__submit"
+        type="submit"
+        aria-label="Search"
+        {...(editing ? { tabIndex: -1 } : {})}
+      >
+        {glass}
+      </button>
+    </>
+  );
+
+  if (editing) {
+    return (
+      <div className="tgs-search" data-display="box">
+        {field}
+      </div>
+    );
+  }
+
+  return (
+    <form
+      className="tgs-search"
+      data-display="box"
+      role="search"
+      method="get"
+      action="/search"
+    >
+      {field}
+    </form>
+  );
+}
+
+/**
  * The menu.
  *
  * NO JAVASCRIPT, INCLUDING THE MENU BUTTON. The whole render tree is server

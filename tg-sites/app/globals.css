@@ -1716,6 +1716,64 @@
 .tgs-block[data-align='right']  .tgs-buttons { justify-content: flex-end; }
 
 /*
+ * SEARCH. A themed box or a bare magnifier, both drawn from the palette so a
+ * client's brand fills them without a second thought. inline-flex so the block
+ * wrapper's text-align places it, the same as any inline block. Every colour is
+ * a token with a plain fallback, so it reads on a light bar and a dark one.
+ */
+.tgs-search { display: inline-flex; align-items: center; max-width: 100%; vertical-align: middle; }
+
+.tgs-search[data-display='box'] {
+  gap: 4px;
+  padding: 4px 4px 4px 16px;
+  border: 1px solid var(--tgs-border-strong, rgba(0, 0, 0, 0.24));
+  border-radius: 999px;
+  background: var(--tgs-surface, #fff);
+  color: var(--tgs-text, #14181f);
+}
+.tgs-search__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  padding: 8px 2px;
+  outline: none;
+}
+.tgs-search__input::placeholder { color: var(--tgs-text-muted, #5b6472); opacity: 1; }
+.tgs-search__submit {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  background: var(--tgs-primary, #1f3a8a);
+  color: var(--tgs-on-primary, #fff);
+  transition: filter 0.15s ease;
+}
+.tgs-search__submit:hover { filter: brightness(1.08); }
+
+/* The magnifier on its own: a tappable link, tinted from the text around it. */
+.tgs-search__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+.tgs-search__link:hover { background: color-mix(in srgb, currentColor 12%, transparent); }
+.tgs-search__glass { display: block; }
+
+/*
  * PER-SCREEN ALIGNMENT (see lib/content/responsive.ts). Spacing and text size
  * fold a scalar through one custom property; alignment cannot, because it drives
  * three things at once: the block's own text-align, a max-width paragraph's

@@ -1450,6 +1450,40 @@ export const BLOCKS: readonly BlockDefinition[] = [
 
   {
     /*
+     * SEARCH.
+     *
+     * A box that looks through the site's OWN pages, not the web. It belongs in
+     * Actions beside the menu and the buttons, because in practice it lives in a
+     * header next to them. It carries no results itself: it is a plain form that
+     * sends the visitor to /search, and the server builds the answer there with
+     * no JavaScript on the page. See SearchBlock and the search branch of the
+     * site route.
+     */
+    type: 'search',
+    label: 'Search',
+    group: 'Actions',
+    icon: 'search',
+    description: 'A box that searches your own pages.',
+    defaults: { placeholder: 'Search', display: 'box', align: 'left' },
+    summarise: () => 'Search',
+    fields: [
+      { kind: 'text', key: 'placeholder', label: 'Placeholder', max: 40, help: 'The faint words inside the empty box.' },
+      {
+        kind: 'select',
+        key: 'display',
+        label: 'Show as',
+        options: [
+          { value: 'box', label: 'A search box' },
+          { value: 'icon', label: 'Just the magnifier' },
+        ],
+        help: 'The magnifier on its own links to the search page, for a tidy header.',
+      },
+      { kind: 'select', key: 'align', label: 'Alignment', options: ALIGN_OPTIONS, group: 'layout' },
+    ],
+  },
+
+  {
+    /*
      * THE MENU.
      *
      * Added 31 Jul 2026 with the header and the footer, and it only makes sense
