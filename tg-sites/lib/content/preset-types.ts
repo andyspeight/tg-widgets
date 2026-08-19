@@ -138,6 +138,17 @@ export interface PresetRow {
    * per column, and a gap in the array leaves that column plain.
    */
   columnBox?: ReadonlyArray<Partial<Column['box']> | undefined>;
+  /**
+   * How the blocks INSIDE a column sit: stacked, or in a row. One entry per
+   * column, a gap leaving that column its stacked default.
+   *
+   * The floating header bars use it: a logo, a menu and a button ride side by
+   * side inside one rounded column so the whole bar is a single pill rather than
+   * three cells across the open width. The column already carries `flow` (see
+   * ColumnFlow in schema.ts); this is how a preset sets it, the same way
+   * columnBox sets the box. It stacks on a phone like every flow-row column does.
+   */
+  columnFlow?: ReadonlyArray<Column['flow'] | undefined>;
   /** Space between the columns, when the default is not right for a card grid. */
   gap?: number;
   /**

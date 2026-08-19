@@ -531,6 +531,28 @@
 .tgs-col[data-flow='row'] > .tgs-block { flex: 0 1 auto; }
 
 /*
+ * THE FLOATING HEADER BAR. A single boxed column set to flow row is the pill
+ * navbar the modern designs use: the logo, the menu and the button ride inside
+ * one rounded panel rather than across the open width. Inside that panel they
+ * want the same shape a header takes on a phone, centred and pushed to the two
+ * ends, so the button sits hard right and the logo hard left with the menu
+ * between. Scoped to the header region, and desktop only by being outside the
+ * phone query above, which turns a flow-row column back into a stack.
+ */
+.tgs-region[data-region='header'] .tgs-col[data-flow='row'] {
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Keep the logo a header's height inside the pill, whatever the picture's own
+   size, so the bar stays a bar rather than growing into a banner. Only inside a
+   floating bar: a logo in its own column is already sized by the column. */
+.tgs-region[data-region='header'] .tgs-col[data-flow='row'] img {
+  max-height: 44px;
+  width: auto;
+}
+
+/*
  * PER-SCREEN TEXT SIZE AND LINE SPACING, the block half of the size vars.
  *
  * A block carries its size as inline custom properties: --tgs-fs (a desktop base)

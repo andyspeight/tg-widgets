@@ -157,7 +157,12 @@ function buildRow(row: PresetRow): Row {
        * logo beside it.
        */
       const aligned = row.align ? { ...column, align: row.align } : column;
-      return box ? { ...aligned, box: { ...aligned.box, ...box } } : aligned;
+      // How the blocks inside this column sit. The floating header bars set it to
+      // 'row' so the logo, menu and button ride side by side inside the one pill.
+      const flowed = row.columnFlow?.[index]
+        ? { ...aligned, flow: row.columnFlow[index]! }
+        : aligned;
+      return box ? { ...flowed, box: { ...flowed.box, ...box } } : flowed;
     }),
     gap: row.gap ?? DEFAULT_GAP,
     stackBelow: row.stackBelow ?? 'mobile',
