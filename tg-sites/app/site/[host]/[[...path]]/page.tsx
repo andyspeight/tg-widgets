@@ -9,10 +9,12 @@ import { RegionRenderer } from '../../../../components/render/RegionRenderer';
 import { SiteBody, SiteHead } from '../../../../components/render/SiteHead';
 import { WidgetScripts } from '../../../../components/render/WidgetScripts';
 import { SlideshowScript } from '../../../../components/render/SlideshowScript';
+import { ThemeToggleScript } from '../../../../components/render/ThemeToggleScript';
 import { fillNavFolders, fillNavRegion } from '../../../../lib/content/nav';
 import { listFontFaces } from '../../../../lib/db/fonts';
 import { getPublishedPage, listPublishedForSearch, listPublishedNavPages } from '../../../../lib/db/pages';
 import { searchDocs } from '../../../../lib/content/search';
+import { hasThemeToggle } from '../../../../lib/content/theme-toggle';
 import { SearchResults } from '../../../../components/render/SearchResults';
 import { resolveRedirect } from '../../../../lib/db/redirects';
 import { getPublishedRegions } from '../../../../lib/db/regions';
@@ -27,7 +29,7 @@ import { resolveTenantByHostname } from '../../../../lib/db/tenants';
 import { socialMetas } from '../../../../lib/settings/head';
 import { jsonLdScript, pageJsonLd, profileLinks } from '../../../../lib/seo/jsonld';
 import { familiesFromFiles } from '../../../../lib/theme/fonts';
-import { themeTokens } from '../../../../lib/theme/tokens';
+import { darkThemeTokens, themeTokens } from '../../../../lib/theme/tokens';
 
 /**
  * A client's website, on their own hostname.
@@ -329,7 +331,23 @@ export default async function SitePage({ params, searchParams }: Params) {
   }
 
   const slug = decodeURIComponent(host);
-  const theme = themeTokens(found.theme, familiesFromFiles(found.faces)).style;
+
+  /*
+   * Dark mode is OPT IN: a page turns dark only when it actually carries a Light
+   * / dark switch, in the header, the footer or the page's own body. When it
+   * does, the dark palette rides on the same theme object (globals.css swaps it
+   * in) and the switch is wired at the top of the render below. When it does not,
+   * none of this is emitted and the page is byte for byte what it was, which is
+   * the whole safety property: a visitor's system dark mode must never restyle a
+   * site that did not ask for it. See hasThemeToggle and darkThemeTokens.
+   */
+  const scanTree = found.page ? found.page.content : found.entry ? found.entry.item : null;
+  const dark =
+    hasThemeToggle(found.regions.header) ||
+    hasThemeToggle(scanTree) ||
+    hasThemeToggle(found.regions.footer);
+  const base = themeTokens(found.theme, familiesFromFiles(found.faces)).style;
+  const theme = dark ? { ...base, ...darkThemeTokens(found.theme) } : base;
 
   /*
    * STRUCTURED DATA, which is the difference between an AI engine summarising
@@ -388,6 +406,13 @@ export default async function SitePage({ params, searchParams }: Params) {
 
   return (
     <>
+      {/*
+        The Light / dark switch's flash guard and wiring, when the page carries a
+        switch. First in the tree, so the guard runs before the content below it
+        paints. Renders nothing at all otherwise, keeping the no-script promise.
+      */}
+      <ThemeToggleScript active={dark} />
+
       {/*
         Icons, the manifest link and the analytics snippets. React hoists link,
         meta and script into the head from here, so it sits with the content it
@@ -651,10 +676,16 @@ async function loadSearch(host: string, query: string) {
 
 function renderSearchPage(host: string, data: NonNullable<Awaited<ReturnType<typeof loadSearch>>>) {
   const slug = decodeURIComponent(host);
-  const theme = themeTokens(data.theme, familiesFromFiles(data.faces)).style;
+
+  // The results page wears the same header and footer a page does, so it opts
+  // into dark the same way: if either carries a switch, it turns dark too.
+  const dark = hasThemeToggle(data.regions.header) || hasThemeToggle(data.regions.footer);
+  const base = themeTokens(data.theme, familiesFromFiles(data.faces)).style;
+  const theme = dark ? { ...base, ...darkThemeTokens(data.theme) } : base;
 
   return (
     <>
+      <ThemeToggleScript active={dark} />
       <SiteHead settings={data.settings} />
       <FontHead tenantSlug={slug} files={data.faces} typography={data.theme.typography} />
 

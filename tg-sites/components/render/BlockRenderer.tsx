@@ -41,6 +41,7 @@ import {
   TabsBlock,
   TestimonialsBlock,
   TextBlock,
+  ThemeToggleBlock,
   VideoBlock,
   WidgetBlock,
 } from './blocks';
@@ -127,6 +128,8 @@ export function BlockRenderer({
        */
       case 'search':
         return <SearchBlock props={props} editing={editable} />;
+      case 'theme-toggle':
+        return <ThemeToggleBlock props={props} editing={editable} />;
       case 'social':
         return <SocialBlock props={props} />;
       case 'table':

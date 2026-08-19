@@ -1487,6 +1487,46 @@ export const BLOCKS: readonly BlockDefinition[] = [
 
   {
     /*
+     * LIGHT / DARK SWITCH.
+     *
+     * The one control on a published site that flips the whole page between a
+     * light and a dark version of the client's own colours. It belongs in
+     * Actions beside the menu and the search, because that is where it lives: in
+     * a header, to hand.
+     *
+     * Adding it is the OPT IN for dark mode. A site with a switch gets the dark
+     * palette and starts following a visitor's system preference; a site without
+     * one is never touched, whatever the visitor's system asks for. See
+     * hasThemeToggle, darkThemeTokens and the ThemeToggleScript: this block is
+     * also the ONLY thing on the whole platform that puts JavaScript on a
+     * published page, and it is progressive, so the automatic half still works
+     * with the script blocked.
+     */
+    type: 'theme-toggle',
+    label: 'Light / dark',
+    group: 'Actions',
+    icon: 'theme',
+    description: 'A switch that turns the whole site light or dark.',
+    defaults: { display: 'switch', align: 'left' },
+    summarise: () => 'Light / dark',
+    fields: [
+      {
+        kind: 'select',
+        key: 'display',
+        label: 'Show as',
+        options: [
+          { value: 'switch', label: 'A sliding switch' },
+          { value: 'icon', label: 'Just the moon' },
+        ],
+        help: 'The switch shows the sun and the moon; the moon on its own is tidier in a busy bar.',
+      },
+      { kind: 'select', key: 'align', label: 'Alignment', options: ALIGN_OPTIONS, group: 'layout' },
+      { kind: 'colour', key: 'colour', label: 'Colour', group: 'colours', help: 'The switch tint, so it shows on a dark bar. Blank follows the header.' },
+    ],
+  },
+
+  {
+    /*
      * THE MENU.
      *
      * Added 31 Jul 2026 with the header and the footer, and it only makes sense

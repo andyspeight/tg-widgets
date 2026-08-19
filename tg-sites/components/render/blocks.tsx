@@ -1765,6 +1765,98 @@ export function SearchBlock({
 }
 
 /**
+ * The Light / dark switch.
+ *
+ * A plain button, and nothing more until the page loads. The published page
+ * wires it with /theme-toggle.js (see ThemeToggleScript), which flips
+ * `data-theme` on the document and remembers the choice; the CSS in globals.css
+ * does the rest, and the automatic half runs with no script at all. On the
+ * editor canvas there is no script, so the button is inert and shows the light
+ * look, which is exactly right for a preview: pressing it there must not restyle
+ * the canvas the agent is building on.
+ *
+ * `type="button"`, so a switch dropped next to a search box never submits the
+ * form around it. The label carries the meaning; the sun and the moon are
+ * decorative and hidden from a screen reader, and which one shows is decided by
+ * the current theme in CSS, not here, so this render is the same in both modes.
+ */
+export function ThemeToggleBlock({
+  props,
+  editing = false,
+}: {
+  props: Props;
+  editing?: boolean;
+}): ReactElement {
+  const display = oneOf(props, 'display', ['switch', 'icon'] as const, 'switch');
+  const colour = safeColour(props.colour);
+  const style = colour ? ({ color: colour } as CSSProperties) : undefined;
+
+  const sun = (
+    <svg
+      className="tgs-toggle__sun"
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="4.2" />
+      <path d="M12 2v2.5M12 19.5V22M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2 12h2.5M19.5 12H22M4.2 19.8l1.8-1.8M18 6l1.8-1.8" />
+    </svg>
+  );
+  const moon = (
+    <svg
+      className="tgs-toggle__moon"
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+    </svg>
+  );
+
+  const common = {
+    className: 'tgs-toggle',
+    type: 'button' as const,
+    'data-display': display,
+    // The hook the script binds to. Left off on the canvas so a stray click while
+    // editing does nothing.
+    ...(editing ? { tabIndex: -1 } : { 'data-tg-theme-toggle': 'true' }),
+    'aria-label': 'Switch between light and dark',
+    style,
+  };
+
+  if (display === 'icon') {
+    return (
+      <button {...common}>
+        {moon}
+        {sun}
+      </button>
+    );
+  }
+
+  return (
+    <button {...common}>
+      <span className="tgs-toggle__track" aria-hidden="true">
+        {sun}
+        {moon}
+      </span>
+      <span className="tgs-toggle__knob" aria-hidden="true" />
+    </button>
+  );
+}
+
+/**
  * The menu.
  *
  * NO JAVASCRIPT, INCLUDING THE MENU BUTTON. The whole render tree is server

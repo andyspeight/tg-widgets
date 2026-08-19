@@ -241,6 +241,70 @@
   --tgs-border: var(--tgs-on-primary-border);
 }
 
+/* ------------------------------------------------------------------ */
+/* Light / dark                                                        */
+/* ------------------------------------------------------------------ */
+
+/*
+ * A published site turns dark two ways, and both are OPT IN. The switch (the
+ * theme-toggle block) is the ONLY thing that emits the --tgs-d-* palette onto
+ * the page and region elements, so a site without one is never matched here,
+ * whatever the visitor's system asks for. That is the safety property: turning
+ * on dark mode across an operating system must not silently restyle every
+ * existing client site. See lib/theme/tokens.ts darkThemeTokens.
+ *
+ *   AUTOMATIC   the system asks for dark and the visitor has not overridden it.
+ *               Pure CSS, so it is right in the first paint and works with the
+ *               script blocked.
+ *   MANUAL      the visitor pressed the switch, which sets data-theme on <html>,
+ *               and it wins over the system either way.
+ *
+ * MATCHED OFF THE STYLE, not a class. `[style*='--tgs-d-surface']` keys off the
+ * presence of the dark palette in the inline style, the same trick the gradient
+ * and blur rules below use, so nothing has to thread an extra attribute through
+ * the renderers.
+ *
+ * !important, and it is load bearing. The light values are inline custom
+ * properties on the very same element (the tenant theme), and only importance
+ * beats an inline declaration. It is safe: a tone section sets its own --tgs-text
+ * and the rest on ITSELF, so those still win for their own subtree, and a
+ * dark-tone band stays the measured band it always was.
+ */
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme='light']) .tgs-page[style*='--tgs-d-surface'] {
+    --tgs-surface: var(--tgs-d-surface) !important;
+    --tgs-surface-alt: var(--tgs-d-surface-alt) !important;
+    --tgs-text: var(--tgs-d-text) !important;
+    --tgs-text-muted: var(--tgs-d-text-muted) !important;
+    --tgs-border: var(--tgs-d-border) !important;
+    --tgs-border-strong: var(--tgs-d-border-strong) !important;
+  }
+}
+html[data-theme='dark'] .tgs-page[style*='--tgs-d-surface'] {
+  --tgs-surface: var(--tgs-d-surface) !important;
+  --tgs-surface-alt: var(--tgs-d-surface-alt) !important;
+  --tgs-text: var(--tgs-d-text) !important;
+  --tgs-text-muted: var(--tgs-d-text-muted) !important;
+  --tgs-border: var(--tgs-d-border) !important;
+  --tgs-border-strong: var(--tgs-d-border-strong) !important;
+}
+
+/*
+ * The canvas behind the page, so a short page has no light strip under a dark
+ * one. It is on <html>, which is the layout's and carries no tenant tokens, so a
+ * neutral near-black rather than the tenant's tint; the difference never shows,
+ * because it only peeks below an opaque page. Opted-in sites only, via :has, so
+ * a plain site's background is untouched.
+ */
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme='light']):has(.tgs-page[style*='--tgs-d-surface']) {
+    background: #0b0d12;
+  }
+}
+html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
+  background: #0b0d12;
+}
+
 /*
  * ANIMATED GRADIENT BAND. A section marked data-gradient carries a slow, moving
  * gradient of the site's brand colours as its background: the stand-in a rebuild
@@ -1796,6 +1860,92 @@
 }
 .tgs-search__link:hover { background: color-mix(in srgb, currentColor 12%, transparent); }
 .tgs-search__glass { display: block; }
+
+/* ------------------------------------------------------------------ */
+/* Light / dark switch                                                 */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Everything here is currentColor, so the block's colour (or the ink of the bar
+ * it sits in) sets the whole control, and it shows on a dark bar or a light one
+ * without a second setting. Which icon shows, and where the knob sits, is decided
+ * by the page's theme in CSS, so the server render is the same either way and the
+ * script only flips data-theme.
+ */
+.tgs-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  line-height: 0;
+}
+.tgs-toggle svg { display: block; }
+.tgs-toggle:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+
+/* The moon on its own: a round, tappable button. Shows the theme you would switch
+   TO, so a moon while light and a sun while dark. */
+.tgs-toggle[data-display='icon'] {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  transition: background-color 0.15s ease;
+}
+.tgs-toggle[data-display='icon']:hover { background: color-mix(in srgb, currentColor 12%, transparent); }
+.tgs-toggle[data-display='icon'] .tgs-toggle__sun { display: none; }
+
+/* The sliding switch: a pill with the sun and the moon marking its ends and a
+   knob that travels between them. Both glyphs always show; the knob says which is
+   live, sitting over the sun while light and sliding to the moon while dark. */
+.tgs-toggle[data-display='switch'] {
+  position: relative;
+  width: 58px;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 999px;
+  border: 1.5px solid color-mix(in srgb, currentColor 32%, transparent);
+}
+.tgs-toggle__track {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  opacity: 0.62;
+}
+.tgs-toggle__track svg { width: 15px; height: 15px; }
+.tgs-toggle__knob {
+  position: absolute;
+  top: 50%;
+  left: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: currentColor;
+  transform: translateY(-50%);
+  transition: transform 0.2s ease;
+}
+
+/*
+ * Dark: slide the knob to the moon and, for the icon form, swap the shown glyph.
+ * Written twice on purpose, the three-state way: once for the visitor's manual
+ * choice (data-theme on <html>), once for the automatic one (the system, unless
+ * they have forced light). prefers-reduced-motion drops the slide to an instant.
+ */
+html[data-theme='dark'] .tgs-toggle[data-display='icon'] .tgs-toggle__moon { display: none; }
+html[data-theme='dark'] .tgs-toggle[data-display='icon'] .tgs-toggle__sun { display: block; }
+html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme='light']) .tgs-toggle[data-display='icon'] .tgs-toggle__moon { display: none; }
+  html:not([data-theme='light']) .tgs-toggle[data-display='icon'] .tgs-toggle__sun { display: block; }
+  html:not([data-theme='light']) .tgs-toggle__knob { transform: translate(28px, -50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tgs-toggle__knob { transition: none; }
+}
 
 /*
  * THE SEARCH RESULTS PAGE. Plain and readable, drawn from the palette so it

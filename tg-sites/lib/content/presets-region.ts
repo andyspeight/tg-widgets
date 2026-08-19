@@ -456,6 +456,52 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
     ],
     section: { paddingY: 20, width: 'wide' },
   },
+  {
+    /*
+     * The two with a Light / dark switch. Adding either turns the whole site's
+     * dark mode on: the page follows the visitor's system setting, and the switch
+     * lets them override it. The BAR itself keeps its baked light look in both
+     * modes, on purpose. It is a chosen design, the same as every bar above, and a
+     * pale bar over dark content is a real and common one; it is the page behind
+     * that turns over. A client who wants the bar to move with the theme swaps its
+     * baked colours for theme tokens. See the Light / dark rules in globals.css.
+     */
+    id: 'header-m',
+    category: 'header',
+    label: 'm.',
+    description: 'A soft pastel bar with a sun and moon switch. Minimal and current, for a studio or a personal site. Turns the whole site light or dark.',
+    rows: [
+      {
+        ...BAR_ROW,
+        columnBox: [{ gradient: { from: '#eef1f7', to: '#e8ecf4', angle: 90 }, radius: 30, padding: BAR_PAD, borderWidth: 1, borderColour: '#ffffff' }],
+        columns: [[
+          wordmark('m.', '#1b2130'),
+          barNav('#3b4152', ICON_LINKS),
+          { type: 'theme-toggle', props: { display: 'switch', colour: '#1b2130' } },
+        ]],
+      },
+    ],
+    section: { paddingY: 20, width: 'wide' },
+  },
+  {
+    id: 'header-moksha',
+    category: 'header',
+    label: 'MOKSHA',
+    description: 'A clean white bar with a moon switch and one dark call to action. Calm and modern, for a retreat or a wellness brand. Turns the whole site light or dark.',
+    rows: [
+      {
+        ...BAR_ROW,
+        columnBox: [{ background: '#ffffff', radius: 30, padding: BAR_PAD, borderWidth: 1, borderColour: '#ececec', shadow: 'soft' }],
+        columns: [[
+          wordmark('MOKSHA', '#141414'),
+          barNav('#3a3a3a', LINKS, true),
+          { type: 'theme-toggle', props: { display: 'icon', colour: '#141414' } },
+          { type: 'button', props: { label: 'Get the App', href: '/contact', variant: 'primary', colour: '#141414', textColour: '#ffffff' } },
+        ]],
+      },
+    ],
+    section: { paddingY: 20, width: 'wide' },
+  },
 
   /*
    * Headers
