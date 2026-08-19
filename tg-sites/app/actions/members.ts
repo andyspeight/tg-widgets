@@ -39,12 +39,15 @@ import {
   startSession,
 } from '../../lib/auth/session';
 import { isStaffEmail } from '../../lib/auth/staff';
+import { parsePermissions } from '../../lib/auth/permissions';
 import {
   acceptInvite,
   createInvite,
   isMemberRole,
   removeMember,
+  setMemberPermissions,
   setMemberRole,
+  setSiteDefaultPermissions,
   type AcceptOutcome,
   type MemberRole,
   type PendingInvite,
@@ -100,6 +103,7 @@ export async function inviteMemberAction(input: {
   email: unknown;
   role: unknown;
   origin: unknown;
+  permissions?: unknown;
 }): Promise<MemberResult<IssuedInvite>> {
   try {
     const site = await requireOwner();
@@ -122,6 +126,7 @@ export async function inviteMemberAction(input: {
     const invite = await createInvite(site.tenantId, {
       email,
       role,
+      permissions: parsePermissions(input.permissions),
       tokenHash: hashInviteToken(token),
       createdBy: (await currentUser())?.id,
     });
@@ -168,6 +173,46 @@ export async function setRoleAction(
     const refusal = await setMemberRole(site.tenantId, String(userId ?? ''), next);
     if (refusal) return { ok: false, error: refusalMessage(refusal) };
 
+    revalidatePath('/members');
+    return { ok: true, data: undefined };
+  } catch (error) {
+    return { ok: false, error: explain(error) };
+  }
+}
+
+/**
+ * Set what one member may do, capability by capability. Owner or staff only, the
+ * same gate as changing a role. The incoming set is free client input, made safe
+ * by parsePermissions before it reaches the column: a non-array becomes null,
+ * which clears the member back to the legacy full grant, and an array is filtered
+ * to known keys, so a member sending an unknown capability cannot invent one.
+ */
+export async function setPermissionsAction(
+  userId: unknown,
+  perms: unknown,
+): Promise<MemberResult> {
+  try {
+    const site = await requireOwner();
+
+    const refusal = await setMemberPermissions(
+      site.tenantId,
+      String(userId ?? ''),
+      parsePermissions(perms),
+    );
+    if (refusal) return { ok: false, error: refusalMessage(refusal) };
+
+    revalidatePath('/members');
+    return { ok: true, data: undefined };
+  } catch (error) {
+    return { ok: false, error: explain(error) };
+  }
+}
+
+/** Save the site's default capabilities for a new member ("use as default"). */
+export async function setDefaultPermissionsAction(perms: unknown): Promise<MemberResult> {
+  try {
+    const site = await requireOwner();
+    await setSiteDefaultPermissions(site.tenantId, parsePermissions(perms));
     revalidatePath('/members');
     return { ok: true, data: undefined };
   } catch (error) {

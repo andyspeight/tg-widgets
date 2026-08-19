@@ -22,17 +22,25 @@
  * beside their email invites, and it works today.
  */
 
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 
 import {
   inviteMemberAction,
   removeMemberAction,
   revokeInviteAction,
+  setDefaultPermissionsAction,
+  setPermissionsAction,
   setRoleAction,
   type IssuedInvite,
 } from '../../app/actions/members';
 import { MEMBER_ROLES, ROLE_NOTES, type MemberRole } from '../../lib/auth/roles';
+import {
+  ALL_CAPABILITIES,
+  CAPABILITIES,
+  PRESETS,
+  type Capability,
+} from '../../lib/auth/permissions';
 import type { Member, PendingInvite } from '../../lib/db/members';
 import type { Membership } from '../../lib/db/users';
 import { AccountBar } from '../auth/AccountBar';
@@ -49,9 +57,19 @@ interface Props {
   canManage: boolean;
   /** The signed-in person's own user id, so the list can say "you". */
   meId: string;
+  /** The site's default capabilities for a new member, or null when unset. */
+  defaultPermissions: Capability[] | null;
 }
 
-export function MembersScreen({ account, site, members, invites, canManage, meId }: Props) {
+export function MembersScreen({
+  account,
+  site,
+  members,
+  invites,
+  canManage,
+  meId,
+  defaultPermissions,
+}: Props) {
   const router = useRouter();
 
   const [email, setEmail] = useState('');
@@ -199,10 +217,28 @@ export function MembersScreen({ account, site, members, invites, canManage, meId
                 </div>
 
                 <p className="mb-row__note">{ROLE_NOTES[member.role]}</p>
+
+                {canManage && (
+                  <MemberPermissions
+                    member={member}
+                    busy={busy}
+                    onSave={(perms) => run(() => setPermissionsAction(member.userId, perms))}
+                  />
+                )}
               </li>
             ))}
           </ul>
         </section>
+
+        {/* --- what new people can edit by default ----------------------- */}
+
+        {canManage && (
+          <DefaultPermissions
+            initial={defaultPermissions}
+            busy={busy}
+            onSave={(perms) => run(() => setDefaultPermissionsAction(perms))}
+          />
+        )}
 
         {/* --- invited, waiting ------------------------------------------ */}
 
@@ -369,5 +405,166 @@ export function MembersScreen({ account, site, members, invites, canManage, meId
         />
       )}
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Permissions
+// ---------------------------------------------------------------------------
+
+/**
+ * What a member's tick boxes should start on. An explicit stored set is shown as
+ * it is; an unset member shows the legacy default (everything for an owner or
+ * editor, nothing for a viewer), which is exactly what effectiveCapabilities
+ * resolves them to, so the screen and the server agree.
+ */
+function displayedSet(member: Member): Set<Capability> {
+  if (member.permissions !== null) return new Set(member.permissions);
+  return new Set(member.role === 'viewer' ? [] : ALL_CAPABILITIES);
+}
+
+/** A short word for a set, so a collapsed row says what it is at a glance. */
+function summarise(value: Set<Capability>): string {
+  if (value.size === ALL_CAPABILITIES.length) return 'Everything';
+  if (value.size === 0) return 'Nothing';
+  const contentOnly = PRESETS['content-only'];
+  if (value.size === contentOnly.length && contentOnly.every((cap) => value.has(cap))) {
+    return 'Content only';
+  }
+  return `${value.size} of ${ALL_CAPABILITIES.length}`;
+}
+
+/** The tick boxes and the two presets, shared by a member editor and the default. */
+function PermissionChecklist({
+  value,
+  disabled,
+  onChange,
+}: {
+  value: Set<Capability>;
+  disabled: boolean;
+  onChange: (next: Set<Capability>) => void;
+}) {
+  return (
+    <div className="mb-perms">
+      <div className="mb-perms__presets">
+        <span className="mb-perms__presets-label">Start from</span>
+        <button
+          type="button"
+          className="sv-btn"
+          disabled={disabled}
+          onClick={() => onChange(new Set(PRESETS['content-only']))}
+        >
+          Content only
+        </button>
+        <button
+          type="button"
+          className="sv-btn"
+          disabled={disabled}
+          onClick={() => onChange(new Set(PRESETS['full-restyle']))}
+        >
+          Full restyle
+        </button>
+      </div>
+      <ul className="mb-perms__list">
+        {CAPABILITIES.map((cap) => (
+          <li key={cap.key} className="mb-perm">
+            <label className="mb-perm__label">
+              <input
+                type="checkbox"
+                checked={value.has(cap.key)}
+                disabled={disabled}
+                onChange={(event) => {
+                  const next = new Set(value);
+                  if (event.target.checked) next.add(cap.key);
+                  else next.delete(cap.key);
+                  onChange(next);
+                }}
+              />
+              <span className="mb-perm__name">{cap.label}</span>
+            </label>
+            <span className="mb-perm__note">{cap.note}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** One member's capabilities: a collapsed summary that opens to the checklist. */
+function MemberPermissions({
+  member,
+  busy,
+  onSave,
+}: {
+  member: Member;
+  busy: boolean;
+  onSave: (perms: Capability[]) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState<Set<Capability>>(() => displayedSet(member));
+
+  // Re-sync when the stored set changes under us (after a save and a refresh),
+  // keyed on the values rather than the array identity a fresh fetch gives.
+  const signature = member.permissions === null ? `role:${member.role}` : member.permissions.join(',');
+  useEffect(() => {
+    setValue(displayedSet(member));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signature]);
+
+  return (
+    <div className="mb-row__perms">
+      <button
+        type="button"
+        className="mb-perms__toggle"
+        aria-expanded={open}
+        onClick={() => setOpen((current) => !current)}
+      >
+        {open ? 'Hide what they can edit' : 'Change what they can edit'}
+        <span className="mb-perms__summary">{summarise(value)}</span>
+      </button>
+      {open && (
+        <PermissionChecklist
+          value={value}
+          disabled={busy}
+          onChange={(next) => {
+            setValue(next);
+            onSave([...next]);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+/** The site's default capabilities for a new member. */
+function DefaultPermissions({
+  initial,
+  busy,
+  onSave,
+}: {
+  initial: Capability[] | null;
+  busy: boolean;
+  onSave: (perms: Capability[]) => void;
+}) {
+  const [value, setValue] = useState<Set<Capability>>(
+    () => new Set(initial ?? PRESETS['full-restyle']),
+  );
+
+  return (
+    <section className="mb-panel">
+      <h2 className="mb-panel__title">What new people can edit by default</h2>
+      <p className="mb-panel__lede">
+        Applied to anybody you invite from now on. You can still change it per person
+        afterwards.
+      </p>
+      <PermissionChecklist
+        value={value}
+        disabled={busy}
+        onChange={(next) => {
+          setValue(next);
+          onSave([...next]);
+        }}
+      />
+    </section>
   );
 }

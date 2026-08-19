@@ -145,3 +145,100 @@
   .mb-row__what { justify-content: flex-start; }
   .jn-card { margin: var(--ed-4) auto; padding: var(--ed-5); }
 }
+
+/* --- permissions -------------------------------------------------------- */
+
+.mb-panel__lede {
+  margin: calc(var(--ed-2) * -1) 0 0;
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink-2);
+}
+
+/* The per-member permissions block spans the whole row, under the role. */
+.mb-row__perms {
+  grid-column: 1 / -1;
+  margin-top: var(--ed-2);
+}
+
+.mb-perms__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ed-2);
+  padding: 4px 0;
+  border: none;
+  background: none;
+  color: var(--ed-select);
+  font: inherit;
+  font-size: var(--ed-text-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mb-perms__toggle:hover { text-decoration: underline; }
+.mb-perms__toggle:focus-visible { outline: 2px solid var(--ed-select); outline-offset: 2px; }
+
+.mb-perms__summary {
+  padding: 1px var(--ed-2);
+  border-radius: var(--ed-r-full);
+  background: var(--ed-well);
+  color: var(--ed-ink-3);
+  font-size: var(--ed-text-xs);
+  font-weight: 600;
+}
+
+.mb-perms {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-3);
+  margin-top: var(--ed-3);
+  padding: var(--ed-4);
+  border: 1px solid var(--ed-line-soft);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-bg);
+}
+
+.mb-perms__presets {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-2);
+  flex-wrap: wrap;
+}
+
+.mb-perms__presets-label {
+  font-size: var(--ed-text-xs);
+  font-weight: 600;
+  color: var(--ed-ink-3);
+}
+
+.mb-perms__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--ed-3);
+}
+
+.mb-perm {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mb-perm__label {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-2);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mb-perm__label input { accent-color: var(--ed-select); }
+.mb-perm__name { color: var(--ed-ink); }
+
+.mb-perm__note {
+  margin-left: calc(16px + var(--ed-2));
+  font-size: var(--ed-text-xs);
+  color: var(--ed-ink-3);
+  line-height: 1.4;
+}
