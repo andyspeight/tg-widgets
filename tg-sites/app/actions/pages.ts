@@ -38,7 +38,16 @@ import {
 import { slugify } from '../../lib/content/slug';
 import { pageTemplateSections } from '../../lib/content/page-templates';
 import { importDesignedFonts } from '../../lib/content/designed-fonts';
+import { parsePage } from '../../lib/content/schema';
+import { sanitisePage } from '../../lib/content/sanitise-page';
+import { changeScope } from '../../lib/content/change-scope';
 import { currentUserId, requireTenantId } from '../../lib/auth/session';
+import {
+  currentCapabilities,
+  isPermissionError,
+  PermissionError,
+  requireCapability,
+} from '../../lib/auth/capabilities';
 
 export type ActionResult<T = undefined> =
   | { ok: true; data: T }
@@ -59,7 +68,15 @@ async function attempt<T>(fn: () => Promise<T>): Promise<ActionResult<T>> {
   }
 }
 
+/**
+ * A save refused for want of a capability is the member's to see, spelt out
+ * rather than hidden behind the generic message. requireCapability and the
+ * content-only check below both raise it. Named first, before the Postgres and
+ * session cases, because it is a policy answer rather than a fault.
+ */
 function explain(error: unknown): string {
+  if (isPermissionError(error)) return error.message;
+
   const message = error instanceof Error ? error.message : String(error);
 
   // Postgres unique violation. The only one this schema can raise on a page
@@ -125,7 +142,7 @@ export async function createPageAction(input: {
 
   const result = await attempt(async () =>
     createPage(
-      await requireTenantId(),
+      await requireCapability('pages'),
       {
         title: String(input.title ?? '').slice(0, 200),
         slug: slugify(input.slug ?? input.title ?? ''),
@@ -154,7 +171,7 @@ export async function renamePageAction(
   changes: { title?: string; slug?: string },
 ): Promise<ActionResult<PageSummary | null>> {
   const result = await attempt(async () =>
-    updatePageMeta(await requireTenantId(), pageId, {
+    updatePageMeta(await requireCapability('pages'), pageId, {
       title: changes.title?.slice(0, 200),
       // Undefined leaves the slug alone. An empty string is a real value: it
       // is the home page. So the two cannot be collapsed.
@@ -181,7 +198,7 @@ export async function movePageAction(
   parentId: string | null,
 ): Promise<ActionResult<PageSummary | null>> {
   const result = await attempt(async () =>
-    updatePageMeta(await requireTenantId(), pageId, { parentId }),
+    updatePageMeta(await requireCapability('pages'), pageId, { parentId }),
   );
   if (result.ok) revalidatePath('/sites');
   return result;
@@ -189,7 +206,7 @@ export async function movePageAction(
 
 export async function deletePageAction(pageId: string): Promise<ActionResult<boolean>> {
   const result = await attempt(async () =>
-    deletePage(await requireTenantId(), pageId, (await currentUserId()) ?? undefined),
+    deletePage(await requireCapability('pages'), pageId, (await currentUserId()) ?? undefined),
   );
   if (result.ok) revalidatePath('/sites');
   return result;
@@ -201,21 +218,56 @@ export async function deletePageAction(pageId: string): Promise<ActionResult<boo
  * `page` arrives from the browser and is treated as hostile: saveDraft parses
  * it against the schema, normalises the column widths and runs the whole tree
  * through the sanitiser before a single byte reaches the database.
+ *
+ * AND IT IS GATED BY CAPABILITY, which is the whole point of the permissions
+ * epic. `content` is the floor: without it there is no saving at all. A member
+ * who has `content` but not `structure` may still save, but only a CONTENT
+ * change, worked out by comparing the incoming page to the one already stored
+ * (lib/content/change-scope.ts): the same words, photos and links they could
+ * always edit, and not a section added, moved or restyled. `seo` guards the
+ * page's search settings the same way. A member with `structure` skips the
+ * comparison entirely, so the common case pays nothing for it. The editor hides
+ * the controls a content-only client lacks, but the editor is a courtesy and
+ * this is the control: a server action is a public endpoint.
  */
 export async function saveDraftAction(
   pageId: string,
   page: unknown,
 ): Promise<ActionResult<PageSummary | null>> {
-  return attempt(async () =>
-    saveDraft(await requireTenantId(), pageId, page, (await currentUserId()) ?? undefined),
-  );
+  return attempt(async () => {
+    const { tenantId, userId, caps } = await currentCapabilities();
+    if (!caps.has('content')) throw new PermissionError('content');
+
+    // Only a member who cannot freely restructure or change SEO needs the stored
+    // page fetched and the change classified. Everyone else saves as before.
+    if (!caps.has('structure') || !caps.has('seo')) {
+      const parsed = parsePage(page);
+      if (!parsed.ok) {
+        throw new Error(`Refusing to save a malformed page: ${parsed.errors.join('; ')}`);
+      }
+      const current = await getPage(tenantId, pageId);
+      // A missing page means saveDraft will change nothing anyway, so there is
+      // nothing to gate: let it fall through and no-op.
+      if (current) {
+        const scope = changeScope(sanitisePage(current.content), sanitisePage(parsed.page));
+        if (scope.structure && !caps.has('structure')) {
+          throw new PermissionError('structure');
+        }
+        if (scope.seo && !caps.has('seo')) {
+          throw new PermissionError('seo');
+        }
+      }
+    }
+
+    return saveDraft(tenantId, pageId, page, userId || undefined);
+  });
 }
 
 export async function publishPageAction(
   pageId: string,
 ): Promise<ActionResult<PageSummary | null>> {
   const result = await attempt(async () =>
-    publishPage(await requireTenantId(), pageId, (await currentUserId()) ?? undefined),
+    publishPage(await requireCapability('publish'), pageId, (await currentUserId()) ?? undefined),
   );
 
   if (result.ok) {
@@ -228,7 +280,9 @@ export async function publishPageAction(
 export async function unpublishPageAction(
   pageId: string,
 ): Promise<ActionResult<PageSummary | null>> {
-  const result = await attempt(async () => unpublishPage(await requireTenantId(), pageId));
+  const result = await attempt(async () =>
+    unpublishPage(await requireCapability('publish'), pageId),
+  );
 
   if (result.ok) {
     revalidatePath('/sites');
@@ -265,9 +319,11 @@ export async function restorePublishAction(
   pageId: string,
   publishId: string,
 ): Promise<ActionResult<PageWithContent | null>> {
+  // Restore replaces the whole draft with an old snapshot, structure and all, so
+  // it is the `structure` capability's to allow, not `content`'s.
   return attempt(async () =>
     restorePublish(
-      await requireTenantId(),
+      await requireCapability('structure'),
       pageId,
       publishId,
       (await currentUserId()) ?? undefined,

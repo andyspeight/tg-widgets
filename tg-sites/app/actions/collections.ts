@@ -13,6 +13,7 @@
 import { revalidatePath } from 'next/cache';
 
 import { currentUserId, requireTenantId } from '../../lib/auth/session';
+import { isPermissionError, requireEitherCapability } from '../../lib/auth/capabilities';
 import {
   createCollection,
   createItem,
@@ -40,6 +41,8 @@ async function attempt<T>(fn: () => Promise<T>): Promise<ActionResult<T>> {
 }
 
 function explain(error: unknown): string {
+  if (isPermissionError(error)) return error.message;
+
   const message = error instanceof Error ? error.message : String(error);
 
   if (message.includes('23505') || message.includes('duplicate key')) {
@@ -90,7 +93,7 @@ export async function createCollectionAction(input: {
   key?: string;
 }): Promise<ActionResult<Collection>> {
   const result = await attempt(async () =>
-    createCollection(await requireTenantId(), {
+    createCollection(await requireEitherCapability('collections', 'blog'), {
       name: String(input.name ?? '').slice(0, 120),
       key: input.key,
     }),
@@ -100,7 +103,7 @@ export async function createCollectionAction(input: {
 }
 
 export async function deleteCollectionAction(id: string): Promise<ActionResult<boolean>> {
-  const result = await attempt(async () => deleteCollection(await requireTenantId(), id));
+  const result = await attempt(async () => deleteCollection(await requireEitherCapability('collections', 'blog'), id));
   if (result.ok) revalidatePath('/collections');
   return result;
 }
@@ -110,7 +113,7 @@ export async function createItemAction(
   title: string,
 ): Promise<ActionResult<ItemWithContent | null>> {
   const result = await attempt(async () =>
-    createItem(await requireTenantId(), collectionId, String(title ?? '').slice(0, 200)),
+    createItem(await requireEitherCapability('collections', 'blog'), collectionId, String(title ?? '').slice(0, 200)),
   );
   if (result.ok) revalidatePath('/collections');
   return result;
@@ -130,7 +133,7 @@ export async function saveItemAction(
 ): Promise<ActionResult<ItemSummary | null>> {
   return attempt(async () =>
     saveItem(
-      await requireTenantId(),
+      await requireEitherCapability('collections', 'blog'),
       itemId,
       content,
       String(slug ?? ''),
@@ -148,7 +151,7 @@ export async function saveItemAction(
  * are.
  */
 export async function publishItemAction(itemId: string): Promise<ActionResult<ItemSummary | null>> {
-  const result = await attempt(async () => publishItem(await requireTenantId(), itemId));
+  const result = await attempt(async () => publishItem(await requireEitherCapability('collections', 'blog'), itemId));
   if (result.ok) {
     revalidatePath('/collections');
     revalidatePath('/preview', 'layout');
@@ -170,7 +173,7 @@ export async function scheduleItemAction(
   publishAt: string,
 ): Promise<ActionResult<ItemSummary | null>> {
   const result = await attempt(async () =>
-    scheduleItem(await requireTenantId(), itemId, String(publishAt ?? '')),
+    scheduleItem(await requireEitherCapability('collections', 'blog'), itemId, String(publishAt ?? '')),
   );
   if (result.ok) {
     revalidatePath('/collections');
@@ -182,7 +185,7 @@ export async function scheduleItemAction(
 export async function unpublishItemAction(
   itemId: string,
 ): Promise<ActionResult<ItemSummary | null>> {
-  const result = await attempt(async () => unpublishItem(await requireTenantId(), itemId));
+  const result = await attempt(async () => unpublishItem(await requireEitherCapability('collections', 'blog'), itemId));
   if (result.ok) {
     revalidatePath('/collections');
     revalidatePath('/preview', 'layout');
@@ -191,7 +194,7 @@ export async function unpublishItemAction(
 }
 
 export async function deleteItemAction(itemId: string): Promise<ActionResult<boolean>> {
-  const result = await attempt(async () => deleteItem(await requireTenantId(), itemId));
+  const result = await attempt(async () => deleteItem(await requireEitherCapability('collections', 'blog'), itemId));
   if (result.ok) {
     revalidatePath('/collections');
     revalidatePath('/preview', 'layout');

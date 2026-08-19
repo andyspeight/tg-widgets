@@ -11,7 +11,7 @@
 
 import { revalidatePath } from 'next/cache';
 
-import { requireTenantId } from '../../lib/auth/session';
+import { isPermissionError, requireCapability } from '../../lib/auth/capabilities';
 import { deleteFontFamily, listFonts, saveFontFamily, type FontFamily } from '../../lib/db/fonts';
 import { CATEGORY_LABEL, GOOGLE_FONTS, type FontCategory } from '../../lib/fonts/catalogue';
 import {
@@ -100,7 +100,7 @@ function categoryOf(family: string): FontCategory {
 
 export async function importGoogleFontAction(family: string): Promise<FontResult> {
   try {
-    const tenantId = await requireTenantId();
+    const tenantId = await requireCapability('theme');
 
     const typed = normaliseFamilyName(family);
     if (!typed) {
@@ -157,7 +157,7 @@ const MAX_UPLOAD_FILES = 8;
  */
 export async function uploadFontAction(form: FormData): Promise<FontResult> {
   try {
-    const tenantId = await requireTenantId();
+    const tenantId = await requireCapability('theme');
 
     const family = normaliseFamilyName(form.get('family'));
     if (!family) {
@@ -231,7 +231,7 @@ export async function uploadFontAction(form: FormData): Promise<FontResult> {
 
 export async function deleteFontAction(slug: string): Promise<FontResult> {
   try {
-    const tenantId = await requireTenantId();
+    const tenantId = await requireCapability('theme');
 
     const clean = String(slug ?? '').trim().toLowerCase();
     if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(clean)) {
@@ -259,6 +259,8 @@ export async function deleteFontAction(slug: string): Promise<FontResult> {
 // ---------------------------------------------------------------------------
 
 function explain(error: unknown, generic: string): string {
+  if (isPermissionError(error)) return error.message;
+
   const message = error instanceof Error ? error.message : String(error);
 
   // Worth showing as written: they name a font, a size or a missing membership.
