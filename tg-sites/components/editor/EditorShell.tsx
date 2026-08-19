@@ -26,6 +26,7 @@ import {
 } from '../../app/actions/pages';
 import { publishRegionAction, saveRegionAction } from '../../app/actions/regions';
 import { publishItemAction, saveItemAction } from '../../app/actions/collections';
+import { openCommentCountAction } from '../../app/actions/comments';
 import { PublishHistory } from './PublishHistory';
 import type { NavPage } from '../../lib/content/nav';
 import type { Page, RegionName, Section } from '../../lib/content/schema';
@@ -391,6 +392,13 @@ interface EditorProps {
    */
   chromeHeader?: ChromeRegion | null;
   chromeFooter?: ChromeRegion | null;
+  /**
+   * A comment thread to open on, arrived at from the whole-site review list on
+   * another page. Carried in the address (?comment=), it opens the Comments panel
+   * on that thread and jumps to the element it pins to. Only meaningful when
+   * editing a page.
+   */
+  focusComment?: string | null;
 }
 
 export function EditorShell({
@@ -408,6 +416,7 @@ export function EditorShell({
   initialItemMeta,
   chromeHeader = null,
   chromeFooter = null,
+  focusComment = null,
 }: EditorProps) {
   const [history, setHistory] = useState<History>({
     past: [],
@@ -514,7 +523,29 @@ export function EditorShell({
    * same fold the top bar owns; this only says which of the two fills it when it
    * is open. Held here, not in the rail, because the shell draws the column.
    */
-  const [railPanel, setRailPanel] = useState<'layers' | 'pages' | 'comments'>('layers');
+  // Arriving on a comment (from the whole-site list on another page) opens the
+  // Comments panel straight away rather than the outline.
+  const [railPanel, setRailPanel] = useState<'layers' | 'pages' | 'comments'>(
+    focusComment ? 'comments' : 'layers',
+  );
+
+  /*
+   * The number behind the rail's Comments badge: how many threads are open across
+   * the whole site. Read once on mount, and again whenever the panel changes
+   * something (it calls back through onCountChange), so the badge follows a
+   * resolve or a new comment without a reload. Only pages carry comments, so the
+   * region and item screens never ask.
+   */
+  const [openComments, setOpenComments] = useState(0);
+  const refreshCommentCount = useCallback(() => {
+    if (region || itemId) return;
+    void openCommentCountAction().then((result) => {
+      if (result.ok) setOpenComments(result.data);
+    });
+  }, [region, itemId]);
+  useEffect(() => {
+    refreshCommentCount();
+  }, [refreshCommentCount]);
 
   /*
    * The pages as the Menu block needs them, so a link that points at a folder
@@ -1863,6 +1894,7 @@ export function EditorShell({
       */}
       <Rail
         active={panels.outline ? railPanel : null}
+        commentCount={openComments}
         onToggle={(panel) => {
           if (panels.outline && railPanel === panel) {
             // The open panel's own icon: fold the column away.
@@ -1889,6 +1921,8 @@ export function EditorShell({
           anchor={commentAnchor}
           resolveAnchorLabel={resolveAnchorLabel}
           onJump={jumpToAnchor}
+          focusCommentId={focusComment}
+          onCountChange={refreshCommentCount}
         />
       ) : (
         <Outline

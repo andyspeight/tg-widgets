@@ -43,9 +43,9 @@ export const dynamic = 'force-dynamic';
 export default async function EditorPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; region?: string; item?: string }>;
+  searchParams: Promise<{ page?: string; region?: string; item?: string; comment?: string }>;
 }) {
-  const { page: pageId, region: regionParam, item: itemId } = await searchParams;
+  const { page: pageId, region: regionParam, item: itemId, comment: focusComment } = await searchParams;
 
   /*
    * The guard comes first, before the page id is even looked at.
@@ -196,6 +196,7 @@ export default async function EditorPage({
         initialPage={page.content}
         initialStatus={page.status}
         initialHasUnpublishedChanges={page.hasUnpublishedChanges}
+        focusComment={focusComment ?? null}
         chromeHeader={{
           content: regionAsPage(headerRecord.region),
           sticky: headerRecord.region.sticky,

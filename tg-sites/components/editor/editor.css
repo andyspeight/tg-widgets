@@ -314,6 +314,7 @@
   position: relative;
 }
 .ed-rail__ic {
+  position: relative;
   width: 40px;
   height: 34px;
   display: grid;
@@ -5199,4 +5200,158 @@ body[data-tg-dragging='block'] .tg-scrim {
   justify-content: flex-end;
   gap: var(--ed-2);
   margin-top: 8px;
+}
+
+/* This page / all pages: a small segmented control under the head. */
+.ed-comments__scope {
+  display: flex;
+  gap: 4px;
+  padding: var(--ed-2) var(--ed-4);
+  border-bottom: 1px solid var(--ed-line-soft);
+}
+
+.ed-comments__scope-tab {
+  flex: 1;
+  padding: 5px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--ed-r-sm, 6px);
+  background: none;
+  color: var(--ed-ink-3);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ed-comments__scope-tab:hover { color: var(--ed-ink-2); background: var(--ed-well); }
+.ed-comments__scope-tab:focus-visible { outline: 2px solid var(--ed-select); outline-offset: 1px; }
+.ed-comments__scope-tab[data-active] {
+  background: var(--ed-select-wash);
+  color: var(--ed-select);
+}
+
+/* A thread arrived at from the whole-site list: a brief wash so the eye lands. */
+.ed-comments__thread[data-focus] {
+  animation: ed-comment-land 2.4s ease-out 1;
+}
+
+@keyframes ed-comment-land {
+  0%, 40% { background: var(--ed-select-wash); }
+  100% { background: transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ed-comments__thread[data-focus] { animation: none; background: var(--ed-select-wash); }
+}
+
+/* The whole-site review: open threads grouped by the page they are on. */
+.ed-comments__site {
+  overflow-y: auto;
+}
+
+.ed-comments__group {
+  border-bottom: 1px solid var(--ed-line-soft);
+}
+
+.ed-comments__group-head {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--ed-2);
+  margin: 0;
+  padding: 8px var(--ed-4) 6px;
+  background: var(--ed-well);
+  color: var(--ed-ink-2);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ed-comments__group-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ed-comments__group-here {
+  flex: none;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--ed-select-wash);
+  color: var(--ed-select);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.ed-comments__site-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ed-comments__site-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--ed-3) var(--ed-4);
+  border-bottom: 1px solid var(--ed-line-soft);
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.ed-comments__site-list li:last-child .ed-comments__site-row { border-bottom: none; }
+.ed-comments__site-row:hover { background: var(--ed-well); }
+.ed-comments__site-row:focus-visible { outline: 2px solid var(--ed-select); outline-offset: -2px; }
+
+.ed-comments__site-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ed-ink-3);
+}
+
+.ed-comments__site-body {
+  color: var(--ed-ink);
+  font-size: var(--ed-text-base);
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.ed-comments__site-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-3);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ed-ink-3);
+}
+
+.ed-comments__site-pin {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--ed-select);
+}
+
+/* The open-count badge on the rail's Comments icon. */
+.ed-rail__badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--ed-primary);
+  color: var(--ed-on-brand);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 15px;
+  text-align: center;
 }

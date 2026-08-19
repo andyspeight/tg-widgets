@@ -79,10 +79,13 @@ export function Rail({
   active,
   onToggle,
   onAdd,
+  commentCount = 0,
 }: {
   active: Panel | null;
   onToggle: (panel: Panel) => void;
   onAdd: () => void;
+  /** Open comment threads across the site, shown as a badge on the Comments icon. */
+  commentCount?: number;
 }) {
   return (
     <nav className="ed-rail ed-editing-only" aria-label="Editor">
@@ -136,7 +139,7 @@ export function Rail({
       <button
         type="button"
         className="ed-rail__btn"
-        title="Comments on this page"
+        title={commentCount > 0 ? `${commentCount} open across the site` : 'Comments'}
         aria-pressed={active === 'comments'}
         onClick={() => onToggle('comments')}
       >
@@ -144,6 +147,11 @@ export function Rail({
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" strokeLinecap="round">
             <path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.5 9.5 9.5 0 0 1-4-.9L3 20l1-4.5A8.4 8.4 0 0 1 3.5 11 8.5 8.5 0 0 1 12 3a8.4 8.4 0 0 1 8.5 8.5z" />
           </svg>
+          {commentCount > 0 && (
+            <span className="ed-rail__badge" aria-hidden="true">
+              {commentCount > 9 ? '9+' : commentCount}
+            </span>
+          )}
         </span>
         <span className="ed-rail__lbl">Comments</span>
       </button>

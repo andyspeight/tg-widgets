@@ -133,6 +133,73 @@ export async function listPageComments(tenantId: string, pageId: string): Promis
   });
 }
 
+/** An open root thread, with the page it sits on, for the whole-site review list. */
+export interface OpenComment {
+  comment: Comment;
+  page: { id: string; title: string; slug: string };
+  /** How many replies hang off it, so the list can say "2 replies" without them. */
+  replyCount: number;
+}
+
+/**
+ * Every OPEN root thread across the whole site, newest first, each with its page.
+ *
+ * The review worklist. A client leaves notes on any page and the team works
+ * through them from one place, so this reaches past the edited page to the whole
+ * tenant, which the policy already scopes: only this site's rows are visible, so
+ * a plain select is safe. Resolved threads are left out, because a worklist is
+ * what is still open; the per-page panel still shows resolved ones in context.
+ *
+ * Replies are counted, not fetched: the list shows the root and a "2 replies"
+ * hint, and the full thread reads on the page itself. The count is a scalar
+ * subquery so it stays one round trip.
+ */
+export async function listOpenComments(tenantId: string): Promise<OpenComment[]> {
+  return withTenant(tenantId, async (tx) => {
+    const rows = await tx`
+      select
+        c.id, c.page_id, c.parent_id, c.author_id, c.body, c.anchor,
+        c.resolved_at, c.resolved_by, c.created_at,
+        p.title as page_title, p.slug as page_slug,
+        (select count(*) from public.site_comments r where r.parent_id = c.id) as reply_count
+      from public.site_comments c
+      join public.pages p on p.id = c.page_id
+      where c.parent_id is null and c.resolved_at is null
+      order by c.created_at desc, c.id desc
+    `;
+
+    return rows.map((raw) => {
+      const row = raw as Record<string, unknown>;
+      return {
+        comment: toComment(row),
+        page: {
+          id: String(row.page_id),
+          title: String(row.page_title ?? ''),
+          slug: String(row.page_slug ?? ''),
+        },
+        replyCount: Number(row.reply_count ?? 0),
+      };
+    });
+  });
+}
+
+/**
+ * How many root threads are open across the whole site.
+ *
+ * The number behind the rail's Comments badge, kept a scalar count rather than
+ * the length of listOpenComments so the badge costs one cheap query and never
+ * pulls a body it will not show. Scoped by the policy like every read here.
+ */
+export async function countOpenComments(tenantId: string): Promise<number> {
+  return withTenant(tenantId, async (tx) => {
+    const rows = await tx`
+      select count(*)::int as n from public.site_comments
+      where parent_id is null and resolved_at is null
+    `;
+    return Number((rows[0] as Record<string, unknown>).n ?? 0);
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Writing
 // ---------------------------------------------------------------------------
