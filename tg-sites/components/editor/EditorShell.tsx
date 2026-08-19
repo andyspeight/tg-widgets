@@ -33,6 +33,7 @@ import type { Page, RegionName, Section } from '../../lib/content/schema';
 import { parsePage } from '../../lib/content/schema';
 import { pageAsRegion, REGION_TITLES } from '../../lib/content/region-page';
 import { pageAsItem, type ItemMeta } from '../../lib/content/collection-page';
+import { ALL_CAPABILITIES, type Capability } from '../../lib/auth/permissions';
 import { blockLabel, createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
 import { buildPresetSection } from '../../lib/content/presets';
 import { addBlock, addColumn, addInnerBlock, blockAtPath, containerColumns, locateBlockById, moveBlockTo, moveSection, parsePathKey, type Path, pathKey, resolve, updateBlockPropsAtPath } from '../../lib/content/tree';
@@ -312,6 +313,16 @@ export interface ChromeRegion {
 
 interface EditorProps {
   isStaff?: boolean;
+  /**
+   * What this member may do, so the editor draws only the controls they can use.
+   * The server enforces the same set at every save (lib/auth/capabilities.ts), so
+   * this is a courtesy rather than the control: it keeps a content-only client
+   * from being shown an Add button or a design panel that would only refuse them.
+   *
+   * Optional and defaults to everything, so the standalone build and any caller
+   * that does not pass it get the full editor exactly as before.
+   */
+  caps?: readonly Capability[];
   pageId: string;
   initialPage: Page;
   initialStatus: 'draft' | 'published';
@@ -403,6 +414,7 @@ interface EditorProps {
 
 export function EditorShell({
   isStaff = true,
+  caps = ALL_CAPABILITIES,
   pageId,
   initialPage,
   initialStatus,
@@ -418,6 +430,16 @@ export function EditorShell({
   chromeFooter = null,
   focusComment = null,
 }: EditorProps) {
+  /*
+   * The two answers the editor's own drawing keys on. `structure` covers adding,
+   * moving and restyling: the rail's Add, the section and block pickers, and the
+   * design panels in the properties pane. `publish` covers putting changes live.
+   * Everything a content-only client is allowed, editing the words, swapping a
+   * photo, changing a link, stays on regardless. Staff and an unset owner have
+   * every capability, so for them these are both true and nothing changes.
+   */
+  const canStructure = caps.includes('structure');
+  const canPublish = caps.includes('publish');
   const [history, setHistory] = useState<History>({
     past: [],
     present: initialPage,
@@ -1854,24 +1876,30 @@ export function EditorShell({
           Disabled once published with nothing new to say, rather than hidden.
           A button that vanishes leaves an agent wondering where it went; one
           that reads "Published" and sits still answers the question.
+
+          Hidden ENTIRELY, though, for a member without the publish capability:
+          there is no "disabled Publish" that helps them, and the server refuses
+          it anyway (slice 3). Staff and an unset owner keep it.
         */}
-        <button
-          type="button"
-          className="ed-btn ed-editing-only"
-          data-variant="primary"
-          onClick={publish}
-          disabled={publishing || (status === 'published' && !unpublished)}
-          title={
-            status === 'published' && !unpublished
-              ? `The live ${region ?? 'page'} already matches this draft`
-              : region
-                ? `Put this ${region} on every page of the site`
-                : 'Make this the version visitors see'
-          }
-        >
-          <Icon name={status === 'published' && !unpublished ? 'check' : 'upload'} size={16} />
-          {publishLabel}
-        </button>
+        {canPublish && (
+          <button
+            type="button"
+            className="ed-btn ed-editing-only"
+            data-variant="primary"
+            onClick={publish}
+            disabled={publishing || (status === 'published' && !unpublished)}
+            title={
+              status === 'published' && !unpublished
+                ? `The live ${region ?? 'page'} already matches this draft`
+                : region
+                  ? `Put this ${region} on every page of the site`
+                  : 'Make this the version visitors see'
+            }
+          >
+            <Icon name={status === 'published' && !unpublished ? 'check' : 'upload'} size={16} />
+            {publishLabel}
+          </button>
+        )}
 
         <Menu
           label="More actions"
@@ -1939,6 +1967,7 @@ export function EditorShell({
       <Rail
         active={panels.outline ? railPanel : null}
         commentCount={openComments}
+        canAdd={canStructure}
         onToggle={(panel) => {
           if (panels.outline && railPanel === panel) {
             // The open panel's own icon: fold the column away.
@@ -2034,6 +2063,7 @@ export function EditorShell({
         page={page}
         selected={selected}
         isStaff={isStaff}
+        canStructure={canStructure}
         onSelect={select}
         onCommit={commit}
         onBack={() => setMobilePane('canvas')}

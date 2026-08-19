@@ -102,6 +102,14 @@ interface Props {
   page: Page;
   selected: Path | null;
   isStaff: boolean;
+  /**
+   * Whether this member may restructure and restyle. Off for a content-only
+   * client, whose block pane then shows only the Content group, the words, the
+   * picture and the link, and drops the colour, border, spacing, layout and
+   * effect panels they cannot use. The server refuses those changes either way
+   * (lib/content/change-scope.ts); this keeps the pane honest about it.
+   */
+  canStructure: boolean;
   onSelect: (path: Path | null) => void;
   onCommit: (next: (current: Page) => Page, coalesceKey?: string) => void;
   onBack: () => void;
@@ -268,6 +276,7 @@ export function Properties({
   page,
   selected,
   isStaff,
+  canStructure,
   onSelect,
   onCommit,
   onBack,
@@ -322,6 +331,7 @@ export function Properties({
             page={page}
             selected={selected}
             isStaff={isStaff}
+            canStructure={canStructure}
             onCommit={onCommit}
             onSelect={onSelect}
             region={region}
@@ -351,6 +361,7 @@ export function ItemOptions({
   page,
   selected,
   isStaff,
+  canStructure = true,
   onCommit,
   onSelect,
   region = null,
@@ -364,6 +375,12 @@ export function ItemOptions({
   page: Page;
   selected: Path | null;
   isStaff: boolean;
+  /**
+   * Whether design controls are shown for a block. Defaults to on, so the
+   * on-canvas popover and any other caller keep the whole pane; the main pane
+   * passes the member's real capability down. See BlockFields.
+   */
+  canStructure?: boolean;
   onCommit: Props['onCommit'];
   /**
    * The screen size the device switcher is on, so a per-screen control edits the
@@ -427,7 +444,15 @@ export function ItemOptions({
       {/* A block and a block inside a container share the one pane: BlockFields
           reads and commits through the path, so it works either place. */}
       {(selected?.kind === 'block' || selected?.kind === 'inner-block') && (
-        <BlockFields path={selected} page={page} isStaff={isStaff} onCommit={onCommit} onSelect={onSelect} tier={tier} />
+        <BlockFields
+          path={selected}
+          page={page}
+          isStaff={isStaff}
+          canStructure={canStructure}
+          onCommit={onCommit}
+          onSelect={onSelect}
+          tier={tier}
+        />
       )}
     </>
   );
@@ -2238,6 +2263,7 @@ function BlockFields({
   path,
   page,
   isStaff,
+  canStructure = true,
   onCommit,
   onSelect,
   tier = 'desktop',
@@ -2251,6 +2277,12 @@ function BlockFields({
   path: Extract<Path, { kind: 'block' | 'inner-block' }>;
   page: Page;
   isStaff: boolean;
+  /**
+   * Whether the design groups are shown. Off for a content-only client, who
+   * keeps the Content group, the words, the picture and the link, and loses the
+   * colour, border, spacing, layout and effect panels. Defaults to on.
+   */
+  canStructure?: boolean;
   onCommit: Props['onCommit'];
   onSelect?: Props['onSelect'];
   /** The screen the device switcher is on, so Text size edits that size. */
@@ -2580,19 +2612,25 @@ function BlockFields({
   };
   add('layout', <HideOnField key="hide-on" tier={tier} hidden={hideOn.includes(tier)} onChange={setHidden} />);
 
-  const ordered = GROUP_ORDER.filter((group) => groups.get(group)?.length);
+  // A content-only member keeps the Content group, the words, the picture and
+  // the link, and loses the design panels they cannot save anyway.
+  const ordered = GROUP_ORDER.filter((group) => groups.get(group)?.length).filter(
+    (group) => canStructure || group === 'content',
+  );
 
   return (
     <>
       {help}
       {/* Rebuilding an import swaps the whole SECTION it sits in, which only
-          makes sense for a top-level block, never one nested in a container. */}
-      {block.type === 'imported' && path.kind === 'block' && (
+          makes sense for a top-level block, never one nested in a container.
+          Structural, so a content-only member does not get the button. */}
+      {canStructure && block.type === 'imported' && path.kind === 'block' && (
         <RebuildImportButton block={block} section={path.section} onCommit={onCommit} onSelect={onSelect} />
       )}
       {/* The container's own columns: widths, add, remove, even. A container is
-          only ever a top-level block, so the path is a 'block' one here. */}
-      {block.type === 'container' && path.kind === 'block' && (
+          only ever a top-level block, so the path is a 'block' one here. Also
+          structural, so it is hidden from a content-only member. */}
+      {canStructure && block.type === 'container' && path.kind === 'block' && (
         <ContainerColumnsControl block={block} path={path} onCommit={onCommit} />
       )}
       {ordered.map((group, index) => (

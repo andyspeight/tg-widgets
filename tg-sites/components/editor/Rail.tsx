@@ -80,29 +80,40 @@ export function Rail({
   onToggle,
   onAdd,
   commentCount = 0,
+  canAdd = true,
 }: {
   active: Panel | null;
   onToggle: (panel: Panel) => void;
   onAdd: () => void;
   /** Open comment threads across the site, shown as a badge on the Comments icon. */
   commentCount?: number;
+  /**
+   * Whether this member may add sections. Off for a content-only client, who
+   * edits the words and pictures already there but does not restructure. The
+   * server refuses the save either way (lib/auth/capabilities.ts); dropping the
+   * button is the courtesy that stops them reaching for it. Defaults to on, so
+   * the standalone build and staff keep the whole rail.
+   */
+  canAdd?: boolean;
 }) {
   return (
     <nav className="ed-rail ed-editing-only" aria-label="Editor">
-      <button
-        type="button"
-        className="ed-rail__btn ed-rail__btn--add"
-        title="Add a section"
-        aria-label="Add a section"
-        onClick={onAdd}
-      >
-        <span className="ed-rail__ic">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-        </span>
-        <span className="ed-rail__lbl">Add</span>
-      </button>
+      {canAdd && (
+        <button
+          type="button"
+          className="ed-rail__btn ed-rail__btn--add"
+          title="Add a section"
+          aria-label="Add a section"
+          onClick={onAdd}
+        >
+          <span className="ed-rail__ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </span>
+          <span className="ed-rail__lbl">Add</span>
+        </button>
+      )}
 
       <button
         type="button"
