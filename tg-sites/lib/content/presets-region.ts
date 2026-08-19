@@ -38,7 +38,7 @@
  * footers lean on the tones and a legal rule the same way.
  */
 
-import type { SectionPreset } from './preset-types';
+import type { PresetBlock, PresetRow, SectionPreset } from './preset-types';
 import { CENTRED } from './preset-types';
 
 /** A menu pushed to the right of its column, which is where a header wants it. */
@@ -54,6 +54,50 @@ const LINKS = [
 
 /** A footer menu: a list of links rather than a nav bar, and never a burger. */
 const FOOTER_MENU = { layout: 'column', collapse: false } as const;
+
+// ---------------------------------------------------------------------------
+// The floating navbars, reproduced from Andy's references (19 Aug 2026)
+//
+// The modern navbar designs all share one shape: the logo, the menu and the
+// button ride inside a single rounded bar floating on the page, not spread
+// across the open width. Each is one boxed, flow-row column (see columnFlow and
+// the floating-header rule in globals.css), and unlike the tone-based headers
+// below, the colours are BAKED HEX from the reference itself, not theme tokens,
+// so the client gets that exact look and then edits any of it. The wordmark is a
+// heading the client types their own name into, or swaps for a logo image.
+// ---------------------------------------------------------------------------
+
+/** The padding inside every floating bar. */
+const BAR_PAD = { top: 14, right: 26, bottom: 14, left: 26 } as const;
+
+/** One column, its blocks in a row, centred: the floating-pill row shape. */
+const BAR_ROW: Pick<PresetRow, 'widths' | 'columnFlow' | 'align'> = {
+  widths: [1],
+  columnFlow: ['row'],
+  align: 'centre',
+};
+
+/** A wordmark logo, a heading in the bar's own ink, fixed size so it stays a
+ *  wordmark rather than growing with the fluid type scale. */
+function wordmark(text: string, colour: string): PresetBlock {
+  return {
+    type: 'heading',
+    props: { html: text, level: 'h2', style: 'h5', textColour: colour, align: 'left', fluid: false },
+  };
+}
+
+/** A bar menu in a baked link colour. Icons optional, for the icon-led bars. */
+function barNav(colour: string, items: ReadonlyArray<Record<string, unknown>> = LINKS): PresetBlock {
+  return { type: 'nav', props: { items, layout: 'row', collapse: true, gap: 'm', linkColour: colour } };
+}
+
+/** The travel links with an icon each, for the icon-led bars. */
+const ICON_LINKS = [
+  { label: 'Home', href: '/', icon: 'home', newTab: false },
+  { label: 'Holidays', href: '/holidays', icon: 'plane', newTab: false },
+  { label: 'About us', href: '/about', icon: 'compass', newTab: false },
+  { label: 'Contact', href: '/contact', icon: 'mail', newTab: false },
+];
 
 // ---------------------------------------------------------------------------
 // The bare shapes, on the Layouts tab
@@ -165,6 +209,84 @@ export const REGION_LAYOUTS: readonly SectionPreset[] = [
 // ---------------------------------------------------------------------------
 
 export const REGION_PRESETS: readonly SectionPreset[] = [
+  /*
+   * The floating navbars from Andy's references come first: the pill designs,
+   * in their own baked colours, each still fully editable. The tone-based
+   * headers follow, for a site that wants a bar that reads as furniture.
+   */
+  {
+    id: 'header-lumiere',
+    category: 'header',
+    label: 'Lumière',
+    description: 'A dark, quietly luxe bar floating on the page, with a soft lavender button. For a brand that wants to feel considered.',
+    rows: [
+      {
+        ...BAR_ROW,
+        columnBox: [{ background: '#12101f', radius: 36, padding: BAR_PAD, shadow: 'medium' }],
+        columns: [[
+          wordmark('✦ Lumière', '#f4f3fb'),
+          barNav('#c3c2d6'),
+          { type: 'button', props: { label: "Let's talk  →", href: '/contact', variant: 'primary', colour: '#a99cf6', textColour: '#161233' } },
+        ]],
+      },
+    ],
+    section: { paddingY: 20, width: 'wide' },
+  },
+  {
+    id: 'header-natura',
+    category: 'header',
+    label: 'Natura',
+    description: 'A calm cream bar with a search to hand. For a shop or a journal with a natural, unhurried feel.',
+    rows: [
+      {
+        ...BAR_ROW,
+        columnBox: [{ background: '#f2eee3', radius: 36, padding: BAR_PAD, borderWidth: 1, borderColour: '#e4ddcb' }],
+        columns: [[
+          wordmark('❋ NATURA', '#2c2a22'),
+          barNav('#54503f'),
+          { type: 'search', props: { display: 'icon', placeholder: 'Search' } },
+        ]],
+      },
+    ],
+    section: { paddingY: 20, width: 'wide' },
+  },
+  {
+    id: 'header-nexora',
+    category: 'header',
+    label: 'Nexora',
+    description: 'A near-black bar with a bright outlined button. A confident, technical look that sits over a pale page.',
+    rows: [
+      {
+        ...BAR_ROW,
+        columnBox: [{ background: '#0b0f0b', radius: 28, padding: BAR_PAD, borderWidth: 1, borderColour: '#20301f' }],
+        columns: [[
+          wordmark('◈ NEXORA', '#eef3ee'),
+          barNav('#9aa79a'),
+          { type: 'button', props: { label: 'Get started', href: '/contact', variant: 'secondary', outline: true, colour: '#a3e635', textColour: '#a3e635' } },
+        ]],
+      },
+    ],
+    section: { paddingY: 20, width: 'wide' },
+  },
+  {
+    id: 'header-astrix',
+    category: 'header',
+    label: 'Astrix',
+    description: 'A dark bar with a small icon beside every link and a teal outlined button. Playful, but ordered.',
+    rows: [
+      {
+        ...BAR_ROW,
+        columnBox: [{ background: '#0c1418', radius: 30, padding: BAR_PAD, borderWidth: 1, borderColour: '#123039' }],
+        columns: [[
+          wordmark('▲ ASTRIX', '#eafcff'),
+          barNav('#7fdfe6', ICON_LINKS),
+          { type: 'button', props: { label: 'Get started  ↗', href: '/contact', variant: 'secondary', outline: true, colour: '#2dd4bf', textColour: '#2dd4bf' } },
+        ]],
+      },
+    ],
+    section: { paddingY: 20, width: 'wide' },
+  },
+
   /*
    * Headers
    */

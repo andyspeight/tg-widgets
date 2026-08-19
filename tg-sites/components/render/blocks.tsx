@@ -1607,12 +1607,29 @@ function renderButton(button: Props, key: number): ReactElement | null {
    */
   const fill = safeColour(button.colour);
   const textColour = safeColour(button.textColour);
+  const outline = bool(button, 'outline');
   const style: CSSProperties = {};
-  if (fill) {
-    style.background = fill;
-    style.borderColor = fill;
+  if (outline) {
+    /*
+     * Outlined: the chosen colour is the edge and, unless a label colour is set,
+     * the words too, and the fill stays clear. This is what the dark navbar
+     * references use for a quiet call to action, a hairline pill rather than a
+     * solid one, and it is why `colour` alone could not do it: that fills.
+     */
+    if (fill) {
+      style.background = 'transparent';
+      style.borderColor = fill;
+      style.color = textColour ?? fill;
+    } else if (textColour) {
+      style.color = textColour;
+    }
+  } else {
+    if (fill) {
+      style.background = fill;
+      style.borderColor = fill;
+    }
+    if (textColour) style.color = textColour;
   }
-  if (textColour) style.color = textColour;
 
   return (
     <a

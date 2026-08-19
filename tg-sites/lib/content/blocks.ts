@@ -1361,6 +1361,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
       size: 'm',
       align: 'left',
       newTab: false,
+      outline: false,
     },
     summarise: (props) => asString(props.label) || 'Button',
     fields: [
@@ -1388,6 +1389,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
       },
       { kind: 'colour', key: 'colour', label: 'Button colour', group: 'colours', help: 'Fills the button. Blank uses the style above.' },
       { kind: 'colour', key: 'textColour', label: 'Label colour', group: 'colours', help: 'The words on it. Blank follows the style.' },
+      { kind: 'toggle', key: 'outline', label: 'Outlined', group: 'colours', help: 'Draw the button colour as an outline round clear space, not a fill.' },
       { kind: 'select', key: 'align', label: 'Alignment', options: ALIGN_OPTIONS, group: 'layout' },
       { kind: 'toggle', key: 'newTab', label: 'Open in a new tab' },
     ],
