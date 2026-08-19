@@ -28,8 +28,14 @@
 import 'server-only';
 
 import { isMemberRole, type MemberRole } from '../auth/roles';
+import { parsePermissions, type PermissionSet } from '../auth/permissions';
 import { withTenant, type Tx } from './withTenant';
 import { inviteByToken } from './users';
+
+/** Write a JS value into a jsonb column, the same helper the starters use. */
+function json(tx: Tx, value: unknown) {
+  return tx.json(value as Parameters<Tx['json']>[0]);
+}
 
 /*
  * The vocabulary lives in lib/auth/roles.ts, which has no imports at all. It has
@@ -44,6 +50,8 @@ export interface Member {
   email: string;
   name: string | null;
   role: MemberRole;
+  /** The capabilities granted to this member, or null when never set. */
+  permissions: PermissionSet | null;
   joinedAt: Date | null;
   lastSeenAt: Date | null;
 }
@@ -52,6 +60,8 @@ export interface PendingInvite {
   id: string;
   email: string;
   role: MemberRole;
+  /** The capabilities this person lands with, or null for the site default. */
+  permissions: PermissionSet | null;
   createdAt: Date;
   expiresAt: Date;
 }
@@ -85,7 +95,7 @@ function date(value: unknown): Date | null {
 export async function listMembers(tenantId: string): Promise<Member[]> {
   return withTenant(tenantId, async (tx) => {
     const rows = await tx`
-      select tu.user_id, tu.role, tu.created_at, u.email, u.name, u.last_seen_at
+      select tu.user_id, tu.role, tu.permissions, tu.created_at, u.email, u.name, u.last_seen_at
       from public.tenant_users tu
       join public.auth_users u on u.id = tu.user_id
       order by (tu.role <> 'owner'), u.email
@@ -98,6 +108,7 @@ export async function listMembers(tenantId: string): Promise<Member[]> {
         email: String(row.email ?? ''),
         name: row.name == null ? null : String(row.name),
         role: role(row.role),
+        permissions: parsePermissions(row.permissions),
         joinedAt: date(row.created_at),
         lastSeenAt: date(row.last_seen_at),
       };
@@ -109,7 +120,7 @@ export async function listMembers(tenantId: string): Promise<Member[]> {
 export async function listInvites(tenantId: string): Promise<PendingInvite[]> {
   return withTenant(tenantId, async (tx) => {
     const rows = await tx`
-      select id, email, role, created_at, expires_at
+      select id, email, role, permissions, created_at, expires_at
       from public.site_invites
       where accepted_at is null and expires_at > now()
       order by created_at desc
@@ -121,6 +132,7 @@ export async function listInvites(tenantId: string): Promise<PendingInvite[]> {
         id: String(row.id),
         email: String(row.email),
         role: role(row.role),
+        permissions: parsePermissions(row.permissions),
         createdAt: new Date(String(row.created_at)),
         expiresAt: new Date(String(row.expires_at)),
       };
@@ -176,6 +188,62 @@ export async function setMemberRole(
   });
 }
 
+/**
+ * Set a member's capabilities. Passing null clears the set back to unset, which
+ * the resolver reads as the legacy full grant, so this is how staff hand full
+ * access back. An empty array is a genuinely locked-down member and is kept.
+ */
+export async function setMemberPermissions(
+  tenantId: string,
+  userId: string,
+  perms: PermissionSet | null,
+): Promise<MemberRefusal> {
+  return withTenant(tenantId, async (tx) => {
+    const rows = await tx`
+      update public.tenant_users
+      set permissions = ${perms === null ? null : json(tx, perms)}
+      where user_id = ${userId}
+      returning user_id
+    `;
+    return rows.length ? null : 'not-a-member';
+  });
+}
+
+/** One member's stored capability set, for resolving what they may do. */
+export async function memberPermissions(
+  tenantId: string,
+  userId: string,
+): Promise<PermissionSet | null> {
+  return withTenant(tenantId, async (tx) => {
+    const rows = await tx`
+      select permissions from public.tenant_users where user_id = ${userId} limit 1
+    `;
+    return rows.length ? parsePermissions((rows[0] as Record<string, unknown>).permissions) : null;
+  });
+}
+
+/** The site's default capabilities for a new member, or null when none is set. */
+export async function siteDefaultPermissions(tenantId: string): Promise<PermissionSet | null> {
+  return withTenant(tenantId, async (tx) => {
+    const rows = await tx`select default_permissions from public.tenants limit 1`;
+    return rows.length
+      ? parsePermissions((rows[0] as Record<string, unknown>).default_permissions)
+      : null;
+  });
+}
+
+/** Set (or clear, with null) the site's default capabilities for new members. */
+export async function setSiteDefaultPermissions(
+  tenantId: string,
+  perms: PermissionSet | null,
+): Promise<void> {
+  await withTenant(tenantId, async (tx) => {
+    await tx`
+      update public.tenants set default_permissions = ${perms === null ? null : json(tx, perms)}
+    `;
+  });
+}
+
 /** Take somebody out of the site. Refuses to remove the last owner. */
 export async function removeMember(
   tenantId: string,
@@ -211,7 +279,13 @@ export async function removeMember(
  */
 export async function createInvite(
   tenantId: string,
-  input: { email: string; role: MemberRole; tokenHash: string; createdBy?: string },
+  input: {
+    email: string;
+    role: MemberRole;
+    tokenHash: string;
+    createdBy?: string;
+    permissions?: PermissionSet | null;
+  },
 ): Promise<PendingInvite | null> {
   return withTenant(tenantId, async (tx) => {
     // Already in the site. Issuing a link that grants what they have would be a
@@ -224,23 +298,26 @@ export async function createInvite(
     `;
     if (already.length) return null;
 
+    const perms = input.permissions == null ? null : json(tx, input.permissions);
     const rows = await tx`
-      insert into public.site_invites (tenant_id, email, role, token_hash, created_by)
+      insert into public.site_invites (tenant_id, email, role, permissions, token_hash, created_by)
       values (
         ${tenantId}::uuid,
         ${input.email},
         ${input.role},
+        ${perms},
         ${input.tokenHash},
         ${input.createdBy ?? null}::text
       )
       on conflict (tenant_id, email) where accepted_at is null
         do update set
-          role       = excluded.role,
-          token_hash = excluded.token_hash,
-          created_by = excluded.created_by,
-          created_at = now(),
-          expires_at = now() + interval '14 days'
-      returning id, email, role, created_at, expires_at
+          role        = excluded.role,
+          permissions = excluded.permissions,
+          token_hash  = excluded.token_hash,
+          created_by  = excluded.created_by,
+          created_at  = now(),
+          expires_at  = now() + interval '14 days'
+      returning id, email, role, permissions, created_at, expires_at
     `;
 
     const row = rows[0] as Record<string, unknown>;
@@ -248,6 +325,7 @@ export async function createInvite(
       id: String(row.id),
       email: String(row.email),
       role: role(row.role),
+      permissions: parsePermissions(row.permissions),
       createdAt: new Date(String(row.created_at)),
       expiresAt: new Date(String(row.expires_at)),
     };
@@ -308,11 +386,21 @@ export async function acceptInvite(
       update public.site_invites
       set accepted_at = now(), accepted_by = ${user.id}
       where id = ${invite.id}::uuid and accepted_at is null
-      returning id
+      returning id, permissions
     `;
 
     // Somebody got there first, on another tab or another device.
     if (!claimed.length) return { ok: false, reason: 'gone' } as AcceptOutcome;
+
+    // The capabilities the invite named, or the site default when it named none,
+    // so "use as default for future clients" reaches somebody who joins by link.
+    let perms = parsePermissions((claimed[0] as Record<string, unknown>).permissions);
+    if (perms === null) {
+      const def = await tx`select default_permissions from public.tenants limit 1`;
+      perms = def.length
+        ? parsePermissions((def[0] as Record<string, unknown>).default_permissions)
+        : null;
+    }
 
     /*
      * DO NOTHING on a conflict rather than updating the role. An invite is a way
@@ -321,8 +409,13 @@ export async function acceptInvite(
      * them, and one naming them an owner must certainly not promote them.
      */
     await tx`
-      insert into public.tenant_users (tenant_id, user_id, role)
-      values (${invite.tenantId}::uuid, ${user.id}, ${invite.role})
+      insert into public.tenant_users (tenant_id, user_id, role, permissions)
+      values (
+        ${invite.tenantId}::uuid,
+        ${user.id},
+        ${invite.role},
+        ${perms === null ? null : json(tx, perms)}
+      )
       on conflict (tenant_id, user_id) do nothing
     `;
 
