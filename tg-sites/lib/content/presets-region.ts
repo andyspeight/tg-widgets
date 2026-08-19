@@ -403,6 +403,59 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
     ],
     section: { paddingY: 20, width: 'wide' },
   },
+  {
+    id: 'header-halo',
+    category: 'header',
+    label: 'Halo',
+    description: 'A soft pastel bar with a gentle gradient wash. Light and creative, for a boutique stay or a wellness retreat.',
+    rows: [
+      {
+        ...BAR_ROW,
+        columnBox: [{ gradient: { from: '#efe3fb', to: '#e1ecfc', angle: 100 }, radius: 34, padding: BAR_PAD, borderWidth: 1, borderColour: '#ffffff' }],
+        columns: [[
+          wordmark('Halo', '#2c2740'),
+          barNav('#4a4560'),
+          { type: 'button', props: { label: 'Hire me  ↗', href: '/contact', variant: 'ghost', textColour: '#2c2740' } },
+        ]],
+      },
+    ],
+    section: { paddingY: 20, width: 'wide' },
+  },
+  {
+    id: 'header-wanderlust',
+    category: 'header',
+    label: 'Wanderlust',
+    description: 'A frosted glass bar made to float over your opening picture. Add it, then switch on "Sit over the hero" so the photo runs behind it.',
+    rows: [
+      {
+        ...BAR_ROW,
+        columnBox: [{ background: 'rgba(255,255,255,0.16)', blur: 14, radius: 30, padding: BAR_PAD, borderWidth: 1, borderColour: 'rgba(255,255,255,0.55)', shadow: 'soft' }],
+        columns: [[
+          wordmark('✈ WANDERLUST', '#0f2033'),
+          barNav('#21344f'),
+          { type: 'button', props: { label: 'Plan a trip  ↗', href: '/contact', variant: 'primary', colour: '#2563eb', textColour: '#ffffff' } },
+        ]],
+      },
+    ],
+    section: { paddingY: 20, width: 'wide' },
+  },
+  {
+    id: 'header-lumina',
+    category: 'header',
+    label: 'Lumina',
+    description: 'A dark glass bar with an icon on every link, for floating over a moody hero. Turn on "Sit over the hero" once it is in.',
+    rows: [
+      {
+        ...BAR_ROW,
+        columnBox: [{ background: 'rgba(18,22,38,0.30)', blur: 16, radius: 30, padding: BAR_PAD, borderWidth: 1, borderColour: 'rgba(255,255,255,0.16)', shadow: 'medium' }],
+        columns: [[
+          wordmark('◆ LUMINA', '#f2f6ff'),
+          barNav('#e6ebfa', ICON_LINKS),
+        ]],
+      },
+    ],
+    section: { paddingY: 20, width: 'wide' },
+  },
 
   /*
    * Headers

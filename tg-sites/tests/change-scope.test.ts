@@ -161,6 +161,7 @@ describe('changeScope: structural edits', () => {
       radius: 0,
       borderWidth: 0,
       shadow: 'none',
+      blur: 0,
     };
     expect(changeScope(before, after).structure).toBe(true);
   });

@@ -224,6 +224,25 @@ export const BoxSchema = z.object({
   borderWidth: z.unknown().transform((v) => px(v, MAX_BORDER)),
   borderColour: z.unknown().transform(safeColour).optional(),
   shadow: Shadow.catch('none').default('none'),
+  /**
+   * A backdrop blur in pixels, for a glass bar floating over a picture. The
+   * background is a translucent colour and this frosts whatever shows through.
+   * 0 is none, and an absent value parses to 0 so an old box is unchanged.
+   */
+  blur: z.unknown().transform((v) => px(v, 40)),
+  /**
+   * A two-stop gradient fill, for the soft pastel bars. Each stop is a colour
+   * validated the same way as `background`, so nothing but a hex, an rgb(a) or
+   * a theme token can reach the style attribute, and the angle is pinned to
+   * 0..360. An invalid stop drops the gradient rather than emitting junk.
+   */
+  gradient: z
+    .object({
+      from: z.unknown().transform(safeColour),
+      to: z.unknown().transform(safeColour),
+      angle: z.unknown().transform((v) => px(v, 360)),
+    })
+    .optional(),
 });
 
 export type Box = z.infer<typeof BoxSchema>;
@@ -233,6 +252,7 @@ export const EMPTY_BOX: Box = {
   radius: 0,
   borderWidth: 0,
   shadow: 'none',
+  blur: 0,
 };
 
 /** True when a box would render nothing, so the UI can say "not set". */
@@ -240,7 +260,8 @@ export function boxIsEmpty(box: Box): boolean {
   const { padding: p } = box;
   return (
     p.top === 0 && p.right === 0 && p.bottom === 0 && p.left === 0 &&
-    !box.background && box.radius === 0 && box.borderWidth === 0 && box.shadow === 'none'
+    !box.background && box.radius === 0 && box.borderWidth === 0 && box.shadow === 'none' &&
+    box.blur === 0 && !box.gradient
   );
 }
 

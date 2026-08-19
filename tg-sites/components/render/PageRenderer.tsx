@@ -553,6 +553,15 @@ export function SectionRenderer({
  * Writing all of them at every level is what stops that.
  */
 function boxStyle(box: Box): CSSProperties {
+  // A gradient fill, only when both stops validated. It rides its own property
+  // rather than --tgs-bg, because --tgs-bg is used inside a linear-gradient() in
+  // the CSS (so a solid can be a colour), and a gradient inside a gradient is
+  // not a value. The CSS lets --tgs-bg-image win over the solid.
+  const gradient =
+    box.gradient && box.gradient.from && box.gradient.to
+      ? `linear-gradient(${box.gradient.angle}deg, ${box.gradient.from}, ${box.gradient.to})`
+      : undefined;
+
   return {
     '--tgs-pt': `${box.padding.top}px`,
     '--tgs-pr': `${box.padding.right}px`,
@@ -564,6 +573,10 @@ function boxStyle(box: Box): CSSProperties {
     // 'transparent' rather than 'inherit': a column with no background of its
     // own should show the section behind it, not repaint it.
     '--tgs-bg': box.background ?? 'transparent',
+    ...(gradient ? { '--tgs-bg-image': gradient } : {}),
+    // Backdrop blur for a glass bar. Only when set, so an ordinary box carries
+    // no backdrop-filter and pays nothing for it.
+    ...(box.blur > 0 ? { '--tgs-blur': `${box.blur}px` } : {}),
   } as CSSProperties;
 }
 

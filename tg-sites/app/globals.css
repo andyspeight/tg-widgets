@@ -368,6 +368,30 @@
 .tgs-block[data-boxed][data-shadow='medium'] { box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12); }
 .tgs-block[data-boxed][data-shadow='strong'] { box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18); }
 
+/*
+ * A GRADIENT FILL, for the soft pastel bars. It rides its own property and
+ * these rules come after the solid ones above, so a box that carries a gradient
+ * paints it over the solid transparent the substring match still triggers. See
+ * boxStyle in PageRenderer.
+ */
+.tgs-section[style*='--tgs-bg-image'],
+.tgs-col[style*='--tgs-bg-image'],
+.tgs-block[data-boxed][style*='--tgs-bg-image'] {
+  background-image: var(--tgs-bg-image);
+}
+
+/*
+ * A GLASS BAR, for a header floating over a picture. The background is a
+ * translucent colour and this frosts whatever shows through it. -webkit- first
+ * for Safari, which still needs the prefix. Only a box that set a blur gets it.
+ */
+.tgs-section[style*='--tgs-blur'],
+.tgs-col[style*='--tgs-blur'],
+.tgs-block[data-boxed][style*='--tgs-blur'] {
+  -webkit-backdrop-filter: blur(var(--tgs-blur));
+  backdrop-filter: blur(var(--tgs-blur));
+}
+
 .tgs-section__bg {
   position: absolute;
   inset: 0;
