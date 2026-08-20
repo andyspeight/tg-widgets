@@ -32,6 +32,10 @@ Owner: Andy Speight, CEO, Travelgenix.
   `recCKQZ4ucnuef2Ii`).
 - **Email Signature**: `docs/email-signature-handover.md` (Airtable record
   `recYKgvuON4dFQWfa`).
+- **The Duda element audit (tg-sites)**: `docs/duda-element-audit.md`. Read it
+  the moment a session mentions Duda, "the next list", or elements. It carries
+  what has been checked, what was built, what Andy has asked to skip, and the
+  conventions the audit turned up that are not written anywhere else.
 
 Living project state lives in Airtable: base `appj9tksreHOwkhYg`, table
 `tblpyhPNhiQg3XkkT` (Projects). Read the record at the start of a session that
